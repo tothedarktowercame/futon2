@@ -199,4 +199,9 @@
    :status :folded
    :at "2026-09-15"
    :evidence "REVISION-2026-09-15.edn (this dir); p4ng 4c6de1a"
-   :note "Joe asked for the paper and DAG to be updated. DAG: entries 1-31 of this ledger folded into REVISION-2026-09-15.edn (7 node updates, 4 new nodes with edges, machinery-hardening note); a walker reads dag.edn -> the revision -> ledger entries NEWER than this one. Paper: p4ng rows-14/23 margin notes updated from awaiting-fresh-attempts to the dated facts (cohorts 53-56 closed with retention live; first ruled successor-based repair resolution), CHANGELOG-plop-2026 entry added; the 0/7 qualifying row stands unchanged and truthful."}]}
+   :note "Joe asked for the paper and DAG to be updated. DAG: entries 1-31 of this ledger folded into REVISION-2026-09-15.edn (7 node updates, 4 new nodes with edges, machinery-hardening note); a walker reads dag.edn -> the revision -> ledger entries NEWER than this one. Paper: p4ng rows-14/23 margin notes updated from awaiting-fresh-attempts to the dated facts (cohorts 53-56 closed with retention live; first ruled successor-based repair resolution), CHANGELOG-plop-2026 entry added; the 0/7 qualifying row stands unchanged and truthful."}
+  {:node :a-labels
+   :status :o-56-buffer-attempt-firing
+   :at "2026-09-15"
+   :evidence "attempt-001 007 (:review-rejected after agency hiccup + retry); buffer click wm-click-0f23f77b at 03:12:06"
+   :note "Cohort-56 attempt-001 closed :build-failed as an honest review rejection (codex-22 rejected codex-23's authored work after an agency-level author retry) with retention intact. The buffer attempt -- the cohort's last -- fired measured at 03:12:06; its close is the exercise-7 boundary either way (clean manifest with resolution-backed deposits, or typed insufficiency and a cheap cohort 57)."}]}
