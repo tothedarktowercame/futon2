@@ -13,13 +13,22 @@
                                      :modified (str (get b "modified"))
                                      :has-process (get b "has-process")
                                      :visible (get b "visible")
+                                     :active-agent (get b "active-agent")
+                                     :server-clients (get b "server-clients")
                                      :display-age-seconds (get b "display-age-seconds")})
                            (get raw "buffers"))})
-(def categories (c/load-edn "../../../../../futon3/library/buffer-cleaner/params/categories.edn"))
+;; fuel comes from the NODE ARGS (library declaration), not duplicated constants
+(def fuel-args (:fuel (c/load-edn "../../../../../futon3/library/buffer-cleaner/nodes/kill.params.edn")))
+(def categories (assoc (c/load-edn "../../../../../futon3/library/buffer-cleaner/params/categories.edn")
+                       :fuel fuel-args))
 (defn wiring [p] (assoc (c/load-edn (str "../../../../../futon3/library/buffer-cleaner/" p)) :wiring/id (keyword (last (re-find #"/(\w+)\.edn$" p)))))
 (def wirings [(wiring "wirings/aggressive.edn") (wiring "wirings/conservative.edn")])
+(def yield-args (c/load-edn "../../../../../futon3/library/buffer-cleaner/nodes/yield-settled.params.edn"))
 (doseq [w wirings]
-  (let [r (c/classify-packet packet w categories)]
+  (let [r (c/classify-packet packet w categories)
+        out (assoc (select-keys r [:wiring :receipts :meters :sources])
+                   :revisit-truth (:revisit-truth yield-args)
+                   :clean-enough-threshold (:clean-enough-threshold yield-args))]
     (spit (str "runs/receipts-" (name (:wiring r)) ".edn")
-          (with-out-str (pp/pprint (select-keys r [:wiring :receipts :meters :sources]))))
+          (with-out-str (pp/pprint out)))
     (pp/pprint {:wiring (:wiring r) :meters (:meters r)})))

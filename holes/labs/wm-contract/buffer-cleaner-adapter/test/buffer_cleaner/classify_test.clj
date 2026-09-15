@@ -116,3 +116,18 @@
     (testing "*Arxana Browser* protected (live navigation state)"
       (let [r (c/classify-buffer (assoc base :name "*Arxana Browser*") aggressive categories)]
         (is (= :keep (:action r))) (is (= :arxana-browser (:preservation-reason r)))))))
+
+(deftest runner-projection-preserves-protections
+  (testing "the exact key set run.bb projects carries the protections (codex-26 control)"
+    (let [raw {:name "*agent*" :kind "temp" :file "false" :modified "false"
+               :has-process "false" :visible "false" :active-agent true
+               :server-clients "false" :display-age-seconds 9999}
+          ;; same projection keys as adapter/run.bb
+          projected {:name (:name raw) :kind (:kind raw) :file (str (:file raw))
+                     :modified (str (:modified raw)) :has-process (:has-process raw)
+                     :visible (:visible raw) :active-agent (:active-agent raw)
+                     :server-clients (:server-clients raw)
+                     :display-age-seconds (:display-age-seconds raw)}
+          r (c/classify-buffer projected aggressive categories)]
+      (is (= :keep (:action r)))
+      (is (= :active-agent (:preservation-reason r))))))

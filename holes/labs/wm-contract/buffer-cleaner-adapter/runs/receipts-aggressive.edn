@@ -37,4 +37,6 @@
   :remaining 134,
   :expected-recovery 2.2249999999999996,
   :fuel-charged 1.7800000000000002},
- :sources [nil :constructed]}
+ :sources [nil :constructed],
+ :revisit-truth :unavailable,
+ :clean-enough-threshold 16}
