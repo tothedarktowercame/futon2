@@ -19,20 +19,29 @@
    - `~/code/futon2/docs/ants-aif-audit.md` §'Anticipation integration' — design ladder
    - `~/code/futon7/holes/M-interim-director-proxy-metric-inventory.md` §2.A.2.38 — full design"
   (:require [clojure.edn :as edn])
-  (:import (java.time Duration Instant)))
+  (:import (java.time Duration Instant)
+           (java.nio.file Files Paths)
+           (java.nio.charset StandardCharsets)
+           (java.security MessageDigest)
+           (java.math BigInteger)))
 
 (def default-events-path
   (str (System/getProperty "user.home") "/code/calendar/events.edn"))
 
+(defn- read-anticipations [path]
+  (try
+    (let [bytes (Files/readAllBytes (Paths/get path (make-array String 0)))
+          doc (edn/read-string {:readers {'inst #(Instant/parse %)}}
+                               (String. bytes StandardCharsets/UTF_8))]
+      {:document doc
+       :source-sha256 (format "%064x" (BigInteger. 1
+                                      (.digest (MessageDigest/getInstance "SHA-256") bytes)))})
+    (catch Exception _ nil)))
+
 (defn load-anticipations
-  "Read the canonical anticipation source. Returns the full document map
-   (`{:meta ... :events [...] :resolutions [...]}`) or `nil` on read failure
-   — the WM remains operational under intermittent substrate availability."
+  "Read the canonical document; unreadable sources return nil."
   ([] (load-anticipations default-events-path))
-  ([path]
-   (try
-     (edn/read-string {:readers {'inst #(Instant/parse %)}} (slurp path))
-     (catch Exception _ nil))))
+  ([path] (:document (read-anticipations path))))
 
 (defn- ->instant
   "Coerce :event/at into a `java.time.Instant`. Accepts Instant, Date, or
@@ -136,13 +145,16 @@
      :or {path default-events-path horizon-days 30}}]
    (let [now (or now (Instant/now))
          horizon (Duration/ofDays (long horizon-days))
-         doc (load-anticipations path)]
+         captured (read-anticipations path)
+         doc (:document captured)]
      (if doc
        {:events-loaded? true
+        :source-sha256 (:source-sha256 captured)
         :path path
         :horizon-days horizon-days
         :events (mapv summarise-event (events-in-horizon doc now horizon))}
        {:events-loaded? false
+        :source-sha256 nil
         :path path
         :horizon-days horizon-days
         :events []}))))

@@ -1010,6 +1010,37 @@
     :v1
     :off))
 
+(defn effective-run-configuration
+  "Loaded consumer values before evaluation; never infer use from environment."
+  [opts]
+  {:schema :wm/effective-run-configuration-v1
+   :run/id (:run-id opts)
+   :loaded-code-identity (or (:loaded-code-identity opts) {:status :unavailable})
+   :evaluation :not-reached
+   :policy-details? trace/*persist-policy-trace-details?*
+   :fpi-dark? *f-pi-dark?*
+   :fpi-posterior? *f-pi-posterior?*})
+
+(defn evaluated-run-configuration
+  "Attach the exact depth inputs and actual posterior disposition to the snapshot."
+  [loaded opts depth-config snapshot depth decision]
+  (assoc loaded
+         :evaluation :evaluated
+         :requested-depth depth-config
+         :depth-source (cond (:policy-depth opts) {:kind :judge-options}
+                             depth-config {:kind :run-config
+                                           :path (System/getenv "FUTON_WM_RUN_CONFIG")}
+                             :else {:kind :default})
+         :effective-horizon (:horizon-steps depth)
+         :effective-depth (or (:horizon-steps depth) 1)
+         :anticipation {:path (:path snapshot)
+                        :source-sha256 (:source-sha256 snapshot)
+                        :events-loaded? (:events-loaded? snapshot)
+                        :eligible-event-ids (mapv :event/id (:events snapshot))}
+         :fpi-posterior (or (:f-pi-posterior decision)
+                           {:status :absent :reason :decision-unavailable
+                            :applied? false})))
+
 (defn arena-mode-flags
   "B-0a tick provenance (M-aif-faithfulness §2.0): the RESOLVED mode/flag set
    the arena rank lanes score with THIS tick, for the trace's :wm-version
@@ -6009,7 +6040,8 @@
                :as judge-opts
                :or {trace? false include-advisory-lanes? true
                     step-portfolio? true eval-invariant-fallback? true}}]
-  (let [beta-habit? (beta-habit/enabled? judge-opts)
+  (let [loaded-configuration (effective-run-configuration judge-opts)
+        beta-habit? (beta-habit/enabled? judge-opts)
         _ (beta-habit/preconditions! beta-habit? *f-pi-dark?* *beta-dark?*
                                     trace/*persist-policy-trace-details?*)
         depth-config (policy-depth/configured judge-opts)
@@ -6899,7 +6931,12 @@
                                ;; the policy depth actually used. Persistence
                                ;; reads these fields; selection does not.
                                :horizon-steps wm-horizon-steps
-                               :policy-depth-used wm-policy-depth-used)
+                               :policy-depth-used wm-policy-depth-used
+                               :effective-run-configuration
+                               (evaluated-run-configuration
+                                loaded-configuration judge-opts depth-config
+                                anticipation-snapshot depth-anticipation
+                                (:decision result0-unasserted)))
                   depth-config
                   (assoc :policy-depth
                          {:configured depth-config

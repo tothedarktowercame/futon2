@@ -3245,6 +3245,7 @@
         selection-persisted? (atom false)
         dispatched-turns (atom 0)
         standing-readback-state (atom nil)
+        effective-configuration (atom (wm/effective-run-configuration opts))
         reviewer-of-record (atom reviewer)
         closing? (atom false)
         roster-result (try
@@ -3403,7 +3404,8 @@
                                                     [:judgment :code-state])}
                                :discharge-contract
                                (discharge-contract repair-class)})))
-                       data (assoc data :repair-obligation
+                       data (assoc data :effective-run-configuration @effective-configuration
+                                   :repair-obligation
                                    (if admitted-verification? existing-finding finding))
                        parked-transition
                        (when (and finding (not admitted-verification?))
@@ -3531,7 +3533,7 @@
                                             :resource-use
                                             {:agent-turns @dispatched-turns}}
                                             (select-keys data
-                                                         [:witness
+                                                         [:witness :effective-run-configuration
                                                           :standing-readback]))
                                      {:kind :full-loop-outcome :attempt-id attempt-id})
                                 (and cohort? @action-occurrence)
@@ -3623,7 +3625,8 @@
                                                          :started-at])
                                      :discharge-contract
                                      (discharge-contract :machine-failure)})
-                           sorry-data {:outcome :build-failed
+                           sorry-data {:effective-run-configuration @effective-configuration
+                                       :outcome :build-failed
                                        :grounded? false
                                        :artifact-only? false
                                        :failure-kind refusal-kind
@@ -3737,7 +3740,8 @@
                                   (wm/generate-war-machine
                                    days
                                    (merge
-                                    (select-keys opts [:accumulate-strategic-habit?])
+                                    (select-keys opts [:accumulate-strategic-habit?
+                                                       :run-id :loaded-code-identity])
                                     {:include-advisory-lanes? false
                                     :strategic-selection-fn
                                     (fn [request]
@@ -3752,7 +3756,11 @@
             judgement0-base
             (run-phase!
              opts @phase-context :selection
-             #(let [judgement (:judgement (selection-judge window-days))]
+             #(let [_ (swap! effective-configuration assoc :evaluation :started)
+                    judgement (:judgement (selection-judge window-days))
+                    _ (reset! effective-configuration
+                              (or (:effective-run-configuration judgement)
+                                  (assoc @effective-configuration :evaluation :not-retained)))]
                 ;; An open machine stop-line has precedence over ordinary
                 ;; selection.  Do not invite an opt-in campaign to claim it
                 ;; selected an action that the runner is forbidden to enact.
@@ -3875,8 +3883,10 @@
                                           :readiness/selection-transient]
                                          true))
                              (sorry :no-selection {:decision (:decision judgement)}))]
-        (reset! pending-selection selection-cell)
-        (swap! checkpoints assoc :selection selection-cell)
+        (let [selection-cell (assoc-in selection-cell [:judgment :effective-run-configuration]
+                                      @effective-configuration)]
+          (reset! pending-selection selection-cell)
+          (swap! checkpoints assoc :selection selection-cell))
         (when-not entry
           (throw (ex-info "War Machine abstained or selected no addressable action"
                           {:outcome (if (= :abstain (get-in judgement [:decision :action]))
@@ -4686,7 +4696,8 @@
         source-check (refuse-on-runner-source-drift!)
         result
         (try
-      (run-opportunity-core! (assoc raw-opts :run-id run-id))
+      (run-opportunity-core! (assoc raw-opts :run-id run-id
+                                   :loaded-code-identity source-check))
     (catch Throwable e
       (when (or (= :delivery-qa-gate-failed
                    (:failure-kind (ex-data e)))

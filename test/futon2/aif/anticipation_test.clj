@@ -151,3 +151,24 @@
         (is (some #(= "ev-2026-05-28-glasgow-cogito-submit-or-not" (:event/id %))
                   (:events snap))
             "Glasgow seed event should be within 14 days of 2026-05-19")))))
+
+(deftest snapshot-pins-the-parsed-buffer
+  (let [file (java.io.File/createTempFile "anticipation-buffer" ".edn")
+        text "{:events [{:event/id \"due\" :event/at #inst \"2026-09-16T00:00:00Z\"}]}\n"]
+    (try
+      (spit file text)
+      (let [bytes (java.nio.file.Files/readAllBytes (.toPath file))
+            expected (format "%064x" (java.math.BigInteger. 1
+                                      (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)))
+            snapshot (anticipation/anticipation-snapshot
+                      {:path (.getPath file) :now (Instant/parse "2026-09-15T00:00:00Z")})]
+        (is (= expected (:source-sha256 snapshot)))
+        (is (= ["due"] (mapv :event/id (:events snapshot))))
+        (spit file "{:events []}")
+        (is (= ["due"] (mapv :event/id (:events snapshot))))
+        (is (not= expected (:source-sha256 (anticipation/anticipation-snapshot {:path (.getPath file)})))))
+      (.delete file)
+      (let [snapshot (anticipation/anticipation-snapshot {:path (.getPath file)})]
+        (is (false? (:events-loaded? snapshot)))
+        (is (nil? (:source-sha256 snapshot))))
+      (finally (.delete file)))))

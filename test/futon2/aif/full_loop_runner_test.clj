@@ -5481,3 +5481,42 @@
                 "neither repeats implementation nor suggests a decision.")
            (#'runner/standing-completion-prompt
             "target" "/tmp/attempt/evidence")))))
+
+(deftest effective-configuration-survives-success-and-containment
+  (doseq [containment? [false true]]
+    (let [{:keys [root] :as c} (retention-cohort "effective-config-close")
+          expected {:schema :wm/effective-run-configuration-v1
+                    :evaluation :evaluated :run/id "close-retention-success"
+                    :effective-horizon 3 :effective-depth 3
+                    :policy-details? true :fpi-dark? true :fpi-posterior? false}
+          base (retention-success-opts c)
+          opts (assoc base
+                      :judge-fn (fn [_] {:judgement (assoc judgement :effective-run-configuration expected)})
+                      :author-artifact-observer-fn
+                      (fn [repo before job] (assoc (synthetic-artifact-binding repo before job) :repo repo))
+                      :poll-fn (fn [o id] (cond-> ((:poll-fn base) o id)
+                                           (= id "retention-author") (assoc :feature-card feature-card-claim)))
+                      :ground-fn (fn [& _] {:before {:id "before"} :after {:id "after"}
+                                           :resolved? true :dial-moved? true
+                                           :implementation-id "retained" :discharge-id "discharge"}))
+          result (if containment?
+                   (with-redefs-fn {#'runner/checkpoint-evidence-manifest
+                                   (fn [& _] (throw (ex-info "controlled manifest failure"
+                                                            {:evidence-manifest/refusal :source-unavailable})))}
+                     #(runner/run-opportunity! opts))
+                   (runner/run-opportunity! opts))
+          close (cohort/read-edn (io/file root "test-cohort-exhaustion" "attempt-001" "007-closed.edn"))]
+      (is (= (if containment? :build-failed :grounded-change) (:outcome result)))
+      (is (= expected (get-in result [:checkpoints :selection :judgment :effective-run-configuration])))
+      (is (= expected (get-in result [:data :effective-run-configuration])))
+      (is (= expected (get-in close [:payload :judgment :effective-run-configuration]))))))
+
+(deftest pre-judge-failure-keeps-loaded-configuration-only
+  (let [{:keys [root] :as c} (retention-cohort "effective-config-early")
+        result (runner/run-opportunity! (assoc (retention-success-opts c) :roster-fn (constantly {})))
+        close (cohort/read-edn (io/file root "test-cohort-exhaustion" "attempt-001" "007-closed.edn"))
+        configuration (get-in close [:payload :judgment :effective-run-configuration])]
+    (is (= :agent-unavailable (:outcome result)))
+    (is (= :not-reached (:evaluation configuration)))
+    (is (= trace/*persist-policy-trace-details?* (:policy-details? configuration)))
+    (is (not (contains? configuration :effective-depth)))))
