@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-15 ~00:35Z (attempt-001 orphaned by two stacked defects, both fixed; S retry firing)
+Updated: 2026-09-15 ~00:50Z (attempt-002 closed clean build-failed; final S-candidate firing)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,13 +13,13 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **cohort-54 attempt-002** — the S-candidate retry, firing as this tick's last
-  action (ordinary click, worker casting). Attempt-001 is the second retained
-  orphan: zai-5's run went two rounds to grounding, then the close refused the
-  degenerate subject pair (:revision-unchanged — guidance said capture the still-
-  open state, producing identical bytes) and BOTH containment sites then failed
-  the production close contract (missing :duration-ms/:resource-use — hidden by
-  the fixture prereg's empty checkpoint contract). All fixed + reloaded (2c90fa41).
+- **cohort-54 attempt-003** — the LAST attempt, firing as this tick's final action.
+  Attempt-002 closed properly (:build-failed, typed sorries, retention intact — the
+  repaired close machinery held): zai-5's author job failed at the AGENCY level
+  (state "failed", no output), an infrastructure fault, honestly retained.
+  If attempt-003 grounds: lead-invoked T discharge, then O + exercise 6 move to a
+  cohort-55 prereg (declared with the same pre-outcome discipline). If not:
+  cohort 54 exhausts honestly and cohort 55 continues the T/R/S/O contract.
 
 ## DONE (this sitting, newest first)
 - **Packet 3 complete**: cohort-54 prereg `94b4272a` (T/R/S/O declared pre-outcome:
