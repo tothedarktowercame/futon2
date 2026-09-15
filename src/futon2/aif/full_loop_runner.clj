@@ -4462,9 +4462,21 @@
                        #(doseq [obligation stop-lines]
                           (if (= :incomplete-recoverable
                                  (:repair/class obligation))
+                            ;; r6 rule applies here too: the bare
+                            ;; cohort-local ordinal ("attempt-001")
+                            ;; collides with the OBLIGATION's own
+                            ;; attempt-id, and record-side distinctness
+                            ;; refuses it as
+                            ;; :implementation-attempt-not-distinct. The
+                            ;; authority-qualified external id is unique
+                            ;; across the shared findings store. The
+                            ;; repair-ea1-b0eeafa0 attempt-001 run (2026-09-13
+                            ;; 22:39) was refused exactly there: grounded,
+                            ;; approved, witnessed review evidence present,
+                            ;; and still unable to close.
                             ((or (:repair-resolve-fn opts) repair/resolve!)
                              obligation
-                             {:attempt-id attempt-id :commit commit
+                             {:attempt-id external-attempt-id :commit commit
                               :reviewer reviewer
                               :review-job (:job-id review-job)
                               :witness witness
@@ -4474,7 +4486,7 @@
                             ((or (:repair-implement-fn opts)
                                  repair/record-implementation!)
                              obligation
-                             {:attempt-id attempt-id :commit commit
+                             {:attempt-id external-attempt-id :commit commit
                               :reviewer reviewer
                               :review-job (:job-id review-job)
                               :witness witness})))))

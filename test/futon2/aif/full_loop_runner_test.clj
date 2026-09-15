@@ -5089,6 +5089,70 @@
           (is (= :current (get-in record [:runner/source :runner/source-check]))
               "recorded identity is the one that gated the run"))))))
 
+(deftest stop-line-implementation-carries-the-authority-qualified-attempt-id
+  ;; repair-ea1-b0eeafa0 attempt-001 (2026-09-13): grounded, approved,
+  ;; witnessed review evidence could not close because the runner passed
+  ;; the bare cohort-local ordinal ("attempt-001") as the implementation
+  ;; attempt-id, colliding with the obligation's own attempt-id and firing
+  ;; :implementation-attempt-not-distinct. The r6 rule (authority-qualified
+  ;; external id) now applies at the stop-line-resolution boundary too.
+    (with-redefs-fn
+      {#'runner/run-opportunity-core!
+       (fn [_]
+         ;; The core returns a grounded result whose execution identity
+         ;; supplies the external attempt id; the runner's outer boundary
+         ;; performs stop-line resolution (not modelled here -- we drive the
+         ;; phase directly below via the resolved vars).
+         {:attempt-id "attempt-001"
+          :outcome :no-op-change :checkpoints {} :data {}})
+       #'runner/ensure-dispatch-seat! (fn [_] nil)
+       #'runner/refuse-on-runner-source-drift!
+       (fn [] {:runner/source-check :current :runner/sha256 "ddd4444"})}
+      (fn []
+        ;; Drive record-implementation!/resolve! directly with the two
+        ;; candidate ids against an obligation whose own attempt-id is the
+        ;; bare ordinal -- the exact production shape.
+        (let [obligation {:repair/id "repair-attempt-001"
+                          :repair/class :independent-review-failure
+                          :attempt-id "attempt-001"
+                          :discharge-contract
+                          {:requires [:distinct-repair-commit
+                                      :independent-review
+                                      :grounded-repair
+                                      :distinct-production-shaped-successor]
+                           :artifact-shape :code-commit}}
+              bare {:attempt-id "attempt-001" :commit "aaa1111"
+                    :reviewer "codex-24" :review-job "invoke-1"
+                    :witness {:resolved? true :dial-moved? true}}
+              external {:attempt-id
+                        "ea1-b0eeafa0e59b4dc0dd9e0abe1cbbed0e687c5827b3ade8320c98c7f82a79032b--attempt-001"
+                        :commit "bbb2222" :reviewer "codex-24"
+                        :review-job "invoke-1"
+                        :witness {:resolved? true :dial-moved? true}}
+              tmp (str (Files/createTempDirectory
+                        "wm-r6-impl-" (make-array FileAttribute 0)))
+              bare-failure (try
+                             (#'repair/record-implementation!
+                              (io/file tmp) obligation bare)
+                             nil
+                             (catch clojure.lang.ExceptionInfo e (ex-data e)))
+              external-ok (try
+                            (#'repair/record-implementation!
+                             (io/file tmp) obligation external)
+                            :recorded
+                            (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+          (is (= :machine-repair-lacks-grounded-review-evidence
+                 (:failure-kind bare-failure))
+              "the bare ordinal still refuses, fail-closed")
+          (is (contains? (set (:failure-detail bare-failure))
+                         :implementation-attempt-not-distinct)
+              "and names the conjunct")
+          (is (contains? #{:recorded :awaiting-validation}
+                         (if (map? external-ok)
+                           (:repair/status external-ok)
+                           external-ok))
+              "the authority-qualified external id closes the same evidence")))))
+
 (deftest attempt-limb-evidence-follows-checkpoints-in-manifest
   (let [{:keys [root] :as c} (retention-cohort "runner-limb-evidence")
         opts (assoc (retention-success-opts c)
