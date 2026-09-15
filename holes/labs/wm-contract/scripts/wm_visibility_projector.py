@@ -105,6 +105,16 @@ def main():
         if reason:
             trial["blocked_reason"] = reason
         trials.append(trial)
+    # Lead-maintained campaign state: when nothing is executing, the top
+    # of the panel should say what the campaign is DOING (paused, planned
+    # next step), not just echo the last trial's terminal state.
+    state_path = os.path.join(OUT_ROOT, "campaign-state.json")
+    campaign = None
+    if os.path.isfile(state_path):
+        try:
+            campaign = json.load(open(state_path, encoding="utf-8"))
+        except (OSError, ValueError):
+            campaign = None
     running_attempt = live_click()
     if running_attempt and running_attempt not in attempts:
         # The click session has claimed an attempt whose first cell is not
@@ -123,10 +133,24 @@ def main():
         trials = [{"trial_id": cohort + "/awaiting-first-click",
                    "stage": "planned", "result": "pending",
                    "updated_at": now}]
+    if (campaign and isinstance(campaign.get("planned_next"), str)
+            and campaign["planned_next"]
+            and not any(t["stage"] == "working" for t in trials)):
+        trials.append({"trial_id": "planned/" + campaign["planned_next"],
+                       "stage": "planned", "result": "pending",
+                       "updated_at": now})
     last = trials[-1]
+    stage, result = last["stage"], last["result"]
+    reason = None
+    if (campaign and campaign.get("paused") is True
+            and not any(t["stage"] == "working" for t in trials)):
+        stage, result = "blocked", "blocked"
+        reason = str(campaign.get("reason") or "paused by the execution lead")
     doc = {"schema": "wm/run-visibility-v1", "run_id": cohort,
-           "stage": last["stage"], "result": last["result"],
+           "stage": stage, "result": result,
            "updated_at": now, "trials": trials}
+    if reason:
+        doc["blocked_reason"] = reason
     if author:
         doc["worker"] = author
     if reviewer:
