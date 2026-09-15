@@ -1,0 +1,21 @@
+{:schema :wm/outstanding-dag-revision-v1
+ :base-dag-commit "ec09b980"
+ :as-of "2026-09-15T03:20:00Z"
+ :author "claude-15"
+ :folds "STATUS.edn entries 1-31 (through commit 6afaec58). A walker reads dag.edn for structure, then this revision, then any STATUS entries newer than this file."
+ :node-updates
+ {:a-validator {:status :done :evidence "runs/row-14-measured-a-validator-2026-09-14/ACCEPTANCE.md"}
+  :categorical-ambiguity {:status :built-not-wired :evidence "runs/categorical-ambiguity-2026-09-14/ACCEPTANCE.md" :note "Estimator accepted 602ff836; risk-ambiguity-witness still blocked on a-estimate + q-witness-flip."}
+  :r10-caller {:status :done :evidence "futon3c runs/r10-wiring-2026-09-14/ACCEPTANCE.md"}
+  :r10-record {:status :done :evidence "futon3c runs/r10-wiring-2026-09-14/ACCEPTANCE-RUN.md" :note "Operator-lane commissioned click executed and refused-on-replay; branch discharged."}
+  :a-rubric {:status :done :evidence "runs/row-14-observed-status-rubric-2026-09-14/ACCEPTANCE.md" :note "RUBRIC-observed-status-v1.md; 0/7 qualifying at acceptance and still 0/7 at this revision."}
+  :a-pairs {:status :blocked-on-a-labels :evidence "TN-a-pairs-discovery-2026-09-14.md + ACCEPTANCE" :note "0/86 retained closes usable; close-retention now supplies the needed cutoff at NEW closes; joins wait on a-labels acquisition."}
+  :a-labels {:status :in-progress-boundary-pending
+             :evidence "RULING-repair-subject-positive-status-2026-09-14.md (6bfe8750, accepted ff323720); packets 81ce8543/8f5bea11/94b4272a all accepted; exercises 5 (cecd6f7d/1744f829) and 6 (68ae0969/aadab10d) accepted typed insufficiencies; T resolution 2026-09-15T02:09:36Z (runs/t-discharge-2026-09-15/RECORD.md)"
+             :note "Acquisition contract ruled (T/R/S/O, route A with temporal separation) and fully implemented. S grounded (cohort-55 att-002), T discharged through the ruled route. Remaining: ONE clean measured close whose manifest admits the resolution-backed deposits, then exercise 7 and the first possible qualifying annotation. Cohort 56 in flight at this revision."}}
+ :new-nodes
+ [{:id :r10-commission-contract :status :done :edges {:prerequisite-of [:r10-adoption]} :evidence "futon3c runs/r10-commission-2026-09-14/ACCEPTANCE.md"}
+  {:id :r10-adoption :status :done :edges {:prerequisite-of [:r10-record]} :evidence "futon3c runs/r10-adoption-2026-09-14/ACCEPTANCE.md"}
+  {:id :close-retention :status :done-feeding :edges {:prerequisite-of [:a-labels :a-pairs]} :evidence "TN-close-retention-discovery-2026-09-14.md; three slice ACCEPTANCEs" :note "Retention live in production closes from cohort 53 on."}
+  {:id :repair-successor-resolution :status :done :edges {:prerequisite-of [:a-labels]} :evidence "runs/ruling-packet-2-discharge-2026-09-14/ACCEPTANCE.md; runs/t-discharge-2026-09-15/RECORD.md" :note "successor-resolution! seam + first production discharge (T), relation embedded, resolution byte-pinned 36877d37."}]
+ :machinery-hardening-note "Seven production defects found and fixed by the exercise/cohort attempts of 2026-09-14/15, each with a regression pin: close-time orphan (containment boundary), discarded standing readback (persisted through close), production close contract on containment cells, fabricated author sha (verbatim rev-parse rule), stray unreferenced deposit (guidance), degenerate subject pair (derived-state after-capture), external-attempt-id distinctness at stop-line discharge (ed020da2)."}
