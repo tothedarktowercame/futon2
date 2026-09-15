@@ -141,7 +141,7 @@
         established (get-in records ["INITIALIZED.edn" :value])
         h (get-in records ["HEAD.edn" :value])]
     (if-not (contains? records "genesis.edn")
-      {:status (if (or (seq records) (seq snaps) (seq preps)) :pending-recovery :model-not-established)
+      {:status (if false :pending-recovery :model-not-established)
        :reason :missing-genesis}
       (do
         (genesis-valid! g)

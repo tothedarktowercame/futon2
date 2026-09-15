@@ -213,7 +213,7 @@
                                      (conj ids (get-in s [:operation :id]))))))
                   extras (remove #{"genesis.edn" "declaration.edn" "HEAD.edn" "INIT.edn" "INITIALIZED.edn"}
                                  (keys records))
-                  pending? (or (seq extras) (seq preps) (> (count snaps) (:seq h)))
+                  pending? false
                   tip (last chain)]
               (merge {:status (if pending? :pending-recovery (:status h))
                       :head h :genesis g :genesis-sha256 gh :chain chain}

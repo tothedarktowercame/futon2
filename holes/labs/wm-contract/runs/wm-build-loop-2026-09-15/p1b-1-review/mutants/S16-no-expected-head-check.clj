@@ -200,7 +200,7 @@
                               (require! (= (:store/id g) (:store/id s)) :wrong-store-id)
                               (require! (= gh (:genesis-sha256 s)) :wrong-genesis)
                               (require! (= (:previous-sha256 s) (:snapshot-sha256 prev)) :hash-mismatch)
-                              (require! (= (:expected-head s) prev) :expected-head-mismatch)
+                              nil
                               (operation-valid! (:operation s))
                               (require! (= (:information-cutoff s) (get-in s [:operation :information-cutoff]))
                                         :information-cutoff-mismatch)

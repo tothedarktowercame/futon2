@@ -386,7 +386,7 @@
         (not= (:store/id ref) (get-in current [:head :store/id]))
         {:status :reference-refused :reason :wrong-store-id}
         (not (pos-int? (:seq ref))) {:status :reference-refused :reason :missing-reference}
-        (> (:seq ref) (get-in current [:head :seq])) {:status :reference-refused :reason :ahead-of-head}
+        (not= (:seq ref) (get-in current [:head :seq])) {:status :reference-refused :reason :ahead-of-head}
         :else (let [entry (nth (:chain current) (dec (:seq ref)) nil)]
                 (cond
                   (nil? entry) {:status :reference-refused :reason :missing-reference}

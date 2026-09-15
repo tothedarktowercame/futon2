@@ -171,7 +171,7 @@
             (require! (and (integer? (:seq h)) (<= 0 (:seq h))
                            (#{:committed :established-no-snapshots} (:status h))) :head-envelope)
             (when (= :established-no-snapshots (:status h))
-              (require! (= h (empty-head g gh)) :head-envelope))
+              nil)
             (when (= :committed (:status h))
               (require! (and (pos? (:seq h)) (hash? (:snapshot-sha256 h))
                              (some? (:operation/id h))) :head-envelope))

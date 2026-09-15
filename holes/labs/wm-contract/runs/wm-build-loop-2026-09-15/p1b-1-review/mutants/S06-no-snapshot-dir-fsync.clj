@@ -357,7 +357,7 @@
                          (Files/move temp target (into-array java.nio.file.CopyOption [StandardCopyOption/ATOMIC_MOVE]))
                          (*event* {:io :atomic-move :path (str target)})
                          (stage! stage :snapshot-after-rename)
-                         (force-directory! (path store "snapshots"))
+                         nil
                          (stage! stage :snapshot-after-directory-force)
                          (write-forced! (path store "HEAD.edn.tmp") (encode new-head) stage "head")
                          (reset! stage :head-rename)

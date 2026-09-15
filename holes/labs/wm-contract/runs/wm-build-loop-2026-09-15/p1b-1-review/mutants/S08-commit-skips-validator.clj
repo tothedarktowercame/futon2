@@ -337,7 +337,7 @@
                        (not= expected-head (:head current)) {:status :stale-predecessor :head (:head current)}
 
                        :else
-                       (let [_ (payload-valid! store payload)
+                       (let [_ nil
                              h (:head current)
                              s {:schema :wm/work-target-snapshot-v1 :store/id (:store/id h)
                                 :seq (inc (:seq h)) :genesis-sha256 (:genesis-sha256 h)

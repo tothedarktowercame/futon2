@@ -157,7 +157,7 @@
         (cond
           (nil? h)
           {:status (cond established :damaged
-                         (and init (empty? snaps)) :initialization-incomplete
+                         (and init (empty? snaps)) :established-no-snapshots
                          :else :pending-recovery)
            :reason :missing-head}
 

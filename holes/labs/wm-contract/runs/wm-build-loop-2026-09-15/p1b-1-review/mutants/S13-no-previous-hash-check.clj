@@ -199,7 +199,7 @@
                               (require! (= :wm/work-target-snapshot-v1 (:schema s)) :snapshot-envelope)
                               (require! (= (:store/id g) (:store/id s)) :wrong-store-id)
                               (require! (= gh (:genesis-sha256 s)) :wrong-genesis)
-                              (require! (= (:previous-sha256 s) (:snapshot-sha256 prev)) :hash-mismatch)
+                              nil
                               (require! (= (:expected-head s) prev) :expected-head-mismatch)
                               (operation-valid! (:operation s))
                               (require! (= (:information-cutoff s) (get-in s [:operation :information-cutoff]))

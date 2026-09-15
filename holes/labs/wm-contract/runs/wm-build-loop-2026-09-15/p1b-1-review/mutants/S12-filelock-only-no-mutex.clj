@@ -64,7 +64,7 @@
     (get (swap! mutexes #(if (contains? % k) % (assoc % k (Object.)))) k)))
 (defn- locked [store f]
   (let [monitor (mutex store)]
-   (locking monitor
+   (do monitor
     (with-open [channel (FileChannel/open (path store ".writer.lock")
                                          (into-array java.nio.file.OpenOption
                                                      [StandardOpenOption/CREATE StandardOpenOption/WRITE]))

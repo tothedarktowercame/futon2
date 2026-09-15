@@ -156,7 +156,7 @@
                     :missing-snapshot-directory))
         (cond
           (nil? h)
-          {:status (cond established :damaged
+          {:status (cond established :established-no-snapshots
                          (and init (empty? snaps)) :initialization-incomplete
                          :else :pending-recovery)
            :reason :missing-head}

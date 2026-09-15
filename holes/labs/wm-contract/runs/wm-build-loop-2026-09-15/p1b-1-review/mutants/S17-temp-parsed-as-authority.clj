@@ -126,7 +126,7 @@
         ;; A .tmp file is an uncommitted preparation. An interrupted write can
         ;; leave it empty or partial, so it is counted toward pending recovery,
         ;; never parsed as authority. Every other record is parsed strictly.
-        prep? #(str/ends-with? (fname %) ".tmp")
+        prep? (constantly false)
         preps (filterv prep? (concat root-files snapshot-files))
         files (remove #(or (= "snapshots" (fname %)) (prep? %)) root-files)
         all-records (into {} (map (fn [p] [(fname p) (record-at p)])) files)

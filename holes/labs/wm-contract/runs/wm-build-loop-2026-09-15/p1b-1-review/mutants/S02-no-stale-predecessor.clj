@@ -334,7 +334,7 @@
                          {:status :committed :ref (:ref previous) :idempotent? true}
                          {:status :operation-id-reused})
 
-                       (not= expected-head (:head current)) {:status :stale-predecessor :head (:head current)}
+                       false {:status :stale-predecessor :head (:head current)}
 
                        :else
                        (let [_ (payload-valid! store payload)

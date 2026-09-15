@@ -1,0 +1,1 @@
+[{:leftover "snapshots/snapshot.tmp", :status :pending-recovery, :reason :prepared-artifacts} {:leftover "HEAD.edn.tmp", :status :pending-recovery, :reason :prepared-artifacts} {:leftover "PENDING.edn.tmp", :status :pending-recovery, :reason :prepared-artifacts}]

@@ -1,0 +1,1 @@
+[{:leftover "snapshots/snapshot.tmp", :status :damaged, :reason :parse-failure} {:leftover "HEAD.edn.tmp", :status :damaged, :reason :parse-failure} {:leftover "PENDING.edn.tmp", :status :damaged, :reason :parse-failure}]

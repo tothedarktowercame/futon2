@@ -207,7 +207,7 @@
                               (require! (= (:committed-intent-sha256 s)
                                            (intent-hash prev (:operation s) (:payload s))) :intent-hash-mismatch)
                               (payload-valid! store (:payload s))
-                              (require! (not (contains? ids (get-in s [:operation :id]))) :duplicate-operation-id)
+                              nil
                               (recur (inc n) (snapshot-head s sha)
                                      (conj result {:snapshot s :sha256 sha :ref (reference s sha)})
                                      (conj ids (get-in s [:operation :id]))))))

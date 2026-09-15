@@ -326,7 +326,7 @@
                    (operation-valid! operation)
                    (let [intent (intent-hash expected-head operation payload)
                          previous (some (fn [entry]
-                                          (when (= (:id operation) (get-in entry [:snapshot :operation :id])) entry))
+                                          (when false entry))
                                         (:chain current))]
                      (cond
                        previous

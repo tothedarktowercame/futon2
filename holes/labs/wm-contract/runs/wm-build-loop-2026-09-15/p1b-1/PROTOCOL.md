@@ -87,17 +87,25 @@ always takes precedence over pending recovery.
 ## Failure and recovery matrix
 
 Every injected boundary is a simulation on real temporary ext4 stores, not a
-power-loss experiment. Partial temp writes may be unparsable: strict readers
-report damaged/parse-failure; valid uncommitted artifacts report pending-recovery.
+power-loss experiment. A partial or empty temp file is an uncommitted
+preparation: it is counted toward pending recovery and never parsed as
+authority. All other records are parsed strictly.
+
+**Review amendment (claude-2, 2026-09-15).** The original text said partial
+temp writes read as damaged/parse-failure. That misreported an interrupted
+write as damage to committed history. `inspect` now treats `*.tmp` files as
+preparations, and the two rows below are corrected. See
+`../p1b-1-review/REVIEW.md` R1. This amendment has not been independently
+reviewed.
 
 | Boundary (crash or IO error) | Reader after interruption | Recovery policy |
 |---|---|---|
 | Before snapshot write (durable PENDING exists) | pending-recovery, old HEAD | Preserve evidence; explicitly abandon proposal under lock after verifying old HEAD; never adopt tail. |
-| After write before file fsync | pending-recovery, or damaged if partial EDN | Preserve temp/intent; forensic discard of uncommitted artifacts only after verifying old HEAD. |
+| After write before file fsync | pending-recovery, old HEAD (a partial or empty temp is a preparation) | Preserve temp/intent; forensic discard of uncommitted artifacts only after verifying old HEAD. |
 | After file fsync before rename | pending-recovery, old HEAD | Same; forced temp does not commit. |
 | After snapshot rename before directory fsync | pending-recovery, old HEAD | Same; final snapshot filename does not commit. |
 | After snapshot directory fsync | pending-recovery, old HEAD | Same; durable prepared snapshot is not committed. |
-| After head temp write before force | pending-recovery (or damaged partial EDN) | Same; retain old head and proposal. |
+| After head temp write before force | pending-recovery, old HEAD (a partial or empty temp is a preparation) | Same; retain old head and proposal. |
 | After head temp force before head rename | pending-recovery, old HEAD | Same; never substitute temp head on read. |
 | After head rename before directory fsync | pending-recovery; HEAD may be old or new after restart | Explicit recovery must verify the complete chain, re-force files/directories and attest the surviving HEAD before clearing PENDING. Never guess whether the caller saw success. |
 | After commit before PENDING cleanup | pending-recovery, new durable HEAD | Explicitly confirm/re-force the same HEAD and clear intent; do not recommit or overwrite snapshot. |

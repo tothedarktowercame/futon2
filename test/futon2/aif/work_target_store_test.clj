@@ -288,13 +288,37 @@
        (Files/delete external)
        (is (= :already-established (:status (store/initialize! s g))))
        (is (= :committed (:status (append! s "retained" {}))))
+       ;; A temp file is a preparation, not authority: pending recovery.
        (spit (.toFile (p s "orphan.tmp")) "{} {}")
+       (is (= :pending-recovery (:status (store/read-store s))))
+       (Files/delete (p s "orphan.tmp"))
+       ;; Any other extra record is still parsed strictly.
+       (spit (.toFile (p s "orphan.edn")) "{} {}")
        (damage s :parse-failure))))
   (fixture
    (fn [s]
      (establish s)
      (Files/delete (p s "snapshots"))
      (damage s :missing-snapshot-directory))))
+
+(deftest interrupted-temp-writes-are-pending-not-damage
+  ;; Real filesystem. A crash before any bytes reach a temp file leaves it
+  ;; empty; an uncommitted preparation must not read as corrupted history.
+  (doseq [leftover ["snapshots/snapshot.tmp" "HEAD.edn.tmp" "PENDING.edn.tmp"]]
+    (testing leftover
+      (fixture
+       (fn [s]
+         (establish s)
+         (append! s "one" {})
+         (let [h (:head (store/read-store s))]
+           (spit (.toFile (p s leftover)) "")
+           (let [read (store/read-store s)]
+             (is (= :pending-recovery (:status read)) (pr-str read))
+             (is (= h (:head read))))
+           (is (= :pending-recovery (:status (store/commit! s h (operation "two") {}))))
+           ;; Damage to committed history still takes precedence.
+           (spit (.toFile (p s "snapshots/1.edn")) " \n" :append true)
+           (damage s :hash-mismatch)))))))
 
 (deftest envelope-validation-after-consistent-rehash
   ;; Deliberately rehash the tail and HEAD to test semantic checks independently

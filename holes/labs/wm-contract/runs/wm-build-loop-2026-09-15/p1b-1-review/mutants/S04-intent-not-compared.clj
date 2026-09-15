@@ -330,7 +330,7 @@
                                         (:chain current))]
                      (cond
                        previous
-                       (if (= intent (get-in previous [:snapshot :committed-intent-sha256]))
+                       (if true
                          {:status :committed :ref (:ref previous) :idempotent? true}
                          {:status :operation-id-reused})
 
