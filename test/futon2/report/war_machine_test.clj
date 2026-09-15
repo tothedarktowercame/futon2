@@ -368,17 +368,6 @@
            (:exclusions result)))
     (is (not-any? #(= :unknown (:id %)) (:priorities result)))))
 
-(deftest strategic-selector-accepts-resolved-vars-and-rejects-absence
-  (testing "requiring-resolve returns a callable Var, not a value satisfying fn?"
-    (is (= {:probe true}
-           (#'wm/invoke-strategic-selection
-            #'identity {:probe true}))))
-  (testing "absence is a system failure, never an additive fallback"
-    (is (thrown-with-msg?
-         clojure.lang.ExceptionInfo
-         #"requires the shared reason-bearing selector"
-         (#'wm/invoke-strategic-selection nil {:probe true})))))
-
 (deftest futon1b-edn-mission-index-enables-strategic-enrichment-test
   (let [body (pr-str
               {:hyperedges
@@ -1512,54 +1501,6 @@
     (is (= (:decision off) (:decision on)))
     (is (not (contains? off :active-mission)))
     (is (= active (:active-mission on)))))
-
-(deftest strategic-selection-law-records-controller-rank-of-divergent-choice-test
-  (let [head-action {:type :advance-mission :target "M-controller-head"}
-        chosen-action {:type :advance-mission :target "M-live-choice"}
-        controller-decision
-        {:selection-law {:requested :controller-head :applied :controller-head}
-         :controller-ranking [{:rank 1 :action head-action}
-                              {:rank 124 :action chosen-action}]}
-        law (#'wm/strategic-selection-law
-             controller-decision {:action chosen-action}
-             {:consulted-ranking :scheduler-habit})]
-    (is (= :scheduler-habit (:consulted-ranking law)))
-    (is (= 124 (:chosen-rank law)))
-    (is (= 1 (:controller-head-rank law)))
-    (is (true? (:moved-from-controller-head? law)))))
-
-(deftest strategic-selection-law-records-controller-head-honestly-test
-  ;; The ranking carries the ENRICHED action map; the selector returns a
-  ;; MINIMAL one. Identity is type+target (policy-key), never map equality —
-  ;; run 2 of 2026-09-02 stamped the controller head itself as moved because
-  ;; the maps differed on enrichment keys.
-  (let [enriched-head {:type :advance-mission :target "M-controller-head"
-                       :rationale "enriched by the judge" :weight 1.0
-                       :mission-value-factor 0.59}
-        minimal-head {:type :advance-mission :target "M-controller-head"}
-        controller-decision
-        {:selection-law {:requested :controller-head :applied :controller-head}
-         :controller-ranking [{:rank 1 :action enriched-head}
-                              {:rank 2 :action {:type :advance-mission
-                                               :target "M-other"}}]}
-        law (#'wm/strategic-selection-law
-             controller-decision {:action minimal-head}
-             {:consulted-ranking :controller})]
-    (is (= :controller (:consulted-ranking law)))
-    (is (= 1 (:chosen-rank law)))
-    (is (false? (:moved-from-controller-head? law)))))
-
-(deftest strategic-selection-law-types-a-choice-outside-the-ranking-test
-  (let [controller-decision
-        {:selection-law {}
-         :controller-ranking [{:rank 1 :action {:type :advance-mission
-                                                :target "M-head"}}]}
-        law (#'wm/strategic-selection-law
-             controller-decision
-             {:action {:type :repair-machine-failure :target "R-x"}}
-             {:consulted-ranking :scheduler-habit})]
-    (is (= :not-in-controller-ranking (:chosen-rank law)))
-    (is (true? (:moved-from-controller-head? law)))))
 
 ;; ---------------------------------------------------------------------------
 ;; I6 (harvested refusal class prediction-error-v1--source-field-missing):

@@ -3734,25 +3734,13 @@
                 ((or (:repair-supersede-fn opts) repair/supersede!)
                  stop-line successor failure-kind)
                 successor))
-            selection-transient? (atom false)
             selection-judge (or (:judge-fn opts)
                                 (fn [days]
                                   (wm/generate-war-machine
                                    days
-                                   (merge
-                                    (select-keys opts [:accumulate-strategic-habit?
-                                                       :run-id :loaded-code-identity])
-                                    {:include-advisory-lanes? false
-                                    :strategic-selection-fn
-                                    (fn [request]
-                                      (let [selection
-                                            ((or (:strategic-selection-fn opts)
-                                                 #(strategic-selection! opts %))
-                                             request)]
-                                        (when
-                                         (:readiness/selection-transient selection)
-                                          (reset! selection-transient? true))
-                                        selection))}))))
+                                   (assoc (select-keys opts [:accumulate-strategic-habit?
+                                                            :run-id :loaded-code-identity])
+                                          :include-advisory-lanes? false))))
             judgement0-base
             (run-phase!
              opts @phase-context :selection
@@ -3767,9 +3755,7 @@
                 (if stop-line
                   judgement
                   ((or (:judgement-transform-fn opts) identity) judgement))))
-            judgement0 (cond-> judgement0-base
-                         @selection-transient?
-                         (assoc :readiness/selection-transient true))
+            judgement0 judgement0-base
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             ordinary-entry (selected-entry judgement0)
             pinned-selection
@@ -3841,6 +3827,8 @@
                              (cond->
                               (term {:selected-mission (str target)
                                      :selected-action (:action entry)
+                                     :controller-decision (when-not (or stop-line pinned-selection)
+                                                            (:decision judgement))
                                      :stop-the-line-obligations
                                      (mapv #(select-keys % [:repair/id :attempt-id
                                                             :failed-commit

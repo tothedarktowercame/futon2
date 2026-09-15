@@ -40,6 +40,7 @@
             [clojure.set]
             [clojure.string :as str]
             [futon2.aif.action-proposer :as ap]
+            [futon2.aif.controller-authority :as controller-authority]
             [futon2.aif.anticipation :as anticipation]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.beta-habit :as beta-habit]
@@ -5926,41 +5927,6 @@
              :summary (str b " waits on " a)})
           blocked-pairs))))
 
-(defn- invoke-strategic-selection
-  [selector request]
-  (when-not (ifn? selector)
-    (throw
-     (ex-info
-      "War Machine requires the shared reason-bearing selector"
-      {:required-option :strategic-selection-fn
-       :selection-boundary :reviewed-reason-bearing-policy})))
-  (selector request))
-
-(defn- strategic-selection-law
-  "Rewrite the policy selector's law record after the reason-bearing selector
-   has made the final choice. `controller-ranking` is the ranking emitted by
-   the controller decision itself, so chosen rank and movement cannot be
-   confused with scheduler-habit order or a selector-local rank."
-  [controller-decision strategic-action strategic-selection]
-  (let [controller-ranking (:controller-ranking controller-decision)
-        chosen-action (:action strategic-action)
-        ;; Compare by durable action identity (type + target via policy-key),
-        ;; never by full map equality: the selector returns a minimal action
-        ;; map while the ranking carries the enriched one, so map equality
-        ;; reported the controller head itself as moved (chosen-rank nil,
-        ;; moved? true on run 2 of 2026-09-02). Same trap as rank/N joins.
-        chosen-key (habit-prior/policy-key chosen-action)
-        head (first controller-ranking)
-        chosen (some #(when (= chosen-key (candidate-identity %)) %)
-                     controller-ranking)]
-    (assoc (:selection-law controller-decision)
-           :consulted-ranking (or (:consulted-ranking strategic-selection)
-                                  :live-selector-id)
-           :controller-head-rank (:rank head)
-           :chosen-rank (or (:rank chosen) :not-in-controller-ranking)
-           :moved-from-controller-head?
-           (not= chosen-key (candidate-identity head)))))
-
 (defn- route-tag
   [route node via]
   (conj (or route [])
@@ -6035,7 +6001,7 @@
   ([scan-data] (judge scan-data {}))
   ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?
                       step-portfolio? eval-invariant-fallback?
-                      strategic-selection-fn wm-version run-id
+                      wm-version run-id
                       accumulation-entity-id accumulation-initialization]
                :as judge-opts
                :or {trace? false include-advisory-lanes? true
@@ -6588,92 +6554,8 @@
         ;; event.
         default-mode-events (policy/default-mode-events controller-decision)
         route5 (route-tag route4 :R6 "futon2.aif.policy/select-action")
-        strategic-candidate-ids
-        #{"M-aif-policy-conditioned-eig"
-          "M-shared-memory-control-build-test"
-          "M-wm-aif-policy-grain-compliance"}
-        scheduler-habit-ranking
-        (->> wm-admissible
-             (keep #(let [target (get-in % [:action :target])]
-                      (when (contains? strategic-candidate-ids target)
-                        target)))
-             distinct
-             vec)
-        strategic-selection
-        (invoke-strategic-selection
-         strategic-selection-fn
-         {:scheduler-habit-ranking scheduler-habit-ranking
-          :controller-ranking (:controller-ranking controller-decision)
-          :trace-id (str "wm-live-selection-" wm-as-of)})
-        route6 (route-tag route5 :R14 "futon2.report.war-machine/invoke-strategic-selection")
-        selected-mission-ids (:selected-mission-ids strategic-selection)
-        strategic-action
-        (first
-         (keep
-          (fn [mission-id]
-            (some #(when (= mission-id (get-in % [:action :target])) %)
-                  wm-admissible))
-          selected-mission-ids))
-        _ (when-not (and (= :verified-live-selection
-                            (:status strategic-selection))
-                         strategic-action
-                         (= :machine-authorized-bounded-autonomy
-                            (get-in strategic-selection
-                                    [:actuation :status]))
-                         (true? (get-in strategic-selection
-                                        [:actuation :authorized?])))
-            (throw
-             (ex-info
-              "reviewed live strategic selection is not actionable"
-              {:selection-status (:status strategic-selection)
-               :actuation (:actuation strategic-selection)
-               :selected-mission-ids selected-mission-ids
-               :scheduler-habit-ranking scheduler-habit-ranking})))
-        selected-policy (:selected-policy strategic-selection)
-        wm-decision
-        (cond-> (assoc controller-decision
-               :action (:action strategic-action)
-               :selection-law
-               (strategic-selection-law controller-decision strategic-action
-                                        strategic-selection)
-               :reason :reviewed-live-reason-bearing-policy
-               :selection-boundary :reason-bearing-strategic-policy
-               :requires-operator-override? false
-               ;; Operator decision evidence
-               ;; 6e6f56a1-b9d7-4f83-928f-3a211ef890a0 retires
-               ;; confirm-to-enact. All machine gates remain authoritative.
-               :actuation-status
-               (get-in strategic-selection [:actuation :status])
-               :actuation-authorized?
-               (get-in strategic-selection [:actuation :authorized?])
-               :selected-policy-id (:selected-policy-id
-                                    strategic-selection)
-               :selected-mission-ids selected-mission-ids
-               :strategic-memory
-               {:influenced? true
-                :authority :live
-                :basis :chain-integrity-and-auditability
-                :demonstrated-better-selection? false
-                :memory-ids (:selected-memory-ids
-                             strategic-selection)
-                :relation-contributions
-                (:relation-contributions strategic-selection)
-                :path-diversity (:path-diversity strategic-selection)
-                :budget (:budget strategic-selection)
-                :blockers (:blockers strategic-selection)
-                :calibration (:calibration strategic-selection)
-                :serving-cache-gate
-                (:serving-cache-gate strategic-selection)
-                :e-s (:e-s selected-policy)
-                :predicted-g-s (:predicted-g-s selected-policy)
-                :hard-support (:hard-support selected-policy)
-                :provenance (:provenance selected-policy)
-                :counterfactuals
-                (:counterfactuals strategic-selection)
-                :actuation (:actuation strategic-selection)})
-          (:selection-proof-input strategic-selection)
-          (assoc :selection-proof-input
-                 (:selection-proof-input strategic-selection)))
+        route6 (route-tag route5 :R14 "futon2.aif.controller-authority/authorize")
+        wm-decision (controller-authority/authorize controller-decision wm-admissible)
         ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
         ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
         ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction

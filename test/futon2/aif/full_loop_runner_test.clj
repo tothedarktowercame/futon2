@@ -2803,43 +2803,24 @@
     (is (= :selection (get-in result [:data :failure-stage])))
     (is (= 3 @calls))))
 
-(deftest selection-checkpoint-records-only-late-success-marker
-  (letfn [(run [failures-before-success]
-            (let [calls (atom 0)
-                  opts
-                  (-> (isolated-runner-opts)
-                      (dissoc :judge-fn)
-                      (assoc
-                       :repair-open-fn (constantly [])
-                       :repair-system-record-fn
-                       (fn [finding]
-                         (assoc finding :repair/id "repair-selection-marker"))
-                       :strategic-selection-invoke-fn
-                       (fn [_]
-                         (if (<= (swap! calls inc) failures-before-success)
-                           (throw (ex-info "transient selection timeout" {}))
-                           {:ok true
-                            :selection
-                            {:status :verified-live-selection
-                             :selected-mission-ids ["M-selected"]}}))
-                       :strategic-selection-sleep-fn (fn [_])
-                       :construct-fn
-                       (fn [& _]
-                         (throw (ex-info "stop after selection"
-                                         {:outcome :incomplete})))))
-                  result
-                  (with-redefs
-                    [wm/generate-war-machine
-                     (fn [_ {:keys [strategic-selection-fn]}]
-                       (strategic-selection-fn
-                        {:scheduler-habit-ranking ["M-selected"]})
-                       {:judgement judgement})]
-                    (runner/run-opportunity! opts))]
-              (get-in result [:checkpoints :selection :judgment])))]
-    (is (true? (:readiness/selection-transient (run 1)))
-        "retry success is stamped in the durable selection judgment")
-    (is (not (contains? (run 0) :readiness/selection-transient))
-        "first-try success preserves the original judgment shape")))
+(deftest selection-checkpoint-keeps-controller-decision-without-fixture-selector
+  (let [seen (atom nil)
+        opts (-> (isolated-runner-opts)
+                 (dissoc :judge-fn)
+                 (assoc :repair-open-fn (constantly [])
+                        :strategic-selection-invoke-fn
+                        (fn [_] (throw (Exception. "fixture selector must not run")))
+                        :construct-fn (fn [& _] (throw (ex-info "stop after selection"
+                                                              {:outcome :incomplete})))))
+        result (with-redefs [wm/generate-war-machine
+                             (fn [_ options]
+                               (reset! seen options)
+                               {:judgement judgement})]
+                 (runner/run-opportunity! opts))]
+    (is (= (:decision judgement)
+           (get-in result [:checkpoints :selection :judgment :controller-decision])))
+    (is (false? (:include-advisory-lanes? @seen)))
+    (is (not (contains? @seen :strategic-selection-fn)))))
 
 (deftest restored-agent-is-woken-once-before-readiness-proceeds
   (let [phases (atom [])
