@@ -1,0 +1,90 @@
+{
+  "at": "2026-09-15T20:20:27.300896+00:00",
+  "source-sha256": {
+    "src/futon2/aif/work_target_store.clj": "ddf5857c08572933e838092116eeedef4dd69bdd6674b3a9b9c78b535c729629",
+    "test/futon2/aif/work_target_store_test.clj": "75804c185e5f8c49521c1cb88c0b8f6901ed37c064a6d5575852d28f6530ba0c",
+    "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/p1b-1/filesystem-probe.clj": "9de4eb84cd41b351b6b470d6e660e55b893bfbe564fdc33042a4fa1219af55a4"
+  },
+  "gates": [
+    {
+      "gate": "clj-kondo",
+      "argv": [
+        "clj-kondo",
+        "--lint",
+        "src/futon2/aif/work_target_store.clj",
+        "test/futon2/aif/work_target_store_test.clj",
+        "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/p1b-1/filesystem-probe.clj"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 0.043
+    },
+    {
+      "gate": "check-parens",
+      "argv": [
+        "emacs",
+        "-Q",
+        "--batch",
+        "-l",
+        "/home/joe/code/futon4/dev/check-parens.el",
+        "--eval",
+        "(arxana-check-parens-cli)",
+        "--",
+        "--no-defaults",
+        "src/futon2/aif/work_target_store.clj",
+        "test/futon2/aif/work_target_store_test.clj",
+        "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/p1b-1/filesystem-probe.clj"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 0.04
+    },
+    {
+      "gate": "tests",
+      "argv": [
+        "clojure",
+        "-X:test",
+        ":nses",
+        "[futon2.aif.work-target-store-test]"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 3.249
+    },
+    {
+      "gate": "filesystem",
+      "argv": [
+        "clojure",
+        "-M",
+        "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/p1b-1/filesystem-probe.clj"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 0.499
+    },
+    {
+      "gate": "mount",
+      "argv": [
+        "findmnt",
+        "-T",
+        "/home/joe/code/futon2",
+        "-o",
+        "TARGET,FSTYPE,OPTIONS"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 0.001
+    },
+    {
+      "gate": "disk",
+      "argv": [
+        "df",
+        "-h",
+        "/home/joe/code/futon2"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 0.001
+    }
+  ]
+}

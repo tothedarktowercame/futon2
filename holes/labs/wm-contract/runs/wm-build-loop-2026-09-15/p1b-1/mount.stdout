@@ -1,0 +1,2 @@
+TARGET FSTYPE OPTIONS
+/      ext4   rw,relatime

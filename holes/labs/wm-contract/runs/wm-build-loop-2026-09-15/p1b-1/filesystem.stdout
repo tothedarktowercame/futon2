@@ -1,0 +1,1 @@
+{:jdk 21.0.11, :provider sun.nio.fs.LinuxFileSystemProvider@1929425f, :file-store / (/dev/mapper/vg0-root), :file-force :ok, :atomic-move :ok, :atomic-replacement :ok, :directory-force :ok}

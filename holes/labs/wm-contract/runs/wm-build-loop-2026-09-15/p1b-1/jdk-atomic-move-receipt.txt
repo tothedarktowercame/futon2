@@ -1,0 +1,63 @@
+Installed OpenJDK 21.0.11 bytecode, javap -c -p.
+UnixFileSystemProvider.move delegates to UnixFileSystem.move:
+  public void move(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption...) throws java.io.IOException;
+    Code:
+       0: aload_0
+       1: getfield      #21                 // Field theFileSystem:Lsun/nio/fs/UnixFileSystem;
+       4: aload_1
+       5: invokestatic  #95                 // Method sun/nio/fs/UnixPath.toUnixPath:(Ljava/nio/file/Path;)Lsun/nio/fs/UnixPath;
+       8: aload_2
+       9: invokestatic  #95                 // Method sun/nio/fs/UnixPath.toUnixPath:(Ljava/nio/file/Path;)Lsun/nio/fs/UnixPath;
+      12: aload_3
+      13: invokevirtual #231                // Method sun/nio/fs/UnixFileSystem.move:(Lsun/nio/fs/UnixPath;Lsun/nio/fs/UnixPath;[Ljava/nio/file/CopyOption;)V
+      16: return
+
+  public void checkAccess(java.nio.file.Path, java.nio.file.AccessMode...) throws java.io.IOException;
+    Code:
+
+UnixFileSystem.move atomic branch calls UnixNativeDispatcher.rename; EXDEV (errno 18) becomes AtomicMoveNotSupportedException, other errors rethrow as IOException. Atomic branch returns without entering non-atomic copy/delete path.
+  void move(sun.nio.fs.UnixPath, sun.nio.fs.UnixPath, java.nio.file.CopyOption...) throws java.io.IOException;
+    Code:
+       0: invokestatic  #107                // Method java/lang/System.getSecurityManager:()Ljava/lang/SecurityManager;
+       3: astore        4
+       5: aload         4
+       7: ifnull        18
+      10: aload_1
+      11: invokevirtual #463                // Method sun/nio/fs/UnixPath.checkWrite:()V
+      14: aload_2
+      15: invokevirtual #463                // Method sun/nio/fs/UnixPath.checkWrite:()V
+      18: aload_3
+      19: invokestatic  #466                // Method sun/nio/fs/UnixFileSystem$Flags.fromMoveOptions:([Ljava/nio/file/CopyOption;)Lsun/nio/fs/UnixFileSystem$Flags;
+      22: astore        5
+      24: aload         5
+      26: getfield      #470                // Field sun/nio/fs/UnixFileSystem$Flags.atomicMove:Z
+      29: ifeq          81
+      32: aload_1
+      33: aload_2
+      34: invokestatic  #473                // Method sun/nio/fs/UnixNativeDispatcher.rename:(Lsun/nio/fs/UnixPath;Lsun/nio/fs/UnixPath;)V
+      37: goto          80
+      40: astore        6
+      42: aload         6
+      44: invokevirtual #247                // Method sun/nio/fs/UnixException.errno:()I
+      47: bipush        18
+      49: if_icmpne     73
+      52: new           #476                // class java/nio/file/AtomicMoveNotSupportedException
+      55: dup
+      56: aload_1
+      57: invokevirtual #451                // Method sun/nio/fs/UnixPath.getPathForExceptionMessage:()Ljava/lang/String;
+      60: aload_2
+      61: invokevirtual #451                // Method sun/nio/fs/UnixPath.getPathForExceptionMessage:()Ljava/lang/String;
+      64: aload         6
+      66: invokevirtual #478                // Method sun/nio/fs/UnixException.errorString:()Ljava/lang/String;
+      69: invokespecial #481                // Method java/nio/file/AtomicMoveNotSupportedException."<init>":(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+      72: athrow
+      73: aload         6
+      75: aload_1
+      76: aload_2
+      77: invokevirtual #379                // Method sun/nio/fs/UnixException.rethrowAsIOException:(Lsun/nio/fs/UnixPath;Lsun/nio/fs/UnixPath;)V
+      80: return
+      81: aconst_null
+      82: astore        6
+      84: aconst_null
+      85: astore        7
+      87: aload_1

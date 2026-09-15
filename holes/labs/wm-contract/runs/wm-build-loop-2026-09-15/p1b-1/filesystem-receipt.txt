@@ -1,0 +1,15 @@
+Real isolated-filesystem probe; see filesystem-probe.clj and gate-receipts.json.
+
+{:jdk 21.0.11, :provider sun.nio.fs.LinuxFileSystemProvider@1929425f, :file-store / (/dev/mapper/vg0-root), :file-force :ok, :atomic-move :ok, :atomic-replacement :ok, :directory-force :ok}
+
+Canonical repository mount:
+TARGET FSTYPE OPTIONS
+/      ext4   rw,relatime
+
+Capacity (ENOSPC controls are injected, not destructive disk filling):
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/mapper/vg0-root  1.9T  1.7T   79G  96% /
+
+Installed JDK atomic branch is retained in jdk-atomic-move-receipt.txt.
+Real instrumented force/rename ordering is retained in tests.stdout.
+No power-loss test; durability trusts successful filesystem/device force operations.
