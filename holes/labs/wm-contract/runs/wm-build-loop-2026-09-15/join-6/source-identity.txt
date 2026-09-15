@@ -1,0 +1,13 @@
+futon3c branch: master
+futon3c HEAD: ca8f1a45763e1d4f04948356885d8b02886a02dc
+futon3c src/test dirty:
+futon2 HEAD: bf1c8837db2d091352ed3acdac6d8a33ca7b980c
+futon2 src dirty:
+35:  ;; futon2 — canonical War Machine engine + visualiser home.
+36:  futon2/futon2             {:local/root "../futon2"}
+110:                     war-machine/war-machine {:local/root "../futon2/web/war-machine"}
+8f8072537f63a57d307d784da143442d999d82f9a9b7367bee0a4c22108da093  test/futon3c/wm/run4_http_boundary_test.clj
+7c5c3a11d6684e8a05447380e5330f8a0409f6a5483e5519e066ba47d6ff460f  src/futon3c/transport/http.clj
+fef3e6eab4dda00b5c1e079a3e0f9607c5d04b8b7d74cb8f001cf49d13011f07  src/futon3c/wm/run4_attempt_admission.clj
+17210a48730ab71bb6b035d8975765ddf0e00576470ca1f6577d58dd21d54e40  src/futon3c/wm/runner_service.clj
+b1e743a6b14152faf59e6604c60ef2a0ab54242f919303729ed9bd854c4b5605  /home/joe/code/futon2/src/futon2/aif/c_fold_config.clj

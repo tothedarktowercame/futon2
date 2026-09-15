@@ -1,0 +1,1 @@
+clojure -X:test :nses '[futon3c.wm.run4-http-boundary-test]'  (cwd /home/joe/code/futon3c, own process)

@@ -1,0 +1,6 @@
+
+Testing futon3c.wm.run4-http-boundary-test
+
+Ran 4 tests containing 27 assertions.
+0 failures, 0 errors.
+{:test 4, :pass 27, :fail 0, :error 0}

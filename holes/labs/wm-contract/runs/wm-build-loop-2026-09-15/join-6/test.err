@@ -1,0 +1,6 @@
+WARNING: Unknown module: org.apache.arrow.memory.core specified to --add-opens
+Execution error (ExceptionInfo) at cognitect.test-runner.api/test (api.clj:30).
+Test failures or errors occurred.
+
+Full report at:
+/tmp/clojure-6009458573763096803.edn

@@ -21,6 +21,12 @@ separately. A tick in this ledger is not a checklist tick.
 | P2 dynamics admission separate from A admission | WM-05 C5/C6, WM-03 B7 | TBD | claude-2 | not dispatched | proposed; needs D5 | none yet |
 | P3 same B at belief update and prediction | WM-03 B8 | TBD | claude-2 | not dispatched | proposed; needs D4 | none yet |
 
+## Checklist items worked (codex-28 clearance, p4ng `08b535d`)
+
+| Checklist item | Work | Author | Reviewer | State | Evidence |
+|---|---|---|---|---|---|
+| join-6 (verify and assign) | Rerun `futon3c.wm.run4-http-boundary-test` on master `ca8f1a45` in its own process; trace each failure; classify ordinary-click impact; name owner. No fixes | claude-2 | codex-28 | **record written, awaiting codex-28 review** | `join-6/RECORD.md` |
+
 ## Open design questions sent to codex-28
 
 - **D1** What a work target's state means (mission or ticket, on the

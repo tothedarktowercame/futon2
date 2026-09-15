@@ -1,0 +1,51 @@
+
+Running tests in #{"test"}
+
+Testing futon3c.wm.run4-http-boundary-test
+
+FAIL in (valid-run4-propagates-exact-server-derived-options) (run4_http_boundary_test.clj:102)
+expected: (= 200 (:status (handler (request {:run4-pin-ref "pin.edn", :run4-attempt-id "attempt-valid"} auth))))
+  actual: (not (= 200 403))
+
+FAIL in (valid-run4-propagates-exact-server-derived-options) (run4_http_boundary_test.clj:105)
+expected: (= 200 (:status (handler (request {:run4-pin-ref "pin.edn", :run4-attempt-id "attempt-valid"} auth))))
+  actual: (not (= 200 403))
+
+FAIL in (valid-run4-propagates-exact-server-derived-options) (run4_http_boundary_test.clj:108)
+expected: (= 1 (count (clojure.core/deref seen)))
+  actual: (not (= 1 0))
+
+FAIL in (valid-run4-propagates-exact-server-derived-options) (run4_http_boundary_test.clj:109)
+expected: (= casting (select-keys (first (clojure.core/deref seen)) (keys casting)))
+  actual: (not (= {:author "codex-10", :reviewer "codex-17", :repair-reviewer "codex-1"} {}))
+
+FAIL in (valid-run4-propagates-exact-server-derived-options) (run4_http_boundary_test.clj:110)
+expected: (string? (:run4-task-pin-text (first (clojure.core/deref seen))))
+  actual: (not (string? nil))
+
+FAIL in (valid-run4-propagates-exact-server-derived-options) (run4_http_boundary_test.clj:111)
+expected: (fn? (:run4-trusted-boundary-fn (first (clojure.core/deref seen))))
+  actual: (not (fn? nil))
+
+FAIL in (valid-run4-propagates-exact-server-derived-options) (run4_http_boundary_test.clj:112)
+expected: (= #{:resolve-mission :action-admissible? :read-text} (set (keys (:run4-task-pin-ports (first (clojure.core/deref seen))))))
+  actual: (not (= #{:resolve-mission :action-admissible? :read-text} #{}))
+
+FAIL in (concurrent-duplicates-corruption-and-write-failure-never-double-click) (run4_http_boundary_test.clj:129)
+expected: (every? #{200} (map (comp :status deref) requests))
+  actual: (not (every? #{200} (403 403 403 403 403 403 403 403 403 403)))
+
+FAIL in (concurrent-duplicates-corruption-and-write-failure-never-double-click) (run4_http_boundary_test.clj:130)
+expected: (= 1 (clojure.core/deref clicks))
+  actual: (not (= 1 0))
+
+FAIL in (concurrent-duplicates-corruption-and-write-failure-never-double-click) (run4_http_boundary_test.clj:134)
+expected: (= 409 (:status (handler (request (assoc payload :run4-attempt-id "attempt-corrupt") auth))))
+  actual: (not (= 409 403))
+
+FAIL in (concurrent-duplicates-corruption-and-write-failure-never-double-click) (run4_http_boundary_test.clj:140)
+expected: (= 500 (:status (handler (request (assoc payload :run4-attempt-id "attempt-write-failure") auth))))
+  actual: (not (= 500 403))
+
+Ran 4 tests containing 27 assertions.
+11 failures, 0 errors.
