@@ -1,8 +1,7 @@
 (ns futon2.aif.cascade-policy-test
-  "Mirrors of the GOverCascades.lean theorems plus F12 organise conformance
-  cases. The Lean module is the specification; these tests keep the Clojure
-  mirror honest against it."
-  (:require [clojure.test :refer [deftest is testing]]
+  "Ruled organiser conformance and Snatch parity; legacy scoring controls."
+  (:require [clojure.set :as set]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-policy :as cp]))
 
 ;; The Lean sameBag pair: equal node-bags, differing only in composition
@@ -32,40 +31,127 @@
                                     [same-bag-first same-bag-second])))
     (is (not= (:value g1) (:value g2)))))
 
-;; F12 organise conformance (mirror of F12Conformance O1-O3 on unit cases).
-(def repo
-  ;; a → b → c authored descent; d isolated
-  {:patterns #{:a :b :c :d} :stands-on #{[:a :b] [:b :c]} :acyclic? true})
+(def repo {:patterns #{:a :b :c :d} :stands-on #{[:a :b] [:b :c]} :acyclic? true})
+(def authority {:authority :documented-interpretation :source "fixture:admission"})
+(defn fixture-opts [temperament]
+  {:temperament temperament :acting-order-fn (fn [c] (:precedence c))
+   :score-fn (constantly 0)})
+(defn refusal [f]
+  (try (f) nil (catch clojure.lang.ExceptionInfo e (ex-data e))))
+(defn organise-fixture [temperament selected repository admitted]
+  (cp/organise cp/first-attempt-cascade selected repository admitted (fixture-opts temperament)))
 
-(deftest organise-o1-two-way-union
-  (let [c (cp/organise cp/up-closure-temperament #{:a} repo)]
-    (is (= #{:a :b :c} (:nodes c)))
+(deftest organiser-carriers-and-no-bootstrap
+  (let [c (organise-fixture cp/up-closure-temperament #{:a} repo {:d authority})]
+    (is (= #{:a :b :c :d} (:nodes c)))
     (is (= #{:b :c} (:added-by-organise c)))
-    (is (= (:nodes c) (into (:selected c) (:added-by-organise c))))
-    (is (= #{} (:admitted-by c)))))
-
-(deftest organise-selected-only-adds-nothing
-  (let [c (cp/organise cp/selected-only-temperament #{:a :c} repo)]
-    (is (= #{:a :c} (:nodes c)))
+    (is (= #{:d} (:admitted-by c)))
+    (is (= {:d authority} (get-in c [:provenance :admissions])))
+    (is (= #{} (:organised-edges c))))
+  (let [c (organise-fixture cp/selected-only-temperament #{:a :c} repo {})]
+    (is (= #{[:a :c]} (:organised-edges c)))
     (is (= #{} (:added-by-organise c)))))
 
-(deftest organise-o3-fast-forward-through-unselected
-  ;; a and c selected, b not: the authored path a→b→c fast-forwards to a
-  ;; single a→c edge over the selected carrier.
-  (let [c (cp/organise cp/selected-only-temperament #{:a :c} repo)]
-    (is (contains? (:edges c) [:a :c]))
-    (is (not-any? (fn [[u v]] (or (= u :b) (= v :b))) (:edges c)))))
+(defn subsets [xs]
+  (reduce (fn [acc x] (into acc (map #(conj % x) acc))) [#{}] xs))
+(defn paths
+  "Independent exhaustive DAG path enumeration, used as the test oracle."
+  [edges u v]
+  (letfn [(walk [path]
+            (let [last-node (peek path)]
+              (if (and (> (count path) 1) (= last-node v)) [path]
+                  (mapcat #(walk (conj path %))
+                          (for [[a b] edges :when (and (= a last-node) (not (some #{b} path)))] b)))))]
+    (walk [u])))
 
-(deftest organise-o3-introduced-nodes-cannot-justify-edges
-  ;; The ruled O3 bootstrap rejection: nodes organise itself introduced are
-  ;; excluded from the fast-forward carrier, so up-closure introduction of
-  ;; b and c yields NO edges among them from the introduction itself.
-  (let [c (cp/organise cp/up-closure-temperament #{:a} repo)]
-    (is (= #{} (:edges c)))))
+(deftest seven-laws-on-all-three-node-dags-and-carriers
+  ;; 8 DAGs x 8 selected sets x 8 admitted sets x 2 temperaments = 1024.
+  (doseq [edges (subsets [[0 1] [0 2] [1 2]])
+          sel (subsets [0 1 2]) adm (subsets [0 1 2])
+          t [cp/selected-only-temperament cp/up-closure-temperament]]
+    (let [r {:patterns #{0 1 2} :stands-on edges}
+          attributed (zipmap adm (repeat authority))
+          before {:nodes sel :precedence [0 1 2]}
+          t (assoc t :precedence [2 1 0])
+          d (cp/organise before sel r attributed (fixture-opts t))
+          carrier (set/difference (:nodes d) (:added-by-organise d))
+          expected (set (for [u carrier v carrier
+                             :when (some #(not-any? carrier (butlast (rest %))) (paths edges u v))] [u v]))]
+      (is (= sel (:selected d)) "osel")
+      (is (= edges (:authored-edges d)) "oauth")
+      (is (= adm (:admitted-by d)) "oattr")
+      (is (= (:nodes d) (set/union sel (:added-by-organise d) adm)) "o1")
+      (is (every? (fn [[u v]] (seq (paths edges u v))) (:organised-edges d)) "o2")
+      (is (= expected (:organised-edges d)) "o3, independent path oracle")
+      (is (not= (:acting-order-before d) (:acting-order-after d)) "o4, moved precedence")
+      (is (= d (cp/validate-cascade-diff! before sel r attributed d))))))
 
-(deftest organise-refuses-selection-outside-repository
-  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"escapes the repository"
-                        (cp/organise cp/up-closure-temperament #{:z} repo))))
+(deftest each-law-has-a-specific-refusal
+  (let [before cp/first-attempt-cascade sel #{:a :c} adm {:d authority}
+        d (cp/organise before sel repo adm (fixture-opts cp/selected-only-temperament))]
+    (doseq [[law mutate] [[:osel #(assoc % :selected #{})]
+                          [:oauth #(assoc % :authored-edges #{})]
+                          [:oattr #(assoc % :admitted-by #{})]
+                          [:o1 #(assoc % :nodes #{:a})]
+                          [:o2 #(assoc % :organised-edges #{[:c :a]})]
+                          [:o3 #(assoc % :organised-edges #{})]
+                          [:o4 #(assoc % :precedence-after [:a])]]]
+      (is (= law (:law (refusal #(cp/validate-cascade-diff! before sel repo adm (mutate d))))))))
+  (let [d (organise-fixture cp/up-closure-temperament #{:a} repo {})]
+    ;; b was added; its reachable edge b->c cannot justify itself under O3.
+    (is (= :o3 (:law (refusal #(cp/validate-cascade-diff!
+                               cp/first-attempt-cascade #{:a} repo {}
+                               (assoc d :organised-edges #{[:b :c]}))))))))
+
+(deftest repository-admissions-and-explicit-ports
+  (doseq [[reason f] [[:selected-outside-repository #(organise-fixture cp/up-closure-temperament #{:z} repo {})]
+                      [:admitted-outside-repository #(organise-fixture cp/up-closure-temperament #{:a} repo {:z authority})]
+                      [:admission-authority-required #(organise-fixture cp/up-closure-temperament #{:a} repo {:c {}})]
+                      [:cyclic-stands-on #(organise-fixture cp/up-closure-temperament #{} (update repo :stands-on conj [:c :a]) {})]
+                      [:cyclic-stands-on #(organise-fixture cp/up-closure-temperament #{} (update repo :stands-on conj [:a :a]) {})]
+                      [:previous-cascade-required #(cp/organise nil #{:a} repo {} (fixture-opts cp/selected-only-temperament))]
+                      [:observation-ports-required #(cp/organise cp/first-attempt-cascade #{:a} repo {}
+                                                     {:temperament (assoc cp/selected-only-temperament :precedence [:a])})]
+                      [:precedence-change-without-consequence #(cp/organise cp/first-attempt-cascade #{:a} repo {}
+                                                                {:temperament (assoc cp/selected-only-temperament :precedence [:a])
+                                                                 :acting-order-fn (constantly []) :score-fn (constantly 0)})]]]
+    (is (= reason (:reason (refusal f)))))
+  (is (map? (organise-fixture cp/selected-only-temperament #{:a} (assoc repo :acyclic? false) {})))
+  (let [calls (atom []) before {:nodes #{:a} :precedence [:a] :evidence :previous}
+        d (cp/organise before #{:a} repo {}
+                       {:temperament (assoc cp/selected-only-temperament :precedence [])
+                        :acting-order-fn (fn [c] (swap! calls conj c) [])
+                        :score-fn (fn [c] (count (:precedence c)))})]
+    (is (= before (first @calls)))
+    (is (= [1 0] [(:score-before d) (:score-after d)]))
+    (is (= [] (:acting-order-before d) (:acting-order-after d)) "score-only O4 arm")))
+
+(deftest snatch-ruled-parity
+  ;; Exact F12SnatchExemplar.lean:38-122 data; observations are recorded fixture
+  ;; ports, not a claimed implementation of Snatch acting semantics.
+  (let [r {:patterns (set (range 24))
+           :stands-on #{[0 2] [0 11] [1 7] [2 7] [2 11] [3 9] [4 8] [5 18] [6 18]
+                        [7 18] [7 22] [8 18] [8 22] [9 18] [9 22] [10 18] [11 18] [11 22]
+                        [12 20] [13 20] [14 21] [15 21] [16 21] [17 21] [18 22] [19 21]}}
+        before {:nodes #{0 2 10} :precedence [5 2 0 3 6 10 20]}
+        after-order [20 5 2 0 3 6 10]
+        recorded {(:precedence before) {:acting [10 2 0] :score 3}
+                  after-order {:acting [20] :score -5}}
+        d (cp/organise before #{0 2 10} r {}
+                       {:temperament (assoc cp/up-closure-temperament :precedence after-order)
+                        :acting-order-fn #(get-in recorded [(:precedence %) :acting])
+                        :score-fn #(get-in recorded [(:precedence %) :score])})]
+    (is (= #{0 2 10} (:selected d)))
+    (is (= #{7 11 18 22} (:added-by-organise d)))
+    (is (= #{} (:admitted-by d)))
+    (is (= #{0 2 10 7 11 18 22} (:nodes d)))
+    (is (= (:stands-on r) (:authored-edges d)))
+    (is (= #{[0 2]} (:organised-edges d)))
+    (is (= (:precedence before) (:precedence-before d)))
+    (is (= after-order (:precedence-after d)))
+    (is (= [10 2 0] (:acting-order-before d)))
+    (is (= [20] (:acting-order-after d)))
+    (is (= [3 -5] [(:score-before d) (:score-after d)]))))
 
 (deftest posterior-is-a-distribution-over-cascades
   ;; softmaxWithFPi mirror: normalized, and at zero F_π lower G wins under

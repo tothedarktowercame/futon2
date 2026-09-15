@@ -1,24 +1,11 @@
 (ns futon2.aif.cascade-policy
-  "The cascade-grain policy seam — SPECIFICATION: mathlib4
-  DarkTower/WarMachine/GOverCascades.lean (a43440ab61), which this namespace
-  mirrors and which cites only the concept records (F-wm-piloted-2026-06-12
-  §Sortie-12: policy-grade G(s, π) over policies = distributions over
-  CASCADES; M-G-over-cascades §1-2; the glossary's π/cascade paragraphs).
+  "Runtime ruled organiser: DarkTower/WarMachine/F12RuledCarrier.lean,
+  ConformantOrganiseRuled (osel, oauth, oattr, O1-O4). Admissions are explicit
+  and attributed; O3 excludes organise-added nodes from its carrier.
 
-  Direction: this namespace conforms to the Lean module, not the other way
-  around. The retained F13 HOLE (CascadeGrainSeam.owed) is retired only when
-  a production selection presents the cascades this namespace builds to the
-  G below, leaves a durable record, and a Lean witness pins that record
-  against the specification.
-
-  The organise core mirrors futon3:checks/find_organise.clj (the F12
-  reference implementation, conformance-stated by F12Conformance.lean
-  O1-O3): nodes are the two-way union of selected and closure-added
-  (:admitted-by carried empty until a temperament that fires lands here);
-  edges are the ruled O3 fast-forward — selected endpoints connected through
-  authored paths whose INTERMEDIATE vertices are unselected, with
-  organise-introduced nodes excluded from the carrier so an introduced node
-  cannot justify the edge that introduced it."
+  Canonical cascade G is now specified by CascadeEFE.lean and
+  CascadeEFEPolicies.lean. The legacy risk/eig helpers below are not that G;
+  a runtime scorer and a recorded production selection remain separate work."
   (:require [clojure.set :as set]))
 
 ;; --- temperaments (policy-grain cascades; READ, not fired: F12) -----------
@@ -55,50 +42,119 @@
              :when (and (not= u v) (reach-outside? carrier stands-on u v))]
          [u v])))
 
-;; --- organise (F12; mirror of find_organise.clj, O1-O3) -------------------
+(def first-attempt-cascade
+  "Explicit empty predecessor, not an inferred missing previous cascade."
+  {:carrier :first-attempt :nodes #{} :precedence []})
+
+(defn- require-law! [ok law reason data]
+  (when-not ok
+    (throw (ex-info "Ruled organise refused"
+                    (merge {:finding :organise/refusal :law law :reason reason} data)))))
+
+(defn- validate-inputs! [previous selected repository admitted]
+  (require-law! (and (map? previous) (set? (:nodes previous))
+                     (vector? (:precedence previous)))
+                :carrier :previous-cascade-required {})
+  (when (= :first-attempt (:carrier previous))
+    (require-law! (and (empty? (:nodes previous)) (empty? (:precedence previous)))
+                  :carrier :nonempty-first-attempt {}))
+  (require-law! (and (set? selected) (set? (:patterns repository))
+                     (set? (:stands-on repository)) (map? admitted))
+                :carrier :invalid-input-shape {})
+  (let [patterns (:patterns repository) edges (:stands-on repository)]
+    (require-law! (every? #(and (vector? %) (= 2 (count %))
+                                (every? (fn [p] (contains? patterns p)) %)) edges)
+                  :repository :edge-outside-repository {})
+    (require-law! (set/subset? selected patterns) :osel :selected-outside-repository
+                  {:outside (set/difference selected patterns)})
+    (require-law! (set/subset? (set (keys admitted)) patterns) :oattr :admitted-outside-repository
+                  {:outside (set/difference (set (keys admitted)) patterns)})
+    (doseq [[p authority] admitted]
+      (require-law! (and (map? authority) (keyword? (:authority authority))
+                         (string? (:source authority)) (seq (:source authority)))
+                    :oattr :admission-authority-required {:pattern p}))
+    ;; Positive-length reachability, including a return to the start, detects
+    ;; both self loops and longer cycles. Caller :acyclic? is never consulted.
+    (doseq [p patterns]
+      (require-law! (not (reach-outside? #{} edges p p))
+                    :repository :cyclic-stands-on {:vertex p}))))
+
+(defn validate-cascade-diff!
+  "Return DIFF or throw {:finding :organise/refusal :law ... :reason ...}.
+  Validate all seven ruled laws against the actual input arguments."
+  [previous selected repository admitted diff]
+  (validate-inputs! previous selected repository admitted)
+  (doseq [k [:selected :nodes :added-by-organise :admitted-by :authored-edges :organised-edges]]
+    (require-law! (set? (get diff k)) :carrier :set-field-required {:field k}))
+  (doseq [k [:precedence-before :precedence-after :acting-order-before :acting-order-after]]
+    (require-law! (vector? (get diff k)) :carrier :order-field-required {:field k}))
+  (doseq [k [:score-before :score-after]]
+    (require-law! (and (contains? diff k) (some? (get diff k)))
+                  :carrier :score-required {:field k}))
+  (require-law! (= (:precedence previous) (:precedence-before diff))
+                :carrier :previous-precedence-mismatch {})
+  (require-law! (= selected (:selected diff)) :osel :selection-mismatch {})
+  (require-law! (= (:stands-on repository) (:authored-edges diff)) :oauth :authorship-mismatch {})
+  (require-law! (= (set (keys admitted)) (:admitted-by diff)) :oattr :admission-mismatch {})
+  (require-law! (= admitted (get-in diff [:provenance :admissions])) :oattr :authority-mismatch {})
+  (require-law! (= (:nodes diff) (set/union selected (:added-by-organise diff) (:admitted-by diff)))
+                :o1 :node-union-mismatch {})
+  (require-law! (set/subset? (:nodes diff) (:patterns repository)) :carrier :nodes-outside-repository {})
+  (doseq [edge (:organised-edges diff)]
+    (require-law! (and (vector? edge) (= 2 (count edge))
+                       (reach-outside? #{} (:stands-on repository) (first edge) (second edge)))
+                  :o2 :edge-not-authored-reachable {:edge edge}))
+  (require-law! (= (:organised-edges diff)
+                   (fast-forward-edges (set/difference (:nodes diff) (:added-by-organise diff))
+                                       (:stands-on repository)))
+                :o3 :fast-forward-mismatch {})
+  (require-law! (or (= (:precedence-before diff) (:precedence-after diff))
+                    (not= (:acting-order-before diff) (:acting-order-after diff))
+                    (not= (:score-before diff) (:score-after diff)))
+                :o4 :precedence-change-without-consequence {})
+  diff)
 
 (defn organise
-  "Cascade policy → Set P → Repository P → Cascade P.
-  Repository: {:patterns #{...} :stands-on #{[u v] ...} :acyclic? bool}."
-  [temperament selected repository]
-  (when-not (set/subset? (set selected) (:patterns repository))
-    (throw (ex-info "organise: selected escapes the repository"
-                    {:finding :o1-selected-outside-repository
-                     :outside (sort (set/difference (set selected)
-                                                    (:patterns repository)))})))
-  (let [selected (set selected)
-        succ (reduce (fn [m [a b]] (update m a (fnil conj #{}) b)) {}
-                     (:stands-on repository))
+  "Previous cascade → selected set → repository → attributed admissions → diff.
+  ADMITTED maps each repository pattern to {:authority keyword :source string}.
+  OPTS requires :temperament (id, closure, precedence), :acting-order-fn and
+  :score-fn. Both ports receive a cascade {:nodes ... :edges ... :precedence ...}
+  (the previous cascade unchanged on the before arm). Scores stay in the port's
+  declared domain. Even unchanged precedence requires explicit observations;
+  no empty order or score is manufactured. Packet 4 supplies the semantic ports."
+  [previous-cascade candidate-space repository admitted opts]
+  (validate-inputs! previous-cascade candidate-space repository admitted)
+  (let [{:keys [temperament acting-order-fn score-fn]} opts
+        selected candidate-space
+        succ (reduce (fn [m [a b]] (update m a (fnil conj #{}) b)) {} (:stands-on repository))
+        _ (require-law! (and (some? (:id temperament)) (vector? (:precedence temperament)))
+                        :carrier :temperament-required {})
+        _ (require-law! (and (fn? acting-order-fn) (fn? score-fn))
+                        :o4 :observation-ports-required {})
         up-closure (loop [frontier selected acc selected]
-                     (let [nxt (set/difference
-                                (reduce set/union #{} (map #(get succ % #{}) frontier))
-                                acc)]
+                     (let [nxt (set/difference (reduce set/union #{} (map #(get succ % #{}) frontier)) acc)]
                        (if (empty? nxt) acc (recur nxt (set/union acc nxt)))))
         added (case (:closure temperament)
                 :selected-only #{}
                 :stands-on-up-closure (set/difference up-closure selected)
-                (throw (ex-info "organise: temperament declares no closure policy"
-                                {:finding :no-closure-policy
-                                 :temperament temperament})))
-        nodes (set/union selected added)]
-    {:temperament (:id temperament)
-     :selected selected
-     :added-by-organise added
-     :admitted-by #{}
-     :nodes nodes
-     ;; Ruled O3: introduced nodes excluded from the fast-forward carrier.
-     :edges (fast-forward-edges (set/difference nodes added)
-                                (:stands-on repository))
-     :precedence (vec (:precedence temperament))
-     :acyclic? (:acyclic? repository)}))
+                (require-law! false :carrier :no-closure-policy {:temperament temperament}))
+        admissions (set (keys admitted))
+        nodes (set/union selected added admissions)
+        edges (fast-forward-edges (set/difference nodes added) (:stands-on repository))
+        after {:nodes nodes :edges edges :precedence (:precedence temperament)}
+        diff {:selected selected :nodes nodes :added-by-organise added :admitted-by admissions
+              :authored-edges (:stands-on repository) :organised-edges edges
+              :precedence-before (:precedence previous-cascade) :precedence-after (:precedence after)
+              :acting-order-before (acting-order-fn previous-cascade) :acting-order-after (acting-order-fn after)
+              :score-before (score-fn previous-cascade) :score-after (score-fn after)
+              :provenance {:temperament (:id temperament) :admissions admitted}}]
+    (validate-cascade-diff! previous-cascade selected repository admitted diff)))
 
-;; --- G at the ratified grain (mirror of GOverCascades.cascadeGrainG) ------
+;; --- legacy scoring helpers (superseded; runtime G2 still owed) ----------
 
 (defn cascade-grain-G
-  "Policy-grade expected free energy over a CASCADE: risk minus epistemic
-  gain, both legs receiving the whole cascade (nodes, edges, precedence),
-  never a per-node summary. Mirror of Holes.G instantiated at
-  PolicyIndex := Cascade P."
+  "Legacy arbitrary risk-minus-eig helper. Superseded by mathlib4 CascadeEFE;
+  this is NOT canonical cascade G. Kept unchanged until the runtime G2 packet."
   [risk-fn eig-fn cascade]
   {:cascade cascade
    :risk (double (risk-fn cascade))
