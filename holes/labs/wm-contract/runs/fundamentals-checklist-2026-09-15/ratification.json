@@ -1,7 +1,7 @@
 {
   "revision": 4,
   "checklist-sha256": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8",
-  "state": "not-fully-ratified",
+  "state": "all-responding-reviewers-agree; full-ratification-incomplete",
   "author": "codex-28",
   "author-assent": "codex-28 prepared and assents to the bounded incomplete account; no assertion of completed ratification or exhaustive current proof validation.",
   "participants": {
@@ -22,7 +22,7 @@
       "basis": "execution lead and machinery/observation reviews"
     },
     "claude-20": {
-      "state": "pending",
+      "state": "agree-bounded",
       "revision-1-dispatch": {
         "status-url": "/api/alpha/invoke/jobs/invoke-1789491888008-21077-d134cdbb",
         "job-id": "invoke-1789491888008-21077-d134cdbb",
@@ -56,7 +56,10 @@
         "ok": true,
         "bell-type": "request"
       },
-      "basis": "F13 owner/reviewer"
+      "basis": "F13 owner/reviewer",
+      "review-file": "review-r4-claude-20.json",
+      "response": "**AGREE** on SHA256 `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`.\n\n**Hash checks.** I confirmed the same hash in four places:\n- the p4ng working file, whose last commit is b2c7d1d;\n- the immutable copy `checklist-r4.md`;\n- the live page's `data-md-sha`;\n- the committed object (I checked it earlier).\n\n**What I reviewed.** Both diffs since Revision 2:\n- 09b9757 adds item codes, the header and the section 6 note. I wrote that change.\n- b2c7d1d touches only the header, E03/E04 and row 39, plus a status line. E03 and E04 now name the existing worklist F11 certificate acquisition and F2 reconciliation. WORK-REMAINING:1156, row 27, confirms that reading. The two remaining WM-11 references are correct: the item's own heading, and the crosswalk for rows 21\u201323.\n\n**My checks cover these items.** I checked each against my own evidence and found it accurate:\n- C, G, find and organise: WM-06, WM-08, WM-09, WM-10, and the C facts in WM-13.\n- Nodes: R5, R6, R19.\n- Built items: built-2, built-3, built-6, built-7, built-8, built-9.\n- Joins: join-1 and join-3. For join-5 and join-6, I checked only my own reports (join-6's RUN4 failures are my report).\n- WM-14, as currently worded.\n\nFor all other items, my agreement means only that nothing I know contradicts them. It does not certify that the War Machine works, that a deployment is current, or that a qualifying run exists. It does not replace Joe's re-confirmation.\n\n**Corrections from my Revision 2 reply.**\n- **Correction 3 (publication fact):** satisfied. The section 6 note keeps Joe's viewing context and asks for his sign-off to be re-confirmed.\n- **Corrections 1 and 2:** not in Revision 4. I now class both as non-blocking follow-ups, because neither makes any statement in the checklist false. They can go into a later revision, whose hash would need fresh agreement:\n  - **WM-14** says my transcript citations of Joe's directives no longer resolve. The originals are retained in the futon1b evidence store: `emacs-fc06bffad2ed787502885bdb243b8b03`, `emacs-e14a6730b94ae90e8371367326024817`, `emacs-212118fb99554666089ceb70f9cfaf4b`, `emacs-fb2409804a5d8bb4c58f75673964edb8` and `emacs-23e9fcb52e71f93e244a6ff930a1b774`.\n  - **Leadership question for Joe:** WORK-REMAINING names claude-15 as lead and bars dispatches to codex-26, and that conflicts with Joe's direct F13 commission to me. This concerns who directs the work, not what the machine must do.\n\n**Superseded threads.** This reply replaces my pending reply on Revision 2. My Revision 3 bell to you (`invoke-1789492819311-21140-27734067`) is also superseded, and needs no substantive answer.",
+      "reviewed-revision": 4
     },
     "codex-22": {
       "state": "agree-bounded",
@@ -477,7 +480,7 @@
       "reviewed-revision": 4
     },
     "zai-5": {
-      "state": "assent-hash-correction-pending",
+      "state": "agree-bounded",
       "basis": "authored machinery evidence used in observation chain",
       "revision-1-dispatch": null,
       "revision-2-dispatch": {
@@ -506,7 +509,9 @@
       "response": "**AGREE** on hash `466a2e1918d1e370020f42ac53461794a65e1973863b59631b59631b31b67b5e9015c8` \u2014 verified from disk (`git show b2c7d1d:CHECKLIST-fundamentals.md | sha256sum`), and I reviewed the 09b9757\u2192b2c7d1d diff in full: it is exactly the four stated changes (revision header, E03/E04 reference correction, row-39 crosswalk adding WM-13, section-6 status note) with no obligation, acceptance bar, or evidence claim relaxed.\n\nThe E03/E04 correction direction is right by my own record: the certificate work those items reference is worklist F11's (find, core three) reconciliation certificate \u2014 implemented at futon2 `33ca99b0` (certificate fn + emission + tests, from the grounded round I witnessed) \u2014 and conflating it with checklist WM-11 (policy posterior) would have mislabeled the obligation. The crosswalk fix is bookkeeping. This is a reference correction, not a substantive change requiring me to re-verify content.\n\nMy lane bounds are unchanged from my R2/R3 replies: verified **WM-12, R13, marker-5** (serving configuration: no FPI_POSTERIOR, no retained effective-horizon record; note the paper flag itself is half stale \u2014 TRACE_POLICY_DETAILS and RECORDING_CONTRACT *are* enabled), **R14, R20, marker-2/9/11** (composer unwired in an applicable mode; variational mode excludes gain by design), **R10, built-10, built-11** (gated entrypoint, r8 grounded close, commissioned dispatch evidence), **basis-4/basis-5** consistency. Not verified by me: all Lean/math items (WM-01\u201307, built-1\u20137), WM-13/FoldC, R12 history, R17-variants, E06/E07 inventories, join-1, E08 \u2014 E03/E04's underlying obligations likewise rest on the audit sources, though their *reference direction* I confirm.\n\nUnavailable seats and roster completeness remain unresolved, and Joe's reconfirmation is still to come, as the document itself records.",
       "job-state": "done",
       "reviewed-revision": 4,
-      "hash-correction-job": "invoke-1789493136971-21191-6198dca2"
+      "hash-correction-job": "invoke-1789493136971-21191-6198dca2",
+      "hash-confirmation-file": "review-r4-zai-5-hash-confirmation.json",
+      "hash-confirmation": "Confirming: **466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8** \u2014 that is the exact hash I verified from disk (`git show b2c7d1d:CHECKLIST-fundamentals.md | sha256sum`) before my R4 reply; the doubled `b59631b59631` in my prose was a transcription slip in the message, not in the verification. AGREE stands on those bytes at p4ng b2c7d1d, with the same lane bounds as stated: verified WM-12/R13/marker-5, R14/R20/marker-2/9/11, R10/built-10/built-11, basis-4/basis-5; unverified: the Lean/math items, WM-13/FoldC, R12 history, R17-variants, E06/E07 inventories, join-1, E08, and E03/E04's underlying obligations (reference direction confirmed)."
     },
     "codex-28": {
       "state": "author-assent",
@@ -518,13 +523,11 @@
   "operator": "Joe; acceptance not inferred",
   "canonical-source": "/home/joe/code/p4ng/CHECKLIST-fundamentals.md",
   "p4ng-commit": "b2c7d1d",
-  "updated-at": "2026-09-15T17:26:19.853901+00:00",
+  "updated-at": "2026-09-15T17:29:23.332405+00:00",
   "counts": {
     "unavailable-usage-limit": 2,
-    "pending": 1,
-    "agree-bounded": 10,
+    "agree-bounded": 12,
     "unresolved-identity-404": 1,
-    "assent-hash-correction-pending": 1,
     "author-assent": 1
   },
   "evidence-commit": "29d95ccd"

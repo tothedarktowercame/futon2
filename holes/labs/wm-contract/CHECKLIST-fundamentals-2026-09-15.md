@@ -1,6 +1,6 @@
 # Supporting evidence for the War Machine completion checklist
 
-**Supporting audit, 2026-09-15. Canonical editable checklist: [p4ng/CHECKLIST-fundamentals.md](/home/joe/code/p4ng/CHECKLIST-fundamentals.md), revision 2 at p4ng `2be61df`. This file retains the detailed evidence and crosswalk; it is not a second checklist or execution authority. Ratification remains incomplete.**
+**Supporting audit, 2026-09-15. Canonical editable checklist: [p4ng/CHECKLIST-fundamentals.md](/home/joe/code/p4ng/CHECKLIST-fundamentals.md), revision 4 at p4ng `b2c7d1d`. This file retains the detailed evidence and crosswalk; it is not a second checklist or execution authority. Ratification remains incomplete.**
 
 ## Verdict
 
