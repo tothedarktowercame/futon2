@@ -18,6 +18,7 @@ import re
 import sys
 import tempfile
 from datetime import datetime, timezone
+from urllib.request import urlopen
 
 BINDING = "/home/joe/code/futon3c/holes/labs/wm-contract/cohort-execution-binding.edn"
 OUT_ROOT = "/home/joe/code/futon2/data/wm-visibility"
@@ -67,6 +68,23 @@ def project_attempt(attempt_dir):
     return "working", "pending", None
 
 
+def live_click():
+    """The runner's own session report; a click id alone is not work
+    evidence, but the runner's phase state for a named attempt is the
+    runner reporting on itself. Unreachable endpoint = no overlay."""
+    try:
+        with urlopen("http://127.0.0.1:7070/api/alpha/wm/click",
+                     timeout=2) as response:
+            doc = json.load(response)
+        if (isinstance(doc, dict) and doc.get("running?") is True
+                and isinstance(doc.get("attempt-id"), str)
+                and doc["attempt-id"]):
+            return doc["attempt-id"]
+    except Exception:
+        pass
+    return None
+
+
 def main():
     data_root, cohort, prereg = read_binding()
     author, reviewer = read_casting(prereg)
@@ -86,6 +104,18 @@ def main():
             trial["reviewer"] = reviewer
         if reason:
             trial["blocked_reason"] = reason
+        trials.append(trial)
+    running_attempt = live_click()
+    if running_attempt and running_attempt not in attempts:
+        # The click session has claimed an attempt whose first cell is not
+        # on disk yet (tripwire sweep / early construction): show it as
+        # working rather than showing nothing.
+        trial = {"trial_id": cohort + "/" + running_attempt,
+                 "stage": "working", "result": "pending", "updated_at": now}
+        if author:
+            trial["worker"] = author
+        if reviewer:
+            trial["reviewer"] = reviewer
         trials.append(trial)
     if not trials:
         # Schema requires a nonempty trials array; an armed cohort with no
