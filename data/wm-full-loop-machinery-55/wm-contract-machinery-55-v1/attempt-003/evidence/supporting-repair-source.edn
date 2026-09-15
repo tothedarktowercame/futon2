@@ -1,5 +1,5 @@
 {:schema :wm/entity-revision-pair-v1
  :entity/id "futon2/src/futon2/aif/repair_obligation.clj"
- :before {:file "source-before.clj" :sha256 "d6cce09ac002d8964c0a465d405f559d60f421bbaa74f099eb4178683afa37ea" :bytes 51936}
- :after {:file "source-after.clj" :sha256 "c6c321652ad1afeeb38513b0b715e4f1369a6b551ce5edd02d17544e880e4604" :bytes 51966}
+ :before {:file "source-before.snapshot" :sha256 "d6cce09ac002d8964c0a465d405f559d60f421bbaa74f099eb4178683afa37ea" :bytes 51936}
+ :after {:file "source-after.snapshot" :sha256 "c6c321652ad1afeeb38513b0b715e4f1369a6b551ce5edd02d17544e880e4604" :bytes 51966}
  :dimensions {:repair :typed-review-finding-id}}
