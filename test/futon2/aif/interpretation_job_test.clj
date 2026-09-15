@@ -4,6 +4,8 @@
             [clojure.test :refer [deftest is use-fixtures]]
             [clojure.walk :as walk]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.find-receipt-test :as find-fixture]
+            [futon2.aif.cascade-policy :as policy]
             [futon2.aif.interpretation-evidence-test :as receipt-fixture]
             [futon2.aif.interpretation-job :as job]
             [futon2.aif.full-loop-runner :as runner]
@@ -17,10 +19,11 @@
 (defn run-case [mode scenario]
   (let [{:keys [root] :as cohort} (#'runner-fixture/retention-cohort "interpretation-job-test")
         dir (io/file root "test-cohort-exhaustion" "attempt-001" "evidence")
-        {:keys [record captured]} @receipt-fixture/fixture
+        {:keys [record captured]} (find-fixture/sample)
         action (cond-> (get-in record [:identity :occurrence :action/value])
-                 (= scenario :unsupported) (assoc :type :fire-pattern))
-        calls (atom []) constructors (atom 0) saved (atom nil)
+                 (= scenario :unsupported) (assoc :type :fire-pattern)
+                 (= scenario :ticket) (assoc :type :advance-ticket :target "T-receipt-construction"))
+        calls (atom []) constructors (atom 0) organised (atom 0) organise policy/organise saved (atom nil)
         base (#'runner-fixture/retention-success-opts cohort)
         prepare (fn [a identity {:keys [on-capture]}]
                   (when (#{:interpretation/target-unresolved :interpretation/source-unavailable} scenario)
@@ -30,7 +33,9 @@
                     (Files/write (.toPath (io/file dir file)) bs (make-array java.nio.file.OpenOption 0)))
                   (doseq [s (:sources record)] (on-capture s))
                   (let [r (-> record (assoc :identity identity)
-                              (assoc-in [:target :action] a))]
+                              (assoc-in [:target :action] a)
+                              (assoc-in [:target :id] (:target a))
+                              (assoc-in [:target :kind] (if (= :advance-ticket (:type a)) :ticket :mission)))]
                     (reset! saved r)
                     (when (= :interpretation/no-citable-tension scenario)
                       (throw (ex-info "controlled empty tension" {:interpretation/refusal scenario :sources (:sources r)})))
@@ -47,7 +52,8 @@
                                            (fn [xs] (mapv (fn [x]
                                                             (let [x (assoc x :author (:author identity))]
                                                               (assoc x :sha256 (evidence/value-digest (dissoc x :sha256))))) xs))))
-                             r (cond (= scenario :no-relevant) (assoc r :interpretations [])
+                             r (cond (= scenario :nothing-fires) (assoc-in r [:facts 0 :value] false)
+                                     (= scenario :no-relevant) (assoc r :interpretations [])
                                      (#{:genesis :unmeasurable} scenario)
                                      {:schema evidence/failure-schema :identity identity :stage :interpretation
                                       :sources (:sources r) :absent {:interpretations {:status :none :reason :not-interpretable}}
@@ -63,6 +69,7 @@
         opts (assoc base :trace-fn (constantly "/fixture/trace.edn") :run-id (str (UUID/randomUUID)) :interpretation-mode mode :interpreter "interpreter"
                     :judge-fn (fn [_] {:judgement (walk/postwalk-replace
                                                   {runner-fixture/selected-action action} runner-fixture/judgement)})
+                    :interpretation-history-roots [root]
                     :interpretation-prepare-fn prepare
                     :interpretation-readiness-fn (fn [_ _]
                                                    (when (= scenario :unavailable)
@@ -83,14 +90,15 @@
                                  ((:poll-fn base) o id))))]
     (try
       (let [result (binding [runner/*wm-status-reporting?* false]
-                     (with-redefs [runner/ensure-dispatch-seat! (fn [_])]
+                     (with-redefs [runner/ensure-dispatch-seat! (fn [_])
+                                   policy/organise (fn [& args] (swap! organised inc) (apply organise args))]
                        (runner/run-opportunity! opts)))
             failures (when (.exists dir)
                        (mapv #(edn/read-string (slurp %))
                              (filter #(.startsWith (.getName %) "interpretation-failure-") (.listFiles dir))))
             close-file (io/file (.getParentFile dir) "007-closed.edn")
             close (when (.exists close-file) (edn/read-string (slurp close-file)))]
-        {:result result :calls @calls :constructors @constructors :failures failures :close close})
+        {:result result :calls @calls :action action :organised @organised :constructors @constructors :failures failures :close close})
       (finally (doseq [file (reverse (file-seq (io/file root)))] (Files/delete (.toPath file)))))))
 
 (deftest flag-off-preserves-construction-checkpoint
@@ -103,9 +111,11 @@
     (is (empty? (:failures a)))))
 
 (deftest valid-receipt-is-bound-and-admitted
-  (let [{:keys [result close calls constructors]} (run-case :receipt :valid)]
+  (let [{:keys [result close calls constructors organised action]} (run-case :receipt :valid)]
     (is (= 1 (count (filter #{"interpreter"} calls))))
-    (is (= 1 constructors))
+    (is (zero? constructors))
+    (is (= 1 organised))
+    (is (= (pr-str action) (pr-str (get-in result [:checkpoints :construction :judgment :cascade :selected-action]))))
     (is (get-in result [:checkpoints :construction :judgment :interpretation-receipt :sha256]))
     (is (some #(.endsWith (:source-path %) "interpretation-receipt.edn")
               (get-in close [:payload :close-evidence-manifest :entries])))
@@ -115,6 +125,7 @@
   (doseq [[scenario expected] [[:unavailable :interpretation/agent-unavailable]
                               [:invalid :interpretation/invalid-receipt]
                               [:no-relevant :interpretation/no-relevant-pattern]
+                              [:nothing-fires :interpretation/no-relevant-pattern]
                               [:genesis :interpretation/genesis-required]
                               [:unmeasurable :interpretation/unmeasurable-fact]
                               [:source-changed :interpretation/source-changed]
@@ -165,3 +176,14 @@
   (is (= :incomplete-recoverable (#'runner/repair-class-for :agent-budget-expired)))
   (is (= :environmental-hold (#'runner/repair-class-for :agent-unavailable)))
   (is (= :machine-failure (#'runner/repair-class-for :build-failed))))
+
+(deftest ticket-construction-preserves-action-and-rules
+  (let [{:keys [result action constructors organised]} (run-case :receipt :ticket)
+        judgment (get-in result [:checkpoints :construction :judgment])
+        retained (:receipted-construction judgment)]
+    (is (zero? constructors)) (is (= 1 organised))
+    (is (= (pr-str action) (pr-str (get-in judgment [:cascade :selected-action]))))
+    (is (= action (get-in retained [:identity :occurrence :action/value])))
+    (is (= :authored-reachability-topological (:precedence-rule retained)))
+    (is (= :first-true-unfired-guard-apply-effects-from-q0 (:acting-rule retained)))
+    (is (= :vacuous (get-in retained [:find-result :f4])))))

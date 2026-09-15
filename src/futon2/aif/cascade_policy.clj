@@ -121,7 +121,9 @@
   :score-fn. Both ports receive a cascade {:nodes ... :edges ... :precedence ...}
   (the previous cascade unchanged on the before arm). Scores stay in the port's
   declared domain. Even unchanged precedence requires explicit observations;
-  no empty order or score is manufactured. Packet 4 supplies the semantic ports."
+  no empty order or score is manufactured. Packet 4 supplies the semantic ports.
+  ARM 6 item 6 (RULINGS-walkthrough-2026-09-07): closure-added nodes exclude
+  explicit admissions, preserving selected union admitted as the O3 carrier."
   [previous-cascade candidate-space repository admitted opts]
   (validate-inputs! previous-cascade candidate-space repository admitted)
   (let [{:keys [temperament acting-order-fn score-fn]} opts
@@ -136,7 +138,7 @@
                        (if (empty? nxt) acc (recur nxt (set/union acc nxt)))))
         added (case (:closure temperament)
                 :selected-only #{}
-                :stands-on-up-closure (set/difference up-closure selected)
+                :stands-on-up-closure (set/difference up-closure (set/union selected (set (keys admitted))))
                 (require-law! false :carrier :no-closure-policy {:temperament temperament}))
         admissions (set (keys admitted))
         nodes (set/union selected added admissions)

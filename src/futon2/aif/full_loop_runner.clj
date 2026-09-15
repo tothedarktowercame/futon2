@@ -24,6 +24,7 @@
             [futon2.aif.limb-evidence :as limb-evidence]
             [futon2.aif.interpretation-evidence :as interpretation-evidence]
             [futon2.aif.interpretation-job :as interpretation-job]
+            [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
@@ -3972,15 +3973,17 @@
                     :dispatch! (fn [actor prompt]
                                  ((or (:dispatch-fn opts) dispatch!) opts actor "wm-full-loop" target prompt))
                     :poll! (fn [job-id] ((or (:poll-fn opts) poll-job!) opts job-id))
-                    :charge! (fn [] (swap! dispatched-turns inc))})))
+                    :charge! (fn [] (swap! dispatched-turns inc))
+                    :construct! (fn [record read-bytes] (receipt-construction/construct! record read-bytes opts))})))
               {:keys [mission construction]}
               (run-phase! opts @phase-context :construction
                           #(hash-map
                             :mission (if-let [mission-fn (:mission-fn opts)]
                                        (mission-fn target)
                                        (mission-for-decision entry target))
-                            :construction ((or (:construct-fn opts)
-                                               construct-for-decision) entry)))
+                            :construction (if interpretation
+                                            (:construction interpretation)
+                                            ((or (:construct-fn opts) construct-for-decision) entry))))
               wiring-result (when construction
                               (construction-wiring-result
                                construction
@@ -4048,7 +4051,8 @@
                               :deposit nil
                               :trace-path trace-path}
                                interpretation
-                               (assoc :interpretation-receipt (:receipt interpretation)
+                               (assoc :receipted-construction (:receipted-construction construction)
+                                      :interpretation-receipt (:receipt interpretation)
                                       :interpretation-timing (:timing interpretation))
 
                                (and (nil? interpretation) (:interpretation-receipt construction))

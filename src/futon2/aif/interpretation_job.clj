@@ -59,7 +59,7 @@
 (defn run!
   "Ports are the runner's existing readiness/dispatch/poll and turn counter.
   Timed-out jobs continue; immutable failure/intent/job records feed packet 3b."
-  [opts action identity dir {:keys [ready! dispatch! poll! charge!]}]
+  [opts action identity dir {:keys [ready! dispatch! poll! charge! construct!]}]
   (.mkdirs (io/file dir))
   (let [started (System/currentTimeMillis)
         actor (or (:interpreter opts) (:author opts))
@@ -130,13 +130,21 @@
                      :interpretation/invalid-receipt {:reason :retrieval-runs-mismatch}))
             (need! (seq (:interpretations record)) :interpretation/no-relevant-pattern {})
             (need! (<= (count (:genesis record)) 1) :interpretation/genesis-required {:reason :genesis-limit})
-            {:receipt {:file (.getName receipt) :sha256 (evidence/sha256 (bytes receipt))}
-             :timing (assoc @timing :elapsed-ms (- (System/currentTimeMillis) started))})))
+            (let [construction (when construct!
+                                 (reset! stage :construction)
+                                 (let [began (System/currentTimeMillis)]
+                                   (try (construct! record reader)
+                                        (finally (swap! timing assoc :construction-ms
+                                                        (- (System/currentTimeMillis) began))))))]
+              (cond-> {:receipt {:file (.getName receipt) :sha256 (evidence/sha256 (bytes receipt))}
+                       :timing (assoc @timing :elapsed-ms (- (System/currentTimeMillis) started))}
+                construct! (assoc :construction construction))))))
       (catch Exception e
-        (let [_ (when @validation-started
+        (let [_ (when (and @validation-started (= :validation @stage))
                   (swap! timing assoc :validation-ms (- (System/currentTimeMillis) @validation-started)))
               data (ex-data e)
-              kind (cond (= :agent-budget-expired (:failure-kind data)) :interpretation/budget-exceeded
+              kind (cond (= :o4 (:law data)) :interpretation/no-relevant-pattern
+                         (= :agent-budget-expired (:failure-kind data)) :interpretation/budget-exceeded
                          (:interpretation/refusal data) (:interpretation/refusal data)
                          (= :source-digest-mismatch (:interpretation-evidence/refusal data)) :interpretation/source-changed
                          (= :readiness @stage) :interpretation/agent-unavailable
