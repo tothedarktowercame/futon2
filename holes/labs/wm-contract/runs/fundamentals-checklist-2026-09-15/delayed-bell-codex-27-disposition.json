@@ -1,0 +1,19 @@
+{
+  "kind": "delayed-bell-disposition",
+  "date": "2026-09-15",
+  "agent": "codex-28",
+  "source-job": "invoke-1789491575339-21070-498e7b46",
+  "source-disposition": "Source evidence only; explicitly defers ratification to separate review.",
+  "assent-job": "invoke-1789492951734-21173-a8b3455b",
+  "assent-disposition": "Bounded revision-4 assent covering basis-4/basis-5, WM-01/WM-08/WM-09, WM-06 scope distinction and join-1; does not certify machine completion or full ratification.",
+  "checklist-commit": "b2c7d1d",
+  "checklist-sha256": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8",
+  "checklist-changed": false,
+  "verification": "Verified separate job identities, explicit deferred ratification, later hash-bound assent, exact registry response, archived and committed checklist hashes. No implementation tests rerun.",
+  "evidence-sha256": {
+    "source-response-codex-27.json": "07cf55b0b834ef8d8dd1cc53c9c8004c08cde32b5e582e9217bef681e5a3b630",
+    "review-r4-codex-27.json": "2cd43cf968877d899a086317cdd7c13f592fe37f5eb99868e1af4dc31e730833",
+    "ratification.json": "3c95ca5fe7e1ee31edb065eac553040aa55bcd1b794cd3749cd8278b1ffd5afa",
+    "checklist-r4.md": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8"
+  }
+}

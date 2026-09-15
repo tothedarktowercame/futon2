@@ -1,6 +1,6 @@
 # Ratification of the War Machine checklist
 
-**12 responding reviewers AGREE, each within recorded knowledge bounds; codex-28 also records author assent. Full ratification remains incomplete.** Claude-15 and claude-1 cannot respond under the current usage limit. Responsibility/ historical-roster completeness and Joe's acceptance of this expanded revision remain unresolved.
+**12 responding reviewers AGREE, each within recorded knowledge bounds; codex-28 also records author assent. Full ratification remains incomplete.** Claude-15 and claude-1 cannot respond under the current usage limit. Responsibility/historical-roster completeness remains unresolved. Joe has now accepted revision 4 in substance and requested independent subsection folding and transparent project management.
 
 Canonical source: [p4ng/CHECKLIST-fundamentals.md](/home/joe/code/p4ng/CHECKLIST-fundamentals.md), revision 4 at `b2c7d1d`.
 
@@ -27,7 +27,7 @@ SHA256: `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`.
 
 Agreement is to the truthful incomplete checklist, not certification of the machine. The named nodes and connections still require their implementation, validation and runtime evidence.
 
-Joe's earlier conditional sign-off concerned the earlier four-fundamental page draft, not automatically this expanded revision. No new acceptance is inferred.
+Joe's earlier conditional sign-off concerned the earlier four-fundamental page draft. His subsequent direct emacs-repl instruction now explicitly accepts the consolidated draft in substance; the verbatim instruction is retained in ratification.json. This accepts the checklist, not machine completion.
 
 Zai-9 was suggested but is not registered (404), so its identity/role must be resolved rather than counted. Additional historical contributors and documented succession remain listed in [roster](roster.json); the pending roster question does not narrow itself with time.
 

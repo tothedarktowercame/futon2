@@ -1,0 +1,20 @@
+{
+  "kind": "delayed-bell-disposition",
+  "date": "2026-09-15",
+  "agent": "codex-28",
+  "source-job": "invoke-1789491435064-21065-5e2cf2d6",
+  "source-disposition": "Retained source gathering only; does not constitute ratification.",
+  "assent-job": "invoke-1789492950954-21172-8f4c4e8d",
+  "assent-disposition": "Separate bounded assent to revision 4 only; no claim of whole-system completion or full participant ratification.",
+  "checklist-revision": 4,
+  "checklist-commit": "b2c7d1d",
+  "checklist-sha256": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8",
+  "checklist-changed": false,
+  "verification": "Checked retained source disclaimer, distinct job IDs, explicit hash-bound assent, exact registry response equality, archived checklist hash, and committed checklist hash. No WM implementation tests rerun.",
+  "evidence-sha256": {
+    "source-response-codex-26.json": "edf3b52f15d81d7aaded8387753ec98e6f0c08b5bce4eecc4229c212ef2f6bd6",
+    "review-r4-codex-26.json": "5d93bd40cafee61ee18f63e98b7dd59de0c86b26960f15057a6e60d152ea59f2",
+    "ratification.json": "3c95ca5fe7e1ee31edb065eac553040aa55bcd1b794cd3749cd8278b1ffd5afa",
+    "checklist-r4.md": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "kind": "delayed-bell-disposition",
+  "date": "2026-09-15",
+  "agent": "codex-28",
+  "source-job": "invoke-1789491436339-21066-cb5650c9",
+  "source-disposition": "Retained historical source audit, explicitly not signoff; deployment statements remain bounded to that report.",
+  "assent-job": "invoke-1789492944427-21167-847f4dfe",
+  "assent-disposition": "Separate bounded revision-4 agreement. Does not certify current deployment, machine completion, qualifying run, or operator acceptance. Review scope and non-blocking follow-ups remain in the full retained review.",
+  "checklist-commit": "b2c7d1d",
+  "checklist-sha256": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8",
+  "checklist-changed": false,
+  "verification": "Verified source job identity and no-signoff disclaimer, distinct later hash-bound assent, exact registry response equality, and archived and committed checklist hashes. No runtime inspection or implementation tests rerun.",
+  "evidence-sha256": {
+    "source-response-claude-20.json": "77aa0c686610e09dc81952702ddedcfc3f9b10f03f38df448c24d4cc070a429a",
+    "review-r4-claude-20.json": "c7b85624191beac10cae8806f5c32c80a19c082b0e7f14f2f7af5d1d55d52ad8",
+    "ratification.json": "3c95ca5fe7e1ee31edb065eac553040aa55bcd1b794cd3749cd8278b1ffd5afa",
+    "checklist-r4.md": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8"
+  }
+}

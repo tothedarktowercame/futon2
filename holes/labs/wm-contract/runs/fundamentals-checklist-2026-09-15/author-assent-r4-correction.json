@@ -1,0 +1,16 @@
+{
+  "kind": "author-assent-metadata-correction",
+  "trigger-job": "invoke-1789492819311-21140-27734067",
+  "before": {
+    "state": "author-assent",
+    "revision": 2,
+    "basis": "Joe commission/compiler"
+  },
+  "after": {
+    "state": "author-assent",
+    "revision": 4,
+    "basis": "Joe commission/compiler; author assent to the consolidated obligations and evidence boundaries, including E03/E04 and row-39 corrections. Not independent review of my own compilation or certification of production, qualifying execution, or roster completeness.",
+    "checklist-sha256": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8"
+  },
+  "reason": "Delayed superseded R3 request exposed stale R2 author revision in R4 ledger. Author now explicitly assents to verified R4 bytes; reviewer entries and checklist unchanged."
+}

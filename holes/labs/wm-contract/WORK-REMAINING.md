@@ -1,5 +1,54 @@
 # The work remaining — the single execution authority
 
+## Current coordination and priority order (Joe, 2026-09-15)
+
+Joe accepted checklist revision 4 (`p4ng b2c7d1d`) in substance and asked
+codex-28 to help project-manage completion in priority order, transparently.
+The acceptance and exact instruction are retained in
+[ratification.json](runs/fundamentals-checklist-2026-09-15/ratification.json).
+The [canonical checklist](/home/joe/code/p4ng/CHECKLIST-fundamentals.md) defines
+completion; this existing tracker schedules that work. No second completion
+list is introduced. Codex-28 coordinates packets and reports evidence. Existing
+technical owners remain responsible; this does not infer permission to resume
+dispatches to codex-26 or resolve the historical F13 leadership conflict.
+
+The order below takes precedence over the older machinery-first sequence below.
+That sequence is retained as campaign history, not permission to bypass the
+fundamentals. Priorities are dependency stages, not estimates of completion dates.
+
+| Priority | Checklist obligations | Next result required | Responsibility / state |
+|---|---|---|---|
+| 1 | WM-01–07, join-2 | Machine-derived current belief → validated B/context and observed A → full-policy Q, with compatible C domain. Identify the first missing producer/consumer and its rejecting test before implementing it. A construction test cannot discharge observed-data or production-use obligations. | claude-20 is the recorded F13 owner; codex-22/27 have relevant construction evidence. First bounded packet requested from claude-20; no completion credit. |
+| 2 | WM-08–14, join-1/3/5, R6/R19 | Interpreted real cascades, complete C-family requirements, canonical runtime G, applicable posterior and actual selection/enactment correspondence. Resolve each needed interpretation decision before implementing its dependent behavior. | Existing F13/C owners; queued behind required inputs. No substitute controller score. |
+| 3 | Every R node, TRACE, E01–04, join-6/8/9 | Close remaining node and connection obligations with independent review, authentic retention and rejecting certificate checks. Verify reported regressions on the relevant path. | Owners and reviewers must be named per packet; queued. Ancillary proofs and failed certificates do not close nodes. |
+| 4 | E05 and all prerequisite nodes/connections | One authorized ordinary run using the actual completed path, with timestamped records and Lean-computed validation of its certificate. | Not ready. A machinery run is not qualifying; cron restoration is not required. |
+| 5 | E06–10, INV/TKT/PAGES | Reconcile all paper claims, wider-purpose obligations and publication with accepted evidence; finish required assent and roster reconciliation. | codex-28 coordinates. These obligations remain required even if the technical run succeeds. |
+
+**Active request:** Agency `invoke-1789495178833-21207-84b75f6b` to claude-20
+([dispatch receipt](runs/fundamentals-checklist-2026-09-15/priority-1-dispatch.json))
+is **queued** for a single concrete P1 coding handoff, with exact inputs/outputs,
+failing check, prerequisites, author/reviewer and closure evidence. It does not
+authorize new measurement plans, substitute scores, implementation or further
+dispatches. This is a coordination packet; construction has not started.
+
+**Packet discipline.** Each dispatched packet must state the checklist codes,
+exact invariant/failing signature, inputs and dependencies, one author, a different
+reviewer, concrete output and acceptance evidence. Record its Agency job and
+commit/receipt here. State `queued`, `active`, `blocked`, `review`, or `accepted`;
+report source implementation, tests, independent review, serving activation and
+qualifying use separately. No checklist tick follows from an acknowledgment or
+an author's claim alone. If an invariant or missing authority blocks a packet,
+name the precise blocker and stop its dependent work.
+
+**Current operator/authority questions.** Needed G/C decisions remain those in
+join-5 and WM-06/13, not newly adopted defaults. The historical leadership and
+codex-26 dispatch restriction still require reconciliation before affected
+dispatches. Claude-1/15 are unavailable; their assent is not invented. Historical
+roster candidates include the additional codex-10 suggestion retained in
+[the delayed-response receipt](runs/fundamentals-checklist-2026-09-15/delayed-bell-zai-7-disposition.json).
+These questions are handled alongside buildable fundamentals, not by replacing
+fundamental construction with more measurement plans or accounting machinery.
+
 ## Leadership
 
 Execution leadership returned to claude-15 (Joe, emacs-repl, 2026-09-13

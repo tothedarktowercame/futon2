@@ -515,20 +515,30 @@
     },
     "codex-28": {
       "state": "author-assent",
-      "revision": 2,
-      "basis": "Joe commission/compiler"
+      "revision": 4,
+      "basis": "Joe commission/compiler; author assent to the consolidated obligations and evidence boundaries, including E03/E04 and row-39 corrections. Not independent review of my own compilation or certification of production, qualifying execution, or roster completeness.",
+      "checklist-sha256": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8"
     }
   },
   "roster-complete": false,
-  "operator": "Joe; acceptance not inferred",
+  "operator": "Joe; substantive acceptance received in emacs-repl",
   "canonical-source": "/home/joe/code/p4ng/CHECKLIST-fundamentals.md",
   "p4ng-commit": "b2c7d1d",
-  "updated-at": "2026-09-15T17:29:23.332405+00:00",
+  "updated-at": "2026-09-15T17:58:44.396654+00:00",
   "counts": {
     "unavailable-usage-limit": 2,
     "agree-bounded": 12,
     "unresolved-identity-404": 1,
     "author-assent": 1
   },
-  "evidence-commit": "29d95ccd"
+  "evidence-commit": "29d95ccd",
+  "operator-acceptance": {
+    "state": "accepted-in-substance",
+    "revision": 4,
+    "checklist-sha256": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8",
+    "source": "Joe, current emacs-repl turn",
+    "verbatim": "I accept the draft in substance but would like it if each subsection could be folded independently so that it is easier to navigate.  After that I would like you to help me project-manage this through to completion, in priority order, transparently.",
+    "presentation-request": "Independent subsection folding",
+    "completion-certification": false
+  }
 }

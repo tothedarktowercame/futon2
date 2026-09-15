@@ -1,0 +1,17 @@
+{
+  "source-job": "invoke-1789491899219-21085-89921e69",
+  "source": "Delayed auto-bellback supplied in conversation",
+  "reported-assent-hash": "4650d190b6f9c6da0232ea54cc9ed3724397722a6dda562598e8fb0be2a69abb",
+  "disposition": "Earlier assent is limited to the reported intermediate bytes, not revision 1 or revision 4. Separate review-r4-zai-7.json supplies revision-4 assent.",
+  "unresolved-roster-suggestion": {
+    "agent": "codex-10",
+    "basis": "zai-7 suggested checking historical dispatch precedent and explicitly did not verify involvement",
+    "status": "candidate investigation pending; no ownership or assent inferred"
+  },
+  "other-roster-suggestions": {
+    "codex-17": "Included; separate revision-4 review retained",
+    "claude-2": "Already listed as historical candidate"
+  },
+  "checklist-changed": false,
+  "roster-completeness": false
+}

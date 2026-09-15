@@ -1,0 +1,12 @@
+{
+  "source-sha256": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8",
+  "subsection-folds": 13,
+  "checkboxes": 58,
+  "item-anchors": 103,
+  "outside-checklist-unchanged": true,
+  "anchor-script-initial-and-hashchange": "passed with DOM stub",
+  "browser-interaction": "not browser-tested; native details/summary controls",
+  "implementation": "p4ng/empirics-futon/checklist.py",
+  "published-url": "https://zone.hyperreal.enterprises/wip/plop-2026.html",
+  "http-verification": "13 folds, 103 item anchors and unchanged revision-4 hash verified"
+}
