@@ -1,0 +1,470 @@
+{
+  "scope": "executed record consistency check, full A/B computation blocked on model inputs",
+  "predeclaration_sha256": "fd0b179cfa1c56afa50c7b1f6301c6b9d436ca5313fc1be4976dc892493b6f79",
+  "rows": [
+    {
+      "strength": "dense",
+      "truth": "clean",
+      "record": {
+        "artifact": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "code_sha": "6a0a26c28788b341a59f29cf4a003f7d3dda3445742d77c6d6277d7b0b76ed98",
+        "tests": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "test_sha": "6c301cda718f48575f1c55c0f3ae8b643bad3d8a7967046ce3f8fad0abde4343",
+        "environment": "Python deterministic integer equality, isolated fixture",
+        "results": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "posterior_clean_buggy": [
+        1.0,
+        0.0
+      ],
+      "confidence": 1.0,
+      "samples": [
+        {
+          "index": 0,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 1,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 2,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 3,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 4,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 5,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 6,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 7,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 8,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 9,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        }
+      ],
+      "true_verdict_probability": 1.0,
+      "full_rerun_verdict": "clean"
+    },
+    {
+      "strength": "dense",
+      "truth": "buggy",
+      "record": {
+        "artifact": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "code_sha": "0839c65fba0226ca85da7a87e856f15fd533df2a8d1ebbbc02e7a1ccf8ed7300",
+        "tests": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "test_sha": "6c301cda718f48575f1c55c0f3ae8b643bad3d8a7967046ce3f8fad0abde4343",
+        "environment": "Python deterministic integer equality, isolated fixture",
+        "results": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      "posterior_clean_buggy": [
+        0.0,
+        1.0
+      ],
+      "confidence": 1.0,
+      "samples": [
+        {
+          "index": 0,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 1,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 2,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 3,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 4,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 5,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 6,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 7,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 8,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 9,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        }
+      ],
+      "true_verdict_probability": 1.0,
+      "full_rerun_verdict": "buggy"
+    },
+    {
+      "strength": "sparse",
+      "truth": "clean",
+      "record": {
+        "artifact": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "code_sha": "6a0a26c28788b341a59f29cf4a003f7d3dda3445742d77c6d6277d7b0b76ed98",
+        "tests": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "test_sha": "6c301cda718f48575f1c55c0f3ae8b643bad3d8a7967046ce3f8fad0abde4343",
+        "environment": "Python deterministic integer equality, isolated fixture",
+        "results": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "posterior_clean_buggy": [
+        1.0,
+        0.0
+      ],
+      "confidence": 1.0,
+      "samples": [
+        {
+          "index": 0,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 1,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 2,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 3,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 4,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 5,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 6,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 7,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 8,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        },
+        {
+          "index": 9,
+          "passes": true,
+          "record_verdict": "clean",
+          "confident_true": true
+        }
+      ],
+      "true_verdict_probability": 1.0,
+      "full_rerun_verdict": "clean"
+    },
+    {
+      "strength": "sparse",
+      "truth": "buggy",
+      "record": {
+        "artifact": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "code_sha": "606bf2381b20fce6e2f0bbcdc2affc4d81bd3030aa57461a2fd3acd578b9e857",
+        "tests": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "test_sha": "6c301cda718f48575f1c55c0f3ae8b643bad3d8a7967046ce3f8fad0abde4343",
+        "environment": "Python deterministic integer equality, isolated fixture",
+        "results": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      "posterior_clean_buggy": [
+        0.0,
+        1.0
+      ],
+      "confidence": 1.0,
+      "samples": [
+        {
+          "index": 0,
+          "passes": true,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 1,
+          "passes": true,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 2,
+          "passes": true,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 3,
+          "passes": true,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 4,
+          "passes": true,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 5,
+          "passes": true,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 6,
+          "passes": true,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 7,
+          "passes": true,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 8,
+          "passes": true,
+          "record_verdict": "buggy",
+          "confident_true": true
+        },
+        {
+          "index": 9,
+          "passes": false,
+          "record_verdict": "buggy",
+          "confident_true": true
+        }
+      ],
+      "true_verdict_probability": 1.0,
+      "full_rerun_verdict": "buggy"
+    }
+  ],
+  "no_record_sparse_pass_posterior_clean": 0.5263157894736842,
+  "finding": "A complete deterministic retained result detects both bugs regardless of sampled index.",
+  "not_computed": [
+    "G_A",
+    "G_B",
+    "fuel",
+    "adequacy-error-dependent fallback costs"
+  ]
+}

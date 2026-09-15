@@ -1,0 +1,2 @@
+4 artifact/strength cases; 40 sampled draws; all record verdicts confidently true.
+Without the decisive record, sparse sampling pass gives P(clean)= 0.5263157894736842

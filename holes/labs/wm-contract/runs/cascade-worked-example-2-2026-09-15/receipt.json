@@ -1,0 +1,16 @@
+{
+  "validation": "JSON readback; 4 cases and 40 draws verified; no G claims",
+  "predeclaration_commit": "b9b3047c",
+  "source": {
+    "path": "holes/labs/wm-contract/NOTE-test-registry.md",
+    "sha256": "8e6709cc1147669201d616908e03f426ded03c2f468c41448624053db9b3a97b"
+  },
+  "files": {
+    "FINDING.md": "e40e6de27df32110a998b06a481dfc744535bdaa875704d68ae56003a2bd3740",
+    "execution.log": "154b014dae30c1653b95215da87159e4f88d0c5407acb4b7dd586d0867134916",
+    "PREDECLARATION.md": "fd0b179cfa1c56afa50c7b1f6301c6b9d436ca5313fc1be4976dc892493b6f79",
+    "record_check.py": "ea9001f55542c5012c1a7dfd7dce55fbb239bbf040ed3ecd91731acae881a2e8",
+    "coordination.json": "263affb2ce1f5d58410c805b2695d85daaeb145daf6e5fbcb0f92ac2af270cce",
+    "results.json": "3fc6fe20006f53f47686650e8fc0081cf426977d8e5b6cb7660db034eb300d62"
+  }
+}
