@@ -241,3 +241,39 @@
     (is (= 1/1000000000000 (:exact-deviation at-bound)))
     (is (= :float-carried (:admission at-bound)))
     (is (false? (:exactly-normalized? at-bound)))))
+
+(deftest shared-distribution-support-contract
+  (doseq [[support kind] [[[:a :a] :duplicate-support]
+                         [nil :missing-support] [[] :missing-support]
+                         [(list :a) :missing-support] [#{:a} :missing-support]
+                         [42 :missing-support]]]
+    (is (= kind (get-in (m/distribution-admission {:a 1} support) [:refusal :kind]))))
+  (doseq [row [{} {:a 1 :outside 0}]]
+    (is (= :distribution-support-mismatch
+           (get-in (m/distribution-admission row [:a]) [:refusal :kind]))))
+  (let [row {:a 1/4 :b 3/4}
+        forward (m/distribution-admission row [:a :b])
+        reverse-support (m/distribution-admission row [:b :a])
+        swapped-values (m/distribution-admission {:a 3/4 :b 1/4} [:a :b])]
+    (is (:ok (m/distribution-admission {:a 1} [:a])))
+    (is (:ok (m/distribution-admission (zipmap b/status-set (repeat 1/7)) (vec b/status-set))))
+    (is (:ok forward))
+    (is (:ok reverse-support))
+    (is (= [:b :a] (:support reverse-support)))
+    (is (= row (:values forward) (:values reverse-support)))
+    (is (not= (:values forward) (:values swapped-values)))
+    (doseq [result [forward reverse-support swapped-values]]
+      (is (and (vector? (:support result)) (seq (:support result))))
+      (is (= (count (:support result)) (count (set (:support result)))))
+      (is (= (set (:support result)) (set (keys (:values result))))))))
+
+(deftest full-model-uses-the-common-support-shape-law
+  (with-example
+    (fn [x]
+      (let [support (:state-support x)]
+        (doseq [[s kind] [[(conj support (first support)) :duplicate-support]
+                           [[] :missing-support] [(apply list support) :missing-support]
+                           [(set support) :missing-support]
+                           [nil :missing-field]]]
+          (is (= kind (get-in (m/validate (assoc x :state-support s)) [:refusal :kind]))))
+        (is (:ok (m/validate x)))))))

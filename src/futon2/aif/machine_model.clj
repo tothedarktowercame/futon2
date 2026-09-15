@@ -28,9 +28,15 @@
   (doseq [k fields]
     (demand! (and (contains? m k) (some? (get m k))) :missing-field (conj path k))))
 
+(defn- support-refusal-kind [xs]
+  (cond
+    (not (and (vector? xs) (seq xs))) :missing-support
+    (not= (count xs) (count (set xs))) :duplicate-support
+    :else nil))
+
 (defn- support! [xs path]
-  (demand! (and (vector? xs) (seq xs)) :missing-support path)
-  (demand! (= (count xs) (count (set xs))) :duplicate-support path))
+  (when-let [kind (support-refusal-kind xs)]
+    (refuse! kind path)))
 
 (def float-row-tolerance
   "Contract v1.1 declared numerical error criterion (reviewer-declared per
@@ -125,14 +131,17 @@
   (:admission (numeric-row-admission row)))
 
 (defn distribution-admission
-  "The shared full row boundary: support identity, mass checks and detailed
-   numeric admission. Support order is retained; row keys name the masses."
+  "The shared full row boundary: nonempty vector of distinct support identities,
+   exact row-key coverage, and numeric-1 mass admission. The model's support!
+   uses this same support check. Preserve order/masses; return refusals as data."
   [row support]
-  (cond
-    (not (map? row)) {:ok false :refusal {:kind :missing-distribution :path []}}
-    (not= (set (keys row)) (set support))
-    {:ok false :refusal {:kind :distribution-support-mismatch :path []}}
-    :else (assoc (numeric-row-admission row) :support support)))
+  (if-let [kind (support-refusal-kind support)]
+    {:ok false :refusal {:kind kind :path []}}
+    (cond
+      (not (map? row)) {:ok false :refusal {:kind :missing-distribution :path []}}
+      (not= (set (keys row)) (set support))
+      {:ok false :refusal {:kind :distribution-support-mismatch :path []}}
+      :else (assoc (numeric-row-admission row) :support support))))
 
 (defn- distribution! [row support path]
   (let [admission (distribution-admission row support)]

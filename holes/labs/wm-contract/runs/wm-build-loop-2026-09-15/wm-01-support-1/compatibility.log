@@ -1,0 +1,19 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.categorical-ambiguity-test
+
+Testing futon2.aif.efe-machine-q-test
+
+Testing futon2.aif.machine-parameters-test
+
+Testing futon2.aif.machine-q-risk-test
+
+Testing futon2.aif.trace-test
+
+Testing futon2.aif.work-target-belief-test
+
+Testing futon2.aif.work-target-tick-test
+
+Ran 87 tests containing 493 assertions.
+0 failures, 0 errors.

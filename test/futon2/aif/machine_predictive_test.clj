@@ -119,3 +119,30 @@
                                                 (assoc (transition-test/point :spawned) :spawned -1 :refined 2)})]
           (is (= {:ok false :refusal {:kind :invalid-mass :path [:steps 1]}}
                  (predictive/predicted-state-plan belief-input kernel p))))))))
+
+(deftest predictor-refuses-malformed-support-before-transition
+  (model-test/with-example
+    (fn [example]
+      (let [kernel (transition/controlled-transition-kernel
+                    (transition-test/model example) transition-test/actions transition-test/params)
+            support (:state-support kernel)
+            calls (atom [])
+            original transition/apply-belief
+            p (policy "support-check" [:advance-mission])]
+        (with-redefs [transition/apply-belief (fn [k row action]
+                                              (swap! calls conj {:support (:state-support k) :row row})
+                                              (original k row action))]
+          (doseq [[bad-support kind] [[(conj support (first support)) :duplicate-support]
+                                     [nil :missing-support] [[] :missing-support]
+                                     [(apply list support) :missing-support]
+                                     [(set support) :missing-support] [42 :missing-support]]]
+            (reset! calls [])
+            (let [result (predictive/predicted-state-plan belief-input
+                                                         (assoc kernel :state-support bad-support) p)]
+              (is (= kind (get-in result [:refusal :kind])))
+              (is (empty? @calls) "malformed support must not reach transition arithmetic")))
+          (let [valid (predictive/predicted-state-plan belief-input kernel p)]
+            (is (:ok valid))
+            (is (= 1 (count @calls)))
+            (is (= (transition-test/point :refined) (:terminal valid)))
+            (is (= support (get-in valid [:steps 1 :numeric-admission :support])))))))))

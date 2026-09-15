@@ -83,3 +83,15 @@
     (is (= 36028797018963969/36028797018963968 (:exact-total admission)))
     (is (= 1/36028797018963968 (:exact-deviation admission)))
     (is (= result (edn/read-string (pr-str result))))))
+
+(deftest reader-support-shape-entrypoint
+  (doseq [[support kind] [[(conj mb/state-support :spawned) :state-support-order-mismatch]
+                         [nil :state-support-order-mismatch]
+                         [[] :state-support-order-mismatch]
+                         [(set mb/state-support) :state-support-order-mismatch]
+                         ;; Sequential equality allows the canonical-order list
+                         ;; through the order guard; the shared shape check refuses it.
+                         [(apply list mb/state-support) :missing-support]]]
+    (is (= kind (get-in (mb/belief-state-distribution
+                        (assoc context :state-support support) {entity row}) [:refusal :kind]))))
+  (is (:ok (mb/belief-state-distribution context {entity row}))))

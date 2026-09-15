@@ -41,9 +41,12 @@
                  {:depth depth :distribution row :model (:model kernel)
                   :admission (:admission admission) :numeric-admission admission})
           failure (fn [admission path]
-                    (refusal (if (= :unsupported-numeric-type (get-in admission [:refusal :kind]))
-                               :unsupported-numeric-type :invalid-mass) path))]
-      (if (or (not= belief/status-set (set support)) (not (:ok initial-admission)))
+                    ;; Preserve newly enforced support-shape failures. Existing
+                    ;; row coverage/mass failures retain :invalid-mass.
+                    (let [kind (get-in admission [:refusal :kind])]
+                      (refusal (if (#{:missing-support :duplicate-support :unsupported-numeric-type} kind)
+                                 kind :invalid-mass) path)))]
+      (if (or (not (:ok initial-admission)) (not= belief/status-set (set support)))
         (failure initial-admission [:belief-input :posteriors (:entity/id policy)])
         (loop [actions (:actions policy) depth 0 current initial
                steps [(step 0 initial initial-admission)]]
