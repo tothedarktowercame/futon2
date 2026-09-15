@@ -1988,7 +1988,7 @@
            (str "AUTHOR " author " may deposit one actual-command receipt per discharged limb:\n"
                 ":wm/limb-receipt-v1 keys [:schema :repair/id :limb :command :exit :stdout-sha256 :stderr-sha256 :recorded-at].\n"
                 "Write stdout/stderr bytes to flat companion files and reference them with :stdout-file/:stderr-file.\n"
-                "For a repair target, capture its immutable ORIGINAL obligation record bytes under data/wm-repair-obligations/ as :before and its state-at-this-attempt readback (honestly still :open) as :after.\n"
+                "For a repair target, capture its immutable ORIGINAL obligation record bytes under data/wm-repair-obligations/ as :before and the DERIVED-STATE readback record as :after (repair-derived-state output bytes; still :open is honest, but capture the readback record, never a second copy of the finding -- identical before/after bytes refuse :revision-unchanged, which orphaned cohort-54 attempt-001).\n"
                 "Name that :wm/entity-revision-pair-v1 file subject-*.edn and set :entity/id to the exact selected repair id.\n"
                 "Source-file revision pairs are supporting evidence: name them supporting-*.edn and use the source artifact id. Both roles use keys [:schema :entity/id :before :after :dimensions].\n")
            :reviewer
@@ -3625,6 +3625,15 @@
                                        :exception-class exception-class
                                        :refusal-data failure-data
                                        :repair-obligation finding
+                                       ;; the production close contract
+                                       ;; requires these; the thin fixture
+                                       ;; prereg hid their absence and
+                                       ;; cohort-54 attempt-001 orphaned on
+                                       ;; "invalid close outcome"
+                                       :duration-ms (- (System/currentTimeMillis)
+                                                       started)
+                                       :resource-use {:agent-turns
+                                                      @dispatched-turns}
                                        :sorry {:kind refusal-kind
                                                :refusal-data failure-data}}
                            closed (term sorry-data
@@ -4562,6 +4571,8 @@
                             :exception-class exception-class
                             :refusal-data failure-data
                             :repair-obligation finding
+                            :duration-ms (- (System/currentTimeMillis) started)
+                            :resource-use {:agent-turns @dispatched-turns}
                             :sorry {:kind refusal-kind
                                     :refusal-data failure-data}}
                 closed (term sorry-data

@@ -3667,7 +3667,12 @@
                                    :build :adjudication :closed]
                 :required-before-close #{:selection :construction :dispatch :build
                                          :adjudication}
-                :checkpoint-contract {}
+                ;; production preregs validate close cells against this
+                ;; contract; an empty map here let an invalid containment
+                ;; cell pass tests while orphaning cohort-54 attempt-001
+                :checkpoint-contract
+                {:closed [:outcome :grounded? :artifact-only?
+                          :duration-ms :resource-use]}
                 :grounded-success {:outcome :grounded-change
                                    :requires []
                                    :artifact-only-counts? false}
