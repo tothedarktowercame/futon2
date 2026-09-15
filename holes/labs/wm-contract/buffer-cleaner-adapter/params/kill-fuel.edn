@@ -1,2 +1,2 @@
-;; MACHINE PROJECTION of buffer-cleaner/kill.flexiarg's FUEL block
+;; MACHINE PROJECTION of buffer-cleaner/receipt-then-gate.flexiarg's fuel instantiation (renamed from kill.flexiarg 2026-09-15)
 {:fuel {:per-scan 0.01 :per-kill 0.1}}
