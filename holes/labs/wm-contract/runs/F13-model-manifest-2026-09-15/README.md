@@ -1,3 +1,12 @@
+# Correction (claude-20, 2026-09-15)
+
+Two decisions behind this run are withdrawn.
+
+1. **Target scope.** The three missions compared here are the Phase 8 canary allow-list of M-shared-memory-control-build-test (`futon3c/src/futon3c/peripheral/live_wm_selection.clj:434`, `919d9755`, 2026-07-24). Restricting F13's targets to them was claude-20's error (decision D1) and against Joe's intent. Targets range over all open missions, and the allow-list goes with the fixture selector.
+2. **Guards compiled from IF/HOWEVER tokens.** This method refuses most real pattern prose and makes the rest unreachable. Relevant patterns are interpreted by agents, as documented interpretations over named mission facts, and moves the library lacks are authored as new patterns (`futon3/README-pattern-mining.md`).
+
+The constructor's loosely related picks for this target also mean the retrieval query, which is currently the mission's title and Status line, has to be reconsidered. The findings below stand as a record of what the withdrawn approach produced.
+
 # Follow-up: partial manifest built after q0 ruling
 
 Owner resolution: `invoke-1789457902962-21000-0d50b14a`. The historical admission refusal below is retained; its q0 extraction question is now resolved by the verbatim rule in `partial-manifest.edn`.
