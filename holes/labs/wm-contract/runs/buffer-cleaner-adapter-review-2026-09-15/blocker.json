@@ -1,0 +1,51 @@
+{
+  "status": "blocked-before-live-computation",
+  "coordination_jobs": [
+    "invoke-1789491852799-21075-90ce3156",
+    "invoke-1789491967325-21093-1cc70b7c"
+  ],
+  "sources": {
+    "params/categories.edn": {
+      "path": "/home/joe/code/futon3/library/buffer-cleaner/params/categories.edn",
+      "sha256": "947d1a077236905aa321e5891d27ea1f32071240552b7beebbead40817e3f297",
+      "relevant_lines": {
+        "7": "{:stream  {:decisiveness :decisive :prior-needed-later 0.0 :revisit-cost 1.0",
+        "9": " :http    {:decisiveness :decisive :prior-needed-later 0.0 :revisit-cost 1.0",
+        "11": " :temp    {:decisiveness :decisive :prior-needed-later 0.05 :revisit-cost 1.0",
+        "13": " :dired   {:decisiveness :uncertain :prior-needed-later 0.25 :revisit-cost 0.5",
+        "15": " :render  {:decisiveness :uncertain :prior-needed-later 0.10 :revisit-cost 1.0",
+        "17": " :invoke  {:decisiveness :uncertain :prior-needed-later 0.20 :revisit-cost 2.0",
+        "19": " :file-stale {:decisiveness :uncertain :revisit-cost 5.0",
+        "28": " :unknown {:decisiveness :unknown :prior-needed-later nil :revisit-cost nil"
+      }
+    },
+    "adapter/dump-state.el": {
+      "path": "/home/joe/code/futon3/library/buffer-cleaner/adapter/dump-state.el",
+      "sha256": "28db785b3838982ba604d5ba231d640968c4ecfe5dfca1753448927074ec0b61",
+      "relevant_lines": {
+        "8": "(defun bc--kind (buf)",
+        "18": "                (kind . ,(symbol-name (or (ignore-errors (bc--kind buf)) 'unknown)))",
+        "24": "                 . ,(if (and buffer-display-time (boundp 'buffer-display-time))",
+        "25": "                        (ignore-errors (float-time (time-subtract (current-time) buffer-display-time)))"
+      }
+    },
+    "README.md": {
+      "path": "/home/joe/code/futon3/library/buffer-cleaner/README.md",
+      "sha256": "452dae02d04ec0714401b4e3f4cb6becf66bebfb26830c20053cf66638bf4ff0",
+      "relevant_lines": {
+        "14": "- adapter/classify.clj \u2014 PURE: packet + wiring -> per-candidate"
+      }
+    }
+  },
+  "check": {
+    "p": 0.05,
+    "entropy_nats": 0.1985152433458726
+  },
+  "findings": [
+    "temp declared decisive with nonzero Bernoulli entropy; must resolve outcome meaning, not erase uncertainty",
+    "dump-state reads buffer-display-time without switching to each named buffer",
+    "loaded candidate-kind threshold cannot alone classify both alternative wiring thresholds; preserve raw safety and age fields",
+    "age marginal does not identify conditional needed-later probability",
+    "no adapter execution, real input scores, or realized revisit verdict yet"
+  ]
+}
