@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-14 ~23:55Z (cohort 54 armed under the T/R/S/O contract; S-candidate click firing)
+Updated: 2026-09-15 ~00:35Z (attempt-001 orphaned by two stacked defects, both fixed; S retry firing)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,11 +13,13 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **cohort-54 attempt-001** — ordinary (non-measured) click fires as this tick's
-  last action: the S-candidate. If it closes grounded-change, the runner's
-  stop-line-validation auto-discharges T through the authorized writer
-  (T carries 2 recorded implementations); then the NEXT click is measured = O,
-  the exercise-6 subject. Target 3 attempts; worker casting.
+- **cohort-54 attempt-002** — the S-candidate retry, firing as this tick's last
+  action (ordinary click, worker casting). Attempt-001 is the second retained
+  orphan: zai-5's run went two rounds to grounding, then the close refused the
+  degenerate subject pair (:revision-unchanged — guidance said capture the still-
+  open state, producing identical bytes) and BOTH containment sites then failed
+  the production close contract (missing :duration-ms/:resource-use — hidden by
+  the fixture prereg's empty checkpoint contract). All fixed + reloaded (2c90fa41).
 
 ## DONE (this sitting, newest first)
 - **Packet 3 complete**: cohort-54 prereg `94b4272a` (T/R/S/O declared pre-outcome:
