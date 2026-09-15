@@ -297,3 +297,9 @@
                    (some-> (get captured (:file construction-ref)) sha256))
                 :construction-receipt-digest-mismatch [:construction])))
   true)
+
+(defn validate-identity
+  "Validate the shared identity before an interpretation job has been dispatched."
+  [identity]
+  (identity! identity)
+  identity)
