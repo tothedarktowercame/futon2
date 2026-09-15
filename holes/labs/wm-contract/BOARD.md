@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-15 ~04:30Z (exercise 7 ACCEPTED with the delta; MORNING BRIEF out; burn paused for Joe's casting call)
+Updated: 2026-09-15 ~05:05Z (A5 preflight accepted; cohort 57 EXECUTING with required preflight step)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,13 +13,13 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- Nothing dispatched. **Burn paused for Joe's morning call** — see
-  MORNING-BRIEF-2026-09-15.md (0b610444): cohort-57 casting (zai-5 back at
-  10:04Z vs codex), reviewer pairing, target scope. Exercise 7 ACCEPTED
-  (7f4d13a4, acceptance 00e4e206): the boundary discipline is DEMONSTRATED
-  at O-56 (occurrence + cutoff + admission frame + exact-target contract in
-  admitted cells all :satisfied-now); the sole remaining gap is a completed
-  deposit round before a cutoff. O-57 needs exactly one clean measured close.
+- **Cohort-57 attempt-001 = O-57** (click wm-click-47248e0c, 03:59Z; author
+  codex-23, reviewer codex-22). The prereg (1ee3e269) makes the deposit
+  preflight a REQUIRED author step and hands the author the accepted worked
+  template. A5 preflight ACCEPTED (855953a9/acfc78ca — lead re-ran it:
+  template green, five failure shapes refuse with production keywords).
+  Exercise 8 rides on this close regardless of outcome; a clean one is the
+  first qualifying-annotation candidate (A8).
 
 ## DONE (this sitting, newest first)
 - **Packet 3 complete**: cohort-54 prereg `94b4272a` (T/R/S/O declared pre-outcome:

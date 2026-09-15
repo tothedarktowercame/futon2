@@ -1635,10 +1635,10 @@
  :statement "Observation boundary DEMONSTRATED: blinded exercises 5/6/7 all accepted (codex-25); at O-56 every structural requirement is :satisfied-now (occurrence, cutoff, admission frame, exact-target contract in admitted cells). Sole remaining gap: a completed deposit round before a cutoff (exercise-7 lists = the spec)."}
 {:id :A4 :class :A :status :done :owner :claude-15
  :statement "voxterm WM visibility rebuilt: projector + 60s timer + live-click overlay + campaign-state (blocked-with-reason, planned rows) + THIS board now fed (it was not being written by this campaign before 2026-09-15)."}
-{:id :A5 :class :A :status :open :owner :codex-24
- :statement "EXECUTING NOW (job invoke-1789444289029, dispatched 04:45Z): deposit-preflight harness -- run candidate deposit sets through the REAL admission validators offline + a worked T template that must pass green. Kills the failure class that burned 5 live attempts."}
+{:id :A5 :class :A :status :done :owner :codex-24
+ :statement "DONE + reviewed (855953a9, acceptance acfc78ca): offline preflight through the REAL admission seam; worked T template passes green; five known failure shapes refuse with production keywords. Verified by the lead running it."}
 {:id :A6 :class :A :status :open :owner :any :depends-on [:A5]
- :statement "Cohort 57 (target 2): ONE clean measured close with the preflighted deposit round. Casting: zai-5 author after the 10:04Z quota reset unless Joe says otherwise (see :A10)."}
+ :statement "EXECUTING NOW (click wm-click-47248e0c, 03:59Z, author codex-23, preflight REQUIRED in prereg 1ee3e269): cohort 57, one clean measured close = the O boundary for exercise 8."}
 {:id :A7 :class :A :status :open :owner :codex-25 :depends-on [:A6]
  :statement "Exercise 8: blinded observation on cohort-57's first measured close. With deposits admitted, this is the first boundary where a criterion can be ESTABLISHED rather than typed insufficient."}
 {:id :A8 :class :A :status :open :owner :claude-15 :depends-on [:A7]
