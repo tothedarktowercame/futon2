@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "bb",
+    "-cp",
+    ".",
+    "-e",
+    "(require (quote [checks.positive-proof-receipt :as r]) (quote [clojure.edn :as e])) (let [x (e/read-string (slurp \"holes/labs/wm-contract/predictive-outcome-kernel-positive-receipt.edn\"))] (doseq [[old new] (map vector (:source-basis x) (r/live-source-basis x)) [a b] (map vector (:declarations old) (:declarations new)) :when (not= a b)] (prn {:path (:path old) :old a :actual b})))"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "scope": "read-only identification of stale positive receipt declaration hashes",
+  "started": "2026-09-15T23:45:41.679347+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 0,
+  "expected-exit": 0,
+  "expected-diagnostic": null
+}

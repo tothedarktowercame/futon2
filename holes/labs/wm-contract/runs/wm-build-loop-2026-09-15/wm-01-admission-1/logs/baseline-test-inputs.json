@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "git",
+    "diff",
+    "--exit-code",
+    "43cf8563",
+    "--",
+    "test/witnesses/merge_witnesses_control.bb",
+    "checks/witness-fragments/machineObservation.edn",
+    "checks/witness-fragments/machinePrecision.edn",
+    "checks/witness-fragments/machineChannelPredictionError.edn"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "scope": "test and selected fragments unchanged from starting HEAD",
+  "started": "2026-09-15T23:44:53.999490+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 0,
+  "expected-exit": 0,
+  "expected-diagnostic": null
+}

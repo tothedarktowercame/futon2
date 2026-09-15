@@ -1,0 +1,1 @@
+{:pass? false, :failures [:positive-source-drift], :receipt-shape-valid? true, :successful-elaboration? true, :source-basis-matches? false, :fixture-adapter-matches? true, :toolchain-matches? true, :elaboration-matches? true}

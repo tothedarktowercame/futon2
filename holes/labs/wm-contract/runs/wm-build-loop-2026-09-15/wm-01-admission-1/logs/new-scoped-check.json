@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "bb",
+    "scripts/merge_witnesses.bb",
+    "--fragments",
+    "/tmp/wm-r4-new-qvbdjejd/fragments",
+    "--output",
+    "/tmp/wm-r4-new-qvbdjejd/registry.edn",
+    "--check"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "scope": "isolated generated registry roundtrip",
+  "started": "2026-09-15T23:43:26.559331+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 0,
+  "expected-exit": 0,
+  "expected-diagnostic": null
+}

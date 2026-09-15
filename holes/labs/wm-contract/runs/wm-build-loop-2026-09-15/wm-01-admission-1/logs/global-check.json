@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "bb",
+    "scripts/merge_witnesses.bb",
+    "--check"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "scope": "full canonical registry validation",
+  "started": "2026-09-15T23:43:26.680910+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 1,
+  "expected-exit": 1,
+  "expected-diagnostic": "R17-dirichlet-accumulation-ieee-residuals-v1"
+}

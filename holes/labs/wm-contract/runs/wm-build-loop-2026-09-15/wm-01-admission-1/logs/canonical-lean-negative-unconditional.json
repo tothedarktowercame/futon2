@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "lake",
+    "env",
+    "lean",
+    "-j",
+    "1",
+    "DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean"
+  ],
+  "cwd": "/home/joe/code/mathlib4",
+  "scope": "diagnostic in exact wrapper cwd to select canonical toolchain; not a substitute wrapper gate",
+  "started": "2026-09-15T23:45:23.792509+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 0,
+  "expected-exit": 0,
+  "expected-diagnostic": null
+}

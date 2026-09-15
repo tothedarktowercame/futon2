@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "bb",
+    "-cp",
+    "scripts:test",
+    "test/witnesses/merge_witnesses_control.bb"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "scope": "existing merger control suite",
+  "started": "2026-09-15T23:43:27.722779+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 1,
+  "expected-exit": 0,
+  "expected-diagnostic": null
+}

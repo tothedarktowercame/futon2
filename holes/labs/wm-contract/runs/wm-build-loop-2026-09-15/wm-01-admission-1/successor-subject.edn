@@ -1,0 +1,25 @@
+{:subject-artifact
+ {:repo "mathlib4",
+  :path "DarkTower/WarMachine/Holes.lean",
+  :sha256
+  "7f137e4f85b2aae18b699942bdc505faa3f311752a096718704fb2ca7b7a07d3",
+  :declaration "DarkTower.WarMachine.Holes.PredictiveOutcomeKernel"},
+ :scope :constructed-formal-witness-support-laws,
+ :node :R4,
+ :as-of "2026-09-15",
+ :id "R4-forward-model-float-carried-formal-support-v2",
+ :kind :lean-witness,
+ :polarity :supports,
+ :declaration "PredictiveOutcomeKernel",
+ :artifact
+ {:repo "mathlib4",
+  :path "DarkTower/WarMachine/MachineForwardModelWitness.lean",
+  :sha256
+  "62b15fe45ed0cc9eb12eb659b55122c1894cbcb5778b64feec758e965d427389",
+  :module "DarkTower.WarMachine.MachineForwardModelWitness",
+  :declaration
+  "DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried"},
+ :quantity :Q-o-pi,
+ :claim
+ "Constructed formal witness and support laws only: the advanceTwiceRow and cascadeRow FloatCarriedRow constructors discharge duplicate-free support, zero mass off support and the unchanged near-normalization bound; productionPinnedFloatCarried proves the stated constructed positional composition and bound. No fresh observations, production composition correspondence or exact normalization of approximate rows is claimed.",
+ :equation :forward-model}

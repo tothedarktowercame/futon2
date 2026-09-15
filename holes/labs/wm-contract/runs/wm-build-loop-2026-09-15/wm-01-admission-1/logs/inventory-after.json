@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "bb",
+    "-cp",
+    "scripts",
+    "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-admission-1/controls.clj",
+    "inventory"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "scope": "all pinned locators in all fragments after R4 replacement",
+  "started": "2026-09-15T23:43:26.740729+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 0,
+  "expected-exit": 0,
+  "expected-diagnostic": null
+}

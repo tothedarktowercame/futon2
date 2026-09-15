@@ -25,47 +25,57 @@
  :node-witnesses
  [{:schema :wm/node-witness-v1,
    :retained-evidence
-   {:formal-author
+   {:readback
     {:repo "futon2",
      :path
-     "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/RECEIPT.md",
+     "holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.edn",
      :sha256
-     "377270216c932615f4e5c197a172f0c369ad381a8f4419ce89e81c7122f961c9"},
-    :formal-review
+     "88559ad404088f2087212febe8ab24385dfefefe130288a12e6ddbd14da504f7"},
+    :generator
     {:repo "futon2",
      :path
-     "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/REVIEW-claude-3.md",
+     "holes/labs/wm-contract/runs/row-6-predictive-outcome/generate_forward_witness.clj",
      :sha256
-     "32ef73f454ccf4c1cc8006d1676e651430ff328af20bd0e0ae6653cbf34024d5"},
-    :formal-bindings
+     "eaa27949d53c45ee6b8400affba7fbadae4f58309bac57cf595d8cb605f023cf"},
+    :negative-controls
     {:repo "futon2",
      :path
-     "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/successor-binding.json",
+     "holes/labs/wm-contract/runs/row-6-predictive-outcome/readback.edn",
      :sha256
-     "f350640911f154f88e92ff05517474d58ddc1b018e974c26e283a57df660cf86"},
-    :model-support-laws
-    {:repo "mathlib4",
-     :path "DarkTower/WarMachine/MachineModelSpec.lean",
+     "88559ad404088f2087212febe8ab24385dfefefe130288a12e6ddbd14da504f7"}},
+   :verification
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-forward-model-2026-09-12/verification-receipts.edn",
      :sha256
-     "020af77ed11f0b5407bd6dd22a0a9e6e81ae30132ac41508277c0567500ca80f"},
-    :retained-row
-    {:repo "mathlib4",
-     :path "DarkTower/WarMachine/FloatCarriedRowCorrespondence.lean",
-     :sha256
-     "f8e9cdacaa47f2bd4131a41bd2876c5731356cd7b33f2dea3268125360be6e22"}},
+     "cf383515274dba2b24612380724fb9b6f57bfb28d11890f253db493e127af289",
+     :selector
+     [:records "R4-forward-model-float-carried-production-pins-v1"]}},
    :subject-artifact
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/Holes.lean",
     :sha256
-    "7f137e4f85b2aae18b699942bdc505faa3f311752a096718704fb2ca7b7a07d3",
+    "4dc0a76b9999d09b2ab49c932117e5b7dcfec523e5e61735b3a84191229cd02b",
     :declaration "DarkTower.WarMachine.Holes.PredictiveOutcomeKernel"},
-   :scope :constructed-formal-witness-support-laws,
+   :scope :production-pins-float-carried-v1.1,
    :node :R4,
    :evidence-limit
-   "Formal source evidence only; pending subject-bound verification and independent review, not admitted. The retained approximate row has total 1 + 1/2^55. No historical production acceptance transfers.",
-   :as-of "2026-09-15",
-   :status :proposed,
-   :id "R4-forward-model-float-carried-formal-support-v2",
+   "Contract-v1.1 FloatCarriedRow measurement at these production pins only. It does not claim the production bytes are an exactly normalized PredictiveOutcomeKernel and does not perform renormalization.",
+   :as-of "2026-09-12",
+   :review
+   {:status :verified,
+    :receipt
+    {:repo "futon2",
+     :path
+     "holes/labs/wm-contract/runs/row-16-forward-model-2026-09-12/review-receipts.edn",
+     :sha256
+     "82726e60a0c25f2a4e31da0e6e334c9f08ae1a8753a654f191721888c62cb06b",
+     :selector
+     [:records "R4-forward-model-float-carried-production-pins-v1"]}},
+   :status :admitted,
+   :id "R4-forward-model-float-carried-production-pins-v1",
    :kind :lean-witness,
    :polarity :supports,
    :declaration "PredictiveOutcomeKernel",
@@ -73,13 +83,13 @@
    {:repo "mathlib4",
     :path "DarkTower/WarMachine/MachineForwardModelWitness.lean",
     :sha256
-    "62b15fe45ed0cc9eb12eb659b55122c1894cbcb5778b64feec758e965d427389",
+    "02bc5c00a8dc7d5dde2e861d647d805f5023f36eda46a12f4d3ea102d407e34c",
     :module "DarkTower.WarMachine.MachineForwardModelWitness",
     :declaration
     "DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried"},
    :quantity :Q-o-pi,
    :claim
-   "Constructed formal witness and support laws only: the advanceTwiceRow and cascadeRow FloatCarriedRow constructors discharge duplicate-free support, zero mass off support and the unchanged near-normalization bound; productionPinnedFloatCarried proves the stated constructed positional composition and bound. No fresh observations, production composition correspondence or exact normalization of approximate rows is claimed.",
+   "At the unchanged row-9 production pins, three policy-conditioned outcome rows match independent exact positional-A composition within measured IEEE deltas and satisfy FloatCarriedRow.nearNormalised; exact ProbabilityKernel normalization is deferred to row 14's reviewed model instance.",
    :equation :forward-model}],
  :recorded-at "2026-09-08T00:00:00Z",
  :result :passed,

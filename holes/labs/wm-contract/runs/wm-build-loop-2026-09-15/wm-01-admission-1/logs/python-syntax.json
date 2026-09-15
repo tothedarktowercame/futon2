@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "-c",
+    "from pathlib import Path; p=Path(\"holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-admission-1/run.py\"); compile(p.read_bytes(),str(p),\"exec\"); print(\"PASS\")"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "scope": "runner syntax without bytecode writes",
+  "started": "2026-09-15T23:44:54.001918+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 0,
+  "expected-exit": 0,
+  "expected-diagnostic": null
+}

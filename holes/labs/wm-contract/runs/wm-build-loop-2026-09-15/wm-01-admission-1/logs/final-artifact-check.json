@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "bb",
+    "-cp",
+    "scripts",
+    "-e",
+    "(require (quote [witnesses.node-witness :as n])) (let [p \"holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-admission-1/\" old (n/read-edn (slurp (str p \"old-fragment.edn\"))) new (n/read-edn (slurp \"checks/witness-fragments/PredictiveOutcomeKernel.edn\"))) (assert (= (first (:node-witnesses old)) (n/read-edn (slurp (str p \"old-entry.edn\")))) ) (assert (= (dissoc old :node-witnesses) (dissoc new :node-witnesses))) (assert (= [(n/subject (first (:node-witnesses new)))] [(n/read-edn (slurp (str p \"successor-subject.edn\")))])) (println \"PASS: old entry preserved, wrapper unchanged, successor subject matches\"))"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "scope": "historical entry, unchanged wrapper metadata and exact successor subject",
+  "started": "2026-09-15T23:47:37.149155+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 1,
+  "expected-exit": 0,
+  "expected-diagnostic": null
+}

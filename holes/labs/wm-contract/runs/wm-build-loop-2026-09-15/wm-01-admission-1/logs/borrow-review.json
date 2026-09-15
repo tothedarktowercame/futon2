@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "bb",
+    "-cp",
+    "scripts",
+    "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-admission-1/controls.clj",
+    "borrow-review"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "scope": "existing receipt! directly on old review and new subject",
+  "started": "2026-09-15T23:43:26.670636+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 1,
+  "expected-exit": 1,
+  "expected-diagnostic": ":node-witness-subject-mismatch"
+}

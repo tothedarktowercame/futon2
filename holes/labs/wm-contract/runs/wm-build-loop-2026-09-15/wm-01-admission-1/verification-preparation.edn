@@ -1,0 +1,143 @@
+{:accepted-control-records
+ [{:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/canonical-build.json",
+   :sha256
+   "799febba5f5ea3abd68b04863cf5b4b6ed86e699331b6054d29dbfc65c38ab4c"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/canonical-build.stdout",
+   :sha256
+   "5b02ac9542f9d3e154e3d18cb68d37bead1d3ca96251661bf2c78f6a5b87f25a"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/Axioms.json",
+   :sha256
+   "38331410fd94888ece0fe87cdaa6e8a4cc356c14dff4b6e6f84471a4c7a0541f"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/Axioms.stdout",
+   :sha256
+   "67eff09251fbf5fb3d53e4652f0a663dad088e782d169004e7df29822afbd84f"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/Positive.json",
+   :sha256
+   "7fbce64f8e1141c1e72b644902ead5bb15530afaba7a87759cc626e4b67465f6"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/Positive.stdout",
+   :sha256
+   "1008eba9f972259c3448b4dac0c526f13b99a9ef0e3855db2ee03b8bd2febcfd"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/Duplicate.json",
+   :sha256
+   "cf233c5b8fcfd84fe10aad46989c3827203f8df926e0f99724c98f93e6f3f3a3"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/Duplicate.stdout",
+   :sha256
+   "84391279087dc250c3ee328e10650400cf4dd92a3268c9086cd788362b0ec0b4"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/Hidden.json",
+   :sha256
+   "ea30e42a7122a20226bc4386a74cb29b4c86ad754652feec7951c0318c1fcf4f"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/Hidden.stdout",
+   :sha256
+   "842fb1103026ea2a71682a77c6fa88378440efea5008e3fb2335a383d437c167"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/OutsideBound.json",
+   :sha256
+   "fb73db1df45343ad5be4bd74112ea788b403b667516d243b1928b984537db8b5"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/OutsideBound.stdout",
+   :sha256
+   "0b88c446aab2e254937227ae90f4accc1f475bc19fecfa7586d3d28f7b3b634f"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/RetainedConversion.json",
+   :sha256
+   "a58155af9fbd2ce8b3ff59453f3342e45379cfb0380912c07bfa92a4baf9bd33"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/logs/RetainedConversion.stdout",
+   :sha256
+   "4b09be71a935090025f3fa1646515631eaa7453c4ca240b724a9325b60bbdc9e"}],
+ :limit
+ "Preparation from accepted prior formal controls, not a newly executed Lean verification receipt or an approved review of this successor subject.",
+ :review-status :pending,
+ :author "codex-4",
+ :status :prepared-not-admitted,
+ :basis-commits
+ {:mathlib4 "f40c936a64227ba81592a71f3d937e6fbdbf0e4c",
+  :futon2-author "6f494738",
+  :futon2-review "e99c08c4"},
+ :reviewer "claude-3",
+ :dependencies
+ [{:repo "mathlib4",
+   :path "DarkTower/WarMachine/MachineForwardModelWitness.lean",
+   :sha256
+   "62b15fe45ed0cc9eb12eb659b55122c1894cbcb5778b64feec758e965d427389",
+   :module "DarkTower.WarMachine.MachineForwardModelWitness",
+   :declaration
+   "DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried"}
+  {:repo "mathlib4",
+   :path "DarkTower/WarMachine/Holes.lean",
+   :sha256
+   "7f137e4f85b2aae18b699942bdc505faa3f311752a096718704fb2ca7b7a07d3",
+   :declaration "DarkTower.WarMachine.Holes.PredictiveOutcomeKernel"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/RECEIPT.md",
+   :sha256
+   "377270216c932615f4e5c197a172f0c369ad381a8f4419ce89e81c7122f961c9"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/REVIEW-claude-3.md",
+   :sha256
+   "32ef73f454ccf4c1cc8006d1676e651430ff328af20bd0e0ae6653cbf34024d5"}
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-float-carrier-1/successor-binding.json",
+   :sha256
+   "f350640911f154f88e92ff05517474d58ddc1b018e974c26e283a57df660cf86"}
+  {:repo "mathlib4",
+   :path "DarkTower/WarMachine/MachineModelSpec.lean",
+   :sha256
+   "020af77ed11f0b5407bd6dd22a0a9e6e81ae30132ac41508277c0567500ca80f"}
+  {:repo "mathlib4",
+   :path "DarkTower/WarMachine/FloatCarriedRowCorrespondence.lean",
+   :sha256
+   "f8e9cdacaa47f2bd4131a41bd2876c5731356cd7b33f2dea3268125360be6e22"}],
+ :subject
+ {:subject-artifact
+  {:repo "mathlib4",
+   :path "DarkTower/WarMachine/Holes.lean",
+   :sha256
+   "7f137e4f85b2aae18b699942bdc505faa3f311752a096718704fb2ca7b7a07d3",
+   :declaration "DarkTower.WarMachine.Holes.PredictiveOutcomeKernel"},
+  :scope :constructed-formal-witness-support-laws,
+  :node :R4,
+  :as-of "2026-09-15",
+  :id "R4-forward-model-float-carried-formal-support-v2",
+  :kind :lean-witness,
+  :polarity :supports,
+  :declaration "PredictiveOutcomeKernel",
+  :artifact
+  {:repo "mathlib4",
+   :path "DarkTower/WarMachine/MachineForwardModelWitness.lean",
+   :sha256
+   "62b15fe45ed0cc9eb12eb659b55122c1894cbcb5778b64feec758e965d427389",
+   :module "DarkTower.WarMachine.MachineForwardModelWitness",
+   :declaration
+   "DarkTower.WarMachine.MachineForwardModelWitness.productionPinnedFloatCarried"},
+  :quantity :Q-o-pi,
+  :claim
+  "Constructed formal witness and support laws only: the advanceTwiceRow and cascadeRow FloatCarriedRow constructors discharge duplicate-free support, zero mass off support and the unchanged near-normalization bound; productionPinnedFloatCarried proves the stated constructed positional composition and bound. No fresh observations, production composition correspondence or exact normalization of approximate rows is claimed.",
+  :equation :forward-model}}

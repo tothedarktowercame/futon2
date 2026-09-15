@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "bb",
+    "checks/predictive_outcome_kernel_witness.clj",
+    "--negative-softmax"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "scope": "affected wrapper softmax negative; serial",
+  "started": "2026-09-15T23:44:18.911466+00:00",
+  "environment": {
+    "LEAN_NUM_THREADS": "1"
+  },
+  "exit": 2,
+  "expected-exit": 0,
+  "expected-diagnostic": null
+}

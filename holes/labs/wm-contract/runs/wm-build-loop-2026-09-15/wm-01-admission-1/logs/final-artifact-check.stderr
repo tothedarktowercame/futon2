@@ -1,0 +1,24 @@
+----- Error --------------------------------------------------------------------
+Type:     clojure.lang.ExceptionInfo
+Message:  Unmatched delimiter: ), expected: ] to match [ at [1 55]
+Data:     {:type :edamame/error, :line 1, :column 263, :edamame/opened-delimiter "[", :edamame/opened-delimiter-loc {:row 1, :col 55}, :edamame/expected-delimiter "]"}
+Location: NO_SOURCE_PATH:1:263
+Phase:    parse
+
+----- Context ------------------------------------------------------------------
+1: (require (quote [witnesses.node-witness :as n])) (let [p "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-admission-1/" old (n/read-edn (slurp (str p "old-fragment.edn"))) new (n/read-edn (slurp "checks/witness-fragments/PredictiveOutcomeKernel.edn"))) (assert (= (first (:node-witnesses old)) (n/read-edn (slurp (str p "old-entry.edn")))) ) (assert (= (dissoc old :node-witnesses) (dissoc new :node-witnesses))) (assert (= [(n/subject (first (:node-witnesses new)))] [(n/read-edn (slurp (str p "successor-subject.edn")))])) (println "PASS: old entry preserved, wrapper unchanged, successor subject matches"))
+                                                                                                                                                                                                                                                                         ^--- Unmatched delimiter: ), expected: ] to match [ at [1 55]
+
+----- Stack trace --------------------------------------------------------------
+edamame.impl.parser/throw-reader       - <built-in>
+edamame.impl.parser/dispatch           - <built-in>
+edamame.impl.parser/parse-next         - <built-in>
+edamame.impl.parser/parse-to-delimiter - <built-in>
+edamame.impl.parser/dispatch           - <built-in>
+... (run with --debug to see elided elements)
+edamame.impl.parser/parse-to-delimiter - <built-in>
+edamame.impl.parser/parse-list         - <built-in>
+edamame.impl.parser/dispatch           - <built-in>
+edamame.impl.parser/parse-next         - <built-in>
+edamame.core/parse-next                - <built-in>
+

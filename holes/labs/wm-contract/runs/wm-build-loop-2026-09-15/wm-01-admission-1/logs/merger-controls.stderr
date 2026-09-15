@@ -1,0 +1,25 @@
+----- Error --------------------------------------------------------------------
+Type:     clojure.lang.ExceptionInfo
+Message:  Control failed
+Data:     {:control :genuine-deterministic-merge}
+Location: /home/joe/code/futon2/test/witnesses/merge_witnesses_control.bb:12:16
+
+----- Context ------------------------------------------------------------------
+ 8: ;; All generated output is disposable. Synthetic receipts test the admission
+ 9: ;; mechanism only; the genuine F8 fragments must remain pending.
+10: (defn check! [label ok data]
+11:   (prn {:control label :pass? (boolean ok) :evidence data})
+12:   (when-not ok (throw (ex-info "Control failed" {:control label}))))
+                   ^--- Control failed
+13: (defn temp-dir []
+14:   (.toFile (java.nio.file.Files/createTempDirectory
+15:             "witness-merge-control-" (make-array java.nio.file.attribute.FileAttribute 0))))
+16: (defn invoke [args]
+17:   (apply sh/sh "bb" "scripts/merge_witnesses.bb" args))
+
+----- Stack trace --------------------------------------------------------------
+witnesses.merge-witnesses-control/check! - /home/joe/code/futon2/test/witnesses/merge_witnesses_control.bb:12:16
+witnesses.merge-witnesses-control/check! - /home/joe/code/futon2/test/witnesses/merge_witnesses_control.bb:10:1
+witnesses.merge-witnesses-control        - /home/joe/code/futon2/test/witnesses/merge_witnesses_control.bb:41:5
+witnesses.merge-witnesses-control        - /home/joe/code/futon2/test/witnesses/merge_witnesses_control.bb:22:1
+
