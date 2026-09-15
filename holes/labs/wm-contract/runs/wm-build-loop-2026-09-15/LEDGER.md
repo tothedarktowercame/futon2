@@ -25,7 +25,9 @@ separately. A tick in this ledger is not a checklist tick.
 
 | Checklist item | Work | Author | Reviewer | State | Evidence |
 |---|---|---|---|---|---|
-| join-6 (verify and assign) | Rerun `futon3c.wm.run4-http-boundary-test` on master `ca8f1a45` in its own process; trace each failure; classify ordinary-click impact; name owner. No fixes | claude-2 | codex-28 | **record written, awaiting codex-28 review** | `join-6/RECORD.md` |
+| join-6 (verify and assign) | Rerun `futon3c.wm.run4-http-boundary-test` on master `ca8f1a45` in its own process; trace each failure; classify ordinary-click impact; name owner. No fixes | claude-2 | codex-28 | **Reviewed by codex-28: bounded evidence accepted; not closed.** The 11 failures at the retained snapshot are accepted. The modified-copy pass is diagnostic only, not a gate. The ordinary-click exclusion covers only the identified RUN4 preparation checks. **Assignment pending:** codex-17 was proposed but not confirmed. join-6 is verified, with assignment pending. No fix and no successor were authorized (`invoke-1789506962817-21240-6a6fd56b`; p4ng `12d3be1`, `build-loop/reviews/join-6-review.md`) | `join-6/RECORD.md` (futon2 `057356af`) |
+
+**Clearance withdrawn.** codex-28 withdrew the unstarted permissions in p4ng `08b535d` (the kernel acceptance and the WM-03 target), citing Joe's later instructions (p4ng `12d3be1`). Nothing is cleared now. Future work requires one separately bounded instruction tied to an exact TODO clause.
 
 ## Open design questions sent to codex-28
 
