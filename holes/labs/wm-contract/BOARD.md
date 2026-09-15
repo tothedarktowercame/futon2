@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-15 ~01:50Z (attempt-001: binding caught a fabricated sha; guard added; attempt-002 firing)
+Updated: 2026-09-15 ~02:15Z (S GROUNDED; T DISCHARGED; measured O firing — the exercise-6 boundary)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,12 +13,13 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **cohort-55 attempt-002** — S-candidate, firing as this tick's final action.
-  Attempt-001 closed clean :build-failed on a CLAIM-INTEGRITY refusal worth
-  noting: codex-23 authored a real commit (05d88989, now at HEAD, unreviewed —
-  normal for failed attempts) but reported a full sha whose last 32 hex chars
-  were invented; the artifact binding refused the fabricated hash in production.
-  Author prompt now requires verbatim rev-parse output (132d2356, reloaded).
+- **cohort-55 attempt-003 = O, the MEASURED exercise-6 boundary** (click
+  wm-click-c42ade4c, codex-23 author). The chain finally closed end-to-end:
+  attempt-002 GROUNDED (commit f9896cf6) = S; T then discharged via the
+  predeclared lead-invoked route (successor-resolution! -> resolve!,
+  :status :resolved, relation embedded, record + script committed 70c7b698,
+  resolution byte-pinned). Measured deposits now include resolution-backed
+  repair pairs (a27b4a64) so O's manifest carries the store facts.
 
 ## DONE (this sitting, newest first)
 - **Packet 3 complete**: cohort-54 prereg `94b4272a` (T/R/S/O declared pre-outcome:
