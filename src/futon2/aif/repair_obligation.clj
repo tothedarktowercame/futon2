@@ -740,6 +740,11 @@
                     :review-job review-job
                     :witness witness
                     :implemented-at (str (Instant/now))}
+                    (= 3 (:repair/schema-version obligation))
+                    (assoc :grounded-review-evidence
+                           (:review-evidence implementation)
+                           :artifact-binding
+                           (:artifact-binding implementation))
                     (= :code-commit shape)
                     (assoc :replacement-commit commit)
                     (not= :code-commit shape)

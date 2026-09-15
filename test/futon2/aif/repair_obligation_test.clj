@@ -525,9 +525,14 @@
                                  :artifact-binding
                                  (assoc binding :commit "def5678")))))))
     (testing "the exact independently reviewed implementation is retained"
-      (is (= "abc1234"
-             (:replacement-commit
-              (repair/record-implementation!
-               root obligation
-               (assoc base :review-evidence review-evidence
-                      :artifact-binding binding))))))))
+      (let [record (repair/record-implementation!
+                    root obligation
+                    (assoc base :review-evidence review-evidence
+                           :artifact-binding binding))]
+        (is (= "abc1234" (:replacement-commit record)))
+        (is (= review-evidence (:grounded-review-evidence record)))
+        (is (= binding (:artifact-binding record)))
+        (is (= record
+               (edn/read-string
+                (slurp (io/file root "implementations"
+                                "repair-grounded-review.edn")))))))))
