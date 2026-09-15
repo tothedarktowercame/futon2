@@ -22,6 +22,7 @@
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.limb-evidence :as limb-evidence]
+            [futon2.aif.interpretation-evidence :as interpretation-evidence]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
@@ -2789,8 +2790,8 @@
     occurrence))
 
 (def ^:private limb-record-schemas
-  #{:wm/limb-receipt-v1 :wm/target-standing-decision-v1
-    :wm/entity-revision-pair-v1})
+  (into #{:wm/limb-receipt-v1 :wm/target-standing-decision-v1
+          :wm/entity-revision-pair-v1} interpretation-evidence/schemas))
 
 (defn- parse-attempt-evidence [bytes path]
   (let [eof-marker (Object.)]
@@ -2918,7 +2919,7 @@
                               discharge-contract resolution-read-fn))
 
 (defn- checkpoint-evidence-manifest
-  [events data-root cohort-id attempt-id selected-target]
+  [events data-root cohort-id attempt-id selected-target & [interpretation-context]]
   (let [cohort-name (name cohort-id)
         ordered-events (sort-by :event/sequence (vals events))
         checkpoint-entries
@@ -2959,8 +2960,10 @@
         (filterv #(contains? limb-record-schemas
                              (get-in % [:parsed :value :schema]))
                  captured-evidence)
-        records (mapv #(limb-evidence/validate-record
-                        (get-in % [:parsed :value]))
+        records (mapv #(let [record (get-in % [:parsed :value])]
+                        (if (interpretation-evidence/schemas (:schema record))
+                          (interpretation-evidence/validate-record record)
+                          (limb-evidence/validate-record record)))
                       record-captures)
         _ (doseq [[capture record] (map vector record-captures records)
                   :when (= :wm/entity-revision-pair-v1 (:schema record))]
@@ -2969,7 +2972,9 @@
         companion-names
         (into #{}
               (mapcat (fn [record]
-                        (concat (keep record [:stdout-file :stderr-file])
+                        (concat (when (interpretation-evidence/schemas (:schema record))
+                                  (interpretation-evidence/companion-files record))
+                                (keep record [:stdout-file :stderr-file])
                                 (when (= :wm/entity-revision-pair-v1
                                          (:schema record))
                                   (keep #(get-in record [% :file])
@@ -2985,6 +2990,21 @@
               (throw (ex-info "Attempt evidence schema invalid"
                               {:limb-evidence/refusal :schema-mismatch
                                :filename filename}))))
+        interpretation-records (filterv #(interpretation-evidence/schemas (:schema %)) records)
+        _ (when (or (seq interpretation-records)
+                    (get-in events [:construction :payload :judgment :interpretation-receipt]))
+            (let [start-path (:source-path (first checkpoint-entries))
+                  context (assoc interpretation-context
+                                 :data-root (.getCanonicalPath (io/file data-root))
+                                 :start-event-sha256
+                                 (interpretation-evidence/sha256
+                                  (Files/readAllBytes (.toPath (io/file start-path)))))
+                  by-file (into {} (map (fn [capture]
+                                         [(:filename capture) (get-in capture [:parsed :value])]))
+                                record-captures)]
+              (interpretation-evidence/validate-admission!
+               interpretation-records captures-by-name by-file context
+               (get-in events [:construction :payload :judgment :interpretation-receipt]))))
         _ (doseq [receipt (filter #(= :wm/limb-receipt-v1 (:schema %)) records)]
             (limb-evidence/validate-limb-receipt-outputs
              receipt #(get captures-by-name %)))
@@ -3520,7 +3540,9 @@
                                    (:cohort/id start-event)
                                    attempt-id
                                    (or (:target data)
-                                       (:selected-mission selection-judgment))))
+                                       (:selected-mission selection-judgment))
+                                   {:occurrence @action-occurrence
+                                    :semantic-epoch semantic-epoch}))
                        admitted-ids (mapv :evidence/id (:entries manifest))
                        closed (cond->
                                (term (merge {:outcome outcome
@@ -3602,7 +3624,8 @@
                      ;; durable typed close before returning to the caller.
                      (let [failure-data (if (instance? clojure.lang.ExceptionInfo e)
                                           (ex-data e) {})
-                           refusal-kind (or (:limb-evidence/refusal failure-data)
+                           refusal-kind (or (:interpretation-evidence/refusal failure-data)
+                                            (:limb-evidence/refusal failure-data)
                                             (:evidence-manifest/refusal failure-data)
                                             (:close-retention/refusal failure-data)
                                             (:failure-kind failure-data)
@@ -3992,6 +4015,9 @@
                               :patterns (vec (:shown construction))
                               :deposit nil
                               :trace-path trace-path}
+                               (:interpretation-receipt construction)
+                               (assoc :interpretation-receipt (:interpretation-receipt construction))
+
                                pinned-selection
                                (assoc :run4/task-pin (:identity pinned-selection)
                                       :run4/operator-selection
@@ -4562,7 +4588,8 @@
           ;; after adjudication.  Closing is now a last-resort durable boundary.
           (let [failure-data (if (instance? clojure.lang.ExceptionInfo e)
                                (ex-data e) {})
-                refusal-kind (or (:limb-evidence/refusal failure-data)
+                refusal-kind (or (:interpretation-evidence/refusal failure-data)
+                                 (:limb-evidence/refusal failure-data)
                                  (:evidence-manifest/refusal failure-data)
                                  (:close-retention/refusal failure-data)
                                  (:failure-kind failure-data)
