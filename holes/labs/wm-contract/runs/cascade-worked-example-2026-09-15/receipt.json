@@ -1,0 +1,15 @@
+{
+  "scope": "synthetic worked example, no publication",
+  "validation": "closed-form sums and fuel odds independently cross-checked; strict JSON readback passed",
+  "files": {
+    "compute.py": "863cc84f1f784f77086d002dcad630b931c71635cf106f7161d50951fa1007b9",
+    "proxy.clj": "752f4d34ada557de536d5c3db48bf36ce6225cb5cf6df1de26a4e7bb68669e81",
+    "proxy.json": "de228e029029a4aab65ae18df1b4ab978ad549107091c70d1c4f937a434f0281",
+    "results.json": "fff7f3709860abe6c8f8ef643f45d4c5e1640e576a884f89a02b881f71bf5f2b",
+    "WORKED-NUMBERS.md": "fe94c21dd3e77130ff21c78202ed72d1ec93a8d42a330ec251b9e602da1f8b54",
+    "execution.log": "209d0d455f2331825089b8ef66cf5502addab8c21cb3ac619e95f1e2a1c81509",
+    "kondo.log": "b2e51053277fb5fe3df6a71649b85dab0d49dc5dd774bd3064e47c48e674daf0",
+    "parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+    "coordination.json": "f87e26e3e38325dcab00cea333da8edbc99b434f0427906ccfd6fb5f866c7456"
+  }
+}

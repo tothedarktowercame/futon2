@@ -1,0 +1,125 @@
+{
+  "common_horizon": {
+    "bad4": {
+      "total_A": 23.035901265793957,
+      "total_B": 27.19478434915363,
+      "expected_fired": 4.0
+    },
+    "good4": {
+      "total_A": 0.06030201512100904,
+      "total_B": 4.219185098480681,
+      "expected_fired": 4.0
+    },
+    "good6": {
+      "total_A": 0.06030201512100904,
+      "total_B": 4.219185098480681,
+      "expected_fired": 6.0
+    }
+  },
+  "choice": {
+    "A": {
+      "0": {
+        "E": [
+          1,
+          1,
+          1
+        ],
+        "gamma": 1,
+        "F": [
+          0,
+          0,
+          0
+        ],
+        "fuel_coefficient": 0,
+        "logits": [
+          -23.035901265793957,
+          -0.06030201512100904,
+          -0.06030201512100904
+        ],
+        "probabilities": {
+          "bad4": 5.257678563790337e-11,
+          "good4": 0.4999999999737116,
+          "good6": 0.4999999999737116
+        },
+        "status": "illustrative choice distribution; FUEL extension not adopted"
+      },
+      "0.25": {
+        "E": [
+          1,
+          1,
+          1
+        ],
+        "gamma": 1,
+        "F": [
+          0,
+          0,
+          0
+        ],
+        "fuel_coefficient": 0.25,
+        "logits": [
+          -24.035901265793957,
+          -1.060302015121009,
+          -1.560302015121009
+        ],
+        "probabilities": {
+          "bad4": 6.545382164898235e-11,
+          "good4": 0.6224593311611122,
+          "good6": 0.37754066877343395
+        },
+        "status": "illustrative choice distribution; FUEL extension not adopted"
+      }
+    },
+    "B": {
+      "0": {
+        "E": [
+          1,
+          1,
+          1
+        ],
+        "gamma": 1,
+        "F": [
+          0,
+          0,
+          0
+        ],
+        "fuel_coefficient": 0,
+        "logits": [
+          -27.19478434915363,
+          -4.219185098480681,
+          -4.219185098480681
+        ],
+        "probabilities": {
+          "bad4": 5.257678563790318e-11,
+          "good4": 0.4999999999737116,
+          "good6": 0.4999999999737116
+        },
+        "status": "illustrative choice distribution; FUEL extension not adopted"
+      },
+      "0.25": {
+        "E": [
+          1,
+          1,
+          1
+        ],
+        "gamma": 1,
+        "F": [
+          0,
+          0,
+          0
+        ],
+        "fuel_coefficient": 0.25,
+        "logits": [
+          -28.19478434915363,
+          -5.219185098480681,
+          -5.719185098480681
+        ],
+        "probabilities": {
+          "bad4": 6.545382164898212e-11,
+          "good4": 0.6224593311611122,
+          "good6": 0.37754066877343395
+        },
+        "status": "illustrative choice distribution; FUEL extension not adopted"
+      }
+    }
+  }
+}

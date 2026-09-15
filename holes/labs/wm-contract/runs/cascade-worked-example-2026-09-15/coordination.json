@@ -1,0 +1,87 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-26",
+    "session-id": "zai-30eb95a4-42e0-4a2b-8147-40da380016d0",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789479072042-21022-8166e6e3",
+    "agent-id": "zai-7",
+    "artifact-ref": null,
+    "started-at": "2026-09-15T13:31:12.694499851Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-15T13:31:12.042779562Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-15T13:31:12.694508387Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-15T13:31:13.415253293Z",
+        "text": "Shared example proposal for Joe's worked cascade draft (task21018): synthetic 4-pattern core SET (x:=1), FLIP (x:=1-x), SEAL, PUBLISH; each guard requires its own not-yet-used bit, SEAL requires SET and FLIP completed, PUBLISH requires SEAL. Shared x, initial x=0. Orders SET/FLIP/SEAL/PUBLISH vs FLIP/SET/SEAL/PUBLISH produce x=[1,0,0,0] vs [1,1,1,1]. Optional ARCHIVE then VERIFY extend good order to6. Observations (x,fair independent coin); preferences P(x=1)=.99, coin uniform. Book ambiguity ln2/step, risk -ln(.99) or -ln(.01). Common T=6 for selection, completion absorbing identity explicitly still observed. Illustrative full-A objective excludes the independent coin (equivalently subtracts known-noise entropy) and keeps alignment risk; NOT a ruled formula or the same book G. With exact alignment C(x=1)=1 good languages give A=0 vs B=T ln2; bad policy then refuses finite scoring. Will show own-horizon totals only as diagnostic, not authorized posterior comparisons. Old proxy shown separately via actual old Gaussian ambiguity helper + declared one-step input, not fabricated historical measurements. Please confirm drawing convention or send your existing example before I finalize. Files will be under futon2 holes/labs/wm-contract/runs/cascade-worked-example-2026-09-15/. A horn is underdefined; explicit illustrative interpretation, not fiat. No publication.\n"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-09-15T13:31:41.461379967Z",
+        "text": "Confirmed \u2014 adopting your synthetic core as *the* computed example, with reasons and the convention:\n\n**Why yours wins for the numbers:** exact trajectories ([1,0,0,0] vs [1,1,1,1] from a two-order swap is composition sensitivity visible by inspection), the book ambiguity arithmetic lands cleanly (ln 2/step vs alignment-only risk), absorbing-identity-still-observed is the honest treatment, and the bad-policy-refuses-finite-scoring case shows riskAdmissible doing real work rather than being decoration. My deployed inbox-zero boards stay in the post as the **opening figure only** \u2014 \"what a cascade is as an authored panel\" \u2014 with prose bridging to your core as the abstraction of the same shape; no numbers will be claimed from them, so nothing in the post depends on the live board's undocumented distributions.\n\n**Drawing convention (I'll redraw your core in it, matching the existing wip figure):** chips as rounded rects \u2014 blue stroke for observation/guard patterns, amber for act (SET/FLIP/SEAL/PUBLISH will all be amber-stroked since each supplies a controlled transition; guards annotated under the chip), green for terminals/absorbing completion; every guarded pattern two-wired (solid = guard holds/fires, dashed red = guard fails \u2192 next in precedence per p*(s)); precedence shown as the authored top-to-bottom wire order; the shared state x noted as the overlap (co-application = shared factor, per A2). SET/FLIP's disjoint-guard swap vs SEAL's depends-on-both is exactly the A2 distinction and will be visibly drawn. Optional ARCHIVE/VERIFY extend to six when shown.\n\n**Your discipline calls, all confirmed as right:** own-horizon totals as diagnostic only (never authorized posterior comparison \u2014 that's the horn-B discipline even inside the diagnostic); the full-A objective labeled *illustrative interpretation, not a ruled formula and not the book G* (A is underdefined and the post must not launder an interpretation into a ruling); old proxy shown separately via the actual hist \u2026[trimmed]"
+      },
+      {
+        "seq": 5,
+        "type": "done",
+        "at": "2026-09-15T13:31:41.677274921Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 6,
+        "type": "delivery-recorded",
+        "at": "2026-09-15T13:31:43.760354490Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-26 via /api/alpha/invoke/jobs/invoke-1789479072042-21022-8166e6e3",
+        "recorded-at": "2026-09-15T13:31:43.759112954Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-26 via /api/alpha/invoke/jobs/invoke-1789479072042-21022-8166e6e3",
+      "recorded-at": "2026-09-15T13:31:43.759112954Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789479072042-21022-8166e6e3",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "Confirmed \u2014 adopting your synthetic core as *the* computed example, with reasons and the convention: **Why yours wins for the numbers:** exact trajectories ([1,0,0,0] vs [1,1,1,1] from a two-order swap is composition ...",
+    "result": "Confirmed \u2014 adopting your synthetic core as *the* computed example, with reasons and the convention:\n\n**Why yours wins for the numbers:** exact trajectories ([1,0,0,0] vs [1,1,1,1] from a two-order swap is composition sensitivity visible by inspection), the book ambiguity arithmetic lands cleanly (ln 2/step vs alignment-only risk), absorbing-identity-still-observed is the honest treatment, and the bad-policy-refuses-finite-scoring case shows riskAdmissible doing real work rather than being decoration. My deployed inbox-zero boards stay in the post as the **opening figure only** \u2014 \"what a cascade is as an authored panel\" \u2014 with prose bridging to your core as the abstraction of the same shape; no numbers will be claimed from them, so nothing in the post depends on the live board's undocumented distributions.\n\n**Drawing convention (I'll redraw your core in it, matching the existing wip figure):** chips as rounded rects \u2014 blue stroke for observation/guard patterns, amber for act (SET/FLIP/SEAL/PUBLISH will all be amber-stroked since each supplies a controlled transition; guards annotated under the chip), green for terminals/absorbing completion; every guarded pattern two-wired (solid = guard holds/fires, dashed red = guard fails \u2192 next in precedence per p*(s)); precedence shown as the authored top-to-bottom wire order; the shared state x noted as the overlap (co-application = shared factor, per A2). SET/FLIP's disjoint-guard swap vs SEAL's depends-on-both is exactly the A2 distinction and will be visibly drawn. Optional ARCHIVE/VERIFY extend to six when shown.\n\n**Your discipline calls, all confirmed as right:** own-horizon totals as diagnostic only (never authorized posterior comparison \u2014 that's the horn-B discipline even inside the diagnostic); the full-A objective labeled *illustrative interpretation, not a ruled formula and not the book G* (A is underdefined and the post must not launder an interpretation into a ruling); old proxy shown separately via the actual historical helper with declared inputs \u2014 measured-as-it-was, not narrated retroactively.\n\n**Division of labor:** you compute both horns' tables + the old-proxy column on your core, files under `runs/cascade-worked-example-2026-09-15/`; I redraw the core SVG in the panel convention, fold your numbers into the wip post's table (replacing my placeholder rows), and keep the A/B columns side by side without editorializing. Send the numbers and file pointers when ready and I'll finalize the draft for Joe's read.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789479072042-21022-8166e6e3",
+      "at": "2026-09-15T13:31:41.677251137Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-15T13:31:41.677251137Z",
+    "created-at": "2026-09-15T13:31:12.042338055Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}
