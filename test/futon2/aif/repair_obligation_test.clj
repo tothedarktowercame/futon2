@@ -170,6 +170,10 @@
                               :attempt-id "failed-rj"
                               :review-verdict :reject))]
     (is (= 2 (:repair/schema-version requested)))
+    (is (= "repair-failed-rc-review-request-changes"
+           (:repair/id requested)))
+    (is (= "repair-failed-rj-review-rejected"
+           (:repair/id rejected)))
     (is (= :independent-review (:failure-stage requested)))
     (is (= :review-request-changes (:failure-kind requested)))
     (is (= :review-rejected (:failure-kind rejected)))
@@ -180,6 +184,20 @@
            (get-in requested [:discharge-contract :requires])))
     (is (= :code-commit
            (get-in requested [:discharge-contract :artifact-shape])))))
+
+(deftest distinct-review-outcomes-do-not-collide-in-the-finding-store
+  (let [root (temp-root)
+        base {:attempt-id "attempt-002" :target :target/a :commit "bad123"
+              :selected-entry {:action {:type :x}}
+              :reviewer "codex-24" :review-job "review-1"
+              :review-text "review outcome remains unresolved"}
+        requested (repair/record-review-failure!
+                   root (assoc base :review-verdict :request-changes))
+        rejected (repair/record-review-failure!
+                  root (assoc base :review-verdict :reject))]
+    (is (not= (:repair/id requested) (:repair/id rejected)))
+    (is (= #{:review-request-changes :review-rejected}
+           (set (map :failure-kind (repair/open-obligations root)))))))
 
 (deftest system-actuation-failure-is-distinct-durable-stop-line-memory
   (let [root (temp-root)

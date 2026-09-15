@@ -1,0 +1,5 @@
+{:schema :wm/entity-revision-pair-v1
+ :entity/id "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-002-artifact-binding-mismatch"
+ :before {:file "resolved-before.edn" :sha256 "1266151c767ae8e51545f3c5f12683cb1830edbe835928cff49b6382733f572c" :bytes 262478}
+ :after {:file "resolved-after.edn" :sha256 "36877d37e20a16c9c4d991dfc9b2e3699a60fcdff1a7bacc721783fefc4f292e" :bytes 1910}
+ :dimensions {:retained-store :successor-relation}}

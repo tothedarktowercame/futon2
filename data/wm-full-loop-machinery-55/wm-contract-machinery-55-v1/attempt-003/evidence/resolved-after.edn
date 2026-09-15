@@ -1,0 +1,38 @@
+{:repair/status :resolved,
+ :resolved-at "2026-09-15T02:09:36.661744405Z",
+ :replacement-commit "fba72d0f0683caee55be599874d6550bf2f77244",
+ :successor-relation
+ {:schema :wm/repair-successor-relation-v1,
+  :repair-attempt/id
+  "ea1-6ecd77fa689d4c5adb1e1444d7eba993fc5fb7bb60501b873f0d469c7f745317--attempt-002",
+  :repair/id
+  "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-002-artifact-binding-mismatch",
+  :repair-run/id "d7eabcf7-b992-435a-ae11-4ef452eee97a",
+  :authority-review-job "invoke-1789424003193-20878-1f0ca626",
+  :successor-witness-sha256
+  "7a67bbf0211d9f21d076c016cc3bfd2abb5aa7a9dd082ae4efffc77096a18ba7",
+  :decided-by "codex-24",
+  :successor-attempt/id
+  "ea1-9b6ce3a47b9bdc24a5fc6a9b9aab4f270af86a4fcb54550d94b89737bb5e4f35--attempt-002",
+  :repair-closed-at "2026-09-14T22:18:57.401728865Z",
+  :successor-run/id "8872d5ec-5604-4c2a-b393-4c690613f8e6",
+  :successor-closed-at "2026-09-15T01:53:56.367410955Z",
+  :repair-review-sha256
+  "a4ed92e35de1d8e6875a7a6a668536e3401a7c94d2365312f9928b2a4dc7c6ff",
+  :successor-witness-ref
+  "data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-002/006-adjudication.edn",
+  :repair-commit "fba72d0f0683caee55be599874d6550bf2f77244",
+  :repair-review-receipt-ids ["invoke-1789424003193-20878-1f0ca626"]},
+ :witness {:resolved? true, :dial-moved? true},
+ :repair/id
+ "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-002-artifact-binding-mismatch",
+ :failed-commit nil,
+ :review-job "invoke-1789424003193-20878-1f0ca626",
+ :failed-attempt
+ "ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-002",
+ :reviewer "codex-24",
+ :validation
+ {:kind :production-shaped-successor, :production-shaped? true},
+ :validation-attempt
+ "ea1-9b6ce3a47b9bdc24a5fc6a9b9aab4f270af86a4fcb54550d94b89737bb5e4f35--attempt-002",
+ :repair/schema-version 1}

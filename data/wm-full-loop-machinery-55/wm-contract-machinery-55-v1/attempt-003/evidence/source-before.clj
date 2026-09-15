@@ -291,10 +291,7 @@
                   (not (str/blank? (str review-text))))
      (throw (ex-info "Stop-the-line finding lacks required provenance"
                      {:finding finding})))
-   (let [failure-kind (case review-verdict
-                        :request-changes :review-request-changes
-                        :reject :review-rejected)
-         id (obligation-id attempt-id failure-kind)
+   (let [id (obligation-id attempt-id)
          record {:repair/id id
                  :repair/schema-version 2
                  :repair/status :open
@@ -308,7 +305,9 @@
                  :review-verdict review-verdict
                  :review-text review-text
                  :failure-stage :independent-review
-                 :failure-kind failure-kind
+                 :failure-kind (case review-verdict
+                                 :request-changes :review-request-changes
+                                 :reject :review-rejected)
                  :discharge-contract review-failure-discharge-contract
                  :opened-at (str (Instant/now))}]
      (write-new! (io/file root "findings" (str id ".edn")) record)
