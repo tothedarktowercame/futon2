@@ -1,7 +1,8 @@
 (ns futon2.aif.interpretation-request-test
-  (:require [clojure.java.io :as io]
+  (:require [cheshire.core]
+            [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.close-retention :as retention]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.interpretation-request :as request]
@@ -12,8 +13,16 @@
            [java.time Instant]
            [java.util UUID]))
 
+(def roots (atom []))
+(use-fixtures :each
+  (fn [f]
+    (try (f) (finally
+               (doseq [root @roots file (reverse (file-seq root))] (Files/delete (.toPath file)))
+               (reset! roots [])))))
+
 (defn fixture [type text]
   (let [root (.toFile (Files/createTempDirectory "interpretation-request" (make-array FileAttribute 0)))
+        _ (swap! roots conj root)
         id (if (= type :advance-ticket) "T-fixture" "M-fixture")
         target (io/file root (str id ".md"))
         action (array-map :type type :target id :rationale "keep literal action" :extra [1 2])
@@ -52,7 +61,7 @@
 (deftest mission-and-ticket-use-cited-tension-without-construction
   (doseq [[type text] [[:advance-mission "# TITLE-NOT-QUERY\n**Status:** OPEN\n## 1. IDENTIFY\nHave a spec; want a tested implementation.\nHowever evidence is missing.\n## MAP\nBuilt but unwired.\n## ARGUE\nNOT-QUERY\n"]
                      [:open-mission "# TITLE-NOT-QUERY\n## DERIVE\nHave a boundary, want a receipt.\n"]
-                     [:advance-ticket "# TITLE-NOT-QUERY\n## Problem\nThe gate ignores an error.\n## Evidence\nProbe reproduced it.\n## Fix\nNOT-QUERY\n"]]]
+                     [:advance-ticket "# TITLE-NOT-QUERY\n## Problem\nThe gate ignores an error.\n## Evidence\nProbe reproduced it.\n## Fix\nAdditional requirement.\n"]]]
     (let [{:keys [action identity entry opts]} (fixture type text)
           calls (atom []) constructors (atom 0)]
       (with-redefs [registry/load-missions-cached (fn [& _] {:missions [entry]})
@@ -90,7 +99,7 @@
                                         (fn [q] (swap! calls conj (:kind q))
                                           (if (or both? (= "embedding" (:kind q)))
                                             (throw (ex-info "controlled retriever failure" {:port (:kind q)}))
-                                            [{:pattern "result"}]))))
+                                            [{:pattern "family/result"}]))))
           r (if both? (finding run) (run))
           partial (if both? (:request r) r)]
       (is (= ["embedding" "tier0"] @calls))
@@ -98,7 +107,7 @@
       (is (seq (get-in partial [:retrieval :runs 0 :failures])))
       (if both?
         (is (= :interpretation/retrieval-unavailable (:interpretation/refusal r)))
-        (is (= "result" (get-in r [:retrieval :runs 1 :candidates 0 :pattern])))))))
+        (is (= "family/result" (get-in r [:retrieval :runs 1 :candidates 0 :pattern])))))))
 
 (deftest pin-is-stable-after-original-file-edit-and-action-drift-refuses
   (let [{:keys [action identity entry opts]} (fixture :advance-mission "## IDENTIFY\nHave original evidence.\n")
@@ -109,3 +118,48 @@
     (is (= :interpretation/action-mismatch
            (:interpretation/refusal
             (finding #(request/prepare! (assoc action :target "another") identity opts)))))))
+
+(deftest corpus-body-rules-and-metadata
+  (doseq [id ["T-fail-agent-not-found" "T-zai-chat-transient-timeout" "T-cx-new-blocks-emacs"]]
+    (let [text (slurp (str "../futon3c/holes/tickets/" id ".md"))
+          result (request/tension-selection :ticket "source" text)
+          query (str/join "\n" (map :quote (:citations result)))]
+      (is (= :ticket-body (:tension-rule result)))
+      (is (seq (:citations result)))
+      (is (not (str/includes? query (first (str/split-lines text)))))))
+  (let [text (slurp "holes/missions/M-wm-aif-policy-grain-compliance.md")
+        r (request/tension-selection :mission "s" text)
+        query (str/join "\n" (map :quote (:citations r)))]
+    (is (= :mission-body (:tension-rule r)))
+    (is (str/includes? query "The War Machine is the reference implementation"))
+    (is (not (str/includes? query "**Cross-references:**")))
+    (is (not (str/includes? query "**Status:**"))))
+  (let [text "# Mission title\n**Status (triaged):** OPEN\n**Parent:** M-parent\nDate: yesterday\nOwner: person\nDriver: agent\nHome: repo\nLifecycle: draft\nDispatched by lead\nReviewer: peer\n\n## Goal\nHave an interface, want a receipt.\n"
+        r (request/tension-selection :mission "s" text)
+        query (str/join "\n" (map :quote (:citations r)))]
+    (is (= :mission-body (:tension-rule r)))
+    (is (str/includes? query "Have an interface"))
+    (is (not (re-find #"Mission title|OPEN|M-parent|yesterday|person|agent|repo|draft|lead|peer" query)))))
+
+(deftest real-json-array-and-id-normalisation
+  (let [rows (cheshire.core/parse-string "[{\"pattern\":\"p\"},{\"pattern\":\"q\"},{\"pattern_id\":\"full/name\"}]" true)
+        r (request/normalize-rows (vec rows) [{:relative "one/p.flexiarg"} {:relative "two/p.flexiarg"}
+                                             {:relative "one/q.flexiarg"}])]
+    (is (not (vector? rows)))
+    (is (= ["one/q" "full/name"] (mapv :pattern (:candidates r))))
+    (is (= :interpretation/ambiguous-pattern-id (get-in r [:failures 0 :kind])))
+    (is (= {:pattern "p"} (get-in r [:failures 0 :raw])))))
+
+(deftest non-git-symlink-source-remains-pinned
+  (let [{:keys [action identity entry opts]} (fixture :advance-mission "## Goal\nHave bytes, want evidence.\n")
+        source (io/file (:path entry))
+        link (io/file (.getParentFile source) "linked.md")
+        _ (Files/createSymbolicLink (.toPath link) (.toPath source) (make-array FileAttribute 0))
+        r (request/prepare! action identity
+                            (-> opts (dissoc :revision-fn)
+                                (assoc :resolve-fn (constantly (assoc entry :path (str link)))
+                                       :retrieve-fn (constantly []))))]
+    (is (= "untracked:not-in-git-work-tree" (:revision (first (:sources r)))))
+    (is (some #(and (= (str link) (:requested-path %)) (= (str source) (:canonical-path %))) (:source-paths r)))
+    (is (pos? (:captured-bytes r)))
+    (is (citations-match? r))))

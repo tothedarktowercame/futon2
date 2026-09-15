@@ -6,7 +6,7 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
-                        [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.mission-registry :as registry])
   (:import [java.nio.file Files StandardOpenOption]
            [java.time Instant]
@@ -28,24 +28,46 @@
     (registry/ticket-entry (:target action))
     (some #(when (= (:target action) (:id %)) %) (:missions (registry/load-missions-cached)))))
 
-(defn tension-citations
-  "Cite whole named sections, excluding headings and title/status fallbacks."
+(defn tension-selection
+  "Ruled lifecycle sections, otherwise mission body; tickets always use body.
+  Citations are contiguous retained lines, never reconstructed or paraphrased."
   [kind source text]
   (let [lines (vec (str/split-lines text))
         headings (keep-indexed (fn [i line]
-                                 (when-let [[_ hashes title] (re-matches #"^(#{1,6})\s+(.+)$" line)]
-                                   {:i i :level (count hashes) :title title})) lines)
-        wanted (if (= kind :mission) #"(?i)\b(IDENTIFY|MAP|DERIVE)\b"
-                   #"(?i)\b(problem|evidence)\b")]
-    (->> headings
-         (filter #(re-find wanted (:title %)))
-         (keep (fn [{:keys [i level]}]
-                 (let [end (or (:i (first (filter #(and (> (:i %) i) (<= (:level %) level)) headings)))
-                               (count lines))
-                       body (subvec lines (inc i) end)]
-                   (when (some #(not (str/blank? %)) body)
-                     {:source source :lines [(+ i 2) end] :quote (str/join "\n" body)}))))
-         vec)))
+                                (when-let [[_ hashes title] (re-matches #"^(#{1,6})\s+(.+)$" line)]
+                                  {:i i :level (count hashes) :title title})) lines)
+        title (or (:i (first (filter #(= 1 (:level %)) headings))) -1)
+        lifecycle (when (= kind :mission)
+                    (filter #(re-find #"(?i)\b(IDENTIFY|MAP|DERIVE)\b" (:title %)) headings))
+        rule (cond (seq lifecycle) :lifecycle-sections (= kind :ticket) :ticket-body :else :mission-body)
+        eligible (if (seq lifecycle)
+                   (set (mapcat (fn [{:keys [i level]}]
+                                  (range (inc i) (or (:i (first (filter #(and (> (:i %) i) (<= (:level %) level)) headings)))
+                                                    (count lines)))) lifecycle))
+                   (set (range (inc title) (count lines))))
+        metadata? #(re-find #"(?i)^\s*(?:[-*]\s+)?(?:\*\*)?(?:parent|date|owner|driver|home|lifecycle|reviewer|opened|closed|cross-references|priority|severity|created|updated|status(?:\s*\([^)]*\))?)\s*(?:\*\*)?:|(?i)^\s*(?:\*\*)?dispatched by\b" %)
+        front-end (or (:i (first (filter #(> (:i %) title) headings))) (count lines))
+        metadata-lines (:excluded
+                        (reduce (fn [{:keys [active excluded]} [i line]]
+                                  (let [marker (boolean (metadata? line))
+                                        continuation (and active (< i front-end) (not (str/blank? line)))
+                                        omit (or marker continuation)]
+                                    {:active (and (< i front-end) omit)
+                                     :excluded (cond-> excluded omit (conj i))}))
+                                {:active false :excluded #{}} (map-indexed vector lines)))
+        kept (filter #(and (not= % title) (not (contains? metadata-lines %))) (sort eligible))
+        groups (reduce (fn [groups i]
+                         (if (= i (some-> groups peek peek inc))
+                           (conj (pop groups) (conj (peek groups) i))
+                           (conj groups [i]))) [] kept)
+        citations (keep (fn [indices]
+                          (let [a (first indices) b (inc (last indices)) body (subvec lines a b)]
+                            (when (some #(and (not (str/blank? %)) (not (re-matches #"#+.*|---+" %))) body)
+                              {:source source :lines [(inc a) b] :quote (str/join "\n" body)}))) groups)]
+    {:tension-rule rule :citations (vec citations)}))
+
+(defn tension-citations [kind source text]
+  (:citations (tension-selection kind source text)))
 
 (defn- read-bytes [path]
   (try (Files/readAllBytes (.toPath (io/file path)))
@@ -53,9 +75,14 @@
          (refuse! :interpretation/source-unavailable {:path (str path) :reason (.getMessage e)}))))
 
 (defn- revision [path]
-  (let [r (shell/sh "git" "-C" (str (.getParentFile (io/file path))) "rev-parse" "HEAD")]
-    (need! (zero? (:exit r)) :interpretation/source-revision-unavailable {:path path :stderr (:err r)})
-    (str/trim (:out r))))
+  (let [dir (str (.getParentFile (io/file path)))
+        inside (shell/sh "git" "-C" dir "rev-parse" "--is-inside-work-tree")]
+    (if (and (not (zero? (:exit inside)))
+             (str/includes? (:err inside) "not a git repository"))
+      "untracked:not-in-git-work-tree"
+      (let [r (shell/sh "git" "-C" dir "rev-parse" "HEAD")]
+        (need! (zero? (:exit r)) :interpretation/source-revision-unavailable {:path path :stderr (:err r)})
+        (str/trim (:out r))))))
 (defn- pin! [dir path revision-fn]
   (let [file (io/file path)
         path (.getCanonicalPath file)
@@ -67,7 +94,8 @@
       (need! (= digest (evidence/sha256 (Files/readAllBytes (.toPath dest))))
              :interpretation/source-changed {:path path})
       (Files/write (.toPath dest) bs (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW StandardOpenOption/WRITE])))
-    {:source {:id (str path "#" digest) :path path :file name :sha256 digest :revision (revision-fn path)}
+    {:requested-path (.getAbsolutePath file) :canonical-path path :byte-count (alength bs)
+     :source {:id (str path "#" digest) :path path :file name :sha256 digest :revision (revision-fn path)}
      :bytes bs :snapshot (.getAbsolutePath dest)}))
 
 (defn python-retrieve!
@@ -81,7 +109,9 @@
     (if (.waitFor proc timeout-ms TimeUnit/MILLISECONDS)
       (do (need! (zero? (.exitValue proc)) :interpretation/retriever-failed
                  {:exit (.exitValue proc) :stderr @err})
-          (json/parse-string @out true))
+          (let [rows (json/parse-string @out true)]
+            (need! (sequential? rows) :interpretation/retriever-response-invalid {:stdout @out})
+            (vec rows)))
       (do (.destroyForcibly proc)
           (refuse! :interpretation/retriever-timeout {:timeout-ms timeout-ms})))))
 
@@ -90,6 +120,24 @@
        (mapcat #(or (.listFiles %) []))
        (filter #(and (.isFile %) (str/ends-with? (.getName %) ".flexiarg")))
        (map #(.getCanonicalPath %)) sort vec))
+
+(defn normalize-rows
+  "Preserve qualified IDs; resolve bare IDs only against the captured library.
+  Ambiguous/unresolved rows retain the raw response and do not become candidates."
+  [rows library]
+  (let [qualified (map #(str/replace (:relative %) #"\.flexiarg$" "") library)
+        by-stem (group-by #(last (str/split % #"/")) qualified)]
+    (reduce (fn [result [i row]]
+              (let [id (or (:pattern_id row) (:pattern row))
+                    matches (if (and (string? id) (str/includes? id "/")) [id] (distinct (get by-stem id)))
+                    failure (cond (not (and (string? id) (not (str/blank? id)))) :interpretation/retriever-response-invalid
+                                  (> (count matches) 1) :interpretation/ambiguous-pattern-id
+                                  (empty? matches) :interpretation/unresolved-pattern-id)]
+                (if failure
+                  (update result :failures conj {:kind failure :rank (inc i) :raw row :matches (vec matches)})
+                  (update result :candidates conj {:pattern (first matches) :rank (inc (count (:candidates result)))
+                                                   :retriever-rank (inc i) :raw row :judgment :unjudged}))))
+            {:candidates [] :failures []} (map-indexed vector rows))))
 
 (defn prepare!
   "ACTION is the authorized input, not a selection proposal. Ports allow hermetic tests.
@@ -131,12 +179,20 @@
          target-pin (pin! dir (:path entry) revision-fn)
          pinned-at (now)
          kind (if (= :advance-ticket (:type action)) :ticket :mission)
-         citations (tension-citations kind (get-in target-pin [:source :id]) (String. ^bytes (:bytes target-pin) "UTF-8"))
+         tension (tension-selection kind (get-in target-pin [:source :id]) (String. ^bytes (:bytes target-pin) "UTF-8"))
+         citations (:citations tension)
          _ (need! (seq citations) :interpretation/no-citable-tension
                   {:identity identity :action action :sources [(:source target-pin)]})
          query (str/join "\n\n" (map :quote citations))
          sources (atom [(:source target-pin)])
-         capture! (fn [path] (let [p (pin! dir path revision-fn)] (swap! sources conj (:source p)) p))
+         pins (atom [target-pin])
+         capture! (fn [path] (let [p (pin! dir path revision-fn)] (swap! sources conj (:source p)) (swap! pins conj p) p))
+         library-pins (delay
+                        (mapv (fn [path]
+                                (let [p (capture! path) f (io/file path)]
+                                  {:snapshot (:snapshot p) :source-id (get-in p [:source :id])
+                                   :relative (str (.getName (.getParentFile f)) "/" (.getName f))}))
+                              (library-fn)))
          runs (mapv
                (fn [{:keys [kind implementation index k]}]
                  (let [partial (atom {:retriever (name kind) :version "unavailable"
@@ -149,12 +205,7 @@
                                     :index-source (get-in idx [:source :id])
                                     :parameters (assoc (:parameters @partial)
                                                        :implementation-source (get-in code [:source :id])))
-                           library (when (= kind :tier0)
-                                     (mapv (fn [path]
-                                             (let [p (capture! path) f (io/file path)]
-                                               {:snapshot (:snapshot p) :source-id (get-in p [:source :id])
-                                                :relative (str (.getName (.getParentFile f)) "/" (.getName f))}))
-                                           (library-fn)))
+                           library @library-pins
                            _ (when (= kind :tier0)
                                (swap! partial update :parameters assoc
                                       :library-sources (mapv :source-id library) :extra-library-dirs []))
@@ -165,23 +216,22 @@
                        (need! (= (get-in code [:source :sha256])
                                  (evidence/sha256 (Files/readAllBytes (.toPath (io/file implementation)))))
                               :interpretation/source-changed {:path implementation})
-                       (need! (vector? rows) :interpretation/retriever-response-invalid {:retriever kind})
-                       (assoc @partial :candidates
-                              (mapv (fn [i row]
-                                      (let [id (or (:pattern_id row) (:pattern row))]
-                                        (need! (and (string? id) (not (str/blank? id)))
-                                               :interpretation/retriever-response-invalid {:row row})
-                                        {:pattern id :rank (inc i) :raw row :judgment :unjudged}))
-                                    (range) rows)))
+                       (need! (sequential? rows) :interpretation/retriever-response-invalid {:retriever kind})
+                       (let [normalized (normalize-rows (vec rows) library)]
+                         (assoc @partial :candidates (:candidates normalized)
+                                :row-failures (:failures normalized))))
                      (catch Exception e
                        (assoc @partial :failures [{:kind (or (:interpretation/refusal (ex-data e))
                                                                            :interpretation/retriever-failed)
-                                                    :reason (.getMessage e)}])))))
+                                                    :reason (.getMessage e) :details (ex-data e)}])))))
                retriever-specs)
          request {:schema :wm/interpretation-request-v1 :identity identity
                   :target {:id (:target action) :kind kind :action action
-                           :source (get-in target-pin [:source :id]) :citations citations :pinned-at pinned-at}
+                           :source (get-in target-pin [:source :id]) :citations citations :pinned-at pinned-at :tension-rule (:tension-rule tension)}
                   :sources (vec (vals (into (sorted-map) (map (juxt :id clojure.core/identity)) @sources)))
+                  :captured-bytes (reduce + (map :byte-count (vals (into {} (map (juxt :snapshot clojure.core/identity)) @pins))))
+                  :source-paths (mapv #(assoc (select-keys % [:requested-path :canonical-path])
+                                             :source-id (get-in % [:source :id])) @pins)
                   :retrieval {:query query :citations citations :runs runs}}]
      (need! (= #{:embedding :tier0} (set (map :kind retriever-specs)))
             :interpretation/retriever-set-invalid {:request request})
