@@ -1,0 +1,6 @@
+/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/Swapped.lean:54:2: error: unsolved goals
+case spawned_coordinate_equation
+⊢ False
+/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/Swapped.lean:56:2: error: unsolved goals
+case refined_coordinate_equation
+⊢ False

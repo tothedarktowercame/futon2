@@ -1,0 +1,34 @@
+[
+  {
+    "name": "plausible",
+    "revision": "d575be693add4fe9cb996968968ce42ce75c5ccd"
+  },
+  {
+    "name": "LeanSearchClient",
+    "revision": "c5d5b8fe6e5158def25cd28eb94e4141ad97c843"
+  },
+  {
+    "name": "importGraph",
+    "revision": "6db47de43aa7f516708053ae2fdadd29dd9baaaa"
+  },
+  {
+    "name": "proofwidgets",
+    "revision": "85bb7e7637e84a7d9803be7d954579fdae42c64b"
+  },
+  {
+    "name": "aesop",
+    "revision": "fafca80479ff95e041d84373dda7122adf1295f2"
+  },
+  {
+    "name": "Qq",
+    "revision": "8d33324ee877e9735d2829bc6f1f439e60cf98b1"
+  },
+  {
+    "name": "batteries",
+    "revision": "708b057842c4cd0845fba132bd94b08493f6fc42"
+  },
+  {
+    "name": "Cli",
+    "revision": "48bdcff4c5fa27e09028f9f330e59baa0d4640cf"
+  }
+]

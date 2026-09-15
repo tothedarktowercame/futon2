@@ -1,0 +1,238 @@
+{
+  "schema": "wm/row-7-binding-v1",
+  "author": "codex-3",
+  "reviewer": "claude-3",
+  "dispatch": {
+    "path": "/home/joe/code/p4ng/wm-walkthroughs/build-loop/claude-3/WM-01-binding-1.md",
+    "sha256": "2bf0a7edf1505401ab115cc4766b614b769b416bff5b7bad379b043431bb8316"
+  },
+  "lean-subject": "480a666ad27c18477b4b9df86e11862be3930d50",
+  "runtime-subject": "9aad9adfa09e2764df70f74edfa029f7a75b745d",
+  "theorems": [
+    "DarkTower.WarMachine.MachineBeliefDistribution.selectedKernel",
+    "DarkTower.WarMachine.MachineBeliefDistribution.selectedKernel_normalised",
+    "DarkTower.WarMachine.MachineBeliefDistribution.selectedKernel_coordinate",
+    "DarkTower.WarMachine.MachineBeliefDistribution.selectedPosterior_conserved"
+  ],
+  "entity-association": {
+    "lean-nat": 0,
+    "runtime-string": "arxana/stack/futon-v1/leaf/2/2",
+    "status": "assumption for this one entity only"
+  },
+  "model": {
+    "id": "wm-production",
+    "revision": "2026-09-12-row-7",
+    "status": "metadata association, not proved model semantics"
+  },
+  "state-support": [
+    "spawned",
+    "refined",
+    "strengthened",
+    "addressed",
+    "falsified",
+    "foreclosed",
+    "reopened"
+  ],
+  "lean-source-and-import-identities": "source-identities.json",
+  "package-identities": "package-identities.json",
+  "runtime-source-sha256": {
+    "src/futon2/aif/machine_belief.clj": "38993c823ccbd9dd10b6daa51902de4ae9bc7d08feaaa826c26a3bc2f332908b",
+    "src/futon2/aif/machine_model.clj": "462aae432397e21209c238685d1aa39d040f15b330e2baa5f771d4858eb66b77"
+  },
+  "reader-input-output": {
+    "path": "runtime.edn",
+    "sha256": "15e5458243243642fed26b99a18e686bf53cccc57402393ba0c1be800d745c1d"
+  },
+  "independent-arithmetic": {
+    "method": "Python Fraction(float(decimal)) cross-checked against float.fromhex; independent of runtime numeric admission",
+    "values": {
+      "spawned": "7589757911525539/72057594037927936",
+      "refined": "5075107643853621/36028797018963968",
+      "strengthened": "5627707221685375/18014398509481984",
+      "addressed": "3442556320081687/36028797018963968",
+      "falsified": "2683201850079625/36028797018963968",
+      "foreclosed": "5982758850052747/36028797018963968",
+      "reopened": "7589757911525539/72057594037927936"
+    },
+    "total": "36028797018963969/36028797018963968",
+    "deviation": "1/36028797018963968"
+  },
+  "historical-receipts": {
+    "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/receipts/lean.edn": "037e1080b02f2e8039151a02fcf29305f462b386c66a12485e723c46373dff26",
+    "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/input.edn": "5b69620145426a15d4f862238796afd9fbe26a1c536f6c280494cd8390e7fa6d",
+    "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/readback.edn": "e520e35e86484d6fcc9fd643e6a6c3221ec49b5b8221a7591b91776fb1aabf7b",
+    "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/readback.clj": "4353a9d913104b21349bcd41e945dda5c805fd852b006b15f590fb3ecbfe27e6",
+    "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/lean.txt": "e3cb212b522ee1ca29fce3f38689aa734f9576a35b699e84c9052540a256d2fa",
+    "holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/lean-after-dependency-build.txt": "19c0395799c6f56bbf7b7e9b3a89951dd2e5ad8f533b3991bb350082bf916e9f"
+  },
+  "reused-acceptance": {
+    "commits": [
+      "3fc00fe1",
+      "1f373e4b"
+    ],
+    "review": "9fcf1af1",
+    "files": {
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/RECEIPT.md": "062a39b9649c828d0d21f9d477323f7c507cbfda60a9a4691e1a491ea7a26558",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/build-receipts.json": "85429561608671293fc4e6986584f7601639b4c8d00c1fdd0c0f01a7c0286ddb",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/logs/MachineBeliefDistribution.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/logs/MachineBeliefDistribution.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/logs/Axioms-MachineBeliefDistribution.stdout": "7866965abaeca3eb32b4417c8145177166aab61e374205efa5a5fe00e292c5ec"
+    }
+  },
+  "toolchain": {
+    "lean-version": "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+    "lake-version": "Lake version 5.0.0-src+fd00994 (Lean version 4.31.0-rc1)"
+  },
+  "controls": {
+    "Positive.lean": "14ec4810026aaf72996347a51c9182f91460453f9b51353a8c72ba24d13dbd78",
+    "Swapped.lean": "f0661ae7573eee0b852bb889e8e3e58001afa7cfdc18111968f2cb90265bb392",
+    "FailedNormalisation.lean": "23ab145c65f17e5f806c020151abe22f1d7b4b777127bafe1873923ed7fda78d",
+    "runtime-control.clj": "353b34aec0f7556220b0f35e5ab42d4b66a20a1260e6cc3aea98b589bab3f640",
+    "prepare.py": "2a0799ec9c30e8c078c540b640f38daa4227185af0583ff5b6b419996d43f312",
+    "lean-runs.py": "0cd0b3fe299cb4753579b3eb12296ecd3f53bebbd797ebb423559d6d00f9b444",
+    "run.py": "9a71d9f5cef4aab980113255f2193493f97e2959437ce57d3a23201be24d7807"
+  },
+  "commands": {
+    "cache-after": {
+      "command": [
+        "find",
+        ".lake",
+        "-newer",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/cache-before.marker"
+      ],
+      "cwd": "/home/joe/code/mathlib4",
+      "exit": 0
+    },
+    "cache-before": {
+      "command": [
+        "find",
+        ".lake",
+        "-newer",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/cache-before.marker"
+      ],
+      "cwd": "/home/joe/code/mathlib4",
+      "exit": 0
+    },
+    "kondo": {
+      "command": [
+        "clj-kondo",
+        "--lint",
+        "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/runtime-control.clj"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit": 0
+    },
+    "lake-version": {
+      "command": [
+        "lake",
+        "--version"
+      ],
+      "cwd": "/home/joe/code/mathlib4",
+      "exit": 0
+    },
+    "lean-version": {
+      "command": [
+        "lean",
+        "--version"
+      ],
+      "cwd": "/home/joe/code/mathlib4",
+      "exit": 0
+    },
+    "marker": {
+      "command": [
+        "touch",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/cache-before.marker"
+      ],
+      "cwd": "/home/joe/code/mathlib4",
+      "exit": 0
+    },
+    "normalisation": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j",
+        "1",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/FailedNormalisation.lean"
+      ],
+      "cwd": "/home/joe/code/mathlib4",
+      "exit": 1
+    },
+    "parens": {
+      "command": [
+        "emacs",
+        "-Q",
+        "--batch",
+        "-l",
+        "/home/joe/code/futon4/dev/check-parens.el",
+        "--eval",
+        "(arxana-check-parens-cli)",
+        "--",
+        "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/runtime-control.clj"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit": 0
+    },
+    "positive": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j",
+        "1",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/Positive.lean"
+      ],
+      "cwd": "/home/joe/code/mathlib4",
+      "exit": 0
+    },
+    "prepare": {
+      "command": [
+        "python3",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/prepare.py"
+      ],
+      "cwd": "/home/joe/code",
+      "exit": 0
+    },
+    "python-syntax": {
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib; r=pathlib.Path(\"futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1\"); files=sorted(r.glob(\"*.py\")); [compile(p.read_bytes(),str(p),\"exec\") for p in files]; print(\"PASS\", [p.name for p in files])"
+      ],
+      "cwd": "/home/joe/code",
+      "exit": 0
+    },
+    "runtime": {
+      "command": [
+        "clojure",
+        "-M",
+        "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/runtime-control.clj",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit": 0
+    },
+    "stale": {
+      "command": [
+        "python3",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/prepare.py",
+        "--stale"
+      ],
+      "cwd": "/home/joe/code",
+      "exit": 1
+    },
+    "swapped": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j",
+        "1",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-binding-1/Swapped.lean"
+      ],
+      "cwd": "/home/joe/code/mathlib4",
+      "exit": 1
+    }
+  },
+  "verdict": "ACCEPT bounded exact fixture binding and production approximate classification; REJECT exact-kernel correspondence for retained production row"
+}

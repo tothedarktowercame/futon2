@@ -1,0 +1,22 @@
+'Row7Binding.exact_nonnegative' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.exact_Normalised' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.selected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.conserved' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.kernel_normalised' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.coordinate_spawned' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.coordinate_refined' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.coordinate_strengthened' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.coordinate_addressed' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.coordinate_falsified' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.coordinate_foreclosed' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.coordinate_reopened' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Row7Binding.production_not_Normalised' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.MachineBeliefDistribution.selectedPosterior_conserved' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.MachineBeliefDistribution.selectedKernel_coordinate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.MachineBeliefDistribution.selectedKernel_normalised' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

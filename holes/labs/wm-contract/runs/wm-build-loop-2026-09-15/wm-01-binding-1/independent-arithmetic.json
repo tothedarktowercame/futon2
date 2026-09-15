@@ -1,0 +1,14 @@
+{
+  "method": "Python Fraction(float(decimal)) cross-checked against float.fromhex; independent of runtime numeric admission",
+  "values": {
+    "spawned": "7589757911525539/72057594037927936",
+    "refined": "5075107643853621/36028797018963968",
+    "strengthened": "5627707221685375/18014398509481984",
+    "addressed": "3442556320081687/36028797018963968",
+    "falsified": "2683201850079625/36028797018963968",
+    "foreclosed": "5982758850052747/36028797018963968",
+    "reopened": "7589757911525539/72057594037927936"
+  },
+  "total": "36028797018963969/36028797018963968",
+  "deviation": "1/36028797018963968"
+}
