@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-15 ~03:10Z (exercise 6 accepted; cohort 56 armed; measured O-56 firing)
+Updated: 2026-09-15 ~03:50Z (cohort 56 exhausted 2/2 review-rejected; exercise 7 running; cohort burn PAUSED until zai reset)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,12 +13,13 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **cohort-56 attempt-001 = O-56, measured** (click wm-click-b5b437f0,
-  codex-23 author). Exercise 6 ACCEPTED (68ae0969, acceptance aadab10d,
-  8/8 pins): typed :evidence-insufficient with per-criterion evidence-class
-  lists — the :addressed list is now the deposit spec. Cohort 56 (621e3f3f,
-  rebind aa62d64f, target 2): S done, T resolution persists, O-56 = first
-  measured close; exercise 7 rides on its close regardless of outcome.
+- **exercise-7 blinded observation** — codex-25, job
+  `invoke-1789443637117-20950-869bd8c6` (running), park `park-e5086de5`.
+  Cohort 56 exhausted 2/2, both honest review rejections (codex-22 on
+  codex-23). O-56 = attempt-001 per prereg; unlike exercise 6, its close
+  RETAINS occurrence + cutoff (02:54:21Z) — the delta against exercise-6's
+  per-criterion lists is the product. **Cohort burn PAUSED**: no cohort 57
+  until zai reset (10:04Z) / Joe's morning call on casting+reviewer.
 
 ## DONE (this sitting, newest first)
 - **Packet 3 complete**: cohort-54 prereg `94b4272a` (T/R/S/O declared pre-outcome:
