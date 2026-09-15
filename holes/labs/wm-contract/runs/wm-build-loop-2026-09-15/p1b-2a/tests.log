@@ -1,0 +1,12 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.work-target-belief-test
+
+Testing futon2.aif.work-target-store-test
+REAL-FILESYSTEM force/rename receipt: [{:io :write, :path "/tmp/work-target-store-test-5335119288979618082/store/PENDING.edn.tmp"} {:io :file-force, :path "/tmp/work-target-store-test-5335119288979618082/store/PENDING.edn.tmp"} {:io :atomic-move, :path "/tmp/work-target-store-test-5335119288979618082/store/PENDING.edn"} {:io :directory-force, :path "/tmp/work-target-store-test-5335119288979618082/store"} {:io :write, :path "/tmp/work-target-store-test-5335119288979618082/store/snapshots/snapshot.tmp"} {:io :file-force, :path "/tmp/work-target-store-test-5335119288979618082/store/snapshots/snapshot.tmp"} {:io :atomic-move, :path "/tmp/work-target-store-test-5335119288979618082/store/snapshots/1.edn"} {:io :directory-force, :path "/tmp/work-target-store-test-5335119288979618082/store/snapshots"} {:io :write, :path "/tmp/work-target-store-test-5335119288979618082/store/HEAD.edn.tmp"} {:io :file-force, :path "/tmp/work-target-store-test-5335119288979618082/store/HEAD.edn.tmp"} {:io :atomic-move, :path "/tmp/work-target-store-test-5335119288979618082/store/HEAD.edn"} {:io :directory-force, :path "/tmp/work-target-store-test-5335119288979618082/store"} {:io :directory-force, :path "/tmp/work-target-store-test-5335119288979618082/store"}]
+
+Testing futon2.aif.work-target-tick-test
+
+Ran 33 tests containing 556 assertions.
+0 failures, 0 errors.

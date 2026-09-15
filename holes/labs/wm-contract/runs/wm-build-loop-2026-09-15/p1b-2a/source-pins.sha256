@@ -1,0 +1,5 @@
+b9af30ab125def80d4843e7e12ec008bd1f4d06429111dea791f6ea71cc98213  src/futon2/aif/work_target_tick.clj
+3b98232009469db6b1f862270942adfeba302272719213216b25969e8771b1af  test/futon2/aif/work_target_tick_test.clj
+f2f9492c04a9329d163f1dfb8a1b71dadf7bc03b4f7ba50507842a43fb35da9b  src/futon2/aif/work_target_belief.clj
+ff7e3abc02c563fc173af2e0fadaf1685db13dfae98e9e67a2ce832a7e919cfb  src/futon2/aif/work_target_store.clj
+055d579d4bec9ef52c6a3e2949b730d413624ddbc6b60cc00931810a77675e5e  holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/declarations/wm-work-target-interpretation-v1.edn
