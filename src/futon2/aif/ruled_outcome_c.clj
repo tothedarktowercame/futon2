@@ -7,7 +7,11 @@
   "Exact-ratio transcription of `:C-seeded` at
    `futon2:holes/labs/wm-contract/runs/D1-evidence/kl-worked-example.edn:11`.
    That record says this illustrates a registry seed and is not a ruling at
-   `futon2:holes/labs/wm-contract/runs/D1-evidence/kl-worked-example.edn:15`."
+   `futon2:holes/labs/wm-contract/runs/D1-evidence/kl-worked-example.edn:15`.
+   Since `futon2:holes/labs/wm-contract/RULINGS-walkthrough-2026-09-08.md`
+   Item 6, this seed enters the EFE fold as a live preference layer (\"the
+   machine acts on C\"), and Item 10 requires canonical Q(o|pi) scoring; it is
+   the terminal member of the Cτ family in `Holes.C`."
   {:grounded-change 1/2
    :agent-unavailable 1/8
    :build-failed 1/8
