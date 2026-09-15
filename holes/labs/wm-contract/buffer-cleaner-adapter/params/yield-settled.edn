@@ -1,0 +1,2 @@
+;; MACHINE PROJECTION of buffer-cleaner/yield-settled.flexiarg's METERS block
+{:clean-enough-threshold 16 :threshold-source :declared-for-worked-example-not-measured :revisit-truth :unavailable}

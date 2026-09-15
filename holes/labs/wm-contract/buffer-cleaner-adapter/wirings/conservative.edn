@@ -1,0 +1,8 @@
+;; MACHINE PROJECTION of the canonical flexiarg declarations at
+;; futon3c/library/buffer-cleaner/ (Joe's ruling: flexiargs are the library;
+;; this EDN is the adapter's readable projection, values identical).
+{:wiring/id :conservative
+ :eligible-kinds #{:stream :http :file-stale}
+ :file-stale-age-seconds 86400
+ :source :constructed-from-worked-example-74c298f0}
+;; live evaluation: futon2/holes/labs/wm-contract/buffer-cleaner-adapter/ (run.bb reads this file)

@@ -1,0 +1,2 @@
+;; MACHINE PROJECTION of buffer-cleaner/kill.flexiarg's FUEL block
+{:fuel {:per-scan 0.01 :per-kill 0.1}}

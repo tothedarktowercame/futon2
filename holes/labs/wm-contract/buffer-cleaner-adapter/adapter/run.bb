@@ -18,12 +18,12 @@
                                      :display-age-seconds (get b "display-age-seconds")})
                            (get raw "buffers"))})
 ;; fuel comes from the NODE ARGS (library declaration), not duplicated constants
-(def fuel-args (:fuel (c/load-edn "../../../../../futon3/library/buffer-cleaner/nodes/kill.params.edn")))
-(def categories (assoc (c/load-edn "../../../../../futon3/library/buffer-cleaner/params/categories.edn")
+(def fuel-args (:fuel (c/load-edn "params/kill-fuel.edn")))
+(def categories (assoc (c/load-edn "params/categories.edn")
                        :fuel fuel-args))
-(defn wiring [p] (assoc (c/load-edn (str "../../../../../futon3/library/buffer-cleaner/" p)) :wiring/id (keyword (last (re-find #"/(\w+)\.edn$" p)))))
+(defn wiring [p] (assoc (c/load-edn p) :wiring/id (keyword (last (re-find #"/(\w+)\.edn$" p)))))
 (def wirings [(wiring "wirings/aggressive.edn") (wiring "wirings/conservative.edn")])
-(def yield-args (c/load-edn "../../../../../futon3/library/buffer-cleaner/nodes/yield-settled.params.edn"))
+(def yield-args (c/load-edn "params/yield-settled.edn"))
 (doseq [w wirings]
   (let [r (c/classify-packet packet w categories)
         out (assoc (select-keys r [:wiring :receipts :meters :sources])
