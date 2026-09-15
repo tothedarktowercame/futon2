@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-15 ~01:25Z (cohort 54 exhausted on zai quota; cohort 55 armed, codex-23 author)
+Updated: 2026-09-15 ~01:50Z (attempt-001: binding caught a fabricated sha; guard added; attempt-002 firing)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,13 +13,12 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **cohort-55 attempt-001** — S-candidate, firing as this tick's final action.
-  ROOT CAUSE of the cohort-54 burn found by direct seat probe: the zai fleet's
-  shared API quota is EXHAUSTED (HTTP 429, code 1310, resets 2026-09-15 10:04) —
-  author jobs died as bare agency invoke-errors with no output. Cohort 54
-  exhausted 3/3 (orphan since fixed / two quota deaths), all closes retained.
-  Cohort 55 (`2a9e8d53`, rebind `bdd3f30d`) continues the same T/R/S/O contract
-  with author recast to codex-23 (worker-only casting preserved).
+- **cohort-55 attempt-002** — S-candidate, firing as this tick's final action.
+  Attempt-001 closed clean :build-failed on a CLAIM-INTEGRITY refusal worth
+  noting: codex-23 authored a real commit (05d88989, now at HEAD, unreviewed —
+  normal for failed attempts) but reported a full sha whose last 32 hex chars
+  were invented; the artifact binding refused the fabricated hash in production.
+  Author prompt now requires verbatim rev-parse output (132d2356, reloaded).
 
 ## DONE (this sitting, newest first)
 - **Packet 3 complete**: cohort-54 prereg `94b4272a` (T/R/S/O declared pre-outcome:
