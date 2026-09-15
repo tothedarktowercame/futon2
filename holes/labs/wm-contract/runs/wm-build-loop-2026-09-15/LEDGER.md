@@ -9,7 +9,10 @@ separately. A tick in this ledger is not a checklist tick.
 | Packet | Checklist / nodes | Author | Reviewer | Agency job | State | Evidence |
 |---|---|---|---|---|---|---|
 | P0 reproduce the target-belief gap | WM-02 Q2/Q4, R1 | claude-2 | n/a (read-only check) | none (in-turn) | **done** | `p1-reproducer/` (readback, pins, futon2 head `93837a1e`) |
-| P1 work-target belief reaches row 7 | WM-02 Q1–Q9, R1 | codex-2 (proposed) | claude-2 | not dispatched | **blocked** on D1–D3 | `P1-packet.md` |
+| P1 work-target belief reaches row 7 | WM-02 Q1–Q9, R1 | — | claude-2 | — | D1–D3 **decided** by codex-28 (`invoke-1789501835834-21224-7484fd75`), pinned at `declarations/wm-work-target-interpretation-v1.edn` (sha256 `055d579d…5e5e`, futon2 `1e36c0d9`); split into P1a/P1b/P1c | `P1-packet.md` (the pre-decision version) |
+| P1a pure work-target belief module + domain-aware row-7 adapter | WM-02 Q2/Q4/Q6/Q8, R1 | codex-2 | claude-2 | `invoke-1789502167375-21225-81e8d7ea`; park `park-d74a0875-710f-4996-bcde-7e838429c1a5` | **active** | `handoffs/P1a-codex-2.md`; receipts to `p1a/` |
+| P1b tick/trace integration: admissions → carry/introduce → row-7 call site, retained in trace | WM-02 Q9/Q10, R1 | TBD | claude-2 | not dispatched | held on P1a review and on codex-28's answers to Q-A and Q-B | none yet |
+| P1c Lean production carry model (monotone retention, lineage) + correspondence; the old drop theorem untouched | WM-01 K6, WM-02 Q4 | codex-3 (proposed) | claude-2 | not dispatched | held on P1a (it must model the reviewed function) | none yet |
 | P2 dynamics admission separate from A admission | WM-05 C5/C6, WM-03 B7 | TBD | claude-2 | not dispatched | proposed; needs D5 | none yet |
 | P3 same B at belief update and prediction | WM-03 B8 | TBD | claude-2 | not dispatched | proposed; needs D4 | none yet |
 
@@ -27,8 +30,18 @@ Full text: this directory's `P1-packet.md` and the bell reply.
 ## Findings recorded, not yet assigned
 
 - `war_machine.clj` `previous-selection-non-progress?` reads nil target
-  belief as "did not move". This affects non-progress decay in the controller
-  score. It is an existing consumer of an absent value.
+  belief as "did not move". **Corrected 2026-09-15:** production does not
+  reach this. `enrich-candidates-with-mission-value` receives
+  `recent-trace-records` (a sequence), so `consecutive-non-progress-count`
+  takes the outcome-only `recent-non-progress-count` branch. The belief
+  comparison is used only by the one-record compatibility branch, which
+  `war_machine_test.clj:948-957` exercises. The first P1 packet's claim that
+  this defect affects the controller score was wrong.
+- The channel predictors `predict-annotation-health`,
+  `predict-mission-health` and `predict-active-repo-ratio` average over
+  `(count belief)`. Adding work-target rows to the strategic `:mu-post` map
+  would change existing channel predictions inside the update loop. That
+  map-placement conflict is open with codex-28 (Q-A).
 - `bootstrap-from-stack-annotations` swallows read failures into an empty
   section list.
 - The row-7 reader gives the same refusal for an unknown id and for a
