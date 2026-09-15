@@ -6,7 +6,8 @@
 ;; :execute is REFUSED with a typed refusal — live kill needs a gate
 ;; that does not exist (workarounds-forbidden).
 (ns buffer-cleaner.classify
-  (:require [clojure.edn :as edn]))
+  (:require [clojure.edn :as edn]
+            [clojure.string :as str]))
 
 (defn- truthy? [x] (contains? #{true "true"} x))
 
@@ -37,13 +38,19 @@
                          (>= display-age-seconds (:file-stale-age-seconds wiring 0)))
                    :file-stale (keyword kind))
         params (or (get categories kind-k) {:decisiveness :unknown})
-        preserved (cond
-                    (truthy? visible) :visible
+        name-protected (cond
+                        (= name "*scratch*") :scratch
+                        (str/starts-with? name " *Minibuf-") :minibuf
+                        (= name "*Arxana Browser*") :arxana-browser
+                        :else nil)
+        preserved (or name-protected
+                      (cond
+                        (truthy? visible) :visible
                     (truthy? has-process) :has-process
                     (truthy? modified) :modified
-                    (truthy? active-agent) :active-agent
-                    (truthy? server-clients) :server-clients
-                    :else nil)
+                        (truthy? active-agent) :active-agent
+                        (truthy? server-clients) :server-clients
+                        :else nil))
         eligible (and (nil? preserved)
                       (contains? (:eligible-kinds wiring #{}) kind-k)
                       (not= :unknown (:decisiveness params)))

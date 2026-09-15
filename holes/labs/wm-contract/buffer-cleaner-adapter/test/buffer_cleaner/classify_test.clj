@@ -102,3 +102,17 @@
         (is (= :file (:kind r)))
         (is (= :keep (:action r)))
         (is (nil? (:preservation-reason r)))))))
+
+(deftest named-buffer-protections
+  (let [base {:kind "temp" :file "false" :modified "false" :has-process "false"
+              :visible "false" :active-agent "false" :server-clients "false"
+              :display-age-seconds 9999}]
+    (testing "*scratch* never killed even as structural temp"
+      (let [r (c/classify-buffer (assoc base :name "*scratch*") aggressive categories)]
+        (is (= :keep (:action r))) (is (= :scratch (:preservation-reason r)))))
+    (testing "minibuffers protected"
+      (let [r (c/classify-buffer (assoc base :name " *Minibuf-1*") aggressive categories)]
+        (is (= :keep (:action r))) (is (= :minibuf (:preservation-reason r)))))
+    (testing "*Arxana Browser* protected (live navigation state)"
+      (let [r (c/classify-buffer (assoc base :name "*Arxana Browser*") aggressive categories)]
+        (is (= :keep (:action r))) (is (= :arxana-browser (:preservation-reason r)))))))
