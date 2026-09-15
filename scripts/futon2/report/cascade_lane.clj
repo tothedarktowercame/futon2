@@ -15,6 +15,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.lane-futility :as futility]
+            [futon2.aif.mission-registry :as registry]
             [futon2.aif.rollout :as rollout])
   (:import [java.util.concurrent TimeUnit]))
 
@@ -161,10 +162,12 @@
       (str home "/code/" repo "/" sub))))
 
 (defn- mission-doc-file [target]
-  (->> mission-doc-roots
+  (if (str/starts-with? (str target) "T-")
+    (some-> (registry/ticket-entry target) :path io/file)
+    (->> mission-doc-roots
        (map #(io/file % (str target ".md")))
        (filter #(.exists ^java.io.File %))
-       first))
+       first)))
 
 ;; ---------------------------------------------------------------------------
 ;; L2 (E-live-loop-3, 2026-07-05): sorry-grain ψ from the held-work ledger.
@@ -324,11 +327,13 @@
                                              first
                                              (re-find #"^#\s*(?:Mission:)?\s*(.*)")
                                              second)
-                              status (some->> lines
+                              status (or (when (str/starts-with? (str target) "T-")
+                                           (registry/ticket-status-text lines))
+                                         (some->> lines
                                               (filter #(re-find #"(?i)^(?:\*\*)?Status:?(?:\*\*)?" %))
                                               first
                                               (re-find #"(?i)^(?:\*\*)?Status:?(?:\*\*)?:?\s*(.*)")
-                                              second)]
+                                              second))]
                           (when title
                             (str stem " — want: " (clip title 160)
                                  (when (seq (str status)) (str ". have: " (clip status 160))))))

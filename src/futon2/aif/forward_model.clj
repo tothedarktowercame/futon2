@@ -28,7 +28,7 @@
    set means adding both a `predict-effects` multimethod arm (below)
    and a `can-propose?` arm if the action requires substrate
    addressability."
-  #{:no-op :address-sorry :open-mission :advance-mission :close :close-mission
+  #{:no-op :address-sorry :open-mission :advance-mission :advance-ticket :close :close-mission
     :close-hole :survey :survey-mission :apply-cascade :fire-pattern
     :learn-action-class :pursue :decompose})
 
@@ -164,6 +164,16 @@
                  :sorry-count-norm (* -0.05 f)}
      :obs-variance {:mission-health 0.015
                     :sorry-count-norm 0.01}
+     :events [{:entity-id target :type :addressed :weight (* weight f)}]}))
+
+(defmethod predict-effects :advance-ticket
+  ;; Declared prior shared with :advance-mission (lead decision 21033):
+  ;; one-item factor, no sorry term, not calibrated. Mission-health now
+  ;; measures tickets as well as missions; tickets do not enter sorry census.
+  [_state {:keys [target weight] :or {weight 1.0}}]
+  (let [f (advance-mission-ordinal-factor 1)]
+    {:obs-delta {:mission-health (* 0.04 f)}
+     :obs-variance {:mission-health 0.015}
      :events [{:entity-id target :type :addressed :weight (* weight f)}]}))
 
 (defmethod predict-effects :close

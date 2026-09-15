@@ -1636,6 +1636,7 @@
        {:from :not-addressable
         :to :proposable-and-executable}}
 
+      (= :advance-ticket (:type action)) (missions/ticket-entry target)
       :else (mission-entry target))))
 
 (defn- job-text [job]

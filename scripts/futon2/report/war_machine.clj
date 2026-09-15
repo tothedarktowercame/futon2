@@ -3476,15 +3476,25 @@
 ;; ---------------------------------------------------------------------------
 
 (defn scan-mission-triage
-  "Scan mission inventory for strategic health.
+  "Scan missions plus tickets for strategic health. Tickets map complete to
+   complete, inactive to inactive, not-actionable to not-actionable, live to
+   open; they never enter abandoned-in-progress or blocked penalties.
 
    Queries GET /api/alpha/missions, cross-references with git activity
    to detect abandoned-in-progress missions.
 
    Returns {:total :by-status :by-repo :abandoned-missions :health}."
   ([days] (scan-mission-triage days (or (fetch-missions) [])))
-  ([days missions]
-  (let [since (since-str days)
+  ([days missions] (scan-mission-triage days missions (:tickets (mission-registry/load-tickets))))
+  ([days missions tickets]
+  (let [missions (into (vec missions)
+                       (map (fn [t] {:mission/status (case (:status-class t)
+                                                      :complete "complete"
+                                                      :inactive "inactive"
+                                                      :not-actionable "not-actionable"
+                                                      "open")
+                                     :mission/repo "ticket-registry"}) tickets))
+        since (since-str days)
         ;; Classify by status
         by-status (frequencies (map #(or (:mission/status %) "unknown") missions))
         ;; Classify by repo
@@ -3510,6 +3520,7 @@
         blocked (get by-status "blocked" 0)
         active (reduce + (map #(get by-status % 0) active-mission-statuses))]
     {:total total
+     :ticket-count (count tickets)
      :by-status by-status
      :by-repo by-repo
      :active active
@@ -6130,6 +6141,7 @@
         wm-entity-repos (belief/classify-entity-repos-from-stack-annotations)
         wm-entity-ticks (belief/classify-entity-ticks-from-stack-annotations)
         wm-missions (try (mission-registry/open-missions) (catch Exception _ []))
+        wm-tickets (:tickets (mission-registry/load-tickets))
         ;; v0.10/v0.11/v0.13/R3a/R3b/R3d wiring: compute prediction-errors
         ;; for every channel with a likelihood model. All errors record into
         ;; the trace's :prediction-errors map.
@@ -6346,6 +6358,7 @@
         wm-patterns (try (pattern-registry/open-patterns) (catch Exception _ []))
         wm-state {:observation observation :belief wm-belief :sorrys wm-sorrys
                   :missions wm-missions
+                  :tickets wm-tickets
                   :patterns wm-patterns
                   :anticipation anticipation-snapshot
                   :wm/route route3
@@ -6357,6 +6370,7 @@
                        [ap/bootstrap-proposer
                         pattern-registry/pattern-enumerator-proposer
                         mission-registry/mission-enumerator-proposer
+                        mission-registry/ticket-enumerator-proposer
                         sorry-registry/sorry-enumerator-proposer
                         ;; M-aif2 slice-1: credited + admissibility-gated
                         ;; tension-proposer — emits existing S2 classes via κ at

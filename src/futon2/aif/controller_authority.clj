@@ -26,7 +26,10 @@
         score (:controller-score decision)
         law (:selection-law decision)
         mission-action? (contains? mission-action-types (:type action))
+        ticket-action? (= :advance-ticket (:type action))
         reason (cond
+                 (and ticket-action? (not (:open? (missions/ticket-status (:target action)))))
+                 :target-not-open
                  (and mission-action?
                       (not (true? (:open? (missions/mission-status (:target action))))))
                  :target-not-open
@@ -47,11 +50,14 @@
            :authorized? true :executed? false :authority :machine-determined
            :operator-confirmation-required? false
            :operator-decision-evidence-id operator-decision-evidence-id
-           :admissible-set :all-open-missions :scope-authority scope-authority
+           :admissible-set :all-open-missions-and-tickets
+           :ticket-scope-authority "invoke-1789479853453-21033-f928800f (Joe / claude-20 2026-09-15)" :scope-authority scope-authority
            :machine-gates {:open-mission (if mission-action?
                                            {:status :passed}
                                            {:status :not-applicable
                                             :reason :not-a-mission-action})
+                           :live-ticket (if ticket-action? {:status :passed}
+                                           {:status :not-applicable :reason :not-a-ticket-action})
                            :admissible-action {:status :passed}
                            :controller-score-and-law {:status :passed}
                            :serving-cache no-recall :query-bounds no-recall
@@ -65,5 +71,5 @@
       (assoc decision :actuation actuation
              :actuation-status (:status actuation) :actuation-authorized? true
              :requires-operator-override? false
-             :strategic-selection-boundary :controller-over-all-open-missions
+             :strategic-selection-boundary :controller-over-all-open-missions-and-tickets
              :scope-authority scope-authority :rollback (:rollback actuation)))))

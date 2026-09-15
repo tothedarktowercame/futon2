@@ -15,7 +15,7 @@
       (is (= (:selection-law decision) (:selection-law result)))
       (is (true? (:actuation-authorized? result)))
       (is (false? (get-in result [:actuation :executed?])))
-      (is (= :all-open-missions (get-in result [:actuation :admissible-set])))
+      (is (= :all-open-missions-and-tickets (get-in result [:actuation :admissible-set])))
       (is (= authority/scope-authority (:scope-authority result)))
       (is (= "futon3c e74c7e7" (get-in result [:rollback :recorded-fallback])))
       (is (= :not-applicable (get-in result [:actuation :machine-gates :serving-cache :status])))

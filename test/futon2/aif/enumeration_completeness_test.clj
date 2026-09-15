@@ -130,7 +130,7 @@
         "an unreadable or absent status keeps the item in the queue")))
 
 (deftest kind-without-a-proposer-is-a-typed-absence-test
-  (testing "excursions and tickets have no proposer, so their whole population
+  (testing "excursions have no proposer, so their whole population
             is outside the selector's view -- typed, with the pointer to the
             proposer list that omits them, and never counted as agreement"
     (spit (doto (io/file *root* "repo" "holes" "excursions" "E-one.md")
@@ -151,13 +151,13 @@
     (spit (doto (io/file *root* "repo" "holes" "tickets" "T-one.md")
             io/make-parents)
           "# T-one\n")
-    (let [r (ec/completeness-record [(candidate "M-live")] {:code-root *root*})]
+    (let [r (ec/completeness-record [(candidate "M-live") {:action {:type :advance-ticket :target "T-one"}}] {:code-root *root*})]
       (is (= :complete (:verdict r))
           "the one kind that HAS a proposer agrees with its scan")
-      (is (= #{:excursion :ticket} (set (map :kind (:typed-kind-absences r)))))
-      (is (= 1 (some #(when (= :ticket (:kind %)) (:available-count %))
-                     (:typed-kind-absences r)))
-          "and the absence carries the size of what is unseen"))))
+      (is (= #{:excursion} (set (map :kind (:typed-kind-absences r)))))
+      (is (= :complete (some #(when (= :ticket (:kind %)) (:verdict %))
+                             (:kinds r)))
+          "tickets now participate in completeness"))))
 
 (deftest assertion-flag-defaults-off-test
   (testing "the live assertion is opt-in: nothing scans unless the flag is set"

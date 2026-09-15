@@ -100,10 +100,11 @@
    :ticket
    {:dir "tickets"
     :file-pattern #".*/holes/tickets/(T-[^/]+)\.md$"
-    :contract-source :declared-by-this-check
-    :contract-pointer nil
-    :candidate-types #{}
-    :enumerator nil}})
+    :contract-source :code
+    :contract-pointer "src/futon2/aif/mission_registry.clj:load-tickets"
+    :candidate-types #{:advance-ticket}
+    :enumerator {:proposer :ticket-enumerator
+                 :pointer "src/futon2/aif/mission_registry.clj:ticket-enumerator-proposer"}}})
 
 (def proposer-list-pointer
   "Where the tick's proposer list is composed. A kind absent from that vector
@@ -146,6 +147,18 @@
                      (str/includes? upper "SPECIFIED, NOT YET IMPLEMENTED") :draft
                      (= "DRAFT" head) :draft
                      (some #(str/starts-with? head %) terminal-leads) :terminal
+                     :else :live)}))
+
+(defn- classify-ticket-doc-status
+  "Independent reading of the ticket status table (lead packet 21033)."
+  [text]
+  (let [status (some #(second (re-find #"(?i)^\s*\*\*Status(?:\s*\([^)]*\))?\s*:\s*(.*)$" %))
+                     (str/split-lines text))
+        lead (-> (or status "") str/upper-case (str/replace #"^[\s*_]+" ""))]
+    {:status-line status
+     :status-class (cond
+                     (re-find #"JOE['’]S CALL|AWAIT[^.]*JOE|^(WATCH|FINDING|DESIGN CONSTRAINT)\b" lead) :draft
+                     (re-find #"^(DONE|SUPERSEDED|DEFERRED|PARKED|ARCHIVED)" lead) :terminal
                      :else :live)}))
 
 ;; ---------------------------------------------------------------------------
@@ -199,7 +212,7 @@
                  (merge {:kind kind
                          :id (second (re-matches file-pattern path))
                          :path path}
-                        (classify-doc-status (slurp path))))
+                        ((if (= kind :ticket) classify-ticket-doc-status classify-doc-status) (slurp path))))
          ;; Shortest path first, so the primary checkout of a duplicated id is
          ;; the copy that survives dedupe and the copies are what get typed.
          ordered (sort-by (juxt count identity) matched)
@@ -208,7 +221,7 @@
                     (let [id (second (re-matches file-pattern path))
                           reason (or (fence-reason path)
                                      (cond
-                                       (str/includes? (or id "") ".") :derived-id
+                                       (and (not= kind :ticket) (str/includes? (or id "") ".")) :derived-id
                                        (contains? (:seen acc) id) :duplicate-id))]
                       (if reason
                         (update acc :excluded conj {:kind kind :id id :path path

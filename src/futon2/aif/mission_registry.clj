@@ -347,3 +347,80 @@
                          " [" (name (:status-class m))
                          "; advance open holes]")}))
     (proposer-id [_] :mission-enumerator)))
+
+;; Ticket status table (Joe / claude-20, packet 21033, 2026-09-15):
+;; DONE* -> complete; SUPERSEDED/DEFERRED/PARKED/ARCHIVED -> inactive;
+;; WATCH/FINDING/DESIGN CONSTRAINT or awaiting Joe/Joe's call -> not-actionable;
+;; PARTIAL/OPEN/STILL-OPEN/SCOPED/DESIGNED/RECLASSIFY and unknown -> live.
+(defn ticket-status-text [lines]
+  (some #(second (re-find #"(?i)^\s*\*\*Status(?:\s*\([^)]*\))?\s*:\s*(.*)$" %)) lines))
+
+(defn classify-ticket-status [text]
+  (let [s (-> (or text "") str/upper-case (str/replace #"^[\s*_]+" ""))]
+    (cond
+      (re-find #"JOE['’]S CALL|AWAIT[^.]*JOE" s) :not-actionable
+      (str/starts-with? s "DONE") :complete
+      (re-find #"^(SUPERSEDED|DEFERRED|PARKED|ARCHIVED)\b" s) :inactive
+      (re-find #"^(WATCH|FINDING|DESIGN CONSTRAINT)\b" s) :not-actionable
+      :else :live)))
+
+(defn live-ticket? [ticket] (= :live (:status-class ticket)))
+
+(defn load-tickets
+  "Immediate primary-checkout holes/tickets/T-*.md only. Same mission scan
+   fences before ID deduplication; bare holes/T-* discovery notes excluded."
+  ([] (load-tickets default-code-root))
+  ([code-root]
+   {:tickets
+    (->> (or (.listFiles (io/file code-root)) (make-array File 0))
+         (filter #(.isDirectory ^File %))
+         (map #(io/file % "holes" "tickets"))
+         (mapcat #(or (.listFiles ^File %) (make-array File 0)))
+         (filter #(.isFile ^File %))
+         (map #(.getAbsolutePath ^File %))
+         (filter #(re-matches #".*/holes/tickets/T-[^/]+\.md$" %))
+         (remove sandbox-path?)
+         (remove #(non-primary-path? (str/replace % "/holes/tickets/" "/holes/missions/")))
+         (sort-by (juxt count identity))
+         (map (fn [path]
+                (let [id (str/replace (.getName (io/file path)) #"\.md$" "")
+                      lines (str/split-lines (slurp path))
+                      status (ticket-status-text lines)]
+                  {:id id :kind :ticket :path path
+                   :title (mission-title-from-lines id lines)
+                   :status-line status :status-class (classify-ticket-status status)
+                   :parent (some #(when (re-find #"(?i)parent" %)
+                                    (re-find #"M-[A-Za-z0-9_-]+" %)) lines)})))
+         dedupe-by-id vec)}))
+
+(defn ticket-entry [target]
+  (when (and (string? target) (str/starts-with? target "T-"))
+    (some #(when (= target (:id %)) %) (:tickets (load-tickets)))))
+
+(defn live-ticket-target? [tickets target]
+  (boolean (some #(and (= target (:id %)) (live-ticket? %)) tickets)))
+
+(defn ticket-status [target]
+  (let [live? (boolean (some-> (ticket-entry target) live-ticket?))]
+    {:open? live? :open-hole-count (if live? 1 0)}))
+
+(defn work-target-status
+  "Mission semantics unchanged; T- identities resolve only in the ticket registry."
+  [target]
+  (if (and (string? target) (str/starts-with? target "T-"))
+    (ticket-status target)
+    (mission-status target)))
+
+(defmethod fm/can-propose? :advance-ticket [state _]
+  (boolean (some live-ticket? (:tickets state))))
+(defmethod fm/can-execute? :advance-ticket [state action]
+  (live-ticket-target? (:tickets state) (:target action)))
+
+(def ticket-enumerator-proposer
+  (reify ap/ActionProposer
+    (propose [_ state]
+      (for [t (:tickets state) :when (live-ticket? t)]
+        {:type :advance-ticket :target (:id t) :weight 1.0
+         :ticket-path (:path t) :open-hole-count 1
+         :rationale (str "ticket substrate: " (:title t))}))
+    (proposer-id [_] :ticket-enumerator)))
