@@ -109,6 +109,31 @@
                                          :count-after :deposit-run-id])
     :spec-document (select-keys evidence [:path :git-sha])))
 
+(defn- grounded-review-evidence?
+  "Require the independently computed review gate and observed author artifact
+  binding to agree with the repair implementation.  Schema-3 findings were
+  created after these records existed and must not be discharged by the old
+  self-asserted reviewer/job/witness labels alone."
+  [obligation {:keys [commit reviewer review-job review-evidence
+                      artifact-binding]}]
+  (let [machine-repo (:machine-repo obligation)]
+    (and (map? review-evidence)
+         (true? (:valid? review-evidence))
+         (= review-job (:job-id review-evidence))
+         (= reviewer (:reviewer review-evidence))
+         (= "done" (:state review-evidence))
+         (= :approve (:verdict review-evidence))
+         (true? (get-in review-evidence [:execution :executed]))
+         (pos-int? (get-in review-evidence [:execution :tool-events]))
+         (map? artifact-binding)
+         (= commit (:commit artifact-binding))
+         (or (nil? machine-repo) (= machine-repo (:repo artifact-binding)))
+         (true? (:fresh-author? artifact-binding))
+         (true? (:descendant? artifact-binding))
+         (true? (:in-author-window? artifact-binding))
+         (true? (:corroborates? artifact-binding))
+         (false? (:disagreement? artifact-binding)))))
+
 (defn- with-contended-store-lock
   "Bounded retry around the deliberately NON-BLOCKING store lock: the lock
   layer refuses same-instant acquisition as :interoceptive/lock-contention
@@ -689,6 +714,9 @@
                   (not attempt-id) (conj :implementation-attempt-missing)
                   (not reviewer) (conj :reviewer-missing)
                   (not review-job) (conj :review-job-missing)
+                  (and (= 3 (:repair/schema-version obligation))
+                       (not (grounded-review-evidence? obligation implementation)))
+                  (conj :grounded-review-evidence-invalid)
                   (and attempt-id (= attempt-id (:attempt-id obligation)))
                   (conj :implementation-attempt-not-distinct)
                   (not evidence-ok?) (conj :artifact-evidence-invalid)

@@ -200,6 +200,16 @@
     (repair/record-implementation!
      root finding {:attempt-id "canary-repair" :commit "good456"
                    :reviewer "claude-1" :review-job "review-2"
+                   :review-evidence
+                   {:job-id "review-2" :reviewer "claude-1"
+                    :state "done" :verdict :approve :valid? true
+                    :execution {:executed true :tool-events 1
+                                :command-events 1}}
+                   :artifact-binding
+                   {:repo "/home/joe/code/futon2" :commit "good456"
+                    :fresh-author? true :descendant? true
+                    :in-author-window? true :corroborates? true
+                    :disagreement? false}
                    :witness {:resolved? true :dial-moved? true}})
     (repair/resolve! root (first (repair/open-obligations root))
                      {:attempt-id "canary-successor" :commit "next789"
@@ -471,3 +481,53 @@
                       :witness {:resolved? true :dial-moved? false}})]
       (is (some #{:witness-dial-not-moved} (:failure-detail d)))
       (is (not-any? #{:implementation-attempt-not-distinct} (:failure-detail d))))))
+
+(deftest schema-three-implementation-requires-grounded-independent-review
+  (let [root (temp-root)
+        obligation {:repair/id "repair-grounded-review"
+                    :repair/schema-version 3
+                    :repair/status :open
+                    :repair/class :machine-failure
+                    :attempt-id "ea1-old--attempt-001"
+                    :machine-repo "/srv/futon2"
+                    :discharge-contract {:artifact-shape :code-commit}}
+        base {:attempt-id "ea1-new--attempt-001"
+              :commit "abc1234"
+              :reviewer "codex-24"
+              :review-job "review-42"
+              :witness {:resolved? true :dial-moved? true}}
+        review-evidence {:job-id "review-42" :reviewer "codex-24"
+                         :state "done" :verdict :approve :valid? true
+                         :execution {:executed true :tool-events 2
+                                     :command-events 1}}
+        binding {:repo "/srv/futon2" :commit "abc1234"
+                 :fresh-author? true :descendant? true
+                 :in-author-window? true :corroborates? true
+                 :disagreement? false}
+        refusal (fn [implementation]
+                  (try (repair/record-implementation! root obligation implementation)
+                       nil
+                       (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+    (testing "self-asserted legacy labels do not discharge a schema-3 finding"
+      (is (some #{:grounded-review-evidence-invalid}
+                (:failure-detail (refusal base)))))
+    (testing "borrowed review and artifact bindings refuse at the same gate"
+      (is (some #{:grounded-review-evidence-invalid}
+                (:failure-detail
+                 (refusal (assoc base
+                                 :review-evidence
+                                 (assoc review-evidence :job-id "review-other")
+                                 :artifact-binding binding)))))
+      (is (some #{:grounded-review-evidence-invalid}
+                (:failure-detail
+                 (refusal (assoc base
+                                 :review-evidence review-evidence
+                                 :artifact-binding
+                                 (assoc binding :commit "def5678")))))))
+    (testing "the exact independently reviewed implementation is retained"
+      (is (= "abc1234"
+             (:replacement-commit
+              (repair/record-implementation!
+               root obligation
+               (assoc base :review-evidence review-evidence
+                      :artifact-binding binding))))))))

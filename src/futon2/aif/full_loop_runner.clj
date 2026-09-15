@@ -4489,6 +4489,10 @@
                              {:attempt-id external-attempt-id :commit commit
                               :reviewer reviewer
                               :review-job (:job-id review-job)
+                              :review-evidence
+                              (assoc (independent-review-evidence files review-job)
+                                     :reviewer reviewer)
+                              :artifact-binding artifact-binding
                               :witness witness})))))
                     ;; A successfully grounded recovery is itself a real,
                     ;; production-shaped successor.  It may therefore validate
