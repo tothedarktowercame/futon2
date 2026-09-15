@@ -1,0 +1,727 @@
+{
+  "scope": "real retained snapshot; constructed probabilities/costs; dry-run only",
+  "model": "shared candidate-union false-kill outcome projection; independent likelihood; fixed current state",
+  "full_A": "unresolved; displayed A projection is not a ruled full-A formula",
+  "comparison": "not distinguishable on this field",
+  "choice": "no threshold-eligible wiring",
+  "arms": [
+    {
+      "wiring": "aggressive",
+      "channels": [
+        {
+          "name": " *server*",
+          "kind": "temp",
+          "action": "kill",
+          "Q": [
+            0.95,
+            0.05
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "prior_source": "constructed",
+          "risk": 0.16474644417235018,
+          "ambiguity": 0.1985152433458726,
+          "cost": 1.0,
+          "expected_cost": "1/20"
+        },
+        {
+          "name": " *temp file*",
+          "kind": "temp",
+          "action": "kill",
+          "Q": [
+            0.95,
+            0.05
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "prior_source": "constructed",
+          "risk": 0.16474644417235018,
+          "ambiguity": 0.1985152433458726,
+          "cost": 1.0,
+          "expected_cost": "1/20"
+        },
+        {
+          "name": "buffer-cleaner",
+          "kind": "dired",
+          "action": "kill",
+          "Q": [
+            0.75,
+            0.25
+          ],
+          "C": [
+            0.6224593312018546,
+            0.37754066879814546
+          ],
+          "prior_source": "constructed",
+          "risk": 0.03674183956129817,
+          "ambiguity": 0.5623351446188083,
+          "cost": 0.5,
+          "expected_cost": "1/8"
+        }
+      ],
+      "meters": {
+        "scanned": 138,
+        "kills-proposed": 3,
+        "remaining": 135,
+        "expected-recovery": 0.22499999999999998,
+        "fuel-charged": 1.6800000000000002
+      },
+      "G_B": 1.325600359216552,
+      "G_A_projection": 1.325600359216552,
+      "risk": 0.36623472790599854,
+      "ambiguity": 0.9593656313105534,
+      "expected_loss": "9/40",
+      "fuel": "42/25",
+      "total": 3.005600359216552,
+      "threshold": 16,
+      "threshold_eligible": false,
+      "rule_verdict": "unavailable: no observed revisit truth",
+      "joint_check": "passed"
+    },
+    {
+      "wiring": "conservative",
+      "channels": [
+        {
+          "name": " *server*",
+          "kind": "temp",
+          "action": "keep",
+          "Q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "prior_source": "constructed",
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "cost": 1.0,
+          "expected_cost": "0"
+        },
+        {
+          "name": " *temp file*",
+          "kind": "temp",
+          "action": "keep",
+          "Q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "prior_source": "constructed",
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "cost": 1.0,
+          "expected_cost": "0"
+        },
+        {
+          "name": "buffer-cleaner",
+          "kind": "dired",
+          "action": "keep",
+          "Q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.6224593312018546,
+            0.37754066879814546
+          ],
+          "prior_source": "constructed",
+          "risk": 0.4740769841801067,
+          "ambiguity": -0.0,
+          "cost": 0.5,
+          "expected_cost": "0"
+        }
+      ],
+      "meters": {
+        "scanned": 138,
+        "kills-proposed": 0,
+        "remaining": 138,
+        "expected-recovery": 0,
+        "fuel-charged": 1.3800000000000001
+      },
+      "G_B": 1.1006003592165525,
+      "G_A_projection": 1.1006003592165525,
+      "risk": 1.1006003592165525,
+      "ambiguity": 0.0,
+      "expected_loss": "0",
+      "fuel": "69/50",
+      "total": 2.4806003592165524,
+      "threshold": 16,
+      "threshold_eligible": false,
+      "rule_verdict": "unavailable: no observed revisit truth",
+      "joint_check": "passed"
+    }
+  ],
+  "age_distribution": [
+    {
+      "kind": "other",
+      "age": 0.00161455
+    },
+    {
+      "kind": "other",
+      "age": 3.822108935
+    },
+    {
+      "kind": "other",
+      "age": 3.821273713
+    },
+    {
+      "kind": "other",
+      "age": 194.499161732
+    },
+    {
+      "kind": "temp",
+      "age": 0.001741829
+    },
+    {
+      "kind": "dired",
+      "age": 426.056147162
+    },
+    {
+      "kind": "other",
+      "age": 1058.023634088
+    },
+    {
+      "kind": "other",
+      "age": 1658.409830394
+    },
+    {
+      "kind": "other",
+      "age": 1683.714552071
+    },
+    {
+      "kind": "other",
+      "age": 1922.808592504
+    },
+    {
+      "kind": "other",
+      "age": 2191.333141653
+    },
+    {
+      "kind": "other",
+      "age": 65402.870919698
+    },
+    {
+      "kind": "other",
+      "age": 65402.870952439
+    },
+    {
+      "kind": "other",
+      "age": 65409.893429599
+    },
+    {
+      "kind": "other",
+      "age": 65411.91610218
+    },
+    {
+      "kind": "other",
+      "age": 67260.01621833
+    },
+    {
+      "kind": "other",
+      "age": 67328.501889265
+    },
+    {
+      "kind": "other",
+      "age": 67335.086049901
+    },
+    {
+      "kind": "other",
+      "age": 68844.335713146
+    },
+    {
+      "kind": "other",
+      "age": 71436.343115302
+    },
+    {
+      "kind": "file",
+      "age": 76097.009699874
+    },
+    {
+      "kind": "other",
+      "age": 78139.550146712
+    },
+    {
+      "kind": "other",
+      "age": 78515.530260949
+    },
+    {
+      "kind": "temp",
+      "age": 80193.658918946
+    },
+    {
+      "kind": "other",
+      "age": 136411.5152801
+    },
+    {
+      "kind": "other",
+      "age": 144025.753301235
+    },
+    {
+      "kind": "temp",
+      "age": 146603.048673221
+    },
+    {
+      "kind": "other",
+      "age": 228312.812784503
+    },
+    {
+      "kind": "other",
+      "age": 228320.857503983
+    },
+    {
+      "kind": "other",
+      "age": 254539.70942137
+    },
+    {
+      "kind": "other",
+      "age": 257504.217811873
+    },
+    {
+      "kind": "other",
+      "age": 257688.089372984
+    },
+    {
+      "kind": "other",
+      "age": 257689.776936232
+    },
+    {
+      "kind": "other",
+      "age": 258040.33493081
+    },
+    {
+      "kind": "other",
+      "age": 261991.643266078
+    },
+    {
+      "kind": "other",
+      "age": 264201.967258403
+    },
+    {
+      "kind": "other",
+      "age": 270175.918201802
+    },
+    {
+      "kind": "other",
+      "age": 275644.732077722
+    },
+    {
+      "kind": "other",
+      "age": 279327.335906829
+    },
+    {
+      "kind": "other",
+      "age": 332791.287178025
+    },
+    {
+      "kind": "other",
+      "age": 336343.258735853
+    },
+    {
+      "kind": "other",
+      "age": 339326.055611606
+    },
+    {
+      "kind": "other",
+      "age": 405758.575569041
+    },
+    {
+      "kind": "other",
+      "age": 451199.495292573
+    },
+    {
+      "kind": "other",
+      "age": 512141.579459172
+    },
+    {
+      "kind": "other",
+      "age": 515278.487693061
+    },
+    {
+      "kind": "other",
+      "age": 523413.760851487
+    },
+    {
+      "kind": "other",
+      "age": 523443.091855277
+    },
+    {
+      "kind": "other",
+      "age": 523463.551056259
+    },
+    {
+      "kind": "other",
+      "age": 585359.422683213
+    },
+    {
+      "kind": "other",
+      "age": 613498.116141624
+    },
+    {
+      "kind": "other",
+      "age": 613536.615103873
+    },
+    {
+      "kind": "other",
+      "age": 0.003220565
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "http",
+      "age": -1
+    },
+    {
+      "kind": "other",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "other",
+      "age": -1
+    },
+    {
+      "kind": "other",
+      "age": -1
+    },
+    {
+      "kind": "other",
+      "age": -1
+    },
+    {
+      "kind": "other",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": 391903.917568999
+    },
+    {
+      "kind": "temp",
+      "age": 391971.970984142
+    },
+    {
+      "kind": "temp",
+      "age": 391971.898445371
+    },
+    {
+      "kind": "temp",
+      "age": 391970.478229767
+    },
+    {
+      "kind": "temp",
+      "age": 391971.368565515
+    },
+    {
+      "kind": "temp",
+      "age": 391970.035343439
+    },
+    {
+      "kind": "other",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": 391873.61571831
+    },
+    {
+      "kind": "temp",
+      "age": 391875.863530711
+    },
+    {
+      "kind": "temp",
+      "age": 391875.857736815
+    },
+    {
+      "kind": "temp",
+      "age": 391875.42118458
+    },
+    {
+      "kind": "temp",
+      "age": 391875.503504811
+    },
+    {
+      "kind": "temp",
+      "age": 391875.414138059
+    },
+    {
+      "kind": "temp",
+      "age": 391875.434636031
+    },
+    {
+      "kind": "temp",
+      "age": 391875.530126276
+    },
+    {
+      "kind": "temp",
+      "age": 391875.445733244
+    },
+    {
+      "kind": "temp",
+      "age": 391875.401608864
+    },
+    {
+      "kind": "temp",
+      "age": 391875.54961085
+    },
+    {
+      "kind": "temp",
+      "age": 391875.54558781
+    },
+    {
+      "kind": "temp",
+      "age": 391875.471058502
+    },
+    {
+      "kind": "temp",
+      "age": 391875.673983212
+    },
+    {
+      "kind": "temp",
+      "age": 391875.658226576
+    },
+    {
+      "kind": "temp",
+      "age": 391875.631865359
+    },
+    {
+      "kind": "temp",
+      "age": 391875.644197855
+    },
+    {
+      "kind": "temp",
+      "age": 391875.629565994
+    },
+    {
+      "kind": "temp",
+      "age": 391875.50875004
+    },
+    {
+      "kind": "temp",
+      "age": 391875.457463502
+    },
+    {
+      "kind": "temp",
+      "age": 391875.4408217
+    },
+    {
+      "kind": "temp",
+      "age": 391875.430339106
+    },
+    {
+      "kind": "temp",
+      "age": 391875.427580142
+    },
+    {
+      "kind": "temp",
+      "age": 391875.407200521
+    },
+    {
+      "kind": "temp",
+      "age": 391875.379400941
+    },
+    {
+      "kind": "temp",
+      "age": 391875.206696452
+    },
+    {
+      "kind": "temp",
+      "age": 391873.918263546
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "other",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "other",
+      "age": -1
+    },
+    {
+      "kind": "other",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": 1808.241357488
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "http",
+      "age": -1
+    },
+    {
+      "kind": "stream",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "invoke",
+      "age": -1
+    },
+    {
+      "kind": "http",
+      "age": -1
+    },
+    {
+      "kind": "http",
+      "age": -1
+    },
+    {
+      "kind": "http",
+      "age": -1
+    },
+    {
+      "kind": "http",
+      "age": -1
+    },
+    {
+      "kind": "http",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    },
+    {
+      "kind": "temp",
+      "age": -1
+    }
+  ],
+  "kind_counts": {
+    "other": 57,
+    "temp": 59,
+    "dired": 1,
+    "file": 1,
+    "http": 7,
+    "invoke": 12,
+    "stream": 1
+  },
+  "threshold_prior": "not identifiable from age marginal; use declared conditional table only"
+}

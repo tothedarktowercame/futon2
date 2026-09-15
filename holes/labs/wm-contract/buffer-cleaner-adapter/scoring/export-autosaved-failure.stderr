@@ -1,0 +1,27 @@
+----- Error --------------------------------------------------------------------
+Type:     clojure.lang.ExceptionInfo
+Message:  missing or malformed raw protection flag
+Data:     {:field :modified}
+Location: /home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/export.bb:14:7
+
+----- Context ------------------------------------------------------------------
+10:   (let [row (if (and (contains? raw-row :modified) (nil? (:modified raw-row)))
+11:               (assoc raw-row :modified false) raw-row)]
+12:   (doseq [k required-flags]
+13:     (when-not (and (contains? row k) (boolean? (get row k)))
+14:       (throw (ex-info "missing or malformed raw protection flag" {:field k}))))
+          ^--- missing or malformed raw protection flag
+15:   row))
+16: (def packet (json/parse-string (slurp "runs/state-packet.json") true))
+17: ;; Preserve every field; unlike a hand-written projection, this cannot drop flags.
+18: (def checked (update packet :buffers #(mapv validate-row %)))
+19: (def kill-args (args "nodes/kill.params.edn"))
+
+----- Stack trace --------------------------------------------------------------
+user/mapv           - /home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/export.bb:14:7
+user                - /home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/export.bb:12:3
+clojure.core/mapv   - clojure/core.clj:7054:1
+user                - /home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/export.bb:18:39
+clojure.core/update - clojure/core.clj:6255:1
+user                - /home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/export.bb:18:14
+

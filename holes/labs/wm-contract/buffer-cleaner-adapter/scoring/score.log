@@ -1,0 +1,62 @@
+{
+  "scope": "real retained snapshot; constructed probabilities/costs; dry-run only",
+  "model": "shared candidate-union false-kill outcome projection; independent likelihood; fixed current state",
+  "full_A": "unresolved; displayed A projection is not a ruled full-A formula",
+  "comparison": "not distinguishable on this field",
+  "choice": "no threshold-eligible wiring",
+  "arms": [
+    {
+      "wiring": "aggressive",
+      "meters": {
+        "scanned": 138,
+        "kills-proposed": 3,
+        "remaining": 135,
+        "expected-recovery": 0.22499999999999998,
+        "fuel-charged": 1.6800000000000002
+      },
+      "G_B": 1.325600359216552,
+      "G_A_projection": 1.325600359216552,
+      "risk": 0.36623472790599854,
+      "ambiguity": 0.9593656313105534,
+      "expected_loss": "9/40",
+      "fuel": "42/25",
+      "total": 3.005600359216552,
+      "threshold": 16,
+      "threshold_eligible": false,
+      "rule_verdict": "unavailable: no observed revisit truth",
+      "joint_check": "passed"
+    },
+    {
+      "wiring": "conservative",
+      "meters": {
+        "scanned": 138,
+        "kills-proposed": 0,
+        "remaining": 138,
+        "expected-recovery": 0,
+        "fuel-charged": 1.3800000000000001
+      },
+      "G_B": 1.1006003592165525,
+      "G_A_projection": 1.1006003592165525,
+      "risk": 1.1006003592165525,
+      "ambiguity": 0.0,
+      "expected_loss": "0",
+      "fuel": "69/50",
+      "total": 2.4806003592165524,
+      "threshold": 16,
+      "threshold_eligible": false,
+      "rule_verdict": "unavailable: no observed revisit truth",
+      "joint_check": "passed"
+    }
+  ],
+  "age_distribution": "see results.json",
+  "kind_counts": {
+    "other": 57,
+    "temp": 59,
+    "dired": 1,
+    "file": 1,
+    "http": 7,
+    "invoke": 12,
+    "stream": 1
+  },
+  "threshold_prior": "not identifiable from age marginal; use declared conditional table only"
+}

@@ -1,0 +1,45 @@
+{
+  "status": "offline-computation-complete; upstream-autosaved-bug-open",
+  "source_commissions": [
+    "b5081538",
+    "6656138"
+  ],
+  "files": {
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/src/buffer_cleaner/classify.clj": "75ec64bc52ebd733d0f591c2e32ba759b08f1a6b80ff54f9e380467d13fa7324",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/adapter/run.bb": "56bc75e4b455e76b2bd18d1d87fb2de5491ab94964dec175b891531cbe785d07",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/adapter/dump-state.el": "bc1332873452fc36ac2a2e42503ed8aa517336e00b87afe6ef4b145916a25222",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/runs/state-packet.json": "5b12f8d28ebefa2fc441623ba9560afe11ffcfb5ee93832e5264f93f6c59e5db",
+    "/home/joe/code/futon3/library/buffer-cleaner/params/categories.edn": "2260b9e07801d3ad9c973f62ba22840c56bdbc5cddc533b6992fa2894253686c",
+    "/home/joe/code/futon3/library/buffer-cleaner/wirings/conservative.edn": "56ff554f453dfc8617db6e589a3ff3908753b89d7348fe3067ed3871aed6cb56",
+    "/home/joe/code/futon3/library/buffer-cleaner/wirings/aggressive.edn": "77c3d195be53046761e1e6677889dfd358174d9328c0a896bfd207a8e98b3104",
+    "/home/joe/code/futon3/library/buffer-cleaner/nodes/yield-settled.params.edn": "7c24ce097abcd32ed31ca6be0014d7c9b5408915282e85564739bcae946e4c8c",
+    "/home/joe/code/futon3/library/buffer-cleaner/nodes/kill.params.edn": "0dd8189d41b87b62c89d1db12b31e65f06ad15feb2335a22373b986e23ccea0f",
+    "/home/joe/code/futon3/library/buffer-cleaner/nodes/classify-staleness.params.edn": "6a016d7d40dfa2aa501d6b40d6daf11059beb30542dbfd34d2eaaa5a0c97eeca",
+    "/home/joe/code/futon3/library/buffer-cleaner/nodes/observe-categories.params.edn": "8ac6b688981c48fefa3c6b6da8ad7656ab462b2a8032c1a05235603a4bff0d26",
+    "/home/joe/code/futon3/library/buffer-cleaner/nodes/keep.params.edn": "6b13e49bb4b04b07a8225f20480ed730277b132016dce63b2fc29f5f44832893",
+    "/home/joe/code/futon3/library/buffer-cleaner/wirings/aggressive.flexiarg": "ddef8dbbab7d6a96995a841b0f93a73df63cb72bf62bc4d9863569f1fd072cb3",
+    "/home/joe/code/futon3/library/buffer-cleaner/wirings/conservative.flexiarg": "47a9776288a3cd621dd5506d8a721c240343e178e29c90c44617550539ee7903",
+    "/home/joe/code/futon3/library/buffer-cleaner/nodes/yield-settled.flexiarg": "10c5904876d28436c644c00716dc2d5a90071ccae4771eb0e0ad41714d2ddfe6",
+    "/home/joe/code/futon3/library/buffer-cleaner/nodes/kill.flexiarg": "7e4b14b3cef169219d5333144142d7b8c355bba1f2d1ce8a7f7a16eb086865cc",
+    "/home/joe/code/futon3/library/buffer-cleaner/nodes/keep.flexiarg": "9f659e4c6a6e1c55cd611d6afb41f7e9ca13108a9b51ad201d4cfce7af20324e",
+    "/home/joe/code/futon3/library/buffer-cleaner/nodes/classify-staleness.flexiarg": "720a19368fd29e6b9a9e8cc002e6238e6f41da41fa36b9df02767ba934965435",
+    "/home/joe/code/futon3/library/buffer-cleaner/nodes/observe-categories.flexiarg": "0218406886d629e4513626ece3740be6a9a9291ebd8fffc6e21fde6fe6c74b96",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/export-initial-failure.stderr": "f83a3902ac8c20fb88b68a71904c65fd5abdfef66074422321baaee8d8796ba0",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/export-autosaved-failure.stderr": "3679f4d1ee34415dda16123adc7fb7dfd7f837ac1dd4344e1d5c974eb2578701",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/adapter-output.json": "20c6533ba923db391d5ed61fe35593bc438c0a5bb17fe97c95cd2a02a07d22b5",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/export.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/score.log": "2daf269a777f98b73669841f9b52e9d5412ab6ad0557d1402c7dae6512c7ef4e",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/export.bb": "16b11ea3ea89a0488eed80f9896869393c57985460411bea7ceb42db0ed21b40",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/README.md": "b6acc555f974519b9508fc698fc370e0b55aa205b9d973d43869d4c74c3e0f8e",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/results.json": "8dd7b19b53ef53899fd355ebe44d4226e3b3f8a4339992667a5786b4bef65c22",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/score.py": "0f39a1da50712bfc7a9b00ec011afab323dd7b5cf1524f4739f2ba83e0920df5",
+    "/home/joe/code/futon2/holes/labs/wm-contract/buffer-cleaner-adapter/scoring/PLAN.md": "755176e7eb83c8ead2da6172ddf8f07d086b8c8ec612b85a1c734a61ad456f07"
+  },
+  "commands": {
+    "export": 0,
+    "score": 0,
+    "kondo": "0 errors 0 warnings",
+    "parens": 0
+  }
+}
