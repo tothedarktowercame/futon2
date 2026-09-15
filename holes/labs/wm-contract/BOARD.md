@@ -1,6 +1,6 @@
 # wm-contract board — refreshed every claude-15 tick
 
-Updated: 2026-09-15 ~02:15Z (S GROUNDED; T DISCHARGED; measured O firing — the exercise-6 boundary)
+Updated: 2026-09-15 ~02:55Z (O closed evidence-less; exercise 6 running on the honest boundary)
 
 ## OUTSTANDING blocks — honest count
 First completion revision of the DAG snapshot committed (`714822b6`): the
@@ -13,13 +13,15 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 (needs policy-plans + model-assembly).
 
 ## IN FLIGHT
-- **cohort-55 attempt-003 = O, the MEASURED exercise-6 boundary** (click
-  wm-click-c42ade4c, codex-23 author). The chain finally closed end-to-end:
-  attempt-002 GROUNDED (commit f9896cf6) = S; T then discharged via the
-  predeclared lead-invoked route (successor-resolution! -> resolve!,
-  :status :resolved, relation embedded, record + script committed 70c7b698,
-  resolution byte-pinned). Measured deposits now include resolution-backed
-  repair pairs (a27b4a64) so O's manifest carries the store facts.
+- **exercise-6 blinded observation** — codex-25, job
+  `invoke-1789440080593-20945-dc5e5e8c` (running), park `park-f4e373f4`.
+  O (cohort-55 att-003) reached an APPROVED review with a complete-looking
+  deposit set — including the new resolution-backed pairs — and then the
+  close refused on ONE stray unreferenced derived.stderr; fail-closed
+  admission refused the whole close (guidance fixed 04c9e08f). Per prereg
+  the boundary stands regardless: the observer works from 6 blinded cells +
+  an honest absent-manifest conditioning; the product is the per-criterion
+  missing-evidence list. Cohort 56 (T resolution PERSISTS) queues behind it.
 
 ## DONE (this sitting, newest first)
 - **Packet 3 complete**: cohort-54 prereg `94b4272a` (T/R/S/O declared pre-outcome:
