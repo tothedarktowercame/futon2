@@ -223,7 +223,7 @@
       "reviewed-revision": 4
     },
     "codex-26": {
-      "state": "pending",
+      "state": "agree-bounded",
       "revision-1-dispatch": {
         "status-url": "/api/alpha/invoke/jobs/invoke-1789491896295-21083-5c5846c1",
         "job-id": "invoke-1789491896295-21083-5c5846c1",
@@ -257,7 +257,9 @@
         "ok": true,
         "bell-type": "request"
       },
-      "basis": "cascade Lean, controller/tickets, proof audit"
+      "basis": "cascade Lean, controller/tickets, proof audit",
+      "review-file": "review-r4-codex-26.json",
+      "response": "**AGREE**, with bounded lane assent, on revision 4 at **p4ng `b2c7d1d`**, verified SHA-256:\n\n`466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`\n\nE03/E04 now correctly reference worklist F11; the WM-13 crosswalk correction is appropriate.\n\nMy assent covers **basis-4, built-3, WM-10\u201312, join-5, join-8, sub-1\u20138**, and **built-9/TKT\u2019s source/test scope**. I agree the checklist preserves all-node completion and distinguishes mathematics, tested source and demonstrated production behavior.\n\nI have not independently verified other owners\u2019 deployment reports, the complete paper census, or roster completeness. This ratifies the honest account within those bounds\u2014not that WM works. Joe retains operator acceptance.\n\nRead-only review; no tests, edits or dispatches."
     },
     "codex-27": {
       "state": "agree-bounded",
@@ -475,7 +477,7 @@
       "reviewed-revision": 4
     },
     "zai-5": {
-      "state": "agree-bounded",
+      "state": "assent-hash-correction-pending",
       "basis": "authored machinery evidence used in observation chain",
       "revision-1-dispatch": null,
       "revision-2-dispatch": {
@@ -503,7 +505,8 @@
       "review-file": "review-r4-zai-5.json",
       "response": "**AGREE** on hash `466a2e1918d1e370020f42ac53461794a65e1973863b59631b59631b31b67b5e9015c8` \u2014 verified from disk (`git show b2c7d1d:CHECKLIST-fundamentals.md | sha256sum`), and I reviewed the 09b9757\u2192b2c7d1d diff in full: it is exactly the four stated changes (revision header, E03/E04 reference correction, row-39 crosswalk adding WM-13, section-6 status note) with no obligation, acceptance bar, or evidence claim relaxed.\n\nThe E03/E04 correction direction is right by my own record: the certificate work those items reference is worklist F11's (find, core three) reconciliation certificate \u2014 implemented at futon2 `33ca99b0` (certificate fn + emission + tests, from the grounded round I witnessed) \u2014 and conflating it with checklist WM-11 (policy posterior) would have mislabeled the obligation. The crosswalk fix is bookkeeping. This is a reference correction, not a substantive change requiring me to re-verify content.\n\nMy lane bounds are unchanged from my R2/R3 replies: verified **WM-12, R13, marker-5** (serving configuration: no FPI_POSTERIOR, no retained effective-horizon record; note the paper flag itself is half stale \u2014 TRACE_POLICY_DETAILS and RECORDING_CONTRACT *are* enabled), **R14, R20, marker-2/9/11** (composer unwired in an applicable mode; variational mode excludes gain by design), **R10, built-10, built-11** (gated entrypoint, r8 grounded close, commissioned dispatch evidence), **basis-4/basis-5** consistency. Not verified by me: all Lean/math items (WM-01\u201307, built-1\u20137), WM-13/FoldC, R12 history, R17-variants, E06/E07 inventories, join-1, E08 \u2014 E03/E04's underlying obligations likewise rest on the audit sources, though their *reference direction* I confirm.\n\nUnavailable seats and roster completeness remain unresolved, and Joe's reconfirmation is still to come, as the document itself records.",
       "job-state": "done",
-      "reviewed-revision": 4
+      "reviewed-revision": 4,
+      "hash-correction-job": "invoke-1789493136971-21191-6198dca2"
     },
     "codex-28": {
       "state": "author-assent",
@@ -515,12 +518,14 @@
   "operator": "Joe; acceptance not inferred",
   "canonical-source": "/home/joe/code/p4ng/CHECKLIST-fundamentals.md",
   "p4ng-commit": "b2c7d1d",
-  "updated-at": "2026-09-15T17:24:03.398355+00:00",
+  "updated-at": "2026-09-15T17:26:19.853901+00:00",
   "counts": {
     "unavailable-usage-limit": 2,
-    "pending": 2,
+    "pending": 1,
     "agree-bounded": 10,
     "unresolved-identity-404": 1,
+    "assent-hash-correction-pending": 1,
     "author-assent": 1
-  }
+  },
+  "evidence-commit": "29d95ccd"
 }
