@@ -1,0 +1,223 @@
+{
+  "schema": "wm/F13-model-manifest-admission-refusal-v1",
+  "status": "refused",
+  "model-admitted": false,
+  "selected-target": null,
+  "ran-at": "2026-09-15T07:35:21.606821+00:00",
+  "author": "codex-27",
+  "findings": [
+    {
+      "type": "wm/cascade-model-refusal",
+      "kind": "missing-source-bound-have",
+      "input": "q0",
+      "reason": "Mission Status prose is source-bound, but selecting its positive established-token assertions is not determined by byte extraction. Negated and owed capabilities must not be established by occurrence of their words. No explicit HAVE token field in these three documents.",
+      "next-action": "Owner settle the source-span-to-established-token interpretation, including negated and outstanding claims; or identify an existing measured HAVE producer.",
+      "evidence": [
+        {
+          "path": "/home/joe/code/futon2/holes/missions/M-aif-policy-conditioned-eig.md",
+          "sha256": "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478",
+          "line": 4,
+          "status-text": "**Status:** **IDENTIFY agreed in principle; pure kernel instantiated; generative contract open**"
+        },
+        {
+          "path": "/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+          "sha256": "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e",
+          "line": 4,
+          "status-text": "**Status:** INSTANTIATE \u2014 Slices 0, 1a, and 2 kernel dark; persistence/live seams remain open  "
+        },
+        {
+          "path": "/home/joe/code/futon3c/holes/missions/M-shared-memory-control-build-test.md",
+          "sha256": "a33ff99b33677ae93c64a7b20a0618d07e68f563b10e9732dd828d0053ef26fe",
+          "line": 4,
+          "status-text": "**Status:** Phases 1\u20133 ACCEPTED live; Phases 4\u20137 ACCEPTED dark/shadow;"
+        }
+      ]
+    },
+    {
+      "type": "wm/cascade-model-finding",
+      "kind": "missing-coverage-preference-map",
+      "input": "C_tau",
+      "reason": "Existing C seed is over named dispositions, not coverage fractions. No provenance-backed map established in this inspection; no preference rows invented.",
+      "source": {
+        "path": "/home/joe/code/futon2/src/futon2/aif/ruled_outcome_c.clj",
+        "sha256": "bf8784090906d19b0f7a5700e9c148dc2cdd40762e5a624e49e6a70cf995519c"
+      }
+    }
+  ],
+  "comparison": [
+    {
+      "mission": "M-aif-policy-conditioned-eig",
+      "path": "/home/joe/code/futon2/holes/missions/M-aif-policy-conditioned-eig.md",
+      "sha256": "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478",
+      "constructed-pattern-count": 12,
+      "explicit-have-want-markers": [],
+      "interpretability-comparison": {
+        "status": "not-assessed",
+        "reason": "stopped-at-q0-admission-boundary"
+      }
+    },
+    {
+      "mission": "M-wm-aif-policy-grain-compliance",
+      "path": "/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+      "sha256": "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e",
+      "constructed-pattern-count": 9,
+      "explicit-have-want-markers": [],
+      "interpretability-comparison": {
+        "status": "not-assessed",
+        "reason": "stopped-at-q0-admission-boundary"
+      }
+    },
+    {
+      "mission": "M-shared-memory-control-build-test",
+      "path": "/home/joe/code/futon3c/holes/missions/M-shared-memory-control-build-test.md",
+      "sha256": "a33ff99b33677ae93c64a7b20a0618d07e68f563b10e9732dd828d0053ef26fe",
+      "constructed-pattern-count": 7,
+      "explicit-have-want-markers": [],
+      "interpretability-comparison": {
+        "status": "not-assessed",
+        "reason": "stopped-at-q0-admission-boundary"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "path": "/home/joe/code/futon3a/holes/labs/M-memes-arrows/cascade_construct.py",
+      "sha256": "bc3e36d1dfd9c4877eda15ddd9d3f7a0ab62fa51026af43ee29c8eb48cdd8a62"
+    },
+    {
+      "path": "/home/joe/code/futon3a/resources/notions/minilm_pattern_embeddings.json",
+      "sha256": "ce7b3f6d4a2918d0ea7c51cd124f423e20259f9913c8059e37b5b83dc6a5cc01"
+    },
+    {
+      "path": "/home/joe/code/futon6/data/pattern-phylogeny-edges.json",
+      "sha256": "5a0c231ec2debd6e1f7f7cfff7d85d1e253389272d5d7bfa730683b5f3ab1a31"
+    },
+    {
+      "path": "/home/joe/code/futon6/data/pattern-phylogeny-learned.json",
+      "sha256": "02527a1c537223bbbb989e1d30443d8115bfa927c98a63bf7ca1f0c51f674365"
+    },
+    {
+      "path": "/home/joe/code/futon2/scripts/futon2/report/cascade_lane.clj",
+      "sha256": "ef751c06b764f2b7c5fe0809326af9eeb177619fa188b363cab908a47d3cb8f2"
+    },
+    {
+      "path": "/home/joe/code/futon2/src/futon2/aif/ruled_outcome_c.clj",
+      "sha256": "bf8784090906d19b0f7a5700e9c148dc2cdd40762e5a624e49e6a70cf995519c"
+    },
+    {
+      "path": "/home/joe/code/futon3c/src/futon3c/peripheral/live_wm_selection.clj",
+      "sha256": "91c15cc335258d38fb1ce17b97e98829fc87ce29f6be0c813b626e8f4e82afe4"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/gauntlet/aif-as-environment-not-instruction.flexiarg",
+      "sha256": "f5806f54dec5be0f27830f71312b47622bc6e63f111c3474a37a8fd1693b9535"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/gauntlet/modeline-persists-across-worlds.flexiarg",
+      "sha256": "d2d0dc868c75030b3db03010abe9b4591ff4d45c57341e67015c49599803e9ab"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/aif/expected-free-energy-scorecard.flexiarg",
+      "sha256": "ff82d6c0ef5ec8450d72575fc37d8e0c42809f59e89c3c6ecb12af0a149b7e56"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/aif/belief-state-operational-hypotheses.flexiarg",
+      "sha256": "7f12e343b0c6878235a996680062f43014a827c10fcb01cc9e6fac69f861983f"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/aif/policy-precision-commitment-temperature.flexiarg",
+      "sha256": "6d27db7ee7b7d3c859fb5d57e99bdbaadf707709dee39b88f2635f02428b2777"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/aif/candidate-pattern-action-space.flexiarg",
+      "sha256": "dc221cd3304cdd998309a06623b22ab594ff725d46111a1c0687c9b561a6a49e"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/aif/free-energy-as-tick-scalar.flexiarg",
+      "sha256": "7c2b9cc16996715d742fd1591f441489854f37cb32da586d021f42ef8b940107"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/aif/predictive-entropy-as-ambiguity.flexiarg",
+      "sha256": "36da0f0ec55c020f5f717750f19f961c83553832bd875d23b62ee5c88f902f85"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/aif/predictive-coding-belief-update.flexiarg",
+      "sha256": "cd7a7483cf0bcb3ee2cd71eb4b58039c8ab97db0d60025725cf2575ca7a62473"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/aif/belief-aware-risk-term.flexiarg",
+      "sha256": "b7ed35ece50d7d592cf1915a7716ffab2a8c928dbea4f153a8cc58288ad43f62"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/aif/shared-kernel-predictive-forward-model.flexiarg",
+      "sha256": "0b2d4b2b0cd2c61d61265ee878e160e2c624bc4f235ba59ca1a683b397a67e24"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/structure/interest-event-vocabulary.flexiarg",
+      "sha256": "b51296613be9c61bddf9b58d082eaaecbad91ef139373f73438762b2e0943405"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/futon-theory/structural-tension-as-observation.flexiarg",
+      "sha256": "344228d4ac54927d93b691b695fb533a576a7dc8a926c857438d450749b0877a"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/war-machine/ideal-actual-gap.flexiarg",
+      "sha256": "cf9368aa42a4d5cc096edca6d085a6b0314ed446638e10b8a3e9ab2c2d2d67b0"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/ants/baseline-cyber-ant.flexiarg",
+      "sha256": "7f65024c6e11139c3cc9442b4ce54c466ddfc4570279d1d39d17fd1fdae79728"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/futon-theory/all-or-nothing.flexiarg",
+      "sha256": "b2bdcb3397c0cf50c8919ccedf4eb5ba488c297b73895ef6875b298a4106dd87"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/storage/open-world-velocity-validation.flexiarg",
+      "sha256": "2454676e3845cb09919f30c1cea4e872b8e8e6d1f6a9524c6f47ade986da93a4"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/devmap-coherence/prototype-alignment-tension.flexiarg",
+      "sha256": "4b571feabea82a8ae09fd60355d851c69312fb7bd228541d9740a2882e851af2"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/stack-coherence/maturity-evidence-audit.flexiarg",
+      "sha256": "1116322c08771211ef85f4186475b620938895935a91f32143f9d7a1788ddcfd"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/stack-coherence/ready-blocked-triage.flexiarg",
+      "sha256": "676da31a6a133cacba222e9ea46715d5e32dbb5b6d3a93c13c36493a1950471f"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/stack-coherence/stack-blocker-detection.flexiarg",
+      "sha256": "a680ba35f026cf5ab2735312e066d324391e5cea7dfb9447d7ac2d3d0e62767e"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/contributing/stack-scan-logging-protocol.flexiarg",
+      "sha256": "3d30d2fd5b0d3a9cdb292b45dd698dc3734c3f77e7811142e829f8b019b54b82"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/stack-coherence/readme-devmap-sync.flexiarg",
+      "sha256": "6b7bf965866d149fd141acd10d864625749f6c97c0a9c913ed85d417eba09ec9"
+    },
+    {
+      "path": "/home/joe/code/futon3/library/devmap-coherence/ifr-state-convergence.flexiarg",
+      "sha256": "1593496802f5a579f2eca152fc1c7c5c37461af7319daaf95bf57b04562d93d4"
+    }
+  ],
+  "construction-artifact": {
+    "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/construction-comparison.json",
+    "sha256": "e8d2fb4aa9c75bae2e0e4ee360a2cd00ca0d2083c3f0ee1818fb5f762cc0d506"
+  },
+  "execution": {
+    "exit": 0,
+    "python": "/home/joe/code/futon3a/.venv/bin/python -B",
+    "model-snapshot": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "model-loading": "existing local snapshot, local_files_only=True",
+    "query": "mission id stem + title[:160] as want + first Status line[:160] as have; construction query only",
+    "algorithm": "cascade_construct.construct_cascade, defaults, full untruncated result",
+    "epsilon": 0.15,
+    "pool-budget": 40,
+    "note": "Not a live selection, not a model admission, not a comparison of executable guards. No scoring with CascadeEFE."
+  }
+}

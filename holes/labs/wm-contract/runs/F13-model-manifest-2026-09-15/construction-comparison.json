@@ -1,0 +1,1182 @@
+[
+  {
+    "mission": "M-aif-policy-conditioned-eig",
+    "path": "/home/joe/code/futon2/holes/missions/M-aif-policy-conditioned-eig.md",
+    "sha256": "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478",
+    "status-text": "**Status:** **IDENTIFY agreed in principle; pure kernel instantiated; generative contract open**",
+    "status-role": "construction query only; not admitted as measured HAVE",
+    "psi": "aif-policy-conditioned-eig \u2014 want: Policy-conditioned expected information gain (M-aif-policy-conditioned-eig). have: **IDENTIFY agreed in principle; pure kernel instantiated; generative contract open**",
+    "constructor": {
+      "epsilon": 0.15,
+      "pool-budget": 40,
+      "budget-truncation": false
+    },
+    "result": {
+      "cascade": [
+        [
+          "gauntlet/aif-as-environment-not-instruction",
+          0.502,
+          0.151
+        ],
+        [
+          "gauntlet/modeline-persists-across-worlds",
+          0.43,
+          0.645
+        ],
+        [
+          "aif/expected-free-energy-scorecard",
+          0.363,
+          0.472
+        ],
+        [
+          "aif/belief-state-operational-hypotheses",
+          0.396,
+          0.752
+        ],
+        [
+          "aif/policy-precision-commitment-temperature",
+          0.38,
+          1.101
+        ],
+        [
+          "aif/candidate-pattern-action-space",
+          0.37,
+          1.371
+        ],
+        [
+          "aif/free-energy-as-tick-scalar",
+          0.403,
+          0.926
+        ],
+        [
+          "aif/predictive-entropy-as-ambiguity",
+          0.437,
+          0.918
+        ],
+        [
+          "aif/predictive-coding-belief-update",
+          0.359,
+          0.681
+        ],
+        [
+          "aif/belief-aware-risk-term",
+          0.34,
+          0.714
+        ],
+        [
+          "aif/shared-kernel-predictive-forward-model",
+          0.495,
+          0.743
+        ],
+        [
+          "structure/interest-event-vocabulary",
+          0.398,
+          0.438
+        ]
+      ],
+      "size": 12,
+      "wholeness": 4.531,
+      "H-coherence": 0.93,
+      "T-intensity": 4.873,
+      "coverage-reward": 8.912,
+      "prior-cost": 4.968,
+      "cascade-score": 7.67,
+      "lambda": 0.25,
+      "trajectory": [
+        [
+          1,
+          "gauntlet/aif-as-environment-not-instruction",
+          0.151
+        ],
+        [
+          2,
+          "gauntlet/modeline-persists-across-worlds",
+          0.645
+        ],
+        [
+          3,
+          "aif/expected-free-energy-scorecard",
+          0.472
+        ],
+        [
+          4,
+          "aif/belief-state-operational-hypotheses",
+          0.752
+        ],
+        [
+          5,
+          "aif/policy-precision-commitment-temperature",
+          1.101
+        ],
+        [
+          6,
+          "aif/candidate-pattern-action-space",
+          1.371
+        ],
+        [
+          7,
+          "aif/free-energy-as-tick-scalar",
+          0.926
+        ],
+        [
+          8,
+          "aif/predictive-entropy-as-ambiguity",
+          0.918
+        ],
+        [
+          9,
+          "aif/predictive-coding-belief-update",
+          0.681
+        ],
+        [
+          10,
+          "aif/belief-aware-risk-term",
+          0.714
+        ],
+        [
+          11,
+          "aif/shared-kernel-predictive-forward-model",
+          0.743
+        ],
+        [
+          12,
+          "structure/interest-event-vocabulary",
+          0.438
+        ]
+      ],
+      "posterior_weight": 0.0,
+      "posterior_label": "self-graded",
+      "semi-lattice": {
+        "descent": [
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "aif/policy-precision-commitment-temperature"
+          ],
+          [
+            "aif/expected-free-energy-scorecard",
+            "aif/belief-aware-risk-term"
+          ],
+          [
+            "aif/expected-free-energy-scorecard",
+            "aif/predictive-entropy-as-ambiguity"
+          ],
+          [
+            "gauntlet/modeline-persists-across-worlds",
+            "gauntlet/aif-as-environment-not-instruction"
+          ],
+          [
+            "gauntlet/modeline-persists-across-worlds",
+            "aif/policy-precision-commitment-temperature"
+          ]
+        ],
+        "co_app": [
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "aif/belief-state-operational-hypotheses",
+            3
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "aif/candidate-pattern-action-space",
+            3
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "aif/expected-free-energy-scorecard",
+            5
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "aif/free-energy-as-tick-scalar",
+            1
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "structure/interest-event-vocabulary",
+            1
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "gauntlet/modeline-persists-across-worlds",
+            1
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "aif/policy-precision-commitment-temperature",
+            3
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "aif/predictive-coding-belief-update",
+            2
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "aif/predictive-entropy-as-ambiguity",
+            1
+          ],
+          [
+            "aif/belief-aware-risk-term",
+            "aif/candidate-pattern-action-space",
+            1
+          ],
+          [
+            "aif/belief-aware-risk-term",
+            "aif/expected-free-energy-scorecard",
+            2
+          ],
+          [
+            "aif/belief-aware-risk-term",
+            "aif/free-energy-as-tick-scalar",
+            2
+          ],
+          [
+            "aif/belief-aware-risk-term",
+            "aif/policy-precision-commitment-temperature",
+            2
+          ],
+          [
+            "aif/belief-aware-risk-term",
+            "aif/predictive-coding-belief-update",
+            1
+          ],
+          [
+            "aif/belief-aware-risk-term",
+            "aif/predictive-entropy-as-ambiguity",
+            1
+          ],
+          [
+            "aif/belief-aware-risk-term",
+            "aif/shared-kernel-predictive-forward-model",
+            1
+          ],
+          [
+            "aif/belief-state-operational-hypotheses",
+            "aif/candidate-pattern-action-space",
+            4
+          ],
+          [
+            "aif/belief-state-operational-hypotheses",
+            "aif/expected-free-energy-scorecard",
+            5
+          ],
+          [
+            "aif/belief-state-operational-hypotheses",
+            "aif/free-energy-as-tick-scalar",
+            1
+          ],
+          [
+            "aif/belief-state-operational-hypotheses",
+            "aif/policy-precision-commitment-temperature",
+            5
+          ],
+          [
+            "aif/belief-state-operational-hypotheses",
+            "aif/predictive-entropy-as-ambiguity",
+            1
+          ],
+          [
+            "aif/candidate-pattern-action-space",
+            "aif/expected-free-energy-scorecard",
+            7
+          ],
+          [
+            "aif/candidate-pattern-action-space",
+            "aif/free-energy-as-tick-scalar",
+            2
+          ],
+          [
+            "aif/candidate-pattern-action-space",
+            "aif/policy-precision-commitment-temperature",
+            5
+          ],
+          [
+            "aif/candidate-pattern-action-space",
+            "aif/predictive-entropy-as-ambiguity",
+            1
+          ],
+          [
+            "aif/candidate-pattern-action-space",
+            "aif/shared-kernel-predictive-forward-model",
+            2
+          ],
+          [
+            "aif/expected-free-energy-scorecard",
+            "aif/free-energy-as-tick-scalar",
+            3
+          ],
+          [
+            "aif/expected-free-energy-scorecard",
+            "structure/interest-event-vocabulary",
+            2
+          ],
+          [
+            "aif/expected-free-energy-scorecard",
+            "aif/policy-precision-commitment-temperature",
+            7
+          ],
+          [
+            "aif/expected-free-energy-scorecard",
+            "aif/predictive-coding-belief-update",
+            3
+          ],
+          [
+            "aif/expected-free-energy-scorecard",
+            "aif/predictive-entropy-as-ambiguity",
+            2
+          ],
+          [
+            "aif/expected-free-energy-scorecard",
+            "aif/shared-kernel-predictive-forward-model",
+            1
+          ],
+          [
+            "aif/free-energy-as-tick-scalar",
+            "aif/policy-precision-commitment-temperature",
+            3
+          ],
+          [
+            "aif/free-energy-as-tick-scalar",
+            "aif/predictive-coding-belief-update",
+            1
+          ],
+          [
+            "aif/free-energy-as-tick-scalar",
+            "aif/predictive-entropy-as-ambiguity",
+            2
+          ],
+          [
+            "aif/free-energy-as-tick-scalar",
+            "aif/shared-kernel-predictive-forward-model",
+            1
+          ],
+          [
+            "structure/interest-event-vocabulary",
+            "aif/predictive-coding-belief-update",
+            1
+          ],
+          [
+            "aif/policy-precision-commitment-temperature",
+            "aif/predictive-coding-belief-update",
+            1
+          ],
+          [
+            "aif/policy-precision-commitment-temperature",
+            "aif/predictive-entropy-as-ambiguity",
+            2
+          ],
+          [
+            "aif/policy-precision-commitment-temperature",
+            "aif/shared-kernel-predictive-forward-model",
+            1
+          ],
+          [
+            "aif/predictive-coding-belief-update",
+            "aif/predictive-entropy-as-ambiguity",
+            1
+          ]
+        ]
+      },
+      "non-phylogeny": [
+        "accountable-next-action-choice",
+        "admissibility",
+        "catalogue-r5-efe-label-auditability",
+        "graduate-strategy-by-outcome",
+        "hierarchical-and-temporal-depth",
+        "niche-construction",
+        "placenta-transfer",
+        "posterior-variance-as-epistemic-value",
+        "r13-temporal-policy-depth",
+        "r14-commitment-temperature",
+        "r2-structured-observation",
+        "r4-forward-model",
+        "r5-expected-free-energy-core",
+        "r6-candidate-action-space-and-selection",
+        "refusal-becomes-pattern",
+        "reward-supersedes-evidence",
+        "temporal-depth-beyond-greedy",
+        "wr-12-essay-health-is-the-aif-observation-channel",
+        "wr-20-action-class-inventory-becomes-data"
+      ],
+      "coverage-candidates": [
+        {
+          "pattern_id": "war-room/wr-20-action-class-inventory-becomes-data",
+          "stem": "wr-20-action-class-inventory-becomes-data",
+          "relevance": 0.419
+        },
+        {
+          "pattern_id": "problems/catalogue-r5-efe-label-auditability",
+          "stem": "catalogue-r5-efe-label-auditability",
+          "relevance": 0.416
+        },
+        {
+          "pattern_id": "process-coherence/refusal-becomes-pattern",
+          "stem": "refusal-becomes-pattern",
+          "relevance": 0.393
+        },
+        {
+          "pattern_id": "problems/r5-expected-free-energy-core",
+          "stem": "r5-expected-free-energy-core",
+          "relevance": 0.392
+        },
+        {
+          "pattern_id": "aif/niche-construction",
+          "stem": "niche-construction",
+          "relevance": 0.389
+        },
+        {
+          "pattern_id": "aif/hierarchical-and-temporal-depth",
+          "stem": "hierarchical-and-temporal-depth",
+          "relevance": 0.386
+        },
+        {
+          "pattern_id": "aif/posterior-variance-as-epistemic-value",
+          "stem": "posterior-variance-as-epistemic-value",
+          "relevance": 0.385
+        },
+        {
+          "pattern_id": "problems/r6-candidate-action-space-and-selection",
+          "stem": "r6-candidate-action-space-and-selection",
+          "relevance": 0.382
+        },
+        {
+          "pattern_id": "problems/r14-commitment-temperature",
+          "stem": "r14-commitment-temperature",
+          "relevance": 0.381
+        },
+        {
+          "pattern_id": "war-room/wr-12-essay-health-is-the-aif-observation-channel",
+          "stem": "wr-12-essay-health-is-the-aif-observation-channel",
+          "relevance": 0.378
+        },
+        {
+          "pattern_id": "forward-model/graduate-strategy-by-outcome",
+          "stem": "graduate-strategy-by-outcome",
+          "relevance": 0.367
+        },
+        {
+          "pattern_id": "aif/admissibility",
+          "stem": "admissibility",
+          "relevance": 0.366
+        },
+        {
+          "pattern_id": "problems/r4-forward-model",
+          "stem": "r4-forward-model",
+          "relevance": 0.366
+        },
+        {
+          "pattern_id": "gauntlet/placenta-transfer",
+          "stem": "placenta-transfer",
+          "relevance": 0.358
+        },
+        {
+          "pattern_id": "problems/r13-temporal-policy-depth",
+          "stem": "r13-temporal-policy-depth",
+          "relevance": 0.353
+        },
+        {
+          "pattern_id": "aif/temporal-depth-beyond-greedy",
+          "stem": "temporal-depth-beyond-greedy",
+          "relevance": 0.347
+        },
+        {
+          "pattern_id": "problems/r2-structured-observation",
+          "stem": "r2-structured-observation",
+          "relevance": 0.347
+        },
+        {
+          "pattern_id": "forward-model/reward-supersedes-evidence",
+          "stem": "reward-supersedes-evidence",
+          "relevance": 0.339
+        },
+        {
+          "pattern_id": "workshop/accountable-next-action-choice",
+          "stem": "accountable-next-action-choice",
+          "relevance": 0.337
+        }
+      ],
+      "phylogeny": {
+        "alpha": 0.3,
+        "edge_count": 46,
+        "edge_density": 0.697,
+        "coverage_gap": true,
+        "low_connectivity": false
+      }
+    }
+  },
+  {
+    "mission": "M-wm-aif-policy-grain-compliance",
+    "path": "/home/joe/code/futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+    "sha256": "a770d0005af53aa483f2fe2094d363c502eee3c7842d3663af01cf37353ef08e",
+    "status-text": "**Status:** INSTANTIATE \u2014 Slices 0, 1a, and 2 kernel dark; persistence/live seams remain open  ",
+    "status-role": "construction query only; not admitted as measured HAVE",
+    "psi": "wm-aif-policy-grain-compliance \u2014 want: War Machine AIF policy-grain compliance. have: INSTANTIATE \u2014 Slices 0, 1a, and 2 kernel dark; persistence/live seams remain open  ",
+    "constructor": {
+      "epsilon": 0.15,
+      "pool-budget": 40,
+      "budget-truncation": false
+    },
+    "result": {
+      "cascade": [
+        [
+          "gauntlet/modeline-persists-across-worlds",
+          0.453,
+          0.136
+        ],
+        [
+          "gauntlet/aif-as-environment-not-instruction",
+          0.435,
+          0.217
+        ],
+        [
+          "aif/policy-precision-commitment-temperature",
+          0.42,
+          0.378
+        ],
+        [
+          "futon-theory/structural-tension-as-observation",
+          0.418,
+          0.543
+        ],
+        [
+          "war-machine/ideal-actual-gap",
+          0.445,
+          0.311
+        ],
+        [
+          "structure/interest-event-vocabulary",
+          0.422,
+          0.38
+        ],
+        [
+          "ants/baseline-cyber-ant",
+          0.401,
+          0.281
+        ],
+        [
+          "futon-theory/all-or-nothing",
+          0.377,
+          0.264
+        ],
+        [
+          "storage/open-world-velocity-validation",
+          0.393,
+          0.197
+        ]
+      ],
+      "size": 9,
+      "wholeness": 3.275,
+      "H-coherence": 0.87,
+      "T-intensity": 3.764,
+      "coverage-reward": 2.707,
+      "prior-cost": 4.04,
+      "cascade-score": 1.697,
+      "lambda": 0.25,
+      "trajectory": [
+        [
+          1,
+          "gauntlet/modeline-persists-across-worlds",
+          0.136
+        ],
+        [
+          2,
+          "gauntlet/aif-as-environment-not-instruction",
+          0.217
+        ],
+        [
+          3,
+          "aif/policy-precision-commitment-temperature",
+          0.378
+        ],
+        [
+          4,
+          "futon-theory/structural-tension-as-observation",
+          0.543
+        ],
+        [
+          5,
+          "war-machine/ideal-actual-gap",
+          0.311
+        ],
+        [
+          6,
+          "structure/interest-event-vocabulary",
+          0.38
+        ],
+        [
+          7,
+          "ants/baseline-cyber-ant",
+          0.281
+        ],
+        [
+          8,
+          "futon-theory/all-or-nothing",
+          0.264
+        ],
+        [
+          9,
+          "storage/open-world-velocity-validation",
+          0.197
+        ]
+      ],
+      "posterior_weight": 0.0,
+      "posterior_label": "self-graded",
+      "semi-lattice": {
+        "descent": [
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "aif/policy-precision-commitment-temperature"
+          ],
+          [
+            "gauntlet/modeline-persists-across-worlds",
+            "gauntlet/aif-as-environment-not-instruction"
+          ],
+          [
+            "gauntlet/modeline-persists-across-worlds",
+            "aif/policy-precision-commitment-temperature"
+          ]
+        ],
+        "co_app": [
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "futon-theory/all-or-nothing",
+            1
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "war-machine/ideal-actual-gap",
+            1
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "structure/interest-event-vocabulary",
+            1
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "gauntlet/modeline-persists-across-worlds",
+            1
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "aif/policy-precision-commitment-temperature",
+            3
+          ],
+          [
+            "gauntlet/aif-as-environment-not-instruction",
+            "futon-theory/structural-tension-as-observation",
+            2
+          ],
+          [
+            "futon-theory/all-or-nothing",
+            "gauntlet/modeline-persists-across-worlds",
+            1
+          ],
+          [
+            "futon-theory/all-or-nothing",
+            "storage/open-world-velocity-validation",
+            1
+          ],
+          [
+            "ants/baseline-cyber-ant",
+            "futon-theory/structural-tension-as-observation",
+            2
+          ],
+          [
+            "war-machine/ideal-actual-gap",
+            "structure/interest-event-vocabulary",
+            1
+          ],
+          [
+            "war-machine/ideal-actual-gap",
+            "futon-theory/structural-tension-as-observation",
+            1
+          ],
+          [
+            "structure/interest-event-vocabulary",
+            "futon-theory/structural-tension-as-observation",
+            1
+          ],
+          [
+            "aif/policy-precision-commitment-temperature",
+            "futon-theory/structural-tension-as-observation",
+            3
+          ]
+        ]
+      },
+      "non-phylogeny": [
+        "assumptions-commons",
+        "bounded-disposition",
+        "catalogue-r5-efe-label-auditability",
+        "devmap-self-consistency-standards",
+        "ifr-f3-piti",
+        "inhabitation-threshold",
+        "mission-lifecycle",
+        "non-capture",
+        "process-conduct-is-unassured",
+        "r14-commitment-temperature",
+        "refusal-becomes-pattern",
+        "self-patterning-mandate",
+        "state-capture",
+        "wr-1-three-futon-split",
+        "wr-12-essay-health-is-the-aif-observation-channel",
+        "wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+        "wr-18-war-machine-is-demonstrated-not-hypothesised",
+        "wr-19-tension-must-generate-not-only-rank",
+        "wr-2-pattern-library-stays-canonical",
+        "wr-20-action-class-inventory-becomes-data",
+        "wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+        "wr-23-upstream-trackers-are-stack-surfaces",
+        "wr-26-a-capability-switched-off-carries-its-re-arm-condition-in-writing-at-the-switch",
+        "wr-4-inhabit-before-building",
+        "wr-5-war-machine-is-not-a-mission"
+      ],
+      "coverage-candidates": [
+        {
+          "pattern_id": "war-room/wr-20-action-class-inventory-becomes-data",
+          "stem": "wr-20-action-class-inventory-becomes-data",
+          "relevance": 0.545
+        },
+        {
+          "pattern_id": "war-machine/inhabitation-threshold",
+          "stem": "inhabitation-threshold",
+          "relevance": 0.465
+        },
+        {
+          "pattern_id": "devmap-coherence/ifr-f3-piti",
+          "stem": "ifr-f3-piti",
+          "relevance": 0.439
+        },
+        {
+          "pattern_id": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "stem": "wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "relevance": 0.438
+        },
+        {
+          "pattern_id": "war-room/wr-5-war-machine-is-not-a-mission",
+          "stem": "wr-5-war-machine-is-not-a-mission",
+          "relevance": 0.436
+        },
+        {
+          "pattern_id": "futon-theory/mission-lifecycle",
+          "stem": "mission-lifecycle",
+          "relevance": 0.434
+        },
+        {
+          "pattern_id": "war-room/wr-12-essay-health-is-the-aif-observation-channel",
+          "stem": "wr-12-essay-health-is-the-aif-observation-channel",
+          "relevance": 0.418
+        },
+        {
+          "pattern_id": "war-room/wr-18-war-machine-is-demonstrated-not-hypothesised",
+          "stem": "wr-18-war-machine-is-demonstrated-not-hypothesised",
+          "relevance": 0.418
+        },
+        {
+          "pattern_id": "process-coherence/refusal-becomes-pattern",
+          "stem": "refusal-becomes-pattern",
+          "relevance": 0.418
+        },
+        {
+          "pattern_id": "war-room/wr-23-upstream-trackers-are-stack-surfaces",
+          "stem": "wr-23-upstream-trackers-are-stack-surfaces",
+          "relevance": 0.407
+        },
+        {
+          "pattern_id": "ukrns/assumptions-commons",
+          "stem": "assumptions-commons",
+          "relevance": 0.404
+        },
+        {
+          "pattern_id": "war-room/wr-19-tension-must-generate-not-only-rank",
+          "stem": "wr-19-tension-must-generate-not-only-rank",
+          "relevance": 0.4
+        },
+        {
+          "pattern_id": "problems/r14-commitment-temperature",
+          "stem": "r14-commitment-temperature",
+          "relevance": 0.398
+        },
+        {
+          "pattern_id": "war-room/wr-26-a-capability-switched-off-carries-its-re-arm-condition-in-writing-at-the-switch",
+          "stem": "wr-26-a-capability-switched-off-carries-its-re-arm-condition-in-writing-at-the-switch",
+          "relevance": 0.395
+        },
+        {
+          "pattern_id": "war-room/wr-1-three-futon-split",
+          "stem": "wr-1-three-futon-split",
+          "relevance": 0.394
+        },
+        {
+          "pattern_id": "war-room/wr-4-inhabit-before-building",
+          "stem": "wr-4-inhabit-before-building",
+          "relevance": 0.394
+        },
+        {
+          "pattern_id": "war-machine/state-capture",
+          "stem": "state-capture",
+          "relevance": 0.388
+        },
+        {
+          "pattern_id": "invariant-coherence/bounded-disposition",
+          "stem": "bounded-disposition",
+          "relevance": 0.387
+        },
+        {
+          "pattern_id": "problems/process-conduct-is-unassured",
+          "stem": "process-conduct-is-unassured",
+          "relevance": 0.386
+        },
+        {
+          "pattern_id": "hdm/non-capture",
+          "stem": "non-capture",
+          "relevance": 0.386
+        },
+        {
+          "pattern_id": "problems/catalogue-r5-efe-label-auditability",
+          "stem": "catalogue-r5-efe-label-auditability",
+          "relevance": 0.384
+        },
+        {
+          "pattern_id": "war-room/wr-2-pattern-library-stays-canonical",
+          "stem": "wr-2-pattern-library-stays-canonical",
+          "relevance": 0.377
+        },
+        {
+          "pattern_id": "p4ng/self-patterning-mandate",
+          "stem": "self-patterning-mandate",
+          "relevance": 0.375
+        },
+        {
+          "pattern_id": "problems/devmap-self-consistency-standards",
+          "stem": "devmap-self-consistency-standards",
+          "relevance": 0.374
+        },
+        {
+          "pattern_id": "war-room/wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+          "stem": "wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+          "relevance": 0.374
+        }
+      ],
+      "phylogeny": {
+        "alpha": 0.3,
+        "edge_count": 16,
+        "edge_density": 0.444,
+        "coverage_gap": true,
+        "low_connectivity": true
+      }
+    }
+  },
+  {
+    "mission": "M-shared-memory-control-build-test",
+    "path": "/home/joe/code/futon3c/holes/missions/M-shared-memory-control-build-test.md",
+    "sha256": "a33ff99b33677ae93c64a7b20a0618d07e68f563b10e9732dd828d0053ef26fe",
+    "status-text": "**Status:** Phases 1\u20133 ACCEPTED live; Phases 4\u20137 ACCEPTED dark/shadow;",
+    "status-role": "construction query only; not admitted as measured HAVE",
+    "psi": "shared-memory-control-build-test \u2014 want: Shared memory/control build-test regime. have: Phases 1\u20133 ACCEPTED live; Phases 4\u20137 ACCEPTED dark/shadow;",
+    "constructor": {
+      "epsilon": 0.15,
+      "pool-budget": 40,
+      "budget-truncation": false
+    },
+    "result": {
+      "cascade": [
+        [
+          "devmap-coherence/prototype-alignment-tension",
+          0.442,
+          0.133
+        ],
+        [
+          "stack-coherence/maturity-evidence-audit",
+          0.355,
+          0.248
+        ],
+        [
+          "stack-coherence/ready-blocked-triage",
+          0.335,
+          0.369
+        ],
+        [
+          "stack-coherence/stack-blocker-detection",
+          0.407,
+          0.692
+        ],
+        [
+          "contributing/stack-scan-logging-protocol",
+          0.34,
+          0.442
+        ],
+        [
+          "stack-coherence/readme-devmap-sync",
+          0.339,
+          0.441
+        ],
+        [
+          "devmap-coherence/ifr-state-convergence",
+          0.338,
+          0.44
+        ]
+      ],
+      "size": 7,
+      "wholeness": 2.498,
+      "H-coherence": 0.977,
+      "T-intensity": 2.557,
+      "coverage-reward": 2.765,
+      "prior-cost": 8.028,
+      "cascade-score": 0.758,
+      "lambda": 0.25,
+      "trajectory": [
+        [
+          1,
+          "devmap-coherence/prototype-alignment-tension",
+          0.133
+        ],
+        [
+          2,
+          "stack-coherence/maturity-evidence-audit",
+          0.248
+        ],
+        [
+          3,
+          "stack-coherence/ready-blocked-triage",
+          0.369
+        ],
+        [
+          4,
+          "stack-coherence/stack-blocker-detection",
+          0.692
+        ],
+        [
+          5,
+          "contributing/stack-scan-logging-protocol",
+          0.442
+        ],
+        [
+          6,
+          "stack-coherence/readme-devmap-sync",
+          0.441
+        ],
+        [
+          7,
+          "devmap-coherence/ifr-state-convergence",
+          0.44
+        ]
+      ],
+      "posterior_weight": 0.0,
+      "posterior_label": "self-graded",
+      "semi-lattice": {
+        "descent": [
+          [
+            "devmap-coherence/ifr-state-convergence",
+            "stack-coherence/ready-blocked-triage"
+          ],
+          [
+            "stack-coherence/maturity-evidence-audit",
+            "stack-coherence/ready-blocked-triage"
+          ],
+          [
+            "stack-coherence/ready-blocked-triage",
+            "stack-coherence/stack-blocker-detection"
+          ],
+          [
+            "stack-coherence/stack-blocker-detection",
+            "stack-coherence/ready-blocked-triage"
+          ],
+          [
+            "contributing/stack-scan-logging-protocol",
+            "stack-coherence/readme-devmap-sync"
+          ],
+          [
+            "contributing/stack-scan-logging-protocol",
+            "stack-coherence/stack-blocker-detection"
+          ]
+        ],
+        "co_app": [
+          [
+            "stack-coherence/maturity-evidence-audit",
+            "devmap-coherence/prototype-alignment-tension",
+            2
+          ],
+          [
+            "stack-coherence/maturity-evidence-audit",
+            "stack-coherence/readme-devmap-sync",
+            2
+          ],
+          [
+            "stack-coherence/maturity-evidence-audit",
+            "stack-coherence/ready-blocked-triage",
+            3
+          ],
+          [
+            "stack-coherence/maturity-evidence-audit",
+            "stack-coherence/stack-blocker-detection",
+            1
+          ],
+          [
+            "devmap-coherence/prototype-alignment-tension",
+            "stack-coherence/ready-blocked-triage",
+            1
+          ],
+          [
+            "stack-coherence/readme-devmap-sync",
+            "stack-coherence/ready-blocked-triage",
+            2
+          ],
+          [
+            "stack-coherence/readme-devmap-sync",
+            "stack-coherence/stack-blocker-detection",
+            1
+          ],
+          [
+            "stack-coherence/ready-blocked-triage",
+            "stack-coherence/stack-blocker-detection",
+            1
+          ]
+        ]
+      },
+      "non-phylogeny": [
+        "baseline-freeze",
+        "community-problem-solving-substrate",
+        "deterministic-substrate",
+        "disruption-soak",
+        "dual-windowing",
+        "durability-first",
+        "facilitation-scaffolds",
+        "fit-for-use-stars",
+        "futon1-determinism",
+        "ifr-f3-piti",
+        "interoceptive-tripwires",
+        "mode-gate",
+        "name-a-reusable-artifact",
+        "rapid-debugging",
+        "readiness-windows",
+        "scale-register",
+        "shared-memory-architecture",
+        "single-producer",
+        "state-atomicity",
+        "subsumption-witness",
+        "three-layer-architecture",
+        "wr-22-logic-model-before-code-is-a-sanctioned-verify-method"
+      ],
+      "coverage-candidates": [
+        {
+          "pattern_id": "storage/rapid-debugging",
+          "stem": "rapid-debugging",
+          "relevance": 0.46
+        },
+        {
+          "pattern_id": "exotic/dual-windowing",
+          "stem": "dual-windowing",
+          "relevance": 0.434
+        },
+        {
+          "pattern_id": "stack-coherence/futon1-determinism",
+          "stem": "futon1-determinism",
+          "relevance": 0.4
+        },
+        {
+          "pattern_id": "cycle-machine/disruption-soak",
+          "stem": "disruption-soak",
+          "relevance": 0.389
+        },
+        {
+          "pattern_id": "or/readiness-windows",
+          "stem": "readiness-windows",
+          "relevance": 0.381
+        },
+        {
+          "pattern_id": "storage/deterministic-substrate",
+          "stem": "deterministic-substrate",
+          "relevance": 0.377
+        },
+        {
+          "pattern_id": "ukrns/scale-register",
+          "stem": "scale-register",
+          "relevance": 0.359
+        },
+        {
+          "pattern_id": "aif/interoceptive-tripwires",
+          "stem": "interoceptive-tripwires",
+          "relevance": 0.358
+        },
+        {
+          "pattern_id": "realtime/mode-gate",
+          "stem": "mode-gate",
+          "relevance": 0.358
+        },
+        {
+          "pattern_id": "or/fit-for-use-stars",
+          "stem": "fit-for-use-stars",
+          "relevance": 0.353
+        },
+        {
+          "pattern_id": "war-room/wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+          "stem": "wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+          "relevance": 0.346
+        },
+        {
+          "pattern_id": "agency/state-atomicity",
+          "stem": "state-atomicity",
+          "relevance": 0.344
+        },
+        {
+          "pattern_id": "vsatlas/three-layer-architecture",
+          "stem": "three-layer-architecture",
+          "relevance": 0.343
+        },
+        {
+          "pattern_id": "vsatlas/facilitation-scaffolds",
+          "stem": "facilitation-scaffolds",
+          "relevance": 0.341
+        },
+        {
+          "pattern_id": "p4ng/shared-memory-architecture",
+          "stem": "shared-memory-architecture",
+          "relevance": 0.339
+        },
+        {
+          "pattern_id": "storage/durability-first",
+          "stem": "durability-first",
+          "relevance": 0.338
+        },
+        {
+          "pattern_id": "devmap-coherence/baseline-freeze",
+          "stem": "baseline-freeze",
+          "relevance": 0.335
+        },
+        {
+          "pattern_id": "invariant-coherence/subsumption-witness",
+          "stem": "subsumption-witness",
+          "relevance": 0.335
+        },
+        {
+          "pattern_id": "devmap-coherence/ifr-f3-piti",
+          "stem": "ifr-f3-piti",
+          "relevance": 0.334
+        },
+        {
+          "pattern_id": "vsatlas/community-problem-solving-substrate",
+          "stem": "community-problem-solving-substrate",
+          "relevance": 0.334
+        },
+        {
+          "pattern_id": "memory/name-a-reusable-artifact",
+          "stem": "name-a-reusable-artifact",
+          "relevance": 0.332
+        },
+        {
+          "pattern_id": "cycle-machine/single-producer",
+          "stem": "single-producer",
+          "relevance": 0.329
+        }
+      ],
+      "phylogeny": {
+        "alpha": 0.3,
+        "edge_count": 14,
+        "edge_density": 0.667,
+        "coverage_gap": true,
+        "low_connectivity": false
+      }
+    }
+  }
+]
