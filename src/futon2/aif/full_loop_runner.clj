@@ -3146,6 +3146,13 @@
     (#{:agent-budget-expired :agent-job-stalled} failure-kind)
     :incomplete-recoverable
 
+    ;; Interpretation failures (content gaps, invalid receipts, missing
+    ;; sources) are discharged by a later valid attempt, never by a
+    ;; code-repair commit, so they must not open a stop-the-line machine
+    ;; repair. Budget expiry and agent unavailability already map above.
+    (and (keyword? failure-kind) (= "interpretation" (namespace failure-kind)))
+    :environmental-hold
+
     :else :machine-failure))
 
 (defn- last-error-phase [phase-events]

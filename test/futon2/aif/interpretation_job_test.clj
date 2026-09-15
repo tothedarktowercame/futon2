@@ -154,3 +154,14 @@
                              [#(assoc-in % [:failure :kind] :invented) :failure-kind-invalid]]]
       (is (= reason (receipt-fixture/refusal #(evidence/validate-record (mutate failure))))))
     (is (= :text-invalid (receipt-fixture/refusal #(evidence/validate-record (assoc-in record [:retrieval :query] "")))))))
+
+(deftest interpretation-failures-never-open-a-machine-repair
+  ;; A machine-failure obligation pins selection to stop-the-line repair;
+  ;; an interpretation gap must instead wait for a valid successor attempt.
+  (doseq [kind [:interpretation/no-relevant-pattern :interpretation/no-citable-tension
+                :interpretation/invalid-receipt :interpretation/source-changed
+                :interpretation/genesis-required :interpretation/retrieval-unavailable]]
+    (is (= :environmental-hold (#'runner/repair-class-for kind)) (str kind)))
+  (is (= :incomplete-recoverable (#'runner/repair-class-for :agent-budget-expired)))
+  (is (= :environmental-hold (#'runner/repair-class-for :agent-unavailable)))
+  (is (= :machine-failure (#'runner/repair-class-for :build-failed))))
