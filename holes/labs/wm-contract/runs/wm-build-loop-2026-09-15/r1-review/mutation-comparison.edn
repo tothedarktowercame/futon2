@@ -1,0 +1,1 @@
+{:exact-semantic-match true, :mutants 17, :killed 14, :survivors ["S05-non-atomic-move.clj" "S14-duplicate-op-in-chain-allowed.clj" "S15-empty-head-envelope-unchecked.clj"], :original-clean? true}

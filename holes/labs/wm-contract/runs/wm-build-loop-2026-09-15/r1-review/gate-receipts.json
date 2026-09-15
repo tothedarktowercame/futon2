@@ -1,0 +1,77 @@
+{
+  "subject": "e38ea7e5153ce30dc094106a9ab5a904d12d3165",
+  "source-sha256": {
+    "src/futon2/aif/work_target_store.clj": "ff7e3abc02c563fc173af2e0fadaf1685db13dfae98e9e67a2ce832a7e919cfb",
+    "test/futon2/aif/work_target_store_test.clj": "8038af789f7d0f3503d5c29a82b8e759a53dfd3b8f1cf4ff42c1232349f3a87e",
+    "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/r1-review/probes.clj": "10fa523d9f7a9e6913cccb164b369ba7f1070942bb0a6908dc948cc1e02cded8"
+  },
+  "gates": [
+    {
+      "name": "clj-kondo",
+      "argv": [
+        "clj-kondo",
+        "--lint",
+        "src/futon2/aif/work_target_store.clj",
+        "test/futon2/aif/work_target_store_test.clj",
+        "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/r1-review/probes.clj"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 0.04
+    },
+    {
+      "name": "check-parens",
+      "argv": [
+        "emacs",
+        "-Q",
+        "--batch",
+        "-l",
+        "/home/joe/code/futon4/dev/check-parens.el",
+        "--eval",
+        "(arxana-check-parens-cli)",
+        "--",
+        "--no-defaults",
+        "src/futon2/aif/work_target_store.clj",
+        "test/futon2/aif/work_target_store_test.clj",
+        "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/r1-review/probes.clj"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 0.035
+    },
+    {
+      "name": "tests",
+      "argv": [
+        "clojure",
+        "-X:test",
+        ":nses",
+        "[futon2.aif.work-target-store-test]"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 3.122
+    },
+    {
+      "name": "probes",
+      "argv": [
+        "clojure",
+        "-M:test",
+        "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/r1-review/probes.clj"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 1.025
+    },
+    {
+      "name": "mutations",
+      "argv": [
+        "clojure",
+        "-M:test",
+        "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/p1b-1-review/run_mutants.clj"
+      ],
+      "cwd": "/home/joe/code/futon2",
+      "exit-status": 0,
+      "elapsed-seconds": 37.732
+    }
+  ]
+}
