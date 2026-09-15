@@ -1998,7 +1998,8 @@
                 ":wm/target-standing-decision-v1 keys [:schema :entity/id :decision :decided-by :implementation-author :decided-at :evidence].\n"
                 "Include a review-grade :explanation of at least 80 characters.\n"
                 "Set :decided-by to your reviewer id and :implementation-author to " author "; a self-decided record refuses.\n"))
-         "Any invalid deposit refuses the whole close: deposit carefully or not at all.\n"))))
+         "Any invalid deposit refuses the whole close: deposit carefully or not at all.\n"
+         "EVERY non-EDN file must be referenced by exactly one record's :file/:stdout-file/:stderr-file field; an unreferenced byproduct (cohort-55 attempt-003: a stray derived.stderr) is parsed as EDN, fails, and refuses the whole close.\n"))))
 
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head attempt-evidence-dir
