@@ -61,12 +61,18 @@
                (= target (or (get-in occurrence [:action/value :target]) named-target))
                (.isBefore (Instant/parse (:recorded-at closed))
                           (Instant/parse (get-in identity [:occurrence :action-at]))))
-      (need! occurrence :previous-occurrence-unavailable {:file (str close-file)})
-      {:closed closed :construction construction :close-file close-file :construction-file construction-file})))
+      {:closed closed :construction construction :close-file close-file :construction-file construction-file
+       :occurrence occurrence
+       ;; A construction written before receipt mode (the old cascade-lane
+       ;; constructor) carries no ruled CascadeDiff.
+       :legacy? (not (contains? (get-in construction [:payload :judgment]) :receipted-construction))})))
 
 (defn previous!
   "Most recent closed construction on this target across explicit physical roots.
-  Legacy constructions lacking a pinned CascadeDiff refuse; they are not first attempts."
+  A legacy predecessor (the old constructor, no pinned CascadeDiff) cannot supply
+  a ruled cascade, so the first receipted construction on that target starts from
+  first-attempt-cascade and records the legacy files it supersedes. A receipted
+  predecessor that fails validation still refuses."
   [identity roots]
   (let [roots (vec (distinct (map #(.getCanonicalPath (io/file %)) roots)))
         candidates (for [root roots
@@ -81,11 +87,29 @@
                         (get-in (last (butlast ordered)) [:closed :recorded-at])))
             (need! false :ambiguous-previous-construction {}))
         {:keys [closed construction close-file construction-file] :as latest} (last ordered)]
-    (if-not latest
+    (cond
+      (not latest)
       {:cascade policy/first-attempt-cascade :admitted {}
        :provenance {:status :none :reason :no-earlier-target-construction :searched-roots (vec roots)}
        :admission-reason :first-attempt-no-admissions}
-      (let [block (get-in closed [:payload :close-retention])
+
+      ;; The latest earlier construction predates receipt mode, so it cannot
+      ;; supply a ruled cascade (precedence, acting order, attributed
+      ;; admissions). Declare the reset and record what it supersedes.
+      (:legacy? latest)
+      {:cascade policy/first-attempt-cascade :admitted {}
+       :provenance {:status :legacy-predecessor-unrepresentable
+                    :searched-roots (vec roots)
+                    :recorded-at (:recorded-at closed)
+                    :construction-file (.getCanonicalPath (io/file construction-file))
+                    :construction-sha256 (evidence/sha256 (bytes construction-file))
+                    :close-file (.getCanonicalPath (io/file close-file))
+                    :close-sha256 (evidence/sha256 (bytes close-file))}
+       :admission-reason :legacy-predecessor-no-ruled-admissions}
+
+      :else
+      (let [_ (need! (:occurrence latest) :previous-occurrence-unavailable {:file (str close-file)})
+            block (get-in closed [:payload :close-retention])
             m (get-in closed [:payload :close-evidence-manifest])
             retained (get-in construction [:payload :judgment :receipted-construction])
             prior-id (:identity retained)

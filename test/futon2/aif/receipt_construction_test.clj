@@ -125,3 +125,29 @@
         (is (= :previous-occurrence-mismatch
                (:construction/refusal (refusal #(construction/previous! current [r1 r2]))))))
       (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
+
+(deftest legacy-predecessor-resets-with-recorded-provenance
+  ;; Real July closes carry no close-retention, and their constructions no
+  ;; :receipted-construction (futon2/data/wm-full-loop/wm-outer-loop-41-v1/attempt-043).
+  (let [temp (.toFile (Files/createTempDirectory "receipt-legacy" (make-array FileAttribute 0)))
+        dir (io/file temp "legacy-cohort" "attempt-001")]
+    (try
+      (.mkdirs dir)
+      (spit (io/file dir "001-time-step.edn") (pr-str {:payload {:judgment {:semantic-epoch :legacy}}}))
+      (spit (io/file dir "003-construction.edn")
+            (pr-str {:cohort/id :legacy-cohort :attempt/id "attempt-001"
+                     :payload {:judgment {:mission "M-history" :cascade {:shown ["family/old"]}}}}))
+      (spit (io/file dir "007-closed.edn")
+            (pr-str {:recorded-at "2026-07-21T10:08:23Z" :payload {:judgment {:outcome :build-failed}}}))
+      (let [current {:occurrence (retention/mint-occurrence
+                                  {:run-id (str (UUID/randomUUID)) :cohort-id ":fixture" :attempt-id "attempt-002"
+                                   :selected-action {:type :advance-mission :target "M-history"}
+                                   :now #(Instant/parse "2026-09-15T12:00:00Z") :uuid-fn #(UUID/randomUUID)})}
+            previous (construction/previous! current [temp])]
+        (is (= policy/first-attempt-cascade (:cascade previous)))
+        (is (= {} (:admitted previous)))
+        (is (= :legacy-predecessor-unrepresentable (get-in previous [:provenance :status])))
+        (is (= :legacy-predecessor-no-ruled-admissions (:admission-reason previous)))
+        (is (= (evidence/sha256 (Files/readAllBytes (.toPath (io/file dir "003-construction.edn"))))
+               (get-in previous [:provenance :construction-sha256]))))
+      (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
