@@ -1,0 +1,77 @@
+{:cohort/id :wm-contract-machinery-56-v1
+ :protocol/version 4
+ :status :preregistered
+ :registered-on "2026-09-14"
+ :purpose "Build-phase MACHINERY-TEST cohort for the wm-contract qualifying-run build (WORK-REMAINING row 26). Every attempt is machinery evidence only; none is a qualifying candidate. Successor to exhausted :wm-contract-machinery-55-v1 (attempt-002 GROUNDED = S; T DISCHARGED via the predeclared lead-invoked route, resolution resolved-at 2026-09-15T02:09:36Z, immutable in the store, byte-pinned 36877d37 in runs/t-discharge-2026-09-15/RECORD.md; attempt-003 = O-55 closed without admitted evidence on a stray unreferenced deposit byproduct, and exercise 6 returned the accepted typed insufficiency 68ae0969/aadab10d whose per-criterion evidence classes govern this cohort). T and R unchanged; S is DONE and NOT re-acquired here. O-56 = the FIRST measured-acquisition close of THIS cohort (the T resolution already precedes any dispatch, so the boundary condition holds from attempt-001). The O-56 author deposits per the a27b4a64 measured instruction (supporting-resolved-* pair carrying finding-to-resolution bytes) plus the standing decision and limb receipts, and deposits NO file that is not referenced by exactly one record (the 04c9e08f rule; a stray byproduct refused the O-55 close). The exercise-6 ACCEPTANCE-observation.md lists the evidence classes the :addressed criterion needs: exact-target contract, per-limb literal receipts, the successor execution explicitly joined to this repair, exact-target resolution review. Annotation exercise 7 subject = the O-56 close regardless of outcome; if the cohort exhausts first, typed insufficiency retained honestly. Casting: worker seats only per CASTING-AMENDMENT-2026-09-14; author recast to codex-23 because the zai fleet is quota-exhausted until 2026-09-15T10:04 (author codex-23, reviewer codex-22, repair-reviewer codex-24 — three distinct worker seats), passed per click payload. Target 3."
+ :casting {:author "codex-23" :reviewer "codex-22" :repair-reviewer "codex-24"}
+ :activation :separate-append-only-marker
+ :population "Reviewed on-demand build-phase machinery-test opportunities for the wm-contract qualifying-run build"
+ :stopping-rule
+ {:unit :trigger-opportunity
+  :target 2
+  :rule "Count the first 2 distinct eligible trigger opportunities after activation, in order."
+  :counts-as-attempt
+  [:selected-and-dispatched
+   :abstained
+   :no-selection
+   :agent-unavailable
+   :substrate-unavailable
+   :guardrail-refusal
+   :dispatch-failed
+   :build-failed
+   :grounded-no-change
+   :grounded-change]
+  :excluded
+  [:manual-test :replay :duplicate-opportunity :pre-activation]
+  :replacement "None. Failed, unavailable, abstaining, and no-change opportunities remain in the denominator."}
+ :allowed-triggers #{:duree-click-on-demand
+                     :duree-click-continuous}
+ :checkpoint-order
+ [:time-step :selection :construction :dispatch :build :adjudication :closed]
+ :required-before-close
+ #{:selection :construction :dispatch :build :adjudication}
+ :checkpoint-contract
+ {:cell-shape "Every checkpoint payload is either {:judgment ... :ground ...} or {:sorry {:kind keyword ...}}."
+  :time-step [:opportunity-id :trigger :machine-state :agent-roster :code-state :semantic-epoch]
+  :selection [:selected-mission :selected-action :ranked-candidates :selection-reasons]
+  :construction [:mission :cascade :sorries :wiring :patterns :deposit]
+  :dispatch [:agent :availability :job-id :prompt-ref]
+  :build [:artifacts :generated-code :commits :patterns-used :inline-improvements :validation]
+  :adjudication [:before :after :witness :build-match :dial]
+  :closed [:outcome :grounded? :artifact-only? :duration-ms :resource-use]
+  :revision-note "A revision round nests inside the :build payload as :revision {:round 2 :commits [...] :review {...}} with both review records under :reviews; checkpoint order and schema unchanged from protocol 4."}
+ :grounded-success
+ {:outcome :grounded-change
+  :requires [:independent-before-witness
+             :independent-after-witness
+             :resolved-adjudication
+             :dial-moved]
+  :artifact-only-counts? false}
+ :machine-evolution
+ {:allowed? true
+  :rule "Normal machine development may continue during collection; it never permits dropping, replacing, relabelling, or promoting a machinery-test opportunity into a qualifying candidate."
+  :per-attempt-provenance [:semantic-epoch :git-sha :git-dirty? :resolved-mode-flags :configuration-digest]
+  :epoch-boundary "This cohort begins after ruling packets 1+2 and the standing-readback close threading (futon2 04c9e08f) and uses the fresh wm-full-loop-machinery-56 root."
+  :analysis "Report attempts chronologically and as machinery tests only; do not pool them with qualifying-run candidates."}
+ :analysis
+ {:primary
+  [:attempt-count
+   :grounded-change-rate
+   :grounded-no-change-rate
+   :dispatch-rate
+   :completion-rate
+   :revision-round-conversion-rate]
+  :secondary
+  [:mission-selection-frequency
+   :selection-reason-frequency
+   :expected-versus-realized-calibration
+   :agent-availability
+   :elapsed-time
+   :resource-use
+   :patterns-used
+   :inline-improvement-frequency
+   :semantic-epoch-results
+   :code-version-trajectory
+   :substrate-state-distribution
+   :selection-transient-frequency]
+  :reporting "Report attempts and all typed sorries; identify every record as machinery-test evidence and never as a qualifying candidate; report eligible attempts, complete limb bundles, valid entity pairs and accepted rubric results separately; insufficiency is a valid result."}}
