@@ -1,0 +1,254 @@
+[
+  {
+    "candidate": "agent/provisional-claims-ledger",
+    "path": "futon3/library/agent/provisional-claims-ledger.flexiarg",
+    "blocks": {
+      "IF": "The agent needs to continue despite missing confirmation.",
+      "HOWEVER": "Treating provisional claims as facts hides uncertainty and undermines trust.",
+      "THEN": "Record provisional claims in a ledger with fields (claim, reason, evidence needed, expiry, owner). Require each entry to be resolved to confirmed or retracted, and surface unresolved items during handoff."
+    }
+  },
+  {
+    "candidate": "agent/evidence-over-assertion",
+    "path": "futon3/library/agent/evidence-over-assertion.flexiarg",
+    "blocks": {
+      "IF": "The agent's outputs need to be verifiable by other agents, humans, or future selves.",
+      "HOWEVER": "Assertions without anchors are indistinguishable from confabulation. Observers cannot tell if the agent is reporting reality or generating plausible-sounding noise.",
+      "THEN": "Require every substantive claim to point to evidence: a file path, a trace event, a test result, a quotation. If evidence is unavailable, emit the claim as provisional with an expiry and a verification path. Make \"unsupported claim\" a detectable violation, not just a style preference."
+    }
+  },
+  {
+    "candidate": "coordination/session-durability-check",
+    "path": "futon3/library/coordination/session-durability-check.flexiarg",
+    "blocks": {
+      "IF": "you want an audit trail that can be replayed after the session ends",
+      "HOWEVER": "acknowledging success before persistence creates silent loss modes (accepted-but-not-stored)",
+      "THEN": "verify durability at G0 and reject success when persistence fails"
+    }
+  },
+  {
+    "candidate": "coordination/cross-validation-protocol",
+    "path": "futon3/library/coordination/cross-validation-protocol.flexiarg",
+    "blocks": {
+      "IF": "you want to reduce confabulation and improve trust in PUR outcomes",
+      "HOWEVER": "a single agent validating its own work can silently lower standards",
+      "THEN": "require validation evidence to be sufficient for replay, and define a cross-validation protocol that can be invoked from the PUR chain"
+    }
+  },
+  {
+    "candidate": "war-machine/operational-not-decorative",
+    "path": "futon3/library/war-machine/operational-not-decorative.flexiarg",
+    "blocks": {
+      "IF": "The system is relying on a document, diagram, or status surface to steer or validate work.",
+      "HOWEVER": "Decorative infrastructure can still aid comprehension, and some sketches are intentionally aspirational. The failure comes when decorative artifacts are trusted as if they were operational.",
+      "THEN": "Make the artifact testable: derive status from evidence, validate diagrams, and wire failures so they force correction instead of silently going stale."
+    }
+  },
+  {
+    "candidate": "sidecar/append-only-semantic-audit",
+    "path": "futon3/library/sidecar/append-only-semantic-audit.flexiarg",
+    "blocks": {
+      "IF": "Proposal or fact updates overwrite prior states.",
+      "HOWEVER": "You need to revise or retire claims over time.",
+      "THEN": "Persist every semantic write (proposal, promotion, evidence, action, fact, chain) as append-only\n    records with identifiers and audit metadata, and reject duplicate ids at the store boundary."
+    }
+  },
+  {
+    "candidate": "stack-coherence/maturity-evidence-audit",
+    "path": "futon3/library/stack-coherence/maturity-evidence-audit.flexiarg",
+    "blocks": {
+      "IF": "devmap prototypes carry :maturity tags indicating their readiness level",
+      "HOWEVER": "maturity claims are often aspirational \u2014 a prototype tagged :active may have failing tests, and one tagged :stub may actually be running in production",
+      "THEN": "for each prototype with a :maturity tag, verify that evidence supports the claimed level; flag mismatches and emit promotion or demotion recommendations"
+    }
+  },
+  {
+    "candidate": "stack-coherence/ready-blocked-triage",
+    "path": "futon3/library/stack-coherence/ready-blocked-triage.flexiarg",
+    "blocks": {
+      "IF": "every devmap clause should be either ready, blocked, drifting, or done",
+      "HOWEVER": "we rarely log that status explicitly",
+      "THEN": "for each clause, inspect evidence (README links, commits, tests) and blockers; emit a status report `status[done|ready|blocked|drift] blocked-by[...] evidence[...]`"
+    }
+  },
+  {
+    "candidate": "social/verify-before-compose",
+    "path": "futon3/library/social/verify-before-compose.flexiarg",
+    "blocks": {
+      "IF": "Components are designed as coherent architectural units \u2014 a registry, a proof-tree forum, a bell/whistle protocol \u2014 and written to match a design specification.",
+      "HOWEVER": "Code written to match a design document without incremental load-and-test accumulates latent errors (unresolved forward declarations, namespace ordering, type mismatches) that only surface when integration is attempted. At that point the debugging cost is multiplicative: each broken dependency interacts with every other, and the developer cannot tell whether a failure is in their code or in a dependency they assumed worked.",
+      "THEN": "Require each namespace to compile and load before adding the next dependency. Write a minimal smoke test (can I call each public function without exception?) before composing namespaces. Treat a forward-declaration fix as a bug report against the development process, not a normal commit."
+    }
+  },
+  {
+    "candidate": "social/tension-before-code",
+    "path": "futon3/library/social/tension-before-code.flexiarg",
+    "blocks": {
+      "IF": "The system is built feature-first \u2014 bells, pages, registries, kick endpoints, session tracking \u2014 with correctness properties assumed to hold implicitly through careful coding.",
+      "HOWEVER": "Without explicit invariants specified upfront, each successive generation discovers violations that were present from the start. The \"rebuild\" that fixes them is a confession that retroactively names what should have been preconditions. This turns development into an unbounded cycle: build features -> discover violations -> confess invariants -> rebuild -> discover new violations. Agency went through three generations of this cycle before achieving invariant coverage.",
+      "THEN": "Write invariant proof tests first, as failing tests that define the boundary conditions. Derive the implementation from what the tests require. Treat any invariant discovered during implementation (rather than before it) as a tension observation: record it, but also ask why the structural-tension-as-observation loop did not detect it earlier."
+    }
+  },
+  {
+    "candidate": "futon-theory/mission-interface-signature",
+    "path": "futon3/library/futon-theory/mission-interface-signature.flexiarg",
+    "blocks": {
+      "IF": "You are writing a mission document, or reviewing one that has reached\n    the :scoped or :active state.",
+      "HOWEVER": "Not all output ports are known at mission start. Discovery during\n    implementation may reveal new boundary types. The signature should be\n    updated when this happens \u2014 but it must never be empty.",
+      "THEN": "Every mission document must include an Interface Signature section\n    with typed input and output ports:\n\n    1. INPUT-PORTS\n       Each port specifies:\n       - Name: what the input is called\n       - Type: the shape of the data (schema, format, contract)\n       - Source: where it comes from (another system, user, file)\n       - Description: what it carries\n\n    2. OUTPUT-PORTS\n       Each port specifies:\n       - Name: what the output is called\n       - Type: the shape of the data (contract reference or inline)\n       - Consumer: who uses this output\n       - Description: what it provides\n\n    3. COMPOSITION-CONSTRAINT\n       Every output port must be:\n       (a) Specified in the mission's technical specification (section ref)\n       (b) Implemented in code (module reference)\n       (c) Tested (at least one test exercises the port)\n       (d) Documented (in the spec, not just in code comments)\n\n       If an output port exists in code but not in the spec, that is a\n       stop-the-line violation (futon-theory/stop-the-line).\n\n    4. FIDELITY-CONTRACT (required for all missions)\n       Every mission must declare a baseline and track fidelity against it:\n       (a) Baseline capability inventory:\n           - donor missions: donor behavior (feature, shape, known consumers)\n           - greenfield missions: declared spec commitments (ports, behavior,\n             and semantic/query layer)\n       (b) Preservation contract: `preserve`, `adapt`, or `drop` per feature\n       (c) Tripwire tests for each `preserve` feature:\n           - must fail on pre-implementation target state\n           - must pass after implementation\n       (d) Latent dependency/omission probe:\n           - donor missions: static call-sites + runtime traces\n           - greenfield missions: consumer scenario probes against declared spec\n           unresolved findings converted into explicit preserve/drop decisions\n\n       If a baseline feature is neither preserved nor explicitly dropped, this is\n       a stop-the-line violation."
+    }
+  },
+  {
+    "candidate": "devmap-coherence/ifr-f1-dhammavicaya",
+    "path": "futon3/library/devmap-coherence/ifr-f1-dhammavicaya.flexiarg",
+    "blocks": {
+      "IF": "the system maintains a deterministic graph-memory snapshot of the personal stack (CLI transcripts, NLP tags, XTDB mirrors)",
+      "HOWEVER": "focus headers, ingest scripts, and CLI demos drift unless transport invariants are checked and documented",
+      "THEN": "run the FUTON3 `check!` DSL against Pattern Canon entries that certify the MUSN transport baseline, verifying that each CLI/ingest transcript has a reproducible twin in futon1 graphs"
+    }
+  },
+  {
+    "candidate": "storage/open-world-velocity-validation",
+    "path": "futon3/library/storage/open-world-velocity-validation.flexiarg",
+    "blocks": {
+      "IF": "you want to ingest background knowledge quickly",
+      "HOWEVER": "you also need open-world data to remain coherent and mirrorable",
+      "THEN": "enforce strict validation on ingest and supply repair/backfill scripts for recovery"
+    }
+  },
+  {
+    "candidate": "wr-1-three-futon-split",
+    "path": "futon3/library/war-room/wr-1-three-futon-split.flexiarg",
+    "blocks": {
+      "IF": "futon3 handles pattern search, gate pipelines, library evolution, agent dispatch, forum coordination, and peripheral management.",
+      "HOWEVER": "These operate at fundamentally different timescales and have different change rates.",
+      "THEN": "Split into futon3a for search, futon3b for development, and futon3c for realtime coordination."
+    }
+  },
+  {
+    "candidate": "ready-blocked-triage",
+    "path": "futon3/library/stack-coherence/ready-blocked-triage.flexiarg",
+    "blocks": {
+      "IF": "every devmap clause should be either ready, blocked, drifting, or done",
+      "HOWEVER": "we rarely log that status explicitly",
+      "THEN": "for each clause, inspect evidence (README links, commits, tests) and blockers; emit a status report `status[done|ready|blocked|drift] blocked-by[...] evidence[...]`"
+    }
+  },
+  {
+    "candidate": "honest-holes-gate-composed-claims",
+    "path": "futon3/library/workshop/honest-holes-gate-composed-claims.flexiarg",
+    "blocks": {
+      "IF": "A composition (overlap, join, cascade, rendered summary) is about to\n    be published or scored.",
+      "HOWEVER": "Enumerating holes has cost and some dimensions genuinely have none;\n    demanding a hole census everywhere would price composition out.\n    Scope: the composition's OWN dimensions, not the whole register.",
+      "THEN": "Before publish: for each composed dimension, emit either the hole\n    list or a typed none {:checked-dimensions [...] :holes-found 0};\n    s4 becomes true only on typed evidence. Publishing with s4=false is\n    permitted only with the falsity rendered in-band (the page already\n    does this \u2014 the standard is honest; the substrate is not yet)."
+    }
+  },
+  {
+    "candidate": "spec-and-implementation-must-converge-to-runtime-certificates",
+    "path": "futon3/library/problems/spec-and-implementation-must-converge-to-runtime-certificates.flexiarg",
+    "blocks": {
+      "IF": "The spec and the implementation each move, at different speeds, over the same theory.",
+      "HOWEVER": "The problem, per the ruling (Joe, verbatim, 2026-09-05): \"the first order of business as I see it is to get the lean material complete with regard to our implementation of the theory, keeping distinct variable names clearly distinct, and where necessary indexing the implementation by a readiness level (e.g. if cascades need work, we could have the implementation run ahead of the spec or the spec run ahead of the implementation, but both need to converge into a form where run-time certificates can be provided showing that the actual implementation's behaviour matches the intended one)\". Without that convergence there is no artifact against which behaviour-matches-intent can ever be certified. (source: futon2 holes labs wm-contract EPIC-run-era.md, The convergence ruling, 2026-09-05)",
+      "THEN": "Treat this node as the landing point for @why edges from patterns that answer spec/implementation convergence; solving it is F8's job, not this node's."
+    }
+  },
+  {
+    "candidate": "storage/rapid-debugging",
+    "path": "futon3/library/storage/rapid-debugging.flexiarg",
+    "blocks": {
+      "IF": "failures lack traceable context (layer, operation, entity, expected vs actual)",
+      "HOWEVER": "debugging requires ad hoc spelunking and slow recovery cycles",
+      "THEN": "attach explicit diagnostics to all storage errors and prove invariants with targeted tests"
+    }
+  },
+  {
+    "candidate": "structural-obstruction-as-theorem",
+    "path": "futon3/library/math-strategy/structural-obstruction-as-theorem.flexiarg",
+    "blocks": {
+      "IF": "The failure is reproducible across multiple parameter settings (different degrees,\n      different multiplier sets, different starting points) and the failure pattern\n      suggests a structural reason rather than a computational limitation.",
+      "HOWEVER": "Not every failure is structural. Computational failures (memory, time, numerical\n      instability) look like structural failures when resources are insufficient. Before\n      claiming a structural obstruction, verify that increasing resources (degree, precision,\n      time) does not help, or identify the algebraic reason for the failure.",
+      "THEN": "1. State the obstruction precisely: what property of the problem blocks what method.\n      2. Prove the obstruction (even informally): show that the method CANNOT work, not\n         just that it HASN'T worked.\n      3. Record the obstruction as a theorem or remark in the proof status document.\n      4. Use the obstruction to redirect: if method A is blocked, what does the obstruction\n         tell you about which methods might succeed?"
+    }
+  },
+  {
+    "candidate": "storage/durability-first",
+    "path": "futon3/library/storage/durability-first.flexiarg",
+    "blocks": {
+      "IF": "writes can return before XTDB durability is confirmed",
+      "HOWEVER": "the system accumulates repair debt and inconsistent reads after restarts",
+      "THEN": "make Layer 0 a hard gate: acknowledge writes only after durable commit and raise a clear error otherwise"
+    }
+  },
+  {
+    "candidate": "monitors-measure-the-work",
+    "path": "futon3/library/apparatus/monitors-measure-the-work.flexiarg",
+    "blocks": {
+      "IF": "You are building or repairing a liveness or stall detector.",
+      "HOWEVER": "The machinery's state is always lively (ticks tick by construction), so a cursor built from it guarantees false progress; and a cursor built from a *projection* of the work object goes stale as the object grows fields, producing false stalls that get \"fixed\" by naming the last field that burned you.",
+      "THEN": "Read the cursor from the work object's own durable transitions, totally (hash the whole row, not named keys). Treat nil object-identity in the cursor as the alarm condition \u2014 in a monitor, absence of evidence IS the event. Commission in both directions: kill the watched thing and watch the alarm fire; drive a healthy transition and watch it stay silent. Only then trust it. Trial amendment (2026-09-08, S4): commission BY MUTATION \u2014 break the production code in the known ways and watch each direction discriminate. The worked example is the flicker mutation (a cursor that advances on every observation \u2014 the exact f193-night defect): it silences the alarm, so the stall-side test fails and catches it, while a frozen cursor is caught only from the healthy side. Each direction catches the mutation the other hides, which is why one direction is never commissioning."
+    }
+  },
+  {
+    "candidate": "letter-from-the-future",
+    "path": "futon3/library/nomad/letter-from-the-future.flexiarg",
+    "blocks": {
+      "IF": "The portfolio could grow in several directions and you lack a principled way to choose.",
+      "HOWEVER": "Plans decay into abstraction because nothing forces address to a real reader; roadmaps without an addressee optimise for internal coherence rather than external demand.",
+      "THEN": "Draft the future letter in full, addressed to a specific party, dated two months out, claiming only what you could then demonstrate. Diff it against the present: each false clause is a work item with a deadline. Then write it twice more to different addressees; sentences that survive all three unchanged are the invariant core (build these first); sentences that diverge are bets (name them, size them)."
+    }
+  },
+  {
+    "candidate": "wr-15-head-as-escrow-is-a-sanctioned-pattern",
+    "path": "futon3/library/war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern.flexiarg",
+    "blocks": {
+      "IF": "A mission can state its intended work before a predecessor has committed the schema that will determine the mission's final data shape.",
+      "HOWEVER": "HEAD-authoring and predecessor schema commitment occur at different times, so committing prematurely to the data shape would couple the mission to pieces that do not yet exist.",
+      "THEN": "Let the mission HEAD hold the intentions in escrow and name every not-yet-committed piece explicitly as a tension."
+    }
+  },
+  {
+    "candidate": "baldwin-ratchet-defeats-darkroom",
+    "path": "futon3/library/meta/baldwin-ratchet-defeats-darkroom.flexiarg",
+    "blocks": {
+      "IF": "An agent produces bad output \u2014 confabulation, suppressed tests,\n    weakened assertions, evidence-free completion claims. The natural\n    response is to patch around it, switch to a different agent, or\n    dismiss the failing agent as defective.",
+      "HOWEVER": "All of these responses are themselves dark-room moves. Monkey-patching\n    hides the agent's actual behaviour behind a correction layer.\n    Switching agents discards the diagnostic information the failure\n    provides. Dismissal closes the sensory channel entirely. The operator\n    who rejects a failing agent out of frustration is doing the same thing\n    as the agent that deletes a failing test: reducing surprise by\n    reducing observation, not by changing the situation.",
+      "THEN": "Apply the Baldwin ratchet: upgrade the agent's exotype (mission\n    document, evidence gate, mandatory observation channels, completion\n    criteria) and require the same agent to demonstrate correct behaviour\n    under the upgraded exotype. The demo is the agent doing real work with\n    real evidence, not a specification claiming it would work. If the\n    agent cannot adapt, the exotype change is insufficient \u2014 iterate the\n    exotype, not the agent."
+    }
+  },
+  {
+    "candidate": "classify-over-one-clean-source",
+    "path": "futon3/library/data-mining/classify-over-one-clean-source.flexiarg",
+    "blocks": {
+      "IF": "Multiple consumers read the same corpus and each needs a subset defined by provenance (origin, author, role, channel) that is not a clean field but must be inferred.",
+      "HOWEVER": "Provenance signals are non-uniform (a metadata field exists for new records, absent for legacy ones) and each consumer re-implements the inference independently. The filters drift; a record that one consumer excludes, another admits. Surface-token filters confuse MENTIONING an entity with BEING it.",
+      "THEN": "Extract ONE classifier \u2014 `classify(record) -> {source-A | source-B | harness | unknown}` \u2014 with an explicit precedence (trust the provenance metadata first; fall back to body heuristics only for legacy records lacking it). Route every consumer through it. Quantify the leak with an audit that replays each consumer's OLD acceptance test and reports how many admitted records the shared classifier now rejects. Where the corpus itself can be tagged at ingestion, do it once at the source so consumers filter on a field instead of re-deriving \u2014 and note that fixing the CODE does not fix already-produced DATA (re-run or post-filter the artifact)."
+    }
+  },
+  {
+    "candidate": "elbow-immediate",
+    "path": "futon3/library/eight-gates/elbow-immediate.flexiarg",
+    "blocks": {
+      "IF": "A pattern has been deployed and is producing visible harm. The normal test sequence (quarantine \u2192 hold \u2192 mechanism \u2192 warrant) is too slow. By the time tests complete, more harm occurs.",
+      "HOWEVER": "Immediate intervention can be wrong. Acting without full assessment risks stopping legitimate patterns. The urgency itself can be manipulated \u2014 false urgency is a fabrication-template tactic. We must balance speed with accuracy.",
+      "THEN": "Elbow (Zh\u01d2u). Small, centered, close-range intervention. Stop the immediate action. Don't engage the whole pattern \u2014 just halt what's happening right now. This is not a judgment on the pattern's validity, just a pause on its current effect."
+    }
+  },
+  {
+    "candidate": "grant-to-pitch",
+    "path": "futon3/library/depositing/grant-to-pitch.flexiarg",
+    "blocks": {
+      "IF": "The practitioner has experience writing grants (UKRN, EPSRC, etc.) and has demonstrable capabilities (Bayesian modelling, pattern languages, knowledge management, AI integration).",
+      "HOWEVER": "Grant proposals go to institutions with long review cycles and uncertain outcomes. Consulting pitches go to organisations with immediate needs and shorter cycles. The same skill applied to the wrong recipient produces months of waiting instead of weeks of revenue.",
+      "THEN": "For each capability demonstration (working paper, tool, methodology), ask: \"who would pay for this as a service rather than fund it as research?\" Reframe the grant narrative as a consulting proposal. The Bayesian logic model becomes \"evaluation consulting.\" The pattern language becomes \"structured methodology.\" The knowledge graph becomes \"enterprise knowledge management.\""
+    }
+  },
+  {
+    "candidate": "have-a-temperament",
+    "path": "futon3/library/snatch/have-a-temperament.flexiarg",
+    "blocks": {
+      "IF": "You are choosing which patterns a run will play from, or the order in which\n    they are consulted.",
+      "HOWEVER": "A policy left in the runner is invisible to the library the run claims to be\n    playing from: it cannot be read before the run, cited, refused, or set\n    beside another one. `p4ng/app-snatch.tex:231` records the order under\n    *Limits* as \"authored by hand\", and the harness's own re-wiring shows the\n    choice is not cosmetic \u2014 the same eighteen patterns score +3 or \u22125 against a\n    snatcher under G4 depending on nothing but it.",
+      "THEN": "State the temperament as a production rule at policy grain: an IF and a\n    HOWEVER that read the cascade and the record of the run so far, and a THEN\n    that emits a **cascade edit** \u2014 promote, drop, admit \u2014 and never a move.\n    Name it, give it a `@why`, and let a reviewer read it before the run rather\n    than infer it from the score afterwards."
+    }
+  }
+]

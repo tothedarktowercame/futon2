@@ -1,0 +1,1 @@
+{:pattern-id "coordination/bind-promotion-to-post-repair-replay", :chop/status :valid, :chop/timestamp "2026-09-15T13:00:45.653882022Z", :chop/validation {:valid? true, :results [{:valid? true, :errors [], :input "🐜/予", :decoded {:word1 "lili", :word2 "e", :emoji "🐜", :hanzi "予", :binary "10101001", :reading "lili e"}, :format :emoji}], :invalid-count 0}}

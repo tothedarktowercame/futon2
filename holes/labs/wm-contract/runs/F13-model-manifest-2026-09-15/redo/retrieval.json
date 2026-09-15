@@ -1,0 +1,748 @@
+{
+  "query": "Have: built agent harness components, a shipped tested ledger and replay certificates; three runtime defects fixed with regression tests. Want: per-component readiness evidence, independently verified certificate, and a reporting gate whose claims are re-derivable from typed records. However: a built component is not evidence that its behaviour is ready to bring online; the independent witness blocked the certificate, and after fixes the rerun remains pending. Test each component, retain exact evidence, and require independent replay before promoting the certificate.",
+  "query-source": {
+    "path": "futon2/holes/missions/M-zaif-harness-v1.md",
+    "lines": [
+      [
+        44,
+        47
+      ],
+      [
+        89,
+        110
+      ],
+      [
+        208,
+        215
+      ],
+      [
+        226,
+        229
+      ]
+    ]
+  },
+  "embedding": {
+    "cascade": [
+      [
+        "agent/provisional-claims-ledger",
+        0.552,
+        0.166
+      ],
+      [
+        "agent/evidence-over-assertion",
+        0.543,
+        0.163
+      ],
+      [
+        "coordination/session-durability-check",
+        0.517,
+        0.259
+      ],
+      [
+        "coordination/cross-validation-protocol",
+        0.47,
+        0.329
+      ],
+      [
+        "war-machine/operational-not-decorative",
+        0.508,
+        0.254
+      ],
+      [
+        "sidecar/append-only-semantic-audit",
+        0.476,
+        0.333
+      ],
+      [
+        "stack-coherence/maturity-evidence-audit",
+        0.499,
+        0.25
+      ],
+      [
+        "stack-coherence/ready-blocked-triage",
+        0.492,
+        0.541
+      ],
+      [
+        "social/verify-before-compose",
+        0.509,
+        0.153
+      ],
+      [
+        "social/tension-before-code",
+        0.473,
+        0.237
+      ]
+    ],
+    "size": 10,
+    "wholeness": 4.761,
+    "H-coherence": 0.945,
+    "T-intensity": 5.04,
+    "coverage-reward": 2.685,
+    "prior-cost": 6.797,
+    "cascade-score": 0.986,
+    "lambda": 0.25,
+    "trajectory": [
+      [
+        1,
+        "agent/provisional-claims-ledger",
+        0.166
+      ],
+      [
+        2,
+        "agent/evidence-over-assertion",
+        0.163
+      ],
+      [
+        3,
+        "coordination/session-durability-check",
+        0.259
+      ],
+      [
+        4,
+        "coordination/cross-validation-protocol",
+        0.329
+      ],
+      [
+        5,
+        "war-machine/operational-not-decorative",
+        0.254
+      ],
+      [
+        6,
+        "sidecar/append-only-semantic-audit",
+        0.333
+      ],
+      [
+        7,
+        "stack-coherence/maturity-evidence-audit",
+        0.25
+      ],
+      [
+        8,
+        "stack-coherence/ready-blocked-triage",
+        0.541
+      ],
+      [
+        9,
+        "social/verify-before-compose",
+        0.153
+      ],
+      [
+        10,
+        "social/tension-before-code",
+        0.237
+      ]
+    ],
+    "posterior_weight": 0.0,
+    "posterior_label": "self-graded",
+    "semi-lattice": {
+      "descent": [
+        [
+          "stack-coherence/maturity-evidence-audit",
+          "stack-coherence/ready-blocked-triage"
+        ]
+      ],
+      "co_app": [
+        [
+          "sidecar/append-only-semantic-audit",
+          "agent/evidence-over-assertion",
+          1
+        ],
+        [
+          "sidecar/append-only-semantic-audit",
+          "war-machine/operational-not-decorative",
+          1
+        ],
+        [
+          "coordination/cross-validation-protocol",
+          "coordination/session-durability-check",
+          2
+        ],
+        [
+          "agent/evidence-over-assertion",
+          "stack-coherence/maturity-evidence-audit",
+          1
+        ],
+        [
+          "agent/evidence-over-assertion",
+          "war-machine/operational-not-decorative",
+          1
+        ],
+        [
+          "agent/evidence-over-assertion",
+          "stack-coherence/ready-blocked-triage",
+          1
+        ],
+        [
+          "agent/evidence-over-assertion",
+          "coordination/session-durability-check",
+          1
+        ],
+        [
+          "stack-coherence/maturity-evidence-audit",
+          "stack-coherence/ready-blocked-triage",
+          3
+        ],
+        [
+          "social/tension-before-code",
+          "social/verify-before-compose",
+          1
+        ]
+      ]
+    },
+    "non-phylogeny": [
+      "assignment-binding",
+      "authoritative-transcript",
+      "clock-out",
+      "construction-discipline",
+      "coordination-bottleneck",
+      "disruption-soak",
+      "distinguishing-cases-before-adoption",
+      "done-is-observed-running",
+      "evidence-ledger",
+      "facilitation-scaffolds",
+      "ifr-f3-piti",
+      "legitimate-iteration",
+      "licence-to-fail",
+      "pattern-propose",
+      "probe-the-claimed-property-not-the-acceptance-proxy",
+      "progress-is-a-witnessed-state-change",
+      "rapid-debugging",
+      "records-carry-warrant",
+      "reflexivity-failure-in-a-gate",
+      "revise-patterns-from-observed-use",
+      "self-certifying-artifact",
+      "separate-proof-transfer-from-artifact-replay",
+      "single-producer",
+      "spec-and-implementation-must-converge-to-runtime-certificates",
+      "two-stage-fidelity",
+      "wr-23-upstream-trackers-are-stack-surfaces"
+    ],
+    "coverage-candidates": [
+      {
+        "pattern_id": "workshop/progress-is-a-witnessed-state-change",
+        "stem": "progress-is-a-witnessed-state-change",
+        "relevance": 0.544
+      },
+      {
+        "pattern_id": "stack-coherence/evidence-ledger",
+        "stem": "evidence-ledger",
+        "relevance": 0.542
+      },
+      {
+        "pattern_id": "workshop/distinguishing-cases-before-adoption",
+        "stem": "distinguishing-cases-before-adoption",
+        "relevance": 0.508
+      },
+      {
+        "pattern_id": "workshop/records-carry-warrant",
+        "stem": "records-carry-warrant",
+        "relevance": 0.501
+      },
+      {
+        "pattern_id": "math-formalization/separate-proof-transfer-from-artifact-replay",
+        "stem": "separate-proof-transfer-from-artifact-replay",
+        "relevance": 0.492
+      },
+      {
+        "pattern_id": "fulab/clock-out",
+        "stem": "clock-out",
+        "relevance": 0.489
+      },
+      {
+        "pattern_id": "storage/rapid-debugging",
+        "stem": "rapid-debugging",
+        "relevance": 0.482
+      },
+      {
+        "pattern_id": "pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy",
+        "stem": "probe-the-claimed-property-not-the-acceptance-proxy",
+        "relevance": 0.481
+      },
+      {
+        "pattern_id": "problems/spec-and-implementation-must-converge-to-runtime-certificates",
+        "stem": "spec-and-implementation-must-converge-to-runtime-certificates",
+        "relevance": 0.476
+      },
+      {
+        "pattern_id": "cycle-machine/disruption-soak",
+        "stem": "disruption-soak",
+        "relevance": 0.475
+      },
+      {
+        "pattern_id": "war-room/wr-23-upstream-trackers-are-stack-surfaces",
+        "stem": "wr-23-upstream-trackers-are-stack-surfaces",
+        "relevance": 0.473
+      },
+      {
+        "pattern_id": "workshop/revise-patterns-from-observed-use",
+        "stem": "revise-patterns-from-observed-use",
+        "relevance": 0.472
+      },
+      {
+        "pattern_id": "nomad/self-certifying-artifact",
+        "stem": "self-certifying-artifact",
+        "relevance": 0.47
+      },
+      {
+        "pattern_id": "vsatlas/facilitation-scaffolds",
+        "stem": "facilitation-scaffolds",
+        "relevance": 0.469
+      },
+      {
+        "pattern_id": "devmap-coherence/ifr-f3-piti",
+        "stem": "ifr-f3-piti",
+        "relevance": 0.466
+      },
+      {
+        "pattern_id": "or/two-stage-fidelity",
+        "stem": "two-stage-fidelity",
+        "relevance": 0.464
+      },
+      {
+        "pattern_id": "memory/licence-to-fail",
+        "stem": "licence-to-fail",
+        "relevance": 0.463
+      },
+      {
+        "pattern_id": "war-machine/coordination-bottleneck",
+        "stem": "coordination-bottleneck",
+        "relevance": 0.462
+      },
+      {
+        "pattern_id": "cycle-machine/single-producer",
+        "stem": "single-producer",
+        "relevance": 0.459
+      },
+      {
+        "pattern_id": "fulab/pattern-propose",
+        "stem": "pattern-propose",
+        "relevance": 0.458
+      },
+      {
+        "pattern_id": "realtime/authoritative-transcript",
+        "stem": "authoritative-transcript",
+        "relevance": 0.457
+      },
+      {
+        "pattern_id": "exotic/construction-discipline",
+        "stem": "construction-discipline",
+        "relevance": 0.456
+      },
+      {
+        "pattern_id": "coordination/assignment-binding",
+        "stem": "assignment-binding",
+        "relevance": 0.455
+      },
+      {
+        "pattern_id": "p4ng/legitimate-iteration",
+        "stem": "legitimate-iteration",
+        "relevance": 0.454
+      },
+      {
+        "pattern_id": "apparatus/done-is-observed-running",
+        "stem": "done-is-observed-running",
+        "relevance": 0.452
+      },
+      {
+        "pattern_id": "process/reflexivity-failure-in-a-gate",
+        "stem": "reflexivity-failure-in-a-gate",
+        "relevance": 0.451
+      }
+    ],
+    "phylogeny": {
+      "alpha": 0.3,
+      "edge_count": 10,
+      "edge_density": 0.222,
+      "coverage_gap": true,
+      "low_connectivity": true
+    }
+  },
+  "tier0": [
+    {
+      "pattern": "wr-1-three-futon-split",
+      "score": 19.628163,
+      "hits": [
+        "each",
+        "independently",
+        "three"
+      ]
+    },
+    {
+      "pattern": "ready-blocked-triage",
+      "score": 19.474013,
+      "hits": [
+        "blocked",
+        "each",
+        "ready"
+      ]
+    },
+    {
+      "pattern": "honest-holes-gate-composed-claims",
+      "score": 16.370548,
+      "hits": [
+        "claims",
+        "gate",
+        "its"
+      ]
+    },
+    {
+      "pattern": "spec-and-implementation-must-converge-to-runtime-certificates",
+      "score": 14.436616,
+      "hits": [
+        "certificates",
+        "runtime"
+      ]
+    },
+    {
+      "pattern": "storage/rapid-debugging",
+      "score": 13.84883,
+      "hits": [
+        "fixes",
+        "tests"
+      ]
+    },
+    {
+      "pattern": "structural-obstruction-as-theorem",
+      "score": 13.694679,
+      "hits": [
+        "blocked",
+        "certificate"
+      ]
+    },
+    {
+      "pattern": "storage/durability-first",
+      "score": 13.338004,
+      "hits": [
+        "fixes",
+        "remains"
+      ]
+    },
+    {
+      "pattern": "monitors-measure-the-work",
+      "score": 12.932539,
+      "hits": [
+        "component",
+        "whose"
+      ]
+    }
+  ],
+  "baseline-query": "M-zaif-harness-v1 \u2014 want: the harness edition, lifecycle-aligned and WM-fed. have: OPEN \u2014 HEAD through VERIFY drafted; INSTANTIATE runs as wm-contract U rows.",
+  "baseline-embedding": {
+    "cascade": [
+      [
+        "futon-theory/mission-interface-signature",
+        0.359,
+        0.108
+      ],
+      [
+        "devmap-coherence/ifr-f1-dhammavicaya",
+        0.324,
+        0.162
+      ],
+      [
+        "storage/open-world-velocity-validation",
+        0.316,
+        0.158
+      ]
+    ],
+    "size": 3,
+    "wholeness": 0.921,
+    "H-coherence": 0.922,
+    "T-intensity": 0.999,
+    "coverage-reward": 0.428,
+    "prior-cost": 1.469,
+    "cascade-score": 0.061,
+    "lambda": 0.25,
+    "trajectory": [
+      [
+        1,
+        "futon-theory/mission-interface-signature",
+        0.108
+      ],
+      [
+        2,
+        "devmap-coherence/ifr-f1-dhammavicaya",
+        0.162
+      ],
+      [
+        3,
+        "storage/open-world-velocity-validation",
+        0.158
+      ]
+    ],
+    "posterior_weight": 0.0,
+    "posterior_label": "self-graded",
+    "semi-lattice": {
+      "descent": [],
+      "co_app": [
+        [
+          "devmap-coherence/ifr-f1-dhammavicaya",
+          "futon-theory/mission-interface-signature",
+          1
+        ],
+        [
+          "futon-theory/mission-interface-signature",
+          "storage/open-world-velocity-validation",
+          1
+        ]
+      ]
+    },
+    "non-phylogeny": [
+      "advanceability",
+      "built-but-not-wired-invisibility",
+      "capability-vocabulary-v0",
+      "hierarchical-and-temporal-depth",
+      "identifier-separation",
+      "ifr-f3-piti",
+      "model-upstream-and-coupled",
+      "process-conduct-is-unassured",
+      "quick-intro",
+      "recorded-handoff",
+      "refusal-becomes-pattern",
+      "satisfied-rungs-are-counted-and-surfaced",
+      "tension-proposes-candidates",
+      "wr-1-three-futon-split",
+      "wr-11-external-applications-carry-predecessor-exemplar-relationships",
+      "wr-14-predecessor-completion-pull-is-a-fourth-next-move-criterion",
+      "wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+      "wr-17-futon0-as-cyborg-futon7-as-markov-blanket",
+      "wr-19-tension-must-generate-not-only-rank",
+      "wr-20-action-class-inventory-becomes-data",
+      "wr-21-geometrization-is-a-shared-cross-mission-dependency",
+      "wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+      "wr-23-upstream-trackers-are-stack-surfaces",
+      "wr-27-a-loop-is-born-instrumented-for-its-gain",
+      "wr-4-inhabit-before-building",
+      "wr-5-war-machine-is-not-a-mission",
+      "wr-6-daily-scan-is-depositing-heartbeat",
+      "wr-7-frames-interoperate-or-they-do-not-exist"
+    ],
+    "coverage-candidates": [
+      {
+        "pattern_id": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+        "stem": "wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+        "relevance": 0.394
+      },
+      {
+        "pattern_id": "problems/process-conduct-is-unassured",
+        "stem": "process-conduct-is-unassured",
+        "relevance": 0.394
+      },
+      {
+        "pattern_id": "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+        "stem": "wr-11-external-applications-carry-predecessor-exemplar-relationships",
+        "relevance": 0.385
+      },
+      {
+        "pattern_id": "war-room/wr-23-upstream-trackers-are-stack-surfaces",
+        "stem": "wr-23-upstream-trackers-are-stack-surfaces",
+        "relevance": 0.382
+      },
+      {
+        "pattern_id": "pacspine/quick-intro",
+        "stem": "quick-intro",
+        "relevance": 0.378
+      },
+      {
+        "pattern_id": "war-room/wr-1-three-futon-split",
+        "stem": "wr-1-three-futon-split",
+        "relevance": 0.374
+      },
+      {
+        "pattern_id": "war-room/wr-17-futon0-as-cyborg-futon7-as-markov-blanket",
+        "stem": "wr-17-futon0-as-cyborg-futon7-as-markov-blanket",
+        "relevance": 0.37
+      },
+      {
+        "pattern_id": "war-room/wr-19-tension-must-generate-not-only-rank",
+        "stem": "wr-19-tension-must-generate-not-only-rank",
+        "relevance": 0.369
+      },
+      {
+        "pattern_id": "war-room/wr-7-frames-interoperate-or-they-do-not-exist",
+        "stem": "wr-7-frames-interoperate-or-they-do-not-exist",
+        "relevance": 0.362
+      },
+      {
+        "pattern_id": "war-room/wr-21-geometrization-is-a-shared-cross-mission-dependency",
+        "stem": "wr-21-geometrization-is-a-shared-cross-mission-dependency",
+        "relevance": 0.357
+      },
+      {
+        "pattern_id": "problems/satisfied-rungs-are-counted-and-surfaced",
+        "stem": "satisfied-rungs-are-counted-and-surfaced",
+        "relevance": 0.346
+      },
+      {
+        "pattern_id": "war-room/wr-5-war-machine-is-not-a-mission",
+        "stem": "wr-5-war-machine-is-not-a-mission",
+        "relevance": 0.337
+      },
+      {
+        "pattern_id": "agency/identifier-separation",
+        "stem": "identifier-separation",
+        "relevance": 0.333
+      },
+      {
+        "pattern_id": "process-coherence/refusal-becomes-pattern",
+        "stem": "refusal-becomes-pattern",
+        "relevance": 0.333
+      },
+      {
+        "pattern_id": "war-room/wr-14-predecessor-completion-pull-is-a-fourth-next-move-criterion",
+        "stem": "wr-14-predecessor-completion-pull-is-a-fourth-next-move-criterion",
+        "relevance": 0.332
+      },
+      {
+        "pattern_id": "war-room/wr-20-action-class-inventory-becomes-data",
+        "stem": "wr-20-action-class-inventory-becomes-data",
+        "relevance": 0.328
+      },
+      {
+        "pattern_id": "war-room/wr-4-inhabit-before-building",
+        "stem": "wr-4-inhabit-before-building",
+        "relevance": 0.327
+      },
+      {
+        "pattern_id": "war-machine/advanceability",
+        "stem": "advanceability",
+        "relevance": 0.326
+      },
+      {
+        "pattern_id": "devmap-coherence/ifr-f3-piti",
+        "stem": "ifr-f3-piti",
+        "relevance": 0.325
+      },
+      {
+        "pattern_id": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+        "stem": "wr-27-a-loop-is-born-instrumented-for-its-gain",
+        "relevance": 0.323
+      },
+      {
+        "pattern_id": "war-room/wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+        "stem": "wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+        "relevance": 0.317
+      },
+      {
+        "pattern_id": "capability/capability-vocabulary-v0",
+        "stem": "capability-vocabulary-v0",
+        "relevance": 0.316
+      },
+      {
+        "pattern_id": "aif/hierarchical-and-temporal-depth",
+        "stem": "hierarchical-and-temporal-depth",
+        "relevance": 0.314
+      },
+      {
+        "pattern_id": "problems/tension-proposes-candidates",
+        "stem": "tension-proposes-candidates",
+        "relevance": 0.314
+      },
+      {
+        "pattern_id": "war-room/wr-6-daily-scan-is-depositing-heartbeat",
+        "stem": "wr-6-daily-scan-is-depositing-heartbeat",
+        "relevance": 0.313
+      },
+      {
+        "pattern_id": "process/built-but-not-wired-invisibility",
+        "stem": "built-but-not-wired-invisibility",
+        "relevance": 0.311
+      },
+      {
+        "pattern_id": "apparatus/model-upstream-and-coupled",
+        "stem": "model-upstream-and-coupled",
+        "relevance": 0.31
+      },
+      {
+        "pattern_id": "orchestration/recorded-handoff",
+        "stem": "recorded-handoff",
+        "relevance": 0.309
+      }
+    ],
+    "phylogeny": {
+      "alpha": 0.3,
+      "edge_count": 2,
+      "edge_density": 0.667,
+      "coverage_gap": true,
+      "low_connectivity": false
+    }
+  },
+  "baseline-tier0": [
+    {
+      "pattern": "letter-from-the-future",
+      "score": 7.676454,
+      "hits": [
+        "want"
+      ]
+    },
+    {
+      "pattern": "wr-15-head-as-escrow-is-a-sanctioned-pattern",
+      "score": 7.676454,
+      "hits": [
+        "head"
+      ]
+    },
+    {
+      "pattern": "baldwin-ratchet-defeats-darkroom",
+      "score": 6.760163,
+      "hits": [
+        "harness"
+      ]
+    },
+    {
+      "pattern": "classify-over-one-clean-source",
+      "score": 6.760163,
+      "hits": [
+        "harness"
+      ]
+    },
+    {
+      "pattern": "elbow-immediate",
+      "score": 6.760163,
+      "hits": [
+        "u"
+      ]
+    },
+    {
+      "pattern": "f2/p4",
+      "score": 6.760163,
+      "hits": [
+        "harness"
+      ]
+    },
+    {
+      "pattern": "grant-to-pitch",
+      "score": 6.760163,
+      "hits": [
+        "have"
+      ]
+    },
+    {
+      "pattern": "have-a-temperament",
+      "score": 6.760163,
+      "hits": [
+        "have"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": "/home/joe/code/futon3a/holes/labs/M-memes-arrows/cascade_construct.py",
+      "sha256": "bc3e36d1dfd9c4877eda15ddd9d3f7a0ab62fa51026af43ee29c8eb48cdd8a62"
+    },
+    {
+      "path": "/home/joe/code/futon6/scripts/cas_select.py",
+      "sha256": "47c27ad3ba65a37fcab7218cf849dc00c00a5ebafa3a11c7d4a7b18218b4b9fb"
+    },
+    {
+      "path": "/home/joe/code/futon3/resources/sigils/patterns-index.tsv",
+      "sha256": "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+    },
+    {
+      "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+      "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+    }
+  ]
+}

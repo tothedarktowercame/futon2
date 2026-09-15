@@ -1,0 +1,1839 @@
+{:ranking-source
+ "futon2/holes/labs/wm-contract/tick-run-record-fb96bf07-caf2-42df-a000-fbef9329cfd5.edn",
+ :started-at "2026-09-15T03:59:45.443223552Z",
+ :ranking
+ [{:rank 1,
+   :action {:type :advance-mission, :target "M-learning-loop"},
+   :controller-score 11.76062850060562,
+   :habit-prior-bias -2.0853762771996505,
+   :selection-score -13.84600477780527}
+  {:rank 2,
+   :action
+   {:type :advance-mission, :target "M-expressions-of-interest"},
+   :controller-score 11.39477477817185,
+   :habit-prior-bias -4.436751534363128,
+   :selection-score -15.83152631253498}
+  {:rank 3,
+   :action {:type :advance-mission, :target "M-zaif-harness-v1"},
+   :controller-score 11.410939742949353,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.540838457872425}
+  {:rank 4,
+   :action
+   {:type :advance-mission, :target "M-distributed-frontiermath"},
+   :controller-score 11.486861168136684,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.616759883059757}
+  {:rank 5,
+   :action {:type :advance-mission, :target "M-futon-enrichment"},
+   :controller-score 11.50861957202406,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.638518286947132}
+  {:rank 6,
+   :action {:type :advance-mission, :target "M-single-locus"},
+   :controller-score 11.51248880423178,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.642387519154852}
+  {:rank 7,
+   :action {:type :advance-mission, :target "M-war-machine-pilot"},
+   :controller-score 11.515631193340383,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.645529908263455}
+  {:rank 8,
+   :action
+   {:type :advance-mission,
+    :target "M-vsatarcs-invariants-integration"},
+   :controller-score 11.526714148284,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.656612863207073}
+  {:rank 9,
+   :action
+   {:type :advance-mission, :target "M-state-snapshot-witness"},
+   :controller-score 11.527190485936345,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.657089200859417}
+  {:rank 10,
+   :action
+   {:type :advance-mission,
+    :target "M-the-futon-stack-Q6-r12-design-choices"},
+   :controller-score 11.534077952200008,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.66397666712308}
+  {:rank 11,
+   :action {:type :advance-mission, :target "M-archaeology-control"},
+   :controller-score 11.535707939699265,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.665606654622337}
+  {:rank 12,
+   :action {:type :advance-mission, :target "M-webarxana"},
+   :controller-score 11.545846549828084,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.675745264751157}
+  {:rank 13,
+   :action {:type :advance-mission, :target "M-bounded-disposition"},
+   :controller-score 11.546506550850083,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.676405265773155}
+  {:rank 14,
+   :action {:type :advance-mission, :target "M-symbol-grounding"},
+   :controller-score 11.55103381743993,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.680932532363002}
+  {:rank 15,
+   :action {:type :advance-mission, :target "M-action-cost-modelling"},
+   :controller-score 11.554471808416068,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.68437052333914}
+  {:rank 16,
+   :action {:type :advance-mission, :target "M-reachable-from-boot"},
+   :controller-score 11.555681742431787,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.68558045735486}
+  {:rank 17,
+   :action {:type :advance-mission, :target "M-diagramprover"},
+   :controller-score 11.555865623149359,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.68576433807243}
+  {:rank 18,
+   :action
+   {:type :advance-mission, :target "M-canon-fingerprint-store"},
+   :controller-score 11.558996196928788,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.68889491185186}
+  {:rank 19,
+   :action
+   {:type :advance-mission, :target "M-stack-stereolithography"},
+   :controller-score 11.559725309779012,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.689624024702084}
+  {:rank 20,
+   :action
+   {:type :advance-mission, :target "M-typed-holes-mathlib-handoff"},
+   :controller-score 11.563643897642606,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.69354261256568}
+  {:rank 21,
+   :action {:type :advance-mission, :target "M-vsatarcs-writer"},
+   :controller-score 11.564906609755965,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.694805324679038}
+  {:rank 22,
+   :action {:type :advance-mission, :target "M-peeragogy-rewrite"},
+   :controller-score 11.574842315422444,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.704741030345517}
+  {:rank 23,
+   :action {:type :advance-mission, :target "M-prior-mathematics"},
+   :controller-score 11.575161989395,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.705060704318072}
+  {:rank 24,
+   :action {:type :advance-mission, :target "M-superpod-mark2"},
+   :controller-score 11.586141529416068,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.71604024433914}
+  {:rank 25,
+   :action {:type :advance-mission, :target "M-self-improvement-loop"},
+   :controller-score 11.590293760539026,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.7201924754621}
+  {:rank 26,
+   :action
+   {:type :advance-mission, :target "M-recommendation-bindings"},
+   :controller-score 11.5916955492917,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.721594264214772}
+  {:rank 27,
+   :action
+   {:type :advance-mission, :target "M-mission-coherence-patterns"},
+   :controller-score 11.597675157935555,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.727573872858628}
+  {:rank 28,
+   :action {:type :advance-mission, :target "M-autoclock-in"},
+   :controller-score 11.602802207278371,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.732700922201445}
+  {:rank 29,
+   :action
+   {:type :advance-mission, :target "M-emacs-cursor-peripheral"},
+   :controller-score 11.60410787036156,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.734006585284632}
+  {:rank 30,
+   :action {:type :advance-mission, :target "M-war-machine-wiring"},
+   :controller-score 11.604613392796011,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.734512107719084}
+  {:rank 31,
+   :action {:type :advance-mission, :target "M-differentiable-code"},
+   :controller-score 11.605163402183944,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.735062117107017}
+  {:rank 32,
+   :action
+   {:type :advance-mission, :target "M-paper-reverse-morphogenesis"},
+   :controller-score 11.60634445370846,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.736243168631532}
+  {:rank 33,
+   :action
+   {:type :advance-mission, :target "M-differentiable-substrate"},
+   :controller-score 11.617817100857721,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.747715815780793}
+  {:rank 34,
+   :action
+   {:type :advance-mission, :target "M-pattern-retrieval-calibration"},
+   :controller-score 11.619274180870207,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.74917289579328}
+  {:rank 35,
+   :action {:type :advance-mission, :target "M-a-sorry-enterprise"},
+   :controller-score 11.62083799978069,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.750736714703763}
+  {:rank 36,
+   :action {:type :advance-mission, :target "M-kangaroo"},
+   :controller-score 11.621570824252558,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.75146953917563}
+  {:rank 37,
+   :action {:type :advance-mission, :target "M-capability-zones"},
+   :controller-score 11.621570824252558,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.75146953917563}
+  {:rank 38,
+   :action {:type :advance-mission, :target "M-sci-reproduction"},
+   :controller-score 11.621570824252558,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.75146953917563}
+  {:rank 39,
+   :action
+   {:type :advance-mission, :target "M-aif-a-matrix-faithfulness"},
+   :controller-score 11.621570824252558,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.75146953917563}
+  {:rank 40,
+   :action
+   {:type :advance-mission,
+    :target "M-wm-aif-policy-grain-compliance"},
+   :controller-score 11.621570824252558,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.75146953917563}
+  {:rank 41,
+   :action
+   {:type :advance-mission,
+    :target "M-sci-reproduction-replay-ledger"},
+   :controller-score 11.621570824252558,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.75146953917563}
+  {:rank 42,
+   :action {:type :advance-mission, :target "M-categorical-code"},
+   :controller-score 11.621902096790564,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.751800811713636}
+  {:rank 43,
+   :action {:type :advance-mission, :target "M-the-futon-stack"},
+   :controller-score 11.623389750318665,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.753288465241738}
+  {:rank 44,
+   :action {:type :advance-mission, :target "M-eoi-outbox-management"},
+   :controller-score 11.632496910267704,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.762395625190777}
+  {:rank 45,
+   :action {:type :advance-mission, :target "M-pattern-mining"},
+   :controller-score 11.633143106705035,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.763041821628107}
+  {:rank 46,
+   :action {:type :advance-mission, :target "M-patterns-done-right"},
+   :controller-score 11.634309713822077,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.76420842874515}
+  {:rank 47,
+   :action {:type :advance-mission, :target "M-futonzero-mvp"},
+   :controller-score 11.636656406816527,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.7665551217396}
+  {:rank 48,
+   :action {:type :advance-mission, :target "M-landing-practice"},
+   :controller-score 11.638831211730803,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.768729926653876}
+  {:rank 49,
+   :action {:type :advance-mission, :target "M-substrate-metric"},
+   :controller-score 11.641236214640202,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.771134929563274}
+  {:rank 50,
+   :action {:type :advance-mission, :target "M-xor-coupling-probe"},
+   :controller-score 11.641943741999484,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.771842456922556}
+  {:rank 51,
+   :action
+   {:type :advance-mission, :target "M-tpg-coupling-evolution"},
+   :controller-score 11.644965721808902,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.774864436731974}
+  {:rank 52,
+   :action {:type :advance-mission, :target "M-single-entry-point"},
+   :controller-score 11.645066625356435,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.774965340279508}
+  {:rank 53,
+   :action {:type :advance-mission, :target "M-stack-geometry"},
+   :controller-score 11.647305281520332,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.777203996443404}
+  {:rank 54,
+   :action
+   {:type :advance-mission, :target "M-structure-seed-promotion"},
+   :controller-score 11.648302616528866,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.77820133145194}
+  {:rank 55,
+   :action {:type :advance-mission, :target "M-trip-journal"},
+   :controller-score 11.648360833892397,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.77825954881547}
+  {:rank 56,
+   :action {:type :advance-mission, :target "M-pattern-ingest"},
+   :controller-score 11.649773835089348,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.77967255001242}
+  {:rank 57,
+   :action {:type :advance-mission, :target "M-omni-wm-runner"},
+   :controller-score 11.651009300651097,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.78090801557417}
+  {:rank 58,
+   :action
+   {:type :advance-mission,
+    :target "M-simulating-or-training-as-learning-system"},
+   :controller-score 11.651413816293783,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.781312531216855}
+  {:rank 59,
+   :action {:type :advance-mission, :target "M-daily-scan"},
+   :controller-score 11.652967077109665,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.782865792032737}
+  {:rank 60,
+   :action {:type :advance-mission, :target "M-superpod-mark3"},
+   :controller-score 11.653759793083225,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.783658508006297}
+  {:rank 61,
+   :action
+   {:type :advance-mission,
+    :target "M-pattern-application-diagnostic"},
+   :controller-score 11.653983293109661,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.783882008032734}
+  {:rank 62,
+   :action
+   {:type :advance-mission, :target "M-hyperreal-dictionary-planning"},
+   :controller-score 11.65468503922365,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.784583754146723}
+  {:rank 63,
+   :action
+   {:type :advance-mission, :target "M-bounded-in-flight-state"},
+   :controller-score 11.658064157061375,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.787962871984448}
+  {:rank 64,
+   :action {:type :advance-mission, :target "M-weird-modernism"},
+   :controller-score 11.658638114425855,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.788536829348928}
+  {:rank 65,
+   :action
+   {:type :advance-mission, :target "M-coupling-as-constraint"},
+   :controller-score 11.659927369084215,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.789826084007288}
+  {:rank 66,
+   :action
+   {:type :advance-mission, :target "M-futonzero-prelim-practice"},
+   :controller-score 11.660620093816988,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.79051880874006}
+  {:rank 67,
+   :action
+   {:type :advance-mission, :target "M-artificial-stack-exchange"},
+   :controller-score 11.661265963448955,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.791164678372027}
+  {:rank 68,
+   :action
+   {:type :advance-mission, :target "M-war-machine-vsatarcs-interop"},
+   :controller-score 11.66188441461179,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.791783129534863}
+  {:rank 69,
+   :action {:type :advance-mission, :target "M-reflective-discipline"},
+   :controller-score 11.663506123673159,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.79340483859623}
+  {:rank 70,
+   :action
+   {:type :advance-mission, :target "M-essays-retraction-visibility"},
+   :controller-score 11.66694046074744,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.796839175670513}
+  {:rank 71,
+   :action
+   {:type :advance-mission, :target "M-symbol-grounding-scaling-plan"},
+   :controller-score 11.669098104852026,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.7989968197751}
+  {:rank 72,
+   :action {:type :advance-mission, :target "M-editorial-assistant"},
+   :controller-score 11.673246249876584,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.803144964799657}
+  {:rank 73,
+   :action
+   {:type :advance-mission,
+    :target "M-or-training-as-learning-system"},
+   :controller-score 11.675027968442464,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.804926683365537}
+  {:rank 74,
+   :action {:type :advance-mission, :target "M-hypergraph-operator"},
+   :controller-score 11.680045361176596,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.80994407609967}
+  {:rank 75,
+   :action {:type :advance-mission, :target "M-stack-hud-refactor"},
+   :controller-score 11.68066049788247,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.810559212805543}
+  {:rank 76,
+   :action {:type :advance-mission, :target "M-propagators"},
+   :controller-score 11.680762357109998,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.81066107203307}
+  {:rank 77,
+   :action
+   {:type :advance-mission, :target "M-web-arxana-ui-improvements"},
+   :controller-score 11.68327845929565,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.813177174218723}
+  {:rank 78,
+   :action {:type :advance-mission, :target "M-differentiable-math"},
+   :controller-score 11.690150048961328,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.8200487638844}
+  {:rank 79,
+   :action {:type :advance-mission, :target "M-fulab-wiring-survey"},
+   :controller-score 11.69049762218809,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.820396337111163}
+  {:rank 80,
+   :action {:type :advance-mission, :target "M-aif-tokamak"},
+   :controller-score 11.695756289100459,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.82565500402353}
+  {:rank 81,
+   :action {:type :advance-mission, :target "M-wm-tripwires"},
+   :controller-score 11.695756289100459,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.82565500402353}
+  {:rank 82,
+   :action {:type :advance-mission, :target "M-lab-standard"},
+   :controller-score 11.695756289100459,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.82565500402353}
+  {:rank 83,
+   :action {:type :advance-mission, :target "M-metaca-search"},
+   :controller-score 11.695756289100459,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.82565500402353}
+  {:rank 84,
+   :action {:type :advance-mission, :target "M-typed-memories"},
+   :controller-score 11.695756289100459,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.82565500402353}
+  {:rank 85,
+   :action
+   {:type :advance-mission, :target "M-distributed-proofreaders"},
+   :controller-score 11.695756289100459,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.82565500402353}
+  {:rank 86,
+   :action
+   {:type :advance-mission,
+    :target "M-wm-strategic-mission-selection"},
+   :controller-score 11.695756289100459,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.82565500402353}
+  {:rank 87,
+   :action {:type :advance-mission, :target "M-arxana-roundtrip"},
+   :controller-score 11.69609801469467,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.825996729617742}
+  {:rank 88,
+   :action {:type :advance-mission, :target "M-exotype-xenotype-eoc"},
+   :controller-score 11.710828163683843,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.840726878606915}
+  {:rank 89,
+   :action
+   {:type :advance-mission, :target "M-efe-bge-followon-actions"},
+   :controller-score 11.710828163683843,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.840726878606915}
+  {:rank 90,
+   :action
+   {:type :advance-mission, :target "M-capability-zones-S2b-handoff"},
+   :controller-score 11.710828163683843,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.840726878606915}
+  {:rank 91,
+   :action {:type :advance-mission, :target "M-web-arxana-missions"},
+   :controller-score 11.718470272930332,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.848368987853405}
+  {:rank 92,
+   :action {:type :advance-mission, :target "M-intent-curvature"},
+   :controller-score 11.72222399632517,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.852122711248242}
+  {:rank 93,
+   :action {:type :advance-mission, :target "M-live-efe-map"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 94,
+   :action {:type :advance-mission, :target "M-xenotype-its"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 95,
+   :action {:type :advance-mission, :target "M-latex-wysiwyg"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 96,
+   :action {:type :advance-mission, :target "M-metric-harness"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 97,
+   :action {:type :advance-mission, :target "M-pheromone-field"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 98,
+   :action {:type :advance-mission, :target "M-codex-sorry-loop"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 99,
+   :action {:type :advance-mission, :target "M-value-creation-loop"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 100,
+   :action {:type :advance-mission, :target "M-sigils-reconsidered"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 101,
+   :action {:type :advance-mission, :target "M-populate-substrate-2"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 102,
+   :action
+   {:type :advance-mission, :target "M-apm-capability-ratchet"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 103,
+   :action
+   {:type :advance-mission, :target "M-u88-contextual-preferences"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 104,
+   :action
+   {:type :advance-mission, :target "M-capability-zones-S3-handoff"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 105,
+   :action
+   {:type :advance-mission, :target "M-capability-zones-S2a-handoff"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 106,
+   :action
+   {:type :advance-mission, :target "M-f11-find-production-successor"},
+   :controller-score 11.725977719720007,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.85587643464308}
+  {:rank 107,
+   :action {:type :advance-mission, :target "M-the-perfect-crime"},
+   :controller-score 11.726084259031921,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.855982973954994}
+  {:rank 108,
+   :action {:type :advance-mission, :target "M-chipwitz-corps"},
+   :controller-score 11.737450959712675,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.867349674635747}
+  {:rank 109,
+   :action {:type :advance-mission, :target "M-pattern-posteriors"},
+   :controller-score 11.737450959712675,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.867349674635747}
+  {:rank 110,
+   :action {:type :advance-mission, :target "M-futonzero-generative"},
+   :controller-score 11.737450959712675,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.867349674635747}
+  {:rank 111,
+   :action
+   {:type :advance-mission,
+    :target "M-mission-scopes-into-substrate-2"},
+   :controller-score 11.737450959712675,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.867349674635747}
+  {:rank 112,
+   :action {:type :advance-mission, :target "M-librarian"},
+   :controller-score 11.741204683107512,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.871103398030584}
+  {:rank 113,
+   :action {:type :advance-mission, :target "M-usage-hacking"},
+   :controller-score 11.741204683107512,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.871103398030584}
+  {:rank 114,
+   :action {:type :advance-mission, :target "M-agents-queue"},
+   :controller-score 11.741204683107512,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.871103398030584}
+  {:rank 115,
+   :action {:type :advance-mission, :target "M-becoming-nomad"},
+   :controller-score 11.741204683107512,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.871103398030584}
+  {:rank 116,
+   :action {:type :advance-mission, :target "M-arxana-hardening"},
+   :controller-score 11.741204683107512,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.871103398030584}
+  {:rank 117,
+   :action {:type :advance-mission, :target "M-formal-war-machine"},
+   :controller-score 11.741204683107512,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.871103398030584}
+  {:rank 118,
+   :action
+   {:type :advance-mission, :target "M-aif-policy-conditioned-eig"},
+   :controller-score 11.741204683107512,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.871103398030584}
+  {:rank 119,
+   :action
+   {:type :advance-mission, :target "M-federated-agency-hardening"},
+   :controller-score 11.741204683107512,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.871103398030584}
+  {:rank 120,
+   :action
+   {:type :advance-mission, :target "M-aif-gap-epistemic-affordance"},
+   :controller-score 11.741204683107512,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.871103398030584}
+  {:rank 121,
+   :action {:type :advance-mission, :target "M-zai-learning-loop"},
+   :controller-score 11.75650876679343,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.886407481716503}
+  {:rank 122,
+   :action {:type :advance-mission, :target "M-smart-emacs-cursor"},
+   :controller-score 11.75650876679343,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.886407481716503}
+  {:rank 123,
+   :action
+   {:type :advance-mission, :target "M-capability-zones-S1-handoff"},
+   :controller-score 11.75650876679343,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.886407481716503}
+  {:rank 124,
+   :action
+   {:type :advance-mission, :target "M-capability-zones-S1-coverage"},
+   :controller-score 11.75650876679343,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.886407481716503}
+  {:rank 125,
+   :action {:type :advance-mission, :target "M-essays-edit-cycle"},
+   :controller-score 11.768135947395294,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.898034662318366}
+  {:rank 126,
+   :action {:type :advance-mission, :target "M-futonzero-grounding"},
+   :controller-score 11.768135947395294,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.898034662318366}
+  {:rank 127,
+   :action {:type :advance-mission, :target "M-case-studies"},
+   :controller-score 11.77188967079013,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.901788385713203}
+  {:rank 128,
+   :action {:type :advance-mission, :target "M-futon-problems"},
+   :controller-score 11.77188967079013,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.901788385713203}
+  {:rank 129,
+   :action {:type :advance-mission, :target "M-memory-retrieval"},
+   :controller-score 11.77188967079013,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.901788385713203}
+  {:rank 130,
+   :action {:type :advance-mission, :target "M-apm-demonstration"},
+   :controller-score 11.77188967079013,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.901788385713203}
+  {:rank 131,
+   :action {:type :advance-mission, :target "M-dionysus-winddown"},
+   :controller-score 11.77188967079013,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.901788385713203}
+  {:rank 132,
+   :action
+   {:type :advance-mission, :target "M-essay-corpus-substrate"},
+   :controller-score 11.77188967079013,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.901788385713203}
+  {:rank 133,
+   :action
+   {:type :advance-mission, :target "M-run-produces-its-own-brief"},
+   :controller-score 11.77188967079013,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.901788385713203}
+  {:rank 134,
+   :action
+   {:type :advance-mission, :target "M-typed-holes-lean-handoffs"},
+   :controller-score 11.77188967079013,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.901788385713203}
+  {:rank 135,
+   :action
+   {:type :advance-mission,
+    :target "M-shared-memory-control-build-test"},
+   :controller-score 11.77188967079013,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.901788385713203}
+  {:rank 136,
+   :action
+   {:type :address-sorry, :target :sorry/pattern-measure-never-target},
+   :controller-score 11.856477350543813,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.986376065466885}
+  {:rank 137,
+   :action
+   {:type :address-sorry,
+    :target :sorry/pattern-typed-theme-liberates-the-solo},
+   :controller-score 11.856477350543813,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -16.986376065466885}
+  {:rank 138,
+   :action
+   {:type :address-sorry, :target :sorry/wm-realised-on-merge-binding},
+   :controller-score 11.961404593799784,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -17.091303308722857}
+  {:rank 139,
+   :action {:type :no-op},
+   :controller-score 12.341467344235312,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -17.471366059158385}
+  {:rank 140,
+   :action
+   {:type :fire-pattern,
+    :target "futon-theory/mission-interface-signature"},
+   :controller-score 13.49274983241338,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -18.622648547336453}
+  {:rank 141,
+   :action
+   {:type :fire-pattern,
+    :target "features/operator-turns-enter-the-observation-vector"},
+   :controller-score 13.492809515766453,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -18.622708230689526}
+  {:rank 142,
+   :action
+   {:type :fire-pattern, :target "orchestration/recorded-handoff"},
+   :controller-score 13.531563860898814,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -18.661462575821886}
+  {:rank 143,
+   :action {:type :learn-action-class, :target-class :apply-cascade},
+   :controller-score 137.2891887379948,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -142.4190874529179}
+  {:rank 144,
+   :action {:type :learn-action-class, :target-class :close-hole},
+   :controller-score 137.2891887379948,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -142.4190874529179}
+  {:rank 145,
+   :action {:type :learn-action-class, :target-class :close-mission},
+   :controller-score 137.2891887379948,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -142.4190874529179}
+  {:rank 146,
+   :action {:type :learn-action-class, :target-class :close},
+   :controller-score 137.2891887379948,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -142.4190874529179}
+  {:rank 147,
+   :action {:type :learn-action-class, :target-class :survey},
+   :controller-score 137.2891887379948,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -142.4190874529179}
+  {:rank 148,
+   :action {:type :learn-action-class, :target-class :survey-mission},
+   :controller-score 137.2891887379948,
+   :habit-prior-bias -5.1298987149230735,
+   :selection-score -142.4190874529179}],
+ :inventory
+ [{:id "M-capability-zones-S1.5-acceptance",
+   :path "futon0/holes/missions/M-capability-zones-S1.5-acceptance.md",
+   :status
+   "Date: 2026-07-19. Candidate partition: `pca3-v1`. Status: **candidate for"}
+  {:id "M-capability-zones-S2b-handoff",
+   :path "futon0/holes/missions/M-capability-zones-S2b-handoff.md",
+   :status nil}
+  {:id "M-futon-problems",
+   :path "futon0/holes/missions/M-futon-problems.md",
+   :status
+   "**Status:** HEAD (drafted 2026-08-21, claude-13 + Joe, emacs-repl)"}
+  {:id "M-apm-capability-ratchet",
+   :path "futon0/holes/missions/M-apm-capability-ratchet.md",
+   :status
+   "**Status:** MAP — capability-topology map and evidence-observation substrate survey added 2026-07-22"}
+  {:id "M-capability-star-map",
+   :path "futon0/holes/missions/M-capability-star-map.md",
+   :status
+   "**Status:** CLOSED 2026-06-10 — operator close via WM pilot cycle #1 (pilot claude-3); caveats spun out to [[E-starmap-branch-merge]], [[E-starmap-full-registry-scan]], [[E-starmap-efe-hardening]], [[E-starmap-vsatarcs-regen]]."}
+  {:id "M-capability-zones",
+   :path "futon0/holes/missions/M-capability-zones.md",
+   :status
+   "**Status:** INSTANTIATE (S1) — chartered 2026-07-19 (claude-9 draft from the morning-after"}
+  {:id "M-futonzero-generative",
+   :path "futon0/holes/missions/M-futonzero-generative.md",
+   :status "**Status:** HEAD / IDENTIFY charter"}
+  {:id "M-usage-hacking",
+   :path "futon0/holes/missions/M-usage-hacking.md",
+   :status "**Status:** IDENTIFY (mission proposal)"}
+  {:id "M-capability-zones-S3-handoff",
+   :path "futon0/holes/missions/M-capability-zones-S3-handoff.md",
+   :status nil}
+  {:id "M-futonzero-mvp",
+   :path "futon0/holes/missions/M-futonzero-mvp.md",
+   :status "**Status:** IDENTIFY (mission proposal)"}
+  {:id "M-futonzero-prelim-practice",
+   :path "futon0/holes/missions/M-futonzero-prelim-practice.md",
+   :status
+   "**Status:** HEAD — operator shape captured 2026-08-15. Not yet IDENTIFY."}
+  {:id "M-capability-zones-S1-handoff",
+   :path "futon0/holes/missions/M-capability-zones-S1-handoff.md",
+   :status nil}
+  {:id "M-the-futon-stack-Q6-r12-design-choices",
+   :path
+   "futon0/holes/missions/M-the-futon-stack-Q6-r12-design-choices.md",
+   :status
+   "**Status:** DERIVE phase, pre-INSTANTIATE. Authored 2026-05-21 by claude-9"}
+  {:id "M-the-futon-stack",
+   :path "futon0/holes/missions/M-the-futon-stack.md",
+   :status
+   "**Status:** ACTIVE (since November 2025; mission text drafted 2026-05-01)."}
+  {:id "M-capability-zones-S1-coverage",
+   :path "futon0/holes/missions/M-capability-zones-S1-coverage.md",
+   :status nil}
+  {:id "M-capability-zones-S1.5-handoff",
+   :path "futon0/holes/missions/M-capability-zones-S1.5-handoff.md",
+   :status nil}
+  {:id "M-capability-zones-S2a-handoff",
+   :path "futon0/holes/missions/M-capability-zones-S2a-handoff.md",
+   :status nil}
+  {:id "M-futonzero-capability",
+   :path "futon0/holes/missions/M-futonzero-capability.md",
+   :status "**Status:** COMPLETE (2026-03-04)"}
+  {:id "M-patterns-done-right",
+   :path "futon0/holes/missions/M-patterns-done-right.md",
+   :status
+   "**Status:** OPEN (drafted 2026-05-04; sibling to M-the-futon-stack)."}
+  {:id "M-stack-hud-refactor",
+   :path "futon0/holes/missions/M-stack-hud-refactor.md",
+   :status
+   "**Status:** PARTIAL (Phase 1 shipped 2026-04-25; Phases 2–4 deferred)"}
+  {:id "M-wm-tripwires",
+   :path "futon2/holes/missions/M-wm-tripwires.md",
+   :status
+   "- **Status:** DERIVE (drafted 2026-07-16, claude-6 from Joe's directive;"}
+  {:id "M-wm-strategic-mission-selection",
+   :path "futon2/holes/missions/M-wm-strategic-mission-selection.md",
+   :status
+   "**Status:** DERIVE — typed candidate-projection kernel built dark; direct memory/cascade route now primary  "}
+  {:id "M-wm-aif-policy-grain-compliance",
+   :path "futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+   :status
+   "**Status:** INSTANTIATE — Slices 0, 1a, and 2 kernel dark; persistence/live seams remain open  "}
+  {:id "M-f11-find-production-successor",
+   :path "futon2/holes/missions/M-f11-find-production-successor.md",
+   :status "Status: OPEN — first continuous-backlog item"}
+  {:id "M-zaif-harness-v1",
+   :path "futon2/holes/missions/M-zaif-harness-v1.md",
+   :status
+   "**Status:** OPEN — HEAD through VERIFY drafted; INSTANTIATE runs as wm-contract U rows."}
+  {:id "M-aif-gap-epistemic-affordance",
+   :path "futon2/holes/missions/M-aif-gap-epistemic-affordance.md",
+   :status
+   "**Status:** **IDENTIFY — dependent on M-aif-policy-conditioned-eig**"}
+  {:id "M-formal-war-machine",
+   :path "futon2/holes/missions/M-formal-war-machine.md",
+   :status
+   "**Status:** CHARTERED 2026-08-25 (Joe + claude-13). Begins at IDENTIFY: the gap"}
+  {:id "M-aif-policy-conditioned-eig",
+   :path "futon2/holes/missions/M-aif-policy-conditioned-eig.md",
+   :status
+   "**Status:** **IDENTIFY agreed in principle; pure kernel instantiated; generative contract open**"}
+  {:id "M-reflective-discipline",
+   :path "futon2/holes/missions/M-reflective-discipline.md",
+   :status "**Status:** IDENTIFY (2026-04-28)"}
+  {:id "M-u88-contextual-preferences",
+   :path "futon2/holes/missions/M-u88-contextual-preferences.md",
+   :status "Status: OPEN — fixture episode milestone pending"}
+  {:id "M-run-produces-its-own-brief",
+   :path "futon2/holes/missions/M-run-produces-its-own-brief.md",
+   :status nil}
+  {:id "M-aif-a-matrix-faithfulness",
+   :path "futon2/holes/missions/M-aif-a-matrix-faithfulness.md",
+   :status
+   "**Status:** **INSTANTIATE (Stage 1 production-wired; simulation spike complete; Stage 2 exogenous calibration pending)**"}
+  {:id "V-f6-thesis-verification",
+   :path "futon3/holes/missions/V-f6-thesis-verification.md",
+   :status nil}
+  {:id "M-f6-arxiv",
+   :path "futon3/holes/missions/M-f6-arxiv.md",
+   :status "Status: archived"}
+  {:id "M-mission-coherence-patterns",
+   :path "futon3/holes/missions/M-mission-coherence-patterns.md",
+   :status
+   "**Status:** HEAD complete; IDENTIFY drafted; MAP pilot run on 3-mission corpus; DERIVE and beyond pending"}
+  {:id "M-pattern-inference-engine",
+   :path "futon3/holes/missions/M-pattern-inference-engine.md",
+   :status "Status: archived"}
+  {:id "M-pattern-application-diagnostic",
+   :path "futon3/holes/missions/M-pattern-application-diagnostic.md",
+   :status "**Status:** IDENTIFY (2026-04-27)"}
+  {:id "M-weird-modernism",
+   :path "futon3/holes/missions/M-weird-modernism.md",
+   :status
+   "**Status:** IDENTIFY + MAP (2026-05-22, perpetual-projection mode — no closure phase scheduled)"}
+  {:id "M-f6-recursive",
+   :path "futon3/holes/missions/M-f6-recursive.md",
+   :status "Status: archived"}
+  {:id "M-make-agency-work-properly",
+   :path "futon3/holes/missions/M-make-agency-work-properly.md",
+   :status
+   "**Status:** COMPLETE (SUPERSEDED) — Identifier separation and runner defaults implemented in futon3c agency layer (2026-03)"}
+  {:id "M-agency-unified-routing",
+   :path "futon3/holes/missions/M-agency-unified-routing.md",
+   :status "**Status:** :done"}
+  {:id "M-labs-integration",
+   :path "futon3/holes/missions/M-labs-integration.md",
+   :status
+   "**Status:** COMPLETE (SUPERSEDED) — Lab capture reframed as evidence landscape in futon3c; evidence store + thread projection replace Arxana overlays (2026-03)"}
+  {:id "M-mission-control-scoping",
+   :path "futon3/holes/missions/M-mission-control-scoping.md",
+   :status "Status: archived"}
+  {:id "M-fucodex-parity",
+   :path "futon3/holes/missions/M-fucodex-parity.md",
+   :status "Status: archived"}
+  {:id "M-par-session-punctuation",
+   :path "futon3/holes/missions/M-par-session-punctuation.md",
+   :status
+   "**Status:** COMPLETE (SUPERSEDED) — PAR emission via futon3c peripheral/reflect.clj; detach/reattach via peripheral adapter model (2026-03)"}
+  {:id "M-emacs-cursor-peripheral",
+   :path "futon3/holes/missions/M-emacs-cursor-peripheral.md",
+   :status "Status: in progress"}
+  {:id "M-futon1a-rebuild",
+   :path "futon3/holes/missions/M-futon1a-rebuild.md",
+   :status "Status: archived"}
+  {:id "M-agency-rebuild",
+   :path "futon3/holes/missions/M-agency-rebuild.md",
+   :status
+   "**Status:** COMPLETE (SUPERSEDED) — Agency invariants A0-A5 reimplemented in futon3c/agency/registry.clj (2026-03)"}
+  {:id "M-drawbridge-multi-agent",
+   :path "futon3/holes/missions/M-drawbridge-multi-agent.md",
+   :status
+   "**Status:** COMPLETE (SUPERSEDED) — N:1 shared agent registry in futon3c replaces per-agent JVM model (2026-03)"}
+  {:id "M-forum-organization",
+   :path "futon3/holes/missions/M-forum-organization.md",
+   :status "Status: archived"}
+  {:id "M-f6-ingest",
+   :path "futon3/holes/missions/M-f6-ingest.md",
+   :status "Status: archived"}
+  {:id "M-native-plan-coherence",
+   :path "futon3/holes/missions/M-native-plan-coherence.md",
+   :status "Status: archived"}
+  {:id "M-futon1a-workplan",
+   :path "futon3/holes/missions/M-futon1a-workplan.md",
+   :status "Status: archived"}
+  {:id "M-pattern-inference-engine-scoping-review",
+   :path
+   "futon3/holes/missions/M-pattern-inference-engine-scoping-review.md",
+   :status "Status: archived"}
+  {:id "M-coordination-rewrite",
+   :path "futon3/holes/missions/M-coordination-rewrite.md",
+   :status "Status: archived"}
+  {:id "M-arxana-graph-persistence",
+   :path "futon3/holes/missions/M-arxana-graph-persistence.md",
+   :status "Status: archived"}
+  {:id "M-plan-mermaid-viewer",
+   :path "futon3/holes/missions/M-plan-mermaid-viewer.md",
+   :status "Status: archived"}
+  {:id "M-pattern-ingest",
+   :path "futon3/holes/missions/M-pattern-ingest.md",
+   :status "**Status:** IDENTIFY (2026-05-26)"}
+  {:id "M-codex-parity",
+   :path "futon3/holes/missions/M-codex-parity.md",
+   :status "Status: archived"}
+  {:id "M-live-geometric-stack",
+   :path "futon3/holes/missions/M-live-geometric-stack.md",
+   :status
+   "**Status:** COMPLETE (2026-04-28). All seven phases delivered;"}
+  {:id "M-futon3x-e2e",
+   :path "futon3/holes/missions/M-futon3x-e2e.md",
+   :status "**Status:** DONE (2026-03-08) — all 7 criteria PASS"}
+  {:id "M-ws-emacs-log-stream",
+   :path "futon3/holes/missions/M-ws-emacs-log-stream.md",
+   :status "Status: archived"}
+  {:id "M1-smoke-test",
+   :path "futon3/holes/missions/M1-smoke-test.md",
+   :status nil}
+  {:id "M-pattern-mining",
+   :path "futon3/holes/missions/M-pattern-mining.md",
+   :status
+   "**Status:** MAP (entered 2026-04-27, IDENTIFY 2026-04-26)."}
+  {:id "M-graph-unification",
+   :path "futon3/holes/missions/M-graph-unification.md",
+   :status "Status: archived"}
+  {:id "M-agency-forum",
+   :path "futon3/holes/missions/M-agency-forum.md",
+   :status
+   "**Status:** COMPLETE (SUPERSEDED) — Agency/Forum interfaces replaced by futon3c evidence landscape (store.clj + threads.clj) (2026-03)"}
+  {:id "M-futon1a-rebuild-scoping-review",
+   :path "futon3/holes/missions/M-futon1a-rebuild-scoping-review.md",
+   :status "Status: archived"}
+  {:id "M-f6-agents",
+   :path "futon3/holes/missions/M-f6-agents.md",
+   :status "Status: archived"}
+  {:id "M-f6-eval",
+   :path "futon3/holes/missions/M-f6-eval.md",
+   :status "Status: archived"}
+  {:id "M-pattern-retrieval-calibration",
+   :path "futon3/holes/missions/M-pattern-retrieval-calibration.md",
+   :status
+   "**Status:** DERIVE (entered 2026-05-04, MAP 2026-05-04, IDENTIFY 2026-05-04)."}
+  {:id "QUEUE-FORMAT",
+   :path "futon3/holes/missions/QUEUE-FORMAT.md",
+   :status nil}
+  {:id "M-understand-fucodex",
+   :path "futon3/holes/missions/M-understand-fucodex.md",
+   :status
+   "**Status:** COMPLETE (SUPERSEDED) — Bridge architecture resolved by futon3c unified dispatch + peripheral model (2026-03)"}
+  {:id "M-futon1a-evidence",
+   :path "futon3/holes/missions/M-futon1a-evidence.md",
+   :status "Status: archived"}
+  {:id "M-structural-law",
+   :path "futon3c/holes/missions/M-structural-law.md",
+   :status "Status: parked"}
+  {:id "E-support-coverage",
+   :path "futon3c/holes/missions/E-support-coverage.md",
+   :status
+   "**Status:** SCOPED — multi-cycle plan; first cycle to start as a regular operator-paced inhabitation (NOT a candidate for `[[project_claude_autorunner]]` v1 because the design choices in cycle 1 need operator judgement)."}
+  {:id "M-typed-holes-example-mission-head",
+   :path
+   "futon3c/holes/missions/M-typed-holes-example-mission-head.md",
+   :status "Status: complete"}
+  {:id "M-futon3c-codex",
+   :path "futon3c/holes/missions/M-futon3c-codex.md",
+   :status "Status: archived"}
+  {:id "M-substrate-metric",
+   :path "futon3c/holes/missions/M-substrate-metric.md",
+   :status
+   "**Status:** DELIVERED (v1) - with named residue; first paired-consumer live consumption evidenced 2026-06-12. O1-O4 design-fit accepted by Joe; E1 + E2 escrow entries are `:contract-released`; E1 curvature query delivered; E2 continuity cut passed O4(b)/O4(c). Campaign dissolution remains a separate owner/Joe decision."}
+  {:id "E-street-sweeper",
+   :path "futon3c/holes/missions/E-street-sweeper.md",
+   :status
+   "**Status:** ACTIVE — Phase 3 complete; defer-queue (60 packets) awaits operator review; INV catalog expanded 9 → 22 (data-driven); test suite 29 deftests / 94 assertions passing."}
+  {:id "M-typed-holes-MAP",
+   :path "futon3c/holes/missions/M-typed-holes-MAP.md",
+   :status "Status: complete"}
+  {:id "M-agency-hardening",
+   :path "futon3c/holes/missions/M-agency-hardening.md",
+   :status "Status: CLOSED 2026-06-12 (Joe's call) — **but see"}
+  {:id "E-pilot-vsatarcs-feed",
+   :path "futon3c/holes/missions/E-pilot-vsatarcs-feed.md",
+   :status
+   "**Status:** EXECUTED by Codex on 2026-05-25. Mechanism landed; 9-item backfill ingested into canonical VSATARCS; next live substrate event still needed to demonstrate post-landing auto-flow."}
+  {:id "E-wm-staleness-meta-stop",
+   :path "futon3c/holes/missions/E-wm-staleness-meta-stop.md",
+   :status
+   "**Status:** SCOPED, awaiting owner assignment (claude-2 authored, will execute unless reassigned)"}
+  {:id "M-typed-holes-example-first-flights",
+   :path
+   "futon3c/holes/missions/M-typed-holes-example-first-flights.md",
+   :status "Status: complete"}
+  {:id "M-first-flights",
+   :path "futon3c/holes/missions/M-first-flights.md",
+   :status
+   "Status: SUPERSEDED-AS-MISSION toward E-first-flights-transferred-work — Phase A COMPLETE (2026-06-12, operator side-by-side verdict PASS — checkpoint 20). Full lifecycle IDENTIFY → MAP → DERIVE → ARGUE → VERIFY → INSTANTIATE ran 2026-06-11/12. Phase B (policy-grade G(s, π)) and the typed-grounds tail moved to Excursion ownership on 2026-07-06; related fold-frontier work may inform M-fold-ansatz, but M-first-flights no longer carries that work as an open WM target."}
+  {:id "M-improve-irc",
+   :path "futon3c/holes/missions/M-improve-irc.md",
+   :status "## Status: DONE"}
+  {:id "M-kangaroo",
+   :path "futon3c/holes/missions/M-kangaroo.md",
+   :status
+   "Status: INSTANTIATE v1 LANDED on master + LIVE-VALIDATED 2026-06-10 (agent_pouch.clj, gate in make-claude-invoke-fn, flag FUTON3C_KANGAROO default OFF). VERIFY ✅ — live real-claude `feed-turn!` ×2: turn1 spawn 7.6s → \"ONE\", turn2 warm 3.4s → \"TWO\" (≈2.2× faster even fresh; gap scales with session size = the 5.8MB win). ACTIVATION: next restart (closure-capture, like Car-3) + cr-new agents + flag ON. Reviewed: OFF byte-for-byte cold; ON→cold-fallback on any Throwable; feed-turn! evicts pouch on failure (no desync)."}
+  {:id "M-memory-retrieval",
+   :path "futon3c/holes/missions/M-memory-retrieval.md",
+   :status
+   "Status: **PROPOSED** (organised by claude-6 at Joe's handoff, 2026-07-27;"}
+  {:id "M-agency-refactor",
+   :path "futon3c/holes/missions/M-agency-refactor.md",
+   :status "Status: archived"}
+  {:id "M-dispatch-peripheral-bridge",
+   :path "futon3c/holes/missions/M-dispatch-peripheral-bridge.md",
+   :status "Status: archived"}
+  {:id "M-mission-wiring",
+   :path "futon3c/holes/missions/M-mission-wiring.md",
+   :status "Status: parked"}
+  {:id "M-substrate-metric.R2-curvature-report",
+   :path
+   "futon3c/holes/missions/M-substrate-metric.R2-curvature-report.md",
+   :status "Status: complete"}
+  {:id "M-operational-readiness",
+   :path "futon3c/holes/missions/M-operational-readiness.md",
+   :status
+   "Status: Complete (all 8 issues done, all 4 gates met, 2026-02-20)"}
+  {:id "E-wm-metric-redesign",
+   :path "futon3c/holes/missions/E-wm-metric-redesign.md",
+   :status
+   "**Status:** SCOPED by claude-1 (NOT handed off — claude-1 finishes this one, following the E-wm-live-recommendation pattern)."}
+  {:id "M-war-machine-first-outing-expectations",
+   :path
+   "futon3c/holes/missions/M-war-machine-first-outing-expectations.md",
+   :status "Status: complete"}
+  {:id "M-typed-holes-example-scope-query",
+   :path "futon3c/holes/missions/M-typed-holes-example-scope-query.md",
+   :status "Status: complete"}
+  {:id "TN-how-map-missed-the-driver",
+   :path "futon3c/holes/missions/TN-how-map-missed-the-driver.md",
+   :status nil}
+  {:id "M-portfolio-inference",
+   :path "futon3c/holes/missions/M-portfolio-inference.md",
+   :status "**Status:** DONE (TESTING)"}
+  {:id "M-peripheral-phenomenology",
+   :path "futon3c/holes/missions/M-peripheral-phenomenology.md",
+   :status "Status: archived"}
+  {:id "M-single-locus",
+   :path "futon3c/holes/missions/M-single-locus.md",
+   :status
+   "**Status:** INSTANTIATE complete (2026-04-29) for the mission-home slice; siblings handed to Codex via GitHub issue #64."}
+  {:id "M-sigils-reconsidered",
+   :path "futon3c/holes/missions/M-sigils-reconsidered.md",
+   :status
+   "**Status: OPEN, no ruling.** This file records a survey and both sides of the"}
+  {:id "M-IRC-stability",
+   :path "futon3c/holes/missions/M-IRC-stability.md",
+   :status
+   "Status: Complete (all 6 failure modes fixed, 16 stability tests, 2026-02-23)"}
+  {:id "M-typed-bells",
+   :path "futon3c/holes/missions/M-typed-bells.md",
+   :status
+   "Status: **COMPLETE through DOCUMENT; flag-gated OFF by default** (2026-06-11). Full lifecycle"}
+  {:id "M-typed-holes-lean-wave2-design",
+   :path "futon3c/holes/missions/M-typed-holes-lean-wave2-design.md",
+   :status "Status: complete"}
+  {:id "M-the-perfect-crime",
+   :path "futon3c/holes/missions/M-the-perfect-crime.md",
+   :status "Status: HEAD"}
+  {:id "M-peripheral-behavior",
+   :path "futon3c/holes/missions/M-peripheral-behavior.md",
+   :status "Status: archived"}
+  {:id "M-war-machine-pilot",
+   :path "futon3c/holes/missions/M-war-machine-pilot.md",
+   :status
+   "**Status:** HEAD → INSTANTIATE Phase 1-5 EXECUTED; v0 mission-complete in operational substance: claude-9 inhabited per DERIVE Choice 4 + ran first Pair-stage substantive cycle (cycle 408e44ed; anchor-0020 coherence-row authored; new :sub-kind :symptom-to-root-traceback; all 4 consent-gate success-criteria verified); pre-restart no-op flip demo on 0010 also retained; codex-8 closed 4/5 deferrals; awaiting operator acceptance bell to formally close v0"}
+  {:id "M-war-machine-tuning",
+   :path "futon3c/holes/missions/M-war-machine-tuning.md",
+   :status "Status: parked"}
+  {:id "M-case-studies",
+   :path "futon3c/holes/missions/M-case-studies.md",
+   :status nil}
+  {:id "M-alfworld-pattern-discovery",
+   :path "futon3c/holes/missions/M-alfworld-pattern-discovery.md",
+   :status
+   "**Status:** Complete (10/10 patterns written, commit 2713661, 2026-02-20)"}
+  {:id "M-stepper-calibration",
+   :path "futon3c/holes/missions/M-stepper-calibration.md",
+   :status "Status: archived"}
+  {:id "M-apm-solutions",
+   :path "futon3c/holes/missions/M-apm-solutions.md",
+   :status "Status: parked"}
+  {:id "M-latex-wysiwyg",
+   :path "futon3c/holes/missions/M-latex-wysiwyg.md",
+   :status
+   "**Status:** :designed — ground measured on draft8, slices cut, nothing built yet."}
+  {:id "invariant-queue-audit-2026-06-01",
+   :path "futon3c/holes/missions/invariant-queue-audit-2026-06-01.md",
+   :status nil}
+  {:id "M-intent-curvature",
+   :path "futon3c/holes/missions/M-intent-curvature.md",
+   :status
+   "**Status:** IDENTIFY (scoped 2026-06-03 at C-substrate-completion dissolution) — **HIGH PRIORITY**, entry-gated. Not yet picked up."}
+  {:id "M-typed-holes-DERIVE",
+   :path "futon3c/holes/missions/M-typed-holes-DERIVE.md",
+   :status "Status: complete"}
+  {:id "E-r3d-per-entity-attribution",
+   :path "futon3c/holes/missions/E-r3d-per-entity-attribution.md",
+   :status "**Status:** IDENTIFY"}
+  {:id "M-fulab-logic",
+   :path "futon3c/holes/missions/M-fulab-logic.md",
+   :status "Status: parked"}
+  {:id "M-apm-demonstration",
+   :path "futon3c/holes/missions/M-apm-demonstration.md",
+   :status
+   "**Status:** HEAD complete; IDENTIFY draft pending operator acceptance (2026-08-14)"}
+  {:id "M-peripheral-model",
+   :path "futon3c/holes/missions/M-peripheral-model.md",
+   :status "Status: archived"}
+  {:id "M-shared-memory-control-build-test",
+   :path
+   "futon3c/holes/missions/M-shared-memory-control-build-test.md",
+   :status
+   "**Status:** Phases 1–3 ACCEPTED live; Phases 4–7 ACCEPTED dark/shadow;"}
+  {:id "M-agency-hardening-datapoints",
+   :path "futon3c/holes/missions/M-agency-hardening-datapoints.md",
+   :status "Status: archived"}
+  {:id "M-xenotype-its",
+   :path "futon3c/holes/missions/M-xenotype-its.md",
+   :status
+   "Status: **PROPOSED** (Joe's design, this date, recorded by claude-6;"}
+  {:id "M-walkie-talkie",
+   :path "futon3c/holes/missions/M-walkie-talkie.md",
+   :status
+   "## Status: DONE (2026-03-08) — Gates A+D pass, B+C deferred"}
+  {:id "M-agents-queue",
+   :path "futon3c/holes/missions/M-agents-queue.md",
+   :status
+   "Status: IDENTIFY — **PARKED** 2026-06-13 (Joe). Held: claude-1 on `/loop` manages"}
+  {:id "E-wm-live-recommendation",
+   :path "futon3c/holes/missions/E-wm-live-recommendation.md",
+   :status
+   "**Status:** SCOPED + IN PROGRESS by claude-1 (NOT handed off — claude-1 finishes this one)."}
+  {:id "M-sliding-blackboard",
+   :path "futon3c/holes/missions/M-sliding-blackboard.md",
+   :status "Status: parked"}
+  {:id "M-peripheral-gauntlet",
+   :path "futon3c/holes/missions/M-peripheral-gauntlet.md",
+   :status "Status: archived"}
+  {:id "first-flights-day-in-the-life",
+   :path "futon3c/holes/missions/first-flights-day-in-the-life.md",
+   :status nil}
+  {:id "M-repl-wins-over-cli",
+   :path "futon3c/holes/missions/M-repl-wins-over-cli.md",
+   :status "Status: parked"}
+  {:id "M-substrate-metric.R1-report",
+   :path "futon3c/holes/missions/M-substrate-metric.R1-report.md",
+   :status "Status: complete"}
+  {:id "M-pilot-appearance",
+   :path "futon3c/holes/missions/M-pilot-appearance.md",
+   :status
+   "**Status:** **CLOSED 2026-05-29** (operator-ratified, emacs-repl with claude-2). The pilot now appears coherently across all four depths via the differential-operator REPL — see Closing Checkpoint at end. Immersive-storyteller elaboration deferred to `E-storyteller.md`; hole-budget governance to `E-cheesemonger.md`; LOOP-learning + doc-currency automation are named OPEN follow-ons."}
+  {:id "M-diagramprover",
+   :path "futon3c/holes/missions/M-diagramprover.md",
+   :status
+   "Status: active — programme of work adopted 2026-08-02 (see §Programme of Work below)"}
+  {:id "M-stack-inhabitation",
+   :path "futon3c/holes/missions/M-stack-inhabitation.md",
+   :status "Status: parked"}
+  {:id "alleycat-scorecard",
+   :path "futon3c/holes/missions/alleycat-scorecard.md",
+   :status "- Status: COMPLETE"}
+  {:id "M-mission-scopes-into-substrate-2",
+   :path "futon3c/holes/missions/M-mission-scopes-into-substrate-2.md",
+   :status
+   "**Status:** HEAD authored / IDENTIFY (charter). Greenlit by Joe 2026-06-08."}
+  {:id "M-archaeology-control",
+   :path "futon3c/holes/missions/M-archaeology-control.md",
+   :status
+   "**Status:** INSTANTIATE complete (2026-04-29) for three sibling artifact-classes; deferred siblings recorded in scope-out."}
+  {:id "M-futon3-last-mile",
+   :path "futon3c/holes/missions/M-futon3-last-mile.md",
+   :status "Status: archived"}
+  {:id "E-pilot-hop-trigger-wiring",
+   :path "futon3c/holes/missions/E-pilot-hop-trigger-wiring.md",
+   :status
+   "**Status:** SPEC awaiting operator review BEFORE implementation (Joe's call)."}
+  {:id "E-g-incorporates-deltaT",
+   :path "futon3c/holes/missions/E-g-incorporates-deltaT.md",
+   :status
+   "**Status:** CYCLE 2 DRAFTED — implementation landed locally + live WM cache recomputed; awaiting claude-1 review / operator ratification before Cycle 3."}
+  {:id "M-turns-first",
+   :path "futon3c/holes/missions/M-turns-first.md",
+   :status
+   "**Status: IDENTIFY — Joe's decisions recorded; MAP next** (2026-09-14, claude-19)."}
+  {:id "M-invariant-queue-unstuck",
+   :path "futon3c/holes/missions/M-invariant-queue-unstuck.md",
+   :status "Status: parked"}
+  {:id "M-war-machine-first-outing",
+   :path "futon3c/holes/missions/M-war-machine-first-outing.md",
+   :status
+   "**Status:** **CLOSED 2026-05-30** (operator-directed, emacs-repl with claude-5; codex-2 piloted M2). Full lifecycle IDENTIFY→MAP→DERIVE→ARGUE→VERIFY→INSTANTIATE ran in-session; M0–M4 done; the WM-pilot loop demonstrated end-to-end (codex-2 cleared the entire open-sorry queue following the WM, driven unattended-across-turns by `/loop`+whistle). See **Closing Checkpoint** at end for milestones + named follow-ons (the input-sources frontier, geometry→AIF bug, VSATARCS regen, bootstrap auto-register). The mission *asked*: which open edges must close to run the machine confidently for a while, and how such a run is set up — answered yes, demonstrated."}
+  {:id "M-smart-emacs-cursor",
+   :path "futon3c/holes/missions/M-smart-emacs-cursor.md",
+   :status
+   "**Status:** :documented 2026-06-11 — every phase touched in one spoken day; GATE OPEN; retrospective in section 7; IOUs in 6.x."}
+  {:id "M-substrate-metric.R2-curvature-full-report",
+   :path
+   "futon3c/holes/missions/M-substrate-metric.R2-curvature-full-report.md",
+   :status "Status: complete"}
+  {:id "M-mission-control",
+   :path "futon3c/holes/missions/M-mission-control.md",
+   :status "**Status:** Complete (2026-02-26)"}
+  {:id "E-pilot-contract-compliance",
+   :path "futon3c/holes/missions/E-pilot-contract-compliance.md",
+   :status
+   "**Status:** IDENTIFY — finding recorded; \"run-via-WM\" use case captured; cron deferred."}
+  {:id "M-invariant-violations",
+   :path "futon3c/holes/missions/M-invariant-violations.md",
+   :status "Status: parked"}
+  {:id "M-chipwitz-corps",
+   :path "futon3c/holes/missions/M-chipwitz-corps.md",
+   :status
+   "**Status:** IDENTIFY (chartered 2026-06-11 from a live motivating example)"}
+  {:id "E-pattern-mining",
+   :path "futon3c/holes/missions/E-pattern-mining.md",
+   :status
+   "**Status:** ACCEPTED / MAP-SEEDED (claude-1 authored 2026-05-25; accepted by Codex 2026-05-25; bounded embedded MAP pass required before v0 implementation claims)."}
+  {:id "M-autoclock-in",
+   :path "futon3c/holes/missions/M-autoclock-in.md",
+   :status
+   "**Status:** INSTANTIATE-1 (first implementation, 2026-06-03) — explicit resolved target auto-promotion is implemented in `agent-chat.el`; broader confirmation/XTDB witnesses remain future work."}
+  {:id "M-typed-holes-mathlib-handoff",
+   :path "futon3c/holes/missions/M-typed-holes-mathlib-handoff.md",
+   :status
+   "**Status:** DISPATCHED to Codex (2026-06-14). **Owner of result:** claude-2"}
+  {:id "tickle-spec",
+   :path "futon3c/holes/missions/tickle-spec.md",
+   :status nil}
+  {:id "E-storyteller",
+   :path "futon3c/holes/missions/E-storyteller.md",
+   :status
+   "**Status:** SCOPED (vision recorded 2026-05-29; not started)"}
+  {:id "M-action-cost-modelling",
+   :path "futon3c/holes/missions/M-action-cost-modelling.md",
+   :status
+   "**Status:** HEAD / IDENTIFY / MAP / DERIVE / ARGUE / VERIFY all drafted and operator-ratified through 2026-05-27. VERIFY's 10 carried-forward tensions: 4 done (T1, T5, T8, T10), 4 held for downstream INSTANTIATE (T2, T4, T6, T9 — all blocked on `E-substrate-2-sorry-typing.md`'s own INSTANTIATE which is a future cycle), 2 future-Joe-triggered (T3, T7). Mission ready for INSTANTIATE when Joe ratifies."}
+  {:id "M-mission-peripheral",
+   :path "futon3c/holes/missions/M-mission-peripheral.md",
+   :status "Status: archived"}
+  {:id "M-bounded-disposition",
+   :path "futon3c/holes/missions/M-bounded-disposition.md",
+   :status
+   "**Status:** INSTANTIATE complete (2026-04-29) for the stash slice; siblings handed to Codex via GitHub issue."}
+  {:id "E-cheesemonger",
+   :path "futon3c/holes/missions/E-cheesemonger.md",
+   :status "**Status:** SCOPED (authored 2026-05-29; not yet built)"}
+  {:id "M-codex-agent-behaviour",
+   :path "futon3c/holes/missions/M-codex-agent-behaviour.md",
+   :status "**Status:** COMPLETE (2026-03-08)"}
+  {:id "M-zai-learning-loop",
+   :path "futon3c/holes/missions/M-zai-learning-loop.md",
+   :status
+   "**Status:** CHARTERED 2026-07-25 (Joe's direction; this doc claude-4)."}
+  {:id "M-state-snapshot-witness",
+   :path "futon3c/holes/missions/M-state-snapshot-witness.md",
+   :status
+   "**Status:** INSTANTIATE in progress (2026-05-01) for the inventory-snapshot sibling; siblings to Codex."}
+  {:id "M-codex-irc-execution",
+   :path "futon3c/holes/missions/M-codex-irc-execution.md",
+   :status "**Status:** DONE (2026-03-08)"}
+  {:id "M-typed-holes-ARGUE",
+   :path "futon3c/holes/missions/M-typed-holes-ARGUE.md",
+   :status "Status: complete"}
+  {:id "M-substrate-metric.OR-sample",
+   :path "futon3c/holes/missions/M-substrate-metric.OR-sample.md",
+   :status "Status: complete"}
+  {:id "M-tickle-overnight",
+   :path "futon3c/holes/missions/M-tickle-overnight.md",
+   :status
+   "## Status: COMPLETE (orchestration infra shipped: work queue, escalation→restart, REPL helpers, 13 tests/52 assertions, 2026-02-26)"}
+  {:id "M-populate-substrate-2",
+   :path "futon3c/holes/missions/M-populate-substrate-2.md",
+   :status
+   "**Status:** HEAD + IDENTIFY drafted; MAP grounded in live census (port 7071) + prior art; awaiting Joe ratification of the deliverable set and phase. Mission-close and phase transitions are Joe's call."}
+  {:id "M-typed-holes-VERIFY",
+   :path "futon3c/holes/missions/M-typed-holes-VERIFY.md",
+   :status "Status: complete"}
+  {:id "M-reachable-from-boot",
+   :path "futon3c/holes/missions/M-reachable-from-boot.md",
+   :status
+   "**Status:** INSTANTIATE complete (2026-05-01) for evidence-store sibling — **STOP-THE-LINE HOT-FIX, outside normal queue cadence.** Three remaining siblings handed to Codex via GitHub issue #65."}
+  {:id "M-typed-holes",
+   :path "futon3c/holes/missions/M-typed-holes.md",
+   :status
+   "**Status:** **CLOSED (2026-06-15, Joe).** Ran the full lifecycle"}
+  {:id "M-proof-peripheral",
+   :path "futon3c/holes/missions/M-proof-peripheral.md",
+   :status "Status: archived"}
+  {:id "M-dionysus-winddown",
+   :path "futon3c/holes/missions/M-dionysus-winddown.md",
+   :status
+   "**Status:** HEAD complete; IDENTIFY complete; MAP substantially complete (2026-08-14)"}
+  {:id "M-populate-substrate-2.D3-sweep-runbook",
+   :path
+   "futon3c/holes/missions/M-populate-substrate-2.D3-sweep-runbook.md",
+   :status
+   "**STATUS: ✅ COMPLETED 2026-06-25** — all 13 remaining repos replayed & verified"}
+  {:id "M-typed-holes-lean-handoffs",
+   :path "futon3c/holes/missions/M-typed-holes-lean-handoffs.md",
+   :status
+   "**Status:** SCOPED. Dispatch wave 1 (foundational, mathlib-backed) to the Codex"}
+  {:id "E-substrate-2-sorry-typing",
+   :path "futon3c/holes/missions/E-substrate-2-sorry-typing.md",
+   :status
+   "**Status:** HEAD drafted; IDENTIFY ratified; MAP ratified; DERIVE ratified; ARGUE ratified; VERIFY ratified; INSTANTIATE drafted; awaiting operator VERIFY-of-INSTANTIATE before DOCUMENT."}
+  {:id "E-ticks-firing-ratio-likelihood",
+   :path "futon3c/holes/missions/E-ticks-firing-ratio-likelihood.md",
+   :status "**Status:** EXECUTED"}
+  {:id "E-campaign-spec-grounding",
+   :path "futon3c/holes/missions/E-campaign-spec-grounding.md",
+   :status
+   "**Status:** SCOPED for handoff to codex-5 via Agency bell."}
+  {:id "M-bounded-in-flight-state",
+   :path "futon3c/holes/missions/M-bounded-in-flight-state.md",
+   :status "Status: open"}
+  {:id "TN-repertoire",
+   :path "futon3c/holes/missions/pilot-handoff/TN-repertoire.md",
+   :status nil}
+  {:id "TN-appearance",
+   :path "futon3c/holes/missions/pilot-handoff/TN-appearance.md",
+   :status nil}
+  {:id "M-typed-memories",
+   :path "futon3c/holes/missions/M-typed-memories.md",
+   :status
+   "Status: **DERIVE** (chartered at IDENTIFY and MAP completed 2026-07-22 —"}
+  {:id "M-populate-substrate-2.D3-slice2-design",
+   :path
+   "futon3c/holes/missions/M-populate-substrate-2.D3-slice2-design.md",
+   :status
+   "**Author:** claude-4 · **Date:** 2026-06-25 · **Status:** DRAFT for claude-2 sign-off (do not code until ack)"}
+  {:id "M-omni-wm-runner",
+   :path "futon3c/holes/missions/M-omni-wm-runner.md",
+   :status
+   "3. **Registry-direct status:** the service sets the war-machine apparatus"}
+  {:id "turn-delivery-invariants",
+   :path "futon3c/holes/missions/turn-delivery-invariants.md",
+   :status
+   "**Status:** DERIVE → ARGUE. Logic-model-before-code for the Agency hot path."}
+  {:id "M-war-machine",
+   :path "futon3c/holes/missions/M-war-machine.md",
+   :status "Status: parked"}
+  {:id "M-cyder",
+   :path "futon3c/holes/missions/M-cyder.md",
+   :status "Status: parked"}
+  {:id "M-autonomous-pattern-lifecycle",
+   :path "futon3c/holes/missions/M-autonomous-pattern-lifecycle.md",
+   :status "Status: parked"}
+  {:id "M-psr-pur-mesh-peripheral",
+   :path "futon3c/holes/missions/M-psr-pur-mesh-peripheral.md",
+   :status "Status: archived"}
+  {:id "M-federated-agency-hardening",
+   :path "futon3c/holes/missions/M-federated-agency-hardening.md",
+   :status
+   "Status: IDENTIFY — diagnosis recorded (Checkpoint 1). Cross-box federation routing"}
+  {:id "M-transport-adapters",
+   :path "futon3c/holes/missions/M-transport-adapters.md",
+   :status "Status: archived"}
+  {:id "M-single-entry-point",
+   :path "futon3c/holes/missions/M-single-entry-point.md",
+   :status "Status: open"}
+  {:id "E-night-shift",
+   :path "futon3c/holes/missions/E-night-shift.md",
+   :status
+   "**Status:** PARTIALLY EXECUTED by Codex on 2026-05-25. The envelope, registry/spec wiring, invariant tests, and spike-check are landed; pilot-side hop integration and a live operator-reviewed PR demonstration remain open."}
+  {:id "war-machine-response-to-hobbes",
+   :path "futon3c/holes/missions/war-machine-response-to-hobbes.md",
+   :status nil}
+  {:id "M-operational-readiness-traceability",
+   :path
+   "futon3c/holes/missions/M-operational-readiness-traceability.md",
+   :status "Status: archived"}
+  {:id "M-invariant-queue-extend",
+   :path "futon3c/holes/missions/M-invariant-queue-extend.md",
+   :status "Status: parked"}
+  {:id "M-social-exotype",
+   :path "futon3c/holes/missions/M-social-exotype.md",
+   :status "Status: archived"}
+  {:id "M-forum-refactor",
+   :path "futon3c/holes/missions/M-forum-refactor.md",
+   :status "## Status: DONE (2026-03-08)"}
+  {:id "M-codex-sorry-loop",
+   :path "futon3c/holes/missions/M-codex-sorry-loop.md",
+   :status
+   "Status: **CHARTERED at Joe's direction** (this conversation: \"produce a"}],
+ :joined
+ [{:id "M-zaif-harness-v1",
+   :path "futon2/holes/missions/M-zaif-harness-v1.md",
+   :status
+   "**Status:** OPEN — HEAD through VERIFY drafted; INSTANTIATE runs as wm-contract U rows.",
+   :rank 3}
+  {:id "M-single-locus",
+   :path "futon3c/holes/missions/M-single-locus.md",
+   :status
+   "**Status:** INSTANTIATE complete (2026-04-29) for the mission-home slice; siblings handed to Codex via GitHub issue #64.",
+   :rank 6}
+  {:id "M-war-machine-pilot",
+   :path "futon3c/holes/missions/M-war-machine-pilot.md",
+   :status
+   "**Status:** HEAD → INSTANTIATE Phase 1-5 EXECUTED; v0 mission-complete in operational substance: claude-9 inhabited per DERIVE Choice 4 + ran first Pair-stage substantive cycle (cycle 408e44ed; anchor-0020 coherence-row authored; new :sub-kind :symptom-to-root-traceback; all 4 consent-gate success-criteria verified); pre-restart no-op flip demo on 0010 also retained; codex-8 closed 4/5 deferrals; awaiting operator acceptance bell to formally close v0",
+   :rank 7}
+  {:id "M-state-snapshot-witness",
+   :path "futon3c/holes/missions/M-state-snapshot-witness.md",
+   :status
+   "**Status:** INSTANTIATE in progress (2026-05-01) for the inventory-snapshot sibling; siblings to Codex.",
+   :rank 9}
+  {:id "M-the-futon-stack-Q6-r12-design-choices",
+   :path
+   "futon0/holes/missions/M-the-futon-stack-Q6-r12-design-choices.md",
+   :status
+   "**Status:** DERIVE phase, pre-INSTANTIATE. Authored 2026-05-21 by claude-9",
+   :rank 10}
+  {:id "M-archaeology-control",
+   :path "futon3c/holes/missions/M-archaeology-control.md",
+   :status
+   "**Status:** INSTANTIATE complete (2026-04-29) for three sibling artifact-classes; deferred siblings recorded in scope-out.",
+   :rank 11}
+  {:id "M-bounded-disposition",
+   :path "futon3c/holes/missions/M-bounded-disposition.md",
+   :status
+   "**Status:** INSTANTIATE complete (2026-04-29) for the stash slice; siblings handed to Codex via GitHub issue.",
+   :rank 13}
+  {:id "M-action-cost-modelling",
+   :path "futon3c/holes/missions/M-action-cost-modelling.md",
+   :status
+   "**Status:** HEAD / IDENTIFY / MAP / DERIVE / ARGUE / VERIFY all drafted and operator-ratified through 2026-05-27. VERIFY's 10 carried-forward tensions: 4 done (T1, T5, T8, T10), 4 held for downstream INSTANTIATE (T2, T4, T6, T9 — all blocked on `E-substrate-2-sorry-typing.md`'s own INSTANTIATE which is a future cycle), 2 future-Joe-triggered (T3, T7). Mission ready for INSTANTIATE when Joe ratifies.",
+   :rank 15}
+  {:id "M-reachable-from-boot",
+   :path "futon3c/holes/missions/M-reachable-from-boot.md",
+   :status
+   "**Status:** INSTANTIATE complete (2026-05-01) for evidence-store sibling — **STOP-THE-LINE HOT-FIX, outside normal queue cadence.** Three remaining siblings handed to Codex via GitHub issue #65.",
+   :rank 16}
+  {:id "M-diagramprover",
+   :path "futon3c/holes/missions/M-diagramprover.md",
+   :status
+   "Status: active — programme of work adopted 2026-08-02 (see §Programme of Work below)",
+   :rank 17}
+  {:id "M-typed-holes-mathlib-handoff",
+   :path "futon3c/holes/missions/M-typed-holes-mathlib-handoff.md",
+   :status
+   "**Status:** DISPATCHED to Codex (2026-06-14). **Owner of result:** claude-2",
+   :rank 20}
+  {:id "M-mission-coherence-patterns",
+   :path "futon3/holes/missions/M-mission-coherence-patterns.md",
+   :status
+   "**Status:** HEAD complete; IDENTIFY drafted; MAP pilot run on 3-mission corpus; DERIVE and beyond pending",
+   :rank 27}
+  {:id "M-autoclock-in",
+   :path "futon3c/holes/missions/M-autoclock-in.md",
+   :status
+   "**Status:** INSTANTIATE-1 (first implementation, 2026-06-03) — explicit resolved target auto-promotion is implemented in `agent-chat.el`; broader confirmation/XTDB witnesses remain future work.",
+   :rank 28}
+  {:id "M-emacs-cursor-peripheral",
+   :path "futon3/holes/missions/M-emacs-cursor-peripheral.md",
+   :status "Status: in progress",
+   :rank 29}
+  {:id "M-pattern-retrieval-calibration",
+   :path "futon3/holes/missions/M-pattern-retrieval-calibration.md",
+   :status
+   "**Status:** DERIVE (entered 2026-05-04, MAP 2026-05-04, IDENTIFY 2026-05-04).",
+   :rank 34}
+  {:id "M-kangaroo",
+   :path "futon3c/holes/missions/M-kangaroo.md",
+   :status
+   "Status: INSTANTIATE v1 LANDED on master + LIVE-VALIDATED 2026-06-10 (agent_pouch.clj, gate in make-claude-invoke-fn, flag FUTON3C_KANGAROO default OFF). VERIFY ✅ — live real-claude `feed-turn!` ×2: turn1 spawn 7.6s → \"ONE\", turn2 warm 3.4s → \"TWO\" (≈2.2× faster even fresh; gap scales with session size = the 5.8MB win). ACTIVATION: next restart (closure-capture, like Car-3) + cr-new agents + flag ON. Reviewed: OFF byte-for-byte cold; ON→cold-fallback on any Throwable; feed-turn! evicts pouch on failure (no desync).",
+   :rank 36}
+  {:id "M-capability-zones",
+   :path "futon0/holes/missions/M-capability-zones.md",
+   :status
+   "**Status:** INSTANTIATE (S1) — chartered 2026-07-19 (claude-9 draft from the morning-after",
+   :rank 37}
+  {:id "M-aif-a-matrix-faithfulness",
+   :path "futon2/holes/missions/M-aif-a-matrix-faithfulness.md",
+   :status
+   "**Status:** **INSTANTIATE (Stage 1 production-wired; simulation spike complete; Stage 2 exogenous calibration pending)**",
+   :rank 39}
+  {:id "M-wm-aif-policy-grain-compliance",
+   :path "futon2/holes/missions/M-wm-aif-policy-grain-compliance.md",
+   :status
+   "**Status:** INSTANTIATE — Slices 0, 1a, and 2 kernel dark; persistence/live seams remain open  ",
+   :rank 40}
+  {:id "M-the-futon-stack",
+   :path "futon0/holes/missions/M-the-futon-stack.md",
+   :status
+   "**Status:** ACTIVE (since November 2025; mission text drafted 2026-05-01).",
+   :rank 43}
+  {:id "M-pattern-mining",
+   :path "futon3/holes/missions/M-pattern-mining.md",
+   :status
+   "**Status:** MAP (entered 2026-04-27, IDENTIFY 2026-04-26).",
+   :rank 45}
+  {:id "M-patterns-done-right",
+   :path "futon0/holes/missions/M-patterns-done-right.md",
+   :status
+   "**Status:** OPEN (drafted 2026-05-04; sibling to M-the-futon-stack).",
+   :rank 46}
+  {:id "M-futonzero-mvp",
+   :path "futon0/holes/missions/M-futonzero-mvp.md",
+   :status "**Status:** IDENTIFY (mission proposal)",
+   :rank 47}
+  {:id "M-substrate-metric",
+   :path "futon3c/holes/missions/M-substrate-metric.md",
+   :status
+   "**Status:** DELIVERED (v1) - with named residue; first paired-consumer live consumption evidenced 2026-06-12. O1-O4 design-fit accepted by Joe; E1 + E2 escrow entries are `:contract-released`; E1 curvature query delivered; E2 continuity cut passed O4(b)/O4(c). Campaign dissolution remains a separate owner/Joe decision.",
+   :rank 49}
+  {:id "M-single-entry-point",
+   :path "futon3c/holes/missions/M-single-entry-point.md",
+   :status "Status: open",
+   :rank 52}
+  {:id "M-pattern-ingest",
+   :path "futon3/holes/missions/M-pattern-ingest.md",
+   :status "**Status:** IDENTIFY (2026-05-26)",
+   :rank 56}
+  {:id "M-omni-wm-runner",
+   :path "futon3c/holes/missions/M-omni-wm-runner.md",
+   :status
+   "3. **Registry-direct status:** the service sets the war-machine apparatus",
+   :rank 57}
+  {:id "M-pattern-application-diagnostic",
+   :path "futon3/holes/missions/M-pattern-application-diagnostic.md",
+   :status "**Status:** IDENTIFY (2026-04-27)",
+   :rank 61}
+  {:id "M-bounded-in-flight-state",
+   :path "futon3c/holes/missions/M-bounded-in-flight-state.md",
+   :status "Status: open",
+   :rank 63}
+  {:id "M-weird-modernism",
+   :path "futon3/holes/missions/M-weird-modernism.md",
+   :status
+   "**Status:** IDENTIFY + MAP (2026-05-22, perpetual-projection mode — no closure phase scheduled)",
+   :rank 64}
+  {:id "M-futonzero-prelim-practice",
+   :path "futon0/holes/missions/M-futonzero-prelim-practice.md",
+   :status
+   "**Status:** HEAD — operator shape captured 2026-08-15. Not yet IDENTIFY.",
+   :rank 66}
+  {:id "M-reflective-discipline",
+   :path "futon2/holes/missions/M-reflective-discipline.md",
+   :status "**Status:** IDENTIFY (2026-04-28)",
+   :rank 69}
+  {:id "M-stack-hud-refactor",
+   :path "futon0/holes/missions/M-stack-hud-refactor.md",
+   :status
+   "**Status:** PARTIAL (Phase 1 shipped 2026-04-25; Phases 2–4 deferred)",
+   :rank 75}
+  {:id "M-wm-tripwires",
+   :path "futon2/holes/missions/M-wm-tripwires.md",
+   :status
+   "- **Status:** DERIVE (drafted 2026-07-16, claude-6 from Joe's directive;",
+   :rank 81}
+  {:id "M-typed-memories",
+   :path "futon3c/holes/missions/M-typed-memories.md",
+   :status
+   "Status: **DERIVE** (chartered at IDENTIFY and MAP completed 2026-07-22 —",
+   :rank 84}
+  {:id "M-wm-strategic-mission-selection",
+   :path "futon2/holes/missions/M-wm-strategic-mission-selection.md",
+   :status
+   "**Status:** DERIVE — typed candidate-projection kernel built dark; direct memory/cascade route now primary  ",
+   :rank 86}
+  {:id "M-capability-zones-S2b-handoff",
+   :path "futon0/holes/missions/M-capability-zones-S2b-handoff.md",
+   :status nil,
+   :rank 90}
+  {:id "M-intent-curvature",
+   :path "futon3c/holes/missions/M-intent-curvature.md",
+   :status
+   "**Status:** IDENTIFY (scoped 2026-06-03 at C-substrate-completion dissolution) — **HIGH PRIORITY**, entry-gated. Not yet picked up.",
+   :rank 92}
+  {:id "M-xenotype-its",
+   :path "futon3c/holes/missions/M-xenotype-its.md",
+   :status
+   "Status: **PROPOSED** (Joe's design, this date, recorded by claude-6;",
+   :rank 94}
+  {:id "M-latex-wysiwyg",
+   :path "futon3c/holes/missions/M-latex-wysiwyg.md",
+   :status
+   "**Status:** :designed — ground measured on draft8, slices cut, nothing built yet.",
+   :rank 95}
+  {:id "M-codex-sorry-loop",
+   :path "futon3c/holes/missions/M-codex-sorry-loop.md",
+   :status
+   "Status: **CHARTERED at Joe's direction** (this conversation: \"produce a",
+   :rank 98}
+  {:id "M-sigils-reconsidered",
+   :path "futon3c/holes/missions/M-sigils-reconsidered.md",
+   :status
+   "**Status: OPEN, no ruling.** This file records a survey and both sides of the",
+   :rank 100}
+  {:id "M-populate-substrate-2",
+   :path "futon3c/holes/missions/M-populate-substrate-2.md",
+   :status
+   "**Status:** HEAD + IDENTIFY drafted; MAP grounded in live census (port 7071) + prior art; awaiting Joe ratification of the deliverable set and phase. Mission-close and phase transitions are Joe's call.",
+   :rank 101}
+  {:id "M-apm-capability-ratchet",
+   :path "futon0/holes/missions/M-apm-capability-ratchet.md",
+   :status
+   "**Status:** MAP — capability-topology map and evidence-observation substrate survey added 2026-07-22",
+   :rank 102}
+  {:id "M-u88-contextual-preferences",
+   :path "futon2/holes/missions/M-u88-contextual-preferences.md",
+   :status "Status: OPEN — fixture episode milestone pending",
+   :rank 103}
+  {:id "M-capability-zones-S3-handoff",
+   :path "futon0/holes/missions/M-capability-zones-S3-handoff.md",
+   :status nil,
+   :rank 104}
+  {:id "M-capability-zones-S2a-handoff",
+   :path "futon0/holes/missions/M-capability-zones-S2a-handoff.md",
+   :status nil,
+   :rank 105}
+  {:id "M-f11-find-production-successor",
+   :path "futon2/holes/missions/M-f11-find-production-successor.md",
+   :status "Status: OPEN — first continuous-backlog item",
+   :rank 106}
+  {:id "M-the-perfect-crime",
+   :path "futon3c/holes/missions/M-the-perfect-crime.md",
+   :status "Status: HEAD",
+   :rank 107}
+  {:id "M-chipwitz-corps",
+   :path "futon3c/holes/missions/M-chipwitz-corps.md",
+   :status
+   "**Status:** IDENTIFY (chartered 2026-06-11 from a live motivating example)",
+   :rank 108}
+  {:id "M-futonzero-generative",
+   :path "futon0/holes/missions/M-futonzero-generative.md",
+   :status "**Status:** HEAD / IDENTIFY charter",
+   :rank 110}
+  {:id "M-mission-scopes-into-substrate-2",
+   :path "futon3c/holes/missions/M-mission-scopes-into-substrate-2.md",
+   :status
+   "**Status:** HEAD authored / IDENTIFY (charter). Greenlit by Joe 2026-06-08.",
+   :rank 111}
+  {:id "M-usage-hacking",
+   :path "futon0/holes/missions/M-usage-hacking.md",
+   :status "**Status:** IDENTIFY (mission proposal)",
+   :rank 113}
+  {:id "M-agents-queue",
+   :path "futon3c/holes/missions/M-agents-queue.md",
+   :status
+   "Status: IDENTIFY — **PARKED** 2026-06-13 (Joe). Held: claude-1 on `/loop` manages",
+   :rank 114}
+  {:id "M-formal-war-machine",
+   :path "futon2/holes/missions/M-formal-war-machine.md",
+   :status
+   "**Status:** CHARTERED 2026-08-25 (Joe + claude-13). Begins at IDENTIFY: the gap",
+   :rank 117}
+  {:id "M-aif-policy-conditioned-eig",
+   :path "futon2/holes/missions/M-aif-policy-conditioned-eig.md",
+   :status
+   "**Status:** **IDENTIFY agreed in principle; pure kernel instantiated; generative contract open**",
+   :rank 118}
+  {:id "M-federated-agency-hardening",
+   :path "futon3c/holes/missions/M-federated-agency-hardening.md",
+   :status
+   "Status: IDENTIFY — diagnosis recorded (Checkpoint 1). Cross-box federation routing",
+   :rank 119}
+  {:id "M-aif-gap-epistemic-affordance",
+   :path "futon2/holes/missions/M-aif-gap-epistemic-affordance.md",
+   :status
+   "**Status:** **IDENTIFY — dependent on M-aif-policy-conditioned-eig**",
+   :rank 120}
+  {:id "M-zai-learning-loop",
+   :path "futon3c/holes/missions/M-zai-learning-loop.md",
+   :status
+   "**Status:** CHARTERED 2026-07-25 (Joe's direction; this doc claude-4).",
+   :rank 121}
+  {:id "M-smart-emacs-cursor",
+   :path "futon3c/holes/missions/M-smart-emacs-cursor.md",
+   :status
+   "**Status:** :documented 2026-06-11 — every phase touched in one spoken day; GATE OPEN; retrospective in section 7; IOUs in 6.x.",
+   :rank 122}
+  {:id "M-capability-zones-S1-handoff",
+   :path "futon0/holes/missions/M-capability-zones-S1-handoff.md",
+   :status nil,
+   :rank 123}
+  {:id "M-capability-zones-S1-coverage",
+   :path "futon0/holes/missions/M-capability-zones-S1-coverage.md",
+   :status nil,
+   :rank 124}
+  {:id "M-case-studies",
+   :path "futon3c/holes/missions/M-case-studies.md",
+   :status nil,
+   :rank 127}
+  {:id "M-futon-problems",
+   :path "futon0/holes/missions/M-futon-problems.md",
+   :status
+   "**Status:** HEAD (drafted 2026-08-21, claude-13 + Joe, emacs-repl)",
+   :rank 128}
+  {:id "M-memory-retrieval",
+   :path "futon3c/holes/missions/M-memory-retrieval.md",
+   :status
+   "Status: **PROPOSED** (organised by claude-6 at Joe's handoff, 2026-07-27;",
+   :rank 129}
+  {:id "M-apm-demonstration",
+   :path "futon3c/holes/missions/M-apm-demonstration.md",
+   :status
+   "**Status:** HEAD complete; IDENTIFY draft pending operator acceptance (2026-08-14)",
+   :rank 130}
+  {:id "M-dionysus-winddown",
+   :path "futon3c/holes/missions/M-dionysus-winddown.md",
+   :status
+   "**Status:** HEAD complete; IDENTIFY complete; MAP substantially complete (2026-08-14)",
+   :rank 131}
+  {:id "M-run-produces-its-own-brief",
+   :path "futon2/holes/missions/M-run-produces-its-own-brief.md",
+   :status nil,
+   :rank 133}
+  {:id "M-typed-holes-lean-handoffs",
+   :path "futon3c/holes/missions/M-typed-holes-lean-handoffs.md",
+   :status
+   "**Status:** SCOPED. Dispatch wave 1 (foundational, mathlib-backed) to the Codex",
+   :rank 134}
+  {:id "M-shared-memory-control-build-test",
+   :path
+   "futon3c/holes/missions/M-shared-memory-control-build-test.md",
+   :status
+   "**Status:** Phases 1–3 ACCEPTED live; Phases 4–7 ACCEPTED dark/shadow;",
+   :rank 135}]}

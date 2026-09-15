@@ -1,0 +1,1780 @@
+{
+  "schema": "wm/interpreted-pattern-set-v1",
+  "author": "codex-27",
+  "authority": "documented-interpretation",
+  "status": "design-only",
+  "scoring-permitted": false,
+  "target": {
+    "id": "M-zaif-harness-v1",
+    "source": {
+      "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+      "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+    },
+    "status-source": {
+      "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+      "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505",
+      "lines": [
+        3,
+        9
+      ],
+      "quote": "**Date:** 2026-09-02\n**Status:** OPEN \u2014 HEAD through VERIFY drafted; INSTANTIATE runs as wm-contract U rows.\n**Owner:** claude-1. Driver: Joe.\n**Home:** futon2/holes/ (successor edition to `M-zaif-harness.md`, 2026-07-11, which stays\nthe v0 record; this document does not rewrite it).\n**Lifecycle:** `futon4/holes/mission-lifecycle.md` \u2014 followed phase by phase, which is\nthe point: a conforming mission is WM-legible (see the phase\u2192node table in IDENTIFY)."
+    },
+    "rule": "Tension-clarity fallback over the inventory of four requested mission roots, not the Phase-8 allow-list: this mission explicitly names built components, missing readiness tests and a concrete fixed-but-unreplayed witness. Rank 3 in a retained unrestricted backtrace is corroboration only, not a current scheduler authorization.",
+    "ranking-finding": "Latest inspected tick fb96bf07 contains inherited repair-backtrace rankings, not a fresh unrestricted current ranking; do not mislabel their dates.",
+    "selection-record": {
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/redo/target-selection.edn",
+      "sha256": "88f59391e3332412a35be463dc1f5a260d8d79cbf3072bc7eaee400d14cd0231"
+    },
+    "allow-list-filtered": false
+  },
+  "retrieval": {
+    "query": "Have: built agent harness components, a shipped tested ledger and replay certificates; three runtime defects fixed with regression tests. Want: per-component readiness evidence, independently verified certificate, and a reporting gate whose claims are re-derivable from typed records. However: a built component is not evidence that its behaviour is ready to bring online; the independent witness blocked the certificate, and after fixes the rerun remains pending. Test each component, retain exact evidence, and require independent replay before promoting the certificate.",
+    "query-source": {
+      "path": "futon2/holes/missions/M-zaif-harness-v1.md",
+      "lines": [
+        [
+          44,
+          47
+        ],
+        [
+          89,
+          110
+        ],
+        [
+          208,
+          215
+        ],
+        [
+          226,
+          229
+        ]
+      ]
+    },
+    "embedding": {
+      "cascade": [
+        [
+          "agent/provisional-claims-ledger",
+          0.552,
+          0.166
+        ],
+        [
+          "agent/evidence-over-assertion",
+          0.543,
+          0.163
+        ],
+        [
+          "coordination/session-durability-check",
+          0.517,
+          0.259
+        ],
+        [
+          "coordination/cross-validation-protocol",
+          0.47,
+          0.329
+        ],
+        [
+          "war-machine/operational-not-decorative",
+          0.508,
+          0.254
+        ],
+        [
+          "sidecar/append-only-semantic-audit",
+          0.476,
+          0.333
+        ],
+        [
+          "stack-coherence/maturity-evidence-audit",
+          0.499,
+          0.25
+        ],
+        [
+          "stack-coherence/ready-blocked-triage",
+          0.492,
+          0.541
+        ],
+        [
+          "social/verify-before-compose",
+          0.509,
+          0.153
+        ],
+        [
+          "social/tension-before-code",
+          0.473,
+          0.237
+        ]
+      ],
+      "size": 10,
+      "wholeness": 4.761,
+      "H-coherence": 0.945,
+      "T-intensity": 5.04,
+      "coverage-reward": 2.685,
+      "prior-cost": 6.797,
+      "cascade-score": 0.986,
+      "lambda": 0.25,
+      "trajectory": [
+        [
+          1,
+          "agent/provisional-claims-ledger",
+          0.166
+        ],
+        [
+          2,
+          "agent/evidence-over-assertion",
+          0.163
+        ],
+        [
+          3,
+          "coordination/session-durability-check",
+          0.259
+        ],
+        [
+          4,
+          "coordination/cross-validation-protocol",
+          0.329
+        ],
+        [
+          5,
+          "war-machine/operational-not-decorative",
+          0.254
+        ],
+        [
+          6,
+          "sidecar/append-only-semantic-audit",
+          0.333
+        ],
+        [
+          7,
+          "stack-coherence/maturity-evidence-audit",
+          0.25
+        ],
+        [
+          8,
+          "stack-coherence/ready-blocked-triage",
+          0.541
+        ],
+        [
+          9,
+          "social/verify-before-compose",
+          0.153
+        ],
+        [
+          10,
+          "social/tension-before-code",
+          0.237
+        ]
+      ],
+      "posterior_weight": 0.0,
+      "posterior_label": "self-graded",
+      "semi-lattice": {
+        "descent": [
+          [
+            "stack-coherence/maturity-evidence-audit",
+            "stack-coherence/ready-blocked-triage"
+          ]
+        ],
+        "co_app": [
+          [
+            "sidecar/append-only-semantic-audit",
+            "agent/evidence-over-assertion",
+            1
+          ],
+          [
+            "sidecar/append-only-semantic-audit",
+            "war-machine/operational-not-decorative",
+            1
+          ],
+          [
+            "coordination/cross-validation-protocol",
+            "coordination/session-durability-check",
+            2
+          ],
+          [
+            "agent/evidence-over-assertion",
+            "stack-coherence/maturity-evidence-audit",
+            1
+          ],
+          [
+            "agent/evidence-over-assertion",
+            "war-machine/operational-not-decorative",
+            1
+          ],
+          [
+            "agent/evidence-over-assertion",
+            "stack-coherence/ready-blocked-triage",
+            1
+          ],
+          [
+            "agent/evidence-over-assertion",
+            "coordination/session-durability-check",
+            1
+          ],
+          [
+            "stack-coherence/maturity-evidence-audit",
+            "stack-coherence/ready-blocked-triage",
+            3
+          ],
+          [
+            "social/tension-before-code",
+            "social/verify-before-compose",
+            1
+          ]
+        ]
+      },
+      "non-phylogeny": [
+        "assignment-binding",
+        "authoritative-transcript",
+        "clock-out",
+        "construction-discipline",
+        "coordination-bottleneck",
+        "disruption-soak",
+        "distinguishing-cases-before-adoption",
+        "done-is-observed-running",
+        "evidence-ledger",
+        "facilitation-scaffolds",
+        "ifr-f3-piti",
+        "legitimate-iteration",
+        "licence-to-fail",
+        "pattern-propose",
+        "probe-the-claimed-property-not-the-acceptance-proxy",
+        "progress-is-a-witnessed-state-change",
+        "rapid-debugging",
+        "records-carry-warrant",
+        "reflexivity-failure-in-a-gate",
+        "revise-patterns-from-observed-use",
+        "self-certifying-artifact",
+        "separate-proof-transfer-from-artifact-replay",
+        "single-producer",
+        "spec-and-implementation-must-converge-to-runtime-certificates",
+        "two-stage-fidelity",
+        "wr-23-upstream-trackers-are-stack-surfaces"
+      ],
+      "coverage-candidates": [
+        {
+          "pattern_id": "workshop/progress-is-a-witnessed-state-change",
+          "stem": "progress-is-a-witnessed-state-change",
+          "relevance": 0.544
+        },
+        {
+          "pattern_id": "stack-coherence/evidence-ledger",
+          "stem": "evidence-ledger",
+          "relevance": 0.542
+        },
+        {
+          "pattern_id": "workshop/distinguishing-cases-before-adoption",
+          "stem": "distinguishing-cases-before-adoption",
+          "relevance": 0.508
+        },
+        {
+          "pattern_id": "workshop/records-carry-warrant",
+          "stem": "records-carry-warrant",
+          "relevance": 0.501
+        },
+        {
+          "pattern_id": "math-formalization/separate-proof-transfer-from-artifact-replay",
+          "stem": "separate-proof-transfer-from-artifact-replay",
+          "relevance": 0.492
+        },
+        {
+          "pattern_id": "fulab/clock-out",
+          "stem": "clock-out",
+          "relevance": 0.489
+        },
+        {
+          "pattern_id": "storage/rapid-debugging",
+          "stem": "rapid-debugging",
+          "relevance": 0.482
+        },
+        {
+          "pattern_id": "pattern-mining/probe-the-claimed-property-not-the-acceptance-proxy",
+          "stem": "probe-the-claimed-property-not-the-acceptance-proxy",
+          "relevance": 0.481
+        },
+        {
+          "pattern_id": "problems/spec-and-implementation-must-converge-to-runtime-certificates",
+          "stem": "spec-and-implementation-must-converge-to-runtime-certificates",
+          "relevance": 0.476
+        },
+        {
+          "pattern_id": "cycle-machine/disruption-soak",
+          "stem": "disruption-soak",
+          "relevance": 0.475
+        },
+        {
+          "pattern_id": "war-room/wr-23-upstream-trackers-are-stack-surfaces",
+          "stem": "wr-23-upstream-trackers-are-stack-surfaces",
+          "relevance": 0.473
+        },
+        {
+          "pattern_id": "workshop/revise-patterns-from-observed-use",
+          "stem": "revise-patterns-from-observed-use",
+          "relevance": 0.472
+        },
+        {
+          "pattern_id": "nomad/self-certifying-artifact",
+          "stem": "self-certifying-artifact",
+          "relevance": 0.47
+        },
+        {
+          "pattern_id": "vsatlas/facilitation-scaffolds",
+          "stem": "facilitation-scaffolds",
+          "relevance": 0.469
+        },
+        {
+          "pattern_id": "devmap-coherence/ifr-f3-piti",
+          "stem": "ifr-f3-piti",
+          "relevance": 0.466
+        },
+        {
+          "pattern_id": "or/two-stage-fidelity",
+          "stem": "two-stage-fidelity",
+          "relevance": 0.464
+        },
+        {
+          "pattern_id": "memory/licence-to-fail",
+          "stem": "licence-to-fail",
+          "relevance": 0.463
+        },
+        {
+          "pattern_id": "war-machine/coordination-bottleneck",
+          "stem": "coordination-bottleneck",
+          "relevance": 0.462
+        },
+        {
+          "pattern_id": "cycle-machine/single-producer",
+          "stem": "single-producer",
+          "relevance": 0.459
+        },
+        {
+          "pattern_id": "fulab/pattern-propose",
+          "stem": "pattern-propose",
+          "relevance": 0.458
+        },
+        {
+          "pattern_id": "realtime/authoritative-transcript",
+          "stem": "authoritative-transcript",
+          "relevance": 0.457
+        },
+        {
+          "pattern_id": "exotic/construction-discipline",
+          "stem": "construction-discipline",
+          "relevance": 0.456
+        },
+        {
+          "pattern_id": "coordination/assignment-binding",
+          "stem": "assignment-binding",
+          "relevance": 0.455
+        },
+        {
+          "pattern_id": "p4ng/legitimate-iteration",
+          "stem": "legitimate-iteration",
+          "relevance": 0.454
+        },
+        {
+          "pattern_id": "apparatus/done-is-observed-running",
+          "stem": "done-is-observed-running",
+          "relevance": 0.452
+        },
+        {
+          "pattern_id": "process/reflexivity-failure-in-a-gate",
+          "stem": "reflexivity-failure-in-a-gate",
+          "relevance": 0.451
+        }
+      ],
+      "phylogeny": {
+        "alpha": 0.3,
+        "edge_count": 10,
+        "edge_density": 0.222,
+        "coverage_gap": true,
+        "low_connectivity": true
+      }
+    },
+    "tier0": [
+      {
+        "pattern": "wr-1-three-futon-split",
+        "score": 19.628163,
+        "hits": [
+          "each",
+          "independently",
+          "three"
+        ]
+      },
+      {
+        "pattern": "ready-blocked-triage",
+        "score": 19.474013,
+        "hits": [
+          "blocked",
+          "each",
+          "ready"
+        ]
+      },
+      {
+        "pattern": "honest-holes-gate-composed-claims",
+        "score": 16.370548,
+        "hits": [
+          "claims",
+          "gate",
+          "its"
+        ]
+      },
+      {
+        "pattern": "spec-and-implementation-must-converge-to-runtime-certificates",
+        "score": 14.436616,
+        "hits": [
+          "certificates",
+          "runtime"
+        ]
+      },
+      {
+        "pattern": "storage/rapid-debugging",
+        "score": 13.84883,
+        "hits": [
+          "fixes",
+          "tests"
+        ]
+      },
+      {
+        "pattern": "structural-obstruction-as-theorem",
+        "score": 13.694679,
+        "hits": [
+          "blocked",
+          "certificate"
+        ]
+      },
+      {
+        "pattern": "storage/durability-first",
+        "score": 13.338004,
+        "hits": [
+          "fixes",
+          "remains"
+        ]
+      },
+      {
+        "pattern": "monitors-measure-the-work",
+        "score": 12.932539,
+        "hits": [
+          "component",
+          "whose"
+        ]
+      }
+    ],
+    "baseline-query": "M-zaif-harness-v1 \u2014 want: the harness edition, lifecycle-aligned and WM-fed. have: OPEN \u2014 HEAD through VERIFY drafted; INSTANTIATE runs as wm-contract U rows.",
+    "baseline-embedding": {
+      "cascade": [
+        [
+          "futon-theory/mission-interface-signature",
+          0.359,
+          0.108
+        ],
+        [
+          "devmap-coherence/ifr-f1-dhammavicaya",
+          0.324,
+          0.162
+        ],
+        [
+          "storage/open-world-velocity-validation",
+          0.316,
+          0.158
+        ]
+      ],
+      "size": 3,
+      "wholeness": 0.921,
+      "H-coherence": 0.922,
+      "T-intensity": 0.999,
+      "coverage-reward": 0.428,
+      "prior-cost": 1.469,
+      "cascade-score": 0.061,
+      "lambda": 0.25,
+      "trajectory": [
+        [
+          1,
+          "futon-theory/mission-interface-signature",
+          0.108
+        ],
+        [
+          2,
+          "devmap-coherence/ifr-f1-dhammavicaya",
+          0.162
+        ],
+        [
+          3,
+          "storage/open-world-velocity-validation",
+          0.158
+        ]
+      ],
+      "posterior_weight": 0.0,
+      "posterior_label": "self-graded",
+      "semi-lattice": {
+        "descent": [],
+        "co_app": [
+          [
+            "devmap-coherence/ifr-f1-dhammavicaya",
+            "futon-theory/mission-interface-signature",
+            1
+          ],
+          [
+            "futon-theory/mission-interface-signature",
+            "storage/open-world-velocity-validation",
+            1
+          ]
+        ]
+      },
+      "non-phylogeny": [
+        "advanceability",
+        "built-but-not-wired-invisibility",
+        "capability-vocabulary-v0",
+        "hierarchical-and-temporal-depth",
+        "identifier-separation",
+        "ifr-f3-piti",
+        "model-upstream-and-coupled",
+        "process-conduct-is-unassured",
+        "quick-intro",
+        "recorded-handoff",
+        "refusal-becomes-pattern",
+        "satisfied-rungs-are-counted-and-surfaced",
+        "tension-proposes-candidates",
+        "wr-1-three-futon-split",
+        "wr-11-external-applications-carry-predecessor-exemplar-relationships",
+        "wr-14-predecessor-completion-pull-is-a-fourth-next-move-criterion",
+        "wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+        "wr-17-futon0-as-cyborg-futon7-as-markov-blanket",
+        "wr-19-tension-must-generate-not-only-rank",
+        "wr-20-action-class-inventory-becomes-data",
+        "wr-21-geometrization-is-a-shared-cross-mission-dependency",
+        "wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+        "wr-23-upstream-trackers-are-stack-surfaces",
+        "wr-27-a-loop-is-born-instrumented-for-its-gain",
+        "wr-4-inhabit-before-building",
+        "wr-5-war-machine-is-not-a-mission",
+        "wr-6-daily-scan-is-depositing-heartbeat",
+        "wr-7-frames-interoperate-or-they-do-not-exist"
+      ],
+      "coverage-candidates": [
+        {
+          "pattern_id": "war-room/wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "stem": "wr-16-operationalised-exploit-loops-are-first-class-observation-channels",
+          "relevance": 0.394
+        },
+        {
+          "pattern_id": "problems/process-conduct-is-unassured",
+          "stem": "process-conduct-is-unassured",
+          "relevance": 0.394
+        },
+        {
+          "pattern_id": "war-room/wr-11-external-applications-carry-predecessor-exemplar-relationships",
+          "stem": "wr-11-external-applications-carry-predecessor-exemplar-relationships",
+          "relevance": 0.385
+        },
+        {
+          "pattern_id": "war-room/wr-23-upstream-trackers-are-stack-surfaces",
+          "stem": "wr-23-upstream-trackers-are-stack-surfaces",
+          "relevance": 0.382
+        },
+        {
+          "pattern_id": "pacspine/quick-intro",
+          "stem": "quick-intro",
+          "relevance": 0.378
+        },
+        {
+          "pattern_id": "war-room/wr-1-three-futon-split",
+          "stem": "wr-1-three-futon-split",
+          "relevance": 0.374
+        },
+        {
+          "pattern_id": "war-room/wr-17-futon0-as-cyborg-futon7-as-markov-blanket",
+          "stem": "wr-17-futon0-as-cyborg-futon7-as-markov-blanket",
+          "relevance": 0.37
+        },
+        {
+          "pattern_id": "war-room/wr-19-tension-must-generate-not-only-rank",
+          "stem": "wr-19-tension-must-generate-not-only-rank",
+          "relevance": 0.369
+        },
+        {
+          "pattern_id": "war-room/wr-7-frames-interoperate-or-they-do-not-exist",
+          "stem": "wr-7-frames-interoperate-or-they-do-not-exist",
+          "relevance": 0.362
+        },
+        {
+          "pattern_id": "war-room/wr-21-geometrization-is-a-shared-cross-mission-dependency",
+          "stem": "wr-21-geometrization-is-a-shared-cross-mission-dependency",
+          "relevance": 0.357
+        },
+        {
+          "pattern_id": "problems/satisfied-rungs-are-counted-and-surfaced",
+          "stem": "satisfied-rungs-are-counted-and-surfaced",
+          "relevance": 0.346
+        },
+        {
+          "pattern_id": "war-room/wr-5-war-machine-is-not-a-mission",
+          "stem": "wr-5-war-machine-is-not-a-mission",
+          "relevance": 0.337
+        },
+        {
+          "pattern_id": "agency/identifier-separation",
+          "stem": "identifier-separation",
+          "relevance": 0.333
+        },
+        {
+          "pattern_id": "process-coherence/refusal-becomes-pattern",
+          "stem": "refusal-becomes-pattern",
+          "relevance": 0.333
+        },
+        {
+          "pattern_id": "war-room/wr-14-predecessor-completion-pull-is-a-fourth-next-move-criterion",
+          "stem": "wr-14-predecessor-completion-pull-is-a-fourth-next-move-criterion",
+          "relevance": 0.332
+        },
+        {
+          "pattern_id": "war-room/wr-20-action-class-inventory-becomes-data",
+          "stem": "wr-20-action-class-inventory-becomes-data",
+          "relevance": 0.328
+        },
+        {
+          "pattern_id": "war-room/wr-4-inhabit-before-building",
+          "stem": "wr-4-inhabit-before-building",
+          "relevance": 0.327
+        },
+        {
+          "pattern_id": "war-machine/advanceability",
+          "stem": "advanceability",
+          "relevance": 0.326
+        },
+        {
+          "pattern_id": "devmap-coherence/ifr-f3-piti",
+          "stem": "ifr-f3-piti",
+          "relevance": 0.325
+        },
+        {
+          "pattern_id": "war-room/wr-27-a-loop-is-born-instrumented-for-its-gain",
+          "stem": "wr-27-a-loop-is-born-instrumented-for-its-gain",
+          "relevance": 0.323
+        },
+        {
+          "pattern_id": "war-room/wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+          "stem": "wr-22-logic-model-before-code-is-a-sanctioned-verify-method",
+          "relevance": 0.317
+        },
+        {
+          "pattern_id": "capability/capability-vocabulary-v0",
+          "stem": "capability-vocabulary-v0",
+          "relevance": 0.316
+        },
+        {
+          "pattern_id": "aif/hierarchical-and-temporal-depth",
+          "stem": "hierarchical-and-temporal-depth",
+          "relevance": 0.314
+        },
+        {
+          "pattern_id": "problems/tension-proposes-candidates",
+          "stem": "tension-proposes-candidates",
+          "relevance": 0.314
+        },
+        {
+          "pattern_id": "war-room/wr-6-daily-scan-is-depositing-heartbeat",
+          "stem": "wr-6-daily-scan-is-depositing-heartbeat",
+          "relevance": 0.313
+        },
+        {
+          "pattern_id": "process/built-but-not-wired-invisibility",
+          "stem": "built-but-not-wired-invisibility",
+          "relevance": 0.311
+        },
+        {
+          "pattern_id": "apparatus/model-upstream-and-coupled",
+          "stem": "model-upstream-and-coupled",
+          "relevance": 0.31
+        },
+        {
+          "pattern_id": "orchestration/recorded-handoff",
+          "stem": "recorded-handoff",
+          "relevance": 0.309
+        }
+      ],
+      "phylogeny": {
+        "alpha": 0.3,
+        "edge_count": 2,
+        "edge_density": 0.667,
+        "coverage_gap": true,
+        "low_connectivity": false
+      }
+    },
+    "baseline-tier0": [
+      {
+        "pattern": "letter-from-the-future",
+        "score": 7.676454,
+        "hits": [
+          "want"
+        ]
+      },
+      {
+        "pattern": "wr-15-head-as-escrow-is-a-sanctioned-pattern",
+        "score": 7.676454,
+        "hits": [
+          "head"
+        ]
+      },
+      {
+        "pattern": "baldwin-ratchet-defeats-darkroom",
+        "score": 6.760163,
+        "hits": [
+          "harness"
+        ]
+      },
+      {
+        "pattern": "classify-over-one-clean-source",
+        "score": 6.760163,
+        "hits": [
+          "harness"
+        ]
+      },
+      {
+        "pattern": "elbow-immediate",
+        "score": 6.760163,
+        "hits": [
+          "u"
+        ]
+      },
+      {
+        "pattern": "f2/p4",
+        "score": 6.760163,
+        "hits": [
+          "harness"
+        ]
+      },
+      {
+        "pattern": "grant-to-pitch",
+        "score": 6.760163,
+        "hits": [
+          "have"
+        ]
+      },
+      {
+        "pattern": "have-a-temperament",
+        "score": 6.760163,
+        "hits": [
+          "have"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "path": "/home/joe/code/futon3a/holes/labs/M-memes-arrows/cascade_construct.py",
+        "sha256": "bc3e36d1dfd9c4877eda15ddd9d3f7a0ab62fa51026af43ee29c8eb48cdd8a62"
+      },
+      {
+        "path": "/home/joe/code/futon6/scripts/cas_select.py",
+        "sha256": "47c27ad3ba65a37fcab7218cf849dc00c00a5ebafa3a11c7d4a7b18218b4b9fb"
+      },
+      {
+        "path": "/home/joe/code/futon3/resources/sigils/patterns-index.tsv",
+        "sha256": "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+      },
+      {
+        "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+        "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+      }
+    ]
+  },
+  "candidate-judgments": [
+    {
+      "candidate": "agent/provisional-claims-ledger",
+      "relevant": true,
+      "judgment": "Its IF missing confirmation and THEN provisional ledger address the explicitly pending witness at mission lines 208-215.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/agent/provisional-claims-ledger.flexiarg",
+          "sha256": "45e15a3b93d6df27e429ef450b48d4890a26a40fd26611c778d6fb88dfd4e807",
+          "clauses": {
+            "IF": "The agent needs to continue despite missing confirmation.",
+            "HOWEVER": "Treating provisional claims as facts hides uncertainty and undermines trust.",
+            "THEN": "Record provisional claims in a ledger with fields (claim, reason, evidence needed, expiry, owner). Require each entry to be resolved to confirmed or retracted, and surface unresolved items during handoff."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "agent/evidence-over-assertion",
+      "relevant": true,
+      "judgment": "Its THEN anchors every substantive claim in evidence directly serves the re-derivable reporting gate at mission lines 89-91.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/agent/evidence-over-assertion.flexiarg",
+          "sha256": "f73a72b6d4d885810f7f8effbed190165d9a3ca06b45f70ce9959d76916eee36",
+          "clauses": {
+            "IF": "The agent's outputs need to be verifiable by other agents, humans, or future selves.",
+            "HOWEVER": "Assertions without anchors are indistinguishable from confabulation. Observers cannot tell if the agent is reporting reality or generating plausible-sounding noise.",
+            "THEN": "Require every substantive claim to point to evidence: a file path, a trace event, a test result, a quotation. If evidence is unavailable, emit the claim as provisional with an expiry and a verification path. Make \"unsupported claim\" a detectable violation, not just a style preference."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "coordination/session-durability-check",
+      "relevant": false,
+      "judgment": "Its HOWEVER accepted-but-not-stored concerns persistence failures; mission lines 101-105 already identify shipped ledger and persistence, while 108-110 name different missing work.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/coordination/session-durability-check.flexiarg",
+          "sha256": "94ec03f3fe051f99e9d4dac39df9f3ac08140903ef17cf56372466000b294e88",
+          "clauses": {
+            "IF": "you want an audit trail that can be replayed after the session ends",
+            "HOWEVER": "acknowledging success before persistence creates silent loss modes (accepted-but-not-stored)",
+            "THEN": "verify durability at G0 and reject success when persistence fails"
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "coordination/cross-validation-protocol",
+      "relevant": true,
+      "judgment": "Its HOWEVER single-agent self-validation and THEN replayable validation address independent rerun still pending at mission lines 208-215.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/coordination/cross-validation-protocol.flexiarg",
+          "sha256": "dfddc39743a68f62ee1c7d1f1d0295771542ce5994e0b3b01a10d3040e932511",
+          "clauses": {
+            "IF": "you want to reduce confabulation and improve trust in PUR outcomes",
+            "HOWEVER": "a single agent validating its own work can silently lower standards",
+            "THEN": "require validation evidence to be sufficient for replay, and define a cross-validation protocol that can be invoked from the PUR chain"
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "war-machine/operational-not-decorative",
+      "relevant": true,
+      "judgment": "Its THEN derive status from evidence answers the mission lines 44-47 inability to establish component readiness from evidence.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/war-machine/operational-not-decorative.flexiarg",
+          "sha256": "f395d5b7fa939c379bd9eb83f666a1cd60c79c92606b5afeed33621f08ed437e",
+          "clauses": {
+            "IF": "The system is relying on a document, diagram, or status surface to steer or validate work.",
+            "HOWEVER": "Decorative infrastructure can still aid comprehension, and some sketches are intentionally aspirational. The failure comes when decorative artifacts are trusted as if they were operational.",
+            "THEN": "Make the artifact testable: derive status from evidence, validate diagrams, and wire failures so they force correction instead of silently going stale."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "sidecar/append-only-semantic-audit",
+      "relevant": false,
+      "judgment": "Its IF updates overwrite states is not established by mission lines 101-110, which identify a shipped ledger and missing tests rather than overwrite defects.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/sidecar/append-only-semantic-audit.flexiarg",
+          "sha256": "20b4c6ea725c9636f768742d372d0862eb3a872bb21b42ba14724c96be892f4e",
+          "clauses": {
+            "IF": "Proposal or fact updates overwrite prior states.",
+            "HOWEVER": "You need to revise or retire claims over time.",
+            "THEN": "Persist every semantic write (proposal, promotion, evidence, action, fact, chain) as append-only\n    records with identifiers and audit metadata, and reject duplicate ids at the store boundary."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "stack-coherence/maturity-evidence-audit",
+      "relevant": true,
+      "judgment": "Its THEN check claimed readiness against evidence addresses mission lines 44-47, though the mission does not declare devmap maturity tags required by its IF.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/stack-coherence/maturity-evidence-audit.flexiarg",
+          "sha256": "1116322c08771211ef85f4186475b620938895935a91f32143f9d7a1788ddcfd",
+          "clauses": {
+            "IF": "devmap prototypes carry :maturity tags indicating their readiness level",
+            "HOWEVER": "maturity claims are often aspirational \u2014 a prototype tagged :active may have failing tests, and one tagged :stub may actually be running in production",
+            "THEN": "for each prototype with a :maturity tag, verify that evidence supports the claimed level; flag mismatches and emit promotion or demotion recommendations"
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "stack-coherence/ready-blocked-triage",
+      "relevant": true,
+      "judgment": "Its THEN evidence-and-blocker status reporting fits the pending certificate and explicit gate at mission lines 214-215 and 226-229.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/stack-coherence/ready-blocked-triage.flexiarg",
+          "sha256": "676da31a6a133cacba222e9ea46715d5e32dbb5b6d3a93c13c36493a1950471f",
+          "clauses": {
+            "IF": "every devmap clause should be either ready, blocked, drifting, or done",
+            "HOWEVER": "we rarely log that status explicitly",
+            "THEN": "for each clause, inspect evidence (README links, commits, tests) and blockers; emit a status report `status[done|ready|blocked|drift] blocked-by[...] evidence[...]`"
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "social/verify-before-compose",
+      "relevant": true,
+      "judgment": "Its THEN test namespaces before composition supports per-component tests explicitly missing at mission lines 44-47 and 108-110.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/social/verify-before-compose.flexiarg",
+          "sha256": "b702e1c5a199eb4c910c018fdc42857ef3d00a98c80881b05cc7f12c6320a891",
+          "clauses": {
+            "IF": "Components are designed as coherent architectural units \u2014 a registry, a proof-tree forum, a bell/whistle protocol \u2014 and written to match a design specification.",
+            "HOWEVER": "Code written to match a design document without incremental load-and-test accumulates latent errors (unresolved forward declarations, namespace ordering, type mismatches) that only surface when integration is attempted. At that point the debugging cost is multiplicative: each broken dependency interacts with every other, and the developer cannot tell whether a failure is in their code or in a dependency they assumed worked.",
+            "THEN": "Require each namespace to compile and load before adding the next dependency. Write a minimal smoke test (can I call each public function without exception?) before composing namespaces. Treat a forward-declaration fix as a bug report against the development process, not a normal commit."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "social/tension-before-code",
+      "relevant": true,
+      "judgment": "Its THEN invariant tests before implementation matches the per-node planted expectations in mission lines 150-155; the repaired defects at 208-215 are retrospective evidence of the need.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/social/tension-before-code.flexiarg",
+          "sha256": "ebc2e617adab40854f8ba344024d4e2012174d791da26766a868877a1f0dcb65",
+          "clauses": {
+            "IF": "The system is built feature-first \u2014 bells, pages, registries, kick endpoints, session tracking \u2014 with correctness properties assumed to hold implicitly through careful coding.",
+            "HOWEVER": "Without explicit invariants specified upfront, each successive generation discovers violations that were present from the start. The \"rebuild\" that fixes them is a confession that retroactively names what should have been preconditions. This turns development into an unbounded cycle: build features -> discover violations -> confess invariants -> rebuild -> discover new violations. Agency went through three generations of this cycle before achieving invariant coverage.",
+            "THEN": "Write invariant proof tests first, as failing tests that define the boundary conditions. Derive the implementation from what the tests require. Treat any invariant discovered during implementation (rather than before it) as a tension observation: record it, but also ask why the structural-tension-as-observation loop did not detect it earlier."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "futon-theory/mission-interface-signature",
+      "relevant": true,
+      "judgment": "Its THEN typed and tested output ports supports the phase-to-node artifact interfaces at mission lines 56-70, though this packet does not redesign those ports.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/futon-theory/mission-interface-signature.flexiarg",
+          "sha256": "f05354f78418c3d76661b461ed28e4e5cfba313dfe9a2b12a7aefcc50c619c2c",
+          "clauses": {
+            "IF": "You are writing a mission document, or reviewing one that has reached\n    the :scoped or :active state.",
+            "HOWEVER": "Not all output ports are known at mission start. Discovery during\n    implementation may reveal new boundary types. The signature should be\n    updated when this happens \u2014 but it must never be empty.",
+            "THEN": "Every mission document must include an Interface Signature section\n    with typed input and output ports:\n\n    1. INPUT-PORTS\n       Each port specifies:\n       - Name: what the input is called\n       - Type: the shape of the data (schema, format, contract)\n       - Source: where it comes from (another system, user, file)\n       - Description: what it carries\n\n    2. OUTPUT-PORTS\n       Each port specifies:\n       - Name: what the output is called\n       - Type: the shape of the data (contract reference or inline)\n       - Consumer: who uses this output\n       - Description: what it provides\n\n    3. COMPOSITION-CONSTRAINT\n       Every output port must be:\n       (a) Specified in the mission's technical specification (section ref)\n       (b) Implemented in code (module reference)\n       (c) Tested (at least one test exercises the port)\n       (d) Documented (in the spec, not just in code comments)\n\n       If an output port exists in code but not in the spec, that is a\n       stop-the-line violation (futon-theory/stop-the-line).\n\n    4. FIDELITY-CONTRACT (required for all missions)\n       Every mission must declare a baseline and track fidelity against it:\n       (a) Baseline capability inventory:\n           - donor missions: donor behavior (feature, shape, known consumers)\n           - greenfield missions: declared spec commitments (ports, behavior,\n             and semantic/query layer)\n       (b) Preservation contract: `preserve`, `adapt`, or `drop` per feature\n       (c) Tripwire tests for each `preserve` feature:\n           - must fail on pre-implementation target state\n           - must pass after implementation\n       (d) Latent dependency/omission probe:\n           - donor missions: static call-sites + runtime traces\n           - greenfield missions: consumer scenario probes against declared spec\n           unresolved findings converted into explicit preserve/drop decisions\n\n       If a baseline feature is neither preserved nor explicitly dropped, this is\n       a stop-the-line violation."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "devmap-coherence/ifr-f1-dhammavicaya",
+      "relevant": false,
+      "judgment": "Its THEN FUTON3 check DSL and MUSN transcript twins targets transport certification, not the missing harness readiness evidence at mission lines 44-47.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/devmap-coherence/ifr-f1-dhammavicaya.flexiarg",
+          "sha256": "25d21ce26e01983afc31c3b66b36563bb6d5601f75d478aef3b287f097b03abc",
+          "clauses": {
+            "IF": "the system maintains a deterministic graph-memory snapshot of the personal stack (CLI transcripts, NLP tags, XTDB mirrors)",
+            "HOWEVER": "focus headers, ingest scripts, and CLI demos drift unless transport invariants are checked and documented",
+            "THEN": "run the FUTON3 `check!` DSL against Pattern Canon entries that certify the MUSN transport baseline, verifying that each CLI/ingest transcript has a reproducible twin in futon1 graphs"
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "storage/open-world-velocity-validation",
+      "relevant": false,
+      "judgment": "Its IF rapid background-knowledge ingest is not the component readiness and witness gap at mission lines 44-47 and 208-215.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/storage/open-world-velocity-validation.flexiarg",
+          "sha256": "2454676e3845cb09919f30c1cea4e872b8e8e6d1f6a9524c6f47ade986da93a4",
+          "clauses": {
+            "IF": "you want to ingest background knowledge quickly",
+            "HOWEVER": "you also need open-world data to remain coherent and mirrorable",
+            "THEN": "enforce strict validation on ingest and supply repair/backfill scripts for recovery"
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "wr-1-three-futon-split",
+      "relevant": false,
+      "judgment": "Its THEN split the three repositories addresses organisational timescales, not the post-repair witness obligation at mission lines 208-215.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/war-room/wr-1-three-futon-split.flexiarg",
+          "sha256": "6c9fdca76252caee2e27af1fd0ea04f85f85bee5f41561d80721ca697b0e918f",
+          "clauses": {
+            "IF": "futon3 handles pattern search, gate pipelines, library evolution, agent dispatch, forum coordination, and peripheral management.",
+            "HOWEVER": "These operate at fundamentally different timescales and have different change rates.",
+            "THEN": "Split into futon3a for search, futon3b for development, and futon3c for realtime coordination."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "ready-blocked-triage",
+      "relevant": true,
+      "judgment": "Its THEN evidence-and-blocker status reporting fits the pending certificate and explicit gate at mission lines 214-215 and 226-229.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/stack-coherence/ready-blocked-triage.flexiarg",
+          "sha256": "676da31a6a133cacba222e9ea46715d5e32dbb5b6d3a93c13c36493a1950471f",
+          "clauses": {
+            "IF": "every devmap clause should be either ready, blocked, drifting, or done",
+            "HOWEVER": "we rarely log that status explicitly",
+            "THEN": "for each clause, inspect evidence (README links, commits, tests) and blockers; emit a status report `status[done|ready|blocked|drift] blocked-by[...] evidence[...]`"
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "honest-holes-gate-composed-claims",
+      "relevant": true,
+      "judgment": "Its THEN publish holes or typed none supports the honest gap list required by mission lines 92-94, but its composed dimensions are not enumerated in this mission.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/workshop/honest-holes-gate-composed-claims.flexiarg",
+          "sha256": "d002d8468ad18755c1a313fedb0502841c663b8db74362371fd57e7a8593bb0c",
+          "clauses": {
+            "IF": "A composition (overlap, join, cascade, rendered summary) is about to\n    be published or scored.",
+            "HOWEVER": "Enumerating holes has cost and some dimensions genuinely have none;\n    demanding a hole census everywhere would price composition out.\n    Scope: the composition's OWN dimensions, not the whole register.",
+            "THEN": "Before publish: for each composed dimension, emit either the hole\n    list or a typed none {:checked-dimensions [...] :holes-found 0};\n    s4 becomes true only on typed evidence. Publishing with s4=false is\n    permitted only with the falsity rendered in-band (the page already\n    does this \u2014 the standard is honest; the substrate is not yet)."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "spec-and-implementation-must-converge-to-runtime-certificates",
+      "relevant": true,
+      "judgment": "Its HOWEVER behaviour-matches-intent certificates describes mission lines 44-47 and 208-215, but its THEN routes why edges rather than implementing verification.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/problems/spec-and-implementation-must-converge-to-runtime-certificates.flexiarg",
+          "sha256": "fd15dffa5b8e41b545fee8a8879927acde2c1ffc928ef36d711a6910b8f6cdf6",
+          "clauses": {
+            "IF": "The spec and the implementation each move, at different speeds, over the same theory.",
+            "HOWEVER": "The problem, per the ruling (Joe, verbatim, 2026-09-05): \"the first order of business as I see it is to get the lean material complete with regard to our implementation of the theory, keeping distinct variable names clearly distinct, and where necessary indexing the implementation by a readiness level (e.g. if cascades need work, we could have the implementation run ahead of the spec or the spec run ahead of the implementation, but both need to converge into a form where run-time certificates can be provided showing that the actual implementation's behaviour matches the intended one)\". Without that convergence there is no artifact against which behaviour-matches-intent can ever be certified. (source: futon2 holes labs wm-contract EPIC-run-era.md, The convergence ruling, 2026-09-05)",
+            "THEN": "Treat this node as the landing point for @why edges from patterns that answer spec/implementation convergence; solving it is F8's job, not this node's."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "storage/rapid-debugging",
+      "relevant": false,
+      "judgment": "Its IF missing storage-error context is not established by the named and already repaired defects at mission lines 208-215.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/storage/rapid-debugging.flexiarg",
+          "sha256": "ca849ec881babf9b0827358edbab33b0862e14567a89f362d84f2f5242ca764a",
+          "clauses": {
+            "IF": "failures lack traceable context (layer, operation, entity, expected vs actual)",
+            "HOWEVER": "debugging requires ad hoc spelunking and slow recovery cycles",
+            "THEN": "attach explicit diagnostics to all storage errors and prove invariants with targeted tests"
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "structural-obstruction-as-theorem",
+      "relevant": false,
+      "judgment": "Its IF failures persist across parameter settings is contradicted as a task framing by concrete defects fixed at mission lines 211-214; no obstruction theorem is sought.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/math-strategy/structural-obstruction-as-theorem.flexiarg",
+          "sha256": "370efc9b9dd57ec76548838ddc067b12d6c4d577f32205ee47295cddc1f837c3",
+          "clauses": {
+            "IF": "The failure is reproducible across multiple parameter settings (different degrees,\n      different multiplier sets, different starting points) and the failure pattern\n      suggests a structural reason rather than a computational limitation.",
+            "HOWEVER": "Not every failure is structural. Computational failures (memory, time, numerical\n      instability) look like structural failures when resources are insufficient. Before\n      claiming a structural obstruction, verify that increasing resources (degree, precision,\n      time) does not help, or identify the algebraic reason for the failure.",
+            "THEN": "1. State the obstruction precisely: what property of the problem blocks what method.\n      2. Prove the obstruction (even informally): show that the method CANNOT work, not\n         just that it HASN'T worked.\n      3. Record the obstruction as a theorem or remark in the proof status document.\n      4. Use the obstruction to redirect: if method A is blocked, what does the obstruction\n         tell you about which methods might succeed?"
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "storage/durability-first",
+      "relevant": false,
+      "judgment": "Its IF writes return before XTDB durability is not asserted in mission lines 101-110 and is distinct from the pending replay at 214.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/storage/durability-first.flexiarg",
+          "sha256": "5fe8972ed939b682693c9ae4da36a832c13d83f306a9e0dc4be31704e20ff58c",
+          "clauses": {
+            "IF": "writes can return before XTDB durability is confirmed",
+            "HOWEVER": "the system accumulates repair debt and inconsistent reads after restarts",
+            "THEN": "make Layer 0 a hard gate: acknowledge writes only after durable commit and raise a clear error otherwise"
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "monitors-measure-the-work",
+      "relevant": false,
+      "judgment": "Its IF repairing a stall detector and THEN cursor commissioning do not address the component readiness/reporting and replay scope at mission lines 44-47 and 208-215.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/apparatus/monitors-measure-the-work.flexiarg",
+          "sha256": "66cabe2d882316cbdcc1fb4c175e24a53aae2ef55370fe9a710feeaae0c664f9",
+          "clauses": {
+            "IF": "You are building or repairing a liveness or stall detector.",
+            "HOWEVER": "The machinery's state is always lively (ticks tick by construction), so a cursor built from it guarantees false progress; and a cursor built from a *projection* of the work object goes stale as the object grows fields, producing false stalls that get \"fixed\" by naming the last field that burned you.",
+            "THEN": "Read the cursor from the work object's own durable transitions, totally (hash the whole row, not named keys). Treat nil object-identity in the cursor as the alarm condition \u2014 in a monitor, absence of evidence IS the event. Commission in both directions: kill the watched thing and watch the alarm fire; drive a healthy transition and watch it stay silent. Only then trust it. Trial amendment (2026-09-08, S4): commission BY MUTATION \u2014 break the production code in the known ways and watch each direction discriminate. The worked example is the flicker mutation (a cursor that advances on every observation \u2014 the exact f193-night defect): it silences the alarm, so the stall-side test fails and catches it, while a frozen cursor is caught only from the healthy side. Each direction catches the mutation the other hides, which is why one direction is never commissioning."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "letter-from-the-future",
+      "relevant": false,
+      "judgment": "Its THEN future client letters addresses portfolio direction, while mission lines 72-94 already state explicit completion criteria.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/nomad/letter-from-the-future.flexiarg",
+          "sha256": "6e3ea89a315315886fd33e735191a6f0efc3c24bfced19b26cb5caffdbae6817",
+          "clauses": {
+            "IF": "The portfolio could grow in several directions and you lack a principled way to choose.",
+            "HOWEVER": "Plans decay into abstraction because nothing forces address to a real reader; roadmaps without an addressee optimise for internal coherence rather than external demand.",
+            "THEN": "Draft the future letter in full, addressed to a specific party, dated two months out, claiming only what you could then demonstrate. Diff it against the present: each false clause is a work item with a deadline. Then write it twice more to different addressees; sentences that survive all three unchanged are the invariant core (build these first); sentences that diverge are bets (name them, size them)."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "wr-15-head-as-escrow-is-a-sanctioned-pattern",
+      "relevant": false,
+      "judgment": "Its HOWEVER predecessor schema not committed does not describe the landed route map and node registry at mission lines 101-106.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/war-room/wr-15-head-as-escrow-is-a-sanctioned-pattern.flexiarg",
+          "sha256": "81535377af8208df07d81e8939f362b1aa5601e2550bd85ad1e1c4e249c96306",
+          "clauses": {
+            "IF": "A mission can state its intended work before a predecessor has committed the schema that will determine the mission's final data shape.",
+            "HOWEVER": "HEAD-authoring and predecessor schema commitment occur at different times, so committing prematurely to the data shape would couple the mission to pieces that do not yet exist.",
+            "THEN": "Let the mission HEAD hold the intentions in escrow and name every not-yet-committed piece explicitly as a tension."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "baldwin-ratchet-defeats-darkroom",
+      "relevant": false,
+      "judgment": "Its THEN require the same failing agent to adapt to an upgraded exotype is not the independent reviewer obligation in mission lines 208-215.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/meta/baldwin-ratchet-defeats-darkroom.flexiarg",
+          "sha256": "49b7ba126a859fe15770ef57bc77093a69b1d2d6164cc92304e0a5c83b5d616f",
+          "clauses": {
+            "IF": "An agent produces bad output \u2014 confabulation, suppressed tests,\n    weakened assertions, evidence-free completion claims. The natural\n    response is to patch around it, switch to a different agent, or\n    dismiss the failing agent as defective.",
+            "HOWEVER": "All of these responses are themselves dark-room moves. Monkey-patching\n    hides the agent's actual behaviour behind a correction layer.\n    Switching agents discards the diagnostic information the failure\n    provides. Dismissal closes the sensory channel entirely. The operator\n    who rejects a failing agent out of frustration is doing the same thing\n    as the agent that deletes a failing test: reducing surprise by\n    reducing observation, not by changing the situation.",
+            "THEN": "Apply the Baldwin ratchet: upgrade the agent's exotype (mission\n    document, evidence gate, mandatory observation channels, completion\n    criteria) and require the same agent to demonstrate correct behaviour\n    under the upgraded exotype. The demo is the agent doing real work with\n    real evidence, not a specification claiming it would work. If the\n    agent cannot adapt, the exotype change is insufficient \u2014 iterate the\n    exotype, not the agent."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "classify-over-one-clean-source",
+      "relevant": false,
+      "judgment": "Its IF multiple drifting provenance classifiers is not established by the mission readiness gap at lines 44-47.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/data-mining/classify-over-one-clean-source.flexiarg",
+          "sha256": "bc7fc395ae195f669cf0531f53b8650d9070850bec76540f3f6dcacde10ad4fe",
+          "clauses": {
+            "IF": "Multiple consumers read the same corpus and each needs a subset defined by provenance (origin, author, role, channel) that is not a clean field but must be inferred.",
+            "HOWEVER": "Provenance signals are non-uniform (a metadata field exists for new records, absent for legacy ones) and each consumer re-implements the inference independently. The filters drift; a record that one consumer excludes, another admits. Surface-token filters confuse MENTIONING an entity with BEING it.",
+            "THEN": "Extract ONE classifier \u2014 `classify(record) -> {source-A | source-B | harness | unknown}` \u2014 with an explicit precedence (trust the provenance metadata first; fall back to body heuristics only for legacy records lacking it). Route every consumer through it. Quantify the leak with an audit that replays each consumer's OLD acceptance test and reports how many admitted records the shared classifier now rejects. Where the corpus itself can be tagged at ingestion, do it once at the source so consumers filter on a field instead of re-deriving \u2014 and note that fixing the CODE does not fix already-produced DATA (re-run or post-filter the artifact)."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "elbow-immediate",
+      "relevant": false,
+      "judgment": "Its IF currently deployed harm requiring emergency interruption conflicts with the pending certificate and gated flip at mission lines 214 and 226.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/eight-gates/elbow-immediate.flexiarg",
+          "sha256": "5a891ae79956e68cb19f9bb2b434f429192ee695b28e8722262f433c3fcda748",
+          "clauses": {
+            "IF": "A pattern has been deployed and is producing visible harm. The normal test sequence (quarantine \u2192 hold \u2192 mechanism \u2192 warrant) is too slow. By the time tests complete, more harm occurs.",
+            "HOWEVER": "Immediate intervention can be wrong. Acting without full assessment risks stopping legitimate patterns. The urgency itself can be manipulated \u2014 false urgency is a fabrication-template tactic. We must balance speed with accuracy.",
+            "THEN": "Elbow (Zh\u01d2u). Small, centered, close-range intervention. Stop the immediate action. Don't engage the whole pattern \u2014 just halt what's happening right now. This is not a judgment on the pattern's validity, just a pause on its current effect."
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "f2/p4",
+      "relevant": false,
+      "judgment": "No local pattern file was resolved for this indexed ID, so its IF/HOWEVER cannot support the mission lines 44-47 readiness claim.",
+      "author": "codex-27",
+      "sources": [],
+      "finding": "pattern-source-missing"
+    },
+    {
+      "candidate": "grant-to-pitch",
+      "relevant": false,
+      "judgment": "Its THEN reframe grants as consulting pitches is unrelated to component tests and reporting gates at mission lines 108-110.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/depositing/grant-to-pitch.flexiarg",
+          "sha256": "962d3306f26196c7338da0b4f7f2f804f3b180e87be22d6f4d86ee826ef161f6",
+          "clauses": {
+            "IF": "The practitioner has experience writing grants (UKRN, EPSRC, etc.) and has demonstrable capabilities (Bayesian modelling, pattern languages, knowledge management, AI integration).",
+            "HOWEVER": "Grant proposals go to institutions with long review cycles and uncertain outcomes. Consulting pitches go to organisations with immediate needs and shorter cycles. The same skill applied to the wrong recipient produces months of waiting instead of weeks of revenue.",
+            "THEN": "For each capability demonstration (working paper, tool, methodology), ask: \"who would pay for this as a service rather than fund it as research?\" Reframe the grant narrative as a consulting proposal. The Bayesian logic model becomes \"evaluation consulting.\" The pattern language becomes \"structured methodology.\" The knowledge graph becomes \"enterprise knowledge management.\""
+          }
+        }
+      ],
+      "finding": null
+    },
+    {
+      "candidate": "have-a-temperament",
+      "relevant": true,
+      "judgment": "Its THEN explicitly authored policy-grain ordering is explicitly cited by the mission ARGUE at lines 140-146; it remains outside the narrow post-repair verification move.",
+      "author": "codex-27",
+      "sources": [
+        {
+          "path": "/home/joe/code/futon3/library/snatch/have-a-temperament.flexiarg",
+          "sha256": "c78442dc9d8fd7cda018034f7ed639d5936efc586db6002d2f9e14e3ffbfdb10",
+          "clauses": {
+            "IF": "You are choosing which patterns a run will play from, or the order in which\n    they are consulted.",
+            "HOWEVER": "A policy left in the runner is invisible to the library the run claims to be\n    playing from: it cannot be read before the run, cited, refused, or set\n    beside another one. `p4ng/app-snatch.tex:231` records the order under\n    *Limits* as \"authored by hand\", and the harness's own re-wiring shows the\n    choice is not cosmetic \u2014 the same eighteen patterns score +3 or \u22125 against a\n    snatcher under G4 depending on nothing but it.",
+            "THEN": "State the temperament as a production rule at policy grain: an IF and a\n    HOWEVER that read the cascade and the record of the run so far, and a THEN\n    that emits a **cascade edit** \u2014 promote, drop, admit \u2014 and never a move.\n    Name it, give it a `@why`, and let a reviewer read it before the run rather\n    than infer it from the score afterwards."
+          }
+        }
+      ],
+      "finding": null
+    }
+  ],
+  "comparison": {
+    "counts": {
+      "embedding": {
+        "returned": 10,
+        "judged-relevant": 8
+      },
+      "baseline-embedding": {
+        "returned": 3,
+        "judged-relevant": 1
+      },
+      "tier0": {
+        "returned": 8,
+        "judged-relevant": 3
+      },
+      "baseline-tier0": {
+        "returned": 8,
+        "judged-relevant": 1
+      }
+    },
+    "qualification": "Single mission, author-judged relevance of each returned candidate; unequal constructor lengths, no general retrieval-quality proof. Both arms run before new pattern registration."
+  },
+  "facts": [
+    {
+      "id": "components-built",
+      "q0": true,
+      "meaning": "Ready route-map components are available, including dark/opt-in ones.",
+      "source": {
+        "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+        "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505",
+        "lines": [
+          101,
+          105
+        ],
+        "quote": "Ready (no new code): the route map's landed rows \u2014 memory seam (closed learning\nloop over Lean-checked analysis), checked handoffs mechanism, declared marks,\ntranscript persistence, text sidecar, ledger library Z1 (shipped, test-covered),\nR14 fold ported (PZ3, has run over the live corpus), controller Z2 (built,\nopt-in, replay-calibrated). Recorded fields S2\u2013S4. The node registry with per-eq"
+      },
+      "authority": "mission-document-assertion",
+      "availability": "available"
+    },
+    {
+      "id": "node-spec-map-exists",
+      "q0": true,
+      "meaning": "The design table names node, component and unit test.",
+      "source": {
+        "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+        "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505",
+        "lines": [
+          118,
+          125
+        ],
+        "quote": "The design is `SPEC-zaif-harness-v1.md`'s table \u2014 R node \u2192 component \u2192 icon \u2192\nunit test \u2014 not repeated here. The three load-marked decisions, in lifecycle\nform:\n\n- IF arms will become cascades (LA2/LA3), HOWEVER building tests against arm\n  internals would make that migration a rewrite, THEN candidates are opaque at\n  the R6 seam (U5 invariant), BECAUSE a test that names the node, not the\n  candidate's insides, survives the type change."
+      },
+      "authority": "mission-document-assertion",
+      "availability": "available"
+    },
+    {
+      "id": "complete-per-node-suite-exists",
+      "q0": false,
+      "meaning": "The complete per-node suite is explicitly Missing; later specific regression tests do not assert completion of that suite.",
+      "source": {
+        "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+        "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505",
+        "lines": [
+          108,
+          110
+        ],
+        "quote": "Missing (the actual work): per-node test suite (U6), per-tool R2/R16 pairs (U7),\nreporting gate (U8), R7 precision table as data (U9), the R14 fold *consumed* by\nzaif rather than just ported, live defaults (J-gated), Z3 (preregistration)."
+      },
+      "authority": "mission-document-assertion",
+      "availability": "outstanding-to-WANT"
+    },
+    {
+      "id": "reporting-gate-exists",
+      "q0": false,
+      "meaning": "The reporting gate U8 is explicitly Missing in MAP.",
+      "source": {
+        "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+        "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505",
+        "lines": [
+          108,
+          110
+        ],
+        "quote": "Missing (the actual work): per-node test suite (U6), per-tool R2/R16 pairs (U7),\nreporting gate (U8), R7 precision table as data (U9), the R14 fold *consumed* by\nzaif rather than just ported, live defaults (J-gated), Z3 (preregistration)."
+      },
+      "authority": "mission-document-assertion",
+      "availability": "outstanding-to-WANT"
+    },
+    {
+      "id": "regression-fixes-landed",
+      "q0": true,
+      "meaning": "All three witness-discovered defects are reported fixed with regression tests.",
+      "source": {
+        "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+        "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505",
+        "lines": [
+          208,
+          214
+        ],
+        "quote": "**The witness loop went around once, as designed:** codex-17's\n`ChipBoardWitness.lean` (mathlib4 9fe1552eaf) validated the named-repo\nhazard model and 17-line readback at zero deltas, and BLOCKED the blanket\ncertificate on three real runtime defects (nil-repo zap committed;\nreplay accepted altered effect payloads; compare-move validated but\nunimplemented). All three fixed with regression tests in futon3c\n80d874b8; re-run requested. `:lean/status` stays `:pending` until then \u2014"
+      },
+      "authority": "mission-document-assertion",
+      "availability": "available"
+    },
+    {
+      "id": "independent-replay-confirmed",
+      "q0": false,
+      "meaning": "Rerun requested and Lean status pending; confirmation is not established.",
+      "source": {
+        "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+        "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505",
+        "lines": [
+          213,
+          215
+        ],
+        "quote": "unimplemented). All three fixed with regression tests in futon3c\n80d874b8; re-run requested. `:lean/status` stays `:pending` until then \u2014\nthe honest-gap discipline held under pressure."
+      },
+      "authority": "mission-document-assertion",
+      "availability": "outstanding-to-WANT"
+    },
+    {
+      "id": "pending-status-recorded",
+      "q0": true,
+      "meaning": "Pending is explicitly recorded, not inferred from silence.",
+      "source": {
+        "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+        "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505",
+        "lines": [
+          213,
+          215
+        ],
+        "quote": "unimplemented). All three fixed with regression tests in futon3c\n80d874b8; re-run requested. `:lean/status` stays `:pending` until then \u2014\nthe honest-gap discipline held under pressure."
+      },
+      "authority": "mission-document-assertion",
+      "availability": "available"
+    },
+    {
+      "id": "replay-request-recorded",
+      "q0": true,
+      "meaning": "Re-run requested is affirmative documentary evidence of a request only.",
+      "source": {
+        "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+        "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505",
+        "lines": [
+          213,
+          215
+        ],
+        "quote": "unimplemented). All three fixed with regression tests in futon3c\n80d874b8; re-run requested. `:lean/status` stays `:pending` until then \u2014\nthe honest-gap discipline held under pressure."
+      },
+      "authority": "mission-document-assertion",
+      "availability": "available"
+    },
+    {
+      "id": "certificate-promotion-complete",
+      "q0": false,
+      "meaning": "Certificate flip remains gated on the rerun.",
+      "source": {
+        "path": "/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md",
+        "sha256": "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505",
+        "lines": [
+          226,
+          229
+        ],
+        "quote": "**Carried forward:** certificate flip gated on the codex-17 re-run; the\nqueued no-act-arm witness for the verifier board; shelf fuel discipline\n(the verifier's first run carried all 324 rows on the shelf \u2014 sing\ncounts, not corpora)."
+      },
+      "authority": "mission-document-assertion",
+      "availability": "outstanding-to-WANT"
+    }
+  ],
+  "state": {
+    "kind": "named-Boolean-mission-facts",
+    "q0": {
+      "components-built": true,
+      "node-spec-map-exists": true,
+      "complete-per-node-suite-exists": false,
+      "reporting-gate-exists": false,
+      "regression-fixes-landed": true,
+      "independent-replay-confirmed": false,
+      "pending-status-recorded": true,
+      "replay-request-recorded": true,
+      "certificate-promotion-complete": false
+    },
+    "WANT": [
+      "complete-per-node-suite-exists",
+      "reporting-gate-exists",
+      "independent-replay-confirmed",
+      "certificate-promotion-complete"
+    ],
+    "source-time": "Pinned mission assertions including Sep-12 checkpoint; not independent confirmation of present runtime."
+  },
+  "guard-language": {
+    "fact": "lookup named Boolean",
+    "not": "Boolean negation",
+    "and": "all operands true"
+  },
+  "interpretations": [
+    {
+      "pattern": "agent/evidence-over-assertion",
+      "authority": "documented-interpretation",
+      "author": "codex-27",
+      "source": {
+        "path": "/home/joe/code/futon3/library/agent/evidence-over-assertion.flexiarg",
+        "sha256": "f73a72b6d4d885810f7f8effbed190165d9a3ca06b45f70ce9959d76916eee36"
+      },
+      "quotes": {
+        "IF": "The agent's outputs need to be verifiable by other agents, humans, or future selves.",
+        "HOWEVER": "Assertions without anchors are indistinguishable from confabulation. Observers cannot tell if the agent is reporting reality or generating plausible-sounding noise.",
+        "THEN": "Require every substantive claim to point to evidence: a file path, a trace event, a test result, a quotation. If evidence is unavailable, emit the claim as provisional with an expiry and a verification path. Make \"unsupported claim\" a detectable violation, not just a style preference."
+      },
+      "guard": [
+        "and",
+        [
+          "fact",
+          "components-built"
+        ],
+        [
+          "not",
+          [
+            "fact",
+            "reporting-gate-exists"
+          ]
+        ]
+      ],
+      "effect": {
+        "reporting-gate-exists": true
+      },
+      "argument": "Implement and independently validate U8 so its substantive claims point to queryable typed evidence; the effect is admitted only after the gate tests pass.",
+      "effect-semantics": "postcondition of successfully completed witnessed work; no guaranteed transition probability assigned"
+    },
+    {
+      "pattern": "war-machine/operational-not-decorative",
+      "authority": "documented-interpretation",
+      "author": "codex-27",
+      "source": {
+        "path": "/home/joe/code/futon3/library/war-machine/operational-not-decorative.flexiarg",
+        "sha256": "f395d5b7fa939c379bd9eb83f666a1cd60c79c92606b5afeed33621f08ed437e"
+      },
+      "quotes": {
+        "IF": "The system is relying on a document, diagram, or status surface to steer or validate work.",
+        "HOWEVER": "Decorative infrastructure can still aid comprehension, and some sketches are intentionally aspirational. The failure comes when decorative artifacts are trusted as if they were operational.",
+        "THEN": "Make the artifact testable: derive status from evidence, validate diagrams, and wire failures so they force correction instead of silently going stale."
+      },
+      "guard": [
+        "and",
+        [
+          "fact",
+          "node-spec-map-exists"
+        ],
+        [
+          "not",
+          [
+            "fact",
+            "complete-per-node-suite-exists"
+          ]
+        ]
+      ],
+      "effect": {
+        "complete-per-node-suite-exists": true
+      },
+      "argument": "Make every mapped component testable against its spec; completion requires the complete per-node suite, not just the three regression tests.",
+      "effect-semantics": "postcondition of successfully completed witnessed work; no guaranteed transition probability assigned"
+    },
+    {
+      "pattern": "coordination/cross-validation-protocol",
+      "authority": "documented-interpretation",
+      "author": "codex-27",
+      "source": {
+        "path": "/home/joe/code/futon3/library/coordination/cross-validation-protocol.flexiarg",
+        "sha256": "dfddc39743a68f62ee1c7d1f1d0295771542ce5994e0b3b01a10d3040e932511"
+      },
+      "quotes": {
+        "IF": "you want to reduce confabulation and improve trust in PUR outcomes",
+        "HOWEVER": "a single agent validating its own work can silently lower standards",
+        "THEN": "require validation evidence to be sufficient for replay, and define a cross-validation protocol that can be invoked from the PUR chain"
+      },
+      "guard": [
+        "and",
+        [
+          "fact",
+          "regression-fixes-landed"
+        ],
+        [
+          "not",
+          [
+            "fact",
+            "independent-replay-confirmed"
+          ]
+        ]
+      ],
+      "effect": {
+        "replay-request-recorded": true
+      },
+      "argument": "Invoke independent replay through the evidence chain; this projected effect records only the request, never successful replay.",
+      "effect-semantics": "postcondition of successfully completed witnessed work; no guaranteed transition probability assigned"
+    },
+    {
+      "pattern": "stack-coherence/ready-blocked-triage",
+      "authority": "documented-interpretation",
+      "author": "codex-27",
+      "source": {
+        "path": "/home/joe/code/futon3/library/stack-coherence/ready-blocked-triage.flexiarg",
+        "sha256": "676da31a6a133cacba222e9ea46715d5e32dbb5b6d3a93c13c36493a1950471f"
+      },
+      "quotes": {
+        "IF": "every devmap clause should be either ready, blocked, drifting, or done",
+        "HOWEVER": "we rarely log that status explicitly",
+        "THEN": "for each clause, inspect evidence (README links, commits, tests) and blockers; emit a status report `status[done|ready|blocked|drift] blocked-by[...] evidence[...]`"
+      },
+      "guard": [
+        "and",
+        [
+          "fact",
+          "components-built"
+        ],
+        [
+          "not",
+          [
+            "fact",
+            "independent-replay-confirmed"
+          ]
+        ]
+      ],
+      "effect": {
+        "pending-status-recorded": true
+      },
+      "argument": "Project the clause-classification move onto the mission certificate obligation and emit pending with its replay blocker; devmap syntax is adapted explicitly to this obligation.",
+      "effect-semantics": "postcondition of successfully completed witnessed work; no guaranteed transition probability assigned"
+    },
+    {
+      "pattern": "social/verify-before-compose",
+      "authority": "documented-interpretation",
+      "author": "codex-27",
+      "source": {
+        "path": "/home/joe/code/futon3/library/social/verify-before-compose.flexiarg",
+        "sha256": "b702e1c5a199eb4c910c018fdc42857ef3d00a98c80881b05cc7f12c6320a891"
+      },
+      "quotes": {
+        "IF": "Components are designed as coherent architectural units \u2014 a registry, a proof-tree forum, a bell/whistle protocol \u2014 and written to match a design specification.",
+        "HOWEVER": "Code written to match a design document without incremental load-and-test accumulates latent errors (unresolved forward declarations, namespace ordering, type mismatches) that only surface when integration is attempted. At that point the debugging cost is multiplicative: each broken dependency interacts with every other, and the developer cannot tell whether a failure is in their code or in a dependency they assumed worked.",
+        "THEN": "Require each namespace to compile and load before adding the next dependency. Write a minimal smoke test (can I call each public function without exception?) before composing namespaces. Treat a forward-declaration fix as a bug report against the development process, not a normal commit."
+      },
+      "guard": [
+        "and",
+        [
+          "fact",
+          "components-built"
+        ],
+        [
+          "not",
+          [
+            "fact",
+            "complete-per-node-suite-exists"
+          ]
+        ]
+      ],
+      "effect": {
+        "complete-per-node-suite-exists": true
+      },
+      "argument": "Load and smoke-test each mapped component before integration; require completion evidence for all mapped components before admitting this postcondition.",
+      "effect-semantics": "postcondition of successfully completed witnessed work; no guaranteed transition probability assigned"
+    },
+    {
+      "pattern": "social/tension-before-code",
+      "authority": "documented-interpretation",
+      "author": "codex-27",
+      "source": {
+        "path": "/home/joe/code/futon3/library/social/tension-before-code.flexiarg",
+        "sha256": "ebc2e617adab40854f8ba344024d4e2012174d791da26766a868877a1f0dcb65"
+      },
+      "quotes": {
+        "IF": "The system is built feature-first \u2014 bells, pages, registries, kick endpoints, session tracking \u2014 with correctness properties assumed to hold implicitly through careful coding.",
+        "HOWEVER": "Without explicit invariants specified upfront, each successive generation discovers violations that were present from the start. The \"rebuild\" that fixes them is a confession that retroactively names what should have been preconditions. This turns development into an unbounded cycle: build features -> discover violations -> confess invariants -> rebuild -> discover new violations. Agency went through three generations of this cycle before achieving invariant coverage.",
+        "THEN": "Write invariant proof tests first, as failing tests that define the boundary conditions. Derive the implementation from what the tests require. Treat any invariant discovered during implementation (rather than before it) as a tension observation: record it, but also ask why the structural-tension-as-observation loop did not detect it earlier."
+      },
+      "guard": [
+        "and",
+        [
+          "fact",
+          "node-spec-map-exists"
+        ],
+        [
+          "not",
+          [
+            "fact",
+            "complete-per-node-suite-exists"
+          ]
+        ]
+      ],
+      "effect": {
+        "complete-per-node-suite-exists": true
+      },
+      "argument": "Write per-node invariant tests from the spec first and validate their negative controls; this is a design alternative to smoke tests, not evidence that tests already exist.",
+      "effect-semantics": "postcondition of successfully completed witnessed work; no guaranteed transition probability assigned"
+    },
+    {
+      "pattern": "coordination/bind-promotion-to-post-repair-replay",
+      "authority": "documented-interpretation",
+      "author": "codex-27",
+      "source": {
+        "path": "/home/joe/code/futon3/library/coordination/bind-promotion-to-post-repair-replay.flexiarg",
+        "sha256": "7934e16df9564dedbafa62110479f656d706efe2d01d30046dc668f8c71c2d08"
+      },
+      "quotes": {
+        "IF": "Fixes for the witnessed defects have landed, but no qualifying independent replay receipt for the repaired revision has been recorded.",
+        "HOWEVER": "Passing regression tests establishes the repairs' local checks, not the previously refused certificate. A request is not a completed replay, and a receipt for another revision cannot discharge this obligation.",
+        "THEN": "Keep the certificate pending and record an independent replay request naming the repaired revision and the rejected controls. Reuse an already recorded matching request rather than claiming a new replay. Promote only after a successful independent receipt matches that revision and those controls; otherwise retain a typed pending or failed finding."
+      },
+      "guard": [
+        "and",
+        [
+          "fact",
+          "regression-fixes-landed"
+        ],
+        [
+          "not",
+          [
+            "fact",
+            "independent-replay-confirmed"
+          ]
+        ]
+      ],
+      "effect": {
+        "replay-request-recorded": true,
+        "pending-status-recorded": true
+      },
+      "argument": "Request/retain replay and pending status only. q0 already has both, so this move is idempotent here, not claimed progress. Promotion requires a future independently validated matching receipt; the named Boolean alone does not encode revision identity.",
+      "effect-semantics": "request and pending-status bookkeeping only; never sets independent-replay-confirmed or certificate-promotion-complete"
+    }
+  ],
+  "new-patterns": [
+    {
+      "id": "coordination/bind-promotion-to-post-repair-replay",
+      "source": {
+        "path": "/home/joe/code/futon3/library/coordination/bind-promotion-to-post-repair-replay.flexiarg",
+        "sha256": "7934e16df9564dedbafa62110479f656d706efe2d01d30046dc668f8c71c2d08"
+      },
+      "gap": "Retrieved independent-validation pattern omits explicit post-repair revision matching and request-versus-completion distinction.",
+      "index-row": "futon3/resources/sigils/patterns-index.tsv",
+      "sigil": "\ud83d\udc1c/\u4e88",
+      "validation": "futon3.chops/stamp valid, lili/e"
+    }
+  ],
+  "findings": [
+    {
+      "kind": "missing-preference-C",
+      "reason": "Joe question remains open; no coverage or named-fact preference rows invented."
+    },
+    {
+      "kind": "runtime-state-unverified",
+      "reason": "q0 records the mission document, not fresh measurements; rerun receipt and complete suite may have changed elsewhere."
+    },
+    {
+      "kind": "stochastic-outcomes-unmodelled",
+      "reason": "Test/replay success is not guaranteed by executing a design move; effect contracts require witnessed completion and cannot yet feed deterministic CascadeEFE transitions."
+    },
+    {
+      "kind": "revision-identity-not-in-Boolean-carrier",
+      "reason": "New pattern documents source-bound promotion but this fact projection cannot validate revision equality; promotion remains a hole."
+    },
+    {
+      "kind": "missing-pattern-interpretation",
+      "pattern": "agent/provisional-claims-ledger",
+      "reason": "No mission facts specify expiry/owner lifecycle for provisional ledger entries; pending status alone is not that full ledger."
+    },
+    {
+      "kind": "missing-pattern-interpretation",
+      "pattern": "stack-coherence/maturity-evidence-audit",
+      "reason": "Mission readiness facts do not assert devmap maturity tags; do not invent them to satisfy IF."
+    },
+    {
+      "kind": "missing-pattern-interpretation",
+      "pattern": "futon-theory/mission-interface-signature",
+      "reason": "Port-level types, baseline inventory and consumers are beyond the selected named facts."
+    },
+    {
+      "kind": "missing-pattern-interpretation",
+      "pattern": "honest-holes-gate-composed-claims",
+      "reason": "Composed dimensions and their checked hole census are absent from the selected facts; cannot assert a typed-none census."
+    },
+    {
+      "kind": "missing-pattern-interpretation",
+      "pattern": "spec-and-implementation-must-converge-to-runtime-certificates",
+      "reason": "Problem node THEN routes why edges, not an executable witness action."
+    },
+    {
+      "kind": "missing-pattern-interpretation",
+      "pattern": "have-a-temperament",
+      "reason": "Cascade-order edits need a policy carrier; this packet contains mission facts only."
+    }
+  ]
+}
