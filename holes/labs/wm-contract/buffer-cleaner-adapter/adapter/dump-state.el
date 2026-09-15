@@ -50,7 +50,7 @@
   (list (cons 'name (buffer-name buf))
         (cons 'kind (bc--kind buf))
         (cons 'file (if (buffer-file-name buf) t :json-false))
-        (cons 'modified (with-current-buffer buf (buffer-modified-p)))
+        (cons 'modified (if (with-current-buffer buf (buffer-modified-p)) t :json-false))
         (cons 'has-process (if (get-buffer-process buf) t :json-false))
         (cons 'visible (if (bc--visible-p buf) t :json-false))
         (cons 'active-agent (if (bc--active-agent-p buf) t :json-false))

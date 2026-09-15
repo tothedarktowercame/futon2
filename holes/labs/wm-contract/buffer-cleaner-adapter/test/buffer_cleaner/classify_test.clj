@@ -131,3 +131,13 @@
           r (c/classify-buffer projected aggressive categories)]
       (is (= :keep (:action r)))
       (is (= :active-agent (:preservation-reason r))))))
+
+(deftest emacs-truthy-values-preserved
+  (testing "codex-26 finding: Emacs truthiness like :autosaved must preserve as modified"
+    (let [r (c/classify-buffer {:name "auto.org" :kind "file" :file "true"
+                                :modified "autosaved" :has-process "false"
+                                :visible "false" :active-agent "false"
+                                :server-clients "false" :display-age-seconds 90000}
+                               aggressive categories)]
+      (is (= :keep (:action r)))
+      (is (= :modified (:preservation-reason r))))))

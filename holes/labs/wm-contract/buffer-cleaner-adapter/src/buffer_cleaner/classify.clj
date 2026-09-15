@@ -9,7 +9,11 @@
   (:require [clojure.edn :as edn]
             [clojure.string :as str]))
 
-(defn- truthy? [x] (contains? #{true "true"} x))
+(defn- truthy? [x]
+  ;; Emacs truthiness: buffer-modified-p can return symbols (e.g.
+  ;; :autosaved) which JSON-encode as their names. Only explicit
+  ;; false-ish values are false (codex-26 finding).
+  (and (not (contains? #{false "false" nil} x)) (some? x)))
 
 (def hard-preservation
   "Rules that are hard, never parameterized (candidate-kind semantics)."
