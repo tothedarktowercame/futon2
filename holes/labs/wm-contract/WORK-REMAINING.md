@@ -24,12 +24,29 @@ fundamentals. Priorities are dependency stages, not estimates of completion date
 | 4 | E05 and all prerequisite nodes/connections | One authorized ordinary run using the actual completed path, with timestamped records and Lean-computed validation of its certificate. | Not ready. A machinery run is not qualifying; cron restoration is not required. |
 | 5 | E06–10, INV/TKT/PAGES | Reconcile all paper claims, wider-purpose obligations and publication with accepted evidence; finish required assent and roster reconciliation. | codex-28 coordinates. These obligations remain required even if the technical run succeeds. |
 
-**Active request:** Agency `invoke-1789495178833-21207-84b75f6b` to claude-20
-([dispatch receipt](runs/fundamentals-checklist-2026-09-15/priority-1-dispatch.json))
-is **queued** for a single concrete P1 coding handoff, with exact inputs/outputs,
-failing check, prerequisites, author/reviewer and closure evidence. It does not
-authorize new measurement plans, substitute scores, implementation or further
-dispatches. This is a coordination packet; construction has not started.
+**P1 status: declaration review and failing-signature reproduction queued;
+implementation held.** Owner response `invoke-1789495178833-21207-84b75f6b`
+is retained in [the proposal](runs/fundamentals-checklist-2026-09-15/priority-1-owner-proposal.md).
+Claude-20 reports that selected mission/ticket IDs have no row in the retained
+belief, so row 7 refuses before prediction. This is a reported historical-input
+gap pending independent reproduction, not a current serving census.
+
+| Packet | Owner | State / evidence |
+|---|---|---|
+| Review S1–S3 model declaration | codex-25, independent reviewer | Queued: `invoke-1789495801060-21213-286d79a5`. Must establish semantic authority for seven-status mission/ticket rows and registry-event mapping; merely calling it declared is insufficient. |
+| Reproduce missing-entity signature | codex-22, author | Queued: `invoke-1789495802456-21214-1508b397`. Real retained trace and registry IDs, pinned inputs, complete model context, mission/ticket readbacks and non-registry negative control. No bootstrap implementation. |
+| Target-belief implementation | codex-22 proposed; claude-20 independent code reviewer | Held until the declaration is accepted and the actual failure reproduced. Reader success alone will not close the production prediction join. |
+
+The S1–S3 proposal is not adopted by this tracker. Registry status is not an
+independently acquired categorical observation or measured A. Proposed downstream
+B-coverage changes, dynamics/admission separation and policy-plan construction
+remain candidates; no validator may be weakened to make a constructor succeed.
+The full-model and downstream-consumer requirements still apply.
+
+**Presentation review:** claude-20 independently reviewed p4ng `8c2296f` and
+found no specific defect; structure/anchors/hash were checked, not real-browser
+interaction. Full review is retained with the P1 owner response. The folding
+change earns presentation credit only, no WM completion credit.
 
 **Packet discipline.** Each dispatched packet must state the checklist codes,
 exact invariant/failing signature, inputs and dependencies, one author, a different

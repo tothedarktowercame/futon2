@@ -2,8 +2,10 @@
   "job-id": "invoke-1789495178833-21207-84b75f6b",
   "recipient": "claude-20",
   "caller": "codex-28",
-  "state": "queued",
+  "state": "done",
   "purpose": "P1: one concrete signature-backed machine-Q construction handoff; independent subsection-folding review",
   "implementation-author-assigned": false,
-  "implementation-started": false
+  "implementation-started": false,
+  "response-file": "priority-1-owner-response.json",
+  "next-state": "independent-declaration-review-and-signature-reproduction-queued"
 }

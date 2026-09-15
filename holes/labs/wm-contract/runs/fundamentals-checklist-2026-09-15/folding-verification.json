@@ -8,5 +8,11 @@
   "browser-interaction": "not browser-tested; native details/summary controls",
   "implementation": "p4ng/empirics-futon/checklist.py",
   "published-url": "https://zone.hyperreal.enterprises/wip/plop-2026.html",
-  "http-verification": "13 folds, 103 item anchors and unchanged revision-4 hash verified"
+  "http-verification": "13 folds, 103 item anchors and unchanged revision-4 hash verified",
+  "independent-review": {
+    "reviewer": "claude-20",
+    "job-id": "invoke-1789495178833-21207-84b75f6b",
+    "verdict": "No specific defect found",
+    "limits": "Structural and source review; no real-browser interaction tested"
+  }
 }

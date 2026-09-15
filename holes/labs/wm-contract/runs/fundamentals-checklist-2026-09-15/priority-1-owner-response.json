@@ -1,0 +1,522 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-28",
+    "session-id": "b8aec109-71b7-43bf-a3d2-d7cf1e3f7c6a",
+    "execution": {
+      "executed": true,
+      "tool-events": 39,
+      "command-events": 36
+    },
+    "job-id": "invoke-1789495178833-21207-84b75f6b",
+    "agent-id": "claude-20",
+    "artifact-ref": "e9c70b9f",
+    "started-at": "2026-09-15T17:59:39.680454171Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-15T17:59:38.833561415Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-15T17:59:39.680468978Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-15T17:59:40.407639579Z",
+        "text": "Joe has now explicitly accepted checklist R4 in substance and asked me to help project-manage completion in priority order, transparently. I have implemented/published independent subsection folding without changing R4 Markdown bytes. Current priority/packet discipline is at the TOP of futon2/holes/labs/wm-contract/WORK-REMAINING.md; historical machinery-first sequence is not the new priority.\n\nFirst bounded coordination packet, P1 (WM-01\u201307/join-2): as recorded F13 owner, identify and take responsibility for the FIRST buildable missing machine-derived prediction producer/consumer, using current sources and the actual specification. Return one concrete coding handoff: exact input/output/domain, invariant and existing failing signature (or the induced negative control to commission first), source locations, prerequisite evidence, author and independent reviewer, and closure commands/receipts. Where measured A or C/interpretation authority blocks it, identify the exact missing input/ruling rather than a fixture, fallback or substitute score. This is not another whole-stack survey or measurement-plan commission. Do not dispatch further or change implementation in this coordination packet; I will record the single next coding commission once its dependency and acceptance boundary are concrete. Do not dispatch codex-26 while its historical prohibition remains unresolved. Existing technical owners remain owners; I coordinate priority and evidence reporting, not replace Joe's author \u2026[trimmed]"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-09-15T18:00:04.949220839Z",
+        "text": "Two tasks: find P1's first buildable prediction producer and consumer, and review codex-28's checklist UI change. I'll start with the new priority section in WORK-REMAINING, the checklist UI diff, and a search for the existing prediction modules from rows 6\u201311 and the machine-Q adapter."
+      },
+      {
+        "seq": 5,
+        "type": "tool_use",
+        "at": "2026-09-15T18:00:06.635966585Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; git -C /home/joe/code/futon2 log --oneline -3 -- holes/labs/wm-contract"
+        ]
+      },
+      {
+        "seq": 6,
+        "type": "tool_use",
+        "at": "2026-09-15T18:00:08.771865051Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/p4ng && git log --format='%h %ad %s' --date=iso -4 -- empirics-futon/checklist.py CHECKLIST-fundamenta"
+        ]
+      },
+      {
+        "seq": 7,
+        "type": "tool_use",
+        "at": "2026-09-15T18:00:11.011750039Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2; ls src/futon2/aif/ | tr '\\n' ' '; echo; echo ---; grep -rln \"machine-q\\|machine_q\" src scripts"
+        ]
+      },
+      {
+        "seq": 8,
+        "type": "tool_use",
+        "at": "2026-09-15T18:00:54.267380376Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; wc -l machine_model.clj machine_belief.clj machine_transition.clj machine_predi"
+        ]
+      },
+      {
+        "seq": 9,
+        "type": "tool_use",
+        "at": "2026-09-15T18:00:55.766628879Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; sed -n '1,60p' machine_model.clj; echo ======; sed -n '1,40p' machine_belief.cl"
+        ]
+      },
+      {
+        "seq": 10,
+        "type": "tool_use",
+        "at": "2026-09-15T18:00:57.662596519Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; sed -n '1,50p' machine_predictive.clj; echo ======; grep -n \"defn\\|machine-q-en"
+        ]
+      },
+      {
+        "seq": 11,
+        "type": "tool_use",
+        "at": "2026-09-15T18:00:59.262192556Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; sed -n '1,80p' receipt_construction.clj; echo =====; grep -n \"def \\|defn\\|:fact"
+        ]
+      },
+      {
+        "seq": 12,
+        "type": "tool_use",
+        "at": "2026-09-15T18:01:34.320947790Z",
+        "tools": [
+          "Read"
+        ],
+        "previews": [
+          "Read"
+        ]
+      },
+      {
+        "seq": 13,
+        "type": "tool_use",
+        "at": "2026-09-15T18:01:34.325637250Z",
+        "tools": [
+          "Read"
+        ],
+        "previews": [
+          "Read"
+        ]
+      },
+      {
+        "seq": 14,
+        "type": "tool_use",
+        "at": "2026-09-15T18:01:36.275109618Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; sed -n '1,40p' belief.clj; echo ...; grep -n \"defn \\|def status-set\\|def \" beli"
+        ]
+      },
+      {
+        "seq": 15,
+        "type": "tool_use",
+        "at": "2026-09-15T18:01:37.339040234Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; sed -n '1,92p' machine_q.clj"
+        ]
+      },
+      {
+        "seq": 16,
+        "type": "tool_use",
+        "at": "2026-09-15T18:01:39.778680449Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; grep -n -E \"^ {0,4}(6|7|8|9|10|11)\\. \" WORK-REMAINING.md | head; echo; "
+        ]
+      },
+      {
+        "seq": 17,
+        "type": "tool_use",
+        "at": "2026-09-15T18:01:48.845946459Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/p4ng && T=/tmp/checklist-ui && rm -rf $T && mkdir -p $T && cp /var/www/zone.hyperreal.enterprises/wip/"
+        ]
+      },
+      {
+        "seq": 18,
+        "type": "tool_use",
+        "at": "2026-09-15T18:03:02.936705419Z",
+        "tools": [
+          "Read"
+        ],
+        "previews": [
+          "Read"
+        ]
+      },
+      {
+        "seq": 19,
+        "type": "tool_use",
+        "at": "2026-09-15T18:03:03.814520025Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; grep -rln -iE \"full-policy-plan|full policy plan|controlled-action auth"
+        ]
+      },
+      {
+        "seq": 20,
+        "type": "tool_use",
+        "at": "2026-09-15T18:03:06.153202725Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2; ls -d holes/labs/wm-contract/runs/row-{6,7,8,9,10,11}-* 2>/dev/null; echo ---; ls test/futon2/"
+        ]
+      },
+      {
+        "seq": 21,
+        "type": "tool_use",
+        "at": "2026-09-15T18:03:08.316099711Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2; sed -n '835,880p' scripts/futon2/report/war_machine.clj; echo =====; grep -n \"bootstrap-from-s"
+        ]
+      },
+      {
+        "seq": 22,
+        "type": "tool_use",
+        "at": "2026-09-15T18:03:09.366187868Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; sed -n '1,45p' TN-row14-live-wiring-blocker-2026-09-14.md"
+        ]
+      },
+      {
+        "seq": 23,
+        "type": "tool_use",
+        "at": "2026-09-15T18:03:54.690086553Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash sed -n '45,140p' TN-row14-live-wiring-blocker-2026-09-14.md"
+        ]
+      },
+      {
+        "seq": 24,
+        "type": "tool_use",
+        "at": "2026-09-15T18:03:56.412268264Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash ls runs/row-9-predicted-state runs/row-8-controlled-transition runs/row-6-predictive-outcome; python3 - <<'EOF' import r"
+        ]
+      },
+      {
+        "seq": 25,
+        "type": "tool_use",
+        "at": "2026-09-15T18:03:58.175084361Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2; sed -n '325,372p' src/futon2/aif/forward_model.clj; echo =====; grep -n \"defn action->events\\|"
+        ]
+      },
+      {
+        "seq": 26,
+        "type": "tool_use",
+        "at": "2026-09-15T18:04:00.501327018Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash python3 - <<'EOF' import re s=open('/home/joe/code/futon5a/holes/stack-annotations.edn').read() ids=re.findall(r':id\\s+\""
+        ]
+      },
+      {
+        "seq": 27,
+        "type": "tool_use",
+        "at": "2026-09-15T18:04:01.909432406Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash python3 -c ' import json d=json.load(open(\"runs/fundamentals-checklist-2026-09-15/review-r1-codex-22.json\")) s=d.get(\"re"
+        ]
+      },
+      {
+        "seq": 28,
+        "type": "tool_use",
+        "at": "2026-09-15T18:04:23.922186980Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; cat runs/row-9-predicted-state/input.edn; echo; echo =====; python3 - <"
+        ]
+      },
+      {
+        "seq": 29,
+        "type": "tool_use",
+        "at": "2026-09-15T18:04:24.839785135Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2; sed -n '364,446p' src/futon2/aif/belief.clj"
+        ]
+      },
+      {
+        "seq": 30,
+        "type": "tool_use",
+        "at": "2026-09-15T18:04:28.534904336Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/data/wm-trace; f=$(ls -t *.edn | head -1); ls -la $f; python3 - \"$f\" <<'EOF' import re,sys,coll"
+        ]
+      },
+      {
+        "seq": 31,
+        "type": "tool_use",
+        "at": "2026-09-15T18:04:30.334745309Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; python3 -c ' import json d=json.load(open(\"runs/fundamentals-checklist-"
+        ]
+      },
+      {
+        "seq": 32,
+        "type": "tool_use",
+        "at": "2026-09-15T18:05:30.816895768Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; sed -n '40,77p' machine_belief.clj"
+        ]
+      },
+      {
+        "seq": 33,
+        "type": "tool_use",
+        "at": "2026-09-15T18:05:31.630518618Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; grep -n \":status :absent\\|:absent\\b\\|:state {\\|:model {\" close_retention.clj | "
+        ]
+      },
+      {
+        "seq": 34,
+        "type": "tool_use",
+        "at": "2026-09-15T18:05:33.156034920Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; grep -n -i \"lifecycle\\|phase\\|:status\\b\" mission_registry.clj | head -25; echo "
+        ]
+      },
+      {
+        "seq": 35,
+        "type": "tool_use",
+        "at": "2026-09-15T18:05:35.937951625Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2; grep -rn \"entity-id\" src/futon2/aif/morning_brief.clj | head -5; echo ---; grep -rln \":entity-"
+        ]
+      },
+      {
+        "seq": 36,
+        "type": "tool_use",
+        "at": "2026-09-15T18:05:43.270688374Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; sed -n '80,135p' close_retention.clj"
+        ]
+      },
+      {
+        "seq": 37,
+        "type": "tool_use",
+        "at": "2026-09-15T18:05:44.905791574Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; sed -n '142,240p' forward_model.clj | grep -n -E \"defmethod|:events|entity-id\" "
+        ]
+      },
+      {
+        "seq": 38,
+        "type": "tool_use",
+        "at": "2026-09-15T18:05:45.769486353Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; sed -n '95,180p' mission_registry.clj"
+        ]
+      },
+      {
+        "seq": 39,
+        "type": "tool_use",
+        "at": "2026-09-15T18:07:13.049922926Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12; ls; grep -o ':entity/id [^ ]*' input"
+        ]
+      },
+      {
+        "seq": 40,
+        "type": "tool_use",
+        "at": "2026-09-15T18:07:14.122886622Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2; grep -rn \":next-belief\" src/futon2/aif/efe.clj src/futon2/aif/policy.clj src/futon2/aif/rollou"
+        ]
+      },
+      {
+        "seq": 41,
+        "type": "tool_use",
+        "at": "2026-09-15T18:07:15.426171172Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/mathlib4/DarkTower/WarMachine; grep -n -iE \"bootstrap|stack|entity|domain|sorry\" MachineBeliefState.le"
+        ]
+      },
+      {
+        "seq": 42,
+        "type": "tool_use",
+        "at": "2026-09-15T18:07:40.229318107Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; sed -n '44,62p;228,235p' belief.clj; echo ...; sed -n '478,530p' belief.clj"
+        ]
+      },
+      {
+        "seq": 43,
+        "type": "tool_use",
+        "at": "2026-09-15T18:07:40.888399778Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/src/futon2/aif; grep -n \"^(defn \\(load-missions\\|load-tickets\\|work-target-status\\|live-ticket?"
+        ]
+      },
+      {
+        "seq": 44,
+        "type": "text",
+        "at": "2026-09-15T18:09:07.254716686Z",
+        "text": "**P1 answer.** The first missing producer on P1's chain is the belief row for the target the controller actually selects. Every piece further along is built on a different kind of entity, so this is where the chain first breaks.\n\n## Why this link comes first\n\n1. **The controller picks missions and tickets.** Since 09-15 it selects over all open missions and live T- tickets (futon2 e9c70b9f, a24cb621).\n2. **The belief doesn't cover them.** The belief's entities are only stack-annotation sections plus sorry-registry ids (`war_machine.clj:6114`, `bootstrap-from-stack-annotations`). The latest retained trace (`data/wm-trace/wm-trace-2026-09-12.edn`) has 414 rows in its carried belief (`:mu-post`), all `arxana/stack/\u2026`, and none for any mission or ticket.\n3. **So the row-7 reader refuses.** For any selected target it returns `{:ok false :refusal {:kind :missing-entity :path [:stored-belief <target>]}}` (`machine_belief.clj`, the `(nil? posterior)` branch). The whole chain (row 7 belief, row 8 B, row 9 Q(s|\u03c0), row 6 Q(o|\u03c0), then risk against C) stops there for every target the controller chooses.\n4. **Rows 6\u201311 were exercised on a different kind of entity.** The row-7 witness entity is `arxana/stack/futon-v1/leaf/2/2`. Row 8's declared B and the row-9 policies use `:advance-mission` and `:apply-cascade`, which in production target missions. The modules exist, but no production entity joins them to the selected work.\n5. **Where a mission does get a belief row, it's invented.** The forward model emits `{:entity-id <mission> :type :addressed}` for `:advance-mission` and `:advance-ticket`, and `belief/update-belief` gives an untracked entity `uniform-prior` before applying the event. I found no consumer of `:next-belief` in efe, policy, rollout, war_machine or epistemic_value, so today this changes no score. It is still a silent uniform fallback, and it should not become the source of belief.\n\n## The ruling this needs, which I'm making as F13 owner\n\n`SPEC-fundamentals-build-2 \u2026[trimmed]"
+      },
+      {
+        "seq": 45,
+        "type": "done",
+        "at": "2026-09-15T18:09:07.417501306Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 46,
+        "type": "delivery-recorded",
+        "at": "2026-09-15T18:09:09.566365916Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-28 via /api/alpha/invoke/jobs/invoke-1789495178833-21207-84b75f6b",
+        "recorded-at": "2026-09-15T18:09:09.564574642Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-28 via /api/alpha/invoke/jobs/invoke-1789495178833-21207-84b75f6b",
+      "recorded-at": "2026-09-15T18:09:09.564574642Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789495178833-21207-84b75f6b",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": "invoke-c580313f-24ee-4381-830d-a4f3a3bf86ea",
+    "result-summary": "Two tasks: find P1's first buildable prediction producer and consumer, and review codex-28's checklist UI change. I'll start with the new priority section in WORK-REMAINING, the checklist UI diff, and a search for the...",
+    "result": "Two tasks: find P1's first buildable prediction producer and consumer, and review codex-28's checklist UI change. I'll start with the new priority section in WORK-REMAINING, the checklist UI diff, and a search for the existing prediction modules from rows 6\u201311 and the machine-Q adapter.**P1 answer.** The first missing producer on P1's chain is the belief row for the target the controller actually selects. Every piece further along is built on a different kind of entity, so this is where the chain first breaks.\n\n## Why this link comes first\n\n1. **The controller picks missions and tickets.** Since 09-15 it selects over all open missions and live T- tickets (futon2 e9c70b9f, a24cb621).\n2. **The belief doesn't cover them.** The belief's entities are only stack-annotation sections plus sorry-registry ids (`war_machine.clj:6114`, `bootstrap-from-stack-annotations`). The latest retained trace (`data/wm-trace/wm-trace-2026-09-12.edn`) has 414 rows in its carried belief (`:mu-post`), all `arxana/stack/\u2026`, and none for any mission or ticket.\n3. **So the row-7 reader refuses.** For any selected target it returns `{:ok false :refusal {:kind :missing-entity :path [:stored-belief <target>]}}` (`machine_belief.clj`, the `(nil? posterior)` branch). The whole chain (row 7 belief, row 8 B, row 9 Q(s|\u03c0), row 6 Q(o|\u03c0), then risk against C) stops there for every target the controller chooses.\n4. **Rows 6\u201311 were exercised on a different kind of entity.** The row-7 witness entity is `arxana/stack/futon-v1/leaf/2/2`. Row 8's declared B and the row-9 policies use `:advance-mission` and `:apply-cascade`, which in production target missions. The modules exist, but no production entity joins them to the selected work.\n5. **Where a mission does get a belief row, it's invented.** The forward model emits `{:entity-id <mission> :type :addressed}` for `:advance-mission` and `:advance-ticket`, and `belief/update-belief` gives an untracked entity `uniform-prior` before applying the event. I found no consumer of `:next-belief` in efe, policy, rollout, war_machine or epistemic_value, so today this changes no score. It is still a silent uniform fallback, and it should not become the source of belief.\n\n## The ruling this needs, which I'm making as F13 owner\n\n`SPEC-fundamentals-build-2026-09-12.md:118` lists \"entity/joint State\" as an unresolved model obligation for the packet owners and reviewer, not a question for Joe. I settle it as follows, subject to independent review of the declaration. Joe may overrule.\n\n**S1. Each registry mission and ticket is its own belief entity** over the existing seven-status carrier. The key is the exact string the controller uses as the action's `:target` (`mission-target-id`, and the ticket's target id).\n- This keeps the MachineModel contract, the row 7/8/9/6 code and the Lean `MachineBeliefState` unchanged. That Lean module takes its bootstrap domain as a parameter, so it needs no Lean edit.\n- A mission-specific lifecycle-phase carrier would be a larger change: the validator's state-carrier check, the Lean carrier, and a new A and B. Tickets have no phases.\n\n**S2. The domain is every registry mission and ticket, whatever its status,** not just the live ones. `reconcile-belief-carry` and Lean `carriedOnlyEntityIsDropped` both drop carried entities that are missing from a tick's bootstrap. A live-only domain would therefore erase a completed mission's belief at exactly the point where its outcome matters for A.\n\n**S3. Declared observation mapping** from registry status-class transitions observed between ticks to status events. Authority is `:declared` with rationale, never \"measured\". Events go through the existing `apply-arena-belief-events` (the same `:aif` filter), so there is no new update law.\n\n| Registry observation (previous \u2192 current) | Event |\n|---|---|\n| First observation of an id already in the registry | none (baseline recorded; the entity starts at declared D, `initial-prior-v1`) |\n| An id newly appearing in the registry | `:spawned` |\n| draft \u2192 any live class | `:refined` |\n| Live class \u2192 a different live class (open/identify/active/partial/unknown; ticket `:live` changes) | `:refined` |\n| Live \u2192 `:complete` | `:addressed` |\n| Live \u2192 `:inactive` | `:foreclosed` |\n| `:complete` or `:inactive` \u2192 live | `:reopened` |\n| Unchanged, or the registry is unreadable | none; an unreadable registry is a typed refusal in the record |\n| `:falsified`, `:strengthened` | never emitted from the registry (it has no signal for either) |\n\nI propose codex-25 (independent observation lane) or zai-8 to review the S1\u2013S3 declaration itself. The code reviewer below does not cover that.\n\n## The coding handoff\n\n- **Checklist codes:** WM-02 (and R1). It makes the target's post-update belief exist and reach row 7. It does not discharge WM-03, WM-04 or WM-05.\n- **Author:** codex-22, which has row-7/row-14 context. codex-27 is an alternative. Not codex-26.\n- **Reviewer:** claude-20.\n\n**Commission this failing check first** (a test, and a receipt over retained bytes):\n- The call: `machine-belief/belief-state-distribution` with the model-context `{:entity/id <a live mission target> :mode :single-entity :state-support machine-belief/state-support :model {...} :policy-entities [<same>]}`, over `:mu-post` from `wm-trace-2026-09-12.edn`.\n- Today it returns `:missing-entity`.\n- Repeat with a live T- ticket.\n- Keep a non-registry id as the permanent negative control.\n\n**Inputs:**\n- `mission-registry/load-missions` and `load-tickets` (id, status-class, source path, and the sha256 of the bytes read);\n- the previous tick's observed status-class snapshot, taken from the previous trace record;\n- the carried `:mu-post`.\n\n**Outputs, retained in the tick's trace record:**\n- the bootstrap domain, now with all registry targets added to `extra-ids`;\n- the observed snapshot `{target status-class}`, with its source pins;\n- the emitted events `{:entity-id :type :weight 1.0 :evidence/id :evidence/time-provenance :source {:path :sha256 :previous :current}}`;\n- the mapping-table revision.\n\n**Where the code goes:**\n- the `wm-belief-pre` binding at `scripts/futon2/report/war_machine.clj:6114`, the single integration edit;\n- a new `futon2.aif.target-belief-evidence` that maps a pair of snapshots to events, as a pure function;\n- the trace-record key for the snapshot.\n\n**Invariants:**\n1. Belief keys equal controller `:target` strings exactly.\n2. A new entity gets the named, declared D, recorded in the provenance record, never an unlabelled uniform.\n3. No event on first observation or on an unchanged status.\n4. Only the S3 transitions emit.\n5. Events are applied only through `apply-arena-belief-events`.\n6. An unreadable registry produces a typed refusal, not the silent fallback to `extra-ids` that the stack-annotation read uses.\n\n**Acceptance:**\n- Rerun the failing check on the new bootstrap. It now returns `:ok` with a seven-status row for the mission and for the ticket, and its provenance is either D or carried. The non-registry id still refuses.\n- One test per S3 row.\n- A carry test: a mission completes, then disappears from the live set, and its belief survives.\n- A trace readback of the snapshot and the events.\n\n**Gates:**\n- clj-kondo and `futon4/dev/check-parens.el` on the changed files;\n- `clojure -X:test :nses '[futon2.aif.belief-test futon2.aif.machine-belief-test futon2.aif.mission-registry-test futon2.aif.target-belief-evidence-test]'`;\n- the war-machine test namespace that covers `wm-belief-pre`.\n\n**Receipts:** `holes/labs/wm-contract/runs/p1-target-belief-2026-09-15/` holds the before and after row-7 readbacks, the gate outputs and the commit shas.\n\n**Separate steps, not part of this packet:**\n- Serving activation: reloading `war_machine`, `belief` and the new namespace from master is allowed.\n- A traced tick that shows registry targets in `:mu-post`: a click is Joe's call.\n\n**Out of scope:**\n- B coverage, A, and policy plans;\n- `update-belief`'s silent uniform initialisation (report it as its own defect);\n- the stack-annotation read fallback.\n\n## The next blockers after this packet, in order\n\n1. **B covers two action classes.** Row-8 B (`wm-status-action-prior-v1`) declares only `:advance-mission` and `:apply-cascade`. Live rankings also contain `:advance-ticket`, `:address-sorry`, `:fire-pattern`, `:learn-action-class` and `:no-op` (TN-row14-live-wiring-blocker, gap 3). Documented THEN interpretations are permitted (Sept 7 ruling, l.309), but each class needs a declared authority row.\n2. **Q(s|\u03c0) is tied to A.** `controlled-transition-kernel` calls `machine-model/validate`, and `validate*` requires an admitted `:A` kernel. So neither B nor Q(s|\u03c0) can be produced until A is admitted, even though Q(s|\u03c0) doesn't depend on A mathematically (SPEC l.82). The candidate packet splits dynamics admission from observation admission.\n3. **Measured A has zero observations.** The rubric has 0/7 qualifying statuses, and 0/86 retained closes can be licensed. Close retention's state port accepts only `:independent-categorical-observation` of the target's status, and refuses the belief as state (`close_retention.clj:112-120`). Before this packet, missions and tickets had no status carrier at all, so no (state, disposition) pair could exist for the targets being closed. After it, the carrier exists, but an independent observation producer is still needed (codex-22/25 lane).\n4. **No policy plan per candidate.** The judge ranks actions, not versioned full-policy plans, and nothing maps a candidate occurrence to one (TN-row14, gap 2).\n\n## Review of the UI change (p4ng 8c2296f)\n\nNo specific defect found.\n\n**What I checked:**\n- I rendered it onto a copy of the live page. All 14 `<details>` and 14 `<summary>` pairs balance.\n- An HTML-parser nesting check found no errors and no unclosed tags.\n- Only h2/h3 headings sit inside `<summary>`, which HTML permits.\n- All 103 `#ck-` anchors are present, with one script.\n- `data-md-sha` still matches R4 (`466a2e19\u2026`), and the R4 Markdown bytes are unchanged.\n- The reveal walks every `DETAILS` ancestor, including the outer one, so a link into a collapsed section opens it.\n\n**Residuals, none of them a defect:**\n- The hash isn't URI-decoded. That's harmless, because all codes are ASCII.\n- `scrollIntoView()` repeats the browser's own scroll to a fragment. Also harmless.\n- Neither of us tested it in a real browser.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789495178833-21207-84b75f6b",
+      "at": "2026-09-15T18:09:07.417484635Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-15T18:09:07.417484635Z",
+    "created-at": "2026-09-15T17:59:38.833174691Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}
