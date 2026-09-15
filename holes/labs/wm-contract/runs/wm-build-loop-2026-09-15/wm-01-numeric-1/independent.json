@@ -1,4 +1,40 @@
 {
+  "decimal-at-bound": {
+    "deviation": "1/1000000000000",
+    "total": "1000000000001/1000000000000",
+    "values": [
+      {
+        "decimal": "0.01",
+        "exact": "1/100",
+        "literal": "0.01M",
+        "support": "a"
+      },
+      {
+        "decimal": "0.990000000001",
+        "exact": "990000000001/1000000000000",
+        "literal": "0.990000000001M",
+        "support": "b"
+      }
+    ]
+  },
+  "decimal-coercion-crosses-bound": {
+    "deviation": "1000001/1000000000000000000",
+    "total": "1000000000001000001/1000000000000000000",
+    "values": [
+      {
+        "decimal": "0.01",
+        "exact": "1/100",
+        "literal": "0.01M",
+        "support": "a"
+      },
+      {
+        "decimal": "0.990000000001000001",
+        "exact": "990000000001000001/1000000000000000000",
+        "literal": "0.990000000001000001M",
+        "support": "b"
+      }
+    ]
+  },
   "decimal-near": {
     "deviation": "1/2000000000000",
     "total": "2000000000001/2000000000000",
@@ -269,6 +305,23 @@
         "exact": "1/2",
         "literal": "0.5M",
         "support": "c"
+      }
+    ]
+  },
+  "mixed-five-sixths": {
+    "deviation": "1/6",
+    "total": "5/6",
+    "values": [
+      {
+        "exact": "1/3",
+        "literal": "1/3",
+        "support": "a"
+      },
+      {
+        "decimal": "0.5",
+        "exact": "1/2",
+        "literal": "0.5M",
+        "support": "b"
       }
     ]
   },

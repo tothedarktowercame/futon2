@@ -12,6 +12,9 @@
  :mixed-decimal-float {:a 0.1M :b 0.9}
  :mixed-decimal-float-outside {:a 0.1M :b 0.900000000002}
  :decimal-unit {:a 0.1M :b 0.9M}
+ :decimal-coercion-crosses-bound {:a 0.01M :b 0.990000000001000001M}
+ :decimal-at-bound {:a 0.01M :b 0.990000000001M}
+ :mixed-five-sixths {:a 1/3 :b 0.5M}
  :decimal-outside {:a 0.1M :b 0.900000000002M}
  :decimal-near {:a 0.1M :b 0.9000000000005M}
  :mixed-exact-unit {:a 1/3 :b 1/6 :c 0.5M}

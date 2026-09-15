@@ -73,8 +73,9 @@
 (defn numeric-row-admission
   "Shared represented-value admission, with exact rational totals/deviations.
    Integers, ratios and BigDecimal denote exact values; Float/Double denote
-   exact finite IEEE values. Exact-only rows require equality; rows containing
-   IEEE values use the unchanged v1.1 absolute criterion. No mass is repaired.
+   exact finite IEEE values. Integer/ratio-only rows require equality; every
+   other supported row uses the unchanged v1.1 absolute criterion. Representation
+   and criterion are separate. No mass is repaired.
 
    :values preserves numeric values (= the input row). Float is widened EXACTLY
    to Double only in this EDN evidence: pr-str/read-string of raw Float can lose
@@ -96,10 +97,10 @@
       (if invalid
         {:ok false :refusal invalid}
         (let [representation (representation-class representations)
-              floating? (#{:mixed-floating :ieee-floating} representation)
+              toleranced? (not= :exact-rational representation)
               total (reduce +' 0 (map (fn [[k v]] (represented-rational v (get representations k))) row))
               deviation (abs (-' total 1))
-              bound (if floating? (rationalize float-row-tolerance) 0)
+              bound (if toleranced? (rationalize float-row-tolerance) 0)
               admitted? (<= deviation bound)
               result {:ok admitted?
                       :values (into {} (map (fn [[k v]] [k (if (= :float32 (get representations k))
@@ -107,17 +108,19 @@
                       :representation representation :representations representations
                       :exact-total total :exact-deviation deviation
                       :exactly-normalized? (zero? deviation)
-                      :criterion {:id (if floating? :absolute-row-sum :exact-row-sum)
-                                  :revision (if floating? "v1.1" "exact-represented-v1")
+                      :criterion {:id (if toleranced? :absolute-row-sum :exact-row-sum)
+                                  :revision (if toleranced? "v1.1" "exact-represented-v1")
                                   :target 1 :max-absolute-deviation bound}
-                      :admission (when admitted? (if floating? :float-carried :exact))}]
+                      :admission (when admitted? (if toleranced? :float-carried :exact))}]
           (cond-> result
             (not admitted?) (assoc :refusal {:kind :unnormalized-row :path []})))))))
 
 (defn row-sum-admission
   "Compatibility projection of numeric-row-admission; not a second validator.
-   Exact-only admitted rows -> :exact; IEEE-containing admitted rows ->
-   :float-carried (even if exactly normalized); all refusals -> nil."
+   Integer/ratio-only admitted rows -> :exact; every other supported admitted
+   row -> :float-carried; all refusals -> nil. :float-carried is a historical
+   compatibility label, not a claim that a decimal row contains floats or is
+   inexactly normalized. Read :representations and :exactly-normalized? separately."
   [row]
   (:admission (numeric-row-admission row)))
 

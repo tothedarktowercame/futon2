@@ -1,5 +1,10 @@
 # WM-01-numeric-1 receipt
 
+Updated to codex-28 ruling `invoke-1789510104518-21272-bc84615d`, relayed
+by claude-3 in `invoke-1789510179031-21273-4054f2f0`. This supersedes the
+initial decimal/mixed-exact threshold choice in `ac821857`. See `RULING.md`
+for the changes against that implementation.
+
 Author: codex-2; reviewer: claude-3. Dispatch:
 `invoke-1789509835504-21264-d64055e8`; handoff:
 `invoke-1789510028754-21268-d939a7e9`. The governing dispatch hash was checked:
@@ -18,8 +23,8 @@ check; the model's `distribution!`, belief reader and predictor all use it.
 | Representation | Exact interpretation | Admission rule / revision |
 |---|---|---|
 | `:exact-rational` | integer/ratio values | exact total = 1; `exact-represented-v1` |
-| `:exact-decimal` | BigDecimal values as exact decimal rationals | same exact rule |
-| `:mixed-exact` | integers/ratios/BigDecimals, no IEEE value | same exact rule |
+| `:exact-decimal` | BigDecimal values as exact decimal rationals | absolute deviation <= 1/1000000000000; `v1.1` |
+| `:mixed-exact` | integers/ratios/BigDecimals, no IEEE value | same absolute criterion |
 | `:ieee-floating` | finite Float/Double represented binary values | absolute deviation <= 1/1000000000000; `v1.1` |
 | `:mixed-floating` | preserve each exact value and each IEEE value individually | same unchanged absolute criterion |
 
@@ -27,7 +32,10 @@ Exact totals use rational arithmetic. IEEE conversion goes through
 `BigDecimal(double)`, never `rationalize(double)`. BigDecimals are rationalized
 directly. Integer summation promotes rather than overflowing. Negative,
 nonfinite and unsupported masses refuse; unsupported types carry a typed name,
-not an opaque object. A unit-sum IEEE row still reports `:float-carried`, with
+not an opaque object. Every supported row other than integer/ratio-only uses the inclusive absolute
+criterion. Its admitted legacy label is `:float-carried`, even for decimal-only
+input: the label does not describe representation or normalization. A unit-sum
+decimal or IEEE row reports `:float-carried`, with
 `:exactly-normalized? true`; an approximately admitted row reports false.
 
 Every supported finite nonnegative result retains keyed `:values`, per-key
@@ -51,24 +59,31 @@ baseline commit, in a separate tooling namespace. `capture.clj --before`
 reproduces old outputs, including for added controls; without that argument it
 records the new result. `extra_cases.clj` / `extra-cases.edn` cover invalid
 inputs, overflow and Float encoding. Existing tested keyword results stay the
-same. Newly declared cases with changed wrapper behavior are explicit:
+same. The corrected coercion changes the verdict on the threshold-crossing
+decimal row below. Invalid-input changes from the initial implementation also
+remain explicit:
 
 | Input | Old keyword | New keyword / result |
 |---|---|---|
-| `{:a 0.1M :b 0.9M}` | `:float-carried` | `:exact`; represented total 1 |
-| `{:a 1/3 :b 1/6 :c 0.5M}` | `:float-carried` | `:exact`; represented total 1 |
-| `{:a 0.1M :b 0.9000000000005M}` | `:float-carried` | nil; exact-only non-unit row |
-| `{:a 1/3 :b 1/6 :c 0.5000000000005M}` | `:float-carried` | nil; exact-only non-unit row |
+| `{:a 0.01M :b 0.990000000001000001M}` | `:float-carried` | nil; exact represented deviation exceeds the unchanged bound |
 | `{:a -1 :b 2}` | `:exact` | nil; `:invalid-mass` (full model/reader already rejected negatives) |
 | `{:a (AtomicInteger. 1)}` | `:float-carried` | nil; `:unsupported-numeric-type` |
 | two `Long/MAX_VALUE` masses | ArithmeticException | nil; exact total 18446744073709551614, non-unit refusal |
 | NaN / positive Double infinity / negative Float infinity | NumberFormatException | nil; `:invalid-mass` |
 | nil / string mass | NullPointerException / ClassCastException | nil; `:unsupported-numeric-type` |
 
-The exact-only near-unit examples have deviation 1/2000000000000. They are
-inside the IEEE tolerance but are deliberately not granted that tolerance.
-The numeric interpretation for decimal-only and mixed-exact rows is a declared
-choice in this packet, raised for review in the bellback.
+Decimal-only `{:a 0.1M :b 0.9M}` and mixed-exact
+`{:a 1/3 :b 1/6 :c 0.5M}` have exact total 1 and keep `:float-carried`,
+with exact-normalization true. Their near-unit variants ending in
+`0.9000000000005M` / `0.5000000000005M` have deviation
+1/2000000000000 and also keep `:float-carried`, with exact-normalization false.
+The threshold is inclusive; the exact-at-bound control admits.
+
+The newly rejecting decimal row's original masses are
+`{:a 0.01M :b 0.990000000001000001M}`. Old coerced total:
+`576460752303999931/576460752303423488` (within tolerance). Correct exact
+total: `1000000000001000001/1000000000000000000` (outside tolerance).
+This changes what is summed, not the threshold.
 
 Examples where the keyword is unchanged but the represented calculation is
 corrected:
@@ -118,7 +133,7 @@ exit status was retained in `.exit`.
   "(arxana-check-parens-cli)" -- <same nine files>`: OK, exit **0**
   (`check-parens.*`).
 - `clojure -X:test :nses '[futon2.aif.machine-model-test futon2.aif.machine-belief-test futon2.aif.machine-predictive-test]'`:
-  **18 tests, 305 assertions**, no failures/errors, exit **0** (`tests.*`).
+  **19 tests, 375 assertions**, no failures/errors, exit **0** (`tests.*`).
 - `clojure -X:test :nses '[futon2.aif.work-target-belief-test futon2.aif.machine-q-risk-test futon2.aif.categorical-ambiguity-test futon2.aif.machine-parameters-test futon2.aif.work-target-tick-test futon2.aif.efe-machine-q-test futon2.aif.trace-test]'`:
   **87 tests, 493 assertions**, no failures/errors, exit **0** before and after
   (`baseline-compatibility.*`, `compatibility.*`). No baseline failures.
@@ -141,5 +156,5 @@ error are outside this dispatch, including Clojure's ratio/BigDecimal arithmetic
 limitations. The new admission does not establish those operations' correctness.
 
 No serving reload, click, persistence or held-P1 edit occurred. No blocking
-compatibility conflict was found; the declared behavior changes above require
-the independent review requested in the dispatch.
+compatibility conflict was found. The ruling is implemented; independent review
+of the code and the coercion-corrected verdict remains with claude-3.

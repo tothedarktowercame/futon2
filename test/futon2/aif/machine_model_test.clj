@@ -134,8 +134,10 @@
                   :mixed-ratio-float :float-carried :mixed-decimal-float :float-carried
                   :mixed-ratio-float-outside nil :mixed-decimal-float-outside nil
                   :decimal-outside nil
-                  :decimal-unit :exact :decimal-near nil
-                  :mixed-exact-unit :exact :mixed-exact-near nil}]
+                  :decimal-unit :float-carried :decimal-near :float-carried
+                  :mixed-exact-unit :float-carried :mixed-exact-near :float-carried
+                  :decimal-coercion-crosses-bound nil :mixed-five-sixths nil
+                  :decimal-at-bound :float-carried}]
     (doseq [[name row] cases]
       (testing (str name)
         (let [result (m/numeric-row-admission row)
@@ -147,7 +149,7 @@
           (is (= (get-in independent [name :deviation]) (:exact-deviation result)))
           (is (= (zero? (get-in independent [name :deviation])) (:exactly-normalized? result)))
           (is (= (get expected name) (:admission result) (m/row-sum-admission row)))
-          (when (#{:ieee-floating :mixed-floating} (:representation result))
+          (when (not= :exact-rational (:representation result))
             (is (= {:id :absolute-row-sum :revision "v1.1" :target 1
                     :max-absolute-deviation 1/1000000000000} (:criterion result)))))))))
 
@@ -209,3 +211,33 @@
                              [:refusal :kind]))))
         (is (:ok (m/validate (update x :state-support #(vec (reverse %))))))
         (is (= row (get-in x [:belief :posteriors "mission/example"])))))))
+
+(deftest codex-28-representation-and-criterion-ruling
+  (doseq [[row total normalized? representation legacy]
+          [[{:a 0.1M :b 0.9M} 1 true :exact-decimal :float-carried]
+           [{:a 0.1M :b 0.9000000000005M} 2000000000001/2000000000000
+            false :exact-decimal :float-carried]
+           [{:a 0.01M :b 0.990000000001000001M} 1000000000001000001/1000000000000000000
+            false :exact-decimal nil]
+           [{:a 1/3 :b 0.5M} 5/6 false :mixed-exact nil]
+           [{:a 0.5 :b 0.5} 1 true :ieee-floating :float-carried]]]
+    (let [result (m/numeric-row-admission row)]
+      (is (= row (:values result)))
+      (is (= total (:exact-total result)))
+      (is (= (abs (- total 1)) (:exact-deviation result)))
+      (is (= normalized? (:exactly-normalized? result)))
+      (is (= representation (:representation result)))
+      (is (= legacy (:admission result) (m/row-sum-admission row)))
+      (is (= {:id :absolute-row-sum :revision "v1.1" :target 1
+              :max-absolute-deviation 1/1000000000000} (:criterion result)))))
+  (let [row {:a 0.01M :b 0.990000000001000001M}
+        ;; Independent retained old-coercion total from Python Fraction.
+        old-total 576460752303999931/576460752303423488
+        result (m/numeric-row-admission row)]
+    (is (<= (abs (- old-total 1)) 1/1000000000000))
+    (is (> (:exact-deviation result) 1/1000000000000))
+    (is (= :unnormalized-row (get-in result [:refusal :kind]))))
+  (let [at-bound (m/numeric-row-admission {:a 0.01M :b 0.990000000001M})]
+    (is (= 1/1000000000000 (:exact-deviation at-bound)))
+    (is (= :float-carried (:admission at-bound)))
+    (is (false? (:exactly-normalized? at-bound)))))
