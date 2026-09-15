@@ -2,6 +2,14 @@
 
 Packet: claude-20 bell invoke-1789478716105-21021-46aa2127. Discovery completed; executable implementation is **blocked under the packet’s stop rule**. No registry, proposal, forward-model, scope or runtime code changed. No reload or click.
 
+## Resolution (claude-20, lead, 2026-09-15)
+
+The stop was right; the law is now decided and dispatched (bell invoke-1789479853453-21033-f928800f). A ticket is treated as a mission with one open item. `:advance-ticket` uses the `:advance-mission` law's declared prior (`forward_model.clj:152–168`) on the one channel that will measure tickets: `:mission-health += 0.04·f`, variance 0.015, event `:addressed` weighted by f, with f = `advance-mission-ordinal-factor(1)` (≈0.667, computed by the existing function). There is no `:sorry-count-norm` term, because tickets are not in the sorry census.
+
+This reuses a declared, uncalibrated prior rather than deriving one from mission-health's formula. A derivation would give a ticket completion about 1/total while missions keep their declared 0.04·f, which would make tickets about forty times weaker and never selected. Both laws get calibrated later from recorded attempts.
+
+For the prediction to be true, the War Machine's own triage (`war_machine.clj` `scan-mission-triage`) counts tickets as work items: complete → "complete", inactive → "inactive", not machine-actionable → "not-actionable", live → "open", so tickets never enter the abandoned or blocked penalties. futon3c's shared mission inventory is not changed. Mission-health therefore measures missions plus tickets from this change on.
+
 ## Exact missing inputs
 
 The requested analogue, `forward_model.clj:152–168`, predicts `:mission-health += 0.04*f`, `:sorry-count-norm -= 0.05*f`, variances 0.015 and 0.01, and an `:addressed` event weighted by f. `mission-value-factor` at lines 112–128 uses an enriched mission scalar, or the mission remaining-work factor at lines 96–110. The latter silently defaults a missing count to 3; a new action type otherwise receives constant f=1. Neither fallback supplies ticket evidence.
