@@ -88,6 +88,7 @@
         path (.getCanonicalPath file)
         bs (read-bytes file)
         digest (evidence/sha256 bs)
+        version (revision-fn path)
         name (str (evidence/value-digest path) "-" digest ".source")
         dest (io/file dir name)]
     (if (.exists dest)
@@ -95,7 +96,7 @@
              :interpretation/source-changed {:path path})
       (Files/write (.toPath dest) bs (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW StandardOpenOption/WRITE])))
     {:requested-path (.getAbsolutePath file) :canonical-path path :byte-count (alength bs)
-     :source {:id (str path "#" digest) :path path :file name :sha256 digest :revision (revision-fn path)}
+     :source {:id (str path "#" digest) :path path :file name :sha256 digest :revision version}
      :bytes bs :snapshot (.getAbsolutePath dest)}))
 
 (defn python-retrieve!
@@ -143,9 +144,9 @@
   "ACTION is the authorized input, not a selection proposal. Ports allow hermetic tests.
   On double retrieval failure, ex-data retains the full partial request and source list."
   ([action identity] (prepare! action identity {}))
-  ([action identity {:keys [resolve-fn revision-fn retrieve-fn retriever-specs library-fn now]
+  ([action identity {:keys [resolve-fn revision-fn retrieve-fn retriever-specs library-fn now on-capture]
                      :or {resolve-fn resolve-target revision-fn revision retrieve-fn python-retrieve!
-                          retriever-specs retrievers library-fn library-paths now #(str (Instant/now))}}]
+                          retriever-specs retrievers library-fn library-paths on-capture (fn [_]) now #(str (Instant/now))}}]
    (need! (and (= 2 (count retriever-specs))
                (= #{:embedding :tier0} (set (map :kind retriever-specs))))
           :interpretation/retriever-set-invalid {})
@@ -177,6 +178,7 @@
          dir (io/file root "evidence")
          _ (.mkdirs dir)
          target-pin (pin! dir (:path entry) revision-fn)
+         _ (on-capture (:source target-pin))
          pinned-at (now)
          kind (if (= :advance-ticket (:type action)) :ticket :mission)
          tension (tension-selection kind (get-in target-pin [:source :id]) (String. ^bytes (:bytes target-pin) "UTF-8"))
@@ -186,7 +188,7 @@
          query (str/join "\n\n" (map :quote citations))
          sources (atom [(:source target-pin)])
          pins (atom [target-pin])
-         capture! (fn [path] (let [p (pin! dir path revision-fn)] (swap! sources conj (:source p)) (swap! pins conj p) p))
+         capture! (fn [path] (let [p (pin! dir path revision-fn)] (on-capture (:source p)) (swap! sources conj (:source p)) (swap! pins conj p) p))
          library-pins (delay
                         (mapv (fn [path]
                                 (let [p (capture! path) f (io/file path)]

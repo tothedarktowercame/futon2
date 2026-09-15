@@ -8,12 +8,19 @@
            [java.time Instant]
            [java.util UUID]))
 
-(def schemas #{:wm/interpreted-pattern-set-v1 :wm/mission-fact-observation-v1})
+(def failure-schema :wm/interpretation-failure-v1)
+(def schemas #{:wm/interpretation-failure-v1 :wm/interpreted-pattern-set-v1 :wm/mission-fact-observation-v1})
 (def failure-kinds
   #{:interpretation/agent-unavailable :interpretation/no-relevant-pattern
     :interpretation/genesis-required :interpretation/budget-exceeded
     :interpretation/source-changed :interpretation/invalid-receipt
-    :interpretation/unmeasurable-fact})
+    :interpretation/unmeasurable-fact
+    :interpretation/no-citable-tension :interpretation/target-unresolved
+    :interpretation/retrieval-unavailable :interpretation/source-unavailable
+    :interpretation/source-revision-unavailable :interpretation/action-type-unsupported
+    :interpretation/attempt-identity-mismatch :interpretation/attempt-path-invalid
+    :interpretation/action-mismatch :interpretation/retriever-set-invalid
+    :interpretation/job-already-dispatched})
 
 (defn- refuse! [reason path]
   (throw (ex-info "Interpretation evidence refused"
@@ -188,7 +195,7 @@
     (digest! (:sha256 x) [:interpretation :sha256])
     (require! (= (:sha256 x) (value-digest (dissoc x :sha256))) :interpretation-digest-mismatch [:interpretation])))
 
-(defn validate-record [r]
+(defn- validate-complete-record [r]
   (require! (contains? schemas (:schema r)) :schema-mismatch [:schema])
   (let [base #{:schema :identity :sources :target :facts :holes :failure}
         interpretation? (= :wm/interpreted-pattern-set-v1 (:schema r))]
@@ -231,6 +238,31 @@
             (digest! (get-in r [:interpretation-ref :sha256]) [:interpretation-ref])))))
   r)
 
+(defn validate-record [r]
+  (if (= failure-schema (:schema r))
+    (do
+      (shape! r #{:schema :identity :stage :failure :sources :absent} [:record])
+      (identity! (:identity r)) (sources! (:sources r))
+      (require! (keyword? (:stage r)) :stage-invalid [:stage])
+      (let [f (:failure r) ids (set (map :id (:sources r)))]
+        (shape! f #{:kind :identity :stage :source-refs :elapsed-ms :partial-artifacts} [:failure])
+        (require! (contains? failure-kinds (:kind f)) :failure-kind-invalid [:failure])
+        (require! (= (:identity r) (:identity f)) :attempt-identity-mismatch [:failure])
+        (require! (= (:stage r) (:stage f)) :stage-invalid [:failure])
+        (require! (nat-int? (:elapsed-ms f)) :elapsed-invalid [:failure])
+        (doseq [k [:source-refs :partial-artifacts]]
+          (vec! (get f k) [:failure k])
+          (doseq [id (get f k)] (require! (contains? ids id) :source-unknown [:failure k]))))
+      (require! (map? (:absent r)) :shape-invalid [:absent])
+      (doseq [[section absent] (:absent r)]
+        (require! (contains? #{:target :retrieval :query :facts :interpretations :genesis} section)
+                  :absence-section-invalid [:absent section])
+        (shape! absent #{:status :reason} [:absent section])
+        (require! (and (= :none (:status absent)) (keyword? (:reason absent)))
+                  :absence-invalid [:absent section]))
+      r)
+    (validate-complete-record r)))
+
 (defn companion-files [r] (mapv :file (:sources r)))
 (defn validate-sources!
   "READ-BYTES resolves only captured same-attempt companion names, never live source paths."
@@ -267,7 +299,8 @@
               :construction-receipt-digest-mismatch [:construction]))
   (doseq [r records]
     (validate-sources! r captured)
-    (doseq [at (conj (mapv :observed-at (:facts r)) (get-in r [:target :pinned-at]))]
+    (doseq [at (cond-> (mapv :observed-at (:facts r))
+                 (get-in r [:target :pinned-at]) (conj (get-in r [:target :pinned-at])))]
       (require! (not (.isAfter (Instant/parse at) (Instant/now)))
                 :observation-after-admission [:observed-at]))
     (assert-same-attempt! (:identity r) context)

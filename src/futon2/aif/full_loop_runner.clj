@@ -23,6 +23,7 @@
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.limb-evidence :as limb-evidence]
             [futon2.aif.interpretation-evidence :as interpretation-evidence]
+            [futon2.aif.interpretation-job :as interpretation-job]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
@@ -3941,7 +3942,31 @@
           :selected-action (:action entry)
           :now #(Instant/now)
           :uuid-fn #(UUID/randomUUID)})
-        (let [{:keys [mission construction]}
+        (let [interpretation
+              (when (= :receipt (:interpretation-mode opts))
+                (when-not attempt-evidence-dir
+                  (throw (ex-info "Interpretation requires an existing cohort evidence directory"
+                                  {:outcome :incomplete :failure-kind :interpretation/cohort-required})))
+                (run-phase!
+                 opts @phase-context :interpretation
+                 #(interpretation-job/run!
+                   opts (:action entry)
+                   {:occurrence @action-occurrence :semantic-epoch semantic-epoch
+                    :data-root (.getCanonicalPath
+                                (io/file (or (:data-root execution-cohort) cohort/default-data-root)))
+                    :start-event-sha256
+                    (interpretation-evidence/sha256
+                     (Files/readAllBytes (.toPath (io/file (.getParentFile (io/file attempt-evidence-dir))
+                                                         "001-time-step.edn"))))
+                    :interpreter-job {:status :none :reason :not-dispatched}
+                    :author (or (:interpreter opts) author) :schema-version 1}
+                   attempt-evidence-dir
+                   {:ready! (fn [actor] ((or (:interpretation-readiness-fn opts) agent-readiness!) opts actor))
+                    :dispatch! (fn [actor prompt]
+                                 ((or (:dispatch-fn opts) dispatch!) opts actor "wm-full-loop" target prompt))
+                    :poll! (fn [job-id] ((or (:poll-fn opts) poll-job!) opts job-id))
+                    :charge! (fn [] (swap! dispatched-turns inc))})))
+              {:keys [mission construction]}
               (run-phase! opts @phase-context :construction
                           #(hash-map
                             :mission (if-let [mission-fn (:mission-fn opts)]
@@ -4015,7 +4040,11 @@
                               :patterns (vec (:shown construction))
                               :deposit nil
                               :trace-path trace-path}
-                               (:interpretation-receipt construction)
+                               interpretation
+                               (assoc :interpretation-receipt (:receipt interpretation)
+                                      :interpretation-timing (:timing interpretation))
+
+                               (and (nil? interpretation) (:interpretation-receipt construction))
                                (assoc :interpretation-receipt (:interpretation-receipt construction))
 
                                pinned-selection
