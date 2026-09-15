@@ -135,7 +135,7 @@
   build-loop precedent (wm-build-loop.sh ensure_seats) registers its two
   seats at start for exactly this reason; registration is idempotent (a
   duplicate answers 409 and is ignored). Fail-open with a stderr note only:
-  a registration outage must not consume the attempt it was protecting." 
+  a registration outage must not consume the attempt it was protecting."
   [{:keys [agency-base]}]
   (try
     (http/post (str agency-base "/api/alpha/agents")
@@ -323,7 +323,7 @@
    refused :missing-run-record AFTER the work was banked (2026-09-11
    codex20 click; 2026-09-12 u88-zai-successor click wm-click-c398aea7,
    grounded commit 5d595dc9). Historical admissions keep their explicit
-   STOP_LINE->HISTORICAL_VERIFICATION hops." 
+   STOP_LINE->HISTORICAL_VERIFICATION hops."
   ([selection-judgment selection-ground outcome trace-path]
    (packet-run-route selection-judgment selection-ground outcome trace-path nil))
   ([selection-judgment selection-ground outcome trace-path
@@ -419,6 +419,21 @@
 (def ^:private canonical-runner-path
   "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj")
 
+(defn- sha256-bytes
+  "Digest the BYTES themselves. The generic sha256 hashes (pr-str x); a Java
+  byte-array's pr-str carries object identity, so equal sources hashed as
+  false drift (round-2 review of repair-ea1-3f4cac attempt-003: the fresh-JVM
+  suite warned drift on every run)."
+  [^bytes b]
+  (let [d (.digest (MessageDigest/getInstance "SHA-256") b)]
+    (apply str (map #(format "%02x" (bit-and 0xff %)) d))))
+
+(defn- canonical-runner-bytes
+  []
+  (try (java.nio.file.Files/readAllBytes
+        (java.nio.file.Path/of canonical-runner-path (make-array String 0)))
+       (catch Throwable _ nil)))
+
 (defn runner-source-drift
   "Compare the loaded runner bytecode source against the canonical checkout.
 
@@ -427,16 +442,9 @@
   exactly (33ca99b0), but the serving JVM was running runner code older than
   the corroboration fix merged hours earlier, so the stale dispatch-time job
   stamp (decea980) was compared instead. The repairs lived in git; the JVM
-  never reloaded them, and nothing said so. This check makes that condition
-  loud: when the loaded classpath source and the canonical checkout disagree,
-  the run records it. Fail-open with a durable marker -- a stale JVM must not
-  consume the attempt it misjudged, but its verdicts must be visibly
-  suspect." 
+  never reloaded them, and nothing said so."
   ([]
-   (runner-source-drift (fn [path] (try (java.nio.file.Files/readAllBytes
-                                          (java.nio.file.Path/of
-                                           path (make-array String 0)))
-                                         (catch Throwable _ nil)))))
+   (runner-source-drift (fn [_] (canonical-runner-bytes))))
   ([canonical-read]
    (let [loaded (resource-bytes)
          canonical (canonical-read canonical-runner-path)]
@@ -446,24 +454,32 @@
         :runner/loaded-present? (some? loaded)
         :runner/canonical-present? (some? canonical)}
 
-       (= (sha256 loaded) (sha256 canonical))
+       (= (sha256-bytes loaded) (sha256-bytes canonical))
        {:runner/source-check :current
-        :runner/sha256 (sha256 loaded)}
+        :runner/sha256 (sha256-bytes loaded)}
 
        :else
        {:runner/source-check :drift
-        :runner/loaded-sha256 (sha256 loaded)
-        :runner/canonical-sha256 (sha256 canonical)}))))
+        :runner/loaded-sha256 (sha256-bytes loaded)
+        :runner/canonical-sha256 (sha256-bytes canonical)}))))
 
-(defn- warn-on-runner-source-drift!
+(defn- refuse-on-runner-source-drift!
+  "Check BEFORE the attempt runs and refuse consumption on drift (round-2
+  review: detection after execution lets a stale runner judge the attempt it
+  should never have judged). :unavailable stays fail-open -- a dev checkout
+  without the canonical file must not brick the loop -- but drift refuses."
   []
   (let [check (runner-source-drift)]
     (when (= :drift (:runner/source-check check))
       (binding [*out* *err*]
-        (println "[wm-full-loop] WARNING: serving runner source drifts from"
-                 (str canonical-runner-path "; verdicts this run may repeat"
-                      " already-repaired faults. Reload the namespace from"
-                      " the canonical checkout."))))
+        (println "[wm-full-loop] REFUSING: serving runner source drifts from"
+                 (str canonical-runner-path "; reload the namespace from the"
+                      " canonical checkout before running attempts.")))
+      (throw (ex-info "Serving runner source drifts from the canonical checkout"
+                      {:outcome :build-failed
+                       :failure-kind :stale-runner-source
+                       :failure-stage :runner-source
+                       :runner/source check})))
     check))
 
 (defn- persist-run-record!
@@ -486,6 +502,7 @@
                             :effective-environment])
             terminal-context (terminal-record-context raw-opts result)
             record (cond-> {:run/id run-id
+                    :runner/source (:runner/source result)
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
@@ -4630,6 +4647,9 @@
   (let [run-id (or (:run-id raw-opts) (str (UUID/randomUUID)))
         started-at (str (Instant/now))
         _ (ensure-dispatch-seat! (config raw-opts))
+        ;; BEFORE the attempt: a stale runner must not consume it, and the
+        ;; identity it records must be the identity that judged the run.
+        source-check (refuse-on-runner-source-drift!)
         result
         (try
       (run-opportunity-core! (assoc raw-opts :run-id run-id))
@@ -4727,9 +4747,10 @@
       (finally
         (post-wm-status! (config raw-opts)
                          {:source "wm-full-loop" :status "idle"})))]
-    (merge result
-           {:run/id run-id
-            ;; Loud and durable: a stale serving JVM produced attempt-003's
-            ;; false mismatch; the record must show the code identity.
-            :runner/source (warn-on-runner-source-drift!)}
-           (persist-run-record! raw-opts run-id started-at result))))
+    ;; The SAME identity annotates the result persist-run-record! sees; the
+    ;; tick record therefore carries :runner/source (round-2 review: the
+    ;; durable record never included it).
+    (merge (assoc result :runner/source source-check)
+           {:run/id run-id}
+           (persist-run-record! raw-opts run-id started-at
+                                (assoc result :runner/source source-check)))))

@@ -5017,37 +5017,72 @@
       (is (= :artifact-binding-mismatch (:failure-kind failure))
           "a commit-shaped but uncorroboratable claim stays a mismatch"))))
 
-(deftest run-opportunity-reports-runner-source-drift
-  ;; Attempt-003 of repair-ea1-3f4cac: a stale serving JVM compared the
-  ;; dispatch-time job stamp instead of the DONE line and produced a FALSE
-  ;; artifact-binding mismatch although the repairs were already in git.
-  ;; Every run now records which runner source produced it; drift is loud
-  ;; (stderr) and durable (on the result), never silent.
+(deftest runner-source-drift-compares-actual-bytes
+  ;; Round-2 review: the old check hashed (pr-str byte-array) -- object
+  ;; identity -- so EQUAL sources read as drift. Equal byte arrays must be
+  ;; :current; genuinely different bytes must be :drift.
+  (let [a (.getBytes "same source bytes" "UTF-8")
+        b (.getBytes "same source bytes" "UTF-8")
+        c (.getBytes "different source bytes" "UTF-8")]
+    (with-redefs-fn
+      {#'runner/resource-bytes (fn [] a)}
+      (fn []
+        (is (= :current (:runner/source-check
+                         (#'runner/runner-source-drift (fn [_] b))))
+            "two distinct but equal byte arrays are :current, not drift")))
+    (with-redefs-fn
+      {#'runner/resource-bytes (fn [] a)}
+      (fn []
+        (is (= :drift (:runner/source-check
+                       (#'runner/runner-source-drift (fn [_] c))))
+            "different bytes are drift")))
+    (with-redefs-fn
+      {#'runner/resource-bytes (fn [] a)}
+      (fn []
+        (is (= :unavailable (:runner/source-check
+                             (#'runner/runner-source-drift (fn [_] nil))))
+            "a missing canonical file stays fail-open")))))
+
+(deftest drifting-runner-refuses-before-consuming-the-attempt
+  ;; Round-2 review: detection ran AFTER the core, so the stale runner judged
+  ;; the attempt it should never have judged. Drift must refuse before any
+  ;; core execution; the refusal carries the typed check.
   (let [core-ran (atom false)]
     (with-redefs-fn
-      {#'runner/warn-on-runner-source-drift!
-       (fn [] {:runner/source-check :drift
-               :runner/loaded-sha256 "aaa1111"
-               :runner/canonical-sha256 "bbb2222"})
+      {#'runner/resource-bytes (fn [] (.getBytes "stale" "UTF-8"))
+       #'runner/canonical-runner-bytes (fn [] (.getBytes "fresh" "UTF-8"))
        #'runner/run-opportunity-core!
-       (fn [_] (reset! core-ran true)
-              {:attempt-id "a" :outcome :no-op-change
-               :checkpoints {} :data {}})}
+       (fn [_] (reset! core-ran true) {:attempt-id "x" :outcome :no-op-change})}
       (fn []
-        (let [r (runner/run-opportunity! {:run-record-dir "/tmp/wm-drift-test"})]
-          (is @core-ran)
-          (is (= :drift (get-in r [:runner/source :runner/source-check]))
-              "the run records that its JVM is stale, loudly")))))
-  (with-redefs-fn
-    {#'runner/warn-on-runner-source-drift!
-     (fn [] {:runner/source-check :current :runner/sha256 "ccc3333"})
-     #'runner/run-opportunity-core!
-     (fn [_] {:attempt-id "b" :outcome :no-op-change
-              :checkpoints {} :data {}})}
-    (fn []
-      (let [r (runner/run-opportunity! {:run-record-dir "/tmp/wm-drift-test2"})]
-        (is (= :current (get-in r [:runner/source :runner/source-check]))
-            "a current JVM records identity, not drift")))))
+        (let [failure (try (runner/run-opportunity!
+                            {:run-record-dir "/tmp/wm-drift-refuse"})
+                           nil
+                           (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+          (is (false? @core-ran)
+              "the core never runs when the runner source drifts")
+          (is (= :stale-runner-source (:failure-kind failure)))
+          (is (= :drift (get-in failure [:runner/source :runner/source-check]))))))))
+
+(deftest run-record-carries-the-runner-source-identity
+  ;; Round-2 review: the durable tick record never contained :runner/source.
+  ;; The same identity that gated the run must be readable back from the
+  ;; persisted record.
+  (let [record-dir (.getPath (.toFile (Files/createTempDirectory
+                                       "wm-src-record-" (make-array FileAttribute 0))))]
+    (with-redefs-fn
+      {#'runner/resource-bytes (fn [] (.getBytes "live" "UTF-8"))
+       #'runner/canonical-runner-bytes (fn [] (.getBytes "live" "UTF-8"))
+       #'runner/run-opportunity-core!
+       (fn [_] {:attempt-id "s" :outcome :no-op-change
+                :checkpoints {} :data {}})}
+      (fn []
+        (let [r (runner/run-opportunity! {:run-record-dir record-dir})
+              record (edn/read-string (slurp (:run-record r)))]
+          (is (= :current (get-in r [:runner/source :runner/source-check])))
+          (is (contains? record :runner/source)
+              "the tick record persists the identity")
+          (is (= :current (get-in record [:runner/source :runner/source-check]))
+              "recorded identity is the one that gated the run"))))))
 
 (deftest attempt-limb-evidence-follows-checkpoints-in-manifest
   (let [{:keys [root] :as c} (retention-cohort "runner-limb-evidence")
