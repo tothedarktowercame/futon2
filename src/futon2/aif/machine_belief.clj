@@ -2,8 +2,7 @@
   "Single-entity bridge from the stored categorical belief to MachineModel v1.
    This namespace reads the post-filter, post-carry belief; it never repairs,
    normalises, averages, or otherwise rewrites it."
-  (:require [futon2.aif.belief :as belief]
-            [futon2.aif.machine-model :as machine-model]))
+  (:require [futon2.aif.machine-model :as machine-model]))
 
 (def state-support
   "The declared order of MachineBeliefState.Status.all."
@@ -51,27 +50,19 @@
       (nil? posterior)
       (refusal :missing-entity [:stored-belief entity])
 
-      (not (map? posterior))
-      (refusal :invalid-posterior [:stored-belief entity])
-
-      (not= belief/status-set (set (keys posterior)))
-      (refusal :posterior-support-mismatch [:stored-belief entity])
-
-      (not (every? #(and (number? %)
-                         (Double/isFinite (double %))
-                         (not (neg? %)))
-                   (vals posterior)))
-      (refusal :invalid-mass [:stored-belief entity])
-
-      ;; Contract v1.1 numeric admission: exact rows == 1; float-carried
-      ;; rows within the declared order-independent criterion.
-      (nil? (machine-model/row-sum-admission posterior))
-      (refusal :invalid-mass [:stored-belief entity])
-
       :else
-      {:ok true
-       :model (:model model-context)
-       :context {:entity/id entity}
-       :state-support state-support
-       :belief-input {:mode :single-entity
-                      :posteriors {entity posterior}}})))
+      (let [admission (machine-model/distribution-admission posterior support)]
+        (if-not (:ok admission)
+          (refusal (case (get-in admission [:refusal :kind])
+                     :missing-distribution :invalid-posterior
+                     :distribution-support-mismatch :posterior-support-mismatch
+                     :unnormalized-row :invalid-mass
+                     (get-in admission [:refusal :kind]))
+                   [:stored-belief entity])
+          {:ok true
+           :model (:model model-context)
+           :context {:entity/id entity}
+           :state-support state-support
+           :numeric-admission admission
+           :belief-input {:mode :single-entity
+                          :posteriors {entity posterior}}})))))

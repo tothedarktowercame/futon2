@@ -37,36 +37,105 @@
    SPEC-fundamentals-build common evidence rules: 'prove/declare the
    numerical error criterion under review; do not quietly expand a
    tolerance'). Float-carried rows are summed EXACTLY at their IEEE values
-   (BigDecimal), so the sum is order-independent; admission requires
+   (exact rational arithmetic), so the sum is order-independent; admission requires
    |sum - 1| <= this bound. Masses are never renormalized. Evidence basis:
    row-7 production rows sum to 0.9999999999999999 / ...98 (one-ulp float
    error; runs/row-7-belief-state-2026-09-12/readback.edn)."
   1e-12M)
 
-(defn row-sum-admission
-  "Typed numeric admission for a mass row. Exact rows (all ratios/integers)
-   must sum to exactly 1 -> :exact. Rows carrying doubles are summed at
-   their exact IEEE values -> :float-carried when within
-   float-row-tolerance of 1. nil = inadmissible."
+(defn- numeric-representation [v]
+  (cond
+    (integer? v) :integer
+    (ratio? v) :ratio
+    (instance? BigDecimal v) :decimal
+    (instance? Float v) :float32
+    (instance? Double v) :float64
+    :else nil))
+
+(defn- represented-rational [v representation]
+  (case representation
+    (:integer :ratio) v
+    :decimal (rationalize v)
+    ;; rationalize on a float itself uses its decimal spelling, not its bits.
+    (:float32 :float64) (rationalize (BigDecimal. (double v)))))
+
+(defn- representation-class [representations]
+  (let [kinds (set (vals representations))
+        ieee? (some #{:float32 :float64} kinds)
+        exact? (some #{:integer :ratio :decimal} kinds)]
+    (cond
+      (and ieee? exact?) :mixed-floating
+      ieee? :ieee-floating
+      (= #{:decimal} kinds) :exact-decimal
+      (contains? kinds :decimal) :mixed-exact
+      :else :exact-rational)))
+
+(defn numeric-row-admission
+  "Shared represented-value admission, with exact rational totals/deviations.
+   Integers, ratios and BigDecimal denote exact values; Float/Double denote
+   exact finite IEEE values. Exact-only rows require equality; rows containing
+   IEEE values use the unchanged v1.1 absolute criterion. No mass is repaired.
+
+   :values preserves numeric values (= the input row). Float is widened EXACTLY
+   to Double only in this EDN evidence: pr-str/read-string of raw Float can lose
+   its value. :representations retains float32 identity. Consumer rows are never
+   rewritten. Unsupported/nonfinite values return typed refusals without opaque
+   values. Admission is not a composed prediction or logarithmic error bound."
   [row]
-  (let [vs (vals row)]
-    (if (every? #(or (integer? %) (ratio? %)) vs)
-      (when (== 1 (reduce + vs)) :exact)
-      (let [sum (reduce (fn [^BigDecimal acc v] (.add acc (BigDecimal. (double v))))
-                        BigDecimal/ZERO vs)
-            gap (.abs (.subtract sum BigDecimal/ONE))]
-        (when (<= (.compareTo gap ^BigDecimal float-row-tolerance) 0)
-          :float-carried)))))
+  (if-not (map? row)
+    {:ok false :refusal {:kind :missing-distribution :path []}}
+    (let [representations (into {} (map (fn [[k v]] [k (numeric-representation v)])) row)
+          invalid (some (fn [[k v]]
+                          (cond
+                            (nil? (get representations k))
+                            {:kind :unsupported-numeric-type :path [k] :type (if (nil? v) "nil" (.getName (class v)))}
+                            (and (#{:float32 :float64} (get representations k))
+                                 (not (Double/isFinite (double v))))
+                            {:kind :invalid-mass :path [k]}
+                            (neg? v) {:kind :invalid-mass :path [k]})) row)]
+      (if invalid
+        {:ok false :refusal invalid}
+        (let [representation (representation-class representations)
+              floating? (#{:mixed-floating :ieee-floating} representation)
+              total (reduce +' 0 (map (fn [[k v]] (represented-rational v (get representations k))) row))
+              deviation (abs (-' total 1))
+              bound (if floating? (rationalize float-row-tolerance) 0)
+              admitted? (<= deviation bound)
+              result {:ok admitted?
+                      :values (into {} (map (fn [[k v]] [k (if (= :float32 (get representations k))
+                                                            (double v) v)])) row)
+                      :representation representation :representations representations
+                      :exact-total total :exact-deviation deviation
+                      :exactly-normalized? (zero? deviation)
+                      :criterion {:id (if floating? :absolute-row-sum :exact-row-sum)
+                                  :revision (if floating? "v1.1" "exact-represented-v1")
+                                  :target 1 :max-absolute-deviation bound}
+                      :admission (when admitted? (if floating? :float-carried :exact))}]
+          (cond-> result
+            (not admitted?) (assoc :refusal {:kind :unnormalized-row :path []})))))))
+
+(defn row-sum-admission
+  "Compatibility projection of numeric-row-admission; not a second validator.
+   Exact-only admitted rows -> :exact; IEEE-containing admitted rows ->
+   :float-carried (even if exactly normalized); all refusals -> nil."
+  [row]
+  (:admission (numeric-row-admission row)))
+
+(defn distribution-admission
+  "The shared full row boundary: support identity, mass checks and detailed
+   numeric admission. Support order is retained; row keys name the masses."
+  [row support]
+  (cond
+    (not (map? row)) {:ok false :refusal {:kind :missing-distribution :path []}}
+    (not= (set (keys row)) (set support))
+    {:ok false :refusal {:kind :distribution-support-mismatch :path []}}
+    :else (assoc (numeric-row-admission row) :support support)))
 
 (defn- distribution! [row support path]
-  (demand! (map? row) :missing-distribution path)
-  (demand! (= (set (keys row)) (set support)) :distribution-support-mismatch path)
-  (doseq [v (vals row)]
-    (demand! (and (number? v) (Double/isFinite (double v)) (not (neg? v)))
-             :invalid-mass path))
-  ;; Exact arithmetic when inputs are ratios; declared v1.1 criterion for
-  ;; float-carried rows; no silent epsilon or renormalization.
-  (demand! (some? (row-sum-admission row)) :unnormalized-row path))
+  (let [admission (distribution-admission row support)]
+    (when-not (:ok admission)
+      (refuse! (get-in admission [:refusal :kind]) path))
+    admission))
 
 (defn- measurement! [{:keys [path sha256]} at]
   (demand! (and (named? path) (string? sha256)

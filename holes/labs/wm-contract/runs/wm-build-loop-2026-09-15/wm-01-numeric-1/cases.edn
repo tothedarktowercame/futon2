@@ -1,0 +1,18 @@
+{:exact-thirds {:a 1/3 :b 1/3 :c 1/3}
+ :exact-nonunit {:a 1/3 :b 1/3}
+ :float-seven {:a 0.10532904980883244 :b 0.14086253396643547
+               :c 0.31240050666821867 :d 0.09555013225308848
+               :e 0.07447381184188043 :f 0.1660549156527121
+               :g 0.10532904980883244}
+ :float-unit {:a 0.25 :b 0.75}
+ :float-inside {:a 1.0 :b 5e-13}
+ :float-outside {:a 1.0 :b 2e-12}
+ :mixed-ratio-float {:a 1/3 :b 0.6666666666666666}
+ :mixed-ratio-float-outside {:a 1/3 :b 0.6666666666686667}
+ :mixed-decimal-float {:a 0.1M :b 0.9}
+ :mixed-decimal-float-outside {:a 0.1M :b 0.900000000002}
+ :decimal-unit {:a 0.1M :b 0.9M}
+ :decimal-outside {:a 0.1M :b 0.900000000002M}
+ :decimal-near {:a 0.1M :b 0.9000000000005M}
+ :mixed-exact-unit {:a 1/3 :b 1/6 :c 0.5M}
+ :mixed-exact-near {:a 1/3 :b 1/6 :c 0.5000000000005M}}

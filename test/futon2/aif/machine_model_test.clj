@@ -1,5 +1,6 @@
 (ns futon2.aif.machine-model-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.machine-model :as m]
             [futon2.aif.belief :as b])
   (:import [java.nio.file Files]
@@ -120,3 +121,91 @@
     (is (= :exact (m/row-sum-admission {:a 1/2 :b 1/2})))
     (is (nil? (m/row-sum-admission {:a 1/2 :b 1/3}))
         "exact rows keep the exact ==1 requirement")))
+
+(def numeric-receipt-root
+  "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-numeric-1/")
+
+(deftest detailed-admission-agrees-with-independent-fractions
+  (let [cases (edn/read-string (slurp (str numeric-receipt-root "cases.edn")))
+        independent (edn/read-string (slurp (str numeric-receipt-root "independent.edn")))
+        expected {:exact-thirds :exact :exact-nonunit nil
+                  :float-seven :float-carried :float-unit :float-carried
+                  :float-inside :float-carried :float-outside nil
+                  :mixed-ratio-float :float-carried :mixed-decimal-float :float-carried
+                  :mixed-ratio-float-outside nil :mixed-decimal-float-outside nil
+                  :decimal-outside nil
+                  :decimal-unit :exact :decimal-near nil
+                  :mixed-exact-unit :exact :mixed-exact-near nil}]
+    (doseq [[name row] cases]
+      (testing (str name)
+        (let [result (m/numeric-row-admission row)
+              reversed (m/numeric-row-admission (into (array-map) (reverse row)))]
+          (is (= row (:values result)))
+          (is (= result reversed))
+          (is (= result (edn/read-string (pr-str result))))
+          (is (= (get-in independent [name :total]) (:exact-total result)))
+          (is (= (get-in independent [name :deviation]) (:exact-deviation result)))
+          (is (= (zero? (get-in independent [name :deviation])) (:exactly-normalized? result)))
+          (is (= (get expected name) (:admission result) (m/row-sum-admission row)))
+          (when (#{:ieee-floating :mixed-floating} (:representation result))
+            (is (= {:id :absolute-row-sum :revision "v1.1" :target 1
+                    :max-absolute-deviation 1/1000000000000} (:criterion result)))))))))
+
+(deftest representation-cases-and-stable-float-evidence
+  (doseq [[row representation types]
+          [[{:a 1 :b 0N} :exact-rational {:a :integer :b :integer}]
+           [{:a 1/3 :b 2/3} :exact-rational {:a :ratio :b :ratio}]
+           [{:a 0.1M :b 0.9M} :exact-decimal {:a :decimal :b :decimal}]
+           [{:a 1/3 :b 1/6 :c 0.5M} :mixed-exact {:a :ratio :b :ratio :c :decimal}]
+           [{:a 0.25 :b 0.75} :ieee-floating {:a :float64 :b :float64}]
+           [{:a 1/2 :b 0.5} :mixed-floating {:a :ratio :b :float64}]]]
+    (let [result (m/numeric-row-admission row)]
+      (is (= representation (:representation result)))
+      (is (= types (:representations result)))
+      (is (:exactly-normalized? result))))
+  (let [f (float 0.1) row {:a f :b (- 1.0 (double f))}
+        result (m/numeric-row-admission row)]
+    (is (:ok result))
+    (is (= :float-carried (:admission result)))
+    (is (= 1 (:exact-total result)))
+    (is (= 0 (:exact-deviation result)))
+    (is (= {:a :float32 :b :float64} (:representations result)))
+    (is (= row (:values result)))
+    (is (instance? Float (:a row)) "caller row retains its original representation")
+    (is (= result (edn/read-string (pr-str result))))
+    (is (not= row (edn/read-string (pr-str row)))
+        "control demonstrates why raw Float is unsuitable as retained EDN evidence"))
+  (let [row {:a Long/MAX_VALUE :b Long/MAX_VALUE} result (m/numeric-row-admission row)]
+    (is (= 18446744073709551614N (:exact-total result)))
+    (is (= :unnormalized-row (get-in result [:refusal :kind])))))
+
+(deftest shared-refusals-and-wrapper-projection
+  (doseq [[v kind] [[Double/NaN :invalid-mass] [Double/POSITIVE_INFINITY :invalid-mass]
+                    [Float/NEGATIVE_INFINITY :invalid-mass] [-1 :invalid-mass]
+                    [(java.util.concurrent.atomic.AtomicInteger. 1) :unsupported-numeric-type]
+                    [nil :unsupported-numeric-type] ["1" :unsupported-numeric-type]]]
+    (let [result (m/numeric-row-admission {:a v})]
+      (is (= kind (get-in result [:refusal :kind])))
+      (is (= result (edn/read-string (pr-str result))))
+      (is (nil? (m/row-sum-admission {:a v})))))
+  (let [calls (atom [])]
+    (with-redefs [m/numeric-row-admission (fn [row] (swap! calls conj row) {:admission :from-shared-result})]
+      (is (= :from-shared-result (m/row-sum-admission {:a 1})))
+      (is (= [{:a 1}] @calls)))))
+
+(deftest full-model-numeric-and-support-boundary
+  (with-example
+    (fn [x]
+      (let [row (get-in x [:belief :posteriors "mission/example"])]
+        (doseq [[kind r]
+                [[:distribution-support-mismatch (assoc (dissoc row :spawned) :foreign 1/7)]
+                 [:distribution-support-mismatch (assoc row :extra 0)]
+                 [:invalid-mass (assoc row :spawned -1/7 :refined 3/7)]
+                 [:invalid-mass (assoc row :spawned Double/NaN)]
+                 [:invalid-mass (assoc row :spawned Double/POSITIVE_INFINITY)]
+                 [:invalid-mass (assoc row :spawned Double/NEGATIVE_INFINITY)]
+                 [:unsupported-numeric-type (assoc row :spawned (java.util.concurrent.atomic.AtomicInteger. 0))]]]
+          (is (= kind (get-in (m/validate (assoc-in x [:belief :posteriors "mission/example"] r))
+                             [:refusal :kind]))))
+        (is (:ok (m/validate (update x :state-support #(vec (reverse %))))))
+        (is (= row (get-in x [:belief :posteriors "mission/example"])))))))

@@ -34,28 +34,32 @@
   [belief-input kernel policy]
   (if-let [r (policy-refusal belief-input kernel policy)]
     r
-    (let [initial (first (vals (:posteriors belief-input)))]
-      (if (or (not= belief/status-set (set (keys initial)))
-              (nil? (machine-model/row-sum-admission initial)))
-        (refusal :invalid-mass [:belief-input :posteriors (:entity/id policy)])
+    (let [initial (first (vals (:posteriors belief-input)))
+          support (:state-support kernel)
+          initial-admission (machine-model/distribution-admission initial support)
+          step (fn [depth row admission]
+                 {:depth depth :distribution row :model (:model kernel)
+                  :admission (:admission admission) :numeric-admission admission})
+          failure (fn [admission path]
+                    (refusal (if (= :unsupported-numeric-type (get-in admission [:refusal :kind]))
+                               :unsupported-numeric-type :invalid-mass) path))]
+      (if (or (not= belief/status-set (set support)) (not (:ok initial-admission)))
+        (failure initial-admission [:belief-input :posteriors (:entity/id policy)])
         (loop [actions (:actions policy) depth 0 current initial
-               steps [{:depth 0 :distribution initial
-                       :admission (machine-model/row-sum-admission initial)}]]
+               steps [(step 0 initial initial-admission)]]
           (if-let [action (first actions)]
             (let [applied (transition/apply-belief kernel current action)
                   next-row (:distribution applied)
                   admission (when (:ok applied)
-                              (machine-model/row-sum-admission next-row))]
+                              (machine-model/distribution-admission next-row support))]
               (cond
                 (not (:ok applied)) applied
-                (nil? admission) (refusal :invalid-mass [:steps (inc depth)])
+                (not (:ok admission)) (failure admission [:steps (inc depth)])
                 :else (recur (next actions) (inc depth) next-row
-                             (conj steps {:depth (inc depth) :action action
-                                          :distribution next-row
-                                          :admission admission}))))
+                             (conj steps (assoc (step (inc depth) next-row admission) :action action)))))
             {:ok true :schema schema :model (:model kernel)
              :policy (select-keys policy [:id :revision :entity/id :model/revision :actions])
-             :state-support (:state-support kernel)
+             :state-support support
              :steps steps :terminal current}))))))
 
 (defn predicted-state-kernel
