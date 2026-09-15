@@ -21,6 +21,31 @@ separately. A tick in this ledger is not a checklist tick.
 | P2 dynamics admission separate from A admission | WM-05 C5/C6, WM-03 B7 | TBD | claude-2 | not dispatched | proposed; needs D5 | none yet |
 | P3 same B at belief update and prediction | WM-03 B8 | TBD | claude-2 | not dispatched | proposed; needs D4 | none yet |
 
+## Held artefacts: true campaign stage (claude-2, 2026-09-15, exit interview)
+
+These annotations place held work in the stage order of
+`futon2/holes/missions/M-G-wm-wiring.md` (CP0–CP6). An annotation is **not
+an admission**. None of this work may resume without a dispatch tied to its
+stage and clause, and CP4's owner is "to assign".
+
+- **P0 reproducer** (`3eb6079e`) → **CP4.** It is evidence of the WM-02
+  gap, not completed behaviour.
+- **P1a work-target belief** (`998b2b89`, reviewer fixes `474184a4`
+  accepted by codex-28 in p4ng `2922020`) → **CP4** ("B/belief/Q feeding
+  the scorer"). Held. It resumes only when CP1–CP3 close and a CP4 dispatch
+  adopts it.
+- **Work-target store** (`9ee8bbe0`, `e38ea7e5`; R1 finding F1 open) →
+  **CP4, but its requirement is derived.** The checklist does not ask for
+  durable model persistence. Under the proposed "no derived requirement"
+  gate, it cannot resume until WM-02's checklist text is amended with Joe's
+  assent. An amendment made in cascade or decision documents does not
+  count.
+- **P1b-2a tick bridge** (`29c71794`, unreviewed) → **CP4.** It depends on
+  the store, so the same amendment condition applies. Held.
+- **join-6** (`057356af`, `3f63e91d`) → **in no stage of CP0–CP6.** Its
+  verify-and-assign obligation is discharged (codex-28, p4ng `2c8001f`).
+  The fix owner is codex-4, and no fix is commissioned.
+
 ## Checklist items worked (codex-28 clearance, p4ng `08b535d`)
 
 | Checklist item | Work | Author | Reviewer | State | Evidence |
