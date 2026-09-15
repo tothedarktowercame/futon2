@@ -10,16 +10,25 @@
 (def scope-authority
   "invoke-1789477467267-21004-c4169097 (Joe 2026-09-15)")
 
+(def mission-action-types
+  "Action types whose target is a mission; only these are checked against the
+   mission registry. The controller also ranks other admissible types
+   (address-sorry, fire-pattern, learn-action-class, no-op)."
+  #{:advance-mission :open-mission})
+
 (defn authorize
-  "Check the open target and exact admissible action before granting bounded
-   authorization. Execution, tripwires, stop-lines and delivery QA remain owned
-   by the runner. A report alone never executes the decision."
+  "Check the exact admissible action, and for mission actions the open target,
+   before granting bounded authorization. Execution, tripwires, stop-lines and
+   delivery QA remain owned by the runner. A report alone never executes the
+   decision."
   [decision admissible]
   (let [action (:action decision)
         score (:controller-score decision)
         law (:selection-law decision)
+        mission-action? (contains? mission-action-types (:type action))
         reason (cond
-                 (not (true? (:open? (missions/mission-status (:target action)))))
+                 (and mission-action?
+                      (not (true? (:open? (missions/mission-status (:target action))))))
                  :target-not-open
                  (not (some #(= action (:action %)) admissible))
                  :action-not-admissible
@@ -39,7 +48,10 @@
            :operator-confirmation-required? false
            :operator-decision-evidence-id operator-decision-evidence-id
            :admissible-set :all-open-missions :scope-authority scope-authority
-           :machine-gates {:open-mission {:status :passed}
+           :machine-gates {:open-mission (if mission-action?
+                                           {:status :passed}
+                                           {:status :not-applicable
+                                            :reason :not-a-mission-action})
                            :admissible-action {:status :passed}
                            :controller-score-and-law {:status :passed}
                            :serving-cache no-recall :query-bounds no-recall

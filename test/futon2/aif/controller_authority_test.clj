@@ -35,6 +35,18 @@
              (try (authority/authorize candidate domain)
                   (catch clojure.lang.ExceptionInfo e (:reason (ex-data e)))))))))
 
+(deftest non-mission-admissible-action-is-not-checked-against-missions
+  (let [sorry-action {:type :address-sorry :target "sorry-outside-registry"}
+        sorry-decision (assoc decision :action sorry-action)]
+    (with-redefs [missions/mission-status (constantly {:open? false})]
+      (let [result (authority/authorize sorry-decision [{:action sorry-action}])]
+        (is (true? (:actuation-authorized? result)))
+        (is (= {:status :not-applicable :reason :not-a-mission-action}
+               (get-in result [:actuation :machine-gates :open-mission]))))
+      (is (= :action-not-admissible
+             (try (authority/authorize sorry-decision [])
+                  (catch clojure.lang.ExceptionInfo e (:reason (ex-data e)))))))))
+
 (deftest controller-selection-outside-old-three-keeps-its-law
   (let [ranked [{:action action :rank 1 :controller-score 0.25}
                 {:action {:type :advance-mission :target "M-aif-policy-conditioned-eig"}
