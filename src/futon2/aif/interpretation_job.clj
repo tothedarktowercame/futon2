@@ -6,7 +6,8 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
-            [futon2.aif.interpretation-request :as request])
+            [futon2.aif.interpretation-request :as request]
+            [futon2.aif.fact-measurement :as measurement])
   (:import [java.nio.file Files StandardOpenOption]
            [java.time Instant]
            [java.util Base64 UUID]))
@@ -51,6 +52,11 @@
        "At most ONE new pattern: only for a named missing move, author library .flexiarg plus index row and commit explicit paths, "
        "then capture the new pattern/index bytes as additional .source companions and cite them. Never overwrite original snapshots. "
        "Include every existing .source companion in receipt :sources (id/path/file/sha256/revision), including request, intent and job files. "
+       "In this SAME job write interpretation-reader-plan.edn: a vector with at most one entry per declared fact, "
+       "each {:fact id :reader kind :parameters map :citations [exact-span-citations]}. Read fact_measurement.clj "
+       "for the strict parameter maps and literal predicates. Plan only justified independent measurements; omit unmeasurable facts. "
+       "Use [] when none can be measured. Include the plan as a hashed receipt source. Do not use outcomes, grounded?, priors, "
+       "controller scores or predicted effects as evidence. Freeze this plan before construction/build; never revise it after the result. "
        "Use evidence/value-digest for hashes. Do not include additional top-level fields. "
        "If blocked, write :wm/interpretation-failure-v1 with the exact identity, stage, sources, typed absent sections and failure map; "
        "use interpretation/no-relevant-pattern, genesis-required or unmeasurable-fact as appropriate. No build, reload, click, push, "
@@ -130,6 +136,7 @@
                      :interpretation/invalid-receipt {:reason :retrieval-runs-mismatch}))
             (need! (seq (:interpretations record)) :interpretation/no-relevant-pattern {})
             (need! (<= (count (:genesis record)) 1) :interpretation/genesis-required {:reason :genesis-limit})
+            (measurement/validate-plan! record reader (:author opts))
             (let [construction (when construct!
                                  (reset! stage :construction)
                                  (let [began (System/currentTimeMillis)]
@@ -161,6 +168,8 @@
                                        :returned-bytes-base64 (.encodeToString (Base64/getEncoder) returned)})
                       (capture! (source path))
                       (Files/delete (.toPath receipt))))
+              _ (let [plan (io/file dir measurement/plan-file)]
+                  (when (.exists plan) (capture! (source plan))))
               _ (doseq [s (or (:sources data) (get-in data [:request :sources]))] (capture! s))
               _ (when (and (nil? @prepared) (:request data)) (reset! prepared (:request data)))
               elapsed (- (System/currentTimeMillis) started)

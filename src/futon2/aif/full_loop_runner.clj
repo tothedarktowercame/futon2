@@ -24,6 +24,7 @@
             [futon2.aif.limb-evidence :as limb-evidence]
             [futon2.aif.interpretation-evidence :as interpretation-evidence]
             [futon2.aif.interpretation-job :as interpretation-job]
+            [futon2.aif.fact-measurement :as measurement]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
@@ -3333,6 +3334,21 @@
           (.getAbsolutePath
            (io/file (or (:data-root execution-cohort) cohort/default-data-root)
                     (name (:cohort/id start-event)) attempt-id "evidence")))
+        measurement-state (atom nil)
+        measurement-artifact (atom nil)
+        measurement-end (atom nil)
+        observe-end! (fn []
+                       (when (and @measurement-state (nil? @measurement-end))
+                         (reset! measurement-end
+                                 (measurement/finish!
+                                  @measurement-state
+                                  {:artifact @measurement-artifact
+                                   :wiring (select-keys (get-in @checkpoints [:construction :judgment])
+                                                        [:wiring :fold-output :shape-validation :correspondence-validation])
+                                   ;; Existing author/review prose and approval are not
+                                   ;; revision-bound gate or replay receipts.
+                                   :receipts []}
+                                  #(str (Instant/now))))))
         prompt-opts (cond-> opts
                       attempt-evidence-dir
                       (assoc :attempt-evidence-dir attempt-evidence-dir))
@@ -3625,6 +3641,7 @@
                    result))
         close! (fn [outcome data]
                  (try
+                   (observe-end!)
                    (close-core! outcome data)
                    (catch Throwable e
                      ;; Cohort-53 attempt-001 is retained as the historical
@@ -4071,6 +4088,10 @@
                                (assoc :run4/task-pin (:identity pinned-selection))))]
           (persist-selection! trace-path)
           (checkpoint! :construction construction-cell)
+          (when (:interpretation-receipt (:judgment construction-cell))
+            (reset! measurement-state
+                    (measurement/begin! attempt-evidence-dir (:judgment construction-cell)
+                                        #(str (Instant/now)) author)))
           (when historical-action?
             (when-not (:historical-verification-execute-fn opts)
               (throw (ex-info "Historical verification execution port missing"
@@ -4348,6 +4369,7 @@
                                   {:outcome :build-failed
                                    :author-verdict (:verdict (author-verdict author-job))
                                    :author-job author-job})))
+                (reset! measurement-artifact {:repository repo :commit commit :paths files})
                 (let [{:keys [commit repo files author-job build-retries]}
                       (build-cure-loop opts @phase-context author dispatched-turns
                                        target commit repo files author-job
@@ -4365,6 +4387,7 @@
                          (:author-window-end-ms artifact-binding)
                          :artifact-binding/failed-commits
                          (vec (keep :failed-commit stop-lines))})
+                      _ (reset! measurement-artifact {:repository repo :commit commit :paths files})
                       review-response
                       (run-phase!
                        opts (cond-> @phase-context
@@ -4421,6 +4444,7 @@
                       approved? (and (= "done" (:state review-job))
                                      (= :approve (review-verdict review-job))
                                      (:passed? review-gate))]
+                  (reset! measurement-artifact {:repository repo :commit commit :paths files})
                   (checkpoint! :build
                                (term (cond->
                                       {:artifacts files
@@ -4444,6 +4468,7 @@
                                               :reviews reviews))
                                      {:kind :git-commit-and-independent-review
                                       :repository repo}))
+                  (observe-end!)
                   (when (and approved? (:measured-acquisition? opts)
                              attempt-evidence-dir)
                     (let [discharge-contract
@@ -4622,6 +4647,7 @@
                                 feature-card
                                 (assoc :feature-card feature-card))))))))))))
       (catch Throwable e
+        (observe-end!)
         (if @closing?
           ;; Cohort-53 attempt-001 is retained as the historical counterexample:
           ;; a typed evidence refusal escaped this branch and orphaned the attempt

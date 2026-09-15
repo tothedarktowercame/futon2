@@ -9,6 +9,7 @@
             [futon2.aif.interpretation-evidence-test :as receipt-fixture]
             [futon2.aif.interpretation-job :as job]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.full-loop-cohort :as cohort-store]
             [futon2.aif.full-loop-runner-test :as runner-fixture]
             [futon2.aif.hermetic-repair-fixture :as hermetic])
   (:import [java.nio.file Files]
@@ -24,6 +25,8 @@
                  (= scenario :unsupported) (assoc :type :fire-pattern)
                  (= scenario :ticket) (assoc :type :advance-ticket :target "T-receipt-construction"))
         calls (atom []) constructors (atom 0) organised (atom 0) organise policy/organise saved (atom nil)
+        adjudication-observations (atom [])
+        append-checkpoint cohort-store/append-checkpoint!
         base (#'runner-fixture/retention-success-opts cohort)
         prepare (fn [a identity {:keys [on-capture]}]
                   (when (#{:interpretation/target-unresolved :interpretation/source-unavailable} scenario)
@@ -43,7 +46,15 @@
                       (throw (ex-info "controlled failed retrieval" {:interpretation/refusal scenario :request r})))
                     (assoc r :schema :wm/interpretation-request-v1)))
         emit-receipt (fn []
-                       (let [identity (:identity (edn/read-string (slurp (io/file dir "interpretation-job.source"))))
+                       (let [plan (when (#{:bad-reader :bad-parameter :bad-fact :bad-citation} scenario)
+                                    [{:fact (if (= scenario :bad-fact) "not-declared" (get-in @saved [:facts 0 :id]))
+                                      :reader (if (= scenario :bad-reader) :made-up :artifact)
+                                      :parameters (cond-> {:repository "futon2" :path "component"}
+                                                    (= scenario :bad-parameter) (assoc :outcome :success))
+                                      :citations (cond-> (get-in @saved [:facts 0 :citations])
+                                                   (= scenario :bad-citation) (assoc-in [0 :quote] "invented"))}])
+                             _ (spit (io/file dir "interpretation-reader-plan.edn") (pr-str (vec plan)))
+                             identity (:identity (edn/read-string (slurp (io/file dir "interpretation-job.source"))))
                              metadata (map job/source (filter #(and (.isFile %) (.startsWith (.getName %) "interpretation-"))
                                                               (.listFiles dir)))
                              r (-> @saved
@@ -66,7 +77,11 @@
                            (spit (io/file dir (:file (first (:sources r)))) "changed source"))
                          (spit (io/file dir "interpretation-receipt.edn")
                                (if (= scenario :invalid) "this is not one valid receipt" (pr-str r)))))
-        opts (assoc base :trace-fn (constantly "/fixture/trace.edn") :run-id (str (UUID/randomUUID)) :interpretation-mode mode :interpreter "interpreter"
+        opts (assoc (cond-> base
+                      (= scenario :success)
+                      (assoc :author-artifact-observer-fn
+                             (fn [repo _ _] {:repo repo :commit "abc123" :corroborates? true :disagreement? false})))
+                    :trace-fn (constantly "/fixture/trace.edn") :run-id (str (UUID/randomUUID)) :interpretation-mode mode :interpreter "interpreter"
                     :judge-fn (fn [_] {:judgement (walk/postwalk-replace
                                                   {runner-fixture/selected-action action} runner-fixture/judgement)})
                     :interpretation-history-roots [root]
@@ -91,6 +106,12 @@
     (try
       (let [result (binding [runner/*wm-status-reporting?* false]
                      (with-redefs [runner/ensure-dispatch-seat! (fn [_])
+                                   cohort-store/append-checkpoint!
+                                   (fn [& args]
+                                     (when (some #{:adjudication} args)
+                                       (swap! adjudication-observations conj
+                                              (.exists (io/file dir "fact-end.edn"))))
+                                     (apply append-checkpoint args))
                                    policy/organise (fn [& args] (swap! organised inc) (apply organise args))]
                        (runner/run-opportunity! opts)))
             failures (when (.exists dir)
@@ -98,7 +119,11 @@
                              (filter #(.startsWith (.getName %) "interpretation-failure-") (.listFiles dir))))
             close-file (io/file (.getParentFile dir) "007-closed.edn")
             close (when (.exists close-file) (edn/read-string (slurp close-file)))]
-        {:result result :calls @calls :action action :organised @organised :constructors @constructors :failures failures :close close})
+        {:result result :calls @calls :action action :organised @organised :constructors @constructors :failures failures :close close
+         :adjudication-observations @adjudication-observations
+         :observations (into {} (for [n ["fact-pre.edn" "fact-end.edn"]
+                                     :let [f (io/file dir n)] :when (.exists f)]
+                                 [n (edn/read-string (slurp f))]))})
       (finally (doseq [file (reverse (file-seq (io/file root)))] (Files/delete (.toPath file)))))))
 
 (deftest flag-off-preserves-construction-checkpoint
@@ -187,3 +212,35 @@
     (is (= :authored-reachability-topological (:precedence-rule retained)))
     (is (= :first-true-unfired-guard-apply-effects-from-q0 (:acting-rule retained)))
     (is (= :vacuous (get-in retained [:find-result :f4])))))
+
+(deftest fact-pairs-start-after-construction-and-survive-build-failure
+  (let [{:keys [result observations close]} (run-case :receipt :valid)
+        entries (get-in close [:payload :close-evidence-manifest :entries])]
+    (is (= :build-failed (:outcome result)))
+    (is (= #{"fact-pre.edn" "fact-end.edn"} (set (keys observations))))
+    (is (= :pre (get-in observations ["fact-pre.edn" :phase])))
+    (is (= :end (get-in observations ["fact-end.edn" :phase])))
+    (doseq [name ["fact-pre.edn" "fact-end.edn"]]
+      (is (some #(.endsWith (:source-path %) name) entries))))
+  (doseq [scenario [:invalid :nothing-fires]]
+    (is (empty? (:observations (run-case :receipt scenario)))))
+  (is (empty? (:observations (run-case nil :valid)))))
+
+(deftest invalid-reader-plan-stops-construction
+  (doseq [scenario [:bad-reader :bad-parameter :bad-fact :bad-citation]]
+    (let [{:keys [organised constructors failures observations calls]} (run-case :receipt scenario)]
+      (is (= :interpretation/invalid-receipt (get-in failures [0 :failure :kind])))
+      (is (zero? organised))
+      (is (zero? constructors))
+      (is (= ["interpreter"] calls))
+      (is (empty? observations)))))
+
+(deftest end-freezes-before-adjudication-and-close-cutoff
+  (let [{:keys [result observations close adjudication-observations]} (run-case :receipt :success)]
+    (is (seq adjudication-observations))
+    (is (every? true? adjudication-observations))
+    (is (= #{"fact-pre.edn" "fact-end.edn"} (set (keys observations))))
+    (is (= :absent (get-in result [:close-retention :state :status])))
+    (doseq [entry (get-in close [:payload :close-evidence-manifest :entries])]
+      (is (not (.isAfter (java.time.Instant/parse (:admitted-at entry))
+                        (java.time.Instant/parse (:recorded-at close))))))))
