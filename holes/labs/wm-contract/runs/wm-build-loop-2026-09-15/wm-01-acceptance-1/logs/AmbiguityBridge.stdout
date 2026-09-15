@@ -1,0 +1,16 @@
+DarkTower/WarMachine/AmbiguityBridge.lean:52:53: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+DarkTower/WarMachine/AmbiguityBridge.lean:60:53: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+'DarkTower.WarMachine.AmbiguityBridge.categorical_projection' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.AmbiguityBridge.deterministicCategoricalAmbiguity_is_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.AmbiguityBridge.unitVariance_diverges_from_deterministicCategorical' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.AmbiguityBridge.zeroEntropy_specialCase_agrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

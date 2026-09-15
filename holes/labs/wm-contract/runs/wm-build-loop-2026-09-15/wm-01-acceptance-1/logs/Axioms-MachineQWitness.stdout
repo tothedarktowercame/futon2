@@ -1,0 +1,3 @@
+'DarkTower.WarMachine.MachineQWitness.demoObservation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.MachineQWitness.demoPolicyPrior' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.MachineQWitness.demoTransition' depends on axioms: [propext, Classical.choice, Quot.sound]

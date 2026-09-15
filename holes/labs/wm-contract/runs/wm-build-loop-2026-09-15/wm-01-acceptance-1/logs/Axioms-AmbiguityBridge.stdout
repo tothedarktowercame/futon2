@@ -1,0 +1,6 @@
+'_private.DarkTower.WarMachine.AmbiguityBridge.0.DarkTower.WarMachine.AmbiguityBridge.deterministicObservation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'_private.DarkTower.WarMachine.AmbiguityBridge.0.DarkTower.WarMachine.AmbiguityBridge.deterministicPredictedState' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

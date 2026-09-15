@@ -1,0 +1,6 @@
+'DarkTower.WarMachine.MachineParameters.machineParameterPosterior' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.MachineParameters.machineParameterPrior' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

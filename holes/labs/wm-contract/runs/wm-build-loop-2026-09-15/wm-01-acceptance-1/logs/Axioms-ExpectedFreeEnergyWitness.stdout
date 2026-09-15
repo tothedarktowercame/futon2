@@ -1,0 +1,6 @@
+'_private.DarkTower.WarMachine.ExpectedFreeEnergyWitness.0.DarkTower.WarMachine.ExpectedFreeEnergyWitness.Cdist' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'_private.DarkTower.WarMachine.ExpectedFreeEnergyWitness.0.DarkTower.WarMachine.ExpectedFreeEnergyWitness.Q' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

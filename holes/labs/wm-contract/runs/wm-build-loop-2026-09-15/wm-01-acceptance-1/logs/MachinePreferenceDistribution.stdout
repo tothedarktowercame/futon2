@@ -1,0 +1,8 @@
+DarkTower/WarMachine/MachinePreferenceDistribution.lean:34:138: warning: This simp argument is unused:
+  seed
+
+Hint: Omit it from the simp argument list.
+  simp_all [machineSupport,
+  ̲  ̲ ̲ ̲organisationOutcome,̵ ̵s̵e̵e̵d̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`

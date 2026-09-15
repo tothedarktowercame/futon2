@@ -1,0 +1,9 @@
+'_private.DarkTower.WarMachine.GenerativeModelNegative.0.DarkTower.WarMachine.GenerativeModelNegative.policyPrior' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'_private.DarkTower.WarMachine.GenerativeModelNegative.0.DarkTower.WarMachine.GenerativeModelNegative.transition' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'_private.DarkTower.WarMachine.GenerativeModelNegative.0.DarkTower.WarMachine.GenerativeModelNegative.wrongObservation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

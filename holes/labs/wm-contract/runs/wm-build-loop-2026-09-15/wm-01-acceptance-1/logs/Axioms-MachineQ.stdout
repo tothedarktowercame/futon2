@@ -1,0 +1,7 @@
+'DarkTower.WarMachine.MachineQ.machinePredictedStateKernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.MachineQ.machinePredictiveOutcomeKernel' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'_private.DarkTower.WarMachine.MachineQ.0.DarkTower.WarMachine.MachineQ.sum_swap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

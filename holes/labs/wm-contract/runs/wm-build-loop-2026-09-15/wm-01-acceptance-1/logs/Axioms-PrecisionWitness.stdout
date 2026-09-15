@@ -1,0 +1,5 @@
+'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PrecisionWitness.swappedReference' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.PrecisionWitness.weightedReference' depends on axioms: [propext, Classical.choice, Quot.sound]

@@ -1,0 +1,22 @@
+'DarkTower.WarMachine.PreferenceRiskSeparation.constantConditional' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PreferenceRiskSeparation.predictiveMass' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PreferenceRiskSeparation.constant_absorbs_prediction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PreferenceRiskSeparation.RiskContribution' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PreferenceRiskSeparation.riskAdmissible' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PreferenceRiskSeparation.scalarKL' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.PreferenceRiskSeparation.preferred_zero_refuses' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PreferenceRiskSeparation.grounded_seed_risk' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

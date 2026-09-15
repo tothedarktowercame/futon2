@@ -1,0 +1,9 @@
+'DarkTower.WarMachine.PreferenceRiskWitness.concrete_scalarKL' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PreferenceRiskWitness.same_twelve_support' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PreferenceRiskWitness.abstained_refuses' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

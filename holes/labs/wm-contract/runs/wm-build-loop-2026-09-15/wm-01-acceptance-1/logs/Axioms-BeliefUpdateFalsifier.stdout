@@ -1,0 +1,3 @@
+'_private.DarkTower.WarMachine.BeliefUpdateFalsifier.0.DarkTower.WarMachine.BeliefUpdateFalsifier.kernel' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,12 @@
+'DarkTower.WarMachine.ProbabilityKernelRepairNegative.duplicateKernel' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.ProbabilityKernelRepairNegative.hiddenMassKernel' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.ProbabilityKernelRepairNegative.negativePrecisionCall' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

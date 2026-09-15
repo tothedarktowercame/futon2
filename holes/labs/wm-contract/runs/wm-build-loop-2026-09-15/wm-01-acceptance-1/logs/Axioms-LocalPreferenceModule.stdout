@@ -1,0 +1,5 @@
+'DarkTower.WarMachine.LocalPreferenceModule.ExactTable' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.LocalPreferenceModule.ExactTable.kernel' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.LocalPreferenceModule.binaryTable' depends on axioms: [propext, Classical.choice, Quot.sound]

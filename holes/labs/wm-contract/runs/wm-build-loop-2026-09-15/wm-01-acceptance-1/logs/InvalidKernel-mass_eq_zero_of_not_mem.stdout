@@ -1,0 +1,5 @@
+/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/InvalidKernel-mass_eq_zero_of_not_mem.lean:6:52: error: unsolved goals
+case mass_eq_zero_of_not_mem.true
+s : Unit
+h : True
+⊢ False

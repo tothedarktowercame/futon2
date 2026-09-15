@@ -1,0 +1,9 @@
+DarkTower/WarMachine/GenerativeModelNegative.lean:21:75: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+DarkTower/WarMachine/GenerativeModelNegative.lean:28:53: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+DarkTower/WarMachine/GenerativeModelNegative.lean:35:53: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`

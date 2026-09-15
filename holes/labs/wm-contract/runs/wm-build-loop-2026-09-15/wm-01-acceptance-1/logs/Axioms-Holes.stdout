@@ -1,0 +1,15 @@
+'DarkTower.WarMachine.Holes.ProbabilityKernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.Holes.beliefUpdate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'_private.DarkTower.WarMachine.Holes.0.DarkTower.WarMachine.Holes.eigCounterPosterior' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'_private.DarkTower.WarMachine.Holes.0.DarkTower.WarMachine.Holes.eigCounterPredictive' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'_private.DarkTower.WarMachine.Holes.0.DarkTower.WarMachine.Holes.eigCounterPrior' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.Holes.variationalFreeEnergy' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.Holes.variationalFreeEnergy_nonnegative' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

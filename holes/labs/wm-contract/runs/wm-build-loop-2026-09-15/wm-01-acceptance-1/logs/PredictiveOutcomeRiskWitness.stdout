@@ -1,0 +1,7 @@
+DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean:19:39: warning: This simp argument is unused:
+  ob
+
+Hint: Omit it from the simp argument list.
+  simp [oa,̵ ̵o̵b̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`

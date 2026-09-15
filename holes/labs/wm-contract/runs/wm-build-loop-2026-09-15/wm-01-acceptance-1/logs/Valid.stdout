@@ -1,0 +1,8 @@
+'sparseKernel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'exactThirds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'sparseExact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'zeroPrecisionAccepted' depends on axioms: [propext, Classical.choice, Quot.sound]
+'twoPrecision' depends on axioms: [propext, Classical.choice, Quot.sound]
+'sparseOutsideZero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'exactCastOutsideZero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'thirdsPreserved' depends on axioms: [propext, Classical.choice, Quot.sound]

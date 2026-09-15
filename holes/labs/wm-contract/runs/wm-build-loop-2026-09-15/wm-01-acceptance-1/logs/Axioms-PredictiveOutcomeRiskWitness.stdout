@@ -1,0 +1,9 @@
+'DarkTower.WarMachine.PredictiveOutcomeRiskWitness.positivePreference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PredictiveOutcomeRiskWitness.predictive' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DarkTower.WarMachine.PredictiveOutcomeRiskWitness.preference' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,2 @@
+'DarkTower.WarMachine.AmbiguityWitness.observationModel' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DarkTower.WarMachine.AmbiguityWitness.predictedState' depends on axioms: [propext, Classical.choice, Quot.sound]

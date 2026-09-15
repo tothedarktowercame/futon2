@@ -1,0 +1,9 @@
+'_private.DarkTower.WarMachine.ExpectedInformationGainWitness.0.DarkTower.WarMachine.ExpectedInformationGainWitness.Q' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'_private.DarkTower.WarMachine.ExpectedInformationGainWitness.0.DarkTower.WarMachine.ExpectedInformationGainWitness.posterior' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'_private.DarkTower.WarMachine.ExpectedInformationGainWitness.0.DarkTower.WarMachine.ExpectedInformationGainWitness.prior' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,4 @@
+/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/InvalidKernel-support_nodup.lean:6:52: error: unsolved goals
+case support_nodup
+s : Unit
+⊢ False
