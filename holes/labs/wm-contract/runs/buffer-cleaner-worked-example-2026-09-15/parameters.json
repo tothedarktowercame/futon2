@@ -1,0 +1,224 @@
+{
+  "schema": "constructed-buffer-example-v1",
+  "window_hours": 24,
+  "remaining_threshold": 16,
+  "scan_cost_per_buffer": 0.01,
+  "kill_cost": 0.1,
+  "nats_per_cost_unit": 1,
+  "buffers": [
+    {
+      "id": "stream-0-0",
+      "kind": "stream",
+      "age_hours": 0,
+      "p_needed": 0,
+      "recovery_cost": 1,
+      "revisited": false
+    },
+    {
+      "id": "stream-0-1",
+      "kind": "stream",
+      "age_hours": 0,
+      "p_needed": 0,
+      "recovery_cost": 1,
+      "revisited": false
+    },
+    {
+      "id": "stream-0-2",
+      "kind": "stream",
+      "age_hours": 0,
+      "p_needed": 0,
+      "recovery_cost": 1,
+      "revisited": false
+    },
+    {
+      "id": "stream-0-3",
+      "kind": "stream",
+      "age_hours": 0,
+      "p_needed": 0,
+      "recovery_cost": 1,
+      "revisited": false
+    },
+    {
+      "id": "http-0-0",
+      "kind": "http",
+      "age_hours": 0,
+      "p_needed": 0,
+      "recovery_cost": 1,
+      "revisited": false
+    },
+    {
+      "id": "http-0-1",
+      "kind": "http",
+      "age_hours": 0,
+      "p_needed": 0,
+      "recovery_cost": 1,
+      "revisited": false
+    },
+    {
+      "id": "render-0-0",
+      "kind": "render",
+      "age_hours": 0,
+      "p_needed": 0.1,
+      "recovery_cost": 1,
+      "revisited": true
+    },
+    {
+      "id": "invoke-0-0",
+      "kind": "invoke",
+      "age_hours": 0,
+      "p_needed": 0.2,
+      "recovery_cost": 2,
+      "revisited": false
+    },
+    {
+      "id": "dired-0-0",
+      "kind": "dired",
+      "age_hours": 0,
+      "p_needed": 0.25,
+      "recovery_cost": 0.5,
+      "revisited": false
+    },
+    {
+      "id": "temp-0-0",
+      "kind": "temp",
+      "age_hours": 0,
+      "p_needed": 0.05,
+      "recovery_cost": 1,
+      "revisited": false
+    },
+    {
+      "id": "temp-0-1",
+      "kind": "temp",
+      "age_hours": 0,
+      "p_needed": 0.05,
+      "recovery_cost": 1,
+      "revisited": false
+    },
+    {
+      "id": "file-30-0",
+      "kind": "file",
+      "age_hours": 30,
+      "p_needed": 0.05,
+      "recovery_cost": 5,
+      "revisited": true
+    },
+    {
+      "id": "file-30-1",
+      "kind": "file",
+      "age_hours": 30,
+      "p_needed": 0.05,
+      "recovery_cost": 5,
+      "revisited": false
+    },
+    {
+      "id": "file-8-0",
+      "kind": "file",
+      "age_hours": 8,
+      "p_needed": 0.4,
+      "recovery_cost": 5,
+      "revisited": true
+    },
+    {
+      "id": "file-8-1",
+      "kind": "file",
+      "age_hours": 8,
+      "p_needed": 0.4,
+      "recovery_cost": 5,
+      "revisited": true
+    },
+    {
+      "id": "file-8-2",
+      "kind": "file",
+      "age_hours": 8,
+      "p_needed": 0.4,
+      "recovery_cost": 5,
+      "revisited": false
+    },
+    {
+      "id": "file-2-0",
+      "kind": "file",
+      "age_hours": 2,
+      "p_needed": 0.6,
+      "recovery_cost": 5,
+      "revisited": false
+    },
+    {
+      "id": "file-2-1",
+      "kind": "file",
+      "age_hours": 2,
+      "p_needed": 0.6,
+      "recovery_cost": 5,
+      "revisited": false
+    },
+    {
+      "id": "file-2-2",
+      "kind": "file",
+      "age_hours": 2,
+      "p_needed": 0.6,
+      "recovery_cost": 5,
+      "revisited": false
+    },
+    {
+      "id": "file-2-3",
+      "kind": "file",
+      "age_hours": 2,
+      "p_needed": 0.6,
+      "recovery_cost": 5,
+      "revisited": false
+    },
+    {
+      "id": "protected-0-0",
+      "kind": "protected",
+      "age_hours": 0,
+      "p_needed": 0,
+      "recovery_cost": 5,
+      "revisited": false
+    },
+    {
+      "id": "protected-0-1",
+      "kind": "protected",
+      "age_hours": 0,
+      "p_needed": 0,
+      "recovery_cost": 5,
+      "revisited": false
+    },
+    {
+      "id": "protected-0-2",
+      "kind": "protected",
+      "age_hours": 0,
+      "p_needed": 0,
+      "recovery_cost": 5,
+      "revisited": false
+    },
+    {
+      "id": "protected-0-3",
+      "kind": "protected",
+      "age_hours": 0,
+      "p_needed": 0,
+      "recovery_cost": 5,
+      "revisited": false
+    }
+  ],
+  "wirings": {
+    "aggressive": {
+      "file_age_hours": 6,
+      "categories": [
+        "stream",
+        "http",
+        "render",
+        "invoke",
+        "dired",
+        "temp",
+        "file"
+      ]
+    },
+    "conservative": {
+      "file_age_hours": 24,
+      "categories": [
+        "stream",
+        "http",
+        "file"
+      ]
+    }
+  }
+}
