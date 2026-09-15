@@ -42,7 +42,7 @@
                                        [{:action {:type :no-op}}])
           decision (policy/select-action
                     [{:action {:type :no-op} :controller-score 1.0}]
-                    :selection-boundary :strategic-recommendation :f-pi-opts fields)
+                    {:selection-boundary :strategic-recommendation :f-pi-opts fields})
           result (wm/evaluated-run-configuration
                   (wm/effective-run-configuration {}) {} nil {:events []}
                   {:horizon-steps nil} decision)]
