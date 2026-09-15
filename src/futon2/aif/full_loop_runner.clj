@@ -2058,6 +2058,10 @@
        "and what you should see). Include :fold-ref or :proof-ref only for "
        "artifacts that already exist; the runner will verify and discover links.\n"
        "6. Finish with: FULL_LOOP_AUTHOR: DONE <commit-sha> and list validations.\n"
+       "   The sha MUST be copied verbatim from `git rev-parse HEAD` output.\n"
+       "   Never reconstruct it from a short id or from memory: a fabricated\n"
+       "   tail fails artifact binding and closes the attempt (cohort-55\n"
+       "   attempt-001 died exactly this way).\n"
        "If no safe substantive parcel is possible, make no commit and finish with "
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
 
