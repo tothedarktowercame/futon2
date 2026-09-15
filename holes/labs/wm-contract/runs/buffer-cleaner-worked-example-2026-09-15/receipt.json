@@ -1,0 +1,36 @@
+{
+  "preregistration_commit": "a508aa24",
+  "command": "python3 holes/labs/wm-contract/runs/buffer-cleaner-worked-example-2026-09-15/compute.py",
+  "exit": 0,
+  "scope": "constructed offline arithmetic; no live data or Emacs calls",
+  "files": {
+    "PREDECLARATION.md": {
+      "sha256": "f3a01cd886e2da351734c815ea6e5fa60a7dde7305c523a01a9aa7234674cd21",
+      "bytes": 4004
+    },
+    "parameters.json": {
+      "sha256": "d37ccca883e14920caffdb7025aadd6a4b970107f8cfac00a5d1ef5ee5a7a7cd",
+      "bytes": 4327
+    },
+    "source-pin.json": {
+      "sha256": "69f9bda129019d1821ba43d05a4e706f1beb1bfe902b24536436ad4586a90216",
+      "bytes": 273
+    },
+    "compute.py": {
+      "sha256": "08641e37a4db660fe2586fb647bb5000ec196ac1838178abcdb3c69b643915f3",
+      "bytes": 4471
+    },
+    "results.json": {
+      "sha256": "1933fc0a1c388d2eafee6dafc0b8bf2adce32ea0540038649e82d6e2784821f3",
+      "bytes": 19001
+    },
+    "execution.log": {
+      "sha256": "734f1d43d013cbe94c6a4c3473151cff67cf5aae0131495e577b279eafb687ef",
+      "bytes": 1694
+    },
+    "WORKED-NUMBERS.md": {
+      "sha256": "ebe024e7183820bde394383052606dce11ab13e432f3916706d660a63b48ba51",
+      "bytes": 5881
+    }
+  }
+}

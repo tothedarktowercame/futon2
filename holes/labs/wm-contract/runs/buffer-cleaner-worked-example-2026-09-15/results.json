@@ -1,0 +1,811 @@
+{
+  "schema": "buffer-computation-v1",
+  "data_status": "constructed-not-measured",
+  "preregistration_commit": "a508aa24",
+  "full_A_status": "not-defined-by-available-ruling",
+  "comparison_status": "A-projection-and-B-not-distinguishable-on-this-field",
+  "rows": [
+    {
+      "wiring": "aggressive",
+      "killed": [
+        "stream-0-0",
+        "stream-0-1",
+        "stream-0-2",
+        "stream-0-3",
+        "http-0-0",
+        "http-0-1",
+        "render-0-0",
+        "invoke-0-0",
+        "dired-0-0",
+        "temp-0-0",
+        "temp-0-1",
+        "file-30-0",
+        "file-30-1",
+        "file-8-0",
+        "file-8-1",
+        "file-8-2"
+      ],
+      "remaining": 8,
+      "eligible": true,
+      "risk": 6.531743197285914,
+      "ambiguity": 4.200916515959705,
+      "G_B": 10.732659713245619,
+      "G_A_illustration": 10.732659713245619,
+      "A_status": "deterministic-bookkeeping-projection; full-A-undetermined",
+      "expected_recovery_cost": "289/40",
+      "realized_recovery_cost": "16",
+      "fuel": "46/25",
+      "predicted_A_total": 12.572659713245619,
+      "predicted_B_total": 12.572659713245619,
+      "oracle_realized_total": "446/25",
+      "constant_preference_baseline": 3.5076597132456198,
+      "coordinates": [
+        {
+          "id": "stream-0-0",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "stream-0-1",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "stream-0-2",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "stream-0-3",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "http-0-0",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "http-0-1",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "render-0-0",
+          "killed": true,
+          "q": [
+            0.9,
+            0.1
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.08817871412677462,
+          "ambiguity": 0.3250829733914482,
+          "expected_cost": "1/10"
+        },
+        {
+          "id": "invoke-0-0",
+          "killed": true,
+          "q": [
+            0.8,
+            0.2
+          ],
+          "C": [
+            0.8807970779778823,
+            0.11920292202211755
+          ],
+          "risk": 0.026525587504784787,
+          "ambiguity": 0.5004024235381879,
+          "expected_cost": "2/5"
+        },
+        {
+          "id": "dired-0-0",
+          "killed": true,
+          "q": [
+            0.75,
+            0.25
+          ],
+          "C": [
+            0.6224593312018546,
+            0.37754066879814546
+          ],
+          "risk": 0.03674183956129817,
+          "ambiguity": 0.5623351446188083,
+          "expected_cost": "1/8"
+        },
+        {
+          "id": "temp-0-0",
+          "killed": true,
+          "q": [
+            0.95,
+            0.05
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.16474644417235018,
+          "ambiguity": 0.1985152433458726,
+          "expected_cost": "1/20"
+        },
+        {
+          "id": "temp-0-1",
+          "killed": true,
+          "q": [
+            0.95,
+            0.05
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.16474644417235018,
+          "ambiguity": 0.1985152433458726,
+          "expected_cost": "1/20"
+        },
+        {
+          "id": "file-30-0",
+          "killed": true,
+          "q": [
+            0.95,
+            0.05
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.058200105143245404,
+          "ambiguity": 0.1985152433458726,
+          "expected_cost": "1/4"
+        },
+        {
+          "id": "file-30-1",
+          "killed": true,
+          "q": [
+            0.95,
+            0.05
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.058200105143245404,
+          "ambiguity": 0.1985152433458726,
+          "expected_cost": "1/4"
+        },
+        {
+          "id": "file-8-0",
+          "killed": true,
+          "q": [
+            0.6,
+            0.4
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 1.3337036814798615,
+          "ambiguity": 0.6730116670092565,
+          "expected_cost": "2"
+        },
+        {
+          "id": "file-8-1",
+          "killed": true,
+          "q": [
+            0.6,
+            0.4
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 1.3337036814798615,
+          "ambiguity": 0.6730116670092565,
+          "expected_cost": "2"
+        },
+        {
+          "id": "file-8-2",
+          "killed": true,
+          "q": [
+            0.6,
+            0.4
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 1.3337036814798615,
+          "ambiguity": 0.6730116670092565,
+          "expected_cost": "2"
+        },
+        {
+          "id": "file-2-0",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "file-2-1",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "file-2-2",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "file-2-3",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "protected-0-0",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "protected-0-1",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "protected-0-2",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "protected-0-3",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        }
+      ],
+      "direct_joint_mass": 1.0000000000000044,
+      "direct_joint_risk": 6.531743197285901,
+      "direct_joint_ambiguity": 4.200916515959674,
+      "A_selected": false,
+      "oracle_selected": false,
+      "A_pick_agrees_with_constructed_oracle": true,
+      "B_selected": false,
+      "B_pick_agrees_with_constructed_oracle": true
+    },
+    {
+      "wiring": "conservative",
+      "killed": [
+        "stream-0-0",
+        "stream-0-1",
+        "stream-0-2",
+        "stream-0-3",
+        "http-0-0",
+        "http-0-1",
+        "file-30-0",
+        "file-30-1"
+      ],
+      "remaining": 16,
+      "eligible": true,
+      "risk": 3.6106292265538733,
+      "ambiguity": 0.3970304866917452,
+      "G_B": 4.007659713245618,
+      "G_A_illustration": 4.007659713245618,
+      "A_status": "deterministic-bookkeeping-projection; full-A-undetermined",
+      "expected_recovery_cost": "1/2",
+      "realized_recovery_cost": "5",
+      "fuel": "26/25",
+      "predicted_A_total": 5.0476597132456185,
+      "predicted_B_total": 5.0476597132456185,
+      "oracle_realized_total": "151/25",
+      "constant_preference_baseline": 3.5076597132456198,
+      "coordinates": [
+        {
+          "id": "stream-0-0",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "stream-0-1",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "stream-0-2",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "stream-0-3",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "http-0-0",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "http-0-1",
+          "killed": true,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "render-0-0",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "invoke-0-0",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.8807970779778823,
+            0.11920292202211755
+          ],
+          "risk": 0.1269280110429726,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "dired-0-0",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.6224593312018546,
+            0.37754066879814546
+          ],
+          "risk": 0.4740769841801067,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "temp-0-0",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "temp-0-1",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.7310585786300049,
+            0.2689414213699951
+          ],
+          "risk": 0.31326168751822286,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "file-30-0",
+          "killed": true,
+          "q": [
+            0.95,
+            0.05
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.058200105143245404,
+          "ambiguity": 0.1985152433458726,
+          "expected_cost": "1/4"
+        },
+        {
+          "id": "file-30-1",
+          "killed": true,
+          "q": [
+            0.95,
+            0.05
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.058200105143245404,
+          "ambiguity": 0.1985152433458726,
+          "expected_cost": "1/4"
+        },
+        {
+          "id": "file-8-0",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "file-8-1",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "file-8-2",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "file-2-0",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "file-2-1",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "file-2-2",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "file-2-3",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "protected-0-0",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "protected-0-1",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "protected-0-2",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        },
+        {
+          "id": "protected-0-3",
+          "killed": false,
+          "q": [
+            1.0,
+            0.0
+          ],
+          "C": [
+            0.9933071490757153,
+            0.006692850924284856
+          ],
+          "risk": 0.006715348489117967,
+          "ambiguity": -0.0,
+          "expected_cost": "0"
+        }
+      ],
+      "direct_joint_mass": 0.9999999999999999,
+      "direct_joint_risk": 3.6106292265538724,
+      "direct_joint_ambiguity": 0.3970304866917451,
+      "A_selected": true,
+      "oracle_selected": true,
+      "A_pick_agrees_with_constructed_oracle": true,
+      "B_selected": true,
+      "B_pick_agrees_with_constructed_oracle": true
+    }
+  ]
+}
