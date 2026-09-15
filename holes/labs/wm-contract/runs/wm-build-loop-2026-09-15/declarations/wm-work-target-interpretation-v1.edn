@@ -1,0 +1,58 @@
+{:schema :wm/work-target-interpretation-v1
+ :revision "v1"
+ :decision {:by "codex-28"
+            :at "2026-09-15"
+            :bell "invoke-1789501835834-21224-7484fd75"
+            :kind :design-decision-within-build-commission
+            :commission "invoke-1789501050276-21222-59c12ada"
+            :limits ["Not a Joe quotation, observed finding, blanket model acceptance or permission to enable the production scorer."
+                     "Subject to independent implementation and applicability review before production model admission."]}
+ :transcribed-by "claude-2"
+ :applies-to #{:mission :ticket}
+
+ ;; D1
+ :modeled-variable
+ "The target's fallibly adjudicated WM lifecycle status at a specified reference point, under a pinned rubric. Not registry phase, raw interest-event category, a physical truth label or the success of an attempt."
+ :state-support [:spawned :refined :strengthened :addressed :falsified :foreclosed :reopened]
+ :state-meanings
+ {:spawned "The target work obligation has been newly constituted, supported by its creation record. Mere first encounter by this process is not creation."
+  :refined "The target's problem, scope or criterion has been substantively clarified/re-anchored. A timestamp change or cosmetic edit is insufficient."
+  :strengthened "Evidence supporting the target's substantive claim or proposed solution has increased. A favorable registry label or stronger agent confidence alone is insufficient."
+  :addressed "The target's declared resolution criteria are satisfied by admitted evidence, with relevant contradictions accounted for. Completion of a bounded subphase is not necessarily resolution of the whole target."
+  :falsified "Admitted evidence contradicts the target's substantive claim or proposed solution under the declared scope. A failed command alone need not falsify that claim."
+  :foreclosed "An authorized decision deliberately closes off this work or avenue. Disappearance from a live list, temporary gating or unavailable agent does not establish foreclosure."
+  :reopened "An explicit authorized reopening follows a previously established terminal standing for this same target. Repeated selection is insufficient."}
+ :missing-classification
+ {:rule "Zero-match/insufficient, multi-match/ambiguous and accepted-label-conflict are missing-classification conditions, not extra probability cells. No invented precedence among overlapping assertions."
+  :conditions #{:evidence-insufficient :evidence-ambiguous :evidence-conflicting}}
+ :recorded-limitations
+ ["Seven-way categorical adjudication is a modelling choice; missingness and coverage limitations must be retained."
+  "Does not prove exhaustive physical state coverage or measured A."
+  "Independent review must challenge applicability before production model admission."]
+
+ ;; D2
+ :domain
+ {:rule :introduce-on-first-authorized-candidate-admission
+  :statement "A work target is introduced when a retained, authorized candidate-admission record first admits it to the controller's candidate population (before the winning choice). Exact target identity is the key. Registry presence is eligibility evidence, not model-domain membership."
+  :retention :monotone-in-p1
+  :retention-note "Leaving the live candidate set does not drop the row or lineage. Future authorized archival is not prohibited; it is not designed here."
+  :missing-predecessor :carry-missing
+  :registry-read-failure "Not evidence of an empty domain."}
+ :initial-distribution
+ {:name "wm-work-target-D-v1"
+  :authority :declared-prior
+  :kind :declared-pre-evidence-initialization-assumption
+  :masses {:spawned 1/7 :refined 1/7 :strengthened 1/7 :addressed 1/7
+           :falsified 1/7 :foreclosed 1/7 :reopened 1/7}
+  :rationale "This initialization assigns no preference among labels before admissible target-specific evidence."
+  :is-not ["an empirical frequency estimate" "proof of exchangeability"
+           "maximum entropy over every possible state representation"
+           "a migrated historical posterior" "a fallback"]
+  :restricted-to "First introduction under this pinned work-target interpretation."
+  :change-rule "Changing D requires a new explicit model revision and migration/reinitialization authority; it cannot silently rewrite existing targets."}
+
+ ;; D3
+ :update-authority
+ {:p1 :none
+  :path-label :no-admitted-observations
+  :statement "No work-target observation updates in P1. Registry material is retained as timestamped context only. Registry transitions and implementation-commit events are not work-target measurements. Carry preserves the declared prior or last admitted distribution and its information cutoff; it does not assert the world is unchanged. An unchanged carried prior is not an informative current posterior. Transition propagation under B is a separate operation (D4, unresolved)."}}
