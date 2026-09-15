@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789491886641-21076-c87ac378",
+  "agent-id": "claude-15",
+  "session-id": "9593f811-f96b-4582-a8f0-c462af80f0de",
+  "state": "done",
+  "created-at": "2026-09-15T17:04:46.641225167Z",
+  "finished-at": "2026-09-15T17:04:50.885516881Z",
+  "result": "You've reached your Fable limit. Switch to another model, or manage usage credits at claude.ai/settings/usage?from=cc_cli_limit_message, to continue.",
+  "result-summary": "You've reached your Fable limit. Switch to another model, or manage usage credits at claude.ai/settings/usage?from=cc_cli_limit_message, to continue."
+}

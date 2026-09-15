@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789492727411-21129-17d985f4",
+  "agent-id": "codex-12",
+  "session-id": "01a085fa-1198-7fe3-8706-fe2c5a6cb807",
+  "state": "done",
+  "created-at": "2026-09-15T17:18:47.411933456Z",
+  "finished-at": "2026-09-15T17:19:11.172694587Z",
+  "result": "AGREE \u2014 bounded assent to exact SHA-256 `56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`. The source and immutable review copy are byte-identical. My assent covers the checklist\u2019s honest separation of implemented mechanisms, historical qualification evidence, unresolved joins, and required completion evidence. It does not certify WM completion, a qualifying run, production activation, the reported baseline failures, unavailable history, or unresolved roster identities. No source correction required.",
+  "result-summary": "AGREE \u2014 bounded assent to exact SHA-256 `56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`. The source and immutable review copy are byte-identical. My assent covers the checklist\u2019s honest separation o..."
+}

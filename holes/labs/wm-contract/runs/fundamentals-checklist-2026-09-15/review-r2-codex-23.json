@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789492714402-21121-3b92d104",
+  "agent-id": "codex-23",
+  "session-id": "01a096e5-0740-71a1-904b-568ae41e14b5",
+  "state": "done",
+  "created-at": "2026-09-15T17:18:34.402129403Z",
+  "finished-at": "2026-09-15T17:19:04.384742652Z",
+  "result": "CHANGES REQUIRED on SHA256 `56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`.\n\nTwo identifier substitutions accidentally change the referenced obligation:\n\n- E03 says \u201cComplete **WM-11** acquisition/adapter.\u201d This should be \u201cComplete **worklist F11** acquisition/adapter.\u201d Checklist WM-11 is candidate prior/posterior and policy identity; it is not the F11 certificate-acquisition limb.\n- E04 is titled \u201cAccepted **WM-11/F2** reconciliation.\u201d Restore \u201cAccepted **worklist F11/F2** reconciliation\u201d or \u201cAccepted row-27 F11/F2 reconciliation.\u201d Otherwise the new WM-prefixed numbering silently retargets the historical repair obligation.\n\nMy lane assent is otherwise unchanged and bounded: commits `0476071e`, `ae0c95fd`, and reviewer correction `76c7088b` repaired stop-line evidence/collision machinery only. They do not establish deployment, cascade-G use, all-node operation, E04 closure, or a qualifying run.\n\nThe revision otherwise preserves Joe\u2019s September 12 Item 5 standard and correctly distinguishes source, serving state, clicks, machinery closes, and actual all-node certification. I performed no runtime or publication verification.",
+  "result-summary": "CHANGES REQUIRED on SHA256 `56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`. Two identifier substitutions accidentally change the referenced obligation: - E03 says \u201cComplete **WM-11** acquisition/ada..."
+}

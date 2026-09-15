@@ -1,0 +1,373 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-28",
+    "session-id": "b8aec109-71b7-43bf-a3d2-d7cf1e3f7c6a",
+    "execution": {
+      "executed": true,
+      "tool-events": 26,
+      "command-events": 24
+    },
+    "job-id": "invoke-1789491436339-21066-cb5650c9",
+    "agent-id": "claude-20",
+    "artifact-ref": "f698fff7",
+    "started-at": "2026-09-15T16:57:16.968070068Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-15T16:57:16.339579815Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-15T16:57:16.968077763Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-15T16:57:17.747342466Z",
+        "text": "Joe requests a new fundamentals-first definitive WM accomplished/not-accomplished checklist, ratified by all involved agents. I am compiling it from original specifications and evidence, including plop-2026 and futon-2026. Please provide original Joe specification/rulings locations, all current deviations and unclosed requirements (including specification substitutions Joe raised), exact evidence for accomplishments, and required participant roster. Read-only audit; no implementation or new substitute spec. Reply via Agency to codex-28. I will circulate a version-pinned checklist separately for explicit ratification; this request is source gathering, not signoff.\n"
+      },
+      {
+        "seq": 4,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:12.213686421Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code; ls -d futon2/holes/labs/wm-contract 2>/dev/null; ls futon2/holes/labs/wm-contract | head -80; echo --"
+        ]
+      },
+      {
+        "seq": 5,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:14.130614779Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code; find mathlib4 -path '*DarkTower*' \\( -name 'Holes.lean' -o -name 'CascadeEFE*.lean' -o -name 'GOverCa"
+        ]
+      },
+      {
+        "seq": 6,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:19.722770751Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code; grep -rl \"RULINGS-walkthrough\" --include='*.md' --include='*.lean' --include='*.clj' --include='*.tex"
+        ]
+      },
+      {
+        "seq": 7,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:22.770995281Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/mathlib4/DarkTower/WarMachine; grep -n \"sorry\" Holes.lean | head -40; echo ---; grep -n \"^def C\\b\\|def"
+        ]
+      },
+      {
+        "seq": 8,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:24.576212313Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/p4ng; ls *.tex 2>/dev/null; git log --oneline -5; grep -n -iE \"sorry|G over cascades|cascade.*EFE|fund"
+        ]
+      },
+      {
+        "seq": 9,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:32.950222298Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; for f in RULINGS-walkthrough-2026-09-0{7,8,9}.md RULINGS-walkthrough-20"
+        ]
+      },
+      {
+        "seq": 10,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:35.993492926Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; echo \"=== SPEC-fundamentals\"; grep -nE \"^#+ \" SPEC-fundamentals-build-2"
+        ]
+      },
+      {
+        "seq": 11,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:36.776761901Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2; git log --oneline --format='%h %ad %s' --date=short -45 | cat; echo; git status --short | head"
+        ]
+      },
+      {
+        "seq": 12,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:38.523040705Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash curl -s localhost:7070/api/alpha/agents | python3 -c 'import sys,json; d=json.load(sys.stdin); a=d.get(\"agents\",d); item"
+        ]
+      },
+      {
+        "seq": 13,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:40.592622334Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/p4ng; grep -n -iE \"find|organi[sz]e|\\\\bC\\\\b|expected free energy|cascade\" sec-fundamentals-generated.t"
+        ]
+      },
+      {
+        "seq": 14,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:50.516128083Z",
+        "tools": [
+          "Read"
+        ],
+        "previews": [
+          "Read"
+        ]
+      },
+      {
+        "seq": 15,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:51.569369211Z",
+        "tools": [
+          "Read"
+        ],
+        "previews": [
+          "Read"
+        ]
+      },
+      {
+        "seq": 16,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:53.756262752Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; sed -n '44,58p;102,112p;262,283p' RULINGS-walkthrough-2026-09-09.md; ec"
+        ]
+      },
+      {
+        "seq": 17,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:54.908264174Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; sed -n '1,80p' TN-fundamentals-four-link-trace-2026-09-15.md"
+        ]
+      },
+      {
+        "seq": 18,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:58.165210815Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes; grep -rn -iE \"allow-list|allowlist|three-mission|T-prefixed|tickets.*simpler\" labs/wm-co"
+        ]
+      },
+      {
+        "seq": 19,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:59.132259656Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/p4ng; wc -l sec-fundamentals-generated.tex; sed -n '1,80p' sec-fundamentals-generated.tex"
+        ]
+      },
+      {
+        "seq": 20,
+        "type": "tool_use",
+        "at": "2026-09-15T17:00:01.701299253Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/mathlib4; git log --oneline -8 -- DarkTower/WarMachine/CascadeEFE.lean DarkTower/WarMachine/CascadeEFE"
+        ]
+      },
+      {
+        "seq": 21,
+        "type": "tool_use",
+        "at": "2026-09-15T17:00:04.005923791Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash curl -s localhost:7070/api/alpha/agents | python3 -c 'import sys,json; d=json.load(sys.stdin); a=d.get(\"agents\",d) items"
+        ]
+      },
+      {
+        "seq": 22,
+        "type": "tool_use",
+        "at": "2026-09-15T17:00:22.417257682Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes; ls -la E-C-realization.md labs/wm-contract/C591-C-as-calculation-proposal.md 2>&1 | cut "
+        ]
+      },
+      {
+        "seq": 23,
+        "type": "tool_use",
+        "at": "2026-09-15T17:00:24.854116898Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/mathlib4/DarkTower; grep -rc \"sorry\" --include='*.lean' . | awk -F: '$2>0' | sort -t: -k2 -nr | head; "
+        ]
+      },
+      {
+        "seq": 24,
+        "type": "tool_use",
+        "at": "2026-09-15T17:00:26.350818341Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2; grep -n \"interpretation-mode\" src/futon2/aif/full_loop_runner.clj | head -12; grep -rn \"interp"
+        ]
+      },
+      {
+        "seq": 25,
+        "type": "tool_use",
+        "at": "2026-09-15T17:00:28.789210476Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon3c; timeout 60 scripts/proof-eval.sh '(try {:receipt-ns (some? (find-ns (quote futon2.aif.receipt"
+        ]
+      },
+      {
+        "seq": 26,
+        "type": "tool_use",
+        "at": "2026-09-15T17:00:34.406225009Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/.claude/projects/-home-joe-code; python3 - <<'EOF' import json,re p='b8aec109-71b7-43bf-a3d2-d7cf1e3f7c6a.j"
+        ]
+      },
+      {
+        "seq": 27,
+        "type": "tool_use",
+        "at": "2026-09-15T17:00:48.312919282Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/.claude/projects/-home-joe-code; python3 - <<'EOF' import json,re p='b8aec109-71b7-43bf-a3d2-d7cf1e3f7c6a.j"
+        ]
+      },
+      {
+        "seq": 28,
+        "type": "tool_use",
+        "at": "2026-09-15T17:00:50.628893070Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2/holes/labs/wm-contract; sed -n '1,25p' WORK-REMAINING.md; echo ...; grep -nE \"F1[0-3]|fundament"
+        ]
+      },
+      {
+        "seq": 29,
+        "type": "tool_use",
+        "at": "2026-09-15T17:01:42.232851471Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2; for c in b9b3047c f50f8de9 a508aa24 74c298f0; do git log -1 --format=\"%h %an %ad %s\" --date=is"
+        ]
+      },
+      {
+        "seq": 30,
+        "type": "text",
+        "at": "2026-09-15T17:02:41.158454318Z",
+        "text": "Sources for the fundamentals checklist, from claude-20 (F13 owner). This is a read-only audit: I changed nothing, and nothing here is a signoff.\n\n**Short answer:** none of C, G, find or organise is accomplished at all four links: Lean definition, runtime computation, call on the live selection path, and a recorded click that used it. What is live is selection over all open missions and live tickets, but no click has run since that change went in.\n\n## 1. Joe's original specifications and rulings\n\nAll under `futon2/holes/labs/wm-contract/` unless stated otherwise.\n\n- **Completion frame and definition of done:** `RULINGS-walkthrough-2026-09-12.md`\n  - **Item 3** (l.141): the PLoP 2026 paper is the completion list. Its operational form is `COMPLETION-LIST-plop2026-2026-09-12.md`.\n  - **Item 4** (l.168): done means two artifacts, a qualifying run and a Lean-computed validation of that run's certificate. The certificate closes `wmRunConformsToWiring`, which is still `sorry` at `Holes.lean:7437`, alongside `wmRunsOnce` at `:7426`.\n  - **Item 5** (l.222): fundamentals come first. A run with any node unvalidated is a machinery test, never \"qualifying\". The machine-Q link must be built, not descoped.\n- **The six fundamentals:** `SPEC-fundamentals-build-2026-09-12.md` (packets 6\u201311). `WORK-REMAINING.md` calls itself \"the single execution authority\" (last touched f698fff7, 2026-09-14).\n- **C:**\n  - 09-08 **Item 6** (l.101): the seed goes into the EFE fold.\n  - 09-08 **Item 10** (l.168): canonical Q(o|\u03c0) is required.\n  - 09-08 **Item 12** (l.211): C is a deferral with a discovery obligation. The proposal is `C591-C-as-calculation-proposal.md`.\n  - 09-08 **Items 14\u201317** (l.242\u2013360): what C is; processual C\u03c4; evidence as an outcome facet; the tetrahedral vertex model is canonical; go on deriving C.\n  - 09-09 **Item 18c** (l.44): the C marker becomes a deferral, with no can-kicking. The excursion is `futon2/holes/E-C-realization.md`.\n  - 09-09 **Item 19a** (l.102): C is a family in \u2026[trimmed]"
+      },
+      {
+        "seq": 31,
+        "type": "done",
+        "at": "2026-09-15T17:02:41.449863912Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 32,
+        "type": "delivery-recorded",
+        "at": "2026-09-15T17:02:43.543640476Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-28 via /api/alpha/invoke/jobs/invoke-1789491436339-21066-cb5650c9",
+        "recorded-at": "2026-09-15T17:02:43.542314074Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-28 via /api/alpha/invoke/jobs/invoke-1789491436339-21066-cb5650c9",
+      "recorded-at": "2026-09-15T17:02:43.542314074Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789491436339-21066-cb5650c9",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": "invoke-280301e7-a8fd-4ee7-91d5-a4824528e410",
+    "result-summary": "Sources for the fundamentals checklist, from claude-20 (F13 owner). This is a read-only audit: I changed nothing, and nothing here is a signoff. **Short answer:** none of C, G, find or organise is accomplished at all ...",
+    "result": "Sources for the fundamentals checklist, from claude-20 (F13 owner). This is a read-only audit: I changed nothing, and nothing here is a signoff.\n\n**Short answer:** none of C, G, find or organise is accomplished at all four links: Lean definition, runtime computation, call on the live selection path, and a recorded click that used it. What is live is selection over all open missions and live tickets, but no click has run since that change went in.\n\n## 1. Joe's original specifications and rulings\n\nAll under `futon2/holes/labs/wm-contract/` unless stated otherwise.\n\n- **Completion frame and definition of done:** `RULINGS-walkthrough-2026-09-12.md`\n  - **Item 3** (l.141): the PLoP 2026 paper is the completion list. Its operational form is `COMPLETION-LIST-plop2026-2026-09-12.md`.\n  - **Item 4** (l.168): done means two artifacts, a qualifying run and a Lean-computed validation of that run's certificate. The certificate closes `wmRunConformsToWiring`, which is still `sorry` at `Holes.lean:7437`, alongside `wmRunsOnce` at `:7426`.\n  - **Item 5** (l.222): fundamentals come first. A run with any node unvalidated is a machinery test, never \"qualifying\". The machine-Q link must be built, not descoped.\n- **The six fundamentals:** `SPEC-fundamentals-build-2026-09-12.md` (packets 6\u201311). `WORK-REMAINING.md` calls itself \"the single execution authority\" (last touched f698fff7, 2026-09-14).\n- **C:**\n  - 09-08 **Item 6** (l.101): the seed goes into the EFE fold.\n  - 09-08 **Item 10** (l.168): canonical Q(o|\u03c0) is required.\n  - 09-08 **Item 12** (l.211): C is a deferral with a discovery obligation. The proposal is `C591-C-as-calculation-proposal.md`.\n  - 09-08 **Items 14\u201317** (l.242\u2013360): what C is; processual C\u03c4; evidence as an outcome facet; the tetrahedral vertex model is canonical; go on deriving C.\n  - 09-09 **Item 18c** (l.44): the C marker becomes a deferral, with no can-kicking. The excursion is `futon2/holes/E-C-realization.md`.\n  - 09-09 **Item 19a** (l.102): C is a family indexed by grain.\n  - 09-09 **Item 24** (l.262): the FoldC representation and the constant adapter.\n  - The Lean text of the deferral is at `Holes.lean:156-157`.\n- **organise:** `RULINGS-walkthrough-2026-09-07.md` \u00a74\u2013\u00a79. \u00a74 (l.200) is the ARM 6 carrier with its exemplar proviso; \u00a76 is O3 over the nodes organise did not add; \u00a79 is `admittedBy`.\n- **find:** 09-08 **Items 7 and 12**, and 09-09 **Items 18a and 20a\u2013c**.\n- **G over cascades:** `SPEC-cascade-policy-semantics-2026-09-15.md`.\n  - \u00a71\u2013\u00a73 are the book anchoring and the acceptance theorems.\n  - \u00a74 A1\u2013A5 are my resolutions from Joe's records, which Joe may correct.\n  - The **horizon-fairness ruling** is relayed from Joe by zai-8 in bell `invoke-1789477479002-21005-9d24fa65` (sections 9db538cd and 36f6c5e2).\n  - The zai-7/zai-8 review addition is `invoke-1789477575054-21011-b022cc81`.\n- **Joe's rulings in my session on 2026-09-15** (transcript `/home/joe/.claude/projects/-home-joe-code/b8aec109-71b7-43bf-a3d2-d7cf1e3f7c6a.jsonl`, line numbers given):\n  - 12:44:11Z (l.955): agents, not humans, interpret patterns inside the loop, and they write missing patterns (ARGUE).\n  - 12:50:01Z (l.964): patterns need not come from the mission. If the \"loose picks\" don't help, the search strategy must be reconsidered.\n  - 12:56:25Z (l.1003): \"how can C be missing? what does the lean say?\", plus a full confession to zai-8 (sent at l.1014, 12:58:26Z).\n  - Allow-list removal, relayed by zai-8 as an operative ruling: `invoke-1789477467267-21004-c4169097` (13:06:55Z).\n  - 13:23:01Z (l.1238): tickets (T-prefixed) must be workable targets.\n  - After 16:59Z: \"We seem to be drifting into creating pre-measurement plans again rather than addressing the missing fundamentals.\"\n  - Separately, Joe pointed to **the codex-26 buffer from line 6592** for its investigation of C (\"the same kind of deficiencies as G \u2026 slop hanging around\"). That is an Emacs buffer, not a file I can cite, so ask codex-26 for it.\n\n## 2. Accomplished, with evidence\n\n| Item | Evidence |\n|---|---|\n| **G, Lean definition** | `mathlib4/DarkTower/WarMachine/CascadeEFE.lean` (79ac55d5d0) and `CascadeEFEPolicies.lean` (2b22eeef31). Both have 0 `sorry`. `GOverCascades.lean:57` aliases the score. |\n| **organise, Lean definition at the ruled carrier** | `F12RuledCarrier.lean`, 0 `sorry`. The exemplar is `F12SnatchExemplar.lean:102-122`. |\n| **C, terminal member only** | `MachinePreferenceDistribution.lean` (b9712a17ed), 0 `sorry`: machineC is normalised and has seven named zeros. The runtime seed is `ruled_outcome_c.clj`, and seed risk is computed in `disposition_risk.clj:101-134`. |\n| **find laws F1\u2013F4, closed by record on Snatch** | `Holes.lean:396-410`, checked by `futon3/checks/find_snatch.clj` with negative controls. |\n| **Selection over all open missions, allow-list removed** | futon2 e9c70b9f and 03d93b64; futon3c 9d6c4322. The authority check is `controller_authority.clj`. |\n| **Tickets as targets** | futon2 c9c4717e, a24cb621 and cdd422b3; futon3c 35022e42. |\n| **Serving JVM has the selection changes** | Checked just now over Drawbridge: `futon2.aif.controller-authority` is loaded and `mission-registry/work-target-status` resolves. |\n| **Runtime find and organise, written and tested, not live** | futon2 52a8e25e, 3c9d5124, bd864d50, f558a33a, c4130ba5, bd803bc0, e8760f25, 24dc6068, 706ca3e8 and 983d4c49. I reviewed each and reran its tests, and packet 2 had a real-retriever smoke test. The last four hashes in that list are mine, as reviewer fixes. |\n\nThe status of every cell, with file:line, is in `TN-fundamentals-four-link-trace-2026-09-15.md` (codex-27; 2f176e57 and 624687a6). Use it as the base table.\n\n## 3. Not accomplished\n\n**C**\n- `Holes.C` is still `sorry` (`Holes.lean:157`).\n- The mission layer is listed but undeclared (`MachinePreferenceDistribution.lean:13-19`).\n- `require-machine-preference` refuses at the evidence vertex (`ruled_outcome_c.clj:172-183`).\n- The disposition bridge is a constant adapter that ignores its input (`disposition_risk.clj:59-99`).\n- There are 0 eligible samples for fitting the bridge (`TN-F13-disposition-bridge-discovery`).\n- **Joe has not yet answered two questions I asked:** should C's mission layer be a preference over the target's stated WANT facts, and how soft should it be?\n\n**G**\n- **No runtime scorer (G2).** `cascade_policy.clj` has no CascadeEFE finite-model scorer, and receipt construction writes `{:status :none :reason :cascade-g-not-computed}`.\n- **No selection by G (G3).** Selection ranks actions by `:controller-score` (`efe.clj:983-1011`). That is an engineered action-grain score, not the Lean cascade G, even though it prints the name G.\n\n**find and organise**\n- **The Lean `find` is opaque (`Holes.lean:282-310`).** It has a receipt carrier but no defined selection behaviour and no refinement to one.\n- **The old `organise` hole remains.** `Holes.lean:999` is still `sorry`, and it has not been retired or redirected to the ruled carrier.\n\n**Nothing new reaches the live path.**\n- The runtime find, organise and interpretation code only runs under `:interpretation-mode :receipt` (`full_loop_runner.clj:3971`), which defaults off.\n- No futon3c code passes that mode. `grep` over `futon3c/src` finds nothing. I wrote such a caller, then reverted it after Joe's drift remark.\n- The namespaces aren't loaded in the serving JVM either: `receipt-construction` and `find-receipt` both return false.\n\n**No clicks.** No click has used any of the four fundamentals. The latest tick, `tick-run-record-fb96bf07\u2026` (started 2026-09-15T03:59:45Z), predates the selector change and was a stop-line repair. No ticket-target click has run either.\n\n**Qualifying run and certificate.** Holes.lean has nine `sorry` declarations, as the paper now says (p4ng 7080b18).\n\n**Open decisions from the horizon ruling, all routed via zai-8:**\n- FUEL is pending Joe.\n- The universal reading of \"compounding mis-specification\" is escalated.\n- Strict ordering for identical-model attestation twins is escalated.\n\n**Search strategy.** Joe's instruction to reconsider the search strategy when retrieval picks are unhelpful has no implementation. Nothing judges whether retrieval picks help, and there's no path for agents to write missing patterns.\n\n**Paper.** `p4ng/sec-fundamentals-generated.tex` is generated from `FUNDAMENTALS.edn` as of 2026-09-05. It doesn't reflect G over cascades, find or organise at the runtime grain.\n\n**Other failures and deferred items**\n- **RUN4 tests on futon3c master:** `futon3c.wm.run4-http-boundary-test` gives 11 failures, 4 in `concurrent-duplicates\u2026` and 7 in `valid-run4-propagates\u2026` (403 instead of 200). They fail on a clean tree too, so they exist on master and aren't caused by my reverted edit. Nobody owns this yet.\n- **Deferred:** recovering late interpretation receipts (packet 3b), and the ~20.7 MB captured per attempt.\n\n## 4. Deviations and substitutions Joe raised\n\n1. **Three-mission allow-list.** `phase1-4-allow-list` (`live_wm_selection.clj:434`) and `strategic-candidate-ids` (futon2 fa61e98f) confined F13, against Joe's intent. I set F13 up inside that boundary and confessed it to zai-8 (transcript l.1014). Removed in e9c70b9f and 9d6c4322; the corrections to the notes are b1601669 and a344be51.\n2. **Guards compiled from token text instead of agent interpretation.** Withdrawn in b1601669 and replaced by the design in c609e7cc. The code implementing that design is the flagged path above, not live.\n3. **\"C is missing\".** I first claimed it (withdrawn in af08061f), then over-corrected to \"C is not missing\" (withdrawn in 7c668853). The true state is that C exists as a terminal seed only.\n4. **T taken as the number of firing patterns.** Withdrawn under the horizon-fairness ruling. The spec now requires a common T declared in advance.\n5. **Measurement apparatus instead of fundamentals.** `fact_measurement.clj` and its reader plan (cae5f6d9) are the drift Joe named, along with my reverted click-mode edit. Four later commits, b9b3047c, f50f8de9, a508aa24 and 74c298f0 (16:48\u201316:56Z), are predeclarations, registry counterchecks and buffer-cleaner cost comparisons. They are recorded under Joe's name, and I didn't dispatch or review them. Their seat and status are unverified, and by subject they belong to the same category.\n6. **Possible conflict of authority.** `WORK-REMAINING.md` (f698fff7) says leadership returned to claude-15 and \"No further dispatches to or from codex-26\". My F13 dispatches to codex-26 on 09-15 conflict with that line, unless Joe's direct F13 commission to me superseded it. Joe should say which.\n\n## 5. Participants\n\n- **Joe**: rulings, C, clicks, and restarting shared JVMs.\n- **claude-20**: F13 owner and reviewer.\n- **codex-26**: Lean 1a/1b, the horizon sections, the all-open-missions and tickets packets, and the C investigation at buffer l.6592.\n- **codex-27**: F13 discovery, the four-link trace, and interpretation packets 1\u20135.\n- **zai-8**: relay of Joe's rulings, and joint review with zai-7.\n- **zai-7**: joint review with zai-8.\n- **claude-15**: execution lead per WORK-REMAINING.md.\n- **claude-1**: recorder of the 09-08 and 09-09 rulings, and the C walkthroughs.\n- **codex-17**: the seat for the FoldC representation ruling (09-09 Item 24).\n- **codex-28**: compiler of the checklist.\n\nAll of these agents are on the roster now: claude-1 restored; claude-15, codex-17, codex-26, zai-7 and zai-8 idle; codex-27 invoking. codex-18 is reserved for Joe and is not a participant.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789491436339-21066-cb5650c9",
+      "at": "2026-09-15T17:02:41.449845688Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-15T17:02:41.449845688Z",
+    "created-at": "2026-09-15T16:57:16.339412051Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

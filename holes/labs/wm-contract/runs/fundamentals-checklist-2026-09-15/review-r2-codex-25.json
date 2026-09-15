@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789492718567-21123-640d7698",
+  "agent-id": "codex-25",
+  "session-id": "01a09700-faf6-7b32-9b0e-54dabcd613d4",
+  "state": "done",
+  "created-at": "2026-09-15T17:18:38.567326092Z",
+  "finished-at": "2026-09-15T17:19:19.066737142Z",
+  "result": "**CHANGES REQUIRED** on SHA256 `56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`. Source and immutable review copy match.\n\nMy R1 corrections are incorporated satisfactorily: **WM-04, E02 and E10** preserve observation insufficiency, sparse-data discipline, production-evidence limits and unresolved roster responsibility. I assent to those bounded obligations.\n\nOne residual cross-reference error prevents whole-document assent:\n\n- **E03:** restore \u201cF11 acquisition/adapter\u201d instead of \u201cWM-11 acquisition/adapter.\u201d\n- **E04:** restore \u201cAccepted F11/F2 reconciliation\u201d instead of \u201cAccepted WM-11/F2 reconciliation.\u201d\n\nRevision 1 uses **F11** for those acquisition/reconciliation obligations. Revision 2 defines **WM-11** as candidate prior/posterior and policy identity\u2014a different subject. The retained row-27 reference does not repair that substitution. Qualify \u201cexisting worklist F11\u201d if needed to avoid ambiguity.\n\nJoe\u2019s **ALL nodes defined, validated, working, provably** standard remains intact. My assent does not independently verify other lanes\u2019 accomplishments, current deployment, publication or the historical census. No tests, mutations or dispatches performed.",
+  "result-summary": "**CHANGES REQUIRED** on SHA256 `56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`. Source and immutable review copy match. My R1 corrections are incorporated satisfactorily: **WM-04, E02 and E10** pres..."
+}

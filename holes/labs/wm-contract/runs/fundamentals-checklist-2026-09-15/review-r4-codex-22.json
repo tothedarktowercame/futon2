@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789492945215-21168-5475af98",
+  "agent-id": "codex-22",
+  "session-id": "01a096e4-a8b8-75d2-a6ab-c1e490c32585",
+  "state": "done",
+  "created-at": "2026-09-15T17:22:25.215616766Z",
+  "finished-at": "2026-09-15T17:23:20.993099360Z",
+  "result": "AGREE on exact hash `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8` at p4ng `b2c7d1d`.\n\nI verified the hash and both diffs. R4 correctly restores E03/E04 to worklist F11 certificate acquisition and F2 reconciliation, and adds WM-13 to the row-39 crosswalk without relaxing obligations.\n\nMy bounded verification remains:\n\n- Verified: `basis-4`, `basis-5`; `built-2`, `built-4`, `built-5`, `built-10`, `built-12`; `WM-02`\u2013`WM-07`; the machine-Q/categorical-ambiguity portion of `WM-10`; `R1`, `R4`, `R5`, `R9`\u2013`R11`, `R13`\u2013`R17`, `R20`, `TRACE`; `E02`, `E03`, `E05`; `join-1`, `join-2`, `join-8`; `sub-1`\u2013`sub-8`.\n- Not independently verified: `WM-01`, `WM-08`, `WM-09`, `WM-11`\u2013`WM-14`; `R2`, `R3`, `R3a`, `R6`\u2013`R8`, `R12`, `R17-variants`, `R19`; `E01`, `E04`, `E06`\u2013`E10`; `join-3`\u2013`join-7`, `join-9`; `INV`, `TKT`, and live publication `PAGES`.\n\nThus I assent to the checklist\u2019s honest obligations and incompleteness statements, not to certification that WM presently works or is deployed.",
+  "result-summary": "AGREE on exact hash `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8` at p4ng `b2c7d1d`. I verified the hash and both diffs. R4 correctly restores E03/E04 to worklist F11 certificate acquisition and F..."
+}

@@ -1,0 +1,87 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-28",
+    "session-id": "9593f811-f96b-4582-a8f0-c462af80f0de",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789491493019-21067-0f13b516",
+    "agent-id": "claude-15",
+    "artifact-ref": null,
+    "started-at": "2026-09-15T16:58:13.694164108Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-15T16:58:13.019707377Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-15T16:58:13.694172544Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-15T16:58:14.452888805Z",
+        "text": "Joe has commissioned me now to produce a fundamentals-first definitive WM accomplished/not-accomplished checklist, ratified by all involved agents. I have located Item 5 in RULINGS-walkthrough-2026-09-12 (ALL nodes defined validated working provably), WORK-REMAINING, the 150 paper claims, and codex-27 four-link trace. Please provide current original-authority locations, known deviations from Joe's spec, exact bounded accomplishments/open requirements, and complete involved-agent ratification roster. The current bulletin's first qualifying annotation must not be substituted for the all-node qualifying run. Read-only source gathering; no new implementation or spec narrowing. I will circulate a pinned draft for explicit ratification. Please reply via Agency to codex-28.\n"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-09-15T16:58:16.633540582Z",
+        "text": "You've reached your Fable limit. Switch to another model, or manage usage credits at claude.ai/settings/usage?from=cc_cli_limit_message, to continue."
+      },
+      {
+        "seq": 5,
+        "type": "done",
+        "at": "2026-09-15T16:58:16.898551156Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 6,
+        "type": "delivery-recorded",
+        "at": "2026-09-15T16:58:19.065532403Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-28 via /api/alpha/invoke/jobs/invoke-1789491493019-21067-0f13b516",
+        "recorded-at": "2026-09-15T16:58:19.063800140Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-28 via /api/alpha/invoke/jobs/invoke-1789491493019-21067-0f13b516",
+      "recorded-at": "2026-09-15T16:58:19.063800140Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789491493019-21067-0f13b516",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": "invoke-5088818a-e78a-47b6-be8d-5e07a9fe197f",
+    "result-summary": "You've reached your Fable limit. Switch to another model, or manage usage credits at claude.ai/settings/usage?from=cc_cli_limit_message, to continue.",
+    "result": "You've reached your Fable limit. Switch to another model, or manage usage credits at claude.ai/settings/usage?from=cc_cli_limit_message, to continue.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789491493019-21067-0f13b516",
+      "at": "2026-09-15T16:58:16.898529666Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-15T16:58:16.898529666Z",
+    "created-at": "2026-09-15T16:58:13.019434927Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

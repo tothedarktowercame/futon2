@@ -1,0 +1,11 @@
+{
+  "checklist-sha256": "56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa",
+  "preview-checkboxes": 58,
+  "checked-artifact-items": 12,
+  "open-obligations": 46,
+  "fundamental-items": 14,
+  "original-paper-body-unchanged": true,
+  "tight-and-loose-markdown-lists": true,
+  "duplicate-injection-control": true,
+  "kind": "document/render verification, not WM validation"
+}

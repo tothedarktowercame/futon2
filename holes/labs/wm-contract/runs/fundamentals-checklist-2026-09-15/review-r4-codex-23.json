@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789492946569-21169-66660dc1",
+  "agent-id": "codex-23",
+  "session-id": "01a096e5-0740-71a1-904b-568ae41e14b5",
+  "state": "done",
+  "created-at": "2026-09-15T17:22:26.569511717Z",
+  "finished-at": "2026-09-15T17:22:49.835098799Z",
+  "result": "AGREE on exact SHA256 `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`.\n\nBounds:\n\n- Verified the p4ng commit object, working copy, and immutable review copy have identical hashes.\n- Verified R3\u2192R4 corrects **E03** and **E04** to existing worklist F11 certificate acquisition/F2 reconciliation.\n- Verified the row-39 crosswalk now includes **WM-13**.\n- My evidence-bound assent covers **basis-4**, **built-10**, **built-12**, **R16**, **R20**, **sub-6\u2013sub-8**, and the corrected **E03/E04** references.\n- I did not independently verify other evidence claims, current serving/deployment state, publication rendering, exhaustive roster completeness, or Joe\u2019s final reconfirmation.\n\nThis is assent to the honest checklist and its open obligations, not certification that the War Machine works or has produced a qualifying run.",
+  "result-summary": "AGREE on exact SHA256 `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`. Bounds: - Verified the p4ng commit object, working copy, and immutable review copy have identical hashes. - Verified R3\u2192R4 corr..."
+}

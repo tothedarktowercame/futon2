@@ -1,0 +1,39 @@
+{
+  "current": {
+    "codex-28": "Joe commission/compiler",
+    "claude-20": "F13 owner/reviewer",
+    "claude-15": "execution lead and machinery/observation reviews",
+    "claude-1": "recorded C/find original rulings",
+    "codex-12": "C institutional products explicitly referenced in Sept9 Item19a/20b",
+    "codex-17": "FoldC authority/review",
+    "codex-22": "machine-Q and measured-A authority lanes",
+    "codex-23": "machinery repair/source review",
+    "codex-24": "retention/admission/certificate/annotation preflight",
+    "codex-25": "independent observation lane",
+    "codex-26": "cascade Lean, controller/tickets, proof audit",
+    "codex-27": "kernel repair, find/organise/interpretation",
+    "zai-5": "authored machinery evidence used in observation chain",
+    "zai-7": "joint semantics review/real-domain exercise",
+    "zai-8": "Joe ruling relay/joint semantics review"
+  },
+  "unresolved-identity": [
+    "zai-9"
+  ],
+  "historical-candidates": [
+    "codex-1",
+    "codex-2",
+    "codex-3",
+    "codex-4",
+    "codex-7",
+    "codex-18",
+    "codex-21",
+    "claude-2",
+    "claude-4",
+    "claude-5",
+    "claude-7",
+    "claude-13"
+  ],
+  "operator": "Joe",
+  "roster-complete": false,
+  "note": "Asked Joe current owners/reviewers versus every historical contributor; no answer inferred. Historical packet approval is never current assent. No ownership transfers assumed."
+}

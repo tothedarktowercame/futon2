@@ -1,0 +1,183 @@
+{
+  "revision": 1,
+  "checklist-sha256": "7719c6a405804692edcc60e64421e24372c07924c5ff126485ea23325e13044d",
+  "state": "pending",
+  "author": "codex-28",
+  "author-assent": "This is my bounded audit; completeness and listed unresolved facts remain subject to independent review.",
+  "participants": {
+    "claude-15": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491886641-21076-c87ac378",
+        "job-id": "invoke-1789491886641-21076-c87ac378",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "claude-20": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491888008-21077-d134cdbb",
+        "job-id": "invoke-1789491888008-21077-d134cdbb",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "codex-22": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491888775-21078-bb9c4315",
+        "job-id": "invoke-1789491888775-21078-bb9c4315",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "codex-23": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491890183-21079-399381d0",
+        "job-id": "invoke-1789491890183-21079-399381d0",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "codex-24": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491892217-21080-3b391a32",
+        "job-id": "invoke-1789491892217-21080-3b391a32",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "codex-25": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491894291-21082-d65f5cf4",
+        "job-id": "invoke-1789491894291-21082-d65f5cf4",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "codex-26": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491896295-21083-5c5846c1",
+        "job-id": "invoke-1789491896295-21083-5c5846c1",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "codex-27": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491897700-21084-60d031d8",
+        "job-id": "invoke-1789491897700-21084-60d031d8",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "zai-7": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491899219-21085-89921e69",
+        "job-id": "invoke-1789491899219-21085-89921e69",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "zai-8": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491900338-21086-183af7ae",
+        "job-id": "invoke-1789491900338-21086-183af7ae",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "zai-9": {
+      "state": "pending",
+      "dispatch-error": "Traceback (most recent call last):\n  File \"/home/joe/code/futon3c/scripts/agency_send.py\", line 189, in <module>\n    bell_raw, bell_json = post_json(f\"{a.base}/api/alpha/{a.kind}\", body)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/joe/code/futon3c/scripts/agency_send.py\", line 146, in post_json\n    raw = urllib.request.urlopen(req).read().decode()\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 215, in urlopen\n    return opener.open(url, data, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 521, in open\n    response = meth(req, response)\n               ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 630, in http_response\n    response = self.parent.error(\n               ^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 559, in error\n    return self._call_chain(*args)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 492, in _call_chain\n    result = func(*args)\n             ^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 639, in http_error_default\n    raise HTTPError(req.full_url, code, msg, hdrs, fp)\nurllib.error.HTTPError: HTTP Error 404: Not Found\n"
+    },
+    "claude-1": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491954063-21089-fcdf3e8e",
+        "job-id": "invoke-1789491954063-21089-fcdf3e8e",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    },
+    "codex-17": {
+      "state": "pending",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491955383-21090-045c29bf",
+        "job-id": "invoke-1789491955383-21090-045c29bf",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      }
+    }
+  },
+  "roster-complete": false,
+  "operator": "Joe; acceptance not inferred"
+}

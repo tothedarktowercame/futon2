@@ -1,0 +1,544 @@
+{:schema :wm/fundamentals-v1
+ :as-of "2026-09-05"
+ :row :F0
+ :owner :wm-organization
+ :produced-by "holes/labs/wm-contract/FUNDAMENTALS.edn (hand-read census; see :derivation-proposal for how it should stop being hand-kept)"
+
+ :ruling
+ {:by "Joe" :at "2026-09-05"
+  :recorded-at "futon2/holes/labs/wm-contract/EPIC-run-era.md:321-354"
+  :verbatim "the missing Q(o|pi) constructor our interface audit keeps finding.... this is the kind of fundamental gap that the big backlog of letter-number tasks and :keyword-statuses was drowning out. this should be a major finding and a priority focus, the Lean model should be saying stop other work until this is solved (and similar needed fundamentals exist)"}
+
+ :criterion
+ {:statement "A FUNDAMENTAL is a definition the theory requires whose CONSTRUCTING SIGNATURE is uninhabited in BOTH Lean and the runtime. Proxies and fixtures do not count as inhabitants."
+  :conjunction "BOTH. An object inhabited on one side and not the other is NOT a fundamental under this criterion; it is a wiring hole, and four such are recorded below with verdict :out so the boundary is legible rather than implied."
+  :what-counts-as-an-inhabitant
+  ["Lean: a non-private declaration whose value is built from the machine's own declared model inputs (a GenerativeModel, a BeliefState, a declared policy carrier), not from types introduced for the witness."
+   "Runtime: a value the shipped code computes from machine data, reachable on a code path (a default-off flag still counts as reachable; a namespace with no caller does not)."]
+  :what-does-not-count
+  [":fixture -- a hand-built value in a *Witness.lean or *Negative.lean module, whose Policy/Obs/State/Parameter types are declared in that module for the witness. Every carrier in the spine has one; if fixtures counted, the census would be empty and would say nothing."
+   ":private-counterexample -- a private Lean value built to state a refutation (eigCounterPredictive)."
+   ":proxy -- a runtime value of a DIFFERENT grain or a different functional form that stands in for the required object, and that the code itself usually says is a stand-in."]
+  :why-fixtures-are-excluded "The exclusion is the ruling's, and it has teeth here: PredictiveOutcomeKernelWitness.predictive has TWO policy rows and proves all rows normalise, so a criterion that counted fixtures would report Q(o|pi) as inhabited and close the finding the ruling was issued about. What is missing is not a kernel value; it is a MAP from the machine's model and belief to one."
+  :limits-of-the-criterion "Uninhabitedness is DECLARED here, not decided. Lean cannot decide it (see :derivation-proposal :what-lean-cannot-do), so each entry's Lean verdict is the result of reading every declaration of the carrier type in the corpus and classifying it, and its falsifier is a single declaration that would refute the reading."}
+
+ :method
+ {:lean "Every declaration named below was READ at the line cited, not grepped for. The carrier sweep enumerated every value of each spine carrier type across all 68 .lean modules in DarkTower/WarMachine and classified each as :fixture, :private-counterexample or :machine; no value classified :machine was found for any carrier."
+  :runtime "For each entry the named seam was read, and for the runtime-inhabitant question the CALLERS were counted across futon2 src/, scripts/, checks/ and test/ -- a namespace whose only references are prose and tests is recorded as such."
+  :sweep-basis "Holes.lean abbrevs/structures at 6751-7148 (the AIF spine) plus the three sorry-bodied definitions outside it (C:153, find:264, organise:861); the ten declarations the emission marks kind=hole (holes-contract.json)."
+  :not-adjudicated "find (Holes.lean:264) and organise (Holes.lean:861) are sorry-bodied but were CLOSED UNDER THE J9 CRITERION 2026-09-03 with recorded-row evidence (worklist :U46) and are deliberate implementation refusals, not missing constructors; they are out of scope for this criterion rather than judged by it."}
+
+ :source-pins
+ [{:id :lean-spine :path "mathlib4/DarkTower/WarMachine/Holes.lean" :lines 7928
+   :sha256-16 "befa119972496102"
+   :note "BYTE-IDENTICAL to the :lean-spine pin in Q-interface-completeness.edn, which the U53 pin review re-read on 2026-09-04. Same blob, same evidence."}
+  {:id :lean-q-fixture :path "mathlib4/DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean" :sha256-16 "2834925bcd742442"}
+  {:id :contract-emitter :path "mathlib4/DarkTower/Contract/Emit.lean" :sha256-16 "498ce2126f727b95"}
+  {:id :contract-json :path "mathlib4/DarkTower/WarMachine/holes-contract.json" :sha256-16 "4e1feed965e962dd"}
+  {:id :runtime-forward-model :path "futon2/src/futon2/aif/forward_model.clj" :lines 356 :sha256-16 "14caaf3db1947826"
+   :note "byte-identical to Q-interface-completeness.edn :runtime-forward-model"}
+  {:id :runtime-belief :path "futon2/src/futon2/aif/belief.clj" :lines 1238 :sha256-16 "39c1dabaf7be878b"}
+  {:id :runtime-preferences :path "futon2/src/futon2/aif/preferences.clj" :lines 565 :sha256-16 "f1a0b5c0a05a3d20"}
+  {:id :runtime-efe :path "futon2/src/futon2/aif/efe.clj" :lines 981 :sha256-16 "138c47f62715facf"
+   :note "byte-identical to Q-interface-completeness.edn :runtime-efe"}
+  {:id :runtime-eig :path "futon2/src/futon2/aif/epistemic_value.clj" :lines 97 :sha256-16 "0df62893adfdce64"
+   :note "byte-identical to Q-interface-completeness.edn :runtime-eig"}
+  {:id :runtime-habit :path "futon2/src/futon2/aif/habit_prior.clj" :lines 164 :sha256-16 "23f631d82dbbace7"}
+  {:id :runtime-cascade-prior :path "futon2/src/futon2/aif/cascade_prior.clj" :lines 212 :sha256-16 "4c5c5464c7df91b6"}
+  {:id :runtime-realized-outcome :path "futon2/src/futon2/aif/realized_outcome.clj" :lines 140 :sha256-16 "35c546c35c54a633"}
+  {:id :probe :path "futon2/holes/labs/wm-contract/lean_state_probe.bb" :sha256-16 "8f386f04b4809f3e"}
+  {:id :lean-gain-chain :path "mathlib4/DarkTower/WarMachine/GainChain.lean" :lines 379 :sha256-16 "d8fec82564a5a05f"
+   :note "ADDED BY THE REVIEW PASS. Not in the original census's reads; it is where the realized-outcome carrier the census reported absent actually lives. See :review-repairs."}
+  {:id :runtime-policy :path "futon2/src/futon2/aif/policy.clj" :sha256-16 "3980d203d4997d9f"
+   :note "ADDED BY THE REVIEW PASS: effective-temperature and selection-scores were cited by the original entries but the file was not pinned."}
+  {:id :runtime-policy-precision :path "futon2/src/futon2/aif/policy_precision.clj" :lines 561 :sha256-16 "2e7164ecf965fe95" :note "ADDED BY THE REVIEW PASS."}
+  {:id :runtime-selection-gain :path "futon2/src/futon2/aif/selection_gain.clj" :sha256-16 "2f58d9ceff766521" :note "ADDED BY THE REVIEW PASS."}
+  {:id :runtime-tripwire :path "futon2/src/futon2/aif/tripwire.clj" :sha256-16 "cfb7483c260cb9e3" :note "ADDED BY THE REVIEW PASS."}
+  {:id :runtime-war-machine :path "futon2/scripts/futon2/report/war_machine.clj" :sha256-16 "314a703e31a252ac" :note "ADDED BY THE REVIEW PASS."}
+  {:id :lab-observe :path "futon2/holes/labs/wm-contract/wm_step_observe.bb" :sha256-16 "36476c05de17cf68" :note "ADDED BY THE REVIEW PASS."}]
+
+ :repo-heads {:futon2 "09451d10" :mathlib4 "4bbc7111c4" :p4ng "dfabf9e"}
+ :repo-heads-at-review {:futon2 "8d987964" :mathlib4 "4bbc7111c4" :p4ng "5cd83cf"
+   :note "The review pass re-read at these heads. Every file the original census pinned is BYTE-IDENTICAL at both (checked: the eleven :sha256-16 values above all still match), so the two readings are of the same bytes and the futon2/p4ng head movement is other work."}
+
+ :entries
+ [{:id :fundamental/predictive-outcome-kernel-constructor
+   :name "Q(o|pi) -- the machine's predictive outcome kernel, constructed"
+   :verdict :in
+   :known-candidate "the audit's standing finding (candidate 1 of the three the ruling named)"
+   :required-signature "GenerativeModel Obs State Action PolicyIndex -> BeliefState -> PredictiveOutcomeKernel PolicyIndex Obs"
+   :lean
+   {:verdict :uninhabited
+    :declarations-read
+    [{:what "the carrier" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6757-6759"
+      :read "abbrev PredictiveOutcomeKernel (PolicyIndex) (Obs) := ProbabilityKernel PolicyIndex (Outcome Obs). A type, and its docstring says the evidence for it is a Witness module."}
+     {:what "the inputs that would have to be composed" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6787-6790"
+      :read "structure GenerativeModel carries observation : ProbabilityKernel State (Outcome Obs), transition : TransitionKernel State Action, policyPrior : PolicyPriorKernel PolicyIndex -- three separate kernels, never composed into a kernel over Outcome."}
+     {:what "the nearest composition that exists" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6792-6799"
+      :read "generativeFactorMass forms the one-step joint as a SCALAR in R (observation mass * transition mass * policy prior mass). A number, not a normalized row over Outcome; nothing sums it over states."}]
+    :inhabitants-found
+    [{:name "PredictiveOutcomeKernelWitness.predictive" :at "mathlib4/DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean:15-20"
+      :class :fixture
+      :read "Two policy rows (inspect/repair), each a hand-derived point mass on a locally declared Observation type; support and mass are given by pattern match, and the docstring says hand-derived. It proves row normalization (:22-33), which is why it is the strongest fixture in the corpus and still not an inhabitant: nothing about it is derived from a GenerativeModel or a BeliefState."}
+     {:name "PredictiveOutcomeRiskWitness.predictive" :at "mathlib4/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean:13" :class :fixture}
+     {:name "ExpectedFreeEnergyWitness.Q" :at "mathlib4/DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean:15" :class :fixture :note "private"}
+     {:name "ExpectedInformationGainWitness.Q" :at "mathlib4/DarkTower/WarMachine/ExpectedInformationGainWitness.lean:19" :class :fixture :note "private"}
+     {:name "ParameterPriorKernelOutcomeNegative.outcomePrediction" :at "mathlib4/DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean:10" :class :fixture :note "a rejecting control"}
+     {:name "ParameterPosteriorKernelOutcomeNegative.outcomePrediction" :at "mathlib4/DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean:6" :class :fixture :note "a rejecting control"}
+     {:name "PredictiveOutcomeKernelUnconditionalNegative.badPredictive" :at "mathlib4/DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean:22" :class :fixture :note "a rejecting control"}
+     {:name "PredictiveOutcomeKernelSoftmaxNegative.badPredictive" :at "mathlib4/DarkTower/WarMachine/PredictiveOutcomeKernelSoftmaxNegative.lean:18" :class :fixture :note "a rejecting control"}
+     {:name "Holes.eigCounterPredictive" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6985-6990" :class :private-counterexample
+      :read "private, one policy (EIGCounterPolicy.only), one outcome, mass 1; built to state modelUncertaintyAndEIG."}]
+    :basis "Nine values of the type exist in the corpus and every one is a fixture or a private counterexample. No declaration takes a GenerativeModel and returns a PredictiveOutcomeKernel."}
+   :runtime
+   {:verdict :proxy-only
+    :seam-read
+    [{:what "the R4 producer" :at "futon2/src/futon2/aif/forward_model.clj:311-356"
+      :read "predict returns {:next-observation {:mean <channel map> :variance <channel map>} :next-belief ...}. Per-channel Gaussian moments for ONE action, not a normalized distribution over an outcome domain and not indexed by a policy."}
+     {:what "where the prediction comes from" :at "futon2/src/futon2/aif/forward_model.clj:333"
+      :read "(predict-effects nil action) -- the state argument is literally nil. The predicted observation is a hand-tuned per-action-type delta (:55-62 declares the multimethod, dispatching on (:type action) alone; the docstring says the variance model is hand-tuned, a placeholder) applied to the CURRENT observation. So the runtime prediction is a function of the action alone."}
+     {:what "the consumer that names it Q(o|pi)" :at "futon2/src/futon2/aif/epistemic_value.clj:69"
+      :read "the canonical EIG docstring calls its argument :predicted-observations Q(o|pi); its callers supply a hand-built two-point mission distribution, not R4's output (re-verified in Q-interface-completeness.edn :pin-review 2026-09-04, this file byte-identical since)."}]
+    :basis "The one runtime object offered for this role is action-grain and Gaussian; the code's own docstrings say hand-tuned and placeholder. It is a proxy under the criterion."}
+   :depends
+   ["predictiveOutcomeRisk (Holes.lean:6867-6872) -- the risk leg of G takes Q as a bound parameter and cannot be evaluated for the machine without one."
+    "expectedFreeEnergy (Holes.lean:6887-6891) and G_eq_expectedFreeEnergy (Holes.lean:6895-6912) -- the bridge theorem relates the two decompositions under hypotheses about a Q it does not construct."
+    "expectedInformationGain (Holes.lean:6926-6934) -- canonical EIG sums parameter KL against Q."
+    "the whole downstream ranking: G-core feeds policy/select-action, so every ranking the machine has ever produced is action-grain by this root cause (Q-interface-completeness.edn :Q/risk-to-ranking)."]
+   :prerequisites [:fundamental/machine-policy-carrier :fundamental/belief-to-state-distribution :fundamental/controlled-transition-kernel]
+   :worklist-row :F1
+   :falsifier "A non-private Lean declaration whose result type is PredictiveOutcomeKernel and whose arguments include a GenerativeModel and a BeliefState; or a runtime function that returns a normalized distribution over a declared outcome domain, indexed by a declared policy, computed from the belief."}
+
+  {:id :fundamental/belief-to-state-distribution
+   :name "BeliefState -> a distribution the model can be run on"
+   :verdict :in
+   :known-candidate "candidate 2 of the three the ruling named (no map exists, Holes.lean ~6806)"
+   :required-signature "BeliefState -> ProbabilityKernel Unit State (equivalently: any map from the belief carrier into the generative model's State)"
+   :lean
+   {:verdict :uninhabited
+    :declarations-read
+    [{:what "the belief carrier" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6806-6808"
+      :read "structure BeliefState where mean : Channel -> R; variance : Channel -> NonnegativeReal. Two channel-indexed maps of moments. It is not a distribution over anything."}
+     {:what "every use of it" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6839-6865"
+      :read "BeliefState occurs in exactly three places in the whole file: its own definition (6806) and the prior/posterior arguments of beliefUpdate (6841, 6843). Nothing else consumes it."}]
+    :basis "THE TYPES DO NOT MEET. GenerativeModel is indexed by an abstract State (6787-6790) and BeliefState is indexed by Channel (6806-6808); no declaration maps one to the other, so the model's kernels cannot be applied to the machine's belief even in principle. This is the reason the Q constructor cannot be written rather than a second instance of it."}
+   :runtime
+   {:verdict :proxy-only
+    :seam-read
+    [{:what "what the runtime belief is" :at "futon2/src/futon2/aif/belief.clj:44-60,364-422"
+      :read "a map entity-id -> normalized distribution over the 7-member status-set. A per-entity categorical, live and genuinely normalized -- but over entity lifecycle statuses, not over the 14 observation channels the observation vector carries."}
+     {:what "the four maps that do go belief -> channel" :at "futon2/src/futon2/aif/belief.clj:640-704,705-766"
+      :read "predict-annotation-health, predict-sorry-count-norm, predict-mission-health, predict-active-repo-ratio each take the belief and return {:mean :variance} for ONE channel. Four of fourteen channels, moment pairs rather than a distribution, and not policy-conditioned."}
+     {:what "whether they are called" :at "futon2/src/futon2/aif/belief.clj:640"
+      :read "COUNTED across futon2 src/, scripts/, checks/, test/ and holes/: 36 references in test/futon2/aif/belief_test.clj, 10 in prose (docs/futon-aif-completeness.md, holes/r1-r3-disaggregation-bridge.md) and 2 in comments inside scripts/futon2/report/war_machine.clj (:3789, :6170). NO caller. The nearest thing the runtime has to this map is dead code."}]
+    :basis "The live path goes the other way: forward_model.clj:333 predicts the next observation from the action with the state argument nil, so the belief does not reach the prediction at all."}
+   :depends
+   ["the Q constructor (this entry is its missing first step: belief -> predicted state -> predicted outcome)"
+    "ambiguity (Holes.lean:6880-6885), whose predictedState argument is exactly the object this map would produce once pushed through the transition kernel"
+    "beliefUpdate's claim to be an inference step rather than a filter: without a map into the model, the posterior it constrains is not the model's posterior"]
+   :prerequisites []
+   :worklist-row :F1
+   :falsifier "A Lean declaration taking a BeliefState and returning a distribution over the GenerativeModel's State (or a declaration unifying the two carriers); or a runtime caller of the four belief/predict-* functions on the live path, or any runtime function mapping the belief to a distribution over the observation domain."}
+
+  {:id :fundamental/controlled-transition-kernel
+   :name "B(s'|s,u) -- the ACTION-CONDITIONED transition kernel"
+   :verdict :in
+   :known-candidate :no-swept
+   :required-signature "GenerativeModel-carrier level: ProbabilityKernel (State x Action) State, instantiated at the machine's own State and Action"
+   :lean
+   {:verdict :uninhabited
+    :declarations-read
+    [{:what "the carrier and its declared falsifier" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6770-6772"
+      :read "abbrev TransitionKernel (State Action) := ProbabilityKernel (State x Action) State, with the falsifier stated on the row: an action-unconditioned state kernel or the scalar multivariate-beta normalizer B(alpha) is accepted as controlled transition B."}]
+    :inhabitants-found
+    [{:name "TransitionKernelWitness.controlled" :at "mathlib4/DarkTower/WarMachine/TransitionKernelWitness.lean:12" :class :fixture}
+     {:name "GenerativeModelWitness.transition" :at "mathlib4/DarkTower/WarMachine/GenerativeModelWitness.lean:34" :class :fixture :note "private"}
+     {:name "GenerativeModelNegative.transition" :at "mathlib4/DarkTower/WarMachine/GenerativeModelNegative.lean:21" :class :fixture :note "private, a rejecting control"}
+     {:name "TransitionKernelUncontrolledNegative.badTransition" :at "mathlib4/DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean:22" :class :fixture :note "a rejecting control"}
+     {:name "TransitionKernelBetaNegative.badTransition" :at "mathlib4/DarkTower/WarMachine/TransitionKernelBetaNegative.lean:19" :class :fixture :note "a rejecting control"}]
+    :basis "Five values, all fixtures, two of them deliberate rejections."}
+   :runtime
+   {:verdict :uninhabited
+    :seam-read
+    [{:what "the runtime B" :at "futon2/src/futon2/aif/belief.clj:214-226"
+      :read "transition-model-v1 is {predecessor-status {successor-status P}}, the 7x7 IDENTITY, and its docstring says so: identity means no explicit dynamics; the prior is the previous posterior. It carries no action index -- the type is state -> state, not (state x action) -> state."}
+     {:what "that it is live" :at "futon2/scripts/futon2/report/war_machine.clj:803-812"
+      :read "arena-likelihood-mode returns :aif by default (the env hatch FUTON_WM_LIKELIHOOD_MODE restores :legacy), so the categorical filter with this identity B IS the production belief update (belief.clj:325-347 runs q- = B x q then the tempered A update)."}
+     {:what "the only action-conditioned prediction anywhere" :at "futon2/src/futon2/aif/forward_model.clj:55-62,333"
+      :read "predict-effects dispatches on action type and returns an observation delta and a hand-tuned variance. It is action-conditioned and it is NOT a state transition kernel: it has no state argument (nil is passed) and returns no distribution over states."}]
+    :basis "The runtime has a valid transition kernel that is uncontrolled, and an action-conditioned predictor that is not a transition kernel. The controlled object -- the one the criterion asks about -- exists on neither side, and the Lean row names the runtime's B as its own falsifier if offered."}
+   :depends
+   ["the Q constructor: Q(o|pi) = A composed with B^pi applied to the belief. With B uncontrolled, every policy predicts the same next state and Q(o|pi) is constant in pi -- the policy-conditioned DIFFERENCE F1 must exhibit cannot exist until B carries the action."
+    "ambiguity's predictedState (Holes.lean:6880-6881)"
+    "any horizon >= 2 claim: efe.clj passes an integer horizon into fm/predict-multi-horizon (forward_model.clj:279-310), which chains the same action-delta K times; there is no dynamics to iterate."]
+   :prerequisites []
+   :worklist-row :F1
+   :falsifier "A runtime kernel indexed by (state, action) whose rows are normalized over successor states, or a Lean declaration constructing one at the machine's carriers. NOT falsified by belief.clj's transition-model-v1: the Lean row names an action-unconditioned kernel as the thing that must be rejected."}
+
+  {:id :fundamental/policy-conditioned-state-predictive
+   :name "Q(s|pi) -- the policy-conditioned predicted-state distribution"
+   :verdict :in
+   :known-candidate :no-swept
+   :required-signature "GenerativeModel + BeliefState + PolicyIndex -> ProbabilityKernel PolicyIndex State"
+   :lean
+   {:verdict :uninhabited
+    :declarations-read
+    [{:what "the consumer that requires it" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6880-6885"
+      :read "ambiguity takes predictedState : ProbabilityKernel PolicyIndex State as a bound parameter and weights each state's observation-row entropy by its predicted mass. The argument is supplied, never constructed."}
+     {:what "the only value of that shape" :at "mathlib4/DarkTower/WarMachine/AmbiguityWitness.lean:17"
+      :read "observationModel : observationKernel State Observation, beside a hand-built predicted-state fixture in the same module."}]
+    :basis "Bound parameter with fixture-only applications, exactly as Q(o|pi); recorded separately because it has its own consumer and its own runtime proxy, and because it is the intermediate the Q constructor must pass through."}
+   :runtime
+   {:verdict :proxy-only
+    :seam-read
+    [{:what "what stands in for it" :at "futon2/src/futon2/aif/efe.clj:37-61"
+      :read "ambiguity is either the sum of per-channel predicted variance (:variance-sum) or sum_ch 0.5*ln(2*pi*e*sigma^2) (:gaussian-entropy, the compute-efe default per :612). Its own docstring calls :gaussian-entropy the audit's repair TOWARD the canonical E_Q(s|pi)[H[P(o|s)]] -- the code says it is a stand-in."
+      :note "The variances it consumes are forward_model's hand-tuned per-action constants, so the epistemic leg of G is a function of the action type and nothing else."}]
+    :basis "A per-channel Gaussian entropy over hand-tuned variances is not an expectation over a predicted state distribution. Proxy, and self-declared."}
+   :depends ["ambiguity (Holes.lean:6880-6885), hence the second leg of expectedFreeEnergy (6887-6891)"
+             "the Q constructor, which factors through this object"]
+   :prerequisites [:fundamental/belief-to-state-distribution :fundamental/controlled-transition-kernel :fundamental/machine-policy-carrier]
+   :worklist-row :F1
+   :falsifier "A runtime value assigning normalized mass to declared states conditional on a policy, or a Lean constructor producing ProbabilityKernel PolicyIndex State from the model and the belief."}
+
+  {:id :fundamental/machine-preference-distribution
+   :name "C -- the machine's preferred-outcome distribution"
+   :verdict :in
+   :known-candidate :no-swept
+   :required-signature "PreferenceDistribution Obs = ProbabilityKernel Unit (Outcome Obs), instantiated at the machine's outcome domain"
+   :lean
+   {:verdict :uninhabited
+    :declarations-read
+    [{:what "the carrier" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6778-6780"
+      :read "abbrev PreferenceDistribution (Obs) := ProbabilityKernel Unit (Outcome Obs), with the falsifier: a state-conditioned kernel or vertex-local pragmatic cost is accepted as the unconditioned preferred-outcome distribution."}
+     {:what "the machine's own C" :at "mathlib4/DarkTower/WarMachine/Holes.lean:151-153"
+      :read "def C (v : Vertex) (_pragmatic : v != Vertex.evidence) : Obs v -> R := sorry, docstring DELIBERATE IMPLEMENTATION REFUSAL, contract kind HOLE intentionally. It is one of the ten kind=hole rows in the emission."}
+     {:what "the in-language census that already found this" :at "mathlib4/DarkTower/WarMachine/Holes.lean:7093-7120"
+      :read "preferenceConstantCensus marks .vertexLocalC as the one freeConstant (C returns Obs v -> Real without a preference distribution, base, or layer input) and .preferenceDistribution as a carrier type, not a value; freePreferenceConstants_eq proves the free list is exactly [.vertexLocalC] by decide, and machineHasNoC (7117-7120) proves that list is non-empty."}]
+    :inhabitants-found
+    [{:name "PreferenceDistributionWitness.fair" :at "mathlib4/DarkTower/WarMachine/PreferenceDistributionWitness.lean:13" :class :fixture}
+     {:name "PredictiveOutcomeRiskWitness.preference" :at "mathlib4/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean:19" :class :fixture}
+     {:name "ExpectedFreeEnergyWitness.Cdist" :at "mathlib4/DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean:21" :class :fixture :note "private"}
+     {:name "three rejecting controls" :at "mathlib4/DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean:24" :class :fixture
+      :note "with PreferenceDistributionPragmaticCostNegative.lean:18 and PredictiveOutcomeKernelUnconditionalNegative.lean:6"}]
+    :basis "The Lean model already proves its own version of this entry (machineHasNoC). What the census adds is the second leg: the runtime object that might have discharged it is a different grain."}
+   :runtime
+   {:verdict :proxy-only
+    :seam-read
+    [{:what "what the runtime has" :at "futon2/src/futon2/aif/preferences.clj:235-285"
+      :read "c-distribution builds a normalised preference density for ONE CHANNEL: :range (density 1 on [lo,hi], exponential tails, normalised over [0,1]) or :bernoulli (mass on a binary target). Genuinely normalized, and per channel."
+      :note "the floor it is built from is preferences.clj:9-24, the 13 declared [lo hi] ranges, read live through current-C (:60-70)."}
+     {:what "how risk consumes it" :at "futon2/src/futon2/aif/efe.clj:644-698"
+      :read "under :risk-mode :kl (the default, :613) risk is sum_ch w_ch * KL(N(mu_ch,sigma_ch^2) || C_ch) in nats over the per-channel preference densities, plus a zone-risk term. A weighted sum of per-channel KLs, not KL[Q(o|pi) || C] over a joint outcome distribution."}]
+    :basis "The runtime C is real, live and normalized -- and it is a product of 13 independent per-channel densities over channel VALUE ranges, while the required object is one distribution over the vertex-tagged outcome domain. The gap here is grain, not existence, and that is the honest difference between this entry and the Q entry."
+    :recorded-not-decided "The runtime C is a fold of a five-layer recorded stack (efe.clj:117-152 transcribes it; Holes.lean:7040-7046 records it as data). Whether the fold of that stack, once the outcome domain is declared, IS the machine C is a question the F1 domain preregistration will answer; this census does not rule on it."}
+   :depends ["predictiveOutcomeRisk (Holes.lean:6867-6872), whose positivePreference hypothesis is stated against C"
+             "expectedFreeEnergy (Holes.lean:6887-6891)"
+             "preferenceStackLiveRecorded (Holes.lean:7114), the sorry-bodied claim that every running instance's C is the fold of a recorded stack"]
+   :prerequisites []
+   :prerequisite-note "None of the other six. What this entry waits on is the DECLARATION of the outcome domain (Q-interface-completeness.edn work-order unit 1), which is the same declaration :machine-policy-carrier waits on but a different half of it: the policy index and the outcome space are declared together or neither is."
+   :worklist-row :F1
+   :falsifier "A single normalized distribution over the machine's declared outcome domain, in Lean or in the runtime; or a declaration that the product of per-channel densities IS that distribution, with the outcome domain named and the product proven normalized over it."}
+
+  {:id :fundamental/machine-policy-carrier
+   :name "Pi -- a machine policy carrier with two or more admissible rows"
+   :verdict :out
+   :known-candidate :no-swept
+   :criterion-leg-that-fails :lean
+   :id-note "This id keeps its :fundamental/ prefix while the other four :out entries carry :out/. Those four were MINTED :out at the F0 census; this one was minted :in and MOVED, and five places name it as it stands -- :prerequisites at FUNDAMENTALS.edn:108, :200 and :301, and prose at :432 and :476. Renaming would break five references to record nothing the :verdict does not already say."
+   :census-correction
+   {:at "2026-09-05, row :F7"
+    :was ":verdict :in, :runtime {:verdict :uninhabited}, on the basis 'The machine ranks single actions. The declared policy carrier is a cascade, and no code path builds two admissible cascades for one decision.'"
+    :now ":verdict :out, :criterion-leg-that-fails :lean. The runtime leg is inhabited by a decision record. The criterion is a conjunction -- uninhabited in BOTH Lean and the runtime -- and it is now broken on the runtime side."
+    :why "The entry's :falsifier is a statement about RUNS, and until :F1 slice 2 it had only ever been argued from code. f1_policy_family_census.bb ran it over the 889-decision corpus first and it did NOT fire (holes/labs/wm-contract/runs/F1-machine-q/02-policy-family-census.edn:55-58: 234 decisions carry an :apply-cascade candidate, :most-distinct-cascades-for-one-target-in-one-record 1, :records-with-two-or-more-cascades-for-one-target 0). :F7 then MADE it fire on recorded state, using the machine's own constructor and the machine's own scorer, and the entry moves on the record rather than on the reading."}
+   :required-signature "a concrete PolicyIndex the machine constructs, with >= 2 rows for one decision, at the cascade grain the glossary declares"
+   :lean
+   {:verdict :uninhabited
+    :declarations-read
+    [{:what "the declared policy grain" :at "mathlib4/DarkTower/WarMachine/Holes.lean:7022"
+      :read "abbrev cascadeGrainPi (P) := Cascade P, docstring: pi is the pattern-language cascade scored as one policy; the state-to-action result of inference is DecisionRule."}
+     {:what "the only cascade value in the corpus" :at "mathlib4/DarkTower/WarMachine/Holes.lean:872-885"
+      :read "wmCascadeDiffFixture : CascadeDiff Nat Int, built from private fixture sets (cascadeFixtureSelected :863, cascadeFixtureAuthored :867). Named a fixture in its own identifier."}
+     {:what "every PolicyIndex instantiation" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6980-6981"
+      :read "the only concrete policy types in the file are the private EIGCounterPolicy and EIGCounterParameter (one constructor each); everywhere else PolicyIndex is a bound type variable."}]
+    :basis "The grain is declared and no machine value of it exists. UNCHANGED BY :F7 -- nothing was built in Lean, and the runtime record is not a Lean value of cascadeGrainPi. This is now the leg that fails."}
+   :runtime
+   {:verdict :inhabited
+    :seam-read
+    [{:what "the constructor of a same-mission menu" :at "futon2/scripts/futon2/report/cascade_lane.clj:102-144"
+      :read "cascade-policy-menu-for varies the coverage-saturation threshold around the production incumbent 0.15 and admits only COMPLETE (untruncated) policies at the constructor's pool ceiling, collapsing duplicate identities. It returns :policy-choice? true only at two or more. Its candidates are the same objects the production lane builds, from the same Python constructor."}
+     {:what "the scorer" :at "futon2/src/futon2/aif/cascade_prior.clj:163-207"
+      :read "shadow-rank refuses a menu of fewer than two policies (:176-179), attaches ln E(pi) over the concrete menu, enters the higher-is-better :cascade-score at the shared softmax seam through its negation, and reports which term governed. A mixed-mission menu fails closed at :138-141."}
+     {:what "the decision record, read rather than inferred" :at "futon2/holes/labs/wm-contract/runs/F7-cascade-policy/f7-cascade-policy-decision.edn:161"
+      :read ":candidate-count 2, :policy-choice? true for one selected mission -- M-expressions-of-interest, the target the machine committed to in recorded run c149f9de-669c-4817-9b0e-ed4aad77db79 (:144-153, data/wm-trace/wm-trace-2026-09-04.edn). The two policies differ in both pattern membership and wiring: 23 patterns with a 7-edge descent and 2 co_app edges at epsilon 0.10, 1 pattern with an empty semilattice at 0.20 (:5-137). Both carry a finite :cascade-score (-6.901 and 0.019) and both are ranked with normalized selection weights (:186-265)."}
+     {:what "the producer" :at "futon2/holes/labs/wm-contract/f7_cascade_policy_decision.clj:101-160"
+      :read "build-record reads one recorded decision by :run/id, takes the mission the machine committed to, builds |psi> with the live lane's own mission->psi (cascade_lane.clj:306), constructs, scores, and writes. It writes nothing under data/, takes no run lock, and sets :enacted? false."}
+     {:what "the namespace's own condition, re-read" :at "futon2/src/futon2/aif/cascade_prior.clj:1-12"
+      :read "'Live use is valid only after the War Machine exposes two or more admissible cascades for the same selected mission and supplies an honest cascade-level score.' Both clauses of that condition are met by the record above. What follows is that LIVE USE would now be valid, not that it has been taken -- and it has not been; see :what-is-still-open."
+      :note "This sentence was the strongest evidence for the old :uninhabited verdict. It is the same sentence, and it now reads the other way, because it states a CONDITION rather than a fact about the world."}]
+    :basis "A producer, a scorer and an actual record -- the standard :out/realized-outcome-channel closed its runtime leg by, and not a schema. The value exists at the declared cascade grain, for one decision the machine actually made."}
+   :what-is-still-open
+   ["NOTHING SELECTS OR ENACTS A CASCADE, and the entry does not claim it does. The record's :enacted? is false; the production lane still constructs ONE cascade per target (cascade_lane.clj:66-91 is called once per mission), cascade-policy-menu-for has no caller outside this producer and test/futon2/report/cascade_lane_policy_menu_test.clj, and the advisory lane that would carry cascades into a tick is off at scripts/futon2/run_tick_once.clj:255 (:include-advisory-lanes? false). The criterion this census applies is that a machine value of the carrier EXISTS, not that it is on the live path."
+    "THE HABIT LEG IS COLD. The record's prior state is the cold start (:samples 0, :class-count 0), so ln E(pi) is uniform over the menu and :governed-by is :cascade-score. No cascade-prior state has ever been persisted; M-wm-aif-policy-grain-compliance.md slice 3 is what would persist one."
+    "ONE DECISION, ONE MISSION. The frontier was run on the last decision in the corpus. What fraction of targets yield two or more complete distinct policies is not measured here, and the 889-record census measured the OTHER construction (the production lane's single cascade), so it does not answer this either."
+    "THE LEAN LEG IS UNTOUCHED. No value of cascadeGrainPi is built from machine data, which is why this entry is :out on a failing Lean leg rather than closed."]
+   :depends ["Q(o|pi): a kernel indexed by a policy needs a policy index, and F1's acceptance requires at least two policy rows with a policy-conditioned difference"
+             "Q(pi) = softmax(-G/tau): what is being ranked is what the softmax is over"
+             "Q-interface-completeness.edn work-order unit 1, which puts naming this carrier BEFORE constructing Q"]
+   :prerequisites []
+   :worklist-row :F1
+   :verdict-note "The census's second moved entry, and the first that moved because a falsifier was RUN rather than because a reading was corrected. It moved on 2026-09-05 by row :F7, and the census entry it unblocks is not itself: :F1 slice 2 was set :blocked for want of a machine pi (02-policy-family-census.edn :conclusion), and this is the pi at the declared grain."
+   :falsifier "What would move this entry back IN is a reading showing the record was not produced as claimed -- that its candidates are hand-written rather than constructor output, or that its two policies are one policy counted twice, or that the run it cites committed to a different mission. holes/labs/wm-contract/f7_cascade_choice_check.bb decides exactly those, and p4ng/empirics-futon/negative_controls.sh section 12 runs it against thirteen ways of resembling a policy choice without being one. A Lean value of cascadeGrainPi built from machine data would close the remaining leg; it would not move this verdict, which is already :out."}
+
+  {:id :fundamental/parameter-kernels
+   :name "Q(theta|pi) and Q(theta|o,pi) -- the parameter prior and posterior, and the theta they range over"
+   :verdict :in
+   :known-candidate :no-swept
+   :required-signature "a declared machine Parameter carrier theta, plus ParameterPriorKernel PolicyIndex theta and ParameterPosteriorKernel PolicyIndex Obs theta constructed from the machine's model"
+   :lean
+   {:verdict :uninhabited
+    :declarations-read
+    [{:what "the two carriers" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6761-6768"
+      :read "ParameterPriorKernel (PolicyIndex Parameter) := ProbabilityKernel PolicyIndex Parameter; ParameterPosteriorKernel (PolicyIndex Obs Parameter) := ProbabilityKernel (PolicyIndex x Outcome Obs) Parameter."}
+     {:what "the consumer" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6917-6934"
+      :read "parameterInformationGain takes both kernels plus a positivity hypothesis; expectedInformationGain sums it against Q. Three bound parameters, no constructor for any of them."}
+     {:what "every concrete Parameter" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6981"
+      :read "private inductive EIGCounterParameter where | only -- the sole concrete parameter type in the file, declared for the counterexample. Parameter is a bound type variable everywhere else."}]
+    :basis "The machine names no theta. Without a parameter carrier neither kernel can be instantiated, so this is one entry rather than two."}
+   :runtime
+   {:verdict :proxy-only
+    :seam-read
+    [{:what "the canonical EIG function" :at "futon2/src/futon2/aif/epistemic_value.clj:64-90"
+      :read "expected-information-gain takes {:prior :predicted-observations :posteriors} and validates each as a probability distribution. It is a formula with callers, not a producer."}
+     {:what "what feeds it" :at "futon2/src/futon2/aif/epistemic_value.clj:69"
+      :read "its two callers (mission_epistemic_value.clj:210 and survey_mission_value.clj:261,272) supply a hand-built two-point distribution over {:workable :not-workable} set equal to the prior of one binary latent, off the tick path behind two default-off gates -- read and recorded in Q-interface-completeness.edn :Q/to-EIG on 2026-09-04; this file is byte-identical to that pin."}
+     {:what "the machine's actual Dirichlet accumulation" :at "mathlib4/DarkTower/WarMachine/Holes.lean:7678-7679"
+      :read "dirichletAccumulationImportAbsent (a kind=hole row): a4a accumulates concentrations from a capability x mission model read off the substrate (a4a_substrate.clj:46-60), not from the tick model's o and mu. Two accumulations over different data -- so the offline Dirichlet is not an instance of this machine's theta either."}]
+    :basis "The runtime has a fixture theta off the live path and an offline Dirichlet over a different generative model. Neither is a machine parameter kernel for the tick model."}
+   :depends ["expectedInformationGain (Holes.lean:6926-6934) -- the epistemic leg of G in the risk-minus-information-gain decomposition"
+             "modelUncertaintyAndEIG (Holes.lean:7013-7020), which has already PROVEN that the live posterior-spread bonus is not canonical EIG, so nothing in the runtime can be promoted into this slot"]
+   :prerequisites [:fundamental/machine-policy-carrier :fundamental/predictive-outcome-kernel-constructor]
+   :worklist-row :none
+   :note "No worklist row owns this. F1 covers Q(o|pi) only; Q-interface-completeness.edn work-order unit 4 (bind risk and EIG) is where it would land."
+   :falsifier "A declared machine parameter carrier with a prior and a posterior kernel constructed from the tick model, in Lean or in the runtime."}
+
+  {:id :out/realized-outcome-channel
+   :name "the realized-outcome channel -- G's outcome feedback"
+   :verdict :out
+   :known-candidate "candidate 3 of the three the ruling named (U56: dark since July)"
+   :criterion-leg-that-fails :runtime
+   :census-correction
+   {:at "2026-09-05, this row's review pass"
+    :was ":criterion-leg-that-fails :both, on the reading that the theory states no realized-outcome signature at all"
+    :now ":runtime, and the Lean leg is recorded as fixture-only rather than absent"
+    :why "The original reading swept Holes.lean (:method :sweep-basis) and was correct THERE -- the string occurs once, at Holes.lean:7645, inside fixture-scaffolding prose. It is not correct of the corpus: mathlib4/DarkTower/WarMachine/GainChain.lean:88-94 declares structure RealizedOutcome. The verdict does not move (:out either way, because the runtime leg is inhabited), but the reason does, and the failing leg is now the one that actually fails."}
+   :lean
+   {:verdict :uninhabited
+    :declarations-read
+    [{:what "the carrier, which does exist" :at "mathlib4/DarkTower/WarMachine/GainChain.lean:88-94"
+      :read "structure RealizedOutcome where tick : Tick; mission : Mission; producer : Producer; expectedLeg : Int; realizedLeg : Measurement; durable : Bool. The two legs are present and TYPED DIFFERENTLY -- expectedLeg is an Int, realizedLeg a Measurement (:77-81, .measured or .noData), which is the typed-absence distinction the runtime schema carries as record presence."}
+     {:what "what the module says it is" :at "mathlib4/DarkTower/WarMachine/GainChain.lean:6-20"
+      :read "an outline behavioural model of the R8 realised-outcome fold through the R14 selection gain; it names the requirements which rule out the composition-and-liveness defect introduced on 2026-07-08; IT IS NOT A SEMANTICS OF THE WAR MACHINE. So the carrier is declared for an incident argument, not as a spine carrier."}
+     {:what "the consumer inside that module" :at "mathlib4/DarkTower/WarMachine/GainChain.lean:236-241"
+      :read "foldOf takes a CorpusLoadPolicy, a rejected count and a RealizedOutcome and returns a FoldOccurrence -- consumed := some outcome with gainMoved := true, or consumed := none with gainMoved := false. A fold, taking the outcome as a bound parameter; it constructs no outcome."}
+     {:what "the spine's silence" :at "mathlib4/DarkTower/WarMachine/Holes.lean:7645"
+      :read "the only occurrence of the string in Holes.lean, inside the fixture-scaffolding docstring for the enacted-vs-selected hole. The AIF spine (6751-7148) declares no realized-outcome carrier and no theorem quantifies over one, so nothing in the spine can be discharged by constructing this object."}]
+    :inhabitants-found
+    [{:name "GainChain.pendingOutcome" :at "mathlib4/DarkTower/WarMachine/GainChain.lean:243-249" :class :fixture
+      :read "tick 9, bayesianMission, .coverageDelta, expectedLeg -2, realizedLeg .measured (-5); the antecedent of strict_load_swallowed_gives_a_silent_success (:255)."}
+     {:name "GainChain.clockSplitOutcome" :at "mathlib4/DarkTower/WarMachine/GainChain.lean:262-268" :class :fixture :note "antecedent of two_clocks_break_threaded_identity (:283)"}
+     {:name "GainChain.domainMismatchOutcome" :at "mathlib4/DarkTower/WarMachine/GainChain.lean:291-297" :class :fixture :note "antecedent of domain_mismatch_is_a_record_not_a_silence (:314)"}
+     {:name "GainChain.soundOutcome" :at "mathlib4/DarkTower/WarMachine/GainChain.lean:334-340" :class :fixture :note "antecedent of gain_chain_sound_nonvacuous (:355)"}]
+    :basis "Four values of the type exist in the corpus, all four hand-written literals in the module that declares it, each the antecedent of one named incident theorem. None is built from a GenerativeModel, a BeliefState or a tick record. Uninhabited under the criterion -- and this leg does not decide the entry, because the conjunction is already broken on the runtime side."}
+   :runtime
+   {:verdict :inhabited
+    :seam-read
+    [{:what "the one schema and its accessors" :at "futon2/src/futon2/aif/realized_outcome.clj:49-51,53-58,115-132"
+      :read "schema is :wm/realized-outcome-v1; vocabularies is an array-map naming the two numeric legs in both spellings (:v1 :expected-score/:realized-score, :july-2026-delta-g :expected-G/:realized-G); normalize copies the historical legs to their v1 names and LEAVES THE ORIGINALS. The namespace is pure and loadable from babashka, so the lab reader and the JVM reader are the same file."}
+     {:what "the producer" :at "futon2/holes/labs/wm-contract/wm_step_observe.bb:226-239"
+      :read "observe builds the record and spits it to runs/<observing-run>/observation/realized-outcome-<observed-run>.edn -- written into the OBSERVING run's store, never the observed one, so a deposited run's receipt does not change under observation."}
+     {:what "one record on disk, read rather than inferred from a receipt" :at "futon2/holes/labs/wm-contract/runs/2026-09-05-u59-b/observation/realized-outcome-2026-09-05-u59-a.edn:1-20"
+      :read ":schema :wm/realized-outcome-v1, :expected-score 6.879411221866079, :realized-score 7.013215250842563, :scale :g-core, :outcome :grounded-no-change, :policy \"M-zaif-harness-v1\", with :observation/basis naming the three fields it was computed from. Machine data from a run, not a fixture."}]
+    :basis "A producer, a schema and an actual record. The criterion's conjunction requires uninhabited on BOTH sides; this side is inhabited, so the entry is out."}
+   :depends
+   ["futon2/src/futon2/aif/selection_gain.clj:174-197 fold-realized-outcome -- the R14 selection gain g folds the two numeric legs, reading them THROUGH realized-outcome rather than by key, which is what lets the 88 July records in the :july-2026-delta-g spelling fold instead of being skipped. Its own docstring records that it is INERT on the live path: the field is absent from every record the tick writes, because its only producer is reached from enact.clj:329, outside run-tick-once's require closure (C509)."
+    "futon2/scripts/futon2/report/war_machine.clj:2425-2439 trace-outcome -- the CATEGORICAL leg, a different answer from the two numeric ones. It reads ro/categorical-outcome (the three in-record places) and falls back to the observed side-channel keyed by :run/id. Its docstring records that the three in-record places carry nothing on 889 of 889 live-corpus records."
+    "futon2/scripts/futon2/report/war_machine.clj:2441-2456 previous-selection-non-progress? -- the second reader of the categorical outcome, and the reason the accessor exists as one function rather than three inlined copies."
+    "futon2/src/futon2/aif/tripwire.clj:185-195 -- branches on the categorical outcome (:grounded-change vs not) to decide zero-achievement, so a missing categorical outcome is not inert here: it reads as non-achievement."
+    "policyPrecisionIsGammaFromBeta (mathlib4/DarkTower/WarMachine/Holes.lean:7681-7682) reaches this channel at one remove: its docstring's live reading is that the gain does not move unless a realised outcome is well-formed and new, so tau holds at its prior."]
+   :what-is-still-open
+   ["The consumer's calibration is measured but thin: U59 measured 77 records with both legs folding gamma from 1.0 to 1.3375092522591208, and 0 of 889 corpus records carry a categorical outcome in any of the three places the readers look (war_machine.clj:2432-2434 says so in its own docstring)."
+    "The two U59 runs were sandboxed and NOT deposited (wm_step.sh deposit not run), so no run-era ledger row carries them."
+    "This entry is the precedent for what closing a fundamental's runtime leg looks like, and it closed by a producer plus one observed record -- not by a schema."]
+   :verdict-note "This is the one known candidate the criterion REMOVES, and saying so is the point of adjudicating rather than assuming. It moved between the ruling (2026-09-05 morning, wording: outcome feedback dark) and this census (2026-09-05 evening), by row :U59."
+   :falsifier "A machine-data RealizedOutcome constructed in Lean from a tick record would still leave this entry :out; what would move it back IN is the runtime record ceasing to exist -- i.e. a reading showing runs/2026-09-05-u59-b's record was hand-written rather than produced by wm_step_observe.bb."}
+
+  {:id :out/observation-kernel-instance
+   :name "A -- the observation model instance"
+   :verdict :out
+   :criterion-leg-that-fails :runtime
+   :lean
+   {:verdict :uninhabited
+    :declarations-read
+    [{:what "the carrier" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6802-6803"
+      :read "abbrev observationKernel (State Observation) := ProbabilityKernel State Observation, CLOSED-BY-RECORD against ObservationKernelWitness, falsifier: a row has negative mass or its declared masses do not sum to one. The docstring says outright that this witnesses kernel WELL-FORMEDNESS, not semantic observation correctness -- so the closed record is about the type, not about any machine instance."
+      :note "the row is minted as witnessed-closed at Holes.lean:7860-7861, which is why it is not in the hole list and why an instance gap here is invisible to the emission."}
+     {:what "the consumer that needs a machine instance" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6839-6843"
+      :read "beliefUpdate takes (A : observationKernel Channel Channel) as a BOUND PARAMETER alongside the prior, the observation vector, the precision map and the posterior. A is supplied to it; nothing constructs the machine's A for it."}
+     {:what "the grain the theory asks for" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6841,6803"
+      :read "beliefUpdate instantiates the kernel at Channel -> Channel -- 14 observation channels to 14 channels -- while GenerativeModel.observation (:6788) instantiates it at State -> Outcome Obs. Two different instantiations in one file, and the runtime's A is at neither."}]
+    :inhabitants-found
+    [{:name "ObservationKernelWitness.reference" :at "mathlib4/DarkTower/WarMachine/ObservationKernelWitness.lean:11-18" :class :fixture
+      :read "noncomputable, over a locally declared State/Observation pair, with referenceRowMass proving one row sums to 1 by norm_num."}
+     {:name "AmbiguityWitness.observationModel" :at "mathlib4/DarkTower/WarMachine/AmbiguityWitness.lean:17" :class :fixture}
+     {:name "BeliefUpdateFalsifier.kernel" :at "mathlib4/DarkTower/WarMachine/BeliefUpdateFalsifier.lean:7" :class :fixture :note "private, the antecedent of the falsifier"}]
+    :basis "Three values, all fixtures, none at the machine's own carriers. So the Lean leg IS uninhabited under the criterion -- which is exactly why the entry has to be adjudicated on the conjunction rather than on this leg alone."}
+   :runtime
+   {:verdict :inhabited
+    :seam-read
+    [{:what "the value" :at "futon2/src/futon2/aif/belief.clj:199-206"
+      :read "observation-model-v1 is (normalise-a-matrix a-matrix-v0): the 7x7 event-block A, {observed-event {true-status P(o|s)}}, column-normalised so each column s satisfies sum_o A[o,s] = 1. Machine data -- the lifecycle-adjacency structure of a-matrix-v0 -- not a hand-built witness row."}
+     {:what "that it is checked" :at "futon2/src/futon2/aif/belief.clj:247-256"
+      :read "valid-observation-model? requires the key set to be exactly status-set and every column to be a proper distribution; belief.clj:339-342 THROWS on a malformed A or B, so the filter fails closed rather than degrading."}
+     {:what "the whole live chain, counted rather than assumed" :at "futon2/scripts/futon2/report/war_machine.clj:803-812,821-827"
+      :read "arena-likelihood-mode returns :aif by default (the env hatch FUTON_WM_LIKELIHOOD_MODE restores :legacy); apply-arena-belief-events passes that mode into belief/update-belief-batch. From there: update-belief-batch (belief.clj:434-445) -> update-belief (:423-432) -> update-entity-belief (:399-421), whose :aif branch at :416-420 calls categorical-filter-step with observation-model-v1 as the default A. Four hops, each read at source."}
+     {:what "what the filter does with it" :at "futon2/src/futon2/aif/belief.clj:325-347"
+      :read "categorical-filter-step is the explicit q- = B x q then q ~ A(o|.)^kappa(w) . q- computation. A is applied on the live path on every belief event."}]
+    :basis "Inhabited by machine data on a default-on path with a fail-closed validator. The conjunction is not met."}
+   :depends
+   ["beliefUpdate (mathlib4/DarkTower/WarMachine/Holes.lean:6839-6865) -- A enters the posterior mean through observationKernelRowMass A k (:6850); with no machine A the theory's update relation cannot be evaluated at the machine."
+    "ambiguity (mathlib4/DarkTower/WarMachine/Holes.lean:6880-6885), which weights each state's observation-row entropy -- the rows are A's."
+    "the Q constructor (:fundamental/predictive-outcome-kernel-constructor): Q(o|pi) = A composed with B^pi applied to the belief, and A is the one factor of that composition the runtime already has at a normalized grain. That is why this entry is recorded rather than dropped: it is the composition's ONLY inhabited argument."
+    "futon2/src/futon2/aif/belief.clj:325-347 categorical-filter-step and every caller above it -- the live posterior is a function of this value."]
+   :what-is-still-open "The Lean leg is fixture-only (ObservationKernelWitness.lean:11, AmbiguityWitness.lean:17, BeliefUpdateFalsifier.lean:7), and the grains differ: the runtime A is over 7 entity statuses while Lean's beliefUpdate takes A : observationKernel Channel Channel (Holes.lean:6841) and GenerativeModel.observation takes it at State -> Outcome Obs (:6788). A Lean-side transcription gap over three grains, recorded here so the boundary is visible; not a fundamental."
+   :falsifier "Either leg would move this entry: a Lean declaration building an observationKernel from the machine's own status set and event types would close the transcription gap; a reading showing observation-model-v1 unreachable on the default path (e.g. arena-likelihood-mode defaulting to :legacy) would put the entry back IN."}
+
+  {:id :out/policy-prior-habit-E
+   :name "E -- the policy prior / habit prior"
+   :verdict :out
+   :criterion-leg-that-fails :runtime
+   :lean
+   {:verdict :uninhabited
+    :declarations-read
+    [{:what "the carrier" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6774-6776"
+      :read "abbrev PolicyPriorKernel (PolicyIndex) := ProbabilityKernel Unit PolicyIndex, CLOSED-BY-RECORD against PolicyPriorKernelWitness, falsifier: the proposed prior is conditioned on state rather than Unit, or its policy masses are not a distribution. The Unit domain is the point: it stops a contextual likelihood masquerading as the prior."}
+     {:what "where the model requires one" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6787-6790"
+      :read "GenerativeModel carries policyPrior : PolicyPriorKernel PolicyIndex as its third field, so a machine GenerativeModel cannot be constructed without a machine E."}
+     {:what "the consumer" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6959-6966"
+      :read "softmax takes (habit : PolicyIndex -> R) and forms exp (log (habit pi) - (grade pi).value / tau). ln E enters unscaled by tau on the Lean side too -- the same convention the runtime states at policy.clj:179-180."}]
+    :inhabitants-found
+    [{:name "PolicyPriorKernelWitness.reference" :at "mathlib4/DarkTower/WarMachine/PolicyPriorKernelWitness.lean:9-17" :class :fixture :note "noncomputable, over a locally declared Policy type"}
+     {:name "GenerativeModelWitness.policyPrior" :at "mathlib4/DarkTower/WarMachine/GenerativeModelWitness.lean:40" :class :fixture :note "private"}
+     {:name "GenerativeModelNegative.policyPrior" :at "mathlib4/DarkTower/WarMachine/GenerativeModelNegative.lean:26" :class :fixture :note "private, a rejecting control"}
+     {:name "PolicyPriorKernelNegative.badPrior" :at "mathlib4/DarkTower/WarMachine/PolicyPriorKernelNegative.lean:22-25" :class :fixture :note "a rejecting control: stateConditioned, the falsifier the row names"}
+     {:name "ParameterPriorKernelHabitNegative.habit" :at "mathlib4/DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean:6-17" :class :fixture :note "a rejecting control: a habit prior offered where a parameter prior is required"}]
+    :basis "Five values, all fixtures, two of them deliberate rejections, and every one over a Policy type declared in its own module. The Lean leg is uninhabited under the criterion."}
+   :runtime
+   {:verdict :inhabited
+    :seam-read
+    [{:what "the producer" :at "futon2/src/futon2/aif/habit_prior.clj:1-23"
+      :read "E(pi=i | Pi_feasible) = (n_i + alpha)/sum_j(n_j + alpha), a symmetric Dirichlet-multinomial posterior predictive over observed policy frequencies, alpha = 1 (:24), no recency decay. The namespace states its own honesty limit: a learned habit/frequency prior, not evidence that a policy is good."}
+     {:what "the value" :at "futon2/src/futon2/aif/habit_prior.clj:100-119"
+      :read "log-priors returns ln E aligned with the candidate menu, normalising over the CURRENTLY FEASIBLE menu and dividing duplicate action identities' mass evenly so the probabilities still sum to one. A normalized distribution over the candidate policies, computed from wm-trace counts -- machine data."}
+     {:what "how it reaches the score" :at "futon2/src/futon2/aif/habit_prior.clj:121-136"
+      :read "attach-log-priors replaces each candidate's :habit-prior-bias with the learned ln E and stamps :habit-prior-source :learned-frequency. The :span-ratio-cap layer is default-off (:129-131)."}
+     {:what "the score expression itself" :at "futon2/src/futon2/aif/policy.clj:157-214"
+      :read "selection-scores -- THE ONE PLACE THE SCORE EXPRESSION IS WRITTEN -- computes -G/tau + ln E per candidate (:209-213), with log-priors nil meaning ln E = 0. Its docstring states the convention: ln E enters UNSCALED by tau, controller temperature modulates G and never the habit prior (:179-180). softmax-weights (:216-235) is that vector normalised."}]
+    :basis "A producer computing a normalized distribution from recorded machine data, reaching the one place the score is written. Inhabited; out under the conjunction."}
+   :depends
+   ["softmax / Q(pi) (mathlib4/DarkTower/WarMachine/Holes.lean:6959-6966), whose habit argument is this object"
+    "GenerativeModel (mathlib4/DarkTower/WarMachine/Holes.lean:6787-6790), which cannot be instantiated at the machine without its policyPrior field"
+    ":fundamental/machine-policy-carrier -- E is a distribution OVER the policy index, so the runtime E is a distribution over what the machine actually ranks (single actions, forward_model.clj:25-32) and not over the declared cascade grain (Holes.lean:7022). The runtime leg is inhabited at the ACTION grain; that mismatch is the policy-carrier entry's, not this one's."
+    "futon2/src/futon2/aif/policy.clj:157-235 selection-scores and softmax-weights -- every recorded policy posterior carries this term"
+    "futon2/src/futon2/aif/efe.clj:145-151, the :habit-prior layer of the five-layer recorded preference stack, whose :folded? is false"]
+   :what-is-still-open "Its AUTHORITY is law-dependent, not flatly counterfactual. On the DEFAULT law the scores including ln E order an inspectable counterfactual only and the record carries :habit-prior-applied? false; under :full-score-posterior (U10) ln E is in the expression that chose, and policy.clj:618-621 moves BOTH :habit-prior-applied? and :habit-authority with the law so the record cannot contradict itself. That is a wiring decision about a value that exists -- the distinction this census exists to draw."
+   :pointer-correction "The census's earlier draft cited war_machine.clj:364 for :scheduler-habit-authority :counterfactual-only, copying the pointer from the prose at efe.clj:150. Re-resolved at source: :364 is inside the f-pi/tau preconditions docstring, and the declaration is at scripts/futon2/report/war_machine.clj:1011. The stale pointer in efe.clj:150 is REPORTED, not repaired -- this row changes no code."
+   :falsifier "A Lean value of PolicyPriorKernel at a machine policy carrier would close the Lean leg; a reading showing habit_prior/log-priors unreachable from any scored candidate would put the entry back IN."}
+
+  {:id :out/policy-precision-gamma-from-beta
+   :name "gamma = 1/beta, the variational policy precision"
+   :verdict :out
+   :criterion-leg-that-fails :runtime
+   :lean
+   {:verdict :no-carrier-declared
+    :declarations-read
+    [{:what "what the theory side actually has: a bare real" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6959-6966"
+      :read "softmax takes (tau : R) as an unstructured real argument. There is no PolicyPrecision carrier, no beta, and no update relation on tau anywhere in the spine -- so unlike the other three :out entries there is no signature here to be inhabited or uninhabited."}
+     {:what "the carrier that shares the WORD and is a different quantity" :at "mathlib4/DarkTower/WarMachine/Holes.lean:6819-6820"
+      :read "abbrev PrecisionMap := Channel -> NonnegativeReal, CLOSED-BY-RECORD against PrecisionWitness with the falsifier: swapping precision with its signed prediction error preserves variational F. This is the channel-indexed multiplicative weight in beliefUpdate (:6850), not policy precision. Recorded so the two are not read as one."}
+     {:what "how the theory side carries the claim instead" :at "mathlib4/DarkTower/WarMachine/Holes.lean:7681-7682"
+      :read "def policyPrecisionIsGammaFromBeta : Prop := sorry, minted as a kind=hole row at :7917. PERMANENT EXTERNAL ATTESTATION, holder by-record, evidence: a run record carrying tau together with the beta it was derived from; falsifier: no run record carries them together. So the theory side holds this as an EVENT claim about run records, not as a constructor obligation -- which is why it is out of this census's criterion by shape and not only by verdict."}]
+    :basis "No constructing signature is declared, so the criterion's Lean leg has nothing to bind. The obligation exists in the corpus as a sorry-bodied Prop about run records."}
+   :runtime
+   {:verdict :inhabited
+    :seam-read
+    [{:what "the law, with its three modes named" :at "futon2/src/futon2/aif/policy.clj:77-126"
+      :read "effective-temperature's docstring separates the three layers: g (R14 engineering selection gain, and it says in its own words it is not variational policy precision), tau_spread (adaptive calibration), and beta -- variational policy precision, gamma = 1/beta with beta the root of friston2017 eq. 2.7, tau = beta exactly because the softmax consumes -G/tau."}
+     {:what "the branch" :at "futon2/src/futon2/aif/policy.clj:130-148"
+      :read ":spread (DEFAULT) gives tau = adaptive-temperature/g; :selection-gain-only gives 1/g; :variational-beta-gamma returns the caller's :variational-beta if finite and positive and otherwise THROWS -- it never falls back to 1/g, because mixing the two laws inside one run makes the tau series uninterpretable. beta is deliberately NOT floored at tau-min (:120-123), so an engineering constant cannot be substituted for the solved temperature."}
+     {:what "the producer of beta" :at "futon2/src/futon2/aif/policy_precision.clj:95,497-561"
+      :read "converge-beta solves eq. 2.7; carry-beta holds the last solved posterior across ticks, returning :beta with :beta-source :converged-posterior when the solve both converged and bracketed and :held-unsolved otherwise (:546-552), plus the solve itself as data. So a beta always reaches the temperature and the HOLD is visible in the provenance rather than in a silent fallback."}]
+    :basis "The object exists in the runtime with a producer, a provenance field and a refusal to degrade. Inhabited; out under the conjunction."}
+   :depends
+   ["softmax / Q(pi) (mathlib4/DarkTower/WarMachine/Holes.lean:6959-6966): tau is the divisor of G in the policy posterior, so every recorded posterior depends on which law produced it"
+    "policyPrecisionIsGammaFromBeta (mathlib4/DarkTower/WarMachine/Holes.lean:7681-7682), the kind=hole row this entry corresponds to, whose closure condition is a PERSISTED RECORD rather than a constructor"
+    "futon2/src/futon2/aif/selection_gain.clj:174-197 -- the default law's g comes from the realized-outcome fold, which ties this entry to :out/realized-outcome-channel: the two are the same loop read at its two ends"
+    "futon2/src/futon2/aif/policy.clj:157-214 selection-scores, which divides G by whichever tau the mode produced"]
+   :what-is-still-open "This is already a declared hole with its own record: policyPrecisionIsGammaFromBeta (Holes.lean:7681-7682, kind=hole), whose docstring carries the correction that the sentence 'no beta appears anywhere in the policy path' became false after RUN8. It is run-gated, not uninhabited: the DEFAULT is :spread and no persisted tick carries a carry-beta tau (the docstring records 18 :tau-source values in data/wm-trace/wm-trace-2026-09-01.edn, all :selection-gain-only, and S3's one live tau = beta tick ran under a write-suppressing preflight)."
+   :falsifier "A persisted default-path tick carrying tau together with the beta it came from closes the Lean-side hole; nothing would move this entry back IN short of the :variational-beta-gamma branch being removed from policy.clj."}]
+ :counts {:entries 11 :in 6 :out 5
+          :known-candidates-adjudicated 3
+          :known-candidates-in 2 :known-candidates-out 1
+          :new-from-the-sweep 5
+          :counts-note "7 :in / 4 :out at the F0 census (2026-09-05). :fundamental/machine-policy-carrier moved :in -> :out the same day by row :F7, on a decision record rather than on a re-reading; its own :census-correction carries the before and after. The known-candidate counts do not move: that entry came from the sweep, not from the three adjudicated candidates."}
+
+ :reading
+ "The fundamentals are not independent gaps. They are the input list of Q(o|pi) = A composed with B^pi applied to the belief, scored against C, over a policy index pi, and the F0 census found that pi (:machine-policy-carrier), B at the controlled grain (:controlled-transition-kernel), the belief-to-state map (:belief-to-state-distribution), the intermediate Q(s|pi) (:policy-conditioned-state-predictive) and C at outcome grain (:machine-preference-distribution) were each missing on both sides -- five inputs and the constructor itself, seven entries with the parameter kernels. FOUR OF THOSE FIVE STILL ARE. Pi is not: it moved :out on 2026-09-05 by row :F7, on a decision record in which two distinct complete cascades for one selected mission are constructed and scored, so the first step of the order below has been taken at the runtime and not in Lean. That is why the Q constructor has stayed missing through repeated audits: it is not one declaration that nobody wrote, it is a composition whose every argument is absent at the required grain. The parameter kernels are a second cluster, hanging off canonical EIG rather than off risk. THE ORDER THIS IMPLIES: name pi, then map belief into the model's state, then make B carry the action, and Q is then a definition rather than a research problem -- which is the order Q-interface-completeness.edn :work-order already gives, now with the reason for each step measured. That order is why :F7 came before :F1 slice 2 rather than instead of it: the carrier is named, and the belief-to-state map and the action-carrying B are the two steps still open before Q is a definition."
+
+ :derivation-proposal
+ {:goal "This file is hand-kept. The ruling asks that the F-list be DERIVED from the Lean model. Proposed mechanism, NOT IMPLEMENTED here (F0 changes no code)."
+  :what-lean-cannot-do
+  "Lean cannot decide that a signature is uninhabited, and the corpus proves the point: every carrier in the spine already has a fixture value, and Nonempty of a function type follows from an inhabited codomain. So a fundamental cannot be a computed property of the model. It must be a DECLARED OBLIGATION carried by the model, with machine-checkable parts."
+  :field-that-would-carry-the-marker
+  {:where "mathlib4/DarkTower/Contract/Emit.lean:13-24, structure Declaration"
+   :add "one field, constructorObligation : Option String, holding the required constructing signature verbatim; emitted as constructor-obligation by Declaration.toJson (mathlib4/DarkTower/Contract/Emit.lean:39-47)."
+   :reuse "TWO FIELDS FOR THIS ALREADY EXIST AND ARE EMPTY: clojureLocus and fixture are declared on Declaration (mathlib4/DarkTower/Contract/Emit.lean:20-21) and are null on ALL 124 rows of the current holes-contract.json (counted). clojureLocus should carry the runtime seam (the :runtime :seam-read pointer of each entry above) and fixture should carry the value that must NOT count as an inhabitant. No new field is needed for either leg."
+   :do-not "Do NOT add a third DeclarationKind. lean_state_probe.bb:238 partitions on kind = hole, so a third value would silently drop these rows out of both the hole count and the closed count. Fundamentals stay kind := .hole and are distinguished by their minting constructor."}
+  :minting
+  {:where "mathlib4/DarkTower/WarMachine/Holes.lean, beside mkHole (:7747-7750)"
+   :add "private def mkFundamental (name owner signature clojureLocus fixture evidence falsifier : String) : Declaration, setting kind := .hole and the three fields above."
+   :why-this-shape "The probe already learns the hole-minting constructors FROM SOURCE rather than hard-coding them (lean_state_probe.bb:242-248 regexes every private def whose body matches kind := .hole; its own comment says a third could be added), and records each hole with the constructor that minted it (:253-258, :source-holes carries {:name :constructor}). So the fundamentals list is derivable from the EXISTING probe output the day mkFundamental lands: filter :source-holes on :constructor = mkFundamental."}
+  :what-consumes-it
+  [{:consumer "futon2/holes/labs/wm-contract/lean_state_probe.bb:237-258,386-400"
+    :change "add :contract-fundamentals derived from the JSON exactly as :contract-holes is (:237-238), plus the same two-way reconciliation as :in-source-not-in-contract / :in-contract-not-in-source (:394-395), so an emission that has drifted from the source is REPORTED rather than trusted."}
+   {:consumer "futon2/holes/labs/wm-contract/build_step.bb"
+    :change "the :F priority reads the derived list; a fundamental with no open :F row is a finding the loop can raise, which is the operational form of stop other work until this is solved."}
+   {:consumer "this file"
+    :change "FUNDAMENTALS.edn :entries becomes the NEGATIVE CONTROL rather than the source: the derived set must equal the recorded set, and a disagreement is the finding. Hand-kept content survives only as the :lean/:runtime reading behind each entry, which no emission can carry."}]
+  :three-checkable-parts
+  ["(a) The companion obligation is still open: each fundamental gets a Prop declaration whose body is sorry, so the probe's existing :holes-without-a-sorry lint (lean_state_probe.bb:397-400) reads it, and discharging the fundamental by writing the constructor flips the emission without anyone editing a list."
+   "(b) The named fixture is still the only value of the carrier type in the corpus -- a countable check over the module list, which is what this census did by hand."
+   "(c) clojure-locus resolves as a file:line pointer, under the u56_pointer_check.bb convention."]
+  :what-it-still-cannot-check "That the runtime object at clojure-locus is a PROXY rather than an inhabitant. That judgement is the reading recorded per entry above, and it is the part a human or a review has to make; the emission can carry it, not decide it."
+  :authority "A marker in Holes.lean moves the authority for the F-list to the Lean model, which is what the ruling asks for; holes-contract.json source.git-sha then pins it, as it already pins the hole list (C175)."}
+
+ :review-repairs
+ {:at "2026-09-05" :by "F0 review pass (worklist :F0 :review-finding)"
+  :finding "The four :out entries carried :why-out prose only, with no :lean, :runtime or :depends keys. The acceptance requires EVERY entry to carry the Lean declaration(s) read, the runtime seam read, and the dependent machinery named."
+  :repair "All four :out entries now carry the same three keys the seven :in entries do, filled from source reads rather than from the existing prose. Pointer count went from 94 distinct file:line to 139, all resolving under u56_pointer_check.bb."
+  :what-the-repair-found
+  ["ONE VERDICT REASON CHANGED. :out/realized-outcome-channel recorded :criterion-leg-that-fails :both on the reading that the theory declares no realized-outcome signature. Writing its :lean key required reading the corpus rather than Holes.lean, and mathlib4/DarkTower/WarMachine/GainChain.lean:88-94 declares structure RealizedOutcome with four fixture values (:243,:262,:291,:334). The entry stays :out -- the runtime leg is inhabited either way -- but the failing leg is :runtime, and the Lean leg is fixture-only rather than absent. The original claim was scoped to Holes.lean and true there; it was not true of the corpus, and the sweep did not catch it because RealizedOutcome is not a spine carrier type and so was not in the carrier sweep (:method :lean)."
+   "ONE STALE POINTER REPORTED. :out/policy-prior-habit-E cited war_machine.clj:364 for :scheduler-habit-authority :counterfactual-only, copied from the prose at futon2/src/futon2/aif/efe.clj:150. Re-resolved: the declaration is at futon2/scripts/futon2/report/war_machine.clj:1011; :364 is inside an unrelated preconditions docstring. Reported, not repaired -- efe.clj:150 is code and this row changes none."
+   "ONE CLAIM SCOPED. :out/policy-prior-habit-E said the habit prior's authority is declared counterfactual-only. That is the DEFAULT law: futon2/src/futon2/aif/policy.clj:615-621 sets :habit-prior-applied? and :habit-authority from full-score?, so under :full-score-posterior (U10) ln E is in the expression that chose. The entry now states the law-dependence instead of the flat claim."
+   "ONE ENTRY IS SHAPED DIFFERENTLY AND SAYS SO. :out/policy-precision-gamma-from-beta's Lean verdict is :no-carrier-declared, not :uninhabited: softmax takes tau as a bare real (Holes.lean:6961) and there is no policy-precision carrier at all, so there is no signature to be uninhabited. The theory side carries the claim as an EVENT about run records (policyPrecisionIsGammaFromBeta, Holes.lean:7681-7682, kind=hole), which is a different kind of obligation from the constructor obligations this census enumerates."]
+  :not-changed "No entry's :verdict moved. The counts are unchanged: 11 entries, 7 :in, 4 :out."}
+ :not-done
+ ["No code changed, in any repository -- the acceptance bar for this row."
+  "No entry written to aif-equations.edn :choices or control-map-edges.edn :decisions. This census records no ruling."
+  "gen_aif_dag.bb NOT run; nothing regenerated into a publish (TN 9a)."
+  "Q-interface-completeness.edn NOT modified. It is a registry, its central :missing finding is re-affirmed by this census rather than moved, and F1's row is what moves it."
+  "The derivation proposal is a proposal: mkFundamental, the Emit.lean field and the probe change are not implemented, and no row is minted for them here."
+  "The Lean corpus was READ, not built: no lake build was run for this row (nothing was changed to build)."
+  "Entry :fundamental/parameter-kernels has no owning worklist row, and this census does not mint one."
+  "REPORTED NOT REPAIRED (review pass): the stale pointer war_machine.clj:364 inside the prose at futon2/src/futon2/aif/efe.clj:150 -- the declaration it names is at futon2/scripts/futon2/report/war_machine.clj:1011. Repairing it edits a source file, which this row may not do; :review-repairs records it."
+  "REPORTED NOT REPAIRED (review pass): p4ng/empirics-futon/pointer_check.bb still resolves bare filenames against a hand-maintained directory allowlist that omits mathlib4/DarkTower/Contract/, so the two Emit.lean references in :derivation-proposal are written as file plus lines rather than file:line. Appending the root is a one-line p4ng change this row does not make."]}

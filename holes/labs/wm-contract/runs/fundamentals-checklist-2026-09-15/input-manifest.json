@@ -1,0 +1,170 @@
+{
+  "captured-at": "2026-09-15T17:04:25.783230+00:00",
+  "method": "read-only source and existing receipt review; no new runtime or proof execution",
+  "heads": {
+    "futon2": "74c298f0603d8bae02f81048c3a1cdf647976c6b",
+    "futon3c": "35022e4273aedf39365a4672b2e4648b3704b5aa",
+    "p4ng": "7080b188a3f07b6b5706eab1c9c6de7d72699806",
+    "mathlib4": "2b22eeef3102b3b48c8c12df66aaded459c36819"
+  },
+  "inputs": [
+    {
+      "path": "futon2/holes/labs/wm-contract/RULINGS-walkthrough-2026-09-12.md",
+      "sha256": "9a20cbb57e57c9c9f5c3c19e67be663de1b7f779d45b92734b01f48c53a575e0",
+      "snapshot": "futon2__holes__labs__wm-contract__RULINGS-walkthrough-2026-09-12.md"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/WORK-REMAINING.md",
+      "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+      "snapshot": "futon2__holes__labs__wm-contract__WORK-REMAINING.md"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/FUNDAMENTALS.edn",
+      "sha256": "169d611af2ce66a23531e00baaea9eba4e8bdf59ee63e28a3444bad11c0a0efa",
+      "snapshot": "futon2__holes__labs__wm-contract__FUNDAMENTALS.edn"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/COMPLETION-LIST-plop2026-2026-09-12.md",
+      "sha256": "cdb06820677265ee4649a6324824fffd570c4a9710cce97717b028124fdf0d20",
+      "snapshot": "futon2__holes__labs__wm-contract__COMPLETION-LIST-plop2026-2026-09-12.md"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/TN-fundamentals-four-link-trace-2026-09-15.md",
+      "sha256": "c8205183a82928365832d0a4c77a1f33136c3740315be406bd96e8e4eecdfad1",
+      "snapshot": "futon2__holes__labs__wm-contract__TN-fundamentals-four-link-trace-2026-09-15.md"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/TN-lean-audit-2026-09-15.md",
+      "sha256": "f1f23556c09f8f380ab04a4b6880f0a813f28dbdea5a91a028fe944caf01b840",
+      "snapshot": "futon2__holes__labs__wm-contract__TN-lean-audit-2026-09-15.md"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/TN-probability-kernel-repair-2026-09-15.md",
+      "sha256": "04215c7d776ffe255f920578667e52a12669e75835e78e352b66b90a6ace073b",
+      "snapshot": "futon2__holes__labs__wm-contract__TN-probability-kernel-repair-2026-09-15.md"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/SPEC-cascade-policy-semantics-2026-09-15.md",
+      "sha256": "047a857c26b50679fb489f0ba5cc09a517ff1f1c1cccc89c8835d7697cb62fb0",
+      "snapshot": "futon2__holes__labs__wm-contract__SPEC-cascade-policy-semantics-2026-09-15.md"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/TN-paper13-paper07-closure-path-2026-09-15.md",
+      "sha256": "693df847232cc6ed32a2db4bc9e36abe6cd4d98c47e08ab87b0644b81b811fe9",
+      "snapshot": "futon2__holes__labs__wm-contract__TN-paper13-paper07-closure-path-2026-09-15.md"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md",
+      "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+      "snapshot": "futon2__holes__labs__wm-contract__LEAD-DECISIONS-2026-09-12.md"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md",
+      "sha256": "8656824061db951460896fec3345ddcc5dcb7dc070c7ae1214eaabd5d31cc0c5",
+      "snapshot": "futon2__holes__labs__wm-contract__CONVERGENCE-PLAN-2026-09-13.md"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/runs/outstanding-dag-2026-09-14/dag.json",
+      "sha256": "ef01fb545dc25eb6f5968a249f661c973f3cecc938ad7f936144acf7b23bbf39",
+      "snapshot": "futon2__holes__labs__wm-contract__runs__outstanding-dag-2026-09-14__dag.json"
+    },
+    {
+      "path": "futon2/holes/M-G-over-cascades.md",
+      "sha256": "cb0a55e9fa4f0e1bd219f1f9ea351c0b0aa6eca347c933a8f838a09c5753fce1",
+      "snapshot": "futon2__holes__M-G-over-cascades.md"
+    },
+    {
+      "path": "futon3c/holes/flights/F-wm-piloted-2026-06-12.md",
+      "sha256": "2868d201fab4851e128a7607032c34edbaba7b9d704c414fea8be6f43c719f2f",
+      "snapshot": "futon3c__holes__flights__F-wm-piloted-2026-06-12.md"
+    },
+    {
+      "path": "futon2/holes/DESIGN-REQUIREMENTS-apex-2026-09-09.md",
+      "sha256": "79228ad2299e639b427592f2eb24d4a80fadb9891271ca4bfe1211bf0a27f21c",
+      "snapshot": "futon2__holes__DESIGN-REQUIREMENTS-apex-2026-09-09.md"
+    },
+    {
+      "path": "p4ng/empirics-futon/control-stages.edn",
+      "sha256": "0dc90da2b870938f0014d82ac642d8738cc06965cb369108f26773a7d06ecb74",
+      "snapshot": "p4ng__empirics-futon__control-stages.edn"
+    },
+    {
+      "path": "p4ng/sec-c-vector.tex",
+      "sha256": "e56ef2973e4bbca81b24e2a9a14af4a237faa667a25bb1f79500a57d2af8b4cb",
+      "snapshot": "p4ng__sec-c-vector.tex"
+    },
+    {
+      "path": "p4ng/sec-catalog.tex",
+      "sha256": "e57c7e30e1b435ee48c8ee65c9d1ab0a55caf5c1b15fa168b8c05ef867ea64fe",
+      "snapshot": "p4ng__sec-catalog.tex"
+    },
+    {
+      "path": "mathlib4/DarkTower/WarMachine/Holes.lean",
+      "sha256": "7f137e4f85b2aae18b699942bdc505faa3f311752a096718704fb2ca7b7a07d3",
+      "snapshot": "mathlib4__DarkTower__WarMachine__Holes.lean"
+    },
+    {
+      "path": "futon2/src/futon2/aif/find_receipt.clj",
+      "sha256": "fbcf83d5baf1a88b81ffb2fa1f95add87f9305264fe64be72d2cb299fb7549c7",
+      "snapshot": "futon2__src__futon2__aif__find_receipt.clj"
+    },
+    {
+      "path": "futon2/src/futon2/aif/cascade_policy.clj",
+      "sha256": "263a1700c257811cc8085f9bff16cb0bc44acaf4b38745fd82ded172cda532ec",
+      "snapshot": "futon2__src__futon2__aif__cascade_policy.clj"
+    },
+    {
+      "path": "futon2/src/futon2/aif/receipt_construction.clj",
+      "sha256": "1b4f766c5b5b4ce540a44c2c22f345274d2a8fb21f994c5c9091c2a3cfe60338",
+      "snapshot": "futon2__src__futon2__aif__receipt_construction.clj"
+    },
+    {
+      "url": "https://zone.hyperreal.enterprises/wip/plop-2026.html",
+      "sha256": "7d60c0c32ec5e417235f9570de6a9cd5937289f944dfc9d217fca2c29c1ce969",
+      "snapshot": "plop-2026.html",
+      "outstanding-literal-count": 11
+    },
+    {
+      "url": "https://zone.hyperreal.enterprises/wip/futon-2026.html",
+      "sha256": "6e453b0a2b8e800725f248e824494cbbae6f1532f0577f49429d322d1b060894",
+      "snapshot": "futon-2026.html",
+      "outstanding-literal-count": 0
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/RULINGS-walkthrough-2026-09-08.md",
+      "sha256": "c19a8984bd4de2d58412a8bf36f37f05b192d5b67071a10e73e7f961404990aa",
+      "snapshot": "futon2__holes__labs__wm-contract__RULINGS-walkthrough-2026-09-08.md",
+      "added-at": "2026-09-15T17:19:29.477214+00:00"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/RULINGS-walkthrough-2026-09-09.md",
+      "sha256": "94222af425799985990929fd71e8dccf988ef4ced29958a96a188198964059c7",
+      "snapshot": "futon2__holes__labs__wm-contract__RULINGS-walkthrough-2026-09-09.md",
+      "added-at": "2026-09-15T17:19:29.477269+00:00"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/runs/a-labels-exercise7-2026-09-15/ACCEPTANCE-observation.md",
+      "sha256": "046939077dc4700f5dd5a57fd70a022a42e0e9bda8beae64cb0560c1655c376e",
+      "snapshot": "futon2__holes__labs__wm-contract__runs__a-labels-exercise7-2026-09-15__ACCEPTANCE-observation.md",
+      "added-at": "2026-09-15T17:19:29.477326+00:00"
+    },
+    {
+      "path": "futon2/holes/labs/wm-contract/runs/V7-R12-node-sim/00-r12.edn",
+      "sha256": "c53ca1b5b70b26fcf9dfe4dd1e05af396261b69576d70dd11d32129f66800c66",
+      "snapshot": "futon2__holes__labs__wm-contract__runs__V7-R12-node-sim__00-r12.edn",
+      "added-at": "2026-09-15T17:19:29.477354+00:00"
+    },
+    {
+      "path": "mathlib4/DarkTower/WarMachine/PreferenceLadderDraft.lean",
+      "sha256": "f663932ebf7e2b3bd6031ecfe38d38c9a510e2bf707aec9c52ae2c9ac8c86396",
+      "snapshot": "mathlib4__DarkTower__WarMachine__PreferenceLadderDraft.lean",
+      "added-at": "2026-09-15T17:19:29.477398+00:00"
+    },
+    {
+      "path": "mathlib4/DarkTower/WarMachine/FoldCWitness.lean",
+      "sha256": "786ef673e884b6783682dd0856fc6670cf814dfacdc13c7f4c772bc2ddfdfb04",
+      "snapshot": "mathlib4__DarkTower__WarMachine__FoldCWitness.lean",
+      "added-at": "2026-09-15T17:19:29.477438+00:00"
+    }
+  ]
+}

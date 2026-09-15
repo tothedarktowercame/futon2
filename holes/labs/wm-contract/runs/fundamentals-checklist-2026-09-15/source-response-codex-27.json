@@ -1,0 +1,135 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-28",
+    "session-id": "01a0a152-fca5-7ee1-b108-16f84ac40a10",
+    "execution": {
+      "executed": true,
+      "tool-events": 6,
+      "command-events": 6
+    },
+    "job-id": "invoke-1789491575339-21070-498e7b46",
+    "agent-id": "codex-27",
+    "artifact-ref": "480a666ad2",
+    "started-at": "2026-09-15T16:59:36.036587527Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-15T16:59:35.339507753Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-15T16:59:36.036596163Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-15T16:59:36.801520037Z",
+        "text": "Joe requests a fundamentals-first definitive WM checklist, ratified by all involved agents. I have read your four-link trace and probability-kernel discovery, and see repaired ProbabilityKernel fields currently in Holes.lean. Please provide current completion/review evidence for your kernel work, corrections to the four-link trace, and any omitted fundamental requirements. Read-only response, no implementation. I will circulate a pinned consolidated checklist for explicit ratification. Need your own facts/limits, not another substitute scope. Reply to codex-28 via Agency.\n"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-09-15T16:59:43.489341037Z",
+        "text": "I\u2019ll check the kernel commits and review records, then separate what has landed from what still lacks live-path or click evidence."
+      },
+      {
+        "seq": 5,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:47.539571468Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"git -C mathlib4 log -8 --oneline -- DarkTower/WarMachine/ProbabilityKernelRepairNegative.lean DarkTower/W"
+        ],
+        "output": [
+          "7020:  support_nodup : \u2200 s, (support s).Nodup\n7021:  mass_eq_zero_of_not_mem : \u2200 s o, o \u2209 support s \u2192 mass s o = 0\n7100:theorem variationalFreeEnergy_nonnegative (precision : PrecisionMap) (error : Channel \u2192 \u211d) :\n7271:    support_nodup := by intro; simp\n7272:    mass_eq_zero_of_not_mem := by\n7283:    support_nodup := by intro; simp\n7284:    mass_eq_zero_of_not_mem := by intro s o h; cases o; simp_all }\n7292:    support_nodup := by intro; simp\n7293:    mass_eq_zero_of_not_mem := by intro s o h; cases o; simp \u2026[trimmed]\u2026 ** Replace/supersede the obsolete runtime cascade scorer with the finite-model propagation and horizon sum, refusing missing interpretations/inadmissible risk. Depends on supplied valid q0/A/B/C kernels; fixture tests can verify arithmetic, but production readiness depends on the C2 and transition producers. Acceptance: hand-computable conditional-ambiguity and order-sensitive cases agree with the accepted Lean definition, including negative controls.\n- **F1/F2 \u2014 one receipted applicability implementation and its formal refinement.** Reuse the repository reader and `find` reference; supply agent-authored, source-pinned antecedent interpretations and match the current Clause/AsOf/TextCitation contract. Define/refine the behavioral operation without replacing the approved opaque boundary by an arbitrary chooser. Depends on current receipt law semantics. Acceptance: real input receipts contain actual IF/HOWEVER acknowledgments, repository containment, non-self-certifying citations and falsifiable exclusions; the proof/refinement refers to this runtime contract.\n- **O2 \u2014 extend the existing organiser to the ruled carrier.** Add explicit admissions, preserved authored edges, before/after precedence and acting order/score, checked no-bootstrap fast-forward and admissibility; retire or explicitly redirect the predecessor signature after callers migrate. Depends on ruled F12 carrier and F2 inputs, with an acting-order witness sufficient to make O4 non-vacuous before G is available. Acceptance: same source-bound input gives a validated CascadeDiff, not merely another standalone exemplar.\n- **F3/O3/G3/C3 \u2014 install one connected candidate path.** Keep the actual controller/authorization boundary for selecting the target. At the ordinary construction seam, make retrievers propose, agent interpretations/find receipt the admitted set, organise produce a finite admissible family with precedence, and the G scorer use compatible predictions/C to select the exact cascade passed onward to fold/gates/dispatch. Refuse missing model data rather than falling back to unrelated engineering scores under a canonical label. Depends on the preceding producers. Acceptance: tracing a real ordinary decision reaches each new producer and downstream execution carries its chosen policy identity; no fixture chooser or stale three-target restriction.\n- **C4/G4/F4/O4 \u2014 one joint production witness, not four unrelated demos.** After integration is deployed through the normal owner-controlled process, request one authorized ordinary click with an eligible target and model. Retain loaded/source identities, supplied C/model, find receipts, organise diff/family, candidate G/prior values, chosen policy, gate result and independent enacted identity. Depends on all link-3 work and live-data admission. The run must actually exercise ordinary construction; a stop-line repair or missing-data refusal is honest evidence but cannot close these four successful-use links. No click or deployment is authorized by this discovery note.\n\n## Proposed order\n\n**Connect receipted find and ruled organise to the ordinary construction seam first (F1/F2/O2, then F3/O3).** That replaces proxies at an actual consumer and yields the policy identities/precedences needed both by G and by transition-evidence collection. In parallel in the project plan, resolve C's scope and record paired state/transition observations at the existing attempt boundary; the latter is the shared data prerequisite for C2 and production B. Implement G2 against explicit supplied kernels, then close C3/G3 together when those inputs are admitted. Finish with the single four-link click above. This is a dependency order, not permission to run a coverage-hunting loop or fabricate defaults.\n\nValidation: read current source definitions/call sites; searched futon2 src/scripts and futon3c src for reference-find/organise callers; parsed the dated tick, its own selection/construction, older ordinary constructions and a channel-C trace. No code, environment, serving state or other notes changed; no build/test/run claims added.\n"
+        ]
+      },
+      {
+        "seq": 6,
+        "type": "tool_use",
+        "at": "2026-09-15T16:59:54.586854724Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"git -C mathlib4 show --stat --oneline 480a666ad2; rg --files /tmp | rg 'codex27.*(kernel|axiom)|kernel-re"
+        ],
+        "output": [
+          "rg: /tmp/systemd-private-a80b396f89894188b7ba246e15eca579-upower.service-qezpqJ: Permission denied (os error 13)\nrg: /tmp/compactor6537322549745101760: Permission denied (os error 13)\nrg: /tmp/external-sort11033056285389750887: Permission denied (os error 13)\nrg: /tmp/tmux-1002: Permission denied (os error 13)\nrg: /tmp/external-sort12976679038025887379: Permission denied (os error 13)\nrg: /tmp/external-sort5521062300255828680: Permission denied (os error 13)\nrg: /tmp/systemd-private-a80b396f89894188b7ba246e15eca579-systemd-resolved.service-QnFOF2: Permission denied (os error 13)\nrg: /tmp/external-sort16171371396210375525: Permission denied (os error 13)\nrg: /tmp/futon1b-candidate-query-test-7944310496232596710: Permission denied (os error 13)\nrg: /tmp/external-sort10571954561024474230: Permission denied (os error 13)\nrg: /tmp/external-sort17426353557599761668: Permission denied (os error 13)\nrg: /tmp/external-sort15604405786823328416: Permission denied (os error 13)\nrg: /tmp/systemd-private-a80b396f89894188b7ba246e15eca579-caddy.service-ugaqmq: Permission denied (os error 13)\nrg: /tmp/external-sort6147587957624969963: Permission denied (os error 13)\nrg: /tmp/systemd-private-a80b396f89894188b7ba246e15eca579-systemd-logind.service-1clnT8: Permission denied (os error 13)\nrg: /tmp/external-sort5602361946926481123: Permission denied (os error 13)\nrg: /tmp/compactor4626856097769866737: Permission denied (os error 13)\nrg: /tmp/external-sort13541972131837105090: Permission denied (os error 13)\nrg: /tmp/compactor14950914442763910405: Permission denied (os error 13)\nrg: /tmp/systemd-private-a80b396f89894188b7ba246e15eca579-systemd-timesyncd.service-4XND9u: Permission denied (os error 13)\nrg: /tmp/external-sort16094593739674172197: Permission denied (os error 13)\nrg: /tmp/external-sort5922756151829553021: Permission denied (os error 13)\nrg: /tmp/compactor18295890348247896698: Permission denied (os error 13)\nrg: /tmp/futon1b-text-test-6437761803907033093: Permission denied (os error 13)\nrg: /tmp/compactor5327592489989371916: Permission denied (os error 13)\nrg: /tmp/futon1b-candidate-index-test-8445092316332866538: Permission denied (os error 13)\n/tmp/codex27-kernel-dependent-build.log\n/tmp/codex27-kernel-mass-retention-11.lean\n/tmp/codex27-kernel-mass-retention-10.lean\n/tmp/codex27-kernel-build-pass2.log\n/tmp/codex27-kernel-source-audit.json\n/tmp/codex27-kernel-composition.py\n/tmp/codex27-kernel-build-modules.json\n/tmp/codex27-probability-kernel-repro.lean\n/tmp/codex27-kernel-mass-retention-cases.txt\n/tmp/codex27-kernel-build-pass1.log\n/tmp/codex27-kernel-repair-before-axioms.stderr\n/tmp/codex27-kernel-dependent-build-continued.log\n/tmp/codex27-kernel-mass-retention-05.lean\n/tmp/codex27-kernel-mass-retention-08.lean\n/tmp/codex27-kernel-mass-retention-09.lean\n/tmp/codex27-kernel-final-build.log\n/tmp/codex27-kernel-dependent-modules.json\n/tmp/codex27-kernel-mass-retention-04.lean\n/tmp/codex27-probability-kernel-repro.stderr\n/tmp/codex27-kernel-mass-retention-01.lean\n/tmp/codex27-kernel-core.py\n/tmp/codex27-kernel-mass-retention-demo.log\n/tmp/codex27-kernel-core-build.log\n/tmp/codex27-kernel-constructors.py\n/tmp/codex27-kernel-mass-retention-supplement.log\n/tmp/codex27-write-kernel-note.py\n/tmp/codex27-kernel-mass-retention.log\n/tmp/codex27-kernel-repair-before-axioms.lean\n/tmp/codex27-kernel-repair-after-axioms.stdout\n/tmp/codex27-kernel-controls-probe.lean\nfuton2/src/futon2/aif/full_loop_runner.clj:3343:                                 (measurement/finish!\nfuton2/src/futon2/aif/full_loop_runner.clj:3971:              (when (= :receipt (:interpretation-mode opts))\nfuton2/src/futon2/aif/full_loop_runner.clj:3994:                    :construct! (fn [record read-bytes] (receipt-construction/construct! record read-bytes opts))})))\nfuton2/src/futon2/aif/full_loop_runner.clj:4093:                    (measurement/begin! attempt-evidence-dir (:judgment construction-cell)\nfuton2/src/futon2/aif/find_receipt.clj:302:(defn find\nfuton2/src/futon2/aif/cascade_policy.clj:117:(defn organise\n74c298f0 Compute constructed buffer-cleaner costs and retain A/B identifiability limit\na508aa24 Declare constructed buffer-cleaner comparison before arithmetic\nf50f8de9 Retain registry countercheck and hold scoring pending example-domain decision\nb9b3047c Predeclare test-registry record consistency check before cascade scoring\ncae5f6d9 Retain preregistered pre/end fact measurements and move exposures\n983d4c49 Receipt construction: before arm reuses the recorded acting order\n"
+        ]
+      },
+      {
+        "seq": 7,
+        "type": "tool_use",
+        "at": "2026-09-15T17:00:04.728190534Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"tail -4 /tmp/codex27-kernel-final-build.log; cat /tmp/codex27-kernel-source-audit.json; cmp /tmp/codex27-"
+        ],
+        "output": [
+          " Classical.choice,\n Quot.sound]\nBuild completed successfully (8645 jobs).\nEXIT: 0\n{\n  \"unchanged_existing_named_theorem_statements\": 106,\n  \"unchanged_existing_anonymous_examples\": 3,\n  \"approved_changes\": [\n    {\n      \"file\": \"DarkTower/WarMachine/PrecisionWitness.lean\",\n      \"name\": \"weightedReference\",\n      \"before\": \"theorem weightedReference :\\n    variationalFreeEnergy (fun k => (precisionTwo k).value)\\n      (fun _ => precisionReference.weightedError) = \u27e8precisionReference.weightedF\u27e9\",\n      \"afte \u2026[trimmed]\u2026 hine/MachineBeliefDistribution.lean\",\n    \"DarkTower/WarMachine/MachineParameters.lean\",\n    \"DarkTower/WarMachine/MachinePredictiveOutcome.lean\",\n    \"DarkTower/WarMachine/MachinePreferenceDistribution.lean\",\n    \"DarkTower/WarMachine/MachineQ.lean\",\n    \"DarkTower/WarMachine/MachineQWitness.lean\",\n    \"DarkTower/WarMachine/MachineTransition.lean\",\n    \"DarkTower/WarMachine/ObservationKernelWitness.lean\",\n    \"DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean\",\n    \"DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean\",\n    \"DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean\",\n    \"DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean\",\n    \"DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean\",\n    \"DarkTower/WarMachine/ParameterPriorKernelWitness.lean\",\n    \"DarkTower/WarMachine/PolicyPriorKernelNegative.lean\",\n    \"DarkTower/WarMachine/PolicyPriorKernelWitness.lean\",\n    \"DarkTower/WarMachine/PrecisionWitness.lean\",\n    \"DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean\",\n    \"DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean\",\n    \"DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean\",\n    \"DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean\",\n    \"DarkTower/WarMachine/PreferenceDistributionWitness.lean\",\n    \"DarkTower/WarMachine/PreferenceRiskSeparation.lean\",\n    \"DarkTower/WarMachine/PreferenceRiskWitness.lean\",\n    \"DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean\",\n    \"DarkTower/WarMachine/TransitionKernelWitness.lean\",\n    \"DarkTower/WarMachine/VariationalFreeEnergyWitness.lean\"\n  ],\n  \"new_file\": \"DarkTower/WarMachine/ProbabilityKernelRepairNegative.lean\"\n}'DarkTower.WarMachine.Holes.wmFindSnatchF1Containment' depends on axioms: [propext, Quot.sound]\n'DarkTower.WarMachine.Holes.wmFindSnatchF2Receipted' depends on axioms: [propext, Quot.sound]\n'DarkTower.WarMachine.Holes.wmFindSnatchF3NonSelfCertifying' depends on axioms: [propext, Quot.sound]\n'DarkTower.WarMachine.Holes.wmFindSnatchF4Falsifiable' depends on axioms: [propext, Quot.sound]\n'DarkTower.WarMachine.GOverCascades.acyclicDescent_empty' does not depend on any axioms\n'DarkTower.WarMachine.GOverCascades.sameBag_distinct' depends on axioms: [propext]\n'DarkTower.WarMachine.GOverCascades.compositionBlind_cannot_separate' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'DarkTower.WarMachine.GOverCascades.cascadeGrain_separates_sameBag' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\nimport DarkTower.WarMachine.Holes\n\n/-! Rejection controls for finite-support kernels and nonnegative VFE precision.\nEach candidate supplies every field. The rejected obligations are the actual\ninvariants, not missing-field or unrelated conditioning errors. -/\nnamespace DarkTower.WarMachine.ProbabilityKernelRepairNegative\nopen DarkTower.WarMachine.Holes\n\n/--\nerror: unsolved goals\ns : Unit\n\u22a2 False\n-/\n#guard_msgs in\nnoncomputable def duplicateKernel : ProbabilityKernel Unit Unit where\n  support _ := [(), ()]\n  mass _ _ := 1/2\n  nonnegative _ _ := by norm_num\n  normalised _ := by norm_num\n  support_nodup := by intro s; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o; simp_all\n\n/--\nerror: unsolved goals\ncase true\ns : Unit\nh : True\n\u22a2 False\n-/\n#guard_msgs in\nnoncomputable def hiddenMassKernel : ProbabilityKernel Unit Bool where\n  support _ := [false]\n  mass _ b := if b then 100 else 1\n  nonnegative _ b := by cases b <;> norm_num\n  normalised _ := by norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> norm_num at *\n\n/--\nerror: unsolved goals\nx\u271d : Channel\n\u22a2 False\n-/\n#guard_msgs in\nnoncomputable def negativePrecisionCall :=\n  variationalFreeEnergy (fun _ => \u27e8-2, by norm_num\u27e9) (fun _ => 1)\n\nend DarkTower.WarMachine.ProbabilityKernelRepairNegative\n162:        found (finder/find record read-bytes library-root designated)\n179:        diff (policy/organise (:cascade previous) selected repository admitted\n193:                  :precedence-rule :authored-reachability-topological :tie-break :canonical-id\n"
+        ]
+      },
+      {
+        "seq": 8,
+        "type": "text",
+        "at": "2026-09-15T17:00:39.377120243Z",
+        "text": "Read-only verification completed. **These are my bounded facts for consolidation; I will ratify the pinned checklist separately.**\n\n**Kernel repair**\n\n- Landed in **mathlib4 `480a666ad2`**: `ProbabilityKernel` now requires duplicate-free support and zero mass off support; `ExactTable` forwards those obligations; fixtures preserve their declared supported masses; MachineQ composition supplies the proofs.\n- Current evidence: [Holes.lean:7020](/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:7020), with `variationalFreeEnergy` taking `PrecisionMap` and its nonnegativity theorem at [Holes.lean:7100](/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:7100).\n- [Committed negative controls](/home/joe/code/mathlib4/DarkTower/WarMachine/ProbabilityKernelRepairNegative.lean) reject duplicate support, hidden mass and negative precision for their intended obligations.\n- [Final build log](/tmp/codex27-kernel-final-build.log) ends `Build completed successfully (8645 jobs). EXIT: 0`. This is retained execution evidence, **not a rebuild today**.\n- Before/after axiom outputs compare byte-identically: `/tmp/codex27-kernel-repair-{before,after}-axioms.stdout`. The audited find/GOverCascades theorems contain no `sorryAx`. [Source audit](/tmp/codex27-kernel-source-audit.json) records 106 unchanged named theorem statements, three unchanged examples, and only the four approved precision-argument changes.\n- I do **not** have a separately inspected kernel-review acceptance receipt to cite here. Keep author validation and independent acceptance separate.\n\n**Corrections to my four-link trace**\n\n1. **C scope was subsequently settled as terminal `machineC`**, over the twelve dispositions. Do not make completing arbitrary intermediate C\u03c4 members a prerequisite for this commission. C exists; the missing compatible predictive/observation bridge must not be called \u201cmissing C.\u201d\n2. **Target scope is all open missions, plus authorized tickets**, not the historical three-mission canary list \u2026[trimmed]"
+      },
+      {
+        "seq": 9,
+        "type": "done",
+        "at": "2026-09-15T17:00:39.994149628Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 10,
+        "type": "delivery-recorded",
+        "at": "2026-09-15T17:00:42.251111308Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-28 via /api/alpha/invoke/jobs/invoke-1789491575339-21070-498e7b46",
+        "recorded-at": "2026-09-15T17:00:42.249870745Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-28 via /api/alpha/invoke/jobs/invoke-1789491575339-21070-498e7b46",
+      "recorded-at": "2026-09-15T17:00:42.249870745Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789491575339-21070-498e7b46",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": "invoke-41b7b1e3-b049-4c9f-98c8-459479fba62f",
+    "result-summary": "Read-only verification completed. **These are my bounded facts for consolidation; I will ratify the pinned checklist separately.** **Kernel repair** - Landed in **mathlib4 `480a666ad2`**: `ProbabilityKernel` now requi...",
+    "result": "Read-only verification completed. **These are my bounded facts for consolidation; I will ratify the pinned checklist separately.**\n\n**Kernel repair**\n\n- Landed in **mathlib4 `480a666ad2`**: `ProbabilityKernel` now requires duplicate-free support and zero mass off support; `ExactTable` forwards those obligations; fixtures preserve their declared supported masses; MachineQ composition supplies the proofs.\n- Current evidence: [Holes.lean:7020](/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:7020), with `variationalFreeEnergy` taking `PrecisionMap` and its nonnegativity theorem at [Holes.lean:7100](/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean:7100).\n- [Committed negative controls](/home/joe/code/mathlib4/DarkTower/WarMachine/ProbabilityKernelRepairNegative.lean) reject duplicate support, hidden mass and negative precision for their intended obligations.\n- [Final build log](/tmp/codex27-kernel-final-build.log) ends `Build completed successfully (8645 jobs). EXIT: 0`. This is retained execution evidence, **not a rebuild today**.\n- Before/after axiom outputs compare byte-identically: `/tmp/codex27-kernel-repair-{before,after}-axioms.stdout`. The audited find/GOverCascades theorems contain no `sorryAx`. [Source audit](/tmp/codex27-kernel-source-audit.json) records 106 unchanged named theorem statements, three unchanged examples, and only the four approved precision-argument changes.\n- I do **not** have a separately inspected kernel-review acceptance receipt to cite here. Keep author validation and independent acceptance separate.\n\n**Corrections to my four-link trace**\n\n1. **C scope was subsequently settled as terminal `machineC`**, over the twelve dispositions. Do not make completing arbitrary intermediate C\u03c4 members a prerequisite for this commission. C exists; the missing compatible predictive/observation bridge must not be called \u201cmissing C.\u201d\n2. **Target scope is all open missions, plus authorized tickets**, not the historical three-mission canary list. Target selection remains with controller-authority.\n3. **Find runtime is now implemented and independently accepted:** futon2 `e8760f25`, [find_receipt.clj:302](/home/joe/code/futon2/src/futon2/aif/find_receipt.clj:302).\n4. **Ruled organiser runtime is implemented and accepted:** `bd803bc0`, with admissions correction in `24dc6068`; [cascade_policy.clj:117](/home/joe/code/futon2/src/futon2/aif/cascade_policy.clj:117).\n5. **Their construction call sites now exist under explicit `:interpretation-mode :receipt`:** `24dc6068`, owner fixes `706ca3e8` and `983d4c49`; [receipt_construction.clj:162](/home/joe/code/futon2/src/futon2/aif/receipt_construction.clj:162), [runner:3971](/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj:3971). This closes source-level integration, **not verified serving activation or a qualifying click**.\n6. My trace\u2019s proposed treatment of opaque `find` is **not itself a ruling**. Preserve the approved opacity boundary; require the relevant refinement/conformance evidence rather than automatically demanding replacement.\n7. **Measurement packet `cae5f6d9` is delivered:** preregistered plans, pre/end facts and exposures through existing retention. Author validation: 207 tests / 1,228 assertions, kondo 0/0, parens clean. I have not received independent acceptance for it in this thread.\n\n**Requirements the consolidated checklist must retain**\n\n- Valid probability carriers do not establish that production estimates are supported by data.\n- Runtime cascade G must match the accepted grain, horizon and policy semantics\u2014not merely reuse the controller\u2019s action score.\n- Bridge/transition estimates need eligible observations, explicit priors/smoothing, and typed handling of missing data.\n- Find\u2019s independent F2 expectations and F4 designation must remain distinct; production\u2019s empty F4 designation is explicitly vacuous.\n- Preserve full occurrence/epoch joins, independent end measurements, and exact selected/enacted policy correspondence.\n- Link 4 requires a recorded **ordinary receipt-mode run actually exercising these functions**. Unit tests, constructed examples, stop-line constructors and successful refusals do not establish that successful-use claim.\n\nI have no qualifying production-click evidence for the newly connected path to contribute.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789491575339-21070-498e7b46",
+      "at": "2026-09-15T17:00:39.994120193Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-15T17:00:39.994120193Z",
+    "created-at": "2026-09-15T16:59:35.339124235Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

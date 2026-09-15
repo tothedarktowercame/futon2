@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789492721253-21124-baa173dd",
+  "agent-id": "codex-26",
+  "session-id": "01a097ff-471a-72d3-b10b-54d01eaa14e0",
+  "state": "done",
+  "created-at": "2026-09-15T17:18:41.253669728Z",
+  "finished-at": "2026-09-15T17:19:26.563578241Z",
+  "result": "**CHANGES REQUIRED** on verified hash **`56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`**.\n\nOne concrete renaming error remains:\n\n- **E03:** \u201cComplete **WM-11** acquisition/adapter\u201d must refer to the original **F11 certificate acquisition/adapter**.\n- **E04:** \u201cAccepted **WM-11/F2** reconciliation\u201d must remain **F11/F2 reconciliation**, linked to WORK-REMAINING row 27.\n\nWM-11 denotes candidate priors/posteriors. It is not the certificate producer. Revision 1 had these references correctly; the checklist-ID conversion changed their meaning.\n\nMy other R1 corrections are incorporated. I support the incomplete verdict, Item 5\u2019s all-node requirement, the scoped mathematical accomplishments, and the explicit source/serving/run distinctions. My support does not independently verify other owners\u2019 deployment reports, the entire paper census, or roster completeness.\n\nNo tests, edits, deployment or dispatches performed. Please send the corrected hash for assent.",
+  "result-summary": "**CHANGES REQUIRED** on verified hash **`56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`**. One concrete renaming error remains: - **E03:** \u201cComplete **WM-11** acquisition/adapter\u201d must refer to the ..."
+}

@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789492957380-21177-294777e5",
+  "agent-id": "codex-12",
+  "session-id": "01a085fa-1198-7fe3-8706-fe2c5a6cb807",
+  "state": "done",
+  "created-at": "2026-09-15T17:22:37.380987217Z",
+  "finished-at": "2026-09-15T17:23:04.164441960Z",
+  "result": "AGREE \u2014 exact SHA-256 `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`.\n\nThe committed source, working copy, and immutable Revision 4 copy are byte-identical. I verified the Revision 3 code-only changes and the Revision 4 corrections to `E03`, `E04`, and the row-39 crosswalk. The F11 references now distinguish the existing worklist certificate/F2 reconciliation from checklist `WM-11`; adding `WM-13` correctly preserves the C-family obligation.\n\nMy evidence-backed bounds remain `basis-3`, `basis-4`, `basis-5`, `built-10`, `built-12`, `R9`, `R10`, `R20`, `TRACE`, `E02`\u2013`E05`, `join-6`\u2013`join-9`, and `sub-5`\u2013`sub-8`. I accept the remaining entries only as an honest open/partial/unresolved checklist, without independently validating their mathematical, semantic, historical, serving, roster, or publication claims. This is not certification of WM completion or a qualifying run. No correction required.",
+  "result-summary": "AGREE \u2014 exact SHA-256 `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`. The committed source, working copy, and immutable Revision 4 copy are byte-identical. I verified the Revision 3 code-only chang..."
+}

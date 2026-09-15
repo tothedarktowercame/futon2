@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789492713101-21120-c8e2729e",
+  "agent-id": "codex-22",
+  "session-id": "01a096e4-a8b8-75d2-a6ab-c1e490c32585",
+  "state": "done",
+  "created-at": "2026-09-15T17:18:33.101721624Z",
+  "finished-at": "2026-09-15T17:19:14.038970337Z",
+  "result": "AGREE on exact SHA-256 `56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`.\n\nI verified the p4ng source and immutable futon2 review copy are byte-identical. My assent is bounded to the checklist\u2019s obligations and to the belief, measured-A, close-retention, categorical-ambiguity, and machine-Q lanes I inspected directly. It is not certification that the WM works, ratification of unresolved C semantics, or evidence of deployment.\n\nThe revision correctly records:\n\n- Row 7 categorical belief versus Row 13 accumulation as different computations.\n- Zero qualifying measured-A statuses and 0/86 licensable historical closes.\n- Observer independence, blinding, predeclared sampling, exact review, immutable cutoff evidence, sparse-data handling, and no automatic smoothing.\n- Close-retention as source acceptance only, without a post-change production close.\n- Machine-Q adapter/interface/retention as built but the production resolver and flip still absent.\n- Terminal C scope without silently narrowing the broader C-family obligation.\n- Serving/source/click distinctions and unresolved roster/history.\n\nI read \u201cRubric/validator and admission mechanisms exist\u201d in WM-04 narrowly as the pure validator and close-retention carrier\u2014not as an implemented evidence-manifest acquisition path; WM-04 and E02 explicitly keep that path open. No residual correction is required within my bounded lanes.",
+  "result-summary": "AGREE on exact SHA-256 `56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`. I verified the p4ng source and immutable futon2 review copy are byte-identical. My assent is bounded to the checklist\u2019s obliga..."
+}

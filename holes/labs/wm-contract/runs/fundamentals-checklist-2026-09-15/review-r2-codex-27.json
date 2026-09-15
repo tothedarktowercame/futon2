@@ -1,0 +1,10 @@
+{
+  "job-id": "invoke-1789492722466-21125-c28654c2",
+  "agent-id": "codex-27",
+  "session-id": "01a0a152-fca5-7ee1-b108-16f84ac40a10",
+  "state": "done",
+  "created-at": "2026-09-15T17:18:42.466530978Z",
+  "finished-at": "2026-09-15T17:19:38.571982463Z",
+  "result": "**CHANGES REQUIRED** on SHA256 **`56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`**. Both local copies match.\n\nMy R1 corrections are incorporated satisfactorily. One residual identifier error needs correction:\n\n- **E03:** \u201cWM-11 acquisition/adapter\u201d should retain **F11 mission acquisition/adapter**.\n- **E04:** \u201cAccepted WM-11/F2 reconciliation\u201d should remain **Accepted F11/F2 reconciliation**.\n\nChecklist WM-11 means candidate prior/posterior. The existing **F11 mission** is a different referent: [WORK-REMAINING:1156](/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1156) explicitly requires its F2 reconciliation and repair-024 discharge; [CONVERGENCE-PLAN:7](/home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md:7) identifies its FullAttestation/QualifyingRun acquisition work. The prefix conversion must not substitute the posterior obligation.\n\nAlso update the row-39 cross-reference to include **WM-13**, now the explicit broader C-family item.\n\n**Bounded assent otherwise:** my kernel/find/organise/construction evidence and limits are accurately represented; packet scope does not waive broader C; the prediction/enactment discrepancy and F4 scope remain open. I endorse the ALL-nodes completion criterion and the prohibition on substitute evidence. I have not independently verified other agents\u2019 deployment reports or roster completeness.\n\nRead-only review only; no tests, deployment actions or publication.",
+  "result-summary": "**CHANGES REQUIRED** on SHA256 **`56153f1b8baf9c5f904d879d4b5b37c2c5ea5a475a99594b4416ceddcc16c7fa`**. Both local copies match. My R1 corrections are incorporated satisfactorily. One residual identifier error needs co..."
+}

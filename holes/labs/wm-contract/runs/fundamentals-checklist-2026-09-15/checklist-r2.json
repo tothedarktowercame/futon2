@@ -1,0 +1,356 @@
+{
+  "source": "/home/joe/code/p4ng/CHECKLIST-fundamentals.md",
+  "sha256": "9fa930eec403fd5782bd68ac910e328ce0357a61f2071dc17acb72271dffd075",
+  "revision": 2,
+  "ratified": false,
+  "items": [
+    {
+      "checked": true,
+      "text": "**built-1** Repaired shared probability carrier and nonnegative precision (`mathlib4 480a666ad2`); author build/negative controls exist, independent acceptance still needs its own record.",
+      "source-line": 34,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-2** Terminal `machineC` and runtime seed/risk; this is one member, not the whole C family.",
+      "source-line": 35,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-3** Finite cascade-G Lean definition and scoped composition controls (`79ac55d5d0`, `2b22eeef31`); no production scorer/selection by it yet.",
+      "source-line": 36,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-4** Probability-constructor source/proof/reference packets, with declared-prior, float and placeholder-A limits (WORK-REMAINING 6\u201311); production integration remains open.",
+      "source-line": 37,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-5** Dirichlet accumulation recurrence and update-input retention seam (rows 12\u201313); the complete learning/next-choice chain is not thereby validated.",
+      "source-line": 38,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-6** Snatch find record-law certificates and runtime receipted find (`e8760f25`); not a live-behavior proof.",
+      "source-line": 39,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-7** Ruled organiser definition/runtime (`F12RuledCarrier`, `bd803bc0`, `24dc6068`); semantic and review gaps remain below.",
+      "source-line": 40,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-8** Receipt construction source call sites (`24dc6068`, `706ca3e8`, `983d4c49`); not enabled by the serving caller and not run-evidenced.",
+      "source-line": 41,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-9** All-open-mission/T-ticket controller source changes; claude-20 reports loaded controller/status resolver on September 15, but no later click. Action scoring is not cascade G.",
+      "source-line": 42,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-10** On-demand gated machinery entrypoint and grounded machinery attempts, including r8; not an all-node qualifying run.",
+      "source-line": 43,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-11** Bounded commissioned R10 dispatch/reservation/duplicate-refusal evidence; remaining assurance joins are below.",
+      "source-line": 44,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": true,
+      "text": "**built-12** Typed witness/certificate/checkpoint mechanisms; complete acquired semantic validation and a positive qualifying run remain open.",
+      "source-line": 45,
+      "scope": "bounded artifact only"
+    },
+    {
+      "checked": false,
+      "text": "**WM-01 \u2014 Sound, shared probability and model carriers.** **PARTIAL:** bind dependent proofs and admitted witnesses to the repaired source; verify repair acceptance and avoid inheriting old admissions by filename. Record State/Action/Outcome, model revision and numeric semantics consistently. [K,L] Built evidence: mathlib4 `480a666ad2` adds duplicate-free support, zero mass off support and nonnegative PrecisionMap; author reports committed rejection controls and successful build. Independent acceptance receipt not yet supplied.",
+      "source-line": 51,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-02 \u2014 Current belief becomes the model's state distribution.** **PARTIAL:** prove the actual post-update entity/context distribution reaches the production cascade predictor; no fabricated joint state or uniform fallback. [W rows 7,13; T] Built evidence: Row 7 supplies the categorical single-entity belief reader with float admission; row 13 supplies Dirichlet accumulation and an update-input retention seam. These are different computations.",
+      "source-line": 53,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-03 \u2014 Action-conditioned B matches the machine's declared dynamics.** **PARTIAL:** full live action/pattern interpretation coverage, same B at prediction and belief-update consumers, complete policy-plan bindings, measured-vs-declared provenance. Joe permits attested or documented THEN interpretations (September 7 ruling, line 309); not every B must be a success-frequency estimate. Such interpretation still needs independent validation of applicability, and is not evidence that the effect occurred. The two-action reference does not cover the production domain. [W8,W14,D,S] Built evidence: Row 8 source module, proofs and reference witness exist for declared priors.",
+      "source-line": 55,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-04 \u2014 Observation A has the required observed authority and compatible domain.** **OPEN:** independently authorized, blinded observation and distinct exact-subject review; predeclared close eligibility/sampling; immutable pre-cutoff admitted literal evidence; exact entity/occurrence/cutoff joins; then accepted categorical labels, measured A and admitted assembly. Insufficient/ambiguous/conflicting findings contribute no label or count. Distinguish unobserved rows from observed zero-frequency cells; retain denominators/coverage, refuse unsupported assembly and assign follow-on collection. No invented mass or automatic smoothing. One real accepted label still does not establish full coverage. [W14,D] Built evidence: Rubric/validator and admission mechanisms exist. Exercise 7 acceptance (September 15, 7f4d13a4) is evidence-insufficient and reports 0/7 qualifying statuses. Codex-22 reports a retained-close census of 0/86 licensable closes; that is a bounded historical census, not a newly rerun count.",
+      "source-line": 57,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-05 \u2014 Q(s|pi) and Q(o|pi) are constructed from those inputs over the full policy.** **PARTIAL:** real cascade plans, measured-A authority and declared/validated B/context feed the actual scorer; every horizon step and model identity retained. Standalone constructor acceptance is not live integration. [W6\u20139,W14,T] Built evidence: Rows 6/9 supply multi-step modules, generic laws and independent reference calculations, with float and placeholder-A caveats.",
+      "source-line": 59,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-06 \u2014 C is the specified preference distribution on Q's outcome domain.** **PARTIAL:** actual matched Q/C scorer consumption and evidence. Owner bell `invoke-1789481249314-21037-9af06802` limits one interpretation-design packet to terminal machineC; it does not narrow the whole build. The proposed state-to-disposition bridge remains subject to the model/C authority; a constant adapter is not evidence of state-dependent prediction. Preserve zero-preference refusal and exclusion of preferences over evidence content. No replacement preference numbers are implied. The full C-family obligation is separately retained below. [T,C,S] Built evidence: Ruled terminal `machineC`, twelve tagged masses, seven zeros, normalized seed and supplied-kernel risk exist. Channel preferences demonstrably affect controller scores.",
+      "source-line": 61,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-07 \u2014 Parameter prior/posterior and information gain have machine meaning.** **PARTIAL:** actual model inputs and observations, refresh of registrations after A/model changes, actual epistemic consumer and evidence. Continuous Dirichlet claims cannot be inferred from a finite-hypothesis witness. [W11,W14,L] Built evidence: Row 11 finite registered-hypothesis module and Bayes/reference checks exist.",
+      "source-line": 63,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-08 \u2014 `find` admits applicable real patterns with source-bound interpretation receipts.** **PARTIAL:** serving activation and an ordinary receipt-mode run with real source-bound interpretations and independent F2 expectation evidence. F4 needs independent designation and must state its vacuity honestly; whether qualifying production must be nonvacuous or an external commissioning control suffices is UNRESOLVED. The packet permits production designation nil under owner bell `invoke-1789486651305-21044-14330937`, honestly vacuous. An interpreter cannot supply its own independent F4 designation. Source-level integration is creditable; it is not recorded successful use. [T,L,S] Built evidence: Opaque interface, F1\u2013F4 laws and recorded-table certificates exist. Runtime `find_receipt` (`e8760f25`) and explicit receipt-mode construction (`24dc6068`, owner fixes `706ca3e8`/`983d4c49`) now exist; claude-20 independently reviewed codex-27's implementation; owner follow-up fixes have not themselves received independent review.",
+      "source-line": 65,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-09 \u2014 `organise` constructs the ruled attributed cascade change.** **PARTIAL:** serving activation, ordinary constructed family and click receipt with preserved authored relations, nonvacuous no-bootstrap/precedence/acting evidence and exact downstream policy identity. Legacy `organise` still has a sorry; its replacement must be explicitly connected. [T,L] Built evidence: Four-input F12RuledCarrier and Snatch formal exemplar exist. Runtime `bd803bc0`, admissions repair `24dc6068`, and receipt-mode call sites now exist; claude-20 independently reviewed codex-27's implementation; owner follow-up fixes have not themselves received independent review.",
+      "source-line": 67,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-10 \u2014 G evaluates whole interpreted cascades using the AIF law.** **OPEN:** runtime implementation of this definition, independent numeric correspondence, complete real candidate family, compatible C/model, and a selection that actually consumes these scores. Receipt construction explicitly emits `:cascade-g-not-computed`. This is the existing worklist **F13** obligation (mapped here, not retired or renumbered in the worklist). Action/channel Gaussian controller scores do not discharge this. [T,S,L] Built evidence: mathlib4 `79ac55d5d0` (`CascadeEFE.lean`) and `2b22eeef31` (`CascadeEFEPolicies.lean`, rewritten `GOverCascades.lean`) define finite guarded transitions, horizon predictions, risk+conditional ambiguity, equivalent information-gain expression, and composition-sensitive controls. Old arbitrary Lean score is replaced by a canonical alias. Earlier audit L predates these repairs; use their own build/axiom receipts, not that older audit as proof of acceptance.",
+      "source-line": 69,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-11 \u2014 Candidate prior/posterior and choice preserve full policy identity.** **PARTIAL:** full cascade+precedence identity, declared prior/choice rule, applicable per-policy F and complete detail coverage, no mission-only identity collapse, and independent selected-to-enacted correspondence. Prior-only mathematics is not the observed-data posterior. Proposed fuel accounting in selection is pending, distinct from variational F; runtime charging does not establish it. [S,T,W16,W23] Built evidence: Mathematical admissible priors and some production-pinned policy/posterior witnesses exist.",
+      "source-line": 71,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-12 \u2014 Horizon, interaction, hierarchy and interpretation mean what the specification says.** **OPEN:** legitimate current anticipation, effective horizon >=2 and FPI consumer evidence; fair common observation schedule; order/overlap and nested interpretation correspondence. No policy-length penalty from raw sums over different horizons. Declared extrapolations and constructed arithmetic are not established world dynamics. Preserve pending paired fairness/composition, nonfiring-versus-progressing and concrete compounding-misspecification controls and evidence-bound interpretation admission. Shared-T proofs alone do not settle the later Alexander formulation; universal worsening and metadata-only ordering are unproved proposals, not adopted facts. [S,H,T] Built evidence: Shared-horizon mathematics and scoped composition/independence examples exist.",
+      "source-line": 73,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-13 \u2014 C as a family across grain and time, connected to real work.** **OPEN:** complete the grain-indexed family and processual/terminal connection at compatible observation domains with declared composition/revision authority. Grain and time indexing are different. PreferenceLadderDraft supplies family/bridge types, not production correspondence. Preserve communicable-witness existence as an outcome facet while excluding preferences over evidence content. FoldC must retain exact layer identities, order, composition operators, support and provenance at the actual consumer; FoldCWitness's empty runtimeFoldedLayers/constructed order example is not the present runtime fold. Mission layer remains undeclared; the general Holes.C declaration remains sorry. Terminal-only packet scope does not close this. Specific WANT-fact/softness proposals are not adopted by this checklist. Built evidence: Terminal seed is built; September 8 Items 14\u201317 and September 9 Item 19a explicitly require the broader family/derivation and connection.",
+      "source-line": 75,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**WM-14 \u2014 In-loop agent interpretation, missing-pattern authoring and search feedback.** **OPEN:** actual agent interpretation in the loop, bounded ARGUE/genesis for missing patterns and a feedback test/path to reconsider retrieval when picks do not help, with source-bound evidence and independent review. A token compiler or a list of unhelpful picks cannot substitute. Built evidence: Source interpretation/retrieval/receipt machinery exists. Joe's September 15 session instructions are reported by claude-20; the supplied transcript line numbers no longer resolve in the current shortened file, so immutable original-event retention is still requested.",
+      "source-line": 77,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R1 belief.** **PARTIAL:** current real belief used by the same admitted model and subsequent selection. WM-02/WM-05. Built evidence: Categorical state/carry and pinned correspondence records",
+      "source-line": 86,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R2 observation.** **PARTIAL:** independent observed authority, currency, complete observation-to-update/learn joins. WM-04. Built evidence: Structured observations and retained update envelopes",
+      "source-line": 88,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R3 update.** **PARTIAL:** real event/A/B/model-bound update witness and downstream effect; recorded initialization is not a measured update. Built evidence: Filter/update implementation and some pinned calculations",
+      "source-line": 90,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R3a prediction error.** **PARTIAL:** current binding and source-to-consumer edges in the qualifying record; preserve hosting distinctions. Built evidence: Projection source and measured consumer evidence",
+      "source-line": 92,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R4 forward model.** **PARTIAL:** WM-03\u2013WM-05 on the actual cascade path, with shared dynamics. Built evidence: Channel predictor and separate machine predictor modules",
+      "source-line": 94,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R5 expected free energy.** **OPEN:** WM-06/WM-10 connected and witnessed in production. Built evidence: Canonical Lean cascade definition; standalone risk/categorical ambiguity arithmetic",
+      "source-line": 96,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R6 action/policy space.** **PARTIAL:** WM-08\u2013WM-11, complete candidate authority over all open missions and live T-tickets, actual choice/enactment and a regression guard against restoring the old three-mission restriction. Ticket source handoff explicitly did not claim deployment. Built evidence: Retrieval, action ranking, posterior components; September 15 controller/ticket source changes",
+      "source-line": 98,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R7 channel precision.** **PARTIAL:** current input/update/consumer chain and relevant gain applicability; do not confuse channel precision with policy precision. Built evidence: Running mechanism and pinned equation witness",
+      "source-line": 100,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R8 present fit / policy F.** **PARTIAL:** applicable live policy F/detail coverage and posterior use. Exact retired legacy scalar is not a whole-node exemption. Built evidence: Equation components and F_pi witness machinery",
+      "source-line": 102,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R9 independent certification.** **OPEN:** authenticated genesis, retained exact review commissions, independent producer/reviewer binding and production consumer. Parking deployment does not satisfy this node. Built evidence: Refusing join checker, real-pair partial joins, typed anchor refusal",
+      "source-line": 104,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R10 entrypoint.** **PARTIAL:** bounded R2/predecessor joins and full required lifecycle evidence. Current commissioned HTTP\u2192run-scheduled-dispatch evidence, reservation recorded and duplicate refusal are credited as reported in the newer DAG status; dispatch itself is not listed as missing. A functioning click is not full R10 assurance. No cron restoration is required by Item 2 amended. Built evidence: On-demand gated entrypoint; later commissioned dispatch evidence reported",
+      "source-line": 106,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R11 hierarchical budget.** **OPEN:** actual ranked-field shared-budget restriction and consumer, independent lifecycle evidence. All seven required lifecycle cells remain obligations; reporting them absent does not complete R11. Built evidence: Standalone arbitration and some integration work; census admits absences",
+      "source-line": 108,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R12 two-layer calibration.** **UNRESOLVED:** reconcile the historical Campaign S claims (P121/P125/P130) with original records, and retain current producer/consumer plus independently grounded Layer 2 evidence. Layer 1 must remain labelled never-value-evidence. Catalogue R12 is not the differently numbered hyperparameter-inference contract. Do not silently omit this node because the recent DAG focuses elsewhere. Built evidence: Catalogue distinguishes internal and external calibration. Historical V7 census retained 892 records/69 R12 routes, but zero calibration-field/process-identity records; its seven checks and four controls pass only that census scope",
+      "source-line": 110,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R13 depth.** **OPEN:** legitimate effective depth >=2, actual branch computations and same-run continuations. A requested configuration is insufficient. Built evidence: Definition/reference witness and depth branch source",
+      "source-line": 112,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R14 commitment.** **PARTIAL:** applicable posterior/gain law, actual selection influence and R20 composition. Variational-mode insensitivity cannot be counted as successful modulation. Built evidence: Temperature/precision components and pinned witnesses",
+      "source-line": 114,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R15 hierarchy/timescale.** **PARTIAL:** slow-state prior and selection influence, independent outcome-to-next-state feedback, full lifecycle acquisition; a phase change is not the entire hierarchical model. Built evidence: Slow-state implementation and machinery feedback examples reported",
+      "source-line": 116,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R16 actuation, including realised cascade witness.** **PARTIAL:** exact independently witnessed execution of the selected cascade, retained guarded interpretation, re-observed outcome and continuation. Comparing the selected input to itself at construction does not prove enactment. Built evidence: Grounded machinery attempts, author/reviewer/close records and construction validation",
+      "source-line": 118,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R17 structure learning.** **PARTIAL:** actual observation-to-count-to-model-change-to-next-decision chain over real capability substrate; nonvacuous BMR evidence. Built evidence: Accumulation recurrence, anti-recount and model-reduction components",
+      "source-line": 120,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R17-variants \u2014 R17', R17'', R17''', R16\u2192R6.** **UNRESOLVED:** separately establish exploration-bonus/core separation controls (P095), exact embedding-proposal\u2192BMR verdict (P096), genesis/admission/repeated review (P097\u2013P099, WM-14), and live outcome\u2192proposal\u2192later selection (P100\u2013P105); generation alone is not validated structure learning. Built evidence: P095\u2013P105 separately inventory these claims: exploration bonus source, proposal/reduction machinery, missing connected genesis and outcome-to-proposal learning, and historical comparison claims",
+      "source-line": 122,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R19 preferences.** **PARTIAL:** WM-06's compatible predictive bridge plus WM-13 and declared authorship, composition and revision provenance. Built evidence: Terminal seed and channel C as WM-06",
+      "source-line": 124,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**R20 self-monitoring.** **PARTIAL:** genuine-trip snapshot/history, applicable trip\u2192R14 composition, discharge restoration and actual decision effect; catalogue-wide coverage not implied by narrow receipts. Built evidence: Live trips (including loaded-code drift), refusing checks and bounded Agency reliability receipts",
+      "source-line": 126,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**TRACE \u2014 TRACE and connections.** **PARTIAL:** complete current node/edge census, semantic identity and actual mandatory-edge firing in the same run. Include R6\u2192R13\u2192R14\u2192R16\u2192R2; reconcile conditional and retired edges and drawn/source differences. Built evidence: Durable checkpoints, terminal records, source pins and some joined receipts",
+      "source-line": 128,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**E01 \u2014 Machine-level validity, not just equation arithmetic.** **OPEN:** show model inputs and policy semantics address the intended real work; bind implementation to those definitions. Finite fixtures and recorded tables alone cannot establish this.",
+      "source-line": 137,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**E02 \u2014 Producer/consumer retention and independent acquisition.** **PARTIAL:** checkpoints and emitters exist. Complete immutable census universes, model threading, evidence-manifest acquisition, freshness, exact commission preimages and independent semantic ownership remain required. Close-retention source acceptance at `3a6f4f61` does not establish that a post-change production close used it.",
+      "source-line": 139,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**E03 \u2014 Complete rejecting certificate pipeline.** **PARTIAL:** typed attestation/generator machinery exists. Complete WM-11 acquisition/adapter, source binding, semantic predicates, rejecting controls and end-to-end tamper tests. A complete record of failures is useful but is not positive validation.",
+      "source-line": 141,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**E04 \u2014 Accepted WM-11/F2 reconciliation.** **OPEN:** exact author\u2192independent review\u2192gates\u2192grounded discharge evidence for row 27; do not inherit a repair packet's completion prose.",
+      "source-line": 143,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**E05 \u2014 Qualifying timestamped run + Lean validation.** **OPEN:** every required node and connection positively validated at the specified meaning, actual real work, retained inputs/outputs and independently computed certificate. Machinery r8 and annotation A8 cannot replace this.",
+      "source-line": 145,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**E06 \u2014 All operational paper claims reconciled.** **OPEN:** the 150-row completion inventory, including seven historically refuted claims, all unresolved/missing claims, current additions and deletions, matched to actual scoped evidence. Rewrite to facts; do not lower the build requirement by rewriting the promise away.",
+      "source-line": 147,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**E07 \u2014 Cross-paper promises and historical evidence.** **PARTIAL:** companion referent ruling exists. Pin actual delivered formal/experimental sections; locate or explicitly dispose of missing historical artifacts, correct stale proof counts and unsupported validation wording, including the still-stale fundamentals table generated from the September 5 census. The fetched PLoP snapshot claimed two sorry declarations while the September 15 audit found nine; claude-20 reports paper correction `7080b18`, which is not retroactive correction of the retained page snapshot.",
+      "source-line": 149,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**E08 \u2014 Wider purpose, including humans and goal formation.** **OPEN:** evidence for all four apex requirements, including participant feedback and accountable formation of goals. The choice of an already supplied task is insufficient for goal formation.",
+      "source-line": 151,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**E09 \u2014 Staged capability-zone/native-currency scope reconciled.** **UNRESOLVED:** retain historical S1.5 acceptance, staged paper status and remaining load/demand/currency claims separately. No automatic rebuild, promotion or exclusion by presentation.",
+      "source-line": 153,
+      "scope": "open completion obligation"
+    },
+    {
+      "checked": false,
+      "text": "**E10 \u2014 Closure, publication and agreement.** **OPEN:** all required owners ratify this exact account; record each participant's role/evidence basis, unresolved roster candidates and documented succession; keep roster completeness unresolved until reconciled. Paper/board status must point to the agreed revision. Joe retains acceptance of the qualifying fact.",
+      "source-line": 155,
+      "scope": "open completion obligation"
+    }
+  ]
+}

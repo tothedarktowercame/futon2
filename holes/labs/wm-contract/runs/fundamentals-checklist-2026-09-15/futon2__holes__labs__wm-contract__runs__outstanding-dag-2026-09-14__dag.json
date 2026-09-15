@@ -1,0 +1,4674 @@
+{
+  "schema": "wm/outstanding-dependency-dag-v1",
+  "as-of": "2026-09-14T12:06:58.933836+00:00",
+  "author": "codex-26",
+  "commission": "invoke-1789386739928-20782-ec4646d4",
+  "scope": "discovery-only",
+  "review-status": "author-source-reviewed-awaiting-lead-independent-review",
+  "edge-direction": "prerequisite -> dependent; normal incoming edges are AND; conditional ruling branch is OR and excluded from topological metrics",
+  "state-policy": "Only unfinished work is in nodes. DONE baselines are recorded separately; built-not-wired includes implemented machinery awaiting real integration/evidence. in-flight is commission status, not independent acceptance.",
+  "sources": [
+    {
+      "id": "r6-authority",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row22-r6-scoring-correspondence-2026-09-13.md",
+      "sha256": "fb8176bc6e2c01d8e65e9079f3552a846bc24bbdb4d58e107e4d0457eb0c9bd3",
+      "bytes": 9271,
+      "snapshot": "sources/r6-authority.md",
+      "lines": 146
+    },
+    {
+      "id": "feedback-contract",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/CONTRACT-e6b-prospective-retrospective-v1-2026-09-13.md",
+      "sha256": "0e7a5549f64c65ed85bb6a60f0bf8a8435f622c28be7e4bc46e531512f41f584",
+      "bytes": 8449,
+      "snapshot": "sources/feedback-contract.md",
+      "lines": 163
+    },
+    {
+      "id": "tracker",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md",
+      "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+      "bytes": 70515,
+      "snapshot": "sources/tracker.md",
+      "lines": 1207
+    },
+    {
+      "id": "decisions",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md",
+      "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+      "bytes": 14095,
+      "snapshot": "sources/decisions.md",
+      "lines": 236
+    },
+    {
+      "id": "rulings",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/RULINGS-walkthrough-2026-09-12.md",
+      "sha256": "9a20cbb57e57c9c9f5c3c19e67be663de1b7f779d45b92734b01f48c53a575e0",
+      "bytes": 14420,
+      "snapshot": "sources/rulings.md",
+      "lines": 259
+    },
+    {
+      "id": "convergence",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md",
+      "sha256": "8656824061db951460896fec3345ddcc5dcb7dc070c7ae1214eaabd5d31cc0c5",
+      "bytes": 4926,
+      "snapshot": "sources/convergence.md",
+      "lines": 26
+    },
+    {
+      "id": "blocker",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md",
+      "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+      "bytes": 5364,
+      "snapshot": "sources/blocker.md",
+      "lines": 95
+    },
+    {
+      "id": "row14-discovery",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-discovery-2026-09-12.md",
+      "sha256": "c9694e660b62bd5c5271ec4293fc3f023b96b8137b388817b219676ecbbc6a0a",
+      "bytes": 8804,
+      "snapshot": "sources/row14-discovery.md",
+      "lines": 149
+    },
+    {
+      "id": "annotation",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/SPEC-measured-a-annotation-v1.md",
+      "sha256": "6815b48da949ee9b3b1aa87b5f4221f5852602910ac241ffcbc39454810522ec",
+      "bytes": 3834,
+      "snapshot": "sources/annotation.md",
+      "lines": 69
+    },
+    {
+      "id": "annotation-receipt",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/execution-receipts.edn",
+      "sha256": "00cef29552755df2d71a7bb73e54a963c10d45803098039ed8296468cc97a150",
+      "bytes": 2319,
+      "snapshot": "sources/annotation-receipt.edn",
+      "lines": 40
+    },
+    {
+      "id": "r11-refresh",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/TN-r11-census-refresh-discovery-2026-09-13.md",
+      "sha256": "9436037744e1c6e7cb5240b0b9060022c22bb3061da41ffdda73cdb905972d0b",
+      "bytes": 3448,
+      "snapshot": "sources/r11-refresh.md",
+      "lines": 66
+    },
+    {
+      "id": "inventory",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md",
+      "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+      "bytes": 17775,
+      "snapshot": "sources/inventory.md",
+      "lines": 281
+    },
+    {
+      "id": "zones",
+      "path": "/home/joe/code/futon0/holes/missions/M-capability-zones.md",
+      "sha256": "85e92f3c6f5d2b48e19ea0d045b3505ae48f511fc8e6121630e67e7fb784f86b",
+      "bytes": 27189,
+      "snapshot": "sources/zones.md",
+      "lines": 362
+    },
+    {
+      "id": "slow-semantics",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-e5-e6-semantic-integration-2026-09-13.md",
+      "sha256": "73ffd42478b41ee05adf1044a0cb067f6f1146f3f958973f297e23776b8e7a01",
+      "bytes": 8665,
+      "snapshot": "sources/slow-semantics.md",
+      "lines": 168
+    },
+    {
+      "id": "slow-review",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-22-e5-e6-semantic-integration-2026-09-13/lead-review.md",
+      "sha256": "be96a2cd9ca3f4a5e51e7156d687d969e69ea4a5901092336eb2eaf968ab6795",
+      "bytes": 1426,
+      "snapshot": "sources/slow-review.md",
+      "lines": 11
+    },
+    {
+      "id": "precision",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-proposal-v1.md",
+      "sha256": "cbc928bdad6b0cc9c27822722a6c77fa581d0201352d02291e5f5663d9eaf9b8",
+      "bytes": 8839,
+      "snapshot": "sources/precision.md",
+      "lines": 167
+    },
+    {
+      "id": "variance",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-variance-v1.md",
+      "sha256": "5f6a1e07be6042fbbd27a3ac1ced8580a434be9851a549d55ad5661b1327bb1a",
+      "bytes": 2388,
+      "snapshot": "sources/variance.md",
+      "lines": 54
+    },
+    {
+      "id": "edge-audit",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md",
+      "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+      "bytes": 10769,
+      "snapshot": "sources/edge-audit.md",
+      "lines": 116
+    },
+    {
+      "id": "f11-path",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-f11-false-certificate-path-2026-09-13.md",
+      "sha256": "71a64a18f84cc0f49ae2bfd94ed714c43bcd5e5314a540800e039d14045f9bff",
+      "bytes": 6070,
+      "snapshot": "sources/f11-path.md",
+      "lines": 110
+    },
+    {
+      "id": "generator-review",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/independent-review-20757.md",
+      "sha256": "f4e6bd2312dc578a22414636b85a621045157531f7f7bb50728604f5620e20ec",
+      "bytes": 3391,
+      "snapshot": "sources/generator-review.md",
+      "lines": 61
+    },
+    {
+      "id": "generator-fix",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/f1-refusal-normalization/receipt.json",
+      "sha256": "e56933a7dbd369511c075d00f98db8ec219984b9c01ea15ed7abc4f4876bf910",
+      "bytes": 1458,
+      "snapshot": "sources/generator-fix.json",
+      "lines": 49
+    },
+    {
+      "id": "lead-log",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-PACKET-LOG-2026-09-13.md",
+      "sha256": "8a90fc4ebbc87737f79dcfcaa8d49bbfa8b826684d04d1e3dd0d3b80ba8fee43",
+      "bytes": 55976,
+      "snapshot": "sources/lead-log.md",
+      "lines": 480
+    },
+    {
+      "id": "predictive",
+      "path": "/home/joe/code/futon2/src/futon2/aif/machine_predictive.clj",
+      "sha256": "0bf8d72bd7017a16751c44d343cb2a928902af9793de3f953e20c370fac7f59b",
+      "bytes": 6502,
+      "snapshot": "sources/predictive.clj",
+      "lines": 128
+    },
+    {
+      "id": "transition",
+      "path": "/home/joe/code/futon2/src/futon2/aif/machine_transition.clj",
+      "sha256": "697b54db1a9f40844f9feff3622f95414dfcd3d019a7469272fc5d9a109ab6f8",
+      "bytes": 3019,
+      "snapshot": "sources/transition.clj",
+      "lines": 64
+    },
+    {
+      "id": "fold",
+      "path": "/home/joe/code/futon2/src/futon2/aif/c_fold_config.clj",
+      "sha256": "b1e743a6b14152faf59e6604c60ef2a0ab54242f919303729ed9bd854c4b5605",
+      "bytes": 3727,
+      "snapshot": "sources/fold.clj",
+      "lines": 69
+    },
+    {
+      "id": "transition-record",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-8-controlled-transition/production-match.edn",
+      "sha256": "dcb2e2221e71516f37ec642ea8ed953e8f944641f17d98521f46ad02585644b5",
+      "bytes": 2880,
+      "snapshot": "sources/transition-record.edn",
+      "lines": 52
+    },
+    {
+      "id": "live-ranked-record",
+      "path": "/home/joe/code/futon2/holes/labs/wm-contract/runs/2026-09-04-010-accepted/rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn",
+      "sha256": "784092c604786ef324c7c07f0dbc15bc63e3f307871a59d202d430770c683c3f",
+      "bytes": 9278,
+      "snapshot": "sources/live-ranked-record.edn",
+      "lines": 1
+    },
+    {
+      "id": "paper-sec-ack",
+      "path": "/home/joe/code/p4ng/sec-ack.tex",
+      "sha256": "9e026d695902f1900709e13892b0224b7dadcaaa2e86a3e204cade671721e71d",
+      "bytes": 271,
+      "snapshot": "sources/paper-sec-ack.tex",
+      "lines": 9
+    },
+    {
+      "id": "paper-sec-aif-conformance-generated",
+      "path": "/home/joe/code/p4ng/sec-aif-conformance-generated.tex",
+      "sha256": "1818aa085d724a129430cdcda85096a99bfbaf9f666343264ef9235a264574ee",
+      "bytes": 2713,
+      "snapshot": "sources/paper-sec-aif-conformance-generated.tex",
+      "lines": 17
+    },
+    {
+      "id": "paper-sec-background-missions",
+      "path": "/home/joe/code/p4ng/sec-background-missions.tex",
+      "sha256": "265167b06d2e2309c29189a1380556d6e71ceae630a0457a712daff56479d041",
+      "bytes": 983,
+      "snapshot": "sources/paper-sec-background-missions.tex",
+      "lines": 16
+    },
+    {
+      "id": "paper-sec-background",
+      "path": "/home/joe/code/p4ng/sec-background.tex",
+      "sha256": "84fde4385881b14d8f2bf189a036b952811ddb34a508292d3eb631dbf5cdd149",
+      "bytes": 5772,
+      "snapshot": "sources/paper-sec-background.tex",
+      "lines": 16
+    },
+    {
+      "id": "paper-sec-boundary",
+      "path": "/home/joe/code/p4ng/sec-boundary.tex",
+      "sha256": "22ad4866700474323061d901f7477d42660a7be02353b4d891e99f56207511f7",
+      "bytes": 3917,
+      "snapshot": "sources/paper-sec-boundary.tex",
+      "lines": 70
+    },
+    {
+      "id": "paper-sec-c-vector",
+      "path": "/home/joe/code/p4ng/sec-c-vector.tex",
+      "sha256": "e56ef2973e4bbca81b24e2a9a14af4a237faa667a25bb1f79500a57d2af8b4cb",
+      "bytes": 4284,
+      "snapshot": "sources/paper-sec-c-vector.tex",
+      "lines": 78
+    },
+    {
+      "id": "paper-sec-case-study-vetting",
+      "path": "/home/joe/code/p4ng/sec-case-study-vetting.tex",
+      "sha256": "a2eb4e0581c0376023cd73460f14b77b44ea6790fe2c844ea2bc9c9fb8f9ff78",
+      "bytes": 5529,
+      "snapshot": "sources/paper-sec-case-study-vetting.tex",
+      "lines": 96
+    },
+    {
+      "id": "paper-sec-catalog",
+      "path": "/home/joe/code/p4ng/sec-catalog.tex",
+      "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+      "bytes": 73799,
+      "snapshot": "sources/paper-sec-catalog.tex",
+      "lines": 509
+    },
+    {
+      "id": "paper-sec-conclusion",
+      "path": "/home/joe/code/p4ng/sec-conclusion.tex",
+      "sha256": "71fd9404419998b29abdf17185132754e7090cad7785db100160e379adf074eb",
+      "bytes": 2646,
+      "snapshot": "sources/paper-sec-conclusion.tex",
+      "lines": 41
+    },
+    {
+      "id": "paper-sec-discussion-patterns",
+      "path": "/home/joe/code/p4ng/sec-discussion-patterns.tex",
+      "sha256": "140fd6b369a4e64c32b7b80918a1d85be6529c4209e98814d5ac38940e0fd222",
+      "bytes": 9840,
+      "snapshot": "sources/paper-sec-discussion-patterns.tex",
+      "lines": 143
+    },
+    {
+      "id": "paper-sec-discussion",
+      "path": "/home/joe/code/p4ng/sec-discussion.tex",
+      "sha256": "662cad2306d124fb55c87b257009cd0e611cfceeaa281a79b10cc511ed77642e",
+      "bytes": 26166,
+      "snapshot": "sources/paper-sec-discussion.tex",
+      "lines": 343
+    },
+    {
+      "id": "paper-sec-evaluation-outline",
+      "path": "/home/joe/code/p4ng/sec-evaluation-outline.tex",
+      "sha256": "7ce5187a279842e124fb0b8b8cab378aed5a5ff9bce5cd0b072754e399b73fb7",
+      "bytes": 2305,
+      "snapshot": "sources/paper-sec-evaluation-outline.tex",
+      "lines": 41
+    },
+    {
+      "id": "paper-sec-fundamentals-generated",
+      "path": "/home/joe/code/p4ng/sec-fundamentals-generated.tex",
+      "sha256": "91a8772bba4b1b394df5c93d65a80da852114f88601b752f533511ff7a3370c7",
+      "bytes": 1818,
+      "snapshot": "sources/paper-sec-fundamentals-generated.tex",
+      "lines": 35
+    },
+    {
+      "id": "paper-sec-future-work",
+      "path": "/home/joe/code/p4ng/sec-future-work.tex",
+      "sha256": "c527ad54b4ac936e46cebc8b9b00e4a4c44beb0ebe0c3fb704dd0bb809a05f15",
+      "bytes": 11082,
+      "snapshot": "sources/paper-sec-future-work.tex",
+      "lines": 18
+    },
+    {
+      "id": "paper-sec-glossary-assurance-generated",
+      "path": "/home/joe/code/p4ng/sec-glossary-assurance-generated.tex",
+      "sha256": "2f566a19eb1b28f7562aced5f910a9582b8f21cbe471e0cd2e505f1f0e49d2ec",
+      "bytes": 1298,
+      "snapshot": "sources/paper-sec-glossary-assurance-generated.tex",
+      "lines": 2
+    },
+    {
+      "id": "paper-sec-glossary",
+      "path": "/home/joe/code/p4ng/sec-glossary.tex",
+      "sha256": "d7ec5b68d1049a86d7a6c3c71eb61f50eb0e351a1d2d212affa6e5636032260f",
+      "bytes": 42179,
+      "snapshot": "sources/paper-sec-glossary.tex",
+      "lines": 86
+    },
+    {
+      "id": "paper-sec-institutions",
+      "path": "/home/joe/code/p4ng/sec-institutions.tex",
+      "sha256": "ffd029bbfee836cbd7f6c276868833278e59ca96c0049f32d290c4058f51b50d",
+      "bytes": 8230,
+      "snapshot": "sources/paper-sec-institutions.tex",
+      "lines": 168
+    },
+    {
+      "id": "paper-sec-issue-board-generated",
+      "path": "/home/joe/code/p4ng/sec-issue-board-generated.tex",
+      "sha256": "398e7af6b559bbec297450aaef3cc3c93d61dc85dd5882d76c53116bf4377075",
+      "bytes": 6288,
+      "snapshot": "sources/paper-sec-issue-board-generated.tex",
+      "lines": 89
+    },
+    {
+      "id": "paper-sec-lane-campaign-generated",
+      "path": "/home/joe/code/p4ng/sec-lane-campaign-generated.tex",
+      "sha256": "b9ef8d5c6ed99b5878b05a1e68bdd0374e2f049f46117e4933a9692e881d280b",
+      "bytes": 1018,
+      "snapshot": "sources/paper-sec-lane-campaign-generated.tex",
+      "lines": 20
+    },
+    {
+      "id": "paper-sec-lean-holes-generated",
+      "path": "/home/joe/code/p4ng/sec-lean-holes-generated.tex",
+      "sha256": "69707074735aff22db7f610c5875f3502fea128dd83cdcf632062fda3243b1ec",
+      "bytes": 1384,
+      "snapshot": "sources/paper-sec-lean-holes-generated.tex",
+      "lines": 13
+    },
+    {
+      "id": "paper-sec-lean-state-generated",
+      "path": "/home/joe/code/p4ng/sec-lean-state-generated.tex",
+      "sha256": "3ab3f2a863b856718b51f41641e584747a5910ff850a0cdb20ee61837931114a",
+      "bytes": 5048,
+      "snapshot": "sources/paper-sec-lean-state-generated.tex",
+      "lines": 51
+    },
+    {
+      "id": "paper-sec-limitations",
+      "path": "/home/joe/code/p4ng/sec-limitations.tex",
+      "sha256": "b5b56d12b417a6ac2cf3e6045732dae7c65b64fd7498d603ba96096026424131",
+      "bytes": 4219,
+      "snapshot": "sources/paper-sec-limitations.tex",
+      "lines": 33
+    },
+    {
+      "id": "paper-sec-methods-plop",
+      "path": "/home/joe/code/p4ng/sec-methods-plop.tex",
+      "sha256": "96d23f5b5df74b589564d57771990aa4495da1d82006518fceb5ec745d87c0b0",
+      "bytes": 5654,
+      "snapshot": "sources/paper-sec-methods-plop.tex",
+      "lines": 92
+    },
+    {
+      "id": "paper-sec-model-coverage-generated",
+      "path": "/home/joe/code/p4ng/sec-model-coverage-generated.tex",
+      "sha256": "0f8a85e7eec8d62114393633c1c502817a6afd3dd83ae0de7603b7c8e853b2e2",
+      "bytes": 2695,
+      "snapshot": "sources/paper-sec-model-coverage-generated.tex",
+      "lines": 12
+    },
+    {
+      "id": "paper-sec-observation-futon",
+      "path": "/home/joe/code/p4ng/sec-observation-futon.tex",
+      "sha256": "d4a98b00c31b2c4a5d0064a8f4cfee628b41272d287cf41e027dde7cdee1731e",
+      "bytes": 2400,
+      "snapshot": "sources/paper-sec-observation-futon.tex",
+      "lines": 42
+    },
+    {
+      "id": "paper-sec-observation-plop",
+      "path": "/home/joe/code/p4ng/sec-observation-plop.tex",
+      "sha256": "a5432e543046e7e96a8901b8651b8155fc67f301d92b5a599a90898c20c464ac",
+      "bytes": 3849,
+      "snapshot": "sources/paper-sec-observation-plop.tex",
+      "lines": 57
+    },
+    {
+      "id": "paper-sec-observation",
+      "path": "/home/joe/code/p4ng/sec-observation.tex",
+      "sha256": "dc20e1cd3a169844711d3673f7461ef310ee254e48b292e80951793c465f1746",
+      "bytes": 969,
+      "snapshot": "sources/paper-sec-observation.tex",
+      "lines": 8
+    },
+    {
+      "id": "paper-sec-operator",
+      "path": "/home/joe/code/p4ng/sec-operator.tex",
+      "sha256": "dd0e5aa70394070d8596fffe9cdc258b23946484880ef33edd897b6d485222b2",
+      "bytes": 5619,
+      "snapshot": "sources/paper-sec-operator.tex",
+      "lines": 95
+    },
+    {
+      "id": "paper-sec-overview-futon",
+      "path": "/home/joe/code/p4ng/sec-overview-futon.tex",
+      "sha256": "78c16ae2a4dd8e54918d3905fab89fb39f806a848ee15475ac55a9281af59e48",
+      "bytes": 3118,
+      "snapshot": "sources/paper-sec-overview-futon.tex",
+      "lines": 57
+    },
+    {
+      "id": "paper-sec-overview-plop",
+      "path": "/home/joe/code/p4ng/sec-overview-plop.tex",
+      "sha256": "a93f33799c14b341c32cbb06e6fc69fb3a53c150272b72b3996e137f87d0bfab",
+      "bytes": 5842,
+      "snapshot": "sources/paper-sec-overview-plop.tex",
+      "lines": 101
+    },
+    {
+      "id": "paper-sec-overview",
+      "path": "/home/joe/code/p4ng/sec-overview.tex",
+      "sha256": "08d48e0a771818827cbeb0ebaef21f8a6e4668f8b84fa2f0d41e8722d0594e99",
+      "bytes": 3562,
+      "snapshot": "sources/paper-sec-overview.tex",
+      "lines": 24
+    },
+    {
+      "id": "paper-sec-q-interface-generated",
+      "path": "/home/joe/code/p4ng/sec-q-interface-generated.tex",
+      "sha256": "60fc3a6cc06b6a7dee193579f3d678b965d1f2c30a8fcae858c11af37d96266a",
+      "bytes": 3174,
+      "snapshot": "sources/paper-sec-q-interface-generated.tex",
+      "lines": 24
+    },
+    {
+      "id": "paper-sec-recapitulation",
+      "path": "/home/joe/code/p4ng/sec-recapitulation.tex",
+      "sha256": "2771afbbc13e881a1007e43b1b02334f1933557646f0e3cff5fd716c019e4d4b",
+      "bytes": 1051,
+      "snapshot": "sources/paper-sec-recapitulation.tex",
+      "lines": 22
+    },
+    {
+      "id": "paper-sec-related-futon",
+      "path": "/home/joe/code/p4ng/sec-related-futon.tex",
+      "sha256": "00d97aac6068c906820a4f0225997871df3ade9677c5966b6c7e364539de2809",
+      "bytes": 3272,
+      "snapshot": "sources/paper-sec-related-futon.tex",
+      "lines": 57
+    },
+    {
+      "id": "paper-sec-related",
+      "path": "/home/joe/code/p4ng/sec-related.tex",
+      "sha256": "c4a524fc6a2323e8d7626bdcf250ac17eee454dbc3209a03c030c80ac24db796",
+      "bytes": 4510,
+      "snapshot": "sources/paper-sec-related.tex",
+      "lines": 10
+    },
+    {
+      "id": "paper-sec-rnode-dossiers-generated",
+      "path": "/home/joe/code/p4ng/sec-rnode-dossiers-generated.tex",
+      "sha256": "b5b595089092d722f37415678bd8092fef24308de65e55e9159adba9234ebe7f",
+      "bytes": 28171,
+      "snapshot": "sources/paper-sec-rnode-dossiers-generated.tex",
+      "lines": 260
+    },
+    {
+      "id": "paper-sec-snatch-mini-c-generated",
+      "path": "/home/joe/code/p4ng/sec-snatch-mini-c-generated.tex",
+      "sha256": "4fa94a4c58debfeddd830f64578af14a4d87a6a2efe20ac1818997d87232f9df",
+      "bytes": 1038,
+      "snapshot": "sources/paper-sec-snatch-mini-c-generated.tex",
+      "lines": 6
+    },
+    {
+      "id": "paper-sec-system",
+      "path": "/home/joe/code/p4ng/sec-system.tex",
+      "sha256": "da4dc7c279f313c813ddd994270b55e5018feae7f9b52ac3c9215de5817e24ba",
+      "bytes": 4604,
+      "snapshot": "sources/paper-sec-system.tex",
+      "lines": 59
+    },
+    {
+      "id": "paper-sec-transfer",
+      "path": "/home/joe/code/p4ng/sec-transfer.tex",
+      "sha256": "a745706f26869d70f9bbd60a75d5d8d3842326cbdb6fa1fa1b4982ec80cce864",
+      "bytes": 1314,
+      "snapshot": "sources/paper-sec-transfer.tex",
+      "lines": 24
+    },
+    {
+      "id": "paper-sec-turn-chain",
+      "path": "/home/joe/code/p4ng/sec-turn-chain.tex",
+      "sha256": "2c38518d953dfbac1e57fdf1dfb6f49fd6ffa232a48e2633957a17024bb9a85c",
+      "bytes": 5885,
+      "snapshot": "sources/paper-sec-turn-chain.tex",
+      "lines": 103
+    },
+    {
+      "id": "paper-sec-variable-situation-generated",
+      "path": "/home/joe/code/p4ng/sec-variable-situation-generated.tex",
+      "sha256": "83daab417a8e657195bd41e4022dc3ce9f37c6179dbb243e8713527cb1c9e448",
+      "bytes": 3258,
+      "snapshot": "sources/paper-sec-variable-situation-generated.tex",
+      "lines": 42
+    },
+    {
+      "id": "paper-sec-vetting-corrections",
+      "path": "/home/joe/code/p4ng/sec-vetting-corrections.tex",
+      "sha256": "97b0ced05434edf7076d02354d6702ffc6f7e07b26db9c4682e81c0480078fcf",
+      "bytes": 3775,
+      "snapshot": "sources/paper-sec-vetting-corrections.tex",
+      "lines": 22
+    },
+    {
+      "id": "paper-sec-what-this-is",
+      "path": "/home/joe/code/p4ng/sec-what-this-is.tex",
+      "sha256": "c186ffa047e03c50ce308ca8dfa730c7ec1d93ac19b79b8c2395b1029d29c4e1",
+      "bytes": 5414,
+      "snapshot": "sources/paper-sec-what-this-is.tex",
+      "lines": 82
+    },
+    {
+      "id": "paper-sec-workflow-generated",
+      "path": "/home/joe/code/p4ng/sec-workflow-generated.tex",
+      "sha256": "6df775147352f61f781e412d3c86c471f5ce2624a587532b7fb5587e56ec3436",
+      "bytes": 1238,
+      "snapshot": "sources/paper-sec-workflow-generated.tex",
+      "lines": 20
+    },
+    {
+      "id": "paper-sec-wr-catalog",
+      "path": "/home/joe/code/p4ng/sec-wr-catalog.tex",
+      "sha256": "bdc41ae8ee39e18b49ec8e6a8e240d95bf13e04e2634bf3e148f9283af8651e0",
+      "bytes": 3523,
+      "snapshot": "sources/paper-sec-wr-catalog.tex",
+      "lines": 43
+    },
+    {
+      "id": "paper-sec-wr-spine",
+      "path": "/home/joe/code/p4ng/sec-wr-spine.tex",
+      "sha256": "a6d3adcb6e8936158f7147b659ab5b7c9bafa78a9f24627e70cca92a99656d2f",
+      "bytes": 2608,
+      "snapshot": "sources/paper-sec-wr-spine.tex",
+      "lines": 42
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a-validator",
+      "title": "Measured-A annotation validator: finish independent review",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/execution-receipts.edn:1",
+      "state": "done",
+      "evidence": [
+        {
+          "source": "annotation-receipt",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/execution-receipts.edn:1",
+          "line": 1,
+          "through": 21,
+          "sha256": "00cef29552755df2d71a7bb73e54a963c10d45803098039ed8296468cc97a150",
+          "snapshot": "sources/annotation-receipt.edn"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "DONE 2026-09-14: independent acceptance retained with follow-up execution receipts (runs/row-14-measured-a-validator-2026-09-14/ACCEPTANCE.md)."
+    },
+    {
+      "id": "a-rubric",
+      "title": "Independently owned categorical Status rubric and authority",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/SPEC-measured-a-annotation-v1.md:25",
+      "state": "done",
+      "evidence": [
+        {
+          "source": "annotation",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/SPEC-measured-a-annotation-v1.md:25",
+          "line": 25,
+          "through": 58,
+          "sha256": "6815b48da949ee9b3b1aa87b5f4221f5852602910ac241ffcbc39454810522ec",
+          "snapshot": "sources/annotation.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "DONE 2026-09-14: rubric v1 accepted (runs/row-14-observed-status-rubric-2026-09-14/ACCEPTANCE.md, 8a6e5a5a); observer/reviewer authority bound (authority-observer-origin / reviewer-authorization records)."
+    },
+    {
+      "id": "a-labels",
+      "title": "Acquire independently observed closed-context categorical annotations",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:184",
+      "state": "in-flight",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:184",
+          "line": 184,
+          "through": 195,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "a-pairs",
+      "title": "Join reviewed labels to exact closes, cutoff, state and outcome",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/SPEC-measured-a-annotation-v1.md:8",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "annotation",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/SPEC-measured-a-annotation-v1.md:8",
+          "line": 8,
+          "through": 38,
+          "sha256": "6815b48da949ee9b3b1aa87b5f4221f5852602910ac241ffcbc39454810522ec",
+          "snapshot": "sources/annotation.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "a-estimate",
+      "title": "Packet 1: measured 7-by-12 A with observed support coverage",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 205,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Unobserved rows remain absent; no smoothing or posterior-argmax labels."
+    },
+    {
+      "id": "model-assembly",
+      "title": "Packet 2: admit measured A in versioned machine model",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:19",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:19",
+          "line": 19,
+          "through": 27,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        },
+        {
+          "source": "predictive",
+          "file-line": "/home/joe/code/futon2/src/futon2/aif/machine_predictive.clj:96",
+          "line": 96,
+          "through": 110,
+          "sha256": "0bf8d72bd7017a16751c44d343cb2a928902af9793de3f953e20c370fac7f59b",
+          "snapshot": "sources/predictive.clj"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "Current outcome constructor only accepts :declared-prior. Measured authority must be admitted explicitly, not relabelled."
+    },
+    {
+      "id": "action-domain",
+      "title": "Total controlled-transition authority over live action classes",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:39",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:39",
+          "line": 39,
+          "through": 52,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        },
+        {
+          "source": "transition-record",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-8-controlled-transition/production-match.edn:1",
+          "line": 1,
+          "through": 1,
+          "sha256": "dcb2e2221e71516f37ec642ea8ed953e8f944641f17d98521f46ad02585644b5",
+          "snapshot": "sources/transition-record.edn"
+        },
+        {
+          "source": "live-ranked-record",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/2026-09-04-010-accepted/rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn:1",
+          "line": 1,
+          "through": 1,
+          "sha256": "784092c604786ef324c7c07f0dbc15bc63e3f307871a59d202d430770c683c3f",
+          "snapshot": "sources/live-ranked-record.edn"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Two-action row-8 authority does not cover live ranked vocabulary; extend authority or review a total semantic mapping."
+    },
+    {
+      "id": "policy-plans",
+      "title": "Complete versioned occurrence-to-policy-plan artifact",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:29",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:29",
+          "line": 29,
+          "through": 38,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "q-resolver",
+      "title": "Production resolver for A/B, beliefs, full plans and C",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:54",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:54",
+          "line": 54,
+          "through": 75,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "q-witness-flip",
+      "title": "Packet 6: witnesses, registration refresh and separate live Q flip",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:288",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:288",
+          "line": 288,
+          "through": 320,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Q callable, risk adapter and per-candidate retention exist; no source-only live claim."
+    },
+    {
+      "id": "categorical-ambiguity",
+      "title": "Implement categorical ambiguity over licensed A and Q",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:196",
+      "state": "done",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:196",
+          "line": 196,
+          "through": 201,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "DONE 2026-09-14: categorical R5 ambiguity estimator implemented (codex-22, 602ff836: sum_s Q(s)*H[A(o|s)], fail-closed refusals incl. :authority-unlicensed) and independently accepted by claude-15 (runs/categorical-ambiguity-2026-09-14/ACCEPTANCE.md; receipts a796f6df). Landed after this snapshot was cut; the 22:05 re-dispatch was detected as a duplicate by codex-23 with zero edits."
+    },
+    {
+      "id": "risk-ambiguity-witness",
+      "title": "Real Q/C risk and categorical ambiguity witnesses",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:209",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:209",
+          "line": 209,
+          "through": 211,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "efe-composition",
+      "title": "Full real scoring-input and canonical EFE composition witness",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:210",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:210",
+          "line": 210,
+          "through": 211,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "effective-config",
+      "title": "Retain effective horizon, detail and FPI configuration",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+      "state": "built-not-wired",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+          "line": 155,
+          "through": 162,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Readback complete (TN-existing-record-audit-2026-09-14.md): FPI-posterior observably :flag-off in selections, but NO retained record of effective horizon/detail/FPI-dark \u2014 missing artifact class :effective-horizon-detail-fpi-configuration-record. Remaining work: retain that record via a reviewed serving procedure; no config mutation in discovery."
+    },
+    {
+      "id": "configured-machinery-records",
+      "title": "Bounded machinery records with required configuration and identity",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md:5",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "convergence",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md:5",
+          "line": 5,
+          "through": 6,
+          "sha256": "8656824061db951460896fec3345ddcc5dcb7dc070c7ae1214eaabd5d31cc0c5",
+          "snapshot": "sources/convergence.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "existing-record-audit",
+      "title": "Read existing machinery records for rows 13/15/23 witnesses",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:32",
+      "state": "done",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:32",
+          "line": 32,
+          "through": 34,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "DONE 2026-09-14: audit TN committed 069b0c30 (codex-21), accepted (ACCEPTANCE-existing-record-audit.md). Row 23 :usable-exact-joins-retained (12 byte-pinned construction checkpoints, all :match); rows 13/15 :insufficient-retention with named missing artifact classes \u2014 downstream nodes need NEW production capture, not archaeology."
+    },
+    {
+      "id": "belief-update",
+      "title": "Row15 real belief update, event/A/B and model joins",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 206,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "action-selector",
+      "title": "Row15 internal action and reason-bearing selector evidence",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:207",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:207",
+          "line": 207,
+          "through": 208,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "fpi-posterior",
+      "title": "Row16 real F-present R6 posterior witness",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:734",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:734",
+          "line": 734,
+          "through": 746,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "depth-witness",
+      "title": "Live R13 depth branch at effective horizon at least two",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:436",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:436",
+          "line": 436,
+          "through": 455,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "accumulation-witness",
+      "title": "Row13/16 live observation-to-accumulation joins",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:224",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:224",
+          "line": 224,
+          "through": 248,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "selection-enactment",
+      "title": "Row23 exact selected/enacted or typed-divergence witness",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1064",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1064",
+          "line": 1064,
+          "through": 1087,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "continuations",
+      "title": "Same-run R6→R13→R14→R16→R2 continuation evidence",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:173",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:173",
+          "line": 173,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "r10-caller",
+      "title": "R10 production caller through assurance dispatch boundary",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:214",
+      "state": "done",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:214",
+          "line": 214,
+          "through": 214,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "DONE 2026-09-14: wiring accepted and the operator-lane production run discharged the commission (futon3c runs/r10-wiring-2026-09-14/ACCEPTANCE-RUN.md fe333299; evidence e-af73b9b5-a164-4a18-9bb6-68eac432cf8c)."
+    },
+    {
+      "id": "r10-record",
+      "title": "R10 assurance dispatch and bounded tick/R2 predecessor joins",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:20",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:20",
+          "line": 20,
+          "through": 29,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "r20-trip-source",
+      "title": "Independent genuine trip snapshot and operational writer/history evidence",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:39",
+      "state": "built-not-wired",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:39",
+          "line": 39,
+          "through": 51,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        },
+        {
+          "source": "lead-log",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-PACKET-LOG-2026-09-13.md:404",
+          "line": 404,
+          "through": 420,
+          "sha256": "8a90fc4ebbc87737f79dcfcaa8d49bbfa8b826684d04d1e3dd0d3b80ba8fee43",
+          "snapshot": "sources/lead-log.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Cooperative source tests are not installed lease enforcement or historical open-to-resolved transition authority."
+    },
+    {
+      "id": "r20-engineering-composer",
+      "title": "Wire fixed-half engineering composer in an applicable gain mode",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:39",
+      "state": "built-not-wired",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:39",
+          "line": 39,
+          "through": 74,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "Constants settled; no extra Joe gate for this engineering law. Saturation or variational ignored gain cannot count as firing."
+    },
+    {
+      "id": "r20-engineering-witness",
+      "title": "Joint trip→applied gain/temperature production witness",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:52",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:52",
+          "line": 52,
+          "through": 85,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "joe-precision-law",
+      "title": "Joe-owned adoption of theory-aligned interoceptive precision law",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-proposal-v1.md:1",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "precision",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-proposal-v1.md:1",
+          "line": 1,
+          "through": 7,
+          "sha256": "cbc928bdad6b0cc9c27822722a6c77fa581d0201352d02291e5f5663d9eaf9b8",
+          "snapshot": "sources/precision.md"
+        }
+      ],
+      "work-kind": "joe-ruling",
+      "state-note": "Proposal is not adopted; fixed-half engineering law is not this law. A delegated reviewed decision may discharge this gate.",
+      "joe-owned": true
+    },
+    {
+      "id": "precision-applicability",
+      "title": "Fixed-field theorem applicability and numeric/real correspondence",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-variance-v1.md:37",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "variance",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row18-interoceptive-policy-precision-variance-v1.md:37",
+          "line": 37,
+          "through": 53,
+          "sha256": "5f6a1e07be6042fbbd27a3ac1ced8580a434be9851a549d55ad5661b1327bb1a",
+          "snapshot": "sources/variance.md"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "Proof is exact-real conditional, not solver/adoption authority. Failed sufficient condition leaves uniqueness unknown; do not find a convenient field."
+    },
+    {
+      "id": "precision-integration",
+      "title": "Correct beta/gamma connection and applicable live response",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:28",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:28",
+          "line": 28,
+          "through": 37,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "r9-serving-retention",
+      "title": "Serving commission preimages, review records and safe writer ownership",
+      "flag": "parked",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:5",
+      "state": "ruled-parked",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:5",
+          "line": 5,
+          "through": 15,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "Undeployed Row19 excluded from paper path; positive qualification still needs its capability, not necessarily this implementation. Historical 20588 cannot be reconstructed."
+    },
+    {
+      "id": "r9-genesis",
+      "title": "Authenticate independent R9 genesis at retained exact bytes",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:87",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:87",
+          "line": 87,
+          "through": 113,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Genesis branch already chosen. No new choice-of-branch ruling; missing external evidence remains."
+    },
+    {
+      "id": "r9-real-pair",
+      "title": "Fresh exact-commission author/reviewer independence evidence",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:881",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:881",
+          "line": 881,
+          "through": 930,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "e1-e2-runtime",
+      "title": "Real ranked-field budget arbitration, restriction and exact action consumer",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:24",
+      "state": "built-not-wired",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:24",
+          "line": 24,
+          "through": 25,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "e3-runtime",
+      "title": "Canonical independent R9 pre-enact consumer on exact pending subject",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:26",
+      "state": "built-not-wired",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:26",
+          "line": 26,
+          "through": 26,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "r11-method",
+      "title": "Define lifecycle-cell acquisition contract for newer evidence",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-r11-census-refresh-discovery-2026-09-13.md:44",
+      "state": "unbuilt",
+      "evidence": [
+        {
+          "source": "r11-refresh",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-r11-census-refresh-discovery-2026-09-13.md:44",
+          "line": 44,
+          "through": 66,
+          "sha256": "9436037744e1c6e7cb5240b0b9060022c22bb3061da41ffdda73cdb905972d0b",
+          "snapshot": "sources/r11-refresh.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "0/7 means lifecycle cells, not run denominator; appending click counts is invalid."
+    },
+    {
+      "id": "r11-lifecycle",
+      "title": "Build/integrate and witness R11 seven-stage lifecycle",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:217",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:217",
+          "line": 217,
+          "through": 217,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "r15-lifecycle",
+      "title": "Build/integrate and witness R15 seven-stage lifecycle",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:217",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:217",
+          "line": 217,
+          "through": 217,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "joe-r11-fork",
+      "title": "Joe item-16 fork: build R11/R15 or written non-load-bearing scope",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:196",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:196",
+          "line": 196,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "joe-ruling",
+      "state-note": "Existing ruling keeps both required. Optional scope branch only; no ruling is needed to continue the build branch.",
+      "joe-owned": true
+    },
+    {
+      "id": "slow-prior-runtime",
+      "title": "R15 slow-state→rollout prior consumer separate from R13 depth",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:27",
+      "state": "built-not-wired",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:27",
+          "line": 27,
+          "through": 29,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "joe-slow-policy-law",
+      "title": "Joe-owned semantic choice for slow-state→R6 policy influence",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-22-e5-e6-semantic-integration-2026-09-13/lead-review.md:5",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "slow-review",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-22-e5-e6-semantic-integration-2026-09-13/lead-review.md:5",
+          "line": 5,
+          "through": 7,
+          "sha256": "be96a2cd9ca3f4a5e51e7156d687d969e69ea4a5901092336eb2eaf968ab6795",
+          "snapshot": "sources/slow-review.md"
+        }
+      ],
+      "work-kind": "joe-ruling",
+      "state-note": "Alternatives analysis accepted; policy-prior recommendation explicitly unadopted. No field copying or dual-counting authorization.",
+      "joe-owned": true
+    },
+    {
+      "id": "e6a",
+      "title": "Complete shaped-policy scoring, changed selection and enactment influence",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-e5-e6-semantic-integration-2026-09-13.md:95",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "slow-semantics",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-e5-e6-semantic-integration-2026-09-13.md:95",
+          "line": 95,
+          "through": 118,
+          "sha256": "73ffd42478b41ee05adf1044a0cb067f6f1146f3f958973f297e23776b8e7a01",
+          "snapshot": "sources/slow-semantics.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "e6b",
+      "title": "Real terminal outcome→revisioned next slow-state feedback",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:29",
+      "state": "built-not-wired",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:29",
+          "line": 29,
+          "through": 29,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "Needs independent outcome, prior, exactly-once persistence and next-tick consumption; does not mandate the parked store implementation."
+    },
+    {
+      "id": "e6b-storage-chain",
+      "title": "Experimental E6b store/codec/provenance/completeness chain",
+      "flag": "parked",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md:12",
+      "state": "ruled-parked",
+      "evidence": [
+        {
+          "source": "convergence",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md:12",
+          "line": 12,
+          "through": 22,
+          "sha256": "8656824061db951460896fec3345ddcc5dcb7dc070c7ae1214eaabd5d31cc0c5",
+          "snapshot": "sources/convergence.md"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "No hard edge to continuation evidence or certificate; excluded apparatus is not an automatic dependency."
+    },
+    {
+      "id": "capability-substrate",
+      "title": "Real capability-typed substrate and nonvacuous R17 model-reduction envelope",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:213",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:213",
+          "line": 213,
+          "through": 213,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Capability-typed evidence does not by itself require the staged embedding/zone design."
+    },
+    {
+      "id": "zones-reconcile",
+      "title": "Reconcile staged paper scope with historical capability-zone mission claims",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon0/holes/missions/M-capability-zones.md:340",
+      "state": "unbuilt",
+      "evidence": [
+        {
+          "source": "zones",
+          "file-line": "/home/joe/code/futon0/holes/missions/M-capability-zones.md:340",
+          "line": 340,
+          "through": 361,
+          "sha256": "85e92f3c6f5d2b48e19ea0d045b3505ae48f511fc8e6121630e67e7fb784f86b",
+          "snapshot": "sources/zones.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Mission reports resolved 036/037/041 and accepted S1.5; paper still excludes. Do not silently reopen accepted geometry or promote the mission claims."
+    },
+    {
+      "id": "joe-zones-scope",
+      "title": "Joe scope gate before promoting excluded zones/native-currency claims",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md:8",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "convergence",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md:8",
+          "line": 8,
+          "through": 22,
+          "sha256": "8656824061db951460896fec3345ddcc5dcb7dc070c7ae1214eaabd5d31cc0c5",
+          "snapshot": "sources/convergence.md"
+        }
+      ],
+      "work-kind": "joe-ruling",
+      "state-note": "Already excluded; only a proposed promotion needs a new ruling. No recommendation to include or exclude.",
+      "joe-owned": true
+    },
+    {
+      "id": "zones-native-currency",
+      "title": "Earned load in C and validated own-outcome ambiguity / score refinement",
+      "flag": "parked",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon0/holes/missions/M-capability-zones.md:168",
+      "state": "ruled-parked",
+      "evidence": [
+        {
+          "source": "zones",
+          "file-line": "/home/joe/code/futon0/holes/missions/M-capability-zones.md:168",
+          "line": 168,
+          "through": 184,
+          "sha256": "85e92f3c6f5d2b48e19ea0d045b3505ae48f511fc8e6121630e67e7fb784f86b",
+          "snapshot": "sources/zones.md"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "S1.5 acceptance is recorded (mission:360), not an unfilled prerequisite. Current paper scope excludes validation claims; estimator semantics and refinement still need evidence."
+    },
+    {
+      "id": "row16-census",
+      "title": "Current full equation census with honest per-claim scopes",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:35",
+      "state": "built-not-wired",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:35",
+          "line": 35,
+          "through": 40,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "Census can report missing positive witnesses; do not AND positive witnesses into this reporting task."
+    },
+    {
+      "id": "row16-positive",
+      "title": "All remaining required equation correspondences positively witnessed",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "edge-classification",
+      "title": "Row22 complete corrected edge universe and honest grain labels",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1031",
+      "state": "unbuilt",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1031",
+          "line": 1031,
+          "through": 1063,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        },
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+          "line": 155,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "Scope/configuration choices settled by LEAD §5; annotate never-fired as such, not aspirational waivers."
+    },
+    {
+      "id": "edge-positive",
+      "title": "Every required corrected edge fires with exact run joins",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:173",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:173",
+          "line": 173,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "f11-acquisition-contract",
+      "title": "Independent immutable census universes and status/source acquisition",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-f11-false-certificate-path-2026-09-13.md:37",
+      "state": "unbuilt",
+      "evidence": [
+        {
+          "source": "f11-path",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-f11-false-certificate-path-2026-09-13.md:37",
+          "line": 37,
+          "through": 45,
+          "sha256": "71a64a18f84cc0f49ae2bfd94ed714c43bcd5e5314a540800e039d14045f9bff",
+          "snapshot": "sources/f11-path.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Acquired typed absence is allowed; unacquired universe/status authority must refuse."
+    },
+    {
+      "id": "f11-adapter",
+      "title": "F11-owned acquisition adapter into existing typed certificate inputs",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-f11-false-certificate-path-2026-09-13.md:37",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "f11-path",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-f11-false-certificate-path-2026-09-13.md:37",
+          "line": 37,
+          "through": 45,
+          "sha256": "71a64a18f84cc0f49ae2bfd94ed714c43bcd5e5314a540800e039d14045f9bff",
+          "snapshot": "sources/f11-path.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "certificate-generator",
+      "title": "Row25 integrate existing typed generator with F11 and semantic gate",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/independent-review-20757.md:53",
+      "state": "built-not-wired",
+      "evidence": [
+        {
+          "source": "generator-review",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/independent-review-20757.md:53",
+          "line": 53,
+          "through": 59,
+          "sha256": "f4e6bd2312dc578a22414636b85a621045157531f7f7bb50728604f5620e20ec",
+          "snapshot": "sources/generator-review.md"
+        },
+        {
+          "source": "generator-fix",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/f1-refusal-normalization/receipt.json:1",
+          "line": 1,
+          "through": 12,
+          "sha256": "e56933a7dbd369511c075d00f98db8ec219984b9c01ea15ed7abc4f4876bf910",
+          "snapshot": "sources/generator-fix.json"
+        }
+      ],
+      "work-kind": "code",
+      "state-note": "Isolated generator already reviewed; F1 normalized in receipt 71cb7ed5. Do not rebuild Lean layers."
+    },
+    {
+      "id": "certificate-tamper",
+      "title": "Row25 transport, acquisition and predicate tamper battery",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1108",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1108",
+          "line": 1108,
+          "through": 1110,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "code"
+    },
+    {
+      "id": "full-attestation",
+      "title": "Row24 complete acquired FullAttestation plus honest predicate result",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:114",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:114",
+          "line": 114,
+          "through": 131,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "f11-f2",
+      "title": "Row27 accepted F11 F2 reconciliation through actual author/review/gates",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1156",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1156",
+          "line": 1156,
+          "through": 1158,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Authored parcel alone is not accepted gated mission completion; inspect latest run linkage."
+    },
+    {
+      "id": "qualifying-run",
+      "title": "Row28 positive fully attested on-demand run and acceptance",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1159",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1159",
+          "line": 1159,
+          "through": 1163,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition"
+    },
+    {
+      "id": "paper-alignment",
+      "title": "Rows29–32 truthful claims, companion links and historical-record disposition",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1166",
+      "state": "unbuilt",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1166",
+          "line": 1166,
+          "through": 1181,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Historical source inventory can proceed now. Final prose can report false qualification; cannot name it THE qualifying run."
+    },
+    {
+      "id": "r6-field-authority",
+      "title": "Independently owned complete R6 occurrence/scoring input authority",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row22-r6-scoring-correspondence-2026-09-13.md:56",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "r6-authority",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/SPEC-row22-r6-scoring-correspondence-2026-09-13.md:56",
+          "line": 56,
+          "through": 85,
+          "sha256": "fb8176bc6e2c01d8e65e9079f3552a846bc24bbdb4d58e107e4d0457eb0c9bd3",
+          "snapshot": "sources/r6-authority.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Actual sources and immutable complete support must exist; fixture pins are not production authority."
+    },
+    {
+      "id": "feedback-authorities",
+      "title": "Independent terminal outcome, prior acquisition and owned feedback persistence",
+      "flag": "hidden-prereq",
+      "paper-anchor": "--",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/CONTRACT-e6b-prospective-retrospective-v1-2026-09-13.md:1",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "feedback-contract",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/CONTRACT-e6b-prospective-retrospective-v1-2026-09-13.md:1",
+          "line": 1,
+          "through": 40,
+          "sha256": "0e7a5549f64c65ed85bb6a60f0bf8a8435f622c28be7e4bc46e531512f41f584",
+          "snapshot": "sources/feedback-contract.md"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "state-note": "Actual outcome review, prior-state authority, writer ownership and retrospective completeness are required; none mandates the parked store implementation."
+    },
+    {
+      "id": "paper-01",
+      "title": "sec-background.tex:4 — OUTSTANDING: Real Q/C risk and categorical ambiguity witnesses; Fresh exact-commission author/reviewer independence evidence; R10 assurance dispatch and bounded tick/R2 predecessor joins",
+      "flag": "outstanding",
+      "paper-anchor": "sec-background.tex:4",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:209; /home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:881; /home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:20",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-background",
+          "file-line": "/home/joe/code/p4ng/sec-background.tex:4",
+          "line": 4,
+          "through": 10,
+          "sha256": "84fde4385881b14d8f2bf189a036b952811ddb34a508292d3eb631dbf5cdd149",
+          "snapshot": "sources/paper-sec-background.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-02",
+      "title": "sec-catalog.tex:168 — OUTSTANDING: R10 assurance dispatch and bounded tick/R2 predecessor joins",
+      "flag": "outstanding",
+      "paper-anchor": "sec-catalog.tex:168",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:20",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:168",
+          "line": 168,
+          "through": 174,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-03",
+      "title": "sec-catalog.tex:196 — OUTSTANDING: Fresh exact-commission author/reviewer independence evidence",
+      "flag": "outstanding",
+      "paper-anchor": "sec-catalog.tex:196",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:881",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:196",
+          "line": 196,
+          "through": 202,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-04",
+      "title": "sec-catalog.tex:277 — OUTSTANDING: Real Q/C risk and categorical ambiguity witnesses",
+      "flag": "outstanding",
+      "paper-anchor": "sec-catalog.tex:277",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:209",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:277",
+          "line": 277,
+          "through": 283,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-05",
+      "title": "sec-catalog.tex:292 — OUTSTANDING: Joint trip→applied gain/temperature production witness",
+      "flag": "outstanding",
+      "paper-anchor": "sec-catalog.tex:292",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:52",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:292",
+          "line": 292,
+          "through": 298,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-06",
+      "title": "sec-catalog.tex:297 — HONEST ABSENCE: Build/integrate and witness R11 seven-stage lifecycle",
+      "flag": "honest-absence",
+      "paper-anchor": "sec-catalog.tex:297",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:217",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:297",
+          "line": 297,
+          "through": 303,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true,
+      "flip-alternatives": [
+        {
+          "branch": "build",
+          "requires": [
+            "r11-lifecycle"
+          ],
+          "effect": "Replace absence only after real node-linked seven-cell evidence validates."
+        },
+        {
+          "branch": "ruling",
+          "requires": [
+            "joe-r11-fork"
+          ],
+          "effect": "Explicit written non-load-bearing ruling changes required scope; absence remains a true observation."
+        }
+      ]
+    },
+    {
+      "id": "paper-07",
+      "title": "sec-catalog.tex:322 — OUTSTANDING: Live R13 depth branch at effective horizon at least two",
+      "flag": "outstanding",
+      "paper-anchor": "sec-catalog.tex:322",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:436",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:322",
+          "line": 322,
+          "through": 328,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-08",
+      "title": "sec-catalog.tex:443 — STAGED: Earned load in C and validated own-outcome ambiguity / score refinement",
+      "flag": "staged",
+      "paper-anchor": "sec-catalog.tex:443",
+      "tracker": "/home/joe/code/futon0/holes/missions/M-capability-zones.md:168",
+      "state": "ruled-parked",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:443",
+          "line": 443,
+          "through": 449,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-09",
+      "title": "sec-catalog.tex:464 — OUTSTANDING: Joint trip→applied gain/temperature production witness",
+      "flag": "outstanding",
+      "paper-anchor": "sec-catalog.tex:464",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:52",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:464",
+          "line": 464,
+          "through": 470,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-10",
+      "title": "sec-observation-plop.tex:13 — OUTSTANDING: Row28 positive fully attested on-demand run and acceptance",
+      "flag": "outstanding",
+      "paper-anchor": "sec-observation-plop.tex:13",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1159",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-observation-plop",
+          "file-line": "/home/joe/code/p4ng/sec-observation-plop.tex:13",
+          "line": 13,
+          "through": 19,
+          "sha256": "a5432e543046e7e96a8901b8651b8155fc67f301d92b5a599a90898c20c464ac",
+          "snapshot": "sources/paper-sec-observation-plop.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-11",
+      "title": "sec-observation-plop.tex:41 — OUTSTANDING: Joint trip→applied gain/temperature production witness",
+      "flag": "outstanding",
+      "paper-anchor": "sec-observation-plop.tex:41",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:52",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-observation-plop",
+          "file-line": "/home/joe/code/p4ng/sec-observation-plop.tex:41",
+          "line": 41,
+          "through": 47,
+          "sha256": "a5432e543046e7e96a8901b8651b8155fc67f301d92b5a599a90898c20c464ac",
+          "snapshot": "sources/paper-sec-observation-plop.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-12",
+      "title": "sec-observation-plop.tex:57 — OUTSTANDING: Row28 positive fully attested on-demand run and acceptance",
+      "flag": "outstanding",
+      "paper-anchor": "sec-observation-plop.tex:57",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1159",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-observation-plop",
+          "file-line": "/home/joe/code/p4ng/sec-observation-plop.tex:57",
+          "line": 57,
+          "through": 57,
+          "sha256": "a5432e543046e7e96a8901b8651b8155fc67f301d92b5a599a90898c20c464ac",
+          "snapshot": "sources/paper-sec-observation-plop.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    },
+    {
+      "id": "paper-13",
+      "title": "sec-overview.tex:11 — OUTSTANDING: Retain effective horizon, detail and FPI configuration",
+      "flag": "outstanding",
+      "paper-anchor": "sec-overview.tex:11",
+      "tracker": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+      "state": "blocked",
+      "evidence": [
+        {
+          "source": "paper-sec-overview",
+          "file-line": "/home/joe/code/p4ng/sec-overview.tex:11",
+          "line": 11,
+          "through": 17,
+          "sha256": "08d48e0a771818827cbeb0ebaef21f8a6e4668f8b84fa2f0d41e8722d0594e99",
+          "snapshot": "sources/paper-sec-overview.tex"
+        }
+      ],
+      "work-kind": "evidence-acquisition",
+      "occurrence-only": true
+    }
+  ],
+  "edges": [
+    {
+      "from": "a-validator",
+      "to": "a-labels",
+      "kind": "hard-prerequisite",
+      "why": "Annotation acceptance must pass the reviewed validator.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:184",
+          "line": 184,
+          "through": 195,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "a-rubric",
+      "to": "a-labels",
+      "kind": "hard-prerequisite",
+      "why": "Observations require an independently owned operational Status rubric.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:184",
+          "line": 184,
+          "through": 195,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "a-labels",
+      "to": "a-pairs",
+      "kind": "hard-prerequisite",
+      "why": "Only reviewed exact labels can be joined as observed evidence.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "annotation",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/SPEC-measured-a-annotation-v1.md:8",
+          "line": 8,
+          "through": 38,
+          "sha256": "6815b48da949ee9b3b1aa87b5f4221f5852602910ac241ffcbc39454810522ec",
+          "snapshot": "sources/annotation.md"
+        }
+      ]
+    },
+    {
+      "from": "a-pairs",
+      "to": "a-estimate",
+      "kind": "hard-prerequisite",
+      "why": "Measured rows require exact joined observations and outcomes.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 205,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "a-estimate",
+      "to": "model-assembly",
+      "kind": "hard-prerequisite",
+      "why": "Packet 2 consumes the licensed packet-1 A artifact.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:19",
+          "line": 19,
+          "through": 27,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        },
+        {
+          "source": "predictive",
+          "file-line": "/home/joe/code/futon2/src/futon2/aif/machine_predictive.clj:96",
+          "line": 96,
+          "through": 110,
+          "sha256": "0bf8d72bd7017a16751c44d343cb2a928902af9793de3f953e20c370fac7f59b",
+          "snapshot": "sources/predictive.clj"
+        }
+      ]
+    },
+    {
+      "from": "model-assembly",
+      "to": "action-domain",
+      "kind": "hard-prerequisite",
+      "why": "The blocker orders model admission before extending its controlled transition authority.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:39",
+          "line": 39,
+          "through": 52,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        },
+        {
+          "source": "transition-record",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-8-controlled-transition/production-match.edn:1",
+          "line": 1,
+          "through": 1,
+          "sha256": "dcb2e2221e71516f37ec642ea8ed953e8f944641f17d98521f46ad02585644b5",
+          "snapshot": "sources/transition-record.edn"
+        },
+        {
+          "source": "live-ranked-record",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/2026-09-04-010-accepted/rationale/rationale-2026-09-04-7923ae0d-4514-40d9-8901-6e22995f5b94.edn:1",
+          "line": 1,
+          "through": 1,
+          "sha256": "784092c604786ef324c7c07f0dbc15bc63e3f307871a59d202d430770c683c3f",
+          "snapshot": "sources/live-ranked-record.edn"
+        }
+      ]
+    },
+    {
+      "from": "action-domain",
+      "to": "policy-plans",
+      "kind": "hard-prerequisite",
+      "why": "Every policy action must belong to the admitted controlled vocabulary.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:29",
+          "line": 29,
+          "through": 38,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        }
+      ]
+    },
+    {
+      "from": "policy-plans",
+      "to": "q-resolver",
+      "kind": "hard-prerequisite",
+      "why": "Predictive Q requires a complete occurrence-indexed policy-plan table.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:54",
+          "line": 54,
+          "through": 75,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        }
+      ]
+    },
+    {
+      "from": "model-assembly",
+      "to": "q-resolver",
+      "kind": "hard-prerequisite",
+      "why": "Resolver must supply the admitted model revision and measured A.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:54",
+          "line": 54,
+          "through": 75,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        }
+      ]
+    },
+    {
+      "from": "q-resolver",
+      "to": "q-witness-flip",
+      "kind": "hard-prerequisite",
+      "why": "Production flip follows resolver construction and identity witnesses.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:288",
+          "line": 288,
+          "through": 320,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "effective-config",
+      "to": "configured-machinery-records",
+      "kind": "hard-prerequisite",
+      "why": "Records must retain the effective anticipation and FPI settings.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "convergence",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md:5",
+          "line": 5,
+          "through": 6,
+          "sha256": "8656824061db951460896fec3345ddcc5dcb7dc070c7ae1214eaabd5d31cc0c5",
+          "snapshot": "sources/convergence.md"
+        }
+      ]
+    },
+    {
+      "from": "configured-machinery-records",
+      "to": "depth-witness",
+      "kind": "hard-prerequisite",
+      "why": "Depth branch evidence requires actual anticipation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:436",
+          "line": 436,
+          "through": 455,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "configured-machinery-records",
+      "to": "fpi-posterior",
+      "kind": "hard-prerequisite",
+      "why": "F-present posterior evidence requires complete predecessor detail coverage.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:734",
+          "line": 734,
+          "through": 746,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "existing-record-audit",
+      "to": "belief-update",
+      "kind": "hard-prerequisite",
+      "why": "First locate retained real update inputs before constructing the witness.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 206,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "existing-record-audit",
+      "to": "action-selector",
+      "kind": "hard-prerequisite",
+      "why": "Actual epsilon, details and selector envelopes must be located.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:207",
+          "line": 207,
+          "through": 208,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "existing-record-audit",
+      "to": "accumulation-witness",
+      "kind": "hard-prerequisite",
+      "why": "Accumulation evidence must join retained events to the real update.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:224",
+          "line": 224,
+          "through": 248,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "existing-record-audit",
+      "to": "selection-enactment",
+      "kind": "hard-prerequisite",
+      "why": "Correspondence requires actual construction and enactment records.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1064",
+          "line": 1064,
+          "through": 1087,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "a-estimate",
+      "to": "risk-ambiguity-witness",
+      "kind": "hard-prerequisite",
+      "why": "Categorical ambiguity depends on the licensed outcome likelihood.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:209",
+          "line": 209,
+          "through": 211,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "q-witness-flip",
+      "to": "risk-ambiguity-witness",
+      "kind": "hard-prerequisite",
+      "why": "Real predictive risk needs live per-candidate Q/C pairs.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:209",
+          "line": 209,
+          "through": 211,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "categorical-ambiguity",
+      "to": "risk-ambiguity-witness",
+      "kind": "hard-prerequisite",
+      "why": "A declaration must have a corresponding categorical implementation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:209",
+          "line": 209,
+          "through": 211,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "risk-ambiguity-witness",
+      "to": "efe-composition",
+      "kind": "hard-prerequisite",
+      "why": "The full canonical core must preserve its witnessed risk and ambiguity terms.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:210",
+          "line": 210,
+          "through": 211,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "depth-witness",
+      "to": "continuations",
+      "kind": "hard-prerequisite",
+      "why": "The R6-to-R13 continuation must actually exercise depth.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:173",
+          "line": 173,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "action-selector",
+      "to": "continuations",
+      "kind": "hard-prerequisite",
+      "why": "The R14-to-R16 arrow needs actual selected action details.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:173",
+          "line": 173,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "selection-enactment",
+      "to": "continuations",
+      "kind": "hard-prerequisite",
+      "why": "The enactment/observation continuation needs exact enacted identity.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:173",
+          "line": 173,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "configured-machinery-records",
+      "to": "continuations",
+      "kind": "hard-prerequisite",
+      "why": "All four continuations must join within one configured run.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:173",
+          "line": 173,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "r10-caller",
+      "to": "r10-record",
+      "kind": "hard-prerequisite",
+      "why": "Assurance evidence must originate in a real caller of the dispatch boundary.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:20",
+          "line": 20,
+          "through": 29,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ]
+    },
+    {
+      "from": "r20-trip-source",
+      "to": "r20-engineering-composer",
+      "kind": "hard-prerequisite",
+      "why": "Composer needs authoritative distinct genuine open trips.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:39",
+          "line": 39,
+          "through": 74,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "r20-engineering-composer",
+      "to": "r20-engineering-witness",
+      "kind": "hard-prerequisite",
+      "why": "Engineering modulation requires actual applied values and explicit mode applicability.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:52",
+          "line": 52,
+          "through": 85,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "precision-applicability",
+      "to": "precision-integration",
+      "kind": "hard-prerequisite",
+      "why": "Conditional exact-real results must apply to the fixed live field before integration.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:28",
+          "line": 28,
+          "through": 37,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "r20-trip-source",
+      "to": "precision-integration",
+      "kind": "hard-prerequisite",
+      "why": "The theory-aligned input also needs real trip authority.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:28",
+          "line": 28,
+          "through": 37,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "r9-serving-retention",
+      "to": "r9-real-pair",
+      "kind": "hard-prerequisite",
+      "why": "Fresh evidence requires retained exact commissions and job histories.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:881",
+          "line": 881,
+          "through": 930,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "r9-genesis",
+      "to": "r9-real-pair",
+      "kind": "hard-prerequisite",
+      "why": "Independent review cannot authenticate its own root.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:881",
+          "line": 881,
+          "through": 930,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "r9-real-pair",
+      "to": "e3-runtime",
+      "kind": "hard-prerequisite",
+      "why": "The pre-enact consumer needs an actual authenticated independence verdict.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:26",
+          "line": 26,
+          "through": 26,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ]
+    },
+    {
+      "from": "r6-field-authority",
+      "to": "e1-e2-runtime",
+      "kind": "hard-prerequisite",
+      "why": "Production E1/E2 needs independently owned complete ranked support, values and immutable source pins.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:24",
+          "line": 24,
+          "through": 25,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ]
+    },
+    {
+      "from": "r6-field-authority",
+      "to": "e6a",
+      "kind": "hard-prerequisite",
+      "why": "Each shaped arm must join a full independently resolved scoring correspondence.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "slow-semantics",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-e5-e6-semantic-integration-2026-09-13.md:95",
+          "line": 95,
+          "through": 118,
+          "sha256": "73ffd42478b41ee05adf1044a0cb067f6f1146f3f958973f297e23776b8e7a01",
+          "snapshot": "sources/slow-semantics.md"
+        }
+      ]
+    },
+    {
+      "from": "feedback-authorities",
+      "to": "e6b",
+      "kind": "hard-prerequisite",
+      "why": "Pure replay does not supply real outcome/state/persistence authority.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:29",
+          "line": 29,
+          "through": 29,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ]
+    },
+    {
+      "from": "r11-method",
+      "to": "r11-lifecycle",
+      "kind": "hard-prerequisite",
+      "why": "New run evidence must map to the seven lifecycle cells by a reviewed procedure.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:217",
+          "line": 217,
+          "through": 217,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "e1-e2-runtime",
+      "to": "r11-lifecycle",
+      "kind": "hard-prerequisite",
+      "why": "Positive lifecycle needs production proposal/arbitration/delivery participation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:217",
+          "line": 217,
+          "through": 217,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "r11-method",
+      "to": "r15-lifecycle",
+      "kind": "hard-prerequisite",
+      "why": "The corresponding lifecycle census also needs explicit acquisition rules.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:217",
+          "line": 217,
+          "through": 217,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "slow-prior-runtime",
+      "to": "r15-lifecycle",
+      "kind": "hard-prerequisite",
+      "why": "Positive temporal lifecycle requires real slow-state participation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:217",
+          "line": 217,
+          "through": 217,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "policy-plans",
+      "to": "e6a",
+      "kind": "hard-prerequisite",
+      "why": "Slow-to-policy aggregation requires complete ordered policy constructions.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "slow-semantics",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-e5-e6-semantic-integration-2026-09-13.md:95",
+          "line": 95,
+          "through": 118,
+          "sha256": "73ffd42478b41ee05adf1044a0cb067f6f1146f3f958973f297e23776b8e7a01",
+          "snapshot": "sources/slow-semantics.md"
+        }
+      ]
+    },
+    {
+      "from": "slow-prior-runtime",
+      "to": "e6a",
+      "kind": "hard-prerequisite",
+      "why": "Forward influence must propagate the actual shaped state.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "slow-semantics",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-e5-e6-semantic-integration-2026-09-13.md:95",
+          "line": 95,
+          "through": 118,
+          "sha256": "73ffd42478b41ee05adf1044a0cb067f6f1146f3f958973f297e23776b8e7a01",
+          "snapshot": "sources/slow-semantics.md"
+        }
+      ]
+    },
+    {
+      "from": "e1-e2-runtime",
+      "to": "e6a",
+      "kind": "hard-prerequisite",
+      "why": "The altered scores must propagate through approved selection and exact action.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "slow-semantics",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-e5-e6-semantic-integration-2026-09-13.md:95",
+          "line": 95,
+          "through": 118,
+          "sha256": "73ffd42478b41ee05adf1044a0cb067f6f1146f3f958973f297e23776b8e7a01",
+          "snapshot": "sources/slow-semantics.md"
+        }
+      ]
+    },
+    {
+      "from": "e3-runtime",
+      "to": "e6a",
+      "kind": "hard-prerequisite",
+      "why": "Changed enactment still requires independent pre-enact authorization.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "slow-semantics",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-e5-e6-semantic-integration-2026-09-13.md:95",
+          "line": 95,
+          "through": 118,
+          "sha256": "73ffd42478b41ee05adf1044a0cb067f6f1146f3f958973f297e23776b8e7a01",
+          "snapshot": "sources/slow-semantics.md"
+        }
+      ]
+    },
+    {
+      "from": "e3-runtime",
+      "to": "e6b",
+      "kind": "hard-prerequisite",
+      "why": "Feedback must refer to an independently authorized action.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:29",
+          "line": 29,
+          "through": 29,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ]
+    },
+    {
+      "from": "selection-enactment",
+      "to": "e6b",
+      "kind": "hard-prerequisite",
+      "why": "Feedback must bind the exact enacted occurrence and terminal outcome.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "edge-audit",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-declaration-edge-audit-2026-09-13.md:29",
+          "line": 29,
+          "through": 29,
+          "sha256": "e8c663661f56dcda95ea29e492a786d9689e70748810760b4f1606953e073fde",
+          "snapshot": "sources/edge-audit.md"
+        }
+      ]
+    },
+    {
+      "from": "e6b",
+      "to": "r15-lifecycle",
+      "kind": "hard-prerequisite",
+      "why": "The next slow-state lifecycle requires actual retained feedback consumption.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:217",
+          "line": 217,
+          "through": 217,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "zones-reconcile",
+      "to": "zones-native-currency",
+      "kind": "hard-prerequisite",
+      "why": "Determine which evidence and obligations actually remain before rebuilding staged mechanisms.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "zones",
+          "file-line": "/home/joe/code/futon0/holes/missions/M-capability-zones.md:168",
+          "line": 168,
+          "through": 184,
+          "sha256": "85e92f3c6f5d2b48e19ea0d045b3505ae48f511fc8e6121630e67e7fb784f86b",
+          "snapshot": "sources/zones.md"
+        }
+      ]
+    },
+    {
+      "from": "row16-census",
+      "to": "f11-adapter",
+      "kind": "hard-prerequisite",
+      "why": "The adapter needs current exact equation/claim dispositions, including absences.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "f11-path",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-f11-false-certificate-path-2026-09-13.md:37",
+          "line": 37,
+          "through": 45,
+          "sha256": "71a64a18f84cc0f49ae2bfd94ed714c43bcd5e5314a540800e039d14045f9bff",
+          "snapshot": "sources/f11-path.md"
+        }
+      ]
+    },
+    {
+      "from": "edge-classification",
+      "to": "f11-adapter",
+      "kind": "hard-prerequisite",
+      "why": "The census must contain the independently declared corrected connection universe.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "f11-path",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-f11-false-certificate-path-2026-09-13.md:37",
+          "line": 37,
+          "through": 45,
+          "sha256": "71a64a18f84cc0f49ae2bfd94ed714c43bcd5e5314a540800e039d14045f9bff",
+          "snapshot": "sources/f11-path.md"
+        }
+      ]
+    },
+    {
+      "from": "f11-acquisition-contract",
+      "to": "f11-adapter",
+      "kind": "hard-prerequisite",
+      "why": "Input completeness requires independent universe and source/status authority.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "f11-path",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-f11-false-certificate-path-2026-09-13.md:37",
+          "line": 37,
+          "through": 45,
+          "sha256": "71a64a18f84cc0f49ae2bfd94ed714c43bcd5e5314a540800e039d14045f9bff",
+          "snapshot": "sources/f11-path.md"
+        }
+      ]
+    },
+    {
+      "from": "f11-adapter",
+      "to": "certificate-generator",
+      "kind": "hard-prerequisite",
+      "why": "Generator must consume acquired typed input, not invented absence fixtures.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "generator-review",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/independent-review-20757.md:53",
+          "line": 53,
+          "through": 59,
+          "sha256": "f4e6bd2312dc578a22414636b85a621045157531f7f7bb50728604f5620e20ec",
+          "snapshot": "sources/generator-review.md"
+        },
+        {
+          "source": "generator-fix",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/f1-refusal-normalization/receipt.json:1",
+          "line": 1,
+          "through": 12,
+          "sha256": "e56933a7dbd369511c075d00f98db8ec219984b9c01ea15ed7abc4f4876bf910",
+          "snapshot": "sources/generator-fix.json"
+        }
+      ]
+    },
+    {
+      "from": "certificate-generator",
+      "to": "certificate-tamper",
+      "kind": "hard-prerequisite",
+      "why": "Tamper checks require the actual transport and generator implementation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1108",
+          "line": 1108,
+          "through": 1110,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "certificate-tamper",
+      "to": "full-attestation",
+      "kind": "hard-prerequisite",
+      "why": "End-to-end certificate acceptance requires rejection controls across transport.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:114",
+          "line": 114,
+          "through": 131,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "full-attestation",
+      "to": "qualifying-run",
+      "kind": "hard-prerequisite",
+      "why": "THE run requires a computed Lean-validated complete certificate.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1159",
+          "line": 1159,
+          "through": 1163,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "f11-f2",
+      "to": "qualifying-run",
+      "kind": "hard-prerequisite",
+      "why": "Row28 explicitly requires prior row27 completion.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1159",
+          "line": 1159,
+          "through": 1163,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "row16-positive",
+      "to": "qualifying-run",
+      "kind": "hard-prerequisite",
+      "why": "False or absent equations cannot establish positive qualification.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1159",
+          "line": 1159,
+          "through": 1163,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "edge-positive",
+      "to": "qualifying-run",
+      "kind": "hard-prerequisite",
+      "why": "Every required edge must fire at the qualifying run subject.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1159",
+          "line": 1159,
+          "through": 1163,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "from": "joe-precision-law",
+      "to": "precision-integration",
+      "kind": "ruling-prerequisite",
+      "why": "The unadopted theory law needs an authorized semantic decision.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:28",
+          "line": 28,
+          "through": 37,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "joe-slow-policy-law",
+      "to": "e6a",
+      "kind": "ruling-prerequisite",
+      "why": "Unadopted slow-policy semantics cannot be installed as an inferred law.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "slow-semantics",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row22-e5-e6-semantic-integration-2026-09-13.md:95",
+          "line": 95,
+          "through": 118,
+          "sha256": "73ffd42478b41ee05adf1044a0cb067f6f1146f3f958973f297e23776b8e7a01",
+          "snapshot": "sources/slow-semantics.md"
+        }
+      ]
+    },
+    {
+      "from": "joe-zones-scope",
+      "to": "zones-native-currency",
+      "kind": "ruling-prerequisite",
+      "why": "Excluded experimental claims cannot be promoted without a scope decision.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "zones",
+          "file-line": "/home/joe/code/futon0/holes/missions/M-capability-zones.md:168",
+          "line": 168,
+          "through": 184,
+          "sha256": "85e92f3c6f5d2b48e19ea0d045b3505ae48f511fc8e6121630e67e7fb784f86b",
+          "snapshot": "sources/zones.md"
+        }
+      ]
+    },
+    {
+      "from": "belief-update",
+      "to": "row16-positive",
+      "kind": "evidence-prerequisite",
+      "why": "The full positive inventory requires this specific correspondence.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "action-selector",
+      "to": "row16-positive",
+      "kind": "evidence-prerequisite",
+      "why": "The full positive inventory requires this specific correspondence.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "fpi-posterior",
+      "to": "row16-positive",
+      "kind": "evidence-prerequisite",
+      "why": "The full positive inventory requires this specific correspondence.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "efe-composition",
+      "to": "row16-positive",
+      "kind": "evidence-prerequisite",
+      "why": "The full positive inventory requires this specific correspondence.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "accumulation-witness",
+      "to": "row16-positive",
+      "kind": "evidence-prerequisite",
+      "why": "The full positive inventory requires this specific correspondence.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "capability-substrate",
+      "to": "row16-positive",
+      "kind": "evidence-prerequisite",
+      "why": "The full positive inventory requires this specific correspondence.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "depth-witness",
+      "to": "row16-positive",
+      "kind": "evidence-prerequisite",
+      "why": "The full positive inventory requires this specific correspondence.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "continuations",
+      "to": "edge-positive",
+      "kind": "evidence-prerequisite",
+      "why": "Required underlying capabilities cannot be replaced by a diagram marking or fixture.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+          "line": 155,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "r10-record",
+      "to": "edge-positive",
+      "kind": "evidence-prerequisite",
+      "why": "Required underlying capabilities cannot be replaced by a diagram marking or fixture.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+          "line": 155,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "precision-integration",
+      "to": "edge-positive",
+      "kind": "evidence-prerequisite",
+      "why": "Required underlying capabilities cannot be replaced by a diagram marking or fixture.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+          "line": 155,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "e1-e2-runtime",
+      "to": "edge-positive",
+      "kind": "evidence-prerequisite",
+      "why": "Required underlying capabilities cannot be replaced by a diagram marking or fixture.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+          "line": 155,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "e3-runtime",
+      "to": "edge-positive",
+      "kind": "evidence-prerequisite",
+      "why": "Required underlying capabilities cannot be replaced by a diagram marking or fixture.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+          "line": 155,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "slow-prior-runtime",
+      "to": "edge-positive",
+      "kind": "evidence-prerequisite",
+      "why": "Required underlying capabilities cannot be replaced by a diagram marking or fixture.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+          "line": 155,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "e6a",
+      "to": "edge-positive",
+      "kind": "evidence-prerequisite",
+      "why": "Required underlying capabilities cannot be replaced by a diagram marking or fixture.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+          "line": 155,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "e6b",
+      "to": "edge-positive",
+      "kind": "evidence-prerequisite",
+      "why": "Required underlying capabilities cannot be replaced by a diagram marking or fixture.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:155",
+          "line": 155,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "from": "r11-lifecycle",
+      "to": "qualifying-run",
+      "kind": "evidence-prerequisite",
+      "why": "The current positive scope retains this prior-row obligation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "r15-lifecycle",
+      "to": "qualifying-run",
+      "kind": "evidence-prerequisite",
+      "why": "The current positive scope retains this prior-row obligation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "r9-real-pair",
+      "to": "qualifying-run",
+      "kind": "evidence-prerequisite",
+      "why": "The current positive scope retains this prior-row obligation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "r20-engineering-witness",
+      "to": "qualifying-run",
+      "kind": "evidence-prerequisite",
+      "why": "The current positive scope retains this prior-row obligation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "belief-update",
+      "to": "qualifying-run",
+      "kind": "evidence-prerequisite",
+      "why": "The current positive scope retains this prior-row obligation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "action-selector",
+      "to": "qualifying-run",
+      "kind": "evidence-prerequisite",
+      "why": "The current positive scope retains this prior-row obligation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "selection-enactment",
+      "to": "qualifying-run",
+      "kind": "evidence-prerequisite",
+      "why": "The current positive scope retains this prior-row obligation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "q-witness-flip",
+      "to": "qualifying-run",
+      "kind": "evidence-prerequisite",
+      "why": "The current positive scope retains this prior-row obligation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "accumulation-witness",
+      "to": "qualifying-run",
+      "kind": "evidence-prerequisite",
+      "why": "The current positive scope retains this prior-row obligation.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ]
+    },
+    {
+      "from": "risk-ambiguity-witness",
+      "to": "paper-01",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-background",
+          "file-line": "/home/joe/code/p4ng/sec-background.tex:4",
+          "line": 4,
+          "through": 10,
+          "sha256": "84fde4385881b14d8f2bf189a036b952811ddb34a508292d3eb631dbf5cdd149",
+          "snapshot": "sources/paper-sec-background.tex"
+        }
+      ]
+    },
+    {
+      "from": "r9-real-pair",
+      "to": "paper-01",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-background",
+          "file-line": "/home/joe/code/p4ng/sec-background.tex:4",
+          "line": 4,
+          "through": 10,
+          "sha256": "84fde4385881b14d8f2bf189a036b952811ddb34a508292d3eb631dbf5cdd149",
+          "snapshot": "sources/paper-sec-background.tex"
+        }
+      ]
+    },
+    {
+      "from": "r10-record",
+      "to": "paper-01",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-background",
+          "file-line": "/home/joe/code/p4ng/sec-background.tex:4",
+          "line": 4,
+          "through": 10,
+          "sha256": "84fde4385881b14d8f2bf189a036b952811ddb34a508292d3eb631dbf5cdd149",
+          "snapshot": "sources/paper-sec-background.tex"
+        }
+      ]
+    },
+    {
+      "from": "r10-record",
+      "to": "paper-02",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:168",
+          "line": 168,
+          "through": 174,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ]
+    },
+    {
+      "from": "r9-real-pair",
+      "to": "paper-03",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:196",
+          "line": 196,
+          "through": 202,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ]
+    },
+    {
+      "from": "risk-ambiguity-witness",
+      "to": "paper-04",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:277",
+          "line": 277,
+          "through": 283,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ]
+    },
+    {
+      "from": "r20-engineering-witness",
+      "to": "paper-05",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:292",
+          "line": 292,
+          "through": 298,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ]
+    },
+    {
+      "from": "r11-lifecycle",
+      "to": "paper-06",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:297",
+          "line": 297,
+          "through": 303,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ]
+    },
+    {
+      "from": "joe-r11-fork",
+      "to": "paper-06",
+      "kind": "ruling-prerequisite",
+      "why": "An explicit written item-16 ruling is the alternative scope branch, not evidence that the lifecycle exists.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:196",
+          "line": 196,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "conditional-branch": "ruling"
+    },
+    {
+      "from": "depth-witness",
+      "to": "paper-07",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:322",
+          "line": 322,
+          "through": 328,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ]
+    },
+    {
+      "from": "zones-native-currency",
+      "to": "paper-08",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:443",
+          "line": 443,
+          "through": 449,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ]
+    },
+    {
+      "from": "r20-engineering-witness",
+      "to": "paper-09",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:464",
+          "line": 464,
+          "through": 470,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ]
+    },
+    {
+      "from": "qualifying-run",
+      "to": "paper-10",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-observation-plop",
+          "file-line": "/home/joe/code/p4ng/sec-observation-plop.tex:13",
+          "line": 13,
+          "through": 19,
+          "sha256": "a5432e543046e7e96a8901b8651b8155fc67f301d92b5a599a90898c20c464ac",
+          "snapshot": "sources/paper-sec-observation-plop.tex"
+        }
+      ]
+    },
+    {
+      "from": "r20-engineering-witness",
+      "to": "paper-11",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-observation-plop",
+          "file-line": "/home/joe/code/p4ng/sec-observation-plop.tex:41",
+          "line": 41,
+          "through": 47,
+          "sha256": "a5432e543046e7e96a8901b8651b8155fc67f301d92b5a599a90898c20c464ac",
+          "snapshot": "sources/paper-sec-observation-plop.tex"
+        }
+      ]
+    },
+    {
+      "from": "qualifying-run",
+      "to": "paper-12",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-observation-plop",
+          "file-line": "/home/joe/code/p4ng/sec-observation-plop.tex:57",
+          "line": 57,
+          "through": 57,
+          "sha256": "a5432e543046e7e96a8901b8651b8155fc67f301d92b5a599a90898c20c464ac",
+          "snapshot": "sources/paper-sec-observation-plop.tex"
+        }
+      ]
+    },
+    {
+      "from": "effective-config",
+      "to": "paper-13",
+      "kind": "evidence-prerequisite",
+      "why": "This work discharges the specific paper margin claim.",
+      "basis": "source-derived-dependency",
+      "evidence": [
+        {
+          "source": "paper-sec-overview",
+          "file-line": "/home/joe/code/p4ng/sec-overview.tex:11",
+          "line": 11,
+          "through": 17,
+          "sha256": "08d48e0a771818827cbeb0ebaef21f8a6e4668f8b84fa2f0d41e8722d0594e99",
+          "snapshot": "sources/paper-sec-overview.tex"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "runtime-feedback-cycle",
+      "type": "runtime-cycle",
+      "cycle": [
+        "R6",
+        "R13",
+        "R14",
+        "R16",
+        "R2",
+        "R6"
+      ],
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:180",
+          "line": 180,
+          "through": 182,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        },
+        {
+          "source": "inventory",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row24-scoping-2026-09-12.md:203",
+          "line": 203,
+          "through": 218,
+          "sha256": "052ba8a060cf158bf04267b90c1d0839ec068f085ea5f28f4e0385818b9b577d",
+          "snapshot": "sources/inventory.md"
+        }
+      ],
+      "finding": "Runtime continuation/feedback is cyclic. Build prerequisites are phase-separated; predecessor t and successor t+1 are distinct evidence. No completed future qualifying run is used to license its own inputs."
+    },
+    {
+      "id": "row24-row25-cycle",
+      "type": "coarse-completion-cycle",
+      "cycle": [
+        "row24",
+        "row25",
+        "row24"
+      ],
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1108",
+          "line": 1108,
+          "through": 1110,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        },
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1134",
+          "line": 1134,
+          "through": 1136,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "finding": "Tracker makes row24 rejection commissioning depend on row25 tamper tests, while row25 generates row24 certificates. Explicit implementation→generator→tamper→accepted artifact phases resolve sequencing; neither whole row is silently assumed complete."
+    },
+    {
+      "id": "data-bootstrap",
+      "type": "apparent-cycle",
+      "cycle": [
+        "measured A",
+        "live Q",
+        "run outcomes",
+        "measured A"
+      ],
+      "evidence": [
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:63",
+          "line": 63,
+          "through": 75,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        },
+        {
+          "source": "convergence",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/CONVERGENCE-PLAN-2026-09-13.md:5",
+          "line": 5,
+          "through": 6,
+          "sha256": "8656824061db951460896fec3345ddcc5dcb7dc070c7ae1214eaabd5d31cc0c5",
+          "snapshot": "sources/convergence.md"
+        },
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1137",
+          "line": 1137,
+          "through": 1155,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "finding": "No hard cycle: existing gated machinery runs supply candidate observations before machine-Q activation. Labels/rubric authority remain required and outcomes do not guarantee full state coverage."
+    },
+    {
+      "id": "scope-conflict",
+      "type": "joe-scope-finding",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:5",
+          "line": 5,
+          "through": 15,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        },
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:114",
+          "line": 114,
+          "through": 120,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        },
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1159",
+          "line": 1159,
+          "through": 1163,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ],
+      "finding": "Paper excludes undeployed Row19 and experimental chains; current positive predicate still requires R9/R11/R15 and every prior row. Honest false reporting is possible; calling that row28 completion is not. Item16 fork remains available only through an explicit new ruling; this report does not adopt one."
+    },
+    {
+      "id": "zones-record-conflict",
+      "type": "scope-and-history-finding",
+      "evidence": [
+        {
+          "source": "zones",
+          "file-line": "/home/joe/code/futon0/holes/missions/M-capability-zones.md:340",
+          "line": 340,
+          "through": 361,
+          "sha256": "85e92f3c6f5d2b48e19ea0d045b3505ae48f511fc8e6121630e67e7fb784f86b",
+          "snapshot": "sources/zones.md"
+        },
+        {
+          "source": "paper-sec-catalog",
+          "file-line": "/home/joe/code/p4ng/sec-catalog.tex:443",
+          "line": 443,
+          "through": 447,
+          "sha256": "8344f510357030f3f904f187fa1fe2388fd7d1c11fdbdc84e32720c48f764b71",
+          "snapshot": "sources/paper-sec-catalog.tex"
+        }
+      ],
+      "finding": "Mission records S1.5 accepted and native-currency canary obligations resolved; current paper marks prototype excluded. Reconcile scopes/evidence before restarting old build items. Historical mission closure does not establish paper necessity or the remaining load/demand refinements."
+    },
+    {
+      "id": "mutable-status",
+      "type": "status-finding",
+      "evidence": [
+        {
+          "source": "annotation-receipt",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-14-measured-a-validator-2026-09-14/execution-receipts.edn:1",
+          "line": 1,
+          "through": 21,
+          "sha256": "00cef29552755df2d71a7bb73e54a963c10d45803098039ed8296468cc97a150",
+          "snapshot": "sources/annotation-receipt.edn"
+        }
+      ],
+      "finding": "Commission reports validator in flight; retained author completion receipt exists. Independent acceptance was not supplied. Treat lane as occupied/review pending, never duplicate it."
+    }
+  ],
+  "satisfied-baselines": [
+    {
+      "title": "Row26 gated on-demand entrypoint DONE; do not rebuild",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:1137",
+          "line": 1137,
+          "through": 1155,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        }
+      ]
+    },
+    {
+      "title": "Rows6/8/9 Q/A/B mechanism foundations, row14 packets3/4/5 exist; admission/live activation separate",
+      "evidence": [
+        {
+          "source": "tracker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/WORK-REMAINING.md:151",
+          "line": 151,
+          "through": 202,
+          "sha256": "161253e91b20cc8456c55db3366dbb592c6663946f2e24225c1271df0578764d",
+          "snapshot": "sources/tracker.md"
+        },
+        {
+          "source": "blocker",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/TN-row14-live-wiring-blocker-2026-09-14.md:19",
+          "line": 19,
+          "through": 27,
+          "sha256": "9f2c0c41cde220d148a9527bad41e011cdb47ac1e117fa4278909948f7c72879",
+          "snapshot": "sources/blocker.md"
+        }
+      ]
+    },
+    {
+      "title": "R8 exact legacy scalar item11 retired; no whole-node exemptions",
+      "evidence": [
+        {
+          "source": "decisions",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/LEAD-DECISIONS-2026-09-12.md:133",
+          "line": 133,
+          "through": 153,
+          "sha256": "30414e60c0b84d18f4322c4f45fba8f22242c633eef35c1d209025b00577faea",
+          "snapshot": "sources/decisions.md"
+        }
+      ]
+    },
+    {
+      "title": "Typed-gap generator exists and F1 normalization retained; no real authority",
+      "evidence": [
+        {
+          "source": "generator-review",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/independent-review-20757.md:53",
+          "line": 53,
+          "through": 59,
+          "sha256": "f4e6bd2312dc578a22414636b85a621045157531f7f7bb50728604f5620e20ec",
+          "snapshot": "sources/generator-review.md"
+        },
+        {
+          "source": "generator-fix",
+          "file-line": "/home/joe/code/futon2/holes/labs/wm-contract/runs/row-24-typed-gap-generator-2026-09-13/f1-refusal-normalization/receipt.json:1",
+          "line": 1,
+          "through": 12,
+          "sha256": "e56933a7dbd369511c075d00f98db8ec219984b9c01ea15ed7abc4f4876bf910",
+          "snapshot": "sources/generator-fix.json"
+        }
+      ]
+    },
+    {
+      "title": "Existing S1.5 visual acceptance is not a new gate",
+      "evidence": [
+        {
+          "source": "zones",
+          "file-line": "/home/joe/code/futon0/holes/missions/M-capability-zones.md:360",
+          "line": 360,
+          "through": 361,
+          "sha256": "85e92f3c6f5d2b48e19ea0d045b3505ae48f511fc8e6121630e67e7fb784f86b",
+          "snapshot": "sources/zones.md"
+        }
+      ]
+    }
+  ],
+  "metrics": {
+    "paper-flags": 13,
+    "work-nodes": 63,
+    "edges": 101,
+    "dependency-sccs": [],
+    "topological-order": [
+      "zones-reconcile",
+      "slow-prior-runtime",
+      "row16-census",
+      "r9-serving-retention",
+      "r9-genesis",
+      "r9-real-pair",
+      "r6-field-authority",
+      "r20-trip-source",
+      "r20-engineering-composer",
+      "r20-engineering-witness",
+      "r11-method",
+      "r10-caller",
+      "r10-record",
+      "precision-applicability",
+      "paper-alignment",
+      "paper-11",
+      "paper-09",
+      "paper-05",
+      "paper-03",
+      "paper-02",
+      "joe-zones-scope",
+      "zones-native-currency",
+      "paper-08",
+      "joe-slow-policy-law",
+      "joe-r11-fork",
+      "joe-precision-law",
+      "precision-integration",
+      "feedback-authorities",
+      "f11-f2",
+      "f11-acquisition-contract",
+      "existing-record-audit",
+      "selection-enactment",
+      "effective-config",
+      "paper-13",
+      "edge-classification",
+      "f11-adapter",
+      "e6b-storage-chain",
+      "e3-runtime",
+      "e6b",
+      "r15-lifecycle",
+      "e1-e2-runtime",
+      "r11-lifecycle",
+      "paper-06",
+      "configured-machinery-records",
+      "fpi-posterior",
+      "depth-witness",
+      "paper-07",
+      "certificate-generator",
+      "certificate-tamper",
+      "full-attestation",
+      "categorical-ambiguity",
+      "capability-substrate",
+      "belief-update",
+      "action-selector",
+      "continuations",
+      "accumulation-witness",
+      "a-validator",
+      "a-rubric",
+      "a-labels",
+      "a-pairs",
+      "a-estimate",
+      "model-assembly",
+      "action-domain",
+      "policy-plans",
+      "e6a",
+      "edge-positive",
+      "q-resolver",
+      "q-witness-flip",
+      "risk-ambiguity-witness",
+      "paper-04",
+      "paper-01",
+      "efe-composition",
+      "row16-positive",
+      "qualifying-run",
+      "paper-12",
+      "paper-10"
+    ],
+    "root-work-nodes": [
+      "a-validator",
+      "a-rubric",
+      "categorical-ambiguity",
+      "effective-config",
+      "existing-record-audit",
+      "r10-caller",
+      "r20-trip-source",
+      "joe-precision-law",
+      "precision-applicability",
+      "r9-genesis",
+      "r11-method",
+      "joe-r11-fork",
+      "slow-prior-runtime",
+      "joe-slow-policy-law",
+      "capability-substrate",
+      "zones-reconcile",
+      "joe-zones-scope",
+      "row16-census",
+      "edge-classification",
+      "f11-acquisition-contract",
+      "f11-f2",
+      "paper-alignment",
+      "r6-field-authority",
+      "feedback-authorities"
+    ],
+    "reachability": [
+      {
+        "id": "a-rubric",
+        "downstream-work-nodes": 14
+      },
+      {
+        "id": "a-validator",
+        "downstream-work-nodes": 14
+      },
+      {
+        "id": "a-labels",
+        "downstream-work-nodes": 13
+      },
+      {
+        "id": "a-pairs",
+        "downstream-work-nodes": 12
+      },
+      {
+        "id": "a-estimate",
+        "downstream-work-nodes": 11
+      },
+      {
+        "id": "existing-record-audit",
+        "downstream-work-nodes": 10
+      },
+      {
+        "id": "model-assembly",
+        "downstream-work-nodes": 10
+      },
+      {
+        "id": "action-domain",
+        "downstream-work-nodes": 9
+      },
+      {
+        "id": "policy-plans",
+        "downstream-work-nodes": 8
+      },
+      {
+        "id": "effective-config",
+        "downstream-work-nodes": 7
+      },
+      {
+        "id": "r9-genesis",
+        "downstream-work-nodes": 7
+      },
+      {
+        "id": "configured-machinery-records",
+        "downstream-work-nodes": 6
+      },
+      {
+        "id": "r9-real-pair",
+        "downstream-work-nodes": 6
+      },
+      {
+        "id": "e3-runtime",
+        "downstream-work-nodes": 5
+      },
+      {
+        "id": "edge-classification",
+        "downstream-work-nodes": 5
+      },
+      {
+        "id": "f11-acquisition-contract",
+        "downstream-work-nodes": 5
+      },
+      {
+        "id": "q-resolver",
+        "downstream-work-nodes": 5
+      },
+      {
+        "id": "r20-trip-source",
+        "downstream-work-nodes": 5
+      },
+      {
+        "id": "r6-field-authority",
+        "downstream-work-nodes": 5
+      },
+      {
+        "id": "row16-census",
+        "downstream-work-nodes": 5
+      },
+      {
+        "id": "selection-enactment",
+        "downstream-work-nodes": 5
+      },
+      {
+        "id": "action-selector",
+        "downstream-work-nodes": 4
+      },
+      {
+        "id": "categorical-ambiguity",
+        "downstream-work-nodes": 4
+      },
+      {
+        "id": "depth-witness",
+        "downstream-work-nodes": 4
+      },
+      {
+        "id": "e1-e2-runtime",
+        "downstream-work-nodes": 4
+      },
+      {
+        "id": "f11-adapter",
+        "downstream-work-nodes": 4
+      },
+      {
+        "id": "feedback-authorities",
+        "downstream-work-nodes": 4
+      },
+      {
+        "id": "q-witness-flip",
+        "downstream-work-nodes": 4
+      },
+      {
+        "id": "slow-prior-runtime",
+        "downstream-work-nodes": 4
+      },
+      {
+        "id": "certificate-generator",
+        "downstream-work-nodes": 3
+      },
+      {
+        "id": "e6b",
+        "downstream-work-nodes": 3
+      },
+      {
+        "id": "joe-precision-law",
+        "downstream-work-nodes": 3
+      },
+      {
+        "id": "joe-slow-policy-law",
+        "downstream-work-nodes": 3
+      },
+      {
+        "id": "precision-applicability",
+        "downstream-work-nodes": 3
+      },
+      {
+        "id": "r10-caller",
+        "downstream-work-nodes": 3
+      },
+      {
+        "id": "r11-method",
+        "downstream-work-nodes": 3
+      },
+      {
+        "id": "risk-ambiguity-witness",
+        "downstream-work-nodes": 3
+      },
+      {
+        "id": "accumulation-witness",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "belief-update",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "capability-substrate",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "certificate-tamper",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "continuations",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "e6a",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "efe-composition",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "fpi-posterior",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "precision-integration",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "r10-record",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "r20-engineering-composer",
+        "downstream-work-nodes": 2
+      },
+      {
+        "id": "edge-positive",
+        "downstream-work-nodes": 1
+      },
+      {
+        "id": "f11-f2",
+        "downstream-work-nodes": 1
+      },
+      {
+        "id": "full-attestation",
+        "downstream-work-nodes": 1
+      },
+      {
+        "id": "joe-zones-scope",
+        "downstream-work-nodes": 1
+      },
+      {
+        "id": "r11-lifecycle",
+        "downstream-work-nodes": 1
+      },
+      {
+        "id": "r15-lifecycle",
+        "downstream-work-nodes": 1
+      },
+      {
+        "id": "r20-engineering-witness",
+        "downstream-work-nodes": 1
+      },
+      {
+        "id": "row16-positive",
+        "downstream-work-nodes": 1
+      },
+      {
+        "id": "zones-reconcile",
+        "downstream-work-nodes": 1
+      },
+      {
+        "id": "joe-r11-fork",
+        "downstream-work-nodes": 0
+      },
+      {
+        "id": "paper-alignment",
+        "downstream-work-nodes": 0
+      },
+      {
+        "id": "qualifying-run",
+        "downstream-work-nodes": 0
+      }
+    ],
+    "longest-root-chains": [
+      [
+        "a-rubric",
+        "a-labels",
+        "a-pairs",
+        "a-estimate",
+        "model-assembly",
+        "action-domain",
+        "policy-plans",
+        "q-resolver",
+        "q-witness-flip",
+        "risk-ambiguity-witness",
+        "efe-composition",
+        "row16-positive",
+        "qualifying-run"
+      ],
+      [
+        "a-validator",
+        "a-labels",
+        "a-pairs",
+        "a-estimate",
+        "model-assembly",
+        "action-domain",
+        "policy-plans",
+        "q-resolver",
+        "q-witness-flip",
+        "risk-ambiguity-witness",
+        "efe-composition",
+        "row16-positive",
+        "qualifying-run"
+      ],
+      [
+        "edge-classification",
+        "f11-adapter",
+        "certificate-generator",
+        "certificate-tamper",
+        "full-attestation",
+        "qualifying-run"
+      ],
+      [
+        "effective-config",
+        "configured-machinery-records",
+        "depth-witness",
+        "continuations",
+        "edge-positive",
+        "qualifying-run"
+      ],
+      [
+        "f11-acquisition-contract",
+        "f11-adapter",
+        "certificate-generator",
+        "certificate-tamper",
+        "full-attestation",
+        "qualifying-run"
+      ],
+      [
+        "r9-genesis",
+        "r9-real-pair",
+        "e3-runtime",
+        "e6a",
+        "edge-positive",
+        "qualifying-run"
+      ],
+      [
+        "row16-census",
+        "f11-adapter",
+        "certificate-generator",
+        "certificate-tamper",
+        "full-attestation",
+        "qualifying-run"
+      ],
+      [
+        "categorical-ambiguity",
+        "risk-ambiguity-witness",
+        "efe-composition",
+        "row16-positive",
+        "qualifying-run"
+      ],
+      [
+        "existing-record-audit",
+        "action-selector",
+        "continuations",
+        "edge-positive",
+        "qualifying-run"
+      ],
+      [
+        "r6-field-authority",
+        "e1-e2-runtime",
+        "e6a",
+        "edge-positive",
+        "qualifying-run"
+      ],
+      [
+        "feedback-authorities",
+        "e6b",
+        "r15-lifecycle",
+        "qualifying-run"
+      ],
+      [
+        "joe-precision-law",
+        "precision-integration",
+        "edge-positive",
+        "qualifying-run"
+      ],
+      [
+        "joe-slow-policy-law",
+        "e6a",
+        "edge-positive",
+        "qualifying-run"
+      ],
+      [
+        "precision-applicability",
+        "precision-integration",
+        "edge-positive",
+        "qualifying-run"
+      ],
+      [
+        "r10-caller",
+        "r10-record",
+        "edge-positive",
+        "qualifying-run"
+      ],
+      [
+        "r20-trip-source",
+        "r20-engineering-composer",
+        "r20-engineering-witness",
+        "qualifying-run"
+      ],
+      [
+        "slow-prior-runtime",
+        "e6a",
+        "edge-positive",
+        "qualifying-run"
+      ],
+      [
+        "capability-substrate",
+        "row16-positive",
+        "qualifying-run"
+      ],
+      [
+        "r11-method",
+        "r11-lifecycle",
+        "qualifying-run"
+      ],
+      [
+        "f11-f2",
+        "qualifying-run"
+      ],
+      [
+        "joe-zones-scope",
+        "zones-native-currency"
+      ],
+      [
+        "zones-reconcile",
+        "zones-native-currency"
+      ],
+      [
+        "joe-r11-fork"
+      ],
+      [
+        "paper-alignment"
+      ]
+    ]
+  },
+  "ruling-branch-policy": "joe-r11-fork is an optional alternative to build, not a mandatory permission request. Other Joe-owned semantic gates may be discharged by explicitly delegated reviewed decisions; no adoption inferred here."
+}

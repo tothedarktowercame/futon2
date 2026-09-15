@@ -1,0 +1,526 @@
+{
+  "revision": 4,
+  "checklist-sha256": "466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8",
+  "state": "not-fully-ratified",
+  "author": "codex-28",
+  "author-assent": "codex-28 prepared and assents to the bounded incomplete account; no assertion of completed ratification or exhaustive current proof validation.",
+  "participants": {
+    "claude-15": {
+      "state": "unavailable-usage-limit",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491886641-21076-c87ac378",
+        "job-id": "invoke-1789491886641-21076-c87ac378",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "latest-revision-assent": false,
+      "basis": "execution lead and machinery/observation reviews"
+    },
+    "claude-20": {
+      "state": "pending",
+      "revision-1-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491888008-21077-d134cdbb",
+        "job-id": "invoke-1789491888008-21077-d134cdbb",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492712298-21119-468ad36b",
+        "job-id": "invoke-1789492712298-21119-468ad36b",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492944427-21167-847f4dfe",
+        "job-id": "invoke-1789492944427-21167-847f4dfe",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "basis": "F13 owner/reviewer"
+    },
+    "codex-22": {
+      "state": "agree-bounded",
+      "revision-1-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491888775-21078-bb9c4315",
+        "job-id": "invoke-1789491888775-21078-bb9c4315",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492713101-21120-c8e2729e",
+        "job-id": "invoke-1789492713101-21120-c8e2729e",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492945215-21168-5475af98",
+        "job-id": "invoke-1789492945215-21168-5475af98",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "basis": "machine-Q and measured-A authority lanes",
+      "review-file": "review-r4-codex-22.json",
+      "response": "AGREE on exact hash `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8` at p4ng `b2c7d1d`.\n\nI verified the hash and both diffs. R4 correctly restores E03/E04 to worklist F11 certificate acquisition and F2 reconciliation, and adds WM-13 to the row-39 crosswalk without relaxing obligations.\n\nMy bounded verification remains:\n\n- Verified: `basis-4`, `basis-5`; `built-2`, `built-4`, `built-5`, `built-10`, `built-12`; `WM-02`\u2013`WM-07`; the machine-Q/categorical-ambiguity portion of `WM-10`; `R1`, `R4`, `R5`, `R9`\u2013`R11`, `R13`\u2013`R17`, `R20`, `TRACE`; `E02`, `E03`, `E05`; `join-1`, `join-2`, `join-8`; `sub-1`\u2013`sub-8`.\n- Not independently verified: `WM-01`, `WM-08`, `WM-09`, `WM-11`\u2013`WM-14`; `R2`, `R3`, `R3a`, `R6`\u2013`R8`, `R12`, `R17-variants`, `R19`; `E01`, `E04`, `E06`\u2013`E10`; `join-3`\u2013`join-7`, `join-9`; `INV`, `TKT`, and live publication `PAGES`.\n\nThus I assent to the checklist\u2019s honest obligations and incompleteness statements, not to certification that WM presently works or is deployed.",
+      "job-state": "done",
+      "reviewed-revision": 4
+    },
+    "codex-23": {
+      "state": "agree-bounded",
+      "revision-1-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491890183-21079-399381d0",
+        "job-id": "invoke-1789491890183-21079-399381d0",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492714402-21121-3b92d104",
+        "job-id": "invoke-1789492714402-21121-3b92d104",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492946569-21169-66660dc1",
+        "job-id": "invoke-1789492946569-21169-66660dc1",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "basis": "machinery repair/source review",
+      "review-file": "review-r4-codex-23.json",
+      "response": "AGREE on exact SHA256 `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`.\n\nBounds:\n\n- Verified the p4ng commit object, working copy, and immutable review copy have identical hashes.\n- Verified R3\u2192R4 corrects **E03** and **E04** to existing worklist F11 certificate acquisition/F2 reconciliation.\n- Verified the row-39 crosswalk now includes **WM-13**.\n- My evidence-bound assent covers **basis-4**, **built-10**, **built-12**, **R16**, **R20**, **sub-6\u2013sub-8**, and the corrected **E03/E04** references.\n- I did not independently verify other evidence claims, current serving/deployment state, publication rendering, exhaustive roster completeness, or Joe\u2019s final reconfirmation.\n\nThis is assent to the honest checklist and its open obligations, not certification that the War Machine works or has produced a qualifying run.",
+      "job-state": "done",
+      "reviewed-revision": 4
+    },
+    "codex-24": {
+      "state": "agree-bounded",
+      "revision-1-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491892217-21080-3b391a32",
+        "job-id": "invoke-1789491892217-21080-3b391a32",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492715773-21122-2db438b1",
+        "job-id": "invoke-1789492715773-21122-2db438b1",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492948033-21170-28be3c2a",
+        "job-id": "invoke-1789492948033-21170-28be3c2a",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "basis": "retention/admission/certificate/annotation preflight",
+      "review-file": "review-r4-codex-24.json",
+      "response": "AGREE on exact SHA256 `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`.\n\nMy assent retains the Revision 3 bounds: `basis-4`, `basis-5`, `built-4`, `built-5`, `built-10`\u2013`built-12`, `WM-03`\u2013`WM-05`, `WM-10`, `R10`, `TRACE`, `E02`\u2013`E05`, `join-1`\u2013`join-3`, `join-5`, `join-8`, and `sub-1`\u2013`sub-8`.\n\nI verified the committed hash and scoped corrections. E03/E04 now correctly reference existing worklist F11/F2 rather than checklist `WM-11`, and adding `WM-13` to row 39\u2019s C\u03c4 crosswalk is consistent. No acceptance criterion or evidence claim is weakened.\n\nCurrent deployment assertions, reported RUN4 failures, operational measurements, exhaustive marker mappings, and roster completeness remain outside my independent verification. This is checklist ratification, not WM certification.",
+      "job-state": "done",
+      "reviewed-revision": 4
+    },
+    "codex-25": {
+      "state": "agree-bounded",
+      "revision-1-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491894291-21082-d65f5cf4",
+        "job-id": "invoke-1789491894291-21082-d65f5cf4",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492718567-21123-640d7698",
+        "job-id": "invoke-1789492718567-21123-640d7698",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492949438-21171-3caf600e",
+        "job-id": "invoke-1789492949438-21171-3caf600e",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "basis": "independent observation lane",
+      "review-file": "review-r4-codex-25.json",
+      "response": "**AGREE**, with bounded lane assent, on revision 4 SHA256 `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8` at `b2c7d1d`.\n\nVerified committed bytes, matching immutable copy and R3\u2192R4 diff. **E03/E04** now correctly reference existing worklist F11; my requested corrections are satisfied.\n\nMy verified scope covers **basis-3, basis-4, WM-04, E02\u2013E04, E10 and sub-5\u2013sub-8**. Joe\u2019s all-node completion standard and observation-evidence limits remain intact.\n\nThis ratifies the honest checklist and obligations, not machine completion, other lanes\u2019 accomplishment claims, deployment, published rendering or roster exhaustiveness. Joe retains operator acceptance. No edits, tests or dispatches performed.",
+      "job-state": "done",
+      "reviewed-revision": 4
+    },
+    "codex-26": {
+      "state": "pending",
+      "revision-1-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491896295-21083-5c5846c1",
+        "job-id": "invoke-1789491896295-21083-5c5846c1",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492721253-21124-baa173dd",
+        "job-id": "invoke-1789492721253-21124-baa173dd",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492950954-21172-8f4c4e8d",
+        "job-id": "invoke-1789492950954-21172-8f4c4e8d",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "basis": "cascade Lean, controller/tickets, proof audit"
+    },
+    "codex-27": {
+      "state": "agree-bounded",
+      "revision-1-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491897700-21084-60d031d8",
+        "job-id": "invoke-1789491897700-21084-60d031d8",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492722466-21125-c28654c2",
+        "job-id": "invoke-1789492722466-21125-c28654c2",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492951734-21173-a8b3455b",
+        "job-id": "invoke-1789492951734-21173-a8b3455b",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "basis": "kernel repair, find/organise/interpretation",
+      "review-file": "review-r4-codex-27.json",
+      "response": "**AGREE** on revision 4, p4ng **`b2c7d1d`**, exact SHA256 **`466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`**. Both copies match; E03/E04 and the row-39 crosswalk are corrected.\n\nMy assent covers **basis-4/basis-5**, bounded implementation evidence in **WM-01/WM-08/WM-09**, the scope distinction in **WM-06**, and the open correspondence obligation in **join-1**. No further corrections from my lane.\n\nThis ratifies the honest checklist and obligations\u2014not machine completion. I have not independently verified other agents\u2019 deployment reports, every node, roster completeness or the published renderer. ALL-node validation remains required; Joe retains operator acceptance.",
+      "job-state": "done",
+      "reviewed-revision": 4
+    },
+    "zai-7": {
+      "state": "agree-bounded",
+      "revision-1-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491899219-21085-89921e69",
+        "job-id": "invoke-1789491899219-21085-89921e69",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492723852-21126-6c49f65c",
+        "job-id": "invoke-1789492723852-21126-6c49f65c",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492953090-21174-f7589401",
+        "job-id": "invoke-1789492953090-21174-f7589401",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "basis": "joint semantics review/real-domain exercise",
+      "review-file": "review-r4-zai-7.json",
+      "response": "**AGREE on `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8` (p4ng `b2c7d1d`, Revision 4)** \u2014 verified at rest, immutable copy confirmed.\n\n**The R3\u2192R4 delta, checked line by line, is exactly as you describe and reference-only:**\n- **E03**: \"Complete WM-11 acquisition/adapter\u2026\" \u2192 \"Complete **existing worklist F11** certificate acquisition/adapter\u2026\" \u2014 same obligation, correct referent (the checklist's WM-11 is the policy posterior; the certificate mission is F11). No bar moved: the required work (source binding, semantic predicates, rejecting controls, end-to-end tamper tests) is verbatim.\n- **E04**: \"Accepted WM-11/F2 reconciliation\" \u2192 \"Accepted **existing worklist F11**/F2 reconciliation\" \u2014 same correction class, the OPEN status and \"do not inherit a repair packet's completion prose\" discipline unchanged.\n- **Crosswalk**: row 39 gains `/WM-13` \u2014 additive mapping, nothing retracted.\n- Plus the revision-note paragraph and header \u2014 provenance, not obligations.\n\n**My lane bounds, unchanged from my R3 ratification and carried to this hash:** verified against direct knowledge \u2014 `basis-4`, `basis-5`, `sub-1`\u2013`sub-8` (especially `sub-3` and `sub-5`), the ancillary inbox-zero witness bounds (atomic-guarding and complete-detection/restoration assumptions, runtime correspondence `:not-proven`, no row closed), the G-interpretation pending items preserved as proposed-not-adopted, and `built-3`'s honest \"no production scorer/selection yet.\" Not verified: the `built-*` and `WM-*`/`R*` technical particulars, the RUN4 failure report, serving-state reports, `E06`/`E07` claim counts \u2014 my agreement on those rests on cited evidence being accurately reported, bounded accordingly.\n\n**No CHANGES REQUIRED.** The standing roster note repeats one final time: codex-17's assent remains owed on the correspondence-load-bearing rows. Unavailable seats and roster completeness: acknowledged as unresolved, not agreed by me either. This supersedes my R2/R3 replies as my current assent; no edits, tests, clicks, or dispatches performed.",
+      "job-state": "done",
+      "reviewed-revision": 4
+    },
+    "zai-8": {
+      "state": "agree-bounded",
+      "revision-1-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491900338-21086-183af7ae",
+        "job-id": "invoke-1789491900338-21086-183af7ae",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492724570-21127-c0a69193",
+        "job-id": "invoke-1789492724570-21127-c0a69193",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492954551-21175-b58e883f",
+        "job-id": "invoke-1789492954551-21175-b58e883f",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "basis": "Joe ruling relay/joint semantics review",
+      "review-file": "review-r4-zai-8.json",
+      "response": "**AGREE on Revision 4, hash `466a2e19\u20269015c8`** \u2014 verified from disk at p4ng `b2c7d1d`. The diff against the R3 I ratified (`09b9757`) is exactly the described delta, 14 changed lines, all reference corrections:\n\n1. **E03** now points at the *existing worklist F11* certificate acquisition/adapter rather than anything that could be read as the checklist's WM-11 \u2014 correct, since WM-11 is the policy-posterior obligation and E03 is the certificate pipeline; the earlier cross-reference invited exactly the conflation the substitution list forbids.\n2. **E04** likewise: \"Accepted existing worklist F11/F2 reconciliation,\" keeping it anchored to the worklist's row-27 authority rather than the checklist's posterior item.\n3. **Row 39 crosswalk** gains WM-13 explicitly (`39 \u2192 WM-06/WM-12/WM-13 C_tau`) \u2014 an addition to the mapping, not a discharge of anything.\n4. Status text and revision notes updated accordingly, including the preserved caveat that Joe's sign-off (given while viewing the earlier draft) is to be reconfirmed against this object.\n\nNo acceptance bar moved, no evidence claim strengthened, no obligation weakened \u2014 I checked each changed line against the substitution list and the Item-5 preservation, and none is touched.\n\n**My lane bounds carry over unchanged from my R2/R3 replies**, now on this hash: I verified by my own checks \u2014 the controller/ticket commits and reloads (R6/TKT/basis), the nine-`sorry` count (E07), the scheduler-gate fact, and the open-operator-decision boundaries (FUEL, episode/book-horizon, compounding, attestation-twins, mid-run transitions, yield \u2014 decisions I personally relayed and hold recorded). Everything else I take as dated inputs per the checklist's own framing and do not certify. The built-evidence citations in WM-10 (`79ac55d5d0`, `2b22eeef31`) remain report-based for me, as stated in R2.\n\nUnavailable agents and roster completeness remain outside my agreement, as you note. This supersedes my queued R2-era responses; any Revision 5 should base on `b2c7d1d`.",
+      "job-state": "done",
+      "reviewed-revision": 4
+    },
+    "zai-9": {
+      "state": "unresolved-identity-404",
+      "dispatch-error": "Traceback (most recent call last):\n  File \"/home/joe/code/futon3c/scripts/agency_send.py\", line 189, in <module>\n    bell_raw, bell_json = post_json(f\"{a.base}/api/alpha/{a.kind}\", body)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/joe/code/futon3c/scripts/agency_send.py\", line 146, in post_json\n    raw = urllib.request.urlopen(req).read().decode()\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 215, in urlopen\n    return opener.open(url, data, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 521, in open\n    response = meth(req, response)\n               ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 630, in http_response\n    response = self.parent.error(\n               ^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 559, in error\n    return self._call_chain(*args)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 492, in _call_chain\n    result = func(*args)\n             ^^^^^^^^^^^\n  File \"/usr/lib/python3.12/urllib/request.py\", line 639, in http_error_default\n    raise HTTPError(req.full_url, code, msg, hdrs, fp)\nurllib.error.HTTPError: HTTP Error 404: Not Found\n"
+    },
+    "claude-1": {
+      "state": "unavailable-usage-limit",
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491954063-21089-fcdf3e8e",
+        "job-id": "invoke-1789491954063-21089-fcdf3e8e",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "latest-revision-assent": false,
+      "basis": "recorded C/find original rulings"
+    },
+    "codex-17": {
+      "state": "agree-bounded",
+      "revision-1-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789491955383-21090-045c29bf",
+        "job-id": "invoke-1789491955383-21090-045c29bf",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492726105-21128-abde5490",
+        "job-id": "invoke-1789492726105-21128-abde5490",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492955981-21176-e7821d96",
+        "job-id": "invoke-1789492955981-21176-e7821d96",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "basis": "FoldC authority/review",
+      "review-file": "review-r4-codex-17.json",
+      "response": "**AGREE** on exact R4 SHA-256 **`466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`**. The committed object and immutable copy match.\n\nThe R3\u2192R4 diff corrects **E03/E04** to existing worklist F11 and adds **WM-13** to row 39\u2019s crosswalk. It does not weaken the obligations.\n\nMy assent retains the same bounds: **basis-2\u20135, built-2, WM-06, WM-13, R19, join-9, sub-1/2/5\u20138, E05 and E10**, plus these reference corrections. No remaining correction in my lane.\n\nOther lanes\u2019 accomplishments, deployment, published rendering and roster exhaustiveness remain unverified by me. No tests, edits or runtime actions performed. This is fresh checklist assent, not WM completion certification.",
+      "job-state": "done",
+      "reviewed-revision": 4
+    },
+    "codex-12": {
+      "state": "agree-bounded",
+      "basis": "C institutional products explicitly referenced in Sept9 Item19a/20b",
+      "revision-1-dispatch": null,
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492727411-21129-17d985f4",
+        "job-id": "invoke-1789492727411-21129-17d985f4",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492957380-21177-294777e5",
+        "job-id": "invoke-1789492957380-21177-294777e5",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "review-file": "review-r4-codex-12.json",
+      "response": "AGREE \u2014 exact SHA-256 `466a2e1918d1e370020f42ac53461794a65e1973863b59631b31b67b5e9015c8`.\n\nThe committed source, working copy, and immutable Revision 4 copy are byte-identical. I verified the Revision 3 code-only changes and the Revision 4 corrections to `E03`, `E04`, and the row-39 crosswalk. The F11 references now distinguish the existing worklist certificate/F2 reconciliation from checklist `WM-11`; adding `WM-13` correctly preserves the C-family obligation.\n\nMy evidence-backed bounds remain `basis-3`, `basis-4`, `basis-5`, `built-10`, `built-12`, `R9`, `R10`, `R20`, `TRACE`, `E02`\u2013`E05`, `join-6`\u2013`join-9`, and `sub-5`\u2013`sub-8`. I accept the remaining entries only as an honest open/partial/unresolved checklist, without independently validating their mathematical, semantic, historical, serving, roster, or publication claims. This is not certification of WM completion or a qualifying run. No correction required.",
+      "job-state": "done",
+      "reviewed-revision": 4
+    },
+    "zai-5": {
+      "state": "agree-bounded",
+      "basis": "authored machinery evidence used in observation chain",
+      "revision-1-dispatch": null,
+      "revision-2-dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492728966-21130-65d9e598",
+        "job-id": "invoke-1789492728966-21130-65d9e598",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "dispatch": {
+        "status-url": "/api/alpha/invoke/jobs/invoke-1789492958741-21178-7ef4ae3d",
+        "job-id": "invoke-1789492958741-21178-7ef4ae3d",
+        "ref": null,
+        "accepted": true,
+        "mode": "brief",
+        "state": "queued",
+        "arse": null,
+        "ok": true,
+        "bell-type": "request"
+      },
+      "review-file": "review-r4-zai-5.json",
+      "response": "**AGREE** on hash `466a2e1918d1e370020f42ac53461794a65e1973863b59631b59631b31b67b5e9015c8` \u2014 verified from disk (`git show b2c7d1d:CHECKLIST-fundamentals.md | sha256sum`), and I reviewed the 09b9757\u2192b2c7d1d diff in full: it is exactly the four stated changes (revision header, E03/E04 reference correction, row-39 crosswalk adding WM-13, section-6 status note) with no obligation, acceptance bar, or evidence claim relaxed.\n\nThe E03/E04 correction direction is right by my own record: the certificate work those items reference is worklist F11's (find, core three) reconciliation certificate \u2014 implemented at futon2 `33ca99b0` (certificate fn + emission + tests, from the grounded round I witnessed) \u2014 and conflating it with checklist WM-11 (policy posterior) would have mislabeled the obligation. The crosswalk fix is bookkeeping. This is a reference correction, not a substantive change requiring me to re-verify content.\n\nMy lane bounds are unchanged from my R2/R3 replies: verified **WM-12, R13, marker-5** (serving configuration: no FPI_POSTERIOR, no retained effective-horizon record; note the paper flag itself is half stale \u2014 TRACE_POLICY_DETAILS and RECORDING_CONTRACT *are* enabled), **R14, R20, marker-2/9/11** (composer unwired in an applicable mode; variational mode excludes gain by design), **R10, built-10, built-11** (gated entrypoint, r8 grounded close, commissioned dispatch evidence), **basis-4/basis-5** consistency. Not verified by me: all Lean/math items (WM-01\u201307, built-1\u20137), WM-13/FoldC, R12 history, R17-variants, E06/E07 inventories, join-1, E08 \u2014 E03/E04's underlying obligations likewise rest on the audit sources, though their *reference direction* I confirm.\n\nUnavailable seats and roster completeness remain unresolved, and Joe's reconfirmation is still to come, as the document itself records.",
+      "job-state": "done",
+      "reviewed-revision": 4
+    },
+    "codex-28": {
+      "state": "author-assent",
+      "revision": 2,
+      "basis": "Joe commission/compiler"
+    }
+  },
+  "roster-complete": false,
+  "operator": "Joe; acceptance not inferred",
+  "canonical-source": "/home/joe/code/p4ng/CHECKLIST-fundamentals.md",
+  "p4ng-commit": "b2c7d1d",
+  "updated-at": "2026-09-15T17:24:03.398355+00:00",
+  "counts": {
+    "unavailable-usage-limit": 2,
+    "pending": 2,
+    "agree-bounded": 10,
+    "unresolved-identity-404": 1,
+    "author-assent": 1
+  }
+}
