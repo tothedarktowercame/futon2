@@ -1,0 +1,982 @@
+commit 480a666ad27c18477b4b9df86e11862be3930d50
+Author: Joseph Corneli <joseph.corneli@hyperreal.enterprises>
+Date:   Tue Sep 15 06:36:02 2026 +0000
+
+    Enforce finite-support probability kernels and nonnegative VFE precision
+
+diff --git a/DarkTower/WarMachine/AmbiguityBridge.lean b/DarkTower/WarMachine/AmbiguityBridge.lean
+index d3d9db309e..dda3c85b72 100644
+--- a/DarkTower/WarMachine/AmbiguityBridge.lean
++++ b/DarkTower/WarMachine/AmbiguityBridge.lean
+@@ -48,12 +48,16 @@ private def deterministicPredictedState : ProbabilityKernel Unit Unit where
+   support _ := [()]
+   mass _ _ := 1
+   nonnegative _ _ := by norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised _ := by norm_num
+ 
+ private def deterministicObservation : observationKernel Unit Unit where
+   support _ := [()]
+   mass _ _ := 1
+   nonnegative _ _ := by norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised _ := by norm_num
+ 
+ theorem deterministicCategoricalAmbiguity_is_zero :
+diff --git a/DarkTower/WarMachine/AmbiguityWitness.lean b/DarkTower/WarMachine/AmbiguityWitness.lean
+index 02aba973cf..02b11d05ac 100644
+--- a/DarkTower/WarMachine/AmbiguityWitness.lean
++++ b/DarkTower/WarMachine/AmbiguityWitness.lean
+@@ -12,12 +12,16 @@ def predictedState : ProbabilityKernel Policy State where
+   support := fun _ => [.certain]
+   mass := fun _ _ => 1
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intro; norm_num
+ 
+ def observationModel : observationKernel State Observation where
+   support := fun _ => [.seen]
+   mass := fun _ _ => 1
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intro; norm_num
+ 
+ structure AmbiguityReference where
+diff --git a/DarkTower/WarMachine/BeliefUpdateFalsifier.lean b/DarkTower/WarMachine/BeliefUpdateFalsifier.lean
+index d20584b300..81813f79fb 100644
+--- a/DarkTower/WarMachine/BeliefUpdateFalsifier.lean
++++ b/DarkTower/WarMachine/BeliefUpdateFalsifier.lean
+@@ -8,6 +8,8 @@ private def kernel : observationKernel Channel Channel where
+   support s := [s]
+   mass s o := if s = o then 1 else 0
+   nonnegative s o := by split <;> norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all [eq_comm]
+   normalised s := by simp
+ 
+ private def learningRate : NonnegativeReal := ⟨1, by norm_num⟩
+diff --git a/DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean b/DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean
+index a461fb7106..8ca0b59631 100644
+--- a/DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean
++++ b/DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean
+@@ -16,12 +16,16 @@ private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where
+   support := fun _ => [datum]
+   mass := fun _ _ => 1
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [datum]
+   normalised := by intros; norm_num
+ 
+ private def Cdist : PreferenceDistribution TestObservation where
+   support := fun _ => [datum]
+   mass := fun _ _ => 1
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [datum]
+   normalised := by intros; norm_num
+ 
+ private theorem positivePreference :
+diff --git a/DarkTower/WarMachine/ExpectedInformationGainWitness.lean b/DarkTower/WarMachine/ExpectedInformationGainWitness.lean
+index 5da1947ffa..84e8970765 100644
+--- a/DarkTower/WarMachine/ExpectedInformationGainWitness.lean
++++ b/DarkTower/WarMachine/ExpectedInformationGainWitness.lean
+@@ -20,12 +20,16 @@ private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where
+   support := fun _ => [outcome]
+   mass := fun _ _ => 1
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [outcome]
+   normalised := by intros; norm_num
+ 
+ private def prior : ParameterPriorKernel TestPolicy Parameter where
+   support := fun _ => [.a, .b]
+   mass := fun _ _ => 1 / 2
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intros; norm_num
+ 
+ private def posterior : ParameterPosteriorKernel TestPolicy TestObservation Parameter where
+@@ -34,6 +38,8 @@ private def posterior : ParameterPosteriorKernel TestPolicy TestObservation Para
+   nonnegative := by
+     intro _ θ
+     cases θ <;> norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intros; norm_num
+ 
+ private theorem positivePrior :
+diff --git a/DarkTower/WarMachine/F10RuledCarrier.lean b/DarkTower/WarMachine/F10RuledCarrier.lean
+index 21d2e6831a..e4539921c8 100644
+--- a/DarkTower/WarMachine/F10RuledCarrier.lean
++++ b/DarkTower/WarMachine/F10RuledCarrier.lean
+@@ -102,6 +102,8 @@ noncomputable def seed : PreferenceDistribution SeedObs where
+     | ⟨.organization, .cancelled⟩ => 0
+     | _ => 0
+   nonnegative := by intro _ o; rcases o with ⟨v, o⟩; cases v <;> cases o <;> norm_num
++  support_nodup := by intro; simp [FlightDisposition.all, organisationOutcome]
++  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases v <;> cases x <;> simp_all [FlightDisposition.all, organisationOutcome]
+   normalised := by intro _; norm_num [FlightDisposition.all, organisationOutcome]
+ 
+ theorem seedMass_zero_of_mem_namedZeros (d : FlightDisposition)
+diff --git a/DarkTower/WarMachine/GenerativeModelNegative.lean b/DarkTower/WarMachine/GenerativeModelNegative.lean
+index 1261001ad6..08ddaf51fe 100644
+--- a/DarkTower/WarMachine/GenerativeModelNegative.lean
++++ b/DarkTower/WarMachine/GenerativeModelNegative.lean
+@@ -17,16 +17,22 @@ private def wrongObservation : ProbabilityKernel OtherState (Outcome Observation
+   support := fun _ => [passOutcome]
+   mass := fun _ _ => 1
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [passOutcome]
+   normalised := by intros; norm_num
+ private def transition : TransitionKernel State Action where
+   support := fun _ => [.ready]
+   mass := fun _ _ => 1
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intros; norm_num
+ private def policyPrior : PolicyPriorKernel Policy where
+   support := fun _ => [.inspect]
+   mass := fun _ _ => 1
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intros; norm_num
+ 
+ /--
+diff --git a/DarkTower/WarMachine/GenerativeModelWitness.lean b/DarkTower/WarMachine/GenerativeModelWitness.lean
+index 9f2882dd1c..d220db2eca 100644
+--- a/DarkTower/WarMachine/GenerativeModelWitness.lean
++++ b/DarkTower/WarMachine/GenerativeModelWitness.lean
+@@ -21,6 +21,8 @@ private def observation : ProbabilityKernel TestState (Outcome TestObservation)
+   support := fun _ => [passOutcome, failOutcome]
+   mass := fun _ _ => 1 / 2
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp [passOutcome, failOutcome]
++  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [passOutcome, failOutcome]
+   normalised := by intros; norm_num
+ 
+ /-- Used only by the executable structural negative control: its state type is
+@@ -29,18 +31,24 @@ private def wrongObservation : ProbabilityKernel OtherState (Outcome TestObserva
+   support := fun _ => [passOutcome, failOutcome]
+   mass := fun _ _ => 1 / 2
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp [passOutcome, failOutcome]
++  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [passOutcome, failOutcome]
+   normalised := by intros; norm_num
+ 
+ private def transition : TransitionKernel TestState TestAction where
+   support := fun _ => [.ready]
+   mass := fun _ _ => 1
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intros; norm_num
+ 
+ private def policyPrior : PolicyPriorKernel TestPolicy where
+   support := fun _ => [.inspect]
+   mass := fun _ _ => 1
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intros; norm_num
+ 
+ private def model : GenerativeModel TestObservation TestState TestAction TestPolicy where
+diff --git a/DarkTower/WarMachine/Holes.lean b/DarkTower/WarMachine/Holes.lean
+index 2f379beaba..60dbb97ec6 100644
+--- a/DarkTower/WarMachine/Holes.lean
++++ b/DarkTower/WarMachine/Holes.lean
+@@ -7017,6 +7017,8 @@ structure ProbabilityKernel (S O : Type*) where
+   mass : S → O → ℝ
+   nonnegative : ∀ s o, 0 ≤ mass s o
+   normalised : ∀ s, ((support s).map (mass s)).sum = 1
++  support_nodup : ∀ s, (support s).Nodup
++  mass_eq_zero_of_not_mem : ∀ s o, o ∉ support s → mass s o = 0
+ 
+ /-- CLOSED-BY-RECORD · owner: sec-glossary.tex:23 · P-glossary-mathematics · holder: by-record · evidence: PredictiveOutcomeKernelWitness · falsifier: an unconditional outcome distribution or softmax policy vector is accepted as policy-conditioned `Q(o∣π)` · `Q(o∣π)` is a normalized finite-support predictive distribution over vertex-tagged outcomes for each policy. -/
+ abbrev PredictiveOutcomeKernel (PolicyIndex : Type*) (Obs : Vertex → Type*) :=
+@@ -7089,11 +7091,25 @@ structure VariationalFreeEnergyValue where
+   value : ℝ
+ 
+ /-- CLOSED-BY-RECORD · owner: sec-glossary.tex:19 · P-glossary-mathematics · holder: by-record · evidence: VariationalFreeEnergyWitness · falsifier: the Gaussian reference value disagrees, or an expected-free-energy value is accepted as variational F · F = ½ · mean_k (Π_k · ε_k²), over Channel.all. -/
+-def variationalFreeEnergy (precision error : Channel → ℝ) : VariationalFreeEnergyValue :=
++def variationalFreeEnergy (precision : PrecisionMap) (error : Channel → ℝ) : VariationalFreeEnergyValue :=
+   ⟨(1 / 2 : ℝ) *
+-    ((Channel.all.map fun k => precision k * (error k) ^ 2).foldl (· + ·) 0 /
++    ((Channel.all.map fun k => (precision k).value * (error k) ^ 2).foldl (· + ·) 0 /
+       Channel.all.length)⟩
+ 
++/-- Nonnegative precision weights squared errors by nonnegative amounts. -/
++theorem variationalFreeEnergy_nonnegative (precision : PrecisionMap) (error : Channel → ℝ) :
++    0 ≤ (variationalFreeEnergy precision error).value := by
++  have hsum : ∀ (xs : List Channel) (a : ℝ), 0 ≤ a →
++      0 ≤ (xs.map fun k => (precision k).value * (error k) ^ 2).foldl (· + ·) a := by
++    intro xs
++    induction xs with
++    | nil => intro a ha; exact ha
++    | cons k xs ih =>
++      intro a ha
++      exact ih _ (add_nonneg ha (mul_nonneg (precision k).nonnegative (sq_nonneg _)))
++  exact mul_nonneg (by norm_num)
++    (div_nonneg (hsum _ 0 (le_refl 0)) (Nat.cast_nonneg _))
++
+ /-- CLOSED-BY-RECORD · owner: sec-glossary.tex:31 · P-glossary-mathematics · holder: by-record · decided 2026-08-31 · The computed mass of a kernel row; `ProbabilityKernel.normalised` proves it is one. -/
+ def observationKernelRowMass {State Observation : Type*}
+     (A : observationKernel State Observation) (s : State) : ℝ :=
+@@ -7120,9 +7136,9 @@ def beliefUpdate (learningRate sensorNoiseFloor : NonnegativeReal)
+         (1 - learningRate.value * w.value) * (prior.variance k).value +
+           learningRate.value * w.value *
+             ((predictionError observation prior.mean k) ^ 2 + sensorNoiseFloor.value)) ∧
+-  (variationalFreeEnergy (fun k => (precision k).value)
++  (variationalFreeEnergy precision
+       (predictionError observation posterior.mean)).value ≤
+-    (variationalFreeEnergy (fun k => (precision k).value)
++    (variationalFreeEnergy precision
+       (predictionError observation prior.mean)).value
+ 
+ /-- CLOSED-BY-RECORD · owner: sec-glossary.tex:21,27 · P-glossary-mathematics · holder: by-record · evidence: PredictiveOutcomeRiskWitness · falsifier: predictive support contains an outcome with zero preference mass, or the KL value disagrees with the reference · The risk term `KL[Q(o∣π)‖C]`, over the predictive kernel's declared finite
+@@ -7249,23 +7265,32 @@ private def eigCounterOutcome : Outcome EIGCounterObs := ⟨.evidence, ()⟩
+ private def eigCounterPredictive :
+     PredictiveOutcomeKernel EIGCounterPolicy EIGCounterObs :=
+   { support := fun _ => [eigCounterOutcome]
+-    mass := fun _ _ => 1
+-    nonnegative := by intros; norm_num
+-    normalised := by intros; norm_num }
++    mass := fun _ o => if o.1 = .evidence then 1 else 0
++    nonnegative := by intros; split <;> norm_num
++    normalised := by intros; norm_num [eigCounterOutcome]
++    support_nodup := by intro; simp
++    mass_eq_zero_of_not_mem := by
++      intro s o h
++      rcases o with ⟨v, u⟩
++      cases v <;> cases u <;> simp_all [eigCounterOutcome, EIGCounterObs] }
+ 
+ private def eigCounterPrior :
+     ParameterPriorKernel EIGCounterPolicy EIGCounterParameter :=
+   { support := fun _ => [.only]
+     mass := fun _ _ => 1
+     nonnegative := by intros; norm_num
+-    normalised := by intros; norm_num }
++    normalised := by intros; norm_num
++    support_nodup := by intro; simp
++    mass_eq_zero_of_not_mem := by intro s o h; cases o; simp_all }
+ 
+ private def eigCounterPosterior :
+     ParameterPosteriorKernel EIGCounterPolicy EIGCounterObs EIGCounterParameter :=
+   { support := fun _ => [.only]
+     mass := fun _ _ => 1
+     nonnegative := by intros; norm_num
+-    normalised := by intros; norm_num }
++    normalised := by intros; norm_num
++    support_nodup := by intro; simp
++    mass_eq_zero_of_not_mem := by intro s o h; cases o; simp_all }
+ 
+ private theorem eigCounterPositivePrior :
+     ∀ π o θ, θ ∈ eigCounterPosterior.support (π, o) →
+diff --git a/DarkTower/WarMachine/LocalPreferenceModule.lean b/DarkTower/WarMachine/LocalPreferenceModule.lean
+index e5d820709f..dda88ef1cf 100644
+--- a/DarkTower/WarMachine/LocalPreferenceModule.lean
++++ b/DarkTower/WarMachine/LocalPreferenceModule.lean
+@@ -11,12 +11,16 @@ structure ExactTable (O : Type) where
+   mass : O → ℚ
+   nonnegative : ∀ o, 0 ≤ mass o
+   normalised : (support.map mass).sum = 1
++  support_nodup : support.Nodup
++  mass_eq_zero_of_not_mem : ∀ o, o ∉ support → mass o = 0
+ 
+ noncomputable def ExactTable.kernel {O : Type} (t : ExactTable O) :
+     ProbabilityKernel Unit O where
+   support := fun _ => t.support
+   mass := fun _ o => (t.mass o : ℝ)
+   nonnegative := by intro _ o; exact_mod_cast t.nonnegative o
++  support_nodup := fun _ => t.support_nodup
++  mass_eq_zero_of_not_mem := by intro s o h; simp [t.mass_eq_zero_of_not_mem o h]
+   normalised := by
+     intro _
+     have cast_sum : ∀ xs : List O,
+@@ -60,6 +64,8 @@ def binaryTable (p : ℚ) (hlo : 0 ≤ p) (hhi : p ≤ 1) :
+     intro o
+     rcases o with ⟨v, b⟩
+     cases v <;> cases b <;> simp_all
++  support_nodup := by simp [yes, no]
++  mass_eq_zero_of_not_mem := by intro o h; rcases o with ⟨v,b⟩; cases v <;> cases b <;> simp_all [yes, no]
+   normalised := by simp [yes, no]
+ 
+ noncomputable def softBinary (p : ℚ) (hlo : 1 / 2 < p) (hhi : p < 1) :
+diff --git a/DarkTower/WarMachine/MachineBeliefDistribution.lean b/DarkTower/WarMachine/MachineBeliefDistribution.lean
+index 1e2cd1b98e..94c8e0ce1a 100644
+--- a/DarkTower/WarMachine/MachineBeliefDistribution.lean
++++ b/DarkTower/WarMachine/MachineBeliefDistribution.lean
+@@ -16,6 +16,8 @@ noncomputable def selectedKernel (posterior : Posterior)
+   support _ := Status.all
+   mass _ := posterior
+   nonnegative _ s := hn s
++  support_nodup := by intro; simp [Status.all]
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all [Status.all]
+   normalised _ := h₁
+ 
+ theorem selectedKernel_normalised (posterior : Posterior)
+diff --git a/DarkTower/WarMachine/MachineParameters.lean b/DarkTower/WarMachine/MachineParameters.lean
+index e2260fab85..facef596d9 100644
+--- a/DarkTower/WarMachine/MachineParameters.lean
++++ b/DarkTower/WarMachine/MachineParameters.lean
+@@ -15,6 +15,8 @@ noncomputable def machineParameterPrior (Policy : Type) :
+   support _ := Theta.all
+   mass _ _ := 1 / 2
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp [Theta.all]
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all [Theta.all]
+   normalised := by intros; norm_num [Theta.all]
+ 
+ structure RegisteredLikelihood (Obs : Vertex → Type) where
+@@ -36,6 +38,8 @@ noncomputable def machineParameterPosterior (Policy : Type)
+     intro po t
+     exact div_nonneg (mul_nonneg (by norm_num) (l.nonnegative t po.2))
+       (le_of_lt (positive po.2))
++  support_nodup := by intro; simp [Theta.all]
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all [Theta.all]
+   normalised := by
+     intro po
+     have hs : l.mass .identityTransition po.2 + l.mass .controlledTransition po.2 ≠ 0 := by
+diff --git a/DarkTower/WarMachine/MachinePredictiveOutcome.lean b/DarkTower/WarMachine/MachinePredictiveOutcome.lean
+index 6c9bcd8094..0485cb0531 100644
+--- a/DarkTower/WarMachine/MachinePredictiveOutcome.lean
++++ b/DarkTower/WarMachine/MachinePredictiveOutcome.lean
+@@ -48,6 +48,18 @@ noncomputable def fullPlanOutcomeKernel (a : MachineA Obs) (q : Posterior)
+     simp only [List.mem_map] at hx
+     obtain ⟨s, _, rfl⟩ := hx
+     exact mul_nonneg (terminalNonnegative q plan hn s) (a.kernel.nonnegative s o)
++  support_nodup := by
++    intro plan
++    simpa only [a.supportExact] using a.kernel.support_nodup .spawned
++  mass_eq_zero_of_not_mem := by
++    intro plan o h
++    unfold fullPlanOutcomeMass
++    apply List.sum_eq_zero
++    intro x hx
++    obtain ⟨s, _, rfl⟩ := List.mem_map.mp hx
++    rw [a.kernel.mass_eq_zero_of_not_mem s o
++      (by simpa only [a.supportExact] using h)]
++    simp
+   normalised := by
+     intro plan
+     have hT := terminalNormalised q plan hn hq
+diff --git a/DarkTower/WarMachine/MachinePreferenceDistribution.lean b/DarkTower/WarMachine/MachinePreferenceDistribution.lean
+index f63c8bedd5..95ff497e59 100644
+--- a/DarkTower/WarMachine/MachinePreferenceDistribution.lean
++++ b/DarkTower/WarMachine/MachinePreferenceDistribution.lean
+@@ -30,6 +30,8 @@ noncomputable def machineC : PreferenceDistribution SeedObs where
+   support := fun _ => machineSupport.map organisationOutcome
+   mass := seed.mass
+   nonnegative := seed.nonnegative
++  support_nodup := by intro; simp [machineSupport, organisationOutcome]
++  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases v <;> cases x <;> simp_all [machineSupport, organisationOutcome, seed]
+   normalised := by intro _; norm_num [machineSupport, organisationOutcome, seed]
+ 
+ theorem machineC_normalised :
+diff --git a/DarkTower/WarMachine/MachineQ.lean b/DarkTower/WarMachine/MachineQ.lean
+index 699fd2a053..75d4da94e2 100644
+--- a/DarkTower/WarMachine/MachineQ.lean
++++ b/DarkTower/WarMachine/MachineQ.lean
+@@ -71,9 +71,9 @@ obligation rather than assumed:
+ 
+ * `states` / `outcomes` -- the finite carriers the composition sums over. The
+   support hypotheses say the model's rows are all stated over these same two
+-  lists, which is what makes a row sum meaningful: `ProbabilityKernel` fixes no
+-  mass off its own support, so summing an observation row over any list other
+-  than its declared support would be summing an unconstrained quantity.
++  lists. Each row has distinct support and zero mass outside it; these
++  equalities let composition reuse row normalization and transfer the
++  finite-support obligations to the resulting kernel.
+ * `plan` -- the controlled step the policy commits to. `Holes.TransitionKernel`
+   is conditioned on an `Action` and `Q(o∣π)` on a `PolicyIndex`; `plan` is the
+   projection between them, and `rowsEqualOfEqualPlans` below states exactly how
+@@ -143,6 +143,24 @@ noncomputable def machinePredictedStateKernel
+   support _ := reading.states
+   mass := predictedStateMass model reading belief
+   nonnegative := predictedStateMass_nonneg model reading belief
++  support_nodup := by
++    intro π
++    cases hs : reading.states with
++    | nil =>
++      have h := reading.beliefNormalised belief
++      simp [hs] at h
++    | cons s ss =>
++      simpa only [reading.transitionSupport, hs] using
++        model.transition.support_nodup (s, reading.plan π)
++  mass_eq_zero_of_not_mem := by
++    intro π o h
++    unfold predictedStateMass
++    apply List.sum_eq_zero
++    intro x hx
++    obtain ⟨s, _, rfl⟩ := List.mem_map.mp hx
++    rw [model.transition.mass_eq_zero_of_not_mem (s, reading.plan π) o
++      (by simpa only [reading.transitionSupport] using h)]
++    simp
+   normalised := predictedStateMass_sum model reading belief
+ 
+ /-! ## Q(o∣π): the predictive outcome kernel -/
+@@ -191,6 +209,23 @@ noncomputable def machinePredictiveOutcomeKernel
+   support _ := reading.outcomes
+   mass := predictiveOutcomeMass model reading belief
+   nonnegative := predictiveOutcomeMass_nonneg model reading belief
++  support_nodup := by
++    intro π
++    cases hs : reading.states with
++    | nil =>
++      have h := reading.beliefNormalised belief
++      simp [hs] at h
++    | cons s ss =>
++      simpa only [reading.observationSupport] using model.observation.support_nodup s
++  mass_eq_zero_of_not_mem := by
++    intro π o h
++    unfold predictiveOutcomeMass
++    apply List.sum_eq_zero
++    intro x hx
++    obtain ⟨s, _, rfl⟩ := List.mem_map.mp hx
++    rw [model.observation.mass_eq_zero_of_not_mem s o
++      (by simpa only [reading.observationSupport] using h)]
++    simp
+   normalised := predictiveOutcomeMass_sum model reading belief
+ 
+ /-! ## How much of the policy the construction sees -/
+diff --git a/DarkTower/WarMachine/MachineQWitness.lean b/DarkTower/WarMachine/MachineQWitness.lean
+index b8c80a137c..792eca77d1 100644
+--- a/DarkTower/WarMachine/MachineQWitness.lean
++++ b/DarkTower/WarMachine/MachineQWitness.lean
+@@ -129,10 +129,14 @@ noncomputable def aRow : DemoState → EvidenceOutcome → ℝ
+ /-- `A : S ⇝ O`, over the declared alphabet. -/
+ noncomputable def demoObservation : ProbabilityKernel DemoState (Outcome DemoObs) where
+   support _ := demoAlphabet
+-  mass s o := aRow s o.2
++  mass := fun s o => if o.1 = .evidence then aRow s o.2 else 0
+   nonnegative := by
+     intro s o
+-    cases s <;> cases (o.2 : EvidenceOutcome) <;> norm_num [aRow]
++    split
++    · cases s <;> cases (o.2 : EvidenceOutcome) <;> norm_num [aRow]
++    · norm_num
++  support_nodup := by intro; simp [demoAlphabet, EvidenceOutcome.all, out]
++  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v,x⟩; cases v <;> cases x <;> simp_all [demoAlphabet, EvidenceOutcome.all, out]
+   normalised := by
+     intro s
+     cases s <;> norm_num [demoAlphabet, EvidenceOutcome.all, out, aRow]
+@@ -153,6 +157,8 @@ noncomputable def demoTransition : TransitionKernel DemoState DemoAction where
+   nonnegative := by
+     rintro ⟨_, u⟩ s'
+     cases u <;> cases s' <;> norm_num [bRow]
++  support_nodup := by intro; simp [demoStates]
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all [demoStates]
+   normalised := by
+     rintro ⟨_, u⟩
+     cases u <;> norm_num [demoStates, bRow]
+@@ -162,6 +168,8 @@ noncomputable def demoPolicyPrior : PolicyPriorKernel DemoPolicy where
+   support _ := [.acquisition, .review]
+   mass _ _ := 1/2
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intro; norm_num
+ 
+ /-- The generative model the kernel is constructed from. -/
+diff --git a/DarkTower/WarMachine/MachineTransition.lean b/DarkTower/WarMachine/MachineTransition.lean
+index c5fb0e3d96..2127c4fa8e 100644
+--- a/DarkTower/WarMachine/MachineTransition.lean
++++ b/DarkTower/WarMachine/MachineTransition.lean
+@@ -19,6 +19,8 @@ noncomputable def controlled : TransitionKernel Status Action where
+   support := fun _ => Status.all
+   mass := fun (sa : Status × Action) s' => if s' = next sa.1 sa.2 then 1 else 0
+   nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp [Status.all]
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all [Status.all]
+   normalised := by
+     intro sa
+     rcases sa with ⟨s, a⟩
+@@ -48,6 +50,8 @@ noncomputable def uncontrolled : TransitionKernel Status Action where
+   support := fun _ => Status.all
+   mass := fun sa s' => if s' = sa.1 then 1 else 0
+   nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp [Status.all]
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all [Status.all]
+   normalised := by intro sa; rcases sa with ⟨s, _⟩; cases s <;> simp [Status.all]
+ 
+ theorem uncontrolledActionsIndistinguishable (s : Status) :
+diff --git a/DarkTower/WarMachine/ObservationKernelWitness.lean b/DarkTower/WarMachine/ObservationKernelWitness.lean
+index 03eb52c4ce..317c5a957d 100644
+--- a/DarkTower/WarMachine/ObservationKernelWitness.lean
++++ b/DarkTower/WarMachine/ObservationKernelWitness.lean
+@@ -12,6 +12,8 @@ noncomputable def reference : observationKernel State Observation where
+   support := fun _ => [.present, .absent]
+   mass := fun _ _ => 1 / 2
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intro; norm_num
+ 
+ theorem referenceRowMass : observationKernelRowMass reference .latent = 1 := by
+diff --git a/DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean b/DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean
+index c1a0b134a6..ebba95b2f9 100644
+--- a/DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean
++++ b/DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean
+@@ -5,9 +5,16 @@ open DarkTower.WarMachine.ParameterPosteriorKernelWitness
+ 
+ noncomputable def outcomePrediction : PredictiveOutcomeKernel Policy Obs where
+   support := fun _ => [clear]
+-  mass := fun _ _ => 1
+-  nonnegative := by intros; norm_num
+-  normalised := by intro; norm_num
++  mass := by
++    classical
++    exact fun s o => if o ∈ [clear] then 1 else 0
++  nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp [clear]
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all
++  normalised := by
++    intro s
++    classical
++    norm_num [clear]
+ 
+ -- Must fail: Q(o|pi) has neither the posterior's domain nor its codomain.
+ /--
+diff --git a/DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean b/DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean
+index c8b59c4250..021b007629 100644
+--- a/DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean
++++ b/DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean
+@@ -5,9 +5,16 @@ open DarkTower.WarMachine.ParameterPosteriorKernelWitness
+ 
+ noncomputable def parameterPrior : ParameterPriorKernel Policy Parameter where
+   support := fun _ => [.cautious]
+-  mass := fun _ _ => 1
+-  nonnegative := by intros; norm_num
+-  normalised := by intro; norm_num
++  mass := by
++    classical
++    exact fun s o => if o ∈ [.cautious] then 1 else 0
++  nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all
++  normalised := by
++    intro s
++    classical
++    norm_num
+ 
+ -- Must fail: Q(theta|pi) omits the observed-outcome conditioning coordinate.
+ /--
+diff --git a/DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean b/DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean
+index 6d946de2a4..a2291ccba6 100644
+--- a/DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean
++++ b/DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean
+@@ -17,11 +17,16 @@ normalized parameter row for every policy/observation pair; this witnesses the
+ carrier and does not claim that every observation must change the posterior. -/
+ noncomputable def posterior : ParameterPosteriorKernel Policy Obs Parameter where
+   support := fun _ => [.cautious]
+-  mass := fun _ _ => 1
+-  nonnegative := by intros; norm_num
++  mass := by
++    classical
++    exact fun s o => if o ∈ [.cautious] then 1 else 0
++  nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all
+   normalised := by
+-    intro
+-    simp
++    intro s
++    classical
++    norm_num
+ 
+ theorem observedPolicyRowMass :
+     ((posterior.support (.inspect, clear)).map
+diff --git a/DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean b/DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean
+index ef9f594d8f..7ba8120f06 100644
+--- a/DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean
++++ b/DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean
+@@ -7,6 +7,8 @@ noncomputable def habit : PolicyPriorKernel Policy where
+   support := fun _ => [.inspect, .repair]
+   mass := fun _ _ => 1 / 2
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intro; norm_num
+ 
+ -- Must fail: Q(pi) is unconditioned and ranges over policies, not parameters.
+diff --git a/DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean b/DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean
+index 65d347ea28..82c39fb2b3 100644
+--- a/DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean
++++ b/DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean
+@@ -9,9 +9,16 @@ def clear : Outcome Obs := ⟨.evidence, .clear⟩
+ 
+ noncomputable def outcomePrediction : PredictiveOutcomeKernel Policy Obs where
+   support := fun _ => [clear]
+-  mass := fun _ _ => 1
+-  nonnegative := by intros; norm_num
+-  normalised := by intro; norm_num
++  mass := by
++    classical
++    exact fun s o => if o ∈ [clear] then 1 else 0
++  nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp [clear]
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all
++  normalised := by
++    intro s
++    classical
++    norm_num [clear]
+ 
+ -- Must fail: Q(o|pi) has outcomes, not model parameters, as its codomain.
+ /--
+diff --git a/DarkTower/WarMachine/ParameterPriorKernelWitness.lean b/DarkTower/WarMachine/ParameterPriorKernelWitness.lean
+index 7daa85382e..b42c02155f 100644
+--- a/DarkTower/WarMachine/ParameterPriorKernelWitness.lean
++++ b/DarkTower/WarMachine/ParameterPriorKernelWitness.lean
+@@ -13,8 +13,13 @@ noncomputable def prior : ParameterPriorKernel Policy Parameter where
+   support
+     | .inspect => [.cautious]
+     | .repair => [.bold]
+-  mass := fun _ _ => 1
+-  nonnegative := by intros; norm_num
++  mass := fun p o => match p, o with
++    | .inspect, .cautious => 1
++    | .repair, .bold => 1
++    | _, _ => 0
++  nonnegative := by intro p o; cases p <;> cases o <;> norm_num
++  support_nodup := by intro p; cases p <;> simp
++  mass_eq_zero_of_not_mem := by intro p o h; cases p <;> cases o <;> simp_all
+   normalised := by intro p; cases p <;> simp
+ 
+ theorem inspectRowMass :
+diff --git a/DarkTower/WarMachine/PolicyPriorKernelNegative.lean b/DarkTower/WarMachine/PolicyPriorKernelNegative.lean
+index 8bfcfa279b..0b808832b5 100644
+--- a/DarkTower/WarMachine/PolicyPriorKernelNegative.lean
++++ b/DarkTower/WarMachine/PolicyPriorKernelNegative.lean
+@@ -10,6 +10,8 @@ noncomputable def stateConditioned : ProbabilityKernel HiddenState Policy where
+   support := fun _ => [.inspect, .repair]
+   mass := fun _ _ => 1 / 2
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intro; norm_num
+ 
+ -- Must fail: a state-conditioned kernel is not the Unit-conditioned prior.
+diff --git a/DarkTower/WarMachine/PolicyPriorKernelWitness.lean b/DarkTower/WarMachine/PolicyPriorKernelWitness.lean
+index 9710e9a489..7763c2875b 100644
+--- a/DarkTower/WarMachine/PolicyPriorKernelWitness.lean
++++ b/DarkTower/WarMachine/PolicyPriorKernelWitness.lean
+@@ -10,6 +10,8 @@ noncomputable def reference : PolicyPriorKernel Policy where
+   support := fun _ => [.inspect, .repair]
+   mass := fun _ _ => 1 / 2
+   nonnegative := by intros; norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all
+   normalised := by intro; norm_num
+ 
+ theorem referenceRowMass : ((reference.support ()).map (reference.mass ())).sum = 1 :=
+diff --git a/DarkTower/WarMachine/PrecisionWitness.lean b/DarkTower/WarMachine/PrecisionWitness.lean
+index fc8d880a85..c9c5eaef7c 100644
+--- a/DarkTower/WarMachine/PrecisionWitness.lean
++++ b/DarkTower/WarMachine/PrecisionWitness.lean
+@@ -20,18 +20,18 @@ def precisionReference : PrecisionReference :=
+     swappedPrecision := 1, swappedError := 2, swappedF := 2 }
+ 
+ theorem weightedReference :
+-    variationalFreeEnergy (fun k => (precisionTwo k).value)
++    variationalFreeEnergy precisionTwo
+       (fun _ => precisionReference.weightedError) = ⟨precisionReference.weightedF⟩ := by
+   norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionTwo]
+ 
+ theorem swappedReference :
+-    variationalFreeEnergy (fun k => (precisionOne k).value)
++    variationalFreeEnergy precisionOne
+       (fun _ => precisionReference.swappedError) = ⟨precisionReference.swappedF⟩ := by
+   norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionOne]
+ 
+ theorem precisionAndErrorAreNotInterchangeable :
+-    variationalFreeEnergy (fun k => (precisionTwo k).value) (fun _ => 1) ≠
+-      variationalFreeEnergy (fun k => (precisionOne k).value) (fun _ => 2) := by
++    variationalFreeEnergy precisionTwo (fun _ => 1) ≠
++      variationalFreeEnergy precisionOne (fun _ => 2) := by
+   norm_num [variationalFreeEnergy, Channel.all, precisionTwo, precisionOne]
+ 
+ end DarkTower.WarMachine.PrecisionWitness
+diff --git a/DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean b/DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean
+index 37b5ce7f0f..025c964d0c 100644
+--- a/DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean
++++ b/DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean
+@@ -5,9 +5,16 @@ open DarkTower.WarMachine.PredictiveOutcomeKernelWitness
+ 
+ noncomputable def unconditional : PreferenceDistribution Obs where
+   support := fun _ => [clear, fixed]
+-  mass := fun _ _ => 1 / 2
+-  nonnegative := by intros; norm_num
+-  normalised := by intro; norm_num
++  mass := by
++    classical
++    exact fun s o => if o ∈ [clear, fixed] then 1 / 2 else 0
++  nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp [clear, fixed]
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all
++  normalised := by
++    intro s
++    classical
++    norm_num [clear, fixed]
+ 
+ -- Must fail: an unconditional distribution is not Q(o|pi).
+ /--
+diff --git a/DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean b/DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean
+index 99e85de9fb..5860ccae30 100644
+--- a/DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean
++++ b/DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean
+@@ -16,9 +16,14 @@ noncomputable def predictive : PredictiveOutcomeKernel Policy Obs where
+   support
+     | .inspect => [clear]
+     | .repair => [fixed]
+-  mass := fun _ _ => 1
+-  nonnegative := by intros; norm_num
+-  normalised := by intro p; cases p <;> simp
++  mass := fun p o => match p, o with
++    | .inspect, ⟨.evidence, .clear⟩ => 1
++    | .repair, ⟨.evidence, .fixed⟩ => 1
++    | _, _ => 0
++  nonnegative := by intro p o; rcases o with ⟨v, x⟩; cases p <;> cases v <;> cases x <;> norm_num
++  support_nodup := by intro p; cases p <;> simp
++  mass_eq_zero_of_not_mem := by intro p o h; rcases o with ⟨v, x⟩; cases p <;> cases v <;> cases x <;> simp_all [clear, fixed]
++  normalised := by intro p; cases p <;> simp [clear, fixed]
+ 
+ theorem inspectRowMass :
+     ((predictive.support .inspect).map (predictive.mass .inspect)).sum = 1 :=
+diff --git a/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean b/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean
+index f3bf34e531..671ec06f73 100644
+--- a/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean
++++ b/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean
+@@ -12,18 +12,35 @@ def ob : Outcome Obs := ⟨.evidence, .b⟩
+ 
+ noncomputable def predictive : PredictiveOutcomeKernel Policy Obs where
+   support := fun _ => [oa]
+-  mass := fun _ _ => 1
+-  nonnegative := by intros; norm_num
+-  normalised := by intro; norm_num
++  mass := by
++    classical
++    exact fun s o => if o ∈ [oa] then 1 else 0
++  nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp [oa, ob]
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all
++  normalised := by
++    intro s
++    classical
++    norm_num [oa, ob]
+ 
+ noncomputable def preference : PreferenceDistribution Obs where
+   support := fun _ => [oa, ob]
+-  mass := fun _ _ => 1 / 2
+-  nonnegative := by intros; norm_num
+-  normalised := by intro; norm_num
++  mass := by
++    classical
++    exact fun s o => if o ∈ [oa, ob] then 1 / 2 else 0
++  nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp [oa, ob]
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all
++  normalised := by
++    intro s
++    classical
++    norm_num [oa, ob]
+ 
+ theorem positivePreference : ∀ π o, o ∈ predictive.support π → 0 < preference.mass () o := by
+-  intros; norm_num [preference]
++  intro π o h
++  have ho : o = oa := by simpa [predictive] using h
++  subst o
++  norm_num [preference]
+ 
+ structure RiskReference where
+   predictiveMassA : ℝ
+diff --git a/DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean b/DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean
+index 5f255dbd27..fa57695673 100644
+--- a/DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean
++++ b/DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean
+@@ -7,9 +7,16 @@ inductive HiddenState where | one | two
+ 
+ noncomputable def stateConditioned : ProbabilityKernel HiddenState (Outcome Obs) where
+   support := fun _ => [good, bad]
+-  mass := fun _ _ => 1 / 2
+-  nonnegative := by intros; norm_num
+-  normalised := by intro; norm_num
++  mass := by
++    classical
++    exact fun s o => if o ∈ [good, bad] then 1 / 2 else 0
++  nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp [good, bad]
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all
++  normalised := by
++    intro s
++    classical
++    norm_num [good, bad]
+ 
+ -- Must fail: preferences are unconditional, not likelihoods indexed by state.
+ /--
+diff --git a/DarkTower/WarMachine/PreferenceDistributionWitness.lean b/DarkTower/WarMachine/PreferenceDistributionWitness.lean
+index 558378607a..6bfcc1bca4 100644
+--- a/DarkTower/WarMachine/PreferenceDistributionWitness.lean
++++ b/DarkTower/WarMachine/PreferenceDistributionWitness.lean
+@@ -12,9 +12,16 @@ def bad : Outcome Obs := ⟨.evidence, .bad⟩
+ /-- Hand-derived fair preference over two outcomes: each mass is `1/2`. -/
+ noncomputable def fair : PreferenceDistribution Obs where
+   support := fun _ => [good, bad]
+-  mass := fun _ _ => 1 / 2
+-  nonnegative := by intros; norm_num
+-  normalised := by intro; norm_num
++  mass := by
++    classical
++    exact fun s o => if o ∈ [good, bad] then 1 / 2 else 0
++  nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp [good, bad]
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all
++  normalised := by
++    intro s
++    classical
++    norm_num [good, bad]
+ 
+ theorem fairMassesSumToOne :
+     ((fair.support ()).map (fair.mass ())).sum = 1 := fair.normalised ()
+diff --git a/DarkTower/WarMachine/PreferenceRiskSeparation.lean b/DarkTower/WarMachine/PreferenceRiskSeparation.lean
+index eb13d5e5dd..165a21e1fb 100644
+--- a/DarkTower/WarMachine/PreferenceRiskSeparation.lean
++++ b/DarkTower/WarMachine/PreferenceRiskSeparation.lean
+@@ -17,6 +17,8 @@ def constantConditional {Observation Disposition : Type*}
+   support := fun _ => distribution.support ()
+   mass := fun _ => distribution.mass ()
+   nonnegative := fun _ => distribution.nonnegative ()
++  support_nodup := fun _ => distribution.support_nodup ()
++  mass_eq_zero_of_not_mem := fun _ => distribution.mass_eq_zero_of_not_mem ()
+   normalised := fun _ => distribution.normalised ()
+ 
+ /-- Finite stochastic composition, with the same marginalisation as the ladder. -/
+diff --git a/DarkTower/WarMachine/PreferenceRiskWitness.lean b/DarkTower/WarMachine/PreferenceRiskWitness.lean
+index d88c0b419e..2399257f9b 100644
+--- a/DarkTower/WarMachine/PreferenceRiskWitness.lean
++++ b/DarkTower/WarMachine/PreferenceRiskWitness.lean
+@@ -15,6 +15,8 @@ def groundedPrediction : ProbabilityKernel Unit (Outcome SeedObs) where
+     | ⟨.organization, .groundedChange⟩ => 1
+     | _ => 0
+   nonnegative := by intro _ o; rcases o with ⟨v, o⟩; cases v <;> cases o <;> norm_num
++  support_nodup := by intro; simp [FlightDisposition.all, organisationOutcome]
++  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases v <;> cases x <;> simp_all [FlightDisposition.all, organisationOutcome]
+   normalised := by intro _; norm_num [FlightDisposition.all, organisationOutcome]
+ 
+ theorem grounded_admissible : riskAdmissible groundedPrediction seed := by
+diff --git a/DarkTower/WarMachine/ProbabilityKernelRepairNegative.lean b/DarkTower/WarMachine/ProbabilityKernelRepairNegative.lean
+new file mode 100644
+index 0000000000..9bdae48f65
+--- /dev/null
++++ b/DarkTower/WarMachine/ProbabilityKernelRepairNegative.lean
+@@ -0,0 +1,48 @@
++import DarkTower.WarMachine.Holes
++
++/-! Rejection controls for finite-support kernels and nonnegative VFE precision.
++Each candidate supplies every field. The rejected obligations are the actual
++invariants, not missing-field or unrelated conditioning errors. -/
++namespace DarkTower.WarMachine.ProbabilityKernelRepairNegative
++open DarkTower.WarMachine.Holes
++
++/--
++error: unsolved goals
++s : Unit
++⊢ False
++-/
++#guard_msgs in
++noncomputable def duplicateKernel : ProbabilityKernel Unit Unit where
++  support _ := [(), ()]
++  mass _ _ := 1/2
++  nonnegative _ _ := by norm_num
++  normalised _ := by norm_num
++  support_nodup := by intro s; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o; simp_all
++
++/--
++error: unsolved goals
++case true
++s : Unit
++h : True
++⊢ False
++-/
++#guard_msgs in
++noncomputable def hiddenMassKernel : ProbabilityKernel Unit Bool where
++  support _ := [false]
++  mass _ b := if b then 100 else 1
++  nonnegative _ b := by cases b <;> norm_num
++  normalised _ := by norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> norm_num at *
++
++/--
++error: unsolved goals
++x✝ : Channel
++⊢ False
++-/
++#guard_msgs in
++noncomputable def negativePrecisionCall :=
++  variationalFreeEnergy (fun _ => ⟨-2, by norm_num⟩) (fun _ => 1)
++
++end DarkTower.WarMachine.ProbabilityKernelRepairNegative
+diff --git a/DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean b/DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean
+index 5d52df6fd9..a6651a4e13 100644
+--- a/DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean
++++ b/DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean
+@@ -5,9 +5,16 @@ open DarkTower.WarMachine.TransitionKernelWitness
+ 
+ noncomputable def uncontrolled : ProbabilityKernel State State where
+   support := fun s => [s]
+-  mass := fun _ _ => 1
+-  nonnegative := by intros; norm_num
+-  normalised := by intro; norm_num
++  mass := by
++    classical
++    exact fun s o => if o ∈ [s] then 1 else 0
++  nonnegative := by intros; split <;> norm_num
++  support_nodup := by intro; simp
++  mass_eq_zero_of_not_mem := by intro s o h; simp_all
++  normalised := by
++    intro s
++    classical
++    norm_num
+ 
+ -- Must fail: B is conditioned jointly on state and action.
+ /--
+diff --git a/DarkTower/WarMachine/TransitionKernelWitness.lean b/DarkTower/WarMachine/TransitionKernelWitness.lean
+index 26f3d954f2..a2a8f9e70a 100644
+--- a/DarkTower/WarMachine/TransitionKernelWitness.lean
++++ b/DarkTower/WarMachine/TransitionKernelWitness.lean
+@@ -13,8 +13,12 @@ noncomputable def controlled : TransitionKernel State Action where
+   support
+     | (s, .stay) => [s]
+     | (_, .start) => [.active]
+-  mass := fun _ _ => 1
+-  nonnegative := by intros; norm_num
++  mass := fun sa o => match sa with
++    | (s, .stay) => if o = s then 1 else 0
++    | (_, .start) => if o = .active then 1 else 0
++  nonnegative := by intro sa o; rcases sa with ⟨s,a⟩; cases a <;> dsimp <;> split <;> norm_num
++  support_nodup := by intro sa; rcases sa with ⟨s,a⟩; cases a <;> simp
++  mass_eq_zero_of_not_mem := by intro sa o h; rcases sa with ⟨s,a⟩; cases a <;> simp_all
+   normalised := by intro sa; cases sa with | mk s a => cases a <;> simp
+ 
+ theorem startRowMass :
+diff --git a/DarkTower/WarMachine/VariationalFreeEnergyWitness.lean b/DarkTower/WarMachine/VariationalFreeEnergyWitness.lean
+index 9f7351f6df..7ce1a95741 100644
+--- a/DarkTower/WarMachine/VariationalFreeEnergyWitness.lean
++++ b/DarkTower/WarMachine/VariationalFreeEnergyWitness.lean
+@@ -21,7 +21,7 @@ def gaussianReference : GaussianReference :=
+ /-- Independent Gaussian fixture: fourteen identical channels with precision 2
+ and error 1 have `F = 1/2 * mean(2 * 1^2) = 1`. -/
+ theorem constantGaussianReference :
+-    variationalFreeEnergy (fun _ => gaussianReference.precision)
++    variationalFreeEnergy (fun _ => ⟨gaussianReference.precision, by norm_num [gaussianReference]⟩)
+         (fun _ => gaussianReference.predictionError) =
+       ⟨gaussianReference.expectedVariationalF⟩ := by
+   norm_num [gaussianReference, variationalFreeEnergy, Channel.all]

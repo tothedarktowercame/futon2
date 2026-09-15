@@ -1,0 +1,32 @@
+{
+  "searched-roots": [
+    "/home/joe/code/futon2/holes/labs/wm-contract",
+    "/home/joe/code/p4ng/wm-walkthroughs",
+    "/tmp/codex27-kernel*"
+  ],
+  "search-pattern": "480a666|kernel.*acceptance|repair.acceptance",
+  "complete-independent-receipt-located": false,
+  "author-logs-found": [
+    {
+      "path": "/tmp/codex27-kernel-final-build.log",
+      "sha256": "8b7094f1292dd5136bad32582d79d95bcefa51860059be84acd6ff18ec56dda6",
+      "bytes": 67850
+    },
+    {
+      "path": "/tmp/codex27-kernel-source-audit.json",
+      "sha256": "aae47ba5591a36de8e9b1b291f54be4e644fda0f5c70b0b78dc6edecd9395ef4",
+      "bytes": 4512
+    },
+    {
+      "path": "/tmp/codex27-kernel-repair-before-axioms.stdout",
+      "sha256": "c268500274ef5a9e2387e21769ba05dac9fddefc615017080beb897089ceee3b",
+      "bytes": 819
+    },
+    {
+      "path": "/tmp/codex27-kernel-repair-after-axioms.stdout",
+      "sha256": "c268500274ef5a9e2387e21769ba05dac9fddefc615017080beb897089ceee3b",
+      "bytes": 819
+    }
+  ],
+  "classification": "author-only evidence; new executions are independent evidence, not recovered historical acceptance"
+}

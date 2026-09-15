@@ -1,0 +1,520 @@
+[
+  {
+    "file": "Axioms-AmbiguityBridge.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-AmbiguityBridge.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.503
+  },
+  {
+    "file": "Axioms-AmbiguityWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-AmbiguityWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.592
+  },
+  {
+    "file": "Axioms-BeliefUpdateFalsifier.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-BeliefUpdateFalsifier.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.18
+  },
+  {
+    "file": "Axioms-ExpectedFreeEnergyWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-ExpectedFreeEnergyWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.569
+  },
+  {
+    "file": "Axioms-ExpectedInformationGainWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-ExpectedInformationGainWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 3.036
+  },
+  {
+    "file": "Axioms-F10RuledCarrier.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-F10RuledCarrier.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.127
+  },
+  {
+    "file": "Axioms-GenerativeModelNegative.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-GenerativeModelNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.972
+  },
+  {
+    "file": "Axioms-GenerativeModelWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-GenerativeModelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 3.607
+  },
+  {
+    "file": "Axioms-Holes.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-Holes.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 4.783
+  },
+  {
+    "file": "Axioms-LocalPreferenceModule.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-LocalPreferenceModule.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.944
+  },
+  {
+    "file": "Axioms-MachineBeliefDistribution.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-MachineBeliefDistribution.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.252
+  },
+  {
+    "file": "Axioms-MachineParameters.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-MachineParameters.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.705
+  },
+  {
+    "file": "Axioms-MachinePredictiveOutcome.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-MachinePredictiveOutcome.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.326
+  },
+  {
+    "file": "Axioms-MachinePreferenceDistribution.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-MachinePreferenceDistribution.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.276
+  },
+  {
+    "file": "Axioms-MachineQ.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-MachineQ.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.942
+  },
+  {
+    "file": "Axioms-MachineQWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-MachineQWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 3.089
+  },
+  {
+    "file": "Axioms-MachineTransition.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-MachineTransition.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.565
+  },
+  {
+    "file": "Axioms-ObservationKernelWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-ObservationKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.213
+  },
+  {
+    "file": "Axioms-ParameterPosteriorKernelOutcomeNegative.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-ParameterPosteriorKernelOutcomeNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.266
+  },
+  {
+    "file": "Axioms-ParameterPosteriorKernelPriorNegative.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-ParameterPosteriorKernelPriorNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.089
+  },
+  {
+    "file": "Axioms-ParameterPosteriorKernelWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-ParameterPosteriorKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.159
+  },
+  {
+    "file": "Axioms-ParameterPriorKernelHabitNegative.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-ParameterPriorKernelHabitNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.059
+  },
+  {
+    "file": "Axioms-ParameterPriorKernelOutcomeNegative.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-ParameterPriorKernelOutcomeNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.218
+  },
+  {
+    "file": "Axioms-ParameterPriorKernelWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-ParameterPriorKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.138
+  },
+  {
+    "file": "Axioms-PolicyPriorKernelNegative.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-PolicyPriorKernelNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.085
+  },
+  {
+    "file": "Axioms-PolicyPriorKernelWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-PolicyPriorKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.186
+  },
+  {
+    "file": "Axioms-PrecisionWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-PrecisionWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 3.171
+  },
+  {
+    "file": "Axioms-PredictiveOutcomeKernelUnconditionalNegative.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-PredictiveOutcomeKernelUnconditionalNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.191
+  },
+  {
+    "file": "Axioms-PredictiveOutcomeKernelWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-PredictiveOutcomeKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.088
+  },
+  {
+    "file": "Axioms-PredictiveOutcomeRiskWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-PredictiveOutcomeRiskWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 3.708
+  },
+  {
+    "file": "Axioms-PreferenceDistributionConditioningNegative.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-PreferenceDistributionConditioningNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.523
+  },
+  {
+    "file": "Axioms-PreferenceDistributionWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-PreferenceDistributionWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.159
+  },
+  {
+    "file": "Axioms-PreferenceRiskSeparation.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-PreferenceRiskSeparation.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.342
+  },
+  {
+    "file": "Axioms-PreferenceRiskWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-PreferenceRiskWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.271
+  },
+  {
+    "file": "Axioms-TransitionKernelUncontrolledNegative.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-TransitionKernelUncontrolledNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.198
+  },
+  {
+    "file": "Axioms-TransitionKernelWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-TransitionKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.236
+  },
+  {
+    "file": "Axioms-VariationalFreeEnergyWitness.lean",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-acceptance-1/Axioms-VariationalFreeEnergyWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.504
+  }
+]

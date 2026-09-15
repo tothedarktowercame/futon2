@@ -1,0 +1,262 @@
+[
+  {
+    "file": "DarkTower/WarMachine/AmbiguityBridge.lean",
+    "declaration": "DarkTower.WarMachine.AmbiguityBridge.deterministicObservation"
+  },
+  {
+    "file": "DarkTower/WarMachine/AmbiguityBridge.lean",
+    "declaration": "DarkTower.WarMachine.AmbiguityBridge.deterministicPredictedState"
+  },
+  {
+    "file": "DarkTower/WarMachine/AmbiguityWitness.lean",
+    "declaration": "DarkTower.WarMachine.AmbiguityWitness.observationModel"
+  },
+  {
+    "file": "DarkTower/WarMachine/AmbiguityWitness.lean",
+    "declaration": "DarkTower.WarMachine.AmbiguityWitness.predictedState"
+  },
+  {
+    "file": "DarkTower/WarMachine/BeliefUpdateFalsifier.lean",
+    "declaration": "DarkTower.WarMachine.BeliefUpdateFalsifier.kernel"
+  },
+  {
+    "file": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+    "declaration": "DarkTower.WarMachine.ExpectedFreeEnergyWitness.Cdist"
+  },
+  {
+    "file": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+    "declaration": "DarkTower.WarMachine.ExpectedFreeEnergyWitness.Q"
+  },
+  {
+    "file": "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+    "declaration": "DarkTower.WarMachine.ExpectedInformationGainWitness.Q"
+  },
+  {
+    "file": "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+    "declaration": "DarkTower.WarMachine.ExpectedInformationGainWitness.posterior"
+  },
+  {
+    "file": "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+    "declaration": "DarkTower.WarMachine.ExpectedInformationGainWitness.prior"
+  },
+  {
+    "file": "DarkTower/WarMachine/F10RuledCarrier.lean",
+    "declaration": "DarkTower.WarMachine.F10RuledCarrier.seed"
+  },
+  {
+    "file": "DarkTower/WarMachine/GenerativeModelNegative.lean",
+    "declaration": "DarkTower.WarMachine.GenerativeModelNegative.policyPrior"
+  },
+  {
+    "file": "DarkTower/WarMachine/GenerativeModelNegative.lean",
+    "declaration": "DarkTower.WarMachine.GenerativeModelNegative.transition"
+  },
+  {
+    "file": "DarkTower/WarMachine/GenerativeModelNegative.lean",
+    "declaration": "DarkTower.WarMachine.GenerativeModelNegative.wrongObservation"
+  },
+  {
+    "file": "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "declaration": "DarkTower.WarMachine.GenerativeModelWitness.observation"
+  },
+  {
+    "file": "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "declaration": "DarkTower.WarMachine.GenerativeModelWitness.policyPrior"
+  },
+  {
+    "file": "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "declaration": "DarkTower.WarMachine.GenerativeModelWitness.transition"
+  },
+  {
+    "file": "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "declaration": "DarkTower.WarMachine.GenerativeModelWitness.wrongObservation"
+  },
+  {
+    "file": "DarkTower/WarMachine/Holes.lean",
+    "declaration": "DarkTower.WarMachine.Holes.ProbabilityKernel"
+  },
+  {
+    "file": "DarkTower/WarMachine/Holes.lean",
+    "declaration": "DarkTower.WarMachine.Holes.beliefUpdate"
+  },
+  {
+    "file": "DarkTower/WarMachine/Holes.lean",
+    "declaration": "DarkTower.WarMachine.Holes.eigCounterPosterior"
+  },
+  {
+    "file": "DarkTower/WarMachine/Holes.lean",
+    "declaration": "DarkTower.WarMachine.Holes.eigCounterPredictive"
+  },
+  {
+    "file": "DarkTower/WarMachine/Holes.lean",
+    "declaration": "DarkTower.WarMachine.Holes.eigCounterPrior"
+  },
+  {
+    "file": "DarkTower/WarMachine/Holes.lean",
+    "declaration": "DarkTower.WarMachine.Holes.variationalFreeEnergy"
+  },
+  {
+    "file": "DarkTower/WarMachine/Holes.lean",
+    "declaration": "DarkTower.WarMachine.Holes.variationalFreeEnergy_nonnegative"
+  },
+  {
+    "file": "DarkTower/WarMachine/LocalPreferenceModule.lean",
+    "declaration": "DarkTower.WarMachine.LocalPreferenceModule.ExactTable"
+  },
+  {
+    "file": "DarkTower/WarMachine/LocalPreferenceModule.lean",
+    "declaration": "DarkTower.WarMachine.LocalPreferenceModule.ExactTable.kernel"
+  },
+  {
+    "file": "DarkTower/WarMachine/LocalPreferenceModule.lean",
+    "declaration": "DarkTower.WarMachine.LocalPreferenceModule.binaryTable"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineBeliefDistribution.lean",
+    "declaration": "DarkTower.WarMachine.MachineBeliefDistribution.selectedKernel"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineParameters.lean",
+    "declaration": "DarkTower.WarMachine.MachineParameters.machineParameterPosterior"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineParameters.lean",
+    "declaration": "DarkTower.WarMachine.MachineParameters.machineParameterPrior"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachinePredictiveOutcome.lean",
+    "declaration": "DarkTower.WarMachine.MachinePredictiveOutcome.fullPlanOutcomeKernel"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachinePreferenceDistribution.lean",
+    "declaration": "DarkTower.WarMachine.MachinePreferenceDistribution.machineC"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineQ.lean",
+    "declaration": "DarkTower.WarMachine.MachineQ.machinePredictedStateKernel"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineQ.lean",
+    "declaration": "DarkTower.WarMachine.MachineQ.machinePredictiveOutcomeKernel"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineQ.lean",
+    "declaration": "DarkTower.WarMachine.MachineQ.sum_swap"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineQWitness.lean",
+    "declaration": "DarkTower.WarMachine.MachineQWitness.demoObservation"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineQWitness.lean",
+    "declaration": "DarkTower.WarMachine.MachineQWitness.demoPolicyPrior"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineQWitness.lean",
+    "declaration": "DarkTower.WarMachine.MachineQWitness.demoTransition"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineTransition.lean",
+    "declaration": "DarkTower.WarMachine.MachineTransition.controlled"
+  },
+  {
+    "file": "DarkTower/WarMachine/MachineTransition.lean",
+    "declaration": "DarkTower.WarMachine.MachineTransition.uncontrolled"
+  },
+  {
+    "file": "DarkTower/WarMachine/ObservationKernelWitness.lean",
+    "declaration": "DarkTower.WarMachine.ObservationKernelWitness.reference"
+  },
+  {
+    "file": "DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean",
+    "declaration": "outcomePrediction"
+  },
+  {
+    "file": "DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean",
+    "declaration": "parameterPrior"
+  },
+  {
+    "file": "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+    "declaration": "DarkTower.WarMachine.ParameterPosteriorKernelWitness.posterior"
+  },
+  {
+    "file": "DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean",
+    "declaration": "habit"
+  },
+  {
+    "file": "DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean",
+    "declaration": "outcomePrediction"
+  },
+  {
+    "file": "DarkTower/WarMachine/ParameterPriorKernelWitness.lean",
+    "declaration": "DarkTower.WarMachine.ParameterPriorKernelWitness.prior"
+  },
+  {
+    "file": "DarkTower/WarMachine/PolicyPriorKernelNegative.lean",
+    "declaration": "stateConditioned"
+  },
+  {
+    "file": "DarkTower/WarMachine/PolicyPriorKernelWitness.lean",
+    "declaration": "DarkTower.WarMachine.PolicyPriorKernelWitness.reference"
+  },
+  {
+    "file": "DarkTower/WarMachine/PrecisionWitness.lean",
+    "declaration": "DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable"
+  },
+  {
+    "file": "DarkTower/WarMachine/PrecisionWitness.lean",
+    "declaration": "DarkTower.WarMachine.PrecisionWitness.swappedReference"
+  },
+  {
+    "file": "DarkTower/WarMachine/PrecisionWitness.lean",
+    "declaration": "DarkTower.WarMachine.PrecisionWitness.weightedReference"
+  },
+  {
+    "file": "DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean",
+    "declaration": "unconditional"
+  },
+  {
+    "file": "DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean",
+    "declaration": "DarkTower.WarMachine.PredictiveOutcomeKernelWitness.predictive"
+  },
+  {
+    "file": "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
+    "declaration": "DarkTower.WarMachine.PredictiveOutcomeRiskWitness.positivePreference"
+  },
+  {
+    "file": "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
+    "declaration": "DarkTower.WarMachine.PredictiveOutcomeRiskWitness.predictive"
+  },
+  {
+    "file": "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
+    "declaration": "DarkTower.WarMachine.PredictiveOutcomeRiskWitness.preference"
+  },
+  {
+    "file": "DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean",
+    "declaration": "stateConditioned"
+  },
+  {
+    "file": "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+    "declaration": "DarkTower.WarMachine.PreferenceDistributionWitness.fair"
+  },
+  {
+    "file": "DarkTower/WarMachine/PreferenceRiskSeparation.lean",
+    "declaration": "DarkTower.WarMachine.PreferenceRiskSeparation.constantConditional"
+  },
+  {
+    "file": "DarkTower/WarMachine/PreferenceRiskWitness.lean",
+    "declaration": "DarkTower.WarMachine.PreferenceRiskWitness.groundedPrediction"
+  },
+  {
+    "file": "DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean",
+    "declaration": "uncontrolled"
+  },
+  {
+    "file": "DarkTower/WarMachine/TransitionKernelWitness.lean",
+    "declaration": "DarkTower.WarMachine.TransitionKernelWitness.controlled"
+  },
+  {
+    "file": "DarkTower/WarMachine/VariationalFreeEnergyWitness.lean",
+    "declaration": "DarkTower.WarMachine.VariationalFreeEnergyWitness.constantGaussianReference"
+  }
+]

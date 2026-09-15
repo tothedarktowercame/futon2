@@ -1,0 +1,14 @@
+{
+  "canonical-head-after": "2b22eeef3102b3b48c8c12df66aaded459c36819",
+  "38-source-hashes-unchanged": true,
+  "cache-sample-distinct-inodes": true,
+  "temporary-size-command": [
+    "du",
+    "-sh",
+    "/tmp/wm01-acc-480a-38ujzwha"
+  ],
+  "temporary-size-exit": 0,
+  "temporary-size-output": "11G\t/tmp/wm01-acc-480a-38ujzwha\n",
+  "cleanup": "shutil.rmtree only generated isolated workspace",
+  "workspace-absent": true
+}

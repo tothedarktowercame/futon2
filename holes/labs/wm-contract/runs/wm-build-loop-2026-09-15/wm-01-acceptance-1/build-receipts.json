@@ -1,0 +1,642 @@
+[
+  {
+    "name": "lean-version",
+    "argv": [
+      "lean",
+      "--version"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 0.025
+  },
+  {
+    "name": "lake-version",
+    "argv": [
+      "lake",
+      "--version"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 0.029
+  },
+  {
+    "name": "lean-path",
+    "argv": [
+      "lake",
+      "env",
+      "printenv",
+      "LEAN_PATH"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 0.314
+  },
+  {
+    "name": "Holes",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/Holes.olean",
+      "DarkTower/WarMachine/Holes.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 8.842
+  },
+  {
+    "name": "AmbiguityBridge",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/AmbiguityBridge.olean",
+      "DarkTower/WarMachine/AmbiguityBridge.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.195
+  },
+  {
+    "name": "AmbiguityWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/AmbiguityWitness.olean",
+      "DarkTower/WarMachine/AmbiguityWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.796
+  },
+  {
+    "name": "BeliefUpdateFalsifier",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/BeliefUpdateFalsifier.olean",
+      "DarkTower/WarMachine/BeliefUpdateFalsifier.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.04
+  },
+  {
+    "name": "ExpectedFreeEnergyWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/ExpectedFreeEnergyWitness.olean",
+      "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.961
+  },
+  {
+    "name": "ExpectedInformationGainWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/ExpectedInformationGainWitness.olean",
+      "DarkTower/WarMachine/ExpectedInformationGainWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.866
+  },
+  {
+    "name": "F10RuledCarrier",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/F10RuledCarrier.olean",
+      "DarkTower/WarMachine/F10RuledCarrier.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 3.968
+  },
+  {
+    "name": "GenerativeModelNegative",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/GenerativeModelNegative.olean",
+      "DarkTower/WarMachine/GenerativeModelNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.926
+  },
+  {
+    "name": "GenerativeModelWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/GenerativeModelWitness.olean",
+      "DarkTower/WarMachine/GenerativeModelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.023
+  },
+  {
+    "name": "LocalPreferenceModule",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/LocalPreferenceModule.olean",
+      "DarkTower/WarMachine/LocalPreferenceModule.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.054
+  },
+  {
+    "name": "MachineBeliefDistribution",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/MachineBeliefDistribution.olean",
+      "DarkTower/WarMachine/MachineBeliefDistribution.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.14
+  },
+  {
+    "name": "MachineQ",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/MachineQ.olean",
+      "DarkTower/WarMachine/MachineQ.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.057
+  },
+  {
+    "name": "MachineTransition",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/MachineTransition.olean",
+      "DarkTower/WarMachine/MachineTransition.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.32
+  },
+  {
+    "name": "MachinePredictiveOutcome",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/MachinePredictiveOutcome.olean",
+      "DarkTower/WarMachine/MachinePredictiveOutcome.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.828
+  },
+  {
+    "name": "MachineParameters",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/MachineParameters.olean",
+      "DarkTower/WarMachine/MachineParameters.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.173
+  },
+  {
+    "name": "MachinePreferenceDistribution",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/MachinePreferenceDistribution.olean",
+      "DarkTower/WarMachine/MachinePreferenceDistribution.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.461
+  },
+  {
+    "name": "MachineQWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/MachineQWitness.olean",
+      "DarkTower/WarMachine/MachineQWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.711
+  },
+  {
+    "name": "ObservationKernelWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/ObservationKernelWitness.olean",
+      "DarkTower/WarMachine/ObservationKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.813
+  },
+  {
+    "name": "ParameterPosteriorKernelWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/ParameterPosteriorKernelWitness.olean",
+      "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.009
+  },
+  {
+    "name": "ParameterPosteriorKernelOutcomeNegative",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.olean",
+      "DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.906
+  },
+  {
+    "name": "ParameterPosteriorKernelPriorNegative",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.olean",
+      "DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.665
+  },
+  {
+    "name": "ParameterPriorKernelWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/ParameterPriorKernelWitness.olean",
+      "DarkTower/WarMachine/ParameterPriorKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.958
+  },
+  {
+    "name": "ParameterPriorKernelHabitNegative",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/ParameterPriorKernelHabitNegative.olean",
+      "DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.811
+  },
+  {
+    "name": "ParameterPriorKernelOutcomeNegative",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.olean",
+      "DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.899
+  },
+  {
+    "name": "PolicyPriorKernelNegative",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/PolicyPriorKernelNegative.olean",
+      "DarkTower/WarMachine/PolicyPriorKernelNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.926
+  },
+  {
+    "name": "PolicyPriorKernelWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/PolicyPriorKernelWitness.olean",
+      "DarkTower/WarMachine/PolicyPriorKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.875
+  },
+  {
+    "name": "PrecisionWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/PrecisionWitness.olean",
+      "DarkTower/WarMachine/PrecisionWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.906
+  },
+  {
+    "name": "PredictiveOutcomeKernelWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/PredictiveOutcomeKernelWitness.olean",
+      "DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.955
+  },
+  {
+    "name": "PredictiveOutcomeKernelUnconditionalNegative",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.olean",
+      "DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.771
+  },
+  {
+    "name": "PredictiveOutcomeRiskWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.olean",
+      "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.914
+  },
+  {
+    "name": "PreferenceDistributionWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/PreferenceDistributionWitness.olean",
+      "DarkTower/WarMachine/PreferenceDistributionWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.792
+  },
+  {
+    "name": "PreferenceDistributionConditioningNegative",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/PreferenceDistributionConditioningNegative.olean",
+      "DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.732
+  },
+  {
+    "name": "PreferenceRiskSeparation",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/PreferenceRiskSeparation.olean",
+      "DarkTower/WarMachine/PreferenceRiskSeparation.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.969
+  },
+  {
+    "name": "PreferenceRiskWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/PreferenceRiskWitness.olean",
+      "DarkTower/WarMachine/PreferenceRiskWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 2.879
+  },
+  {
+    "name": "ProbabilityKernelRepairNegative",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/ProbabilityKernelRepairNegative.olean",
+      "DarkTower/WarMachine/ProbabilityKernelRepairNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.762
+  },
+  {
+    "name": "TransitionKernelWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/TransitionKernelWitness.olean",
+      "DarkTower/WarMachine/TransitionKernelWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.951
+  },
+  {
+    "name": "TransitionKernelUncontrolledNegative",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/TransitionKernelUncontrolledNegative.olean",
+      "DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.7
+  },
+  {
+    "name": "VariationalFreeEnergyWitness",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j",
+      "1",
+      "-o",
+      "/tmp/wm01-acc-480a-38ujzwha/.lake/build/lib/lean/DarkTower/WarMachine/VariationalFreeEnergyWitness.olean",
+      "DarkTower/WarMachine/VariationalFreeEnergyWitness.lean"
+    ],
+    "cwd": "/tmp/wm01-acc-480a-38ujzwha",
+    "exit-status": 0,
+    "seconds": 1.897
+  }
+]
