@@ -1,0 +1,305 @@
+{
+  "scope": "read-only stop-rule discovery; no registry or selection implementation",
+  "counts": {
+    "complete": 8,
+    "live": 20,
+    "inactive": 2,
+    "not-actionable": 4
+  },
+  "tickets": [
+    {
+      "id": "T-agency-desktop-save",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-agency-desktop-save.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): DONE-IN-FACT.** roster_store.clj shipped whole (restore-payload, continuous persist watch, restore-on-boot! with detached marking and collision refusal), wired into bootstrap restore-before-watch, flag default TRUE since 2026-06-14, 12 tests. Close.",
+      "classification": "complete",
+      "sha256": "2dca3681bfa1715d080175966870e32189b775cef5cf116851d4792b8a9529e8"
+    },
+    {
+      "id": "T-car3-phase2-impl",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-car3-phase2-impl.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): PARTIAL -- shipped, one contract delta.** Core Phase-2 pieces are at HEAD and the model test passes (8/8, re-run at review). The hard 'default OFF' rollout requirement was flipped: turn_queue.clj:19 documents Default TRUE (2026-06-14) after the queue was proven live -- a dated decision, not a silent breach. Close by amending this rollout section to record the flip. Triage codex-5, reviewed claude-1.",
+      "classification": "live",
+      "sha256": "42ab25071afe61b7a1cc933e25c071ec7cb882e90ba52b78cedb8b48d5fbcc25"
+    },
+    {
+      "id": "T-car3-queue-routing-design-note",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-car3-queue-routing-design-note.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): PARTIAL -- mechanism landed, capture-gap fallback still tolerated.** Persisted route + seq markers exist (turn_queue.clj:213,241,523); missing caller/surface still normalizes to \"unknown\" with generated msg-ids (turn_queue.clj:221-239, :msg-id-source records which). Close after either proving all accept sites supply stable :from/:surface/:msg-id or accepting the fallback as the contract. Triage codex-5, reviewed claude-1.",
+      "classification": "live",
+      "sha256": "e539d69d02ab28760e704dbfa825e015ba49a813d933e1f086471c5e4808282c"
+    },
+    {
+      "id": "T-car3-queue-routing",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-car3-queue-routing.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): SUPERSEDED.** The Phase-1 stop-for-ratification state no longer describes HEAD: the implementation shipped (turn_queue.clj accept!/drain/reply-route; invoke wiring dev.clj:4083). Triage codex-5 invoke-1788294329332-7138-9bb9f7de, reviewed claude-1; verdicts in tickets-index.edn.",
+      "classification": "inactive",
+      "sha256": "a9b9b7685cdf8b86c50095129c951ed3de89cab2c39645f490ca752d2c27af5a"
+    },
+    {
+      "id": "T-codex-auto-bellback",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-codex-auto-bellback.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): DONE-IN-FACT, widened.** Default-on, durable enqueue, idempotency stamp, loop prevention, delivery records, tests -- all live; recipients widened from codex-only to #{:codex :claude :zai}. Close.",
+      "classification": "complete",
+      "sha256": "439f38f4c79b86b6ea38b34669e53775805dd17349f290942b33a0c9fa4a48b6"
+    },
+    {
+      "id": "T-cx-new-blocks-emacs",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-cx-new-blocks-emacs.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): STILL-OPEN, deferred by design.** cx at HEAD still runs the synchronous wait_for_agency poll (up to 30 s) and blocking emacsclient evals; no async conversion exists. The ticket's own DO-NOT-PICK-UP note stands -- needs Joe's go-ahead plus a timing repro separating the wait from the first turn.",
+      "classification": "live",
+      "sha256": "77d7d283b8476759d30f80c302af86c3be9422a255956ed8b29b1412b1edbf19"
+    },
+    {
+      "id": "T-devmap-forward-model-calibration",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-devmap-forward-model-calibration.md",
+      "line": 7,
+      "status": "**Status: DESIGNED, NOT STARTED.** Joe's call: ticket it rather than deep-dive",
+      "classification": "not-actionable",
+      "sha256": "b87a0cc83ac8d02e8320041d3d3848afcd72b1155f91dda3ce3f601a2fa68c82"
+    },
+    {
+      "id": "T-dispatch-clock-excursion-prefix",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-dispatch-clock-excursion-prefix.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): DONE-IN-FACT.** dispatch-clock routes ^[MEC]- ids to campaign/excursion/mission (clock_store.clj:94-104), bare ids still get M-; commit 926c15e1. Close.",
+      "classification": "complete",
+      "sha256": "2bf07edc096dd116be2c5892c5d9491a7b470c69b72b014c302376dad8d50a39"
+    },
+    {
+      "id": "T-durable-queue-rename-and-tidies",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-durable-queue-rename-and-tidies.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): DONE-IN-FACT.** Only FUTON3C_DURABLE_QUEUE names remain (0 CAR3 hits in src/test/resources); bellback delivery recorded; MQ-7 excludes http-caller/joe. Focused tests pass (5/17, 6/23 -- mesh-qa re-run at review). Close all three rows.",
+      "classification": "complete",
+      "sha256": "360d3e8262fa80d9c2f123c6257e50d9cb53c68c331dc1aff71a62777f376882"
+    },
+    {
+      "id": "T-evidence-pinned-to-mutable-prose-26082026",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-evidence-pinned-to-mutable-prose-26082026.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): PARTIAL -- blast radius closed, mechanism unchanged.** futon2 42a997e quarantines the 10 unreconstructable fold turns (load-deposits: 8/10/0, reproduced at review), so nothing throws today. But fold_escrow.clj still slurps CURRENT flexiarg prose with no sha pin, so future prose edits can still kill replay-valid deposits. Close after picking one of the ticket's three candidate fixes.",
+      "classification": "live",
+      "sha256": "8412657e794a5babda9013db3b94d2b0b5e7f66fecdf66a91667e0235c1a84ce"
+    },
+    {
+      "id": "T-exogenous-evidence-update-rule",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-exogenous-evidence-update-rule.md",
+      "line": 7,
+      "status": "**Status: DESIGN CONSTRAINT. Blocked on a prior question \u2014 see Blocker.**",
+      "classification": "not-actionable",
+      "sha256": "ad41f9c021c5d36043eeda1e237e5d3d3d8ca1e61b09cb4c6bf07376d2907405"
+    },
+    {
+      "id": "T-fail-activation-authority-unavailable",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-fail-activation-authority-unavailable.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): STILL-OPEN, quiescent.** 1 occurrence ever (08-22), none since; the job is stuck in state `delivering`, so the real residue is delivery-retry terminal handling. Close as non-reproducing, reopen on second occurrence.",
+      "classification": "live",
+      "sha256": "aa64f5e17c194961011df0bc091f61991f9c4badefbc84a218766a6a21f3d84f"
+    },
+    {
+      "id": "T-fail-agent-not-found",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-fail-agent-not-found.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): STILL-OPEN, worsening.** 72 at ticketing -> 145 at review (latest 09-01T17:23); mitigation is process-only (roster-check rule). Candidate fixes: auto-register pull-only seats (E-bell-clink-adapter) or fail-fast at send with a roster hint.",
+      "classification": "live",
+      "sha256": "438769e0f2360f668c526c965d1b4121eb1426fcead65719f39936a4d80cfc47"
+    },
+    {
+      "id": "T-fail-invoke-error",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-fail-invoke-error.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): STILL-OPEN.** 2 -> 111 at review (latest 09-01T03:06); now the second-heaviest class. Needs exception-payload triage before a close criterion can be stated.",
+      "classification": "live",
+      "sha256": "aacb62ffe3ee885c801cb8b3346bf6fec32bcd8125e2e697b2b009649b111b13"
+    },
+    {
+      "id": "T-fail-invoke-interrupted",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-fail-invoke-interrupted.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): STILL-OPEN, rare.** 4 occurrences, latest 08-31. Decide whether interruption is a defect or an expected terminal class.",
+      "classification": "live",
+      "sha256": "33bbd62d7dcc8d00f2ab50645e714b0529680e3dc57924f3e7f3fb48df7ddce1"
+    },
+    {
+      "id": "T-fail-no-execution-evidence",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-fail-no-execution-evidence.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): PARTIAL -- merge with defect C3.** 22 occurrences; TN-apm-defect-register C3 records a job can be functionally successful yet state:failed under this code. The state semantics need the C3 decision; census alone cannot close it.",
+      "classification": "live",
+      "sha256": "5f8c64fc17d7512a8d9a5d4bf8c0411bc9c891d1990135bd881bae4278f55e95"
+    },
+    {
+      "id": "T-fail-operator-cancelled",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-fail-operator-cancelled.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): RECLASSIFY CANDIDATE.** 19 at review, mostly deliberate watchdog cancels. Propose census-exempting operator cancellation as expected behaviour rather than fixing anything.",
+      "classification": "live",
+      "sha256": "e045a2aeeeb3a9ccc515fa27ec804da54e7c05cd144780ca59fe8da055538e53"
+    },
+    {
+      "id": "T-fail-worker-lost-on-restart",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-fail-worker-lost-on-restart.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): PARTIAL, quiescent.** Exactly the ticketed 3 (last 08-23), all stuck in `delivering`. Close as non-reproducing after a delivery-retry cap for restart-orphaned jobs.",
+      "classification": "live",
+      "sha256": "359caf5e8eac61e5b81a399889dfe643c9f83715cb9b40d36067c6a191f216af"
+    },
+    {
+      "id": "T-fixture-becomes-registry-26082026",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-fixture-becomes-registry-26082026.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): PARTIAL -- anti-pattern repaired, data gap by design.** futon2 4a65616: renamed to sampled-candidate-cleans with an explicit no-census docstring, sample test, :domain-mismatch regime, inhabited/bound dial. Still exactly four missions; grounded realization is sample-only. Remaining item is a product decision: bind CLeans for WM-selected missions or record sample-only as the contract.",
+      "classification": "live",
+      "sha256": "1d9ea3b61e59bccf0e09c6ece5f64b55af02d4e250483c73230a0fa913e18788"
+    },
+    {
+      "id": "T-forward-model-vs-active-work",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-forward-model-vs-active-work.md",
+      "line": 6,
+      "status": "**Status: FINDING, not a defect. Do not hotfix.** Joe's call, and the reason is",
+      "classification": "not-actionable",
+      "sha256": "f589cce77c1a4948093e89bca6f2b794a4196ae66af4c2d8bc618481fa9568fe"
+    },
+    {
+      "id": "T-jvm-provenance-before-multi-jvm",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-jvm-provenance-before-multi-jvm.md",
+      "line": 9,
+      "status": "**Status:** open. The resource premise of the one-JVM rule is void; the",
+      "classification": "live",
+      "sha256": "a66ce6d7f26cf3c117d07a0fd9cef211be087693d1e6575babf71a9903a0dca5"
+    },
+    {
+      "id": "T-kangaroo-caching-and-compaction",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-kangaroo-caching-and-compaction.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): PARTIAL -- research portions obsolete.** The 1h-prompt-cache env rollout and joey-threshold recalibration were never implemented (0 occurrences; threshold still 2 MiB). Compaction went further than the ticket: warm /compact and default-on cold monster compaction both shipped. Close the superseded parts; decide whether threshold recalibration is still wanted.",
+      "classification": "live",
+      "sha256": "31182f0bdd417bfa1adb35933ad706724901180b162660596888cc0a7175128f"
+    },
+    {
+      "id": "T-kangaroo-v1-pouch",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-kangaroo-v1-pouch.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): DONE-IN-FACT.** Warm reuse, locking, eviction, joey cap, snapshots, cold fallback all live (agent_pouch.clj; enabled in dev-laptop-env, source default off). One deliberate later change: an operator-interrupted warm turn does NOT fall back cold (dev.clj:4039+). Close.",
+      "classification": "complete",
+      "sha256": "f9cd8434ee5f06975b9b24357aed2ee61a4689e23075c406495d13f770b783ba"
+    },
+    {
+      "id": "T-lean-authority-alias-27082026",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-lean-authority-alias-27082026.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): DONE-IN-FACT.** Closed 2026-08-27 and holds at HEAD: mathlib4/.lake/packages is a real directory, apm-lean batteries at the recorded bce25af7 baseline, and the AGENTS.md do-not-alias rule is in place. No action.",
+      "classification": "complete",
+      "sha256": "496fcab21fa924946cfeb4ec329bef29d741af36c82f567b87896d11759dbb47"
+    },
+    {
+      "id": "T-matrix-federation-proof",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-matrix-federation-proof.md",
+      "line": 3,
+      "status": "**Status: DEFERRED / parked 2026-06-10.** Standalone follow-on \u2014 **NOT** part of",
+      "classification": "inactive",
+      "sha256": "3c8624c89fc53b5d9638e1cd5f3366faf24e267d54d4fe39eaa6f8e84a473bab"
+    },
+    {
+      "id": "T-mesh-edge-coverage",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-mesh-edge-coverage.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): DONE-IN-FACT.** Typed mesh-edge evidence, the three bypass-caller migrations, GET /api/alpha/coordination/edges, and the merged mesh_trace.py source all shipped and are tested. Close.",
+      "classification": "complete",
+      "sha256": "1a2f23c601551becd50cd0b45fbb6913592744a7e898711676497625c9acd355"
+    },
+    {
+      "id": "T-mesh-qa-misrouting",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-mesh-qa-misrouting.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): DONE-IN-FACT, with declared limits.** Unified reader + MQ checks + GET /api/alpha/coordination/qa exist; the checkability registry itself records MQ-2 as a capture gap and MQ-3/MQ-4 as partial. Close the implementation; the limits are recorded, not hidden.",
+      "classification": "complete",
+      "sha256": "c80ea9704ff8d20e2397436dc30ab19f09d5c083946929b89453b05a7936c830"
+    },
+    {
+      "id": "T-mq7-unaddressable-caller",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-mq7-unaddressable-caller.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): PARTIAL -- policy conflict, not missing code.** MQ-7 is wired and flags unregistered callers, but the ticket's motivating case (http-caller, blank) is deliberately exempted by mesh_qa.clj:261-265 and asserted by tests. Reconcile: amend the ticket as superseded policy, or flag placeholders and update tests. Note 145 agent-not-found jobs suggest the placeholder exemption hides real routing debt.",
+      "classification": "live",
+      "sha256": "0719c04830e7ac8bf30c70adb972b336d0624bfa937ec03ce456ada5c52bcf03"
+    },
+    {
+      "id": "T-strategic-cascade-emits-disconnected-patterns",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-strategic-cascade-emits-disconnected-patterns.md",
+      "line": 9,
+      "status": "**Status:** open. Diagnosis complete and reduced; the repair and its acceptance",
+      "classification": "live",
+      "sha256": "b1d0fe24d5a4602c071999c00c7f2d82fc5ea5403bb73dce190650fc1e4f4fa7"
+    },
+    {
+      "id": "T-typed-bell-arse-write-async",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-typed-bell-arse-write-async.md",
+      "line": 4,
+      "status": "**Status: WATCH \u2014 not a defect, no action while `FUTON3C_TYPED_BELLS` is OFF.**",
+      "classification": "not-actionable",
+      "sha256": "aa91e43a1de73843633d6f079afed8d7f20376fa3401f3285ff13fb9c0b170a2"
+    },
+    {
+      "id": "T-watu-replay-layer",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-watu-replay-layer.md",
+      "line": 7,
+      "status": "**Status: SCOPED, NOT STARTED.**",
+      "classification": "live",
+      "sha256": "b86fd33aa91e02250bca9ff778b0b5cd596106226e5e9d47e23614a6064a4ec4"
+    },
+    {
+      "id": "T-wm-turns-are-not-operator-turns",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-wm-turns-are-not-operator-turns.md",
+      "line": 7,
+      "status": "**Status:** open. **Diagnosis substantially corrected 2026-08-27 \u2014 see",
+      "classification": "live",
+      "sha256": "2f4a53f4e4e37d3f7f0c7da65cdd72b2a22f8b48cdd22c8d0361306b1eb6ae21"
+    },
+    {
+      "id": "T-wm-wrong-corpus-26082026",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-wm-wrong-corpus-26082026.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): PARTIAL -- convention adopted, not enforced.** Pinned-corpus phrasing is mandated in facts-R14 slice constraints and practiced in C102/C105. But no schema requires a corpus path on recorded null results, and the ambiguity source stands: wm_scheduled_run.clj:108 enacts (close-loop!) while wm_outer_loop.clj does not, and the two archive names still do not say which. Close by documenting the two runner archives and/or requiring the corpus-path field.",
+      "classification": "live",
+      "sha256": "5509cd2ee6d8a6ba6c350cb0520effccc0d20a5497735822578919a2ff9ee60c"
+    },
+    {
+      "id": "T-zai-chat-transient-timeout",
+      "path": "/home/joe/code/futon3c/holes/tickets/T-zai-chat-transient-timeout.md",
+      "line": 3,
+      "status": "**Status (triaged 2026-09-01): STILL-OPEN, cheap prerequisite named.** chat! (zai_api.clj:752) still sends with no transport catch; a timeout throws past the {:error ...} contract and the sole caller has no retry. One fresh occurrence since filing. H1 (~5-line catch returning the error shape) is the first row; H2 retry after.",
+      "classification": "live",
+      "sha256": "09e1272ef353388d571b959a97200eaca8c1665eb2aa2a8d69026680c06d72ee"
+    }
+  ],
+  "source_pins": [
+    {
+      "path": "/home/joe/code/futon2/src/futon2/aif/forward_model.clj",
+      "lines": "96-128,152-168",
+      "sha256": "073492ee1276a5f17fcaf994931a430e1f72551ec0d9a19d3c7042a6d74f17d0"
+    },
+    {
+      "path": "/home/joe/code/futon2/src/futon2/aif/observation.clj",
+      "lines": "21-27,52-59,124-133",
+      "sha256": "9c93087e6b8a1ecb327749b58159799125edbaff43cf21a17deb4a2680ed6b57"
+    },
+    {
+      "path": "/home/joe/code/futon2/scripts/futon2/report/war_machine.clj",
+      "lines": "2700-2729",
+      "sha256": "69a066cccb0b67ac56521f53a94783b260a1ea754ed4ecde63dea700af7540ff"
+    },
+    {
+      "path": "/home/joe/code/futon2/src/futon2/aif/mission_registry.clj",
+      "lines": "152-161,322-350",
+      "sha256": "07822ed0667f268350fc3b9d921adce4d0d8c78276463b3bf03e93f5a01b89da"
+    }
+  ]
+}
