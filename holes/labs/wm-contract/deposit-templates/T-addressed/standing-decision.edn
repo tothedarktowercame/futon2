@@ -1,0 +1,8 @@
+{:schema :wm/target-standing-decision-v1
+ :entity/id "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-002-artifact-binding-mismatch"
+ :decision :resolved
+ :decided-by "__REPLACE_WITH_ACTUAL_REVIEWER_SEAT__"
+ :implementation-author "__REPLACE_WITH_ACTUAL_AUTHOR_SEAT__"
+ :decided-at "2026-09-15T02:30:00Z"
+ :explanation "Template decision: the actual reviewer must replace this explanation with an independent account of how the admitted subject readback, resolution, and limb receipts bear on the exact target's standing."
+ :evidence ["subject-repair.edn" "supporting-resolved.edn" "limb-distinct-commit.edn" "limb-independent-review.edn" "limb-grounded-repair.edn" "limb-successor.edn"]}
