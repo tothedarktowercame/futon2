@@ -7,5 +7,6 @@
   "implementation-author-assigned": false,
   "implementation-started": false,
   "response-file": "priority-1-owner-response.json",
-  "next-state": "independent-declaration-review-and-signature-reproduction-queued"
+  "next-state": "dispatch-held-for-five-narrative-walkthroughs-and-conceptual-review",
+  "follow-on-commissions": "cancelled by Joe instruction"
 }

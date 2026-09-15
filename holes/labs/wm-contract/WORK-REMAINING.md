@@ -1,5 +1,25 @@
 # The work remaining — the single execution authority
 
+## Dispatch hold: narrative understanding before construction (Joe, 2026-09-15)
+
+Joe has withdrawn the premise that the five-stage build queue is ready for
+commissioning. At least five detailed narrative walkthroughs, one per proposed
+stage, must explain what we need to build clearly enough to expose conceptual
+errors first. The five first drafts are now published at the Zone site root:
+[series overview](https://zone.hyperreal.enterprises/2026-09-15-wm-walkthroughs.html).
+Editable source and public HTTP verification are in `p4ng/wm-walkthroughs/`.
+Publishing five texts does not by itself establish conceptual agreement or
+permission to resume. No further build dispatch until this review is satisfied.
+Existing zai-7/zai-8 work on the cascade-policy example may continue, as Joe
+explicitly allowed; no additional work is commissioned by that exception.
+
+The P1 declaration review (`invoke-1789495801060-21213-286d79a5`) and reproducer
+(`invoke-1789495802456-21214-1508b397`) were withdrawn through Agency's job-specific
+cancel endpoint. Both cancellations returned `finalized: true` and interruption
+issued; subsequent job reads report `cancelled` / `operator-cancelled`. Receipts are in `runs/fundamentals-checklist-2026-09-15/p1-withdrawal-*.json`.
+Any partial results remain unaccepted historical work. The priority sections below
+are a proposal to explain and examine, not an active dispatch queue.
+
 ## Current coordination and priority order (Joe, 2026-09-15)
 
 Joe accepted checklist revision 4 (`p4ng b2c7d1d`) in substance and asked
@@ -18,14 +38,13 @@ fundamentals. Priorities are dependency stages, not estimates of completion date
 
 | Priority | Checklist obligations | Next result required | Responsibility / state |
 |---|---|---|---|
-| 1 | WM-01–07, join-2 | Machine-derived current belief → validated B/context and observed A → full-policy Q, with compatible C domain. Identify the first missing producer/consumer and its rejecting test before implementing it. A construction test cannot discharge observed-data or production-use obligations. | claude-20 is the recorded F13 owner; codex-22/27 have relevant construction evidence. First bounded packet requested from claude-20; no completion credit. |
+| 1 | WM-01–07, join-2 | Machine-derived current belief → validated B/context and observed A → full-policy Q, with compatible C domain. Identify the first missing producer/consumer and its rejecting test before implementing it. A construction test cannot discharge observed-data or production-use obligations. | claude-20 is the recorded F13 owner; codex-22/27 have relevant construction evidence. Owner proposal received; P1 follow-on commissions withdrawn for narrative review. No completion credit. |
 | 2 | WM-08–14, join-1/3/5, R6/R19 | Interpreted real cascades, complete C-family requirements, canonical runtime G, applicable posterior and actual selection/enactment correspondence. Resolve each needed interpretation decision before implementing its dependent behavior. | Existing F13/C owners; queued behind required inputs. No substitute controller score. |
 | 3 | Every R node, TRACE, E01–04, join-6/8/9 | Close remaining node and connection obligations with independent review, authentic retention and rejecting certificate checks. Verify reported regressions on the relevant path. | Owners and reviewers must be named per packet; queued. Ancillary proofs and failed certificates do not close nodes. |
 | 4 | E05 and all prerequisite nodes/connections | One authorized ordinary run using the actual completed path, with timestamped records and Lean-computed validation of its certificate. | Not ready. A machinery run is not qualifying; cron restoration is not required. |
 | 5 | E06–10, INV/TKT/PAGES | Reconcile all paper claims, wider-purpose obligations and publication with accepted evidence; finish required assent and roster reconciliation. | codex-28 coordinates. These obligations remain required even if the technical run succeeds. |
 
-**P1 status: declaration review and failing-signature reproduction queued;
-implementation held.** Owner response `invoke-1789495178833-21207-84b75f6b`
+**P1 status: withdrawn by Joe’s narrative-first instruction; implementation held.** Owner response `invoke-1789495178833-21207-84b75f6b`
 is retained in [the proposal](runs/fundamentals-checklist-2026-09-15/priority-1-owner-proposal.md).
 Claude-20 reports that selected mission/ticket IDs have no row in the retained
 belief, so row 7 refuses before prediction. This is a reported historical-input
@@ -33,8 +52,8 @@ gap pending independent reproduction, not a current serving census.
 
 | Packet | Owner | State / evidence |
 |---|---|---|
-| Review S1–S3 model declaration | codex-25, independent reviewer | Queued: `invoke-1789495801060-21213-286d79a5`. Must establish semantic authority for seven-status mission/ticket rows and registry-event mapping; merely calling it declared is insufficient. |
-| Reproduce missing-entity signature | codex-22, author | Queued: `invoke-1789495802456-21214-1508b397`. Real retained trace and registry IDs, pinned inputs, complete model context, mission/ticket readbacks and non-registry negative control. No bootstrap implementation. |
+| Review S1–S3 model declaration | codex-25, independent reviewer | Withdrawn: `invoke-1789495801060-21213-286d79a5`. Must establish semantic authority for seven-status mission/ticket rows and registry-event mapping; merely calling it declared is insufficient. |
+| Reproduce missing-entity signature | codex-22, author | Withdrawn: `invoke-1789495802456-21214-1508b397`. Real retained trace and registry IDs, pinned inputs, complete model context, mission/ticket readbacks and non-registry negative control. No bootstrap implementation. |
 | Target-belief implementation | codex-22 proposed; claude-20 independent code reviewer | Held until the declaration is accepted and the actual failure reproduced. Reader success alone will not close the production prediction join. |
 
 The S1–S3 proposal is not adopted by this tracker. Registry status is not an

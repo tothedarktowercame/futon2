@@ -1,0 +1,320 @@
+{
+  "before": {
+    "ok": true,
+    "job": {
+      "caller": "codex-28",
+      "session-id": null,
+      "execution": {
+        "executed?": false,
+        "tool-events": 0,
+        "command-events": 0
+      },
+      "job-id": "invoke-1789495802456-21214-1508b397",
+      "agent-id": "codex-22",
+      "artifact-ref": null,
+      "started-at": "2026-09-15T18:10:03.333281802Z",
+      "events": [
+        {
+          "seq": 1,
+          "type": "accepted",
+          "at": "2026-09-15T18:10:02.456547649Z"
+        },
+        {
+          "seq": 2,
+          "type": "running",
+          "at": "2026-09-15T18:10:03.333289467Z"
+        },
+        {
+          "seq": 3,
+          "type": "prompt",
+          "at": "2026-09-15T18:10:04.068650657Z",
+          "text": "P1 failing-signature commission ONLY, before implementation. Read priority-1-owner-proposal.md in futon2/holes/labs/wm-contract/runs/fundamentals-checklist-2026-09-15/ (claude-20 proposal). Independently reproduce the claimed selected-target missing-entity gap using exact retained wm-trace bytes and real registry mission/ticket target IDs. Write a minimal executable regression reproducer and before receipt under holes/labs/wm-contract/runs/p1-target-belief-2026-09-15/: input paths+hashes, exact complete model context, chosen target IDs, row-7 outputs, non-registry negative control, actual command and exit status. Distinguish missing-entity from model-validation refusal, trace historical scope from current serving state, and baseline reader success from production predictor consumption. Verify the real gap, do not encode the proposed S1-S3 mapping as accepted: codex-25 is independently reviewing that declaration. Do not implement bootstrap/update changes, create labels, use fabricated replacement input data, reload, click, or dispatch others. Run applicable syntax gates for any Clojure/Lisp file you write. Return commit/receipt and any conflict that invalidates the proposed packet. Claude-20 reviews eventual implementation; construction remains held pending declaration review.\nProposal SHA256: 385c9f18a23471295a15140038e5a0df0cb5d7d23bc930a644bafb9cb85bcf91\n"
+        },
+        {
+          "seq": 4,
+          "type": "text",
+          "at": "2026-09-15T18:10:11.404822423Z",
+          "text": "I\u2019ll reproduce only the pre-implementation failure signature, using the retained trace and registry identities, and keep any declaration mapping explicitly unaccepted. I\u2019ll first read the workspace/repo instructions and proposal, then inspect the existing row-7 reader and retained artifacts before writing the minimal runner."
+        },
+        {
+          "seq": 5,
+          "type": "tool_use",
+          "at": "2026-09-15T18:10:13.789317009Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc \"sed -n '1,240p' AGENTS.md && find futon2 -name AGENTS.md -print && sed -n '1,260p' futon2/AGENTS.md && sh"
+          ],
+          "output": [
+            "# AGENTS.md (workspace)\n\nOn \"load-bearing\" and other LLM idioms: Say what is happening, rather than naming an abstract shape that it resembles.  Rather than using a phrase that sounds like it could appear unchanged in discussions about software architecture, relationships, organizations, and philosophy (all things that Joe is interested in!), make it specific to the thing being discussed.\n\nThis workspace uses an evidence-backed system map as the seed for a complete,\nmachine-readable self-description of the  \u2026[trimmed]\u2026 ion;\n- the trace-record key for the snapshot.\n\n**Invariants:**\n1. Belief keys equal controller `:target` strings exactly.\n2. A new entity gets the named, declared D, recorded in the provenance record, never an unlabelled uniform.\n3. No event on first observation or on an unchanged status.\n4. Only the S3 transitions emit.\n5. Events are applied only through `apply-arena-belief-events`.\n6. An unreadable registry produces a typed refusal, not the silent fallback to `extra-ids` that the stack-annotation read uses.\n\n**Acceptance:**\n- Rerun the failing check on the new bootstrap. It now returns `:ok` with a seven-status row for the mission and for the ticket, and its provenance is either D or carried. The non-registry id still refuses.\n- One test per S3 row.\n- A carry test: a mission completes, then disappears from the live set, and its belief survives.\n- A trace readback of the snapshot and the events.\n\n**Gates:**\n- clj-kondo and `futon4/dev/check-parens.el` on the changed files;\n- `clojure -X:test :nses '[futon2.aif.belief-test futon2.aif.machine-belief-test futon2.aif.mission-registry-test futon2.aif.target-belief-evidence-test]'`;\n- the war-machine test namespace that covers `wm-belief-pre`.\n\n**Receipts:** `holes/labs/wm-contract/runs/p1-target-belief-2026-09-15/` holds the before and after row-7 readbacks, the gate outputs and the commit shas.\n\n**Separate steps, not part of this packet:**\n- Serving activation: reloading `war_machine`, `belief` and the new namespace from master is allowed.\n- A traced tick that shows registry targets in `:mu-post`: a click is Joe's call.\n\n**Out of scope:**\n- B coverage, A, and policy plans;\n- `update-belief`'s silent uniform initialisation (report it as its own defect);\n- the stack-annotation read fallback.\n\n## The next blockers after this packet, in order\n\n1. **B covers two action classes.** Row-8 B (`wm-status-action-prior-v1`) declares only `:advance-mission` and `:apply-cascade`. Live rankings also contain `:advance-ticket`, `:address-sorry`, `:fire-pattern`, `:learn-action-class` and `:no-op` (TN-row14-live-wiring-blocker, gap 3). Documented THEN interpretations are permitted (Sept 7 ruling, l.309), but each class needs a declared authority row.\n2. **Q(s|\u03c0) is tied to A.** `controlled-transition-kernel` calls `machine-model/validate`, and `validate*` requires an admitted `:A` kernel. So neither B nor Q(s|\u03c0) can be produced until A is admitted, even though Q(s|\u03c0) doesn't depend on A mathematically (SPEC l.82). The candidate packet splits dynamics admission from observation admission.\n3. **Measured A has zero observations.** The rubric has 0/7 qualifying statuses, and 0/86 retained closes can be licensed. Close retention's state port accepts only `:independent-categorical-observation` of the target's status, and refuses the belief as state (`close_retention.clj:112-120`). Before this packet, missions and tickets had no status carrier at all, so no (state, disposition) pair could exist for the targets being closed. After it, the carrier exists, but an independent observation producer is still needed (codex-22/25 lane).\n4. **No policy plan per candidate.** The judge ranks actions, not versioned full-policy plans, and nothing maps a candidate occurrence to one (TN-row14, gap 2).\n\n## Review of the UI change (p4ng 8c2296f)\n\nNo specific defect found.\n\n**What I checked:**\n- I rendered it onto a copy of the live page. All 14 `<details>` and 14 `<summary>` pairs balance.\n- An HTML-parser nesting check found no errors and no unclosed tags.\n- Only h2/h3 headings sit inside `<summary>`, which HTML permits.\n- All 103 `#ck-` anchors are present, with one script.\n- `data-md-sha` still matches R4 (`466a2e19\u2026`), and the R4 Markdown bytes are unchanged.\n- The reveal walks every `DETAILS` ancestor, including the outer one, so a link into a collapsed section opens it.\n\n**Residuals, none of them a defect:**\n- The hash isn't URI-decoded. That's harmless, because all codes are ASCII.\n- `scrollIntoView()` repeats the browser's own scroll to a fragment. Also harmless.\n- Neither of us tested it in a real browser.\n"
+          ]
+        },
+        {
+          "seq": 6,
+          "type": "tool_use",
+          "at": "2026-09-15T18:10:23.586005312Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc 'git status --short && git branch --show-current && git rev-parse HEAD && rg -n \"defn belief-state-distrib"
+          ],
+          "output": [
+            " M holes/labs/wm-contract/PROPOSED-ROWS.md\n M holes/labs/wm-contract/variable-situation-accounting.edn\n M holes/labs/wm-contract/workflow-report.edn\n?? holes/TN-astra-wmreview.md\n?? holes/labs/library-loop/runs/build-loop.lock\n?? holes/labs/library-loop/runs/build-loop.log\n?? holes/labs/wm-contract/runs/fundamentals-checklist-2026-09-15/p1-dispatch-codex-22.json\n?? holes/labs/wm-contract/runs/fundamentals-checklist-2026-09-15/p1-dispatch-codex-25.json\n?? holes/labs/wm-contract/runs/fundamentals-checklist-20 \u2026[trimmed]\u2026 ate-support #(vec (reverse %))) {entity row}]\ntest/futon2/aif/machine_belief_test.clj:31:            {entity (update (zipmap mb/state-support (repeat (/ 1.0 7.0)))\ntest/futon2/aif/machine_parameters_test.clj:20:            :state-support states :outcome (machine-model/outcome-authority)})\nsrc/futon2/aif/machine_predictive.clj:58:             :state-support (:state-support kernel)\nsrc/futon2/aif/machine_predictive.clj:73:         :state-support (:state-support kernel)\nsrc/futon2/aif/machine_predictive.clj:82:  (let [states (:state-support model)\nsrc/futon2/aif/machine_predictive.clj:107:    (not= (set (:state-support kernel)) (set (keys (get-in model [:A :rows]))))\nsrc/futon2/aif/machine_predictive.clj:120:          (if (some nil? (for [s (:state-support kernel) o outcomes]\nsrc/futon2/aif/machine_predictive.clj:127:             :pins {:model (:model model) :state-support (:state-support model)\nsrc/futon2/aif/machine_parameters.clj:40:        states (:state-support model)\nscripts/futon2/report/cascade_lane.clj:166:    (some-> (registry/ticket-entry target) :path io/file)\nsrc/futon2/aif/selection_authoring_coupling.clj:24:  (missions/mission-target-id mission-id))\nscripts/futon2/report/war_machine.clj:1554:    (let [registry-id (mission-registry/mission-target-id\nsrc/futon2/aif/interpretation_request.clj:28:    (registry/ticket-entry (:target action))\ntest/futon2/aif/mission_registry_test.clj:155:    (is (= \"M-alpha\" (mr/mission-target-id \"futon4-d/mission/alpha\")))\ntest/futon2/aif/mission_registry_test.clj:156:    (is (= \"M-alpha\" (mr/mission-target-id \"M-alpha\")))\ntest/futon2/aif/ticket_test.clj:55:      (is (false? (fm/can-execute? state {:type :advance-ticket :target \"T-done\"})))\ntest/futon2/aif/ticket_test.clj:69:               (try (authority/authorize {:action {:type :advance-ticket :target \"T-done\"}} [])\ntest/futon2/aif/ticket_test.clj:79:      (is (false? (fm/can-execute? state {:type :advance-ticket :target \"T-held\"}))))))\ntest/futon2/aif/ticket_test.clj:83:        prediction (#'fm/predict-effects {} {:type :advance-ticket :target \"T-live\" :weight 1.0})]\nsrc/futon2/aif/full_loop_runner.clj:1440:  (first (filter #(= (missions/mission-target-id target) (:id %))\nsrc/futon2/aif/full_loop_runner.clj:1643:      (= :advance-ticket (:type action)) (missions/ticket-entry target)\nsrc/futon2/aif/controller_authority.clj:31:                 (and ticket-action? (not (:open? (missions/ticket-status (:target action)))))\nsrc/futon2/aif/interpretation_evidence.clj:123:  (require! (#{:mission :ticket} (:kind target)) :target-kind-invalid [:target])\nsrc/futon2/aif/mission_registry.clj:193:(defn load-missions\nsrc/futon2/aif/mission_registry.clj:243:(defn load-missions-cached\nsrc/futon2/aif/mission_registry.clj:273:(defn mission-target-id\nsrc/futon2/aif/mission_registry.clj:292:    (contains? live-ids (mission-target-id target))))\nsrc/futon2/aif/mission_registry.clj:300:  (let [target-id (mission-target-id target)\nsrc/futon2/aif/mission_registry.clj:369:(defn load-tickets\nsrc/futon2/aif/mission_registry.clj:396:(defn ticket-entry [target]\nsrc/futon2/aif/mission_registry.clj:400:(defn live-ticket-target? [tickets target]\nsrc/futon2/aif/mission_registry.clj:403:(defn ticket-status [target]\nsrc/futon2/aif/mission_registry.clj:404:  (let [live? (boolean (some-> (ticket-entry target) live-ticket?))]\nsrc/futon2/aif/mission_registry.clj:411:    (ticket-status target)\nsrc/futon2/aif/mission_registry.clj:417:  (live-ticket-target? (:tickets state) (:target action)))\nsrc/futon2/aif/mission_registry.clj:423:        {:type :advance-ticket :target (:id t) :weight 1.0\nsrc/futon2/aif/actuator_a3.clj:141:  (missions/mission-target-id mission-id))\ntest/futon2/aif/enumeration_completeness_test.clj:154:    (let [r (ec/completeness-record [(candidate \"M-live\") {:action {:type :advance-ticket :target \"T-one\"}}] {:code-root *root*})]\ntest/futon2/aif/interpretation_job_test.clj:26:                 (= scenario :ticket) (assoc :type :advance-ticket :target \"T-receipt-construction\"))\n-rw-rw-r-- 1 joe joe 140M Sep 12 19:55 data/wm-trace/wm-trace-2026-09-12.edn\n"
+          ]
+        },
+        {
+          "seq": 7,
+          "type": "tool_use",
+          "at": "2026-09-15T18:10:42.093673248Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc \"sed -n '1,110p' src/futon2/aif/machine_belief.clj; sed -n '170,440p' src/futon2/aif/mission_registry.clj;"
+          ],
+          "output": [
+            "(ns futon2.aif.machine-belief\n  \"Single-entity bridge from the stored categorical belief to MachineModel v1.\n   This namespace reads the post-filter, post-carry belief; it never repairs,\n   normalises, averages, or otherwise rewrites it.\"\n  (:require [futon2.aif.belief :as belief]\n            [futon2.aif.machine-model :as machine-model]))\n\n(def state-support\n  \"The declared order of MachineBeliefState.Status.all.\"\n  [:spawned :refined :strengthened :addressed :falsified :foreclosed :reopened])\n\n(defn- refus \u2026[trimmed]\u2026 transcript.txt\nholes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic\nholes/labs/wm-contract/runs/U22-mission-epistemic/05-rank-moves.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/01-candidates.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/02-weights.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/03-before.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/README.md\nholes/labs/wm-contract/runs/U22-mission-epistemic/06-field-census.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/07-doability-live.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/04-after.edn\nholes/labs/wm-contract/runs/ticket-selection-discovery-2026-09-15\nholes/labs/wm-contract/runs/ticket-selection-discovery-2026-09-15/census.json\nholes/labs/wm-contract/runs/RUN4-enriched-fold-gate-2026-09-12/commissioning.edn\nholes/labs/wm-contract/runs/U24-survey-mission\nholes/labs/wm-contract/runs/U24-survey-mission/01-field.edn\nholes/labs/wm-contract/runs/U24-survey-mission/06-planted-identify-demo.edn\nholes/labs/wm-contract/runs/U24-survey-mission/03-survey-readings.edn\nholes/labs/wm-contract/runs/U24-survey-mission/02-phase-readings.edn\nholes/labs/wm-contract/runs/U24-survey-mission/04-arms.edn\nholes/labs/wm-contract/runs/U24-survey-mission/README.md\nholes/labs/wm-contract/runs/U24-survey-mission/05-ambiguity-rerun.edn\nholes/labs/wm-contract/runs/U24-survey-mission/07-discharge-shape.edn\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/registry-readback.json\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-f2-parens.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-authority-regression.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-mission-regression.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-authority-kondo-final.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-tests-final.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-guardrail-tests.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-http-tests.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-f3-parens.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-forward-regression.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-wm-regression.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-kondo-initial.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-kondo-final.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-selector-regression.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-tests-third.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-authority-parens-final.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-tests.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/receipt.json\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/IMPLEMENTATION.md\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/completeness-readback.json\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-enumeration-tests.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/futon2.diff\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/futon3c.diff\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-f3-kondo.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-http-final.log\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/check-parens.txt\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/test.txt\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/implementation-note.md\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/clj-kondo.txt\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/lead-review.md\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/execution-receipts.edn\n"
+          ]
+        },
+        {
+          "seq": 8,
+          "type": "tool_use",
+          "at": "2026-09-15T18:10:51.848011431Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc \"sed -n '1,110p' holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/readback.clj; sed -n '1,80p' sr"
+          ],
+          "output": [
+            "(require '[clojure.edn :as edn]\n         '[clojure.java.io :as io]\n         '[futon2.aif.machine-belief :as mb]\n         '[futon2.aif.machine-model :as machine-model])\n(import '[java.security MessageDigest])\n\n(def input (edn/read-string (slurp \"holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/input.edn\")))\n(def context-base {:model {:id \"wm-production\" :revision \"2026-09-12-row-7\"}\n                   :state-support mb/state-support :mode :single-entity})\n\n(defn sha256 [path]\n  (let [digest (.digest \u2026[trimmed]\u2026 box, and exposes them as addressable targets for the WM's\n   action layer.\n\n   Honest scope: file-backed and heuristic. The adapter reads mission docs'\n   `Status:` line rather than a typed substrate. This is still an honest\n   improvement over the prior state where `:open-mission` was permanently\n   gated and only surfaced as `:learn-action-class`.\n\n   The interface (`load-missions` / `open-missions` /\n   `can-propose? :open-mission` / the enumerator proposer) is the swap\n   target for a richer substrate if mission metadata becomes canonical\n   elsewhere.\"\n  (:require [clojure.java.io :as io]\n            [clojure.string :as str]\n            [futon2.aif.action-proposer :as ap]\n            [futon2.aif.forward-model :as fm])\n  (:import (java.io File)))\n\n(def ^:private default-code-root\n  (str (System/getProperty \"user.home\") \"/code\"))\n\n(def ^:private mission-path-pattern\n  #\".*/holes/missions/(M-[^/]+)\\.md$\")\n\n(def ^:private status-line-pattern\n  #\"(?i)^\\s*(?:[-*]\\s*)?(?:#+\\s*)?(?:\\*\\*)?Status:?(?:\\*\\*)?\\s*:?\\s*(.+)$\")\n\n(def ^:private unchecked-task-pattern\n  #\"^\\s*[-*]\\s+\\[\\s\\]\\s+\\S.*$\")\n\n(def ^:private explicit-work-marker-pattern\n  #\"(?i)(?:^|[\\s`(*_:-])(?:TODO|FIXME|XXX|TBD)(?:$|[\\s`),.:;_-])|(?:\\b(?:open\\s+)?(?:hole|sorry)\\s*:)|\\bsorry/[-A-Za-z0-9_.]+\")\n\n(def ^:private pending-lifecycle-pattern\n  #\"(?i)\\b(?:HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE)\\b[^.\\n;|]*\\b(?:pending|next|open|blocked|active|in[ -]progress|remaining|not yet|needed)\\b|\\b(?:pending|next|open|blocked|active|in[ -]progress|remaining|not yet|needed)\\b[^.\\n;|]*\\b(?:HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE)\\b\")\n\n(def ^:private open-section-heading-pattern\n  #\"(?i)^\\s*#{2,6}\\s+(?:open questions?|open tasks?|remaining work|remaining tasks?|pending work|next steps)\\b.*$\")\n\n(def ^:private list-item-pattern\n  #\"^\\s*(?:[-*+]\\s+|\\d+[.)]\\s+)\\S.*$\")\n\n(defn- mission-id-from-path\n  [path]\n  (second (re-matches mission-path-pattern path)))\n\n(defn- sandbox-path?\n  [path]\n  (str/includes? path \"/.state/\"))\n\n(def ^:private non-primary-path-patterns\n  \"Patterns that identify non-primary checkout paths \u2014 git worktrees,\n   directory copies, and other sources of duplicate mission-doc hits.\n\n   Each entry is [pattern source-name]. The scan-root fence (non-primary-path?)\n   excludes these BEFORE dedupe, so the path-length sort heuristic in dedupe-by-id\n   is a defense-in-depth fallback, not the sole guard against re-pollution.\n\n   The patterns are deliberately structural (not per-directory-name):\n     - /.worktrees/    \u2014 the standard git worktree location\n     - -health-main    \u2014 futon5's health-check worktree\n     - -index-check    \u2014 futon3c's index-check directory copy\n     - futon3b/        \u2014 futon3b is a separate repo that duplicates some futon3 docs\n\n   Adding a new drift source = adding a pattern here with its source name.\n   The census script (scripts/mission_scan_census.bb) reports which patterns fire\n   so future drift has a one-line explanation.\"\n  [[#\"/\\.worktrees/\" \"git-worktree\"]\n   [#\"-health-main/\" \"health-main-worktree\"]\n   [#\"-index-check/\" \"index-check-copy\"]\n   [#\"futon3b/holes/missions/\" \"futon3b-cross-repo\"]])\n\n(defn- non-primary-path?\n  \"True when PATH is a non-primary checkout (worktree, directory copy, or\n3b25d2d43e3ebbcf19fc6f82e103ae49907b81d0cf009fa8d7884e74ef53e175  data/wm-trace/wm-trace-2026-09-12.edn\n5491a3892c28245735520c4e05e3fb1e2c7c3326954d4a4e51741e53dfe39965  src/futon2/aif/machine_belief.clj\na060ed1384e6bd0a699c1efedc244b6f2b68316292b61b22d3a25a435b47cfc4  src/futon2/aif/mission_registry.clj\nholes/missions/M-aif-a-matrix-faithfulness.md\nholes/missions/M-aif-gap-epistemic-affordance.md\nholes/missions/M-aif-policy-conditioned-eig.md\nholes/missions/M-f11-find-production-successor.md\nholes/missions/M-formal-war-machine.md\nholes/missions/M-reflective-discipline.md\nholes/missions/M-run-produces-its-own-brief.md\nholes/missions/M-u88-contextual-preferences.md\nholes/missions/M-wm-aif-policy-grain-compliance.md\nholes/missions/M-wm-strategic-mission-selection.md\nholes/missions/M-wm-tripwires.md\nholes/missions/M-zaif-harness-v1.md\n"
+          ]
+        },
+        {
+          "seq": 9,
+          "type": "text",
+          "at": "2026-09-15T18:11:03.486961685Z",
+          "text": "The retained trace pin is stable, and the row-7 reader\u2019s validation order lets the commission distinguish a valid model context ending specifically at `:missing-entity` from an earlier context/schema refusal. I\u2019m now selecting registry-backed mission and ticket IDs and checking whether the historical trace itself records them as candidate/selected targets, rather than merely assuming today\u2019s registry membership implies historical selection."
+        },
+        {
+          "seq": 10,
+          "type": "tool_use",
+          "at": "2026-09-15T18:11:12.739759324Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc \"clojure -M -e '(require (quote [clojure.edn :as edn]) (quote [clojure.java.io :as io]) (quote [futon2.aif"
+          ],
+          "output": [
+            "{:last-ts \"2026-09-12T17:28:09.498448087Z\", :last-mu-index 3, :last-mu-count 417, :ranked-target-count 145, :open-mission-sample {:id \"M-kangaroo\", :path \"/home/joe/code/futon3c/holes/missions/M-kangaroo.md\", :status-class :active}, :ticket-ranked? false, :selected-targets [\"M-shared-memory-control-build-test\"], :ticket-in-last-mu? false, :mission-in-last-mu? false, :mission-ranked? true, :mu-forms 4, :forms 4, :live-ticket-sample {:id \"T-car3-phase2-impl\", :path \"/home/joe/code/futon3c/holes/tickets/T-car3-phase2-impl.md\", :status-class :live}}\n"
+          ]
+        },
+        {
+          "seq": 11,
+          "type": "tool_use",
+          "at": "2026-09-15T18:11:36.907738864Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc \"clojure -M -e '(require (quote [futon2.aif.mission-registry :as mr])) (let [mid \\\"M-shared-memory-control"
+          ],
+          "output": [
+            "{:mission {:id \"M-shared-memory-control-build-test\", :path \"/home/joe/code/futon3c/holes/missions/M-shared-memory-control-build-test.md\", :status-class :unknown}, :tickets [{:id \"T-car3-phase2-impl\", :path \"/home/joe/code/futon3c/holes/tickets/T-car3-phase2-impl.md\", :status-class :live} {:id \"T-fail-invoke-error\", :path \"/home/joe/code/futon3c/holes/tickets/T-fail-invoke-error.md\", :status-class :live} {:id \"T-watu-replay-layer\", :path \"/home/joe/code/futon3c/holes/tickets/T-watu-replay-layer.md\", :status-class :live} {:id \"T-cx-new-blocks-emacs\", :path \"/home/joe/code/futon3c/holes/tickets/T-cx-new-blocks-emacs.md\", :status-class :live} {:id \"T-fail-agent-not-found\", :path \"/home/joe/code/futon3c/holes/tickets/T-fail-agent-not-found.md\", :status-class :live} {:id \"T-fail-invoke-interrupted\", :path \"/home/joe/code/futon3c/holes/tickets/T-fail-invoke-interrupted.md\", :status-class :live} {:id \"T-fail-operator-cancelled\", :path \"/home/joe/code/futon3c/holes/tickets/T-fail-operator-cancelled.md\", :status-class :live} {:id \"T-mq7-unaddressable-caller\", :path \"/home/joe/code/futon3c/holes/tickets/T-mq7-unaddressable-caller.md\", :status-class :live} {:id \"T-wm-wrong-corpus-26082026\", :path \"/home/joe/code/futon3c/holes/tickets/T-wm-wrong-corpus-26082026.md\", :status-class :live} {:id \"T-fail-no-execution-evidence\", :path \"/home/joe/code/futon3c/holes/tickets/T-fail-no-execution-evidence.md\", :status-class :live}], :counts [242 34]}\n"
+          ]
+        }
+      ],
+      "mode": "work",
+      "delivery": {
+        "status": "pending"
+      },
+      "state": "running",
+      "invocation/model": null,
+      "trace-id": null,
+      "result-summary": null,
+      "terminal-message": null,
+      "finished-at": null,
+      "created-at": "2026-09-15T18:10:02.456270510Z",
+      "terminal-code": null,
+      "surface": "bell"
+    }
+  },
+  "cancel": {
+    "job-id": "invoke-1789495802456-21214-1508b397",
+    "agent-id": "codex-22",
+    "preserved-job-ids": [],
+    "worker-interrupted": true,
+    "state": "cancelled",
+    "process-interrupt": {
+      "ok": true,
+      "agent-id": "codex-22",
+      "action": "interrupt-issued",
+      "message": "interrupt issued",
+      "interrupted?": true,
+      "root-pid": 3674039,
+      "descendant-count": 2
+    },
+    "ok": true,
+    "process-interrupted": true,
+    "finalized": true
+  },
+  "after": {
+    "ok": true,
+    "job": {
+      "caller": "codex-28",
+      "session-id": null,
+      "execution": {
+        "executed": true,
+        "tool-events": 6,
+        "command-events": 6
+      },
+      "job-id": "invoke-1789495802456-21214-1508b397",
+      "agent-id": "codex-22",
+      "artifact-ref": null,
+      "started-at": "2026-09-15T18:10:03.333281802Z",
+      "events": [
+        {
+          "seq": 1,
+          "type": "accepted",
+          "at": "2026-09-15T18:10:02.456547649Z"
+        },
+        {
+          "seq": 2,
+          "type": "running",
+          "at": "2026-09-15T18:10:03.333289467Z"
+        },
+        {
+          "seq": 3,
+          "type": "prompt",
+          "at": "2026-09-15T18:10:04.068650657Z",
+          "text": "P1 failing-signature commission ONLY, before implementation. Read priority-1-owner-proposal.md in futon2/holes/labs/wm-contract/runs/fundamentals-checklist-2026-09-15/ (claude-20 proposal). Independently reproduce the claimed selected-target missing-entity gap using exact retained wm-trace bytes and real registry mission/ticket target IDs. Write a minimal executable regression reproducer and before receipt under holes/labs/wm-contract/runs/p1-target-belief-2026-09-15/: input paths+hashes, exact complete model context, chosen target IDs, row-7 outputs, non-registry negative control, actual command and exit status. Distinguish missing-entity from model-validation refusal, trace historical scope from current serving state, and baseline reader success from production predictor consumption. Verify the real gap, do not encode the proposed S1-S3 mapping as accepted: codex-25 is independently reviewing that declaration. Do not implement bootstrap/update changes, create labels, use fabricated replacement input data, reload, click, or dispatch others. Run applicable syntax gates for any Clojure/Lisp file you write. Return commit/receipt and any conflict that invalidates the proposed packet. Claude-20 reviews eventual implementation; construction remains held pending declaration review.\nProposal SHA256: 385c9f18a23471295a15140038e5a0df0cb5d7d23bc930a644bafb9cb85bcf91\n"
+        },
+        {
+          "seq": 4,
+          "type": "text",
+          "at": "2026-09-15T18:10:11.404822423Z",
+          "text": "I\u2019ll reproduce only the pre-implementation failure signature, using the retained trace and registry identities, and keep any declaration mapping explicitly unaccepted. I\u2019ll first read the workspace/repo instructions and proposal, then inspect the existing row-7 reader and retained artifacts before writing the minimal runner."
+        },
+        {
+          "seq": 5,
+          "type": "tool_use",
+          "at": "2026-09-15T18:10:13.789317009Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc \"sed -n '1,240p' AGENTS.md && find futon2 -name AGENTS.md -print && sed -n '1,260p' futon2/AGENTS.md && sh"
+          ],
+          "output": [
+            "# AGENTS.md (workspace)\n\nOn \"load-bearing\" and other LLM idioms: Say what is happening, rather than naming an abstract shape that it resembles.  Rather than using a phrase that sounds like it could appear unchanged in discussions about software architecture, relationships, organizations, and philosophy (all things that Joe is interested in!), make it specific to the thing being discussed.\n\nThis workspace uses an evidence-backed system map as the seed for a complete,\nmachine-readable self-description of the  \u2026[trimmed]\u2026 ion;\n- the trace-record key for the snapshot.\n\n**Invariants:**\n1. Belief keys equal controller `:target` strings exactly.\n2. A new entity gets the named, declared D, recorded in the provenance record, never an unlabelled uniform.\n3. No event on first observation or on an unchanged status.\n4. Only the S3 transitions emit.\n5. Events are applied only through `apply-arena-belief-events`.\n6. An unreadable registry produces a typed refusal, not the silent fallback to `extra-ids` that the stack-annotation read uses.\n\n**Acceptance:**\n- Rerun the failing check on the new bootstrap. It now returns `:ok` with a seven-status row for the mission and for the ticket, and its provenance is either D or carried. The non-registry id still refuses.\n- One test per S3 row.\n- A carry test: a mission completes, then disappears from the live set, and its belief survives.\n- A trace readback of the snapshot and the events.\n\n**Gates:**\n- clj-kondo and `futon4/dev/check-parens.el` on the changed files;\n- `clojure -X:test :nses '[futon2.aif.belief-test futon2.aif.machine-belief-test futon2.aif.mission-registry-test futon2.aif.target-belief-evidence-test]'`;\n- the war-machine test namespace that covers `wm-belief-pre`.\n\n**Receipts:** `holes/labs/wm-contract/runs/p1-target-belief-2026-09-15/` holds the before and after row-7 readbacks, the gate outputs and the commit shas.\n\n**Separate steps, not part of this packet:**\n- Serving activation: reloading `war_machine`, `belief` and the new namespace from master is allowed.\n- A traced tick that shows registry targets in `:mu-post`: a click is Joe's call.\n\n**Out of scope:**\n- B coverage, A, and policy plans;\n- `update-belief`'s silent uniform initialisation (report it as its own defect);\n- the stack-annotation read fallback.\n\n## The next blockers after this packet, in order\n\n1. **B covers two action classes.** Row-8 B (`wm-status-action-prior-v1`) declares only `:advance-mission` and `:apply-cascade`. Live rankings also contain `:advance-ticket`, `:address-sorry`, `:fire-pattern`, `:learn-action-class` and `:no-op` (TN-row14-live-wiring-blocker, gap 3). Documented THEN interpretations are permitted (Sept 7 ruling, l.309), but each class needs a declared authority row.\n2. **Q(s|\u03c0) is tied to A.** `controlled-transition-kernel` calls `machine-model/validate`, and `validate*` requires an admitted `:A` kernel. So neither B nor Q(s|\u03c0) can be produced until A is admitted, even though Q(s|\u03c0) doesn't depend on A mathematically (SPEC l.82). The candidate packet splits dynamics admission from observation admission.\n3. **Measured A has zero observations.** The rubric has 0/7 qualifying statuses, and 0/86 retained closes can be licensed. Close retention's state port accepts only `:independent-categorical-observation` of the target's status, and refuses the belief as state (`close_retention.clj:112-120`). Before this packet, missions and tickets had no status carrier at all, so no (state, disposition) pair could exist for the targets being closed. After it, the carrier exists, but an independent observation producer is still needed (codex-22/25 lane).\n4. **No policy plan per candidate.** The judge ranks actions, not versioned full-policy plans, and nothing maps a candidate occurrence to one (TN-row14, gap 2).\n\n## Review of the UI change (p4ng 8c2296f)\n\nNo specific defect found.\n\n**What I checked:**\n- I rendered it onto a copy of the live page. All 14 `<details>` and 14 `<summary>` pairs balance.\n- An HTML-parser nesting check found no errors and no unclosed tags.\n- Only h2/h3 headings sit inside `<summary>`, which HTML permits.\n- All 103 `#ck-` anchors are present, with one script.\n- `data-md-sha` still matches R4 (`466a2e19\u2026`), and the R4 Markdown bytes are unchanged.\n- The reveal walks every `DETAILS` ancestor, including the outer one, so a link into a collapsed section opens it.\n\n**Residuals, none of them a defect:**\n- The hash isn't URI-decoded. That's harmless, because all codes are ASCII.\n- `scrollIntoView()` repeats the browser's own scroll to a fragment. Also harmless.\n- Neither of us tested it in a real browser.\n"
+          ]
+        },
+        {
+          "seq": 6,
+          "type": "tool_use",
+          "at": "2026-09-15T18:10:23.586005312Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc 'git status --short && git branch --show-current && git rev-parse HEAD && rg -n \"defn belief-state-distrib"
+          ],
+          "output": [
+            " M holes/labs/wm-contract/PROPOSED-ROWS.md\n M holes/labs/wm-contract/variable-situation-accounting.edn\n M holes/labs/wm-contract/workflow-report.edn\n?? holes/TN-astra-wmreview.md\n?? holes/labs/library-loop/runs/build-loop.lock\n?? holes/labs/library-loop/runs/build-loop.log\n?? holes/labs/wm-contract/runs/fundamentals-checklist-2026-09-15/p1-dispatch-codex-22.json\n?? holes/labs/wm-contract/runs/fundamentals-checklist-2026-09-15/p1-dispatch-codex-25.json\n?? holes/labs/wm-contract/runs/fundamentals-checklist-20 \u2026[trimmed]\u2026 ate-support #(vec (reverse %))) {entity row}]\ntest/futon2/aif/machine_belief_test.clj:31:            {entity (update (zipmap mb/state-support (repeat (/ 1.0 7.0)))\ntest/futon2/aif/machine_parameters_test.clj:20:            :state-support states :outcome (machine-model/outcome-authority)})\nsrc/futon2/aif/machine_predictive.clj:58:             :state-support (:state-support kernel)\nsrc/futon2/aif/machine_predictive.clj:73:         :state-support (:state-support kernel)\nsrc/futon2/aif/machine_predictive.clj:82:  (let [states (:state-support model)\nsrc/futon2/aif/machine_predictive.clj:107:    (not= (set (:state-support kernel)) (set (keys (get-in model [:A :rows]))))\nsrc/futon2/aif/machine_predictive.clj:120:          (if (some nil? (for [s (:state-support kernel) o outcomes]\nsrc/futon2/aif/machine_predictive.clj:127:             :pins {:model (:model model) :state-support (:state-support model)\nsrc/futon2/aif/machine_parameters.clj:40:        states (:state-support model)\nscripts/futon2/report/cascade_lane.clj:166:    (some-> (registry/ticket-entry target) :path io/file)\nsrc/futon2/aif/selection_authoring_coupling.clj:24:  (missions/mission-target-id mission-id))\nscripts/futon2/report/war_machine.clj:1554:    (let [registry-id (mission-registry/mission-target-id\nsrc/futon2/aif/interpretation_request.clj:28:    (registry/ticket-entry (:target action))\ntest/futon2/aif/mission_registry_test.clj:155:    (is (= \"M-alpha\" (mr/mission-target-id \"futon4-d/mission/alpha\")))\ntest/futon2/aif/mission_registry_test.clj:156:    (is (= \"M-alpha\" (mr/mission-target-id \"M-alpha\")))\ntest/futon2/aif/ticket_test.clj:55:      (is (false? (fm/can-execute? state {:type :advance-ticket :target \"T-done\"})))\ntest/futon2/aif/ticket_test.clj:69:               (try (authority/authorize {:action {:type :advance-ticket :target \"T-done\"}} [])\ntest/futon2/aif/ticket_test.clj:79:      (is (false? (fm/can-execute? state {:type :advance-ticket :target \"T-held\"}))))))\ntest/futon2/aif/ticket_test.clj:83:        prediction (#'fm/predict-effects {} {:type :advance-ticket :target \"T-live\" :weight 1.0})]\nsrc/futon2/aif/full_loop_runner.clj:1440:  (first (filter #(= (missions/mission-target-id target) (:id %))\nsrc/futon2/aif/full_loop_runner.clj:1643:      (= :advance-ticket (:type action)) (missions/ticket-entry target)\nsrc/futon2/aif/controller_authority.clj:31:                 (and ticket-action? (not (:open? (missions/ticket-status (:target action)))))\nsrc/futon2/aif/interpretation_evidence.clj:123:  (require! (#{:mission :ticket} (:kind target)) :target-kind-invalid [:target])\nsrc/futon2/aif/mission_registry.clj:193:(defn load-missions\nsrc/futon2/aif/mission_registry.clj:243:(defn load-missions-cached\nsrc/futon2/aif/mission_registry.clj:273:(defn mission-target-id\nsrc/futon2/aif/mission_registry.clj:292:    (contains? live-ids (mission-target-id target))))\nsrc/futon2/aif/mission_registry.clj:300:  (let [target-id (mission-target-id target)\nsrc/futon2/aif/mission_registry.clj:369:(defn load-tickets\nsrc/futon2/aif/mission_registry.clj:396:(defn ticket-entry [target]\nsrc/futon2/aif/mission_registry.clj:400:(defn live-ticket-target? [tickets target]\nsrc/futon2/aif/mission_registry.clj:403:(defn ticket-status [target]\nsrc/futon2/aif/mission_registry.clj:404:  (let [live? (boolean (some-> (ticket-entry target) live-ticket?))]\nsrc/futon2/aif/mission_registry.clj:411:    (ticket-status target)\nsrc/futon2/aif/mission_registry.clj:417:  (live-ticket-target? (:tickets state) (:target action)))\nsrc/futon2/aif/mission_registry.clj:423:        {:type :advance-ticket :target (:id t) :weight 1.0\nsrc/futon2/aif/actuator_a3.clj:141:  (missions/mission-target-id mission-id))\ntest/futon2/aif/enumeration_completeness_test.clj:154:    (let [r (ec/completeness-record [(candidate \"M-live\") {:action {:type :advance-ticket :target \"T-one\"}}] {:code-root *root*})]\ntest/futon2/aif/interpretation_job_test.clj:26:                 (= scenario :ticket) (assoc :type :advance-ticket :target \"T-receipt-construction\"))\n-rw-rw-r-- 1 joe joe 140M Sep 12 19:55 data/wm-trace/wm-trace-2026-09-12.edn\n"
+          ]
+        },
+        {
+          "seq": 7,
+          "type": "tool_use",
+          "at": "2026-09-15T18:10:42.093673248Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc \"sed -n '1,110p' src/futon2/aif/machine_belief.clj; sed -n '170,440p' src/futon2/aif/mission_registry.clj;"
+          ],
+          "output": [
+            "(ns futon2.aif.machine-belief\n  \"Single-entity bridge from the stored categorical belief to MachineModel v1.\n   This namespace reads the post-filter, post-carry belief; it never repairs,\n   normalises, averages, or otherwise rewrites it.\"\n  (:require [futon2.aif.belief :as belief]\n            [futon2.aif.machine-model :as machine-model]))\n\n(def state-support\n  \"The declared order of MachineBeliefState.Status.all.\"\n  [:spawned :refined :strengthened :addressed :falsified :foreclosed :reopened])\n\n(defn- refus \u2026[trimmed]\u2026 transcript.txt\nholes/labs/wm-contract/runs/row-2-admission-2026-09-12/precision-receipts.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic\nholes/labs/wm-contract/runs/U22-mission-epistemic/05-rank-moves.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/01-candidates.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/02-weights.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/03-before.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/README.md\nholes/labs/wm-contract/runs/U22-mission-epistemic/06-field-census.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/07-doability-live.edn\nholes/labs/wm-contract/runs/U22-mission-epistemic/04-after.edn\nholes/labs/wm-contract/runs/ticket-selection-discovery-2026-09-15\nholes/labs/wm-contract/runs/ticket-selection-discovery-2026-09-15/census.json\nholes/labs/wm-contract/runs/RUN4-enriched-fold-gate-2026-09-12/commissioning.edn\nholes/labs/wm-contract/runs/U24-survey-mission\nholes/labs/wm-contract/runs/U24-survey-mission/01-field.edn\nholes/labs/wm-contract/runs/U24-survey-mission/06-planted-identify-demo.edn\nholes/labs/wm-contract/runs/U24-survey-mission/03-survey-readings.edn\nholes/labs/wm-contract/runs/U24-survey-mission/02-phase-readings.edn\nholes/labs/wm-contract/runs/U24-survey-mission/04-arms.edn\nholes/labs/wm-contract/runs/U24-survey-mission/README.md\nholes/labs/wm-contract/runs/U24-survey-mission/05-ambiguity-rerun.edn\nholes/labs/wm-contract/runs/U24-survey-mission/07-discharge-shape.edn\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/registry-readback.json\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-f2-parens.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-authority-regression.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-mission-regression.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-authority-kondo-final.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-tests-final.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-guardrail-tests.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-http-tests.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-f3-parens.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-forward-regression.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-wm-regression.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-kondo-initial.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-kondo-final.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-selector-regression.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-tests-third.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-authority-parens-final.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-tests.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/receipt.json\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/IMPLEMENTATION.md\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/completeness-readback.json\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-enumeration-tests.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/futon2.diff\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/futon3c.diff\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-f3-kondo.log\nholes/labs/wm-contract/runs/ticket-selection-2026-09-15/ticket-http-final.log\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/check-parens.txt\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/test.txt\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/implementation-note.md\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/clj-kondo.txt\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/lead-review.md\nholes/labs/wm-contract/runs/row-19-commission-retention-2026-09-13/execution-receipts.edn\n"
+          ]
+        },
+        {
+          "seq": 8,
+          "type": "tool_use",
+          "at": "2026-09-15T18:10:51.848011431Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc \"sed -n '1,110p' holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/readback.clj; sed -n '1,80p' sr"
+          ],
+          "output": [
+            "(require '[clojure.edn :as edn]\n         '[clojure.java.io :as io]\n         '[futon2.aif.machine-belief :as mb]\n         '[futon2.aif.machine-model :as machine-model])\n(import '[java.security MessageDigest])\n\n(def input (edn/read-string (slurp \"holes/labs/wm-contract/runs/row-7-belief-state-2026-09-12/input.edn\")))\n(def context-base {:model {:id \"wm-production\" :revision \"2026-09-12-row-7\"}\n                   :state-support mb/state-support :mode :single-entity})\n\n(defn sha256 [path]\n  (let [digest (.digest \u2026[trimmed]\u2026 box, and exposes them as addressable targets for the WM's\n   action layer.\n\n   Honest scope: file-backed and heuristic. The adapter reads mission docs'\n   `Status:` line rather than a typed substrate. This is still an honest\n   improvement over the prior state where `:open-mission` was permanently\n   gated and only surfaced as `:learn-action-class`.\n\n   The interface (`load-missions` / `open-missions` /\n   `can-propose? :open-mission` / the enumerator proposer) is the swap\n   target for a richer substrate if mission metadata becomes canonical\n   elsewhere.\"\n  (:require [clojure.java.io :as io]\n            [clojure.string :as str]\n            [futon2.aif.action-proposer :as ap]\n            [futon2.aif.forward-model :as fm])\n  (:import (java.io File)))\n\n(def ^:private default-code-root\n  (str (System/getProperty \"user.home\") \"/code\"))\n\n(def ^:private mission-path-pattern\n  #\".*/holes/missions/(M-[^/]+)\\.md$\")\n\n(def ^:private status-line-pattern\n  #\"(?i)^\\s*(?:[-*]\\s*)?(?:#+\\s*)?(?:\\*\\*)?Status:?(?:\\*\\*)?\\s*:?\\s*(.+)$\")\n\n(def ^:private unchecked-task-pattern\n  #\"^\\s*[-*]\\s+\\[\\s\\]\\s+\\S.*$\")\n\n(def ^:private explicit-work-marker-pattern\n  #\"(?i)(?:^|[\\s`(*_:-])(?:TODO|FIXME|XXX|TBD)(?:$|[\\s`),.:;_-])|(?:\\b(?:open\\s+)?(?:hole|sorry)\\s*:)|\\bsorry/[-A-Za-z0-9_.]+\")\n\n(def ^:private pending-lifecycle-pattern\n  #\"(?i)\\b(?:HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE)\\b[^.\\n;|]*\\b(?:pending|next|open|blocked|active|in[ -]progress|remaining|not yet|needed)\\b|\\b(?:pending|next|open|blocked|active|in[ -]progress|remaining|not yet|needed)\\b[^.\\n;|]*\\b(?:HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE)\\b\")\n\n(def ^:private open-section-heading-pattern\n  #\"(?i)^\\s*#{2,6}\\s+(?:open questions?|open tasks?|remaining work|remaining tasks?|pending work|next steps)\\b.*$\")\n\n(def ^:private list-item-pattern\n  #\"^\\s*(?:[-*+]\\s+|\\d+[.)]\\s+)\\S.*$\")\n\n(defn- mission-id-from-path\n  [path]\n  (second (re-matches mission-path-pattern path)))\n\n(defn- sandbox-path?\n  [path]\n  (str/includes? path \"/.state/\"))\n\n(def ^:private non-primary-path-patterns\n  \"Patterns that identify non-primary checkout paths \u2014 git worktrees,\n   directory copies, and other sources of duplicate mission-doc hits.\n\n   Each entry is [pattern source-name]. The scan-root fence (non-primary-path?)\n   excludes these BEFORE dedupe, so the path-length sort heuristic in dedupe-by-id\n   is a defense-in-depth fallback, not the sole guard against re-pollution.\n\n   The patterns are deliberately structural (not per-directory-name):\n     - /.worktrees/    \u2014 the standard git worktree location\n     - -health-main    \u2014 futon5's health-check worktree\n     - -index-check    \u2014 futon3c's index-check directory copy\n     - futon3b/        \u2014 futon3b is a separate repo that duplicates some futon3 docs\n\n   Adding a new drift source = adding a pattern here with its source name.\n   The census script (scripts/mission_scan_census.bb) reports which patterns fire\n   so future drift has a one-line explanation.\"\n  [[#\"/\\.worktrees/\" \"git-worktree\"]\n   [#\"-health-main/\" \"health-main-worktree\"]\n   [#\"-index-check/\" \"index-check-copy\"]\n   [#\"futon3b/holes/missions/\" \"futon3b-cross-repo\"]])\n\n(defn- non-primary-path?\n  \"True when PATH is a non-primary checkout (worktree, directory copy, or\n3b25d2d43e3ebbcf19fc6f82e103ae49907b81d0cf009fa8d7884e74ef53e175  data/wm-trace/wm-trace-2026-09-12.edn\n5491a3892c28245735520c4e05e3fb1e2c7c3326954d4a4e51741e53dfe39965  src/futon2/aif/machine_belief.clj\na060ed1384e6bd0a699c1efedc244b6f2b68316292b61b22d3a25a435b47cfc4  src/futon2/aif/mission_registry.clj\nholes/missions/M-aif-a-matrix-faithfulness.md\nholes/missions/M-aif-gap-epistemic-affordance.md\nholes/missions/M-aif-policy-conditioned-eig.md\nholes/missions/M-f11-find-production-successor.md\nholes/missions/M-formal-war-machine.md\nholes/missions/M-reflective-discipline.md\nholes/missions/M-run-produces-its-own-brief.md\nholes/missions/M-u88-contextual-preferences.md\nholes/missions/M-wm-aif-policy-grain-compliance.md\nholes/missions/M-wm-strategic-mission-selection.md\nholes/missions/M-wm-tripwires.md\nholes/missions/M-zaif-harness-v1.md\n"
+          ]
+        },
+        {
+          "seq": 9,
+          "type": "text",
+          "at": "2026-09-15T18:11:03.486961685Z",
+          "text": "The retained trace pin is stable, and the row-7 reader\u2019s validation order lets the commission distinguish a valid model context ending specifically at `:missing-entity` from an earlier context/schema refusal. I\u2019m now selecting registry-backed mission and ticket IDs and checking whether the historical trace itself records them as candidate/selected targets, rather than merely assuming today\u2019s registry membership implies historical selection."
+        },
+        {
+          "seq": 10,
+          "type": "tool_use",
+          "at": "2026-09-15T18:11:12.739759324Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc \"clojure -M -e '(require (quote [clojure.edn :as edn]) (quote [clojure.java.io :as io]) (quote [futon2.aif"
+          ],
+          "output": [
+            "{:last-ts \"2026-09-12T17:28:09.498448087Z\", :last-mu-index 3, :last-mu-count 417, :ranked-target-count 145, :open-mission-sample {:id \"M-kangaroo\", :path \"/home/joe/code/futon3c/holes/missions/M-kangaroo.md\", :status-class :active}, :ticket-ranked? false, :selected-targets [\"M-shared-memory-control-build-test\"], :ticket-in-last-mu? false, :mission-in-last-mu? false, :mission-ranked? true, :mu-forms 4, :forms 4, :live-ticket-sample {:id \"T-car3-phase2-impl\", :path \"/home/joe/code/futon3c/holes/tickets/T-car3-phase2-impl.md\", :status-class :live}}\n"
+          ]
+        },
+        {
+          "seq": 11,
+          "type": "tool_use",
+          "at": "2026-09-15T18:11:36.907738864Z",
+          "tools": [
+            "bash"
+          ],
+          "previews": [
+            "bash /bin/bash -lc \"clojure -M -e '(require (quote [futon2.aif.mission-registry :as mr])) (let [mid \\\"M-shared-memory-control"
+          ],
+          "output": [
+            "{:mission {:id \"M-shared-memory-control-build-test\", :path \"/home/joe/code/futon3c/holes/missions/M-shared-memory-control-build-test.md\", :status-class :unknown}, :tickets [{:id \"T-car3-phase2-impl\", :path \"/home/joe/code/futon3c/holes/tickets/T-car3-phase2-impl.md\", :status-class :live} {:id \"T-fail-invoke-error\", :path \"/home/joe/code/futon3c/holes/tickets/T-fail-invoke-error.md\", :status-class :live} {:id \"T-watu-replay-layer\", :path \"/home/joe/code/futon3c/holes/tickets/T-watu-replay-layer.md\", :status-class :live} {:id \"T-cx-new-blocks-emacs\", :path \"/home/joe/code/futon3c/holes/tickets/T-cx-new-blocks-emacs.md\", :status-class :live} {:id \"T-fail-agent-not-found\", :path \"/home/joe/code/futon3c/holes/tickets/T-fail-agent-not-found.md\", :status-class :live} {:id \"T-fail-invoke-interrupted\", :path \"/home/joe/code/futon3c/holes/tickets/T-fail-invoke-interrupted.md\", :status-class :live} {:id \"T-fail-operator-cancelled\", :path \"/home/joe/code/futon3c/holes/tickets/T-fail-operator-cancelled.md\", :status-class :live} {:id \"T-mq7-unaddressable-caller\", :path \"/home/joe/code/futon3c/holes/tickets/T-mq7-unaddressable-caller.md\", :status-class :live} {:id \"T-wm-wrong-corpus-26082026\", :path \"/home/joe/code/futon3c/holes/tickets/T-wm-wrong-corpus-26082026.md\", :status-class :live} {:id \"T-fail-no-execution-evidence\", :path \"/home/joe/code/futon3c/holes/tickets/T-fail-no-execution-evidence.md\", :status-class :live}], :counts [242 34]}\n"
+          ]
+        },
+        {
+          "seq": 12,
+          "type": "cancelled",
+          "at": "2026-09-15T18:11:44.101131855Z",
+          "code": "operator-cancelled",
+          "message": "Cancelled by codex-28: Joe explicitly pauses dispatch pending at least five narrative walkthroughs and conceptual review; this P1 commission is withdrawn."
+        }
+      ],
+      "mode": "work",
+      "delivery": {
+        "status": "pending"
+      },
+      "state": "delivering",
+      "invocation/model": null,
+      "trace-id": null,
+      "result-summary": null,
+      "result": null,
+      "auto-bellback": {
+        "sent?": true,
+        "bell-job-id": "auto-bellback-invoke-1789495802456-21214-1508b397",
+        "at": "2026-09-15T18:11:44.101112950Z"
+      },
+      "terminal-message": "Cancelled by codex-28: Joe explicitly pauses dispatch pending at least five narrative walkthroughs and conceptual review; this P1 commission is withdrawn.",
+      "finished-at": "2026-09-15T18:11:44.101112950Z",
+      "created-at": "2026-09-15T18:10:02.456270510Z",
+      "terminal-code": "operator-cancelled",
+      "surface": "bell"
+    }
+  }
+}

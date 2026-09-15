@@ -1,0 +1,14 @@
+{
+  "operator": "Joe",
+  "source": "emacs-repl, current turn",
+  "instruction": "At least five clear narrative walkthroughs before dispatch; five blog posts at site root; existing zai-7/zai-8 cascade example work may continue.",
+  "dispatch-state": "held; publication alone does not resume commissioning",
+  "withdrawn-jobs": [
+    "invoke-1789495801060-21213-286d79a5",
+    "invoke-1789495802456-21214-1508b397"
+  ],
+  "verified-terminal-state": "cancelled / operator-cancelled for both",
+  "series-url": "https://zone.hyperreal.enterprises/2026-09-15-wm-walkthroughs.html",
+  "post-count": 5,
+  "status": "first drafts for conceptual review, no ratification or implementation credit"
+}
