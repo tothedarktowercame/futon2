@@ -1990,7 +1990,9 @@
                 "Write stdout/stderr bytes to flat companion files and reference them with :stdout-file/:stderr-file.\n"
                 "For a repair target, capture its immutable ORIGINAL obligation record bytes under data/wm-repair-obligations/ as :before and the DERIVED-STATE readback record as :after (repair-derived-state output bytes; still :open is honest, but capture the readback record, never a second copy of the finding -- identical before/after bytes refuse :revision-unchanged, which orphaned cohort-54 attempt-001).\n"
                 "Name that :wm/entity-revision-pair-v1 file subject-*.edn and set :entity/id to the exact selected repair id.\n"
-                "Source-file revision pairs are supporting evidence: name them supporting-*.edn and use the source artifact id. Both roles use keys [:schema :entity/id :before :after :dimensions].\n")
+                "Source-file revision pairs are supporting evidence: name them supporting-*.edn and use the source artifact id. Both roles use keys [:schema :entity/id :before :after :dimensions].\n"
+                (when measured-acquisition?
+                  (str "MEASURED-ONLY ADDITION: for EVERY repair id under data/wm-repair-obligations/resolutions/ whose resolution embeds a :successor-relation, also deposit a supporting-resolved-*.edn revision pair with :entity/id set to THAT repair id (:before = its findings/ bytes, :after = its resolutions/ bytes; supporting-* naming because it is not the selected target). These retained-store captures are observation evidence for the later boundary; they cannot be reconstructed after the cutoff.\n")))
            :reviewer
            (str "REVIEWER " reviewer " (not author " author ") deposits the same-target standing decision:\n"
                 ":wm/target-standing-decision-v1 keys [:schema :entity/id :decision :decided-by :implementation-author :decided-at :evidence].\n"
