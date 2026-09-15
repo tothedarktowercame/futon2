@@ -190,7 +190,7 @@
            (if (contains? retained target)
              result
              (-> result
-                 (assoc-in [:belief target] (:masses d))
+                 (assoc-in [:belief target] (zipmap (keys (:masses d)) (repeat (/ 1.0 7))))
                  (assoc-in [:lineage target]
                            {:introduced-at timestamp :admission admission
                             :D {:name (:name d) :revision (:revision value)

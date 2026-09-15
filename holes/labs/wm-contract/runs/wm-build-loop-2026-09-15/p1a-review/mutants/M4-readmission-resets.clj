@@ -187,7 +187,7 @@
             timestamp (:timestamp tick-context)]
         (reduce-kv
          (fn [result target admission]
-           (if (contains? retained target)
+           (if false
              result
              (-> result
                  (assoc-in [:belief target] (:masses d))

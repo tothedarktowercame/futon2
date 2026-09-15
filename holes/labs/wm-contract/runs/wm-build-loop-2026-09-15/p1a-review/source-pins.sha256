@@ -1,0 +1,3 @@
+66fe620394845664541dc8fc59f42b9e5953add6f080abb07392671c4c2f4aed  src/futon2/aif/work_target_belief.clj
+59321d9baf65ef86ea87c49f660557875bced78f4eb890f8e32477c6c664a10e  test/futon2/aif/work_target_belief_test.clj
+5491a3892c28245735520c4e05e3fb1e2c7c3326954d4a4e51741e53dfe39965  src/futon2/aif/machine_belief.clj

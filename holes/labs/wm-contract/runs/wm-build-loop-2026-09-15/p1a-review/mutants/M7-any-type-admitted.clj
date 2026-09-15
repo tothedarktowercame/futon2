@@ -97,7 +97,7 @@
                    ;; id is another string, and admitting it would give one
                    ;; mission two beliefs. It waits for a declared alias mapping.
                    reason (cond
-                            (not (#{:advance-mission :advance-ticket} type))
+                            false
                             :not-a-work-target-type
                             (and (some? id) (not= id target)) :target-alias-undeclared
                             (nil? entry) :not-registry-eligible)]

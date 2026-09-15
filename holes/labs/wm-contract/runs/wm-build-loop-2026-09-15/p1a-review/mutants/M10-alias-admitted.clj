@@ -99,7 +99,7 @@
                    reason (cond
                             (not (#{:advance-mission :advance-ticket} type))
                             :not-a-work-target-type
-                            (and (some? id) (not= id target)) :target-alias-undeclared
+                            false :target-alias-undeclared
                             (nil? entry) :not-registry-eligible)]
                (cond
                  reason (update result :not-admitted conj

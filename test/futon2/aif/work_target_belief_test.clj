@@ -35,7 +35,7 @@
 
 (defn kind [result] (get-in result [:refusal :kind]))
 (defn introduce [declaration cs]
-  (wt/carry-and-introduce declaration {:status :absent-pre-genesis}
+  (wt/carry-and-introduce declaration {:status :established-no-snapshots}
                           (wt/admissions cs snapshot t0) t0))
 (defn context [state target]
   (assoc (:model-context state) :entity/id target
@@ -93,7 +93,12 @@
       (let [r (wt/carry-and-introduce d p a t0)]
         (is (= :carry-missing (kind r)))
         (is (not (contains? r :belief)))
-        (is (not (contains? r :lineage)))))))
+        (is (not (contains? r :lineage)))))
+    (testing "a store that was never established is not an empty established one"
+      (let [r (wt/carry-and-introduce d {:status :model-not-established} a t0)]
+        (is (= :invalid-predecessor (kind r)))
+        (is (= :model-not-established (:predecessor-status r)))
+        (is (not (contains? r :belief)))))))
 
 (deftest later-introduction-does-not-change-earlier-target
   (let [d (wt/read-declaration)
@@ -162,12 +167,15 @@
                     {:type :advance-mission :target (keyword (:id mission))}])
         result (wt/admissions cs snapshot t0)]
     (is (:ok result))
-    (is (= #{(:id mission) (:id ticket) endpoint} (set (keys (:admitted result)))))
+    (is (= #{(:id mission) (:id ticket)} (set (keys (:admitted result)))))
     (is (= {:type :advance-mission :registry-id (:id mission)
             :registry-pin (select-keys mission [:path :sha256 :status-class])
             :admitted-at (:timestamp t0)}
-           (get-in result [:admitted endpoint])))
-    (is (= {:not-a-work-target-type 2 :not-registry-eligible 3}
+           (get-in result [:admitted (:id mission)])))
+    (is (= [{:candidate {:type :advance-mission :target endpoint}
+             :reason :target-alias-undeclared :resolves-to (:id mission)}]
+           (filterv #(= :target-alias-undeclared (:reason %)) (:not-admitted result))))
+    (is (= {:not-a-work-target-type 2 :not-registry-eligible 3 :target-alias-undeclared 1}
            (frequencies (map :reason (:not-admitted result)))))
     (is (= {} (:admitted (wt/admissions [] snapshot t1))))
     (is (= :registry-pin-missing
@@ -177,11 +185,11 @@
       (is (= :registry-unreadable (kind r)))
       (is (not (contains? r :admitted)))
       (is (= r (wt/carry-and-introduce (wt/read-declaration)
-                                      {:status :absent-pre-genesis} r t0))))))
+                                      {:status :established-no-snapshots} r t0))))))
 
 (deftest declaration-pin-and-model-separation
   (let [d (wt/read-declaration) a (wt/admissions candidates snapshot t0)
-        prior {:status :absent-pre-genesis}]
+        prior {:status :established-no-snapshots}]
     (testing "the loader refuses changed bytes, including a harmless newline"
       (let [file (java.io.File/createTempFile "p1a-declaration-" ".edn")]
         (try

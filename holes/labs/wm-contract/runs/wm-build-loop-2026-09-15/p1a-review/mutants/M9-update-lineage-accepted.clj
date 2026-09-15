@@ -168,7 +168,7 @@
            (not= context (:model-context previous)))
       (refusal :model-context-mismatch [:predecessor :state :model-context])
 
-      (some #(and (some? %) (not= :no-admitted-observations (:updates %)))
+      (some #(and (some? %) false)
             (vals (:lineage previous)))
       (refusal :unsupported-update-lineage [:predecessor :state :lineage])
 

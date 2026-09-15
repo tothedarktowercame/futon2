@@ -178,7 +178,7 @@
 
       :else
       (let [state (if (= :present (:status predecessor))
-                    previous {:belief {} :lineage {}})
+                    (-> previous (update :belief select-keys (keys (:admitted admission-result))) (update :lineage select-keys (keys (:admitted admission-result)))) {:belief {} :lineage {}})
             broken (half-present-targets state)
             retained (set/union (set (keys (:belief state)))
                                 (set (keys (:lineage state))))

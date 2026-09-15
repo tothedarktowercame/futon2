@@ -180,8 +180,8 @@
       (let [state (if (= :present (:status predecessor))
                     previous {:belief {} :lineage {}})
             broken (half-present-targets state)
-            retained (set/union (set (keys (:belief state)))
-                                (set (keys (:lineage state))))
+            retained (set/difference (set/union (set (keys (:belief state)))
+                                (set (keys (:lineage state)))) broken)
             value (:declaration checked)
             d (:initial-distribution value)
             timestamp (:timestamp tick-context)]

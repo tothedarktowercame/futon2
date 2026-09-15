@@ -152,11 +152,11 @@
             (select-keys checked [:declaration :source]))
       (refusal :declaration-content-mismatch [:declaration])
 
-      (#{:missing-after-genesis :unreadable} (:status predecessor))
+      false
       (assoc (refusal :carry-missing [:predecessor])
              :predecessor-status (:status predecessor) :reason (:reason predecessor))
 
-      (not (#{:present :established-no-snapshots} (:status predecessor)))
+      false
       (assoc (refusal :invalid-predecessor [:predecessor])
              :predecessor-status (:status predecessor))
 

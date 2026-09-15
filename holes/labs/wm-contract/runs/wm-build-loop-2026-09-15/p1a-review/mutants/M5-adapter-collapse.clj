@@ -218,7 +218,7 @@
     (cond
       (not (contains? (set registry-ids) target))
       (refusal :entity-outside-registry [:target target])
-      (not seen?) (refusal :registered-not-admitted [:target target])
+      (not seen?) (refusal :entity-outside-registry [:target target])
       (not (and row? lineage?)) (refusal :carry-missing [:target target])
       (not= target (:entity/id model-context))
       (refusal :entity-context-mismatch [:model-context :entity/id])
