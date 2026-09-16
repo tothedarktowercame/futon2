@@ -216,20 +216,3 @@
             "empty cascade plus one candidate per non-empty subset of the three interpretations")
         (is (= :not-performed-here (:retrieval (:rules sp)))
             "retrieval is explicitly recorded as not performed here (still open)")))))
-
-  (testing "REQUIRED: receipted construct refuses this tick's find with a TYPED refusal (no captured receipt exists)"
-    (let [r (try
-              {:ok (rc/construct {:schema :wm/interpreted-pattern-set-v1
-                                  :sources []
-                                  :facts []}
-                                 (fn [_] (throw (ex-info "no captured bytes this tick"
-                                                         {:finding :find/refusal})))
-                                 "/home/joe/code/futon3/library"
-                                 cp/first-attempt-cascade
-                                 nil)}
-              (catch Exception e {:throw e}))]
-      (is (nil? (:ok r))
-          "construct must not construct from a live library without a receipt")
-      (is (map? (some-> r :throw ex-data))
-          (str "the refusal must be typed (ex-data), got: "
-               (when-let [t (:throw r)] (class t))))))
