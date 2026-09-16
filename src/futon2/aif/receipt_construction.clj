@@ -50,71 +50,71 @@
       (recur (merge facts (:effect (get interpretations id))) (conj acted id))
       acted)))
 
-(defn- same-target-close [identity close-file]
-  (let [closed (read-one close-file)
+(defn- history-read! [file]
+  (try (read-one file)
+       (catch Exception e
+         (throw (ex-info "History record cannot be read"
+                         {:interpretation/refusal :interpretation/invalid-receipt
+                          :construction/refusal :history-discovery-invalid
+                          :reason :unreadable-or-malformed-record :file (str file)} e)))))
+
+(defn- history-time! [value file]
+  (try (Instant/parse value)
+       (catch Exception e
+         (throw (ex-info "History ordering is unavailable"
+                         {:interpretation/refusal :interpretation/invalid-receipt
+                          :construction/refusal :history-discovery-invalid
+                          :reason :ordering-unavailable :file (str file) :value value} e)))))
+
+(defn- history-root! [root]
+  (need! (or (instance? java.io.File root) (and (string? root) (not (str/blank? root))))
+         :history-discovery-invalid {:reason :invalid-search-root :file (str root)})
+  (try (.getCanonicalPath (io/file root))
+       (catch java.io.IOException e
+         (throw (ex-info "History root cannot be resolved"
+                         {:interpretation/refusal :interpretation/invalid-receipt
+                          :construction/refusal :history-discovery-invalid
+                          :reason :root-unresolvable :file (str root)} e)))))
+
+(defn- history-children! [directory]
+  (let [children (.listFiles (io/file directory))]
+    (need! (some? children) :history-discovery-invalid
+           {:reason :root-or-directory-unreadable :file (str directory)})
+    children))
+
+(defn- closed-candidate! [close-file]
+  (let [closed (history-read! close-file)
         construction-file (io/file (.getParentFile (io/file close-file)) "003-construction.edn")
-        construction (when (.exists construction-file) (read-one construction-file))
-        target (get-in identity [:occurrence :action/value :target])
+        construction (when (.exists construction-file) (history-read! construction-file))
         occurrence (get-in closed [:payload :close-retention :occurrence])
-        named-target (get-in construction [:payload :judgment :mission])]
-    (when (and (contains? (get-in construction [:payload :judgment]) :cascade)
-               (= target (or (get-in occurrence [:action/value :target]) named-target))
-               (.isBefore (Instant/parse (:recorded-at closed))
-                          (Instant/parse (get-in identity [:occurrence :action-at]))))
-      {:closed closed :construction construction :close-file close-file :construction-file construction-file
-       :occurrence occurrence
-       ;; A construction written before receipt mode (the old cascade-lane
-       ;; constructor) carries no ruled CascadeDiff.
-       :legacy? (not (contains? (get-in construction [:payload :judgment]) :receipted-construction))})))
+        judgment (get-in construction [:payload :judgment])
+        targets (remove nil? [(get-in occurrence [:action/value :target])
+                              (:mission judgment)
+                              (get-in judgment [:cascade :selected-action :target])
+                              (get-in judgment [:receipted-construction :identity :occurrence :action/value :target])])
+        at (history-time! (:recorded-at closed) close-file)]
+    (when-let [retained-time (get-in closed [:payload :close-retention :closed-at])]
+      (need! (= at (history-time! retained-time close-file)) :history-discovery-invalid
+             {:reason :contradictory-ordering :file (str close-file)}))
+    (need! (and (seq targets) (every? #(and (string? %) (not (str/blank? %))) targets))
+           :history-discovery-invalid {:reason :target-unavailable :file (str close-file)})
+    (need! (apply = targets) :history-discovery-invalid
+           {:reason :contradictory-targets :file (str close-file) :targets (vec targets)})
+    {:closed closed :construction construction :close-file close-file :construction-file construction-file
+     :occurrence occurrence :target (first targets) :closed-at at}))
 
-(defn previous!
-  "Most recent closed construction on this target across explicit physical roots.
-  A legacy predecessor (the old constructor, no pinned CascadeDiff) cannot supply
-  a ruled cascade, so the first receipted construction on that target starts from
-  first-attempt-cascade and records the legacy files it supersedes. A receipted
-  predecessor that fails validation still refuses."
-  [identity roots]
-  (let [roots (vec (distinct (map #(.getCanonicalPath (io/file %)) roots)))
-        candidates (for [root roots
-                         cohort (or (.listFiles (io/file root)) []) :when (.isDirectory cohort)
-                         attempt (or (.listFiles cohort) []) :when (.isDirectory attempt)
-                         :let [f (io/file attempt "007-closed.edn")]
-                         :when (.isFile f)
-                         :let [x (same-target-close identity f)] :when x] x)
-        ordered (sort-by #(get-in % [:closed :recorded-at]) candidates)
-        _ (when (and (> (count ordered) 1)
-                     (= (get-in (last ordered) [:closed :recorded-at])
-                        (get-in (last (butlast ordered)) [:closed :recorded-at])))
-            (need! false :ambiguous-previous-construction {}))
-        {:keys [closed construction close-file construction-file] :as latest} (last ordered)]
-    (cond
-      (not latest)
-      {:cascade policy/first-attempt-cascade :admitted {}
-       :provenance {:status :none :reason :no-earlier-target-construction :searched-roots (vec roots)}
-       :admission-reason :first-attempt-no-admissions}
-
-      ;; The latest earlier construction predates receipt mode, so it cannot
-      ;; supply a ruled cascade (precedence, acting order, attributed
-      ;; admissions). Declare the reset and record what it supersedes.
-      (:legacy? latest)
-      {:cascade policy/first-attempt-cascade :admitted {}
-       :provenance {:status :legacy-predecessor-unrepresentable
-                    :searched-roots (vec roots)
-                    :recorded-at (:recorded-at closed)
-                    :construction-file (.getCanonicalPath (io/file construction-file))
-                    :construction-sha256 (evidence/sha256 (bytes construction-file))
-                    :close-file (.getCanonicalPath (io/file close-file))
-                    :close-sha256 (evidence/sha256 (bytes close-file))}
-       :admission-reason :legacy-predecessor-no-ruled-admissions}
-
-      :else
+(defn- validated-previous! [{:keys [closed construction close-file construction-file] :as latest} roots]
+  (try
       (let [_ (need! (:occurrence latest) :previous-occurrence-unavailable {:file (str close-file)})
             block (get-in closed [:payload :close-retention])
             m (get-in closed [:payload :close-evidence-manifest])
             retained (get-in construction [:payload :judgment :receipted-construction])
+            _ (need! (map? (get-in construction [:payload :judgment :cascade]))
+                     :previous-cascade-unavailable {:file (str construction-file)})
+            _ (need! (map? retained) :previous-cascade-carrier-unavailable {:file (str construction-file)})
             prior-id (:identity retained)
             start-file (io/file (.getParentFile (io/file close-file)) "001-time-step.edn")
-            start (read-one start-file)
+            start (history-read! start-file)
             root (.getCanonicalPath (.getParentFile (.getParentFile (.getParentFile (io/file close-file)))))
             d (:cascade-diff retained)]
         (retention/validate-retention-block block)
@@ -124,7 +124,6 @@
           (let [entry (first (filter #(= (.getCanonicalPath (io/file (:source-path %))) (.getCanonicalPath file)) (:entries m)))]
             (need! (and entry (= (:sha256 entry) (evidence/sha256 (bytes file))))
                    :previous-manifest-source-mismatch {:file (str file)})))
-        (need! retained :previous-cascade-carrier-unavailable {:file (str construction-file)})
         (evidence/validate-identity prior-id)
         (need! (and (= (:occurrence prior-id) (:occurrence block))
                      (= (:semantic-epoch prior-id) (get-in start [:payload :judgment :semantic-epoch]))
@@ -148,7 +147,46 @@
          :provenance {:identity prior-id :searched-roots roots :construction-file (.getCanonicalPath construction-file)
                       :construction-sha256 (evidence/sha256 (bytes construction-file))
                       :close-file (.getCanonicalPath (io/file close-file))
-                      :close-sha256 (evidence/sha256 (bytes close-file))}}))))
+                      :close-sha256 (evidence/sha256 (bytes close-file))}})
+    (catch clojure.lang.ExceptionInfo e
+      (throw (ex-info "Previous construction validation refused"
+                      (merge {:interpretation/refusal :interpretation/invalid-receipt
+                              :construction/refusal :previous-evidence-invalid}
+                             (ex-data e)
+                             {:history/close-file (str close-file)
+                              :history/construction-file (str construction-file)}) e)))))
+
+(defn previous!
+  "Latest relevant closed history in explicit roots, or established absence.
+  Damaged or unclassifiable history refuses; missing modern evidence never resets."
+  [identity roots]
+  (let [target (get-in identity [:occurrence :action/value :target])
+        _ (need! (and (string? target) (not (str/blank? target)))
+                 :history-discovery-invalid {:reason :current-target-unavailable})
+        before (history-time! (get-in identity [:occurrence :action-at]) :current-identity)
+        roots (vec (distinct (map history-root! roots)))
+        _ (need! (seq roots) :history-discovery-invalid {:reason :search-roots-unavailable})
+        candidates (doall (for [root roots
+                               cohort (history-children! root) :when (.isDirectory cohort)
+                               attempt (history-children! cohort) :when (.isDirectory attempt)
+                               :let [f (io/file attempt "007-closed.edn")]
+                               :when (.exists f)]
+                           (closed-candidate! f)))
+        earlier (filter #(.isBefore ^Instant (:closed-at %) before) candidates)
+        ;; Exclusion as unrelated requires current evidence, not an unverified
+        ;; mission name that could conceal damaged matching history.
+        _ (doseq [candidate earlier :when (not= target (:target candidate))]
+            (validated-previous! candidate roots))
+        ordered (sort-by :closed-at (filter #(= target (:target %)) earlier))
+        _ (when (and (> (count ordered) 1)
+                     (= (:closed-at (last ordered)) (:closed-at (last (butlast ordered)))))
+            (need! false :ambiguous-previous-construction
+                   {:files (mapv #(str (:close-file %)) (take-last 2 ordered))}))]
+    (if-let [latest (last ordered)]
+      (validated-previous! latest roots)
+      {:cascade policy/first-attempt-cascade :admitted {}
+       :provenance {:status :none :reason :no-earlier-target-construction :searched-roots roots}
+       :admission-reason :first-attempt-no-admissions})))
 
 (defn history-roots [identity]
   (vec (distinct (cons (:data-root identity)

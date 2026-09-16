@@ -1,5 +1,6 @@
 (ns futon2.aif.receipt-construction-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [clojure.set :as set]
             [clojure.java.io :as io]
             [futon2.aif.close-retention :as retention]
@@ -126,7 +127,7 @@
                (:construction/refusal (refusal #(construction/previous! current [r1 r2]))))))
       (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
 
-(deftest legacy-predecessor-resets-with-recorded-provenance
+(deftest old-shaped-predecessor-refuses-current-evidence-gap
   ;; Real July closes carry no close-retention, and their constructions no
   ;; :receipted-construction (futon2/data/wm-full-loop/wm-outer-loop-41-v1/attempt-043).
   (let [temp (.toFile (Files/createTempDirectory "receipt-legacy" (make-array FileAttribute 0)))
@@ -143,13 +144,9 @@
                                   {:run-id (str (UUID/randomUUID)) :cohort-id ":fixture" :attempt-id "attempt-002"
                                    :selected-action {:type :advance-mission :target "M-history"}
                                    :now #(Instant/parse "2026-09-15T12:00:00Z") :uuid-fn #(UUID/randomUUID)})}
-            previous (construction/previous! current [temp])]
-        (is (= policy/first-attempt-cascade (:cascade previous)))
-        (is (= {} (:admitted previous)))
-        (is (= :legacy-predecessor-unrepresentable (get-in previous [:provenance :status])))
-        (is (= :legacy-predecessor-no-ruled-admissions (:admission-reason previous)))
-        (is (= (evidence/sha256 (Files/readAllBytes (.toPath (io/file dir "003-construction.edn"))))
-               (get-in previous [:provenance :construction-sha256]))))
+            rejected (refusal #(construction/previous! current [temp]))]
+        (is (= :previous-occurrence-unavailable (:construction/refusal rejected)))
+        (is (= (str (io/file dir "007-closed.edn")) (:history/close-file rejected))))
       (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
 
 (deftest before-arm-reuses-the-recorded-acting-order
@@ -167,3 +164,59 @@
     (is (= [:other/pattern] (:acting-order-before d)))
     (is (= [:other/pattern] (:precedence-before d)))
     (is (= [id] (:acting-order-after d)))))
+
+(defn rewrite-history! [file f]
+  (spit file (pr-str (f (edn/read-string (slurp file))))))
+
+(deftest damaged-latest-history-never-resets-or-falls-back
+  (doseq [[label damage expected]
+          [[:carrier-removed #(rewrite-history! (:construction-file %) (fn [x] (update-in x [:payload :judgment] dissoc :receipted-construction))) :previous-cascade-carrier-unavailable]
+           [:carrier-malformed #(rewrite-history! (:construction-file %) (fn [x] (assoc-in x [:payload :judgment :receipted-construction] {}))) :previous-manifest-source-mismatch]
+           [:cascade-removed #(rewrite-history! (:construction-file %) (fn [x] (update-in x [:payload :judgment] dissoc :cascade))) :previous-cascade-unavailable]
+           [:construction-missing #(Files/delete (.toPath (:construction-file %))) :previous-cascade-unavailable]
+           [:manifest-missing #(rewrite-history! (:close-file %) (fn [x] (update x :payload dissoc :close-evidence-manifest))) :previous-evidence-invalid]
+           [:manifest-corrupt #(rewrite-history! (:close-file %) (fn [x] (assoc-in x [:payload :close-evidence-manifest] {}))) :previous-evidence-invalid]
+           [:occurrence-missing #(rewrite-history! (:close-file %) (fn [x] (update-in x [:payload :close-retention] dissoc :occurrence))) :previous-occurrence-unavailable]
+           [:occurrence-corrupt #(rewrite-history! (:close-file %) (fn [x] (assoc-in x [:payload :close-retention :occurrence] {}))) :previous-evidence-invalid]
+           [:target-conflict #(rewrite-history! (:construction-file %) (fn [x] (assoc-in x [:payload :judgment :mission] "M-other"))) :history-discovery-invalid]
+           [:order-missing #(rewrite-history! (:close-file %) (fn [x] (dissoc x :recorded-at))) :history-discovery-invalid]
+           [:order-conflict #(rewrite-history! (:close-file %) (fn [x] (assoc x :recorded-at "2026-09-16T12:00:00Z"))) :history-discovery-invalid]
+           [:order-corrupt #(rewrite-history! (:close-file %) (fn [x] (assoc x :recorded-at "not-a-time"))) :history-discovery-invalid]
+           [:unreadable-edn #(spit (:close-file %) "{") :history-discovery-invalid]
+           [:multiple-forms #(spit (:close-file %) "{} {}") :history-discovery-invalid]
+           [:missing-targets (fn [x]
+                               (Files/delete (.toPath (:construction-file x)))
+                               (rewrite-history! (:close-file x) #(update-in % [:payload :close-retention] dissoc :occurrence))) :history-discovery-invalid]]]
+    (testing (name label)
+      (let [temp (.toFile (Files/createTempDirectory "receipt-damage" (make-array FileAttribute 0)))
+            older (io/file temp "older") newer (io/file temp "newer")]
+        (try
+          (history-fixture! older :older "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z")
+          (let [latest (history-fixture! newer :newer "2026-09-15T11:00:00Z" "2026-09-15T11:01:00Z")
+                current (assoc-in (:identity latest) [:occurrence :action-at] "2026-09-15T12:00:00Z")]
+            (damage latest)
+            (let [error (refusal #(construction/previous! current [older newer]))]
+              (is (= expected (:construction/refusal error)))
+              (is (or (:file error) (:history/close-file error)))))
+          (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))))
+
+(deftest discovery-establishes-absence-and-compares-instants
+  (let [temp (.toFile (Files/createTempDirectory "receipt-discovery" (make-array FileAttribute 0)))
+        first-root (io/file temp "first") second-root (io/file temp "second")
+        current {:occurrence {:action/value {:target "M-history"} :action-at "2026-09-15T12:00:00Z"}}]
+    (try
+      (is (= :first-attempt-no-admissions (:admission-reason (construction/previous! current [temp]))))
+      (is (= :history-discovery-invalid (:construction/refusal (refusal #(construction/previous! current [(io/file temp "absent")])))))
+      (is (= :history-discovery-invalid (:construction/refusal (refusal #(construction/previous! current [])))))
+      (is (= :history-discovery-invalid (:construction/refusal (refusal #(construction/previous! current [nil])))))
+      (spit (io/file temp "not-a-root") "file")
+      (is (= :history-discovery-invalid (:construction/refusal (refusal #(construction/previous! current [(io/file temp "not-a-root")])))))
+      (history-fixture! first-root :earlier "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z")
+      ;; Valid modern evidence proves this history unrelated to a different target.
+      (is (= :first-attempt-no-admissions
+             (:admission-reason (construction/previous! (assoc-in current [:occurrence :action/value :target] "M-other") [first-root]))))
+      ;; Different textual representations of the same instant remain ambiguous.
+      (history-fixture! second-root :same-time "2026-09-15T10:00:00Z" "2026-09-15T11:01:00+01:00")
+      (is (= :ambiguous-previous-construction
+             (:construction/refusal (refusal #(construction/previous! current [first-root second-root])))))
+      (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))

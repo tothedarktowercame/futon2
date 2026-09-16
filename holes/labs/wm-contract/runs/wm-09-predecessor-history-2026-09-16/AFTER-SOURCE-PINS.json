@@ -1,0 +1,12 @@
+{
+  "head-before-repair-commit": "8beb626cb7ec8371917842ea3b1c67d38a619d1d",
+  "files": {
+    "src/futon2/aif/receipt_construction.clj": "28860aa628c04775ed7ac8ca2523842f3d3dd5453b7fa3e09f5569121c7d0086",
+    "test/futon2/aif/receipt_construction_test.clj": "793129449ea669330c69d895fa4a8f4572a27acd586929ac00229b64b925750a",
+    "src/futon2/aif/interpretation_job.clj": "a85a3d64a9d7d757a6d45f98998a8512147eeab7c47cb599dffc4d26822e7df5",
+    "test/futon2/aif/interpretation_job_test.clj": "5a3dcbbae9534730f9d721588374e1ca667aa98faf79110eda207d2184c34e52",
+    "src/futon2/aif/full_loop_runner.clj": "aa258d744552778a9ee06dfc70470e5cf46f9d9e70a366be519aacf0f982d55f"
+  },
+  "original-receipts": "all nine files from 7e738d53 byte-identical",
+  "packet": "p4ng 55bf8c3 revised WM-09-predecessor-history-1"
+}
