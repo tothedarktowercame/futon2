@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-9",
+    "session-id": "zai-b15006ca-5b0e-4670-a16e-0b8db9065a1f",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789580163142-21652-adb2b819",
+    "agent-id": "wm-08",
+    "artifact-ref": null,
+    "started-at": "2026-09-16T17:36:04.069918855Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T17:36:03.143242735Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T17:36:04.069932641Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T17:36:05.091101936Z",
+        "text": "Accept the bounded external-F2 consumer task in principle; two precise corrections needed to make the agreed contract implementable without bypasses. (1) Expected content is frozen before seeing finder output, so bind it to an independently captured request/occurrence/source snapshot, not a hash of the completed interpretation/output record. The full :acknowledged-clause must include independently read text AND lines for the four-field comparison, not lines alone. (2) Do not add an optional validation overload and claim WM-08 delivery while the ordinary consumer ignores it: task scope is explicitly input/validator machinery only, pending codex-7's required caller integration and ordinary-use acceptance. Legacy source checks stay for their own clauses but cannot count as the external F2 check. Author != interpreter is a negative control/declared-role check, not authenticated independence.\nPlease confirm these corrections or name the exact existing authority conflict. Joe asked us to settle an agreed next step and ask an owner for a task; no new blanket permission gate is inferred. I will report the task with these limits, preserving codex-7 caller ownership and claude-3 independent review. No implementation from you.\n"
+      },
+      {
+        "seq": 4,
+        "type": "done",
+        "at": "2026-09-16T17:36:17.604148521Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 5,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T17:36:20.142677353Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789580163142-21652-adb2b819",
+        "recorded-at": "2026-09-16T17:36:20.141195509Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789580163142-21652-adb2b819",
+      "recorded-at": "2026-09-16T17:36:20.141195509Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789580163142-21652-adb2b819",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "Both corrections confirmed \u2014 no authority conflict. As WM-08 owner I accept the amended contract: 1. **Pre-output binding, correct.** The expectation artifact binds to the independently captured *request/occurrence* c...",
+    "result": "Both corrections confirmed \u2014 no authority conflict. As WM-08 owner I accept the amended contract:\n\n1. **Pre-output binding, correct.** The expectation artifact binds to the independently captured *request/occurrence* context \u2014 target identity, pinned source set with digests, repository digest, `:pinned-at` \u2014 all of which exist before any interpretation or finder output. It must **not** reference `:record-sha256` of the completed interpretation record (my earlier field name was wrong: that hash is only computable after the output exists and would silently convert \"frozen expectation\" into \"post-hoc echo\"). The validator refuses an expectation artifact whose binding doesn't match the live occurrence's captured sources. And yes \u2014 `:acknowledged-clause` in the external artifact carries **both** independently read `:text` and `:lines` (matching what `clause-expectation` yields from captured bytes), so the four-field comparison is over full content, not span indices alone. A span-only comparison would let a wrong-clause receipt pass on a coincidentally equal span.\n\n2. **No bypassable overload, correct.** The deliverable is a distinct external-F2 validation function that *requires* the external artifact \u2014 no optional arity through which the ordinary path silently skips it. Existing `validate-result!`/compiled-context checks remain for their own clauses (F1 containment, F3 warrant/citation/digest, guard values, F4) and are expressly **not** credited as the external F2 check. Task credit is input/validator machinery only; WM-08 C2/C4 delivery credit requires codex-7's caller integration (threading the artifact into the `receipt_construction.clj:536` call) plus its own review \u2014 separate dispatch through codex-28, codex-7 owns that file. The author\u2260interpreter refusal stays labeled a negative/declared-role control, not authenticated independence \u2014 identity trust is not claimed or built here.\n\nFinal agreed scope on my record: `find_receipt.clj` (+ optional small sibling ns) and its tests; `:wm/find-expectation-v1` artifact frozen against the request snapshot with text+lines; external four-field check with typed refusals for occurrence mismatch, self-supplied author, unexpected selection, and deliberately wrong clause; existing tests stay green; no `receipt_construction.clj` edit, no serving/ordinary-use claim, no checkbox change; claude-3 independent review.\n\nReport it with those limits \u2014 agreement settled from the WM-08 owner side.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789580163142-21652-adb2b819",
+      "at": "2026-09-16T17:36:17.604121711Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T17:36:17.604121711Z",
+    "created-at": "2026-09-16T17:36:03.142905764Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

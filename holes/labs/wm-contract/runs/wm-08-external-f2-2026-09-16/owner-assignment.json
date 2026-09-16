@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-9",
+    "session-id": "zai-b15006ca-5b0e-4670-a16e-0b8db9065a1f",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789580052636-21647-0b6c8e04",
+    "agent-id": "wm-08",
+    "artifact-ref": null,
+    "started-at": "2026-09-16T17:34:13.331439548Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T17:34:12.636593148Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T17:34:13.331450960Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T17:34:14.062248197Z",
+        "text": "I agree full closure isn't feasible from the proposed run, but cannot advocate the run as stated. A hermetic isolated JVM at a historical snapshot with real dispatch is an offline exercise, not ordinary serving-use evidence; acceptance b2e98483 covers classification only, not the whole find/construction implementation. No new execution authority can be inferred. Combined-image source review itself is read-only and need not touch a serving JVM. Please correct those distinctions.\nLet's settle the concrete F2 blocker instead. Current find_receipt.clj/find obtains ctx from context(record,...), merges its own expectations into emitted receipts, then validate-result! checks against that SAME ctx. receipt_construction.clj calls finder/find with record/read-bytes/library-root/designated, no independent expected-content parameter apparent. Merely commissioning an expectation author before a run does not show this code consumes their artifact.\nPlease inspect context/find/validate-result! and exact canonical F2 law/ruled scope, then give an agreed bounded assignment to establish the missing independently supplied F2 expectation contract and actual consumer (within WM-08 C2/C4/C5). If law treats independence differently, explain with source evidence; do not invent a new requirement. Proposed result: externally authored, source/query/occurrence-bound expected receipt content is consumed by validation, with controls rejecting self-supplied expectations, source/occurrence mismatch, and a de \u2026[trimmed]"
+      },
+      {
+        "seq": 4,
+        "type": "done",
+        "at": "2026-09-16T17:35:37.032196400Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 5,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T17:35:39.372129794Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789580052636-21647-0b6c8e04",
+        "recorded-at": "2026-09-16T17:35:39.370396470Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "work",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789580052636-21647-0b6c8e04",
+      "recorded-at": "2026-09-16T17:35:39.370396470Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789580052636-21647-0b6c8e04",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "Assessment done \u2014 read `find_receipt.clj` (`context`, `find`, `validate-result!`), the `receipt_construction.clj` call site (:535\u2013536), and the canonical law: `DarkTower/WarMachine/Holes.lean` Item 20a \u2014 `FindReceiptE...",
+    "result": "Assessment done \u2014 read `find_receipt.clj` (`context`, `find`, `validate-result!`), the `receipt_construction.clj` call site (:535\u2013536), and the canonical law: `DarkTower/WarMachine/Holes.lean` Item 20a \u2014 `FindReceiptExpectation` / `FindResult.contentF2`, with the ruling comment: *\"independently supplied expected receipt content. Neither the pattern identity nor the actual receipt supplies this expectation by definition.\"*\n\n**What the law actually requires (so we don't invent or under-read):** the Lean statement takes `expected : P \u2192 FindReceiptExpectation` as an *external argument* and constrains that neither the pattern identity nor the actual receipt supplies it. It does **not** mandate runtime author-identity policing \u2014 that's the cascade's distinguishing control (\"reject self-supplied F2 expectations\"), not a law obligation on the validator. So the assignment must add an external-expectation *consumer*, not an identity-enforcement apparatus.\n\n**Confirmed gap, precisely sized:** your reading is correct with one refinement. In `context` (find_receipt.clj:222+), expectations are compiled from the interpretation **record's own cited clause spans**, then byte-anchored (`clause-expectation` refuses spans outside the captured IF block \u2014 so the interpreter cannot invent clause *text*). But the *choice* of span and the *set* of expected patterns are interpreter-derived, and in `find` the expectation fields are merged into the emitted receipts before `validate-result!` compares them against the same ctx \u2014 for exactly the four F2 keys (`:clause-kind :acknowledged-clause :route :as-of`) the comparison is tautological when expectations come from `context`. The genuine byte checks (warrant, citation, digest, guards, F1/F4) are not tautological; the F2 content check is. `receipt_construction.clj:536` passes no expectation artifact. Nothing in the runtime consumes an externally authored expectation. That is the C2/C4 blocker.\n\n**Agreed assignment \u2014 one executable task:**\n\n1. **Expectation artifact schema + loader** (new, in `find_receipt.clj` or a small sibling ns you choose): `:wm/find-expectation-v1` carrying author identity, authored-at, binding `{:record-sha256 :repository-sha256 :target-id}`, and `:expected` map `{pattern-id {:clause-kind :acknowledged-clause {:lines [a b]} :route :as-of}}`. Loader validates: bindings match the actual record/repository occurrence (refuse `:F2 :expectation-occurrence-mismatch`); each cited span is inside the authored IF/HOWEVER block of the captured bytes (reuse `clause-expectation`); wrong-shaped rows refused.\n2. **External F2 check function:** `validate-result!` variant (or an added arity) that, given the loaded external expectations, checks every selected pattern's receipt F2 fields against **them** \u2014 refusing `:F2 :unexpected-selection` for selected-but-not-expected patterns and `:F2 :expectation-mismatch` on any field difference. Do not delete or bypass the existing compiled-context path (it carries the non-tautological checks and is review-accepted); add the external check alongside, and make the four F2-key comparison in the external path non-tautological by construction (it compares bytes-anchored external rows to emitted receipts).\n3. **Controls (tests):** (a) self-supplied expectation \u2014 artifact authored by the record's interpreter identity \u2014 rejected with a typed refusal; (b) expectation bound to a different record/repository/occurrence \u2014 rejected; (c) deliberately wrong expected span (valid but wrong lines) \u2014 rejected; (d) correct external expectations \u2014 accepted. Plus existing find_receipt tests stay green.\n4. **receipt_construction.clj:** I am preserving codex-7's ownership \u2014 **this task does not edit it.** The integration point (threading the artifact into the `finder/find` call at :536) is a named follow-up for codex-7 through codex-28, with the seam you define in step 2 as its contract. If you judge a one-line thread-through is unavoidable to make the controls meaningful, request it through codex-28 explicitly rather than editing.\n5. **Credit scope:** C2/C4 expectation-input machinery only; no serving, no occurrence commissioned, no checkbox change. Independent reviewer: claude-3 (schema-literate, reviewed the classification repair).\n\n**Authority/decisions still needed:** none blocking for steps 1\u20133 beyond Joe's confirmation of this assignment. One semantic decision I'm making as owner, correct me if you disagree: runtime enforcement is *shape and binding* (external artifact, occurrence-bound, byte-anchored, author \u2260 interpreter as a refusal control), not a general identity-trust system \u2014 the Lean law demands independence of *source*, not a credential mechanism.\n\nAgreed from my side as WM-08 owner, pending Joe's confirmation per your framing.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789580052636-21647-0b6c8e04",
+      "at": "2026-09-16T17:35:37.032178407Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T17:35:37.032178407Z",
+    "created-at": "2026-09-16T17:34:12.636361514Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}
