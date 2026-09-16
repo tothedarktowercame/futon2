@@ -1,0 +1,625 @@
+commit cae5f6d97fec30afa1bbbbdc6049f727ab868b21
+Author: Joseph Corneli <joseph.corneli@hyperreal.enterprises>
+Date:   Tue Sep 15 16:39:49 2026 +0000
+
+    Retain preregistered pre/end fact measurements and move exposures
+
+diff --git a/src/futon2/aif/fact_measurement.clj b/src/futon2/aif/fact_measurement.clj
+new file mode 100644
+index 00000000..52f2122b
+--- /dev/null
++++ b/src/futon2/aif/fact_measurement.clj
+@@ -0,0 +1,233 @@
++(ns futon2.aif.fact-measurement
++  "Frozen literal measurement plans and pre/end evidence, never disposition inference.
++  Artifact measures a path in a commit-bound build artifact list, not live capability.
++  Wiring measures the named field's shape, not a predicted effect.
++  Request-status measures a recorded request/status, never its completion.
++  Gate/replay readers require explicit revision-bound measurement receipts;
++  ordinary author/reviewer approval is insufficient. Unqualified evidence is unknown."
++  (:require [clojure.edn :as edn] [clojure.java.io :as io] [clojure.string :as str]
++            [futon2.aif.interpretation-evidence :as evidence]
++            [futon2.aif.find-receipt :as finder])
++  (:import [java.nio.file Files StandardOpenOption]))
++
++(def plan-file "interpretation-reader-plan.edn")
++(def forbidden #{:outcome :grounded? :prior :selected-prior :controller-score :predicted-effects :effect :interpretations})
++(def parameter-keys
++  {:document-span #{:source :lines :predicate :literal}
++   :artifact #{:repository :path} :wiring #{:field :expected-shape}
++   :gate-receipt #{:gate-id :revision}
++   :independent-replay #{:reviewer :revision :command} :request-status #{:record-id}})
++(defn- need! [ok reason]
++  (when-not ok (throw (ex-info "Measurement plan refused"
++                              {:interpretation/refusal :interpretation/invalid-receipt :measurement/refusal reason}))))
++(defn- text? [x] (and (string? x) (not (str/blank? x))))
++(defn- read-one [bs]
++  (with-open [r (java.io.PushbackReader. (io/reader (java.io.ByteArrayInputStream. bs)))]
++    (let [eof (Object.) value (edn/read {:eof eof} r)]
++      (need! (identical? eof (edn/read {:eof eof} r)) :multiple-forms) value)))
++(defn- exact-citation! [record reader c]
++  (need! (= #{:source :lines :quote} (set (keys c))) :citation-shape)
++  (let [s (first (filter #(= (:id %) (:source c)) (:sources record)))
++        [a b] (:lines c)
++        ls (when s (str/split-lines (String. ^bytes (reader (:file s)) "UTF-8")))]
++    (need! (and s (vector? (:lines c)) (= 2 (count (:lines c)))
++                 (pos-int? a) (pos-int? b) (<= a b (count ls))
++                 (= (:quote c) (str/join "\n" (subvec (vec ls) (dec a) b)))) :citation-mismatch)))
++(defn validate-plan! [record reader & [build-author]]
++  (let [s (first (filter #(= plan-file (:file %)) (:sources record)))
++        _ (need! s :plan-not-in-sources)
++        bs (reader plan-file)
++        _ (need! (= (:sha256 s) (evidence/sha256 bs)) :plan-digest-mismatch)
++        plan (read-one bs) ids (set (map :id (:facts record)))]
++    (need! (vector? plan) :plan-not-vector)
++    (need! (= (count plan) (count (set (map :fact plan)))) :duplicate-plan-fact)
++    (doseq [{:keys [fact parameters citations] kind :reader :as entry} plan]
++      (need! (= #{:fact :reader :parameters :citations} (set (keys entry))) :plan-entry-shape)
++      (need! (contains? ids fact) :undeclared-fact)
++      (need! (contains? parameter-keys kind) :unknown-reader)
++      (need! (not-any? forbidden (tree-seq coll? seq parameters)) :forbidden-input)
++      (need! (and (map? parameters) (= (get parameter-keys kind) (set (keys parameters)))) :unknown-parameters)
++      (need! (and (vector? citations) (seq citations)) :citation-required)
++      (doseq [c citations] (exact-citation! record reader c))
++      (case kind
++        :document-span
++        (let [[a b] (:lines parameters)]
++          (need! (and (= (:source parameters) (get-in record [:target :source]))
++                       (vector? (:lines parameters)) (= 2 (count (:lines parameters)))
++                       (pos-int? a) (pos-int? b) (<= a b)
++                       (#{:contains :not-contains} (:predicate parameters)) (text? (:literal parameters))) :document-parameters))
++        :wiring (need! (and (#{:wiring :fold-output :shape-validation :correspondence-validation} (:field parameters))
++                            (#{:map :vector :valid} (:expected-shape parameters))) :wiring-parameters)
++        :independent-replay (need! (and (every? text? (vals parameters))
++                                        (not= (:reviewer parameters) (get-in record [:identity :author]))
++                                        (not= (:reviewer parameters) build-author)) :replay-parameters)
++        (need! (every? text? (vals parameters)) :text-parameters)))
++    plan))
++
++(def input-keys #{:source-bytes :artifact :wiring :receipts})
++(defn- wiring-shape [v]
++  (if (and (map? v) (= #{:map? :vector? :valid?} (set (keys v))))
++    (into {} (map (fn [[k x]] [k (true? x)])) v)
++    {:map? (map? v)
++     :vector? (vector? v)
++     :valid? (boolean (and (map? v)
++                          (or (= :valid (:status v)) (true? (:valid? v)))))}))
++(defn- receipt-input [r]
++  (into {} (filter (fn [[k v]]
++                     (cond
++                       (= k :kind) (#{:gate-receipt :independent-replay :request-status} v)
++                       (#{:executed? :passed? :recorded?} k) (boolean? v)
++                       :else (text? v))))
++        (select-keys r [:kind :gate-id :revision :reviewer :command :executed? :passed? :record-id :recorded?])))
++(defn reader-input [raw]
++  ;; Shape readers see only shape, never the fold's predicted effects.
++  {:source-bytes (:source-bytes raw)
++   :artifact (let [a (:artifact raw)]
++               {:repository (when (text? (:repository a)) (:repository a))
++                :commit (when (text? (:commit a)) (:commit a))
++                :paths (vec (filter text? (:paths a)))})
++   :wiring (into {} (map (fn [[k v]] [k (wiring-shape v)]))
++                 (select-keys (:wiring raw) [:wiring :fold-output :shape-validation :correspondence-validation]))
++   :receipts (mapv receipt-input (:receipts raw))})
++(defn require-input! [input key]
++  (need! (contains? input-keys key) :forbidden-input)
++  (get input key))
++(defn- agreeing-value [values]
++  (let [values (set values)]
++    (when (= 1 (count values)) (first values))))
++(def readers
++  {:document-span
++   (fn [p input]
++     (when-let [bs (get (require-input! input :source-bytes) (:source p))]
++       (let [ls (vec (str/split-lines (String. ^bytes bs "UTF-8"))) [a b] (:lines p)]
++         (when (<= a b (count ls))
++           (let [present (str/includes? (str/join "\n" (subvec ls (dec a) b)) (:literal p))]
++             (if (= :contains (:predicate p)) present (not present)))))))
++   :artifact (fn [p input] (let [a (require-input! input :artifact)]
++                            (when (and (= (:repository p) (:repository a)) (text? (:commit a))
++                                       (some #{(:path p)} (:paths a))) true)))
++   :wiring (fn [p input] (let [v (get (require-input! input :wiring) (:field p))]
++                          (when (case (:expected-shape p) :map (:map? v) :vector (:vector? v)
++                                      :valid (:valid? v)) true)))
++   :gate-receipt
++   (fn [p input]
++     (agreeing-value
++      (for [r (require-input! input :receipts)
++            :when (and (= :gate-receipt (:kind r))
++                       (= (:gate-id p) (:gate-id r)) (= (:revision p) (:revision r))
++                       (boolean? (:passed? r)))]
++        (:passed? r))))
++   :independent-replay
++   (fn [p input]
++     (agreeing-value
++      (for [r (require-input! input :receipts)
++            :when (and (= :independent-replay (:kind r))
++                       (= p (select-keys r [:reviewer :revision :command]))
++                       (true? (:executed? r)) (boolean? (:passed? r)))]
++        (:passed? r))))
++   :request-status (fn [p input] (when (some #(and (= :request-status (:kind %))
++                                                   (= (:record-id p) (:record-id %)) (true? (:recorded? %)))
++                                             (require-input! input :receipts)) true))})
++(defn measure [plan raw]
++  (let [input (reader-input raw)]
++    (into {} (for [{:keys [fact reader parameters]} plan]
++               [fact (try (let [r ((get readers reader) parameters input)
++                                r (if (vector? r) (first r) r)]
++                            {:value (if (boolean? r) r :unknown)
++                             :reason (if (boolean? r) :qualified-evidence :no-qualifying-evidence)})
++                          (catch Exception _ {:value :unknown :reason :reader-failed}))]))))
++
++(defn exposures [record order end-facts]
++  (let [pre (into {} (map (juxt :id :value)) (:facts record)) end (into {} (map (juxt :id :value)) end-facts)
++        xs (into {} (map (juxt #(keyword (:pattern %)) identity)) (:interpretations record))
++        named (set (mapcat #(keys (:effect (get xs %))) order))]
++    {:kind :observed-exposure-not-success-probability
++     :moves (loop [ids order state pre out []]
++              (if-let [id (first ids)]
++                (let [x (get xs id)]
++                  (recur (rest ids) (merge state (:effect x))
++                         (conj out {:pattern id :interpretation-sha256 (:sha256 x)
++                                    :guard-value (finder/guard-value state (:guard x))
++                                    :effects (into {} (for [[fact _] (:effect x)]
++                                                        [fact {:pre (get pre fact) :end (get end fact)
++                                                               :status (cond (true? (get pre fact)) :already-true
++                                                                             (or (= :unknown (get pre fact)) (= :unknown (get end fact))) :unknown
++                                                                             (and (false? (get pre fact)) (true? (get end fact))) :newly-established
++                                                                             (= (get pre fact) (get end fact)) :unchanged
++                                                                             :else :changed)}]))}))) out))
++     :unexplained (vec (sort (for [[id v] end :when (and (not (named id)) (not= :unknown v)
++                                                        (not= :unknown (get pre id)) (not= v (get pre id)))] id)))}))
++
++(defn- file-bytes [file] (Files/readAllBytes (.toPath (io/file file))))
++(defn- source
++  ([file] (source file (file-bytes file)))
++  ([file bs]
++   (let [f (io/file file)]
++     {:id (.getCanonicalPath f) :path (.getCanonicalPath f) :file (.getName f)
++      :sha256 (evidence/sha256 bs) :revision "captured-at-measurement"})))
++(defn- write! [dir name value]
++  (let [f (io/file dir name)]
++    (Files/write (.toPath f) (.getBytes (pr-str value) "UTF-8")
++                 (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW StandardOpenOption/WRITE]))
++    (source f)))
++(defn- observation [record phase _at facts sources ref]
++  {:schema :wm/mission-fact-observation-v1 :identity (:identity record) :target (:target record)
++   :sources sources :facts facts :holes [] :failure nil
++   :model-sha256 (evidence/value-digest (:interpretations record)) :phase phase
++   :measured-by "futon2.aif.fact-measurement/v1" :interpretation-ref ref})
++(defn begin! [dir construction now & [build-author]]
++  (let [reader #(file-bytes (io/file dir %)) record (read-one (reader "interpretation-receipt.edn"))
++        plan (validate-plan! record reader build-author) ref {:file "interpretation-receipt.edn" :sha256 (evidence/sha256 (reader "interpretation-receipt.edn"))}
++        pre (observation record :pre (now) (:facts record) (:sources record) ref)]
++    (evidence/validate-sources! pre reader)
++    (write! dir "fact-pre.edn" pre)
++    {:record record :plan plan :ref ref :dir dir :pre pre :construction construction :build-author build-author}))
++(defn- retained-reader-receipts [dir]
++  ;; Only explicit measurement receipts, not reviewer prose or disposition
++  ;; records. Producer identity/revision/command qualification is in readers.
++  ;; Preserve each admitted input's exact bytes in the observation sources.
++  (vec
++   (keep (fn [f]
++           (when (and (.isFile f) (str/ends-with? (.getName f) ".source")
++                      (<= (.length f) 1048576))
++             (try
++               (let [bs (file-bytes f) r (read-one bs)]
++                 (when (and (map? r) (#{:gate-receipt :independent-replay :request-status} (:kind r)))
++                   {:record r :source (source f bs)}))
++               (catch Exception _ nil))))
++         (sort-by #(.getName %) (.listFiles (io/file dir))))))
++
++(defn finish! [state raw now]
++  (let [{:keys [record plan ref dir construction build-author]} state
++        at (now) reader #(file-bytes (io/file dir %))
++        _ (validate-plan! record reader build-author)
++        target (first (filter #(= (:id %) (get-in record [:target :source])) (:sources record)))
++        retained (retained-reader-receipts dir)
++        target-bytes (try (file-bytes (:path target)) (catch Exception _ nil))
++        input (reader-input (assoc raw :source-bytes (if target-bytes {(:id target) target-bytes} {})
++                                      :receipts (into (vec (:receipts raw)) (map :record retained))))
++        results (merge (into {} (map (fn [f] [(:id f) {:value :unknown :reason :unplanned}])) (:facts record))
++                       (measure plan input))
++        ;; Diagnostic evidence, not a disposition or an interpretation effect.
++        proof (write! dir "fact-end-measurements.source" {:observed-at at :results results
++                                                         :artifact (:artifact input) :wiring (:wiring input) :receipts (:receipts input)
++                                                         :source-snapshots (if target-bytes
++                                                                             {(:id target) {:file "fact-end-target.source"
++                                                                                            :sha256 (evidence/sha256 target-bytes)}} {})})
++        target-source (when target-bytes
++                        (let [f (io/file dir "fact-end-target.source")]
++                          (Files/write (.toPath f) target-bytes
++                                       (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW StandardOpenOption/WRITE]))
++                          (source f)))
++        quote (slurp (io/file dir (:file proof)))
++        facts (mapv #(assoc % :value (get-in results [(:id %) :value] :unknown) :observed-at at
++                            :method (if (boolean? (get-in results [(:id %) :value])) :source-span-observation :unavailable-observation)
++                            :citations [{:source (:id proof) :lines [1 1] :quote quote}]) (:facts record))
++        exposure (write! dir "fact-exposures.source"
++                         (exposures record (get-in construction [:receipted-construction :cascade-diff :acting-order-after]) facts))
++        end (observation record :end at facts (vec (vals (into (array-map) (map (juxt :file identity))
++                                         (concat (map :source retained) (:sources record)
++                                                 (remove nil? [proof target-source exposure]))))) ref)]
++    (evidence/validate-sources! end reader)
++    (write! dir "fact-end.edn" end)
++    end))
+diff --git a/src/futon2/aif/full_loop_runner.clj b/src/futon2/aif/full_loop_runner.clj
+index c73c3d6e..e1fb3798 100644
+--- a/src/futon2/aif/full_loop_runner.clj
++++ b/src/futon2/aif/full_loop_runner.clj
+@@ -24,6 +24,7 @@
+             [futon2.aif.limb-evidence :as limb-evidence]
+             [futon2.aif.interpretation-evidence :as interpretation-evidence]
+             [futon2.aif.interpretation-job :as interpretation-job]
++            [futon2.aif.fact-measurement :as measurement]
+             [futon2.aif.receipt-construction :as receipt-construction]
+             [futon2.aif.mission-registry :as missions]
+             [futon2.aif.morning-brief :as brief]
+@@ -3333,6 +3334,21 @@
+           (.getAbsolutePath
+            (io/file (or (:data-root execution-cohort) cohort/default-data-root)
+                     (name (:cohort/id start-event)) attempt-id "evidence")))
++        measurement-state (atom nil)
++        measurement-artifact (atom nil)
++        measurement-end (atom nil)
++        observe-end! (fn []
++                       (when (and @measurement-state (nil? @measurement-end))
++                         (reset! measurement-end
++                                 (measurement/finish!
++                                  @measurement-state
++                                  {:artifact @measurement-artifact
++                                   :wiring (select-keys (get-in @checkpoints [:construction :judgment])
++                                                        [:wiring :fold-output :shape-validation :correspondence-validation])
++                                   ;; Existing author/review prose and approval are not
++                                   ;; revision-bound gate or replay receipts.
++                                   :receipts []}
++                                  #(str (Instant/now))))))
+         prompt-opts (cond-> opts
+                       attempt-evidence-dir
+                       (assoc :attempt-evidence-dir attempt-evidence-dir))
+@@ -3625,6 +3641,7 @@
+                    result))
+         close! (fn [outcome data]
+                  (try
++                   (observe-end!)
+                    (close-core! outcome data)
+                    (catch Throwable e
+                      ;; Cohort-53 attempt-001 is retained as the historical
+@@ -4071,6 +4088,10 @@
+                                (assoc :run4/task-pin (:identity pinned-selection))))]
+           (persist-selection! trace-path)
+           (checkpoint! :construction construction-cell)
++          (when (:interpretation-receipt (:judgment construction-cell))
++            (reset! measurement-state
++                    (measurement/begin! attempt-evidence-dir (:judgment construction-cell)
++                                        #(str (Instant/now)) author)))
+           (when historical-action?
+             (when-not (:historical-verification-execute-fn opts)
+               (throw (ex-info "Historical verification execution port missing"
+@@ -4348,6 +4369,7 @@
+                                   {:outcome :build-failed
+                                    :author-verdict (:verdict (author-verdict author-job))
+                                    :author-job author-job})))
++                (reset! measurement-artifact {:repository repo :commit commit :paths files})
+                 (let [{:keys [commit repo files author-job build-retries]}
+                       (build-cure-loop opts @phase-context author dispatched-turns
+                                        target commit repo files author-job
+@@ -4365,6 +4387,7 @@
+                          (:author-window-end-ms artifact-binding)
+                          :artifact-binding/failed-commits
+                          (vec (keep :failed-commit stop-lines))})
++                      _ (reset! measurement-artifact {:repository repo :commit commit :paths files})
+                       review-response
+                       (run-phase!
+                        opts (cond-> @phase-context
+@@ -4421,6 +4444,7 @@
+                       approved? (and (= "done" (:state review-job))
+                                      (= :approve (review-verdict review-job))
+                                      (:passed? review-gate))]
++                  (reset! measurement-artifact {:repository repo :commit commit :paths files})
+                   (checkpoint! :build
+                                (term (cond->
+                                       {:artifacts files
+@@ -4444,6 +4468,7 @@
+                                               :reviews reviews))
+                                      {:kind :git-commit-and-independent-review
+                                       :repository repo}))
++                  (observe-end!)
+                   (when (and approved? (:measured-acquisition? opts)
+                              attempt-evidence-dir)
+                     (let [discharge-contract
+@@ -4622,6 +4647,7 @@
+                                 feature-card
+                                 (assoc :feature-card feature-card))))))))))))
+       (catch Throwable e
++        (observe-end!)
+         (if @closing?
+           ;; Cohort-53 attempt-001 is retained as the historical counterexample:
+           ;; a typed evidence refusal escaped this branch and orphaned the attempt
+diff --git a/src/futon2/aif/interpretation_job.clj b/src/futon2/aif/interpretation_job.clj
+index f4836b7e..2d45b9c8 100644
+--- a/src/futon2/aif/interpretation_job.clj
++++ b/src/futon2/aif/interpretation_job.clj
+@@ -6,7 +6,8 @@
+             [clojure.java.io :as io]
+             [clojure.string :as str]
+             [futon2.aif.interpretation-evidence :as evidence]
+-            [futon2.aif.interpretation-request :as request])
++            [futon2.aif.interpretation-request :as request]
++            [futon2.aif.fact-measurement :as measurement])
+   (:import [java.nio.file Files StandardOpenOption]
+            [java.time Instant]
+            [java.util Base64 UUID]))
+@@ -51,6 +52,11 @@
+        "At most ONE new pattern: only for a named missing move, author library .flexiarg plus index row and commit explicit paths, "
+        "then capture the new pattern/index bytes as additional .source companions and cite them. Never overwrite original snapshots. "
+        "Include every existing .source companion in receipt :sources (id/path/file/sha256/revision), including request, intent and job files. "
++       "In this SAME job write interpretation-reader-plan.edn: a vector with at most one entry per declared fact, "
++       "each {:fact id :reader kind :parameters map :citations [exact-span-citations]}. Read fact_measurement.clj "
++       "for the strict parameter maps and literal predicates. Plan only justified independent measurements; omit unmeasurable facts. "
++       "Use [] when none can be measured. Include the plan as a hashed receipt source. Do not use outcomes, grounded?, priors, "
++       "controller scores or predicted effects as evidence. Freeze this plan before construction/build; never revise it after the result. "
+        "Use evidence/value-digest for hashes. Do not include additional top-level fields. "
+        "If blocked, write :wm/interpretation-failure-v1 with the exact identity, stage, sources, typed absent sections and failure map; "
+        "use interpretation/no-relevant-pattern, genesis-required or unmeasurable-fact as appropriate. No build, reload, click, push, "
+@@ -130,6 +136,7 @@
+                      :interpretation/invalid-receipt {:reason :retrieval-runs-mismatch}))
+             (need! (seq (:interpretations record)) :interpretation/no-relevant-pattern {})
+             (need! (<= (count (:genesis record)) 1) :interpretation/genesis-required {:reason :genesis-limit})
++            (measurement/validate-plan! record reader (:author opts))
+             (let [construction (when construct!
+                                  (reset! stage :construction)
+                                  (let [began (System/currentTimeMillis)]
+@@ -161,6 +168,8 @@
+                                        :returned-bytes-base64 (.encodeToString (Base64/getEncoder) returned)})
+                       (capture! (source path))
+                       (Files/delete (.toPath receipt))))
++              _ (let [plan (io/file dir measurement/plan-file)]
++                  (when (.exists plan) (capture! (source plan))))
+               _ (doseq [s (or (:sources data) (get-in data [:request :sources]))] (capture! s))
+               _ (when (and (nil? @prepared) (:request data)) (reset! prepared (:request data)))
+               elapsed (- (System/currentTimeMillis) started)
+diff --git a/test/futon2/aif/fact_measurement_test.clj b/test/futon2/aif/fact_measurement_test.clj
+new file mode 100644
+index 00000000..2637a02c
+--- /dev/null
++++ b/test/futon2/aif/fact_measurement_test.clj
+@@ -0,0 +1,125 @@
++(ns futon2.aif.fact-measurement-test
++  (:require [clojure.edn :as edn]
++            [clojure.java.io :as io]
++            [clojure.test :refer [deftest is]]
++            [futon2.aif.fact-measurement :as m]
++            [futon2.aif.find-receipt-test :as fixture]
++            [futon2.aif.interpretation-evidence :as e])
++  (:import [java.nio.file Files]
++           [java.nio.file.attribute FileAttribute]))
++
++(def at "2026-09-15T12:00:00Z")
++(defn sample [plan-fn]
++  (let [{:keys [record captured]} (fixture/sample)
++        plan (plan-fn record)
++        bs (.getBytes (pr-str plan) "UTF-8")
++        source {:id "reader-plan" :path "/fixture/interpretation-reader-plan.edn"
++                :file m/plan-file :revision "fixture" :sha256 (e/sha256 bs)}]
++    {:record (update record :sources conj source) :captured (assoc captured m/plan-file bs) :plan plan}))
++(defn entry [r i reader parameters]
++  {:fact (get-in r [:facts i :id]) :reader reader :parameters parameters
++   :citations (get-in r [:facts i :citations])})
++(defn plans [r]
++  [(entry r 0 :artifact {:repository "futon2" :path "src/component.clj"})
++   (entry r 1 :request-status {:record-id "request-1"})
++   (entry r 2 :independent-replay {:reviewer "independent" :revision "abc" :command "test replay"})])
++(defn refused [f]
++  (try (f) nil (catch clojure.lang.ExceptionInfo ex (:measurement/refusal (ex-data ex)))))
++(defn with-files [record captured f]
++  (let [dir (.toFile (Files/createTempDirectory "p5-measure-" (make-array FileAttribute 0)))]
++    (try
++      (doseq [[file bs] captured]
++        (Files/write (.toPath (io/file dir file)) bs (make-array java.nio.file.OpenOption 0)))
++      (spit (io/file dir "interpretation-receipt.edn") (pr-str record))
++      (f dir)
++      (finally (doseq [file (reverse (file-seq dir))] (Files/delete (.toPath file)))))))
++
++(deftest real-nine-fact-carrier-and-three-planned-readers
++  (let [{:keys [record captured plan]} (sample plans)
++        raw {:artifact {:repository "futon2" :commit "abc" :paths ["src/component.clj"]}
++             :receipts [{:kind :request-status :record-id "request-1" :recorded? true}
++                        {:kind :independent-replay :reviewer "independent" :revision "abc"
++                         :command "test replay" :executed? true :passed? true}]}
++        measured (m/measure plan raw)]
++    (is (= 9 (count (:facts record))))
++    (is (= plan (m/validate-plan! record captured)))
++    (is (every? true? (map :value (vals measured))))
++    (with-files record captured
++      (fn [dir]
++        (doseq [[n receipt] (map-indexed vector (:receipts raw))]
++          (spit (io/file dir (str "reader-receipt-" n ".source")) (pr-str receipt)))
++        (let [state (m/begin! dir {:receipted-construction {:cascade-diff {:acting-order-after []}}} (constantly at))
++              end (m/finish! state (dissoc raw :receipts) (constantly at))]
++          (is (= (:facts record) (get-in state [:pre :facts])))
++          (is (= 3 (count (filter #(true? (:value %)) (:facts end)))))
++          (is (= 6 (count (filter #(= :unknown (:value %)) (:facts end)))))
++          (is (= end (e/validate-record end)))
++          (is (= end (edn/read-string (slurp (io/file dir "fact-end.edn"))))))))))
++
++(deftest strict-plan-controls
++  (doseq [[reason mutate] [[:unknown-reader #(assoc-in % [0 :reader] :invented)]
++                          [:forbidden-input #(assoc-in % [0 :parameters :outcome] :success)]
++                          [:unknown-parameters #(assoc-in % [0 :parameters :typo] "x")]
++                          [:undeclared-fact #(assoc-in % [0 :fact] "invented")]
++                          [:citation-mismatch #(assoc-in % [0 :citations 0 :quote] "invented")]]]
++    (let [{:keys [record captured]} (sample #(mutate (plans %)))]
++      (is (= reason (refused #(m/validate-plan! record captured))))))
++  (let [{:keys [record captured]} (sample plans)]
++    (is (= :plan-digest-mismatch
++           (refused #(m/validate-plan! record (assoc captured m/plan-file (.getBytes "[]" "UTF-8"))))))))
++
++(deftest unknown-and-independent-input-controls
++  (let [{:keys [plan]} (sample plans) fact (:fact (first plan))]
++    (is (= :unknown (get-in (m/measure plan {}) [fact :value])))
++    (with-redefs [m/readers {}]
++      (is (= :unknown (get-in (m/measure plan {}) [fact :value]))))
++    (with-redefs [m/readers {:artifact (fn [_ _] (throw (ex-info "reader failed" {})))}]
++      (is (= :reader-failed (get-in (m/measure plan {}) [fact :reason]))))
++    (doseq [key m/forbidden]
++      (is (= :forbidden-input (refused #(m/require-input! {key true} key)))))
++    (let [raw {:outcome :grounded-change :grounded? true :predicted-effects {"x" true}
++               :wiring {:fold-output {:outcome :incomplete :predicted-effects {"x" true}}}
++               :receipts [{:kind :gate-receipt :revision "x" :outcome :success}]}]
++      (is (= (m/reader-input raw) (m/reader-input (assoc raw :outcome :incomplete))))
++      (is (not-any? m/forbidden (tree-seq coll? seq (m/reader-input raw)))))))
++
++(deftest exposure-controls
++  (let [record {:facts [{:id "a" :value true} {:id "b" :value false} {:id "c" :value false}]
++                :interpretations [{:pattern "test/move" :sha256 "digest"
++                                   :guard [:fact "a"] :effect {"a" true "b" true}}]}
++        result (m/exposures record [:test/move] [{:id "a" :value true} {:id "b" :value true} {:id "c" :value true}])]
++    (is (= true (get-in result [:moves 0 :guard-value])))
++    (is (= :already-true (get-in result [:moves 0 :effects "a" :status])))
++    (is (= :newly-established (get-in result [:moves 0 :effects "b" :status])))
++    (is (= ["c"] (:unexplained result)))))
++
++(deftest literal-document-and-qualifying-receipts
++  (let [p [{:fact "d" :reader :document-span :parameters {:source "s" :lines [1 1] :predicate :not-contains :literal "open"}}]]
++    (is (false? (get-in (m/measure p {:source-bytes {"s" (.getBytes "open" "UTF-8")}}) ["d" :value])))
++    (is (= :unknown (get-in (m/measure p {}) ["d" :value]))))
++  (let [p [{:fact "g" :reader :gate-receipt :parameters {:gate-id "gate" :revision "abc"}}]]
++    (is (= :unknown (get-in (m/measure p {:receipts [{:approved? true}]}) ["g" :value])))
++    (is (false? (get-in (m/measure p {:receipts [{:kind :gate-receipt :gate-id "gate" :revision "abc" :passed? false}]}) ["g" :value])))))
++
++(deftest labels-cannot-change-observation-bytes
++  (let [{:keys [record captured]} (sample plans)]
++    (with-files record captured
++      (fn [dir]
++        (let [state (m/begin! dir {} (constantly at))
++              a (m/finish! state {:outcome :grounded-change :grounded? true} (constantly at))
++              files ["fact-end-measurements.source" "fact-end-target.source" "fact-exposures.source" "fact-end.edn"]]
++          ;; Test-only removal of our own outputs permits identical paths/identity/time
++          ;; for the counterfactual label arm; production writes are CREATE_NEW.
++          (doseq [n files :let [f (io/file dir n)] :when (.exists f)] (Files/delete (.toPath f)))
++          (is (= (pr-str a) (pr-str (m/finish! state {:outcome :build-failed :grounded? false} (constantly at))))))))))
++
++(deftest replay-reader-cannot-be-the-build-author
++  (let [{:keys [record captured]} (sample plans)]
++    (is (= :replay-parameters
++           (refused #(m/validate-plan! record captured "independent"))))))
++
++(deftest contradictory-gate-receipts-are-unknown
++  (let [p [{:fact "g" :reader :gate-receipt :parameters {:gate-id "gate" :revision "abc"}}]
++        rows (mapv #(hash-map :kind :gate-receipt :gate-id "gate" :revision "abc" :passed? %) [true false])]
++    (is (= :unknown (get-in (m/measure p {:receipts rows}) ["g" :value])))
++    (is (= :unknown (get-in (m/measure p {:receipts (reverse rows)}) ["g" :value])))))
+diff --git a/test/futon2/aif/interpretation_job_test.clj b/test/futon2/aif/interpretation_job_test.clj
+index 12b6a4c5..6a79d7a6 100644
+--- a/test/futon2/aif/interpretation_job_test.clj
++++ b/test/futon2/aif/interpretation_job_test.clj
+@@ -9,6 +9,7 @@
+             [futon2.aif.interpretation-evidence-test :as receipt-fixture]
+             [futon2.aif.interpretation-job :as job]
+             [futon2.aif.full-loop-runner :as runner]
++            [futon2.aif.full-loop-cohort :as cohort-store]
+             [futon2.aif.full-loop-runner-test :as runner-fixture]
+             [futon2.aif.hermetic-repair-fixture :as hermetic])
+   (:import [java.nio.file Files]
+@@ -24,6 +25,8 @@
+                  (= scenario :unsupported) (assoc :type :fire-pattern)
+                  (= scenario :ticket) (assoc :type :advance-ticket :target "T-receipt-construction"))
+         calls (atom []) constructors (atom 0) organised (atom 0) organise policy/organise saved (atom nil)
++        adjudication-observations (atom [])
++        append-checkpoint cohort-store/append-checkpoint!
+         base (#'runner-fixture/retention-success-opts cohort)
+         prepare (fn [a identity {:keys [on-capture]}]
+                   (when (#{:interpretation/target-unresolved :interpretation/source-unavailable} scenario)
+@@ -43,7 +46,15 @@
+                       (throw (ex-info "controlled failed retrieval" {:interpretation/refusal scenario :request r})))
+                     (assoc r :schema :wm/interpretation-request-v1)))
+         emit-receipt (fn []
+-                       (let [identity (:identity (edn/read-string (slurp (io/file dir "interpretation-job.source"))))
++                       (let [plan (when (#{:bad-reader :bad-parameter :bad-fact :bad-citation} scenario)
++                                    [{:fact (if (= scenario :bad-fact) "not-declared" (get-in @saved [:facts 0 :id]))
++                                      :reader (if (= scenario :bad-reader) :made-up :artifact)
++                                      :parameters (cond-> {:repository "futon2" :path "component"}
++                                                    (= scenario :bad-parameter) (assoc :outcome :success))
++                                      :citations (cond-> (get-in @saved [:facts 0 :citations])
++                                                   (= scenario :bad-citation) (assoc-in [0 :quote] "invented"))}])
++                             _ (spit (io/file dir "interpretation-reader-plan.edn") (pr-str (vec plan)))
++                             identity (:identity (edn/read-string (slurp (io/file dir "interpretation-job.source"))))
+                              metadata (map job/source (filter #(and (.isFile %) (.startsWith (.getName %) "interpretation-"))
+                                                               (.listFiles dir)))
+                              r (-> @saved
+@@ -66,7 +77,11 @@
+                            (spit (io/file dir (:file (first (:sources r)))) "changed source"))
+                          (spit (io/file dir "interpretation-receipt.edn")
+                                (if (= scenario :invalid) "this is not one valid receipt" (pr-str r)))))
+-        opts (assoc base :trace-fn (constantly "/fixture/trace.edn") :run-id (str (UUID/randomUUID)) :interpretation-mode mode :interpreter "interpreter"
++        opts (assoc (cond-> base
++                      (= scenario :success)
++                      (assoc :author-artifact-observer-fn
++                             (fn [repo _ _] {:repo repo :commit "abc123" :corroborates? true :disagreement? false})))
++                    :trace-fn (constantly "/fixture/trace.edn") :run-id (str (UUID/randomUUID)) :interpretation-mode mode :interpreter "interpreter"
+                     :judge-fn (fn [_] {:judgement (walk/postwalk-replace
+                                                   {runner-fixture/selected-action action} runner-fixture/judgement)})
+                     :interpretation-history-roots [root]
+@@ -91,6 +106,12 @@
+     (try
+       (let [result (binding [runner/*wm-status-reporting?* false]
+                      (with-redefs [runner/ensure-dispatch-seat! (fn [_])
++                                   cohort-store/append-checkpoint!
++                                   (fn [& args]
++                                     (when (some #{:adjudication} args)
++                                       (swap! adjudication-observations conj
++                                              (.exists (io/file dir "fact-end.edn"))))
++                                     (apply append-checkpoint args))
+                                    policy/organise (fn [& args] (swap! organised inc) (apply organise args))]
+                        (runner/run-opportunity! opts)))
+             failures (when (.exists dir)
+@@ -98,7 +119,11 @@
+                              (filter #(.startsWith (.getName %) "interpretation-failure-") (.listFiles dir))))
+             close-file (io/file (.getParentFile dir) "007-closed.edn")
+             close (when (.exists close-file) (edn/read-string (slurp close-file)))]
+-        {:result result :calls @calls :action action :organised @organised :constructors @constructors :failures failures :close close})
++        {:result result :calls @calls :action action :organised @organised :constructors @constructors :failures failures :close close
++         :adjudication-observations @adjudication-observations
++         :observations (into {} (for [n ["fact-pre.edn" "fact-end.edn"]
++                                     :let [f (io/file dir n)] :when (.exists f)]
++                                 [n (edn/read-string (slurp f))]))})
+       (finally (doseq [file (reverse (file-seq (io/file root)))] (Files/delete (.toPath file)))))))
+ 
+ (deftest flag-off-preserves-construction-checkpoint
+@@ -187,3 +212,35 @@
+     (is (= :authored-reachability-topological (:precedence-rule retained)))
+     (is (= :first-true-unfired-guard-apply-effects-from-q0 (:acting-rule retained)))
+     (is (= :vacuous (get-in retained [:find-result :f4])))))
++
++(deftest fact-pairs-start-after-construction-and-survive-build-failure
++  (let [{:keys [result observations close]} (run-case :receipt :valid)
++        entries (get-in close [:payload :close-evidence-manifest :entries])]
++    (is (= :build-failed (:outcome result)))
++    (is (= #{"fact-pre.edn" "fact-end.edn"} (set (keys observations))))
++    (is (= :pre (get-in observations ["fact-pre.edn" :phase])))
++    (is (= :end (get-in observations ["fact-end.edn" :phase])))
++    (doseq [name ["fact-pre.edn" "fact-end.edn"]]
++      (is (some #(.endsWith (:source-path %) name) entries))))
++  (doseq [scenario [:invalid :nothing-fires]]
++    (is (empty? (:observations (run-case :receipt scenario)))))
++  (is (empty? (:observations (run-case nil :valid)))))
++
++(deftest invalid-reader-plan-stops-construction
++  (doseq [scenario [:bad-reader :bad-parameter :bad-fact :bad-citation]]
++    (let [{:keys [organised constructors failures observations calls]} (run-case :receipt scenario)]
++      (is (= :interpretation/invalid-receipt (get-in failures [0 :failure :kind])))
++      (is (zero? organised))
++      (is (zero? constructors))
++      (is (= ["interpreter"] calls))
++      (is (empty? observations)))))
++
++(deftest end-freezes-before-adjudication-and-close-cutoff
++  (let [{:keys [result observations close adjudication-observations]} (run-case :receipt :success)]
++    (is (seq adjudication-observations))
++    (is (every? true? adjudication-observations))
++    (is (= #{"fact-pre.edn" "fact-end.edn"} (set (keys observations))))
++    (is (= :absent (get-in result [:close-retention :state :status])))
++    (doseq [entry (get-in close [:payload :close-evidence-manifest :entries])]
++      (is (not (.isAfter (java.time.Instant/parse (:admitted-at entry))
++                        (java.time.Instant/parse (:recorded-at close))))))))

@@ -1,0 +1,54 @@
+commit c4130ba5592f37ccb55936ce3dd243e0161cbb55
+Author: Joseph Corneli <joseph.corneli@hyperreal.enterprises>
+Date:   Tue Sep 15 15:21:19 2026 +0000
+
+    Interpretation failures open an environmental hold, not a machine repair
+    
+    repair-class-for sent every unrecognised failure kind to :machine-failure,
+    and a machine-failure obligation pins the next selection to stop-the-line
+    repair (full_loop_runner.clj stop-line filter). With interpretation mode
+    on, an ordinary content gap (no relevant pattern, no citable tension, an
+    invalid receipt) would have wedged the loop on a code repair. Interpretation
+    kinds now map to :environmental-hold, discharged by a later valid attempt;
+    budget expiry and agent unavailability keep their classes. Review fix on
+    f558a33a.
+    
+    Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+
+diff --git a/src/futon2/aif/full_loop_runner.clj b/src/futon2/aif/full_loop_runner.clj
+index 2260d149..3b6c6619 100644
+--- a/src/futon2/aif/full_loop_runner.clj
++++ b/src/futon2/aif/full_loop_runner.clj
+@@ -3146,6 +3146,13 @@
+     (#{:agent-budget-expired :agent-job-stalled} failure-kind)
+     :incomplete-recoverable
+ 
++    ;; Interpretation failures (content gaps, invalid receipts, missing
++    ;; sources) are discharged by a later valid attempt, never by a
++    ;; code-repair commit, so they must not open a stop-the-line machine
++    ;; repair. Budget expiry and agent unavailability already map above.
++    (and (keyword? failure-kind) (= "interpretation" (namespace failure-kind)))
++    :environmental-hold
++
+     :else :machine-failure))
+ 
+ (defn- last-error-phase [phase-events]
+diff --git a/test/futon2/aif/interpretation_job_test.clj b/test/futon2/aif/interpretation_job_test.clj
+index 345f61dd..4239ae76 100644
+--- a/test/futon2/aif/interpretation_job_test.clj
++++ b/test/futon2/aif/interpretation_job_test.clj
+@@ -154,3 +154,14 @@
+                              [#(assoc-in % [:failure :kind] :invented) :failure-kind-invalid]]]
+       (is (= reason (receipt-fixture/refusal #(evidence/validate-record (mutate failure))))))
+     (is (= :text-invalid (receipt-fixture/refusal #(evidence/validate-record (assoc-in record [:retrieval :query] "")))))))
++
++(deftest interpretation-failures-never-open-a-machine-repair
++  ;; A machine-failure obligation pins selection to stop-the-line repair;
++  ;; an interpretation gap must instead wait for a valid successor attempt.
++  (doseq [kind [:interpretation/no-relevant-pattern :interpretation/no-citable-tension
++                :interpretation/invalid-receipt :interpretation/source-changed
++                :interpretation/genesis-required :interpretation/retrieval-unavailable]]
++    (is (= :environmental-hold (#'runner/repair-class-for kind)) (str kind)))
++  (is (= :incomplete-recoverable (#'runner/repair-class-for :agent-budget-expired)))
++  (is (= :environmental-hold (#'runner/repair-class-for :agent-unavailable)))
++  (is (= :machine-failure (#'runner/repair-class-for :build-failed))))

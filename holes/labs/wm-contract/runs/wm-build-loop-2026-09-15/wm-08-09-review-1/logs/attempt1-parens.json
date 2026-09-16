@@ -1,0 +1,15 @@
+{
+  "command": [
+    "emacs",
+    "-Q",
+    "--batch",
+    "-l",
+    "/home/joe/code/futon4/dev/check-parens.el",
+    "--eval",
+    "(arxana-check-parens-cli)",
+    "--",
+    "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-08-09-review-1/review_probe.clj"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "exit": 0
+}

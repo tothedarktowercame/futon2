@@ -1,0 +1,116 @@
+commit 706ca3e83355d215a4b54464c16efa547768f31e
+Author: Joseph Corneli <joseph.corneli@hyperreal.enterprises>
+Date:   Tue Sep 15 16:09:47 2026 +0000
+
+    Receipt construction: a legacy predecessor resets with provenance, not a refusal
+    
+    previous! refused whenever the latest earlier construction on the target
+    predated receipt mode: July closes carry no close-retention and their
+    constructions no :receipted-construction (e.g. wm-outer-loop-41-v1/
+    attempt-043 for M-learning-loop, the controller's usual top pick), and
+    September closes have an occurrence but still no ruled CascadeDiff. So
+    receipt mode could only ever run on targets never worked before.
+    
+    A legacy predecessor cannot supply a ruled cascade, so the first receipted
+    construction on such a target starts from first-attempt-cascade and
+    records :legacy-predecessor-unrepresentable with the superseded
+    construction and close files and their sha256s. A receipted predecessor
+    still goes through full validation, now starting with its occurrence.
+    Checked against real history: M-learning-loop resets with provenance;
+    M-zaif-harness-v1 and T-fail-agent-not-found are clean first attempts.
+    Review fix on 24dc6068.
+    
+    Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+
+diff --git a/src/futon2/aif/receipt_construction.clj b/src/futon2/aif/receipt_construction.clj
+index 0cd51f05..92fa782b 100644
+--- a/src/futon2/aif/receipt_construction.clj
++++ b/src/futon2/aif/receipt_construction.clj
+@@ -61,12 +61,18 @@
+                (= target (or (get-in occurrence [:action/value :target]) named-target))
+                (.isBefore (Instant/parse (:recorded-at closed))
+                           (Instant/parse (get-in identity [:occurrence :action-at]))))
+-      (need! occurrence :previous-occurrence-unavailable {:file (str close-file)})
+-      {:closed closed :construction construction :close-file close-file :construction-file construction-file})))
++      {:closed closed :construction construction :close-file close-file :construction-file construction-file
++       :occurrence occurrence
++       ;; A construction written before receipt mode (the old cascade-lane
++       ;; constructor) carries no ruled CascadeDiff.
++       :legacy? (not (contains? (get-in construction [:payload :judgment]) :receipted-construction))})))
+ 
+ (defn previous!
+   "Most recent closed construction on this target across explicit physical roots.
+-  Legacy constructions lacking a pinned CascadeDiff refuse; they are not first attempts."
++  A legacy predecessor (the old constructor, no pinned CascadeDiff) cannot supply
++  a ruled cascade, so the first receipted construction on that target starts from
++  first-attempt-cascade and records the legacy files it supersedes. A receipted
++  predecessor that fails validation still refuses."
+   [identity roots]
+   (let [roots (vec (distinct (map #(.getCanonicalPath (io/file %)) roots)))
+         candidates (for [root roots
+@@ -81,11 +87,29 @@
+                         (get-in (last (butlast ordered)) [:closed :recorded-at])))
+             (need! false :ambiguous-previous-construction {}))
+         {:keys [closed construction close-file construction-file] :as latest} (last ordered)]
+-    (if-not latest
++    (cond
++      (not latest)
+       {:cascade policy/first-attempt-cascade :admitted {}
+        :provenance {:status :none :reason :no-earlier-target-construction :searched-roots (vec roots)}
+        :admission-reason :first-attempt-no-admissions}
+-      (let [block (get-in closed [:payload :close-retention])
++
++      ;; The latest earlier construction predates receipt mode, so it cannot
++      ;; supply a ruled cascade (precedence, acting order, attributed
++      ;; admissions). Declare the reset and record what it supersedes.
++      (:legacy? latest)
++      {:cascade policy/first-attempt-cascade :admitted {}
++       :provenance {:status :legacy-predecessor-unrepresentable
++                    :searched-roots (vec roots)
++                    :recorded-at (:recorded-at closed)
++                    :construction-file (.getCanonicalPath (io/file construction-file))
++                    :construction-sha256 (evidence/sha256 (bytes construction-file))
++                    :close-file (.getCanonicalPath (io/file close-file))
++                    :close-sha256 (evidence/sha256 (bytes close-file))}
++       :admission-reason :legacy-predecessor-no-ruled-admissions}
++
++      :else
++      (let [_ (need! (:occurrence latest) :previous-occurrence-unavailable {:file (str close-file)})
++            block (get-in closed [:payload :close-retention])
+             m (get-in closed [:payload :close-evidence-manifest])
+             retained (get-in construction [:payload :judgment :receipted-construction])
+             prior-id (:identity retained)
+diff --git a/test/futon2/aif/receipt_construction_test.clj b/test/futon2/aif/receipt_construction_test.clj
+index 4f64033f..aa591d12 100644
+--- a/test/futon2/aif/receipt_construction_test.clj
++++ b/test/futon2/aif/receipt_construction_test.clj
+@@ -125,3 +125,29 @@
+         (is (= :previous-occurrence-mismatch
+                (:construction/refusal (refusal #(construction/previous! current [r1 r2]))))))
+       (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
++
++(deftest legacy-predecessor-resets-with-recorded-provenance
++  ;; Real July closes carry no close-retention, and their constructions no
++  ;; :receipted-construction (futon2/data/wm-full-loop/wm-outer-loop-41-v1/attempt-043).
++  (let [temp (.toFile (Files/createTempDirectory "receipt-legacy" (make-array FileAttribute 0)))
++        dir (io/file temp "legacy-cohort" "attempt-001")]
++    (try
++      (.mkdirs dir)
++      (spit (io/file dir "001-time-step.edn") (pr-str {:payload {:judgment {:semantic-epoch :legacy}}}))
++      (spit (io/file dir "003-construction.edn")
++            (pr-str {:cohort/id :legacy-cohort :attempt/id "attempt-001"
++                     :payload {:judgment {:mission "M-history" :cascade {:shown ["family/old"]}}}}))
++      (spit (io/file dir "007-closed.edn")
++            (pr-str {:recorded-at "2026-07-21T10:08:23Z" :payload {:judgment {:outcome :build-failed}}}))
++      (let [current {:occurrence (retention/mint-occurrence
++                                  {:run-id (str (UUID/randomUUID)) :cohort-id ":fixture" :attempt-id "attempt-002"
++                                   :selected-action {:type :advance-mission :target "M-history"}
++                                   :now #(Instant/parse "2026-09-15T12:00:00Z") :uuid-fn #(UUID/randomUUID)})}
++            previous (construction/previous! current [temp])]
++        (is (= policy/first-attempt-cascade (:cascade previous)))
++        (is (= {} (:admitted previous)))
++        (is (= :legacy-predecessor-unrepresentable (get-in previous [:provenance :status])))
++        (is (= :legacy-predecessor-no-ruled-admissions (:admission-reason previous)))
++        (is (= (evidence/sha256 (Files/readAllBytes (.toPath (io/file dir "003-construction.edn"))))
++               (get-in previous [:provenance :construction-sha256]))))
++      (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))

@@ -1,0 +1,76 @@
+commit 983d4c49b088a869d9b31ef209cee029bc50ba70
+Author: Joseph Corneli <joseph.corneli@hyperreal.enterprises>
+Date:   Tue Sep 15 16:15:46 2026 +0000
+
+    Receipt construction: before arm reuses the recorded acting order
+    
+    The before arm re-simulated the previous cascade's acting order from this
+    receipt's interpretations, so a second receipted attempt on a target had
+    to re-interpret every pattern in the previous precedence or refuse with
+    :previous-or-admitted-interpretation-missing. previous! now returns the
+    previous CascadeDiff's :acting-order-after (checked to be a vector), and
+    the acting port uses it when organise calls the port with that previous
+    cascade object; the after arm is still simulated from q0. First attempts
+    and legacy resets have no recorded order ([]).
+    
+    Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+
+diff --git a/src/futon2/aif/receipt_construction.clj b/src/futon2/aif/receipt_construction.clj
+index 92fa782b..fa4d457d 100644
+--- a/src/futon2/aif/receipt_construction.clj
++++ b/src/futon2/aif/receipt_construction.clj
+@@ -135,10 +135,14 @@
+                :previous-occurrence-mismatch {:file (str construction-file)})
+         (need! (= (:cascade-diff-sha256 retained) (evidence/value-digest d)) :previous-diff-digest-mismatch {})
+         (need! (and (set? (:nodes d)) (vector? (:precedence-after d))
++                     (vector? (:acting-order-after d))
+                      (map? (get-in d [:provenance :admissions]))
+                      (= (:admitted-by d) (set (keys (get-in d [:provenance :admissions])))))
+                :previous-admission-carrier-invalid {})
+         {:cascade {:nodes (:nodes d) :edges (:organised-edges d) :precedence (:precedence-after d)}
++         ;; The acting order the previous attempt actually recorded; reused as
++         ;; this attempt's before arm instead of being re-simulated.
++         :acting-order (:acting-order-after d)
+          :admitted (get-in d [:provenance :admissions])
+          :admission-reason :carried-from-previous-occurrence
+          :provenance {:identity prior-id :searched-roots roots :construction-file (.getCanonicalPath construction-file)
+@@ -164,7 +168,14 @@
+         order (precedence carrier (:stands-on repository))
+         interpretations (:interpretations ctx)
+         q0 (into {} (map (juxt :id :value)) (:facts record))
+-        acting (fn [c] (acting-order interpretations q0 (:precedence c)))
++        ;; Before arm: the previous attempt's recorded acting order (organise
++        ;; calls this port with the very previous-cascade object it was given),
++        ;; so this receipt need not re-interpret every earlier pattern. A first
++        ;; attempt or legacy reset has none. After arm: simulated from q0.
++        acting (fn [c]
++                 (if (identical? c (:cascade previous))
++                   (vec (:acting-order previous []))
++                   (acting-order interpretations q0 (:precedence c))))
+         diff (policy/organise (:cascade previous) selected repository admitted
+                               {:temperament (assoc policy/up-closure-temperament :precedence order)
+                                :acting-order-fn acting
+diff --git a/test/futon2/aif/receipt_construction_test.clj b/test/futon2/aif/receipt_construction_test.clj
+index aa591d12..8384662f 100644
+--- a/test/futon2/aif/receipt_construction_test.clj
++++ b/test/futon2/aif/receipt_construction_test.clj
+@@ -151,3 +151,19 @@
+         (is (= (evidence/sha256 (Files/readAllBytes (.toPath (io/file dir "003-construction.edn"))))
+                (get-in previous [:provenance :construction-sha256]))))
+       (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
++
++(deftest before-arm-reuses-the-recorded-acting-order
++  ;; The previous precedence names a pattern this receipt never interprets.
++  ;; Re-simulating it would refuse (:previous-or-admitted-interpretation-missing);
++  ;; the before arm must use the previous attempt's recorded acting order.
++  (let [{:keys [record captured id]} (fixture/sample)
++        prev {:cascade {:nodes #{:other/pattern} :edges #{} :precedence [:other/pattern]}
++              :acting-order [:other/pattern]
++              :admitted {}
++              :provenance {:status :fixture}
++              :admission-reason :carried-from-previous-occurrence}
++        c (construction/construct record captured fixture/root prev nil)
++        d (get-in c [:receipted-construction :cascade-diff])]
++    (is (= [:other/pattern] (:acting-order-before d)))
++    (is (= [:other/pattern] (:precedence-before d)))
++    (is (= [id] (:acting-order-after d)))))

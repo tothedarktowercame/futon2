@@ -1,0 +1,13 @@
+{
+  "command": [
+    "clojure",
+    "-Sdeps",
+    "{:aliases {:wm-review {:extra-paths [\"test\" \"holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-08-09-review-1\"]}}}",
+    "-M:wm-review",
+    "-m",
+    "review-probe",
+    "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-08-09-review-1/probe-results.edn"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "exit": 0
+}

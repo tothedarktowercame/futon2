@@ -1,0 +1,9 @@
+{
+  "command": [
+    "clj-kondo",
+    "--lint",
+    "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-08-09-review-1/review_probe.clj"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "exit": 3
+}

@@ -1,0 +1,1933 @@
+{:tests {:test 3, :pass 42, :fail 6, :error 0, :type :summary},
+ :observations
+ {:malformed-construction
+  {:exception "java.lang.RuntimeException",
+   :data nil,
+   :message "EOF while reading"},
+  :valid
+  {:accepted
+   {:cascade {:nodes #{:b :a}, :edges #{[:a :b]}, :precedence [:b :a]},
+    :acting-order [:b :a],
+    :admitted
+    {:b
+     {:authority :documented-interpretation,
+      :source "previous-occurrence/fixture"}},
+    :admission-reason :carried-from-previous-occurrence,
+    :provenance
+    {:identity
+     {:occurrence
+      {:schema :wm/action-transition-occurrence-v1,
+       :attempt/id "attempt-001",
+       :run/id "1d4b8b5d-de43-45f8-8f9e-85f35584624b",
+       :action/value {:type :advance-mission, :target "M-history"},
+       :action-at "2026-09-15T10:00:00Z",
+       :action/value-sha256
+       "d41deec61a3c1484edc05051ccf10cea9621a9ad3623170b382bbe0c662d886c",
+       :action/id "action-74797b61-5ffb-4bbd-878a-0a4d10be36d4",
+       :transition/id
+       "transition-c5a02ff7-63c5-4fdc-927d-5539cc76f17e",
+       :cohort/id ":fixture"},
+      :semantic-epoch :review,
+      :data-root "/tmp/wm-review-history-13495459140691800922",
+      :start-event-sha256
+      "d7772f0348e22d065f24824f3616a1f6d8c16852735aa88e852e80f2ca1aa042",
+      :interpreter-job "prior-job",
+      :author "fixture",
+      :schema-version 1},
+     :searched-roots ["/tmp/wm-review-history-13495459140691800922"],
+     :construction-file
+     "/tmp/wm-review-history-13495459140691800922/fixture/attempt-001/003-construction.edn",
+     :construction-sha256
+     "d7253a5ad33aa78f90bdecf3e0962f715ec40d42d028402581cf7e549c64d4ca",
+     :close-file
+     "/tmp/wm-review-history-13495459140691800922/fixture/attempt-001/007-closed.edn",
+     :close-sha256
+     "232fe11d2cb8786f8c817fe2b2631d6d3b55b8ae7944de4906b7bd96ab71df1d"}}},
+  :missing-cascade
+  {:accepted
+   {:cascade {:carrier :first-attempt, :nodes #{}, :precedence []},
+    :admitted {},
+    :provenance
+    {:status :none,
+     :reason :no-earlier-target-construction,
+     :searched-roots ["/tmp/wm-review-history-9715153505806051067"]},
+    :admission-reason :first-attempt-no-admissions}},
+  :missing-construction
+  {:accepted
+   {:cascade {:carrier :first-attempt, :nodes #{}, :precedence []},
+    :admitted {},
+    :provenance
+    {:status :none,
+     :reason :no-earlier-target-construction,
+     :searched-roots ["/tmp/wm-review-history-17140744644438839533"]},
+    :admission-reason :first-attempt-no-admissions}},
+  :changed-acting-order-unsealed
+  {:exception "clojure.lang.ExceptionInfo",
+   :data
+   {:interpretation/refusal :interpretation/invalid-receipt,
+    :construction/refusal :previous-manifest-source-mismatch,
+    :file
+    "/tmp/wm-review-history-1203134248772956793/fixture/attempt-001/003-construction.edn"},
+   :message "Receipted construction refused"},
+  :missing-close
+  {:accepted
+   {:cascade {:carrier :first-attempt, :nodes #{}, :precedence []},
+    :admitted {},
+    :provenance
+    {:status :none,
+     :reason :no-earlier-target-construction,
+     :searched-roots ["/tmp/wm-review-history-1839136769821111183"]},
+    :admission-reason :first-attempt-no-admissions}},
+  :invalid
+  {:outcome :incomplete,
+   :data
+   {:witness nil,
+    :feature-card-invalid-reason nil,
+    :author-job nil,
+    :error-data
+    {:outcome :incomplete,
+     :failure-kind :interpretation/invalid-receipt,
+     :failure-stage :interpretation,
+     :job-id "interpretation-one",
+     :interpretation/failure :interpretation/invalid-receipt,
+     :interpretation-record
+     "/tmp/interpretation-job-test10685580690464611146/test-cohort-exhaustion/attempt-001/evidence/interpretation-failure-098a5a15-7672-44f1-94dc-40ab6e6d6cf8.edn",
+     :interpretation/timing
+     {:queue-ms
+      {:status :none, :reason :agency-timestamps-unavailable},
+      :validation-ms 1,
+      :elapsed-ms 15},
+     :recovery-todo :packet-3b-original-receipt-successor-binding},
+    :repair-obligation
+    {:discharge-contract
+     {:requires
+      [:cleared-precondition :grounded-production-shaped-successor],
+      :artifact-shape :code-commit},
+     :repair/status :open,
+     :opened-at "2026-09-16T12:54:23.706089212Z",
+     :repair/class :environmental-hold,
+     :repair/id
+     "repair-ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001-invalid-receipt",
+     :backtrace
+     {:phase-events
+      [{:at "2026-09-16T12:54:18.980381605Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :trigger :duree-click-on-demand,
+        :phase :opportunity,
+        :transition :start}
+       {:at "2026-09-16T12:54:23.703553555Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :trigger :duree-click-on-demand,
+        :phase :agent-readiness,
+        :transition :start}
+       {:transition :end,
+        :readiness/wake-result :not-needed,
+        :readiness/wake-attempted false,
+        :phase :agent-readiness,
+        :outcome :ok,
+        :duration-ms 1,
+        :at "2026-09-16T12:54:23.704046057Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732"}
+       {:at "2026-09-16T12:54:23.704559739Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :start}
+       {:at "2026-09-16T12:54:23.704736540Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :end,
+        :outcome :ok,
+        :duration-ms 0}
+       {:at "2026-09-16T12:54:23.711294498Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"},
+        :phase :substrate-preflight,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :substrate-preflight,
+        :outcome :ok,
+        :duration-ms 0,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"},
+        :at "2026-09-16T12:54:23.711693655Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :external-attempt-id
+        "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"}
+       {:at "2026-09-16T12:54:23.711918155Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"},
+        :phase :preference-refresh,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :preference-refresh,
+        :outcome :ok,
+        :duration-ms 1,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"},
+        :at "2026-09-16T12:54:23.712054891Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :external-attempt-id
+        "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"}
+       {:at "2026-09-16T12:54:23.712208889Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"},
+        :phase :stop-line-memory,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :stop-line-memory,
+        :outcome :ok,
+        :duration-ms 0,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"},
+        :at "2026-09-16T12:54:23.712329054Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :external-attempt-id
+        "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"}
+       {:at "2026-09-16T12:54:23.712704748Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"},
+        :phase :selection,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :selection,
+        :outcome :ok,
+        :duration-ms 1,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"},
+        :at "2026-09-16T12:54:23.713136636Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :external-attempt-id
+        "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"}
+       {:at "2026-09-16T12:54:23.714574659Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"},
+        :phase :interpretation,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :interpretation,
+        :outcome :error,
+        :error-class "clojure.lang.ExceptionInfo",
+        :duration-ms 27,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"},
+        :at "2026-09-16T12:54:23.741584327Z",
+        :error "Interpretation stopped construction",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:18.980311784Z/aa21ce26-33b8-42dd-84d6-5810ec23d732",
+        :external-attempt-id
+        "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001"}],
+      :last-completed-checkpoint :adjudication,
+      :checkpoints
+      {:selection
+       {:judgment
+        {:stop-the-line-obligations [],
+         :controller-decision
+         {:action
+          {:type :advance-mission, :target "M-zaif-harness-v1"},
+          :rank 2,
+          :source :habit-prior},
+         :effective-run-configuration
+         {:schema :wm/effective-run-configuration-v1,
+          :run/id "e436f332-96ca-4d72-add3-9a2f343e8480",
+          :loaded-code-identity
+          #:runner{:source-check :current,
+                   :sha256
+                   "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353"},
+          :evaluation :not-retained,
+          :policy-details? true,
+          :fpi-dark? true,
+          :fpi-posterior? false},
+         :selected-mission "M-zaif-harness-v1",
+         :selection-reasons
+         {:source :habit-prior,
+          :rank 2,
+          :discrimination
+          {:passes? true,
+           :valid-score-count 2,
+           :distinct-score 2,
+           :score-values [-2.0 -1.0],
+           :candidate-count 2,
+           :valid-g-count 2,
+           :distinct-g 2,
+           :g-values [-2.0 -1.0],
+           :epsilon 1.0E-6,
+           :top-k 5}},
+         :trace-persistence :after-construction,
+         :belief-source
+         #:run{:id "e436f332-96ca-4d72-add3-9a2f343e8480"},
+         :ranked-candidates
+         [{:rank 1,
+           :action {:type :open-mission, :target "M-rank-head"},
+           :G-efe -2.0,
+           :controller-score -2.0}
+          {:rank 2,
+           :action
+           {:type :advance-mission, :target "M-zaif-harness-v1"},
+           :G-efe -1.0,
+           :controller-score -1.0}],
+         :selected-action
+         {:type :advance-mission, :target "M-zaif-harness-v1"}},
+        :ground
+        {:kind :wm-judgement,
+         :decision
+         {:action
+          {:type :advance-mission, :target "M-zaif-harness-v1"},
+          :rank 2,
+          :source :habit-prior}}},
+       :construction
+       {:sorry
+        {:outcome :incomplete, :kind :not-reached-construction}},
+       :dispatch
+       {:sorry {:outcome :incomplete, :kind :not-reached-dispatch}},
+       :build
+       {:sorry {:outcome :incomplete, :kind :not-reached-build}},
+       :adjudication
+       {:sorry
+        {:outcome :incomplete, :kind :not-reached-adjudication}}},
+      :code-state
+      {:repo "/futon2",
+       :git-sha "head",
+       :git-dirty? false,
+       :repo-heads {},
+       :resolved-mode-flags
+       {:goal-outcome-mode :kl,
+        :belief-model-manifest
+        {:observation-model-hash "0x9f0e738a",
+         :transition-model-hash "0x5351a7ad",
+         :initial-prior-hash "0xfc317074"},
+        :strategic-selection-boundary :reviewed-reason-bearing-policy,
+        :structural-pressure-mode :habit-prior,
+        :c-temperature 0.1,
+        :ambiguity-mode :gaussian-entropy,
+        :homeostatic-control-mode :telemetry-only,
+        :salience-mode :separate,
+        :move-class-intensity-mode :off,
+        :predictability-control-mode :telemetry-only,
+        :habit-prior-source :learned-frequency,
+        :tau-mode :selection-gain-only,
+        :scheduler-habit-authority :counterfactual-only,
+        :risk-mode :kl,
+        :kl-channel-weights {},
+        :strategic-memory-authority :reviewed-live-chain-integrity,
+        :graph-feasibility-mode :policy-support,
+        :likelihood-mode :aif},
+       :configuration-digest
+       "9498a0fd4bda604d3e813f6e8a9cf6d8645a0f36491e28065179aaad765f6fe8"}},
+     :failure-data
+     {:outcome :incomplete,
+      :failure-kind :interpretation/invalid-receipt,
+      :failure-stage :interpretation,
+      :job-id "interpretation-one",
+      :interpretation/failure :interpretation/invalid-receipt,
+      :interpretation-record
+      "/tmp/interpretation-job-test10685580690464611146/test-cohort-exhaustion/attempt-001/evidence/interpretation-failure-098a5a15-7672-44f1-94dc-40ab6e6d6cf8.edn",
+      :interpretation/timing
+      {:queue-ms
+       {:status :none, :reason :agency-timestamps-unavailable},
+       :validation-ms 1,
+       :elapsed-ms 15},
+      :recovery-todo :packet-3b-original-receipt-successor-binding},
+     :failure-error "Interpretation stopped construction",
+     :failure-kind :interpretation/invalid-receipt,
+     :attempt-id
+     "ea1-2125005af17247059bce373680c75124859902cc270d55b7be9d1b1c1dda6f1c--attempt-001",
+     :selected-entry
+     {:action {:type :advance-mission, :target "M-zaif-harness-v1"},
+      :controller-score nil},
+     :machine-repo "/futon2",
+     :failure-stage :interpretation,
+     :target "M-zaif-harness-v1",
+     :repair/schema-version 3,
+     :failure-outcome :incomplete},
+    :build-retries nil,
+    :failure-kind :interpretation/invalid-receipt,
+    :failure-detail nil,
+    :effective-run-configuration
+    {:schema :wm/effective-run-configuration-v1,
+     :run/id "e436f332-96ca-4d72-add3-9a2f343e8480",
+     :loaded-code-identity
+     #:runner{:source-check :current,
+              :sha256
+              "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353"},
+     :evaluation :not-retained,
+     :policy-details? true,
+     :fpi-dark? true,
+     :fpi-posterior? false},
+    :error-class "clojure.lang.ExceptionInfo",
+    :feature-card-source nil,
+    :failure-stage :interpretation,
+    :review-job nil,
+    :commit nil,
+    :error "Interpretation stopped construction",
+    :target "M-zaif-harness-v1"},
+   :failure-kind :interpretation/invalid-receipt,
+   :constructors 0,
+   :calls ["interpreter"],
+   :organised 0,
+   :construction-checkpoint
+   {:sorry {:outcome :incomplete, :kind :not-reached-construction}}},
+  :removed-receipted-carrier
+  {:accepted
+   {:cascade {:carrier :first-attempt, :nodes #{}, :precedence []},
+    :admitted {},
+    :provenance
+    {:status :legacy-predecessor-unrepresentable,
+     :searched-roots ["/tmp/wm-review-history-6781375493636492581"],
+     :recorded-at "2026-09-15T10:01:00Z",
+     :construction-file
+     "/tmp/wm-review-history-6781375493636492581/fixture/attempt-001/003-construction.edn",
+     :construction-sha256
+     "9089f30fe2c4fbac1f7765cff8128b57a5ee94c112bf1606373168c835a08257",
+     :close-file
+     "/tmp/wm-review-history-6781375493636492581/fixture/attempt-001/007-closed.edn",
+     :close-sha256
+     "de42b4f75a55274664e757dfd261d0507cdbf3c0ab36eb708b5352532cdcc98a"},
+    :admission-reason :legacy-predecessor-no-ruled-admissions}},
+  :no-relevant
+  {:outcome :incomplete,
+   :data
+   {:witness nil,
+    :feature-card-invalid-reason nil,
+    :author-job nil,
+    :error-data
+    {:outcome :incomplete,
+     :failure-kind :interpretation/no-relevant-pattern,
+     :failure-stage :interpretation,
+     :job-id "interpretation-one",
+     :interpretation/failure :interpretation/no-relevant-pattern,
+     :interpretation-record
+     "/tmp/interpretation-job-test13002228095084274179/test-cohort-exhaustion/attempt-001/evidence/interpretation-failure-31e8ef2e-192f-45ff-8bba-4da9e2f01bf0.edn",
+     :interpretation/timing
+     {:queue-ms
+      {:status :none, :reason :agency-timestamps-unavailable},
+      :validation-ms 29,
+      :elapsed-ms 42},
+     :recovery-todo :packet-3b-original-receipt-successor-binding},
+    :repair-obligation
+    {:discharge-contract
+     {:requires
+      [:cleared-precondition :grounded-production-shaped-successor],
+      :artifact-shape :code-commit},
+     :repair/status :open,
+     :opened-at "2026-09-16T12:54:28.625427360Z",
+     :repair/class :environmental-hold,
+     :repair/id
+     "repair-ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001-no-relevant-pattern",
+     :backtrace
+     {:phase-events
+      [{:at "2026-09-16T12:54:23.978703406Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :trigger :duree-click-on-demand,
+        :phase :opportunity,
+        :transition :start}
+       {:at "2026-09-16T12:54:28.620353841Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :trigger :duree-click-on-demand,
+        :phase :agent-readiness,
+        :transition :start}
+       {:transition :end,
+        :readiness/wake-result :not-needed,
+        :readiness/wake-attempted false,
+        :phase :agent-readiness,
+        :outcome :ok,
+        :duration-ms 1,
+        :at "2026-09-16T12:54:28.621681978Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb"}
+       {:at "2026-09-16T12:54:28.622917351Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :start}
+       {:at "2026-09-16T12:54:28.623987113Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :end,
+        :outcome :ok,
+        :duration-ms 1}
+       {:at "2026-09-16T12:54:28.627511742Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"},
+        :phase :substrate-preflight,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :substrate-preflight,
+        :outcome :ok,
+        :duration-ms 1,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"},
+        :at "2026-09-16T12:54:28.628395637Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :external-attempt-id
+        "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"}
+       {:at "2026-09-16T12:54:28.629398465Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"},
+        :phase :preference-refresh,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :preference-refresh,
+        :outcome :ok,
+        :duration-ms 1,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"},
+        :at "2026-09-16T12:54:28.630129403Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :external-attempt-id
+        "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"}
+       {:at "2026-09-16T12:54:28.630814626Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"},
+        :phase :stop-line-memory,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :stop-line-memory,
+        :outcome :ok,
+        :duration-ms 1,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"},
+        :at "2026-09-16T12:54:28.631416503Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :external-attempt-id
+        "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"}
+       {:at "2026-09-16T12:54:28.632135068Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"},
+        :phase :selection,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :selection,
+        :outcome :ok,
+        :duration-ms 1,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"},
+        :at "2026-09-16T12:54:28.633015406Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :external-attempt-id
+        "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"}
+       {:at "2026-09-16T12:54:28.634477193Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"},
+        :phase :interpretation,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :interpretation,
+        :outcome :error,
+        :error-class "clojure.lang.ExceptionInfo",
+        :duration-ms 49,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"},
+        :at "2026-09-16T12:54:28.683045314Z",
+        :error "Interpretation stopped construction",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:23.978681144Z/1703c4f4-5bb8-40b5-b0c0-5d029525d9bb",
+        :external-attempt-id
+        "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001"}],
+      :last-completed-checkpoint :adjudication,
+      :checkpoints
+      {:selection
+       {:judgment
+        {:stop-the-line-obligations [],
+         :controller-decision
+         {:action
+          {:type :advance-mission, :target "M-zaif-harness-v1"},
+          :rank 2,
+          :source :habit-prior},
+         :effective-run-configuration
+         {:schema :wm/effective-run-configuration-v1,
+          :run/id "4f176649-8ceb-426b-b183-0a950aeaf6da",
+          :loaded-code-identity
+          #:runner{:source-check :current,
+                   :sha256
+                   "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353"},
+          :evaluation :not-retained,
+          :policy-details? true,
+          :fpi-dark? true,
+          :fpi-posterior? false},
+         :selected-mission "M-zaif-harness-v1",
+         :selection-reasons
+         {:source :habit-prior,
+          :rank 2,
+          :discrimination
+          {:passes? true,
+           :valid-score-count 2,
+           :distinct-score 2,
+           :score-values [-2.0 -1.0],
+           :candidate-count 2,
+           :valid-g-count 2,
+           :distinct-g 2,
+           :g-values [-2.0 -1.0],
+           :epsilon 1.0E-6,
+           :top-k 5}},
+         :trace-persistence :after-construction,
+         :belief-source
+         #:run{:id "4f176649-8ceb-426b-b183-0a950aeaf6da"},
+         :ranked-candidates
+         [{:rank 1,
+           :action {:type :open-mission, :target "M-rank-head"},
+           :G-efe -2.0,
+           :controller-score -2.0}
+          {:rank 2,
+           :action
+           {:type :advance-mission, :target "M-zaif-harness-v1"},
+           :G-efe -1.0,
+           :controller-score -1.0}],
+         :selected-action
+         {:type :advance-mission, :target "M-zaif-harness-v1"}},
+        :ground
+        {:kind :wm-judgement,
+         :decision
+         {:action
+          {:type :advance-mission, :target "M-zaif-harness-v1"},
+          :rank 2,
+          :source :habit-prior}}},
+       :construction
+       {:sorry
+        {:outcome :incomplete, :kind :not-reached-construction}},
+       :dispatch
+       {:sorry {:outcome :incomplete, :kind :not-reached-dispatch}},
+       :build
+       {:sorry {:outcome :incomplete, :kind :not-reached-build}},
+       :adjudication
+       {:sorry
+        {:outcome :incomplete, :kind :not-reached-adjudication}}},
+      :code-state
+      {:repo "/futon2",
+       :git-sha "head",
+       :git-dirty? false,
+       :repo-heads {},
+       :resolved-mode-flags
+       {:goal-outcome-mode :kl,
+        :belief-model-manifest
+        {:observation-model-hash "0x9f0e738a",
+         :transition-model-hash "0x5351a7ad",
+         :initial-prior-hash "0xfc317074"},
+        :strategic-selection-boundary :reviewed-reason-bearing-policy,
+        :structural-pressure-mode :habit-prior,
+        :c-temperature 0.1,
+        :ambiguity-mode :gaussian-entropy,
+        :homeostatic-control-mode :telemetry-only,
+        :salience-mode :separate,
+        :move-class-intensity-mode :off,
+        :predictability-control-mode :telemetry-only,
+        :habit-prior-source :learned-frequency,
+        :tau-mode :selection-gain-only,
+        :scheduler-habit-authority :counterfactual-only,
+        :risk-mode :kl,
+        :kl-channel-weights {},
+        :strategic-memory-authority :reviewed-live-chain-integrity,
+        :graph-feasibility-mode :policy-support,
+        :likelihood-mode :aif},
+       :configuration-digest
+       "9498a0fd4bda604d3e813f6e8a9cf6d8645a0f36491e28065179aaad765f6fe8"}},
+     :failure-data
+     {:outcome :incomplete,
+      :failure-kind :interpretation/no-relevant-pattern,
+      :failure-stage :interpretation,
+      :job-id "interpretation-one",
+      :interpretation/failure :interpretation/no-relevant-pattern,
+      :interpretation-record
+      "/tmp/interpretation-job-test13002228095084274179/test-cohort-exhaustion/attempt-001/evidence/interpretation-failure-31e8ef2e-192f-45ff-8bba-4da9e2f01bf0.edn",
+      :interpretation/timing
+      {:queue-ms
+       {:status :none, :reason :agency-timestamps-unavailable},
+       :validation-ms 29,
+       :elapsed-ms 42},
+      :recovery-todo :packet-3b-original-receipt-successor-binding},
+     :failure-error "Interpretation stopped construction",
+     :failure-kind :interpretation/no-relevant-pattern,
+     :attempt-id
+     "ea1-d4edd52480cccb5f35d21202f5ad5feae607f15e4b564ccbf539480a677d4cb8--attempt-001",
+     :selected-entry
+     {:action {:type :advance-mission, :target "M-zaif-harness-v1"},
+      :controller-score nil},
+     :machine-repo "/futon2",
+     :failure-stage :interpretation,
+     :target "M-zaif-harness-v1",
+     :repair/schema-version 3,
+     :failure-outcome :incomplete},
+    :build-retries nil,
+    :failure-kind :interpretation/no-relevant-pattern,
+    :failure-detail nil,
+    :effective-run-configuration
+    {:schema :wm/effective-run-configuration-v1,
+     :run/id "4f176649-8ceb-426b-b183-0a950aeaf6da",
+     :loaded-code-identity
+     #:runner{:source-check :current,
+              :sha256
+              "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353"},
+     :evaluation :not-retained,
+     :policy-details? true,
+     :fpi-dark? true,
+     :fpi-posterior? false},
+    :error-class "clojure.lang.ExceptionInfo",
+    :feature-card-source nil,
+    :failure-stage :interpretation,
+    :review-job nil,
+    :commit nil,
+    :error "Interpretation stopped construction",
+    :target "M-zaif-harness-v1"},
+   :failure-kind :interpretation/no-relevant-pattern,
+   :constructors 0,
+   :calls ["interpreter"],
+   :organised 0,
+   :construction-checkpoint
+   {:sorry {:outcome :incomplete, :kind :not-reached-construction}}},
+  :nothing-fires
+  {:outcome :incomplete,
+   :data
+   {:witness nil,
+    :feature-card-invalid-reason nil,
+    :author-job nil,
+    :error-data
+    {:outcome :incomplete,
+     :failure-kind :interpretation/no-relevant-pattern,
+     :failure-stage :interpretation,
+     :job-id "interpretation-one",
+     :interpretation/failure :interpretation/no-relevant-pattern,
+     :interpretation-record
+     "/tmp/interpretation-job-test916011989621793503/test-cohort-exhaustion/attempt-001/evidence/interpretation-failure-897c8722-b059-413b-a80f-8481a56cded9.edn",
+     :interpretation/timing
+     {:queue-ms
+      {:status :none, :reason :agency-timestamps-unavailable},
+      :validation-ms 34,
+      :construction-ms 95,
+      :elapsed-ms 148},
+     :recovery-todo :packet-3b-original-receipt-successor-binding},
+    :repair-obligation
+    {:discharge-contract
+     {:requires
+      [:cleared-precondition :grounded-production-shaped-successor],
+      :artifact-shape :code-commit},
+     :repair/status :open,
+     :opened-at "2026-09-16T12:54:34.611135440Z",
+     :repair/class :environmental-hold,
+     :repair/id
+     "repair-ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001-no-relevant-pattern",
+     :backtrace
+     {:phase-events
+      [{:at "2026-09-16T12:54:28.797104347Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :trigger :duree-click-on-demand,
+        :phase :opportunity,
+        :transition :start}
+       {:at "2026-09-16T12:54:34.604387516Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :trigger :duree-click-on-demand,
+        :phase :agent-readiness,
+        :transition :start}
+       {:transition :end,
+        :readiness/wake-result :not-needed,
+        :readiness/wake-attempted false,
+        :phase :agent-readiness,
+        :outcome :ok,
+        :duration-ms 2,
+        :at "2026-09-16T12:54:34.606355761Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0"}
+       {:at "2026-09-16T12:54:34.607889994Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :start}
+       {:at "2026-09-16T12:54:34.609200878Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :end,
+        :outcome :ok,
+        :duration-ms 2}
+       {:at "2026-09-16T12:54:34.613409498Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"},
+        :phase :substrate-preflight,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :substrate-preflight,
+        :outcome :ok,
+        :duration-ms 1,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"},
+        :at "2026-09-16T12:54:34.614630994Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :external-attempt-id
+        "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"}
+       {:at "2026-09-16T12:54:34.615986602Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"},
+        :phase :preference-refresh,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :preference-refresh,
+        :outcome :ok,
+        :duration-ms 2,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"},
+        :at "2026-09-16T12:54:34.617582991Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :external-attempt-id
+        "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"}
+       {:at "2026-09-16T12:54:34.618902492Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"},
+        :phase :stop-line-memory,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :stop-line-memory,
+        :outcome :ok,
+        :duration-ms 2,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"},
+        :at "2026-09-16T12:54:34.620080597Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :external-attempt-id
+        "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"}
+       {:at "2026-09-16T12:54:34.621373007Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"},
+        :phase :selection,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :selection,
+        :outcome :ok,
+        :duration-ms 1,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"},
+        :at "2026-09-16T12:54:34.622668913Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :external-attempt-id
+        "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"}
+       {:at "2026-09-16T12:54:34.624464585Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"},
+        :phase :interpretation,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :interpretation,
+        :outcome :error,
+        :error-class "clojure.lang.ExceptionInfo",
+        :duration-ms 159,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"},
+        :at "2026-09-16T12:54:34.783016069Z",
+        :error "Interpretation stopped construction",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:28.797081925Z/01310d3f-e34a-4325-a758-781cd1c838d0",
+        :external-attempt-id
+        "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001"}],
+      :last-completed-checkpoint :adjudication,
+      :checkpoints
+      {:selection
+       {:judgment
+        {:stop-the-line-obligations [],
+         :controller-decision
+         {:action
+          {:type :advance-mission, :target "M-zaif-harness-v1"},
+          :rank 2,
+          :source :habit-prior},
+         :effective-run-configuration
+         {:schema :wm/effective-run-configuration-v1,
+          :run/id "42ae9f0b-17c4-4f4e-891e-72a339e26462",
+          :loaded-code-identity
+          #:runner{:source-check :current,
+                   :sha256
+                   "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353"},
+          :evaluation :not-retained,
+          :policy-details? true,
+          :fpi-dark? true,
+          :fpi-posterior? false},
+         :selected-mission "M-zaif-harness-v1",
+         :selection-reasons
+         {:source :habit-prior,
+          :rank 2,
+          :discrimination
+          {:passes? true,
+           :valid-score-count 2,
+           :distinct-score 2,
+           :score-values [-2.0 -1.0],
+           :candidate-count 2,
+           :valid-g-count 2,
+           :distinct-g 2,
+           :g-values [-2.0 -1.0],
+           :epsilon 1.0E-6,
+           :top-k 5}},
+         :trace-persistence :after-construction,
+         :belief-source
+         #:run{:id "42ae9f0b-17c4-4f4e-891e-72a339e26462"},
+         :ranked-candidates
+         [{:rank 1,
+           :action {:type :open-mission, :target "M-rank-head"},
+           :G-efe -2.0,
+           :controller-score -2.0}
+          {:rank 2,
+           :action
+           {:type :advance-mission, :target "M-zaif-harness-v1"},
+           :G-efe -1.0,
+           :controller-score -1.0}],
+         :selected-action
+         {:type :advance-mission, :target "M-zaif-harness-v1"}},
+        :ground
+        {:kind :wm-judgement,
+         :decision
+         {:action
+          {:type :advance-mission, :target "M-zaif-harness-v1"},
+          :rank 2,
+          :source :habit-prior}}},
+       :construction
+       {:sorry
+        {:outcome :incomplete, :kind :not-reached-construction}},
+       :dispatch
+       {:sorry {:outcome :incomplete, :kind :not-reached-dispatch}},
+       :build
+       {:sorry {:outcome :incomplete, :kind :not-reached-build}},
+       :adjudication
+       {:sorry
+        {:outcome :incomplete, :kind :not-reached-adjudication}}},
+      :code-state
+      {:repo "/futon2",
+       :git-sha "head",
+       :git-dirty? false,
+       :repo-heads {},
+       :resolved-mode-flags
+       {:goal-outcome-mode :kl,
+        :belief-model-manifest
+        {:observation-model-hash "0x9f0e738a",
+         :transition-model-hash "0x5351a7ad",
+         :initial-prior-hash "0xfc317074"},
+        :strategic-selection-boundary :reviewed-reason-bearing-policy,
+        :structural-pressure-mode :habit-prior,
+        :c-temperature 0.1,
+        :ambiguity-mode :gaussian-entropy,
+        :homeostatic-control-mode :telemetry-only,
+        :salience-mode :separate,
+        :move-class-intensity-mode :off,
+        :predictability-control-mode :telemetry-only,
+        :habit-prior-source :learned-frequency,
+        :tau-mode :selection-gain-only,
+        :scheduler-habit-authority :counterfactual-only,
+        :risk-mode :kl,
+        :kl-channel-weights {},
+        :strategic-memory-authority :reviewed-live-chain-integrity,
+        :graph-feasibility-mode :policy-support,
+        :likelihood-mode :aif},
+       :configuration-digest
+       "9498a0fd4bda604d3e813f6e8a9cf6d8645a0f36491e28065179aaad765f6fe8"}},
+     :failure-data
+     {:outcome :incomplete,
+      :failure-kind :interpretation/no-relevant-pattern,
+      :failure-stage :interpretation,
+      :job-id "interpretation-one",
+      :interpretation/failure :interpretation/no-relevant-pattern,
+      :interpretation-record
+      "/tmp/interpretation-job-test916011989621793503/test-cohort-exhaustion/attempt-001/evidence/interpretation-failure-897c8722-b059-413b-a80f-8481a56cded9.edn",
+      :interpretation/timing
+      {:queue-ms
+       {:status :none, :reason :agency-timestamps-unavailable},
+       :validation-ms 34,
+       :construction-ms 95,
+       :elapsed-ms 148},
+      :recovery-todo :packet-3b-original-receipt-successor-binding},
+     :failure-error "Interpretation stopped construction",
+     :failure-kind :interpretation/no-relevant-pattern,
+     :attempt-id
+     "ea1-fe0c622b7313e2f064c275f7c678b443cffa39af39e4380a6185ddb1003543ba--attempt-001",
+     :selected-entry
+     {:action {:type :advance-mission, :target "M-zaif-harness-v1"},
+      :controller-score nil},
+     :machine-repo "/futon2",
+     :failure-stage :interpretation,
+     :target "M-zaif-harness-v1",
+     :repair/schema-version 3,
+     :failure-outcome :incomplete},
+    :build-retries nil,
+    :failure-kind :interpretation/no-relevant-pattern,
+    :failure-detail nil,
+    :effective-run-configuration
+    {:schema :wm/effective-run-configuration-v1,
+     :run/id "42ae9f0b-17c4-4f4e-891e-72a339e26462",
+     :loaded-code-identity
+     #:runner{:source-check :current,
+              :sha256
+              "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353"},
+     :evaluation :not-retained,
+     :policy-details? true,
+     :fpi-dark? true,
+     :fpi-posterior? false},
+    :error-class "clojure.lang.ExceptionInfo",
+    :feature-card-source nil,
+    :failure-stage :interpretation,
+    :review-job nil,
+    :commit nil,
+    :error "Interpretation stopped construction",
+    :target "M-zaif-harness-v1"},
+   :failure-kind :interpretation/no-relevant-pattern,
+   :constructors 0,
+   :calls ["interpreter"],
+   :organised 1,
+   :construction-checkpoint
+   {:sorry {:outcome :incomplete, :kind :not-reached-construction}}},
+  :wrong-order-resealed
+  {:accepted-before [:a :b],
+   :prior-precedence [:b :a],
+   :prior-edges #{[:a :b]},
+   :meaning
+   :producer-supplied-order-not-validated-as-actual-enactment},
+  :genesis
+  {:outcome :incomplete,
+   :data
+   {:witness nil,
+    :feature-card-invalid-reason nil,
+    :author-job nil,
+    :error-data
+    {:outcome :incomplete,
+     :failure-kind :interpretation/genesis-required,
+     :failure-stage :interpretation,
+     :job-id "interpretation-one",
+     :interpretation/failure :interpretation/genesis-required,
+     :interpretation-record
+     "/tmp/interpretation-job-test7197330580578311613/test-cohort-exhaustion/attempt-001/evidence/interpretation-failure-98b8cb4d-adb2-4a32-9559-a855b274d885.edn",
+     :interpretation/timing
+     {:queue-ms
+      {:status :none, :reason :agency-timestamps-unavailable},
+      :validation-ms 4,
+      :elapsed-ms 9},
+     :recovery-todo :packet-3b-original-receipt-successor-binding},
+    :repair-obligation
+    {:discharge-contract
+     {:requires
+      [:cleared-precondition :grounded-production-shaped-successor],
+      :artifact-shape :code-commit},
+     :repair/status :open,
+     :opened-at "2026-09-16T12:54:47.595924727Z",
+     :repair/class :environmental-hold,
+     :repair/id
+     "repair-ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001-genesis-required",
+     :backtrace
+     {:phase-events
+      [{:at "2026-09-16T12:54:41.296175327Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :trigger :duree-click-on-demand,
+        :phase :opportunity,
+        :transition :start}
+       {:at "2026-09-16T12:54:47.586806144Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :trigger :duree-click-on-demand,
+        :phase :agent-readiness,
+        :transition :start}
+       {:transition :end,
+        :readiness/wake-result :not-needed,
+        :readiness/wake-attempted false,
+        :phase :agent-readiness,
+        :outcome :ok,
+        :duration-ms 3,
+        :at "2026-09-16T12:54:47.589273424Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f"}
+       {:at "2026-09-16T12:54:47.591407329Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :start}
+       {:at "2026-09-16T12:54:47.593348944Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :end,
+        :outcome :ok,
+        :duration-ms 2}
+       {:at "2026-09-16T12:54:47.597663923Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"},
+        :phase :substrate-preflight,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :substrate-preflight,
+        :outcome :ok,
+        :duration-ms 2,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"},
+        :at "2026-09-16T12:54:47.599638199Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :external-attempt-id
+        "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"}
+       {:at "2026-09-16T12:54:47.601546151Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"},
+        :phase :preference-refresh,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :preference-refresh,
+        :outcome :ok,
+        :duration-ms 2,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"},
+        :at "2026-09-16T12:54:47.603386697Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :external-attempt-id
+        "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"}
+       {:at "2026-09-16T12:54:47.605279711Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"},
+        :phase :stop-line-memory,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :stop-line-memory,
+        :outcome :ok,
+        :duration-ms 2,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"},
+        :at "2026-09-16T12:54:47.607142398Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :external-attempt-id
+        "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"}
+       {:at "2026-09-16T12:54:47.609096848Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"},
+        :phase :selection,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :selection,
+        :outcome :ok,
+        :duration-ms 2,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"},
+        :at "2026-09-16T12:54:47.611078858Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :external-attempt-id
+        "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"}
+       {:at "2026-09-16T12:54:47.613339451Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"},
+        :phase :interpretation,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :interpretation,
+        :outcome :error,
+        :error-class "clojure.lang.ExceptionInfo",
+        :duration-ms 17,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"},
+        :at "2026-09-16T12:54:47.630053814Z",
+        :error "Interpretation stopped construction",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:41.296154167Z/e19f9bff-1db8-41a5-812f-6ab29155161f",
+        :external-attempt-id
+        "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001"}],
+      :last-completed-checkpoint :adjudication,
+      :checkpoints
+      {:selection
+       {:judgment
+        {:stop-the-line-obligations [],
+         :controller-decision
+         {:action
+          {:type :advance-mission, :target "M-zaif-harness-v1"},
+          :rank 2,
+          :source :habit-prior},
+         :effective-run-configuration
+         {:schema :wm/effective-run-configuration-v1,
+          :run/id "2ae4595d-74cf-4ac0-9d36-8ad676782ab0",
+          :loaded-code-identity
+          #:runner{:source-check :current,
+                   :sha256
+                   "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353"},
+          :evaluation :not-retained,
+          :policy-details? true,
+          :fpi-dark? true,
+          :fpi-posterior? false},
+         :selected-mission "M-zaif-harness-v1",
+         :selection-reasons
+         {:source :habit-prior,
+          :rank 2,
+          :discrimination
+          {:passes? true,
+           :valid-score-count 2,
+           :distinct-score 2,
+           :score-values [-2.0 -1.0],
+           :candidate-count 2,
+           :valid-g-count 2,
+           :distinct-g 2,
+           :g-values [-2.0 -1.0],
+           :epsilon 1.0E-6,
+           :top-k 5}},
+         :trace-persistence :after-construction,
+         :belief-source
+         #:run{:id "2ae4595d-74cf-4ac0-9d36-8ad676782ab0"},
+         :ranked-candidates
+         [{:rank 1,
+           :action {:type :open-mission, :target "M-rank-head"},
+           :G-efe -2.0,
+           :controller-score -2.0}
+          {:rank 2,
+           :action
+           {:type :advance-mission, :target "M-zaif-harness-v1"},
+           :G-efe -1.0,
+           :controller-score -1.0}],
+         :selected-action
+         {:type :advance-mission, :target "M-zaif-harness-v1"}},
+        :ground
+        {:kind :wm-judgement,
+         :decision
+         {:action
+          {:type :advance-mission, :target "M-zaif-harness-v1"},
+          :rank 2,
+          :source :habit-prior}}},
+       :construction
+       {:sorry
+        {:outcome :incomplete, :kind :not-reached-construction}},
+       :dispatch
+       {:sorry {:outcome :incomplete, :kind :not-reached-dispatch}},
+       :build
+       {:sorry {:outcome :incomplete, :kind :not-reached-build}},
+       :adjudication
+       {:sorry
+        {:outcome :incomplete, :kind :not-reached-adjudication}}},
+      :code-state
+      {:repo "/futon2",
+       :git-sha "head",
+       :git-dirty? false,
+       :repo-heads {},
+       :resolved-mode-flags
+       {:goal-outcome-mode :kl,
+        :belief-model-manifest
+        {:observation-model-hash "0x9f0e738a",
+         :transition-model-hash "0x5351a7ad",
+         :initial-prior-hash "0xfc317074"},
+        :strategic-selection-boundary :reviewed-reason-bearing-policy,
+        :structural-pressure-mode :habit-prior,
+        :c-temperature 0.1,
+        :ambiguity-mode :gaussian-entropy,
+        :homeostatic-control-mode :telemetry-only,
+        :salience-mode :separate,
+        :move-class-intensity-mode :off,
+        :predictability-control-mode :telemetry-only,
+        :habit-prior-source :learned-frequency,
+        :tau-mode :selection-gain-only,
+        :scheduler-habit-authority :counterfactual-only,
+        :risk-mode :kl,
+        :kl-channel-weights {},
+        :strategic-memory-authority :reviewed-live-chain-integrity,
+        :graph-feasibility-mode :policy-support,
+        :likelihood-mode :aif},
+       :configuration-digest
+       "9498a0fd4bda604d3e813f6e8a9cf6d8645a0f36491e28065179aaad765f6fe8"}},
+     :failure-data
+     {:outcome :incomplete,
+      :failure-kind :interpretation/genesis-required,
+      :failure-stage :interpretation,
+      :job-id "interpretation-one",
+      :interpretation/failure :interpretation/genesis-required,
+      :interpretation-record
+      "/tmp/interpretation-job-test7197330580578311613/test-cohort-exhaustion/attempt-001/evidence/interpretation-failure-98b8cb4d-adb2-4a32-9559-a855b274d885.edn",
+      :interpretation/timing
+      {:queue-ms
+       {:status :none, :reason :agency-timestamps-unavailable},
+       :validation-ms 4,
+       :elapsed-ms 9},
+      :recovery-todo :packet-3b-original-receipt-successor-binding},
+     :failure-error "Interpretation stopped construction",
+     :failure-kind :interpretation/genesis-required,
+     :attempt-id
+     "ea1-0cea535991e925f069e29c8fd6b06c7952739012c51091f1319ecffed2874521--attempt-001",
+     :selected-entry
+     {:action {:type :advance-mission, :target "M-zaif-harness-v1"},
+      :controller-score nil},
+     :machine-repo "/futon2",
+     :failure-stage :interpretation,
+     :target "M-zaif-harness-v1",
+     :repair/schema-version 3,
+     :failure-outcome :incomplete},
+    :build-retries nil,
+    :failure-kind :interpretation/genesis-required,
+    :failure-detail nil,
+    :effective-run-configuration
+    {:schema :wm/effective-run-configuration-v1,
+     :run/id "2ae4595d-74cf-4ac0-9d36-8ad676782ab0",
+     :loaded-code-identity
+     #:runner{:source-check :current,
+              :sha256
+              "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353"},
+     :evaluation :not-retained,
+     :policy-details? true,
+     :fpi-dark? true,
+     :fpi-posterior? false},
+    :error-class "clojure.lang.ExceptionInfo",
+    :feature-card-source nil,
+    :failure-stage :interpretation,
+    :review-job nil,
+    :commit nil,
+    :error "Interpretation stopped construction",
+    :target "M-zaif-harness-v1"},
+   :failure-kind :interpretation/genesis-required,
+   :constructors 0,
+   :calls ["interpreter"],
+   :organised 0,
+   :construction-checkpoint
+   {:sorry {:outcome :incomplete, :kind :not-reached-construction}}},
+  :wrong-occurrence
+  {:exception "clojure.lang.ExceptionInfo",
+   :data
+   {:close-retention/refusal :temporal-order-invalid,
+    :path [:occurrence :action-at]},
+   :message "Close retention refused"},
+  :source-changed
+  {:outcome :incomplete,
+   :data
+   {:witness nil,
+    :feature-card-invalid-reason nil,
+    :author-job nil,
+    :error-data
+    {:outcome :incomplete,
+     :failure-kind :interpretation/source-changed,
+     :failure-stage :interpretation,
+     :job-id "interpretation-one",
+     :interpretation/failure :interpretation/source-changed,
+     :interpretation-record
+     "/tmp/interpretation-job-test10039675629100173403/test-cohort-exhaustion/attempt-001/evidence/interpretation-failure-b940f045-6980-4fdd-a72d-5e78671c8c73.edn",
+     :interpretation/timing
+     {:queue-ms
+      {:status :none, :reason :agency-timestamps-unavailable},
+      :validation-ms 6,
+      :elapsed-ms 21},
+     :recovery-todo :packet-3b-original-receipt-successor-binding},
+    :repair-obligation
+    {:discharge-contract
+     {:requires
+      [:cleared-precondition :grounded-production-shaped-successor],
+      :artifact-shape :code-commit},
+     :repair/status :open,
+     :opened-at "2026-09-16T12:54:41.093416236Z",
+     :repair/class :environmental-hold,
+     :repair/id
+     "repair-ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001-source-changed",
+     :backtrace
+     {:phase-events
+      [{:at "2026-09-16T12:54:34.909057857Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :trigger :duree-click-on-demand,
+        :phase :opportunity,
+        :transition :start}
+       {:at "2026-09-16T12:54:41.082561594Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :trigger :duree-click-on-demand,
+        :phase :agent-readiness,
+        :transition :start}
+       {:transition :end,
+        :readiness/wake-result :not-needed,
+        :readiness/wake-attempted false,
+        :phase :agent-readiness,
+        :outcome :ok,
+        :duration-ms 3,
+        :at "2026-09-16T12:54:41.085660907Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6"}
+       {:at "2026-09-16T12:54:41.088094774Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :start}
+       {:at "2026-09-16T12:54:41.090278342Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :trigger :duree-click-on-demand,
+        :phase :code-state,
+        :transition :end,
+        :outcome :ok,
+        :duration-ms 2}
+       {:at "2026-09-16T12:54:41.095867346Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"},
+        :phase :substrate-preflight,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :substrate-preflight,
+        :outcome :ok,
+        :duration-ms 3,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"},
+        :at "2026-09-16T12:54:41.098163575Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :external-attempt-id
+        "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"}
+       {:at "2026-09-16T12:54:41.100304643Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"},
+        :phase :preference-refresh,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :preference-refresh,
+        :outcome :ok,
+        :duration-ms 2,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"},
+        :at "2026-09-16T12:54:41.102324465Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :external-attempt-id
+        "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"}
+       {:at "2026-09-16T12:54:41.104381616Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"},
+        :phase :stop-line-memory,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :stop-line-memory,
+        :outcome :ok,
+        :duration-ms 2,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"},
+        :at "2026-09-16T12:54:41.106360110Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :external-attempt-id
+        "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"}
+       {:at "2026-09-16T12:54:41.108426249Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"},
+        :phase :selection,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :selection,
+        :outcome :ok,
+        :duration-ms 2,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"},
+        :at "2026-09-16T12:54:41.110572066Z",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :external-attempt-id
+        "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"}
+       {:at "2026-09-16T12:54:41.113237055Z",
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :trigger :duree-click-on-demand,
+        :attempt-id "attempt-001",
+        :external-attempt-id
+        "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001",
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"},
+        :phase :interpretation,
+        :transition :start}
+       {:transition :end,
+        :attempt-id "attempt-001",
+        :phase :interpretation,
+        :outcome :error,
+        :error-class "clojure.lang.ExceptionInfo",
+        :duration-ms 32,
+        :execution-identity
+        {:kind :runner-execution,
+         :id
+         "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"},
+        :at "2026-09-16T12:54:41.145464222Z",
+        :error "Interpretation stopped construction",
+        :trigger :duree-click-on-demand,
+        :opportunity-id
+        "duree-click-on-demand/2026-09-16T12:54:34.909032038Z/3bd36e02-4fcb-4e56-8678-ce23f7d299c6",
+        :external-attempt-id
+        "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001"}],
+      :last-completed-checkpoint :adjudication,
+      :checkpoints
+      {:selection
+       {:judgment
+        {:stop-the-line-obligations [],
+         :controller-decision
+         {:action
+          {:type :advance-mission, :target "M-zaif-harness-v1"},
+          :rank 2,
+          :source :habit-prior},
+         :effective-run-configuration
+         {:schema :wm/effective-run-configuration-v1,
+          :run/id "0fb2a205-6475-4af1-a448-68bf2f525b53",
+          :loaded-code-identity
+          #:runner{:source-check :current,
+                   :sha256
+                   "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353"},
+          :evaluation :not-retained,
+          :policy-details? true,
+          :fpi-dark? true,
+          :fpi-posterior? false},
+         :selected-mission "M-zaif-harness-v1",
+         :selection-reasons
+         {:source :habit-prior,
+          :rank 2,
+          :discrimination
+          {:passes? true,
+           :valid-score-count 2,
+           :distinct-score 2,
+           :score-values [-2.0 -1.0],
+           :candidate-count 2,
+           :valid-g-count 2,
+           :distinct-g 2,
+           :g-values [-2.0 -1.0],
+           :epsilon 1.0E-6,
+           :top-k 5}},
+         :trace-persistence :after-construction,
+         :belief-source
+         #:run{:id "0fb2a205-6475-4af1-a448-68bf2f525b53"},
+         :ranked-candidates
+         [{:rank 1,
+           :action {:type :open-mission, :target "M-rank-head"},
+           :G-efe -2.0,
+           :controller-score -2.0}
+          {:rank 2,
+           :action
+           {:type :advance-mission, :target "M-zaif-harness-v1"},
+           :G-efe -1.0,
+           :controller-score -1.0}],
+         :selected-action
+         {:type :advance-mission, :target "M-zaif-harness-v1"}},
+        :ground
+        {:kind :wm-judgement,
+         :decision
+         {:action
+          {:type :advance-mission, :target "M-zaif-harness-v1"},
+          :rank 2,
+          :source :habit-prior}}},
+       :construction
+       {:sorry
+        {:outcome :incomplete, :kind :not-reached-construction}},
+       :dispatch
+       {:sorry {:outcome :incomplete, :kind :not-reached-dispatch}},
+       :build
+       {:sorry {:outcome :incomplete, :kind :not-reached-build}},
+       :adjudication
+       {:sorry
+        {:outcome :incomplete, :kind :not-reached-adjudication}}},
+      :code-state
+      {:repo "/futon2",
+       :git-sha "head",
+       :git-dirty? false,
+       :repo-heads {},
+       :resolved-mode-flags
+       {:goal-outcome-mode :kl,
+        :belief-model-manifest
+        {:observation-model-hash "0x9f0e738a",
+         :transition-model-hash "0x5351a7ad",
+         :initial-prior-hash "0xfc317074"},
+        :strategic-selection-boundary :reviewed-reason-bearing-policy,
+        :structural-pressure-mode :habit-prior,
+        :c-temperature 0.1,
+        :ambiguity-mode :gaussian-entropy,
+        :homeostatic-control-mode :telemetry-only,
+        :salience-mode :separate,
+        :move-class-intensity-mode :off,
+        :predictability-control-mode :telemetry-only,
+        :habit-prior-source :learned-frequency,
+        :tau-mode :selection-gain-only,
+        :scheduler-habit-authority :counterfactual-only,
+        :risk-mode :kl,
+        :kl-channel-weights {},
+        :strategic-memory-authority :reviewed-live-chain-integrity,
+        :graph-feasibility-mode :policy-support,
+        :likelihood-mode :aif},
+       :configuration-digest
+       "9498a0fd4bda604d3e813f6e8a9cf6d8645a0f36491e28065179aaad765f6fe8"}},
+     :failure-data
+     {:outcome :incomplete,
+      :failure-kind :interpretation/source-changed,
+      :failure-stage :interpretation,
+      :job-id "interpretation-one",
+      :interpretation/failure :interpretation/source-changed,
+      :interpretation-record
+      "/tmp/interpretation-job-test10039675629100173403/test-cohort-exhaustion/attempt-001/evidence/interpretation-failure-b940f045-6980-4fdd-a72d-5e78671c8c73.edn",
+      :interpretation/timing
+      {:queue-ms
+       {:status :none, :reason :agency-timestamps-unavailable},
+       :validation-ms 6,
+       :elapsed-ms 21},
+      :recovery-todo :packet-3b-original-receipt-successor-binding},
+     :failure-error "Interpretation stopped construction",
+     :failure-kind :interpretation/source-changed,
+     :attempt-id
+     "ea1-30dfb634ad3ddb8ba824f7ddedbf33d234324e5cf457fc7a42e41d4b2d425a8c--attempt-001",
+     :selected-entry
+     {:action {:type :advance-mission, :target "M-zaif-harness-v1"},
+      :controller-score nil},
+     :machine-repo "/futon2",
+     :failure-stage :interpretation,
+     :target "M-zaif-harness-v1",
+     :repair/schema-version 3,
+     :failure-outcome :incomplete},
+    :build-retries nil,
+    :failure-kind :interpretation/source-changed,
+    :failure-detail nil,
+    :effective-run-configuration
+    {:schema :wm/effective-run-configuration-v1,
+     :run/id "0fb2a205-6475-4af1-a448-68bf2f525b53",
+     :loaded-code-identity
+     #:runner{:source-check :current,
+              :sha256
+              "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353"},
+     :evaluation :not-retained,
+     :policy-details? true,
+     :fpi-dark? true,
+     :fpi-posterior? false},
+    :error-class "clojure.lang.ExceptionInfo",
+    :feature-card-source nil,
+    :failure-stage :interpretation,
+    :review-job nil,
+    :commit nil,
+    :error "Interpretation stopped construction",
+    :target "M-zaif-harness-v1"},
+   :failure-kind :interpretation/source-changed,
+   :constructors 0,
+   :calls ["interpreter"],
+   :organised 0,
+   :construction-checkpoint
+   {:sorry {:outcome :incomplete, :kind :not-reached-construction}}},
+  :positive-order
+  {:identity
+   {:occurrence
+    {:schema :wm/action-transition-occurrence-v1,
+     :attempt/id "attempt-001",
+     :run/id "5fb82c89-5083-43fa-b807-31a1c2980c35",
+     :action/value {:type :advance-mission, :target "M-history"},
+     :action-at "2026-09-15T10:00:00Z",
+     :action/value-sha256
+     "d41deec61a3c1484edc05051ccf10cea9621a9ad3623170b382bbe0c662d886c",
+     :action/id "action-0d7bea6f-25e2-43d4-b1b8-855f5f40b0e9",
+     :transition/id "transition-93cd0a00-d173-47e0-a86d-efe1ecf2e031",
+     :cohort/id ":fixture"},
+    :semantic-epoch :review,
+    :data-root "/tmp/wm-review-history-2824530507800006192",
+    :start-event-sha256
+    "d7772f0348e22d065f24824f3616a1f6d8c16852735aa88e852e80f2ca1aa042",
+    :interpreter-job "prior-job",
+    :author "fixture",
+    :schema-version 1},
+   :before [:b :a],
+   :after [:agent/evidence-over-assertion]}}}

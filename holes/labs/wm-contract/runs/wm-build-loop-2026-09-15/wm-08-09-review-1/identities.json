@@ -1,0 +1,11 @@
+{
+  "head": "4fec38948a3714158e4d3efac9bf1e87096f6039",
+  "sources": {
+    "src/futon2/aif/full_loop_runner.clj": "c1c52aaa28cb23c0edaf645a292056caadf56cc33431fd429530f29da720e353",
+    "src/futon2/aif/receipt_construction.clj": "1b4f766c5b5b4ce540a44c2c22f345274d2a8fb21f994c5c9091c2a3cfe60338",
+    "test/futon2/aif/interpretation_job_test.clj": "af0bdb37c391468b215ec2a7d8d78f65fcd99926c0bb04dd25bd6540fa73f658",
+    "test/futon2/aif/receipt_construction_test.clj": "72f4876f6ed8067a68f39d749b21cdd28f7ac8581231a5e109edbd4fe7382271"
+  },
+  "later-runner-commits": "cae5f6d9 Retain preregistered pre/end fact measurements and move exposures\n24dc6068 Construct receipt-mode cascades once through find and ruled organise\n",
+  "later-construction-commits": ""
+}
