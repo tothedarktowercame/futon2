@@ -283,3 +283,59 @@
     (is (not (contains? enacted "start")))
     (is (not (contains? enacted "cap")))))
 
+(deftest token-preference-lean-fixture-correspondence
+  "Lean TokenPreference.Fixture (mathlib4 678c797666) replayed through the
+   runtime functions: c0 has want {t0,t1}, evidence {t2}, lam = mu = 1,
+   zeroed ∅, universe {t0,t1,t2}. Asserts the exact rational utilities
+   (u_full = 2, u_01 = 1, u_0 = 1/2, u_empty = 0), the strict fixture_chain
+   with < on doubles, and fixture_sum within 1e-12."
+  (let [spec (m/preference-spec {:want #{"t0" "t1"} :evidence #{"t2"}
+                                 :lam 1 :mu 1 :zeroed #{}})
+        universe #{"t0" "t1" "t2"}]
+    (is (and (map? spec) (not (contains? spec :status))))
+    (is (= 2 (m/token-utility spec #{"t0" "t1" "t2"})))
+    (is (= 1 (m/token-utility spec #{"t0" "t1"})))
+    (is (= 1/2 (m/token-utility spec #{"t0"})))
+    (is (= 0 (m/token-utility spec #{})))
+    (let [p (m/preference-distribution spec universe)]
+      (is (< (p #{"t0" "t1"}) (p #{"t0" "t1" "t2"})))
+      (is (< (p #{"t0"}) (p #{"t0" "t1"})))
+      (is (< (p #{}) (p #{"t0"})))
+      (is (< (Math/abs (- 1.0 (reduce + (vals p)))) 1e-12)))))
+
+(deftest token-preference-lean-theorem-properties
+  "Lean preference_pos_iff / preference_eq_zero_iff / preference_sum /
+   preference_lt_of_want_lt / preference_congr with zeroed = #{#{t2}}."
+  (let [spec (m/preference-spec {:want #{:t0 :t1} :evidence #{:t2}
+                                 :lam 1 :mu 1 :zeroed #{#{:t2}}})
+        universe #{:t0 :t1 :t2}
+        p (m/preference-distribution spec universe)]
+    ;; nonneg and normalized (preference_nonneg, preference_sum)
+    (is (every? (fn [v] (or (zero? v) (pos? v))) (vals p)))
+    (is (< (Math/abs (- 1.0 (reduce + (vals p)))) 1e-12))
+    ;; zero exactly on the zeroed set, positive elsewhere (pos_iff/eq_zero_iff)
+    (is (zero? (p #{:t2})))
+    (is (every? pos? (vals (dissoc p #{:t2}))))
+    ;; stalling: equal evidence counts, strictly more want coverage strictly
+    ;; preferred (preference_lt_of_want_lt)
+    (is (= (count (clojure.set/intersection (:evidence spec) #{:t0}))
+           (count (clojure.set/intersection (:evidence spec) #{:t0 :t1}))))
+    (is (< (count (clojure.set/intersection (:want spec) #{:t0}))
+           (count (clojure.set/intersection (:want spec) #{:t0 :t1}))))
+    (is (< (p #{:t0}) (p #{:t0 :t1})))
+    ;; content-blind: equal counts give equal preference (preference_congr)
+    (is (= (p #{:t0}) (p #{:t1})))))
+
+(deftest token-preference-lean-falsifiers
+  ;; Lean lam_pos and want_nonempty as typed refusals.
+  (let [bad-lam (m/preference-spec {:want #{"t0"} :evidence #{}
+                                    :lam 0 :mu 1 :zeroed #{}})
+        bad-want (m/preference-spec {:want #{} :evidence #{}
+                                     :lam 1 :mu 1 :zeroed #{}})]
+    (is (= :missing (:status bad-lam)))
+    (is (= :invalid-preference-spec (:kind bad-lam)))
+    (is (= :lam (:field bad-lam)))
+    (is (= :missing (:status bad-want)))
+    (is (= :invalid-preference-spec (:kind bad-want)))
+    (is (= :want (:field bad-want)))))
+

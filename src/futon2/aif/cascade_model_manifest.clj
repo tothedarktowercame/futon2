@@ -355,3 +355,62 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                               {:kind :guard-unreachable-in-declared-universe :pattern (:id p)
                                :required-outside-universe outside :source (:source p)
                                :action :review-interpretation-without-widening-carrier})))})))
+
+(defn preference-spec
+  "Lean DarkTower.WarMachine.TokenPreference.PreferenceSpec (mathlib4
+   678c797666): want nonempty (want_nonempty), lam > 0 (lam_pos),
+   mu >= 0 (mu_nonneg), and zeroed not every subset of the universe
+   want ∪ evidence ∪ zeroed tokens (zeroed_proper). lam and mu are exact
+   rationals (ratio or integer), the represented reals of the Lean fields.
+   Returns the validated spec; each violation refuses with the typed
+   {:status :missing :kind :invalid-preference-spec} outcome."
+  [{:keys [want evidence lam mu zeroed] :as spec}]
+  (let [want (set want) evidence (set evidence) zeroed (set zeroed)
+        exact? (fn [x] (or (ratio? x) (integer? x)))
+        universe (set/union want evidence (into #{} (mapcat identity) zeroed))]
+    (cond
+      (empty? want)
+      {:status :missing :kind :invalid-preference-spec :field :want :reason :empty-want}
+
+      (not (and (exact? lam) (pos? lam)))
+      {:status :missing :kind :invalid-preference-spec :field :lam :value lam :reason :lam-not-positive}
+
+      (not (and (exact? mu) (<= 0 mu)))
+      {:status :missing :kind :invalid-preference-spec :field :mu :value mu :reason :mu-negative}
+
+      (= (powerset universe) zeroed)
+      {:status :missing :kind :invalid-preference-spec :field :zeroed :reason :zeroed-covers-universe}
+
+      :else
+      (assoc spec :want want :evidence evidence :zeroed zeroed :universe universe
+             :schema :wm/token-preference-spec-v1))))
+
+(defn token-utility
+  "Lean TokenPreference.utility: lam·(|want ∩ obs| / |want|) +
+   mu·|evidence ∩ obs|, an exact rational. The coverage term reuses
+   `coverage` (Lean TokenState.coverage)."
+  [spec obs]
+  (let [c (coverage (:want spec) obs)]
+    (if (refusal? c)
+      c
+      (+ (* (:lam spec) c)
+         (* (:mu spec) (count (set/intersection (:evidence spec) (set obs))))))))
+
+(defn preference-distribution
+  "Lean TokenPreference.preference over every subset of the universe:
+   zeroed subsets map to 0.0 (preference_eq_zero_iff), the others to
+   exp(utility)/Z with Z = Σ exp(utility) over non-zeroed subsets (Z_pos ⇒
+   the distribution is well defined; preference_sum holds up to double
+   rounding, checked to 1e-12 in tests). exp is Math/exp on doubles — the
+   one non-exact step, standing for the Lean reals."
+  [spec universe]
+  (let [universe (set universe)
+        subsets (powerset universe)
+        zeroed (:zeroed spec)
+        u (fn [s] (token-utility spec s))
+        z (reduce + (map #(Math/exp (double (u %))) (remove #(contains? zeroed %) subsets)))]
+    (into {} (map (fn [s]
+                    [s (if (contains? zeroed s)
+                         0.0
+                         (/ (Math/exp (double (u s))) z))])
+                  subsets))))
