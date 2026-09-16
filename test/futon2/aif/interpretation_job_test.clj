@@ -303,7 +303,7 @@
     (is (= (pr-str action) (pr-str (get-in judgment [:cascade :selected-action]))))
     (is (= action (get-in retained [:identity :occurrence :action/value])))
     (is (= :authored-reachability-topological (:precedence-rule retained)))
-    (is (= :first-true-unfired-guard-apply-effects-from-q0 (:acting-rule retained)))
+    (is (= :first-true-unachieved-guard-apply-add-only-effects-from-q0 (:acting-rule retained)))
     (is (= :vacuous (get-in retained [:find-result :f4])))))
 
 (deftest fact-pairs-start-after-construction-and-survive-build-failure

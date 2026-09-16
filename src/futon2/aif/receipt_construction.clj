@@ -600,7 +600,7 @@
         retained {:identity (:identity record) :previous (:provenance previous)
                   :admission-reason (:admission-reason previous)
                   :precedence-rule :authored-reachability-topological :tie-break :canonical-id
-                  :acting-rule :first-true-unfired-guard-apply-effects-from-q0
+                  :acting-rule :first-true-unachieved-guard-apply-add-only-effects-from-q0
                   :effect-authority :documented-interpretation-not-measured-success
                   :cascade-diff diff :cascade-diff-sha256 (evidence/value-digest diff)
                   :find-result found :find-result-sha256 (evidence/value-digest found)
