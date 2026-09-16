@@ -1,0 +1,14 @@
+{
+  "disposition": "preserved",
+  "reading": "Q and Cdist each exhaust the only possible vertex-tagged TestObservation with datum of mass one. The repair adds distinct-support and vacuous off-support-zero proofs; no mass changes. onePointFixture and decompositionFixture retain KL zero plus declared ambiguity 2, equivalently risk 0 minus gain -2. No claim that the supplied ambiguity is computed from this point mass. EFEReference fields match all six unchanged adapter values and fixture.",
+  "additions": [
+    "ProbabilityKernel",
+    "PredictiveOutcomeKernel",
+    "PreferenceDistribution"
+  ],
+  "wrapper": "expected_free_energy_witness.clj",
+  "negative-modes": [
+    "--negative"
+  ],
+  "exit-convention": "Negative alters expected-free-energy 2 to 3 in memory. 0 requires valid receipt/fixture/Lean baseline and rejected fixture; 1 invalid baseline; 2 escaped mutation."
+}

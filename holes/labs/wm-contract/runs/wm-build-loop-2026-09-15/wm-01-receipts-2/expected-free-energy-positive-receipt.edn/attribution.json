@@ -1,0 +1,19 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+  "name" : "Q",
+  "old" : "1acd2511dc1e521a12aec384baa65d3fe26b3fe8f376e0da53e63e6af665e80c",
+  "new" : "55c76675edf83d1601a0384dead60b297d37d30046d9f778d0000059ee6969c8",
+  "pre-repair-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+  "repaired-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [datum]\n  normalised := by intros; norm_num\n\n",
+  "head-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [datum]\n  normalised := by intros; norm_num\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+  "name" : "Cdist",
+  "old" : "43bf261efeadbe4aa0e1507d48666d6bab8fe03a16d79cce86f1e16b9b339650",
+  "new" : "78821fab3626623543975f225d15ff4c4ebde04114149261999cedf10a2c12ea",
+  "pre-repair-text" : "private def Cdist : PreferenceDistribution TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+  "repaired-text" : "private def Cdist : PreferenceDistribution TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [datum]\n  normalised := by intros; norm_num\n\n",
+  "head-text" : "private def Cdist : PreferenceDistribution TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [datum]\n  normalised := by intros; norm_num\n\n"
+} ]

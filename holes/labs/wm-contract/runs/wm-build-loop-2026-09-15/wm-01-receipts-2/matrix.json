@@ -268,7 +268,344 @@
       ],
       "protocol-commands": "ambiguity-positive-receipt.edn/protocol-commands.json",
       "status": "author-verified; independent review pending"
+    },
+    {
+      "new-sha256": "861ce100b2ed9a885fbf389a63c21d7291ae21f5e3b3220dafbf7919aa301791",
+      "pins": [
+        {
+          "path": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+          "name": "Q",
+          "old": "1acd2511dc1e521a12aec384baa65d3fe26b3fe8f376e0da53e63e6af665e80c",
+          "new": "55c76675edf83d1601a0384dead60b297d37d30046d9f778d0000059ee6969c8",
+          "changed?": true,
+          "indices": [
+            0,
+            0
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+          "name": "Cdist",
+          "old": "43bf261efeadbe4aa0e1507d48666d6bab8fe03a16d79cce86f1e16b9b339650",
+          "new": "78821fab3626623543975f225d15ff4c4ebde04114149261999cedf10a2c12ea",
+          "changed?": true,
+          "indices": [
+            0,
+            1
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+          "name": "positivePreference",
+          "old": "106cfb1e118a5f51cb2593c499a3e75dcae9955f4baf976e061179999698072b",
+          "new": "106cfb1e118a5f51cb2593c499a3e75dcae9955f4baf976e061179999698072b",
+          "changed?": false,
+          "indices": [
+            0,
+            2
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+          "name": "EFEReference",
+          "old": "15e437a1f2c444639eb3cfc3d4c0c71fa4fe5e863005374d835239aa2f6da366",
+          "new": "15e437a1f2c444639eb3cfc3d4c0c71fa4fe5e863005374d835239aa2f6da366",
+          "changed?": false,
+          "indices": [
+            0,
+            3
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+          "name": "efeReference",
+          "old": "8c874019fa053b6e68628407017b3cc68d4346fc2398a2f85b632775838d249a",
+          "new": "8c874019fa053b6e68628407017b3cc68d4346fc2398a2f85b632775838d249a",
+          "changed?": false,
+          "indices": [
+            0,
+            4
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+          "name": "onePointFixture",
+          "old": "a59a00907741a2d8f5340fdef610fd32a5184346ced7656175b49551dfc21067",
+          "new": "a59a00907741a2d8f5340fdef610fd32a5184346ced7656175b49551dfc21067",
+          "changed?": false,
+          "indices": [
+            0,
+            5
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+          "name": "decompositionFixture",
+          "old": "05474babdd3a9b5faa8d9c930472fcd4bf3d1513a0e1c9bb3cec8770ab83c477",
+          "new": "05474babdd3a9b5faa8d9c930472fcd4bf3d1513a0e1c9bb3cec8770ab83c477",
+          "changed?": false,
+          "indices": [
+            0,
+            6
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "predictiveOutcomeRisk",
+          "old": "019267ca2ff14dc41dd501d1ec8693ff6d6534b6e2464d34f9dfa74aca48dced",
+          "new": "019267ca2ff14dc41dd501d1ec8693ff6d6534b6e2464d34f9dfa74aca48dced",
+          "changed?": false,
+          "indices": [
+            1,
+            0
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "expectedFreeEnergy",
+          "old": "ca65d68f0cc4deb24197d1d273b97e34cb1b5c05db176ef1dc32396adc16380b",
+          "new": "ca65d68f0cc4deb24197d1d273b97e34cb1b5c05db176ef1dc32396adc16380b",
+          "changed?": false,
+          "indices": [
+            1,
+            1
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "G",
+          "old": "1747d9b5a8db91f1374eb8d7026ba25716e1604087c0bf3125650404a14324dd",
+          "new": "1747d9b5a8db91f1374eb8d7026ba25716e1604087c0bf3125650404a14324dd",
+          "changed?": false,
+          "indices": [
+            1,
+            2
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ProbabilityKernel",
+          "old": null,
+          "new": "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+          "changed?": true,
+          "indices": [
+            1,
+            3
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "PredictiveOutcomeKernel",
+          "old": null,
+          "new": "a87f0d22850f0bbe839460485ee614534bb0cad0fddcfe81d3bfb4f60353f788",
+          "changed?": true,
+          "indices": [
+            1,
+            4
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "PreferenceDistribution",
+          "old": null,
+          "new": "2867aa7840b091fd59f622401350e18ff218a3ede2d11f42584b344e98dd1f8b",
+          "changed?": true,
+          "indices": [
+            1,
+            5
+          ]
+        }
+      ],
+      "file": "expected-free-energy-positive-receipt.edn",
+      "controls": [
+        {
+          "path": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+          "name": "Q",
+          "old": "1acd2511dc1e521a12aec384baa65d3fe26b3fe8f376e0da53e63e6af665e80c",
+          "new": "55c76675edf83d1601a0384dead60b297d37d30046d9f778d0000059ee6969c8",
+          "changed?": true,
+          "indices": [
+            0,
+            0
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        },
+        {
+          "path": "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+          "name": "Cdist",
+          "old": "43bf261efeadbe4aa0e1507d48666d6bab8fe03a16d79cce86f1e16b9b339650",
+          "new": "78821fab3626623543975f225d15ff4c4ebde04114149261999cedf10a2c12ea",
+          "changed?": true,
+          "indices": [
+            0,
+            1
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ProbabilityKernel",
+          "old": null,
+          "new": "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+          "changed?": true,
+          "indices": [
+            1,
+            3
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "PredictiveOutcomeKernel",
+          "old": null,
+          "new": "a87f0d22850f0bbe839460485ee614534bb0cad0fddcfe81d3bfb4f60353f788",
+          "changed?": true,
+          "indices": [
+            1,
+            4
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "PreferenceDistribution",
+          "old": null,
+          "new": "2867aa7840b091fd59f622401350e18ff218a3ede2d11f42584b344e98dd1f8b",
+          "changed?": true,
+          "indices": [
+            1,
+            5
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        }
+      ],
+      "axioms": {
+        "exit": 0,
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "old-sha256": "503cabbf96fea232ad3c85f8d10334cb783614207c2bca457dca87120fb524dd",
+      "review": "pending claude-3 independent review",
+      "new-recorded-at": "2026-09-16T00:18:30.285487773Z",
+      "validation": {
+        "pass?": true,
+        "failures": [],
+        "receipt-shape-valid?": true,
+        "successful-elaboration?": true,
+        "source-basis-matches?": true,
+        "fixture-adapter-matches?": true,
+        "toolchain-matches?": true,
+        "elaboration-matches?": true
+      },
+      "old-recorded-at": "2026-09-08T00:00:00Z",
+      "semantic-disposition": {
+        "disposition": "preserved",
+        "reading": "Q and Cdist each exhaust the only possible vertex-tagged TestObservation with datum of mass one. The repair adds distinct-support and vacuous off-support-zero proofs; no mass changes. onePointFixture and decompositionFixture retain KL zero plus declared ambiguity 2, equivalently risk 0 minus gain -2. No claim that the supplied ambiguity is computed from this point mass. EFEReference fields match all six unchanged adapter values and fixture.",
+        "additions": [
+          "ProbabilityKernel",
+          "PredictiveOutcomeKernel",
+          "PreferenceDistribution"
+        ],
+        "wrapper": "expected_free_energy_witness.clj",
+        "negative-modes": [
+          "--negative"
+        ],
+        "exit-convention": "Negative alters expected-free-energy 2 to 3 in memory. 0 requires valid receipt/fixture/Lean baseline and rejected fixture; 1 invalid baseline; 2 escaped mutation."
+      },
+      "commands": [
+        {
+          "name": "protocol",
+          "command": [
+            "bb",
+            "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-receipts-2/receipt_control.clj",
+            "run",
+            "expected-free-energy-positive-receipt.edn",
+            "[\"ProbabilityKernel\" \"PredictiveOutcomeKernel\" \"PreferenceDistribution\"]"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "positive",
+          "command": [
+            "bb",
+            "checks/expected_free_energy_witness.clj"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "negative",
+          "command": [
+            "bb",
+            "checks/expected_free_energy_witness.clj",
+            "--negative"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        }
+      ],
+      "protocol-commands": "expected-free-energy-positive-receipt.edn/protocol-commands.json",
+      "status": "author-verified; independent review pending"
     }
   ],
-  "next-receipt": "expected-free-energy-positive-receipt.edn"
+  "next-receipt": "expected-information-gain-positive-receipt.edn"
 }

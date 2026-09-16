@@ -50,3 +50,9 @@ matrix['entries'].append(result)
 matrix['next-receipt'] = manifest['receipts'][index + 1] if index + 1 < len(manifest['receipts']) else None
 matrix_path.write_text(json.dumps(matrix, indent=2) + '\n')
 print('CHECKPOINT READY', filename, flush=True)
+paths = [str(p.relative_to(ROOT)) for p in RUN.iterdir() if p.is_file()]
+paths += [str(dirpath.relative_to(ROOT)), 'holes/labs/wm-contract/' + filename]
+subprocess.run(['git', 'log', '-1', '--oneline'], cwd=ROOT, check=True)
+subprocess.run(['git', 'add', '--'] + paths, cwd=ROOT, check=True)
+subprocess.run(['git', 'diff', '--cached', '--check'], cwd=ROOT, check=True)
+subprocess.run(['git', 'commit', '--only', '-m', 'Re-attest ' + filename + ' at repaired carrier', '--'] + paths, cwd=ROOT, check=True)
