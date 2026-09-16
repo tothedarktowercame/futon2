@@ -331,12 +331,16 @@
    :lean nil :lean-status :missing
    :note "MINTED 2026-09-16 under P9 (claude-7), replacing :belief-update as the WM target. Stated in the same module as :state-prediction-error (its fixed point)."}
   {:id :likelihood-precision :model :categorical
+   :lean-reaudit {:date "2026-09-16" :auditor :claude-7 :verdict :matches
+                  :subject "mathlib4 fd02c510f8 (zai-30, R7 owner): LikelihoodPrecision.precisionLikelihood; precisionLikelihood_eq_softmax; precisionLikelihood_sum; precisionLikelihood_one; precisionLikelihood_zero; preciseForwardModel; predictive_normalised; PrecisionPrior; expectedPrecision; betaPosterior; betaPosterior_nil; betaPosterior_no_surprise; fixedLikelihood; fixture_precision_two"
+                  :finding "A_zeta(o|s) = A(o|s)^zeta / Z(zeta)_s with Z(zeta)_s = sum_o A(o|s)^zeta, the column partition function of B.17, proved equal to sigma(zeta ln A) column-wise (B.18). It is positive and normalised for every real zeta, equals A at zeta = 1 and is uniform at zeta = 0. Q(o|pi) under A_zeta is normalised because A_zeta instantiates PolicyRollout.ForwardModel. zeta-bar = 1/beta_zeta with beta > 0 by type (B.14-B.15). betaPosterior is the B.19 fixed point beta_post = beta_prior + sum_tau (o_zeta_tau - o_tau).(ln A s_tau), with o_zeta_tau = A_zeta s_tau. It is unchanged for an empty trial and whenever the observations equal their precision-weighted predictions. fixedLikelihood declares a fixed zeta. Domain: A > 0 entrywise, since ln A appears in B.18-B.19. Finding, recorded but not a divergence: B.19 does not by itself keep beta_post > 0, so a runtime must refuse (typed) a non-positive update rather than invert it. Fixture: A = (3/4, 1/4) at zeta = 2 gives 9/10 and 1/10. Source B.14-B.19 checked at refs/parr2022.txt:12720-12830. Rebuilt by claude-7; axioms propext/Classical.choice/Quot.sound only."}
    :defines :zeta :node :R7 :class :theory-defined :ref :parr2022
    :imports [:A :o :s]
-   :formal "A_zeta(o|s) := A(o|s)^zeta / sum_o' A(o'|s)^zeta; zeta-bar = 1/beta_zeta; beta_zeta <- beta_zeta-prior + sum_tau (o_zeta_tau - o_tau).ln A s_tau with o_zeta_tau = sigma(zeta ln A) s_tau"
+   :formal "A_zeta(o|s) := A(o|s)^zeta / sum_o' A(o'|s)^zeta = sigma(zeta ln A); zeta-bar = 1/beta_zeta; beta_zeta-post = beta_zeta-prior + sum_tau (o_zeta_tau - o_tau).ln A s_tau with o_zeta_tau = A_zeta s_tau (domain: A > 0)"
    :eq "parr2022 §B.2.4 eqs. B.14-B.19 (likelihood precision zeta, gamma prior, posterior update)"
-   :lean nil :lean-status :missing
-   :note "MINTED 2026-09-16 under P9 (claude-7), replacing :precision as the WM target. Commissioned to the R7 owner: DarkTower/WarMachine/LikelihoodPrecision.lean."}]
+   :lean "LikelihoodPrecision.precisionLikelihood" :lean-status :closed
+   :lean-at "mathlib4 fd02c510f8 (LikelihoodPrecision.lean)"
+   :note "MINTED 2026-09-16 under P9 (claude-7), replacing :precision as the WM target. Closed the same day on zai-30's LikelihoodPrecision.lean."}]
 
  ;; Where the framework leaves a free hand. Each is recorded as OBSERVED in
  ;; the War Machine as of 2026-09-01; Joe decides. Format mirrors
