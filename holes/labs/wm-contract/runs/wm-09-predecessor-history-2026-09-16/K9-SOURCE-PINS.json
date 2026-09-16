@@ -1,0 +1,20 @@
+{
+  "base": "135b931a5938bde39cb1ea0b3a8b844c4b2f68f4",
+  "sha256": {
+    "src/futon2/aif/receipt_construction.clj": "9a16668d0d343765db44929e4d2629e7d97fe0db9f2a70e5ce937560887e394f",
+    "test/futon2/aif/receipt_construction_test.clj": "227f700bc160efe2192db241969d2819f41620a14ccc4b9107ccecd8ba7a652d",
+    "/home/joe/code/p4ng/wm-walkthroughs/build-loop/claude-3/WM-09-predecessor-history-1.md": "b355dd8e79032b7501bf12abaa60bd3ca480d3c26e88460a1f900d5770761e1f"
+  },
+  "original_diagnostics_unchanged_against": "7e738d53",
+  "files": [
+    "REPORT.md",
+    "SOURCE-PINS.json",
+    "VALIDATION.json",
+    "before.edn",
+    "before.stderr",
+    "kondo.log",
+    "namespace-tests.log",
+    "parens.log",
+    "probe.clj"
+  ]
+}

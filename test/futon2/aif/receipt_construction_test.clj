@@ -74,18 +74,19 @@
                                                (refusal #(run (assoc-in record [:facts 0 :value] false))))))))
 
 (defn history-fixture! [root epoch at closed-at]
-  (let [action {:type :advance-mission :target "M-history"}
-        occurrence (retention/mint-occurrence {:run-id (str (UUID/randomUUID)) :cohort-id ":fixture"
+  (let [fixture-cohort (keyword (str "fixture-" (name epoch)))
+        action {:type :advance-mission :target "M-history"}
+        occurrence (retention/mint-occurrence {:run-id (str (UUID/randomUUID)) :cohort-id (str fixture-cohort)
                                               :attempt-id "attempt-001" :selected-action action
                                               :now #(Instant/parse at) :uuid-fn #(UUID/randomUUID)})
-        dir (io/file root "fixture" "attempt-001")
+        dir (io/file root (name fixture-cohort) "attempt-001")
         start-file (io/file dir "001-time-step.edn")
         selection-file (io/file dir "002-selection.edn")
         construction-file (io/file dir "003-construction.edn")
         close-file (io/file dir "007-closed.edn")
         _ (.mkdirs dir)
         event (fn [index checkpoint time payload]
-                {:event/schema-version 1 :cohort/id :fixture :attempt/id "attempt-001"
+                {:event/schema-version 1 :cohort/id fixture-cohort :attempt/id "attempt-001"
                  :attempt/ordinal 1 :event/sequence index :checkpoint/type checkpoint
                  :recorded-at time :payload payload})
         _ (spit start-file (pr-str (event 1 :time-step at {:judgment {:semantic-epoch epoch} :ground {:kind :fixture-start}})))
@@ -116,7 +117,7 @@
     (spit close-file (pr-str close))
     {:identity identity :close close :close-file close-file :construction-file construction-file}))
 
-(deftest prior-construction-joins-full-occurrence-across-reused-names
+(deftest prior-construction-joins-full-occurrence-across-distinct-cohorts
   (let [temp (.toFile (Files/createTempDirectory "receipt-history" (make-array FileAttribute 0)))
         r1 (io/file temp "first") r2 (io/file temp "second")]
     (try
@@ -130,7 +131,7 @@
         (is (= (:identity newer) (get-in previous [:provenance :identity])))
         (is (= {:b authority} (:admitted previous)))
         (is (= [:b :a] (get-in previous [:cascade :precedence])))
-        ;; Same attempt/cohort names cannot replace the full occurrence join.
+        ;; Distinct cohort names still cannot replace the full occurrence join.
         (spit (:close-file newer) (pr-str (assoc-in (:close newer) [:payload :close-retention :occurrence]
                                                   (get-in old [:identity :occurrence]))))
         (is (= :previous-occurrence-mismatch
@@ -149,7 +150,7 @@
             (pr-str {:cohort/id :legacy-cohort :attempt/id "attempt-001"
                      :payload {:judgment {:mission "M-history" :cascade {:shown ["family/old"]}}}}))
       (spit (io/file dir "007-closed.edn")
-            (pr-str {:recorded-at "2026-07-21T10:08:23Z" :payload {:judgment {:outcome :build-failed}}}))
+            (pr-str {:cohort/id :legacy-cohort :attempt/id "attempt-001" :recorded-at "2026-07-21T10:08:23Z" :payload {:judgment {:outcome :build-failed}}}))
       (let [current {:occurrence (retention/mint-occurrence
                                   {:run-id (str (UUID/randomUUID)) :cohort-id ":fixture" :attempt-id "attempt-002"
                                    :selected-action {:type :advance-mission :target "M-history"}
@@ -584,3 +585,60 @@
           (Files/deleteIfExists (.toPath link))
           (Files/delete (.toPath temp))
           (Files/delete (.toPath outside)))))))
+
+(deftest distinct-path-checkpoint-copies-remain-unresolved
+  (doseq [different? [false true]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-collision" (make-array FileAttribute 0)))
+          archive (io/file temp "archives" "snapshot")]
+      (try
+        (let [files (non-construction-fixture! temp true false)
+              copied (mapv #(io/file archive "fixture" "attempt-002" (.getName %)) files)]
+          (.mkdirs (.getParentFile (first copied)))
+          (doseq [[source dest] (map vector files copied)] (spit dest (slurp source)))
+          (when different?
+            (rewrite-history! (first copied) #(assoc-in % [:payload :ground :annotation] :different)))
+          (let [error (refusal #(construction/previous! {:occurrence {:action/value {:target "M-fresh"}
+                                                                   :action-at "2026-09-15T12:00:00Z"}} [temp archive]))]
+            (is (= :history-discovery-invalid (:construction/refusal error)))
+            (is (= (if different? :history-identity-collision :distinct-path-identical-history) (:reason error)))
+            (is (= {:cohort/id :fixture :attempt/id "attempt-002"} (:identity error)))
+            (is (= 2 (count (:records error))))
+            (is (= (not different?) (:identical-checkpoint-sets? error)))
+            (is (every? #(= 7 (count (:checkpoints %))) (:records error)))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
+
+(deftest auxiliary-exclusion-requires-complete-coverage
+  (doseq [hidden [nil :close :attempt :unreadable]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-aux" (make-array FileAttribute 0)))
+          auxiliary (io/file temp "fixture" "arbitrary-name")
+          leaf (io/file auxiliary "nested")
+          children @#'construction/history-children!
+          current {:occurrence {:action/value {:target "M-fresh"} :action-at "2026-09-15T12:00:00Z"}}]
+      (try
+        (.mkdirs (io/file temp "fixture" "attempt-003"))
+        (.mkdirs leaf)
+        (spit (io/file auxiliary "notes.txt") "ancillary")
+        (case hidden
+          :close (spit (io/file leaf "007-closed.edn") "{}")
+          :attempt (.mkdirs (io/file leaf "attempt-999"))
+          nil)
+        (let [run #(construction/previous! current [temp])
+              result (if (= :unreadable hidden)
+                       (with-redefs-fn {#'construction/history-children!
+                                       (fn [dir]
+                                         (if (= (str dir) (str leaf))
+                                           (throw (ex-info "simulated unreadable directory"
+                                                           {:construction/refusal :history-discovery-invalid
+                                                            :reason :root-or-directory-unreadable :file (str dir)}))
+                                           (children dir)))}
+                         #(refusal run))
+                       (if hidden (refusal run) (run)))]
+          (if hidden
+            (do (is (= :history-discovery-invalid (:construction/refusal result)))
+                (is (string? (:file result))))
+            (let [coverage (first (get-in result [:provenance :auxiliary-exclusions]))]
+              (is (= :first-attempt-no-admissions (:admission-reason result)))
+              (is (= :complete-no-attempt-no-close-coverage (:reason coverage)))
+              (is (= (str auxiliary) (:path coverage)))
+              (is (= 3 (count (:visited coverage)))))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))

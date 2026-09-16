@@ -87,7 +87,7 @@
 (defn- discover-closes! [roots]
   ;; K8 supports only the producer layout and its explicit archive container.
   ;; A recognized attempt may be open; an unknown nested directory is not one.
-  (let [closes (atom #{}) layouts (atom [])]
+  (let [closes (atom #{}) layouts (atom []) auxiliary (atom [])]
     (letfn [(children! [root dir]
               (mapv (fn [file]
                       (need! (and (not (Files/isSymbolicLink (.toPath file)))
@@ -99,28 +99,40 @@
                              {:reason :unclassifiable-history-entry :file (str file)})
                       file)
                     (history-children! dir)))
+            (auxiliary! [root dir]
+              (let [visited (atom [])]
+                (letfn [(scan! [entry]
+                          (need! (and (not (str/starts-with? (.getName entry) "attempt-"))
+                                      (not= "007-closed.edn" (.getName entry)))
+                                 :history-discovery-invalid
+                                 {:reason :unsupported-history-layout :file (str entry)})
+                          (swap! visited conj (str entry))
+                          (when (.isDirectory entry)
+                            (doseq [child (children! root entry)] (scan! child))))]
+                  (scan! dir)
+                  (swap! auxiliary conj {:path (str dir) :reason :complete-no-attempt-no-close-coverage
+                                         :visited @visited}))))
+            (cohort-or-auxiliary! [root dir]
+              (need! (not (str/starts-with? (.getName dir) "attempt-"))
+                     :history-discovery-invalid {:reason :unsupported-history-layout :file (str dir)})
+              (if (some #(and (.isDirectory %) (re-matches #"attempt-\d{3}" (.getName %)))
+                        (children! root dir))
+                (walk! root dir :cohort)
+                (auxiliary! root dir)))
             (walk! [root dir stage]
               (doseq [file (children! root dir)]
                 (if (.isDirectory file)
                   (case stage
                     :root (if (= "archives" (.getName file))
                             (walk! root file :archives)
-                            (walk! root file :cohort))
+                            (cohort-or-auxiliary! root file))
                     :archives (do (swap! layouts conj {:root root :layout :archive :path (str file)})
                                   (walk! root file :archive-group))
-                    :archive-group (walk! root file :cohort)
-                    :cohort (do (need! (re-matches #"attempt-\d{3}" (.getName file))
-                                       :history-discovery-invalid
-                                       {:reason :unsupported-history-layout :file (str file)})
-                                (walk! root file :attempt))
-                    :attempt (if (= "evidence" (.getName file))
-                               ;; full-loop-runner/checkpoint-evidence-manifest reads
-                               ;; immutable source files here, not nested attempts.
-                               (walk! root file :evidence)
-                               (need! false :history-discovery-invalid
-                                      {:reason :unsupported-history-layout :file (str file)}))
-                    :evidence (need! false :history-discovery-invalid
-                                    {:reason :unsupported-history-layout :file (str file)}))
+                    :archive-group (cohort-or-auxiliary! root file)
+                    :cohort (if (re-matches #"attempt-\d{3}" (.getName file))
+                              (walk! root file :attempt)
+                              (auxiliary! root file))
+                    :attempt (auxiliary! root file))
                   (when (= "007-closed.edn" (.getName file))
                     (need! (= :attempt stage) :history-discovery-invalid
                            {:reason :misplaced-closed-history :file (str file)})
@@ -128,7 +140,32 @@
       (doseq [root roots]
         (swap! layouts conj {:root root :layout :direct :path root})
         (walk! root (io/file root) :root))
-      {:files (sort @closes) :layouts @layouts})))
+      {:files (sort @closes) :layouts @layouts :auxiliary-exclusions @auxiliary})))
+
+(defn- distinct-history-identities! [files]
+  (let [rows (mapv (fn [path]
+                     (let [closed (history-read! path)
+                           id (select-keys closed [:cohort/id :attempt/id])
+                           dir (.getParentFile (io/file path))]
+                       (need! (and (keyword? (:cohort/id id))
+                                   (string? (:attempt/id id)) (not (str/blank? (:attempt/id id))))
+                              :history-discovery-invalid {:reason :history-identity-unavailable :file path})
+                       {:path path :identity id
+                        :checkpoints (into (sorted-map)
+                                           (map-indexed
+                                            (fn [i checkpoint]
+                                              (let [f (io/file dir (format "%03d-%s.edn" (inc i) (name checkpoint)))]
+                                                [(.getName f) (when (.exists f)
+                                                               (history-read! f)
+                                                               (evidence/sha256 (bytes f)))]))
+                                            cohort/checkpoint-order))})) files)]
+    (doseq [[id group] (group-by :identity rows) :when (> (count group) 1)]
+      (let [identical? (apply = (map :checkpoints group))]
+        (need! false :history-discovery-invalid
+               {:reason (if identical? :distinct-path-identical-history :history-identity-collision)
+                :file (:path (first group)) :identity id :records (vec group)
+                :identical-checkpoint-sets? identical?})))
+    rows))
 
 (defn- discovery-target! [value file path]
   (need! (or (keyword? value) (and (string? value) (not (str/blank? value))))
@@ -458,6 +495,7 @@
         roots (vec (distinct (map history-root! roots)))
         _ (need! (seq roots) :history-discovery-invalid {:reason :search-roots-unavailable})
         discovered (discover-closes! roots)
+        _ (distinct-history-identities! (:files discovered))
         candidates (mapv #(closed-candidate! (io/file %)) (:files discovered))
         earlier-all (filter #(.isBefore ^Instant (:closed-at %) before) candidates)
         earlier (remove :non-construction? earlier-all)
@@ -470,7 +508,7 @@
                    {:files (mapv #(str (:close-file %)) (take-last 2 ordered))}))]
     (if-let [latest (last ordered)]
       (try (update (validated-previous! latest roots) :provenance assoc
-                   :searched-layouts (:layouts discovered) :excluded-attempts exclusions :requested-target requested-target
+                   :auxiliary-exclusions (:auxiliary-exclusions discovered) :searched-layouts (:layouts discovered) :excluded-attempts exclusions :requested-target requested-target
                    :target-evidence (:target-evidence latest))
            (catch clojure.lang.ExceptionInfo e
              (throw (ex-info (.getMessage e) (assoc (ex-data e) :history/searched-layouts (:layouts discovered) :history/excluded-attempts exclusions
@@ -478,7 +516,7 @@
                                                    :history/target-evidence (:target-evidence latest)) e))))
       {:cascade policy/first-attempt-cascade :admitted {}
        :provenance {:status :none :reason :no-earlier-target-construction :searched-roots roots
-                    :searched-layouts (:layouts discovered) :excluded-attempts exclusions :requested-target requested-target}
+                    :auxiliary-exclusions (:auxiliary-exclusions discovered) :searched-layouts (:layouts discovered) :excluded-attempts exclusions :requested-target requested-target}
        :admission-reason :first-attempt-no-admissions})))
 
 (defn history-roots [identity]
