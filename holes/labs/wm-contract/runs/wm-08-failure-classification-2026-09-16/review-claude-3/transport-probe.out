@@ -1,0 +1,8 @@
+:transport-classes [["java.net.http.HttpTimeoutException" :transport-timeout] ["java.net.SocketTimeoutException" :transport-timeout] ["java.net.ConnectException" :transport-unavailable] ["java.net.BindException" :transport-unavailable] ["java.net.NoRouteToHostException" :transport-unavailable] ["java.net.PortUnreachableException" :transport-unavailable] ["java.net.UnknownHostException" :transport-unavailable]]
+:runner-direct {:connect :transport-unavailable, :timeout :transport-timeout}
+{:case :control-construct-npe, :runner-failure-kind :untyped-failure, :repair-class :machine-failure, :recorded-kind :interpretation/machine-failure, :diagnostic-causes ["java.lang.NullPointerException"], :close-written? true}
+{:case :readiness-connect-refused, :runner-failure-kind :untyped-failure, :repair-class :machine-failure, :recorded-kind :interpretation/machine-failure, :diagnostic-causes ["java.net.ConnectException"], :close-written? true}
+{:case :poll-socket-timeout, :runner-failure-kind :untyped-failure, :repair-class :machine-failure, :recorded-kind :interpretation/machine-failure, :diagnostic-causes ["java.net.SocketTimeoutException"], :close-written? true}
+{:case :dispatch-wrapped-connect, :runner-failure-kind :untyped-failure, :repair-class :machine-failure, :recorded-kind :interpretation/machine-failure, :diagnostic-causes ["clojure.lang.ExceptionInfo" "java.net.ConnectException"], :close-written? true}
+Execution error at futon2.aif.interpretation-job-test/run-case$fn (interpretation_job_test.clj:126).
+No reader function for tag object
