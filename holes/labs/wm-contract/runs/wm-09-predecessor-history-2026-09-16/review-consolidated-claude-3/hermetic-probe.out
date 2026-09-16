@@ -1,0 +1,9 @@
+{:case :not-reached-selection-without-target-alongside-valid, :result {:refusal :history-discovery-invalid, :reason :non-construction-selection-invalid}}
+{:case :not-reached-with-non-producer-close-ground, :result {:refusal :history-discovery-invalid, :reason :non-construction-close-contradiction}}
+{:case :unrelated-missing-construction-file, :result {:refusal :history-discovery-invalid, :reason :relevance-checkpoint-invalid}}
+{:case :unrelated-internal-target-conflict, :result {:refusal :history-discovery-invalid, :reason :contradictory-targets}}
+{:case :colonless-request-vs-keyword-history, :result {:admission-reason :first-attempt-no-admissions, :excluded [:producer-recorded-different-target]}}
+{:case :unrelated-construction-after-close, :result {:refusal :history-discovery-invalid, :reason :relevance-ordering-invalid}}
+{:case :unrelated-rejected-construction-extra-key, :result {:refusal :history-discovery-invalid, :reason :relevance-checkpoint-invalid}}
+{:case :matching-rejected-over-valid, :result {:refusal :previous-construction-rejected, :reason nil, :rejection {:kind :invalid-checkpoint-cell, :outcome :incomplete, :refused-checkpoint :construction, :cell-errors [[:invalid-fold-output :fixture]]}, :sha-matches? true, :target-evidence-count 2, :requested-target {:file ":current-identity", :path [:occurrence :action/value :target], :value "M-history", :type :string, :comparison "M-history"}}}
+{:case :npe-inside-relevance-evidence, :thrown "java.lang.NullPointerException", :job-kind :interpretation/machine-failure, :failure-kind :untyped-failure, :repair-class :machine-failure}

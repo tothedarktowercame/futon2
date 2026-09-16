@@ -1,0 +1,5 @@
+closes 77
+:dispositions {:k5-excluded-for-fresh-target 59, :k2k3-excluded 16, :refuses-discovery 2}
+:refusal-reasons {[:history-discovery-invalid :non-construction-selection-invalid] 1, [:history-discovery-invalid :non-construction-close-contradiction] 1}
+{:path "wm-full-loop/wm-outer-loop-40-v1/attempt-036/007-closed.edn", :disposition :refuses-discovery, :reason [:history-discovery-invalid :non-construction-selection-invalid]}
+{:path "wm-full-loop/wm-outer-loop-43-v1/attempt-053/007-closed.edn", :disposition :refuses-discovery, :reason [:history-discovery-invalid :non-construction-close-contradiction]}

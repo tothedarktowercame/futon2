@@ -1,0 +1,4 @@
+futon2.aif.receipt-construction-test exit 0
+focused callers exit 0
+classification exit 0
+interpretation-job-test full exit 0
