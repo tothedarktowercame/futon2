@@ -1,0 +1,3 @@
+classpath: git show 6c417fc8 receipt_construction.clj (28860aa6) + test (79312944) prepended to clojure -Spath -M:test; java -cp ... clojure.main
+old-source negative run: 7e738d53 receipt_construction.clj + 6c417fc8 test
+real roots: cp -a data/wm-full-loop* /tmp/c3-wm09i/realcopy (113M); realcopy2 = same minus attempts whose 003-construction.edn contains :not-reached-construction

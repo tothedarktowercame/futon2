@@ -1,0 +1,242 @@
+
+Testing futon2.aif.receipt-construction-test
+
+FAIL in (old-shaped-predecessor-refuses-current-evidence-gap) (receipt_construction_test.clj:148)
+expected: (= :previous-occurrence-unavailable (:construction/refusal rejected))
+  actual: (not (= :previous-occurrence-unavailable nil))
+
+FAIL in (old-shaped-predecessor-refuses-current-evidence-gap) (receipt_construction_test.clj:149)
+expected: (= (str (io/file dir "007-closed.edn")) (:history/close-file rejected))
+  actual: (not (= "/tmp/receipt-legacy5390140095087005441/legacy-cohort/attempt-001/007-closed.edn" nil))
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:199)
+carrier-removed
+expected: (= expected (:construction/refusal error))
+  actual: (not (= :previous-cascade-carrier-unavailable nil))
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:200)
+carrier-removed
+expected: (or (:file error) (:history/close-file error))
+  actual: nil
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:199)
+cascade-removed
+expected: (= expected (:construction/refusal error))
+  actual: (not (= :previous-cascade-unavailable nil))
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:200)
+cascade-removed
+expected: (or (:file error) (:history/close-file error))
+  actual: nil
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:199)
+construction-missing
+expected: (= expected (:construction/refusal error))
+  actual: (not (= :previous-cascade-unavailable nil))
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:200)
+construction-missing
+expected: (or (:file error) (:history/close-file error))
+  actual: nil
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:199)
+manifest-missing
+expected: (= expected (:construction/refusal error))
+  actual: (not (= :previous-evidence-invalid nil))
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:200)
+manifest-missing
+expected: (or (:file error) (:history/close-file error))
+  actual: nil
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:199)
+manifest-corrupt
+expected: (= expected (:construction/refusal error))
+  actual: (not (= :previous-evidence-invalid nil))
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:200)
+manifest-corrupt
+expected: (or (:file error) (:history/close-file error))
+  actual: nil
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:199)
+occurrence-corrupt
+expected: (= expected (:construction/refusal error))
+  actual: (not (= :previous-evidence-invalid nil))
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:200)
+occurrence-corrupt
+expected: (or (:file error) (:history/close-file error))
+  actual: nil
+
+FAIL in (damaged-latest-history-never-resets-or-falls-back) (receipt_construction_test.clj:199)
+target-conflict
+expected: (= expected (:construction/refusal error))
+  actual: (not (= :history-discovery-invalid :previous-manifest-source-mismatch))
+
+ERROR in (damaged-latest-history-never-resets-or-falls-back) (Objects.java:259)
+Uncaught exception, not in assertion.
+expected: nil
+  actual: java.lang.NullPointerException: text
+ at java.util.Objects.requireNonNull (Objects.java:259)
+    java.time.format.DateTimeFormatter.parse (DateTimeFormatter.java:2007)
+    java.time.Instant.parse (Instant.java:398)
+    futon2.aif.receipt_construction$same_target_close.invokeStatic (receipt_construction.clj:62)
+    futon2.aif.receipt_construction$same_target_close.invoke (receipt_construction.clj:53)
+    futon2.aif.receipt_construction$previous_BANG_$iter__1209__1217$fn__1218$iter__1211__1219$fn__1220$iter__1213__1221$fn__1222.invoke (receipt_construction.clj:83)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.RT.seq (RT.java:535)
+    clojure.core$seq__5467.invokeStatic (core.clj:139)
+    clojure.core/seq (core.clj:139)
+    futon2.aif.receipt_construction$previous_BANG_$iter__1209__1217$fn__1218$iter__1211__1219$fn__1220.invoke (receipt_construction.clj:78)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.RT.seq (RT.java:535)
+    clojure.core$seq__5467.invokeStatic (core.clj:139)
+    clojure.core/seq (core.clj:139)
+    futon2.aif.receipt_construction$previous_BANG_$iter__1209__1217$fn__1218.invoke (receipt_construction.clj:78)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:58)
+    clojure.lang.Cons.next (Cons.java:39)
+    clojure.lang.RT.length (RT.java:1782)
+    clojure.lang.RT.seqToArray (RT.java:1723)
+    clojure.lang.LazySeq.toArray (LazySeq.java:132)
+    clojure.lang.RT.toArray (RT.java:1696)
+    clojure.core$to_array.invokeStatic (core.clj:346)
+    clojure.core$sort.invokeStatic (core.clj:3114)
+    clojure.core$sort_by.invokeStatic (core.clj:3120)
+    clojure.core$sort_by.invokeStatic (core.clj:3120)
+    clojure.core$sort_by.invoke (core.clj:3120)
+    futon2.aif.receipt_construction$previous_BANG_.invokeStatic (receipt_construction.clj:84)
+    futon2.aif.receipt_construction$previous_BANG_.invoke (receipt_construction.clj:70)
+    futon2.aif.receipt_construction_test$fn__19953$fn__20015$fn__20016.invoke (receipt_construction_test.clj:198)
+    futon2.aif.receipt_construction_test$refusal.invokeStatic (receipt_construction_test.clj:19)
+    futon2.aif.receipt_construction_test$refusal.invoke (receipt_construction_test.clj:19)
+    futon2.aif.receipt_construction_test$fn__19953$fn__20015.invoke (receipt_construction_test.clj:198)
+    futon2.aif.receipt_construction_test$fn__19953.invokeStatic (receipt_construction_test.clj:190)
+    futon2.aif.receipt_construction_test/fn (receipt_construction_test.clj:171)
+    clojure.test$test_var$fn__9856.invoke (test.clj:717)
+    clojure.test$test_var.invokeStatic (test.clj:717)
+    clojure.test$test_var.invoke (test.clj:708)
+    clojure.test$test_vars$fn__9882$fn__9887.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars$fn__9882.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars.invokeStatic (test.clj:731)
+    clojure.test$test_all_vars.invokeStatic (test.clj:737)
+    clojure.test$test_ns.invokeStatic (test.clj:758)
+    clojure.test$test_ns.invoke (test.clj:743)
+    clojure.core$map$fn__5935.invoke (core.clj:2772)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.Cons.next (Cons.java:39)
+    clojure.lang.RT.boundedLength (RT.java:1790)
+    clojure.lang.RestFn.applyTo (RestFn.java:130)
+    clojure.core$apply.invokeStatic (core.clj:669)
+    clojure.test$run_tests.invokeStatic (test.clj:768)
+    clojure.test$run_tests.doInvoke (test.clj:768)
+    clojure.lang.RestFn.invoke (RestFn.java:408)
+    user$eval20105.invokeStatic (NO_SOURCE_FILE:1)
+    user$eval20105.invoke (NO_SOURCE_FILE:1)
+    clojure.lang.Compiler.eval (Compiler.java:7194)
+    clojure.lang.Compiler.eval (Compiler.java:7149)
+    clojure.core$eval.invokeStatic (core.clj:3215)
+    clojure.main$eval_opt.invokeStatic (main.clj:488)
+    clojure.main$eval_opt.invoke (main.clj:482)
+    clojure.main$initialize.invokeStatic (main.clj:508)
+    clojure.main$null_opt.invokeStatic (main.clj:542)
+    clojure.main$null_opt.invoke (main.clj:539)
+    clojure.main$main.invokeStatic (main.clj:664)
+    clojure.main$main.doInvoke (main.clj:616)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.main.main (main.java:40)
+
+FAIL in (discovery-establishes-absence-and-compares-instants) (receipt_construction_test.clj:209)
+expected: (= :history-discovery-invalid (:construction/refusal (refusal (fn* [] (construction/previous! current [(io/file temp "absent")])))))
+  actual: (not (= :history-discovery-invalid nil))
+
+FAIL in (discovery-establishes-absence-and-compares-instants) (receipt_construction_test.clj:210)
+expected: (= :history-discovery-invalid (:construction/refusal (refusal (fn* [] (construction/previous! current [])))))
+  actual: (not (= :history-discovery-invalid nil))
+
+ERROR in (discovery-establishes-absence-and-compares-instants) (receipt_construction.clj:77)
+expected: (= :history-discovery-invalid (:construction/refusal (refusal (fn* [] (construction/previous! current [nil])))))
+  actual: java.lang.NullPointerException: Cannot invoke "java.io.File.getCanonicalPath()" because the return value of "clojure.lang.IFn.invoke(Object)" is null
+ at futon2.aif.receipt_construction$previous_BANG_$fn__1207.invoke (receipt_construction.clj:77)
+    clojure.core$map$fn__5935.invoke (core.clj:2770)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.RT.seq (RT.java:535)
+    clojure.lang.RT.nthFrom (RT.java:982)
+    clojure.lang.RT.nth (RT.java:940)
+    clojure.core$distinct$step__6481$fn__6482$fn__6484.invoke (core.clj:5073)
+    clojure.core$distinct$step__6481$fn__6482.invoke (core.clj:5073)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.RT.seq (RT.java:535)
+    clojure.lang.LazilyPersistentVector.create (LazilyPersistentVector.java:44)
+    clojure.core$vec.invokeStatic (core.clj:379)
+    clojure.core$vec.invoke (core.clj:369)
+    futon2.aif.receipt_construction$previous_BANG_.invokeStatic (receipt_construction.clj:77)
+    futon2.aif.receipt_construction$previous_BANG_.invoke (receipt_construction.clj:70)
+    futon2.aif.receipt_construction_test$fn__20058$fn__20075$fn__20076.invoke (receipt_construction_test.clj:211)
+    futon2.aif.receipt_construction_test$refusal.invokeStatic (receipt_construction_test.clj:19)
+    futon2.aif.receipt_construction_test$refusal.invoke (receipt_construction_test.clj:19)
+    futon2.aif.receipt_construction_test$fn__20058$fn__20075.invoke (receipt_construction_test.clj:211)
+    futon2.aif.receipt_construction_test$fn__20058.invokeStatic (receipt_construction_test.clj:211)
+    futon2.aif.receipt_construction_test/fn (receipt_construction_test.clj:203)
+    clojure.test$test_var$fn__9856.invoke (test.clj:717)
+    clojure.test$test_var.invokeStatic (test.clj:717)
+    clojure.test$test_var.invoke (test.clj:708)
+    clojure.test$test_vars$fn__9882$fn__9887.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars$fn__9882.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars.invokeStatic (test.clj:731)
+    clojure.test$test_all_vars.invokeStatic (test.clj:737)
+    clojure.test$test_ns.invokeStatic (test.clj:758)
+    clojure.test$test_ns.invoke (test.clj:743)
+    clojure.core$map$fn__5935.invoke (core.clj:2772)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.Cons.next (Cons.java:39)
+    clojure.lang.RT.boundedLength (RT.java:1790)
+    clojure.lang.RestFn.applyTo (RestFn.java:130)
+    clojure.core$apply.invokeStatic (core.clj:669)
+    clojure.test$run_tests.invokeStatic (test.clj:768)
+    clojure.test$run_tests.doInvoke (test.clj:768)
+    clojure.lang.RestFn.invoke (RestFn.java:408)
+    user$eval20105.invokeStatic (NO_SOURCE_FILE:1)
+    user$eval20105.invoke (NO_SOURCE_FILE:1)
+    clojure.lang.Compiler.eval (Compiler.java:7194)
+    clojure.lang.Compiler.eval (Compiler.java:7149)
+    clojure.core$eval.invokeStatic (core.clj:3215)
+    clojure.main$eval_opt.invokeStatic (main.clj:488)
+    clojure.main$eval_opt.invoke (main.clj:482)
+    clojure.main$initialize.invokeStatic (main.clj:508)
+    clojure.main$null_opt.invokeStatic (main.clj:542)
+    clojure.main$null_opt.invoke (main.clj:539)
+    clojure.main$main.invokeStatic (main.clj:664)
+    clojure.main$main.doInvoke (main.clj:616)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.main.main (main.java:40)
+
+FAIL in (discovery-establishes-absence-and-compares-instants) (receipt_construction_test.clj:213)
+expected: (= :history-discovery-invalid (:construction/refusal (refusal (fn* [] (construction/previous! current [(io/file temp "not-a-root")])))))
+  actual: (not (= :history-discovery-invalid nil))
+
+FAIL in (discovery-establishes-absence-and-compares-instants) (receipt_construction_test.clj:220)
+expected: (= :ambiguous-previous-construction (:construction/refusal (refusal (fn* [] (construction/previous! current [first-root second-root])))))
+  actual: (not (= :ambiguous-previous-construction nil))
+
+Ran 9 tests containing 54 assertions.
+19 failures, 2 errors.
+{:test 9, :pass 33, :fail 19, :error 2, :type :summary}
+old-source exit 21

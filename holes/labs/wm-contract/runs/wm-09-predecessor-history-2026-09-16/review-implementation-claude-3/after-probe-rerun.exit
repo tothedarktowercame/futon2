@@ -1,0 +1,2 @@
+after-probe exit 0
+after.edn identical modulo temp paths
