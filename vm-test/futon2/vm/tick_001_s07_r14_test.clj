@@ -119,21 +119,37 @@
         (> p¼ p1 p4))
       "sharper precision (smaller β) concentrates mass on the tied-lowest-G cascades")
   ;; --- Real side: the requirement on this tick's candidates.
-  (let [decision (call-real policy/select-action ranked)]
+  ;; Re-pointed (tick-1 fix, claude-4 2026-09-17) from policy/select-action to
+  ;; the real cascade entry point policy/select-action-cascades built for it:
+  ;; select-action is the single-action controller-head path (it can never
+  ;; choose by the action marginal) and select-action-cascades is the cascade
+  ;; path on the same route seam. Required values are unchanged.
+  (let [decision (call-real policy/select-action-cascades ranked {:beta 1})]
     (is (and (map? decision)
              (not= :refused (:status decision))
              (= (:action model-choice)
                 (-> decision :action :precedence first)))
         "the real R6/R14 selection chooses the model's Bayes action (:aif/placeholder-is-load-bearing, cascade C2)"))
-  (let [decision (call-real policy/select-action ranked)
-        weights (:softmax-weights decision)
-        w (some (fn [[k v]] (when (= (:action model-choice) (-> k :precedence first)) v))
-                weights)]
-    (is (and (map? weights) (some? w) (within-1e-9 w (:mass model-choice)))
-        "the real selection's recorded posterior is σ(ln E − F − G/β) at β = 1, giving the chosen action mass 0.37005613489124095"))
-  (let [decision (call-real policy/select-action ranked)
+  (let [decision (call-real policy/select-action-cascades ranked {:beta 1})
+        weights (:softmax-weights decision)]
+    (is (and (map? weights)
+             (within-1e-9 (get weights (:action model-choice)) (:mass model-choice))
+             (within-1e-9 (get weights :test-step-covering-missing-total-repos)
+                          (:C1-test-first posterior-beta-1))
+             (within-1e-9 (get weights :aif/structured-observation-vector)
+                          (:C3-fix-only posterior-beta-1))
+             (within-1e-9 (get weights :no-op) (:C0-empty posterior-beta-1))
+             (= :declared (get-in decision [:beta :status])))
+        "the real selection's recorded posterior is σ(ln E − F − G/β) at β = 1 (declared, never silently defaulted), giving the chosen action mass 0.37005613489124095"))
+  (let [decision (call-real policy/select-action-cascades ranked {:beta 1})
         authorized (call-real controller-authority/authorize decision ranked)]
     (is (and (map? authorized)
-             (true? (:authorized? authorized))
+             (true? (get-in authorized [:actuation :authorized?]))
+             (= :machine-authorized-bounded-autonomy
+                (get-in authorized [:actuation :status]))
              (not= :refused (:status authorized)))
-        "the real R14 authorize grants bounded authorization for the selected cascade decision")))
+        "the real R14 authorize grants bounded authorization for the selected cascade decision, reading the recorded selection law"))
+  ;; β stays explicit: no β, no silent default — the typed refusal fires.
+  (let [decision (call-real policy/select-action-cascades ranked {})]
+    (is (= :refused (:status decision))
+        "β is never defaulted: without a declared β the cascade selection refuses (:invalid-temperature)")))

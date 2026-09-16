@@ -18,7 +18,8 @@
    and surfaces a gap-report enumerating the `:learn-action-class`
    recommendations the bootstrap proposer detected."
   (:require [futon2.aif.free-energy :as fe]
-            [futon2.aif.hierarchical-budget :as hierarchical-budget]))
+            [futon2.aif.hierarchical-budget :as hierarchical-budget]
+            [futon2.aif.cascade-selection :as cascade-selection]))
 
 (defn select-budgeted-actions
   "R11 policy boundary for collective, hierarchical action selection.
@@ -872,3 +873,99 @@
     ;; strategic decisions retain the same resolved option so their boundary
     ;; and option envelope can be reconstructed without inventing a default.
     :abstain-epsilon abstain-epsilon)))
+
+;; ---------------------------------------------------------------------------
+;; Cascade-candidate selection (R14 requirement, tick 1 of the virtual WM)
+;; ---------------------------------------------------------------------------
+
+(defn- cascade-first-action
+  "The action a ranked cascade entry contributes to the action marginal at
+  this step: its first acting pattern; a non-cascade entry (e.g. the explicit
+  no-op) contributes its :type. Purely additive helper of
+  `select-action-cascades`."
+  [action]
+  (if (and (map? action) (seq (:precedence action)))
+    (first (:precedence action))
+    (if (map? action) (:type action) action)))
+
+(defn select-action-cascades
+  "Cascade-candidate selection at a DECLARED β (tick 1, R14 requirement).
+
+   Unlike `select-action` — whose single-action behaviour is untouched — this
+   path is for cascade candidates carrying G in :controller-score. It selects
+   by the aligned model functions, not by re-derived maths:
+
+   - futon2.aif.cascade-selection/selection-posterior at the caller-declared
+     β (γ = 1/β): σ(ln E − F − G/β). There is NO default for β: it is not
+     approved, so it must be passed by the caller; a missing or non-positive
+     β propagates selection-posterior's typed refusal
+     :invalid-temperature. The decision records it under
+     :beta {:value β :status :declared}.
+   - futon2.aif.cascade-selection/bayes-choice over each cascade's first
+     acting pattern (the per-state projection of ActionMarginal), with that
+     function's declared tie-break rule (:action-name-ascending).
+
+   Entries may carry :habit (default 1 — no habit prior exists yet, a
+   declared neutral input) and :f (default 0 — no F_π on the tick).
+
+   Returns a decision in `select-action`'s shape, plus:
+     :beta                 {:value β :status :declared}
+     :selection-law        {:requested :cascade-selection-posterior
+                            :applied :cascade-selection-posterior
+                            :beta β :beta-status :declared
+                            :posterior {cascade-action-map → p}
+                            :softmax-weights {first-acting-action → p}
+                            :tie-break-rule <rule>
+                            :tie-broken? bool}
+     :softmax-weights      {first-acting-action → probability}
+
+   `controller-authority/authorize` accepts the result on the admissible set
+   (finite :controller-score, admissible action, :selection-law with :applied)."
+  [ranked-actions {:keys [beta]}]
+  (let [candidates (mapv (fn [e]
+                           {:id (:action e)
+                            :habit (or (:habit e) 1)
+                            :f (or (:f e) 0)
+                            :g (:controller-score e)})
+                         ranked-actions)
+        posterior (cascade-selection/selection-posterior
+                   {:beta beta :candidates candidates})
+        ;; bayes-choice takes action-of as a MAP (it does (get action-of id)),
+        ;; so build the per-candidate first-acting-action map, not a function.
+        action-of (zipmap (map :action ranked-actions)
+                          (map (comp cascade-first-action :action) ranked-actions))
+        choice (cascade-selection/bayes-choice
+                posterior action-of)
+        chosen-entry (some (fn [e]
+                             (when (= (cascade-first-action (:action e))
+                                      (:action choice))
+                               e))
+                           ranked-actions)
+        weights (into {}
+                      (map (fn [[a p]] [(cascade-first-action a) p]))
+                      posterior)]
+    {:action (:action chosen-entry)
+     :rank (or (:rank chosen-entry) 1)
+     :controller-score (:controller-score chosen-entry)
+     :selection-boundary :strategic-recommendation
+     :recommendation-authority :live
+     :requires-operator-override? false
+     :actuation-status :pending-downstream-gates
+     :actuation-authorized? false
+     :beta {:value beta :status :declared}
+     :selection-law
+     {:requested :cascade-selection-posterior
+      :applied :cascade-selection-posterior
+      :beta beta
+      :beta-status :declared
+      :posterior posterior
+      :softmax-weights weights
+      :tie-break-rule (:tie-break-rule choice)
+      :tie-broken?
+      (boolean (some (fn [[a p]]
+                       (and (not= a (:action choice))
+                            (= p (:mass choice))))
+                     weights))}
+     :softmax-weights weights
+     :chosen-action (:action choice)
+     :chosen-action-mass (:mass choice)}))
