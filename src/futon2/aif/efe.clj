@@ -28,7 +28,9 @@
    Theory: AIF Expected Free Energy decomposition. In the production default,
    ambiguity is Gaussian observation entropy and risk is outcome divergence
    from C. The separately named controller controls are not EFE terms."
-  (:require [futon2.aif.forward-model :as fm]
+  (:require [clojure.set :as set]
+            [futon2.aif.cascade-model-manifest :as cascade-manifest]
+            [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
             [futon2.aif.preferences :as pref]
             [futon2.aif.preference-module :as c-module]
@@ -979,6 +981,126 @@
               :survey-eig-nats (double (:survey-eig-nats action))
               :survey-eig-contribution survey-eig-contribution)))))
 
+;; ===== VM tick 1 R5 fix wave: cascade-candidate scoring =====
+;; The virtual War Machine's R5 node scores cascade candidates
+;; ({:kind :cascade-candidate …}, R4's shape) at a common declared horizon
+;; with the aligned model function, not the channel-mean scorer above.
+
+(defn- cascade-candidate-tokens
+  "Every token named by one cascade candidate's pattern precedence: each
+  pattern's :produces set and every guard-clause :present/:absent token."
+  [precedence]
+  (reduce
+   (fn [acc pattern]
+     (reduce conj acc
+             (concat (:produces pattern)
+                     (mapcat (fn [clause] (concat (:present clause) (:absent clause)))
+                             (get-in pattern [:guard :clauses])))))
+   #{}
+   precedence))
+
+(defn rank-cascade-actions
+  "Score a sequence of cascade candidates ({:kind :cascade-candidate :id …
+  :precedence [patterns…]}) by expected free energy and rank ascending.
+
+  This is the R5 path of the virtual War Machine (tick 1 fix wave,
+  VM-PROTOCOL step 7): G per candidate is `cascade-model-manifest/
+  horizon-g-sparse` — the aligned Clojure of Lean PolicyHorizon.horizonEFE
+  with risk by Lean OutcomeRiskKL.outcomeRisk — computed at ONE common
+  horizon and over ONE common token universe for the whole candidate list
+  (union of q0's support, the preference spec's :want and every token named
+  by any candidate's patterns; per-candidate universes would shift G by
+  T·k·ln 2 and are never used). Rates are the zero adjudication rates (the
+  exact P5 identity-observation reduction; horizon-g-sparse refuses
+  non-zero rates itself).
+
+  Inputs and where each parameter comes from:
+  - T: `(:horizon-steps opts)` — the declared common horizon of the
+    candidate family (R13). Typed refusal :missing-common-horizon if absent.
+  - q0: `(:cascade-belief state)` — the token-state belief (R1/R4's
+    :missing-cascade-belief convention). Typed refusal if absent.
+  - spec: `(:cascade-spec opts)` — {:want … :lam … :mu … :evidence …
+    :zeroed …}. :want is required (typed refusal :missing-cascade-want);
+    λ, μ default 1 (R6's declared theta), :evidence/:zeroed default #{}.
+  - precedence: each candidate's own :precedence.
+
+  Each ranked entry carries :G-efe (= :G-cascade = :controller-score, lower
+  more preferred), :rank, :cascade-id, :horizon-steps and :cascade true.
+  EQUAL G IS A TIE: equal-G entries share one :rank (dense ranking over the
+  distinct G values) and each carries :g-tie, the vector of cascade-ids at
+  that G. The tie is recorded, never broken here — selection (R14)
+  resolves it. The result's meta records the scoring parameters under
+  :cascade-scoring.
+
+  Pure; the existing single-action channel scoring in `rank-actions` is
+  unchanged. A mixed list (cascade candidates and :type actions together)
+  is the typed refusal :mixed-candidate-kinds — no combined semantics is
+  invented."
+  [state candidate-actions opts]
+  (let [T (:horizon-steps opts)
+        q0 (:cascade-belief state)
+        spec-in (or (:cascade-spec opts) {})
+        want (:want spec-in)]
+    (cond
+      (not (and (integer? T) (pos? T)))
+      {:status :missing :kind :missing-common-horizon
+       :horizon-steps T
+       :limitation "cascade candidates are scored at the family's declared common horizon; pass :horizon-steps (R13's T)"}
+      (not (map? q0))
+      {:status :missing :kind :missing-cascade-belief
+       :limitation "cascade scoring reads the token-state belief from (:cascade-belief state) (R1/R4 convention)"}
+      ((complement seq) want)
+      {:status :missing :kind :missing-cascade-want
+       :limitation "cascade scoring needs the preference spec's :want (R1's want tokens); pass :cascade-spec {:want #{…}}"}
+      :else
+      (let [spec {:want want
+                  :evidence (or (:evidence spec-in) #{})
+                  :lam (or (:lam spec-in) 1)
+                  :mu (or (:mu spec-in) 1)
+                  :zeroed (or (:zeroed spec-in) #{})}
+            universe (-> (cascade-candidate-tokens
+                          (mapcat :precedence candidate-actions))
+                         (into (reduce set/union #{} (keys q0)))
+                         (into want))
+            rates (zipmap universe (repeat {:false-neg 0 :false-pos 0}))
+            scored (map (fn [action]
+                          (let [g (cascade-manifest/horizon-g-sparse
+                                   {:rates rates
+                                    :q0 q0
+                                    :precedence-fn (constantly (:precedence action))
+                                    :horizon T
+                                    :spec spec
+                                    :universe universe})]
+                            {:action action
+                             :cascade true
+                             :cascade-id (:id action)
+                             :horizon-steps T
+                             :G-efe g
+                             :G-cascade g
+                             :controller-score (if (number? g) g ##Inf)}))
+                        candidate-actions)
+            sorted (sort-by :controller-score scored)
+            rank-of (into {} (map-indexed (fn [i g] [g (inc i)]))
+                          (distinct (map :controller-score sorted)))
+            ranked (map (fn [entry]
+                          (let [tied (filter #(= (:controller-score %)
+                                                 (:controller-score entry))
+                                             sorted)]
+                            (cond-> (assoc entry
+                                           :rank (get rank-of
+                                                      (:controller-score entry)))
+                              (< 1 (count tied))
+                              (assoc :g-tie (mapv :cascade-id tied)))))
+                        sorted)]
+        (with-meta (vec ranked)
+          {:policy-support/excluded []
+           :disposition-risk-events []
+           :refused? false
+           :cascade-scoring {:universe universe
+                             :horizon T
+                             :spec spec
+                             :rates :zero-adjudication-identity}})))))
+
 (defn rank-actions
   "Score a sequence of candidate actions and order them by controller-score
    ascending. Returns a vec of `compute-efe` outputs each carrying
@@ -987,11 +1109,26 @@
    v0.14: optional `opts` map threaded to `compute-efe` for every
    candidate — supports `:info-weight`, `:survival-weight`,
    `:structural-pressure-weight`, `:time-pressure`,
-   `:time-pressure-scale`."
+   `:time-pressure-scale`.
+
+   v0.16 (VM tick 1 R5): if EVERY candidate is a cascade candidate
+   ({:kind :cascade-candidate …}), scoring goes through
+   `rank-cascade-actions` — G by `cascade-model-manifest/horizon-g-sparse`
+   at the declared common horizon over one common universe, ranked
+   ascending with equal G a recorded tie. Channel scoring is unchanged for
+   the existing :type actions; a mixed list is the typed refusal
+   :mixed-candidate-kinds."
   ([state candidate-actions] (rank-actions state candidate-actions {}))
   ([state candidate-actions opts]
    (when (:preference-module opts)
      (c-module/validate-module (:preference-module opts)))
+   (cond
+     (and (seq candidate-actions) (every? fm/cascade-candidate? candidate-actions))
+     (rank-cascade-actions state candidate-actions opts)
+     (some fm/cascade-candidate? candidate-actions)
+     {:status :missing :kind :mixed-candidate-kinds
+      :limitation "cascade candidates and :type actions cannot be scored in one list; score each kind separately"}
+     :else
    (let [{:keys [included excluded]}
          (partition-policy-support (:capability-graph opts) candidate-actions opts)
          seed-required? (and (:ruled-outcome-c-enabled? opts) (seq included))
@@ -1016,7 +1153,7 @@
         :disposition-risk-events (if seed-record
                                    (disposition/seeded-c-events seed-record)
                                    [])
-        :refused? refusal?}))))
+        :refused? refusal?})))))
 
 (defn rank-star-map-actions
   "Rank candidate actions after applying the INV-G selector gate. Unsafe pursuit,

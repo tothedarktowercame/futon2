@@ -17,10 +17,11 @@
     they tie.
 
   Real machine: rank-actions scores (state, action) via compute-efe — channel
-  means against the live C-vector, not token-state KL, and cascade-shaped
-  candidates are refused by the forward model (ex-info, no cascade action
-  type — R4's finding). These are requirement tests: failures are the node's
-  open requirements, not defects."
+  means against the live C-vector. Since the tick-1 R5 fix wave, a list of
+  cascade candidates ({:kind :cascade-candidate …}) is scored by the cascade
+  path: G by cascade-model-manifest/horizon-g-sparse at the declared common
+  horizon over one common universe, equal G a recorded tie. These
+  assertions are the requirement on that path, live on this tick's input."
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.efe :as efe]))
@@ -107,9 +108,19 @@
 
 (defn- cascade-action
   [cid]
-  {:type :cascade-rollout
-   :target :wm-tick-001-observation-crash
-   :precedence (mapv :id (get cascades cid))})
+  {:kind :cascade-candidate
+   :id cid
+   :precedence (get cascades cid)})
+
+(def cascade-state {:cascade-belief q0})
+
+(def real-opts
+  {:horizon-steps T
+   :cascade-spec {:want (:want spec)
+                  :evidence #{}
+                  :lam 1
+                  :mu 1
+                  :zeroed #{}}})
 
 (defn- call-real
   "Call a real efe function, refusing symbolically instead of erroring."
@@ -134,52 +145,50 @@
            (within-1e-9 (- (g :C0-empty T) (g :C0-empty 2))
                         (- (g :C0-empty 2) (g :C0-empty 1))))
       "per-step risk on the identity stall is constant (ambiguity 0 at zero rates)")
-  ;; --- Real side: the requirement on this tick's candidates.
-  (let [ranked (into {}
-                     (map (fn [cid]
-                            [cid (call-real efe/rank-actions
-                                            {:observation {} :belief {}}
-                                            [(cascade-action cid)]
-                                            {:horizon-steps T})]))
-                     (keys cascades))]
-    (is (every? (comp #(and (vector? %) (seq %)) val) ranked)
-        "the real R5 scorer accepts every cascade candidate of this tick and returns a ranking"))
-  (let [scored (into {}
-                     (map (fn [cid]
-                            [cid (first (call-real efe/rank-actions
-                                                   {:observation {} :belief {}}
-                                                   [(cascade-action cid)]
-                                                   {:horizon-steps T}))]))
-                     (keys cascades))]
-    (is (every? (comp #(and (map? %)
-                            (within-1e-9 (:G-efe %) (G-at-T (key %))))
-                      val)
-                scored)
+  ;; --- Real side: the requirement on this tick's candidates. One real call
+  ;; --- over the whole list (the universe must be common to all candidates).
+  (let [ranked (call-real efe/rank-actions
+                          cascade-state
+                          (mapv cascade-action (keys cascades))
+                          real-opts)]
+    (is (and (vector? ranked) (= 4 (count ranked)))
+        "the real R5 scorer accepts every cascade candidate of this tick and returns one ranked entry per candidate"))
+  (let [entries (into {}
+                      (map (fn [{:keys [cascade-id] :as e}] [cascade-id e]))
+                      (try (efe/rank-actions cascade-state
+                                             (mapv cascade-action (keys cascades))
+                                             real-opts)
+                           (catch clojure.lang.ExceptionInfo _e
+                             [])))]
+    (is (every? (fn [pair] (within-1e-9 (:G-efe (val pair)) (G-at-T (key pair))))
+                entries)
         "the real scorer's G per candidate equals the model's horizon-g-sparse value at T = 3"))
-  (let [real-ranking
-        (try
-          (let [entries (efe/rank-actions
-                         {:observation {} :belief {}}
-                         (mapv cascade-action (keys cascades))
-                         {:horizon-steps T})]
-            (mapv (comp :precedence :action) (sort-by :rank entries)))
-          (catch clojure.lang.ExceptionInfo _ :refused))]
-    (is (= [[:test-step-covering-missing-total-repos :aif/structured-observation-vector]
-            [:aif/placeholder-is-load-bearing :test-step-covering-missing-total-repos
-             :aif/structured-observation-vector]
-            [:aif/structured-observation-vector]
-            []]
-           real-ranking)
+  (let [ranked (try
+                 (efe/rank-actions cascade-state
+                                   (mapv cascade-action (keys cascades))
+                                   real-opts)
+                 (catch clojure.lang.ExceptionInfo e
+                   {:status :refused :message (ex-message e)}))
+        order (mapv :cascade-id (sort-by :rank ranked))]
+    (is (= [:C1-test-first :C2-fix-first :C3-fix-only :C0-empty]
+           order)
         "the real ranking follows G: C1 and C2 tie ahead of C3 ahead of C0"))
-  ;; The closest real action type scores every candidate identically at
-  ;; :horizon-steps 3 — the precedence that distinguishes C1 from C0 is
-  ;; invisible to it.
-  (let [g-closest (fn [cid]
-                    (try
-                      (:G-efe (first (efe/rank-actions
-                                      {:observation {} :belief {}}
-                                      [(assoc (cascade-action cid) :type :apply-cascade)]
-                                      {:horizon-steps T})))
-                      (catch clojure.lang.ExceptionInfo _ :refused)))]
-    (is (not= (g-closest :C1-test-first) (g-closest :C0-empty))
-        "the real scorer distinguishes the best cascade from doing nothing at T = 3")))
+  ;; Equal G is a recorded tie, not broken by an undeclared rule: C1 and C2
+  ;; share one :rank and each carries :g-tie naming both.
+  (let [ranked (try
+                 (efe/rank-actions cascade-state
+                                   (mapv cascade-action (keys cascades))
+                                   real-opts)
+                 (catch clojure.lang.ExceptionInfo _e
+                   []))
+        by-id (into {} (map (fn [{:keys [cascade-id] :as e}] [cascade-id e]) ranked))
+        c1 (get by-id :C1-test-first)
+        c2 (get by-id :C2-fix-first)]
+    (is (and (within-1e-9 (:G-efe c1) 11.434408130577516)
+             (within-1e-9 (:G-efe (get by-id :C0-empty)) 13.101074797244184)
+             (< (:G-efe c1) (:G-efe (get by-id :C0-empty)))
+             (= (:rank c1) (:rank c2))
+             (contains? c1 :g-tie)
+             (set (:g-tie c1))
+             (contains? (set (:g-tie c1)) :C2-fix-first))
+        "the real scorer distinguishes best from doing nothing at T = 3 and records the C1/C2 G tie explicitly")))
