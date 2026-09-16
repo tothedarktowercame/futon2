@@ -104,9 +104,9 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
 
 (defn guard-holds? [pattern state]
   (when (= :interpreted (get-in pattern [:guard :status]))
-    (every? #(and (set/subset? (:present %) state)
-                  (empty? (set/intersection (:absent %) state)))
-            (get-in pattern [:guard :clauses]))))
+    (and (every? #(and (set/subset? (:present %) state) (empty? (set/intersection (:absent %) state)))
+                 (get-in pattern [:guard :clauses]))
+         (not (set/subset? (or (:produces pattern) (get-in pattern [:transition :produces]) #{}) state)))))
 (defn transition-row [pattern state]
   (if (= :interpreted (get-in pattern [:transition :status]))
     {(set/union state (get-in pattern [:transition :produces])) 1}
@@ -261,8 +261,8 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
 
 (defn first-enabled
   "Lean CascadeTransition.firstEnabled: the first pattern in precedence whose
-   guard holds at state — present tokens ⊆ state and absent tokens ∩ state = ∅
-   (guard-holds?), so absent tokens act as forbids. nil when none holds."
+   guard holds at state — present ⊆ s, absent ∩ s = ∅, and produces ⊄ s
+   (guard-holds?): a completed pattern is skipped. nil when none holds."
   [precedence state]
   (first (filter #(true? (guard-holds? % state)) precedence)))
 

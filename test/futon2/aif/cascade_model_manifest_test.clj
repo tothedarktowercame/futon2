@@ -283,6 +283,56 @@
     (is (not (contains? enacted "start")))
     (is (not (contains? enacted "cap")))))
 
+;; P10 continuing guard: mathlib4 95127698bd,
+;; DarkTower/WarMachine/CascadeTransition.lean — firstEnabled_skips_achieved,
+;; fixture_same_precedence_chain, fixture_situation_i … _v. The guard now
+;; also requires produces ⊄ state, so a completed pattern no longer wins
+;; precedence (guards are re-evaluated every step).
+(deftest cascade-transition-p10-same-precedence-chain
+  (let [p1 (ct-pattern :p1 #{} #{} #{"t0" "t1"} 1)
+        p2 (ct-pattern :p2 #{"t0" "t1"} #{} #{"t2"} 1)]
+    ;; firstEnabled_skips_achieved: at {t0 t1} the achieved p1 is skipped
+    (is (= :p2 (:id (m/first-enabled [p1 p2] #{"t0" "t1"}))))
+    ;; fixture_same_precedence_chain: the SAME precedence at both steps
+    ;; reaches the full state with probability 1 (the old guard returned the
+    ;; identity here and p2 never fired)
+    (is (= {#{"t0" "t1" "t2"} 1}
+           (m/rollout (constantly [p1 p2]) {#{} 1} 2)))))
+
+;; Lean fixture_situation_i … fixture_situation_v over the permission tokens,
+;; θ = 1/2.
+(deftest cascade-transition-p10-five-situations
+  (let [patA (ct-pattern :a #{"perm"} #{"withdrawn"} #{"aOut"} 1/2)
+        patB (ct-pattern :b #{"perm"} #{"withdrawn"} #{"bOut"} 1/2)
+        patB2 (ct-pattern :b2 #{"perm2"} #{"withdrawn2"} #{"bOut"} 1/2)]
+    ;; (i) permission holds, aOut not achieved: A is enabled
+    (is (true? (m/guard-holds? patA #{"perm"})))
+    ;; (ii) failed attempt leaves the state unchanged with mass 1 − θ, and A
+    ;; is still enabled there at the next step
+    (is (= 1/2 (get (m/pattern-kernel patA #{"perm"}) #{"perm"} 0)))
+    (is (true? (m/guard-holds? patA #{"perm"})))
+    ;; (iii) at {perm, withdrawn} neither A nor B is enabled: identity
+    (is (= {#{"perm" "withdrawn"} 1}
+           (m/cascade-kernel [patA patB] #{"perm" "withdrawn"})))
+    ;; (iv) withdrawal present before B starts: B is not enabled
+    (is (false? (m/guard-holds? patB #{"perm" "withdrawn"})))
+    ;; (v) identity under both precedence orders; only a renewed permission
+    ;; perm2 with its own pattern B2 enables production of bOut
+    (is (= {#{"perm" "withdrawn"} 1}
+           (m/cascade-kernel [patB patA] #{"perm" "withdrawn"})))
+    (is (= :b2 (:id (m/first-enabled [patB2 patA patB]
+                                     #{"perm" "withdrawn" "perm2"}))))))
+
+(deftest cascade-transition-p10-achieved-first-is-skipped
+  "Falsifier for the old guard: an achieved pattern placed first in
+   precedence is skipped and the next pattern fires. Under the old guard
+   cascade-kernel returned the identity {state 1} here."
+  (let [p1 (ct-pattern :p1 #{} #{} #{"t0" "t1"} 1)
+        p2 (ct-pattern :p2 #{"t0" "t1"} #{} #{"t2"} 1)]
+    (is (not= {#{"t0" "t1"} 1} (m/cascade-kernel [p1 p2] #{"t0" "t1"})))
+    (is (= {#{"t0" "t1" "t2"} 1} (m/cascade-kernel [p1 p2] #{"t0" "t1"})))))
+
+
 (deftest token-preference-lean-fixture-correspondence
   "Lean TokenPreference.Fixture (mathlib4 678c797666) replayed through the
    runtime functions: c0 has want {t0,t1}, evidence {t2}, lam = mu = 1,
