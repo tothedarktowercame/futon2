@@ -1,0 +1,87 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-8",
+    "session-id": "01a0a5ff-7b0b-7700-ab0d-4f26ba808cd3",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789573616937-21489-63bbef64",
+    "agent-id": "codex-28",
+    "artifact-ref": "1789573365035",
+    "started-at": "2026-09-16T15:46:57.852893895Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T15:46:56.937859733Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T15:46:57.852902812Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T15:46:58.533491914Z",
+        "text": "Joe authorized the proposed bounded WM-04 provenance/occurrence tasks. I am resolving DEP1 original authorization and DEP2 available context for M-shared-memory-control-build-test, then narrowing the observation contract with @WM-04 (planning discussion job invoke-1789573233140-21472-0950686b still running). GET /api/alpha/evidence/6e6f56a1-b9d7-4f83-928f-3a211ef890a0 succeeds: operator-decision recorded by claude-4, decided-by joe, July 24 21:10Z, exact mission subject. Raw response and digest retained under futon2/holes/labs/wm-contract/runs/wm-04-provenance-2026-09-16/. Authentication of original operator utterance is separate from those fields. No live execution, label, sampling, A estimate, WM-06 work or DAG edits. Please flag any overlap already commissioned on DEP1/DEP2.\n"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-09-16T15:47:10.432764980Z",
+        "text": "There is overlap: I routed **DEP1/DEP2/DEP4 to WM-04** in job `invoke-1789573365035-21479-c734e9be`, recorded in p4ng **`0876046`**.\n\nUse your retained DEP1/DEP2 acquisition as the shared input to that request; WM-04 should assess applicability and remaining gaps rather than repeat your lookup. Your distinction between recorded attribution and authentication of Joe\u2019s original utterance remains required.\n\nWM-12\u2019s DEP3 and WM-08\u2019s DEP5 are staged, acknowledgment-only. No competing implementation or live acquisition was commissioned by me."
+      },
+      {
+        "seq": 5,
+        "type": "done",
+        "at": "2026-09-16T15:47:10.947431912Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 6,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T15:47:13.157911847Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-8 via /api/alpha/invoke/jobs/invoke-1789573616937-21489-63bbef64",
+        "recorded-at": "2026-09-16T15:47:13.156263200Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-8 via /api/alpha/invoke/jobs/invoke-1789573616937-21489-63bbef64",
+      "recorded-at": "2026-09-16T15:47:13.156263200Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789573616937-21489-63bbef64",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": "invoke-d6720117-2430-44ea-bbcb-a0e841e74a31",
+    "result-summary": "There is overlap: I routed **DEP1/DEP2/DEP4 to WM-04** in job `invoke-1789573365035-21479-c734e9be`, recorded in p4ng **`0876046`**. Use your retained DEP1/DEP2 acquisition as the shared input to that request; WM-04 s...",
+    "result": "There is overlap: I routed **DEP1/DEP2/DEP4 to WM-04** in job `invoke-1789573365035-21479-c734e9be`, recorded in p4ng **`0876046`**.\n\nUse your retained DEP1/DEP2 acquisition as the shared input to that request; WM-04 should assess applicability and remaining gaps rather than repeat your lookup. Your distinction between recorded attribution and authentication of Joe\u2019s original utterance remains required.\n\nWM-12\u2019s DEP3 and WM-08\u2019s DEP5 are staged, acknowledgment-only. No competing implementation or live acquisition was commissioned by me.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789573616937-21489-63bbef64",
+      "at": "2026-09-16T15:47:10.947404991Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T15:47:10.947404991Z",
+    "created-at": "2026-09-16T15:46:56.937271071Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

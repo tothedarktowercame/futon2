@@ -1,0 +1,16 @@
+{
+  "checks": {
+    "authorization-digest": true,
+    "operator-turn-digest": true,
+    "operator-parent-digest": true,
+    "session-evidence-digest": true,
+    "user-role": true,
+    "author-joe": true,
+    "same-session": true,
+    "reply-parent": true,
+    "query-direct-equality": true,
+    "exact-decision-subject": true,
+    "pinned-sources-unchanged": true
+  },
+  "scope": "Byte consistency and record linkage, not independent identity authentication"
+}

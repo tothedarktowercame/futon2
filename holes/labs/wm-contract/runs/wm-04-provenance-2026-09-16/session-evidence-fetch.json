@@ -1,0 +1,6 @@
+{
+  "url": "http://localhost:7070/api/alpha/evidence?session-id=8b297865-a47b-4b91-bb40-e5ae59ff4f70&since=2026-07-24T20%3A00%3A00Z&before=2026-07-25T00%3A00%3A00Z&limit=1000",
+  "status": 200,
+  "retrieved-at": "2026-09-16T15:48:15.075861+00:00",
+  "sha256": "190c806b27e20d023489656fc6556fff1ce272d3cd9ecc5aeb358ac5d9788819"
+}

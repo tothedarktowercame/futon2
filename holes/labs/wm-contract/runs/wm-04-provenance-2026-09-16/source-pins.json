@@ -1,0 +1,362 @@
+[
+  {
+    "path": "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-12.edn",
+    "bytes": 146682828,
+    "sha256": "3b25d2d43e3ebbcf19fc6f82e103ae49907b81d0cf009fa8d7884e74ef53e175"
+  },
+  {
+    "path": "/home/joe/code/futon2/src/futon2/aif/observation_authority_resolver.clj",
+    "bytes": 6865,
+    "sha256": "c9e830ed6a7e5f00a836409370c49262ee0c60f0d6da84893b1f02eaa8289efe"
+  },
+  {
+    "path": "/home/joe/code/futon2/src/futon2/aif/categorical_state_observation.clj",
+    "bytes": 18410,
+    "sha256": "8d48ecf867e2b6df7ce720b48ace3cf699bb9e19c05481c3d11369fb8d678fb2"
+  },
+  {
+    "path": "/home/joe/code/futon3c/src/futon3c/transport/http.clj",
+    "bytes": 464668,
+    "sha256": "7c5c3a11d6684e8a05447380e5330f8a0409f6a5483e5519e066ba47d6ff460f"
+  },
+  {
+    "path": "/home/joe/code/futon3c/emacs/claude-repl.el",
+    "bytes": 90295,
+    "sha256": "aedaac0563e186a6c2d813895c12d568c4e7a3f0e872da54278a45bcc4c4c298"
+  },
+  {
+    "path": "/home/joe/code/p4ng/wm-walkthroughs/item-owners/closure-plans/wm-05/DEPENDENCY-HANDOFF.md",
+    "bytes": 4569,
+    "sha256": "987067e5450bcfe8ccd610b41dda3e892993f32e1dd958ca04d7ee424dd59cea"
+  },
+  {
+    "path": "/home/joe/code/p4ng/wm-walkthroughs/item-owners/closure-plans/wm-05/U1-OBSERVATION-SPEC.md",
+    "bytes": 12872,
+    "sha256": "ef0553e054c3d2da4387010d52d81b1e96b3bdceada49ef4ce94b86359049399"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-42-v1/attempt-051/002-selection.edn",
+    "bytes": 158290,
+    "sha256": "d0dc934a6c27988cebb2beef21d2dbc8798eed112a6eebdbef2c8ff2c922cf04"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-46-v1/attempt-061/002-selection.edn",
+    "bytes": 140738,
+    "sha256": "80bf4db143c46f24f899c7eb865115c954207853b6fea668fbd56f7271ad3a27"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-002/007-closed.edn",
+    "bytes": 221997,
+    "sha256": "dd8cdd5299a46fb27909595aed67013fd7ef82d6269c454fc8db2c1b50bebba6"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-49/wm-contract-machinery-49-v1/attempt-002/002-selection.edn",
+    "bytes": 168967,
+    "sha256": "1a03c22e757653937093197c4fd66be7d36c81b6cb3fe551126305b1f26434ac"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-46-v1/attempt-060/002-selection.edn",
+    "bytes": 153503,
+    "sha256": "2611ec9ad37b51c156fc0001e6ec813574832ed74af51ff15536f9a907c758ea"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-002/007-closed.edn",
+    "bytes": 443395,
+    "sha256": "d70003691ad647caea8a83c3096935e39164ae898b8c2325ce739fbdaa6c58b1"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-002/002-selection.edn",
+    "bytes": 164980,
+    "sha256": "b808106dc926dc06b8d349dc1e6679f60511e8ee5d3e7236d1af6d50bca3a093"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-48/wm-contract-machinery-48-v1/attempt-002/002-selection.edn",
+    "bytes": 169157,
+    "sha256": "96b531b8a046cdcb1f7f974a42aced4ebbacd323878f3b4338e505651cd37148"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-46-v1/attempt-059/007-closed.edn",
+    "bytes": 154154,
+    "sha256": "68a783a933b833450aab4e9e705876d2dd1fb0f7f98aa6ef7289251db8a21e6f"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-50/wm-contract-machinery-50-v1/attempt-002/007-closed.edn",
+    "bytes": 465255,
+    "sha256": "21d8084c4a5c3a53228eb327c5749fed7087d4aa18acecd829118dd85c404a48"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-53/wm-contract-machinery-53-v1/attempt-002/007-closed.edn",
+    "bytes": 439496,
+    "sha256": "0b1fee65aa9c9a5164aa6ddd43c617e39d0cbc63184563d0536a08fa6be321cf"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-49/wm-contract-machinery-49-v1/attempt-001/002-selection.edn",
+    "bytes": 168919,
+    "sha256": "463db1bd4a68686f596c8df6c8813f857b464bf703b8ca51e9e6406e27d22052"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-002/006-adjudication.edn",
+    "bytes": 440874,
+    "sha256": "7a67bbf0211d9f21d076c016cc3bfd2abb5aa7a9dd082ae4efffc77096a18ba7"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-47/wm-contract-machinery-47-v1/attempt-002/002-selection.edn",
+    "bytes": 170216,
+    "sha256": "d6d23b4aa1d042aad31e8fb8414014c7015ead21fc1494c83a9835382e6cb2f8"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-48/wm-contract-machinery-48-v1/attempt-001/002-selection.edn",
+    "bytes": 169135,
+    "sha256": "edb142db6ff5c0d56da26efdd7cb327907c7af0c398c9cdaf40cfbf8203509bc"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-47/wm-contract-machinery-47-v1/attempt-003/002-selection.edn",
+    "bytes": 168772,
+    "sha256": "09531221f1c7c9cc1d66168eaf183d11d233bd2d304e1e5ac3092e67b32789ad"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-50/wm-contract-machinery-50-v1/attempt-002/006-adjudication.edn",
+    "bytes": 462656,
+    "sha256": "2cdcbd738c7f8460e73a699b4cd81a33f304d7b0f5b58c123352d8218fbf990c"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-53/wm-contract-machinery-53-v1/attempt-002/006-adjudication.edn",
+    "bytes": 432862,
+    "sha256": "36b92116eeff35709d5042a214c12375a6967f2ae623f749aac7139f91d0d900"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-45-v1/attempt-056/002-selection.edn",
+    "bytes": 133181,
+    "sha256": "f625c906044e194f138bfbcfaef8e952f685e0a429d7b090b3fdbbcd5ef332b5"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-47/wm-contract-machinery-47-v1/attempt-001/002-selection.edn",
+    "bytes": 170693,
+    "sha256": "fbbc8088234cd211b9f657ab2c5cfcf93d04c5035ef52c725ec564d1a249ff8e"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-46-v1/attempt-059/006-adjudication.edn",
+    "bytes": 305600,
+    "sha256": "09d160a09e3b09ccce0d17f54d23a051567e03b8e46e51fb6ffb9fe4404adc56"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-53/wm-contract-machinery-53-v1/attempt-002/002-selection.edn",
+    "bytes": 589124,
+    "sha256": "cb81df5ff682a91cd8095a23988d12319b467f4a9e07d1e6a619e68503824e10"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/007-closed.edn",
+    "bytes": 439940,
+    "sha256": "5fc485c5f33fd6c4b259c9e5ee4c1c3c42ca52a903ad45319cb31ac74bb32dec"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-46-v1/attempt-059/002-selection.edn",
+    "bytes": 435310,
+    "sha256": "15f440cb99a15b472495acdc07e7c024d414c5315f2955231e52bb7d90f21191"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-002/002-selection.edn",
+    "bytes": 598366,
+    "sha256": "6ba0b87329146cf2bd7ce7e4f135230d713b6a1e866f8d9e6a44ebc43fe657f2"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/006-adjudication.edn",
+    "bytes": 436516,
+    "sha256": "2af11a12c8d8690b44e2ca22211180be109abd82b834b30482ea290962a8ba4c"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-46-v1/attempt-059/003-construction.edn",
+    "bytes": 303062,
+    "sha256": "0e6e41b55d0b2c0aa49a797d37314baae94374d4540075b94af24d3b242de58f"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-52/wm-contract-machinery-52-v1/attempt-002/002-selection.edn",
+    "bytes": 590028,
+    "sha256": "138728f7afba11fd40643d9f85d3b4ac0794f26909794d3d8d4fbac492b33ebf"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-52/wm-contract-machinery-52-v1/attempt-001/007-closed.edn",
+    "bytes": 220436,
+    "sha256": "530097776573d5b5476d779fad3d0ba29f7971676714c7106d3ce95a0b3fe1af"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-002/003-construction.edn",
+    "bytes": 875061,
+    "sha256": "f1a8d4d0743ec60005980e7dddf3b8046cac381d27633651dbbc9ffa0a3b7d95"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-50/wm-contract-machinery-50-v1/attempt-002/002-selection.edn",
+    "bytes": 620145,
+    "sha256": "61aef6a7be7ff7c98bda1519661dac5cb7de8c90d5c03d97b58b5865f910c920"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-003/007-closed.edn",
+    "bytes": 221997,
+    "sha256": "744a8bfa311ce3a7c0fa486f27d704fb3f55bd56c4dfd89b195f1c9e1cc97861"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-002/002-selection.edn",
+    "bytes": 598236,
+    "sha256": "00a6aab30a108621f4925702eb3a928cb9700e88f3cc87fc7e6c098afb38f0ea"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-52/wm-contract-machinery-52-v1/attempt-001/002-selection.edn",
+    "bytes": 590059,
+    "sha256": "a18cf8b8a6e03c30ec505c500e52e9b273e7572a63da8b8d4e4e7487534df99b"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-56/wm-contract-machinery-56-v1/attempt-002/007-closed.edn",
+    "bytes": 1690644,
+    "sha256": "8265a2b7a38fb50c3b0da3cd3e6cf6a212f4e93a103575b7ec39156383e3fc7b"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-003/002-selection.edn",
+    "bytes": 598445,
+    "sha256": "4ce7b03b06789de22295e59c69c6e0b5b24af7ba88371d90711adfe303cfd6eb"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-50/wm-contract-machinery-50-v1/attempt-002/003-construction.edn",
+    "bytes": 918737,
+    "sha256": "c6e8446684afa66108acbdaff3e9059c6bf1b771d1bae62c6e1c46ef36b6f573"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log",
+    "bytes": 5514568,
+    "sha256": "125d1f5e92cd925e7548272cedc33ba28c9fd44fc936bfa339252bb1e37926e4"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-52/wm-contract-machinery-52-v1/attempt-001/003-construction.edn",
+    "bytes": 858977,
+    "sha256": "94daaf21c4ee4554d60b18cf5481d34c80f26035bd9c790326715c69a108804a"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-002/003-construction.edn",
+    "bytes": 875061,
+    "sha256": "9cd53d549fd81085e6dbe4279954120d18c79d78cc7cf54aa38ef381a2a3477b"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-003/003-construction.edn",
+    "bytes": 875061,
+    "sha256": "fb07e24e5c2aa6b06049817ba83a0ba8d6b99c4afbf7a381c01a2aac5f56be19"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/002-selection.edn",
+    "bytes": 165234,
+    "sha256": "c31c97b92af8aecaa084caf89f5869ead44ed6b907eb55165aeb48eea0e36912"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/002-selection.edn",
+    "bytes": 593755,
+    "sha256": "63e64f6ba14de2a2f1537488546e3552ec1587cd1a42dc6e35634e622d8ccbb4"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-51/wm-contract-machinery-51-v1/attempt-001/003-construction.edn",
+    "bytes": 866293,
+    "sha256": "205981199186576060a52672eb8eb03071da78bf6a92d3944f51a4fd756ce043"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-001/006-adjudication.edn",
+    "bytes": 444846,
+    "sha256": "e49c739edf86917bbf92fc4e93d0ecbaf62fe107146a087167a0042c39acdde9"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-44-v1/attempt-054/002-selection.edn",
+    "bytes": 135153,
+    "sha256": "45539ba733ee4e4062d415f3230445d543fd6b4549bb5ed117218e33a5eff898"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-56/wm-contract-machinery-56-v1/attempt-001/007-closed.edn",
+    "bytes": 1690644,
+    "sha256": "0e474e803b515a98981d2cf58e229c6417e3803dec3def3df8085c7ec23c85b5"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-001/002-selection.edn",
+    "bytes": 602628,
+    "sha256": "405405511bac7e33dd4a7029b0408bc6ce9a7c4dfe1fbaafa0ec29c08847137d"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/evidence/resolved-before.edn",
+    "bytes": 262478,
+    "sha256": "1266151c767ae8e51545f3c5f12683cb1830edbe835928cff49b6382733f572c"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-001/007-closed.edn",
+    "bytes": 221997,
+    "sha256": "cdba4d9fa0a07f00cc8454713cf9935fbf2e95a849c4baa948e3aab5c0cfa50f"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-53/wm-contract-machinery-53-v1/attempt-002/003-construction.edn",
+    "bytes": 858977,
+    "sha256": "85a7ee27f8f5d48c25d3eab81237f393f93e7e12881345128aad59c44439c038"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-001/evidence/subject-before.edn",
+    "bytes": 268692,
+    "sha256": "6459e684f36c0a4b38e52213121f6938d742a01e6fb47d97ba9050889cf53491"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-001/002-selection.edn",
+    "bytes": 598476,
+    "sha256": "27d3c42a35dd000f78d81b1daf51303cb7857cedd21bcf7f6885bd1c3b99654f"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-53/wm-contract-machinery-53-v1/attempt-001/002-selection.edn",
+    "bytes": 589821,
+    "sha256": "5c9b2e0196102f4e9fadada6ba0809be371168c98d3e76c13ad989f794cac8cb"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-001/evidence/subject-after.edn",
+    "bytes": 268692,
+    "sha256": "6459e684f36c0a4b38e52213121f6938d742a01e6fb47d97ba9050889cf53491"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-001/003-construction.edn",
+    "bytes": 875061,
+    "sha256": "f02b3795714f964fdb5d2f7915cffd72f0f124049147b05b76dc8e62624ffdfa"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-54/wm-contract-machinery-54-v1/attempt-001/003-construction.edn",
+    "bytes": 883145,
+    "sha256": "639f633104fa4896aa9a047337a8d1f817b4abf6dabd1c21d028c6bad96b1484"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-53/wm-contract-machinery-53-v1/attempt-001/003-construction.edn",
+    "bytes": 858977,
+    "sha256": "78f6b28c32a5f5fc70b7550166a7e122c5d2d1045ca1ee3245680ec2a6955db4"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-57/wm-contract-machinery-57-v1/attempt-001/007-closed.edn",
+    "bytes": 1690645,
+    "sha256": "bef2fa9c7e155caed030683b2d77928ed56cde806d0b7c4563a707c4497653f9"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-56/wm-contract-machinery-56-v1/attempt-001/002-selection.edn",
+    "bytes": 3535648,
+    "sha256": "40db087a44d439790ed56f78f6470ae0e7b69afd91c8db6946b3a9a001b35beb"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-56/wm-contract-machinery-56-v1/attempt-002/002-selection.edn",
+    "bytes": 3535578,
+    "sha256": "f778a348d296a7fbb43357b0e56f48d8aa0dabc5b6ff894ee8be463c75ad6015"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-57/wm-contract-machinery-57-v1/attempt-001/002-selection.edn",
+    "bytes": 3535492,
+    "sha256": "7eff45e396c7cee04576e8e1c0e7f9a9c9ee73e83da969cd980f8f6cb99e0c54"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-56/wm-contract-machinery-56-v1/attempt-002/003-construction.edn",
+    "bytes": 6749589,
+    "sha256": "f7a750a178218a7c055b59d2249e32f0f2abc4c50d083bcfd51161715b2acc0e"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-57/wm-contract-machinery-57-v1/attempt-001/003-construction.edn",
+    "bytes": 6749589,
+    "sha256": "128d87a32789ce9d2e0f819ff326beb161ff5d27bfca6ea1e1a2adfa18fcc542"
+  },
+  {
+    "path": "/home/joe/code/futon2/data/wm-full-loop-machinery-56/wm-contract-machinery-56-v1/attempt-001/003-construction.edn",
+    "bytes": 6749589,
+    "sha256": "39c284be29df2e92b5f731efe66da3737b8dd4585691083788199c29a9efc042"
+  }
+]
