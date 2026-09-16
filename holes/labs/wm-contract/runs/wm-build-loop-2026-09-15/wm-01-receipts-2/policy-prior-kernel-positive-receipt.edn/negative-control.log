@@ -1,0 +1,1 @@
+policy-prior-kernel-witness: negative-control PASS (state-conditioned kernel rejected) exit-convention=0-pass/1-fail/2-mutation-slipped

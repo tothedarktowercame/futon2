@@ -1,0 +1,10 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/PolicyPriorKernelWitness.lean",
+  "name" : "reference",
+  "old" : "8452d3f112bc454b48a37ba2ff370f985e18d0ff527d7488ea7f746b19967504",
+  "new" : "d05bf72e5230fa51c609b12a8bbac55e6a4028a128baf711fb22817083131c15",
+  "pre-repair-text" : "noncomputable def reference : PolicyPriorKernel Policy where\n  support := fun _ => [.inspect, .repair]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+  "repaired-text" : "noncomputable def reference : PolicyPriorKernel Policy where\n  support := fun _ => [.inspect, .repair]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n",
+  "head-text" : "noncomputable def reference : PolicyPriorKernel Policy where\n  support := fun _ => [.inspect, .repair]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n"
+} ]

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "-C",
+    "/home/joe/code/mathlib4",
+    "show",
+    "480a666ad2",
+    "--"
+  ],
+  "output": "commit 480a666ad27c18477b4b9df86e11862be3930d50\nAuthor: Joseph Corneli <joseph.corneli@hyperreal.enterprises>\nDate:   Tue Sep 15 06:36:02 2026 +0000\n\n    Enforce finite-support probability kernels and nonnegative VFE precision\n\ndiff --git a/DarkTower/WarMachine/PolicyPriorKernelWitness.lean b/DarkTower/WarMachine/PolicyPriorKernelWitness.lean\nindex 9710e9a489..7763c2875b 100644\n--- a/DarkTower/WarMachine/PolicyPriorKernelWitness.lean\n+++ b/DarkTower/WarMachine/PolicyPriorKernelWitness.lean\n@@ -10,6 +10,8 @@ noncomputable def reference : PolicyPriorKernel Policy where\n   support := fun _ => [.inspect, .repair]\n   mass := fun _ _ => 1 / 2\n   nonnegative := by intros; norm_num\n+  support_nodup := by intro; simp\n+  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n   normalised := by intro; norm_num\n \n theorem referenceRowMass : ((reference.support ()).map (reference.mass ())).sum = 1 :=\n"
+}

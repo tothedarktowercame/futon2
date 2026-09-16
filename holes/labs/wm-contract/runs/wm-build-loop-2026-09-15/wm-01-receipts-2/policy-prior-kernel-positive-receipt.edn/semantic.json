@@ -1,0 +1,12 @@
+{
+  "disposition": "preserved",
+  "reading": "Fair half/half policy prior exhausts inspect and repair under Unit conditioning. Repair adds duplicate-free and zero-off-support proofs, no mass changes. referenceRowMass remains one; Unit alias, reference.support and reference.mass adapter literals remain.",
+  "additions": [
+    "ProbabilityKernel"
+  ],
+  "wrapper": "policy_prior_kernel_witness.clj",
+  "negative-modes": [
+    "--negative-control"
+  ],
+  "exit-convention": "Negative combines in-memory hidden-state conditioning mutation with #guard_msgs Lean rejection. 0 requires valid baseline and both detections; negative failure 2, positive failure 1."
+}

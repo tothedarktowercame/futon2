@@ -1,0 +1,141 @@
+[ {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-13127065583459521904.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PolicyPriorKernelWitness.referenceRowMass' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-18233261674950689139.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PolicyPriorKernelWitness.referenceRowMass' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-5424774413346419395.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PolicyPriorKernelWitness.referenceRowMass' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-16965474824243156787.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PolicyPriorKernelWitness.referenceRowMass' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-12385774234582720790.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PolicyPriorKernelWitness.referenceRowMass' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-5486197927360801417.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PolicyPriorKernelWitness.referenceRowMass' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-2381176639276867102.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PolicyPriorKernelWitness.referenceRowMass' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+} ]
