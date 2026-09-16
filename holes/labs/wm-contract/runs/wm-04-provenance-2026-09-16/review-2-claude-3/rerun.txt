@@ -1,0 +1,9 @@
+bb readback.clj at 8beb626c with output-dir redirected to /tmp/c3-wm04r/out: exit 0
+Read four trace records and 65 policy-matching files.
+Verified displaced selector head, enacted F11 target, and backup decision.
+fcf913fb66248e96b5acfa6b6f9c250d51055c23992d39c26f601f3c52a9d311  trace-readback.edn
+9b94e0e84dd273c3998e83b54fd03bcd3c614ce274dad59d8f9720dc60eb6f24  policy-occurrences.edn
+a7f9ec39d2b14cdf78b5de4e763cf098f74fb9f833aae569efe115236c9d71cd  execution-join.edn
+all three byte-identical (cmp) to retained files
+clj-kondo readback.clj: 0 errors 0 warnings; check-parens (arxana-check-parens-cli): OK exit 0
+revision-source-pins.json: 4 pins, 0 mismatches at review time
