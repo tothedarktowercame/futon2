@@ -1,0 +1,98 @@
+#'futon2.aif.receipt-construction/construct!
+
+Testing futon2.aif.receipt-construction-test
+
+FAIL in (unrelated-archive-and-recognized-open-attempt) (receipt_construction_test.clj:550)
+expected: (= 1 (count excluded))
+  actual: (not (= 1 0))
+
+FAIL in (unrelated-archive-and-recognized-open-attempt) (receipt_construction_test.clj:551)
+expected: (= :producer-recorded-different-target (:reason (first excluded)))
+  actual: (not (= :producer-recorded-different-target nil))
+
+FAIL in (unrelated-archive-and-recognized-open-attempt) (receipt_construction_test.clj:552)
+expected: (some (fn* [p1__21658#] (= (str (last files)) (:file p1__21658#))) (:records (first excluded)))
+  actual: (not (some #object[futon2.aif.receipt_construction_test$fn__21659$fn__21672 0x2187cfc "futon2.aif.receipt_construction_test$fn__21659$fn__21672@2187cfc"] nil))
+
+FAIL in (history-links-do-not-escape-or-cycle) (receipt_construction_test.clj:580)
+expected: (= :history-discovery-invalid (:construction/refusal error))
+  actual: (not (= :history-discovery-invalid nil))
+
+FAIL in (history-links-do-not-escape-or-cycle) (receipt_construction_test.clj:581)
+expected: (= :unsupported-history-link-or-escape (:reason error))
+  actual: (not (= :unsupported-history-link-or-escape nil))
+
+FAIL in (history-links-do-not-escape-or-cycle) (receipt_construction_test.clj:582)
+expected: (= (str link) (:file error))
+  actual: (not (= "/tmp/receipt-links7298242602171015354/link" nil))
+
+FAIL in (history-links-do-not-escape-or-cycle) (receipt_construction_test.clj:580)
+expected: (= :history-discovery-invalid (:construction/refusal error))
+  actual: (not (= :history-discovery-invalid nil))
+
+FAIL in (history-links-do-not-escape-or-cycle) (receipt_construction_test.clj:581)
+expected: (= :unsupported-history-link-or-escape (:reason error))
+  actual: (not (= :unsupported-history-link-or-escape nil))
+
+FAIL in (history-links-do-not-escape-or-cycle) (receipt_construction_test.clj:582)
+expected: (= (str link) (:file error))
+  actual: (not (= "/tmp/receipt-links1325717329917812826/link" nil))
+
+FAIL in (unsupported-history-containers-refuse-coverage) (receipt_construction_test.clj:566)
+expected: (= :history-discovery-invalid (:construction/refusal error))
+  actual: (not (= :history-discovery-invalid nil))
+
+FAIL in (unsupported-history-containers-refuse-coverage) (receipt_construction_test.clj:567)
+expected: (= :unsupported-history-layout (:reason error))
+  actual: (not (= :unsupported-history-layout nil))
+
+FAIL in (unsupported-history-containers-refuse-coverage) (receipt_construction_test.clj:568)
+expected: (string? (:file error))
+  actual: (not (string? nil))
+
+FAIL in (unsupported-history-containers-refuse-coverage) (receipt_construction_test.clj:566)
+expected: (= :history-discovery-invalid (:construction/refusal error))
+  actual: (not (= :history-discovery-invalid nil))
+
+FAIL in (unsupported-history-containers-refuse-coverage) (receipt_construction_test.clj:567)
+expected: (= :unsupported-history-layout (:reason error))
+  actual: (not (= :unsupported-history-layout nil))
+
+FAIL in (unsupported-history-containers-refuse-coverage) (receipt_construction_test.clj:568)
+expected: (string? (:file error))
+  actual: (not (string? nil))
+
+FAIL in (unsupported-history-containers-refuse-coverage) (receipt_construction_test.clj:566)
+expected: (= :history-discovery-invalid (:construction/refusal error))
+  actual: (not (= :history-discovery-invalid nil))
+
+FAIL in (unsupported-history-containers-refuse-coverage) (receipt_construction_test.clj:567)
+expected: (= :unsupported-history-layout (:reason error))
+  actual: (not (= :unsupported-history-layout nil))
+
+FAIL in (unsupported-history-containers-refuse-coverage) (receipt_construction_test.clj:568)
+expected: (string? (:file error))
+  actual: (not (string? nil))
+
+FAIL in (archived-history-shares-ordering-and-admission) (receipt_construction_test.clj:532)
+expected: (= (str (:construction-file latest)) (get-in result [:provenance :construction-file]))
+  actual: (not (= "/tmp/receipt-archive9924382387539483982/archives/fixture-group/fixture/attempt-001/003-construction.edn" "/tmp/receipt-archive9924382387539483982/fixture/attempt-001/003-construction.edn"))
+
+FAIL in (archived-history-shares-ordering-and-admission) (receipt_construction_test.clj:533)
+expected: (some (fn* [p1__21508#] (= :archive (:layout p1__21508#))) (get-in result [:provenance :searched-layouts]))
+  actual: (not (some #object[futon2.aif.receipt_construction_test$fn__21509$fn__21522$fn__21539 0x1516a77b "futon2.aif.receipt_construction_test$fn__21509$fn__21522$fn__21539@1516a77b"] nil))
+
+FAIL in (archived-history-shares-ordering-and-admission) (receipt_construction_test.clj:533)
+expected: (some (fn* [p1__21508#] (= :archive (:layout p1__21508#))) (get-in result [:provenance :searched-layouts]))
+  actual: (not (some #object[futon2.aif.receipt_construction_test$fn__21509$fn__21522$fn__21539 0x665b69fe "futon2.aif.receipt_construction_test$fn__21509$fn__21522$fn__21539@665b69fe"] nil))
+
+FAIL in (archived-history-shares-ordering-and-admission) (receipt_construction_test.clj:528)
+expected: (= :previous-cascade-carrier-unavailable (:construction/refusal error))
+  actual: (not (= :previous-cascade-carrier-unavailable nil))
+
+FAIL in (archived-history-shares-ordering-and-admission) (receipt_construction_test.clj:529)
+expected: (= (str (:construction-file latest)) (:file error))
+  actual: (not (= "/tmp/receipt-archive15223833583376498280/archives/fixture-group/fixture/attempt-001/003-construction.edn" nil))
+
+Ran 23 tests containing 279 assertions.
+23 failures, 0 errors.

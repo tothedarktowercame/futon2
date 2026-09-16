@@ -1,0 +1,23 @@
+{
+  "base": "615a998784cca652028ed2c3cf0c7b26815fbbff",
+  "sha256": {
+    "src/futon2/aif/receipt_construction.clj": "bc83f7d5f5d2ef76cb544de472cec2c420f67d89d1a0d81d4e28f2f523985f04",
+    "test/futon2/aif/receipt_construction_test.clj": "b606e539f71871e3f10fb9cfe811e5d241d168ca1e1a39de31e037067f0618a6",
+    "src/futon2/aif/full_loop_cohort.clj": "619281d634f3ac941d677352dcabdfc66a644238a957e63e5ba33ef64f41eb9e",
+    "src/futon2/aif/full_loop_runner.clj": "aa258d744552778a9ee06dfc70470e5cf46f9d9e70a366be519aacf0f982d55f",
+    "/home/joe/code/p4ng/wm-walkthroughs/build-loop/claude-3/WM-09-predecessor-history-1.md": "b355dd8e79032b7501bf12abaa60bd3ca480d3c26e88460a1f900d5770761e1f",
+    "/home/joe/code/p4ng/wm-walkthroughs/build-loop/closure/revision-21-inputs/archive-census.json": "cd86a33922e71239d9ca51c7f6f87c6c8ebe058bf3523f1aceece9d6d5925a39"
+  },
+  "unchanged_diagnostics_against": "7e738d53",
+  "diagnostics": [
+    "REPORT.md",
+    "SOURCE-PINS.json",
+    "VALIDATION.json",
+    "before.edn",
+    "before.stderr",
+    "kondo.log",
+    "namespace-tests.log",
+    "parens.log",
+    "probe.clj"
+  ]
+}

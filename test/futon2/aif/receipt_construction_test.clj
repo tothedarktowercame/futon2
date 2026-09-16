@@ -511,3 +511,76 @@
             (is (= :non-construction-close-contradiction (:reason error)))
             (is (= (str (last files)) (:file error)))))
         (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
+
+(deftest archived-history-shares-ordering-and-admission
+  (doseq [damaged? [false true] overlap? [false true]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-archive" (make-array FileAttribute 0)))
+          group (io/file temp "archives" "fixture-group")
+          current {:occurrence {:action/value {:target "M-history"} :action-at "2026-09-15T12:00:00Z"}}]
+      (try
+        (history-fixture! temp :old "2026-09-15T09:00:00Z" "2026-09-15T09:01:00Z")
+        (let [latest (history-fixture! group :archived "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z")
+              roots (if overlap? [temp group] [temp])]
+          (when damaged?
+            (rewrite-history! (:construction-file latest) #(update-in % [:payload :judgment] dissoc :receipted-construction)))
+          (if damaged?
+            (let [error (refusal #(construction/previous! current roots))]
+              (is (= :previous-cascade-carrier-unavailable (:construction/refusal error)))
+              (is (= (str (:construction-file latest)) (:file error))))
+            (let [result (construction/previous! current roots)]
+              (is (= :carried-from-previous-occurrence (:admission-reason result)))
+              (is (= (str (:construction-file latest)) (get-in result [:provenance :construction-file])))
+              (is (some #(= :archive (:layout %)) (get-in result [:provenance :searched-layouts]))))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
+
+(deftest unrelated-archive-and-recognized-open-attempt
+  (let [temp (.toFile (Files/createTempDirectory "receipt-archive-other" (make-array FileAttribute 0)))
+        group (io/file temp "archives" "fixture-group")]
+    (try
+      (let [files (discovery-history! group "M-other" false)
+            open (io/file temp "fixture" "attempt-003")]
+        (.mkdirs open)
+        (spit (io/file open "001-time-step.edn") "{:fixture :open}")
+        (.mkdirs (io/file open "evidence"))
+        (spit (io/file open "evidence" "fixture.source") "immutable fixture")
+        (let [result (construction/previous! {:occurrence {:action/value {:target "M-fresh"}
+                                                          :action-at "2026-09-15T12:00:00Z"}} [temp])
+              excluded (get-in result [:provenance :excluded-attempts])]
+          (is (= :first-attempt-no-admissions (:admission-reason result)))
+          (is (= 1 (count excluded)))
+          (is (= :producer-recorded-different-target (:reason (first excluded))))
+          (is (some #(= (str (last files)) (:file %)) (:records (first excluded))))))
+      (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
+
+(deftest unsupported-history-containers-refuse-coverage
+  (doseq [path [["extra" "nested" "fixture" "attempt-001"]
+                ["archives" "group" "extra" "nested" "fixture" "attempt-001"]
+                ["fixture" "attempt-001" "hidden"]]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-layout" (make-array FileAttribute 0)))]
+      (try
+        (let [dir (apply io/file temp path)]
+          (.mkdirs dir)
+          (spit (io/file dir "007-closed.edn") "{}")
+          (let [error (refusal #(construction/previous! {:occurrence {:action/value {:target "M-fresh"}
+                                                                   :action-at "2026-09-15T12:00:00Z"}} [temp]))]
+            (is (= :history-discovery-invalid (:construction/refusal error)))
+            (is (= :unsupported-history-layout (:reason error)))
+            (is (string? (:file error)))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
+
+(deftest history-links-do-not-escape-or-cycle
+  (doseq [cycle? [true false]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-links" (make-array FileAttribute 0)))
+          outside (.toFile (Files/createTempDirectory "receipt-outside" (make-array FileAttribute 0)))
+          link (io/file temp "link")]
+      (try
+        (Files/createSymbolicLink (.toPath link) (.toPath (if cycle? temp outside)) (make-array FileAttribute 0))
+        (let [error (refusal #(construction/previous! {:occurrence {:action/value {:target "M-fresh"}
+                                                                 :action-at "2026-09-15T12:00:00Z"}} [temp]))]
+          (is (= :history-discovery-invalid (:construction/refusal error)))
+          (is (= :unsupported-history-link-or-escape (:reason error)))
+          (is (= (str link) (:file error))))
+        (finally
+          (Files/deleteIfExists (.toPath link))
+          (Files/delete (.toPath temp))
+          (Files/delete (.toPath outside)))))))
