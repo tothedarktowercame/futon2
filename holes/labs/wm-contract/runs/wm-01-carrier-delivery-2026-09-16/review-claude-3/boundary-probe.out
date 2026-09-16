@@ -1,0 +1,17 @@
+:decimal-exact-one {:ok true, :admission :float-carried, :representation :exact-decimal, :exactly-normalized? true, :exact-deviation 0N, :criterion {:id :absolute-row-sum, :revision "v1.1", :target 1, :max-absolute-deviation 1/1000000000000}}
+:decimal-dev-1e-13 {:ok true, :admission :float-carried, :representation :exact-decimal, :exactly-normalized? false, :exact-deviation 1/10000000000000, :criterion {:id :absolute-row-sum, :revision "v1.1", :target 1, :max-absolute-deviation 1/1000000000000}}
+:decimal-dev-exactly-1e-12 {:ok true, :admission :float-carried, :representation :exact-decimal, :exactly-normalized? false, :exact-deviation 1/1000000000000, :criterion {:id :absolute-row-sum, :revision "v1.1", :target 1, :max-absolute-deviation 1/1000000000000}}
+:decimal-dev-just-over {:ok false, :admission nil, :representation :exact-decimal, :exactly-normalized? false, :exact-deviation 10000000000000000001/10000000000000000000000000000000, :criterion {:id :absolute-row-sum, :revision "v1.1", :target 1, :max-absolute-deviation 1/1000000000000}, :refusal {:kind :unnormalized-row, :path []}}
+:ratio-dev-1e-13 {:ok false, :admission nil, :representation :exact-rational, :exactly-normalized? false, :exact-deviation 1/10000000000000, :criterion {:id :exact-row-sum, :revision "exact-represented-v1", :target 1, :max-absolute-deviation 0}, :refusal {:kind :unnormalized-row, :path []}}
+:ratio-plus-decimal-dev-1e-13 {:ok true, :admission :float-carried, :representation :mixed-exact, :exactly-normalized? false, :exact-deviation 1/10000000000000, :criterion {:id :absolute-row-sum, :revision "v1.1", :target 1, :max-absolute-deviation 1/1000000000000}}
+:extra-zero-key {:ok false, :refusal {:kind :distribution-support-mismatch, :path []}}
+:missing-key {:ok false, :refusal {:kind :distribution-support-mismatch, :path []}}
+:dup-support {:ok false, :refusal {:kind :duplicate-support, :path []}}
+:list-support {:ok false, :refusal {:kind :missing-support, :path []}}
+:nan {:ok false, :refusal {:kind :invalid-mass, :path [:a]}}
+:neg {:ok false, :refusal {:kind :invalid-mass, :path [:a]}}
+:permuted-support-preserves-assignment [true {:a 0.25, :b 0.75} [:b :a]]
+:float32 [{:a :float32, :b :float64} true java.lang.Double true 0N]
+:retained-classes (java.lang.Double java.lang.Double java.lang.Double java.lang.Double java.lang.Double java.lang.Double java.lang.Double)
+:retained-coords-equal-lean true
+:retained-admission {:ok true, :admission :float-carried, :exactly-normalized? false, :exact-total 36028797018963969/36028797018963968, :exact-deviation 1/36028797018963968}
