@@ -22,8 +22,7 @@
   (:require [clojure.set :as set]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-policy :as cp]
-            [futon2.aif.policy :as policy]
-            [futon2.aif.receipt-construction :as rc]))
+            [futon2.aif.policy :as policy]))
 
 ;; --- the tick's tokens, interpretations and cascades (03-R6.edn) ---------
 
