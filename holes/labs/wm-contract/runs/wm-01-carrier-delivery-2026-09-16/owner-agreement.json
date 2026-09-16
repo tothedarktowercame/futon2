@@ -1,0 +1,130 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-8",
+    "session-id": "zai-6165adae-712f-4c59-838d-3569c6d8e692",
+    "execution": {
+      "executed": true,
+      "tool-events": 2,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789571881135-21439-56a3f06a",
+    "agent-id": "zai-9",
+    "artifact-ref": "/CONTRACT.md",
+    "started-at": "2026-09-16T15:18:01.896580867Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T15:18:01.135391319Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T15:18:01.896588712Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T15:18:02.629158322Z",
+        "text": "Your finding is now concrete: futon2 754550e1, holes/labs/wm-contract/runs/wm-01-carrier-delivery-2026-09-16/CONTRACT.md. All 9 accepted support/formal source hashes match; fresh existing runtime tests 23 tests/427 assertions pass. The contract explicitly includes decimal/mixed-exact tolerance, legacy-tag ambiguity, full support vs numeric-only boundary, exact-conversion premise, same retained row, specialized consumer limits and full exclusions. Independent composite review sent to claude-3, job invoke-1789571867543-21438-4bbdf696. Please check this exact contract for item-owner agreement or specific correction. Read-only; no dispatch, source, DAG or checklist edits. Reply to codex-8.\n"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-09-16T15:18:08.261679260Z",
+        "text": "Read the CONTRACT.md and the commit, verify claims."
+      },
+      {
+        "seq": 5,
+        "type": "tool_use",
+        "at": "2026-09-16T15:18:08.269489551Z",
+        "tools": [
+          "run_readonly",
+          "read_file"
+        ],
+        "previews": [
+          "run_readonly cd /home/joe/code/futon2 && git show --stat --oneline 754550e1 | head -20",
+          "read_file /home/joe/code/futon2/holes/labs/wm-contract/runs/wm-01-carrier-delivery-2026-09-16/CONTRACT.md"
+        ],
+        "output": [
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"754550e1 Document bounded WM-01 carrier delivery and verify accepted source pins\\n .../wm-01-carrier-delivery-2026-09-16/CONTRACT.md  | 111 ++++++++++\\n .../coordinator-response.json                      | 107 +++++++++\\n .../coordinator-response.md                        |  10 +\\n .../machine-belief-test.log                        |   7 +\\n .../machine-predictive-test.log                    |   7 +\\n .../owner-response.json                            | 244 +++++++++++++++++++++\\n .../owner-response.md                              |  17 ++\\n .../source-verification.json                       |  73 ++++++\\n .../test-results.json                              |  26 +++\\n 9 files changed, 602 insertions(+)\\n\",\"err\":\"\"}}",
+          "{\"ok\":true,\"result\":\"# WM-01 carrier delivery\\n\\nPrepared by codex-8 for Joe, 2026-09-16. Item owner: zai-9.\\nSubject: `WM-01-carrier-contract` in the existing closure DAG, not full WM-01.\\nStatus: submitted for independent composite review. No implementation changes.\\n\\n## Delivered interface\\n\\n`futon2.aif.machine-model/distribution-admission [row support]` is the public\\nfull-row boundary. `support` must be a nonempty vector with distinct identities;\\nthe row must be a map with exactly those keys. Extra  \u2026[trimmed]\u2026  tag. A nonexact admitted\\nrow cannot be treated as an exact kernel without additional justified work.\\n\\nThe same retained seven-status binary64 row is exercised by\\n`machine-belief-test/reader-exposes-approximate-production-row-admission` and\\nrepresented in `FloatCarriedRowCorrespondence.retainedRow`. Its total is\\n`36028797018963969/36028797018963968`, deviation `1/2^55`: admitted and nonexact.\\nThe historical independent formal review checked every rational coordinate\\nagainst Python `Fraction(double)` and rejected exact conversion of that row.\\nThis packet freshly reruns the runtime reader test; it does not rerun Lean.\\n\\n## Availability to downstream implementation\\n\\n| Interface / declaration | Location | Bounded evidence |\\n|---|---|---|\\n| Full-row and numeric admission, common support check | `src/futon2/aif/machine_model.clj` | numeric-1 and support-1 accepted; current bytes match support-1 |\\n| Single-entity reader | `src/futon2/aif/machine_belief.clj` | calls full-row boundary; retains original posterior, model/context and numeric evidence |\\n| State predictor | `src/futon2/aif/machine_predictive.clj` | calls full-row boundary at initial and every produced row; rejects malformed support before transition |\\n| Approximate carrier and exact conversion | `mathlib4/DarkTower/WarMachine/MachineModelSpec.lean` | float-carrier-1 accepted; current bytes match |\\n| Concrete retained-row representation | `mathlib4/DarkTower/WarMachine/FloatCarriedRowCorrespondence.lean` | nonexact row and coordinate theorems accepted; current bytes match |\\n\\nThese are existing callable interfaces and formal declarations. They are\\navailable for downstream bounded implementation against the pinned source.\\nThe row boundary does not invent State/Action/Outcome meanings or model identity.\\nThe single-entity reader's canonical status order and the predictor's policy/model\\nchecks remain additional consumer conditions. Arbitrary support permutations\\nadmitted by the generic boundary need not be accepted by that specialized reader.\\nNew domains, interpreted dynamics and shared identities across all actual\\nconsumers remain the respective delivery/closure obligations.\\n\\n## Acceptance basis and fresh verification\\n\\n- numeric-1: futon2 `ac821857` + `7f546b63`; independent review `00915661`.\\n- support-1: futon2 `9aad9adf`; independent review `0e5f5545`.\\n- float-carrier-1: mathlib4 `f40c936a64`, futon2 receipts `6f494738`;\\n  independent review `e99c08c4`.\\n- `source-verification.json` compares all six accepted support source/test files\\n  and all three accepted formal source files with their retained hashes: 9/9 match.\\n- Fresh isolated tests: machine-model 11 tests/319 assertions; machine-belief\\n  6/45; machine-predictive 6/63; all pass. The model invocation was captured by\\n  the agent tool transcript; the other two raw outputs and commands are retained\\n  here in `test-results.json` and the `.log` files. These are existing tests,\\n  including support-shape, negative/nonfinite/extra-key refusals, exact and\\n  approximate cases, support permutation, retained row and predictor refusals.\\n- `owner-response.json` retains zai-9's finding that composite acceptance is the\\n  missing step. `coordinator-response.json` confirms no overlapping WM-01 work.\\n\\n## Exact acceptance requested\\n\\nDetermine whether the three already accepted subclauses jointly satisfy the\\nexisting DAG acceptance: shared support and represented-value admission\\ninterfaces, exact versus approximate laws, available downstream. Review the\\ninterface agreement and the same-row correspondence above; identify a concrete\\nmissing obligation if the delivery cannot be accepted.\\n\\nAcceptance does not establish composed prediction/KL/ordering bounds, universal\\nruntime/formal correspondence, all proof/witness bindings, R4 admission, registry\\npublication, measured A/B, actual serving use or full WM-01 closure. It does not\\ndispatch a downstream task or alter its other prerequisites. No source, runtime,\\nregistry, checklist, preference or WM-06 changes are part of this delivery.\"}"
+        ]
+      },
+      {
+        "seq": 6,
+        "type": "text",
+        "at": "2026-09-16T15:18:11.935577117Z",
+        "text": "Spot-check a couple of claims: source-verification.json 9/9, test-results. Also check runtime tests log briefly. Then reply with agreement or correction."
+      },
+      {
+        "seq": 7,
+        "type": "tool_use",
+        "at": "2026-09-16T15:18:11.980185927Z",
+        "tools": [
+          "run_readonly"
+        ],
+        "previews": [
+          "run_readonly cd /home/joe/code/futon2/holes/labs/wm-contract/runs/wm-01-carrier-delivery-2026-09-16 && python3 -c \" import json sv=js"
+        ],
+        "output": [
+          "{\"ok\":true,\"result\":{\"exit\":0,\"out\":\"{\\\"checked_at\\\": \\\"2026-09-16\\\", \\\"heads\\\": {\\\"futon2\\\": \\\"5b3141da5d104aff2a04db50a01a031dd0f44fd8\\\", \\\"mathlib4\\\": \\\"f40c936a64227ba81592a71f3d937e6fbdbf0e4c\\\", \\\"p4ng\\\": \\\"ab13e48a949bffba289b38f4f76f8fd752aa3cd3\\\"}, \\\"sources\\\": [{\\\"repo\\\": \\\"futon2\\\", \\\"path\\\": \\\"src/futon2/aif/machine_model.clj\\\", \\\"expected\\\": \\\"462aae432397e21209c238685d1aa39d040f15b330e2baa5f771d4858eb66b77\\\", \\\"actual\\\": \\\"462aae432397e21209c238685d1aa39d040f15b330e2baa5f771d4858eb66b77\\\", \\\"matches\\\": true}, {\\\"repo\\\": \\\"futon2\\\", \\\"path\\\": \\\"src/futon2/aif/machine_belief.clj\\\", \\\"expected\\\": \\\"38993c823ccbd9dd10b6daa51902de4ae9bc7d08feaaa826c26a3bc2f332908b\\\", \\\"actual\\\": \\\"38993c823ccbd9dd10b6daa51902de4ae9bc7d08feaaa826c26a3bc2f332908b\\\", \\\"matches\\\": true}, {\\\"repo\\\": \\\"futon2\\\", \\\"path\\\": \\\"src/futon2/aif/machine_predictive.clj\\\", \\\"expected\\\": \\\"3ab634a5263b71efd21a8d18bb\\n[{\\\"command\\\": [\\\"clojure\\\", \\\"-M:test\\\", \\\"-m\\\", \\\"cognitect.test-runner\\\", \\\"-n\\\", \\\"futon2.aif.machine-belief-test\\\"], \\\"exit\\\": 0, \\\"log\\\": \\\"machine-belief-test.log\\\"}, {\\\"command\\\": [\\\"clojure\\\", \\\"-M:test\\\", \\\"-m\\\", \\\"cognitect.test-runner\\\", \\\"-n\\\", \\\"futon2.aif.machine-predictive-test\\\"], \\\"exit\\\": 0, \\\"log\\\": \\\"machine-predictive-test.log\\\"}]\\n\\nRunning tests in #{\\\"test\\\"}\\n\\nTesting futon2.aif.machine-belief-test\\n\\nRan 6 tests containing 45 assertions.\\n0 failures, 0 errors.\\n\",\"err\":\"\"}}"
+        ]
+      },
+      {
+        "seq": 8,
+        "type": "text",
+        "at": "2026-09-16T15:18:32.132015419Z",
+        "text": "**zai-9 \u2192 codex-8: item-owner AGREEMENT on `wm-01-carrier-delivery-2026-09-16/CONTRACT.md` at futon2 `754550e1`, with one small evidence-retention note.**\n\nI read the contract in full and independently spot-checked its factual anchors:\n- `source-verification.json`: heads pinned at futon2 `5b3141da` (current HEAD), mathlib4 `f40c936a64` (the accepted float-carrier-1 commit) \u2014 9/9 hash matches as claimed.\n- `machine-belief-test.log` confirms 6 tests / 45 assertions, 0 failures; `test-results.json` records the predictive run exit 0.\n- The acceptance-basis chain (numeric-1 `ac821857`+`7f546b63`/`00915661`; support-1 `9aad9adf`/`0e5f5545`; float-carrier-1 `f40c936a64`+`6f494738`/`e99c08c4`) matches my own earlier read of the DAG and futon2 log.\n\n**Why I agree it is the right composite packet:** it addresses exactly the three elements no single subclause established \u2014 (1) shared interface (one `distribution-admission` full-row boundary calling the common support check and `numeric-row-admission`, with `machine_belief`/`machine_predictive` as actual call sites at pinned hashes); (2) exact-vs-approximate stated consistently (the exact-total-one premise of `FloatCarriedRow.toProbabilityKernel` vs the runtime criterion, on the *same* retained row, total `36028797018963969/36028797018963968`, deviation `1/2^55` \u2014 admitted and nonexact, with the legacy-tag ambiguity called out rather than papered over); (3) downstream availability at named files. All six exclusions I flagged are restated verbatim, including no R4/registry renewal and no serving use. The \"Exact acceptance requested\" section matches the DAG node's acceptance sentence without enlarging it. No implementation, DAG or checklist changes \u2014 consistent with my scope.\n\n**One specific correction for the record (not a blocker):** the fresh machine-model run (11 tests / 319 assertions) is claimed as \"captured by the agent tool transcript,\" but unlike the other two namespaces its raw log/command is not retained in the packet  \u2026[trimmed]"
+      },
+      {
+        "seq": 9,
+        "type": "done",
+        "at": "2026-09-16T15:18:32.267926682Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 10,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T15:18:34.501338964Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-8 via /api/alpha/invoke/jobs/invoke-1789571881135-21439-56a3f06a",
+        "recorded-at": "2026-09-16T15:18:34.499275851Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-8 via /api/alpha/invoke/jobs/invoke-1789571881135-21439-56a3f06a",
+      "recorded-at": "2026-09-16T15:18:34.499275851Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789571881135-21439-56a3f06a",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "**zai-9 \u2192 codex-8: item-owner AGREEMENT on `wm-01-carrier-delivery-2026-09-16/CONTRACT.md` at futon2 `754550e1`, with one small evidence-retention note.** I read the contract in full and independently spot-checked its...",
+    "result": "**zai-9 \u2192 codex-8: item-owner AGREEMENT on `wm-01-carrier-delivery-2026-09-16/CONTRACT.md` at futon2 `754550e1`, with one small evidence-retention note.**\n\nI read the contract in full and independently spot-checked its factual anchors:\n- `source-verification.json`: heads pinned at futon2 `5b3141da` (current HEAD), mathlib4 `f40c936a64` (the accepted float-carrier-1 commit) \u2014 9/9 hash matches as claimed.\n- `machine-belief-test.log` confirms 6 tests / 45 assertions, 0 failures; `test-results.json` records the predictive run exit 0.\n- The acceptance-basis chain (numeric-1 `ac821857`+`7f546b63`/`00915661`; support-1 `9aad9adf`/`0e5f5545`; float-carrier-1 `f40c936a64`+`6f494738`/`e99c08c4`) matches my own earlier read of the DAG and futon2 log.\n\n**Why I agree it is the right composite packet:** it addresses exactly the three elements no single subclause established \u2014 (1) shared interface (one `distribution-admission` full-row boundary calling the common support check and `numeric-row-admission`, with `machine_belief`/`machine_predictive` as actual call sites at pinned hashes); (2) exact-vs-approximate stated consistently (the exact-total-one premise of `FloatCarriedRow.toProbabilityKernel` vs the runtime criterion, on the *same* retained row, total `36028797018963969/36028797018963968`, deviation `1/2^55` \u2014 admitted and nonexact, with the legacy-tag ambiguity called out rather than papered over); (3) downstream availability at named files. All six exclusions I flagged are restated verbatim, including no R4/registry renewal and no serving use. The \"Exact acceptance requested\" section matches the DAG node's acceptance sentence without enlarging it. No implementation, DAG or checklist changes \u2014 consistent with my scope.\n\n**One specific correction for the record (not a blocker):** the fresh machine-model run (11 tests / 319 assertions) is claimed as \"captured by the agent tool transcript,\" but unlike the other two namespaces its raw log/command is not retained in the packet \u2014 `test-results.json` and the `.log` files cover only belief and predictive. For an acceptance packet whose whole point is retained evidence at pinned bytes, the reviewer (claude-3, job `invoke-1789571867543-21438-4bbdf696`) should either accept the transcript citation explicitly or you should add the machine-model log/command in a follow-up commit to the same run directory. I'd suggest flagging it to claude-3 rather than pre-emptively editing.\n\nSubject to that, I concur the composite review is the only remaining step for `WM-01-carrier-contract`; the DAG state flip on acceptance is yours/codex-28's channel, not mine. Read-only throughout this turn.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789571881135-21439-56a3f06a",
+      "at": "2026-09-16T15:18:32.267906384Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T15:18:32.267906384Z",
+    "created-at": "2026-09-16T15:18:01.135056883Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}
