@@ -1,0 +1,37 @@
+{
+  "review-controls-tests": {
+    "command": [
+      "clojure",
+      "-X:test",
+      ":nses",
+      "[futon2.aif.receipt-construction-test]"
+    ],
+    "exit": 0
+  },
+  "review-controls-kondo": {
+    "command": [
+      "clj-kondo",
+      "--lint",
+      "src/futon2/aif/receipt_construction.clj",
+      "test/futon2/aif/receipt_construction_test.clj"
+    ],
+    "exit": 0
+  },
+  "review-controls-parens": {
+    "command": [
+      "emacs",
+      "-Q",
+      "--batch",
+      "-l",
+      "/home/joe/code/futon4/dev/check-parens.el",
+      "--eval",
+      "(arxana-check-parens-cli)",
+      "--",
+      "--no-defaults",
+      "src/futon2/aif/receipt_construction.clj",
+      "test/futon2/aif/receipt_construction_test.clj"
+    ],
+    "exit": 0
+  },
+  "initial-test-correction": "One new assertion used the wrong refusal key; corrected to :interpretation-evidence/refusal. No source change."
+}

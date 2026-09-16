@@ -169,7 +169,8 @@
   (spit file (pr-str (f (edn/read-string (slurp file))))))
 
 (deftest damaged-latest-history-never-resets-or-falls-back
-  (doseq [[label damage expected]
+  (doseq [with-older? [false true]
+          [label damage expected]
           [[:carrier-removed #(rewrite-history! (:construction-file %) (fn [x] (update-in x [:payload :judgment] dissoc :receipted-construction))) :previous-cascade-carrier-unavailable]
            [:carrier-malformed #(rewrite-history! (:construction-file %) (fn [x] (assoc-in x [:payload :judgment :receipted-construction] {}))) :previous-manifest-source-mismatch]
            [:cascade-removed #(rewrite-history! (:construction-file %) (fn [x] (update-in x [:payload :judgment] dissoc :cascade))) :previous-cascade-unavailable]
@@ -187,15 +188,16 @@
            [:missing-targets (fn [x]
                                (Files/delete (.toPath (:construction-file x)))
                                (rewrite-history! (:close-file x) #(update-in % [:payload :close-retention] dissoc :occurrence))) :history-discovery-invalid]]]
-    (testing (name label)
+    (testing (str (name label) " older=" with-older?)
       (let [temp (.toFile (Files/createTempDirectory "receipt-damage" (make-array FileAttribute 0)))
             older (io/file temp "older") newer (io/file temp "newer")]
         (try
-          (history-fixture! older :older "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z")
+          (when with-older?
+            (history-fixture! older :older "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z"))
           (let [latest (history-fixture! newer :newer "2026-09-15T11:00:00Z" "2026-09-15T11:01:00Z")
                 current (assoc-in (:identity latest) [:occurrence :action-at] "2026-09-15T12:00:00Z")]
             (damage latest)
-            (let [error (refusal #(construction/previous! current [older newer]))]
+            (let [error (refusal #(construction/previous! current (if with-older? [older newer] [newer])))]
               (is (= expected (:construction/refusal error)))
               (is (or (:file error) (:history/close-file error)))))
           (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))))
@@ -220,3 +222,34 @@
       (is (= :ambiguous-previous-construction
              (:construction/refusal (refusal #(construction/previous! current [first-root second-root])))))
       (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
+
+(deftest resealed-carriers-reach-carrier-validation
+  (doseq [[label mutate expected]
+          [[:unchanged identity nil]
+           [:removed #(update-in % [:payload :judgment] dissoc :receipted-construction)
+            :previous-cascade-carrier-unavailable]
+           [:malformed #(assoc-in % [:payload :judgment :receipted-construction] {})
+            :previous-evidence-invalid]]]
+    (testing (name label)
+      (let [temp (.toFile (Files/createTempDirectory "receipt-resealed" (make-array FileAttribute 0)))]
+        (try
+          (let [latest (history-fixture! temp :sealed "2026-09-15T11:00:00Z" "2026-09-15T11:01:00Z")
+                current (assoc-in (:identity latest) [:occurrence :action-at] "2026-09-15T12:00:00Z")]
+            (rewrite-history! (:construction-file latest) mutate)
+            (rewrite-history! (:close-file latest)
+                              (fn [closed]
+                                (assoc-in closed [:payload :close-evidence-manifest]
+                                          (manifest/build-manifest
+                                           {:entries (mapv #(select-keys % [:evidence/id :source-path :admitted-at])
+                                                           (get-in closed [:payload :close-evidence-manifest :entries]))
+                                            :read-bytes #(Files/readAllBytes (.toPath (io/file %)))}))))
+            (if expected
+              (let [error (refusal #(construction/previous! current [temp]))]
+                (is (= expected (:construction/refusal error)))
+                (is (:history/construction-file error))
+                (when (= label :malformed)
+                  (is (= :shape-invalid (:interpretation-evidence/refusal error)))
+                  (is (= [:identity] (:path error)))))
+              (is (= :carried-from-previous-occurrence
+                     (:admission-reason (construction/previous! current [temp]))))))
+          (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))))
