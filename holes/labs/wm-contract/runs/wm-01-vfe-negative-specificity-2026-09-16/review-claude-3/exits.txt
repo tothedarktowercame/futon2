@@ -1,0 +1,11 @@
+kondo exit 0
+parens exit 0
+focused exit 0
+real positive exit 0 (4s)
+real negative-value exit 0 (5s)
+real negative-type exit 0 (6s)
+adversarial exit 1
+real negative-weakened-positive exit 0 (8s)
+real unrelated-positive-edit exit 0 (5s)
+REAL-MODES-DONE
+adversarial (rerun after rename) exit 0

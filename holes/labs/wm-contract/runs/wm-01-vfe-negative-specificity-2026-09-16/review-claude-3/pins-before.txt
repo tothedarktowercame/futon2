@@ -1,0 +1,9 @@
+IMMUTABLE-PINS.json OK holes/labs/wm-contract/variational-free-energy-reference.edn
+IMMUTABLE-PINS.json OK holes/labs/wm-contract/variational-free-energy-positive-receipt.edn
+IMMUTABLE-PINS.json OK /home/joe/code/mathlib4/DarkTower/WarMachine/VariationalFreeEnergyWitness.lean
+IMMUTABLE-PINS.json OK /home/joe/code/mathlib4/DarkTower/WarMachine/VariationalFreeEnergyNegative.lean
+IMMUTABLE-PINS.json OK /home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean
+SOURCE-PINS.json OK checks/variational_free_energy_witness.clj
+SOURCE-PINS.json OK checks/variational_free_energy_witness_control_test.clj
+SOURCE-PINS.json OK checks/positive_proof_receipt.clj
+SOURCE-PINS.json OK /home/joe/code/p4ng/wm-walkthroughs/build-loop/claude-3/WM-01-vfe-negative-specificity-1.md
