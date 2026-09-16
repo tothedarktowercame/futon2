@@ -104,3 +104,15 @@
     (is (= :unmapped-candidate
            (refusal-kind #(cs/bayes-choice {:p1 1.0} {}))))))
 
+
+(deftest selection-posterior-f-and-habit-enter-with-lean-signs
+  (testing "selectionWeight = habit * exp(-gamma G - F): at equal G and habit,
+            larger F lowers probability, p2/p1 = exp(F1 - F2); at equal G and F,
+            probability is proportional to habit (review falsifier: +F sign)"
+    (let [p (cs/selection-posterior {:beta 1 :candidates [{:id :p1 :habit 1 :f 0 :g 1}
+                                                           {:id :p2 :habit 1 :f 1 :g 1}]})]
+      (is (< (Math/abs (- (/ (:p2 p) (:p1 p)) (Math/exp -1))) tol))
+      (is (< (:p2 p) (:p1 p))))
+    (let [p (cs/selection-posterior {:beta 2 :candidates [{:id :p1 :habit 1 :f 0.5 :g 3}
+                                                           {:id :p2 :habit 3 :f 0.5 :g 3}]})]
+      (is (< (Math/abs (- (/ (:p2 p) (:p1 p)) 3.0)) tol)))))

@@ -82,7 +82,7 @@
                 :n-infinite (count infinite)}))
     (let [scores (mapv (fn [c]
                          (+ (math/log (double (:habit c)))
-                            (double (:f c))
+                            (- (double (:f c)))
                             (- (/ (double (:g c)) (double beta)))))
                        finite)
           lse (log-sum-exp scores)
