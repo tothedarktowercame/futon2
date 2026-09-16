@@ -414,3 +414,70 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                          0.0
                          (/ (Math/exp (double (u s))) z))])
                   subsets))))
+
+(defn outcome-risk
+  "Lean DarkTower.WarMachine.OutcomeRiskKL.outcomeRisk (mathlib4 f4fed50271):
+   D_KL[q ‖ c] in extended reals. Returns :infinite exactly when some
+   observation has q(o) > 0 and c(o) = 0 (a missing key counts as 0);
+   otherwise the Gibbs sum Σ_{q(o)>0} q(o)·ln(q(o)/c(o)) as a double."
+  [q c]
+  (if (some (fn [[o p]] (and (pos? p) (zero? (get c o 0)))) q)
+    :infinite
+    (double (reduce + 0.0
+                    (for [[o p] q :when (pos? p)]
+                      (* (double p) (Math/log (/ (double p) (double (get c o))))))))))
+
+(defn step-ambiguity
+  "Lean DarkTower.WarMachine.PolicyHorizon.stepAmbiguity (mathlib4 6d80f56f5d):
+   Σ_s q(s)·H[A(·|s)] with H = −Σ_o A(o|s)·ln A(o|s) and 0·ln 0 = 0
+   (zero-mass entries are omitted by observation-distribution, so every
+   retained p is positive). With all-zero adjudication rates A is the identity
+   kernel (tokenLikelihood_checkable) and this is 0.0. Rate refusals
+   propagate as the typed {:status :missing ...} outcome."
+  [rates q-state]
+  (if (rate-bad-token rates)
+    {:status :missing :kind :invalid-adjudication-rate
+     :token (rate-bad-token rates) :value (get rates (rate-bad-token rates))}
+    (double (reduce + 0.0
+                    (map (fn [[s mass]]
+                           (* (double mass)
+                              (- (reduce + 0.0
+                                         (map (fn [[_ p]]
+                                                (* (double p) (Math/log (double p))))
+                                              (observation-distribution rates s))))))
+                         q-state)))))
+
+(defn horizon-g
+  "Lean DarkTower.WarMachine.PolicyHorizon.horizonEFE (mathlib4 6d80f56f5d):
+   G(π) = Σ_{τ=1}^{T} [ D_KL[Q(o_τ|π) ‖ C_τ] + Σ_s Q(s_τ|π)·H[A(·|s)] ], one
+   horizon T for the candidate (audit A4 §2; design P7, step 1a). q_τ is
+   (rollout precedence-fn q0 τ), Q_τ is (predict-observations rates q_τ), and
+   C_τ is step-indexed via :c-fn as the re-audit requires
+   (fixture_stepIndexed_preference; a constant C is the special case, not the
+   definition). Returns the double sum, :infinite when any step's risk is
+   infinite (horizonEFE_eq_top_iff), or the first typed refusal from the
+   rates, the rollout, or the observation model. :horizon must be a positive
+   integer. Pure function; no scoring port, selection or live wiring."
+  [{:keys [rates q0 precedence-fn horizon c-fn]}]
+  (or (when-let [bad (rate-bad-token rates)]
+        {:status :missing :kind :invalid-adjudication-rate
+         :token bad :value (get rates bad)})
+      (when-not (and (integer? horizon) (pos? horizon))
+        {:status :missing :kind :invalid-horizon :horizon horizon})
+      (when-not (and (ifn? c-fn) (ifn? precedence-fn) (map? q0))
+        {:status :missing :kind :invalid-horizon-g-input})
+      (loop [tau 1 total 0.0]
+        (if (> tau horizon)
+          (double total)
+          (let [q (rollout precedence-fn q0 tau)]
+            (cond
+              (refusal? q) q
+              :else (let [predicted (predict-observations rates q)]
+                      (cond
+                        (refusal? predicted) predicted
+                        :else (let [risk (outcome-risk predicted (c-fn tau))
+                                    amb (step-ambiguity rates q)]
+                                (cond
+                                  (= risk :infinite) :infinite
+                                  (refusal? amb) amb
+                                  :else (recur (inc tau) (+ total risk amb))))))))))))

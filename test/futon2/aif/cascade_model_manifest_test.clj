@@ -339,3 +339,76 @@
     (is (= :invalid-preference-spec (:kind bad-want)))
     (is (= :want (:field bad-want)))))
 
+
+;; Lean fixture PolicyHorizon.fxModel replayed on the token carriers: states
+;; are subsets of #{:a :b} with false ↦ #{} and true ↦ #{:b}; A is the identity
+;; kernel via all-zero adjudication rates (tokenLikelihood_checkable); q0 is
+;; the point mass at false. πstay never fires; πflip fires one guard-true
+;; θ=1 pattern producing :b at step 2 only, so the two policies share their
+;; first action exactly as fx stay/flip do.
+(def fx-rates {:a {:false-neg 0 :false-pos 0} :b {:false-neg 0 :false-pos 0}})
+(def fx-q0 {#{} 1})
+(def fx-stay (constantly []))
+(def fx-flip-pattern
+  {:id :flip
+   :guard {:status :interpreted :operator :and
+           :clauses [{:status :interpreted :present #{} :absent #{}}]}
+   :transition {:status :interpreted :operator :union :produces #{:b}}
+   :produces #{:b}})
+(def fx-flip (fn [k] (if (= k 1) [fx-flip-pattern] [])))
+;; fxC: outcome false preferred 3/4; fxC' (step 2 only): true preferred 3/4.
+(def fx-c1 {#{} 3/4 #{:b} 1/4})
+(def fx-c2 {#{} 1/4 #{:b} 3/4})
+(def fx-step-indexed-c (fn [tau] (if (= tau 2) fx-c2 fx-c1)))
+(def fx-constant-c (constantly fx-c1))
+
+(deftest horizon-g-lean-fixture-correspondence
+  (let [ln43 (Math/log (/ 4.0 3.0)) ln4 (Math/log 4.0)
+        base {:rates fx-rates :q0 fx-q0 :horizon 2}
+        g (fn [prec c-fn] (m/horizon-g (assoc base :precedence-fn prec :c-fn c-fn)))]
+    ;; fixture_stepIndexed_preference: stay = ln(4/3)+ln 4, flip = 2·ln(4/3)
+    (is (< (Math/abs (- (g fx-stay fx-step-indexed-c) (+ ln43 ln4))) 1e-12))
+    (is (< (Math/abs (- (g fx-flip fx-step-indexed-c) (* 2 ln43))) 1e-12))
+    ;; and the ranking reverses against the constant C (fixture_depth_two_differs)
+    (is (< (Math/abs (- (g fx-stay fx-constant-c) (* 2 ln43))) 1e-12))
+    (is (< (Math/abs (- (g fx-flip fx-constant-c) (+ ln43 ln4))) 1e-12))
+    (is (< (g fx-flip fx-step-indexed-c) (g fx-stay fx-step-indexed-c)))
+    (is (< (g fx-stay fx-constant-c) (g fx-flip fx-constant-c)))
+    ;; horizonEFE_succ: G at T=2 is the T=1 value plus the step-2 term.
+    (let [g1-flip (m/horizon-g {:rates fx-rates :q0 fx-q0 :precedence-fn fx-flip
+                                :horizon 1 :c-fn fx-step-indexed-c})
+          step2-flip (+ (m/outcome-risk {#{:b} 1} (fx-step-indexed-c 2))
+                        (m/step-ambiguity fx-rates {#{:b} 1}))]
+      (is (< (Math/abs (- g1-flip ln43)) 1e-12))
+      (is (< (Math/abs (- (g fx-flip fx-step-indexed-c) (+ g1-flip step2-flip))) 1e-12)))))
+
+(deftest horizon-g-infinite-risk
+  ;; horizonEFE_eq_top_iff: C zero on an outcome the rollout reaches with
+  ;; positive mass gives :infinite at that step, hence for the horizon.
+  (is (= :infinite (m/horizon-g {:rates fx-rates :q0 fx-q0 :precedence-fn fx-stay
+                                 :horizon 2 :c-fn (constantly {#{:b} 1.0})})))
+  ;; the typed refusals propagate: an out-of-range rate and a bad horizon.
+  (is (= :missing (:status (m/horizon-g {:rates {:a {:false-neg 0 :false-pos 2}}
+                                         :q0 fx-q0 :precedence-fn fx-stay
+                                         :horizon 1 :c-fn fx-constant-c}))))
+  (is (= :invalid-adjudication-rate
+         (:kind (m/horizon-g {:rates {:a {:false-neg 0 :false-pos 2}}
+                              :q0 fx-q0 :precedence-fn fx-stay
+                              :horizon 1 :c-fn fx-constant-c}))))
+  (is (= :invalid-horizon
+         (:kind (m/horizon-g {:rates fx-rates :q0 fx-q0 :precedence-fn fx-stay
+                              :horizon 0 :c-fn fx-constant-c})))))
+
+(deftest outcome-risk-properties
+  ;; stepRisk_nonneg (Gibbs): KL >= 0 on proper distributions ...
+  (is (<= 0 (m/outcome-risk {:x 0.5 :y 0.5} {:x 0.25 :y 0.75})))
+  (is (<= 0 (m/outcome-risk {:x 0.9 :y 0.1} {:x 0.5 :y 0.5})))
+  ;; ... and 0 exactly when q = c.
+  (is (= 0.0 (m/outcome-risk {:x 0.25 :y 0.75} {:x 0.25 :y 0.75})))
+  ;; outcomeRisk: :infinite iff some q(o) > 0 has c(o) = 0, missing key = 0.
+  (is (= :infinite (m/outcome-risk {:x 0.5 :y 0.5} {:x 1.0})))
+  ;; a zero-preferred outcome with zero predicted mass is NOT infinite, and
+  ;; the sum runs only over positive q mass.
+  (is (= 0.0 (m/outcome-risk {:x 1.0} {:x 1.0 :y 0.0})))
+  (is (< (Math/abs (- (m/outcome-risk {#{:b} 1} {#{} 1/4 #{:b} 3/4})
+                     (Math/log (/ 4.0 3.0)))) 1e-12)))
