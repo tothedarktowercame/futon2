@@ -10,6 +10,7 @@
             [futon2.aif.close-retention :as retention]
             [futon2.aif.evidence-manifest :as manifest]
             [futon2.aif.find-receipt :as finder]
+            [futon2.aif.forward-model :as fm]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.interpretation-evidence :as evidence])
   (:import [java.nio.file Files]
@@ -221,12 +222,24 @@
           judgment (:judgment cell)
           action (:selected-action judgment)
           target (:target action)
+          ;; action-proposer emits these two targetless forms. The runner's
+          ;; selected-mission is a display of target-class/type, not a target.
+          targetless? (and (map? action) (not (contains? action :target))
+                           (case (:type action)
+                             :no-op (not (contains? action :target-class))
+                             :learn-action-class (contains? (disj fm/action-types :no-op :learn-action-class)
+                                                            (:target-class action))
+                             false))
+          selection-label (if targetless? (or (:target-class action) (:type action)) target)
           retained (get-in closed [:payload :close-retention])]
       (fail! (or (and (= #{:judgment :ground} (set (keys cell)))
                        (map? action) (keyword? (:type action))
-                       (or (keyword? target) (and (string? target) (not (str/blank? target))))
-                       (or (nil? (:selected-mission judgment)) (= (:comparison (discovery-target! target (nth files 1) [:selected-action :target]))
-                                                                      (:comparison (discovery-target! (:selected-mission judgment) (nth files 1) [:selected-mission])))))
+                       (or targetless? (and (not (#{:no-op :learn-action-class} (:type action)))
+                                                  (or (keyword? target) (and (string? target) (not (str/blank? target))))))
+                       (or (not (contains? judgment :selected-mission))
+                           (and (not targetless?) (nil? (:selected-mission judgment)))
+                           (= (:comparison (discovery-target! selection-label (nth files 1) [:payload :judgment :selected-action]))
+                              (:comparison (discovery-target! (:selected-mission judgment) (nth files 1) [:payload :judgment :selected-mission])))))
                   (and (= #{:sorry} (set (keys cell))) (nil? judgment) (map? (:sorry cell))
                        (#{:no-selection :not-reached-selection} (get-in cell [:sorry :kind]))))
              :non-construction-selection-invalid (nth files 1))
@@ -274,13 +287,17 @@
                                :reason :non-construction-manifest-source-unreadable :file (str close-file)} e)))))))
     {:non-construction? true :closed-at (history-time! (:recorded-at closed) close-file)
       :exclusion {:reason :producer-not-reached-construction :identity identity
+                 :selection-evidence {:file (str (nth files 1))
+                                      :path [:payload :judgment]
+                                      :value (get-in (nth records 1) [:payload :judgment])}
                  :target-evidence
                  (vec (keep (fn [[record file path]]
                               (let [value (get-in record path ::absent)]
                                 (when (and (not= ::absent value) (some? value))
                                   (discovery-target! value file path))))
                             [[(nth records 1) (nth files 1) [:payload :judgment :selected-action :target]]
-                             [(nth records 1) (nth files 1) [:payload :judgment :selected-mission]]
+                             [(when (some? (get-in (nth records 1) [:payload :judgment :selected-action :target]))
+                                (nth records 1)) (nth files 1) [:payload :judgment :selected-mission]]
                              [closed close-file [:payload :close-retention :occurrence :action/value :target]]
                              [closed close-file [:payload :judgment :outcome-entity :entity/id]]]))
                  :records (mapv (fn [file] {:file (.getCanonicalPath file)

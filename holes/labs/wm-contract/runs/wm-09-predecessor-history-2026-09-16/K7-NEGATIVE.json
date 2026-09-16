@@ -1,0 +1,5 @@
+{
+  "source": "ab0b56f2:src/futon2/aif/receipt_construction.clj",
+  "exit": 1,
+  "expected": "targetless positive controls reject pre-K7 implementation"
+}

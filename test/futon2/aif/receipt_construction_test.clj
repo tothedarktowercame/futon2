@@ -438,3 +438,76 @@
         (is (every? #(and (:file %) (:path %)) fields))
         (is (= :different/target (get-in result [:provenance :requested-target :value]))))
       (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
+
+(defn targetless-non-construction! [root action label]
+  (let [files (non-construction-fixture! root true false)]
+    (rewrite-history! (nth files 1)
+                      #(assoc % :payload {:judgment {:selected-action action :selected-mission label}
+                                          :ground {:kind :wm-judgement}}))
+    files))
+
+(deftest producer-targetless-non-construction-is-excluded
+  (doseq [[action label] [[{:type :learn-action-class :target-class :survey-mission
+                          :intrinsic-value 0.1 :rationale "no addressable entities for :survey-mission in current substrate"}
+                         ":survey-mission"]
+                        [{:type :no-op} ":no-op"]]
+          older? [false true]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-targetless" (make-array FileAttribute 0)))
+          old (io/file temp "old") marker (io/file temp "marker")
+          current {:occurrence {:action/value {:target "M-history"} :action-at "2026-09-15T12:00:00Z"}}]
+      (try
+        (when older? (history-fixture! old :older "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z"))
+        (let [files (targetless-non-construction! marker action label)
+              result (construction/previous! current (if older? [old marker] [marker]))
+              excluded (first (get-in result [:provenance :excluded-attempts]))]
+          (is (= (if older? :carried-from-previous-occurrence :first-attempt-no-admissions) (:admission-reason result)))
+          (is (= :producer-not-reached-construction (:reason excluded)))
+          (is (= 7 (count (:records excluded))))
+          (is (= "attempt-002" (get-in excluded [:identity :attempt/id])))
+          (is (empty? (:target-evidence excluded)))
+          (is (= action (get-in excluded [:selection-evidence :value :selected-action])))
+          (is (= action (get-in (edn/read-string (slurp (nth files 1))) [:payload :judgment :selected-action]))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
+
+(deftest targetless-selection-does-not-exempt-damage
+  (doseq [[label damage]
+          [[:missing-class #(rewrite-history! (nth % 1) (fn [x] (update-in x [:payload :judgment :selected-action] dissoc :target-class)))]
+           [:unknown-class #(rewrite-history! (nth % 1) (fn [x] (assoc-in x [:payload :judgment :selected-action :target-class] :invented)))]
+           [:string-class #(rewrite-history! (nth % 1) (fn [x] (assoc-in x [:payload :judgment :selected-action :target-class] "survey-mission")))]
+           [:unknown-action #(rewrite-history! (nth % 1) (fn [x] (assoc-in x [:payload :judgment :selected-action :type] :invented)))]
+           [:nil-target #(rewrite-history! (nth % 1) (fn [x] (assoc-in x [:payload :judgment :selected-action :target] nil)))]
+           [:conflicting-target #(rewrite-history! (nth % 1) (fn [x] (assoc-in x [:payload :judgment :selected-action :target] "M-other")))]
+           [:conflicting-label #(rewrite-history! (nth % 1) (fn [x] (assoc-in x [:payload :judgment :selected-mission] ":other")))]
+           [:nil-label #(rewrite-history! (nth % 1) (fn [x] (assoc-in x [:payload :judgment :selected-mission] nil)))]
+           [:malformed-label #(rewrite-history! (nth % 1) (fn [x] (assoc-in x [:payload :judgment :selected-mission] 7)))]
+           [:attempt-identity #(rewrite-history! (nth % 1) (fn [x] (assoc x :attempt/id "wrong")))]
+           [:constructed-evidence #(rewrite-history! (nth % 2) (fn [x] (assoc-in x [:payload :judgment] {:cascade {}})))]
+           [:close-target #(rewrite-history! (last %) (fn [x] (assoc-in x [:payload :judgment :outcome-entity] {:status :present :entity/id "M-other"})))]
+           [:integrity #(rewrite-history! (last %) (fn [x] (assoc-in x [:payload :close-evidence-manifest] {})))]]]
+    (testing (name label)
+      (let [temp (.toFile (Files/createTempDirectory "receipt-targetless-damage" (make-array FileAttribute 0)))]
+        (try
+          (damage (targetless-non-construction! temp {:type :learn-action-class :target-class :survey-mission} ":survey-mission"))
+          (let [error (refusal #(construction/previous! {:occurrence {:action/value {:target "M-history"}
+                                                                   :action-at "2026-09-15T12:00:00Z"}} [temp]))]
+            (is (= :history-discovery-invalid (:construction/refusal error)))
+            (is (string? (:file error))))
+          (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))))
+
+(deftest annotated-close-is-not-producer-exclusion-evidence
+  ;; Retained attempt-053 form, per K7 B2: no path/hash exemption or recovery.
+  (doseq [older? [false true]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-annotated-close" (make-array FileAttribute 0)))
+          old (io/file temp "old") marker (io/file temp "marker")]
+      (try
+        (when older? (history-fixture! old :older "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z"))
+        (let [files (non-construction-fixture! marker false false)]
+          (rewrite-history! (last files)
+                            #(assoc-in % [:payload :ground] {:witness "claude-4" :evidence ["fixture exit 143 SIGTERM" "fixture jstack"]}))
+          (let [error (refusal #(construction/previous! {:occurrence {:action/value {:target "M-history"}
+                                                                   :action-at "2026-09-15T12:00:00Z"}}
+                                                      (if older? [old marker] [marker])))]
+            (is (= :history-discovery-invalid (:construction/refusal error)))
+            (is (= :non-construction-close-contradiction (:reason error)))
+            (is (= (str (last files)) (:file error)))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
