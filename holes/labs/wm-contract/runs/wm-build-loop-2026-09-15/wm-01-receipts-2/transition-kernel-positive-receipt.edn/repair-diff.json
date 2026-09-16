@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "-C",
+    "/home/joe/code/mathlib4",
+    "show",
+    "480a666ad2",
+    "--"
+  ],
+  "output": "commit 480a666ad27c18477b4b9df86e11862be3930d50\nAuthor: Joseph Corneli <joseph.corneli@hyperreal.enterprises>\nDate:   Tue Sep 15 06:36:02 2026 +0000\n\n    Enforce finite-support probability kernels and nonnegative VFE precision\n\ndiff --git a/DarkTower/WarMachine/TransitionKernelWitness.lean b/DarkTower/WarMachine/TransitionKernelWitness.lean\nindex 26f3d954f2..a2a8f9e70a 100644\n--- a/DarkTower/WarMachine/TransitionKernelWitness.lean\n+++ b/DarkTower/WarMachine/TransitionKernelWitness.lean\n@@ -13,8 +13,12 @@ noncomputable def controlled : TransitionKernel State Action where\n   support\n     | (s, .stay) => [s]\n     | (_, .start) => [.active]\n-  mass := fun _ _ => 1\n-  nonnegative := by intros; norm_num\n+  mass := fun sa o => match sa with\n+    | (s, .stay) => if o = s then 1 else 0\n+    | (_, .start) => if o = .active then 1 else 0\n+  nonnegative := by intro sa o; rcases sa with \u27e8s,a\u27e9; cases a <;> dsimp <;> split <;> norm_num\n+  support_nodup := by intro sa; rcases sa with \u27e8s,a\u27e9; cases a <;> simp\n+  mass_eq_zero_of_not_mem := by intro sa o h; rcases sa with \u27e8s,a\u27e9; cases a <;> simp_all\n   normalised := by intro sa; cases sa with | mk s a => cases a <;> simp\n \n theorem startRowMass :\n"
+}

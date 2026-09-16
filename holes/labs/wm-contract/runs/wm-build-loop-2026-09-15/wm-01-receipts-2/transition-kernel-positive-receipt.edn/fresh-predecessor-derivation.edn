@@ -56,10 +56,7 @@
    :declarations
    [{:name "TransitionKernel",
      :sha256
-     "c8650cbde4347c92b097a940e956cb6b572df2fad52d7169d5c68febb05f4fdb"}
-    {:name "ProbabilityKernel",
-     :sha256
-     "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc"}]}],
+     "c8650cbde4347c92b097a940e956cb6b572df2fad52d7169d5c68febb05f4fdb"}]}],
  :elaborator
  {:command ["lake" "env" "lean"], :cwd "/home/joe/code/mathlib4"},
  :toolchain
@@ -70,7 +67,7 @@
   :lake-manifest-sha256
   "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"},
  :module "DarkTower.WarMachine.TransitionKernelWitness",
- :recorded-at "2026-09-16T00:25:34.733820403Z",
+ :recorded-at "2026-09-08T00:00:00Z",
  :result
  {:exit 0, :axioms ["propext" "Classical.choice" "Quot.sound"]},
  :receipt/type :PositiveLeanWitnessReceipt,

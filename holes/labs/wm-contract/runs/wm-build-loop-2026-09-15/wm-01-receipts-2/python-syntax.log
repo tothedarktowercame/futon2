@@ -1,1 +1,2 @@
 ast.parse(checkpoint.py): PASS
+ast.parse(weakened_probe.py): PASS

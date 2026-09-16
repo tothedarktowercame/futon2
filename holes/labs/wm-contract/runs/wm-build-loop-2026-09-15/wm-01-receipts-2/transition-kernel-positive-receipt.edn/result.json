@@ -1,0 +1,100 @@
+{
+  "new-sha256" : "cc619f592c5b354a17ced27b825b4d583af3499d608b907f487695e12d888ad5",
+  "pins" : [ {
+    "path" : "DarkTower/WarMachine/TransitionKernelWitness.lean",
+    "name" : "State",
+    "old" : "dac5621fd4936c7b280af414aeb5e788ce8f0f66039041b3fcf0482d818b1eec",
+    "new" : "dac5621fd4936c7b280af414aeb5e788ce8f0f66039041b3fcf0482d818b1eec",
+    "changed?" : false,
+    "indices" : [ 0, 0 ]
+  }, {
+    "path" : "DarkTower/WarMachine/TransitionKernelWitness.lean",
+    "name" : "Action",
+    "old" : "12d15964c698c981336ef0a7a954e8e37dfd372ad7fa8ba3241cc85d4d3d5231",
+    "new" : "12d15964c698c981336ef0a7a954e8e37dfd372ad7fa8ba3241cc85d4d3d5231",
+    "changed?" : false,
+    "indices" : [ 0, 1 ]
+  }, {
+    "path" : "DarkTower/WarMachine/TransitionKernelWitness.lean",
+    "name" : "controlled",
+    "old" : "0b606f6958c7b2ff34f18d589e63d97473da346139520877e5efbf78de2e29b0",
+    "new" : "9b94767f97ff5afa1e740830624621cca49afa97f1177d0f697da3ff4341abd7",
+    "changed?" : true,
+    "indices" : [ 0, 2 ]
+  }, {
+    "path" : "DarkTower/WarMachine/TransitionKernelWitness.lean",
+    "name" : "allControlledRowsNormalised",
+    "old" : "bf65b933e15c12c58d36da33e83e452fabf79e381a92bb13c173d2cb49e46f25",
+    "new" : "bf65b933e15c12c58d36da33e83e452fabf79e381a92bb13c173d2cb49e46f25",
+    "changed?" : false,
+    "indices" : [ 0, 3 ]
+  }, {
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "TransitionKernel",
+    "old" : "c8650cbde4347c92b097a940e956cb6b572df2fad52d7169d5c68febb05f4fdb",
+    "new" : "c8650cbde4347c92b097a940e956cb6b572df2fad52d7169d5c68febb05f4fdb",
+    "changed?" : false,
+    "indices" : [ 1, 0 ]
+  }, {
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "ProbabilityKernel",
+    "old" : null,
+    "new" : "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+    "changed?" : true,
+    "indices" : [ 1, 1 ]
+  } ],
+  "file" : "transition-kernel-positive-receipt.edn",
+  "controls" : [ {
+    "path" : "DarkTower/WarMachine/TransitionKernelWitness.lean",
+    "name" : "controlled",
+    "old" : "0b606f6958c7b2ff34f18d589e63d97473da346139520877e5efbf78de2e29b0",
+    "new" : "9b94767f97ff5afa1e740830624621cca49afa97f1177d0f697da3ff4341abd7",
+    "changed?" : true,
+    "indices" : [ 0, 2 ],
+    "result" : {
+      "pass?" : false,
+      "failures" : [ "positive-source-drift" ],
+      "receipt-shape-valid?" : true,
+      "successful-elaboration?" : true,
+      "source-basis-matches?" : false,
+      "fixture-adapter-matches?" : true,
+      "toolchain-matches?" : true,
+      "elaboration-matches?" : true
+    }
+  }, {
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "ProbabilityKernel",
+    "old" : null,
+    "new" : "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+    "changed?" : true,
+    "indices" : [ 1, 1 ],
+    "result" : {
+      "pass?" : false,
+      "failures" : [ "positive-source-drift" ],
+      "receipt-shape-valid?" : true,
+      "successful-elaboration?" : true,
+      "source-basis-matches?" : false,
+      "fixture-adapter-matches?" : true,
+      "toolchain-matches?" : true,
+      "elaboration-matches?" : true
+    }
+  } ],
+  "axioms" : {
+    "exit" : 0,
+    "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+  },
+  "old-sha256" : "f3a55121607e6621bd3008b213496140ba61e1df0545b09f5b371fca35c45a26",
+  "review" : "pending claude-3 independent review",
+  "new-recorded-at" : "2026-09-16T00:25:34.733820403Z",
+  "validation" : {
+    "pass?" : true,
+    "failures" : [ ],
+    "receipt-shape-valid?" : true,
+    "successful-elaboration?" : true,
+    "source-basis-matches?" : true,
+    "fixture-adapter-matches?" : true,
+    "toolchain-matches?" : true,
+    "elaboration-matches?" : true
+  },
+  "old-recorded-at" : "2026-09-08T00:00:00Z"
+}

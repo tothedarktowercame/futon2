@@ -1,0 +1,13 @@
+{
+  "disposition": "preserved",
+  "reading": "controlled formerly returned one at every next state. Repair returns one only at s for stay and active for start, zero elsewhere. The four deterministic transitions named in the fixture and singleton supports remain unchanged; added support proofs discharge the repaired carrier laws. allControlledRowsNormalised still uses controlled.normalised (s,a); State/Action and stay-support adapter literals survive.",
+  "additions": [
+    "ProbabilityKernel"
+  ],
+  "wrapper": "transition_kernel_witness.clj",
+  "negative-modes": [
+    "--negative-uncontrolled",
+    "--negative-beta"
+  ],
+  "exit-convention": "0 requires valid baseline and #guard_msgs elaboration rejecting action-unconditioned kernel or beta normalizer substitution. Negative failure 2, positive failure 1."
+}
