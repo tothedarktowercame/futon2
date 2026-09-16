@@ -412,3 +412,115 @@
   (is (= 0.0 (m/outcome-risk {:x 1.0} {:x 1.0 :y 0.0})))
   (is (< (Math/abs (- (m/outcome-risk {#{:b} 1} {#{} 1/4 #{:b} 3/4})
                      (Math/log (/ 4.0 3.0)))) 1e-12)))
+
+;; --- P11 step 1b-i: exact G at mission scale (no powerset enumeration) ---
+
+(defn- sparse-spec [n-want n-evidence zeroed]
+  (let [want (into #{} (map (partial str "t")) (range n-want))
+        evidence (into #{} (map (partial str "e")) (range n-evidence))]
+    {:want want :evidence evidence :lam 2 :mu 1/2 :zeroed zeroed}))
+
+(defn- sparse-rates [spec]
+  (into {} (map (fn [t] [t {:false-neg 0 :false-pos 0}]))
+        (cset/union (:want spec) (:evidence spec) #{:seed})))
+
+(deftest preference-fn-equals-distribution
+  ;; On a 4-token universe (2 want + 2 evidence, one zeroed subset), the
+  ;; closed-form pointwise C equals preference-distribution on all 16 subsets.
+  (let [spec (m/preference-spec (sparse-spec 2 2 #{#{"t0" "e1"}}))
+        universe (:universe spec)
+        pd (m/preference-distribution spec universe)
+        pf (m/preference-fn (sparse-spec 2 2 #{#{"t0" "e1"}}))]
+    (is (fn? pf))
+    (let [subsets (reduce (fn [ss v] (into ss (map #(cset/union % #{v})) ss)) [#{}] universe)]
+      (is (= 16 (count subsets)))
+      (doseq [s subsets]
+        (is (< (Math/abs (- (pf s) (get pd s 0.0))) 1e-12))))))
+
+(deftest sparse-g-equals-enumerating-g
+  ;; On 2-, 3- and 4-token universes at zero rates, the sparse evaluation
+  ;; gives the same numbers as the enumerating horizon-g within 1e-12, and
+  ;; the same :infinite when a zeroed outcome is reached with positive mass.
+  (doseq [n [2 3 4]
+          :let [spec (m/preference-spec (sparse-spec (dec n) 1 #{}))
+                universe (:universe spec)
+                rates (sparse-rates spec)
+                cmap (m/preference-distribution spec universe)
+                q0 {#{} 1}
+                p1 {:id :p1 :guard {:status :interpreted :operator :and
+                                    :clauses [{:status :interpreted :present #{} :absent #{}}]}
+                    :transition {:status :interpreted :operator :union :produces #{(first (:want spec))}}
+                    :produces #{(first (:want spec))}}
+                p2 {:id :p2 :guard {:status :interpreted :operator :and
+                                    :clauses [{:status :interpreted :present (into #{} (take 1 (:want spec))) :absent #{}}]}
+                    :transition {:status :interpreted :operator :union :produces #{(first (:evidence spec))}}
+                    :produces #{(first (:evidence spec))}}
+                cascades [(constantly [])
+                          (fn [k] (if (even? k) [p1] []))
+                          (fn [k] (if (= k 1) [p2] [p1]))]]]
+    (doseq [prec cascades
+            horizon [1 2 3]]
+      (is (< (Math/abs (- (m/horizon-g-sparse {:rates rates :q0 q0 :precedence-fn prec
+                                               :horizon horizon :spec spec})
+                         (m/horizon-g {:rates rates :q0 q0 :precedence-fn prec
+                                       :horizon horizon :c-fn (constantly cmap)})))
+             1e-12)
+          (str "n=" n " h=" horizon))))
+  ;; zeroed outcome reached: both :infinite (preference_eq_zero_iff +
+  ;; horizonEFE_eq_top_iff).
+  (let [spec (m/preference-spec (sparse-spec 2 1 #{#{"t0"}}))
+        universe (:universe spec)
+        rates (sparse-rates spec)
+        cmap (m/preference-distribution spec universe)
+        q0 {#{} 1}
+        fire {:id :fire :guard {:status :interpreted :operator :and
+                                :clauses [{:status :interpreted :present #{} :absent #{}}]}
+              :transition {:status :interpreted :operator :union :produces #{"t0"}}
+              :produces #{"t0"}}]
+    (is (= :infinite
+           (m/horizon-g-sparse {:rates rates :q0 q0 :precedence-fn (constantly [fire])
+                                :horizon 2 :spec spec})))
+    (is (= :infinite
+           (m/horizon-g {:rates rates :q0 q0 :precedence-fn (constantly [fire])
+                         :horizon 2 :c-fn (constantly cmap)})))))
+
+(deftest sparse-g-mission-scale
+  ;; 40 tokens, 20 want + 5 evidence, three firing steps, horizon 3: exact
+  ;; and fast — no 2^40 enumeration anywhere.
+  (let [want (into #{} (map (partial str "t")) (range 20))
+        evidence (into #{} (map (partial str "e")) (range 5))
+        spec {:want want :evidence evidence :lam 3 :mu 1/4 :zeroed #{}}
+        rates (into {} (map (fn [t] [t {:false-neg 0 :false-pos 0}]))
+                    (cset/union want evidence))
+        have (into #{} (map (partial str "h")) (range 5))
+        q0 {have 1}
+        p1 {:id :p1 :guard {:status :interpreted :operator :and
+                            :clauses [{:status :interpreted :present #{} :absent #{}}]}
+            :transition {:status :interpreted :operator :union :produces #{"t0" "t1"}}
+            :produces #{"t0" "t1"}}
+        p2 {:id :p2 :guard {:status :interpreted :operator :and
+                            :clauses [{:status :interpreted :present #{"t0"} :absent #{}}]}
+            :transition {:status :interpreted :operator :union :produces #{"t2" "e0"}}
+            :produces #{"t2" "e0"}}
+        prec (fn [k] (cond (= k 0) [p1] (= k 1) [p2] :else []))
+        t0 (System/nanoTime)
+        g (m/horizon-g-sparse {:rates rates :q0 q0 :precedence-fn prec
+                               :horizon 3 :spec spec})
+        elapsed (- (System/nanoTime) t0)]
+    (is (and (double? g) (Double/isFinite g) (pos? g)))
+    (is (< elapsed 5e9) (str "elapsed ns: " elapsed))))
+
+(deftest sparse-g-judgement-rates-refused
+  ;; Non-zero adjudication rates: the typed declared-limitation refusal, not
+  ;; an approximation.
+  (let [r (m/horizon-g-sparse {:rates {:a {:false-neg 1/8 :false-pos 0}}
+                               :q0 {#{} 1} :precedence-fn (constantly [])
+                               :horizon 1 :spec (sparse-spec 1 1 #{})})]
+    (is (= :missing (:status r)))
+    (is (= :judgement-rates-not-supported-at-scale (:kind r))))
+  ;; an invalid preference spec still refuses like preference-spec
+  (let [r (m/horizon-g-sparse {:rates {:a {:false-neg 0 :false-pos 0}}
+                               :q0 {#{} 1} :precedence-fn (constantly [])
+                               :horizon 1 :spec {:want #{} :evidence #{} :lam 1 :mu 1 :zeroed #{}}})]
+    (is (= :missing (:status r)))
+    (is (= :invalid-preference-spec (:kind r)))))

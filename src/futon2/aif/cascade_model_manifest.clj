@@ -481,3 +481,124 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                   (= risk :infinite) :infinite
                                   (refusal? amb) amb
                                   :else (recur (inc tau) (+ total risk amb))))))))))))
+
+(defn- utility-weights
+  "Per-token additive weights of TokenPreference.utility: utility(o) =
+   Σ_{v ∈ o} w_v with w_v = lam/|want| for v ∈ want, plus mu for v ∈
+   evidence, and nothing for any other token. The empty sum is utility 0,
+   matching token-utility on the empty subset."
+  [spec]
+  (let [want (:want spec) evidence (:evidence spec)
+        per (if (seq want) (/ (:lam spec) (count want)) 0)]
+    (into {} (map (fn [v] [v (+ (if (contains? want v) per 0)
+                                (if (contains? evidence v) (:mu spec) 0))]))
+          (set/union want evidence))))
+
+(defn preference-fn
+  "Pointwise closed form of Lean TokenPreference.preference: c(o) = 0.0 for
+   o ∈ zeroed (preference_eq_zero_iff), else
+   exp(Σ_{v ∈ o ∩ universe} w_v) / Z with
+   Z = ∏_{v ∈ universe} (1 + e^{w_v}) − Σ_{z ∈ zeroed} exp(utility z).
+   The product form is exact — Σ_{s ⊆ U} exp(utility s) factors over tokens
+   because utility is a per-token sum — so this equals preference-distribution
+   on every subset (preference_sum) without enumerating the powerset. Tokens
+   outside the spec's universe carry weight 0 and a larger enumerated universe
+   only multiplies both Z and each term by the same power of 2. Validation is
+   preference-spec's, with one computation change: zeroed_proper is decided by
+   counting — zeroed is a set of distinct subsets of the universe, so it
+   equals the whole powerset exactly when its size is 2^|universe| — never by
+   materialising the powerset. Refuses exactly like preference-spec."
+  [spec]
+  (let [want (set (:want spec)) evidence (set (:evidence spec))
+        zeroed (set (:zeroed spec))
+        lam (:lam spec) mu (:mu spec)
+        exact? (fn [x] (or (ratio? x) (integer? x)))
+        universe (set/union want evidence (into #{} (mapcat identity) zeroed))]
+    (cond
+      (empty? want)
+      {:status :missing :kind :invalid-preference-spec :field :want :reason :empty-want}
+      (not (and (exact? lam) (pos? lam)))
+      {:status :missing :kind :invalid-preference-spec :field :lam :value lam :reason :lam-not-positive}
+      (not (and (exact? mu) (<= 0 mu)))
+      {:status :missing :kind :invalid-preference-spec :field :mu :value mu :reason :mu-negative}
+      (= (count zeroed) (bit-shift-left 1 (count universe)))
+      {:status :missing :kind :invalid-preference-spec :field :zeroed :reason :zeroed-covers-universe}
+      :else
+      (let [w (utility-weights {:want want :evidence evidence :lam lam :mu mu})
+            z (- (reduce * 1.0
+                         (map (fn [t] (+ 1.0 (Math/exp (double (get w t 0))))) universe))
+                 (reduce + 0.0
+                         (map (fn [zp] (Math/exp (double (token-utility {:want want :evidence evidence :lam lam :mu mu} zp))))
+                              zeroed)))]
+        (fn pointwise-preference [o]
+          (if (contains? zeroed o)
+            0.0
+            (/ (Math/exp (double (reduce + 0.0
+                                         (map (fn [t] (double (get w t 0)))
+                                              (set/intersection (set o) universe)))))
+               z)))))))
+
+(defn- zero-rates?
+  "Every adjudication rate entry is exactly zero, the precondition of the
+   identity observation kernel (Lean tokenLikelihood_checkable)."
+  [rates]
+  (every? (fn [t] (and (zero? (:false-neg t)) (zero? (:false-pos t)))) (vals rates)))
+
+(defn- outcome-risk-pointwise
+  "outcome-risk with C supplied pointwise instead of as a map, so no C over a
+   powerset is ever materialised. Same Lean OutcomeRiskKL.outcomeRisk: ⊤ iff
+   some q(o) > 0 has c(o) = 0, else the Gibbs sum over positive q mass."
+  [q c-of]
+  (if (some (fn [[o p]] (and (pos? p) (zero? (c-of o)))) q)
+    :infinite
+    (double (reduce + 0.0
+                    (for [[o p] q :when (pos? p)]
+                      (* (double p) (Math/log (/ (double p) (double (c-of o))))))))))
+
+(defn horizon-g-sparse
+  "Lean PolicyHorizon.horizonEFE at mission scale: exactly the numbers of
+   horizon-g (futon2 233ad909) without ever enumerating the powerset. Two
+   exact reductions: (1) C is evaluated pointwise by preference-fn's
+   closed-form Z; (2) at zero adjudication rates A is the identity kernel
+   (tokenLikelihood_checkable), so Q(o_τ|π) = q_τ and the ambiguity term is
+   identically 0 — q_τ comes from rollout and only its support is scored.
+   Non-zero rates refuse with the typed
+   {:status :missing :kind :judgement-rates-not-supported-at-scale}: a
+   declared current limitation, not a silent approximation. C is supplied
+   either as :c-fn-pointwise (τ ↦ (o ↦ c(o)), step-indexed) or as :spec (a
+   preference spec used as a DECLARED CONSTANT C_τ at every τ — the constant
+   case, not a claim that C_τ is constant in general). Returns the double
+   sum, :infinite when any step's risk is infinite
+   (horizonEFE_eq_top_iff), or the first typed refusal. Pure; no wiring."
+  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise]}]
+  (let [bad (rate-bad-token rates)]
+    (cond
+      bad {:status :missing :kind :invalid-adjudication-rate
+           :token bad :value (get rates bad)}
+      (not (zero-rates? rates))
+      {:status :missing :kind :judgement-rates-not-supported-at-scale
+       :limitation "pointwise identity-A reduction is exact only at zero rates; non-zero judgement rates need the enumerating observation model"}
+      (not (and (integer? horizon) (pos? horizon)))
+      {:status :missing :kind :invalid-horizon :horizon horizon}
+      (not (and (ifn? precedence-fn) (map? q0)))
+      {:status :missing :kind :invalid-horizon-g-input}
+      (and (nil? c-fn-pointwise) (nil? spec))
+      {:status :missing :kind :missing-preference-spec}
+      :else
+      (let [pf (when (nil? c-fn-pointwise) (preference-fn spec))
+            point-c (cond
+                      c-fn-pointwise (fn [tau o] ((c-fn-pointwise tau) o))
+                      (refusal? pf) pf
+                      :else (fn [_tau o] (pf o)))]
+        (if (refusal? point-c)
+          point-c
+          (loop [tau 1 total 0.0]
+            (if (> tau horizon)
+              (double total)
+              (let [q (rollout precedence-fn q0 tau)]
+                (if (refusal? q)
+                  q
+                  (let [risk (outcome-risk-pointwise q (fn [o] (point-c tau o)))]
+                    (if (= risk :infinite)
+                      :infinite
+                      (recur (inc tau) (+ total risk)))))))))))))
