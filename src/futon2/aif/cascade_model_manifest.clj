@@ -613,3 +613,56 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                     (if (= risk :infinite)
                       :infinite
                       (recur (inc tau) (+ total risk)))))))))))))
+
+;; ===== WM-02 design P12: the stored belief as the exact categorical posterior =====
+;; Lean DarkTower.WarMachine.ExactBeliefTrajectory (mathlib4 ba0eda16df).
+
+(defn exact-update
+  "Lean ExactBeliefTrajectory.exactUpdate: the normalised exact categorical
+   posterior s ↦ A(o|s) · (B q_prev)(s) / P(o), where
+   P(o) = Σ_x A(o|x) · (B q_prev)(x) (observationProbability). Exact
+   rationals throughout.
+
+   Signature: (exact-update likelihood-of prior-pushed o), where
+   likelihood-of is a function (fn [state observation] -> A(o|state)) and
+   prior-pushed is the map {state (B q_prev)(state)} over states with
+   predicted support. Returns the belief map {state mass} summing to 1
+   (exactUpdate_dist), or the typed
+   {:status :missing :kind :zero-predictive-probability} exactly when
+   P(o) = 0 (exactUpdate_eq_none_iff). Refusals from likelihood-of or
+   prior-pushed propagate."
+  [likelihood-of prior-pushed o]
+  (cond
+    (refusal? prior-pushed) prior-pushed
+    :else
+    (let [likes (into {} (map (fn [s] [s (likelihood-of s o)]) (keys prior-pushed)))
+          bad (first (filter refusal? (vals likes)))]
+      (if bad
+        bad
+        (let [weighted (into {} (map (fn [[s pushed]] [s (* (get likes s) pushed)]) prior-pushed))
+              po (reduce + (vals weighted))]
+          (if (zero? po)
+            {:status :missing :kind :zero-predictive-probability :observation o}
+            (into {} (map (fn [[s w]] [s (/ w po)])) weighted)))))))
+
+(defn token-belief-at
+  "Lean ExactBeliefTrajectory.tokenBeliefAt over the approved carriers
+   (P2–P5): μ₀ is the observed token-state belief q₀ (observed-belief,
+   P4); step k pushes the current belief through cascade-kernel with the
+   precedence list (precedence-fn k) (P3) and then conditions on the
+   observation (observations (inc k)) with token-likelihood (P5) via
+   exact-update. Exact rationals. Refusals — a zero-predictive-probability
+   observation, or a carrier refusal — propagate and are carried forward
+   for all later t (exactBeliefAt's Option.none)."
+  [rates q0 precedence-fn observations t]
+  (loop [k 0 q q0]
+    (if (= k t)
+      q
+      (let [pushed (push-forward (precedence-fn k) q)]
+        (if (refusal? pushed)
+          pushed
+          (let [updated (exact-update (fn [s o] (token-likelihood rates s o)) pushed
+                                      (observations (inc k)))]
+            (if (refusal? updated)
+              updated
+              (recur (inc k) updated))))))))

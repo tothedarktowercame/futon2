@@ -572,3 +572,91 @@
         g3 (m/horizon-g-sparse (assoc base :universe #{"x0" "x1" "x2"}))]
     (is (double? g0))
     (is (< (Math/abs (- (- g3 g0) (* 2 3 (Math/log 2)))) 1e-9))))
+
+;; WM-02 P12: Lean DarkTower.WarMachine.ExactBeliefTrajectory (mathlib4
+;; ba0eda16df): exact-update (exactUpdate), token-belief-at (tokenBeliefAt),
+;; fixture_exact_accepts, tokenBeliefAt_dist, exactUpdate_eq_meanField_observed,
+;; exactUpdate_eq_none_iff / BeliefTrajectory.fixture_meanField_refuses_possible.
+
+(defn- ebt-noisy [s o] (if (= s o) 9/10 1/10))       ; BeliefTrajectory.fxAnoisy
+(defn- ebt-flip [] {:t {:f 1} :f {:t 1}})            ; BeliefTrajectory.fxB true
+
+(deftest exact-belief-lean-fixture-correspondence
+  ;; fixture_exact_accepts: a uniform belief through the deterministic flip,
+  ;; observed :t with the noisy 9/10 likelihood: the exact posterior is
+  ;; {t 9/10, f 1/10}.
+  (is (= {:t 9/10 :f 1/10} (m/exact-update ebt-noisy {:t 1/2 :f 1/2} :t)))
+  ;; P(o) = 1/2 (the second conjunct of fixture_meanField_refuses_possible)
+  (is (= 1/2 (reduce + (map (fn [[s mass]] (* (ebt-noisy s :t) mass)) {:t 1/2 :f 1/2})))))
+
+(deftest exact-belief-properties
+  (let [rates {"a" {:false-neg 1/4 :false-pos 0} "b" {:false-neg 1/4 :false-pos 0}}
+        rates0 {"a" {:false-neg 0 :false-pos 0} "b" {:false-neg 0 :false-pos 0}}
+        p (assoc (m/interpret-pattern "p" "pattern" "  + IF: a\n  + HOWEVER: not blocked\n  + THEN: b\n") :theta 1/2)
+        s0 #{"a"} target #{"a" "b"}
+        plans (constantly [p])
+        obs1 (fn [k] (if (= k 1) target #{"a" "b"}))]
+    ;; tokenBeliefAt_dist: every stored belief is a distribution, exact rationals
+    (doseq [t (range 3)
+            :let [b (m/token-belief-at rates0 (m/observed-belief s0) plans obs1 t)]]
+      (is (map? b))
+      (is (every? #(and (or (ratio? %) (integer? %)) (<= 0 %)) (vals b)))
+      (is (= 1 (reduce + (vals b)))))
+    ;; the first two stored beliefs are as computed by hand (zero-mass entries
+    ;; retained by exact-update, as Lean's function does; dropped for comparison)
+    (is (= {s0 1} (m/token-belief-at rates0 (m/observed-belief s0) plans obs1 0)))
+    (is (= {target 1}
+           (into {} (remove (comp zero? val))
+                 (m/token-belief-at rates0 (m/observed-belief s0) plans obs1 1))))
+    ;; exactUpdate_eq_meanField_observed: from a point-mass previous belief the
+    ;; exact update equals the one-step Bayes formula
+    ;; A(o|x)·B(s₀,x) / Σ_y A(o|y)·B(s₀,y)
+    (let [pushed (m/cascade-kernel [p] s0)
+          o target
+          like (fn [s ob] (m/token-likelihood rates s ob))
+          exact (m/exact-update like pushed o)
+          bayes (let [num (fn [x] (* (like x o) (get pushed x 0)))
+                      po (reduce + (map num (keys pushed)))]
+                  (into {} (map (fn [[x _]] [x (/ (num x) po)]) pushed)))
+          drop-zero (fn [d] (into {} (remove (comp zero? val)) d))]
+      (is (= (drop-zero bayes) (drop-zero exact))))
+    ;; exactUpdate_eq_none_iff: an observation of zero predictive probability
+    ;; gives the typed refusal, carried forward for later t
+    (let [obs (fn [k] (if (= k 1) target #{"a"}))
+          traj2 (m/token-belief-at rates0 (m/observed-belief s0) plans obs 2)
+          traj3 (m/token-belief-at rates0 (m/observed-belief s0) plans obs 3)]
+      (is (= {:status :missing :kind :zero-predictive-probability}
+             (select-keys traj2 [:status :kind])))
+      ;; the refusal is carried forward
+      (is (= traj2 traj3)))
+    ;; with no pattern firing (identity cascade), observing the state itself
+    ;; with identity rates keeps the point mass
+    (is (= {s0 1} (m/token-belief-at rates0 (m/observed-belief s0)
+                                     (constantly []) (constantly s0) 1)))))
+
+(deftest exact-belief-falsifiers
+  ;; Negative control (BeliefTrajectory.fixture_meanField_refuses_possible /
+  ;; stateWeight_eq_zero): a mean-field-style update, whose state weight is
+  ;; ∏_{s ∈ supp(q)} (A(x,o)·B(s,x))^{q(s)} and which refuses when every
+  ;; state's weight contains a zero factor, fails the fixture input that
+  ;; exact-update accepts.
+  (let [a ebt-noisy
+        flip (ebt-flip)
+        q {:t 1/2 :f 1/2}
+        states [:t :f]
+        zero-factor (fn [x] (some (fn [s] (and (pos? (get q s 0))
+                                               (zero? (* (a x :t) (get-in flip [s x] 0)))))
+                                  states))
+        mean-field (fn []
+                     (if (every? zero-factor states)
+                       {:status :missing :kind :mean-field-no-solution}
+                       (throw (ex-info "control: not refused" {}))))]
+    ;; the mean-field weights of both states contain a zero factor
+    (is (every? zero-factor states))
+    ;; so the mean-field update refuses this input
+    (is (= :missing (:status (mean-field))))
+    ;; while the exact update accepts and computes the 9/10 posterior
+    (is (= {:t 9/10 :f 1/10} (m/exact-update a q :t)))
+    ;; and the P(o) = 0 falsifier gives the typed refusal
+    (is (= {:status :missing :kind :zero-predictive-probability}
+           (select-keys (m/exact-update (fn [_ _] 0) {:t 1} :t) [:status :kind])))))
