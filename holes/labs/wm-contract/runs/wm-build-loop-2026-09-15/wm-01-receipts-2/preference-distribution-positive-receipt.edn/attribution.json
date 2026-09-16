@@ -1,0 +1,10 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+  "name" : "fair",
+  "old" : "130bbde169b7d3376a0f604b3dbebdba7da43356ffb94013d798bab3883eb7c3",
+  "new" : "840c489a9d9b156c47599dd1367604d3801a0d14a1d2d965a03c8b9f6758a56d",
+  "pre-repair-text" : "noncomputable def fair : PreferenceDistribution Obs where\n  support := fun _ => [good, bad]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+  "repaired-text" : "noncomputable def fair : PreferenceDistribution Obs where\n  support := fun _ => [good, bad]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [good, bad] then 1 / 2 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [good, bad]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [good, bad]\n\n",
+  "head-text" : "noncomputable def fair : PreferenceDistribution Obs where\n  support := fun _ => [good, bad]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [good, bad] then 1 / 2 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [good, bad]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [good, bad]\n\n"
+} ]

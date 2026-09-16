@@ -2774,7 +2774,229 @@
       ],
       "protocol-commands": "predictive-outcome-risk-positive-receipt.edn/protocol-commands.json",
       "status": "author-verified; independent review pending"
+    },
+    {
+      "new-sha256": "20c3c04f3c965283e6d0b3d049e7f24ac718f34089c448b77d0c92f389bb24e4",
+      "pins": [
+        {
+          "path": "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+          "name": "Observation",
+          "old": "e6ec83c185b251b63f7c3f31122d762a0a49777396b1a43ab37d2436c3cbf76d",
+          "new": "e6ec83c185b251b63f7c3f31122d762a0a49777396b1a43ab37d2436c3cbf76d",
+          "changed?": false,
+          "indices": [
+            0,
+            0
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+          "name": "Obs",
+          "old": "f1018aef10fdd0223ea371186a3a3ddfe08d9125b050f16b9d7a6d150c8e8d66",
+          "new": "f1018aef10fdd0223ea371186a3a3ddfe08d9125b050f16b9d7a6d150c8e8d66",
+          "changed?": false,
+          "indices": [
+            0,
+            1
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+          "name": "good",
+          "old": "2faa212d9d76d921fdb9ea33c27b0f66b42d60cb695b6b4242e73fe5d2f91fc8",
+          "new": "2faa212d9d76d921fdb9ea33c27b0f66b42d60cb695b6b4242e73fe5d2f91fc8",
+          "changed?": false,
+          "indices": [
+            0,
+            2
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+          "name": "bad",
+          "old": "643e8354346de430f12516ce050ca33b80cfe87981185f36b8353fefe1270b5c",
+          "new": "643e8354346de430f12516ce050ca33b80cfe87981185f36b8353fefe1270b5c",
+          "changed?": false,
+          "indices": [
+            0,
+            3
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+          "name": "fair",
+          "old": "130bbde169b7d3376a0f604b3dbebdba7da43356ffb94013d798bab3883eb7c3",
+          "new": "840c489a9d9b156c47599dd1367604d3801a0d14a1d2d965a03c8b9f6758a56d",
+          "changed?": true,
+          "indices": [
+            0,
+            4
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+          "name": "fairMassesSumToOne",
+          "old": "bfc2c2c62700bc7ff028f0930617d09f697e49355555ee306407302df78a7d14",
+          "new": "bfc2c2c62700bc7ff028f0930617d09f697e49355555ee306407302df78a7d14",
+          "changed?": false,
+          "indices": [
+            0,
+            5
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "PreferenceDistribution",
+          "old": "2867aa7840b091fd59f622401350e18ff218a3ede2d11f42584b344e98dd1f8b",
+          "new": "2867aa7840b091fd59f622401350e18ff218a3ede2d11f42584b344e98dd1f8b",
+          "changed?": false,
+          "indices": [
+            1,
+            0
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ProbabilityKernel",
+          "old": null,
+          "new": "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+          "changed?": true,
+          "indices": [
+            1,
+            1
+          ]
+        }
+      ],
+      "file": "preference-distribution-positive-receipt.edn",
+      "controls": [
+        {
+          "path": "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+          "name": "fair",
+          "old": "130bbde169b7d3376a0f604b3dbebdba7da43356ffb94013d798bab3883eb7c3",
+          "new": "840c489a9d9b156c47599dd1367604d3801a0d14a1d2d965a03c8b9f6758a56d",
+          "changed?": true,
+          "indices": [
+            0,
+            4
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ProbabilityKernel",
+          "old": null,
+          "new": "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+          "changed?": true,
+          "indices": [
+            1,
+            1
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        }
+      ],
+      "axioms": {
+        "exit": 0,
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "old-sha256": "66bdadf4fc5d66079c204e21308827c5d70fe9e1f7cea85cc1f4712ede36c17a",
+      "review": "pending claude-3 independent review",
+      "new-recorded-at": "2026-09-16T00:25:07.135712266Z",
+      "validation": {
+        "pass?": true,
+        "failures": [],
+        "receipt-shape-valid?": true,
+        "successful-elaboration?": true,
+        "source-basis-matches?": true,
+        "fixture-adapter-matches?": true,
+        "toolchain-matches?": true,
+        "elaboration-matches?": true
+      },
+      "old-recorded-at": "2026-09-08T00:00:00Z",
+      "semantic-disposition": {
+        "disposition": "preserved",
+        "reading": "fair now returns zero outside the two evidence-tagged outcomes instead of half everywhere. On-support good/bad half masses and Unit conditioning remain exactly the declared fair binary fixture. Support distinctness and zero-off-support laws are discharged; fairMassesSumToOne still follows from fair.normalised (). Adapter literals from the alias and theorem remain.",
+        "additions": [
+          "ProbabilityKernel"
+        ],
+        "wrapper": "preference_distribution_witness.clj",
+        "negative-modes": [
+          "--negative-conditioning",
+          "--negative-pragmatic-cost"
+        ],
+        "exit-convention": "0 requires valid baseline and #guard_msgs elaboration rejecting state conditioning or pragmatic-cost substitution. Negative failure 2, including baseline failure; positive failure 1."
+      },
+      "commands": [
+        {
+          "name": "protocol",
+          "command": [
+            "bb",
+            "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-receipts-2/receipt_control.clj",
+            "run",
+            "preference-distribution-positive-receipt.edn",
+            "[\"ProbabilityKernel\"]"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "positive",
+          "command": [
+            "bb",
+            "checks/preference_distribution_witness.clj"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "negative-conditioning",
+          "command": [
+            "bb",
+            "checks/preference_distribution_witness.clj",
+            "--negative-conditioning"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "negative-pragmatic-cost",
+          "command": [
+            "bb",
+            "checks/preference_distribution_witness.clj",
+            "--negative-pragmatic-cost"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        }
+      ],
+      "protocol-commands": "preference-distribution-positive-receipt.edn/protocol-commands.json",
+      "status": "author-verified; independent review pending"
     }
   ],
-  "next-receipt": "preference-distribution-positive-receipt.edn"
+  "next-receipt": "transition-kernel-positive-receipt.edn"
 }

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "-C",
+    "/home/joe/code/mathlib4",
+    "show",
+    "480a666ad2",
+    "--"
+  ],
+  "output": "commit 480a666ad27c18477b4b9df86e11862be3930d50\nAuthor: Joseph Corneli <joseph.corneli@hyperreal.enterprises>\nDate:   Tue Sep 15 06:36:02 2026 +0000\n\n    Enforce finite-support probability kernels and nonnegative VFE precision\n\ndiff --git a/DarkTower/WarMachine/PreferenceDistributionWitness.lean b/DarkTower/WarMachine/PreferenceDistributionWitness.lean\nindex 558378607a..6bfcc1bca4 100644\n--- a/DarkTower/WarMachine/PreferenceDistributionWitness.lean\n+++ b/DarkTower/WarMachine/PreferenceDistributionWitness.lean\n@@ -12,9 +12,16 @@ def bad : Outcome Obs := \u27e8.evidence, .bad\u27e9\n /-- Hand-derived fair preference over two outcomes: each mass is `1/2`. -/\n noncomputable def fair : PreferenceDistribution Obs where\n   support := fun _ => [good, bad]\n-  mass := fun _ _ => 1 / 2\n-  nonnegative := by intros; norm_num\n-  normalised := by intro; norm_num\n+  mass := by\n+    classical\n+    exact fun s o => if o \u2208 [good, bad] then 1 / 2 else 0\n+  nonnegative := by intros; split <;> norm_num\n+  support_nodup := by intro; simp [good, bad]\n+  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n+  normalised := by\n+    intro s\n+    classical\n+    norm_num [good, bad]\n \n theorem fairMassesSumToOne :\n     ((fair.support ()).map (fair.mass ())).sum = 1 := fair.normalised ()\n"
+}

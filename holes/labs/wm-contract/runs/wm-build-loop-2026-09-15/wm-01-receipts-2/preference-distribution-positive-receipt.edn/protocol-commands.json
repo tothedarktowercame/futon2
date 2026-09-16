@@ -1,0 +1,141 @@
+[ {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-15830910237216187187.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PreferenceDistributionWitness.fairMassesSumToOne' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-12939068277492031832.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PreferenceDistributionWitness.fairMassesSumToOne' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-15403415673395257898.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PreferenceDistributionWitness.fairMassesSumToOne' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-17082708663611693644.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PreferenceDistributionWitness.fairMassesSumToOne' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-8547226963721997612.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PreferenceDistributionWitness.fairMassesSumToOne' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-2967479146125302255.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PreferenceDistributionWitness.fairMassesSumToOne' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-940953935208291181.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PreferenceDistributionWitness.fairMassesSumToOne' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+} ]

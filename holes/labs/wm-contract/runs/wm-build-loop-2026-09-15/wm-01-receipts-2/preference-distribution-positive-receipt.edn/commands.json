@@ -1,0 +1,43 @@
+[
+  {
+    "name": "protocol",
+    "command": [
+      "bb",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-receipts-2/receipt_control.clj",
+      "run",
+      "preference-distribution-positive-receipt.edn",
+      "[\"ProbabilityKernel\"]"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "positive",
+    "command": [
+      "bb",
+      "checks/preference_distribution_witness.clj"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "negative-conditioning",
+    "command": [
+      "bb",
+      "checks/preference_distribution_witness.clj",
+      "--negative-conditioning"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "negative-pragmatic-cost",
+    "command": [
+      "bb",
+      "checks/preference_distribution_witness.clj",
+      "--negative-pragmatic-cost"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  }
+]

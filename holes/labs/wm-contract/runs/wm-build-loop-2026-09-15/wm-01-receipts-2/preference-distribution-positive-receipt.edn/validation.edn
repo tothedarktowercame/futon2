@@ -1,0 +1,8 @@
+{:pass? true,
+ :failures [],
+ :receipt-shape-valid? true,
+ :successful-elaboration? true,
+ :source-basis-matches? true,
+ :fixture-adapter-matches? true,
+ :toolchain-matches? true,
+ :elaboration-matches? true}

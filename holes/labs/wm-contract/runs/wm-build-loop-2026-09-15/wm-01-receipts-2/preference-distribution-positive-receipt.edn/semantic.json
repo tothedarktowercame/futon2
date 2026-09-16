@@ -1,0 +1,13 @@
+{
+  "disposition": "preserved",
+  "reading": "fair now returns zero outside the two evidence-tagged outcomes instead of half everywhere. On-support good/bad half masses and Unit conditioning remain exactly the declared fair binary fixture. Support distinctness and zero-off-support laws are discharged; fairMassesSumToOne still follows from fair.normalised (). Adapter literals from the alias and theorem remain.",
+  "additions": [
+    "ProbabilityKernel"
+  ],
+  "wrapper": "preference_distribution_witness.clj",
+  "negative-modes": [
+    "--negative-conditioning",
+    "--negative-pragmatic-cost"
+  ],
+  "exit-convention": "0 requires valid baseline and #guard_msgs elaboration rejecting state conditioning or pragmatic-cost substitution. Negative failure 2, including baseline failure; positive failure 1."
+}
