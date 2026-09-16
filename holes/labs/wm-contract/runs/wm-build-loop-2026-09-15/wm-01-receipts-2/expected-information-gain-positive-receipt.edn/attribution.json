@@ -1,0 +1,28 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+  "name" : "Q",
+  "old" : "214ca13df03659d049d0e8982d99218b88af654159688fde9633de419a3ac0f1",
+  "new" : "78e9a9f9e5007d013bdc9a98dccaa005ffebad80c7b3d4653fcfa844762a9cb4",
+  "pre-repair-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [outcome]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+  "repaired-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [outcome]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [outcome]\n  normalised := by intros; norm_num\n\n",
+  "head-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [outcome]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [outcome]\n  normalised := by intros; norm_num\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+  "name" : "prior",
+  "old" : "e476c58e3d2153697517103a8fcf6f7330db36f46d55f3a01039067f026dca33",
+  "new" : "af8143bd06d50878648d99b6e9c0934a00f899136049d0e94d927601531a15af",
+  "pre-repair-text" : "private def prior : ParameterPriorKernel TestPolicy Parameter where\n  support := fun _ => [.a, .b]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+  "repaired-text" : "private def prior : ParameterPriorKernel TestPolicy Parameter where\n  support := fun _ => [.a, .b]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n",
+  "head-text" : "private def prior : ParameterPriorKernel TestPolicy Parameter where\n  support := fun _ => [.a, .b]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+  "name" : "posterior",
+  "old" : "bf05e61328b96b1c775e7953c2d341f8239504ee0939e1fde162f9ea5af37946",
+  "new" : "821ea72b35f4623c318f08ddd65837e5f48ea402eddb6c4a035578c6da5386c6",
+  "pre-repair-text" : "private def posterior : ParameterPosteriorKernel TestPolicy TestObservation Parameter where\n  support := fun _ => [.a]\n  mass := fun _ θ => match θ with | .a => 1 | .b => 0\n  nonnegative := by\n    intro _ θ\n    cases θ <;> norm_num\n  normalised := by intros; norm_num\n\n",
+  "repaired-text" : "private def posterior : ParameterPosteriorKernel TestPolicy TestObservation Parameter where\n  support := fun _ => [.a]\n  mass := fun _ θ => match θ with | .a => 1 | .b => 0\n  nonnegative := by\n    intro _ θ\n    cases θ <;> norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n",
+  "head-text" : "private def posterior : ParameterPosteriorKernel TestPolicy TestObservation Parameter where\n  support := fun _ => [.a]\n  mass := fun _ θ => match θ with | .a => 1 | .b => 0\n  nonnegative := by\n    intro _ θ\n    cases θ <;> norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n"
+} ]

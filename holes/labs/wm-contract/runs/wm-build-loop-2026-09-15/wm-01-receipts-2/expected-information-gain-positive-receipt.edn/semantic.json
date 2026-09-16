@@ -1,0 +1,15 @@
+{
+  "disposition": "preserved",
+  "reading": "The unit predictive outcome and exhaustive uniform binary prior keep their masses; posterior already assigned a=1, b=0. The repair adds support distinctness and zero-off-support proofs only. binaryFixture still computes log(2), with positivePrior discharged on posterior support; fixture and EIGReference adapter fields remain 1, half/half, 1/0 and log(2).",
+  "additions": [
+    "ProbabilityKernel",
+    "PredictiveOutcomeKernel",
+    "ParameterPriorKernel",
+    "ParameterPosteriorKernel"
+  ],
+  "wrapper": "expected_information_gain_witness.clj",
+  "negative-modes": [
+    "--negative"
+  ],
+  "exit-convention": "Negative perturbs log(2) to log(3) in memory; 0 requires valid baseline and detection, 1 invalid baseline, 2 slipped mutation."
+}

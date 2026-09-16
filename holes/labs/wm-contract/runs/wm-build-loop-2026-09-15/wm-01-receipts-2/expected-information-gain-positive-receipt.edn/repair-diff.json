@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "-C",
+    "/home/joe/code/mathlib4",
+    "show",
+    "480a666ad2",
+    "--"
+  ],
+  "output": "commit 480a666ad27c18477b4b9df86e11862be3930d50\nAuthor: Joseph Corneli <joseph.corneli@hyperreal.enterprises>\nDate:   Tue Sep 15 06:36:02 2026 +0000\n\n    Enforce finite-support probability kernels and nonnegative VFE precision\n\ndiff --git a/DarkTower/WarMachine/ExpectedInformationGainWitness.lean b/DarkTower/WarMachine/ExpectedInformationGainWitness.lean\nindex 5da1947ffa..84e8970765 100644\n--- a/DarkTower/WarMachine/ExpectedInformationGainWitness.lean\n+++ b/DarkTower/WarMachine/ExpectedInformationGainWitness.lean\n@@ -20,12 +20,16 @@ private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n   support := fun _ => [outcome]\n   mass := fun _ _ => 1\n   nonnegative := by intros; norm_num\n+  support_nodup := by intro; simp\n+  mass_eq_zero_of_not_mem := by intro s o h; rcases o with \u27e8v, x\u27e9; cases x <;> simp_all [outcome]\n   normalised := by intros; norm_num\n \n private def prior : ParameterPriorKernel TestPolicy Parameter where\n   support := fun _ => [.a, .b]\n   mass := fun _ _ => 1 / 2\n   nonnegative := by intros; norm_num\n+  support_nodup := by intro; simp\n+  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n   normalised := by intros; norm_num\n \n private def posterior : ParameterPosteriorKernel TestPolicy TestObservation Parameter where\n@@ -34,6 +38,8 @@ private def posterior : ParameterPosteriorKernel TestPolicy TestObservation Para\n   nonnegative := by\n     intro _ \u03b8\n     cases \u03b8 <;> norm_num\n+  support_nodup := by intro; simp\n+  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n   normalised := by intros; norm_num\n \n private theorem positivePrior :\n"
+}

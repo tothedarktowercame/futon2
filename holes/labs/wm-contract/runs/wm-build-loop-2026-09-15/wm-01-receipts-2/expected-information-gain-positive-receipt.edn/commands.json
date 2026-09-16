@@ -1,0 +1,33 @@
+[
+  {
+    "name": "protocol",
+    "command": [
+      "bb",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-receipts-2/receipt_control.clj",
+      "run",
+      "expected-information-gain-positive-receipt.edn",
+      "[\"ProbabilityKernel\" \"PredictiveOutcomeKernel\" \"ParameterPriorKernel\" \"ParameterPosteriorKernel\"]"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "positive",
+    "command": [
+      "bb",
+      "checks/expected_information_gain_witness.clj"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "negative",
+    "command": [
+      "bb",
+      "checks/expected_information_gain_witness.clj",
+      "--negative"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  }
+]

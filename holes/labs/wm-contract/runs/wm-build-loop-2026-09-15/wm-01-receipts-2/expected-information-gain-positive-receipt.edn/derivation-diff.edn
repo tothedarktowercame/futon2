@@ -1,0 +1,126 @@
+({:recorded-at "2026-09-08T00:00:00Z",
+  :source-basis
+  [{:declarations
+    [{:sha256
+      "214ca13df03659d049d0e8982d99218b88af654159688fde9633de419a3ac0f1"}
+     {:sha256
+      "e476c58e3d2153697517103a8fcf6f7330db36f46d55f3a01039067f026dca33"}
+     {:sha256
+      "bf05e61328b96b1c775e7953c2d341f8239504ee0939e1fde162f9ea5af37946"}]}]}
+ {:recorded-at "2026-09-16T00:19:41.958611420Z",
+  :source-basis
+  [{:declarations
+    [{:sha256
+      "78e9a9f9e5007d013bdc9a98dccaa005ffebad80c7b3d4653fcfa844762a9cb4"}
+     {:sha256
+      "af8143bd06d50878648d99b6e9c0934a00f899136049d0e94d927601531a15af"}
+     {:sha256
+      "821ea72b35f4623c318f08ddd65837e5f48ea402eddb6c4a035578c6da5386c6"}]}
+   {:declarations
+    [nil
+     nil
+     {:name "ProbabilityKernel",
+      :sha256
+      "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc"}
+     {:name "PredictiveOutcomeKernel",
+      :sha256
+      "a87f0d22850f0bbe839460485ee614534bb0cad0fddcfe81d3bfb4f60353f788"}
+     {:name "ParameterPriorKernel",
+      :sha256
+      "e37314a8cf55710a75ac31ded33ba00c5a8b2046bfbd05a07e4bbf5bdefdcb7f"}
+     {:name "ParameterPosteriorKernel",
+      :sha256
+      "4f05e4aa3733d9c67533c4220492965c754f63dfeabecc07acd44141d88d6a04"}]}]}
+ {:adapter
+  {:kind :edn-fields-to-lean-declaration/v1,
+   :lean-declaration "eigReference",
+   :mappings
+   [{:fixture-path [:cases 0 :predictive-outcome-masses 0],
+     :lean-field "predictiveOutcomeMass",
+     :expected 1,
+     :expected-shape :scalar}
+    {:fixture-path [:cases 0 :parameter-prior-masses 0],
+     :lean-field "parameterPriorMassA",
+     :expected 1/2,
+     :expected-shape :scalar}
+    {:fixture-path [:cases 0 :parameter-prior-masses 1],
+     :lean-field "parameterPriorMassB",
+     :expected 1/2,
+     :expected-shape :scalar}
+    {:fixture-path [:cases 0 :parameter-posterior-masses 0],
+     :lean-field "parameterPosteriorMassA",
+     :expected 1,
+     :expected-shape :scalar}
+    {:fixture-path [:cases 0 :parameter-posterior-masses 1],
+     :lean-field "parameterPosteriorMassB",
+     :expected 0,
+     :expected-shape :scalar}
+    {:fixture-path [:cases 0 :expected-information-gain],
+     :lean-field "expectedInformationGain",
+     :expected "log(2)",
+     :expected-shape :scalar}],
+   :correspondence
+   {:boundary/type :declared-not-derived,
+    :subject :fixture-to-lean-correspondence,
+    :pinned :fixture-identity-shape-and-retained-slice-occurrence,
+    :not-pinned :semantic-value-correspondence,
+    :derivation-status :derivable-not-adopted,
+    :reason :identity-preserving-adapter-and-proof-not-provided}},
+  :theorem
+  "DarkTower.WarMachine.ExpectedInformationGainWitness.binaryFixture",
+  :dependency-closure
+  {:boundary/type :declared-not-derived,
+   :subject :lean-semantic-dependency-closure,
+   :pinned :author-declared-source-slices,
+   :not-pinned :complete-transitive-constant-closure,
+   :derivation-status :derivable-not-adopted,
+   :reason :closure-derivable-but-impractical-to-content-pin},
+  :receipt/version 1,
+  :source-basis
+  [{:declarations
+    [{:name "Q"}
+     {:name "prior"}
+     {:name "posterior"}
+     {:name "positivePrior",
+      :sha256
+      "5570f735287843dcdf520bfede0e0854f2e14829aa067caf3a97cab76990d652"}
+     {:name "EIGReference",
+      :sha256
+      "173bc79c7c3a5998b8e234a96839d54b654dd5d4655c54bfd8e4990abc6879b4"}
+     {:name "eigReference",
+      :sha256
+      "e74c6be3f1e400ff4a79e88c3b38019241a04f40c45ad3c44c2c09818fd69f8c"}
+     {:name "binaryFixture",
+      :sha256
+      "af9bb308b52f1733a1eedd0192dc19b0ad0b196c2f3268c7ebf092823d69ad15"}],
+    :path "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+    :repo "mathlib4"}
+   {:declarations
+    [{:name "parameterInformationGain",
+      :sha256
+      "9c46be7bfb46ac1593d93bc6959787192e18c116ca16128fc24c4b3e2a0aaa92"}
+     {:name "expectedInformationGain",
+      :sha256
+      "dcc3c0a46cd122c986a18656758df15c1d44a39e2106a39d5bd81b0b3c1e8cf4"}],
+    :path "DarkTower/WarMachine/Holes.lean",
+    :repo "mathlib4"}],
+  :elaborator
+  {:command ["lake" "env" "lean"], :cwd "/home/joe/code/mathlib4"},
+  :toolchain
+  {:lean-version
+   "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+   :lean-toolchain-sha256
+   "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+   :lake-manifest-sha256
+   "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"},
+  :module "DarkTower.WarMachine.ExpectedInformationGainWitness",
+  :result
+  {:exit 0, :axioms ["propext" "Classical.choice" "Quot.sound"]},
+  :receipt/type :PositiveLeanWitnessReceipt,
+  :fixture
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/expected-information-gain-reference.edn",
+   :schema :expected-information-gain-reference/v1,
+   :sha256
+   "17a37dcde4a9c2fdc889ab4f7421b59ef96458f94d525df99d788a778a3f7f6c"}})

@@ -54,5 +54,5 @@ paths = [str(p.relative_to(ROOT)) for p in RUN.iterdir() if p.is_file()]
 paths += [str(dirpath.relative_to(ROOT)), 'holes/labs/wm-contract/' + filename]
 subprocess.run(['git', 'log', '-1', '--oneline'], cwd=ROOT, check=True)
 subprocess.run(['git', 'add', '--'] + paths, cwd=ROOT, check=True)
-subprocess.run(['git', 'diff', '--cached', '--check'], cwd=ROOT, check=True)
+subprocess.run(['git', 'diff', '--cached', '--check', '--'] + paths, cwd=ROOT, check=True)
 subprocess.run(['git', 'commit', '--only', '-m', 'Re-attest ' + filename + ' at repaired carrier', '--'] + paths, cwd=ROOT, check=True)
