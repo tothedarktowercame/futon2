@@ -1,6 +1,7 @@
 (ns futon2.aif.cascade-model-manifest-test
   (:require [clojure.test :refer [deftest is]]
             [clojure.edn :as edn]
+            [clojure.set :as cset]
             [futon2.aif.cascade-model-manifest :as m]))
 
 (def pattern-text "  + IF: ready and not blocked\n  + HOWEVER: stalled\n  + THEN: produce evidence\n  + BECAUSE: test\n")
@@ -50,3 +51,54 @@
     (is (= :prefer-status-table (:selection-rule t)))
     (is (some #(= :outstanding (:classification %)) (:clauses t)))
     (is (some #(= :unclassified-clause (:kind %)) (:findings t)))))
+
+;; Lean correspondence: mathlib4 17fb61d038, DarkTower/WarMachine/TokenState.lean,
+;; fixtures fixture_coverage_half, fixture_coverage_full, fixture_observedBelief
+;; with tokens "t0" "t1" "t2" for Fin 3.
+(deftest token-state-lean-fixture-correspondence
+  (let [want #{"t0" "t1"} state #{"t1" "t2"}]
+    ;; fixture_coverage_half: coverage {0,1} {1,2} = 1/2
+    (is (= 1/2 (m/coverage want state)))
+    ;; fixture_coverage_full: coverage {0,1} {0,1} = 1
+    (is (= 1 (m/coverage want #{"t0" "t1"})))
+    ;; fixture_observedBelief: point mass at fne = {t1 t2}
+    (is (= 1 (get (m/observed-belief state) state 0)))
+    (is (= 0 (get (m/observed-belief state) want 0)))))
+
+;; Lean theorems: observedBelief_sum, independentBelief_sum,
+;; independentBelief_eq_observedBelief, coverage_nonneg, coverage_le_one,
+;; coverage_eq_one_iff, coverage_mono, over all 8 subsets of {t0 t1 t2}.
+(deftest token-state-lean-theorem-properties
+  (let [univ #{"t0" "t1" "t2"}
+        subs (reduce (fn [ss v] (into ss (map #(conj % v)) ss)) #{#{}} univ)
+        ib (m/independent-belief {"t0" 1/2 "t1" 1/4 "t2" 1} univ)
+        want #{"t0" "t1"}
+        cov (fn [s] (m/coverage want s))]
+    ;; observedBelief_sum: sum over states of the point mass at {t1} = 1
+    (is (= 1 (reduce + (map #(get (m/observed-belief #{"t1"}) % 0) subs))))
+    ;; independentBelief_sum: exactly 1, exact rational
+    (is (= 1 (reduce + (vals ib))))
+    ;; spot values: {t0} = 1/2·3/4·0, {t0 t2} = 1/2·3/4·1
+    (is (= 0 (get ib #{"t0"})))
+    (is (= 3/8 (get ib #{"t0" "t2"})))
+    ;; independentBelief_eq_observedBelief: 0/1 probabilities = membership in {t1}
+    (let [p01 (m/independent-belief {"t0" 0 "t1" 1 "t2" 0} univ)
+          ob (m/observed-belief #{"t1"})]
+      (is (every? #(= (get ob % 0) (get p01 % 0)) subs)))
+    ;; coverage bounds and coverage_eq_one_iff
+    (doseq [s subs]
+      (is (<= 0 (cov s) 1))
+      (is (= (= 1 (cov s)) (cset/subset? want s))))
+    ;; coverage_mono
+    (doseq [s subs s' subs :when (cset/subset? s s')]
+      (is (<= (cov s) (cov s'))))))
+
+(deftest token-state-lean-falsifiers
+  ;; Lean requires want.Nonempty; empty want refuses with the typed finding
+  (is (= {:status :missing :kind :empty-want-signature} (m/coverage #{} #{"t0"})))
+  (is (= {:status :missing :kind :empty-want-signature} (m/observation-row #{} #{"t0"})))
+  ;; probability outside [0,1] refuses with the typed finding
+  (is (= :missing (:status (m/independent-belief {"t0" 3/2 "t1" 1/2} #{"t0" "t1"}))))
+  (is (= :invalid-token-probability (:kind (m/independent-belief {"t0" 3/2 "t1" 1/2} #{"t0" "t1"}))))
+  ;; missing token probability also refuses
+  (is (= :invalid-token-probability (:kind (m/independent-belief {"t0" 1/2} #{"t0" "t1"})))))

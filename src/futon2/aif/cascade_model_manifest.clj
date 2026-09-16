@@ -111,10 +111,50 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
   (if (= :interpreted (get-in pattern [:transition :status]))
     {(set/union state (get-in pattern [:transition :produces])) 1}
     {:status :missing :kind :missing-pattern-interpretation}))
-(defn observation-row [want state]
+(defn observed-belief
+  "Lean DarkTower.WarMachine.TokenState.observedBelief (mathlib4
+   DarkTower/WarMachine/TokenState.lean): the point mass at the observed
+   token state. Sums to 1 (observedBelief_sum)."
+  [state]
+  {state 1})
+
+(defn- powerset [coll]
+  (reduce (fn [ss v] (into ss (map #(conj % v)) ss)) #{#{}} coll))
+
+(defn independent-belief
+  "Lean DarkTower.WarMachine.TokenState.independentBelief: each token v is
+   established independently with probability (p v); a subset s of universe
+   has mass ∏_v (if v ∈ s then p v else 1 − p v), exact rationals. Sums to 1
+   over the powerset (independentBelief_sum), and reduces to
+   observed-belief when every (p v) is 0 or 1 (independentBelief_eq_observedBelief).
+   Refuses with {:status :missing :kind :invalid-token-probability} when any
+   probability is outside [0,1] or missing."
+  [p universe]
+  (let [universe (set universe)
+        bad (some (fn [v] (let [x (get p v)]
+                            (when-not (and (or (ratio? x) (integer? x)) (<= 0 x 1))
+                              v)))
+                  universe)]
+    (if bad
+      {:status :missing :kind :invalid-token-probability :token bad :value (get p bad)}
+      (into {}
+            (map (fn [s]
+                   [s (reduce * (map #(if (contains? s %) (get p %) (- 1 (get p %))) universe))]))
+            (powerset universe)))))
+
+(defn coverage
+  "Lean DarkTower.WarMachine.TokenState.coverage: |want ∩ state| / |want|,
+   an exact rational; = 1 exactly when want ⊆ state (coverage_eq_one_iff),
+   monotone in state (coverage_mono). Lean requires want.Nonempty, so an
+   empty want refuses with the typed empty-want-signature finding."
+  [want state]
   (if (seq want)
-    {(/ (count (set/intersection want state)) (count want)) 1}
+    (/ (count (set/intersection (set want) (set state))) (count want))
     {:status :missing :kind :empty-want-signature}))
+
+(defn observation-row [want state]
+  (let [c (coverage want state)]
+    (if (map? c) c {c 1})))
 (defn normalized-exact? [row]
   (and (map? row) (every? #(and (or (integer? %) (ratio? %)) (<= 0 %)) (vals row))
        (= 1 (reduce + (vals row)))))
@@ -133,7 +173,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
              :representation :symbolic-finite-powerset :authority :documented-interpretation}
      :patterns patterns :guard-interpretation guard-interpretation
      :initial-belief {:authority :documented-interpretation :source (:source target)
-                      :mass {(:have target) 1}}
+                      :mass (observed-belief (:have target))}
      :observation {:authority :documented-interpretation :kind :deterministic-want-coverage
                    :label "token-level proxy for true discharge" :want (:want target)
                    :source (:source target)
