@@ -12,7 +12,8 @@
             [futon2.aif.find-receipt :as finder]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.full-loop-cohort :as cohort]
-            [futon2.aif.interpretation-evidence :as evidence])
+            [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.shadow-cascade-g :as shadow])
   (:import [java.nio.file Files]
            [java.time Instant]))
 
@@ -531,8 +532,10 @@
                                     (or (.listFiles (io/file "/home/joe/code/futon2/data")) [])))))))
 
 (defn construct
-  [record read-bytes library-root previous designated]
-  (let [ctx (finder/context record read-bytes library-root)
+  ([record read-bytes library-root previous designated]
+   (construct record read-bytes library-root previous designated nil))
+  ([record read-bytes library-root previous designated score-fn-override]
+   (let [ctx (finder/context record read-bytes library-root)
         found (finder/find record read-bytes library-root designated)
         selected (set (:selected found))
         r (:repository ctx)
@@ -550,10 +553,29 @@
                  (if (identical? c (:cascade previous))
                    (vec (:acting-order previous []))
                    (acting-order interpretations q0 (:precedence c))))
+        ;; Shadow cascade G (P11 step 1b-ii): computed ONCE for both arms over
+        ;; ONE common universe (per-arm universes shift G by T*k*ln2 and would
+        ;; fake candidate differences), then handed to organise's score port.
+        ;; SHADOW ONLY: organise records :score-before/:score-after in the diff;
+        ;; the shown acting order comes from acting-order-fn and does not read
+        ;; them. Exception-safe: any failure becomes a typed missing outcome.
+        after-nodes (set/union carrier (shadow/up-closure carrier (:stands-on repository))
+                               (set (keys admitted)))
+        shadow-arms {:before (:cascade previous)
+                     :after {:nodes after-nodes :edges (:stands-on repository) :precedence order}}
+        shadow-results (delay (shadow/shadow-cascade-g record shadow-arms {:library-root library-root}))
+        score (fn [c]
+                (let [arm (if (identical? c (:cascade previous)) :before :after)]
+                  (try
+                    (get @shadow-results arm
+                         {:status :missing :kind :shadow-arm-not-found})
+                    (catch Exception e
+                      {:status :missing :kind :shadow-scorer-error
+                       :message (str (.getMessage e))}))))
         diff (policy/organise (:cascade previous) selected repository admitted
                               {:temperament (assoc policy/up-closure-temperament :precedence order)
                                :acting-order-fn acting
-                               :score-fn (constantly {:status :none :reason :cascade-g-not-computed})})
+                               :score-fn (or score-fn-override score)})
         _ (need! (= carrier (set/difference (:nodes diff) (:added-by-organise diff)))
                  :bootstrap-carrier-mismatch {})
         _ (policy/validate-cascade-diff! (:cascade previous) selected repository admitted diff)
@@ -573,7 +595,7 @@
     {:shown (mapv #(subs (str %) 1) shown)
      :semilattice {:descent (mapv (fn [[a b]] [(subs (str a) 1) (subs (str b) 1)]) (sort (:organised-edges diff))) :co_app []}
      :construction-kind :receipted-pattern-cascade :selected-action (get-in record [:identity :occurrence :action/value])
-     :receipted-construction retained}))
+     :receipted-construction retained})))
 
 (defn construct! [record read-bytes opts]
   (construct record read-bytes (or (:interpretation-library-root opts) "/home/joe/code/futon3/library")
