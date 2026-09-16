@@ -22,7 +22,8 @@
   (:require [clojure.set :as set]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-policy :as cp]
-            [futon2.aif.policy :as policy]))
+            [futon2.aif.policy :as policy]
+            [futon2.report.war-machine :as wm]))
 
 ;; --- the tick's tokens, interpretations and cascades (03-R6.edn) ---------
 
@@ -214,4 +215,21 @@
         (is (= 8 (count (:candidates sp)))
             "empty cascade plus one candidate per non-empty subset of the three interpretations")
         (is (= :not-performed-here (:retrieval (:rules sp)))
-            "retrieval is explicitly recorded as not performed here (still open)")))))
+            "retrieval is explicitly recorded as not performed here (still open)"))))
+
+  ;; R10 wiring (s11): the tick's cascade lane routes THIS node — the real
+  ;; candidate-space constructor — under :R6 on this tick's problem.
+  (let [lane (wm/cascade-lane
+              {:facts (-> (into {} (map (fn [t] [t true]) q0))
+                          (assoc :test-covers-missing-total-repos false))
+               :want want
+               :interpretations steps
+               :repository repository
+               :precedences (mapv second (rest cascades))
+               :horizon-steps 3
+               :cascade-spec {:want (set want)}
+               :beta 1})]
+    (is (boolean (some #(and (= :R6 (:node %))
+                             (= "futon2.aif.cascade-policy/candidate-space" (:via %)))
+                       (:route lane)))
+        "the cascade lane's route contains :R6 with futon2.aif.cascade-policy/candidate-space (behavioural: the lane ran candidate-space on this tick's problem)")))

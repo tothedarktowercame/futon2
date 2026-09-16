@@ -28,7 +28,8 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-selection :as cs]
             [futon2.aif.policy :as policy]
-            [futon2.aif.controller-authority :as controller-authority]))
+            [futon2.aif.controller-authority :as controller-authority]
+            [futon2.report.war-machine :as wm]))
 
 ;; G at T = 3 from R5 (06-R5.edn :computed :G), reproduced by claude-4.
 (def G-at-T
@@ -152,4 +153,48 @@
   ;; β stays explicit: no β, no silent default — the typed refusal fires.
   (let [decision (call-real policy/select-action-cascades ranked {})]
     (is (= :refused (:status decision))
-        "β is never defaulted: without a declared β the cascade selection refuses (:invalid-temperature)")))
+        "β is never defaulted: without a declared β the cascade selection refuses (:invalid-temperature)"))
+
+  ;; R10 wiring (s11): the tick's cascade lane routes THIS node — the real
+  ;; cascade selection at a declared β — under :R14 on this tick's problem.
+  (let [interpretations
+        {:aif/structured-observation-vector
+         {:guard {:needs #{:summary-without-total-repos-throws}
+                  :forbids #{:summary-without-total-repos-observes-cleanly}}
+          :produces #{:summary-without-total-repos-observes-cleanly}}
+         :aif/placeholder-is-load-bearing
+         {:guard {:needs #{:coupling-density-reads-same-key-with-default
+                           :summary-without-total-repos-throws}
+                  :forbids #{:summary-without-total-repos-observes-cleanly}}
+          :produces #{:summary-without-total-repos-observes-cleanly
+                      :active-repo-ratio-absent-default-is-0}}
+         :test-step-covering-missing-total-repos
+         {:guard {:needs #{:summary-without-total-repos-throws}
+                  :forbids #{:test-covers-missing-total-repos}}
+          :produces #{:test-covers-missing-total-repos}}}
+        lane (wm/cascade-lane
+              {:facts {:summary-without-total-repos-throws true
+                       :active-repo-ratio-absent-default-is-0 true
+                       :coupling-density-reads-same-key-with-default true
+                       :observe-empty-does-not-throw true
+                       :test-covers-missing-total-repos false}
+               :want [:summary-without-total-repos-observes-cleanly
+                      :active-repo-ratio-absent-default-is-0
+                      :test-covers-missing-total-repos]
+               :interpretations interpretations
+               :repository {:patterns (set (keys interpretations)) :stands-on #{}}
+               :precedences [[:test-step-covering-missing-total-repos
+                              :aif/structured-observation-vector]
+                             [:aif/placeholder-is-load-bearing
+                              :test-step-covering-missing-total-repos
+                              :aif/structured-observation-vector]
+                             [:aif/structured-observation-vector]]
+               :horizon-steps 3
+               :cascade-spec {:want #{:summary-without-total-repos-observes-cleanly
+                                      :active-repo-ratio-absent-default-is-0
+                                      :test-covers-missing-total-repos}}
+               :beta 1})]
+    (is (boolean (some #(and (= :R14 (:node %))
+                             (= "futon2.aif.policy/select-action-cascades" (:via %)))
+                       (:route lane)))
+        "the cascade lane's route contains :R14 with futon2.aif.policy/select-action-cascades (behavioural: the lane selected at the declared β through the real cascade selection)")))

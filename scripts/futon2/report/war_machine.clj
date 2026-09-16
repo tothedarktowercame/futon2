@@ -44,6 +44,9 @@
             [futon2.aif.anticipation :as anticipation]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.beta-habit :as beta-habit]
+            [futon2.aif.cascade-model-manifest :as cascade-manifest]
+            [futon2.aif.cascade-policy :as cascade-policy]
+            [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.adapters.interest-network :as interest-net]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
@@ -5984,6 +5987,241 @@
                           [:ruled-outcome-c-enabled? :seeded-c
                            :disposition-kernel :c-fold-provenance])))
 
+;; ---------------------------------------------------------------------------
+;; Cascade lane (VM tick-1 wiring, R10). When the tick's input carries a
+;; :cascade-problem, judge runs the model's node sequence on it through the
+;; REAL node functions, route-tagging each node in Figure 5A order. Purely
+;; additive: a scan without :cascade-problem never enters this lane.
+;; ---------------------------------------------------------------------------
+
+(defn- lane-step
+  "Run one cascade-lane node call. A typed refusal — an ex-info thrown by the
+  node function or a returned {:status … :kind …} refusal map — is returned
+  as {:refusal …}, never coerced into a value."
+  [f]
+  (try
+    (let [v (f)]
+      (if (and (map? v) (contains? v :status) (contains? v :kind))
+        {:refusal v}
+        {:value v}))
+    (catch clojure.lang.ExceptionInfo e
+      {:refusal (let [d (ex-data e)]
+                  {:kind (or (:finding d) (:law d) (:reason d) :typed-refusal)
+                   :message (ex-message e)
+                   :data d})})))
+
+(defn cascade-lane
+  "The cascade lane of the tick (VM-PROTOCOL Figure 5A node order; R10 wiring,
+  tick 1). PROBLEM is a cascade problem map:
+
+    {:facts {fact-id true|false|:unknown}    R2's adjudicated facts
+     :want [token …]                         the want signature
+     :interpretations {pattern-id {:guard {:needs #{} :forbids #{}}
+                                   :produces #{}}}   R6's on-the-fly readings
+     :repository {:patterns #{} :stands-on #{[u v]}}
+     :precedences [[pattern-id …] …]         authored candidate orders
+     :horizon-steps T                        R13's declared common horizon
+     :cascade-spec {:want #{} …}             R5's preference spec
+     :beta β}                                R14's DECLARED temperature
+
+  It runs R1 → R6 → R13 → R4 → R5 → R14 → R16 → R9 through the real node
+  functions (no maths is re-derived here) and route-tags each node in order:
+
+    :R1  cascade-model-manifest/observed-belief      q0 from the true facts
+    :R6  cascade-policy/candidate-space              C0..Cn from the problem
+    :R13 policy-depth/configured                     the common T, typed,
+                                                     never defaulted
+    :R4  forward-model/predict-multi-horizon         every candidate at T
+    :R5  efe/rank-actions                            G over a common universe
+    :R14 policy/select-action-cascades → authorize   at the declared β
+    :R16 receipt-construction/acting-order           the enactment PLAN on
+                                                     the facts
+    :R9  the certification below
+
+  Returns {:route [route-tags …] :candidates … :predictions … :ranked …
+  :decision … :authorization … :enactment-plan … :certification
+  {:status :independent-check-required :enactor …}}. R16 here is the
+  machine's enactment plan (the acting order); real source edits are a
+  builder's work and never part of the tick. R9: the tick never marks its
+  own enactment confirmed — the claim is :independent-check-required with
+  the enactor recorded. Any node's typed refusal stops the lane and is
+  returned with the route so far: {:route … :refusal … :stopped-at <node>}."
+  [problem]
+  (let [{:keys [facts want interpretations repository precedences horizon-steps
+                cascade-spec beta]} problem
+        route (atom [])
+        state (atom {})
+        stopped (atom nil)
+        step (fn [node via f]
+               (when-not @stopped
+                 (swap! route conj {:node node :via via
+                                    :at (str (Instant/now))})
+                 (let [r (lane-step f)]
+                   (if (:refusal r)
+                     (reset! stopped {:node node :refusal (:refusal r)})
+                     (swap! state assoc node (:value r))))))
+        stop! (fn [node refusal]
+                (reset! stopped {:node node :refusal refusal}))]
+    ;; R1 — belief from the true facts (absence is the negative: a false or
+    ;; :unknown fact contributes no token).
+    (step :R1 "futon2.aif.cascade-model-manifest/observed-belief"
+          (fn []
+            (cascade-manifest/observed-belief
+             (set (for [[fact v] facts :when (true? v)] fact)))))
+    ;; R6 — candidate action space from the problem's own readings; the empty
+    ;; cascade is always the first candidate (candidate-space's own law).
+    (step :R6 "futon2.aif.cascade-policy/candidate-space"
+          (fn []
+            (cascade-policy/candidate-space
+             (cond-> {:q0 (ffirst (get @state :R1))
+                      :want want
+                      :interpretations interpretations
+                      :repository repository}
+               (seq precedences) (assoc :precedences (vec precedences))))))
+    ;; R13 — the common horizon, read as a typed declared value through the
+    ;; real depth entry point. A missing or non-positive :horizon-steps is a
+    ;; typed refusal (:missing-common-horizon); no default is applied.
+    (step :R13 "futon2.aif.policy-depth/configured"
+          (fn []
+            (policy-depth/configured
+             {:policy-depth (when (pos-int? horizon-steps)
+                              {:anticipation horizon-steps
+                               :cascade-rollout horizon-steps})})))
+    (when (and (not @stopped) (nil? (get @state :R13)))
+      (stop! :R13 {:kind :missing-common-horizon
+                   :horizon-steps horizon-steps
+                   :message "the cascade lane requires a declared positive :horizon-steps; no default"}))
+    ;; R4 — predict every candidate at the SAME declared T. A typed
+    ;; prediction refusal (e.g. :missing-cascade-belief) stops the lane.
+    (step :R4 "futon2.aif.forward-model/predict-multi-horizon"
+          (fn []
+            (let [T (get-in @state [:R13 :cascade-rollout])
+                  pattern-maps
+                  (into {}
+                        (map (fn [[id x]]
+                               [id (cascade-policy/token-interpretation id x)]))
+                        interpretations)
+                  candidates
+                  (mapv (fn [c]
+                          (cond-> {:kind :cascade-candidate
+                                   :id (:id c)
+                                   :precedence (mapv pattern-maps (:precedence c))}
+                            (empty? (:precedence c))
+                            (assoc :type :no-op)))
+                        (:candidates (get @state :R6)))
+                  predictions
+                  (mapv (fn [a]
+                          {:cascade-id (:id a)
+                           :prediction (fm/predict-multi-horizon
+                                        {:cascade-belief (get @state :R1)}
+                                        a T)})
+                        candidates)
+                  refused (some (fn [{:keys [prediction]}]
+                                  (when (and (map? prediction)
+                                             (contains? prediction :status)
+                                             (contains? prediction :kind))
+                                    prediction))
+                                predictions)]
+              (if refused
+                refused
+                {:candidates candidates :predictions predictions}))))
+    ;; R5 — G per candidate over one common universe, all candidates at T.
+    (step :R5 "futon2.aif.efe/rank-actions"
+          (fn []
+            (efe/rank-actions {:cascade-belief (get @state :R1)}
+                              (:candidates (get @state :R4))
+                              {:horizon-steps (get-in @state [:R13 :cascade-rollout])
+                               :cascade-spec cascade-spec})))
+    ;; R14 — selection at the DECLARED β (no default: a missing β is
+    ;; selection-posterior's typed refusal :invalid-temperature), then
+    ;; authorize the decision on the same :R14 node — one node, both legs,
+    ;; so the lane's route carries each node exactly once.
+    (step :R14 "futon2.aif.policy/select-action-cascades"
+          (fn []
+            (let [decision (policy/select-action-cascades (get @state :R5)
+                                                          {:beta beta})
+                  ;; The candidates' :precedence carries manifest pattern MAPS
+                  ;; (that is what R4/R5 consume), so select-action-cascades
+                  ;; keys the action marginal by the pattern map; re-key it by
+                  ;; the pattern id for the judgement — same probabilities,
+                  ;; readable names, no value touched.
+                  decision (assoc decision
+                                  :softmax-weights
+                                  (into {}
+                                        (map (fn [[k v]]
+                                               [(if (map? k)
+                                                  (or (:id k)
+                                                      (first (:precedence k)))
+                                                  k)
+                                                 v]))
+                                        (:softmax-weights decision)))]
+              {:decision decision
+               :authorization (controller-authority/authorize decision
+                                                              (get @state :R5))})))
+    ;; R16 — the enactment PLAN: acting order for the chosen cascade on the
+    ;; facts. Interpretations are translated into acting-order's Strong-Kleene
+    ;; guard language (one conjunctive clause per reading: every :needs token
+    ;; a [:fact _], every :forbids token a [:not [:fact _]]); facts are
+    ;; closed-world over the token universe and mirror R1's tokenization —
+    ;; only a literal-true fact is true; absent, false and :unknown are
+    ;; literal false (an :unknown guard value would never fire a :not, per
+    ;; 08-R16's precedent and receipt_construction's own tests).
+    (when-not @stopped
+      (step :R16 "futon2.aif.receipt-construction/acting-order"
+            (fn []
+              (let [chosen (get (:decision (get @state :R14)) :action)
+                    chosen-precedence (mapv :id (:precedence chosen))
+                    sk-interpretations
+                    (into {}
+                          (map (fn [[id {:keys [guard produces]}]]
+                                 [id {:guard
+                                      (into [:and]
+                                            (concat
+                                             (map (fn [t] [:fact t])
+                                                  (:needs guard))
+                                             (map (fn [t] [:not [:fact t]])
+                                                  (:forbids guard))))
+                                      :effect (into {} (map (fn [t] [t true])
+                                                            produces))}]))
+                          interpretations)
+                    universe
+                    (reduce (fn [acc [_ {:keys [guard produces]}]]
+                              (clojure.set/union acc (:needs guard)
+                                                 (:forbids guard) produces))
+                            (clojure.set/union (set (keys facts))
+                                               (ffirst (get @state :R1))
+                                               (set want))
+                            interpretations)
+                    facts-closed (into {}
+                                       (map (fn [t] [t (true? (get facts t))]))
+                                       universe)]
+                {:chosen-cascade (:id chosen)
+                 :acting-order (receipt-construction/acting-order
+                                sk-interpretations facts-closed
+                                chosen-precedence)}))))
+    (if @stopped
+      {:route @route
+       :refusal (:refusal @stopped)
+       :stopped-at (:node @stopped)}
+      (let [s @state
+            _ (swap! route conj {:node :R9
+                                 :via "futon2.report.war-machine/cascade-lane"
+                                 :at (str (Instant/now))})]
+        ;; R9 — no self-certification: the enactment claim stays
+        ;; :independent-check-required, with the enactor recorded; the tick
+        ;; never marks its own enactment confirmed.
+        {:route @route
+         :candidates (:candidates (:R4 s))
+         :predictions (:predictions (:R4 s))
+         :ranked (:R5 s)
+         :decision (:decision (:R14 s))
+         :authorization (:authorization (:R14 s))
+         :enactment-plan (:R16 s)
+         :certification {:status :independent-check-required
+                         :enactor "futon2.report.war-machine/cascade-lane"
+                         :claim :enactment-plan}}))))
+
+
 (defn judge
   "The war machine's inference step.
 
@@ -6570,6 +6808,12 @@
         route5 (route-tag route4 :R6 "futon2.aif.policy/select-action")
         route6 (route-tag route5 :R14 "futon2.aif.controller-authority/authorize")
         wm-decision (controller-authority/authorize controller-decision wm-admissible)
+        ;; Cascade lane (VM tick-1 wiring, R10): when the scan carries a
+        ;; :cascade-problem, run the model's cascade node sequence through
+        ;; the real node functions on its own additive lane. Absent, this is
+        ;; nil and everything below is byte-identical to the lane-less tick.
+        cascade-lane-result (when (:cascade-problem scan-data)
+                              (cascade-lane (:cascade-problem scan-data)))
         ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
         ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
         ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction
@@ -6787,7 +7031,12 @@
                                                  depth-config (assoc :policy-depth depth-config)))
                                     (catch Throwable _ []))
                                   [])
-                  :wm/route route6
+                  ;; The cascade lane's route entries ride along after :R14
+                  ;; only when a :cascade-problem was carried; nil keeps the
+                  ;; route exactly route6.
+                  :wm/route (if cascade-lane-result
+                              (reduce conj route6 (:route cascade-lane-result))
+                              route6)
                   :input-status (current-input-status)}
                    f-pi-dark-fields
                    (merge f-pi-dark-fields)
@@ -6811,6 +7060,8 @@
            (:ladder wm-ladder)
            (assoc :task-belief-ladder (:ladder wm-ladder)
                   :task-belief-refusals (:refusals wm-ladder))
+           cascade-lane-result
+           (assoc :cascade-lane cascade-lane-result)
            run-id
            (assoc :run/id run-id))
           active-mission)

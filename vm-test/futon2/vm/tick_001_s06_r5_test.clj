@@ -24,7 +24,8 @@
   assertions are the requirement on that path, live on this tick's input."
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-model-manifest :as m]
-            [futon2.aif.efe :as efe]))
+            [futon2.aif.efe :as efe]
+            [futon2.report.war-machine :as wm]))
 
 (def T 3)
 
@@ -191,4 +192,46 @@
              (contains? c1 :g-tie)
              (set (:g-tie c1))
              (contains? (set (:g-tie c1)) :C2-fix-first))
-        "the real scorer distinguishes best from doing nothing at T = 3 and records the C1/C2 G tie explicitly")))
+        "the real scorer distinguishes best from doing nothing at T = 3 and records the C1/C2 G tie explicitly"))
+
+  ;; R10 wiring (s11): the tick's cascade lane routes THIS node — the real
+  ;; rank-actions — under :R5 on this tick's problem.
+  (let [interpretations
+        {:aif/structured-observation-vector
+         {:guard {:needs #{:summary-without-total-repos-throws}
+                  :forbids #{:summary-without-total-repos-observes-cleanly}}
+          :produces #{:summary-without-total-repos-observes-cleanly}}
+         :aif/placeholder-is-load-bearing
+         {:guard {:needs #{:coupling-density-reads-same-key-with-default
+                           :summary-without-total-repos-throws}
+                  :forbids #{:summary-without-total-repos-observes-cleanly}}
+          :produces #{:summary-without-total-repos-observes-cleanly
+                      :active-repo-ratio-absent-default-is-0}}
+         :test-step-covering-missing-total-repos
+         {:guard {:needs #{:summary-without-total-repos-throws}
+                  :forbids #{:test-covers-missing-total-repos}}
+          :produces #{:test-covers-missing-total-repos}}}
+        lane (wm/cascade-lane
+              {:facts {:summary-without-total-repos-throws true
+                       :active-repo-ratio-absent-default-is-0 true
+                       :coupling-density-reads-same-key-with-default true
+                       :observe-empty-does-not-throw true
+                       :test-covers-missing-total-repos false}
+               :want [:summary-without-total-repos-observes-cleanly
+                      :active-repo-ratio-absent-default-is-0
+                      :test-covers-missing-total-repos]
+               :interpretations interpretations
+               :repository {:patterns (set (keys interpretations)) :stands-on #{}}
+               :precedences [[:test-step-covering-missing-total-repos
+                              :aif/structured-observation-vector]
+                             [:aif/placeholder-is-load-bearing
+                              :test-step-covering-missing-total-repos
+                              :aif/structured-observation-vector]
+                             [:aif/structured-observation-vector]]
+               :horizon-steps T
+               :cascade-spec {:want (:want spec)}
+               :beta 1})]
+    (is (boolean (some #(and (= :R5 (:node %))
+                             (= "futon2.aif.efe/rank-actions" (:via %)))
+                       (:route lane)))
+        "the cascade lane's route contains :R5 with futon2.aif.efe/rank-actions (behavioural: the lane scored this tick's candidates through the real scorer)")))
