@@ -329,8 +329,12 @@
        {:trajectory trajectory
         :final-state current-state
         :horizon-steps K}
-       (let [prediction (predict current-state action belief-update-opts)
-             next-obs (get-in prediction [:next-observation :mean])
+       (let [prediction (predict current-state action belief-update-opts)]
+         (if (and (map? prediction) (= :missing (:status prediction)))
+           ;; a typed refusal (cascade candidates only) ends the chain; it is
+           ;; returned, never folded into a trajectory
+           prediction
+         (let [next-obs (get-in prediction [:next-observation :mean])
              next-belief (:next-belief prediction)
              next-state (cond-> (-> current-state
                                     (assoc :observation next-obs)
@@ -339,21 +343,26 @@
                           ;; distribution addressable as :cascade-belief too
                           (:next-token-state prediction)
                           (assoc :cascade-belief (:next-token-state prediction)))]
-         (recur (inc step) next-state (conj trajectory prediction)))))))
+         (recur (inc step) next-state (conj trajectory prediction)))))))))
 
 (defn- predict-cascade-step
   "One step of the token-space forward model for a cascade candidate: the
    aligned cascade-model-manifest kernel (cascade-kernel/first-enabled apply
    the P10 continuing guards; Lean PolicyRollout.rolloutState). The belief
-   read is (:cascade-belief state) falling back to (:belief state): a
-   token-state distribution map (e.g. observed-belief of the current state).
-   A typed manifest refusal (missing pattern interpretation) is returned
-   unchanged, not coerced."
+   read is (:cascade-belief state), a token-state distribution map (e.g.
+   observed-belief of the current state). The channel :belief is a different
+   quantity and is never used in its place: an absent :cascade-belief is the
+   typed refusal :missing-cascade-belief. A typed manifest refusal (missing
+   pattern interpretation) is returned unchanged, not coerced."
   [state action]
-  (let [q (or (:cascade-belief state) (:belief state) {})
-        q' (cascade-manifest/rollout (constantly (:precedence action)) q 1)]
-    (if (and (map? q') (contains? q' :status))
+  (let [q (:cascade-belief state)
+        q' (when (map? q) (cascade-manifest/rollout (constantly (:precedence action)) q 1))]
+    (cond
+      (not (map? q))
+      {:status :missing :kind :missing-cascade-belief :action (:id action)}
+      (and (map? q') (contains? q' :status))
       q'
+      :else
       {:next-belief q'
        :next-token-state q'
        :action action
