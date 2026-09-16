@@ -1,0 +1,8 @@
+{:case :identical-unrelated-copy-with-valid-matching, :result {:refusal :history-discovery-invalid, :reason :distinct-path-identical-history, :file "TMP/live/archives/snapshot/fixture/attempt-002/007-closed.edn"}}
+{:case :identical-unrelated-copy-fresh-target, :result {:refusal :history-discovery-invalid, :reason :distinct-path-identical-history, :file "TMP/live/archives/snapshot/fixture/attempt-002/007-closed.edn"}}
+{:case :identical-matching-copy, :result {:refusal :history-discovery-invalid, :reason :distinct-path-identical-history, :file "TMP/live/archives/snapshot/fixture/attempt-002/007-closed.edn"}}
+{:case :differing-reused-identity-unrelated, :result {:refusal :history-discovery-invalid, :reason :history-identity-collision, :file "TMP/live/archives/snapshot/fixture/attempt-002/007-closed.edn"}}
+{:case :overlapping-roots-single-record, :result {:admission-reason :first-attempt-no-admissions, :excluded [:producer-recorded-different-target], :auxiliary []}}
+{:case :auxiliary-regular-files-named-attempt, :result {:refusal :history-discovery-invalid, :reason :unsupported-history-layout, :file "TMP/live/archives/snapshot/derived-projections/morning-brief-items/attempt-013.edn"}}
+{:case :auxiliary-regular-files-other-name, :result {:admission-reason :first-attempt-no-admissions, :excluded [:producer-recorded-different-target], :auxiliary [:complete-no-attempt-no-close-coverage]}}
+{:case :attempt-evidence-file-named-attempt, :result {:refusal :history-discovery-invalid, :reason :unsupported-history-layout, :file "TMP/live/fixture/attempt-002/evidence/attempt-identity.edn"}}

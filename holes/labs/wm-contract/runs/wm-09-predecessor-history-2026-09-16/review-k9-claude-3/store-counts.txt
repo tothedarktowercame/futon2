@@ -1,0 +1,3 @@
+stores before: 465
+stores after: 465
+stores after full caller ns: 465

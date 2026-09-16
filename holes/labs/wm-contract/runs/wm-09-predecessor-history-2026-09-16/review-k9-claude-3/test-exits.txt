@@ -1,0 +1,4 @@
+receipt-construction-test exit 0
+classification exit 0
+negative (858aa7f7 source, 8d5b569d tests) exit 1
+interpretation-job-test full exit 0

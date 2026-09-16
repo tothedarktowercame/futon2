@@ -1,0 +1,102 @@
+
+Testing futon2.aif.receipt-construction-test
+
+ERROR in (auxiliary-exclusion-requires-complete-coverage) (receipt_construction.clj:20)
+Uncaught exception, not in assertion.
+expected: nil
+  actual: clojure.lang.ExceptionInfo: Receipted construction refused
+{:interpretation/refusal :interpretation/invalid-receipt, :construction/refusal :history-discovery-invalid, :reason :unsupported-history-layout, :file "/tmp/receipt-aux13538685611769132396/fixture/arbitrary-name"}
+ at futon2.aif.receipt_construction$need_BANG_.invokeStatic (receipt_construction.clj:20)
+    futon2.aif.receipt_construction$need_BANG_.invoke (receipt_construction.clj:19)
+    futon2.aif.receipt_construction$discover_closes_BANG_$walk_BANG___2646.invoke (receipt_construction.clj:112)
+    futon2.aif.receipt_construction$discover_closes_BANG_$walk_BANG___2646.invoke (receipt_construction.clj:108)
+    futon2.aif.receipt_construction$discover_closes_BANG_.invokeStatic (receipt_construction.clj:130)
+    futon2.aif.receipt_construction$discover_closes_BANG_.invoke (receipt_construction.clj:87)
+    futon2.aif.receipt_construction$previous_BANG_.invokeStatic (receipt_construction.clj:460)
+    futon2.aif.receipt_construction$previous_BANG_.invoke (receipt_construction.clj:450)
+    futon2.aif.receipt_construction_test$fn__21892$fn__21897$run__21899.invoke (receipt_construction_test.clj:625)
+    futon2.aif.receipt_construction_test$fn__21892$fn__21897.invoke (receipt_construction_test.clj:635)
+    futon2.aif.receipt_construction_test$fn__21892.invokeStatic (receipt_construction_test.clj:617)
+    futon2.aif.receipt_construction_test/fn (receipt_construction_test.clj:610)
+    clojure.test$test_var$fn__9856.invoke (test.clj:717)
+    clojure.test$test_var.invokeStatic (test.clj:717)
+    clojure.test$test_var.invoke (test.clj:708)
+    clojure.test$test_vars$fn__9882$fn__9887.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars$fn__9882.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars.invokeStatic (test.clj:731)
+    clojure.test$test_all_vars.invokeStatic (test.clj:737)
+    clojure.test$test_ns.invokeStatic (test.clj:758)
+    clojure.test$test_ns.invoke (test.clj:743)
+    clojure.core$map$fn__5935.invoke (core.clj:2772)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.Cons.next (Cons.java:39)
+    clojure.lang.RT.boundedLength (RT.java:1790)
+    clojure.lang.RestFn.applyTo (RestFn.java:130)
+    clojure.core$apply.invokeStatic (core.clj:669)
+    clojure.test$run_tests.invokeStatic (test.clj:768)
+    clojure.test$run_tests.doInvoke (test.clj:768)
+    clojure.lang.RestFn.invoke (RestFn.java:408)
+    user$eval21975.invokeStatic (NO_SOURCE_FILE:1)
+    user$eval21975.invoke (NO_SOURCE_FILE:1)
+    clojure.lang.Compiler.eval (Compiler.java:7194)
+    clojure.lang.Compiler.eval (Compiler.java:7149)
+    clojure.core$eval.invokeStatic (core.clj:3215)
+    clojure.main$eval_opt.invokeStatic (main.clj:488)
+    clojure.main$eval_opt.invoke (main.clj:482)
+    clojure.main$initialize.invokeStatic (main.clj:508)
+    clojure.main$null_opt.invokeStatic (main.clj:542)
+    clojure.main$null_opt.invoke (main.clj:539)
+    clojure.main$main.invokeStatic (main.clj:664)
+    clojure.main$main.doInvoke (main.clj:616)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.main.main (main.java:40)
+
+FAIL in (distinct-path-checkpoint-copies-remain-unresolved) (receipt_construction_test.clj:602)
+expected: (= :history-discovery-invalid (:construction/refusal error))
+  actual: (not (= :history-discovery-invalid nil))
+
+FAIL in (distinct-path-checkpoint-copies-remain-unresolved) (receipt_construction_test.clj:603)
+expected: (= (if different? :history-identity-collision :distinct-path-identical-history) (:reason error))
+  actual: (not (= :distinct-path-identical-history nil))
+
+FAIL in (distinct-path-checkpoint-copies-remain-unresolved) (receipt_construction_test.clj:604)
+expected: (= {:cohort/id :fixture, :attempt/id "attempt-002"} (:identity error))
+  actual: (not (= {:cohort/id :fixture, :attempt/id "attempt-002"} nil))
+
+FAIL in (distinct-path-checkpoint-copies-remain-unresolved) (receipt_construction_test.clj:605)
+expected: (= 2 (count (:records error)))
+  actual: (not (= 2 0))
+
+FAIL in (distinct-path-checkpoint-copies-remain-unresolved) (receipt_construction_test.clj:606)
+expected: (= (not different?) (:identical-checkpoint-sets? error))
+  actual: (not (= true nil))
+
+FAIL in (distinct-path-checkpoint-copies-remain-unresolved) (receipt_construction_test.clj:602)
+expected: (= :history-discovery-invalid (:construction/refusal error))
+  actual: (not (= :history-discovery-invalid nil))
+
+FAIL in (distinct-path-checkpoint-copies-remain-unresolved) (receipt_construction_test.clj:603)
+expected: (= (if different? :history-identity-collision :distinct-path-identical-history) (:reason error))
+  actual: (not (= :history-identity-collision nil))
+
+FAIL in (distinct-path-checkpoint-copies-remain-unresolved) (receipt_construction_test.clj:604)
+expected: (= {:cohort/id :fixture, :attempt/id "attempt-002"} (:identity error))
+  actual: (not (= {:cohort/id :fixture, :attempt/id "attempt-002"} nil))
+
+FAIL in (distinct-path-checkpoint-copies-remain-unresolved) (receipt_construction_test.clj:605)
+expected: (= 2 (count (:records error)))
+  actual: (not (= 2 0))
+
+FAIL in (distinct-path-checkpoint-copies-remain-unresolved) (receipt_construction_test.clj:606)
+expected: (= (not different?) (:identical-checkpoint-sets? error))
+  actual: (not (= false nil))
+
+Ran 25 tests containing 292 assertions.
+10 failures, 1 errors.
+{:test 25, :pass 281, :fail 10, :error 1, :type :summary}
