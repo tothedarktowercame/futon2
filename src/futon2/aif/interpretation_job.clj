@@ -31,11 +31,16 @@
 (defn- exception-chain [e]
   (take 16 (take-while some? (iterate #(.getCause ^Throwable %) e))))
 
-(defn- failure-classification [e]
+(defn- failure-classification [e transport-failure-kind]
   (let [chain (exception-chain e)
         typed (some #(or (:failure-kind (ex-data %)) (:outcome (ex-data %))) chain)
         data (ex-data e)
         refusal (:interpretation/refusal data)
+        ;; The runner supplies its canonical transport policy. Never infer
+        ;; transport over an explicit classification or a content refusal.
+        transport-kind (when-not (or typed refusal (:interpretation-evidence/refusal data)
+                                     (= :find/refusal (:finding data)))
+                         (transport-failure-kind e))
         kind (cond
                (#{:agent-budget-expired :agent-job-stalled} typed) :interpretation/budget-exceeded
                (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
@@ -53,9 +58,10 @@
                (= :find/refusal (:finding data))
                (if (= :o4 (:law data)) :interpretation/no-relevant-pattern
                    :interpretation/invalid-receipt)
+               transport-kind :interpretation/agent-unavailable
                :else :interpretation/machine-failure)]
     {:kind kind
-     :failure-kind (or typed
+     :failure-kind (or typed transport-kind
                        (case kind
                          :interpretation/budget-exceeded :agent-budget-expired
                          :interpretation/agent-unavailable :agent-unavailable
@@ -99,7 +105,10 @@
 (defn run!
   "Ports are the runner's existing readiness/dispatch/poll and turn counter.
   Timed-out jobs continue; immutable failure/intent/job records feed packet 3b."
-  [opts action identity dir {:keys [ready! dispatch! poll! charge! construct!]}]
+  [opts action identity dir {:keys [ready! dispatch! poll! charge! construct! transport-failure-kind]}]
+  (when-not (ifn? transport-failure-kind)
+    (throw (ex-info "Interpretation requires the runner's transport classifier"
+                    {:failure-kind :interpretation/transport-classifier-missing})))
   (.mkdirs (io/file dir))
   (let [started (System/currentTimeMillis)
         actor (or (:interpreter opts) (:author opts))
@@ -184,7 +193,7 @@
         (let [_ (when (and @validation-started (= :validation @stage))
                   (swap! timing assoc :validation-ms (- (System/currentTimeMillis) @validation-started)))
               data (ex-data e)
-              {:keys [kind failure-kind]} (failure-classification e)
+              {:keys [kind failure-kind]} (failure-classification e transport-failure-kind)
               causes (mapv (fn [t] {:class (.getName (class t))
                                    :message (.getMessage ^Throwable t)
                                    :data (ex-data t)}) (exception-chain e))

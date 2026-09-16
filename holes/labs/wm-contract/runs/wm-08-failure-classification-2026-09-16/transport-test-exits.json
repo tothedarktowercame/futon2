@@ -1,0 +1,22 @@
+[
+  {
+    "name": "transport-final",
+    "command": [
+      "clojure",
+      "-X:test",
+      ":nses",
+      "[futon2.aif.interpretation-job-test]"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "transport-construction",
+    "command": [
+      "clojure",
+      "-X:test",
+      ":nses",
+      "[futon2.aif.receipt-construction-test]"
+    ],
+    "exit": 0
+  }
+]

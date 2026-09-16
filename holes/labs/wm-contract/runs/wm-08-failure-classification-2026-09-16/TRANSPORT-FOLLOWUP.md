@@ -1,0 +1,7 @@
+# Follow-up to independent review 1b070d4b
+
+Both item owners agree the correction (retained transport-agreement JSON). Runner supplies its existing transport-failure-kind as a required job port. Job uses it only for exceptions without explicit typing or known refusal metadata. A missing classifier refuses before job artifact writes. No duplicated transport tables or changed runner precedence.
+
+The regression matrix covers readiness, dispatch and poll, raw and wrapped ConnectException/SocketTimeoutException, NPE, and typed build-failed with a nested transport exception. Each case checks direct runner classification against the full receipt-mode result, repair class, retained envelope and cause class, close evidence and no build dispatch. Both hermetic namespace fixtures are active.
+
+Review F3: transport-final.log retains the full final namespace: 14 tests / 467 assertions, zero failures/errors, exit 0. receipt-construction-test also passed 7 tests / 31 assertions, exit 0. Exact commands/exits are in transport-test-exits.json. The before-change selected matrix had 1 test / 194 assertions and 36 expected failures (exit 1); transport-before.log. Lint and check-parens both passed (transport-kondo.log, transport-parens.log). F1 self-reported availability/budget and F2 non-EDN exception-data remain explicitly open, pre-existing findings; neither is hidden by acceptance of transport handling. Original exception objects/data remain in cause chains. No production operation or checklist closure.

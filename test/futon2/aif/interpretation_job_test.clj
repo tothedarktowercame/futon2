@@ -259,6 +259,42 @@
                :interpretation/retriever-set-invalid]]
     (is (= :machine-failure (#'runner/repair-class-for kind)) (str kind))))
 
+(deftest interpretation-ports-preserve-the-runner-transport-policy
+  (doseq [port [:ready! :dispatch! :poll!]
+          wrapped? [false true]
+          [make-fault expected] [[#(java.net.ConnectException. "Connection refused") :transport-unavailable]
+                                 [#(java.net.SocketTimeoutException. "Read timed out") :transport-timeout]
+                                 [#(NullPointerException. "port bug") :untyped-failure]
+                                 [#(ex-info "typed bug" {:failure-kind :build-failed}
+                                            (java.net.ConnectException. "nested transport")) :build-failed]]]
+    (let [raw (make-fault)
+          fault (if wrapped? (ex-info "port wrapper" {} raw) raw)
+          run-job job/run!
+          {:keys [result failures close diagnostics calls constructors]}
+          (with-redefs [job/run! (fn [opts action identity dir ports]
+                                  (run-job opts action identity dir
+                                           (assoc ports port (fn [& _] (throw fault)))))]
+            (run-case :receipt :valid))
+          transport? (#{:transport-unavailable :transport-timeout} expected)
+          label (str port " wrapped=" wrapped? " expected=" expected)]
+      (is (= expected (#'runner/failure-kind-from fault)) label)
+      (is (= expected (get-in result [:data :failure-kind])) label)
+      (is (= (if transport? :environmental-hold :machine-failure)
+             (get-in result [:data :repair-obligation :repair/class])) label)
+      (is (= (if transport? :interpretation/agent-unavailable :interpretation/machine-failure)
+             (get-in failures [0 :failure :kind])) label)
+      (is (= (.getName (class fault)) (get-in diagnostics [0 :causes 0 :class])) label)
+      (is (some #(.startsWith (.getName (io/file (:source-path %))) "interpretation-failure-")
+                (get-in close [:payload :close-evidence-manifest :entries])) label)
+      (is (every? #{"interpreter"} calls) label)
+      (is (zero? constructors) label))))
+
+(deftest interpretation-requires-transport-authority-before-writing
+  (is (= :interpretation/transport-classifier-missing
+         (try (job/run! {} {} {} nil {})
+              nil
+              (catch clojure.lang.ExceptionInfo e (:failure-kind (ex-data e)))))))
+
 (deftest ticket-construction-preserves-action-and-rules
   (let [{:keys [result action constructors organised]} (run-case :receipt :ticket)
         judgment (get-in result [:checkpoints :construction :judgment])

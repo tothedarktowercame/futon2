@@ -1,0 +1,8 @@
+{
+  "parent-head": "7e738d538f4b2153b8dbaa034970aaac04ca1c96",
+  "sha256": {
+    "src/futon2/aif/interpretation_job.clj": "a85a3d64a9d7d757a6d45f98998a8512147eeab7c47cb599dffc4d26822e7df5",
+    "src/futon2/aif/full_loop_runner.clj": "aa258d744552778a9ee06dfc70470e5cf46f9d9e70a366be519aacf0f982d55f",
+    "test/futon2/aif/interpretation_job_test.clj": "5a3dcbbae9534730f9d721588374e1ca667aa98faf79110eda207d2184c34e52"
+  }
+}

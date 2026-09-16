@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-9",
+    "session-id": "zai-7657dc81-3d21-41c9-80d6-446bb3c7f220",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789573276663-21473-803e0d53",
+    "agent-id": "wm-09",
+    "artifact-ref": null,
+    "started-at": "2026-09-16T15:41:17.459930785Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T15:41:16.663565424Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T15:41:17.459942126Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T15:41:18.321724930Z",
+        "text": "Review of eeaaf199 found a blocking transport regression; see futon2/holes/labs/wm-contract/runs/wm-08-failure-classification-2026-09-16/REVIEW-claude-3.md (1b070d4b). Joe resumed fix/gates/commit/follow-up review. Propose minimal structural correction: runner passes its EXISTING transport-failure-kind function as an explicit required port to interpretation-job/run!, alongside ready!/dispatch!/poll!. Job uses that only after checking explicit typed failures and genuine interpretation refusals; recognized transport gets existing agent-unavailable envelope with exact transport-timeout/unavailable outer kind; unknown NPE stays machine. No copy of transport tables, no runner classifier-order change, no circular require. Scope adds one runner call-site map entry beyond prior interpretation-mapping-only edit; same source files. Required port, not optional missing-authority fallback. Add raw/wrapped transport controls at ready/dispatch/poll and typed machine fault with nested transport control. Both hermetic fixtures. Please agree/correct this bounded adjustment; no implementation/dispatch by you. WM-08 is also consulted. Independent reviewer remains claude-3. No production operation or checkbox claim.\n"
+      },
+      {
+        "seq": 4,
+        "type": "done",
+        "at": "2026-09-16T15:41:49.179967264Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 5,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T15:41:51.479072574Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789573276663-21473-803e0d53",
+        "recorded-at": "2026-09-16T15:41:51.476986659Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789573276663-21473-803e0d53",
+      "recorded-at": "2026-09-16T15:41:51.476986659Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789573276663-21473-803e0d53",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "**Agree \u2014 the bounded adjustment is correct and I accept it.** Verified against current source: - The regression is real and exactly as claude-3 demonstrated: `failure-classification` in the job only sees transport th...",
+    "result": "**Agree \u2014 the bounded adjustment is correct and I accept it.** Verified against current source:\n\n- The regression is real and exactly as claude-3 demonstrated: `failure-classification` in the job only sees transport through explicit ex-data, so raw/wrapped `ConnectException`/`SocketTimeoutException` at `ready!`/`dispatch!`/`poll!` became `:interpretation/machine-failure` \u2192 `:untyped-failure` \u2192 stop-line machine repair \u2014 inverting the runner's own contract (`transport-failure-classes` / `transport-failure-kind` at `full_loop_runner.clj:3030\u20133136` map these to `:transport-unavailable`/`:transport-timeout` \u2192 `:environmental-hold`).\n- Your structural fix is the right shape: `transport-failure-kind` already exists in the runner (`defn-` at :3123), the runner already requires the job (so a port is the only non-circular direction), and passing it as a **required** port in the existing port map alongside `ready!`/`dispatch!`/`poll!` avoids both a duplicated transport table and any missing-authority fallback. \u2718 for the record: my earlier concurrence named \"the interpretation mapping in full_loop_runner.clj\" as the only runner edit and missed that the call site at :3982 necessarily changes too \u2014 your one-call-site-map-entry addition is the honest scope correction, not an expansion.\n\n**Conditions:**\n\n1. **Classification order as proposed:** explicit typed failures and genuine interpretation refusals are checked first; the transport port is consulted only for otherwise-untyped faults (and wrapped causes). This keeps a typed machine fault with a nested transport cause as machine \u2014 that's the right tie-break, since the dangerous laundering direction is machine\u2192environmental, not the reverse. Your control for exactly that case covers it.\n2. **Recognized transport reuses the existing `:interpretation/agent-unavailable` envelope** with the outer `:failure-kind` exactly `:transport-timeout`/`:transport-unavailable`, so the runner's existing explicit mapping yields `:environmental-hold` with no classifier-order change. NPE and typed `:build-failed` must stay `:machine-failure` \u2014 both already covered by retained tests; keep them green.\n3. **Controls:** raw and wrapped transport at each of ready/dispatch/poll, plus the typed-machine-fault-with-nested-transport case, in both hermetic fixtures (`with-hermetic-stores` and `with-hermetic-traces`), through the job's own ports, no production-store probes.\n4. Cheap riders while you're in the file, non-blocking but please take them if trivial: claude-3's **F2** (project non-EDN ex-data to a readable form so retained diagnostics actually read back \u2014 the current `#object[\u2026]` round-trip failure undermines the audit trail this whole packet builds) and **F3** (retain a full-namespace test log of the final committed test file). **F1** predates the packet \u2014 leave it recorded, don't bundle.\n\nSame three source files + tests/receipts; claude-3 stays the independent reviewer (their review already contains the needed control matrix); no runner classifier-order change, no checkbox or production claim. WM-09 concurrence recorded \u2014 proceed through Joe/codex-28's fix dispatch.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789573276663-21473-803e0d53",
+      "at": "2026-09-16T15:41:49.179943830Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T15:41:49.179943830Z",
+    "created-at": "2026-09-16T15:41:16.663093781Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-9",
+    "session-id": "zai-b15006ca-5b0e-4670-a16e-0b8db9065a1f",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789573278329-21474-015d6b5a",
+    "agent-id": "wm-08",
+    "artifact-ref": "eeaaf199",
+    "started-at": "2026-09-16T15:41:19.179558551Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T15:41:18.329659542Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T15:41:19.179563360Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T15:41:20.086485067Z",
+        "text": "Joe resumed our repair after claude-3 NOT ACCEPTED eeaaf199 for transport regression (review commit 1b070d4b; REVIEW-claude-3.md in wm-08-failure-classification-2026-09-16). Propose minimal correction: runner passes its existing private transport-failure-kind as REQUIRED explicit job port, not a copied classifier or default fallback. Job consults it only after explicit typed failure and genuine refusal checks. Transport gets existing agent-unavailable evidence envelope plus exact outer transport kind; NPE/unknown remain machine, typed machine outranks nested transport. Runner change is one call-site map entry; no classification order change/shared namespace/circular dependency. Same three source files; add hermetic raw+wrapped transport tests at ready/dispatch/poll and typed machine wrapping transport. Please agree scope adjustment beyond previous mapping-only runner edit. WM-09 also consulted, review stays claude-3. No production or checkbox claims. Nonblocking review F1 self-reported availability is preexisting and outside this correction; F3 full final namespace log will be retained. F2 non-EDN exception-data retention is preexisting and remains explicitly open unless separately resolved; no weakening serializer/admission to hide it.\n"
+      },
+      {
+        "seq": 4,
+        "type": "done",
+        "at": "2026-09-16T15:41:55.004869355Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 5,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T15:41:57.374090465Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789573278329-21474-015d6b5a",
+        "recorded-at": "2026-09-16T15:41:57.372138651Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789573278329-21474-015d6b5a",
+      "recorded-at": "2026-09-16T15:41:57.372138651Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789573278329-21474-015d6b5a",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "**Agree the scope adjustment \u2014 it's the right fix among claude-3's three options.** I read REVIEW-claude-3.md (wm-08-failure-classification-2026-09-16): the blocking finding is exactly that `eeaaf199` moved raw/wrappe...",
+    "result": "**Agree the scope adjustment \u2014 it's the right fix among claude-3's three options.** I read REVIEW-claude-3.md (wm-08-failure-classification-2026-09-16): the blocking finding is exactly that `eeaaf199` moved raw/wrapped transport faults at ready/dispatch/poll to machine-repair, and claude-3 named two candidate designs (shared namespace, or dropping the explicit kind \u2014 the latter blocked by the rethrow's `:outcome :incomplete`). Your third option \u2014 passing the runner's **existing private** `transport-failure-kind` as a **required** job port \u2014 is cleaner than both: no copied classifier that can drift, no shared namespace, no circular dependency (runner requires job already), no runner classification-order change. Runner diff stays one call-site map entry. This is within the spirit of the agreed repair; the \"mapping-only runner scope\" cap was about not refactoring the classifier, and this doesn't.\n\nConditions, all consistent with what you proposed:\n\n1. **Pass the actual runner fn, never a re-implementation** \u2014 so the job's transport typing can never diverge from `failure-kind-from`'s. A future edit to `transport-failure-classes` propagates automatically.\n2. **Precedence, exactly as you stated:** explicit typed `:failure-kind` (at any depth) \u2192 genuine `:interpretation/refusal` content failures \u2192 port-classified transport \u2192 `:interpretation/machine-failure` for NPE/unknown. Typed machine outranking nested transport matches the runner's own \"explicit typing wins at ANY depth\" contract. Required (not defaulted) port is correct \u2014 silent misclassification is the failure mode we're closing; a missing port should refuse, not guess.\n3. **Transport outcome:** existing agent-unavailable evidence envelope plus the exact outer transport kind (`:transport-unavailable`/`:transport-timeout`), so the failure record stays schema-valid with sources retained, same as the machine-failure envelope treatment.\n4. **Controls:** hermetic, raw and wrapped transport at ready/dispatch/poll \u2192 `:environmental-hold`; typed machine wrapping transport \u2192 `:machine-failure`; keep the existing NPE / `:build-failed` / untyped-wrapping-typed regressions green. Both fixtures if you exercise the real receipt-mode path, per claude-3's own probe discipline; no `run-case` outside fixtures.\n\nNon-blocking findings: F1 preexisting and out of scope \u2014 agreed. F3 retain a full final namespace log of the committed test file \u2014 agreed, that's cheap and closes the review gap. F2 non-EDN ex-data diagnostic readability: agreed it stays explicitly open and unweakened; if you can include the readable projection of `:data`/`:causes` in this pass without serializer changes, do, but don't let it grow the scope \u2014 it's not blocking and must not be \"fixed\" by hiding data.\n\nReview stays with claude-3 \u2014 correct, they demonstrated both the original defect and this regression. No production, serving, or checkbox claims from any of this; the deliverable is a repaired commit passing the above controls under independent review.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789573278329-21474-015d6b5a",
+      "at": "2026-09-16T15:41:55.004851892Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T15:41:55.004851892Z",
+    "created-at": "2026-09-16T15:41:18.329173101Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

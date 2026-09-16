@@ -3991,7 +3991,8 @@
                     :interpreter-job {:status :none :reason :not-dispatched}
                     :author (or (:interpreter opts) author) :schema-version 1}
                    attempt-evidence-dir
-                   {:ready! (fn [actor] ((or (:interpretation-readiness-fn opts) agent-readiness!) opts actor))
+                   {:transport-failure-kind transport-failure-kind
+                    :ready! (fn [actor] ((or (:interpretation-readiness-fn opts) agent-readiness!) opts actor))
                     :dispatch! (fn [actor prompt]
                                  ((or (:dispatch-fn opts) dispatch!) opts actor "wm-full-loop" target prompt))
                     :poll! (fn [job-id] ((or (:poll-fn opts) poll-job!) opts job-id))
