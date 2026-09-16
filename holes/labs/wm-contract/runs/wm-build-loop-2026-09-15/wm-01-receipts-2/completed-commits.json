@@ -1,0 +1,50 @@
+[
+  {
+    "receipt": "ambiguity-positive-receipt.edn",
+    "commit": "4ecc3f3fb2b617f3a64e412985c3fedc2fd2b4ce"
+  },
+  {
+    "receipt": "expected-free-energy-positive-receipt.edn",
+    "commit": "91fbfc07c1e34bc73a34185b9c38904dd5983d5f"
+  },
+  {
+    "receipt": "expected-information-gain-positive-receipt.edn",
+    "commit": "23c35113db7df23fc85f1c3e12453284f10f0e2e"
+  },
+  {
+    "receipt": "generative-model-positive-receipt.edn",
+    "commit": "2d6e09fa3e40f2435cc3a5d9600929c981927de8"
+  },
+  {
+    "receipt": "observation-kernel-positive-receipt.edn",
+    "commit": "d88cd1ddc8ad7bc5f65a54c534d7cbfbbba72512"
+  },
+  {
+    "receipt": "parameter-posterior-kernel-positive-receipt.edn",
+    "commit": "7f07a12d7acd17af35fe384e00376e24fa304f02"
+  },
+  {
+    "receipt": "parameter-prior-kernel-positive-receipt.edn",
+    "commit": "25993210ff51036054d1fed81e5c2e899332699b"
+  },
+  {
+    "receipt": "policy-prior-kernel-positive-receipt.edn",
+    "commit": "48775da690654c5e36ac698d19c4bba202c6eb71"
+  },
+  {
+    "receipt": "precision-positive-receipt.edn",
+    "commit": "d3074df71e2318fcea0940f50b43a770bc3e21cc"
+  },
+  {
+    "receipt": "predictive-outcome-risk-positive-receipt.edn",
+    "commit": "4c4aee595cc24cc33313c5323423ea6b92041ce9"
+  },
+  {
+    "receipt": "preference-distribution-positive-receipt.edn",
+    "commit": "22c2bfd55440cfcf5709a1f5edbbd5140b36a497"
+  },
+  {
+    "receipt": "transition-kernel-positive-receipt.edn",
+    "commit": "66ee4d8897b4cee9d6d668d84bab3e77da0aae8d"
+  }
+]

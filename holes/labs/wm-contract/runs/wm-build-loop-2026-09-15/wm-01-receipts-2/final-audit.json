@@ -1,0 +1,13 @@
+{
+  "entries": 13,
+  "author-verified": 12,
+  "blocked": 1,
+  "pin-mutations": 47,
+  "wrapper-invocations": 34,
+  "wrapper-exit-zero": 33,
+  "wrapper-exit-two": 1,
+  "final-drift-count": 2,
+  "final-gate-exit": 1,
+  "unchanged-protected-files": 36,
+  "fixture-source-and-canonical-hashes": "verified"
+}

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "lean",
+    "/tmp/vfe-weakened-probe-m0voz_1v/Weakened.lean"
+  ],
+  "cwd": "/home/joe/code/mathlib4",
+  "exit": 1,
+  "source_sha256": "d8f43f4ffeb0147dfffc268556e06742391338218249f65fc7941c4d3adf0249",
+  "wrapper_sha256": "4046dee5e97d05dbb9576a3c0e1fa22c6a8055438da07b9d7117d627c5c5dc2e",
+  "mutant_sha256": "eb3cf5d06ecf26da96396b48faa6e8b1b52dd70c34b64f37b7bb0b5541afa5c4"
+}

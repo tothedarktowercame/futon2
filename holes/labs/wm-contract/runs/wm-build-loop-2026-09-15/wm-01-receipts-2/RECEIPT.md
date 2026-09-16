@@ -104,3 +104,59 @@ hand-derived mathematical fixtures, not empirical observations or runtime Q.
 A zero-drift gate alone would not establish per-receipt acceptance, WM-01
 completion or R4 admission. R4 remains blocked. No known-stale entries, fixture
 rewrites, gate suppressions or out-of-scope fixes are authorized here.
+
+## Final disposition: 12 verified, 1 blocked
+
+The 13-entry matrix is complete. Twelve successor receipts are installed in
+separate commits; `completed-commits.json` records their full commit identities
+in manifest order. The final checkpoint commits the blocked thirteenth entry
+and campaign evidence, without replacing its canonical predecessor.
+
+There were **47 individual changed/added-pin mutation controls**, all reporting
+exactly source drift. All 13 candidate successors passed fresh basis-record and
+real validation. All **34** registered wrapper invocations were run serially:
+**33 exited 0; one exited 2**. Lint/parens and both Python syntax checks passed.
+`SUMMARY.md` provides a compact per-receipt table; `final-audit.json` records
+counts and the final byte checks. Protected negative fixtures and the accepted
+predictive kernel receipt are unchanged, as are all 13 fixtures and the source
+files checked before/after. No FUTON_POSITIVE_LEAN_OVERRIDE was set.
+
+### Blocked: variational-free-energy-positive-receipt.edn
+
+Its positive, --negative-value and --negative-type modes exit 0 against the
+candidate successor. --negative-weakened-positive exits **2**. The real
+validator reports precisely `:positive-source-drift` for its source override,
+but the wrapper also requires that the weakened theorem elaborate. Its
+replacement RHS still contains:
+
+```lean
+variationalFreeEnergy (fun _ => gaussianReference.precision)
+```
+
+The repaired function requires PrecisionMap. Reproducing exactly the existing
+replacement in a temporary source file gives Lean exit **1**:
+`gaussianReference.precision has type ℝ but is expected to have type NonnegativeReal`.
+This is a stale control construction, not a failure of the positive theorem or
+an escaped source-hash mutation. The wrapper's printed "mutation slipped" is
+misleading here. `weakened_probe.py` retains the exact generated source, raw Lean
+output and command/cwd/exit in the blocked receipt directory. Its Python runner
+exits 0 after recording the child Lean exit 1; the child result is the evidence.
+
+Repairing that replacement would edit an explicitly out-of-scope wrapper, so
+no such change was made. The existing mathematical reference remains meaningful,
+but its required controls cannot all pass under this dispatch. The candidate
+successor is retained only in the run directory; the canonical predecessor was
+restored byte-for-byte after confirming it still matched this task's installed
+candidate. The blocked matrix entry distinguishes candidate and canonical hashes.
+A separate dispatch is needed for the wrapper correction before this receipt can
+be accepted. No blocked claim was reworded, and no gate was weakened.
+
+### Final gate
+
+Command, cwd `/home/joe/code/futon2`:
+`bb holes/labs/wm-contract/positive_receipt_reattestation_check.bb`.
+`final-gate.log` / `final-gate.exit` record **exit 1, 2 drifts**, down from 26.
+Both remaining drifts are in the blocked variational-free-energy receipt:
+constantGaussianReference and Holes variationalFreeEnergy. No unrelated drift
+appeared. The zero-drift target was not reached; U71 and R4 remain blocked.
+Independent review of the twelve valid checkpoints remains with claude-3.

@@ -1,0 +1,15 @@
+{
+  "disposition": "preserved",
+  "reading": "variationalFreeEnergy now takes PrecisionMap with nonnegative entries; constantGaussianReference constructs a NonnegativeReal from fixture precision 2 and proves positivity by norm_num. Same 14 channels, error 1 and expected F=1; formula projects .value without changing the numeric result. Fixture and GaussianReference adapter remain unchanged. Shared Holes variationalFreeEnergy attribution is separately recorded here and in precision; no Lean command result is reused.",
+  "additions": [
+    "PrecisionMap",
+    "NonnegativeReal"
+  ],
+  "wrapper": "variational_free_energy_witness.clj",
+  "negative-modes": [
+    "--negative-value",
+    "--negative-type",
+    "--negative-weakened-positive"
+  ],
+  "exit-convention": "Value mutates F to 2; type requires #guard_msgs rejection; weakened-positive requires altered source to elaborate and source-drift validation to reject. 0 is success, 2 negative failure, 1 positive failure. Source reading finds weakened RHS still supplies plain real precision, potentially incompatible with repaired PrecisionMap; execution must resolve this."
+}

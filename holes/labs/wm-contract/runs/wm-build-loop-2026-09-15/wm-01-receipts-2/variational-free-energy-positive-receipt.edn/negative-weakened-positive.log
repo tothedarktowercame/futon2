@@ -1,0 +1,1 @@
+variational-free-energy-witness: mutation slipped {:pass? false, :failures [:positive-source-drift], :receipt-shape-valid? true, :successful-elaboration? true, :source-basis-matches? false, :fixture-adapter-matches? true, :toolchain-matches? true, :elaboration-matches? true} exit-convention=0-pass/1-fail/2-mutation-slipped

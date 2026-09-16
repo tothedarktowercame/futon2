@@ -1,0 +1,53 @@
+[
+  {
+    "name": "protocol",
+    "command": [
+      "bb",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-receipts-2/receipt_control.clj",
+      "run",
+      "variational-free-energy-positive-receipt.edn",
+      "[\"PrecisionMap\" \"NonnegativeReal\"]"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "positive",
+    "command": [
+      "bb",
+      "checks/variational_free_energy_witness.clj"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "negative-value",
+    "command": [
+      "bb",
+      "checks/variational_free_energy_witness.clj",
+      "--negative-value"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "negative-type",
+    "command": [
+      "bb",
+      "checks/variational_free_energy_witness.clj",
+      "--negative-type"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "negative-weakened-positive",
+    "command": [
+      "bb",
+      "checks/variational_free_energy_witness.clj",
+      "--negative-weakened-positive"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 2
+  }
+]

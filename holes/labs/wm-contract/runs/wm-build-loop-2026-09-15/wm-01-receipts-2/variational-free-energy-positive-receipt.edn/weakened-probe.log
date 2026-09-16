@@ -1,0 +1,6 @@
+/tmp/vfe-weakened-probe-m0voz_1v/Weakened.lean:26:38: error: Type mismatch
+  gaussianReference.precision
+has type
+  ℝ
+but is expected to have type
+  NonnegativeReal
