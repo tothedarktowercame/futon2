@@ -1,0 +1,129 @@
+{
+  "source_commit": "858aa7f7",
+  "census_sha256": "cd86a33922e71239d9ca51c7f6f87c6c8ebe058bf3523f1aceece9d6d5925a39",
+  "verified_copied_closes": [
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/007-closed.edn",
+      "sha256": "48eb15025df4820bb5155ad6a329e203fc7dfdb9abe6b5eadf70a0614a9f89a4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/007-closed.edn",
+      "sha256": "d9a70102c776ea37c01e7c0db8829984fa2cde38962f90821ae62b1e2d501a58"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/007-closed.edn",
+      "sha256": "95d8f6c9517f03cd2a6c98d45e4a143906785829aae583c469be21c84b711db8"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/007-closed.edn",
+      "sha256": "cc93e8e2fa74d1998e9c320fa4c2c3a6e79b0f0ae74ce5caedcecebd85b68762"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/007-closed.edn",
+      "sha256": "a372173a192f5d762dbdeccd1630cbc08db10c25d1f151b595899bf0392202ca"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/007-closed.edn",
+      "sha256": "7d5b8ba0d7c36e21601c412dbfa017f1576afac7cdf85855e38deb9a619c4772"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/007-closed.edn",
+      "sha256": "cf0704be26310d71a28a1885c483e8941971d432c350d1c02cd977c2fe7d0385"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/007-closed.edn",
+      "sha256": "5ca6c74d449aa7f8cd5c35947c6af070f485cad6af84f735559476f481c4808e"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/007-closed.edn",
+      "sha256": "8937c06e8dd015da7fd055d5238b447e7313a75a81855df2d62b377767c82723"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/007-closed.edn",
+      "sha256": "5d019fea7491573d38f9b5c9e6c4a1d9dd99f43d5d39778de5171746130b6c33"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/007-closed.edn",
+      "sha256": "0e28193818ea01f3dad17fa3e93ad79a17009231bec02d1d0f1f50099224e66b"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/007-closed.edn",
+      "sha256": "1c011979004d0035d34357ec365d56d208722219bd3a89d90bd353db65b3e736"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/007-closed.edn",
+      "sha256": "63ca96c25998141416743a1645bc5f43e919c8180b9c5ad78ec7c9e25420172d"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/007-closed.edn",
+      "sha256": "d997202e421173c037aecbe3b901fd3917f9f0f2c07407f7eb80aa9f9d5fbf1d"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/007-closed.edn",
+      "sha256": "7147d0f89ea11a15fbdf0e84c26f9a26fbbcbe2c46bb1e1ce8b84991fae97ba6"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/007-closed.edn",
+      "sha256": "6eff35f4d7b949e01daa2ce37c0fa34d8609f663c1cba77519162ca40751af31"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/007-closed.edn",
+      "sha256": "b465f2edbc74d0888c93b37ae21f2d405ffa196e26b7effa7d26125f6d37ee30"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/007-closed.edn",
+      "sha256": "e6785a6763ee4e4d455ba321554867dd8ae4286165f00a3245895d0bdc76f275"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/007-closed.edn",
+      "sha256": "f805e31c4fcf2d6d1605c34d55f699ca0337c6ba810843abe87cb8af5f619a07"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/007-closed.edn",
+      "sha256": "1be0ff885d51ce5a434e0ef94c9e1e03b3c0ed8c8027ba7779d6a47a45e2131f"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/007-closed.edn",
+      "sha256": "5d6b84454526c7a92d4997a349920658f6aafa2cd4fd0fb3673e1f7aa59fbba0"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/007-closed.edn",
+      "sha256": "b557bc35d567699113252775a9729ea859d92dc741391582a9da529c2b0ab1cb"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/007-closed.edn",
+      "sha256": "2b273df4667af674cb8c6e8829e01ce986f75951f7e9962de32550acb1a0c195"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/007-closed.edn",
+      "copy": "/tmp/wm09-k8-archive-ye6rkqwf/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/007-closed.edn",
+      "sha256": "1a1794c98b5456577f0d1ca9d31d55b61dea78f00c9f6cc256a02f421f65f044"
+    }
+  ],
+  "exit": 0,
+  "production_close_hashes_unchanged": true,
+  "temporary_copy_removed_on_exit": true
+}
