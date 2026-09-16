@@ -1,0 +1,955 @@
+{
+  "source": "96d5b5e579c79cd0151bcfe9de820c9de4710feb",
+  "verified_files": [
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/001-time-step.edn",
+      "sha256": "e7bc655878f56a52eb121093d6b586b339e3b2601e538c874e589512c8349e9b"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/003-construction.edn",
+      "sha256": "89507f6758b7831d0989710e40f88d3f84fac65c5c5b4fbfb452513b397671c3"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/004-dispatch.edn",
+      "sha256": "0f4c2393eeaf5ed5b6986d7b1dc144e7af19c35af5a504e516383b3738c89424"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/005-build.edn",
+      "sha256": "3c4f174881650de94af4612a2576aa8cb191dbcd455b375e450d432ddcb288fc"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/002-selection.edn",
+      "sha256": "3d0762ca451ce5b63b6515ad4bc3c42e35c915f84b85f511b54deb07de843082"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/006-adjudication.edn",
+      "sha256": "2d4b01bd13dc681704b0da7a400d16b1113fe0f6c2ea1a41584d5a025a9a0dcf"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-001/007-closed.edn",
+      "sha256": "48eb15025df4820bb5155ad6a329e203fc7dfdb9abe6b5eadf70a0614a9f89a4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/001-time-step.edn",
+      "sha256": "6bd8c338b4cff0b759043d6e6f58e06c443fb6d5a55ddb255c3519fb7499409e"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/003-construction.edn",
+      "sha256": "04127cddc3284f3fa57f8728b4470b093ac0a4c2aed3f962585add0eeae6be56"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/004-dispatch.edn",
+      "sha256": "2700194cb2af7070996c78df04c5c9fbe4bccd7970ca2ba2f323ee99b4474b7e"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/005-build.edn",
+      "sha256": "4071108b8312df8cc1a8fe0d51f44eb8d0be15c29744dfce20060a0c644dba4b"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/002-selection.edn",
+      "sha256": "747348af5bfd0ccd3e4bc54720b44379d01fa84c2851dd3b0297221c9e9593e2"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/006-adjudication.edn",
+      "sha256": "62a5cbd52d780c46bd85fffc10577871b8007c3f28294380196167ce938bf5d4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-002/007-closed.edn",
+      "sha256": "d9a70102c776ea37c01e7c0db8829984fa2cde38962f90821ae62b1e2d501a58"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/001-time-step.edn",
+      "sha256": "b8c243b4f406cc2efe3c988093e32df14aea2494f4aa7007f591b1cf9aa32604"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/003-construction.edn",
+      "sha256": "370245bcb37ac276d2bfc16f3da8e0dc337d66d213bae51326305915c3737704"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/004-dispatch.edn",
+      "sha256": "f3a3310afef82da734142f6aaf6607b614fc6b0938891bf63b0078e06006ee04"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/005-build.edn",
+      "sha256": "cb3493dd46f8619d7e96d1b00d7e7ea84681e62159d1a2860f3f812bb0a3b67c"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/002-selection.edn",
+      "sha256": "9bcc622f7714659864aa5f3241f23e4a1a1bec9ecad5e0912d6e95bcf8706c1f"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/006-adjudication.edn",
+      "sha256": "04eee5127761954f5fbb01e08e7a19ab70e9917682e1fc78af0f37a39b1fe4b7"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-003/007-closed.edn",
+      "sha256": "95d8f6c9517f03cd2a6c98d45e4a143906785829aae583c469be21c84b711db8"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/001-time-step.edn",
+      "sha256": "6dad00e91aac14eb644f36734db54b15c9d4fd8788a0e43601ebd5ce33cf8b40"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/003-construction.edn",
+      "sha256": "b2d4aa2e6eb9db179f573e71cb5ece4062915c2437f5da6ede7d98dba395c226"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/004-dispatch.edn",
+      "sha256": "590616b4c3e7e1f54e89dbd321114d9542998d843d1c7b13817c8431c6021a59"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/005-build.edn",
+      "sha256": "de0e5bbb19a6b6658dde36b675bffed373ba5ffffb7a79a540d1935da28e968e"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/002-selection.edn",
+      "sha256": "11038343657b5ca7751aba3c7007be14322df855dbae0124e318b89e38075d7e"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/006-adjudication.edn",
+      "sha256": "3fb410e1c141b634a8ca9e46576648f6f90c3e6fd28796b5c884da621791d42d"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-004/007-closed.edn",
+      "sha256": "cc93e8e2fa74d1998e9c320fa4c2c3a6e79b0f0ae74ce5caedcecebd85b68762"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/001-time-step.edn",
+      "sha256": "08f9ca6bc727953ac82b6ca420047cce038fa4e62eadaeceaef4cc67e66af8af"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/003-construction.edn",
+      "sha256": "30f9e6ece5edc6b5045678885f7cbe5c906f56a1fb8b1c2922e98a486bb1fca9"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/004-dispatch.edn",
+      "sha256": "6e0b9f9107c10b1f6d1ad3861bc654d64688377fa488dfea68989b520dd9a03d"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/005-build.edn",
+      "sha256": "cd875716c45e36910d1a479eff137800b26bc97121882266f9706c6ccab731e9"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/002-selection.edn",
+      "sha256": "2b6a3a9b97e4bc478042cebf4d920d2fb96611583df1f69b4046bb98ca21ce90"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/006-adjudication.edn",
+      "sha256": "83b04d0c791f46192e9aae4326fed9781ab942b953e932d217d8b911e8be45ab"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-005/007-closed.edn",
+      "sha256": "a372173a192f5d762dbdeccd1630cbc08db10c25d1f151b595899bf0392202ca"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/001-time-step.edn",
+      "sha256": "81e999a7207e6c12dde6bf65201146bec45f11ef6ec438e74d84d9620a2c3bcb"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/003-construction.edn",
+      "sha256": "90cbab9a90661da05739ac27e0dd1a886ce6539d22f8b2bd70d5a2cc48330720"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/004-dispatch.edn",
+      "sha256": "feb09b80a8ed4ba2c15b90a8098ac3ce41b5b8c4cbabd8cda6ed47c815e3a715"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/005-build.edn",
+      "sha256": "49cda5bdcbcb6c430bc01d296cadb0402fc76b4b2cbefcfd9e665b3b4655df65"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/002-selection.edn",
+      "sha256": "664d52a9e79cd117bd888a1a6911cb086fe63504f6624529d5c870da81e1313f"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/006-adjudication.edn",
+      "sha256": "219e53f2e82b58dc37ecd688d2e31ef98d2a6abe318278b94375c411bbd3a079"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-006/007-closed.edn",
+      "sha256": "7d5b8ba0d7c36e21601c412dbfa017f1576afac7cdf85855e38deb9a619c4772"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/001-time-step.edn",
+      "sha256": "5d08efd962d132743acd60232cbd7094b175dd99837e1bcc45a089272f90658b"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/003-construction.edn",
+      "sha256": "2dfef81469b99f9ac98495844c920659050167f989b865b55209bddf391f6536"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/004-dispatch.edn",
+      "sha256": "b6871e561efc074674003e26d7dc386f479ee9a1c9df77f8dd3df0c8b38f3c4b"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/005-build.edn",
+      "sha256": "55d9ea0c9dbb5f15d78f9451efa800598c1ed1e31a024d863f4e04c01999da5c"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/002-selection.edn",
+      "sha256": "98f75cf01e47d4ab29bbdde1f8341767f5740f5d97269762f9d97ad1d5f57acb"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/006-adjudication.edn",
+      "sha256": "a3d2ed16b16eaaf6c926d191dde9a2208a7aa917046fdc837bbab3630172f14b"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-007/007-closed.edn",
+      "sha256": "cf0704be26310d71a28a1885c483e8941971d432c350d1c02cd977c2fe7d0385"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/001-time-step.edn",
+      "sha256": "70a8d13b0d6355974d95b93c669843a56e8bbbbd6a349628754f16d97ea0bdd2"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/003-construction.edn",
+      "sha256": "dcc305803308a5cc2d83373544d968ef331e67804f3ef2901d0b59e3c63b8828"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/004-dispatch.edn",
+      "sha256": "fac1c29a4d6681cd201a91bb1966b6ee64f08004c55cf5656bc8fc1c63d481e7"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/005-build.edn",
+      "sha256": "73099a6338ea717f313f05488fdd90827b36ffc4b428d363be1fefe7c42b48a9"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/002-selection.edn",
+      "sha256": "f3aee8d61637a8d24b822aa952ffe901bb5d6ac3e543206be852126713e87486"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/006-adjudication.edn",
+      "sha256": "0d41278a2ce2722498dd9a4ea20b82811db03608ac326d5a68c6cbeda855b4ea"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-008/007-closed.edn",
+      "sha256": "5ca6c74d449aa7f8cd5c35947c6af070f485cad6af84f735559476f481c4808e"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/001-time-step.edn",
+      "sha256": "de0ae0c7ae061bf42cbcb96e2fd0888d7df75c689636ecb0c60d0a664b991190"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/003-construction.edn",
+      "sha256": "8d3aac5e0d4a16d9c4c6bf1f6babefc739647a34985ee04dab54a14c9157f1e0"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/004-dispatch.edn",
+      "sha256": "ca87d3c5cd247f5f6c3281b95532777c0b4539d0114d10b35dfaf30b93a24496"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/005-build.edn",
+      "sha256": "3c37efcd41ad7eea7031db2b490248a3ef889c9f8eeacba65981314ad02a5738"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/002-selection.edn",
+      "sha256": "4244605ccebb1613d1e882140bede593308638d3bdd48adb707fdf41835a760c"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/006-adjudication.edn",
+      "sha256": "1681ad228da5a04891cdadec3e26eeae9f2b5eecd2c911f02de5741dbc792340"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-009/007-closed.edn",
+      "sha256": "8937c06e8dd015da7fd055d5238b447e7313a75a81855df2d62b377767c82723"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/001-time-step.edn",
+      "sha256": "838a167bc4657b013569685c18a8f090e2000d7d6e226df834f49a8c02ba11cf"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/003-construction.edn",
+      "sha256": "30a2cf529161270f970580ce9123db932b19543646168dba6e4655dd103718ed"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/004-dispatch.edn",
+      "sha256": "8c684087f1dd092ef294736b162b041a5710b309b6a8834b55149d9108cedc88"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/005-build.edn",
+      "sha256": "9d3141f46c17c489881f258bf85989ff413e524c58723557cfe248107e0f89f3"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/002-selection.edn",
+      "sha256": "b723865e1439eb4bd6b5e6ca1b54c0451723a4901abfb1987ad18bf19fb7ec2a"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/006-adjudication.edn",
+      "sha256": "8e0e3ef200a00b05d47106a2fdc7958ceafacf18a79e02d5124e4c6e8d0b6ca0"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-010/007-closed.edn",
+      "sha256": "5d019fea7491573d38f9b5c9e6c4a1d9dd99f43d5d39778de5171746130b6c33"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/001-time-step.edn",
+      "sha256": "995414e6b81f53f33107a4e8081bff31840508068356899889f8a59045986bf4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/003-construction.edn",
+      "sha256": "5d4c142747189ea34192d83978d67a8600112bfba65c9804f28b63037c27ad2c"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/004-dispatch.edn",
+      "sha256": "6823973b9285713ac9cb08908b078ef065d7104ba6c69cb3fa0c2816941821f8"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/005-build.edn",
+      "sha256": "8514e98119bce445e29347d2e3846ca1c02c508d78bd9609e29836b215963d58"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/002-selection.edn",
+      "sha256": "d6501ec68bd5565479eeac3a7194c3cd89dda4e3a050b1439e480efbf61d4071"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/006-adjudication.edn",
+      "sha256": "794e313cf4d0faee5ab16d3c90ae426182dc873f590588bb5c8c0c4f08352251"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-011/007-closed.edn",
+      "sha256": "0e28193818ea01f3dad17fa3e93ad79a17009231bec02d1d0f1f50099224e66b"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/001-time-step.edn",
+      "sha256": "1f0fae2e081e58ecf66763e2a85e32b92319cee4a675400ffd1e8e257aa03c78"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/003-construction.edn",
+      "sha256": "91fbb87eeb80a157034ebb9d4dfab9ec9943877196b3ed39a38459d6fbfb8a27"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/004-dispatch.edn",
+      "sha256": "4c1f5b1a4f4ed9cfd6d79dca1eddb0b16734a23ecd1617737671084b84eb971c"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/005-build.edn",
+      "sha256": "7dfc5af6b33660aff80b07cfaac0e45c136e43a85a66466d5ec2da9b2a87c1fd"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/002-selection.edn",
+      "sha256": "b765a524902f784e57f6b7a02f7de7dd780171d245f55721fdfc495a962ff052"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/006-adjudication.edn",
+      "sha256": "81596c66b3acc1e1f86e793a4272ea31ea5706512bb9909945d1b52588a932dd"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-012/007-closed.edn",
+      "sha256": "1c011979004d0035d34357ec365d56d208722219bd3a89d90bd353db65b3e736"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/001-time-step.edn",
+      "sha256": "c497934919daccf7574df25e3cfd34a609f912fcc98cfbcec1e576d9faa12438"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/003-construction.edn",
+      "sha256": "c18a84852e3969f97551839226aa8746be811e5ea6e07e59ccbd2e7d31a4673f"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/004-dispatch.edn",
+      "sha256": "49705de320934a552f0ef12c16065adf2ff47bdf6ea32d7e2bf779c954e1a245"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/005-build.edn",
+      "sha256": "6a8ff965485ffa75fd0956351d4b6289c3b4ee716896c961fbcea9e9974c5ba4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/002-selection.edn",
+      "sha256": "9bfec992a0b2528e640bc47afc9daa7ab166bb2e3b123028575f5a0902458fa0"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/006-adjudication.edn",
+      "sha256": "8522b3749f2d0c1f78d8549af4349e3cc2a5426ccc72aa559cc7165708cb89d4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-013/007-closed.edn",
+      "sha256": "63ca96c25998141416743a1645bc5f43e919c8180b9c5ad78ec7c9e25420172d"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/001-time-step.edn",
+      "sha256": "5cb9c810c493d7d7feff7c8da9cb6efce235888ad388aa6d7b54daa255d1d849"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/003-construction.edn",
+      "sha256": "2e240dafc320769f521b115ecce33a8c7fbd64270e52155ba8b413b1d2bbcb59"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/004-dispatch.edn",
+      "sha256": "bdfb8428857a300358e15e11ac50567e745ab1dab2571af08425043eac97edcd"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/005-build.edn",
+      "sha256": "f811edc900baa7b0254d28cea8a5c35b42562e0fd7f8ba73b1d172a24bfb5646"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/002-selection.edn",
+      "sha256": "5fbf4385bfd311bfbb0feec22f618cd5bc688f8dcc3d7f62c4731dd55ffc9cd7"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/006-adjudication.edn",
+      "sha256": "8ae22af124e31637b789a74f6eba813d152267ac273b55b9530252015f0ab8de"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-014/007-closed.edn",
+      "sha256": "d997202e421173c037aecbe3b901fd3917f9f0f2c07407f7eb80aa9f9d5fbf1d"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/001-time-step.edn",
+      "sha256": "0f126551360c20ebca2213500020c4a39dae21bc4fe17d19539f68faf918b515"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/003-construction.edn",
+      "sha256": "2bb80bee41802d63bac6b7776a538f7a6638c42acaa74ae6ea617dd8b274bab9"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/004-dispatch.edn",
+      "sha256": "3c9278cd9869367f0d2ac1e69e6b5cfdc86b78a18cd446fd53f7166e9d9b9b75"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/005-build.edn",
+      "sha256": "ab46d400fce66fc63906ffc5d263de959ae5b26e31bbb50b7f3627a73e5aa2a8"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/002-selection.edn",
+      "sha256": "58f142ffb86c3daafa727ff5870c9b4b72070ee4203e2e8054c2cbff6cf903af"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/006-adjudication.edn",
+      "sha256": "26befb1985e1546699a311c145d73eb5f312e34394c7f485d57e26d556ee4e75"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-015/007-closed.edn",
+      "sha256": "7147d0f89ea11a15fbdf0e84c26f9a26fbbcbe2c46bb1e1ce8b84991fae97ba6"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/001-time-step.edn",
+      "sha256": "1017e6f26c60921ba7cd8d715a42fdaca5290ad8ba676fc1e0beafcc04630469"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/003-construction.edn",
+      "sha256": "c41d5e264988edf2922bb5f9d7b82beaf1002ca4ab868ae2d8859180bb82e7ec"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/004-dispatch.edn",
+      "sha256": "6b5cd734b7a641aa8f9b9e3b3887cbdeb4e5db27b70e1fb296ddd95df792b4ed"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/005-build.edn",
+      "sha256": "58862baf4af26f0b7286c5bcd782df3270cf908c2ac749de25a6d1cdf28880fa"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/002-selection.edn",
+      "sha256": "1b20e9b37c2ab010f00a6b243a7ede5ef6150f8a52d12d2efffc562fe95b8d84"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/006-adjudication.edn",
+      "sha256": "db1db6a633cc71595a6fe394c796b5042fe5fb789efb8f134606365761e65530"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-016/007-closed.edn",
+      "sha256": "6eff35f4d7b949e01daa2ce37c0fa34d8609f663c1cba77519162ca40751af31"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/001-time-step.edn",
+      "sha256": "3a08641bbf96f81fa11b31973d44937009be9a42d6de75ada0804450dd2d2498"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/003-construction.edn",
+      "sha256": "5ef07a2d73fa8cf1ba954605935afda96a778f0649b383ac5dd7a45228736e3a"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/004-dispatch.edn",
+      "sha256": "e010c9e73c82e93fd0406fbcde9dbe474d8b19b96db91c407cb399e36c4c3f41"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/005-build.edn",
+      "sha256": "08d662a76e2bdc7b449b7c9b833f228aea818283acde8e684fa9845f2e5f4929"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/002-selection.edn",
+      "sha256": "96ef615fdf0b66eedf092f0cb6ee1484e7571bcb1c6d7962e5c0ead30deeba56"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/006-adjudication.edn",
+      "sha256": "699873354a852a7fdb77850b69ef51a1c7cda2a879c633beb94dbf462e11cf76"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-017/007-closed.edn",
+      "sha256": "b465f2edbc74d0888c93b37ae21f2d405ffa196e26b7effa7d26125f6d37ee30"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/001-time-step.edn",
+      "sha256": "49ae9637a2afee74cf14764c865deaed66732f553d080fcc7eddd87c08f7e042"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/003-construction.edn",
+      "sha256": "8f27b4678a860ee5358910528c33342aee81a058630a1571459473cc1ebe3566"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/004-dispatch.edn",
+      "sha256": "30c4b629e8421dbd47a4f55409b41b923a6ba0d41d4acbd383101d82bbebdf29"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/005-build.edn",
+      "sha256": "a0f2061dcc6d382caf677d0017f86782063dda2a51a75321671316022d6b8eb4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/002-selection.edn",
+      "sha256": "9664552098d8741449921878dd7b3b65c6a79eb7ad044143cf057d1a8b75f734"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/006-adjudication.edn",
+      "sha256": "5246f27a773598970bff43ea2056ac1a85b85933732a898594ca94dfa98aefd5"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-018/007-closed.edn",
+      "sha256": "e6785a6763ee4e4d455ba321554867dd8ae4286165f00a3245895d0bdc76f275"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/001-time-step.edn",
+      "sha256": "2256cc6b83f9436ccac581137a3139b2b7a3edd0eba35ce587e595cccc92b25a"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/003-construction.edn",
+      "sha256": "3ee636d709fa86a4d2e5b626708bc22aab8c96a40075c96897d51078d4c1b434"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/004-dispatch.edn",
+      "sha256": "650bffcbbd235fb04b5185a1a78a33f25d56c729994de1880cff9cca8b0b6530"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/005-build.edn",
+      "sha256": "69c6b3aa2ef94471f12d9a24b8fce55ff34bad8d87020dda9c11401c7d6e8bc9"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/002-selection.edn",
+      "sha256": "c36ac4d63f634ef056fe21790a5e4e8aeef980f3616f5c0b8d0e7c8e74e35a40"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/006-adjudication.edn",
+      "sha256": "1a9462e6b7502aa7b14dbb4561997b07d09bdef2907843f0d31e33056f63efcf"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-019/007-closed.edn",
+      "sha256": "f805e31c4fcf2d6d1605c34d55f699ca0337c6ba810843abe87cb8af5f619a07"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/001-time-step.edn",
+      "sha256": "24479c39e00d4ac85aec8c24ea266a050a15e2876c71cdd70a254986124097fd"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/003-construction.edn",
+      "sha256": "6ca68188f2d9973c26f6f17ad997b50f574c24b5e02a1b897d529d2a5a403796"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/004-dispatch.edn",
+      "sha256": "75168833e86d77c67406666e06d1164c7be5de85e2b14a8c3fc9a52718f8c7d7"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/005-build.edn",
+      "sha256": "2b3c85838c83a44d95e7948727debd241669bee3e9898d763d489b727ca187fb"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/002-selection.edn",
+      "sha256": "8e951c53b1c48ce9c44d78e21bf8d65e0621a95c4dfcc347a20cb5e1815392cf"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/006-adjudication.edn",
+      "sha256": "4e0062e7b37155de9adb18bc3eaabd3ed273b3bfe4269546b3b09811f36789dc"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-020/007-closed.edn",
+      "sha256": "1be0ff885d51ce5a434e0ef94c9e1e03b3c0ed8c8027ba7779d6a47a45e2131f"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/001-time-step.edn",
+      "sha256": "56508d748d68b9a7441a2518e8bf7618aa65ca78443ec6449453b31b7aa273fe"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/003-construction.edn",
+      "sha256": "782fe9d9bf1805efccb6f530f48f0542380e44edf7d778e2582c4250a0207131"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/004-dispatch.edn",
+      "sha256": "12a41757290622da8f2299ffb99eabdde67b13a3bcb6130448c783b9c5aa94dc"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/005-build.edn",
+      "sha256": "6de0a7bcbe6e2dbcd9a85037d7a460ac8ad86e56075099d2a034db8943e32ee8"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/002-selection.edn",
+      "sha256": "430a364d0f77da5d3387d18c34e2de6fa46ae86d74687c9c649a735aaa1222f6"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/006-adjudication.edn",
+      "sha256": "13faefe5ba030064f316fcf0c3c24f5c123b28e13586327b382deb11916204f4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-021/007-closed.edn",
+      "sha256": "5d6b84454526c7a92d4997a349920658f6aafa2cd4fd0fb3673e1f7aa59fbba0"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/001-time-step.edn",
+      "sha256": "b97f74905a2d4402c6df231b393f7a5481faa47542a775af844d7e0e7908b30f"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/003-construction.edn",
+      "sha256": "1ae1eeba59bc125c1e58ad2a0688bc3e2ecefe6dfc6a430294f1577d63ee0323"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/004-dispatch.edn",
+      "sha256": "ae5144d2b5a9487821e11a3cca43176246c1ae71ef40ca5ad57c6954aec044ab"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/005-build.edn",
+      "sha256": "2aeda5e023c84bae5f686227dd9c67c783cfcae23fb3d428d8cbcb4f7bcb8b4c"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/002-selection.edn",
+      "sha256": "c938d554abb43294137b6b60d4afa60c63555642ec37f98674f1561267e834db"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/006-adjudication.edn",
+      "sha256": "91f418556b8dbd5ba65681a8e4a9f140de429c31f49f9fd49b832a3580f58a19"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-022/007-closed.edn",
+      "sha256": "b557bc35d567699113252775a9729ea859d92dc741391582a9da529c2b0ab1cb"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/001-time-step.edn",
+      "sha256": "adfc1146b8f3b932ffe859138d78838119fddcb13577fd326989a481b3ddb720"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/003-construction.edn",
+      "sha256": "4accbccd6468759871d9771a37aac74711bc32d39f6b60d7f1d16105744833b3"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/004-dispatch.edn",
+      "sha256": "d3b309d9641f16fd20a41b65808cee294908d5e145dcbb5a7b46adb231f9aa2b"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/005-build.edn",
+      "sha256": "fa9fa85382bfe78201a4b20020c4199ec35590d54067b1d87a3a4a678c8c5c7f"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/002-selection.edn",
+      "sha256": "5aac57e7c9d9ea52dc3dfa457a3ec4e20e92ea06084dd2f3fa47d30277920b90"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/006-adjudication.edn",
+      "sha256": "3be2a4c16521ba215d4474ef072702fb78479be37dce20a937826187cd6acd47"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-023/007-closed.edn",
+      "sha256": "2b273df4667af674cb8c6e8829e01ce986f75951f7e9962de32550acb1a0c195"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/001-time-step.edn",
+      "sha256": "177174d7b4a2edd88074c8e3d190e3bc0f4268ac12c5fcffd480a1aef728e008"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/003-construction.edn",
+      "sha256": "bc91970441a23e7ddc002e6b7a16be2086aa220b220134741ee3e24c86487fd5"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/004-dispatch.edn",
+      "sha256": "3eee11a5d87526d20bea333251544878f135b536bdb5a794b0feebb87ee69e45"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/005-build.edn",
+      "sha256": "49dcb6e1d183c18e5708e18b07e407d3ff8dd42a4ac9700ede49c9f2c680bc0e"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/002-selection.edn",
+      "sha256": "e5d8f857e2c6f11144f3377b9b32642eb9ea2b0319656f5b4ecb1c10a1c91f1f"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/006-adjudication.edn",
+      "sha256": "a841effafa19ec86e6ada0350aa519eef153ae7aff150e2f4523965f1dffba5d"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/archives/stop-line-2026-07-15/wm-outer-loop-40-v1/attempt-024/007-closed.edn",
+      "sha256": "1a1794c98b5456577f0d1ca9d31d55b61dea78f00c9f6cc256a02f421f65f044"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-001/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-001/001-time-step.edn",
+      "sha256": "e7bc655878f56a52eb121093d6b586b339e3b2601e538c874e589512c8349e9b"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-001/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-001/003-construction.edn",
+      "sha256": "89507f6758b7831d0989710e40f88d3f84fac65c5c5b4fbfb452513b397671c3"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-001/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-001/004-dispatch.edn",
+      "sha256": "0f4c2393eeaf5ed5b6986d7b1dc144e7af19c35af5a504e516383b3738c89424"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-001/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-001/005-build.edn",
+      "sha256": "3c4f174881650de94af4612a2576aa8cb191dbcd455b375e450d432ddcb288fc"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-001/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-001/002-selection.edn",
+      "sha256": "3d0762ca451ce5b63b6515ad4bc3c42e35c915f84b85f511b54deb07de843082"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-001/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-001/006-adjudication.edn",
+      "sha256": "2d4b01bd13dc681704b0da7a400d16b1113fe0f6c2ea1a41584d5a025a9a0dcf"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-001/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-001/007-closed.edn",
+      "sha256": "48eb15025df4820bb5155ad6a329e203fc7dfdb9abe6b5eadf70a0614a9f89a4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-002/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-002/001-time-step.edn",
+      "sha256": "5a516980feddd1bfe1962a83a67a6730921ee5332c162ad7b7904112aa8cf0b4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-002/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-002/003-construction.edn",
+      "sha256": "16427b7ef0ba1159c3661ab421a151d10a4d8b25d972a60af6a2afc734f6abca"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-002/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-002/004-dispatch.edn",
+      "sha256": "1edd821678f06176cd0e2dcd5ca17261f316d414a0036a61dd685a3d8ed83457"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-002/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-002/005-build.edn",
+      "sha256": "faf5d464abe7c6d6627ad8f43777f2f6b3dd14d31e3f0d6ad4fffd5e691739d9"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-002/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-002/002-selection.edn",
+      "sha256": "6a0b5166dd43f7955d86777368352dec3fa14dc7a807aeaac56e6533ec19f706"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-002/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-002/006-adjudication.edn",
+      "sha256": "e9695e98b708ab5652cefa76702d1df397f8d1f5c21807a23ec178b4728148a8"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-002/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-002/007-closed.edn",
+      "sha256": "7071e39eae2731a8a10b6f01f7f59ba17bdf26764c27b071a335b52e9848b520"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-024/001-time-step.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-024/001-time-step.edn",
+      "sha256": "92007f2685cdf240242480ad9f87cb5cd114e87f88f4a0ae86a46d6fb934a347"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-024/003-construction.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-024/003-construction.edn",
+      "sha256": "8f2feaf742a3ddc296b2ad56484df548e7e4bd118673607d31d893542f1e2da4"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-024/004-dispatch.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-024/004-dispatch.edn",
+      "sha256": "e55776e7e89349f890ae9fdf5b72aa7bbceef38c07df97efb8e7daef8a847b98"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-024/005-build.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-024/005-build.edn",
+      "sha256": "9eba4017177ed084fd8c9b873bed5a962b401edc21ea30ab10638b5b56d2e21d"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-024/002-selection.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-024/002-selection.edn",
+      "sha256": "747ead1e49d13ce2c32c6f9ca3296227222ba9b98eb46b16c3caf289c40ed713"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-024/006-adjudication.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-024/006-adjudication.edn",
+      "sha256": "450cab35fb06e4fe97a5056c9eb91332b708067136031b36315444b0680d9ad1"
+    },
+    {
+      "original": "/home/joe/code/futon2/data/wm-full-loop/wm-outer-loop-40-v1/attempt-024/007-closed.edn",
+      "copy": "/tmp/wm09-k9-structure-7m46237a/copy/wm-outer-loop-40-v1/attempt-024/007-closed.edn",
+      "sha256": "07f83616044509db29d8c6dad99b5b4f4c5b086bf0bf2183310927ae004823af"
+    }
+  ],
+  "exit": 0,
+  "production_bytes_unchanged": true,
+  "rebindings": 0,
+  "scope": "structure only; admission not attempted; no manifest rewriting",
+  "temporary_copy_removed_on_exit": true
+}
