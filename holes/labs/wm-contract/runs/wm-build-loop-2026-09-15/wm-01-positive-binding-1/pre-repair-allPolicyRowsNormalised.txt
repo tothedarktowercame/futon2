@@ -1,0 +1,4 @@
+theorem allPolicyRowsNormalised (p : Policy) :
+    ((predictive.support p).map (predictive.mass p)).sum = 1 :=
+  predictive.normalised p
+

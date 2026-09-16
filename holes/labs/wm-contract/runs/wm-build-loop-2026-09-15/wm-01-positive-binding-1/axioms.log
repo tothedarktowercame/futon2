@@ -1,0 +1,3 @@
+'DarkTower.WarMachine.PredictiveOutcomeKernelWitness.allPolicyRowsNormalised' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

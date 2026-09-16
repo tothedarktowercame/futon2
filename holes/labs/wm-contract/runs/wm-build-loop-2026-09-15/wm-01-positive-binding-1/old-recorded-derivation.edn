@@ -50,7 +50,7 @@
      "0ed1287bfdf9c93a07e5cdeb9c4047406196d91a9482f2a0d9099989d91e7713"}
     {:name "predictive",
      :sha256
-     "24e92e8657312646cf9c355bf4a46f98c9c7060765153acd4115b9e7843b9350"}
+     "5c6f447de29814d89de8106b2c4fa3a4bb1ba407bbdf8defacee564ffe17d011"}
     {:name "allPolicyRowsNormalised",
      :sha256
      "049529f36bebc51c4cfd253e5f1168112d9a36f347536309de54ac893c6cb3fc"}]}
@@ -59,10 +59,7 @@
    :declarations
    [{:name "PredictiveOutcomeKernel",
      :sha256
-     "a87f0d22850f0bbe839460485ee614534bb0cad0fddcfe81d3bfb4f60353f788"}
-    {:name "ProbabilityKernel",
-     :sha256
-     "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc"}]}],
+     "a87f0d22850f0bbe839460485ee614534bb0cad0fddcfe81d3bfb4f60353f788"}]}],
  :elaborator
  {:command ["lake" "env" "lean"], :cwd "/home/joe/code/mathlib4"},
  :toolchain
@@ -73,7 +70,7 @@
   :lake-manifest-sha256
   "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"},
  :module "DarkTower.WarMachine.PredictiveOutcomeKernelWitness",
- :recorded-at "2026-09-16T00:04:25.753158436Z",
+ :recorded-at "2026-09-08T00:00:00Z",
  :result
  {:exit 0, :axioms ["propext" "Classical.choice" "Quot.sound"]},
  :receipt/type :PositiveLeanWitnessReceipt,

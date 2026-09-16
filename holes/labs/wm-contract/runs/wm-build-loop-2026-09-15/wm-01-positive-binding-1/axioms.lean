@@ -1,0 +1,2 @@
+import DarkTower.WarMachine.PredictiveOutcomeKernelWitness
+#print axioms DarkTower.WarMachine.PredictiveOutcomeKernelWitness.allPolicyRowsNormalised

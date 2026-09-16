@@ -1,0 +1,105 @@
+{:baseline
+ {:pass? true,
+  :failures [],
+  :receipt-shape-valid? true,
+  :successful-elaboration? true,
+  :source-basis-matches? true,
+  :fixture-adapter-matches? true,
+  :toolchain-matches? true,
+  :elaboration-matches? true},
+ :mutant
+ {:pass? false,
+  :failures [:positive-source-drift],
+  :receipt-shape-valid? true,
+  :successful-elaboration? true,
+  :source-basis-matches? false,
+  :fixture-adapter-matches? true,
+  :toolchain-matches? true,
+  :elaboration-matches? true},
+ :mutation
+ {:adapter
+  {:kind :edn-fields-to-lean-declaration/v1,
+   :lean-declaration "predictive",
+   :mappings
+   [{:fixture-path [:policies],
+     :lean-field "inductive Policy",
+     :expected [:inspect :repair],
+     :expected-shape :collection}
+    {:fixture-path [:rows],
+     :lean-field "| .inspect => [clear]",
+     :expected
+     {:inspect {:support [:clear], :mass {:clear 1}},
+      :repair {:support [:fixed], :mass {:fixed 1}}},
+     :expected-shape :structured}],
+   :correspondence
+   {:boundary/type :declared-not-derived,
+    :subject :fixture-to-lean-correspondence,
+    :pinned :fixture-identity-shape-and-retained-slice-occurrence,
+    :not-pinned :semantic-value-correspondence,
+    :derivation-status :derivable-not-adopted,
+    :reason :identity-preserving-adapter-and-proof-not-provided}},
+  :theorem
+  "DarkTower.WarMachine.PredictiveOutcomeKernelWitness.allPolicyRowsNormalised",
+  :dependency-closure
+  {:boundary/type :declared-not-derived,
+   :subject :lean-semantic-dependency-closure,
+   :pinned :author-declared-source-slices,
+   :not-pinned :complete-transitive-constant-closure,
+   :derivation-status :derivable-not-adopted,
+   :reason :closure-derivable-but-impractical-to-content-pin},
+  :receipt/version 1,
+  :source-basis
+  [{:repo "mathlib4",
+    :path "DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean",
+    :declarations
+    [{:name "Policy",
+      :sha256
+      "39d1037fd07fdbb5b0713555b51bff3c0efe0c76b8fa71688d639f5f21a55e32"}
+     {:name "Observation",
+      :sha256
+      "fae1c17cd6cf0190ae35c30b360448b36157bc339cb7076c501897b1996fc447"}
+     {:name "Obs",
+      :sha256
+      "f1018aef10fdd0223ea371186a3a3ddfe08d9125b050f16b9d7a6d150c8e8d66"}
+     {:name "clear",
+      :sha256
+      "ded9d17e22d4b0260d7c9d15ec71fcf3f78493b6e1e3748f21398977e287a215"}
+     {:name "fixed",
+      :sha256
+      "0ed1287bfdf9c93a07e5cdeb9c4047406196d91a9482f2a0d9099989d91e7713"}
+     {:name "predictive",
+      :sha256
+      "0000000000000000000000000000000000000000000000000000000000000000"}
+     {:name "allPolicyRowsNormalised",
+      :sha256
+      "049529f36bebc51c4cfd253e5f1168112d9a36f347536309de54ac893c6cb3fc"}]}
+   {:repo "mathlib4",
+    :path "DarkTower/WarMachine/Holes.lean",
+    :declarations
+    [{:name "PredictiveOutcomeKernel",
+      :sha256
+      "a87f0d22850f0bbe839460485ee614534bb0cad0fddcfe81d3bfb4f60353f788"}
+     {:name "ProbabilityKernel",
+      :sha256
+      "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc"}]}],
+  :elaborator
+  {:command ["lake" "env" "lean"], :cwd "/home/joe/code/mathlib4"},
+  :toolchain
+  {:lean-version
+   "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+   :lean-toolchain-sha256
+   "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+   :lake-manifest-sha256
+   "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"},
+  :module "DarkTower.WarMachine.PredictiveOutcomeKernelWitness",
+  :recorded-at "2026-09-16T00:04:25.753158436Z",
+  :result
+  {:exit 0, :axioms ["propext" "Classical.choice" "Quot.sound"]},
+  :receipt/type :PositiveLeanWitnessReceipt,
+  :fixture
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/predictive-outcome-kernel-reference.edn",
+   :schema :predictive-outcome-kernel-reference/v1,
+   :sha256
+   "667873b464525ad9a14be4fbc4cf0d28ba55d379b5d9381bbe506264603eff48"}}}

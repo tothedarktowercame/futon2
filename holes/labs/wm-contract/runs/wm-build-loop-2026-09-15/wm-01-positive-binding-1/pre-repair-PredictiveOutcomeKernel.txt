@@ -1,0 +1,4 @@
+abbrev PredictiveOutcomeKernel (PolicyIndex : Type*) (Obs : Vertex → Type*) :=
+  ProbabilityKernel PolicyIndex (Outcome Obs)
+
+/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:33 · P-glossary-mathematics · holder: by-record · evidence: ParameterPriorKernelWitness · falsifier: predictive outcome `Q(o∣π)` or unconditioned policy habit `Q(π)` is accepted as parameter prior `Q(θ∣π)` · `Q(θ∣π)` is the normalized parameter prior predicted by a policy. -/

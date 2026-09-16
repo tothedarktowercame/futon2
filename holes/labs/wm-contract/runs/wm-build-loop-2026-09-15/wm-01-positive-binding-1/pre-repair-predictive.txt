@@ -1,0 +1,8 @@
+noncomputable def predictive : PredictiveOutcomeKernel Policy Obs where
+  support
+    | .inspect => [clear]
+    | .repair => [fixed]
+  mass := fun _ _ => 1
+  nonnegative := by intros; norm_num
+  normalised := by intro p; cases p <;> simp
+

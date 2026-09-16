@@ -1,0 +1,7 @@
+structure ProbabilityKernel (S O : Type*) where
+  support : S → List O
+  mass : S → O → ℝ
+  nonnegative : ∀ s o, 0 ≤ mass s o
+  normalised : ∀ s, ((support s).map (mass s)).sum = 1
+
+/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:23 · P-glossary-mathematics · holder: by-record · evidence: PredictiveOutcomeKernelWitness · falsifier: an unconditional outcome distribution or softmax policy vector is accepted as policy-conditioned `Q(o∣π)` · `Q(o∣π)` is a normalized finite-support predictive distribution over vertex-tagged outcomes for each policy. -/

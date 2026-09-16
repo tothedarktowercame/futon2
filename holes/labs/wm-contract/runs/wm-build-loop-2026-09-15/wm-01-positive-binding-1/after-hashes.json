@@ -1,0 +1,7 @@
+{
+  "holes/labs/wm-contract/predictive-outcome-kernel-reference.edn": "667873b464525ad9a14be4fbc4cf0d28ba55d379b5d9381bbe506264603eff48",
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean": "b38429046b74af1ed580c5fbfddda984d49d81f8705b5568f74a783494c05632",
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean": "2b2005173fd4f3b789073372b8c4eeebfd1379215cb00ded3b77f62b3da545b0",
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/PredictiveOutcomeKernelSoftmaxNegative.lean": "65431ad0fbe0da42747477afcb74624a3f4a89b77cc05f83a1b128dfee25047b",
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean": "7f137e4f85b2aae18b699942bdc505faa3f311752a096718704fb2ca7b7a07d3"
+}

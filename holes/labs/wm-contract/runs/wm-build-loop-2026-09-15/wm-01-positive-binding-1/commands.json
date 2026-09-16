@@ -1,0 +1,97 @@
+[
+  {
+    "name": "positive-theorem",
+    "cwd": "/home/joe/code/mathlib4",
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean"
+    ],
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "axioms",
+    "cwd": "/home/joe/code/mathlib4",
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-positive-binding-1/axioms.lean"
+    ],
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "positive-wrapper",
+    "cwd": "/home/joe/code/futon2",
+    "command": [
+      "bb",
+      "checks/predictive_outcome_kernel_witness.clj"
+    ],
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "negative-unconditional",
+    "cwd": "/home/joe/code/futon2",
+    "command": [
+      "bb",
+      "checks/predictive_outcome_kernel_witness.clj",
+      "--negative-unconditional"
+    ],
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "negative-softmax",
+    "cwd": "/home/joe/code/futon2",
+    "command": [
+      "bb",
+      "checks/predictive_outcome_kernel_witness.clj",
+      "--negative-softmax"
+    ],
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "after-gate",
+    "cwd": "/home/joe/code/futon2",
+    "command": [
+      "bb",
+      "holes/labs/wm-contract/positive_receipt_reattestation_check.bb"
+    ],
+    "exit": 1,
+    "expected": 1
+  },
+  {
+    "name": "lint",
+    "cwd": "/home/joe/code/futon2",
+    "command": [
+      "clj-kondo",
+      "--lint",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-positive-binding-1/reattest.clj"
+    ],
+    "exit": 0,
+    "expected": 0
+  },
+  {
+    "name": "parens",
+    "cwd": "/home/joe/code/futon2",
+    "command": [
+      "emacs",
+      "-Q",
+      "--batch",
+      "-l",
+      "/home/joe/code/futon4/dev/check-parens.el",
+      "--eval",
+      "(arxana-check-parens-cli)",
+      "--",
+      "--no-defaults",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-positive-binding-1/reattest.clj"
+    ],
+    "exit": 0,
+    "expected": 0
+  }
+]
