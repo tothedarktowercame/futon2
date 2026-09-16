@@ -1,0 +1,107 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-8",
+    "session-id": "01a0a5ff-7b0b-7700-ab0d-4f26ba808cd3",
+    "execution": {
+      "executed": true,
+      "tool-events": 2,
+      "command-events": 2
+    },
+    "job-id": "invoke-1789571689554-21433-c9a0206e",
+    "agent-id": "codex-28",
+    "artifact-ref": "1789563298158",
+    "started-at": "2026-09-16T15:14:50.266762131Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T15:14:49.555042268Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T15:14:50.266774714Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T15:14:51.041115887Z",
+        "text": "Joe has explicitly assigned codex-8 WM-01 carrier delivery alongside WM-05/WM-10; WM-06 is in hand and excluded from my scope. I am discussing the bounded WM-01-carrier-contract with zai-9 (job invoke-1789571677709-21432-b5778c9d) and inspecting existing numeric/support/float-carrier acceptances before deciding whether code remains necessary. I will retain a concrete delivery with separate independent review and keep full WM-01 closure, composed-operation bounds, registry publication and serving operations separate. Please flag any overlapping active WM-01 work. No new worker dispatch requested.\n"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-09-16T15:15:00.352232429Z",
+        "text": "I\u2019ll check the last WM-01 job and retained status so I can give you a concrete overlap answer."
+      },
+      {
+        "seq": 5,
+        "type": "tool_use",
+        "at": "2026-09-16T15:15:05.518824511Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' import json,urllib.request for job in ['invoke-1789563298158-21308-2fafd353','invoke-178"
+        ],
+        "output": [
+          "{\"job\": \"invoke-1789563298158-21308-2fafd353\", \"state\": \"done\"}\n{\"job\": \"invoke-1789571677709-21432-b5778c9d\", \"state\": \"running\"}\n{\n  \"item\": \"WM-01\",\n  \"owner\": \"zai-9\",\n  \"packet\": \"WM-01-vfe-control-1\",\n  \"author\": \"codex-2\",\n  \"implementation-commit\": \"c7a6f24f\",\n  \"reviewer\": \"claude-3\",\n  \"review-commit\": \"68c2cbc1b922d5fa8174a5597228a5c7a3a1d9c9\",\n  \"review-path\": \"/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-vfe-control-1/REVIEW-claude-3.md\",\n  \"review-sha256\": \"43e570d8c43bf3eb3c3aa91829f1c42cfadfae1f194cb1046e4e4d4b3bd98f31\",\n  \"review-verdict\": \"ACCEPT\",\n  \"credited-scope\": \"Type-correct VFE weakened-positive control and re-attested receipt; completes the 14-receipt repair-drift campaign\",\n  \"gate-result\": {\n    \"reported-by\": \"claude-3 independent rerun\",\n    \"receipts\": 33,\n    \"known-stale\": 0,\n    \"unattested-drift\": 0,\n    \"exit\": 0\n  },\n  \"coordinator-check\": \"Read retained review and verified review commit scope; no independent gate rerun by codex-28\",\n  \"residual-findings\": [\n    \"Weakened mode accepts any receipt failure, although reviewer verified this occurrence failed exactly on intended source drift\",\n    \"Mutation-slipped message misdescribes positive-side failures\"\n  ],\n  \"remaining\": [\n    \"R4 subject-bound verification and independent review\",\n    \"global registry publication after R17 reconciliation\",\n    \"remaining proof and consumer bindings\",\n    \"shared State/Action/Outcome and model-revision semantics\",\n    \"numeric semantics and production correspondence\"\n  ],\n  \"checkbox-closed\": false,\n  \"R4-admitted\": false,\n  \"successor-dispatched\": false,\n  \"incoming-job\": \"invoke-1789564977847-21409-b32b35a2\"\n}\n"
+        ]
+      },
+      {
+        "seq": 6,
+        "type": "text",
+        "at": "2026-09-16T15:15:17.039426090Z",
+        "text": "**No overlapping WM-01 work commissioned by me remains active.** I verified the last author job, `invoke-1789563298158-21308-2fafd353`, is `done`; no successor was dispatched. Your zai-9 discussion is running.\n\nUseful handoff:\n\n- Numeric/support/float-carrier reviews are retained under `futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/`.\n- Receipt re-attestation is complete: `c7a6f24f`, independently reviewed at `68c2cbc1`; gate **33 receipts, zero drift**.\n- My WM-10 scorer is `5b3141da`, `src/futon2/aif/cascade_g.clj`. It consumes `machine-model/distribution-admission`; changes there would affect it. It leaves near-normalized rows explicitly non-exact.\n- No active edits from me to those shared files.\n\nYour distinction between carrier delivery and full WM-01 closure matches the retained evidence. WM-06 remains outside your scope."
+      },
+      {
+        "seq": 7,
+        "type": "done",
+        "at": "2026-09-16T15:15:17.576907862Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 8,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T15:15:19.870997507Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-8 via /api/alpha/invoke/jobs/invoke-1789571689554-21433-c9a0206e",
+        "recorded-at": "2026-09-16T15:15:19.868930687Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-8 via /api/alpha/invoke/jobs/invoke-1789571689554-21433-c9a0206e",
+      "recorded-at": "2026-09-16T15:15:19.868930687Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789571689554-21433-c9a0206e",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": "invoke-2f1edf3f-c9d5-45ad-9a21-4928323de538",
+    "result-summary": "**No overlapping WM-01 work commissioned by me remains active.** I verified the last author job, `invoke-1789563298158-21308-2fafd353`, is `done`; no successor was dispatched. Your zai-9 discussion is running. Useful ...",
+    "result": "**No overlapping WM-01 work commissioned by me remains active.** I verified the last author job, `invoke-1789563298158-21308-2fafd353`, is `done`; no successor was dispatched. Your zai-9 discussion is running.\n\nUseful handoff:\n\n- Numeric/support/float-carrier reviews are retained under `futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/`.\n- Receipt re-attestation is complete: `c7a6f24f`, independently reviewed at `68c2cbc1`; gate **33 receipts, zero drift**.\n- My WM-10 scorer is `5b3141da`, `src/futon2/aif/cascade_g.clj`. It consumes `machine-model/distribution-admission`; changes there would affect it. It leaves near-normalized rows explicitly non-exact.\n- No active edits from me to those shared files.\n\nYour distinction between carrier delivery and full WM-01 closure matches the retained evidence. WM-06 remains outside your scope.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789571689554-21433-c9a0206e",
+      "at": "2026-09-16T15:15:17.576884458Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T15:15:17.576884458Z",
+    "created-at": "2026-09-16T15:14:49.554806627Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "command": [
+      "clojure",
+      "-M:test",
+      "-m",
+      "cognitect.test-runner",
+      "-n",
+      "futon2.aif.machine-belief-test"
+    ],
+    "exit": 0,
+    "log": "machine-belief-test.log"
+  },
+  {
+    "command": [
+      "clojure",
+      "-M:test",
+      "-m",
+      "cognitect.test-runner",
+      "-n",
+      "futon2.aif.machine-predictive-test"
+    ],
+    "exit": 0,
+    "log": "machine-predictive-test.log"
+  }
+]

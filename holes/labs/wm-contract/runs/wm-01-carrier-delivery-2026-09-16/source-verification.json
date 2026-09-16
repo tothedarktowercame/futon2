@@ -1,0 +1,73 @@
+{
+  "checked_at": "2026-09-16",
+  "heads": {
+    "futon2": "5b3141da5d104aff2a04db50a01a031dd0f44fd8",
+    "mathlib4": "f40c936a64227ba81592a71f3d937e6fbdbf0e4c",
+    "p4ng": "ab13e48a949bffba289b38f4f76f8fd752aa3cd3"
+  },
+  "sources": [
+    {
+      "repo": "futon2",
+      "path": "src/futon2/aif/machine_model.clj",
+      "expected": "462aae432397e21209c238685d1aa39d040f15b330e2baa5f771d4858eb66b77",
+      "actual": "462aae432397e21209c238685d1aa39d040f15b330e2baa5f771d4858eb66b77",
+      "matches": true
+    },
+    {
+      "repo": "futon2",
+      "path": "src/futon2/aif/machine_belief.clj",
+      "expected": "38993c823ccbd9dd10b6daa51902de4ae9bc7d08feaaa826c26a3bc2f332908b",
+      "actual": "38993c823ccbd9dd10b6daa51902de4ae9bc7d08feaaa826c26a3bc2f332908b",
+      "matches": true
+    },
+    {
+      "repo": "futon2",
+      "path": "src/futon2/aif/machine_predictive.clj",
+      "expected": "3ab634a5263b71efd21a8d18bbf725cdf1ffbe64fac67d379af1fa3fd33a5703",
+      "actual": "3ab634a5263b71efd21a8d18bbf725cdf1ffbe64fac67d379af1fa3fd33a5703",
+      "matches": true
+    },
+    {
+      "repo": "futon2",
+      "path": "test/futon2/aif/machine_model_test.clj",
+      "expected": "fa7019c73a4df7b0a5f67e201e5619978c4eab62adcb2b3a178978025faf826c",
+      "actual": "fa7019c73a4df7b0a5f67e201e5619978c4eab62adcb2b3a178978025faf826c",
+      "matches": true
+    },
+    {
+      "repo": "futon2",
+      "path": "test/futon2/aif/machine_belief_test.clj",
+      "expected": "0d558b86c627d64237d4ba90e700b0c7136ee45e7361367f48143bcf843b0322",
+      "actual": "0d558b86c627d64237d4ba90e700b0c7136ee45e7361367f48143bcf843b0322",
+      "matches": true
+    },
+    {
+      "repo": "futon2",
+      "path": "test/futon2/aif/machine_predictive_test.clj",
+      "expected": "54d2d31572819a13648d1ac357519ffa0ded091d064b24b951941d0018a47d8e",
+      "actual": "54d2d31572819a13648d1ac357519ffa0ded091d064b24b951941d0018a47d8e",
+      "matches": true
+    },
+    {
+      "repo": "mathlib4",
+      "path": "DarkTower/WarMachine/MachineModelSpec.lean",
+      "expected": "020af77ed11f0b5407bd6dd22a0a9e6e81ae30132ac41508277c0567500ca80f",
+      "actual": "020af77ed11f0b5407bd6dd22a0a9e6e81ae30132ac41508277c0567500ca80f",
+      "matches": true
+    },
+    {
+      "repo": "mathlib4",
+      "path": "DarkTower/WarMachine/MachineForwardModelWitness.lean",
+      "expected": "62b15fe45ed0cc9eb12eb659b55122c1894cbcb5778b64feec758e965d427389",
+      "actual": "62b15fe45ed0cc9eb12eb659b55122c1894cbcb5778b64feec758e965d427389",
+      "matches": true
+    },
+    {
+      "repo": "mathlib4",
+      "path": "DarkTower/WarMachine/FloatCarriedRowCorrespondence.lean",
+      "expected": "f8e9cdacaa47f2bd4131a41bd2876c5731356cd7b33f2dea3268125360be6e22",
+      "actual": "f8e9cdacaa47f2bd4131a41bd2876c5731356cd7b33f2dea3268125360be6e22",
+      "matches": true
+    }
+  ]
+}
