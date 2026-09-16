@@ -1756,7 +1756,207 @@
       ],
       "protocol-commands": "parameter-posterior-kernel-positive-receipt.edn/protocol-commands.json",
       "status": "author-verified; independent review pending"
+    },
+    {
+      "new-sha256": "e18d420c8e13b0e9a18f47a854c6655d6a74913b768ee850a6cd3d66a4506bfe",
+      "pins": [
+        {
+          "path": "DarkTower/WarMachine/ParameterPriorKernelWitness.lean",
+          "name": "Policy",
+          "old": "39d1037fd07fdbb5b0713555b51bff3c0efe0c76b8fa71688d639f5f21a55e32",
+          "new": "39d1037fd07fdbb5b0713555b51bff3c0efe0c76b8fa71688d639f5f21a55e32",
+          "changed?": false,
+          "indices": [
+            0,
+            0
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ParameterPriorKernelWitness.lean",
+          "name": "Parameter",
+          "old": "11e32860efc2d53bb4655a4f00c370cf2720a578f266aa18529f86577bd7f62b",
+          "new": "11e32860efc2d53bb4655a4f00c370cf2720a578f266aa18529f86577bd7f62b",
+          "changed?": false,
+          "indices": [
+            0,
+            1
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ParameterPriorKernelWitness.lean",
+          "name": "prior",
+          "old": "0d4762f47d3ea27d20abc9b491615fa30768a2fe7a8b9bcc650bedd91dd8272c",
+          "new": "7f6face7bce1758dfe1802084f7083063022bec7cd9990f1137b8e4963f90b8c",
+          "changed?": true,
+          "indices": [
+            0,
+            2
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ParameterPriorKernelWitness.lean",
+          "name": "allPriorRowsNormalised",
+          "old": "5f77d1a9551fd98ae9344e15f312001e4aa3bf9df5aa8cc99309b60f129dc685",
+          "new": "5f77d1a9551fd98ae9344e15f312001e4aa3bf9df5aa8cc99309b60f129dc685",
+          "changed?": false,
+          "indices": [
+            0,
+            3
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ParameterPriorKernel",
+          "old": "e37314a8cf55710a75ac31ded33ba00c5a8b2046bfbd05a07e4bbf5bdefdcb7f",
+          "new": "e37314a8cf55710a75ac31ded33ba00c5a8b2046bfbd05a07e4bbf5bdefdcb7f",
+          "changed?": false,
+          "indices": [
+            1,
+            0
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ProbabilityKernel",
+          "old": null,
+          "new": "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+          "changed?": true,
+          "indices": [
+            1,
+            1
+          ]
+        }
+      ],
+      "file": "parameter-prior-kernel-positive-receipt.edn",
+      "controls": [
+        {
+          "path": "DarkTower/WarMachine/ParameterPriorKernelWitness.lean",
+          "name": "prior",
+          "old": "0d4762f47d3ea27d20abc9b491615fa30768a2fe7a8b9bcc650bedd91dd8272c",
+          "new": "7f6face7bce1758dfe1802084f7083063022bec7cd9990f1137b8e4963f90b8c",
+          "changed?": true,
+          "indices": [
+            0,
+            2
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ProbabilityKernel",
+          "old": null,
+          "new": "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+          "changed?": true,
+          "indices": [
+            1,
+            1
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        }
+      ],
+      "axioms": {
+        "exit": 0,
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "old-sha256": "7930bc742fe4e689a4b57dc987d1318c5d159e8a8a73f7c56c8931c4c88dce08",
+      "review": "pending claude-3 independent review",
+      "new-recorded-at": "2026-09-16T00:23:15.577318387Z",
+      "validation": {
+        "pass?": true,
+        "failures": [],
+        "receipt-shape-valid?": true,
+        "successful-elaboration?": true,
+        "source-basis-matches?": true,
+        "fixture-adapter-matches?": true,
+        "toolchain-matches?": true,
+        "elaboration-matches?": true
+      },
+      "old-recorded-at": "2026-09-08T00:00:00Z",
+      "semantic-disposition": {
+        "disposition": "preserved",
+        "reading": "prior formerly returned one for every parameter. Repair gives inspect/cautious and repair/bold unit masses, and zero to the other pairs. The named singleton supports and on-support masses in the fixture are unchanged. Distinctness and zero-off-support obligations are discharged; allPriorRowsNormalised still follows from prior.normalised p. The Policy and inspect-support adapter strings remain.",
+        "additions": [
+          "ProbabilityKernel"
+        ],
+        "wrapper": "parameter_prior_kernel_witness.clj",
+        "negative-modes": [
+          "--negative-outcome",
+          "--negative-habit"
+        ],
+        "exit-convention": "0 requires valid positive baseline and #guard_msgs elaboration rejecting predictive outcome or policy habit as parameter prior. Negative failures use 2, including invalid baseline; positive failure 1."
+      },
+      "commands": [
+        {
+          "name": "protocol",
+          "command": [
+            "bb",
+            "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-receipts-2/receipt_control.clj",
+            "run",
+            "parameter-prior-kernel-positive-receipt.edn",
+            "[\"ProbabilityKernel\"]"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "positive",
+          "command": [
+            "bb",
+            "checks/parameter_prior_kernel_witness.clj"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "negative-outcome",
+          "command": [
+            "bb",
+            "checks/parameter_prior_kernel_witness.clj",
+            "--negative-outcome"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "negative-habit",
+          "command": [
+            "bb",
+            "checks/parameter_prior_kernel_witness.clj",
+            "--negative-habit"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        }
+      ],
+      "protocol-commands": "parameter-prior-kernel-positive-receipt.edn/protocol-commands.json",
+      "status": "author-verified; independent review pending"
     }
   ],
-  "next-receipt": "parameter-prior-kernel-positive-receipt.edn"
+  "next-receipt": "policy-prior-kernel-positive-receipt.edn"
 }

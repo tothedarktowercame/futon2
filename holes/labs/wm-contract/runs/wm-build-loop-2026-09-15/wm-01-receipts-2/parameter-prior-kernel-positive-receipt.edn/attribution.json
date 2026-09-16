@@ -1,0 +1,10 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/ParameterPriorKernelWitness.lean",
+  "name" : "prior",
+  "old" : "0d4762f47d3ea27d20abc9b491615fa30768a2fe7a8b9bcc650bedd91dd8272c",
+  "new" : "7f6face7bce1758dfe1802084f7083063022bec7cd9990f1137b8e4963f90b8c",
+  "pre-repair-text" : "noncomputable def prior : ParameterPriorKernel Policy Parameter where\n  support\n    | .inspect => [.cautious]\n    | .repair => [.bold]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intro p; cases p <;> simp\n\n",
+  "repaired-text" : "noncomputable def prior : ParameterPriorKernel Policy Parameter where\n  support\n    | .inspect => [.cautious]\n    | .repair => [.bold]\n  mass := fun p o => match p, o with\n    | .inspect, .cautious => 1\n    | .repair, .bold => 1\n    | _, _ => 0\n  nonnegative := by intro p o; cases p <;> cases o <;> norm_num\n  support_nodup := by intro p; cases p <;> simp\n  mass_eq_zero_of_not_mem := by intro p o h; cases p <;> cases o <;> simp_all\n  normalised := by intro p; cases p <;> simp\n\n",
+  "head-text" : "noncomputable def prior : ParameterPriorKernel Policy Parameter where\n  support\n    | .inspect => [.cautious]\n    | .repair => [.bold]\n  mass := fun p o => match p, o with\n    | .inspect, .cautious => 1\n    | .repair, .bold => 1\n    | _, _ => 0\n  nonnegative := by intro p o; cases p <;> cases o <;> norm_num\n  support_nodup := by intro p; cases p <;> simp\n  mass_eq_zero_of_not_mem := by intro p o h; cases p <;> cases o <;> simp_all\n  normalised := by intro p; cases p <;> simp\n\n"
+} ]

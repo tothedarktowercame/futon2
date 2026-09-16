@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "-C",
+    "/home/joe/code/mathlib4",
+    "show",
+    "480a666ad2",
+    "--"
+  ],
+  "output": "commit 480a666ad27c18477b4b9df86e11862be3930d50\nAuthor: Joseph Corneli <joseph.corneli@hyperreal.enterprises>\nDate:   Tue Sep 15 06:36:02 2026 +0000\n\n    Enforce finite-support probability kernels and nonnegative VFE precision\n\ndiff --git a/DarkTower/WarMachine/ParameterPriorKernelWitness.lean b/DarkTower/WarMachine/ParameterPriorKernelWitness.lean\nindex 7daa85382e..b42c02155f 100644\n--- a/DarkTower/WarMachine/ParameterPriorKernelWitness.lean\n+++ b/DarkTower/WarMachine/ParameterPriorKernelWitness.lean\n@@ -13,8 +13,13 @@ noncomputable def prior : ParameterPriorKernel Policy Parameter where\n   support\n     | .inspect => [.cautious]\n     | .repair => [.bold]\n-  mass := fun _ _ => 1\n-  nonnegative := by intros; norm_num\n+  mass := fun p o => match p, o with\n+    | .inspect, .cautious => 1\n+    | .repair, .bold => 1\n+    | _, _ => 0\n+  nonnegative := by intro p o; cases p <;> cases o <;> norm_num\n+  support_nodup := by intro p; cases p <;> simp\n+  mass_eq_zero_of_not_mem := by intro p o h; cases p <;> cases o <;> simp_all\n   normalised := by intro p; cases p <;> simp\n \n theorem inspectRowMass :\n"
+}
