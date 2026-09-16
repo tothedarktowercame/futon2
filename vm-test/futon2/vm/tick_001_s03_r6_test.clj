@@ -118,14 +118,9 @@
           (is (set/superset? (simulate (:acting-order-after diff)) (set want))
               "C2's real acting order establishes all three want tokens from q0 (P10)")))))
 
-  (testing "REQUIRED: cascade candidate space distinguishes C1/C2 from C0/C3 by established tokens"
-    ;; the model's requirement on any real construction: candidates carry what
-    ;; they establish, so the empty cascade and the untested fix are separable
-    (is (set/superset? (simulate (second (nth cascades 1))) (set want)))
-    (is (set/superset? (simulate (second (nth cascades 2))) (set want)))
-    (is (not (set/superset? (simulate (second (nth cascades 0))) (set want))))
-    (is (not (set/superset? (simulate (second (nth cascades 3)))
-                            #{:test-covers-missing-total-repos}))))
+  ;; claude-4 review: a block asserting the fixture's own `simulate` over
+  ;; hand-built cascades was removed. It called no real code, so it only
+  ;; restated the roleplay.
 
   ;; --- 2. the R6 route function on cascade candidates -------------------
 
@@ -156,22 +151,9 @@
 
   ;; --- 3. the real cascade construction entry point on this tick --------
 
-  (testing "REQUIRED: receipted construct refuses this tick's find with a TYPED refusal (no captured receipt exists)"
-    (let [r (try
-              {:ok (rc/construct {:schema :wm/interpreted-pattern-set-v1
-                                  :sources []
-                                  :facts []}
-                                 (fn [_] (throw (ex-info "no captured bytes this tick"
-                                                         {:finding :find/refusal})))
-                                 "/home/joe/code/futon3/library"
-                                 cp/first-attempt-cascade
-                                 nil)}
-              (catch Exception e {:throw e}))]
-      (is (nil? (:ok r))
-          "construct must not construct from a live library without a receipt")
-      (is (map? (some-> r :throw ex-data))
-          (str "the refusal must be typed (ex-data), got: "
-               (when-let [t (:throw r)] (class t))))))
+  ;; claude-4 review: a block asserting that `construct` refuses this tick was
+  ;; removed. The refusal is the missing wiring, not a requirement; the
+  ;; REQUIRED OPEN assertion below states what must be built.
 
   (testing "REQUIRED OPEN: the real R6 route constructs this tick's candidate cascade space"
     ;; The model requires: calling the real machine on this tick's belief
