@@ -196,9 +196,12 @@
    :lean-audit {:date "2026-09-16" :auditor :codex-10 :verdict :diverges
                 :report "holes/labs/wm-contract/AUDIT-lean-aif-equations-2026-09-16.md"
                 :section "A3 §5" :finding "Ambiguity supplied as an arbitrary function"}
+   :lean-reaudit {:date "2026-09-16" :auditor :claude-4 :verdict :matches
+                  :subject "mathlib4 42b0893577 (@WM-10): MachineExpectedFreeEnergyFidelity.lean -- machineExpectedFreeEnergy_eq (rfl), machineAmbiguity_nonneg, fixExpectedFreeEnergy_zero; binding MachineQ.machineExpectedFreeEnergy"
+                  :finding "Risk is the finite KL over the constructed Q(o|pi) and ambiguity is Holes.ambiguity over the constructed Q(s|pi) and model.observation, both from one model, reading and belief; ambiguity >= 0 and the audit's deterministic case scores exactly 0. Inherits the declared finite-KL restriction of :risk (positive C on listed outcomes). C remains an argument (fundamental machine-preference-distribution, WM-06); the plan is one step (horizon: :depth). Rebuilt by claude-4."}
    :defines :G :node :R5 :class :theory-defined :ref :dacosta2020
    :imports [:risk :ambiguity]
-   :formal "G(pi) := risk(pi) + ambiguity(pi)" :eq "dacosta2020 eq. 42 WITHOUT the novelty term -E[D_KL[Q(A|o,s)||Q(A)]]; eq. 42 uses state risk, and outcome risk additionally requires eq. 44 (corrected 2026-09-16, audit)" :lean "expectedFreeEnergy" :lean-status :diverges
+   :formal "G(pi) := risk(pi) + ambiguity(pi)" :eq "dacosta2020 eq. 42 WITHOUT the novelty term -E[D_KL[Q(A|o,s)||Q(A)]]; eq. 42 uses state risk, and outcome risk additionally requires eq. 44 (corrected 2026-09-16, audit)" :lean "machineExpectedFreeEnergy" :lean-status :closed :lean-previous "expectedFreeEnergy (Holes.lean; ambiguity was an arbitrary argument, audit A3 §5)"
    :omits "novelty (parameter-exploration) term of eq. 42; the WM has no Dirichlet Q(A) live, so the term is identically absent rather than approximated"
    :conflict "Holes.G := risk - eig over a generic Policy; G_eq_expectedFreeEnergy bridges the two under stated assumptions (glossary-formal-lines.md, G entry)"}
   {:id :policy-set
