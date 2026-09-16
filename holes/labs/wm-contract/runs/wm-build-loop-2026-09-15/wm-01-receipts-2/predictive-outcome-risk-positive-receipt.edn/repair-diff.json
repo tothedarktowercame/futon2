@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "-C",
+    "/home/joe/code/mathlib4",
+    "show",
+    "480a666ad2",
+    "--"
+  ],
+  "output": "commit 480a666ad27c18477b4b9df86e11862be3930d50\nAuthor: Joseph Corneli <joseph.corneli@hyperreal.enterprises>\nDate:   Tue Sep 15 06:36:02 2026 +0000\n\n    Enforce finite-support probability kernels and nonnegative VFE precision\n\ndiff --git a/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean b/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean\nindex f3bf34e531..671ec06f73 100644\n--- a/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean\n+++ b/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean\n@@ -12,18 +12,35 @@ def ob : Outcome Obs := \u27e8.evidence, .b\u27e9\n \n noncomputable def predictive : PredictiveOutcomeKernel Policy Obs where\n   support := fun _ => [oa]\n-  mass := fun _ _ => 1\n-  nonnegative := by intros; norm_num\n-  normalised := by intro; norm_num\n+  mass := by\n+    classical\n+    exact fun s o => if o \u2208 [oa] then 1 else 0\n+  nonnegative := by intros; split <;> norm_num\n+  support_nodup := by intro; simp [oa, ob]\n+  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n+  normalised := by\n+    intro s\n+    classical\n+    norm_num [oa, ob]\n \n noncomputable def preference : PreferenceDistribution Obs where\n   support := fun _ => [oa, ob]\n-  mass := fun _ _ => 1 / 2\n-  nonnegative := by intros; norm_num\n-  normalised := by intro; norm_num\n+  mass := by\n+    classical\n+    exact fun s o => if o \u2208 [oa, ob] then 1 / 2 else 0\n+  nonnegative := by intros; split <;> norm_num\n+  support_nodup := by intro; simp [oa, ob]\n+  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n+  normalised := by\n+    intro s\n+    classical\n+    norm_num [oa, ob]\n \n theorem positivePreference : \u2200 \u03c0 o, o \u2208 predictive.support \u03c0 \u2192 0 < preference.mass () o := by\n-  intros; norm_num [preference]\n+  intro \u03c0 o h\n+  have ho : o = oa := by simpa [predictive] using h\n+  subst o\n+  norm_num [preference]\n \n structure RiskReference where\n   predictiveMassA : \u211d\n"
+}

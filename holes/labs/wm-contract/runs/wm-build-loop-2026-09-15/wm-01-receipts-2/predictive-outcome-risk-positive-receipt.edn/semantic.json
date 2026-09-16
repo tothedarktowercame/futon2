@@ -1,0 +1,14 @@
+{
+  "disposition": "preserved",
+  "reading": "predictive previously returned one for every outcome, now one only at oa and zero elsewhere, including ob. preference previously returned half at all vertex-tagged outcomes, now half only at oa/ob and zero elsewhere. The repaired functions satisfy the existing fixture a=1,b=0 and half/half; this is not equality of old and new off-support functions. positivePreference now uses membership to establish o=oa; its quantified statement is unchanged. pointMassAgainstUniform retains KL log(2); RiskReference adapter values remain unchanged.",
+  "additions": [
+    "ProbabilityKernel",
+    "PredictiveOutcomeKernel",
+    "PreferenceDistribution"
+  ],
+  "wrapper": "predictive_outcome_risk_witness.clj",
+  "negative-modes": [
+    "--negative-control"
+  ],
+  "exit-convention": "In-memory zero preference on predictive support must fail valid?; 0 requires valid baseline and rejected mutation, 1 invalid baseline, 2 slipped mutation."
+}

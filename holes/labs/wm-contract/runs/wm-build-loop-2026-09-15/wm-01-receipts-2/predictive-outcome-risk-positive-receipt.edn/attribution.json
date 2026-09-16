@@ -1,0 +1,28 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
+  "name" : "predictive",
+  "old" : "b751e9a43be6f7dbae5f76964de845426357f44c4455a2035d2c1b9057e12be8",
+  "new" : "1ca78693fd32c1ad2741c0afc3712f57aa76853dd231bf62a492c56d13322c2d",
+  "pre-repair-text" : "noncomputable def predictive : PredictiveOutcomeKernel Policy Obs where\n  support := fun _ => [oa]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+  "repaired-text" : "noncomputable def predictive : PredictiveOutcomeKernel Policy Obs where\n  support := fun _ => [oa]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [oa] then 1 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [oa, ob]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [oa, ob]\n\n",
+  "head-text" : "noncomputable def predictive : PredictiveOutcomeKernel Policy Obs where\n  support := fun _ => [oa]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [oa] then 1 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [oa, ob]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [oa, ob]\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
+  "name" : "preference",
+  "old" : "8b1f7f0a74a51cc592d1cb1728c1505f3e81bb55b72105b21124341523a5c7ae",
+  "new" : "35b5a4945778a3a356eb015844478778d0378f6afaa8b392124328618445d2dc",
+  "pre-repair-text" : "noncomputable def preference : PreferenceDistribution Obs where\n  support := fun _ => [oa, ob]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+  "repaired-text" : "noncomputable def preference : PreferenceDistribution Obs where\n  support := fun _ => [oa, ob]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [oa, ob] then 1 / 2 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [oa, ob]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [oa, ob]\n\n",
+  "head-text" : "noncomputable def preference : PreferenceDistribution Obs where\n  support := fun _ => [oa, ob]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [oa, ob] then 1 / 2 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [oa, ob]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [oa, ob]\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
+  "name" : "positivePreference",
+  "old" : "60bfdddbed1f8169b6e2724539500d8c24ec5982cbd99ab1c27215089fbb8cba",
+  "new" : "d2b1672f8f9b3107188c50b4e64c65d76d624510519a127cdbd2f234d9aa068c",
+  "pre-repair-text" : "theorem positivePreference : ∀ π o, o ∈ predictive.support π → 0 < preference.mass () o := by\n  intros; norm_num [preference]\n\n",
+  "repaired-text" : "theorem positivePreference : ∀ π o, o ∈ predictive.support π → 0 < preference.mass () o := by\n  intro π o h\n  have ho : o = oa := by simpa [predictive] using h\n  subst o\n  norm_num [preference]\n\n",
+  "head-text" : "theorem positivePreference : ∀ π o, o ∈ predictive.support π → 0 < preference.mass () o := by\n  intro π o h\n  have ho : o = oa := by simpa [predictive] using h\n  subst o\n  norm_num [preference]\n\n"
+} ]
