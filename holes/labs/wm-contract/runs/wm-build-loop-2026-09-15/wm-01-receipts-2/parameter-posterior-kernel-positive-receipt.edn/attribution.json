@@ -1,0 +1,10 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+  "name" : "posterior",
+  "old" : "e4df54ba4a9fa14630d86d904fb009672a8caeb7df868b8a4bfff5610baaad56",
+  "new" : "ce62bb6658462738bac45e884ba17b9e01a10ebfcd9f3a002a86dde29ebeaa09",
+  "pre-repair-text" : "noncomputable def posterior : ParameterPosteriorKernel Policy Obs Parameter where\n  support := fun _ => [.cautious]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by\n    intro\n    simp\n\n",
+  "repaired-text" : "noncomputable def posterior : ParameterPosteriorKernel Policy Obs Parameter where\n  support := fun _ => [.cautious]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [.cautious] then 1 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num\n\n",
+  "head-text" : "noncomputable def posterior : ParameterPosteriorKernel Policy Obs Parameter where\n  support := fun _ => [.cautious]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [.cautious] then 1 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num\n\n"
+} ]

@@ -1,0 +1,13 @@
+{
+  "disposition": "preserved",
+  "reading": "posterior formerly returned one for bold as well as cautious; repaired mass is one only for cautious and zero for bold. Each policy/observation singleton cautious support and its unit mass remains as declared by the fixture. Added support laws are proved. allPosteriorRowsNormalised still derives from posterior.normalised for every pair, with no claim that observations change this hand-derived posterior. All policy/observation and support adapter literals survive.",
+  "additions": [
+    "ProbabilityKernel"
+  ],
+  "wrapper": "parameter_posterior_kernel_witness.clj",
+  "negative-modes": [
+    "--negative-prior",
+    "--negative-outcome"
+  ],
+  "exit-convention": "0 requires receipt/fixture/Lean baseline plus successful #guard_msgs elaboration rejecting a prior or predictive outcome used as posterior. Negative failure returns 2 even for invalid baseline; positive failure 1."
+}

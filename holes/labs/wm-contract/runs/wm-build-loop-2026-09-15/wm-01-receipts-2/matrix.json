@@ -1512,7 +1512,251 @@
       ],
       "protocol-commands": "observation-kernel-positive-receipt.edn/protocol-commands.json",
       "status": "author-verified; independent review pending"
+    },
+    {
+      "new-sha256": "e4427546a2c0ba50b2a7d6a48a84344b1e489875d8c7c2eebce94cd039d04812",
+      "pins": [
+        {
+          "path": "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+          "name": "Policy",
+          "old": "39d1037fd07fdbb5b0713555b51bff3c0efe0c76b8fa71688d639f5f21a55e32",
+          "new": "39d1037fd07fdbb5b0713555b51bff3c0efe0c76b8fa71688d639f5f21a55e32",
+          "changed?": false,
+          "indices": [
+            0,
+            0
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+          "name": "Observation",
+          "old": "12195b94bc6e1a77ddda53a793707f19cda0efd6604dc0213febf0c30830973a",
+          "new": "12195b94bc6e1a77ddda53a793707f19cda0efd6604dc0213febf0c30830973a",
+          "changed?": false,
+          "indices": [
+            0,
+            1
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+          "name": "Parameter",
+          "old": "d7199f2b2ee3cfe1a9812e39ddca6a3681202946653bb7acd9b856181c1025db",
+          "new": "d7199f2b2ee3cfe1a9812e39ddca6a3681202946653bb7acd9b856181c1025db",
+          "changed?": false,
+          "indices": [
+            0,
+            2
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+          "name": "Obs",
+          "old": "f1018aef10fdd0223ea371186a3a3ddfe08d9125b050f16b9d7a6d150c8e8d66",
+          "new": "f1018aef10fdd0223ea371186a3a3ddfe08d9125b050f16b9d7a6d150c8e8d66",
+          "changed?": false,
+          "indices": [
+            0,
+            3
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+          "name": "clear",
+          "old": "ded9d17e22d4b0260d7c9d15ec71fcf3f78493b6e1e3748f21398977e287a215",
+          "new": "ded9d17e22d4b0260d7c9d15ec71fcf3f78493b6e1e3748f21398977e287a215",
+          "changed?": false,
+          "indices": [
+            0,
+            4
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+          "name": "blocked",
+          "old": "8c2eb50333fcfdda5062a4112875ba55348ac3c1f8a6bbfe960aa93774301b5d",
+          "new": "8c2eb50333fcfdda5062a4112875ba55348ac3c1f8a6bbfe960aa93774301b5d",
+          "changed?": false,
+          "indices": [
+            0,
+            5
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+          "name": "posterior",
+          "old": "e4df54ba4a9fa14630d86d904fb009672a8caeb7df868b8a4bfff5610baaad56",
+          "new": "ce62bb6658462738bac45e884ba17b9e01a10ebfcd9f3a002a86dde29ebeaa09",
+          "changed?": true,
+          "indices": [
+            0,
+            6
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+          "name": "allPosteriorRowsNormalised",
+          "old": "ce072a82b2b2d1262ab8e8ddf684e84810c9270afcfdc40cb2b8a422c24af88e",
+          "new": "ce072a82b2b2d1262ab8e8ddf684e84810c9270afcfdc40cb2b8a422c24af88e",
+          "changed?": false,
+          "indices": [
+            0,
+            7
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ParameterPosteriorKernel",
+          "old": "4f05e4aa3733d9c67533c4220492965c754f63dfeabecc07acd44141d88d6a04",
+          "new": "4f05e4aa3733d9c67533c4220492965c754f63dfeabecc07acd44141d88d6a04",
+          "changed?": false,
+          "indices": [
+            1,
+            0
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ProbabilityKernel",
+          "old": null,
+          "new": "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+          "changed?": true,
+          "indices": [
+            1,
+            1
+          ]
+        }
+      ],
+      "file": "parameter-posterior-kernel-positive-receipt.edn",
+      "controls": [
+        {
+          "path": "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+          "name": "posterior",
+          "old": "e4df54ba4a9fa14630d86d904fb009672a8caeb7df868b8a4bfff5610baaad56",
+          "new": "ce62bb6658462738bac45e884ba17b9e01a10ebfcd9f3a002a86dde29ebeaa09",
+          "changed?": true,
+          "indices": [
+            0,
+            6
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ProbabilityKernel",
+          "old": null,
+          "new": "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+          "changed?": true,
+          "indices": [
+            1,
+            1
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        }
+      ],
+      "axioms": {
+        "exit": 0,
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "old-sha256": "bbaba7c2c98835e9ba1ed549a314ca0ad053890f843056d2aabd13c69d09f679",
+      "review": "pending claude-3 independent review",
+      "new-recorded-at": "2026-09-16T00:22:48.772776612Z",
+      "validation": {
+        "pass?": true,
+        "failures": [],
+        "receipt-shape-valid?": true,
+        "successful-elaboration?": true,
+        "source-basis-matches?": true,
+        "fixture-adapter-matches?": true,
+        "toolchain-matches?": true,
+        "elaboration-matches?": true
+      },
+      "old-recorded-at": "2026-09-08T00:00:00Z",
+      "semantic-disposition": {
+        "disposition": "preserved",
+        "reading": "posterior formerly returned one for bold as well as cautious; repaired mass is one only for cautious and zero for bold. Each policy/observation singleton cautious support and its unit mass remains as declared by the fixture. Added support laws are proved. allPosteriorRowsNormalised still derives from posterior.normalised for every pair, with no claim that observations change this hand-derived posterior. All policy/observation and support adapter literals survive.",
+        "additions": [
+          "ProbabilityKernel"
+        ],
+        "wrapper": "parameter_posterior_kernel_witness.clj",
+        "negative-modes": [
+          "--negative-prior",
+          "--negative-outcome"
+        ],
+        "exit-convention": "0 requires receipt/fixture/Lean baseline plus successful #guard_msgs elaboration rejecting a prior or predictive outcome used as posterior. Negative failure returns 2 even for invalid baseline; positive failure 1."
+      },
+      "commands": [
+        {
+          "name": "protocol",
+          "command": [
+            "bb",
+            "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-receipts-2/receipt_control.clj",
+            "run",
+            "parameter-posterior-kernel-positive-receipt.edn",
+            "[\"ProbabilityKernel\"]"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "positive",
+          "command": [
+            "bb",
+            "checks/parameter_posterior_kernel_witness.clj"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "negative-prior",
+          "command": [
+            "bb",
+            "checks/parameter_posterior_kernel_witness.clj",
+            "--negative-prior"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "negative-outcome",
+          "command": [
+            "bb",
+            "checks/parameter_posterior_kernel_witness.clj",
+            "--negative-outcome"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        }
+      ],
+      "protocol-commands": "parameter-posterior-kernel-positive-receipt.edn/protocol-commands.json",
+      "status": "author-verified; independent review pending"
     }
   ],
-  "next-receipt": "parameter-posterior-kernel-positive-receipt.edn"
+  "next-receipt": "parameter-prior-kernel-positive-receipt.edn"
 }

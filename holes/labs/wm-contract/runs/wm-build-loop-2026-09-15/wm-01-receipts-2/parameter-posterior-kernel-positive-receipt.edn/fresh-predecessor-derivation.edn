@@ -68,10 +68,7 @@
    :declarations
    [{:name "ParameterPosteriorKernel",
      :sha256
-     "4f05e4aa3733d9c67533c4220492965c754f63dfeabecc07acd44141d88d6a04"}
-    {:name "ProbabilityKernel",
-     :sha256
-     "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc"}]}],
+     "4f05e4aa3733d9c67533c4220492965c754f63dfeabecc07acd44141d88d6a04"}]}],
  :elaborator
  {:command ["lake" "env" "lean"], :cwd "/home/joe/code/mathlib4"},
  :toolchain
@@ -82,7 +79,7 @@
   :lake-manifest-sha256
   "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"},
  :module "DarkTower.WarMachine.ParameterPosteriorKernelWitness",
- :recorded-at "2026-09-16T00:22:48.772776612Z",
+ :recorded-at "2026-09-08T00:00:00Z",
  :result
  {:exit 0, :axioms ["propext" "Classical.choice" "Quot.sound"]},
  :receipt/type :PositiveLeanWitnessReceipt,

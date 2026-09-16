@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "-C",
+    "/home/joe/code/mathlib4",
+    "show",
+    "480a666ad2",
+    "--"
+  ],
+  "output": "commit 480a666ad27c18477b4b9df86e11862be3930d50\nAuthor: Joseph Corneli <joseph.corneli@hyperreal.enterprises>\nDate:   Tue Sep 15 06:36:02 2026 +0000\n\n    Enforce finite-support probability kernels and nonnegative VFE precision\n\ndiff --git a/DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean b/DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean\nindex 6d946de2a4..a2291ccba6 100644\n--- a/DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean\n+++ b/DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean\n@@ -17,11 +17,16 @@ normalized parameter row for every policy/observation pair; this witnesses the\n carrier and does not claim that every observation must change the posterior. -/\n noncomputable def posterior : ParameterPosteriorKernel Policy Obs Parameter where\n   support := fun _ => [.cautious]\n-  mass := fun _ _ => 1\n-  nonnegative := by intros; norm_num\n+  mass := by\n+    classical\n+    exact fun s o => if o \u2208 [.cautious] then 1 else 0\n+  nonnegative := by intros; split <;> norm_num\n+  support_nodup := by intro; simp\n+  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n   normalised := by\n-    intro\n-    simp\n+    intro s\n+    classical\n+    norm_num\n \n theorem observedPolicyRowMass :\n     ((posterior.support (.inspect, clear)).map\n"
+}
