@@ -1,0 +1,3 @@
+futon2.aif.interpretation-job-test exit 0
+futon2.aif.receipt-construction-test exit 0
+futon2.aif.interpretation-evidence-test exit 0

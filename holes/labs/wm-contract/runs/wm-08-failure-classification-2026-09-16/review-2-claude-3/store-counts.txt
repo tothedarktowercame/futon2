@@ -1,0 +1,5 @@
+stores before: 465
+stores after tests: 465
+stores before probe: 465
+stores after probe: 465
+probe stdout also carries 127 hermetic [wm-phase] trace lines
