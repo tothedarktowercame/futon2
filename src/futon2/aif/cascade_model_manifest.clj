@@ -494,49 +494,56 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                 (if (contains? evidence v) (:mu spec) 0))]))
           (set/union want evidence))))
 
+(defn log-preference-fn
+  "Log-space pointwise form of Lean TokenPreference.preference over the token
+   universe V = want ∪ evidence ∪ tokens(zeroed) ∪ (the optional
+   `universe` argument). Returns o ↦ ln c(o): ##-Inf for o ∈ zeroed
+   (preference_eq_zero_iff), else u(o) − ln Z, with
+   ln Z = Σ_{v ∈ V} ln(1 + e^{w_v}) + ln(1 − Σ_{z ∈ zeroed} e^{u(z) − ln Z₀}).
+   The product form is exact because utility is a per-token sum; working in
+   logs keeps Z finite for universes of thousands of tokens (a plain product
+   of (1 + e^{w_v}) overflows near 1000 tokens, since every weight-0 token
+   contributes a factor 2). V must be the observation space of the comparison:
+   tokens outside want/evidence carry weight 0 but still enlarge Z, so the
+   caller passes the common universe of the candidates being compared.
+   zeroed_proper is decided by counting, and cannot fail for |V| ≥ 62 (a
+   zeroed set cannot hold 2^62 subsets). Refuses exactly like preference-spec."
+  ([spec] (log-preference-fn spec nil))
+  ([spec extra-universe]
+   (let [want (set (:want spec)) evidence (set (:evidence spec))
+         zeroed (set (:zeroed spec))
+         lam (:lam spec) mu (:mu spec)
+         exact? (fn [x] (or (ratio? x) (integer? x)))
+         universe (set/union want evidence (into #{} (mapcat identity) zeroed) (set extra-universe))]
+     (cond
+       (empty? want)
+       {:status :missing :kind :invalid-preference-spec :field :want :reason :empty-want}
+       (not (and (exact? lam) (pos? lam)))
+       {:status :missing :kind :invalid-preference-spec :field :lam :value lam :reason :lam-not-positive}
+       (not (and (exact? mu) (<= 0 mu)))
+       {:status :missing :kind :invalid-preference-spec :field :mu :value mu :reason :mu-negative}
+       (and (< (count universe) 62) (= (count zeroed) (bit-shift-left 1 (count universe))))
+       {:status :missing :kind :invalid-preference-spec :field :zeroed :reason :zeroed-covers-universe}
+       :else
+       (let [w (utility-weights {:want want :evidence evidence :lam lam :mu mu})
+             u (fn [o] (reduce + 0.0 (map (fn [t] (double (get w t 0))) (set/intersection (set o) universe))))
+             log-z0 (reduce + 0.0 (map (fn [t] (Math/log1p (Math/exp (double (get w t 0))))) universe))
+             zeroed-share (reduce + 0.0 (map (fn [zp] (Math/exp (- (u zp) log-z0))) zeroed))
+             log-z (+ log-z0 (Math/log1p (- zeroed-share)))]
+         (fn log-pointwise-preference [o]
+           (if (contains? zeroed o) ##-Inf (- (u o) log-z))))))))
+
 (defn preference-fn
-  "Pointwise closed form of Lean TokenPreference.preference: c(o) = 0.0 for
-   o ∈ zeroed (preference_eq_zero_iff), else
-   exp(Σ_{v ∈ o ∩ universe} w_v) / Z with
-   Z = ∏_{v ∈ universe} (1 + e^{w_v}) − Σ_{z ∈ zeroed} exp(utility z).
-   The product form is exact — Σ_{s ⊆ U} exp(utility s) factors over tokens
-   because utility is a per-token sum — so this equals preference-distribution
-   on every subset (preference_sum) without enumerating the powerset. Tokens
-   outside the spec's universe carry weight 0 and a larger enumerated universe
-   only multiplies both Z and each term by the same power of 2. Validation is
-   preference-spec's, with one computation change: zeroed_proper is decided by
-   counting — zeroed is a set of distinct subsets of the universe, so it
-   equals the whole powerset exactly when its size is 2^|universe| — never by
-   materialising the powerset. Refuses exactly like preference-spec."
-  [spec]
-  (let [want (set (:want spec)) evidence (set (:evidence spec))
-        zeroed (set (:zeroed spec))
-        lam (:lam spec) mu (:mu spec)
-        exact? (fn [x] (or (ratio? x) (integer? x)))
-        universe (set/union want evidence (into #{} (mapcat identity) zeroed))]
-    (cond
-      (empty? want)
-      {:status :missing :kind :invalid-preference-spec :field :want :reason :empty-want}
-      (not (and (exact? lam) (pos? lam)))
-      {:status :missing :kind :invalid-preference-spec :field :lam :value lam :reason :lam-not-positive}
-      (not (and (exact? mu) (<= 0 mu)))
-      {:status :missing :kind :invalid-preference-spec :field :mu :value mu :reason :mu-negative}
-      (= (count zeroed) (bit-shift-left 1 (count universe)))
-      {:status :missing :kind :invalid-preference-spec :field :zeroed :reason :zeroed-covers-universe}
-      :else
-      (let [w (utility-weights {:want want :evidence evidence :lam lam :mu mu})
-            z (- (reduce * 1.0
-                         (map (fn [t] (+ 1.0 (Math/exp (double (get w t 0))))) universe))
-                 (reduce + 0.0
-                         (map (fn [zp] (Math/exp (double (token-utility {:want want :evidence evidence :lam lam :mu mu} zp))))
-                              zeroed)))]
-        (fn pointwise-preference [o]
-          (if (contains? zeroed o)
-            0.0
-            (/ (Math/exp (double (reduce + 0.0
-                                         (map (fn [t] (double (get w t 0)))
-                                              (set/intersection (set o) universe)))))
-               z)))))))
+  "Pointwise closed form of Lean TokenPreference.preference: o ↦ c(o) =
+   exp(ln c(o)) from log-preference-fn over the same universe (0.0 on zeroed).
+   Equals preference-distribution on every subset of the universe
+   (preference_sum). Refuses exactly like preference-spec."
+  ([spec] (preference-fn spec nil))
+  ([spec extra-universe]
+   (let [lpf (log-preference-fn spec extra-universe)]
+     (if (refusal? lpf)
+       lpf
+       (fn pointwise-preference [o] (Math/exp (lpf o)))))))
 
 (defn- zero-rates?
   "Every adjudication rate entry is exactly zero, the precondition of the
@@ -545,15 +552,16 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
   (every? (fn [t] (and (zero? (:false-neg t)) (zero? (:false-pos t)))) (vals rates)))
 
 (defn- outcome-risk-pointwise
-  "outcome-risk with C supplied pointwise instead of as a map, so no C over a
-   powerset is ever materialised. Same Lean OutcomeRiskKL.outcomeRisk: ⊤ iff
-   some q(o) > 0 has c(o) = 0, else the Gibbs sum over positive q mass."
-  [q c-of]
-  (if (some (fn [[o p]] (and (pos? p) (zero? (c-of o)))) q)
+  "outcome-risk with C supplied as a pointwise log-preference, so no C over a
+   powerset is materialised and tiny c(o) never underflows to a false ⊤.
+   Same Lean OutcomeRiskKL.outcomeRisk: ⊤ iff some q(o) > 0 has c(o) = 0
+   (ln c = ##-Inf), else Σ_{q(o)>0} q(o)·(ln q(o) − ln c(o))."
+  [q log-c-of]
+  (if (some (fn [[o p]] (and (pos? p) (= ##-Inf (log-c-of o)))) q)
     :infinite
     (double (reduce + 0.0
                     (for [[o p] q :when (pos? p)]
-                      (* (double p) (Math/log (/ (double p) (double (c-of o))))))))))
+                      (* (double p) (- (Math/log (double p)) (double (log-c-of o)))))))))
 
 (defn horizon-g-sparse
   "Lean PolicyHorizon.horizonEFE at mission scale: exactly the numbers of
@@ -567,10 +575,12 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    declared current limitation, not a silent approximation. C is supplied
    either as :c-fn-pointwise (τ ↦ (o ↦ c(o)), step-indexed) or as :spec (a
    preference spec used as a DECLARED CONSTANT C_τ at every τ — the constant
-   case, not a claim that C_τ is constant in general). Returns the double
+   case, not a claim that C_τ is constant in general). :universe is the
+   common token universe of the comparison (observation space of C); pass
+   the same universe for every candidate compared. Returns the double
    sum, :infinite when any step's risk is infinite
    (horizonEFE_eq_top_iff), or the first typed refusal. Pure; no wiring."
-  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise]}]
+  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe]}]
   (let [bad (rate-bad-token rates)]
     (cond
       bad {:status :missing :kind :invalid-adjudication-rate
@@ -585,11 +595,12 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
       (and (nil? c-fn-pointwise) (nil? spec))
       {:status :missing :kind :missing-preference-spec}
       :else
-      (let [pf (when (nil? c-fn-pointwise) (preference-fn spec))
+      (let [lpf (when (nil? c-fn-pointwise) (log-preference-fn spec universe))
             point-c (cond
-                      c-fn-pointwise (fn [tau o] ((c-fn-pointwise tau) o))
-                      (refusal? pf) pf
-                      :else (fn [_tau o] (pf o)))]
+                      c-fn-pointwise (fn [tau o] (let [c ((c-fn-pointwise tau) o)]
+                                                   (if (zero? c) ##-Inf (Math/log (double c)))))
+                      (refusal? lpf) lpf
+                      :else (fn [_tau o] (lpf o)))]
         (if (refusal? point-c)
           point-c
           (loop [tau 1 total 0.0]

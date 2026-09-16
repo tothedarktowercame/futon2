@@ -524,3 +524,51 @@
                                :horizon 1 :spec {:want #{} :evidence #{} :lam 1 :mu 1 :zeroed #{}}})]
     (is (= :missing (:status r)))
     (is (= :invalid-preference-spec (:kind r)))))
+
+(deftest preference-fn-universe-matches-enumerating
+  ;; Review fix (claude-4): C is over subsets of the comparison's full token
+  ;; universe V, not just want ∪ evidence ∪ zeroed. With one extra
+  ;; zero-weight token, preference-fn with that universe equals
+  ;; preference-distribution over the enlarged universe on all subsets.
+  (let [raw (sparse-spec 2 1 #{})
+        spec (m/preference-spec raw)
+        big (cset/union (:universe spec) #{"x0"})
+        pd (m/preference-distribution spec big)
+        pf (m/preference-fn raw big)
+        subsets (reduce (fn [ss v] (into ss (map #(cset/union % #{v})) ss)) [#{}] big)]
+    (is (= 16 (count subsets)))
+    (doseq [s subsets]
+      (is (< (Math/abs (- (pf s) (get pd s 0.0))) 1e-12)))))
+
+(deftest log-preference-fn-scales-and-zeroed-check-safe
+  ;; Review fix (claude-4): log-space Z stays finite at 1200 tokens (a plain
+  ;; product of (1 + e^w) overflows near 1000), and the zeroed-covers-universe
+  ;; check does not misfire past 62 tokens (a long shift wraps mod 64).
+  (let [raw (sparse-spec 20 5 #{})
+        extra (into #{} (map (partial str "x")) (range 1175))
+        lpf (m/log-preference-fn raw extra)
+        some-o #{"t0" "e0"}]
+    (is (fn? lpf))
+    (is (Double/isFinite (lpf some-o)))
+    (is (neg? (lpf some-o))))
+  (let [raw (sparse-spec 40 30 #{#{"t0"}})
+        lpf (m/log-preference-fn raw)]
+    (is (fn? lpf) "one zeroed subset in a 70-token universe must not be refused")
+    (is (= ##-Inf (lpf #{"t0"})))))
+
+(deftest horizon-g-sparse-universe-offset
+  ;; Review fix (claude-4): enlarging the comparison universe by k zero-weight
+  ;; tokens lowers every ln c(o) by k·ln 2, so G rises by T·k·ln 2. Candidates
+  ;; must therefore be scored over one common universe.
+  (let [spec (sparse-spec 2 1 #{})
+        rates (sparse-rates spec)
+        p1 {:id :p1 :guard {:status :interpreted :operator :and
+                            :clauses [{:status :interpreted :present #{} :absent #{}}]}
+            :transition {:status :interpreted :operator :union :produces #{"t0"}}
+            :produces #{"t0"} :theta 1}
+        prec (constantly [p1])
+        base {:rates rates :q0 {#{} 1} :precedence-fn prec :horizon 2 :spec spec}
+        g0 (m/horizon-g-sparse base)
+        g3 (m/horizon-g-sparse (assoc base :universe #{"x0" "x1" "x2"}))]
+    (is (double? g0))
+    (is (< (Math/abs (- (- g3 g0) (* 2 3 (Math/log 2)))) 1e-9))))
