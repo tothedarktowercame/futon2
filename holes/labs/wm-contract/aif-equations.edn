@@ -272,11 +272,14 @@
    :lean-audit {:date "2026-09-16" :auditor :codex-10 :verdict :diverges
                 :report "holes/labs/wm-contract/AUDIT-lean-aif-equations-2026-09-16.md"
                 :section "A1 §3" :finding "`List.zip` silently truncates unequal-length vectors"}
+   :lean-reaudit {:date "2026-09-16" :auditor :claude-4 :verdict :matches
+                  :subject "mathlib4 6ee25f03b6 (zai-40, R17 owner): ModelReductionDecision.sameLength; bayesianModelReduction_length_of_decision; auditCounterexample_lengthFails"
+                  :finding "All four concentration vectors must share one length, so zip cannot truncate; signs, log-beta normalizer and the -3 threshold were already correct (A1 §3). Rebuilt by claude-4; axioms propext/Classical.choice/Quot.sound only."}
    :defines :Delta-F :node :R17 :class :theory-defined :ref :friston2018bmr
    :imports [:a-conc]  ;; C453: BMR takes the full posterior and full/reduced priors (Dirichlet concentrations), not the scalar F. Earlier [:F] was the registry author's error.
    :formal "Delta F := ln P(y|full) - ln P(y|reduced) = ln B(A) + ln B(a') - ln B(a) - ln B(A') over Dirichlet concentrations a (prior), A (posterior), a' (reduced prior); a reduction is accepted when Delta F <= -3" :eq "friston2018bmr eq. 9 and Table 1 (Dirichlet), sign reversed: see :references :friston2018bmr :sign-convention"
    :code "bmr.clj:108-130; a4a.clj:126-159 (offline)" :note "No live consumer of per-tick F feeds this; R17 runs offline (r17_offline.clj)."
-   :lean "modelReductionDecision" :lean-status :diverges :threshold-ref :kass1995
+   :lean "modelReductionDecision" :lean-status :closed :threshold-ref :kass1995
    :lean-rebinding-note "REBOUND 2026-09-12 (claude-15, reviewer, from the row-16 capture-family carrier-lags-registry finding): :lean previously named 'bayesFactorThreshold' alone, but this row's :formal line asserts THREE laws (componentwise A' = A + a' - a; Dirichlet-normalizer Delta-F; acceptance iff Delta-F <= -3) — a threshold-only binding cannot support a model-reduction proof. The composite carrier modelReductionDecision (ModelReduction.lean, mathlib4 9fd88669, NEW module per the subject-file freeze policy) composes the three frozen Holes declarations BY REFERENCE with projection theorems recovering each at all inputs, an end-to-end V7-fixture instance, and an above-threshold rejection; Holes.lean untouched at 4dc0a76b. The R6 softmaxWithFPi rebinding is the precedent. The measurement proof remains blocked on capability-typed substrate data (recorded at row 16)."}]
 
  ;; Where the framework leaves a free hand. Each is recorded as OBSERVED in
