@@ -1,0 +1,9 @@
+{
+  "parent-head": "72ed7da593cf31645617542fadd44493a3a14dc8",
+  "sha256": {
+    "src/futon2/aif/interpretation_job.clj": "0c434ff1aa254352dfa00333ccb8e57ad1a51899e5dd9c7ab7ed6ffa48e0686e",
+    "src/futon2/aif/interpretation_evidence.clj": "41f97c13bcd09e0d2e367b20e565fc63fbebefa2e8e47f0f4b4766d268f7b7ee",
+    "src/futon2/aif/full_loop_runner.clj": "6ed914fc08aa53abfdf2c115c1bebbdd94d03be62bf3bced1b4f5325fcf1036c",
+    "test/futon2/aif/interpretation_job_test.clj": "2b27488ae60be3f5c1e241ba1d8319db5727700986ff9c1b83706a7cc4a73673"
+  }
+}

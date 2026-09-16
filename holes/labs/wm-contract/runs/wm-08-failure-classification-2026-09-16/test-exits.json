@@ -1,0 +1,34 @@
+[
+  {
+    "name": "final-controls",
+    "command": [
+      "clojure",
+      "-X:test",
+      ":nses",
+      "[futon2.aif.interpretation-job-test]",
+      ":vars",
+      "[futon2.aif.interpretation-job-test/construction-machine-faults-keep-their-repair-contract futon2.aif.interpretation-job-test/failures-stop-before-old-construction-or-build]"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "receipt-construction",
+    "command": [
+      "clojure",
+      "-X:test",
+      ":nses",
+      "[futon2.aif.receipt-construction-test]"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "interpretation-evidence",
+    "command": [
+      "clojure",
+      "-X:test",
+      ":nses",
+      "[futon2.aif.interpretation-evidence-test]"
+    ],
+    "exit": 0
+  }
+]

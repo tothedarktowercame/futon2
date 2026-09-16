@@ -11,7 +11,8 @@
 (def failure-schema :wm/interpretation-failure-v1)
 (def schemas #{:wm/interpretation-failure-v1 :wm/interpreted-pattern-set-v1 :wm/mission-fact-observation-v1})
 (def failure-kinds
-  #{:interpretation/agent-unavailable :interpretation/no-relevant-pattern
+  #{:interpretation/machine-failure
+    :interpretation/agent-unavailable :interpretation/no-relevant-pattern
     :interpretation/genesis-required :interpretation/budget-exceeded
     :interpretation/source-changed :interpretation/invalid-receipt
     :interpretation/unmeasurable-fact

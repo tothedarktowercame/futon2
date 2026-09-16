@@ -3148,11 +3148,16 @@
     (#{:agent-budget-expired :agent-job-stalled} failure-kind)
     :incomplete-recoverable
 
-    ;; Interpretation failures (content gaps, invalid receipts, missing
-    ;; sources) are discharged by a later valid attempt, never by a
-    ;; code-repair commit, so they must not open a stop-the-line machine
-    ;; repair. Budget expiry and agent unavailability already map above.
-    (and (keyword? failure-kind) (= "interpretation" (namespace failure-kind)))
+    ;; Only identified content gaps have an environmental discharge.
+    ;; Identity/dispatch invariants, machine faults and unknown kinds retain
+    ;; the machine-repair contract. Budget and availability map above.
+    (#{:interpretation/no-relevant-pattern :interpretation/genesis-required
+       :interpretation/source-changed :interpretation/invalid-receipt
+       :interpretation/unmeasurable-fact :interpretation/no-citable-tension
+       :interpretation/target-unresolved :interpretation/retrieval-unavailable
+       :interpretation/source-unavailable :interpretation/source-revision-unavailable
+       :interpretation/action-type-unsupported}
+     failure-kind)
     :environmental-hold
 
     :else :machine-failure))

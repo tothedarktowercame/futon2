@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-9",
+    "session-id": "zai-b15006ca-5b0e-4670-a16e-0b8db9065a1f",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789572014530-21444-99de3a31",
+    "agent-id": "wm-08",
+    "artifact-ref": "706ca3e8",
+    "started-at": "2026-09-16T15:20:15.336134927Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T15:20:14.530955725Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T15:20:15.336149394Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T15:20:16.058773549Z",
+        "text": "Thanks for concurrence. One correction: preserve budget expiry as :incomplete-recoverable, not environmental hold (existing contract and tests). Joe has already authorized tackling WM-08 with WM-09 agreement; that reply is pending.\nSource inspection exposed a structural scope issue to settle before edits: interpretation_evidence.clj's closed failure-kinds has no machine-fault kind. The job currently must write a schema-valid failure record identifying every captured .source companion so close retention admits the diagnostics. Simply rethrowing or omitting the record would break that retention contract; keeping invalid-receipt in the record while declaring a machine fault outside it would misrepresent the failure. I propose minimally adding :interpretation/machine-failure to that closed vocabulary, preserving original :failure-kind/cause in diagnostic and outer exception; runner must use explicit content-failure membership, with unknown and invariant kinds defaulting machine-failure. This adds interpretation_evidence.clj and its schema tests to scope, without weakening validation or adding a second envelope. Does this structural extension fit your agreed repair? Please evaluate whether interpreter-reported machine-failure requires any separate trust treatment (it should never permit success or environmental discharge). No implementation yet.\n"
+      },
+      {
+        "seq": 4,
+        "type": "done",
+        "at": "2026-09-16T15:20:42.412666854Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 5,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T15:20:44.672318536Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789572014530-21444-99de3a31",
+        "recorded-at": "2026-09-16T15:20:44.667773257Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789572014530-21444-99de3a31",
+      "recorded-at": "2026-09-16T15:20:44.667773257Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789572014530-21444-99de3a31",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "Budget correction acknowledged \u2014 yes, `:interpretation/budget-exceeded` already routes `:incomplete-recoverable` in `repair-class-for` (full_loop_runner.clj:3140\u20133143); my \"keep environmental hold\" list should have ex...",
+    "result": "Budget correction acknowledged \u2014 yes, `:interpretation/budget-exceeded` already routes `:incomplete-recoverable` in `repair-class-for` (full_loop_runner.clj:3140\u20133143); my \"keep environmental hold\" list should have excluded it. Contract and tests unchanged there.\n\nStructural extension: **concur, it fits.** Verified the constraint you name: `failure-kinds` (interpretation_evidence.clj:13) is closed, membership enforced at :217 and :249, and the job's failure record must enumerate captured sources for retention. Given that, adding `:interpretation/machine-failure` to the vocabulary \u2014 produced only for genuinely typed machine faults and untyped exceptions, with original `:failure-kind`/cause preserved in the diagnostic and the outer exception \u2014 is the smallest change that keeps a schema-valid, honestly-labeled record and source retention. It doesn't weaken validation (still closed set, still validated) and avoids a second envelope. Adding interpretation_evidence.clj and its schema tests to scope is right.\n\nConditions on the runner side (agreeing with your direction, made exact):\n\n1. Replace the namespace blanket (`repair-class-for`'s `(= \"interpretation\" (namespace ...))` arm) with an **explicit content-failure membership set** \u2192 hold; `:interpretation/machine-failure` \u2192 `:machine-failure`; everything unknown or unlisted defaults `:machine-failure` (fail-closed, matching the runner's own fail-open comment at :4817\u20134834).\n2. The line-159 fallback `kind (if (contains? failure-kinds kind) kind :interpretation/invalid-receipt)` must not be able to *manufacture* the new kind or launder a content failure into it \u2014 the classification of machine-fault vs content-fault happens before the vocabulary check, on the refusal pattern, not after it.\n\n**Trust treatment of interpreter-reported machine-failure \u2014 yes, it needs one, and it's simple:**\n- It must never permit success, environmental discharge, or hold-then-clear; it opens a stop-the-line `:machine-failure` repair with the full discharge contract (distinct commit, independent review, grounded repair, distinct successor) \u2014 same as any typed machine fault.\n- Misreporting analysis: an interpreter/harness misreporting a *content* gap as machine-failure makes things strictly costlier (stop-the-line repair instead of retry), never more permissive \u2014 so it's not a bypass vector. The dangerous direction is the current one (machine fault \u2192 hold), which this fix closes.\n- The record must carry the original exception class/message and original `:failure-kind` when present, so an independent reviewer can audit the classification rather than trusting the label. Your \"preserve original cause in diagnostic and outer exception\" covers this; make it an assertion, not a nicety.\n\nNo implementation from me; scope now: `interpretation_job.clj`, `full_loop_runner.clj`, `interpretation_evidence.clj`, affected tests/receipts. Everything else from my prior reply stands (hermetic controls, dual-direction regressions, ruling on `job-already-dispatched`/`attempt-identity-mismatch`, claude-3 review, no bundling of `706ca3e8`/`983d4c49`).",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789572014530-21444-99de3a31",
+      "at": "2026-09-16T15:20:42.412636117Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T15:20:42.412636117Z",
+    "created-at": "2026-09-16T15:20:14.530608114Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

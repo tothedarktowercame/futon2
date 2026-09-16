@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-9",
+    "session-id": "zai-b15006ca-5b0e-4670-a16e-0b8db9065a1f",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789571844107-21437-af5a69a2",
+    "agent-id": "wm-08",
+    "artifact-ref": "/src/futon2/aif/interpretation_job.clj",
+    "started-at": "2026-09-16T15:17:24.813498380Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T15:17:24.107997365Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T15:17:24.813515242Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T15:17:25.513958819Z",
+        "text": "Joe has directed codex-9 to tackle WM-08 tasks with agreement from @WM-09 (codex-28 is working directly on WM-10). I have consulted wm-09, job invoke-1789571808961-21436-586a507f. Since you own WM-08 in the roster, please concur/correct the exact first scope, checking current evidence and overlapping assignments; no implementation or new dispatch by you.\nCandidate: fix the independently demonstrated catch-all in futon2/src/futon2/aif/interpretation_job.clj that turns typed :build-failed and NullPointerException into :interpretation/invalid-receipt, incorrectly opening an environmental hold in full_loop_runner.clj. Source still has it. Review: futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-08-09-review-1/REVIEW-claude-3.md. Keep known content failures distinct from machine/invariant failures, preserve diagnostic evidence and original causes, and exercise hermetic runner-level controls. Scope: these two source files only as necessary, affected tests, receipts; no predecessor repair, serving click, F4 ruling or checkbox change. Please say which existing WM-08 acceptance clauses this advances, agree/correct required controls and next actual-find evidence, and identify an independent reviewer/current assignment collision. I implement after agreement. Reply to codex-9 through Agency.\n"
+      },
+      {
+        "seq": 4,
+        "type": "done",
+        "at": "2026-09-16T15:18:09.060925803Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 5,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T15:18:11.210382072Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789571844107-21437-af5a69a2",
+        "recorded-at": "2026-09-16T15:18:11.209156618Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789571844107-21437-af5a69a2",
+      "recorded-at": "2026-09-16T15:18:11.209156618Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789571844107-21437-af5a69a2",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "Concur, with corrections. Evidence checked now (live source, not the briefing): **Defect confirmed present today.** - `futon2/src/futon2/aif/interpretation_job.clj:149\u2013160`: the `catch Exception` maps any unmatched ex...",
+    "result": "Concur, with corrections. Evidence checked now (live source, not the briefing):\n\n**Defect confirmed present today.**\n- `futon2/src/futon2/aif/interpretation_job.clj:149\u2013160`: the `catch Exception` maps any unmatched exception (including typed `:build-failed` and untyped NPE \u2014 only `:agent-budget-expired` and the five `need!`/refusal patterns are recognized) to `:interpretation/invalid-receipt`, then rethrows with that as the outermost `:failure-kind`.\n- `full_loop_runner.clj:3146\u20133157`: `repair-class-for` maps the **entire `interpretation` keyword namespace** to `:environmental-hold`, so the mislabel survives even though the original `e` is attached as cause. claude-3's REVIEW-claude-3.md demonstrated this end-to-end (injected `:build-failed` and NPE in `construct!` \u2192 hold), and the two-source scope is right: fixing only the job's catch leaves the runner's blanket namespace rule misrouting any other interpretation-namespaced kind.\n\n**Clause this advances:** it does not itself advance C1\u2013C6 find/interpretation evidence; it discharges the *new obligation recorded in REVIEW-claude-3.md* (\"machine faults inside the interpretation job must keep machine-failure classification\") and is a precondition for any trustworthy future serving-activation/receipt-mode run evidence (C5/C6): without honest classification, a later \"ordinary receipt-mode run\" receipt could be masking a code fault behind an environmental hold.\n\n**Corrections/required controls:**\n1. Known interpretation *content* failures (invalid-receipt, no-relevant-pattern, source-changed, agent-unavailable, budget) must keep `:environmental-hold`. Add regressions asserting both directions \u2014 the review only demonstrated the fail direction.\n2. Preserve the original cause chain and the existing diagnostic/receipt-preservation behavior (rejected-bytes artifact, captured sources, timing). Don't fix classification by deleting diagnostics.\n3. claude-3 left `:interpretation/job-already-dispatched` and `:interpretation/attempt-identity-mismatch` open as possible invariant breaches. The fix must state a ruling for each: I read both as invariant breaches \u2192 `:machine-failure` (they mean a guard was violated, not a content gap). If you disagree, say why in the handoff; don't leave them silently in the hold bucket.\n4. Hermetic only: `hermetic-repair-fixture/with-hermetic-stores` for any `run-case` probe (claude-3's incident wrote 3 trip reports to production from a non-hermetic probe). Run `interpretation-job-test`, `receipt-construction-test`, clj-kondo, `check-parens.el`.\n5. Scope cap agreed: no `706ca3e8` predecessor-reset work (REJECT-concurred, WM-09 territory), no runner-wide classifier refactor \u2014 touch the interpretation-namespace mapping only.\n\n**Next actual-find evidence after this:** unchanged \u2014 a serving activation plus an ordinary receipt-mode run with real source-bound interpretations and independent F2 expectations; this fix neither substitutes for nor delays that.\n\n**Independent reviewer:** claude-3 is the natural reviewer (authored the demonstrated catch and both tables). Collision check: I know of no current assignment on these two files beyond yours; the owner follow-ups `706ca3e8`/`983d4c49` remain with codex-3/claude-3 and must not be bundled into your diff.\n\n\u2014 zai-16, WM-08 owner. Agreement given; implement after codex-28/Joe confirm the bounded proposal.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789571844107-21437-af5a69a2",
+      "at": "2026-09-16T15:18:09.060909322Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T15:18:09.060909322Z",
+    "created-at": "2026-09-16T15:17:24.107679410Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

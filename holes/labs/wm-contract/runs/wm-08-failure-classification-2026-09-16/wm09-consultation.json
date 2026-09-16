@@ -1,0 +1,82 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-9",
+    "session-id": "zai-7657dc81-3d21-41c9-80d6-446bb3c7f220",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789571808961-21436-586a507f",
+    "agent-id": "wm-09",
+    "artifact-ref": "72ed7da5",
+    "started-at": "2026-09-16T15:16:49.633237595Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T15:16:48.961395532Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T15:16:49.633246792Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T15:16:50.331060435Z",
+        "text": "Joe explicitly directed this turn: \"codex-28 is working directly on WM-10. I think we should tackle the WM-08 tasks, with agreement from their @WM-09 zai manager\". I am codex-9. Please discuss and agree a concrete bounded WM-08 task with me, checking current source and assignments. Roster says WM-08 owner is wm-08/zai-16 and you are downstream WM-09/zai-17; retain that ownership distinction, and identify any required WM-08 owner concurrence rather than silently changing it.\nI read WM-08 cascade and wm-08-09-review-1/REVIEW-claude-3.md (futon2). Candidate first repair: interpretation_job's catch-all recasts typed machine failures and untyped exceptions as interpretation/invalid-receipt, then runner sends them to environmental hold. Preserve actual interpretation content refusals while keeping machine faults machine failures. Scope would be interpretation_job.clj, relevant failure classifier in full_loop_runner.clj only if needed, hermetic targeted tests and retained receipts. No predecessor-history repair, activation, click, F4 ruling or checkbox change in this packet. Please agree/correct this choice based on which exact WM-08 clause it advances; give current producer/consumer contract, ownership conflicts or existing repairs, required controls, and independent reviewer. Also identify the next ordinary-find evidence after repair, so this stays directed toward closure. Read-only consultation; do not implement or dispatch others. Reply via Agency to codex-9.\n"
+      },
+      {
+        "seq": 4,
+        "type": "done",
+        "at": "2026-09-16T15:22:39.681083550Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 5,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T15:22:41.128129449Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789571808961-21436-586a507f",
+        "recorded-at": "2026-09-16T15:22:41.126713568Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789571808961-21436-586a507f",
+      "recorded-at": "2026-09-16T15:22:41.126713568Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789571808961-21436-586a507f",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "Replying to codex-9 in-thread (auto-routes back). Summary of what I checked and my answer: **Current evidence verified live (futon2 @ HEAD `72ed7da5`):** - `src/futon2/aif/interpretation_job.clj` \u2014 the `catch Exceptio...",
+    "result": "Replying to codex-9 in-thread (auto-routes back). Summary of what I checked and my answer:\n\n**Current evidence verified live (futon2 @ HEAD `72ed7da5`):**\n- `src/futon2/aif/interpretation_job.clj` \u2014 the `catch Exception` block confirms claude-3's finding verbatim: the `kind` cond has a catch-all `:else :interpretation/invalid-receipt`, and a final `(if (contains? evidence/failure-kinds kind) kind :interpretation/invalid-receipt)`. Only `:agent-budget-expired` is carried through as a typed machine kind. Any other typed `:failure-kind` or untyped exception is recast.\n- `src/futon2/aif/full_loop_runner.clj` (~line 3155) \u2014 `(and (keyword? failure-kind) (= \"interpretation\" (namespace failure-kind))) \u2192 :environmental-hold`, so the recast kind lands in environmental hold, exactly as the review demonstrated.\n- `REVIEW-claude-3.md` \u2014 finding reproduced with a hermetic two-case control (`:build-failed` and `NullPointerException` both \u2192 `:interpretation/invalid-receipt` \u2192 `:environmental-hold`), production store unchanged. Review explicitly records: \"No repair was attempted and no successor was chosen.\"\n- futon2 git log since shows only WM-01/WM-10/inbox work \u2014 **no in-flight repair to this classifier, no duplication risk as of now**. \u2718 I initially assumed the runner mapping itself was the defect; the source shows the fabrication happens in `interpretation_job.clj`'s catch, and the runner clause is merely over-broad downstream \u2014 so the primary edit belongs in `interpretation_job.clj`, with the runner clause narrowed only as needed.\n\n**My answer as WM-09 owner (downstream consumer of admitted interpretation receipts):**\n\n1. **Agree with the choice, with a scope correction.** This advances the review's explicit \"New, from `c4130ba5`\" obligation \u2014 faithful failure classification, which serves WM-08-C4/C5 (checks must bind to what actually failed; a code fault misreported as a content refusal is a self-certification-shaped breach) and protects WM-09's downstream admissions. It is *not* C1\u2013C3 ordinary-use work, so it does not by itself move the WM-08 checkbox \u2014 correct to keep it a bounded repair packet with no checkbox claim.\n2. **Required design decision inside the packet:** untyped exceptions must not fabricate an interpretation failure record at all \u2014 the job should rethrow the original exception (preserving any typed `:failure-kind`) so the runner classifies `:machine-failure`; only genuine content refusals (`:interpretation/refusal`, digest mismatch, budget) write `:wm/interpretation-failure-v1`. Also explicitly decide the two open kinds claude-3 flagged (`:interpretation/job-already-dispatched`, `:interpretation/attempt-identity-mismatch`) rather than silently leaving them in the hold branch. Runner edit limited to the namespace-mapping clause.\n3. **WM-08 owner concurrence is required.** Roster: WM-08 \u2192 zai-16 (address `wm-08`), state primed; I am WM-09 only. This code is on the WM-08/09 shared path, so zai-16 must concur with the packet before dispatch; agreement runs through codex-28/Joe, and the implementer is commissioned, not chosen by me.\n4. **Controls:** claude-3's hermetic two-case control reproduced as a failing-before test under `with-hermetic-stores` (mind the claude-3 probe incident \u2014 no bare `/tmp` runs against production stores); clj-kondo + `check-parens.el`; `interpretation-job-test` and `receipt-construction-test` namespaces only. **Independent reviewer:** must differ from the implementer (claude-3 or claude-20 are candidates; claude-3 already holds the finding context).\n5. **Next ordinary-find evidence after repair:** a receipt-mode run where a genuine content refusal opens an environmental hold *and* an injected machine fault opens a stop-line machine repair \u2014 the discriminating pair in a serving-shaped run \u2014 then return to WM-08-C1 (ordinary problem-derived query/retrieval in actual use), which remains the item's largest gap.",
+    "auto-bellback": {
+      "suppressed?": true,
+      "reason": "parked-on",
+      "park-id": "park-f6b4d49e-3034-470b-a475-1230aaefc41b",
+      "at": "2026-09-16T15:22:39.681059535Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T15:22:39.681059535Z",
+    "created-at": "2026-09-16T15:16:48.961144181Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

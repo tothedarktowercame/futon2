@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-9",
+    "session-id": "zai-7657dc81-3d21-41c9-80d6-446bb3c7f220",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789572196755-21452-a2d62af8",
+    "agent-id": "wm-09",
+    "artifact-ref": "706ca3e8",
+    "started-at": "2026-09-16T15:23:17.458690896Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T15:23:16.756044208Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T15:23:17.458707196Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T15:23:18.284466810Z",
+        "text": "Reconcile ONE conflicting condition before implementation. Joe resumed our task after your consultation, explicitly requiring respect for scope corrections. You request no interpretation failure envelope for machine exceptions, whereas WM-08 owner has already agreed the minimal closed-vocabulary addition :interpretation/machine-failure. Read retained wm08-schema-agreement.json and SCOPE.md under futon2/holes/labs/wm-contract/runs/wm-08-failure-classification-2026-09-16/.\nConcrete structural reason: full_loop_runner.clj attempt-evidence admission rejects companion .source files not referenced by a schema-valid record (around lines 2950\u20133000). The job captures request/intent/job/source bytes before construction. Bare rethrow would leave these orphaned and cause secondary close-admission failure; dropping diagnostics would violate your retention requirement. Existing interpretation failure schema is closed and contains no machine kind. Proposal: add exactly :interpretation/machine-failure to closed vocabulary, retain original exception/class/message/data and failure-kind in diagnostic and cause, preserve typed outer failure-kind (untyped -> :untyped-failure), write honest machine-labelled envelope; explicit runner content-membership set excludes machine/unknown/invariant kinds. No success/hold discharge from that new kind. This is stage-of-failure evidence, not fabricated interpretation content. WM-08 explicitly concurs.\nDo you accept this revision to your no-envelope condition? \u2026[trimmed]"
+      },
+      {
+        "seq": 4,
+        "type": "done",
+        "at": "2026-09-16T15:23:47.157454304Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 5,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T15:23:49.499608524Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789572196755-21452-a2d62af8",
+        "recorded-at": "2026-09-16T15:23:49.497379211Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-9 via /api/alpha/invoke/jobs/invoke-1789572196755-21452-a2d62af8",
+      "recorded-at": "2026-09-16T15:23:49.497379211Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789572196755-21452-a2d62af8",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "**Yes \u2014 I accept the revision.** My \"no envelope\" condition was wrong as stated; \u2718 my earlier advice overlooked that the attempt-evidence admission path requires every captured `.source` companion to be enumerated by ...",
+    "result": "**Yes \u2014 I accept the revision.** My \"no envelope\" condition was wrong as stated; \u2718 my earlier advice overlooked that the attempt-evidence admission path requires every captured `.source` companion to be enumerated by a schema-valid record, and I have now verified both halves of your structural argument in current source:\n\n- `interpretation_evidence.clj` \u2014 `failure-kinds` is a closed set (17 kinds) with no machine member, and `validate-record` enforces membership; and\n- `full_loop_runner.clj` (~2960\u20132995) \u2014 `companion-names` is built only from validated records; any captured file not in `companion-names` and not itself a schema-valid record throws `Attempt evidence schema invalid`. A bare rethrow would orphan request/intent/job/source bytes and break close admission \u2014 worse than the current defect, and dropping diagnostics would violate retention.\n\nSo the smallest change that keeps a schema-valid, honestly-labeled record and full source retention is exactly what you and WM-08 propose: add `:interpretation/machine-failure` to the closed vocabulary. This is a stage-of-failure envelope, not fabricated interpretation content \u2014 I agree with that characterization.\n\n**Conditions of acceptance (all consistent with the wm-08 owner's own conditions in the retained agreement, so no new conflict):**\n\n1. **Classification precedes vocabulary.** The machine-vs-content decision must happen on the refusal pattern (typed non-interpretation `:failure-kind` / untyped exception) *before* the `failure-kinds` membership check, and the current fallback `(if (contains? failure-kinds kind) kind :interpretation/invalid-receipt)` must not be reachable in a way that can manufacture or launder the new kind.\n2. **Cause preservation is an assertion, not a nicety.** The retained diagnostic and the outer exception must carry original exception class, message, `ex-data`, and original `:failure-kind` when present (untyped \u2192 `:untyped-failure` as proposed), so an independent reviewer can audit the classification rather than trust the label.\n3. **Runner side:** explicit content-failure membership set \u2192 hold; `:interpretation/machine-failure` \u2192 stop-line `:machine-failure` with the full discharge contract (distinct commit, independent review, grounded repair, distinct successor); unknown/unlisted kinds default `:machine-failure` (fail-closed). The new kind must never permit success, environmental discharge, or hold-then-clear. Misreporting in the safe direction (content\u2192machine) is strictly costlier, not permissive \u2014 the current machine\u2192hold direction is the bypass, and this closes it.\n4. **Budget stays `:incomplete-recoverable`** (already the runner's mapping for `:agent-budget-expired`); `:interpretation/budget-exceeded` keeps its existing route. Confirmed at `repair-class-for`.\n5. Explicit controls for `:interpretation/job-already-dispatched` and `:interpretation/attempt-identity-mismatch` (decide and test their routing, don't inherit it silently).\n\nScope as in SCOPE.md (three source files + tests/receipts) is agreed; hermetic controls, no production-store probes, clj-kondo + check-parens, claude-3 as proposed independent reviewer, no bundling of `706ca3e8`/`983d4c49`, no checkbox claim. WM-09 concurrence is hereby recorded \u2014 you have both owner agreements needed.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789572196755-21452-a2d62af8",
+      "at": "2026-09-16T15:23:47.157430760Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T15:23:47.157430760Z",
+    "created-at": "2026-09-16T15:23:16.755588204Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

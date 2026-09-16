@@ -27,6 +27,40 @@
     (let [end (Object.) r (edn/read {:eof end} reader)]
       (need! (and (map? r) (identical? end (edn/read {:eof end} reader)))
              :interpretation/invalid-receipt {:reason :not-one-edn-record}) r)))
+
+(defn- exception-chain [e]
+  (take 16 (take-while some? (iterate #(.getCause ^Throwable %) e))))
+
+(defn- failure-classification [e]
+  (let [chain (exception-chain e)
+        typed (some #(or (:failure-kind (ex-data %)) (:outcome (ex-data %))) chain)
+        data (ex-data e)
+        refusal (:interpretation/refusal data)
+        kind (cond
+               (#{:agent-budget-expired :agent-job-stalled} typed) :interpretation/budget-exceeded
+               (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
+                  :dispatch-failed :transport-timeout :transport-unavailable} typed)
+               :interpretation/agent-unavailable
+               typed (if (contains? evidence/failure-kinds typed)
+                       typed :interpretation/machine-failure)
+               refusal (if (contains? evidence/failure-kinds refusal)
+                         refusal :interpretation/machine-failure)
+               (= :source-digest-mismatch (:interpretation-evidence/refusal data))
+               :interpretation/source-changed
+               (= :attempt-identity-mismatch (:interpretation-evidence/refusal data))
+               :interpretation/attempt-identity-mismatch
+               (:interpretation-evidence/refusal data) :interpretation/invalid-receipt
+               (= :find/refusal (:finding data))
+               (if (= :o4 (:law data)) :interpretation/no-relevant-pattern
+                   :interpretation/invalid-receipt)
+               :else :interpretation/machine-failure)]
+    {:kind kind
+     :failure-kind (or typed
+                       (case kind
+                         :interpretation/budget-exceeded :agent-budget-expired
+                         :interpretation/agent-unavailable :agent-unavailable
+                         :interpretation/machine-failure :untyped-failure
+                         kind))}))
 (defn- queue-time [job]
   (try (- (.toEpochMilli (Instant/parse (:started-at job)))
           (.toEpochMilli (Instant/parse (:created-at job))))
@@ -150,13 +184,10 @@
         (let [_ (when (and @validation-started (= :validation @stage))
                   (swap! timing assoc :validation-ms (- (System/currentTimeMillis) @validation-started)))
               data (ex-data e)
-              kind (cond (= :o4 (:law data)) :interpretation/no-relevant-pattern
-                         (= :agent-budget-expired (:failure-kind data)) :interpretation/budget-exceeded
-                         (:interpretation/refusal data) (:interpretation/refusal data)
-                         (= :source-digest-mismatch (:interpretation-evidence/refusal data)) :interpretation/source-changed
-                         (= :readiness @stage) :interpretation/agent-unavailable
-                         :else :interpretation/invalid-receipt)
-              kind (if (contains? evidence/failure-kinds kind) kind :interpretation/invalid-receipt)
+              {:keys [kind failure-kind]} (failure-classification e)
+              causes (mapv (fn [t] {:class (.getName (class t))
+                                   :message (.getMessage ^Throwable t)
+                                   :data (ex-data t)}) (exception-chain e))
               _ (when (.exists receipt)
                   ;; Invalid or failed receipt bytes remain evidence, not an admitted success record.
                   (let [path (io/file dir (str "interpretation-return-" (UUID/randomUUID) ".source"))
@@ -175,6 +206,7 @@
               elapsed (- (System/currentTimeMillis) started)
               _ (save! (str "interpretation-diagnostic-" (UUID/randomUUID) ".source")
                        {:kind kind :stage @stage :error (.getMessage e) :data data
+                        :failure-kind failure-kind :causes causes
                         :expected-sources (vec (vals @captured))
                         :timing (assoc @timing :elapsed-ms elapsed)})
               _ (doseq [[file s] @captured]
@@ -202,8 +234,8 @@
           (write-new! path record)
           (throw (ex-info "Interpretation stopped construction"
                           {:outcome (if (= kind :interpretation/agent-unavailable) :agent-unavailable :incomplete)
-                           :failure-kind (case kind :interpretation/budget-exceeded :agent-budget-expired
-                                               :interpretation/agent-unavailable :agent-unavailable kind)
+                           :failure-kind failure-kind
+                           :interpretation/causes causes
                            :failure-stage :interpretation
                            :job-id (when (string? (:interpreter-job @identity)) (:interpreter-job @identity))
                            :interpretation/failure kind :interpretation-record (.getAbsolutePath path)

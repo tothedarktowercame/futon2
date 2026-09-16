@@ -8,6 +8,7 @@
             [futon2.aif.cascade-policy :as policy]
             [futon2.aif.interpretation-evidence-test :as receipt-fixture]
             [futon2.aif.interpretation-job :as job]
+            [futon2.aif.receipt-construction :as construction]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.full-loop-cohort :as cohort-store]
             [futon2.aif.full-loop-runner-test :as runner-fixture]
@@ -88,7 +89,7 @@
                     :interpretation-prepare-fn prepare
                     :interpretation-readiness-fn (fn [_ _]
                                                    (when (= scenario :unavailable)
-                                                     (throw (ex-info "no interpreter" {}))))
+                                                     (throw (ex-info "no interpreter" {:failure-kind :agent-unavailable}))))
                     :repo-head-observation-fn (fn [_] {:head "before" :observed-at-ms 1000})
                     :construct-fn (fn [_] (swap! constructors inc)
                                     {:shown [] :semilattice {:descent [] :co_app []}})
@@ -121,6 +122,12 @@
             close (when (.exists close-file) (edn/read-string (slurp close-file)))]
         {:result result :calls @calls :action action :organised @organised :constructors @constructors :failures failures :close close
          :adjudication-observations @adjudication-observations
+         :diagnostics (when (.exists dir)
+                        (mapv #(edn/read-string (slurp %))
+                              (filter #(.startsWith (.getName %) "interpretation-diagnostic-") (.listFiles dir))))
+         :rejected-returns (when (.exists dir)
+                             (mapv #(edn/read-string (slurp %))
+                                   (filter #(.startsWith (.getName %) "interpretation-return-") (.listFiles dir))))
          :observations (into {} (for [n ["fact-pre.edn" "fact-end.edn"]
                                      :let [f (io/file dir n)] :when (.exists f)]
                                  [n (edn/read-string (slurp f))]))})
@@ -159,10 +166,12 @@
                               [:interpretation/source-unavailable :interpretation/source-unavailable]
                               [:interpretation/no-citable-tension :interpretation/no-citable-tension]
                               [:interpretation/retrieval-unavailable :interpretation/retrieval-unavailable]]]
-    (let [{:keys [constructors calls failures close]} (run-case :receipt scenario)]
+    (let [{:keys [result constructors calls failures close]} (run-case :receipt scenario)]
       (is (zero? constructors) (str scenario))
       (is (every? #{"interpreter"} calls) (str scenario))
       (is (= expected (get-in failures [0 :failure :kind])) (str scenario))
+      (is (= :environmental-hold (get-in result [:data :repair-obligation :repair/class]))
+          (str scenario))
       (is (= evidence/failure-schema (:schema (first failures))))
       (is (seq (get-in close [:payload :close-evidence-manifest :entries])) (str scenario)))))
 
@@ -185,6 +194,8 @@
                  :failure {:kind :interpretation/target-unresolved :identity identity :stage :prepare
                            :source-refs [] :elapsed-ms 0 :partial-artifacts []}}]
     (is (= failure (evidence/validate-record failure)))
+    (let [machine (assoc-in failure [:failure :kind] :interpretation/machine-failure)]
+      (is (= machine (evidence/validate-record machine))))
     (doseq [[mutate reason] [[#(assoc-in % [:absent :identity] {:status :none :reason :missing}) :absence-section-invalid]
                              [#(assoc % :target {}) :shape-invalid]
                              [#(assoc-in % [:failure :kind] :invented) :failure-kind-invalid]]]
@@ -201,6 +212,52 @@
   (is (= :incomplete-recoverable (#'runner/repair-class-for :agent-budget-expired)))
   (is (= :environmental-hold (#'runner/repair-class-for :agent-unavailable)))
   (is (= :machine-failure (#'runner/repair-class-for :build-failed))))
+
+(deftest construction-machine-faults-keep-their-repair-contract
+  ;; Use the real receipt-mode runner with its namespace's hermetic stores.
+  ;; A successful interpretation followed by a code fault is not a content gap.
+  (doseq [[fault expected] [[(ex-info "controlled construction fault"
+                                    {:failure-kind :build-failed}) :build-failed]
+                            [(NullPointerException. "controlled null fault") :untyped-failure]
+                            [(ex-info "wrapped fault" {}
+                                      (ex-info "typed cause" {:failure-kind :build-failed})) :build-failed]
+                            [(ex-info "duplicate dispatch" {:interpretation/refusal :interpretation/job-already-dispatched})
+                             :interpretation/job-already-dispatched]
+                            [(ex-info "attempt mismatch" {:interpretation/refusal :interpretation/attempt-identity-mismatch})
+                             :interpretation/attempt-identity-mismatch]]]
+    (let [caught (atom nil)
+          run-job job/run!
+          {:keys [result calls constructors failures close diagnostics rejected-returns]}
+          (with-redefs [job/run! (fn [& args]
+                                  (try (apply run-job args)
+                                       (catch Exception e (reset! caught e) (throw e))))
+                        construction/construct!
+                                                          (fn [& _] (throw fault))]
+            (run-case :receipt :valid))]
+      (is (= ["interpreter"] calls))
+      (is (zero? constructors))
+      (is (= expected (get-in result [:data :failure-kind])))
+      (is (= :machine-failure (get-in result [:data :repair-obligation :repair/class])))
+      (is (identical? fault (.getCause ^Throwable @caught)))
+      (is (= expected (get-in diagnostics [0 :failure-kind])))
+      (is (= {:class (.getName (class fault)) :message (.getMessage ^Throwable fault) :data (ex-data fault)}
+             (get-in diagnostics [0 :causes 0])))
+      (is (= (:causes (first diagnostics)) (:interpretation/causes (ex-data @caught))))
+      (is (= (if (#{:build-failed :untyped-failure} expected)
+               :interpretation/machine-failure expected)
+             (get-in failures [0 :failure :kind])))
+      (is (seq (get-in close [:payload :close-evidence-manifest :entries])))
+      (doseq [prefix ["interpretation-failure-" "interpretation-diagnostic-" "interpretation-return-"]]
+        (is (some #(.startsWith (.getName (io/file (:source-path %))) prefix)
+                  (get-in close [:payload :close-evidence-manifest :entries])) prefix))
+      (is (string? (:returned-bytes-base64 (first rejected-returns)))))))
+
+(deftest unknown-and-invariant-interpretation-kinds-are-machine-failures
+  (doseq [kind [:interpretation/machine-failure :interpretation/new-unknown-kind
+               :interpretation/job-already-dispatched :interpretation/attempt-identity-mismatch
+               :interpretation/attempt-path-invalid :interpretation/action-mismatch
+               :interpretation/retriever-set-invalid]]
+    (is (= :machine-failure (#'runner/repair-class-for kind)) (str kind))))
 
 (deftest ticket-construction-preserves-action-and-rules
   (let [{:keys [result action constructors organised]} (run-case :receipt :ticket)
