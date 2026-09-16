@@ -1,0 +1,4 @@
+receipt-construction-test exit 0
+classification exit 0
+negative ae721644 exit 1
+delta negative 9d7ab9a5 exit 1

@@ -1,0 +1,2 @@
+{:case :d1-equal-time-distinct-identities, :result {:refusal :ambiguous-previous-construction, :identical? false, :files 2, :records 2}}
+{:case :d2-identical-pair-plus-distinct-equal-time, :result {:refusal :ambiguous-previous-construction, :identical? false, :files 2, :records 2}}
