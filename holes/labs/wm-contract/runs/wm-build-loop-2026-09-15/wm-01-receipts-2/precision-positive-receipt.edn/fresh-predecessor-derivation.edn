@@ -76,10 +76,7 @@
      "204a124fe3cbbde14841a7db76ef72a8e06fc5705bcfe6c2c39332fab5520cc9"}
     {:name "variationalFreeEnergy",
      :sha256
-     "b1caf4f3d2a21cc98121b38ac3414f1a41904da5df2209b6c639676c0ec0c69e"}
-    {:name "NonnegativeReal",
-     :sha256
-     "fd545b8db5ec8de29b37ad0b509f46cb14782d89dde93d2d859cd22cf429d442"}]}],
+     "b1caf4f3d2a21cc98121b38ac3414f1a41904da5df2209b6c639676c0ec0c69e"}]}],
  :elaborator
  {:command ["lake" "env" "lean"], :cwd "/home/joe/code/mathlib4"},
  :toolchain
@@ -90,7 +87,7 @@
   :lake-manifest-sha256
   "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"},
  :module "DarkTower.WarMachine.PrecisionWitness",
- :recorded-at "2026-09-16T00:24:04.851249813Z",
+ :recorded-at "2026-09-08T00:00:00Z",
  :result
  {:exit 0, :axioms ["propext" "Classical.choice" "Quot.sound"]},
  :receipt/type :PositiveLeanWitnessReceipt,

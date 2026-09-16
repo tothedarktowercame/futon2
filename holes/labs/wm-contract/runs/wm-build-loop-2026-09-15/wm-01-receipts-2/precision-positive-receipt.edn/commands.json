@@ -1,0 +1,43 @@
+[
+  {
+    "name": "protocol",
+    "command": [
+      "bb",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-receipts-2/receipt_control.clj",
+      "run",
+      "precision-positive-receipt.edn",
+      "[\"NonnegativeReal\"]"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "positive",
+    "command": [
+      "bb",
+      "checks/precision_witness.clj"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "negative-swap",
+    "command": [
+      "bb",
+      "checks/precision_witness.clj",
+      "--negative-swap"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "negative-type",
+    "command": [
+      "bb",
+      "checks/precision_witness.clj",
+      "--negative-type"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  }
+]

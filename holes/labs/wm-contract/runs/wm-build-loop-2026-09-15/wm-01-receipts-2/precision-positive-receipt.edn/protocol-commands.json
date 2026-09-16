@@ -1,0 +1,201 @@
+[ {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-7509903116315775431.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-14767423766511117262.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-17637118344201298156.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-8008426242769006946.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-3966159690819413784.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-15656065586056845082.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-3307993149739461019.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-8310209988962431674.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-8650531379409589383.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "--version" ],
+  "exit" : 0,
+  "out" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  "err" : ""
+}, {
+  "arguments" : [ {
+    "dir" : "/home/joe/code/mathlib4",
+    "out" : "string",
+    "err" : "string",
+    "continue" : true
+  }, "lake", "env", "lean", "/tmp/positive-proof-receipt-3596403534097908558.lean" ],
+  "exit" : 0,
+  "out" : "'DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  "err" : ""
+} ]

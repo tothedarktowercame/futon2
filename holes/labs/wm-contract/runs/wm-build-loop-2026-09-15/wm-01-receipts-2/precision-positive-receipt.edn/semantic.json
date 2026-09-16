@@ -1,0 +1,13 @@
+{
+  "disposition": "preserved",
+  "reading": "variationalFreeEnergy now accepts PrecisionMap instead of arbitrary real weights and projects each NonnegativeReal.value. precisionTwo and precisionOne already carry proofs of nonnegativity; theorem calls now pass those maps directly. Numeric meaning remains half of mean(weight times squared error): weighted 2/1 gives 1, swapped 1/2 gives 2 over 14 channels. No general permission for signed precision survives; the positive reference subjects and six adapter scalar values are unchanged. Pin NonnegativeReal alongside the already pinned PrecisionMap.",
+  "additions": [
+    "NonnegativeReal"
+  ],
+  "wrapper": "precision_witness.clj",
+  "negative-modes": [
+    "--negative-swap",
+    "--negative-type"
+  ],
+  "exit-convention": "Swap changes expected swapped F to 1 in memory; type mode requires #guard_msgs rejecting signed error map as precision. Each requires valid positive baseline; failure 2 for negatives, 1 for positive."
+}

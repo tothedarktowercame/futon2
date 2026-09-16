@@ -1,0 +1,1 @@
+precision-witness: negative-control PASS (signed error map rejected as precision) exit-convention=0-pass/1-fail/2-mutation-slipped

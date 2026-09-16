@@ -1,0 +1,37 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/PrecisionWitness.lean",
+  "name" : "weightedReference",
+  "old" : "542e6e23243c0e99f60fa1cbca6b00c783f802930ef8bf176ba72132f250fd62",
+  "new" : "a2310939f460fa555c7a04b5adf0208626092123e43e8da459e107fbb52ebf79",
+  "pre-repair-text" : "theorem weightedReference :\n    variationalFreeEnergy (fun k => (precisionTwo k).value)\n      (fun _ => precisionReference.weightedError) = ⟨precisionReference.weightedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionTwo]\n\n",
+  "repaired-text" : "theorem weightedReference :\n    variationalFreeEnergy precisionTwo\n      (fun _ => precisionReference.weightedError) = ⟨precisionReference.weightedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionTwo]\n\n",
+  "head-text" : "theorem weightedReference :\n    variationalFreeEnergy precisionTwo\n      (fun _ => precisionReference.weightedError) = ⟨precisionReference.weightedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionTwo]\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/PrecisionWitness.lean",
+  "name" : "swappedReference",
+  "old" : "4af6666616a4cb9650b2b28330fbaff41c6bfde9c34330b9645c6db6ce2ec27a",
+  "new" : "1b73a3a18640500e48eb70e8dbdab71b0be7f20791b16d84cdef729047c6f7c4",
+  "pre-repair-text" : "theorem swappedReference :\n    variationalFreeEnergy (fun k => (precisionOne k).value)\n      (fun _ => precisionReference.swappedError) = ⟨precisionReference.swappedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionOne]\n\n",
+  "repaired-text" : "theorem swappedReference :\n    variationalFreeEnergy precisionOne\n      (fun _ => precisionReference.swappedError) = ⟨precisionReference.swappedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionOne]\n\n",
+  "head-text" : "theorem swappedReference :\n    variationalFreeEnergy precisionOne\n      (fun _ => precisionReference.swappedError) = ⟨precisionReference.swappedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionOne]\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/PrecisionWitness.lean",
+  "name" : "precisionAndErrorAreNotInterchangeable",
+  "old" : "c914e1877b9f17178461964d989b862bec271edc783c6677e3fcc12fd834a767",
+  "new" : "0ff217ed61fccc546a98748755b72ba7e7fe8ee26371b6c97b062729b392d09e",
+  "pre-repair-text" : "theorem precisionAndErrorAreNotInterchangeable :\n    variationalFreeEnergy (fun k => (precisionTwo k).value) (fun _ => 1) ≠\n      variationalFreeEnergy (fun k => (precisionOne k).value) (fun _ => 2) := by\n  norm_num [variationalFreeEnergy, Channel.all, precisionTwo, precisionOne]\n\n",
+  "repaired-text" : "theorem precisionAndErrorAreNotInterchangeable :\n    variationalFreeEnergy precisionTwo (fun _ => 1) ≠\n      variationalFreeEnergy precisionOne (fun _ => 2) := by\n  norm_num [variationalFreeEnergy, Channel.all, precisionTwo, precisionOne]\n\n",
+  "head-text" : "theorem precisionAndErrorAreNotInterchangeable :\n    variationalFreeEnergy precisionTwo (fun _ => 1) ≠\n      variationalFreeEnergy precisionOne (fun _ => 2) := by\n  norm_num [variationalFreeEnergy, Channel.all, precisionTwo, precisionOne]\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/Holes.lean",
+  "name" : "variationalFreeEnergy",
+  "old" : "6a2cf76f8016e8f7efe2575c3fad09a963f3eae3da0f78c20b465966c9d96174",
+  "new" : "b1caf4f3d2a21cc98121b38ac3414f1a41904da5df2209b6c639676c0ec0c69e",
+  "pre-repair-text" : "def variationalFreeEnergy (precision error : Channel → ℝ) : VariationalFreeEnergyValue :=\n  ⟨(1 / 2 : ℝ) *\n    ((Channel.all.map fun k => precision k * (error k) ^ 2).foldl (· + ·) 0 /\n      Channel.all.length)⟩\n\n/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:31 · P-glossary-mathematics · holder: by-record · decided 2026-08-31 · The computed mass of a kernel row; `ProbabilityKernel.normalised` proves it is one. -/\n",
+  "repaired-text" : "def variationalFreeEnergy (precision : PrecisionMap) (error : Channel → ℝ) : VariationalFreeEnergyValue :=\n  ⟨(1 / 2 : ℝ) *\n    ((Channel.all.map fun k => (precision k).value * (error k) ^ 2).foldl (· + ·) 0 /\n      Channel.all.length)⟩\n\n/-- Nonnegative precision weights squared errors by nonnegative amounts. -/\n",
+  "head-text" : "def variationalFreeEnergy (precision : PrecisionMap) (error : Channel → ℝ) : VariationalFreeEnergyValue :=\n  ⟨(1 / 2 : ℝ) *\n    ((Channel.all.map fun k => (precision k).value * (error k) ^ 2).foldl (· + ·) 0 /\n      Channel.all.length)⟩\n\n/-- Nonnegative precision weights squared errors by nonnegative amounts. -/\n"
+} ]
