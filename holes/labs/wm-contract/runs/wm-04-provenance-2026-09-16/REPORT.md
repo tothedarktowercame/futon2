@@ -5,8 +5,9 @@ DEP1/DEP2 provenance work and narrow the observation-contract work with WM-04.
 Target: `M-shared-memory-control-build-test`.
 Revised after independent review `1b1e96b6`: DEP1 retrieval accepted with wording
 corrections; the initial DEP2 account was rejected and is corrected below using
-the reviewer's execution join. Revision acceptance pending. No observation,
-label, model or production action.
+the reviewer's execution join. Final independent ACCEPT: `6802fa87`, including
+owner assessment `b4d9f746`, at bounded retrieval/linkage and proposed-question
+scope. No observation, label, model or production action.
 
 ## DEP1: original records acquired
 
@@ -33,7 +34,7 @@ they are stronger evidence than a source-code citation to the decision UUID.
 The retrieval API returns stored entries (`handle-evidence-entry`); it does not
 authenticate authorship cryptographically. The transcript's author/role/transport
 fields and chain are the available attribution, but they do not identify who
-typed the input: the same session has 17 user-role turns attributed to joe,
+typed the input: the retained 79-record query window has 17 user-role turns attributed to joe,
 including eight agent-written park-wake payloads. The quoted turn reads as
 operator speech rather than a wake payload; that distinction relies on content.
 This packet does not manufacture
@@ -90,8 +91,9 @@ transport source and upstream specification/handoff. This is a bounded local
 correlation search, not a global absence census or proof the selected action
 never ran. Different timestamp encodings or an external ledger would require
 additional linkage evidence. This initial search was insufficient for the
-provenance task: independent review found the join through the phases log and
-morning-brief item, which is outside those globbed roots.
+provenance task: independent review found the join through the phases log
+(inside the searched roots, but with different timestamps) and the morning-brief
+item (outside those globbed roots).
 
 **Verified join:** opportunity
 `duree-click-on-demand/2026-09-12T17:23:07.717766103Z/ed3826f3-e2bc-4bf4-8285-d98ea30d71b8`,
@@ -104,7 +106,9 @@ different keys but equal 148-value multisets. The same record says
 `M-f11-find-production-successor` as the enacted candidate and selected target.
 This is the record's authority classification, not new authentication by us.
 
-The phases log lines 6833–6869 identify this opportunity/execution. Selection is
+The retained phases-log excerpt, lines 6833–6869, identifies this
+opportunity/execution. The whole-file hash may change on a future append; use
+`review-claude-3/phases-log-lines-6833-6869.txt` for the retained excerpt. Selection is
 17:26:16–17:27:26, construction 17:27:30–17:27:34, author-dispatch starts at
 17:28:10.105, and delivery QA occurs at 17:34:21. These times belong to the F11
 click. They cannot be borrowed as action/close times for the displaced target.
