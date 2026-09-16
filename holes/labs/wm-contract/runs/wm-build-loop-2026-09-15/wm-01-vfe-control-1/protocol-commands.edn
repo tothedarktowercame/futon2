@@ -1,0 +1,129 @@
+[{:arguments
+  ({:dir "/home/joe/code/mathlib4",
+    :out :string,
+    :err :string,
+    :continue true}
+   "lake"
+   "env"
+   "lean"
+   "/tmp/vfe-mutation-1784542009600774495.lean"),
+  :exit 1,
+  :out
+  "/tmp/vfe-mutation-1784542009600774495.lean:26:38: error: Type mismatch\n  gaussianReference.precision\nhas type\n  ℝ\nbut is expected to have type\n  NonnegativeReal\n",
+  :err ""}
+ {:arguments
+  ({:dir "/home/joe/code/mathlib4",
+    :out :string,
+    :err :string,
+    :continue true}
+   "lake"
+   "env"
+   "lean"
+   "/tmp/vfe-mutation-14330552937398733899.lean"),
+  :exit 0,
+  :out "",
+  :err ""}
+ {:arguments
+  ({:dir "/home/joe/code/mathlib4",
+    :out :string,
+    :err :string,
+    :continue true}
+   "lake"
+   "env"
+   "lean"
+   "--version"),
+  :exit 0,
+  :out
+  "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  :err ""}
+ {:arguments
+  ({:dir "/home/joe/code/mathlib4",
+    :out :string,
+    :err :string,
+    :continue true}
+   "lake"
+   "env"
+   "lean"
+   "/tmp/positive-proof-receipt-4953785799573413759.lean"),
+  :exit 0,
+  :out
+  "'DarkTower.WarMachine.VariationalFreeEnergyWitness.constantGaussianReference' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  :err ""}
+ {:arguments
+  ({:dir "/home/joe/code/mathlib4",
+    :out :string,
+    :err :string,
+    :continue true}
+   "lake"
+   "env"
+   "lean"
+   "--version"),
+  :exit 0,
+  :out
+  "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  :err ""}
+ {:arguments
+  ({:dir "/home/joe/code/mathlib4",
+    :out :string,
+    :err :string,
+    :continue true}
+   "lake"
+   "env"
+   "lean"
+   "/tmp/positive-proof-receipt-14264867774514299637.lean"),
+  :exit 0,
+  :out
+  "'DarkTower.WarMachine.VariationalFreeEnergyWitness.constantGaussianReference' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  :err ""}
+ {:arguments
+  ({:dir "/home/joe/code/mathlib4",
+    :out :string,
+    :err :string,
+    :continue true}
+   "lake"
+   "env"
+   "lean"
+   "--version"),
+  :exit 0,
+  :out
+  "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  :err ""}
+ {:arguments
+  ({:dir "/home/joe/code/mathlib4",
+    :out :string,
+    :err :string,
+    :continue true}
+   "lake"
+   "env"
+   "lean"
+   "/tmp/positive-proof-receipt-2403533416341082199.lean"),
+  :exit 0,
+  :out
+  "'DarkTower.WarMachine.VariationalFreeEnergyWitness.constantGaussianReference' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  :err ""}
+ {:arguments
+  ({:dir "/home/joe/code/mathlib4",
+    :out :string,
+    :err :string,
+    :continue true}
+   "lake"
+   "env"
+   "lean"
+   "--version"),
+  :exit 0,
+  :out
+  "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)\n",
+  :err ""}
+ {:arguments
+  ({:dir "/home/joe/code/mathlib4",
+    :out :string,
+    :err :string,
+    :continue true}
+   "lake"
+   "env"
+   "lean"
+   "/tmp/positive-proof-receipt-16666349030114590278.lean"),
+  :exit 0,
+  :out
+  "'DarkTower.WarMachine.VariationalFreeEnergyWitness.constantGaussianReference' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n",
+  :err ""}]

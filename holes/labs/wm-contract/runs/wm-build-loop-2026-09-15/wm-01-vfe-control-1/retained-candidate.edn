@@ -76,7 +76,7 @@
   :lake-manifest-sha256
   "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"},
  :module "DarkTower.WarMachine.VariationalFreeEnergyWitness",
- :recorded-at "2026-09-16T12:56:48.954835438Z",
+ :recorded-at "2026-09-16T00:26:24.673983334Z",
  :result
  {:exit 0, :axioms ["propext" "Classical.choice" "Quot.sound"]},
  :receipt/type :PositiveLeanWitnessReceipt,

@@ -1,0 +1,4 @@
+{:exit 1,
+ :out
+ "/tmp/vfe-mutation-1784542009600774495.lean:26:38: error: Type mismatch\n  gaussianReference.precision\nhas type\n  ℝ\nbut is expected to have type\n  NonnegativeReal\n",
+ :err ""}

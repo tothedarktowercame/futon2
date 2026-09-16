@@ -1,0 +1,7 @@
+{:needle
+ "=\n      ⟨gaussianReference.expectedVariationalF⟩ := by\n  norm_num [gaussianReference, variationalFreeEnergy, Channel.all]",
+ :old
+ "=\n      variationalFreeEnergy (fun _ => gaussianReference.precision)\n        (fun _ => gaussianReference.predictionError) := by\n  rfl",
+ :new
+ "=\n      variationalFreeEnergy (fun _ => ⟨gaussianReference.precision, by norm_num [gaussianReference]⟩)\n        (fun _ => gaussianReference.predictionError) := by\n  rfl",
+ :substitution-count 1}

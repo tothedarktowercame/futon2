@@ -33,7 +33,7 @@
         weakened-source
         (str/replace source
           "=\n      ⟨gaussianReference.expectedVariationalF⟩ := by\n  norm_num [gaussianReference, variationalFreeEnergy, Channel.all]"
-          "=\n      variationalFreeEnergy (fun _ => ⟨gaussianReference.precision, by norm_num [gaussianReference]⟩)\n        (fun _ => gaussianReference.predictionError) := by\n  rfl")
+          "=\n      variationalFreeEnergy (fun _ => gaussianReference.precision)\n        (fun _ => gaussianReference.predictionError) := by\n  rfl")
         overrides (cond weakened? {["mathlib4" "DarkTower/WarMachine/VariationalFreeEnergyWitness.lean"] weakened-source}
                         unrelated? {["mathlib4" "DarkTower/WarMachine/VariationalFreeEnergyWitness.lean"]
                                     (str source "\n-- unrelated positive-receipt control\n")}
