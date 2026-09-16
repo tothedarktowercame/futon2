@@ -1,0 +1,1608 @@
+[ {
+  "file" : "ambiguity-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "ambiguityReference",
+      "mappings" : [ {
+        "fixture-path" : [ "cases", 0, "predicted-state-masses", 0 ],
+        "lean-field" : "predictedStateMass",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "observation-masses", 0 ],
+        "lean-field" : "observationMass",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "expected-ambiguity" ],
+        "lean-field" : "expectedAmbiguity",
+        "expected" : 0,
+        "expected-shape" : "scalar"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.AmbiguityWitness.pointMassAmbiguity",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/AmbiguityWitness.lean",
+      "declarations" : [ {
+        "name" : "predictedState",
+        "sha256" : "98e655ea9a0c1f77290db02d84af58e36d2dc266ad78a8c2af1c5944e5629257"
+      }, {
+        "name" : "observationModel",
+        "sha256" : "8329b7c2a065c20d977156de334d81ec4181240e2cfb0a4b2d5dc4af81112fb8"
+      }, {
+        "name" : "AmbiguityReference",
+        "sha256" : "d24a5caa3e5d4972349afc6f43494ea832676e24ae9c2a2a592734219ec03b0b"
+      }, {
+        "name" : "ambiguityReference",
+        "sha256" : "fcd41174ad023a4b7ecdd41468cb8c8eb549dea52208911862056c25667eaa0e"
+      }, {
+        "name" : "pointMassAmbiguity",
+        "sha256" : "17d23bdaf4a4e1303ff6d3de72377f8518d8e6c9b37da2dcd801611b190c8ec9"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "observationEntropy",
+        "sha256" : "ac1ad42dbd725edd5087f2da02d828715f7c777229d07b5edc099bdb41660507"
+      }, {
+        "name" : "ambiguity",
+        "sha256" : "1999be50396039fae4810324cf65f2db75de1bdf21c59880e03e33d2a45dd935"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.AmbiguityWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/ambiguity-reference.edn",
+      "schema" : "ambiguity-reference/v1",
+      "sha256" : "3b95bc04ab9e58e65a581d61dbf9fbe0969f454122a988ba9fccd59db64797d0"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/AmbiguityWitness.lean",
+    "name" : "predictedState",
+    "old" : "98e655ea9a0c1f77290db02d84af58e36d2dc266ad78a8c2af1c5944e5629257",
+    "new" : "2156ea86d2b865bba75dda2fa43ff792569e7b859b974ee2c4dab04842911a6e",
+    "pre-repair-text" : "def predictedState : ProbabilityKernel Policy State where\n  support := fun _ => [.certain]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+    "repaired-text" : "def predictedState : ProbabilityKernel Policy State where\n  support := fun _ => [.certain]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n",
+    "head-text" : "def predictedState : ProbabilityKernel Policy State where\n  support := fun _ => [.certain]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/AmbiguityWitness.lean",
+    "name" : "observationModel",
+    "old" : "8329b7c2a065c20d977156de334d81ec4181240e2cfb0a4b2d5dc4af81112fb8",
+    "new" : "dc5954fa0959eff5b9a0092ad001a0edbe9d4d3a51180f4ea233bfafd8067316",
+    "pre-repair-text" : "def observationModel : observationKernel State Observation where\n  support := fun _ => [.seen]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+    "repaired-text" : "def observationModel : observationKernel State Observation where\n  support := fun _ => [.seen]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n",
+    "head-text" : "def observationModel : observationKernel State Observation where\n  support := fun _ => [.seen]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n"
+  } ],
+  "old-sha256" : "78d33ebc36d9455a63c1a07a8f5b8a733fac70f51cae684ad1d990475610656e"
+}, {
+  "file" : "expected-free-energy-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "efeReference",
+      "mappings" : [ {
+        "fixture-path" : [ "cases", 0, "predictive-masses", 0 ],
+        "lean-field" : "predictiveMass",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "preference-masses", 0 ],
+        "lean-field" : "preferenceMass",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "risk" ],
+        "lean-field" : "risk",
+        "expected" : 0,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "ambiguity" ],
+        "lean-field" : "ambiguity",
+        "expected" : 2,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "epistemic-gain" ],
+        "lean-field" : "epistemicGain",
+        "expected" : -2,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "expected-free-energy" ],
+        "lean-field" : "expectedFreeEnergy",
+        "expected" : 2,
+        "expected-shape" : "scalar"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.ExpectedFreeEnergyWitness.onePointFixture",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+      "declarations" : [ {
+        "name" : "Q",
+        "sha256" : "1acd2511dc1e521a12aec384baa65d3fe26b3fe8f376e0da53e63e6af665e80c"
+      }, {
+        "name" : "Cdist",
+        "sha256" : "43bf261efeadbe4aa0e1507d48666d6bab8fe03a16d79cce86f1e16b9b339650"
+      }, {
+        "name" : "positivePreference",
+        "sha256" : "106cfb1e118a5f51cb2593c499a3e75dcae9955f4baf976e061179999698072b"
+      }, {
+        "name" : "EFEReference",
+        "sha256" : "15e437a1f2c444639eb3cfc3d4c0c71fa4fe5e863005374d835239aa2f6da366"
+      }, {
+        "name" : "efeReference",
+        "sha256" : "8c874019fa053b6e68628407017b3cc68d4346fc2398a2f85b632775838d249a"
+      }, {
+        "name" : "onePointFixture",
+        "sha256" : "a59a00907741a2d8f5340fdef610fd32a5184346ced7656175b49551dfc21067"
+      }, {
+        "name" : "decompositionFixture",
+        "sha256" : "05474babdd3a9b5faa8d9c930472fcd4bf3d1513a0e1c9bb3cec8770ab83c477"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "predictiveOutcomeRisk",
+        "sha256" : "019267ca2ff14dc41dd501d1ec8693ff6d6534b6e2464d34f9dfa74aca48dced"
+      }, {
+        "name" : "expectedFreeEnergy",
+        "sha256" : "ca65d68f0cc4deb24197d1d273b97e34cb1b5c05db176ef1dc32396adc16380b"
+      }, {
+        "name" : "G",
+        "sha256" : "1747d9b5a8db91f1374eb8d7026ba25716e1604087c0bf3125650404a14324dd"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.ExpectedFreeEnergyWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/expected-free-energy-reference.edn",
+      "schema" : "expected-free-energy-reference/v1",
+      "sha256" : "491989539e5025ca7c8efa80f2827ec2bed5a84106a5a3cd40164deaa32cf13f"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+    "name" : "Q",
+    "old" : "1acd2511dc1e521a12aec384baa65d3fe26b3fe8f376e0da53e63e6af665e80c",
+    "new" : "55c76675edf83d1601a0384dead60b297d37d30046d9f778d0000059ee6969c8",
+    "pre-repair-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+    "repaired-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [datum]\n  normalised := by intros; norm_num\n\n",
+    "head-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [datum]\n  normalised := by intros; norm_num\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean",
+    "name" : "Cdist",
+    "old" : "43bf261efeadbe4aa0e1507d48666d6bab8fe03a16d79cce86f1e16b9b339650",
+    "new" : "78821fab3626623543975f225d15ff4c4ebde04114149261999cedf10a2c12ea",
+    "pre-repair-text" : "private def Cdist : PreferenceDistribution TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+    "repaired-text" : "private def Cdist : PreferenceDistribution TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [datum]\n  normalised := by intros; norm_num\n\n",
+    "head-text" : "private def Cdist : PreferenceDistribution TestObservation where\n  support := fun _ => [datum]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [datum]\n  normalised := by intros; norm_num\n\n"
+  } ],
+  "old-sha256" : "503cabbf96fea232ad3c85f8d10334cb783614207c2bca457dca87120fb524dd"
+}, {
+  "file" : "expected-information-gain-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "eigReference",
+      "mappings" : [ {
+        "fixture-path" : [ "cases", 0, "predictive-outcome-masses", 0 ],
+        "lean-field" : "predictiveOutcomeMass",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "parameter-prior-masses", 0 ],
+        "lean-field" : "parameterPriorMassA",
+        "expected" : 0.5,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "parameter-prior-masses", 1 ],
+        "lean-field" : "parameterPriorMassB",
+        "expected" : 0.5,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "parameter-posterior-masses", 0 ],
+        "lean-field" : "parameterPosteriorMassA",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "parameter-posterior-masses", 1 ],
+        "lean-field" : "parameterPosteriorMassB",
+        "expected" : 0,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "expected-information-gain" ],
+        "lean-field" : "expectedInformationGain",
+        "expected" : "log(2)",
+        "expected-shape" : "scalar"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.ExpectedInformationGainWitness.binaryFixture",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+      "declarations" : [ {
+        "name" : "Q",
+        "sha256" : "214ca13df03659d049d0e8982d99218b88af654159688fde9633de419a3ac0f1"
+      }, {
+        "name" : "prior",
+        "sha256" : "e476c58e3d2153697517103a8fcf6f7330db36f46d55f3a01039067f026dca33"
+      }, {
+        "name" : "posterior",
+        "sha256" : "bf05e61328b96b1c775e7953c2d341f8239504ee0939e1fde162f9ea5af37946"
+      }, {
+        "name" : "positivePrior",
+        "sha256" : "5570f735287843dcdf520bfede0e0854f2e14829aa067caf3a97cab76990d652"
+      }, {
+        "name" : "EIGReference",
+        "sha256" : "173bc79c7c3a5998b8e234a96839d54b654dd5d4655c54bfd8e4990abc6879b4"
+      }, {
+        "name" : "eigReference",
+        "sha256" : "e74c6be3f1e400ff4a79e88c3b38019241a04f40c45ad3c44c2c09818fd69f8c"
+      }, {
+        "name" : "binaryFixture",
+        "sha256" : "af9bb308b52f1733a1eedd0192dc19b0ad0b196c2f3268c7ebf092823d69ad15"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "parameterInformationGain",
+        "sha256" : "9c46be7bfb46ac1593d93bc6959787192e18c116ca16128fc24c4b3e2a0aaa92"
+      }, {
+        "name" : "expectedInformationGain",
+        "sha256" : "dcc3c0a46cd122c986a18656758df15c1d44a39e2106a39d5bd81b0b3c1e8cf4"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.ExpectedInformationGainWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/expected-information-gain-reference.edn",
+      "schema" : "expected-information-gain-reference/v1",
+      "sha256" : "17a37dcde4a9c2fdc889ab4f7421b59ef96458f94d525df99d788a778a3f7f6c"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+    "name" : "Q",
+    "old" : "214ca13df03659d049d0e8982d99218b88af654159688fde9633de419a3ac0f1",
+    "new" : "78e9a9f9e5007d013bdc9a98dccaa005ffebad80c7b3d4653fcfa844762a9cb4",
+    "pre-repair-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [outcome]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+    "repaired-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [outcome]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [outcome]\n  normalised := by intros; norm_num\n\n",
+    "head-text" : "private def Q : PredictiveOutcomeKernel TestPolicy TestObservation where\n  support := fun _ => [outcome]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [outcome]\n  normalised := by intros; norm_num\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+    "name" : "prior",
+    "old" : "e476c58e3d2153697517103a8fcf6f7330db36f46d55f3a01039067f026dca33",
+    "new" : "af8143bd06d50878648d99b6e9c0934a00f899136049d0e94d927601531a15af",
+    "pre-repair-text" : "private def prior : ParameterPriorKernel TestPolicy Parameter where\n  support := fun _ => [.a, .b]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+    "repaired-text" : "private def prior : ParameterPriorKernel TestPolicy Parameter where\n  support := fun _ => [.a, .b]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n",
+    "head-text" : "private def prior : ParameterPriorKernel TestPolicy Parameter where\n  support := fun _ => [.a, .b]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/ExpectedInformationGainWitness.lean",
+    "name" : "posterior",
+    "old" : "bf05e61328b96b1c775e7953c2d341f8239504ee0939e1fde162f9ea5af37946",
+    "new" : "821ea72b35f4623c318f08ddd65837e5f48ea402eddb6c4a035578c6da5386c6",
+    "pre-repair-text" : "private def posterior : ParameterPosteriorKernel TestPolicy TestObservation Parameter where\n  support := fun _ => [.a]\n  mass := fun _ θ => match θ with | .a => 1 | .b => 0\n  nonnegative := by\n    intro _ θ\n    cases θ <;> norm_num\n  normalised := by intros; norm_num\n\n",
+    "repaired-text" : "private def posterior : ParameterPosteriorKernel TestPolicy TestObservation Parameter where\n  support := fun _ => [.a]\n  mass := fun _ θ => match θ with | .a => 1 | .b => 0\n  nonnegative := by\n    intro _ θ\n    cases θ <;> norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n",
+    "head-text" : "private def posterior : ParameterPosteriorKernel TestPolicy TestObservation Parameter where\n  support := fun _ => [.a]\n  mass := fun _ θ => match θ with | .a => 1 | .b => 0\n  nonnegative := by\n    intro _ θ\n    cases θ <;> norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n"
+  } ],
+  "old-sha256" : "9185fab0f83f56ab83aedaf4061825bf6c28e76e685e3da887c5eba87a1de521"
+}, {
+  "file" : "generative-model-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "factorReference",
+      "mappings" : [ {
+        "fixture-path" : [ "cases", 0, "observation-mass" ],
+        "lean-field" : "observationMass",
+        "expected" : 0.5,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "transition-mass" ],
+        "lean-field" : "transitionMass",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "policy-prior-mass" ],
+        "lean-field" : "policyPriorMass",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "cases", 0, "joint-factor-mass" ],
+        "lean-field" : "jointFactorMass",
+        "expected" : 0.5,
+        "expected-shape" : "scalar"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.GenerativeModelWitness.factorFixture",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+      "declarations" : [ {
+        "name" : "observation",
+        "sha256" : "a53010b3302cfa67522ce52ec5f60d6b2f694935954188027ecb2c53edef1b58"
+      }, {
+        "name" : "transition",
+        "sha256" : "80fdb22d491d91abba8b3ddda520d071a193ff4dfc3be52fdc82436a1f6d55b6"
+      }, {
+        "name" : "policyPrior",
+        "sha256" : "d68e4107e5be595f8b7837728f1904edc7d688bee8bdccf5ddd2d4dfc8547828"
+      }, {
+        "name" : "model",
+        "sha256" : "809aa8ea4a0c6e8a6432b5cbdf8c8c5cb072241f5a158b14c7573df1f99a1caf"
+      }, {
+        "name" : "FactorReference",
+        "sha256" : "4f4d30f76e664901b2f0b1e57a2e3a5d37aa0a8e6dc2d92bac30508a240befde"
+      }, {
+        "name" : "factorReference",
+        "sha256" : "8f5ee9e8cd0cd0971ac0e06b4c4099eebaf6a78ca14280e0c6edcc1d3c110504"
+      }, {
+        "name" : "factorFixture",
+        "sha256" : "e2bdca10eff9663a9a9fc83247dd372f8e8fb4d4d6d6407a3bd96e4ee0f53c27"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "ProbabilityKernel",
+        "sha256" : "d5940a2d22c5f76cd28f62475c178bfd68dd870fee372a0a6dbec4c17fa57e4c"
+      }, {
+        "name" : "Outcome",
+        "sha256" : "f58ab3a48801ea1f0c37c39b738f11212cc7f34d158bb28c075d5c9ce20a5a42"
+      }, {
+        "name" : "TransitionKernel",
+        "sha256" : "c8650cbde4347c92b097a940e956cb6b572df2fad52d7169d5c68febb05f4fdb"
+      }, {
+        "name" : "PolicyPriorKernel",
+        "sha256" : "570a07a800fd63eab3b19197117d9d974872017860268d03a0089137952d814e"
+      }, {
+        "name" : "GenerativeModel",
+        "sha256" : "2f612cf9075ff571b1165f5bcb37511a967495a2652d84f2483a62db211e0017"
+      }, {
+        "name" : "generativeFactorMass",
+        "sha256" : "3cc8c2d69fdd0c227a5bce728013c6200e2829fefca58c59133793a3ce666e52"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "reattested" : "2026-09-09 claude-1: Outcome window moved because the adjacent C-hole docstring at Holes.lean:152 changed under RULINGS-walkthrough-2026-09-09.md Item 18c (mathlib4 453054fbef); abbrev Outcome itself is byte-identical; lake env lean DarkTower/WarMachine/GenerativeModelWitness.lean re-run exit 0",
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.GenerativeModelWitness",
+    "recorded-at" : "2026-09-09T03:35:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/generative-model-reference.edn",
+      "schema" : "generative-model-reference/v1",
+      "sha256" : "e332acad80c4a8e5e7b7ed878041d833c2ddb9e3fd529f8ad9f587eb89e5d93d"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "observation",
+    "old" : "a53010b3302cfa67522ce52ec5f60d6b2f694935954188027ecb2c53edef1b58",
+    "new" : "f383a02d375c80ad4413fbfa86b158270d0d4d212b57567b789ef8f326309b9a",
+    "pre-repair-text" : "private def observation : ProbabilityKernel TestState (Outcome TestObservation) where\n  support := fun _ => [passOutcome, failOutcome]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n/-- Used only by the executable structural negative control: its state type is\ndeliberately incompatible with `transition`. -/\n",
+    "repaired-text" : "private def observation : ProbabilityKernel TestState (Outcome TestObservation) where\n  support := fun _ => [passOutcome, failOutcome]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp [passOutcome, failOutcome]\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [passOutcome, failOutcome]\n  normalised := by intros; norm_num\n\n/-- Used only by the executable structural negative control: its state type is\ndeliberately incompatible with `transition`. -/\n",
+    "head-text" : "private def observation : ProbabilityKernel TestState (Outcome TestObservation) where\n  support := fun _ => [passOutcome, failOutcome]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp [passOutcome, failOutcome]\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [passOutcome, failOutcome]\n  normalised := by intros; norm_num\n\n/-- Used only by the executable structural negative control: its state type is\ndeliberately incompatible with `transition`. -/\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "transition",
+    "old" : "80fdb22d491d91abba8b3ddda520d071a193ff4dfc3be52fdc82436a1f6d55b6",
+    "new" : "6eacde9ca9b5930ec8063ed1f2f5ddae408ed4931fc5cd3ecd00b37b15f6b4c2",
+    "pre-repair-text" : "private def transition : TransitionKernel TestState TestAction where\n  support := fun _ => [.ready]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+    "repaired-text" : "private def transition : TransitionKernel TestState TestAction where\n  support := fun _ => [.ready]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n",
+    "head-text" : "private def transition : TransitionKernel TestState TestAction where\n  support := fun _ => [.ready]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "policyPrior",
+    "old" : "d68e4107e5be595f8b7837728f1904edc7d688bee8bdccf5ddd2d4dfc8547828",
+    "new" : "b1d0b9c2e716b887316cff3eed0eea3d306f858fd5b4d45dc20eed32d861869a",
+    "pre-repair-text" : "private def policyPrior : PolicyPriorKernel TestPolicy where\n  support := fun _ => [.inspect]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+    "repaired-text" : "private def policyPrior : PolicyPriorKernel TestPolicy where\n  support := fun _ => [.inspect]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n",
+    "head-text" : "private def policyPrior : PolicyPriorKernel TestPolicy where\n  support := fun _ => [.inspect]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "ProbabilityKernel",
+    "old" : "d5940a2d22c5f76cd28f62475c178bfd68dd870fee372a0a6dbec4c17fa57e4c",
+    "new" : "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+    "pre-repair-text" : "structure ProbabilityKernel (S O : Type*) where\n  support : S → List O\n  mass : S → O → ℝ\n  nonnegative : ∀ s o, 0 ≤ mass s o\n  normalised : ∀ s, ((support s).map (mass s)).sum = 1\n\n/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:23 · P-glossary-mathematics · holder: by-record · evidence: PredictiveOutcomeKernelWitness · falsifier: an unconditional outcome distribution or softmax policy vector is accepted as policy-conditioned `Q(o∣π)` · `Q(o∣π)` is a normalized finite-support predictive distribution over vertex-tagged outcomes for each policy. -/\n",
+    "repaired-text" : "structure ProbabilityKernel (S O : Type*) where\n  support : S → List O\n  mass : S → O → ℝ\n  nonnegative : ∀ s o, 0 ≤ mass s o\n  normalised : ∀ s, ((support s).map (mass s)).sum = 1\n  support_nodup : ∀ s, (support s).Nodup\n  mass_eq_zero_of_not_mem : ∀ s o, o ∉ support s → mass s o = 0\n\n/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:23 · P-glossary-mathematics · holder: by-record · evidence: PredictiveOutcomeKernelWitness · falsifier: an unconditional outcome distribution or softmax policy vector is accepted as policy-conditioned `Q(o∣π)` · `Q(o∣π)` is a normalized finite-support predictive distribution over vertex-tagged outcomes for each policy. -/\n",
+    "head-text" : "structure ProbabilityKernel (S O : Type*) where\n  support : S → List O\n  mass : S → O → ℝ\n  nonnegative : ∀ s o, 0 ≤ mass s o\n  normalised : ∀ s, ((support s).map (mass s)).sum = 1\n  support_nodup : ∀ s, (support s).Nodup\n  mass_eq_zero_of_not_mem : ∀ s o, o ∉ support s → mass s o = 0\n\n/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:23 · P-glossary-mathematics · holder: by-record · evidence: PredictiveOutcomeKernelWitness · falsifier: an unconditional outcome distribution or softmax policy vector is accepted as policy-conditioned `Q(o∣π)` · `Q(o∣π)` is a normalized finite-support predictive distribution over vertex-tagged outcomes for each policy. -/\n"
+  } ],
+  "old-sha256" : "c958f09c32342bfbacdbc5847beb7cc4757e6c3013af4be026cfe3a0185ce7ec"
+}, {
+  "file" : "observation-kernel-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "reference",
+      "mappings" : [ {
+        "fixture-path" : [ "rows" ],
+        "lean-field" : "mass := fun _ _ => 1 / 2",
+        "expected" : [ {
+          "state" : "latent",
+          "support" : [ "present", "absent" ],
+          "mass" : {
+            "present" : 0.5,
+            "absent" : 0.5
+          }
+        } ],
+        "expected-shape" : "collection"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.ObservationKernelWitness.referenceRowMass",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/ObservationKernelWitness.lean",
+      "declarations" : [ {
+        "name" : "State",
+        "sha256" : "7eb2f0d6a13d4ee5dec6e6cc3e92b41ad7ab59a91f019dfad3565cd5046d6022"
+      }, {
+        "name" : "Observation",
+        "sha256" : "e226cda4508af7adab03678b779c0d8b53f21371a641843a066cd28b7e1a3194"
+      }, {
+        "name" : "reference",
+        "sha256" : "16d2e69414a93598871f0be4408a9f91ef08e1bd8c55b451bda6ad552d1fe689"
+      }, {
+        "name" : "referenceRowMass",
+        "sha256" : "1fc2ac32fb0ff789fab26cf929e952cadf744267b258054eab7549980cdef00d"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "observationKernel",
+        "sha256" : "9a3ac0361aec3cb69ca0546e4e391468b7c9d86cde736ae16bb2ec75e72d331e"
+      }, {
+        "name" : "observationKernelRowMass",
+        "sha256" : "5c42ed350552abd548b71c869b502316e60116597239b416e2bf1fd1a56ea199"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.ObservationKernelWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/observation-kernel-reference.edn",
+      "schema" : "observation-kernel-reference/v1",
+      "sha256" : "080ed464b5d3a647fc1b71a641f0f6152e950079dbc8f0c542a8089b502d107f"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/ObservationKernelWitness.lean",
+    "name" : "reference",
+    "old" : "16d2e69414a93598871f0be4408a9f91ef08e1bd8c55b451bda6ad552d1fe689",
+    "new" : "ea0a7c724cc33232923376536946ae80a458d91dc018b52b1cfad84690013e9f",
+    "pre-repair-text" : "noncomputable def reference : observationKernel State Observation where\n  support := fun _ => [.present, .absent]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+    "repaired-text" : "noncomputable def reference : observationKernel State Observation where\n  support := fun _ => [.present, .absent]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n",
+    "head-text" : "noncomputable def reference : observationKernel State Observation where\n  support := fun _ => [.present, .absent]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n"
+  } ],
+  "old-sha256" : "0983bcd33e5ea9517c684b98ec61998d0df3e3555cb31e045f819f031a10bacb"
+}, {
+  "file" : "parameter-posterior-kernel-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "posterior",
+      "mappings" : [ {
+        "fixture-path" : [ "policies" ],
+        "lean-field" : "inductive Policy",
+        "expected" : [ "inspect", "repair" ],
+        "expected-shape" : "collection"
+      }, {
+        "fixture-path" : [ "observations" ],
+        "lean-field" : "inductive Observation",
+        "expected" : [ "clear", "blocked" ],
+        "expected-shape" : "collection"
+      }, {
+        "fixture-path" : [ "rows" ],
+        "lean-field" : "support := fun _ => [.cautious]",
+        "expected" : {
+          "[:inspect :clear]" : {
+            "support" : [ "cautious" ],
+            "mass" : {
+              "cautious" : 1
+            }
+          },
+          "[:inspect :blocked]" : {
+            "support" : [ "cautious" ],
+            "mass" : {
+              "cautious" : 1
+            }
+          },
+          "[:repair :clear]" : {
+            "support" : [ "cautious" ],
+            "mass" : {
+              "cautious" : 1
+            }
+          },
+          "[:repair :blocked]" : {
+            "support" : [ "cautious" ],
+            "mass" : {
+              "cautious" : 1
+            }
+          }
+        },
+        "expected-shape" : "structured"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.ParameterPosteriorKernelWitness.allPosteriorRowsNormalised",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+      "declarations" : [ {
+        "name" : "Policy",
+        "sha256" : "39d1037fd07fdbb5b0713555b51bff3c0efe0c76b8fa71688d639f5f21a55e32"
+      }, {
+        "name" : "Observation",
+        "sha256" : "12195b94bc6e1a77ddda53a793707f19cda0efd6604dc0213febf0c30830973a"
+      }, {
+        "name" : "Parameter",
+        "sha256" : "d7199f2b2ee3cfe1a9812e39ddca6a3681202946653bb7acd9b856181c1025db"
+      }, {
+        "name" : "Obs",
+        "sha256" : "f1018aef10fdd0223ea371186a3a3ddfe08d9125b050f16b9d7a6d150c8e8d66"
+      }, {
+        "name" : "clear",
+        "sha256" : "ded9d17e22d4b0260d7c9d15ec71fcf3f78493b6e1e3748f21398977e287a215"
+      }, {
+        "name" : "blocked",
+        "sha256" : "8c2eb50333fcfdda5062a4112875ba55348ac3c1f8a6bbfe960aa93774301b5d"
+      }, {
+        "name" : "posterior",
+        "sha256" : "e4df54ba4a9fa14630d86d904fb009672a8caeb7df868b8a4bfff5610baaad56"
+      }, {
+        "name" : "allPosteriorRowsNormalised",
+        "sha256" : "ce072a82b2b2d1262ab8e8ddf684e84810c9270afcfdc40cb2b8a422c24af88e"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "ParameterPosteriorKernel",
+        "sha256" : "4f05e4aa3733d9c67533c4220492965c754f63dfeabecc07acd44141d88d6a04"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.ParameterPosteriorKernelWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/parameter-posterior-kernel-reference.edn",
+      "schema" : "parameter-posterior-kernel-reference/v1",
+      "sha256" : "0b83170a80b4a9b2dcae3793e1862be092490b9930f9db6f1d0c36ab7cd6c7ac"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/ParameterPosteriorKernelWitness.lean",
+    "name" : "posterior",
+    "old" : "e4df54ba4a9fa14630d86d904fb009672a8caeb7df868b8a4bfff5610baaad56",
+    "new" : "ce62bb6658462738bac45e884ba17b9e01a10ebfcd9f3a002a86dde29ebeaa09",
+    "pre-repair-text" : "noncomputable def posterior : ParameterPosteriorKernel Policy Obs Parameter where\n  support := fun _ => [.cautious]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by\n    intro\n    simp\n\n",
+    "repaired-text" : "noncomputable def posterior : ParameterPosteriorKernel Policy Obs Parameter where\n  support := fun _ => [.cautious]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [.cautious] then 1 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num\n\n",
+    "head-text" : "noncomputable def posterior : ParameterPosteriorKernel Policy Obs Parameter where\n  support := fun _ => [.cautious]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [.cautious] then 1 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num\n\n"
+  } ],
+  "old-sha256" : "bbaba7c2c98835e9ba1ed549a314ca0ad053890f843056d2aabd13c69d09f679"
+}, {
+  "file" : "parameter-prior-kernel-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "prior",
+      "mappings" : [ {
+        "fixture-path" : [ "policies" ],
+        "lean-field" : "inductive Policy",
+        "expected" : [ "inspect", "repair" ],
+        "expected-shape" : "collection"
+      }, {
+        "fixture-path" : [ "rows" ],
+        "lean-field" : "| .inspect => [.cautious]",
+        "expected" : {
+          "inspect" : {
+            "support" : [ "cautious" ],
+            "mass" : {
+              "cautious" : 1
+            }
+          },
+          "repair" : {
+            "support" : [ "bold" ],
+            "mass" : {
+              "bold" : 1
+            }
+          }
+        },
+        "expected-shape" : "structured"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.ParameterPriorKernelWitness.allPriorRowsNormalised",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/ParameterPriorKernelWitness.lean",
+      "declarations" : [ {
+        "name" : "Policy",
+        "sha256" : "39d1037fd07fdbb5b0713555b51bff3c0efe0c76b8fa71688d639f5f21a55e32"
+      }, {
+        "name" : "Parameter",
+        "sha256" : "11e32860efc2d53bb4655a4f00c370cf2720a578f266aa18529f86577bd7f62b"
+      }, {
+        "name" : "prior",
+        "sha256" : "0d4762f47d3ea27d20abc9b491615fa30768a2fe7a8b9bcc650bedd91dd8272c"
+      }, {
+        "name" : "allPriorRowsNormalised",
+        "sha256" : "5f77d1a9551fd98ae9344e15f312001e4aa3bf9df5aa8cc99309b60f129dc685"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "ParameterPriorKernel",
+        "sha256" : "e37314a8cf55710a75ac31ded33ba00c5a8b2046bfbd05a07e4bbf5bdefdcb7f"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.ParameterPriorKernelWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/parameter-prior-kernel-reference.edn",
+      "schema" : "parameter-prior-kernel-reference/v1",
+      "sha256" : "297cda4717d492457d53fbfa9abfc8f40d920102232023ed677e9447edcea88d"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/ParameterPriorKernelWitness.lean",
+    "name" : "prior",
+    "old" : "0d4762f47d3ea27d20abc9b491615fa30768a2fe7a8b9bcc650bedd91dd8272c",
+    "new" : "7f6face7bce1758dfe1802084f7083063022bec7cd9990f1137b8e4963f90b8c",
+    "pre-repair-text" : "noncomputable def prior : ParameterPriorKernel Policy Parameter where\n  support\n    | .inspect => [.cautious]\n    | .repair => [.bold]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intro p; cases p <;> simp\n\n",
+    "repaired-text" : "noncomputable def prior : ParameterPriorKernel Policy Parameter where\n  support\n    | .inspect => [.cautious]\n    | .repair => [.bold]\n  mass := fun p o => match p, o with\n    | .inspect, .cautious => 1\n    | .repair, .bold => 1\n    | _, _ => 0\n  nonnegative := by intro p o; cases p <;> cases o <;> norm_num\n  support_nodup := by intro p; cases p <;> simp\n  mass_eq_zero_of_not_mem := by intro p o h; cases p <;> cases o <;> simp_all\n  normalised := by intro p; cases p <;> simp\n\n",
+    "head-text" : "noncomputable def prior : ParameterPriorKernel Policy Parameter where\n  support\n    | .inspect => [.cautious]\n    | .repair => [.bold]\n  mass := fun p o => match p, o with\n    | .inspect, .cautious => 1\n    | .repair, .bold => 1\n    | _, _ => 0\n  nonnegative := by intro p o; cases p <;> cases o <;> norm_num\n  support_nodup := by intro p; cases p <;> simp\n  mass_eq_zero_of_not_mem := by intro p o h; cases p <;> cases o <;> simp_all\n  normalised := by intro p; cases p <;> simp\n\n"
+  } ],
+  "old-sha256" : "7930bc742fe4e689a4b57dc987d1318c5d159e8a8a73f7c56c8931c4c88dce08"
+}, {
+  "file" : "policy-prior-kernel-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "reference",
+      "mappings" : [ {
+        "fixture-path" : [ "conditioning-domain" ],
+        "lean-field" : "ProbabilityKernel Unit Policy",
+        "expected" : "unit",
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "allowable-policies" ],
+        "lean-field" : "reference.support",
+        "expected" : [ "inspect", "repair" ],
+        "expected-shape" : "collection"
+      }, {
+        "fixture-path" : [ "mass" ],
+        "lean-field" : "reference.mass",
+        "expected" : {
+          "inspect" : 0.5,
+          "repair" : 0.5
+        },
+        "expected-shape" : "structured"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.PolicyPriorKernelWitness.referenceRowMass",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/PolicyPriorKernelWitness.lean",
+      "declarations" : [ {
+        "name" : "Policy",
+        "sha256" : "e02c8aad94ada3df771602410ad6f10af09c7f1c16631498e63855d6cbe3787d"
+      }, {
+        "name" : "reference",
+        "sha256" : "8452d3f112bc454b48a37ba2ff370f985e18d0ff527d7488ea7f746b19967504"
+      }, {
+        "name" : "referenceRowMass",
+        "sha256" : "bfe55496cded24d13d65c953ef39e581657cd22741f7b45561c72cac52f0a6d5"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "PolicyPriorKernel",
+        "sha256" : "570a07a800fd63eab3b19197117d9d974872017860268d03a0089137952d814e"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.PolicyPriorKernelWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/policy-prior-reference.edn",
+      "schema" : "policy-prior-reference/v1",
+      "sha256" : "0d296b69dbbe403e67c02b7edc3e0de6bdb628d1f5fd8f695f2467d3e1e80ce6"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/PolicyPriorKernelWitness.lean",
+    "name" : "reference",
+    "old" : "8452d3f112bc454b48a37ba2ff370f985e18d0ff527d7488ea7f746b19967504",
+    "new" : "d05bf72e5230fa51c609b12a8bbac55e6a4028a128baf711fb22817083131c15",
+    "pre-repair-text" : "noncomputable def reference : PolicyPriorKernel Policy where\n  support := fun _ => [.inspect, .repair]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+    "repaired-text" : "noncomputable def reference : PolicyPriorKernel Policy where\n  support := fun _ => [.inspect, .repair]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n",
+    "head-text" : "noncomputable def reference : PolicyPriorKernel Policy where\n  support := fun _ => [.inspect, .repair]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n"
+  } ],
+  "old-sha256" : "4a31c17b4254202a8d752095f217fe7e4df1032c1a339959cfad5ccfadbe7783"
+}, {
+  "file" : "precision-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "precisionReference",
+      "mappings" : [ {
+        "fixture-path" : [ "weighted", "precision" ],
+        "lean-field" : "weightedPrecision",
+        "expected" : 2,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "weighted", "prediction-error" ],
+        "lean-field" : "weightedError",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "weighted", "expected-variational-F" ],
+        "lean-field" : "weightedF",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "swapped", "precision" ],
+        "lean-field" : "swappedPrecision",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "swapped", "prediction-error" ],
+        "lean-field" : "swappedError",
+        "expected" : 2,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "swapped", "expected-variational-F" ],
+        "lean-field" : "swappedF",
+        "expected" : 2,
+        "expected-shape" : "scalar"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.PrecisionWitness.precisionAndErrorAreNotInterchangeable",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/PrecisionWitness.lean",
+      "declarations" : [ {
+        "name" : "precisionTwo",
+        "sha256" : "58f0ab3e44ee676490074a2c7c9c7f6c4b6b98c140fab0a093242d942e2174f6"
+      }, {
+        "name" : "precisionOne",
+        "sha256" : "74906a001e4cd65246bdde26c8bda9f484baecada41b1e52d67273b6686b5f57"
+      }, {
+        "name" : "PrecisionReference",
+        "sha256" : "a4509a35a652a645774a3640da0c3de4835f9b410a3c24be252eb984f8106e45"
+      }, {
+        "name" : "precisionReference",
+        "sha256" : "66300340c542c007547f3fffad5c009594859236bcd6f2e3329079ee5154963d"
+      }, {
+        "name" : "weightedReference",
+        "sha256" : "542e6e23243c0e99f60fa1cbca6b00c783f802930ef8bf176ba72132f250fd62"
+      }, {
+        "name" : "swappedReference",
+        "sha256" : "4af6666616a4cb9650b2b28330fbaff41c6bfde9c34330b9645c6db6ce2ec27a"
+      }, {
+        "name" : "precisionAndErrorAreNotInterchangeable",
+        "sha256" : "c914e1877b9f17178461964d989b862bec271edc783c6677e3fcc12fd834a767"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "PrecisionMap",
+        "sha256" : "204a124fe3cbbde14841a7db76ef72a8e06fc5705bcfe6c2c39332fab5520cc9"
+      }, {
+        "name" : "variationalFreeEnergy",
+        "sha256" : "6a2cf76f8016e8f7efe2575c3fad09a963f3eae3da0f78c20b465966c9d96174"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.PrecisionWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/precision-reference.edn",
+      "schema" : "precision-reference/v1",
+      "sha256" : "6ff5b86c2b2ed2b55f0d90b9c34786121432125f6e05e889a81408f7670b60cd"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/PrecisionWitness.lean",
+    "name" : "weightedReference",
+    "old" : "542e6e23243c0e99f60fa1cbca6b00c783f802930ef8bf176ba72132f250fd62",
+    "new" : "a2310939f460fa555c7a04b5adf0208626092123e43e8da459e107fbb52ebf79",
+    "pre-repair-text" : "theorem weightedReference :\n    variationalFreeEnergy (fun k => (precisionTwo k).value)\n      (fun _ => precisionReference.weightedError) = ⟨precisionReference.weightedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionTwo]\n\n",
+    "repaired-text" : "theorem weightedReference :\n    variationalFreeEnergy precisionTwo\n      (fun _ => precisionReference.weightedError) = ⟨precisionReference.weightedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionTwo]\n\n",
+    "head-text" : "theorem weightedReference :\n    variationalFreeEnergy precisionTwo\n      (fun _ => precisionReference.weightedError) = ⟨precisionReference.weightedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionTwo]\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/PrecisionWitness.lean",
+    "name" : "swappedReference",
+    "old" : "4af6666616a4cb9650b2b28330fbaff41c6bfde9c34330b9645c6db6ce2ec27a",
+    "new" : "1b73a3a18640500e48eb70e8dbdab71b0be7f20791b16d84cdef729047c6f7c4",
+    "pre-repair-text" : "theorem swappedReference :\n    variationalFreeEnergy (fun k => (precisionOne k).value)\n      (fun _ => precisionReference.swappedError) = ⟨precisionReference.swappedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionOne]\n\n",
+    "repaired-text" : "theorem swappedReference :\n    variationalFreeEnergy precisionOne\n      (fun _ => precisionReference.swappedError) = ⟨precisionReference.swappedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionOne]\n\n",
+    "head-text" : "theorem swappedReference :\n    variationalFreeEnergy precisionOne\n      (fun _ => precisionReference.swappedError) = ⟨precisionReference.swappedF⟩ := by\n  norm_num [precisionReference, variationalFreeEnergy, Channel.all, precisionOne]\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/PrecisionWitness.lean",
+    "name" : "precisionAndErrorAreNotInterchangeable",
+    "old" : "c914e1877b9f17178461964d989b862bec271edc783c6677e3fcc12fd834a767",
+    "new" : "0ff217ed61fccc546a98748755b72ba7e7fe8ee26371b6c97b062729b392d09e",
+    "pre-repair-text" : "theorem precisionAndErrorAreNotInterchangeable :\n    variationalFreeEnergy (fun k => (precisionTwo k).value) (fun _ => 1) ≠\n      variationalFreeEnergy (fun k => (precisionOne k).value) (fun _ => 2) := by\n  norm_num [variationalFreeEnergy, Channel.all, precisionTwo, precisionOne]\n\n",
+    "repaired-text" : "theorem precisionAndErrorAreNotInterchangeable :\n    variationalFreeEnergy precisionTwo (fun _ => 1) ≠\n      variationalFreeEnergy precisionOne (fun _ => 2) := by\n  norm_num [variationalFreeEnergy, Channel.all, precisionTwo, precisionOne]\n\n",
+    "head-text" : "theorem precisionAndErrorAreNotInterchangeable :\n    variationalFreeEnergy precisionTwo (fun _ => 1) ≠\n      variationalFreeEnergy precisionOne (fun _ => 2) := by\n  norm_num [variationalFreeEnergy, Channel.all, precisionTwo, precisionOne]\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "variationalFreeEnergy",
+    "old" : "6a2cf76f8016e8f7efe2575c3fad09a963f3eae3da0f78c20b465966c9d96174",
+    "new" : "b1caf4f3d2a21cc98121b38ac3414f1a41904da5df2209b6c639676c0ec0c69e",
+    "pre-repair-text" : "def variationalFreeEnergy (precision error : Channel → ℝ) : VariationalFreeEnergyValue :=\n  ⟨(1 / 2 : ℝ) *\n    ((Channel.all.map fun k => precision k * (error k) ^ 2).foldl (· + ·) 0 /\n      Channel.all.length)⟩\n\n/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:31 · P-glossary-mathematics · holder: by-record · decided 2026-08-31 · The computed mass of a kernel row; `ProbabilityKernel.normalised` proves it is one. -/\n",
+    "repaired-text" : "def variationalFreeEnergy (precision : PrecisionMap) (error : Channel → ℝ) : VariationalFreeEnergyValue :=\n  ⟨(1 / 2 : ℝ) *\n    ((Channel.all.map fun k => (precision k).value * (error k) ^ 2).foldl (· + ·) 0 /\n      Channel.all.length)⟩\n\n/-- Nonnegative precision weights squared errors by nonnegative amounts. -/\n",
+    "head-text" : "def variationalFreeEnergy (precision : PrecisionMap) (error : Channel → ℝ) : VariationalFreeEnergyValue :=\n  ⟨(1 / 2 : ℝ) *\n    ((Channel.all.map fun k => (precision k).value * (error k) ^ 2).foldl (· + ·) 0 /\n      Channel.all.length)⟩\n\n/-- Nonnegative precision weights squared errors by nonnegative amounts. -/\n"
+  } ],
+  "old-sha256" : "70475fcbcf66997848a936b66616fccd63e0e9292c96ee7670030bc0d96769c5"
+}, {
+  "file" : "predictive-outcome-risk-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "riskReference",
+      "mappings" : [ {
+        "fixture-path" : [ "predictive-mass", "a" ],
+        "lean-field" : "predictiveMassA",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "predictive-mass", "b" ],
+        "lean-field" : "predictiveMassB",
+        "expected" : 0,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "preference-mass", "a" ],
+        "lean-field" : "preferenceMassA",
+        "expected" : 0.5,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "preference-mass", "b" ],
+        "lean-field" : "preferenceMassB",
+        "expected" : 0.5,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "expected-risk" ],
+        "lean-field" : "expectedRisk",
+        "expected" : [ "log", 2 ],
+        "expected-shape" : "collection"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.PredictiveOutcomeRiskWitness.pointMassAgainstUniform",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
+      "declarations" : [ {
+        "name" : "predictive",
+        "sha256" : "b751e9a43be6f7dbae5f76964de845426357f44c4455a2035d2c1b9057e12be8"
+      }, {
+        "name" : "preference",
+        "sha256" : "8b1f7f0a74a51cc592d1cb1728c1505f3e81bb55b72105b21124341523a5c7ae"
+      }, {
+        "name" : "positivePreference",
+        "sha256" : "60bfdddbed1f8169b6e2724539500d8c24ec5982cbd99ab1c27215089fbb8cba"
+      }, {
+        "name" : "RiskReference",
+        "sha256" : "58d97c301f1e1231640798bb599e2beeddeb1f3b2230bfc55aaf40d36a4d0ae9"
+      }, {
+        "name" : "riskReference",
+        "sha256" : "d6122e009eb4e2af41c8e3aecd589029b43fc9c97d0d2f74c7cad0d80e64e10e"
+      }, {
+        "name" : "pointMassAgainstUniform",
+        "sha256" : "2e84b0df65ae808c7dddfecad68a35185218a65e8721e9f9ca520944b9de04ec"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "predictiveOutcomeRisk",
+        "sha256" : "019267ca2ff14dc41dd501d1ec8693ff6d6534b6e2464d34f9dfa74aca48dced"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.PredictiveOutcomeRiskWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/predictive-outcome-risk-reference.edn",
+      "schema" : "predictive-outcome-risk-reference/v1",
+      "sha256" : "1046c708998f7af56403496ab7329de8bc10c38af8f834bd64ebd3307cbd8c4c"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
+    "name" : "predictive",
+    "old" : "b751e9a43be6f7dbae5f76964de845426357f44c4455a2035d2c1b9057e12be8",
+    "new" : "1ca78693fd32c1ad2741c0afc3712f57aa76853dd231bf62a492c56d13322c2d",
+    "pre-repair-text" : "noncomputable def predictive : PredictiveOutcomeKernel Policy Obs where\n  support := fun _ => [oa]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+    "repaired-text" : "noncomputable def predictive : PredictiveOutcomeKernel Policy Obs where\n  support := fun _ => [oa]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [oa] then 1 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [oa, ob]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [oa, ob]\n\n",
+    "head-text" : "noncomputable def predictive : PredictiveOutcomeKernel Policy Obs where\n  support := fun _ => [oa]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [oa] then 1 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [oa, ob]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [oa, ob]\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
+    "name" : "preference",
+    "old" : "8b1f7f0a74a51cc592d1cb1728c1505f3e81bb55b72105b21124341523a5c7ae",
+    "new" : "35b5a4945778a3a356eb015844478778d0378f6afaa8b392124328618445d2dc",
+    "pre-repair-text" : "noncomputable def preference : PreferenceDistribution Obs where\n  support := fun _ => [oa, ob]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+    "repaired-text" : "noncomputable def preference : PreferenceDistribution Obs where\n  support := fun _ => [oa, ob]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [oa, ob] then 1 / 2 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [oa, ob]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [oa, ob]\n\n",
+    "head-text" : "noncomputable def preference : PreferenceDistribution Obs where\n  support := fun _ => [oa, ob]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [oa, ob] then 1 / 2 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [oa, ob]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [oa, ob]\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean",
+    "name" : "positivePreference",
+    "old" : "60bfdddbed1f8169b6e2724539500d8c24ec5982cbd99ab1c27215089fbb8cba",
+    "new" : "d2b1672f8f9b3107188c50b4e64c65d76d624510519a127cdbd2f234d9aa068c",
+    "pre-repair-text" : "theorem positivePreference : ∀ π o, o ∈ predictive.support π → 0 < preference.mass () o := by\n  intros; norm_num [preference]\n\n",
+    "repaired-text" : "theorem positivePreference : ∀ π o, o ∈ predictive.support π → 0 < preference.mass () o := by\n  intro π o h\n  have ho : o = oa := by simpa [predictive] using h\n  subst o\n  norm_num [preference]\n\n",
+    "head-text" : "theorem positivePreference : ∀ π o, o ∈ predictive.support π → 0 < preference.mass () o := by\n  intro π o h\n  have ho : o = oa := by simpa [predictive] using h\n  subst o\n  norm_num [preference]\n\n"
+  } ],
+  "old-sha256" : "efe68b64089c1e7fbb576f2ec9be2fc79117b0a6942c524a4109c4e383988ec1"
+}, {
+  "file" : "preference-distribution-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "fair",
+      "mappings" : [ {
+        "fixture-path" : [ "conditioning-domain" ],
+        "lean-field" : "ProbabilityKernel Unit",
+        "expected" : "unit",
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "outcomes" ],
+        "lean-field" : "fair.support",
+        "expected" : [ "good", "bad" ],
+        "expected-shape" : "collection"
+      }, {
+        "fixture-path" : [ "mass" ],
+        "lean-field" : "fair.mass",
+        "expected" : {
+          "good" : [ 1, 2 ],
+          "bad" : [ 1, 2 ]
+        },
+        "expected-shape" : "structured"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.PreferenceDistributionWitness.fairMassesSumToOne",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+      "declarations" : [ {
+        "name" : "Observation",
+        "sha256" : "e6ec83c185b251b63f7c3f31122d762a0a49777396b1a43ab37d2436c3cbf76d"
+      }, {
+        "name" : "Obs",
+        "sha256" : "f1018aef10fdd0223ea371186a3a3ddfe08d9125b050f16b9d7a6d150c8e8d66"
+      }, {
+        "name" : "good",
+        "sha256" : "2faa212d9d76d921fdb9ea33c27b0f66b42d60cb695b6b4242e73fe5d2f91fc8"
+      }, {
+        "name" : "bad",
+        "sha256" : "643e8354346de430f12516ce050ca33b80cfe87981185f36b8353fefe1270b5c"
+      }, {
+        "name" : "fair",
+        "sha256" : "130bbde169b7d3376a0f604b3dbebdba7da43356ffb94013d798bab3883eb7c3"
+      }, {
+        "name" : "fairMassesSumToOne",
+        "sha256" : "bfc2c2c62700bc7ff028f0930617d09f697e49355555ee306407302df78a7d14"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "PreferenceDistribution",
+        "sha256" : "2867aa7840b091fd59f622401350e18ff218a3ede2d11f42584b344e98dd1f8b"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.PreferenceDistributionWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/preference-distribution-reference.edn",
+      "schema" : "preference-distribution-reference/v1",
+      "sha256" : "72da6e624227feb8b5263fac95ec35d63dfe2e929226cac6d26f675d7115f787"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/PreferenceDistributionWitness.lean",
+    "name" : "fair",
+    "old" : "130bbde169b7d3376a0f604b3dbebdba7da43356ffb94013d798bab3883eb7c3",
+    "new" : "840c489a9d9b156c47599dd1367604d3801a0d14a1d2d965a03c8b9f6758a56d",
+    "pre-repair-text" : "noncomputable def fair : PreferenceDistribution Obs where\n  support := fun _ => [good, bad]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+    "repaired-text" : "noncomputable def fair : PreferenceDistribution Obs where\n  support := fun _ => [good, bad]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [good, bad] then 1 / 2 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [good, bad]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [good, bad]\n\n",
+    "head-text" : "noncomputable def fair : PreferenceDistribution Obs where\n  support := fun _ => [good, bad]\n  mass := by\n    classical\n    exact fun s o => if o ∈ [good, bad] then 1 / 2 else 0\n  nonnegative := by intros; split <;> norm_num\n  support_nodup := by intro; simp [good, bad]\n  mass_eq_zero_of_not_mem := by intro s o h; simp_all\n  normalised := by\n    intro s\n    classical\n    norm_num [good, bad]\n\n"
+  } ],
+  "old-sha256" : "66bdadf4fc5d66079c204e21308827c5d70fe9e1f7cea85cc1f4712ede36c17a"
+}, {
+  "file" : "transition-kernel-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "controlled",
+      "mappings" : [ {
+        "fixture-path" : [ "states" ],
+        "lean-field" : "inductive State",
+        "expected" : [ "idle", "active" ],
+        "expected-shape" : "collection"
+      }, {
+        "fixture-path" : [ "actions" ],
+        "lean-field" : "inductive Action",
+        "expected" : [ "stay", "start" ],
+        "expected-shape" : "collection"
+      }, {
+        "fixture-path" : [ "rows" ],
+        "lean-field" : "| (s, .stay) => [s]",
+        "expected" : {
+          "[:idle :stay]" : "idle",
+          "[:active :stay]" : "active",
+          "[:idle :start]" : "active",
+          "[:active :start]" : "active"
+        },
+        "expected-shape" : "structured"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.TransitionKernelWitness.allControlledRowsNormalised",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/TransitionKernelWitness.lean",
+      "declarations" : [ {
+        "name" : "State",
+        "sha256" : "dac5621fd4936c7b280af414aeb5e788ce8f0f66039041b3fcf0482d818b1eec"
+      }, {
+        "name" : "Action",
+        "sha256" : "12d15964c698c981336ef0a7a954e8e37dfd372ad7fa8ba3241cc85d4d3d5231"
+      }, {
+        "name" : "controlled",
+        "sha256" : "0b606f6958c7b2ff34f18d589e63d97473da346139520877e5efbf78de2e29b0"
+      }, {
+        "name" : "allControlledRowsNormalised",
+        "sha256" : "bf65b933e15c12c58d36da33e83e452fabf79e381a92bb13c173d2cb49e46f25"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "TransitionKernel",
+        "sha256" : "c8650cbde4347c92b097a940e956cb6b572df2fad52d7169d5c68febb05f4fdb"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.TransitionKernelWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/transition-kernel-reference.edn",
+      "schema" : "transition-kernel-reference/v1",
+      "sha256" : "0a5489e4b518e3d01f447b34c5a64f61d323fd6df2b31b3c9406066f3032f37f"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/TransitionKernelWitness.lean",
+    "name" : "controlled",
+    "old" : "0b606f6958c7b2ff34f18d589e63d97473da346139520877e5efbf78de2e29b0",
+    "new" : "9b94767f97ff5afa1e740830624621cca49afa97f1177d0f697da3ff4341abd7",
+    "pre-repair-text" : "noncomputable def controlled : TransitionKernel State Action where\n  support\n    | (s, .stay) => [s]\n    | (_, .start) => [.active]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intro sa; cases sa with | mk s a => cases a <;> simp\n\n",
+    "repaired-text" : "noncomputable def controlled : TransitionKernel State Action where\n  support\n    | (s, .stay) => [s]\n    | (_, .start) => [.active]\n  mass := fun sa o => match sa with\n    | (s, .stay) => if o = s then 1 else 0\n    | (_, .start) => if o = .active then 1 else 0\n  nonnegative := by intro sa o; rcases sa with ⟨s,a⟩; cases a <;> dsimp <;> split <;> norm_num\n  support_nodup := by intro sa; rcases sa with ⟨s,a⟩; cases a <;> simp\n  mass_eq_zero_of_not_mem := by intro sa o h; rcases sa with ⟨s,a⟩; cases a <;> simp_all\n  normalised := by intro sa; cases sa with | mk s a => cases a <;> simp\n\n",
+    "head-text" : "noncomputable def controlled : TransitionKernel State Action where\n  support\n    | (s, .stay) => [s]\n    | (_, .start) => [.active]\n  mass := fun sa o => match sa with\n    | (s, .stay) => if o = s then 1 else 0\n    | (_, .start) => if o = .active then 1 else 0\n  nonnegative := by intro sa o; rcases sa with ⟨s,a⟩; cases a <;> dsimp <;> split <;> norm_num\n  support_nodup := by intro sa; rcases sa with ⟨s,a⟩; cases a <;> simp\n  mass_eq_zero_of_not_mem := by intro sa o h; rcases sa with ⟨s,a⟩; cases a <;> simp_all\n  normalised := by intro sa; cases sa with | mk s a => cases a <;> simp\n\n"
+  } ],
+  "old-sha256" : "f3a55121607e6621bd3008b213496140ba61e1df0545b09f5b371fca35c45a26"
+}, {
+  "file" : "variational-free-energy-positive-receipt.edn",
+  "receipt" : {
+    "adapter" : {
+      "kind" : "edn-fields-to-lean-declaration/v1",
+      "lean-declaration" : "gaussianReference",
+      "mappings" : [ {
+        "fixture-path" : [ "channel-count" ],
+        "lean-field" : "channelCount",
+        "expected" : 14,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "precision" ],
+        "lean-field" : "precision",
+        "expected" : 2,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "prediction-error" ],
+        "lean-field" : "predictionError",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      }, {
+        "fixture-path" : [ "expected-variational-F" ],
+        "lean-field" : "expectedVariationalF",
+        "expected" : 1,
+        "expected-shape" : "scalar"
+      } ],
+      "correspondence" : {
+        "boundary/type" : "declared-not-derived",
+        "subject" : "fixture-to-lean-correspondence",
+        "pinned" : "fixture-identity-shape-and-retained-slice-occurrence",
+        "not-pinned" : "semantic-value-correspondence",
+        "derivation-status" : "derivable-not-adopted",
+        "reason" : "identity-preserving-adapter-and-proof-not-provided"
+      }
+    },
+    "theorem" : "DarkTower.WarMachine.VariationalFreeEnergyWitness.constantGaussianReference",
+    "dependency-closure" : {
+      "boundary/type" : "declared-not-derived",
+      "subject" : "lean-semantic-dependency-closure",
+      "pinned" : "author-declared-source-slices",
+      "not-pinned" : "complete-transitive-constant-closure",
+      "derivation-status" : "derivable-not-adopted",
+      "reason" : "closure-derivable-but-impractical-to-content-pin"
+    },
+    "receipt/version" : 1,
+    "source-basis" : [ {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/VariationalFreeEnergyWitness.lean",
+      "declarations" : [ {
+        "name" : "GaussianReference",
+        "sha256" : "fd9623934ea149e09de5bd1e3f039763db4a7adc11b53b76694d9668de0032fe"
+      }, {
+        "name" : "gaussianReference",
+        "sha256" : "34602f9bf1b27e270c0aaf1acba604f548a915575426d8448253e1479553b430"
+      }, {
+        "name" : "constantGaussianReference",
+        "sha256" : "b3954989c51a720f9495d134640385682bcd953607485cb15bdf74aabd8e3f2d"
+      } ]
+    }, {
+      "repo" : "mathlib4",
+      "path" : "DarkTower/WarMachine/Holes.lean",
+      "declarations" : [ {
+        "name" : "VariationalFreeEnergyValue",
+        "sha256" : "7ebaffa6d69e18d2f2fab47c0a75e27d44583e3f7094b410a592223b3a73da71"
+      }, {
+        "name" : "Channel",
+        "sha256" : "d3d6259d040c584bb36d3f238dea41644fff5458c7c74fadfac429b1226b3235"
+      }, {
+        "name" : "variationalFreeEnergy",
+        "sha256" : "6a2cf76f8016e8f7efe2575c3fad09a963f3eae3da0f78c20b465966c9d96174"
+      } ]
+    } ],
+    "elaborator" : {
+      "command" : [ "lake", "env", "lean" ],
+      "cwd" : "/home/joe/code/mathlib4"
+    },
+    "toolchain" : {
+      "lean-version" : "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
+      "lean-toolchain-sha256" : "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8",
+      "lake-manifest-sha256" : "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"
+    },
+    "module" : "DarkTower.WarMachine.VariationalFreeEnergyWitness",
+    "recorded-at" : "2026-09-08T00:00:00Z",
+    "result" : {
+      "exit" : 0,
+      "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+    },
+    "receipt/type" : "PositiveLeanWitnessReceipt",
+    "fixture" : {
+      "repo" : "futon2",
+      "path" : "holes/labs/wm-contract/variational-free-energy-reference.edn",
+      "schema" : "variational-free-energy-reference/v1",
+      "sha256" : "0515b1203e1f04689f1d095a10318e38a91b0dd9c00ba604f3f346a38d21683d"
+    }
+  },
+  "changes" : [ {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/VariationalFreeEnergyWitness.lean",
+    "name" : "constantGaussianReference",
+    "old" : "b3954989c51a720f9495d134640385682bcd953607485cb15bdf74aabd8e3f2d",
+    "new" : "6b5ab5c8be55a1ea15f814db40384e329ecb4930bc93f9dbe737ecb409325e45",
+    "pre-repair-text" : "theorem constantGaussianReference :\n    variationalFreeEnergy (fun _ => gaussianReference.precision)\n        (fun _ => gaussianReference.predictionError) =\n      ⟨gaussianReference.expectedVariationalF⟩ := by\n  norm_num [gaussianReference, variationalFreeEnergy, Channel.all]\n\n",
+    "repaired-text" : "theorem constantGaussianReference :\n    variationalFreeEnergy (fun _ => ⟨gaussianReference.precision, by norm_num [gaussianReference]⟩)\n        (fun _ => gaussianReference.predictionError) =\n      ⟨gaussianReference.expectedVariationalF⟩ := by\n  norm_num [gaussianReference, variationalFreeEnergy, Channel.all]\n\n",
+    "head-text" : "theorem constantGaussianReference :\n    variationalFreeEnergy (fun _ => ⟨gaussianReference.precision, by norm_num [gaussianReference]⟩)\n        (fun _ => gaussianReference.predictionError) =\n      ⟨gaussianReference.expectedVariationalF⟩ := by\n  norm_num [gaussianReference, variationalFreeEnergy, Channel.all]\n\n"
+  }, {
+    "repo" : "mathlib4",
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "variationalFreeEnergy",
+    "old" : "6a2cf76f8016e8f7efe2575c3fad09a963f3eae3da0f78c20b465966c9d96174",
+    "new" : "b1caf4f3d2a21cc98121b38ac3414f1a41904da5df2209b6c639676c0ec0c69e",
+    "pre-repair-text" : "def variationalFreeEnergy (precision error : Channel → ℝ) : VariationalFreeEnergyValue :=\n  ⟨(1 / 2 : ℝ) *\n    ((Channel.all.map fun k => precision k * (error k) ^ 2).foldl (· + ·) 0 /\n      Channel.all.length)⟩\n\n/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:31 · P-glossary-mathematics · holder: by-record · decided 2026-08-31 · The computed mass of a kernel row; `ProbabilityKernel.normalised` proves it is one. -/\n",
+    "repaired-text" : "def variationalFreeEnergy (precision : PrecisionMap) (error : Channel → ℝ) : VariationalFreeEnergyValue :=\n  ⟨(1 / 2 : ℝ) *\n    ((Channel.all.map fun k => (precision k).value * (error k) ^ 2).foldl (· + ·) 0 /\n      Channel.all.length)⟩\n\n/-- Nonnegative precision weights squared errors by nonnegative amounts. -/\n",
+    "head-text" : "def variationalFreeEnergy (precision : PrecisionMap) (error : Channel → ℝ) : VariationalFreeEnergyValue :=\n  ⟨(1 / 2 : ℝ) *\n    ((Channel.all.map fun k => (precision k).value * (error k) ^ 2).foldl (· + ·) 0 /\n      Channel.all.length)⟩\n\n/-- Nonnegative precision weights squared errors by nonnegative amounts. -/\n"
+  } ],
+  "old-sha256" : "fe6f51a9eef81f59de6b8aadc9be4f15fd8c158fcb6c345517f77a90d53afbf5"
+} ]

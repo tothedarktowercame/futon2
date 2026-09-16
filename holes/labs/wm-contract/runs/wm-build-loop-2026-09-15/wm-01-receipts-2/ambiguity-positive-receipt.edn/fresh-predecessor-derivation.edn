@@ -57,13 +57,7 @@
      "ac1ad42dbd725edd5087f2da02d828715f7c777229d07b5edc099bdb41660507"}
     {:name "ambiguity",
      :sha256
-     "1999be50396039fae4810324cf65f2db75de1bdf21c59880e03e33d2a45dd935"}
-    {:name "ProbabilityKernel",
-     :sha256
-     "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc"}
-    {:name "observationKernel",
-     :sha256
-     "9a3ac0361aec3cb69ca0546e4e391468b7c9d86cde736ae16bb2ec75e72d331e"}]}],
+     "1999be50396039fae4810324cf65f2db75de1bdf21c59880e03e33d2a45dd935"}]}],
  :elaborator
  {:command ["lake" "env" "lean"], :cwd "/home/joe/code/mathlib4"},
  :toolchain
@@ -74,7 +68,7 @@
   :lake-manifest-sha256
   "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"},
  :module "DarkTower.WarMachine.AmbiguityWitness",
- :recorded-at "2026-09-16T00:17:34.143256942Z",
+ :recorded-at "2026-09-08T00:00:00Z",
  :result
  {:exit 0, :axioms ["propext" "Classical.choice" "Quot.sound"]},
  :receipt/type :PositiveLeanWitnessReceipt,

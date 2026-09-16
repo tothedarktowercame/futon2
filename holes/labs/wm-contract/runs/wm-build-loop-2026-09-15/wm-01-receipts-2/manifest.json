@@ -1,0 +1,23 @@
+{
+  "checklist": "WM-01",
+  "dag-node": "WM-01-bindings",
+  "receipts": [
+    "ambiguity-positive-receipt.edn",
+    "expected-free-energy-positive-receipt.edn",
+    "expected-information-gain-positive-receipt.edn",
+    "generative-model-positive-receipt.edn",
+    "observation-kernel-positive-receipt.edn",
+    "parameter-posterior-kernel-positive-receipt.edn",
+    "parameter-prior-kernel-positive-receipt.edn",
+    "policy-prior-kernel-positive-receipt.edn",
+    "precision-positive-receipt.edn",
+    "predictive-outcome-risk-positive-receipt.edn",
+    "preference-distribution-positive-receipt.edn",
+    "transition-kernel-positive-receipt.edn",
+    "variational-free-energy-positive-receipt.edn"
+  ],
+  "remaining_drift_count": 26,
+  "baseline_source": "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-positive-binding-1/after-gate.log",
+  "baseline_sha256": "9c439d233d2be59a49e2584fbf7941e7760349ac9f2652f1a14672e4bf7c32e0",
+  "coordinator_gate_run": "2026-09-16: exit 1, same 26 drifts across these 13 receipts; predictive kernel receipt absent"
+}

@@ -1,0 +1,274 @@
+{
+  "entries": [
+    {
+      "new-sha256": "32927ad3b1af6b511a91bfa96a31558ed0247729462784b6a97d36ba162d1428",
+      "pins": [
+        {
+          "path": "DarkTower/WarMachine/AmbiguityWitness.lean",
+          "name": "predictedState",
+          "old": "98e655ea9a0c1f77290db02d84af58e36d2dc266ad78a8c2af1c5944e5629257",
+          "new": "2156ea86d2b865bba75dda2fa43ff792569e7b859b974ee2c4dab04842911a6e",
+          "changed?": true,
+          "indices": [
+            0,
+            0
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/AmbiguityWitness.lean",
+          "name": "observationModel",
+          "old": "8329b7c2a065c20d977156de334d81ec4181240e2cfb0a4b2d5dc4af81112fb8",
+          "new": "dc5954fa0959eff5b9a0092ad001a0edbe9d4d3a51180f4ea233bfafd8067316",
+          "changed?": true,
+          "indices": [
+            0,
+            1
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/AmbiguityWitness.lean",
+          "name": "AmbiguityReference",
+          "old": "d24a5caa3e5d4972349afc6f43494ea832676e24ae9c2a2a592734219ec03b0b",
+          "new": "d24a5caa3e5d4972349afc6f43494ea832676e24ae9c2a2a592734219ec03b0b",
+          "changed?": false,
+          "indices": [
+            0,
+            2
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/AmbiguityWitness.lean",
+          "name": "ambiguityReference",
+          "old": "fcd41174ad023a4b7ecdd41468cb8c8eb549dea52208911862056c25667eaa0e",
+          "new": "fcd41174ad023a4b7ecdd41468cb8c8eb549dea52208911862056c25667eaa0e",
+          "changed?": false,
+          "indices": [
+            0,
+            3
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/AmbiguityWitness.lean",
+          "name": "pointMassAmbiguity",
+          "old": "17d23bdaf4a4e1303ff6d3de72377f8518d8e6c9b37da2dcd801611b190c8ec9",
+          "new": "17d23bdaf4a4e1303ff6d3de72377f8518d8e6c9b37da2dcd801611b190c8ec9",
+          "changed?": false,
+          "indices": [
+            0,
+            4
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "observationEntropy",
+          "old": "ac1ad42dbd725edd5087f2da02d828715f7c777229d07b5edc099bdb41660507",
+          "new": "ac1ad42dbd725edd5087f2da02d828715f7c777229d07b5edc099bdb41660507",
+          "changed?": false,
+          "indices": [
+            1,
+            0
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ambiguity",
+          "old": "1999be50396039fae4810324cf65f2db75de1bdf21c59880e03e33d2a45dd935",
+          "new": "1999be50396039fae4810324cf65f2db75de1bdf21c59880e03e33d2a45dd935",
+          "changed?": false,
+          "indices": [
+            1,
+            1
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ProbabilityKernel",
+          "old": null,
+          "new": "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+          "changed?": true,
+          "indices": [
+            1,
+            2
+          ]
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "observationKernel",
+          "old": null,
+          "new": "9a3ac0361aec3cb69ca0546e4e391468b7c9d86cde736ae16bb2ec75e72d331e",
+          "changed?": true,
+          "indices": [
+            1,
+            3
+          ]
+        }
+      ],
+      "file": "ambiguity-positive-receipt.edn",
+      "controls": [
+        {
+          "path": "DarkTower/WarMachine/AmbiguityWitness.lean",
+          "name": "predictedState",
+          "old": "98e655ea9a0c1f77290db02d84af58e36d2dc266ad78a8c2af1c5944e5629257",
+          "new": "2156ea86d2b865bba75dda2fa43ff792569e7b859b974ee2c4dab04842911a6e",
+          "changed?": true,
+          "indices": [
+            0,
+            0
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        },
+        {
+          "path": "DarkTower/WarMachine/AmbiguityWitness.lean",
+          "name": "observationModel",
+          "old": "8329b7c2a065c20d977156de334d81ec4181240e2cfb0a4b2d5dc4af81112fb8",
+          "new": "dc5954fa0959eff5b9a0092ad001a0edbe9d4d3a51180f4ea233bfafd8067316",
+          "changed?": true,
+          "indices": [
+            0,
+            1
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "ProbabilityKernel",
+          "old": null,
+          "new": "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+          "changed?": true,
+          "indices": [
+            1,
+            2
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        },
+        {
+          "path": "DarkTower/WarMachine/Holes.lean",
+          "name": "observationKernel",
+          "old": null,
+          "new": "9a3ac0361aec3cb69ca0546e4e391468b7c9d86cde736ae16bb2ec75e72d331e",
+          "changed?": true,
+          "indices": [
+            1,
+            3
+          ],
+          "result": {
+            "pass?": false,
+            "failures": [
+              "positive-source-drift"
+            ],
+            "receipt-shape-valid?": true,
+            "successful-elaboration?": true,
+            "source-basis-matches?": false,
+            "fixture-adapter-matches?": true,
+            "toolchain-matches?": true,
+            "elaboration-matches?": true
+          }
+        }
+      ],
+      "axioms": {
+        "exit": 0,
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "old-sha256": "78d33ebc36d9455a63c1a07a8f5b8a733fac70f51cae684ad1d990475610656e",
+      "review": "pending claude-3 independent review",
+      "new-recorded-at": "2026-09-16T00:17:34.143256942Z",
+      "validation": {
+        "pass?": true,
+        "failures": [],
+        "receipt-shape-valid?": true,
+        "successful-elaboration?": true,
+        "source-basis-matches?": true,
+        "fixture-adapter-matches?": true,
+        "toolchain-matches?": true,
+        "elaboration-matches?": true
+      },
+      "old-recorded-at": "2026-09-08T00:00:00Z",
+      "semantic-disposition": {
+        "disposition": "preserved",
+        "reading": "Both State and Observation have one constructor; support already exhausts their types. Added support_nodup and off-support-zero proofs change no mass value. pointMassAmbiguity still computes Shannon entropy zero from a unit predicted state and unit observation. Fixture and adapter expected scalars 1, 1, 0 agree. No theorem premise changed.",
+        "additions": [
+          "ProbabilityKernel",
+          "observationKernel"
+        ],
+        "wrapper": "ambiguity_witness.clj",
+        "negative-modes": [
+          "--negative-control"
+        ],
+        "exit-convention": "Positive 0 iff receipt, fixture and Lean pass. Negative mutates expected entropy 0 to 1 in memory; 0 iff baseline valid and fixture mismatch detected; 1 invalid baseline; 2 slipped mutation."
+      },
+      "commands": [
+        {
+          "name": "protocol",
+          "command": [
+            "bb",
+            "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-receipts-2/receipt_control.clj",
+            "run",
+            "ambiguity-positive-receipt.edn",
+            "[\"ProbabilityKernel\" \"observationKernel\"]"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "positive",
+          "command": [
+            "bb",
+            "checks/ambiguity_witness.clj"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        },
+        {
+          "name": "negative-control",
+          "command": [
+            "bb",
+            "checks/ambiguity_witness.clj",
+            "--negative-control"
+          ],
+          "cwd": "/home/joe/code/futon2",
+          "exit": 0
+        }
+      ],
+      "protocol-commands": "ambiguity-positive-receipt.edn/protocol-commands.json",
+      "status": "author-verified; independent review pending"
+    }
+  ],
+  "next-receipt": "expected-free-energy-positive-receipt.edn"
+}

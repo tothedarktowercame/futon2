@@ -1,0 +1,19 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/AmbiguityWitness.lean",
+  "name" : "predictedState",
+  "old" : "98e655ea9a0c1f77290db02d84af58e36d2dc266ad78a8c2af1c5944e5629257",
+  "new" : "2156ea86d2b865bba75dda2fa43ff792569e7b859b974ee2c4dab04842911a6e",
+  "pre-repair-text" : "def predictedState : ProbabilityKernel Policy State where\n  support := fun _ => [.certain]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+  "repaired-text" : "def predictedState : ProbabilityKernel Policy State where\n  support := fun _ => [.certain]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n",
+  "head-text" : "def predictedState : ProbabilityKernel Policy State where\n  support := fun _ => [.certain]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/AmbiguityWitness.lean",
+  "name" : "observationModel",
+  "old" : "8329b7c2a065c20d977156de334d81ec4181240e2cfb0a4b2d5dc4af81112fb8",
+  "new" : "dc5954fa0959eff5b9a0092ad001a0edbe9d4d3a51180f4ea233bfafd8067316",
+  "pre-repair-text" : "def observationModel : observationKernel State Observation where\n  support := fun _ => [.seen]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+  "repaired-text" : "def observationModel : observationKernel State Observation where\n  support := fun _ => [.seen]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n",
+  "head-text" : "def observationModel : observationKernel State Observation where\n  support := fun _ => [.seen]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n"
+} ]

@@ -1,0 +1,13 @@
+{
+  "disposition": "preserved",
+  "reading": "Both State and Observation have one constructor; support already exhausts their types. Added support_nodup and off-support-zero proofs change no mass value. pointMassAmbiguity still computes Shannon entropy zero from a unit predicted state and unit observation. Fixture and adapter expected scalars 1, 1, 0 agree. No theorem premise changed.",
+  "additions": [
+    "ProbabilityKernel",
+    "observationKernel"
+  ],
+  "wrapper": "ambiguity_witness.clj",
+  "negative-modes": [
+    "--negative-control"
+  ],
+  "exit-convention": "Positive 0 iff receipt, fixture and Lean pass. Negative mutates expected entropy 0 to 1 in memory; 0 iff baseline valid and fixture mismatch detected; 1 invalid baseline; 2 slipped mutation."
+}
