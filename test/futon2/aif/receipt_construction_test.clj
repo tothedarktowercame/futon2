@@ -253,3 +253,94 @@
               (is (= :carried-from-previous-occurrence
                      (:admission-reason (construction/previous! current [temp]))))))
           (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))))
+
+(defn non-construction-fixture! [root selected? manifest?]
+  ;; Producer-shaped checkpoint envelopes and marker, pinned by revision 3 to
+  ;; machinery-52/attempt-002; all values below remain hermetic fixture data.
+  (let [dir (io/file root "fixture" "attempt-002")
+        _ (.mkdirs dir)
+        action {:type :advance-mission :target "M-history"}
+        outcome (if selected? :agent-unavailable :no-selection)
+        types [:time-step :selection :construction :dispatch :build :adjudication :closed]
+        files (mapv #(io/file dir (format "%03d-%s.edn" %1 (name %2))) (range 1 8) types)
+        records (mapv (fn [index checkpoint]
+                        {:event/schema-version 1 :cohort/id :fixture :attempt/id "attempt-002"
+                         :attempt/ordinal 2 :event/sequence index :checkpoint/type checkpoint
+                         :recorded-at (format "2026-09-15T11:%02d:00Z" index)
+                         :payload (case checkpoint
+                                    :time-step {:judgment {} :ground {:kind :fixture-start}}
+                                    :selection (if selected?
+                                                 {:judgment {:selected-action action :selected-mission "M-history"}
+                                                  :ground {:kind :fixture-selection}}
+                                                 {:sorry {:kind :no-selection :decision nil}})
+                                    :closed {:judgment {:outcome outcome :grounded? false :artifact-only? false :witness nil}
+                                             :ground {:kind :full-loop-outcome :attempt-id "attempt-002"}}
+                                    {:sorry {:kind (keyword (str "not-reached-" (name checkpoint))) :outcome outcome}})})
+                      (range 1 8) types)]
+    (doseq [[file record] (map vector files records)] (spit file (pr-str record)))
+    (when manifest?
+      (let [m (manifest/build-manifest {:entries (mapv (fn [file] {:evidence/id (.getName file)
+                                                                :source-path (.getCanonicalPath file)
+                                                                :admitted-at "2026-09-15T11:07:00Z"}) (butlast files))
+                                        :read-bytes #(Files/readAllBytes (.toPath (io/file %)))})
+            occurrence (retention/mint-occurrence {:run-id (str (UUID/randomUUID)) :cohort-id ":fixture"
+                                                   :attempt-id "attempt-002" :selected-action action
+                                                   :now #(Instant/parse "2026-09-15T11:01:00Z") :uuid-fn #(UUID/randomUUID)})
+            block (retention/build-retention-block {:occurrence occurrence :state {:status :absent :reason :test}
+                                                     :model {:status :absent :reason :declared-model-identity-unthreaded}
+                                                     :closed-at "2026-09-15T11:07:00Z" :evidence-cutoff "2026-09-15T11:07:00Z"
+                                                     :admitted-evidence (mapv :evidence/id (:entries m))})]
+        (rewrite-history! (last files) #(update % :payload assoc :close-retention block :close-evidence-manifest m))))
+    files))
+
+(deftest positive-non-construction-exclusion-retains-provenance
+  (doseq [[selected? manifest?] [[true true] [true false] [false false]] with-older? [true false]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-nonconstruction" (make-array FileAttribute 0)))
+          older (io/file temp "old") marker (io/file temp "marker")
+          current {:occurrence {:action/value {:target "M-history"} :action-at "2026-09-15T12:00:00Z"}}]
+      (try
+        (when with-older? (history-fixture! older :older "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z"))
+        (non-construction-fixture! marker selected? manifest?)
+        (let [result (construction/previous! current (if with-older? [older marker] [marker]))
+              excluded (get-in result [:provenance :excluded-attempts])]
+          (is (= (if with-older? :carried-from-previous-occurrence :first-attempt-no-admissions) (:admission-reason result)))
+          (is (= 1 (count excluded)))
+          (is (= :producer-not-reached-construction (:reason (first excluded))))
+          (is (= 7 (count (:records (first excluded))))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
+
+(deftest non-construction-cannot-hide-missing-or-contradictory-records
+  (doseq [[label damage]
+          [[:missing #(Files/delete (.toPath (nth % 2)))]
+           [:cascade #(rewrite-history! (nth % 2) (fn [x] (assoc-in x [:payload :judgment :cascade] {})))]
+           [:carrier #(rewrite-history! (nth % 2) (fn [x] (assoc-in x [:payload :judgment :receipted-construction] {})))]
+           [:identity #(rewrite-history! (nth % 2) (fn [x] (assoc x :attempt/id "attempt-999")))]
+           [:checkpoint #(rewrite-history! (nth % 2) (fn [x] (assoc x :checkpoint/type :selection)))]
+           [:unknown-marker #(rewrite-history! (nth % 2) (fn [x] (assoc-in x [:payload :sorry :kind] :unknown)))]
+           [:malformed-marker #(rewrite-history! (nth % 2) (fn [x] (assoc-in x [:payload :sorry] 7)))]
+           [:manifest #(rewrite-history! (last %) (fn [x] (assoc-in x [:payload :close-evidence-manifest] {})))]
+           [:manifest-source #(spit (first %) (str (slurp (first %)) " "))]
+           [:later-construction #(rewrite-history! (nth % 3) (fn [x] (assoc x :payload {:judgment {} :ground {:kind :dispatch}})))]
+           [:close-claim #(rewrite-history! (last %) (fn [x] (assoc-in x [:payload :judgment :grounded?] true)))]]]
+    (testing (name label)
+      (let [temp (.toFile (Files/createTempDirectory "receipt-marker-refusal" (make-array FileAttribute 0)))
+            current {:occurrence {:action/value {:target "M-history"} :action-at "2026-09-15T12:00:00Z"}}]
+        (try
+          (damage (non-construction-fixture! temp true true))
+          (let [error (refusal #(construction/previous! current [temp]))]
+            (is (:construction/refusal error))
+            (is (or (:file error) (:history/construction-file error))))
+          (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))))
+
+(deftest excluded-marker-does-not-recover-unsupported-actual-history
+  (let [temp (.toFile (Files/createTempDirectory "receipt-marker-no-recovery" (make-array FileAttribute 0)))
+        older (io/file temp "actual") marker (io/file temp "marker")
+        current {:occurrence {:action/value {:target "M-history"} :action-at "2026-09-15T12:00:00Z"}}]
+    (try
+      (let [actual (history-fixture! older :actual "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z")]
+        (rewrite-history! (:construction-file actual) #(update-in % [:payload :judgment] dissoc :receipted-construction))
+        (non-construction-fixture! marker false false)
+        (let [error (refusal #(construction/previous! current [older marker]))]
+          (is (= :previous-cascade-carrier-unavailable (:construction/refusal error)))
+          (is (= 1 (count (:history/excluded-attempts error))))))
+      (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))

@@ -1,0 +1,13 @@
+{
+  "head-before-commit": "8892c01a5356121f3969a918770db0446c5d70c0",
+  "classification-revision": "fb849b22b4c62b2c1e65ff7aae6fbf69dd2b238e",
+  "files": {
+    "src/futon2/aif/receipt_construction.clj": "7d5e2a921115d43d6b9374cbd06624b870a602b296f162e4d1f14f950a5caf7b",
+    "test/futon2/aif/receipt_construction_test.clj": "d49c762cd82d03b1379c1393d5003a588e1064233785b594f965cb88ad5cbf9f",
+    "src/futon2/aif/full_loop_cohort.clj": "619281d634f3ac941d677352dcabdfc66a644238a957e63e5ba33ef64f41eb9e",
+    "src/futon2/aif/full_loop_runner.clj": "aa258d744552778a9ee06dfc70470e5cf46f9d9e70a366be519aacf0f982d55f",
+    "src/futon2/aif/interpretation_job.clj": "a85a3d64a9d7d757a6d45f98998a8512147eeab7c47cb599dffc4d26822e7df5",
+    "test/futon2/aif/interpretation_job_test.clj": "5a3dcbbae9534730f9d721588374e1ca667aa98faf79110eda207d2184c34e52",
+    "data/wm-full-loop-machinery-52/wm-contract-machinery-52-v1/attempt-002/003-construction.edn": "95598f36ef808696322d9abbdf9ef6f57e3b95efee73ae370962a01f4d1ad4f0"
+  }
+}

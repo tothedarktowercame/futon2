@@ -10,6 +10,7 @@
             [futon2.aif.close-retention :as retention]
             [futon2.aif.evidence-manifest :as manifest]
             [futon2.aif.find-receipt :as finder]
+            [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.interpretation-evidence :as evidence])
   (:import [java.nio.file Files]
            [java.time Instant]))
@@ -82,6 +83,112 @@
            {:reason :root-or-directory-unreadable :file (str directory)})
     children))
 
+(defn- non-construction! [close-file closed construction]
+  (let [dir (.getParentFile (io/file close-file))
+        files (mapv #(io/file dir (format "%03d-%s.edn" %1 (name %2)))
+                    (range 1 8) cohort/checkpoint-order)
+        records (mapv (fn [file]
+                        (case (.getName file)
+                          "003-construction.edn" construction
+                          "007-closed.edn" closed
+                          (history-read! file))) files)
+        ordinal (:attempt/ordinal closed)
+        identity (select-keys closed [:cohort/id :attempt/id :attempt/ordinal])
+        fail! (fn [ok reason file]
+                (need! ok :history-discovery-invalid {:reason reason :file (str file)}))
+        close-judgment (get-in closed [:payload :judgment])
+        outcome (:outcome close-judgment)]
+    (fail! (and (keyword? (:cohort/id closed))
+                (= (name (:cohort/id closed)) (.getName (.getParentFile dir)))
+                (= (:attempt/id closed) (.getName dir))
+                (pos-int? ordinal)) :non-construction-identity close-file)
+    (doseq [[index checkpoint record file] (map vector (range 1 8) cohort/checkpoint-order records files)]
+      (fail! (and (= #{:event/schema-version :cohort/id :attempt/id :attempt/ordinal
+                      :event/sequence :checkpoint/type :recorded-at :payload} (set (keys record)))
+                  (= 1 (:event/schema-version record))
+                  (= identity (select-keys record (keys identity)))
+                  (= index (:event/sequence record)) (= checkpoint (:checkpoint/type record))
+                  (or (and (map? (get-in record [:payload :sorry]))
+                           (keyword? (get-in record [:payload :sorry :kind])))
+                      (and (map? (get-in record [:payload :judgment]))
+                           (some? (get-in record [:payload :ground]))))
+                  (empty? (cohort/checkpoint-cell-errors {} checkpoint (:payload record))))
+             :non-construction-checkpoint-invalid file))
+    (let [times (mapv #(history-time! (:recorded-at %1) %2) records files)]
+      (fail! (every? (fn [[a b]] (not (.isAfter ^Instant a b))) (partition 2 1 times))
+             :non-construction-ordering close-file))
+    ;; These exact sorries are emitted by close-core! for missing checkpoints.
+    ;; A later grounded checkpoint would contradict not having constructed.
+    (doseq [index (range 2 6)]
+      (let [record (nth records index) checkpoint (nth cohort/checkpoint-order index)]
+        (fail! (= {:sorry {:kind (keyword (str "not-reached-" (name checkpoint))) :outcome outcome}}
+                  (:payload record)) :non-construction-marker-contradiction (nth files index))))
+    (fail! (and (contains? cohort/outcome-kinds outcome)
+                (not (#{:grounded-change :grounded-no-change :artifact-only
+                        :historical-verification-awaiting-validation} outcome))
+                (false? (:grounded? close-judgment)) (false? (:artifact-only? close-judgment))
+                (nil? (:witness close-judgment))
+                (not-any? #(contains? close-judgment %) [:cascade :receipted-construction :construction :commit])
+                (= {:kind :full-loop-outcome :attempt-id (:attempt/id closed)} (get-in closed [:payload :ground])))
+           :non-construction-close-contradiction close-file)
+    (let [selection (nth records 1)
+          cell (:payload selection)
+          judgment (:judgment cell)
+          action (:selected-action judgment)
+          target (:target action)
+          retained (get-in closed [:payload :close-retention])]
+      (fail! (or (and (= #{:judgment :ground} (set (keys cell)))
+                       (map? action) (keyword? (:type action)) (string? target) (not (str/blank? target))
+                       (or (nil? (:selected-mission judgment)) (= target (:selected-mission judgment))))
+                  (and (= #{:sorry} (set (keys cell))) (nil? judgment) (map? (:sorry cell))
+                       (#{:no-selection :not-reached-selection} (get-in cell [:sorry :kind]))))
+             :non-construction-selection-invalid (nth files 1))
+      (when (= :present (get-in close-judgment [:outcome-entity :status]))
+        (fail! (and target (= target (get-in close-judgment [:outcome-entity :entity/id])))
+               :non-construction-target-contradiction close-file))
+      (when (contains? (:payload closed) :close-retention)
+        (try (retention/validate-retention-block retained)
+             (catch clojure.lang.ExceptionInfo e
+               (throw (ex-info "Invalid non-construction retention"
+                               (merge (ex-data e) {:interpretation/refusal :interpretation/invalid-receipt
+                                                   :construction/refusal :history-discovery-invalid
+                                                   :reason :non-construction-retention-invalid :file (str close-file)}) e))))
+        (fail! (and (= (str (:cohort/id closed)) (get-in retained [:occurrence :cohort/id]))
+                    (= (:attempt/id closed) (get-in retained [:occurrence :attempt/id]))
+                    (= action (get-in retained [:occurrence :action/value]))
+                    (= (history-time! (:closed-at retained) close-file)
+                       (history-time! (:recorded-at closed) close-file)))
+               :non-construction-retention-identity close-file))
+      (when (contains? (:payload closed) :close-evidence-manifest)
+        (let [m (get-in closed [:payload :close-evidence-manifest])]
+          (try
+            (manifest/validate-manifest m)
+            (manifest/verify-retention-agreement m retained)
+            (doseq [file (butlast files)]
+              (let [entry (first (filter #(= (.getCanonicalPath file)
+                                             (.getCanonicalPath (io/file (:source-path %)))) (:entries m)))]
+                (fail! (some? entry) :non-construction-manifest-binding-missing file)))
+            (doseq [entry (:entries m)]
+              (fail! (not (.isAfter (history-time! (:admitted-at entry) close-file)
+                                   (history-time! (:recorded-at closed) close-file)))
+                     :non-construction-manifest-after-close close-file)
+              (fail! (= (:sha256 entry) (evidence/sha256 (bytes (:source-path entry))))
+                     :non-construction-manifest-source-mismatch (:source-path entry)))
+            (catch clojure.lang.ExceptionInfo e
+              (throw (ex-info "Invalid non-construction manifest"
+                              (merge (ex-data e) {:interpretation/refusal :interpretation/invalid-receipt
+                                                  :construction/refusal :history-discovery-invalid
+                                                  :file (str close-file)}) e)))
+            (catch java.io.IOException e
+              (throw (ex-info "Unreadable non-construction manifest source"
+                              {:interpretation/refusal :interpretation/invalid-receipt
+                               :construction/refusal :history-discovery-invalid
+                               :reason :non-construction-manifest-source-unreadable :file (str close-file)} e)))))))
+    {:non-construction? true :closed-at (history-time! (:recorded-at closed) close-file)
+     :exclusion {:reason :producer-not-reached-construction :identity identity
+                 :records (mapv (fn [file] {:file (.getCanonicalPath file)
+                                            :sha256 (evidence/sha256 (bytes file))}) files)}}))
+
 (defn- closed-candidate! [close-file]
   (let [closed (history-read! close-file)
         construction-file (io/file (.getParentFile (io/file close-file)) "003-construction.edn")
@@ -93,15 +200,18 @@
                               (get-in judgment [:cascade :selected-action :target])
                               (get-in judgment [:receipted-construction :identity :occurrence :action/value :target])])
         at (history-time! (:recorded-at closed) close-file)]
-    (when-let [retained-time (get-in closed [:payload :close-retention :closed-at])]
-      (need! (= at (history-time! retained-time close-file)) :history-discovery-invalid
-             {:reason :contradictory-ordering :file (str close-file)}))
-    (need! (and (seq targets) (every? #(and (string? %) (not (str/blank? %))) targets))
-           :history-discovery-invalid {:reason :target-unavailable :file (str close-file)})
-    (need! (apply = targets) :history-discovery-invalid
-           {:reason :contradictory-targets :file (str close-file) :targets (vec targets)})
-    {:closed closed :construction construction :close-file close-file :construction-file construction-file
-     :occurrence occurrence :target (first targets) :closed-at at}))
+    (if (= :not-reached-construction (get-in construction [:payload :sorry :kind]))
+      (non-construction! close-file closed construction)
+      (do
+        (when-let [retained-time (get-in closed [:payload :close-retention :closed-at])]
+          (need! (= at (history-time! retained-time close-file)) :history-discovery-invalid
+                 {:reason :contradictory-ordering :file (str close-file)}))
+        (need! (and (seq targets) (every? #(and (string? %) (not (str/blank? %))) targets))
+               :history-discovery-invalid {:reason :target-unavailable :file (str close-file)})
+        (need! (apply = targets) :history-discovery-invalid
+               {:reason :contradictory-targets :file (str close-file) :targets (vec targets)})
+        {:closed closed :construction construction :close-file close-file :construction-file construction-file
+         :occurrence occurrence :target (first targets) :closed-at at}))))
 
 (defn- validated-previous! [{:keys [closed construction close-file construction-file] :as latest} roots]
   (try
@@ -172,7 +282,9 @@
                                :let [f (io/file attempt "007-closed.edn")]
                                :when (.exists f)]
                            (closed-candidate! f)))
-        earlier (filter #(.isBefore ^Instant (:closed-at %) before) candidates)
+        earlier-all (filter #(.isBefore ^Instant (:closed-at %) before) candidates)
+        exclusions (mapv :exclusion (filter :non-construction? earlier-all))
+        earlier (remove :non-construction? earlier-all)
         ;; Exclusion as unrelated requires current evidence, not an unverified
         ;; mission name that could conceal damaged matching history.
         _ (doseq [candidate earlier :when (not= target (:target candidate))]
@@ -183,9 +295,12 @@
             (need! false :ambiguous-previous-construction
                    {:files (mapv #(str (:close-file %)) (take-last 2 ordered))}))]
     (if-let [latest (last ordered)]
-      (validated-previous! latest roots)
+      (try (assoc-in (validated-previous! latest roots) [:provenance :excluded-attempts] exclusions)
+           (catch clojure.lang.ExceptionInfo e
+             (throw (ex-info (.getMessage e) (assoc (ex-data e) :history/excluded-attempts exclusions) e))))
       {:cascade policy/first-attempt-cascade :admitted {}
-       :provenance {:status :none :reason :no-earlier-target-construction :searched-roots roots}
+       :provenance {:status :none :reason :no-earlier-target-construction :searched-roots roots
+                    :excluded-attempts exclusions}
        :admission-reason :first-attempt-no-admissions})))
 
 (defn history-roots [identity]
