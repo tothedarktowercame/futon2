@@ -1,0 +1,55 @@
+{
+  "k9r3-kondo": {
+    "command": [
+      "clj-kondo",
+      "--lint",
+      "src/futon2/aif/receipt_construction.clj",
+      "test/futon2/aif/receipt_construction_test.clj"
+    ],
+    "exit": 0
+  },
+  "k9r3-parens": {
+    "command": [
+      "emacs",
+      "-Q",
+      "--batch",
+      "-l",
+      "/home/joe/code/futon4/dev/check-parens.el",
+      "--eval",
+      "(arxana-check-parens-cli)",
+      "--",
+      "--no-defaults",
+      "src/futon2/aif/receipt_construction.clj",
+      "test/futon2/aif/receipt_construction_test.clj"
+    ],
+    "exit": 0
+  },
+  "k9r3-tests": {
+    "command": [
+      "clojure",
+      "-X:test",
+      ":nses",
+      "[futon2.aif.receipt-construction-test]"
+    ],
+    "exit": 0
+  },
+  "k9r3-caller-tests": {
+    "command": [
+      "clojure",
+      "-X:test",
+      ":nses",
+      "[futon2.aif.interpretation-job-test]",
+      ":vars",
+      "[futon2.aif.interpretation-job-test/valid-receipt-is-bound-and-admitted futon2.aif.interpretation-job-test/ticket-construction-preserves-action-and-rules]"
+    ],
+    "exit": 0
+  },
+  "k9r3-classification": {
+    "command": [
+      "clojure",
+      "-M:test",
+      "holes/labs/wm-contract/runs/wm-09-predecessor-history-2026-09-16/k23-classification.clj"
+    ],
+    "exit": 0
+  }
+}

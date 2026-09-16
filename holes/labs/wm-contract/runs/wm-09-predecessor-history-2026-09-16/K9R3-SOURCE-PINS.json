@@ -1,0 +1,19 @@
+{
+  "base": "9d7ab9a5",
+  "sha256": {
+    "src/futon2/aif/receipt_construction.clj": "8594d8ba62cb007287320443c148787f777a63a26a13e8b78bfbe83592ace51c",
+    "test/futon2/aif/receipt_construction_test.clj": "9ac293002b736129408ac9134a13216562f20e790aba35c6ef93a418a8ebf496"
+  },
+  "original_diagnostics_unchanged_against": "7e738d53",
+  "diagnostics": [
+    "REPORT.md",
+    "SOURCE-PINS.json",
+    "VALIDATION.json",
+    "before.edn",
+    "before.stderr",
+    "kondo.log",
+    "namespace-tests.log",
+    "parens.log",
+    "probe.clj"
+  ]
+}

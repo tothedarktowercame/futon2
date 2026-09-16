@@ -602,15 +602,18 @@
                                                              :action-at "2026-09-15T12:00:00Z"}} [temp archive])]
               (if (or different? (= requested "M-history"))
                 (let [error (refusal run)]
-                  (is (= (if different? :history-discovery-invalid :ambiguous-previous-construction)
+                  (is (= (if different? :history-discovery-invalid :distinct-path-identical-history)
                          (:construction/refusal error)))
                   (when different? (is (= :history-identity-collision (:reason error))))
                   (is (= 2 (count (:records error))))
+                  (is (= #{(str (last files)) (str (last copied))} (set (map :path (:records error)))))
                   (is (= (not different?) (:identical-checkpoint-sets? error)))
                   (is (every? #(= 7 (count (:checkpoints %))) (:records error))))
                 (let [result (run)]
                   (is (= :first-attempt-no-admissions (:admission-reason result)))
-                  (is (= 2 (count (get-in result [:provenance :excluded-attempts])))))))))
+                  (is (= 2 (count (get-in result [:provenance :excluded-attempts]))))
+                  (is (every? (set (map :file (mapcat :records (get-in result [:provenance :excluded-attempts]))))
+                              [(str (last files)) (str (last copied))])))))))
         (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
 
 (deftest auxiliary-exclusion-requires-complete-coverage
@@ -649,4 +652,22 @@
               (is (= :complete-no-attempt-no-close-coverage (:reason coverage)))
               (is (= (str auxiliary) (:path coverage)))
               (is (= 28 (count (:visited coverage)))))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
+
+(deftest identical-copies-respect-the-latest-earlier-boundary
+  (doseq [future? [false true]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-copy-time" (make-array FileAttribute 0)))
+          archive (io/file temp "archives" "snapshot")
+          current {:occurrence {:action/value {:target "M-history"} :action-at "2026-09-15T12:00:00Z"}}]
+      (try
+        (let [files (discovery-history! temp "M-history" false)
+              _ (when future?
+                  (rewrite-history! (last files) #(assoc % :recorded-at "2026-09-15T13:00:00Z")))
+              copied (mapv #(io/file archive "fixture" "attempt-002" (.getName %)) files)
+              latest (history-fixture! temp :unique-latest "2026-09-15T11:20:00Z" "2026-09-15T11:30:00Z")]
+          (.mkdirs (.getParentFile (first copied)))
+          (doseq [[source dest] (map vector files copied)] (spit dest (slurp source)))
+          (let [result (construction/previous! current [temp archive])]
+            (is (= :carried-from-previous-occurrence (:admission-reason result)))
+            (is (= (str (:construction-file latest)) (get-in result [:provenance :construction-file])))))
         (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))

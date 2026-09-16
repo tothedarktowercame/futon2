@@ -505,11 +505,12 @@
         _ (when (and (> (count ordered) 1)
                      (= (:closed-at (last ordered)) (:closed-at (last (butlast ordered)))))
             (let [paths (set (map #(str (:close-file %)) (take-last 2 ordered)))
-                  records (filterv #(contains? paths (:path %)) history-identities)]
-              (need! false :ambiguous-previous-construction
+                  records (filterv #(contains? paths (:path %)) history-identities)
+                  identical? (apply = (map :checkpoints records))]
+              (need! false (if identical? :distinct-path-identical-history :ambiguous-previous-construction)
                      {:files (vec (sort paths)) :requested-target requested-target
                       :records records
-                      :identical-checkpoint-sets? (apply = (map :checkpoints records))})))]
+                      :identical-checkpoint-sets? identical?})))]
     (if-let [latest (last ordered)]
       (try (update (validated-previous! latest roots) :provenance assoc
                    :auxiliary-exclusions (:auxiliary-exclusions discovered) :searched-layouts (:layouts discovered) :excluded-attempts exclusions :requested-target requested-target
