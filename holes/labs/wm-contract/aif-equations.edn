@@ -158,10 +158,14 @@
    :lean-audit {:date "2026-09-16" :auditor :codex-10 :verdict :cannot-tell
                 :report "holes/labs/wm-contract/AUDIT-lean-aif-equations-2026-09-16.md"
                 :section "A3 §2" :finding "Carrier accurate; rollout from μ, A, B, T unstated"}
+   :lean-reaudit {:date "2026-09-16" :auditor :claude-7 :verdict :matches
+                  :subject "mathlib4 07b094c59b + review addition 452692faba (zai-27, R4 owner): PolicyRollout.ForwardModel; rolloutState; rolloutAt; predictedOutcome; rolloutState_sum; predictedOutcome_sum; predictedOutcome_one; rolloutAt_eq_of_extends; fixture_outcome_one_eq; fixture_outcome_two_diff"
+                  :finding "The rollout is now stated: Q(s_{tau+1}|pi) = sum_s B(u_tau)(s,s') Q(s_tau|pi) from Q(s_0|pi) = q0 (rolloutState_succ), and Q(o_tau|pi) = sum_s A(s,o) Q(s_tau|pi) (predictedOutcome), over Fintype carriers with real normalisation hypotheses on A, B and q0. Every predicted state and outcome distribution is proved nonnegative and normalised at every tau. A depth-T policy is Fin T -> U; rolloutAt_eq_of_extends (added in review) proves that at tau <= T the rollout reads only the policy's own actions, so the past-horizon padding in policySeq is never used. At tau = 1 it equals the one-step composition MachineQ.predictiveOutcomeMass computes. The fixture has two depth-2 policies that differ only in their second action: equal at tau = 1, different at tau = 2. Rebuilt by claude-7; axioms propext/Classical.choice/Quot.sound only."}
    :defines :Q-o-pi :node :R4 :class :theory-defined :ref :dacosta2020
    :imports [:mu :A :B :pi :T]
-   :formal "Q(o|pi) := sum_s A(o|s) Q(s|pi), Q(s|pi) rolled forward by B from mu over depth T" :eq "dacosta2020 eq. 42-44 (the predictive terms A s_π)" :code "forward_model.clj:280-311 (predict-multi-horizon, the roll-forward over T), forward_model.clj:312-369 (predict, one step), forward_model.clj:278 (default-horizon-steps 3); efe.clj:629-635 (where the rolled-forward final-state observation is consumed for risk and ambiguity)"
-   :lean "PredictiveOutcomeKernel" :lean-status :carrier-only
+   :formal "Q(o|pi) := sum_s A(o|s) Q(s|pi), Q(s|pi) rolled forward by B from mu over depth T" :eq "dacosta2020 eq. 44 (the predictive term A s_π_τ), with s_π_τ rolled forward by B from D over the POMDP of refs/dacosta2020.txt:257-259 (corrected 2026-09-16, re-audit: eqs. 42-43 do not state the rollout)" :code "forward_model.clj:280-311 (predict-multi-horizon, the roll-forward over T), forward_model.clj:312-369 (predict, one step), forward_model.clj:278 (default-horizon-steps 3); efe.clj:629-635 (where the rolled-forward final-state observation is consumed for risk and ambiguity)"
+   :lean "predictedOutcome" :lean-status :closed
+   :lean-at "mathlib4 452692faba (PolicyRollout.lean, first committed at 07b094c59b by zai-27; the earlier binding, the carrier Holes.PredictiveOutcomeKernel, is unchanged)"
    :note "Q-interface-completeness.edn records 2 missing wires for this row"}
   {:id :risk
    :lean-audit {:date "2026-09-16" :auditor :codex-10 :verdict :matches-with-undeclared-reduction
