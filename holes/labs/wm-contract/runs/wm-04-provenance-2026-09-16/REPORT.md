@@ -161,6 +161,24 @@ No preference construction or WM-06 changes are commissioned by this packet.
 No new observation, accepted label, eligible pair, denominator, measured A,
 model admission, serving use or checklist/DAG state change is claimed.
 
+### WM-04 owner's returned assessment
+
+`OWNER-ASSESSMENT.md` retains the completed owner response to
+`invoke-1789574000734-21494-4b95d23b`. The owner accepts the corrected displaced-
+recommendation account and treats the original-record provenance as adequate
+at source-record/design-context scope, not admitted-evidence-window scope.
+This resolves the missing-close question for this recommendation: it was not
+the enacted target, and there is no mission-level q0 in the trace to recover.
+
+The owner agrees that an enacted-target population would exclude this case as
+not enacted, without assigning an F11 label. This remains a design conclusion;
+the population/eligibility rule still requires prospective reviewed authority.
+Any future evidence use must admit literal bytes before its cutoff through the
+existing manifest/resolver. The owner also preserves WM-12 schedule and outcome-
+domain dependencies and identifies prospective sample adequacy/stopping authority
+as outstanding. This assessment narrows the next contract packet without
+claiming those missing inputs have been delivered.
+
 ## Validation and coordination
 
 The readback executes against actual retained EDN with assertions on the exact
