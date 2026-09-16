@@ -1,0 +1,28 @@
+{
+  "probe": {
+    "command": "clojure -M:test holes/labs/wm-contract/runs/wm-09-predecessor-history-2026-09-16/probe.clj",
+    "exit": 0,
+    "output": "before.edn",
+    "scope": "diagnostic expectations of unfixed behavior, not repair acceptance"
+  },
+  "kondo": {
+    "exit": 0,
+    "output": "kondo.log",
+    "initial-run": "exit 2 unused clojure.test alias warning; removed from probe, rerun clean"
+  },
+  "parens": {
+    "exit": 0,
+    "output": "parens.log"
+  },
+  "namespace": {
+    "command": "clojure -X:test :nses '[futon2.aif.receipt-construction-test]'",
+    "exit": 0,
+    "tests": 7,
+    "assertions": 31,
+    "failures": 0,
+    "errors": 0,
+    "output": "namespace-tests.log"
+  },
+  "production-edits": false,
+  "after-repair": "not applicable: authority-conflict return under packet deliverable 4"
+}

@@ -1,0 +1,20 @@
+{
+  "head-at-inspection": "b61f1a6d290d91aff729b6d80efce882f5d08059",
+  "working-tree-pins": {
+    "src/futon2/aif/receipt_construction.clj": "1b4f766c5b5b4ce540a44c2c22f345274d2a8fb21f994c5c9091c2a3cfe60338",
+    "test/futon2/aif/receipt_construction_test.clj": "72f4876f6ed8067a68f39d749b21cdd28f7ac8581231a5e109edbd4fe7382271",
+    "src/futon2/aif/full_loop_runner.clj": "aa258d744552778a9ee06dfc70470e5cf46f9d9e70a366be519aacf0f982d55f",
+    "src/futon2/aif/full_loop_cohort.clj": "619281d634f3ac941d677352dcabdfc66a644238a957e63e5ba33ef64f41eb9e",
+    "data/wm-full-loop/wm-outer-loop-41-v1/attempt-043/003-construction.edn": "8c4aa77a12158c33a59190d49621c2eaf48b47897df9049d4905d1dfa42377b6",
+    "data/wm-full-loop/wm-outer-loop-41-v1/attempt-043/007-closed.edn": "99ec6d5dd9f9c48fddaec685d339c0db6930dc9ccea7f89fc0bd1addb5f5652a"
+  },
+  "unrelated-dirty-producer": "full_loop_runner.clj read only; not changed by this task",
+  "epoch-comparison": {
+    "24dc6068^": [
+      "(def semantic-epoch :full-loop-real-actuation-v6)"
+    ],
+    "24dc6068": [
+      "(def semantic-epoch :full-loop-real-actuation-v6)"
+    ]
+  }
+}
