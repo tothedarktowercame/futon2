@@ -156,6 +156,78 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
   (let [c (coverage want state)]
     (if (map? c) c {c 1})))
 
+(defn- rate-bad-token
+  "The first token whose adjudication rate entry is missing, non-rational or
+   outside [0,1], else nil. Lean bounds both structure fields with
+   Set.Icc 0 1 (AdjudicationRates.falseNeg_mem/falsePos_mem)."
+  [rates]
+  (some (fn [v] (let [{:keys [false-neg false-pos]} (get rates v)]
+                  (when-not (and (or (ratio? false-neg) (integer? false-neg))
+                                 (<= 0 false-neg 1)
+                                 (or (ratio? false-pos) (integer? false-pos))
+                                 (<= 0 false-pos 1))
+                    v)))
+        (set (keys rates))))
+
+(defn- refusal-map? [x] (and (map? x) (contains? x :status)))
+
+(defn token-likelihood
+  "Lean DarkTower.WarMachine.TokenObservation.tokenLikelihood (mathlib4
+   889429e6bf): A(o|s) = ∏_v over the universe (all tokens in rates) of
+   (if v ∈ s then (if v ∈ o then 1 − falseNeg v else falseNeg v)
+                    else (if v ∈ o then falsePos v else 1 − falsePos v)),
+   exact rationals; nonnegative (tokenLikelihood_nonneg) and column-summing
+   to 1 over observations (tokenLikelihood_colsum); the identity kernel when
+   every rate is 0 (tokenLikelihood_checkable). Refuses with the typed
+   {:status :missing :kind :invalid-adjudication-rate} for a missing,
+   non-rational or out-of-[0,1] rate, including a state/observation token
+   with no rate entry at all."
+  [rates state obs]
+  (or (if-let [outside (some #(when-not (contains? rates %) %)
+                              (set/union (set state) (set obs)))]
+        {:status :missing :kind :invalid-adjudication-rate :token outside :value nil}
+        nil)
+      (when-let [bad (rate-bad-token rates)]
+        {:status :missing :kind :invalid-adjudication-rate :token bad :value (get rates bad)})
+      (reduce * (map (fn [v]
+                       (let [{:keys [false-neg false-pos]} (get rates v)]
+                         (if (contains? state v)
+                           (if (contains? obs v) (- 1 false-neg) false-neg)
+                           (if (contains? obs v) false-pos (- 1 false-pos)))))
+                     (set (keys rates))))
+      (throw (ex-info "unreachable" {}))))
+
+(defn observation-distribution
+  "Lean TokenObservation.tokenLikelihood_colsum: the full observation row
+   {obs tokenLikelihood rates state obs} over every subset obs of the
+   universe, zero-mass entries omitted (sparse representation, as
+   pattern-kernel); the retained entries sum to exactly 1. Rate refusals
+   propagate."
+  [rates state]
+  (if (or (rate-bad-token rates)
+          (some #(not (contains? rates %)) (set state)))
+    {:status :missing :kind :invalid-adjudication-rate
+     :token (or (rate-bad-token rates) (some #(when-not (contains? rates %) %) (set state)))
+     :value (get rates (rate-bad-token rates))}
+    (let [universe (set (keys rates))
+          subsets (powerset universe)]
+      (into {} (remove (comp zero? val))
+            (zipmap subsets (map (partial token-likelihood rates state) subsets))))))
+
+(defn predict-observations
+  "Lean PolicyRollout.predictedOutcome composed with TokenObservation's A:
+   Q(o) = Σ_s A(s,o) · q(s) over a state distribution q. With zero rates
+   (tokenLikelihood_checkable) this equals q itself
+   (TokenObservation.predictedOutcome_eq_rolloutState). Rate refusals
+   propagate."
+  [rates q]
+  (reduce (fn [acc [s mass]]
+            (let [d (observation-distribution rates s)]
+              (if (refusal-map? d)
+                (reduced d)
+                (reduce-kv (fn [acc' o p] (update acc' o (fnil + 0) (* mass p))) acc d))))
+          {} q))
+
 (defn with-pattern-theta
   "Lean DarkTower.WarMachine.CascadeTransition.InterpretedPattern (mathlib4
    c1caf481a2): every pattern carries an interpretation theta ∈ [0,1]. A

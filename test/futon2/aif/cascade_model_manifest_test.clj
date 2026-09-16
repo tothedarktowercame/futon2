@@ -173,6 +173,70 @@
          (m/with-pattern-theta {:id :doc :produces #{"t0"}})))
   (is (= 1 (get (m/pattern-kernel {:produces #{"t0"}} #{}) #{"t0"} 0))))
 
+;; Lean correspondence: mathlib4 889429e6bf,
+;; DarkTower/WarMachine/TokenObservation.lean, fixtures on V = Fin 2 with
+;; tokens "t0" "t1" (tokenLikelihood_zeroRates_identity,
+;; tokenLikelihood_noisy_miss, tokenLikelihood_noisy_hit).
+(deftest token-observation-lean-fixture-correspondence
+  (let [zero {"t0" {:false-neg 0 :false-pos 0}
+              "t1" {:false-neg 0 :false-pos 0}}
+        noisy {"t0" {:false-neg 1/10 :false-pos 0}
+               "t1" {:false-neg 0 :false-pos 0}}]
+    ;; tokenLikelihood_zeroRates_identity: zero rates give the identity row
+    ;; (sparse: only the state itself carries mass 1)
+    (is (= #{#{}} (set (keys (m/observation-distribution zero #{})))))
+    (is (= 1 (get (m/observation-distribution zero #{"t0"}) #{"t0"} 0)))
+    (is (= {#{"t0"} 1} (m/observation-distribution zero #{"t0"})))
+    ;; tokenLikelihood_noisy_miss: falseNeg t0 = 1/10, state {t0}, obs ∅
+    (is (= 1/10 (m/token-likelihood noisy #{"t0"} #{})))
+    ;; tokenLikelihood_noisy_hit: same rates, obs {t0}
+    (is (= 9/10 (m/token-likelihood noisy #{"t0"} #{"t0"})))))
+
+;; Lean theorems: tokenLikelihood_nonneg, tokenLikelihood_colsum,
+;; tokenLikelihood_checkable, predictedOutcome_eq_rolloutState, over all 4
+;; subsets of {t0 t1}.
+(deftest token-observation-lean-theorem-properties
+  (let [rates {"t0" {:false-neg 1/10 :false-pos 1/5}
+               "t1" {:false-neg 0 :false-pos 1/3}}
+        univ #{"t0" "t1"}
+        subs (reduce (fn [ss v] (into ss (map #(conj % v)) ss)) #{#{}} univ)]
+    ;; tokenLikelihood_nonneg and tokenLikelihood_colsum for every state
+    (doseq [s subs]
+      (is (every? #(<= 0 %) (map (partial m/token-likelihood rates s) subs)))
+      (is (= 1 (reduce + (vals (m/observation-distribution rates s))))))
+    ;; predictedOutcome_eq_rolloutState: with zero rates,
+    ;; predict-observations of a rollout distribution is that distribution
+    (let [zero {"t0" {:false-neg 0 :false-pos 0}
+                "t1" {:false-neg 0 :false-pos 0}}
+          p1 (ct-pattern :q1 #{} #{} #{"t0"} 1/2)
+          p2 (ct-pattern :q2 #{"t0"} #{} #{"t1"} 1/3)
+          rolled (m/rollout (fn [k] (if (zero? k) [p1 p2] [p2 p1])) {#{} 1} 2)]
+      (is (not (contains? rolled :status)))
+      (is (= rolled (m/predict-observations zero rolled))))))
+
+(deftest token-observation-lean-falsifiers
+  ;; falseNeg outside [0,1] refuses with the typed outcome
+  (is (= :missing (:status (m/token-likelihood {"t0" {:false-neg 3/2 :false-pos 0}
+                                                "t1" {:false-neg 0 :false-pos 0}}
+                                               #{"t0"} #{"t0"}))))
+  (is (= :invalid-adjudication-rate
+         (:kind (m/token-likelihood {"t0" {:false-neg 3/2 :false-pos 0}
+                                     "t1" {:false-neg 0 :false-pos 0}}
+                                    #{"t0"} #{"t0"}))))
+  ;; a missing token rate also refuses (state token absent from rates)
+  (is (= :invalid-adjudication-rate
+         (:kind (m/token-likelihood {"t0" {:false-neg 1/10 :false-pos 0}}
+                                    #{"t0" "t1"} #{"t0"}))))
+  ;; an entry missing a :false-pos key refuses too
+  (is (= :invalid-adjudication-rate
+         (:kind (m/token-likelihood {"t0" {:false-neg 1/10}} #{"t0"} #{"t0"}))))
+  ;; refusals propagate through observation-distribution and predict-observations
+  (is (= :invalid-adjudication-rate
+         (:kind (m/observation-distribution {"t0" {:false-neg 3/2 :false-pos 0}} #{}))))
+  (is (= :invalid-adjudication-rate
+         (:kind (m/predict-observations {"t0" {:false-neg 3/2 :false-pos 0}}
+                                        {#{} 1})))))
+
 (deftest enactment-prediction-agreement-add-only
   "Design P3: with add-only effects and theta = 1, once-only enactment and
    repeat-enabled prediction agree (patternKernel_of_achieved is why)."
