@@ -155,6 +155,88 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
 (defn observation-row [want state]
   (let [c (coverage want state)]
     (if (map? c) c {c 1})))
+
+(defn with-pattern-theta
+  "Lean DarkTower.WarMachine.CascadeTransition.InterpretedPattern (mathlib4
+   c1caf481a2): every pattern carries an interpretation theta ∈ [0,1]. A
+   Clojure pattern without :theta carries the declared documented default
+   interpretation 1; the default is recorded on the pattern
+   (:theta-source :documented-default), never silent."
+  [pattern]
+  (if (contains? pattern :theta)
+    pattern
+    (assoc pattern :theta 1 :theta-source :documented-default)))
+
+(defn pattern-kernel
+  "Lean CascadeTransition.patternKernel: to (set/union state produces) with
+   probability theta and stay at state with 1 − theta, exact rationals; the
+   two masses merge to {state 1} when the pattern is already achieved
+   (patternKernel_of_achieved, theta + (1 − theta) = 1 at state). A theta
+   outside [0,1] refuses with the typed
+   {:status :missing :kind :invalid-pattern-interpretation} outcome."
+  [pattern state]
+  (let [pattern (with-pattern-theta pattern)
+        theta (:theta pattern)]
+    (if-not (and (or (ratio? theta) (integer? theta)) (<= 0 theta 1))
+      {:status :missing :kind :invalid-pattern-interpretation
+       :pattern (:id pattern) :theta theta}
+      (let [target (set/union state (:produces pattern))]
+        (if (= target state)
+          {state 1}
+          ;; sparse representation of the Lean row: zero-mass entries (theta
+          ;; = 0 or 1) are omitted, as in observed-belief
+          (into {} (remove (comp zero? val)) {target theta state (- 1 theta)}))))))
+
+(defn first-enabled
+  "Lean CascadeTransition.firstEnabled: the first pattern in precedence whose
+   guard holds at state — present tokens ⊆ state and absent tokens ∩ state = ∅
+   (guard-holds?), so absent tokens act as forbids. nil when none holds."
+  [precedence state]
+  (first (filter #(true? (guard-holds? % state)) precedence)))
+
+(defn missing-interpretation
+  "Lean CascadeTransition.interpret_eq_none_iff: a precedence list is a typed
+   hole when some firing pattern in it lacks an interpretation. Returns that
+   typed refusal, or nil when every pattern is interpreted."
+  [precedence]
+  (when-let [p (first (filter #(not= :interpreted (get-in % [:guard :status])) precedence))]
+    {:status :missing :kind :missing-pattern-interpretation :pattern (:id p)}))
+
+(defn cascade-kernel
+  "Lean CascadeTransition.cascadeKernel: pattern-kernel of the first enabled
+   pattern, or the identity {state 1} when none is enabled
+   (cascadeKernel_of_noEnabled). A precedence containing a pattern without an
+   interpretation is the typed hole (interpret_eq_none_iff) and refuses."
+  [precedence state]
+  (or (missing-interpretation precedence)
+      (if-let [p (first-enabled precedence state)]
+        (pattern-kernel p state)
+        {state 1})))
+
+(defn- refusal? [x] (and (map? x) (contains? x :status)))
+
+(defn- push-forward [prec q]
+  (reduce (fn [acc [s mass]]
+            (let [k (cascade-kernel prec s)]
+              (if (refusal? k)
+                (reduced k)
+                (reduce-kv (fn [acc' s' p] (update acc' s' (fnil + 0) (* mass p))) acc k))))
+          {} q))
+
+(defn rollout
+  "Lean PolicyRollout.rolloutState (mathlib4 07b094c59b): push the
+   distribution map q0 forward n steps; step k uses (precedence-fn k) as the
+   cascade policy (the action space U is the precedence list). Refusals
+   propagate."
+  [precedence-fn q0 n]
+  (loop [k 0 q q0]
+    (if (= k n)
+      q
+      (let [q' (push-forward (precedence-fn k) q)]
+        (if (refusal? q')
+          q'
+          (recur (inc k) q'))))))
+
 (defn normalized-exact? [row]
   (and (map? row) (every? #(and (or (integer? %) (ratio? %)) (<= 0 %)) (vals row))
        (= 1 (reduce + (vals row)))))
