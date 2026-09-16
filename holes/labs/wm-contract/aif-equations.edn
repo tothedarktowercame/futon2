@@ -180,10 +180,14 @@
    :lean-audit {:date "2026-09-16" :auditor :codex-10 :verdict :matches-with-undeclared-reduction
                 :report "holes/labs/wm-contract/AUDIT-lean-aif-equations-2026-09-16.md"
                 :section "A3 §3" :finding "Exact finite KL; requires positive preference on all listed outcomes"}
+   :lean-reaudit {:date "2026-09-16" :auditor :claude-7 :verdict :matches
+                  :subject "mathlib4 1b4247b8c7 (zai-28, R5 owner) + f4fed50271 (claude-7, posterior-zero section): OutcomeRiskKL.outcomeRisk; outcomeRisk_eq_top_iff; outcomeRisk_eq_predictiveOutcomeRisk; outcomeRisk_nonneg; outcomeRisk_padding_delta; outcomeRisk_disjoint_deltas; policyPosterior_eq_zero_of_risk_top; policyPosterior_eq_zero_of_unpreferred_outcome; policyPosterior_sum; policyWeight_coe"
+                  :finding "The undeclared reduction is removed, not declared. This is the design Joe approved (absolute continuity; p4ng 3880a38). risk is D_KL[Q(o|pi) || C] valued in EReal: top exactly when Q(o|pi) > 0 and C(o) = 0 (outcomeRisk_eq_top_iff), the condition checked per policy and only where Q has positive mass. Otherwise it is the finite Gibbs sum over positive-mass outcomes, nonnegative by Gibbs' inequality. The old finite binding predictiveOutcomeRisk is the special case under its positivity hypothesis. Both audit cases compile: support padded with a zero-mass b where C(b) = 0 gives 0, and disjoint deltas give top. With G extended to EReal, the policy posterior E(pi) exp(-G - F), normalised in ENNReal, gives probability 0 to any policy that puts positive mass on a zero-preference outcome (policyPosterior_eq_zero_of_unpreferred_outcome). So zero-preference exclusion follows from the model and is not an extra rule. On finite G the posterior agrees with the real softmax weight and sums to one. Eq. (44) checked at refs/dacosta2020.txt:1418-1423. Rebuilt by claude-7; axioms propext/Classical.choice/Quot.sound only."}
    :reduction "Finite KL only: positive preference mass is required on every listed predictive outcome."
    :defines :risk :node :R5 :class :theory-defined :ref :dacosta2020
    :imports [:Q-o-pi :C]
-   :formal "risk(pi) := D_KL[Q(o|pi) || C]" :eq "dacosta2020 eq. 44 (risk over outcomes)" :lean "predictiveOutcomeRisk" :lean-status :closed-undeclared-reduction}
+   :formal "risk(pi) := D_KL[Q(o|pi) || C]" :eq "dacosta2020 eq. 44 (risk over outcomes)" :lean "OutcomeRiskKL.outcomeRisk" :lean-status :closed
+   :lean-at "mathlib4 f4fed50271 (OutcomeRiskKL.lean; Holes.predictiveOutcomeRisk is unchanged and proved its finite special case)"}
   {:id :ambiguity
    :lean-audit {:date "2026-09-16" :auditor :codex-10 :verdict :matches
                 :report "holes/labs/wm-contract/AUDIT-lean-aif-equations-2026-09-16.md"
