@@ -1,0 +1,7 @@
+{
+  "src/futon2/aif/cascade_g.clj": "8742aa1cca91138f778ebe337b227b545462f7d7aa4c00f3f538ebd223522583",
+  "test/futon2/aif/cascade_g_test.clj": "705c6ea73c0d40568b91fc1baf645cea4c9be7b7c826f87566fd4457282122c1",
+  "src/futon2/aif/machine_model.clj": "462aae432397e21209c238685d1aa39d040f15b330e2baa5f771d4858eb66b77",
+  "src/futon2/aif/categorical_ambiguity.clj": "6ffef96acba3853b04d5357f4ebf2675774dc9a093487970823d46ccd67b4a4f",
+  "src/futon2/aif/machine_q_risk.clj": "9d4ed5e1dab8d2a591ca7bb0fd5a5b87f763c337b4ff51e782cc6c3afbb0200e"
+}

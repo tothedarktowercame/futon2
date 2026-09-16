@@ -1,0 +1,11 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.cascade-g-test
+
+Testing futon2.aif.categorical-ambiguity-test
+
+Testing futon2.aif.machine-q-risk-test
+
+Ran 13 tests containing 67 assertions.
+0 failures, 0 errors.
