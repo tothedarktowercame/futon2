@@ -1,0 +1,8 @@
+== holes/labs/wm-contract/runs/wm-09-predecessor-history-2026-09-16/probe.clj
+linting took 7ms, errors: 0, warnings: 0
+kondo exit 0
+parens exit 0
+== holes/labs/wm-contract/runs/wm-09-predecessor-history-2026-09-16/review-claude-3/reviewer-probe.clj
+linting took 8ms, errors: 0, warnings: 0
+kondo exit 0
+parens exit 0

@@ -1,0 +1,4 @@
+classpath: overlay of git show 7e738d53 for receipt_construction.clj (sha256 1b4f766c…) and receipt_construction_test.clj (72f4876f…) prepended to clojure -Spath -M:test; run as java -cp … clojure.main
+reason: shared worktree receipt_construction.clj was being modified by an in-flight writer (worktree sha256 4674b63d… at review time); a first reviewer-probe run that loaded the worktree copy was discarded
+author probe rerun: exit 0, output identical to before.edn modulo temp paths
+temp dirs remaining after runs: 0

@@ -1,0 +1,10 @@
+{:case :valid-modern, :result {:admission-reason :carried-from-previous-occurrence, :status nil, :epoch :newer}}
+{:case :carrier-removed, :result {:admission-reason :legacy-predecessor-no-ruled-admissions, :status :legacy-predecessor-unrepresentable, :epoch nil}}
+{:case :carrier-malformed, :result {:exception "clojure.lang.ExceptionInfo", :data {:interpretation/refusal :interpretation/invalid-receipt, :construction/refusal :previous-manifest-source-mismatch, :file "/tmp/wm09-predecessor-probe2561420302721138530/newer/fixture/attempt-001/003-construction.edn"}}}
+{:case :cascade-removed, :result {:admission-reason :carried-from-previous-occurrence, :status nil, :epoch :older}}
+{:case :construction-missing, :result {:admission-reason :carried-from-previous-occurrence, :status nil, :epoch :older}}
+{:case :manifest-missing, :result {:exception "clojure.lang.ExceptionInfo", :data {:evidence-manifest/refusal :shape-invalid, :path [:manifest], :expected #{:schema :entries :manifest-sha256}, :actual nil}}}
+{:case :occurrence-missing, :result {:exception "clojure.lang.ExceptionInfo", :data {:interpretation/refusal :interpretation/invalid-receipt, :construction/refusal :previous-occurrence-unavailable, :file "/tmp/wm09-predecessor-probe12597025472665961880/newer/fixture/attempt-001/007-closed.edn"}}}
+{:case :carrier-and-manifest-missing, :result {:admission-reason :legacy-predecessor-no-ruled-admissions, :status :legacy-predecessor-unrepresentable, :epoch nil}}
+{:case :no-earlier-target, :result {:admission-reason :first-attempt-no-admissions, :status :none, :epoch nil}}
+{:scope :diagnostic-only, :production-edits false, :repair-acceptance false}

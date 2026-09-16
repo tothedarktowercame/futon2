@@ -1,0 +1,10 @@
+{:case :control-valid-alone, :older-present? false, :result {:admission-reason :carried-from-previous-occurrence, :status nil, :epoch :newer}}
+{:case :resealed-control-unchanged, :older-present? true, :result {:admission-reason :carried-from-previous-occurrence, :status nil, :epoch :newer}}
+{:case :resealed-carrier-removed, :older-present? true, :result {:admission-reason :legacy-predecessor-no-ruled-admissions, :status :legacy-predecessor-unrepresentable, :epoch nil}}
+{:case :resealed-carrier-malformed, :older-present? true, :result {:exception "clojure.lang.ExceptionInfo", :data {:interpretation-evidence/refusal :shape-invalid, :path [:identity]}}}
+{:case :resealed-cascade-removed, :older-present? true, :result {:admission-reason :carried-from-previous-occurrence, :status nil, :epoch :older}}
+{:case :carrier-removed-no-older, :older-present? false, :result {:admission-reason :legacy-predecessor-no-ruled-admissions, :status :legacy-predecessor-unrepresentable, :epoch nil}}
+{:case :cascade-removed-no-older, :older-present? false, :result {:admission-reason :first-attempt-no-admissions, :status :none, :epoch nil}}
+{:case :construction-missing-no-older, :older-present? false, :result {:admission-reason :first-attempt-no-admissions, :status :none, :epoch nil}}
+{:case :close-unreadable, :older-present? true, :result {:exception "java.lang.RuntimeException", :data nil}}
+{:case :close-recorded-at-missing, :older-present? true, :result {:exception "java.lang.NullPointerException", :data nil}}
