@@ -126,7 +126,7 @@
      :consulting-pct (:consulting commit-percentages 0.0)
      :portfolio-pct (:portfolio commit-percentages 0.0)
      :mathematics-pct (:mathematics commit-percentages 0.0)
-     :active-repo-ratio (if (and summary (pos? (:total-repos summary)))
+     :active-repo-ratio (if (and summary (pos? (:total-repos summary 0)))
                           (/ (double (:active-repos summary 0))
                              (:total-repos summary))
                           0.0)
