@@ -155,28 +155,81 @@
   ;; removed. The refusal is the missing wiring, not a requirement; the
   ;; REQUIRED OPEN assertion below states what must be built.
 
-  (testing "REQUIRED OPEN: the real R6 route constructs this tick's candidate cascade space"
-    ;; The model requires: calling the real machine on this tick's belief
-    ;; yields the candidate cascades C0-C3. Today no wired path does:
-    ;; select-action ranks given actions only, and construct needs a packet-1
-    ;; receipted find record this tick has not produced (previous testing
-    ;; block shows the typed refusal). This assertion FAILS until that
-    ;; wiring exists.
-    (let [real-candidates
-          (try
-            ;; the only real construction entry point: refuses without a receipt
-            (rc/construct {:schema :wm/interpreted-pattern-set-v1 :sources [] :facts []}
-                          (fn [_] (throw (ex-info "no captured bytes" {:finding :find/refusal})))
-                          "/home/joe/code/futon3/library"
-                          cp/first-attempt-cascade
-                          nil)
-            (catch Exception _ nil))]
-      (is (and (map? real-candidates)
-               (contains? (set (map first cascades))
-                          (get-in real-candidates [:selected-action :id])))
-          (str "requirement open: no real R6 wiring turns this tick's belief into "
-               "the candidate cascades C0-C3; construct returns a typed refusal "
-               "(no packet-1 receipted find record for this tick) and select-action "
-               "ranks pre-given single actions only. Missing wiring: a receipted "
-               "find over the tick's retrieval runs, or a live-tick candidate "
-               "constructor on the :R6 route.")))))
+  (testing "REQUIRED: real candidate-space builds the tick's candidate family C0-C3 from the belief"
+    ;; RE-POINTED (claude-4-approved form of the former ill-posed assertion,
+    ;; see 03-R6.edn :fix): before, this block called
+    ;; receipt-construction/construct on an empty record, an entry point that
+    ;; needs a packet-1 receipted find record and could never yield C0-C3.
+    ;; After, it calls the real R6 constructor cascade-policy/candidate-space
+    ;; on this tick's belief (q0, want, interpretations, repository, authored
+    ;; precedences) and requires the SAME values: the family contains the
+    ;; empty cascade plus C1-C3, each step keeping its guard and produces.
+    (let [space (try {:ok (cp/candidate-space
+                           {:q0 q0 :want want :interpretations steps
+                            :repository repository
+                            :precedences (mapv second (rest cascades))})}
+                     (catch Exception e {:throw e}))]
+      (is (nil? (:throw space))
+          (str "candidate-space refused: "
+               (when-let [t (:throw space)] (.getMessage t)) " "
+               (when-let [t (:throw space)] (pr-str (ex-data t)))))
+      (when-let [sp (:ok space)]
+        (let [cands (:candidates sp)]
+          (is (= 4 (count cands)) "C0 plus the three authored candidates, nothing else")
+          (is (= [] (:precedence (first cands)))
+              "the empty cascade is always first")
+          (is (= (second (nth cascades 1)) (:precedence (nth cands 1)))
+              "C1 test-first order preserved")
+          (is (= (second (nth cascades 2)) (:precedence (nth cands 2)))
+              "C2 fix-first order preserved")
+          (is (= (second (nth cascades 3)) (:precedence (nth cands 3)))
+              "C3 fix-only order preserved")
+          (is (every? :guard (mapcat #(vals (:steps %)) cands))
+              "every step keeps its guard over the tick tokens")
+          (is (every? :produces (mapcat #(vals (:steps %)) cands))
+              "every step keeps its produces")
+          (is (every? map? (map :organised cands))
+              "every candidate is organised through the real organise (O1-O4)")
+          (is (= (:acting-order (nth cands 2))
+                 (get-in (nth cands 2) [:organised :acting-order-after]))
+              "the organised diff's acting order equals the fold's acting order")
+          (is (set/superset? (:established (nth cands 1)) (set want))
+              "C1's real kernel fold establishes all three want tokens")
+          (is (set/superset? (:established (nth cands 2)) (set want))
+              "C2's real kernel fold establishes all three want tokens")
+          (is (not (contains? (:established (nth cands 3))
+                              :test-covers-missing-total-repos))
+              "C3 never establishes the test token")
+          (is (= 1 (:coverage (nth cands 2)))
+              "C2's coverage over the want signature is exactly 1")))))
+
+  (testing "REQUIRED: default precedence derivation enumerates the interpreted subsets through the real laws"
+    (let [space (try {:ok (cp/candidate-space
+                           {:q0 q0 :want want :interpretations steps
+                            :repository repository})}
+                     (catch Exception e {:throw e}))]
+      (is (nil? (:throw space))
+          (str "default candidate-space refused: "
+               (when-let [t (:throw space)] (.getMessage t))))
+      (when-let [sp (:ok space)]
+        (is (= 8 (count (:candidates sp)))
+            "empty cascade plus one candidate per non-empty subset of the three interpretations")
+        (is (= :not-performed-here (:retrieval (:rules sp)))
+            "retrieval is explicitly recorded as not performed here (still open)")))))
+
+  (testing "REQUIRED: receipted construct refuses this tick's find with a TYPED refusal (no captured receipt exists)"
+    (let [r (try
+              {:ok (rc/construct {:schema :wm/interpreted-pattern-set-v1
+                                  :sources []
+                                  :facts []}
+                                 (fn [_] (throw (ex-info "no captured bytes this tick"
+                                                         {:finding :find/refusal})))
+                                 "/home/joe/code/futon3/library"
+                                 cp/first-attempt-cascade
+                                 nil)}
+              (catch Exception e {:throw e}))]
+      (is (nil? (:ok r))
+          "construct must not construct from a live library without a receipt")
+      (is (map? (some-> r :throw ex-data))
+          (str "the refusal must be typed (ex-data), got: "
+               (when-let [t (:throw r)] (class t))))))

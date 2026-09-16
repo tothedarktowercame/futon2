@@ -6,7 +6,8 @@
   Canonical cascade G is now specified by CascadeEFE.lean and
   CascadeEFEPolicies.lean. The legacy risk/eig helpers below are not that G;
   a runtime scorer and a recorded production selection remain separate work."
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [futon2.aif.cascade-model-manifest :as manifest]))
 
 ;; --- temperaments (policy-grain cascades; READ, not fired: F12) -----------
 
@@ -203,3 +204,157 @@
                                             f-pi-fn tau cascades)]
     {:posterior posterior
      :selected (apply max-key :weight posterior)}))
+
+;; --- R6 candidate action space (vm tick-001 step 3, VM-PROTOCOL) ---------
+
+(defn token-interpretation
+  "Adapter from an on-the-fly token interpretation
+  {pattern-id {:guard {:needs #{token} :forbids #{token}}
+               :produces #{token}}} to the manifest's interpreted-pattern
+  shape, so the aligned Lean-backed guard/kernel/coverage functions apply
+  unchanged. The guard is one conjunctive clause: every :needs token present,
+  every :forbids token absent. Produces are add-only (P10); θ carries the
+  manifest's declared documented default."
+  [id {:keys [guard produces]}]
+  {:id id
+   :authority :documented-interpretation
+   ;; top-level :produces because pattern-kernel reads it there; the
+   ;; :transition map is the manifest's own interpretation record shape.
+   :produces (set produces)
+   :guard {:status :interpreted :operator :and
+           :clauses [{:status :interpreted
+                      :present (set (:needs guard))
+                      :absent (set (:forbids guard))}]}
+   :transition {:status :interpreted :operator :union
+                :produces (set produces)
+                :authority :documented-interpretation}})
+
+(defn- topo-order
+  "Authored-reachability topological order of `carrier` over `stands-on`,
+  canonical-id tie-break — the same precedence rule receipted construction
+  records (:precedence-rule :authored-reachability-topological)."
+  [carrier stands-on]
+  (loop [remaining (sort carrier) order []]
+    (if (empty? remaining)
+      (vec order)
+      (let [ready (first (filter (fn [u]
+                                   (not-any? #(reach-outside? #{} stands-on u %)
+                                             (remove #{u} remaining)))
+                                 remaining))]
+        (if (nil? ready)
+          (throw (ex-info "candidate precedence refused"
+                          {:finding :candidate-space/refusal
+                           :law :precedence-cycle
+                           :remaining (vec remaining)}))
+          (recur (remove #{ready} remaining) (conj order ready)))))))
+
+(defn- acting-and-state
+  "First-true-unachieved-guard fold over one precedence of manifest pattern
+  maps: repeatedly take the first enabled pattern (manifest/first-enabled,
+  which rechecks guards and skips completed patterns) and advance the state
+  through its pattern kernel (manifest/pattern-kernel). Returns
+  {:acting [id ...] :state #{token}}; a typed kernel refusal propagates."
+  [q0 pattern-maps]
+  (loop [state (set q0) acted []]
+    (if-let [p (manifest/first-enabled pattern-maps state)]
+      (let [row (manifest/pattern-kernel p state)]
+        (if (contains? row :status)
+          (throw (ex-info "candidate fold refused" row))
+          (recur (key (apply max-key val row)) (conj acted (:id p)))))
+      {:acting (vec acted) :state state})))
+
+(defn- nonempty-subsets
+  "Every non-empty subset of `ids`, as sets, smallest first."
+  [ids]
+  (rest (reduce (fn [ss id] (into ss (map #(conj % id)) ss))
+                [#{}] ids)))
+
+(defn candidate-space
+  "R6 candidate action space over a token belief. Input map:
+    :q0              observed token state (set)
+    :want            want signature (non-empty coll of tokens)
+    :interpretations {pattern-id {:guard {:needs #{t} :forbids #{t}}
+                                  :produces #{t}}} — on-the-fly token
+                     interpretations, given as INPUT. Pattern retrieval and
+                     interpretation themselves are NOT performed here; they
+                     are upstream requirements (see :rules in the result).
+    :repository      {:patterns #{id} :stands-on #{[u v]}} for organise's laws
+    :precedences     optional vector of authored candidate orders (vectors of
+                     pattern ids). Default: one order per non-empty subset of
+                     the interpretations, each ordered by topo-order.
+  The empty cascade is ALWAYS the first candidate and is never omitted.
+  Every candidate is organised through `organise` (closure :selected-only),
+  so the O1–O4 laws hold for each; acting order and established tokens come
+  from the aligned model functions (manifest/first-enabled,
+  manifest/pattern-kernel), coverage from manifest/coverage. Returns
+  {:candidates [{:id :Ck :precedence [...] :steps {...} :acting-order [...]
+                 :established #{...} :coverage r :organised <diff>} ...]
+   :rules {...}}."
+  [{:keys [q0 want interpretations repository precedences]}]
+  (let [q0 (set q0)
+        want (vec want)
+        ids (set (keys interpretations))
+        repo-patterns (set (:patterns repository))
+        stands-on (:stands-on repository)
+        unknown (set/difference ids repo-patterns)]
+    (when (seq unknown)
+      (throw (ex-info "candidate space refused"
+                      {:finding :candidate-space/refusal
+                       :law :interpretation-outside-repository
+                       :outside (vec (sort unknown))})))
+    (when-not (and (set? repo-patterns) (set? stands-on) (map? interpretations))
+      (throw (ex-info "candidate space refused"
+                      {:finding :candidate-space/refusal
+                       :law :invalid-input-shape})))
+    (let [patterns (into {} (map (fn [[id x]] [id (token-interpretation id x)]))
+                         interpretations)
+          orders (if (nil? precedences)
+                   (do (when (> (count ids) 8)
+                         (throw (ex-info "candidate space refused"
+                                         {:finding :candidate-space/refusal
+                                          :law :subset-explosion
+                                          :interpretations (count ids)})))
+                       (into [[]] (mapv #(topo-order % stands-on)
+                                        (nonempty-subsets ids))))
+                   (vec (distinct (concat [[]] (map vec precedences)))))
+          _ (doseq [order orders
+                    :let [outside (remove interpretations order)]]
+              (when (seq outside)
+                (throw (ex-info "candidate space refused"
+                                {:finding :candidate-space/refusal
+                                 :law :precedence-outside-interpretations
+                                 :outside (vec outside)}))))
+          fold (fn [order]
+                 (acting-and-state q0 (mapv patterns order)))
+          candidates (map-indexed
+                      (fn [i order]
+                        (let [sel (set order)
+                              {:keys [acting state]} (fold order)
+                              diff (organise first-attempt-cascade sel repository {}
+                                             {:temperament
+                                              {:id :r6-candidate-space
+                                               :closure :selected-only
+                                               :precedence (vec order)}
+                                              :acting-order-fn (fn [c] (:acting (fold (:precedence c []))))
+                                              :score-fn (fn [c]
+                                                          {:kind :token-coverage
+                                                           :value (manifest/coverage
+                                                                   want (:state (fold (:precedence c []))))})})]
+                          {:id (keyword (str "C" i))
+                           :precedence (vec order)
+                           :steps (select-keys interpretations order)
+                           :acting-order acting
+                           :established state
+                           :coverage (manifest/coverage want state)
+                           :organised diff}))
+                      orders)]
+      {:candidates (vec candidates)
+       :rules {:precedence-rule (if (nil? precedences)
+                                  :authored-reachability-topological
+                                  :caller-authored)
+               :tie-break :canonical-id
+               :acting-rule :first-true-unachieved-guard-apply-add-only-effects-from-q0
+               :closure :selected-only
+               :empty-cascade :always-first
+               :retrieval :not-performed-here
+               :interpretation :not-performed-here}})))
