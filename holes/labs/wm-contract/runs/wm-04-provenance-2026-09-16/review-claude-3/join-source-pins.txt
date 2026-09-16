@@ -1,0 +1,7 @@
+125d1f5e92cd925e7548272cedc33ba28c9fd44fc936bfa339252bb1e37926e4  data/wm-full-loop-phases.edn.log
+61d17a533c475a392cf42ab3a6de4277a61fb5c1f1d3554de9e76fe53efb7dd1  data/wm-morning-brief/items/ea1-418bb56e1f0d7ad8986839e45f5268a98e62dcbf9c8ad3634bd998f421a293ae--attempt-001.edn
+3b25d2d43e3ebbcf19fc6f82e103ae49907b81d0cf009fa8d7884e74ef53e175  data/wm-trace/wm-trace-2026-09-12.edn
+25a0a1e2257396c2d1db889375773c9cbed99b2ad26c57b4674e02ca1660d686  data/wm-trace/wm-trace-2026-09-12.edn.pre-migration-backup
+3ed73d48cc9085a1c1884bc869e6e5c1f977ef6014a0bbbf58d7f29cc2f306b5  holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12-v2/run-config.edn
+-rw-rw-r-- 1 joe joe 146682828 2026-09-12 19:55:48.997570632 +0000 data/wm-trace/wm-trace-2026-09-12.edn
+-rw-rw-r-- 1 joe joe 146680381 2026-09-12 17:28:10.068546509 +0000 data/wm-trace/wm-trace-2026-09-12.edn.pre-migration-backup

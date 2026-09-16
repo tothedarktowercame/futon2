@@ -1,0 +1,34 @@
+timestamps [2026-09-12T13:16:12.144484983Z 2026-09-12T14:02:27.232494961Z 2026-09-12T16:48:03.815122125Z 2026-09-12T17:28:09.498448087Z]
+:mu-pre type clojure.lang.PersistentHashMap count 417
+  sample keys (arxana/stack/futon-v1/leaf/2/2 arxana/stack/futon-v1/devmap/futon2/P9 arxana/stack/futon-v1/leaf/6-4-4/15 arxana/stack/futon-v1/devmap/futon3/P2 arxana/stack/futon-v1/leaf/argument/F2 arxana/stack/futon-v1/devmap/futon5/P0 arxana/stack/futon-v1/globe/8-policy-transition/2 arxana/stack/futon-v1/devmap/futon0/IFR)
+  keys mentioning shared-memory ()
+:mu-post type clojure.lang.PersistentHashMap count 417
+  sample keys (arxana/stack/futon-v1/leaf/2/2 arxana/stack/futon-v1/devmap/futon2/P9 arxana/stack/futon-v1/leaf/6-4-4/15 arxana/stack/futon-v1/devmap/futon3/P2 arxana/stack/futon-v1/leaf/argument/F2 arxana/stack/futon-v1/devmap/futon5/P0 arxana/stack/futon-v1/globe/8-policy-transition/2 arxana/stack/futon-v1/devmap/futon0/IFR)
+  keys mentioning shared-memory ()
+target mentions 17
+[:val [:ranked-actions 138 :goal-outcome-replay-inputs :capability-graph-input :target]]
+[:val [:ranked-actions 138 :action :mission-path]]
+[:val [:ranked-actions 138 :action :target]]
+[:val [:f-pi-by-candidate-id :by-candidate-id "rank/139" :candidate-identity 1 1]]
+[:val [:support-typed-scoring-shadow :candidates 138 :action :mission-path]]
+[:val [:support-typed-scoring-shadow :candidates 138 :action :target]]
+[:val [:decision :selected-mission-ids 0]]
+[:val [:decision :strategic-memory :hard-support :support-relations 1 :memories 0 :memory/mission-ids 0]]
+[:val [:decision :strategic-memory :counterfactuals :fixed 1]]
+[:val [:decision :strategic-memory :counterfactuals :additive-controller 1]]
+[:val [:decision :strategic-memory :counterfactuals :scheduler-habit 2]]
+[:val [:decision :strategic-memory :relation-contributions 0 :mission-id]]
+[:val [:decision :strategic-memory :actuation :allow-listed-mission-ids 1]]
+[:val [:decision :habit-adjusted-ranking 138 :action :target]]
+[:val [:decision :controller-ranking 138 :action :target]]
+[:val [:decision :action :mission-path]]
+[:val [:decision :action :target]]
+nested occurrence-like keys (:attempt-count :disposition)
+--- part 2
+mu-pre key types {java.lang.String 414, clojure.lang.Keyword 3}
+mu-pre keys with mission/M- ()
+nested :attempt-count/:disposition paths 3
+[[:decision :strategic-memory :blockers 0 :blocking-relations 0 :memories 0 :memory/body :body :disposition] ":block-unwarmed-click"]
+[[:decision :strategic-memory :actuation :machine-gates :serving-cache :attempt-count] "1"]
+[[:decision :strategic-memory :serving-cache-gate :attempt-count] "1"]
+observation {:type :futon2.aif/tagged-observation, :channels {:mathematics-pct {:variant :observed, :value 0.0}, :coupling-density {:variant :observed, :value 0.10833333333333334}, :support-coverage {:variant :observed, :value 0.8}, :depositing-signal {:variant :observed, :value 0.0}, :loop-health {:variant :observed, :value 0.5872951571421657}, :mission-health {:variant :observed, :value 0.20993685213868699}, :portfolio-pct {:variant :observed, :value 2.0964360587002095E-4}, :annotation-health {:variant :observed, :value 0.9951690821256038}, :ticks-firing-ratio {:variant :observed, :value 0.0}, :active-repo-ratio {:variant :observed, :value 0.5}, :attack-coverage {:variant :observed, :value 0.5}, :consulting-pct {:variant :observed, :value 0.0010482180293501049}, :sorry-count-norm {:variant :observed, :value 0.3}, :stack-pct {:variant :observed, :value 0.9987421383647799}}}

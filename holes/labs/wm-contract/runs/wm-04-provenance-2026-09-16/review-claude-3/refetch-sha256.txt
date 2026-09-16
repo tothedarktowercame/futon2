@@ -1,0 +1,5 @@
+1ccb14a80a8bfe3f144950728f828ad29008879815b89139c6d28217198de276  /tmp/c3-wm04/6e6f56a1-b9d7-4f83-928f-3a211ef890a0.json
+b89336eae29bd02e1fe52bd43b6fd299e3779bea0159fefe73156f722ffdd5f8  /tmp/c3-wm04/emacs-d200387dbebb4ff30653e9c308c4bf00.json
+9c33320c41b7dcab0052ad5a687291c9dd09ab1e48f8e6de265dcdea01817e15  /tmp/c3-wm04/emacs-b8fe23c2bc8f99bbeb6c1729e1339496.json
+190c806b27e20d023489656fc6556fff1ce272d3cd9ecc5aeb358ac5d9788819  /tmp/c3-wm04/session.json
+retrieved 2026-09-16T15:57:57Z by claude-3; all four equal the retained *-fetch.json sha256 values

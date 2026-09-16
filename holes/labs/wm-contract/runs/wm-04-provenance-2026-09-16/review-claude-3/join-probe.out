@@ -1,0 +1,32 @@
+item: selected-target M-f11-find-production-successor opportunity duree-click-on-demand/2026-09-12T17:23:07.717766103Z/ed3826f3-e2bc-4bf4-8285-d98ea30d71b8 trigger :duree-click-on-demand queued-at 2026-09-12T17:34:21.177048993Z
+maps in item with selected-policy-id = pi-s-9dbc: [[:selection-review :selection-reasons :ordinary-selector-decision]]
+path [:selection-review :selection-reasons :ordinary-selector-decision]
+  item decision keys 26 trace decision keys 26
+  (= item-decision trace-decision) false
+  keys differing: (:softmax-weights :softmax-weights-by-candidate-id)
+  action equal true
+trace keys :moved-from-controller-head? nil
+trace decision keys (:action :actuation-authorized? :actuation-status :controller-ranking :controller-score :counterfactual :decision-explanation :f-pi-posterior :habit-adjusted-ranking :habit-authority :habit-prior-applied? :no-op-comparison :rank :reason :recommendation-authority :requires-operator-override? :selected-mission-ids :selected-policy-id :selection-boundary :selection-gain :selection-law :softmax-weights-by-candidate-id :strategic-memory :tau :tau-source :tau-spread)
+--- softmax comparison
+:softmax-weights item type clojure.lang.PersistentHashMap count 148 | trace type nil count nil
+  item sample ([{:central 0.0, :open-hole-count 0, :structural-pressure-per-action 0.0, :non-progress-decay 1.0, :phase "map", :type :advance-mission, :operator-gate-factor 1.0, :rationale "mission substrate: Mission: M-populate-substrate-2 [open; advance open holes]", :non-progress-count 0, :weight 1.0, :completion-gate-factor 1.0, :non-progress? false, :mission-path "/home/joe/code/futon3c/holes/missions/M-populate-substrate-2.md", :strategic 0.0, :target "M-populate-substrate-2", :mission-value-factor 0.09, :doable 0.3} 0.005757179477057391] [{:central 0.4694232105628909, :open-hole-count 7, :structural-pressure-per-action 0.0, :non-progress-decay 1.0, :phase "instantiate", :type :advance-mission, :operator-gate-factor 1.0, :rationale "mission substrate: Mission: M-vsatarcs-writer [active; advance open holes]", :non-progress-count 0, :weight 1.0, :completion-gate-factor 1.0, :non-progress? false, :mission-path "/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md", :strategic 0.0, :target "M-vsatarcs-writer", :mission-value-factor 0.4173558026407227, :doable 1.0} 0.007010274239332766])
+  trace sample ()
+:softmax-weights-by-candidate-id item type nil count nil | trace type clojure.lang.PersistentHashMap count 148
+  item sample ()
+  trace sample (["rank/18" 0.0070880588924022055] ["rank/58" 0.00633072411602219])
+backup timestamp 2026-09-12T17:28:09.498448087Z backup decision = item decision false
+backup keys only / trace keys only #{} #{:accumulation-state :accumulation-initialization}
+backup decision keys differing from trace ()
+--- weight multiset
+sorted weight vectors equal true
+--- selection reasons
+selection-reasons keys (:authority-attestation :authority-ref :controller-score :discrimination :enacted-candidate-action :operator :ordinary-selector-decision :outer-loop-ranking-match-required? :source)
+  :discrimination {:passes? true, :valid-score-count 5, :distinct-score 5, :score-values [2.0198396241717806 2.0394672683857213 2.0600075256330688 2.1318162149208466 2.1393867009371808], :candidate-count 5, :valid-g-count 5, :distinct-g 5, :g-values [-1.120833964772359 -1.1012063205584184 -1.080666063311071 -1.0088573740232931 -0.8512868880069533], :epsilon 1.0E-6, :top-k 5}
+  :authority-ref "Joe continuous WM direction; claude-15 seam and TN-9a review; 2026-09-12"
+  :source :authenticated-operator-task-pin
+  :controller-score 2.42391260900088
+  :authority-attestation {:status :authenticated, :boundary :trusted-serving-context, :principal "Joe", :pin-sha256 "6c6f54240211fe0fda92399fb3b0bc298dd64d08a0330566a8c078d715a726c7", :effective-environment {:schema :wm/run4-effective-environment-attestation-v1, :hierarchy {:model :single-level, :scope :RUN4}, :flags [{:flag "FUTON_WM_BETA_DARK", :required "1", :observed "1", :effective true, :consumer [futon2.report.war-
+  :enacted-candidate-action {:central 0.0, :open-hole-count 2, :structural-pressure-per-action 0.0, :non-progress-decay 1.0, :phase nil, :type :advance-mission, :operator-gate-factor 1.0, :rationale "mission substrate: M-f11-find-production-successor — OPEN — repair-024 successor [open; advance open holes]", :non-progress-count 0, :weight 1.0, :completion-gate-factor 1.0, :non-progress? false, :mission-path "/home/joe/code/f
+  :operator "Joe"
+  :outer-loop-ranking-match-required? false
+enacted target nil operator nil
