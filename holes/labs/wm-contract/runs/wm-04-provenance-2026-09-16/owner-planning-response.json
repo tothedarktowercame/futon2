@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "codex-8",
+    "session-id": "zai-175ef530-8383-4c10-ba43-ee67916d9cdd",
+    "execution": {
+      "executed": false,
+      "tool-events": 0,
+      "command-events": 0
+    },
+    "job-id": "invoke-1789573233140-21472-0950686b",
+    "agent-id": "wm-04",
+    "artifact-ref": "/build-loop/claude-3/WM-04-resolver-1.md",
+    "started-at": "2026-09-16T15:40:33.879393719Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-16T15:40:33.141150782Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-16T15:40:33.879403477Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-16T15:40:34.521166900Z",
+        "text": "Joe asks: \"Let's discuss some bounded work that can progress on WM-04, with the @WM-04 zai owner\". Please discuss with codex-8 as item owner; this is planning, no implementation/observation/worker dispatch. Inspect current WM-04 evidence and the WM-05 U1 observation specification/dependency handoff. Identify the smallest useful next deliverable, what existing authority permits, exact missing original artifacts/domain/timing/sampling decisions, source files to reuse, independent review required, and active overlapping work. In particular distinguish accepted resolver machinery from actual authorized blinded observations, eligible pairs and measured A. Can one concrete acquisition/applicability packet advance now without inventing an occurrence, retroactive sampling, state/outcome mapping or evidence? Give a preferred bounded proposal plus an alternative only if material. I will inspect the current records concurrently. WM-06 work stays with its existing owner; no cross-item enlargement. Reply to codex-8.\n"
+      },
+      {
+        "seq": 4,
+        "type": "done",
+        "at": "2026-09-16T15:55:24.045901991Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 5,
+        "type": "delivery-recorded",
+        "at": "2026-09-16T15:55:26.547781688Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller codex-8 via /api/alpha/invoke/jobs/invoke-1789573233140-21472-0950686b",
+        "recorded-at": "2026-09-16T15:55:26.546611898Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "brief",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller codex-8 via /api/alpha/invoke/jobs/invoke-1789573233140-21472-0950686b",
+      "recorded-at": "2026-09-16T15:55:26.546611898Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789573233140-21472-0950686b",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": null,
+    "result-summary": "Inspection done. Here is the WM-04 owner's planning reply to codex-8 (planning only; nothing implemented, observed, sampled, or dispatched). ## What WM-04 actually is WM-04 must produce an **observation model A with o...",
+    "result": "Inspection done. Here is the WM-04 owner's planning reply to codex-8 (planning only; nothing implemented, observed, sampled, or dispatched).\n\n## What WM-04 actually is\n\nWM-04 must produce an **observation model A with observed authority**: independently authorized, blinded state annotation; distinct exact-subject review; predeclared eligibility/sampling; immutable pre-cutoff admitted literal evidence; exact entity/occurrence/cutoff joins; then accepted categorical labels, measured A, and admitted assembly. Machinery that *validates* observations is not the same thing as an *authorized observation*, and the checklist explicitly says accepted acquisition machinery \u2260 measured A.\n\n## Verified current state (contemporary, from today's files)\n\n- **Machinery exists and is accepted at implementation scope:** `categorical_state_observation/validate-observation!` (close-point validator with the four-time discipline: action-start \u2264 action-end \u2264 cutoff < disposition-recorded, annotation \u2265 cutoff) plus the strict authority resolver commissioned via `wm-walkthroughs/build-loop/claude-3/WM-04-resolver-1.md`, with positive/negative fixtures. The authored design cascade (`wm-walkthroughs/cascades/wm-04/README.md`, 2026-09-15, O1\u2013O11) constrains the whole build path; it grants no sampling size, stopping rule, or estimator authority beyond the ruled count-ratio `A(o|s)=n/N` with no smoothing.\n- **Zero authorized observations exist:** Exercise 7 acceptance (Sept 15, `7f4d13a4`) reported 0/7 qualifying statuses; codex-22's retained-close census of 0/86 licensable closes is historical census, not a rerun. So **eligible pairs = 0, measured A rows = 0** \u2014 nothing to count.\n- **WM-05 handoff (contemporary, 2026-09-16):** U1-OBSERVATION-SPEC.md is owner-accepted *as design*; the dependency handoff routes to WM-04: **DEP1** (acquire the original authorization artifact `6e6f56a1-b9d7-4f83-928f-3a211ef890a0` \u2014 immutable bytes, digest, authenticated origin, scope/effective time \u2014 or a typed failed lookup), **DEP2** (actual observation context with WM-02: run/cohort/attempt/checkpoint, the four times, authority config, belief lineage), **DEP4** (shared outcome meaning with WM-06/13, coupled to WM-12's DEP3 \u2014 do not finalize before WM-12 replies).\n- **Active overlapping work \u2014 do not duplicate:** a DEP dispatch to me is already queued (job `invoke-1789573365035-21479-c734e9be`, WM04-PENDING-EVIDENCE.json shows state queued, WM-05 instructed \"no action until WM04 substantive reply\"). That is my in-flight thread for the same packet.\n\n## Smallest useful next deliverable\n\n**WM05-DEP1 as a concrete acquisition packet:** attempt the bounded existing-record lookup of `6e6f56a1\u2026` through the authorized acquisition/resolver path; return either the immutable original with sha256 digest, authenticated origin, and applicable scope/effective time, **or the exact failed lookup/authority step** with the body reference retained as an unauthenticated lead (no execution inference). Alongside it (same turn, no extra authority): a **DEP2 missing-field inventory** listing which of the four times / identities / authority config are actually absent for the historical D1 selection \u2014 explicitly refusing to copy the Sept 12 selection timestamp into them.\n\n**Answer to your direct question: yes.** This packet advances now without inventing an occurrence (we acquire an existing artifact or report a typed failure), without retroactive sampling (no cohort/eligibility decision is made \u2014 that needs its own prospective authority per O3, including sample size and stopping rule which the cascade deliberately does not supply), without a state/outcome mapping (DEP4 stays coupled to DEP3/WM-12), and without evidence invention (unauthenticated leads stay leads).\n\n**What existing authority permits:** exactly this \u2014 existing evidence lookup and design assessment (the codex-28 routing packet's own scope). It does not permit commissioning an observer, fixing a cohort, or producing any label.\n\n**Independent review required:** a distinct applicability reviewer must accept/reject the packet against the pinned declaration, subject scope, point applicability and label ambiguity (U1 spec \u00a76) \u2014 not me self-certifying the lookup.\n\n**Sources to reuse:** `U1-OBSERVATION-SPEC.md` + `U1-SOURCE-PINS.json`, `D1-CONTRACT.md`, the dependency handoff, the existing validator/resolver (no new namespaces), and the wm-04 cascade README.\n\n## Alternative (only if material)\n\nA **DEP4 outcome-meaning design note** (state-lifecycle vs terminal disposition vs evidence-qualification variables, rectangular-A validity argument) could be drafted at design scope now, but it is explicitly gated on WM-12's DEP3 reply and touches WM-06/13 owners \u2014 I recommend not opening it until DEP1/DEP2 return and WM-12 has answered, to avoid a speculative contract that coupling will invalidate.\n\n**Preferred proposal, bounded:** one dispatch answering DEP1 (acquire-or-typed-failure) plus the DEP2 missing-field inventory, with a distinct exact-subject review of the result, no sampling/observer/label decisions. Agree with you and Joe before any implementation goes to Codex/Claude.",
+    "auto-bellback": {
+      "sent?": true,
+      "bell-job-id": "auto-bellback-invoke-1789573233140-21472-0950686b",
+      "at": "2026-09-16T15:55:24.045881472Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-16T15:55:24.045881472Z",
+    "created-at": "2026-09-16T15:40:33.140811948Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "data/wm-morning-brief/items/ea1-418bb56e1f0d7ad8986839e45f5268a98e62dcbf9c8ad3634bd998f421a293ae--attempt-001.edn",
+    "sha256": "61d17a533c475a392cf42ab3a6de4277a61fb5c1f1d3554de9e76fe53efb7dd1",
+    "mtime_ns": 1789234461759177966
+  },
+  {
+    "path": "data/wm-full-loop-phases.edn.log",
+    "sha256": "125d1f5e92cd925e7548272cedc33ba28c9fd44fc936bfa339252bb1e37926e4",
+    "mtime_ns": 1789490558852715134
+  },
+  {
+    "path": "data/wm-trace/wm-trace-2026-09-12.edn.pre-migration-backup",
+    "sha256": "25a0a1e2257396c2d1db889375773c9cbed99b2ad26c57b4674e02ca1660d686",
+    "mtime_ns": 1789234090068546509
+  },
+  {
+    "path": "holes/labs/wm-contract/runs/RUN4-F11-production-successor-2026-09-12-v2/run-config.edn",
+    "sha256": "3ed73d48cc9085a1c1884bc869e6e5c1f977ef6014a0bbbf58d7f29cc2f306b5",
+    "mtime_ns": 1789233582831078251
+  }
+]
