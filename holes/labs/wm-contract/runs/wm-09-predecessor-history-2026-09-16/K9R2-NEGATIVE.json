@@ -1,0 +1,5 @@
+{
+  "source": "ae721644",
+  "exit": 1,
+  "expected": "target-relative identical-copy and regular ancillary filename controls reject prior source"
+}

@@ -102,7 +102,7 @@
             (auxiliary! [root dir]
               (let [visited (atom [])]
                 (letfn [(scan! [entry]
-                          (need! (and (not (str/starts-with? (.getName entry) "attempt-"))
+                          (need! (and (not (and (.isDirectory entry) (str/starts-with? (.getName entry) "attempt-")))
                                       (not= "007-closed.edn" (.getName entry)))
                                  :history-discovery-invalid
                                  {:reason :unsupported-history-layout :file (str entry)})
@@ -161,8 +161,8 @@
                                             cohort/checkpoint-order))})) files)]
     (doseq [[id group] (group-by :identity rows) :when (> (count group) 1)]
       (let [identical? (apply = (map :checkpoints group))]
-        (need! false :history-discovery-invalid
-               {:reason (if identical? :distinct-path-identical-history :history-identity-collision)
+        (need! identical? :history-discovery-invalid
+               {:reason :history-identity-collision
                 :file (:path (first group)) :identity id :records (vec group)
                 :identical-checkpoint-sets? identical?})))
     rows))
@@ -495,7 +495,7 @@
         roots (vec (distinct (map history-root! roots)))
         _ (need! (seq roots) :history-discovery-invalid {:reason :search-roots-unavailable})
         discovered (discover-closes! roots)
-        _ (distinct-history-identities! (:files discovered))
+        history-identities (distinct-history-identities! (:files discovered))
         candidates (mapv #(closed-candidate! (io/file %)) (:files discovered))
         earlier-all (filter #(.isBefore ^Instant (:closed-at %) before) candidates)
         earlier (remove :non-construction? earlier-all)
@@ -504,8 +504,12 @@
         ordered (sort-by :closed-at (filter #(= target (:target %)) earlier))
         _ (when (and (> (count ordered) 1)
                      (= (:closed-at (last ordered)) (:closed-at (last (butlast ordered)))))
-            (need! false :ambiguous-previous-construction
-                   {:files (mapv #(str (:close-file %)) (take-last 2 ordered))}))]
+            (let [paths (set (map #(str (:close-file %)) (take-last 2 ordered)))
+                  records (filterv #(contains? paths (:path %)) history-identities)]
+              (need! false :ambiguous-previous-construction
+                     {:files (vec (sort paths)) :requested-target requested-target
+                      :records records
+                      :identical-checkpoint-sets? (apply = (map :checkpoints records))})))]
     (if-let [latest (last ordered)]
       (try (update (validated-previous! latest roots) :provenance assoc
                    :auxiliary-exclusions (:auxiliary-exclusions discovered) :searched-layouts (:layouts discovered) :excluded-attempts exclusions :requested-target requested-target

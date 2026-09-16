@@ -1,0 +1,7 @@
+{
+  "base": "8d5b569d",
+  "sha256": {
+    "src/futon2/aif/receipt_construction.clj": "275f120e0b1b696782bf275a95e212a5173eb9eeab5ccc40ccb37097ab859020",
+    "test/futon2/aif/receipt_construction_test.clj": "a7a24cc8ac08b3233de8fb77a1fd9c192bad6996e5416adeb5f3cd5ed4a4869d"
+  }
+}

@@ -591,20 +591,26 @@
     (let [temp (.toFile (Files/createTempDirectory "receipt-collision" (make-array FileAttribute 0)))
           archive (io/file temp "archives" "snapshot")]
       (try
-        (let [files (non-construction-fixture! temp true false)
+        (let [files (discovery-history! temp "M-history" false)
               copied (mapv #(io/file archive "fixture" "attempt-002" (.getName %)) files)]
           (.mkdirs (.getParentFile (first copied)))
           (doseq [[source dest] (map vector files copied)] (spit dest (slurp source)))
           (when different?
             (rewrite-history! (first copied) #(assoc-in % [:payload :ground :annotation] :different)))
-          (let [error (refusal #(construction/previous! {:occurrence {:action/value {:target "M-fresh"}
-                                                                   :action-at "2026-09-15T12:00:00Z"}} [temp archive]))]
-            (is (= :history-discovery-invalid (:construction/refusal error)))
-            (is (= (if different? :history-identity-collision :distinct-path-identical-history) (:reason error)))
-            (is (= {:cohort/id :fixture :attempt/id "attempt-002"} (:identity error)))
-            (is (= 2 (count (:records error))))
-            (is (= (not different?) (:identical-checkpoint-sets? error)))
-            (is (every? #(= 7 (count (:checkpoints %))) (:records error)))))
+          (doseq [requested ["M-history" "M-fresh"]]
+            (let [run #(construction/previous! {:occurrence {:action/value {:target requested}
+                                                             :action-at "2026-09-15T12:00:00Z"}} [temp archive])]
+              (if (or different? (= requested "M-history"))
+                (let [error (refusal run)]
+                  (is (= (if different? :history-discovery-invalid :ambiguous-previous-construction)
+                         (:construction/refusal error)))
+                  (when different? (is (= :history-identity-collision (:reason error))))
+                  (is (= 2 (count (:records error))))
+                  (is (= (not different?) (:identical-checkpoint-sets? error)))
+                  (is (every? #(= 7 (count (:checkpoints %))) (:records error))))
+                (let [result (run)]
+                  (is (= :first-attempt-no-admissions (:admission-reason result)))
+                  (is (= 2 (count (get-in result [:provenance :excluded-attempts])))))))))
         (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
 
 (deftest auxiliary-exclusion-requires-complete-coverage
@@ -618,6 +624,8 @@
         (.mkdirs (io/file temp "fixture" "attempt-003"))
         (.mkdirs leaf)
         (spit (io/file auxiliary "notes.txt") "ancillary")
+        (doseq [i (range 1 26)]
+          (spit (io/file leaf (format "attempt-%03d.edn" i)) "{:projection true}"))
         (case hidden
           :close (spit (io/file leaf "007-closed.edn") "{}")
           :attempt (.mkdirs (io/file leaf "attempt-999"))
@@ -640,5 +648,5 @@
               (is (= :first-attempt-no-admissions (:admission-reason result)))
               (is (= :complete-no-attempt-no-close-coverage (:reason coverage)))
               (is (= (str auxiliary) (:path coverage)))
-              (is (= 3 (count (:visited coverage)))))))
+              (is (= 28 (count (:visited coverage)))))))
         (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
