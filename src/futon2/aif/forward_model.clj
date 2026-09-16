@@ -19,9 +19,11 @@
    action type — a placeholder for a learned variance model that would
    ship with R7 (adaptive precision) work."
   (:require [futon2.aif.belief :as belief]
+            [futon2.aif.cascade-model-manifest :as cascade-manifest]
             [futon2.aif.machine-q :as machine-q]))
 
 (declare predict)  ; v0.15: predict-multi-horizon (below can-execute?) calls predict (further below).
+(declare ^:private predict-channel-state)  ; v0.16: predict dispatches cascade candidates; channel body below.
 
 (def action-types
   "The set of action types this forward model recognises. Extending the
@@ -32,17 +34,33 @@
     :close-hole :survey :survey-mission :apply-cascade :fire-pattern
     :learn-action-class :pursue :decompose})
 
+(defn cascade-candidate?
+  "An action representing an interpreted cascade candidate (virtual War
+   Machine tick 1, R4): {:kind :cascade-candidate :id … :precedence
+   [patterns…]}, where each pattern is in the cascade-model-manifest shape
+   (:id, :produces set, :theta, :guard {:status :interpreted :clauses […]}).
+   An empty precedence is valid (the do-nothing cascade: identity at every
+   step, per SPEC-cascade-policy-semantics §2's absorbing-identity stall
+   rule)."
+  [action]
+  (and (map? action)
+       (= :cascade-candidate (:kind action))
+       (vector? (:precedence action))))
+
 (defn- valid-action?
   "An action is a map carrying :type (one of action-types). Most actions
    require a :target (entity-id); :no-op needs no target; :learn-action-class
-   requires :target-class (an action-type keyword the proposer wants enabled)."
-  [{:keys [type target target-class]}]
-  (and (contains? action-types type)
-       (case type
-         :no-op true
-         :learn-action-class (some? target-class)
-         :decompose (some? target)
-         (some? target))))
+   requires :target-class (an action-type keyword the proposer wants enabled).
+   A cascade candidate ({:kind :cascade-candidate …}) is also a valid action;
+   its state update is delegated to the aligned token-space kernel."
+  [{:keys [type target target-class] :as action}]
+  (or (cascade-candidate? action)
+      (and (contains? action-types type)
+           (case type
+             :no-op true
+             :learn-action-class (some? target-class)
+             :decompose (some? target)
+             (some? target)))))
 
 (defn- merge-obs-delta
   "Apply a delta map to an observation, clamping channels to [0,1]."
@@ -314,10 +332,33 @@
        (let [prediction (predict current-state action belief-update-opts)
              next-obs (get-in prediction [:next-observation :mean])
              next-belief (:next-belief prediction)
-             next-state (-> current-state
-                            (assoc :observation next-obs)
-                            (assoc :belief next-belief))]
+             next-state (cond-> (-> current-state
+                                    (assoc :observation next-obs)
+                                    (assoc :belief next-belief))
+                          ;; cascade candidates: keep the token-state
+                          ;; distribution addressable as :cascade-belief too
+                          (:next-token-state prediction)
+                          (assoc :cascade-belief (:next-token-state prediction)))]
          (recur (inc step) next-state (conj trajectory prediction)))))))
+
+(defn- predict-cascade-step
+  "One step of the token-space forward model for a cascade candidate: the
+   aligned cascade-model-manifest kernel (cascade-kernel/first-enabled apply
+   the P10 continuing guards; Lean PolicyRollout.rolloutState). The belief
+   read is (:cascade-belief state) falling back to (:belief state): a
+   token-state distribution map (e.g. observed-belief of the current state).
+   A typed manifest refusal (missing pattern interpretation) is returned
+   unchanged, not coerced."
+  [state action]
+  (let [q (or (:cascade-belief state) (:belief state) {})
+        q' (cascade-manifest/rollout (constantly (:precedence action)) q 1)]
+    (if (and (map? q') (contains? q' :status))
+      q'
+      {:next-belief q'
+       :next-token-state q'
+       :action action
+       :predicted-events []
+       :cascade true})))
 
 (defn predict
   "Pure forward model.
@@ -327,20 +368,34 @@
      action — {:type <keyword in action-types>
                :target <entity-id, required for non-:no-op>
                :weight <number, optional, default 1.0>}
+              or a cascade candidate {:kind :cascade-candidate :id …
+              :precedence [patterns…]} (see cascade-candidate?); for those the
+              prediction is the token-state rollout step (:next-token-state).
 
    Output:
      {:next-observation {:mean <obs map> :variance <obs map>}
       :next-belief      <updated belief map (a distribution by construction)>
       :action           <the action passed in>
       :predicted-events <seq of belief events the action emits>}
+     For cascade candidates additionally :next-token-state / :cascade true,
+     and no :next-observation (the prediction is a token-state distribution,
+     not a channel mean).
 
    Throws ex-info on invalid action (unknown :type, missing :target for
    non-:no-op). Pure: same (state, action) → same output."
   ([state action] (predict state action {}))
-  ([{:keys [observation belief] :as _state} action belief-update-opts]
-   (when-not (valid-action? action)
-     (throw (ex-info "Invalid action for forward model"
-                     {:action action :action-types action-types})))
+  ([state action belief-update-opts]
+   (if (cascade-candidate? action)
+     (predict-cascade-step state action)
+     (predict-channel-state state action belief-update-opts))))
+
+(defn- predict-channel-state
+  "Channel-mean forward model for the :type actions; this is the body of
+   `predict` before cascade candidates existed, unchanged."
+  [{:keys [observation belief] :as _state} action belief-update-opts]
+  (when-not (valid-action? action)
+    (throw (ex-info "Invalid action for forward model"
+                    {:action action :action-types action-types})))
    (let [{:keys [obs-delta obs-variance events]} (predict-effects nil action)
          next-mean (merge-obs-delta (or observation {}) obs-delta)
          ;; Variance is per-channel; channels not touched by the action
@@ -376,4 +431,4 @@
          machine-q (machine-q/seam-attachment belief action)]
      (if machine-q
        (assoc prediction :machine-q machine-q)
-       prediction))))
+       prediction)))

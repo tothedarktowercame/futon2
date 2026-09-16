@@ -15,10 +15,11 @@
 
   Real machine: futon2.aif.forward-model (fm) is the tick's forward model
   (war_machine.clj uses fm/can-execute? ~:1450, ~:6540; efe composes
-  fm/predict and fm/predict-multi-horizon). These are requirement tests: they
-  assert what the model requires of the real tick and fail where the real
-  forward model cannot yet represent this tick's candidates (cascades over
-  token states). Failures are the node's open requirements, not defects."
+  fm/predict and fm/predict-multi-horizon). Since the tick-1 fix wave the
+  real forward model accepts cascade candidates ({:kind
+  :cascade-candidate …}) and predicts token-state trajectories through the
+  aligned manifest kernel. The remaining failing assertion is the :R4 route
+  tag in war_machine.clj, which stays failing until the serial wiring wave."
   (:require [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.test :refer [deftest is]]
@@ -87,12 +88,14 @@
   (when (and (= 1 (count q)) (= 1 (val (first q))))
     (set/intersection want (key (first q)))))
 
-;; The candidates as actions for the real forward model: a cascade carries
-;; its interpreted pattern precedence; the target is the tick's fix target.
+;; The candidates as actions for the real forward model: cascade candidates
+;; per the R4 requirement ({:kind :cascade-candidate :id … :precedence
+;; [patterns…]}), patterns carrying guard, produces and theta as interpreted
+;; by R6 (03-R6.edn).
 (defn- cascade-action [cid]
-  {:type :cascade-rollout
-   :target :wm-tick-001-observation-crash
-   :precedence (mapv :id (cid cascades))})
+  {:kind :cascade-candidate
+   :id cid
+   :precedence (cid cascades)})
 
 (defn- call-real
   "Call a real fm function, refusing symbolically instead of erroring."
@@ -106,6 +109,8 @@
   (or (some-> (io/resource "futon2/report/war_machine.clj") slurp)
       (try (slurp "scripts/futon2/report/war_machine.clj")
            (catch Exception _ nil))))
+
+(def cascade-state {:cascade-belief q0})
 
 (deftest s05-r4
   ;; --- Model side (the aligned runtime function; passes, it is the
@@ -130,41 +135,39 @@
   ;; --- Real side: requirement is prediction per candidate over the common T.
   (let [preds (into {}
                     (map (fn [cid]
-                           [cid (call-real fm/predict
-                                           {:observation {} :belief {}}
-                                           (cascade-action cid))]))
+                           [cid (call-real fm/predict cascade-state (cascade-action cid))]))
                     (keys cascades))]
     (is (every? (comp #(and (map? %) (not (contains? % :status))) val) preds)
         "the real forward model accepts every cascade candidate of this tick and predicts its next state"))
-  (let [closest (call-real fm/predict
-                           {:observation {} :belief {}}
-                           {:type :apply-cascade
-                            :target :wm-tick-001-observation-crash})]
-    (is (and (map? closest)
-             (contains? (get-in closest [:next-observation :mean])
-                        :summary-without-total-repos-observes-cleanly))
-        "the real prediction expresses want-token outcomes (not only channel means)"))
-  ;; Equality with the model's rollout at the declared T.
+  (let [c1 (call-real fm/predict-multi-horizon cascade-state
+                      (cascade-action :C1-test-first) T)
+        tau2-state (some-> (get-in c1 [:trajectory 1 :next-token-state])
+                           first key)]
+    (is (and (map? c1) (not (contains? c1 :status))
+             (contains? tau2-state :summary-without-total-repos-observes-cleanly))
+        "the real prediction expresses want-token outcomes (C1's tau-2 predicted token state carries the clean-observe want token), not only channel means"))
+  ;; Equality with the model's rollout: every tau, and the terminal state.
   (let [model (roll (:C1-test-first cascades))
-        real (call-real fm/predict-multi-horizon
-                        {:observation {} :belief {}}
+        real (call-real fm/predict-multi-horizon cascade-state
                         (cascade-action :C1-test-first) T)]
-    (is (and (map? real)
-             (= (get model T)
-                ;; the model's terminal state must be reproducible from the
-                ;; real prediction's trajectory at the common T
-                (when (map? real)
-                  (get-in real [:final-state :observation]))))
-        "the real forward model's prediction at T equals the model's rollout for the same candidate"))
+    (is (and (map? real) (not (contains? real :status))
+             (= (mapv (fn [tau] (get model tau)) (range 1 (inc T)))
+                (mapv :next-token-state (:trajectory real)))
+             (= (get model T) (get-in real [:final-state :cascade-belief])))
+        "the real forward model's trajectory at every tau <= T equals the model's rollout for the same candidate"))
   ;; Common T, through real calls: every candidate predicted at the same T=3.
   (let [horizons (into {}
                        (map (fn [cid]
-                              [cid (call-real fm/predict-multi-horizon
-                                              {:observation {} :belief {}}
+                              [cid (call-real fm/predict-multi-horizon cascade-state
                                               (cascade-action cid) T)]))
                        (keys cascades))]
     (is (and (seq horizons)
-             (every? (comp #(= T %) :horizon-steps val) horizons))
+             (every? (comp #(and (map? %)
+                                 (not (contains? % :status))
+                                 (= T (:horizon-steps %))
+                                 (= T (count (:trajectory %))))
+                           val)
+                     horizons))
         "every candidate of the family is predicted at the SAME declared T = 3"))
   ;; The tick declares the common T as a typed value the forward model reads.
   (is (= {:anticipation 3 :cascade-rollout 3}
