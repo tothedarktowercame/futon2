@@ -1,0 +1,13 @@
+{
+  "disposition": "preserved",
+  "reading": "reference retains exhaustive present/absent support and half masses. Only duplicate-free and zero-off-support proofs were added; there are no observations outside these two constructors. referenceRowMass remains one. Literal mass := fun _ _ => 1 / 2 and the fixture row are unchanged.",
+  "additions": [
+    "ProbabilityKernel"
+  ],
+  "wrapper": "observation_kernel_witness.clj",
+  "negative-modes": [
+    "--negative-normalisation",
+    "--negative-mass"
+  ],
+  "exit-convention": "In-memory mutations change present mass to 3/4 or -1/2. 0 requires valid receipt/fixture/Lean baseline and rejected mutation, 1 invalid baseline, 2 slipped mutation."
+}

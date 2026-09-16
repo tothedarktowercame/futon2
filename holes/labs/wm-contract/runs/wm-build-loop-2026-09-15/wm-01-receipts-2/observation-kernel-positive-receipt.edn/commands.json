@@ -1,0 +1,43 @@
+[
+  {
+    "name": "protocol",
+    "command": [
+      "bb",
+      "holes/labs/wm-contract/runs/wm-build-loop-2026-09-15/wm-01-receipts-2/receipt_control.clj",
+      "run",
+      "observation-kernel-positive-receipt.edn",
+      "[\"ProbabilityKernel\"]"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "positive",
+    "command": [
+      "bb",
+      "checks/observation_kernel_witness.clj"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "negative-normalisation",
+    "command": [
+      "bb",
+      "checks/observation_kernel_witness.clj",
+      "--negative-normalisation"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  },
+  {
+    "name": "negative-mass",
+    "command": [
+      "bb",
+      "checks/observation_kernel_witness.clj",
+      "--negative-mass"
+    ],
+    "cwd": "/home/joe/code/futon2",
+    "exit": 0
+  }
+]

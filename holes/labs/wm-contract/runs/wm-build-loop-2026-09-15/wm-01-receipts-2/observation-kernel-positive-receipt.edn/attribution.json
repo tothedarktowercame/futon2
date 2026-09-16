@@ -1,0 +1,10 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/ObservationKernelWitness.lean",
+  "name" : "reference",
+  "old" : "16d2e69414a93598871f0be4408a9f91ef08e1bd8c55b451bda6ad552d1fe689",
+  "new" : "ea0a7c724cc33232923376536946ae80a458d91dc018b52b1cfad84690013e9f",
+  "pre-repair-text" : "noncomputable def reference : observationKernel State Observation where\n  support := fun _ => [.present, .absent]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intro; norm_num\n\n",
+  "repaired-text" : "noncomputable def reference : observationKernel State Observation where\n  support := fun _ => [.present, .absent]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n",
+  "head-text" : "noncomputable def reference : observationKernel State Observation where\n  support := fun _ => [.present, .absent]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intro; norm_num\n\n"
+} ]

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "-C",
+    "/home/joe/code/mathlib4",
+    "show",
+    "480a666ad2",
+    "--"
+  ],
+  "output": "commit 480a666ad27c18477b4b9df86e11862be3930d50\nAuthor: Joseph Corneli <joseph.corneli@hyperreal.enterprises>\nDate:   Tue Sep 15 06:36:02 2026 +0000\n\n    Enforce finite-support probability kernels and nonnegative VFE precision\n\ndiff --git a/DarkTower/WarMachine/ObservationKernelWitness.lean b/DarkTower/WarMachine/ObservationKernelWitness.lean\nindex 03eb52c4ce..317c5a957d 100644\n--- a/DarkTower/WarMachine/ObservationKernelWitness.lean\n+++ b/DarkTower/WarMachine/ObservationKernelWitness.lean\n@@ -12,6 +12,8 @@ noncomputable def reference : observationKernel State Observation where\n   support := fun _ => [.present, .absent]\n   mass := fun _ _ => 1 / 2\n   nonnegative := by intros; norm_num\n+  support_nodup := by intro; simp\n+  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n   normalised := by intro; norm_num\n \n theorem referenceRowMass : observationKernelRowMass reference .latent = 1 := by\n"
+}
