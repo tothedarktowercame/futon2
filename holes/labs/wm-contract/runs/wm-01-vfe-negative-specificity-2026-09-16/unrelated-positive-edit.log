@@ -1,0 +1,1 @@
+variational-free-energy-witness: unrelated-edit PASS (declaration basis stable) {:pass? true, :failures [], :receipt-shape-valid? true, :successful-elaboration? true, :source-basis-matches? true, :fixture-adapter-matches? true, :toolchain-matches? true, :elaboration-matches? true} exit-convention=0-pass/1-fail/2-mutation-slipped

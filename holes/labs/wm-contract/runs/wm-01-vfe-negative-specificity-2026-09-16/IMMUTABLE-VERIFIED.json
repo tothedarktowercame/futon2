@@ -1,0 +1,10 @@
+{
+  "unchanged": true,
+  "files": [
+    "holes/labs/wm-contract/variational-free-energy-reference.edn",
+    "holes/labs/wm-contract/variational-free-energy-positive-receipt.edn",
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/VariationalFreeEnergyWitness.lean",
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/VariationalFreeEnergyNegative.lean",
+    "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "checks/variational_free_energy_witness.clj": "a3d90b74227d61dc995c4782524fd6b47f0b798a61ad9f1d13556c07c8adf627",
+  "checks/variational_free_energy_witness_control_test.clj": "dfb2b3c7a72e8939bb3466c5250b59b0a5d9372370fc112afbb332e40ca82f58",
+  "checks/positive_proof_receipt.clj": "3e7b082c2bcb304b0b2e7dd3efc4b8f19055884700c92956e8c50bddc3226a0c",
+  "/home/joe/code/p4ng/wm-walkthroughs/build-loop/claude-3/WM-01-vfe-negative-specificity-1.md": "c1cb031129a698251a28eed9103ed5f52f4a02c39064d81baa4238d1bba13455"
+}

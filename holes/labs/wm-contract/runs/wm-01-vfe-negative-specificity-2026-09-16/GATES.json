@@ -1,0 +1,73 @@
+{
+  "kondo": {
+    "command": [
+      "clj-kondo",
+      "--lint",
+      "checks/variational_free_energy_witness.clj",
+      "checks/variational_free_energy_witness_control_test.clj"
+    ],
+    "exit": 0
+  },
+  "parens": {
+    "command": [
+      "emacs",
+      "-Q",
+      "--batch",
+      "-l",
+      "/home/joe/code/futon4/dev/check-parens.el",
+      "--eval",
+      "(arxana-check-parens-cli)",
+      "--",
+      "--no-defaults",
+      "checks/variational_free_energy_witness.clj",
+      "checks/variational_free_energy_witness_control_test.clj"
+    ],
+    "exit": 0
+  },
+  "focused": {
+    "command": [
+      "bb",
+      "checks/variational_free_energy_witness_control_test.clj"
+    ],
+    "exit": 0
+  },
+  "positive": {
+    "command": [
+      "bb",
+      "checks/variational_free_energy_witness.clj"
+    ],
+    "exit": 0
+  },
+  "negative-value": {
+    "command": [
+      "bb",
+      "checks/variational_free_energy_witness.clj",
+      "--negative-value"
+    ],
+    "exit": 0
+  },
+  "negative-type": {
+    "command": [
+      "bb",
+      "checks/variational_free_energy_witness.clj",
+      "--negative-type"
+    ],
+    "exit": 0
+  },
+  "negative-weakened-positive": {
+    "command": [
+      "bb",
+      "checks/variational_free_energy_witness.clj",
+      "--negative-weakened-positive"
+    ],
+    "exit": 0
+  },
+  "unrelated-positive-edit": {
+    "command": [
+      "bb",
+      "checks/variational_free_energy_witness.clj",
+      "--unrelated-positive-edit"
+    ],
+    "exit": 0
+  }
+}
