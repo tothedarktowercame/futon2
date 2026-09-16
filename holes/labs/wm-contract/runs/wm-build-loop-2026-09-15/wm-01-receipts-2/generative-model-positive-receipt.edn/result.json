@@ -1,0 +1,183 @@
+{
+  "new-sha256" : "175f2839f608a4be7a84f0a1cda76a7ce67f65a12790ef5f5e691a1c744c59fb",
+  "pins" : [ {
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "observation",
+    "old" : "a53010b3302cfa67522ce52ec5f60d6b2f694935954188027ecb2c53edef1b58",
+    "new" : "f383a02d375c80ad4413fbfa86b158270d0d4d212b57567b789ef8f326309b9a",
+    "changed?" : true,
+    "indices" : [ 0, 0 ]
+  }, {
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "transition",
+    "old" : "80fdb22d491d91abba8b3ddda520d071a193ff4dfc3be52fdc82436a1f6d55b6",
+    "new" : "6eacde9ca9b5930ec8063ed1f2f5ddae408ed4931fc5cd3ecd00b37b15f6b4c2",
+    "changed?" : true,
+    "indices" : [ 0, 1 ]
+  }, {
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "policyPrior",
+    "old" : "d68e4107e5be595f8b7837728f1904edc7d688bee8bdccf5ddd2d4dfc8547828",
+    "new" : "b1d0b9c2e716b887316cff3eed0eea3d306f858fd5b4d45dc20eed32d861869a",
+    "changed?" : true,
+    "indices" : [ 0, 2 ]
+  }, {
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "model",
+    "old" : "809aa8ea4a0c6e8a6432b5cbdf8c8c5cb072241f5a158b14c7573df1f99a1caf",
+    "new" : "809aa8ea4a0c6e8a6432b5cbdf8c8c5cb072241f5a158b14c7573df1f99a1caf",
+    "changed?" : false,
+    "indices" : [ 0, 3 ]
+  }, {
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "FactorReference",
+    "old" : "4f4d30f76e664901b2f0b1e57a2e3a5d37aa0a8e6dc2d92bac30508a240befde",
+    "new" : "4f4d30f76e664901b2f0b1e57a2e3a5d37aa0a8e6dc2d92bac30508a240befde",
+    "changed?" : false,
+    "indices" : [ 0, 4 ]
+  }, {
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "factorReference",
+    "old" : "8f5ee9e8cd0cd0971ac0e06b4c4099eebaf6a78ca14280e0c6edcc1d3c110504",
+    "new" : "8f5ee9e8cd0cd0971ac0e06b4c4099eebaf6a78ca14280e0c6edcc1d3c110504",
+    "changed?" : false,
+    "indices" : [ 0, 5 ]
+  }, {
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "factorFixture",
+    "old" : "e2bdca10eff9663a9a9fc83247dd372f8e8fb4d4d6d6407a3bd96e4ee0f53c27",
+    "new" : "e2bdca10eff9663a9a9fc83247dd372f8e8fb4d4d6d6407a3bd96e4ee0f53c27",
+    "changed?" : false,
+    "indices" : [ 0, 6 ]
+  }, {
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "ProbabilityKernel",
+    "old" : "d5940a2d22c5f76cd28f62475c178bfd68dd870fee372a0a6dbec4c17fa57e4c",
+    "new" : "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+    "changed?" : true,
+    "indices" : [ 1, 0 ]
+  }, {
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "Outcome",
+    "old" : "f58ab3a48801ea1f0c37c39b738f11212cc7f34d158bb28c075d5c9ce20a5a42",
+    "new" : "f58ab3a48801ea1f0c37c39b738f11212cc7f34d158bb28c075d5c9ce20a5a42",
+    "changed?" : false,
+    "indices" : [ 1, 1 ]
+  }, {
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "TransitionKernel",
+    "old" : "c8650cbde4347c92b097a940e956cb6b572df2fad52d7169d5c68febb05f4fdb",
+    "new" : "c8650cbde4347c92b097a940e956cb6b572df2fad52d7169d5c68febb05f4fdb",
+    "changed?" : false,
+    "indices" : [ 1, 2 ]
+  }, {
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "PolicyPriorKernel",
+    "old" : "570a07a800fd63eab3b19197117d9d974872017860268d03a0089137952d814e",
+    "new" : "570a07a800fd63eab3b19197117d9d974872017860268d03a0089137952d814e",
+    "changed?" : false,
+    "indices" : [ 1, 3 ]
+  }, {
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "GenerativeModel",
+    "old" : "2f612cf9075ff571b1165f5bcb37511a967495a2652d84f2483a62db211e0017",
+    "new" : "2f612cf9075ff571b1165f5bcb37511a967495a2652d84f2483a62db211e0017",
+    "changed?" : false,
+    "indices" : [ 1, 4 ]
+  }, {
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "generativeFactorMass",
+    "old" : "3cc8c2d69fdd0c227a5bce728013c6200e2829fefca58c59133793a3ce666e52",
+    "new" : "3cc8c2d69fdd0c227a5bce728013c6200e2829fefca58c59133793a3ce666e52",
+    "changed?" : false,
+    "indices" : [ 1, 5 ]
+  } ],
+  "file" : "generative-model-positive-receipt.edn",
+  "controls" : [ {
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "observation",
+    "old" : "a53010b3302cfa67522ce52ec5f60d6b2f694935954188027ecb2c53edef1b58",
+    "new" : "f383a02d375c80ad4413fbfa86b158270d0d4d212b57567b789ef8f326309b9a",
+    "changed?" : true,
+    "indices" : [ 0, 0 ],
+    "result" : {
+      "pass?" : false,
+      "failures" : [ "positive-source-drift" ],
+      "receipt-shape-valid?" : true,
+      "successful-elaboration?" : true,
+      "source-basis-matches?" : false,
+      "fixture-adapter-matches?" : true,
+      "toolchain-matches?" : true,
+      "elaboration-matches?" : true
+    }
+  }, {
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "transition",
+    "old" : "80fdb22d491d91abba8b3ddda520d071a193ff4dfc3be52fdc82436a1f6d55b6",
+    "new" : "6eacde9ca9b5930ec8063ed1f2f5ddae408ed4931fc5cd3ecd00b37b15f6b4c2",
+    "changed?" : true,
+    "indices" : [ 0, 1 ],
+    "result" : {
+      "pass?" : false,
+      "failures" : [ "positive-source-drift" ],
+      "receipt-shape-valid?" : true,
+      "successful-elaboration?" : true,
+      "source-basis-matches?" : false,
+      "fixture-adapter-matches?" : true,
+      "toolchain-matches?" : true,
+      "elaboration-matches?" : true
+    }
+  }, {
+    "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+    "name" : "policyPrior",
+    "old" : "d68e4107e5be595f8b7837728f1904edc7d688bee8bdccf5ddd2d4dfc8547828",
+    "new" : "b1d0b9c2e716b887316cff3eed0eea3d306f858fd5b4d45dc20eed32d861869a",
+    "changed?" : true,
+    "indices" : [ 0, 2 ],
+    "result" : {
+      "pass?" : false,
+      "failures" : [ "positive-source-drift" ],
+      "receipt-shape-valid?" : true,
+      "successful-elaboration?" : true,
+      "source-basis-matches?" : false,
+      "fixture-adapter-matches?" : true,
+      "toolchain-matches?" : true,
+      "elaboration-matches?" : true
+    }
+  }, {
+    "path" : "DarkTower/WarMachine/Holes.lean",
+    "name" : "ProbabilityKernel",
+    "old" : "d5940a2d22c5f76cd28f62475c178bfd68dd870fee372a0a6dbec4c17fa57e4c",
+    "new" : "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+    "changed?" : true,
+    "indices" : [ 1, 0 ],
+    "result" : {
+      "pass?" : false,
+      "failures" : [ "positive-source-drift" ],
+      "receipt-shape-valid?" : true,
+      "successful-elaboration?" : true,
+      "source-basis-matches?" : false,
+      "fixture-adapter-matches?" : true,
+      "toolchain-matches?" : true,
+      "elaboration-matches?" : true
+    }
+  } ],
+  "axioms" : {
+    "exit" : 0,
+    "axioms" : [ "propext", "Classical.choice", "Quot.sound" ]
+  },
+  "old-sha256" : "c958f09c32342bfbacdbc5847beb7cc4757e6c3013af4be026cfe3a0185ce7ec",
+  "review" : "pending claude-3 independent review",
+  "new-recorded-at" : "2026-09-16T00:20:54.548082250Z",
+  "validation" : {
+    "pass?" : true,
+    "failures" : [ ],
+    "receipt-shape-valid?" : true,
+    "successful-elaboration?" : true,
+    "source-basis-matches?" : true,
+    "fixture-adapter-matches?" : true,
+    "toolchain-matches?" : true,
+    "elaboration-matches?" : true
+  },
+  "old-recorded-at" : "2026-09-09T03:35:00Z"
+}

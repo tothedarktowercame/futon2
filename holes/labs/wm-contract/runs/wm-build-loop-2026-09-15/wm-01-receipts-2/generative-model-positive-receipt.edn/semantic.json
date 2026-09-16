@@ -1,0 +1,12 @@
+{
+  "disposition": "preserved",
+  "reading": "All three kernels already have exhaustive supports: two observation constructors with half masses, one state and one policy with unit masses. Repair adds distinctness and zero-off-support proofs, no mass changes. ProbabilityKernel now demands both support laws. factorFixture still proves half times one times one equals half. Fixture ports and FactorReference adapter fields preserve this factorisation; no theorem premise changes.",
+  "additions": [
+    "ProbabilityKernel"
+  ],
+  "wrapper": "generative_model_witness.clj",
+  "negative-modes": [
+    "--negative"
+  ],
+  "exit-convention": "Positive checks receipt, fixture and Lean. Negative exits 0 if GenerativeModelNegative.lean #guard_msgs elaborates rejecting mis-wired state carrier; 2 otherwise. Its negative branch does not require receipt-ok; positive is run independently."
+}

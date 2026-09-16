@@ -1,0 +1,37 @@
+[ {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+  "name" : "observation",
+  "old" : "a53010b3302cfa67522ce52ec5f60d6b2f694935954188027ecb2c53edef1b58",
+  "new" : "f383a02d375c80ad4413fbfa86b158270d0d4d212b57567b789ef8f326309b9a",
+  "pre-repair-text" : "private def observation : ProbabilityKernel TestState (Outcome TestObservation) where\n  support := fun _ => [passOutcome, failOutcome]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n/-- Used only by the executable structural negative control: its state type is\ndeliberately incompatible with `transition`. -/\n",
+  "repaired-text" : "private def observation : ProbabilityKernel TestState (Outcome TestObservation) where\n  support := fun _ => [passOutcome, failOutcome]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp [passOutcome, failOutcome]\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [passOutcome, failOutcome]\n  normalised := by intros; norm_num\n\n/-- Used only by the executable structural negative control: its state type is\ndeliberately incompatible with `transition`. -/\n",
+  "head-text" : "private def observation : ProbabilityKernel TestState (Outcome TestObservation) where\n  support := fun _ => [passOutcome, failOutcome]\n  mass := fun _ _ => 1 / 2\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp [passOutcome, failOutcome]\n  mass_eq_zero_of_not_mem := by intro s o h; rcases o with ⟨v, x⟩; cases x <;> simp_all [passOutcome, failOutcome]\n  normalised := by intros; norm_num\n\n/-- Used only by the executable structural negative control: its state type is\ndeliberately incompatible with `transition`. -/\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+  "name" : "transition",
+  "old" : "80fdb22d491d91abba8b3ddda520d071a193ff4dfc3be52fdc82436a1f6d55b6",
+  "new" : "6eacde9ca9b5930ec8063ed1f2f5ddae408ed4931fc5cd3ecd00b37b15f6b4c2",
+  "pre-repair-text" : "private def transition : TransitionKernel TestState TestAction where\n  support := fun _ => [.ready]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+  "repaired-text" : "private def transition : TransitionKernel TestState TestAction where\n  support := fun _ => [.ready]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n",
+  "head-text" : "private def transition : TransitionKernel TestState TestAction where\n  support := fun _ => [.ready]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/GenerativeModelWitness.lean",
+  "name" : "policyPrior",
+  "old" : "d68e4107e5be595f8b7837728f1904edc7d688bee8bdccf5ddd2d4dfc8547828",
+  "new" : "b1d0b9c2e716b887316cff3eed0eea3d306f858fd5b4d45dc20eed32d861869a",
+  "pre-repair-text" : "private def policyPrior : PolicyPriorKernel TestPolicy where\n  support := fun _ => [.inspect]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  normalised := by intros; norm_num\n\n",
+  "repaired-text" : "private def policyPrior : PolicyPriorKernel TestPolicy where\n  support := fun _ => [.inspect]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n",
+  "head-text" : "private def policyPrior : PolicyPriorKernel TestPolicy where\n  support := fun _ => [.inspect]\n  mass := fun _ _ => 1\n  nonnegative := by intros; norm_num\n  support_nodup := by intro; simp\n  mass_eq_zero_of_not_mem := by intro s o h; cases o <;> simp_all\n  normalised := by intros; norm_num\n\n"
+}, {
+  "repo" : "mathlib4",
+  "path" : "DarkTower/WarMachine/Holes.lean",
+  "name" : "ProbabilityKernel",
+  "old" : "d5940a2d22c5f76cd28f62475c178bfd68dd870fee372a0a6dbec4c17fa57e4c",
+  "new" : "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc",
+  "pre-repair-text" : "structure ProbabilityKernel (S O : Type*) where\n  support : S → List O\n  mass : S → O → ℝ\n  nonnegative : ∀ s o, 0 ≤ mass s o\n  normalised : ∀ s, ((support s).map (mass s)).sum = 1\n\n/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:23 · P-glossary-mathematics · holder: by-record · evidence: PredictiveOutcomeKernelWitness · falsifier: an unconditional outcome distribution or softmax policy vector is accepted as policy-conditioned `Q(o∣π)` · `Q(o∣π)` is a normalized finite-support predictive distribution over vertex-tagged outcomes for each policy. -/\n",
+  "repaired-text" : "structure ProbabilityKernel (S O : Type*) where\n  support : S → List O\n  mass : S → O → ℝ\n  nonnegative : ∀ s o, 0 ≤ mass s o\n  normalised : ∀ s, ((support s).map (mass s)).sum = 1\n  support_nodup : ∀ s, (support s).Nodup\n  mass_eq_zero_of_not_mem : ∀ s o, o ∉ support s → mass s o = 0\n\n/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:23 · P-glossary-mathematics · holder: by-record · evidence: PredictiveOutcomeKernelWitness · falsifier: an unconditional outcome distribution or softmax policy vector is accepted as policy-conditioned `Q(o∣π)` · `Q(o∣π)` is a normalized finite-support predictive distribution over vertex-tagged outcomes for each policy. -/\n",
+  "head-text" : "structure ProbabilityKernel (S O : Type*) where\n  support : S → List O\n  mass : S → O → ℝ\n  nonnegative : ∀ s o, 0 ≤ mass s o\n  normalised : ∀ s, ((support s).map (mass s)).sum = 1\n  support_nodup : ∀ s, (support s).Nodup\n  mass_eq_zero_of_not_mem : ∀ s o, o ∉ support s → mass s o = 0\n\n/-- CLOSED-BY-RECORD · owner: sec-glossary.tex:23 · P-glossary-mathematics · holder: by-record · evidence: PredictiveOutcomeKernelWitness · falsifier: an unconditional outcome distribution or softmax policy vector is accepted as policy-conditioned `Q(o∣π)` · `Q(o∣π)` is a normalized finite-support predictive distribution over vertex-tagged outcomes for each policy. -/\n"
+} ]
