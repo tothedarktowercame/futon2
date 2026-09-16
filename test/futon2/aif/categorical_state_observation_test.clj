@@ -1,6 +1,8 @@
 (ns futon2.aif.categorical-state-observation-test
   (:require [clojure.test :refer [deftest is]]
-            [futon2.aif.categorical-state-observation :as sut])
+            [futon2.aif.categorical-state-observation :as sut]
+            [futon2.aif.evidence-manifest :as manifest]
+            [futon2.aif.observation-authority-resolver :as authority-resolver])
   (:import (java.nio.charset StandardCharsets)
            (java.nio.file Files)))
 
@@ -88,6 +90,43 @@
       :observer-record observer-record :observer-source observer-source
       :expected expected :frozen-subject frozen-subject
       :authority {:expected expected :resolver (fn [kind ref] (get records [kind ref]))}})))
+
+(defn indexed-fixture
+  "Test-only commissioned index over the existing realistic fixture records."
+  []
+  (let [{:keys [dir records expected] :as f} (fixture)
+        evidence-source (get records [:evidence :evidence/claim-a])
+        admitted (manifest/build-manifest
+                  {:entries [{:evidence/id "claim/test-1"
+                              :source-path (:path evidence-source)
+                              :expected-sha256 (:sha256 evidence-source)
+                              :admitted-at (get-in expected [:point :evidence/cutoff-at])}]
+                   :read-bytes #(Files/readAllBytes (java.nio.file.Path/of
+                                                     ^String % (make-array String 0)))})
+        index {:schema authority-resolver/index-schema :index/id :test/index-1
+               :expected expected :manifest-sha256 (:manifest-sha256 admitted)
+               :entries (mapv (fn [[[kind ref] source]]
+                                (cond-> {:kind kind :ref ref :source source}
+                                  (= kind :evidence) (assoc :evidence/id "claim/test-1")))
+                              records)}
+        index-source (write-record! dir "index.edn" index)
+        inputs {:index-source index-source :manifest admitted :expected expected
+                :commission/ref :test/external-commission}]
+    (assoc f :index index :resolver-inputs inputs)))
+
+(deftest indexed-authority-integration-and-late-review-test
+  (let [{:keys [candidate resolver-inputs records]} (indexed-fixture)
+        authority (authority-resolver/build-resolver! resolver-inputs)
+        result (sut/validate-observation! candidate authority)
+        review (sut/read-pinned-form! (get records [:review :authority/review-a]))]
+    (is (= :qualified (:status result)))
+    (is (= :test (:authority/scope result)))
+    (is (= [:support-gained] (:derived-rubric-assertions result)))
+    (is (.isAfter (java.time.Instant/parse (:reviewed-at review))
+                  (java.time.Instant/parse (get-in candidate [:point :evidence/cutoff-at]))))
+    (is (= (get records [:evidence :evidence/claim-a])
+           (get-in result [:resolved-evidence-claims 0 :source])))
+    (is (= :test/external-commission (get-in authority [:identities :commission/ref])))))
 
 (deftest grounded-claim-qualification-test
   (let [{:keys [candidate authority]} (fixture)

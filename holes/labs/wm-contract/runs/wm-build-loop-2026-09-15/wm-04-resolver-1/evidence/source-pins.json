@@ -1,0 +1,11 @@
+{
+  "command": [
+    "sha256sum",
+    "src/futon2/aif/categorical_state_observation.clj",
+    "src/futon2/aif/evidence_manifest.clj",
+    "/home/joe/code/p4ng/wm-walkthroughs/build-loop/claude-3/WM-04-resolver-1.md"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "started": "2026-09-16T12:56:35.733109+00:00",
+  "exit": 0
+}

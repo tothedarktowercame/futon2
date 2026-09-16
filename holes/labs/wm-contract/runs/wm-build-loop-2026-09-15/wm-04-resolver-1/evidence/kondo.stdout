@@ -1,0 +1,8 @@
+test/futon2/aif/observation_authority_resolver_test.clj:61:95: error: Unmatched bracket: unexpected )
+test/futon2/aif/observation_authority_resolver_test.clj:74:116: error: Unmatched bracket: unexpected )
+test/futon2/aif/observation_authority_resolver_test.clj:98:71: error: Unmatched bracket: unexpected )
+test/futon2/aif/observation_authority_resolver_test.clj:115:41: error: Unresolved symbol: f
+test/futon2/aif/observation_authority_resolver_test.clj:115:92: error: Unresolved symbol: resolver-inputs
+test/futon2/aif/observation_authority_resolver_test.clj:117:112: error: Unmatched bracket: unexpected )
+test/futon2/aif/observation_authority_resolver_test.clj:117:113: error: Unmatched bracket: unexpected )
+linting took 36ms, errors: 7, warnings: 0

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "clojure",
+    "-X:test",
+    ":nses",
+    "[futon2.aif.evidence-manifest-test]"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "started": "2026-09-16T12:55:42.760107+00:00",
+  "exit": 0
+}

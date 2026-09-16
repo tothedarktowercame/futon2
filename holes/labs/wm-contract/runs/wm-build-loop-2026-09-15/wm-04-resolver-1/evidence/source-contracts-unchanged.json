@@ -1,0 +1,14 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--exit-code",
+    "4fec3894",
+    "--",
+    "src/futon2/aif/categorical_state_observation.clj",
+    "src/futon2/aif/evidence_manifest.clj"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "started": "2026-09-16T12:56:35.735810+00:00",
+  "exit": 0
+}

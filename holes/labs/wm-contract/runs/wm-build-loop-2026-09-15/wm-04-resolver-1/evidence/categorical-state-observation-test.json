@@ -1,0 +1,11 @@
+{
+  "command": [
+    "clojure",
+    "-X:test",
+    ":nses",
+    "[futon2.aif.categorical-state-observation-test]"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "started": "2026-09-16T12:55:42.762983+00:00",
+  "exit": 0
+}

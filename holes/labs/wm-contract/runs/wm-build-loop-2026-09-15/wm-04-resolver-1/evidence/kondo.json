@@ -1,0 +1,12 @@
+{
+  "command": [
+    "clj-kondo",
+    "--lint",
+    "src/futon2/aif/observation_authority_resolver.clj",
+    "test/futon2/aif/observation_authority_resolver_test.clj",
+    "test/futon2/aif/categorical_state_observation_test.clj"
+  ],
+  "cwd": "/home/joe/code/futon2",
+  "started": "2026-09-16T12:55:22.277873+00:00",
+  "exit": 3
+}

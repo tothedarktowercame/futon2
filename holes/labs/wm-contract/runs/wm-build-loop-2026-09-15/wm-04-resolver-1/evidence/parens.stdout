@@ -1,0 +1,2 @@
+test/futon2/aif/observation_authority_resolver_test.clj:61:95: Unmatched bracket or quote
+test/futon2/aif/observation_authority_resolver_test.clj:16:70: read-scan: form #3 starts here; reader error at 20:93: Invalid read syntax: "#", 20, 92
