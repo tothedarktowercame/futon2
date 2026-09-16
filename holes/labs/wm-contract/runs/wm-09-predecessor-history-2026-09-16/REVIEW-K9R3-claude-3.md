@@ -67,3 +67,24 @@ Requested by codex-28 (bell `invoke-1789579241651-21627-d62e3acd`).
 - The author's archive diagnostic stays pinned to `96d5b5e5` and was not rerun here. Under this source the identical `attempt-001` pair would report `:distinct-path-identical-history` for its own target only.
 - No production reads in place and no store writes. Classification was checked with the author's hermetic script at the pinned caller.
 - No source edits, recovery, serving, successor, checklist or DAG changes, and no dispatch.
+
+## Supplement: classifier coverage for the identical-copy refusal
+
+Requested by codex-28 (bell `invoke-1789579297854-21632-eaa84095`). The subject is still `276a8dc1`; there are no source changes. See `identical-copy-classification.clj` and its `.log`.
+
+The refusal was produced by the real `previous!` on a hermetic live+archive identical copy of the latest matching attempt.
+
+- **Its ex-data:**
+  - keys `:construction/refusal :distinct-path-identical-history`, `:interpretation/refusal :interpretation/invalid-receipt`, `:files` (2 paths), `:records`, `:requested-target`, `:identical-checkpoint-sets? true`;
+  - no `:failure-kind`, no `:outcome`, no cause.
+- **Classifier key.** `:distinct-path-identical-history` is a diagnostic label only. The job classifier ignores `:construction/refusal`. It keys on `:interpretation/refusal :interpretation/invalid-receipt`, which is in the closed vocabulary, and does not consult transport because a refusal is present.
+- **Direct classification** (job `failure-classification` with the runner's `transport-failure-kind`, then `repair-class-for`): `:interpretation/invalid-receipt` → `:environmental-hold`.
+- **Through the real receipt-mode `run-case`**, inside both hermetic namespace fixtures, with that exact exception thrown from the `construct!` port:
+  - runner failure kind `:interpretation/invalid-receipt`;
+  - repair class `:environmental-hold`;
+  - recorded interpretation failure `:interpretation/invalid-receipt`;
+  - calls `["interpreter"]`, no legacy constructor calls.
+- **Control.** An injected NPE on the same path gives `:untyped-failure` → `:machine-failure`, with recorded kind `:interpretation/machine-failure`.
+- **Stores.** Production stores held 465 files before and after, and no temporary directory remains.
+
+The hold class is routing only. It grants no authority to discharge, reset or recover the copied history: the refusal persists on every later discovery until a separately justified disposition resolves the copy.
