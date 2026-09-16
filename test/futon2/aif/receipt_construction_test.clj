@@ -39,11 +39,24 @@
     (is (= [:b :a] (:acting-order-after d)))
     (is (= {:b authority} (get-in d [:provenance :admissions])))))
 
-(deftest first-firing-applies-effects-and-never-repeats
-  (let [xs {:a {:guard [:fact "start"] :effect {"next" true "start" false}}
-            :b {:guard [:fact "next"] :effect {"start" true}}}]
-    (is (= [:a :b] (construction/acting-order xs {"start" true "next" false} [:b :a])))
-    (is (= [] (construction/acting-order {:a {:guard [:not [:fact "x"]] :effect {"x" true}}} {"x" :unknown} [:a])))))
+(deftest acting-order-rechecks-guards-and-completes-by-achievement
+  (let [xs {:a {:guard [:fact "start"] :effect {"base" true}}
+            :b {:guard [:fact "base"] :effect {"cap" true}}}]
+    ;; (a) add-only two-pattern chain: under precedence [:b :a] both act, a
+    ;; first — guards are rechecked every step on the current facts
+    (is (= [:a :b] (construction/acting-order xs {"start" true} [:b :a])))
+    ;; (b) a pattern whose effect is already achieved at q0 does not act:
+    ;; achievement is completion
+    (is (= [:b] (construction/acting-order xs {"start" true "base" true} [:b :a])))
+    ;; (c) a retracting effect is refused with the typed refusal
+    (is (= :retracting-effect-forbidden
+           (:construction/refusal
+             (refusal #(construction/acting-order
+                         {:a {:guard [:fact "start"] :effect {"start" false "mid" true}}}
+                         {"start" true} [:a])))))
+    ;; (d) an unknown guard value never fires (strong Kleene, only true fires)
+    (is (= [] (construction/acting-order {:a {:guard [:not [:fact "x"]] :effect {"x" true}}}
+                                         {"x" :unknown} [:a])))))
 
 (deftest construction-ports-and-negative-controls
   (let [{:keys [record captured id]} (fixture/sample)

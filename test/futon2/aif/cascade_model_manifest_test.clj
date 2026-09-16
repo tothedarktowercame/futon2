@@ -238,50 +238,50 @@
                                         {#{} 1})))))
 
 (deftest enactment-prediction-agreement-add-only
-  "Design P3: with add-only effects and theta = 1, once-only enactment and
-   repeat-enabled prediction agree (patternKernel_of_achieved is why)."
+  "Design P3/P10: with add-only effects, theta = 1 and the SAME precedence on
+   both sides ([:a :b] enactment, [pa pb] prediction), once-per-step enactment
+   with achievement-as-completion and the continuing-guard rollout agree."
   (let [interpretations {:a {:guard [:fact "start"] :effect {"base" true}}
                          :b {:guard [:fact "base"] :effect {"cap" true}}}
         acted (construction/acting-order interpretations {"start" true} [:a :b])
-        enacted (reduce #(merge %1 (:effect (get interpretations %2)))
-                        {"start" true} acted)
+        enacted (set (keys (filter val (reduce #(merge %1 (:effect (get interpretations %2)))
+                                               {"start" true} acted))))
         pa (ct-pattern :a #{"start"} #{} #{"base"} 1)
         pb (ct-pattern :b #{"base"} #{} #{"cap"} 1)
-        ;; precedence puts the not-yet-enabled pattern first; an achieved
-        ;; pattern is idempotent (patternKernel_of_achieved), so re-firing it
-        ;; is a no-op and the later pattern still fires
-        rolled (m/rollout (constantly [pb pa]) {#{"start"} 1} (count acted))]
+        rolled (m/rollout (constantly [pa pb]) {#{"start"} 1} (count acted))]
     (is (= [:a :b] acted))
-    ;; single support state with probability 1
     (is (= 1 (count rolled)))
     (is (= #{#{"start" "base" "cap"}} (set (keys rolled))))
-    ;; the facts acting-order makes true equal the predicted support state
-    (is (= (set (keys (filter val enacted))) (first (keys rolled))))))
+    (is (= enacted (first (keys rolled))))))
 
-(deftest enactment-prediction-divergence-with-retraction
-  "Divergence case, recorded not fixed: when an effect retracts a fact, the
-   add-only cascade kernel (set-union with theta) cannot follow it. Here :a
-   retracts \"start\" while producing \"mid\", so enactment (acting-order)
-   blocks :b, whose guard needs \"start\"; the add-only prediction keeps
-   \"start\" true forever (patternKernel_of_achieved keeps union monotone) and
-   so fires :b's kernel and retains \"start\". The two disagree on the final
-   state, exactly as the retraction example of
-   first-firing-applies-effects-and-never-repeats shows enactment can undo."
-  (let [interpretations {:a {:guard [:fact "start"] :effect {"start" false "mid" true}}
-                         :b {:guard [:fact "start"] :effect {"cap" true}}}
+(deftest retraction-refused-withdrawal-token-agrees
+  "P10 item 2: retraction is refused (:retracting-effect-forbidden); the same
+   scenario written add-only, with a withdrawal token the dependent guard
+   forbids, agrees between enactment and prediction with probability 1."
+  ;; enactment refuses the retracting interpretation
+  (is (= :retracting-effect-forbidden
+         (:construction/refusal
+           (try (construction/acting-order
+                  {:a {:guard [:fact "start"] :effect {"start" false "mid" true}}}
+                  {"start" true} [:a])
+                nil
+                (catch clojure.lang.ExceptionInfo e (ex-data e))))))
+  ;; the same scenario with a withdrawal token: :a produces "mid" and
+  ;; "start-withdrawn"; :b guards on "start" and not "start-withdrawn"
+  (let [interpretations {:a {:guard [:fact "start"]
+                             :effect {"mid" true "start-withdrawn" true}}
+                         :b {:guard [:and [:fact "start"] [:not [:fact "start-withdrawn"]]]
+                             :effect {"cap" true}}}
         acted (construction/acting-order interpretations {"start" true} [:a :b])
         enacted (set (keys (filter val (reduce #(merge %1 (:effect (get interpretations %2)))
                                                {"start" true} acted))))
-        pa (ct-pattern :a #{"start"} #{} #{"mid"} 1)
-        pb (ct-pattern :b #{"start"} #{} #{"cap"} 1)
-        rolled (m/rollout (constantly [pa pb]) {#{"start"} 1} (count acted))
-        predicted (first (keys rolled))]
+        pa (ct-pattern :a #{"start"} #{} #{"mid" "start-withdrawn"} 1)
+        pb (ct-pattern :b #{"start"} #{"start-withdrawn"} #{"cap"} 1)
+        rolled (m/rollout (constantly [pa pb]) {#{"start"} 1} (count acted))]
     (is (= [:a] acted))
-    (is (not= enacted predicted))
-    ;; enacted lost "start" (retracted) and never got "cap" (:b blocked)
-    (is (contains? predicted "start"))
-    (is (not (contains? enacted "start")))
-    (is (not (contains? enacted "cap")))))
+    ;; prediction with the same precedence gives the same final true-fact set
+    ;; with probability 1 (the withdrawal token blocks pb's guard)
+    (is (= {enacted 1} rolled))))
 
 ;; P10 continuing guard: mathlib4 95127698bd,
 ;; DarkTower/WarMachine/CascadeTransition.lean — firstEnabled_skips_achieved,
@@ -331,6 +331,74 @@
         p2 (ct-pattern :p2 #{"t0" "t1"} #{} #{"t2"} 1)]
     (is (not= {#{"t0" "t1"} 1} (m/cascade-kernel [p1 p2] #{"t0" "t1"})))
     (is (= {#{"t0" "t1" "t2"} 1} (m/cascade-kernel [p1 p2] #{"t0" "t1"})))))
+
+;; P10 part 2: Joe's five situations through BOTH enactment
+;; (construction/acting-order, continuing guards, achievement-as-completion)
+;; and prediction (m/rollout), theta = 1, the SAME precedence on both sides.
+(defn p10-interps []
+  {:a {:guard [:and [:fact "perm"] [:not [:fact "withdrawn"]]] :effect {"aOut" true}}
+   :b {:guard [:and [:fact "perm"] [:not [:fact "withdrawn"]]] :effect {"bOut" true}}
+   :b2 {:guard [:and [:fact "perm2"] [:not [:fact "withdrawn2"]]] :effect {"bOut" true}}
+   :w {:guard [:fact "perm"] :effect {"withdrawn" true}}})
+
+(defn p10-enacted
+  "The true facts after acting-order runs, folded from q0."
+  [interps q0 acted]
+  (set (keys (filter val (reduce #(merge %1 (:effect (get interps %2))) q0 acted)))))
+
+(def p10-token-universe
+  "Under strong Kleene an absent fact is :unknown and a [:not ...] guard over
+   it is unknown (never true), so the fact map carries every token in the
+   universe explicitly: true if in the state, false otherwise."
+  ["perm" "withdrawn" "aOut" "bOut" "perm2" "withdrawn2"])
+
+(defn p10-agrees [interps order state precedence]
+  (let [facts0 (into {} (map (fn [t] [t (contains? state t)])) p10-token-universe)
+        acted (construction/acting-order interps facts0 order)
+        enacted (p10-enacted interps facts0 acted)
+        rolled (m/rollout (constantly precedence) {state 1} (count acted))]
+    {:acted acted :enacted enacted :rolled rolled}))
+
+(deftest p10-five-situations-enactment-agrees
+  (let [interps (p10-interps)
+        pa (ct-pattern :a #{"perm"} #{"withdrawn"} #{"aOut"} 1)
+        pb (ct-pattern :b #{"perm"} #{"withdrawn"} #{"bOut"} 1)
+        pb2 (ct-pattern :b2 #{"perm2"} #{"withdrawn2"} #{"bOut"} 1)
+        pw (ct-pattern :w #{"perm"} #{} #{"withdrawn"} 1)
+        agree (fn [order state prec]
+                (p10-agrees interps order (into (sorted-set) state) prec))]
+    ;; (i) from {perm} with order [:a]: A acts, the final state has aOut
+    (let [{:keys [acted enacted rolled]} (agree [:a] ["perm"] [pa])]
+      (is (= [:a] acted))
+      (is (contains? enacted "aOut"))
+      (is (= {enacted 1} rolled)))
+    ;; (ii) from {perm, aOut}: A does not act again (achieved is completion)
+    (let [{:keys [acted enacted rolled]} (agree [:a] ["perm" "aOut"] [pa])]
+      (is (= [] acted))
+      (is (= #{"perm" "aOut"} enacted))
+      (is (= {enacted 1} rolled)))
+    ;; (iii) from {perm, withdrawn} with [:a :b]: nothing acts, unchanged
+    (let [{:keys [acted enacted rolled]} (agree [:a :b] ["perm" "withdrawn"] [pa pb])]
+      (is (= [] acted))
+      (is (= #{"perm" "withdrawn"} enacted))
+      (is (= {enacted 1} rolled)))
+    ;; (iv) from {perm, withdrawn} with [:b]: B doesn't start
+    (let [{:keys [acted]} (agree [:b] ["perm" "withdrawn"] [pb])]
+      (is (= [] acted)))
+    ;; (v) from {perm, withdrawn, perm2} with [:b2 :a :b]: only B2 acts,
+    ;; yielding bOut
+    (let [{:keys [acted enacted rolled]} (agree [:b2 :a :b] ["perm" "withdrawn" "perm2"]
+                                                 [pb2 pa pb])]
+      (is (= [:b2] acted))
+      (is (contains? enacted "bOut"))
+      (is (= {enacted 1} rolled)))
+    ;; mid-run withdrawal: :w produces "withdrawn" from {perm}; order
+    ;; [:w :b] acts W first and the withdrawal token stops B. Both engines
+    ;; agree on the final state.
+    (let [{:keys [acted enacted rolled]} (p10-agrees interps [:w :b] #{"perm"} [pw pb])]
+      (is (= [:w] acted))
+      (is (= #{"perm" "withdrawn"} enacted))
+      (is (= {enacted 1} rolled)))))
 
 
 (deftest token-preference-lean-fixture-correspondence

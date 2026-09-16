@@ -44,12 +44,25 @@
       (need! (not (reaches? edges (nth firing i) (nth firing j)))
              :inadmissible-order {:earlier (nth firing i) :later (nth firing j)})))
   true)
-(defn acting-order [interpretations q0 order]
+(defn acting-order
+  "P10 continuing guards: every step rechecks every guard on the current
+   facts, and the acting pattern is the first id in order whose guard is
+   literal true and whose effect is not already achieved (every [k v] in
+   :effect already has (= v (get facts k))). Effects are add-only: any false
+   value is refused up front with :retracting-effect-forbidden; withdrawal is
+   expressed as a new token the guards forbid. With add-only effects each
+   step adds at least one new true fact, so the loop terminates (the set of
+   true facts strictly grows and is bounded by the fact universe)."
+  [interpretations q0 order]
   (doseq [id order]
-    (need! (contains? interpretations id) :previous-or-admitted-interpretation-missing {:pattern id}))
+    (need! (contains? interpretations id) :previous-or-admitted-interpretation-missing {:pattern id})
+    (doseq [[k v] (:effect (get interpretations id))]
+      (need! (not (false? v)) :retracting-effect-forbidden {:pattern id :fact k})))
   (loop [facts q0 acted []]
-    (if-let [id (first (filter #(and (not (some #{%} acted))
-                                     (true? (finder/guard-value facts (:guard (get interpretations %))))) order))]
+    (if-let [id (first (filter #(and (true? (finder/guard-value facts (:guard (get interpretations %))))
+                                     (not-every? (fn [[k v]] (= v (get facts k)))
+                                                 (:effect (get interpretations %))))
+                              order))]
       (recur (merge facts (:effect (get interpretations id))) (conj acted id))
       acted)))
 
