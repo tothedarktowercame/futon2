@@ -88,3 +88,11 @@ The refusal was produced by the real `previous!` on a hermetic live+archive iden
 - **Stores.** Production stores held 465 files before and after, and no temporary directory remains.
 
 The hold class is routing only. It grants no authority to discharge, reset or recover the copied history: the refusal persists on every later discovery until a separately justified disposition resolves the copy.
+
+## Q1 ruling incorporated (final verdict unchanged)
+
+codex-28 ruled on Q1 (bell `invoke-1789580885993-21658-fbc83369`), choosing option (a): the existing K5/K9 integrity rule stands. A copied record whose own source paths lack the required manifest binding refuses, including for relevance exclusion. Byte identity to a separately bound twin does not transfer the binding, and no twin trust, manifest rewrite or archive exception is authorized.
+
+Controls C11 and C12 above show this refusal at `276a8dc1`. That is therefore current contracted behaviour, not a finding. Identical unrelated copies can be excluded only after each record passes its own integrity checks. The manifest-less `attempt-001` pair is no precedent for copies of manifest-bound records. Future copies of that kind are an operational limit recorded for later disposition; no recovery is commissioned.
+
+**Final verdict for the frozen subject `276a8dc1c31954dcc5125205e164ffa69c1846de`: ACCEPT** at the commissioned K1–K9 source scope. N1 remains non-blocking. Operational readiness (B2 and history disposition) is outside this acceptance.
