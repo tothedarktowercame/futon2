@@ -83,6 +83,91 @@
            {:reason :root-or-directory-unreadable :file (str directory)})
     children))
 
+(defn- discovery-target! [value file path]
+  (need! (or (keyword? value) (and (string? value) (not (str/blank? value))))
+         :history-discovery-invalid {:reason :target-unavailable :file (str file) :path path :value value})
+  {:file (str file) :path path :value value :type (if (keyword? value) :keyword :string)
+   :comparison (if (keyword? value) (str value) value)})
+
+(defn- rejected-construction? [construction]
+  (let [sorry (get-in construction [:payload :sorry])]
+    (and (= :invalid-checkpoint-cell (:kind sorry))
+         (= :construction (:refused-checkpoint sorry)))))
+
+(defn- relevance-evidence! [{:keys [closed construction selection close-file construction-file selection-file target-evidence]}]
+  (let [dir (.getParentFile (io/file close-file))
+        sources (cond-> [[3 :construction construction construction-file] [7 :closed closed close-file]]
+                  selection (conj [2 :selection selection selection-file]))
+        identity (select-keys closed [:cohort/id :attempt/id :attempt/ordinal])
+        fail! (fn [ok reason file]
+                (need! ok :history-discovery-invalid {:reason reason :file (str file)}))]
+    (fail! (and (keyword? (:cohort/id closed))
+                (= (name (:cohort/id closed)) (.getName (.getParentFile dir)))
+                (= (:attempt/id closed) (.getName dir)) (pos-int? (:attempt/ordinal closed)))
+           :relevance-identity-invalid close-file)
+    (doseq [[index checkpoint record file] sources]
+      (fail! (and (map? record)
+                  (= #{:event/schema-version :cohort/id :attempt/id :attempt/ordinal
+                       :event/sequence :checkpoint/type :recorded-at :payload} (set (keys record)))
+                  (= 1 (:event/schema-version record)) (= index (:event/sequence record))
+                  (= checkpoint (:checkpoint/type record))
+                  (= identity (select-keys record (keys identity)))
+                  (or (and (map? (get-in record [:payload :judgment]))
+                           (some? (get-in record [:payload :ground]))
+                           (not (contains? (:payload record) :sorry)))
+                      (and (= :construction checkpoint) (rejected-construction? record)
+                           (= #{:sorry} (set (keys (:payload record))))
+                           (= #{:kind :outcome :refused-checkpoint :cell-errors}
+                              (set (keys (get-in record [:payload :sorry]))))
+                           (= :incomplete (get-in record [:payload :sorry :outcome]))
+                           (vector? (get-in record [:payload :sorry :cell-errors])))))
+             :relevance-checkpoint-invalid file))
+    (let [times (mapv (fn [[_ _ record file]] (history-time! (:recorded-at record) file)) (sort-by first sources))]
+      (fail! (every? (fn [[a b]] (not (.isAfter ^Instant a b))) (partition 2 1 times))
+             :relevance-ordering-invalid close-file))
+    (doseq [[record path file] [[closed [:payload :close-retention :occurrence] close-file]
+                               [construction [:payload :judgment :receipted-construction :identity :occurrence] construction-file]]
+            :let [occurrence (get-in record path)] :when (some? occurrence)]
+      (fail! (and (map? occurrence)
+                  (= (str (:cohort/id closed)) (:cohort/id occurrence))
+                  (= (:attempt/id closed) (:attempt/id occurrence)))
+             :relevance-occurrence-identity-conflict file))
+    (let [carrier (get-in construction [:payload :judgment :receipted-construction])
+          prior-id (:identity carrier)]
+      (when (contains? carrier :cascade-diff-sha256)
+        (fail! (= (:cascade-diff-sha256 carrier) (evidence/value-digest (:cascade-diff carrier)))
+               :relevance-diff-binding-mismatch construction-file))
+      (when (contains? prior-id :start-event-sha256)
+        (let [start-file (io/file dir "001-time-step.edn")]
+          (history-read! start-file)
+          (fail! (= (:start-event-sha256 prior-id) (evidence/sha256 (bytes start-file)))
+                 :relevance-start-binding-mismatch start-file))))
+    (when (contains? (:payload closed) :close-evidence-manifest)
+      (let [m (get-in closed [:payload :close-evidence-manifest])]
+        (try
+          (manifest/validate-manifest m)
+          (when (contains? (:payload closed) :close-retention)
+            (manifest/verify-retention-agreement m (get-in closed [:payload :close-retention])))
+          (doseq [[_ checkpoint _ file] sources :when (not= :closed checkpoint)]
+            (fail! (some #(= (.getCanonicalPath (io/file (:source-path %))) (.getCanonicalPath file)) (:entries m))
+                   :relevance-manifest-binding-missing file))
+          (doseq [entry (:entries m)]
+            (fail! (= (:sha256 entry) (evidence/sha256 (bytes (:source-path entry))))
+                   :relevance-manifest-source-mismatch (:source-path entry)))
+          (catch clojure.lang.ExceptionInfo e
+            (throw (ex-info "Relevance evidence refused"
+                            (merge (ex-data e) {:interpretation/refusal :interpretation/invalid-receipt
+                                                :construction/refusal :history-discovery-invalid
+                                                :file (str close-file)}) e)))
+          (catch java.io.IOException e
+            (throw (ex-info "Relevance source unreadable"
+                            {:interpretation/refusal :interpretation/invalid-receipt
+                             :construction/refusal :history-discovery-invalid
+                             :reason :relevance-source-unreadable :file (str close-file)} e))))))
+    {:reason :producer-recorded-different-target :identity identity :target-evidence target-evidence
+     :records (mapv (fn [[_ _ _ file]] {:file (.getCanonicalPath file)
+                                       :sha256 (evidence/sha256 (bytes file))}) sources)}))
+
 (defn- non-construction! [close-file closed construction]
   (let [dir (.getParentFile (io/file close-file))
         files (mapv #(io/file dir (format "%03d-%s.edn" %1 (name %2)))
@@ -138,13 +223,16 @@
           target (:target action)
           retained (get-in closed [:payload :close-retention])]
       (fail! (or (and (= #{:judgment :ground} (set (keys cell)))
-                       (map? action) (keyword? (:type action)) (string? target) (not (str/blank? target))
-                       (or (nil? (:selected-mission judgment)) (= target (:selected-mission judgment))))
+                       (map? action) (keyword? (:type action))
+                       (or (keyword? target) (and (string? target) (not (str/blank? target))))
+                       (or (nil? (:selected-mission judgment)) (= (:comparison (discovery-target! target (nth files 1) [:selected-action :target]))
+                                                                      (:comparison (discovery-target! (:selected-mission judgment) (nth files 1) [:selected-mission])))))
                   (and (= #{:sorry} (set (keys cell))) (nil? judgment) (map? (:sorry cell))
                        (#{:no-selection :not-reached-selection} (get-in cell [:sorry :kind]))))
              :non-construction-selection-invalid (nth files 1))
       (when (= :present (get-in close-judgment [:outcome-entity :status]))
-        (fail! (and target (= target (get-in close-judgment [:outcome-entity :entity/id])))
+        (fail! (and target (= (:comparison (discovery-target! target (nth files 1) [:selected-action :target]))
+                                             (:comparison (discovery-target! (get-in close-judgment [:outcome-entity :entity/id]) close-file [:outcome-entity :entity/id]))))
                :non-construction-target-contradiction close-file))
       (when (contains? (:payload closed) :close-retention)
         (try (retention/validate-retention-block retained)
@@ -185,37 +273,67 @@
                                :construction/refusal :history-discovery-invalid
                                :reason :non-construction-manifest-source-unreadable :file (str close-file)} e)))))))
     {:non-construction? true :closed-at (history-time! (:recorded-at closed) close-file)
-     :exclusion {:reason :producer-not-reached-construction :identity identity
+      :exclusion {:reason :producer-not-reached-construction :identity identity
+                 :target-evidence
+                 (vec (keep (fn [[record file path]]
+                              (let [value (get-in record path ::absent)]
+                                (when (and (not= ::absent value) (some? value))
+                                  (discovery-target! value file path))))
+                            [[(nth records 1) (nth files 1) [:payload :judgment :selected-action :target]]
+                             [(nth records 1) (nth files 1) [:payload :judgment :selected-mission]]
+                             [closed close-file [:payload :close-retention :occurrence :action/value :target]]
+                             [closed close-file [:payload :judgment :outcome-entity :entity/id]]]))
                  :records (mapv (fn [file] {:file (.getCanonicalPath file)
                                             :sha256 (evidence/sha256 (bytes file))}) files)}}))
 
 (defn- closed-candidate! [close-file]
   (let [closed (history-read! close-file)
-        construction-file (io/file (.getParentFile (io/file close-file)) "003-construction.edn")
+        dir (.getParentFile (io/file close-file))
+        construction-file (io/file dir "003-construction.edn")
         construction (when (.exists construction-file) (history-read! construction-file))
+        selection-file (io/file dir "002-selection.edn")
+        selection (when (.exists selection-file) (history-read! selection-file))
         occurrence (get-in closed [:payload :close-retention :occurrence])
-        judgment (get-in construction [:payload :judgment])
-        targets (remove nil? [(get-in occurrence [:action/value :target])
-                              (:mission judgment)
-                              (get-in judgment [:cascade :selected-action :target])
-                              (get-in judgment [:receipted-construction :identity :occurrence :action/value :target])])
         at (history-time! (:recorded-at closed) close-file)]
     (if (= :not-reached-construction (get-in construction [:payload :sorry :kind]))
       (non-construction! close-file closed construction)
-      (do
+      (let [missing (Object.)
+            fields (for [[file record paths]
+                         [[construction-file construction [[:payload :judgment :mission]
+                                                            [:payload :ground :selected-action :target]
+                                                            [:payload :judgment :cascade :selected-action :target]
+                                                            [:payload :judgment :receipted-construction :identity :occurrence :action/value :target]]]
+                          [selection-file selection [[:payload :judgment :selected-mission]
+                                                     [:payload :judgment :selected-action :target]
+                                                     [:payload :ground :selected-action :target]]]
+                          [close-file closed [[:payload :close-retention :occurrence :action/value :target]
+                                              [:payload :judgment :outcome-entity :entity/id]
+                                              [:payload :judgment :entity-state-at-close :entity/id]]]]
+                         path paths :let [value (get-in record path missing)]
+                         :when (not (identical? missing value))]
+                     (discovery-target! value file path))
+            target-evidence (vec fields)
+            targets (mapv :comparison target-evidence)]
         (when-let [retained-time (get-in closed [:payload :close-retention :closed-at])]
           (need! (= at (history-time! retained-time close-file)) :history-discovery-invalid
                  {:reason :contradictory-ordering :file (str close-file)}))
-        (need! (and (seq targets) (every? #(and (string? %) (not (str/blank? %))) targets))
-               :history-discovery-invalid {:reason :target-unavailable :file (str close-file)})
+        (need! (seq targets) :history-discovery-invalid {:reason :target-unavailable :file (str close-file)})
         (need! (apply = targets) :history-discovery-invalid
-               {:reason :contradictory-targets :file (str close-file) :targets (vec targets)})
+               {:reason :contradictory-targets :file (str close-file) :target-evidence target-evidence})
         {:closed closed :construction construction :close-file close-file :construction-file construction-file
+         :selection selection :selection-file selection-file :target-evidence target-evidence
          :occurrence occurrence :target (first targets) :closed-at at}))))
 
 (defn- validated-previous! [{:keys [closed construction close-file construction-file] :as latest} roots]
   (try
-      (let [_ (need! (:occurrence latest) :previous-occurrence-unavailable {:file (str close-file)})
+      (let [_ (when (rejected-construction? construction)
+                  (relevance-evidence! latest)
+                  (need! false :previous-construction-rejected
+                         {:file (str construction-file)
+                          :history/construction-sha256 (evidence/sha256 (bytes construction-file))
+                          :history/rejection (get-in construction [:payload :sorry])
+                          :history/target-evidence (:target-evidence latest)}))
+            _ (need! (:occurrence latest) :previous-occurrence-unavailable {:file (str close-file)})
             block (get-in closed [:payload :close-retention])
             m (get-in closed [:payload :close-evidence-manifest])
             retained (get-in construction [:payload :judgment :receipted-construction])
@@ -270,9 +388,9 @@
   "Latest relevant closed history in explicit roots, or established absence.
   Damaged or unclassifiable history refuses; missing modern evidence never resets."
   [identity roots]
-  (let [target (get-in identity [:occurrence :action/value :target])
-        _ (need! (and (string? target) (not (str/blank? target)))
-                 :history-discovery-invalid {:reason :current-target-unavailable})
+  (let [requested-target (discovery-target! (get-in identity [:occurrence :action/value :target])
+                                           :current-identity [:occurrence :action/value :target])
+        target (:comparison requested-target)
         before (history-time! (get-in identity [:occurrence :action-at]) :current-identity)
         roots (vec (distinct (map history-root! roots)))
         _ (need! (seq roots) :history-discovery-invalid {:reason :search-roots-unavailable})
@@ -283,24 +401,25 @@
                                :when (.exists f)]
                            (closed-candidate! f)))
         earlier-all (filter #(.isBefore ^Instant (:closed-at %) before) candidates)
-        exclusions (mapv :exclusion (filter :non-construction? earlier-all))
         earlier (remove :non-construction? earlier-all)
-        ;; Exclusion as unrelated requires current evidence, not an unverified
-        ;; mission name that could conceal damaged matching history.
-        _ (doseq [candidate earlier :when (not= target (:target candidate))]
-            (validated-previous! candidate roots))
+        exclusions (into (mapv :exclusion (filter :non-construction? earlier-all))
+                         (map relevance-evidence! (filter #(not= target (:target %)) earlier)))
         ordered (sort-by :closed-at (filter #(= target (:target %)) earlier))
         _ (when (and (> (count ordered) 1)
                      (= (:closed-at (last ordered)) (:closed-at (last (butlast ordered)))))
             (need! false :ambiguous-previous-construction
                    {:files (mapv #(str (:close-file %)) (take-last 2 ordered))}))]
     (if-let [latest (last ordered)]
-      (try (assoc-in (validated-previous! latest roots) [:provenance :excluded-attempts] exclusions)
+      (try (update (validated-previous! latest roots) :provenance assoc
+                   :excluded-attempts exclusions :requested-target requested-target
+                   :target-evidence (:target-evidence latest))
            (catch clojure.lang.ExceptionInfo e
-             (throw (ex-info (.getMessage e) (assoc (ex-data e) :history/excluded-attempts exclusions) e))))
+             (throw (ex-info (.getMessage e) (assoc (ex-data e) :history/excluded-attempts exclusions
+                                                   :history/requested-target requested-target
+                                                   :history/target-evidence (:target-evidence latest)) e))))
       {:cascade policy/first-attempt-cascade :admitted {}
        :provenance {:status :none :reason :no-earlier-target-construction :searched-roots roots
-                    :excluded-attempts exclusions}
+                    :excluded-attempts exclusions :requested-target requested-target}
        :admission-reason :first-attempt-no-admissions})))
 
 (defn history-roots [identity]

@@ -80,10 +80,17 @@
                                               :now #(Instant/parse at) :uuid-fn #(UUID/randomUUID)})
         dir (io/file root "fixture" "attempt-001")
         start-file (io/file dir "001-time-step.edn")
+        selection-file (io/file dir "002-selection.edn")
         construction-file (io/file dir "003-construction.edn")
         close-file (io/file dir "007-closed.edn")
         _ (.mkdirs dir)
-        _ (spit start-file (pr-str {:payload {:judgment {:semantic-epoch epoch}}}))
+        event (fn [index checkpoint time payload]
+                {:event/schema-version 1 :cohort/id :fixture :attempt/id "attempt-001"
+                 :attempt/ordinal 1 :event/sequence index :checkpoint/type checkpoint
+                 :recorded-at time :payload payload})
+        _ (spit start-file (pr-str (event 1 :time-step at {:judgment {:semantic-epoch epoch} :ground {:kind :fixture-start}})))
+        _ (spit selection-file (pr-str (event 2 :selection at {:judgment {:selected-action action :selected-mission "M-history"}
+                                                             :ground {:kind :fixture-selection}})))
         identity {:occurrence occurrence :semantic-epoch epoch :data-root (.getCanonicalPath (io/file root))
                   :start-event-sha256 (evidence/sha256 (Files/readAllBytes (.toPath start-file)))
                   :interpreter-job "prior-job" :author "fixture" :schema-version 1}
@@ -91,18 +98,21 @@
                               {:patterns #{:a :b} :stands-on #{[:a :b]}} {:b authority}
                               {:temperament (assoc policy/up-closure-temperament :precedence [:b :a])
                                :acting-order-fn (fn [c] (:precedence c)) :score-fn (constantly absent-score)})
-        construction {:cohort/id :fixture :attempt/id "attempt-001"
-                      :payload {:judgment {:mission "M-history" :cascade {}
-                                           :receipted-construction {:identity identity :cascade-diff diff
-                                                                    :cascade-diff-sha256 (evidence/value-digest diff)}}}}
+        construction (event 3 :construction at
+                            {:judgment {:mission "M-history" :cascade {}
+                                        :receipted-construction {:identity identity :cascade-diff diff
+                                                                 :cascade-diff-sha256 (evidence/value-digest diff)}}
+                             :ground {:kind :fixture-construction}})
         _ (spit construction-file (pr-str construction))
         m (manifest/build-manifest {:entries (mapv (fn [f] {:evidence/id (.getName f) :source-path (.getCanonicalPath f)
-                                                          :admitted-at closed-at}) [start-file construction-file])
+                                                          :admitted-at closed-at}) [start-file selection-file construction-file])
                                     :read-bytes #(Files/readAllBytes (.toPath (io/file %)))})
         block (retention/build-retention-block {:occurrence occurrence :state {:status :absent :reason :test}
                                                :model {:status :absent :reason :declared-model-identity-unthreaded} :closed-at closed-at :evidence-cutoff closed-at
                                                :admitted-evidence (mapv :evidence/id (:entries m))})
-        close {:recorded-at closed-at :payload {:close-retention block :close-evidence-manifest m}}]
+        close (event 7 :closed closed-at {:judgment {:outcome :build-failed}
+                                         :ground {:kind :full-loop-outcome :attempt-id "attempt-001"}
+                                         :close-retention block :close-evidence-manifest m})]
     (spit close-file (pr-str close))
     {:identity identity :close close :close-file close-file :construction-file construction-file}))
 
@@ -187,6 +197,7 @@
            [:multiple-forms #(spit (:close-file %) "{} {}") :history-discovery-invalid]
            [:missing-targets (fn [x]
                                (Files/delete (.toPath (:construction-file x)))
+                               (Files/delete (.toPath (io/file (.getParentFile (:construction-file x)) "002-selection.edn")))
                                (rewrite-history! (:close-file x) #(update-in % [:payload :close-retention] dissoc :occurrence))) :history-discovery-invalid]]]
     (testing (str (name label) " older=" with-older?)
       (let [temp (.toFile (Files/createTempDirectory "receipt-damage" (make-array FileAttribute 0)))
@@ -343,4 +354,87 @@
         (let [error (refusal #(construction/previous! current [older marker]))]
           (is (= :previous-cascade-carrier-unavailable (:construction/refusal error)))
           (is (= 1 (count (:history/excluded-attempts error))))))
+      (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
+
+(defn discovery-history! [root target rejected?]
+  (let [files (non-construction-fixture! root true false)
+        action {:type :advance-mission :target target}]
+    (rewrite-history! (nth files 1)
+                      #(assoc % :payload {:judgment {:selected-action action :selected-mission target}
+                                          :ground {:kind :fixture-selection}}))
+    (rewrite-history! (nth files 2)
+                      #(assoc % :payload (if rejected?
+                                           {:sorry {:kind :invalid-checkpoint-cell :outcome :incomplete
+                                                    :refused-checkpoint :construction :cell-errors [[:invalid-fold-output :fixture]]}}
+                                           {:judgment {:mission (str target) :cascade {:construction-kind :selected-policy}}
+                                            :ground {:kind :decision-pinned-construction :selected-action action}})))
+    (when rejected?
+      (rewrite-history! (last files) #(assoc-in % [:payload :judgment :outcome] :incomplete)))
+    files))
+
+(deftest rejected-construction-remains-a-predecessor
+  (doseq [older? [false true]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-rejection" (make-array FileAttribute 0)))
+          old (io/file temp "old") latest (io/file temp "latest")
+          current {:occurrence {:action/value {:target "M-history"} :action-at "2026-09-15T12:00:00Z"}}]
+      (try
+        (when older? (history-fixture! old :older "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z"))
+        (let [files (discovery-history! latest "M-history" true)
+              error (refusal #(construction/previous! current (if older? [old latest] [latest])))]
+          (is (= :previous-construction-rejected (:construction/refusal error)))
+          (is (= (str (nth files 2)) (:file error)))
+          (is (= :invalid-checkpoint-cell (get-in error [:history/rejection :kind])))
+          (is (= [[:invalid-fold-output :fixture]] (get-in error [:history/rejection :cell-errors])))
+          (is (= (evidence/sha256 (Files/readAllBytes (.toPath (nth files 2)))) (:history/construction-sha256 error))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
+
+(deftest unrelated-history-needs-relevance-evidence-not-modern-carrier
+  (doseq [older? [false true] rejected? [false true]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-unrelated" (make-array FileAttribute 0)))
+          old (io/file temp "old") other (io/file temp "other")
+          current {:occurrence {:action/value {:target "M-history"} :action-at "2026-09-15T12:00:00Z"}}]
+      (try
+        (when older? (history-fixture! old :older "2026-09-15T10:00:00Z" "2026-09-15T10:01:00Z"))
+        (let [files (discovery-history! other "M-other" rejected?)
+              roots (if older? [old other] [other])
+              result (construction/previous! current roots)
+              excluded (first (get-in result [:provenance :excluded-attempts]))]
+          (is (= (if older? :carried-from-previous-occurrence :first-attempt-no-admissions) (:admission-reason result)))
+          (is (= :producer-recorded-different-target (:reason excluded)))
+          (is (seq (:target-evidence excluded)))
+          (is (= 3 (count (:records excluded))))
+          ;; A present broken integrity binding cannot be discarded as old data.
+          (rewrite-history! (last files) #(assoc-in % [:payload :close-evidence-manifest] {}))
+          (is (= :history-discovery-invalid (:construction/refusal (refusal #(construction/previous! current roots))))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))))
+
+(deftest discovery-target-rendering-is-exact-and-provenanced
+  (doseq [[mission requested expected]
+          [[":ns/target" :ns/target :match]
+           [":ns/target" ":ns/target" :match]
+           [":other/target" :ns/target :conflict]
+           ["ns/target" :ns/target :conflict]
+           [42 :ns/target :conflict]]]
+    (let [temp (.toFile (Files/createTempDirectory "receipt-target-rendering" (make-array FileAttribute 0)))
+          current {:occurrence {:action/value {:target requested} :action-at "2026-09-15T12:00:00Z"}}]
+      (try
+        (let [files (discovery-history! temp :ns/target false)]
+          (rewrite-history! (nth files 2) #(assoc-in % [:payload :judgment :mission] mission))
+          (let [error (refusal #(construction/previous! current [temp]))]
+            ;; Exact agreement makes this matching OLD construction, which must
+            ;; refuse current admission, not disappear as an unrelated target.
+            (is (= (if (= expected :match) :previous-occurrence-unavailable :history-discovery-invalid)
+                   (:construction/refusal error)))))
+        (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))
+  (let [temp (.toFile (Files/createTempDirectory "receipt-target-provenance" (make-array FileAttribute 0)))]
+    (try
+      (discovery-history! temp :ns/target false)
+      (let [result (construction/previous! {:occurrence {:action/value {:target :different/target}
+                                                        :action-at "2026-09-15T12:00:00Z"}} [temp])
+            fields (get-in result [:provenance :excluded-attempts 0 :target-evidence])]
+        (is (= #{:keyword :string} (set (map :type fields))))
+        (is (some #(= :ns/target (:value %)) fields))
+        (is (some #(= ":ns/target" (:value %)) fields))
+        (is (every? #(and (:file %) (:path %)) fields))
+        (is (= :different/target (get-in result [:provenance :requested-target :value]))))
       (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f)))))))

@@ -1,0 +1,5 @@
+{
+  "source": "c664f402:src/futon2/aif/receipt_construction.clj",
+  "exit": 1,
+  "expected": "new K4/K5/K6 controls reject pre-ruling source"
+}
