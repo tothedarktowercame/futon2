@@ -486,11 +486,19 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
   "Per-token additive weights of TokenPreference.utility: utility(o) =
    Σ_{v ∈ o} w_v with w_v = lam/|want| for v ∈ want, plus mu for v ∈
    evidence, and nothing for any other token. The empty sum is utility 0,
-   matching token-utility on the empty subset."
+  matching token-utility on the empty subset.
+
+  Spec extension (live C, 2026-09-17): an optional :weights {token w} map
+  replaces the UNIFORM per-token share for the tokens it names — w_v = w
+  instead of lam/|want| — so a derived C can weight its want tokens by
+  source evidence. Unnamed want tokens keep the uniform share."
   [spec]
-  (let [want (:want spec) evidence (:evidence spec)
+  (let [want (:want spec) evidence (:evidence spec) weights (:weights spec)
         per (if (seq want) (/ (:lam spec) (count want)) 0)]
-    (into {} (map (fn [v] [v (+ (if (contains? want v) per 0)
+    (into {} (map (fn [v] [v (+ (cond
+                                  (contains? weights v) (get weights v)
+                                  (contains? want v) per
+                                  :else 0)
                                 (if (contains? evidence v) (:mu spec) 0))]))
           (set/union want evidence))))
 
@@ -513,6 +521,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    (let [want (set (:want spec)) evidence (set (:evidence spec))
          zeroed (set (:zeroed spec))
          lam (:lam spec) mu (:mu spec)
+         weights (:weights spec)
          exact? (fn [x] (or (ratio? x) (integer? x)))
          universe (set/union want evidence (into #{} (mapcat identity) zeroed) (set extra-universe))]
      (cond
@@ -522,10 +531,20 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
        {:status :missing :kind :invalid-preference-spec :field :lam :value lam :reason :lam-not-positive}
        (not (and (exact? mu) (<= 0 mu)))
        {:status :missing :kind :invalid-preference-spec :field :mu :value mu :reason :mu-negative}
+       (and (contains? spec :weights)
+            (not (and (map? weights)
+                      (every? (fn [[t w]] (and (contains? want t) (exact? w) (pos? w)))
+                              weights))))
+       {:status :missing :kind :invalid-preference-spec :field :weights
+        :reason (cond (not (map? weights)) :weights-not-a-map
+                      (some (comp not #(contains? want %)) (keys weights)) :weight-token-not-in-want
+                      :else :weight-not-positive-rational)
+        :weights weights}
        (and (< (count universe) 62) (= (count zeroed) (bit-shift-left 1 (count universe))))
        {:status :missing :kind :invalid-preference-spec :field :zeroed :reason :zeroed-covers-universe}
        :else
-       (let [w (utility-weights {:want want :evidence evidence :lam lam :mu mu})
+       (let [w (utility-weights {:want want :evidence evidence :lam lam :mu mu
+                                 :weights weights})
              u (fn [o] (reduce + 0.0 (map (fn [t] (double (get w t 0))) (set/intersection (set o) universe))))
              log-z0 (reduce + 0.0 (map (fn [t] (Math/log1p (Math/exp (double (get w t 0))))) universe))
              zeroed-share (reduce + 0.0 (map (fn [zp] (Math/exp (- (u zp) log-z0))) zeroed))

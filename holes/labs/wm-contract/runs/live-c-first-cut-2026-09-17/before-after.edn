@@ -1,0 +1,293 @@
+{:ran-at
+ #object[java.time.Instant 0x22271065 "2026-09-17T21:08:23.558294563Z"],
+ :before
+ {:production-decision
+  {:action
+   {:kind :cascade-candidate,
+    :id :C1,
+    :target "M-wm-aif-policy-grain-compliance",
+    :precedence
+    [{:id :wm-connected-learning/observation-to-next-choice,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-wm-aif-policy-grain-compliance"
+         :standing-cascade-g-test-passes]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-wm-aif-policy-grain-compliance"
+            :judge-loads-declared-cascade-sources]},
+         :absent #{}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-wm-aif-policy-grain-compliance"
+          :standing-cascade-g-test-passes]},
+       :authority :documented-interpretation},
+      :target "M-wm-aif-policy-grain-compliance"}],
+    :construction-receipt
+    {:kind :hand-admitted,
+     :by "claude-4",
+     :date "2026-09-17",
+     :moves [],
+     :stopped-is-not-success true},
+    :interpretation-receipts
+    #:wm-connected-learning{:observation-to-next-choice
+                            {:kind :hand-admitted,
+                             :by "claude-4",
+                             :date "2026-09-17",
+                             :source
+                             {:path
+                              "p4ng/wm-walkthroughs/collections/connected-learning/observation-to-next-choice.flexiarg",
+                              :sha256
+                              "b0407ef81dea874d78bb7697042342d4d8023592a058d66e01e6fa4813186053"},
+                             :reading
+                             "Follow the finding into the next decision: production loads the declared sources and decides from them, so the standing test's enacted decision becomes a cascade decision."}}},
+   :selection-law
+   {:requested :cascade-selection-posterior,
+    :applied :cascade-selection-posterior,
+    :beta 1,
+    :beta-status :declared,
+    :posterior
+    {{:kind :cascade-candidate,
+      :id :C1,
+      :target "M-wm-aif-policy-grain-compliance",
+      :precedence
+      [{:id :wm-connected-learning/observation-to-next-choice,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-wm-aif-policy-grain-compliance"
+           :standing-cascade-g-test-passes]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-wm-aif-policy-grain-compliance"
+              :judge-loads-declared-cascade-sources]},
+           :absent #{}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-wm-aif-policy-grain-compliance"
+            :standing-cascade-g-test-passes]},
+         :authority :documented-interpretation},
+        :target "M-wm-aif-policy-grain-compliance"}],
+      :construction-receipt
+      {:kind :hand-admitted,
+       :by "claude-4",
+       :date "2026-09-17",
+       :moves [],
+       :stopped-is-not-success true},
+      :interpretation-receipts
+      #:wm-connected-learning{:observation-to-next-choice
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "p4ng/wm-walkthroughs/collections/connected-learning/observation-to-next-choice.flexiarg",
+                                :sha256
+                                "b0407ef81dea874d78bb7697042342d4d8023592a058d66e01e6fa4813186053"},
+                               :reading
+                               "Follow the finding into the next decision: production loads the declared sources and decides from them, so the standing test's enacted decision becomes a cascade decision."}}}
+     0.47536688641867164,
+     {:kind :cascade-candidate,
+      :id :C0,
+      :target "M-wm-aif-policy-grain-compliance",
+      :precedence [],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :construction :empty-cascade,
+       :target "M-wm-aif-policy-grain-compliance",
+       :moves [],
+       :coverage 0},
+      :interpretation-receipts
+      #:wm-connected-learning{:observation-to-next-choice
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "p4ng/wm-walkthroughs/collections/connected-learning/observation-to-next-choice.flexiarg",
+                                :sha256
+                                "b0407ef81dea874d78bb7697042342d4d8023592a058d66e01e6fa4813186053"},
+                               :reading
+                               "Follow the finding into the next decision: production loads the declared sources and decides from them, so the standing test's enacted decision becomes a cascade decision."}}}
+     0.17487770452710943,
+     {:kind :cascade-candidate,
+      :id :C0,
+      :target "M-wm-08-external-f2",
+      :precedence [],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :construction :empty-cascade,
+       :target "M-wm-08-external-f2",
+       :moves [],
+       :coverage 0},
+      :interpretation-receipts
+      #:cascade-construction{:run-it-on-a-real-case
+                             {:kind :hand-admitted,
+                              :by "claude-4",
+                              :date "2026-09-17",
+                              :source
+                              {:path
+                               "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                              :reading
+                              "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}}}
+     0.17487770452710943,
+     {:kind :cascade-candidate,
+      :id :C1,
+      :target "M-wm-08-external-f2",
+      :precedence
+      [{:id :cascade-construction/run-it-on-a-real-case,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-wm-08-external-f2" :independent-expectations-written]
+             ["M-wm-08-external-f2"
+              :external-expectation-validator-exists]},
+           :absent #{}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+         :authority :documented-interpretation},
+        :target "M-wm-08-external-f2"}],
+      :construction-receipt
+      {:kind :hand-admitted,
+       :by "claude-4",
+       :date "2026-09-17",
+       :moves [],
+       :stopped-is-not-success true},
+      :interpretation-receipts
+      #:cascade-construction{:run-it-on-a-real-case
+                             {:kind :hand-admitted,
+                              :by "claude-4",
+                              :date "2026-09-17",
+                              :source
+                              {:path
+                               "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                              :reading
+                              "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}}}
+     0.17487770452710943},
+    :softmax-weights
+    {{:id :wm-connected-learning/observation-to-next-choice,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-wm-aif-policy-grain-compliance"
+         :standing-cascade-g-test-passes]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-wm-aif-policy-grain-compliance"
+            :judge-loads-declared-cascade-sources]},
+         :absent #{}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-wm-aif-policy-grain-compliance"
+          :standing-cascade-g-test-passes]},
+       :authority :documented-interpretation},
+      :target "M-wm-aif-policy-grain-compliance"}
+     0.47536688641867164,
+     nil 0.17487770452710943,
+     {:id :cascade-construction/run-it-on-a-real-case,
+      :authority :documented-interpretation,
+      :produces #{["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-wm-08-external-f2" :independent-expectations-written]
+           ["M-wm-08-external-f2"
+            :external-expectation-validator-exists]},
+         :absent #{}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+       :authority :documented-interpretation},
+      :target "M-wm-08-external-f2"}
+     0.17487770452710943},
+    :tie-break-rule :action-name-ascending,
+    :tie-broken? false},
+   :horizon-steps 2},
+  :replica-ranked 4,
+  :replica-decision
+  {:action
+   {:kind :cascade-candidate,
+    :id :C1,
+    :target "M-wm-aif-policy-grain-compliance",
+    :precedence
+    [{:id :wm-connected-learning/observation-to-next-choice,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-wm-aif-policy-grain-compliance"
+         :standing-cascade-g-test-passes]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-wm-aif-policy-grain-compliance"
+            :judge-loads-declared-cascade-sources]},
+         :absent #{}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-wm-aif-policy-grain-compliance"
+          :standing-cascade-g-test-passes]},
+       :authority :documented-interpretation},
+      :target "M-wm-aif-policy-grain-compliance"}]}}},
+ :live-c
+ {:n-want 297,
+  :n-gaps 229,
+  :deduped 121,
+  :signature
+  "54b7529e21743aaa2ea6b3964ed6913828840137e2c3514c7a6edf79569e7726",
+  :stale-check
+  {:stale? false,
+   :signature-derived
+   "54b7529e21743aaa2ea6b3964ed6913828840137e2c3514c7a6edf79569e7726",
+   :signature-now
+   "54b7529e21743aaa2ea6b3964ed6913828840137e2c3514c7a6edf79569e7726"}},
+ :after
+ {:reachable-tokens 6,
+  :live-tokens-in-domain 0,
+  :spec
+  {:kind :no-reachable-want,
+   :reachable 6,
+   :live-want 297,
+   :limitation
+   "no live-C want token lies in this comparison's outcome domain; scoring would be pure information gain — the dark room — so it refuses"},
+  :decision
+  {:unchanged :live-c-refused-to-speak,
+   :refusal
+   {:kind :no-reachable-want,
+    :reachable 6,
+    :live-want 297,
+    :limitation
+    "no live-C want token lies in this comparison's outcome domain; scoring would be pure information gain — the dark room — so it refuses"}}}}
