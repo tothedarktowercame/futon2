@@ -35,5 +35,6 @@
   (is (rejected? (assoc-in baseline [:result :exit] 1)))
   (is (rejected? (assoc-in baseline [:result :axioms] nil))))
 
-(let [{:keys [fail error]} (run-tests)]
-  (System/exit (if (zero? (+ fail error)) 0 1)))
+(when (= *file* (System/getProperty "babashka.file"))
+  (let [{:keys [fail error]} (run-tests)]
+    (System/exit (if (zero? (+ fail error)) 0 1))))
