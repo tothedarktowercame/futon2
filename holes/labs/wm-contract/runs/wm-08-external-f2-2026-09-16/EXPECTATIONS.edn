@@ -1,0 +1,137 @@
+;; F2 expectations for the frozen occurrence wm-08-external-f2-2026-09-16.
+;; Produced BLIND: written only from FROZEN-CONTEXT.edn, the target mission
+;; M-zaif-harness-v1.md, and the pattern sources themselves at their pinned
+;; digests. The interpreter record (F13-model-manifest-2026-09-15/redo/
+;; interpreted-pattern-set.edn / .json) and the find_expectations validator
+;; and its tests were NOT opened.
+{:schema :wm/find-expectations-v1
+ :author {:id "zai-45" :role :external-expectation-producer}
+ :occurrence
+ {:record
+  {:path "holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/redo/interpreted-pattern-set.edn"
+   :sha256 "b2126ceaea3e927d9e3d26b5ad14bd4899ac65d20283e401e7b65e3bfcc92d23"}
+  :target
+  {:id "M-zaif-harness-v1"
+   :source
+   {:path "holes/missions/M-zaif-harness-v1.md"
+    :sha256 "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"}}
+  :repository-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+  :pinned-at "2026-09-15T13:02:32Z"
+  :pinned-commit "cc231bf6f479c0dd87629edeca87b7c7dd973909"
+  :source-digests
+  {:agent/provisional-claims-ledger "45e15a3b93d6df27e429ef450b48d4890a26a40fd26611c778d6fb88dfd4e807"
+   :agent/evidence-over-assertion "f73a72b6d4d885810f7f8effbed190165d9a3ca06b45f70ce9959d76916eee36"
+   :coordination/session-durability-check "94ec03f3fe051f99e9d4dac39df9f3ac08140903ef17cf56372466000b294e88"
+   :coordination/cross-validation-protocol "dfddc39743a68f62ee1c7d1f1d0295771542ce5994e0b3b01a10d3040e932511"
+   :war-machine/operational-not-decorative "f395d5b7fa939c379bd9eb83f666a1cd60c79c92606b5afeed33621f08ed437e"
+   :sidecar/append-only-semantic-audit "20b4c6ea725c9636f768742d372d0862eb3a872bb21b42ba14724c96be892f4e"
+   :stack-coherence/maturity-evidence-audit "1116322c08771211ef85f4186475b620938895935a91f32143f9d7a1788ddcfd"
+   :stack-coherence/ready-blocked-triage "676da31a6a133cacba222e9ea46715d5e32dbb5b6d3a93c13c36493a1950471f"
+   :social/verify-before-compose "b702e1c5a199eb4c910c018fdc42857ef3d00a98c80881b05cc7f12c6320a891"
+   :social/tension-before-code "ebc2e617adab40854f8ba344024d4e2012174d791da26766a868877a1f0dcb65"
+   "/home/joe/code/futon3a/holes/labs/M-memes-arrows/cascade_construct.py" "bc3e36d1dfd9c4877eda15ddd9d3f7a0ab62fa51026af43ee29c8eb48cdd8a62"
+   "/home/joe/code/futon6/scripts/cas_select.py" "47c27ad3ba65a37fcab7218cf849dc00c00a5ebafa3a11c7d4a7b18218b4b9fb"
+   "/home/joe/code/futon3/resources/sigils/patterns-index.tsv" "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"}
+  :repository-index
+  {:note "repository-sha256 above is the digest of the pre-genesis pattern index at retrieval time (2026-09-15). It is NOT the digest of the live futon3 index today, which has drifted since."
+   :frozen-copy "holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/redo/retrieval-index.tsv"
+   :frozen-copy-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+   :live-sha256-at-capture "36a5ee5de58827bd9dd6f4ae469da4f6986193ee360d4cf9dbc0282fb9c072db"}}
+ :expected
+ {:agent/provisional-claims-ledger
+  {:clause-kind :if-clause
+   :acknowledged-clause {:text "The agent needs to continue despite missing confirmation."
+                         :lines [15 15]}
+   :route :structured-antecedent
+   :as-of {:target-sha256 "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+           :repository-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+           :pinned-at "2026-09-15T13:02:32Z"}
+   :produced-from "FROZEN-CONTEXT.edn"
+   :reasoning "The harness work continues while the certificate's confirmation is missing: the independent witness blocked it and the post-fix rerun is pending, which is exactly acting ahead of confirmation. That pending state is a provisional claim that must be tracked, timeboxed, and resolved rather than treated as fact."}
+
+  :agent/evidence-over-assertion
+  {:clause-kind :if-clause
+   :acknowledged-clause {:text "The agent's outputs need to be verifiable by other agents, humans, or future selves."
+                         :lines [15 15]}
+   :route :structured-antecedent
+   :as-of {:target-sha256 "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+           :repository-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+           :pinned-at "2026-09-15T13:02:32Z"}
+   :produced-from "FROZEN-CONTEXT.edn"
+   :reasoning "The stated want is a reporting gate whose claims are re-derivable from typed records — every substantive report claim must point to evidence rather than rest on assertion. The pattern's antecedent (outputs verifiable by others) is the tension's own phrasing of the goal."}
+
+  :coordination/session-durability-check
+  {:clause-kind :if-clause
+   :acknowledged-clause {:text "you want an audit trail that can be replayed after the session ends"
+                         :lines [15 15]}
+   :route :structured-antecedent
+   :as-of {:target-sha256 "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+           :repository-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+           :pinned-at "2026-09-15T13:02:32Z"}
+   :produced-from "FROZEN-CONTEXT.edn"
+   :reasoning "The mission's have-side is replay certificates and its want is to retain exact evidence and require independent replay — a proof-path only real if reconstructible after the session. Success must be gated on durable persistence of the evidence, not acknowledged before it."}
+
+  :coordination/cross-validation-protocol
+  {:clause-kind :if-clause
+   :acknowledged-clause {:text "you want to reduce confabulation and improve trust in PUR outcomes"
+                         :lines [15 15]}
+   :route :structured-antecedent
+   :as-of {:target-sha256 "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+           :repository-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+           :pinned-at "2026-09-15T13:02:32Z"}
+   :produced-from "FROZEN-CONTEXT.edn"
+   :reasoning "The tension's core want is an independently verified certificate — validation replayable by someone other than the executor, which is precisely what already happened (the independent witness blocked it). The pattern's antecedent names PUR outcomes as the trust target; certificate promotion is the same self-serving-validation risk."}
+
+  :war-machine/operational-not-decorative
+  {:clause-kind :if-clause
+   :acknowledged-clause {:text "The system is relying on a document, diagram, or status surface to steer or validate work."
+                         :lines [10 10]}
+   :route :structured-antecedent
+   :as-of {:target-sha256 "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+           :repository-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+           :pinned-at "2026-09-15T13:02:32Z"}
+   :produced-from "FROZEN-CONTEXT.edn"
+   :reasoning "The however-clause of the tension is that a built component is not evidence its behaviour is ready — a status surface trusted without a failing test would be decorative. The mission itself rules that a mapping row without a test is decoration; the reporting gate must change behaviour when it fails."}
+
+  :stack-coherence/maturity-evidence-audit
+  {:clause-kind :if-clause
+   :acknowledged-clause {:text "devmap prototypes carry :maturity tags indicating their readiness level"
+                         :lines [15 15]}
+   :route :structured-antecedent
+   :as-of {:target-sha256 "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+           :repository-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+           :pinned-at "2026-09-15T13:02:32Z"}
+   :produced-from "FROZEN-CONTEXT.edn"
+   :reasoning "Per-component readiness evidence is exactly a maturity claim audited against evidence: components carry implied readiness levels (built, tested, witnessed) and the tension says the claim must be verified from logged evidence, with mismatches flagged, before promotion."}
+
+  :stack-coherence/ready-blocked-triage
+  {:clause-kind :if-clause
+   :acknowledged-clause {:text "every devmap clause should be either ready, blocked, drifting, or done"
+                         :lines [16 16]}
+   :route :structured-antecedent
+   :as-of {:target-sha256 "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+           :repository-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+           :pinned-at "2026-09-15T13:02:32Z"}
+   :produced-from "FROZEN-CONTEXT.edn"
+   :reasoning "The tension's live state — certificate blocked by the witness, rerun pending after fixes — is a blocked clause whose status must be explicit and derived from evidence and blockers rather than implicit, which is this pattern's whole mechanism."}
+
+  :social/verify-before-compose
+  {:clause-kind :if-clause
+   :acknowledged-clause {:text "Components are designed as coherent architectural units — a registry, a proof-tree forum, a bell/whistle protocol — and written to match a design specification."
+                         :lines [14 14]}
+   :route :structured-antecedent
+   :as-of {:target-sha256 "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"
+           :repository-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+           :pinned-at "2026-09-15T13:02:32Z"}
+   :produced-from "FROZEN-CONTEXT.edn"
+   :reasoning "The tension's prescription — test each component, retain exact evidence — before promoting the composed certificate is verify-each-unit-before-composing verbatim; the mission's own ARGUE cross-reference is per-tool tests before integration. The harness components are coherent units written to SPEC-zaif-harness-v1's table, matching the antecedent."}}}
+;; Rejected (no row written):
+;; :sidecar/append-only-semantic-audit — its antecedent is about a store where
+;;   proposal/fact updates overwrite prior states; the tension concerns testing
+;;   harness components and certificate promotion, and names no overwrite
+;;   hazard, so the IF clause does not fire on this task context.
+;; :social/tension-before-code — its antecedent is building feature-first with
+;;   correctness properties assumed implicitly; this mission already carries
+;;   its invariants up front (every mapping row has a unit test; anti-glibness
+;;   ruled at authorship), and the tension is readiness evidence for built
+;;   components, not retroactive invariant discovery.
