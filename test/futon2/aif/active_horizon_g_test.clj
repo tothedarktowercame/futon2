@@ -160,3 +160,69 @@
     (is (= :missing (:status r)))
     (is (= :cap-required (:kind r))
         "the cap is an input with no default")))
+
+;;; --------------------------- (d)(e)(f) ONE acting pattern per step (P10)
+
+(def facts-a-b [:a :b])
+
+(def two-fact-universe #{:a :b})
+
+(def two-fact-rates {:a {:false-neg 0 :false-pos 0}
+                     :b {:false-neg 0 :false-pos 0}})
+
+(defn- two-fact-input
+  [precedence]
+  {:q0 (m/observed-belief #{})
+   :precedence-fn (fn [_] precedence)
+   :horizon 1
+   :c-fn-pointwise indifferent-c
+   :universe two-fact-universe
+   :rates two-fact-rates
+   :unknown-prior {:a 1/2 :b 1/2}
+   :masked #{:a :b}
+   :cap 2})
+
+(defn- check [fact]
+  {:id (keyword "check" (name fact)) :kind :check :fact fact
+   :guard {:unknown #{fact}} :opens fact :produces #{} :theta 1})
+
+(deftest d-one-acting-check-per-step
+  (let [g-both-listed (ah/active-horizon-g (two-fact-input [(check :a) (check :b)]))
+        g-a-only (ah/active-horizon-g (two-fact-input [(check :a)]))]
+    (is (within 1e-12 g-both-listed g-a-only)
+        "[check-a check-b]: only the first-enabled check acts, so G equals the single [check-a] case")
+    (is (not (within 1e-9 g-both-listed (Math/log 2)))
+        "…and NOT the case where both channels open (uniform Q over 4 observations against c = 1/2 would score ln 2)")))
+
+(def fix-pattern
+  "An ordinary pattern whose guard is enabled in the fixture state."
+  {:id :fix :produces #{:done} :theta 1
+   :guard {:status :interpreted
+           :clauses [{:status :interpreted
+                      :present #{}
+                      :absent #{:done}}]}})
+
+(defn- fix-universe-input
+  [precedence]
+  {:q0 (m/observed-belief #{})
+   :precedence-fn (fn [_] precedence)
+   :horizon 1
+   :c-fn-pointwise indifferent-c
+   ;; :done is a state token outside the observation universe
+   :universe #{:a}
+   :rates {:a {:false-neg 0 :false-pos 0}}
+   :unknown-prior {:a 1/2}
+   :masked #{:a}
+   :cap 1})
+
+(deftest e-ordinary-pattern-acts-check-does-not-open
+  (let [g-fix-check (ah/active-horizon-g (fix-universe-input [fix-pattern (check :a)]))
+        g-fix-alone (ah/active-horizon-g (fix-universe-input [fix-pattern]))]
+    (is (within 1e-12 g-fix-check g-fix-alone)
+        "[fix check-a] with fix's guard enabled: fix acts, the channel is the default, G equals [fix] alone with :a still masked")))
+
+(deftest f-check-first-acts-check-observes
+  (let [g-check-fix (ah/active-horizon-g (fix-universe-input [(check :a) fix-pattern]))
+        g-check-alone (ah/active-horizon-g (fix-universe-input [(check :a)]))]
+    (is (within 1e-12 g-check-fix g-check-alone)
+        "[check-a fix] at T = 1: the check acts (transition doing-nothing, a's channel opens), G equals the single check")))

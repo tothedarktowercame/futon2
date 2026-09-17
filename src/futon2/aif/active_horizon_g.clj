@@ -29,16 +29,22 @@
   typed refusal :missing-unknown-prior, never 1/2 by default.
 
   Channels.  The default channel observes the established tokens of the
-  universe EXCEPT the masked facts.  A check pattern
-  ({:kind :check :opens f …}, as produced by futon2.aif.check-candidates)
-  in the step's precedence acts as the observation action: it opens f's
-  channel for that step.  A check has no transition effect (its B is doing
-  nothing's, Lean rolloutState_eq_of_B), so transitions are the manifest's
-  cascade-kernel over the step's precedence with checks removed.  A check's
-  θ (:theta, required by check-candidates) is its probability of returning
-  an answer: the step's observation is the independent mixture over which
-  acting checks answer, each channel's row built by token-likelihood over
-  the default tokens plus that answer's opened facts.
+  universe EXCEPT the masked facts.  Lean ActiveModel observes step τ through
+  the channel of ONE acting pattern, σ(τ−1): the first pattern enabled by
+  the P10 first-enabled rule over the step's precedence, checks and ordinary
+  patterns alike (a check is enabled while its fact is masked).  If the
+  acting pattern is a check ({:kind :check :opens f …}, as produced by
+  futon2.aif.check-candidates), the step's transition is doing-nothing's
+  (rolloutState_eq_of_B) and f's channel opens for that step; if an ordinary
+  pattern acts, its transition is the manifest's cascade-kernel (rollout
+  with checks removed) and the channel is the default.  A check's θ
+  (:theta, required by check-candidates) is its probability of returning an
+  answer: the step's observation is the independent mixture over whether the
+  acting check answers, each channel's row built by token-likelihood over
+  the default tokens plus the answered fact.  The masked set does NOT shrink
+  after a check inside the rollout — that would be belief-conditioned
+  branching, which Joe's H7a approval explicitly left open — so a check
+  that stays first-enabled acts again at later steps.
 
   Support grows as 2^k in the number of unknown facts, so :cap (an input,
   no default) bounds them; exceeding it is the typed refusal
@@ -49,6 +55,35 @@
 (defn- refusal? [x] (and (map? x) (contains? x :status)))
 
 (defn- check-pattern? [p] (= :check (:kind p)))
+
+(defn- pattern-enabled?
+  "P10 first-enabled rule at the step's belief: a CHECK is enabled while its
+  fact is masked (its guard {:unknown #{f}} tests unknown-ness, a property
+  of the belief — the manifest's guard-holds? reads only the clauses shape,
+  so this is the smallest aligned form for check guards); an ordinary
+  pattern is enabled when the manifest's guard-holds? holds at some
+  positive-mass state of the step's prior."
+  [p masked q-prev]
+  (if (check-pattern? p)
+    (contains? masked (:opens p))
+    (some (fn [[s mass]] (and (pos? mass) (true? (m/guard-holds? p s)))) (seq q-prev))))
+
+(defn- step-acting-check
+  "THE acting check of the step, Lean ActiveModel's σ(τ−1): ONE acting
+  pattern per step, the first enabled pattern of the step's precedence under
+  the P10 rule (pattern-enabled?) — checks and ordinary patterns alike.  If
+  the acting pattern is a check, the step's transition is doing-nothing's
+  (rolloutState_eq_of_B) and that fact's channel opens; if it is an ordinary
+  pattern (or nothing) acts, the channel is the default.  Returns the acting
+  check {:fact :theta} or nil.  The masked set does NOT shrink after a
+  check inside the rollout — that would be belief-conditioned branching,
+  which Joe's H7a approval explicitly left open — so a check that stays
+  first-enabled acts again at later steps."
+  [precedence masked q-prev]
+  (when-let [p (first (filter #(pattern-enabled? % masked q-prev) precedence))]
+    (when (check-pattern? p)
+      (let [p' (m/with-pattern-theta p)]
+        {:fact (:opens p') :theta (:theta p')}))))
 
 (defn- exact-prob? [x] (and (or (ratio? x) (integer? x)) (<= 0 x 1)))
 
@@ -86,25 +121,13 @@
   (let [r (select-keys rates observed)]
     (m/observation-distribution r (set/intersection (set state) observed))))
 
-(defn- step-acting-checks
-  "The acting checks of one step's precedence: every :check pattern whose
-  :opens fact is still masked.  (A check's guard tests unknown-ness, a
-  property of the belief, not of the state; with-pattern-theta supplies its
-  declared answer probability, defaulting to the documented 1 only when the
-  pattern already carries :theta — check-candidates requires :theta, so the
-  default never fires for its output.)"
-  [precedence masked]
-  (for [p precedence
-        :when (and (check-pattern? p)
-                   (contains? masked (:opens p)))]
-    (let [p' (m/with-pattern-theta p)]
-      {:fact (:opens p') :theta (:theta p')})))
-
 (defn- step-row
   "One state's observation row for one step: the independent mixture over
   which acting checks answer, over the default channel plus the answered
   checks' opened facts.  Lean activeRowEntropy/activePredictedOutcome are
-  built on exactly these per-(state, channel) rows."
+  built on exactly these per-(state, channel) rows.  acting-checks is the
+  empty vector when no check acts (the default channel only) or the one
+  acting check's fact (step-acting-check: ONE acting pattern per step)."
   [rates default-obs acting-checks state]
   (let [facts (mapv :fact acting-checks)
         thetas (mapv :theta acting-checks)
@@ -202,10 +225,18 @@
                   (loop [tau 1 total 0.0 q q0']
                   (if (> tau horizon)
                     (double total)
-                    (let [q' (m/rollout transition-fn q 1)]
+                    (let [acting-check (step-acting-check (precedence-fn (dec tau)) masked q)
+                          ;; ONE acting pattern per step: if the acting
+                          ;; pattern is a check the transition is
+                          ;; doing-nothing's (rolloutState_eq_of_B); if an
+                          ;; ordinary pattern acts, the manifest rollout with
+                          ;; checks removed applies its transition
+                          q' (if acting-check
+                               q
+                               (m/rollout transition-fn q 1))]
                       (if (refusal? q')
                         q'
-                        (let [acting (step-acting-checks (precedence-fn (dec tau)) masked)
+                        (let [acting (if acting-check [acting-check] [])
                               rows (into {}
                                          (map (fn [[state _mass]]
                                                 [state (step-row rates default-obs acting state)]))
