@@ -206,3 +206,63 @@
                 (catch clojure.lang.ExceptionInfo e
                   (:kind (ex-data e)))))
         "different T across problems refuses, typed, with the values")))
+
+(deftest h5a-targets-stay-apart
+  ;; (f) Two targets using the SAME pattern id and the SAME token names.
+  ;; A's fact is true, B's is false: B's guard must not be satisfied by
+  ;; A's fact, the marginal is per (target, pattern) — never summed across
+  ;; targets — and the decision's action carries its :target.
+  (let [pattern {:p {:guard {:needs #{:open} :forbids #{:done}}
+                     :produces #{:done}}}
+        interp {:patterns pattern :receipts {:p {:receipt "p" :source "f"}}}
+        assembled (cp/assemble
+                   {:targets [:A :B]
+                    :sources {:universes {:A {:open true :done false}
+                                          :B {:open false :done false}}
+                              :interpretations {:A interp :B interp}
+                              :wants {:A [:done] :B [:done]}
+                              :candidates {:A [{:precedence [:p]
+                                                :construction-receipt receipt}]
+                                           :B [{:precedence [:p]
+                                                :construction-receipt receipt}]}
+                              :horizon-steps 3
+                              :beta-by-context {:x {:beta 1}}
+                              :context-of (fn [_] :x)}})
+        r (wm/cascade-decision assembled {})
+        decision (:decision r)
+        posterior (get-in decision [:selection-law :posterior])
+        by (fn [t id]
+             (some (fn [[c p]] (when (and (= t (:target c)) (= id (:id c))) [c p]))
+                   posterior))
+        [_ a-p] (by :A :C1)
+        [_ b-p] (by :B :C1)]
+    (is (some? a-p))
+    (is (some? b-p))
+    ;; B's :p candidate never establishes [:B :done]: its guard is blocked
+    ;; (B's own :open is false and A's :open true does NOT reach it), so it
+    ;; scores exactly like B's empty cascade — equal G ⇒ equal posterior
+    ;; mass at equal habit.
+    (is (< (Math/abs (- (double b-p) (double (second (by :B :C0))))) 1e-9)
+        "B's guard is not satisfied by A's fact: B's same-id candidate scores like B's empty cascade (identity stall)")
+    (is (> (double a-p) (double b-p))
+        "A's candidate, whose OWN fact satisfies the guard, carries more posterior mass (lower G)")
+    (is (= :A (get-in decision [:action :target]))
+        "the decision's action carries its :target")
+    (is (= :p (-> decision :action :precedence first :id)))
+    (is (= :A (-> decision :action :precedence first :target))
+        "the first acting pattern map carries its :target")
+    (let [chosen-pattern (get-in decision [:action :precedence 0])
+          marginal (transduce (comp (filter (fn [[c _]]
+                                              (= chosen-pattern
+                                                 (first (:precedence c)))))
+                                    (map val))
+                              + 0.0 posterior)]
+      (is (< (Math/abs (- (double (:chosen-action-mass decision))
+                          (double marginal)))
+             1e-9)
+          "the chosen mass equals the posterior mass of THIS target's candidates starting with that pattern (A's :p alone), not the sum over both targets")
+      (is (< (Math/abs (- (double marginal) (double a-p))) 1e-9)
+          "the marginal is A's :p candidate's mass exactly — B's same-id pattern contributed nothing"))
+    (is (= :target-token-pair
+           (get-in decision [:token-qualification :scheme]))
+        "the token qualification scheme is recorded on the decision")))
