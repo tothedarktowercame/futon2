@@ -94,9 +94,24 @@
     (check-occurrence-binding! occurrence artifact))
   (let [designated (:designated artifact)
         applicable (and designated repository
-                        (set/intersection designated (:patterns repository)))]
-    {:designated designated
-     :f4 (if (seq applicable) :discriminating :vacuous)}))
+                        (set/intersection designated (:patterns repository)))
+        ;; :f4 keeps exactly the reader's two values. But three different
+        ;; situations reach :vacuous, and a reader of :f4 alone cannot tell
+        ;; them apart: nobody was asked; an authority declared that nothing
+        ;; here is excluded, with a stated basis; or an authority named
+        ;; patterns that are not in this repository at all -- which is more
+        ;; likely a designation aimed at another snapshot than a statement
+        ;; about this one. The last is the one worth seeing.
+        why (cond
+              (nil? artifact) :no-designation-supplied
+              (empty? designated) :designation-declared-empty
+              (empty? applicable) :designated-outside-repository)]
+    (cond-> {:designated designated
+             :f4 (if (seq applicable) :discriminating :vacuous)}
+      why (assoc :vacuous-because why)
+      (= :designated-outside-repository why)
+      (assoc :designated-not-in-repository
+             (vec (sort (set/difference designated (:patterns repository))))))))
 
 (defn designation-for
   "The designated set (or nil) for find-receipt/validate-result!'s third

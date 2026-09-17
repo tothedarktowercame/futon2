@@ -109,7 +109,9 @@
         ctx (find/context record captured base/root)]
     ;; No artifact is the correct report, not a deficiency, and it is
     ;; recorded as such -- not silently skipped.
-    (is (= {:designated nil :f4 :vacuous} (fd/resolve-designation occurrence nil repository)))
+    (is (= {:designated nil :f4 :vacuous
+            :vacuous-because :no-designation-supplied}
+           (fd/resolve-designation occurrence nil repository)))
     (is (nil? (fd/designation-for occurrence nil repository)))
     ;; And it flows straight through the real validator.
     (is (= result (find/validate-result! ctx nil result)))
@@ -135,3 +137,26 @@
                          nil (catch clojure.lang.ExceptionInfo e (ex-data e))))))
     ;; A designation entirely outside the repository is honest vacuity.
     (is (= :vacuous (:f4 (find/find record captured base/root #{:outside/pattern}))))))
+
+;; claude-4's review, 2026-09-17: three situations reach :f4 :vacuous and a
+;; reader of :f4 alone cannot tell them apart. The third — an authority naming
+;; patterns that are not in this repository — is more likely a designation
+;; aimed at another snapshot than a statement about this one, and it was
+;; silently indistinguishable from nobody having been asked.
+(deftest vacuity-says-why-it-is-vacuous
+  (let [occ {:target "t" :target-source {:path "p" :sha256 "s"}
+             :repository-sha256 "r" :pinned-at "2026-01-01T00:00:00Z"}
+        art (fn [des] {:schema :wm/find-designation-v1
+                       :author {:id "joe" :role :designation-author}
+                       :occurrence occ :designated des :basis "stated reason"})
+        repo {:patterns #{:a/b :c/d}}]
+    (is (= :no-designation-supplied
+           (:vacuous-because (fd/resolve-designation occ nil repo))))
+    (is (= :designation-declared-empty
+           (:vacuous-because (fd/resolve-designation occ (art #{}) repo))))
+    (let [r (fd/resolve-designation occ (art #{:not/here}) repo)]
+      (is (= :vacuous (:f4 r)))
+      (is (= :designated-outside-repository (:vacuous-because r)))
+      (is (= [:not/here] (:designated-not-in-repository r))))
+    ;; a designation that bites carries no vacuity reason at all
+    (is (nil? (:vacuous-because (fd/resolve-designation occ (art #{:a/b}) repo))))))
