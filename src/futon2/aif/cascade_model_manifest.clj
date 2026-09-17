@@ -603,16 +603,41 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                       :else (fn [_tau o] (lpf o)))]
         (if (refusal? point-c)
           point-c
-          (loop [tau 1 total 0.0]
-            (if (> tau horizon)
-              (double total)
-              (let [q (rollout precedence-fn q0 tau)]
-                (if (refusal? q)
-                  q
-                  (let [risk (outcome-risk-pointwise q (fn [o] (point-c tau o)))]
-                    (if (= risk :infinite)
-                      :infinite
-                      (recur (inc tau) (+ total risk)))))))))))))
+          ;; WM-06 domain meeting: when C is the spec seed, every positive-mass
+          ;; Q outcome must be a subset of C's universe — the passed
+          ;; :universe, or the spec's own want ∪ evidence ∪ zeroed tokens when
+          ;; none was passed. A state carrying tokens outside it would be
+          ;; scored by C as if those tokens were absent — two distinct Q
+          ;; outcomes collapsing to one C value — so it is the typed refusal,
+          ;; never a silent projection. (:c-fn-pointwise declares no domain
+          ;; here; skipped.)
+          (let [c-universe (when (nil? c-fn-pointwise)
+                             (if (set? universe) universe
+                                 (set/union (set (:want spec)) (set (:evidence spec))
+                                            (into #{} (mapcat identity) (:zeroed spec)))))
+                q-outside (fn [q]
+                            (when c-universe
+                              (some (fn [[s p]]
+                                    (when (and (pos? p)
+                                               (not (set/subset? (set s) c-universe)))
+                                      s))
+                                  (seq q))))]
+            (if-let [s (q-outside q0)]
+              {:status :missing :kind :q-support-outside-c-universe
+               :state s :universe (count c-universe)}
+              (loop [tau 1 total 0.0]
+                (if (> tau horizon)
+                  (double total)
+                  (let [q (rollout precedence-fn q0 tau)]
+                    (if (refusal? q)
+                      q
+                      (if-let [s (q-outside q)]
+                        {:status :missing :kind :q-support-outside-c-universe
+                         :state s :step tau :universe (count c-universe)}
+                        (let [risk (outcome-risk-pointwise q (fn [o] (point-c tau o)))]
+                          (if (= risk :infinite)
+                            :infinite
+                            (recur (inc tau) (+ total risk))))))))))))))))
 
 ;; ===== WM-02 design P12: the stored belief as the exact categorical posterior =====
 ;; Lean DarkTower.WarMachine.ExactBeliefTrajectory (mathlib4 ba0eda16df).

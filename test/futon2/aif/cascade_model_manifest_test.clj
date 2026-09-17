@@ -622,8 +622,12 @@
             :produces #{"t2" "e0"}}
         prec (fn [k] (cond (= k 0) [p1] (= k 1) [p2] :else []))
         t0 (System/nanoTime)
+        ;; WM-06: the established `have` tokens are part of Q's support, so C's
+        ;; universe must contain them — the live tick (efe/rank-cascade-actions,
+        ;; shadow-cascade-g) always unions q0's support into the universe.
         g (m/horizon-g-sparse {:rates rates :q0 q0 :precedence-fn prec
-                               :horizon 3 :spec spec})
+                               :horizon 3 :spec spec
+                               :universe (cset/union want evidence have)})
         elapsed (- (System/nanoTime) t0)]
     (is (and (double? g) (Double/isFinite g) (pos? g)))
     (is (< elapsed 5e9) (str "elapsed ns: " elapsed))))
@@ -687,7 +691,12 @@
         prec (constantly [p1])
         base {:rates rates :q0 {#{} 1} :precedence-fn prec :horizon 2 :spec spec}
         g0 (m/horizon-g-sparse base)
-        g3 (m/horizon-g-sparse (assoc base :universe #{"x0" "x1" "x2"}))]
+        ;; the larger universe must still CONTAIN the scored tokens (WM-06:
+        ;; Q and C meet on one domain); the offset comes from extra
+        ;; zero-weight tokens, not from dropping scored tokens out of C.
+        g3 (m/horizon-g-sparse
+            (assoc base :universe (cset/union (:want spec) (:evidence spec)
+                                               #{"x0" "x1" "x2"})))]
     (is (double? g0))
     (is (< (Math/abs (- (- g3 g0) (* 2 3 (Math/log 2)))) 1e-9))))
 
@@ -778,3 +787,50 @@
     ;; and the P(o) = 0 falsifier gives the typed refusal
     (is (= {:status :missing :kind :zero-predictive-probability}
            (select-keys (m/exact-update (fn [_ _] 0) {:t 1} :t) [:status :kind])))))
+
+;;; WM-06: Q and C meet on ONE outcome domain; zero-preference preserved.
+
+(deftest wm-06-q-support-outside-c-universe-refuses
+  ;; Positive Q mass on a state carrying tokens outside C's universe is the
+  ;; typed refusal :q-support-outside-c-universe — never a silent projection
+  ;; (C's u(o) sums only over the universe, so distinct outcomes outside it
+  ;; would collapse to one C value).
+  (let [spec (sparse-spec 2 1 #{})
+        rates (sparse-rates spec)
+        fire {:id :fire :guard {:status :interpreted :operator :and
+                                :clauses [{:status :interpreted :present #{} :absent #{}}]}
+              :transition {:status :interpreted :operator :union :produces #{"t0"}}
+              :produces #{"t0"} :theta 1}]
+    ;; the declared universe omits the produced want token: refused at step 1
+    (is (= {:status :missing :kind :q-support-outside-c-universe
+            :state #{"t0"} :step 1 :universe 1}
+           (m/horizon-g-sparse {:rates rates :q0 {#{} 1}
+                                :precedence-fn (constantly [fire])
+                                :horizon 2 :spec spec
+                                :universe #{"e0"}})))
+    ;; the derived universe (want ∪ evidence) omits q0's established token
+    (is (= :q-support-outside-c-universe
+           (:kind (m/horizon-g-sparse {:rates rates :q0 {#{"h0"} 1}
+                                       :precedence-fn (constantly [])
+                                       :horizon 1 :spec spec}))))
+    ;; :c-fn-pointwise declares its own domain: no universe check applies
+    (is (double? (m/horizon-g-sparse {:rates rates :q0 {#{"h0"} 1}
+                                      :precedence-fn (constantly [])
+                                      :horizon 1
+                                      :c-fn-pointwise (fn [_tau] (fn [_o] 1/2))})))))
+
+(deftest wm-06-zero-preference-behavior-preserved
+  ;; One spec, one zeroed outcome (#{t0}), two candidates: the one reaching
+  ;; the zeroed outcome with positive Q mass scores :infinite (never a
+  ;; smoothed finite value); the one that stays away scores a finite double.
+  (let [spec (sparse-spec 2 1 #{#{:t0}})
+        rates (sparse-rates spec)
+        fire {:id :fire :guard {:status :interpreted :operator :and
+                                :clauses [{:status :interpreted :present #{} :absent #{}}]}
+              :transition {:status :interpreted :operator :union :produces #{:t0}}
+              :produces #{:t0} :theta 1}
+        base {:rates rates :q0 {#{} 1} :horizon 2 :spec spec}]
+    (is (= :infinite
+           (m/horizon-g-sparse (assoc base :precedence-fn (constantly [fire])))))
+    (let [g (m/horizon-g-sparse (assoc base :precedence-fn (constantly [])))]
+      (is (and (double? g) (Double/isFinite g) (pos? g))))))

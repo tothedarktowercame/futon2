@@ -205,6 +205,12 @@
       {:status :missing :kind :unknown-facts-over-cap
        :masked (count masked) :cap cap
        :limitation "the spread support grows as 2^k in the number of unknown facts"}
+      (not (set? universe))
+      {:status :missing :kind :invalid-universe :universe universe}
+      (not (set/subset? masked universe))
+      {:status :missing :kind :masked-outside-universe
+       :masked (vec (sort masked))
+       :limitation "masked facts spread Q over states and open channels inside :universe; C and Q meet only there"}
       :else
       (let [lpf (when (nil? c-fn-pointwise)
                       (m/log-preference-fn spec universe))

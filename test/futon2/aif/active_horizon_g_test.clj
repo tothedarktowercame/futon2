@@ -226,3 +226,18 @@
         g-check-alone (ah/active-horizon-g (fix-universe-input [(check :a)]))]
     (is (within 1e-12 g-check-fix g-check-alone)
         "[check-a fix] at T = 1: the check acts (transition doing-nothing, a's channel opens), G equals the single check")))
+
+;;; WM-06: Q and C meet on ONE outcome domain inside :universe. In
+;;; active-horizon-g the scored Q is the channel-predicted OBSERVATION
+;;; distribution, built by construction over default-obs ∪ answered ⊆
+;;; universe, so the domain meeting is structural; the refusals below guard
+;;; the two ways a caller could break it.
+
+(deftest wm-06-domain-refusals
+  ;; a masked fact outside :universe would open a channel onto observations
+  ;; outside C's declared domain: typed refusal.
+  (is (= :masked-outside-universe
+         (:kind (ah/active-horizon-g (assoc (fixture-input []) :masked #{:g})))))
+  ;; :universe is required — nil is not an implicit empty domain.
+  (is (= :invalid-universe
+         (:kind (ah/active-horizon-g (assoc (fixture-input []) :universe nil))))))
