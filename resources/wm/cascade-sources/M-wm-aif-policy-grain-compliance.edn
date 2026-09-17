@@ -1,0 +1,36 @@
+;; First declared production target (claude-4, 2026-09-17, no handoff).
+;; Mission M-wm-aif-policy-grain-compliance: the machine's policy grain is the
+;; cascade. Facts are observed each tick through their locators; nothing here
+;; asserts a fact value. Interpretation and construction are hand-admitted by
+;; claude-4 and say so.
+{:schema :wm/cascade-source-v1
+ :target "M-wm-aif-policy-grain-compliance"
+ :context :WM
+ :beta {:value 1 :status :declared}
+ :facts [:judge-reaches-no-flat-selector
+         :judge-loads-declared-cascade-sources]
+ :want [:standing-cascade-g-test-passes]
+ :locators
+ {:judge-reaches-no-flat-selector
+  {:class :C2 :repo "futon2" :ns "futon2.report.war-machine-test"
+   :entry-id "test-registry-40b1ca450225af15eee6084bb8df6d876b8b984fb2e01246656e2f6568fad346"}
+  :judge-loads-declared-cascade-sources
+  {:class :C4 :repo "futon2" :sha "e2e1b477" :path "scripts/futon2/report/war_machine.clj"
+   :decl "declared-sources (when-not (:cascade-sources judge-opts)"}
+  :standing-cascade-g-test-passes
+  {:class :C2 :repo "futon2" :ns "futon2.vm.standing-enacted-policy-is-cascade-g-test"
+   :entry-id :to-register-when-it-passes}}
+ :patterns
+ {:wm-connected-learning/observation-to-next-choice
+  {:guard {:needs #{:judge-loads-declared-cascade-sources} :forbids #{}}
+   :produces #{:standing-cascade-g-test-passes}}}
+ :interpretation-receipts
+ {:wm-connected-learning/observation-to-next-choice
+  {:kind :hand-admitted :by "claude-4" :date "2026-09-17"
+   :source {:path "p4ng/wm-walkthroughs/collections/connected-learning/observation-to-next-choice.flexiarg"
+            :sha256 "b0407ef81dea874d78bb7697042342d4d8023592a058d66e01e6fa4813186053"}
+   :reading "Follow the finding into the next decision: production loads the declared sources and decides from them, so the standing test's enacted decision becomes a cascade decision."}}
+ :candidates
+ [{:precedence [:wm-connected-learning/observation-to-next-choice]
+   :construction-receipt {:kind :hand-admitted :by "claude-4" :date "2026-09-17"
+                          :moves [] :stopped-is-not-success true}}]}
