@@ -19,11 +19,11 @@
    :mechanical-checks    {:class :C3 :repo "futon2" :sha "b81e5996" :path "src/futon2/aif/observation_checks.clj"}
    :locator-requirement  {:class :C4 :repo "futon2" :sha "705adb39" :path "src/futon2/aif/cascade_problems.clj" :decl "(def checkable-classes"}
    :checkable-kernel-law {:class :C4 :repo "mathlib4" :sha "889429e6bf" :path "DarkTower/WarMachine/TokenObservation.lean" :decl "theorem tokenLikelihood_checkable"}
-   :observation-contract-entry {:class :C5 :repo "mathlib4" :sha "3726659d84" :bundle-path "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json" :entry "wm-token-observation"}
+   :observation-contract-entry {:class :C5 :repo "mathlib4" :sha "52d6516922" :bundle-path "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json" :entry "wm-token-observation"}
    :construction-receipt-locators {:class :C4 :repo "futon2" :sha "9f7eeb46" :path "src/futon2/aif/construction.clj" :decl ":unlocated-tokens"}
    :test-warrant-check   {:class :C4 :repo "futon2" :sha "75708b9e" :path "src/futon2/aif/observation_checks.clj" :decl "(defn check-test-warrant"}
    :raw-rate-tests-pass  {:class :C2 :repo "futon2" :entry-id "test-registry-0b4a2378bb224daa499a8012209eff3a35208871e529c7b5c1eb578364496978" :ns "futon2.aif.observation-rates-test"}
-   :contract-modules-build {:class :C1 :repo "mathlib4" :entry-id "test-registry-0a3802b77bfcbbd3db483605f6f532bdab60e53c9b27739d8e2c2b82860b4c40" :module "DarkTower.WarMachine.MachineContracts" :path "DarkTower/WarMachine/TokenObservation.lean" :decl "theorem tokenLikelihood_checkable"}
+   :contract-modules-build {:class :C1 :repo "mathlib4" :entry-id "test-registry-d97d4143f16ccf4248c5bfdd964c8ce2642ad0e3177885977d0424fcb145b936" :module "DarkTower.WarMachine.MachineContracts" :path "DarkTower/WarMachine/TokenObservation.lean" :decl "theorem tokenLikelihood_checkable"}
    :judgement-rate-admitted {:class :C4 :repo "futon2" :sha "75708b9e" :path "holes/labs/wm-contract/wm04-pilot/RESULT.edn" :decl ":rates"}})
 
 (let [contract (edn/read-string (slurp "resources/wm/observation-contract.edn"))

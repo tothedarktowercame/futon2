@@ -64,7 +64,7 @@
   {:class :C1,
    :repo "mathlib4",
    :entry-id
-   "test-registry-0a3802b77bfcbbd3db483605f6f532bdab60e53c9b27739d8e2c2b82860b4c40",
+   "test-registry-d97d4143f16ccf4248c5bfdd964c8ce2642ad0e3177885977d0424fcb145b936",
    :module "DarkTower.WarMachine.MachineContracts",
    :path "DarkTower/WarMachine/TokenObservation.lean",
    :decl "theorem tokenLikelihood_checkable"},
@@ -93,9 +93,9 @@
   :observation-contract-entry
   {:class :C5,
    :repo "mathlib4",
-   :sha "3726659d84",
+   :sha "52d6516922",
    :bundle-path
-   "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json",
    :entry "wm-token-observation"},
   :raw-rate-counts
   {:class :C4,
@@ -135,24 +135,27 @@
   :contract-modules-build
   {:observed true,
    :check :C1,
+   :cutoff {"mathlib4" "52d65169223ebb8a18cf26d19f2ef0f7e95b6ea9"},
    :evidence
    {:warrant? true,
     :path "DarkTower/WarMachine/TokenObservation.lean",
+    :file-sorries 0,
+    :git-head-at-run "2b255a3dc12993ccaee6d426069fc84378bdafa5",
     :command ["lake" "build" "DarkTower.WarMachine.MachineContracts"],
     :module "DarkTower.WarMachine.MachineContracts",
     :reason nil,
     :decl "theorem tokenLikelihood_checkable",
     :entry-id
-    "test-registry-0a3802b77bfcbbd3db483605f6f532bdab60e53c9b27739d8e2c2b82860b4c40",
-    :path-in-closure true,
+    "test-registry-d97d4143f16ccf4248c5bfdd964c8ce2642ad0e3177885977d0424fcb145b936",
     :decl-present true,
     :repo "mathlib4",
     :results
-    {"duration-ms" 2027,
+    {"duration-ms" 2156,
      "error-count" 0,
      "exit" 0,
      "jobs" 8523,
-     "sorry-count" 0}}},
+     "sorry-count" 9,
+     "sorry-files" {"DarkTower/WarMachine/Holes.lean" 9}}}},
   :locator-requirement
   {:observed true,
    :check :C4,
@@ -172,10 +175,9 @@
   :raw-rate-tests-pass
   {:observed true,
    :check :C2,
+   :cutoff {"futon2" "29529b9427e99a5b9223a6180ee23d34701f2547"},
    :evidence
-   {:entry-id
-    "test-registry-0b4a2378bb224daa499a8012209eff3a35208871e529c7b5c1eb578364496978",
-    :warrant? true,
+   {:warrant? true,
     :reason nil,
     :command
     ["clojure" "-M:test" "-n" "futon2.aif.observation-rates-test"],
@@ -186,8 +188,11 @@
      "exit" 0,
      "failures" 0,
      "tests" 5},
+    :git-head-at-run "a3661e3d143c5c26c9cc2e362e0ca74a0817d4d1",
     :repo "futon2",
-    :ns "futon2.aif.observation-rates-test"}},
+    :ns "futon2.aif.observation-rates-test",
+    :entry-id
+    "test-registry-0b4a2378bb224daa499a8012209eff3a35208871e529c7b5c1eb578364496978"}},
   :mechanical-checks
   {:observed true,
    :check :C3,
@@ -200,14 +205,14 @@
    :check :C5,
    :evidence
    {:repo "mathlib4",
-    :sha "3726659d84",
+    :sha "52d6516922",
     :bundle-path
-    "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+    "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json",
     :entry "wm-token-observation",
     :contract-found true,
     :clojure-loci
-    ["futon2/src/futon2/aif/cascade_model_manifest.clj:174"
-     "futon2/src/futon2/aif/cascade_model_manifest.clj:200"]}},
+    {"futon2/src/futon2/aif/cascade_model_manifest.clj:174" true,
+     "futon2/src/futon2/aif/cascade_model_manifest.clj:200" true}}},
   :raw-rate-counts
   {:observed true,
    :check :C4,
