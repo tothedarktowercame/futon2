@@ -1,0 +1,384 @@
+[{:subject-id "R14-1",
+  :evidence
+  [{:repo "futon2",
+    :sha "06ecba8cf7143e12c04831dded7450f07d892d99",
+    :path-or-ref "src/futon2/aif/policy.clj",
+    :what
+    "declared three-layer temperature law with named modes (:spread/:selection-gain-only/:variational, tau_eff = beta), typed refusals for nonpositive/nonfinite temperature; commitment record retains :tau-mode/:tau-source"}
+   {:repo "mathlib4",
+    :sha "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+    :path-or-ref "DarkTower/WarMachine/PolicyPrecision.lean",
+    :what
+    "declared variational law tau = beta, gamma = 1/tau (Friston 2017 eq 2.1) with spread/selection-gain modes explicitly excluded as this quantity"}],
+  :view-digest
+  "22c3473b0b3a5187bfdeb36eda99f448bfdc501fc95d2f50a82684aa32e023f7",
+  :reason
+  "The applicable posterior/temperature law is identified with input scale and mode in both the runtime (futon2 policy.clj) and the Lean model (PolicyPrecision.lean), each naming which mode is active and refusing the seed's simple-softmax-as-universal substitution.",
+  :finding :present,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "futon2 06ecba8 src/futon2/aif/policy.clj effective-temperature/commitment record; mathlib4 3b19f62 DarkTower/WarMachine/PolicyPrecision.lean"}
+ {:subject-id "R16-3",
+  :evidence
+  [{:repo "futon3c",
+    :sha "4e9c626635343420edfc819c9421e8c47bc969cd",
+    :path-or-ref
+    "holes/labs/wm-contract/runs/chip-board-cascade-verifier/run-2026-09-12.edn",
+    :what
+    "executed chip-board run querying a digest-pinned board (sha256 digests per verb) with effects (observe/verify-request/report/yield), not the builder's copied input"}
+   {:repo "futon3c",
+    :sha "4e9c626635343420edfc819c9421e8c47bc969cd",
+    :path-or-ref
+    "holes/labs/wm-contract/runs/CHIP-BOARD-WITNESS-STATUS-2026-09-12.md",
+    :what
+    "certificates explicitly mark :runtime-correspondence :not-proven, :semantic-approval? false, witness scope :lean-model"}],
+  :view-digest
+  "8df9da552476aa13bc5cea0abff56146ad663a117ffe8c5081d1ea85499dacbe",
+  :reason
+  "A shape-appropriate witness of an effect from a digest-pinned substrate exists, but the substrate is the in-process registered-verb chip board whose semantic approval is false and whose runtime correspondence is explicitly unproven; whether it is 'the appropriate external substrate' the application names cannot be decided from the cutoff evidence.",
+  :finding :ambiguous,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "futon3c 4e9c626 holes/labs/wm-contract/runs/chip-board-cascade-verifier/run-2026-09-12.edn; CHIP-BOARD-WITNESS-STATUS-2026-09-12.md"}
+ {:subject-id "R3-3",
+  :evidence
+  [{:repo "mathlib4",
+    :sha "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+    :path-or-ref "DarkTower/WarMachine/ExactBeliefTrajectory.lean",
+    :what
+    "exact categorical posterior s_t = A(o_t|x)(B s_{t-1})(x)/P(o_t) with named intermediates (predictedState, P(o)) and typed refusal exactly at zero-probability observations; seven named reductions vs eq 4.13 recorded"}
+   {:repo "futon2",
+    :sha "06ecba8cf7143e12c04831dded7450f07d892d99",
+    :path-or-ref "holes/labs/wm-contract/row12_witness.clj",
+    :what
+    "witness labels initialization as :authority :declared (not measured-update credit) and names control refusals"}],
+  :view-digest
+  "f7c7783632f9e8f2c54149170bf11d6a08472b7d43d53183ba9bc75833e09519",
+  :reason
+  "The declared law applies transition propagation once then the observation update with named intermediates and output; initialization and no-observation cases carry their own names (:authority :declared; :no-observation-names-this-tick in u39 measurements), not measured-update credit.",
+  :finding :present,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "mathlib4 3b19f62 DarkTower/WarMachine/ExactBeliefTrajectory.lean (declared law P12)"}
+ {:subject-id "R5-1",
+  :evidence
+  [{:repo "mathlib4",
+    :sha "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+    :path-or-ref "DarkTower/WarMachine/F12CascadeDiffArm.lean",
+    :what
+    "records what each candidate carrier arm states and excludes, without selecting a carrier"}],
+  :view-digest
+  "e6bdaa70aa422c56bbf04030d065f86adb4bfb354f13c1ca91ab680185bb7d9f",
+  :reason
+  "The WM-08/09 cascade-family arm analysis with legal partial constructions exists, but I did not locate an artifact that explains how a response changes another pattern's conditions or outcome, i.e. the interacting-alternatives interpretation context. Unknown is not absent.",
+  :finding :insufficient,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "mathlib4 3b19f62 DarkTower/WarMachine/F12CascadeDiffArm.lean (candidate carrier arms)"}
+ {:subject-id "R6-1",
+  :evidence
+  [{:repo "futon2",
+    :sha "06ecba8cf7143e12c04831dded7450f07d892d99",
+    :path-or-ref "src/futon2/aif/mission_registry.clj",
+    :what
+    "file-backed scan of live top-level mission docs plus T-ticket status classification (retained status table, Joe/claude-20 packet 21033); no three-mission allow-list"}
+   {:repo "futon2",
+    :sha "06ecba8cf7143e12c04831dded7450f07d892d99",
+    :path-or-ref "test/futon2/aif/mission_registry_test.clj",
+    :what
+    "tests retaining explicit exclusions: sandbox/derived docs, non-primary checkouts, scan-root fence, inactive status classes"}],
+  :view-digest
+  "f18f1a59d951603b4b07d75d27b8306abcc8452138b8fa58be794e710e1bace3",
+  :reason
+  "Strict registry inputs for open missions and live T-tickets exist at the cutoff, with included targets addressable and exclusions exercised by tests rather than restored via allow-list or fixture.",
+  :finding :present,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "futon2 06ecba8 src/futon2/aif/mission_registry.clj + test/futon2/aif/mission_registry_test.clj"}
+ {:subject-id "R8-1",
+  :evidence
+  [{:repo "mathlib4",
+    :sha "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+    :path-or-ref
+    "DarkTower/WarMachine/PolicyVariationalFreeEnergy.lean",
+    :what
+    "per-policy F(pi) pinned per Parr 2022 B.1-B.2 over arbitrary finite S, zeros in EReal, header states the active claim"}
+   {:repo "mathlib4",
+    :sha "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+    :path-or-ref
+    "DarkTower/WarMachine/VariationalFreeEnergyWitness.lean",
+    :what
+    "current-fit variational F pinned field-for-field to an independent EDN fixture with proved constant reference"}],
+  :view-digest
+  "e370806f56650107879c25338582f53a2057c7057a429f2091fe8772f97d3ee5",
+  :reason
+  "Both the current-fit and per-policy variational F are pinned as separate declared definitions, each module stating its own mode and claim; the Gaussian tick formula is used only as the pinned Gaussian reference, not as a universal posterior law.",
+  :finding :present,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "mathlib4 3b19f62 DarkTower/WarMachine/PolicyVariationalFreeEnergy.lean and VariationalFreeEnergyWitness.lean"}
+ {:subject-id "WM-06-C3",
+  :evidence
+  [{:repo "mathlib4",
+    :sha "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+    :path-or-ref "DarkTower/WarMachine/AmbiguityBridge.lean",
+    :what
+    "names categorical and Gaussian quantities and proves comparison cases but explicitly does not coerce or relabel either as the other"}
+   {:repo "mathlib4",
+    :sha "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+    :path-or-ref "DarkTower/WarMachine/PreferenceLadderDraft.lean",
+    :what
+    "family/bridge types recorded as 'typeable before the canonical vertex reconciliation', i.e. not the correspondence"}],
+  :view-digest
+  "a076023f8615077743b6553d19963886e95c300532481844f6a0e960f58cc6ca",
+  :reason
+  "No located artifact binds both distributions to the same tagged outcome identities with a validated state-dependent bridge; the Lean modules on this seam explicitly decline to establish it. A broader futon2 runtime binding could not be excluded from my bounded search. Unknown is not absent.",
+  :finding :insufficient,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "mathlib4 3b19f62 DarkTower/WarMachine/AmbiguityBridge.lean; PreferenceLadderDraft.lean"}
+ {:subject-id "WM-09-C1",
+  :evidence
+  [{:repo "mathlib4",
+    :sha "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+    :path-or-ref "DarkTower/WarMachine/F12AttributionArm.lean",
+    :what
+    "attribution-input arm supplies per-pattern admission provenance as an explicit organise input and proves zaifProvenanceNeverTheStopRule: the recorded summary cannot be read as an emitting-rule attribution"}
+   {:repo "mathlib4",
+    :sha "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+    :path-or-ref "DarkTower/WarMachine/F12AdmittingArm.lean",
+    :what
+    "admitting arm over the prior cascade/candidate/repository argument list, measuring conformance and origin attribution without selecting a carrier"}],
+  :view-digest
+  "be39d2ff55b4ac1b9017b9414007b1f382c5acdfe28c4fc20d9c317972de2469",
+  :reason
+  "Admission attribution is bound as a distinct input over the prior cascade and candidate set, with a theorem refusing attribution derived from the output summary; before-state provenance is retained in the provenance maps the arms analyse.",
+  :finding :present,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "mathlib4 3b19f62 DarkTower/WarMachine/F12AttributionArm.lean"}
+ {:subject-id "WM-10-C6",
+  :evidence
+  [{:repo "mathlib4",
+    :sha "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+    :path-or-ref "DarkTower/WarMachine/CommitmentTemperature.lean",
+    :what
+    "states the live :selection-boundary path selects the first controller entry, temperature changes scores but not the action, G is opaque and undefined; whether three habit-prior-mode records are live decisions 'is not established'"}],
+  :view-digest
+  "a6586c46210c18de35a31eb7f885ea34c94555612588b1fba2e44073e006aff0",
+  :reason
+  "The analysis states the canonical G/temperature result is not what chooses on the live path and that live use is unestablished, but I did not positively establish that no actual choice consumer binds the canonical result elsewhere. Unknown is not absent.",
+  :finding :insufficient,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "mathlib4 3b19f62 DarkTower/WarMachine/CommitmentTemperature.lean (live-path analysis)"}
+ {:subject-id "WM-11-C1",
+  :evidence
+  [{:repo "futon2",
+    :sha "06ecba8cf7143e12c04831dded7450f07d892d99",
+    :path-or-ref "src/futon2/aif/policy.clj",
+    :what
+    "both selection laws range over the SAME ranked candidates; :no-op excluded with the declared non-abstaining reason; :selection-law retains requested vs applied law with typed refusal and fallback; :precedence retained per action"}],
+  :view-digest
+  "43b229a82e428b74f34451871c1da4b2d382401272abf529c6c121460125f43d",
+  :reason
+  "Full candidate identities, precedence, law revisions and the declared exclusion with its reason are retained in the selection record; two laws over one candidate set remain two laws.",
+  :finding :present,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "futon2 06ecba8 src/futon2/aif/policy.clj selection record (ranked candidates, same-candidate laws)"}
+ {:subject-id "WM-14-C1",
+  :evidence
+  [{:repo "futon2",
+    :sha "06ecba8cf7143e12c04831dded7450f07d892d99",
+    :path-or-ref "repo-wide git grep WM-08",
+    :what
+    "only checklist/WORK-REMAINING/runs references; no source-bound interpretation attempt"}
+   {:repo "futon3c",
+    :sha "4e9c626635343420edfc819c9421e8c47bc969cd",
+    :path-or-ref
+    "git grep -l WM-08 and 'interpretation attempt' -- docs holes",
+    :what "no hits at all"}],
+  :view-digest
+  "1d39ff6257e2bdc6c1457ad3e077b1772ec3dfd976418445d3631e90b8b540a5",
+  :reason
+  "A source-bound interpretation attempt for WM-08/03 would have to be a document naming WM-08/WM-03 with an argued reading of retrieved patterns; repo-wide searches at both cutoffs return none. The retrieval machinery exists, but the stated output does not.",
+  :finding :absent,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "searched futon2 (06ecba8), futon3c (4e9c626) docs+holes, mathlib4 DarkTower (3b19f62); no interpretation-attempt artifact for WM-08/03"}
+ {:subject-id "E03-3",
+  :evidence
+  [{:repo "futon2",
+    :sha "06ecba8cf7143e12c04831dded7450f07d892d99",
+    :path-or-ref "test/futon2/aif/observation_admission_test.clj",
+    :what
+    "semantic tamper tests at the acquisition boundary: mutated view (view-digest-mismatch, never relabelled absent), observer-is-author, observer-is-reviewer, review-of-other-adjudication — semantic conditions, not syntax"}],
+  :view-digest
+  "41140a8f8a8dccfaa7bae668cdbf0427b294b5dce125774be02cedfd648fbee1",
+  :reason
+  "Acquisition-boundary semantic tamper exists, but the application also names source/model/occurrence/mandatory-edge fields and the generated-certificate boundary; I did not locate tamper tests at the certificate boundary. Unknown is not absent.",
+  :finding :insufficient,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "futon2 06ecba8 test/futon2/aif/observation_admission_test.clj"}
+ {:subject-id "E10-1",
+  :evidence
+  [{:repo "p4ng",
+    :sha "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48",
+    :path-or-ref "wm-walkthroughs/item-owners/roster.json",
+    :what
+    "current one-owner-per-item roster with states/jobs, owners keyed to the checklist digest, not inferred from connected agents"}
+   {:repo "p4ng",
+    :sha "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48",
+    :path-or-ref "wm-walkthroughs/item-owners/roster.json",
+    :what
+    "no unresolved-historical-candidates, unavailable-seat or succession fields anywhere in the roster artifacts (grep: zero hits)"}],
+  :view-digest
+  "10789ef9bf9fbb1391c8aed57ac8864e8d99448db04a09b51e295efe498e4ecb",
+  :reason
+  "Owner/role/current-authority identification exists, but retention of unresolved historical candidates, unavailable seats and documented succession is not in the roster artifacts (one TRANSITION-to-claude-3.md exists but is not a retained candidate census). Unknown is not absent.",
+  :finding :insufficient,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "p4ng-wm04-blind f5805d8 wm-walkthroughs/item-owners/roster.json + ROSTER.md"}
+ {:subject-id "R16-4",
+  :evidence
+  [{:repo "futon2",
+    :sha "06ecba8cf7143e12c04831dded7450f07d892d99",
+    :path-or-ref "scripts/futon2/report/war_machine.clj",
+    :what
+    "R16 lane emits only the enactment PLAN; the claim stays :independent-check-required with the enactor recorded, and 'the tick never marks its own enactment confirmed' (6244-6246)"}],
+  :view-digest
+  "132c91cf4c055e548c15e0dabfb27c39fe716c461bd5019b0c40059aa9f85117",
+  :reason
+  "Where the selected-vs-enacted comparison and independent re-observation would have to be (the R16 lane and its receipts), the code positively records that enactment confirmation is independent-check-required and never self-marked; no re-observation bound to the next belief/choice exists on that path at the cutoff.",
+  :finding :absent,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "futon2 06ecba8 scripts/futon2/report/war_machine.clj R16 cascade lane"}
+ {:subject-id "TRACE-1",
+  :evidence
+  [{:repo "p4ng",
+    :sha "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48",
+    :path-or-ref "empirics-futon/control-map-edges.edn",
+    :what
+    "versioned node/edge universe lifted from the figure: nodes incl. R3a/R17/R20/TRACE, R3a hosting edges with source-backed basis, :drawn/:unresolved statuses, source-sync :awaits-figure-owner"}
+   {:repo "p4ng",
+    :sha "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48",
+    :path-or-ref "empirics-futon/control-map-edges.edn",
+    :what
+    "single R17 node, no R17 variants; figure/source reconciliation explicitly incomplete (:awaits-figure-owner)"}],
+  :view-digest
+  "14d04eee45424438bcf7a8f416798dbb12dc3bde19445b46f33028113695ca84",
+  :reason
+  "A versioned node/edge universe with R3a hosting exists, but the stated output also requires reconciled catalogue/drawing/source with ruled conditional/retired edges and R17 variants; the artifact itself records the reconciliation as incomplete. Unknown is not absent.",
+  :finding :insufficient,
+  :worktree "/home/joe/code/p4ng-wm04-blind",
+  :observer "zai-21",
+  :cutoff
+  {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99",
+   :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b",
+   :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd",
+   :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"},
+  :occurrence
+  "p4ng-wm04-blind f5805d8 empirics-futon/control-map-edges.edn (as-of 2026-09-12)"}]
