@@ -72,7 +72,18 @@
    (let [files (->> (file-seq (io/file dir))
                     (filter #(.isFile %))
                     (filter #(.endsWith (.getName %) ".edn"))
-                    (sort-by #(.getPath %)))]
+                    (sort-by #(.getPath %)))
+         ;; Look each source up BY RESOURCE NAME as well, when it lives on the
+         ;; classpath. Enumerating with file-seq alone reads plain file paths,
+         ;; which the Test Registry's recording loader never sees -- so a
+         ;; warrant would not pin the declared sources, and editing a target's
+         ;; declaration would leave every warrant looking current. This is what
+         ;; makes a source change stale the warrants that depend on it
+         ;; (zai-16's finding, 2026-09-17: the directory entry was their only
+         ;; trace, and it killed the warrant instead of pinning them).
+         _ (doseq [f files]
+             (when-let [u (io/resource (str "wm/cascade-sources/" (.getName f)))]
+               (.getPath u)))]
      (when (seq files)
        (oc/with-registry-runs*
         (fn []
