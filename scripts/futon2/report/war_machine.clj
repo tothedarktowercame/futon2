@@ -6400,7 +6400,14 @@
                           {:value 2 :authority "p4ng 462aa79 (Joe 2026-09-17: initial T=2)"})
         cascade-assembled
         (cascade-problems/assemble
-         {:targets (cascade-problems/substrate-targets)
+         ;; The targets are the substrate's missions AND every target that has
+         ;; a declared source. A declared target was previously invisible
+         ;; unless it also existed as a substrate mission, so a fully located
+         ;; target with an unmet want could not be considered at all -- the
+         ;; machine ignored work it had been given because a registry did not
+         ;; list it.
+         {:targets (vec (distinct (concat (cascade-problems/substrate-targets)
+                                          (keys (:universes cascade-sources)))))
           :sources (assoc cascade-sources :horizon-steps (:value cascade-horizon))})
         cascade-result (cascade-decision cascade-assembled judge-opts)
         wm-decision (:decision cascade-result)

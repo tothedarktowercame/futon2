@@ -1,0 +1,49 @@
+;; Second declared production target (claude-4, 2026-09-17).
+;;
+;; The point of this file is that the machine now has something to CHOOSE
+;; between. With one target the tick's decision was formal: act, or don't. This
+;; target's want is NOT satisfied — the Route A rehearsal has produced no
+;; report — so acting here is worth more than acting on the first target, whose
+;; want already holds. That difference is the first real choice the machine has
+;; been given.
+;;
+;; Facts are observed each tick through their locators; nothing here asserts a
+;; fact value. Interpretation and construction are hand-admitted and say so.
+{:schema :wm/cascade-source-v1
+ :target "M-wm-08-external-f2"
+ :context :WM
+ :beta {:value 1 :status :declared}
+ :facts [:external-expectation-validator-exists
+         :frozen-occurrence-context-captured
+         :independent-expectations-written
+         :route-a-rehearsal-reported]
+ :want [:route-a-rehearsal-reported]
+ :locators
+ {:external-expectation-validator-exists
+  {:class :C4 :repo "futon2" :sha "ad1b8f08" :path "src/futon2/aif/find_expectations.clj"
+   :decl "(defn validate-external!"}
+  :frozen-occurrence-context-captured
+  {:class :C3 :repo "futon2" :sha "ad1b8f08"
+   :path "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/FROZEN-CONTEXT.edn"}
+  :independent-expectations-written
+  {:class :C3 :repo "futon2" :sha "ad1b8f08"
+   :path "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn"}
+  ;; not yet produced: this is what the machine can act toward
+  :route-a-rehearsal-reported
+  {:class :C3 :repo "futon2" :sha "ad1b8f08"
+   :path "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md"}}
+ :patterns
+ {:cascade-construction/run-it-on-a-real-case
+  {:guard {:needs #{:external-expectation-validator-exists
+                    :independent-expectations-written}
+           :forbids #{}}
+   :produces #{:route-a-rehearsal-reported}}}
+ :interpretation-receipts
+ {:cascade-construction/run-it-on-a-real-case
+  {:kind :hand-admitted :by "claude-4" :date "2026-09-17"
+   :source {:path "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"}
+   :reading "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}}
+ :candidates
+ [{:precedence [:cascade-construction/run-it-on-a-real-case]
+   :construction-receipt {:kind :hand-admitted :by "claude-4" :date "2026-09-17"
+                          :moves [] :stopped-is-not-success true}}]}
