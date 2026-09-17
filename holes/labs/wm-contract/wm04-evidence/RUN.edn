@@ -1,0 +1,144 @@
+{:schema :wm04-evidence-run-v1,
+ :predicted-observations
+ {#{:locator-requirement
+    :admission-records
+    :mechanical-checks
+    :observation-contract-entry
+    :raw-rate-counts
+    :checkable-kernel-law}
+  1},
+ :rate-map
+ {:admission-records {:false-neg 0, :false-pos 0, :basis :checkable},
+  :raw-rate-counts {:false-neg 0, :false-pos 0, :basis :checkable},
+  :mechanical-checks {:false-neg 0, :false-pos 0, :basis :checkable},
+  :locator-requirement {:false-neg 0, :false-pos 0, :basis :checkable},
+  :checkable-kernel-law
+  {:false-neg 0, :false-pos 0, :basis :checkable},
+  :observation-contract-entry
+  {:false-neg 0, :false-pos 0, :basis :checkable},
+  :construction-receipt-locators
+  {:false-neg 0, :false-pos 0, :basis :checkable}},
+ :observed-state
+ [:admission-records
+  :checkable-kernel-law
+  :locator-requirement
+  :mechanical-checks
+  :observation-contract-entry
+  :raw-rate-counts],
+ :exact? true,
+ :not-observed [:construction-receipt-locators],
+ :observation-distribution
+ {#{:locator-requirement
+    :admission-records
+    :mechanical-checks
+    :observation-contract-entry
+    :raw-rate-counts
+    :checkable-kernel-law}
+  1},
+ :tokens
+ {:admission-records
+  {:class :C3,
+   :repo "futon2",
+   :sha "3f601f60",
+   :path "src/futon2/aif/observation_admission.clj"},
+  :raw-rate-counts
+  {:class :C4,
+   :repo "futon2",
+   :sha "6bb94fee",
+   :path "src/futon2/aif/observation_rates.clj",
+   :decl "(defn rates-by-class"},
+  :mechanical-checks
+  {:class :C3,
+   :repo "futon2",
+   :sha "b81e5996",
+   :path "src/futon2/aif/observation_checks.clj"},
+  :locator-requirement
+  {:class :C4,
+   :repo "futon2",
+   :sha "705adb39",
+   :path "src/futon2/aif/cascade_problems.clj",
+   :decl "(def checkable-classes"},
+  :checkable-kernel-law
+  {:class :C4,
+   :repo "mathlib4",
+   :sha "889429e6bf",
+   :path "DarkTower/WarMachine/TokenObservation.lean",
+   :decl "theorem tokenLikelihood_checkable"},
+  :observation-contract-entry
+  {:class :C5,
+   :repo "mathlib4",
+   :sha "3726659d84",
+   :bundle-path
+   "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   :entry "wm-token-observation"},
+  :construction-receipt-locators
+  {:class :C4,
+   :repo "futon2",
+   :sha "705adb39",
+   :path "src/futon2/aif/construction.clj",
+   :decl ":locators"}},
+ :refused {},
+ :results
+ {:admission-records
+  {:observed true,
+   :check :C3,
+   :evidence
+   {:repo "futon2",
+    :sha "3f601f60",
+    :path "src/futon2/aif/observation_admission.clj"}},
+  :raw-rate-counts
+  {:observed true,
+   :check :C4,
+   :evidence
+   {:repo "futon2",
+    :sha "6bb94fee",
+    :path "src/futon2/aif/observation_rates.clj",
+    :decl "(defn rates-by-class",
+    :file-present true}},
+  :mechanical-checks
+  {:observed true,
+   :check :C3,
+   :evidence
+   {:repo "futon2",
+    :sha "b81e5996",
+    :path "src/futon2/aif/observation_checks.clj"}},
+  :locator-requirement
+  {:observed true,
+   :check :C4,
+   :evidence
+   {:repo "futon2",
+    :sha "705adb39",
+    :path "src/futon2/aif/cascade_problems.clj",
+    :decl "(def checkable-classes",
+    :file-present true}},
+  :checkable-kernel-law
+  {:observed true,
+   :check :C4,
+   :evidence
+   {:repo "mathlib4",
+    :sha "889429e6bf",
+    :path "DarkTower/WarMachine/TokenObservation.lean",
+    :decl "theorem tokenLikelihood_checkable",
+    :file-present true}},
+  :observation-contract-entry
+  {:observed true,
+   :check :C5,
+   :evidence
+   {:repo "mathlib4",
+    :sha "3726659d84",
+    :bundle-path
+    "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+    :entry "wm-token-observation",
+    :contract-found true,
+    :clojure-loci
+    ["futon2/src/futon2/aif/cascade_model_manifest.clj:174"
+     "futon2/src/futon2/aif/cascade_model_manifest.clj:200"]}},
+  :construction-receipt-locators
+  {:observed false,
+   :check :C4,
+   :evidence
+   {:repo "futon2",
+    :sha "705adb39",
+    :path "src/futon2/aif/construction.clj",
+    :decl ":locators",
+    :file-present true}}}}
