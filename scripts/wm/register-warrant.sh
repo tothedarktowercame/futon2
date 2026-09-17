@@ -23,14 +23,18 @@
 # ARTIFACT_DIR (default /home/joe/code/storage/test-registry/artifacts).
 #
 # --pinned <commit>: register from a git worktree pinned at <commit> (a SIBLING
-# of futon2, because deps.edn's local/root paths are ../futonN). The worktree
-# is quiescent by construction, so the 22 s stable? window cannot be broken by
-# another agent's commit; the registry's scope guard also passes by
-# construction (a checked-out commit has no dirty or untracked files). The
-# warrant validates on the LIVE checkout whenever the live bytes at its
-# recorded repo-relative paths match the pinned commit's — :git-head is
-# recorded but never compared. LAND <commit> in the live checkout before
-# anyone checks, or the check correctly refuses :stale-sha.
+# of futon2, because deps.edn's local/root paths are ../futonN). This is not a
+# convenience wrapper: since futon3c's :scope-not-committed guard (6f50e24b,
+# 18ba2516), registering from the LIVE shared checkout refuses almost always,
+# because git status in a tree five agents are editing is almost never empty.
+# A pinned worktree is the mechanism that makes expensive registration
+# possible at all — quiescent by construction, so the 22 s stable? window
+# cannot be broken by another agent's commit, and the scope guard passes
+# because a checked-out commit has no dirty or untracked files. The warrant
+# validates on the LIVE checkout whenever the live bytes at its recorded
+# repo-relative paths match the pinned commit's — :git-head is recorded but
+# never compared. LAND <commit> in the live checkout before anyone checks, or
+# the check correctly refuses :stale-sha.
 set -euo pipefail
 
 usage() { sed -n '2,26p' "$0"; exit 2; }
