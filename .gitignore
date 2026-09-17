@@ -70,3 +70,11 @@ holes/labs/wm-contract/refusal-sweep-state.edn
 holes/labs/wm-contract/runs/build-loop.log
 holes/labs/zaif-harness/runs/build-loop.log
 holes/labs/zaif-harness/runs/build-loop.lock
+
+# Tool and run output written into the lab tree; data, not evidence
+# (Joe 2026-09-17: run data is data, and a futon repo others should be able to
+# reuse must not carry it). The registry writes logs here on every check; the
+# library-loop build log reached 32 MB.
+holes/labs/wm-contract/test-registry/
+holes/labs/library-loop/runs/build-loop.log
+holes/labs/library-loop/runs/build-loop.lock
