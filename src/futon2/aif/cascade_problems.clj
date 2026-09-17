@@ -134,7 +134,13 @@
         :cascade-spec {:want (set want)}
         :beta beta}
        :construction-receipts
-       (mapv :construction-receipt constructed)})))
+       (mapv :construction-receipt constructed)
+       :interpretation-receipts
+       ;; the interpretations source's own receipts, carried so the E1 gate
+       ;; can require them per candidate without the caller reaching back
+       ;; into the source map. Absent receipts stay {} — the gate then
+       ;; refuses, honestly, rather than a default being invented here.
+       (or (:receipts interp) {})})))
 
 (defn assemble
   "Assemble one `:cascade-problem` per fully supplied target, plus one typed

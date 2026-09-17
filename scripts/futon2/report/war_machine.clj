@@ -41,6 +41,7 @@
             [clojure.string :as str]
             [futon2.aif.action-proposer :as ap]
             [futon2.aif.controller-authority :as controller-authority]
+            [futon2.aif.decision-gate :as decision-gate]
             [futon2.aif.anticipation :as anticipation]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.beta-habit :as beta-habit]
@@ -6253,6 +6254,170 @@
          :certification {:status :independent-check-required
                          :enactor "futon2.report.war-machine/cascade-lane"
                          :claim :enactment-plan}}))))
+
+;; ---------------------------------------------------------------------------
+;; Joint cascade decision over assembled problems (SPEC-flat-removal H5a).
+;; cascade-lane runs per problem; this function selects JOINTLY across every
+;; problem's family — one common universe, one G computation at the common
+;; declared T, one select-action-cascades over the union — and passes the
+;; result through the E1 decision gate. No flat action ever enters.
+;; ---------------------------------------------------------------------------
+
+(defn- cascade-decision-refuse!
+  [kind detail]
+  (throw (ex-info "cascade decision refused"
+                  (merge {:kind kind} detail))))
+
+(defn- receipt-for-candidate
+  "The construction receipt for one lane candidate of one problem, matched by
+  precedence: H2's :construction-receipts are parallel to the problem's
+  constructed precedences (its :precedences minus the leading empty cascade).
+  The empty cascade is constructed trivially, so it carries a self-describing
+  empty receipt (nothing was built; that is the whole receipt). nil ⇒ no
+  match."
+  [problem precedence-ids]
+  (if (empty? precedence-ids)
+    {:kind :construction-receipt :construction :empty-cascade
+     :target (:target problem) :moves [] :coverage 0}
+    (let [cp (:cascade-problem problem)
+          constructed (rest (:precedences cp))
+          receipts (:construction-receipts problem)]
+      (some (fn [[ids receipt]]
+              (when (= ids precedence-ids) receipt))
+            (map vector constructed receipts)))))
+
+(defn cascade-decision
+  "Joint cascade decision over ASSEMBLED, the output of
+  futon2.aif.cascade-problems/assemble. OPTS is reserved (ignored today).
+
+  Returns {:decision … :lanes [… ] :cascade-problems assembled}, where
+  :decision has passed futon2.aif.decision-gate/emit! and :lanes records
+  every problem's cascade-lane route plus any candidate dropped for
+  unmatched receipts (a candidate is NEVER passed through unreceipted).
+
+  - No problems ⇒ the abstention {:status :abstained :refusals …} through
+    emit! (an empty refusal list throws there — a tick with no targets and
+    no refusals is a configuration error).
+  - Each problem's R1/R6/R13/R4/R5 run inside cascade-lane (no maths is
+    copied); G is then recomputed JOINTLY by ONE efe/rank-actions call over
+    the union family, which computes one common universe per call —
+    per-problem G over a per-problem universe is never used for selection.
+  - ONE policy/select-action-cascades over the union family at the declared
+    β; candidates keep :target; selection is never per-target-then-ranked.
+  - Problems declaring different T or β refuse, typed
+    :incommensurable-family with the values."
+  [assembled _opts]
+  (let [problems (:problems assembled)]
+    (if (empty? problems)
+      {:decision (decision-gate/emit!
+                  {:status :abstained :refusals (:refusals assembled)})
+       :lanes []
+       :cascade-problems assembled}
+      (let [Ts (distinct (map #(get-in % [:cascade-problem :horizon-steps])
+                              problems))
+            betas (distinct (map #(get-in % [:cascade-problem :beta]) problems))]
+        (when (not= 1 (count Ts))
+          (cascade-decision-refuse! :incommensurable-family
+                                    {:horizon-steps (vec Ts)}))
+        (when (not= 1 (count betas))
+          (cascade-decision-refuse! :incommensurable-family
+                                    {:beta (vec betas)}))
+        (let [T (first Ts)
+              beta (first betas)
+              lanes
+              (mapv (fn [problem]
+                      (let [lane (cascade-lane (:cascade-problem problem))]
+                        {:target (:target problem)
+                         :route (:route lane)
+                         :refusal (when (:stopped-at lane) (:refusal lane))
+                         :candidates (:candidates lane)}))
+                    problems)
+              ;; Carry each candidate's receipts (H2, per target) onto the
+              ;; lane's candidate maps, matching by precedence. A candidate
+              ;; whose construction receipt cannot be matched, or whose
+              ;; target supplied no interpretation receipts, is dropped with
+              ;; a recorded reason — never passed through unreceipted.
+              receipted
+              (mapcat
+               (fn [problem lane]
+                 (let [interp-receipts (:interpretation-receipts problem)]
+                   (keep
+                    (fn [cand]
+                      (let [precedence-ids (mapv :id (:precedence cand))
+                            receipt (receipt-for-candidate problem
+                                                           precedence-ids)]
+                        (cond
+                          (nil? receipt)
+                          {:dropped {:target (:target problem)
+                                     :candidate (:id cand)
+                                     :reason :construction-receipt-unmatched}}
+
+                          (and (seq precedence-ids)
+                               (empty? interp-receipts))
+                          {:dropped {:target (:target problem)
+                                     :candidate (:id cand)
+                                     :reason :interpretation-receipts-missing}}
+
+                          :else
+                          {:candidate (-> cand
+                                          (assoc :target (:target problem))
+                                          (assoc :construction-receipt receipt)
+                                          (assoc :interpretation-receipts
+                                                 interp-receipts))})))
+                    (:candidates lane))))
+               problems lanes)
+              joint-candidates (vec (keep :candidate receipted))
+              dropped (vec (keep :dropped receipted))
+              ;; Joint G: one rank-actions call over the union family at the
+              ;; common T; its universe is the union of every problem's
+              ;; tokens (q0 support ∪ want ∪ every pattern token), computed
+              ;; by the scorer itself.
+              joint-q0 (cascade-manifest/observed-belief
+                        (reduce (fn [acc p]
+                                  (clojure.set/union
+                                   acc
+                                   (set (for [[f v] (get-in
+                                                     p [:cascade-problem :facts])
+                                              :when (true? v)]
+                                          f))))
+                                #{} problems))
+              joint-want (reduce (fn [acc p]
+                                   (clojure.set/union
+                                    acc (set (get-in p
+                                                    [:cascade-problem :want]))))
+                                 #{} problems)
+              ranked (efe/rank-actions {:cascade-belief joint-q0}
+                                       joint-candidates
+                                       {:horizon-steps T
+                                        :cascade-spec {:want joint-want}})]
+          (when (and (map? ranked) (contains? ranked :status))
+            (cascade-decision-refuse! (or (:kind ranked) :rank-refused)
+                                      ranked))
+          (let [decision (policy/select-action-cascades ranked {:beta beta})
+                ;; re-key the action marginal by [target first-acting-pattern]
+                ;; — the candidates' :precedence carries pattern MAPS, and ids
+                ;; alone would collide across targets. Probabilities are
+                ;; untouched; only the key names change.
+                decision (assoc decision
+                                :softmax-weights
+                                (into {}
+                                      (map (fn [[k v]]
+                                             [(if (map? k)
+                                                [(or (:target k) :joint)
+                                                 (or (:id k) (:type k))]
+                                                k)
+                                              v]))
+                                      (:softmax-weights decision)))
+                authorized (controller-authority/authorize decision ranked)
+                emitted (decision-gate/emit! authorized)]
+            {:decision emitted
+             :lanes (mapv (fn [lane]
+                            (cond-> lane
+                              (seq dropped)
+                              (assoc :dropped-candidates dropped)))
+                          lanes)
+             :dropped-candidates dropped
+             :cascade-problems assembled}))))))
 
 
 (defn judge
