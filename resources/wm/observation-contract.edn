@@ -7,28 +7,31 @@
                    :enforced-by "futon2.aif.cascade-problems (705adb39): every problem token needs a checkable locator, else :universe-not-admitted naming the tokens"
                    :J-evidence "futon2 holes/labs/wm-contract/wm04-pilot/PILOT-OBSERVER-ONLY.edn (83f8b5ce): unreviewed pilot; of 38 recorded realised steps, blind observers confirmed 15"
                    :checks-implemented {:C3 check-path-exists :C4 check-decl-in-file :C5 check-registry-entry
-                                        :C1 :awaiting-test-registry-warrants :C2 :awaiting-test-registry-warrants}}
+                                        :C1 check-lean-warrant :C2 check-test-warrant}
+                   :cutoff-for-C1-C2 "checkout HEAD at check time; dirty paths refused :working-tree-differs-from-head"
+                   :applicability-reading "claude-7, 2026-09-17: schedule holds; J refusal holds; zero rates hold only for the class tokens as defined here (fixes applied in futon2 725a17f1)"}
  :written "2026-09-17"
  :owner "WM-04"
  :carrier {:lean {:repo "mathlib4" :sha "889429e6bf" :module "DarkTower.WarMachine.TokenObservation"}
            :clojure {:repo "futon2" :sha "4bf05c84d4"
                      :functions [token-likelihood observation-distribution predict-observations]
                      :locus "src/futon2/aif/cascade_model_manifest.clj"}}
- :token {:definition "one step application's stated output; 'exists' = independently locatable artifact satisfying the application's own stated conditions at the cutoff sha"}
+ :token {:definition "each checkable class defines its own token (see :classes): exactly the fact its check observes, nothing more. Zero adjudication rates hold only for that fact (claude-7 applicability reading, 2026-09-17)."
+         :stated-conditions-rule "an output whose application states further conditions (correctness, adequacy, coverage, behaviour beyond the class token) is class J for those conditions; a locator makes only the class token observable"}
  :classes
- [{:id :C1 :kind :checkable :token "named Lean module/declaration"
-   :check "at pinned repo sha, lake env lean with #print decl succeeds, no sorryAx"
+ [{:id :C1 :kind :checkable :token "the named declaration head starts a line of the named Lean file, the file is in a valid lake-build warrant for the named module, and the build exited 0 with no errors and no sorries in that file"
+   :check "futon2.aif.observation-checks/check-lean-warrant: registry warrant, per-file sorry-files, anchored decl at HEAD"
    :check-fn check-lean-declaration :inputs {:repo string :sha string :module string :decl string}}
-  {:id :C2 :kind :checkable :token "named test namespace passing"
-   :check "at pinned sha, one runner invocation yields aggregate 0 failures 0 errors"
+  {:id :C2 :kind :checkable :token "a valid test-registry warrant exists for exactly the named test namespace, recording 0 failures and 0 errors"
+   :check "futon2.aif.observation-checks/check-test-warrant: registry warrant for exactly this ns; missing/stale refused :no-current-warrant"
    :check-fn check-test-aggregate :inputs {:repo string :sha string :nses vector}}
-  {:id :C3 :kind :checkable :token "named file at path"
+  {:id :C3 :kind :checkable :token "the named path exists at the pinned sha"
    :check "git cat-file -e sha:path succeeds"
    :check-fn check-path-exists :inputs {:repo string :sha string :path string}}
-  {:id :C4 :kind :checkable :token "named declaration in a named file"
-   :check "bytes at sha:path contain the exact declaration head"
+  {:id :C4 :kind :checkable :token "a line of the file at the pinned sha starts with the declaration head, and the head is followed by whitespace, :, (, {, [ or end of line"
+   :check "anchored line match (decl-present?)"
    :check-fn check-decl-in-file :inputs {:repo string :sha string :path string :decl string}}
-  {:id :C5 :kind :checkable :token "named entry in the contract bundle"
+  {:id :C5 :kind :checkable :token "the contract bundle at the pinned sha has the named contract-id, and every clojure-locus it declares resolves (file present with at least that many lines at the locus repo HEAD)"
    :check "emitted bundle JSON at pinned sha contains the entry with resolving clojureLocus"
    :check-fn check-registry-entry :inputs {:repo string :sha string :entry string}}
   {:id :J :kind :judgement
@@ -56,5 +59,5 @@
            :E {:cascades 11 :nodes 46 :with-application 46 :checkable 0 :judgement 46 :no-stated-output 0}}}
  :settled {:r-a "Joe 2026-09-17: no per-pass blinded study (see :authority)"
            :r-c "Joe 2026-09-17 via codex-13 (p4ng 462aa79): T=2 initially, common to the family; one observation after each application"}
- :not-claimed [:judgement-labels :judgement-rates :C1-C2-checks]
+ :not-claimed [:judgement-labels :judgement-rates :stated-conditions-beyond-class-tokens]
  :claimed {:observations "futon2 holes/labs/wm-contract/wm04-evidence/RUN.edn" :assembly "observation-rates/token-likelihood-rates over checkable classes"}}
