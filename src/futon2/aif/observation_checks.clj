@@ -185,16 +185,28 @@
     (catch Exception e
       (refuse :registry-unavailable {:error (.getMessage e)}))))
 
+(def recent-limit
+  "How many evidence records a pass reads before widening. The store's cost is
+  proportional to what it returns: 1 record takes ~2 s, all 73 take ~13 s, and
+  records are newest-first. A warrant a locator wants is almost always recent,
+  so read a window and widen only on a miss."
+  25)
+
+(def wide-limit 500)
+
 (def ^:dynamic *registry-runs*
-  "A delay holding the run records for one pass of observations, so a pass
-  that checks several C1/C2 facts reads the evidence store once. Reading it
-  costs about 11 s — the dominant cost of a tick, far above the registry
-  check itself (under a second) — and every fact would otherwise repeat it.
-  `observe` binds this; nil means read afresh."
+  "Delays holding the run records for one pass of observations — {limit delay}
+  — so a pass that checks several C1/C2 facts reads the store once per window
+  rather than once per fact. `observe` binds this; nil means read afresh."
   nil)
 
-(defn- current-runs []
-  (if *registry-runs* @*registry-runs* (registry-runs 500)))
+(defn- runs-at
+  "Run records at LIMIT, through the pass cache when there is one."
+  [limit]
+  (if-let [cache *registry-runs*]
+    @(or (get @cache limit)
+         (get (swap! cache assoc limit (delay (registry-runs limit))) limit))
+    (registry-runs limit)))
 
 (defn latest-warrant-id
   "The newest registry run for REPO whose recorded command satisfies
@@ -202,15 +214,19 @@
   Validity now is still decided by `check`; this only finds the candidate, so
   a locator need not name an entry-id that editing the located file would stale."
   [repo command-pred]
-  (let [runs (current-runs)]
-    (when-not (and (map? runs) (:status runs))
-      (->> runs
-           (filter #(and (true? (:warrant? %))
-                         (= (str repo-root "/" repo) (:repo/root %))
-                         (command-pred (:command %))))
-           (sort-by :finished-at #(compare %2 %1))
-           first
-           :entry-id))))
+  (let [match (fn [runs]
+                (when-not (and (map? runs) (:status runs))
+                  (->> runs
+                       (filter #(and (true? (:warrant? %))
+                                     (= (str repo-root "/" repo) (:repo/root %))
+                                     (command-pred (:command %))))
+                       (sort-by :finished-at #(compare %2 %1))
+                       first
+                       :entry-id)))]
+    ;; the recent window first; widen only when it holds no candidate, so the
+    ;; common case costs ~2 s instead of ~13 s
+    (or (match (runs-at recent-limit))
+        (match (runs-at wide-limit)))))
 
 (defn- resolve-entry-id
   "The locator's :entry-id when it names one (a string), else the latest
@@ -351,7 +367,7 @@
   whatever the number of C1/C2 facts in it. Nesting is safe: an outer
   binding (a whole tick, say) is kept."
   [tokens]
-  (binding [*registry-runs* (or *registry-runs* (delay (registry-runs 500)))]
+  (binding [*registry-runs* (or *registry-runs* (atom {}))]
     (observe* tokens)))
 
 (defn with-registry-runs*
@@ -360,5 +376,5 @@
   in one pass (a tick over several declared sources, say). An outer binding
   is kept, so nesting reads once."
   [f]
-  (binding [*registry-runs* (or *registry-runs* (delay (registry-runs 500)))]
+  (binding [*registry-runs* (or *registry-runs* (atom {}))]
     (f)))
