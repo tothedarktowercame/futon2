@@ -28,9 +28,12 @@
   :independent-expectations-written
   {:class :C3 :repo "futon2" :sha "ad1b8f08"
    :path "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn"}
-  ;; not yet produced: this is what the machine can act toward
+  ;; A WANT is observed at HEAD, never at a pinned sha. Pinned at a past sha
+  ;; it could never become true: the work that satisfies it happens after the
+  ;; pin, so the machine would keep choosing it forever and never notice it
+  ;; was done. Facts ABOUT existing artifacts stay pinned; wants track HEAD.
   :route-a-rehearsal-reported
-  {:class :C3 :repo "futon2" :sha "ad1b8f08"
+  {:class :C3 :repo "futon2" :sha "HEAD"
    :path "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md"}}
  :patterns
  {:cascade-construction/run-it-on-a-real-case
