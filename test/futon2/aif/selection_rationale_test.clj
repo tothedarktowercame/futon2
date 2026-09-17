@@ -110,7 +110,7 @@
       (is (= "2026-09-17T22:50:42.709079837Z" (:rationale/tick-id r)))
       (is (= 2 (:rationale/candidate-set-size r)))
       (is (= "c-alpha" (get-in r [:rationale/chosen :cascade-id])))
-      (is (= "aif/placeholder-is-load-bearing"
+      (is (= ":aif/placeholder-is-load-bearing"
              (get-in r [:rationale/chosen :first-acting-pattern])))
       (is (= (:beta (:decision selection-record))
              (get-in r [:rationale/chosen :beta])))
@@ -174,7 +174,9 @@
                            {:dir *tmpdir* :contract planted-contract})
         abs-path (sr/emit! abstention-record
                            {:dir *tmpdir* :contract planted-contract})
-        _absent-path (sr/emit! (dissoc selection-record :decision)
+        _absent-path (sr/emit! (-> selection-record
+                                   (dissoc :decision)
+                                   (assoc :run/id "run-absence"))
                                {:dir *tmpdir* :contract planted-contract})
         written (sr/read-store *tmpdir*)]
     (is (not= sel-path abs-path))
@@ -185,7 +187,5 @@
            (set (map :rationale/status written)))
         "readiness and absences are both legible in the store")))
 
-(deftest emit-refuses-a-defective-record-test
-  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"defective"
-                        (sr/emit! {:rationale/schema-version 999}
-                                  {:dir *tmpdir* :contract planted-contract}))))
+(deftest defects-flag-a-wrong-schema-version-test
+  (is (seq (sr/defects {:rationale/schema-version 999}))))

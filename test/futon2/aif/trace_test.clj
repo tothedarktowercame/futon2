@@ -282,7 +282,7 @@
       (is (= (dissoc off :timestamp) (dissoc on :mission-c :timestamp))
           "the enabled record differs from the disabled one in exactly this key
            (:timestamp aside, which trace-record stamps per call)")
-      (is (= 29 trace/trace-schema-version)
+      (is (= 30 trace/trace-schema-version)
           ":mission-c entered the ledger at 23, and that bump is what separates
            'producer predates C_mis' from 'flag was off'. Pinning the ledger
            HEAD here is what makes every later key-set change bump too -- this
@@ -316,7 +316,7 @@
            producer that read one and measured zero")
       (is (= (dissoc off :timestamp) (dissoc on :mission-c :timestamp))
           "and it is still exactly one key that separates the two records")
-    (is (= 29 trace/trace-schema-version)
+    (is (= 30 trace/trace-schema-version)
           "absence of :gauge-observables at 25 or later would mean every
            producer was absent; before 25 it means the producer predates them.
            The pin is on the ledger HEAD, so a later key added without a bump
@@ -347,27 +347,25 @@
       (is (= (dissoc off :timestamp)
              (update (dissoc on :timestamp) :decision dissoc :enumeration-completeness))
           "the flag-on record differs from the flag-off one in exactly this key")
-      (is (= 29 trace/trace-schema-version)
+      (is (= 30 trace/trace-schema-version)
           "absence of the key at 26 or later means the flag was off on that
            tick; before 26 it means the producer predates the check, and only
            the version tells a reader which -- a false clean bill otherwise"))))
 
-(deftest redirected-trace-retains-resolved-abstain-epsilon-test
-  (testing "the production selector field passes strip-decision and a redirected write"
-    (let [epsilon 0.125
-          ranked [{:action {:type :address-sorry} :controller-score 0.1}
-                  {:action {:type :no-op} :controller-score 0.5}]
-          decision (policy/select-action ranked {:abstain-epsilon epsilon})
-          date "2026-09-12"
-          _ (trace/write-trace! (assoc sample-judge-output
-                                       :ranked-actions ranked
-                                       :decision decision)
+(deftest redirected-trace-retains-the-whole-cascade-decision-test
+  (testing "the decision's selector detail passes strip-decision and a redirected write"
+    (let [decision (assoc (cascade-decision)
+                          ::retained-selector-detail {:tie-break :action-name-ascending})
+          date "2026-09-17"
+          _ (trace/write-trace! (assoc sample-judge-output :decision decision)
                                 :dir *tmpdir* :date-str date)
           persisted (first (trace/read-trace :dir *tmpdir* :date-str date))]
-      (is (= epsilon (:abstain-epsilon decision)))
-      (is (= epsilon (get-in persisted [:decision :abstain-epsilon])))
-      (is (not (contains? (:decision persisted) :softmax-weights))
-          "strip-decision still removes only the existing bulky selector detail"))))
+      (is (= (::retained-selector-detail decision)
+             (::retained-selector-detail (:decision persisted))))
+      ;; the softmax-weights are pattern-keyed and stringable: they are now
+      ;; PERSISTED (the flat action-map-keyed weights were the bulky form)
+      (is (contains? (:decision persisted) :softmax-weights))
+      (is (every? keyword? (keys (:softmax-weights (:decision persisted))))))))
 
 (deftest trace-record-carries-typed-mission-focus-test
   (testing "U21: present-only, a SECOND field beside :active-mission, and the
@@ -410,8 +408,8 @@
     (let [[r] (trace/read-trace :dir *tmpdir* :date-str "2026-05-17")]
       (is (= (:observation sample-judge-output) (:observation r)))
       (is (= (:mode sample-judge-output) (:mode r)))
-      (is (= 2 (count (:ranked-actions r)))
-          "both ranked actions preserved"))))
+      (is (= 2 (count (get-in r [:decision :selection-law :posterior])))
+          "both cascade candidates preserved, keyed by candidate id"))))
 
 (deftest read-trace-missing-file-returns-empty-test
   (testing "read-trace on a non-existent file returns empty vec"
@@ -425,28 +423,13 @@
       (is (= :multiplied (:mode r)))
       (is (map? (:observation r))))))
 
-(deftest trace-record-propagates-selection-gain-test
-  (testing "R14 γ-state propagates through trace-record from judge output"
-    (let [gain-state {:selection-gain 1.6 :error-history [0.2 0.1]
-                       :mean-error 0.15 :samples 7}
-          r (trace/trace-record (assoc sample-judge-output
-                                       :selection-gain gain-state))]
-      (is (= gain-state (:selection-gain r)))))
-  (testing "absent γ-state reconstructs the prior (γ=1.0), never nil"
-    (let [r (trace/trace-record sample-judge-output)]
-      (is (= 1.0 (get-in r [:selection-gain :selection-gain]))
-          "trace always carries a usable γ-state for the next tick's read-back"))))
+;; DELETED (SPEC flat-removal H4 review fix, 2026-09-17):
+;; trace-record-propagates-selection-gain-test — the flat controller's
+;; :selection-gain γ-state is retired at trace schema 30 (no silent default
+;; statistic; β is caller-declared on the cascade path).
 
-(deftest selection-gain-roundtrips-through-trace-test
-  (testing "γ-state survives write → read so the next tick continues the window"
-    (let [gain-state {:selection-gain 0.75 :error-history [0.6 0.7 0.65]
-                       :mean-error 0.65 :samples 12}
-          out (assoc sample-judge-output :selection-gain gain-state)]
-      (trace/write-trace! out :dir *tmpdir* :date-str "2026-06-26")
-      (let [record (trace/latest-trace-record :dir *tmpdir*
-                                              :end-date (LocalDate/parse "2026-06-26")
-                                              :lookback-days 1)]
-        (is (= gain-state (:selection-gain record)))))))
+;; DELETED (SPEC flat-removal H4 review fix, 2026-09-17):
+;; selection-gain-roundtrips-through-trace-test — same retirement.
 
 (deftest realized-outcome-present-only-passthrough-test
   (testing "R16 :realized-outcome is propagated when the enactor supplies it"

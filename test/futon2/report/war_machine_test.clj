@@ -585,6 +585,8 @@
 
 (def ^:private cascade-judgement
   {:mode :multiplied
+   :free-energy {:controller-score 0.05 :preference-gap-score 0.05
+                 :coverage-uncertainty-pressure 0.1}
    :decision {:kind :decision
               :action {:kind :cascade-candidate :cascade-id "c-alpha"
                        :precedence [:aif/placeholder-is-load-bearing]}
@@ -595,6 +597,8 @@
 
 (def ^:private abstaining-judgement
   {:mode :multiplied
+   :free-energy {:controller-score 0.05 :preference-gap-score 0.05
+                 :coverage-uncertainty-pressure 0.1}
    :decision {:status :abstained
               :refusals [{:target "M-a" :kind :beta-not-declared :missing :beta-by-context}
                          {:target "M-b" :kind :beta-not-declared :missing :beta-by-context}

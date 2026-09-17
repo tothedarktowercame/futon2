@@ -52,8 +52,7 @@
             [clojure.string :as str]
             [futon2.aif.forward-model :as forward-model]
             [futon2.aif.lane-futility :as lane-futility]
-            [futon2.aif.observation :as observation]
-            [futon2.aif.selection-gain :as selection-gain])
+            [futon2.aif.observation :as observation])
   (:import (java.io PushbackReader)
            (java.time Instant LocalDate ZoneId)
            (java.time.format DateTimeFormatter)))
@@ -291,7 +290,9 @@
          :selection-law with the posterior re-keyed by candidate id) or a
          typed {:status :abstained :refusals [...]}. :ranked-actions,
          :preference-stack, :support-typed-scoring-shadow,
-         :policy-support-exclusions and :default-mode-events are REMOVED:
+         :policy-support-exclusions and :default-mode-events are REMOVED, and
+         the top-level :selection-gain statistic (the flat controller's
+         gamma, previously defaulted silently) is no longer written:
          each was a projection of the flat scoring lane. :cascade-problems
          {:problems [...] :refusals [...]} is added beside the decision.
          Bumped (not additive) because a reader must distinguish \"no ranked
@@ -417,12 +418,9 @@
    history. Subsequent calls read this field to continue the rolling
    window; trace-record itself is pure (read-side is `judge`'s
    responsibility).
-
-   As of R14 (precision-over-policies), `:selection-gain` is propagated
-   too — the policy-scale γ-state (`futon2.aif.selection-gain`): a single
-   bounded inverse-temperature learned from the realized-vs-expected
-   outcomes of chosen policies. Same cross-call read-back pattern as
-   `:precision-state`; absent ⇒ the prior (γ=1.0) is reconstructed."
+   The flat controller's `:selection-gain` γ-state is RETIRED at schema 30
+   (SPEC flat-removal H4, 2026-09-17): β is caller-declared on the cascade
+   selection path, and no silent default statistic is written."
   [judge-output]
   (let [observed (:observation judge-output)
         ;; C104: derive both persisted views from the one evaluation object.
@@ -438,11 +436,9 @@
     :free-energy (:free-energy judge-output)
     :prediction-errors (:prediction-errors judge-output {})
     :precision-state (:precision-state judge-output {})
-    ;; R14 precision-over-policies (γ): the policy-scale sibling of
-    ;; :precision-state. The next tick reads this back to continue the rolling
-    ;; realized-outcome window. Absent ⇒ the prior (γ=1.0) is reconstructed.
-    :selection-gain (:selection-gain judge-output
-                                         (selection-gain/initial-selection-gain-state))
+    ;; :selection-gain RETIRED with the flat decision (SPEC flat-removal H4,
+    ;; 2026-09-17, review fix): persisting the old controller γ behind a
+    ;; silent default would write a statistic no producer produced.
     :micro-step-trace (:micro-step-trace judge-output [])
     :morning-brief-events (:morning-brief-events judge-output [])
     :morning-brief-held-events (:morning-brief-held-events judge-output [])

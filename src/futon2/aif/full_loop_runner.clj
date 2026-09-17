@@ -1358,8 +1358,31 @@
 (defmulti construct-selected-action
   "Production constructor dispatch. Every selectable meta-action needs its
   own construction contract; it must not be made to look like an ordinary
-  mission merely by renaming fields."
-  (fn [entry] (get-in entry [:action :type])))
+  mission merely by renaming fields. A cascade candidate dispatches on its
+  :kind (SPEC flat-removal H4, 2026-09-17): its construction is its own
+  recorded precedence and receipts, not a lane reconstruction."
+  (fn [entry]
+    (let [action (:action entry)]
+      (if (= :cascade-candidate (:kind action))
+        :cascade-candidate
+        (:type action)))))
+
+(defmethod construct-selected-action :cascade-candidate
+  [entry]
+  (let [action (:action entry)]
+    {:mission (str (or (:cascade-id action) (:id action)))
+     :psi (str "enact cascade " (or (:cascade-id action) (:id action)))
+     :construction-kind :selected-cascade
+     :selected-action action
+     :precedence (vec (:precedence action))
+     :construction-receipt (:construction-receipt action)
+     :interpretation-receipts (:interpretation-receipts action)
+     :shown (mapv (fn [p] (if (map? p)
+                            (str (or (:id p) (:cascade-id p)))
+                            (str p)))
+                  (:precedence action))
+     :semilattice []
+     :policy-holes []}))
 
 (defmethod construct-selected-action :learn-action-class
   [entry]
@@ -3782,8 +3805,12 @@
                                 ;; decision's own recorded posterior
                                 (vec (map-indexed
                                       (fn [i [candidate p]]
+                                        ;; the discrimination guard reads
+                                        ;; :controller-score and :G-efe; on the
+                                        ;; posterior the comparable quantity is
+                                        ;; the posterior mass itself
                                         {:rank (inc i) :action candidate
-                                         :controller-score p})
+                                         :controller-score p :G-efe p})
                                       (get-in judgement
                                               [:decision :selection-law :posterior]))))
             discrimination (when-not stop-line

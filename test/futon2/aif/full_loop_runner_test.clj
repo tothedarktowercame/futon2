@@ -12,6 +12,7 @@
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.policy :as policy]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire]
@@ -485,17 +486,29 @@
       (is (= :deterministic-rejection (:failure-detail failure)))
       (is (true? (:selection-response-invalid failure))))))
 
-(def selected-action {:type :open-mission :target "M-selected"})
+;; SPEC flat-removal H4 (2026-09-17): the runner's selected entry is a
+;; CASCADE candidate, and the judgement's decision is a real
+;; select-action-cascades decision. The target identity "M-selected" is kept
+;; as the chosen cascade's id so mission-file fixtures keep matching.
+(def selected-action
+  {:kind :cascade-candidate :cascade-id "M-selected" :id "M-selected"
+   :precedence [:test/selected-pattern]
+   :construction-receipt {:cascade/id "M-selected" :moves 1
+                          :family-searched :unit :coverage 1}
+   :interpretation-receipts [{:pattern :test/selected-pattern
+                              :admitted-by :test-suite}]})
 
 (def judgement
-  {:ranked-actions [{:rank 1 :action {:type :open-mission :target "M-rank-head"}
-                     :G-efe -2.0 :controller-score -2.0}
-                    {:rank 2 :action selected-action
-                     :G-efe -1.0 :controller-score -1.0}]
-   :decision {:action selected-action :rank 2 :source :habit-prior}
+  {:decision (policy/select-action-cascades
+              [{:action selected-action :controller-score -2.0 :rank 1}
+               {:action (assoc selected-action
+                               :cascade-id "M-rank-head" :id "M-rank-head"
+                               :precedence [:test/other-pattern])
+                :controller-score -1.0 :rank 2}]
+              {:beta 2.0})
    :belief {} :belief-pre {} :observation {} :free-energy {}
    :prediction-errors {} :precision-state {} :micro-step-trace []
-   :ranked-actions-extra [] :mode :maintain})
+   :mode :maintain})
 
 (defn synthetic-artifact-binding [_repo before author-job]
   {:fresh-author? true
@@ -720,17 +733,10 @@
             :parked-transition nil}
            (:lifecycle/discharge item)))))
 
-(deftest judge-operator-actions-queue-at-the-runner-persistence-boundary
-  (let [gate {:type :mission-gate
-              :mission "M-learning-loop"
-              :gate-kind "operator-acceptance"
-              :gate-text "Joe accepts the rendered graph"
-              :date "2026-07-22"}
-        {:keys [result queued-operator-actions]}
-        (run-feature-card-attempt
-         {:author-card feature-card-claim :operator-actions [gate]})]
-    (is (= :grounded-change (:outcome result)))
-    (is (= [gate] queued-operator-actions))))
+;; DELETED (flat, SPEC flat-removal H4 2026-09-17):
+;; judge-operator-actions-queue-at-the-runner-persistence-boundary — it
+;; asserted operator gates queued from the judgement's :operator-actions,
+;; a flat-candidate field that can no longer be produced.
 
 (deftest opt-in-judgement-transform-runs-inside-the-selection-phase
   (let [seen (atom nil)
@@ -1465,65 +1471,11 @@
              (get-in construction
                      [:actuation-contract :production-route]))))))
 
-(deftest fire-pattern-production-construction-reaches-full-loop-actuation
-  (let [action (fire-pattern-action)
-        fire-judgement (-> judgement
-                           (assoc :ranked-actions
-                                  [{:rank 1 :action action
-                                    :G-efe -2.0
-                                    :controller-score -2.0}])
-                           (assoc :decision {:action action :rank 1}))
-        dispatches (atom [])
-        grounded-construction (atom nil)
-        result
-        (runner/run-opportunity!
-         {:cohort? false
-          :phase-log-fn (fn [_])
-          :repair-open-fn (constantly [])
-          :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                              :codex-7 {:status "idle" :invoke-ready? true}})
-          :judge-fn (fn [_] {:judgement fire-judgement})
-          :refresh-fn (fn [])
-          :substrate-preflight-fn (fn [_] {:route :test})
-          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
-                                 :git-dirty? false :repo-heads {}})
-          :mode-flags-fn (fn [] {})
-          :version-stamp-fn identity
-          :mission-fn (fn [_] nil)
-          :trace-fn (fn [_] "/tmp/fire-pattern-trace.edn")
-          :construction-wiring-fn enriched-test-fold
-          :author-artifact-observer-fn synthetic-artifact-binding
-          :dispatch-fn (fn [_ agent _ _ prompt]
-                         (swap! dispatches conj {:agent agent :prompt prompt})
-                         {:job-id (if (= agent "zai-5")
-                                    "author-job" "review-job")})
-          :poll-fn (fn [_ job-id]
-                     (if (= job-id "author-job")
-                       {:job-id job-id :state "done" :artifact-ref "fire123"
-                        :feature-card feature-card-claim
-                        :execution successful-execution}
-                       {:job-id job-id :state "done"
-                        :execution successful-execution
-                        :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
-          :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/fire.clj"]})
-          :ground-fn (fn [_ _ _ _ _ _ _ construction _ _]
-                       (reset! grounded-construction construction)
-                       {:resolved? true :dial-moved? true
-                        :implementation-id "fire-pattern-impl"})
-          :queue-fn identity})]
-    (is (= :grounded-change (:outcome result)))
-    (is (= ["zai-5" "codex-7"] (mapv :agent @dispatches)))
-    (is (re-find #":fire-pattern-actuation"
-                 (:prompt (first @dispatches))))
-    (is (re-find #":retrieval-provenance"
-                 (:prompt (first @dispatches))))
-    (is (re-find #":artifact-integrity"
-                 (:prompt (first @dispatches))))
-    (is (re-find #":grounded-implementation"
-                 (:prompt (second @dispatches))))
-    (is (= (:pattern-sha256 action)
-           (get-in @grounded-construction
-                   [:actuation-contract :pattern-sha256])))))
+;; DELETED (flat meta-action selection, SPEC flat-removal H4 2026-09-17):
+;; fire-pattern-production-construction-reaches-full-loop-actuation — a
+;; :fire-pattern action can no longer be a decision. The construction
+;; contract itself stays covered by fire-pattern-construction-is-a-typed-
+;; production-contract above (direct construct-for-decision call).
 
 (defn- substrate-fixture []
   (let [docs (atom {})
@@ -1580,12 +1532,9 @@
 (deftest construction-failure-opens-system-stop-line-and-does-not-write-trace
   (let [findings (atom [])
         traces (atom [])
-        gap-action {:type :learn-action-class :target-class :fire-pattern}
-        gap-judgement (-> judgement
-                          (assoc :ranked-actions [{:rank 1 :action gap-action
-                                                   :G-efe -2.0
-                                                   :controller-score -2.0}])
-                          (assoc :decision {:action gap-action :rank 1}))
+        ;; the shared cascade judgement: the failure under test is the
+        ;; constructor refusing (construct-fn nil), not the action grain
+        gap-judgement judgement
         result (runner/run-opportunity!
                 {:cohort? false
                  :phase-log-fn (fn [_])
@@ -2671,9 +2620,11 @@
    :judge-fn
    (fn [_]
      {:judgement (assoc judgement
-                        :ranked-actions []
-                        :admissible-actions []
-                        :decision {:action :abstain})})})
+                        :decision {:status :abstained
+                                   :refusals
+                                   [{:target "M-readiness"
+                                     :kind :beta-not-declared
+                                     :missing :beta-by-context}]})})})
 
 (deftest exhausted-selection-retries-close-with-typed-kind
   (let [phases (atom [])
@@ -2932,28 +2883,21 @@
     (is (= 1 @substrate-calls))))
 
 (deftest flat-leading-g-stops-before-spending-an-agent-turn
+  "Cascade grain, same claim: candidates the posterior cannot discriminate
+   stop the tick before an agent turn is spent (SPEC flat-removal H4)."
   (let [dispatches (atom [])
         findings (atom [])
-        flat-action {:type :advance-mission :target "M-flat-a"
-                     :open-hole-count 8}
-        flat-admissible
-        [{:rank 1 :action flat-action :G-efe 4.0
-          :controller-score 4.0}
-         {:rank 2
-          :action {:type :advance-mission :target "M-flat-b"
-                   :open-hole-count 9}
-          :G-efe 4.0
-          :controller-score 4.0}]
         flat-judgement
-        (-> judgement
-            (assoc :ranked-actions
-                   (conj flat-admissible
-                         {:rank 3
-                          :action {:type :inadmissible :target "mask"}
-                          :G-efe 9.0 :controller-score 9.0}))
-            (assoc :admissible-actions flat-admissible)
-            (assoc :decision {:action flat-action :rank 1
-                              :controller-score 4.0}))
+        (assoc judgement
+               :decision
+               (policy/select-action-cascades
+                ;; identical G: the posterior cannot discriminate
+                [{:action selected-action :controller-score 4.0 :rank 1}
+                 {:action (assoc selected-action
+                                 :cascade-id "M-flat-b" :id "M-flat-b"
+                                 :precedence [:test/other-pattern])
+                  :controller-score 4.0 :rank 2}]
+                {:beta 2.0}))
         result
         (runner/run-opportunity!
          {:cohort? false
