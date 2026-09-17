@@ -13,7 +13,13 @@
   to the lane.
 
   Note: `judge` on {} reads the live mission/ticket substrate for candidates.
-  That affects which action is chosen, not the grain these assertions check."
+  That affects which action is chosen, not the grain these assertions check.
+
+  Moved into the DEFAULT suite on 2026-09-17 (SPEC-flat-removal E2: \"moved
+  into the default suite once it passes\"), from vm-test, where it had been
+  the requirement the production tick failed. It costs ~1 minute: `judge`
+  observes each declared cascade source's facts, and a C1/C2 fact runs the
+  Test Registry check in its own JVM."
   (:require [clojure.test :refer [deftest is]]
             [futon2.report.war-machine :as wm]))
 
