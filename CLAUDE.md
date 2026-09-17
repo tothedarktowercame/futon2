@@ -28,6 +28,34 @@ futon3c/CLAUDE.md while the violating pattern (the `-m` click entrypoint,
 futon2 `d0be5e6`) grew in this repo unremarked for twelve days. Invariants
 must live where the violations get built.
 
+## Test discipline: check a warrant before you run a suite
+
+**Do not run futon2's full suite as a matter of course.** It is minutes of CPU
+on a shared box, and one wedged test takes it away from everyone: on
+2026-09-17 a WM-08 rehearsal in `test/futon2/aif/` was killed at 400 s, then
+again at 150 s after its fix, and while it sat there `clojure -M:test -m
+cognitect.test-runner` did not terminate for anybody.
+
+Reach for evidence first, execution second:
+
+```bash
+# Already-recorded evidence, no execution, typed refusal when it is stale
+clojure -M -m futon3c.test-registry check <config.edn>
+
+# If you must run, run the narrowest thing that answers the question
+clojure -M:test -n futon2.aif.some-test
+clojure -M:test -n futon2.aif.some-test -v futon2.aif.some-test/one-case
+```
+
+A check refuses — `:stale-sha`, `:environment-mismatch`,
+`:results-log-mismatch` — the moment the code, tests, environment or load
+closure move, and that refusal is your signal to run. The warrant's log lives
+in the write-only ledger under its own sha256, so it survives the file being
+moved or deleted; see futon3c/CLAUDE.md I-6 for the full contract.
+
+You changed the code? Then the warrant refuses by design and running is the
+point. Everything else is re-execution in place of evidence.
+
 ## Store discipline (futon1b :7073)
 
 - Never restart the store casually; it is systemd-managed

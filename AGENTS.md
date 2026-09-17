@@ -23,6 +23,29 @@ Ant map keys (always present):
  :prec {:Pi-o {:food double :pher double :h double}
         :tau double}}                         ; action temperature
 
+## A warrant is evidence; a suite run is a cost (adopted 2026-09-17)
+
+Registry warrants replaced habitual re-running. Check before you run, and when
+you run, run one namespace — not the suite.
+
+The failure that adopted this rule: an unverified rehearsal test was swept onto
+main during a backlog clear, and it does not terminate. claude-4 killed it at
+400 s; a second run with its author's fix in place was killed at 150 s. For as
+long as it sat on main, every agent running futon2's whole suite lost the same
+minutes to the same hang, and none of them learned anything the warrant for
+those namespaces did not already record.
+
+- `clojure -M -m futon3c.test-registry check <config.edn>` executes nothing and
+  refuses with a typed reason when the evidence has gone stale.
+- A refusal means run. No refusal means running tells you nothing new.
+- Register a run when others will need to rely on it; the log is stored by
+  content in the write-only ledger, so the warrant outlives the file.
+
+Corollary for landing work: never commit a test you have not run. The sweep
+that put this one on main flagged it as unrun in the commit message, which was
+honest and still insufficient — the note does not stop the next agent losing
+six minutes.
+
 ## Changing a witness: run its negative modes before you land (adopted 2026-09-01)
 
 The 32 Lean `#guard_msgs` fixtures are the checks that prove the *other* checks
