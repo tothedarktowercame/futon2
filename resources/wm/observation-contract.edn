@@ -1,0 +1,51 @@
+{:schema :wm/observation-contract-v1
+ :authority :proposed-under-ruling-r-a-pending
+ :written "2026-09-17"
+ :owner "WM-04"
+ :carrier {:lean {:repo "mathlib4" :sha "889429e6bf" :module "DarkTower.WarMachine.TokenObservation"}
+           :clojure {:repo "futon2" :sha "4bf05c84d4"
+                     :functions [token-likelihood observation-distribution predict-observations]
+                     :locus "src/futon2/aif/cascade_model_manifest.clj"}}
+ :token {:definition "one step application's stated output; 'exists' = independently locatable artifact satisfying the application's own stated conditions at the cutoff sha"}
+ :classes
+ [{:id :C1 :kind :checkable :token "named Lean module/declaration"
+   :check "at pinned repo sha, lake env lean with #print decl succeeds, no sorryAx"
+   :check-fn check-lean-declaration :inputs {:repo string :sha string :module string :decl string}}
+  {:id :C2 :kind :checkable :token "named test namespace passing"
+   :check "at pinned sha, one runner invocation yields aggregate 0 failures 0 errors"
+   :check-fn check-test-aggregate :inputs {:repo string :sha string :nses vector}}
+  {:id :C3 :kind :checkable :token "named file at path"
+   :check "git cat-file -e sha:path succeeds"
+   :check-fn check-path-exists :inputs {:repo string :sha string :path string}}
+  {:id :C4 :kind :checkable :token "named declaration in a named file"
+   :check "bytes at sha:path contain the exact declaration head"
+   :check-fn check-decl-in-file :inputs {:repo string :sha string :path string :decl string}}
+  {:id :C5 :kind :checkable :token "named entry in the contract bundle"
+   :check "emitted bundle JSON at pinned sha contains the entry with resolving clojureLocus"
+   :check-fn check-registry-entry :inputs {:repo string :sha string :entry string}}
+  {:id :J :kind :judgement
+   :question "Does this step's stated output exist as an independently locatable artifact satisfying the application's own stated conditions, at cutoff sha X?"
+   :verdicts [:exists :does-not-exist :insufficient-evidence :ambiguous]
+   :may-see ["cascade node application text" "repository and DAG/registry at pinned cutoff sha" "pattern source"]
+   :must-not-see ["DATA-cascade-outcomes recorded outcome" "node :status / author claim" "downstream acceptance/review records" "model posterior"]}]
+ :schedule {:point :after-each-application
+            :cutoff "git sha of the observing repository at observation time, recorded with the adjudication record"
+            :missing-cutoff-refusal :missing-cutoff
+            :extra-points-depend-on :ruling-r-c}
+ :refusals {:no-application-field :no-stated-output
+            :checkable-without-locator :no-locator
+            :unrecorded-cutoff :missing-cutoff
+            :judgement-noncategorical [:insufficient-evidence :ambiguous]}
+ :classification {:method "scan application text for mechanically nameable stated artifacts (paths, lake build, #print axioms, test ns, contract/registry entry); C1-C5 only when the stated output itself is such an artifact, else J"
+                  :rule-recorded true :reviewer :R9 :reclassification-expected true}
+ :census {:total-cascades 46 :total-nodes 233 :with-application 184
+          :checkable 1 :judgement 183 :no-stated-output 49
+          :checkable-nodes [{:target "WM-07" :node "WM-07-C5" :class :C5}]
+          :data-outcomes {:realised 39 :contradicted 1 :unknown 193 :source "DATA-cascade-outcomes-2026-09-17.edn"}
+          :by-family
+          {:WM {:cascades 14 :nodes 103 :with-application 54 :checkable 1 :judgement 53 :no-stated-output 49}
+           :R {:cascades 21 :nodes 84 :with-application 84 :checkable 0 :judgement 84 :no-stated-output 0}
+           :E {:cascades 11 :nodes 46 :with-application 46 :checkable 0 :judgement 46 :no-stated-output 0}}}
+ :pending-rulings {:r-a "rescope WM-04 under P5 (rate policy, census purpose)"
+                   :r-c "horizon semantics / declared schedule points"}
+ :not-claimed [:observations :labels :rates :measured-A :assembly]}

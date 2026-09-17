@@ -39,6 +39,11 @@ resources/*
 !resources/sorrys.edn
 !resources/capability_zones/
 !resources/c-modules/
+# WM-04 S-1 (2026-09-17): machine-readable observation contract for the P5
+# token adjudication kernel (PLAN-WM-04-unblock-2026-09-17.md).
+!resources/wm/
+resources/wm/*
+!resources/wm/observation-contract.edn
 
 # local file that shouldn't be tracked here
 LICENSE
