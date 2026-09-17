@@ -18,6 +18,8 @@
   spec, R14's declared β = 1. Required values are the recorded,
   R9-reproduced ones (10-R9-fix-wave-1.edn)."
   (:require [clojure.test :refer [deftest is]]
+            [futon2.aif.cascade-problems :as cp]
+            [futon2.aif.locator-fixtures :as locfix]
             [futon2.report.war-machine :as wm]))
 
 ;; --- tick 1's problem, from the p4ng records 01-R2 … 07-R14 ---------------
@@ -73,6 +75,13 @@
    :horizon-steps 3
    :cascade-spec {:want (set want) :evidence #{} :lam 1 :mu 1 :zeroed #{}}
    :beta 1})
+
+;; tick-level judge sources (H5b): targets and per-target maps are supplied
+;; at the assertion below; the horizon and β come from the problem.
+(def tick-1-sources-from-problem
+  {:horizon-steps (:horizon-steps problem)
+   :beta-by-context {:tick-1 {:beta (:beta problem)}}
+   :context-of (fn [_] :tick-1)})
 
 ;; candidate-space ids C0..C3 by position: C1 test-first, C2 fix-first,
 ;; C3 fix-only (03-R6.edn :computed :cascades).
@@ -136,26 +145,57 @@
              (every? #(= 3 (count (get-in % [:prediction :trajectory])))
                      (:predictions lane)))
         "R4 predicted all four candidates at the same declared T = 3"))
-  ;; 4. The real judge wires the lane: same result attached, route appended.
-  (let [lane (wm/cascade-lane problem)
-        j1 (wm/judge {:cascade-problem problem})]
-    (is (= (dissoc lane :route) (dissoc (:cascade-lane j1) :route))
-        "judge with :cascade-problem attaches the same cascade-lane result")
-    (is (= (concat [:R2 :R7 :R3 :R8 :R5 :R6 :R14]
-                   [:R1 :R6 :R13 :R4 :R5 :R14 :R16 :R9])
-           (mapv :node (:wm/route j1)))
-        "the lane's route entries are appended to the judgement's :wm/route"))
-  ;; 5. judge WITHOUT :cascade-problem is unchanged (baseline recorded from
-  ;;    the pre-wiring judge on the same minimal scan data, 2026-09-18).
-  (let [j0 (wm/judge {})
-        j1 (wm/judge {:cascade-problem problem})]
-    (is (= [:R2 :R7 :R3 :R8 :R5 :R6 :R14] (mapv :node (:wm/route j0)))
-        "the lane-less tick keeps its original route")
-    (is (not (contains? j0 :cascade-lane))
-        "no :cascade-lane key is attached without :cascade-problem")
-    (is (= (dissoc j0 :cascade-lane :wm/route)
-           (dissoc j1 :cascade-lane :wm/route))
-        "the lane is purely additive: the judgement body is identical with and without the problem"))
+  ;; 4. The real judge now runs the cascade decision from :cascade-sources
+  ;;    (H5b; the single :cascade-problem injection is gone with the flat
+  ;;    path). The tick-1 sources key a REAL substrate target.
+  (let [target (first (cp/substrate-targets))
+        ;; every token needs a checkable locator (WM-04, futon2 705adb39);
+        ;; fixture C3 locators, never observed here
+        sources (locfix/locate-all
+                 (assoc tick-1-sources-from-problem
+                       :universes {target (:facts problem)}
+                       :interpretations
+                       {target {:patterns (:interpretations problem)
+                                :receipts
+                                {:aif/structured-observation-vector {:receipt "S"}
+                                 :aif/placeholder-is-load-bearing {:receipt "P"}
+                                 :test-step-covering-missing-total-repos {:receipt "T"}}}}
+                       :wants {target (:want problem)}
+                       :candidates
+                       {target (mapv (fn [p] {:precedence p
+                                              :construction-receipt
+                                              {:kind :construction-receipt :moves []}})
+                                     (:precedences problem))}))
+        j1 (wm/judge {} {:cascade-sources sources})]
+    (is (= :aif/placeholder-is-load-bearing
+           (-> j1 :decision :action :precedence first :id))
+        "judge with tick-1 sources decides :aif/placeholder-is-load-bearing for that target (gated)")
+    (is (within-1e-9 (get-in j1 [:decision :chosen-action-mass])
+                     0.37005613489124095)
+        "the judge's chosen action carries mass 0.37005613489124095 at the declared β = 1")
+    (is (= 1 (count (get-in j1 [:cascade-problems :problems])))
+        "the target's problem is attached under :cascade-problems")
+    (is (= [[:R1 :R6 :R13 :R4 :R5 :R14 :R16 :R9]]
+           (mapv #(mapv :node (:route %)) (:cascade-lanes j1)))
+        "the judgement records the target's full cascade-lane route under :cascade-lanes")
+  ;; 5. judge WITHOUT sources abstains honestly: every substrate target is
+  ;;    refused, no removed flat key is present, and no problem is assembled.
+  (let [j0 (wm/judge {})]
+    (is (= [:R2 :R7 :R3 :R8] (mapv :node (:wm/route j0)))
+        "the substrate route remains; the flat R5/R6/R14 tags are gone with the flat path")
+    (is (= :abstained (get-in j0 [:decision :status]))
+        "no sources ⇒ the gated abstention")
+    (is (pos? (count (get-in j0 [:decision :refusals])))
+        "the abstention lists per-target refusals")
+    (is (= [] (get-in j0 [:cascade-problems :problems]))
+        "nothing is assembled without sources")
+    (is (= :none-supplied (:cascade-sources j0))
+        "the absent sources are recorded, never invented")
+    (is (nil? (some #(contains? j0 %)
+                    [:ranked-actions :admissible-actions :default-mode-events
+                     :operator-actions :policy-support-exclusions
+                     :cascade-policies :cascade-lane]))
+        "no removed flat key is present on the judgement")))
   ;; 6. Typed refusals stop the lane with the route so far; nothing defaults.
   (let [no-beta (wm/cascade-lane (dissoc problem :beta))]
     (is (and (= :R14 (:stopped-at no-beta))

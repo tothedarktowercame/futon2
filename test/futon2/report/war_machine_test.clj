@@ -12,9 +12,6 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.efe :as efe]
-            [futon2.aif.disposition-risk :as disposition]
-            [checks.disposition-kernel :as checkpoint-kernel]
-            [futon2.aif.ruled-outcome-c :as ruled]
             [futon2.aif.enumeration-completeness :as ec]
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.mission-c :as mc]
@@ -742,117 +739,6 @@
                                :evidence/type "coordination"
                                :evidence/body {:text "war-machine changes in futon3c"}})))))
 
-(deftest anamnesis-tiebreak-reorders-address-sorry-groups
-  (let [ranked [{:rank 1
-                 :controller-score -4.2558
-                 :action {:type :address-sorry
-                          :target :sorry/r3a-likelihood-coupling-density}}
-                {:rank 2
-                 :controller-score -4.2558
-                 :action {:type :address-sorry
-                          :target :sorry/r3a-likelihood-ticks-firing-ratio}}
-                {:rank 3
-                 :controller-score -4.2558
-                 :action {:type :address-sorry
-                          :target :sorry/r3d-per-entity-attribution}}
-                {:rank 4
-                 :controller-score -4.2558
-                 :action {:type :address-sorry
-                          :target :sorry/stub-lifts-pending-aif-edn}}
-                {:rank 5
-                 :controller-score -4.2558
-                 :action {:type :address-sorry
-                          :target :sorry/wm-ui-hud-mode-rationale-hardcode}}
-                {:rank 6
-                 :controller-score -4.2558
-                 :action {:type :address-sorry
-                          :target :sorry/mission-aif-head-not-served}}
-                {:rank 7
-                 :controller-score -4.2558
-                 :action {:type :address-sorry
-                          :target :sorry/handler-closure-route-rebinding}}]
-        sorry-idx {"sorry/r3a-likelihood-coupling-density"
-                   {:hx/props {:sorry/related-missions ["M-r3a-density"]}}
-                   "sorry/r3a-likelihood-ticks-firing-ratio"
-                   {:hx/props {:sorry/related-missions ["M-r3a-ticks"]}}
-                   "sorry/r3d-per-entity-attribution"
-                   {:hx/props {:sorry/related-missions ["M-r3d"]}}
-                   "sorry/stub-lifts-pending-aif-edn"
-                   {:hx/props {:sorry/related-missions []}}
-                   "sorry/wm-ui-hud-mode-rationale-hardcode"
-                   {:hx/props {:sorry/related-missions ["M-wm-ui"]}}
-                   "sorry/mission-aif-head-not-served"
-                   {:hx/props {:sorry/related-missions ["M-head-a" "M-head-b" "M-head-c"]}}
-                   "sorry/handler-closure-route-rebinding"
-                   {:hx/props {:sorry/related-missions ["M-drawbridge"]}}}
-        mission-idx {"r3a-density" "futon3c-d/mission/r3a-density"
-                     "r3a-ticks" "futon3c-d/mission/r3a-ticks"
-                     "r3d" "futon3c-d/mission/r3d"
-                     "wm-ui" "futon3c-d/mission/wm-ui"
-                     "head-a" "futon3c-d/mission/head-a"
-                     "head-b" "futon3c-d/mission/head-b"
-                     "head-c" "futon3c-d/mission/head-c"
-                     "drawbridge" "futon3c-d/mission/drawbridge"}
-        delta-by-endpoint {"futon3c-d/mission/r3a-density" {:mission-T 1.0}
-                           "futon3c-d/mission/r3a-ticks" {:mission-T 1.0}
-                           "futon3c-d/mission/r3d" {:mission-T 0.3}
-                           "futon3c-d/mission/wm-ui" {:mission-T 0.8}
-                           "futon3c-d/mission/head-a" {:mission-T 0.1}
-                           "futon3c-d/mission/head-b" {:mission-T 0.3}
-                           "futon3c-d/mission/head-c" {:mission-T 0.4}
-                           "futon3c-d/mission/drawbridge" {:mission-T 0.0}}]
-    (with-redefs-fn {#'wm/sorry-doc-index (fn [] sorry-idx)
-                     #'wm/mission-doc-index (fn [] mission-idx)
-                     #'wm/compute-delta-t-mission
-                     (fn [mission-endpoint]
-                       (get delta-by-endpoint mission-endpoint {:delta-T 0.0}))}
-      (fn []
-        (let [reordered (#'wm/apply-anamnesis-tiebreak ranked)
-              targets (mapv #(get-in % [:action :target]) reordered)]
-          (is (= [:sorry/mission-aif-head-not-served
-                  :sorry/handler-closure-route-rebinding
-                  :sorry/r3d-per-entity-attribution
-                  :sorry/wm-ui-hud-mode-rationale-hardcode
-                  :sorry/r3a-likelihood-coupling-density
-                  :sorry/r3a-likelihood-ticks-firing-ratio
-                  :sorry/stub-lifts-pending-aif-edn]
-                 targets))
-          (is (= [1 2 3 4 5 6 7] (mapv :rank reordered)))
-          (is (= [:sorry/r3a-likelihood-coupling-density
-                  :sorry/r3a-likelihood-ticks-firing-ratio
-                  :sorry/stub-lifts-pending-aif-edn]
-                 (subvec targets 4 7))
-              "legitimate 0.0 concentration ties stay in original order"))))))
-
-(deftest structural-pressure-enrichment-attaches-candidate-local-values
-  (let [candidates [{:type :no-op}
-                    {:type :address-sorry
-                     :target :sorry/r3d-per-entity-attribution}
-                    {:type :address-sorry
-                     :target :sorry/mission-aif-head-not-served}]
-        sorry-idx {"sorry/r3d-per-entity-attribution"
-                   {:hx/props {:sorry/related-missions ["M-r3d"]}}
-                   "sorry/mission-aif-head-not-served"
-                   {:hx/props {:sorry/related-missions ["M-head-a" "M-head-b" "M-head-c"]}}}
-        mission-idx {"r3d" "futon3c-d/mission/r3d"
-                     "head-a" "futon3c-d/mission/head-a"
-                     "head-b" "futon3c-d/mission/head-b"
-                     "head-c" "futon3c-d/mission/head-c"}
-        delta-by-endpoint {"futon3c-d/mission/r3d" {:mission-T 0.3}
-                           "futon3c-d/mission/head-a" {:mission-T 0.1}
-                           "futon3c-d/mission/head-b" {:mission-T 0.3}
-                           "futon3c-d/mission/head-c" {:mission-T 0.4}}]
-    (with-redefs-fn {#'wm/sorry-doc-index (fn [] sorry-idx)
-                     #'wm/mission-doc-index (fn [] mission-idx)
-                     #'wm/compute-delta-t-mission
-                     (fn [mission-endpoint]
-                       (get delta-by-endpoint mission-endpoint {:mission-T 0.5}))}
-      (fn []
-        (let [enriched (#'wm/enrich-candidates-with-structural-pressure candidates)]
-          (is (= 0.0 (:structural-pressure-per-action (first enriched))))
-          (is (= 0.7 (:structural-pressure-per-action (second enriched))))
-          (is (= 2.2 (:structural-pressure-per-action (nth enriched 2)))))))))
-
 (deftest three-factor-mission-value-enrichment-and-non-progress-decay
   (let [candidates [{:type :advance-mission :target "M-spine" :open-hole-count 4}
                     {:type :advance-mission :target "M-head" :open-hole-count 4}
@@ -1003,131 +889,6 @@
     (is (= 1 (#'wm/consecutive-non-progress-count
               action [failed {:decision {:action {:type :no-op}}} failed]))
         "a targetless record (no-op/abstain) breaks the chain without throwing")))
-
-(deftest configured-fold-options-preserve-absence
-  (let [base {:time-pressure 0.25 :horizon-steps 3}
-        absent (#'wm/configured-fold-efe-opts base {})
-        calls (atom [])
-        config {:ruled-outcome-c-enabled? true
-                :seeded-c ruled/seeded-c
-                :disposition-kernel (fn [observation]
-                                      (swap! calls conj observation)
-                                      (assoc (zipmap (:support ruled/seeded-c)
-                                                    (repeat 0.0))
-                                             :agent-unavailable 1.0))}
-        supplied (#'wm/configured-fold-efe-opts base config)]
-    (is (= base absent))
-    (is (= config (select-keys supplied (keys config))))
-    (is (= (pr-str (efe/compute-efe {} {:type :no-op} base))
-           (pr-str (efe/compute-efe {} {:type :no-op} absent))))
-    (is (pos? (:G-ruled-outcome-c
-               (efe/compute-efe {} {:type :no-op} supplied))))
-    (is (= 1 (count @calls)))))
-
-(deftest live-star-map-efe-opts-adds-conservative-graph-blend
-  (testing "live WM opts carry the graph and softened star-map weights when graph loads"
-    (let [graph {:capabilities {:goal {:status :held}}
-                 :missions {}}]
-      (with-redefs-fn {#'wm/capability-star-map (fn [] graph)}
-        (fn []
-          (let [opts (#'wm/live-star-map-efe-opts
-                      {:time-pressure 0.25 :horizon-steps 3})]
-            (is (= graph (:capability-graph opts)))
-            (is (= :wm-overnight-unsupervised (:pre-registered-goal opts)))
-            (is (= 5.0 (:graph-applicability-penalty opts)))
-            (is (= 6.0 (:graph-ascent-weight opts)))
-            (is (= 3.0 (:graph-body-weight opts)))
-            (is (= 0.25 (:time-pressure opts)))
-            (is (= 3 (:horizon-steps opts))))))))
-
-  (testing "live WM opts are unchanged if the star-map graph is absent"
-    (with-redefs-fn {#'wm/capability-star-map (fn [] nil)}
-      (fn []
-        (let [base {:time-pressure 0.25 :horizon-steps 3}]
-          (is (= base (#'wm/live-star-map-efe-opts base))))))))
-
-(deftest live-gap-view-efe-opts-adds-conservative-gap-blend
-  (testing "live WM opts carry only ratified local-capability fold-view gap scores"
-    (let [fold-view {:missions [{:mission "M-war-machine-tuning" :gap-score 0.491}
-                                {:mission "M-canon-fingerprint-store" :gap-score 0.8}]}
-          domain-view {:source "test-ratified"
-                       :missions [{:mission "M-war-machine-tuning"
-                                   :repo "futon3c"
-                                   :domain :local-capability}
-                                  {:mission "M-canon-fingerprint-store"
-                                   :repo "futon6"
-                                   :domain :math}]}]
-      (reset! @#'wm/mission-fold-view-cache nil)
-      (reset! @#'wm/mission-domain-ratified-cache nil)
-      (with-redefs-fn {#'wm/mission-fold-view-path "fold.edn"
-                       #'wm/mission-domain-ratified-path "domain.edn"
-                       #'wm/read-edn-file (fn [path]
-                                            (case path
-                                              "fold.edn" fold-view
-                                              "domain.edn" domain-view
-                                              nil))}
-        (fn []
-          (let [opts (#'wm/live-gap-view-efe-opts
-                      {:time-pressure 0.25 :horizon-steps 3})
-                local (efe/gap-control-terms (:mission-gap-view opts)
-                                         {:type :open-mission
-                                          :target "M-war-machine-tuning"}
-                                         {:gap-weight (:gap-weight opts)})
-                math (efe/gap-control-terms (:mission-gap-view opts)
-                                        {:type :open-mission
-                                         :target "M-canon-fingerprint-store"}
-                                        {:gap-weight (:gap-weight opts)})]
-            (is (= {"M-war-machine-tuning" 0.491}
-                   (:mission-gap-view opts)))
-            (is (= 6.0 (:gap-weight opts)))
-            (is (= 2.9459999999999997 (:gap-exploration-bonus local)))
-            (is (= 0.0 (:gap-exploration-bonus math)))
-            (is (= 0.25 (:time-pressure opts)))
-            (is (= 3 (:horizon-steps opts))))))))
-
-  (testing "live WM opts carry an empty gap view if the ratified domain file is absent"
-    (let [fold-view {:missions [{:mission "M-war-machine-tuning" :gap-score 0.491}]}]
-      (reset! @#'wm/mission-fold-view-cache nil)
-      (reset! @#'wm/mission-domain-ratified-cache nil)
-      (with-redefs-fn {#'wm/mission-fold-view-path "fold.edn"
-                       #'wm/mission-domain-ratified-path "missing.edn"
-                       #'wm/read-edn-file (fn [path]
-                                            (case path
-                                              "fold.edn" fold-view
-                                              "missing.edn" nil
-                                              nil))}
-      (fn []
-        (let [opts (#'wm/live-gap-view-efe-opts
-                    {:time-pressure 0.25 :horizon-steps 3})
-              local (efe/gap-control-terms (:mission-gap-view opts)
-                                       {:type :open-mission
-                                        :target "M-war-machine-tuning"}
-                                       {:gap-weight (:gap-weight opts)})]
-          (is (= {} (:mission-gap-view opts)))
-          (is (= 0.0 (:gap-exploration-bonus local)))))))))
-
-(deftest anamnesis-tiebreak-leaves-mixed-or-non-sorry-ties-alone
-  (let [ranked [{:rank 1
-                 :controller-score -4.2558
-                 :action {:type :address-sorry
-                          :target :sorry/r3d-per-entity-attribution}}
-                {:rank 2
-                 :controller-score -4.2558
-                 :action {:type :open-mission
-                          :target "M-action-cost-modelling"}}
-                {:rank 3
-                 :controller-score -4.2558
-                 :action {:type :open-mission
-                          :target "M-mission-wiring"}}]]
-    (with-redefs-fn {#'wm/sorry-doc-index (fn [] (throw (ex-info "should not be called" {})))
-                     #'wm/mission-doc-index (fn [] (throw (ex-info "should not be called" {})))
-                     #'wm/compute-delta-t-mission
-                     (fn [_] (throw (ex-info "should not be called" {})))}
-      (fn []
-        (let [reordered (#'wm/apply-anamnesis-tiebreak ranked)]
-          (is (= (mapv #(get-in % [:action :target]) ranked)
-                 (mapv #(get-in % [:action :target]) reordered)))
-          (is (= [1 2 3] (mapv :rank reordered))))))))
 
 ;; ---------------------------------------------------------------------------
 ;; RUN8 / stage S3 — the FUTON_WM_TAU_MODE parser and the β hand-off.
@@ -2722,41 +2483,17 @@
       (is (nil? (get idx [:advance-mission "M-c"]))
           "and a file that is not a daily trace is not corpus"))))
 
-(deftest constant-checkpoint-adapter-through-a3-scorer
-  (let [legacy-artifact
-        (checkpoint-kernel/fit-kernel
-         {:attempts [{:closed? true :checkpoints [:selected :closed]
-                      :outcome :grounded-change}]}
-         "synthetic-cohort" "test-fixture")
-        ;; The checkpoint fitter still records its historical 14-label carrier.
-        ;; The A3 scorer contract narrowed to ruled-outcome C's current twelve
-        ;; on 2026-09-12; this fixture must exercise that boundary, not disable
-        ;; the refusal by feeding the two named historical labels through it.
-        support (vec (sort (:support ruled/seeded-c)))
-        project (fn [mass] (select-keys mass support))
-        artifact (-> legacy-artifact
-                     (assoc :support support)
-                     (update :outcome-counts project)
-                     (update :supported-outcomes
-                             #(vec (filter (set support) %)))
-                     (update :unsupported-outcomes
-                             #(vec (filter (set support) %)))
-                     (update :states
-                             (fn [states]
-                               (mapv #(-> %
-                                          (update :counts project)
-                                          (update :probability project))
-                                     states))))
-        adapter (disposition/constant-checkpoint-kernel artifact)
-        base {:risk-mode :hinge :ambiguity-mode :variance-sum}
-        absent (#'wm/configured-fold-efe-opts base {})
-        enabled (#'wm/configured-fold-efe-opts
-                 base {:ruled-outcome-c-enabled? true :seeded-c ruled/seeded-c
-                       :disposition-kernel adapter})
-        action {:type :no-op}
-        before (efe/compute-efe {} action base)
-        after (efe/compute-efe {} action enabled)]
-    (is (= (pr-str before) (pr-str (efe/compute-efe {} action absent))))
-    (is (< (Math/abs (- (Math/log 2.0) (:G-ruled-outcome-c after))) 1.0e-12))
-    (is (< (Math/abs (- (Math/log 2.0)
-                       (- (:controller-score after) (:controller-score before)))) 1.0e-12))))
+
+(deftest judge-never-reaches-a-flat-entry-point
+  ;; H5b (Joe 2026-09-17): the flat decision is impossible to run. With the
+  ;; flat selectors redefined to throw, judge still completes, and with no
+  ;; cascade sources it returns the gated abstention with no flat keys.
+  (with-redefs [policy/select-action (fn [& _] (throw (ex-info "flat select-action reached" {})))
+                policy/default-mode-select (fn [& _] (throw (ex-info "flat default-mode-select reached" {})))]
+    (let [j (wm/judge {})]
+      (is (= :abstained (get-in j [:decision :status])))
+      (is (seq (get-in j [:decision :refusals])))
+      (is (= :none-supplied (:cascade-sources j)))
+      (is (= 2 (get-in j [:cascade-horizon :value])))
+      (is (not-any? #(contains? j %) [:ranked-actions :admissible-actions :default-mode-events
+                                       :operator-actions :policy-support-exclusions :cascade-policies])))))

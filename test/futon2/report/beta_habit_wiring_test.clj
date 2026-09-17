@@ -32,15 +32,6 @@
     (is (every? #(= :learned-frequency (:source %))
                 (get-in state [:habit-provenance :candidates])))))
 
-(deftest real-judge-refuses-disconnected-config-before-io
-  (with-redefs-fn {#'wm/*beta-dark?* false #'wm/*f-pi-dark?* false
-                  #'trace/*persist-policy-trace-details?* false}
-    (fn []
-      (is (= :beta-habit-producer-missing
-             (try (wm/judge {} {:beta-habit-in-both? true})
-                  nil
-                  (catch clojure.lang.ExceptionInfo e (:error (ex-data e)))))))))
-
 (deftest hold-keeps-the-requested-arm-visible
   (let [state (:policy-precision-state (wm/beta-dark-carry nil nil [] true))]
     (is (= :absent (:status state)))

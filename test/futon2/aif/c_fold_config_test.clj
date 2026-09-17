@@ -2,29 +2,13 @@
   (:require [clojure.test :refer [deftest is]]
             [clojure.edn :as edn]
             [futon2.aif.c-fold-config :as config]
-            [futon2.aif.efe :as efe]
-            [futon2.report.war-machine :as wm]
-            [futon2.run-tick-once :as tick]))
+            [futon2.aif.efe :as efe]))
 
 (def sheet "holes/labs/wm-contract/runs/F2-run4-readiness/RUN4-config-2026-09-09.edn")
 (def base {:ambiguity-mode :variance-sum :risk-mode :hinge})
 (def state {:belief {:x 0.5} :observation {:mission-health 0.5}})
 (defn refusal [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (:reason (ex-data e)))))
-
-(deftest real-sheet-reaches-scorer-and-trace
-  (let [resolve-real config/resolve-opts
-        opts (with-redefs [config/resolve-opts #(resolve-real % sheet slurp)]
-               (#'wm/configured-fold-efe-opts
-                base (#'tick/diagnostic-judge-opts identity {} "config-wiring-test")))
-        scored (efe/compute-efe state {:type :no-op} opts)]
-    (is (true? (:ruled-outcome-c-enabled? opts)))
-    (is (< (Math/abs (- (Math/log 2) (:predicted-disposition-risk scored))) 1e-12))
-    ;; trace no longer strips ranked actions (flat removal, SPEC H4
-    ;; 2026-09-17); the scorer's own output is the recorded provenance.
-    (is (= (:c-fold-provenance opts) (:c-fold-provenance scored)))
-    (is (= :efe-disposition-risk (get-in scored [:c-fold-provenance :boundary])))
-    (is (true? (get-in scored [:c-fold-provenance :constant-across-policies?])))))
 
 (deftest absent-and-explicit-false-preserve-behavior
   (let [no-read (fn [_] (throw (Exception. "unexpected read")))

@@ -31,15 +31,13 @@
    after a successful trace append. Its separate default-off read is carried
    only as report/trace evidence; selection never consumes it.
    Pattern:   war-machine/operational-not-decorative"
-  (:require [futon2.aif.c-fold-config :as c-fold-config]
-            [babashka.http-client :as http]
+  (:require [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.set]
             [clojure.string :as str]
-            [futon2.aif.action-proposer :as ap]
             [futon2.aif.controller-authority :as controller-authority]
             [futon2.aif.decision-gate :as decision-gate]
             [futon2.aif.anticipation :as anticipation]
@@ -47,8 +45,8 @@
             [futon2.aif.beta-habit :as beta-habit]
             [futon2.aif.cascade-model-manifest :as cascade-manifest]
             [futon2.aif.cascade-policy :as cascade-policy]
+            [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.receipt-construction :as receipt-construction]
-            [futon2.aif.adapters.interest-network :as interest-net]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
             [futon2.aif.enumeration-completeness :as enum-complete]
@@ -67,14 +65,12 @@
             [futon2.aif.policy-free-energy :as policy-free-energy]
             [futon2.aif.policy-precision :as policy-precision]
             [futon2.aif.realized-outcome :as ro]
-            [futon2.aif.selection-gain :as selection-gain]
             [futon2.aif.selection-rationale :as selection-rationale]
             [futon2.aif.precision :as precision]
             [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
             [futon2.aif.task-belief-ladder :as ladder]
-            [futon2.aif.trace :as trace]
-            [futon2.aif2.tension :as tension])
+            [futon2.aif.trace :as trace])
   (:import (java.time Instant LocalDate ZoneId ZonedDateTime)
            (java.time.format DateTimeFormatter)))
 
@@ -99,11 +95,6 @@
 ;; A one-shot production JVM dereferences this at most once, on the first tick
 ;; after the learned-prior flip. Test/report JVMs may call judge repeatedly;
 ;; memoising the immutable corpus fold prevents repeated 760-record cold reads.
-(defonce ^:private default-habit-prior-seed
-  (delay (trace/reduce-traces habit-prior/fold-record
-                              (habit-prior/initial-state)
-                              :dir default-wm-trace-dir)))
-
 (def ^:dynamic *clock-focus?*
   "S4 durable active-focus read, resolved once when this namespace loads.
    Default OFF preserves the historical tick without an HTTP read or field."
@@ -356,20 +347,6 @@
   (case env-value
     "full-score-posterior" :full-score-posterior
     :controller-head))
-
-(defn- arena-selection-law
-  "U10. `:controller-head` is the live default and the historical behaviour:
-   the chosen action is the head of the G-ordered list and the F_pi-bearing
-   posterior is recorded and never read.
-
-   `FUTON_WM_SELECTION_LAW=full-score-posterior` makes the chosen action the
-   argmax of that posterior -- ln E - G/tau_eff - F_pi, the same
-   `policy/selection-scores` vector `:softmax-weights` normalises. It is off by
-   default and stays behind the flag until Joe rules on the flip
-   (SPEC-dormant-wiring.md U10 states the prediction the flip is to be judged
-   against, before the flip)."
-  []
-  (selection-law-of (System/getenv "FUTON_WM_SELECTION_LAW")))
 
 (defn selection-law-preconditions!
   "U10. `FUTON_WM_SELECTION_LAW=full-score-posterior` needs an F_pi to select
@@ -743,7 +720,6 @@
       "http://localhost:7073"))
 (def ^:private futon1a-penholder
   (or (System/getenv "FUTON1A_PENHOLDER") "api"))
-(def ^:private g-total-tie-epsilon 1.0e-6)
 (def ^:private default-session-evidence-limit 500)
 (def ^:private max-session-evidence-limit 2000)
 
@@ -756,35 +732,10 @@
 
 (def ^:private capability-star-map-path
   (str home "/code/futon0/holes/missions/M-capability-star-map.graph.edn"))
-(def ^:private live-star-map-goal :wm-overnight-unsupervised)
-(def ^:private live-star-map-efe-weights
-  {:graph-applicability-penalty 5.0
-   :graph-ascent-weight 6.0
-   :graph-body-weight 3.0
-   ;; M-wm-policies Track-1 (regulator-swept P=4, operator-consented 2026-06-09):
-   ;; off-map work no longer scores a free 0; body is next-step (leaf-aware), not
-   ;; whole-mission hole-count; ascent ignores already-:satisfied caps. Flips the
-   ;; live top from M-emacs-cursor-peripheral to on-ascent work (star-map / leaf).
-   :graph-off-map-penalty 4.0
-   :graph-body-mode :leaf
-   :graph-ascent-status-aware? true})
 (defonce ^:private capability-star-map-cache (atom nil))
-(def ^:private mission-fold-view-path
-  (str home "/code/futon6/data/mission-fold-view.edn"))
-(def ^:private mission-domain-ratified-path
-  (str home "/code/futon6/data/mission-domain-ratified.edn"))
 (def ^:private forward-model-centrality-path
   (str home "/code/futon7/holes/M-futon-forward-model.centrality.json"))
-(def ^:private forward-model-roi-results-path
-  (str home "/code/futon7/holes/M-futon-forward-model.roi-results.edn"))
-(def ^:private live-gap-view-efe-weights
-  {:gap-weight 6.0})
-(defonce ^:private mission-fold-view-cache (atom nil))
-(defonce ^:private mission-domain-ratified-cache (atom nil))
 (defonce ^:private centrality-cache (atom nil))
-(defonce ^:private roi-results-cache (atom nil))
-(defonce !last-wm-inputs (atom nil))
-
 (defn- arena-ambiguity-mode
   "D5c PRODUCTION FLIP (Joe, 2026-07-03, M-evaluate-policies §14): the audit's
    named repair for G-ambiguity — per-channel Gaussian entropy ½ln(2πe·σ²) —
@@ -1264,75 +1215,6 @@
                                            :graph graph})
         graph))))
 
-(defn- live-star-map-efe-opts
-  [base-opts]
-  (if-let [graph (let [graph (capability-star-map)]
-                   (when-not (unreadable-input? graph)
-                     graph))]
-    (merge base-opts
-           live-star-map-efe-weights
-           {:capability-graph graph
-            :pre-registered-goal live-star-map-goal})
-    base-opts))
-
-(defn- normalize-mission-gap-view
-  [fold-view]
-  (when (map? fold-view)
-    (->> (:missions fold-view)
-         (keep (fn [{:keys [mission gap-score]}]
-                 (when (and mission (number? gap-score))
-                   [(str mission) (double gap-score)])))
-         (into {}))))
-
-(defn- normalize-mission-domain-view
-  [domain-view]
-  (when (map? domain-view)
-    (->> (:missions domain-view)
-         (keep (fn [{:keys [mission domain]}]
-                 (when (and mission domain)
-                   [(str mission) domain])))
-         (into {}))))
-
-(defn- mission-domain-ratified
-  []
-  (let [{:keys [path domain-view]} @mission-domain-ratified-cache]
-    (if (= path mission-domain-ratified-path)
-      domain-view
-      (let [raw-domain-view (read-edn-file mission-domain-ratified-path)
-            domain-view (when-not (unreadable-input? raw-domain-view)
-                          (normalize-mission-domain-view raw-domain-view))]
-        (reset! mission-domain-ratified-cache {:path mission-domain-ratified-path
-                                               :domain-view domain-view})
-        domain-view))))
-
-(defn- mission-gap-view
-  []
-  (let [{:keys [path gap-view]} @mission-fold-view-cache]
-    (if (= path mission-fold-view-path)
-      gap-view
-      (let [raw-gap-input (read-edn-file mission-fold-view-path)
-            raw-gap-view (when-not (unreadable-input? raw-gap-input)
-                           (normalize-mission-gap-view raw-gap-input))
-            domain-view (mission-domain-ratified)
-            gap-view (if (seq domain-view)
-                       (into {}
-                             (filter (fn [[mission _gap-score]]
-                                       (= :local-capability
-                                          (get domain-view mission))))
-                             raw-gap-view)
-                       {})]
-        (reset! mission-fold-view-cache {:path mission-fold-view-path
-                                         :gap-view gap-view})
-        gap-view))))
-
-(defn- live-gap-view-efe-opts
-  [base-opts]
-  (if-let [gap-view (mission-gap-view)]
-    (merge base-opts
-           live-gap-view-efe-weights
-           {:mission-gap-view gap-view})
-    base-opts))
-
 (defn- centrality-joint-map []
   (let [{:keys [path centrality]} @centrality-cache]
     (if (= path forward-model-centrality-path)
@@ -1348,117 +1230,6 @@
         (reset! centrality-cache {:path forward-model-centrality-path
                                   :centrality centrality})
         centrality))))
-
-(defn- valuable-path-set [centrality]
-  (->> centrality
-       (sort-by (comp - val))
-       (take 25)
-       (map key)
-       set))
-
-(defn- roi-results []
-  (let [{:keys [path results]} @roi-results-cache]
-    (if (= path forward-model-roi-results-path)
-      results
-      (let [results (let [results (read-edn-file forward-model-roi-results-path)]
-                      (when-not (unreadable-input? results)
-                        results))]
-        (reset! roi-results-cache {:path forward-model-roi-results-path
-                                   :results results})
-        results))))
-
-(defn- normalize-feature-key [v]
-  (-> (if (keyword? v) (name v) (str v))
-      (str/lower-case)
-      (str/replace #"^[a-z]\\+" "")
-      (str/replace #"[^a-z0-9]+" "")))
-
-(defn- roi-feature-map []
-  (->> (get-in (roi-results) [:default-effort :features])
-       (keep (fn [{:keys [id] :as feature}]
-               (when id
-                 [(normalize-feature-key id)
-                  (select-keys feature [:id :expected-roi-gbp])])))
-       (into {})))
-
-(defn- ^{:scalar-awaiting-density
-         {:awaits "a declared preference density over ROI outcomes (a C_roi the registry does not yet carry); until then :expected-roi-gbp is a bare scalar, an affine image of a log-density evaluation whose C is undeclared -- DESIGN-c-vector section 6, tally row :c-cost-vs-distribution (wm half, row U30)"}}
-  roi-map-for-missions [missions]
-  (let [features (roi-feature-map)]
-    (->> missions
-         (keep (fn [{:keys [id title]}]
-                 (let [mission-key (normalize-feature-key (or title id))
-                       match (some (fn [[feature-key feature]]
-                                     (when (or (str/includes? mission-key feature-key)
-                                               (str/includes? feature-key mission-key))
-                                       feature))
-                                   features)]
-                   (when (and id match)
-                     [id {:expected-roi-gbp
-                          (double (or (:expected-roi-gbp match) 0.0))
-                          :feature-id (:id match)}]))))
-         (into {}))))
-
-(defn pin-wm-snapshot
-  "Return the last live WM ranking input bundle with structure/grounding data.
-   Returns nil until `judge` has run once in this JVM."
-  []
-  (when-let [snapshot @!last-wm-inputs]
-    (let [centrality (centrality-joint-map)]
-      (merge snapshot
-             {:structure {:capability-graph (capability-star-map)
-                          :pre-registered-goal live-star-map-goal
-                          :mission-gap-view (mission-gap-view)
-                          :mission-domain-view (mission-domain-ratified)}
-              :grounding {:centrality centrality
-                          :valuable-path (valuable-path-set centrality)
-                          :roi-map (roi-map-for-missions (:wm-missions snapshot))}
-              :live-weights (merge live-star-map-efe-weights
-                                   live-gap-view-efe-weights)}))))
-
-(declare apply-anamnesis-tiebreak filter-live-open-mission-ranked-actions)
-
-(defn rollout-snapshot-under-weights
-  "Replay a pinned WM snapshot under injected EFE weights. Pure for the same
-   snapshot and weight-overrides; no scanning or live state mutation."
-  ([snapshot weight-overrides]
-   (rollout-snapshot-under-weights snapshot weight-overrides {}))
-  ([snapshot weight-overrides {:keys [k] :or {k 5}}]
-   (let [structure (:structure snapshot)
-         opts (merge (live-star-map-efe-opts
-                      (live-gap-view-efe-opts
-                       {:time-pressure 0
-                        ;; D5c flip — keep the re-rank lane mode-coherent
-                        :ambiguity-mode (arena-ambiguity-mode)
-                        ;; :kl flip (§15) — same coherence for the risk lane
-                        :risk-mode (arena-risk-mode)
-                        ;; D-1e flip — the W1 goal-outcome lane, same boundary
-                        :goal-outcome-mode (arena-goal-outcome-mode)
-                        ;; D-1d live relocation — see arena-structural-pressure-mode
-                        :structural-pressure-mode (arena-structural-pressure-mode)
-                        :predictability-control-mode (arena-predictability-control-mode)
-                        :homeostatic-control-mode (arena-homeostatic-control-mode)
-                        :graph-feasibility-mode (arena-graph-feasibility-mode)
-                        ;; M-action-vocabulary P2 dark — default :off
-                        :move-class-intensity-mode (arena-move-class-intensity-mode)}))
-                     (select-keys structure
-                                  [:capability-graph :pre-registered-goal
-                                   :mission-gap-view :mission-domain-view])
-                     weight-overrides)
-         ranked (->> (efe/rank-actions (:wm-state snapshot)
-                                        (:candidates snapshot)
-                                        opts)
-                     apply-anamnesis-tiebreak
-                     (filter-live-open-mission-ranked-actions
-                      (:wm-missions snapshot)))
-         admissible (filterv #(fm/can-execute? (:wm-state snapshot)
-                                               (:action %))
-                             ranked)
-         bundle (vec (take k admissible))]
-     {:ranked ranked
-      :admissible admissible
-      :bundle bundle
-      :opts opts})))
 
 (defn- parse-substrate-edn [body]
   (cond
@@ -1534,53 +1305,11 @@
     (string? target) target
     :else (some-> target str)))
 
-(defn- rerank
-  [ranked-actions]
-  (->> ranked-actions
-       (map-indexed (fn [i entry] (assoc entry :rank (inc i))))
-       vec))
-
 (def ^:private mission-action-types
   ;; :advance-mission = engage an already-open mission's holes (the
   ;; enumerator's type since pilot cycle #1, 2026-06-10); :open-mission
   ;; retained for genuinely-unopened targets.
   #{:open-mission :advance-mission})
-
-(defn- live-open-mission-ranked-entry?
-  [missions entry]
-  (let [action (:action entry)]
-    (or (not (mission-action-types (:type action)))
-        (mission-registry/live-mission-target? missions (:target action)))))
-
-(defn- canonicalize-open-mission-ranked-entry
-  [entry]
-  (if (mission-action-types (get-in entry [:action :type]))
-    (let [registry-id (mission-registry/mission-target-id
-                       (get-in entry [:action :target]))]
-      (cond-> entry
-        registry-id (assoc-in [:action :target] registry-id)))
-    entry))
-
-(defn- filter-live-open-mission-ranked-actions
-  [missions ranked-actions]
-  (->> ranked-actions
-       (filter #(live-open-mission-ranked-entry? missions %))
-       (map canonicalize-open-mission-ranked-entry)
-       rerank))
-
-(defn- sorry-doc-index
-  []
-  (reduce (fn [idx hx]
-            (let [endpoint (first (real-endpoints hx))
-                  local-id (when endpoint
-                             (second (re-find #"/sorry/(.+)$" endpoint)))
-                  action-target (when local-id
-                                  (str "sorry/" local-id))]
-              (cond-> idx
-                endpoint (assoc endpoint hx)
-                action-target (assoc action-target hx))))
-          {}
-          (fetch-hyperedges-by-type "code/v05/sorry")))
 
 (defn- mission-doc-index
   []
@@ -2425,72 +2154,6 @@
                          :families ["code/v05/mission-doc"]})
     {:delta-T 0.0}))
 
-(defn- related-mission-endpoints
-  [sorry-doc mission-idx]
-  (->> (or (hx-prop sorry-doc :sorry/related-missions) [])
-       (keep (fn [mission-name]
-               (some-> (get mission-idx (normalize-mission-id mission-name))
-                       mission-index-endpoint)))
-       distinct
-       vec))
-
-(defn- address-sorry-entry?
-  [entry]
-  (= :address-sorry (get-in entry [:action :type])))
-
-(defn- tied-g-total?
-  [left right]
-  (<= (Math/abs (- (double (or (:controller-score left) 0.0))
-                   (double (or (:controller-score right) 0.0))))
-      g-total-tie-epsilon))
-
-(defn- partition-tied-groups
-  [ranked-actions]
-  (reduce (fn [groups entry]
-            (if-let [current (peek groups)]
-              (if (tied-g-total? (peek current) entry)
-                (conj (pop groups) (conj current entry))
-                (conj groups [entry]))
-              [[entry]]))
-          []
-          ranked-actions))
-
-(defn- structural-pressure-for-action
-  [action {:keys [sorry-idx mission-idx delta-cache]}]
-  (if (= :address-sorry (:type action))
-    (let [target (action-target-key (:target action))
-          sorry-doc (get sorry-idx target)
-          mission-endpoints (when sorry-doc
-                              (related-mission-endpoints sorry-doc mission-idx))]
-      (double
-       (reduce (fn [acc mission-endpoint]
-                 (let [delta-result (or (get @delta-cache mission-endpoint)
-                                        (let [result (compute-delta-t-mission
-                                                      mission-endpoint)]
-                                          (swap! delta-cache assoc mission-endpoint result)
-                                          result))]
-                   (+ acc (- 1.0 (double (:mission-T delta-result 0.5))))))
-               0.0
-               mission-endpoints)))
-    0.0))
-
-(defn- anamnesis-concentration-for-entry
-  [entry ctx]
-  (structural-pressure-for-action (:action entry) ctx))
-
-(defn- enrich-candidates-with-structural-pressure
-  [candidates]
-  (if-not (some #(= :address-sorry (:type %)) candidates)
-    (vec candidates)
-    (let [ctx {:sorry-idx (sorry-doc-index)
-               :mission-idx (mission-doc-index)
-               :delta-cache (atom {})}]
-      (mapv (fn [action]
-              (assoc action
-                     :structural-pressure-per-action
-                     (structural-pressure-for-action action ctx)))
-            candidates))))
-
 (def ^:private non-progress-decay-k 1.0)
 
 (def ^:private default-strategy-cascade-path
@@ -2876,40 +2539,6 @@
                  :history-size (count history)
                  :census census
                  :refused (count refusals)}}))))
-
-(defn- apply-anamnesis-tiebreak
-  [ranked-actions]
-  (if (< (count ranked-actions) 2)
-    ranked-actions
-    (let [groups (partition-tied-groups ranked-actions)
-          needs-tiebreak? (some #(and (> (count %) 1)
-                                      (every? address-sorry-entry? %))
-                                groups)]
-      (if-not needs-tiebreak?
-        ranked-actions
-        (let [ctx {:sorry-idx (sorry-doc-index)
-                   :mission-idx (mission-doc-index)
-                   :delta-cache (atom {})}]
-          (->> groups
-               (mapcat (fn [group]
-                         (if (and (> (count group) 1)
-                                  (every? address-sorry-entry? group))
-                           (->> group
-                                (map-indexed
-                                 (fn [i entry]
-                                   {:entry entry
-                                    :original-index i
-                                    :anamnesis-concentration
-                                    (anamnesis-concentration-for-entry entry ctx)}))
-                                (sort-by (juxt (comp - :anamnesis-concentration)
-                                               :original-index))
-                                (mapv (fn [m]
-                                        (assoc (:entry m)
-                                               :anamnesis-concentration
-                                               (:anamnesis-concentration m)))))
-                           group)))
-               (map-indexed (fn [i entry] (assoc entry :rank (inc i))))
-               vec))))))
 
 (defn- since-str
   "Date string for N days ago."
@@ -6014,13 +5643,6 @@
                      (name (or (get-in verdict [:observation :reason])
                                :reason-unavailable)) ")")}))))
 
-(defn- configured-fold-efe-opts
-  "Materialize opt-in pinned run-sheet C, with explicit caller opts taking precedence."
-  [base config]
-  (merge base (select-keys (c-fold-config/resolve-opts config)
-                          [:ruled-outcome-c-enabled? :seeded-c
-                           :disposition-kernel :c-fold-provenance])))
-
 ;; ---------------------------------------------------------------------------
 ;; Cascade lane (VM tick-1 wiring, R10). When the tick's input carries a
 ;; :cascade-problem, judge runs the model's node sequence on it through the
@@ -6449,17 +6071,14 @@
      identity rather than by timestamp range. Optional: callers that mint no
      run id leave the key off the record."
   ([scan-data] (judge scan-data {}))
-  ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?
+  ([scan-data {:keys [trace? trace-dir scan-id
                       step-portfolio? eval-invariant-fallback?
                       wm-version run-id
                       accumulation-entity-id accumulation-initialization]
                :as judge-opts
-               :or {trace? false include-advisory-lanes? true
+               :or {trace? false
                     step-portfolio? true eval-invariant-fallback? true}}]
   (let [loaded-configuration (effective-run-configuration judge-opts)
-        beta-habit? (beta-habit/enabled? judge-opts)
-        _ (beta-habit/preconditions! beta-habit? *f-pi-dark?* *beta-dark?*
-                                    trace/*persist-policy-trace-details?*)
         depth-config (policy-depth/configured judge-opts)
         accumulate-strategic-habit?
         (strategic-habit/enabled? judge-opts
@@ -6524,28 +6143,6 @@
         ;; previous trace, then carried after ranking/selection are complete.
         ;; No observation, G, weight, admissibility, or selector receives it.
         active-mission (load-active-mission)
-        structural-pressure-mode (arena-structural-pressure-mode)
-        habit-prior-source (arena-habit-prior-source)
-        habit-prior-span-ratio-cap (arena-habit-prior-span-ratio-cap)
-        _habit-mode-coherence
-        (when (and (= :learned-frequency habit-prior-source)
-                   (not= :habit-prior structural-pressure-mode))
-          (throw (ex-info
-                  "learned habit prior requires structural pressure relocated out of controller-score"
-                  {:habit-prior-source habit-prior-source
-                   :structural-pressure-mode structural-pressure-mode})))
-        ;; B1: prefer the sufficient-statistic state persisted by the previous
-        ;; enabled tick. On the first enabled tick only, deterministically seed
-        ;; it from the complete chronological trace corpus.
-        habit-prior-pre
-        (when (= :learned-frequency habit-prior-source)
-          (if-let [persisted (:habit-prior-state prev-trace-record)]
-            (habit-prior/coerce-state persisted)
-            (if (= wm-trace-dir default-wm-trace-dir)
-              @default-habit-prior-seed
-              (trace/reduce-traces habit-prior/fold-record
-                                   (habit-prior/initial-state)
-                                   :dir wm-trace-dir))))
         ;; v0.9 symmetric bootstrap: belief domain = stack-annotations.edn
         ;; :sections[] :id ∪ sorry-registry ids. Mirrors VSATARCS-side
         ;; bootstrap so per-entity comparison reduces to alist-lookup
@@ -6579,8 +6176,6 @@
         wm-entity-tags (belief/classify-entity-tags-from-stack-annotations)
         wm-entity-repos (belief/classify-entity-repos-from-stack-annotations)
         wm-entity-ticks (belief/classify-entity-ticks-from-stack-annotations)
-        wm-missions (try (mission-registry/open-missions) (catch Exception _ []))
-        wm-tickets (:tickets (mission-registry/load-tickets))
         ;; v0.10/v0.11/v0.13/R3a/R3b/R3d wiring: compute prediction-errors
         ;; for every channel with a likelihood model. All errors record into
         ;; the trace's :prediction-errors map.
@@ -6597,33 +6192,6 @@
         prev-precision-state
         (or (:precision-state prev-trace-record)
             (precision/initial-precision-state))
-        ;; R14 precision-over-policies (γ): the previous tick's γ-state, read
-        ;; from the trace like :precision-state. Default = the prior (γ=1.0).
-        ;; coerce-state guards against the retired v0 :error-history schema
-        ;; whose degenerate 8-sample state pinned γ to 0.5 for days (2026-07-02
-        ;; find) — malformed/retired shapes reset to the honest prior.
-        prev-selection-gain-state
-        (selection-gain/coerce-state
-         (or (:selection-gain prev-trace-record)
-             (selection-gain/initial-selection-gain-state)))
-        ;; R14 learning step: fold the REALIZED outcome of an enacted policy into
-        ;; γ. The signal is R16's committed `:realized-outcome` trace contract
-        ;; (paired with claude-10, E-close-the-loop), written at enactment and
-        ;; READ here next tick — async-clean, never a synchronous cross-subsystem
-        ;; call (cf. the 2026-06-26 freeze incident):
-        ;;   {:policy <id> :expected-score <g> :realized-score <g'> :tick <enactment tick>}
-        ;; Both legs are the SAME EFE quantity (the fold's coverage→rollout ΔG —
-        ;; expected over the PREDICTED wiring, realized over the ENACTED wiring),
-        ;; so the relative error is apples-to-apples (NOT a ΔG-vs-ΔF mismatch).
-        ;; STAGING (E-precision-over-policies §3.5): until enactment is
-        ;; live-wired the field is ABSENT ⇒ no sample ⇒ γ holds at the prior 1.0
-        ;; ⇒ byte-identical to today's τ path. `:last-outcome-tick` (carried in
-        ;; the γ-state) dedups: judge ticks far faster than enactment, so the
-        ;; same outcome must be folded at most once.
-        selection-gain-state
-        (selection-gain/fold-realized-outcome
-         prev-selection-gain-state (:realized-outcome prev-trace-record))
-        selection-gain-value (selection-gain/selection-gain-for selection-gain-state)
         ;; Inner loop result
         {:keys [belief precision-state prediction-errors micro-step-trace
                 prediction-triple-events belief-aggregation-events]}
@@ -6794,278 +6362,45 @@
         ;; events to the trace. R5 time-conditioning and R4 multi-horizon
         ;; composition are deferred (v0.14 / v0.15 candidates).
         anticipation-snapshot (anticipation/anticipation-snapshot)
-        wm-patterns (try (pattern-registry/open-patterns) (catch Exception _ []))
-        wm-state {:observation observation :belief wm-belief :sorrys wm-sorrys
-                  :missions wm-missions
-                  :tickets wm-tickets
-                  :patterns wm-patterns
-                  :anticipation anticipation-snapshot
-                  :wm/route route3
-                  ;; M-aif2 slice-1 live install (consent-gated, Joe 2026-06-01):
-                  ;; inject the delivered E1 curvature signal. Fail-safe —
-                  ;; absent/malformed ⇒ [] ⇒ tension-proposer silent ⇒ WM unchanged.
-                  :curvature-signal (tension/read-curvature-signal)}
-        wm-candidates (ap/compose-proposers
-                       [ap/bootstrap-proposer
-                        pattern-registry/pattern-enumerator-proposer
-                        mission-registry/mission-enumerator-proposer
-                        mission-registry/ticket-enumerator-proposer
-                        sorry-registry/sorry-enumerator-proposer
-                        ;; M-aif2 slice-1: credited + admissibility-gated
-                        ;; tension-proposer — emits existing S2 classes via κ at
-                        ;; high-curvature actionable substrate-2 nodes (E1 consume).
-                        (tension/tension-proposer)]
-                       wm-state)
-        ;; v0.14 anticipation-driven time-pressure: scale G-risk + homeostatic-pressure
-        ;; by proximity to closest anticipated event in horizon. When no
-        ;; events are within horizon, time-pressure = 0 (no scaling).
-        wm-time-pressure (anticipation/time-pressure anticipation-snapshot
-                                                     (java.time.Instant/now))
-        ;; v0.15: multi-horizon scoring activates when anticipation
-        ;; loaded events in horizon. Falls back to single-step if no
-        ;; anticipation data.
+        ;; v0.15 depth reads (declared run configuration; not flat-derived).
         depth-anticipation (policy-depth/anticipation anticipation-snapshot depth-config)
         wm-horizon-steps (:horizon-steps depth-anticipation)
         wm-policy-depth-used (if (and wm-horizon-steps (>= wm-horizon-steps 2))
                                wm-horizon-steps
                                1)
-        wm-enriched-candidates-pre-ladder
-        (->> wm-candidates
-             enrich-candidates-with-structural-pressure
-             (#(enrich-candidates-with-mission-value
-                % recent-trace-records))
-             ;; M-interest-network-coupling capstone:
-             ;; bias candidates by the lived interest posterior
-             interest-net/enrich-candidates)
-        ;; U52: the three-rung ladder sits HERE -- after every channel has had
-        ;; its say and before ranking -- because the plateau it is aimed at is a
-        ;; property of the enriched field (55 candidates at one
-        ;; :mission-value-factor) and because refusing a candidate has to happen
-        ;; before it can be ranked. Default off: with the flag absent
-        ;; wm-enriched-candidates is the identical object.
-        wm-ladder (apply-task-belief-ladder wm-enriched-candidates-pre-ladder
-                                            {:trace-dir wm-trace-dir})
-        wm-enriched-candidates (:candidates wm-ladder)
         wm-as-of (str (java.time.Instant/now))
-        operator-actions
-        (->> wm-enriched-candidates
-             (filter :operator-gate-top-candidate)
-             (mapcat (fn [action]
-                       (map (fn [{:keys [kind text]}]
-                              {:type :mission-gate
-                               :mission (str (:target action))
-                               :gate-kind kind
-                               :gate-text text
-                               :date (str (LocalDate/now tz))})
-                            (:operator-gates action))))
-             vec)
-        _wm-snapshot-stash (reset! !last-wm-inputs
-                                   {:wm-state wm-state
-                                    :candidates wm-enriched-candidates
-                                    :wm-missions wm-missions
-                                    :as-of wm-as-of
-                                    :scan-id (or (:scan-id scan-data)
-                                                 scan-id
-                                                 "war-machine/judge")})
-        wm-efe-opts (configured-fold-efe-opts
-                    (live-star-map-efe-opts
-                     (live-gap-view-efe-opts
-                      {:time-pressure wm-time-pressure
-                       :horizon-steps wm-horizon-steps
-                       ;; R3 categorical-filter coherence: imagined policy
-                       ;; outcomes and live posterior updates use the same A/B/D.
-                       :belief-update-opts (arena-belief-update-opts)
-                       ;; D5c flip — see arena-ambiguity-mode docstring
-                       :ambiguity-mode (arena-ambiguity-mode)
-                       ;; :kl flip (§15) — see arena-risk-mode docstring
-                       :risk-mode (arena-risk-mode)
-                       ;; D-1e flip — see arena-goal-outcome-mode docstring
-                       :goal-outcome-mode (arena-goal-outcome-mode)
-                       ;; D-1d live relocation — see arena-structural-pressure-mode
-                       :structural-pressure-mode structural-pressure-mode
-                       :predictability-control-mode (arena-predictability-control-mode)
-                       :homeostatic-control-mode (arena-homeostatic-control-mode)
-                       :graph-feasibility-mode (arena-graph-feasibility-mode)
-                       ;; M-action-vocabulary P2 dark — default :off
-                       :move-class-intensity-mode (arena-move-class-intensity-mode)}))
-                    judge-opts)
-        wm-ranked-domain-base (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
-        route4 (route-tag route3 :R5 "futon2.aif.efe/rank-actions")
-        wm-policy-exclusions (-> wm-ranked-domain-base meta :policy-support/excluded)
-        wm-ranked-domain (if (= :learned-frequency habit-prior-source)
-                           (if (some? habit-prior-span-ratio-cap)
-                             (habit-prior/attach-log-priors
-                              habit-prior-pre wm-ranked-domain-base
-                              {:span-ratio-cap habit-prior-span-ratio-cap})
-                             (habit-prior/attach-log-priors habit-prior-pre
-                                                           wm-ranked-domain-base))
-                           wm-ranked-domain-base)
-        wm-ranked (->> wm-ranked-domain
-                       apply-anamnesis-tiebreak
-                       (filter-live-open-mission-ranked-actions wm-missions))
-        ;; Dual-prediction logging (target-sensitive model, 2026-06-11): every
-        ;; ranked entry also carries :G-constant — the frozen v1 constant
-        ;; model's counterfactual G for the SAME (state, action) — so
-        ;; constant-vs-scaled discriminates on the same measured pairs.
-        ;; Pure recompute, no second scan.
-        g-constant-by-key (binding [fm/*effects-mode* :constant]
-                            (into {}
-                                  (map (fn [e] [[(get-in e [:action :type])
-                                                 (get-in e [:action :target])]
-                                                (:controller-score e)]))
-                                  (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)))
-        wm-ranked (mapv (fn [e]
-                          (if-some [gc (get g-constant-by-key
-                                            [(get-in e [:action :type])
-                                             (get-in e [:action :target])])]
-                            (assoc e :G-constant gc)
-                            e))
-                        wm-ranked)
-        ;; RUN8 / stage S3: resolved ONCE and threaded, so the mode the
-        ;; preconditions check, the mode the temperature-opts carry and the mode
-        ;; the :wm-version stamp records cannot drift apart.
-        wm-tau-mode (arena-tau-mode)
-        _ (variational-tau-preconditions! wm-tau-mode)
-        _ (f-pi-posterior-preconditions! wm-tau-mode)
-        ;; U10 / the selector consult. Resolved ONCE and threaded, for the same
-        ;; reason the tau mode is: the law the precondition checks and the law
-        ;; `select-action` is handed cannot drift apart. Checked HERE, outside
-        ;; the try/catch below, so a config error is a stopped tick and not a
-        ;; silent fall to `default-mode-select`.
-        wm-selection-law (arena-selection-law)
-        _ (selection-law-preconditions! wm-selection-law)
-        ;; RUN8 / stage S3. The F_pi readback and the beta carry are computed
-        ;; HERE, BEFORE selection, because under
-        ;; `FUTON_WM_TAU_MODE=variational-beta-gamma` the tick's own solved beta
-        ;; IS the selection temperature. Under the two selection-gain modes
-        ;; nothing below reads them and they are, as in S2, merged onto the
-        ;; judgement for persistence only -- the move is a reordering of pure
-        ;; bindings, not a change to what they compute. They run after ranking
-        ;; because G is each candidate's own :controller-score.
+        ;; -----------------------------------------------------------------
+        ;; H5b — the cascade-only decision path (Joe 2026-09-17: the flat
+        ;; decision is removed and made impossible to run; a cascade is a
+        ;; policy, and G is computed over policies). The flat block that
+        ;; lived here — ap/compose-proposers candidates, channel
+        ;; efe/rank-actions over them, policy/select-action with the
+        ;; default-mode-select fallback, flat authorize, the advisory
+        ;; :cascade-policies/:apply-cascade rows and every carry computed
+        ;; over the flat ranking (selection-gain, habit-prior, β/F_π dark) —
+        ;; is DELETED, not flagged.
         ;;
-        ;; :F9 SETTLES WHICH FIELD THEY RUN OVER, which C475 6.2 asked for
-        ;; before the cascade block could move. It is `wm-ranked`, the machine's
-        ;; own EFE-ranked field -- NOT the cascade-augmented one, which from
-        ;; here on is built below `wm-decision` and so does not exist yet.
-        ;; Three reasons, in the order they bind:
-        ;;   (a) beta is the selection temperature under the variational mode,
-        ;;       and the pool it is solved over should be the pool selection
-        ;;       ranges over. `wm-admissible` -- what `select-action` receives,
-        ;;       and what `f-pi-posterior-opts` already joins against -- is
-        ;;       filtered from `wm-ranked`, and cascade rows are
-        ;;       `:held-for-arming? true`: never selectable, on any tick.
-        ;;   (b) it removes the cycle C474 5 warned of. With the cascade lane
-        ;;       constructed for the COMMITTED decision, a beta solved over
-        ;;       cascade rows would be a temperature that depends on the
-        ;;       decision it sets the temperature for.
-        ;;   (c) the S2/S3 beta series stays comparable, and by identity rather
-        ;;       than by assertion: every recorded tick ran with
-        ;;       `:include-advisory-lanes? false`, so `cascade-actions` was
-        ;;       always empty and `wm-ranked+cascades` was `wm-ranked` with the
-        ;;       ranks re-asserted. The field this now names is the field those
-        ;;       runs actually used.
-        f-pi-dark-fields (when (or *f-pi-dark?* (= :variational-beta-gamma wm-tau-mode))
-                           (f-pi-dark-readback prev-trace-record
-                                               wm-ranked
-                                               observation))
-        beta-dark-fields (when (or *beta-dark?* (= :variational-beta-gamma wm-tau-mode))
-                           (beta-dark-carry prev-trace-record
-                                            f-pi-dark-fields
-                                            wm-ranked beta-habit?))
-        ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility
-        ;; (composes with can-propose? at proposer-side); then run
-        ;; deliberative select-action with default-mode-select as a
-        ;; try/catch fallback for I6 compositional closure.
-        wm-admissible (filterv #(fm/can-execute? wm-state (:action %)) wm-ranked)
-        ;; RUN9 / stage S4. Joined against `wm-admissible` and not against the
-        ;; wider `wm-ranked` the readback ran over, because this is the field
-        ;; `select-action` receives and `:f-pi-values` must align with its
-        ;; `g-totals`. Off unless FUTON_WM_FPI_POSTERIOR=1, and off
-        ;; on any tick whose coverage is incomplete -- see
-        ;; `f-pi-posterior-opts`.
-        f-pi-posterior-fields (f-pi-posterior-opts f-pi-dark-fields
-                                                   wm-admissible)
-        controller-decision
-        (try (policy/select-action
-              wm-admissible
-              {:selection-gain selection-gain-value
-               :selection-boundary :strategic-recommendation
-               :selection-law wm-selection-law
-               :habit-prior-stats
-               (when habit-prior-pre
-                 (habit-prior/state-stats habit-prior-pre))
-               :f-pi-opts f-pi-posterior-fields
-               :temperature-opts
-               (variational-temperature-opts wm-tau-mode beta-dark-fields)})
-             (catch Exception _
-               (policy/default-mode-select wm-state wm-admissible)))
-        ;; AC4 (Joe's 2026-09-02 ruling on C130 §3): when the fallback ran and
-        ;; could not read sorry pressure, it abstains instead of selecting as
-        ;; though pressure were 0.0. Present-only: a tick whose fallback read a
-        ;; real pressure -- and every tick on which `select-action` succeeded,
-        ;; whose decision carries no `:sorry-pressure` key at all -- writes no
-        ;; event.
-        default-mode-events (policy/default-mode-events controller-decision)
-        route5 (route-tag route4 :R6 "futon2.aif.policy/select-action")
-        route6 (route-tag route5 :R14 "futon2.aif.controller-authority/authorize")
-        wm-decision (controller-authority/authorize controller-decision wm-admissible)
-        ;; Cascade lane (VM tick-1 wiring, R10): when the scan carries a
-        ;; :cascade-problem, run the model's cascade node sequence through
-        ;; the real node functions on its own additive lane. Absent, this is
-        ;; nil and everything below is byte-identical to the lane-less tick.
-        cascade-lane-result (when (:cascade-problem scan-data)
-                              (cascade-lane (:cascade-problem scan-data)))
-        ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
-        ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
-        ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction
-        ;; verdict. They are APPENDED to the served ranked-actions (so wm-admissible/wm-decision
-        ;; — the WM's own auto-selection — are unaffected) and tagged :held-for-arming? true:
-        ;; the pilot can SELECT one as v and mint a consent gate over it, but EXECUTING it is
-        ;; Part B, held for operator arming (WM-I4). cascade-policies computed once, reused below.
-        ;;
-        ;; :F9 MOVED THIS BLOCK HERE, BELOW `wm-decision`, and hands the lane the
-        ;; decision itself. Where it used to sit -- above `select-action` -- the
-        ;; only decision available to it was `(first ranked-actions)`, the
-        ;; RANKING's head, and `cascade-lane`'s own docstring said it was
-        ;; building for "what the machine decided". Over the 48 recorded
-        ;; S1b/S2/S4/S5 ticks those two targets disagree 48 times out of 48
-        ;; (`runs/F9-cascade-decision/00-corpus-target-gap.edn`), so the lane
-        ;; would have gated the wrong mission on every one of them. Constructing
-        ;; below the decision is what the 2026-07-06 operator ruling quoted at
-        ;; `cascade-lane/*gate-decision-target?*` asks for, and what Joe's
-        ;; 2026-08-30 "target first, then the cascade to match" asks for
-        ;; (`P-validated-R5.md`:414-415). Nothing here feeds selection: these
-        ;; rows are appended AFTER `wm-decision` is final, exactly as the
-        ;; `judge` docstring already promised.
-        cascade-policies (if include-advisory-lanes?
-                           (try ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
-                                 wm-ranked (cond-> {:n 3 :budget 6 :decision wm-decision}
-                                             depth-config (assoc :policy-depth depth-config)))
-                                (catch Throwable _ []))
-                           [])
-        cascade-actions (mapv (fn [cp]
-                                (let [dF (:cascade-score cp) dG (:policy-rollout-score cp)
-                                      pass? (boolean (and dF (pos? dF) dG (neg? dG)))]
-                                  {:action {:type :apply-cascade
-                                            :target (:mission cp)
-                                            :rationale "apply the acquired cascade-policy (Car-3 / R16); execution HELD for operator arming"
-                                            :cascade {:shown (:shown cp) :wholeness (:wholeness cp)}
-                                            :act-gate {:cascade-score dF :coverage-score-delta dG :pass? pass?}}
-                                   :controller-score (or dG 0.0)
-                                   ;; D1b (M-evaluate-policies §8.2): the 0.0 fallback is
-                                   ;; load-bearing (IHTB-2) — the marker makes the constant
-                                   ;; self-describing instead of silently rank-neutral.
-                                   :score-provenance (if dG :rollout-dG :placeholder)
-                                   :held-for-arming? true}))
-                              cascade-policies)
-        wm-ranked+cascades (vec (map-indexed (fn [i e] (assoc e :rank (inc i)))
-                                             (into (vec wm-ranked) cascade-actions)))
-        habit-prior-state
-        (when (= :learned-frequency habit-prior-source)
-          ;; Do not train the scheduler-grain prior on strategic
-          ;; recommendations while it is counterfactual-only. A distinct E_S
-          ;; will learn from reviewed strategic selection events.
-          habit-prior-pre)
+        ;; Targets are the mission/ticket substrate identities; sources come
+        ;; from judge-opts :cascade-sources. Absent sources are {} — every
+        ;; target is then refused and the decision is the gated abstention.
+        ;; No source is invented.
+        ;; -----------------------------------------------------------------
+        cascade-sources (or (:cascade-sources judge-opts) {})
+        ;; The tick-level horizon: the sources' own :horizon-steps, else the
+        ;; declared initial T = 2 (Joe 2026-09-17, p4ng 462aa79), common to
+        ;; the compared family. Recorded on the judgement with its authority.
+        cascade-horizon (if-let [h (:horizon-steps cascade-sources)]
+                          {:value h :authority :cascade-sources}
+                          {:value 2 :authority "p4ng 462aa79 (Joe 2026-09-17: initial T=2)"})
+        cascade-assembled
+        (cascade-problems/assemble
+         {:targets (cascade-problems/substrate-targets)
+          :sources (assoc cascade-sources :horizon-steps (:value cascade-horizon))})
+        cascade-result (cascade-decision cascade-assembled judge-opts)
+        wm-decision (:decision cascade-result)
+        ;; Strategic habit observes the CASCADE decision's first acting
+        ;; pattern (strategic_habit/carry, H4/dd4a3bbe); an abstention
+        ;; observes nothing.
         strategic-habit-state
         (strategic-habit/carry
          (:strategic-habit-state prev-trace-record) wm-decision
@@ -7134,7 +6469,9 @@
                              (let [gauges (mission-gauges/reading)]
                                (cond-> (mission-c-readback
                                         mission-focus
-                                        wm-ranked+cascades
+                                        ;; H5b: the flat ranked field is gone;
+                                        ;; the readback runs over no candidates.
+                                        []
                                         (merge observation (:observables gauges)))
                                  (seq (:records gauges))
                                  (assoc :gauge-observables (:records gauges))))
@@ -7195,59 +6532,24 @@
                   ;; an absent key means the mode was inferred from six observed
                   ;; features, not that nobody looked.
                   :strategic-mode-events strategic-mode-events
-                  ;; AC4: the fallback selector's sorry-pressure record, kept
-                  ;; only when the fallback ran AND could not read the channel.
-                  ;; Same present-only discipline at the trace boundary.
-                  :default-mode-events default-mode-events
                   :precision-state precision-state
-                  ;; R14 precision-over-policies (γ): the learned, bounded inverse
-                  ;; selection temperature this tick used (τ_eff = τ_spread / γ).
-                  ;; Persisted so the next tick continues the rolling outcome window.
-                  :selection-gain selection-gain-state
                   :micro-step-trace micro-step-trace
                   :morning-brief-events morning-brief-events
                   :morning-brief-held-events morning-brief-held-events
                   :morning-brief-consumed-event-ids
                   (vec (sort morning-brief-consumed-event-ids))
-                  :operator-actions operator-actions
                   :anticipation anticipation-snapshot
-                  :ranked-actions wm-ranked+cascades
-                  ;; The decision is drawn from this executable support, not the
-                  ;; served ranked/advisory display. Full-loop discrimination
-                  ;; must inspect the same Π_feasible domain.
-                  :admissible-actions wm-admissible
-                  :policy-support-exclusions (vec wm-policy-exclusions)
+                  ;; H5b: the tick's decision is the gated cascade decision
+                  ;; (or the gated abstention); the flat ranked/advisory
+                  ;; fields are gone with the flat path.
                   :decision wm-decision
-                  ;; M-wm-policies v1: the visible cascade-policy lane (additive, defensive —
-                  ;; a cascade failure can never break the scan; memoized; shell-out to minilm).
-                  :cascade-policies cascade-policies
-                  ;; M-wm-policies Track 3 (proactive / defensive driving): the horizon
-                  ;; gap-scan — open-mission classes with THIN pattern coverage (candidates
-                  ;; for seeding cascades before the WM gets stuck in them). Additive,
-                  ;; defensive (a failure never breaks the scan); shares the cascade memo.
-                  :pattern-gaps (if include-advisory-lanes?
-                                  (try
-                                    ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
-                                     wm-ranked (cond-> {:n 10 :budget 6}
-                                                 depth-config (assoc :policy-depth depth-config)))
-                                    (catch Throwable _ []))
-                                  [])
-                  ;; The cascade lane's route entries ride along after :R14
-                  ;; only when a :cascade-problem was carried; nil keeps the
-                  ;; route exactly route6.
-                  :wm/route (if cascade-lane-result
-                              (reduce conj route6 (:route cascade-lane-result))
-                              route6)
-                  :input-status (current-input-status)}
-                   f-pi-dark-fields
-                   (merge f-pi-dark-fields)
-
-                   beta-dark-fields
-                   (merge beta-dark-fields))
+                  :cascade-problems (:cascade-problems cascade-result)
+                  :cascade-lanes (:lanes cascade-result)
+                  :cascade-horizon cascade-horizon
+                  :wm/route route3
+                  :input-status (current-input-status)})
            strategic-habit-state
            (assoc :strategic-habit-state strategic-habit-state)
-           habit-prior-state
-           (assoc :habit-prior-state habit-prior-state)
            wm-version
            (assoc :wm-version wm-version)
            ;; RUN11: the caller's run id, carried onto the judgement so
@@ -7255,16 +6557,13 @@
            ;; tick receipt uses. Present-only — a caller that passes no
            ;; `:run-id` (the scheduled runner and the full-loop runner) leaves
            ;; the key off the record entirely.
-           ;; U52: the ladder's own record, PRESENT-ONLY. An absent key means
-           ;; the ladder did not run, not that it ran and refused nothing --
-           ;; and it is what keeps the default record byte-identical.
-           (:ladder wm-ladder)
-           (assoc :task-belief-ladder (:ladder wm-ladder)
-                  :task-belief-refusals (:refusals wm-ladder))
-           cascade-lane-result
-           (assoc :cascade-lane cascade-lane-result)
            run-id
-           (assoc :run/id run-id))
+           (assoc :run/id run-id)
+           ;; H5b: no cascade sources supplied is recorded honestly — every
+           ;; substrate target was refused and the decision is the gated
+           ;; abstention. No source was invented.
+           (nil? (:cascade-sources judge-opts))
+           (assoc :cascade-sources :none-supplied))
           active-mission)
          mission-c-fields)
         ;; U21: the last of the three terminal projections, applied in its own
@@ -7289,15 +6588,7 @@
                   (assoc :policy-depth
                          {:configured depth-config
                           :horizon-steps wm-horizon-steps
-                          :effective wm-policy-depth-used
-                          :anticipation (mapv #(assoc (:record depth-anticipation)
-                                                 :action (:action %)) wm-ranked-domain-base)
-                          :cascade-rollout
-                          (vec (for [lane (concat cascade-policies
-                                                  (:pattern-gaps result0-unasserted))
-                                     event (:policy-rollout-events lane)
-                                     :when (= :policy-depth/v1 (:producer-contract event))]
-                                 event))}))
+                          :effective wm-policy-depth-used}))
         result
         (if trace?
           (let [result (-> result0
