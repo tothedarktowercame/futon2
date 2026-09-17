@@ -1,16 +1,23 @@
 (ns futon2.aif.cascade-beta-update-test
   "Per-context β update over cascade candidates (approved 2026-09-17,
-  PROPOSAL-policy-precision-learning.md §1–§4; @R14 implementation).
+  PROPOSAL-policy-precision-learning.md §1–§4, corrected 2026-09-17: no
+  order-only tie merge — B.19 already treats equal-G ties correctly when both
+  candidates are interior in π; @R14 implementation).
 
   Required behaviour, from the model:
-  - Order-only tie groups: candidates with equal G (1e-12) and the SAME
-    pattern set. Tick 1's C1/C2 share G but their precedence SETS differ
-    ([test sov] vs [placeholder test sov]), so tick 1 has NO group; a
-    constructed pair of permutations of one set IS grouped.
   - The β update (Parr B.19 / Friston 2.7 fixed point) over tick-1 G with
     F from the observation (C0 = C1 = ##Inf contradicted, C2 = C3 = 0),
     prior β = 1, context :R, converges with β DECREASING (γ increasing),
     because the evidence moved mass toward lower-G candidates.
+  - The corrected tie premise, asserted where it is TRUE: moving probability
+    between equal-G candidates that are BOTH interior in π contributes
+    exactly zero to (π − π₀)·G — swapping two finite F values between the
+    equal-G pair C1/C2 leaves the solved β unchanged. The stronger claim
+    that changing C1's F from ##Inf to C2's value also leaves β unchanged
+    is FALSE and is asserted as false here, with both values recorded:
+    re-including C1 in π renormalises the softmax and pulls mass from C3 —
+    a different-G candidate — so (π − π₀)·G changes (measured: β 0.9848 vs
+    0.9072). Reported to claude-4 2026-09-17.
   - Contexts are independent: updating :R leaves :WM absent or unchanged."
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.policy-precision :as pp]))
@@ -39,23 +46,10 @@
 (def tick-1-f
   {:C0-empty ##Inf :C1-test-first ##Inf :C2-fix-first 0.0 :C3-fix-only 0.0})
 
-(deftest order-only-tie-groups-test
-  (is (= [] (pp/order-only-tie-groups tick-1-candidates))
-      "tick 1: C1/C2 share G but their pattern SETS differ, so no group —
-      separating them by order is not excluded from the update")
-  (is (= 1 (count (pp/order-only-tie-groups
-                   [{:id :a :precedence [:x :y] :g 5.0}
-                    {:id :b :precedence [:y :x] :g 5.0}])))
-      "two equal-G permutations of one set form one order-only tie group")
-  (is (= 3 (count (first (pp/order-only-tie-groups
-                          [{:id :a :precedence [:x :y] :g 5.0}
-                           {:id :b :precedence [:y :x] :g 5.0}
-                           {:id :c :precedence [:x :y] :g 5.0}]))))
-      "a third member of the same set and G joins the group")
-  (is (= [] (pp/order-only-tie-groups
-             [{:id :a :precedence [:x :y] :g 5.0}
-              {:id :b :precedence [:y :x] :g 5.5}]))
-      "same set but different G is not an order-only tie"))
+(defn- solved-beta
+  [f]
+  (get-in (pp/cascade-beta-update {} :R tick-1-candidates f {})
+          [:R :beta]))
 
 (deftest cascade-beta-update-tick-1-test
   (let [states (pp/cascade-beta-update {} :R tick-1-candidates tick-1-f {})
@@ -65,7 +59,7 @@
              (true? (get-in st [:solve :converged?]))
              (true? (get-in st [:solve :bracketed?])))
         "the tick-1 solve converges and brackets")
-    (is (and (number? (:beta st)) (< (:beta st) (:beta-prior st) ))
+    (is (and (number? (:beta st)) (< (:beta st) (:beta-prior st)))
         "β decreases (γ = 1/β increases): evidence moved mass toward lower-G
         candidates (C0/C1 contradicted), so confidence in G rises")
     (is (> (/ 1.0 (:beta st)) (/ 1.0 (:beta-prior st)))
@@ -77,17 +71,44 @@
     (is (< (Math/abs (- (:beta st) 0.983)) 0.01)
         "solved β is within 0.01 of claude-4's one-step hand value 0.983
         (fixed point, not one step — see the ns docstring)")
-    (is (= [] (:merged-ties st))
-        "tick 1 has no order-only tie group, so nothing is merged")
     (is (= [:C0-empty :C1-test-first] (:excluded-infinite-f st))
         "contradicted candidates (F = ##Inf) are excluded from π with p = 0,
         exactly, and recorded")
     (is (= 1.0 (:beta-prior st))
         "the prior is recorded")
     (is (every? (set (keys st))
-                [:context :beta-source :beta-prior :beta :merged-ties
+                [:context :beta-source :beta-prior :beta
                  :candidates :g :f :solve])
         "the state records every declared value (the required keys at least)")))
+
+(deftest equal-g-tie-contributes-nothing-when-interior-test
+  ;; The corrected premise where it holds: C1 and C2 share G, and swapping
+  ;; their FINITE F values moves probability between equal-G interior
+  ;; candidates — (π − π₀)·G is unchanged, so β is unchanged.
+  (let [f-a {:C0-empty 0.0 :C1-test-first 3.0 :C2-fix-first 0.0 :C3-fix-only 0.0}
+        f-b {:C0-empty 0.0 :C1-test-first 0.0 :C2-fix-first 3.0 :C3-fix-only 0.0}
+        beta-a (solved-beta f-a)
+        beta-b (solved-beta f-b)]
+    (is (< (Math/abs (- beta-a beta-b)) 1.0e-9)
+        (str "equal-G interior swap leaves the solved β unchanged: "
+             beta-a " vs " beta-b))))
+
+(deftest boundary-tie-is-not-neutral-test
+  ;; The stronger claim claude-4's replacement test 1 asked for — solved β the
+  ;; same whether C1's F is ##Inf or C2's value — is FALSE, and asserting it
+  ;; would assert a wrong number. Recorded here as the true statement, with
+  ;; both values, so the fact cannot be lost: re-including C1 (F ∞ → 0)
+  ;; renormalises π and pulls mass from C3, a different-G candidate, so the
+  ;; dot and the root both move. Reported to claude-4 with the numbers.
+  (let [beta-inf (solved-beta tick-1-f)
+        beta-c2  (solved-beta (assoc tick-1-f :C1-test-first 0.0))]
+    (is (> 0.01 (Math/abs (- beta-inf 0.983)))
+        (str "C1 F = ##Inf: β = " beta-inf " (contradiction excluded from π)"))
+    (is (> (Math/abs (- beta-inf beta-c2)) 0.01)
+        (str "C1 F = C2's value: β = " beta-c2
+             " — the two cases differ, because the renormalisation moves mass
+             between different-G candidates (C1/C2 ↔ C3), not only within the
+             equal-G tie"))))
 
 (deftest cascade-beta-update-contexts-independent-test
   (let [wm-state {:status :present :beta 2.0 :beta-source :converged-posterior
@@ -97,24 +118,6 @@
     (is (= wm-state (get states :WM))
         "an update in :R leaves :WM's state unchanged")
     (is (and (contains? states :R) (contains? states :WM)))))
-
-(deftest cascade-beta-update-merges-order-only-ties-test
-  ;; Constructed: two permutations of [:x :y] with equal G and unequal F; the
-  ;; merge keeps the group's G with the group's MINIMUM F, and records it.
-  (let [candidates [{:id :p :precedence [:x :y] :g 5.0}
-                    {:id :q :precedence [:y :x] :g 5.0}
-                    {:id :r :precedence [:z] :g 6.0}]
-        states (pp/cascade-beta-update {} :R candidates
-                                       {:p 0.0 :q 3.0 :r 0.0} {})
-        st (:R states)]
-    (is (= 1 (count (:merged-ties st)))
-        "the order-only tie group is merged before solving")
-    (is (= [:p :q] (-> st :merged-ties first :ids))
-        "the merge records which candidates it merged")
-    (is (= 0.0 (-> st :merged-ties first :f))
-        "the representative carries the group's minimum F (at least one
-        ordering fits the observation)")
-    (is (true? (get-in st [:solve :converged?])))))
 
 (deftest cascade-beta-update-refusals-test
   (is (thrown-with-msg? clojure.lang.ExceptionInfo #"numeric F"

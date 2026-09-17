@@ -565,41 +565,11 @@
 ;; PROPOSAL-policy-precision-learning.md §1–§4)
 ;; ---------------------------------------------------------------------------
 
-(def ^:private order-only-tie-tolerance 1.0e-12)
-
-(defn order-only-tie-groups
-  "Groups of ≥2 candidates that have EQUAL G (within 1e-12) and the SAME
-   pattern set in (possibly) different orders — the proposal's §2 lesson 1:
-   an observation that separates candidates inside such a group is evidence
-   about step ORDER, not about whether G is reliable, so the β update must not
-   read it.
-
-   Candidates carry :id, :precedence (a vector of pattern ids) and :g.
-   Returns a vector of groups; each group is a vector of the member
-   candidates, in input order. Candidates lacking a finite :g or a
-   sequential :precedence are not grouped (they carry no tie statement)."
-  [candidates]
-  (let [groupable (filter (fn [c]
-                            (and (map? c)
-                                 (sequential? (:precedence c))
-                                 (finite-number? (:g c))))
-                          candidates)
-        by-set (group-by (fn [c] (set (:precedence c))) groupable)
-        runs (fn [members]
-               (loop [acc [] run [] last-g nil sorted (sort-by :g members)]
-                 (if (empty? sorted)
-                   (if (>= (count run) 2) (conj acc run) acc)
-                   (let [c (first sorted)
-                         g (:g c)
-                         same? (and last-g
-                                    (<= (- g last-g) order-only-tie-tolerance))]
-                     (recur (if same?
-                              acc
-                              (if (>= (count run) 2) (conj acc run) acc))
-                            (if same? (conj run c) [c])
-                            g
-                            (next sorted))))))]
-    (into [] (mapcat runs) (vals by-set))))
+;; ORDER-ONLY TIE GROUPS AND THE MERGE STEP WERE REMOVED (claude-4's design
+;; correction, 2026-09-17): C1 and C2 have different pattern sets, and no
+;; exclusion or merging is needed — moving probability between candidates
+;; with equal G (both interior in π) contributes exactly zero to (π − π₀)·G,
+;; so B.19 already treats ties correctly. A merge would distort F.
 
 (defn- cascade-residual
   "Eq. 2.7's residual with EXACT infinite-F handling: pi_0 = softmax(-gamma*G)
@@ -678,11 +648,10 @@
    F-BY-ID is {candidate-id F} from this tick's observation; a missing or
    non-number F is a typed refusal, ##Inf is legal (see below).
 
-   ORDER-ONLY TIES. Groups of ≥2 candidates with equal G (1e-12) and the same
-   pattern set (`order-only-tie-groups`) are MERGED before solving: one
-   representative carries the group's G, and its F is the group's MINIMUM F —
-   at least one ordering fits the observation, so the separation is not
-   evidence about G. Each merge is recorded under :merged-ties.
+   ORDER-ONLY TIES. No merge step (design correction, 2026-09-17): moving
+   probability between candidates with equal G — both interior in π —
+   contributes exactly zero to (π − π₀)·G, so B.19 already treats ties
+   correctly. `:precedence` is carried through untouched for the record.
 
    INFINITE F. A candidate whose prediction the observation contradicts has
    F = ##Inf, whose exact posterior probability is 0. It is EXCLUDED from π
@@ -694,7 +663,7 @@
 
    Returns {context new-state} merged into prev-states (other contexts
    untouched). The new state records :context, :beta-source, :beta-prior,
-   :beta, :merged-ties, :candidates (ids), :g, :f and :solve. Following
+   :beta, :candidates (ids), :g, :f and :solve. Following
    `carry-beta`'s rule, only a converged, bracketed solve carries
    (:beta-source :converged-posterior); otherwise the β is held with a
    reason (:held-unsolved / :held-absent)."
@@ -708,29 +677,12 @@
                 (initial-beta-state))
         beta-prior (beta-for state)
         cs (cascade-f-by-id candidates f-by-id)
-        groups (order-only-tie-groups cs)
-        merge-record (mapv (fn [group]
-                             {:ids (mapv :id group)
-                              :g (:g (first group))
-                              :f (apply min (map :f group))
-                              :f-values (mapv :f group)})
-                           groups)
-        ;; replace each group by one representative: group's G, group's min F
-        grouped-ids (into #{} (mapcat (fn [g] (map :id g))) groups)
-        representatives (mapv (fn [g]
-                                {:id (mapv :id g) ; vector id: stable, distinct
-                                 :precedence (:precedence (first g))
-                                 :g (:g (first g))
-                                 :f (apply min (map :f g))})
-                              groups)
-        merged (vec (concat (remove (fn [c] (contains? grouped-ids (:id c))) cs)
-                            representatives))
-        all-g (mapv (comp double :g) merged)
+        all-g (mapv (comp double :g) cs)
         finite-idx (vec (keep-indexed (fn [i c]
                                         (when (Double/isFinite (double (:f c))) i))
-                                      merged))
-        finite (mapv merged finite-idx)
-        infinite (vec (remove (fn [c] (Double/isFinite (double (:f c)))) merged))
+                                      cs))
+        finite (mapv cs finite-idx)
+        infinite (vec (remove (fn [c] (Double/isFinite (double (:f c)))) cs))
         finite-g (mapv (comp double :g) finite)
         finite-f (mapv (comp double :f) finite)
         {:keys [tolerance max-iterations beta-floor beta-ceiling]
@@ -766,7 +718,6 @@
                      :solved-tick-count (cond-> (long (:solved-tick-count state 0))
                                           solved? inc)
                      :prior-was-absent (not had-state?)
-                     :merged-ties merge-record
                      :candidates (mapv :id cs)
                      :g (mapv (fn [c] [(:id c) (double (:g c))]) cs)
                      :f (mapv (fn [c] [(:id c) (:f c)]) cs)
