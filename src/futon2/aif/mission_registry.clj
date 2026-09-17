@@ -191,6 +191,93 @@
                     false)))
             entries)))
 
+;; ---------- mission record writes (futon3c watcher lane calls these) ----------
+;; Single source for the machine's mission-entity record. The watcher's
+;; scope lane (futon3c.watcher.multi/reingest-mission-scopes!) refreshes the
+;; record after its scope reingest by calling `upsert-mission-record!`;
+;; scripts/futon2/aif/mission_substrate_ingest.clj uses the same builders
+;; for whole-corpus backfill.
+
+(defn- sha256-file ^String [path]
+  (let [digest (java.security.MessageDigest/getInstance "SHA-256")]
+    (with-open [in (io/input-stream path)]
+      (let [buf (make-array Byte/TYPE 8192)]
+        (loop []
+          (let [n (.read in buf)]
+            (when (pos? n)
+              (.update digest buf 0 n)
+              (recur))))))
+    (apply str (map #(format "%02x" %) (.digest digest)))))
+
+(defn- repo-of
+  "Source repo for an absolute mission-doc path: the path segment immediately
+   under the scan root CODE-ROOT."
+  [code-root path]
+  (let [rel (str/replace-first (str path) (str code-root "/") "")]
+    (first (str/split rel #"/"))))
+
+(defn mission-record-props
+  "The props the mission-record writer OWNS for one file-scan ENTRY. Status is
+   carried un-reclassified: :mission/status-line is the raw line and
+   :mission/status-class the registry classification as a string (unparseable
+   stays \"unknown\", never silently defaulted live). Nil-valued keys are
+   dropped: XTDB will not store them (learned 2026-09-17, e-f1b19720)."
+  [code-root entry]
+  (into {}
+        (remove (comp nil? val))
+        {:scope/role "mission"
+         :mission/relation "relates-to"
+         :mission/title (:title entry)
+         :mission/status-line (:status-line entry)
+         :mission/status-class (some-> (:status-class entry) name)
+         :mission/open-hole-count (some-> (:open-hole-count entry) long)
+         :provenance/repo (repo-of code-root (:path entry))
+         :provenance/path (:path entry)
+         :provenance/sha256 (sha256-file (:path entry))}))
+
+(defn- record-parse-props [props]
+  (cond
+    (map? props) props
+    (string? props) (try (edn/read-string props) (catch Throwable _ {}))
+    :else {}))
+
+(defn upsert-mission-record!
+  "Refresh ONE mission entity in substrate-2 from its doc file (the watcher
+   lane's per-land call; also usable standalone). Idempotent: foreign props
+   already on the entity are preserved and an unchanged record is a no-op.
+   Returns {:id .. :status :created|:updated|:unchanged}. The file scan must
+   admit PATH — a path the contract rejects is an :error, not a silent skip."
+  ([] (upsert-mission-record! {:path nil}))
+  ([{:keys [code-root path existing]}]
+   (let [code-root (or code-root default-code-root)]
+     (if-not (and path (re-matches mission-path-pattern (str path)))
+       {:status :error :reason :path-not-admitted :path path}
+       (let [entry (mission-doc->entry (str path))
+             id (:id entry)
+             props (record-parse-props (:entity/props existing))
+             merged (into {} (remove (comp nil? val))
+                          (merge props (mission-record-props code-root entry)))]
+         (if (and existing (= props merged))
+           {:id id :status :unchanged}
+           (do (substrate/put-doc!
+                (cond-> {:entity/name (str "mission|" id)
+                         :entity/type :mission
+                         :entity/external-id id
+                         :entity/props merged}
+                  (:entity/id existing) (assoc :entity/id (:entity/id existing))
+                  (not (:entity/source existing))
+                  (assoc :entity/source "mission-doc-ingest")))
+               {:id id :status (if existing :updated :created)})))))))
+
+(defn mission-entity-index
+  "All substrate-2 mission entities indexed by :entity/external-id (one
+   bounded query; callers reuse it across a corpus run instead of N+1)."
+  []
+  (->> (substrate/entities-by-type "mission" {:limit 1000})
+       (filter :entity/external-id)
+       (map (fn [e] [(:entity/external-id e) e]))
+       (into {})))
+
 (defn load-missions-from-files
   "The explicit FILE scan. `<code-root>/<repo>/holes/missions/M-*.md` only,
    with the scan-root fences and dedupe documented below. This is the
