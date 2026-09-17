@@ -1,25 +1,26 @@
 (ns futon2.aif.mission-registry
-  "Mission-doc substrate adapter for the WM AIF apparatus.
+  "Mission registry adapter for the WM AIF apparatus.
 
-   This namespace is the first concrete adapter for `:open-mission`.
-   It scans live top-level mission docs at `*/holes/missions/M-*.md`,
-   extracts a lightweight status/title view, filters to missions that are
-   not closed/draft/sandbox, and exposes them as addressable targets for the WM's
-   action layer.
-
-   Honest scope: file-backed and heuristic. The adapter reads mission docs'
-   `Status:` line rather than a typed substrate. This is still an honest
-   improvement over the prior state where `:open-mission` was permanently
-   gated and only surfaced as `:learn-action-class`.
+   AUTHORITATIVE SOURCE (2026-09-17, Joe): substrate-2 (futon1b :7073). The
+   zero-arg `load-missions` reads mission entities from there — one per
+   mission doc the file contract admits, written by the ingester
+   `scripts/futon2/aif/mission_substrate_ingest.clj` — and refuses with a
+   typed reason if the store is unreachable or empty. It never falls back to
+   the filesystem. The explicit file scan survives as
+   `load-missions-from-files` / the one-arg `load-missions`, for the ingester
+   and the test suite.
 
    The interface (`load-missions` / `open-missions` /
-   `can-propose? :open-mission` / the enumerator proposer) is the swap
-   target for a richer substrate if mission metadata becomes canonical
-   elsewhere."
-  (:require [clojure.java.io :as io]
+   `can-propose? :open-mission` / the enumerator proposer) is unchanged;
+   entries keep the file-scan shape (`:id :path :title :status-line
+   :status-class :open-hole-count`) with substrate provenance under
+   `:provenance/*` props."
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.action-proposer :as ap]
-            [futon2.aif.forward-model :as fm])
+            [futon2.aif.forward-model :as fm]
+            [futon2.aif.substrate :as substrate])
   (:import (java.io File)))
 
 (def ^:private default-code-root
@@ -190,13 +191,12 @@
                     false)))
             entries)))
 
-(defn load-missions
-  "Scan the code root for top-level mission docs and return
-   `{:missions [...]}` with lightweight metadata for each one.
-
-   Only files matching `*/holes/missions/M-*.md` at the immediate mission-doc
-   level are included; nested handoff/journal/support docs are excluded."
-  ([] (load-missions default-code-root))
+(defn load-missions-from-files
+  "The explicit FILE scan. `<code-root>/<repo>/holes/missions/M-*.md` only,
+   with the scan-root fences and dedupe documented below. This is the
+   ingester's reader (scripts/futon2/aif/mission_substrate_ingest.clj) and the
+   form the test suite uses against tmpdirs; the machine's default load
+   (`load-missions`, zero-arg) reads substrate-2 and never falls back here."
   ([code-root]
    (let [root (io/file code-root)
          ;; The contract admits only <code-root>/<repo>/holes/missions/M-*.md.
@@ -230,15 +230,75 @@
                        vec)]
      {:missions missions})))
 
+(defn- parse-entity-props
+  "The entities read route returns :entity/props as an EDN string; normalize
+   to a map (nil → {})."
+  [props]
+  (cond
+    (map? props) props
+    (string? props) (try (edn/read-string props) (catch Throwable _ {}))
+    :else {}))
+
+(defn- substrate-entity->entry
+  "Map one substrate-2 mission entity to the file-scan entry shape
+   (`:id :path :title :status-line :status-class :open-hole-count`).
+   A mission entity with no recorded status class reads as `:unknown` — the
+   same honest-unparseable bias `classify-status` gives a file whose Status
+   line it cannot read; it is NOT silently defaulted to a live class."
+  [entity]
+  (let [props (parse-entity-props (:entity/props entity))]
+    {:id (:entity/external-id entity)
+     :path (:provenance/path props)
+     :title (or (:mission/title props) (:entity/name entity) (:entity/external-id entity))
+     :status-line (:mission/status-line props)
+     :status-class (if-some [sc (:mission/status-class props)]
+                     (keyword sc)
+                     :unknown)
+     :open-hole-count (long (or (:mission/open-hole-count props) 0))}))
+
+(defn load-missions-from-substrate
+  "Read the mission registry from substrate-2 (futon1b, :7073) and return the
+   same `{:missions [...]}` shape the file scan produced. NO FALLBACK: an
+   unreachable store or an empty registry is a typed refusal
+   (`:kind :substrate-unreachable` / `:kind :substrate-mission-registry-empty`)
+   that the caller must surface — this namespace never quietly re-scans files
+   instead (Joe 2026-09-17: substrate-2 holds all the missions and the machine
+   points at it, not at a second source it doesn't announce)."
+  ([] (load-missions-from-substrate {}))
+  ([opts]
+   (let [entities (try
+                    (substrate/entities-by-type "mission" (assoc opts :limit 1000))
+                    (catch Throwable t
+                      (throw (ex-info "substrate-2 mission registry unreachable"
+                                      {:kind :substrate-unreachable}
+                                      t))))
+         entries (->> (or entities [])
+                      (filter #(str/starts-with? (str (:entity/external-id %)) "M-"))
+                      (map substrate-entity->entry)
+                      vec)]
+     (when (empty? entries)
+       (throw (ex-info "substrate-2 mission registry returned no missions"
+                       {:kind :substrate-mission-registry-empty})))
+     {:missions entries})))
+
+(defn load-missions
+  "Load the mission registry the machine points at: substrate-2
+   (`load-missions-from-substrate`). Zero-arg is the machine's read and NEVER
+   falls back to the filesystem. The one-arg form is the EXPLICIT file scan
+   (same as `load-missions-from-files`) — kept for the ingester and the test
+   suite, never as an automatic fallback."
+  ([] (load-missions-from-substrate))
+  ([code-root] (load-missions-from-files code-root)))
+
 (def ^:private missions-cache (atom nil))
 
 (def missions-cache-ttl-ms
-  "TTL for the load-missions snapshot. A full scan walks ~/code and parses every
-   mission doc (~10s), so per-action callers (the WM guardrail selector calls
-   `mission-status` once per ranked :open-mission — dozens per selection) MUST
-   share one snapshot or a selection takes minutes. The TTL is short so
-   cross-cycle freshness (e.g. after the pilot advances a hole) still refreshes."
-  15000)
+  "TTL for the load-missions snapshot. Since 2026-09-17 the zero-arg load is a
+   bounded substrate-2 query (cheap), so the TTL exists only to coalesce the
+   per-action hot path (the WM guardrail selector calls `mission-status` once
+   per ranked :open-mission — dozens per selection). It is deliberately short
+   so a stale store is re-read within one selection cycle rather than hidden."
+  5000)
 
 (defn load-missions-cached
   "Memoized `load-missions` (TTL = `missions-cache-ttl-ms`). Within one WM
