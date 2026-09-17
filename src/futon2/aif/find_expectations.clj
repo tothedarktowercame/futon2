@@ -61,6 +61,17 @@
     artifact))
 
 (defn- check-occurrence-binding! [occurrence artifact]
+  ;; TWO DIFFERENT DIGESTS SHARE THIS KEY NAME, and unifying them would void
+  ;; both bindings (zai-16, link-4 discovery, 2026-09-17):
+  ;;   - HERE, :repository-sha256 is the frozen INDEX digest of the pattern
+  ;;     library at retrieval time (FROZEN-CONTEXT.edn, from the retrieval
+  ;;     index TSV). It says WHICH library state the occurrence happened in.
+  ;;   - In find-receipt/validate-result! it is read-repository's VALUE digest
+  ;;     over the pattern entries' {:path :sha256}. It says the finder read
+  ;;     the repository it claims to have read.
+  ;; They are never compared with each other, and they must not be: the
+  ;; occurrence binding and the result check answer different questions. If
+  ;; you are here because the two "don't match", that is correct behaviour.
   (let [o (:occurrence artifact)
         mismatch (fn [k] (need! false :occurrence-binding-mismatch
                                 {:field k :artifact (get o k)
