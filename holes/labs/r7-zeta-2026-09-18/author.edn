@@ -1,0 +1,9 @@
+{:agency-url "http://localhost:7070"
+ :origin "futon3c-agency:7070"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/likelihood_precision.clj"]
+ :test-paths ["test/futon2/aif/likelihood_precision_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.likelihood-precision-test"]
+ :test-environment {"LC_ALL" "C.UTF-8" "LANG" "C.UTF-8" "TZ" "UTC"}
+ :author "zai-30"
+ :artifact-dir "/home/joe/code/storage/test-registry"}
