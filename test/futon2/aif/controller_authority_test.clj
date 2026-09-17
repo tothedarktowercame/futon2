@@ -1,8 +1,7 @@
 (ns futon2.aif.controller-authority-test
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.controller-authority :as authority]
-            [futon2.aif.mission-registry :as missions]
-            [futon2.aif.policy :as policy]))
+            [futon2.aif.mission-registry :as missions]))
 
 (def action {:type :advance-mission :target "M-outside-old-canary"})
 (def decision {:action action :controller-score 0.25
@@ -47,17 +46,3 @@
              (try (authority/authorize sorry-decision [])
                   (catch clojure.lang.ExceptionInfo e (:reason (ex-data e)))))))))
 
-(deftest controller-selection-outside-old-three-keeps-its-law
-  (let [ranked [{:action action :rank 1 :controller-score 0.25}
-                {:action {:type :advance-mission :target "M-aif-policy-conditioned-eig"}
-                 :rank 2 :controller-score 0.75}]
-        selected (policy/select-action ranked {:selection-boundary :strategic-recommendation
-                                               :selection-law :controller-head})]
-    (with-redefs [missions/mission-status (constantly {:open? true})]
-      (let [result (authority/authorize selected ranked)]
-        (is (= action (:action result)))
-        (is (= (:controller-score selected) (:controller-score result)))
-        (is (= (:selection-law selected) (:selection-law result)))
-        (is (true? (get-in result [:actuation :authorized?])))
-        (is (not (contains? result :selected-policy-id)))
-        (is (not (contains? result :strategic-memory)))))))

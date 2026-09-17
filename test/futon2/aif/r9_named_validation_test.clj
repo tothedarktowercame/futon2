@@ -15,8 +15,7 @@
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
-            [futon2.aif.free-energy :as fe]
-            [futon2.aif.policy :as policy]))
+            [futon2.aif.free-energy :as fe]))
 
 ;; ---------------------------------------------------------------------------
 ;; V-shrink
@@ -137,56 +136,3 @@
 ;; Abstain-fires
 ;; ---------------------------------------------------------------------------
 
-(defn- ranked
-  "Helper: build a ranked-action seq sorted ascending by controller-score
-   (mirroring `efe/rank-actions`'s output contract)."
-  [pairs]
-  (->> pairs
-       (mapv (fn [[t g]] {:action {:type t} :controller-score g}))
-       (sort-by :controller-score)
-       vec))
-
-(deftest abstain-fires-property-test
-  (testing
-    "**Abstain-fires**: when no action's controller-score is meaningfully below :no-op's,
-     select-action abstains.
-
-     Acceptance criterion: across 5 test cases where (best.controller-score - no-op.controller-score)
-     is within abstain-epsilon (default 0.01), select-action returns :abstain in
-     100% of cases. When the gap exceeds epsilon, select-action does NOT abstain."
-    (let [;; cases that should abstain (gap within ε)
-          abstain-cases
-          [(ranked [[:no-op 0.5] [:address-sorry 0.495]])         ; gap 0.005
-           (ranked [[:no-op 0.3] [:fire-pattern 0.3]])             ; gap 0
-           (ranked [[:no-op 1.0] [:learn-action-class 0.999]])     ; gap 0.001
-           (ranked [[:no-op 0.5]])                                  ; no-op alone
-           []]                                                      ; empty input
-          ;; cases that should NOT abstain (gap exceeds ε)
-          choose-cases
-          [(ranked [[:no-op 0.5] [:address-sorry 0.3]])           ; gap 0.2
-           (ranked [[:no-op 0.5] [:open-mission 0.4]])             ; gap 0.1
-           (ranked [[:no-op 1.0] [:fire-pattern 0.5]])]            ; gap 0.5
-          abstain-results (map #(:action (policy/select-action %)) abstain-cases)
-          choose-results (map #(:action (policy/select-action %)) choose-cases)]
-      (is (every? #(= :abstain %) abstain-results)
-          (str "Abstain-fires: all near-tied cases should abstain; got " abstain-results))
-      (is (every? #(not= :abstain %) choose-results)
-          (str "Abstain-fires (negative): clear-best cases should choose; got "
-               choose-results)))))
-
-(deftest abstain-fires-gap-report-test
-  (testing
-    "**Abstain-fires (gap report)**: when abstaining, the gap-report carries the
-     :learn-action-class candidates in the ranked list.
-
-     Acceptance criterion: gap-report enumerates every :learn-action-class in the
-     ranked input."
-    (let [ranked-acts [{:action {:type :no-op} :controller-score 0.5}
-                      {:action {:type :learn-action-class :target-class :a
-                                :intrinsic-value 0.1} :controller-score 0.495}
-                      {:action {:type :learn-action-class :target-class :b
-                                :intrinsic-value 0.1} :controller-score 0.499}]
-          out (policy/select-action ranked-acts)]
-      (is (= :abstain (:action out)))
-      (is (= #{:a :b} (set (map :target-class (:gap-report out))))
-          "gap-report enumerates all :learn-action-class candidates"))))

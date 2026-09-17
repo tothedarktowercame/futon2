@@ -231,7 +231,13 @@
          ;; live observation instead — see `plant-real-split`.
          realised {channel realised-value}
          f-pi (mapv #(pfe/f-pi-for-candidate (predictions %) realised) order)
-         tau (policy/effective-temperature g-vec 1.0 {})
+         tau (let [spread (- (apply max g-vec) (apply min g-vec))]
+               ;; planted τ, historically policy/effective-temperature's
+               ;; :spread mode at g=1 (deleted with the flat selector, H6b
+               ;; 2026-09-17); kept inline here as a FIXTURE constant so the
+               ;; surviving seam tests (selection-scores/softmax-weights)
+               ;; still have a temperature to run at.
+               (max 0.01 (/ spread 5.0)))
          ranked (vec (map-indexed (fn [i a]
                                     {:action {:type a}
                                      :rank (inc i)
@@ -250,12 +256,11 @@
       :scores-flags-on (policy/selection-scores g-vec tau log-e f-pi-opts)
       :scores-flags-off (policy/selection-scores g-vec tau log-e)
       :posterior (policy/softmax-weights g-vec tau log-e f-pi-opts)
-      :full-score-decision
-      (policy/select-action ranked {:selection-boundary :strategic-recommendation
-                                    :selection-law :full-score-posterior
-                                    :f-pi-opts f-pi-opts})
-      :head-decision
-      (policy/select-action ranked {:selection-boundary :strategic-recommendation})})))
+      ;; H6b (2026-09-17): the flat decisions (select-action at the strategic
+      ;; boundary) were deleted; the walk's decision is the cascade selector
+      ;; over the same ranked field at a declared β=1 (argmax over the same
+      ;; min-G head for these single-action candidates).
+      :cascade-decision (policy/select-action-cascades ranked {:beta 1.0})})))
 
 (def ^:private run (memoize pipeline))
 
@@ -400,15 +405,6 @@
 ;; ---------------------------------------------------------------------------
 ;; R14 — tau. policy.clj:33-46 (spread), :77-146 (effective).
 
-(deftest r14-temperature-from-the-arm-g-spread-test
-  (let [{:keys [g-vec tau]} (run)]
-    (testing "tau comes from the arm G spread at unit selection gain"
-      (is (= tau (policy/adaptive-temperature g-vec {})))
-      (is (within? 1e-12 0.10396979632561867 tau))
-      (is (= :selection-gain-spread (policy/temperature-source {}))))
-    (testing "zaif has no temperature at all — nothing in its record carries one"
-      (is (not-any? #{:tau :temperature :precision} (keys recorded-decision))))))
-
 ;; ---------------------------------------------------------------------------
 ;; R6 — ln E. habit_prior.clj:27-37 (identity), :100-119 (log-priors).
 
@@ -475,52 +471,16 @@
 ;; R16 — u. policy.clj:503-519 (the laws), :594-596 (the argmax), :672-...
 
 (deftest r16-action-the-three-laws-choose-three-different-arms-test
-  (let [{:keys [full-score-decision head-decision order scores-flags-on]} (run)]
-    (testing "the full-score law's choice IS the argmax of the recorded posterior"
-      (is (= :full-score-posterior
-             (get-in full-score-decision [:selection-law :applied])))
-      (is (nil? (get-in full-score-decision [:selection-law :refusal])))
-      (is (= (:action full-score-decision)
-             {:type (nth order (first-argmax-idx scores-flags-on))})))
-    (testing "the head law takes the G-ordered head instead"
-      (is (= {:type (first order)} (:action head-decision)))
-      (is (= :controller-head (get-in head-decision [:selection-law :applied]))))
-    (testing "THREE laws, THREE arms, from one recorded decision"
-      (is (= :retrieve (:arm recorded-decision)))
-      (is (= {:type :ask} (:action head-decision)))
-      (is (= {:type :act} (:action full-score-decision)))
-      (is (true? (get-in full-score-decision
-                         [:selection-law :moved-from-controller-head?]))))
-    (testing "zaif's own R16 is an argmax too — but 83 of 114 were tie-breaks"
+  ;; H6b (2026-09-17): the first two testing blocks pinned the two FLAT laws
+  ;; (controller-head vs :full-score-posterior through policy/select-action)
+  ;; and were deleted with the selector. What survives is the corpus fact the
+  ;; node is named for: zaif's own R16 choice rule.
+  (testing "zaif's own R16 is an argmax too — but 83 of 114 were tie-breaks"
       (is (= 83 (:chosen-by-tie-break recorded-corpus)))
       (is (= {:act 83} (:tie-broken-arms recorded-corpus))
           "at equal G-terms `choose-arm` takes the first arm in source order")
       (is (= 31 (- (:sessions recorded-corpus) (:chosen-by-tie-break recorded-corpus)))
-          "31 of 114 recorded decisions were settled by a score"))))
-
-(deftest r16-candidates-stay-opaque-at-the-seam-test
-  ;; U5 (SPEC-dormant-wiring.md:244-254). The same invariant U10 pinned: from
-  ;; `selection-scores` upward the WM reads (G, ln E, F_pi) and nothing inside
-  ;; the candidate, so this suite survives arms becoming cascades.
-  (let [{:keys [ranked f-pi-opts]} (run)
-        disguised (mapv #(assoc % :action
-                                {:type :apply-cascade
-                                 :target (keyword (str "cascade-"
-                                                       (name (get-in % [:action :type]))))
-                                 :payload {:zaif/turn "e-ce907fcf" :zaif/rounds 4}})
-                        ranked)
-        opts {:selection-boundary :strategic-recommendation
-              :selection-law :full-score-posterior
-              :f-pi-opts f-pi-opts}
-        a (policy/select-action ranked opts)
-        b (policy/select-action disguised opts)]
-    (testing "different candidate payloads, same scores ⇒ same chosen rank"
-      (is (= (:rank a) (:rank b)))
-      (is (= (:controller-score a) (:controller-score b)))
-      (is (= (get-in a [:selection-law :chosen-rank])
-             (get-in b [:selection-law :chosen-rank]))))
-    (testing "and the candidate identity did change, so the test is not vacuous"
-      (is (not= (:action a) (:action b))))))
+          "31 of 114 recorded decisions were settled by a score")))
 
 ;; ---------------------------------------------------------------------------
 ;; R17 — a-conc, Delta-F. bmr.clj:108-138; a4a.clj:85-113. STUBBED BY DESIGN.
@@ -556,7 +516,7 @@
                               [:sorry-count-norm 0.0]]]
                (assoc (select-keys (run ch base) [:order])
                       :channel ch
-                      :head (get-in (run ch base) [:head-decision :action :type])))]
+                      :head (get-in (run ch base) [:cascade-decision :action :type])))]
     (testing "the arm ordering at R5 is a different order on each plant channel"
       (is (= [[:ask :act :retrieve]
               [:act :retrieve :ask]
@@ -794,35 +754,6 @@
       (is (= (vec (sort-by by-arm modelled-arms))
              (vec (sort-by #(get-in recorded-decision [:g-terms %]) modelled-arms)))))))
 
-(deftest u25-regrounding-moves-the-r16-three-law-finding-test
-  ;; U6's headline at R16 was "three laws, three arms": zaif chose :retrieve,
-  ;; the controller-head law chose :ask, the full-score law chose :act, and the
-  ;; arm zaif chose was the WM's LEAST preferred. On the re-grounded level and
-  ;; dispersion that result does not survive.
-  (let [planted (run)
-        grounded (grounded-run)
-        head #(get-in % [:head-decision :action :type])
-        full #(get-in % [:full-score-decision :action :type])]
-    (testing "the U6 result, restated so the comparison is visible"
-      (is (= :retrieve (:arm recorded-decision)))
-      (is (= :ask (head planted)))
-      (is (= :act (full planted)))
-      (is (true? (get-in planted [:full-score-decision :selection-law
-                                  :moved-from-controller-head?])))
-      (is (= 3 (count (distinct [(:arm recorded-decision) (head planted) (full planted)])))))
-    (testing "re-grounded, all three laws agree on the arm zaif actually chose"
-      (is (= :retrieve (head grounded)))
-      (is (= :retrieve (full grounded)))
-      (is (= 1 (count (distinct [(:arm recorded-decision) (head grounded) (full grounded)]))))
-      (is (false? (get-in grounded [:full-score-decision :selection-law
-                                    :moved-from-controller-head?]))))
-    (testing "and zaif's arm goes from LEAST preferred to MOST preferred at G"
-      (is (= :retrieve (last (:order planted))))
-      (is (= :retrieve (first (:order grounded)))))
-    (testing "tau moves with the G spread, so the posterior is not comparable either"
-      (is (within? 1e-12 0.10396979632561867 (:tau planted)))
-      (is (within? 1e-12 0.047056937300750334 (:tau grounded))))))
-
 (deftest u25-grounded-plant-dependence-negative-control-test
   ;; The control U6 ran, re-run with the plant REMOVED from level and dispersion
   ;; — every channel now carries its own live predicted mean and variance from
@@ -836,17 +767,21 @@
                {:channel ch
                 :order (:order (run ch level variance realised))
                 :head (get-in (run ch level variance realised)
-                              [:head-decision :action :type])})]
+                              [:cascade-decision :action :type])})]
     (testing "the corpus carries seven channels at R8, all grounded"
       (is (= 7 (count channels)))
       (is (= [:active-repo-ratio :annotation-health :attack-coverage :coupling-density
               :mission-health :support-coverage :ticks-firing-ratio]
              (vec channels))))
-    (testing "three different R5 orders and two different head choices remain"
+    (testing "three different R5 orders and head choices remain"
       (is (= 3 (count (distinct (map :order runs)))))
       (is (= #{[:retrieve :ask :act] [:act :retrieve :ask] [:act :ask :retrieve]}
              (set (map :order runs))))
-      (is (= #{:retrieve :act} (set (map :head runs)))))
+      ;; H6b: heads are now the cascade posterior's choice (β=1, tie-break
+      ;; :action-name-ascending) instead of the flat controller-head order,
+      ;; so a G-tie resolves to :ask here where the old head took the first
+      ;; ranked arm — still a plant-dependence result, one arm per placement.
+      (is (= #{:retrieve :act :ask} (set (map :head runs)))))
     (testing "the conclusion this licenses, and its limit"
       ;; Re-grounding removed two invented numbers and left the arm-conditional
       ;; delta and the channel placement planted. So the U6 prohibition stands

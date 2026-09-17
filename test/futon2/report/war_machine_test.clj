@@ -18,8 +18,7 @@
             [futon2.aif.mission-epistemic-value :as mev]
             [futon2.aif.mission-gauges :as gauges]
             [futon2.aif.observation :as observation]
-            [futon2.aif.policy :as policy]
-            [futon2.aif.preferences :as pref]
+                        [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
             [futon2.aif.selection-rationale :as selection-rationale]
             [futon2.aif.trace :as trace]
@@ -77,7 +76,16 @@
          ;; with nil, which is sound here precisely because F is off the
          ;; portfolio-step path this test reads.
          (str/replace "(fe/compute-variational-free-energy prediction-errors)"
-                      "nil")))
+                      "nil")
+         ;; H6b (2026-09-17) deleted the flat selectors from futon2.aif.policy,
+         ;; and this control compiles a HISTORICAL war_machine against TODAY's
+         ;; libraries — the anchor's judge calls `policy/select-action`, which
+         ;; no longer resolves. Same ruling as above: the anchor stays pinned;
+         ;; the retired call becomes `(constantly nil)`, arity-safe, and sound
+         ;; because the portfolio-step path this test reads never consults the
+         ;; flat decision.
+         (str/replace "policy/select-action" "(constantly nil)")
+         (str/replace "policy/default-mode-select" "(constantly nil)")))
     (let [judge-form (some #(when (and (seq? %)
                                        (= 'defn (first %))
                                        (= 'judge (second %)))
@@ -891,38 +899,10 @@
         "a targetless record (no-op/abstain) breaks the chain without throwing")))
 
 ;; ---------------------------------------------------------------------------
-;; RUN8 / stage S3 — the FUTON_WM_TAU_MODE parser and the β hand-off.
-;;
-;; The parser and `policy/effective-temperature`'s closed dispatch have to
-;; change together: one throws on any mode the other admits. These tests pin
-;; the pair, so a later edit to one alone fails here rather than at tick time.
+;; RUN8 / stage S3 — the variational-τ precondition guard. The τ_eff dispatch
+;; itself (policy/effective-temperature) was deleted with the flat selector
+;; (H6b, 2026-09-17); this guard still protects the tick's flag chain.
 ;; ---------------------------------------------------------------------------
-
-(deftest tau-mode-parser-admits-exactly-what-the-dispatch-accepts-test
-  (testing "the REAL parser: which strings map to which mode"
-    (is (= :spread (wm/tau-mode-of "spread")))
-    (is (= :variational-beta-gamma (wm/tau-mode-of "variational-beta-gamma")))
-    (is (= :selection-gain-only (wm/tau-mode-of nil))
-        "unset is the live default, flipped by Joe 2026-07-13")
-    (doseq [junk ["" "gamma-only" "variational" "VARIATIONAL-BETA-GAMMA" "1"]]
-      (is (= :selection-gain-only (wm/tau-mode-of junk))
-          (str "unrecognised " (pr-str junk) " falls to the live default"))))
-  (testing "and every mode it can produce is one effective-temperature handles
-            -- the pair the acceptance says must change together"
-    (let [produced (set (map wm/tau-mode-of
-                             [nil "spread" "variational-beta-gamma"
-                              "" "gamma-only" "typo"]))]
-      (is (= #{:spread :selection-gain-only :variational-beta-gamma} produced))
-      (doseq [m produced]
-        (is (number?
-             (policy/effective-temperature
-              [0.0 1.0] 1.0 (cond-> {:tau-mode m}
-                              (= m :variational-beta-gamma)
-                              (assoc :variational-beta 1.25))))
-            (str "effective-temperature accepts " m)))))
-  (testing "the env read is the parser applied to the env and nothing else"
-    (is (= (wm/tau-mode-of (System/getenv "FUTON_WM_TAU_MODE"))
-           (#'wm/arena-tau-mode)))))
 
 (deftest variational-tau-preconditions-are-loud-test
   (testing "the variational mode without the flags that compute β holds β₀ on
@@ -947,41 +927,6 @@
       (fn []
         (is (nil? (wm/variational-tau-preconditions! :variational-beta-gamma))
             "all three flags on: no complaint")))))
-
-(deftest variational-temperature-opts-carry-beta-and-its-source-test
-  (testing "the two selection-gain modes get the historical bare map; the
-            variational mode gets β and the provenance carry-beta assigned it"
-    (is (= {:tau-mode :spread}
-           (wm/variational-temperature-opts :spread {:policy-precision-state
-                                                     {:beta 9.9 :beta-source :converged-posterior}}))
-        "β is not smuggled into a mode that does not use it")
-    (is (= {:tau-mode :selection-gain-only}
-           (wm/variational-temperature-opts :selection-gain-only nil)))
-    (is (= {:tau-mode :variational-beta-gamma
-            :variational-beta 1.034342317
-            :variational-beta-source :converged-posterior}
-           (wm/variational-temperature-opts
-            :variational-beta-gamma
-            {:policy-precision-state {:beta 1.034342317
-                                      :beta-source :converged-posterior}})))
-    (testing "a HELD tick still supplies a β — the hold happened in the carry,
-              and the source is what says so"
-      (let [opts (wm/variational-temperature-opts
-                  :variational-beta-gamma
-                  {:policy-precision-state {:status :absent
-                                            :reason :no-f-pi-readback
-                                            :beta 1.0
-                                            :beta-source :initial}})]
-        (is (= 1.0 (:variational-beta opts)))
-        (is (= :initial (:variational-beta-source opts)))
-        (is (= 1.0 (policy/effective-temperature [0.0 1.0] 4.0 opts))
-            "and it is used as τ, NOT crossed to 1/g = 0.25")))
-    (testing "no beta state at all reaches effective-temperature's throw
-              rather than a silent 1/g"
-      (is (thrown? clojure.lang.ExceptionInfo
-                   (policy/effective-temperature
-                    [0.0 1.0] 4.0
-                    (wm/variational-temperature-opts :variational-beta-gamma nil)))))))
 
 ;; ---------------------------------------------------------------------------
 ;; RUN9 / stage S4 — the F_π the live posterior is handed
@@ -2484,16 +2429,3 @@
           "and a file that is not a daily trace is not corpus"))))
 
 
-(deftest judge-never-reaches-a-flat-entry-point
-  ;; H5b (Joe 2026-09-17): the flat decision is impossible to run. With the
-  ;; flat selectors redefined to throw, judge still completes, and with no
-  ;; cascade sources it returns the gated abstention with no flat keys.
-  (with-redefs [policy/select-action (fn [& _] (throw (ex-info "flat select-action reached" {})))
-                policy/default-mode-select (fn [& _] (throw (ex-info "flat default-mode-select reached" {})))]
-    (let [j (wm/judge {} {:cascade-sources-dir "/nonexistent/cascade-sources"})]
-      (is (= :abstained (get-in j [:decision :status])))
-      (is (seq (get-in j [:decision :refusals])))
-      (is (= :none-supplied (:cascade-sources j)))
-      (is (= 2 (get-in j [:cascade-horizon :value])))
-      (is (not-any? #(contains? j %) [:ranked-actions :admissible-actions :default-mode-events
-                                       :operator-actions :policy-support-exclusions :cascade-policies])))))

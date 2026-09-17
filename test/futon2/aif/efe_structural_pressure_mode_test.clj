@@ -5,7 +5,7 @@
    Goldens captured at `6b4d9a8` (pre-D-1d HEAD) on a fixture whose actions
    CARRY :structural-pressure-per-action (sp .8/.2/.4/0 across the four) — so
    default-mode byte-identity is load-bearing, not vacuous. Two levels:
-   controller-score (rank-actions) and selection (policy/select-action).
+   controller-score (rank-actions); the flat selection leg was deleted with the flat selector (H6b, 2026-09-17).
 
    Dark-mode section documents the FLIP MEMO SEED: what changes about ranking
    when the term moves from G to prior — (a) :controller-score rises by exactly w·sp
@@ -14,8 +14,7 @@
    longer see the term."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
-            [futon2.aif.efe :as efe]
-            [futon2.aif.policy :as policy]))
+            [futon2.aif.efe :as efe]))
 
 (def ^:private obs
   {:loop-health 0.9 :support-coverage 0.9 :attack-coverage 0.9
@@ -78,16 +77,6 @@
         (is (every? #(= :controller-augmentation (:structural-pressure-mode %)) rs))
         (is (not-any? :habit-prior-bias rs))))))
 
-(deftest default-mode-selection-byte-identity
-  (doseq [[label opts] [[:hinge base-opts] [:kl kl-opts]]]
-    (let [d (policy/select-action (ranked opts) {:selection-gain 1.0})
-          [target g-total tau] (get-in golden [label :decision])]
-      (testing (str label " — chosen action, controller-score, tau all golden")
-        (is (= target (get-in d [:action :target])))
-        (is (= g-total (:controller-score d)))
-        (is (= tau (:tau d)))
-        (is (not (:habit-prior-applied? d)))))))
-
 (deftest dark-mode-g-relocation
   (let [default-rs (ranked base-opts)
         dark-rs (ranked (assoc base-opts :structural-pressure-mode :habit-prior))
@@ -119,26 +108,3 @@
       (is (= (mapv :structural-pressure default-rs)
              (mapv :structural-pressure dark-rs))))))
 
-(deftest dark-mode-selection-seam
-  (let [dark-rs (ranked (assoc base-opts :structural-pressure-mode :habit-prior))
-        d (policy/select-action dark-rs {:selection-gain 1.0})]
-    (testing "selection engages the prior seam and self-describes"
-      (is (:habit-prior-applied? d)))
-    (testing "chosen action is argmax(ln E − G/τ), computable independently"
-      (let [tau (:tau d)
-            scores (mapv #(+ (/ (- (double (:controller-score %))) (double tau))
-                             (double (:habit-prior-bias %)))
-                         dark-rs)
-            expect (get-in (nth dark-rs (apply max-key scores
-                                               (range (count scores))))
-                           [:action :target])]
-        (is (= expect (get-in d [:action :target])))))
-    (testing "zero-bias entries under dark mode ⇒ historical path (no seam)"
-      (let [no-sp-actions (mapv #(dissoc % :structural-pressure-per-action)
-                                actions)
-            rs (efe/rank-actions state no-sp-actions
-                                 (assoc base-opts
-                                        :structural-pressure-mode :habit-prior))
-            d2 (policy/select-action rs {:selection-gain 1.0})]
-        (is (not (:habit-prior-applied? d2)))
-        (is (= 1 (:rank d2)))))))

@@ -124,7 +124,7 @@
 
   ;; --- 2. the R6 route function on cascade candidates -------------------
 
-  (testing "REQUIRED: select-action (:R6 route) preserves cascade candidates and their guards"
+  (testing "REQUIRED: select-action-cascades (:R6 route) preserves cascade candidates and their guards"
     ;; efe/rank-actions returns candidates best-first; select-action takes the
     ;; first entry as best (policy.clj `best (first ranked-actions)`), so the
     ;; fixture must arrive ranked exactly as the real route contract says.
@@ -134,10 +134,10 @@
                           :controller-score (if (set/superset? (simulate prec) (set want)) -1.0 -3.0)
                           :rank 1})
                        (reverse cascades))
-          decision (try {:ok (policy/select-action ranked)}
+          decision (try {:ok (policy/select-action-cascades ranked {:beta 1.0})}
                         (catch Exception e {:throw e}))]
       (is (nil? (:throw decision))
-          (str "select-action threw on cascade candidates: "
+          (str "select-action-cascades threw on cascade candidates: "
                (when-let [t (:throw decision)] (.getMessage t))))
       (when-let [d (:ok decision)]
         (is (map? (:action d)) "a cascade candidate is chosen, not flattened to a keyword")
@@ -146,8 +146,8 @@
         (is (every? :guard (vals (get-in d [:action :steps])))
             "the chosen candidate keeps each pattern's guard over the tick tokens"))))
 
-  (testing "REQUIRED: select-action abstains with :no-candidates when the space is empty"
-    (is (= :no-candidates (:reason (policy/select-action [])))))
+  ;; H6b (2026-09-17): the flat abstain-on-empty block was deleted with the
+  ;; flat selector; an empty cascade menu is a typed refusal upstream.
 
   ;; --- 3. the real cascade construction entry point on this tick --------
 

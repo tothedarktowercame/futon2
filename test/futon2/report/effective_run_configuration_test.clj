@@ -2,8 +2,7 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.anticipation :as anticipation]
             [futon2.aif.policy-depth :as depth]
-            [futon2.aif.policy :as policy]
-            [futon2.aif.trace :as trace]
+                        [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm]))
 
 (deftest loaded-values-and-evaluated-depth
@@ -36,16 +35,3 @@
               (is (= "test-run" (:run/id evaluated)))))))
       (finally (.delete file)))))
 
-(deftest incomplete-posterior-is-recorded-from-decision
-  (binding [wm/*f-pi-posterior?* true]
-    (let [fields (wm/f-pi-posterior-opts {:f-pi-by-candidate-id {:status :present :by-candidate-id {}}}
-                                       [{:action {:type :no-op}}])
-          decision (policy/select-action
-                    [{:action {:type :no-op} :controller-score 1.0}]
-                    {:selection-boundary :strategic-recommendation :f-pi-opts fields})
-          result (wm/evaluated-run-configuration
-                  (wm/effective-run-configuration {}) {} nil {:events []}
-                  {:horizon-steps nil} decision)]
-      (is (= :incomplete-coverage (get-in result [:fpi-posterior :reason])))
-      (is (false? (get-in result [:fpi-posterior :applied?])))
-      (is (= (:f-pi-posterior decision) (:fpi-posterior result))))))

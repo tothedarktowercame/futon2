@@ -39,10 +39,10 @@
         :code-var 'futon2.aif.efe/compute-efe
         :gating-sorries []}
    :b4 {:code-ns ['futon2.aif.policy]
-        :code-var 'futon2.aif.policy/select-action
+        :code-var 'futon2.aif.policy/select-action-cascades
         :gating-sorries []
         :known-not-ready? true
-        :faithfulness-note "R13 policy has the tie-floor and acting is HELD; no open registry sorry records that incompleteness."}
+        :faithfulness-note "Rebound 2026-09-17: the flat policy/select-action was removed by Joe's ruling (cascade-grain selection); the box now binds the cascade selector. Still flagged not-ready pending an R13 readiness review of the cascade selector itself."}
    :b5 {:code-ns ['futon2.aif.actuator-a3]
         :code-var 'futon2.aif.actuator-a3/build-match
         :gating-sorries []}
