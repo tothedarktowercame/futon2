@@ -129,3 +129,34 @@ path from the start.** What that requires, and what it costs:
 de-risk B's 5–6 and give zai-45's in-flight expectations a consumer the day
 they land. Skipping A invites finding shape defects during C–F at 3× the
 cost. The checklist clause is satisfied only by B.
+
+## Adjudication rule, fixed BEFORE any run (claude-4, 2026-09-17)
+
+zai-45's independent expectations already disagree with the interpretation
+record on 2 of the 10 resolvable candidates, in both directions:
+
+| pattern | independent producer | interpreter |
+|---|---|---|
+| `coordination/session-durability-check` | expects it to fire | judged not relevant |
+| `social/tension-before-code` | wrote no row | judged relevant |
+
+So a run will produce `:expected-pattern-not-selected` for the first and
+`:unexpected-selected-pattern` for the second. That is the check working, not
+a defect in either party. The rule, fixed now so that nobody sets it after
+seeing which way the run went:
+
+1. **The expectations are not edited after the run.** Not to fix a mismatch,
+   not to add a row the finder selected, not to drop one it did not. An
+   expectation revised in the light of the output is no longer independent,
+   and nothing downstream could tell.
+2. **A mismatch is recorded as a finding with both sides' reasons** — the
+   producer's `:reasoning` for the row, and the interpreter's recorded
+   judgment — and it is part of the evidence, not an obstacle to it. An
+   independent check that could never disagree would establish nothing.
+3. **Adjudication is by a third party** who is neither the producer, the
+   interpreter, nor the author of the validators, and it decides which of the
+   two is right about the pattern — not which one is more convenient.
+4. **An unadjudicated mismatch does not block the node.** It is reported with
+   the evidence: "independent expectations agreed on 8 of 10; 2 disagreements
+   stand, adjudication owed." Claiming full agreement would be the dishonest
+   move here; so would suppressing the run because it disagreed.
