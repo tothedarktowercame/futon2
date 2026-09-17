@@ -559,3 +559,217 @@
              :solve (-> solve
                         (dissoc :pi :pi-0)
                         (assoc :candidate-count present-count))}))))))
+
+;; ---------------------------------------------------------------------------
+;; Per-context β update over cascade candidates (approved 2026-09-17,
+;; PROPOSAL-policy-precision-learning.md §1–§4)
+;; ---------------------------------------------------------------------------
+
+(def ^:private order-only-tie-tolerance 1.0e-12)
+
+(defn order-only-tie-groups
+  "Groups of ≥2 candidates that have EQUAL G (within 1e-12) and the SAME
+   pattern set in (possibly) different orders — the proposal's §2 lesson 1:
+   an observation that separates candidates inside such a group is evidence
+   about step ORDER, not about whether G is reliable, so the β update must not
+   read it.
+
+   Candidates carry :id, :precedence (a vector of pattern ids) and :g.
+   Returns a vector of groups; each group is a vector of the member
+   candidates, in input order. Candidates lacking a finite :g or a
+   sequential :precedence are not grouped (they carry no tie statement)."
+  [candidates]
+  (let [groupable (filter (fn [c]
+                            (and (map? c)
+                                 (sequential? (:precedence c))
+                                 (finite-number? (:g c))))
+                          candidates)
+        by-set (group-by (fn [c] (set (:precedence c))) groupable)
+        runs (fn [members]
+               (loop [acc [] run [] last-g nil sorted (sort-by :g members)]
+                 (if (empty? sorted)
+                   (if (>= (count run) 2) (conj acc run) acc)
+                   (let [c (first sorted)
+                         g (:g c)
+                         same? (and last-g
+                                    (<= (- g last-g) order-only-tie-tolerance))]
+                     (recur (if same?
+                              acc
+                              (if (>= (count run) 2) (conj acc run) acc))
+                            (if same? (conj run c) [c])
+                            g
+                            (next sorted))))))]
+    (into [] (mapcat runs) (vals by-set))))
+
+(defn- cascade-residual
+  "Eq. 2.7's residual with EXACT infinite-F handling: pi_0 = softmax(-gamma*G)
+   over ALL candidates (F never enters pi_0), pi = softmax(-F - gamma*G) over
+   the finite-F candidates ONLY, with probability exactly 0 on the
+   excluded ones — the exact limit of F → infinity, never a large finite
+   stand-in. Residual: beta-prior + (pi - pi_0) . G - beta, in beta units,
+   same statement as `fixed-point-residual` above.
+
+   FINITE-IDX are the indices of the finite-F candidates INTO all-g (index
+   based, because two candidates may share a G — one excluded, one not — and
+   a G-keyed join would conflate them)."
+  [beta-prior beta all-g finite-idx finite-g finite-f]
+  (let [gamma (/ 1.0 beta)
+        pi-0 (softmax (mapv (fn [g] (- (* gamma g))) all-g))
+        pi (softmax (mapv (fn [f g] (+ (- f) (- (* gamma g)))) finite-f finite-g))
+        pi-all (reduce (fn [v [i p]] (assoc v i p))
+                       (vec (repeat (count all-g) 0.0))
+                       (map vector finite-idx pi))
+        dot (reduce + (map (fn [p0 p g] (* (- p p0) g)) pi-0 pi-all all-g))]
+    (- (+ beta-prior dot) beta)))
+
+(defn- bisect-cascade
+  "Same bracket discipline as `bisect-beta`: the ends are checked for opposite
+   signs and reported, never assumed."
+  [beta-prior lo hi all-g finite-idx finite-g finite-f tolerance max-iterations]
+  (let [f #(cascade-residual beta-prior % all-g finite-idx finite-g finite-f)
+        f-lo (f lo)
+        f-hi (f hi)]
+    (if (pos? (* f-lo f-hi))
+      {:bracketed? false :beta nil :evaluations 2
+       :residual-at-floor f-lo :residual-at-ceiling f-hi}
+      (loop [lo lo hi hi n 2]
+        (let [mid (* 0.5 (+ lo hi))
+              width (- hi lo)]
+          (if (or (>= n max-iterations)
+                  (<= width (* 1.0e-15 (max 1.0 (Math/abs mid))))
+                  (<= (Math/abs (f mid)) tolerance))
+            (let [residual-at-root (f mid)]
+              {:bracketed? true :beta mid :evaluations n
+               :bracket-width width
+               :residual residual-at-root
+               :converged? (<= (Math/abs residual-at-root) tolerance)})
+            (if (pos? (f mid))
+              (recur mid hi (inc n))
+              (recur lo mid (inc n)))))))))
+
+(defn- cascade-f-by-id
+  "Resolve each candidate's F from f-by-id, refusing typed on a missing or
+   non-number entry (no silent default F). ##Inf is a legal value: it is the
+   exact 'prediction contradicted' case and is handled by exclusion, not by
+   substitution."
+  [candidates f-by-id]
+  (when-not (map? f-by-id)
+    (fail! "f-by-id must be a map of candidate id → F"
+           {:error :invalid-f-by-id :value f-by-id}))
+  (mapv (fn [c]
+          (let [f (get f-by-id (:id c) ::absent)]
+            (when (or (= f ::absent) (not (number? f)))
+              (fail! "every candidate needs a numeric F in f-by-id"
+                     {:error (if (= f ::absent) :missing-f :invalid-f)
+                      :candidate (:id c) :value f}))
+            (assoc c :f f)))
+        candidates))
+
+(defn cascade-beta-update
+  "One per-context β update over cascade candidates (approved method,
+   PROPOSAL-policy-precision-learning.md §1–§4; update site R3, read site R14).
+
+   PREV-STATES is {context beta-state}; the context's entry is coerced with
+   `coerce-state`, and a MISSING entry gives `initial-beta-state` — recorded
+   as such via :beta-source :initial, never silently defaulted inside the
+   solve (the prior β itself is always recorded under :beta-prior).
+
+   CANDIDATES carry :id, :precedence (vector of pattern ids) and :g.
+   F-BY-ID is {candidate-id F} from this tick's observation; a missing or
+   non-number F is a typed refusal, ##Inf is legal (see below).
+
+   ORDER-ONLY TIES. Groups of ≥2 candidates with equal G (1e-12) and the same
+   pattern set (`order-only-tie-groups`) are MERGED before solving: one
+   representative carries the group's G, and its F is the group's MINIMUM F —
+   at least one ordering fits the observation, so the separation is not
+   evidence about G. Each merge is recorded under :merged-ties.
+
+   INFINITE F. A candidate whose prediction the observation contradicts has
+   F = ##Inf, whose exact posterior probability is 0. It is EXCLUDED from π
+   with probability exactly 0 and KEPT in π₀ (F never enters π₀) — the exact
+   limit, never a large finite stand-in. With at least one excluded candidate
+   the residual is eq. 2.7's with that exact treatment (`cascade-residual`,
+   bisected with the same end-sign discipline as `converge-beta`); with no
+   exclusion the solve DELEGATES to the aligned `converge-beta` unchanged.
+
+   Returns {context new-state} merged into prev-states (other contexts
+   untouched). The new state records :context, :beta-source, :beta-prior,
+   :beta, :merged-ties, :candidates (ids), :g, :f and :solve. Following
+   `carry-beta`'s rule, only a converged, bracketed solve carries
+   (:beta-source :converged-posterior); otherwise the β is held with a
+   reason (:held-unsolved / :held-absent)."
+  [prev-states context candidates f-by-id opts]
+  (let [prev-states (or prev-states {})
+        _ (when-not (map? prev-states)
+            (fail! "prev-states must be a map" {:error :invalid-prev-states}))
+        had-state? (contains? prev-states context)
+        state (if had-state?
+                (coerce-state (get prev-states context))
+                (initial-beta-state))
+        beta-prior (beta-for state)
+        cs (cascade-f-by-id candidates f-by-id)
+        groups (order-only-tie-groups cs)
+        merge-record (mapv (fn [group]
+                             {:ids (mapv :id group)
+                              :g (:g (first group))
+                              :f (apply min (map :f group))
+                              :f-values (mapv :f group)})
+                           groups)
+        ;; replace each group by one representative: group's G, group's min F
+        grouped-ids (into #{} (mapcat (fn [g] (map :id g))) groups)
+        representatives (mapv (fn [g]
+                                {:id (mapv :id g) ; vector id: stable, distinct
+                                 :precedence (:precedence (first g))
+                                 :g (:g (first g))
+                                 :f (apply min (map :f g))})
+                              groups)
+        merged (vec (concat (remove (fn [c] (contains? grouped-ids (:id c))) cs)
+                            representatives))
+        all-g (mapv (comp double :g) merged)
+        finite-idx (vec (keep-indexed (fn [i c]
+                                        (when (Double/isFinite (double (:f c))) i))
+                                      merged))
+        finite (mapv merged finite-idx)
+        infinite (vec (remove (fn [c] (Double/isFinite (double (:f c)))) merged))
+        finite-g (mapv (comp double :g) finite)
+        finite-f (mapv (comp double :f) finite)
+        {:keys [tolerance max-iterations beta-floor beta-ceiling]
+         :or {tolerance 1.0e-9 max-iterations 4096
+              beta-floor 1.0e-6 beta-ceiling 1.0e6}} opts
+        solve (cond
+                (empty? finite)
+                {:status :no-finite-f-candidates
+                 :excluded-infinite-f (mapv :id infinite)}
+
+                (seq infinite)
+                (bisect-cascade beta-prior (double beta-floor) (double beta-ceiling)
+                                all-g finite-idx finite-g finite-f
+                                (double tolerance) (long max-iterations))
+
+                :else
+                (converge-beta beta-prior all-g finite-f
+                               (dissoc opts :identity-fn :score-fn)))
+        solved? (boolean (and (:converged? solve)
+                              (not (false? (:bracketed? solve)))
+                              (number? (:beta solve))))
+        new-state (cond->
+                    {:context context
+                     :status (if solved? :present :absent)
+                     :reason (when-not solved?
+                               (or (:status solve)
+                                   (if (false? (:bracketed? solve))
+                                     :bracket-not-straddling :not-converged)))
+                     :beta-source (if solved? :converged-posterior
+                                      (if had-state? :held-unsolved :held-absent))
+                     :beta-prior beta-prior
+                     :beta (if solved? (or (:beta-posterior solve) (:beta solve)) beta-prior)
+                     :solved-tick-count (cond-> (long (:solved-tick-count state 0))
+                                          solved? inc)
+                     :prior-was-absent (not had-state?)
+                     :merged-ties merge-record
+                     :candidates (mapv :id cs)
+                     :g (mapv (fn [c] [(:id c) (double (:g c))]) cs)
+                     :f (mapv (fn [c] [(:id c) (:f c)]) cs)
+                     :excluded-infinite-f (mapv :id infinite)}
+                    true (assoc :solve (dissoc solve :pi :pi-0)))]
+    (assoc prev-states context new-state)))
