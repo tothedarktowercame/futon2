@@ -122,7 +122,13 @@
     (is (= :model-revision-changed
            (get-in (delivery/stale? d {:a-identity "A-7"
                                        :model {:model {:id "eig-witness" :revision "v2"}}})
-                   [:because])))))
+                   [:because])))
+    ;; claude-4's review, 2026-09-17: asked with neither identity, the old
+    ;; answer was "current" for every delivery -- a silent never-refresh
+    (is (= :refused (:status (delivery/stale? d {}))))
+    (is (= :nothing-to-compare-against (:kind (delivery/stale? d {}))))
+    (is (= :nothing-to-compare-against
+           (:kind (delivery/refresh d {:observations {:o :datum}}))))))
 
 (deftest refresh-recomputes-only-when-stale
   (let [d (delivery/delivery fixture-kernels {:a-identity "A-7"

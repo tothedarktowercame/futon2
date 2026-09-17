@@ -92,6 +92,11 @@
    kernels stamps into the kernels and hence into the delivery."
   [delivery {:keys [a-identity model]}]
   (cond
+    ;; asking without saying what A and which model revision are current
+    ;; would answer "current" for every delivery: refuse instead
+    (and (nil? a-identity) (nil? model))
+    (refused :nothing-to-compare-against [:a-identity :model])
+
     (and (contains? delivery :a-identity)
          (some-> a-identity (not= (:a-identity delivery))))
     {:stale true :because :a-changed}
@@ -108,14 +113,19 @@
    from parameter-kernels passes through untouched."
   [delivery-record {:keys [model parameter-state policies outcome-support
                            a-identity observations] :as inputs}]
-  (if (stale? delivery-record inputs)
-    (let [kernels (machine-parameters/parameter-kernels
-                   model parameter-state policies outcome-support)]
-      (if (:ok kernels)
-        (assoc (delivery kernels {:a-identity a-identity :observations observations})
-               :refreshed :stale)
-        kernels))
-    (assoc delivery-record :refreshed :not-required)))
+  (let [s (stale? delivery-record inputs)]
+    (cond
+      ;; nothing to compare against: refuse rather than recompute blind
+      (= :refused (:status s)) s
+
+      s (let [kernels (machine-parameters/parameter-kernels
+                       model parameter-state policies outcome-support)]
+          (if (:ok kernels)
+            (assoc (delivery kernels {:a-identity a-identity :observations observations})
+                   :refreshed :stale)
+            kernels))
+
+      :else (assoc delivery-record :refreshed :not-required))))
 
 (defn g-with-information-gain
   "Consumer hand-off. Runs the injected g-fn on g-input and returns its value
