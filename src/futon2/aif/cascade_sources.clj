@@ -27,7 +27,13 @@
   loaded no sources at all — silently, since \"no sources\" is a legitimate
   state. The relative path remains the fallback for a JVM without futon2's
   resources on its classpath."
-  (or (some-> (io/resource "wm/cascade-sources") io/file .getPath)
+  ;; Resolved from a sibling FILE resource, never by asking the classloader
+  ;; for the directory itself. The Test Registry's runner records every
+  ;; resource a run looks up and the registry hashes each one, so a directory
+  ;; lookup made every warrant unmintable with
+  ;; :closure-unavailable "(Is a directory)" -- which is how this was found.
+  (or (some-> (io/resource "wm/observation-contract.edn")
+              io/file .getParentFile (io/file "cascade-sources") .getPath)
       "resources/wm/cascade-sources"))
 
 (defn- refuse! [reason data]
