@@ -166,33 +166,29 @@ the temptation is to read the finder's answer and call the producer wrong.
    self-consistency would never have shown it. It is reported, not erased.
 
 
-## Adjudication rule, fixed BEFORE any run (claude-4, 2026-09-17)
+## 7. Amendments: the artifact for a run is immutable (claude-4, 2026-09-17)
 
-zai-45's independent expectations already disagree with the interpretation
-record on 2 of the 10 resolvable candidates, in both directions:
+Sections 6.1, 6.2 and 6.4 stand as written; 6.2 is the better rule and
+replaces the third-party adjudication I first proposed — guard truth on the
+recorded frozen facts is mechanical, side-independent and already what the
+finder consults, so it decides the disputed patterns without anyone
+arbitrating taste.
 
-| pattern | independent producer | interpreter |
-|---|---|---|
-| `coordination/session-durability-check` | expects it to fire | judged not relevant |
-| `social/tension-before-code` | wrote no row | judged relevant |
+6.3 needs one amendment of its own, because it reintroduces the hazard the
+rest of the rule closes. An author who is told "your row for X was refused"
+has learned something FROM THE RUN, even without seeing its output: which row
+to revisit. So:
 
-So a run will produce `:expected-pattern-not-selected` for the first and
-`:unexpected-selected-pattern` for the second. That is the check working, not
-a defect in either party. The rule, fixed now so that nobody sets it after
-seeing which way the run went:
+- **The artifact that a run was checked against is immutable, and it is the
+  evidence for that run.** Its disagreements are reported as they stood, per
+  6.4.
+- **An amendment produces a NEW artifact** (`…-v2.edn`, its own author block
+  and basis), which is evidence for a FUTURE occurrence, never retroactively
+  for the one that prompted it. Both artifacts stay in the record.
+- A rerun against an amended artifact is a new occurrence with its own
+  report. It does not replace the first result, and the first result is not
+  described as superseded.
 
-1. **The expectations are not edited after the run.** Not to fix a mismatch,
-   not to add a row the finder selected, not to drop one it did not. An
-   expectation revised in the light of the output is no longer independent,
-   and nothing downstream could tell.
-2. **A mismatch is recorded as a finding with both sides' reasons** — the
-   producer's `:reasoning` for the row, and the interpreter's recorded
-   judgment — and it is part of the evidence, not an obstacle to it. An
-   independent check that could never disagree would establish nothing.
-3. **Adjudication is by a third party** who is neither the producer, the
-   interpreter, nor the author of the validators, and it decides which of the
-   two is right about the pattern — not which one is more convenient.
-4. **An unadjudicated mismatch does not block the node.** It is reported with
-   the evidence: "independent expectations agreed on 8 of 10; 2 disagreements
-   stand, adjudication owed." Claiming full agreement would be the dishonest
-   move here; so would suppressing the run because it disagreed.
+Otherwise "we reran it and it passed" becomes the sentence in the record, and
+the two disagreements — the only thing this whole apparatus was built to
+surface — quietly disappear.
