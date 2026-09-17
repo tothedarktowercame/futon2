@@ -1,7 +1,8 @@
 (ns futon2.aif.mission-registry-substrate-test
   "2026-09-17 half 2: the zero-arg registry read points at substrate-2 and
    refuses typed rather than falling back to the filesystem."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.mission-registry :as mr]
             [futon2.aif.substrate :as substrate]))
 
@@ -65,3 +66,68 @@
       (let [doc (mr/load-missions "/tmp/never-scanned-here")]
         (is (= [:fake-files] (:missions doc)))
         (is (= ["/tmp/never-scanned-here"] @calls))))))
+
+;; ---- record writer: the caller that omits :existing (the watcher lane) ----
+;; Added 2026-09-17 by claude-4 in review of bc400322. The lane calls
+;; `upsert-mission-record!` with `{:path path}` and nothing else, which used
+;; to mean "there is no existing entity": foreign props were replaced instead
+;; of merged, :unchanged was unreachable so every doc-land wrote, and
+;; :entity/source was overwritten each pass.
+
+(defn- write-mission-doc!
+  "A mission doc at a path the registry contract admits, under a tmp root."
+  [root id status]
+  (let [dir (io/file root "somerepo" "holes" "missions")]
+    (.mkdirs dir)
+    (let [f (io/file dir (str id ".md"))]
+      (spit f (str "# " id "\n\nStatus: " status "\n"))
+      (.getAbsolutePath f))))
+
+(deftest omitted-existing-is-looked-up-and-foreign-props-survive-test
+  (let [root (str (java.nio.file.Files/createTempDirectory
+                   "mission-record" (make-array java.nio.file.attribute.FileAttribute 0)))
+        path (write-mission-doc! root "M-zeta" "ACTIVE")
+        stored (atom nil)
+        writes (atom 0)]
+    ;; First pass: nothing in the store yet.
+    (with-redefs [substrate/entities-by-type (fn [& _] [])
+                  substrate/put-doc! (fn [doc & _] (reset! stored doc) doc)]
+      (is (= :created (:status (mr/upsert-mission-record! {:code-root root :path path})))))
+    ;; …as the store would hand it back, plus state this writer does not own.
+    (let [entity (assoc @stored
+                        :entity/id "uuid-1"
+                        :entity/source "hinge-log-bridge"
+                        :entity/props (assoc (:entity/props @stored) :foreign/keep "yes"))]
+      ;; Second pass, same unedited file, :existing still omitted: no write.
+      (with-redefs [substrate/entities-by-type (fn [& _] [entity])
+                    substrate/put-doc! (fn [doc & _] (swap! writes inc) doc)]
+        (is (= :unchanged (:status (mr/upsert-mission-record! {:code-root root :path path})))
+            "an unchanged doc must not write on every land")
+        (is (zero? @writes) "and must not reach the store at all"))
+      ;; Third pass, the doc's Status edited: it writes, and carries the
+      ;; foreign state through instead of replacing it.
+      (write-mission-doc! root "M-zeta" "COMPLETE")
+      (with-redefs [substrate/entities-by-type (fn [& _] [entity])
+                    substrate/put-doc! (fn [doc & _] (reset! stored doc) doc)]
+        (is (= :updated (:status (mr/upsert-mission-record! {:code-root root :path path}))))
+        (is (= "complete" (:mission/status-class (:entity/props @stored)))
+            "the edited status is what the machine now reads")
+        (is (= "yes" (:foreign/keep (:entity/props @stored)))
+            "a prop this writer does not own must survive the refresh")
+        (is (= "uuid-1" (:entity/id @stored))
+            "the entity id must stay stable across refreshes")
+        (is (= "hinge-log-bridge" (:entity/source @stored))
+            "an existing entity's source must be carried through, not dropped")))))
+
+(deftest explicit-existing-nil-is-taken-as-given-test
+  ;; A corpus run shares one index and passes :existing, including nil. That
+  ;; answer is authoritative: no per-record lookup is issued.
+  (let [root (str (java.nio.file.Files/createTempDirectory
+                   "mission-record" (make-array java.nio.file.attribute.FileAttribute 0)))
+        path (write-mission-doc! root "M-eta" "ACTIVE")
+        lookups (atom 0)]
+    (with-redefs [substrate/entities-by-type (fn [& _] (swap! lookups inc) [])
+                  substrate/put-doc! (fn [doc & _] doc)]
+      (is (= :created (:status (mr/upsert-mission-record!
+                                {:code-root root :path path :existing nil}))))
+      (is (zero? @lookups) "an explicit :existing must not trigger a lookup"))))

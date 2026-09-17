@@ -241,19 +241,41 @@
     (string? props) (try (edn/read-string props) (catch Throwable _ {}))
     :else {}))
 
+(defn mission-entity-index
+  "All substrate-2 mission entities indexed by :entity/external-id (one
+   bounded query; callers reuse it across a corpus run instead of N+1)."
+  []
+  (->> (substrate/entities-by-type "mission" {:limit 1000})
+       (filter :entity/external-id)
+       (map (fn [e] [(:entity/external-id e) e]))
+       (into {})))
+
 (defn upsert-mission-record!
   "Refresh ONE mission entity in substrate-2 from its doc file (the watcher
    lane's per-land call; also usable standalone). Idempotent: foreign props
    already on the entity are preserved and an unchanged record is a no-op.
    Returns {:id .. :status :created|:updated|:unchanged}. The file scan must
-   admit PATH — a path the contract rejects is an :error, not a silent skip."
+   admit PATH — a path the contract rejects is an :error, not a silent skip.
+
+   `:existing` is the entity this record belongs to. OMIT the key and it is
+   looked up here (one bounded query); pass it — including as nil — and that
+   answer is taken as given, which is what a corpus run does with a single
+   shared `mission-entity-index`. Omitting it used to mean `nil`, and that
+   silently cost all three of the guarantees above: with no existing entity
+   to merge against, foreign props were replaced rather than preserved,
+   `:unchanged` was unreachable so every land wrote, and `:entity/source` was
+   overwritten on each pass. The watcher lane calls with `{:path path}`, so
+   it got exactly that."
   ([] (upsert-mission-record! {:path nil}))
-  ([{:keys [code-root path existing]}]
+  ([{:keys [code-root path] :as opts}]
    (let [code-root (or code-root default-code-root)]
      (if-not (and path (re-matches mission-path-pattern (str path)))
        {:status :error :reason :path-not-admitted :path path}
        (let [entry (mission-doc->entry (str path))
              id (:id entry)
+             existing (if (contains? opts :existing)
+                        (:existing opts)
+                        (get (mission-entity-index) id))
              props (record-parse-props (:entity/props existing))
              merged (into {} (remove (comp nil? val))
                           (merge props (mission-record-props code-root entry)))]
@@ -265,18 +287,14 @@
                          :entity/external-id id
                          :entity/props merged}
                   (:entity/id existing) (assoc :entity/id (:entity/id existing))
-                  (not (:entity/source existing))
-                  (assoc :entity/source "mission-doc-ingest")))
+                  ;; ALWAYS send the source. futon1b's write-entity! builds a
+                  ;; fresh document from the payload and puts it, so a field
+                  ;; left out is erased rather than preserved — omitting an
+                  ;; existing foreign source (e.g. "hinge-log-bridge") drops
+                  ;; it on the first refresh.
+                  true (assoc :entity/source
+                              (or (:entity/source existing) "mission-doc-ingest"))))
                {:id id :status (if existing :updated :created)})))))))
-
-(defn mission-entity-index
-  "All substrate-2 mission entities indexed by :entity/external-id (one
-   bounded query; callers reuse it across a corpus run instead of N+1)."
-  []
-  (->> (substrate/entities-by-type "mission" {:limit 1000})
-       (filter :entity/external-id)
-       (map (fn [e] [(:entity/external-id e) e]))
-       (into {})))
 
 (defn load-missions-from-files
   "The explicit FILE scan. `<code-root>/<repo>/holes/missions/M-*.md` only,
