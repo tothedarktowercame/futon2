@@ -166,3 +166,4 @@
 ;;   harness components and certificate promotion, and names no overwrite
 ;;   hazard, so the IF clause does not fire on this task context. (Guard
 ;;   verdict for this one was not disputed in the v2 bell.)
+}
