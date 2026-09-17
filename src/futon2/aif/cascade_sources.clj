@@ -20,7 +20,15 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.observation-checks :as oc]))
 
-(def default-dir "resources/wm/cascade-sources")
+(def default-dir
+  "Where the declared sources live, resolved on the CLASSPATH rather than
+  relative to the working directory: the tick runs in the serving JVM, whose
+  working directory is futon3c, and a relative path there found no files and
+  loaded no sources at all — silently, since \"no sources\" is a legitimate
+  state. The relative path remains the fallback for a JVM without futon2's
+  resources on its classpath."
+  (or (some-> (io/resource "wm/cascade-sources") io/file .getPath)
+      "resources/wm/cascade-sources"))
 
 (defn- refuse! [reason data]
   (throw (ex-info (str "cascade-sources: " (name reason))
@@ -60,6 +68,8 @@
                     (filter #(.endsWith (.getName %) ".edn"))
                     (sort-by #(.getPath %)))]
      (when (seq files)
+       (oc/with-registry-runs*
+        (fn []
        (reduce
         (fn [acc f]
           (let [path (.getPath f)
@@ -78,7 +88,7 @@
                 (update :files (fnil conj []) {:path path :sha256 (file-sha f) :target t})
                 (assoc-in [:observations t] observations))))
         {}
-        files)))))
+        files)))))))
 
 (defn with-context-fn
   "Add the :context-of function cascade-problems needs (it cannot live in data)."

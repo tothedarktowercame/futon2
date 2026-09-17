@@ -34,6 +34,15 @@
       (let [a (cp/assemble {:targets ["M-fixture"] :sources (assoc s :horizon-steps 2)})]
         (is (= 1 (count (:problems a))) (pr-str (:refusals a)))))))
 
+(deftest default-dir-resolves-to-the-declared-sources
+  ;; the tick runs in the serving JVM, whose working directory is futon3c, so
+  ;; a working-directory-relative default found nothing and loaded no sources
+  ;; at all — and "no sources" is a legitimate state, so nothing complained
+  (let [dir (io/file cs/default-dir)]
+    (is (.isDirectory dir) (str "default-dir does not resolve: " cs/default-dir))
+    (is (seq (filter #(.endsWith (.getName ^java.io.File %) ".edn") (.listFiles dir)))
+        "no declared cascade source is where the tick looks for it")))
+
 (deftest empty-or-missing-dir-is-nil-and-malformed-throws
   (is (nil? (cs/load-declared "/nonexistent/cascade-sources")))
   (let [dir (tmp-dir)]

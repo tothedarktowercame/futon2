@@ -20,7 +20,8 @@
   sha. Nothing is rerun here. A missing or stale warrant is refused, not
   observed false, and the checkout HEAD at check time is recorded as the
   cutoff."
-  (:require [clojure.data.json :as json]
+  (:require [cheshire.core :as cheshire]
+            [clojure.data.json :as json]
             [clojure.edn :as edn]
             [clojure.java.shell :as sh]
             [clojure.string :as str]))
@@ -105,13 +106,49 @@
 
 (def futon3c-root "/home/joe/code/futon3c")
 
-(defn- registry-check
-  "Run `futon3c.test-registry check` for ENTRY-ID against REPO. Returns the
-  parsed JSON result, or a typed refusal when the registry cannot be run."
+(def agency-url "http://localhost:7070")
+
+(def ^:private registry-in-process
+  "The registry's own check function and evidence backend, when futon3c is on
+  THIS JVM's classpath. It is in the serving JVM, where the tick runs; it is
+  not in futon2's test JVM, which falls back to the CLI. Resolved once."
+  (delay
+    (try
+      (let [check (requiring-resolve 'futon3c.test-registry/check-record!)
+            backend (requiring-resolve 'futon3c.evidence.http-backend/make-http-backend)]
+        (when (and check backend) {:check check :backend backend}))
+      (catch Throwable _ nil))))
+
+(defn- in-process-check
+  "The registry check in this JVM. Same result as the CLI: `-main` prints
+  `(json/generate-string (check-record! backend options))`, and on a refusal
+  the ex-data instead — so the JSON round-trip here produces the identical
+  shape at a fraction of the cost (the CLI pays a JVM start per check, which
+  was about 20 s of every tick). nil means the registry is not loadable here
+  and the caller shells out."
+  [repo entry-id]
+  (when-let [{:keys [check backend]} @registry-in-process]
+    (let [options {:agency-url agency-url
+                   :entry-id entry-id
+                   :repo-root (str repo-root "/" repo)
+                   :changed-paths []}
+          result (try (check (backend agency-url) options)
+                      (catch clojure.lang.ExceptionInfo e
+                        (or (ex-data e)
+                            {:status :refused :reason :registry-failed}))
+                      (catch Throwable e
+                        {:status :refused :reason :registry-failed
+                         :error (.getMessage e)}))]
+      (json/read-str (cheshire/generate-string result)))))
+
+(defn- registry-check-cli
+  "Run `futon3c.test-registry check` for ENTRY-ID against REPO in its own JVM.
+  Returns the parsed JSON result, or a typed refusal when the registry cannot
+  be run."
   [repo entry-id]
   (let [config (java.io.File/createTempFile "wm04-registry-check" ".edn")]
     (try
-      (spit config (pr-str {:agency-url "http://localhost:7070"
+      (spit config (pr-str {:agency-url agency-url
                             :entry-id entry-id
                             :repo-root (str repo-root "/" repo)
                             :changed-paths []
@@ -124,7 +161,14 @@
                (refuse :registry-unavailable {:entry-id entry-id :err (subs (str err) 0 (min 400 (count (str err))))}))))
       (finally (.delete config)))))
 
-(def evidence-url "http://localhost:7070/api/alpha/evidence")
+(defn- registry-check
+  "The registry check for ENTRY-ID against REPO: in this JVM when futon3c is
+  loadable here, else in a CLI JVM. Both return the same JSON shape."
+  [repo entry-id]
+  (or (in-process-check repo entry-id)
+      (registry-check-cli repo entry-id)))
+
+(def evidence-url (str agency-url "/api/alpha/evidence"))
 
 (defn- registry-runs
   "Test Registry run records (newest first), read from the evidence store by
@@ -141,13 +185,24 @@
     (catch Exception e
       (refuse :registry-unavailable {:error (.getMessage e)}))))
 
+(def ^:dynamic *registry-runs*
+  "A delay holding the run records for one pass of observations, so a pass
+  that checks several C1/C2 facts reads the evidence store once. Reading it
+  costs about 11 s — the dominant cost of a tick, far above the registry
+  check itself (under a second) — and every fact would otherwise repeat it.
+  `observe` binds this; nil means read afresh."
+  nil)
+
+(defn- current-runs []
+  (if *registry-runs* @*registry-runs* (registry-runs 500)))
+
 (defn latest-warrant-id
   "The newest registry run for REPO whose recorded command satisfies
   COMMAND-PRED and that recorded a warrant. Returns its entry-id, or nil.
   Validity now is still decided by `check`; this only finds the candidate, so
   a locator need not name an entry-id that editing the located file would stale."
   [repo command-pred]
-  (let [runs (registry-runs 500)]
+  (let [runs (current-runs)]
     (when-not (and (map? runs) (:status runs))
       (->> runs
            (filter #(and (true? (:warrant? %))
@@ -272,13 +327,7 @@
    :C4 check-decl-in-file
    :C5 check-registry-entry})
 
-(defn observe
-  "Observe a set of located tokens at their pinned shas.
-  tokens: {token {:class :C3|:C4|:C5 …locator}}.
-  Returns {:observed #{tokens observed true} :results {token result}
-  :refused {token refusal}}. A class without a mechanical check (J, or unknown) is refused :no-mechanical-check. It is never treated as observed or
-  absent."
-  [tokens]
+(defn- observe* [tokens]
   (reduce-kv
    (fn [acc token {:keys [class] :as locator}]
      (let [f (get checks class)
@@ -289,3 +338,27 @@
            (:observed r) (update :observed conj token)))))
    {:observed #{} :results {} :refused {}}
    tokens))
+
+(defn observe
+  "Observe a set of located tokens at their pinned shas.
+  tokens: {token {:class :C3|:C4|:C5 …locator}}.
+  Returns {:observed #{tokens observed true} :results {token result}
+  :refused {token refusal}}. A class without a mechanical check (J, or
+  unknown) is refused :no-mechanical-check. It is never treated as observed
+  or absent.
+
+  The pass reads the registry's run records once (see `*registry-runs*`),
+  whatever the number of C1/C2 facts in it. Nesting is safe: an outer
+  binding (a whole tick, say) is kept."
+  [tokens]
+  (binding [*registry-runs* (or *registry-runs* (delay (registry-runs 500)))]
+    (observe* tokens)))
+
+(defn with-registry-runs*
+  "Call F with ONE read of the registry's run records shared by every
+  observation made inside it — for a caller that observes several token sets
+  in one pass (a tick over several declared sources, say). An outer binding
+  is kept, so nesting reads once."
+  [f]
+  (binding [*registry-runs* (or *registry-runs* (delay (registry-runs 500)))]
+    (f)))
