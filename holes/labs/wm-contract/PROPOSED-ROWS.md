@@ -14,9 +14,9 @@ the machine can become self repairing" (`holes/problems/DECISIONS-PENDING.md:343
 
 ---
 
-## Sweep 549 -- 2026-09-08T00:18:12.180690145Z
+## Sweep 641 -- 2026-09-12T14:45:36.551373073Z
 
-- trace: `/home/joe/code/futon2/data/wm-trace`, 58 file(s) read, 0 new record(s) past the watermark
+- trace: `/home/joe/code/futon2/data/wm-trace`, 60 file(s) read, 0 new record(s) past the watermark
 - lint: `/home/joe/code/futon2/checks/preemptive_absence_coercion_lint.clj` -- 0 finding(s), 0 new since last sweep
 - recurrence threshold: **3** cumulative occurrences of one (site, reason)
 - classes: 1 with occurrences, 0 new record(s) this sweep
