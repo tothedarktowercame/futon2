@@ -1,7 +1,7 @@
 (ns futon2.aif.observation-checks
   "Mechanical observation checks for the checkable token classes of the WM-04
   observation contract (futon2 resources/wm/observation-contract.edn, classes
-  C3-C5). Each check reads a repository at a pinned sha and returns either
+  C1-C5). Each check reads a repository at a pinned sha and returns either
   {:observed true|false :check … :evidence …} or a typed refusal
   {:status :missing :kind …}.
 
@@ -14,11 +14,12 @@
 
   C1 (a Lean declaration builds) and C2 (a test namespace passes) never rerun
   a build or tests. They read a Test Registry warrant
-  (futon3c.test-registry check, futon3c 33824f0f). The registry verifies that
+  (futon3c.test-registry check, futon3c 33824f0f and ab388662). The registry verifies that
   the warrant's recorded code, load closure, environment and log still match
   the current checkout, so these observe \"as of now\", not as of an arbitrary
-  sha. A missing or stale warrant is observed false with its reason; nothing
-  is rerun here."
+  sha. Nothing is rerun here. A missing or stale warrant is refused, not
+  observed false, and the checkout HEAD at check time is recorded as the
+  cutoff."
   (:require [clojure.data.json :as json]
             [clojure.java.shell :as sh]
             [clojure.string :as str]))
@@ -50,15 +51,35 @@
         {:observed (zero? exit) :check :C3
          :evidence {:repo repo :sha sha :path path}})))
 
+(defn decl-present?
+  "The declaration head DECL starts a line of TEXT (after optional leading
+  whitespace), and the token after it ends at whitespace, `:`, `(`, `{`, `[`
+  or end of line. So `theorem foo` does not match `theorem foo_bar`, a
+  comment or a docstring (claude-7's applicability reading, 2026-09-17)."
+  [text decl]
+  (boolean
+   (re-find (re-pattern (str "(?m)^\\s*" (java.util.regex.Pattern/quote decl) "(?=[\\s:({\\[]|$)"))
+            text)))
+
 (defn check-decl-in-file
-  "C4: the file at sha:path contains the exact declaration head `decl`."
+  "C4: the file at sha:path has a line starting with the declaration head
+  DECL (anchored, see decl-present?)."
   [{:keys [repo sha path decl] :as m}]
   (or (locator-refusal :C4 m [:repo :sha :path :decl])
       (sha-refusal repo sha)
       (let [{:keys [exit out]} (git repo "show" (str sha ":" path))]
-        {:observed (and (zero? exit) (str/includes? out decl)) :check :C4
+        {:observed (and (zero? exit) (decl-present? out decl)) :check :C4
          :evidence {:repo repo :sha sha :path path :decl decl
                     :file-present (zero? exit)}})))
+
+(defn- locus-resolves?
+  "A clojure-locus \"repo/path:line\" resolves at the repo's current HEAD:
+  the file exists there and has at least LINE lines."
+  [locus]
+  (when-let [[_ lrepo lpath line] (re-matches #"([^/]+)/(.+):(\d+)" (str locus))]
+    (let [{:keys [exit out]} (git lrepo "show" (str "HEAD:" lpath))]
+      (and (zero? exit)
+           (<= (Long/parseLong line) (count (str/split-lines out)))))))
 
 (defn check-registry-entry
   "C5: the emitted contract bundle JSON at sha:bundle-path contains a contract
@@ -72,11 +93,14 @@
           (refuse :bundle-not-found {:repo repo :sha sha :bundle-path bundle-path})
           (let [contract (some #(when (= entry (get % "contract-id")) %)
                                (get (json/read-str out) "contracts"))
-                loci (keep #(get % "clojure-locus") (get contract "declarations"))]
-            {:observed (boolean (and contract (some (complement str/blank?) loci)))
+                loci (vec (keep #(get % "clojure-locus") (get contract "declarations")))
+                resolved (into {} (map (fn [l] [l (boolean (locus-resolves? l))])) loci)]
+            ;; every declared locus must resolve (file present with that many
+            ;; lines at the locus repo's HEAD), not merely be non-blank
+            {:observed (boolean (and contract (seq loci) (every? true? (vals resolved))))
              :check :C5
              :evidence {:repo repo :sha sha :bundle-path bundle-path :entry entry
-                        :contract-found (boolean contract) :clojure-loci (vec loci)}})))))
+                        :contract-found (boolean contract) :clojure-loci resolved}})))))
 
 (def futon3c-root "/home/joe/code/futon3c")
 
@@ -100,53 +124,92 @@
       (finally (.delete config)))))
 
 (defn- warrant-evidence [result]
-  {:entry-id (get-in result ["record" "entry-id"] (get result "entry-id"))
-   :warrant? (get result "warrant?")
+  {:warrant? (get result "warrant?")
    :reason (get result "reason")
    :command (get-in result ["record" "command"])
-   :results (get-in result ["record" "results"])})
+   :results (get-in result ["record" "results"])
+   :git-head-at-run (get-in result ["record" "git-head"])})
+
+(defn- head-cutoff
+  "The checkout's HEAD at check time, and whether any of PATHS differs from
+  HEAD in the working tree. A warrant observes the working tree now; the
+  cutoff is recorded as this HEAD, and a dirty path refuses."
+  [repo paths]
+  (let [head (str/trim (:out (git repo "rev-parse" "HEAD")))
+        dirty (vec (filter #(seq (str/trim (:out (git repo "status" "--porcelain" "--" %)))) paths))]
+    {:cutoff {repo head} :dirty dirty}))
+
+(defn- no-current-warrant
+  "A missing or stale warrant says nothing about the artifact: refuse rather
+  than observe false (false negatives would enter A)."
+  [check entry-id r]
+  (refuse :no-current-warrant {:check check :entry-id entry-id
+                               :registry (warrant-evidence r)}))
 
 (defn check-test-warrant
-  "C2: the Test Registry warrant ENTRY-ID is valid now, its command runs exactly
-  the named namespace, and its results show 0 failures and 0 errors."
+  "C2: the Test Registry warrant ENTRY-ID is valid now for exactly the named
+  namespace. Observed true when its results show 0 failures and 0 errors, and
+  false only when a valid warrant records failures or errors. A missing or
+  stale warrant, or one for another namespace, is refused
+  :no-current-warrant. The recorded code and test files must match HEAD
+  (cutoff recorded), else :working-tree-differs-from-head."
   [{:keys [repo entry-id ns] :as m}]
   (or (locator-refusal :C2 m [:repo :entry-id :ns])
       (let [r (registry-check repo entry-id)]
-        (if (contains? r :status)
-          r
+        (cond
+          (contains? r :status) r
+          (not (true? (get r "warrant?"))) (no-current-warrant :C2 entry-id r)
+          :else
           (let [cmd (get-in r ["record" "command"])
-                res (get-in r ["record" "results"])]
-            {:observed (boolean (and (true? (get r "warrant?"))
-                                     (sequential? cmd) (= ns (last cmd)) (= "-n" (last (butlast cmd)))
-                                     (= 0 (get res "failures")) (= 0 (get res "errors"))))
-             :check :C2
-             :evidence (assoc (warrant-evidence r) :repo repo :ns ns :entry-id entry-id)})))))
+                res (get-in r ["record" "results"])
+                files (concat (keys (get-in r ["record" "code-files"]))
+                              (keys (get-in r ["record" "test-files"])))
+                {:keys [cutoff dirty]} (head-cutoff repo files)]
+            (cond
+              (not (and (sequential? cmd) (= ns (last cmd)) (= "-n" (last (butlast cmd)))))
+              (no-current-warrant :C2 entry-id r)
+              (seq dirty)
+              (refuse :working-tree-differs-from-head {:repo repo :paths dirty})
+              :else
+              {:observed (and (= 0 (get res "failures")) (= 0 (get res "errors")))
+               :check :C2 :cutoff cutoff
+               :evidence (assoc (warrant-evidence r) :repo repo :ns ns :entry-id entry-id)}))))))
 
 (defn check-lean-warrant
-  "C1: the Test Registry build warrant ENTRY-ID is valid now for
-  `lake build MODULE`, with exit 0, 0 errors and 0 sorries. The file declaring
-  DECL is in the warrant's load closure, and it contains the declaration head
-  DECL (the warrant pins that file's bytes)."
+  "C1: a valid Test Registry warrant ENTRY-ID for `lake build MODULE`, with the
+  file PATH in its load closure. Observed true when the build exited 0 with 0
+  errors, PATH has no sorries in the warrant's per-file sorry-files, and PATH
+  at HEAD has the anchored declaration head DECL. Other modules' sorries
+  (e.g. Holes.lean) do not count against this declaration. A missing or stale
+  warrant, a different module, or PATH outside the closure is refused
+  :no-current-warrant. A dirty PATH refuses
+  :working-tree-differs-from-head."
   [{:keys [repo entry-id module path decl] :as m}]
   (or (locator-refusal :C1 m [:repo :entry-id :module :path :decl])
       (let [r (registry-check repo entry-id)]
-        (if (contains? r :status)
-          r
+        (cond
+          (contains? r :status) r
+          (not (true? (get r "warrant?"))) (no-current-warrant :C1 entry-id r)
+          :else
           (let [cmd (get-in r ["record" "command"])
                 res (get-in r ["record" "results"])
                 closure-paths (set (map #(get % "path") (get-in r ["record" "load-closure"])))
-                file (java.io.File. (str repo-root "/" repo "/" path))
-                decl? (and (.exists file) (str/includes? (slurp file) decl))]
-            {:observed (boolean (and (true? (get r "warrant?"))
-                                     (= ["lake" "build" module] cmd)
-                                     (= 0 (get res "exit")) (= 0 (get res "error-count"))
-                                     (= 0 (get res "sorry-count"))
-                                     (contains? closure-paths path)
-                                     decl?))
-             :check :C1
-             :evidence (assoc (warrant-evidence r) :repo repo :module module :path path :decl decl
-                              :path-in-closure (contains? closure-paths path) :decl-present decl?
-                              :entry-id entry-id)})))))
+                {:keys [cutoff dirty]} (head-cutoff repo [path])]
+            (cond
+              (not (and (= ["lake" "build" module] cmd) (contains? closure-paths path)))
+              (no-current-warrant :C1 entry-id r)
+              (seq dirty)
+              (refuse :working-tree-differs-from-head {:repo repo :paths dirty})
+              :else
+              (let [{:keys [exit out]} (git repo "show" (str "HEAD:" path))
+                    decl? (and (zero? exit) (decl-present? out decl))
+                    file-sorries (get-in res ["sorry-files" path] 0)]
+                {:observed (and (= 0 (get res "exit")) (= 0 (get res "error-count"))
+                                (= 0 file-sorries) decl?)
+                 :check :C1 :cutoff cutoff
+                 :evidence (assoc (warrant-evidence r) :repo repo :module module :path path
+                                  :decl decl :decl-present decl? :file-sorries file-sorries
+                                  :entry-id entry-id)})))))))
 
 (def checks
   {:C1 check-lean-warrant
