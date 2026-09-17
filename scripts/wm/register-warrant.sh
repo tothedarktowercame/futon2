@@ -21,11 +21,24 @@
 #
 # Environment: AUTHOR (required), AGENCY_URL (default http://localhost:7070),
 # ARTIFACT_DIR (default /home/joe/code/storage/test-registry/artifacts).
+#
+# --pinned <commit>: register from a git worktree pinned at <commit> (a SIBLING
+# of futon2, because deps.edn's local/root paths are ../futonN). The worktree
+# is quiescent by construction, so the 22 s stable? window cannot be broken by
+# another agent's commit; the registry's scope guard also passes by
+# construction (a checked-out commit has no dirty or untracked files). The
+# warrant validates on the LIVE checkout whenever the live bytes at its
+# recorded repo-relative paths match the pinned commit's — :git-head is
+# recorded but never compared. LAND <commit> in the live checkout before
+# anyone checks, or the check correctly refuses :stale-sha.
 set -euo pipefail
 
-usage() { sed -n '2,20p' "$0"; exit 2; }
-[ $# -eq 1 ] || usage
-NS="$1"
+usage() { sed -n '2,26p' "$0"; exit 2; }
+PINNED=""
+case "${1:-}" in
+  --pinned) [ $# -eq 3 ] || usage; PINNED="$2"; NS="$3" ;;
+  *) [ $# -eq 1 ] || usage; NS="$1" ;;
+esac
 : "${AUTHOR:?Set AUTHOR=<agent-id> (required)}"
 AGENCY_URL="${AGENCY_URL:-http://localhost:7070}"
 ARTIFACT_DIR="${ARTIFACT_DIR:-/home/joe/code/storage/test-registry/artifacts}"
@@ -33,14 +46,27 @@ ARTIFACT_DIR="${ARTIFACT_DIR:-/home/joe/code/storage/test-registry/artifacts}"
 FUTON2="$(cd "$(dirname "$0")/../.." && pwd)"
 FUTON3C="$(cd "$FUTON2/.." && pwd)/futon3c"
 
+# --- pinned worktree (optional) --------------------------------------------
+WT=""
+cleanup() { [ -n "$WT" ] && git -C "$FUTON2" worktree remove --force "$WT" 2>/dev/null || true; }
+trap cleanup EXIT
+if [ -n "$PINNED" ]; then
+  WT="$FUTON2/../wt-warrant-$(printf '%s' "$PINNED" | head -c 8)"
+  git -C "$FUTON2" worktree add --detach "$WT" "$PINNED" >/dev/null
+  ROOT="$WT"
+  echo "--- worktree $ROOT at $PINNED"
+else
+  ROOT="$FUTON2"
+fi
+
 ns_path() { printf '%s' "$1" | tr '.' '/' | tr '-' '_'; }
 
 # --- test file -------------------------------------------------------------
 test_rel=""
 for cand in "test/$(ns_path "$NS").clj" "test/$(ns_path "$NS").cljc"; do
-  [ -f "$FUTON2/$cand" ] && test_rel="$cand" && break
+  [ -f "$ROOT/$cand" ] && test_rel="$cand" && break
 done
-[ -n "$test_rel" ] || { echo "No test file for $NS under $FUTON2/test" >&2; exit 1; }
+[ -n "$test_rel" ] || { echo "No test file for $NS under $ROOT/test" >&2; exit 1; }
 
 # --- code paths: namespaces the test file requires, resolved to files ------
 if [ -n "${CODE_PATHS:-}" ]; then
@@ -48,14 +74,14 @@ if [ -n "${CODE_PATHS:-}" ]; then
   code_paths=($CODE_PATHS)
 else
   mapfile -t reqs < <(
-    grep -oE '\[(futon2|checks)[a-zA-Z0-9._-]*' "$FUTON2/$test_rel" \
+    grep -oE '\[(futon2|checks)[a-zA-Z0-9._-]*' "$ROOT/$test_rel" \
       | sed 's/^\[//' | sort -u)
   code_paths=()
   for r in "${reqs[@]:-}"; do
     [ -z "$r" ] && continue
     p="$(ns_path "$r")"
     for cand in "src/$p.clj" "src/$p.cljc" "$p.clj" "$(dirname "$p")/$(basename "$p").clj"; do
-      if [ -f "$FUTON2/$cand" ] && [ "$cand" != "$test_rel" ]; then
+      if [ -f "$ROOT/$cand" ] && [ "$cand" != "$test_rel" ]; then
         code_paths+=("$cand"); break
       fi
     done
@@ -72,7 +98,7 @@ CFG="$(mktemp /tmp/warrant-XXXXXX.edn)"
 {
   printf '{\n'
   printf ':agency-url "%s"\n:origin "scripts/wm/register-warrant.sh"\n' "$AGENCY_URL"
-  printf ':repo-root "%s"\n' "$FUTON2"
+  printf ':repo-root "%s"\n' "$ROOT"
   printf ':code-paths %s\n' "$(edn_list "${code_paths[@]}")"
   printf ':test-paths %s\n' "$(edn_list "$test_rel")"
   printf ':command ["clojure" "-M:test" "-n" "%s"]\n' "$NS"
