@@ -210,3 +210,26 @@
                            :q0 [:inbox/zero])))]
       (is (= :want-already-observed (:stop-reason receipt)))
       (is (zero? (:budget-used receipt))))))
+
+(deftest receipt-records-locators-and-unlocated-tokens
+  ;; claude-4, WM-04: the receipt names the tokens with no checkable locator,
+  ;; and records its locator coverage honestly when no token set is supplied.
+  (let [base {:target :mission/loc
+              :initial-family [{:precedence []}]
+              :moves []
+              :evaluate-g (constantly 1.0)
+              :budget {:max-moves 0}
+              :horizon 2}
+        with-tokens (assoc base
+                           :facts {:f true}
+                           :want [:w]
+                           :patterns [{:id :p :guard {:needs #{:f} :forbids #{}} :produces #{:w}}]
+                           :check-theta 1
+                           :locators {:f {:class :C3 :repo "futon2" :sha "x" :path "a"}
+                                      :w {:class :J}})
+        r (:receipt (construction/construct with-tokens))]
+    (is (= #{:f :w} (set (keys (:locators r))))
+        "supplied locators for problem tokens are carried, whatever their class")
+    (is (= [:w] (:unlocated-tokens r)))
+    (is (= :token-set-not-supplied
+           (:locator-coverage (:receipt (construction/construct base)))))))

@@ -77,7 +77,7 @@
   token the model predicts must be observable by a mechanical check."
   #{:C1 :C2 :C3 :C4 :C5})
 
-(defn- problem-tokens
+(defn problem-tokens
   "Every token a target's problem reads or writes: its facts, its want, and
   every interpreted pattern's guard and produces."
   [universe want patterns]
@@ -90,7 +90,7 @@
                                  (:produces p)))
                        (vals patterns)))))
 
-(defn- unlocated-tokens
+(defn unlocated-tokens
   "Tokens with no locator of a checkable class."
   [locators tokens]
   (seq (sort-by pr-str (remove #(checkable-classes (:class (get locators %))) tokens))))

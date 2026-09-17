@@ -36,6 +36,7 @@
   The receipt is what futon2.aif.cascade-problems accepts as
   :construction-receipt. Stopping is not target success."
   (:require [clojure.set :as set]
+            [futon2.aif.cascade-problems :as problems]
             [futon2.aif.check-candidates :as cc]))
 
 (defn- refusal [kind & [data]]
@@ -152,7 +153,7 @@
    :checks-added checks
    :stopped-is-not-success true})
 
-(defn construct
+(defn- construct*
   "Run the construction-level policy and return {:family […] :receipt {…}}.
 
   Input:
@@ -264,3 +265,35 @@
                     (recur (:proposed-family best)
                            (conj taken best)
                            (inc budget-used))))))))))))
+
+(defn construct
+  "construct* with the construction receipt recording observation locators.
+
+  P5 under Joe's 2026-09-17 answer requires every token the family's problem
+  reads or writes (facts, want, pattern guards and produces) to be observable
+  by a mechanical check. The receipt therefore carries :locators, the supplied
+  locators restricted to those tokens, and :unlocated-tokens, the tokens with
+  no checkable (C1-C5) locator. Construction does not stop on unlocated tokens,
+  since later moves may add or replace patterns. futon2.aif.cascade-problems
+  refuses the problem at assembly while any remain, and the receipt names them
+  so whoever builds the cascade can add locators.
+
+  Input is as for construct*, plus :locators {token {:class :C1..:C5 ...}}.
+  Without :facts, :want and :patterns the token set is unknown, and the receipt
+  records :locator-coverage :token-set-not-supplied instead of claiming
+  coverage."
+  [{:keys [facts want patterns locators] :as input}]
+  (let [result (construct* input)]
+    (if-not (:receipt result)
+      result
+      (let [supplied? (and (map? facts) (sequential? want)
+                           (or (map? patterns) (sequential? patterns)))
+            ;; construct* takes patterns as a vector (check-candidates' shape);
+            ;; cascade-problems keys them by id
+            by-id (if (map? patterns) patterns (into {} (map (juxt :id identity)) patterns))
+            tokens (when supplied? (problems/problem-tokens facts want by-id))]
+        (update result :receipt merge
+                (if supplied?
+                  {:locators (select-keys (or locators {}) tokens)
+                   :unlocated-tokens (vec (problems/unlocated-tokens (or locators {}) tokens))}
+                  {:locator-coverage :token-set-not-supplied}))))))
