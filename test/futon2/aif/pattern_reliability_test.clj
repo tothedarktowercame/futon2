@@ -46,12 +46,16 @@
     ;; r = 1 (TRACE), n = 1 → (1+1)/(2+2) = 1/2, exact
     (is (= 1/2 (:theta (pr/theta c :R "p/b"))))
     ;; no observations (only unobserved): prior-only 1/2
-    (is (= {:theta 1/2 :basis :prior-only :bias :observed-only-when-worked}
+    (is (= {:theta 1/2 :basis :prior-only :prior-reason :no-observed-outcomes :bias :observed-only-when-worked}
            (pr/theta c :WM "p/c")))
     ;; never 1
     (is (= 10/11 (:theta (pr/theta {[:R "p"] {:realised 9 :not-realised 0 :unobserved 0}} :R "p"))))
-    ;; unknown pair is a typed refusal
-    (is (= :unknown-pattern-context (:kind (pr/theta c :E "p/a"))))))
+    ;; a pair absent from the counts is the recorded Beta(1,1) prior, never 1
+    (is (= {:theta 1/2 :basis :prior-only :prior-reason :pattern-absent-from-outcome-data
+            :bias :observed-only-when-worked}
+           (pr/theta c :E "p/a")))
+    ;; keyword manifest ids key the same pattern as the data's strings
+    (is (= (pr/theta c :R "p/a") (pr/theta c :R :p/a)))))
 
 (deftest attest-patterns-rules
   (let [c (pr/seed-counts fixture)
@@ -59,8 +63,11 @@
     (is (= [3/4 1/2] (mapv :theta attested)))
     (is (every? #(= :attested-observation (:theta-source %)) attested))
     (is (= {:realised 2 :not-realised 0 :unobserved 0} (:theta-basis (first attested))))
-    ;; a pattern with no entry for the context is a typed refusal, no default
-    (is (= :unknown-pattern-context (:kind (pr/attest-patterns [{:id "p/zz"}] c :R))))))
+    ;; a pattern with no entry for the context gets the recorded prior, source named
+    (let [[p] (pr/attest-patterns [{:id :p/zz}] c :R)]
+      (is (= 1/2 (:theta p)))
+      (is (= :beta-1-1-prior (:theta-source p)))
+      (is (= :pattern-absent-from-outcome-data (:theta-prior-reason p))))))
 
 (deftest real-data-totals
   ;; The real data file: 46 cascades, 233 steps — 39 realised,

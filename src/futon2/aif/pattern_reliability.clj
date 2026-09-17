@@ -66,39 +66,46 @@
       {}
       (:cascades outcome-data))))
 
+(defn- pattern-key
+  "Pattern ids arrive as strings from the outcome data (\"ns/name\") and as
+   keywords from manifest patterns (:ns/name); both key the same pattern."
+  [id]
+  (if (keyword? id) (subs (str id) 1) (str id)))
+
 (defn theta
   "The attested interpretation θ of a pattern in a context:
    {:theta (1 + r) / (2 + r + n) :basis … :bias :observed-only-when-worked},
-   an exact rational, never 1. A pair with no observations returns θ = 1/2
-   with :basis :prior-only. The bias note is required (proposal §3): only
-   worked steps got observed, so these are upper bounds. An unknown
-   [context pattern] pair is a typed refusal."
+   an exact rational, never 1. A pair with no observed outcomes, including a
+   pair absent from the counts, returns the Beta(1,1) prior mean θ = 1/2 with
+   :basis :prior-only and :prior-reason naming why. It is recorded, not silent,
+   so patterns new since the retrospective data can still be scored. The bias
+   note is required (proposal §3): only worked steps got observed, so these
+   are upper bounds."
   [counts context pattern]
-  (let [m (get counts [context pattern])]
-    (if (nil? m)
-      {:status :missing :kind :unknown-pattern-context :context context :pattern pattern}
-      (let [r (or (:realised m) 0)
-            n (or (:not-realised m) 0)
-            u (or (:unobserved m) 0)]
-        (if (pos? (+ r n))
-          {:theta (/ (+ 1 r) (+ 2 r n))
-           :basis {:realised r :not-realised n :unobserved u}
-           :bias :observed-only-when-worked}
-          {:theta 1/2 :basis :prior-only :bias :observed-only-when-worked})))))
+  (let [m (get counts [context (pattern-key pattern)])
+        r (or (:realised m) 0)
+        n (or (:not-realised m) 0)
+        u (or (:unobserved m) 0)]
+    (if (pos? (+ r n))
+      {:theta (/ (+ 1 r) (+ 2 r n))
+       :basis {:realised r :not-realised n :unobserved u}
+       :bias :observed-only-when-worked}
+      {:theta 1/2 :basis :prior-only
+       :prior-reason (if (nil? m) :pattern-absent-from-outcome-data :no-observed-outcomes)
+       :bias :observed-only-when-worked})))
 
 (defn attest-patterns
   "Set each manifest pattern's :theta from theta (replacing the documented
    default 1 that cascade-model-manifest/with-pattern-theta would otherwise
-   apply) and record :theta-basis and :theta-source :attested-observation on
-   the pattern. A pattern with no entry in the counts for the context is a
-   typed refusal naming the pattern; no silent default."
+   apply) and record :theta-basis, :theta-prior-reason when prior-only, and
+   :theta-source (:attested-observation or :beta-1-1-prior) on the pattern."
   [patterns counts context]
-  (reduce (fn [acc p]
-            (let [t (theta counts context (:id p))]
-              (if (contains? t :status)
-                (reduced t)
-                (conj acc (assoc p :theta (:theta t)
-                                   :theta-basis (:basis t)
-                                   :theta-source :attested-observation)))))
-          []
-          patterns))
+  (mapv (fn [p]
+          (let [t (theta counts context (:id p))]
+            (cond-> (assoc p :theta (:theta t)
+                             :theta-basis (:basis t)
+                             :theta-source (if (= :prior-only (:basis t))
+                                             :beta-1-1-prior
+                                             :attested-observation))
+              (:prior-reason t) (assoc :theta-prior-reason (:prior-reason t)))))
+        patterns))
