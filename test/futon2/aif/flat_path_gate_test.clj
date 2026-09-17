@@ -15,10 +15,9 @@
   functions are left alone. `select-action-cascades` is the CASCADE selector
   and is not matched.
 
-  One exception remains, `src/futon2/aif/policy.clj`, where the retired
-  functions still call each other internally. H6b deletes them and empties
-  the exception list; `exception-still-needed` fails when that has happened,
-  so the exception cannot outlive the code it covers."
+  One exception remained, `src/futon2/aif/policy.clj`, where the retired
+  functions still called each other internally; H6b deleted them (2026-09-17)
+  and the exception list is now empty."
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]))
@@ -39,8 +38,10 @@
 (def scanned-roots ["src/futon2" "scripts"])
 
 (def exceptions
-  "Files where the retired functions still call each other. H6b empties this."
-  #{"src/futon2/aif/policy.clj"})
+  "Files where the retired functions still call each other. H6b emptied
+  this (2026-09-17): the flat selectors no longer exist anywhere under
+  src/futon2 or scripts."
+  #{})
 
 (defn strip-comments [line]
   (let [i (str/index-of line ";")]
