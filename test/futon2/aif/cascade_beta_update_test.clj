@@ -12,12 +12,13 @@
   - The corrected tie premise, asserted where it is TRUE: moving probability
     between equal-G candidates that are BOTH interior in π contributes
     exactly zero to (π − π₀)·G — swapping two finite F values between the
-    equal-G pair C1/C2 leaves the solved β unchanged. The stronger claim
-    that changing C1's F from ##Inf to C2's value also leaves β unchanged
-    is FALSE and is asserted as false here, with both values recorded:
-    re-including C1 in π renormalises the softmax and pulls mass from C3 —
-    a different-G candidate — so (π − π₀)·G changes (measured: β 0.9848 vs
-    0.9072). Reported to claude-4 2026-09-17.
+    equal-G pair C1/C2 leaves the solved β unchanged; and SWAPPING ##Inf
+    between the pair (C1 = ##Inf, C2 = 0 vs C1 = 0, C2 = ##Inf) also leaves
+    β unchanged, because the pair's equal G and equal prior make its total
+    contribution identical. (The variant claude-4 first proposed — C1 from
+    ##Inf to C2's finite value — is false: renormalisation pulls mass from
+    C3, a different-G candidate; measured β 0.9848 vs 0.9072, reported and
+    corrected 2026-09-17.)
   - Contexts are independent: updating :R leaves :WM absent or unchanged."
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.policy-precision :as pp]))
@@ -93,22 +94,21 @@
         (str "equal-G interior swap leaves the solved β unchanged: "
              beta-a " vs " beta-b))))
 
-(deftest boundary-tie-is-not-neutral-test
-  ;; The stronger claim claude-4's replacement test 1 asked for — solved β the
-  ;; same whether C1's F is ##Inf or C2's value — is FALSE, and asserting it
-  ;; would assert a wrong number. Recorded here as the true statement, with
-  ;; both values, so the fact cannot be lost: re-including C1 (F ∞ → 0)
-  ;; renormalises π and pulls mass from C3, a different-G candidate, so the
-  ;; dot and the root both move. Reported to claude-4 with the numbers.
-  (let [beta-inf (solved-beta tick-1-f)
-        beta-c2  (solved-beta (assoc tick-1-f :C1-test-first 0.0))]
-    (is (> 0.01 (Math/abs (- beta-inf 0.983)))
-        (str "C1 F = ##Inf: β = " beta-inf " (contradiction excluded from π)"))
-    (is (> (Math/abs (- beta-inf beta-c2)) 0.01)
-        (str "C1 F = C2's value: β = " beta-c2
-             " — the two cases differ, because the renormalisation moves mass
-             between different-G candidates (C1/C2 ↔ C3), not only within the
-             equal-G tie"))))
+(deftest boundary-tie-swap-is-neutral-test
+  ;; Corrected invariance (claude-4, 2026-09-17): SWAP C1's and C2's F —
+  ;; (a) C1 = ##Inf, C2 = 0; (b) C1 = 0, C2 = ##Inf; C0 = ##Inf, C3 = 0 in
+  ;; both. C1 and C2 have equal G and equal prior, so the pair's total
+  ;; contribution to (π − π₀)·G is identical in (a) and (b) and the solved β
+  ;; is the same. (The earlier variant — changing C1 from ##Inf to C2's
+  ;; finite value — is NOT invariant: it re-includes C1 and pulls mass from
+  ;; C3, a different-G candidate; measured 0.9848 vs 0.9072, reported
+  ;; 2026-09-17.)
+  (let [beta-a (solved-beta tick-1-f)
+        beta-b (solved-beta {:C0-empty ##Inf :C1-test-first 0.0
+                             :C2-fix-first ##Inf :C3-fix-only 0.0})]
+    (is (< (Math/abs (- beta-a beta-b)) 1.0e-12)
+        (str "swapping F between the equal-G pair leaves the solved β
+             unchanged: (a) " beta-a " vs (b) " beta-b))))
 
 (deftest cascade-beta-update-contexts-independent-test
   (let [wm-state {:status :present :beta 2.0 :beta-source :converged-posterior
