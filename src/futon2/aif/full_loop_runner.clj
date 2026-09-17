@@ -47,7 +47,14 @@
 (def default-reviewer "codex-7")
 (def default-repair-reviewer "codex-1")
 (def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
-(def default-run-record-dir "/home/joe/code/futon2/holes/labs/wm-contract")
+(def default-run-record-dir
+  "Where a run drops its receipt when the caller names no directory. Under
+  data/ (gitignored), not the lab root: 148 receipts accumulated there and NO
+  consumer in futon2 could read one of them, because every reader matches
+  `^tick-run-record-(\\d{4}-\\d{2}-\\d{2})-(.+)\\.edn$` and a bare-UUID id
+  has no date (claude-7's inbox-zero analysis, 2026-09-17). A caller that
+  wants a receipt kept as evidence passes :run-record-dir explicitly."
+  "/home/joe/code/futon2/data/wm-runs")
 (def default-agent-budget-ms (* 45 60 1000))
 (def semantic-epoch :full-loop-real-actuation-v6)
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
@@ -4691,7 +4698,10 @@
   completion. Returning :cohort-complete avoids spurious repair obligations
   that would otherwise fire every time the scheduler probes a finished cohort."
   [raw-opts]
-  (let [run-id (or (:run-id raw-opts) (str (UUID/randomUUID)))
+  ;; a missing :run-id gets a DATED id, so the receipt it writes matches the
+  ;; pattern every receipt reader in this repo requires
+  (let [run-id (or (:run-id raw-opts)
+                   (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
         started-at (str (Instant/now))
         _ (ensure-dispatch-seat! (config raw-opts))
         ;; BEFORE the attempt: a stale runner must not consume it, and the
