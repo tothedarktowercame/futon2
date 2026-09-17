@@ -39,6 +39,14 @@
  :task-context
  "Quoted verbatim from the occurrence record's :retrieval :query (its own words for what the retrieval was for):\n\n\"Have: built agent harness components, a shipped tested ledger and replay certificates; three runtime defects fixed with regression tests. Want: per-component readiness evidence, independently verified certificate, and a reporting gate whose claims are re-derivable from typed records. However: a built component is not evidence that its behaviour is ready to bring online; the independent witness blocked the certificate, and after fixes the rerun remains pending. Test each component, retain exact evidence, and require independent replay before promoting the certificate.\"\n\n:query-source {:path \"futon2/holes/missions/M-zaif-harness-v1.md\", :lines [[44 47] [89 110] [208 215] [226 229]]}\n\n:baseline-query \"M-zaif-harness-v1 — want: the harness edition, lifecycle-aligned and WM-fed. have: OPEN — HEAD through VERIFY drafted; INSTANTIATE runs as wm-contract U rows.\""
  :library-root "/home/joe/code/futon3/library"
+ ;; DENOMINATOR (claude-4, 2026-09-17, review of the capture): the record
+ ;; carries 29 candidate entries in all. The 10 below are those that are
+ ;; section-qualified AND carry a pinned flexiarg digest in the record, so
+ ;; they resolve to canonical repository ids (family/name keywords). The
+ ;; other 19 are bare names or carry no pinned digest, and the receipted
+ ;; find can only select ids that exist in the repository. This note is a
+ ;; count and a resolvability rule, not a judgment about any candidate.
+ :candidate-patterns-considered-in-record 29
  :candidate-patterns
  [:agent/provisional-claims-ledger
   :agent/evidence-over-assertion
