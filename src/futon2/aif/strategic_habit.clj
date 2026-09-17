@@ -79,8 +79,13 @@
             policy-id (some-> pattern str)
             event {:grain :strategic :policy-id policy-id :captured-at captured-at
                    :boundary :reason-bearing-strategic-policy}]
-        (when-not (and (= :reason-bearing-strategic-policy
-                          (:selection-boundary decision))
+        ;; A cascade decision is identified by its applied selection law, which
+        ;; the decision gate also checks. The flat path's :selection-boundary
+        ;; label is not the identity (claude-4 review: select-action-cascades
+        ;; records :strategic-recommendation, so the old boundary check threw on
+        ;; every real cascade decision).
+        (when-not (and (= :cascade-selection-posterior
+                          (get-in decision [:selection-law :applied]))
                        (text? policy-id) (text? event-id) (text? captured-at))
           (throw (ex-info "insufficient strategic selection identity"
                           {:decision decision :event-id event-id

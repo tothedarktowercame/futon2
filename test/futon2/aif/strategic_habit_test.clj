@@ -1,13 +1,17 @@
 (ns futon2.aif.strategic-habit-test
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.habit-prior :as tactical]
+            [futon2.aif.policy :as policy]
             [futon2.aif.strategic-habit :as habit]
             [futon2.aif.trace :as trace]))
 
 (def decision
   "A cascade decision (SPEC flat-removal H4, 2026-09-17): the observed policy
    identity is the chosen cascade's enacted FIRST ACTING PATTERN."
-  {:selection-boundary :reason-bearing-strategic-policy
+  {:selection-law {:applied :cascade-selection-posterior}
+   ;; the flat-path label that real select-action-cascades still records; the
+   ;; habit must not depend on it (claude-4 review)
+   :selection-boundary :strategic-recommendation
    :action {:kind :cascade-candidate :cascade-id "c-alpha"
             :precedence [:aif/placeholder-is-load-bearing
                          :aif/belief-state-operational-hypotheses]
@@ -67,7 +71,7 @@
 (deftest refuses-insufficient-or-wrong-grain-test
   (doseq [d [(assoc-in decision [:action :precedence] [])
              (update decision :action dissoc :precedence)
-             (assoc decision :selection-boundary :actuation)]]
+             (assoc decision :selection-law {:applied :controller-head})]]
     (is (thrown-with-msg? clojure.lang.ExceptionInfo #"insufficient"
                          (habit/carry nil d "tick-1" captured true))))
   (is (thrown? clojure.lang.ExceptionInfo
@@ -84,3 +88,18 @@
                                                 [:action :precedence 0]
                                                 :aif/other-pattern)
                                       "tick-1" captured true)))))
+
+(deftest real-cascade-decision-is-observed-test
+  ;; claude-4 review: the fixture above was hand-built; this one is the real
+  ;; select-action-cascades output, which the old boundary check refused
+  (let [cand (fn [id prec g]
+               {:action {:kind :cascade-candidate :cascade-id id :precedence prec
+                         :construction-receipt {:cascade/id id}
+                         :interpretation-receipts (mapv (fn [p] {:pattern p}) prec)}
+                :controller-score g})
+        real (policy/select-action-cascades
+              [(cand "c-empty" [] 13.1)
+               (cand "c-fix" [:aif/placeholder-is-load-bearing] 11.4)]
+              {:beta 1.0})
+        on (habit/carry nil real "tick-1" captured true)]
+    (is (= {(str :aif/placeholder-is-load-bearing) 1} (:counts on)))))
