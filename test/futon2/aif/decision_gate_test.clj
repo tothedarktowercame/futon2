@@ -135,3 +135,37 @@
     (let [decision (dissoc (tick1-decision) :beta)]
       (is (= :beta-not-recorded
              (refusal-of #(gate/emit! decision)))))))
+
+;; --- claude-4 review additions -------------------------------------------
+
+(deftest flat-action-dressed-as-cascade-decision-is-refused
+  (testing "a flat action carried under a cascade selection law is not one of the posterior's candidates"
+    (let [decision (assoc (tick1-decision)
+                          :action {:type :advance-ticket :target "T-42"})]
+      (is (= :chosen-action-not-a-candidate
+             (refusal-of #(gate/emit! decision)))))))
+
+(deftest non-bayes-choice-is-refused
+  (testing "choosing a first acting pattern with less marginal mass than another throws,
+            even when its own marginal is recorded correctly"
+    (let [decision (tick1-decision)
+          posterior (get-in decision [:selection-law :posterior])
+          c0 (some #(when (= :C0-empty (:cascade-id %)) %) (keys posterior))
+          c3 (some #(when (= :C3-fix-only (:cascade-id %)) %) (keys posterior))
+          low (if (seq (:precedence c3)) c3 c0)
+          forged (assoc decision :action low :chosen-action-mass
+                        (reduce + (for [[c p] posterior
+                                        :when (= (first (:precedence c)) (first (:precedence low)))]
+                                    p)))]
+      (is (= :chosen-not-bayes-action
+             (refusal-of #(gate/emit! forged)))))))
+
+(deftest posterior-over-non-cascade-is-refused
+  (testing "a recorded posterior whose support includes a flat action throws"
+    (let [decision (tick1-decision)
+          posterior (get-in decision [:selection-law :posterior])
+          [c p] (first posterior)
+          forged (assoc-in decision [:selection-law :posterior]
+                           (-> posterior (dissoc c) (assoc {:type :advance-ticket :target "T-42"} p)))]
+      (is (= :posterior-over-non-cascade
+             (refusal-of #(gate/emit! forged)))))))

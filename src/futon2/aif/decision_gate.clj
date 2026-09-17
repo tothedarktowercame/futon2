@@ -74,10 +74,12 @@
 (defn- check-candidate-receipts!
   [posterior]
   (doseq [candidate (keys posterior)]
-    (when-not (contains? candidate :construction-receipt)
+    (when-not (and (map? candidate) (= :cascade-candidate (:kind candidate)))
+      (refuse! :posterior-over-non-cascade {:candidate candidate}))
+    (when-not (some? (:construction-receipt candidate))
       (refuse! :missing-construction-receipt
                {:candidate candidate}))
-    (when-not (contains? candidate :interpretation-receipts)
+    (when-not (some? (:interpretation-receipts candidate))
       (refuse! :missing-interpretation-receipts
                {:candidate candidate}))
     (when (and (seq (:precedence candidate))
@@ -104,6 +106,22 @@
       (refuse! :missing-recorded-posterior
                {:selection-law (:selection-law decision)}))
     (check-candidate-receipts! posterior)
+    (let [total (reduce + 0.0 (vals posterior))]
+      (when (> (abs (- total 1.0)) mass-tolerance)
+        (refuse! :posterior-not-normalised {:total total})))
+    (when-not (contains? posterior (:action decision))
+      (refuse! :chosen-action-not-a-candidate {:action (:action decision)}))
+    (let [marginals (reduce (fn [m [c p]] (update m (first-acting-pattern c) (fnil + 0.0) p))
+                            {} posterior)
+          chosen-pattern (first-acting-pattern (:action decision))
+          best (apply max (vals marginals))]
+      ;; the enacted step is the Bayes action: no first acting pattern may
+      ;; carry more marginal mass than the chosen one (ties are the selector's
+      ;; declared tie-break, so equality is admitted)
+      (when (> (- best (get marginals chosen-pattern 0.0)) mass-tolerance)
+        (refuse! :chosen-not-bayes-action
+                 {:chosen chosen-pattern :chosen-marginal (get marginals chosen-pattern)
+                  :best-marginal best})))
     (let [chosen (:action decision)
           chosen-mass (:chosen-action-mass decision)
           marginal (marginal-mass posterior (first-acting-pattern chosen))]
