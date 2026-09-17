@@ -104,9 +104,21 @@
   "Evaluate every move against FAMILY. Returns
   {:evaluations [{:move-id … :value … :proposed-family … :parts {…}} …]
    :no-move-reasons {move-id reason …}}
-  where value = pragmatic + epistemic − cost, and a :state-information
-  estimate is recorded in :parts without being added (active-horizon-g
-  already values checks' state information)."
+  where value = pragmatic + epistemic − cost.
+
+  Which epistemic estimates are ADDED:
+  - :state-information is recorded and NOT added — active-horizon-g already
+    values a check's state information, so adding it here would count it
+    twice;
+  - :novelty (interpretation novelty) is added and marks the value
+    :includes-unformalised-novelty true — it is a typed estimate with no
+    formal definition behind it;
+  - :parameter-information-gain is added and marks nothing unformalised: it
+    is the Lean expectedInformationGain (DarkTower.WarMachine.Holes),
+    computed by futon2.aif.parameter-delivery from a delivered parameter
+    posterior. It is the value of learning about the PARAMETERS, which no
+    other term here carries — G stays free of an epistemic term (that is
+    SPEC-flat-removal S2, unapproved)."
   [moves family evaluate-g cost-of]
   (reduce
    (fn [acc move]
@@ -119,7 +131,9 @@
                             (g-norm (best-g evaluate-g proposed)))
                est (:epistemic-estimate result)
                novelty? (= :novelty (:kind est))
-               epistemic (if (and novelty? (number? (:value est)))
+               added? (contains? #{:novelty :parameter-information-gain}
+                                 (:kind est))
+               epistemic (if (and added? (number? (:value est)))
                            (double (:value est)) 0.0)
                cost (double (move-cost result cost-of))
                value (+ pragmatic epistemic (- cost))]

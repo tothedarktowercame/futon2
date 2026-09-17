@@ -293,3 +293,40 @@
                 :value check-theta
                 :basis :check-candidates}
                :cost (or cost 1)})))))))
+
+(defn with-parameter-information-gain
+  "Wrap MOVE so that what it proposes is valued by the DELIVERED parameter
+  information gain as well (WM-07-delivery's epistemic consumer).
+
+  DELIVERY is futon2.aif.parameter-delivery/delivery's record, and
+  POLICY-ID-OF names the policy a proposed family stands for
+  (fn [proposed-family] -> policy-id), since the delivery's gains are keyed
+  by policy. The wrapped move replaces the move's own
+  :epistemic-estimate with
+
+      {:kind :parameter-information-gain :value <EIG in nats>
+       :basis {:policy-id ... :delivery-schema ... :lean ...}}
+
+  which futon2.aif.construction ADDS to the move's value: unlike :novelty it
+  is the Lean expectedInformationGain over a real posterior, not an estimate.
+  A no-move passes through untouched. A policy with no delivered gain, or a
+  gain that is a typed refusal, leaves the move's own estimate alone and
+  records :parameter-information-gain-refused — a missing gain is never read
+  as a gain of zero."
+  [move {:keys [delivery policy-id-of]}]
+  (fn [family]
+    (let [result (move family)]
+      (if (identical? :no-move (:status result))
+        result
+        (let [policy-id (policy-id-of (:proposed-family result))
+              gain (get-in delivery [:expected-information-gain policy-id])]
+          (if (number? gain)
+            (assoc result :epistemic-estimate
+                   {:kind :parameter-information-gain
+                    :value gain
+                    :basis {:policy-id policy-id
+                            :delivery-schema (:schema delivery)
+                            :lean "DarkTower.WarMachine.Holes.expectedInformationGain"}})
+            (assoc result :parameter-information-gain-refused
+                   {:policy-id policy-id
+                    :refusal (or gain :no-delivered-gain)})))))))

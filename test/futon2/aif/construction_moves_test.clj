@@ -300,3 +300,55 @@
     (is (= :no-move (:status r)))
     (is (= :already-ordered (:reason r)))
     (is (= [[:p/a :p/b]] (:patterns-not-carried r)))))
+
+;; ------------------------------------------- WM-07-delivery's epistemic consumer
+
+(def fake-delivery
+  {:schema :wm/parameter-delivery-v1
+   :expected-information-gain {"advance-twice" 0.6931471805599453
+                              "no-gain" {:status :refused :kind :zero-evidence-conditioning}}})
+
+(deftest delivered-parameter-information-gain-is-the-move-s-epistemic-value
+  (let [move (cm/with-parameter-information-gain
+               (cm/read-what-exists {:sources all-read
+                                     :available-patterns [pb]
+                                     :cost 1})
+               {:delivery fake-delivery
+                :policy-id-of (constantly "advance-twice")})
+        r (move family1)]
+    (is (= :parameter-information-gain (get-in r [:epistemic-estimate :kind])))
+    (is (= 0.6931471805599453 (get-in r [:epistemic-estimate :value])))
+    (is (= :wm/parameter-delivery-v1
+           (get-in r [:epistemic-estimate :basis :delivery-schema])))))
+
+(deftest a-refused-or-missing-gain-is-not-a-gain-of-zero
+  (doseq [policy ["no-gain" "never-delivered"]]
+    (let [move (cm/with-parameter-information-gain
+                 (cm/read-what-exists {:sources all-read
+                                       :available-patterns [pb] :cost 1})
+                 {:delivery fake-delivery :policy-id-of (constantly policy)})
+          r (move family1)]
+      (is (= :state-information (get-in r [:epistemic-estimate :kind]))
+          "the move keeps its own estimate")
+      (is (some? (:parameter-information-gain-refused r))))))
+
+(deftest construct-adds-the-delivered-gain-and-marks-nothing-unformalised
+  (let [move (cm/with-parameter-information-gain
+               (cm/read-what-exists {:sources all-read
+                                     :available-patterns [pb] :cost 0.5})
+               {:delivery fake-delivery
+                :policy-id-of (constantly "advance-twice")})
+        {:keys [receipt]} (construction/construct
+                           {:target :mission/eig
+                            :initial-family family1
+                            :moves [move]
+                            ;; G indifferent: the gain alone decides
+                            :evaluate-g (constantly 1.0)
+                            :budget {:max-moves 2}
+                            :horizon 2})
+        taken (first (:moves receipt))]
+    (is (= :read-what-exists (:move-id taken)))
+    (is (= 0.6931471805599453 (get-in taken [:parts :epistemic-added])))
+    (is (false? (get-in taken [:parts :includes-unformalised-novelty]))
+        "the Lean expectedInformationGain is not an unformalised estimate")
+    (is (< 0 (:value taken)) "gain 0.69 against cost 0.5 and no ΔG")))
