@@ -8,18 +8,17 @@
  :context :WM
  :beta {:value 1 :status :declared}
  :facts [:judge-reaches-no-flat-selector
-         :judge-loads-declared-cascade-sources]
+         :judge-loads-declared-cascade-sources
+         :standing-cascade-g-test-passes]
  :want [:standing-cascade-g-test-passes]
  :locators
  {:judge-reaches-no-flat-selector
-  {:class :C2 :repo "futon2" :ns "futon2.report.war-machine-test"
-   :entry-id "test-registry-40b1ca450225af15eee6084bb8df6d876b8b984fb2e01246656e2f6568fad346"}
+  {:class :C2 :repo "futon2" :ns "futon2.report.war-machine-test"}
   :judge-loads-declared-cascade-sources
   {:class :C4 :repo "futon2" :sha "e2e1b477" :path "scripts/futon2/report/war_machine.clj"
    :decl "declared-sources (when-not (:cascade-sources judge-opts)"}
   :standing-cascade-g-test-passes
-  {:class :C2 :repo "futon2" :ns "futon2.vm.standing-enacted-policy-is-cascade-g-test"
-   :entry-id :to-register-when-it-passes}}
+  {:class :C2 :repo "futon2" :ns "futon2.vm.standing-enacted-policy-is-cascade-g-test"}}
  :patterns
  {:wm-connected-learning/observation-to-next-choice
   {:guard {:needs #{:judge-loads-declared-cascade-sources} :forbids #{}}

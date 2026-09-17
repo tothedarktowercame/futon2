@@ -21,6 +21,7 @@
   observed false, and the checkout HEAD at check time is recorded as the
   cutoff."
   (:require [clojure.data.json :as json]
+            [clojure.edn :as edn]
             [clojure.java.shell :as sh]
             [clojure.string :as str]))
 
@@ -123,6 +124,48 @@
                (refuse :registry-unavailable {:entry-id entry-id :err (subs (str err) 0 (min 400 (count (str err))))}))))
       (finally (.delete config)))))
 
+(def evidence-url "http://localhost:7070/api/alpha/evidence")
+
+(defn- registry-runs
+  "Test Registry run records (newest first), read from the evidence store by
+  tag. Bounded: at most LIMIT entries. A store that cannot be read is a typed
+  refusal."
+  [limit]
+  (try
+    (let [body (json/read-str (slurp (str evidence-url "?tag=test-registry&limit=" limit)))]
+      (for [e (get body "entries")
+            :let [payload (try (edn/read-string (get-in e ["evidence/body" "payload-edn"]))
+                               (catch Exception _ nil))]
+            :when (= :run (:kind payload))]
+        (assoc payload :entry-id (get e "evidence/id"))))
+    (catch Exception e
+      (refuse :registry-unavailable {:error (.getMessage e)}))))
+
+(defn latest-warrant-id
+  "The newest registry run for REPO whose recorded command satisfies
+  COMMAND-PRED and that recorded a warrant. Returns its entry-id, or nil.
+  Validity now is still decided by `check`; this only finds the candidate, so
+  a locator need not name an entry-id that editing the located file would stale."
+  [repo command-pred]
+  (let [runs (registry-runs 500)]
+    (when-not (and (map? runs) (:status runs))
+      (->> runs
+           (filter #(and (true? (:warrant? %))
+                         (= (str repo-root "/" repo) (:repo/root %))
+                         (command-pred (:command %))))
+           (sort-by :finished-at #(compare %2 %1))
+           first
+           :entry-id))))
+
+(defn- resolve-entry-id
+  "The locator's :entry-id when it names one (a string), else the latest
+  matching warrant. Recorded on the evidence as :entry-id-source."
+  [{:keys [repo entry-id]} command-pred]
+  (if (string? entry-id)
+    {:entry-id entry-id :entry-id-source :locator}
+    (when-let [id (latest-warrant-id repo command-pred)]
+      {:entry-id id :entry-id-source :latest-warrant})))
+
 (defn- warrant-evidence [result]
   {:warrant? (get result "warrant?")
    :reason (get result "reason")
@@ -147,14 +190,19 @@
                                :registry (warrant-evidence r)}))
 
 (defn check-test-warrant
-  "C2: the Test Registry warrant ENTRY-ID is valid now for exactly the named
+  "C2: the Test Registry warrant (the locator's :entry-id, or when it names
+  none, the newest recorded warrant for this namespace) is valid now for exactly the named
   namespace. Observed true when its results show 0 failures and 0 errors, and
   false only when a valid warrant records failures or errors. A missing or
   stale warrant, or one for another namespace, is refused
   :no-current-warrant. The recorded code and test files must match HEAD
   (cutoff recorded), else :working-tree-differs-from-head."
-  [{:keys [repo entry-id ns] :as m}]
-  (or (locator-refusal :C2 m [:repo :entry-id :ns])
+  [{:keys [repo ns] :as m}]
+  (or (locator-refusal :C2 m [:repo :ns])
+      (let [{:keys [entry-id entry-id-source]}
+            (resolve-entry-id m #(and (sequential? %) (= ns (last %)) (= "-n" (last (butlast %)))))]
+       (if-not entry-id
+        (refuse :no-current-warrant {:check :C2 :ns ns :entry-id-source :no-warrant-found})
       (let [r (registry-check repo entry-id)]
         (cond
           (contains? r :status) r
@@ -173,10 +221,12 @@
               :else
               {:observed (and (= 0 (get res "failures")) (= 0 (get res "errors")))
                :check :C2 :cutoff cutoff
-               :evidence (assoc (warrant-evidence r) :repo repo :ns ns :entry-id entry-id)}))))))
+               :evidence (assoc (warrant-evidence r) :repo repo :ns ns :entry-id entry-id
+                                :entry-id-source entry-id-source)}))))))))
 
 (defn check-lean-warrant
-  "C1: a valid Test Registry warrant ENTRY-ID for `lake build MODULE`, with the
+  "C1: a valid Test Registry warrant (the locator's :entry-id, or when it names
+  none, the newest recorded warrant for the module's build) for `lake build MODULE`, with the
   file PATH in its load closure. Observed true when the build exited 0 with 0
   errors, PATH has no sorries in the warrant's per-file sorry-files, and PATH
   at HEAD has the anchored declaration head DECL. Other modules' sorries
@@ -184,8 +234,12 @@
   warrant, a different module, or PATH outside the closure is refused
   :no-current-warrant. A dirty PATH refuses
   :working-tree-differs-from-head."
-  [{:keys [repo entry-id module path decl] :as m}]
-  (or (locator-refusal :C1 m [:repo :entry-id :module :path :decl])
+  [{:keys [repo module path decl] :as m}]
+  (or (locator-refusal :C1 m [:repo :module :path :decl])
+      (let [{:keys [entry-id entry-id-source]}
+            (resolve-entry-id m #(= ["lake" "build" module] %))]
+       (if-not entry-id
+        (refuse :no-current-warrant {:check :C1 :module module :entry-id-source :no-warrant-found})
       (let [r (registry-check repo entry-id)]
         (cond
           (contains? r :status) r
@@ -209,7 +263,7 @@
                  :check :C1 :cutoff cutoff
                  :evidence (assoc (warrant-evidence r) :repo repo :module module :path path
                                   :decl decl :decl-present decl? :file-sorries file-sorries
-                                  :entry-id entry-id)})))))))
+                                  :entry-id entry-id :entry-id-source entry-id-source)})))))))))
 
 (def checks
   {:C1 check-lean-warrant

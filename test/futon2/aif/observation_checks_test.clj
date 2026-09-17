@@ -29,7 +29,7 @@
 (deftest refusals
   (is (= :no-locator (:kind (oc/check-path-exists {:repo "futon2" :sha futon2-sha}))))
   (is (= :unknown-sha (:kind (oc/check-path-exists {:repo "futon2" :sha "0000000000" :path "x"}))))
-  (is (= :no-locator (:kind (oc/check-test-warrant {:repo "futon2" :ns "x"}))))
+  (is (= :no-locator (:kind (oc/check-test-warrant {:repo "futon2"}))))
   (let [r (oc/observe {:t-path {:class :C3 :repo "futon2" :sha futon2-sha :path "src/futon2/aif/construction.clj"}
                        :t-judgement {:class :J}
                        :t-unknown {:class :C9}})]
@@ -79,3 +79,17 @@
     ;; every declared clojure-locus resolves at its repo's HEAD
     (is (true? (:observed r)) (pr-str (:evidence r)))
     (is (seq (get-in r [:evidence :clojure-loci])))))
+
+(deftest warrant-found-by-namespace-or-module
+  ;; a locator need not name an entry-id: the newest recorded warrant for the
+  ;; namespace (C2) or module build (C1) is checked
+  (let [r (oc/check-test-warrant {:repo "futon2" :ns "futon2.aif.observation-rates-test"})]
+    (is (true? (:observed r)) (pr-str r))
+    (is (= :latest-warrant (get-in r [:evidence :entry-id-source]))))
+  (is (= :no-current-warrant
+         (:kind (oc/check-test-warrant {:repo "futon2" :ns "futon2.aif.never-registered-test"}))))
+  (let [r (oc/check-lean-warrant {:repo "mathlib4" :module "DarkTower.WarMachine.MachineContracts"
+                                  :path "DarkTower/WarMachine/TokenObservation.lean"
+                                  :decl "theorem tokenLikelihood_checkable"})]
+    (is (true? (:observed r)) (pr-str r))
+    (is (= :latest-warrant (get-in r [:evidence :entry-id-source])))))
