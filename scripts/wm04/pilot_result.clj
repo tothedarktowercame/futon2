@@ -83,6 +83,35 @@
                                                 :recorded (get recorded id)
                                                 :admission (or (:label a) (:kind a))}]))}))))
 
+(defn observer-only
+  "Pilot comparison with no review step (Joe, 2026-09-17: a pilot does not need
+  a full review cycle). Observer findings are compared with the recorded
+  verdicts per group. These are UNREVIEWED pilot findings, not admitted labels,
+  so they are not error rates for A."
+  []
+  (let [subjects (->> (json/read-str (slurp (io/file dir "subjects.json")) :key-fn keyword)
+                      :subjects (map (juxt :subject-id identity)) (into {}))
+        adjs (into {} (map (juxt :subject-id identity)) (read-edn-dir "adjudications"))
+        recorded (recorded-verdicts)
+        rows (for [[id s] subjects
+                   :let [a (get adjs id)]]
+               {:id id :group (:group s) :recorded (get recorded id)
+                :finding (:finding a) :blinding-uncertain (boolean (blinding-uncertain id))})]
+    {:schema :wm04-pilot-observer-only-v1
+     :reviewed false
+     :blinding-uncertain (vec (sort blinding-uncertain))
+     :by-group (into (sorted-map)
+                     (for [[g rs] (group-by :group rows)]
+                       [g (frequencies (map (juxt :recorded :finding) (remove :blinding-uncertain rs)))]))
+     :rows (vec (sort-by :id rows))}))
+
+(let [observer? (some #{"--observer-only"} *command-line-args*)]
+  (when observer?
+    (let [r (observer-only)]
+      (spit (io/file dir "PILOT-OBSERVER-ONLY.edn") (with-out-str (clojure.pprint/pprint r)))
+      (prn (:by-group r))
+      (System/exit 0))))
+
 (let [check? (some #{"--check-digests"} *command-line-args*)
       result (run check?)]
   (if check?
