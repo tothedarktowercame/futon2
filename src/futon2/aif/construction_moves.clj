@@ -107,8 +107,8 @@
             (if p
               (let [base (first family)
                     extended (-> base
-                                 (update :precedence conj (:id p))
-                                 (update :patterns conj p))]
+                                 (update :precedence #(conj (vec %) (:id p)))
+                                 (update :patterns #(conj (vec %) p)))]
                 {:move-id :borrow-a-sibling
                  :proposed-family (conj (vec family) extended)
                  :row-covered (:row row)
@@ -165,6 +165,13 @@
     (let [reordered
           (mapv
            (fn [c]
+             (if (empty? (:patterns c))
+               ;; a candidate that does not carry its patterns (the shape
+               ;; cascade-problems takes, where patterns live in the target's
+               ;; interpretation) says nothing about its own dependencies:
+               ;; leave its precedence exactly as written
+               {:candidate c :precedence (:precedence c) :cyclic? false
+                :unmet [] :patterns-not-carried? true}
              (let [pats (vec (:patterns c))
                    idx (into {} (map-indexed (fn [i p] [(:id p) i])) pats)
                    producers (reduce (fn [m p]
@@ -189,7 +196,7 @@
                {:candidate c
                 :precedence (if (nil? order) (:precedence c) order)
                 :cyclic? (nil? order)
-                :unmet unmet}))
+                :unmet unmet})))
            family)
           changed (not= (mapv :precedence reordered)
                         (mapv :precedence family))
@@ -200,7 +207,14 @@
                     :cycles (vec (keep #(when (:cyclic? %)
                                           {:candidate (get-in % [:candidate :id])
                                            :precedence (:precedence %)})
-                                       reordered))}]
+                                       reordered))
+                    ;; present-only: a family that carries its patterns says
+                    ;; nothing about this
+                    :patterns-not-carried (not-empty
+                                           (vec (keep #(when (:patterns-not-carried? %)
+                                                         (get-in % [:candidate :precedence]))
+                                                      reordered)))}
+          findings (into {} (remove (comp nil? val)) findings)]
       (if-not changed
         ;; unchanged order, but findings are still findings
         (merge {:status :no-move :move-id :order-by-need

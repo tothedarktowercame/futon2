@@ -286,3 +286,17 @@
       (is (pos? (:budget-used receipt)) "at least one move was taken")
       (is (zero? (unmet-need-g (apply min-key unmet-need-g family)))
           "the best final candidate has no unmet needs"))))
+
+;; claude-4's review, 2026-09-17: a candidate that does NOT carry its patterns
+;; is the shape cascade-problems assembles from a declared source (patterns
+;; live in the target's interpretation). order-by-need read its empty pattern
+;; list as "no patterns to order" and returned an EMPTY precedence, which
+;; would have replaced a real cascade with the empty one.
+(deftest order-by-need-leaves-a-candidate-that-does-not-carry-its-patterns
+  (let [move (cm/order-by-need {:cost 0})
+        candidate {:precedence [:p/a :p/b]
+                   :construction-receipt {:kind :hand-admitted}}
+        r (move [candidate])]
+    (is (= :no-move (:status r)))
+    (is (= :already-ordered (:reason r)))
+    (is (= [[:p/a :p/b]] (:patterns-not-carried r)))))
