@@ -88,7 +88,9 @@
   the finder's/interpreter's own rather than :external-expectation-producer;
   :occurrence-binding-mismatch when the artifact is bound to a different
   occurrence; :unexpected-selected-pattern for a receipt with no expected
-  row; :expectation-mismatch on any of the four fields.
+  row; :expectation-mismatch on any of the four fields;
+  :expected-pattern-not-selected when a row the artifact requires did not
+  fire (opt out per row with :must-fire? false).
 
   The declared-role control is not authentication -- it refuses the role the
   finder and interpreter themselves occupy, nothing more."
@@ -107,9 +109,28 @@
             :let [receipt (get-in result [:receipts id]) row (get expected id)]]
       (need! (map? receipt) :invalid-result {:pattern id})
       (need! (some? row) :unexpected-selected-pattern {:pattern id})
-      (need! (= row (select-keys receipt comparison-fields))
+      ;; compare the four fields on BOTH sides: a row may carry its own
+      ;; provenance (which frozen context it was written from, by whom), and
+      ;; that must not read as a content mismatch
+      (need! (= (select-keys row comparison-fields)
+                (select-keys receipt comparison-fields))
              :expectation-mismatch
              {:pattern id
               :expected (select-keys row comparison-fields)
-              :actual (select-keys receipt comparison-fields)})))
+              :actual (select-keys receipt comparison-fields)}))
+    ;; The symmetric direction: an expectation the finder did NOT satisfy.
+    ;; Without this a finder that retrieves a SUBSET of what was independently
+    ;; expected passes -- and retrieving too little is the failure the
+    ;; independent expectations exist to catch. A row may opt out with an
+    ;; explicit :must-fire? false (an expectation that only constrains content
+    ;; IF the pattern fires); the default is that it must fire, so nothing is
+    ;; weakened silently.
+    (let [fired (set selected)
+          missing (vec (sort (keep (fn [[id row]]
+                                     (when (and (not (contains? fired id))
+                                                (not (false? (:must-fire? row))))
+                                       id))
+                                   expected)))]
+      (need! (empty? missing) :expected-pattern-not-selected
+             {:patterns missing :selected selected})))
   result)

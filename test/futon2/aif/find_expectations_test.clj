@@ -117,3 +117,37 @@
         (finally (doseq [f (reverse (file-seq temp))] (Files/delete (.toPath f))))))
     (refusal :invalid-result
              #(fx/validate-external! occurrence artifact {:selected []}))))
+
+;; claude-4's review, 2026-09-17. Two holes in the accept direction:
+;;
+;; (a) an artifact expecting a pattern the finder never selected passed. A
+;;     finder that retrieves a SUBSET of what was independently expected is
+;;     exactly what these expectations exist to catch — retrieving too little
+;;     is the quiet failure, and it validated clean.
+;; (b) a row carrying its own provenance (which frozen context it came from,
+;;     who wrote it) refused as :expectation-mismatch, because the whole row
+;;     was compared against four selected keys.
+(deftest control-6-an-expectation-that-did-not-fire-is-rejected
+  (let [{:keys [occurrence artifact result id]} (external-fixture)
+        as-of (get-in artifact [:expected id :as-of])
+        never {:clause-kind :if-clause
+               :acknowledged-clause {:text "never emitted" :lines [1 2]}
+               :route :structured-antecedent
+               :as-of as-of}
+        with-missing (assoc-in artifact [:expected :made-up/pattern] never)]
+    (let [d (refusal :expected-pattern-not-selected
+                     #(fx/validate-external! occurrence with-missing result))]
+      (is (= [:made-up/pattern] (:patterns d))))
+    ;; an explicit opt-out is honoured: a row may constrain content only IF
+    ;; the pattern fires, but it must say so
+    (is (= result (fx/validate-external!
+                   occurrence
+                   (assoc-in with-missing [:expected :made-up/pattern :must-fire?] false)
+                   result)))))
+
+(deftest a-row-may-carry-its-own-provenance
+  (let [{:keys [occurrence artifact result id]} (external-fixture)
+        tagged (-> artifact
+                   (assoc-in [:expected id :produced-from] "FROZEN-CONTEXT.edn")
+                   (assoc-in [:expected id :produced-by] "an independent producer"))]
+    (is (= result (fx/validate-external! occurrence tagged result)))))
