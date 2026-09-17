@@ -44,6 +44,7 @@ resources/*
 !resources/wm/
 resources/wm/*
 !resources/wm/observation-contract.edn
+!resources/wm/cascade-sources/
 
 # local file that shouldn't be tracked here
 LICENSE

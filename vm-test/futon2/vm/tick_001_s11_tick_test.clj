@@ -180,7 +180,7 @@
         "the judgement records the target's full cascade-lane route under :cascade-lanes")
   ;; 5. judge WITHOUT sources abstains honestly: every substrate target is
   ;;    refused, no removed flat key is present, and no problem is assembled.
-  (let [j0 (wm/judge {})]
+  (let [j0 (wm/judge {} {:cascade-sources-dir "/nonexistent/cascade-sources"})]
     (is (= [:R2 :R7 :R3 :R8] (mapv :node (:wm/route j0)))
         "the substrate route remains; the flat R5/R6/R14 tags are gone with the flat path")
     (is (= :abstained (get-in j0 [:decision :status]))

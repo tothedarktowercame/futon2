@@ -46,6 +46,7 @@
             [futon2.aif.cascade-model-manifest :as cascade-manifest]
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.cascade-problems :as cascade-problems]
+            [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
@@ -6028,7 +6029,8 @@
             (throw (ex-info "cascade decision refused"
                             (merge {:kind (or (:kind ranked) :rank-refused)}
                                    ranked))))
-          (let [decision (policy/select-action-cascades ranked {:beta beta})
+          (let [decision (assoc (policy/select-action-cascades ranked {:beta beta})
+                                :horizon-steps T)
                 authorized (controller-authority/authorize decision ranked)
                 emitted (decision-gate/emit! authorized)]
             {:decision (assoc emitted
@@ -6385,7 +6387,11 @@
         ;; target is then refused and the decision is the gated abstention.
         ;; No source is invented.
         ;; -----------------------------------------------------------------
-        cascade-sources (or (:cascade-sources judge-opts) {})
+        declared-sources (when-not (:cascade-sources judge-opts)
+                           (cascade-sources/with-context-fn
+                            (cascade-sources/load-declared
+                             (or (:cascade-sources-dir judge-opts) cascade-sources/default-dir))))
+        cascade-sources (or (:cascade-sources judge-opts) declared-sources {})
         ;; The tick-level horizon: the sources' own :horizon-steps, else the
         ;; declared initial T = 2 (Joe 2026-09-17, p4ng 462aa79), common to
         ;; the compared family. Recorded on the judgement with its authority.
@@ -6562,8 +6568,12 @@
            ;; H5b: no cascade sources supplied is recorded honestly — every
            ;; substrate target was refused and the decision is the gated
            ;; abstention. No source was invented.
-           (nil? (:cascade-sources judge-opts))
-           (assoc :cascade-sources :none-supplied))
+           true
+           (assoc :cascade-sources
+                  (cond (:cascade-sources judge-opts) :supplied-by-caller
+                        declared-sources {:declared-files (:files declared-sources)
+                                          :observations (:observations declared-sources)}
+                        :else :none-supplied)))
           active-mission)
          mission-c-fields)
         ;; U21: the last of the three terminal projections, applied in its own

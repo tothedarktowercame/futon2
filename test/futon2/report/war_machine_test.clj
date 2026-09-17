@@ -2490,7 +2490,7 @@
   ;; cascade sources it returns the gated abstention with no flat keys.
   (with-redefs [policy/select-action (fn [& _] (throw (ex-info "flat select-action reached" {})))
                 policy/default-mode-select (fn [& _] (throw (ex-info "flat default-mode-select reached" {})))]
-    (let [j (wm/judge {})]
+    (let [j (wm/judge {} {:cascade-sources-dir "/nonexistent/cascade-sources"})]
       (is (= :abstained (get-in j [:decision :status])))
       (is (seq (get-in j [:decision :refusals])))
       (is (= :none-supplied (:cascade-sources j)))
