@@ -5,7 +5,14 @@
   tick-1-like tokens; H7c-2 implements the library's real moves."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-problems :as problems]
+            [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.construction :as construction]))
+
+(defn- assemble*
+  "problems/assemble with every token given a fixture C3 locator (P5 locator
+  requirement); tests about locators call problems/assemble directly."
+  [m]
+  (problems/assemble (update m :sources locfix/locate-all)))
 
 (def base-input
   {:target :mission/test
@@ -164,7 +171,7 @@
                   :moves [(fn [_] {:status :no-move :reason :nothing-left
                                    :move-id :m})]
                   :evaluate-g g))
-          assembled (problems/assemble
+          assembled (assemble*
                      {:targets [:mission/test]
                       :sources {:universes {:mission/test {:f true}}
                                 :interpretations

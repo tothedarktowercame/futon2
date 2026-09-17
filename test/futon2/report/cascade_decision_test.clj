@@ -10,7 +10,14 @@
   refuses :incommensurable-family."
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
+            [futon2.aif.locator-fixtures :as locfix]
             [futon2.report.war-machine :as wm]))
+
+(defn- assemble*
+  "cp/assemble with every token given a fixture C3 locator (P5 locator
+  requirement); tests about locators call cp/assemble directly."
+  [m]
+  (cp/assemble (update m :sources locfix/locate-all)))
 
 (def tick-1-target :wm-tick-001-observation-crash)
 
@@ -75,7 +82,7 @@
 (deftest h5a-no-problems-is-a-gated-abstention
   ;; empty per-target sources (the horizon is the tick's declared input, so
   ;; the per-target refusal kinds are exercised, not the refuse-all rule)
-  (let [assembled (cp/assemble {:targets [:A :B]
+  (let [assembled (assemble* {:targets [:A :B]
                                 :sources {:horizon-steps 3}})
         r (wm/cascade-decision assembled {})]
     (is (= :abstained (get-in r [:decision :status]))
@@ -87,7 +94,7 @@
         "each refusal is typed; the decision has passed emit! by construction")))
 
 (deftest h5a-tick-1-decision
-  (let [assembled (cp/assemble {:targets [tick-1-target]
+  (let [assembled (assemble* {:targets [tick-1-target]
                                 :sources tick-1-sources})
         r (wm/cascade-decision assembled {})
         decision (:decision r)]
@@ -140,7 +147,7 @@
                              [(assoc-in (nth cands 2)
                                         [:precedence]
                                          [:test-step-covering-missing-total-repos])]))
-        assembled (cp/assemble {:targets [tick-1-target b-target]
+        assembled (assemble* {:targets [tick-1-target b-target]
                                 :sources sources})
         r (wm/cascade-decision assembled {})
         decision (:decision r)
@@ -154,7 +161,7 @@
         "the joint posterior's masses sum to 1")))
 
 (deftest h5a-unmatched-receipt-drops-the-candidate
-  (let [assembled (cp/assemble {:targets [tick-1-target]
+  (let [assembled (assemble* {:targets [tick-1-target]
                                 :sources tick-1-sources})
         ;; strip the last construction receipt: that precedence can no
         ;; longer be matched, so its candidate must be dropped, recorded,
@@ -179,11 +186,11 @@
         "the remaining family still selects through the gate")))
 
 (deftest h5a-incommensurable-family-refuses
-  (let [assembled (cp/assemble {:targets [tick-1-target]
+  (let [assembled (assemble* {:targets [tick-1-target]
                                 :sources tick-1-sources})
         ;; one assemble call declares one T; a different-T problem can only
         ;; arrive as a second assembled problem, so build it directly.
-        other (cp/assemble {:targets [:B]
+        other (assemble* {:targets [:B]
                             :sources (assoc tick-1-sources
                                             :universes {:B {:b-open true}}
                                             :interpretations
@@ -215,7 +222,7 @@
   (let [pattern {:p {:guard {:needs #{:open} :forbids #{:done}}
                      :produces #{:done}}}
         interp {:patterns pattern :receipts {:p {:receipt "p" :source "f"}}}
-        assembled (cp/assemble
+        assembled (assemble*
                    {:targets [:A :B]
                     :sources {:universes {:A {:open true :done false}
                                           :B {:open false :done false}}

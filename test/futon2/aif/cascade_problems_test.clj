@@ -9,7 +9,14 @@
   (vm/tick-001/01..07) are the fixture."
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
+            [futon2.aif.locator-fixtures :as locfix]
             [futon2.report.war-machine :as wm]))
+
+(defn- assemble*
+  "cp/assemble with every token given a fixture C3 locator (P5 locator
+  requirement); tests about locators call cp/assemble directly."
+  [m]
+  (cp/assemble (update m :sources locfix/locate-all)))
 
 (def target :wm-tick-001-observation-crash)
 
@@ -76,7 +83,7 @@
 (deftest h2-assemble
   ;; --- a fully supplied target assembles a problem the REAL cascade-lane
   ;; accepts (tick 1's inputs; route complete, no refusal).
-  (let [{:keys [problems refusals]} (cp/assemble {:targets [target]
+  (let [{:keys [problems refusals]} (assemble* {:targets [target]
                                                   :sources full-sources})]
     (is (and (= 1 (count problems)) (= [] refusals))
         "a fully supplied target lands in :problems, not :refusals")
@@ -97,15 +104,15 @@
   ;; 1 :universe-not-admitted — no universe at all (horizon still declared,
   ;; so the per-target order is exercised, not the refuse-all rule)
   (is (= [:universe-not-admitted]
-         (kinds (cp/assemble {:targets [target]
+         (kinds (assemble* {:targets [target]
                               :sources (dissoc full-sources :universes)}))))
   (is (= :universes (:missing (first (:refusals
-                                       (cp/assemble {:targets [target]
+                                       (assemble* {:targets [target]
                                                      :sources (dissoc full-sources
                                                                       :universes)})))))
       "the refusal records which source was absent")
   ;; 2 :no-admitted-interpretation — with the failing clause when given
-  (let [r (cp/assemble {:targets [target]
+  (let [r (assemble* {:targets [target]
                         :sources (-> full-sources
                                      (assoc-in [:interpretations target]
                                                {:patterns {}
@@ -117,7 +124,7 @@
         "the failing clause from the source is included"))
   ;; 2 also fires for a candidate pattern with no admitted interpretation
   (is (= [:no-admitted-interpretation]
-         (kinds (cp/assemble
+         (kinds (assemble*
                  {:targets [target]
                   :sources (assoc-in full-sources
                                      [:candidates target]
@@ -126,23 +133,23 @@
                                             :construction-receipt receipt}))}))))
   ;; 3 :want-not-declared
   (is (= [:want-not-declared]
-         (kinds (cp/assemble {:targets [target]
+         (kinds (assemble* {:targets [target]
                               :sources (dissoc full-sources :wants)}))))
   ;; 4 :no-constructed-candidate — no candidates at all
   (is (= [:no-constructed-candidate]
-         (kinds (cp/assemble {:targets [target]
+         (kinds (assemble* {:targets [target]
                               :sources (dissoc full-sources :candidates)}))))
   ;; 4 — non-empty precedences without construction receipts are proposals,
   ;; not constructed cascades
   (is (= [:no-constructed-candidate]
-         (kinds (cp/assemble
+         (kinds (assemble*
                  {:targets [target]
                   :sources (assoc-in full-sources [:candidates target]
                                      (mapv #(dissoc % :construction-receipt)
                                            candidates))}))))
   (is (= :construction-receipt
          (:missing (first (:refusals
-                           (cp/assemble
+                           (assemble*
                             {:targets [target]
                              :sources (assoc-in full-sources [:candidates target]
                                                 (mapv #(dissoc % :construction-receipt)
@@ -150,10 +157,10 @@
       "a receipt-less candidate refuses with :missing :construction-receipt"))
   ;; 5 :beta-not-declared — no β for the target's context
   (is (= [:beta-not-declared]
-         (kinds (cp/assemble {:targets [target]
+         (kinds (assemble* {:targets [target]
                               :sources (dissoc full-sources :beta-by-context)}))))
   ;; every target lands in exactly one bucket
-  (let [r (cp/assemble {:targets [target :M-other]
+  (let [r (assemble* {:targets [target :M-other]
                         :sources full-sources})]
     (is (= 2 (+ (count (:problems r)) (count (:refusals r))))
         "every target lands in exactly one of :problems / :refusals")
@@ -161,7 +168,7 @@
            (mapv :kind (filter (fn [x] (= :M-other (:target x))) (:refusals r))))))
 
 (deftest h2-missing-horizon-refuses-all
-  (let [r (cp/assemble {:targets [target :M-other :T-other]
+  (let [r (assemble* {:targets [target :M-other :T-other]
                         :sources (dissoc full-sources :horizon-steps)})]
     (is (= [] (:problems r))
         "nothing is assembled without a declared horizon")
@@ -173,10 +180,27 @@
 
 (deftest h2-empty-sources-refuse-everything
   (let [targets [:M-foo :T-bar]
-        r (cp/assemble {:targets targets :sources {}})]
+        r (assemble* {:targets targets :sources {}})]
     (is (= [] (:problems r))
         "with empty sources nothing is assembled")
     (is (= 2 (count (:refusals r)))
         "every target is refused (fixture list; the real list works the same)")
     (is (every? :kind (:refusals r))
         "each refusal is typed — the empty-sources tick abstains with the list")))
+
+(deftest locators-are-required
+  ;; Joe 2026-09-17: no per-pass blinded study, so every token must be
+  ;; mechanically observable. A token with no checkable locator refuses the
+  ;; universe and names the token.
+  (let [r (cp/assemble {:targets [target] :sources full-sources})
+        refusal (first (:refusals r))]
+    (is (empty? (:problems r)))
+    (is (= :universe-not-admitted (:kind refusal)))
+    (is (= :locators (:missing refusal)))
+    (is (seq (:tokens-without-checkable-locator refusal))))
+  (let [located (locfix/locate-all full-sources)
+        some-token (first (keys (get-in located [:locators target])))
+        judged (assoc-in located [:locators target some-token] {:class :J})
+        r (cp/assemble {:targets [target] :sources judged})]
+    (is (= [some-token] (:tokens-without-checkable-locator (first (:refusals r)))))
+    (is (= 1 (count (:problems (cp/assemble {:targets [target] :sources located})))))))

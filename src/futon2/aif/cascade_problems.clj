@@ -70,6 +70,31 @@
           (map? v) (:beta v)
           :else nil)))
 
+(def checkable-classes
+  "The mechanically checkable token classes of the WM-04 observation contract
+  (resources/wm/observation-contract.edn). Class J (judgement) is not among
+  them: Joe, 2026-09-17, a blinded study on each pass is too heavy, so every
+  token the model predicts must be observable by a mechanical check."
+  #{:C1 :C2 :C3 :C4 :C5})
+
+(defn- problem-tokens
+  "Every token a target's problem reads or writes: its facts, its want, and
+  every interpreted pattern's guard and produces."
+  [universe want patterns]
+  (set (concat (keys universe)
+               want
+               (mapcat (fn [p]
+                         (concat (get-in p [:guard :needs]) (get-in p [:guard :forbids])
+                                 (mapcat :present (get-in p [:guard :clauses]))
+                                 (mapcat :absent (get-in p [:guard :clauses]))
+                                 (:produces p)))
+                       (vals patterns)))))
+
+(defn- unlocated-tokens
+  "Tokens with no locator of a checkable class."
+  [locators tokens]
+  (seq (sort-by pr-str (remove #(checkable-classes (:class (get locators %))) tokens))))
+
 (defn- assemble-one
   "Assemble one target's cascade problem, or its first applicable typed
   refusal (kind order: universe, interpretation, want, candidate, β).
@@ -87,7 +112,10 @@
         uninterpreted (seq (remove (set (keys patterns))
                                    (distinct (mapcat :precedence constructed))))
         beta (beta-for sources target)
-        ctx-fn (:context-of sources)]
+        ctx-fn (:context-of sources)
+        locators (get-in sources [:locators target])
+        unlocated (when (and (map? universe) (map? patterns))
+                    (unlocated-tokens locators (problem-tokens universe want patterns)))]
     (cond
       (not (and (map? universe) (seq universe)))
       (refusal target :universe-not-admitted :universes)
@@ -104,6 +132,14 @@
 
       (not (and (sequential? want) (seq want)))
       (refusal target :want-not-declared :wants)
+
+      ;; P5 under Joe's 2026-09-17 answer: every token is observed
+      ;; mechanically. A token without a checkable locator cannot be observed
+      ;; on a pass, so the universe is not admitted; the refusal names the
+      ;; tokens, so whoever builds the cascade can add locators.
+      unlocated
+      (refusal target :universe-not-admitted :locators
+               {:tokens-without-checkable-locator (vec unlocated)})
 
       (empty? constructed)
       (if (and (seq (or candidates []))
@@ -132,7 +168,8 @@
                                  (map #(vec (:precedence %)) constructed))))
         :horizon-steps horizon
         :cascade-spec {:want (set want)}
-        :beta beta}
+        :beta beta
+        :locators locators}
        :construction-receipts
        (mapv :construction-receipt constructed)
        :interpretation-receipts
@@ -154,6 +191,7 @@
                                              :produces #{}}}
                                           :refused {:clause …}}}   ; optional
                :wants {target [token …]}
+               :locators {target {token {:class :C1..:C5 …locator}}}
                :candidates {target [{:precedence [pattern-id …]
                                      :construction-receipt …}]}
                :horizon-steps T
