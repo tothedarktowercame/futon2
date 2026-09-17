@@ -5,7 +5,8 @@
     :mechanical-checks
     :observation-contract-entry
     :raw-rate-counts
-    :checkable-kernel-law}
+    :checkable-kernel-law
+    :construction-receipt-locators}
   1},
  :rate-map
  {:admission-records {:false-neg 0, :false-pos 0, :basis :checkable},
@@ -17,23 +18,26 @@
   :observation-contract-entry
   {:false-neg 0, :false-pos 0, :basis :checkable},
   :construction-receipt-locators
-  {:false-neg 0, :false-pos 0, :basis :checkable}},
+  {:false-neg 0, :false-pos 0, :basis :checkable},
+  :test-warrant-check {:false-neg 0, :false-pos 0, :basis :checkable}},
  :observed-state
  [:admission-records
   :checkable-kernel-law
+  :construction-receipt-locators
   :locator-requirement
   :mechanical-checks
   :observation-contract-entry
   :raw-rate-counts],
  :exact? true,
- :not-observed [:construction-receipt-locators],
+ :not-observed [:test-warrant-check],
  :observation-distribution
  {#{:locator-requirement
     :admission-records
     :mechanical-checks
     :observation-contract-entry
     :raw-rate-counts
-    :checkable-kernel-law}
+    :checkable-kernel-law
+    :construction-receipt-locators}
   1},
  :tokens
  {:admission-records
@@ -74,9 +78,15 @@
   :construction-receipt-locators
   {:class :C4,
    :repo "futon2",
-   :sha "705adb39",
+   :sha "9f7eeb46",
    :path "src/futon2/aif/construction.clj",
-   :decl ":locators"}},
+   :decl ":unlocated-tokens"},
+  :test-warrant-check
+  {:class :C4,
+   :repo "futon2",
+   :sha "9f7eeb46",
+   :path "src/futon2/aif/observation_checks.clj",
+   :decl "(defn check-test-warrant"}},
  :refused {},
  :results
  {:admission-records
@@ -134,11 +144,20 @@
     ["futon2/src/futon2/aif/cascade_model_manifest.clj:174"
      "futon2/src/futon2/aif/cascade_model_manifest.clj:200"]}},
   :construction-receipt-locators
+  {:observed true,
+   :check :C4,
+   :evidence
+   {:repo "futon2",
+    :sha "9f7eeb46",
+    :path "src/futon2/aif/construction.clj",
+    :decl ":unlocated-tokens",
+    :file-present true}},
+  :test-warrant-check
   {:observed false,
    :check :C4,
    :evidence
    {:repo "futon2",
-    :sha "705adb39",
-    :path "src/futon2/aif/construction.clj",
-    :decl ":locators",
+    :sha "9f7eeb46",
+    :path "src/futon2/aif/observation_checks.clj",
+    :decl "(defn check-test-warrant",
     :file-present true}}}}

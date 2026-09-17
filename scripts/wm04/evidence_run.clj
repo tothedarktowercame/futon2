@@ -4,9 +4,8 @@
   S-1 contract gives each token its class. S-3 token-likelihood-rates builds
   the rate map, which is checkable, so it is exact. cascade-model-manifest's
   token-likelihood and predict-observations then turn the observed state into
-  the observation distribution. One token is deliberately not yet built
-  (locators on construction receipts), so the run shows an observed absence as
-  well as presences. Writes holes/labs/wm-contract/wm04-evidence/RUN.edn."
+  the observation distribution. The C2 test-warrant check is not built yet, so the run shows an
+  observed absence as well as presences. Writes holes/labs/wm-contract/wm04-evidence/RUN.edn."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
@@ -21,7 +20,8 @@
    :locator-requirement  {:class :C4 :repo "futon2" :sha "705adb39" :path "src/futon2/aif/cascade_problems.clj" :decl "(def checkable-classes"}
    :checkable-kernel-law {:class :C4 :repo "mathlib4" :sha "889429e6bf" :path "DarkTower/WarMachine/TokenObservation.lean" :decl "theorem tokenLikelihood_checkable"}
    :observation-contract-entry {:class :C5 :repo "mathlib4" :sha "3726659d84" :bundle-path "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json" :entry "wm-token-observation"}
-   :construction-receipt-locators {:class :C4 :repo "futon2" :sha "705adb39" :path "src/futon2/aif/construction.clj" :decl ":locators"}})
+   :construction-receipt-locators {:class :C4 :repo "futon2" :sha "9f7eeb46" :path "src/futon2/aif/construction.clj" :decl ":unlocated-tokens"}
+   :test-warrant-check   {:class :C4 :repo "futon2" :sha "9f7eeb46" :path "src/futon2/aif/observation_checks.clj" :decl "(defn check-test-warrant"}})
 
 (let [contract (edn/read-string (slurp "resources/wm/observation-contract.edn"))
       observed (oc/observe tokens)

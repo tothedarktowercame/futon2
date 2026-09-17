@@ -1,5 +1,13 @@
 {:schema :wm/observation-contract-v1
- :authority :proposed-under-ruling-r-a-pending
+ :authority {:basis "P5 (Joe, 2026-09-16): checkable tokens observed exactly; judgement tokens need rates"
+             :per-pass "Joe, 2026-09-17, emacs REPL to claude-4: \"it seems kind of heavy to do a blinded study with each pass that the WM is supposed to work on.\""
+             :recorded "p4ng PLAN-WM-04-unblock-2026-09-17.md, 337c85b"}
+ :production-path {:classes #{:C1 :C2 :C3 :C4 :C5}
+                   :judgement-class-J :refused-at-assembly
+                   :enforced-by "futon2.aif.cascade-problems (705adb39): every problem token needs a checkable locator, else :universe-not-admitted naming the tokens"
+                   :J-evidence "futon2 holes/labs/wm-contract/wm04-pilot/PILOT-OBSERVER-ONLY.edn (83f8b5ce): unreviewed pilot; of 38 recorded realised steps, blind observers confirmed 15"
+                   :checks-implemented {:C3 check-path-exists :C4 check-decl-in-file :C5 check-registry-entry
+                                        :C1 :awaiting-test-registry-warrants :C2 :awaiting-test-registry-warrants}}
  :written "2026-09-17"
  :owner "WM-04"
  :carrier {:lean {:repo "mathlib4" :sha "889429e6bf" :module "DarkTower.WarMachine.TokenObservation"}
@@ -31,7 +39,7 @@
  :schedule {:point :after-each-application
             :cutoff "git sha of the observing repository at observation time, recorded with the adjudication record"
             :missing-cutoff-refusal :missing-cutoff
-            :extra-points-depend-on :ruling-r-c}
+            :horizon {:initial-T 2 :common-to-family true :authority "p4ng 462aa79"}}
  :refusals {:no-application-field :no-stated-output
             :checkable-without-locator :no-locator
             :unrecorded-cutoff :missing-cutoff
@@ -46,6 +54,7 @@
           {:WM {:cascades 14 :nodes 103 :with-application 54 :checkable 1 :judgement 53 :no-stated-output 49}
            :R {:cascades 21 :nodes 84 :with-application 84 :checkable 0 :judgement 84 :no-stated-output 0}
            :E {:cascades 11 :nodes 46 :with-application 46 :checkable 0 :judgement 46 :no-stated-output 0}}}
- :pending-rulings {:r-a "rescope WM-04 under P5 (rate policy, census purpose)"
-                   :r-c "horizon semantics / declared schedule points"}
- :not-claimed [:observations :labels :rates :measured-A :assembly]}
+ :settled {:r-a "Joe 2026-09-17: no per-pass blinded study (see :authority)"
+           :r-c "Joe 2026-09-17 via codex-13 (p4ng 462aa79): T=2 initially, common to the family; one observation after each application"}
+ :not-claimed [:judgement-labels :judgement-rates :C1-C2-checks]
+ :claimed {:observations "futon2 holes/labs/wm-contract/wm04-evidence/RUN.edn" :assembly "observation-rates/token-likelihood-rates over checkable classes"}}
