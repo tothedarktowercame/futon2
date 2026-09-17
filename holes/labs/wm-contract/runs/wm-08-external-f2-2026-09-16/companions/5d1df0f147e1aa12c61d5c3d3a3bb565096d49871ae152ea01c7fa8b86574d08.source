@@ -1,0 +1,234 @@
+@flexiarg futon-theory/mission-interface-signature
+@title Mission Interface Signature (Boundary Types)
+@sigils [🔌/口]
+@tokipona nasin open
+@truth 口
+@references-extra ["mission-scoping says WHAT is in/out" "mission-lifecycle says what STATE it's in" "mission-dependency says what BLOCKS what" "mission-interface-signature says what the system EXPOSES" "These four together form the complete mission specification."]
+@why no problem-corpus source matched (@holds-at absent; holds-token and id-text searches over every library/problems node -- legacy 6, L5 dossier 20 incl. TRACE, L5 record/ruling 6 -- found no match). Negative claim per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/L6-no-source-check.edn. Rationale not invented (L6 rationale-backfill, zai-1, 2026-09-05)
+@how own mechanism: Every mission must declare a non-empty interface signature - typed inputs, typed outputs, and their wiring - so internally correct work can actually compose with the rest of the stack. (source: this pattern's ! conclusion line; L6 rationale-backfill, zai-1, 2026-09-05)
+
+
+
+
+
+
+
+
+
+
+
+! conclusion: Every mission must declare a non-empty interface signature - typed inputs, typed outputs, and their wiring - so internally correct work can actually compose with the rest of the stack.
+
+  + CONTEXT:
+    Missions that specify internal correctness (invariants, gates, proofs)
+    but not boundary types (what the system exposes) will produce systems
+    that work internally but cannot be composed with anything. The futon1a
+    rebuild demonstrated this failure mode: 5 invariants, 9 tension
+    resolutions, 82 tests — but the API contract was never specified.
+    The system verified itself but couldn't describe what it offered.
+
+    In wiring diagram terms: the internal morphisms were well-composed
+    but the output ports were unspecified. A box with no typed ports
+    cannot participate in composition.
+
+  + IF:
+    You are writing a mission document, or reviewing one that has reached
+    the :scoped or :active state.
+
+  + HOWEVER:
+    Not all output ports are known at mission start. Discovery during
+    implementation may reveal new boundary types. The signature should be
+    updated when this happens — but it must never be empty.
+
+  + THEN:
+    Every mission document must include an Interface Signature section
+    with typed input and output ports:
+
+    1. INPUT-PORTS
+       Each port specifies:
+       - Name: what the input is called
+       - Type: the shape of the data (schema, format, contract)
+       - Source: where it comes from (another system, user, file)
+       - Description: what it carries
+
+    2. OUTPUT-PORTS
+       Each port specifies:
+       - Name: what the output is called
+       - Type: the shape of the data (contract reference or inline)
+       - Consumer: who uses this output
+       - Description: what it provides
+
+    3. COMPOSITION-CONSTRAINT
+       Every output port must be:
+       (a) Specified in the mission's technical specification (section ref)
+       (b) Implemented in code (module reference)
+       (c) Tested (at least one test exercises the port)
+       (d) Documented (in the spec, not just in code comments)
+
+       If an output port exists in code but not in the spec, that is a
+       stop-the-line violation (futon-theory/stop-the-line).
+
+    4. FIDELITY-CONTRACT (required for all missions)
+       Every mission must declare a baseline and track fidelity against it:
+       (a) Baseline capability inventory:
+           - donor missions: donor behavior (feature, shape, known consumers)
+           - greenfield missions: declared spec commitments (ports, behavior,
+             and semantic/query layer)
+       (b) Preservation contract: `preserve`, `adapt`, or `drop` per feature
+       (c) Tripwire tests for each `preserve` feature:
+           - must fail on pre-implementation target state
+           - must pass after implementation
+       (d) Latent dependency/omission probe:
+           - donor missions: static call-sites + runtime traces
+           - greenfield missions: consumer scenario probes against declared spec
+           unresolved findings converted into explicit preserve/drop decisions
+
+       If a baseline feature is neither preserved nor explicitly dropped, this is
+       a stop-the-line violation.
+
+    + MISSION-DIAGRAM:
+      Every mission must include a wiring diagram (mermaid) alongside the
+      port tables. The diagram is the primary artifact — the tables are
+      the machine-readable shadow.
+
+      The diagram shows:
+      - Input ports on the left (what enters the system)
+      - Internal composition in the center (how components connect)
+      - Output ports on the right (what the system exposes)
+      - Typed edges (what flows along each wire)
+
+      The diagram catches gaps that tables miss. A box with no outgoing
+      wires to the output region is visibly incomplete. A table row is
+      easy to forget; a blank region in a diagram is hard to ignore.
+
+      The diagram should be created at mission :scoped state and updated
+      at each prototype gate. Each prototype may add new output ports
+      or refine internal composition — the diagram tracks this evolution.
+
+      DIAGRAM-DISCIPLINE:
+      - Draw the output ports FIRST. What does the system expose?
+        If you cannot name the output ports, the mission is not scoped.
+      - Then draw the input ports. What does the system consume?
+      - Then draw the internal composition. How do inputs become outputs?
+      - Every output port must have at least one path from an input port
+        through internal components. Orphan outputs are unimplementable.
+      - Every internal component that has no path to an output port is
+        either dead code or a missing output port. Both are bugs.
+
+    + TEMPLATE:
+      ```markdown
+      ## Interface Signature
+
+      ### Mission Diagram
+
+      ```mermaid
+      graph LR
+          subgraph inputs
+              I1[input-name<br/>type]
+              I2[input-name<br/>type]
+          end
+
+          subgraph system-name
+              C1[Component] --> C2[Component]
+              C2 --> C3[Component]
+          end
+
+          subgraph outputs
+              O1[output-name<br/>type / spec-section]
+              O2[output-name<br/>type / spec-section]
+          end
+
+          I1 --> C1
+          I2 --> C1
+          C3 --> O1
+          C3 --> O2
+      ```
+
+      ### Input Ports
+
+      | Port | Type | Source | Description |
+      |------|------|--------|-------------|
+      | ... | ... | ... | ... |
+
+      ### Output Ports
+
+      | Port | Type | Consumer | Description |
+      |------|------|----------|-------------|
+      | ... | ... | ... | ... |
+
+      ### Composition Constraint
+
+      Every output port must be:
+      1. Specified in the technical specification (section reference)
+      2. Implemented in code (module reference)
+      3. Tested (at least one test exercises the port)
+      4. Documented (in the spec, not just code comments)
+
+      ### Fidelity Contract (all missions)
+
+      | Capability | Baseline Ref (donor/spec) | Contract | Tripwire Test | Notes |
+      |------------|-----------------------------|----------|---------------|-------|
+      | ... | ... | preserve/adapt/drop | test id/path | ... |
+      ```
+
+    + VERIFICATION:
+      At each checkpoint, verify both manually and by machine.
+
+      Manual:
+      - Every output port in code has a spec section reference
+      - Every output port in spec has at least one test
+      - No unspecified output ports exist in code
+      - No uncategorized baseline capabilities
+      - Every `preserve` capability has a tripwire test
+      - Data-shape, behavior, and semantic/query layers are all tracked
+
+      Machine (futon5.ct.mission):
+      - Maintain an EDN mission diagram alongside the mermaid diagram
+        (see futon1a/docs/mission-diagram.edn for the reference exemplar)
+      - Components are morphisms: declare :accepts (domain) and :produces
+        (codomain), not just :type (identity)
+      - Run `(futon5.ct.mission/validate diagram)` at every prototype gate
+      - All five checks must pass: completeness, coverage, no orphan inputs,
+        type safety, spec coverage
+      - `(futon5.ct.mission/diagram->mermaid diagram)` regenerates the
+        human-readable mermaid from the EDN; keep them in sync
+      - Fidelity check must fail when:
+        - capability inventory contains uncategorized entries
+        - a `preserve` entry has no linked failing-then-passing test
+        - latent dependency findings are unresolved
+        - semantic/query fidelity for an exposed capability is unspecified
+
+      If verification fails, the checkpoint is blocked until the spec
+      catches up with the code.
+
+  + BECAUSE:
+    - Internal correctness without boundary specification produces systems
+      that cannot be composed, integrated, or replaced
+    - Typed ports force the mission author to think about what the system
+      *presents*, not just what it *does internally*
+    - The composition constraint catches the exact failure mode observed
+      in futon1a: code that exists without specification
+    - Wiring diagrams require typed interfaces at every boundary; missions
+      are the organizational equivalent
+    - Fidelity contracts prevent "compat surface passes while behavior
+      silently drops" failures during ports
+    - The same discipline prevents spec omissions in greenfield missions
+
+    + EVIDENCE:
+        futon1a rebuild (M-futon1a-rebuild.md):
+        - Prototype 0 (82 tests) specified internal layers but no API contract
+        - Prototype 1 delivered HTTP serving, but the compat endpoints and
+          model descriptor system were unspecified
+        - The gap was discovered only when attempting to hand off to Codex
+        - Retrofit required: Section 2.6 (API spec), Section 2.11 (model
+          descriptor system), Prototype 2 Gate, interface signature section
+
+  + NEXT-STEPS:
+    - Add Interface Signature section to current mission doc
+    - Enumerate input and output ports from existing code
+    - Cross-reference output ports against spec sections
+    - Flag any unspecified ports as stop-the-line
+    - Build the baseline capability inventory before DERIVE
+    - Add tripwire tests before implementation starts
+
+@related futon-theory/mission-scoping, futon-theory/mission-lifecycle, futon-theory/mission-dependency, futon-theory/stop-the-line

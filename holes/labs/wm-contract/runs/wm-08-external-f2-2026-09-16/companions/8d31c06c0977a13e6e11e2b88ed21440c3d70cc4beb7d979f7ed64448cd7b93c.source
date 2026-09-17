@@ -1,0 +1,32 @@
+@flexiarg agent/evidence-over-assertion
+@title Evidence Over Assertion
+@sigils [📁/示]
+@audience agent architects, workflow designers, futon developers
+@tone foundational
+@style pattern
+@why no problem-corpus source matched (@holds-at absent; holds-token and id-text searches over every node in [problems] found no match). Negative claim per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/L10-no-source-check.edn. Rationale not invented (L10 rationale-backfill, zai-1, 2026-09-05)
+@how own mechanism: Claims require grounding; an agent that asserts without evidence cannot be audited or trusted. (source: this pattern's ! conclusion line; L10 rationale-backfill, zai-1, 2026-09-05)
+
+! conclusion: Claims require grounding; an agent that asserts without evidence cannot be audited or trusted.
+
+  + context: An agent makes claims about what it did, what it found, or what is true.
+
+  + IF:
+    The agent's outputs need to be verifiable by other agents, humans, or future selves.
+
+  + HOWEVER:
+    Assertions without anchors are indistinguishable from confabulation. Observers cannot tell if the agent is reporting reality or generating plausible-sounding noise.
+
+  + THEN:
+    Require every substantive claim to point to evidence: a file path, a trace event, a test result, a quotation. If evidence is unavailable, emit the claim as provisional with an expiry and a verification path. Make "unsupported claim" a detectable violation, not just a style preference.
+
+  + BECAUSE:
+    Evidence transforms agent output from "trust me" to "check this." It enables verification, correction, and cumulative trust-building.
+
+    + evidence: Fulab PUR/PSR templates require anchors/certificates (`src/futon3/fulab/pattern_competence.clj`), and claim verification is enforced via `fulab-pattern-claim` + `fulab-pattern-check`.
+
+  + NEXT-STEPS:
+    - Identify claim types in your agent's output (facts, completions, diagnoses).
+    - For each type, define what counts as adequate evidence.
+    - Add validation that flags claims missing their evidence anchors and records provisional claims separately.
+    - Auto-attach tool/file anchors from `lab/tool-uses` to PUR/PSR records and surface missing evidence in `fulab-session-report`.

@@ -1,0 +1,30 @@
+@flexiarg agent/provisional-claims-ledger
+@title Provisional Claims Ledger
+@sigils [📁/未]
+@audience agent architects, workflow designers, futon developers
+@tone foundational
+@style pattern
+@why no problem-corpus source matched (@holds-at absent; holds-token and id-text searches over every node in [problems] found no match). Negative claim per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/L10-no-source-check.edn. Rationale not invented (L10 rationale-backfill, zai-1, 2026-09-05)
+@how own mechanism: Unsupported claims must be tracked, timeboxed, and resolved. (source: this pattern's ! conclusion line; L10 rationale-backfill, zai-1, 2026-09-05)
+
+! conclusion: Unsupported claims must be tracked, timeboxed, and resolved.
+
+  + context: An agent must sometimes act before evidence is available.
+
+  + IF:
+    The agent needs to continue despite missing confirmation.
+
+  + HOWEVER:
+    Treating provisional claims as facts hides uncertainty and undermines trust.
+
+  + THEN:
+    Record provisional claims in a ledger with fields (claim, reason, evidence needed, expiry, owner). Require each entry to be resolved to confirmed or retracted, and surface unresolved items during handoff.
+
+  + BECAUSE:
+    A ledger turns uncertainty into actionable follow-up rather than silent drift.
+
+  + NEXT-STEPS:
+    - Add a lightweight ledger store (file or trace event) for provisional claims.
+    - Define expiry windows and resolution statuses.
+    - Include the ledger summary in handoff records.
+    - Implement a fulab provisional-claims ledger with expiry/status fields and surface unresolved items in session reports.

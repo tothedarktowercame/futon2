@@ -1,0 +1,32 @@
+@flexiarg storage/rapid-debugging
+@title Rapid Debugging
+@sigils [🎶/口]
+@keywords diagnostics, traceability, tests, debugging
+@audience storage maintainers, futon1a builders
+@tone analytic-neutral
+@factor Keen investigation (dhammavicaya)
+@references [stack-coherence/evidence-ledger]
+@status [status[proposed] evidence[holes/missions/M-futon1a-evidence.md#L63] evidence[holes/missions/M-futon1a-evidence.md#L33]]
+@why no problem-corpus source matched (@holds-at absent; holds-token and id-text searches over every library/problems node -- legacy 6, L5 dossier 20 incl. TRACE, L5 record/ruling 6 -- found no match). Negative claim per the committed check futon2 holes labs library-loop runs l6_no_source_check.py, receipt runs/L7-no-source-check.edn. Rationale not invented (L7 rationale-backfill, zai-1, 2026-09-05)
+@how own mechanism: make storage failures diagnosable in minutes through explicit diagnostics and proof tests (source: this pattern's ! conclusion line; L7 rationale-backfill, zai-1, 2026-09-05)
+
+! conclusion: 
+  make storage failures diagnosable in minutes through explicit diagnostics and proof tests
+
+  + context: futon1 repeatedly needed diagnostics and tests to keep storage behavior legible.
+
+  + IF:
+    failures lack traceable context (layer, operation, entity, expected vs actual)
+
+  + HOWEVER:
+    debugging requires ad hoc spelunking and slow recovery cycles
+
+  + THEN:
+    attach explicit diagnostics to all storage errors and prove invariants with targeted tests
+
+  + BECAUSE:
+    futon1 fixes show that diagnostics and tests reduced drift and clarified failures
+
+  + NEXT-STEPS:
+    next[Define the diagnostic payload shape required on all storage errors.]
+    next[Add proof tests for each core invariant and store them in a dedicated suite.]

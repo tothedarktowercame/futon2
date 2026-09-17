@@ -36,7 +36,11 @@
 (def run-dir "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/")
 (def redo "holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/redo/")
 (def library-root "/home/joe/code/futon3/library")
-(def frozen-index (str redo "retrieval-index.tsv"))
+(def frozen-index (.getCanonicalPath (io/file (str redo "retrieval-index.tsv"))))
+;; The genesis pattern's registration row, captured at occurrence time. The
+;; frozen retrieval index is the PRE-retrieval snapshot, so a pattern this
+;; occurrence authored has no row in it; this patch is its membership record.
+(def genesis-row (.getCanonicalPath (io/file (str redo "new-index-row.patch"))))
 ;; FROZEN-CONTEXT.edn pinned-at: the record's introducing commit instant.
 (def pinned-at "2026-09-15T13:02:32Z")
 
@@ -50,9 +54,14 @@
   identity and the frozen index as the membership/index source."
   []
   (let [old (edn/read-string (slurp (str redo "interpreted-pattern-set.edn")))
+        genesis-patterns (set (map :id (:new-patterns old)))
         sources (atom {}) captured (atom {})
-        add! (fn [path]
-               (let [id path bs (Files/readAllBytes (.toPath (io/file path)))
+        add! (fn [path*]
+               ;; :sources paths must be absolute (evidence schema
+               ;; :path-not-absolute). The library paths already are; the two
+               ;; in-repo captures are repo-relative, so absolutise here.
+               (let [path (.getAbsolutePath (io/file path*))
+                     id path bs (Files/readAllBytes (.toPath (io/file path)))
                      file (str (evidence/sha256 (bytes-of path)) ".source")]
                  (swap! sources assoc id {:id id :path path :file file
                                           :sha256 (evidence/sha256 bs)
@@ -61,18 +70,42 @@
                  id))
         cite (fn [s] {:source (add! (:path s)) :lines (:lines s) :quote (:quote s)})
         mission-cite (cite (get-in old [:target :status-source]))
+        norm (fn [x] (str/replace (str/trim x) #"\s+" " "))
+        ;; Locating a clause's span used to scan every window of every length
+        ;; (O(lines^2) joins, each re-normalised) — 1.26M windows over the
+        ;; 1587-line frozen index — and an ABSENT needle paid that whole bill
+        ;; before failing. That is what hung the suite. Normalised lines and
+        ;; the joined document are built once per file; the first occurrence
+        ;; maps back to the smallest line span containing it, and a needle
+        ;; that is not in the bytes refuses immediately.
+        doc-of (memoize
+                (fn [path]
+                  (let [lines (vec (str/split-lines (slurp path)))
+                        sb (StringBuilder.)
+                        spans (reduce (fn [acc [i l]]
+                                        (let [n (norm l)]
+                                          (if (str/blank? n)
+                                            acc
+                                            (do (when (pos? (.length sb)) (.append sb " "))
+                                                (let [at (.length sb)]
+                                                  (.append sb ^String n)
+                                                  (conj acc [at (.length sb) i]))))))
+                                      [] (map-indexed vector lines))]
+                    {:lines lines :doc (.toString sb) :spans spans})))
         clause (fn [path text]
-                 (let [lines (vec (str/split-lines (slurp path)))
-                       norm #(str/replace (str/trim %) #"\s+" " ")
-                       span (first (for [n (range 1 (inc (count lines)))
-                                         i (range (inc (- (count lines) n)))
-                                         :when (str/includes?
-                                                (norm (str/join " " (subvec lines i (+ i n))))
-                                                (norm text))]
-                                     [i (+ i n)]))]
-                   (assert span (str "Record clause not found in captured bytes: " path))
-                   {:source (add! path) :lines [(inc (first span)) (second span)]
-                    :quote (str/join "\n" (subvec lines (first span) (second span)))}))
+                 (let [{:keys [lines doc spans]} (doc-of path)
+                       needle (norm text)
+                       at (.indexOf ^String doc ^String needle)
+                       _ (when (neg? at)
+                           (throw (ex-info "Record clause not found in captured bytes"
+                                           {:reason :clause-not-in-captured-bytes
+                                            :path path :needle needle})))
+                       end (+ at (count needle))
+                       covered (filterv (fn [[s e _]] (and (< s end) (> e at))) spans)
+                       i (nth (first covered) 2)
+                       j (inc (nth (peek covered) 2))]
+                   {:source (add! path) :lines [(inc i) j]
+                    :quote (str/join "\n" (subvec lines i j))}))
         facts (mapv (fn [f] {:id (:id f) :meaning (:meaning f) :value (:q0 f)
                              :citations [(cite (:source f))] :observed-at pinned-at
                              ;; q0 stays a mission-document assertion; the record's
@@ -88,7 +121,15 @@
                       record {:pattern (:pattern x) :source (add! path)
                               ;; Membership cites the FROZEN index copy, not the
                               ;; drifted live index (ORDINARY-RUN-SCOPE §3).
-                              :membership [(clause frozen-index (:pattern x))]
+                              ;; EXCEPT for a pattern this occurrence AUTHORED:
+                              ;; retrieval-index.tsv is the PRE-retrieval
+                              ;; snapshot, so a genesis pattern cannot have a
+                              ;; row in it. Its registration row was captured
+                              ;; at occurrence time as new-index-row.patch,
+                              ;; which is what §3's rule means for that case.
+                              :membership [(clause (if (genesis-patterns (:pattern x))
+                                                     genesis-row frozen-index)
+                                                   (:pattern x))]
                               :clauses (into {} (for [k [:if :however :then]]
                                                   [k (clause path (get-in x [:quotes (keyword (str/upper-case (name k)))]))]))
                               :guard (guard (:guard x)) :effect (:effect x)
@@ -96,8 +137,17 @@
                   (assoc record :sha256 (evidence/value-digest record))))
               (:interpretations old))
         candidates (mapv (fn [i j]
-                           (let [s (first (:sources j)) path (:path s)]
-                             {:pattern (:candidate j)
+                           (let [s (first (:sources j)) path (:path s)
+                                 ;; Packet-2 candidate id normalization, as
+                                 ;; find-receipt-test/sample applies it: the
+                                 ;; retained artifact predates it, and tier-0
+                                 ;; arms record bare names while the source
+                                 ;; path carries the canonical section/name.
+                                 ;; Mechanical, from pinned bytes only.
+                                 canonical (when (and path (str/starts-with? path (str library-root "/")))
+                                             (str/replace (subs path (inc (count library-root)))
+                                                          #"\.flexiarg$" ""))]
+                             {:pattern (or canonical (:candidate j))
                               :source (if path (add! path)
                                         {:status :none :reason :pattern-source-missing})
                               :rank (inc i)
@@ -113,7 +163,11 @@
         seed (atom 0)
         uuid-fn #(UUID/nameUUIDFromBytes (bytes-of (str "wm08-route-a-" (swap! seed inc))))
         occurrence (retention/mint-occurrence
-                    {:run-id "wm08-route-a-rehearsal" :cohort-id ":wm08-route-a"
+                    {;; The evidence schema requires :run/id to parse as a
+                     ;; UUID; derive it from the rehearsal name so the minted
+                     ;; identity stays deterministic and byte-stable.
+                     :run-id (str (UUID/nameUUIDFromBytes (bytes-of "wm08-route-a-rehearsal")))
+                     :cohort-id ":wm08-route-a"
                      :attempt-id "attempt-route-a"
                      :selected-action {:type :advance-mission :target "M-zaif-harness-v1"}
                      :now #(Instant/parse pinned-at) :uuid-fn uuid-fn})
@@ -155,12 +209,25 @@
      :pinned-at (:pinned-at o)
      :source-digests (:source-digests o)}))
 
-(deftest route-a-reexpression-artifact
+(defn ensure-artifact!
+  "Build the deterministic re-expression, validate it, and make sure the
+  committed artifact and companion bytes exist on disk. Returns the build."
+  []
   (let [{:keys [record captured]} (build-reexpressed)
-        _ (is (= record (evidence/validate-sources! record captured))
-              "translated record passes source/citation validation as built")
+        ;; A refusal must not leave a half-validated artifact on disk: an
+        ;; earlier version recorded the error and then wrote the record
+        ;; anyway, so the next run re-read bytes that had never validated.
+        validated? (try (= record (evidence/validate-sources! record captured))
+                        (catch clojure.lang.ExceptionInfo e
+                          (is false (str "source/citation validation refused: "
+                                         (pr-str (ex-data e))))
+                          false))
         record-bytes (bytes-of (pr-str record))
         companions (io/file run-dir "companions")]
+    (is validated? "translated record passes source/citation validation as built")
+    (when-not validated?
+      (throw (ex-info "rehearsal record did not validate; artifact not written"
+                      {:reason :record-invalid})))
     (.mkdirs companions)
     (doseq [[file bs] captured]
       (Files/write (.toPath (io/file companions file)) bs
@@ -170,12 +237,17 @@
         (Files/write (.toPath artifact) record-bytes (make-array java.nio.file.OpenOption 0)))
       (is (java.util.Arrays/equals record-bytes
                                    (Files/readAllBytes (.toPath artifact)))
-          "committed REEXPRESSED-RECORD.edn is byte-identical to a fresh deterministic build"))))
+          "committed REEXPRESSED-RECORD.edn is byte-identical to a fresh deterministic build"))
+    {:record record :captured captured}))
+
+(deftest route-a-reexpression-artifact
+  (ensure-artifact!))
 
 (defn load-from-disk
   "Reload the committed artifact plus its companion bytes — the rehearsal
   consumes files, not the builder's memory."
   []
+  (ensure-artifact!)
   (let [record (edn/read-string (slurp (str run-dir "REEXPRESSED-RECORD.edn")))
         companions (str run-dir "companions/")
         read-bytes (fn [file] (Files/readAllBytes (.toPath (io/file (str companions file)))))]
@@ -233,8 +305,25 @@
             expected (set (keys (:expected raw)))
             fired (set (:selected result))
             unexpected (sort (set/difference fired expected))
-            missing (sort (clojure.set/difference expected fired))
+            missing (sort (set/difference expected fired))
             d (ex-data-of #(fx/validate-external! (frozen-occurrence) shaped result))]
-        (is (= [:social/tension-before-code] unexpected))
-        (is (= [:agent/provisional-claims-ledger :coordination/session-durability-check] missing))
-        (is (= :unexpected-selected-pattern (:reason d)) (pr-str d))))))
+        ;; Fired with no expectation row: tension-before-code (the known
+        ;; disagreement) AND the genesis pattern (no interpretation-independent
+        ;; row can exist for a pattern this occurrence authored).
+        (is (= [:coordination/bind-promotion-to-post-repair-replay
+                :social/tension-before-code] unexpected))
+        ;; Rows for patterns with no recorded interpretation, so no recorded
+        ;; guard that could fire: the two known ones plus
+        ;; maturity-evidence-audit (its missing-pattern-interpretation
+        ;; finding is retained verbatim in :holes).
+        (is (= [:agent/provisional-claims-ledger
+                :coordination/session-durability-check
+                :stack-coherence/maturity-evidence-audit] missing))
+        ;; Even the first SHARED row refuses on content: the receipt's
+        ;; :as-of :repository-sha256 is read-repository's VALUE digest while
+        ;; the blind external producer can only pin the frozen INDEX digest
+        ;; (the two-digest rule, §3), and the acknowledged-clause text differs
+        ;; by leading indentation. Reported for zai-45's v2; not fixed here.
+        (is (= :expectation-mismatch (:reason d))
+            (pr-str (select-keys d [:reason :pattern]))))))
+)
