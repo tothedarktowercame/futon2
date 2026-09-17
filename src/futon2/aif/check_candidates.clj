@@ -53,19 +53,30 @@
   (throw (ex-info "check-patterns refused"
                   (merge {:finding :check-candidates/refusal :law law} data))))
 
+(defn- enabling-facts
+  "The facts a pattern's guard needs PRESENT, from either guard shape. A
+  pattern that produces one of these is a step towards enabling it."
+  [pattern]
+  (let [g (:guard pattern)]
+    (if (seq (:clauses g))
+      (reduce set/union #{} (map #(set (:present %)) (:clauses g)))
+      (set (:needs g)))))
+
 (defn- relevant-patterns
-  "Fixpoint: a pattern is relevant if it produces a want token directly, or
-  its guard tests a fact produced by a relevant pattern (it could become a
-  step toward the want through other patterns' produces)."
+  "Backward fixpoint from the want: a pattern is relevant if it produces a
+  want token directly, or produces a fact that a relevant pattern's guard
+  needs present (it enables a step towards the want). Producing a token a
+  relevant guard FORBIDS disables that step, so it does not make a pattern
+  relevant."
   [patterns want]
   (let [want (set want)
-        produce-want? (fn [p] (seq (set/intersection (:produces p) want)))]
+        produce-want? (fn [p] (seq (set/intersection (set (:produces p)) want)))]
     (loop [relevant (into {} (map (juxt :id identity))
                           (filter produce-want? patterns))]
-      (let [opened (reduce set/union #{} (map :produces (vals relevant)))
+      (let [needed (reduce set/union #{} (map enabling-facts (vals relevant)))
             newly (filter (fn [p]
                             (and (not (contains? relevant (:id p)))
-                                 (seq (set/intersection (set (guard-facts p)) opened))))
+                                 (seq (set/intersection (set (:produces p)) needed))))
                           patterns)]
         (if (empty? newly)
           (vals relevant)

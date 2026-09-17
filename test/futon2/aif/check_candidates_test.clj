@@ -85,17 +85,21 @@
       (is (= :check-candidates/refusal (:finding (ex-data r))))
       (is (= :check-theta-required (:law (ex-data r))))))
 
-  (testing "chained gating: an unknown fact gating a pattern that only feeds another pattern's guard still yields a check"
-    ;; :mid gates the want-producing pattern only through another pattern's
-    ;; produces: p1 produces :tok, p2 needs :tok and produces the want token.
-    (let [{:keys [checks]}
+  (testing "chained gating: an unknown fact gating a pattern that enables a want-producing pattern yields a check"
+    ;; p2 needs :tok and produces the want token; p1 produces :tok, so p1 is a
+    ;; step towards the want (backward chaining from the want). Both :mid
+    ;; (gates p2) and :root (gates p1) gate steps towards the want.
+    ;; claude-4 review: the first version chained forwards and missed :root.
+    (let [{:keys [checks not-gating]}
           (cc/check-patterns
-           {:facts {:mid :unknown :root :unknown}
+           {:facts {:mid :unknown :root :unknown :after :unknown}
             :want [:want-token]
             :patterns [{:id :p1 :guard {:needs #{:root}} :produces #{:tok}}
-                       {:id :p2 :guard {:needs #{:mid :tok}} :produces #{:want-token}}]
+                       {:id :p2 :guard {:needs #{:mid :tok}} :produces #{:want-token}}
+                       ;; p3 runs only after the want and enables nothing towards it
+                       {:id :p3 :guard {:needs #{:after :want-token}} :produces #{:later}}]
             :check-theta 1})]
-      (is (= #{:check/mid} (set (map :id checks)))
-          ":mid gates p2 (want-relevant through p1's produces); :root gates
-              only p1, which gates nothing toward the want")))
+      (is (= #{:check/mid :check/root} (set (map :id checks))))
+      (is (contains? (set not-gating) :after)
+          ":after gates only p3, which follows the want and enables nothing towards it")))
 )
