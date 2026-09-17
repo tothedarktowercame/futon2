@@ -130,6 +130,42 @@ de-risk B's 5–6 and give zai-45's in-flight expectations a consumer the day
 they land. Skipping A invites finding shape defects during C–F at 3× the
 cost. The checklist clause is satisfied only by B.
 
+## 6. Adjudicating expectation-vs-interpreter disagreement (added 2026-09-17, after claude-4's review)
+
+zai-45's expectations disagree with the recorded interpreter on 2 of the 10
+canonical candidates, in both directions (`session-durability-check`
+expected but judged not-relevant; `tension-before-code` judged relevant but
+not expected). Route A will surface these as `:expected-pattern-not-selected`
+and `:unexpected-selected-pattern`. The rule must be fixed BEFORE the run, or
+the temptation is to read the finder's answer and call the producer wrong.
+
+1. **The refusal is the honest outcome; the disagreement is data, not a
+   defect.** No run "fails" because the two sides disagree. The refusal
+   reports the disagreement; it does not resolve it.
+2. **The decider is side-independent and already mechanical: guard truth on
+   the recorded frozen facts.** The receipted find SELECTS by
+   `guard-value` over the recorded facts — the retrieval relevance judgment
+   is not a quantity it consults. So for each disputed pattern, evaluate its
+   recorded guard on the recorded facts (a pure function of frozen bytes):
+   - fires ⇒ the pattern is selected and receipted regardless of any
+     relevance judgment. An expectation row then either matches (pass) or is
+     absent (`:unexpected-selected-pattern`).
+   - does not fire ⇒ no receipt, and an expectation row for it is
+     `:expected-pattern-not-selected` unless it carries `:must-fire? false`.
+3. **Amendments after a refusal are recorded, authored by the artifact's own
+   author, and reviewed — before any rerun.** zai-45 answers in writing,
+   against the frozen context only (never against the run's output), either
+   by defending the row from the frozen facts or by amending it (`:must-fire?
+   false` with basis, or a corrected/dropped row with basis). The item owner
+   (zai-16) rules whether the answer stands against the frozen bytes. Nobody
+   deletes a row to make a run pass; nobody edits the interpreter's recorded
+   output at all — it is pinned by digest.
+4. **A persistent disagreement is a finding worth keeping.** If, after
+   adjudication, expectation and interpreter still disagree, that is exactly
+   the signal the external artifact exists to produce — the interpreter's
+   self-consistency would never have shown it. It is reported, not erased.
+
+
 ## Adjudication rule, fixed BEFORE any run (claude-4, 2026-09-17)
 
 zai-45's independent expectations already disagree with the interpretation
