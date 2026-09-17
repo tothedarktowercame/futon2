@@ -352,3 +352,25 @@
     (is (false? (get-in taken [:parts :includes-unformalised-novelty]))
         "the Lean expectedInformationGain is not an unformalised estimate")
     (is (< 0 (:value taken)) "gain 0.69 against cost 0.5 and no ΔG")))
+
+;; claude-4's review, 2026-09-17: a move that cannot move still FINDS things —
+;; order-by-need's unmet needs and cycles, borrow-a-sibling's gaps. construct
+;; kept only the no-move REASON, so those findings died with the move's return
+;; value, and construction could stop :no-admitted-move without anyone learning
+;; which needs were unmet. An unmet need is exactly what a check is made from.
+(deftest a-move-that-cannot-move-still-reports-what-it-found
+  (let [cyclic-x {:id :p/x :guard {:needs #{:y} :forbids #{}} :produces #{:x}}
+        cyclic-y {:id :p/y :guard {:needs #{:x} :forbids #{}} :produces #{:y}}
+        {:keys [receipt]}
+        (construction/construct
+         {:target :mission/cycle
+          :initial-family [{:id :c :precedence [:p/x :p/y]
+                            :patterns [cyclic-x cyclic-y]}]
+          :moves [(cm/order-by-need {:cost 0})]
+          :evaluate-g (constantly 1.0)
+          :budget {:max-moves 3}
+          :horizon 2})]
+    (is (= :no-admitted-move (:stop-reason receipt)))
+    (is (= [{:candidate :c :precedence [:p/x :p/y]}]
+           (get-in receipt [:no-move-findings :order-by-need :cycles]))
+        "the cycle reaches the receipt")))

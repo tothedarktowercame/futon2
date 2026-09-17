@@ -103,7 +103,8 @@
 (defn- evaluate-moves
   "Evaluate every move against FAMILY. Returns
   {:evaluations [{:move-id … :value … :proposed-family … :parts {…}} …]
-   :no-move-reasons {move-id reason …}}
+   :no-move-reasons {move-id reason …}
+   :no-move-findings {move-id {what the move found anyway} …}}
   where value = pragmatic + epistemic − cost.
 
   Which epistemic estimates are ADDED:
@@ -124,8 +125,12 @@
    (fn [acc move]
      (let [result (move family)]
        (if (identical? :no-move (:status result))
-         (update acc :no-move-reasons assoc
-                 (:move-id result :unknown-move) (:reason result))
+         (let [move-id (:move-id result :unknown-move)
+               ;; everything the move reported BEYOND being unable to move:
+               ;; unmet needs, cycles, sibling gaps
+               found (not-empty (dissoc result :status :move-id :reason))]
+           (cond-> (update acc :no-move-reasons assoc move-id (:reason result))
+             found (update :no-move-findings assoc move-id found)))
          (let [proposed (:proposed-family result)
                pragmatic (- (g-norm (best-g evaluate-g family))
                             (g-norm (best-g evaluate-g proposed)))
@@ -146,14 +151,15 @@
                             :epistemic-added epistemic
                             :cost cost
                             :includes-unformalised-novelty novelty?}})))))
-   {:evaluations [] :no-move-reasons {}}
+   {:evaluations [] :no-move-reasons {} :no-move-findings {}}
    moves))
 
 (defn- receipt
   "The construction receipt cascade-problems accepts as
   :construction-receipt (non-nil, carried verbatim). Stopping is never
   target success."
-  [target taken evaluations stop-reason budget-used horizon g-of-best checks]
+  [target taken evaluations stop-reason budget-used horizon g-of-best checks
+   no-move-findings]
   {:target target
    :moves (mapv #(dissoc % :proposed-family) taken)
    :family-searched (inc (count taken))
@@ -165,6 +171,12 @@
    :horizon horizon
    :g-of-best g-of-best
    :checks-added checks
+   ;; what a move that could not move nonetheless FOUND: order-by-need's
+   ;; unmet needs and cycles, borrow-a-sibling's gaps. Present-only. Without
+   ;; this the findings died with the move's return value, and construction
+   ;; could stop :no-admitted-move with nobody told which needs were unmet --
+   ;; and an unmet need is exactly what a check candidate is made from
+   :no-move-findings (not-empty no-move-findings)
    :stopped-is-not-success true})
 
 (defn- construct*
@@ -231,7 +243,7 @@
         ;; the target's want is already observed: nothing to construct for
         {:family (vec initial-family)
          :receipt (receipt target [] {} :want-already-observed 0 horizon
-                           (best-g evaluate-g initial-family) [])}
+                           (best-g evaluate-g initial-family) [] nil)}
         (let [checks (checks-for input)]
           (if (contains? checks :status)
             checks
@@ -240,7 +252,7 @@
               (loop [family family0
                      taken []      ;; taken moves, newest last
                      budget-used 0]
-                (let [{:keys [evaluations no-move-reasons]}
+                (let [{:keys [evaluations no-move-reasons no-move-findings]}
                       (evaluate-moves (vec moves) family evaluate-g cost-of)
                       best (when (seq evaluations)
                              (reduce (fn [a b] (if (> (:value b) (:value a)) b a))
@@ -257,7 +269,7 @@
                                  :no-admitted-move)
                                budget-used horizon
                                (best-g evaluate-g family)
-                               (:checks checks))}
+                               (:checks checks) no-move-findings)}
 
                     ;; hand-over-when-acting-is-worth-more: the best move
                     ;; is worth no more than acting on the best family now
@@ -266,14 +278,14 @@
                      :receipt (receipt target taken evaluations
                                        :acting-worth-more budget-used horizon
                                        (best-g evaluate-g family)
-                                       (:checks checks))}
+                                       (:checks checks) no-move-findings)}
 
                     (>= budget-used (:max-moves budget))
                     {:family family
                      :receipt (receipt target taken evaluations
                                        :budget-exhausted budget-used horizon
                                        (best-g evaluate-g family)
-                                       (:checks checks))}
+                                       (:checks checks) no-move-findings)}
 
                     :else
                     (recur (:proposed-family best)
