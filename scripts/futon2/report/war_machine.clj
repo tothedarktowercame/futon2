@@ -4929,6 +4929,39 @@
                            (take 20 blocks))))
         (.append sb "\n")))
 
+
+    ;; --- Decision (SPEC flat-removal H4, 2026-09-17): the tick's decision is
+    ;;     a cascade decision or a typed abstention. An abstention is a
+    ;;     readiness state, not an error.
+    (when-let [j (:judgement data)]
+      (let [decision (:decision j)]
+        (when (map? decision)
+          (.append sb "### Decision\n\n")
+          (if (= :abstained (:status decision))
+            (do (.append sb (str "*Abstained — readiness, not an error.*\n\n"))
+                (when-let [groups (not-empty (group-by :kind (vec (:refusals decision))))]
+                  (.append sb "**Refusals by kind:**\n\n")
+                  (.append sb (render-table
+                               ["Kind" "Count" "Targets"]
+                               [:left :right :left]
+                               (mapv (fn [[kind rs]]
+                                       [(name kind)
+                                        (str (count rs))
+                                        (str/join ", " (map :target rs))])
+                                     (into (sorted-map) groups))))
+                  (.append sb "\n\n")))
+            (when (= :cascade-selection-posterior (get-in decision [:selection-law :applied]))
+              (let [action (:action decision)
+                    step (first (:precedence action))
+                    step-id (if (map? step) (str (or (:id step) (:cascade-id step))) (str step))]
+                (.append sb (str "**Cascade decision:** `" (or (:cascade-id action) (:id action)) "`"
+                                 " — enacts first step `" step-id "`"
+                                 " at posterior mass "
+                                 (format "%.3f" (double (or (:chosen-action-mass decision) 0)))
+                                 ", β " (format "%.2f" (double (get-in decision [:beta :value] 0)))
+                                 " (" (name (or (get-in decision [:beta :status]) :unknown)) ")"
+                                 "\n\n"))))))))
+
     ;; --- Judgement (priorities, losses, free energy) ---
     (when-let [j (:judgement data)]
       (.append sb "## Strategic Judgement\n\n")

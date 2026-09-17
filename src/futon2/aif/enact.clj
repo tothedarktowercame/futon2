@@ -159,18 +159,44 @@
         :exception-class (.getName (class failure))
         :message (.getMessage failure)}})))
 
+(defn- decision-lane-entry
+  "The single lane entry for a CASCADE decision: the chosen candidate's
+   target as :mission, its :precedence pattern ids as :shown, and the
+   decision's G as :cascade-score (SPEC flat-removal H4, 2026-09-17 — there
+   is no ranked-actions lane any more)."
+  [decision]
+  (let [candidate (:action decision)]
+    {:mission (str (or (:cascade-id candidate) (:id candidate)))
+     :shown (mapv (fn [p]
+                    (if (map? p)
+                      (str (or (:id p) (:cascade-id p)))
+                      (str p)))
+                  (:precedence candidate))
+     :cascade-score (:controller-score decision)}))
+
 (defn- act-gates-with-shown
-  "Act-gates over the cascade lane, carrying each entry's :shown (the cascade's
-   pattern-ids). Reconciliation order: rollout G → classical fold → PINNED
+  "Act-gates for the tick's decision: one entry — the chosen cascade
+   candidate — or none for a typed abstention (an abstention enacts
+   nothing; close-loop! records why). Carrying each entry's :shown (the
+   cascade's pattern-ids). Reconciliation order: rollout G → classical fold → PINNED
    escrow (L3: the scheduled caller now injects :escrow-turn-fn/:prose-fn with
    the DEPOSIT-GRAIN circumstance, so a recorded fold-turn's coverage ΔG can
    fill a nil :coverage-score-delta leg on the live scheduled path — ledger §10's real test).
    Entries without a matching deposit use the 1-arity (byte-identical to pre-L3).
    Legacy :llm-escrow files are still loud-ignored (L1, deprecated)."
-  [ranked-actions]
-  (let [lane ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane) ranked-actions)
-        deposits @!deposits-cache]
-    (mapv (fn [entry]
+  [judgement]
+  (let [decision (:decision judgement)]
+    (when-not (or (= :abstained (:status decision))
+                  (= :cascade-selection-posterior
+                     (get-in decision [:selection-law :applied])))
+      (throw (ex-info "act-gates-with-shown: decision is neither a cascade decision nor an abstention"
+                      {:refusal :decision-not-cascade-grain
+                       :decision decision})))
+    (let [lane (if (= :abstained (:status decision))
+                 []
+                 [(decision-lane-entry decision)])
+          deposits @!deposits-cache]
+      (mapv (fn [entry]
             (let [;; First try the 1-arity (rollout + classical fold).
                   ag (cl/act-gate-from-lane-entry entry)
                   ag (if (some? (:coverage-score-delta ag))
@@ -215,7 +241,7 @@
                 ;; the ΔG rollout carried a finite score.
                 (seq (:policy-rollout-events entry))
                 (assoc :policy-rollout-events (vec (:policy-rollout-events entry))))))
-          lane)))
+        lane))))
 
 (def ^:dynamic *selection-gain-escrow-feed?*
   "γ-FEED REWIRE (operator-armed 2026-07-05, bell edge
@@ -265,6 +291,9 @@
         gfold (selection-gain-fold-of act-gate)
         selection-gain-expected (:coverage-score-delta gfold)]
     {:enacted enacted
+     ;; the enacted step of the chosen cascade: the FIRST element of its
+     ;; precedence (what actually acts first)
+     :enacted-step (first shown)
      :decision {:policy mission
                 :expected-score selection-gain-expected
                 :fold gfold}
@@ -301,8 +330,14 @@
   [judgement tick]
   (let [phase (volatile! :act-gates)
         record (volatile! judgement)]
-    (try
-      (let [gates (act-gates-with-shown (:ranked-actions judgement))
+    (if (= :abstained (get-in judgement [:decision :status]))
+      ;; An abstention enacts nothing and records why (SPEC flat-removal H4).
+      (assoc judgement
+             :enactment {:status :abstained
+                         :enacted-step nil
+                         :refusals (vec (get-in judgement [:decision :refusals]))})
+      (try
+      (let [gates (act-gates-with-shown judgement)
             _ (vreset! phase :verdict-recording)
             verdicts (mapv (fn [g]
                              (cond-> {:mission (:mission g)
@@ -336,4 +371,4 @@
                          :enactment-failed
                          {:phase @phase
                           :exception-class (.getName (class failure))
-                          :message (.getMessage failure)})))))))
+                          :message (.getMessage failure)}))))))))

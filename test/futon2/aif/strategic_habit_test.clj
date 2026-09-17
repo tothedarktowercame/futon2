@@ -5,9 +5,19 @@
             [futon2.aif.trace :as trace]))
 
 (def decision
+  "A cascade decision (SPEC flat-removal H4, 2026-09-17): the observed policy
+   identity is the chosen cascade's enacted FIRST ACTING PATTERN."
   {:selection-boundary :reason-bearing-strategic-policy
-   :selected-policy-id "pi-s-9dbc2ceb3317bc38050c41ce"
-   :action {:type :advance-mission :target "M-aif-policy-conditioned-eig"}})
+   :action {:kind :cascade-candidate :cascade-id "c-alpha"
+            :precedence [:aif/placeholder-is-load-bearing
+                         :aif/belief-state-operational-hypotheses]
+            :construction-receipt {:cascade/id "c-alpha"}
+            :interpretation-receipts [{:pattern :aif/placeholder-is-load-bearing}]}})
+
+(def abstention
+  {:status :abstained
+   :refusals [{:target "M-x" :kind :beta-not-declared :missing :beta-by-context}]})
+
 (def captured "2026-09-09T17:00:00Z")
 
 (deftest explicit-flag-test
@@ -17,7 +27,8 @@
   (is (true? (habit/enabled? {:accumulate-strategic-habit? true} nil))))
 
 (deftest legacy-and-persistence-test
-  (let [old (tactical/observe-action (tactical/initial-state) (:action decision))
+  (let [old (tactical/observe-action (tactical/initial-state)
+                                     {:type :advance-mission :target "M-x"})
         output {:habit-prior-state old :decision decision}
         empty-side (habit/load-state (:strategic-habit-state output))
         off (habit/carry nil decision "tick-1" captured false)
@@ -38,16 +49,24 @@
     (is (= :strategic (:grain on)))
     (is (= 1.0 (:alpha on)))
     (is (= captured (:captured-at on)))
-    (is (= {(:selected-policy-id decision) 1} (:counts on)))
+    ;; the observed policy id is the FIRST acting pattern of the chosen cascade
+    (is (= {(str (first (:precedence (:action decision)))) 1} (:counts on)))
     (is (= :strategic (get-in on [:events "tick-1" :grain])))
     (is (= on (habit/carry on nil nil nil false)))
     (is (= on (habit/carry on decision "tick-1" captured true)))
     (is (= 2 (get-in (habit/carry on decision "tick-2" captured true)
-                     [:counts (:selected-policy-id decision)])))))
+                     [:counts (str (first (:precedence (:action decision))))])))))
+
+(deftest abstention-observes-nothing-test
+  (let [state (habit/carry nil decision "tick-1" captured true)]
+    ;; an abstention enacts nothing: the store is returned unchanged
+    (is (= state (habit/carry state abstention "tick-2" captured true)))
+    ;; and an empty store stays empty — no fabricated policy observation
+    (is (= :empty (:status (habit/carry nil abstention "tick-1" captured true))))))
 
 (deftest refuses-insufficient-or-wrong-grain-test
-  (doseq [d [(dissoc decision :selected-policy-id)
-             (assoc decision :selected-policy-id "")
+  (doseq [d [(assoc-in decision [:action :precedence] [])
+             (update decision :action dissoc :precedence)
              (assoc decision :selection-boundary :actuation)]]
     (is (thrown-with-msg? clojure.lang.ExceptionInfo #"insufficient"
                          (habit/carry nil d "tick-1" captured true))))
@@ -57,6 +76,11 @@
                        (habit/require-promotable nil)))
   (let [state (habit/carry nil decision "tick-1" captured true)]
     (is (= state (habit/require-promotable state)))
+    ;; a different cascade whose first acting pattern differs is a different
+    ;; policy observation for the same event id: refuse
     (is (thrown-with-msg? clojure.lang.ExceptionInfo #"conflicting"
-                         (habit/carry state (assoc decision :selected-policy-id "pi-s-other")
+                         (habit/carry state
+                                      (assoc-in decision
+                                                [:action :precedence 0]
+                                                :aif/other-pattern)
                                       "tick-1" captured true)))))

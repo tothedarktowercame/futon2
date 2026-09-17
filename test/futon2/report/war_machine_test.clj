@@ -579,6 +579,48 @@
                      :coupling-edges 12
                      :ticks-firing 1}}})
 
+;; ---------------------------------------------------------------------------
+;; Decision display (SPEC flat-removal H4, 2026-09-17): cascade decision or
+;; typed abstention, rendered as readiness.
+
+(def ^:private cascade-judgement
+  {:mode :multiplied
+   :decision {:kind :decision
+              :action {:kind :cascade-candidate :cascade-id "c-alpha"
+                       :precedence [:aif/placeholder-is-load-bearing]}
+              :chosen-action-mass 0.75
+              :beta {:value 2.0 :status :declared}
+              :selection-law {:applied :cascade-selection-posterior
+                              :posterior {"c-alpha" 0.75 "c-beta" 0.25}}}})
+
+(def ^:private abstaining-judgement
+  {:mode :multiplied
+   :decision {:status :abstained
+              :refusals [{:target "M-a" :kind :beta-not-declared :missing :beta-by-context}
+                         {:target "M-b" :kind :beta-not-declared :missing :beta-by-context}
+                         {:target "M-c" :kind :universe-not-admitted :missing :universes}]}})
+
+(deftest render-decision-cascade-test
+  (let [md (wm/render-war-machine {:judgement cascade-judgement
+                                   :now "2026-09-17" :days 14})]
+    (is (.contains md "### Decision"))
+    (is (.contains md "c-alpha"))
+    (is (.contains md "enacts first step"))
+    (is (.contains md "aif/placeholder-is-load-bearing"))
+    (is (.contains md "0.750"))
+    (is (.contains md "declared"))))
+
+(deftest render-decision-abstention-test
+  (let [md (wm/render-war-machine {:judgement abstaining-judgement
+                                   :now "2026-09-17" :days 14})]
+    (is (.contains md "### Decision"))
+    (is (.contains md "readiness, not an error"))
+    (is (.contains md "Refusals by kind"))
+    (is (.contains md "beta-not-declared"))
+    (is (.contains md "universe-not-admitted"))
+    (is (.contains md "2"))
+    (is (.contains md "M-a"))))
+
 (deftest render-war-machine-test
   (testing "produces non-empty markdown"
     (let [md (wm/render-war-machine

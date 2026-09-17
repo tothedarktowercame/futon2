@@ -28,9 +28,13 @@
       :observation-envelope <lossless tagged channel values/absences>
       :free-energy      {:preference-gap-score :coverage-uncertainty-pressure :controller-score
                           :per-channel :avoidance-by-channel :avoided-active}
-      :ranked-actions   [{:action :G-risk :G-ambiguity :controller-score :rank}]
-      :decision         {:action :rank? :controller-score? :tau? :tau-source?
-                          :reason? :gap-report? ...}
+      :decision         a cascade decision {:action {:kind :cascade-candidate
+                          :cascade-id ... :precedence [...] :construction-receipt ...
+                          :interpretation-receipts ...} :chosen-action-mass
+                          :beta {:value :status} :selection-law {...} ...}
+                          or a typed abstention {:status :abstained
+                          :refusals [...]}
+      :cascade-problems {:problems [...] :refusals [...]}
       :mode             <strategic-mode keyword>}
 
    Honest gap: prediction errors (ε per R8) are not yet recorded because
@@ -45,7 +49,6 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
-            [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.forward-model :as forward-model]
             [futon2.aif.lane-futility :as lane-futility]
@@ -81,220 +84,69 @@
   ([] (daily-path default-trace-dir (today-date-string)))
   ([dir date-str] (str dir "/wm-trace-" date-str ".edn")))
 
-(defn- validated-machine-q
-  "Admit the complete scorer-produced Q/C pair before it reaches an append.
-   Retention is byte-for-byte; this boundary checks completeness and ordered
-   support only, leaving probability admission to the scorer's adapter."
-  [ranked-action]
-  (when (contains? ranked-action :machine-q)
-    (let [pair (:machine-q ranked-action)
-          q (:q pair)
-          c (:c pair)]
-      (when-not (map? q)
-        (throw (ex-info "Machine-Q trace requires Q"
-                        {:refusal :machine-q-missing-q :path [:machine-q :q]})))
-      (when-not (map? c)
-        (throw (ex-info "Machine-Q trace requires C"
-                        {:refusal :machine-q-missing-c :path [:machine-q :c]})))
-      (doseq [[part value fields]
-              [[:machine-q pair [:q :c :risk :weight :G-machine-q-risk]]
-               [:q q [:support :mass :policy/id :authority :pins]]
-               [:c c [:support :mass :model :provenance]]]
-              field fields]
-        (when-not (contains? value field)
-          (throw (ex-info "Machine-Q trace pair is incomplete"
-                          {:refusal :machine-q-incomplete
-                           :path [part field]}))))
-      (when-not (= (:support q) (:support c))
-        (throw (ex-info "Machine-Q trace support order mismatch"
-                        {:refusal :support-mismatch
-                         :path [:machine-q :support]
-                         :Q (:support q) :C (:support c)})))
-      pair)))
+;; validated-machine-q admission RETIRED with the flat decision (SPEC
+;; flat-removal H4, 2026-09-17): there are no ranked-action rows to
+;; admit a Q/C pair for.
+;; strip-ranked-action and the per-ranked-action machine-Q admission
+;; RETIRED with the flat decision (SPEC flat-removal H4, 2026-09-17):
+;; there are no ranked flat actions to strip.
+(defn- cascade-candidate-id
+  "Stringable identity of a cascade candidate. Candidates are maps
+   ({:kind :cascade-candidate :cascade-id …}); the id is what a reader joins
+   the persisted posterior on. Candidates with neither id are refused —
+   persisting a hash-keyed posterior would make replay irreproducible."
+  [candidate]
+  (let [id (if (map? candidate)
+             (or (:cascade-id candidate) (:id candidate))
+             candidate)]
+    (when-not (or (string? id) (keyword? id))
+      (throw (ex-info "Cascade posterior candidate has no stable id"
+                      {:refusal :cascade-candidate-unidentifiable
+                       :path [:decision :selection-law :posterior]
+                       :candidate candidate})))
+    (str id)))
 
-(defn- strip-ranked-action
-  "Compact a ranked-action entry for trace — keep the EFE summary plus
-   the action. By default the deeply-nested :prediction remains omitted.
-   `FUTON_WM_TRACE_POLICY_DETAILS=1` retains the exact recorded predicted
-   observation mean (rather than repeating the much larger next-belief),
-   avoiding the dishonest claim that replay is mode-independent. v0.13 added
-   `:predictability-bonus` + `:homeostatic-pressure`; v0.14 added `:time-pressure`; v0.15
-   added `:horizon-steps`; v0.20 adds `:structural-pressure`."
-  [r]
-  ;; Validate before constructing any record; write-trace! cannot append a
-  ;; partial or support-reordered machine-Q/C pair.
-  (let [machine-q (validated-machine-q r)]
-  ;; :G-goal-outcome (R19, 2026-07-02): the belly's predictive-risk term was
-  ;; computed per action but STRIPPED here — so no flight could show the belly
-  ;; steering. Persist it: the R19 analog of R16's :act-gate-verdicts audit.
-  ;; :gap-exploration-bonus :graph-control-score :G-core (M-evaluate-policies D1a/D2, 2026-07-03):
-  ;; same fix, same reason — these terms ENTER :controller-score but were stripped, so
-  ;; recomputing the total from persisted terms carried a hidden residual
-  ;; (census: mean-abs 0.324). Whitelist ⊇ terms entering :controller-score (invariant I4).
-  ;; :score-provenance (D1b follow-up, same day): the cascade-row marker was
-  ;; attached in war_machine.clj but stripped HERE — the D1a spec omitted it
-  ;; from the whitelist (caught by the live post-deploy I-check: markers nil in
-  ;; the 13:03Z tick). Invariant I2 needs it persisted, not just attached.
-  ;; :risk-mode (D5a, 2026-07-03): whitelisted AT BIRTH with the key itself —
-  ;; the :score-provenance lesson: a key that isn't persisted the day it is
-  ;; emitted becomes a silent spec gap later.
-  ;; :ambiguity-mode (D5c, 2026-07-08): same provenance rule for the dark/live
-  ;; nats ambiguity lane. If :G-ambiguity is gaussian entropy, the trace says so.
-  ;; :controller-augmentation :augmentation-terms :graph-feasibility-penalty
-  ;; :graph-control-score-proxy (B-2a/B-2b struct split, 2026-07-04): the named
-  ;; multi-objective layer + the mask/value split of the graph term —
-  ;; whitelisted AT BIRTH (same lesson); values are relabels of quantities
-  ;; already entering :controller-score, so I4 (whitelist ⊇ terms entering :controller-score)
-  ;; is preserved and the persisted-total residual stays 0.
-  ;; :structural-pressure-mode :habit-prior-bias (D-1d dark build, 2026-07-04):
-  ;; where structural pressure sits (always emitted, self-describing like
-  ;; :risk-mode) + the relocated term's ln-E bias (dark mode only) —
-  ;; whitelisted AT BIRTH.
-  ;; :move-class-intensity-mode :move-class-intensity-contribution :move-class-intensity
-  ;; (M-action-vocabulary P2 dark build, 2026-07-05): same birth rule. If the
-  ;; dark term enters :controller-score, the trace must carry both the signed G
-  ;; contribution and the conditioning bundle that produced it.
-  (cond->
-   (select-keys r [:action :G-risk :G-ambiguity :predictability-bonus :homeostatic-pressure
-                   :structural-pressure :G-goal-outcome
-                   :goal-outcome-replay-inputs
-                   :gap-exploration-bonus :graph-control-score :G-core :G-efe :score-provenance :risk-mode
-                   :ambiguity-mode :g-ambiguity-source :c-zone-load
-                   :goal-outcome-mode
-                   :controller-augmentation :augmentation-terms
-                   :graph-feasibility-penalty :graph-control-score-proxy
-                   :predictability-control-mode :homeostatic-control-mode
-                   :graph-feasibility-mode
-                   :structural-pressure-mode :habit-prior-bias :habit-prior-source
-                   :move-class-intensity-mode :move-class-intensity-contribution
-                   :move-class-intensity
-                   :controller-score :rank :time-pressure :horizon-steps])
-    machine-q
-    (assoc :machine-q machine-q)
-    (:c-fold-provenance r)
-    (assoc :c-fold-provenance (:c-fold-provenance r)
-           :G-ruled-outcome-c (:G-ruled-outcome-c r)
-           :predicted-disposition-risk (:predicted-disposition-risk r))
-    *persist-policy-trace-details?*
-    (assoc :prediction-mean (get-in r [:prediction :next-observation :mean])
-           ;; F_π scores an observation under each candidate's predictive
-           ;; DISTRIBUTION, so the mean alone is not enough — a Gaussian free
-           ;; energy needs the precision too. Persisting the mean without the
-           ;; variance would leave the consumer inventing one (C462 §5).
-           :prediction-variance (get-in r [:prediction :next-observation :variance])
-           ;; F_pi distinguishes a genuinely deterministic zero from a channel
-           ;; for which the action model supplied no variance.
-           :prediction-variance-status
-           (get-in r [:prediction :next-observation :variance-status])))))
+(defn- stringable-cascade-posterior
+  "Re-key the decision's recorded posterior {candidate-map → p} by candidate
+   id. Probabilities are untouched; only the join key becomes stringable. An
+   absent posterior is an empty map (the abstention arm never reaches here)."
+  [posterior]
+  (if (map? posterior)
+    (into {}
+          (map (fn [[candidate p]] [(cascade-candidate-id candidate) p]))
+          posterior)
+    {}))
 
-(defn- ranked-candidate-id
-  "Tick-local stable candidate id retained across stripping. Rank is already
-   persisted on every ranked action and uniquely identifies the exact scored
-   candidate within the decision whose Q(π) map is being serialized."
-  [ranked-action]
-  (str "rank/" (:rank ranked-action)))
-
-(defn- stringable-softmax-weights
-  [softmax-weights ranked-actions]
-  ;; A decision with NO softmax-weights has no posterior to persist; the
-  ;; historical details-on shape for it is an empty rank-keyed map, not a
-  ;; refusal. The rank-join completeness check guards decisions that DO carry
-  ;; a posterior (row 16 R6 boundary; nil-case repair 2026-09-12, reviewer,
-  ;; from the packet-4b ambient findings).
-  (if (nil? softmax-weights)
-    {}
-    (let [rank-keys (mapv ranked-candidate-id ranked-actions)
-        duplicate-rank-keys (->> rank-keys frequencies
-                                 (keep (fn [[k n]] (when (> n 1) k)))
-                                 sort vec)
-        ranked-action-set (set (map :action ranked-actions))
-        weight-action-set (if (map? softmax-weights)
-                            (set (keys softmax-weights)) #{})
-        missing-actions (set/difference ranked-action-set weight-action-set)
-        extra-actions (set/difference weight-action-set ranked-action-set)]
-    (when (or (not (map? softmax-weights))
-              (seq duplicate-rank-keys) (seq missing-actions) (seq extra-actions))
-      (throw (ex-info "Softmax rank join is incomplete"
-                      {:refusal :softmax-rank-join-incomplete
-                       :path [:decision :softmax-weights]
-                       :missing-ranked-keys
-                       (mapv ranked-candidate-id
-                             (filter #(contains? missing-actions (:action %)) ranked-actions))
-                       :extra-weight-actions (vec extra-actions)
-                       :duplicate-rank-keys duplicate-rank-keys})))
-      (into {}
-            (map (fn [ranked-action]
-                   [(ranked-candidate-id ranked-action)
-                    (get softmax-weights (:action ranked-action))]))
-            ranked-actions))))
-
-(def ^:private selection-proof-input-fields
-  #{:schema :algorithm/revision :decision-id :temperature :candidate-domain
-    :policy-table :tie-break :selected-policy-id})
-
-(def ^:private selection-proof-policy-fields
-  #{:policy-id :mission-ids :E_S :G_S :log-shadow-potential
-    :shadow-probability :hard-support :provenance})
-
-(defn- validate-selection-proof-input [envelope]
-  (let [missing (set/difference selection-proof-input-fields
-                                (set (keys envelope)))
-        rows (:policy-table envelope)
-        partial-rows (when (vector? rows)
-                       (keep-indexed
-                        (fn [idx row]
-                          (when (or (not (map? row))
-                                    (seq (set/difference
-                                          selection-proof-policy-fields
-                                          (set (keys row)))))
-                            idx))
-                        rows))
-        policy-ids (when (vector? rows) (mapv :policy-id rows))
-        table-support (when (vector? rows)
-                        (set (mapcat :mission-ids rows)))
-        domain-support (when (vector? (:candidate-domain envelope))
-                         (set (:candidate-domain envelope)))]
-    (cond
-      (or (not (map? envelope))
-          (seq missing)
-          (not= :wm/selection-proof-input-v1 (:schema envelope))
-          (not (vector? rows))
-          (seq partial-rows))
-      (throw (ex-info "Selection proof input is incomplete"
-                      {:refusal :selection-proof-input-incomplete
-                       :missing-fields (vec (sort missing))
-                       :partial-policy-rows (vec partial-rows)}))
-
-      (not= domain-support table-support)
-      (throw (ex-info "Selection proof input support disagrees"
-                      {:refusal :selection-proof-support-mismatch
-                       :candidate-domain domain-support
-                       :policy-table-support table-support}))
-
-      (not (some #{(:selected-policy-id envelope)} policy-ids))
-      (throw (ex-info "Selected policy is absent from proof table"
-                      {:refusal :selected-policy-not-in-proof-table
-                       :selected-policy-id (:selected-policy-id envelope)}))
-
-      :else envelope)))
-
+;; selection-proof-input fields RETIRED with the flat decision (SPEC
+;; flat-removal H4, 2026-09-17); see the note below.
+;; selection-proof-input validation RETIRED with the flat decision (SPEC
+;; flat-removal H4, 2026-09-17). The envelope described the flat
+;; selector policy table over ranked actions; the cascade decision
+;; records its own posterior, beta and receipts, and no flat proof
+;; envelope can be produced.
 (defn- strip-decision
-  "Compact the decision for trace. The full softmax-weights map is
-   keyed by action maps (non-stringable), so the default-off form drops it.
-   When policy trace details are enabled, Q(π) is re-keyed by `rank/N`, the
-   stable rank already retained by `strip-ranked-action`. Chosen-action /
-   abstain identity is preserved. The details-on path refuses an incomplete
-   rank join before append; this changes admission, not the record shape.
-   Decision fields follow that precedent: present-only
-   :selection-proof-input is validated here but does not advance schema 29,
-   just as :softmax-weights-by-candidate-id did not advance its schema."
-  [d ranked-actions]
-  (when (contains? d :selection-proof-input)
-    (validate-selection-proof-input (:selection-proof-input d)))
-  (cond-> (dissoc d :softmax-weights :ranked-actions)
-    *persist-policy-trace-details?*
-    (assoc :softmax-weights-by-candidate-id
-           (stringable-softmax-weights (:softmax-weights d) ranked-actions))))
+  "Persist the tick's decision for trace. Exactly two arms (SPEC
+   flat-removal H4, Joe's 2026-09-17 ruling; the flat single-action
+   decision is removed and cannot be produced):
+
+   - a CASCADE decision from select-action-cascades: the chosen candidate
+     (with its construction/interpretation receipts), :chosen-action-mass,
+     :beta {:value :status}, :selection-law (posterior re-keyed by candidate
+     id — candidate maps are not stable join keys), and the pattern-keyed
+     :softmax-weights;
+   - a typed abstention {:status :abstained :refusals […]}, persisted as-is.
+
+   There is no flat branch and no compatibility read of :ranked-actions."
+  [d]
+  (if (= :abstained (:status d))
+    ;; persisted as-is: the refusals ARE the record
+    (assoc d :refusals (vec (:refusals d)))
+    ;; the cascade decision is persisted whole — the candidate carries its
+    ;; receipts — with ONE transformation: the recorded posterior's
+    ;; candidate-map keys become candidate ids (a stable join key).
+    (if (map? (:selection-law d))
+      (update-in d [:selection-law :posterior] stringable-cascade-posterior)
+      d)))
 
 ;; ---------------------------------------------------------------------------
 ;; B-0a tick provenance (M-aif-faithfulness §2.0, V-1) — which code, which
@@ -432,8 +284,20 @@
          support disagreement refuse before append (row 14, 2026-09-12).
     29 - adds present-only :cohort-attempt to traces produced by a full-loop
          cohort attempt. The literal cohort/attempt identity is threaded by
-         the runner; ordinary and scheduled ticks remain byte-identical."
-  29)
+         the runner; ordinary and scheduled ticks remain byte-identical.
+    30 - the flat decision is removed (SPEC flat-removal-and-cascade-decision
+         H4, Joe's 2026-09-17 ruling). :decision is now a cascade decision
+         (chosen candidate with receipts, :chosen-action-mass, :beta,
+         :selection-law with the posterior re-keyed by candidate id) or a
+         typed {:status :abstained :refusals [...]}. :ranked-actions,
+         :preference-stack, :support-typed-scoring-shadow,
+         :policy-support-exclusions and :default-mode-events are REMOVED:
+         each was a projection of the flat scoring lane. :cascade-problems
+         {:problems [...] :refusals [...]} is added beside the decision.
+         Bumped (not additive) because a reader must distinguish \"no ranked
+         actions because the producer predates the cascade ruling\" from
+         \"none because the flat path can never run again\"."
+  30)
 
 (def r8-producer-contract
   "Contract carried by trace records that require selection gain and the
@@ -444,124 +308,11 @@
    identity stored? = gain? = controller?."
   :r8/retired-f-controller-v1)
 
-(defn- preference-stack-evidence
-  "Preserve the exact stack carried by ranked evaluation objects without
-   repeating its static provenance on every row. Empty is a present value;
-   missing is a reason-bearing absence. Divergence is retained per rank rather
-   than silently selecting the first candidate's stack."
-  [ranked-actions]
-  (let [ranked (vec ranked-actions)
-        entries (mapv (fn [idx action]
-                        {:rank (or (:rank action) (inc idx))
-                         :recorded? (contains? action :preference-stack)
-                         :value (:preference-stack action)})
-                      (range) ranked)
-        recorded (filterv :recorded? entries)
-        distinct-stacks (distinct (map :value recorded))]
-    (cond
-      (empty? ranked)
-      {:status :absent :reason :no-ranked-actions}
-
-      (empty? recorded)
-      {:status :absent :reason :not-recorded-by-evaluator}
-
-      (not= (count recorded) (count entries))
-      {:status :partial
-       :reason :missing-from-some-ranked-actions
-       :by-rank (mapv #(if (:recorded? %)
-                         {:rank (:rank %) :status :present :value (:value %)}
-                         {:rank (:rank %) :status :absent
-                          :reason :not-recorded-by-evaluator})
-                      entries)}
-
-      (= 1 (count distinct-stacks))
-      {:status :present
-       :scope :all-ranked-actions
-       :candidate-count (count entries)
-       :value (first distinct-stacks)}
-
-      :else
-      {:status :conflict
-       :reason :ranked-actions-recorded-different-stacks
-       :by-rank (mapv #(select-keys % [:rank :value]) entries)})))
-
-(defn- support-typed-scoring-shadow
-  "Apply observation support to the exact additive channel decomposition made
-   by the evaluator. This is evidence only: its result is persisted but never
-   returned to policy/select-action."
-  [envelope ranked-actions]
-  (let [statuses (:channels envelope)
-        candidates
-        (mapv (fn [idx candidate]
-                (let [terms (:support-shadow-terms candidate)
-                      by-channel (:by-channel terms)
-                      required (set (keys by-channel))
-                      support (set (for [ch required
-                                         :when (= :observed
-                                                  (get-in statuses [ch :variant]))]
-                                     ch))
-                      absent (into {}
-                                   (for [ch (sort (set/difference required support))]
-                                     [ch (select-keys (get statuses ch)
-                                                      [:reason :paths])]))]
-                  (if-not (and (map? by-channel)
-                               (number? (:non-channel-contribution terms)))
-                    {:candidate-index idx
-                     :rank (:rank candidate)
-                     :action (:action candidate)
-                     :current-score (:controller-score candidate)
-                     :status :unavailable
-                     :reason :evaluator-lacks-channel-decomposition}
-                    {:candidate-index idx
-                     :rank (:rank candidate)
-                     :action (:action candidate)
-                     :current-score (:controller-score candidate)
-                     :support-typed-score
-                     (+ (double (:non-channel-contribution terms))
-                        (reduce + 0.0 (map #(double (get by-channel %)) support)))
-                     :support (vec (sort support))
-                     :required-support (vec (sort required))
-                     :absent-reasons absent
-                     :status :measured})))
-              (range) ranked-actions)
-        measured (filterv #(= :measured (:status %)) candidates)
-        pair-count (quot (* (count measured) (dec (count measured))) 2)
-        incomparable-pairs
-        (count (for [i (range (count measured))
-                     j (range (inc i) (count measured))
-                     :when (not= (:support (nth measured i))
-                                 (:support (nth measured j)))]
-                 [i j]))
-        comparable? (and (seq candidates)
-                         (= (count measured) (count candidates))
-                         (zero? incomparable-pairs))
-        shadow-order (when comparable?
-                       (mapv :candidate-index
-                             (sort-by (juxt :support-typed-score :candidate-index)
-                                      measured)))
-        shadow-ranks (when shadow-order
-                       (zipmap shadow-order (range 1 (inc (count shadow-order)))))
-        candidates (mapv (fn [candidate]
-                           (if-let [shadow-rank (get shadow-ranks
-                                                    (:candidate-index candidate))]
-                             (assoc candidate
-                                    :support-typed-rank shadow-rank
-                                    :would-rank-differently
-                                    (not= (:rank candidate) shadow-rank))
-                             candidate))
-                         candidates)]
-    {:status (cond
-               (empty? candidates) :absent
-               (every? #(= :measured (:status %)) candidates) :measured
-               :else :partial)
-     :authority :shadow-only
-     :score-kind :multi-objective-controller-score
-     :candidates candidates
-     :comparison {:candidate-pairs pair-count
-                  :incomparable-support-pairs incomparable-pairs
-                  :ranking-comparable? comparable?
-                  :winner-changed? (when comparable?
-                                     (not= 0 (first shadow-order)))}}))
+;; preference-stack-evidence and support-typed-scoring-shadow RETIRED
+;; with the flat decision (SPEC flat-removal H4, 2026-09-17): both
+;; read the flat ranked-action entries that no longer exist. The
+;; per-tick preference stack and the support-typed shadow were
+;; projections of the flat scoring lane.
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:
@@ -626,6 +377,14 @@
       (nil? path)
       {:status :absent :reason :unknown-field-contract :field field}
 
+      ;; Fields retired at schema 30 (flat-decision removal, SPEC H4,
+      ;; 2026-09-17): a v30+ record can never carry them.
+      (and (number? version) (>= version 30)
+           (contains? #{:goal-outcome-replay-inputs :preference-stack
+                        :support-typed-scoring-shadow} field))
+      {:status :absent :reason :retired-at-schema-30 :field field
+       :record-schema-version version}
+
       (not (identical? missing value))
       {:status :present :value value :record-schema-version (or version :unversioned)}
 
@@ -641,7 +400,10 @@
 (defn trace-record
   "Pure: construct a v1 trace record from a `judge`-style output map.
    Accepts a map carrying at minimum `:belief`, `:observation`,
-   `:free-energy`, `:ranked-actions`, `:decision`, `:mode`.
+   `:free-energy`, `:decision`, `:mode`. As of schema 30 (SPEC
+   flat-removal H4, 2026-09-17) the decision is a cascade decision or a
+   typed abstention, there is no `:ranked-actions` field, and the
+   judgement's `:cascade-problems` is persisted beside the decision.
 
    As of v0.10 (R3a landed), `:mu-pre` and `:mu-post` are read from
    `:belief-pre` and `:belief` respectively; when `:belief-pre` is
@@ -673,9 +435,6 @@
     :mu-post (:belief judge-output)
     :observation observed
     :observation-envelope observed-envelope
-    :support-typed-scoring-shadow
-    (support-typed-scoring-shadow observed-envelope
-                                  (:ranked-actions judge-output))
     :free-energy (:free-energy judge-output)
     :prediction-errors (:prediction-errors judge-output {})
     :precision-state (:precision-state judge-output {})
@@ -690,23 +449,12 @@
     :morning-brief-consumed-event-ids
     (:morning-brief-consumed-event-ids judge-output [])
     :anticipation (:anticipation judge-output {:events-loaded? false :events []})
-    :ranked-actions (mapv strip-ranked-action (:ranked-actions judge-output))
-    ;; I3 optional policy detail cost, measured on the first 110-candidate tick
-    ;; in wm-trace-2026-07-04.edn (307,910 bytes, 14 observation channels):
-    ;; +92,985 bytes/tick = 30.2% of that record. Of it, 824 bytes/candidate is
-    ;; the predicted mean AND variance (the mean alone would be 467, but F_π
-    ;; needs the distribution, not its centre), 2,312 bytes is the Q(π) map, and
-    ;; 33 bytes is :effects-mode. This beats the naive form C66 warns about by
-    ;; 198,075 bytes (68%). Default OFF is byte-identical to the pre-I3 record,
-    ;; verified against the previous implementation, not merely against a
-    ;; restatement of the current one.
-    ;; C66: sourced from the same per-candidate evaluation maps as scoring.
-    ;; Stored once when identical: the current 2,646-byte stack would otherwise
-    ;; add 291,060 bytes to a 110-candidate tick.
-    :preference-stack (preference-stack-evidence (:ranked-actions judge-output))
-    :policy-support-exclusions (vec (:policy-support-exclusions judge-output))
-    :decision (strip-decision (:decision judge-output)
-                              (:ranked-actions judge-output))
+    ;; Schema 30 (SPEC flat-removal H4): no :ranked-actions, no
+    ;; :preference-stack, no :policy-support-exclusions — all were projections
+    ;; of the flat scoring lane. The candidate population now lives inside
+    ;; the cascade decision's recorded posterior.
+    :decision (strip-decision (:decision judge-output))
+    :cascade-problems (:cascade-problems judge-output)
     :mode (:mode judge-output)}
     (contains? judge-output :horizon-steps)
     ;; Row 15 depth capture. A present nil is the observed scorer input, not a
@@ -746,16 +494,9 @@
     ;; carries every offending feature, so this is a vector of at most one.
     (seq (:strategic-mode-events judge-output))
     (assoc :strategic-mode-events (:strategic-mode-events judge-output))
-    ;; AC4 (same ruling, same condition): the fallback selector's
-    ;; sorry-pressure record, kept only when the I6 fallback actually ran and
-    ;; then could not read `:sorry-count-norm` -- absent (`:unknown`) or
-    ;; malformed (`:refused`). Present-only, and doubly so here: no key means
-    ;; either that `select-action` succeeded and the fallback was never
-    ;; consulted, or that it was consulted and read a real pressure. Both are
-    ;; different claims from "the selector did not report", and the two are
-    ;; told apart by the decision's own `:source`.
-    (seq (:default-mode-events judge-output))
-    (assoc :default-mode-events (:default-mode-events judge-output))
+    ;; AC4 (:default-mode-events) RETIRED with the flat decision's fallback
+    ;; selector (SPEC flat-removal H4, 2026-09-17): the I6 fallback no longer
+    ;; exists, so no sorry-pressure record can be produced.
     ;; RUN11 run identity. The per-date trace file is shared by every run on
     ;; the day, so without this key the only discriminator between two runs'
     ;; records is the timestamp and a reader has to select by range. `:run/id`

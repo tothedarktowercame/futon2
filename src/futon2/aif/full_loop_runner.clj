@@ -30,7 +30,6 @@
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
-            [futon2.aif.run4-task-pin :as run4-pin]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.trace :as trace]
             [futon2.aif.tripwire :as tripwire]
@@ -1247,118 +1246,34 @@
          (nil? (:artifact-ref job))
          (= "invoke-exception" failure-code))))
 
-(defn- selected-entry [judgement]
-  (let [action (get-in judgement [:decision :action])]
-    (when (map? action)
-      (first (filter #(= action (:action %)) (:ranked-actions judgement))))))
+(defn- selected-entry
+  "The tick's selected entry from a cascade-only decision (SPEC
+   flat-removal H4, 2026-09-17). A cascade decision yields the chosen
+   candidate with its own scores (there is no ranked-actions join); an
+   abstention yields nil — nothing was selected."
+  [judgement]
+  (let [decision (:decision judgement)]
+    (cond
+      (and (map? decision) (= :abstained (:status decision))) nil
+      (= :cascade-selection-posterior (get-in decision [:selection-law :applied]))
+      (let [action (:action decision)]
+        {:action action
+         :rank (or (:rank decision) 1)
+         :G-efe (:controller-score decision)
+         :controller-score (:controller-score decision)})
+      :else nil)))
 
-(defn- pinned-refusal! [detail & [data]]
-  (throw (ex-info "RUN4 pinned selection refused"
-                  (merge {:outcome :pinned-selection-refused
-                          :failure-kind :pinned-selection-refused
-                          :failure-stage :selection
-                          :failure-detail detail}
-                         data))))
+;; resolve-pinned-selection and pinned-refusal! (RUN4) RETIRED with the flat
+;; decision (SPEC flat-removal H4, 2026-09-17): they validated a pinned flat
+;; mission action against :ranked-actions/:admissible-actions, neither of
+;; which can be produced. A cascade-grain pinned-selection seam would be new
+;; work under its own commission.
 
-(defn resolve-pinned-selection
-  "Resolve an authenticated, fresh RUN4 pin against current policy evidence.
-
-  This is an opt-in selection boundary, not an authentication mechanism. A
-  trusted caller must inject `:run4-trusted-boundary-fn`; its structured
-  attestation must bind the exact-byte pin digest. With no RUN4 options this
-  returns nil, preserving the ordinary selector path."
-  [opts judgement effective-casting]
-  (let [option-keys [:run4-task-pin-text :run4-task-pin-ports
-                     :run4-trusted-boundary-fn]
-        present (filter #(contains? opts %) option-keys)]
-    (when (seq present)
-      (when-not (= (set option-keys) (set present))
-        (pinned-refusal! :incomplete-pinned-selection-options))
-      (let [envelope (try
-                       (run4-pin/validate (:run4-task-pin-text opts)
-                                          (:run4-task-pin-ports opts))
-                       (catch clojure.lang.ExceptionInfo e
-                         (pinned-refusal! :invalid-or-stale-task-pin
-                                          {:pin-refusal (:reason (ex-data e))})))
-            pin-digest (get-in envelope [:task-pin :sha256])
-            casting-keys [:author :reviewer :repair-reviewer]
-            pinned-casting (select-keys (:casting envelope) casting-keys)
-            actual-casting (select-keys effective-casting casting-keys)
-            _ (when-not (= pinned-casting actual-casting)
-                (pinned-refusal! :pinned-casting-mismatch
-                                 {:pinned pinned-casting :effective actual-casting}))
-            trust-fn (:run4-trusted-boundary-fn opts)
-            _ (when-not (fn? trust-fn)
-                (pinned-refusal! :missing-trusted-boundary))
-            attestation (trust-fn {:pin-digest pin-digest
-                                   :operator-selection
-                                   (:operator-selection envelope)})
-            _ (when-not (and (map? attestation)
-                             (= :authenticated (:status attestation))
-                             (= :trusted-serving-context (:boundary attestation))
-                             (string? (:principal attestation))
-                             (not (str/blank? (:principal attestation)))
-                             (= pin-digest (:pin-sha256 attestation)))
-                (pinned-refusal! :pinned-authority-unauthenticated))
-            action (get-in envelope [:mission-action :action])
-            mission (get-in envelope [:mission-action :mission])
-            ranked-actions (:ranked-actions judgement)
-            _ (when-not (and (vector? ranked-actions)
-                             (seq ranked-actions)
-                             (every? #(and (map? %) (map? (:action %)))
-                                     ranked-actions))
-                (pinned-refusal! :missing-or-malformed-ranked-evidence))
-            admissible-actions (:admissible-actions judgement)
-            _ (when-not (and (vector? admissible-actions)
-                             (seq admissible-actions)
-                             (every? #(and (map? %) (map? (:action %)))
-                                     admissible-actions))
-                (pinned-refusal! :missing-or-malformed-admissible-evidence))
-            ;; A canonical mission pin names the operation and mission. The
-            ;; real proposer/ranker also carries prediction/scoring inputs.
-            ;; Keep those inputs intact, and require the SAME full candidate
-            ;; to have passed admissibility; never synthesize a ranked entry.
-            mission-identity? (and (= :advance-mission (:type action))
-                                   (= #{:type :target} (set (keys action))))
-            matches? (fn [entry]
-                       (= action (if mission-identity?
-                                   (select-keys (:action entry) [:type :target])
-                                   (:action entry))))
-            ranked-matches (filterv matches? ranked-actions)
-            _ (when (empty? ranked-matches)
-                (pinned-refusal! :pinned-action-not-candidate))
-            _ (when-not (= 1 (count ranked-matches))
-                (pinned-refusal! :ambiguous-pinned-candidate))
-            ranked-entry (first ranked-matches)
-            admissible-matches (filterv matches? admissible-actions)
-            _ (when (empty? admissible-matches)
-                (pinned-refusal! :pinned-action-not-admissible))
-            _ (when-not (= 1 (count admissible-matches))
-                (pinned-refusal! :ambiguous-pinned-admissibility))
-            admissible-entry (first admissible-matches)
-            _ (when-not (= (:action ranked-entry) (:action admissible-entry))
-                (pinned-refusal! :pinned-candidate-admissibility-mismatch))
-            entry admissible-entry
-            identity (assoc (:task-pin envelope)
-                            :mission-id (:id mission)
-                            :action action)
-            counterfactual (:decision judgement)]
-        {:entry entry
-         :identity identity
-         :provenance
-         {:source :authenticated-operator-task-pin
-          :operator (get-in envelope [:operator-selection :operator])
-          :authority-ref (get-in envelope [:operator-selection :authority-ref])
-          :authority-attestation
-          (select-keys attestation [:status :boundary :principal :pin-sha256
-                                    :effective-environment])
-          :outer-loop-ranking-match-required? false
-          :ordinary-selector-decision counterfactual
-          :enacted-candidate-action (:action entry)}
-         :counterfactual counterfactual}))))
 
 (defn- selected-target [entry]
-  (or (get-in entry [:action :target])
+  (or (get-in entry [:action :cascade-id])
+      (get-in entry [:action :id])
+      (get-in entry [:action :target])
       (get-in entry [:action :target-class])
       (get-in entry [:action :type])))
 
@@ -3813,11 +3728,6 @@
             judgement0 judgement0-base
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             ordinary-entry (selected-entry judgement0)
-            pinned-selection
-            (when-not stop-line
-              (resolve-pinned-selection
-               opts judgement0 {:author author :reviewer reviewer
-                                :repair-reviewer repair-reviewer}))
             historical-admission
             (when (and stop-line (:historical-verification-candidate-fn opts))
               ((:historical-verification-candidate-fn opts) stop-line))
@@ -3828,7 +3738,7 @@
                {:author author :repair-reviewer repair-reviewer}))
             entry (if stop-line
                     (or historical-entry (repair-entry stop-line))
-                    (or (:entry pinned-selection) ordinary-entry))
+                    ordinary-entry)
             historical-action? (= :revalidate-historical-repair
                                   (get-in entry [:action :type]))
             repair-action? (contains? #{:repair-machine-failure
@@ -3836,10 +3746,10 @@
                                       (get-in entry [:action :type]))
             reviewer (if repair-action? repair-reviewer reviewer)
             _ (reset! reviewer-of-record reviewer)
-            operator-action-refs
-            (mapv #((or (:operator-gate-queue-fn opts)
-                        brief/queue-operator-gate!) %)
-                  (:operator-actions judgement0))
+            ;; :operator-actions RETIRED with the flat decision (SPEC
+            ;; flat-removal H4, 2026-09-17): there are no flat candidates,
+            ;; so no operator gates are queued from the judgement.
+            operator-action-refs []
             judgement (cond-> (assoc judgement0
                              :run/id (:run-id opts)
                              :operator-action-refs operator-action-refs
@@ -3851,12 +3761,6 @@
                                      :author author
                                      :reviewer reviewer
                                      :repair-reviewer repair-reviewer)))
-                        pinned-selection
-                        (assoc :run4/task-pin (:identity pinned-selection)
-                               :run4/operator-selection (:provenance pinned-selection)
-                               :run4/counterfactual-decision
-                               (:counterfactual pinned-selection)
-                               :run4/enacted-action (:action entry))
                         (and historical-action? (:run4/requested-pin opts))
                         (assoc :run4/requested-pin (:run4/requested-pin opts)
                                :run4/enacted-action (:action entry))
@@ -3874,15 +3778,21 @@
                        :run-id (:run/id judgement)})
             ranked-for-review (if stop-line
                                 [entry]
-                                (or (:admissible-actions judgement)
-                                    (:ranked-actions judgement)))
+                                ;; the candidate population is the cascade
+                                ;; decision's own recorded posterior
+                                (vec (map-indexed
+                                      (fn [i [candidate p]]
+                                        {:rank (inc i) :action candidate
+                                         :controller-score p})
+                                      (get-in judgement
+                                              [:decision :selection-law :posterior]))))
             discrimination (when-not stop-line
                              (selection-discrimination ranked-for-review))
             selection-cell (if entry
                              (cond->
                               (term {:selected-mission (str target)
                                      :selected-action (:action entry)
-                                     :controller-decision (when-not (or stop-line pinned-selection)
+                                     :controller-decision (when-not stop-line
                                                             (:decision judgement))
                                      :stop-the-line-obligations
                                      (mapv #(select-keys % [:repair/id :attempt-id
@@ -3899,25 +3809,16 @@
                                        {:source :stop-the-line
                                         :repair-id (:repair/id stop-line)
                                         :repair-class (:repair/class stop-line)}
-                                       (if pinned-selection
-                                         (assoc (:provenance pinned-selection)
-                                                :controller-score (:controller-score entry)
-                                                :discrimination discrimination)
-                                         (assoc
-                                          (select-keys (:decision judgement)
-                                                       [:source :rank :controller-score :tau
-                                                        :selection-gain
-                                                        :habit-prior-applied?])
-                                          :discrimination discrimination)))
+                                       (assoc
+                                        (select-keys (:decision judgement)
+                                                     [:rank :controller-score
+                                                      :selection-boundary :beta])
+                                        :discrimination discrimination))
                                      :trace-persistence (if repair-action?
                                                           :repair-action-not-traced
                                                           :after-construction)}
                                     (cond-> {:kind :wm-judgement
                                              :decision (:decision judgement)}
-                                     pinned-selection
-                                     (assoc :run4/task-pin (:identity pinned-selection)
-                                             :run4/operator-selection
-                                             (:provenance pinned-selection))
                                      (and historical-action? (:run4/requested-pin opts))
                                      (assoc :run4/requested-pin (:run4/requested-pin opts)
                                             :run4/enacted-action (:action entry))))
@@ -3932,7 +3833,8 @@
           (swap! checkpoints assoc :selection selection-cell))
         (when-not entry
           (throw (ex-info "War Machine abstained or selected no addressable action"
-                          {:outcome (if (= :abstain (get-in judgement [:decision :action]))
+                          {:outcome (if (= :abstained
+                                           (get-in judgement [:decision :status]))
                                       :abstained :no-selection)})))
         (let [reviewer-roster
               (if (restored? roster reviewer)
@@ -4011,7 +3913,7 @@
                               (construction-wiring-result
                                construction
                                (:construction-wiring-fn opts)
-                               (boolean pinned-selection)))]
+                               false))]
           (when-not construction
             (throw (ex-info "No construction for selected decision"
                             {:outcome :construction-failed
@@ -4061,15 +3963,8 @@
                               :selection-enaction
                               (selection-enaction-record
                                (:action entry)
-                               (or (get-in pinned-selection
-                                           [:provenance :enacted-candidate-action])
-                                   (:action entry))
-                               {:source (if pinned-selection
-                                          :authenticated-operator-task-pin
-                                          :runner-selection)
-                                :operator-authority-ref
-                                (get-in pinned-selection
-                                        [:provenance :authority-ref])})
+                               (:action entry)
+                               {:source :runner-selection})
                               :patterns (vec (:shown construction))
                               :deposit nil
                               :trace-path trace-path}
@@ -4081,17 +3976,10 @@
                                (and (nil? interpretation) (:interpretation-receipt construction))
                                (assoc :interpretation-receipt (:interpretation-receipt construction))
 
-                               pinned-selection
-                               (assoc :run4/task-pin (:identity pinned-selection)
-                                      :run4/operator-selection
-                                      (:provenance pinned-selection))
-
                                (= :refused (:status wiring-result))
                                (assoc :wiring-refusal (:fold-output wiring-result)))
-                             (cond-> {:kind :decision-pinned-construction
-                                      :selected-action (:action entry)}
-                               pinned-selection
-                               (assoc :run4/task-pin (:identity pinned-selection))))]
+                             {:kind :decision-pinned-construction
+                              :selected-action (:action entry)})]
           (persist-selection! trace-path)
           (checkpoint! :construction construction-cell)
           (when (:interpretation-receipt (:judgment construction-cell))

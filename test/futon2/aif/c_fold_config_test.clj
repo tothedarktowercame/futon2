@@ -3,7 +3,6 @@
             [clojure.edn :as edn]
             [futon2.aif.c-fold-config :as config]
             [futon2.aif.efe :as efe]
-            [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm]
             [futon2.run-tick-once :as tick]))
 
@@ -18,14 +17,14 @@
         opts (with-redefs [config/resolve-opts #(resolve-real % sheet slurp)]
                (#'wm/configured-fold-efe-opts
                 base (#'tick/diagnostic-judge-opts identity {} "config-wiring-test")))
-        scored (efe/compute-efe state {:type :no-op} opts)
-        recorded (#'trace/strip-ranked-action scored)]
+        scored (efe/compute-efe state {:type :no-op} opts)]
     (is (true? (:ruled-outcome-c-enabled? opts)))
     (is (< (Math/abs (- (Math/log 2) (:predicted-disposition-risk scored))) 1e-12))
-    (is (= (:G-ruled-outcome-c scored) (:G-ruled-outcome-c recorded)))
-    (is (= (:c-fold-provenance opts) (:c-fold-provenance recorded)))
-    (is (= :efe-disposition-risk (get-in recorded [:c-fold-provenance :boundary])))
-    (is (true? (get-in recorded [:c-fold-provenance :constant-across-policies?])))))
+    ;; trace no longer strips ranked actions (flat removal, SPEC H4
+    ;; 2026-09-17); the scorer's own output is the recorded provenance.
+    (is (= (:c-fold-provenance opts) (:c-fold-provenance scored)))
+    (is (= :efe-disposition-risk (get-in scored [:c-fold-provenance :boundary])))
+    (is (true? (get-in scored [:c-fold-provenance :constant-across-policies?])))))
 
 (deftest absent-and-explicit-false-preserve-behavior
   (let [no-read (fn [_] (throw (Exception. "unexpected read")))
@@ -33,7 +32,7 @@
         off (config/resolve-opts (assoc base :ruled-outcome-c-enabled? false) "missing" no-read)]
     (is (= base (config/resolve-opts base nil no-read)))
     (is (= (pr-str legacy) (pr-str (efe/compute-efe state {:type :no-op} off))))
-    (is (not (contains? (#'trace/strip-ranked-action legacy) :c-fold-provenance)))))
+    (is (not (contains? legacy :c-fold-provenance)))))
 
 (deftest invalid-pins-and-selectors-refuse
   (let [original (edn/read-string (slurp sheet))

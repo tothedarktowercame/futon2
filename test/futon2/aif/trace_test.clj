@@ -2,10 +2,11 @@
   "Tests for R8 per-call trace persistence."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.belief :as belief]
+            [futon2.aif.cascade-problems :as cascade-problems]
+            [futon2.aif.decision-gate :as decision-gate]
             [futon2.aif.observation :as observation]
             [futon2.aif.policy :as policy]
             [futon2.aif.trace :as trace])
@@ -30,96 +31,53 @@
 
 (use-fixtures :each with-tmpdir)
 
-(def ^:private pre-beta-dark-trace-sha
-  "The last commit that touched src/futon2/aif/trace.clj before the RUN7 dark
-   beta field was added.
+(def ^:private sample-resolved-flags
+  {:risk-mode :kl :live-wire? true})
 
-   PINNED, NOT HEAD~ (the RUN5 review finding, 2026-09-01): a moving anchor
-   rots. After the next edit to this file HEAD~ already CONTAINS the field, so
-   the control compares the flag-off path with itself and the claim it backs
-   turns quietly from `the default record is unchanged by dark beta` into `the
-   last commit changed nothing`. Both are checks; only the first is the claim.
-   A control for a fixed claim gets a fixed anchor."
-  "183749a")
+(defn- cascade-entry
+  "A ranked cascade candidate carrying receipts, the H4 decision shape."
+  [id patterns g]
+  {:action {:kind :cascade-candidate
+            :cascade-id id :id id
+            :precedence patterns
+            :construction-receipt
+            {:cascade/id id :moves 1 :family-searched :unit :coverage 1}
+            :interpretation-receipts
+            (mapv (fn [p] {:pattern p :admitted-by :test-suite :as-of "2026-09-17"})
+                  patterns)}
+   :controller-score g
+   :rank 1})
 
-(defn- record-at
-  "Load a past revision's trace implementation under a parallel namespace and
-   build a record with it. This is the cross-version control: it does not
-   restate the current strip logic."
-  [sha ns-suffix judge-output]
-  (let [{:keys [exit out err]}
-        (shell/sh "git" "show" (str sha ":src/futon2/aif/trace.clj"))]
-    (when-not (zero? exit)
-      (throw (ex-info "could not load previous trace implementation"
-                      {:sha sha :err err})))
-    (load-string
-     (str/replace-first out
-                        "(ns futon2.aif.trace"
-                        (str "(ns futon2.aif.trace-" ns-suffix)))
-    ;; The parallel namespace has its OWN copy of the policy-detail var, which
-    ;; reads the env at load. Without this the "flag on" comparison would put a
-    ;; details-on record beside a details-off one and fail for a reason that has
-    ;; nothing to do with the change under test.
-    (let [old-ns (symbol (str "futon2.aif.trace-" ns-suffix))]
-      (with-bindings {(ns-resolve old-ns '*persist-policy-trace-details?*)
-                      trace/*persist-policy-trace-details?*}
-        ((ns-resolve old-ns 'trace-record) judge-output)))))
+(defn- cascade-decision
+  "A REAL cascade decision from policy/select-action-cascades (SPEC
+   flat-removal H4): posterior, beta, softmax-weights over first acting
+   patterns, receipts intact."
+  []
+  (policy/select-action-cascades
+   [(cascade-entry "c-alpha" [:aif/placeholder-is-load-bearing] 1.0)
+    (cascade-entry "c-beta" [:aif/belief-state-operational-hypotheses] 2.0)]
+   {:beta 2.0}))
 
-(defn- previous-trace-record [judge-output]
-  (record-at pre-beta-dark-trace-sha "previous" judge-output))
-
-(def ^:private i5-retired-keys
-  "The two keys whose difference from the pinned historical anchors below is
-   DELIBERATE and belongs to I5 slice (c) rather than to any flag: the retired
-   scalar F, and the producer contract that declares its retirement.
-
-   The anchors are NOT re-pinned to HEAD. Re-pinning would turn each control's
-   claim from `this flag adds nothing to the record` into `the last commit
-   changed nothing` -- exactly the rot `pre-beta-dark-trace-sha` was pinned to
-   avoid. So the anchors stay and the comparison drops these two keys from both
-   sides, which keeps every remaining byte under the control."
-  [:variational-free-energy :producer-contract])
-
-(defn- modulo-i5
-  "A record with the I5-retired keys removed, for comparison against an anchor
-   written before the retirement."
-  [record]
-  (apply dissoc record i5-retired-keys))
+(defn- real-abstention
+  "A REAL typed abstention: the refusals come from cascade-problems/assemble
+   over an unsupplied target, so their kinds are the gate's closed set."
+  []
+  {:status :abstained
+   :refusals (:refusals
+              (cascade-problems/assemble
+               {:targets ["M-test-absent"]
+                :sources {:horizon-steps 3}}))})
 
 (def ^:private sample-judge-output
-  "Minimal judge-style output covering the trace-record fields."
+  "Minimal judge-style output covering the trace-record fields, in the
+   cascade-only decision shape (SPEC flat-removal H4, 2026-09-17)."
   {:belief (belief/initial-belief-state [:m1])
    :observation {:loop-health 0.7 :stack-pct 0.2}
    :free-energy {:preference-gap-score 0.05 :coverage-uncertainty-pressure 0.10 :controller-score 0.075
                  :per-channel {:loop-health {:value 0.7 :gap 0.0 :in-range? false}}
                  :avoided-active []}
-   :ranked-actions [{:action {:type :no-op}
-                     :G-risk 0.05 :G-ambiguity 0.0 :structural-pressure 0.0
-                     :goal-outcome-replay-inputs
-                     {:version 1
-                      :c-entries [{:outcome-ref {:id :goal/x}
-                                   :status :open :weight {:value 0.4}
-                                   :preferred {:op :becomes :value :closed}}]
-                      :entry-evaluations
-                      [{:outcome-ref {:id :goal/x} :advanced? false
-                        :q-sat {:status :present :value 0.0}}]}
-                     :controller-score 0.05 :rank 1
-                     :preference-stack [{:layer/id :floor :folded? true}]
-                     :prediction {:next-observation
-                                  {:mean {:loop-health 0.8 :stack-pct 0.3}
-                                   :variance {:loop-health 0.02 :stack-pct 0.01}}
-                                  :next-belief {:huge :nested}}}
-                    {:action {:type :address-sorry :target :sorry/x}
-                     :G-risk 0.03 :G-ambiguity 0.015 :structural-pressure 0.7
-                     :controller-score 0.045 :rank 2
-                     :preference-stack [{:layer/id :floor :folded? true}]
-                     :prediction {:next-observation
-                                  {:mean {:loop-health 0.6 :stack-pct 0.4}}
-                                  :next-belief {:also :stripped}}}]
-   :decision {:action {:type :no-op}
-              :rank 1 :controller-score 0.05 :tau 0.2
-              :softmax-weights {{:type :no-op} 0.75
-                                {:type :address-sorry :target :sorry/x} 0.25}}
+   :cascade-problems {:problems [] :refusals (:refusals (real-abstention))}
+   :decision (cascade-decision)
    :mode :multiplied})
 
 (deftest trace-record-retains-depth-input-and-effective-depth-test
@@ -150,8 +108,10 @@
       ;; not an omission the reader should tolerate.
       (is (not (contains? r :variational-free-energy)))
       (is (= :r8/retired-f-controller-v1 (:producer-contract r)))
-      (is (contains? r :ranked-actions))
+      (is (not (contains? r :ranked-actions))
+          "the flat ranked-action field cannot be produced (schema 30)")
       (is (contains? r :decision))
+      (is (contains? r :cascade-problems))
       (is (contains? r :mode)))))
 
 (deftest route-roundtrips-in-hop-order-test
@@ -224,15 +184,6 @@
                            (assoc sample-judge-output :run/id "run-7"))))
       "and a producer that has one persists it verbatim"))
 
-(deftest f-pi-dark-off-is-byte-identical-to-previous-implementation-test
-  (testing "the default-off record matches HEAD~ byte-for-byte apart from its clock"
-    (binding [trace/*persist-policy-trace-details?* false]
-      (let [now (trace/trace-record sample-judge-output)
-            before (previous-trace-record sample-judge-output)
-            fix-clock #(assoc (modulo-i5 %) :timestamp "<same-instant>")]
-        (is (= (pr-str (fix-clock before))
-               (pr-str (fix-clock now))))))))
-
 (deftest f-pi-dark-fields-roundtrip-when-supplied-test
   (let [details {:f-pi-by-candidate-id
                  {"rank/1" {:status :present :value 1.25}
@@ -278,260 +229,6 @@
   (trace/write-trace! sample-judge-output :dir *tmpdir* :date-str "2026-08-31")
   (let [[record] (trace/read-trace :dir *tmpdir* :date-str "2026-08-31")]
     (is (= trace/r8-producer-contract (:producer-contract record)))))
-
-(deftest support-typed-scoring-shadow-is-non-authoritative-test
-  (let [ranked [{:action {:type :a} :rank 1 :controller-score 0.0
-                 :support-shadow-terms
-                 {:by-channel {:loop-health -2.0}
-                  :non-channel-contribution 2.0}}
-                {:action {:type :b} :rank 2 :controller-score 1.0
-                 :support-shadow-terms
-                 {:by-channel {:loop-health 2.0}
-                  :non-channel-contribution -1.0}}]
-        output (assoc sample-judge-output
-                      :observation (observation/observe {})
-                      :ranked-actions ranked)
-        ;; The final assertion pins the default-off decision shape; bind the
-        ;; details flag so the ambient FUTON_WM_TRACE_POLICY_DETAILS cannot
-        ;; add :softmax-weights-by-candidate-id to the stripped decision.
-        record (binding [trace/*persist-policy-trace-details?* false]
-                 (trace/trace-record output))
-        shadow (:support-typed-scoring-shadow record)]
-    (is (= :shadow-only (:authority shadow)))
-    (is (= [2.0 -1.0]
-           (mapv :support-typed-score (:candidates shadow))))
-    (is (true? (get-in shadow [:comparison :winner-changed?])))
-    (is (= (dissoc (:decision sample-judge-output) :softmax-weights)
-           (:decision record))
-        "the counterfactual cannot feed back into the live decision")))
-
-(deftest measured-zero-remains-in-shadow-support-test
-  (let [ranked [{:action {:type :a} :rank 1 :controller-score 0.0
-                 :support-shadow-terms
-                 {:by-channel {:loop-health -2.0}
-                  :non-channel-contribution 2.0}}]
-        output (assoc sample-judge-output
-                      :observation
-                      (observation/observe {:loop-health {:overall 0.0}})
-                      :ranked-actions ranked)
-        candidate (get-in (trace/trace-record output)
-                          [:support-typed-scoring-shadow :candidates 0])]
-    (is (= [:loop-health] (:support candidate)))
-    (is (= 0.0 (:support-typed-score candidate)))
-    (is (false? (:would-rank-differently candidate)))))
-
-(deftest trace-record-strips-prediction-field-test
-  (testing "ranked-actions in trace drop the heavy :prediction field"
-    (let [r (trace/trace-record sample-judge-output)
-          rs (:ranked-actions r)]
-      (is (every? #(not (contains? % :prediction)) rs)
-          "trace ranked-actions don't carry :prediction"))
-    (let [r (trace/trace-record sample-judge-output)
-          rs (:ranked-actions r)]
-      (is (= [0.0 0.7] (mapv :structural-pressure rs))
-          "trace preserves the structural-pressure term in ranked-actions"))))
-
-(def ^:private machine-q-support
-  [[:organization :abstained] [:organization :agent-unavailable]])
-
-(defn- machine-q-pair [policy-id q-mass]
-  (let [c-mass (zipmap machine-q-support [0.5 0.5])]
-    {:q {:policy/id policy-id :authority {:authority :declared-prior :name "A-v1"}
-         :model {:id "wm" :revision "v1"} :support machine-q-support
-         :mass q-mass :pins {:A "sha-a" :model "sha-model"}}
-     :c {:model {:id "wm" :revision "v1"} :support machine-q-support
-         :mass c-mass :provenance {:source "ruled-C" :sha256 "sha-c"}}
-     :risk {:ok true :policy/id policy-id :risk 0.1}
-     :weight 2.0 :G-machine-q-risk 0.2}))
-
-(defn- machine-q-output []
-  (update sample-judge-output :ranked-actions
-          (fn [actions]
-            (mapv (fn [action pair] (assoc action :machine-q pair)) actions
-                  [(machine-q-pair "policy-1" (zipmap machine-q-support [0.75 0.25]))
-                   (machine-q-pair "policy-2" (zipmap machine-q-support [0.25 0.75]))]))))
-
-(deftest machine-q-pairs-survive-write-read-exactly-test
-  (let [output (machine-q-output)
-        expected (mapv :machine-q (:ranked-actions output))]
-    (trace/write-trace! output :dir *tmpdir* :date-str "2026-09-12")
-    (let [[record] (trace/read-trace :dir *tmpdir* :date-str "2026-09-12")]
-      (is (= expected (mapv :machine-q (:ranked-actions record))))
-      (is (= 2 (count expected))))))
-
-(deftest incomplete-or-reordered-machine-q-refuses-before-append-test
-  (doseq [[expected mutate]
-          [[:machine-q-missing-q #(update-in % [:ranked-actions 0 :machine-q] dissoc :q)]
-           [:machine-q-missing-c #(update-in % [:ranked-actions 0 :machine-q] dissoc :c)]
-           [:support-mismatch #(update-in % [:ranked-actions 0 :machine-q :c :support]
-                                          (comp vec reverse))]]]
-    (let [path (io/file *tmpdir* "wm-trace-2026-09-12.edn")]
-      (is (= expected
-             (try (trace/write-trace! (mutate (machine-q-output))
-                                      :dir *tmpdir* :date-str "2026-09-12")
-                  nil
-                  (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e))))))
-      (is (not (.exists path)) "refusal occurs before any append"))))
-
-(deftest record-without-machine-q-remains-machine-q-free-test
-  (let [record (trace/trace-record sample-judge-output)]
-    (is (every? #(not (contains? % :machine-q)) (:ranked-actions record)))))
-
-(deftest goal-outcome-replay-inputs-survive-trace-test
-  (let [expected (get-in sample-judge-output
-                         [:ranked-actions 0 :goal-outcome-replay-inputs])
-        actual (get-in (trace/trace-record sample-judge-output)
-                       [:ranked-actions 0 :goal-outcome-replay-inputs])]
-    (is (= expected actual))
-    (is (= {:status :present :value 0.0}
-           (get-in actual [:entry-evaluations 0 :q-sat]))
-        "zero probability survives as a present value")))
-
-(deftest preference-stack-survives-trace-with-typed-presence-test
-  (let [rec (trace/trace-record sample-judge-output)
-        evidence (:preference-stack rec)]
-    (is (= :present (:status evidence)))
-    (is (= :all-ranked-actions (:scope evidence)))
-    (is (= 2 (:candidate-count evidence)))
-    (is (= [{:layer/id :floor :folded? true}] (:value evidence)))
-    (is (every? #(not (contains? % :preference-stack)) (:ranked-actions rec))
-        "the identical 2.6KB stack is stored once, not repeated per candidate")))
-
-(deftest preference-stack-empty-is-not-absence-test
-  (let [output (assoc sample-judge-output :ranked-actions
-                      [{:rank 1 :action {:type :no-op} :preference-stack []}])]
-    (is (= {:status :present :scope :all-ranked-actions
-            :candidate-count 1 :value []}
-           (:preference-stack (trace/trace-record output))))))
-
-(deftest preference-stack-absence-and-conflict-are-loud-test
-  (let [missing (assoc sample-judge-output :ranked-actions
-                       [{:rank 1 :action {:type :no-op}}])
-        conflict (assoc sample-judge-output :ranked-actions
-                        [{:rank 1 :preference-stack [{:layer/id :floor}]}
-                         {:rank 2 :preference-stack [{:layer/id :habit-prior}]}])]
-    (is (= {:status :absent :reason :not-recorded-by-evaluator}
-           (:preference-stack (trace/trace-record missing))))
-    (is (= :conflict
-           (get-in (trace/trace-record conflict) [:preference-stack :status])))))
-
-(deftest preference-stack-write-read-preservation-test
-  (let [_ (trace/write-trace! sample-judge-output
-                              :dir *tmpdir* :date-str "2026-08-31")
-        [record] (trace/read-trace :dir *tmpdir* :date-str "2026-08-31")]
-    (is (= (:preference-stack (trace/trace-record sample-judge-output))
-           (:preference-stack record)))))
-
-(deftest trace-record-strips-softmax-weights-test
-  (testing "decision in trace drops :softmax-weights (non-stringable keys)"
-    (let [r (trace/trace-record sample-judge-output)]
-      (is (not (contains? (:decision r) :softmax-weights))
-          "decision in trace doesn't carry :softmax-weights"))))
-
-(deftest policy-trace-details-flag-off-is-byte-identical-test
-  ;; The point of this test is that the DEFAULT record did not change when I3
-  ;; landed. An assertion that re-lists the whitelist cannot show that: it
-  ;; restates the current implementation, so it passes for any edit made in
-  ;; both places. The golden below was captured by running the PRE-I3
-  ;; `trace-record` (git 5febaee^) and the current one over the same input in
-  ;; one process and confirming the serialized bytes were equal. What is pinned
-  ;; here is therefore the pre-I3 output, not a description of today's code.
-  (binding [trace/*persist-policy-trace-details?* false]
-    ;; The golden FILE is left exactly as captured; only the comparison changes,
-    ;; dropping the two keys I5 slice (c) retired from both sides (see
-    ;; `i5-retired-keys`). Re-capturing the file would delete the pre-I3 claim
-    ;; this test exists to make.
-    (let [golden (str/trim-newline
-                  (slurp (io/resource "futon2/aif/trace-flag-off-golden.txt")))
-          strip #(pr-str (modulo-i5 (dissoc % :timestamp)))
-          golden' (strip (edn/read-string golden))
-          actual' (strip (trace/trace-record sample-judge-output))]
-      (is (= (count golden') (count actual'))
-          "flag-off record changed size against the pre-I3 bytes")
-      (is (= golden' actual')
-          "flag-off record is no longer byte-identical to the pre-I3 record"))))
-
-(deftest policy-trace-details-flag-on-roundtrip-test
-  (binding [trace/*persist-policy-trace-details?* true]
-    (let [weights {{:type :no-op} 0.75
-                   {:type :address-sorry :target :sorry/x} 0.25}
-          output (assoc-in sample-judge-output [:decision :softmax-weights] weights)
-          record (trace/trace-record output)
-          encoded (pr-str record)
-          decoded (edn/read-string encoded)]
-      (is (= {:loop-health 0.8 :stack-pct 0.3}
-             (get-in decoded [:ranked-actions 0 :prediction-mean])))
-      (is (not (contains? (first (:ranked-actions decoded)) :prediction))
-          "the repeated next-belief is not persisted")
-      ;; F_pi scores an observation under a DISTRIBUTION; a mean without a
-      ;; variance leaves the consumer inventing the precision.
-      (is (= {:loop-health 0.02 :stack-pct 0.01}
-             (get-in decoded [:ranked-actions 0 :prediction-variance])))
-      ;; without the mode on the record, a flat per-candidate field cannot be
-      ;; told from a machine that had no discrimination
-      (is (contains? decoded :effects-mode))
-      (is (= {"rank/1" 0.75 "rank/2" 0.25}
-             (get-in decoded [:decision :softmax-weights-by-candidate-id])))
-      (is (every? string?
-                  (keys (get-in decoded
-                                [:decision :softmax-weights-by-candidate-id])))))))
-
-(defn- complete-softmax-output []
-  (assoc-in sample-judge-output [:decision :softmax-weights]
-            (into {} (map (juxt :action #(double (:rank %)))
-                          (:ranked-actions sample-judge-output)))))
-
-(deftest softmax-rank-join-reconstructs-action-keyed-posterior-test
-  (binding [trace/*persist-policy-trace-details?* true]
-    (let [output (complete-softmax-output)
-          expected (get-in output [:decision :softmax-weights])]
-      (trace/write-trace! output :dir *tmpdir* :date-str "2026-09-12")
-      (let [[record] (trace/read-trace :dir *tmpdir* :date-str "2026-09-12")
-            ranked (:ranked-actions record)
-            weights (get-in record [:decision :softmax-weights-by-candidate-id])
-            reconstructed
-            (into {} (map (fn [candidate]
-                            [(:action candidate)
-                             (get weights (str "rank/" (:rank candidate)))])
-                          ranked))]
-        (is (= expected reconstructed))
-        (is (= (count ranked) (count weights)))))))
-
-(deftest incomplete-softmax-rank-joins-refuse-before-append-test
-  (binding [trace/*persist-policy-trace-details?* true]
-    (doseq [[case-name mutate expected-detail]
-            [[:missing-weight
-              #(update-in % [:decision :softmax-weights]
-                          dissoc (get-in % [:ranked-actions 1 :action]))
-              :missing-ranked-keys]
-             [:extra-weight
-              #(assoc-in % [:decision :softmax-weights {:type :foreign}] 0.25)
-              :extra-weight-actions]
-             [:duplicate-rank
-              #(assoc-in % [:ranked-actions 1 :rank]
-                         (get-in % [:ranked-actions 0 :rank]))
-              :duplicate-rank-keys]]]
-      (let [date-str (name case-name)
-            path (io/file *tmpdir* (str "wm-trace-" date-str ".edn"))
-            refusal (try
-                      (trace/write-trace! (mutate (complete-softmax-output))
-                                          :dir *tmpdir* :date-str date-str)
-                      nil
-                      (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-        (is (= :softmax-rank-join-incomplete (:refusal refusal)))
-        (is (seq (expected-detail refusal)))
-        (is (not (.exists path)) "rank-join refusal occurs before append")))))
-
-(deftest incomplete-softmax-is-byte-identical-when-details-are-off-test
-  (binding [trace/*persist-policy-trace-details?* false]
-    (let [incomplete (update-in (complete-softmax-output)
-                                [:decision :softmax-weights]
-                                dissoc (get-in sample-judge-output
-                                               [:ranked-actions 1 :action]))
-          without-weights (update incomplete :decision dissoc :softmax-weights)
-          strip-time #(dissoc % :timestamp)]
-      (is (= (strip-time (trace/trace-record without-weights))
-             (strip-time (trace/trace-record incomplete)))))))
 
 (deftest trace-record-pure-test
   (testing "trace-record is pure (modulo timestamp): same input → same shape"
@@ -799,60 +496,6 @@
 ;; M-evaluate-policies D1a (2026-07-03) — whitelist covers the blend's terms
 ;; ---------------------------------------------------------------------------
 
-(deftest strip-ranked-action-whitelist-test
-  (testing "I4: every term entering :controller-score survives the trace strip"
-    (let [entry {:action {:type :no-op}
-                 :G-risk 1.0 :G-ambiguity 2.0 :predictability-bonus 0.1 :homeostatic-pressure 0.2
-                 :structural-pressure 0.3 :G-goal-outcome 0.4
-                 :gap-exploration-bonus 0.5 :graph-control-score 0.6 :G-core 3.0
-                 :g-ambiguity-source :beta-predictive
-                 :c-zone-load {:class :survey :mass 4.0 :load-weight 0.75}
-                 :risk-mode :kl :ambiguity-mode :gaussian-entropy
-                 :predictability-control-mode :telemetry-only
-                 :homeostatic-control-mode :telemetry-only
-                 :graph-feasibility-mode :policy-support
-                 :controller-score 7.1 :rank 1
-                 :prediction {:dropme true}}
-          rec (trace/trace-record {:belief {} :observation {} :free-energy {}
-                                   :ranked-actions [entry]
-                                   :decision {:action :abstain} :mode :test})
-          kept (first (:ranked-actions rec))]
-      (doseq [k [:gap-exploration-bonus :graph-control-score :G-core :G-goal-outcome :controller-score]]
-        (is (contains? kept k) (str k " must survive the strip")))
-      (is (= :gaussian-entropy (:ambiguity-mode kept))
-          "ambiguity-mode provenance survives the strip")
-      (is (= :beta-predictive (:g-ambiguity-source kept))
-          "learn-action ambiguity provenance survives the strip")
-      (is (= {:class :survey :mass 4.0 :load-weight 0.75}
-             (:c-zone-load kept))
-          "the named empirical C channel survives the strip")
-      (is (= :telemetry-only (:predictability-control-mode kept)))
-      (is (= :telemetry-only (:homeostatic-control-mode kept)))
-      (is (= :policy-support (:graph-feasibility-mode kept)))
-      (is (not (contains? kept :prediction)) "the deep :prediction still drops"))))
-
-(deftest policy-support-exclusions-survive-trace-test
-  (let [exclusions [{:action {:type :open-mission :target "M-off-map"}
-                     :reason :mission-absent-from-capability-graph}]
-        rec (trace/trace-record
-             (assoc sample-judge-output :policy-support-exclusions exclusions))]
-    (is (= exclusions (:policy-support-exclusions rec))
-        "the domain restriction is inspectable without replaying the scorer")))
-
-;; ---------------------------------------------------------------------------
-;; B-0a (M-aif-faithfulness §2.0) — tick provenance stamp
-;; ---------------------------------------------------------------------------
-
-(def ^:private sample-resolved-flags
-  "A resolved mode/flag set as the scheduled runner assembles it (the arena
-   fns + the live-wire switch); values here are fixtures, not env reads."
-  {:risk-mode :kl
-   :ambiguity-mode :gaussian-entropy
-   :goal-outcome-mode :kl
-   :kl-channel-weights {}
-   :c-temperature 0.1
-   :live-wire? true})
-
 (deftest wm-version-stamp-shape-test
   (testing "stamp = git identity + resolved flags + schema version"
     (let [stamp (trace/wm-version-stamp sample-resolved-flags)]
@@ -907,21 +550,6 @@
                      :observation-envelope)))
         "a current contract cannot enter the permissive legacy arm")))
 
-(deftest beta-dark-off-is-byte-identical-to-the-pinned-pre-beta-record-test
-  (testing "RUN7: with the dark beta flag off the record matches 183749a's"
-    (binding [trace/*persist-policy-trace-details?* false]
-      (let [fix-clock #(assoc (modulo-i5 %) :timestamp "<same-instant>")]
-        (is (= (pr-str (fix-clock (record-at pre-beta-dark-trace-sha
-                                             "pre-beta" sample-judge-output)))
-               (pr-str (fix-clock (trace/trace-record sample-judge-output))))
-            "no key appears, and no key moves, when the flag is off")))
-    (testing "and with the policy-detail flag on, which is the shape S2 runs in"
-      (binding [trace/*persist-policy-trace-details?* true]
-        (let [fix-clock #(assoc (modulo-i5 %) :timestamp "<same-instant>")]
-          (is (= (pr-str (fix-clock (record-at pre-beta-dark-trace-sha
-                                               "pre-beta-details" sample-judge-output)))
-                 (pr-str (fix-clock (trace/trace-record sample-judge-output))))))))))
-
 (deftest beta-dark-state-roundtrips-when-supplied-test
   (let [state {:status :present
                :beta 0.9877
@@ -969,46 +597,72 @@
      :hard-support {:status :supported} :provenance [:memory/b]}]
    :tie-break :ascending-policy-id :selected-policy-id "pi-a"})
 
-(deftest redirected-trace-retains-selection-proof-input-exactly
-  (let [date "2026-09-12"
-        output (assoc-in sample-judge-output [:decision :selection-proof-input]
-                         selection-proof-envelope)]
-    (binding [trace/*persist-policy-trace-details?* false]
-      (trace/write-trace! output :dir *tmpdir* :date-str date))
-    (is (= selection-proof-envelope
-           (get-in (first (trace/read-trace :dir *tmpdir* :date-str date))
-                   [:decision :selection-proof-input])))))
 
-(deftest selection-proof-input-refuses-before-trace-append
-  (doseq [[date envelope expected]
-          [["2026-09-09" (dissoc selection-proof-envelope :temperature)
-            :selection-proof-input-incomplete]
-           ["2026-09-10" (assoc selection-proof-envelope
-                                  :candidate-domain ["M-a"])
-            :selection-proof-support-mismatch]
-           ["2026-09-11" (assoc selection-proof-envelope
-                                  :selected-policy-id "pi-missing")
-            :selected-policy-not-in-proof-table]]]
-    (let [path (io/file *tmpdir* (str "wm-trace-" date ".edn"))
-          refusal (try
-                    (binding [trace/*persist-policy-trace-details?* false]
-                      (trace/write-trace!
-                       (assoc-in sample-judge-output
-                                 [:decision :selection-proof-input] envelope)
-                       :dir *tmpdir* :date-str date))
-                    nil
-                    (catch clojure.lang.ExceptionInfo e
-                      (:refusal (ex-data e))))]
-      (is (= expected refusal))
-      (is (false? (.exists path))))))
+;; ---------------------------------------------------------------------------
+;; Cascade-decision / abstention persistence (SPEC flat-removal H4, 2026-09-17)
 
-(deftest absent-selection-proof-input-is-byte-identical-in-both-detail-modes
-  (doseq [details? [false true]]
-    (binding [trace/*persist-policy-trace-details?* details?]
-      (let [off (trace/trace-record sample-judge-output)
-            on (trace/trace-record
-                (assoc-in sample-judge-output [:decision :selection-proof-input]
-                          selection-proof-envelope))]
-        (is (= (dissoc off :timestamp)
-               (update (dissoc on :timestamp) :decision
-                       dissoc :selection-proof-input)))))))
+(deftest cascade-decision-persists-posterior-by-candidate-id-test
+  (testing "the recorded posterior is re-keyed by candidate id; probabilities untouched"
+    (let [decision (cascade-decision)
+          record (trace/trace-record (assoc sample-judge-output :decision decision))
+          persisted (get-in record [:decision :selection-law :posterior])
+          original (get-in decision [:selection-law :posterior])]
+      (is (= #{"c-alpha" "c-beta"} (set (keys persisted))))
+      (is (= (vals original) (vals persisted))
+          "only the join key changed")
+      (is (every? string? (keys persisted)) "candidate-map keys are not stringable"))
+    (testing "and the whole decision survives: receipts, beta, softmax-weights"
+      (let [decision (cascade-decision)
+            record (trace/trace-record (assoc sample-judge-output :decision decision))]
+        (is (= (:beta decision) (get-in record [:decision :beta])))
+        (is (= (:softmax-weights decision)
+               (get-in record [:decision :softmax-weights])))
+        (is (= (:precedence (:action decision))
+               (get-in record [:decision :action :precedence])))
+        (is (contains? (get-in record [:decision :action]) :construction-receipt))
+        (is (contains? (get-in record [:decision :action]) :interpretation-receipts))))))
+
+(deftest cascade-decision-is-gate-admissible-test
+  (testing "the fixture decision is a real one: the decision gate admits it"
+    (is (= (cascade-decision) (decision-gate/emit! (cascade-decision))))))
+
+(deftest abstention-persists-refusals-test
+  (testing "an abstention persists its typed refusals, and nothing else is decided"
+    (let [abstention (real-abstention)
+          record (trace/trace-record (assoc sample-judge-output :decision abstention))]
+      (is (= :abstained (get-in record [:decision :status])))
+      (is (= (:refusals abstention) (get-in record [:decision :refusals])))
+      (is (= (:refusals abstention)
+             (get-in record [:cascade-problems :refusals]))))))
+
+(deftest abstention-is-gate-admissible-test
+  (is (= (real-abstention) (decision-gate/emit! (real-abstention)))))
+
+(deftest flat-decision-refuses-at-the-gate-test
+  (testing "a flat {:action {:type ...}} decision cannot be re-admitted anywhere"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Inadmissible decision"
+                          (decision-gate/emit! {:action {:type :no-op} :rank 1})))))
+
+(deftest unidentifiable-candidate-refuses-before-append-test
+  (testing "a posterior candidate with no stable id refuses rather than hash-keying"
+    (let [decision (assoc-in (cascade-decision)
+                             [:selection-law :posterior]
+                             {{:kind :cascade-candidate :precedence [:x]} 1.0})]
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo #"no stable id"
+                            (trace/trace-record
+                             (assoc sample-judge-output :decision decision)))))))
+
+(deftest no-ranked-actions-anywhere-test
+  (testing "no flat field can appear on a v30 record, whatever the input carries"
+    (let [record (trace/trace-record
+                  (assoc sample-judge-output
+                         :ranked-actions [{:action {:type :no-op} :rank 1}]
+                         :admissible-actions [{:action {:type :no-op}}]
+                         :policy-support-exclusions []
+                         :operator-actions []
+                         :default-mode-events []
+                         :cascade-policies []
+                         :selection-gain nil))]
+      (doseq [k [:ranked-actions :admissible-actions :policy-support-exclusions
+                 :operator-actions :default-mode-events :cascade-policies]]
+        (is (not (contains? record k)) (str k " retired at schema 30"))))))

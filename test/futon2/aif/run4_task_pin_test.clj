@@ -1,7 +1,6 @@
 (ns futon2.aif.run4-task-pin-test
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.c-fold-config :as digest]
-            [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.run4-task-pin :as pin]))
 
 (def mission
@@ -71,12 +70,6 @@
               :principal "Joe/session-authenticated"
               :pin-sha256 pin-digest})}
           overrides)))
-
-(defn selection-failure [opts judgement]
-  (try
-    (runner/resolve-pinned-selection opts judgement casting)
-    nil
-    (catch clojure.lang.ExceptionInfo e (ex-data e))))
 
 (deftest validates-identity-without-authorizing-execution
   (let [text (pin-text base-pin)
@@ -175,69 +168,3 @@
               nil
               (catch clojure.lang.ExceptionInfo e (:reason (ex-data e)))))))
 
-(deftest guarded-runner-selection-is-exact-and-counterfactual-is-retained
-  (is (nil? (runner/resolve-pinned-selection {} policy-judgement casting))
-      "absent opt-in is the ordinary-path identity")
-  (let [selection (runner/resolve-pinned-selection
-                   (pinned-opts) policy-judgement casting)]
-    (is (= pinned-action (get-in selection [:entry :action])))
-    (is (= "M-kangaroo" (get-in selection [:identity :mission-id])))
-    (is (= (:decision policy-judgement) (:counterfactual selection)))
-    (is (= (:decision policy-judgement)
-           (get-in selection [:provenance :ordinary-selector-decision])))
-    (is (= :authenticated
-           (get-in selection [:provenance :authority-attestation :status])))))
-
-(deftest guarded-runner-selection-refuses-before-an-entry-is-returned
-  (testing "authentication is a trusted function result, never a request boolean"
-    (is (= :incomplete-pinned-selection-options
-           (:failure-detail
-            (selection-failure
-             (dissoc (pinned-opts) :run4-trusted-boundary-fn)
-             policy-judgement))))
-    (is (= :pinned-authority-unauthenticated
-           (:failure-detail
-            (selection-failure
-             (pinned-opts {:run4-trusted-boundary-fn (constantly true)})
-             policy-judgement)))))
-  (testing "current candidate and admissible evidence must contain the exact action"
-    (doseq [ranked [nil [] {} [{:rank 1 :action :malformed}]]]
-      (is (= :missing-or-malformed-ranked-evidence
-             (:failure-detail
-              (selection-failure
-               (pinned-opts)
-               (assoc policy-judgement :ranked-actions ranked))))))
-    (doseq [admissible [nil [] {} [{:rank 1 :action :malformed}]]]
-      (is (= :missing-or-malformed-admissible-evidence
-             (:failure-detail
-              (selection-failure
-               (pinned-opts)
-               (assoc policy-judgement :admissible-actions admissible))))))
-    (is (= :pinned-action-not-candidate
-           (:failure-detail
-            (selection-failure
-             (pinned-opts)
-             (assoc policy-judgement :ranked-actions
-                    [{:rank 1 :action ordinary-action :controller-score 0.1}])))))
-    (is (= :pinned-action-not-admissible
-           (:failure-detail
-            (selection-failure
-             (pinned-opts)
-             (assoc policy-judgement :admissible-actions
-                    [{:rank 1 :action ordinary-action :controller-score 0.1}]))))))
-  (testing "freshness and casting are rechecked at the deciding boundary"
-    (is (= :stale-source
-           (:pin-refusal
-            (selection-failure
-             (pinned-opts
-              {:run4-task-pin-ports
-               (assoc (ports) :read-text
-                      #(if (= % "packet.md") "changed\n" (files %)))})
-             policy-judgement))))
-    (is (= :pinned-casting-mismatch
-           (:failure-detail
-            (try
-              (runner/resolve-pinned-selection
-               (pinned-opts) policy-judgement (assoc casting :author "codex-10"))
-              nil
-              (catch clojure.lang.ExceptionInfo e (ex-data e))))))))

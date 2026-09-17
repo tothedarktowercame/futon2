@@ -13,10 +13,7 @@
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.pattern-registry :as patterns]
-            [futon2.aif.mission-registry :as mission-registry]
-            [futon2.aif.action-proposer :as proposer]
             [futon2.aif.repair-obligation :as repair]
-            [futon2.aif.run4-task-pin :as run4-pin]
             [futon2.aif.tripwire :as tripwire]
             [futon2.aif.trace :as trace]
             [futon2.report.cascade-lane :as cascade]
@@ -1318,101 +1315,6 @@
            (mapv :phase @phases)))
     (is (= #{:selection :construction :dispatch :build :adjudication}
            (set (keys (:checkpoints result)))))))
-
-(deftest authenticated-run4-pin-enters-normal-gated-runner-path
-  (let [pinned-action (get-in judgement [:ranked-actions 0 :action])
-        digest (apply str (repeat 64 "a"))
-        constructed (atom nil)
-        dispatches (atom [])
-        pinned-judgement (assoc judgement :admissible-actions
-                                (:ranked-actions judgement))
-        envelope {:task-pin {:sha256 digest :digest-semantics :exact-utf8-pin-bytes
-                             :series-id "RUN4" :trial-id :outer-loop
-                             :selected-task-id :outer-loop
-                             :ordered-task-ids [:outer-loop :math :caption :monitor]}
-                  :casting {:author "zai-5" :reviewer "codex-7"
-                            :repair-reviewer "codex-1"}
-                  :operator-selection {:operator "Joe" :authority-ref "SERIES.edn"}
-                  :mission-action {:mission {:id "M-rank-head"}
-                                   :action pinned-action}}
-        opts (merge
-              (isolated-runner-opts)
-              {:repair-open-fn (constantly [])
-               :judge-fn (fn [_] {:judgement pinned-judgement})
-               :repair-system-record-fn
-               (fn [finding] (assoc finding :repair/id "test/run4-refusal"))
-               :trace-fn (constantly "/tmp/test-run4-trace.edn")
-               :construction-wiring-fn enriched-test-fold
-               :construct-fn (fn [entry]
-                               (reset! constructed entry)
-                               {:shown [] :psi :psi :cascade-score 1.0
-                                :semilattice [] :policy-holes []})
-               :dispatch-fn (fn [_ agent _ _ _]
-                              (swap! dispatches conj agent)
-                              {:job-id (if (= agent "zai-5") "author" "reviewer")})
-               :poll-fn (fn [_ job-id]
-                          (if (= job-id "author")
-                            {:job-id job-id :state "done" :artifact-ref "abc123"
-                             :feature-card feature-card-claim
-                             :execution successful-execution
-                             :events [{:text "FULL_LOOP_AUTHOR: DONE abc123"}]}
-                            {:job-id job-id :state "done"
-                             :execution successful-execution
-                             :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
-               :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
-               :ground-fn (fn [& _] {:resolved? true :dial-moved? true
-                                     :implementation-id "run4-impl"
-                                     :discharge-id "run4-discharge"})
-               :run4-task-pin-text "{:exact :pin-bytes}"
-               :run4-task-pin-ports {:read-text identity
-                                     :resolve-mission identity
-                                     :action-admissible? (constantly true)}
-               :run4-trusted-boundary-fn
-               (fn [{:keys [pin-digest]}]
-                 {:status :authenticated :boundary :trusted-serving-context
-                  :principal "Joe/session-authenticated"
-                  :pin-sha256 pin-digest})})]
-    (with-redefs [run4-pin/validate (fn [_ _] envelope)]
-      (let [result (runner/run-opportunity! opts)]
-        (is (= :grounded-change (:outcome result)))
-        (is (= pinned-action (:action @constructed)))
-        (is (= ["zai-5" "codex-7"] @dispatches)
-            "the existing author/reviewer arm and its gates were reached")
-        (is (= "RUN4" (get-in result [:checkpoints :selection :ground
-                                      :run4/task-pin :series-id])))
-        (is (= :habit-prior
-               (get-in result [:checkpoints :selection :ground
-                               :decision :source]))
-            "ordinary selection remains recorded as the counterfactual")
-        (is (= :outer-loop
-               (get-in result [:checkpoints :construction :judgment
-                               :run4/task-pin :trial-id]))))
-      (reset! dispatches [])
-      (let [root (.getPath (.toFile (Files/createTempDirectory
-                                    "pinned-refusal-cohort" (make-array FileAttribute 0))))
-            path (str root "/cohort.edn")
-            raw (pr-str (-> (edn/read-string (slurp cohort/default-preregistration))
-                            (assoc :cohort/id :pinned-refusal-test)
-                            (assoc-in [:stopping-rule :target] 1)))
-            _ (spit path raw)
-            _ (cohort/activate! path root)
-            authority {:preregistration path :data-root root
-                       :cohort-id :pinned-refusal-test :sha256 (digest/sha256 raw)}
-            refused (runner/run-opportunity!
-                     (assoc opts :cohort? true :execution-cohort authority :judge-fn
-                            (fn [_]
-                              {:judgement
-                               (dissoc pinned-judgement :admissible-actions)})))]
-        (is (= :guardrail-refusal (:outcome refused)))
-        (is (= :guardrail-refusal
-               (:outcome (cohort/closed-execution authority "attempt-001"))))
-        (is (= :pinned-selection-refused (get-in refused [:data :failure-kind])))
-        (is (= :missing-or-malformed-admissible-evidence
-               (get-in refused [:data :repair-obligation :failure-data :failure-detail])))
-        (is (= :missing-or-malformed-admissible-evidence
-               (get-in refused [:data :failure-detail])))
-        (is (empty? @dispatches)
-            "missing admissible evidence refuses before author dispatch")))))
 
 (deftest reviewer-prompt-cannot-supply-its-own-approval
   (let [job {:result-summary "FULL_LOOP_REVIEW: REQUEST_CHANGES live seam remains optional"
@@ -4633,42 +4535,6 @@
                       :outcome :agent-unavailable :cohort? true
                       :external-attempt-id bid :repair-root repair/default-root})))))
 
-
-(deftest pinned-mission-identity-retains-real-proposer-action
-  (let [action {:type :advance-mission :target "M-u88-contextual-preferences"}
-        mission {:id (:target action) :path "/disposable/M-u88.md"
-                 :title "U88" :status-class :open :open-hole-count 1}
-        candidate (first (proposer/propose mission-registry/mission-enumerator-proposer
-                                          {:missions [mission]}))
-        entry {:rank 1 :action candidate}
-        casting {:author "codex-20" :reviewer "zai-1" :repair-reviewer "zai-1"}
-        envelope {:task-pin {:sha256 "digest"} :casting casting
-                  :mission-action {:action action :mission mission}}
-        opts {:run4-task-pin-text "pin" :run4-task-pin-ports {}
-              :run4-trusted-boundary-fn
-              (constantly {:status :authenticated :boundary :trusted-serving-context
-                           :principal "Joe" :pin-sha256 "digest"})}
-        judge {:ranked-actions [entry] :admissible-actions [entry]
-               :decision {:action {:type :no-op}}}
-        refusal (fn [j] (try (runner/resolve-pinned-selection opts j casting)
-                             (catch clojure.lang.ExceptionInfo e
-                               (:failure-detail (ex-data e)))))]
-    (with-redefs [run4-pin/validate (fn [& _] envelope)]
-      (let [selected (runner/resolve-pinned-selection opts judge casting)]
-        (is (not= action candidate))
-        (is (= entry (:entry selected)))
-        (is (= candidate (get-in selected [:provenance :enacted-candidate-action])))
-        (is (= action (get-in selected [:identity :action]))))
-      (is (= :ambiguous-pinned-candidate
-             (refusal (assoc judge :ranked-actions [entry entry]))))
-      (is (= :ambiguous-pinned-admissibility
-             (refusal (assoc judge :admissible-actions [entry entry]))))
-      (is (= :pinned-candidate-admissibility-mismatch
-             (refusal (assoc-in judge [:admissible-actions 0 :action :open-hole-count] 2))))
-      (is (= :pinned-action-not-candidate
-             (refusal (assoc-in judge [:ranked-actions 0 :action :target] "M-other"))))
-      (is (= :pinned-action-not-candidate
-             (refusal (assoc-in judge [:ranked-actions 0 :action :type] :open-mission)))))))
 
 (deftest ^:slow commissioned-repository-wins-over-shared-worktree-objects
   (let [root (.toFile (Files/createTempDirectory "wm-commissioned-repo-"

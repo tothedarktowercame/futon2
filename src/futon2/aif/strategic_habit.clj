@@ -43,27 +43,57 @@
         (throw (ex-info "invalid strategic habit store" {:state state})))
       state)))
 
+(defn first-acting-pattern
+  "The enacted step of a cascade decision's chosen candidate: the first
+   element of its :precedence (the same projection
+   futon2.aif.decision-gate/first-acting-pattern and policy.clj's
+   cascade-first-action use). Nil for anything that is not a cascade
+   candidate with a non-empty precedence."
+  [decision]
+  (let [action (:action decision)]
+    (when (and (map? action)
+               (= :cascade-candidate (:kind action))
+               (seq (:precedence action)))
+      (first (:precedence action)))))
+
+(defn abstention?
+  "A typed abstention {:status :abstained :refusals […]}. An abstention
+   enacts nothing, so there is no selection to observe."
+  [decision]
+  (and (map? decision) (= :abstained (:status decision))))
+
 (defn accumulate
-  "Fold the final recorded policy identity, not its scheduler action. Replays
-   of an identical event are idempotent; conflicting event ids refuse."
+  "Fold the enacted first acting pattern of the chosen cascade — the policy
+   identity the tick actually enacted — not a flat action (SPEC
+   flat-removal H4, Joe's 2026-09-17 ruling). An abstention observes
+   NOTHING: the store is returned unchanged with the abstention recorded
+   nowhere, because no policy acted. Replays of an identical event are
+   idempotent; conflicting event ids refuse."
   [previous decision event-id captured-at]
-  (let [state (load-state previous)
-        policy-id (:selected-policy-id decision)
-        event {:grain :strategic :policy-id policy-id :captured-at captured-at
-               :boundary :reason-bearing-strategic-policy}]
-    (when-not (and (= :reason-bearing-strategic-policy
-                     (:selection-boundary decision))
-                   (text? policy-id) (text? event-id) (text? captured-at))
-      (throw (ex-info "insufficient strategic selection identity"
-                      {:decision decision :event-id event-id :captured-at captured-at})))
-    (if-let [old (get-in state [:events event-id])]
-      (if (= old event) state
-          (throw (ex-info "conflicting strategic selection event" {:event-id event-id})))
-      (-> state
-          (dissoc :empty-reason)
-          (assoc :status :accumulating :captured-at captured-at)
-          (assoc-in [:events event-id] event)
-          (update-in [:counts policy-id] (fnil inc 0))))))
+  (let [state (load-state previous)]
+    (cond
+      (abstention? decision) state
+
+      :else
+      (let [pattern (first-acting-pattern decision)
+            policy-id (some-> pattern str)
+            event {:grain :strategic :policy-id policy-id :captured-at captured-at
+                   :boundary :reason-bearing-strategic-policy}]
+        (when-not (and (= :reason-bearing-strategic-policy
+                          (:selection-boundary decision))
+                       (text? policy-id) (text? event-id) (text? captured-at))
+          (throw (ex-info "insufficient strategic selection identity"
+                          {:decision decision :event-id event-id
+                           :captured-at captured-at})))
+        (if-let [old (get-in state [:events event-id])]
+          (if (= old event) state
+              (throw (ex-info "conflicting strategic selection event"
+                              {:event-id event-id})))
+          (-> state
+              (dissoc :empty-reason)
+              (assoc :status :accumulating :captured-at captured-at)
+              (assoc-in [:events event-id] event)
+              (update-in [:counts policy-id] (fnil inc 0))))))))
 
 (defn carry
   "Off carries an existing store unchanged, and adds nothing to legacy traces."
