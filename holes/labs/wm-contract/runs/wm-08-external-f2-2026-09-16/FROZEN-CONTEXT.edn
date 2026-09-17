@@ -1,0 +1,52 @@
+{:schema :wm/find-occurrence-context-v1
+ :captured-by "zai-6"
+ :captured-at "2026-09-17T18:59:08Z"
+ :occurrence
+ {:record
+  {:path "holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/redo/interpreted-pattern-set.edn"
+   :sha256 "b2126ceaea3e927d9e3d26b5ad14bd4899ac65d20283e401e7b65e3bfcc92d23"}
+  :target
+  {:id "M-zaif-harness-v1"
+   :source
+   {:path "holes/missions/M-zaif-harness-v1.md"
+    :sha256 "37607fbfe84ab31cec68c15f5f205a6628322f99cd2a02a9034612a3e1eab505"}}
+  :repository-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+  :pinned-at "2026-09-15T13:02:32Z"
+  :source-digests
+  {;; Library pattern sources, id -> flexiarg file sha256.
+   ;; Each value re-verified against the file bytes on disk 2026-09-17 and
+   ;; equal to the digest pinned inside the occurrence record.
+   agent/provisional-claims-ledger "45e15a3b93d6df27e429ef450b48d4890a26a40fd26611c778d6fb88dfd4e807"
+   agent/evidence-over-assertion "f73a72b6d4d885810f7f8effbed190165d9a3ca06b45f70ce9959d76916eee36"
+   coordination/session-durability-check "94ec03f3fe051f99e9d4dac39df9f3ac08140903ef17cf56372466000b294e88"
+   coordination/cross-validation-protocol "dfddc39743a68f62ee1c7d1f1d0295771542ce5994e0b3b01a10d3040e932511"
+   war-machine/operational-not-decorative "f395d5b7fa939c379bd9eb83f666a1cd60c79c92606b5afeed33621f08ed437e"
+   sidecar/append-only-semantic-audit "20b4c6ea725c9636f768742d372d0862eb3a872bb21b42ba14724c96be892f4e"
+   stack-coherence/maturity-evidence-audit "1116322c08771211ef85f4186475b620938895935a91f32143f9d7a1788ddcfd"
+   stack-coherence/ready-blocked-triage "676da31a6a133cacba222e9ea46715d5e32dbb5b6d3a93c13c36493a1950471f"
+   social/verify-before-compose "b702e1c5a199eb4c910c018fdc42857ef3d00a98c80881b05cc7f12c6320a891"
+   social/tension-before-code "ebc2e617adab40854f8ba344024d4e2012174d791da26766a868877a1f0dcb65"
+   ;; Non-library sources the record itself pins under :retrieval :sources.
+   "/home/joe/code/futon3a/holes/labs/M-memes-arrows/cascade_construct.py" "bc3e36d1dfd9c4877eda15ddd9d3f7a0ab62fa51026af43ee29c8eb48cdd8a62"
+   "/home/joe/code/futon6/scripts/cas_select.py" "47c27ad3ba65a37fcab7218cf849dc00c00a5ebafa3a11c7d4a7b18218b4b9fb"
+   "/home/joe/code/futon3/resources/sigils/patterns-index.tsv" "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"}}
+  :repository-index
+  {:note "repository-sha256 above is the digest of the pre-genesis pattern index at retrieval time. It is NOT the digest of the live futon3 index today, which has drifted since 2026-09-15."
+   :frozen-copy "holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/redo/retrieval-index.tsv"
+   :frozen-copy-sha256 "0cb12b243cc0a0a91e79e9daa01a6792bb1ad67bda856e8757731d8baaf755ff"
+   :live-sha256-at-capture "36a5ee5de58827bd9dd6f4ae469da4f6986193ee360d4cf9dbc0282fb9c072db"}}
+  :pinned-commit "cc231bf6f479c0dd87629edeca87b7c7dd973909"}
+ :task-context
+ "Quoted verbatim from the occurrence record's :retrieval :query (its own words for what the retrieval was for):\n\n\"Have: built agent harness components, a shipped tested ledger and replay certificates; three runtime defects fixed with regression tests. Want: per-component readiness evidence, independently verified certificate, and a reporting gate whose claims are re-derivable from typed records. However: a built component is not evidence that its behaviour is ready to bring online; the independent witness blocked the certificate, and after fixes the rerun remains pending. Test each component, retain exact evidence, and require independent replay before promoting the certificate.\"\n\n:query-source {:path \"futon2/holes/missions/M-zaif-harness-v1.md\", :lines [[44 47] [89 110] [208 215] [226 229]]}\n\n:baseline-query \"M-zaif-harness-v1 — want: the harness edition, lifecycle-aligned and WM-fed. have: OPEN — HEAD through VERIFY drafted; INSTANTIATE runs as wm-contract U rows.\""
+ :library-root "/home/joe/code/futon3/library"
+ :candidate-patterns
+ [:agent/provisional-claims-ledger
+  :agent/evidence-over-assertion
+  :coordination/session-durability-check
+  :coordination/cross-validation-protocol
+  :war-machine/operational-not-decorative
+  :sidecar/append-only-semantic-audit
+  :stack-coherence/maturity-evidence-audit
+  :stack-coherence/ready-blocked-triage
+  :social/verify-before-compose
+  :social/tension-before-code]}
