@@ -87,3 +87,20 @@
         out (oa/admit subject adj (oa/review "codex-5" adj :dispute))]
     (is (= :missing (:status out)))
     (is (not (contains? out :label)))))
+
+(deftest review-binding-identity-and-authorship-refusals
+  ;; claude-4 review additions
+  (let [view (oa/observer-view subject)
+        cutoff {:futon2 "abc123"}
+        adj (oa/adjudication "claude-3" view :present cutoff)
+        other (oa/adjudication "claude-3" (assoc view :token "other") :present cutoff)]
+    (is (= :review-of-other-adjudication
+           (:kind (oa/admit subject adj (oa/review "codex-5" other :concur)))))
+    (is (= :observer-missing
+           (:kind (oa/admit subject (assoc adj :observer nil) (oa/review "codex-5" adj :concur)))))
+    (is (= :reviewer-missing
+           (:kind (oa/admit subject adj (assoc (oa/review "codex-5" adj :concur) :reviewer nil)))))
+    (is (= :authorship-undeclared
+           (:kind (oa/admit (dissoc subject :author) adj (oa/review "codex-5" adj :concur)))))
+    (is (= {:disposition :delivered}
+           (:recorded-verdict (oa/admit subject adj (oa/review "codex-5" adj :concur)))))))

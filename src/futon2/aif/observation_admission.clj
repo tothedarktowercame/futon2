@@ -47,7 +47,9 @@
   Admitted: {:status :admitted :label :present|:absent ...}.
   Refusals (each {:status :missing :kind ...}):
     :invalid-finding / :invalid-verdict     — vocabulary violations
+    :observer-missing / :reviewer-missing / :authorship-undeclared
     :observer-is-author / :observer-is-enactor / :observer-is-reviewer
+    :review-of-other-adjudication          — the review is not of this adjudication
     :cutoff-missing                        — the adjudication carries no cutoff
     :view-digest-mismatch                  — the observer saw something else
     :no-label                              — insufficient/ambiguous/conflicting
@@ -69,6 +71,18 @@
       (not (contains? verdicts verdict))
       (refuse :invalid-verdict {:verdict verdict})
 
+      (not (and (string? observer) (seq observer)))
+      (refuse :observer-missing {:adjudication adjudication})
+
+      (not (and (string? reviewer) (seq reviewer)))
+      (refuse :reviewer-missing {:review review-record})
+
+      ;; independence is checkable only if the subject declares who authored
+      ;; and enacted it (a string, or :none); an undeclared role is a refusal,
+      ;; not a pass (claude-4 review)
+      (not (and (contains? subject :author) (contains? subject :enactor)))
+      (refuse :authorship-undeclared {:declared (select-keys subject [:author :enactor])})
+
       (and author (= observer author))
       (refuse :observer-is-author {:observer observer :author author})
 
@@ -86,6 +100,13 @@
               {:recorded (:view-digest adjudication)
                :recomputed (view-digest (observer-view subject))})
 
+      ;; the review must be of THIS adjudication (claude-4 review)
+      (not (and (= (:of review-record) (:view-digest adjudication))
+                (= (:finding review-record) finding)))
+      (refuse :review-of-other-adjudication
+              {:review-of (:of review-record) :adjudication (:view-digest adjudication)
+               :review-finding (:finding review-record) :finding finding})
+
       (contains? #{:insufficient :ambiguous :conflicting} finding)
       (refuse :no-label {:finding finding})
 
@@ -94,6 +115,9 @@
 
       :else {:status :admitted :label finding
              :token (:token subject)
+             ;; the recorded verdict is carried AFTER admission so rates
+             ;; (S-3) can compare it with the admitted label; the observer never saw it
+             :recorded-verdict (:recorded-verdict subject)
              :observer observer :reviewer reviewer
              :cutoff (:cutoff adjudication)
              :view-digest (:view-digest adjudication)})))
