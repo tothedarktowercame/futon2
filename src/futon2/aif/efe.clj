@@ -1215,6 +1215,16 @@
                                             :c (assoc (:c spec)
                                                       :weights-echo
                                                       (:weights spec))
+                                            ;; WIRE-5 rates provenance:
+                                            ;; sourced vs declared vs
+                                            ;; identity-default is readable
+                                            ;; on the certificate itself,
+                                            ;; not only the family meta.
+                                            :rates-provenance
+                                            (or (:rates-provenance opts)
+                                                {:status (if declared-rates
+                                                           :declared-in-opts
+                                                           :identity-default)})
                                             ;; WIRE-2 F provenance: the
                                             ;; certificate says WHERE F came
                                             ;; from, so "F computed = 0.0"
@@ -1279,12 +1289,18 @@
            :cascade-scoring {:universe universe
                              :horizon T
                              :spec spec
-                             :rates (if (every? (fn [t]
-                                                  (and (zero? (:false-neg t))
-                                                       (zero? (:false-pos t))))
-                                                (vals rates))
-                                      :zero-adjudication-identity
-                                      :declared-adjudication-rates)
+                             :rates (if (:rates-provenance opts)
+                                      :sourced-adjudication-rates
+                                      (if (every? (fn [t]
+                                                    (and (zero? (:false-neg t))
+                                                         (zero? (:false-pos t))))
+                                                  (vals rates))
+                                        :zero-adjudication-identity
+                                        :declared-adjudication-rates))
+                             ;; WIRE-5: the sourcing record itself (e.g.
+                             ;; {:source … :basis {token k} :labels …}),
+                             ;; echoed unchanged when present.
+                             :rates-provenance (:rates-provenance opts)
                              ;; R7: the declared FIXED zeta the scorer was
                              ;; asked to temper at (default 1).
                              :zeta (get opts :zeta 1)

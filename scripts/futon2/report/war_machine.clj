@@ -51,6 +51,7 @@
             [futon2.aif.belief :as belief]
             [futon2.aif.calibration-cycle :as calibration-cycle]
             [futon2.aif.efe :as efe]
+            [futon2.aif.observation-rates :as observation-rates]
             [futon2.aif.enumeration-completeness :as enum-complete]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
@@ -5667,6 +5668,11 @@
 ;; additive: a scan without :cascade-problem never enters this lane.
 ;; ---------------------------------------------------------------------------
 
+;; WIRE-5: the S-1 observation contract read from the classpath (never a
+;; local copy — the contract is the single authority for token classes).
+(defn- observation-contract []
+  (clojure.edn/read-string (slurp (io/resource "wm/observation-contract.edn"))))
+
 (defn- lane-step
   "Run one cascade-lane node call. A typed refusal — an ex-info thrown by the
   node function or a returned {:status … :kind …} refusal map — is returned
@@ -5799,12 +5805,50 @@
                 refused
                 {:candidates candidates :predictions predictions}))))
     ;; R5 — G per candidate over one common universe, all candidates at T.
+    ;; WIRE-5: when the problem carries :locators (cascade-problems'
+    ;; assemble puts them there; every token must have a CHECKABLE locator
+    ;; or the problem was never admitted), the lane SOURCES the adjudication
+    ;; rates from futon2.aif.observation-rates instead of letting the
+    ;; scorer default to the identity kernel. With no admitted judgement
+    ;; labels yet, an all-checkable universe sources the EXACT ZERO kernel
+    ;; (tokenLikelihood_checkable) — numerically the identity kernel, but
+    ;; provenance-recorded as :sourced, not defaulted. A judgement-class
+    ;; token with no admitted rate is the producer's :unsupported-class
+    ;; refusal and stops the lane here: that refusal is the finding, never
+    ;; padded. A problem without :locators (hand-built) keeps the previous
+    ;; behaviour and the certificate records :identity-default.
     (step :R5 "futon2.aif.efe/rank-actions"
           (fn []
-            (efe/rank-actions {:cascade-belief (get @state :R1)}
-                              (:candidates (get @state :R4))
-                              {:horizon-steps (get-in @state [:R13 :cascade-rollout])
-                               :cascade-spec cascade-spec})))
+            (let [locators (:locators problem)
+                  sourced (when (map? locators)
+                            (observation-rates/sourced-rates
+                             nil nil nil locators (observation-contract)))
+                  base-opts {:horizon-steps (get-in @state [:R13 :cascade-rollout])
+                             :cascade-spec cascade-spec}]
+              (cond
+                ;; no locators on the problem: previous behaviour, the
+                ;; certificate records :identity-default.
+                (nil? sourced)
+                (efe/rank-actions {:cascade-belief (get @state :R1)}
+                                  (:candidates (get @state :R4))
+                                  base-opts)
+                ;; the producer refused (judgement class with no admitted
+                ;; rate, or an unknown class): the refusal IS the finding.
+                ;; Returning it here makes lane-step stop the lane at R5 —
+                ;; it is never merged into opts where it would be ignored
+                ;; and silently default to the identity kernel.
+                (not= :sourced (:status sourced))
+                sourced
+                :else
+                (efe/rank-actions {:cascade-belief (get @state :R1)}
+                                  (:candidates (get @state :R4))
+                                  (merge base-opts
+                                         {:adjudication-rates (:rates sourced)
+                                          :rates-provenance
+                                          {:source (:source sourced)
+                                           :basis (:basis sourced)
+                                           :labels :none-admitted
+                                           :contract :wm/observation-contract-v1}}))))))
     ;; R14 — selection at the DECLARED β (no default: a missing β is
     ;; selection-posterior's typed refusal :invalid-temperature), then
     ;; authorize the decision on the same :R14 node — one node, both legs,

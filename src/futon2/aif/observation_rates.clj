@@ -150,3 +150,36 @@
                                      :class class-id :token token})))))))
                {}
                token-classes)))
+
+(defn sourced-rates
+  "Adjudication rates for a cascade scoring universe, SOURCED from this
+  namespace rather than declared by a caller (WIRE-5). LABELS, SUBJECTS and
+  PRIOR are `rates-by-class`'s inputs (nil labels = no admitted judgement
+  data: checkable classes still get their exact zero kernel from
+  tokenLikelihood_checkable; a judgement class with no admitted rate is the
+  typed :unsupported-class refusal, never padded). LOCATORS is the cascade
+  problem's {token {:class class-id}}; CONTRACT is the S-1 observation
+  contract. Returns
+
+    {:status :sourced
+     :source :futon2.aif.observation-rates/sourced-rates
+     :rates {token {:false-neg r :false-pos r}}   ; every LOCATED token
+     :basis {token :checkable|:estimated|:prior}
+     :class-of {token class-id}}
+
+  or token-likelihood-rates' typed refusal (:unknown-class /
+  :unsupported-class). Tokens WITHOUT a locator are simply absent from
+  :rates — the consumer's own coverage check names them; no rate is
+  invented for an unlocated token."
+  [labels subjects prior locators contract]
+  (let [rates (rates-by-class labels subjects prior)
+        class-of (into {} (map (fn [[t l]] [t (:class l)])) locators)
+        assembled (token-likelihood-rates rates contract class-of)]
+    (if (contains? assembled :status)
+      assembled
+      {:status :sourced
+       :source :futon2.aif.observation-rates/sourced-rates
+       :rates (into {} (map (fn [[t r]] [t (select-keys r [:false-neg :false-pos])]))
+                    assembled)
+       :basis (into {} (map (fn [[t r]] [t (:basis r)])) assembled)
+       :class-of class-of})))

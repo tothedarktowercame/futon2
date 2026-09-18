@@ -18,7 +18,10 @@
      pattern, with cascade-selection's declared tie-break.
    - Outcome: the common QUALIFIED-token universe of the joint family; G by
      efe/rank-actions → cascade-model-manifest/horizon-g-sparse with
-     :rates :zero-adjudication-identity, recorded on the ranked meta. The
+     :rates :sourced-adjudication-rates (WIRE-5: the problem's checkable
+     locators source the exact-zero kernel from observation-rates; same
+     numbers the identity default produced, sourced provenance), recorded
+     on the ranked meta. The
      ruled-outcome-c disposition carrier (machine-model/outcome-authority)
      is NOT this occurrence's outcome carrier.
    - Model revisions: no :wm/machine-model-v1 schema, no machine-model
@@ -147,8 +150,8 @@
     ;; Outcome vocabulary: the common qualified-token universe, identity rates.
     (is (map? scoring) "ranked carries :cascade-scoring meta")
     (is (= 3 (:horizon scoring)) "the declared common horizon T")
-    (is (= :zero-adjudication-identity (:rates scoring))
-        "outcome channel: zero-adjudication identity, NOT ruled-outcome-c dispositions")
+    (is (= :sourced-adjudication-rates (:rates scoring))
+        "WIRE-5: the fixture's C3 locators source the exact-zero kernel; same numbers as the old identity default, sourced provenance")
     (is (set? (:universe scoring)) "universe is a set of qualified tokens")
     ;; Action vocabulary: token-interpretation pattern maps — the recorded
     ;; binding is the INTERPRETED guard shape (clauses of present/absent
