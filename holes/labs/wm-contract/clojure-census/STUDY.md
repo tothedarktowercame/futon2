@@ -51,6 +51,23 @@ Results table appended below as each pair (Dn, Tn) completes.
 | :risk | :no-plans (informative) | :not-checked — dedicated OutcomeRiskKL pass queued | :consistent |
 | :ambiguity | :no-plans | :matches (within the identity-A known-failing context) | **discrepancy found and resolved**: census said `step-ambiguity` :live; testimony said built-but-not-reached; rerun showed the sole call site is inside `horizon-g` (enumerating reference) → testimony right, census corrected in place (f3d0417b). Class: **:census-role-error** (new). Note: the census hedged in prose while stretching the role field — prose hedges don't survive joins |
 
+### Precisions — D6 (30b1711a) × T6 (6c7a8660), compared 2026-09-18
+
+| term | P↔S | B↔S | P↔B |
+|---|---|---|---|
+| :likelihood-precision (ζ) | :no-plans as a DECLARED REFUSAL to invent a numerical law (`zeta-declaration` `:update :none` with reason, citing the r7 README rule; names its own upstream blocker: nothing on the tick evaluates a likelihood matrix, so a learned ζ has no consumer — R7-3 open). Scores differently from plain unwiredness. Corroboration: the declaration, dated the same day, independently reaches T3's three conclusions — two witnesses, no contact | **:matches** — `temper-a`/`temper-row` is an exact implementation of `temperedLikelihood` (sum-to-one ↔ `temperedLikelihood_sum`, ζ=1 recovery ↔ `temperedLikelihood_one`); zero consumers; and NEITHER side carries a ζ prior/update law — a symmetric, honest gap | :consistent |
+| :precision (channel) | sunset-in-role per P9 with ζ the declared successor; κ(w) kept deliberately un-reinterpreted | :not-checked, STATED NOT INVENTED (no Lean carrier exists; P9 quoted — census rule followed). **The one adaptive precision live**: R3 micro-step inner loop, variance→weighted-error→belief events, output CONSUMED. R7 held where R14 regressed | :consistent — T6's "off cascade path" (efe never requires precision) and D6's "live on belief path" reconcile at grain |
+| :policy-precision (β/γ) | caller-declared β is PARKED, not settled ("it is not approved" = awaiting decision); R7 and R14 both needs-owner, no owner | :diverges (wiring half): the eq-2.7 solver dead with NO Lean β-update law (PolicyPrecision states γ=1/β, never an update) | **:reachability-error (T6), corrected by owner rerun**: "carry path live" — wm:595 sits INSIDE beta-dark-carry (defn 566), the dead island; beta_habit's one non-test caller is that same line. Dead-by-enclosure. Mirror of D1's census error: each witness type has now made, and been corrected for, exactly one reachability-grade error |
+
+**Cross-cutting (D6×T6):** the adaptivity census closes: ONE precision
+adapts live (channel, R7); ζ and β are declared constants; γ/β
+adaptation is dead code without Lean. ζ's operator is the census's
+rarest species: built, exactly matching its Lean, and unwired by
+DECLARED REFUSAL rather than neglect. `intrinsic-values` (R12) is
+live-but-OUTPUT-UNREAD for scoring (its hyperparameter's only scoring
+consumer is dead compute-efe); `wm_outer_loop` :shadow off-tick by
+design.
+
 ### F and Q — D5 (e3dce99a) × T5 (4d2c78bc), compared 2026-09-18
 
 | term | P↔S | B↔S | P↔B |

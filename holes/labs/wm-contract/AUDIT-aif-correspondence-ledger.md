@@ -57,7 +57,7 @@ out of scope). "Producer" = what the live path calls today.
 |---|---|---|---|---|---|
 | :observe | R2 | OK* (09-16 reaudit) | CENSUSED D3: :matches; live A = identity EVERYWHERE on the tick (identity rates constructed at the R5 call site; sparse refuses real rates; observation-rates unconsumed); non-degenerate token-likelihood :test-only | STALE (09-12) | channel-grain observe (14-vector) live at R2 but is diagnostics, not a likelihood |
 | :prediction-error | R3a | OK* | STALE | STALE (reference-model witnesses 09-12) | Gaussian row legacy per ruling P9; categorical successor below |
-| :precision | R7 | OK* | STALE | STALE | ζ (likelihood precision) declared 09-17, separate row below |
+| :precision | R7 | OK* | CENSUSED D6: :not-checked stated-not-invented (no Lean carrier; P9 Gaussian-legacy). THE one adaptive precision live (R3 micro-step, output consumed — R7 held, R14 regressed) | STALE | ζ declared successor; κ kept legacy |
 | :free-energy | — | OK (MATCHES 09-16, independent) | OPEN | STALE (VFE witness 09-12) | |
 | :policy-free-energy | R8 | OK* | CENSUSED D5: :diverges — F formally retired from the tick; live posterior runs F≡0, contradicting B.2's equality-case value; the matching producer (cascade-free-energy, cites vfe_posterior_eq) is test-only | STALE (s4-run admission 09-01) | discharge path: call producer on tick + pass :f (WM-11) |
 | :belief-update | R3 | OK* | CENSUSED D5: :diverges scope-stated — live conditioning is channel-grain only; cascade-grain exact-update test-only; surprising-observation case structurally absent under identity-A | STALE | Gaussian legacy per P9; filtering successor built-unwired |
@@ -75,7 +75,7 @@ out of scope). "Producer" = what the live path calls today.
 | :model-reduction | R12 | OK* | OPEN | STALE (BMR witness) | |
 | :state-prediction-error | R3a-cat | OPEN — new Lean row needed | OPEN | OPEN | categorical successor, eq. 4.13 |
 | :state-belief-update | R3-cat | CLARIFIED 2026-09-18 (T5 flag, resolved from theory): eq. 4.13 is the variational MESSAGE-PASSING update (gradient flow with the ln B_{tau+1} smoothing term); `ExactBeliefTrajectory.exactUpdate` is closed-form Bayes FILTERING, which its own docstring declares as deliberately not the v-dot flow. The filtering case is DONE (Lean + Clojure `exact-update`, contract-bound, zero live callers per T5/D-sweep); the 4.13 smoothing form remains the OPEN row | OPEN | OPEN | filtering built-unwired; smoothing form open |
-| :likelihood-precision | R7-ζ | OK (2026-09-18: `AIF.Terms.temperedLikelihood`, book B.2.4, sum-to-one + ζ=1 recovery theorems) | OPEN (declared 09-17, fe55a1a0) | OPEN | Gibbs inverse temperature on A |
+| :likelihood-precision | R7-ζ | OK (`temperedLikelihood`, book B.2.4) | CENSUSED D6: :matches — temper-a exact impl of the Lean operator, ZERO consumers (unwired by declared refusal, zeta-declaration); no ζ update law on either side | OPEN | blocked upstream: nothing on the tick evaluates a likelihood matrix (R7-3) |
 
 **PRIORITY REORDER (Joe, 2026-09-18, second ruling):** the theory layer
 comes first; "there's no point in looking at the Clojure implementation"
