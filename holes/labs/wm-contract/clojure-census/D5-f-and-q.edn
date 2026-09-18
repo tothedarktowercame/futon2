@@ -1,0 +1,197 @@
+{:dispatch :D5,
+ :terms
+ [{:term :policy-free-energy,
+   :lean
+   {:census "DarkTower.AIF.Terms.variationalFreeEnergy",
+    :carrier
+    "DarkTower.WarMachine.PolicyVariationalFreeEnergy.variationalFreeEnergy (B.1-B.2)"},
+   :interpretation
+   {:text
+    "F is RETIRED on the live tick: selection reads :f default 0 with no live supplier; the R8 route tag is kept only because the box also hosts eps (war_machine.clj:6358-6359 'the R8 tag survives the retirement of F'); F computations exist in three places and all are off the tick",
+    :status :recorded},
+   :producers
+   [{:var "futon2.aif.cascade-free-energy/policy-free-energy",
+     :role :test-only,
+     :entry-point
+     "none in src (D1 finding, unchanged): the B.2 equality case — exact inference over the powerset carrier makes the complexity term vanish, F_pi = -ln P(o_tau|pi) exactly (vfe_posterior_eq)",
+     :inputs
+     ["{:q0 ...} {:candidates [{:id :precedence [...]}]} {:tau n} {:observed-tokens #{...}} {:rates {...}}"],
+     :output
+     "{:f {id F-or-refusal} :tau tau :params {...}} with every declared input recorded (:complexity-term 0 with reason)",
+     :callers ["test/futon2/aif/cascade_free_energy_test.clj only"],
+     :evidence
+     ["grep -rln 'futon2.aif.cascade-free-energy' src -> its own file only (D1 census, re-verified this round)"]}
+    {:var
+     "futon2.aif.policy-free-energy/f-pi-for-candidate (+ f-pi-vector)",
+     :role :dead,
+     :entry-point
+     "war-machine/f-pi-dark-readback (line 441) calls f-pi-vector at line 528 — and f-pi-dark-readback itself is called only from tests and holes/labs/wm-contract lab scripts (D2 finding), never from generate-war-machine or the runner",
+     :inputs
+     ["per-candidate prediction mean/variance maps"
+      "observation"
+      "opts {:absent-variance :floor}"],
+     :output
+     "per-candidate F_pi (Gaussian negative log likelihood family)",
+     :callers
+     ["war-machine f-pi-dark-readback:528 (dead lane)"
+      "free_energy.clj ruling note (retired predecessor)"
+      "tests (policy_free_energy_test, policy_free_energy_measurement_test, zaif_full_loop_test)"],
+     :evidence
+     ["sed -n '520,535p' scripts/futon2/report/war_machine.clj -> (policy-free-energy/f-pi-vector ...) inside f-pi-dark-readback"
+      "grep -rn 'f-pi-dark-readback' src scripts holes test -> war_machine.clj defn only; callers are tests + lab scripts"]}
+    {:var "futon2.aif.free-energy/compute-controller-diagnostics",
+     :role :live,
+     :entry-point
+     "war-machine generate-war-machine line 6091 (fe/compute-controller-diagnostics observation) — LIVE, but it is the legacy engineering-diagnostics surface (preference-gap, workstream-balance distances over the 14-channel observation), NOT the Lean variational F term; also called from efe.clj:650 on the dead compute-efe channel",
+     :inputs
+     ["14-channel observation vector (observation/observe output)"],
+     :output
+     "named engineering diagnostics (controller-diagnostics map)",
+     :callers
+     ["war-machine:6091 (live R2 diagnostics + base-mode inputs)"
+      "futon2.aif.efe:650 (dead channel lane)"],
+     :evidence
+     ["grep -n 'fe/compute-controller-diagnostics' scripts/futon2/report/war_machine.clj -> 6091"
+      "free_energy.clj:11 ruling note: 'F_pi in futon2.aif.policy-free-energy, entering the [tick] ... not reinstate this one'"]}
+    {:var "futon2.aif.free-energy/compute-prediction-error",
+     :role :dead,
+     :entry-point
+     "no call site anywhere: the R8 route tag names it (war_machine.clj:6362) but the tag 'survives the retirement of F' — eps itself no longer runs; internal arity at free_energy.clj:238,290 only",
+     :inputs ["observed" "prediction" "opts"],
+     :output "precision-weighted prediction error eps",
+     :callers
+     ["route tag only (war_machine.clj:6362)"
+      "docstring references (rollout.clj:171, belief.clj:1126)"],
+     :evidence
+     ["grep -rn 'compute-prediction-error' src scripts -> defn + internal arities + comments/route-tag only; zero call sites"
+      "sed -n '6358,6362p' scripts/futon2/report/war_machine.clj -> 'the R8 tag survives the retirement of F'"]}],
+   :duplicates
+   ["cascade-free-energy (exact-inference equality case, token grain) vs policy-free-energy (Gaussian F_pi, channel grain) vs free-energy legacy diagnostics — three F-flavored computations, none live for selection"],
+   :irrelevant
+   ["f-pi-posterior-opts / variational-temperature-opts (war-machine RUN9/S4 helpers) — dead option plumbing for the retired select-action lane (D2)"
+    "fold_* namespaces' 'free energy' mentions — fold evaluation, not variational F"],
+   :match
+   {:status :diverges,
+    :notes
+    "THE KEY QUESTION: F is NOT computed anywhere on the live tick — this is not the D4 computed-but-not-consumed pattern; there is no computation to leave unread. Selection's :f default 0 (D2) has NO live supplier, and war_machine.clj:6358-6359 states F was formally RETIRED ('the R8 tag survives the retirement of F because R8 the box hosts eps as well'), while eps itself (compute-prediction-error) also has zero call sites. The implementations that would match Lean exist off-tick: cascade-free-energy implements the B.2 EQUALITY case (exact inference, complexity term 0, F = -ln P(o|pi), citing mathlib4 vfe_posterior_eq) but is test-only; policy-free-energy implements a Gaussian per-channel F_pi consumed only by the dead f-pi-dark lane. So the divergence is one of wiring, not law: no live F producer exists to compare a signature against, and the live posterior therefore runs at sigma(ln E - 0 - G/beta)."}}
+  {:term :belief-state,
+   :lean
+   {:census "DarkTower.AIF (belief state Q)",
+    :carrier
+    "DarkTower.WarMachine.PolicyRollout.rolloutState (predicted) / ExactBeliefTrajectory.exactBeliefAt (conditioned)"},
+   :interpretation
+   {:text
+    "two grains, both live at their own seams: the cascade-grain belief is the rollout-from-q0 predicted distribution inside horizon-g-sparse/R4 (D3), and the channel-grain belief is belief.clj's per-entity posterior map carried and updated by the arena loop; no cascade-grain CONDITIONED belief runs live",
+    :status :recorded},
+   :producers
+   [{:var
+     "futon2.aif.cascade-model-manifest/rollout (as the live belief trajectory)",
+     :role :live,
+     :entry-point
+     "the live cascade-grain Q: q_tau pushed forward from q0 inside horizon-g-sparse (R5, efe.clj:1067) and forward-model/predict (R4, forward_model.clj:359) — census carried from D3; recorded here because it IS the belief trajectory that runs",
+     :inputs
+     ["precedence-fn"
+      "q0 (observed-belief of the declared facts, R1)"
+      "n"],
+     :output
+     "predicted belief map {token-set prob} at step n (NO observation conditioning — see :belief-update)",
+     :callers
+     ["horizon-g-sparse (live)"
+      "forward-model predict (live R4)"
+      "tests"],
+     :evidence
+     ["D3 evidence, re-verified: grep -n 'cascade-manifest/rollout' src/futon2/aif/forward_model.clj -> 359; efe.clj:1067"]}
+    {:var "futon2.aif.belief (per-entity posterior map)",
+     :role :live,
+     :entry-point
+     "the channel-grain Q: apply-arena-belief-events (war_machine.clj:811) -> belief/update-belief-batch runs inside the generate loop (war_machine.clj:6294) on arena belief events; carried across ticks via the carry-belief lane (war_machine.clj:6136)",
+     :inputs
+     ["belief-state: {entity-id posterior-over-status-set}"
+      "typed evidence events"
+      "likelihood-mode opts"],
+     :output "updated per-entity posterior map + model manifest",
+     :callers
+     ["war-machine apply-arena-belief-events:6294 (live)"
+      "morning-brief event application (apply-morning-brief-events)"
+      "machine-model / measured-a lanes (dead)"],
+     :evidence
+     ["grep -n 'apply-arena-belief-events' scripts/futon2/report/war_machine.clj -> 811 (defn), 6294 (live call), 6356 (R3 route tag)"
+      "grep -n 'update-belief-batch' src/futon2/aif/belief.clj -> the batch seam apply-arena-belief-events wraps"]}],
+   :duplicates
+   ["cascade-grain Q (rollout map) vs channel-grain Q (belief.clj entity map) — different state spaces, both live at their own seams, never interchangeable (forward_model.clj refuses :channel substituted for :cascade-belief)"],
+   :irrelevant
+   ["machine-belief, task-belief-ladder, work-target-belief/store/tick — entity-grain belief carriers outside the quartet (D7 sweep)"
+    "cascade-prior state — policy-frequency memory, not a belief over states"],
+   :match
+   {:status :matches,
+    :notes
+    "Lean has two trajectories: rolloutState (predicted) and exactBeliefAt (push-forward + conditioning). The live cascade-grain belief is rolloutState's aligned implementation (rollout, exact rationals, precedence-fn as the step action) — D3 verified input-by-input against PolicyRollout. The conditioned trajectory (token-belief-at) exists and matches Lean but is test-only (see :belief-update). Under the D3 identity-A finding the unconditioned rollout EQUALS the exact trajectory for observations consistent with the state (conditioning on the identity kernel is a no-op), so the live instantiation is a true special case, not an approximation; the divergence-shaped case (surprising observation, P(o)=0) is structurally unreachable live because nothing conditions. The channel-grain belief.clj Q is a different state space with no DarkTower carrier — recorded, not matched."}}
+  {:term :belief-update,
+   :lean
+   {:census "DarkTower.AIF (belief update)",
+    :carrier
+    "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate (closed-form exact categorical posterior, Option-valued refusals)"},
+   :interpretation
+   {:text
+    "the ExactBeliefTrajectory-aligned pair (exact-update, token-belief-at) is TEST-ONLY: no live observation-conditioned update exists on any grain except the channel-grain entity update (belief/update-belief-batch); the cascade tick runs its beliefs open-loop from q0",
+    :status :recorded},
+   :producers
+   [{:var "futon2.aif.cascade-model-manifest/exact-update",
+     :role :test-only,
+     :entry-point
+     "no src caller: the normalized exact categorical posterior s -> A(o|s)(B q_prev)(s)/P(o); MachineContracts bindings (wm-token-observation, ba0eda16df) are exercised only by scripts/wm04 lab scripts and tests",
+     :inputs
+     ["likelihood-of: fn [state observation] -> A(o|state)"
+      "prior-pushed: {state (B q_prev)(state)}"
+      "o: observation"],
+     :output
+     "{state mass} summing to 1; typed {:status :missing :kind :zero-predictive-probability} exactly when P(o)=0 (exactUpdate_eq_none_iff)",
+     :callers
+     ["token-belief-at (its own trajectory walker)"
+      "tests (cascade_model_manifest_test.clj:715)"
+      "scripts/wm04 evidence_run.clj (MachineContracts entries)"],
+     :evidence
+     ["grep -rn 'exact-update' src scripts test -> cascade_model_manifest.clj + cascade_model_manifest_test.clj:715 + wm04 scripts only"
+      "grep -rn 'MachineContracts' src scripts -> scripts/wm04/evidence_run.clj only"]}
+    {:var "futon2.aif.cascade-model-manifest/token-belief-at",
+     :role :test-only,
+     :entry-point
+     "the exactBeliefAt walker (push-forward via cascade-kernel then exact-update via token-likelihood, exact rationals, refusals carried forward as Option.none) — tests only",
+     :inputs
+     ["rates" "q0" "precedence-fn" "observations (indexed)" "t"],
+     :output "belief at step t, or a propagating typed refusal",
+     :callers
+     ["tests (cascade_model_manifest_test.clj:728-737)"
+      "no src caller"],
+     :evidence
+     ["grep -rn 'token-belief-at' src scripts test -> cascade_model_manifest_test.clj only"]}
+    {:var "futon2.aif.belief/update-belief-batch",
+     :role :live,
+     :entry-point
+     "OUTPUT-CONSUMED (for contrast with the D4 pattern): the channel-grain observation-conditioned update — apply-arena-belief-events (war_machine.clj:811, called live at 6294) conditions the per-entity posteriors on typed evidence events under the arena likelihood mode; this is the ONLY live observation-conditioned update on the tick, and it is entity-grain, not the Lean token-state exact update",
+     :inputs ["belief-state" "events" "likelihood-mode opts"],
+     :output "updated per-entity posteriors",
+     :callers
+     ["war-machine apply-arena-belief-events:6294 (live)"
+      "apply-morning-brief-events"
+      "tests"],
+     :evidence
+     ["sed -n '811,818p;6288,6296p' scripts/futon2/report/war_machine.clj (seam defn + live call)"]}],
+   :duplicates [],
+   :irrelevant
+   ["precision/update-precision-state (R7 tag) — precision learning on eps, not a belief update"
+    "observation-admission / evidence gates — authority surfaces feeding belief.clj events, not updates themselves"],
+   :match
+   {:status :diverges,
+    :notes
+    "exact-update matches Lean ExactBeliefTrajectory.exactUpdate line-for-line (normalized posterior, exactUpdate_dist, zero-predictive-probability = exactUpdate_eq_none_iff, refusals propagating like Option.none in token-belief-at) — but it is test-only. THE KEY QUESTION: there is NO live observation-conditioned update on the cascade grain. The live tick runs its cascade beliefs open-loop: q0 (R1, observed-belief of declared facts) pushed forward by rollout, never conditioned on anything that happens later. The only live conditioning is belief/update-belief-batch, a different state space (per-entity status posteriors) with no DarkTower carrier. Under identity-A (D3) the missing conditioning is a no-op for consistent observations, so the open-loop rollout coincides with the exact trajectory in the case the live system can produce — but the surprising-observation case that Lean's Option.none exists for is structurally absent from the live design, which is the honest scope of this divergence."}}],
+ :evidence-commands
+ ["grep -n 'defn ' src/futon2/aif/free_energy.clj (producer inventory: compute-controller-diagnostics, compute-prediction-error, channel-prediction-error, infer-mode)"
+  "grep -rn 'compute-prediction-error' src scripts --include=*.clj -> zero call sites (defn + internal arities + comments/route-tag only)"
+  "sed -n '6355,6362p' scripts/futon2/report/war_machine.clj ('the R8 tag survives the retirement of F')"
+  "sed -n '520,535p' scripts/futon2/report/war_machine.clj (f-pi-vector inside f-pi-dark-readback, dead lane per D2)"
+  "grep -rln 'futon2.aif.cascade-free-energy' src -> its own file only"
+  "grep -rn 'exact-update|token-belief-at' src scripts test -> cascade_model_manifest_test.clj + wm04 scripts only"
+  "grep -rn 'MachineContracts' src scripts -> scripts/wm04/evidence_run.clj only"
+  "grep -n 'apply-arena-belief-events' scripts/futon2/report/war_machine.clj -> 811 defn, 6294 live call, 6356 R3 tag"
+  "sed -n '664,712p' src/futon2/aif/cascade_model_manifest.clj (exact-update + token-belief-at bodies)"]}
