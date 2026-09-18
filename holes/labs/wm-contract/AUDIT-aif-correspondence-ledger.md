@@ -239,6 +239,20 @@ Additive fields on the per-candidate record. Order per claude-4's bite
 list: (1) per-τ emission, (2) C-form marker, (3) E/F status, (4) β
 capture, (5) rates precondition.
 
+## Open ruling: is the ambiguity-off premise wanted? (surfaced 2026-09-18)
+
+The identity-A theorems (`Certificates.lean`, scope-warned at darktower
+`e15d8e4874` after Joe's objection) locate the off-switch: production's
+risk-only G follows from exactly one modeling premise — deterministic A
+(observation reveals state exactly), which disables the epistemic
+(ambiguity) half of G entirely. The theorem proves the conditional needed
+for certificate soundness and nothing normative. THE PREMISE ITSELF IS AN
+OPEN RULING for Joe: keep zero-adjudication identity-A (exact, cheap,
+risk-only, no ambiguity-driven information seeking from this half), or
+introduce a non-degenerate observation model (categorical successor rows;
+or finite ζ via temperedLikelihood) and bring the epistemic term back at
+real compute cost. Certificates record which regime ran either way.
+
 Remaining from the approved plan: the three categorical-successor
 equation rows.
 
