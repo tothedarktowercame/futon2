@@ -75,7 +75,7 @@ out of scope). "Producer" = what the live path calls today.
 | :model-reduction | R12 | OK* | OPEN | STALE (BMR witness) | |
 | :state-prediction-error | R3a-cat | OPEN — new Lean row needed | OPEN | OPEN | categorical successor, eq. 4.13 |
 | :state-belief-update | R3-cat | OPEN — new Lean row needed | OPEN | OPEN | exact categorical update |
-| :likelihood-precision | R7-ζ | OPEN — new Lean row needed | OPEN (declared 09-17, fe55a1a0) | OPEN | Gibbs inverse temperature on A |
+| :likelihood-precision | R7-ζ | OK (2026-09-18: `AIF.Terms.temperedLikelihood`, book B.2.4, sum-to-one + ζ=1 recovery theorems) | OPEN (declared 09-17, fe55a1a0) | OPEN | Gibbs inverse temperature on A |
 
 **PRIORITY REORDER (Joe, 2026-09-18, second ruling):** the theory layer
 comes first; "there's no point in looking at the Clojure implementation"
@@ -111,6 +111,37 @@ discovery is C's *ruled content* (the masses), never its *definition*.
 | D | prior over initial states | initial belief in ExactBeliefTrajectory — not independently audited this pass | survey with the :belief-state row |
 | E | habit prior over policies | `habit` parameter in policyWeight/policyPosterior with sum/zero theorems | defined as parameter; Clojure passes constant 1 ("no habit prior exists yet" — a declared neutral input, should be stated in the contract entry) |
 | β/γ, ζ | policy precision, likelihood precision | covered by :temperature and :likelihood-precision equation rows | see those rows |
+
+## Book-verification pass (2026-09-18, per Joe's approved plan)
+
+Census verified against the pinned book text (`refs/parr2022.txt`), module
+`DarkTower/AIF/Terms.lean` at mathlib4 `fc5309ab59`/`f601c8aabf`, build
+green, zero sorries. Findings the verification forced:
+
+1. **C normalisation.** Book eq. 4.10 (`parr2022.txt:3764`):
+   `P(oτ|C) = Cat(Cτ)` — canonical C is a normalised distribution per step.
+   `Preference.IsCanonical` added. An unnormalised family shifts each
+   step's risk by a policy-independent log-normaliser — rankings survive,
+   G's value does not. The Clojure's log-preference spec (and its
+   T·k·ln2 universe offset) must be re-read against this once Leg B
+   resumes: is the offset exactly the log-normaliser accounting, declared?
+2. **Quartet, not quintet.** Book base model = A/B/C/D
+   (`parr2022.txt:3801`); base posterior `σ(−G−F)` (eq. 4.14) has no
+   habit term. E is the *extension* (Friston 2016 eq. 7), recovered at
+   `Habit.uniform` — which strengthens the case for treating the
+   production E=1 as a declared reduction (Joe already dubious).
+3. **F bound**: census `variationalFreeEnergy` identified with the audited
+   `PolicyVariationalFreeEnergy` carrier (book B.1–B.2 / eq. 4.11).
+4. **ζ defined**: `temperedLikelihood = A^ζ/Z(ζ)` (book B.2.4,
+   `parr2022.txt:12738`, `:12779`), with `exists_likelihood_pos`,
+   `temperedLikelihood_sum`, `temperedLikelihood_one`. The Terms-row gap
+   for declared terms is closed; the *equation* rows for the categorical
+   successors remain open.
+5. **D audited**: consumed at t=0 by `ExactBeliefTrajectory.exactBeliefAt`.
+
+Remaining from the approved plan: the institutions adjudication (typed
+answer to whether Ostrom-style process preference fits inside AIF), and
+the three categorical-successor equation rows.
 
 ## The exemplar row worked: :expected-free-energy (G over cascades)
 
