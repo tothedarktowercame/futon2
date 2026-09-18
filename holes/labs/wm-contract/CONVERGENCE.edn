@@ -33,7 +33,7 @@
 
   {:id :free-energy :defines :F :node :R8
    :formal "F = 1/2 * mean_k (Pi_k eps_k^2)"
-   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6827-6831" :basis "variationalFreeEnergy states the formula."}
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7094-7097" :basis "variationalFreeEnergy states the formula."}
    :impl-leg {:rung :named :licence "holes/labs/wm-contract/aif-equations.edn:92-101" :basis "The row is retired and its :code says NO PRODUCER AT HEAD; a runtime formula or record was not found."}
    :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "Runtime producer retired; not found at HEAD." :what-would-license "A deliberate replacement producer plus an accepted-run certificate, or an adjudicated removal of this convergence row."} :converged? false}
 
@@ -57,25 +57,25 @@
 
   {:id :forward-model :defines :Q-o-pi :node :R4
    :formal "Q(o|pi) := sum_s A(o|s) Q(s|pi), Q(s|pi) rolled forward by B from mu over depth T"
-   :spec-leg {:rung :type-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6757-6759" :basis "PredictiveOutcomeKernel is a carrier only, as aif-equations.edn:127-131 states."}
+   :spec-leg {:rung :type-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7024-7025" :basis "PredictiveOutcomeKernel is a carrier only, as aif-equations.edn:127-131 states."}
    :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/machine_q.clj:336-374" :basis "The composition is implemented at a default-off seam; runs/F1-machine-q/01-runtime-seam.edn measures it but carries no run identity and says no live caller."}
    :leading-leg :impl-ahead :certificate {:trailing-leg :spec :reason "Lean has only the carrier and the runtime seam is not shipped; no accepted-run certificate found." :what-would-license "A machine-grain Lean composition and an accepted run through the enabled seam with independent rows."} :converged? false}
 
   {:id :risk :defines :risk :node :R5
    :formal "risk(pi) := D_KL[Q(o|pi) || C]"
-   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6864-6871" :basis "predictiveOutcomeRisk states KL[Q||C]."}
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7147-7154" :basis "predictiveOutcomeRisk states KL[Q||C]."}
    :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/node_sim.clj:241-255" :basis "The node simulation computes risk; its F3 receipt has no run identity and explicitly is not the shipped call path."}
    :leading-leg :level :certificate {:artifact "holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn" :green? true :accepted-run? false :reason "No run identity and no shipped call path; runs/F3-node-sim/00-r5-pilot.edn :what-this-is/:not-done."} :converged? false}
 
   {:id :ambiguity :defines :ambiguity :node :R5
    :formal "ambiguity(pi) := E_{Q(s|pi)}[H(P(o|s))]"
-   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6873-6884" :basis "ambiguity states expected observation entropy."}
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7160-7164" :basis "ambiguity states expected observation entropy."}
    :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/node_sim.clj:232-255" :basis "The node simulation computes the formula; its receipt lacks run identity and reports an import-name finding."}
    :leading-leg :level :certificate {:artifact "holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn" :green? true :accepted-run? false :reason "No run identity and no shipped call path; the pilot also records Q-o-pi/Q-s-pi import disagreement."} :converged? false}
 
   {:id :expected-free-energy :defines :G :node :R5
    :formal "G(pi) := risk(pi) + ambiguity(pi)"
-   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6886-6891" :basis "expectedFreeEnergy states the two-term sum."}
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7167-7174" :basis "expectedFreeEnergy states the two-term sum."}
    :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/node_sim.clj:241-255" :basis "The node simulation emits risk, ambiguity and G; the F3 receipt lacks run identity."}
    :leading-leg :level :certificate {:artifact "holes/labs/wm-contract/runs/F3-node-sim/00-r5-pilot.edn" :green? true :accepted-run? false :reason "Exact/refusing node certificate, but not an accepted run and not shipped wiring."} :converged? false}
 
@@ -99,7 +99,7 @@
 
   {:id :policy-posterior :defines :Q-pi :node :R6
    :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau - F_pi(pi))"
-   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6959-6965" :basis "softmax states the normalized score map."}
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7240-7245" :basis "softmax states the normalized score map."}
    :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/policy.clj:51-134" :basis "selection-scores (51-113) and softmax-weights (115-134) implement it -- re-pointed 2026-09-18 (zai-51) from 157-235 after 0d29c706 moved both; same referents, verified by name at HEAD. The rung holds only when F-pi enters; no run-identified F3-form certificate was found."}
    :leading-leg :level :certificate {:trailing-leg :both :reason "not found: no accepted-run posterior certificate with all three terms" :what-would-license "A run-identified candidate menu and independent normalized weights, including the F-pi coverage decision."} :converged? false}
 
@@ -111,13 +111,13 @@
 
   {:id :dirichlet-accumulation :defines :a-conc :node :R17
    :formal "a_post = a_prior + sum_{tau=1..T} o_tau (x) s_tau  (Dirichlet concentrations accumulated from observed outcome/state-belief pairs; a_post is the next trial's a_prior)"
-   :spec-leg {:rung :type-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6935-6936" :basis "DirichletConcentrations is carrier-only; aif-equations.edn:187-195 deliberately does not point at machineDirichletAccumulation because that module proves the runtime object differs."}
+   :spec-leg {:rung :type-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7216" :basis "DirichletConcentrations is carrier-only; aif-equations.edn:187-195 deliberately does not point at machineDirichletAccumulation because that module proves the runtime object differs."}
    :impl-leg {:rung :named :licence "holes/labs/wm-contract/aif-equations.edn:187-195" :basis "The declared o-by-mu recurrence is not found; A4a recounts a different capability-by-mission model."}
    :leading-leg :spec-ahead :certificate {:trailing-leg :impl :reason "Class-(b) divergence remains and no declared runtime inhabitant exists." :what-would-license "A runtime recurrence over fixed Channel/Status coordinates consuming tick o and mu, plus an accepted-run outer-product certificate."} :converged? false}
 
   {:id :model-reduction :defines :Delta-F :node :R17
    :formal "Delta F := ln P(y|full) - ln P(y|reduced) = ln B(A) + ln B(a') - ln B(a) - ln B(A') over Dirichlet concentrations a (prior), A (posterior), a' (reduced prior); a reduction is accepted when Delta F <= -3"
-   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6949-6957" :basis "modelReductionFreeEnergyChange and bayesFactorThreshold state the formula and threshold."}
+   :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:7226-7237" :basis "modelReductionFreeEnergyChange and bayesFactorThreshold state the formula and threshold."}
    :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/bmr.clj:108-134" :basis "bayesian-model-reduction implements the formula; no candidate artifact with a run identity and independent reference was found."}
    :leading-leg :level :certificate {:trailing-leg :both :reason "not found: no accepted-run Delta-F certificate" :what-would-license "A run-identified full/reduced concentration tuple, independent log-beta reference, and refusing threshold verdict."} :converged? false}
 
