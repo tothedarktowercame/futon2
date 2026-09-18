@@ -272,6 +272,24 @@ attached to the law (futon2 `57b3dcf4`); the emitted
 `:computed-not-attached` status now elaborates, with the honesty clause
 that the ℝ field records the neutral value which entered the law.
 
+## Observation-model declaration: independence now, WMC as the named successor (Joe, 2026-09-18)
+
+The A kernel's per-token independence is a declared modeling assumption,
+not a discovered fact: `token-likelihood` is a product of independent
+per-token Bernoullis, which makes every G quantity a linear-cost closed
+form (the trivial Bayesian network: binary token variables, no edges).
+Universe size (45 today) is decided by practical applications, not by the
+formalism — cost is linear in it either way. If an application demands
+COUPLED tokens, the declared upgrade path is the standard reduction:
+probabilistic queries over discrete variables reduce to weighted model
+counting (WMC), with cost governed by the coupling graph's treewidth. The
+certificate architecture survives that pivot: model counters emit
+checkable traces (knowledge compilation), so the witness-lane shape —
+untrusted fast computation, small checked certificate, soundness theorem
+into the frozen spec — continues with a bigger engine. Until then, SAT/WMC
+machinery is not used: with no coupling there is nothing to count that
+arithmetic does not already give exactly.
+
 ## Known-failing vs certificates — the two test qualities (Joe, 2026-09-18)
 
 Directive set, superseding the "open ruling" entry that stood here (that
