@@ -68,9 +68,9 @@ out of scope). "Producer" = what the live path calls today.
 | :expected-free-energy | R5 | OK* (rebuilt+reaudited by same agent) | **CENSUSED D1 2026-09-18: :matches on declared reduction domain** (clojure-census/D1-g-cluster.edn); duplicates: 3 G computations + Gaussian grain; dead: compute-efe, active-horizon-g (aligned-but-dead) | **OPEN — no witness** | `cascade-model-manifest/horizon-g-sparse`, LIVE since 09-17 |
 | :policy-set | R6 | OK (limited claim, declared) | STALE (production-trace admission 09-12) | STALE | |
 | :depth | R13 | OK* | STALE (machinery-capture 09-12) | STALE | effective-horizon wiring changed 09-09 |
-| :temperature | R14 | OK* | STALE (trace row 09-04) | STALE | β now caller-DECLARED in select-action-cascades — post-dates all evidence |
+| :temperature | R14 | OK* | CENSUSED D2: :matches — β is a declared input channel on the live path (no live producer var); eq-2.7 solver dead AND un-modeled in Lean | STALE | R14 'LIVE feed' status regressed: policy-precision dead on tick |
 | :policy-posterior | R6 | OK* — **census corrected 2026-09-18 (T2)**: three Lean laws exist (base OutcomeRiskKL; tempered PolicySelection γ=1/β; census wrapper); production implements the TEMPERED law; comparisons bind `AIF.Selection.temperedPolicyPosterior` (darktower 99130e5fc3, core re-pinned fd8d5f8ee0) | STALE | STALE | selection-posterior cites selectionPosterior_finite; β↔γ bridge owned: H3 policyPrecisionIsGammaFromBeta, discharge = certificate betaDeclared |
-| :action | R16 | OK* | STALE — 09-12 witness REFUTES old live selector | STALE | bayes-choice over first acting pattern is the current law; the refuting witness is about retired code |
+| :action | R16 | OK* | CENSUSED D2: :matches (bayes-choice + authorize live; flat select-action dead) | STALE | refuting 09-12 witness is about retired code |
 | :dirichlet-accumulation | R17 | OK* | OPEN (waiting-row, DirichletLearning.accumulate) | STALE (3-tick IEEE 09-12) | |
 | :model-reduction | R12 | OK* | OPEN | STALE (BMR witness) | |
 | :state-prediction-error | R3a-cat | OPEN — new Lean row needed | OPEN | OPEN | categorical successor, eq. 4.13 |

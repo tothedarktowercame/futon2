@@ -36,7 +36,9 @@ and both testimonies are compared against the Lean specification.
   risk: planning what exists; facade risk: claiming built what is not)
 
 Discrepancy classes: :plan-diverges-from-spec, :built-diverges-from-spec,
-:plan-ignores-built, :claims-built-not-found, :consistent.
+:plan-ignores-built, :claims-built-not-found, :consistent; added in use:
+:census-role-error (D1), :aligned-but-dead (D1), :spec-census-error (T2 —
+the Lean census itself bound the wrong law and the testimony caught it).
 Results table appended below as each pair (Dn, Tn) completes.
 
 ## Results
@@ -48,6 +50,25 @@ Results table appended below as each pair (Dn, Tn) completes.
 | :G | no new plans — testimony is claims-built only (the DAG records obligations, not build plans). Pre-registered finding stands: `LF-expected-free-energy` is *accepted* while its own acceptance text leaves the ambiguity argument unbound → **:plan-diverges-from-spec** (at the obligation-record level) | **:matches on the declared reduction domain** (horizon↔T, precedence-fn↔π, :spec↔constant C, pointwise risk with ⊤-iff-zero-C; refuses outside the domain rather than mis-scoring) | all 6 claims-built confirmed by the census, incl. the private `outcome-risk-pointwise` both witnesses flagged independently → **:consistent** |
 | :risk | :no-plans (informative) | :not-checked — dedicated OutcomeRiskKL pass queued | :consistent |
 | :ambiguity | :no-plans | :matches (within the identity-A known-failing context) | **discrepancy found and resolved**: census said `step-ambiguity` :live; testimony said built-but-not-reached; rerun showed the sole call site is inside `horizon-g` (enumerating reference) → testimony right, census corrected in place (f3d0417b). Class: **:census-role-error** (new). Note: the census hedged in prose while stretching the role field — prose hedges don't survive joins |
+
+### Selection cluster — D2 (38a57c8e) × T2 (454fa6d8), compared 2026-09-18
+
+| term | P↔S | B↔S | P↔B |
+|---|---|---|---|
+| :temperature (β) | no plans; on the live path β is a DECLARED INPUT CHANNEL (per cascade-problem, distinct betas → :incommensurable-family, no default), not a computation. The dead eq.-2.7 solver (`policy-precision/converge-beta`) has **no Lean declaration at all** — a Clojure computation outside the model, though dead. Pre-registered `LF-temperature` "three laws conflated" finding: untangled on the Lean side by the census correction (`AIF.Selection`); DAG node text is claude-4's to fix | **:matches** | :consistent (T2 lists β *consumers* as claims-built; compatible framing) |
+| :policy-posterior | **:spec-census-error, found and fixed**: the census had bound the base law; T2 proved production implements the tempered law (γ=1/β on G only, F unscaled); corrected at darktower 99130e5fc3 + re-pin fd8d5f8ee0 BEFORE the D2 comparison ran | **:matches** input-by-input vs `PolicySelection.selectionWeight` (infinite-G → exactly 0 both sides; zero-normalizer ↔ :no-admissible-candidate typed refusal; Clojure-only runtime rules — tie-break, log-sum-exp — noted, uncontradicted) | :consistent. New duplicate found: `cascade_policy/cascade-policy-posterior` + `select-over-cascades`, same law, zero src callers, :test-only |
+| :action | no plans | **:matches** (`bayes-choice` over first acting pattern; `authorize` on the admissible set) | :consistent |
+
+**Cross-cutting (D2):** `policy-precision` (R14's converge/carry-β) is
+DEAD on the tick — reachable only via `beta-dark-carry`, whose only
+callers are tests and lab scripts; the completeness doc's "R14 ✓ LIVE
+feed" status has silently regressed or was recorded against a
+now-removed path. F is the cluster's one construction gap (`:f` defaults
+0; WM-11 needs-owner; Lean side `policyPosteriorImportsPolicyF` sorry,
+evidence = a run record carrying per-policy F). E is `Habit.uniform` by
+declaration. **Study health note: in two rounds, each witness has been
+corrected once by the process** — D1 corrected the built-census, T2
+corrected the spec census. No witness is privileged; the reruns are.
 
 **Cross-cutting findings (D1):** `active-horizon-g` is Lean-aligned and
 DEAD (test-only island; nothing from the tick reaches it) → new class
