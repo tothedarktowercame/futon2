@@ -175,7 +175,16 @@
         "machine-model's specialized vocabulary is absent from the lane data")))
 
 (deftest decision-law-and-revision-bindings
-  (let [r (wm/cascade-decision (assembled*) {})
+  (let [r (wm/cascade-decision
+           (assembled*)
+           ;; WIRE-3: inject a derived live C whose want token is in this
+           ;; fixture's joint domain (the derivation itself is covered in
+           ;; futon2.aif.live-c-test); a bare live-C token outside the
+           ;; domain is the reachable restriction's typed refusal.
+           {:live-c {:derived {:want #{[target :test-covers-missing-total-repos]}
+                               :weights {[target :test-covers-missing-total-repos] 1}
+                               :lam 1 :entries [] :gaps [] :refusals nil
+                               :signature "wm01-bindings-live-c"}}})
         decision (:decision r)]
     (is (map? decision))
     (is (not= :abstained (:status decision)) "the occurrence yields a decision")

@@ -10,6 +10,7 @@
   refuses :incommensurable-family."
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
+            [futon2.aif.live-c :as lc]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.report.war-machine :as wm]))
 
@@ -55,6 +56,19 @@
     :aif/placeholder-is-load-bearing {:receipt "PH-interpretation" :source "03-R6"}
     :test-step-covering-missing-total-repos {:receipt "TS-interpretation" :source "03-R6"}}})
 
+(def live-c-fixture
+  "WIRE-3 test seam: a derived live C whose want token IS in the tick-1
+  joint domain (target-qualified, exactly as the qualification scheme
+  builds the family's tokens), with a fixed weight — so these tests do
+  not read the real corpus (the derivation itself is covered in
+  futon2.aif.live-c-test) and stay deterministic."
+  {:want #{[tick-1-target :test-covers-missing-total-repos]}
+   :weights {[tick-1-target :test-covers-missing-total-repos] 1}
+   :lam 1 :entries [] :gaps [] :refusals nil
+   :signature "cascade-decision-test-live-c"})
+
+(def live-c-opts {:live-c {:derived live-c-fixture}})
+
 (def receipt
   {:kind :construction-receipt :moves [:interpret :order]
    :family-searched 3 :coverage 1})
@@ -84,7 +98,7 @@
   ;; the per-target refusal kinds are exercised, not the refuse-all rule)
   (let [assembled (assemble* {:targets [:A :B]
                                 :sources {:horizon-steps 3}})
-        r (wm/cascade-decision assembled {})]
+        r (wm/cascade-decision assembled live-c-opts)]
     (is (= :abstained (get-in r [:decision :status]))
         "no assembled problem ⇒ the abstention")
     (is (= 2 (count (get-in r [:decision :refusals])))
@@ -96,13 +110,19 @@
 (deftest h5a-tick-1-decision
   (let [assembled (assemble* {:targets [tick-1-target]
                                 :sources tick-1-sources})
-        r (wm/cascade-decision assembled {})
+        r (wm/cascade-decision assembled live-c-opts)
         decision (:decision r)]
-    (is (= :aif/placeholder-is-load-bearing
+    ;; WIRE-3: the injected live C weights
+    ;; [:wm-tick-001-observation-crash :test-covers-missing-total-repos]
+    ;; at 1 (3x the uniform 1/3 share), and the choice follows the weight:
+    ;; :test-step-covering-missing-total-repos now outranks
+    ;; :aif/placeholder-is-load-bearing (uniform: 0.37005613489124095 and
+    ;; the placeholder pattern won).
+    (is (= :test-step-covering-missing-total-repos
            (-> decision :action :precedence first :id))
-        "the gated decision chooses :aif/placeholder-is-load-bearing")
-    (is (= 0.37005613489124095 (:chosen-action-mass decision))
-        "the chosen action's mass is the posterior marginal 0.37005613489124095")
+        "the weighted want token moves the choice to the test-step cascade")
+    (is (= 0.6217118810867193 (:chosen-action-mass decision))
+        "the chosen action's mass is the posterior marginal 0.6217118810867193")
     (is (= {:value 1 :status :declared} (:beta decision))
         "β = 1 is recorded :declared")
     (let [posterior (get-in decision [:selection-law :posterior])]
@@ -149,11 +169,15 @@
                                          [:test-step-covering-missing-total-repos])]))
         assembled (assemble* {:targets [tick-1-target b-target]
                                 :sources sources})
-        r (wm/cascade-decision assembled {})
+        r (wm/cascade-decision assembled live-c-opts)
         decision (:decision r)
         posterior (get-in decision [:selection-law :posterior])]
-    (is (= :b-fix (-> decision :action :precedence first :id))
-        "B's lower-G cascade wins the JOINT selection")
+    ;; WIRE-3: the live C's weight on tick-1's :test-covers token (1 vs
+    ;; the uniform 1/3 share) now outranks B's lower-G cascade — the
+    ;; derived preference redistributes which target the machine acts on.
+    (is (= :test-step-covering-missing-total-repos
+           (-> decision :action :precedence first :id))
+        "the weighted tick-1 cascade wins the JOINT selection")
     (is (= #{tick-1-target b-target}
            (set (map :target (keys posterior))))
         "one posterior spans both targets' candidates")
@@ -169,7 +193,7 @@
         stripped (update-in assembled
                             [:problems 0 :construction-receipts]
                             #(vec (butlast %)))
-        r (wm/cascade-decision stripped {})
+        r (wm/cascade-decision stripped live-c-opts)
         decision (:decision r)
         posterior (get-in decision [:selection-law :posterior])]
     (is (= [{:target tick-1-target
@@ -181,7 +205,7 @@
         "no unreceipted candidate reached the posterior")
     (is (not (some #(= :C3 (:id %)) (keys posterior)))
         "the dropped candidate is absent from the posterior")
-    (is (= :aif/placeholder-is-load-bearing
+    (is (= :test-step-covering-missing-total-repos
            (-> decision :action :precedence first :id))
         "the remaining family still selects through the gate")))
 
@@ -207,9 +231,9 @@
     (is (thrown-with-msg?
          clojure.lang.ExceptionInfo
          #"cascade decision refused"
-         (wm/cascade-decision merged {})))
+         (wm/cascade-decision merged live-c-opts)))
     (is (= :incommensurable-family
-           (try (wm/cascade-decision merged {})
+           (try (wm/cascade-decision merged live-c-opts)
                 (catch clojure.lang.ExceptionInfo e
                   (:kind (ex-data e)))))
         "different T across problems refuses, typed, with the values")))
@@ -235,7 +259,14 @@
                               :horizon-steps 3
                               :beta-by-context {:x {:beta 1}}
                               :context-of (fn [_] :x)}})
-        r (wm/cascade-decision assembled {})
+        r (wm/cascade-decision
+           assembled
+           ;; this test's own live C: its want token must be in THIS
+           ;; family's domain, or the reachable restriction rightly
+           ;; refuses (see the wire-3 production-state test below).
+           {:live-c {:derived (assoc live-c-fixture
+                                      :want #{[:A :done]}
+                                      :weights {[:A :done] 1})}})
         decision (:decision r)
         posterior (get-in decision [:selection-law :posterior])
         by (fn [t id]
@@ -273,3 +304,60 @@
     (is (= :target-token-pair
            (get-in decision [:token-qualification :scheme]))
         "the token qualification scheme is recorded on the decision")))
+
+;; ===== WIRE-3: the derived live C into the joint preference spec =====
+
+(deftest wire-3-stale-live-c-refuses-the-decision-typed
+  ;; Requirement 2: a stale C is never scored and never silently uniform.
+  ;; The injected :derived C's signature cannot match a fresh read of the
+  ;; real corpus, so the freshness guard fires.
+  (let [assembled (assemble* {:targets [tick-1-target]
+                              :sources tick-1-sources})
+        call (fn [] (wm/cascade-decision
+                     assembled
+                     {:live-c {:derived live-c-fixture
+                               :sources-now (lc/read-sources)}}))]
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"cascade decision refused"
+                          (call)))
+    (let [e (try (call) (catch clojure.lang.ExceptionInfo e e))
+          d (ex-data e)]
+      (is (= :live-c-stale (:kind d)) "the refusal is typed :live-c-stale")
+      (is (= (:signature live-c-fixture) (:signature-derived d))
+          "both signatures are recorded — derived and now"))))
+
+(deftest wire-3-refused-derivation-propagates-typed
+  ;; Requirement 3: a missing source refuses the whole derivation, and the
+  ;; decision refuses with it — no silent uniform fallback.
+  (let [assembled (assemble* {:targets [tick-1-target]
+                              :sources tick-1-sources})
+        e (try (wm/cascade-decision
+                assembled
+                {:live-c {:sources {:wholeness {:refusal {:kind :source-missing
+                                                          :path "/nonexistent"}}
+                                    :missions []
+                                    :stars {:value {:capabilities {}}}}}})
+               (catch clojure.lang.ExceptionInfo e e))
+        d (ex-data e)]
+    (is (= :live-c-refused (:kind d)))
+    (is (= [:source-missing] (mapv :kind (:refusals d))))))
+
+(deftest wire-3-live-c-tokens-are-not-in-any-real-tick-domain-today
+  ;; The FINDING, recorded as a test: the real corpus's live-C tokens are
+  ;; namespaced keywords (:alive/M-* :closed/M-* :star/*), while the joint
+  ;; cascade domain is target-qualified [target token] pairs. live-c's own
+  ;; reachable restriction (cascade-spec) therefore refuses every real
+  ;; decision typed :no-reachable-want until a declared cascade source
+  ;; puts a live-C token into its want/pattern vocabulary under the same
+  ;; qualification. The refusal is the honest state — never a silent
+  ;; uniform fallback, never an unreachable token dumped into :want.
+  (let [assembled (assemble* {:targets [tick-1-target]
+                              :sources tick-1-sources})
+        d (lc/derive-live-c (lc/read-sources))]
+    (is (seq (:want d)) "the real corpus derives a non-empty live C")
+    (is (every? keyword? (:want d))
+        "live-C tokens are (namespaced) keywords, never [target token] pairs")
+    (is (= :no-reachable-want
+           (try (wm/cascade-decision assembled {})
+                (catch clojure.lang.ExceptionInfo e
+                  (:kind (ex-data e)))))
+        "the real corpus refuses :no-reachable-want at this call site today")))

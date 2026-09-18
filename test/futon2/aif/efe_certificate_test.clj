@@ -292,3 +292,66 @@
         (is (= :invalid-free-energy (:kind refusal))
             (str "F = " bad " must refuse, not produce NaN"))
         (is (= :a (get-in refusal [:detail :id])))))))
+
+;; ===== WIRE-3: which C the scoring used =====
+;; The certificate's :c field records derived (with signature and the
+;; weights echoed) versus the uniform declared-constant spec, so "C was
+;; derived and happened to be near-uniform" is distinguishable from "C was
+;; never derived".
+
+(deftest wire-3-derived-and-uniform-c-are-distinguishable-in-the-certificate
+  (let [{:keys [q0 spec candidates]} (fixture)
+        base-opts {:horizon-steps 1 :cascade-spec spec}
+        uniform (efe/rank-cascade-actions {:cascade-belief q0} candidates base-opts)
+        want-tok (first (:want spec))
+        weighted-spec (-> spec
+                          (assoc :weights {want-tok 1}
+                                 :c {:status :derived
+                                     :source :futon2.aif.live-c/cascade-spec
+                                     :signature "wire-3-test-signature"}))
+        derived (efe/rank-cascade-actions
+                 {:cascade-belief q0} candidates
+                 {:horizon-steps 1 :cascade-spec weighted-spec})
+        c-uniform (:c (:certificate (first uniform)))
+        c-derived (:c (:certificate (first derived)))]
+    (is (= :uniform-declared-constant (:status c-uniform))
+        "no :c on the spec records the uniform declared-constant spec")
+    (is (nil? (:signature c-uniform)))
+    (is (= :derived (:status c-derived)))
+    (is (= "wire-3-test-signature" (:signature c-derived)))
+    (is (= :futon2.aif.live-c/cascade-spec (:source c-derived)))
+    (is (= {want-tok 1} (:weights-echo c-derived))
+        "the weights that reached the law are echoed — a derived C that
+        happens to be near-uniform still reads :derived")
+    ;; the two records are structurally distinguishable: no shared status
+    (is (not= (:status c-uniform) (:status c-derived)))
+    ;; the weighted scoring itself is well-formed: finite G, no NaN, no
+    ;; candidate zeroed out by the weights (weights are positive rationals
+    ;; over want, so no preference mass can vanish).
+    (is (every? number? (map :controller-score derived)))
+    (is (every? #(Double/isFinite ^double %) (map :controller-score derived))
+        "a positive-rational weight cannot zero preferred mass: every G finite")))
+
+(deftest wire-3-invalid-weights-refuse-the-spec-typed
+  ;; A weight on a token outside :want is log-preference-fn's typed
+  ;; refusal. At the ranking layer it lands per candidate: G IS the typed
+  ;; refusal, controller-score is ##Inf, and NO certificate is fabricated
+  ;; for a computation that did not run — selection-posterior then filters
+  ;; on finite G and refuses :no-admissible-candidate. The invalid weights
+  ;; are never silently dropped.
+  (let [{:keys [q0 spec candidates]} (fixture)
+        r (efe/rank-cascade-actions
+           {:cascade-belief q0} candidates
+           {:horizon-steps 1
+            :cascade-spec (assoc spec :weights {:not-in-want 1})})]
+    (is (vector? r))
+    (is (= 2 (count r)))
+    (doseq [entry r]
+      (is (= :missing (:status (:G-efe entry)))
+          "G is the typed refusal itself")
+      (is (= :invalid-preference-spec (:kind (:G-efe entry))))
+      (is (= :weights (:field (:G-efe entry))))
+      (is (= ##Inf (:controller-score entry))
+          "a refused G cannot be ranked as finite")
+      (is (nil? (:certificate entry))
+          "no certificate is fabricated for the refused computation"))))

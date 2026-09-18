@@ -1054,11 +1054,25 @@
       {:status :missing :kind :missing-cascade-want
        :limitation "cascade scoring needs the preference spec's :want (R1's want tokens); pass :cascade-spec {:want #{…}}"}
       :else
-      (let [spec {:want want
-                  :evidence (or (:evidence spec-in) #{})
-                  :lam (or (:lam spec-in) 1)
-                  :mu (or (:mu spec-in) 1)
-                  :zeroed (or (:zeroed spec-in) #{})}
+      (let [spec (cond-> {:want want
+                          :evidence (or (:evidence spec-in) #{})
+                          :lam (or (:lam spec-in) 1)
+                          :mu (or (:mu spec-in) 1)
+                          :zeroed (or (:zeroed spec-in) #{})
+                          ;; WIRE-3 C provenance: the certificate must be
+                          ;; able to say WHICH C the scoring used. A caller
+                          ;; that derived the live C passes {:c {:status
+                          ;; :derived …}}; everything else records the
+                          ;; uniform declared-constant spec it always was.
+                          :c (or (:c spec-in)
+                                 {:status :uniform-declared-constant})}
+                    ;; WIRE-3: the derived live C's per-token weights, when
+                    ;; the caller carries them. Attached only when present —
+                    ;; log-preference-fn validates :weights whenever the key
+                    ;; exists (positive rationals over :want, typed refusal
+                    ;; :invalid-preference-spec :field :weights otherwise).
+                    (:weights spec-in)
+                    (assoc :weights (:weights spec-in)))
             universe (-> (cascade-candidate-tokens
                           (mapcat :precedence candidate-actions))
                          (into (reduce set/union #{} (keys q0)))
@@ -1160,6 +1174,19 @@
                                                        :declared
                                                        :not-in-scoring-opts)}
                                             :habit {:value 1 :status :declared-neutral}
+                                            ;; WIRE-3: which C the scoring
+                                            ;; used — the caller's derived
+                                            ;; live C (with signature) or
+                                            ;; the uniform declared-constant
+                                            ;; spec. "C was derived and
+                                            ;; happened to be near-uniform"
+                                            ;; reads as :derived with the
+                                            ;; weights echoed; "C was never
+                                            ;; derived" reads as
+                                            ;; :uniform-declared-constant.
+                                            :c (assoc (:c spec)
+                                                      :weights-echo
+                                                      (:weights spec))
                                             ;; WIRE-2 F provenance: the
                                             ;; certificate says WHERE F came
                                             ;; from, so "F computed = 0.0"

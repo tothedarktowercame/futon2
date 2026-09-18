@@ -54,6 +54,7 @@
             [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
             [futon2.aif.habit-prior :as habit-prior]
+            [futon2.aif.live-c :as live-c]
             [futon2.aif.machine-accumulation :as machine-accumulation]
             [futon2.aif.strategic-habit :as strategic-habit]
             [futon2.aif.mission-c :as mission-c] [futon2.aif.mission-epistemic-value :as mission-epistemic]
@@ -5917,7 +5918,7 @@
     per-target-then-ranked.
   - Problems declaring different T or β refuse, typed
     :incommensurable-family with the values."
-  [assembled _opts]
+  [assembled opts]
   (let [problems (:problems assembled)]
     (if (empty? problems)
       {:decision (decision-gate/emit!
@@ -5937,6 +5938,49 @@
                            :beta (vec betas)})))
         (let [T (first Ts)
               beta (first betas)
+              ;; WIRE-3: the derived live C enters the joint preference
+              ;; spec. Derived from Joe's three named sources at decision
+              ;; time; a STALE C (the corpus changed after the derivation)
+              ;; or a refused derivation refuses the decision typed —
+              ;; never scored against a stale C, never silently uniform.
+              ;; opts :live-c {:sources :sources-now :derived} is the test
+              ;; injection seam for the source reads and the derived map
+              ;; (the derivation itself is covered in
+              ;; futon2.aif.live-c-test); production passes nothing and
+              ;; reads the real corpus twice (derive, then the freshness
+              ;; re-read).
+              live-c-opts (:live-c opts)
+              live-sources (or (:sources live-c-opts) (live-c/read-sources))
+              live-derived (or (:derived live-c-opts)
+                               (live-c/derive-live-c live-sources))
+              _ (when (seq (:refusals live-derived))
+                  (throw (ex-info "cascade decision refused"
+                                  {:kind :live-c-refused
+                                   :refusals (:refusals live-derived)
+                                   :limitation (:limitation live-derived)})))
+              ;; Freshness: compare the derived C's signature against a fresh
+              ;; source read. Production always derives from a real read, so
+              ;; the guard always runs. The :derived test seam bypasses
+              ;; DERIVATION, not the guard: a test that injects :derived AND
+              ;; a source read gets the real comparison (that is how the
+              ;; stale test below refuses); only a bare :derived with no
+              ;; source read at all records the seam instead of inventing a
+              ;; comparison.
+              live-freshness
+              (if (and (:derived live-c-opts)
+                       (not (or (:sources live-c-opts)
+                                (:sources-now live-c-opts))))
+                {:stale? false :signature-derived (:signature live-derived)
+                 :signature-now :injected-test-seam}
+                (live-c/stale?
+                 live-derived
+                 (or (:sources-now live-c-opts) live-sources)))
+              _ (when (:stale? live-freshness)
+                  (throw (ex-info "cascade decision refused"
+                                  {:kind :live-c-stale
+                                   :signature-derived (:signature-derived live-freshness)
+                                   :signature-now (:signature-now live-freshness)
+                                   :limitation "the corpus changed after C was derived: re-derive before scoring"})))
               lanes
               (mapv (fn [problem]
                       (let [lane (cascade-lane (:cascade-problem problem))]
@@ -6021,10 +6065,43 @@
                                      (into acc (map (fn [w] [t w]))
                                            (get-in p [:cascade-problem :want]))))
                                  #{} problems)
+              ;; WIRE-3: the joint comparison's REACHABLE token domain —
+              ;; every token the family's states, patterns or declared
+              ;; wants can name — is what live-c/cascade-spec restricts
+              ;; the live want to (the producer's own law: an unreachable
+              ;; want token dilutes the uniform share and distorts the
+              ;; comparison, so it is refused as :no-reachable-want, not
+              ;; kept). The spec that reaches scoring is the joint want
+              ;; plus the in-domain live want, with the live weights.
+              joint-reachable
+              (reduce
+               (fn [acc candidate]
+                 (reduce (fn [a pattern]
+                           (reduce conj a
+                                   (concat (:produces pattern)
+                                           (mapcat (fn [cl]
+                                                     (concat (:present cl)
+                                                             (:absent cl)))
+                                                   (get-in pattern [:guard :clauses])))))
+                         acc (:precedence candidate)))
+               (reduce clojure.set/union joint-want (map (partial reduce clojure.set/union #{}) (keys joint-q0)))
+               joint-candidates)
+              live-spec (live-c/cascade-spec live-derived joint-reachable)
+              _ (when (:refusal live-spec)
+                  (throw (ex-info "cascade decision refused" (:refusal live-spec))))
               ranked (efe/rank-actions {:cascade-belief joint-q0}
                                        joint-candidates
                                        {:horizon-steps T
-                                        :cascade-spec {:want joint-want}})]
+                                        :cascade-spec
+                                        {:want (into joint-want (:want live-spec))
+                                         :weights (:weights live-spec)
+                                         :lam (:lam live-spec)
+                                         :mu (:mu live-spec)
+                                         :evidence (:evidence live-spec)
+                                         :zeroed (:zeroed live-spec)
+                                         :c {:status :derived
+                                             :source :futon2.aif.live-c/cascade-spec
+                                             :live-c (:live-c live-spec)}}})]
           (when (and (map? ranked) (contains? ranked :status))
             (throw (ex-info "cascade decision refused"
                             (merge {:kind (or (:kind ranked) :rank-refused)}
