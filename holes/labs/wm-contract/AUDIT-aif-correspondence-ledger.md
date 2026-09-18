@@ -290,6 +290,17 @@ into the frozen spec — continues with a bigger engine. Until then, SAT/WMC
 machinery is not used: with no coupling there is nothing to count that
 arithmetic does not already give exactly.
 
+**2026-09-18, the factorization is now proven, not spot-checked.**
+mathlib4 `5e5753dbb3` (`DarkTower/AIF/ProductFactorization.lean`):
+`rowEntropy_tokenLikelihood` (ambiguity = Σ per-token binary entropies,
+valid on the closed cube — the mixed checkable/judgement kernel
+included) and `klSum_product` (risk Gibbs sum = Σ per-token Bernoulli
+KLs, C interior = the zeroed-∅ precondition; `prodB_pos` makes
+`stepRisk`'s ⊤-guard vacuous there), with bridges binding the deployed
+`tokenLikelihood` by name. These are the acceptance instruments for the
+sparse non-degenerate evaluator: the 2^|V| enumeration appears only on
+the theorems' left-hand sides.
+
 ## Known-failing vs certificates — the two test qualities (Joe, 2026-09-18)
 
 Directive set, superseding the "open ruling" entry that stood here (that
