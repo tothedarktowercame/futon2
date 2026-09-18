@@ -39,7 +39,8 @@
   {:id :runtime-forward-model :path "futon2/src/futon2/aif/forward_model.clj" :lines 443 :sha256-16 "da9f516159467fbf"
    :note "byte-identical to Q-interface-completeness.edn :runtime-forward-model"}
   {:id :runtime-belief :path "futon2/src/futon2/aif/belief.clj" :lines 1238 :sha256-16 "39c1dabaf7be878b"}
-  {:id :runtime-preferences :path "futon2/src/futon2/aif/preferences.clj" :lines 565 :sha256-16 "f1a0b5c0a05a3d20"}
+  {:id :runtime-preferences :path "futon2/src/futon2/aif/preferences.clj" :lines 583 :sha256-16 "5438295b8f5fd6f5"
+   :note "RE-PINNED by :pin-review-2026-09-18b. 565 -> 583 lines at futon2 1ea77e70 (LF-temperature's domain guard on :temperature). Verdict :proxy-only UNCHANGED."}
   {:id :runtime-efe :path "futon2/src/futon2/aif/efe.clj" :lines 1342 :sha256-16 "6ea7a30859e31b48"
    :note "byte-identical to Q-interface-completeness.edn :runtime-efe"}
   {:id :runtime-eig :path "futon2/src/futon2/aif/epistemic_value.clj" :lines 97 :sha256-16 "0df62893adfdce64"
@@ -62,6 +63,21 @@
  :repo-heads-at-review {:futon2 "8d987964" :mathlib4 "4bbc7111c4" :p4ng "5cd83cf"
    :note "The review pass re-read at these heads. Every file the original census pinned is BYTE-IDENTICAL at both (checked: the eleven :sha256-16 values above all still match), so the two readings are of the same bytes and the futon2/p4ng head movement is other work."}
 
+  :pin-review-2026-09-18b
+ {:by "claude-4 (reviewed the drifting commit itself; carve-out (b) -- full context already held)"
+  :at "2026-09-18"
+  :reason "gen_fundamentals REFUSED the publish: the :runtime-preferences pin had drifted f1a0b5c0a05a3d20 -> 5438295b8f5fd6f5 and the generator will not render a dated reading as current. The drift is futon2 1ea77e70, LF-temperature's domain guard on c-distribution's :temperature. GF_ALLOW_PIN_DRIFT was NOT used; the citation was re-read instead."
+  :what-changed "c-distribution previously computed (max t 1e-9), silently clamping any non-positive temperature. A negative T reverses the preference law -- exp(-gap/T) becomes a reward for distance -- and was being read as a near-hard preference; NaN propagated through every score. It now refuses non-positive, non-finite and non-numeric T with a typed reason, and T -> 0 is recorded as a declared LIMIT rather than an admitted value. 565 -> 583 lines."
+  :citations-re-read
+  [{:at "preferences.clj:9-24" :finding "INTACT at the new bytes -- the 13 declared [lo hi] channel ranges are still there and still at those lines."}
+   {:at "preferences.clj:60-70" :finding "INTACT -- current-C still returns the static preferences floor."}
+   {:at "preferences.clj:235-285" :finding "INTACT -- c-distribution still starts at :235 and still builds a normalised per-channel density; the guard was added inside it, not around it."}]
+  :verdict-unchanged
+  {:entry :machine-C :runtime-verdict :proxy-only
+   :why "The guard changes what c-distribution REFUSES, not what it IS. The entry's basis is a GRAIN claim -- the runtime C is a product of 13 independent per-channel densities over channel value ranges, while the required object is one distribution over the vertex-tagged outcome domain. A domain guard on the temperature parameter moves neither the grain nor the existence question. If anything it strengthens the entry's 'real, live and normalized' half, which was never the half in dispute."}
+  :pins-moved {:runtime-preferences "f1a0b5c0a05a3d20 -> 5438295b8f5fd6f5 (565 -> 583 lines, futon2 1ea77e70)"}
+  :scope "ONE pin. This pass re-read only the citation that drifted; it is not a re-run of the whole census and makes no claim about the other pins beyond their being unmoved at this read."}
+
   :pin-review-2026-09-18
  {:by "zai-51, E07 slice 2 (dispatched by claude-4, briefing v2)"
   :at "2026-09-18"
@@ -71,7 +87,7 @@
   :pins-unchanged
   [:contract-emitter "498ce2126f727b95"
    :runtime-belief "39c1dabaf7be878b"
-   :runtime-preferences "f1a0b5c0a05a3d20"
+   :runtime-preferences "f1a0b5c0a05a3d20"  ;; superseded by :pin-review-2026-09-18b
    :runtime-eig "0df62893adfdce64"
    :runtime-habit "23f631d82dbbace7"
    :runtime-cascade-prior "4c5c5464c7df91b6"
