@@ -1,0 +1,224 @@
+{:dispatch :D1
+ :terms
+ [{:term :G
+   :lean {:census "DarkTower.AIF.expectedFreeEnergy"
+          :carrier "DarkTower.WarMachine.PolicyHorizon.horizonEFE"}
+   :interpretation {:text "G = risk-only on the live path under the identity-A reduction (zero adjudication rates; ambiguity identically 0), known-failing vs full eq. 4.9 — AUDIT-aif-correspondence-ledger.md; the sparse form evaluates C pointwise against a declared-constant spec"
+                    :status :recorded}
+   :producers
+   [{:var "futon2.aif.cascade-model-manifest/horizon-g-sparse"
+     :role :live
+     :entry-point "futon2.aif.full-loop-runner (selection phase judge) -> futon2.report.war-machine/generate-war-machine -> futon2.aif.efe/rank-actions -> futon2.aif.efe/rank-cascade-actions"
+     :inputs ["{:rates ...} adjudication rates, must be zero or typed refusal"
+              "{:q0 ...} token-state belief map (state token-set -> prob)"
+              "{:precedence-fn ...} tau -> pattern precedence (the policy pi)"
+              "{:horizon T} positive integer"
+              "{:spec ...} preference spec {:want :lam :mu :evidence :zeroed} — the DECLARED CONSTANT C_tau; or :c-fn-pointwise tau -> o -> c(o)"
+              "{:universe ...} common token set of the comparison"]
+     :output "double sum over tau=1..T of pointwise risk; :infinite when any step risk is infinite; or typed {:status :missing :kind ...} refusal"
+     :callers ["futon2.aif.efe/rank-cascade-actions (efe.clj:1067)"
+               "test/futon2/aif/cascade_model_manifest_test.clj"]
+     :evidence ["grep -n 'horizon-g-sparse' src/futon2/aif/efe.clj -> 1008,1014,1067 (call at 1067)"
+                "grep -n 'efe/rank-actions' scripts/futon2/report/war_machine.clj -> 5786/5788 (R5 step), 6024 (cascade decision), 6379"
+                "grep -n 'wm/generate-war-machine' src/futon2/aif/full_loop_runner.clj -> 3739"]}
+    {:var "futon2.aif.efe/rank-cascade-actions"
+     :role :live
+     :entry-point "futon2.report.war-machine/generate-war-machine (R5 step and H5b cascade-only decision path)"
+     :inputs ["state with :cascade-belief (q0)"
+              "candidate-actions: seq of {:kind :cascade-candidate :id ... :precedence [patterns...]}"
+              "opts: :horizon-steps T (required), :cascade-spec {:want ... :lam :mu :evidence :zeroed}"]
+     :output "vec of ranked entries carrying :G-efe (= :G-cascade = :controller-score), :rank, :g-tie; or typed refusal (:missing-common-horizon, :missing-cascade-want, :mixed-candidate-kinds)"
+     :callers ["futon2.aif.efe/rank-actions (efe.clj:1127)"
+               "futon2.report.war-machine (scripts/futon2/report/war_machine.clj:5788, 6024) via rank-actions"]
+     :evidence ["grep -n 'rank-cascade-actions' src/futon2/aif/efe.clj -> 1002 (defn), 1127 (call from rank-actions)"
+                "sed -n '5786,5792p' scripts/futon2/report/war_machine.clj -> (step :R5 \"futon2.aif.efe/rank-actions\" ... {:horizon-steps ... :cascade-spec ...})"]}
+    {:var "futon2.aif.shadow-cascade-g/shadow-cascade-g"
+     :role :shadow
+     :entry-point "futon2.aif.full-loop-runner :construct! (line 3936) -> futon2.aif.receipt-construction/construct! -> shadow/shadow-cascade-g (line 579, delayed)"
+     :inputs ["record (mission document + pattern repository)"
+              "cascades: map of arm keyword -> {:nodes #{...} :precedence [...]}"
+              "opts: :library-root, :horizon (default 3), :lam :mu (default 1), zero adjudication rates DECLARED in :inputs, :interpret-fn test seam"]
+     :output "per arm {:status :computed :g <double or :infinite> :inputs {...}} or typed {:status :missing :kind ...}; no decision consumes it"
+     :callers ["futon2.aif.receipt-construction (line 579)"
+               "test/futon2/aif/shadow_cascade_g_test.clj"]
+     :evidence ["grep -n 'shadow/shadow-cascade-g' src/futon2/aif/receipt_construction.clj -> 579 (inside (delay ...))"
+                "grep -n 'receipt-construction/construct!' src/futon2/aif/full_loop_runner.clj -> 3936"]}
+    {:var "futon2.aif.cascade-model-manifest/horizon-g"
+     :role :test-only
+     :entry-point "none in src; the powerset-enumerating original superseded by horizon-g-sparse"
+     :inputs ["same keys as horizon-g-sparse plus :c-fn (tau -> o -> c(o)); enumerates the powerset observation model"]
+     :output "the same numbers as horizon-g-sparse by enumeration; typed refusals"
+     :callers ["test/futon2/aif/cascade_model_manifest_test.clj (horizon-g-lean-fixture-correspondence, horizon-g-infinite-risk)"
+               "src/futon2/aif/likelihood_precision.clj mentions it in a limitation note only"]
+     :evidence ["grep -rn 'horizon-g\\b' src test --include=*.clj | grep -v horizon-g-sparse -> only cascade_model_manifest.clj defn + its own docstrings, likelihood_precision.clj:136 note, and cascade_model_manifest_test.clj:486,496,503"]}
+    {:var "futon2.aif.cascade-g/step-g"
+     :role :duplicate
+     :entry-point "none in src; rational-enclosure exact categorical G on supplied inputs (canonical seam for Lean conversion agreement)"
+     :inputs ["{:q ...} categorical-ambiguity-shaped belief {:model :state-support :mass}"
+              "{:a ...} observation rows {:outcome-support :rows {s {:mass {o p}}}}"
+              "{:c ...} preference {:model :support :mass :provenance}"
+              "{:context ...} must bind :policy/id :occurrence/id :point"]
+     :output "risk and ambiguity decompositions as rational log bounds [lo hi], inputs echoed; typed refusals"
+     :callers ["futon2.aif.cascade-g/total-g"
+               "test/futon2/aif/cascade_g_test.clj"
+               "test/futon2/aif/wm01_conversion_agreement_test.clj"]
+     :evidence ["grep -rn 'cascade-g/step-g\\|cascade-g/total-g' src test --include=*.clj -> only wm01_conversion_agreement_test.clj:15 mentions the seam; no src caller"]}
+    {:var "futon2.aif.cascade-g/total-g"
+     :role :duplicate
+     :entry-point "none in src"
+     :inputs ["{:schedule [...]} nonempty distinct point ids" "{:steps [...]} one {:q :a :c :context} per schedule point"]
+     :output "summed rational G enclosure over the declared schedule"
+     :callers ["test/futon2/aif/cascade_g_test.clj"]
+     :evidence ["grep -rln 'futon2.aif.cascade-g' src test -> src/futon2/aif/cascade_g.clj, test/futon2/aif/cascade_g_test.clj, test/futon2/aif/wm01_conversion_agreement_test.clj"]}
+    {:var "futon2.aif.core-efe/g-efe"
+     :role :duplicate
+     :entry-point "none on the WM cascade tick path; consumed by the ants port (src/ants/aif/efe.clj re-exports it) and the node-sim pilot"
+     :inputs ["means, variances: per-channel predicted mu / sigma^2 seqs"
+              "c-means, c-variances: per-channel preference Gaussian params"
+              "opts: :weights, :risk-mode :kl, :ambiguity-mode :gaussian-entropy"]
+     :output "{:risk ... :ambiguity ... :g-efe risk+ambiguity} — Gaussian KL risk + Gaussian entropy ambiguity (channel-grain G, not token-grain)"
+     :callers ["src/ants/aif/efe.clj (def risk/ambiguity/g-efe re-exports)"
+               "src/futon2/aif/node_sim.clj"
+               "src/ants/aif/policy.clj via efe/g-efe"]
+     :evidence ["grep -rln 'futon2.aif.core-efe' src -> src/ants/aif/efe.clj, src/futon2/aif/core_efe.clj, src/futon2/aif/node_sim.clj (no futon2.aif live caller)"
+                "grep -rln 'node-sim' src --include=*.clj -> only src/futon2/aif/efe.clj (comment-level) — node-sim is not required by full-loop-runner or war_machine"]}
+    {:var "futon2.aif.efe/compute-efe"
+     :role :dead
+     :entry-point "none on the live tick: H5b (Joe 2026-09-17) DELETED the flat decision path that scored :type actions through rank-actions/compute-efe; war-machine's rank-actions calls supply only cascade candidates"
+     :inputs ["state (channels/observation map)" "action {:type ...}" "opts (:info-weight, :survival-weight, weights, preference module...)"]
+     :output "map with :G-risk :G-ambiguity :G-goal-outcome :controller-score ... (multi-objective controller score, only partly EFE)"
+     :callers ["futon2.aif.efe/rank-actions (the :type-action branch, unreachable from the live selection)"
+               "src/futon2/aif/actuator_a6.clj (itself required by nothing in src)"
+               "scripts demos"]
+     :evidence ["sed -n '6379,6398p' scripts/futon2/report/war_machine.clj -> 'H5b ... The flat block that lived here ... channel efe/rank-actions over them ... is DELETED, not flagged'"
+                "grep -n 'efe/rank-actions\\|efe/compute-efe' scripts/futon2/report/war_machine.clj -> only rank-actions at 5788/6024, both cascade-candidate calls"
+                "grep -rln 'actuator-a6' src --include=*.clj -> nothing outside actuator_a6.clj"]}
+    {:var "futon2.aif.active-horizon-g/active-horizon-g"
+     :role :dead
+     :entry-point "none live: its callers are futon2.aif.construction and futon2.aif.parameter-delivery, and construction-moves; construction* are required by nothing in src outside their own family — reachable only from tests"
+     :inputs ["{:q0 ...} token-state belief" "{:precedence-fn ...} per-step precedence with acting checks"
+              "{:horizon T}" "{:spec ...} or :c-fn-pointwise" "{:universe ...}" "{:rates ...}" "{:unknown-prior {fact p}}" "{:masked #{facts}}" "{:cap N}"]
+     :output "double G = sum_tau (risk + ambiguity) with per-step action-dependent channel; :infinite or typed refusal; equals horizon-g-sparse at :masked #{} zero rates"
+     :callers ["futon2.aif.construction (docstring + g-fn wiring)"
+               "futon2.aif.parameter-delivery (docstring: passes active-horizon-g as g-fn)"
+               "test/futon2/aif/active_horizon_g_test.clj"]
+     :evidence ["grep -rln 'futon2.aif.active-horizon-g' src -> parameter_delivery.clj, construction.clj, active_horizon_g.clj"
+                "grep -rln 'futon2.aif.construction ' src test -> construction_moves.clj + tests only; grep -rln 'construction-moves' -> test only; grep -rln 'parameter-delivery' src -> construction.clj, construction_moves.clj"
+                "grep -n 'construction/construct\\|parameter-delivery' src/futon2/aif/full_loop_runner.clj scripts/futon2/report/war_machine.clj -> no hits"]}]
+   :duplicates ["horizon-g (powerset-enumerating) vs horizon-g-sparse (pointwise/identity-A reduction) — same term, same numbers claimed by docstring, different computation"
+                "cascade-g/step-g+total-g — exact rational-enclosure categorical G on supplied A/C rows, a third computation of the same term (test/conversion seam only)"
+                "core-efe/g-efe — Gaussian channel-grain G (KL + entropy), same term name, different domain and computation (ants port)"
+                "compute-efe — legacy flat/channel G plus non-EFE controller terms; its EFE core is core-efe"]
+   :irrelevant ["futon2.aif.cascade-free-energy/policy-free-energy — F_pi, not G (D5 cluster; callers are tests only)"
+                "futon2.aif.epistemic-value — policy-conditioned EIG kernel, the information-gain analogue, explicitly unwired"
+                "futon2.aif.machine-q-risk — KL-risk adapter injected into compute-efe's dead branch (Row 14)"
+                "futon2.aif.close-loop / selection-gain — docstrings state explicitly they are NOT expected free energy"
+                "futon2.aif.node-sim — simulator/pilot that renders the EFE core conceptually; not a scorer on the tick"]
+   :match {:status :matches
+           :notes "PRIMARY live producer cascade-model-manifest/horizon-g-sparse vs Lean PolicyHorizon.horizonEFE (mathlib4 DarkTower/WarMachine/PolicyHorizon.lean:55 'horizonEFE (M : ForwardModel S O U) {T} (hT : 0 < T) (pi : Fin T -> U) (C : nat -> O -> real) : EReal := sum i, stepTerm M (policySeq hT pi) (i.val+1) C', stepTerm = stepRisk + stepAmbiguity). Input-by-input: T <-> :horizon (validated pos int = hT). pi <-> :precedence-fn (tau -> pattern precedence; a cascade IS the policy). C <-> :c-fn-pointwise (tau -> o -> c) exactly, or :spec which is the DECLARED-CONSTANT case C_tau = C for all tau (production supplies :spec per the dispatch note). M is DECOMPOSED: transition/rollout = cascade-model-manifest/rollout over q0 (Lean PolicyRollout.rolloutState), observation model A = token-likelihood — but horizon-g-sparse only admits ZERO adjudication rates where A is the identity kernel (Lean TokenObservation.tokenLikelihood_checkable), so stepAmbiguity is identically 0 and Q(o_tau|pi) = q_tau; non-zero rates are the typed refusal :judgement-rates-not-supported-at-scale, never approximated. stepRisk matches OutcomeRiskKL.outcomeRisk pointwise: positive Q on zero C -> :infinite (== stepRisk = top / horizonEFE_eq_top_iff). Output: double sum or :infinite <-> EReal with top. So the verdict is :matches FOR THE DECLARED REDUCTION DOMAIN (zero rates, constant-or-pointwise C), and :diverges from the general Lean definition only outside that domain — which the Clojure refuses rather than mis-scores. Extra Clojure input :universe (finite token observation space) has no Lean counterpart beyond O; the q-support-outside-c-universe refusal guards the projection Lean gets for free."}}
+  {:term :risk
+   :lean {:census "DarkTower.AIF.expectedFreeEnergy (pragmatic term)"
+          :carrier "DarkTower.WarMachine.OutcomeRiskKL.outcomeRisk"}
+   :interpretation {:text "risk = KL(Q(o_tau|pi) || C_tau), outcome divergence from the weighted-want preference spec; positive predicted mass on zero C is infinite risk, never smoothed (ZeroPreferenceExclusion)"
+                    :status :recorded}
+   :producers
+   [{:var "futon2.aif.cascade-model-manifest/outcome-risk"
+     :role :live
+     :entry-point "same live chain as horizon-g-sparse; the enumerating risk over the powerset observation distribution"
+     :inputs ["q_tau: state -> prob map" "c-fn: o -> c(o)"]
+     :output "double KL risk or :infinite"
+     :callers ["cascade-model-manifest internal (horizon-g path, tests)"
+               "shadow-cascade-g / active-horizon-g cite the same Lean declaration"]
+     :evidence ["grep -n 'defn outcome-risk' src/futon2/aif/cascade_model_manifest.clj -> 418"]}
+    {:var "futon2.aif.cascade-model-manifest/outcome-risk-pointwise (private)"
+     :role :live
+     :entry-point "horizon-g-sparse's risk kernel (the identity-A reduction of outcomeRisk)"
+     :inputs ["q_tau map" "pointwise log-C fn"]
+     :output "double or :infinite"
+     :callers ["horizon-g-sparse (line ~649)"
+               "active-horizon-g/step-risk implements the same Lean declaration per its docstring because the pointwise reduction cannot take a per-step channel"]
+     :evidence ["sed -n '585,663p' src/futon2/aif/cascade_model_manifest.clj -> (let [risk (outcome-risk-pointwise q (fn [o] (point-c tau o)))] ...)"]}
+    {:var "futon2.aif.active-horizon-g/step-risk"
+     :role :dead
+     :entry-point "inside active-horizon-g (dead chain, see :G)"
+     :inputs ["channel-predicted outcome distribution" "C"]
+     :output "risk with top-iff-zero-preferred-mass semantics"
+     :callers ["active-horizon-g only"]
+     :evidence ["grep -n 'defn- step-risk' src/futon2/aif/active_horizon_g.clj -> 156"]}
+    {:var "futon2.aif.core-efe/risk"
+     :role :duplicate
+     :entry-point "ants port policy scoring; not the WM cascade tick"
+     :inputs ["means, variances, c-means, c-variances, weights — per-channel Gaussian params"]
+     :output "sum of weighted full Gaussian-Gaussian KL"
+     :callers ["src/ants/aif/efe.clj (re-export), ants.aif.policy"
+               "futon2.aif.node-sim"]
+     :evidence ["grep -rln 'core-efe' src -> ants/aif/efe.clj, core_efe.clj, node_sim.clj"]}
+    {:var "futon2.aif.machine-q-risk"
+     :role :dead
+     :entry-point "injected into efe/compute-efe's :G-goal-outcome/Row-14 leg — dead with compute-efe on the live tick"
+     :inputs ["admitted machine-Q rows" "machine-C rows"]
+     :output "KL-risk or typed refusal"
+     :callers ["futon2.aif.efe only"]
+     :evidence ["grep -rln 'machine-q-risk' src -> src/futon2/aif/efe.clj, src/futon2/aif/machine_q_risk.clj"]}
+    {:var "futon2.aif.efe/compute-efe :G-risk term"
+     :role :dead
+     :entry-point "flat/channel branch of rank-actions — deleted from the live decision by H5b"
+     :inputs ["forward-model prediction vs current preferences + intrinsic value"]
+     :output "pragmatic gap term inside controller-score"
+     :callers ["rank-actions :type branch (unreachable live)"]
+     :evidence ["sed -n '6379,6398p' scripts/futon2/report/war_machine.clj (H5b deletion note)"]}]
+   :duplicates ["outcome-risk (enumerating) vs outcome-risk-pointwise (identity-A reduction) vs active-horizon-g/step-risk (per-step channel) — three Clojure kernels of the SAME Lean declaration OutcomeRiskKL.outcomeRisk"
+                "core-efe/risk — Gaussian KL risk, different family"
+                "machine-q-risk and compute-efe :G-risk — machine/channel grain, dead on the live tick"]
+   :irrelevant ["disposition-risk, mission-epistemic-value, survey-mission-value — 'risk'/'value' by name only, not EFE risk terms (D7 sweep will confirm)"]
+   :match {:status :not-checked
+           :notes "risk is a component of :G; the :G match above covers the pointwise risk kernel against OutcomeRiskKL.outcomeRisk. A dedicated input-by-input pass over OutcomeRiskKL.lean was not run in D1."}}
+  {:term :ambiguity
+   :lean {:census "DarkTower.AIF.expectedFreeEnergy (epistemic term)"
+          :carrier "DarkTower.WarMachine.PolicyHorizon.stepAmbiguity / rowEntropy"}
+   :interpretation {:text "ambiguity = sum_s Q(s_tau|pi) * H[A(.|s)] — on the live path it is identically 0 under the identity-A reduction at zero adjudication rates; the enumerating horizon-g and active-horizon-g compute real entropies but are not on the live tick"
+                    :status :recorded}
+   :producers
+   [{:var "futon2.aif.cascade-model-manifest/step-ambiguity"
+     :role :live
+     :entry-point "called by horizon-g (test-only producer) and horizon-g-sparse — in the sparse path the term is identically 0, not computed; listed live only as the manifest's declared ambiguity carrier"
+     :inputs ["observation-distribution rows per state"]
+     :output "sum_s q(s) H[A(.|s)]"
+     :callers ["horizon-g / horizon-g-sparse internals"]
+     :evidence ["grep -n 'defn step-ambiguity' src/futon2/aif/cascade_model_manifest.clj -> 430"]}
+    {:var "futon2.aif.active-horizon-g/row-entropy"
+     :role :dead
+     :entry-point "active-horizon-g's ambiguity term (Lean activeRowEntropy); dead chain"
+     :inputs ["observation-distribution row over the step's channel"]
+     :output "row entropy"
+     :callers ["active-horizon-g only"]
+     :evidence ["grep -n 'defn- row-entropy' src/futon2/aif/active_horizon_g.clj -> 150"]}
+    {:var "futon2.aif.core-efe/ambiguity"
+     :role :duplicate
+     :entry-point "ants port / node-sim"
+     :inputs ["variance-map {channel sigma^2} or variance seq" "mode :gaussian-entropy | legacy raw sum"]
+     :output "sum 1/2 ln(2*pi*e*sigma^2)"
+     :callers ["ants.aif.efe, ants.aif.policy, node-sim"]
+     :evidence ["sed -n '56,74p' src/futon2/aif/core_efe.clj (docstring: matches futon2.aif.efe/ambiguity :gaussian-entropy byte-for-byte)"]}
+    {:var "futon2.aif.categorical-ambiguity/ambiguity"
+     :role :duplicate
+     :entry-point "the authority/row checks and binary64 ambiguity used by cascade-g/step-g (duplicate chain)"
+     :inputs ["q belief, a observation rows (categorical-ambiguity contracts)"]
+     :output "categorical ambiguity value + checks"
+     :callers ["futon2.aif.cascade-g"]
+     :evidence ["sed -n '55,64p' src/futon2/aif/cascade_g.clj -> (ambiguity/ambiguity q a) reuse of its authority checks"]}]
+   :duplicates ["categorical token-grain ambiguity (cascade-model-manifest/step-ambiguity, categorical-ambiguity, active-horizon-g/row-entropy) vs Gaussian channel entropy (core-efe/ambiguity) — the 13-channel observation vector vs cascade-grain tokens split recorded in the standing o interpretation"]
+   :irrelevant ["epistemic-value (EIG, not entropy-of-A)"]
+   :match {:status :matches
+           :notes "Lean stepAmbiguity (PolicyHorizon.lean:38) = sum_s Q(s) * H[A(.|s)] over rowEntropy of the ForwardModel's observation rows. cascade-model-manifest/step-ambiguity implements exactly this over observation-distribution rows; on the live sparse path the term is 0 because A is the identity kernel (each row is a point mass), which Lean supports via TokenObservation.tokenLikelihood_checkable — 0 entropy, not a dropped term. core-efe/ambiguity is the Gaussian analogue (1/2 ln(2*pi*e*sigma^2)) and matches Lean only under a Gaussian instantiation of A, which DarkTower does not declare — hence :duplicate, not :diverges."}}]
+  :evidence-commands
+  ["grep -rln 'futon2.aif.<ns>' src test for each of cascade-g, active-horizon-g, cascade-free-energy, core-efe, shadow-cascade-g, cascade-model-manifest, efe (caller census)"
+   "grep -rln 'expected.free.energy\\|expected free energy\\|expected-free-energy' src/futon2 — the EFE-like namespace search beyond the named seven; found close_loop.clj, efe.clj, node_sim.clj, selection_gain.clj (close-loop and selection-gain self-declare NOT EFE; node-sim classified irrelevant)"
+   "grep -n 'rank-cascade-actions\\|horizon-g-sparse\\|generate-war-machine' across src/futon2/aif/full_loop_runner.clj, src/futon2/aif/efe.clj, scripts/futon2/report/war_machine.clj (live-chain verification)"
+   "sed -n '585,663p' src/futon2/aif/cascade_model_manifest.clj (horizon-g-sparse body: inputs, refusals, loop)"
+   "sed -n '44,60p' /home/joe/code/mathlib4/DarkTower/WarMachine/PolicyHorizon.lean (stepRisk, stepTerm, horizonEFE signatures)"
+   "sed -n '1002,1035p;1104,1184p' src/futon2/aif/efe.clj (rank-cascade-actions / rank-actions dispatch)"
+   "sed -n '6379,6398p' scripts/futon2/report/war_machine.clj (H5b flat-path deletion)"
+   "grep -rn 'horizon-g\\b' src test --include=*.clj | grep -v horizon-g-sparse (horizon-g callers)"
+   "grep -rln 'actuator-a6\\|machine-q-risk\\|node-sim\\|parameter-delivery\\|construction-moves\\|futon2.aif.construction ' src (dead-chain verification)"]}
+}
