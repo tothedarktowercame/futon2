@@ -100,7 +100,7 @@
   {:id :policy-posterior :defines :Q-pi :node :R6
    :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau - F_pi(pi))"
    :spec-leg {:rung :formula-transcribed :licence "mathlib4/DarkTower/WarMachine/Holes.lean:6959-6965" :basis "softmax states the normalized score map."}
-   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/policy.clj:51-134" :basis "selection-scores (51-113) and softmax-weights (115-134) implement it -- re-pointed 2026-09-18 (zai-51) from 157-235 after 0d29c706 moved both; same referents, verified by name at HEAD. selection-scores and softmax-weights implement it when F-pi enters; no run-identified F3-form certificate was found."}
+   :impl-leg {:rung :formula-transcribed :licence "src/futon2/aif/policy.clj:51-134" :basis "selection-scores (51-113) and softmax-weights (115-134) implement it -- re-pointed 2026-09-18 (zai-51) from 157-235 after 0d29c706 moved both; same referents, verified by name at HEAD. The rung holds only when F-pi enters; no run-identified F3-form certificate was found."}
    :leading-leg :level :certificate {:trailing-leg :both :reason "not found: no accepted-run posterior certificate with all three terms" :what-would-license "A run-identified candidate menu and independent normalized weights, including the F-pi coverage decision."} :converged? false}
 
   {:id :action :defines :u :node :R16
