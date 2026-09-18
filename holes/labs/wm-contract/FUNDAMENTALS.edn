@@ -40,14 +40,14 @@
    :note "byte-identical to Q-interface-completeness.edn :runtime-forward-model"}
   {:id :runtime-belief :path "futon2/src/futon2/aif/belief.clj" :lines 1238 :sha256-16 "39c1dabaf7be878b"}
   {:id :runtime-preferences :path "futon2/src/futon2/aif/preferences.clj" :lines 565 :sha256-16 "f1a0b5c0a05a3d20"}
-  {:id :runtime-efe :path "futon2/src/futon2/aif/efe.clj" :lines 1342 :sha256-16 "57a8784434381949"
+  {:id :runtime-efe :path "futon2/src/futon2/aif/efe.clj" :lines 1342 :sha256-16 "6ea7a30859e31b48"
    :note "byte-identical to Q-interface-completeness.edn :runtime-efe"}
   {:id :runtime-eig :path "futon2/src/futon2/aif/epistemic_value.clj" :lines 97 :sha256-16 "0df62893adfdce64"
    :note "byte-identical to Q-interface-completeness.edn :runtime-eig"}
   {:id :runtime-habit :path "futon2/src/futon2/aif/habit_prior.clj" :lines 164 :sha256-16 "23f631d82dbbace7"}
   {:id :runtime-cascade-prior :path "futon2/src/futon2/aif/cascade_prior.clj" :lines 212 :sha256-16 "4c5c5464c7df91b6"}
   {:id :runtime-realized-outcome :path "futon2/src/futon2/aif/realized_outcome.clj" :lines 146 :sha256-16 "5ab6330ce29f08a0"}
-  {:id :probe :path "futon2/holes/labs/wm-contract/lean_state_probe.bb" :sha256-16 "8f386f04b4809f3e"}
+  {:id :probe :path "futon2/holes/labs/wm-contract/lean_state_probe.bb" :sha256-16 "dd59b929a976641a"}
   {:id :lean-gain-chain :path "mathlib4/DarkTower/WarMachine/GainChain.lean" :lines 379 :sha256-16 "d8fec82564a5a05f"
    :note "ADDED BY THE REVIEW PASS. Not in the original census's reads; it is where the realized-outcome carrier the census reported absent actually lives. See :review-repairs."}
   {:id :runtime-policy :path "futon2/src/futon2/aif/policy.clj" :sha256-16 "bfdb6cc4edf2ecd8"
@@ -55,7 +55,7 @@
   {:id :runtime-policy-precision :path "futon2/src/futon2/aif/policy_precision.clj" :lines 726 :sha256-16 "0b3ef7cc7689ecfb" :note "ADDED BY THE REVIEW PASS."}
   {:id :runtime-selection-gain :path "futon2/src/futon2/aif/selection_gain.clj" :sha256-16 "80ffd163350e27eb" :note "ADDED BY THE REVIEW PASS."}
   {:id :runtime-tripwire :path "futon2/src/futon2/aif/tripwire.clj" :sha256-16 "a75b2a571d76fa93" :note "ADDED BY THE REVIEW PASS."}
-  {:id :runtime-war-machine :path "futon2/scripts/futon2/report/war_machine.clj" :sha256-16 "4ab23c978e45d44d" :note "ADDED BY THE REVIEW PASS."}
+  {:id :runtime-war-machine :path "futon2/scripts/futon2/report/war_machine.clj" :sha256-16 "86b734b3e3ebfff5" :note "ADDED BY THE REVIEW PASS."}
   {:id :lab-observe :path "futon2/holes/labs/wm-contract/wm_step_observe.bb" :sha256-16 "b3bbaedfc3fd3079" :note "ADDED BY THE REVIEW PASS."}]
 
  :repo-heads {:futon2 "09451d10" :mathlib4 "4bbc7111c4" :p4ng "dfabf9e"}
@@ -110,6 +110,17 @@
    :machine-policy-carrier "STAYS-OUT: moved 2026-09-05 by :F7 before this pass; unchanged."
    :belief-to-state-distribution "STAYS-IN: belief.clj is byte-identical (pin 39c1dabaf7be878b), so the original runtime read stands as written; the four predict-* functions re-checked: still no live caller."
    :controlled-transition-kernel "STAYS-IN: belief.clj byte-identical (transition-model-v1 identity, no action index); C516 section 2 arm 2 measured the consequence on a run."}}
+
+ :pin-review-2026-09-18-pass2
+ {:by "zai-51, E07 slice 3 (publish-time provenance)"
+  :at "2026-09-18T15:45Z"
+  :reason "The drift refusal added in pass 1 fired again DURING slice 3: three more pins moved between the pass-1 render and the publish-time gate's first run. This pass re-pins those three and corrects one rationale sentence; verdicts again unchanged."
+  :pins-moved-this-pass
+  {:runtime-efe "57a8784434381949 -> 6ea7a30859e31b48 -- WIRE-5 landed (futon2 a097e0b4 + review e76e62ab): observation-rates sources the per-token likelihood kernel into the cascade lane's R5 scorer, with typed :unsupported-class refusals and :rates-provenance on every certificate"
+   :probe "8f386f04b4809f3e -> dd59b929a976641a -- zai-35's U69b (futon2 b4f0304d): the probe records negative-witness intent; fresh lean-state report at 15:21Z"
+   :runtime-war-machine "4ab23c978e45d44d -> 86b734b3e3ebfff5 -- WIRE-5's 52-line change, worktree bytes at this pass (the lane commits as I write)"}
+  :decision-3-postscript
+  "Pass 1's :decision-3 said likelihood_precision.clj's gap list reads 'no consumer on the live tick path evaluates a likelihood matrix (R7-3 open at the pass)'. WIRE-5 made that sentence historical HOURS after it was written: the cascade lane now sources a per-token likelihood kernel from observation-rates. The parameter-kernels VERDICT is unaffected -- WIRE-5 sources a likelihood kernel A, not a Theta prior or posterior, and the entry's falsifier requires 'a prior and a posterior kernel constructed from the tick model' -- but the lesson is recorded: in this worktree a rationale sentence citing a live gap is a pin with a much shorter half-life than a sha. STAYS-IN, restated on the falsifier alone."}
 
  :entries
  [{:id :fundamental/predictive-outcome-kernel-constructor
