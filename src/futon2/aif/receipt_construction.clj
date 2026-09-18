@@ -11,6 +11,7 @@
             [futon2.aif.evidence-manifest :as manifest]
             [futon2.aif.find-receipt :as finder]
             [futon2.aif.find-expectations :as find-expectations]
+            [futon2.aif.find-designation :as find-designation]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.interpretation-evidence :as evidence]
@@ -657,9 +658,58 @@
     (update-in result [:receipted-construction]
                assoc :external-expectations {:status :not-supplied})))
 
+(defn- resolve-f4-designation
+  "WIRE (Option A, elected by claude-4 2026-09-18, PINNED-DISPATCH-wm-08-
+  delivery 3): the ordinary construction seam resolves the caller-declared
+  F4 designation with the same present/absent discipline as
+  validate-external-expectations! — deliberately the same shape, so two
+  adjacent features never grow two disciplines.
+
+  opts :f4-designation is a path to EDN, a pre-read artifact map, or
+  {:artifact path-or-map :occurrence binding}.
+
+  PRESENT → the artifact is read through find-designation/read-artifact and
+  resolved by find-designation/resolve-designation against this run's own
+  repository: an author role other than :designation-author (the
+  finder's/interpreter's own side of the run) is refused as self-supplied,
+  an occurrence-binding mismatch is the typed refusal, and the resolved
+  designated set REACHES construct instead of the hardcoded nil this seam
+  used to pass. ABSENT → designated stays nil (validate-result! already
+  accepts nil as honest vacuity) and the construction RECORDS
+  :f4-designation {:status :not-supplied} — the receipt says the external
+  designation was not supplied, never silently deciding F4 was vacuous.
+
+  No standing F4 authority is elected here (AUTH-F4-scope stays Joe's);
+  the per-occasion artifact is whichever external author supplied one."
+  [record read-bytes library-root opts]
+  (if-let [cfg (:f4-designation opts)]
+    (let [artifact (cond (string? cfg) (find-designation/read-artifact cfg)
+                         (string? (:artifact cfg)) (find-designation/read-artifact (:artifact cfg))
+                         (some? (:artifact cfg)) (:artifact cfg)
+                         (= find-designation/schema-id (:schema cfg)) cfg
+                         :else (throw (ex-info "f4 designation config carries no artifact"
+                                               {:construction/refusal :f4-designation-config-invalid
+                                                :config (select-keys cfg [:artifact :occurrence])})))
+          occurrence (or (:occurrence cfg) (:occurrence artifact))
+          repository (:repository (finder/context record read-bytes library-root))
+          resolved (find-designation/resolve-designation occurrence artifact repository)]
+      {:designated (:designated resolved)
+       :record (cond-> {:status :validated
+                        :author (:author artifact)
+                        :f4 (:f4 resolved)
+                        :designated (count (:designated resolved))}
+                 (:vacuous-because resolved)
+                 (assoc :vacuous-because (:vacuous-because resolved)))})
+    {:designated nil
+     :record {:status :not-supplied}}))
+
 (defn construct! [record read-bytes opts]
-  (validate-external-expectations!
-   (construct record read-bytes (or (:interpretation-library-root opts) "/home/joe/code/futon3/library")
-              (previous! (:identity record) (or (:interpretation-history-roots opts) (history-roots (:identity record))))
-              nil)
-   opts))
+  (let [library-root (or (:interpretation-library-root opts) "/home/joe/code/futon3/library")
+        f4 (resolve-f4-designation record read-bytes library-root opts)]
+    (validate-external-expectations!
+     (update-in
+      (construct record read-bytes library-root
+                 (previous! (:identity record) (or (:interpretation-history-roots opts) (history-roots (:identity record))))
+                 (:designated f4))
+      [:receipted-construction] assoc :f4-designation (:record f4))
+     opts)))
