@@ -133,6 +133,14 @@
                  lines)]
     {:module (str "DarkTower.WarMachine." (str/replace (.getName f) #"\.lean$" ""))
      :path rel
+     :negative-witness?
+     ;; A source-level declaration of intent, read from the raw bytes: a
+     ;; module whose header carries this marker is EXPECTED NOT to elaborate.
+     ;; Without it, a nonzero exit is indistinguishable from breakage, so the
+     ;; report must be able to tell them apart. The prose "-- Must fail:"
+     ;; convention is NOT this marker: 21 of its 23 uses document a refuted
+     ;; attempt in a comment while the module still elaborates.
+     (boolean (re-find #"(?m)^--\s*NEGATIVE-WITNESS:" raw))
      :lines (count raw-lines)
      :bytes (count (.getBytes raw "UTF-8"))
      :sha256 (sha256 raw)
@@ -346,9 +354,20 @@
     :modules-checked (count (filter #(some? (:exit %)) checks))
     :exit-zero (count (filter #(= 0 (:exit %)) checks))
     :exit-nonzero (count (filter #(and (some? (:exit %)) (not= 0 (:exit %))) checks))
+    :exit-nonzero-expected
+    (count (for [[s c] (map vector scans checks)
+                 :when (and (some? (:exit c)) (not= 0 (:exit c))
+                            (:negative-witness? s))]
+             c))
+    :exit-nonzero-unexpected
+    (count (for [[s c] (map vector scans checks)
+                 :when (and (some? (:exit c)) (not= 0 (:exit c))
+                            (not (:negative-witness? s)))]
+             c))
     :nonzero-modules (vec (for [[s c] (map vector scans checks)
                                 :when (and (some? (:exit c)) (not= 0 (:exit c)))]
-                            {:module (:module s) :exit (:exit c)}))
+                            {:module (:module s) :exit (:exit c)
+                             :expected? (:negative-witness? s)}))
     :error-diagnostics (reduce + (map #(get-in % [:diagnostics :error] 0) checks))
     :verdict (cond (not typecheck?) :not-run
                    (and (every? #(= 0 (:exit %)) checks)
