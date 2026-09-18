@@ -1,0 +1,167 @@
+;; T7 — claude-4 remainder testimony + closing statement. Final pair, with D7.
+;; Schema: STUDY.md (futon2 3cc3dcc2).
+;;
+;; T6 correction accepted and verified independently: beta-dark-carry is defined
+;; at war_machine.clj:566 and its only call is at :582, inside its own 3-arity
+;; delegating to the 4-arity. No external caller. So carry-beta and
+;; align-f-pi-and-g have callers that are themselves unreachable, and my T6
+;; statement "the beta carry/alignment path is live" was wrong. The right
+;; statement is that no policy-precision function is tick-reachable.
+
+{:testimony :T7
+ :cluster :remainder
+ :terms
+ [{:term :remainder
+   :no-plans? true
+   :planned []
+   :note
+   (str "The DAG plans no work I can cite in any namespace outside the D1-D6 "
+        "clusters. Every WM-* delivery node and every LF-* node maps into those "
+        "clusters. The R* and E* checklist items reference apparatus (retention, "
+        "receipts, enactment witness) rather than naming producers, so I cannot "
+        "turn them into namespace-level plans without inventing them.")
+   :claims-built []}]
+
+ :orphan-census
+ {:method "for each of 168 futon2.aif namespaces, count requiring files in src and scripts excluding itself"
+  :total-namespaces 168
+  :zero-requirer-count 42
+  :entry-points-not-orphans
+  [{:ns "futon2.aif.full-loop-cli" :note "has -main; IS the live tick entry (deps.edn :wm-scheduled)"}
+   {:ns "futon2.aif.on-demand-entrypoint" :note "has -main"}
+   {:ns "futon2.aif.tripwire-calibration" :note "has -main"}]
+  :genuine-orphans 39
+  :caution
+  (str "I nearly made the mirror image of the error you corrected in T6. There I "
+       "counted a caller and did not ask whether the caller was reachable; here "
+       "the temptation is to count zero requirers and call it dead, when three "
+       "of the 42 are -main entry points that nothing requires BY DESIGN. Both "
+       "errors are the same shape: a local edge count standing in for "
+       "reachability.")}
+
+ :deletion-candidates
+ {:framing
+  (str "Offered as candidates for D7 to classify, NOT as recommendations. "
+       "Deletion is Joe's call and he has said explicitly he does not want "
+       "things ripped out that may not correspond to what he wants. I am naming "
+       "what I would ask about, with the reason.")
+  :strongest
+  [{:target "src/ants/ (27 namespaces)"
+    :reason
+    (str "A complete parallel AIF implementation — its own efe.clj, policy.clj, "
+         "rollout.clj, forward.clj, observe.clj, perceive.clj, pattern_efe.clj — "
+         "with ZERO futon2 namespaces requiring any of it. It is on the "
+         "classpath via :paths [\"src\" ...]. Unlike the other candidates it has "
+         "a concrete hazard attached: src/ants/aif/default_mode.clj:23 defines a "
+         "select-action that the flat-path gate does not scan, because "
+         "flat_path_gate_test scans src/futon2 and scripts only. So the one tree "
+         "nothing uses is also the one place a retired flat selector still lives "
+         "unguarded.")
+    :confidence :high
+    :caveat "src/ants/aif/perceive.clj requires futon2.aif.precision, so the dependency runs ants -> futon2, not the reverse. Deleting ants breaks nothing in futon2."}
+   {:target "futon2.aif.action-proposer/compose-proposers"
+    :reason
+    (str "One of the four retired flat selectors. The gate bans CALL SITES, not "
+         "definitions, so it survives as a definition anyone could call again. "
+         "A one-var deletion, not a namespace one.")
+    :confidence :high}]
+  :explicitly-not-deletion-candidates
+  [{:target "futon2.aif.live-c" :reason "orphan by the same measure, but T4 argues it should be WIRED — it is Joe's three-source C"}
+   {:target "futon2.aif.cascade-free-energy" :reason "orphan, but T5 argues it is the F the selection wants, in the right shape"}
+   {:target "futon2.aif.likelihood-precision" :reason "orphan, but T6 shows its absence of an update law is a declared refusal, and it is R7's named quantity"}
+   {:target "futon2.aif.mission-c" :reason "orphan, but it is :c-mis, the mission layer Joe named as outranking the bookkeeping gates"}]
+  :the-point-for-the-census
+  (str "The same measure — zero requirers — produces both my strongest deletion "
+       "candidate and the four namespaces I have spent four testimonies arguing "
+       "should be wired. Disuse does not distinguish abandoned from not-yet-"
+       "connected. Only intent does, and intent is not in the code. If D7 "
+       "classifies by reachability alone it will put live-c and ants in the same "
+       "bucket, and that bucket is not actionable.")}
+
+ :closing
+ {:marked-as :claude-4-view
+  :three-commissions
+  [{:rank 1
+    :commission "Emit per-step risk and the ambiguity term from horizon-g-sparse, with the universe, the C form used (:spec vs :c-fn-pointwise) and the rates map"
+    :why
+    (str "It changes nothing about what the machine chooses, so it carries no "
+         "behavioural risk, and it is the instrument the other two need. Today G "
+         "returns one scalar; per-tau risk is bound to a local and summed in "
+         "place. Joe's stated requirement — 'we should be able to detect whether "
+         "or not risk has been computed' — is currently not satisfiable, and the "
+         "ambiguity case is worse: at zero rates it is identically 0 by the exact "
+         "reduction, so computed-and-zero is byte-identical to never-computed. "
+         "Put this first because you cannot see the effect of commissions 2 and 3 "
+         "without it.")}
+   {:rank 2
+    :commission "Call cascade-free-energy/policy-free-energy on the tick and pass :f into select-action-cascades"
+    :why
+    (str "The producer already returns F keyed by candidate id, which is the "
+         "exact shape (or (:f e) 0) reads, and records every declared input "
+         "including :complexity-term 0 with its cited theorem. So it is a call "
+         "site, not a computation. It also produces most of the run record "
+         "Holes.lean's policyPosteriorImportsPolicyF asks for. Ranked second "
+         "rather than first because unlike commission 1 it DOES change the "
+         "choice — F is currently 0 for every candidate, so real F reranks — and "
+         "that change should be observable before it is made.")}
+   {:rank 3
+    :commission "Wire live-c's :want/:weights into the cascade preference spec"
+    :why
+    (str "log-preference-fn already accepts and validates :weights; live-c "
+         "already emits exactly that shape from Joe's three named sources with "
+         "the dark-room guard; war_machine passes :want only, so every token "
+         "takes the uniform share. This is Joe's stated priority — the mission "
+         "layer outranking the bookkeeping gates — and it is unowned. Ranked "
+         "third not because it matters least but because it changes what the "
+         "machine PREFERS, which is a decision for Joe rather than a wiring job, "
+         "and because live-c's freshness guard means a wired live C also needs a "
+         "staleness policy nobody has written.")}]
+  :single-finding-that-most-changed-my-model
+  (str "That every non-trivial term in the live G is simultaneously at its "
+       "neutral or degenerate value, and that no one decided this.\n\n"
+       "On the production path today: A is the identity kernel (all adjudication "
+       "rates zero), so the ambiguity term is identically 0 and no likelihood "
+       "matrix is evaluated. C is a declared constant C_tau, not the step-indexed "
+       "family horizonEFE is defined over. D is a point mass, not "
+       "independent-belief. E is 1. F is 0. Beliefs are rollout predictions that "
+       "never condition on an observation, although exact-update exists and is "
+       "contract-bound. What remains, after all of that, is G = Sum_tau "
+       "KL(q_tau || C_tau) against a constant preference.\n\n"
+       "What changed my model is not that this is bad — each of those "
+       "degeneracies is individually declared, individually defensible, and in "
+       "most cases carries a cited theorem saying exactly when it is exact. The "
+       "identity-A reduction is exact at zero rates and refuses rather than "
+       "approximating otherwise. theta defaults to 1 with :theta-source "
+       ":documented-default recorded. :complexity-term 0 cites "
+       "vfe_posterior_eq. E is declared a neutral input. Six careful local "
+       "decisions.\n\n"
+       "The aggregate is that the War Machine's active-inference apparatus "
+       "currently reduces to a single KL divergence against a fixed preference, "
+       "and that outcome appears in no document, no ruling, and no node of the "
+       "DAG I maintain. It is the product of six defensible choices none of "
+       "which was wrong on its own. Before this study I would have said the "
+       "problem was that things were unbuilt. The study says the mathematics is "
+       "largely built and mostly disconnected, and that the disconnection "
+       "compounds silently because each step declares itself honestly and "
+       "nothing sums the declarations.\n\n"
+       "The methodological half, which I got wrong in T6 and should record: I "
+       "spent six rounds asking 'does anything call this?' when the question is "
+       "'is any caller reachable from the tick?'. beta-dark-carry is the "
+       "instance — callers exist, the enclosing function is dead. Caller-"
+       "existence is not reachability, and an edge count is not a path.")}
+
+ :grounding
+ ["futon2/scripts/futon2/report/war_machine.clj (beta-dark-carry defined :566, its only call at :582 inside its own 3-arity — verified independently for the T6 correction)"
+  "futon2/src/futon2/aif/*.clj (168 namespaces; requirer counts by grep over src and scripts)"
+  "futon2/deps.edn (:wm-scheduled -> futon2.aif.full-loop-cli tick; :paths includes src, which is why src/ants is on the classpath)"
+  "futon2/test/futon2/aif/flat_path_gate_test.clj (scans src/futon2 and scripts; src/ants not covered)"
+  "futon2/src/ants/aif/default_mode.clj:23 (the unscanned select-action)"
+  "futon2/src/ants/aif/perceive.clj (requires futon2.aif.precision — the ants -> futon2 direction)"
+  "futon2/src/futon2/aif/action_proposer.clj:63 (compose-proposers still defined)"
+  "p4ng/wm-walkthroughs/build-loop/closure/closure-dag.json (r79)"
+  "prior testimonies T1-T6 in this directory"]
+
+ :caveats
+ ["No :origin :conversation entries."
+  "Deletion candidates are candidates, not recommendations. I have not deleted anything and would not without Joe."
+  "The 39 genuine orphans are a count, not a list I have individually assessed. I assessed the ones that came up in T1-T6 plus the entry-point class."]}
