@@ -180,8 +180,8 @@
                     :status :recorded}
    :producers
    [{:var "futon2.aif.cascade-model-manifest/step-ambiguity"
-     :role :live
-     :entry-point "called by horizon-g (test-only producer) and horizon-g-sparse — in the sparse path the term is identically 0, not computed; listed live only as the manifest's declared ambiguity carrier"
+     :role :test-only
+     :entry-point "called ONLY by horizon-g (enumerating reference) at manifest:479; horizon-g-sparse does NOT call it (the sparse path never evaluates ambiguity — identity-A reduction). CORRECTED by claude-12 2026-09-18 review: original :live role contradicted the single call site; rerun evidence: grep -n 'step-ambiguity' src/futon2/aif/cascade_model_manifest.clj -> defn at 430, sole call at 479 inside horizon-g (defn at 450)"
      :inputs ["observation-distribution rows per state"]
      :output "sum_s q(s) H[A(.|s)]"
      :callers ["horizon-g / horizon-g-sparse internals"]
