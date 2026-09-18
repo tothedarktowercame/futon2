@@ -146,6 +146,12 @@ artifact in the tree is not connected to anything.
 - [RECORD, 09-09] Modular, versioned C implementation authorized, with Lean
   type correctness and WM interoperability as the criteria; speculative
   duality deferred to evidence from use.
+- [PARAPHRASE, 2026-09-18] C must have a Lean *definition*: it is a
+  fundamental AIF-approved concept — a term, not an equation, but a term
+  has a definition, and it cannot be recorded as a hole. Only C's ruled
+  *content* stays under discovery. (Supersedes reading the `Holes.lean:157`
+  sorry as an acceptable standing state; tracked as row T-C in
+  `labs/wm-contract/AUDIT-aif-correspondence-ledger.md`.)
 
 ## 5. Cross-check: the "4 vs 5 layer" question dissolves
 

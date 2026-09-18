@@ -77,9 +77,24 @@ out of scope). "Producer" = what the live path calls today.
 | :state-belief-update | R3-cat | OPEN — new Lean row needed | OPEN | OPEN | exact categorical update |
 | :likelihood-precision | R7-ζ | OPEN — new Lean row needed | OPEN (declared 09-17, fe55a1a0) | OPEN | Gibbs inverse temperature on A |
 
-C (the preference constant) is deliberately not a row here: it is a HOLE, not
-an equation — see `holes/NOTE-joes-view-of-C.md` (two halves; only the
-outcome half has any implementation, and `live_c.clj` is unwired).
+## Terms (fundamental AIF concepts and variables)
+
+**Correction 2026-09-18 (Joe):** the first version of this ledger kept C off
+the table as "a hole, not an equation." Wrong distinction. Lean needs a
+definition for every fundamental AIF-approved concept and variable; C is
+such a concept; it is a term, not an equation, but a term has a definition —
+its type, its role in G, what makes a candidate admissible — and that
+definition cannot be recorded as a hole. What stays under organized
+discovery is C's *ruled content* (the masses), never its *definition*.
+
+| Term | AIF role | Lean definition today | Status / next |
+|---|---|---|---|
+| A | observation/likelihood model | ForwardModel observation kernel (ProbabilityKernel since 480a666ad2); DirichletLearning over it | defined; Leg B/C per equation rows |
+| B | transition model | ForwardModel transition; CascadeTransition.cascadeKernel (rowsum + blocked-identity theorems) | defined, cascade-structured |
+| **C** | prior preference over outcomes (and, per Joe, process regulated by institutions — NOTE-joes-view-of-C §1) | **`Holes.lean:157`: `def C ... := sorry` — a type with no definition.** `horizonEFE` correctly takes C as a parameter, so the consuming shape exists | **T-C, the open definition task (mine):** replace the sorry'd global with an admissible-C definition — a structure stating what any C must be (per-PRAGMATIC-vertex, step-indexed family Cτ, log-preference entering stepRisk, provenance-carrying), with the census theorems reproven over it. The value stays parameterized and under discovery; the *concept* stops being a hole |
+| D | prior over initial states | initial belief in ExactBeliefTrajectory — not independently audited this pass | survey with the :belief-state row |
+| E | habit prior over policies | `habit` parameter in policyWeight/policyPosterior with sum/zero theorems | defined as parameter; Clojure passes constant 1 ("no habit prior exists yet" — a declared neutral input, should be stated in the contract entry) |
+| β/γ, ζ | policy precision, likelihood precision | covered by :temperature and :likelihood-precision equation rows | see those rows |
 
 ## The exemplar row worked: :expected-free-energy (G over cascades)
 
