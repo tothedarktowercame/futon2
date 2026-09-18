@@ -41,6 +41,95 @@ Discrepancy classes: :plan-diverges-from-spec, :built-diverges-from-spec,
 the Lean census itself bound the wrong law and the testimony caught it).
 Results table appended below as each pair (Dn, Tn) completes.
 
+## CLOSING SYNTHESIS — census complete, 2026-09-18
+
+Seven dispatches (D1–D7, zai-50), seven testimonies (T1–T7, claude-4),
+one Lean specification (the AIF census, frozen core). Every artifact
+committed; every verdict evidence-backed; every correction by rerun.
+
+### Totals
+
+172 files under `futon2.aif` fully accounted: 45 censused in depth
+(D1–D6, 68 producer entries), 126 classified (D7, after review fix
+081f690b), 1 live root. Classes: **live-core 2, live-infra 45,
+relevant-unbound 18, dead 57, irrelevant 4** — plus D1–D6's dead and
+duplicate producers inside the censused set. Joe's opening suspicion is
+quantified: about a third of the tree is dead, and **25 namespaces
+implement AIF-relevant computation with no live caller** (the 18
+relevant-unbound + the 7 known built-unwired family members).
+
+### The headline (claude-4's closing, endorsed by the census arithmetic)
+
+**Every non-trivial term of the live G sits simultaneously at its
+declared neutral or degenerate value** — identity A (ambiguity ≡ 0),
+constant C, point-mass D, E = 1, F = 0, never-conditioned beliefs —
+leaving one KL against a fixed preference. Each reduction is
+individually declared, defensible, and mostly theorem-cited. The
+AGGREGATE was recorded nowhere before this study — no ruling, no
+document, no DAG node. That is the mechanism behind "nobody can tell
+what actually works": six honest local declarations, and nothing that
+sums the declarations. The certificate layer is the designed fix — a
+certificate carries every reduction status of a run in one record.
+
+### Match verdicts
+
+Where the live code runs, it is FAITHFUL: :matches on the declared
+reduction domain for G, ambiguity, β, posterior, action, A/B/D, C
+canonicity (live C normalises by construction), and the ζ operator.
+:diverges appears exactly twice, both principled: F ≡ 0 (a declared
+value the law contradicts — B.2's equality case gives −ln P(o|π)) and
+belief conditioning (structurally absent surprising-observation case).
+**The infidelity is not in what runs; it is in what never runs.**
+
+### Study health
+
+Three witness corrections, all by rerun, one per witness type: the
+built-census (D1, role stretched past call graph), the Lean census
+itself (T2, wrong law bound — fixed in the frozen core before D2
+compared), the testimony (T6, caller-existence ≠ tick-reachability).
+The owner's premises were corrected twice by claude-4. No witness was
+privileged; the reruns were. Four path-rot instances (Lean rebaser +
+DAG sparse-g + DAG R1/R3 + gate test path) independently vindicate
+name-based addressing.
+
+### Standing findings register
+
+1. Three ACCEPTED DAG nodes carry self-contradicting open text
+   (LF-expected-free-energy, LF-temperature, LF-observe) — claude-4's
+   lane.
+2. Flat-gate scope gap: `src/ants/aif/default_mode.clj` defines a
+   `select-action` outside `flat_path_gate_test`'s scanned roots; the
+   ants tree (27 ns, zero futon2 requirers, dependency points outward)
+   is T7's argued deletion candidate — operator decision.
+3. `c-vector` refreshed every tick (from two directions, incl. futon3c
+   dynamic calls), read by nothing scoring.
+4. R14's "LIVE feed" status regressed silently; R7 held (the one
+   adaptive precision).
+5. Two Holes attestations within reach of existing machinery + the
+   certificate lane: `policyPrecisionIsGammaFromBeta` (β declared,
+   emitted) and `policyPosteriorImportsPolicyF` (producer built,
+   selection-keyed).
+6. Caller-declared β is parked ("not approved"), not settled; R7, R14,
+   and every C/E node are needs-owner with no owner recorded.
+
+### The wiring shortlist (order = observability before behaviour)
+
+1. **Per-step emission from `horizon-g-sparse`** — risk_τ, ambiguity
+   status, C form, rates, universe, per the GCertificate fields. No
+   behaviour change; makes Joe's "detect whether risk was computed"
+   satisfiable; the instrument the next two need.
+2. **F on the tick** — call `cascade-free-energy/policy-free-energy`,
+   pass `:f` through. One call site; it RERANKS, so it follows the
+   instrument.
+3. **Wire `live-c`** into the cascade spec `:want`/`:weights`
+   (shadow-first). Third because it changes what the machine PREFERS —
+   the operator's decision, and a wired live C needs a staleness policy
+   nobody has written.
+
+Then the 18-row relevant-unbound queue, keyed by term —
+`observation-admission` first (the missing live front half of a real A,
+feeding observation-rates → token-likelihood → ambiguity ≠ 0).
+
 ## Results
 
 ### G cluster — D1 (2c4e022a + review fix f3d0417b) × T1 (2afbc6ed), compared 2026-09-18
