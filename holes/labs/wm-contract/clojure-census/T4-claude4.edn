@@ -1,0 +1,147 @@
+;; T4 — claude-4 testimony for the preference carriers (:C and :E).
+;; Paired with D4. Schema: STUDY.md (futon2 3cc3dcc2).
+;;
+;; Headline for both terms: the consumers EXIST and the live path does not use
+;; them. C's :weights extension is built and validated in log-preference-fn; the
+;; live cascade spec passes :want only. E has a cascade-grain habit prior built
+;; (cascade-prior) that is documented as deliberately non-selecting, and
+;; rank-cascade-actions emits no :habit at all, so select-action-cascades falls to
+;; its default of 1. Ownership: every C and E node on the DAG is needs-owner with
+;; NO owner field — including the mission layer Joe named as outranking the
+;; bookkeeping gates.
+
+{:testimony :T4
+ :cluster :preference-carriers
+ :terms
+ [{:term :C
+   :no-plans? false
+   :planned
+   [{:var "name not yet chosen"
+     :wm-item "WM-13-delivery"
+     :status :planned
+     :note (str "Acceptance: 'Grain/time C family, authorized composition and "
+                "processual/terminal domain connection.' needs-owner, NO owner. "
+                "This is the node that would carry the mission-layer wiring Joe "
+                "named on 2026-09-18 as a bigger liability than the bookkeeping "
+                "gates. Nobody is on it.")
+     :inputs ["live-c/cascade-spec output" "the fold-declaration's grain indexing"]
+     :depends-on ["WM-06-delivery"]}
+    {:var "name not yet chosen"
+     :wm-item "WM-06-delivery"
+     :status :planned
+     :note (str "Acceptance: 'Compatible Q/C outcome domains and seed consumption, "
+                "zero-preference behavior preserved.' needs-owner, NO owner. This "
+                "is the Q/C domain-compatibility half that the Cτ sourcing needs.")
+     :inputs ["Q's outcome domain" "C's universe"]
+     :depends-on ["WM-01-carrier-contract"]}]
+   :claims-built
+   [{:var "futon2.aif.cascade-model-manifest/preference-spec" :wm-item "WM-06-delivery"}
+    {:var "futon2.aif.cascade-model-manifest/preference-distribution" :wm-item "WM-06-delivery"}
+    {:var "futon2.aif.cascade-model-manifest/log-preference-fn" :wm-item "WM-06-delivery"
+     :note (str "THE WEIGHTS CONSUMER EXISTS. Spec extension (live C, 2026-09-17): "
+                "optional :weights {token w}, validated — positive rationals, "
+                "tokens must be in :want — with typed refusal "
+                "{:status :missing :kind :invalid-preference-spec :field :weights} "
+                "and reasons :weights-not-a-map etc. Unnamed tokens keep the "
+                "uniform share.")}
+    {:var "futon2.aif.cascade-model-manifest/preference-fn" :wm-item "WM-06-delivery"}
+    {:var "futon2.aif.live-c/derive-live-c" :wm-item "WM-13-delivery"
+     :note (str "Derives weighted want tokens from Joe's three named sources: "
+                "Salingaros wholeness L = T·H per :alive mission (weight is the "
+                "PRODUCT, never H alone — the dark-room guard), mission Status "
+                "lines (a mission not closed wants its closure), capability stars "
+                "(a capability not :satisfied is unreached). Missing or "
+                "unparseable source refuses the whole derivation; per-mission gaps "
+                "are non-blocking typed refusals; never a default weight.")}
+    {:var "futon2.aif.live-c/cascade-spec" :wm-item "WM-13-delivery"
+     :note "emits :want plus :weights in the shape log-preference-fn already accepts; refuses :no-reachable-want rather than scoring pure information gain, and never puts unreachable tokens into :want"}
+    {:var "futon2.aif.live-c/stale?" :wm-item "WM-13-delivery"
+     :note "freshness guard: signature over every source sha AND the parsed content read; C is stale the moment the corpus changes"}
+    {:var "futon2.aif.live-c/normalise-weights" :wm-item "WM-13-delivery"
+     :note "weights normalised so their sum is lam, matching the uniform law's total — a weighted spec and a uniform spec of the same want are the same strength of preference, differently distributed"}
+    {:var "futon2.aif.ruled-outcome-c/fold-declaration" :wm-item "WM-13-delivery"
+     :note "4 layers :ruled-outcome-c :c-int :c-ser :c-mis; its own docstring says 'Declaration only'. :c-mis carries :source :runtime-dark, :folded? false, :in-ruled-sum :undeclared and an :owed ruling"}
+    {:var "futon2.aif.ruled-outcome-c/seeded-c" :wm-item "WM-13-delivery"}]
+   :wiring
+   {:weights-extension
+    {:consumer-exists? true :live-path-uses? false
+     :evidence "war_machine.clj:6027 passes {:cascade-spec {:want joint-want}} — no :weights key, so every want token takes the uniform lam/|want| share"}
+    :live-c
+    {:built? true :consumers 0
+     :evidence "no qualified live-c/ call anywhere in src, scripts or test; one test file references the namespace"}
+    :c-tau-step-indexed
+    {:parameter-exists? true :caller-exists? false
+     :evidence ":c-fn-pointwise is a real parameter of cascade-model-manifest/horizon-g-sparse and active-horizon-g/*; grep over src, scripts and test finds only the definitions, no caller passing it. The live path passes :spec, the declared-constant case."}}}
+
+  {:term :E
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.cascade-prior/log-priors" :wm-item "WM-11-delivery"
+     :note "returns ln E(pi) aligned with a same-mission feasible cascade menu — this IS a cascade-grain E"}
+    {:var "futon2.aif.cascade-prior/attach-log-priors" :wm-item "WM-11-delivery"
+     :note (str "docstring: 'Attach cascade-grain ln E(pi) WITHOUT selecting or "
+                "changing a score.' The non-selection is deliberate and declared, "
+                "not an oversight.")}
+    {:var "futon2.aif.cascade-prior/observe-policy" :wm-item "WM-11-delivery"
+     :note "folds one selected, constructible cascade into the habit state — the accumulation half exists"}
+    {:var "futon2.aif.cascade-prior/policy-key" :wm-item "WM-11-delivery"
+     :note "stable identity for a complete cascade policy (recursively stabilises unordered EDN)"}
+    {:var "futon2.aif.cascade-prior/shadow-rank" :wm-item "WM-11-delivery"}
+    {:var "futon2.aif.cascade-prior/state-stats" :wm-item "WM-11-delivery"}
+    {:var "futon2.aif.strategic-habit/accumulate" :wm-item "WM-11-delivery"}
+    {:var "futon2.aif.strategic-habit/carry" :wm-item "WM-11-delivery"}
+    {:var "futon2.aif.habit-prior/fold-records" :wm-item "WM-11-delivery"}
+    {:var "futon2.aif.habit-prior/observe-action" :wm-item "WM-11-delivery"}]
+   :wiring
+   {:reaches-selection? false
+    :evidence
+    (str "efe/rank-cascade-actions builds each candidate as "
+         "{:action :cascade :cascade-id :horizon-steps :G-efe :G-cascade "
+         ":controller-score} — NO :habit key. policy/select-action-cascades then "
+         "takes (or (:habit e) 1). So E is exactly 1 on the live cascade path "
+         "regardless of what the habit namespaces accumulate. cascade-prior has "
+         "no production caller: policy.clj mentions cascade-prior/shadow-rank in "
+         "prose, and two test files require it.")
+    :note
+    (str "strategic-habit, habit-prior and beta-habit are all referenced from "
+         "war_machine.clj, so they run somewhere on the tick — but not into the "
+         "cascade candidates' :habit. The older efe.clj :habit-prior layer note "
+         "records the same shape at the flat grain: ln E(pi) computed and "
+         "recorded at the seam with :habit-prior-applied? false and "
+         ":scheduler-habit-authority :counterfactual-only. E has been computed "
+         "and declared non-selecting at two grains now.")}}]
+
+ :ownership-answer
+ {:question "which of the C/E items has a WM item / owner, which is unowned"
+  :answer "every one of them is unowned"
+  :nodes [{:id "WM-13" :state "needs-owner" :owner nil}
+          {:id "WM-13-delivery" :state "needs-owner" :owner nil}
+          {:id "WM-06" :state "needs-owner" :owner nil}
+          {:id "WM-06-delivery" :state "needs-owner" :owner nil}
+          {:id "R19" :state "needs-owner" :owner nil}]
+  :note
+  (str "No node carries an :owner field for C or E. The mission-layer wiring "
+       "specifically has no node of its own — it would fall under WM-13-delivery, "
+       "which is unowned. So Joe's 2026-09-18 statement that the undeclared "
+       "mission layer outranks the bookkeeping gates is not reflected by any "
+       "assignment on the DAG. That is a gap I can close on the DAG side; I have "
+       "not done it in this testimony because assigning an owner is not mine to "
+       "decide.")}
+
+ :grounding
+ ["p4ng/wm-walkthroughs/build-loop/closure/closure-dag.json (r79): WM-13, WM-13-delivery, WM-06, WM-06-delivery, R19, R17 — states and owner fields read directly"
+  "futon2/src/futon2/aif/live_c.clj (derive-live-c 201, stale? 252, cascade-spec 266, normalise-weights 166, signature-of 183, read-sources 101, alive-entries 130, completion-entries 142, unreached-stars 150)"
+  "futon2/src/futon2/aif/cascade_model_manifest.clj (preference-spec 359, preference-distribution 399, log-preference-fn 505 incl. the :weights validation at 491-547, preference-fn 555, horizon-g-sparse 585 incl. :c-fn-pointwise at 602-633)"
+  "futon2/src/futon2/aif/active_horizon_g.clj (:c-fn-pointwise parameter at 176-197)"
+  "futon2/src/futon2/aif/cascade_prior.clj (policy-key 48, initial-state 68, coerce-state 81, observe-policy 104, state-stats 116, log-priors 125, attach-log-priors 152, shadow-rank 163)"
+  "futon2/src/futon2/aif/strategic_habit.clj, habit_prior.clj, beta_habit.clj (entry fns listed by grep)"
+  "futon2/src/futon2/aif/policy.clj (select-action-cascades :habit default at 168 and 188)"
+  "futon2/src/futon2/aif/efe.clj (rank-cascade-actions candidate map; the :habit-prior layer note at 150-155)"
+  "futon2/scripts/futon2/report/war_machine.clj (:cascade-spec {:want joint-want} at 6027)"
+  "futon2 b707c561 commit message (the three sources, as Joe named them)"]
+
+ :caveats
+ ["No :origin :conversation entries."
+  "I report live-c as having zero consumers on the basis of no qualified live-c/ call in src, scripts or test, plus one test file that references the namespace. If that test aliases it differently and exercises it, the namespace is test-covered but still not production-wired — the production claim is the one I am confident in."
+  "strategic-habit, habit-prior and beta-habit are referenced from war_machine.clj and I did not trace what those references do. My claim is narrow: none of them puts :habit on a cascade candidate, which is what select-action-cascades reads."]}
