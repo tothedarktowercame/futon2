@@ -3,6 +3,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [clojure.set :as set]
             [futon2.aif.capability-zones :as zones]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.intrinsic-values :as iv]))
@@ -10,9 +11,37 @@
 (deftest checked-seeds-cover-the-action-vocabulary
   (let [seeds (json/parse-string
                (slurp "resources/capability_zones/action_class_seeds.json") true)]
-    (is (= fm/action-types (set (map (comp keyword :class) seeds))))
+    (testing "coverage is declared, not accidental"
+      (is (= #{:advance-ticket} zones/declared-unseeded)
+          "the declaration names exactly the known drift")
+      (is (= (set/difference fm/action-types zones/declared-unseeded)
+             (set (map (comp keyword :class) seeds)))
+          "seeds are exactly the action vocabulary minus the declared gap"))
     (is (= 14 (count seeds)))
     (is (every? #(and (string? (:text %)) (not-empty (:text %))) seeds))))
+
+(deftest unseeded-action-class-refuses-typed
+  (let [file (java.io.File/createTempFile "capability-zone-seeds" ".json")]
+    (try
+      (spit file (json/generate-string
+                  [{:class "survey" :text_seed [1.0 0.0]}
+                   {:class "pursue" :text_seed [0.0 1.0]}]))
+      (binding [zones/*seeds-path* (.getPath file)
+                zones/*seed-generation* :text]
+        (testing "an unseeded class zones to a typed refusal, never a guess"
+          (is (thrown-with-msg?
+               clojure.lang.ExceptionInfo #"outside the frozen partition"
+               (zones/zone-of-action {:type :advance-ticket
+                                      :embedding [0.8 0.6]})))
+          (try
+            (zones/zone-of-action {:type :advance-ticket :embedding [0.8 0.6]})
+            (is false "unreachable")
+            (catch clojure.lang.ExceptionInfo e
+              (is (= :unseeded-action-class (:type (ex-data e)))))))
+        (testing "a seeded class still zones"
+          (is (= :survey (:class (zones/zone-of-action
+                                  {:type :survey :embedding [0.8 0.6]}))))))
+      (finally (.delete file)))))
 
 (deftest zone-of-is-deterministic-and-reports-margin
   (let [file (java.io.File/createTempFile "capability-zone-seeds" ".json")]

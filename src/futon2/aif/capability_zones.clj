@@ -6,7 +6,9 @@
   :interim-metric-3d. The ground metric remains :held by M-substrate-metric;
   this namespace consumes that hold and does not introduce a competing one."
   (:require [cheshire.core :as json]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.set :as set]
+            [futon2.aif.forward-model :as fm]))
 
 (def ^:dynamic *seeds-path*
   "/home/joe/code/data/notions/bge_action_class_seeds.json")
@@ -19,6 +21,19 @@
 (def ^:dynamic *seed-records*
   "Optional in-memory seeds for batch callers and deterministic fixtures."
   nil)
+
+(def declared-unseeded
+  "Action types deliberately OUTSIDE the frozen partition's coverage.
+
+  Declared 2026-09-18 (E09, decision claude-4): `:advance-ticket` entered
+  `fm/action-types` after the 2026-07-19 harvest, so the frozen partition
+  covers 14 of the 15 action types. The partition is NOT re-harvested to
+  close the gap: a re-harvest adds a seed, moves the PCA-3 partition and
+  silently re-assigns actions zoned under it — the automatic rebuild E09's
+  clause forbids. An unseeded action type zones to nothing; callers asking
+  to zone one get a typed refusal (see `zone-of-action`), never a
+  nearest-seed guess."
+  #{:advance-ticket})
 
 (defn cosine
   "Plain cosine similarity between equal-length numeric vectors."
@@ -42,6 +57,24 @@
       (throw (ex-info "Capability-zone seed file is unavailable"
                       {:path *seeds-path*})))
     (json/parse-string (slurp file) true)))
+
+(defn seeded-classes
+  "Classes actually present in the current seed records."
+  []
+  (set (map (comp keyword :class) (or *seed-records* (read-seeds)))))
+
+(defn declared-coverage
+  "Declared coverage of the frozen partition against `fm/action-types`.
+
+  `:covered` is the seed classes; `:unseeded` is the declared remainder.
+  The vocabulary test asserts `:unseeded` equals `declared-unseeded`, so
+  further vocabulary drift fails loudly instead of fabricating zones."
+  []
+  (let [seeded (seeded-classes)]
+    {:covered seeded
+     :unseeded (set/difference fm/action-types seeded)
+     :declared-unseeded declared-unseeded
+     :declared-at "2026-09-18"}))
 
 (defn- seed-vector [seed]
   (or (when (= :centroid *seed-generation*) (:centroid_seed seed))
@@ -150,3 +183,29 @@
          :metric :interim-metric-3d}
         {:metric :interim-metric-3d
          :reduction-version version}))))
+
+(defn- assert-seeded-class!
+  [type partition]
+  (when (contains? (set/difference fm/action-types (seeded-classes)) type)
+    (throw (ex-info "Action class is outside the frozen partition's declared coverage"
+                    {:type :unseeded-action-class
+                     :class type
+                     :partition partition
+                     :declared-unseeded declared-unseeded}))))
+
+(defn zone-of-action
+  "Zone an ACTION MAP ({:type action-type, :embedding vector}) under the
+  raw-space seeds. Typed refusal when the action's class is unseeded: the
+  machine must not fabricate a zone for it by nearest-seed. Callers holding
+  a bare embedding with no declared class keep using `zone-of` unchanged."
+  [{:keys [type embedding] :as _action}]
+  (assert-seeded-class! type :raw-space)
+  (zone-of embedding))
+
+(defn zone-of-action-3d
+  "Zone an ACTION MAP ({:type action-type, :embedding vector}) under the
+  operative frozen PCA-3 partition. Same typed refusal on an unseeded
+  class as `zone-of-action`; bare-embedding callers keep `zone-of-3d`."
+  [reduction seeds-3d-records {:keys [type embedding] :as _action}]
+  (assert-seeded-class! type (or (:version reduction) (get reduction "version")))
+  (zone-of-3d reduction seeds-3d-records embedding))
