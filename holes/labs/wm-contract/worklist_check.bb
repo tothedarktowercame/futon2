@@ -13,7 +13,22 @@
   (doseq [k [:id :class :status :owner :statement :acceptance]] (when-not (contains? i k) (die (:id i) "lacks" k)))
   (when-not (contains? (:classes w) (:class i)) (die (:id i) "unknown class" (:class i)))
   (when-not (contains? (:statuses w) (:status i)) (die (:id i) "unknown status" (:status i)))
-  (when (and (= :J (:class i)) (not (or (= :needs-joe (:status i)) (= :done (:status i))))) (die (:id i) "class J must be :needs-joe or :done"))
+  ;; :done-unreviewed admitted for class J, 2026-09-18 (claude-4). The class
+  ;; rule said :needs-joe or :done, and the signature rule below says a row
+  ;; whose signed content changed must be :done-unreviewed or superseded. A J
+  ;; row with a void signature could satisfy neither: :needs-joe is false (the
+  ;; ruling stands and Joe is not being asked again), :done is false (the
+  ;; review no longer covers the bytes), and a superseding row would assert a
+  ;; decision nobody made. :J11 hit exactly this when the arm-A :site inside
+  ;; [:choices :task-belief-actand-source] was falsified and restored today.
+  ;; When every admissible state is false, the vocabulary is wrong rather than
+  ;; the row. :done-unreviewed is strictly weaker than :done and keeps the
+  ;; class rule's intent -- a J row is awaiting Joe or settled, never sitting
+  ;; in some other workflow state.
+  (when (and (= :J (:class i))
+             (not (or (= :needs-joe (:status i)) (= :done (:status i))
+                      (= :done-unreviewed (:status i)))))
+    (die (:id i) "class J must be :needs-joe, :done or :done-unreviewed"))
   ;; Joe, 2026-09-01: "if there's a decision to be made that isn't
   ;; predetermined by the theory, then we need to note that down as a decision.
   ;; And probably explore all the different branches ... so that we can make an
