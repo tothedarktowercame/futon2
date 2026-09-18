@@ -1,0 +1,7 @@
+marginal P(miss tok0) indep = 1/10  coupled = 1/10
+ambiguity H[A(.|s)]:  indep 1.9054   coupled 1.6744   (sum of marginal H = 1.9054)
+total correlation TC of coupled row = 0.2311 nats
+risk KL(Q||C):        indep 0.4860   coupled 0.7170
+decomposition check:  sum-marginal-KL + TC = 0.4860 + 0.2311 = 0.7170  (vs coupled KL 0.7170)
+P(judge reports NOTHING | 5 tokens established): indep 9.510e-06  coupled 4.458e-03  ratio 469x
+F = -ln P:  indep 11.56 nats   coupled 5.41 nats
