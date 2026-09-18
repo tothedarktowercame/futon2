@@ -139,9 +139,25 @@ green, zero sorries. Findings the verification forced:
    successors remain open.
 5. **D audited**: consumed at t=0 by `ExactBeliefTrajectory.exactBeliefAt`.
 
-Remaining from the approved plan: the institutions adjudication (typed
-answer to whether Ostrom-style process preference fits inside AIF), and
-the three categorical-successor equation rows.
+The institutions adjudication is DONE (2026-09-18, third sitting):
+`mathlib4:DarkTower/AIF/Institutions.lean` (darktower `7bd6e913de`, build
+green, zero sorries), grounded in the Cascade Live apex thesis (pinned
+2026-09-06). Verdict: **partial fit with a precise boundary** — IAD's
+operational level fits inside the census (InstitutionalStatement with
+typed deontics; norm-vs-rule typed by the sanction field; four landing
+sites: policy boundary / E / C-via-sanction / guards); trajectory-grain
+design requirements (apex clusters A/C) fit via Monitor augmentation
+(bookkeeping automaton in state AND observation, conservativity theorems:
+the institution observes, it does not change the physics), becoming
+step-preference inside the book's G; collective-choice level is model
+revision → the unruled :learning layer, OPEN; constitutional level does
+not fit inside the model and correctly so — it is the operator's ruling
+layer. Formal precondition surfaced: preference lives on observations, so
+compliance must be OBSERVED to steer — cluster A ("records carry
+warrant") is the enabling condition for all institutional steering.
+
+Remaining from the approved plan: the three categorical-successor
+equation rows.
 
 ## The exemplar row worked: :expected-free-energy (G over cascades)
 
