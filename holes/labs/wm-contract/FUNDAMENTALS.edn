@@ -26,7 +26,7 @@
  :method
  {:lean "Every declaration named below was READ at the line cited, not grepped for. The carrier sweep enumerated every value of each spine carrier type across all 68 .lean modules in DarkTower/WarMachine and classified each as :fixture, :private-counterexample or :machine; no value classified :machine was found for any carrier."
   :runtime "For each entry the named seam was read, and for the runtime-inhabitant question the CALLERS were counted across futon2 src/, scripts/, checks/ and test/ -- a namespace whose only references are prose and tests is recorded as such."
-  :sweep-basis "Holes.lean abbrevs/structures at 6751-7148 (the AIF spine) plus the three sorry-bodied definitions outside it (C:153, find:264, organise:861); the ten declarations the emission marks kind=hole (holes-contract.json)."
+  :sweep-basis "Holes.lean abbrevs/structures at 6751-7148 (the AIF spine) plus the three sorry-bodied definitions outside it (C:157, find:307, organise:999); the ten declarations the emission marks kind=hole (holes-contract.json)."
   :not-adjudicated "find (Holes.lean:307) and organise (Holes.lean:999) are sorry-bodied but were CLOSED UNDER THE J9 CRITERION 2026-09-03 with recorded-row evidence (worklist :U46) and are deliberate implementation refusals, not missing constructors; they are out of scope for this criterion rather than judged by it."}
 
  :source-pins
@@ -41,8 +41,8 @@
   {:id :runtime-belief :path "futon2/src/futon2/aif/belief.clj" :lines 1238 :sha256-16 "39c1dabaf7be878b"}
   {:id :runtime-preferences :path "futon2/src/futon2/aif/preferences.clj" :lines 583 :sha256-16 "5438295b8f5fd6f5"
    :note "RE-PINNED by :pin-review-2026-09-18b. 565 -> 583 lines at futon2 1ea77e70 (LF-temperature's domain guard on :temperature). Verdict :proxy-only UNCHANGED."}
-  {:id :runtime-efe :path "futon2/src/futon2/aif/efe.clj" :lines 1342 :sha256-16 "6ea7a30859e31b48"
-   :note "byte-identical to Q-interface-completeness.edn :runtime-efe"}
+  {:id :runtime-efe :path "futon2/src/futon2/aif/efe.clj" :lines 1424 :sha256-16 "6ea7a30859e31b48"
+   :note "RE-READ at :pin-review-2026-09-18c; :lines updated 1342 -> 1424. Byte-identical to Q-interface-completeness.edn :runtime-efe -- TRUE again after that registry's 2026-09-18 re-pin to the same bytes (it had lagged at 138c47f6 while this pin, taken against the then-uncommitted WIRE-5 worktree, became current only when WIRE-5 committed; during that window the byte-identical note was false in BOTH directions and is now reported rather than quietly mended)."}
   {:id :runtime-eig :path "futon2/src/futon2/aif/epistemic_value.clj" :lines 97 :sha256-16 "0df62893adfdce64"
    :note "byte-identical to Q-interface-completeness.edn :runtime-eig"}
   {:id :runtime-habit :path "futon2/src/futon2/aif/habit_prior.clj" :lines 164 :sha256-16 "23f631d82dbbace7"}
@@ -77,6 +77,21 @@
    :why "The guard changes what c-distribution REFUSES, not what it IS. The entry's basis is a GRAIN claim -- the runtime C is a product of 13 independent per-channel densities over channel value ranges, while the required object is one distribution over the vertex-tagged outcome domain. A domain guard on the temperature parameter moves neither the grain nor the existence question. If anything it strengthens the entry's 'real, live and normalized' half, which was never the half in dispute."}
   :pins-moved {:runtime-preferences "f1a0b5c0a05a3d20 -> 5438295b8f5fd6f5 (565 -> 583 lines, futon2 1ea77e70)"}
   :scope "ONE pin. This pass re-read only the citation that drifted; it is not a re-run of the whole census and makes no claim about the other pins beyond their being unmoved at this read."}
+
+  :pin-review-2026-09-18c
+ {:by "zai-30 (dispatched by claude-4; the :runtime-efe census re-adjudication)"
+  :at "2026-09-18"
+  :reason "gen_fundamentals refused a dated reading as current on :runtime-efe drift. The drift resolved in an unexpected direction, reported not papered over: the pin's 6ea7a308 bytes were taken against the WIRE-5 WORKTREE before WIRE-5 committed (the :worktree-note of :pin-review-2026-09-18), so the file spent a window at c0551c97 (R7's e8744c98 state) with this pin AHEAD of it, and became 6ea7a308 again when WIRE-5 (a097e0b4+e76e62ab) committed. What still needed a real read regardless: the four citations had MOVED, not shifted, across the day's eight commits, and the changes bear on what they assert. All four re-located BY CONTENT and re-read at 6ea7a308."
+  :citations-re-read
+  [{:was "efe.clj:37-61" :now "efe.clj:44-67" :finding "INTACT at the new bytes -- the ambiguity seam (variance-sum / :gaussian-entropy with its self-declared stand-in docstring) is unchanged in substance; compute-efe's defaults :gaussian-entropy/:kl sit at :622-623."}
+   {:was "efe.clj:117-152" :now "efe.clj:125-158" :finding "INTACT -- the five-layer recorded preference-stack transcription, layer for layer."}
+   {:was "efe.clj:145-151" :now "efe.clj:152-157" :finding "INTACT -- the :habit-prior layer, :folded? false, owner amendment text unchanged; its internal stale pointer to war_machine.clj:364 is the pre-existing REPORTED-NOT-REPAIRED item and is still reported, still not repaired."}
+   {:was "efe.clj:644-698" :now "efe.clj:650-700" :finding "RE-READ, the one that could have moved the verdict: the channel-lane risk under :risk-mode :kl is still the w_ch-weighted sum of per-channel KL(N(mu_ch,sigma_ch^2) || C_ch) plus zone-risk (:656ff), unchanged in grain. The day's commits (WIRE-2/3/5, R7) all landed in the CASCADE lane or its certificates; the cascade scorer computes joint-outcome G but names its own evaluation path on every certificate (:identity-A-zero-rates / :factorized-nonzero-rates, :rates-provenance), so the :machine-C runtime leg's grain basis -- the runtime C the CHANNEL lane consumes is thirteen per-channel densities -- is untouched by it."}]
+  :verdict-unchanged
+  {:entry :machine-C :runtime-verdict :proxy-only
+   :why "The eight commits moved certificates, seams and a rates-provenance record; they did not move the grain of the channel lane's C consumption. :out/policy-prior-habit-E's efe.clj:145-151 citation moved to :152-157 with the same content and the same :folded? false, so that entry's basis is likewise unchanged."}
+  :pins-moved {:runtime-efe ":lines 1342 -> 1424 only; :sha256-16 6ea7a308 was already the current bytes (worktree-pinned, see :reason)"}
+  :scope "ONE pin's citations and the two entries that cite them (:machine-C runtime leg, :out/policy-prior-habit-E). Not a census re-run."}
 
   :pin-review-2026-09-18
  {:by "zai-51, E07 slice 2 (dispatched by claude-4, briefing v2)"
@@ -113,7 +128,7 @@
    "policy.clj (bfdb6cc4): SUPERSEDED STRUCTURALLY, not just by line. The flat policy/select-action the entries' prose cites at policy.clj:672 was DELETED by Joe's cascade-grain selection ruling (futon2 0d29c706, H6b: delete the flat selectors; rebound 2026-09-17 at code_build_match.clj:45). Selection is now policy/select-action-cascades (policy.clj:151) over cascade-selection/selection-posterior at a caller-declared beta. Entries citing select-action name an object that no longer exists."
    "war_machine.clj (f2efacca): arena-likelihood-mode 803-812 -> 795-811 (still :aif by default, re-read)"]
   :sorry-census-at-pass
-  "Holes.lean at 7f137e4f holds NINE sorry bodies: C at :157, organise at :999, and the seven Prop attestations at :7403, :7426, :7437, :7965, :7968, :7971, :7974. `find`'s body is closed under J9 (CLOSED docstrings at :396-409), so :method/:sweep-basis text reading 'the three sorry-bodied definitions outside it (C:153, find:264, organise:861)' is now TWO (C:157, organise:999). The ten-hole contract era the :sweep-basis cites is superseded by holes-contract.json at 46d73de9; the September-15 nine-count is CONFIRMED CURRENT."
+  "Holes.lean at 7f137e4f holds NINE sorry bodies: C at :157, organise at :999, and the seven Prop attestations at :7403, :7426, :7437, :7965, :7968, :7971, :7974. `find`'s body is closed under J9 (CLOSED docstrings at :396-409), so :method/:sweep-basis text reading 'the three sorry-bodied definitions outside it (C:157, find:307, organise:999)' is now TWO (C:157, organise:999). The ten-hole contract era the :sweep-basis cites is superseded by holes-contract.json at 46d73de9; the September-15 nine-count is CONFIRMED CURRENT."
   :verdict-decisions
   {:predictive-outcome-kernel-constructor :stays-in
    :decision-1 "MachineQ.lean (mathlib4 824f67b5e2, 2026-09-05 07:43Z, i.e. AFTER the original hand-read) constructs Q(o|pi) at MachineQ.lean:205 from a GenerativeModel and a BeliefState -- but THROUGH a declared QReading obligation seam (MachineQ.lean:84) whose machine instance does not exist, and futon2's transcription (src/futon2/aif/machine_q.clj:382, R4 seam default-off, *seam-reading* bound nowhere in src/) has no live caller. Worklist :F1 (done) and C516-F1-machine-grain-q.md section 6 record 'No FUNDAMENTALS.edn verdict moves': the constructor's machine-grain inputs (belief-to-state, controlled B, C at outcome grain) are exactly the entries that remain :in. The entry's :in verdict is RE-CONFIRMED on that record, not on a fresh opinion."
@@ -542,7 +557,7 @@
     [{:what "what the theory side actually has: a bare real" :at "mathlib4/DarkTower/WarMachine/Holes.lean:7240-7245"
       :read "softmax takes (tau : R) as an unstructured real argument. There is no PolicyPrecision carrier, no beta, and no update relation on tau anywhere in the spine -- so unlike the other three :out entries there is no signature here to be inhabited or uninhabited."}
      {:what "the carrier that shares the WORD and is a different quantity" :at "mathlib4/DarkTower/WarMachine/Holes.lean:7086-7089"
-      :read "abbrev PrecisionMap := Channel -> NonnegativeReal, CLOSED-BY-RECORD against PrecisionWitness with the falsifier: swapping precision with its signed prediction error preserves variational F. This is the channel-indexed multiplicative weight in beliefUpdate (:6850), not policy precision. Recorded so the two are not read as one."}
+      :read "abbrev PrecisionMap := Channel -> NonnegativeReal, CLOSED-BY-RECORD against PrecisionWitness with the falsifier: swapping precision with its signed prediction error preserves variational F. This is the channel-indexed multiplicative weight in beliefUpdate (:7114), not policy precision. Recorded so the two are not read as one."}
      {:what "how the theory side carries the claim instead" :at "mathlib4/DarkTower/WarMachine/Holes.lean:7971"
       :read "def policyPrecisionIsGammaFromBeta : Prop := sorry, minted as a kind=hole row at :7917. PERMANENT EXTERNAL ATTESTATION, holder by-record, evidence: a run record carrying tau together with the beta it was derived from; falsifier: no run record carries them together. So the theory side holds this as an EVENT claim about run records, not as a constructor obligation -- which is why it is out of this census's criterion by shape and not only by verdict."}]
     :basis "No constructing signature is declared, so the criterion's Lean leg has nothing to bind. The obligation exists in the corpus as a sorry-bodied Prop about run records."}

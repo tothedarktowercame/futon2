@@ -21,17 +21,28 @@
  :source-pins
  [{:id :lean-spine
    :path "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"
-   :sha256 "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b"}
+   :sha256 "7f137e4f85b2aae18b699942bdc505faa3f311752a096718704fb2ca7b7a07d3"
+   :re-pinned-at "2026-09-18"
+   :re-pinned-by "zai-30 (Q-interface re-pin pass, dispatched by claude-4)"
+   :prior-sha256 "befa1199724961021d7344ab2be0f3f3581df3054e2fb529219ebbd05f32407b"
+   :re-pin-basis "The file grew ~280 lines (duplicate-free-support and PrecisionMap repairs, mathlib4 480a666ad2, then certificate-era growth). Every citation this pin supports was RE-LOCATED BY CONTENT and re-read at the new bytes: PredictiveOutcomeKernel at :7024-7026, GenerativeModel :7053-7056, generativeFactorMass :7060-7066, BeliefState :7072-7074, predictiveOutcomeRisk and expectedFreeEnergy :7160-7168ff, eigCounterPredictive :7266ff -- read directly, and consistent with the independent line-correction map zai-51 recorded in FUNDAMENTALS.edn :pin-review-2026-09-18 the same day. The claims stand: the kernel is still an abbrev/type, the bound-parameter findings unchanged, no declaration composes transition-with-observation over a policy. Coordinate note: zai-35's concurrent Holes.lean citation sweep (invoke-1789762029741) covers the OTHER registries; this pass touched only this file."}
   {:id :lean-risk-fixture
    :path "/home/joe/code/mathlib4/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean"
-   :sha256 "c49a36983a3d4f7a72d782a5ecf9825c95bac49c354cf9d80d574d522894e58a"}
+   :sha256 "5336e34b3fe09fcb5f8e6a6bf9bc506c1f77186ee4f8544828a000df1ff8b7b4"
+   :re-pinned-at "2026-09-18"
+   :re-pinned-by "zai-30 (Q-interface re-pin pass)"
+   :prior-sha256 "c49a36983a3d4f7a72d782a5ecf9825c95bac49c354cf9d80d574d522894e58a"
+   :re-pin-basis "One commit moved it: mathlib4 480a666ad2 (2026-09-15, 'Enforce finite-support probability kernels'), diff READ in full for this file. The witnesses were restructured to the finite-support ProbabilityKernel interface -- mass now decidable membership on the support list, with support_nodup and mass_eq_zero_of_not_mem fields -- but the VALUES are unchanged: predictive is still the point mass (mass 1 on [oa]) and preference still uniform 1/2 on [oa, ob]. Same fixture evidence, same row basis; the interface gained obligations and the witness discharges them."}
   {:id :runtime-forward-model
    :path "/home/joe/code/futon2/src/futon2/aif/forward_model.clj"
-   :sha256 "073492ee1276a5f17fcaf994931a430e1f72551ec0d9a19d3c7042a6d74f17d0"
-   :re-pinned-at "2026-09-05"
-   :re-pinned-by ":F1 slice 3"
-   :prior-sha256 "14caaf3db19478267d5473ba48a565328d72d118289d4241b2d57c2177895227"
-   :re-pin-basis "The pin moved because THIS SLICE moved the file, and the whole change was read: it is four lines (forward_model.clj:22 the require, :359-366 the comment and the seam call, :367-368 the conditional assoc). Refreshing it certifies exactly one commit's worth of re-reading, which is the condition the C176 note attaches to a pin refresh."}
+   :sha256 "da9f516159467fbf43d0b6587fcb01466fdff6974028e1613df86be930f518d3"
+   :re-pinned-at "2026-09-18"
+   :re-pinned-by "zai-30 (Q-interface re-pin pass; second re-pin of this pin)"
+   :prior-sha256 "073492ee1276a5f17fcaf994931a430e1f72551ec0d9a19d3c7042a6d74f17d0"
+   :re-pin-basis "The file grew 356 -> 443 lines across the R4 seam work after 073492ee. The call-site citation re-located by content and re-read at HEAD: the machine-q require at forward_model.clj:23, predict-effects defmulti at :74, and the seam block at :436-443 -- machine-q/seam-attachment at :440, the conditional assoc at :441-443, with the docstring at :436-439 naming the :refusal/action-grain-gaussian-proxy the seam answers. The claim stands: the prediction is still the per-channel Gaussian pair, the seam attaches machine-grain rows only when the caller supplies them, and the Gaussian pair fed to predictive-outcome-row! is refused. FUNDAMENTALS.edn independently re-pinned the same bytes (its :pin-review-2026-09-18) -- the 'byte-identical' cross-note is TRUE again at this re-pin, after being false while this registry lagged."
+   :first-re-pin {:at "2026-09-05" :by ":F1 slice 3"
+                  :prior-sha256 "14caaf3db19478267d5473ba48a565328d72d118289d4241b2d57c2177895227"
+                  :basis "The pin moved because THIS SLICE moved the file, and the whole change was read: it is four lines (forward_model.clj:22 the require, :359-366 the comment and the seam call, :367-368 the conditional assoc). Refreshing it certifies exactly one commit's worth of re-reading, which is the condition the C176 note attaches to a pin refresh."}}
   {:id :runtime-machine-q
    :path "/home/joe/code/futon2/src/futon2/aif/machine_q.clj"
    :sha256 "5ca91dd8065ce73ad8ada66e5c6bd1f5f0f462ab0920f9bd3415b3e35bbd9299"
@@ -43,7 +54,11 @@
    :pin-basis "New in :F1 slice 3. Pinned as the source of the :runtime/Q-machine-construction row below, not as evidence that row read."}
   {:id :runtime-efe
    :path "/home/joe/code/futon2/src/futon2/aif/efe.clj"
-   :sha256 "138c47f62715facfb7c156f53acd98c94a643d5d7f8a98410d81ebfc4e75c5dc"}
+   :sha256 "6ea7a30859e31b48c23c6674a6d37df1d78de0247bce93168eece25236e9c99d"
+   :re-pinned-at "2026-09-18"
+   :re-pinned-by "zai-30 (Q-interface re-pin pass)"
+   :prior-sha256 "138c47f62715facfb7c156f53acd98c94a643d5d7f8a98410d81ebfc4e75c5dc"
+   :re-pin-basis "The file grew 1342 -> 1424 lines over eight commits (WIRE-1/2/3/5, R7 x4), every one in the CASCADE lane or metadata -- read per-commit and re-located by content at HEAD: the per-channel ambiguity seam (variance-sum / :gaussian-entropy) at :44-67 with compute-efe's defaults :gaussian-entropy/:kl at :622-623; the per-channel KL risk at :656ff (w_ch-weighted, unchanged in grain); the five-layer preference-stack transcription at :125-158 with the :habit-prior layer :152-157; multi-horizon guard fm/predict at :635 with predict-multi-horizon at :640-642; :survey-eig consumption :786-789 and :844, default-survey-eig-weight :99-107. WIRE-5 (a097e0b4+e76e62ab, diff read) adds :rates-provenance on certificates over the R7 :adjudication-rates seam; compute-efe's channel lane is untouched. THE CLAIM RE-READ: the Q proxy limitation stands -- the runtime prediction consumed by G is still the per-action per-channel Gaussian pair, and the cascade lane's joint-outcome G (declared rates, R7) is a SEPARATE scorer whose certificates name their own evaluation path, so this row's proxy finding is not moved by it. The reported-not-repaired note below is itself re-dated: D5d/D7's efe.clj:602/:607-609 now sit at :635/:640-642."}
   {:id :runtime-core-efe
    :path "/home/joe/code/futon2/src/futon2/aif/core_efe.clj"
    :sha256 "519c8983328d17e5a3adacb405f9b4d7851e170340d693959c2c5854bdbbe6e3"}
@@ -52,10 +67,18 @@
    :sha256 "0df62893adfdce64189c99724a4e1fb80ff0d0a07f84c74a5acf780cc370b690"}
   {:id :runtime-selection
    :path "/home/joe/code/futon2/src/futon2/aif/policy.clj"
-   :sha256 "3980d203d4997d9fd3019540652119a6ecc295d045d89bbcf5d5922e2695bd17"}
+   :sha256 "bfdb6cc4edf2ecd8c3d5ae34db6dd70ae7b07a87d758a144310b8ecf25f13fdd"
+   :re-pinned-at "2026-09-18"
+   :re-pinned-by "zai-30 (Q-interface re-pin pass)"
+   :prior-sha256 "3980d203d4997d9fd3019540652119a6ecc295d045d89bbcf5d5922e2695bd17"
+   :re-pin-basis "THE CAREFUL ONE. futon2 0d29c706 (Joe 2026-09-17 flat-path removal) cut the file 971 -> 232 lines and DELETED the selector this pin's rows cite: select-action at policy.clj:672-676 is gone, not moved. Re-read at HEAD rather than trusted-to-resolve: the production selector is now select-action-cascades (policy.clj:151-231) over cascade-selection/selection-posterior, with the general seam selection-scores at :51-113 and softmax-weights at :115-134 (the same referents zai-51 re-pointed FUNDAMENTALS' :policy-posterior row to on 2026-09-18, verified by name here independently). THE CLAIM RE-READ AT THE SUCCESSOR: the selection distribution is over CASCADE CANDIDATES (policies), still not a distribution over outcomes -- the limitation the rows state survives the deletion; what does not survive is their PROSE, which names a deleted selector. Reported to claude-4 with this re-pin: the rows' :read lines at :195 and :215 are historical pin-time reads and are left as dated history, but a row-owner edit should re-point them at the successor before any future hand-read copies them."}
   {:id :topology
    :path "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn"
-   :sha256 "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec"}]
+   :sha256 "1b60718060a1a7b86d3d95b44ab994f47e66a84e517c83757f2ebc29b7393e06"
+   :re-pinned-at "2026-09-18"
+   :re-pinned-by "zai-30 (Q-interface re-pin pass)"
+   :prior-sha256 "161d0abffd21551078ac2d7a87427e6cacafbfca0695c09a496260be21fafdec"
+   :re-pin-basis "One commit moved it: p4ng 6133ad0 (2026-09-18, 'Pointer round 2'), diff READ in full -- an 8-line header and stale policy.clj spans in :basis strings marked '(pre-deletion)', plus edge renumbering from the header insert. NO EDGE REDRAWN, exactly as its commit message records. The edges this pin's rows cite re-located and re-read: [:R1 :R4] 'predict' at :25 (was :14, still :status :drawn), [:R4 :R5] at :86 (was :17), [:R5 :R6] 'rank' at :87 (was :18), the D7 conditional [:R13 :R4] 'T' at :68. Low-substance, confirmed: the topology claims stand."}]
  :definitions
  [{:id :lean/Q-carrier
    :status :implemented-generic
