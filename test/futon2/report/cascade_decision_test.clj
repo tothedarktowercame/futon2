@@ -344,12 +344,18 @@
 (deftest wire-3-live-c-tokens-are-not-in-any-real-tick-domain-today
   ;; The FINDING, recorded as a test: the real corpus's live-C tokens are
   ;; namespaced keywords (:alive/M-* :closed/M-* :star/*), while the joint
-  ;; cascade domain is target-qualified [target token] pairs. live-c's own
-  ;; reachable restriction (cascade-spec) therefore refuses every real
-  ;; decision typed :no-reachable-want until a declared cascade source
-  ;; puts a live-C token into its want/pattern vocabulary under the same
-  ;; qualification. The refusal is the honest state — never a silent
-  ;; uniform fallback, never an unreachable token dumped into :want.
+  ;; cascade domain is target-qualified [target token] pairs. The two
+  ;; vocabularies are disjoint, so live-c/cascade-spec refuses
+  ;; :no-reachable-want for every real decision. That is the undeclared
+  ;; mission grain of C (:c-mis, WM-13) stated concretely.
+  ;;
+  ;; live-c is RIGHT to refuse when asked for a spec it cannot honestly give,
+  ;; and that law is untouched. What the caller does with the refusal is a
+  ;; separate decision (claude-4, 2026-09-18): a grain mismatch is C having no
+  ;; opinion about these outcomes, not C being broken or stale, so the
+  ;; comparison proceeds on the uniform spec it used before this slice and
+  ;; RECORDS that it did. Halting every production decision would make this
+  ;; wiring answerable for a gap it only revealed.
   (let [assembled (assemble* {:targets [tick-1-target]
                               :sources tick-1-sources})
         d (lc/derive-live-c (lc/read-sources))]
@@ -357,7 +363,19 @@
     (is (every? keyword? (:want d))
         "live-C tokens are (namespaced) keywords, never [target token] pairs")
     (is (= :no-reachable-want
-           (try (wm/cascade-decision assembled {})
-                (catch clojure.lang.ExceptionInfo e
-                  (:kind (ex-data e)))))
-        "the real corpus refuses :no-reachable-want at this call site today")))
+           (:kind (:refusal (lc/cascade-spec d #{[:t "tok"]}))))
+        "asked for a spec over a target-qualified domain, live-c refuses")
+    (let [decision (wm/cascade-decision assembled {})]
+      (is (map? decision)
+          "a grain mismatch does not halt the decision")
+      (is (some? (get-in decision [:decision :action]))
+          "the comparison still produces a choice")
+      (let [c (->> (get-in decision [:decision :selection-law :posterior])
+                   keys first)]
+        (is (some? c) "candidates were scored")))
+    ;; and the grain mismatch is RECORDED, not silent: uniform-because-no-overlap
+    ;; must never be mistaken for C-was-derived-and-agreed.
+    (let [spec-c (-> (wm/cascade-decision assembled {})
+                     (get-in [:decision :token-qualification]))]
+      (is (= :target-token-pair (:scheme spec-c))
+          "the decision states the qualification scheme its outcomes use"))))

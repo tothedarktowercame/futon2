@@ -6087,21 +6087,52 @@
                (reduce clojure.set/union joint-want (map (partial reduce clojure.set/union #{}) (keys joint-q0)))
                joint-candidates)
               live-spec (live-c/cascade-spec live-derived joint-reachable)
-              _ (when (:refusal live-spec)
-                  (throw (ex-info "cascade decision refused" (:refusal live-spec))))
+              live-refusal (:refusal live-spec)
+              ;; :no-reachable-want is NOT the same class of refusal as
+              ;; :live-c-stale or a source failure. Those two mean "C cannot be
+              ;; trusted, do not score". This one means "no live-C want token
+              ;; lies in this comparison's outcome domain" -- and today that is
+              ;; true of EVERY real decision, because the live C is derived at
+              ;; MISSION grain (:alive/M-…, :closed/M-…, :star/…) while a
+              ;; cascade comparison's outcomes are target-qualified [target
+              ;; token] pairs. Nothing maps between the two vocabularies. That
+              ;; is the undeclared mission layer of C (:c-mis, WM-13), and it
+              ;; predates this wiring by months.
+              ;;
+              ;; live-c is right to refuse when ASKED for a spec it cannot
+              ;; honestly give -- that law is not touched here. What the CALLER
+              ;; does with the refusal is this decision: a grain mismatch is C
+              ;; having no opinion about these outcomes, not C being broken, so
+              ;; the comparison proceeds on the uniform spec it used before this
+              ;; slice and records that it did. Halting every production
+              ;; decision would make this wiring responsible for a gap it only
+              ;; revealed. The record is on the certificate, so "C had no
+              ;; opinion at this grain" cannot be mistaken for "C was derived
+              ;; and agreed".
+              grain-mismatch? (= :no-reachable-want (:kind live-refusal))
+              _ (when (and live-refusal (not grain-mismatch?))
+                  (throw (ex-info "cascade decision refused" live-refusal)))
               ranked (efe/rank-actions {:cascade-belief joint-q0}
                                        joint-candidates
                                        {:horizon-steps T
                                         :cascade-spec
-                                        {:want (into joint-want (:want live-spec))
-                                         :weights (:weights live-spec)
-                                         :lam (:lam live-spec)
-                                         :mu (:mu live-spec)
-                                         :evidence (:evidence live-spec)
-                                         :zeroed (:zeroed live-spec)
-                                         :c {:status :derived
-                                             :source :futon2.aif.live-c/cascade-spec
-                                             :live-c (:live-c live-spec)}}})]
+                                        (if grain-mismatch?
+                                          {:want joint-want
+                                           :c {:status :derived-no-overlap
+                                               :source :futon2.aif.live-c/cascade-spec
+                                               :reason :mission-grain-c-not-in-cascade-outcome-domain
+                                               :live-want (:live-want live-refusal)
+                                               :reachable (:reachable live-refusal)
+                                               :owed "WM-13: the mission grain of C has no map into the cascade outcome domain"}}
+                                          {:want (into joint-want (:want live-spec))
+                                           :weights (:weights live-spec)
+                                           :lam (:lam live-spec)
+                                           :mu (:mu live-spec)
+                                           :evidence (:evidence live-spec)
+                                           :zeroed (:zeroed live-spec)
+                                           :c {:status :derived
+                                               :source :futon2.aif.live-c/cascade-spec
+                                               :live-c (:live-c live-spec)}})})]
           (when (and (map? ranked) (contains? ranked :status))
             (throw (ex-info "cascade decision refused"
                             (merge {:kind (or (:kind ranked) :rank-refused)}
