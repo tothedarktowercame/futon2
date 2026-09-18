@@ -1,5 +1,6 @@
 {:schema :wm/fundamentals-v1
- :as-of "2026-09-05"
+ :as-of "2026-09-18"
+ :as-of-note "The 2026-09-05 hand-read census, RE-READ at 2026-09-18 bytes by the :pin-review-2026-09-18 pass (E07 clause 4: the generated table had outlived its pins). No verdict moved; see that pass's :verdict-decisions for the constructors that landed after the original read and why each leaves its entry :in."
  :row :F0
  :owner :wm-organization
  :produced-by "holes/labs/wm-contract/FUNDAMENTALS.edn (hand-read census; see :derivation-proposal for how it should stop being hand-kept)"
@@ -29,37 +30,86 @@
   :not-adjudicated "find (Holes.lean:264) and organise (Holes.lean:861) are sorry-bodied but were CLOSED UNDER THE J9 CRITERION 2026-09-03 with recorded-row evidence (worklist :U46) and are deliberate implementation refusals, not missing constructors; they are out of scope for this criterion rather than judged by it."}
 
  :source-pins
- [{:id :lean-spine :path "mathlib4/DarkTower/WarMachine/Holes.lean" :lines 7928
-   :sha256-16 "befa119972496102"
+ [{:id :lean-spine :path "mathlib4/DarkTower/WarMachine/Holes.lean" :lines 8219
+   :sha256-16 "7f137e4f85b2aae1"
    :note "BYTE-IDENTICAL to the :lean-spine pin in Q-interface-completeness.edn, which the U53 pin review re-read on 2026-09-04. Same blob, same evidence."}
-  {:id :lean-q-fixture :path "mathlib4/DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean" :sha256-16 "2834925bcd742442"}
+  {:id :lean-q-fixture :path "mathlib4/DarkTower/WarMachine/PredictiveOutcomeKernelWitness.lean" :sha256-16 "b38429046b74af1e"}
   {:id :contract-emitter :path "mathlib4/DarkTower/Contract/Emit.lean" :sha256-16 "498ce2126f727b95"}
-  {:id :contract-json :path "mathlib4/DarkTower/WarMachine/holes-contract.json" :sha256-16 "4e1feed965e962dd"}
-  {:id :runtime-forward-model :path "futon2/src/futon2/aif/forward_model.clj" :lines 356 :sha256-16 "14caaf3db1947826"
+  {:id :contract-json :path "mathlib4/DarkTower/WarMachine/holes-contract.json" :sha256-16 "46d73de9b80bb397"}
+  {:id :runtime-forward-model :path "futon2/src/futon2/aif/forward_model.clj" :lines 443 :sha256-16 "da9f516159467fbf"
    :note "byte-identical to Q-interface-completeness.edn :runtime-forward-model"}
   {:id :runtime-belief :path "futon2/src/futon2/aif/belief.clj" :lines 1238 :sha256-16 "39c1dabaf7be878b"}
   {:id :runtime-preferences :path "futon2/src/futon2/aif/preferences.clj" :lines 565 :sha256-16 "f1a0b5c0a05a3d20"}
-  {:id :runtime-efe :path "futon2/src/futon2/aif/efe.clj" :lines 981 :sha256-16 "138c47f62715facf"
+  {:id :runtime-efe :path "futon2/src/futon2/aif/efe.clj" :lines 1342 :sha256-16 "57a8784434381949"
    :note "byte-identical to Q-interface-completeness.edn :runtime-efe"}
   {:id :runtime-eig :path "futon2/src/futon2/aif/epistemic_value.clj" :lines 97 :sha256-16 "0df62893adfdce64"
    :note "byte-identical to Q-interface-completeness.edn :runtime-eig"}
   {:id :runtime-habit :path "futon2/src/futon2/aif/habit_prior.clj" :lines 164 :sha256-16 "23f631d82dbbace7"}
   {:id :runtime-cascade-prior :path "futon2/src/futon2/aif/cascade_prior.clj" :lines 212 :sha256-16 "4c5c5464c7df91b6"}
-  {:id :runtime-realized-outcome :path "futon2/src/futon2/aif/realized_outcome.clj" :lines 140 :sha256-16 "35c546c35c54a633"}
+  {:id :runtime-realized-outcome :path "futon2/src/futon2/aif/realized_outcome.clj" :lines 146 :sha256-16 "5ab6330ce29f08a0"}
   {:id :probe :path "futon2/holes/labs/wm-contract/lean_state_probe.bb" :sha256-16 "8f386f04b4809f3e"}
   {:id :lean-gain-chain :path "mathlib4/DarkTower/WarMachine/GainChain.lean" :lines 379 :sha256-16 "d8fec82564a5a05f"
    :note "ADDED BY THE REVIEW PASS. Not in the original census's reads; it is where the realized-outcome carrier the census reported absent actually lives. See :review-repairs."}
-  {:id :runtime-policy :path "futon2/src/futon2/aif/policy.clj" :sha256-16 "3980d203d4997d9f"
+  {:id :runtime-policy :path "futon2/src/futon2/aif/policy.clj" :sha256-16 "bfdb6cc4edf2ecd8"
    :note "ADDED BY THE REVIEW PASS: effective-temperature and selection-scores were cited by the original entries but the file was not pinned."}
-  {:id :runtime-policy-precision :path "futon2/src/futon2/aif/policy_precision.clj" :lines 561 :sha256-16 "2e7164ecf965fe95" :note "ADDED BY THE REVIEW PASS."}
-  {:id :runtime-selection-gain :path "futon2/src/futon2/aif/selection_gain.clj" :sha256-16 "2f58d9ceff766521" :note "ADDED BY THE REVIEW PASS."}
-  {:id :runtime-tripwire :path "futon2/src/futon2/aif/tripwire.clj" :sha256-16 "cfb7483c260cb9e3" :note "ADDED BY THE REVIEW PASS."}
-  {:id :runtime-war-machine :path "futon2/scripts/futon2/report/war_machine.clj" :sha256-16 "314a703e31a252ac" :note "ADDED BY THE REVIEW PASS."}
-  {:id :lab-observe :path "futon2/holes/labs/wm-contract/wm_step_observe.bb" :sha256-16 "36476c05de17cf68" :note "ADDED BY THE REVIEW PASS."}]
+  {:id :runtime-policy-precision :path "futon2/src/futon2/aif/policy_precision.clj" :lines 726 :sha256-16 "0b3ef7cc7689ecfb" :note "ADDED BY THE REVIEW PASS."}
+  {:id :runtime-selection-gain :path "futon2/src/futon2/aif/selection_gain.clj" :sha256-16 "80ffd163350e27eb" :note "ADDED BY THE REVIEW PASS."}
+  {:id :runtime-tripwire :path "futon2/src/futon2/aif/tripwire.clj" :sha256-16 "a75b2a571d76fa93" :note "ADDED BY THE REVIEW PASS."}
+  {:id :runtime-war-machine :path "futon2/scripts/futon2/report/war_machine.clj" :sha256-16 "4ab23c978e45d44d" :note "ADDED BY THE REVIEW PASS."}
+  {:id :lab-observe :path "futon2/holes/labs/wm-contract/wm_step_observe.bb" :sha256-16 "b3bbaedfc3fd3079" :note "ADDED BY THE REVIEW PASS."}]
 
  :repo-heads {:futon2 "09451d10" :mathlib4 "4bbc7111c4" :p4ng "dfabf9e"}
  :repo-heads-at-review {:futon2 "8d987964" :mathlib4 "4bbc7111c4" :p4ng "5cd83cf"
    :note "The review pass re-read at these heads. Every file the original census pinned is BYTE-IDENTICAL at both (checked: the eleven :sha256-16 values above all still match), so the two readings are of the same bytes and the futon2/p4ng head movement is other work."}
+
+  :pin-review-2026-09-18
+ {:by "zai-51, E07 slice 2 (dispatched by claude-4, briefing v2)"
+  :at "2026-09-18"
+  :reason "E07 clause 4: sec-fundamentals-generated.tex was rendered from this census at pins that had drifted. Every pin was re-hashed and every drifted citation re-READ at the new bytes before regeneration. NO VERDICT MOVED; the constructors that landed after the 2026-09-05 hand-read are adjudicated in :verdict-decisions below."
+  :repo-heads-at-pass {:futon2 "98adff8d3b" :mathlib4 "58615336ef" :p4ng "182106c87a"
+   :worktree-note "mathlib4 clean. The futon2 worktree carried UNCOMMITTED changes in other lanes at the read (scripts/futon2/report/war_machine.clj, src/futon2/aif/likelihood_precision.clj, src/futon2/aif/capability_zones.clj and their tests); the :runtime-war-machine pin below is of the WORKTREE bytes at read time, not of any commit."}
+  :pins-unchanged
+  [:contract-emitter "498ce2126f727b95"
+   :runtime-belief "39c1dabaf7be878b"
+   :runtime-preferences "f1a0b5c0a05a3d20"
+   :runtime-eig "0df62893adfdce64"
+   :runtime-habit "23f631d82dbbace7"
+   :runtime-cascade-prior "4c5c5464c7df91b6"
+   :probe "8f386f04b4809f3e"
+   :lean-gain-chain "d8fec82564a5a05f"]
+  :pins-moved
+  {:lean-q-fixture "2834925bcd742442 -> b38429046b74af1e (moved between the pass's first hash and its verification -- caught by the generator's new pin-drift refusal, not by the pass itself)"
+   :lean-spine "befa119972496102 -> 7f137e4f85b2aae1 (7928 -> 8219 lines)"
+   :contract-json "4e1feed965e962dd -> 46d73de9b80bb397"
+   :runtime-forward-model "14caaf3db1947826 -> da9f516159467fbf (356 -> 443 lines)"
+   :runtime-efe "138c47f62715facf -> 57a8784434381949 (981 -> 1342 lines)"
+   :runtime-realized-outcome "35c546c35c54a633 -> 5ab6330ce29f08a0 (140 -> 146 lines)"
+   :runtime-policy "3980d203d4997d9f -> bfdb6cc4edf2ecd8 (232 lines)"
+   :runtime-policy-precision "2e7164ecf965fe95 -> 0b3ef7cc7689ecfb (561 -> 726 lines)"
+   :runtime-selection-gain "2f58d9ceff766521 -> 80ffd163350e27eb (270 lines)"
+   :runtime-tripwire "cfb7483c260cb9e3 -> a75b2a571d76fa93 (768 lines)"
+   :runtime-war-machine "314a703e31a252ac -> f2efacca0e2d6138 (worktree bytes at render time, see :worktree-note; the file was being edited by the WIRE-4/R7 lane DURING the pass -- f2efacca at the first read, 4ab23c97 at render -- and any pin of it is dated by definition)"
+   :lab-observe "36476c05de17cf68 -> b3bbaedfc3fd3079"}
+  :line-citations-corrected
+  ["Holes.lean (all at 7f137e4f): PredictiveOutcomeKernel 6757-6759 -> 7024-7026; TransitionKernel 6770-6772 -> 7037-7039; PreferenceDistribution 6778-6780 -> 7045-7047; GenerativeModel 6787-6790 -> 7053-7056; generativeFactorMass 6792-6799 -> 7060-7066; BeliefState 6806-6808 -> 7072-7074; beliefUpdate prior/posterior args 6841,6843 -> 7119ff; ambiguity 6880-6885 -> 7160-7165; expectedFreeEnergy 6887-6891 -> 7167ff; preferenceConstantCensus 7093-7120 -> 7382-7396; machineHasNoC 7117-7120 -> 7405-7406; eigCounterPredictive 6985-6990 -> 7266ff; C 151-153 -> 157"
+   "forward_model.clj (da9f5161): predict-effects defmulti 55-62 -> 74; predict 333 -> 372; the R4 producer seam read at 311-356 -> 372-443 (same per-channel Gaussian shape, re-read)"
+   "efe.clj (57a87844): the ambiguity seam 37-61 substantively unchanged (re-read; :gaussian-entropy default now at :47-62); compute-efe 612 -> 478"
+   "policy.clj (bfdb6cc4): SUPERSEDED STRUCTURALLY, not just by line. The flat policy/select-action the entries' prose cites at policy.clj:672 was DELETED by Joe's cascade-grain selection ruling (futon2 0d29c706, H6b: delete the flat selectors; rebound 2026-09-17 at code_build_match.clj:45). Selection is now policy/select-action-cascades (policy.clj:151) over cascade-selection/selection-posterior at a caller-declared beta. Entries citing select-action name an object that no longer exists."
+   "war_machine.clj (f2efacca): arena-likelihood-mode 803-812 -> 795-811 (still :aif by default, re-read)"]
+  :sorry-census-at-pass
+  "Holes.lean at 7f137e4f holds NINE sorry bodies: C at :157, organise at :999, and the seven Prop attestations at :7403, :7426, :7437, :7965, :7968, :7971, :7974. `find`'s body is closed under J9 (CLOSED docstrings at :396-409), so :method/:sweep-basis text reading 'the three sorry-bodied definitions outside it (C:153, find:264, organise:861)' is now TWO (C:157, organise:999). The ten-hole contract era the :sweep-basis cites is superseded by holes-contract.json at 46d73de9; the September-15 nine-count is CONFIRMED CURRENT."
+  :verdict-decisions
+  {:predictive-outcome-kernel-constructor :stays-in
+   :decision-1 "MachineQ.lean (mathlib4 824f67b5e2, 2026-09-05 07:43Z, i.e. AFTER the original hand-read) constructs Q(o|pi) at MachineQ.lean:205 from a GenerativeModel and a BeliefState -- but THROUGH a declared QReading obligation seam (MachineQ.lean:84) whose machine instance does not exist, and futon2's transcription (src/futon2/aif/machine_q.clj:382, R4 seam default-off, *seam-reading* bound nowhere in src/) has no live caller. Worklist :F1 (done) and C516-F1-machine-grain-q.md section 6 record 'No FUNDAMENTALS.edn verdict moves': the constructor's machine-grain inputs (belief-to-state, controlled B, C at outcome grain) are exactly the entries that remain :in. The entry's :in verdict is RE-CONFIRMED on that record, not on a fresh opinion."
+   :policy-conditioned-state-predictive :stays-in
+   :decision-2 "MachineQ.machinePredictedStateKernel (MachineQ.lean:139-146) and machine_q.clj:336 construct Q(s|pi) under the same QReading obligation; C516 section 2 measured that with the machine's own identity B the rows are CONSTANT in pi ('Q(s|pi) came back equal to the belief in every arm'), which is evidence FOR :fundamental/controlled-transition-kernel staying :in. Re-confirmed."
+   :parameter-kernels :stays-in
+   :decision-3 "MachineParameters.lean:13/:31 constructs machineParameterPrior (uniform 1/2 over a two-case Theta declared in that module) and machineParameterPosterior over a SUPPLIED RegisteredLikelihood -- an obligation-seam constructor over a declared carrier, not built from the tick model, so the entry's falsifier ('constructed from the tick model') does not fire. likelihood_precision.clj's own gap list still reads 'no consumer on the live tick path evaluates a likelihood matrix' (R7-3 open at the pass; WIRE-4 was in flight in the dirty worktree). Re-confirmed."
+   :machine-preference-distribution :stays-in
+   :decision-4 "Lean C is still a sorry body (Holes.lean:157, re-verified). The runtime live C (src/futon2/aif/c_vector.clj:196, WIRE-3/futon2 00363276) is stated-CHANNEL grain, and machine_q_risk.clj is a KL adapter validating supplied rows over a 12-element support -- neither constructs a PreferenceDistribution over the machine's Outcome domain. Re-confirmed."
+   :machine-policy-carrier "STAYS-OUT: moved 2026-09-05 by :F7 before this pass; unchanged."
+   :belief-to-state-distribution "STAYS-IN: belief.clj is byte-identical (pin 39c1dabaf7be878b), so the original runtime read stands as written; the four predict-* functions re-checked: still no live caller."
+   :controlled-transition-kernel "STAYS-IN: belief.clj byte-identical (transition-model-v1 identity, no action index); C516 section 2 arm 2 measured the consequence on a run."}}
 
  :entries
  [{:id :fundamental/predictive-outcome-kernel-constructor
