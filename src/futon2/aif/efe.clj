@@ -1064,20 +1064,40 @@
                          (into want))
             rates (zipmap universe (repeat {:false-neg 0 :false-pos 0}))
             scored (map (fn [action]
-                          (let [g (cascade-manifest/horizon-g-sparse
-                                   {:rates rates
-                                    :q0 q0
-                                    :precedence-fn (constantly (:precedence action))
-                                    :horizon T
-                                    :spec spec
-                                    :universe universe})]
-                            {:action action
-                             :cascade true
-                             :cascade-id (:id action)
-                             :horizon-steps T
-                             :G-efe g
-                             :G-cascade g
-                             :controller-score (if (number? g) g ##Inf)}))
+                          (let [{:keys [g certificate]}
+                                (cascade-manifest/horizon-g-sparse-cert
+                                 {:rates rates
+                                  :q0 q0
+                                  :precedence-fn (constantly (:precedence action))
+                                  :horizon T
+                                  :spec spec
+                                  :universe universe})]
+                            (cond-> {:action action
+                                     :cascade true
+                                     :cascade-id (:id action)
+                                     :horizon-steps T
+                                     :G-efe g
+                                     :G-cascade g
+                                     :controller-score (if (number? g) g ##Inf)}
+                              ;; WIRE-1 emission slice: the GCertificate
+                              ;; record (Lean DarkTower/AIF/Certificates.lean)
+                              ;; for this candidate's G — present exactly when
+                              ;; the computation ran, never fabricated for a
+                              ;; refusal. β is echoed when the caller declared
+                              ;; it on opts (production declares it on the
+                              ;; cascade problem and selection reads it there;
+                              ;; R5 scoring opts do not carry it today, and
+                              ;; that absence is recorded, not defaulted).
+                              certificate
+                              (assoc :certificate
+                                     (assoc certificate
+                                            :beta-declared
+                                            {:value (:beta opts)
+                                             :status (if (number? (:beta opts))
+                                                       :declared
+                                                       :not-in-scoring-opts)}
+                                            :habit {:value 1 :status :declared-neutral}
+                                            :f {:value 0 :status :declared-neutral})))))
                         candidate-actions)
             sorted (sort-by :controller-score scored)
             rank-of (into {} (map-indexed (fn [i g] [g (inc i)]))

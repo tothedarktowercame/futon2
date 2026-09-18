@@ -582,37 +582,29 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                     (for [[o p] q :when (pos? p)]
                       (* (double p) (- (Math/log (double p)) (double (log-c-of o)))))))))
 
-(defn horizon-g-sparse
-  "Lean PolicyHorizon.horizonEFE at mission scale: exactly the numbers of
-   horizon-g (futon2 233ad909) without ever enumerating the powerset. Two
-   exact reductions: (1) C is evaluated pointwise by preference-fn's
-   closed-form Z; (2) at zero adjudication rates A is the identity kernel
-   (tokenLikelihood_checkable), so Q(o_τ|π) = q_τ and the ambiguity term is
-   identically 0 — q_τ comes from rollout and only its support is scored.
-   Non-zero rates refuse with the typed
-   {:status :missing :kind :judgement-rates-not-supported-at-scale}: a
-   declared current limitation, not a silent approximation. C is supplied
-   either as :c-fn-pointwise (τ ↦ (o ↦ c(o)), step-indexed) or as :spec (a
-   preference spec used as a DECLARED CONSTANT C_τ at every τ — the constant
-   case, not a claim that C_τ is constant in general). :universe is the
-   common token universe of the comparison (observation space of C); pass
-   the same universe for every candidate compared. Returns the double
-   sum, :infinite when any step's risk is infinite
-   (horizonEFE_eq_top_iff), or the first typed refusal. Pure; no wiring."
-  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe]}]
+(defn- horizon-g-sparse*
+  "The shared evaluation core of horizon-g-sparse. Same refusals, same
+   arithmetic, same iteration order; when RECORD? is true the per-step risk
+   (a local summed and discarded before the WIRE-1 emission slice) is also
+   returned under :steps, one {:tau tau :risk risk} per tau actually
+   iterated. The infinite-risk step records :risk :infinite and stops,
+   matching the scalar path's early return. Returns {:g <scalar, :infinite
+   or typed refusal> :steps <vector or nil>}."
+  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe]} record?]
   (let [bad (rate-bad-token rates)]
     (cond
-      bad {:status :missing :kind :invalid-adjudication-rate
-           :token bad :value (get rates bad)}
+      bad {:g {:status :missing :kind :invalid-adjudication-rate
+               :token bad :value (get rates bad)} :steps nil}
       (not (zero-rates? rates))
-      {:status :missing :kind :judgement-rates-not-supported-at-scale
-       :limitation "pointwise identity-A reduction is exact only at zero rates; non-zero judgement rates need the enumerating observation model"}
+      {:g {:status :missing :kind :judgement-rates-not-supported-at-scale
+           :limitation "pointwise identity-A reduction is exact only at zero rates; non-zero judgement rates need the enumerating observation model"}
+       :steps nil}
       (not (and (integer? horizon) (pos? horizon)))
-      {:status :missing :kind :invalid-horizon :horizon horizon}
+      {:g {:status :missing :kind :invalid-horizon :horizon horizon} :steps nil}
       (not (and (ifn? precedence-fn) (map? q0)))
-      {:status :missing :kind :invalid-horizon-g-input}
+      {:g {:status :missing :kind :invalid-horizon-g-input} :steps nil}
       (and (nil? c-fn-pointwise) (nil? spec))
-      {:status :missing :kind :missing-preference-spec}
+      {:g {:status :missing :kind :missing-preference-spec} :steps nil}
       :else
       (let [lpf (when (nil? c-fn-pointwise) (log-preference-fn spec universe))
             point-c (cond
@@ -621,7 +613,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                       (refusal? lpf) lpf
                       :else (fn [_tau o] (lpf o)))]
         (if (refusal? point-c)
-          point-c
+          {:g point-c :steps nil}
           ;; WM-06 domain meeting: when C is the spec seed, every positive-mass
           ;; Q outcome must be a subset of C's universe — the passed
           ;; :universe, or the spec's own want ∪ evidence ∪ zeroed tokens when
@@ -642,21 +634,85 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                       s))
                                   (seq q))))]
             (if-let [s (q-outside q0)]
-              {:status :missing :kind :q-support-outside-c-universe
-               :state s :universe (count c-universe)}
-              (loop [tau 1 total 0.0]
+              {:g {:status :missing :kind :q-support-outside-c-universe
+                   :state s :universe (count c-universe)}
+               :steps nil}
+              (loop [tau 1 total 0.0 steps (transient [])]
                 (if (> tau horizon)
-                  (double total)
+                  {:g (double total) :steps (when record? (persistent! steps))}
                   (let [q (rollout precedence-fn q0 tau)]
                     (if (refusal? q)
-                      q
+                      {:g q :steps nil}
                       (if-let [s (q-outside q)]
-                        {:status :missing :kind :q-support-outside-c-universe
-                         :state s :step tau :universe (count c-universe)}
+                        {:g {:status :missing :kind :q-support-outside-c-universe
+                             :state s :step tau :universe (count c-universe)}
+                         :steps nil}
                         (let [risk (outcome-risk-pointwise q (fn [o] (point-c tau o)))]
                           (if (= risk :infinite)
-                            :infinite
-                            (recur (inc tau) (+ total risk))))))))))))))))
+                            {:g :infinite
+                             :steps (when record?
+                                      (persistent! (conj! steps {:tau tau :risk :infinite})))}
+                            (recur (inc tau) (+ total risk)
+                                   (if record?
+                                     (conj! steps {:tau tau :risk risk})
+                                     steps))))))))))))))))
+
+(defn horizon-g-sparse
+  "Lean PolicyHorizon.horizonEFE at mission scale: exactly the numbers of
+   horizon-g (futon2 233ad909) without ever enumerating the powerset. Two
+   exact reductions: (1) C is evaluated pointwise by preference-fn's
+   closed-form Z; (2) at zero adjudication rates A is the identity kernel
+   (tokenLikelihood_checkable), so Q(o_τ|π) = q_τ and the ambiguity term is
+   identically 0 — q_τ comes from rollout and only its support is scored.
+   Non-zero rates refuse with the typed
+   {:status :missing :kind :judgement-rates-not-supported-at-scale}: a
+   declared current limitation, not a silent approximation. C is supplied
+   either as :c-fn-pointwise (τ ↦ (o ↦ c(o)), step-indexed) or as :spec (a
+   preference spec used as a DECLARED CONSTANT C_τ at every τ — the constant
+   case, not a claim that C_τ is constant in general). :universe is the
+   common token universe of the comparison (observation space of C); pass
+   the same universe for every candidate compared. Returns the double
+   sum, :infinite when any step's risk is infinite
+   (horizonEFE_eq_top_iff), or the first typed refusal. Pure; no wiring.
+   WIRE-1: the per-step record this function always had (and discarded)
+   is exposed by horizon-g-sparse-cert; this function's return is
+   unchanged."
+  [m]
+  (:g (horizon-g-sparse* m false)))
+
+(defn horizon-g-sparse-cert
+  "WIRE-1 emission slice: horizon-g-sparse with the per-step certificate
+   the Lean specification DarkTower/AIF/Certificates.lean (GCertificate)
+   requires. Returns {:g <exactly what horizon-g-sparse returns on the
+   same input> :certificate <map or nil>}. The certificate records, per
+   tau actually iterated, the risk with :risk-status :computed and the
+   ambiguity with :ambiguity-status :reduced-identically-zero under the
+   named reduction \"identity-A-zero-rates\" — the three QuantityStatus
+   constructors stay distinct, so a 0 value alone never carries the
+   distinction (Certificates.lean rule 2). :c-form is :constant-spec when
+   C came from :spec and :step-indexed when :c-fn-pointwise was supplied.
+   :rates-all-zero and :universe-size are read off the actual rates map
+   of this call. A refused computation returns {:certificate nil} — no
+   certificate is fabricated for a computation that did not run; the
+   refusal IS the record. Pure; emits, changes nothing."
+  [m]
+  (let [{:keys [g steps]} (horizon-g-sparse* m true)]
+    (if (and (map? g) (contains? g :status))
+      {:g g :certificate nil}
+      {:g g
+       :certificate {:horizon (:horizon m)
+                     :steps (mapv (fn [step]
+                                   {:tau (:tau step)
+                                    :risk (:risk step)
+                                    :risk-status :computed
+                                    :ambiguity 0
+                                    :ambiguity-status :reduced-identically-zero
+                                    :reduction "identity-A-zero-rates"})
+                                 (or steps []))
+                     :total g
+                     :c-form (if (:c-fn-pointwise m) :step-indexed :constant-spec)
+                     :rates-all-zero (zero-rates? (:rates m))
+                     :universe-size (count (:rates m))}})))
 
 ;; ===== WM-02 design P12: the stored belief as the exact categorical posterior =====
 ;; Lean DarkTower.WarMachine.ExactBeliefTrajectory (mathlib4 ba0eda16df).
