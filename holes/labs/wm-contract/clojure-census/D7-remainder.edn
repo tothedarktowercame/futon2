@@ -1,0 +1,522 @@
+{:dispatch :D7
+ :rows [
+ {:ns "futon2.aif.cascade-problems"
+  :class :live-core
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "assembles the quartet inputs (facts/want/T/beta) censused as inputs in D2/D3"}
+ {:ns "futon2.aif.cascade-sources"
+  :class :live-core
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "declares the per-target sources (facts/want/patterns/beta) the live G consumes"}
+ {:ns "futon2.aif.action-proposer"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "flat-path proposer family; its decision consumer was deleted by H5b (war_machine.clj:6379-6398), require-reachable only"}
+ {:ns "futon2.aif.anticipation"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.close-retention"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.decision-gate"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.delivery-qa"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.enumeration-completeness"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.evidence-manifest"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.fact-measurement"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.find-receipt"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.fold"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "R16 loop-closure contract interface; fold-* implementations are tick plumbing"}
+ {:ns "futon2.aif.fold-classical"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.fold-eval"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.fold-llm"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.fold-semilattice"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.full-loop-cohort"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.hierarchical-budget"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.interoceptive-store-lock"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.interpretation-evidence"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.interpretation-job"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.interpretation-request"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.lane-futility"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.limb-evidence"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.machine-accumulation"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.machine-q"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "Q(o|pi) readback of the retired flat selector; reachable via efe require, output unread on the cascade tick"}
+ {:ns "futon2.aif.mission-epistemic-value"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "computes an EIG-family mission term for reporting; not the G ambiguity path"}
+ {:ns "futon2.aif.mission-gauges"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.mission-registry"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.morning-brief"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.move-class-intensity"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "dark value terms, DEFAULT :off (war_machine.clj:961)"}
+ {:ns "futon2.aif.observation-checks"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.pattern-registry"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.policy-depth"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.preference-module"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "local C modules; consumed on rank-actions' dead channel branch"}
+ {:ns "futon2.aif.realized-outcome"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.realized-recording"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.receipt-construction"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.repair-obligation"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.selection-rationale"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.sorry-registry"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.substrate"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.task-belief-ladder"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "U52 selection-scoring seam ladder; report-side"}
+ {:ns "futon2.aif.trace"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.tripwire"
+  :class :live-infra
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> REACHABLE; head-3 docstring read"
+  :note "tick plumbing/reporting; no AIF term"}
+ {:ns "futon2.aif.bmr"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve B (model structure): pure Bayesian Model Reduction over Dirichlet concentrations"}
+ {:ns "futon2.aif.cascade-order-check"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve B (precedence order): pure mirror of CascadeOrder.lean, no live caller"}
+ {:ns "futon2.aif.construction"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve G (active-horizon-g consumer): H7c-1 cascade-construction library, dead chain per D1"}
+ {:ns "futon2.aif.construction-moves"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve G (construction moves): H7c-2 move library, same dead chain"}
+ {:ns "futon2.aif.fold-clean"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve F (fold verification): wiring -> CLean adapter for the fold interface"}
+ {:ns "futon2.aif.fold-escrow"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve F (fold escrow): deposits/replay for fold-llm, unwired"}
+ {:ns "futon2.aif.fold-realized"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve E/F (realized outcome): R16->R14 :realized-outcome producer, enactor side"}
+ {:ns "futon2.aif.machine-parameters"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve A/B (model kernels): finite registered machine-model kernels, no live caller"}
+ {:ns "futon2.aif.machine-policy-set"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve policy-posterior: exact projection of retained rankings to MachinePolicySet"}
+ {:ns "futon2.aif.machine-predictive"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve Q (predicted states): full-plan predicted-state construction, unread"}
+ {:ns "futon2.aif.observation-admission"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve A (adjudication labels): WM-04 S-2 admit — would feed observation-rates/token-likelihood"}
+ {:ns "futon2.aif.parameter-delivery"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve A/zeta (parameter posterior + info gain): pairs with active-horizon-g per D1"}
+ {:ns "futon2.aif.pattern-reliability"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve B (theta): attested theta seed counts per pattern, unwired"}
+ {:ns "futon2.aif.preference-discovery"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve C: reads explicit preference claims into a proposed-C comparison"}
+ {:ns "futon2.aif.survey-mission-value"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve G/epistemic: epistemic payload of survey-mission candidates"}
+ {:ns "futon2.aif.temporal-hierarchy"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve model quartet (fast/slow): R15 compositional-depth half, unwired"}
+ {:ns "futon2.aif.work-target-belief"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve D: P1a work-target belief admission/carry, no observation path"}
+ {:ns "futon2.aif.work-target-predictor-input"
+  :class :relevant-unbound
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "would serve D/q0: WM-02 selected target belief row input"}
+ {:ns "futon2.aif.actuator-a3"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.actuator-a6"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.adapter"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.arguing-worlds"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.authority-buffer"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.bulletin"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.calibration-admission"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.capability-zones"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.categorical-state-close-attachment"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.check-candidates"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.code-build-match"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.coverage-check"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.cross-ledger-identity"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.deposit-preflight"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.enact"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.engine"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.evidence-emit"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.find-designation"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.find-expectations"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.find-reconciliation"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.hierarchical-budget-adapter"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.interoceptive-activation"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.interoceptive-commitment"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.interoceptive-manifest"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-belief"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-budget-authority"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-budget-mapping"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-enactment-correspondence"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-portfolio-restriction"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-pre-enact-authorization"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-slow-feedback-capture"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-slow-feedback-completeness"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-slow-feedback-evidence"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-slow-feedback-provenance"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-slow-feedback-retrospective-projection"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-slow-feedback-store"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-slow-feedback-store-v2"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-slow-prior-evidence"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.machine-slow-state-carrier"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.mana-gate"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.measured-a-annotation"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.memory-contract"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.mission-control-graph"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.observation-authority-resolver"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.operational-witness"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.portfolio-action-proposer"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.r17-offline"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.r9-checker"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.rollout"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.run4-route-conformance"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.run4-task-pin"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.scheduled-route-evidence"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.selection-authoring-coupling"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.step-acceptance"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.tripwire-calibration"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.work-target-store"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.work-target-tick"
+  :class :dead
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "no callers outside tests/labs; no AIF term"}
+ {:ns "futon2.aif.full-loop-cli"
+  :class :irrelevant
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "operator CLI entrypoint"}
+ {:ns "futon2.aif.on-demand-entrypoint"
+  :class :irrelevant
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "operator one-click client"}
+ {:ns "futon2.aif.adapters/ants"
+  :class :irrelevant
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "ants-stack port adapter"}
+ {:ns "futon2.aif.adapters/fulab"
+  :class :irrelevant
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "fulab-stack softmax adapter"}
+ {:ns "futon2.aif.adapters/futon5-mca"
+  :class :irrelevant
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "futon5 MCA adapter"}
+ {:ns "futon2.aif.adapters/interest-network"
+  :class :irrelevant
+  :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
+  :note "interest-network port adapter"}
+]
+ :totals {:live-core 2
+           :live-infra 43
+           :relevant-unbound 18
+           :duplicate 0
+           :dead 57
+           :irrelevant 6
+           :rows-total 126
+           :censused-d1-d6 45
+           :runner-root 1
+           :files-total 172
+           :reconciliation "126 rows + 45 censused (D1-D6) + 1 runner root (futon2.aif.full-loop-runner, the live root censused as entry-point throughout) = 172 = ls | wc -l"}
+ :evidence-commands ["ls src/futon2/aif/*.clj src/futon2/aif/adapters/*.clj | wc -l -> 172 (168 top-level + 4 adapters)"
+                "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine (reachability: 46 remainder ns reachable, 77 unreachable, 4 adapters unreachable)"
+                "for f in $(sed 's/-/_/g' /tmp/remainder.txt); do awk '/\\(ns /,/\\(def/{print}' $f.clj | grep -m1 '^  \"'; done (one-line docstring per remainder ns, the classification input)"
+                "comm -23 <(ls src/futon2/aif/*.clj | sed 's/.*aif\\///;s/\\.clj$//' | tr '_' '-') <(sort /tmp/censused.txt) -> 123 remainder ns (the D1-D6 censused set is the 45 names in /tmp/censused.txt)"]}
