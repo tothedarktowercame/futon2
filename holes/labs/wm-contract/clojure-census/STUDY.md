@@ -51,6 +51,34 @@ Results table appended below as each pair (Dn, Tn) completes.
 | :risk | :no-plans (informative) | :not-checked — dedicated OutcomeRiskKL pass queued | :consistent |
 | :ambiguity | :no-plans | :matches (within the identity-A known-failing context) | **discrepancy found and resolved**: census said `step-ambiguity` :live; testimony said built-but-not-reached; rerun showed the sole call site is inside `horizon-g` (enumerating reference) → testimony right, census corrected in place (f3d0417b). Class: **:census-role-error** (new). Note: the census hedged in prose while stretching the role field — prose hedges don't survive joins |
 
+### Preference carriers — D4 (7e85f106) × T4 (6521785d), compared 2026-09-18
+
+| term | P↔S | B↔S | P↔B |
+|---|---|---|---|
+| :C | no OWNED plans: every C node (WM-13/-delivery, WM-06/-delivery, R19) is needs-owner with no owner field; the mission-layer wiring has no DAG node at all — Joe's stated priority is reflected nowhere in assignments (recorded as coordination fact, not routed as a ruling) | **:matches**, and the canonicity question closes: `log-preference-fn` is canonical BY CONSTRUCTION (log-partition over the universe) ↔ `Preference.IsCanonical`; the live `:spec` case is exactly `Preference.constant`; zeroed outcomes ↔ `preference_eq_zero_iff` | :consistent — T4's three built-and-unused couplings all confirmed by call graph; zai independently caught the `live-c` grep pitfall (war_machine hits were the substring `accumulation-live-config`) |
+| :E | :no-plans on the DAG for replacing neutral habit | **:matches** — live E is `Habit.uniform` EXACTLY (nothing writes :habit; log E = 0 in the live posterior) | :consistent |
+
+**The complete C-carrier map (D4's key deliverable):** ONE live C in the
+G (the `:spec` declared constant via `log-preference-fn`); `preferences`
+C_int live at diagnostics grain only; `c-vector` REFRESHED EVERY TICK
+with no live reader (H5b killed its only consumer — live compute, dead
+read); `mission-c` SHADOW behind `FUTON_WM_MISSION_C` default-off,
+attaching risk_mis post-selection — the mission layer exists as post-hoc
+record, structurally unable to move selection; dead: `live-c`,
+`ruled-outcome-c` (**F10 answered: computed-fold, NOT enabled-fold** —
+fold code exists, its enable flag has no live supplier), `c-fold-config`,
+`contextual-preferences`. E carriers: built and declared non-selecting at
+two grains (flat: `:habit-prior-applied? false`; cascade:
+`attach-log-priors` "without selecting or changing a score");
+`strategic-habit/carry` executes on the tick but post-selection,
+accumulate default-off.
+
+**Cross-cutting (D4×T4):** the built-but-unwired family and the
+computed-but-not-consumed family now dominate the preference layer: the
+`:weights` consumer validates input it never receives; `live-c` produces
+exactly that input with zero consumers; `:c-fn-pointwise` (step-indexed
+Cτ) has NO caller anywhere — T1's finding re-derived from the C side.
+
 ### Model quartet — D3 (bfc6f712) × T3 (eae229c7), compared 2026-09-18
 
 | term | P↔S | B↔S | P↔B |
