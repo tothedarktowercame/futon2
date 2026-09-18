@@ -2429,3 +2429,45 @@
           "and a file that is not a daily trace is not corpus"))))
 
 
+
+;; ---------------------------------------------------------------------------
+;; R12 admission block (regression, 2026-09-18)
+;; ---------------------------------------------------------------------------
+;;
+;; c77c802b added the admission receipt to `scan-data` and a consumer to the
+;; renderer, but the render call site hands the renderer a hand-listed subset of
+;; scan-data and `:r12-admission` was not added to that list.  The consumer read
+;; nil, `(:ok nil)` took the refusal branch, and `(name nil)` threw.
+;; generate-war-machine renders inside the runner's selection phase, so that NPE
+;; ended cohort 57 attempt-002 at :not-reached-selection with no action selected.
+;;
+;; These pin both halves: a receipt that arrives is reported, and a receipt that
+;; does not arrive degrades to a labelled gap instead of throwing.
+
+(deftest render-r12-admission-block-test
+  (testing "an admitted receipt is reported as admitted"
+    (let [md (wm/render-war-machine
+              {:r12-apparatus {:available? true :class-count 0}
+               :r12-admission {:ok true
+                               :returned {:return/id "wm-scan/r12-apparatus/t0"}}
+               :now "2026-09-18" :days 14})]
+      (is (.contains md "Admission: admitted"))
+      (is (.contains md "wm-scan/r12-apparatus/t0"))))
+
+  (testing "a refusal names its error code"
+    (let [md (wm/render-war-machine
+              {:r12-apparatus {:available? true :class-count 0}
+               :r12-admission {:ok false :error/code :r12/untied-return}
+               :now "2026-09-18" :days 14})]
+      ;; (name :r12/untied-return) drops the namespace; that is not a loss
+      ;; here, since every code in this block is :r12/... and the block sits
+      ;; under the "R12 Apparatus" heading.
+      (is (.contains md "REFUSED `untied-return`"))))
+
+  (testing "a missing receipt does not throw and is not printed as a refusal"
+    (let [md (wm/render-war-machine
+              {:r12-apparatus {:available? true :class-count 0}
+               :now "2026-09-18" :days 14})]
+      (is (string? md))
+      (is (.contains md "NOT WIRED"))
+      (is (not (.contains md "REFUSED"))))))

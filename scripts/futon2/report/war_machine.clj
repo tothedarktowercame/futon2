@@ -4747,11 +4747,27 @@
       (let [adm (:r12-admission data)]
         (.append sb
                  (str "Admission: "
-                      (if (:ok adm)
+                      (cond
+                        (:ok adm)
                         (str "admitted (return `" (:return/id (:returned adm))
                              "`; Layer 1 diagnostic-only, never value evidence; "
                              "Layer 2 independent evidence: not-available)")
-                        (str "REFUSED `" (name (:error/code adm))
+
+                        ;; No receipt arrived at all.  That is this report
+                        ;; failing to hand the consumer its input, not the
+                        ;; admission boundary refusing the return, and it must
+                        ;; not be printed as a refusal.  It must also not
+                        ;; throw: generate-war-machine renders inside the
+                        ;; runner's selection phase, so an exception here ends
+                        ;; the attempt before any action is selected — which is
+                        ;; what (name nil) on a nil receipt did to attempt-002
+                        ;; of cohort 57 on 2026-09-18.
+                        (nil? adm)
+                        "NOT WIRED (no admission receipt reached the renderer)"
+
+                        :else
+                        (str "REFUSED `" (or (some-> (:error/code adm) name)
+                                             "unspecified")
                              "` — "
                              (if-let [r (some-> adm :check :reason)]
                                (name r) "structural refusal")))
@@ -7106,6 +7122,7 @@
                                       :blocks blocks
                                       :r-criteria r-criteria
                                       :r12-apparatus r12-apparatus
+                                      :r12-admission r12-admission
                                       :vsatarcs-status vsatarcs-status
                                       :judgement judgement
                                       :input-status input-status
