@@ -1011,9 +1011,12 @@
   horizon and over ONE common token universe for the whole candidate list
   (union of q0's support, the preference spec's :want and every token named
   by any candidate's patterns; per-candidate universes would shift G by
-  T·k·ln 2 and are never used). Rates are the zero adjudication rates (the
-  exact P5 identity-observation reduction; horizon-g-sparse refuses
-  non-zero rates itself).
+  T·k·ln 2 and are never used). Rates default to the zero adjudication
+  kernel (the exact P5 identity-observation reduction) and may be DECLARED
+  non-zero via :adjudication-rates on opts (R7, 2026-09-18; typed refusal
+  :invalid-adjudication-rates when they do not cover the scored universe),
+  with an optional declared FIXED :zeta tempering the likelihood
+  (likelihood-precision).
 
   Inputs and where each parameter comes from:
   - T: `(:horizon-steps opts)` — the declared common horizon of the
@@ -1077,7 +1080,25 @@
                           (mapcat :precedence candidate-actions))
                          (into (reduce set/union #{} (keys q0)))
                          (into want))
-            rates (zipmap universe (repeat {:false-neg 0 :false-pos 0}))
+            ;; R7 (2026-09-18): the adjudication rates are no longer
+            ;; hardcoded to zero here. Absent :adjudication-rates the call
+            ;; is EXACTLY what it always was — the all-zero identity kernel,
+            ;; byte-identical. A declared rates map must carry an entry for
+            ;; EVERY token of the scored universe (exact rationals in [0,1];
+            ;; the scorer's own validation adds nothing weaker), else the
+            ;; typed refusal :invalid-adjudication-rates below names the
+            ;; missing tokens — never a silent projection onto zero.
+            declared-rates (:adjudication-rates opts)
+            rates (if (nil? declared-rates)
+                    (zipmap universe (repeat {:false-neg 0 :false-pos 0}))
+                    (if (and (map? declared-rates)
+                             (every? #(contains? declared-rates %) universe))
+                      declared-rates
+                      {:status :missing
+                       :kind :invalid-adjudication-rates
+                       :missing (vec (sort (remove #(contains? declared-rates %)
+                                                   universe)))
+                       :limitation ":adjudication-rates must map EVERY token of the scored universe to {:false-neg fn :false-pos fp} (exact rationals in [0,1])"}))
             ;; WIRE-2: per-policy F_π on the tick. F comes from
             ;; cascade-free-energy/policy-free-energy (the aligned B.2
             ;; equality case), computed once for the whole candidate family
@@ -1121,6 +1142,10 @@
                                   :precedence-fn (constantly (:precedence action))
                                   :horizon T
                                   :spec spec
+                                  ;; R7: the declared FIXED zeta rides the
+                                  ;; opts through to the scorer (default 1,
+                                  ;; byte-identical when absent).
+                                  :zeta (:zeta opts)
                                   :universe universe})
                                 f-raw (when (and (not fe-refusal?)
                                                  (not (contains? excluded-ids (:id action))))
@@ -1241,7 +1266,9 @@
                               (< 1 (count tied))
                               (assoc :g-tie (mapv :cascade-id tied)))))
                         sorted)]
-        (with-meta (vec ranked)
+        (if (= :invalid-adjudication-rates (:kind rates))
+          rates
+          (with-meta (vec ranked)
           {:policy-support/excluded []
            :disposition-risk-events []
            :refused? false
@@ -1249,7 +1276,15 @@
            :cascade-scoring {:universe universe
                              :horizon T
                              :spec spec
-                             :rates :zero-adjudication-identity
+                             :rates (if (every? (fn [t]
+                                                  (and (zero? (:false-neg t))
+                                                       (zero? (:false-pos t))))
+                                                (vals rates))
+                                      :zero-adjudication-identity
+                                      :declared-adjudication-rates)
+                             ;; R7: the declared FIXED zeta the scorer was
+                             ;; asked to temper at (default 1).
+                             :zeta (get opts :zeta 1)
                              ;; WIRE-2: the F_π computation record — the
                              ;; producer's own declared params when it ran,
                              ;; its typed refusal when it did not.
@@ -1257,7 +1292,7 @@
                              (if fe-refusal?
                                {:status :refused :source f-source :reason fe}
                                {:status :computed :source f-source
-                                :params (:params fe)})}})))))
+                                :params (:params fe)})}}))))))
 
 (defn rank-actions
   "Score a sequence of candidate actions and order them by controller-score

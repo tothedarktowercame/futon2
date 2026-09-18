@@ -184,12 +184,11 @@
   {:item :R7
    :quantity :likelihood-precision-zeta
    :gibbs-operator "A(o|s)^ζ, row-renormalized (temper-row/temper-a)"
-   :live-tick {:consumer "futon2.aif.cascade-model-manifest/horizon-g-sparse (the :zeta seam, 2026-09-18)"
-               :via "futon2.aif.efe/rank-cascade-actions"
-               :rates :zero-adjudication-identity
-               :status :identity-path-refuses-non-unit-zeta
+   :live-tick {:consumer "futon2.aif.efe/rank-cascade-actions → cascade-model-manifest/horizon-g-sparse (:adjudication-rates + :zeta on the scoring opts, 2026-09-18)"
+               :rates :caller-declared
+               :status :wired-declared-fixed
                :declared :fixed
-               :reason "efe/rank-cascade-actions still constructs all-zero adjudication rates itself (the next WIRE slice wires real observation-rates into the tick), so the live call runs the identity path — where a ζ ≠ 1 is now the typed refusal :zeta-with-identity-rates, never a silent no-op. The scorer itself (horizon-g-sparse*) tempers the kernel at :zeta on the factorized non-zero-rate path since WIRE-4 (98adff8d)"}
+               :reason "the zero-rate hardcode in rank-cascade-actions is gone: a caller may now declare non-zero adjudication rates (typed refusal :invalid-adjudication-rates if they do not cover the scored universe) and a declared FIXED ζ (threaded to the scorer, byte-identical at ζ=1). What no caller does yet is SOURCE real rates from futon2.aif.observation-rates (built, zero live consumers) — that sourcing is the next WIRE slice; until a production caller passes them, live runs still default to the identity kernel, now as an explicit default rather than a hardcode"}
    :prior {:law :none-declared
            :reason "Parr 2022 B.14–B.19 gamma-prior/fixed-point machinery is pinned in futon2 only for POLICY precision (futon2.aif.policy-precision, R14); a ζ-side prior is a new numerical law and is not chosen here (r7 cascade README: 'No new precision law, floor or gain is chosen here')"}
    :update :none
@@ -203,5 +202,5 @@
    :wiring {:tempered-rates "tempered-rates — effective rates whose token-likelihood IS A_ζ (verified against temper-row of the enumerating observation-distribution); applicable to any consumer of rates: observation-distribution, predict-observations (Q(o|π)), horizon-g and WIRE-4's horizon-g-sparse factorized path"
             :demonstration "RUN-r7-zeta-effect-2026-09-18 (futon2/holes/labs/wm-contract/): recorded run showing a declared FIXED ζ measurably changing Q(o|π) and G through predict-observations and horizon-g at non-zero adjudication rates"
             :status "ζ is DECLARED FIXED (value 1 on the live identity path; the demonstration fixes other values explicitly); no prior/update law is invented"}
-   :gaps ["the live tick's rates: efe/rank-cascade-actions still constructs all-zero adjudication rates itself, so the live call never reaches the tempered factorized path — wiring real observation-rates into the tick is the next WIRE slice (zai-55: not mine to preempt)"
+   :gaps ["no production caller SOURCES real adjudication rates yet: futon2.aif.observation-rates is built with zero live consumers, and until a tick caller passes :adjudication-rates the live run still defaults to the identity kernel (an explicit default now, not a hardcode) — that sourcing is the next WIRE slice"
           "no gamma prior or B.14–B.19-style posterior update for ζ is pinned (R7-2 open; ζ is declared FIXED, which the checklist accepts as such)"]})

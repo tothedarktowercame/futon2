@@ -101,3 +101,31 @@ Remaining gap, unchanged and named in `zeta-declaration`:
 `efe/rank-cascade-actions` still constructs all-zero adjudication rates
 itself, so the LIVE tick has not yet reached the tempered path — wiring real
 observation-rates into the tick is the next WIRE slice.
+
+## Addendum 2 (2026-09-18, later still): the tick path itself — no more hardcoded rates
+
+Per claude-4's dispatch, the zero-rate hardcode at efe/rank-cascade-actions is
+gone. `:adjudication-rates` on the scoring opts declares the kernel (typed
+refusal `:invalid-adjudication-rates` naming missing tokens when it does not
+cover the scored universe — never a silent projection to zero), and `:zeta`
+rides the same opts to the scorer. Absent both, the call is byte-identical to
+what it always was.
+
+Recorded through the full tick path (`efe/rank-actions` →
+`rank-cascade-actions` → `horizon-g-sparse-cert`), same pattern fixture,
+horizon 1:
+
+| call | G | meta :rates | certificate |
+|---|---|---|---|
+| default (no rates) | 8.171700819516008 | :zero-adjudication-identity | :evaluation :identity-A-zero-rates, :zeta 1 |
+| declared rates 1/8·1/16 | 8.046700819516008 | :declared-adjudication-rates | :factorized-nonzero-rates, ambiguity :computed |
+| declared rates + ζ=3 (FIXED) | 8.171108402454397 | :declared-adjudication-rates, :zeta 3 | :zeta 3, :zeta-tempered? true |
+
+The tempered tick-path G equals the sparse scorer run directly on
+`tempered-rates` at the same ζ (asserted at 1e-12 in
+`efe-certificate-test/r7-declared-rates-and-zeta-reach-the-tick-path`).
+
+What remains open, named in `zeta-declaration`: no production caller SOURCES
+real rates from `futon2.aif.observation-rates` yet (built, zero live
+consumers). That sourcing is the next WIRE slice; R7's own clauses — Lean
+statement, aligned runtime, demonstrated effect on Q(o|π) and G — are met.

@@ -7,6 +7,7 @@
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.set :as cset]
             [futon2.aif.cascade-model-manifest :as m]
+            [futon2.aif.likelihood-precision :as lp]
             [futon2.aif.cascade-selection :as cs]
             [futon2.aif.efe :as efe]))
 
@@ -360,3 +361,73 @@
           "a refused G cannot be ranked as finite")
       (is (nil? (:certificate entry))
           "no certificate is fabricated for the refused computation"))))
+
+(defn- r7-setup
+  "Self-contained R7 fixture: the universe rank-cascade-actions actually
+  constructs (precedence tokens + q0 support + want), so declared rates can
+  cover it exactly."
+  []
+  (let [p (m/interpret-pattern "p" "pattern" pattern-text)
+        q0 (m/observed-belief #{"ready"})
+        want #{"evidence"}
+        spec {:want want :evidence #{} :lam 1 :mu 1/2 :zeroed #{}}
+        universe (-> (candidate-tokens [p])
+                     (into (reduce cset/union #{} (keys q0)))
+                     (into want))]
+    {:q0 q0 :spec spec :universe universe :candidates
+     [{:kind :cascade-candidate :id :c1 :precedence [p]}]
+     :p p}))
+
+(deftest r7-declared-rates-and-zeta-reach-the-tick-path
+  ;; R7 (2026-09-18): rank-cascade-actions no longer hardcodes zero rates.
+  ;; Absent :adjudication-rates the call is byte-identical to the identity
+  ;; path; a declared rates map (covering the scored universe) reaches the
+  ;; factorized scorer, and a declared FIXED :zeta tempers it — the effect
+  ;; shows in G, the GCertificate and the scoring meta.
+  (let [{:keys [q0 spec universe p candidates]} (r7-setup)
+        state {:cascade-belief q0}
+        opts {:horizon-steps 1 :cascade-spec spec}
+        base (efe/rank-actions state candidates opts)
+        nz (zipmap universe (repeat {:false-neg 1/8 :false-pos 1/16}))
+        scored (efe/rank-actions state candidates (assoc opts :adjudication-rates nz))
+        tempered (efe/rank-actions state candidates
+                                  (assoc opts :adjudication-rates nz :zeta 3))]
+    ;; absent rates: exactly the identity path it always was
+    (is (= :zero-adjudication-identity
+           (get-in (meta base) [:cascade-scoring :rates])))
+    (is (= :identity-A-zero-rates
+           (:evaluation (:certificate (first base)))))
+    ;; declared rates: the factorized path, meta says so
+    (is (= :declared-adjudication-rates
+           (get-in (meta scored) [:cascade-scoring :rates])))
+    (is (= :factorized-nonzero-rates
+           (:evaluation (:certificate (first scored)))))
+    ;; declared FIXED zeta: G measurably moves, the certificate records it
+    (is (not= (:G-cascade (first scored)) (:G-cascade (first tempered))))
+    (is (= 3 (:zeta (:certificate (first tempered)))))
+    (is (true? (:zeta-tempered? (:certificate (first tempered)))))
+    (is (= 3 (get-in (meta tempered) [:cascade-scoring :zeta])))
+    ;; and the tempered score is exactly the sparse scorer at tempered rates
+    (is (< (Math/abs (- (:G-cascade (first tempered))
+                        (m/horizon-g-sparse
+                         {:rates (lp/tempered-rates nz 3)
+                          :q0 q0 :precedence-fn (constantly [p])
+                          :horizon 1 :spec spec :universe universe})))
+           1e-12))))
+
+(deftest r7-partial-rates-refuse-typed-never-projected-to-zero
+  ;; a declared rates map missing tokens of the scored universe is the
+  ;; typed refusal :invalid-adjudication-rates naming the missing tokens —
+  ;; the old hardcode would have silently scored them at zero.
+  (let [{:keys [q0 universe candidates]} (r7-setup)
+        state {:cascade-belief q0}
+        missing-token (first universe)
+        partial (zipmap (rest universe) (repeat {:false-neg 1/8 :false-pos 1/16}))
+        r (efe/rank-actions state candidates
+                            {:horizon-steps 1
+                             :cascade-spec {:want #{"evidence"} :lam 1 :mu 1/2}
+                             :adjudication-rates partial})]
+    (is (= :missing (:status r)))
+    (is (= :invalid-adjudication-rates (:kind r)))
+    (is (= 1 (count (:missing r))))
+    (is (= missing-token (first (:missing r))))))

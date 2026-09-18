@@ -111,8 +111,8 @@
   (let [d lp/zeta-declaration]
     (is (= :R7 (:item d)))
     (is (= :likelihood-precision-zeta (:quantity d)))
-    (is (= :zero-adjudication-identity (get-in d [:live-tick :rates])))
-    (is (= :identity-path-refuses-non-unit-zeta (get-in d [:live-tick :status])))
+    (is (= :caller-declared (get-in d [:live-tick :rates])))
+    (is (= :wired-declared-fixed (get-in d [:live-tick :status])))
     (is (= :fixed (get-in d [:live-tick :declared])))
     ;; no prior/update law is claimed for ζ
     (is (= :none-declared (get-in d [:prior :law])))
