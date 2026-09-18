@@ -151,3 +151,34 @@
                    (assoc-in [:expected id :produced-from] "FROZEN-CONTEXT.edn")
                    (assoc-in [:expected id :produced-by] "an independent producer"))]
     (is (= result (fx/validate-external! occurrence tagged result)))))
+
+(deftest build-artifact-pulls-text-from-captured-bytes
+  ;; The build-time strengthening ported from the reverted singular
+  ;; duplicate (6eabefe6, claude-4 duplicate finding 2026-09-18): the
+  ;; author declares LINES, never TEXT — text comes from the pinned bytes,
+  ;; and a span outside the authored IF block is refused at BUILD.
+  (let [{:keys [record captured id result occurrence]} (external-fixture)
+        entry-lines (get-in result [:receipts id :acknowledged-clause :lines])
+        built (fx/build-artifact
+               {:library-root base/root
+                :sources (:sources record)
+                :read-bytes captured
+                :author {:id "an-external-producer"}
+                :occurrence occurrence
+                :expected {id {:lines entry-lines}}})]
+    (is (= (get-in result [:receipts id :acknowledged-clause :text])
+           (get-in built [:expected id :acknowledged-clause :text]))
+        "text read from the captured bytes at the declared span")
+    (is (= result (fx/validate-external! occurrence built result))
+        "a built artifact validates the real occurrence's receipts")
+    (is (= :not-authored-clause
+           (:reason (try (fx/build-artifact
+                          {:library-root base/root
+                           :sources (:sources record)
+                           :read-bytes captured
+                           :author {:id "an-external-producer"}
+                           :occurrence occurrence
+                           :expected {id {:lines [(inc (second entry-lines))
+                                                  (inc (second entry-lines))]}}})
+                         (catch clojure.lang.ExceptionInfo e (ex-data e)))))
+        "a span outside the authored IF block is refused at BUILD")))

@@ -15,8 +15,18 @@
   artifact whose :author :role is the finder's or interpreter's own role
   (anything other than :external-expectation-producer) is refused as
   self-supplied. There is no optional-artifact path: a caller with no
-  artifact is refused, never waved through."
-  (:require [clojure.edn :as edn]))
+  artifact is refused, never waved through.
+
+  build-artifact (ported from the singular duplicate 6eabefe6 after
+  claude-4's duplicate finding, 2026-09-18): the author declares LINES,
+  never TEXT — clause text is pulled from the independently captured
+  pattern bytes at the declared span, and a span outside the pattern's
+  authored clause block is refused at BUILD time. :repository-sha256 is
+  an INPUT here (the frozen index digest from FROZEN-CONTEXT.edn), never
+  computed from the pattern bytes — see the two-digest trap below."
+  (:require [clojure.edn :as edn]
+            [clojure.string :as str]
+            [futon2.aif.find-receipt :as find]))
 
 (def schema-id :wm/find-expectations-v1)
 
@@ -145,3 +155,75 @@
       (need! (empty? missing) :expected-pattern-not-selected
              {:patterns missing :selected selected})))
   result)
+
+(defn build-artifact
+  "Build an expectation artifact from INDEPENDENTLY captured bytes — the
+  author declares LINES, never TEXT. Everything this reads exists before
+  interpretation or finder output. INPUT map:
+
+    :library-root  the repository root the occurrence pinned
+    :sources       the occurrence's pinned source set
+    :read-bytes    byte reader over the captured files
+    :author        {:id …} — the ROLE is fixed at
+                   :external-expectation-producer here; anything the caller
+                   tries to smuggle in :role is refused as self-supplied
+    :occurrence    {:target id :repository-sha256 <frozen INDEX digest from
+                   FROZEN-CONTEXT.edn — an INPUT, never recomputed from the
+                   pattern bytes; see the two-digest trap above>
+                   :pinned-at … :source-digests {…}}
+    :expected      {pattern-id {:lines [a b] :route :structured-antecedent
+                                :must-fire? true}} — the author's declared
+                   expectations; TEXT is read from the captured bytes at
+                   the declared lines and any extra author-supplied
+                   :acknowledged-clause is overwritten, never trusted.
+
+  Refuses (typed, law :F2 as this namespace's other refusals):
+  :self-supplied-expectations when :author :role is supplied and is not
+  :external-expectation-producer; :pattern-outside-repository;
+  :not-authored-clause (a span outside the pattern's authored IF block —
+  the author may expect a subspan of IF, not arbitrary text);
+  :invalid-span.
+
+  The returned map conforms to read-artifact's shape, so it round-trips
+  through EDN and the ordinary validate-external! path."
+  [{:keys [library-root sources read-bytes author occurrence expected]
+    :or {expected {}}}]
+  (need! (= :external-expectation-producer
+            (or (:role author) :external-expectation-producer))
+         :self-supplied-expectations {:author author})
+  (let [repository (find/read-repository library-root sources read-bytes)
+        ;; Row :as-of is receipt-shaped (find-receipt's as-of), derived from
+        ;; the independently captured occurrence binding — target sha from
+        ;; the pinned target source, repository digest and pinned-at as
+        ;; captured. NOT a comparison against the receipt's as-of computed
+        ;; by the finder: validate-external! compares the two and a build
+        ;; from the true occurrence context makes them agree.
+        row-as-of {:target-sha256 (get-in occurrence [:target-source :sha256])
+                   :repository-sha256 (:repository-sha256 occurrence)
+                   :pinned-at (:pinned-at occurrence)}
+        text-at (fn [entry [a b :as span]]
+                  (need! (and (= 2 (count span)) (every? pos-int? span)
+                              (<= a b (count (:captured-lines entry))))
+                         :invalid-span {:span span})
+                  (str/join "\n" (subvec (:captured-lines entry) (dec a) b)))
+        rows (into (sorted-map)
+                   (map (fn [[id {:keys [lines route must-fire?]
+                                  :or {route :structured-antecedent}}]]
+                          (let [entry (get-in repository [:entries id])
+                                [lo hi] (:if-lines entry)]
+                            (need! (some? entry) :pattern-outside-repository
+                                   {:pattern id})
+                            (need! (and lo hi (<= lo (first lines) (second lines) hi))
+                                   :not-authored-clause
+                                   {:pattern id :clause :if-clause :span lines})
+                            [id {:clause-kind :if-clause
+                                 :acknowledged-clause
+                                 {:text (text-at entry lines) :lines lines}
+                                 :route route
+                                 :as-of row-as-of
+                                 :must-fire? (not (false? must-fire?))}]))
+                        expected))]
+    {:schema schema-id
+     :author (assoc author :role :external-expectation-producer)
+     :occurrence occurrence
+     :expected rows}))
