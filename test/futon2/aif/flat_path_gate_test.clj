@@ -35,12 +35,19 @@
         (str/join "|" retired)
         ")(?![A-Za-z0-9*+!_?<>=-])")))
 
-(def scanned-roots ["src/futon2" "scripts"])
+(def scanned-roots
+  "All of src, not just src/futon2. It was narrowed to src/futon2 while the
+  ants simulation shared this tree, which left ants.aif.default-mode/select-action
+  outside the gate's view -- the flat law had somewhere to live that this test
+  could not see. ants moved to ../futon2a on 2026-09-18, so the gate now covers
+  every source root here, and a future sibling tree is covered by default
+  instead of by remembering to add it."
+  ["src" "scripts"])
 
 (def exceptions
   "Files where the retired functions still call each other. H6b emptied
   this (2026-09-17): the flat selectors no longer exist anywhere under
-  src/futon2 or scripts."
+  src or scripts."
   #{})
 
 (defn strip-comments [line]

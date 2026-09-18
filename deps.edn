@@ -7,8 +7,7 @@
        common/common {:local/root "../futon1/apps/common"}
        futon3a/meme-store {:local/root "../futon3a"}}
  :aliases
- {:run {:main-opts ["-m" "ants.main"]}
-  :war-machine {:main-opts ["-m" "futon2.report.war-machine-visual"]}
+ {:war-machine {:main-opts ["-m" "futon2.report.war-machine-visual"]}
   :war-machine-text {:main-opts ["-m" "futon2.report.war-machine"]}
   ;; Authoritative real-actuation entrypoint. The historical judgement/fold
   ;; runner remains available only under its honest diagnostic name.
@@ -23,7 +22,7 @@
   :fold-author {:main-opts ["-m" "fold-author"]}
   :wm-outer-loop {:main-opts ["-m" "wm-outer-loop"]}
   :manual-overnight-flights {:main-opts ["scripts/manual_overnight_flights.clj"]}
-  :run-m {:main-opts ["-m" "ants.clj-ants-aif"]}
+  ;; :run/:run-m/:bench/:viz moved to ../futon2a with the ants simulation (2026-09-18)
   :build {:deps {io.github.clojure/tools.build
                  {:mvn/version "0.9.6"}}
           :ns-default build}
@@ -38,6 +37,4 @@
                       babashka/process {:mvn/version "0.5.22"}
                       io.github.cognitect-labs/test-runner
                       {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
-         :exec-fn cognitect.test-runner.api/test}
-  :bench {:main-opts ["-m" "ants.bench"]}
-  :viz {:main-opts ["-m" "ants.visual"]}}}
+         :exec-fn cognitect.test-runner.api/test}}}
