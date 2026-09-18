@@ -1,0 +1,127 @@
+;; T3 — claude-4 testimony for the model quartet (:observe A, transitions B,
+;; initial belief D). Paired with D3. Schema: STUDY.md (futon2 3cc3dcc2).
+;;
+;; The request asks whether there is ANY planned work toward a non-degenerate A,
+;; calling it the premise the ambiguity known-failing hangs on. Checked rather
+;; than recalled, and the premise needs correcting: a non-degenerate A is BUILT,
+;; Lean-cited and theorem-backed. So is a non-degenerate B, and so is a
+;; non-degenerate D. The live path passes the DEGENERATE SPECIAL CASE of all
+;; three, deliberately, and each degeneracy is declared rather than silent.
+;; See :quartet-degeneracy-pattern.
+
+{:testimony :T3
+ :cluster :model-quartet
+ :terms
+ [{:term :observe
+   :no-plans? false
+   :planned
+   [{:var "futon2.aif.likelihood-precision/temper-a"
+     :wm-item "R7"
+     :status :in-progress
+     :note (str "ZETA IS THE PLANNED ROUTE TO A NON-DEGENERATE A. R7 "
+                "(needs-owner, rewritten 2026-09-16 under Joe's ruling P9): "
+                "'Precision ζ of the likelihood A as a Gibbs inverse temperature "
+                "(A_ζ ∝ A^ζ, column-normalised), with its gamma prior and "
+                "posterior update'. Tempering A is exactly a knob on A's entropy, "
+                "which is the ambiguity term's input. The Clojure EXISTS already "
+                "— futon2.aif.likelihood-precision with temper-row, temper-a, "
+                "zeta-declaration — and has ZERO source requirers. Built, unwired. "
+                "Lean side landed today per the ledger (AIF.Terms.temperedLikelihood, "
+                "book B.2.4, sum-to-one + ζ=1 recovery theorems).")
+     :inputs ["an A row" "ζ as Gibbs inverse temperature" "gamma prior + posterior update (not built)"]
+     :depends-on ["a consumer that wires temper-a into the scoring path"]}
+    {:var "name not yet chosen"
+     :wm-item "R3a"
+     :status :planned
+     :note (str "R3a (needs-owner), categorical successor rewritten 2026-09-16 "
+                "under P9: state prediction error ε_πτ = ln A·o_τ + ln B_πτ s_πτ−1 "
+                "+ ln B_πτ+1† s_πτ+1 − ln s_πτ, Parr et al. 2022 eq. 4.13. The "
+                "ledger has :state-prediction-error OPEN on ALL THREE legs — "
+                "'new Lean row needed'. Not started, not owned, no producer named.")
+     :inputs ["A" "B" "s_πτ"]
+     :depends-on ["a new Lean row"]}]
+   :claims-built
+   [{:var "futon2.aif.cascade-model-manifest/token-likelihood" :wm-item "WM-04-observation-contract"
+     :note (str "A(o|s) = ∏_v (v ∈ s ? (v ∈ o ? 1−falseNeg v : falseNeg v) "
+                ": (v ∈ o ? falsePos v : 1−falsePos v)), exact rationals. Cites "
+                "TokenObservation.tokenLikelihood with tokenLikelihood_nonneg, "
+                "_colsum, _checkable (identity kernel iff every rate is 0). This "
+                "IS a non-degenerate A: give it non-zero false-neg/false-pos and "
+                "it has entropy.")}
+    {:var "futon2.aif.cascade-model-manifest/observation-distribution" :wm-item "WM-04-observation-contract"
+     :note "the full observation row over every subset of the universe, sparse, retained entries sum to exactly 1"}]}
+
+  {:term :transitions
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.cascade-model-manifest/pattern-kernel" :wm-item "WM-03-delivery"
+     :note (str "θ ∈ [0,1]: to (state ∪ produces) with mass θ, stay with 1−θ, "
+                "exact rationals; merges to {state 1} when already achieved "
+                "(patternKernel_of_achieved). Non-degenerate whenever θ < 1.")}
+    {:var "futon2.aif.cascade-model-manifest/with-pattern-theta" :wm-item "WM-03-delivery"
+     :note (str "a pattern with no :theta gets the documented default 1, RECORDED "
+                "as :theta-source :documented-default — 'never silent'. Good "
+                "precedent for the declared-neutral-vs-absent problem I flagged "
+                "for E and ambiguity in T1/T2: this one is detectable.")}
+    {:var "futon2.aif.cascade-model-manifest/cascade-kernel" :wm-item "WM-03-delivery"
+     :note "pattern-kernel of the first enabled pattern, identity when none enabled (cascadeKernel_of_noEnabled). The one runtime-correspondence-live-enactment entry in MachineContracts.lean binds here (as acting-order)."}
+    {:var "futon2.aif.cascade-model-manifest/first-enabled" :wm-item "WM-03-delivery"}
+    {:var "futon2.aif.cascade-model-manifest/rollout" :wm-item "WM-05-delivery"
+     :note "PolicyRollout.rolloutState: push q0 forward n steps, step k uses (precedence-fn k)"}]}
+
+  {:term :initial-belief
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.cascade-model-manifest/independent-belief" :wm-item "WM-02-delivery"
+     :note (str "each token established independently with probability p v; subset "
+                "s has mass ∏_v (v ∈ s ? p v : 1 − p v), exact rationals, sums to "
+                "1 over the powerset (independentBelief_sum). This IS a "
+                "non-degenerate D. Reduces to observed-belief exactly when every "
+                "p v ∈ {0,1} (independentBelief_eq_observedBelief).")}
+    {:var "futon2.aif.cascade-model-manifest/observed-belief" :wm-item "WM-02-delivery"
+     :note "point mass {state 1} at the observed token state (observedBelief_sum). THIS is what the live path passes."}]}]
+
+ :quartet-degeneracy-pattern
+ {:finding
+  (str "All three non-degenerate forms are built, Lean-cited and theorem-backed. "
+       "The production path passes the degenerate special case of each, and in "
+       "every case the degeneracy is DECLARED rather than hidden — which is the "
+       "good news, because it means a certificate can see it if the record "
+       "carries it.")
+  :rows
+  [{:term :observe :nondegenerate "token-likelihood with non-zero rates"
+    :live "rates (zipmap universe (repeat {:false-neg 0 :false-pos 0})) in efe/rank-cascade-actions -> identity kernel"
+    :declared-by "tokenLikelihood_checkable; horizon-g-sparse refuses :judgement-rates-not-supported-at-scale on non-zero rates"}
+   {:term :transitions :nondegenerate "pattern-kernel with θ < 1"
+    :live "θ = 1 for any pattern carrying no :theta"
+    :declared-by ":theta-source :documented-default recorded on the pattern"}
+   {:term :initial-belief :nondegenerate "independent-belief"
+    :live "observed-belief (point mass), at war_machine.clj R1 step and in the joint-q0 the cascade decision uses"
+    :declared-by "independentBelief_eq_observedBelief"}]
+  :consequence-for-ambiguity
+  (str "The ambiguity known-failing does NOT hang on A being unbuilt. "
+       "cascade-model-manifest/horizon-g computes the full "
+       "G(π) = Σ_τ [ D_KL[Q(o_τ|π) ‖ C_τ] + Σ_s Q(s_τ|π)·H[A(·|s)] ] — ambiguity "
+       "as conditional entropy of A, present and correct — AND takes C step-indexed "
+       "via :c-fn, its docstring saying 'a constant C is the special case, not the "
+       "definition'. What horizon-g cannot do is scale: it enumerates the powerset. "
+       "horizon-g-sparse reaches mission scale precisely BY assuming identity A, "
+       "which zeroes the ambiguity term, and by taking a constant C_τ. "
+       "So the gap is a SCALABLE non-degenerate observation model, not an "
+       "observation model — and the same reduction is what makes C constant on "
+       "the live path, which ties this cluster to the Cτ hole in T1.")}
+
+ :grounding
+ ["p4ng/wm-walkthroughs/build-loop/closure/closure-dag.json (r79): LF-observe, WM-04-observation-contract, WM-04-machinery, WM-02-delivery, WM-03-delivery, R2, R3, R3a, R4, R7"
+  "futon2/holes/labs/wm-contract/AUDIT-aif-correspondence-ledger.md (rows :observe, :state-prediction-error R3a-cat, :state-belief-update R3-cat, :likelihood-precision R7-ζ; Terms table A/B/D)"
+  "futon2/src/futon2/aif/cascade_model_manifest.clj (observed-belief 114, independent-belief 124, token-likelihood 174, observation-distribution 200, with-pattern-theta 231, pattern-kernel 242, first-enabled 262, cascade-kernel 277, rollout 298, horizon-g 450, horizon-g-sparse 585)"
+  "futon2/src/futon2/aif/likelihood_precision.clj (temper-row 28, temper-a 96, zeta-declaration 111; zero source requirers — checked by grep over src)"
+  "futon2/scripts/futon2/report/war_machine.clj (R1 step observed-belief 5724; joint-q0 observed-belief 6009; rates all-zero in the cascade decision)"
+  "futon2/src/futon2/aif/efe.clj (rank-cascade-actions: rates (zipmap universe (repeat {:false-neg 0 :false-pos 0})))"]
+
+ :caveats
+ ["No :origin :conversation entries — every claim here is from an artifact read or a grep run this turn."
+  "LF-observe is accepted with an open-note of its own: 'No theorem yet for mixed checkable/judgement rates (marginal on checkable tokens).' That is the exact regime a partially non-degenerate A would live in, so it is worth the P<->S look."
+  "I did not check whether live patterns from the pattern registry ever carry an explicit :theta. If some do, B is non-degenerate in production for those and my row above is too strong. A census over real pattern records would settle it — worth a D3 question to zai."]}
