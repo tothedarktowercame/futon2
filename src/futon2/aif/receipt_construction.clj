@@ -10,6 +10,7 @@
             [futon2.aif.close-retention :as retention]
             [futon2.aif.evidence-manifest :as manifest]
             [futon2.aif.find-receipt :as finder]
+            [futon2.aif.find-expectations :as find-expectations]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.interpretation-evidence :as evidence]
@@ -610,7 +611,55 @@
      :construction-kind :receipted-pattern-cascade :selected-action (get-in record [:identity :occurrence :action/value])
      :receipted-construction retained})))
 
+(defn- validate-external-expectations!
+  "WIRE (2026-09-18, EV-find-expectations caller integration): the ordinary
+   construction seam validates its find result against the REQUIRED external
+   F2 expectation artifact when the run carries one.
+
+   opts :external-expectations is
+     {:artifact <path to EDN, or a pre-read artifact map>
+      :occurrence <the independently captured binding
+                   {:target .. :target-source {:path :sha256}
+                    :repository-sha256 .. :pinned-at ..
+                    :source-digests {..}}>}
+
+   PRESENT → the check is REQUIRED: the artifact is read through
+   find-expectations/read-artifact (a path) and validate-external! runs
+   against the construction's own find result. A bad artifact, a mismatched
+   occurrence binding, an unexpected selection or a four-field disagreement
+   is the typed find-expectations refusal — construction NEVER returns a
+   result the external producer contradicts, and there is no path that
+   catches the refusal and proceeds.
+
+   ABSENT → the retained construction records :external-expectations
+   {:status :not-supplied}. The receipt SAYS the external check did not run;
+   absence is recorded on the record, never silent. Whether an occurrence
+   runs with an artifact is the runner's/operator's configuration decision —
+   this seam just never lies about which happened."
+  [result opts]
+  (if-let [cfg (:external-expectations opts)]
+    (let [;; cfg may be the artifact map itself (its own :occurrence is the
+          ;; binding) or {:artifact path-or-map :occurrence binding}.
+          artifact (cond (string? (:artifact cfg)) (find-expectations/read-artifact (:artifact cfg))
+                         (some? (:artifact cfg)) (:artifact cfg)
+                         (= :wm/find-expectations-v1 (:schema cfg)) cfg
+                         :else (throw (ex-info "external expectations config carries no artifact"
+                                               {:construction/refusal :external-expectations-config-invalid
+                                                :config (select-keys cfg [:artifact :occurrence])})))
+          occurrence (or (:occurrence cfg) (:occurrence artifact))
+          found (:find-result (:receipted-construction result))]
+      (find-expectations/validate-external! occurrence artifact found)
+      (update-in result [:receipted-construction]
+                 assoc :external-expectations
+                 {:status :validated
+                  :author (:author artifact)
+                  :expected (count (:expected artifact))}))
+    (update-in result [:receipted-construction]
+               assoc :external-expectations {:status :not-supplied})))
+
 (defn construct! [record read-bytes opts]
-  (construct record read-bytes (or (:interpretation-library-root opts) "/home/joe/code/futon3/library")
-             (previous! (:identity record) (or (:interpretation-history-roots opts) (history-roots (:identity record))))
-             nil))
+  (validate-external-expectations!
+   (construct record read-bytes (or (:interpretation-library-root opts) "/home/joe/code/futon3/library")
+              (previous! (:identity record) (or (:interpretation-history-roots opts) (history-roots (:identity record))))
+              nil)
+   opts))
