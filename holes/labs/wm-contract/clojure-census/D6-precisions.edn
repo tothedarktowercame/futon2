@@ -1,0 +1,166 @@
+{:dispatch :D6,
+ :terms
+ [{:term :likelihood-precision,
+   :lean
+   {:census "DarkTower.AIF.Terms.temperedLikelihood",
+    :carrier
+    "DarkTower.WarMachine/AIF temperedLikelihood (zeta: A^zeta / Z(zeta), sum-to-one, zeta=1 recovery)"},
+   :interpretation
+   {:text
+    "zeta is DECLARED FIXED-VACUOUS on the live tick: at zero adjudication rates A is the identity kernel, no likelihood matrix is evaluated, the ambiguity term is identically 0, so zeta multiplies nothing — the namespace names this rather than leaving it implicit, and refuses to invent a zeta-side prior or update (r7 cascade README ruling)",
+    :status :recorded},
+   :producers
+   [{:var "futon2.aif.likelihood-precision/temper-row (+ temper-a)",
+     :role :test-only,
+     :entry-point
+     "no consumers anywhere (zero requirers, verified in D4 and re-verified this round): the Gibbs inverse-temperature operator exists as pure functions with tests, waiting on a live A to temper (R7-3 open)",
+     :inputs
+     ["row: {state p} stochastic map (or [p...] for temper-a)"
+      "zeta: real exponent"],
+     :output
+     "p -> p^zeta / sum p^zeta per row; typed refusals for non-stochastic rows / bad zeta; zeta=1 recovers the row",
+     :callers
+     ["test/futon2/aif/likelihood_precision_test.clj"
+      "referenced by cascade_model_manifest_test (cross-citations)"],
+     :evidence
+     ["grep -rln 'likelihood-precision' src scripts -> its own file only (re-verified)"
+      "sed -n '28,110p' src/futon2/aif/likelihood_precision.clj (temper-row + temper-a bodies)"]}
+    {:var "futon2.aif.likelihood-precision/zeta-declaration",
+     :role :test-only,
+     :entry-point
+     "OUTPUT-UNREAD: a provenance RECORD (a map value, not a computation) naming the live tick's implicit zeta as :implicit-and-vacuous / :declared :fixed-vacuous, with :prior :none-declared and :update :none; it documents the R7-2/R7-3 gaps",
+     :inputs ["none (declarative)"],
+     :output
+     "the declaration map {:item :R7 :quantity :likelihood-precision-zeta ...}",
+     :callers ["tests" "its own namespace docstring"],
+     :evidence
+     ["sed -n '111,135p' src/futon2/aif/likelihood_precision.clj (zeta-declaration map)"]}],
+   :duplicates [],
+   :irrelevant
+   ["belief.clj's kappa(w) = log2(1+w) — a legacy channel-weight exponent on A rows; the zeta-declaration itself records it as distinct-from zeta"
+    "likelihood_precision's amr-test-support cousins — test scaffolding"],
+   :match
+   {:status :matches,
+    :notes
+    "temper-row/temper-a implement exactly Lean temperedLikelihood (Terms.lean:232): A(o|s)^zeta / sum_o' A(o'|s)^zeta, row-renormalized; the sum-to-one law corresponds to temperedLikelihood_sum and the zeta=1 recovery to temperedLikelihood_one (temper-row returns the row unchanged at zeta=1; refusals are typed where Lean's hypotheses — a stochastic row — fail). So the OPERATOR matches; what does not exist anywhere is a live application of it: no consumer evaluates a likelihood matrix on the tick (D3's identity-A finding), so the match is an unwired implementation, not a live correspondence. The zeta side has no prior/update law in Clojure AND none in DarkTower — both sides leave it declared-fixed."}}
+  {:term :precision,
+   :lean
+   {:census "(channel precision — Gaussian-legacy row, ruling P9)",
+    :carrier
+    "none: no DarkTower declaration covers the per-channel rolling-variance precision; stated, not matched"},
+   :interpretation
+   {:text
+    "R7 channel precision is the ONE ADAPTIVE precision live today: a rolling-variance per-channel estimate updated inside the war-machine R3 inner loop from channel prediction errors, whose weighted errors drive the live belief events; Gaussian-legacy grain per ruling P9",
+    :status :recorded},
+   :producers
+   [{:var
+     "futon2.aif.precision/update-precision-state (+ precision-for, salience-for, weighted-error)",
+     :role :live,
+     :entry-point
+     "OUTPUT-CONSUMED: war-machine generate loop's R3 micro-step inner loop (war_machine.clj:6235) — belief/predict-observation -> fe/channel-prediction-error triples -> update-precision-state -> weighted-error -> belief aggregation events -> apply-arena-belief-events (the live channel-grain belief update, D5); the precision state is carried across ticks via :precision-state on the trace record (6191-6196)",
+     :inputs
+     ["prec-state: per-channel {window variances, precision}"
+      "raw-errors: per-channel typed prediction-error records (present only; absent channels omitted, any refusal refuses the whole update)"
+      "opts {:salience-mode}"],
+     :output
+     "updated precision state + per-channel precision/need salience",
+     :callers
+     ["war-machine R3 inner loop (live, 6235)"
+      "ants port perceive.clj:196 (its own stack)"
+      "selection-gain:268 references precision-for (dead lane)"
+      "tests"],
+     :evidence
+     ["sed -n '6191,6245p' scripts/futon2/report/war_machine.clj (the R3 inner loop: triples -> update-precision-state -> weighted-error)"
+      "grep -rn 'update-precision-state' src scripts -> war_machine.clj:6235 (live) + ants perceive.clj:196"]}
+    {:var "futon2.aif.precision/initial-precision-state (+ defaults)",
+     :role :live,
+     :entry-point
+     "seeds prev-precision-state when the trace record carries none (war_machine.clj:6196 (precision/initial-precision-state)); defaults window 20, min-variance 0.01, initial precision 1.0",
+     :inputs ["none"],
+     :output "the initial per-channel precision state",
+     :callers ["war-machine:6196 (live)"],
+     :evidence
+     ["grep -n 'initial-precision-state' scripts/futon2/report/war_machine.clj -> 6196"]}
+    {:var
+     "futon2.aif.intrinsic-values (R12 apparatus: next-record/apply-update!/rehydrate!)",
+     :role :live,
+     :entry-point
+     "OUTPUT-UNREAD on the tick's decisions: war-machine Scan 12 rehydrates the intrinsic-values atom from XTDB hyperedges (war_machine.clj:6776) and the report renders the R12 apparatus section (4738-4774); the :intrinsic-value hyperparameter's only SCORING consumer is compute-efe's :G-risk subtraction (efe.clj), which is dead on the tick (D1) — so the learned value is computed (by the cron outer loop) and displayed, but no live decision reads it",
+     :inputs
+     ["Beta(alpha beta) posterior per action class"
+      "emission traces + git follow-through counts"],
+     :output "next hyperparameter record + updated atom",
+     :callers
+     ["war-machine scan 12 + report (live, read-only)"
+      "scripts/wm_outer_loop.clj (cron, the updater)"
+      "tests"],
+     :evidence
+     ["grep -n 'intrinsic-values' scripts/futon2/report/war_machine.clj -> 4738-4774 (report), 6776 (scan 12 rehydrate)"]}
+    {:var "scripts/wm_outer_loop.clj (wm-outer-loop)",
+     :role :shadow,
+     :entry-point
+     "an OPERATOR-SCHEDULED cron entrypoint (recommended 0 4 * * *), not part of the tick: reads the trace window, extracts :learn-action-class emissions, derives git follow-through, computes the Beta update via intrinsic-values/next-record, persists code/v05/wm-hyperparameter-update hyperedges to futon1a XTDB",
+     :inputs
+     ["trace window (last N daily wm-trace files)"
+      "git history"
+      "per-class substrate"],
+     :output
+     "one hyperedge per class + applied in-process record + printed summary",
+     :callers ["cron (operator installation)" "tests"],
+     :evidence
+     ["head -25 scripts/wm_outer_loop.clj (the ns docstring: steps 1-7, cadence, Beta(1,1) day-1 contract)"]}],
+   :duplicates
+   ["precision (channel, rolling-variance, adaptive, live) vs policy-precision (gamma on -F-gamma*G, dead) vs likelihood-precision (zeta on A, test-only) — three distinct precision quantities, correctly kept distinct in the zeta-declaration's :distinct-from record"],
+   :irrelevant
+   ["selection-gain's tau — inverse selection temperature for the retired select-action lane (dead, D2); its precision-for reference is to the live channel state but its own output is dead"
+    "machine-slow-* precision/salience carriers — slow-feedback ledger lanes (D7)"
+    "ants/aif/perceive.clj — same precision.clj functions in a different stack's live loop; evidence for the functions' design, not this tick"],
+   :match
+   {:status :not-checked,
+    :notes
+    "There is NO Lean carrier for the channel precision: it is Gaussian-legacy by ruling P9, and DarkTower's ForwardModel has no per-channel variance object at all. Stating what exists without inventing a match: update-precision-state is an exponential/rolling-window variance estimator with floor/cap (0.1/200.0 defaults) and a typed error contract (:prediction-error/v1); its live adaptivity is real and its output is consumed (the R3 loop's weighted errors drive belief events). The zeta and gamma sides each have their own rows in this ledger."}}
+  {:term :policy-precision,
+   :lean
+   {:census "DarkTower.AIF.policyPosterior (:temperature row)",
+    :carrier
+    "DarkTower.WarMachine.PolicyPrecision.policyPrecision / PolicyTemperature"},
+   :interpretation
+   {:text
+    "gamma = 1/beta is the softmax inverse temperature on -F - gamma*G; on the live tick beta arrives DECLARED per cascade-problem (a constant per family, D2) — the adaptive eq-2.7 solve exists in futon2 but is dead, and has NO Lean declaration",
+    :status :recorded},
+   :producers
+   [{:var
+     "futon2.aif.policy-precision (converge-beta, carry-beta, cascade-beta-update, held-state, beta-for)",
+     :role :dead,
+     :entry-point
+     "census closure from D2, restated for this cluster: the eq-2.7 fixed-point solve (Friston 2017 App. B beta gradient flow, closed by checked bisection) is reachable only via war-machine/beta-dark-carry, which is called only from tests and holes/labs/wm-contract lab scripts — never from generate-war-machine or the runner; the live beta is the cascade-problem's declared value, a constant per family",
+     :inputs
+     ["carried beta-prior"
+      "candidate-aligned G and F_pi vectors"
+      "log-priors + placement"],
+     :output "solved/held beta state for trace persistence",
+     :callers
+     ["war-machine beta-dark-carry:595 (dead lane)"
+      "beta-habit (dead)"
+      "tests + lab scripts"],
+     :evidence
+     ["D2 evidence, unchanged: grep -rn 'beta-dark-carry' src scripts holes test -> war_machine.clj defn, tests, lab scripts only"
+      "grep -n 'defn converge-beta' src/futon2/aif/policy_precision.clj -> 95"]}],
+   :duplicates [],
+   :irrelevant
+   ["beta-habit — the RUN4 habit-in-both adapter on the same dead carry (D2/D4)"
+    "default-initial-beta 1.0 — a constant, not machinery"],
+   :match
+   {:status :diverges,
+    :notes
+    "Two halves, both precise: (1) the DECLARED beta matches Lean PolicyTemperature/policyPrecision exactly (positivity, gamma=1/beta on G only — D2's input-by-input pass). (2) The ADAPTIVE half — converge-beta's eq-2.7 fixed point — has NO DarkTower declaration (PolicyPrecision.lean states gamma = 1/beta and precisionWeightedPosterior, never a beta update law), so there is nothing to match against: an unwritten-in-Lean extension sitting on a dead Clojure lane. THE KEY ANSWER (1): across all three precision quantities, exactly ONE is adaptive live — the R7 channel precision (Gaussian-legacy grain). zeta is declared fixed-vacuous (identity A leaves nothing to temper) and gamma is a declared constant per cascade family; neither regressed, they were never adaptive. KEY ANSWER (2): R7 did NOT regress like R14 — update-precision-state runs live in the R3 inner loop with its output consumed by the live belief update (war_machine.clj:6235 -> weighted-error -> belief events)."}}],
+ :evidence-commands
+ ["grep -n 'defn \\|def ' src/futon2/aif/likelihood_precision.clj src/futon2/aif/precision.clj (producer inventory)"
+  "grep -rln 'likelihood-precision' src scripts -> its own file only (zero-requirer re-verification)"
+  "sed -n '28,135p' src/futon2/aif/likelihood_precision.clj (temper-row, temper-a, zeta-declaration)"
+  "grep -n 'temperedLikelihood' /home/joe/code/mathlib4/DarkTower/AIF/Terms.lean -> 86, 232, 250, 257 (definition + sum + one-recovery)"
+  "sed -n '6191,6245p' scripts/futon2/report/war_machine.clj (R3 inner loop: the live adaptive precision update and its consumed output)"
+  "grep -rn 'update-precision-state' src scripts -> war_machine.clj:6235 + ants perceive.clj:196"
+  "grep -n 'intrinsic-values' scripts/futon2/report/war_machine.clj -> 4738-4774, 6776"
+  "head -25 scripts/wm_outer_loop.clj (R12 cron entrypoint contract)"
+  "grep -rn 'beta-dark-carry' src scripts holes test (D2 closure, unchanged)"]}
