@@ -108,6 +108,75 @@
                        {} a)]
     result))
 
+(defn temper-bernoulli
+  "Gibbs tempering at ζ of ONE Bernoulli parameter p (a two-outcome row of
+   A): p ↦ p^ζ / (p^ζ + (1−p)^ζ), i.e. sigmoid(ζ·logit p). This is exactly
+   `temper-row` applied to the row [p, 1−p] — the audited law, not a
+   reimplementation — so its refusals and its ζ=0 declaration (p ∈ (0,1)
+   becomes 1/2; p = 0 stays 0; p = 1 stays 1) are inherited verbatim.
+
+   EXACTNESS: when p is rational and ζ is a nonnegative integer the result
+   is the exact rational p^ζ/(p^ζ+(1−p)^ζ) (verified against temper-row's
+   double path to 1e-12 in the tests) — the exact-rational consumers
+   (token-likelihood, observation-distribution, predict-observations,
+   horizon-g) accept tempered rates unchanged. Non-integer ζ falls back to
+   temper-row's doubles. Returns the tempered p or the typed refusal."
+  [p zeta]
+  (let [r (temper-row [(double p) (- 1.0 (double p))] zeta)]
+    (if (refusal? r)
+      r
+      (if (and (rational? p) (integer? zeta) (not (neg? zeta)))
+        (if (zero? zeta)
+          ;; ζ = 0: temper-row's declared 0^0 := 0 — 0 stays 0, 1 stays 1,
+          ;; every interior p is the fair coin — never 0^0 = 1.
+          (cond (zero? p) 0 (= 1 p) 1 :else 1/2)
+          (let [e    (fn [x] (reduce * 1 (repeat zeta x)))
+                a    (e p)
+                b    (e (- 1 p))]
+            (/ a (+ a b))))
+        (first r)))))
+
+(defn tempered-rates
+  "R7 wiring: the EFFECTIVE adjudication rates whose token-likelihood IS the
+   ζ-tempered likelihood. Feeding the returned map to
+   `futon2.aif.cascade-model-manifest/token-likelihood` (and therefore to
+   observation-distribution, predict-observations and horizon-g/horizon-g-sparse)
+   computes exactly Lean `AIF.Terms.temperedLikelihood` M ζ s o = A(s,o)^ζ / Z(ζ)_s
+   for the token observation model.
+
+   Why the substitution is exact: token-likelihood factorizes over the token
+   universe as A(s,o) = ∏_v Bern_v(p_v(s)) with p_v(s) = 1−falseNeg_v when
+   v ∈ s, else falsePos_v (TokenObservation.tokenLikelihood). Raising the
+   whole product to ζ and normalizing over observations o ∈ 2^U factorizes
+   the normalizer too — Z(ζ)_s = ∑_o A(s,o)^ζ = ∏_v (p_v(s)^ζ + (1−p_v(s))^ζ)
+   — so the tempered distribution is the product of INDEPENDENTLY tempered
+   Bernoullis: A_ζ(o|s) = ∏_v Bern(temper-bernoulli p_v(s) ζ)(o_v). Hence
+   replacing each p_v(s) by its tempered Bernoulli inside the existing
+   token-likelihood formula yields the tempered likelihood exactly; verified
+   against direct temper-row tempering of the enumerating
+   observation-distribution (likelihood-precision-test, tolerance 1e-12).
+
+   ζ = 1 is the identity (temperedLikelihood_one): the returned map equals
+   the input modulo doubles. ζ = 0 declares the uninformative kernel: every
+   interior p_v becomes 1/2 (a fair coin per token), p = 0 stays 0, p = 1
+   stays 1. ζ < 0, non-number ζ, or any rate whose two-outcome row is not
+   stochastic (NaN, outside [0,1]) refuses with the typed
+   temper-row/temper-bernoulli refusal. RATES is {token {:false-neg fn
+   :false-pos fp}} as on the cascade model manifest."
+  [rates zeta]
+  (reduce-kv
+   (fn [acc token {:keys [false-neg false-pos]}]
+     (let [fp' (temper-bernoulli false-pos zeta)]
+       (if (refusal? fp')
+         (reduced (assoc fp' :token token :branch :false-pos))
+         (let [fn' (temper-bernoulli (- 1 false-neg) zeta)]
+           (if (refusal? fn')
+             (reduced (assoc fn' :token token :branch :false-neg))
+             ;; p_v(s) for v ∈ s is 1−fn; its tempered value is fn',
+             ;; so the effective false-neg is 1−temper(1−fn).
+             (assoc acc token {:false-neg (- 1 fn') :false-pos fp'}))))))
+   {} rates))
+
 (def zeta-declaration
   "The named declaration of the likelihood precision the running machine uses
    today (R7-1). This is a record of provenance, not a new law: it names the
@@ -131,6 +200,14 @@
     :legacy-weight-exponent-kappa {:ns "futon2.aif.belief"
                                    :law "κ(w) = log₂(1+w) applied to A rows"
                                    :meaning "legacy channel-weight exponent; retained in belief.clj, not reinterpreted as ζ"}}
-   :gaps ["no consumer on the live tick path evaluates a likelihood matrix, so an applicable consumer for a learned ζ does not exist yet (R7-3 open)"
-          "no gamma prior or B.14–B.19-style posterior update for ζ is pinned (R7-2 open)"
-          "the enumerating horizon-g path with non-zero judgement rates refuses (:judgement-rates-not-supported-at-scale), so no scored A exists anywhere in the tick today"]})
+   :wiring {:tempered-rates "tempered-rates — effective rates whose token-likelihood IS A_ζ (verified against temper-row of the enumerating observation-distribution); applicable to any consumer of rates: observation-distribution, predict-observations (Q(o|π)), horizon-g and WIRE-4's horizon-g-sparse factorized path"
+            :demonstration "RUN-r7-zeta-effect-2026-09-18 (futon2/holes/labs/wm-contract/): recorded run showing a declared FIXED ζ measurably changing Q(o|π) and G through predict-observations and horizon-g at non-zero adjudication rates"
+            :status "ζ is DECLARED FIXED (value 1 on the live identity path; the demonstration fixes other values explicitly); no prior/update law is invented"}
+   :gaps [;; R7-3 CLOSED at the evaluation level 2026-09-18: tempered-rates makes
+          ;; predict-observations and horizon-g evaluate A_ζ, and the recorded run
+          ;; demonstrates the effect on Q(o|π) and G. Still open on the LIVE TICK:
+          ;; the sparse scorer (horizon-g-sparse) gains non-zero-rate scoring from
+          ;; WIRE-4 (in flight); until that lands, the tick still scores at
+          ;; :rates :zero-adjudication-identity where ζ multiplies nothing.
+          "live-tick sparse path: WIRE-4's factorized non-zero-rate scoring not yet committed, so the live tick's own G is still evaluated at the identity kernel where ζ is vacuous (demonstration uses the enumerating horizon-g, which is committed and aligned)"
+          "no gamma prior or B.14–B.19-style posterior update for ζ is pinned (R7-2 open; ζ is declared FIXED, which the checklist accepts as such)"]})

@@ -114,4 +114,127 @@
     (is (= :R14 (get-in d [:distinct-from :policy-precision-gamma :item])))
     (is (contains? (:distinct-from d) :legacy-weight-exponent-kappa))
     ;; the gaps are named, not papered over
-    (is (= 3 (count (:gaps d))))))
+    (is (= 2 (count (:gaps d))))
+    ;; the wiring entry names the demonstration and the fixed status
+    (is (contains? (:wiring d) :tempered-rates))
+    (is (string? (:demonstration (:wiring d))))))
+
+;; ---------------------------------------------------------------------------
+;; R7 demonstrated effect: tempered-rates makes the committed evaluation
+;; consumers (token-likelihood / observation-distribution / predict-observations
+;; / horizon-g) compute the ζ-tempered likelihood A_ζ = A^ζ/Z(ζ) exactly, so a
+;; declared FIXED ζ measurably changes Q(o|π) and G.
+;; ---------------------------------------------------------------------------
+
+(def ^:private demo-rates
+  {"t0" {:false-neg 1/10 :false-pos 1/20}
+   "t1" {:false-neg 1/5 :false-pos 1/10}})
+
+(deftest temper-bernoulli-is-the-two-outcome-row-law
+  (is (< (Math/abs (- 0.25 (lp/temper-bernoulli 0.1 0.5))) 1e-12))
+  (is (< (Math/abs (- 0.9 (lp/temper-bernoulli 0.75 2))) 1e-12))
+  ;; p = 0.5 is the fixed point of every ζ
+  (is (= 0.5 (lp/temper-bernoulli 0.5 3)))
+  ;; ζ = 0: interior p becomes the fair coin; 0 and 1 stay (0^0 := 0, the
+  ;; declared law of temper-row, preserved by the exact path)
+  (is (= 0.5 (lp/temper-bernoulli 0.3 0)))
+  (is (= 0 (lp/temper-bernoulli 0 0)))
+  (is (= 1 (lp/temper-bernoulli 1 0)))
+  ;; exactness: rational p, integer ζ → exact rational, equal to the
+  ;; audited double law within 1e-12
+  (is (= 1/10 (lp/temper-bernoulli 1/4 2)))
+  (is (< (Math/abs (- 0.9 (double (lp/temper-bernoulli 3/4 2)))) 1e-12))
+  ;; refusals inherit temper-row's typing
+  (is (= :negative-zeta (:kind (lp/temper-bernoulli 0.3 -1)))))
+
+(deftest tempered-rates-zeta-one-is-the-identity
+  ;; exact rationals in, exact rationals out: ζ = 1 is the identity map
+  (let [out (lp/tempered-rates demo-rates 1)]
+    (is (= demo-rates out))))
+
+(deftest tempered-rates-sharpens-interior-probabilities
+  ;; ζ > 1 sharpens every branch away from 1/2: an interior false-pos (< 1/2)
+  ;; shrinks further toward 0, and an interior detection probability (1−fn)
+  ;; grows toward 1, so the effective false-neg shrinks too. Integer ζ on
+  ;; rational rates stays exact rational (rational? assertions).
+  (let [out (lp/tempered-rates demo-rates 3)]
+    (is (rational? (:false-pos (get out "t0"))))
+    (is (< 0 (:false-pos (get out "t0")) 1/20))
+    (is (< 0 (:false-neg (get out "t1")) 1/5))
+    (is (> (- 1 (:false-neg (get out "t1"))) (- 1 1/5))))
+  ;; ζ = 0: every interior branch is the fair coin
+  (let [out (lp/tempered-rates demo-rates 0)]
+    (is (= 1/2 (:false-neg (get out "t0"))))
+    (is (= 1/2 (:false-pos (get out "t1"))))))
+
+(deftest tempered-rates-refusals-are-typed
+  (is (= :negative-zeta (:kind (lp/tempered-rates demo-rates -0.5))))
+  (is (= :invalid-zeta (:kind (lp/tempered-rates demo-rates :one))))
+  ;; a rate outside [0,1] makes its two-outcome row non-stochastic
+  (is (= :row-not-stochastic
+         (:kind (lp/tempered-rates {"t0" {:false-neg 1.2 :false-pos 0.1}} 2)))))
+
+(deftest tempered-rates-reproduce-temperedLikelihood-exactly
+  ;; The factorization claim: token-likelihood at tempered rates EQUALS
+  ;; temper-row of the enumerating observation distribution — the Lean
+  ;; temperedLikelihood row A^ζ/Z, computed two independent ways.
+  (let [states [#{} #{"t0"} #{"t1"} #{"t0" "t1"}]]
+    ;; integer ζ keeps tempered-rates exact-rational so observation-distribution
+    ;; accepts it; the non-integer double path is refused by that consumer's
+    ;; rationality invariant and is covered by the temper-bernoulli tests.
+    (doseq [s states
+            zeta [0 1 2 3]]
+      (let [direct (m/observation-distribution demo-rates s)
+            tempered (lp/temper-row direct zeta)
+            via-rates (m/observation-distribution (lp/tempered-rates demo-rates zeta) s)]
+        (is (not (lp/refusal? tempered)))
+        (is (not (lp/refusal? via-rates)))
+        (doseq [o (set (concat (keys direct) (keys via-rates)))]
+          (is (< (Math/abs (- (get tempered o 0) (get via-rates o 0))) 1e-12)
+              (str "state " s " zeta " zeta " obs " o)))))))
+
+(deftest zeta-changes-q-o-pi
+  ;; Q(o|π) through predict-observations: a fixed ζ ≠ 1 measurably changes
+  ;; the predictive distribution; ζ = 1 is exactly the untempered one.
+  (let [q {#{"t0"} 0.6 #{"t1"} 0.4}
+        base (m/predict-observations demo-rates q)
+        z1 (m/predict-observations (lp/tempered-rates demo-rates 1) q)
+        z3 (m/predict-observations (lp/tempered-rates demo-rates 3) q)]
+    (is (not (lp/refusal? base)))
+    (is (not (lp/refusal? z3)))
+    ;; ζ = 1 identity
+    (is (= base z1))
+    ;; ζ = 3 sharpens: the modal observation gains mass
+    (let [key-obs (apply max-key (fn [o] (get base o 0)) (keys base))
+          base-mass (double (get base key-obs 0))
+          z3-mass (double (get z3 key-obs 0))]
+      (is (> z3-mass (+ base-mass 1e-6))
+          (str "obs " key-obs " base " base-mass " z3 " z3-mass)))))
+
+(deftest zeta-changes-g
+  ;; G through the enumerating horizon-g (committed, Lean-aligned): a fixed
+  ;; ζ ≠ 1 changes the expected free energy; ζ = 1 is exactly the untempered G.
+  ;; horizon-g's :c-fn returns a MAP o ↦ c(o) (a missing key counts as 0),
+  ;; not a function — same convention as the manifest's own fixtures.
+  (let [spec (m/preference-spec {:want #{"t0"} :evidence #{} :lam 1 :mu 0 :zeroed #{}})
+        rates demo-rates
+        univ (set (keys rates))
+        cpoint (m/preference-fn spec univ)
+        cmap (into {} (map (fn [o] [o (cpoint o)]))
+                   [#{} #{"t0"} #{"t1"} #{"t0" "t1"}])
+        fire {:id :fire :guard {:status :interpreted :operator :and
+                                :clauses [{:status :interpreted :present #{} :absent #{}}]}
+              :transition {:status :interpreted :operator :union :produces #{"t0"}}
+              :produces #{"t0"}}
+        base {:rates rates :q0 {#{} 1}
+              :precedence-fn (constantly [fire])
+              :horizon 2 :c-fn (constantly cmap)}
+        g1 (m/horizon-g (assoc base :rates (lp/tempered-rates rates 1)))
+        g3 (m/horizon-g (assoc base :rates (lp/tempered-rates rates 3)))
+        g0 (m/horizon-g (assoc base :rates (lp/tempered-rates rates 0)))]
+    (is (number? g1)) (is (number? g3)) (is (number? g0))
+    (is (< (Math/abs (- (double g1) (double (m/horizon-g base)))) 1e-9))
+    (is (not= g1 g3))
+    (is (not= g1 g0))
+    (is (> (Math/abs (- (double g3) (double g1))) 1e-4)
+        "the effect is measurable, not epsilon")))
