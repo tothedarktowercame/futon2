@@ -171,6 +171,25 @@ creativity thesis), new patterns, pattern links, cascade reformation —
 with BMR as the evaluator. Registry `:learning` stays unruled: the module
 is the typed proposal for that ruling to accept, amend, or reject.
 
+## Alignment-spec design brief (Joe, 2026-09-18, fifth sitting)
+
+With the fundamentals in place, the missing piece is alignment with the
+Clojure, via SPECIFICATIONS. Joe's requirements, pinned:
+
+- A spec is a testable claim that the Clojure implements the theory — not
+  a description. It must fail when the implementation departs.
+- Runtime certification is part of the spec: the Clojure emits per-run
+  data that Lean certifies. Nondeterministic computations are in scope —
+  the outlines, shapes, data types and results must match the
+  specification even when the trajectory varies.
+- ABSENCE DETECTION is required: the certificate must reveal when a
+  specified quantity was never computed (Joe's example: whether risk was
+  computed at all — currently it exists only folded inside G; claude-4
+  flagged the same gap).
+- Input: claude-4's inventory of built + planned WM modules (belled
+  2026-09-18, job invoke-1789702335673-22072-c6697b98) joined to the
+  census, so specs bind what exists and what the extension will build.
+
 Remaining from the approved plan: the three categorical-successor
 equation rows.
 
