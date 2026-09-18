@@ -128,16 +128,21 @@
   ;; Non-zero rates: horizon-g-sparse-cert returns the typed refusal with
   ;; :certificate nil — no certificate is fabricated for a computation that
   ;; did not run.
-  (let [{:keys [q0 spec universe]} (fixture)
+  ;; WIRE-4: non-zero rates now SCORE, so the induced refusal here is the
+  ;; factorized path's own typed precondition — a non-empty :zeroed under
+  ;; non-zero rates. Still a refusal, still no certificate.
+  (let [{:keys [q0 universe]} (fixture)
         {:keys [g certificate]}
         (m/horizon-g-sparse-cert {:rates (zipmap universe (repeat {:false-neg 1/8 :false-pos 0}))
                                   :q0 q0
                                   :precedence-fn (constantly [])
                                   :horizon 1
-                                  :spec spec
+                                  :spec {:want #{["t" "evidence"]}
+                                         :evidence #{} :lam 1 :mu 1
+                                         :zeroed #{#{["t" "evidence"]}}}
                                   :universe universe})]
     (is (= :missing (:status g)))
-    (is (= :judgement-rates-not-supported-at-scale (:kind g)))
+    (is (= :zeroed-unsupported-with-rates (:kind g)))
     (is (nil? certificate) "the refusal IS the record"))
   ;; At the ranking layer a refusal (here: missing want) returns the refusal
   ;; itself — no ranked entries, so no certificates anywhere.

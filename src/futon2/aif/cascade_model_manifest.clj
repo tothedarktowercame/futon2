@@ -595,10 +595,6 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
     (cond
       bad {:g {:status :missing :kind :invalid-adjudication-rate
                :token bad :value (get rates bad)} :steps nil}
-      (not (zero-rates? rates))
-      {:g {:status :missing :kind :judgement-rates-not-supported-at-scale
-           :limitation "pointwise identity-A reduction is exact only at zero rates; non-zero judgement rates need the enumerating observation model"}
-       :steps nil}
       (not (and (integer? horizon) (pos? horizon)))
       {:g {:status :missing :kind :invalid-horizon :horizon horizon} :steps nil}
       (not (and (ifn? precedence-fn) (map? q0)))
@@ -606,7 +602,12 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
       (and (nil? c-fn-pointwise) (nil? spec))
       {:g {:status :missing :kind :missing-preference-spec} :steps nil}
       :else
-      (let [lpf (when (nil? c-fn-pointwise) (log-preference-fn spec universe))
+      ;; WIRE-4: zero rates keep the identity-A path EXACTLY as it was
+      ;; (byte-identical numbers, refusals and iteration order); non-zero
+      ;; rates now score by the factorized closed forms instead of
+      ;; refusing — see the factorized body and its docstring below.
+      (if (zero-rates? rates)
+        (let [lpf (when (nil? c-fn-pointwise) (log-preference-fn spec universe))
             point-c (cond
                       c-fn-pointwise (fn [tau o] (let [c ((c-fn-pointwise tau) o)]
                                                    (if (zero? c) ##-Inf (Math/log (double c)))))
@@ -655,7 +656,144 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                             (recur (inc tau) (+ total risk)
                                    (if record?
                                      (conj! steps {:tau tau :risk risk})
-                                     steps))))))))))))))))
+                                     steps)))))))))))))
+        ;; WIRE-4: non-zero adjudication rates score by the FACTORIZED
+        ;; closed forms — O(|universe|) per step, no powerset anywhere:
+        ;;
+        ;;   stepRisk      = Σ_v KL(Bern(qbar_v) ‖ Bern(c_v))
+        ;;   stepAmbiguity = Σ_s q(s) · Σ_v H(Bern(p_v(s)))
+        ;;
+        ;; with qbar_v = m_v·(1−falseNeg_v) + (1−m_v)·falsePos_v (m_v the
+        ;; belief marginal), p_v(s) = (1−falseNeg_v) if v ∈ s else
+        ;; falsePos_v, and c_v = sigmoid(w_v) the per-token marginal of C
+        ;; (log-preference-fn's ln c(o) = u(o) − ln Z with additive u and
+        ;; ln Z = Σ_v ln(1+e^{w_v}) is exactly the log-normalizer of a
+        ;; product of independent Bernoullis; entropy/KL are additive over
+        ;; independent coordinates). Verified against the enumerating
+        ;; horizon-g to ~1e-15 — see the WIRE-4 tests.
+        ;;
+        ;; Preconditions, each a TYPED refusal, never an assumption:
+        ;; - C must come from :spec with an EMPTY :zeroed (a zeroed
+        ;;   outcome makes risk identically infinite under non-zero rates,
+        ;;   because Q then has full support; and a non-empty zeroed-share
+        ;;   correction breaks C's pure product form).
+        ;; - each step's rollout belief must be a POINT MASS or PRODUCT
+        ;;   FORM (the live q0, observed-belief, is a point mass; a theta
+        ;;   < 1 kernel makes the rollout a correlated mixture, which is
+        ;;   refused, not approximated).
+        (let [zeroed (set (:zeroed spec))
+              rates-universe (set (keys rates))]
+          (if c-fn-pointwise
+            {:g {:status :missing :kind :c-form-unsupported-with-rates
+                 :limitation "the factorized path needs C's per-token marginals; a step-indexed pointwise C cannot supply them"}
+             :steps nil}
+            (if (seq zeroed)
+              {:g {:status :missing :kind :zeroed-unsupported-with-rates
+                   :zeroed (count zeroed)
+                   :limitation "a non-empty zeroed set makes risk identically infinite under non-zero rates (Q has full support and puts positive mass on an outcome C assigns zero), and it breaks C's product form"}
+               :steps nil}
+              (let [lpf (log-preference-fn spec rates-universe)]
+                (if (refusal? lpf)
+                  {:g lpf :steps nil}
+                  (let [w (utility-weights spec)
+                        ;; ln c_v = −softplus(−w_v), ln(1−c_v) = −softplus(w_v)
+                        softplus (fn [x] (if (pos? x)
+                                           (+ x (Math/log1p (Math/exp (- x))))
+                                           (Math/log1p (Math/exp x))))
+                        ln-c (into {} (map (fn [v]
+                                             (let [wv (double (get w v 0))]
+                                               [v (- (softplus (- wv)))]))
+                                          rates-universe))
+                        ln-1mc (into {} (map (fn [v]
+                                               (let [wv (double (get w v 0))]
+                                                 [v (- (softplus wv))]))
+                                     rates-universe))
+                        point-mass? (fn [q] (and (= 1 (count q))
+                                                 (= 1 (val (first q)))))
+                        marginals (fn [q]
+                                    (into {}
+                                          (map (fn [v]
+                                                 [v (reduce + (map (fn [[s p]]
+                                                                     (if (contains? s v) p 0))
+                                                                   q))]))
+                                          rates-universe))
+                        product-form? (fn [q ms]
+                                        (every? (fn [[s p]]
+                                                  (= p (reduce *
+                                                              (map (fn [v]
+                                                                     (if (contains? s v)
+                                                                       (get ms v)
+                                                                       (- 1 (get ms v))))
+                                                                   rates-universe))))
+                                                q))
+                        q-outside (fn [q]
+                                    (some (fn [[s p]]
+                                            (when (and (pos? p)
+                                                       (not (set/subset? (set s) rates-universe)))
+                                              s))
+                                          (seq q)))]
+                    (if-let [s (q-outside q0)]
+                      {:g {:status :missing :kind :q-support-outside-c-universe
+                           :state s :universe (count rates-universe)}
+                       :steps nil}
+                      (loop [tau 1 total 0.0 steps (transient [])]
+                        (if (> tau horizon)
+                          {:g (double total) :steps (when record? (persistent! steps))}
+                          (let [q (rollout precedence-fn q0 tau)]
+                            (if (refusal? q)
+                              {:g q :steps nil}
+                              (if-let [s (q-outside q)]
+                                {:g {:status :missing :kind :q-support-outside-c-universe
+                                     :state s :step tau :universe (count rates-universe)}
+                                 :steps nil}
+                                (let [ms (marginals q)
+                                      factorizable? (or (point-mass? q)
+                                                        (product-form? q ms))]
+                                  (if-not factorizable?
+                                    {:g {:status :missing
+                                         :kind :non-factorizable-belief
+                                         :step tau :support (count q)
+                                         :limitation "the factorized risk form needs a point-mass or product-form rollout belief; a correlated mixture (e.g. a theta < 1 kernel) is refused, not approximated"}
+                                     :steps nil}
+                                    (let [risk (reduce + 0.0
+                                                       (map (fn [v]
+                                                              (let [{:keys [false-neg false-pos]} (get rates v)
+                                                                    ;; the observation marginal:
+                                                                    ;; qbar_v = m_v·(1−falseNeg_v) +
+                                                                    ;;         (1−m_v)·falsePos_v
+                                                                    m (double (get ms v))
+                                                                    qbar (+ (* m (- 1.0 (double false-neg)))
+                                                                            (* (- 1.0 m) (double false-pos)))
+                                                                    lc (get ln-c v)
+                                                                    l1 (get ln-1mc v)]
+                                                                (+ (if (pos? qbar)
+                                                                     (* qbar (- (Math/log qbar) lc))
+                                                                     0.0)
+                                                                   (let [qb (- 1.0 qbar)]
+                                                                     (if (pos? qb)
+                                                                       (* qb (- (Math/log qb) l1))
+                                                                       0.0)))))
+                                                            rates-universe))
+                                          amb (reduce + 0.0
+                                                      (map (fn [[s mass]]
+                                                             (let [dm (double mass)]
+                                                               (* dm
+                                                                  (reduce + 0.0
+                                                                          (map (fn [v]
+                                                                                 (let [{:keys [false-neg false-pos]} (get rates v)
+                                                                                       p (double (if (contains? s v)
+                                                                                                   (- 1 false-neg)
+                                                                                                   false-pos))]
+                                                                                   (+
+                                                                                    (if (pos? p) (* -1.0 p (Math/log p)) 0.0)
+                                                                                    (let [q1 (- 1.0 p)]
+                                                                                      (if (pos? q1) (* -1.0 q1 (Math/log q1)) 0.0)))))
+                                                                               rates-universe)))))
+                                                           q))]
+                                      (recur (inc tau) (+ total risk amb)
+                                             (if record?
+                                               (conj! steps {:tau tau :risk risk :ambiguity amb})
+                                               steps)))))))))))))))))))))
 
 (defn horizon-g-sparse
   "Lean PolicyHorizon.horizonEFE at mission scale: exactly the numbers of
@@ -676,7 +814,17 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    (horizonEFE_eq_top_iff), or the first typed refusal. Pure; no wiring.
    WIRE-1: the per-step record this function always had (and discarded)
    is exposed by horizon-g-sparse-cert; this function's return is
-   unchanged."
+   unchanged.
+   WIRE-4: NON-ZERO adjudication rates now score by the FACTORIZED closed
+   forms (stepRisk = Σ_v KL(Bern(qbar_v)‖Bern(c_v)), stepAmbiguity = Σ_s
+   q(s)·Σ_v H(Bern(p_v(s))), both O(|universe|) — no powerset), verified
+   against the enumerating horizon-g to ~1e-13. Preconditions, each a
+   typed refusal rather than an assumption: C from :spec with an EMPTY
+   :zeroed (:zeroed-unsupported-with-rates), and each step's rollout
+   belief a point mass or product form (a theta < 1 kernel's correlated
+   mixture refuses :non-factorizable-belief; independent-belief is the
+   product-form carrier). A step-indexed :c-fn-pointwise cannot supply
+   per-token marginals and refuses :c-form-unsupported-with-rates."
   [m]
   (:g (horizon-g-sparse* m false)))
 
@@ -692,9 +840,15 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    distinction (Certificates.lean rule 2). :c-form is :constant-spec when
    C came from :spec and :step-indexed when :c-fn-pointwise was supplied.
    :rates-all-zero and :universe-size are read off the actual rates map
-   of this call. A refused computation returns {:certificate nil} — no
-   certificate is fabricated for a computation that did not run; the
-   refusal IS the record. Pure; emits, changes nothing."
+   of this call. WIRE-4: :evaluation names the path that ran
+   (:identity-A-zero-rates versus :factorized-nonzero-rates), :rates
+   echoes the rates used, and the factorized path's steps record the
+   ambiguity they COMPUTED (:ambiguity-status :computed, reduction
+   \"factorized-nonzero-rates\") instead of the identity path's
+   reduced-identically-zero record. A refused computation returns
+   {:certificate nil} — no certificate is fabricated for a computation
+   that did not run; the refusal IS the record. Pure; emits, changes
+   nothing."
   [m]
   (let [{:keys [g steps]} (horizon-g-sparse* m true)]
     (if (and (map? g) (contains? g :status))
@@ -705,12 +859,29 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                    {:tau (:tau step)
                                     :risk (:risk step)
                                     :risk-status :computed
-                                    :ambiguity 0
-                                    :ambiguity-status :reduced-identically-zero
-                                    :reduction "identity-A-zero-rates"})
+                                    ;; WIRE-4: the factorized path records the
+                                    ;; ambiguity it COMPUTED per step; the
+                                    ;; identity path's steps carry no
+                                    ;; :ambiguity and keep the
+                                    ;; reduced-identically-zero record.
+                                    :ambiguity (:ambiguity step 0)
+                                    :ambiguity-status (if (contains? step :ambiguity)
+                                                        :computed
+                                                        :reduced-identically-zero)
+                                    :reduction (if (contains? step :ambiguity)
+                                                 "factorized-nonzero-rates"
+                                                 "identity-A-zero-rates")})
                                  (or steps []))
                      :total g
                      :c-form (if (:c-fn-pointwise m) :step-indexed :constant-spec)
+                     ;; WIRE-4 provenance: which evaluation path ran and the
+                     ;; rates it ran with — a run that scored a real
+                     ;; observation model is distinguishable from one that
+                     ;; assumed the identity kernel.
+                     :evaluation (if (zero-rates? (:rates m))
+                                   :identity-A-zero-rates
+                                   :factorized-nonzero-rates)
+                     :rates (:rates m)
                      :rates-all-zero (zero-rates? (:rates m))
                      :universe-size (count (:rates m))}})))
 

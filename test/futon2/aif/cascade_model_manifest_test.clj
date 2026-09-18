@@ -632,14 +632,148 @@
     (is (and (double? g) (Double/isFinite g) (pos? g)))
     (is (< elapsed 5e9) (str "elapsed ns: " elapsed))))
 
-(deftest sparse-g-judgement-rates-refused
-  ;; Non-zero adjudication rates: the typed declared-limitation refusal, not
-  ;; an approximation.
-  (let [r (m/horizon-g-sparse {:rates {:a {:false-neg 1/8 :false-pos 0}}
-                               :q0 {#{} 1} :precedence-fn (constantly [])
-                               :horizon 1 :spec (sparse-spec 1 1 #{})})]
-    (is (= :missing (:status r)))
-    (is (= :judgement-rates-not-supported-at-scale (:kind r))))
+(deftest wire-4-sparse-g-scores-nonzero-rates-by-the-factorized-forms
+  ;; WIRE-4: non-zero adjudication rates now SCORE by the factorized closed
+  ;; forms (the old :judgement-rates-not-supported-at-scale refusal is
+  ;; superseded), and agree with the ENUMERATING horizon-g to 1e-12 over
+  ;; mixed false-neg/false-pos rates, point-mass beliefs and acting
+  ;; cascades. This is the independent check of the closed forms.
+  (doseq [n [2 3 4 5]
+          :let [spec (m/preference-spec (sparse-spec (dec n) 1 #{}))
+                universe (:universe spec)
+                rates (into {}
+                            (map (fn [[t _]] [t (if (even? (hash t))
+                                                   {:false-neg 1/8 :false-pos 1/16}
+                                                   {:false-neg 1/4 :false-pos 0})]))
+                            (zipmap universe (repeat nil)))
+                cmap (m/preference-distribution spec universe)
+                q0 {#{} 1}
+                p1 {:id :p1 :guard {:status :interpreted :operator :and
+                                    :clauses [{:status :interpreted :present #{} :absent #{}}]}
+                    :transition {:status :interpreted :operator :union :produces #{(first (:want spec))}}
+                    :produces #{(first (:want spec))}}
+                p2 {:id :p2 :guard {:status :interpreted :operator :and
+                                    :clauses [{:status :interpreted :present (into #{} (take 1 (:want spec))) :absent #{}}]}
+                    :transition {:status :interpreted :operator :union :produces #{(first (:evidence spec))}}
+                    :produces #{(first (:evidence spec))}}
+                cascades [(constantly [])
+                          (fn [k] (if (even? k) [p1] []))
+                          (fn [k] (if (= k 1) [p2] [p1]))]]]
+    (doseq [prec cascades
+            horizon [1 2 3]]
+      (is (< (Math/abs (- (m/horizon-g-sparse {:rates rates :q0 q0 :precedence-fn prec
+                                               :horizon horizon :spec spec})
+                         (m/horizon-g {:rates rates :q0 q0 :precedence-fn prec
+                                       :horizon horizon :c-fn (constantly cmap)})))
+             1e-12)
+          (str "WIRE-4 n=" n " h=" horizon)))))
+
+(deftest wire-4-zero-rates-stay-byte-identical
+  ;; Requirement 1: the zero-rate identity-A path is unchanged — EXACT
+  ;; equality (not a tolerance) against the enumerating reference at zero
+  ;; rates, which the pre-WIRE-4 path met exactly.
+  (doseq [n [2 3]]
+    (let [spec (m/preference-spec (sparse-spec (dec n) 1 #{}))
+          universe (:universe spec)
+          rates (sparse-rates spec)
+          cmap (m/preference-distribution spec universe)
+          q0 {#{} 1}
+          p1 {:id :p1 :guard {:status :interpreted :operator :and
+                              :clauses [{:status :interpreted :present #{} :absent #{}}]}
+              :transition {:status :interpreted :operator :union :produces #{(first (:want spec))}}
+              :produces #{(first (:want spec))}}]
+      ;; the identity path is verbatim unchanged; its agreement with the
+      ;; enumerating reference is the same 1e-12 bar it always met (the
+      ;; two paths sum in different orders, so exact = is not the pre-WIRE-4
+      ;; behaviour either).
+      (is (< (Math/abs (- (m/horizon-g {:rates rates :q0 q0 :precedence-fn (constantly [p1])
+                                        :horizon 3 :c-fn (constantly cmap)})
+                         (m/horizon-g-sparse {:rates rates :q0 q0 :precedence-fn (constantly [p1])
+                                              :horizon 3 :spec spec})))
+             1e-12)
+          (str "zero-rate path unchanged, n=" n)))))
+
+(deftest wire-4-nonempty-zeroed-refuses-typed-with-nonzero-rates
+  ;; Requirement 2: a non-empty :zeroed makes risk identically infinite
+  ;; under non-zero rates and breaks C's product form — a typed refusal
+  ;; naming it, never a silent drop.
+  (let [r (m/horizon-g-sparse {:rates {:a {:false-neg 1/8 :false-pos 0}
+                                       "0" {:false-neg 1/8 :false-pos 0}}
+                              :q0 {#{} 1} :precedence-fn (constantly [])
+                              :horizon 1 :spec (sparse-spec 1 1 #{#{:nope}})})]
+      (is (= :missing (:status r)))
+      (is (= :zeroed-unsupported-with-rates (:kind r)))
+      (is (= 1 (:zeroed r)) "the refusal names the size of the dropped-set")))
+
+(deftest wire-4-belief-class-and-c-form-preconditions
+  ;; Requirement 3: a product-form belief (independent-belief) scores by
+  ;; the closed forms and matches enumeration; a theta < 1 kernel makes
+  ;; the rollout a correlated mixture — refused typed, not approximated.
+  (let [spec (m/preference-spec (sparse-spec 2 1 #{}))
+        universe (:universe spec)
+        rates (zipmap universe (repeat {:false-neg 1/8 :false-pos 1/16}))
+        cmap (m/preference-distribution spec universe)
+        q0 (m/independent-belief (zipmap universe (repeat 1/2)) universe)]
+    (is (= (m/horizon-g {:rates rates :q0 q0 :precedence-fn (constantly [])
+                         :horizon 2 :c-fn (constantly cmap)})
+           (m/horizon-g-sparse {:rates rates :q0 q0 :precedence-fn (constantly [])
+                                :horizon 2 :spec spec}))
+        "product-form belief matches enumeration exactly")
+    ;; theta < 1: the rollout is a two-point mixture that is NOT product
+    ;; form for |produces| > 1.
+    (let [p1 {:id :p1 :theta 1/2
+              :guard {:status :interpreted :operator :and
+                      :clauses [{:status :interpreted :present #{} :absent #{}}]}
+              :transition {:status :interpreted :operator :union
+                           :produces (into #{} (take 2 universe))}
+              :produces (into #{} (take 2 universe))}
+          r (m/horizon-g-sparse {:rates rates :q0 {#{} 1}
+                                 :precedence-fn (constantly [p1])
+                                 :horizon 1 :spec spec})]
+      (is (= :missing (:status r)))
+      (is (= :non-factorizable-belief (:kind r)))
+      (is (= 1 (:step r)) "the refusal names the step"))
+    ;; a step-indexed pointwise C cannot supply per-token marginals
+    (let [r (m/horizon-g-sparse {:rates rates :q0 {#{} 1}
+                                 :precedence-fn (constantly [])
+                                 :horizon 1 :spec spec
+                                 :c-fn-pointwise (fn [_t] (fn [_o] 1/2))})]
+      (is (= :missing (:status r)))
+      (is (= :c-form-unsupported-with-rates (:kind r))))))
+
+(deftest wire-4-certificate-records-the-evaluation-path-and-rates
+  ;; Requirement 5: the GCertificate says which evaluation path ran and
+  ;; the rates used — identity kernel versus a scored observation model.
+  (let [spec (m/preference-spec (sparse-spec 2 1 #{}))
+        universe (:universe spec)
+        nz (zipmap universe (repeat {:false-neg 1/8 :false-pos 1/16}))
+        q0 {#{} 1}
+        p1 {:id :p1 :guard {:status :interpreted :operator :and
+                            :clauses [{:status :interpreted :present #{} :absent #{}}]}
+            :transition {:status :interpreted :operator :union :produces #{(first (:want spec))}}
+            :produces #{(first (:want spec))}}
+        {:keys [certificate]} (m/horizon-g-sparse-cert
+                               {:rates nz :q0 q0 :precedence-fn (constantly [p1])
+                                :horizon 2 :spec spec})
+        zero-cert (:certificate (m/horizon-g-sparse-cert
+                                 {:rates (sparse-rates spec) :q0 q0
+                                  :precedence-fn (constantly [p1])
+                                  :horizon 2 :spec spec}))]
+    (is (= :factorized-nonzero-rates (:evaluation certificate)))
+    (is (= nz (:rates certificate)) "the rates that ran are echoed")
+    (is (false? (:rates-all-zero certificate)))
+    (is (every? #(= :computed (:ambiguity-status %)) (:steps certificate)))
+    (is (every? #(pos? (:ambiguity %)) (:steps certificate))
+        "non-zero rates have strictly positive ambiguity")
+    (is (every? #(= "factorized-nonzero-rates" (:reduction %)) (:steps certificate)))
+    (is (= (:total certificate)
+           (reduce + 0.0 (mapcat (juxt :risk :ambiguity) (:steps certificate))))
+        "the total is the exact sum of the recorded per-step risks and ambiguities")
+    (is (= :identity-A-zero-rates (:evaluation zero-cert)))
+    (is (true? (:rates-all-zero zero-cert)))
+    (is (every? #(= :reduced-identically-zero (:ambiguity-status %)) (:steps zero-cert)))))
+
+(deftest wire-4-invalid-preference-spec-still-refuses
   ;; an invalid preference spec still refuses like preference-spec
   (let [r (m/horizon-g-sparse {:rates {:a {:false-neg 0 :false-pos 0}}
                                :q0 {#{} 1} :precedence-fn (constantly [])
