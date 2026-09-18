@@ -190,6 +190,55 @@ Clojure, via SPECIFICATIONS. Joe's requirements, pinned:
   2026-09-18, job invoke-1789702335673-22072-c6697b98) joined to the
   census, so specs bind what exists and what the extension will build.
 
+## The joined map (claude-4 inventory bellback, 2026-09-18)
+
+Premise corrected: no per-module Clojure inventory exists. What joins:
+
+- **DAG join surface**: `registry-row` on 14 accepted `LF-*` nodes (+
+  `EV-dirichlet-coordinate-domain`), valued with this ledger's `:id`s
+  directly: :observe :prediction-error :precision :policy-free-energy
+  :belief-update :belief-state :risk :expected-free-energy :depth
+  :temperature :policy-posterior :action :dirichlet-accumulation
+  :model-reduction. (`p4ng/.../closure/closure-dag.json` r79.)
+- **Leg-B prior from the DAG**: every `aligned-clojure` node reads
+  `items-1-2-3-5-hold-4-open` — ALIGNMENT item 4 (live-path check) is open
+  on ALL of them, dated 2026-09-16. Divergence hunting starts there.
+- **The live chain, by name** (Leg B's name-based binding targets):
+  `full-loop-runner` → `war-machine/generate-war-machine` →
+  `efe/rank-cascade-actions` → `cascade-model-manifest/horizon-g-sparse`
+  (risk via `outcome-risk-pointwise`; ambiguity ≡ 0 at zero rates) →
+  `policy/select-action-cascades` → `cascade-selection/selection-posterior`
+  → `cascade-selection/bayes-choice` → `controller-authority/authorize` →
+  `decision-gate/emit!`.
+- **Certifiable surface today**: per candidate `:action :cascade
+  :cascade-id :horizon-steps :G-efe :G-cascade :controller-score` — one
+  scalar G. Joe's example confirmed on the live path: per-τ risk is a
+  local, summed and discarded; zero-rate ambiguity is identically 0 by
+  reduction, so computed-0 and never-computed emit the same bytes. Also
+  unemitted: universe used, C spec+weights, τ steps iterated, C form
+  (pointwise vs constant), the rates map.
+
+## Run-certificate spec v1 (the design, 2026-09-18)
+
+`mathlib4:DarkTower/AIF/Certificates.lean` (darktower `403eb7c51e`, build
+green, zero sorries). Presence is STRUCTURAL: `QuantityStatus` makes
+computed / reduced-identically-zero(named) / declared-neutral distinct
+constructors, since a 0 value cannot carry the distinction. `GCertificate`
+has no optional fields; `GCertificate.valid ε` checks shape (steps =
+horizon), arithmetic (total = Σ recorded steps within IEEE tolerance ε),
+and honesty (a named zero-reduction records zero and is admissible only
+when its precondition held). `riskComputedThroughout` is Joe's
+detectability example as a predicate. Nondeterminism handled per design
+rule 1: validity binds this run's recorded values, never reproducibility.
+
+**Emission work item (Clojure, dispatch-ready):** extend
+`horizon-g-sparse`/`rank-cascade-actions` to fill the certificate: surface
+per-τ (risk, ambiguity, statuses), C form, rates map, universe size, τ
+iterated; `select-action-cascades` contributes β/habit/F with statuses.
+Additive fields on the per-candidate record. Order per claude-4's bite
+list: (1) per-τ emission, (2) C-form marker, (3) E/F status, (4) β
+capture, (5) rates precondition.
+
 Remaining from the approved plan: the three categorical-successor
 equation rows.
 
