@@ -1,0 +1,115 @@
+;; T1 — claude-4 testimony for the G cluster (:G :risk :ambiguity).
+;; Paired with census dispatch D1. Schema: STUDY.md (futon2 3cc3dcc2).
+;;
+;; Honesty note on the shape of this testimony: I hold the closure DAG, which
+;; records OBLIGATIONS (what a node must satisfy to be accepted), not build
+;; plans with producer names. So for this cluster my genuine answer is mostly
+;; ":claims-built, no new producer planned" — the open DAG work for G is
+;; correspondence and C, not another scorer. Two proposals below arose in
+;; conversation with claude-12 TODAY and are not in any artifact; they are
+;; marked :origin :conversation-2026-09-18 so the study does not mistake them
+;; for standing plans.
+
+{:testimony :T1
+ :cluster :expected-free-energy
+ :terms
+ [{:term :G
+   :no-plans? false
+   :planned
+   [{:var "name not yet chosen"
+     :wm-item "WM-10-delivery"
+     :status :planned
+     :note (str "DAG node is needs-owner, unowned. Its acceptance is "
+                "'Canonical finite cascade-G scorer, numeric correspondence and "
+                "candidate-family scores delivered to selection'. The SCORER "
+                "exists and is live (see :claims-built), and selection does now "
+                "consume it via policy/select-action-cascades. So the residual "
+                "work under this node is INDEPENDENT NUMERIC CORRESPONDENCE and "
+                "a compatible C/model — not a new producer var. I am not "
+                "planning to write a new G function.")
+     :inputs ["existing horizon-g-sparse output" "an independent reference computation"]
+     :depends-on ["WM-05-delivery" "WM-06-delivery" "WM-01-numerical-operations"]}
+    {:var "name not yet chosen"
+     :wm-item "WM-10-delivery"
+     :status :planned
+     :origin :conversation-2026-09-18
+     :note (str "PROPOSAL, not a standing plan: horizon-g-sparse returns one "
+                "scalar. Per-tau risk is computed and summed in place, so a run "
+                "emits a number equally consistent with three steps or one. For "
+                "Joe's runtime certificates, G's emission needs per-tau risk and "
+                "the ambiguity term as separate values, plus the universe, the C "
+                "form used (:spec constant vs :c-fn-pointwise) and the rates map "
+                "whose zero-ness is the reduction's precondition.")
+     :inputs ["horizon-g-sparse internals"]
+     :depends-on []}]
+   :claims-built
+   [{:var "futon2.aif.cascade-model-manifest/horizon-g-sparse" :wm-item "WM-10-delivery"
+     :note (str "LIVE on the production decision path: full-loop-runner -> "
+                "report.war-machine/generate-war-machine -> efe/rank-actions "
+                "(rank-cascade-actions) -> horizon-g-sparse -> "
+                "policy/select-action-cascades. Measured today: 67.59372187395377 "
+                "at horizon 3 over a 45-token universe, 3.1 ms, no powerset "
+                "enumeration. Refuses :judgement-rates-not-supported-at-scale on "
+                "non-zero adjudication rates rather than approximating. NOTE: "
+                "MachineContracts.lean currently marks this "
+                "runtime-correspondence-not-live-path, which is wrong in the "
+                "conservative direction.")}
+    {:var "futon2.aif.cascade-model-manifest/horizon-g" :wm-item "WM-10-delivery"
+     :note "the enumerating reference; sparse agrees with it to 1e-12 in its own test"}
+    {:var "futon2.aif.efe/rank-cascade-actions" :wm-item "WM-10-delivery"
+     :note "emits per candidate :G-efe :G-cascade :controller-score :horizon-steps :cascade-id"}]}
+
+  {:term :risk
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.cascade-model-manifest/outcome-risk" :wm-item "LF-risk"
+     :note "LF-risk is accepted on the DAG, registry-row :risk"}
+    {:var "futon2.aif.cascade-model-manifest/outcome-risk-pointwise" :wm-item "LF-risk"
+     :note (str "PRIVATE (defn-). This is the one the live sparse path calls "
+                "per tau. Flagging privacy because a census that enumerates "
+                "public vars will miss it, and it is the actual live risk "
+                "producer.")}]
+   :emission-gap
+   {:detectable? false
+    :note (str "Joe's example answered directly: per-tau risk is bound to a "
+               "local and immediately added into the running total, never "
+               "surfaced. From a run's output you cannot detect whether risk "
+               "was computed.")}}
+
+  {:term :ambiguity
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.cascade-model-manifest/step-ambiguity" :wm-item "WM-10-delivery"
+     :note (str "Built, but NOT reached on the live sparse path: at zero "
+                "adjudication rates A is the identity kernel, so the ambiguity "
+                "term is identically 0 by the declared exact reduction and "
+                "horizon-g-sparse never calls it.")}]
+   :emission-gap
+   {:detectable? false
+    :note (str "Stronger absence than risk: 'ambiguity computed, value 0' and "
+               "'ambiguity not computed' are identical in the output. This is "
+               "the undetectable-absence class Joe named.")}
+   :open-finding
+   (str "No LF-ambiguity node exists on the DAG. The concern lives inside "
+        "LF-expected-free-energy's acceptance text, which is accepted while "
+        "saying: 'Arbitrary ambiguity argument is not bound to canonical "
+        "conditional entropy or the same predicted state/A as risk'. Worth "
+        "checking against the Lean spec — an accepted node carrying an unbound "
+        "ambiguity argument looks like a real P<->S discrepancy.")}]
+
+ :grounding
+ ["p4ng/wm-walkthroughs/build-loop/closure/closure-dag.json (r79): nodes WM-10, WM-10-delivery, WM-05-delivery, LF-risk, LF-expected-free-energy; field sets over all 95 nodes"
+  "p4ng/wm-walkthroughs/build-loop/closure/ALIGNMENT.md (the 5-item aligned ladder; item 4 is the live-path check)"
+  "futon2/src/futon2/aif/cascade_model_manifest.clj (defn lines verified today: outcome-risk 418, step-ambiguity 430, horizon-g 450, preference-spec 359, preference-distribution 399, log-preference-fn 505, preference-fn 555, outcome-risk-pointwise 573, horizon-g-sparse 585)"
+  "futon2/src/futon2/aif/efe.clj (rank-cascade-actions candidate emission)"
+  "futon2/src/futon2/aif/policy.clj (select-action-cascades)"
+  "futon2/src/futon2/aif/full_loop_runner.clj (selection-judge -> wm/generate-war-machine)"
+  "futon2/holes/labs/wm-contract/clojure-census/STUDY.md (schema)"
+  "mathlib4 DarkTower/WarMachine/PolicyHorizon.lean (stepRisk / stepTerm / horizonEFE; 0 sorries)"]
+
+ :caveats
+ ["The DAG records obligations, not build plans. It has no producer-var or entry-fn column, so ':planned with a var name' is not a thing it can ground. Where I say 'name not yet chosen' that is literal, not evasion."
+  "The DAG's own sparse-g field records log-preference-fn :497 and preference-fn :536; actual are 505 and 555. Same drift class the Lean locus rebaser reports. The file:line addressing Joe objected to has rotted the DAG too."
+  "The aligned-clojure status on WM-10-delivery reads 'items-1-2-3-5-hold-4-open' as of 2026-09-16. Item 4 is the live-path check, and I verified today that horizon-g-sparse IS on the live path, so that field is stale in the conservative direction."]}
