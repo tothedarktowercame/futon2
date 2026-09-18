@@ -1,0 +1,156 @@
+;; T6 — claude-4 testimony for the precisions (:likelihood-precision zeta,
+;; :precision channel, beta/gamma machinery). Paired with D6.
+;; Schema: STUDY.md (futon2 3cc3dcc2).
+;;
+;; This cluster breaks the T3-T5 pattern in a useful way. Two of the three
+;; absences here are DECLARED REFUSALS rather than missing call sites:
+;; likelihood_precision.clj's zeta-declaration states :update :none and
+;; :prior {:law :none-declared} with its reason, and select-action-cascades
+;; refuses a defaulted beta. Those are not gaps of the kind I reported in
+;; T3-T5; they are places where someone declined to invent a law.
+
+{:testimony :T6
+ :cluster :precisions
+ :terms
+ [{:term :likelihood-precision
+   :no-plans? true
+   :planned []
+   :planned-note
+   (str "NOT planned, and the absence is deliberate and written down. "
+        "likelihood_precision/zeta-declaration records :update :none and "
+        ":prior {:law :none-declared}, reason: 'Parr 2022 B.14-B.19 gamma-prior/"
+        "fixed-point machinery is pinned in futon2 only for POLICY precision "
+        "(futon2.aif.policy-precision, R14); a zeta-side prior is a new "
+        "numerical law and is not chosen here (r7 cascade README: No new "
+        "precision law, floor or gain is chosen here).' So the posterior update "
+        "loop you asked about is an explicit refusal to invent, not an omission "
+        "— which I think should score differently in the study.")
+   :claims-built
+   [{:var "futon2.aif.likelihood-precision/temper-row" :wm-item "R7"}
+    {:var "futon2.aif.likelihood-precision/temper-a" :wm-item "R7"
+     :note "the Gibbs operator A(o|s)^ζ, row-renormalized"}
+    {:var "futon2.aif.likelihood-precision/refusal?" :wm-item "R7"}
+    {:var "futon2.aif.likelihood-precision/zeta-declaration" :wm-item "R7"
+     :note (str "a provenance record, not a law: names the implicit ζ of the "
+                "live tick as :status :implicit-and-vacuous, :declared "
+                ":fixed-vacuous, and enumerates its own gaps as R7-2 (no prior/"
+                "update pinned) and R7-3 (no consumer evaluates a likelihood "
+                "matrix).")}]
+   :wiring
+   {:consumer-exists? false
+    :blocked-on :the-t3-scale-problem
+    :evidence
+    (str "zeta-declaration's own :gaps say it: 'no consumer on the live tick "
+         "path evaluates a likelihood matrix, so an applicable consumer for a "
+         "learned ζ does not exist yet (R7-3 open)' and 'the enumerating "
+         "horizon-g path with non-zero judgement rates refuses "
+         "(:judgement-rates-not-supported-at-scale), so no scored A exists "
+         "anywhere in the tick today'. ζ cannot be wired until something "
+         "evaluates A, and nothing does because the live rates are all zero and "
+         "the enumerating path refuses at mission scale. Same blocker as T3.")}
+   :convergence-note
+   (str "Worth flagging for your confidence rather than as a finding: "
+        "zeta-declaration is dated today and cites a '2026-09-18 census', and it "
+        "independently reaches the three conclusions I reported in T3 — identity "
+        "A at zero rates, ambiguity identically 0, no likelihood matrix "
+        "evaluated. I did not read it before writing T3. Two witnesses, not one "
+        "restated.")
+   :ownership {:node "R7" :state "needs-owner" :owner nil}}
+
+  {:term :precision
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.precision/*" :wm-item "R7"
+     :note (str "the Gaussian channel-precision lane. I did not enumerate its "
+                "entry fns since the cluster question is about its status, not "
+                "its surface.")}]
+   :status
+   {:on-cascade-path? false
+    :evidence
+    (str "futon2.aif.efe does not require futon2.aif.precision at all, and "
+         "rank-cascade-actions makes no reference to it. Its consumers are "
+         "belief.clj, policy_free_energy.clj, selection_gain.clj, "
+         "war_machine.clj and src/ants/aif/perceive.clj — the Gaussian, flat "
+         "and historical lanes.")
+    :verdict :gaussian-legacy-still-running-not-sunset-in-code
+    :note
+    (str "Answering your either/or: it is Gaussian-legacy per P9 with likelihood "
+         "precision as the declared categorical successor, but it has NOT been "
+         "sunset in code — it still has five requiring namespaces, one of which "
+         "is in the historical src/ants tree. Sunset in role, live in code. "
+         "zeta-declaration keeps the two explicitly apart: belief.clj's "
+         "κ(w) = log₂(1+w) on A rows is recorded as "
+         ":legacy-weight-exponent-kappa, 'retained in belief.clj, NOT "
+         "reinterpreted as ζ'.")}
+   :ownership {:node "R7" :state "needs-owner" :owner nil
+               :note "LF-precision is accepted (registry-row :precision) with no owner"}}
+
+  {:term :policy-precision
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.policy-precision/converge-beta" :wm-item "R14"
+     :note "the B.19 fixed-point solver. NO CALLERS."}
+    {:var "futon2.aif.policy-precision/cascade-beta-update" :wm-item "R14"
+     :note "NO CALLERS."}
+    {:var "futon2.aif.policy-precision/beta-for" :wm-item "R14" :note "NO CALLERS."}
+    {:var "futon2.aif.policy-precision/carry-beta" :wm-item "R14"
+     :note "CALLED — beta_habit.clj:61 and war_machine.clj:595"}
+    {:var "futon2.aif.policy-precision/align-f-pi-and-g" :wm-item "R14"
+     :note "CALLED — beta_habit.clj:43"}
+    {:var "futon2.aif.policy-precision/initial-beta-state" :wm-item "R14"}
+    {:var "futon2.aif.policy-precision/held-state" :wm-item "R14"}
+    {:var "futon2.aif.policy-precision/coerce-state" :wm-item "R14"}
+    {:var "futon2.aif.policy-precision/default-initial-beta" :wm-item "R14"}]
+   :correction-to-the-question
+   {:claim-in-request "D2 found the eq-2.7 solver dead with no Lean"
+    :holds-for :the-solver-only
+    :detail
+    (str "converge-beta, cascade-beta-update and beta-for have no callers — the "
+         "ADAPTATION path is dead, so D2's finding stands for the solver. But "
+         "futon2.aif.policy-precision as a namespace is not dead: seven "
+         "namespaces require it (beta_habit, policy, trace, cascade_free_energy, "
+         "pattern_reliability, likelihood_precision, war_machine), and "
+         "carry-beta and align-f-pi-and-g do run. The precise statement is "
+         "'the beta fixed point is dead, the beta carry/alignment path is live'.")}
+   :is-caller-declared-beta-settled?
+   {:answer :no-declared-pending-approval
+    :evidence
+    (str "select-action-cascades' own docstring: 'There is NO default for β: it "
+         "is not approved, so it must be passed by the caller; a missing or "
+         "non-positive β propagates selection-posterior's typed refusal "
+         ":invalid-temperature.' 'Not approved' reads as unsettled-and-declared, "
+         "not as settled design. Holes.lean:7971 "
+         "policyPrecisionIsGammaFromBeta is still sorry, and its required "
+         "evidence is a run record carrying τ with the β it came from. So the "
+         "design is deliberately parked at 'declare it and record the "
+         "declaration' pending a ruling.")}
+   :ownership {:node "R14" :state "needs-owner" :owner nil
+               :note "LF-temperature is accepted (registry-row :temperature) with no owner; its acceptance text says three laws are conflated with reciprocal beta (see T2)"}}]
+
+ :cluster-pattern-check
+ {:note
+  (str "In T5 I cautioned that my 'built but uncalled' pattern was getting "
+       "flattering and might be an artifact of grepping only qualified calls. "
+       "This cluster is a partial check on that: policy-precision DOES have "
+       "live callers, which my method found, so the method is not systematically "
+       "blind. It also found two genuinely dead functions inside a live "
+       "namespace, which is a finer result than namespace-level counting gives. "
+       "The dynamic-resolution blind spot from T5 still stands.")}
+
+ :grounding
+ ["p4ng/wm-walkthroughs/build-loop/closure/closure-dag.json (r79): R7, R14, LF-precision, LF-temperature — states and owner fields read directly; R7 and R14 both needs-owner with no :owner"
+  "futon2/src/futon2/aif/likelihood_precision.clj (ns docstring; refusal? 24, temper-row 28, temper-a 96, zeta-declaration 111-140 incl. :prior, :update, :distinct-from and :gaps)"
+  "futon2/src/futon2/aif/policy_precision.clj (converge-beta 95, default-initial-beta 384, initial-beta-state 397, coerce-state 406, beta-for 423, held-state 429, align-f-pi-and-g 446, carry-beta 497, cascade-beta-update 638)"
+  "futon2/src/futon2/aif/beta_habit.clj:43,61 (the two live policy-precision call sites)"
+  "futon2/scripts/futon2/report/war_machine.clj:595 (carry-beta call site)"
+  "futon2/src/futon2/aif/efe.clj (no require of futon2.aif.precision; rank-cascade-actions makes no precision reference)"
+  "futon2/src/futon2/aif/policy.clj (select-action-cascades beta docstring: no default, not approved)"
+  "mathlib4 DarkTower/WarMachine/Holes.lean:7971 (policyPrecisionIsGammaFromBeta, sorry)"
+  "futon2/holes/labs/wm-contract/AUDIT-aif-correspondence-ledger.md (:precision R7 row, :likelihood-precision R7-ζ row)"]
+
+ :caveats
+ ["No :origin :conversation entries."
+  "I did not enumerate precision.clj's entry fns; the question was its status, and I answered that. If D6 needs the surface, it is a separate grep."
+  "I have not checked whether beta_habit.clj itself is reached on the live tick — only that it calls policy-precision. If beta_habit is dark, carry-beta's liveness is one hop weaker than I have stated."]}
