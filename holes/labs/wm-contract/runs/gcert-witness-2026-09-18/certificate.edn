@@ -1,0 +1,7 @@
+;; Emitted by futon2.aif.cascade-model-manifest/horizon-g-sparse-cert (WIRE-1, futon2 027b5cca)
+;; on the efe-certificate-test fixture (T=3, zero rates, constant-spec C), 2026-09-18.
+;; Command: clojure -M -e on the fixture inputs of test/futon2/aif/efe_certificate_test.clj.
+;; Scalar :g on the same input: 10.178109687594176 (byte-identical to horizon-g-sparse).
+;; Note: total differs from the exact decimal sum 3 x 3.392703229198059 by one double ulp
+;; (accumulation order), which is what GCertificate.valid's tolerance clause is for.
+{:horizon 3, :steps [{:tau 1, :risk 3.392703229198059, :risk-status :computed, :ambiguity 0, :ambiguity-status :reduced-identically-zero, :reduction "identity-A-zero-rates"} {:tau 2, :risk 3.392703229198059, :risk-status :computed, :ambiguity 0, :ambiguity-status :reduced-identically-zero, :reduction "identity-A-zero-rates"} {:tau 3, :risk 3.392703229198059, :risk-status :computed, :ambiguity 0, :ambiguity-status :reduced-identically-zero, :reduction "identity-A-zero-rates"}], :total 10.178109687594176, :c-form :constant-spec, :rates-all-zero true, :universe-size 4}
