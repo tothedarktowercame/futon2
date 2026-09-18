@@ -69,24 +69,43 @@
         (mapv #(assoc % :_lean-file lean-file :_lean-rel lean-rel)
               (:declarations holes))
         machine-declarations
-        (mapv (fn [contract]
-                (let [d (first (:declarations contract))
-                      module (get-in contract [:source :module])
+        ;; ONE ROW PER DECLARATION, not per contract. This took
+        ;; `(first (:declarations contract))` and silently dropped every
+        ;; declaration after the first in each module -- correct when every
+        ;; contract carried exactly one, which is how it was written. The
+        ;; registry now carries 36 entries over 29 declarations, so 13 of them
+        ;; had no accounting row at all and gen_rnode_dossiers refused to render
+        ;; R4: "binds contract declaration 'predictedOutcome', which has no row
+        ;; ... refusing to render a node whose declarations are outside the
+        ;; readiness accounting". The refusal was right; the accounting was
+        ;; under-populated by this `first` (claude-4, 2026-09-18).
+        ;;
+        ;; Distinct declarations only: one declaration may carry several
+        ;; independently falsifiable LAWS (an entry's identity is
+        ;; (declaration, law) -- claude-12's ruling), but the accounting is per
+        ;; VARIABLE, so several laws about one definition share one row.
+        (->> (:contracts bundle)
+             (mapcat (fn [contract]
+                (let [module (get-in contract [:source :module])
                       source-rel (str "mathlib4/" (str/replace module "." "/") ".lean")
                       source-file (io/file code-root source-rel)
                       contract-rel (str "mathlib4/DarkTower/WarMachine/machine-contracts/"
-                                        (.getName bundle-file))
-                      contract-line (line-containing bundle-file
-                                                     (str "\"name\": \"" (:name d) "\""))]
-                  (when-not contract-line
-                    (throw (ex-info (str "machine declaration absent from verified bundle: " (:name d))
-                                    {:error :machine-contract-pointer-absent :name (:name d)})))
-                  (assoc d
-                         :_local-name (last (str/split (:name d) #"\."))
-                         :_lean-file source-file
-                         :_lean-rel source-rel
-                         :_contract-licence (str contract-rel ":" contract-line))))
-              (:contracts bundle))]
+                                        (.getName bundle-file))]
+                  (mapv (fn [d]
+                          (let [contract-line (line-containing
+                                               bundle-file
+                                               (str "\"name\": \"" (:name d) "\""))]
+                            (when-not contract-line
+                              (throw (ex-info (str "machine declaration absent from verified bundle: " (:name d))
+                                              {:error :machine-contract-pointer-absent :name (:name d)})))
+                            (assoc d
+                                   :_local-name (last (str/split (:name d) #"\."))
+                                   :_lean-file source-file
+                                   :_lean-rel source-rel
+                                   :_contract-licence (str contract-rel ":" contract-line))))
+                        (:declarations contract)))))
+             (reduce (fn [acc d] (if (some #(= (:name %) (:name d)) acc) acc (conj acc d))) [])
+             vec)]
     {:source (:source holes)
      :declarations (vec (concat holes-declarations machine-declarations))
      :machine-manifest manifest
