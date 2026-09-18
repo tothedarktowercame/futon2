@@ -69,7 +69,7 @@ out of scope). "Producer" = what the live path calls today.
 | :policy-set | R6 | OK (limited claim, declared) | STALE (production-trace admission 09-12) | STALE | |
 | :depth | R13 | OK* | STALE (machinery-capture 09-12) | STALE | effective-horizon wiring changed 09-09 |
 | :temperature | R14 | OK* | STALE (trace row 09-04) | STALE | β now caller-DECLARED in select-action-cascades — post-dates all evidence |
-| :policy-posterior | R6 | OK* | STALE | STALE | selection-posterior σ(ln E − F − G/β) is the current law; old admission binds prior producer |
+| :policy-posterior | R6 | OK* — **census corrected 2026-09-18 (T2)**: three Lean laws exist (base OutcomeRiskKL; tempered PolicySelection γ=1/β; census wrapper); production implements the TEMPERED law; comparisons bind `AIF.Selection.temperedPolicyPosterior` (darktower 99130e5fc3, core re-pinned fd8d5f8ee0) | STALE | STALE | selection-posterior cites selectionPosterior_finite; β↔γ bridge owned: H3 policyPrecisionIsGammaFromBeta, discharge = certificate betaDeclared |
 | :action | R16 | OK* | STALE — 09-12 witness REFUTES old live selector | STALE | bayes-choice over first acting pattern is the current law; the refuting witness is about retired code |
 | :dirichlet-accumulation | R17 | OK* | OPEN (waiting-row, DirichletLearning.accumulate) | STALE (3-tick IEEE 09-12) | |
 | :model-reduction | R12 | OK* | OPEN | STALE (BMR witness) | |
