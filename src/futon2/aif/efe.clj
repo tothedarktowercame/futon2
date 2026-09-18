@@ -29,6 +29,7 @@
    ambiguity is Gaussian observation entropy and risk is outcome divergence
    from C. The separately named controller controls are not EFE terms."
   (:require [clojure.set :as set]
+            [futon2.aif.cascade-free-energy :as cascade-free-energy]
             [futon2.aif.cascade-model-manifest :as cascade-manifest]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
@@ -1063,6 +1064,41 @@
                          (into (reduce set/union #{} (keys q0)))
                          (into want))
             rates (zipmap universe (repeat {:false-neg 0 :false-pos 0}))
+            ;; WIRE-2: per-policy F_π on the tick. F comes from
+            ;; cascade-free-energy/policy-free-energy (the aligned B.2
+            ;; equality case), computed once for the whole candidate family
+            ;; at the same q0, tau = the declared horizon, rates and
+            ;; universe G was scored over. observed-tokens are the spec's
+            ;; :evidence set — the observed evidence tokens the cascade
+            ;; decision already carries (the same set the coverage term's
+            ;; |evidence ∩ obs| reads); there is no other observed-token
+            ;; source at this call site.
+            f-source :cascade-free-energy/policy-free-energy
+            observed-tokens (set (or (:evidence spec) #{}))
+            fe (cascade-free-energy/policy-free-energy
+                {:q0 q0
+                 :candidates (vec candidate-actions)
+                 :tau T
+                 :observed-tokens observed-tokens
+                 :rates rates})
+            fe-refusal? (and (map? fe) (contains? fe :status))
+            f-by-id (when-not fe-refusal? (:f fe))
+            ;; A refused F is NEVER silently defaulted to 0: the candidate
+            ;; whose F is a typed refusal is excluded from the ranking and
+            ;; recorded with its reason under :f-exclusions. A global
+            ;; producer refusal excludes the whole family the same way.
+            f-exclusions
+            (if fe-refusal?
+              (mapv (fn [a] {:cascade-id (:id a) :source f-source :reason fe})
+                    candidate-actions)
+              (into []
+                    (keep (fn [a]
+                            (when-some [v (get f-by-id (:id a))]
+                              (when (and (map? v) (contains? v :status))
+                                {:cascade-id (:id a) :source f-source
+                                 :reason v}))))
+                    candidate-actions))
+            excluded-ids (set (map :cascade-id f-exclusions))
             scored (map (fn [action]
                           (let [{:keys [g certificate]}
                                 (cascade-manifest/horizon-g-sparse-cert
@@ -1071,7 +1107,10 @@
                                   :precedence-fn (constantly (:precedence action))
                                   :horizon T
                                   :spec spec
-                                  :universe universe})]
+                                  :universe universe})
+                                f (when (and (not fe-refusal?)
+                                             (not (contains? excluded-ids (:id action))))
+                                    (get f-by-id (:id action)))]
                             (cond-> {:action action
                                      :cascade true
                                      :cascade-id (:id action)
@@ -1079,6 +1118,13 @@
                                      :G-efe g
                                      :G-cascade g
                                      :controller-score (if (number? g) g ##Inf)}
+                              ;; WIRE-2: the computed F_π reaches selection as
+                              ;; :f (select-action-cascades' σ(ln E − F − G/β)).
+                              ;; Attached exactly when it was computed for this
+                              ;; candidate; a refused F excludes the candidate
+                              ;; above instead of defaulting here.
+                              (number? f)
+                              (assoc :f f)
                               ;; WIRE-1 emission slice: the GCertificate
                               ;; record (Lean DarkTower/AIF/Certificates.lean)
                               ;; for this candidate's G — present exactly when
@@ -1097,8 +1143,37 @@
                                                        :declared
                                                        :not-in-scoring-opts)}
                                             :habit {:value 1 :status :declared-neutral}
-                                            :f {:value 0 :status :declared-neutral})))))
-                        candidate-actions)
+                                            ;; WIRE-2 F provenance: the
+                                            ;; certificate says WHERE F came
+                                            ;; from, so "F computed = 0.0"
+                                            ;; (:status :computed with the
+                                            ;; source) is distinguishable from
+                                            ;; "F not on this entry"
+                                            ;; (:status :not-attached with the
+                                            ;; reason). Never a bare 0.
+                                            :f
+                                            (if (number? f)
+                                              {:value f
+                                               :status :computed
+                                               :source f-source
+                                               :tau T
+                                               :observed-tokens observed-tokens}
+                                              {:value nil
+                                               :status :not-attached
+                                               :source f-source
+                                               :reason
+                                               (cond
+                                                 fe-refusal? fe
+                                                 (contains? excluded-ids (:id action))
+                                                 (:reason (some #(when (= (:id action)
+                                                                          (:cascade-id %))
+                                                                   %)
+                                                                f-exclusions))
+                                                 :else
+                                                 {:kind :no-f-entry
+                                                  :limitation "F was not computed for this candidate"})}))))))
+                        (remove #(contains? excluded-ids (:id %))
+                                candidate-actions))
             sorted (sort-by :controller-score scored)
             rank-of (into {} (map-indexed (fn [i g] [g (inc i)]))
                           (distinct (map :controller-score sorted)))
@@ -1116,10 +1191,19 @@
           {:policy-support/excluded []
            :disposition-risk-events []
            :refused? false
+           :f-exclusions f-exclusions
            :cascade-scoring {:universe universe
                              :horizon T
                              :spec spec
-                             :rates :zero-adjudication-identity}})))))
+                             :rates :zero-adjudication-identity
+                             ;; WIRE-2: the F_π computation record — the
+                             ;; producer's own declared params when it ran,
+                             ;; its typed refusal when it did not.
+                             :free-energy
+                             (if fe-refusal?
+                               {:status :refused :source f-source :reason fe}
+                               {:status :computed :source f-source
+                                :params (:params fe)})}})))))
 
 (defn rank-actions
   "Score a sequence of candidate actions and order them by controller-score

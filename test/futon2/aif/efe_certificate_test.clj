@@ -80,7 +80,16 @@
       (is (= {:value nil :status :not-in-scoring-opts} (:beta-declared cert))
           "beta is not in R5 scoring opts today; the absence is recorded, not defaulted")
       (is (= {:value 1 :status :declared-neutral} (:habit cert)))
-      (is (= {:value 0 :status :declared-neutral} (:f cert))))))
+      ;; WIRE-2: F is now computed on the tick (not a declared-neutral 0).
+      ;; This fixture declares no :evidence, so the observed token set is
+      ;; empty and the identity observation of nothing is impossible under
+      ;; every rollout: F = ##Inf — COMPUTED and provenance-stamped.
+      (is (= {:value ##Inf
+              :status :computed
+              :source :cascade-free-energy/policy-free-energy
+              :tau T
+              :observed-tokens #{}}
+             (:f cert))))))
 
 (deftest g-byte-identical-to-pre-slice
   (let [{:keys [q0 spec candidates p] :as fx} (fixture)
@@ -158,3 +167,94 @@
              :reduction "identity-A-zero-rates"}]
            (:steps certificate))
         "iteration stopped at the infinite step; no later steps are fabricated")))
+
+;; ===== WIRE-2: per-policy F on the tick =====
+;; F_π comes from cascade-free-energy/policy-free-energy at the same q0,
+;; tau, rates and universe G was scored over; the observed tokens are the
+;; cascade decision's own evidence set. A computed F reaches the ranked
+;; entry as :f and the certificate records WHERE it came from; a refused F
+;; excludes the candidate with a recorded reason — never a silent 0.
+
+(def wire-pattern
+  {:id :p :produces #{"clean"}
+   :guard {:status :interpreted
+           :clauses [{:status :interpreted
+                      :present #{"ready"}
+                      :absent #{"clean"}}]}})
+
+(deftest computed-f-is-attached-with-provenance-and-distinct-from-absence
+  (let [q0 (m/observed-belief #{"ready"})
+        spec {:want #{["t" "evidence"]} :evidence #{"ready"} :lam 1 :mu 1 :zeroed #{}}
+        candidates [{:kind :cascade-candidate :id :c1 :precedence [wire-pattern]}]
+        ranked (efe/rank-cascade-actions {:cascade-belief q0}
+                                         candidates
+                                         {:horizon-steps 1 :cascade-spec spec})
+        entry (first ranked)
+        f-cert (:f (:certificate entry))]
+    ;; the firing pattern leaves the observed state: F is computed ##Inf
+    ;; (a contradicted prediction at theta = 1), NOT defaulted.
+    (is (= ##Inf (:f entry)) ":f on the entry is the computed value")
+    (is (= ##Inf (:value f-cert)))
+    (is (= :computed (:status f-cert)) "computed is stated in the certificate")
+    (is (= :cascade-free-energy/policy-free-energy (:source f-cert))
+        "the certificate names WHERE F came from")
+    ;; Requirement 3, the acceptance point: a computed 0.0 and an absent F
+    ;; are distinguishable — the shapes share no status value. A candidate
+    ;; whose F was NOT computed (see the exclusion test) carries
+    ;; :status :not-attached with a reason, never {:value 0 :status ...}.
+    (is (not= :declared-neutral (:status f-cert)))
+    (is (contains? f-cert :source) "absence-shaped records also carry :source")
+    ;; and the honest zero case: the empty cascade stays on the observation,
+    ;; so its F is computed 0.0 — visible as :computed, not as a default.
+    (let [ranked0 (efe/rank-cascade-actions {:cascade-belief q0}
+                                            [{:kind :cascade-candidate :id :c0
+                                              :precedence []}]
+                                            {:horizon-steps 1 :cascade-spec spec})
+          f0 (:f (:certificate (first ranked0)))]
+      (is (= 0.0 (:value f0)))
+      (is (= :computed (:status f0))
+          "F computed = 0.0 is distinguishable from F defaulted to 0: the status differs"))))
+
+(deftest refused-f-excludes-the-candidate-with-a-recorded-reason
+  ;; A pattern with no interpretation makes policy-free-energy's rollout
+  ;; refuse FOR THAT CANDIDATE only. The candidate is excluded from the
+  ;; ranking (never scored with F = 0) and the reason is recorded in the
+  ;; result meta; the computable sibling is unaffected.
+  (let [q0 (m/observed-belief #{"ready"})
+        spec {:want #{["t" "evidence"]} :evidence #{"ready"} :lam 1 :mu 1 :zeroed #{}}
+        candidates [{:kind :cascade-candidate :id :cbad
+                     :precedence [{:id :missing :status :missing}]}
+                    {:kind :cascade-candidate :id :c0 :precedence []}]
+        ranked (efe/rank-cascade-actions {:cascade-belief q0}
+                                         candidates
+                                         {:horizon-steps 1 :cascade-spec spec})
+        exclusions (:f-exclusions (meta ranked))]
+    (is (= [:c0] (mapv :cascade-id ranked))
+        "the refused candidate is not in the ranking")
+    (is (= 1 (count exclusions)))
+    (is (= :cbad (:cascade-id (first exclusions))))
+    (is (= :cascade-free-energy/policy-free-energy (:source (first exclusions))))
+    (is (= :missing (:status (:reason (first exclusions))))
+        "the typed refusal itself is the recorded reason")
+    (is (= :missing-pattern-interpretation (:kind (:reason (first exclusions))))
+        "the refusal kind names the missing interpretation")
+    ;; the whole run's F computation is visible in the scoring meta
+    (is (= :computed (get-in (meta ranked) [:cascade-scoring :free-energy :status])))))
+
+(deftest global-f-refusal-refuses-the-family-never-a-silent-zero
+  ;; A malformed candidate list (non-vector precedence) makes the producer
+  ;; refuse for the whole family: no candidate is ranked with a defaulted
+  ;; F — the refusal is the record.
+  (let [q0 (m/observed-belief #{"ready"})
+        spec {:want #{["t" "evidence"]} :evidence #{"ready"} :lam 1 :mu 1 :zeroed #{}}
+        ranked (efe/rank-cascade-actions
+                {:cascade-belief q0}
+                [{:kind :cascade-candidate :id :cbad :precedence (seq [wire-pattern])}
+                 {:kind :cascade-candidate :id :c0 :precedence []}]
+                {:horizon-steps 1 :cascade-spec spec})
+        meta' (meta ranked)]
+    (is (= [] ranked) "no candidate is ranked with a defaulted F")
+    (is (= 2 (count (:f-exclusions meta'))))
+    (is (every? #(= :invalid-candidates (:kind (:reason %)))
+                (:f-exclusions meta')))
+    (is (= :refused (get-in meta' [:cascade-scoring :free-energy :status])))))
