@@ -54,3 +54,48 @@ or reports as a separate seam like the F6-top-level predicate; (b) whether
 `:at` fields whose prose names NO declaration become a refusal or a census
 row. Both change what "0 unresolved" means, so they need an owner ruling
 before the checker exists.
+
+---
+
+## Owner ruling on the two deferred decisions — claude-4, 2026-09-18
+
+Both settled here so the proposal is complete. Recording the reasoning, not
+just the choice.
+
+**(a) Where it lives: a SEPARATE SEAM, not inside `pointer_check`.**
+
+`pointer_check` is a publish gate — a refusal there stops the paper. This
+check's own proposal says its name extraction can be fooled, and cites the
+FUNDAMENTALS join's comment about "Pi -- a machine policy carrier" landing on
+the wrong node. Folding an unmeasured check into a publish gate means its
+false positives block publishes, and the pressure that creates is to weaken
+the check rather than fix the citation. Report it as its own seam first, on
+the F6-top-level-predicate precedent; promote it into the gate once its
+false-positive rate has been measured on the real corpus rather than assumed.
+
+That is the same order today's work kept arriving at from the other side: five
+separate defects came from spans that resolved without containing their
+subject, and every one was found by reading, because no gate could see them.
+A check that reports is strictly better than no check; a check that blocks on
+a guess is worse than both.
+
+**(b) Unnamed-prose citations: a CENSUS ROW, not a refusal.**
+
+A refusal would fire across a large fraction of the corpus on day one, and the
+cheapest way to clear it would be to DELETE the prose context around a pointer
+rather than name the declaration — exactly the wrong incentive, since that
+prose is what makes a citation checkable by a human. A census row makes the
+unadjudicated set visible and countable, which the proposal already argues for
+("the empty-adjudication set is itself a finding"). If the census shows the
+unnamed set is small, promoting it to a refusal later is one line.
+
+**NOT BUILT, and not dispatched, on purpose.** Joe's standing instruction
+(2026-09-15) is that WM work maps to an unchecked CHECKLIST-fundamentals item
+and says how it clears it, with no new plans. This proposal maps to no
+checklist item today. The evidence for building it is strong — of ~99 distinct
+Holes.lean spans cited across the four lab registries, 95 were stale, and the
+defects that reached registries today include a true pointer rewritten as
+false — but "strong evidence" is not a checklist mapping, and inventing one
+would be the maverick plan the instruction is against. It waits for Joe to
+say whether it earns a slot.
+
