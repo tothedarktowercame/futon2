@@ -156,6 +156,21 @@ layer. Formal precondition surfaced: preference lives on observations, so
 compliance must be OBSERVED to steer — cluster A ("records carry
 warrant") is the enabling condition for all institutional steering.
 
+Learning settled at the definition level (2026-09-18, fourth sitting;
+Joe's ruling: learning is key AIF and cannot be a hole, same principle as
+C): `mathlib4:DarkTower/AIF/Learning.lean` (darktower `c0909333c1`, build
+green, zero sorries). Three timescales typed; `LearnedVariable` = the
+2026-09-09 ruled design shape (evidence / update / schedule / persistent
+state / next consumer) as a type; A-learning instantiated over the audited
+Dirichlet carrier; E-learning defined (`Habit.accumulate`, never-weakens
+lemma — decay is a ruling to take, not an accident); C-learning typed as
+`PreferenceProposal` with deliberately NO adopt function (discovery
+proposes, ruling fixes); `StructuralMove` types Joe's named targets — new
+institutions (= learning's repository, per his computational-social-
+creativity thesis), new patterns, pattern links, cascade reformation —
+with BMR as the evaluator. Registry `:learning` stays unruled: the module
+is the typed proposal for that ruling to accept, amend, or reject.
+
 Remaining from the approved plan: the three categorical-successor
 equation rows.
 
