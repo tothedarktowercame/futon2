@@ -265,6 +265,12 @@ controls verified red (tampered total; dishonest zero-reduction claim).
 Bool step by `native_decide` (this toolchain's kernel does not reduce ℚ
 arithmetic; probe recorded in the module docstring). `:infinite` runs are
 refused by the generator — their Lean home is `horizonEFE_eq_top_iff`.
+Same day, WIRE-2 review fallout: `QuantityStatus.computedNotAttached`
+added to the frozen core (mathlib4 `2e0897eff8`, re-pin `58615336ef`) —
+under identity-A per-policy F computes to ∞ and is deliberately not
+attached to the law (futon2 `57b3dcf4`); the emitted
+`:computed-not-attached` status now elaborates, with the honesty clause
+that the ℝ field records the neutral value which entered the law.
 
 ## Known-failing vs certificates — the two test qualities (Joe, 2026-09-18)
 
