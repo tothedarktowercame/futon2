@@ -481,13 +481,13 @@
   :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
   :note "no callers outside tests/labs; no AIF term"}
  {:ns "futon2.aif.full-loop-cli"
-  :class :irrelevant
+  :class :live-infra
   :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
-  :note "operator CLI entrypoint"}
+  :note "operator CLI entrypoint — CORRECTED by claude-12 review: the live tick entry (:wm-scheduled, T7) is not \"unrelated to AIF\"; :live-infra"}
  {:ns "futon2.aif.on-demand-entrypoint"
-  :class :irrelevant
+  :class :live-infra
   :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
-  :note "operator one-click client"}
+  :note "operator one-click client — CORRECTED by claude-12 review: entry point, :live-infra not :irrelevant"}
  {:ns "futon2.aif.adapters/ants"
   :class :irrelevant
   :evidence "python3 BFS over the :require graph of src/futon2/aif/**.clj + scripts/futon2/report/war_machine.clj from roots futon2.aif.full-loop-runner and futon2.report.war-machine -> UNREACHABLE; head-3 docstring read"
@@ -506,11 +506,11 @@
   :note "interest-network port adapter"}
 ]
  :totals {:live-core 2
-           :live-infra 43
+           :live-infra 45
            :relevant-unbound 18
            :duplicate 0
            :dead 57
-           :irrelevant 6
+           :irrelevant 4
            :rows-total 126
            :censused-d1-d6 45
            :runner-root 1
