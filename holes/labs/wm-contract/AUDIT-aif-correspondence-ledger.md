@@ -250,6 +250,22 @@ Additive fields on the per-candidate record. Order per claude-4's bite
 list: (1) per-τ emission, (2) C-form marker, (3) E/F status, (4) β
 capture, (5) rates precondition.
 
+**2026-09-18, DONE through the witness lane.** Items (1), (2), (5) landed
+as WIRE-1 (futon2 `027b5cca`, reviewed and accepted); (3)/(4) moved to the
+selection seam as `SelectionCertificate` (mathlib4 `266999ace8`), to be
+emitted with WIRE-f-on-tick. The Lean side now closes the loop: mathlib4
+`4e83bd19f5` adds `DarkTower/AIF/CertificateChecker.lean` (rational
+mirrors, executable check, soundness theorems into the frozen `valid`)
+and `scripts/gen-gcert-witness.bb`; the first generated witness
+(`DarkTower/AIF/Witness/GCertFixture20260918.lean`, from the real emitted
+record at `runs/gcert-witness-2026-09-18/certificate.edn`, futon2
+`6df39ebf`) proves `GCertificate.valid` and `riskComputedThroughout` of
+the run's bytes — green tests in Joe's commissioned sense. Negative
+controls verified red (tampered total; dishonest zero-reduction claim).
+Bool step by `native_decide` (this toolchain's kernel does not reduce ℚ
+arithmetic; probe recorded in the module docstring). `:infinite` runs are
+refused by the generator — their Lean home is `horizonEFE_eq_top_iff`.
+
 ## Known-failing vs certificates — the two test qualities (Joe, 2026-09-18)
 
 Directive set, superseding the "open ruling" entry that stood here (that
