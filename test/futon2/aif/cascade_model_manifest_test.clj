@@ -3,6 +3,7 @@
             [clojure.edn :as edn]
             [clojure.set :as cset]
             [futon2.aif.cascade-model-manifest :as m]
+            [futon2.aif.likelihood-precision :as lp]
             [futon2.aif.receipt-construction :as construction]))
 
 (def pattern-text "  + IF: ready and not blocked\n  + HOWEVER: stalled\n  + THEN: produce evidence\n  + BECAUSE: test\n")
@@ -968,3 +969,95 @@
            (m/horizon-g-sparse (assoc base :precedence-fn (constantly [fire])))))
     (let [g (m/horizon-g-sparse (assoc base :precedence-fn (constantly [])))]
       (is (and (double? g) (Double/isFinite g) (pos? g))))))
+
+(deftest r7-zeta-seam-tempers-the-sparse-factorized-path
+  ;; R7 acceptance (zai-55's cross-check): because tempering a
+  ;; product-of-Bernoullis kernel row-wise equals tempering each token's
+  ;; Bernoulli, sparse G at :zeta ζ must equal the EXISTING sparse path run
+  ;; on the transformed rates — and that in turn already agrees with the
+  ;; enumerating horizon-g. All three must line up, and ζ must measurably
+  ;; move G.
+  (let [spec (m/preference-spec (sparse-spec 2 1 #{}))
+        universe (:universe spec)
+        rates (into {}
+                    (map (fn [t] [t (if (even? (hash t))
+                                      {:false-neg 1/8 :false-pos 1/16}
+                                      {:false-neg 1/4 :false-pos 1/10})]))
+                    universe)
+        cmap (m/preference-distribution spec universe)
+        q0 {#{} 1}
+        p1 {:id :p1 :guard {:status :interpreted :operator :and
+                            :clauses [{:status :interpreted :present #{} :absent #{}}]}
+            :transition {:status :interpreted :operator :union :produces #{(first (:want spec))}}
+            :produces #{(first (:want spec))}}
+        sparse (fn [rs z]
+                 (m/horizon-g-sparse {:rates rs :q0 q0 :precedence-fn (constantly [p1])
+                                      :horizon 2 :spec spec :zeta z}))]
+    (doseq [z [0 2 3]]
+      (let [via-seam (sparse rates z)
+            via-rates (sparse (lp/tempered-rates rates z) 1)
+            enum (m/horizon-g {:rates (lp/tempered-rates rates z) :q0 q0
+                               :precedence-fn (constantly [p1]) :horizon 2
+                               :c-fn (constantly cmap)})]
+        (is (number? via-seam) (str "zeta " z " scores a finite G"))
+        (is (< (Math/abs (- (double via-seam) (double via-rates))) 1e-12)
+            (str "seam equals transformed-rates at zeta " z))
+        (is (< (Math/abs (- (double via-seam) (double enum))) 1e-12)
+            (str "seam equals enumerating horizon-g at zeta " z))))
+    ;; ζ = 1 is EXACTLY the untempered call — no :zeta key at all
+    (is (= (sparse rates 1)
+           (m/horizon-g-sparse {:rates rates :q0 q0 :precedence-fn (constantly [p1])
+                                :horizon 2 :spec spec})))
+    ;; the effect is measurable, not epsilon
+    (is (> (Math/abs (- (double (sparse rates 3)) (double (sparse rates 1)))) 1e-4))))
+
+(deftest r7-zeta-refusals-are-typed
+  ;; a declared fixed ζ ≠ 1 with the identity kernel is a configuration
+  ;; error — refused, never silently ignored (zai-55/zai-30 ruling).
+  (let [spec (m/preference-spec (sparse-spec 1 1 #{}))
+        rates (sparse-rates spec)
+        r (m/horizon-g-sparse {:rates rates :q0 {#{} 1}
+                               :precedence-fn (constantly []) :horizon 1
+                               :spec spec :zeta 2})]
+    (is (= :missing (:status r)))
+    (is (= :zeta-with-identity-rates (:kind r)))
+    (is (= 2 (:zeta r)))
+    ;; ζ = 1 with zero rates stays the ordinary identity path
+    (is (number? (m/horizon-g-sparse {:rates rates :q0 {#{} 1}
+                                      :precedence-fn (constantly []) :horizon 1
+                                      :spec spec :zeta 1}))))
+  ;; invalid ζ values refuse with likelihood-precision's typing
+  (let [spec (m/preference-spec (sparse-spec 1 1 #{}))
+        nz (zipmap (:universe spec) (repeat {:false-neg 1/8 :false-pos 1/16}))]
+    (is (= :negative-zeta
+           (:kind (m/horizon-g-sparse {:rates nz :q0 {#{} 1}
+                                       :precedence-fn (constantly []) :horizon 1
+                                       :spec spec :zeta -1}))))
+    (is (= :invalid-zeta
+           (:kind (m/horizon-g-sparse {:rates nz :q0 {#{} 1}
+                                       :precedence-fn (constantly []) :horizon 1
+                                       :spec spec :zeta :two}))))))
+
+(deftest r7-certificate-records-zeta-provenance
+  ;; the GCertificate echoes the declared FIXED ζ and says whether the kernel
+  ;; was tempered, so a tempered run is distinguishable even when numbers
+  ;; coincide.
+  (let [spec (m/preference-spec (sparse-spec 2 1 #{}))
+        nz (zipmap (:universe spec) (repeat {:false-neg 1/8 :false-pos 1/16}))
+        q0 {#{} 1}
+        p1 {:id :p1 :guard {:status :interpreted :operator :and
+                            :clauses [{:status :interpreted :present #{} :absent #{}}]}
+            :transition {:status :interpreted :operator :union :produces #{(first (:want spec))}}
+            :produces #{(first (:want spec))}}
+        tempered (:certificate (m/horizon-g-sparse-cert
+                                {:rates nz :q0 q0 :precedence-fn (constantly [p1])
+                                 :horizon 2 :spec spec :zeta 3}))
+        plain (:certificate (m/horizon-g-sparse-cert
+                             {:rates (sparse-rates spec) :q0 q0
+                              :precedence-fn (constantly [p1]) :horizon 2 :spec spec}))]
+    (is (= 3 (:zeta tempered)))
+    (is (true? (:zeta-tempered? tempered)))
+    (is (= :factorized-nonzero-rates (:evaluation tempered)))
+    ;; default ζ is 1 and an identity-kernel run is never marked tempered
+    (is (= 1 (:zeta plain)))
+    (is (false? (:zeta-tempered? plain)))))

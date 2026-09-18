@@ -68,16 +68,19 @@
       (is (= "o1" (:observation bad))))))
 
 ;; ---------------------------------------------------------------------------
-;; R7-3/R7-4 consumer control: the live scoring consumer IGNORES ζ today.
-;; This is the rejecting control the cascade asks for — it demonstrates the
-;; named gap (no applicable consumer), not successful modulation.
+;; R7 consumer control: the sparse scorer now HONORS ζ (2026-09-18, the
+;; horizon-g-sparse* :zeta seam). On the identity path (zero rates) a ζ ≠ 1
+;; is the typed refusal :zeta-with-identity-rates — a configuration error,
+;; never a silent no-op; on the factorized path the tempered effect is
+;; demonstrated in RUN-r7-zeta-effect-2026-09-18 and asserted in
+;; cascade-model-manifest-test (r7-zeta-seam-...).
 ;; ---------------------------------------------------------------------------
 
 (defn- live-tick-spec []
   (m/preference-spec {:want #{"t0" "t1"} :evidence #{"e0"}
                       :lam 2 :mu 1/4 :zeroed #{#{:bad}}}))
 
-(deftest live-tick-consumer-ignores-zeta
+(deftest live-tick-consumer-refuses-zeta-with-identity-rates
   (let [spec (live-tick-spec)
         rates (into {} (map (fn [t] [t {:false-neg 0 :false-pos 0}]))
                     (cset/union (:want spec) (:evidence spec)))
@@ -91,22 +94,26 @@
               :precedence-fn (constantly [fire])
               :horizon 2 :spec spec}
         g-base (m/horizon-g-sparse base)
-        g-half (m/horizon-g-sparse (assoc base :zeta 0.5))
-        g-seven (m/horizon-g-sparse (assoc base :zeta 7.0))]
+        r-half (m/horizon-g-sparse (assoc base :zeta 0.5))
+        r-seven (m/horizon-g-sparse (assoc base :zeta 7.0))]
     (is (number? g-base))
-    ;; ζ in the opts is silently destructured away: the score cannot be
-    ;; modulated by likelihood precision on this path. That is the gap R7
-    ;; records, evidenced here rather than assumed.
-    (is (= g-base g-half))
-    (is (= g-base g-seven))))
+    ;; ζ ≠ 1 on the identity path refuses typed — the score is never
+    ;; modulated by a ζ that multiplies nothing, and never silently ignores
+    ;; the declaration either.
+    (is (lp/refusal? r-half))
+    (is (= :zeta-with-identity-rates (:kind r-half)))
+    (is (lp/refusal? r-seven))
+    (is (= :zeta-with-identity-rates (:kind r-seven)))
+    ;; ζ = 1 is exactly the untempered call
+    (is (= g-base (m/horizon-g-sparse (assoc base :zeta 1))))))
 
 (deftest zeta-declaration-names-the-implicit-state
   (let [d lp/zeta-declaration]
     (is (= :R7 (:item d)))
     (is (= :likelihood-precision-zeta (:quantity d)))
     (is (= :zero-adjudication-identity (get-in d [:live-tick :rates])))
-    (is (= :implicit-and-vacuous (get-in d [:live-tick :status])))
-    (is (= :fixed-vacuous (get-in d [:live-tick :declared])))
+    (is (= :identity-path-refuses-non-unit-zeta (get-in d [:live-tick :status])))
+    (is (= :fixed (get-in d [:live-tick :declared])))
     ;; no prior/update law is claimed for ζ
     (is (= :none-declared (get-in d [:prior :law])))
     (is (= :none (:update d)))

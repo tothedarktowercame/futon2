@@ -71,3 +71,33 @@ writing); the same `tempered-rates` substitution applies there unchanged once
 WIRE-4 lands. Until then the live tick's own G is still evaluated at
 :zero-adjudication-identity where ζ multiplies nothing — named in
 `zeta-declaration`'s gaps, not papered over.
+
+## Addendum 2026-09-18 (later same day): the :zeta seam on the sparse scorer
+
+WIRE-4 landed (98adff8d) and `horizon-g-sparse*` now takes an optional
+model-map `:zeta` (default 1, DECLARED FIXED), tempering the per-token kernel
+once up front via `likelihood-precision/tempered-rates` — one law, one place.
+Recorded numbers, mission-scale spec (want {t0,t1}, evidence {e0}, lam 2,
+mu 1/2), rates 1/8·1/16 on all three tokens, one producing cascade, horizon 3:
+
+| ζ (declared fixed) | G (sparse factorized path) |
+|---|---|
+| 1 | 7.895551077649658 |
+| 3 | 7.809189069493589 |
+
+GCertificate provenance at ζ = 3: `{:zeta 3, :zeta-tempered? true,
+:evaluation :factorized-nonzero-rates, :universe-size 3}` — a tempered run is
+distinguishable from an untempered one even when the numbers coincide.
+
+Cross-check asserted in `cascade-model-manifest-test`
+(`r7-zeta-seam-tempers-the-sparse-factorized-path`): sparse(ζ, rates) via
+`:zeta` == the existing sparse path run on the transformed rates == the
+enumerating `horizon-g` on the same tempered rates, all at 1e-12, for
+ζ ∈ {0,2,3}; ζ = 1 is exactly the untempered call; ζ ≠ 1 with all-zero rates
+is the typed refusal `:zeta-with-identity-rates`, never a silent no-op
+(zai-55/zai-30 ruling).
+
+Remaining gap, unchanged and named in `zeta-declaration`:
+`efe/rank-cascade-actions` still constructs all-zero adjudication rates
+itself, so the LIVE tick has not yet reached the tempered path — wiring real
+observation-rates into the tick is the next WIRE slice.

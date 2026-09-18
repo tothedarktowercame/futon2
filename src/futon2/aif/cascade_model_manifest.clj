@@ -1,7 +1,8 @@
 (ns futon2.aif.cascade-model-manifest
   "Partial, source-bound token-frontier model. No scoring or live side effects."
   (:require [clojure.string :as str]
-            [clojure.set :as set])
+            [clojure.set :as set]
+            [futon2.aif.likelihood-precision :as lprec])
   (:import [java.security MessageDigest]))
 
 (def affirmative-markers
@@ -590,11 +591,32 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    iterated. The infinite-risk step records :risk :infinite and stops,
    matching the scalar path's early return. Returns {:g <scalar, :infinite
    or typed refusal> :steps <vector or nil>}."
-  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe]} record?]
-  (let [bad (rate-bad-token rates)]
+  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe zeta]} record?]
+  (let [bad (rate-bad-token rates)
+        zeta (or zeta 1)
+        ;; R7 (declared FIXED ζ): temper the per-token observation kernel ONCE,
+        ;; up front, with likelihood-precision's audited law — tempering each
+        ;; token's Bernoulli (fn,fp) pair is exactly row-wise A^ζ/Z for the
+        ;; product kernel, so qbar_v (risk) and p_v(s) (ambiguity) both score
+        ;; the tempered kernel automatically with no second code path. ζ = 1
+        ;; keeps `rates` EXACTLY as passed (byte-identical discipline, same as
+        ;; the zero-rate guard); a ζ ≠ 1 with ALL-ZERO rates is refused below,
+        ;; never silently ignored. Typed refusals (:invalid-zeta,
+        ;; :negative-zeta) come from lprec/tempered-rates, one law one place.
+        tempered (if (or (= 1 zeta) bad (zero-rates? rates))
+                   rates
+                   (lprec/tempered-rates rates zeta))]
     (cond
       bad {:g {:status :missing :kind :invalid-adjudication-rate
                :token bad :value (get rates bad)} :steps nil}
+      ;; A declared fixed ζ ≠ 1 with the identity observation kernel is a
+      ;; configuration error: ζ multiplies nothing here, and silently ignoring
+      ;; it would hide that (zai-55/zai-30 ruling, 2026-09-18).
+      (and (zero-rates? rates) (not= 1 zeta))
+      {:g {:status :missing :kind :zeta-with-identity-rates :zeta zeta
+           :limitation "a declared fixed zeta ≠ 1 with all-zero adjudication rates tempers an identity kernel that is never evaluated; refuse rather than silently ignore"} :steps nil}
+      (lprec/refusal? tempered)
+      {:g tempered :steps nil}
       (not (and (integer? horizon) (pos? horizon)))
       {:g {:status :missing :kind :invalid-horizon :horizon horizon} :steps nil}
       (not (and (ifn? precedence-fn) (map? q0)))
@@ -682,6 +704,9 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
         ;;   < 1 kernel makes the rollout a correlated mixture, which is
         ;;   refused, not approximated).
         (let [zeroed (set (:zeroed spec))
+              ;; R7: the factorized closed forms score the TEMPERED kernel —
+              ;; identical arithmetic, tempered (fn,fp) pairs.
+              rates tempered
               rates-universe (set (keys rates))]
           (if c-fn-pointwise
             {:g {:status :missing :kind :c-form-unsupported-with-rates
@@ -824,7 +849,14 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    belief a point mass or product form (a theta < 1 kernel's correlated
    mixture refuses :non-factorizable-belief; independent-belief is the
    product-form carrier). A step-indexed :c-fn-pointwise cannot supply
-   per-token marginals and refuses :c-form-unsupported-with-rates."
+   per-token marginals and refuses :c-form-unsupported-with-rates.
+   R7: an optional model-map `:zeta` (default 1, DECLARED FIXED) Gibbs-tempers
+   the observation kernel on the factorized path via
+   likelihood-precision/tempered-rates (tempering each token's Bernoulli pair
+   IS row-wise A^ζ/Z for the product kernel, so one code path scores the
+   tempered qbar_v and p_v(s) automatically). ζ = 1 is byte-identical to the
+   untempered call; a ζ ≠ 1 with all-zero rates is the typed refusal
+   :zeta-with-identity-rates, never a silent no-op."
   [m]
   (:g (horizon-g-sparse* m false)))
 
@@ -845,7 +877,10 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    echoes the rates used, and the factorized path's steps record the
    ambiguity they COMPUTED (:ambiguity-status :computed, reduction
    \"factorized-nonzero-rates\") instead of the identity path's
-   reduced-identically-zero record. A refused computation returns
+   reduced-identically-zero record. R7: :zeta echoes the declared FIXED ζ of
+   the call (default 1) and :zeta-tempered? says whether the kernel was
+   actually tempered, so a tempered run is distinguishable from an untempered
+   one even when the numbers coincide. A refused computation returns
    {:certificate nil} — no certificate is fabricated for a computation
    that did not run; the refusal IS the record. Pure; emits, changes
    nothing."
@@ -883,6 +918,12 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                    :factorized-nonzero-rates)
                      :rates (:rates m)
                      :rates-all-zero (zero-rates? (:rates m))
+                     ;; R7 provenance: which declared FIXED ζ the kernel was
+                     ;; tempered at — a tempered run is distinguishable from
+                     ;; an untempered one even when the numbers coincide.
+                     :zeta (get m :zeta 1)
+                     :zeta-tempered? (and (not (zero-rates? (:rates m)))
+                                          (not= 1 (get m :zeta 1)))
                      :universe-size (count (:rates m))}})))
 
 ;; ===== WM-02 design P12: the stored belief as the exact categorical posterior =====
