@@ -1,0 +1,153 @@
+;; T2 — claude-4 testimony for the selection cluster (:temperature :policy-posterior :action,
+;; with E and F as selection inputs). Paired with D2. Schema: STUDY.md (futon2 3cc3dcc2).
+;;
+;; Same shape as T1: the closure DAG records obligations, not build plans with
+;; producer names, so my honest answer is again mostly :claims-built with no new
+;; producer planned. The one real :planned entry is WM-11-delivery's "applicable
+;; F", which is that node's own acceptance text.
+;;
+;; The β question in the request rests on a premise I could not confirm; see
+;; :beta-divergence below. I checked the Lean rather than testifying to it.
+
+{:testimony :T2
+ :cluster :selection
+ :terms
+ [{:term :temperature
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.cascade-selection/selection-posterior" :wm-item "WM-11-delivery"
+     :note (str "β is a REQUIRED caller-declared argument with no default; a "
+                "missing or non-positive β is the typed refusal "
+                ":invalid-temperature. This is deliberate — β is not approved, "
+                "so it must be passed.")}
+    {:var "futon2.aif.policy/select-action-cascades" :wm-item "WM-11-delivery"
+     :note "records :beta {:value β :status :declared} on the decision"}]
+   :open-finding
+   (str "LF-temperature is ACCEPTED on the DAG (registry-row :temperature) while "
+        "its own acceptance text reads: 'Three laws are conflated with reciprocal "
+        "beta; engineering modes admit zero/negative tau. Resolve mode/domain and "
+        "citation after Friston 2.7.' An accepted node naming three conflated laws "
+        "is worth a P<->S look — it is the same question D2 is asking.")}
+
+  {:term :policy-posterior
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.cascade-selection/selection-posterior" :wm-item "WM-11-delivery"
+     :note (str "Computes habit·exp(−F − G/β) over finite-G candidates, "
+                "normalised over the finite set only, in log space (log-sum-exp) "
+                "so large G cannot overflow. Infinite-G candidates get exactly "
+                "0.0. Its docstring cites PolicySelection.selectionPosterior_finite "
+                "by name. Typed refusals: :invalid-temperature, :invalid-habit, "
+                ":no-admissible-candidate.")}]}
+
+  {:term :action
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.cascade-selection/bayes-choice" :wm-item "WM-11-delivery"
+     :note (str "Chooses over each cascade's FIRST ACTING pattern (per-state "
+                "projection of ActionMarginal), declared tie-break "
+                ":action-name-ascending. select-action-cascades builds the "
+                "per-candidate first-acting-action map and records "
+                ":selection-law {:applied :cascade-selection-posterior ...} "
+                "with :tie-break-rule and :tie-broken?.")}]}
+
+  {:term :E
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.policy/select-action-cascades" :wm-item "WM-11-delivery"
+     :note (str "E enters as the candidate's :habit, DEFAULTED TO 1 with the "
+                "declared reason 'no habit prior exists yet, a declared neutral "
+                "input'. So E is present in the law and neutral in fact. This is "
+                "the same detection problem as :ambiguity in T1 — 'habit declared "
+                "neutral' and 'habit absent' are indistinguishable in the output "
+                "unless the record says which.")}]}
+
+  {:term :F
+   :no-plans? false
+   :planned
+   [{:var "name not yet chosen"
+     :wm-item "WM-11-delivery"
+     :status :planned
+     :note (str "WM-11-delivery's acceptance is 'Full-identity priors, applicable "
+                "F/posterior and selection-to-enactment binding'. Applicable F is "
+                "that node's own obligation and is NOT built: select-action-cascades "
+                "defaults :f to 0. The node is needs-owner and unowned. I am not "
+                "planning to write it myself; I am recording that it is the "
+                "cluster's one genuine construction gap.")
+     :inputs ["per-policy variational free energy over the cascade's own rollout"]
+     :depends-on ["WM-10-delivery" "WM-07-delivery"]}]
+   :claims-built []
+   :lean-side
+   (str "Holes.lean:7974 policyPosteriorImportsPolicyF : Prop := sorry — a "
+        "PERMANENT EXTERNAL ATTESTATION, owner wm-organization, H4 from Joe's J2 "
+        "ruling, whose required evidence is 'a run record whose Q(π) carries a "
+        "per-policy F term alongside E'. So F is owned on the Lean side as an "
+        "attestation awaiting a run record, which is exactly Joe's certificate design.")}]
+
+ :beta-divergence
+ {:question "is the β-tempering of the posterior law unowned?"
+  :answer :no-and-the-premise-is-off
+  :checked-not-recalled true
+  :finding
+  (str "The request states Lean's policyWeight is exp(−G−F) with no β. That is "
+       "true of ONE of three laws in the Lean, and it is not the one the Clojure "
+       "implements. THREE policy-posterior laws exist: "
+       "(1) OutcomeRiskKL.policyWeight/policyPosterior = habit·exp(−G−F), NO β. "
+       "(2) PolicySelection.selectionWeight/selectionPosterior = "
+       "habit·exp(−(policyPrecision t)·G − F), WITH β, where "
+       "PolicyPrecision.policyPrecision t = 1/t.beta; its docstring is "
+       "'Policy probability σ(log E − F − γ G)'. "
+       "(3) AIF.Terms.policyPosterior (claude-12, 2026-09-18) DELEGATES TO (1), "
+       "the β-less one. "
+       "futon2.aif.cascade-selection/selection-posterior implements (2) and names "
+       "selectionPosterior_finite in its docstring. So Clojure and PolicySelection "
+       "AGREE. The divergence is between Lean modules, and the new census term "
+       "binds to the branch the Clojure does not implement — comparing Clojure "
+       "against AIF.Terms.policyPosterior would read a Clojure divergence that is "
+       "really a choice between two Lean laws.")
+  :ownership
+  (str "Not unowned. Holes.lean:7971 policyPrecisionIsGammaFromBeta : Prop := sorry "
+       "— PERMANENT EXTERNAL ATTESTATION, owner wm-organization, H3 from Joe's J1 "
+       "ruling, required evidence 'a run record carrying τ together with the β it "
+       "was derived from'. select-action-cascades already emits "
+       ":beta {:value β :status :declared}, which is part of that record. "
+       "LF-temperature's acceptance text names the same thing as three conflated laws.")}
+
+ :dag-corrections
+ [{:node "WM-11"
+   :field :open-note
+   :status :stale-pessimistic
+   :note (str "The open-note still describes the pre-flat-removal state "
+              "('enacted choice still comes from the controller head over flat "
+              ":type actions ... 5 assertions, 4 failures on 2026-09-17'). I ran "
+              "the gate at futon2 988c4308 today: 1 test, 5 assertions, 0 "
+              "failures, hermetic (59 store dirs before and after). The node's own "
+              "standing-test-gate.passes already records it passing since "
+              "2026-09-17; the two fields disagree in tone.")}
+  {:node "WM-11"
+   :field :standing-test-gate
+   :status :path-rot
+   :note (str "Records the test at vm-test/futon2/vm/standing_enacted_policy_is_"
+              "cascade_g_test.clj; it now lives at test/futon2/vm/. Also its scope "
+              "caveat 'not yet live in the serving JVM (reload is Joe's call)' is "
+              "discharged — Joe restarted futon3c-zone on 2026-09-18 and I "
+              "confirmed the new code is loaded.")}]
+
+ :grounding
+ ["p4ng/wm-walkthroughs/build-loop/closure/closure-dag.json (r79): LF-temperature, LF-policy-posterior, LF-action, R14, R16, R6, WM-11, WM-11-delivery, WM-14"
+  "mathlib4 DarkTower/WarMachine/PolicySelection.lean (selectionWeight :24, selectionPosterior :29, selectionWeight_coe :48, selectionPosterior_finite :63, selectionPosterior_all_finite :82)"
+  "mathlib4 DarkTower/WarMachine/PolicyPrecision.lean (PolicyTemperature :20, policyPrecision :25 = 1/t.beta)"
+  "mathlib4 DarkTower/WarMachine/OutcomeRiskKL.lean (policyWeight :411, policyPosterior :416 — the β-less pair)"
+  "mathlib4 DarkTower/AIF/Terms.lean (policyPosterior :203, delegating to OutcomeRiskKL)"
+  "mathlib4 DarkTower/WarMachine/Holes.lean (policyPrecisionIsGammaFromBeta :7971, policyPosteriorImportsPolicyF :7974 — both sorry, both PERMANENT EXTERNAL ATTESTATION, owner wm-organization)"
+  "futon2/src/futon2/aif/cascade_selection.clj (selection-posterior :51)"
+  "futon2/src/futon2/aif/policy.clj (select-action-cascades)"
+  "futon2/test/futon2/vm/standing_enacted_policy_is_cascade_g_test.clj (run today, 5 assertions 0 failures)"]
+
+ :caveats
+ ["No :origin :conversation entries in this testimony — everything here is grounded in an artifact I read or a command I ran this turn."
+  "I did not re-derive that Clojure's habit·exp(−F − G/β) is numerically identical to Lean's habit·exp(−(1/beta)·G − F); I read both and they agree by inspection, with γ = 1/β stated on both sides. A spec should still pin it."]}
