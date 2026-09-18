@@ -1220,6 +1220,19 @@
                                             ;; identity-default is readable
                                             ;; on the certificate itself,
                                             ;; not only the family meta.
+                                            ;; NOT a contradiction: these
+                                            ;; keys can legitimately appear
+                                            ;; TOGETHER with :evaluation
+                                            ;; :identity-A-zero-rates — an
+                                            ;; all-checkable universe
+                                            ;; SOURCES the exact-zero kernel
+                                            ;; (tokenLikelihood_checkable),
+                                            ;; which IS the identity kernel;
+                                            ;; :rates-provenance says where
+                                            ;; the rates came from,
+                                            ;; :evaluation says which
+                                            ;; evaluation path the numbers
+                                            ;; took.
                                             :rates-provenance
                                             (or (:rates-provenance opts)
                                                 {:status (if declared-rates

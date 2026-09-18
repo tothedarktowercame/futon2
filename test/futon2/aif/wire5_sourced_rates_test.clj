@@ -10,7 +10,11 @@
   before/after G on a concrete case is EXPECTED byte-identical; what
   changes is provenance (:sourced vs :identity-default) on the family meta
   and on every candidate's certificate. A judgement-class token with no
-  admitted rate refuses typed (:unsupported-class) and is never padded."
+  admitted rate refuses typed (:unsupported-class) and is never padded.
+  Reader note: a certificate may carry :evaluation :identity-A-zero-rates
+  AND :rates-provenance {:source …} together — sourced-all-checkable rates
+  ARE the exact-zero kernel, so that pairing is provenance, not
+  contradiction (see the comment at the :rates-provenance assoc in efe)."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
