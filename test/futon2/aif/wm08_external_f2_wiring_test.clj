@@ -104,3 +104,23 @@
       (is (= :validated (get-in retained [:external-expectations :status])))
       (Files/delete (.toPath (io/file path)))
       (Files/delete (.toPath tmp)))))
+
+(deftest acceptance-reader-consumes-the-recorded-status
+  ;; zai-50's ruling (2026-09-18): absence is a FACT at runtime, a FAILURE
+  ;; at acceptance. The predicate is the single reader both halves share;
+  ;; WM-08-delivery control C1 refuses on {:checked? false}.
+  (testing "a validated construction reads checked, with its author"
+    (let [retained (:receipted-construction (construct-with (known-correct-artifact)))
+          r (fx/external-expectations-checked?
+             {:judgment {:receipted-construction retained}})]
+      (is (:checked? r))
+      (is (= "wiring-test-producer" (get-in r [:record :author :id])))))
+  (testing "a not-supplied construction reads unchecked, naming what was recorded"
+    (let [retained (:receipted-construction (construct-with nil))
+          r (fx/external-expectations-checked?
+             {:judgment {:receipted-construction retained}})]
+      (is (false? (:checked? r)))
+      (is (= :not-supplied (:reason r)))))
+  (testing "a payload with no record at all names its absence"
+    (is (= :no-external-expectations-record
+           (:reason (fx/external-expectations-checked? {:judgment {}}))))))

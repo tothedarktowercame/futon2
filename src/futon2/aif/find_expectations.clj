@@ -227,3 +227,25 @@
      :author (assoc author :role :external-expectation-producer)
      :occurrence occurrence
      :expected rows}))
+
+(defn external-expectations-checked?
+  "Pure acceptance reader (WM-08-delivery control C1's consumer,
+  zai-50/claude-4 2026-09-18): true iff a receipt payload's recorded
+  construction actually RAN the external F2 check — status :validated
+  with a named external author. The seam records {:status :not-supplied}
+  when no artifact was configured; at RUNTIME that absence is a recorded
+  fact, not a fault (receipt-construction's own docstring — every ordinary
+  non-WM-08 interpretation runs without one). THIS predicate is where
+  absence becomes a failure: the item whose acceptance demands the
+  evidence reads this and refuses. Returns a map, never a bare boolean,
+  so the refusal it feeds names exactly what was recorded."
+  [payload]
+  (let [status (get-in payload [:judgment :receipted-construction
+                                :external-expectations])]
+    (if (and (map? status) (= :validated (:status status)) (:author status))
+      {:checked? true :record status}
+      {:checked? false
+       :record status
+       :reason (cond (nil? status) :no-external-expectations-record
+                     (map? status) (:status status)
+                     :else :invalid-record)})))
