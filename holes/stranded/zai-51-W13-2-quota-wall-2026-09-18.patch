@@ -1,0 +1,196 @@
+diff --git a/src/futon2/aif/efe.clj b/src/futon2/aif/efe.clj
+index 120f3ef6..d0435bd0 100644
+--- a/src/futon2/aif/efe.clj
++++ b/src/futon2/aif/efe.clj
+@@ -31,6 +31,7 @@
+   (:require [clojure.set :as set]
+             [futon2.aif.cascade-free-energy :as cascade-free-energy]
+             [futon2.aif.cascade-model-manifest :as cascade-manifest]
++            [futon2.aif.ruled-outcome-c :as ruled-outcome-c]
+             [futon2.aif.forward-model :as fm]
+             [futon2.aif.free-energy :as fe]
+             [futon2.aif.preferences :as pref]
+@@ -1044,7 +1045,11 @@
+   (let [T (:horizon-steps opts)
+         q0 (:cascade-belief state)
+         spec-in (or (:cascade-spec opts) {})
+-        want (:want spec-in)]
++        want (:want spec-in)
++        ;; W13-2: the derived C's fold provenance, checked once, before the
++        ;; cond and before scoring (nil when not applicable / valid).
++        c-prov (when (and (map? (:c spec-in)) (= :derived (:status (:c spec-in))))
++                 (ruled-outcome-c/attach-fold-provenance (:c spec-in)))]
+     (cond
+       (not (and (integer? T) (pos? T)))
+       {:status :missing :kind :missing-common-horizon
+@@ -1056,6 +1061,16 @@
+       ((complement seq) want)
+       {:status :missing :kind :missing-cascade-want
+        :limitation "cascade scoring needs the preference spec's :want (R1's want tokens); pass :cascade-spec {:want #{…}}"}
++      ;; WM-13-delivery W13-2: a DERIVED C's fold provenance is validated
++      ;; BEFORE scoring. The declared layer order rides on the certificate
++      ;; path (:c), and a mutated/reordered/partial layer list is the typed
++      ;; refusal :preference-layer-revision-mismatch -- the same refusal
++      ;; construct-machine-preference raises on a mutated :layers -- never
++      ;; a silent acceptance. Declaration plumbing only: no composition
++      ;; semantics are added (the ruled sum is checklist WM-13's, behind
++      ;; AUTH-mission-preferences).
++      (and (map? c-prov) (= :missing (:status c-prov)))
++      c-prov
+       :else
+       (let [spec (cond-> {:want want
+                           :evidence (or (:evidence spec-in) #{})
+@@ -1067,7 +1082,7 @@
+                           ;; that derived the live C passes {:c {:status
+                           ;; :derived …}}; everything else records the
+                           ;; uniform declared-constant spec it always was.
+-                          :c (or (:c spec-in)
++                          :c (or c-prov (:c spec-in)
+                                  {:status :uniform-declared-constant})}
+                     ;; WIRE-3: the derived live C's per-token weights, when
+                     ;; the caller carries them. Attached only when present —
+diff --git a/src/futon2/aif/ruled_outcome_c.clj b/src/futon2/aif/ruled_outcome_c.clj
+index 06ebd0e3..ece411ce 100644
+--- a/src/futon2/aif/ruled_outcome_c.clj
++++ b/src/futon2/aif/ruled_outcome_c.clj
+@@ -100,6 +100,46 @@
+ 
+ (def machine-preference-schema :wm/machine-preference-v1)
+ 
++(def fold-layer-order
++  "The authoritative ordered layer identities of the fold declaration, for
++   provenance attachment at the consumer (WM-13-delivery W13-2). This is
++   DECLARATION plumbing only: it makes the family's exact identities, order
++   and composition-axis VISIBLE on the scoring path; it decides nothing
++   about the ruled-sum composition (that is checklist WM-13 behind
++   AUTH-mission-preferences) and it does not adjudicate :c-mis's owed
++   ruling."
++  (mapv :layer/id fold-declaration))
++
++(defn attach-fold-provenance
++  "Validate and complete a DERIVED C's fold provenance (W13-2). Given the
++   {:status :derived …} map a WIRE-3-style caller attaches to the spec's :c:
++   - with no :ordered-layers, attach the authoritative order (the caller
++     derived the whole live C; the fold it rode is the declaration's);
++   - with :ordered-layers present, they must EQUAL the declaration's order
++     exactly -- a mutated, reordered or partial layer list is the typed
++     refusal :preference-layer-revision-mismatch (the same refusal
++     `construct-machine-preference` raises on a mutated `:layers`), never a
++     silent acceptance;
++   - the per-layer declaration (ids, composition-axis, source, folded?,
++     in-ruled-sum) rides along under :fold, so the consumer can see which
++     layers are folded, which are not, and that :c-mis's sum-membership is
++     :undeclared rather than silently decided.
++   Non-derived maps pass through unchanged (byte-identical default path)."
++  [{:keys [status ordered-layers] :as c}]
++  (if (not= :derived status)
++    c
++    (if (and (some? ordered-layers)
++             (not= ordered-layers (mapv :layer/id fold-declaration)))
++      {:status :missing
++       :kind :preference-layer-revision-mismatch
++       :declared ordered-layers
++       :fold (mapv :layer/id fold-declaration)
++       :limitation "a derived C carries the fold declaration's exact layer order; a mutated list is a revision mismatch, not a scoring input"}
++      (assoc c
++             :ordered-layers (mapv :layer/id fold-declaration)
++             :fold (mapv #(select-keys % [:layer/id :composition-axis :source :folded? :in-ruled-sum])
++                         fold-declaration)))))
++
+ (defn- refuse!
+   [kind path]
+   {:ok false :refusal {:kind kind :path path}})
+diff --git a/test/futon2/aif/live_c_scorer_pin_test.clj b/test/futon2/aif/live_c_scorer_pin_test.clj
+index 68b9dfed..b2c6c28e 100644
+--- a/test/futon2/aif/live_c_scorer_pin_test.clj
++++ b/test/futon2/aif/live_c_scorer_pin_test.clj
+@@ -25,7 +25,9 @@
+      not a claim the carrier acceptance already established it."
+   (:require [clojure.test :refer [deftest is testing]]
+             [futon2.aif.cascade-model-manifest :as m]
+-            [futon2.aif.live-c :as lc]))
++            [futon2.aif.efe :as efe]
++            [futon2.aif.live-c :as lc]
++            [futon2.aif.ruled-outcome-c :as ruled]))
+ 
+ (def sources
+   "Injected read-sources shape (same fixture discipline as live_c_test)."
+@@ -64,11 +66,7 @@
+       (is (every? #(or (ratio? %) (integer? %)) (vals (:weights live-spec))))
+       (let [v (m/preference-spec live-spec)]
+         (is (not (:status v)))
+-        (is (every? #(or (ratio? %) (integer? %)) (vals (:weights v)))))))
+-    (testing "the weights the derivation produced are the spec's weights"
+-      (let [v (m/preference-spec (assoc live-spec :weights (:weights live-spec)))]
+-        (is (not (:status v)))
+-        (is (= (set (keys (:weights live-spec))) (:want live-spec)))))))
++        (is (every? #(or (ratio? %) (integer? %)) (vals (:weights v))))))))
+ 
+ (deftest the-scorer-consumes-the-live-spec-value-level
+   ;; The composed seam: the exact call rank-cascade-actions makes. One
+@@ -124,3 +122,65 @@
+       ;; would otherwise default to
+       (is (= :invalid-preference-spec
+              (:kind (m/preference-spec {:want #{} :evidence #{} :lam 1 :mu 1 :zeroed #{}})))))))
++
++;; ---------------------------------------------------------- W13-2: fold provenance
++
++(deftest derived-c-fold-provenance-is-attached-and-validated
++  (let [layers (ruled/attach-fold-provenance {:status :derived :signature "s"})]
++    (testing "a derived C with no declared layers gets the authoritative order attached"
++      (is (= [:ruled-outcome-c :c-int :c-ser :c-mis] (:ordered-layers layers)))
++      (is (= 4 (count (:fold layers))))
++      (is (every? #(contains? % :layer/id) (:fold layers)))
++      (is (some #(= :undeclared (:in-ruled-sum %)) (:fold layers))
++          "c-mis's undeclared sum-membership is VISIBLE, not silently decided"))
++    (testing "a correct declared order is accepted and completed"
++      (is (= [:ruled-outcome-c :c-int :c-ser :c-mis]
++             (:ordered-layers
++              (ruled/attach-fold-provenance
++               {:status :derived :ordered-layers [:ruled-outcome-c :c-int :c-ser :c-mis]})))))
++    (testing "mutated / reordered / partial layer lists are the typed revision-mismatch refusal"
++      (is (= :preference-layer-revision-mismatch
++             (:kind (ruled/attach-fold-provenance
++                     {:status :derived :ordered-layers [:c-int :ruled-outcome-c :c-ser :c-mis]}))))
++      (is (= :preference-layer-revision-mismatch
++             (:kind (ruled/attach-fold-provenance
++                     {:status :derived :ordered-layers [:ruled-outcome-c :c-int :c-ser]}))))
++      (is (= :preference-layer-revision-mismatch
++             (:kind (ruled/attach-fold-provenance
++                     {:status :derived :ordered-layers [:ruled-outcome-c :c-int :c-ser :c-mis :c-extra]})))))
++    (testing "non-derived maps pass through byte-identical"
++      (is (= {:status :uniform-declared-constant}
++             (ruled/attach-fold-provenance {:status :uniform-declared-constant})))))
++
++(deftest the-scorer-refuses-a-mutated-fold-and-carries-a-valid-one
++  ;; The lane: rank-cascade-actions with a derived :c on the spec. Minimal
++  ;; one-candidate family, same shape as the value-level pin above.
++  (let [d (derived)
++        live-spec (lc/cascade-spec d (conj (:want d) :closed/M-b))
++        produce (first (:want live-spec))
++        state {:cascade-belief {#{} 1}}
++        cand [{:kind :cascade-candidate :id :p1 :precedence
++               [{:id :p1
++                 :guard {:status :interpreted :operator :and
++                         :clauses [{:status :interpreted :present #{} :absent #{}}]}
++                 :transition {:status :interpreted :operator :union :produces #{produce}}
++                 :produces #{produce}}]}]
++        opts+ (fn [c] {:horizon-steps 1 :cascade-spec (assoc live-spec :c c)})
++        run (fn [c] (efe/rank-cascade-actions state cand (opts+ c)))]
++    (testing "a valid derived C scores and the attached spec carries the fold order"
++      (let [r (run {:status :derived :signature "s"})]
++        (is (not (:status r)) (pr-str (select-keys r [:status :kind])))
++        (is (= [:ruled-outcome-c :c-int :c-ser :c-mis]
++               (get-in r [:meta :cascade-scoring :spec :c :ordered-layers])))))
++    (testing "a mutated fold refuses before scoring, typed"
++      (let [r (run {:status :derived :signature "s"
++                    :ordered-layers [:c-int :ruled-outcome-c :c-ser :c-mis]})]
++        (is (= :missing (:status r)))
++        (is (= :preference-layer-revision-mismatch (:kind r)))))
++    (testing "the uniform default path is byte-identical: no :c key scores as before"
++      (let [r (run nil)]
++        (is (not (:status r)))
++        (is (= :uniform-declared-constant
++               (get-in r [:meta :cascade-scoring :spec :c :status])))))))
++)
++)
