@@ -1108,9 +1108,26 @@
                                   :horizon T
                                   :spec spec
                                   :universe universe})
-                                f (when (and (not fe-refusal?)
-                                             (not (contains? excluded-ids (:id action))))
-                                    (get f-by-id (:id action)))]
+                                f-raw (when (and (not fe-refusal?)
+                                                 (not (contains? excluded-ids (:id action))))
+                                        (get f-by-id (:id action)))
+                                ;; A computed but NON-FINITE F is not attached.
+                                ;; Under the identity-A reduction the live tick
+                                ;; runs, P(o|pi) is 0 for any cascade whose
+                                ;; rollout state differs from the observation,
+                                ;; so F = -ln 0 = Inf for every cascade that
+                                ;; produces anything and only the do-nothing
+                                ;; cascade is finite. Passing that to selection
+                                ;; drives the posterior to NaN and rewards
+                                ;; inaction -- a dark room reached through F.
+                                ;; The value is still computed and still
+                                ;; recorded on the certificate; it just does not
+                                ;; reach the law until A stops being degenerate,
+                                ;; at which point it starts flowing with no
+                                ;; further change here.
+                                f-finite? (and (number? f-raw)
+                                               (Double/isFinite (double f-raw)))
+                                f (when f-finite? f-raw)]
                             (cond-> {:action action
                                      :cascade true
                                      :cascade-id (:id action)
@@ -1152,12 +1169,22 @@
                                             ;; (:status :not-attached with the
                                             ;; reason). Never a bare 0.
                                             :f
-                                            (if (number? f)
+                                            (cond
+                                              (and (number? f-raw) (not f-finite?))
+                                              {:value f-raw
+                                               :status :computed-not-attached
+                                               :reason :non-finite-under-identity-a
+                                               :source f-source
+                                               :tau T
+                                               :observed-tokens observed-tokens}
+
+                                              (number? f)
                                               {:value f
                                                :status :computed
                                                :source f-source
                                                :tau T
                                                :observed-tokens observed-tokens}
+                                              :else
                                               {:value nil
                                                :status :not-attached
                                                :source f-source

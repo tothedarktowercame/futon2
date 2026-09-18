@@ -4,9 +4,10 @@
   ranked candidate, filled from inside the horizon-g-sparse evaluation;
   the scalar G is byte-identical to the pre-slice path; a refused
   computation emits no certificate — the refusal IS the record."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
             [clojure.set :as cset]
             [futon2.aif.cascade-model-manifest :as m]
+            [futon2.aif.cascade-selection :as cs]
             [futon2.aif.efe :as efe]))
 
 (def pattern-text "  + IF: ready and not blocked\n  + HOWEVER: stalled\n  + THEN: produce evidence\n  + BECAUSE: test\n")
@@ -80,12 +81,15 @@
       (is (= {:value nil :status :not-in-scoring-opts} (:beta-declared cert))
           "beta is not in R5 scoring opts today; the absence is recorded, not defaulted")
       (is (= {:value 1 :status :declared-neutral} (:habit cert)))
-      ;; WIRE-2: F is now computed on the tick (not a declared-neutral 0).
-      ;; This fixture declares no :evidence, so the observed token set is
-      ;; empty and the identity observation of nothing is impossible under
-      ;; every rollout: F = ##Inf — COMPUTED and provenance-stamped.
+      ;; WIRE-2: F is computed on the tick (not a declared-neutral 0). This
+      ;; fixture declares no :evidence, so the observed token set is empty and
+      ;; the identity observation of nothing is impossible under every
+      ;; rollout: F = ##Inf. Computed and provenance-stamped — and NOT
+      ;; attached to the entry, because a non-finite F drives the selection
+      ;; posterior to NaN for every candidate (WIRE-2 review fix, 2026-09-18).
       (is (= {:value ##Inf
-              :status :computed
+              :status :computed-not-attached
+              :reason :non-finite-under-identity-a
               :source :cascade-free-energy/policy-free-energy
               :tau T
               :observed-tokens #{}}
@@ -191,11 +195,19 @@
                                          {:horizon-steps 1 :cascade-spec spec})
         entry (first ranked)
         f-cert (:f (:certificate entry))]
-    ;; the firing pattern leaves the observed state: F is computed ##Inf
-    ;; (a contradicted prediction at theta = 1), NOT defaulted.
-    (is (= ##Inf (:f entry)) ":f on the entry is the computed value")
-    (is (= ##Inf (:value f-cert)))
-    (is (= :computed (:status f-cert)) "computed is stated in the certificate")
+    ;; The firing pattern leaves the observed state, so under identity A the
+    ;; prediction is contradicted and F = ##Inf. Computed, recorded, and NOT
+    ;; attached: a non-finite F makes every score -Inf and the posterior NaN
+    ;; for every candidate, which selection then reports as a decision. Three
+    ;; states must stay distinguishable — computed-and-attached (finite),
+    ;; computed-not-attached (non-finite), not-attached (never computed).
+    (is (nil? (:f entry))
+        "a non-finite F does not reach the law")
+    (is (= ##Inf (:value f-cert))
+        "but the computed value is still on the certificate, not discarded")
+    (is (= :computed-not-attached (:status f-cert)))
+    (is (= :non-finite-under-identity-a (:reason f-cert))
+        "and the certificate says WHY it did not reach the law")
     (is (= :cascade-free-energy/policy-free-energy (:source f-cert))
         "the certificate names WHERE F came from")
     ;; Requirement 3, the acceptance point: a computed 0.0 and an absent F
@@ -258,3 +270,25 @@
     (is (every? #(= :invalid-candidates (:kind (:reason %)))
                 (:f-exclusions meta')))
     (is (= :refused (get-in meta' [:cascade-scoring :free-energy :status])))))
+
+(deftest finite-f-reaches-the-law-and-non-finite-f-is-refused
+  ;; The other half of the WIRE-2 review fix: nothing above should be read as
+  ;; "F never reaches selection". A finite F is attached and moves the
+  ;; posterior; a non-finite one is a typed refusal rather than a NaN that
+  ;; selection reports as a decision.
+  (testing "a finite F is attached and changes the posterior"
+    (let [post (cs/selection-posterior
+                {:beta 1 :candidates [{:id :x :habit 1 :f 0.5 :g 1.0}
+                                      {:id :y :habit 1 :f 2.0 :g 1.0}]})]
+      (is (= 2 (count post)))
+      (is (every? #(and (number? %) (Double/isFinite (double %))) (vals post)))
+      (is (> (get post :x) (get post :y))
+          "the lower-F candidate carries more posterior mass")))
+  (testing "a non-finite F is a typed refusal, not a NaN posterior"
+    (doseq [bad [##Inf ##-Inf ##NaN]]
+      (let [refusal (try (cs/selection-posterior
+                          {:beta 1 :candidates [{:id :a :habit 1 :f bad :g 1.0}]})
+                         (catch clojure.lang.ExceptionInfo e (:refusal (ex-data e))))]
+        (is (= :invalid-free-energy (:kind refusal))
+            (str "F = " bad " must refuse, not produce NaN"))
+        (is (= :a (get-in refusal [:detail :id])))))))

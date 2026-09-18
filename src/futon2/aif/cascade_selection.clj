@@ -73,6 +73,17 @@
   (doseq [c candidates]
     (when-not (valid-habit? (:habit c))
       (refuse! :invalid-habit {:id (:id c) :habit (:habit c)})))
+  ;; A non-finite F_pi makes every score -Inf, and log-sum-exp then divides
+  ;; -Inf by -Inf: the posterior comes out NaN for every candidate and the
+  ;; caller still gets a decision, chosen by tie-break, with NaN recorded as
+  ;; the selection law. That is the one hole in this function's refusal
+  ;; discipline (2026-09-18, found reviewing WIRE-2: under the identity-A
+  ;; reduction F is infinite for every cascade that produces anything, so it
+  ;; was not a corner case but the ordinary one). Refuse instead.
+  (doseq [c candidates]
+    (let [f (:f c)]
+      (when-not (and (number? f) (Double/isFinite (double f)))
+        (refuse! :invalid-free-energy {:id (:id c) :f f}))))
   (let [finite-g? (fn [c] (and (number? (:g c)) (not (Double/isNaN (double (:g c))))))
         finite (filter finite-g? candidates)
         infinite (remove finite-g? candidates)]
