@@ -10,7 +10,7 @@
     :because
     "the flip's flag chain does not name FUTON_WM_MISSION_C, so no mission's completion criteria are read"},
    :per-node-tests
-   {:verdict :green,
+   {:verdict :blocked,
     :nodes
     [{:node :R4,
       :verdict :green,
@@ -31,17 +31,14 @@
         :owner-rows [:U11 :D8 :S7]}],
       :substrates {:wm [:fresh-green]}}
      {:node :R6,
-      :verdict :green,
-      :test-files
-      ["futon2/test/futon2/aif/policy_test.clj"
-       "futon2/test/futon2/aif/habit_prior_test.clj"
-       "futon2/test/futon2/aif/selection_score_readiness_test.clj"],
+      :verdict :blocked,
+      :test-files [],
       :evidence
       [{:substrate :wm,
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.policy-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/policy_test.clj",
         :run-at "2026-09-03",
         :row :n/R6-wm-policy,
@@ -50,7 +47,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.habit-prior-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/habit_prior_test.clj",
         :run-at "2026-09-03",
         :row :n/R6-habit-prior,
@@ -59,7 +56,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.selection-score-readiness-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file
         "futon2/test/futon2/aif/selection_score_readiness_test.clj",
         :run-at "2026-09-03",
@@ -77,15 +74,14 @@
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green :fresh-green],
+      {:wm [:stale-green :stale-green :stale-green],
        :zaif [:stale-green]}}
      {:node :R8,
       :verdict :green,
       :test-files
       ["futon2/test/futon2/aif/free_energy_test.clj"
        "futon2/test/futon2/aif/policy_free_energy_test.clj"
-       "futon2/test/r8_f_contract_test.clj"
-       "futon3c/test/futon3c/agents/zaif_inputs_test.clj"],
+       "futon2/test/r8_f_contract_test.clj"],
       :evidence
       [{:substrate :wm,
         :exit 0,
@@ -119,7 +115,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon3c.agents.zaif-inputs-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon3c/test/futon3c/agents/zaif_inputs_test.clj",
         :run-at "2026-09-03",
         :row :n/R8-zaif-typed-absence,
@@ -127,13 +123,17 @@
       :named-gaps [],
       :substrates
       {:wm [:fresh-green :fresh-green :fresh-green],
-       :zaif [:fresh-green]}}],
+       :zaif [:stale-green]}}],
     :separate-from-full-run
     "each cited run is one namespace in its own JVM (catalog :test-runs :cmd), not a suite or a tick",
     :caveats
-    [":R6 :n/R6-zaif-controller is stale-green (futon3c/test/futon3c/agents/zaif_controller_test.clj, recorded at 17fde898)"
+    [":R6 :n/R6-wm-policy is stale-green (futon2/test/futon2/aif/policy_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-habit-prior is stale-green (futon2/test/futon2/aif/habit_prior_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-posterior-replay is stale-green (futon2/test/futon2/aif/selection_score_readiness_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-zaif-controller is stale-green (futon3c/test/futon3c/agents/zaif_controller_test.clj, recorded at 17fde898)"
+     ":R8 :n/R8-zaif-typed-absence is stale-green (futon3c/test/futon3c/agents/zaif_inputs_test.clj, recorded at 17fde898)"
      ":R4 has a named gap :n/R4-zaif-observation-model on the :zaif substrate, owned by [:U11 :D8 :S7]"],
-    :blocked-on nil},
+    :blocked-on [":R6 has no fresh green per-node test"]},
    :flag-chain
    {:requires
     ["FUTON_WM_FPI_DARK=1 and FUTON_WM_TRACE_POLICY_DETAILS=1 on the PREVIOUS tick; refused loudly by f-pi-posterior-preconditions! (futon2/scripts/futon2/report/war_machine.clj:155-183)"],
@@ -160,15 +160,13 @@
     :nodes
     [{:node :R9,
       :verdict :green,
-      :test-files
-      ["futon2/test/futon2/aif/r9_named_validation_test.clj"
-       "futon2/test/r9_independence_test.clj"],
+      :test-files ["futon2/test/r9_independence_test.clj"],
       :evidence
       [{:substrate :wm,
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.r9-named-validation-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file
         "futon2/test/futon2/aif/r9_named_validation_test.clj",
         :run-at "2026-09-03",
@@ -194,11 +192,12 @@
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green], :zaif [:typed-stale]}}],
+      {:wm [:stale-green :fresh-green], :zaif [:typed-stale]}}],
     :separate-from-full-run
     "each cited run is one namespace in its own JVM (catalog :test-runs :cmd), not a suite or a tick",
     :caveats
-    [":R9 :n/R9-zaif-authorship is typed-stale (futon3c/test/futon3c/agents/zai_api_test.clj, recorded at 17fde898)"],
+    [":R9 :n/R9-named-validation is stale-green (futon2/test/futon2/aif/r9_named_validation_test.clj, recorded at 42a957c)"
+     ":R9 :n/R9-zaif-authorship is typed-stale (futon3c/test/futon3c/agents/zai_api_test.clj, recorded at 17fde898)"],
     :blocked-on nil},
    :flag-chain
    {:requires
@@ -292,8 +291,7 @@
       :verdict :green,
       :test-files
       ["futon2/test/futon2/aif/efe_test.clj"
-       "futon2/test/futon2/aif/efe_risk_mode_test.clj"
-       "futon3c/test/futon3c/agents/zaif_inputs_test.clj"],
+       "futon2/test/futon2/aif/efe_risk_mode_test.clj"],
       :evidence
       [{:substrate :wm,
         :exit 0,
@@ -317,18 +315,19 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon3c.agents.zaif-inputs-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon3c/test/futon3c/agents/zaif_inputs_test.clj",
         :run-at "2026-09-03",
         :row :n/R5-zaif-mission-risk,
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green], :zaif [:fresh-green]}}],
+      {:wm [:fresh-green :fresh-green], :zaif [:stale-green]}}],
     :separate-from-full-run
     "each cited run is one namespace in its own JVM (catalog :test-runs :cmd), not a suite or a tick",
     :caveats
     [":R2 :n/R2-zaif-envelope is stale-green (futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj, recorded at 17fde898)"
+     ":R5 :n/R5-zaif-mission-risk is stale-green (futon3c/test/futon3c/agents/zaif_inputs_test.clj, recorded at 17fde898)"
      ":R4 has a named gap :n/R4-zaif-observation-model on the :zaif substrate, owned by [:U11 :D8 :S7]"],
     :blocked-on nil},
    :flag-chain
@@ -349,14 +348,13 @@
     :because
     "the flip's flag chain does not name FUTON_WM_MISSION_C, so no mission's completion criteria are read"},
    :per-node-tests
-   {:verdict :green,
+   {:verdict :blocked,
     :nodes
     [{:node :R5,
       :verdict :green,
       :test-files
       ["futon2/test/futon2/aif/efe_test.clj"
-       "futon2/test/futon2/aif/efe_risk_mode_test.clj"
-       "futon3c/test/futon3c/agents/zaif_inputs_test.clj"],
+       "futon2/test/futon2/aif/efe_risk_mode_test.clj"],
       :evidence
       [{:substrate :wm,
         :exit 0,
@@ -380,26 +378,23 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon3c.agents.zaif-inputs-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon3c/test/futon3c/agents/zaif_inputs_test.clj",
         :run-at "2026-09-03",
         :row :n/R5-zaif-mission-risk,
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green], :zaif [:fresh-green]}}
+      {:wm [:fresh-green :fresh-green], :zaif [:stale-green]}}
      {:node :R6,
-      :verdict :green,
-      :test-files
-      ["futon2/test/futon2/aif/policy_test.clj"
-       "futon2/test/futon2/aif/habit_prior_test.clj"
-       "futon2/test/futon2/aif/selection_score_readiness_test.clj"],
+      :verdict :blocked,
+      :test-files [],
       :evidence
       [{:substrate :wm,
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.policy-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/policy_test.clj",
         :run-at "2026-09-03",
         :row :n/R6-wm-policy,
@@ -408,7 +403,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.habit-prior-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/habit_prior_test.clj",
         :run-at "2026-09-03",
         :row :n/R6-habit-prior,
@@ -417,7 +412,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.selection-score-readiness-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file
         "futon2/test/futon2/aif/selection_score_readiness_test.clj",
         :run-at "2026-09-03",
@@ -435,15 +430,14 @@
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green :fresh-green],
+      {:wm [:stale-green :stale-green :stale-green],
        :zaif [:stale-green]}}
      {:node :R8,
       :verdict :green,
       :test-files
       ["futon2/test/futon2/aif/free_energy_test.clj"
        "futon2/test/futon2/aif/policy_free_energy_test.clj"
-       "futon2/test/r8_f_contract_test.clj"
-       "futon3c/test/futon3c/agents/zaif_inputs_test.clj"],
+       "futon2/test/r8_f_contract_test.clj"],
       :evidence
       [{:substrate :wm,
         :exit 0,
@@ -477,7 +471,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon3c.agents.zaif-inputs-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon3c/test/futon3c/agents/zaif_inputs_test.clj",
         :run-at "2026-09-03",
         :row :n/R8-zaif-typed-absence,
@@ -485,19 +479,16 @@
       :named-gaps [],
       :substrates
       {:wm [:fresh-green :fresh-green :fresh-green],
-       :zaif [:fresh-green]}}
+       :zaif [:stale-green]}}
      {:node :R14,
-      :verdict :green,
-      :test-files
-      ["futon2/test/futon2/aif/selection_gain_test.clj"
-       "futon2/test/futon2/aif/policy_test.clj"
-       "futon3c/test/futon3c/agents/zaif_inputs_test.clj"],
+      :verdict :blocked,
+      :test-files [],
       :evidence
       [{:substrate :wm,
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.selection-gain-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/selection_gain_test.clj",
         :run-at "2026-09-03",
         :row :n/R14-selection-gain,
@@ -506,7 +497,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.policy-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/policy_test.clj",
         :run-at "2026-09-03",
         :row :n/R14-effective-temperature,
@@ -515,14 +506,14 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon3c.agents.zaif-inputs-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon3c/test/futon3c/agents/zaif_inputs_test.clj",
         :run-at "2026-09-03",
         :row :n/R14-zaif-fold,
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green], :zaif [:fresh-green]}}
+      {:wm [:stale-green :stale-green], :zaif [:stale-green]}}
      {:node :R16,
       :verdict :green,
       :test-files
@@ -563,9 +554,19 @@
     :separate-from-full-run
     "each cited run is one namespace in its own JVM (catalog :test-runs :cmd), not a suite or a tick",
     :caveats
-    [":R6 :n/R6-zaif-controller is stale-green (futon3c/test/futon3c/agents/zaif_controller_test.clj, recorded at 17fde898)"
+    [":R5 :n/R5-zaif-mission-risk is stale-green (futon3c/test/futon3c/agents/zaif_inputs_test.clj, recorded at 17fde898)"
+     ":R6 :n/R6-wm-policy is stale-green (futon2/test/futon2/aif/policy_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-habit-prior is stale-green (futon2/test/futon2/aif/habit_prior_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-posterior-replay is stale-green (futon2/test/futon2/aif/selection_score_readiness_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-zaif-controller is stale-green (futon3c/test/futon3c/agents/zaif_controller_test.clj, recorded at 17fde898)"
+     ":R8 :n/R8-zaif-typed-absence is stale-green (futon3c/test/futon3c/agents/zaif_inputs_test.clj, recorded at 17fde898)"
+     ":R14 :n/R14-selection-gain is stale-green (futon2/test/futon2/aif/selection_gain_test.clj, recorded at 42a957c)"
+     ":R14 :n/R14-effective-temperature is stale-green (futon2/test/futon2/aif/policy_test.clj, recorded at 42a957c)"
+     ":R14 :n/R14-zaif-fold is stale-green (futon3c/test/futon3c/agents/zaif_inputs_test.clj, recorded at 17fde898)"
      ":R16 :n/R16-zaif-witness is stale-green (futon3c/test/futon3c/agents/zai_memory_tool_contract_test.clj, recorded at 17fde898)"],
-    :blocked-on nil},
+    :blocked-on
+    [":R6 has no fresh green per-node test"
+     ":R14 has no fresh green per-node test"]},
    :flag-chain
    {:requires
     ["FUTON_WM_FPI_POSTERIOR=1, checked loudly by selection-law-preconditions! (futon2/scripts/futon2/report/war_machine.clj:227-240)"],
@@ -584,7 +585,7 @@
     :because
     "the flip's flag chain does not name FUTON_WM_MISSION_C, so no mission's completion criteria are read"},
    :per-node-tests
-   {:verdict :green,
+   {:verdict :blocked,
     :nodes
     [{:node :R4,
       :verdict :green,
@@ -608,8 +609,7 @@
       :verdict :green,
       :test-files
       ["futon2/test/futon2/aif/efe_test.clj"
-       "futon2/test/futon2/aif/efe_risk_mode_test.clj"
-       "futon3c/test/futon3c/agents/zaif_inputs_test.clj"],
+       "futon2/test/futon2/aif/efe_risk_mode_test.clj"],
       :evidence
       [{:substrate :wm,
         :exit 0,
@@ -633,26 +633,23 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon3c.agents.zaif-inputs-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon3c/test/futon3c/agents/zaif_inputs_test.clj",
         :run-at "2026-09-03",
         :row :n/R5-zaif-mission-risk,
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green], :zaif [:fresh-green]}}
+      {:wm [:fresh-green :fresh-green], :zaif [:stale-green]}}
      {:node :R6,
-      :verdict :green,
-      :test-files
-      ["futon2/test/futon2/aif/policy_test.clj"
-       "futon2/test/futon2/aif/habit_prior_test.clj"
-       "futon2/test/futon2/aif/selection_score_readiness_test.clj"],
+      :verdict :blocked,
+      :test-files [],
       :evidence
       [{:substrate :wm,
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.policy-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/policy_test.clj",
         :run-at "2026-09-03",
         :row :n/R6-wm-policy,
@@ -661,7 +658,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.habit-prior-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/habit_prior_test.clj",
         :run-at "2026-09-03",
         :row :n/R6-habit-prior,
@@ -670,7 +667,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.selection-score-readiness-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file
         "futon2/test/futon2/aif/selection_score_readiness_test.clj",
         :run-at "2026-09-03",
@@ -688,14 +685,18 @@
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green :fresh-green],
+      {:wm [:stale-green :stale-green :stale-green],
        :zaif [:stale-green]}}],
     :separate-from-full-run
     "each cited run is one namespace in its own JVM (catalog :test-runs :cmd), not a suite or a tick",
     :caveats
-    [":R6 :n/R6-zaif-controller is stale-green (futon3c/test/futon3c/agents/zaif_controller_test.clj, recorded at 17fde898)"
+    [":R5 :n/R5-zaif-mission-risk is stale-green (futon3c/test/futon3c/agents/zaif_inputs_test.clj, recorded at 17fde898)"
+     ":R6 :n/R6-wm-policy is stale-green (futon2/test/futon2/aif/policy_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-habit-prior is stale-green (futon2/test/futon2/aif/habit_prior_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-posterior-replay is stale-green (futon2/test/futon2/aif/selection_score_readiness_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-zaif-controller is stale-green (futon3c/test/futon3c/agents/zaif_controller_test.clj, recorded at 17fde898)"
      ":R4 has a named gap :n/R4-zaif-observation-model on the :zaif substrate, owned by [:U11 :D8 :S7]"],
-    :blocked-on nil},
+    :blocked-on [":R6 has no fresh green per-node test"]},
    :flag-chain
    {:requires
     ["a :choices ruling on the kin relation and the support map -- neither is derivable from a source and both are declared inputs of the flag (futon2/holes/labs/wm-contract/aif-equations.edn:364-369 names kin/patterns/cascade-playout and writes no relation at mission grain)"],
@@ -715,20 +716,17 @@
     :because
     "the flip's flag chain does not name FUTON_WM_MISSION_C, so no mission's completion criteria are read"},
    :per-node-tests
-   {:verdict :green,
+   {:verdict :blocked,
     :nodes
     [{:node :R6,
-      :verdict :green,
-      :test-files
-      ["futon2/test/futon2/aif/policy_test.clj"
-       "futon2/test/futon2/aif/habit_prior_test.clj"
-       "futon2/test/futon2/aif/selection_score_readiness_test.clj"],
+      :verdict :blocked,
+      :test-files [],
       :evidence
       [{:substrate :wm,
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.policy-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/policy_test.clj",
         :run-at "2026-09-03",
         :row :n/R6-wm-policy,
@@ -737,7 +735,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.habit-prior-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/habit_prior_test.clj",
         :run-at "2026-09-03",
         :row :n/R6-habit-prior,
@@ -746,7 +744,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.selection-score-readiness-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file
         "futon2/test/futon2/aif/selection_score_readiness_test.clj",
         :run-at "2026-09-03",
@@ -764,15 +762,14 @@
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green :fresh-green],
+      {:wm [:stale-green :stale-green :stale-green],
        :zaif [:stale-green]}}
      {:node :R8,
       :verdict :green,
       :test-files
       ["futon2/test/futon2/aif/free_energy_test.clj"
        "futon2/test/futon2/aif/policy_free_energy_test.clj"
-       "futon2/test/r8_f_contract_test.clj"
-       "futon3c/test/futon3c/agents/zaif_inputs_test.clj"],
+       "futon2/test/r8_f_contract_test.clj"],
       :evidence
       [{:substrate :wm,
         :exit 0,
@@ -806,7 +803,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon3c.agents.zaif-inputs-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon3c/test/futon3c/agents/zaif_inputs_test.clj",
         :run-at "2026-09-03",
         :row :n/R8-zaif-typed-absence,
@@ -814,19 +811,16 @@
       :named-gaps [],
       :substrates
       {:wm [:fresh-green :fresh-green :fresh-green],
-       :zaif [:fresh-green]}}
+       :zaif [:stale-green]}}
      {:node :R14,
-      :verdict :green,
-      :test-files
-      ["futon2/test/futon2/aif/selection_gain_test.clj"
-       "futon2/test/futon2/aif/policy_test.clj"
-       "futon3c/test/futon3c/agents/zaif_inputs_test.clj"],
+      :verdict :blocked,
+      :test-files [],
       :evidence
       [{:substrate :wm,
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.selection-gain-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/selection_gain_test.clj",
         :run-at "2026-09-03",
         :row :n/R14-selection-gain,
@@ -835,7 +829,7 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.policy-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon2/test/futon2/aif/policy_test.clj",
         :run-at "2026-09-03",
         :row :n/R14-effective-temperature,
@@ -844,19 +838,28 @@
         :exit 0,
         :catalog-status :exists,
         :ns "futon3c.agents.zaif-inputs-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file "futon3c/test/futon3c/agents/zaif_inputs_test.clj",
         :run-at "2026-09-03",
         :row :n/R14-zaif-fold,
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green], :zaif [:fresh-green]}}],
+      {:wm [:stale-green :stale-green], :zaif [:stale-green]}}],
     :separate-from-full-run
     "each cited run is one namespace in its own JVM (catalog :test-runs :cmd), not a suite or a tick",
     :caveats
-    [":R6 :n/R6-zaif-controller is stale-green (futon3c/test/futon3c/agents/zaif_controller_test.clj, recorded at 17fde898)"],
-    :blocked-on nil},
+    [":R6 :n/R6-wm-policy is stale-green (futon2/test/futon2/aif/policy_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-habit-prior is stale-green (futon2/test/futon2/aif/habit_prior_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-posterior-replay is stale-green (futon2/test/futon2/aif/selection_score_readiness_test.clj, recorded at 42a957c)"
+     ":R6 :n/R6-zaif-controller is stale-green (futon3c/test/futon3c/agents/zaif_controller_test.clj, recorded at 17fde898)"
+     ":R8 :n/R8-zaif-typed-absence is stale-green (futon3c/test/futon3c/agents/zaif_inputs_test.clj, recorded at 17fde898)"
+     ":R14 :n/R14-selection-gain is stale-green (futon2/test/futon2/aif/selection_gain_test.clj, recorded at 42a957c)"
+     ":R14 :n/R14-effective-temperature is stale-green (futon2/test/futon2/aif/policy_test.clj, recorded at 42a957c)"
+     ":R14 :n/R14-zaif-fold is stale-green (futon3c/test/futon3c/agents/zaif_inputs_test.clj, recorded at 17fde898)"],
+    :blocked-on
+    [":R6 has no fresh green per-node test"
+     ":R14 has no fresh green per-node test"]},
    :flag-chain
    {:requires
     ["the beta/F_pi chain; the coupling is checked by variational-tau-preconditions!"],
@@ -881,15 +884,13 @@
     :nodes
     [{:node :R9,
       :verdict :green,
-      :test-files
-      ["futon2/test/futon2/aif/r9_named_validation_test.clj"
-       "futon2/test/r9_independence_test.clj"],
+      :test-files ["futon2/test/r9_independence_test.clj"],
       :evidence
       [{:substrate :wm,
         :exit 0,
         :catalog-status :exists,
         :ns "futon2.aif.r9-named-validation-test",
-        :state :fresh-green,
+        :state :stale-green,
         :test-file
         "futon2/test/futon2/aif/r9_named_validation_test.clj",
         :run-at "2026-09-03",
@@ -915,11 +916,12 @@
         :head-at "17fde898"}],
       :named-gaps [],
       :substrates
-      {:wm [:fresh-green :fresh-green], :zaif [:typed-stale]}}],
+      {:wm [:stale-green :fresh-green], :zaif [:typed-stale]}}],
     :separate-from-full-run
     "each cited run is one namespace in its own JVM (catalog :test-runs :cmd), not a suite or a tick",
     :caveats
-    [":R9 :n/R9-zaif-authorship is typed-stale (futon3c/test/futon3c/agents/zai_api_test.clj, recorded at 17fde898)"],
+    [":R9 :n/R9-named-validation is stale-green (futon2/test/futon2/aif/r9_named_validation_test.clj, recorded at 42a957c)"
+     ":R9 :n/R9-zaif-authorship is typed-stale (futon3c/test/futon3c/agents/zai_api_test.clj, recorded at 17fde898)"],
     :blocked-on nil},
    :flag-chain
    {:requires
@@ -931,7 +933,7 @@
     :blocked-on
     [":requires names no environment flag, so the chain cannot be derived; the declared requirement is carried verbatim: [\"the U14e-1..4 packets landed and their census taken; a separate queued-J decision\"]"]}}},
  :emitted-by "futon2/holes/labs/wm-contract/flip_readiness_check.bb",
- :emitted-at "2026-09-12",
+ :emitted-at "2026-09-18",
  :sources
  {:catalog
   "futon2/holes/labs/wm-contract/runs/RUNTIME-VALIDATION-CATALOG.edn",
@@ -945,9 +947,9 @@
  :whole-tree-lines
  {:contract-pin
   {:verdict :green,
-   :contract-authority "bf79f988b3131701ff9ed257d371cc45dd5eea5b",
+   :contract-authority "480a666ad27c18477b4b9df86e11862be3930d50",
    :holes-last-content-change
-   "bf79f988b3131701ff9ed257d371cc45dd5eea5b",
+   "480a666ad27c18477b4b9df86e11862be3930d50",
    :comparand
    "the last commit that touched DarkTower/WarMachine/Holes.lean, not mathlib HEAD (C175)",
    :comparand-read-from :live-git,
@@ -1057,17 +1059,21 @@
    :blocked-on
    ["M-expressions-of-interest measures 0 of 6 criteria (reasons: no-producer)"]}},
  :verdicts
- {:fpi-posterior {:verdict :blocked, :blocked-on [:box2-holes]},
+ {:fpi-posterior
+  {:verdict :blocked, :blocked-on [:box2-holes :per-node-tests]},
   :guide-gate
   {:verdict :blocked, :blocked-on [:box2-holes :flag-chain]},
   :mission-c
   {:verdict :blocked, :blocked-on [:box2-holes :mission-gauges]},
   :selection-law
-  {:verdict :blocked, :blocked-on [:box2-holes :flag-chain]},
+  {:verdict :blocked,
+   :blocked-on [:box2-holes :per-node-tests :flag-chain]},
   :task-belief-ladder
-  {:verdict :blocked, :blocked-on [:box2-holes :flag-chain]},
+  {:verdict :blocked,
+   :blocked-on [:box2-holes :per-node-tests :flag-chain]},
   :tau-variational
-  {:verdict :blocked, :blocked-on [:box2-holes :flag-chain]},
+  {:verdict :blocked,
+   :blocked-on [:box2-holes :per-node-tests :flag-chain]},
   :zaif-u14e
   {:verdict :blocked, :blocked-on [:box2-holes :flag-chain]}},
  :nothing-is-flipped

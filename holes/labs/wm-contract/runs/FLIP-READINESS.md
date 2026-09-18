@@ -17,12 +17,12 @@ checker refuses if the committed text and its own derivation disagree.
 
 <!-- BEGIN flip_readiness_check -->
 ```
-FLIP fpi-posterior    BLOCKED-ON [box2-holes]
+FLIP fpi-posterior    BLOCKED-ON [box2-holes per-node-tests]
 FLIP guide-gate       BLOCKED-ON [box2-holes flag-chain]
 FLIP mission-c        BLOCKED-ON [box2-holes mission-gauges]
-FLIP selection-law    BLOCKED-ON [box2-holes flag-chain]
-FLIP task-belief-ladder BLOCKED-ON [box2-holes flag-chain]
-FLIP tau-variational  BLOCKED-ON [box2-holes flag-chain]
+FLIP selection-law    BLOCKED-ON [box2-holes per-node-tests flag-chain]
+FLIP task-belief-ladder BLOCKED-ON [box2-holes per-node-tests flag-chain]
+FLIP tau-variational  BLOCKED-ON [box2-holes per-node-tests flag-chain]
 FLIP zaif-u14e        BLOCKED-ON [box2-holes flag-chain]
 GATE: 7 flips | 0 READY | 7 BLOCKED | lines per flip: contract-pin box2-holes figure5-partials mission-gauges per-node-tests flag-chain
 ```
