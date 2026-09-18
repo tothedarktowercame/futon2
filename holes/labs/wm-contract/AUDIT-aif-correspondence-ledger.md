@@ -77,6 +77,22 @@ out of scope). "Producer" = what the live path calls today.
 | :state-belief-update | R3-cat | OPEN — new Lean row needed | OPEN | OPEN | exact categorical update |
 | :likelihood-precision | R7-ζ | OPEN — new Lean row needed | OPEN (declared 09-17, fe55a1a0) | OPEN | Gibbs inverse temperature on A |
 
+**PRIORITY REORDER (Joe, 2026-09-18, second ruling):** the theory layer
+comes first; "there's no point in looking at the Clojure implementation"
+until the terms and their types are down in Lean and the formalism is
+declared. Legs B and C are deferred behind the term census. The census
+module now exists: `mathlib4:DarkTower/AIF/Terms.lean` (darktower
+`a528d14c74`, lake build green, zero sorries) — declared formalism (finite
+discrete AIF; Markov categories considered and not adopted, upgrade path
+recorded), A/B/D identified with audited carriers, **C defined**
+(`Preference`, step-indexed log-preference family — T-C's definition half),
+**E defined** (`Habit`, with `Habit.uniform` naming the E=1 reduction Joe
+is dubious of), G and the policy posterior wrapped over census types. The
+institutional half of C is recorded in the module as an OPEN typed
+adjudication. Terms absent from the census are findings — the standing
+example (claude-4's): G exists in Clojure but risk is never computed there
+as its own term.
+
 ## Terms (fundamental AIF concepts and variables)
 
 **Correction 2026-09-18 (Joe):** the first version of this ledger kept C off
