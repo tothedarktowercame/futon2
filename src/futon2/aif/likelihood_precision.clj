@@ -2,13 +2,16 @@
   "R7: likelihood precision ζ as a Gibbs inverse temperature on the likelihood
    A, DECLARED as a named quantity — distinct from policy precision γ (R14).
 
-  What exists on the live tick today (2026-09-18 census, efe.clj
-  rank-cascade-actions → cascade_model_manifest/horizon-g-sparse at
-  :rates :zero-adjudication-identity): at zero adjudication rates A is the
-  identity kernel (Lean tokenLikelihood_checkable), so no likelihood matrix
-   is ever evaluated and the ambiguity term is identically 0. Whatever ζ the
-   machine 'uses' is therefore implicit and vacuous — this namespace names it
-   as a FIXED declaration rather than leaving it undeclared.
+  What exists on the live tick today (2026-09-18, after
+  22ad77ea/021f129b/e26c31fb): efe/rank-cascade-actions no longer hardcodes
+  zero rates — :adjudication-rates and :zeta on the scoring opts reach the
+  factorized scorer, and absent both the call defaults EXPLICITLY to the
+  identity kernel (zero rates: A is the identity kernel, Lean
+  tokenLikelihood_checkable, so no likelihood matrix is evaluated, the
+  ambiguity term is identically 0, and ζ multiplies nothing — declared
+  FIXED-VACUOUS on that path; see `zeta-declaration` and its
+  :certificate-statuses). No production caller SOURCES real rates from
+  futon2.aif.observation-rates yet; that sourcing is the next WIRE slice.
 
   What this namespace does NOT do: choose a prior or update law for ζ. Parr
    2022 B.14–B.19 gamma-prior/fixed-point machinery is pinned in futon2 only
@@ -199,8 +202,31 @@
     :legacy-weight-exponent-kappa {:ns "futon2.aif.belief"
                                    :law "κ(w) = log₂(1+w) applied to A rows"
                                    :meaning "legacy channel-weight exponent; retained in belief.clj, not reinterpreted as ζ"}}
-   :wiring {:tempered-rates "tempered-rates — effective rates whose token-likelihood IS A_ζ (verified against temper-row of the enumerating observation-distribution); applicable to any consumer of rates: observation-distribution, predict-observations (Q(o|π)), horizon-g and WIRE-4's horizon-g-sparse factorized path"
-            :demonstration "RUN-r7-zeta-effect-2026-09-18 (futon2/holes/labs/wm-contract/): recorded run showing a declared FIXED ζ measurably changing Q(o|π) and G through predict-observations and horizon-g at non-zero adjudication rates"
-            :status "ζ is DECLARED FIXED (value 1 on the live identity path; the demonstration fixes other values explicitly); no prior/update law is invented"}
+   :wiring {:tempered-rates "tempered-rates — effective rates whose token-likelihood IS A_ζ (verified against temper-row of the enumerating observation-distribution); applicable to any consumer of rates: observation-distribution, predict-observations (Q(o|π)), horizon-g and horizon-g-sparse's factorized path"
+            :demonstration "RUN-r7-zeta-effect-2026-09-18 (futon2/holes/labs/wm-contract/): recorded run showing a declared FIXED ζ measurably changing Q(o|π) and G through predict-observations, horizon-g and (addenda 2) the full efe/rank-actions tick path"
+            :status "ζ is DECLARED FIXED (1 on the default identity path; other values declared explicitly per call); no prior/update law is invented"}
+   ;; The SINGLE SOURCE of the GCertificate's ζ-provenance vocabulary
+   ;; (claude-4 ruling, 2026-09-18): cascade-model-manifest's certificate
+   ;; reads these keywords from here rather than restating them, so the
+   ;; declaration and the certificate cannot drift apart. A declaration
+   ;; EXISTS on the identity path too — the fixed ζ is vacuous there, not
+   ;; absent — and the certificate must carry that distinction the same way
+   ;; WIRE-2's :computed-not-attached carries it for F.
+   :certificate-statuses
+   {:identity-path :declared-fixed-vacuous
+    :tempered-path :declared-fixed-applied
+    :absent :absent}
    :gaps ["no production caller SOURCES real adjudication rates yet: futon2.aif.observation-rates is built with zero live consumers, and until a tick caller passes :adjudication-rates the live run still defaults to the identity kernel (an explicit default now, not a hardcode) — that sourcing is the next WIRE slice"
           "no gamma prior or B.14–B.19-style posterior update for ζ is pinned (R7-2 open; ζ is declared FIXED, which the checklist accepts as such)"]})
+
+(def zeta-certificate-statuses
+  "The GCertificate's ζ-provenance vocabulary, EXTRACTED from
+   `zeta-declaration`'s :certificate-statuses at load time — the declaration
+   is the single source; cascade-model-manifest's certificate reads these
+   keywords from here rather than restating them, so the two cannot drift.
+   :identity-path is declared-fixed-VACUOUS (the declaration exists; the
+   identity kernel evaluates no likelihood matrix, so ζ multiplies nothing),
+   :tempered-path is declared-fixed-APPLIED, :absent is reserved for a future
+   run where ζ was never considered — the three states stay distinguishable."
+  (:certificate-statuses zeta-declaration))
+

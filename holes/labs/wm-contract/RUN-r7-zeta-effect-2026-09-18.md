@@ -129,3 +129,22 @@ What remains open, named in `zeta-declaration`: no production caller SOURCES
 real rates from `futon2.aif.observation-rates` yet (built, zero live
 consumers). That sourcing is the next WIRE slice; R7's own clauses — Lean
 statement, aligned runtime, demonstrated effect on Q(o|π) and G — are met.
+
+## Addendum 3 (2026-09-18): the declaration rides the default path too
+
+Claude-4's echo gap, closed: the GCertificate now carries `:zeta-status`
+alongside `:zeta`. On the identity path it reads
+`:declared-fixed-vacuous` — the fixed ζ EXISTS there and is vacuous (no
+likelihood matrix is evaluated), which is a different fact from ζ never being
+considered (`:absent`, reserved). The tempered path reads
+`:declared-fixed-applied`. The status keywords are SOURCED from
+`zeta-declaration`'s `:certificate-statuses` (via
+`likelihood-precision/zeta-certificate-statuses`), so the certificate and the
+declaration cannot drift apart — the same discipline as WIRE-2's
+`:computed-not-attached` for F. Also fixed: the tick path passed `:zeta nil`
+explicitly when the opts lacked it, which masked the scorer's default of 1 —
+now `(get opts :zeta 1)`; a default-path certificate reads
+`{:zeta 1, :zeta-status :declared-fixed-vacuous}`. The ns docstring's stale
+"implicit and vacuous / R7-3 open" narrative is rewritten to the current
+wired state (the census files' dated quotes are historical records and stay
+as they are).

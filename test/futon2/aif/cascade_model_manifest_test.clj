@@ -1060,4 +1060,14 @@
     (is (= :factorized-nonzero-rates (:evaluation tempered)))
     ;; default ζ is 1 and an identity-kernel run is never marked tempered
     (is (= 1 (:zeta plain)))
-    (is (false? (:zeta-tempered? plain)))))
+    (is (false? (:zeta-tempered? plain)))
+    ;; the DECLARATION is echoed, not just the number (claude-4 ruling
+    ;; 2026-09-18): a fixed ζ on the identity path is VACUOUS, not absent —
+    ;; three states, all distinguishable, keywords SOURCED from
+    ;; zeta-declaration so the certificate and the declaration cannot drift.
+    (is (= :declared-fixed-vacuous (:zeta-status plain)))
+    (is (= :declared-fixed-applied (:zeta-status tempered)))
+    (is (= (:identity-path lp/zeta-certificate-statuses) (:zeta-status plain)))
+    (is (= (:tempered-path lp/zeta-certificate-statuses) (:zeta-status tempered)))
+    (is (not= :absent (:zeta-status plain)))
+    (is (not= :absent (:zeta-status tempered)))))

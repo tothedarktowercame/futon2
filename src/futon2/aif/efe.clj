@@ -1145,7 +1145,10 @@
                                   ;; R7: the declared FIXED zeta rides the
                                   ;; opts through to the scorer (default 1,
                                   ;; byte-identical when absent).
-                                  :zeta (:zeta opts)
+                                  ;; R7: get, not (:zeta opts) — an
+                                  ;; explicit nil must never override
+                                  ;; the declared default of 1.
+                                  :zeta (get opts :zeta 1)
                                   :universe universe})
                                 f-raw (when (and (not fe-refusal?)
                                                  (not (contains? excluded-ids (:id action))))

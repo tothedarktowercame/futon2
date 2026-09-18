@@ -924,6 +924,18 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                      :zeta (get m :zeta 1)
                      :zeta-tempered? (and (not (zero-rates? (:rates m)))
                                           (not= 1 (get m :zeta 1)))
+                     ;; R7 (claude-4 ruling 2026-09-18): the DECLARATION is
+                     ;; echoed, not just the number — on the identity path a
+                     ;; fixed ζ exists and is VACUOUS (no likelihood matrix
+                     ;; is evaluated), which is a different fact from ζ never
+                     ;; being considered. The keywords are SOURCED from
+                     ;; likelihood-precision/zeta-declaration's
+                     ;; :certificate-statuses so this cannot drift from the
+                     ;; declaration (same discipline as WIRE-2's
+                     ;; :computed-not-attached for F).
+                     :zeta-status (if (zero-rates? (:rates m))
+                                    (:identity-path lprec/zeta-certificate-statuses)
+                                    (:tempered-path lprec/zeta-certificate-statuses))
                      :universe-size (count (:rates m))}})))
 
 ;; ===== WM-02 design P12: the stored belief as the exact categorical posterior =====

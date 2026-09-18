@@ -397,6 +397,11 @@
            (get-in (meta base) [:cascade-scoring :rates])))
     (is (= :identity-A-zero-rates
            (:evaluation (:certificate (first base)))))
+    ;; the declaration rides the default path too: fixed ζ, VACUOUS not
+    ;; absent (claude-4 ruling 2026-09-18)
+    (is (= 1 (:zeta (:certificate (first base)))))
+    (is (= :declared-fixed-vacuous (:zeta-status (:certificate (first base)))))
+    (is (= :declared-fixed-applied (:zeta-status (:certificate (first tempered)))))
     ;; declared rates: the factorized path, meta says so
     (is (= :declared-adjudication-rates
            (get-in (meta scored) [:cascade-scoring :rates])))
