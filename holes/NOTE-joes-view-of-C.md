@@ -128,6 +128,19 @@ moved (E-C-vector-live's non-negotiable exit condition).
 production requirers — one test, nothing else. The most Joe-derived C
 artifact in the tree is not connected to anything.
 
+**Do not conflate with capability zones [Joe, 2026-09-18, third sitting]:**
+the 3-D capability-zones partition (`capability_zones.clj`; plop-2026's
+"Capability Zones over the Embedded Landscape", formally excluded there on
+the 79% projection-disagreement figure) **predates** both the recent
+embedding work and the interview this note records. [QUOTE] "the 3D
+partition very much predates recent work on embeddings and the interview
+with me about my views ... claude-4 seems to have decided that embeddings
+don't apply and has reasoned based on the 3D property but that's rather an
+irrelevant detail ... which doesn't reflect my own [thought process]."
+The exclusion verdict is about that older prototype's coordinates; it is
+not evidence for or against Embedding Live as the depiction of this
+section's three sources.
+
 ## 4. Standing rulings and rejections (2026-09-18 unless dated)
 
 - [QUOTE] "I don't want to restore anything. I want a correct model." (Bears
