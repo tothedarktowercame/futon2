@@ -5,10 +5,11 @@
   the scalar G is byte-identical to the pre-slice path; a refused
   computation emits no certificate — the refusal IS the record."
   (:require [clojure.test :refer [deftest is testing]]
-            [clojure.set :as cset]
+            [clojure.set :as cset :refer [subset?]]
             [futon2.aif.cascade-model-manifest :as m]
             [futon2.aif.likelihood-precision :as lp]
             [futon2.aif.cascade-selection :as cs]
+            [futon2.aif.policy :as policy]
             [futon2.aif.efe :as efe]))
 
 (def pattern-text "  + IF: ready and not blocked\n  + HOWEVER: stalled\n  + THEN: produce evidence\n  + BECAUSE: test\n")
@@ -436,3 +437,93 @@
     (is (= :invalid-adjudication-rates (:kind r)))
     (is (= 1 (count (:missing r))))
     (is (= missing-token (first (:missing r))))))
+
+;; ===== WM-06 phase 1: zero-preference CONCLUSION preserved on both paths =====
+;; D-ZERO-PATH ruling (claude-4, 2026-09-18): the two evaluation paths cannot
+;; share a MECHANISM because their supports differ (identity Q is point
+;; support, so only the offender reaches the zeroed outcome; under real rates
+;; Q has full support, so every candidate does). "Preserved" means the
+;; CONCLUSION — a zeroed outcome is never selected — with each mechanism
+;; asserted separately. The factorized family refusal is the ruled behaviour
+;; (option a; claude-12 independently endorsed it: an infinity does not rank
+;; one candidate, it invalidates the comparison).
+
+(def pz-pattern
+  {:id :pz :produces #{"zed"}
+   :guard {:status :interpreted
+           :clauses [{:status :interpreted
+                      :present #{"ready"} :absent #{"zed"}}]}})
+
+(defn- wm06-family
+  "One candidate that reaches the zeroed outcome {ready zed} at tau 1, one
+  (the empty cascade) that never does."
+  []
+  {:q0 (m/observed-belief #{"ready"})
+   :candidates [{:kind :cascade-candidate :id :offender :precedence [pz-pattern]}
+                {:kind :cascade-candidate :id :safe :precedence []}]
+   :spec {:want #{["t" "evidence"]}
+          :evidence #{"ready"}
+          :lam 1 :mu 1
+          :zeroed #{#{"ready" "zed"}}}})
+
+(deftest wm06-zero-preference-conclusion-holds-on-the-identity-path
+  (let [{:keys [q0 candidates spec]} (wm06-family)
+        ranked (efe/rank-cascade-actions {:cascade-belief q0}
+                                         candidates
+                                         {:horizon-steps 1 :cascade-spec spec})
+        by-id (into {} (map (juxt :cascade-id identity)) ranked)
+        decision (policy/select-action-cascades ranked {:beta 1})]
+    ;; mechanism (identity): the offender ALONE is excluded — its G is the
+    ;; :infinite record, its certificate stops at the infinite step, and the
+    ;; safe candidate scores normally.
+    (is (= :infinite (:G-efe (:offender by-id))))
+    (is (= :infinite (:total (:certificate (:offender by-id)))))
+    (is (number? (:G-efe (:safe by-id))))
+    ;; CONCLUSION: the zeroed outcome's candidate is never selected —
+    ;; selection-posterior gives it exactly 0 and chooses the safe one.
+    (is (= 0.0 (get-in decision [:selection-law :posterior
+                                 (:action (:offender by-id))])))
+    (is (= :safe (get-in decision [:action :id])))))
+
+(deftest wm06-zero-preference-conclusion-holds-on-the-factorized-path
+  (let [{:keys [q0 candidates spec]} (wm06-family)
+        universe #{"ready" "evidence" "zed" ["t" "evidence"]}
+        ranked (efe/rank-cascade-actions
+                {:cascade-belief q0} candidates
+                {:horizon-steps 1
+                 :cascade-spec spec
+                 :adjudication-rates (zipmap universe
+                                             (repeat {:false-neg 1/8
+                                                      :false-pos 0}))})]
+    ;; mechanism (factorized, ruled): under full-support Q EVERY candidate
+    ;; puts positive mass on the zeroed outcome, so the whole family refuses
+    ;; typed — the refusal IS each entry's G, no certificate is fabricated.
+    (is (vector? ranked))
+    (doseq [entry ranked]
+      (is (= :missing (:status (:G-efe entry))))
+      (is (= :zeroed-unsupported-with-rates (:kind (:G-efe entry))))
+      (is (= ##Inf (:controller-score entry)))
+      (is (nil? (:certificate entry))))
+    ;; CONCLUSION: nothing admissible is selected — the selection layer's
+    ;; own typed refusal (thrown, like every selection refusal), never a
+    ;; default ranking past the infinities.
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Cascade selection refused"
+                          (policy/select-action-cascades ranked {:beta 1})))
+    (is (= :no-admissible-candidate
+           (try (policy/select-action-cascades ranked {:beta 1})
+                (catch clojure.lang.ExceptionInfo e
+                  (:kind (:refusal (ex-data e)))))))))
+
+(deftest wm06-domain-guard-structural-note-at-the-tick
+  ;; C-1, stated honestly: the tick's universe construction UNIONS q0's
+  ;; support into the scored universe, so :q-support-outside-c-universe is
+  ;; structurally unreachable from rank-cascade-actions — the guard protects
+  ;; direct callers, and this control pins the invariant that keeps it so:
+  ;; every positive-mass q0 state is inside the universe the tick scored.
+  (let [{:keys [q0 candidates spec]} (wm06-family)
+        ranked (efe/rank-cascade-actions {:cascade-belief q0}
+                                         candidates
+                                         {:horizon-steps 1 :cascade-spec spec})
+        universe (get-in (meta ranked) [:cascade-scoring :universe])]
+    (is (every? #(subset? % universe) (map key q0))
+        "every q0 support state is a subset of the scored universe")))

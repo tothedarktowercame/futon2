@@ -84,7 +84,16 @@
     (let [f (:f c)]
       (when-not (and (number? f) (Double/isFinite (double f)))
         (refuse! :invalid-free-energy {:id (:id c) :f f}))))
-  (let [finite-g? (fn [c] (and (number? (:g c)) (not (Double/isNaN (double (:g c))))))
+  (let [;; WM-06 C-4 (2026-09-18): a numeric ##Inf G is EReal ⊤ arriving as a
+        ;; double, not as the :infinite keyword — the same hole the F fix
+        ;; above closed one field over. rank-cascade-actions attaches ##Inf
+        ;; as controller-score for every refused/infinite G, so under the
+        ;; ruled zeroed-under-rates family refusal (D-ZERO-PATH a) ALL
+        ;; candidates arrive at ##Inf, every score is -Inf, log-sum-exp
+        ;; divides -Inf by -Inf and the posterior is NaN — while the caller
+        ;; still receives a tie-broken decision. Not-finite G is infinite G.
+        finite-g? (fn [c] (and (number? (:g c))
+                               (Double/isFinite (double (:g c)))))
         finite (filter finite-g? candidates)
         infinite (remove finite-g? candidates)]
     (when (empty? finite)
