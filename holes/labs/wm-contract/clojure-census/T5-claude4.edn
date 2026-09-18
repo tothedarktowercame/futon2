@@ -1,0 +1,158 @@
+;; T5 — claude-4 testimony for F and Q (:policy-free-energy, :belief-state,
+;; :belief-update). Paired with D5. Schema: STUDY.md (futon2 3cc3dcc2).
+;;
+;; Third cluster running to the same shape as T3 and T4: both producers are
+;; built, Lean-cited, theorem-backed, and have no production caller. For F the
+;; gap is two lines of wiring, not a computation — cascade-free-energy already
+;; returns F_pi KEYED BY CANDIDATE ID, which is the exact shape
+;; select-action-cascades' :f consumes, and it already records the run data the
+;; Holes attestation asks for.
+
+{:testimony :T5
+ :cluster :F-and-Q
+ :terms
+ [{:term :policy-free-energy
+   :no-plans? false
+   :planned
+   [{:var "name not yet chosen"
+     :wm-item "WM-11-delivery"
+     :status :planned
+     :note (str "WM-11-delivery's acceptance names 'applicable F/posterior'. "
+                "needs-owner, NO owner. What is missing is not F — it is the "
+                "call site: something on the tick must invoke "
+                "cascade-free-energy/policy-free-energy and put its per-candidate "
+                "F onto the ranked entries before policy/select-action-cascades "
+                "reads (or (:f e) 0).")
+     :inputs ["q0" "candidates with :id and :precedence" "tau" "observed-tokens" "rates"]
+     :depends-on ["WM-10-delivery" "WM-07-delivery"]}]
+   :claims-built
+   [{:var "futon2.aif.cascade-free-energy/policy-free-energy" :wm-item "WM-11-delivery"
+     :note (str "Returns {:f {candidate-id F-or-refusal} :tau tau :params {...}} "
+                "— F_pi PER CANDIDATE ID, which is exactly the keying "
+                "select-action-cascades needs. :params records every declared "
+                "input: :q0, :rates, :observed (restricted to the rate universe), "
+                ":universe, :theta per candidate from with-pattern-theta's "
+                "recorded default, and :complexity-term 0 WITH ITS REASON — "
+                "'exact inference over the finite powerset carrier: the "
+                "variational posterior is the rollout itself, so B.2 holds with "
+                "equality (PolicyVariationalFreeEnergy.vfe_posterior_eq)'. A "
+                "declared zero with a cited theorem, not a silent default.")}]
+   :wiring
+   {:reaches-selection? false
+    :consumers "its own test only (test/futon2/aif/cascade_free_energy_test.clj); no src or scripts caller"
+    :note
+    (str "The ns docstring says 'Categorical cascade F_pi for the "
+         "policy-precision learner', so it was written naming a different "
+         "consumer than selection. But the quantity and the keying are what "
+         "selection wants. Treating it as a separate lane would duplicate it; "
+         "the honest reading is one F with two would-be consumers and zero "
+         "actual ones.")}
+   :lean-attestation-note
+   (str "Holes.lean:7974 policyPosteriorImportsPolicyF wants 'a run record whose "
+        "Q(pi) carries a per-policy F term alongside E'. policy-free-energy "
+        "already emits per-policy F with every declared input recorded. So that "
+        "attestation's evidence is close to producible today: call it on the "
+        "tick, pass :f through, and emit both :f and :habit on the decision. "
+        "That is the same shape as the beta attestation in T2, where "
+        ":beta {:value .. :status :declared} is already emitted.")}
+
+  {:term :belief-state
+   :no-plans? true
+   :planned []
+   :claims-built
+   [{:var "futon2.aif.cascade-model-manifest/observed-belief" :wm-item "WM-02-delivery"
+     :note "point mass at the observed token state (observedBelief_sum). What the live path uses as q0."}
+    {:var "futon2.aif.cascade-model-manifest/independent-belief" :wm-item "WM-02-delivery"
+     :note "non-degenerate D, built, unused on the live path (see T3)"}
+    {:var "futon2.aif.cascade-model-manifest/token-belief-at" :wm-item "WM-02-delivery"
+     :note (str "Lean ExactBeliefTrajectory.tokenBeliefAt over the approved "
+                "carriers P2-P5: mu_0 is observed-belief (P4); step k pushes the "
+                "current belief through cascade-kernel with (precedence-fn k) "
+                "(P3) and THEN CONDITIONS on (observations (inc k)) with "
+                "token-likelihood (P5) via exact-update. Exact rationals; "
+                "refusals propagate and are carried forward for all later t "
+                "(exactBeliefAt's Option.none).")}]}
+
+  {:term :belief-update
+   :no-plans? false
+   :planned
+   [{:var "not named — Lean-first, no Clojure producer named"
+     :wm-item "R3"
+     :status :planned
+     :note (str "The ledger row :state-belief-update / R3-cat reads 'OPEN — new "
+                "Lean row needed' on the theory leg and OPEN on both others, "
+                "described as 'exact categorical update'. I am flagging rather "
+                "than resolving a tension for claude-12 to adjudicate: an exact "
+                "categorical update ALREADY exists in both Lean "
+                "(ExactBeliefTrajectory.exactUpdate, with exactUpdate_dist and "
+                "exactUpdate_eq_none_iff) and Clojure (exact-update), and is "
+                "contract-registered in MachineContracts.lean. So either R3-cat's "
+                "'new Lean row needed' means a different obligation from what "
+                "ExactBeliefTrajectory supplies — the P9 categorical successor as "
+                "a CHECKLIST row rather than as a missing definition — or the "
+                "ledger row is understating what exists. I cannot tell which from "
+                "the DAG, and it is your call.")
+     :inputs ["A" "B" "prior" "observation"]
+     :depends-on ["a decision on whether ExactBeliefTrajectory already discharges R3-cat"]}]
+   :claims-built
+   [{:var "futon2.aif.cascade-model-manifest/exact-update" :wm-item "WM-02-delivery"
+     :note (str "Lean ExactBeliefTrajectory.exactUpdate: s -> A(o|s)·(B q_prev)(s) "
+                "/ P(o), P(o) = Sum_x A(o|x)·(B q_prev)(x) "
+                "(observationProbability). Exact rationals. Returns a belief map "
+                "summing to 1 (exactUpdate_dist), or the typed "
+                "{:status :missing :kind :zero-predictive-probability} EXACTLY "
+                "when P(o) = 0 (exactUpdate_eq_none_iff).")}]
+   :wiring
+   {:reaches-live-path? false
+    :consumers "none in src or scripts; only cascade_model_manifest's own callers inside token-belief-at"
+    :note
+    (str "This confirms D3's finding from the other side. The observation-"
+         "conditioned update is BUILT and contract-bound; the live path simply "
+         "never calls it. efe/rank-cascade-actions uses cascade-manifest/rollout, "
+         "which pushes q0 forward through the transition kernel and never "
+         "conditions on an observation. So live beliefs are predictions from q0, "
+         "as D3 found — not because conditioning is unimplemented, but because "
+         "the conditioning path has no caller.")}}]
+
+ :cluster-pattern
+ {:finding
+  (str "Fourth cluster in a row where the producer exists and the caller does "
+       "not. T3: non-degenerate A/B/D built, degenerate special cases passed. "
+       "T4: :weights consumer built, live-c built, :c-fn-pointwise parameter "
+       "built — none called. T5: per-candidate F built with the exact keying "
+       "selection wants, exact categorical update built and contract-bound — "
+       "neither called. The WM's recurring shape is not missing mathematics. It "
+       "is missing call sites, plus one real scale problem (the powerset "
+       "enumeration in T3) that forces the degenerate path.")
+  :caution
+  (str "I am aware this pattern is now flattering to the codebase and I have "
+       "asserted it four times. If D5's census finds a caller I missed, the "
+       "pattern is weaker than I have stated and the earlier testimonies should "
+       "be re-read with that in mind. My checks were grep over src/scripts/test "
+       "for qualified calls, which misses dynamic resolution "
+       "(requiring-resolve, var indirection) — the futon3c watcher lane uses "
+       "exactly that trick to reach futon2, so it is not a hypothetical miss.")}
+
+ :grounding
+ ["p4ng/wm-walkthroughs/build-loop/closure/closure-dag.json (r79): LF-policy-free-energy, LF-belief-state, LF-belief-update, R1, R3, WM-02-delivery, WM-11-delivery — states and owner fields read directly; all needs-owner or accepted, none carries an :owner"
+  "futon2/holes/labs/wm-contract/AUDIT-aif-correspondence-ledger.md lines 76-77 (:state-prediction-error R3a-cat, :state-belief-update R3-cat — both 'OPEN — new Lean row needed')"
+  "futon2/src/futon2/aif/cascade_free_energy.clj (ns docstring; policy-free-energy 69, with its :params record)"
+  "futon2/src/futon2/aif/cascade_model_manifest.clj (observed-belief 114, independent-belief 124, exact-update 664, token-belief-at 692, rollout 298)"
+  "futon2/src/futon2/aif/policy.clj (select-action-cascades reads (or (:f e) 0) and (or (:habit e) 1))"
+  "futon2/src/futon2/aif/efe.clj (rank-cascade-actions: builds candidates via rollout, emits no :f and no :habit)"
+  "mathlib4 DarkTower/WarMachine/Holes.lean:7974 (policyPosteriorImportsPolicyF)"]
+
+ :dag-corrections
+ [{:node "R1 and R3"
+   :field :aligned-clojure
+   :status :path-rot
+   :note (str "Both record 'exact-update :620, token-belief-at :648'; actual are "
+              "664 and 692. These are the SAME two drifts the Lean locus rebaser "
+              "reports (exactUpdate 620->664, tokenBeliefAt 648->692), so the DAG "
+              "and MachineContracts.lean rotted together off the same edits. "
+              "Third path-rot instance I have found in the DAG across T2-T5.")}]
+
+ :caveats
+ ["No :origin :conversation entries."
+  "The R3-cat tension above is flagged, not resolved. I have no basis to say whether ExactBeliefTrajectory discharges the P9 categorical successor row."
+  "Consumer counts are from grep for qualified calls over src, scripts and test. Dynamic resolution would not show up."]}
