@@ -484,3 +484,48 @@ real fingerprint instead of tripping — but a sha mismatch still trips"
         (is (seq (#'tripwire/t10 {:phase :opportunity :transition :start
                                   :composition/current diff-sha}))
             "sha mismatch is real evidence even with an empty baseline fingerprint")))))
+
+;; ---------------------------------------------------------------------------
+;; Durable trip reports are bounded (2026-09-18)
+;; ---------------------------------------------------------------------------
+;;
+;; cross-run-observation folds the whole repair store into the observation at
+;; :opportunity/:start, and observe! writes a full copy of that observation into
+;; one trip report per firing wire.  Measured on 2026-09-18: 91,336,366 bytes
+;; per report, ~3m43s each under pprint, five per click — roughly 19 minutes of
+;; a click spent serialising the machine's own history, which nothing reads back
+;; from disk.  Replaying that same observation through the bounded writer:
+;; 5,096 bytes in 4 ms, with only :findings elided.
+
+(deftest durable-trip-report-is-bounded-test
+  (let [root (temp-dir)
+        big  (vec (repeatedly 5000 #(hash-map :id (str (java.util.UUID/randomUUID))
+                                              :backtrace {:phase-events (vec (range 50))})))
+        observation {:phase :opportunity
+                     :transition :start
+                     :attempt-id "attempt-777"
+                     :machine-state {:started-at "2026-09-18T23:24:51Z"}
+                     :findings big}
+        report {:trip/wire-id :T1
+                :trip/witness {:reason :probe}
+                :trip/observation observation}
+        path (tripwire/write-trip-report! (.getPath root) report)
+        stored (edn/read-string (slurp path))
+        stored-obs (:trip/observation stored)]
+
+    (testing "small entries survive verbatim, so the report stays legible"
+      (is (= :opportunity (:phase stored-obs)))
+      (is (= "attempt-777" (:attempt-id stored-obs)))
+      (is (= {:started-at "2026-09-18T23:24:51Z"} (:machine-state stored-obs))))
+
+    (testing "the oversized entry is replaced by a description of what was there"
+      (is (= :exceeds-durable-trip-report-budget
+             (get-in stored-obs [:findings :elided/reason])))
+      (is (= :vector (get-in stored-obs [:findings :elided/type])))
+      (is (= 5000 (get-in stored-obs [:findings :elided/count]))))
+
+    (testing "the elision is what keeps the file small"
+      (is (< (.length (io/file path)) 8192)))
+
+    (testing "the in-memory report is untouched — its consumers still see it all"
+      (is (= 5000 (count (get-in report [:trip/observation :findings])))))))

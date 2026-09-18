@@ -10,7 +10,6 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
-            [clojure.pprint :as pp]
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.full-loop-cohort :as cohort]
@@ -460,6 +459,63 @@
     (vec (or (evaluate observation) []))
     (throw (ex-info "Unknown tripwire id" {:wire-id wire-id}))))
 
+(def ^:private observation-node-budget
+  "Collection nodes one observation entry may carry into a durable trip report.
+  See `durable-observation` for why the disk copy is bounded at all."
+  256)
+
+(defn- within-node-budget?
+  "True when V holds at most `observation-node-budget` collection nodes.
+
+  The walk stops as soon as the budget is passed, so its cost is the budget
+  rather than the size of V.  That matters: V is routinely the whole repair
+  store, and measuring it by serialising it would reintroduce the cost this
+  bound exists to avoid."
+  [v]
+  (loop [stack (list v) n 0]
+    (cond
+      (> n observation-node-budget) false
+      (empty? stack) true
+      :else (let [x (first stack) more (rest stack)]
+              (cond
+                (map? x) (recur (into more cat x) (inc n))
+                (coll? x) (recur (into more x) (inc n))
+                :else (recur more n))))))
+
+(defn- describe-elided
+  "Stand in for an observation entry too large to store, saying what was there."
+  [v]
+  (cond-> {:elided/reason :exceeds-durable-trip-report-budget
+           :elided/type (cond (map? v) :map
+                              (vector? v) :vector
+                              (set? v) :set
+                              (sequential? v) :seq
+                              :else :value)}
+    (coll? v) (assoc :elided/count (bounded-count 100000 v))
+    (map? v) (assoc :elided/keys (vec (take 64 (sort-by str (keys v)))))))
+
+(defn- durable-observation
+  "Project OBSERVATION down to what a durable trip report should carry.
+
+  `cross-run-observation` folds the entire repair store into the observation at
+  :opportunity/:start, and `observe!` then writes a full copy of that
+  observation into a separate trip report for every wire that fires.  On
+  2026-09-18 that was 91 MB per report, five reports per click, at ~3m43s each
+  — about 19 minutes of a click spent serialising the machine's own history.
+
+  Nothing reads `:trip/observation` back from disk.  The in-code consumers
+  (`record-finding!`, `handle-action!`) are handed the in-memory report, which
+  is left whole; only the disk copy is bounded.  Small entries are kept
+  verbatim so a report stays legible; large ones are replaced by a description
+  of what stood there, so the elision is visible rather than silent."
+  [observation]
+  (if-not (map? observation)
+    observation
+    (reduce-kv (fn [m k v]
+                 (assoc m k (if (within-node-budget? v) v (describe-elided v))))
+               {}
+               observation)))
+
 (defn write-trip-report!
   "Durably create one append-only EDN trip report. CREATE_NEW forbids rewrite."
   ([report] (write-trip-report! default-trip-root report))
@@ -468,12 +524,16 @@
     (fn []
      (let [id (or (:trip/id report) (str "trip-" (UUID/randomUUID)))
          path (io/file root (str id ".edn"))
-         record (merge {:trip/id id :trip/schema-version 1
-                        :trip/recorded-at (str (Instant/now))}
-                       report)]
+         record (cond-> (merge {:trip/id id :trip/schema-version 1
+                                :trip/recorded-at (str (Instant/now))}
+                               report)
+                  (contains? report :trip/observation)
+                  (update :trip/observation durable-observation))]
      (io/make-parents path)
+     ;; pr-str, not pprint: this file is read by machines, and the layout
+     ;; engine was the dominant cost of writing it.
      (Files/write (.toPath path)
-                  (.getBytes (with-out-str (pp/pprint record)) "UTF-8")
+                  (.getBytes (pr-str record) "UTF-8")
                   (into-array StandardOpenOption
                               [StandardOpenOption/CREATE_NEW
                                StandardOpenOption/WRITE]))
