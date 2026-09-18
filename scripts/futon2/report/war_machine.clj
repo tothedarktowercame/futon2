@@ -49,6 +49,7 @@
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.belief :as belief]
+            [futon2.aif.calibration-cycle :as calibration-cycle]
             [futon2.aif.efe :as efe]
             [futon2.aif.enumeration-completeness :as enum-complete]
             [futon2.aif.forward-model :as fm]
@@ -4740,6 +4741,20 @@
     ;;     in futon1a XTDB; parser in `scan-r12-apparatus`).
     (when-let [r12 (:r12-apparatus data)]
       (.append sb "## R12 Apparatus (intrinsic-values atom)\n\n")
+      ;; R12-4 consumer: the admission receipt, not the raw scan, is what
+      ;; the report surface consumes.  Refusals are shown with their reason.
+      (let [adm (:r12-admission data)]
+        (.append sb
+                 (str "Admission: "
+                      (if (:ok adm)
+                        (str "admitted (return `" (:return/id (:returned adm))
+                             "`; Layer 1 diagnostic-only, never value evidence; "
+                             "Layer 2 independent evidence: not-available)")
+                        (str "REFUSED `" (name (:error/code adm))
+                             "` — "
+                             (if-let [r (some-> adm :check :reason)]
+                               (name r) "structural refusal")))
+                      "\n\n")))
       (cond
         (not (:available? r12))
         (.append sb (str "*R12 apparatus state unavailable: "
@@ -6995,6 +7010,15 @@
           strategic-vocabulary (scan-strategic-vocabulary)
           r-criteria (scan-r-criteria)
           r12-apparatus (scan-r12-apparatus)
+          ;; R12-4: the scan is a producer; its return must pass the
+          ;; admission boundary before the consumer surface sees it.
+          ;; Layer 1 stays labelled never-value-evidence inside the
+          ;; admitted artifact; Layer 2 is reported not-available.
+          r12-admission
+          (calibration-cycle/admit-apparatus!
+            "wm-scan/r12-apparatus"
+            (str "wm-scan/r12-apparatus/" (.toString now-zdt))
+            r12-apparatus)
           scan-route2 (route-tag scan-route1 :R12 "futon2.report.war-machine/scan-r12-apparatus")
           vsatarcs-status (scan-vsatarcs-status)
           capability-star-map (capability-star-map)
@@ -7016,6 +7040,7 @@
                      :strategic-vocabulary strategic-vocabulary
                      :r-criteria r-criteria
                      :r12-apparatus r12-apparatus
+                     :r12-admission r12-admission
                      :wm/route scan-route2
                      :capability-star-map capability-star-map
                      :vsatarcs-status vsatarcs-status}
