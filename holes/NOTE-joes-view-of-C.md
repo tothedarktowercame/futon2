@@ -21,12 +21,62 @@ dated places, which this note now indexes:
 | `holes/E-C-vector-live.md` | 09-08 | channel C_int live; the freshness exit condition |
 | `src/futon2/aif/live_c.clj` | 09-17 | Joe's three named sources, derived as weighted want tokens |
 
-## 1. What C is
+## 1. What C is — two halves, and only one is implemented anywhere
 
+**CORRECTION 2026-09-18 (second sitting):** the first version of this note,
+built from claude-4's capture, missed the institutional half entirely. Joe
+pointed at the Emacs REPL record; the quotes below are recovered verbatim
+from the session transcript (claude-4 session, 2026-09-17 20:30–20:54 UTC —
+the stretch lost to context compaction).
+
+**Half 1 — outcomes (AIF-mandated):**
+
+- [QUOTE, 2026-09-17 20:30] "Yes C has to do with outcomes (and I believe
+  this is what AIF tells us so this is not a matter of opinion if I am
+  correct)."
 - [RECORD, `live_c.clj` header, one hop from Joe] "C is preference over
   OUTCOMES; the live C contributes WEIGHTED WANTED TOKENS in the cascade
   preference spec's existing shape — no second preference object beside the
   spec."
+
+**Half 2 — process, regulated by institutions (stated repeatedly, captured
+nowhere in code or Lean):**
+
+- [QUOTE, 2026-09-17 20:30] "So, I think C is at least partly something
+  else, **and I have talked about this every time I was asked**. ...
+  However, *my* preference is also about *how* the outcome is pursued. And
+  that has to do with Ostrom's institutional theory with its deontics."
+- [QUOTE, 20:54] "I have a preference for *how* things are carried out, and
+  that's not just 'harmony' either but has to do with design requirements /
+  institutions. I might have other *priorities* that would legibly make
+  something a priority at some given moment."
+- [QUOTE, 20:36] the enforcement spectrum, his example: a peripheral makes
+  certain actions *physically impossible* (an IRC reply "cannot *not* land
+  on IRC"); a rule can be "backed up by an institution that checks for
+  duplication and denies such duplicated submissions." Realistic instance:
+  "I *prefer* to focus on the WM topics, not have them interspersed with
+  other standard infrastructure building."
+- [QUOTE, 20:36→20:41] "Ultimately that relates to my concept of anamnesis,
+  which is that I have a dispreference for a highly chaotic unfocused
+  workstate." ... "Yeah, I think it is carried state. We had looked at this
+  in connection with Salingaros mathematics in the EFE landscape (Embedding
+  Live). Salingaros deals with 'live' structures and considerably the
+  mathematics there reflects my preferences too."
+- [QUOTE, 20:46] "I didn't say that 'harmony' is my only preference, and
+  this is the point. M- E- and T- files all describe optative conditions."
+- Grounding text: Joe's own IAD/Ostrom paper,
+  https://metameso.org/~joe/papers/corneli2016institutional.pdf (flagged by
+  him 2026-06-23 in `holes/M-G-over-cascades.md:66`, re-shared 2026-09-09).
+
+[INFERENCE, claude-12, for redlining] The 20:36 quote gives a three-level
+enforcement structure that the Lean model could carry as three different
+objects: physical impossibility = the action space itself (a transition
+that does not exist); institutional rule = a checked guard whose violation
+is a typed denial (deontics: may/must/must-not over transitions); soft
+process preference = weight in C over *trajectories*, not endpoints. If
+that reading is right, the unused step-indexed Cτ machinery
+(`horizonEFE`'s `C : ℕ → O → ℝ`, §6) is where trajectory-grain preference
+would naturally live, and institutions are guards, not C at all.
 - [QUOTE, via E-C-realization header] "I am not happy to kick the can without
   real work to make C real."
 - [QUOTE, 2026-09-18] the whole-system criterion C sits inside: "one correct,
@@ -51,7 +101,12 @@ fixing act." Concretely:
   ruled; proposed-C is evidence-derived. The proposed-vs-ruled gap is the
   operator-facing signal.
 
-## 3. The three named sources (2026-09-17, "plenty to get started")
+## 3. The three named sources (2026-09-17, ratified verbatim)
+
+[QUOTE, 20:48] "it's all depicted in Embedding Live. harmony/aliveness,
+completed missions, and capability stars ... that would be plenty to get us
+moving." — These are the *starter set for the outcome half* (§1 Half 1),
+explicitly not the whole of C (§1 Half 2 quotes).
 
 [RECORD, `live_c.clj`, commissioned from Joe's sources]:
 
@@ -134,3 +189,7 @@ discovery (§2) and the three sources (§3).
 3. The Cτ-derived-per-step inference in §6 — right direction, or no?
 4. Default C temperature: does 0.1 get ratified, or does the default come
    from somewhere principled?
+5. The §1 trichotomy inference (action space / institutional guard with
+   typed denial / trajectory-grain preference weight): is that the right
+   decomposition of the institutional half, and do institutions belong
+   *beside* C (as guards) or *inside* C (as process preferences)?
