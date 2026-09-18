@@ -239,19 +239,36 @@ Additive fields on the per-candidate record. Order per claude-4's bite
 list: (1) per-τ emission, (2) C-form marker, (3) E/F status, (4) β
 capture, (5) rates precondition.
 
-## Open ruling: is the ambiguity-off premise wanted? (surfaced 2026-09-18)
+## Known-failing vs certificates — the two test qualities (Joe, 2026-09-18)
 
-The identity-A theorems (`Certificates.lean`, scope-warned at darktower
-`e15d8e4874` after Joe's objection) locate the off-switch: production's
-risk-only G follows from exactly one modeling premise — deterministic A
-(observation reveals state exactly), which disables the epistemic
-(ambiguity) half of G entirely. The theorem proves the conditional needed
-for certificate soundness and nothing normative. THE PREMISE ITSELF IS AN
-OPEN RULING for Joe: keep zero-adjudication identity-A (exact, cheap,
-risk-only, no ambiguity-driven information seeking from this half), or
-introduce a non-degenerate observation model (categorical successor rows;
-or finite ζ via temperedLikelihood) and bring the epistemic term back at
-real compute cost. Certificates record which regime ran either way.
+Directive set, superseding the "open ruling" entry that stood here (that
+framing manufactured an opinion-request out of a theory-conformance fact;
+AIF theory is written down by the field and is not the operator's to rule
+on; the genuinely interpretive items — C, institutions, G over cascades —
+are already on record):
+
+- **Known-failing tests** (allowed, labeled): honest reds where the
+  passing condition is not yet fully specified. The identity-A theorems
+  are one (darktower `15398c4454`): eq. 4.9 has G = risk + ambiguity; the
+  deterministic-A configuration leaves the epistemic half inert; passing
+  = a non-degenerate observation model (categorical rows; finite ζ),
+  sequenced on the DAG, decided by computed evidence.
+- **The certificate layer is NOT that.** It is: type checks proving the
+  code does what the Lean says, plus type-checked run results — the code
+  runs, emits certificates, and the tests turn GREEN once the code
+  exists, type checks, and produces valid runs. Straightforward, not
+  opinion.
+- **No manufactured rulings.** Questions resolve from the theory, the
+  recorded interpretations, or computation — operator rulings are for
+  genuine preference content only.
+- **Trim commission**: survey of permission-shaped prose in WarMachine
+  Lean (2026-09-18): ~220 CLOSED-BY-RECORD/by-record holder markers, 14
+  "approved", 11 "intentionally" — unchecked authority prose; benign hits
+  excluded (Apache headers; CascadeTransition's permission MODEL; proof
+  "licenses"). Trim = sequenced audit, new work item. The AIF core is now
+  frozen: `mathlib4:scripts/check-aif-core-frozen.sh` + pins (darktower
+  `54df65a86a`) — any core edit fails until pins are deliberately
+  re-generated in their own commit; new work goes in new modules.
 
 Remaining from the approved plan: the three categorical-successor
 equation rows.
