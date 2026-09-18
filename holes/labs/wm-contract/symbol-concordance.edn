@@ -67,9 +67,9 @@
     :note "re-pointed 2026-09-18 (zai-51) from 215-235: softmax-weights survived futon2 0d29c706's flat-path removal and moved; same var, read at HEAD"}}
   {:id :action/selected :bare "u" :fold "u" :reading "The selected action." :node :R16 :registry-symbol :u
    :glossary {:file "p4ng/sec-glossary.tex" :at 39 :term "control u"}
-   :lean {:ident "machineAction" :file "DarkTower/WarMachine/MachineAction.lean" :at 49}
-   :runtime {:var "futon2.aif.policy/select-action-cascades" :file "src/futon2/aif/policy.clj" :at "151-231"
-    :note "re-pointed 2026-09-18 (zai-51): the cited futon2.aif.policy/select-action (:672-862 pre-deletion) was DELETED by futon2 0d29c706 (Joe 2026-09-17 flat-path removal ruling). VERIFIED successor, not a guess: select-action-cascades is the selection function at HEAD and its result carries the selected action (:chosen-action, policy.clj:210-222 read). Grain changed by the same ruling: selection is cascade-grain over cascade-selection/selection-posterior, not the flat single-action path."}}
+   :lean {:ident "machineAction" :file "DarkTower/WarMachine/MachineAction.lean" :at 57}
+   :runtime {:var "futon2.aif.policy/select-action-cascades" :file "src/futon2/aif/policy.clj" :at "151-232"
+    :note "re-pointed 2026-09-18 (zai-51): the cited futon2.aif.policy/select-action (:672-862 pre-deletion) was DELETED by futon2 0d29c706 (Joe 2026-09-17 flat-path removal ruling). VERIFIED successor, not a guess: select-action-cascades is the selection function at HEAD and its result carries the selected action (:chosen-action, policy.clj:231, read; :chosen-action-mass at :232 closes the defn). Grain changed by the same ruling: selection is cascade-grain over cascade-selection/selection-posterior, not the flat single-action path."}}
   {:id :learning/dirichlet-concentration :bare "a-conc" :fold "a-conc" :reading "Dirichlet concentration parameters." :node :R17 :registry-symbol :a-conc
    :glossary {:file "p4ng/sec-glossary.tex" :at 60 :term "Dirichlet concentration parameters"}
    :lean {:ident "DirichletConcentrations" :file "DarkTower/WarMachine/Holes.lean" :at 6936}
