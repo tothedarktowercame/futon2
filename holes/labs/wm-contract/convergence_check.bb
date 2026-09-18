@@ -25,7 +25,14 @@
 ;; BY CONTENT. Re-pin deliberately, in a commit that says why the frame moved;
 ;; a digest you can update silently is the failure this repair exists against.
 (def frame-fields [:registry-basis :rung-rule :rung-rule-limit :caveats])
-(def frame-digest "e2cb36997c10fcee18cfcc8b755bcef5c30f8255f61cf13d3edb0cd90cd48171")
+;; FRAME RE-PINNED 2026-09-18 (zai-30, CONVERGENCE ledger repair, blocking the
+;; plop-2026 republish / E07): :registry-basis moved :74-200 -> :74-410 because
+;; the ledger gained rows for the registry's categorical-model equations
+;; (:state-prediction-error, :state-belief-update, :likelihood-precision) whose
+;; :formal lines are transcribed from aif-equations.edn:376-410. No other frame
+;; field changed; :rung-rule, :rung-rule-limit and :caveats are byte-identical.
+;; This re-pin is deliberately in a commit that names it, per the rule above.
+(def frame-digest "5196e5848b4a32b3c26d4bb67565cce1029fff24be9a3a191be42f3a2cee04b1")
 
 (defn sha256 [^String s]
   (->> (.digest (java.security.MessageDigest/getInstance "SHA-256")
