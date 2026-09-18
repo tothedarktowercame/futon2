@@ -1,0 +1,212 @@
+{:dispatch :D4,
+ :terms
+ [{:term :C,
+   :lean
+   {:census "DarkTower.AIF.Terms.Preference",
+    :carrier
+    "DarkTower.WarMachine.TokenPreference.preference (Preference.constant for the production :spec case)"},
+   :interpretation
+   {:text
+    "C = weighted want tokens in the cascade preference spec ({:want :lam :mu :evidence :zeroed :weights}), evaluated pointwise in log space by log-preference-fn and supplied to horizon-g-sparse as the DECLARED CONSTANT C_tau at every tau; the channel-grain floor (preferences) and the goal-outcome overlay (c-vector) are separate halves that never reach the cascade G",
+    :status :recorded},
+   :producers
+   [{:var
+     "futon2.aif.cascade-model-manifest/log-preference-fn (with preference-fn, utility-weights, preference-spec, preference-distribution, token-utility)",
+     :role :live,
+     :entry-point
+     "horizon-g-sparse's C lane: when :c-fn-pointwise is nil (the production case), C is built from :spec via log-preference-fn over the common universe — reachable through the full live chain (runner -> war-machine R5 -> efe/rank-cascade-actions -> horizon-g-sparse, efe.clj:1067)",
+     :inputs
+     ["spec {:want #{[target token]} :lam (default 1) :mu (default 1) :evidence #{} (default) :zeroed #{} (default) :weights {token positive-rational} (optional)}"
+      "universe: the common token universe of the comparison (tokens outside want/evidence carry weight 0 but enlarge Z)"],
+     :output
+     "o -> ln c(o): ##-Inf on zeroed, else u(o) - ln Z with ln Z = sum log1p(exp w) + log1p(-zeroed-share) — NORMALIZED (canonical); typed refusals :invalid-preference-spec for empty want, non-positive lam, negative mu, bad weights, zeroed-covers-universe",
+     :callers
+     ["futon2.aif.cascade-model-manifest/horizon-g-sparse (live R5)"
+      "futon2.aif.shadow-cascade-g (shadow lane)"
+      "tests (cascade_model_manifest_test, live_c_test)"],
+     :evidence
+     ["sed -n '505,565p' src/futon2/aif/cascade_model_manifest.clj (log-preference-fn body: the log-partition normalization)"
+      "grep -n 'horizon-g-sparse' src/futon2/aif/efe.clj -> 1067 (live call)"]}
+    {:var
+     "futon2.aif.preferences (current-C / c-distribution / default-c-temperature)",
+     :role :live,
+     :entry-point
+     "the C_int channel floor: consumed by futon2.aif.free-energy/compute-controller-diagnostics (live at war_machine.clj:6091, R2) and by base-mode/report code (avoided-states war_machine.clj:5621, mode-prior 6499); it is NOT the C of the live cascade G — default-c-temperature is read only into the retired select-action temperature-opts (war_machine.clj:1040, dead lane per D2)",
+     :inputs
+     ["none (static vocabulary from war-machine-terminal-vocabulary.edn :C/preferred, :C/avoided, :C/mode-prior)"],
+     :output
+     "channel-range preference floor, c-distribution normalized densities, default-c-temperature",
+     :callers
+     ["futon2.aif.free-energy (live diagnostics)"
+      "war-machine base-mode/report (live)"
+      "futon2.aif.efe / c-vector / mission-c / precision (channel lanes, dead for G)"],
+     :evidence
+     ["grep -rln 'futon2.aif.preferences' src -> efe.clj, free_energy.clj, mission_c.clj, precision.clj, c_vector.clj + war_machine.clj:71"
+      "grep -n 'pref/' scripts/futon2/report/war_machine.clj -> 777, 1040, 5621, 6499"]}
+    {:var "futon2.aif.c-vector/maybe-refresh!",
+     :role :live,
+     :entry-point
+     "full-loop-runner :preference-refresh phase calls ((or (:refresh-fn opts) cv/maybe-refresh!)) on EVERY tick (full_loop_runner.clj:3691) — the C-vector is refreshed live, but its only scoring consumer is compute-efe's :G-goal-outcome term, which is dead on the tick (H5b, D1/D2): refreshed-but-unread by any live decision",
+     :inputs ["the live goal/hole corpus files"],
+     :output
+     "refreshed goal-outcome preference overlay (c-vector entries)",
+     :callers
+     ["futon2.aif.full-loop-runner:3691 (live phase)"
+      "futon2.aif.efe goal-outcome lane (dead for G)"],
+     :evidence
+     ["sed -n '3689,3692p' src/futon2/aif/full_loop_runner.clj -> :preference-refresh phase with cv/maybe-refresh! default"
+      "grep -n 'cv/' src/futon2/aif/efe.clj -> 557, 614 (goal-outcome-weight, the dead compute-efe lane)"]}
+    {:var
+     "futon2.aif.ruled-outcome-c (seeded-C + the EFE-fold declaration)",
+     :role :dead,
+     :entry-point
+     "none live: consumed in efe.clj only under (:ruled-outcome-c-enabled? opts) on the flat/channel branch of rank-actions (efe.clj:596,629,706,955) — the branch H5b deleted from the live decision. F10 ANSWER: the fold is a COMPUTED fold (seeded-c-record, disposition events, :folded? in code) but NOT an ENABLED fold on the tick — the enabling opt has no live supplier, so the risk contribution is unreachable",
+     :inputs
+     ["opts :ruled-outcome-c-enabled?"
+      "seeded positive masses"
+      "fold provenance"],
+     :output
+     "seeded C-record + disposition-risk events for the channel scorer",
+     :callers
+     ["futon2.aif.efe (dead branch)"
+      "futon2.aif.c-fold-config (dead)"
+      "futon2.aif.machine-model (dead lane)"],
+     :evidence
+     ["grep -n 'ruled-outcome-c-enabled?' src/futon2/aif/efe.clj -> 596, 629, 706, 955 (all on the rank-actions channel path)"
+      "grep -rln 'ruled-outcome-c' src -> c_fold_config.clj, machine_model.clj"]}
+    {:var "futon2.aif.c-fold-config",
+     :role :dead,
+     :entry-point
+     "the pinned RUN4 C fold; consumers run4-task-pin (itself required by nothing in src/scripts), repair-obligation, interoceptive-manifest — none on the selection tick",
+     :inputs ["pinned fold declaration file (sha256-pinned)"],
+     :output "resolved fold opts",
+     :callers
+     ["futon2.aif.run4-task-pin / repair-obligation / interoceptive-manifest (lab/repair lanes)"
+      "tests"],
+     :evidence
+     ["grep -rln 'c-fold-config' src -> run4_task_pin.clj, repair_obligation.clj, interoceptive_manifest.clj; grep -rln 'run4-task-pin' src scripts -> nothing outside run4_task_pin.clj"]}
+    {:var "futon2.aif.live-c",
+     :role :dead,
+     :entry-point
+     "none: zero source requirers (verified, not trusted) — the 'live C first cut' from Joe's three named sources never reached a consumer; the live G's C is the cascade spec's :want lane instead",
+     :inputs
+     ["mission wholeness, capability star-map, mission file globs"],
+     :output "weighted want entries in the cascade spec shape",
+     :callers ["none in src or scripts"],
+     :evidence
+     ["grep -rln 'futon2.aif.live-c' src scripts -> only live_c.clj itself (the war_machine 'live-c' hits are the substring 'accumulation-live-config')"]}
+    {:var "futon2.aif.mission-c",
+     :role :shadow,
+     :entry-point
+     "war-machine, gated by FUTON_WM_MISSION_C=1 (default OFF): C_mis readback attaches risk_mis per mission action to the judgement AFTER ranking and selection are complete (carry-mission-c) — structurally unable to move selection; this is exactly Joe's 'mission layer of C undeclared' gap: the mission half exists as a post-hoc record, not as a declared C input",
+     :inputs
+     ["the CLOCKED mission's completion criteria (markdown, sha-digest-read)"],
+     :output
+     "C_mis rows + risk_mis recorded on the judgement (post-selection)",
+     :callers
+     ["war-machine carry-mission-c / mission-c-readback (env-gated)"
+      "tests"],
+     :evidence
+     ["sed -n '104,111p' scripts/futon2/report/war_machine.clj (*mission-c? docstring: default off, post-selection, moves no selection)"
+      "grep -n 'mission-c/' scripts/futon2/report/war_machine.clj -> 1783, 1897, 1945"]}
+    {:var "futon2.aif.contextual-preferences",
+     :role :dead,
+     :entry-point
+     "none: zero source requirers; pure fixture binding derivation, authority explicitly fixture-only",
+     :inputs ["warrants/evidence fixtures"],
+     :output "bound preference fixtures",
+     :callers ["tests only"],
+     :evidence
+     ["grep -rln 'contextual-preferences' src scripts -> only contextual_preferences.clj"]}],
+   :duplicates
+   ["preferences (C_int channel floor) vs c-vector (goal-outcome overlay) vs mission-c (C_mis) vs the cascade spec :want lane — four named halves of C, only the :want lane reaches the live G; ruled-outcome-c/c-fold-config are a fifth, folded, dead lane"],
+   :irrelevant
+   ["likelihood-precision — zero source requirers (verified: grep -rln 'likelihood-precision' src scripts -> its own file only); its subject is the ζ-side prior, D6's cluster, listed here only because the dispatch's known-facts asked for the verification"
+    "machine-model's ruled-outcome rows — dead lane (D1)"
+    "observation/preference modules of the ants port — different stack"],
+   :match
+   {:status :matches,
+    :notes
+    "Lean AIF.Terms.Preference is a step-indexed log-preference family with IsCanonical = per-step normalized; Preference.constant is the production case. Clojure input-by-input: the general step-indexed carrier EXISTS as horizon-g-sparse's :c-fn-pointwise (tau -> o -> c) but the live production call supplies :spec, which horizon-g-sparse itself documents as the DECLARED CONSTANT C_tau at every tau — exactly Preference.constant. NORMALIZATION: yes — log-preference-fn is canonical by construction (log-partition ln Z over the universe; preference-fn = exp of it equals preference-distribution on every subset, preference_sum), and zeroed outcomes are ##-Inf = preference_eq_zero_iff. Weights lane: :want/:weights with lam/mu tempering is the utility-weights composition Lean states over TokenPreference. The channel floor (preferences) and goal-outcome overlay (c-vector) are NOT instances of this Lean term on the live path — they feed diagnostics and the dead channel scorer respectively; that grain-split is recorded in the standing o interpretation, not a divergence here."}}
+  {:term :E,
+   :lean
+   {:census "DarkTower.AIF.Terms.Habit",
+    :carrier
+    "Habit / Habit.uniform (via selectionWeight's ofReal(habit pi))"},
+   :interpretation
+   {:text
+    "E on the live tick is the declared neutral 1 — Habit.uniform: select-action-cascades reads (or (:habit e) 1) and no live producer of learned habit mass reaches it; the learned-E carriers (habit-prior, beta-habit, cascade-prior) are all off the tick, and strategic-habit runs post-selection as observation only",
+    :status :recorded},
+   :producers
+   [{:var "futon2.aif.strategic-habit/carry",
+     :role :live,
+     :entry-point
+     "generate-war-machine line 6418 — called on EVERY tick (with wm-decision, i.e. AFTER selection) to carry the strategic-habit state; the accumulate flag is (strategic-habit/enabled? judge-opts env), default OFF unless FUTON_WM_ACCUMULATE_STRATEGIC_HABIT=1 or the opt is set. It observes the cascade decision's first acting pattern (H4/dd4a3bbe); an abstention observes nothing. No selector consumes its output: selection's E remains the default 1 (D2).",
+     :inputs
+     ["previous trace's :strategic-habit-state"
+      "wm-decision (post-selection)"
+      "run label + timestamp"
+      "accumulate? boolean"],
+     :output "carried strategic-habit state for the trace record",
+     :callers
+     ["war-machine generate-war-machine:6418 (live, post-selection)"
+      "tests"],
+     :evidence
+     ["sed -n '6084,6087p;6415,6424p' scripts/futon2/report/war_machine.clj (enabled? + carry call sites)"
+      "sed -n '8,14p' src/futon2/aif/strategic_habit.clj (enabled?: opt or env FUTON_WM_ACCUMULATE_STRATEGIC_HABIT=1)"]}
+    {:var
+     "futon2.aif.habit-prior (ln E from Dirichlet-multinomial policy frequencies)",
+     :role :dead,
+     :entry-point
+     "none live: its ln E scored the retired flat path — wm's habit-prior usages (policy-key identity at 439, arena-habit-prior-* opts at 894-1016, :c-temperature lane at 1040) all serve the select-action/f-pi lanes deleted from the live decision; the cascade selector receives :habit default 1",
+     :inputs ["observed policy frequencies by stable action identity"],
+     :output
+     "ln posterior-predictive E(pi), aligned vector for softmax consumption",
+     :callers
+     ["war-machine dead lanes (candidate-identity, arena opts)"
+      "cascade-prior (test-only)"
+      "tests"],
+     :evidence
+     ["grep -n 'habit-prior' scripts/futon2/report/war_machine.clj -> 56, 436-439, 621, 894-1016 (flat/f-pi lanes)"
+      "grep -rln 'futon2.aif.habit-prior' src -> cascade_prior.clj (test-only per D2)"]}
+    {:var "futon2.aif.beta-habit",
+     :role :dead,
+     :entry-point
+     "the RUN4 habit-in-both arm of war-machine/beta-dark-carry (line 595), itself called only from tests and wm-contract lab scripts (D2) — dead lane",
+     :inputs
+     ["carried beta state" "f-pi by candidate" "ranked actions"],
+     :output "beta carry with identity-aligned ln E provenance",
+     :callers ["war-machine beta-dark-carry:595 (dead lane)" "tests"],
+     :evidence
+     ["sed -n '592,600p' scripts/futon2/report/war_machine.clj -> ((if habit-in-both? beta-habit/carry policy-precision/carry-beta) ...) in beta-dark-carry"]}
+    {:var "futon2.aif.cascade-prior (log-priors over cascades)",
+     :role :test-only,
+     :entry-point
+     "the cascade-grain shadow lane; call graph is tests only (D2 finding, unchanged)",
+     :inputs ["observed cascade policy frequencies, alpha 1.0"],
+     :output "log-priors attachable to ranked cascades (shadow-rank)",
+     :callers
+     ["tests (cascade_prior_test, selection_score_readiness_test note)"
+      "policy.clj docstring mention only"],
+     :evidence
+     ["grep -rn 'shadow-rank' src scripts test -> cascade_prior_test.clj + a selection_score_readiness_test note; no src call"]}],
+   :duplicates
+   ["habit-prior (flat-grain ln E) vs cascade-prior (cascade-grain log-priors) vs beta-habit (carry-tempered ln E) — three learned-E computations at three grains, none wired to live selection"],
+   :irrelevant
+   ["strategic-habit's scheduler-side siblings (habit_prior arena opts, machine_slow_* stores) — observation/ledger lanes, not E terms"
+    "c-vector overlays folded as 'habit' into controller-score — augmentation weights on the dead channel scorer, not a Habit prior"],
+   :match
+   {:status :matches,
+    :notes
+    "Lean Habit is nonneg weights entering selectionWeight as ofReal(habit pi); Habit.uniform is the neutral case. Clojure: the live E is exactly the uniform instantiation — select-action-cascades supplies (or (:habit e) 1) and no live chain writes :habit onto ranked entries, so selection-posterior's log(habit) term is log 1 = 0 (D2). The positivity law is enforced (selection-posterior refuses :invalid-habit on non-positive :habit — Lean's hhabit 0 < habit pi). No learned E is live: habit-prior/beta-habit/cascade-prior are dead or test-only (call-graph evidence above), and strategic-habit — the only E-flavored producer actually executed on the tick — runs strictly post-selection and never feeds a selector. So the E row is :matches at Habit.uniform with the learned-Habit carriers unwired."}}],
+ :evidence-commands
+ ["grep -rln 'futon2.aif.<ns>' src scripts for live-c, preferences, ruled-outcome-c, c-vector, c-fold-config, contextual-preferences, mission-c, beta-habit, habit-prior, strategic-habit (caller census; the war_machine 'live-c' hits are the substring 'accumulation-live-config', verified)"
+  "grep -rln 'likelihood-precision' src scripts -> its own file only (zero-requirer verification)"
+  "sed -n '505,565p' src/futon2/aif/cascade_model_manifest.clj (log-preference-fn: normalization + refusals)"
+  "grep -n 'horizon-g-sparse' src/futon2/aif/efe.clj -> 1067 (live C lane)"
+  "sed -n '3689,3692p' src/futon2/aif/full_loop_runner.clj (:preference-refresh phase, cv/maybe-refresh!)"
+  "grep -n 'pref/' scripts/futon2/report/war_machine.clj -> 777, 1040, 5621, 6499 (floor consumers)"
+  "grep -n 'ruled-outcome-c-enabled?' src/futon2/aif/efe.clj -> 596, 629, 706, 955 (dead fold branch)"
+  "sed -n '104,111p;6084,6087p;6415,6424p' scripts/futon2/report/war_machine.clj (mission-c gate, strategic-habit gate + post-selection carry)"
+  "sed -n '8,14p' src/futon2/aif/strategic_habit.clj (enabled? default-off law)"
+  "grep -n 'Habit|uniform|IsCanonical|constant' in /home/joe/code/mathlib4/DarkTower/AIF/Terms.lean (Lean carriers — read for the match notes)"]}
