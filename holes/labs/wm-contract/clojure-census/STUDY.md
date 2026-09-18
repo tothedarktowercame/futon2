@@ -41,4 +41,19 @@ Results table appended below as each pair (Dn, Tn) completes.
 
 ## Results
 
-(none yet — D1 in flight, T1 requested 2026-09-18)
+### G cluster — D1 (2c4e022a + review fix f3d0417b) × T1 (2afbc6ed), compared 2026-09-18
+
+| term | P↔S | B↔S | P↔B |
+|---|---|---|---|
+| :G | no new plans — testimony is claims-built only (the DAG records obligations, not build plans). Pre-registered finding stands: `LF-expected-free-energy` is *accepted* while its own acceptance text leaves the ambiguity argument unbound → **:plan-diverges-from-spec** (at the obligation-record level) | **:matches on the declared reduction domain** (horizon↔T, precedence-fn↔π, :spec↔constant C, pointwise risk with ⊤-iff-zero-C; refuses outside the domain rather than mis-scoring) | all 6 claims-built confirmed by the census, incl. the private `outcome-risk-pointwise` both witnesses flagged independently → **:consistent** |
+| :risk | :no-plans (informative) | :not-checked — dedicated OutcomeRiskKL pass queued | :consistent |
+| :ambiguity | :no-plans | :matches (within the identity-A known-failing context) | **discrepancy found and resolved**: census said `step-ambiguity` :live; testimony said built-but-not-reached; rerun showed the sole call site is inside `horizon-g` (enumerating reference) → testimony right, census corrected in place (f3d0417b). Class: **:census-role-error** (new). Note: the census hedged in prose while stretching the role field — prose hedges don't survive joins |
+
+**Cross-cutting findings (D1):** `active-horizon-g` is Lean-aligned and
+DEAD (test-only island; nothing from the tick reaches it) → new class
+**:aligned-but-dead**, the facade-adjacent case: elaboration without
+reachability. `efe/compute-efe` dead on the tick (verified: zero call
+forms outside its file). Three Clojure kernels of one Lean `outcomeRisk`;
+three-plus G computations across grains. The DAG's `sparse-g` field has
+file:line rot (497/536 vs actual 505/555) — independent evidence for
+name-based addressing.

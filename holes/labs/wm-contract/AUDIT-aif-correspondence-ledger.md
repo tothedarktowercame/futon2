@@ -63,9 +63,9 @@ out of scope). "Producer" = what the live path calls today.
 | :belief-update | R3 | OK* | OPEN (ALIGNMENT waiting-row) | STALE | Gaussian legacy per P9; exact categorical update is the successor |
 | :belief-state | R1 | OK* | STALE | STALE (production-trace rows 09-12) | |
 | :forward-model | R4 | OK* | OPEN (waiting-row, PolicyRollout.predictedOutcome) | STALE (float-carried pins) | |
-| :risk | R5a | OK (MATCHES-w-reduction, declared) | PARTIAL (fixture only) | OPEN | in horizon-g-sparse via stepRisk |
-| :ambiguity | R5b | OK (MATCHES 09-16, independent) | PARTIAL (fixture only) | STALE (one hand point) | in horizon-g-sparse via stepAmbiguity |
-| :expected-free-energy | R5 | OK* (rebuilt+reaudited by same agent) | PARTIAL — **the exemplar row, expanded below** | **OPEN — no witness** | `cascade-model-manifest/horizon-g-sparse`, LIVE since 09-17 |
+| :risk | R5a | OK (MATCHES-w-reduction, declared) | CENSUSED D1: producers identified (live: outcome-risk, private outcome-risk-pointwise); match :not-checked — dedicated pass queued | OPEN | in horizon-g-sparse via stepRisk |
+| :ambiguity | R5b | OK (MATCHES 09-16, independent) | CENSUSED D1: :matches; step-ambiguity is :test-only (only horizon-g reference calls it; sparse path never evaluates — identity-A) | STALE (one hand point) | inert on live path (known-failing vs eq. 4.9) |
+| :expected-free-energy | R5 | OK* (rebuilt+reaudited by same agent) | **CENSUSED D1 2026-09-18: :matches on declared reduction domain** (clojure-census/D1-g-cluster.edn); duplicates: 3 G computations + Gaussian grain; dead: compute-efe, active-horizon-g (aligned-but-dead) | **OPEN — no witness** | `cascade-model-manifest/horizon-g-sparse`, LIVE since 09-17 |
 | :policy-set | R6 | OK (limited claim, declared) | STALE (production-trace admission 09-12) | STALE | |
 | :depth | R13 | OK* | STALE (machinery-capture 09-12) | STALE | effective-horizon wiring changed 09-09 |
 | :temperature | R14 | OK* | STALE (trace row 09-04) | STALE | β now caller-DECLARED in select-action-cascades — post-dates all evidence |
