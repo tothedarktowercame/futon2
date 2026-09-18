@@ -1,0 +1,6 @@
+n=15 cross-check over 32768 enumerated observations:
+  entropy: enumerated 2.723593088579  factorized 2.723593088579
+  KL:      enumerated 0.705111494085  factorized 0.705111494085
+n=45: entropy 7.9017 nats, KL 2.0676 nats
+n=45: 0.0039 ms per exact (entropy+KL) evaluation, mean of 10000 reps
+n=45: enumeration would visit 2^45 = 3.518e+13 observations; not attempted
