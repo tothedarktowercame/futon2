@@ -55,14 +55,14 @@ out of scope). "Producer" = what the live path calls today.
 
 | Equation (`:id`) | Node | A theory↔Lean | B Lean↔producer | C live witness | Current producer / notes |
 |---|---|---|---|---|---|
-| :observe | R2 | OK* (09-16 reaudit) | STALE (model-transcription-only, old producer) | STALE (09-12) | rework not rebound |
+| :observe | R2 | OK* (09-16 reaudit) | CENSUSED D3: :matches; live A = identity EVERYWHERE on the tick (identity rates constructed at the R5 call site; sparse refuses real rates; observation-rates unconsumed); non-degenerate token-likelihood :test-only | STALE (09-12) | channel-grain observe (14-vector) live at R2 but is diagnostics, not a likelihood |
 | :prediction-error | R3a | OK* | STALE | STALE (reference-model witnesses 09-12) | Gaussian row legacy per ruling P9; categorical successor below |
 | :precision | R7 | OK* | STALE | STALE | ζ (likelihood precision) declared 09-17, separate row below |
 | :free-energy | — | OK (MATCHES 09-16, independent) | OPEN | STALE (VFE witness 09-12) | |
 | :policy-free-energy | R8 | OK* | OPEN | STALE (s4-run admission 09-01) | |
 | :belief-update | R3 | OK* | OPEN (ALIGNMENT waiting-row) | STALE | Gaussian legacy per P9; exact categorical update is the successor |
 | :belief-state | R1 | OK* | STALE | STALE (production-trace rows 09-12) | |
-| :forward-model | R4 | OK* | OPEN (waiting-row, PolicyRollout.predictedOutcome) | STALE (float-carried pins) | |
+| :forward-model | R4 | OK* | CENSUSED D3 (B side): cascade-kernel/rollout fully live and Lean-aligned — the quartet's healthy member | STALE (float-carried pins) | |
 | :risk | R5a | OK (MATCHES-w-reduction, declared) | CENSUSED D1: producers identified (live: outcome-risk, private outcome-risk-pointwise); match :not-checked — dedicated pass queued | OPEN | in horizon-g-sparse via stepRisk |
 | :ambiguity | R5b | OK (MATCHES 09-16, independent) | CENSUSED D1: :matches; step-ambiguity is :test-only (only horizon-g reference calls it; sparse path never evaluates — identity-A) | STALE (one hand point) | inert on live path (known-failing vs eq. 4.9) |
 | :expected-free-energy | R5 | OK* (rebuilt+reaudited by same agent) | **CENSUSED D1 2026-09-18: :matches on declared reduction domain** (clojure-census/D1-g-cluster.edn); duplicates: 3 G computations + Gaussian grain; dead: compute-efe, active-horizon-g (aligned-but-dead) | **OPEN — no witness** | `cascade-model-manifest/horizon-g-sparse`, LIVE since 09-17 |

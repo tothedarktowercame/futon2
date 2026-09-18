@@ -51,6 +51,27 @@ Results table appended below as each pair (Dn, Tn) completes.
 | :risk | :no-plans (informative) | :not-checked — dedicated OutcomeRiskKL pass queued | :consistent |
 | :ambiguity | :no-plans | :matches (within the identity-A known-failing context) | **discrepancy found and resolved**: census said `step-ambiguity` :live; testimony said built-but-not-reached; rerun showed the sole call site is inside `horizon-g` (enumerating reference) → testimony right, census corrected in place (f3d0417b). Class: **:census-role-error** (new). Note: the census hedged in prose while stretching the role field — prose hedges don't survive joins |
 
+### Model quartet — D3 (bfc6f712) × T3 (eae229c7), compared 2026-09-18
+
+| term | P↔S | B↔S | P↔B |
+|---|---|---|---|
+| :observe (A) | THE INVERSION: asked "is a non-degenerate A planned?", the answer is "it is BUILT and excluded": `token-likelihood` (exact rationals, matches Lean `TokenObservation` line-for-line) is :test-only; the live call site CONSTRUCTS identity rates itself (`efe.clj` zipmap of zero rates over the universe); `horizon-g-sparse` refuses real rates; `observation-rates` (the only real-rates producer) has no live consumer. Pre-registered finding stands: `LF-observe` accepted while its own note says no mixed-rates theorem exists | :matches | :consistent (T3 testified exactly this; θ caveat settled by owner rerun: no live pattern carries :theta) |
+| :transitions (B) | fully live AND Lean-aligned — the quartet's one healthy member (cascade-kernel ← rollout ← R4/R5/R6 consumers; theorems correspond) | :matches | :consistent |
+| :initial-belief (D) | point mass live-wide (`observed-belief`); non-degenerate `independent-belief` :test-only | :matches | :consistent |
+
+**Cross-cutting (D3×T3):** both degenerate sides of the quartet are what
+runs; every degeneracy is DECLARED, not silent — certifiable. `horizon-g`
+already computes full G (ambiguity + step-indexed C via :c-fn; "constant
+C is the special case, not the definition") but enumerates the powerset;
+`horizon-g-sparse` buys scale by assuming away exactly the
+non-degeneracy. **The ambiguity known-failing and T1's Cτ hole are one
+reduction seen twice; the gap is a SCALABLE non-degenerate evaluation
+path, not new modeling.** The built-but-unwired family now has three
+members with zero source requirers: `live_c`, `likelihood_precision`
+(ζ's Clojure, R7's exact shape), `observation_rates`. This stack's
+characteristic failure is not missing code — it is built code nothing
+calls.
+
 ### Selection cluster — D2 (38a57c8e) × T2 (454fa6d8), compared 2026-09-18
 
 | term | P↔S | B↔S | P↔B |
