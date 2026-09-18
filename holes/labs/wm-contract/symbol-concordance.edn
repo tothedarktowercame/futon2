@@ -58,15 +58,18 @@
   {:id :policy/temperature :bare "tau" :fold "tau" :reading "Effective policy-selection temperature." :node :R14 :registry-symbol :tau
    :glossary {:file "p4ng/sec-glossary.tex" :at 35 :term "temperature tau"}
    :lean {:ident "machineTemperature" :file "DarkTower/WarMachine/MachineTemperature.lean" :at 42}
-   :runtime {:var "futon2.aif.policy/effective-temperature" :file "src/futon2/aif/policy.clj" :at "77-146"}}
+   :runtime {:absent :var-deleted-0d29c706
+    :note "RETIRED 2026-09-18 (zai-51): futon2.aif.policy/effective-temperature (:77-146 pre-deletion) was DELETED by futon2 0d29c706 (Joe 2026-09-17 flat-path removal ruling); this row was checker-BLIND stale (span 77-146 stays in range of the 232-line file, so pointer resolution passed while the var was gone). No runtime successor dispatches a temperature by mode: the engineering tau survives as selection-gain's tau_eff (src/futon2/aif/selection_gain.clj:14) and the three-arm dispatch is recorded, not dispatched, in Lean MachineTemperature.TauMode"}}
   {:id :distribution/policy-posterior :bare "Q(pi)" :fold "q(pi)" :reading "Softmax posterior over policies." :node :R6 :registry-symbol :Q-pi
    :glossary {:file "p4ng/sec-glossary.tex" :at 43 :term "Q(pi)"}
    :lean {:ident "softmax" :file "DarkTower/WarMachine/Holes.lean" :at 6960}
-   :runtime {:var "futon2.aif.policy/softmax-weights" :file "src/futon2/aif/policy.clj" :at "215-235"}}
+   :runtime {:var "futon2.aif.policy/softmax-weights" :file "src/futon2/aif/policy.clj" :at "115-134"
+    :note "re-pointed 2026-09-18 (zai-51) from 215-235: softmax-weights survived futon2 0d29c706's flat-path removal and moved; same var, read at HEAD"}}
   {:id :action/selected :bare "u" :fold "u" :reading "The selected action." :node :R16 :registry-symbol :u
    :glossary {:file "p4ng/sec-glossary.tex" :at 39 :term "control u"}
    :lean {:ident "machineAction" :file "DarkTower/WarMachine/MachineAction.lean" :at 49}
-   :runtime {:var "futon2.aif.policy/select-action" :file "src/futon2/aif/policy.clj" :at "672-862"}}
+   :runtime {:var "futon2.aif.policy/select-action-cascades" :file "src/futon2/aif/policy.clj" :at "151-231"
+    :note "re-pointed 2026-09-18 (zai-51): the cited futon2.aif.policy/select-action (:672-862 pre-deletion) was DELETED by futon2 0d29c706 (Joe 2026-09-17 flat-path removal ruling). VERIFIED successor, not a guess: select-action-cascades is the selection function at HEAD and its result carries the selected action (:chosen-action, policy.clj:210-222 read). Grain changed by the same ruling: selection is cascade-grain over cascade-selection/selection-posterior, not the flat single-action path."}}
   {:id :learning/dirichlet-concentration :bare "a-conc" :fold "a-conc" :reading "Dirichlet concentration parameters." :node :R17 :registry-symbol :a-conc
    :glossary {:file "p4ng/sec-glossary.tex" :at 60 :term "Dirichlet concentration parameters"}
    :lean {:ident "DirichletConcentrations" :file "DarkTower/WarMachine/Holes.lean" :at 6936}
