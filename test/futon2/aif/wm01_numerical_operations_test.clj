@@ -229,4 +229,14 @@
       (is (< (:hi x) (:lo y))
           (str "enclosures of " (:id x) " and " (:id y) " are disjoint")))
     (doseq [e with-g]
-      (is (< (- (:hi e) (:lo e)) 1e-11) (str (:id e) " total enclosure tight")))))
+      (is (< (- (:hi e) (:lo e)) 1e-11) (str (:id e) " total enclosure tight")))
+    ;; review follow-up (zai-8, 2026-09-18): an EXPLICIT gap-to-width margin,
+    ;; so a future razor-margin fixture cannot pass disjointness without the
+    ;; enclosures actually deciding the order. Measured margins at this
+    ;; fixture are ~1e14 (gaps 0.15/0.70, widths ~1e-15); 1e3 is a floor.
+    (doseq [[x y] (partition 2 1 (sort-by :lo with-g))]
+      (let [gap (- (:lo y) (:hi x))
+            width (max (- (:hi x) (:lo x)) (- (:hi y) (:lo y)) 1e-300)]
+        (is (> gap (* 1e3 width))
+            (str (:id x) " vs " (:id y) ": gap " gap
+                 " must exceed 1e3x max width " width))))))
