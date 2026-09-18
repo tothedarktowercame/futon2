@@ -74,7 +74,7 @@ out of scope). "Producer" = what the live path calls today.
 | :dirichlet-accumulation | R17 | OK* | OPEN (waiting-row, DirichletLearning.accumulate) | STALE (3-tick IEEE 09-12) | |
 | :model-reduction | R12 | OK* | OPEN | STALE (BMR witness) | |
 | :state-prediction-error | R3a-cat | OPEN — new Lean row needed | OPEN | OPEN | categorical successor, eq. 4.13 |
-| :state-belief-update | R3-cat | OPEN — new Lean row needed | OPEN | OPEN | exact categorical update |
+| :state-belief-update | R3-cat | CLARIFIED 2026-09-18 (T5 flag, resolved from theory): eq. 4.13 is the variational MESSAGE-PASSING update (gradient flow with the ln B_{tau+1} smoothing term); `ExactBeliefTrajectory.exactUpdate` is closed-form Bayes FILTERING, which its own docstring declares as deliberately not the v-dot flow. The filtering case is DONE (Lean + Clojure `exact-update`, contract-bound, zero live callers per T5/D-sweep); the 4.13 smoothing form remains the OPEN row | OPEN | OPEN | filtering built-unwired; smoothing form open |
 | :likelihood-precision | R7-ζ | OK (2026-09-18: `AIF.Terms.temperedLikelihood`, book B.2.4, sum-to-one + ζ=1 recovery theorems) | OPEN (declared 09-17, fe55a1a0) | OPEN | Gibbs inverse temperature on A |
 
 **PRIORITY REORDER (Joe, 2026-09-18, second ruling):** the theory layer
@@ -230,6 +230,17 @@ and honesty (a named zero-reduction records zero and is admissible only
 when its precondition held). `riskComputedThroughout` is Joe's
 detectability example as a predicate. Nondeterminism handled per design
 rule 1: validity binds this run's recorded values, never reproducibility.
+
+**Dynamic-resolution sweep (2026-09-18, discharging T5's :caution):** all
+`requiring-resolve`/`ns-resolve`/`find-var` targets in futon2 src+scripts
+and futon3c src were enumerated; NONE reaches the built-but-unwired
+family (live-c, likelihood-precision, observation-rates,
+exact-update/token-belief-at, policy-free-energy, c-fn-pointwise,
+mission-c). The four-cluster built-never-called pattern stands, verified
+against the dynamic escape hatch. Enrichment: futon3c dynamically calls
+`c-vector/ensure-belly-fresh!`/`maybe-refresh!` — refreshers, not
+readers; refreshed-but-unread is now refreshed-from-two-directions,
+read-by-none.
 
 **Emission work item (Clojure, dispatch-ready):** extend
 `horizon-g-sparse`/`rank-cascade-actions` to fill the certificate: surface
