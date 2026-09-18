@@ -137,4 +137,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except BrokenPipeError:
+        # `trip_census.py | head` is the normal way to use this; without
+        # closing stderr first, Python reports the broken pipe on exit.
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stderr.fileno())
+        sys.exit(0)

@@ -316,23 +316,49 @@
     (wedge-violations cohort-history closed-repair-ids)))
 
 (defn livelock-violations
-  "Group immutable findings by the T8 identity and return groups above K=2."
-  [findings]
-  (->> findings
-       (group-by (juxt #(or (:failure-kind %) (:repair/class %))
-                       :target :failed-commit))
-       (keep (fn [[signature records]]
-               (when (> (count records) 2)
-                 {:kind :duplicate-finding-livelock
-                  :signature signature
-                  :repair-ids (mapv :repair/id records)
-                  :finding-count (count records)})))
-       vec))
+  "Group unresolved findings by the T8 identity and return groups above K=2.
 
-(defn- t8 [{:keys [phase transition findings] :as observation}]
+  Two exclusions, both about not calling different things the same thing.
+
+  A finding whose repair is closed is progress, not repetition. The store is
+  append-only, so a resolved finding keeps :repair/status :open in its own
+  record and only `effective-statuses` knows better — which is why the caller
+  passes CLOSED-REPAIR-IDS rather than reading the finding. Counting closed
+  findings had T8 report a livelock over [:artifact-binding-mismatch
+  \"M-selected\" nil] on 2026-09-18, where two of the four findings were
+  resolved canary fixtures.
+
+  A finding carrying neither :target nor :failed-commit says nothing about
+  WHICH thing recurred, and the signature's juxt maps every such finding to
+  [kind nil nil]. That grouped an :agent-unavailable opened 2026-07-25 with one
+  opened 2026-09-11 and called them the same livelock; 23 of 48 open findings
+  had no discriminator at all. Absence of an identifier is not evidence of
+  sameness.
+
+  Measured on the live store, 90 findings: 5 groups counting everything, 4
+  once closed findings are dropped, 1 once a discriminator is required — and
+  that one is three open findings against a single repair id, which is the
+  circling T8 exists to catch."
+  ([findings] (livelock-violations findings #{}))
+  ([findings closed-repair-ids]
+   (let [closed (set closed-repair-ids)]
+     (->> findings
+          (remove #(contains? closed (:repair/id %)))
+          (filter #(or (:target %) (:failed-commit %)))
+          (group-by (juxt #(or (:failure-kind %) (:repair/class %))
+                          :target :failed-commit))
+          (keep (fn [[signature records]]
+                  (when (> (count records) 2)
+                    {:kind :duplicate-finding-livelock
+                     :signature signature
+                     :repair-ids (mapv :repair/id records)
+                     :finding-count (count records)})))
+          vec))))
+
+(defn- t8 [{:keys [phase transition findings closed-repair-ids] :as observation}]
   (when (or (:tripwire/force? observation)
             (and (= :opportunity phase) (= :start transition)))
-    (livelock-violations findings)))
+    (livelock-violations findings closed-repair-ids)))
 
 (defn- composition-drift [baseline current]
   (into []
@@ -803,26 +829,68 @@
              (:tripwire/cross-run-snapshot opts)))
     observation))
 
+(defn- halt! 
+  "Record the trip, say plainly what tripped, and stop the run.
+
+  One tripwire equals one shutdown (Joe, 2026-09-18). The wires exist to say a
+  machine invariant is broken; carrying on past that produced runs whose output
+  was a pile of repetitions of the same complaint. On 2026-09-18 one click wrote
+  five reports for five T8 witnesses of a single kind, at ~3m43s each, and then
+  failed anyway. One report, one message, one stop is more useful than all of
+  it."
+  [opts record {:keys [wire-id witness observation]}]
+  (let [title (get-in @wire-registry [wire-id :title])
+        recorded (record-trip! opts {:trip/wire-id wire-id
+                                     :trip/witness witness
+                                     :trip/observation observation})
+        report-path (:report-path recorded)]
+    (stderr! (str "HALT " (name wire-id) " (" title ") tripped at phase "
+                  (:phase record) "/" (:transition record)) nil)
+    (stderr! (str "  witness: " (pr-str witness)) nil)
+    (stderr! (str "  report:  " (or report-path "(not written)")) nil)
+    (stderr! "  the run is stopped; fix the condition above" nil)
+    (throw (ex-info (str "War Machine tripwire " (name wire-id) " tripped: " title)
+                    {:outcome :tripwire-tripped
+                     :failure-kind :tripwire-tripped
+                     :failure-stage (:phase record)
+                     :tripwire/wire-id wire-id
+                     :tripwire/title title
+                     :tripwire/witness witness
+                     :tripwire/report report-path}))))
+
 (defn observe!
-  "Evaluate enabled wires and perform their actions, returning `record`
-  identically. No exception is permitted to escape this observational seam."
+  "Evaluate enabled wires; a witness stops the run, and nothing else does.
+
+  Two failures are deliberately kept apart. A wire that THROWS is a bug in the
+  wire, and must not take the runner with it — that is why this seam was total
+  to begin with, and it stays total for that case. A wire that YIELDS A WITNESS
+  has found a broken machine invariant, and continuing past it is what produced
+  6.2 GB of the same complaint recorded 205 times.
+
+  Evaluation stops at the first witness: `for` is lazy and `first` realises one
+  element, so no later wire runs and no second report is written. Returns
+  `record` identically when nothing tripped."
   [opts record]
-  (try
-    (let [observation (-> (merge record (:tripwire/snapshot record)
-                                 {:cohort? (:cohort? opts)
-                                  :repair-root (or (:repair-root opts)
-                                                   repair/default-root)})
-                          (assoc :phase-budget-ms (phase-budget opts record))
-                          (#(if (enabled? opts :T6)
-                              (with-repair-boundary opts %)
-                              %))
-                          (#(cross-run-observation opts %)))]
-      (doseq [[wire-id _] @wire-registry
-              :when (enabled? opts wire-id)
-              witness (evaluate-wire wire-id observation)]
-        (record-trip! opts {:trip/wire-id wire-id
-                            :trip/witness witness
-                            :trip/observation observation})))
-    (catch Throwable e
-      (stderr! "wire evaluation failed; runner remains untouched" e)))
-  record)
+  (let [tripped
+        (try
+          (let [observation (-> (merge record (:tripwire/snapshot record)
+                                       {:cohort? (:cohort? opts)
+                                        :repair-root (or (:repair-root opts)
+                                                         repair/default-root)})
+                                (assoc :phase-budget-ms (phase-budget opts record))
+                                (#(if (enabled? opts :T6)
+                                    (with-repair-boundary opts %)
+                                    %))
+                                (#(cross-run-observation opts %)))]
+            (first (for [[wire-id _] @wire-registry
+                         :when (enabled? opts wire-id)
+                         witness (evaluate-wire wire-id observation)]
+                     {:wire-id wire-id
+                      :witness witness
+                      :observation observation})))
+          (catch Throwable e
+            (stderr! "wire evaluation failed; runner remains untouched" e)
+            nil))]
+    (when tripped
+      (halt! opts record tripped))
+    record))

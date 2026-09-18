@@ -16,6 +16,23 @@
 (defn- temp-dir []
   (.toFile (Files/createTempDirectory "wm-tripwire-test" (make-array java.nio.file.attribute.FileAttribute 0))))
 
+(defn- halted!
+  "Run `observe!` on a record expected to trip, returning the halt's ex-data.
+
+  A witness stops the run as of 2026-09-18: one tripwire, one shutdown. The
+  cases below construct a tripping observation deliberately, so the throw is
+  the expected path — what they actually assert is what the trip recorded on
+  its way out."
+  [opts record]
+  (let [data (try
+               (tripwire/observe! opts record)
+               ::no-halt
+               (catch clojure.lang.ExceptionInfo e
+                 (ex-data e)))]
+    (is (not= ::no-halt data) "expected the tripwire to halt the run")
+    (is (= :tripwire-tripped (:failure-kind data)))
+    data))
+
 (defn- write-edn! [root child filename value]
   (let [file (io/file root child filename)]
     (io/make-parents file)
@@ -232,7 +249,7 @@
               (fn [& _] (swap! effects conj :park))
               :tripwire/bell-fn
               (fn [& _] (swap! effects conj :bell))}]
-    (is (identical? record (tripwire/observe! opts record)))
+    (halted! opts record)
     (is (= 1 (count @reports)))
     (is (empty? @effects)
         ":record must not even attempt any escalation-shaped effect")))
@@ -242,7 +259,7 @@
         opts {:tripwire/action :stop-line
               :tripwire/report-writer (fn [_] "/tmp/trip-stop.edn")
               :tripwire/repair-record-fn #(reset! finding %)}]
-    (tripwire/observe! opts (synthetic-trip-record))
+    (halted! opts (synthetic-trip-record))
     (is (= :machine-failure (:repair-class @finding)))
     (is (= :invariant-tripped (:failure-kind @finding)))
     (is (= :T1 (get-in @finding [:failure-data :trip/wire-id])))
@@ -273,7 +290,7 @@
               :tripwire/roster-fn (fn [_] #{"claude-6" "codex-7"})
               :tripwire/park-fn (fn [_ payload] (reset! park payload))
               :tripwire/bell-fn (fn [_ payload] (reset! bell payload))}]
-    (tripwire/observe! opts (synthetic-trip-record))
+    (halted! opts (synthetic-trip-record))
     (is (= :invariant-tripped (:failure-kind @finding)))
     (is (= {:agent "claude-6" :surface "emacs-repl" :mode :background}
            (select-keys @park [:agent :surface :mode])))
@@ -296,7 +313,7 @@
                      :body (json/generate-string
                             {:ok true
                              :agents {"claude-6" {:status "connected"}}})})]
-      (tripwire/observe! opts (synthetic-trip-record)))
+      (halted! opts (synthetic-trip-record)))
     (is (= [:repair :park :bell] @effects))))
 
 (deftest stop-line-failure-degrades-to-record-without-escalating
@@ -314,7 +331,7 @@
               :tripwire/bell-fn
               (fn [& _] (swap! effects conj :bell))}]
     (binding [*err* err]
-      (is (identical? record (tripwire/observe! opts record))))
+      (halted! opts record))
     (is (empty? @effects))
     (is (str/includes? (str err) "degraded to durable :record"))))
 
@@ -332,7 +349,7 @@
               :tripwire/bell-fn
               (fn [& _] (swap! effects conj :bell))}]
     (binding [*err* err]
-      (tripwire/observe! opts (synthetic-trip-record)))
+      (halted! opts (synthetic-trip-record)))
     (is (= [:repair :park] @effects))
     (is (str/includes? (str err) "degraded to :stop-line"))))
 
@@ -350,7 +367,7 @@
               (fn [& _] (swap! effects conj :bell)
                 (throw (ex-info "bell unavailable" {})))}]
     (binding [*err* err]
-      (is (identical? record (tripwire/observe! opts record))))
+      (halted! opts record))
     (is (= [:repair :park :bell] @effects))
     (is (str/includes? (str err) "degraded to :stop-line"))))
 
@@ -445,7 +462,7 @@
                  (tripwire/observe! @opts record))]
     (reset! opts {:tripwire/report-writer writer
                   :tripwire/report-root (.getPath root)})
-    (is (identical? record (tripwire/observe! @opts record)))
+    (halted! @opts record)
     (is (= 1 @writes))
     (is (= 1 (count (filter #(.isFile %)
                             (or (.listFiles root) [])))))))
@@ -529,3 +546,41 @@ real fingerprint instead of tripping — but a sha mismatch still trips"
 
     (testing "the in-memory report is untouched — its consumers still see it all"
       (is (= 5000 (count (get-in report [:trip/observation :findings])))))))
+
+;; ---------------------------------------------------------------------------
+;; T8 counts unresolved, identified repetition (2026-09-18)
+;; ---------------------------------------------------------------------------
+
+(deftest t8-livelock-excludes-closed-and-unidentified-findings-test
+  (let [f (fn [id kind target] {:repair/id id :failure-kind kind :target target})]
+
+    (testing "three open findings against one target are the livelock T8 is for"
+      (is (= [{:kind :duplicate-finding-livelock
+               :signature [:build-failed "repair-x" nil]
+               :repair-ids ["a" "b" "c"]
+               :finding-count 3}]
+             (tripwire/livelock-violations
+              [(f "a" :build-failed "repair-x")
+               (f "b" :build-failed "repair-x")
+               (f "c" :build-failed "repair-x")]))))
+
+    (testing "a closed repair is progress, not repetition"
+      ;; The store is append-only: a resolved finding still reads
+      ;; :repair/status :open in its own record, so closure has to be passed in.
+      (is (empty? (tripwire/livelock-violations
+                   [(f "a" :build-failed "repair-x")
+                    (f "b" :build-failed "repair-x")
+                    (f "c" :build-failed "repair-x")]
+                   #{"c"}))))
+
+    (testing "findings with no target and no failed-commit are not the same thing"
+      (is (empty? (tripwire/livelock-violations
+                   [(f "a" :agent-unavailable nil)
+                    (f "b" :agent-unavailable nil)
+                    (f "c" :agent-unavailable nil)]))))
+
+    (testing "a failed-commit is discriminator enough on its own"
+      (is (= 1 (count (tripwire/livelock-violations
+                       [{:repair/id "a" :failure-kind :build-failed :failed-commit "deadbeef"}
+                        {:repair/id "b" :failure-kind :build-failed :failed-commit "deadbeef"}
+                        {:repair/id "c" :failure-kind :build-failed :failed-commit "deadbeef"}])))))))
