@@ -252,7 +252,25 @@
 
    Opts: `:temperature` (default `default-c-temperature`)."
   [spec & {:keys [temperature] :or {temperature default-c-temperature}}]
-  (let [t (double temperature)]
+  (let [t (if (number? temperature) (double temperature) ##NaN)]
+    ;; LF-temperature (2026-09-18): T on C is the THIRD temperature law
+    ;; (selection beta, likelihood zeta, preference T) and the only one of
+    ;; the three without a domain guard. The old code clamped T <= 0 to 1e-9
+    ;; silently -- a negative T REVERSES the preference law (exp(-gap/T)
+    ;; becomes a reward for distance) and was being read as a near-hard
+    ;; preference; NaN propagated through every score. Laws 1 and 2 refuse
+    ;; (cascade-selection :invalid-temperature, likelihood-precision
+    ;; :negative-zeta); this one now refuses too. T -> 0 is a declared LIMIT
+    ;; (hard hinge / point mass), not an admitted value: use a small
+    ;; positive T for near-hard preference.
+    (when-not (and (Double/isFinite t) (pos? t))
+      (throw (ex-info "c-distribution: :temperature must be a positive finite number"
+                      {:temperature temperature
+                       :reason (cond
+                                 (not (number? temperature)) :not-a-number
+                                 (Double/isNaN t) :nan
+                                 (not (Double/isFinite t)) :not-finite
+                                 :else :non-positive)})))
     (cond
       (and (map? spec) (contains? spec :p1))
       (let [p1 (double (:p1 spec))]

@@ -337,3 +337,24 @@
     (is (thrown-with-msg? clojure.lang.ExceptionInfo #":threshold must be a finite number"
                           (pref/c-distribution {:becomes 1 :threshold t}))
         (str "threshold " t))))
+
+(deftest c-temperature-domain-refuses-non-positive-and-non-finite
+  "LF-temperature (2026-09-18): the three temperature laws share one symbol
+   and only the selection beta and likelihood zeta refused bad domains. The
+   preference T used to clamp T <= 0 to 1e-9 silently (a negative T reverses
+   the law) and let NaN through. All of those now throw; positive finite T,
+   including the old floor's tiny positives, still build."
+  (testing "non-positive / non-finite / non-numeric temperatures are refused for every spec kind"
+    (doseq [bad [0 0.0 -0.5 -1 ##NaN ##Inf "0.1" nil]
+            spec [{:becomes 1} [0.2 0.8]]]
+      (is (thrown? Exception (pref/c-distribution spec :temperature bad))
+          (str spec " at T=" bad " must refuse"))))
+  (testing "the old silent clamp for negative T is gone: it built a hard preference before"
+    (is (thrown? Exception (pref/c-distribution [0.2 0.8] :temperature -0.5))))
+  (testing "positive finite T still builds, including sub-floor values the 1e-9 floor protects"
+    (is (map? (pref/c-distribution [0.2 0.8] :temperature 1e-12)))
+    (is (map? (pref/c-distribution [0.2 0.8] :temperature 10)))
+    (is (= 0.1 (:temperature (pref/c-distribution [0.2 0.8])))))
+  (testing ":p1 specs carry the temperature too, so the guard reaches them"
+    (is (thrown? Exception (pref/c-distribution {:p1 0.5} :temperature 0)))
+    (is (map? (pref/c-distribution {:p1 0.5} :temperature 0.5)))))
