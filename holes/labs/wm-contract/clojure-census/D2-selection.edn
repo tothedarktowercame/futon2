@@ -1,0 +1,138 @@
+{:dispatch :D2
+ :terms
+ [{:term :temperature
+   :lean {:census "DarkTower.AIF.policyPosterior (caller-DECLARED beta)"
+          :carrier "DarkTower.WarMachine.PolicyPrecision.PolicyTemperature / policyPrecision"}
+   :interpretation {:text "beta is caller-declared with no default (R14): each cascade-problem declares :beta in its cascade source; the joint family refuses :incommensurable-family if the compared problems declare different betas; a missing or non-positive beta is selection-posterior's typed refusal :invalid-temperature. gamma = 1/beta scales G only, never F."
+                    :status :recorded}
+   :producers
+   [{:var "futon2.aif.policy-precision/converge-beta"
+     :role :dead
+     :entry-point "none live: scripts/futon2/report/war_machine.clj/beta-dark-carry (line 566) -> policy-precision/carry-beta -> converge-beta, and beta-dark-carry is called only from tests (beta_habit_wiring_test, war_machine_test) and lab scripts (holes/labs/wm-contract/run9_s4_arms.clj, f8_policy_free_energy_readback.clj) — generate-war-machine and full-loop-runner never call it"
+     :inputs ["beta-prior: carried previous-tick beta (or default-initial-beta 1.0)"
+              "g-values: candidate-aligned G (:controller-score)"
+              "f-pi-values: candidate-aligned observed F_pi (unscaled)"
+              "opts: log-priors, log-prior-placement, tolerance, max-iterations"]
+     :output "solved beta at Friston 2017 App. B / eq. 2.7's fixed point (bisection with checked bracket), or :bracketed? false"
+     :callers ["futon2.aif.policy-precision/carry-beta"
+               "futon2.aif.beta-habit (via align-f-pi-and-g)"
+               "tests + holes/labs/wm-contract lab scripts only"]
+     :evidence ["grep -rn 'beta-dark-carry' src scripts test holes --include=*.clj -> only war_machine.clj defn, tests, and the two lab scripts; no call from generate-war-machine/full-loop-runner"
+                "grep -n 'defn converge-beta' src/futon2/aif/policy_precision.clj -> 95"]}
+    {:var "futon2.aif.policy-precision/carry-beta"
+     :role :dead
+     :entry-point "war-machine/beta-dark-carry (dark RUN7/S2 lane), itself uncalled from the live tick"
+     :inputs ["carried state (or nil -> initial-beta-state beta_0 = 1.0, :beta-source :initial)"
+              "f-pi by candidate id" "current ranked actions" "identity-fn / score-fn opts"]
+     :output "{:policy-precision-state {:beta ... :beta-source :solved|:held|:initial ...}} for trace persistence; solver rejection typed, never silent"
+     :callers ["scripts/futon2/report/war_machine.clj/beta-dark-carry line 595"
+               "tests + lab scripts"]
+     :evidence ["sed -n '592,600p' scripts/futon2/report/war_machine.clj -> ((if habit-in-both? beta-habit/carry policy-precision/carry-beta) carried by-candidate current-ranked ...)"]}]
+   :duplicates ["none in this cluster: the only other temperature machinery is selection-gain's inverse selection temperature, which its own docstring scopes to selection gain, not EFE"]
+   :irrelevant ["selection-gain (tau-mode) — self-declares 'inverse selection temperature: high selection gain => sharper softmax', a performance signal, not beta"
+                "adapters/fulab softmax sampling — adapter grain, G-external"]
+   :match {:status :matches
+           :notes "There is no Clojure temperature TYPE; the Lean PolicyTemperature's content (beta > 0, gamma = 1/beta) is enforced at the use site: selection-posterior refuses :invalid-temperature on missing/non-positive beta, and computes G/beta with F unscaled — exactly Lean selectionWeight's -(policyPrecision t * G pi) - F pi. The live beta arrives DECLARED per cascade-problem (cascade-sources :beta field; cascade-decision throws :incommensurable-family on distinct betas, war_machine.clj:5931-5938), matching the 'no default' law. converge-beta's eq.-2.7 fixed-point solve has NO DarkTower declaration — an unwritten-in-Lean extension on a dead lane, not a divergence of a Lean'd term."}}
+  {:term :policy-posterior
+   :lean {:census "DarkTower.AIF.policyPosterior"
+          :carrier "DarkTower.WarMachine.PolicySelection.selectionPosterior (with PolicyPrecision.precisionWeightedPosterior and OutcomeRiskKL.policyPosterior as the special cases)"}
+   :interpretation {:text "sigma(ln E - F - G/beta) over the finite-G candidates, every infinite-G candidate at probability exactly 0; E defaults to declared-neutral 1 and F to declared 0 on the live tick"
+                    :status :recorded}
+   :producers
+   [{:var "futon2.aif.cascade-selection/selection-posterior"
+     :role :live
+     :entry-point "futon2.aif.full-loop-runner selection judge -> war-machine/generate-war-machine -> cascade-decision (6032) or cascade-lane R14 (5798) -> policy/select-action-cascades -> selection-posterior (policy.clj:192)"
+     :inputs ["{:beta beta} positive number (typed refusal :invalid-temperature otherwise)"
+              "{:candidates [...]} each {:id <action> :habit E(pi) positive (refusal :invalid-habit) :f F_pi real :g G real or :infinite}"]
+     :output "{id probability} — habit*exp(-F - G/beta) normalized over finite-G candidates in log-sum-exp space; infinite-G ids get exactly 0.0; refusals :invalid-temperature, :invalid-habit, :no-admissible-candidate"
+     :callers ["futon2.aif.policy/select-action-cascades (policy.clj:192)"
+               "test/futon2/aif/cascade_selection_test.clj"]
+     :evidence ["grep -n 'cascade-selection/selection-posterior' src/futon2/aif/policy.clj -> 158 (docstring), 192 (call)"
+                "grep -n 'select-action-cascades' scripts/futon2/report/war_machine.clj -> 5693, 5796-5798 (cascade-lane R14), 6032 (cascade-decision)"
+                "grep -n 'generate-war-machine' src/futon2/aif/full_loop_runner.clj -> 3739"]}
+    {:var "futon2.aif.policy/select-action-cascades"
+     :role :live
+     :entry-point "war-machine/generate-war-machine via cascade-decision over assembled cascade-problems (one select over the union family at the common declared beta)"
+     :inputs ["ranked-actions: rank-cascade-actions output carrying :controller-score (= G), :rank, :g-tie"
+              "{:keys [beta]} — NO default; propagated to selection-posterior"
+              "E sourced per entry: (or (:habit e) 1) — declared neutral 1, 'no habit prior exists yet'"
+              "F sourced per entry: (or (:f e) 0) — declared 0, 'no F_pi on the tick'"
+              "G sourced per entry: (:controller-score e) — rank-cascade-actions' horizon-g-sparse G"]
+     :output "decision map: chosen :action/:rank/:controller-score plus :beta {:value :status :declared} and :selection-law {:applied :cascade-selection-posterior :posterior :softmax-weights :tie-break-rule :tie-broken?}"
+     :callers ["war-machine cascade-lane R14 (5798) and cascade-decision (6032)"
+               "test/futon2/report/*"]
+     :evidence ["sed -n '186,200p' src/futon2/aif/policy.clj -> candidates built with (or (:habit e) 1), (or (:f e) 0), :g (:controller-score e)"
+                "sed -n '5931,5938p;6032p' scripts/futon2/report/war_machine.clj -> beta = (first betas) from the problems' declared :beta; :incommensurable-family on distinct values"]}
+    {:var "futon2.aif.cascade-policy/cascade-policy-posterior"
+     :role :test-only
+     :entry-point "none in src (the Sortie-12 'distributions over cascades' mirror of PolicyPosterior.softmaxWithFPi)"
+     :inputs ["habit-fn, risk-fn, eig-fn, f-pi-fn, tau, cascades"]
+     :output "[{:cascade :G :weight}] normalized exp(ln E - G/tau - F_pi)"
+     :callers ["futon2.aif.cascade-policy/select-over-cascades (its own seam)"
+               "test/futon2/aif/cascade_policy_test.clj"]
+     :evidence ["grep -rn 'cascade-policy-posterior\\|select-over-cascades' src scripts --include=*.clj -> only cascade_policy.clj itself; no caller outside tests"]}
+    {:var "futon2.aif.policy/select-action (flat, with softmax-weights)"
+     :role :dead
+     :entry-point "none live: the flat decision block that scored :type actions through select-action was DELETED by H5b (Joe 2026-09-17); remaining mentions are docstring/seam notes (code_build_match.clj records 'the flat policy/select-action was removed by Joe's ruling')"
+     :inputs ["ranked :type actions + :temperature-opts (tau-mode; :variational-beta-gamma lane via variational-temperature-opts)"
+              "habit-prior ln E seam (habit_prior)"]
+     :output "flat single-action decision with :softmax-weights"
+     :callers ["docstring references only (machine_q, action_proposer, efe notes); no live call site"]
+     :evidence ["sed -n '6379,6398p' scripts/futon2/report/war_machine.clj -> H5b deletion note naming the removed policy/select-action block"
+                "grep -rn 'policy/select-action\\b' src scripts --include=*.clj -> docstrings/notes only, no call outside policy.clj"]}]
+   :duplicates ["cascade-policy-posterior vs selection-posterior — the same sigma(ln E - F - G/tau) law implemented twice (Sortie-12 mirror vs the P7 runtime); cascade-policy-posterior has no src caller"
+                "policy/select-action's flat softmax-weights — a third softmax law, retired with the flat path"]
+   :irrelevant ["cascade-prior/shadow-rank — an E-input supplier (learned log-priors over cascades) for a shadow lane; call-graph is tests only (cascade_prior_test, selection_score_readiness_test note); full census is D4"
+                "machine-q (reads select-action's :softmax-weights as Q(pi)) — dead with the flat selector"
+                "rollout/softmax and adapters/fulab — unrelated softmax uses (proposal weights, adapter sampling)"
+                "habit-prior / beta-habit / strategic-habit — E suppliers only here (D4); strategic-habit/carry IS live in generate-war-machine (line 6418) but feeds habit observation, not this posterior"]
+   :match {:status :matches
+           :notes "THE BETA QUESTION RESOLVES IN THE CODE, BOTH SIDES. Clojure selection-posterior score = (log habit) - f - (g / beta): gamma = 1/beta multiplies G ONLY; F is never scaled. Lean: PolicySelection.selectionWeight = habit pi * EReal.exp(-(policyPrecision t * G pi) - F pi) — same shape, F unmultiplied; PolicyPrecision.precisionWeightedPosterior = exp(log habit - F - gamma*G)/Z likewise. OutcomeRiskKL.policyPosterior (the weight the dispatch quoted as 'exp(-G-F), no beta') is the gamma = 1 special case, exactly as PolicySelection's docstring states ('OutcomeRiskKL.policyPosterior states the second at gamma = 1'). So a beta-tempered Lean declaration EXISTS (selectionPosterior/precisionWeightedPosterior) and the Clojure matches it input-by-input: habit <-> :habit (positivity enforced both sides), F <-> :f (unscaled both sides), G extended to EReal with T-infinitely-risky candidates at probability zero <-> :infinite g at exactly 0.0 (selectionPosterior_eq_zero_of_risk_top); normalizer-nonzero <-> :no-admissible-candidate refusal. Clojure computes in log-sum-exp doubles vs Lean ENNReal — numerics, not law. Clojure-only additions: the typed-refusal channel and (in bayes-choice) a declared tie-break, neither contradicting a Lean statement."}}
+  {:term :action
+   :lean {:census "DarkTower.AIF.policyPosterior (Bayes action)"
+          :carrier "DarkTower.WarMachine.ActionMarginal.actionMarginal / IsBayesAction"}
+   :interpretation {:text "the Bayes action maximizes posterior mass summed over the policies that choose it (the action marginal over first-acting patterns), not the per-policy argmax; ties broken by the declared rule :action-name-ascending"
+                    :status :recorded}
+   :producers
+   [{:var "futon2.aif.cascade-selection/bayes-choice"
+     :role :live
+     :entry-point "select-action-cascades (policy.clj:198) — same live chain as selection-posterior"
+     :inputs ["posterior {id probability} from selection-posterior"
+              "action-of: map candidate id -> its first acting pattern (the per-state projection proj pi s_t)"]
+     :output "{:action a :mass m :tie-break-rule :action-name-ascending}; refuses :unmapped-candidate, :no-admissible-candidate"
+     :callers ["futon2.aif.policy/select-action-cascades"
+               "test/futon2/aif/cascade_selection_test.clj"]
+     :evidence ["grep -n 'cascade-selection/bayes-choice' src/futon2/aif/policy.clj -> 164 (docstring), 198 (call)"
+                "sed -n '104,140p' src/futon2/aif/cascade_selection.clj -> argmax over actions of sum over policies mapping to that action; declared stable tie-break"]}
+    {:var "futon2.aif.controller-authority/authorize"
+     :role :live
+     :entry-point "war-machine cascade-decision (6034) and cascade-lane R14 (5816), immediately after select-action-cascades"
+     :inputs ["decision (select-action-cascades output: :action, :controller-score, :selection-law)"
+              "admissible: the ranked entries"]
+     :output "bounded actuation envelope {:status :machine-authorized-bounded-autonomy ...} or throws {:err :invalid-controller-decision :reason ...} (:action-not-admissible, :controller-score-missing-or-invalid, :selection-law-missing-or-invalid, :target-not-open)"
+     :callers ["scripts/futon2/report/war_machine.clj:5816, 6034"
+               "test/futon2/aif/controller_authority_test.clj"]
+     :evidence ["grep -n 'controller-authority/authorize' scripts/futon2/report/war_machine.clj -> 5816, 6034"]}
+    {:var "futon2.aif.policy/select-action (flat action choice)"
+     :role :dead
+     :entry-point "none live (H5b; see :policy-posterior)"
+     :inputs ["flat ranked :type actions"]
+     :output "one flat action"
+     :callers ["docstring references only"]
+     :evidence ["same H5b evidence as :policy-posterior"]}]
+   :duplicates []
+   :irrelevant ["decision-gate/emit! — the E1 gate downstream of authorize (live at war_machine 6036 area); an emission ledger, not an action computation; left for D7"
+                "efe/select-star-map-action, rank-local-preference-actions — dead with the flat/compute-efe channel (D1)"]
+   :match {:status :matches
+           :notes "Lean ActionMarginal.actionMarginal u = sum over pi with step pi = u of Q pi (line 21) and IsBayesAction = argmax of that marginal; exists_bayesAction_at_state gives the per-state form with proj pi s. Clojure bayes-choice reduces the posterior by action-of (the cascade's FIRST ACTING pattern — the per-state projection of the enacted step) and takes the max-mass action: same quantity. Divergence-shaped notes: (1) Clojure adds a DECLARED deterministic tie-break (:action-name-ascending) Lean does not state — a runtime determinism rule, recorded in the result; (2) Lean's marginal is over arbitrary U actions, Clojure's action-of is constrained to first-acting cascade patterns, i.e. U instantiated at cascade grain; (3) :unmapped-candidate is a typed refusal where Lean's total function assumes step defined. None contradicts a Lean theorem."}}]
+  :evidence-commands
+  ["grep -n '^(defn ' on cascade_selection.clj, policy_precision.clj, cascade_prior.clj, controller_authority.clj (producer inventory)"
+   "grep -rln 'futon2.aif.cascade-selection|futon2.aif.policy-precision|futon2.aif.cascade-prior|futon2.aif.controller-authority' src scripts test (caller census)"
+   "grep -rln 'softmax' src/futon2 (the beyond-the-named-namespaces search for posterior/softmax computations; surfaced cascade-policy, machine-q, rollout, adapters/fulab, selection-gain — all classified above)"
+   "grep -n 'select-action-cascades' scripts/futon2/report/war_machine.clj -> 5693, 5796-5798, 6032 (live chain)"
+   "sed -n '5931,5938p' scripts/futon2/report/war_machine.clj (declared-beta commensurability check)"
+   "sed -n '186,200p' src/futon2/aif/policy.clj (E=1 / F=0 defaults, G=controller-score)"
+   "grep -rn 'beta-dark-carry|f-pi-posterior-opts|variational-temperature-opts' src scripts test holes (policy-precision liveness)"
+   "sed -n '1,35p' /home/joe/code/mathlib4/DarkTower/WarMachine/PolicySelection.lean; grep -n 'policyPrecision\\|precisionWeightedPosterior' DarkTower/WarMachine/PolicyPrecision.lean (beta-tempered Lean law)"
+   "grep -n 'actionMarginal\\|IsBayesAction' /home/joe/code/mathlib4/DarkTower/WarMachine/ActionMarginal.lean -> 21, 26, 216"
+   "grep -rn 'cascade-policy-posterior|select-over-cascades' src scripts (cascade-policy callers)"]}
