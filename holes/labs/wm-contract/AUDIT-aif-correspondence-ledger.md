@@ -59,9 +59,9 @@ out of scope). "Producer" = what the live path calls today.
 | :prediction-error | R3a | OK* | STALE | STALE (reference-model witnesses 09-12) | Gaussian row legacy per ruling P9; categorical successor below |
 | :precision | R7 | OK* | STALE | STALE | ζ (likelihood precision) declared 09-17, separate row below |
 | :free-energy | — | OK (MATCHES 09-16, independent) | OPEN | STALE (VFE witness 09-12) | |
-| :policy-free-energy | R8 | OK* | OPEN | STALE (s4-run admission 09-01) | |
-| :belief-update | R3 | OK* | OPEN (ALIGNMENT waiting-row) | STALE | Gaussian legacy per P9; exact categorical update is the successor |
-| :belief-state | R1 | OK* | STALE | STALE (production-trace rows 09-12) | |
+| :policy-free-energy | R8 | OK* | CENSUSED D5: :diverges — F formally retired from the tick; live posterior runs F≡0, contradicting B.2's equality-case value; the matching producer (cascade-free-energy, cites vfe_posterior_eq) is test-only | STALE (s4-run admission 09-01) | discharge path: call producer on tick + pass :f (WM-11) |
+| :belief-update | R3 | OK* | CENSUSED D5: :diverges scope-stated — live conditioning is channel-grain only; cascade-grain exact-update test-only; surprising-observation case structurally absent under identity-A | STALE | Gaussian legacy per P9; filtering successor built-unwired |
+| :belief-state | R1 | OK* | CENSUSED D5: :matches (two grains recorded) | STALE (production-trace rows 09-12) | |
 | :forward-model | R4 | OK* | CENSUSED D3 (B side): cascade-kernel/rollout fully live and Lean-aligned — the quartet's healthy member | STALE (float-carried pins) | |
 | :risk | R5a | OK (MATCHES-w-reduction, declared) | CENSUSED D1: producers identified (live: outcome-risk, private outcome-risk-pointwise); match :not-checked — dedicated pass queued | OPEN | in horizon-g-sparse via stepRisk |
 | :ambiguity | R5b | OK (MATCHES 09-16, independent) | CENSUSED D1: :matches; step-ambiguity is :test-only (only horizon-g reference calls it; sparse path never evaluates — identity-A) | STALE (one hand point) | inert on live path (known-failing vs eq. 4.9) |

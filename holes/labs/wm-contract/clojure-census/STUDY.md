@@ -51,6 +51,23 @@ Results table appended below as each pair (Dn, Tn) completes.
 | :risk | :no-plans (informative) | :not-checked — dedicated OutcomeRiskKL pass queued | :consistent |
 | :ambiguity | :no-plans | :matches (within the identity-A known-failing context) | **discrepancy found and resolved**: census said `step-ambiguity` :live; testimony said built-but-not-reached; rerun showed the sole call site is inside `horizon-g` (enumerating reference) → testimony right, census corrected in place (f3d0417b). Class: **:census-role-error** (new). Note: the census hedged in prose while stretching the role field — prose hedges don't survive joins |
 
+### F and Q — D5 (e3dce99a) × T5 (4d2c78bc), compared 2026-09-18
+
+| term | P↔S | B↔S | P↔B |
+|---|---|---|---|
+| :policy-free-energy (F) | plan exists in effect: T5 identifies `cascade-free-energy/policy-free-energy` as THE producer (returns `{:f {candidate-id F}}` — selection's exact keying; complexity-term 0 declared WITH cited theorem `vfe_posterior_eq`); WM-11 needs-owner | **:diverges — and the distinction matters**: E=1 is a declared neutral WITHIN the law (uniform habit is still a habit); F≡0 is a declared value the law CONTRADICTS (B.2's equality case gives F = −ln P(o|π) ≠ 0). D5 adds the history: F was formally RETIRED (war_machine "the R8 tag survives the retirement of F"); even eps has zero call sites. Live posterior runs σ(ln E − 0 − G/β) | :consistent — T5's "gap is a call site" and D5's "not computed at all" are the same facts, D5 adding the retirement record. Discharging `policyPosteriorImportsPolicyF` = call the existing producer on the tick + pass :f through |
+| :belief-state (Q) | R3-cat clarified from theory (filtering done, 4.13 smoothing form open — ledger ab375685) | :matches (two grains: cascade rollout-map + belief.clj entity-map, recorded per-grain) | :consistent |
+| :belief-update | no plans beyond R3-cat | **:diverges, scope-stated**: the only live conditioning is channel/entity-grain `update-belief-batch` (no DarkTower carrier); cascade-grain conditioning (`exact-update`, line-for-line ExactBeliefTrajectory) is test-only. Under identity-A the open-loop rollout IS the exact trajectory for every observation the live system can produce — but the surprising-observation case Lean's Option.none exists for is STRUCTURALLY ABSENT | :consistent; T5's dynamic-resolution :caution discharged by owner sweep (no dynamic caller reaches the family) |
+
+**Cross-cutting (D5×T5):** the census's match vocabulary gained a
+principled split: *declared-neutral-within-the-law* (E=1, identity-A
+as typed refusal domain) vs *declared-value-contradicting-the-law*
+(F≡0). Only the second scores :diverges. Fourth path-rot instance
+(DAG R1/R3 loci). Two Holes attestations now within reach of existing
+producers + the certificate lane: `policyPrecisionIsGammaFromBeta`
+(β declared, T2) and `policyPosteriorImportsPolicyF` (F producer built,
+T5/D5).
+
 ### Preference carriers — D4 (7e85f106) × T4 (6521785d), compared 2026-09-18
 
 | term | P↔S | B↔S | P↔B |
