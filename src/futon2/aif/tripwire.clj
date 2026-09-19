@@ -28,7 +28,7 @@
 (def summon-recipient "claude-6")
 (def investigation-window-ms (* 45 60 1000))
 (def artifact-window-tolerance-ms (* 2 60 1000))
-(def repair-children ["findings" "implementations" "resolutions"])
+(def repair-children ["findings" "implementations" "resolutions" "dismissals"])
 (def known-job-states
   #{"queued" "pending" "running" "done" "failed" "cancelled" "timed-out"})
 
@@ -116,7 +116,7 @@
       {:tripwire/unreadable? true :tripwire/error (.getMessage e)})))
 
 (defn repair-snapshot
-  "Immutable audit snapshot of the three repair-record directories."
+  "Immutable audit snapshot of the repair-record directories, including dispositions."
   ([] (repair-snapshot repair/default-root))
   ([root]
    (into {}
@@ -136,9 +136,9 @@
                 statuses)))
           {}
           (sort-by (fn [[path _]]
-                     (or ({"findings" 0 "implementations" 1 "resolutions" 2}
+                     (or ({"findings" 0 "implementations" 1 "resolutions" 2 "dismissals" 3}
                           (first (str/split path #"/")))
-                         3))
+                         4))
                    snapshot)))
 
 (def allowed-status-edges
@@ -908,7 +908,7 @@
           statuses (effective-statuses repair-state)
           closed-ids (into #{}
                            (keep (fn [[id status]]
-                                   (when (#{:resolved :superseded} status) id)))
+                                   (when (#{:resolved :superseded :dismissed-unexecuted} status) id)))
                            statuses)
           attempts (or (:tripwire/cohort-history opts)
                        (try (:attempts (cohort/ledger))
