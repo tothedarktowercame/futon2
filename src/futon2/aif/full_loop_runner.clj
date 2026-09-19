@@ -1914,7 +1914,7 @@
           (assoc (select-keys finding
                               [:repair/id :repair/class :attempt-id
                                :failed-commit :review-verdict :review-text
-                               :failure-stage :failure-outcome :failure-error
+                               :target :failure-kind :failure-stage :failure-outcome :failure-error
                                :discharge-contract])
                  :failure-job-id (recovery-job-id finding)))
         stop-lines))
@@ -1983,7 +1983,17 @@
        "another repository; a commit elsewhere is an artifact-binding mismatch. If the "
        "target repository is unresolved or the parcel cannot be completed there, make no "
        "commit and REFUSE with a typed reason.\n"
-       "MISSION RECORD: " (pr-str mission) "\n"
+       "MISSION RECORD: "
+       (pr-str (if (:repair/id mission)
+                 (first (prompt-findings [mission]))
+                 mission)) "\n"
+       (when-let [repair-id (:repair/id mission)]
+         (str "FULL REPAIR FINDING: "
+              (pr-str (str (io/file repair/default-root "findings"
+                                   (str repair-id ".edn"))))
+              "\nThe mission record above is the compact finding projection. "
+              "Read the full finding for its backtrace and nested evidence; "
+              "the discharge contract is unchanged.\n"))
        "PATTERN CASCADE: " (pr-str (select-keys cascade-entry
                                                   [:mission :psi :shown :semilattice
                                                    :cascade-score

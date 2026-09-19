@@ -800,7 +800,7 @@
            :artifact-ref nil
            :terminal-code "no-execution-evidence"
            :events [{:type "failed" :code "no-execution-evidence"}]}})]
-    (is (= ["zai-5" "codex-7"] dispatches)
+    (is (= ["zai-5"] dispatches)
         "no-execution-evidence is terminal, not infrastructure")))
 
 (deftest retry-prompt-and-artifact-gate-share-the-fresh-head
@@ -1113,6 +1113,32 @@
     (is (= "cured123" (get-in result [:author-job :artifact-binding :commit]))
         "the cured author-job carries the NEW binding, not the stale one")
     (is (true? (get-in result [:build-retries 0 :cured?])))))
+
+(deftest repair-author-prompt-references-recursive-history
+  ;; Production shape: an old finding nests an earlier finding in its
+  ;; selected action, plus a large checkpoint backtrace. Sending it verbatim
+  ;; exceeded the CLI's 1,048,576-character input limit on 2026-09-19.
+  (let [contract {:requires [:distinct-repair-commit :independent-review
+                            :grounded-repair :distinct-production-shaped-successor]
+                  :artifact-shape :code-commit}
+        history {:backtrace {:checkpoints (apply str (repeat 1100000 "x"))}}
+        mission {:repair/id "repair-prompt-test" :repair/class :machine-failure
+                 :failure-stage :build-resolution :discharge-contract contract
+                 :selected-entry {:action {:repair-obligation history}}
+                 :backtrace history}
+        prompt (#'runner/author-prompt
+                {:author "author" :reviewer "reviewer"
+                 :target-repository "/repo" :target-repository-head "base123"}
+                (:repair/id mission) mission {} [mission])
+        record-text (second (re-find #"MISSION RECORD: ([^\n]+)" prompt))
+        projected (edn/read-string record-text)]
+    (is (< (count prompt) 20000))
+    (is (= contract (:discharge-contract projected)))
+    (is (= :build-resolution (:failure-stage projected)))
+    (is (str/includes? prompt
+                       (str (io/file repair/default-root "findings"
+                                     "repair-prompt-test.edn"))))
+    (is (str/includes? prompt "Read the full finding"))))
 
 (deftest author-contract-names-the-durable-feature-card-boundary
   (let [prompt (#'runner/author-prompt
