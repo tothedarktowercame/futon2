@@ -34,6 +34,15 @@ was bypassed.
   and no `:selection-source`; its only decision datum explicitly says
   `:no-recorded-cascade-selection`. In particular, it also does not contain
   `:selection-source :stop-the-line`.
+- Habit provenance and mass vector: absent. No ranked-candidate menu was
+  recorded, so there are no per-candidate `:source` or `:count` values and no
+  mass vector whose constancy can be assessed. This must not be read as a
+  constant zero vector.
+- Selected mission: absent; no candidate was selected.
+- C source: absent; the record establishes neither `:derived` nor a fallback
+  constant.
+- G-term decomposition: `{:schema :wm/g-term-decomposition-v1,
+  :status :missing, :reason :no-recorded-cascade-selection, :policies []}`.
 
 ## Grant 3 / click 2
 
@@ -54,6 +63,15 @@ was bypassed.
   and no `:selection-source`; its only decision datum explicitly says
   `:no-recorded-cascade-selection`. In particular, it also does not contain
   `:selection-source :stop-the-line`.
+- Habit provenance and mass vector: absent. No ranked-candidate menu was
+  recorded, so there are no per-candidate `:source` or `:count` values and no
+  mass vector whose constancy can be assessed. This must not be read as a
+  constant zero vector.
+- Selected mission: absent; no candidate was selected.
+- C source: absent; the record establishes neither `:derived` nor a fallback
+  constant.
+- G-term decomposition: `{:schema :wm/g-term-decomposition-v1,
+  :status :missing, :reason :no-recorded-cascade-selection, :policies []}`.
 
 ## Boundary
 
