@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2"
+ :subject-id "repair-store/dismiss-fixture-pollution"
+ :command ["clojure" "-M:test" "-n" "futon2.aif.repair-obligation-test"]
+ :author "codex-24"
+ :artifact-dir "/home/joe/code/storage/test-registry/repair-store-dismiss-fixture-pollution-2026-09-19"
+ :code-paths ["src/futon2/aif/repair_obligation.clj"]
+ :test-paths ["test/futon2/aif/repair_obligation_test.clj"]}
