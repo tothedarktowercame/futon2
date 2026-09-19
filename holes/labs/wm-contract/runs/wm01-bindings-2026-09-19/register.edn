@@ -1,4 +1,4 @@
-{:repo-root "/tmp/futon2-wm01-bindings-warrant"
+{:repo-root "/home/joe/code/futon2-wm01-bindings-warrant"
  :subject-id "WM-01-bindings"
  :command ["clojure" "-X:test" ":nses" "[futon2.aif.cascade-free-energy-test]"]
  :author "codex-wm-bindings"
