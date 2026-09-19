@@ -46,6 +46,8 @@ curl -s -X POST localhost:7070/api/alpha/test-registry/check \
   -d '{"entry-id":"test-registry-…","repo-root":"/home/joe/code/futon2","changed-paths":[]}'
 # {:check {...} :meaning "validity-now, …"}; GET /api/alpha/evidence/<id> is the
 # MINT verdict (who/what/counts), a different answer from "still holds".
+# On :stale-sha, read :changed-files — it names WHICH file moved. Uncommitted
+# drift = a lane is mid-edit (wait); committed drift = superseded (re-mint).
 
 # If you must run, run the narrowest thing that answers the question
 clojure -M:test -n futon2.aif.some-test
