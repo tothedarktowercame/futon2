@@ -1,0 +1,2 @@
+{:entry/type :subject-binding, :entry/id "54c6a286-1228-4990-87eb-138b9fd9c21f", :subject-id "LF-certificate-witness-checker", :warrant-id "test-registry-c52af2af5c2a5164f2ecc2be85cf0296b72dfec31f4b3a3eeb269a1a51ee94f6", :actor "codex-32", :at "2026-09-19T16:17:10.155300361Z"}
+{:warrant-id "test-registry-c52af2af5c2a5164f2ecc2be85cf0296b72dfec31f4b3a3eeb269a1a51ee94f6", :warrant? true}

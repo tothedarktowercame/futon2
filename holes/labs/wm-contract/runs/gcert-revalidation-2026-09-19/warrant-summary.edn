@@ -1,0 +1,26 @@
+{:evidence/id
+ "test-registry-c52af2af5c2a5164f2ecc2be85cf0296b72dfec31f4b3a3eeb269a1a51ee94f6",
+ :sha256
+ "c52af2af5c2a5164f2ecc2be85cf0296b72dfec31f4b3a3eeb269a1a51ee94f6",
+ :summary-not-full-warrant true,
+ :payload
+ {:warrant? true,
+  :results
+  {:duration-ms 14956,
+   :error-count 0,
+   :exit 0,
+   :jobs 8506,
+   :sorry-count 9,
+   :sorry-files {"DarkTower/WarMachine/Holes.lean" 9}},
+  :git-head "4199d8ebe02c01c54753d4c62720986b084be0c8",
+  :run/id "af5a76e7-8d7b-44a3-bfac-823e9651c8e4",
+  :command
+  ["lake" "build" "DarkTower.AIF.Witness.GCertFixture20260918"],
+  :repo/root "/home/joe/code/mathlib4",
+  :finished-at "2026-09-19T16:16:31.728106139Z",
+  :log-artifact
+  {:ledger "/home/joe/code/storage/registry-ledger",
+   :path
+   "/home/joe/code/futon2/holes/labs/wm-contract/runs/gcert-revalidation-2026-09-19/af5a76e7-8d7b-44a3-bfac-823e9651c8e4.log",
+   :sha256
+   "d55c5afe426609895a356830ef173a2677cb712ca22c12f7d6c810250cebf869"}}}

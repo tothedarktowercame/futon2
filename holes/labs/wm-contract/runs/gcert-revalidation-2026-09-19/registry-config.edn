@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/mathlib4"
+ :code-paths ["DarkTower/AIF/Certificates.lean" "DarkTower/AIF/CertificateChecker.lean" "scripts/gen-gcert-witness.bb"]
+ :test-paths ["DarkTower/AIF/Witness/GCertFixture20260918.lean"]
+ :command ["lake" "build" "DarkTower.AIF.Witness.GCertFixture20260918"]
+ :author "codex-32"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/gcert-revalidation-2026-09-19"
+ :agency-url "http://localhost:7070"}

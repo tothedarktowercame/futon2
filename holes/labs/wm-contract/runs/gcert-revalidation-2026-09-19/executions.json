@@ -1,0 +1,62 @@
+[
+  {
+    "name": "regenerated",
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/gcert-revalidation-2026-09-19/regenerated.lean"
+    ],
+    "cwd": "/home/joe/code/mathlib4",
+    "exit": 0,
+    "expected_exit": 0,
+    "source_sha256": "a97d15d73e3c94895f96bd4df93736c3e9bd6b4ad5e996bf861a0caffbe4d17d",
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "tampered-total",
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/gcert-revalidation-2026-09-19/tampered-total.lean"
+    ],
+    "cwd": "/home/joe/code/mathlib4",
+    "exit": 1,
+    "expected_exit": 1,
+    "source_sha256": "5a0f83331b49e8ccc3fd1ae876c141086325b91376c32fa136e2fa2fdbde0914",
+    "stdout": "/home/joe/code/futon2/holes/labs/wm-contract/runs/gcert-revalidation-2026-09-19/tampered-total.lean:31:32: error: Tactic `native_decide` evaluated that the proposition\n  GCertificateQ.check \u03b5 cert = true\nis false\n",
+    "stderr": ""
+  },
+  {
+    "name": "dishonest-zero",
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/gcert-revalidation-2026-09-19/dishonest-zero.lean"
+    ],
+    "cwd": "/home/joe/code/mathlib4",
+    "exit": 1,
+    "expected_exit": 1,
+    "source_sha256": "df9d56a6ff73926ddfc502408519626ea2a21cb65ac461689b66c772c4cc5d86",
+    "stdout": "/home/joe/code/futon2/holes/labs/wm-contract/runs/gcert-revalidation-2026-09-19/dishonest-zero.lean:31:32: error: Tactic `native_decide` evaluated that the proposition\n  GCertificateQ.check \u03b5 cert = true\nis false\n",
+    "stderr": ""
+  },
+  {
+    "name": "wrong-guard",
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "/home/joe/code/futon2/holes/labs/wm-contract/runs/gcert-revalidation-2026-09-19/wrong-guard.lean"
+    ],
+    "cwd": "/home/joe/code/mathlib4",
+    "exit": 1,
+    "expected_exit": 1,
+    "source_sha256": "078905072defcd1642e17209452ca81210f0e1afa98246528fd4370afd5d18f1",
+    "stdout": "/home/joe/code/futon2/holes/labs/wm-contract/runs/gcert-revalidation-2026-09-19/wrong-guard.lean:41:0: error: Expression\n  decide (DarkTower.AIF.GCertificateQ.check \u03b5 cert = false)\ndid not evaluate to `true`\n",
+    "stderr": ""
+  }
+]
