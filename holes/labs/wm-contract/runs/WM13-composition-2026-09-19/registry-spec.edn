@@ -1,0 +1,10 @@
+{:repo-root "/home/joe/code/futon2-wm13-warrant"
+ :code-paths ["src/futon2/aif/ruled_outcome_c.clj"
+              "holes/labs/wm-contract/f10_runtime_fold_check.bb"
+              "holes/labs/wm-contract/f10_runtime_fold_controls.sh"]
+ :test-paths ["test/futon2/aif/machine_preference_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.machine-preference-test"]
+ :author "wm-live-c"
+ :subject-id "WM-13-delivery"
+ :artifact-dir "/home/joe/code/storage/test-registry/WM13-composition-2026-09-19"
+ :agency-url "http://localhost:7070"}

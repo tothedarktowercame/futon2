@@ -1,7 +1,9 @@
 (ns futon2.aif.machine-preference-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.set :as set]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
             [futon2.aif.c-fold-config :as loader]
+            [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.machine-model :as model]
             [futon2.aif.ruled-outcome-c :as c])
   (:import [java.nio.file Files]
@@ -61,6 +63,19 @@
    :layers c/fold-declaration
    :provenance {:seed {:id :ruled-outcome-c-v1 :revision "fixture"}
                 :layers {:revision "fixture"}}})
+
+(deftest wm13-composition-and-support-adjudication
+  (let [mission-layer (first (filter #(= :c-mis (:layer/id %))
+                                     c/fold-declaration))]
+    (is (= :no (:in-ruled-sum mission-layer)))
+    (is (re-find #"6220-6226" (:composition-law mission-layer)))
+    (is (re-find #"AUTH-C-bridge" (:reason mission-layer))))
+  (is (= #{:historical-verification-awaiting-validation
+           :historical-verification-refused}
+         c/non-disposition-outcomes))
+  (is (= c/disposition-outcomes
+         (set/difference cohort/outcome-kinds c/non-disposition-outcomes)))
+  (is (= c/disposition-outcomes (:support c/seeded-c))))
 
 (deftest full-tagged-preference-construction
   (with-model
