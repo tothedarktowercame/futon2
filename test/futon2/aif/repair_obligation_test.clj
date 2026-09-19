@@ -13,6 +13,66 @@
     (.mkdirs f)
     (.getPath f)))
 
+(defn- dismissal-refusal [f]
+  (try (f) nil
+       (catch clojure.lang.ExceptionInfo e
+         (:repair-dismissal/refusal (ex-data e)))))
+
+(defn- dispatch-finding! [root attempt-id execution]
+  (repair/record-system-failure!
+   root {:attempt-id attempt-id
+         :repair-class :machine-failure
+         :failure-stage :author-wait
+         :outcome :build-failed
+         :failure-kind :build-failed
+         :error "Author job did not complete"
+         :failure-data {:author-job {:job-id (str "invoke-" attempt-id)
+                                     :state "failed"
+                                     :execution execution}}
+         :discharge-contract {:requires [:distinct-repair-commit]
+                              :artifact-shape :code-commit}}))
+
+(deftest dismiss-unexecuted-is-append-only-and-fail-closed
+  (let [root (temp-root)
+        executed (dispatch-finding! root "executed"
+                                    {:executed true :tool-events 1
+                                     :command-events 0})
+        absent (dispatch-finding! root "ambiguous" {})
+        finding (dispatch-finding! root "never-executed"
+                                   {:executed false :tool-events 0
+                                    :command-events 0})
+        finding-file (io/file root "findings" (str (:repair/id finding) ".edn"))
+        before (java.nio.file.Files/readAllBytes (.toPath finding-file))
+        disposition {:authority "Joe/repair-queue/2026-09-19"
+                     :reason :never-executed-dispatch
+                     :cause-fix "futon3c@7829ea83"
+                     :actor "claude-12"}]
+    (is (= :finding-executed
+           (dismissal-refusal
+            #(repair/dismiss-unexecuted! root (:repair/id executed) disposition))))
+    (is (= :execution-not-retained
+           (dismissal-refusal
+            #(repair/dismiss-unexecuted! root (:repair/id absent) disposition))))
+    (is (= :dismissed-unexecuted
+           (:repair/status
+            (repair/dismiss-unexecuted! root (:repair/id finding) disposition))))
+    (is (= #{(:repair/id executed) (:repair/id absent)}
+           (->> (repair/open-obligations root)
+                (filter #(and (= :open (:repair/status %))
+                              (not= :environmental-hold (:repair/class %))))
+                (map :repair/id)
+                set)))
+    (let [readback (first (repair/obligation-history root "never-executed"))]
+      (is (= :dismissed-unexecuted (:repair/status readback)))
+      (is (= disposition
+             (select-keys (:repair/dismissal readback)
+                          [:authority :reason :cause-fix :actor]))))
+    (is (java.util.Arrays/equals
+         before (java.nio.file.Files/readAllBytes (.toPath finding-file))))
+    (is (= :already-dismissed
+           (dismissal-refusal
+            #(repair/dismiss-unexecuted! root (:repair/id finding) disposition))))))
+
 (def grounded-review
   {:reviewer "reviewer" :review-job "review-job"
    :witness {:resolved? true :dial-moved? true}})

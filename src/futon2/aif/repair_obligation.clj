@@ -772,12 +772,14 @@
 
 (defn obligation-history
   "All immutable findings for an attempt, enriched with any implementation and
-  resolution records. Unlike `open-obligations`, this is an audit view."
+  resolution or administrative-dismissal records. Unlike `open-obligations`,
+  this is an audit view."
   ([attempt-id] (obligation-history default-root attempt-id))
   ([root attempt-id]
    (let [implementations (indexed-records root "implementations")
          verifications (verified-admissions root)
-         resolutions (indexed-records root "resolutions")]
+         resolutions (indexed-records root "resolutions")
+         dismissals (indexed-records root "dismissals")]
      (->> (records (io/file root "findings"))
           (filter #(= attempt-id (:attempt-id %)))
           (mapv (fn [finding]
@@ -789,16 +791,22 @@
                     (assoc :repair/verification (get verifications (:repair/id finding)))
                     (get resolutions (:repair/id finding))
                     (assoc :repair/resolution
-                           (get resolutions (:repair/id finding))))))))))
+                           (get resolutions (:repair/id finding)))
+                    (get dismissals (:repair/id finding))
+                    (assoc :repair/status :dismissed-unexecuted
+                           :repair/dismissal
+                           (get dismissals (:repair/id finding))))))))))
 
 (defn open-obligations
   ([] (open-obligations default-root))
   ([root]
    (let [resolved (set (map :repair/id (records (io/file root "resolutions"))))
+         dismissed (set (map :repair/id (records (io/file root "dismissals"))))
          implementations (indexed-records root "implementations")
          verifications (verified-admissions root)]
      (->> (records (io/file root "findings"))
-          (remove #(contains? resolved (:repair/id %)))
+          (remove #(or (contains? resolved (:repair/id %))
+                       (contains? dismissed (:repair/id %))))
           (mapv (fn [finding]
                   (let [finding (update finding :repair/class
                                         #(if (= :system-actuation-failure %)
@@ -814,6 +822,76 @@
                       finding)))))
           (sort-by :opened-at)
           vec))))
+
+(defn- dismissal-refuse! [reason data]
+  (throw (ex-info "Unexecuted repair finding dismissal refused"
+                  (assoc data :repair-dismissal/refusal reason))))
+
+(defn dismiss-unexecuted!
+  "Append an administrative disposition only when the immutable finding itself
+  proves that its dispatched job never executed. This is not a repair success,
+  resolution, or supersession: the finding remains unchanged and audit-visible.
+
+  The sole accepted execution carrier is
+  [:failure-data :author-job :execution]. Missing or internally inconsistent
+  evidence receives no benefit of the doubt."
+  ([finding-id disposition]
+   (dismiss-unexecuted! default-root finding-id disposition))
+  ([root finding-id {:keys [authority reason cause-fix actor] :as disposition}]
+   (when-not (and (string? finding-id)
+                  (re-matches #"[A-Za-z0-9._-]+" finding-id))
+     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+   (let [dismissals (indexed-records root "dismissals")]
+     (when (contains? dismissals finding-id)
+       (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+     (let [finding (first (filter #(= finding-id (:repair/id %))
+                                  (records (io/file root "findings"))))
+           resolutions (indexed-records root "resolutions")
+           implementation (get (indexed-records root "implementations") finding-id)
+           verification (get (verified-admissions root) finding-id)
+           effective-status (cond
+                              (get resolutions finding-id) :resolved
+                              (or implementation verification) :awaiting-validation
+                              finding (:repair/status finding))
+           execution (get-in finding [:failure-data :author-job :execution])]
+       (when-not finding
+         (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+       (when-not (= :open effective-status)
+         (dismissal-refuse! :finding-not-open
+                             {:repair/id finding-id :repair/status effective-status}))
+       (cond
+         (true? (:executed execution))
+         (dismissal-refuse! :finding-executed {:repair/id finding-id})
+
+         (not (and (map? execution)
+                   (false? (:executed execution))
+                   (= 0 (:tool-events execution))
+                   (= 0 (:command-events execution))))
+         (dismissal-refuse! :execution-not-retained {:repair/id finding-id})
+
+         (not (and (nonblank? authority) (keyword? reason)
+                   (nonblank? actor)
+                   (or (nil? cause-fix) (nonblank? cause-fix))
+                   (= (cond-> #{:authority :reason :actor}
+                        (some? cause-fix) (conj :cause-fix))
+                      (set (keys disposition)))))
+         (dismissal-refuse! :disposition-invalid {:repair/id finding-id})
+
+         :else
+         (let [record (cond->
+                       {:repair/id finding-id
+                        :repair/schema-version 1
+                        :repair/status :dismissed-unexecuted
+                        :failed-attempt (:attempt-id finding)
+                        :authority authority
+                        :reason reason
+                        :actor actor
+                        :execution execution
+                        :dismissed-at (str (Instant/now))}
+                        cause-fix (assoc :cause-fix cause-fix))]
+           (write-new! (io/file root "dismissals" (str finding-id ".edn"))
+                       record)
+           record))))))
 
 (defn record-implementation!
   "Record independently reviewed, grounded implementation of a machine repair.
