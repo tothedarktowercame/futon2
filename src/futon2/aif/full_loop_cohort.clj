@@ -779,6 +779,71 @@
           :cohort-id (:cohort/id succ)
           :sha256 (sha256 (slurp succ-path))})))))
 
+(def ^:private max-lineage
+  "A cohort chain longer than this is a loop, not a lineage."
+  256)
+
+(def ^:private lineage-identity-keys
+  [:cohort/id :status :registered-on :succeeds :succeeds-sha256])
+
+(defn verified-successor?
+  "True when SUCC is THE successor of PARENT and nothing else.
+
+  Every field outside `lineage-identity-keys` must be identical to the
+  parent's, the id must be exactly what `successor-id` produces, and
+  :succeeds/:succeeds-sha256 must name the parent's exact bytes. There is no
+  degree of freedom here, which is the point: it is what lets a successor be
+  admitted without a human re-pinning anything."
+  [parent parent-raw succ]
+  (and (map? succ)
+       (= (:cohort/id succ) (successor-id (:cohort/id parent)))
+       (= (:succeeds succ) (:cohort/id parent))
+       (= (:succeeds-sha256 succ) (sha256 parent-raw))
+       (= :preregistered (:status succ))
+       (= (apply dissoc parent lineage-identity-keys)
+          (apply dissoc succ lineage-identity-keys))))
+
+(defn resolve-lineage!
+  "Return the binding for the cohort that should take the next attempt.
+
+  Walks the succession chain from the server-owned pinned charter, verifying
+  every link against its predecessor's exact bytes, and mints the next link
+  when the last one is exhausted.
+
+  THE BINDING'S GUARANTEE IS UNCHANGED. `cohort-execution-binding.edn` and the
+  source constant pinning its digest are untouched; this only follows a chain
+  that is a pure function of the bytes they pin. A successor is admitted only
+  when its id is exactly `successor-id` of its parent, its :succeeds and
+  :succeeds-sha256 name the parent's exact bytes, and every other field is
+  identical. So HTTP request data still cannot select this file, its digest or
+  its paths -- it simply no longer takes a person to advance the lineage past
+  an exhausted cohort (Joe, 2026-09-19)."
+  [binding]
+  (loop [b binding n 0]
+    (when (> n max-lineage)
+      (throw (ex-info "Cohort lineage exceeds its bound"
+                      {:reason :cohort-lineage-runaway :from (:cohort-id binding)})))
+    (let [raw (slurp (:preregistration b))
+          parent (edn/read-string raw)]
+      (if (pos? (:remaining (ledger (:preregistration b) (:data-root b))))
+        b
+        (let [succ-path (sibling-path (:preregistration b))]
+          (if (.exists (io/file succ-path))
+            (let [sraw (slurp succ-path)
+                  succ (edn/read-string sraw)]
+              (when-not (verified-successor? parent raw succ)
+                (throw (ex-info "Cohort successor is not derivable from its parent"
+                                {:reason :cohort-successor-not-derivable
+                                 :parent (:cohort/id parent)
+                                 :claimed (:cohort/id succ)
+                                 :path succ-path})))
+              (recur {:preregistration succ-path
+                      :data-root (sibling-path (:data-root b))
+                      :cohort-id (:cohort/id succ)
+                      :sha256 (sha256 sraw)}
+                     (inc n)))
+            (recur (succeed! (:preregistration b) (:data-root b)) (inc n))))))))
+
 (defn execution-preflight
   "Read-only pinned cohort identity, activation and capacity validation.
   The locked start-attempt! remains authoritative for concurrent admission."

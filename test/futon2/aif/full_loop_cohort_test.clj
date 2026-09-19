@@ -684,3 +684,88 @@
     (testing "calling again is idempotent, not a conflict"
       (is (= (:cohort-id (cohort/succeed! path data-root (constantly "2026-09-19")))
              :wm-contract-machinery-91-v1)))))
+
+(deftest lineage-admits-only-a-byte-derivable-successor
+  ;; This is what replaces a person re-pinning the server-owned binding. The
+  ;; binding file and the source constant pinning its digest are untouched; a
+  ;; successor is followed only when it is a pure function of the bytes they
+  ;; pin. So the forged cases below must be refused, or the guarantee that
+  ;; request data cannot select a cohort would be gone.
+  (let [parent {:cohort/id :wm-contract-machinery-90-v1
+                :protocol/version 4
+                :status :preregistered
+                :registered-on "2026-09-14"
+                :stopping-rule {:unit :trigger-opportunity :target 2}
+                :casting {:author "codex-23" :reviewer "codex-22"}}
+        raw (pr-str parent)
+        good (cohort/successor-preregistration parent raw "2026-09-19")]
+
+    (testing "the derived successor is admitted"
+      (is (cohort/verified-successor? parent raw good)))
+
+    (testing "a tampered stopping rule is refused"
+      (is (not (cohort/verified-successor?
+                parent raw (assoc-in good [:stopping-rule :target] 99)))))
+
+    (testing "tampered casting is refused"
+      (is (not (cohort/verified-successor?
+                parent raw (assoc-in good [:casting :author] "someone-else")))))
+
+    (testing "an id that is not exactly successor-id is refused"
+      (is (not (cohort/verified-successor?
+                parent raw (assoc good :cohort/id :wm-contract-machinery-99-v1)))))
+
+    (testing "a successor claiming the wrong parent bytes is refused"
+      (is (not (cohort/verified-successor?
+                parent raw (assoc good :succeeds-sha256 (apply str (repeat 64 "0"))))))
+      (is (not (cohort/verified-successor?
+                parent raw (assoc good :succeeds :some-other-cohort-v1)))))
+
+    (testing "a successor that adds a field of its own is refused"
+      (is (not (cohort/verified-successor?
+                parent raw (assoc good :extra-privilege true)))))))
+
+(deftest resolve-lineage-advances-past-an-exhausted-cohort
+  (let [root (tmp-root)
+        lab (io/file root "M-aif-full-loop-95")
+        _ (.mkdirs lab)
+        path (.getPath (io/file lab "cohort.edn"))
+        data-root (.getPath (io/file root "wm-full-loop-machinery-95"))
+        prereg (-> (read-string (slurp "holes/labs/M-aif-full-loop-57/cohort.edn"))
+                   (assoc :cohort/id :wm-contract-machinery-95-v1)
+                   (assoc-in [:stopping-rule :target] 1))
+        _ (spit path (with-out-str (pp/pprint prereg)))
+        _ (.mkdirs (io/file data-root))
+        _ (cohort/activate! path data-root)
+        binding {:preregistration path :data-root data-root
+                 :cohort-id :wm-contract-machinery-95-v1
+                 :sha256 (@#'cohort/sha256 (slurp path))}
+        cell (term {:opportunity-id "lin/one" :trigger :duree-click-on-demand
+                    :machine-state {} :agent-roster []
+                    :code-state {:git-sha "t" :git-dirty? false
+                                 :resolved-mode-flags {} :configuration-digest "t"}
+                    :semantic-epoch :test})]
+
+    (testing "while the pinned cohort has capacity, the binding is returned unchanged"
+      (is (= binding (cohort/resolve-lineage! binding))))
+
+    (cohort/start-attempt! (cohort/pin-preregistration binding) data-root cell)
+
+    (testing "once exhausted it advances, minting the successor"
+      (let [b (cohort/resolve-lineage! binding)]
+        (is (= :wm-contract-machinery-96-v1 (:cohort-id b)))
+        (is (pos? (:remaining (cohort/ledger (:preregistration b) (:data-root b)))))
+        ;; The parent's target was overridden to 1 above, and the successor
+        ;; inherits 1 -- from its actual parent, not from the charter this
+        ;; fixture was copied from.
+        (is (= 1 (:target (cohort/ledger (:preregistration b) (:data-root b)))))))
+
+    (testing "a forged successor on disk is refused, not followed"
+      (let [b (cohort/resolve-lineage! binding)
+            forged (assoc (read-string (slurp (:preregistration b)))
+                          :stopping-rule {:unit :trigger-opportunity :target 999})]
+        (spit (:preregistration b) (with-out-str (pp/pprint forged)))
+        (is (= :cohort-successor-not-derivable
+               (:reason (ex-data (try (cohort/resolve-lineage! binding)
+                                      nil
+                                      (catch clojure.lang.ExceptionInfo e e))))))))))
