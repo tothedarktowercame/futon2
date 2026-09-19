@@ -68,6 +68,13 @@ inflight=$(curl -s -m 15 "$BASE/api/alpha/wm/click" | python3 -c 'import sys,jso
 # zai-14 "13/13 clear" seconds before T8 halted its click on 2026-09-19.
 # Building the real observation costs ~13s because it parses the whole repair
 # store. That is the honest price of the check.
+# NOTE (kept from the withdrawn --disable-wire route, reverted 2026-09-19 by
+# zai-30 under zai-14's handoff; claude-4 stood the route down and is fixing
+# T8 instead): if a preflight skip set is ever re-introduced here, it CANNOT
+# travel by environment -- proof-eval evaluates this form inside the server
+# JVM, whose env is not this shell's, so a var like WM_CLICK_SKIP_WIRES on the
+# proof-eval command line never reaches the code (measured, ab5ca8fa). Inline
+# any such literal into the generated form.
 cat > /tmp/wm_click_wires.clj <<'CLJ'
 (do (require 'futon2.aif.tripwire 'futon2.aif.repair-obligation)
     (let [cro (resolve 'futon2.aif.tripwire/cross-run-observation)
