@@ -4346,7 +4346,10 @@
                        (mapv (fn [{:keys [repo tier pressure count max-age-days action]}]
                                [repo
                                 (name tier)
-                                (format "%.2f" (double pressure))
+                                ;; (or pressure 0), as at :4025, :4460 and
+                                ;; :4483. This site was the one that missed it,
+                                ;; and (double nil) throws.
+                                (format "%.2f" (double (or pressure 0)))
                                 (str count)
                                 (format "%.1fd" (double (or max-age-days 0.0)))
                                 action])
@@ -5278,7 +5281,17 @@
                                     :focus (get-in s [:mu :focus])
                                     :channels (get-in s [:mu :sens])}
                             :judgement (let [mode (get-in s [:mu :mode])
-                                            urgency (get-in s [:mu :urgency] 0)]
+                                            ;; `or`, not get-in's default: the
+                                            ;; default fires only when the key
+                                            ;; is ABSENT, and this comes from
+                                            ;; JSON where :urgency is routinely
+                                            ;; present with a null value. Then
+                                            ;; get-in returns nil, the (double
+                                            ;; urgency) below throws, and this
+                                            ;; renders inside the runner's
+                                            ;; selection phase. :4859 already
+                                            ;; uses the `or` form.
+                                            urgency (or (get-in s [:mu :urgency]) 0)]
                                          {:mode mode
                                           :urgency urgency
                                           :summary (str mode

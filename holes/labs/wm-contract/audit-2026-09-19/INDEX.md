@@ -88,6 +88,32 @@ about to record `find_reconciliation.clj` as having no caller. It has one, in
 `holes/labs/wm-contract/f11_f2_reconcile.bb`. An absence established by an
 under-scoped search is the same defect as `d4`, one level up.
 
+## The confusion that showed up three times tonight
+
+Present-with-a-null-value is not the same as absent, and three separate things
+tonight turned on it:
+
+- `(get-in m ks default)` returns the default only when the key is ABSENT. A
+  key present with a null value returns nil, and the default never fires.
+  Demonstrated, not argued: `(get-in {:mu {:urgency nil}} [:mu :urgency] 0)`
+  => nil, and `(double nil)` throws. `(or (get-in m ks) 0)` covers both.
+- `:mission/repo` is present as a key on all 390 live missions and null on 298.
+  I first reported that as "298 missions without `mission/repo`" -- same
+  number, wrong claim.
+- `(:ok adm)` on a nil `adm` is falsey, so the code took the branch that assumed
+  a refusal map and called `(name nil)`. That is the defect that started the
+  night.
+
+Anything checking this class has to distinguish the two: `(contains? m :k)`
+tests one, `(or (:k m) default)` covers both, and a `get-in` default covers
+only the first.
+
+Both zai-9 (d1) and zai-11 (d3) independently arrived at the same
+discriminator for ranking findings in this area -- the GUARDED-SIBLING
+DIFFERENTIAL: the bugs are where one call site misses a guard its neighbours
+apply to the same field, not where a raw grep matches. Two agents on different
+dimensions converging on it is some evidence it generalises.
+
 ## Method notes, for the next pass
 
 - Requiring `:why` (why the bad case is reachable) and capping at 15 findings
