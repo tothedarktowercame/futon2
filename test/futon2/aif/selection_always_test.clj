@@ -57,3 +57,64 @@
     (is (true? (get-in cell [:selection-reasons :discrimination :passes?])))
     (is (= {:count 0 :ids []} (:open-stop-lines record)))
     (is (= :fixture-end (get-in result [:data :failure-kind])))))
+
+(deftest recoverable-memory-cannot-divert-after-construction
+  (let [reads (atom []) reached (atom false)
+        line {:repair/id "unrelated-recovery" :repair/status :open
+              :repair/class :incomplete-recoverable :attempt-id "old-attempt"
+              :failure-stage :author-wait :failure-data {:job-id "old-running-job"}}
+        result (runner/run-opportunity!
+                (merge (fixture/isolated-runner-opts)
+                       {:repair-open-fn (constantly [line])
+                        :trace-fn (constantly nil)
+                        :read-job-fn (fn [& args] (swap! reads conj args)
+                                       {:job-id "old-running-job" :state "running"})
+                        :target-repo-fn (fn [& _] "/tmp")
+                        :dispatch-fn (fn [& _]
+                                       (reset! reached true)
+                                       (throw (ex-info "Ordinary dispatch reached"
+                                                       {:outcome :incomplete :failure-stage :author-dispatch
+                                                        :failure-kind :fixture-author-boundary})))}))]
+    (is @reached)
+    (is (empty? @reads))
+    (is (= :fixture-author-boundary (get-in result [:data :failure-kind])))
+    (is (= {:count 1 :ids ["unrelated-recovery"]}
+           (:open-stop-lines (edn/read-string (slurp (:run-record result))))))))
+
+(deftest explicit-historical-action-binds-its-selected-obligation
+  (doseq [mismatch? [false true]]
+    (let [target (assoc (second obligations) :repair/class :machine-failure)
+          lines [(first obligations) target]
+          admission {:schema :wm/historical-repair-admission-v1
+                     :repair/status :awaiting-validation
+                     :repair/id (:repair/id target) :verification-id "selected-verification"
+                     :verification-artifact {:path "/fixture/source" :sha256 (apply str (repeat 64 "a"))}
+                     :actors {:author "zai-5" :reviewer "codex-1"}}
+          action {:type :revalidate-historical-repair :target (:repair/id target)
+                  :repair-obligation target :admission admission}
+          seen (atom nil) executed (atom [])
+          result (runner/run-opportunity!
+                  (merge (fixture/isolated-runner-opts)
+                         {:repair-open-fn (constantly lines)
+                          :judge-fn (constantly {:judgement
+                                                {:decision {:action action :controller-score 1.0
+                                                            :selection-law {:applied :cascade-selection-posterior
+                                                                            :posterior [[action 1.0]]}}}})
+                          :historical-verification-candidate-fn
+                          (fn [obligation]
+                            (reset! seen obligation)
+                            (cond-> admission mismatch? (assoc :repair/id "wrong-obligation")))
+                          :historical-verification-execute-fn
+                          (fn [request]
+                            (swap! executed conj request)
+                            (assoc admission :verification-attempt (:execution-identity request)
+                                   :verification-source (:verification-artifact admission)
+                                   :verification-artifact {:path "/fixture/admitted" :sha256 (apply str (repeat 64 "b"))}))
+                          :dispatch-fn (fn [& _] (throw (ex-info "Unexpected dispatch" {})))}))]
+      (is (= target @seen))
+      (is (= action (get-in result [:checkpoints :selection :judgment :selected-action])))
+      (if mismatch?
+        (do (is (empty? @executed))
+            (is (= :historical-verification-admission-invalid (get-in result [:data :failure-kind]))))
+        (do (is (= [target] (mapv :obligation @executed)))
+            (is (= :historical-verification-awaiting-validation (:outcome result))))))))

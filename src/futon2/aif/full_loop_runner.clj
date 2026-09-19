@@ -3767,10 +3767,6 @@
       (let [open-stop-lines
             (run-phase! opts @phase-context :stop-line-memory
                         #((or (:repair-open-fn opts) repair/open-obligations)))
-            stop-line (first (filter #(and (= :open (:repair/status %))
-                                           (not= :environmental-hold
-                                                 (:repair/class %)))
-                                     open-stop-lines))
             validation-lines
             (->> open-stop-lines
                  (filter #(or (= :awaiting-validation (:repair/status %))
@@ -3786,25 +3782,6 @@
                                    (= (:repair/id historical) (:repair/id %)))
                                  historical-validation-lines))
                      validation-lines)
-            supersede-recovery!
-            (fn [repair-class failure-kind failure-stage error failure-data]
-              (let [successor
-                    ((or (:repair-system-record-fn opts)
-                         repair/record-system-failure!)
-                     {:attempt-id attempt-id
-                      :repair-class repair-class
-                      :target (:target stop-line)
-                      :selected-entry (:selected-entry stop-line)
-                      :failure-stage failure-stage
-                      :outcome :incomplete
-                      :failure-kind failure-kind
-                      :error error
-                      :failure-data failure-data
-                      :backtrace {:supersedes (:repair/id stop-line)}
-                      :discharge-contract (discharge-contract repair-class)})]
-                ((or (:repair-supersede-fn opts) repair/supersede!)
-                 stop-line successor failure-kind)
-                successor))
             selection-judge (or (:judge-fn opts)
                                 (fn [days]
                                   (wm/generate-war-machine
@@ -3832,6 +3809,31 @@
             repair-action? (contains? #{:repair-machine-failure
                                         :revalidate-historical-repair}
                                       (get-in entry [:action :type]))
+            ;; Repair execution binds the selected obligation, never the first
+            ;; unrelated member of the observed memory.
+            stop-line (when repair-action?
+                        (first (filter #(= (:repair/id %)
+                                           (get-in entry [:action :target]))
+                                       open-stop-lines)))
+            supersede-recovery!
+            (fn [repair-class failure-kind failure-stage error failure-data]
+              (let [successor
+                    ((or (:repair-system-record-fn opts)
+                         repair/record-system-failure!)
+                     {:attempt-id attempt-id
+                      :repair-class repair-class
+                      :target (:target stop-line)
+                      :selected-entry (:selected-entry stop-line)
+                      :failure-stage failure-stage
+                      :outcome :incomplete
+                      :failure-kind failure-kind
+                      :error error
+                      :failure-data failure-data
+                      :backtrace {:supersedes (:repair/id stop-line)}
+                      :discharge-contract (discharge-contract repair-class)})]
+                ((or (:repair-supersede-fn opts) repair/supersede!)
+                 stop-line successor failure-kind)
+                successor))
             historical-admission
             (when (and historical-action? stop-line
                        (:historical-verification-candidate-fn opts))
@@ -4075,6 +4077,14 @@
                     (measurement/begin! attempt-evidence-dir (:judgment construction-cell)
                                         #(str (Instant/now)) author)))
           (when historical-action?
+            (when-not (historical-revalidation-entry
+                       stop-line historical-admission
+                       {:author author :repair-reviewer repair-reviewer})
+              (throw (ex-info "Selected historical admission does not match obligation or actors"
+                              {:outcome :historical-verification-refused
+                               :failure-kind :historical-verification-admission-invalid
+                               :failure-stage :construction
+                               :repair-obligation stop-line})))
             (when-not (:historical-verification-execute-fn opts)
               (throw (ex-info "Historical verification execution port missing"
                               {:outcome :historical-verification-refused
