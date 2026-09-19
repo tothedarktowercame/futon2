@@ -1,6 +1,7 @@
 (ns futon2.aif.full-loop-cohort-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.pprint :as pp]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.evidence-manifest :as evidence-manifest]
@@ -605,3 +606,81 @@
                     (term {:outcome :agent-unavailable :grounded? false
                            :artifact-only? false :duration-ms 1
                            :resource-use {:agent-turns 0}}))))))))
+
+(deftest cohort-succession-carries-everything-but-identity
+  ;; Eight cohorts (50..57) were minted by hand, and 56 vs 57 differ in
+  ;; :cohort/id and narrative prose only -- every machine-read field is
+  ;; byte-identical. That is the bean-count this removes, and it is also the
+  ;; safety argument: the fields that could be tuned after seeing results are
+  ;; exactly the ones carried over verbatim.
+  (let [parent {:cohort/id :wm-contract-machinery-57-v1
+                :protocol/version 4
+                :status :preregistered
+                :registered-on "2026-09-14"
+                :purpose "machinery test"
+                :casting {:author "codex-23" :reviewer "codex-22"
+                          :repair-reviewer "codex-24"}
+                :stopping-rule {:unit :trigger-opportunity :target 2
+                                :counts-as-attempt [:build-failed :grounded-change]
+                                :replacement "None."}
+                :population "reviewed on-demand opportunities"}
+        raw (pr-str parent)
+        succ (cohort/successor-preregistration parent raw "2026-09-19")]
+
+    (testing "identity advances"
+      (is (= :wm-contract-machinery-58-v1 (:cohort/id succ)))
+      (is (= "2026-09-19" (:registered-on succ)))
+      (is (= :preregistered (:status succ))))
+
+    (testing "provenance names the exact parent bytes"
+      (is (= :wm-contract-machinery-57-v1 (:succeeds succ)))
+      (is (re-matches #"[0-9a-f]{64}" (:succeeds-sha256 succ))))
+
+    (testing "every tunable field is carried over verbatim"
+      (doseq [k [:stopping-rule :casting :population :protocol/version :purpose]]
+        (is (= (get parent k) (get succ k)) (str k " must not change on succession"))))
+
+    (testing "a cohort id with no number cannot be succeeded"
+      (is (nil? (cohort/successor-id :no-number-here)))
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (cohort/successor-preregistration
+                    (assoc parent :cohort/id :no-number-here) raw "2026-09-19"))))))
+
+(deftest cohort-succession-fires-only-when-the-window-is-exhausted
+  (let [root (tmp-root)
+        lab (io/file root "M-aif-full-loop-90")
+        _ (.mkdirs lab)
+        path (.getPath (io/file lab "cohort.edn"))
+        data-root (.getPath (io/file root "wm-full-loop-machinery-90"))
+        prereg (assoc (read-string (slurp "holes/labs/M-aif-full-loop-57/cohort.edn"))
+                      :cohort/id :wm-contract-machinery-90-v1)
+        _ (spit path (with-out-str (pp/pprint (assoc-in prereg [:stopping-rule :target] 1))))
+        _ (.mkdirs (io/file data-root))
+        _ (cohort/activate! path data-root)
+        cell (term {:opportunity-id "succ/one" :trigger :duree-click-on-demand
+                    :machine-state {} :agent-roster []
+                    :code-state {:git-sha "t" :git-dirty? false
+                                 :resolved-mode-flags {} :configuration-digest "t"}
+                    :semantic-epoch :test})]
+
+    (testing "an unexhausted cohort does not mint a successor"
+      (is (nil? (cohort/succeed! path data-root)))
+      (is (not (.exists (io/file root "M-aif-full-loop-91")))))
+
+    (cohort/start-attempt! (cohort/pin-preregistration
+                            {:preregistration path :data-root data-root
+                             :cohort-id :wm-contract-machinery-90-v1
+                             :sha256 (@#'cohort/sha256 (slurp path))})
+                           data-root cell)
+
+    (testing "an exhausted one mints and activates its successor"
+      (let [b (cohort/succeed! path data-root (constantly "2026-09-19"))]
+        (is (= :wm-contract-machinery-91-v1 (:cohort-id b)))
+        (is (.exists (io/file (:preregistration b))))
+        (is (.exists (io/file (:data-root b))))
+        (is (= 1 (:remaining (cohort/ledger (:preregistration b) (:data-root b))))
+            "the successor starts with its parent's full target available")))
+
+    (testing "calling again is idempotent, not a conflict"
+      (is (= (:cohort-id (cohort/succeed! path data-root (constantly "2026-09-19")))
+             :wm-contract-machinery-91-v1)))))

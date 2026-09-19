@@ -685,6 +685,100 @@
      (spit out-html (render-html value))
      {:edn out-edn :html out-html})))
 
+(def ^:private trailing-number #"^(.*?)(\d+)(\D*)$")
+(def ^:private version-suffix #"^(.*?)(-v\d+)$")
+
+(defn- bump-last-number
+  "Increment the last run of digits in S, or nil when it has none."
+  [s]
+  (let [[_ head n tail] (re-matches trailing-number s)]
+    (when head (str head (inc (parse-long n)) tail))))
+
+(defn successor-id
+  "Bump the COHORT number of a cohort id: :wm-...-57-v1 -> :wm-...-58-v1.
+
+  The trailing -v1 is a schema version, not the cohort number, so it is split
+  off before bumping and restored afterwards. Bumping the last number outright
+  produced :wm-contract-machinery-57-v2 -- a second version of the same
+  exhausted cohort rather than its successor."
+  [cohort-id]
+  (let [s (name cohort-id)
+        [_ stem vsuf] (re-matches version-suffix s)]
+    (some-> (bump-last-number (or stem s))
+            (str (or vsuf ""))
+            keyword)))
+
+(defn successor-preregistration
+  "Derive the successor charter from an exhausted one.
+
+  EVERYTHING EXCEPT IDENTITY IS CARRIED OVER VERBATIM. That is the whole
+  safety argument for doing this without a human: the stopping rule, the
+  target, :counts-as-attempt, :replacement, the casting and the population are
+  the fields that could be tuned after seeing results, and none of them is
+  reachable from here. Checked against the hand-made charters: cohorts 56 and
+  57 differ in :cohort/id and in narrative prose only -- every machine-read
+  field is byte-identical, which is what eight hand-minted cohorts were
+  spending a person on.
+
+  :succeeds and :succeeds-sha256 record the exact parent bytes this was
+  derived from, so a successor can always be checked against its origin."
+  [parent parent-raw now-date]
+  (let [id (successor-id (:cohort/id parent))]
+    (when-not id
+      (throw (ex-info "Cohort id has no numeric component to succeed"
+                      {:reason :cohort-id-not-successable
+                       :cohort/id (:cohort/id parent)})))
+    (assoc parent
+           :cohort/id id
+           :status :preregistered
+           :registered-on now-date
+           :succeeds (:cohort/id parent)
+           :succeeds-sha256 (sha256 parent-raw))))
+
+(defn- sibling-path
+  "Bump the last number in PATH: .../M-aif-full-loop-57/cohort.edn -> -58/.
+  cohort.edn carries no digits, so the last run is the cohort number."
+  [path]
+  (bump-last-number (str path)))
+
+(defn succeed!
+  "Mint and activate the successor to an exhausted cohort. Returns its binding
+  shape, or nil when PARENT-PATH's cohort is not yet exhausted.
+
+  Refuses to overwrite: if the successor charter already exists it is reused
+  only when its bytes are exactly what this would have written, so two racing
+  callers cannot end up with divergent charters under one id."
+  ([parent-path parent-data-root]
+   (succeed! parent-path parent-data-root #(subs (str (Instant/now)) 0 10)))
+  ([parent-path parent-data-root now-date-fn]
+   (let [parent-raw (slurp parent-path)
+         parent (edn/read-string parent-raw)
+         state (ledger parent-path parent-data-root)]
+     (when-not (pos? (:remaining state))
+       (let [succ (successor-preregistration parent parent-raw (now-date-fn))
+             succ-path (sibling-path parent-path)
+             succ-root (sibling-path parent-data-root)
+             succ-raw (with-out-str (pp/pprint succ))]
+         (when-not (and succ-path succ-root)
+           (throw (ex-info "Cannot derive successor paths"
+                           {:reason :cohort-paths-not-successable
+                            :parent-path parent-path
+                            :parent-data-root parent-data-root})))
+         (io/make-parents (io/file succ-path))
+         (if (.exists (io/file succ-path))
+           (when-not (= (slurp succ-path) succ-raw)
+             (throw (ex-info "Successor charter exists with different bytes"
+                             {:reason :successor-charter-conflict
+                              :path succ-path})))
+           (spit succ-path succ-raw))
+         (.mkdirs (io/file succ-root))
+         (when-not (.exists (activation-path (cohort-dir succ succ-root)))
+           (activate! succ-path succ-root))
+         {:preregistration succ-path
+          :data-root succ-root
+          :cohort-id (:cohort/id succ)
+          :sha256 (sha256 (slurp succ-path))})))))
+
 (defn execution-preflight
   "Read-only pinned cohort identity, activation and capacity validation.
   The locked start-attempt! remains authoritative for concurrent admission."
