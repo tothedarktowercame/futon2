@@ -1,0 +1,4 @@
+evidence-id test-registry-9b7e0ed20a5dc84113ca39134f8e793f447c460f71f51bf1d5cc6dd13cc4f4d3
+warrant? true
+results {:assertions 28, :duration-ms 3093, :errors 0, :exit 0, :failures 0, :tests 3}
+bound EV-declaration-read-provenance -> test-registry-9b7e0ed20a5dc84113ca39134f8e793f447c460f71f51bf1d5cc6dd13cc4f4d3
