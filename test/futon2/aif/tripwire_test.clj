@@ -43,15 +43,16 @@
     (spit file (pr-str value))
     file))
 
-(deftest dismissal-directory-membership-closes-t8-source
+(deftest dismissal-directory-membership-closes-t8-sources
   (let [root (temp-dir)
-        finding {:repair/id "echo-1" :repair/status :open
-                 :repair/class :machine-failure
-                 :attempt-id "echo-attempt"}
-        dismissal {:repair/id "echo-1"
-                   :repair/status :dismissed-echo}]
-    (write-edn! root "findings" "echo-1.edn" finding)
-    (write-edn! root "dismissals" "echo-1.edn" dismissal)
+        finding (fn [id] {:repair/id id :repair/status :open
+                          :repair/class :machine-failure
+                          :attempt-id (str id "-attempt")})]
+    (doseq [[id status] [["echo-1" :dismissed-echo]
+                         ["fixture-1" :dismissed-fixture-pollution]]]
+      (write-edn! root "findings" (str id ".edn") (finding id))
+      (write-edn! root "dismissals" (str id ".edn")
+                  {:repair/id id :repair/status status}))
     (let [observation (#'tripwire/cross-run-observation
                        {:repair-root (.getPath root)
                         :cohort? true
@@ -60,8 +61,9 @@
                         :tripwire/grounding-witnesses []}
                        {:phase :opportunity :transition :start})]
       (is (contains? (:closed-repair-ids observation) "echo-1"))
+      (is (contains? (:closed-repair-ids observation) "fixture-1"))
       (is (not (tripwire/repair-covered-witness?
-                {:repair-ids ["echo-1"]} observation))))))
+                {:repair-ids ["echo-1" "fixture-1"]} observation))))))
 
 (defn- synthetic-trip-record []
   {:phase :synthetic

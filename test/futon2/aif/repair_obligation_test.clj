@@ -18,6 +18,12 @@
        (catch clojure.lang.ExceptionInfo e
          (:repair-dismissal/refusal (ex-data e)))))
 
+(defn- write-record! [root child record]
+  (let [file (io/file root child (str (:repair/id record) ".edn"))]
+    (io/make-parents file)
+    (spit file (pr-str record))
+    record))
+
 (defn- dispatch-finding! [root attempt-id execution]
   (repair/record-system-failure!
    root {:attempt-id attempt-id
@@ -139,6 +145,64 @@
     (is (= :already-dismissed
            (dismissal-refusal
             #(repair/dismiss-echo! root (:repair/id echo) disposition))))))
+
+(deftest dismiss-fixture-pollution-requires-retained-nonproduction-resolution
+  (let [root (temp-root)
+        finding (write-record! root "findings"
+                               {:repair/id "fixture-leak"
+                                :repair/status :open
+                                :attempt-id "fixture-attempt"
+                                :machine-repo "/futon2"
+                                :failure-data
+                                {:artifact-binding {:repo "/repo"}
+                                 :resolved-repository "/tmp/debug-fixture"}})
+        production (write-record! root "findings"
+                                  {:repair/id "production-mismatch"
+                                   :repair/status :open
+                                   :attempt-id "production-attempt"
+                                   :machine-repo "/home/joe/code/futon2"
+                                   :failure-data
+                                   {:artifact-binding
+                                    {:repo "/home/joe/code/futon2"}}})
+        ambiguous (write-record! root "findings"
+                                 {:repair/id "ambiguous-resolution"
+                                  :repair/status :open
+                                  :attempt-id "ambiguous-attempt"
+                                  :machine-repo "/futon2"
+                                  :failure-data {:artifact-binding
+                                                 {:repo "/repo"}}})
+        disposition {:authority "Joe/repair-queue/2026-09-19"
+                     :reason :fixture-pollution
+                     :cause-fix "6cdb308a"
+                     :actor "claude-12"}
+        file (io/file root "findings" "fixture-leak.edn")
+        before (java.nio.file.Files/readAllBytes (.toPath file))]
+    (is (= :subject-is-production
+           (dismissal-refusal
+            #(repair/dismiss-fixture-pollution!
+              root (:repair/id production) disposition))))
+    (is (= :resolution-not-retained
+           (dismissal-refusal
+            #(repair/dismiss-fixture-pollution!
+              root (:repair/id ambiguous) disposition))))
+    (let [dismissal (repair/dismiss-fixture-pollution!
+                     root (:repair/id finding) disposition)]
+      (is (= :dismissed-fixture-pollution (:repair/status dismissal)))
+      (is (= {:machine-repo "/futon2"
+              :claimed-repository "/repo"
+              :resolved-repository "/tmp/debug-fixture"}
+             (:resolution-evidence dismissal))))
+    (is (not-any? #{(:repair/id finding)}
+                  (map :repair/id (repair/open-obligations root))))
+    (is (= :dismissed-fixture-pollution
+           (:repair/status (first (repair/obligation-history
+                                   root "fixture-attempt")))))
+    (is (java.util.Arrays/equals
+         before (java.nio.file.Files/readAllBytes (.toPath file))))
+    (is (= :already-dismissed
+           (dismissal-refusal
+            #(repair/dismiss-fixture-pollution!
+              root (:repair/id finding) disposition))))))
 
 (def grounded-review
   {:reviewer "reviewer" :review-job "review-job"

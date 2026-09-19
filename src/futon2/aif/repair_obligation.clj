@@ -971,6 +971,81 @@
                        record)
            record))))))
 
+(defn dismiss-fixture-pollution!
+  "Append a closing disposition only when a finding's retained repository
+  resolution proves that its artifact subject resolved outside the repository
+  claimed by its artifact binding. The caller cannot supply this proof.
+
+  A binding that names the finding's production machine repository refuses
+  before considering absent resolution data. Otherwise both claimed and
+  resolved repository paths must be retained and distinct."
+  ([finding-id disposition]
+   (dismiss-fixture-pollution! default-root finding-id disposition))
+  ([root finding-id {:keys [authority reason actor cause-fix] :as disposition}]
+   (when-not (and (string? finding-id)
+                  (re-matches #"[A-Za-z0-9._-]+" finding-id))
+     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+   (let [dismissals (indexed-records root "dismissals")]
+     (when (contains? dismissals finding-id)
+       (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+     (let [finding (first (filter #(= finding-id (:repair/id %))
+                                  (records (io/file root "findings"))))
+           resolutions (indexed-records root "resolutions")
+           implementation (get (indexed-records root "implementations") finding-id)
+           verification (get (verified-admissions root) finding-id)
+           effective-status (cond
+                              (get resolutions finding-id) :resolved
+                              (or implementation verification) :awaiting-validation
+                              finding (:repair/status finding))
+           machine-repo (:machine-repo finding)
+           claimed-repo (get-in finding [:failure-data :artifact-binding :repo])
+           resolved-repo (get-in finding [:failure-data :resolved-repository])
+           canonical (fn [path]
+                       (when (nonblank? path)
+                         (.getCanonicalPath (io/file path))))]
+       (when-not finding
+         (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+       (when-not (= :open effective-status)
+         (dismissal-refuse! :finding-not-open
+                             {:repair/id finding-id :repair/status effective-status}))
+       (when (and (nonblank? machine-repo) (nonblank? claimed-repo)
+                  (= (canonical machine-repo) (canonical claimed-repo)))
+         (dismissal-refuse! :subject-is-production
+                             {:repair/id finding-id
+                              :machine-repo machine-repo
+                              :claimed-repository claimed-repo}))
+       (when-not (and (nonblank? claimed-repo) (nonblank? resolved-repo))
+         (dismissal-refuse! :resolution-not-retained {:repair/id finding-id}))
+       (when (= (canonical claimed-repo) (canonical resolved-repo))
+         (dismissal-refuse! :subject-is-production
+                             {:repair/id finding-id
+                              :claimed-repository claimed-repo
+                              :resolved-repository resolved-repo}))
+       (when-not (and (nonblank? authority) (keyword? reason)
+                      (nonblank? actor)
+                      (or (nil? cause-fix) (nonblank? cause-fix))
+                      (= (cond-> #{:authority :reason :actor}
+                           (some? cause-fix) (conj :cause-fix))
+                         (set (keys disposition))))
+         (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+       (let [resolution-evidence
+             {:machine-repo machine-repo
+              :claimed-repository claimed-repo
+              :resolved-repository resolved-repo}
+             record (cond->
+                     {:repair/id finding-id
+                      :repair/schema-version 1
+                      :repair/status :dismissed-fixture-pollution
+                      :failed-attempt (:attempt-id finding)
+                      :authority authority
+                      :reason reason
+                      :actor actor
+                      :resolution-evidence resolution-evidence
+                      :dismissed-at (str (Instant/now))}
+                      cause-fix (assoc :cause-fix cause-fix))]
+         (write-new! (io/file root "dismissals" (str finding-id ".edn")) record)
+         record)))))
+
 (defn record-implementation!
   "Record independently reviewed, grounded implementation of a machine repair.
   Evidence is validated according to the discharge contract's artifact shape;
