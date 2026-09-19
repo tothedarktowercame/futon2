@@ -1,0 +1,16 @@
+Job: invoke-1789829936689-22390-50493740
+State: done
+
+FULL_LOOP_REVIEW: APPROVE
+FULL_LOOP_REVIEWER_NOTE: The amendment removes the non-hermetic whole-run cohort test while preserving direct coverage of current beyond-window semantics.
+
+The prior three assertion failures were all from the stale `:cohort-complete` expectation. Amendment `9dfdbcac` replaces that test with a direct temporary-cohort boundary control asserting the current contract: a post-target attempt is retained with `:cohort/beyond-window? true`, its window counts, and original opportunity identity. Typed legacy stopping-rule recognition remains separately tested.
+
+Executed independently:
+
+- `git show --check 9dfdbcac6de7b84d18d493918df425b5ed875d66` — PASS.
+- `clj-kondo --lint test/futon2/aif/full_loop_runner_test.clj` — PASS, 0 errors/0 warnings.
+- Full `check-parens.el` driver on the changed test file — PASS (`OK`).
+- `clojure -X:test :nses '[futon2.aif.full-loop-runner-test]'` — PASS: 175 tests, 933 assertions, 0 failures/errors.
+
+The original feature-card prompt repair remains intact. No edits or commits made.

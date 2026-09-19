@@ -1,0 +1,53 @@
+wm_click preflight
+  agency                 up
+  casting                codex-23 / codex-22 / codex-24 on roster
+  in flight              none
+  tripwires              13/13 clear
+  will defer to repair   [:T8]} -- witness names open obligations; repair is selectable
+
+preflight PASS
+
+firing click, run-id 2026-09-19-1789827859
+{"click-id":"wm-click-1acc3e27-81e3-4c2a-9050-88882e429c90","started-at":"2026-09-19T14:24:19.357842200Z"}
+[20s] running=True phase=opportunity
+[40s] running=True phase=substrate-preflight
+[60s] running=True phase=stop-line-memory
+[80s] running=True phase=selection
+[100s] running=True phase=selection
+[120s] running=True phase=author-dispatch
+[140s] running=True phase=author-retry-wait
+[160s] running=True phase=author-retry-wait
+[180s] running=True phase=author-retry-wait
+[200s] running=True phase=author-retry-wait
+[220s] running=True phase=author-retry-wait
+[240s] running=True phase=author-retry-wait
+[260s] running=False phase=None
+
+terminal state:
+{
+    "running?": false,
+    "click-id": "wm-click-1acc3e27-81e3-4c2a-9050-88882e429c90",
+    "phase": null,
+    "attempt-id": "attempt-002",
+    "started-at": "2026-09-19T14:24:19.357842200Z",
+    "last-result": {
+        "run-binding": "/home/joe/code/futon3c/data/wm-click-run-bindings/click-run-binding-wm-click-1acc3e27-81e3-4c2a-9050-88882e429c90.edn",
+        "run-record": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789827859.edn",
+        "click-id": "wm-click-1acc3e27-81e3-4c2a-9050-88882e429c90",
+        "attempt-id": "attempt-002",
+        "outcome": "build-failed",
+        "binding-durability": "confirmed",
+        "binding-status": "verified",
+        "run-id-observation": {
+            "status": "present",
+            "source": "runner-return",
+            "value": "2026-09-19-1789827859"
+        },
+        "run-record-status": "present"
+    },
+    "registry-publication": {
+        "status": "published",
+        "stage": "close"
+
+newest repair finding, if the click opened one:
+-rw-rw-r-- 1 joe joe 19223923 Sep 19 14:27 /home/joe/code/futon2/data/wm-repair-obligations/findings/repair-ea1-4e68d87bb2cfd67bd81841528e073bf8b73eb890903618a08da4de51c7a0e564--attempt-002-build-failed.edn

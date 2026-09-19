@@ -1,0 +1,53 @@
+wm_click preflight
+  agency                 up
+  casting                codex-23 / codex-22 / codex-24 on roster
+  in flight              none
+  tripwires              13/13 clear
+  will defer to repair   [:T8]} -- witness names open obligations; repair is selectable
+
+preflight PASS
+
+firing click, run-id 2026-09-19-1789828199
+{"click-id":"wm-click-79c5a4e0-9fb1-4401-b042-a1eb0e84e865","started-at":"2026-09-19T14:29:59.493657516Z"}
+[20s] running=True phase=starting
+[40s] running=True phase=code-state
+[60s] running=True phase=preference-refresh
+[80s] running=True phase=stop-line-memory
+[100s] running=True phase=selection
+[120s] running=True phase=selection
+[140s] running=True phase=selection
+[162s] running=True phase=author-dispatch
+[182s] running=True phase=author-retry-wait
+[202s] running=True phase=author-retry-wait
+[222s] running=True phase=author-retry-wait
+[242s] running=True phase=author-retry-wait
+[262s] running=False phase=None
+
+terminal state:
+{
+    "running?": false,
+    "click-id": "wm-click-79c5a4e0-9fb1-4401-b042-a1eb0e84e865",
+    "phase": null,
+    "attempt-id": "attempt-001",
+    "started-at": "2026-09-19T14:29:59.493657516Z",
+    "last-result": {
+        "run-binding": "/home/joe/code/futon3c/data/wm-click-run-bindings/click-run-binding-wm-click-79c5a4e0-9fb1-4401-b042-a1eb0e84e865.edn",
+        "run-record": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828199.edn",
+        "click-id": "wm-click-79c5a4e0-9fb1-4401-b042-a1eb0e84e865",
+        "attempt-id": "attempt-001",
+        "outcome": "build-failed",
+        "binding-durability": "confirmed",
+        "binding-status": "verified",
+        "run-id-observation": {
+            "status": "present",
+            "source": "runner-return",
+            "value": "2026-09-19-1789828199"
+        },
+        "run-record-status": "present"
+    },
+    "registry-publication": {
+        "status": "published",
+        "stage": "close"
+
+newest repair finding, if the click opened one:
+-rw-rw-r-- 1 joe joe 19653 Sep 19 14:33 /home/joe/code/futon2/data/wm-repair-obligations/findings/repair-ea1-b82bec4361658ac9fea3bf2acf2b155ee690554056cb43982b320c2554a19bb7--attempt-001-build-failed.edn

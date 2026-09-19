@@ -1,0 +1,40 @@
+== wm-trace-2026-09-12.edn — 4 tick(s)
+
+-- tick 0 @ 2026-09-12T13:16:12.144484983Z (sha 38de06f5, author zai-2, trigger :duree-click-on-demand)
+   route: R20 -> R12 -> R2 -> R7 -> R3 -> R8 -> R5 -> R6 -> R14 -> TRACE
+   live 8/9 — ABSENT: enumeration (U37)
+   F_pi               {:previous-candidate-count 147, :join-key :action-type-and-target, :current-candidate-count 147, :scored-count 145, :unmatched-count 2, :matched-count 145, :previous-trace-timestamp "2026-09-11T20:25:55.547326616Z", :previous-effects-mode :target-sensitive, :unmatched-current-count 2, :scoring-absence-count 0}
+   ranked-actions     147 candidates
+   tau                :selection-gain-only
+
+-- tick 1 @ 2026-09-12T14:02:27.232494961Z (sha 9eb3b317, author zai-2, trigger :duree-click-on-demand)
+   route: R20 -> R12 -> R2 -> R7 -> R3 -> R8 -> R5 -> R6 -> R14 -> TRACE
+   live 8/9 — ABSENT: enumeration (U37)
+   F_pi               {:previous-candidate-count 147, :join-key :action-type-and-target, :current-candidate-count 147, :scored-count 145, :unmatched-count 2, :matched-count 145, :previous-trace-timestamp "2026-09-12T13:16:12.144484983Z", :previous-effects-mode :target-sensitive, :unmatched-current-count 2, :scoring-absence-count 0}
+   ranked-actions     147 candidates
+   tau                :selection-gain-only
+
+-- tick 2 @ 2026-09-12T16:48:03.815122125Z (sha 07a6b7ec, author codex-20, trigger :duree-click-on-demand)
+   route: R20 -> R12 -> R2 -> R7 -> R3 -> R8 -> R5 -> R6 -> R14 -> TRACE
+   live 8/9 — ABSENT: enumeration (U37)
+   F_pi               {:previous-candidate-count 147, :join-key :action-type-and-target, :current-candidate-count 148, :scored-count 146, :unmatched-count 1, :matched-count 146, :previous-trace-timestamp "2026-09-12T14:02:27.232494961Z", :previous-effects-mode :target-sensitive, :unmatched-current-count 2, :scoring-absence-count 0}
+   ranked-actions     148 candidates
+   tau                :selection-gain-only
+
+-- tick 3 @ 2026-09-12T17:28:09.498448087Z (sha 801610f9, author codex-20, trigger :duree-click-on-demand)
+   route: R20 -> R12 -> R2 -> R7 -> R3 -> R8 -> R5 -> R6 -> R14 -> TRACE
+   live 8/9 — ABSENT: enumeration (U37)
+   F_pi               {:previous-candidate-count 148, :join-key :action-type-and-target, :current-candidate-count 148, :scored-count 148, :unmatched-count 0, :matched-count 148, :previous-trace-timestamp "2026-09-12T16:48:03.815122125Z", :previous-effects-mode :target-sensitive, :unmatched-current-count 0, :scoring-absence-count 0}
+   ranked-actions     148 candidates
+   tau                :selection-gain-only
+
+== summary
+   ranked-actions     live in 4/4 ticks
+   free-energy        live in 4/4 ticks
+   precision-state    live in 4/4 ticks
+   policy-precision   live in 4/4 ticks
+   enumeration (U37)  live in 0/4 ticks
+   tau                live in 4/4 ticks
+   F_pi               live in 4/4 ticks
+   prediction-errors  live in 4/4 ticks
+   observation        live in 4/4 ticks

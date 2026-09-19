@@ -1,0 +1,23 @@
+cli-baseline-tests
+ERROR in (run-codex-stream-emits-runtime-events) (ProcessBuilder.java:1170)
+ERROR in (run-codex-stream-preserves-utf8-prompt-text) (ProcessBuilder.java:1170)
+Ran 18 tests containing 85 assertions.
+0 failures, 2 errors.
+
+cli-tests
+Ran 19 tests containing 99 assertions.
+0 failures, 0 errors.
+
+runner-baseline-tests
+FAIL in (invoke-exception-author-job-is-retried-once) (full_loop_runner_test.clj:803)
+FAIL in (cohort-stopping-rule-returns-cohort-complete-not-repair) (full_loop_runner_test.clj:3577)
+FAIL in (cohort-stopping-rule-returns-cohort-complete-not-repair) (full_loop_runner_test.clj:3579)
+FAIL in (cohort-stopping-rule-returns-cohort-complete-not-repair) (full_loop_runner_test.clj:3581)
+Ran 173 tests containing 921 assertions.
+4 failures, 0 errors.
+
+runner-regressions
+{:test 2, :pass 14, :fail 0, :error 0}
+
+Changed full runner namespace stopped at exhausted-cohort test after it reached live substrate/dispatch, exit 143. Targeted final tests above pass.
+Baseline runner used pre-change loaded code; canonical source was subsequently edited, and T10 recorded drift without halting.

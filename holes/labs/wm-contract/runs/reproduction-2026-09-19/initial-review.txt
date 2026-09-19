@@ -1,0 +1,16 @@
+Job: invoke-1789829333503-22381-d1830dd8
+State: done
+
+FULL_LOOP_REVIEW: REQUEST_CHANGES required fresh-JVM runner suite fails with 3 assertions
+FULL_LOOP_REVIEWER_NOTE: The prompt repair is substantive and directly addresses the observed invalid legacy-card retry.
+
+Commit `d1c35641` changes only the cure prompt and its regression test. It explicitly repeats all four required feature-card fields and rejects legacy `:target/:change/:sha` cards.
+
+Executed independently:
+
+- `git show --check d1c3564108b8ce0dc1f205f5ce5f5f9b6b09059d` — PASS.
+- `clj-kondo --lint src/futon2/aif/full_loop_runner.clj test/futon2/aif/full_loop_runner_test.clj` — PASS, 0 errors/0 warnings; one informational finding.
+- `emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/full_loop_runner.clj test/futon2/aif/full_loop_runner_test.clj` — PASS (`OK`).
+- `clojure -X:test :nses '[futon2.aif.full-loop-runner-test]'` — FAIL: 175 tests, 933 assertions, 3 failures, 0 errors.
+
+The suite also exercised non-hermetic live-looking Agency paths and modified `holes/labs/wm-contract/workflow-report.edn`; I made no edits or commits. The relevant mandatory suite must be made isolated and green before approval.

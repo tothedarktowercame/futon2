@@ -1,0 +1,122 @@
+wm_click preflight
+  agency                 up
+  casting                codex-23 / codex-22 / codex-24 on roster
+  in flight              none
+  tripwires              13/13 clear
+  will defer to repair   [:T8]} -- witness names open obligations; repair is selectable
+
+preflight PASS
+
+firing click, run-id 2026-09-19-1789828750
+{"click-id":"wm-click-067eb1cf-cf32-4cc7-9b2c-1dd93b17c087","started-at":"2026-09-19T14:39:10.202009757Z"}
+[20s] running=True phase=starting
+[40s] running=True phase=code-state
+[60s] running=True phase=preference-refresh
+[80s] running=True phase=selection
+[100s] running=True phase=selection
+[120s] running=True phase=selection
+[140s] running=True phase=author-dispatch
+[160s] running=True phase=author-wait
+[180s] running=True phase=author-wait
+[200s] running=True phase=author-wait
+[220s] running=True phase=author-wait
+[240s] running=True phase=author-wait
+[260s] running=True phase=author-wait
+[280s] running=True phase=author-wait
+[300s] running=True phase=author-wait
+[320s] running=True phase=author-wait
+[340s] running=True phase=author-wait
+[360s] running=True phase=author-wait
+[380s] running=True phase=author-wait
+[400s] running=True phase=author-wait
+[420s] running=True phase=author-wait
+[440s] running=True phase=author-wait
+[463s] running=True phase=author-wait
+[483s] running=True phase=author-wait
+[503s] running=True phase=author-wait
+[523s] running=True phase=author-wait
+[543s] running=True phase=author-wait
+[563s] running=True phase=author-wait
+[583s] running=True phase=reviewer-dispatch
+[603s] running=True phase=reviewer-wait
+[623s] running=True phase=reviewer-wait
+[643s] running=True phase=reviewer-wait
+[663s] running=True phase=reviewer-wait
+[683s] running=True phase=reviewer-wait
+[704s] running=True phase=reviewer-wait
+[724s] running=True phase=reviewer-wait
+[744s] running=True phase=reviewer-wait
+[764s] running=True phase=reviewer-wait
+[784s] running=True phase=reviewer-wait
+[804s] running=True phase=reviewer-wait
+[828s] running=True phase=reviewer-wait
+[848s] running=True phase=reviewer-wait
+[868s] running=True phase=reviewer-wait
+[888s] running=True phase=revision-dispatch
+[908s] running=True phase=revision-wait
+[928s] running=True phase=revision-wait
+[948s] running=True phase=revision-wait
+[968s] running=True phase=revision-wait
+[989s] running=True phase=revision-wait
+[1009s] running=True phase=revision-wait
+[1029s] running=True phase=revision-wait
+[1049s] running=True phase=revision-wait
+[1069s] running=True phase=revision-wait
+[1089s] running=True phase=revision-wait
+[1109s] running=True phase=revision-wait
+[1129s] running=True phase=revision-wait
+[1149s] running=True phase=revision-wait
+[1170s] running=True phase=revision-wait
+[1190s] running=True phase=re-review-dispatch
+[1210s] running=True phase=re-review-wait
+[1230s] running=True phase=re-review-wait
+[1250s] running=True phase=re-review-wait
+[1270s] running=True phase=re-review-wait
+[1290s] running=True phase=re-review-wait
+[1310s] running=True phase=re-review-wait
+[1330s] running=True phase=re-review-wait
+[1350s] running=True phase=re-review-wait
+[1370s] running=True phase=re-review-wait
+[1390s] running=True phase=re-review-wait
+[1410s] running=True phase=re-review-wait
+[1430s] running=True phase=re-review-wait
+[1450s] running=True phase=re-review-wait
+[1470s] running=True phase=re-review-wait
+[1490s] running=True phase=re-review-wait
+[1510s] running=True phase=re-review-wait
+[1530s] running=True phase=re-review-wait
+[1550s] running=True phase=re-review-wait
+[1570s] running=True phase=stop-line-validation
+[1590s] running=True phase=stop-line-validation
+[1610s] running=True phase=stop-line-validation
+[1630s] running=True phase=delivery-qa
+[1650s] running=False phase=None
+
+terminal state:
+{
+    "running?": false,
+    "click-id": "wm-click-067eb1cf-cf32-4cc7-9b2c-1dd93b17c087",
+    "phase": null,
+    "attempt-id": "attempt-002",
+    "started-at": "2026-09-19T14:39:10.202009757Z",
+    "last-result": {
+        "run-binding": "/home/joe/code/futon3c/data/wm-click-run-bindings/click-run-binding-wm-click-067eb1cf-cf32-4cc7-9b2c-1dd93b17c087.edn",
+        "run-record": "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828750.edn",
+        "click-id": "wm-click-067eb1cf-cf32-4cc7-9b2c-1dd93b17c087",
+        "attempt-id": "attempt-002",
+        "outcome": "grounded-change",
+        "binding-durability": "confirmed",
+        "binding-status": "verified",
+        "run-id-observation": {
+            "status": "present",
+            "source": "runner-return",
+            "value": "2026-09-19-1789828750"
+        },
+        "run-record-status": "present"
+    },
+    "registry-publication": {
+        "status": "published",
+        "stage": "close"
+
+newest repair finding, if the click opened one:
+-rw-rw-r-- 1 joe joe 19653 Sep 19 14:33 /home/joe/code/futon2/data/wm-repair-obligations/findings/repair-ea1-b82bec4361658ac9fea3bf2acf2b155ee690554056cb43982b320c2554a19bb7--attempt-001-build-failed.edn
