@@ -88,3 +88,67 @@ The T8 integration control observes one witness with three live findings,
 then zero after the real verb dismisses all three in a temporary store.
 Open-obligations and audit-history readback are tested as well. All mutation
 tests use temporary roots; the production repair store was read only.
+
+## Authorized application and unlock-path readback (19:28 UTC)
+
+Subsequent authorization: claude-12 request
+`invoke-1789846054941-22492-1a1fbbcf`. This section supersedes the earlier
+no-application statement for exactly one finding. Invoked the reviewed
+`dismiss-superseded-attempt!` through a fresh `clojure -M -e` process against
+`data/wm-repair-obligations`, for
+`repair-ea1-259a7a93d9a9b63a45020e0ad646c508b9be83097dac6898106a063c1a1eef2e--attempt-002-build-failed`.
+Disposition was exactly:
+
+```clojure
+{:authority "Joe -> claude-12 repair-queue ownership 2026-09-19; DISMISS-SUPERSEDED-ATTEMPT-2026-09-19.md @ eb50561a"
+ :reason :superseded-by-distinct-implementation
+ :actor "codex-1"}
+```
+
+Success, `:dismissed-at "2026-09-19T19:28:15.154222270Z"`, status
+`:dismissed-superseded-attempt`. The verb appended
+[this dismissal](../../../data/wm-repair-obligations/dismissals/repair-ea1-259a7a93d9a9b63a45020e0ad646c508b9be83097dac6898106a063c1a1eef2e--attempt-002-build-failed.edn).
+In the same invocation, `open-obligations` counts before/after were **40/39**;
+filtering those records to `:repair/status :open` (runner-eligible) gave
+**16/15**. `java.util.Arrays/equals` over `Files/readAllBytes` before/after
+returned **true** for the original finding. No refusal occurred. No new
+implementation or resolution records were created, and no clicks were run.
+
+### (a) Binding target: different failure, not unresolved abbreviation
+
+The [3f4cac attempt-003 target finding](../../../data/wm-repair-obligations/findings/repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-003-artifact-binding-mismatch.edn)
+retains, under `[:failure-data :artifact-binding]`:
+
+```clojure
+{:text-artifact-ref "decea980"
+ :text-artifact-sha "decea98008a0bf0810a58212cc6bf097d0051696"
+ :pre-dispatch-head "decea98008a0bf0810a58212cc6bf097d0051696"
+ :observed-head "33ca99b0dfc1bfc17dbc89645dac71f5a8f97972"
+ :disagreement? true :corroborates? false :commit nil}
+```
+
+The short ref **already resolved**, and resolved to the pre-dispatch base,
+not the new observed commit. This is a stale/base-commit claim mismatch,
+not nil `:text-artifact-sha` or an unresolved abbreviation. Inspection of
+`git show 190568dd4296f56189a7e61b1e427eaab381d7af -- src/futon2/aif/full_loop_runner.clj`
+confirms the new fallback applies only when the reported SHA fails to resolve,
+and explicitly excludes the dispatch-time base. That change is not evidence
+that this historical finding is repaired. No runner replay was performed.
+
+### (b) Initialization target: file collision, not close-outcome typing
+
+The [initialization-a3e2319f target finding](../../../data/wm-repair-obligations/findings/repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed.edn)
+retains `[:backtrace :error-class]` as
+`"java.nio.file.FileAlreadyExistsException"`, `:failure-data nil`, and
+`:failure-error` as
+`"/home/joe/code/futon2/data/wm-repair-obligations/findings/repair-attempt-002.edn"`.
+It is an initialization file-collision exception, **not** the untyped
+`"invalid close outcome"` exception. Inspection of
+`git show 06310fcb16d74c0432125f643dc203983b404576 -- src/futon2/aif/full_loop_cohort.clj`
+shows that commit adds typed data to the close-outcome exception; it does not
+establish a repair of this file collision. The retained finding does not
+provide enough detail to diagnose the collision's underlying cause further.
+
+Both unlock-path answers are read-only classifications, not new dispositions
+or implementation claims. No source edits or new test warrant were needed
+for this authorized application of the already-reviewed verb.
