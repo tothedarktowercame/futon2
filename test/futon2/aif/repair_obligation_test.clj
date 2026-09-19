@@ -5,7 +5,8 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
-            [futon2.aif.repair-obligation :as repair]))
+            [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.tripwire :as tripwire]))
 
 (defn- temp-root []
   (let [f (java.io.File/createTempFile "wm-repair-" "")]
@@ -23,6 +24,112 @@
     (io/make-parents file)
     (spit file (pr-str record))
     record))
+
+(deftest dismiss-superseded-attempt-retained-proof-controls
+  (doseq [[label finding-extra record expected]
+          [[:later {} {:implementation-attempt "other-attempt"
+                       :implemented-at "2026-09-19T12:00:01Z"} nil]
+           [:live {} nil :target-not-implemented]
+           [:self {} {:implementation-attempt "failed-attempt"
+                      :implemented-at "2026-09-19T12:00:01Z"} :self-implementation]
+           [:alias {:attempt-id "cohort--attempt-001"}
+            {:implementation-attempt "attempt-001"
+             :implemented-at "2026-09-19T12:00:01Z"} :self-implementation]
+           [:earlier {} {:implementation-attempt "other-attempt"
+                         :implemented-at "2026-09-19T11:00:00Z"}
+            :implementation-predates-attempt]
+           [:equal {} {:implementation-attempt "other-attempt"
+                       :implemented-at "2026-09-19T12:00:00Z"}
+            :implementation-predates-attempt]
+           [:bad-time {} {:implementation-attempt "other-attempt"
+                          :implemented-at "not-a-time"} :implementation-predates-attempt]
+           [:missing-id {} {:implemented-at "2026-09-19T12:00:01Z"}
+            :target-not-implemented]
+           [:conflict {:selected-entry {:action {:target "ancestor"}}}
+            nil :target-not-resolvable]
+           [:deep-only {:target nil :selected-entry
+                        {:action {:target "target" :repair-obligation
+                                  {:repair/id "target" :target "ancestor"}}}}
+            {:implementation-attempt "other-attempt"
+             :implemented-at "2026-09-19T12:00:01Z"} nil]
+           [:absent {:target nil} nil :target-not-resolvable]]]
+    (testing (name label)
+      (let [root (temp-root)
+            finding (merge {:repair/id "finding" :repair/status :open
+                            :attempt-id "failed-attempt" :target "target"
+                            :opened-at "2026-09-19T12:00:00Z"} finding-extra)
+            disposition {:authority "test" :actor "codex-1" :reason :superseded}
+            path (io/file root "findings" "finding.edn")]
+        (write-record! root "findings" finding)
+        (write-record! root "findings" {:repair/id "target" :repair/status :open})
+        (when record
+          (write-record! root "implementations"
+                         (merge {:repair/id "target" :repair/status :awaiting-validation}
+                                record)))
+        (let [before (slurp path)]
+          (is (= :disposition-invalid
+                 (dismissal-refusal
+                  #(repair/dismiss-superseded-attempt!
+                    root "finding" (assoc disposition :target "forged")))))
+          (is (= expected (dismissal-refusal
+                           #(repair/dismiss-superseded-attempt! root "finding" disposition))))
+          (is (= before (slurp path)))
+          (if expected
+            (do (is (not (.exists (io/file root "dismissals" "finding.edn"))))
+                (is (some #(= "finding" (:repair/id %)) (repair/open-obligations root))))
+            (let [history (first (repair/obligation-history root (:attempt-id finding)))
+                  dismissal (:repair/dismissal history)]
+              (is (= :dismissed-superseded-attempt (:repair/status history)))
+              (is (= "target" (:target-id dismissal)))
+              (is (= "other-attempt" (:implementation-attempt dismissal)))
+              (is (.isFile (io/file (:implementation-record-path dismissal))))
+              ;; T8 consumes this directory-based open queue; no status rewrite.
+              (is (not-any? #(= "finding" (:repair/id %)) (repair/open-obligations root)))
+              (is (= :already-dismissed
+                     (dismissal-refusal
+                      #(repair/dismiss-superseded-attempt! root "finding" disposition)))))))))))
+
+(deftest dismiss-superseded-attempt-resolution-proof
+  (let [root (temp-root)
+        disposition {:authority "test" :actor "codex-1" :reason :superseded}]
+    (write-record! root "findings" {:repair/id "finding" :repair/status :open
+                                   :attempt-id "failed" :target "target"
+                                   :opened-at "2026-09-19T12:00:00Z"})
+    (write-record! root "findings" {:repair/id "target" :repair/status :open})
+    (write-record! root "resolutions" {:repair/id "target" :repair/status :superseded
+                                      :validation-attempt "successor"
+                                      :resolved-at "2026-09-19T12:00:01Z"})
+    (is (= :target-not-implemented
+           (dismissal-refusal #(repair/dismiss-superseded-attempt! root "finding" disposition))))
+    (write-record! root "resolutions" {:repair/id "target" :repair/status :resolved
+                                      :validation-attempt "successor"
+                                      :resolved-at "2026-09-19T12:00:01Z"})
+    (is (= :dismissed-superseded-attempt
+           (:repair/status (repair/dismiss-superseded-attempt! root "finding" disposition))))))
+
+(deftest superseded-attempt-dismissal-closes-t8-sources
+  (let [root (temp-root)
+        now (java.time.Instant/now)
+        observation #(let [context {:repair-root root :cohort? true
+                                    :tripwire/cohort-history [] :tripwire/a-matrix-events []
+                                    :tripwire/grounding-witnesses []}]
+                       (#'tripwire/cross-run-observation
+                        context {:phase :opportunity :transition :start}))]
+    (write-record! root "findings" {:repair/id "target" :repair/status :open})
+    (write-record! root "implementations"
+                   {:repair/id "target" :repair/status :awaiting-validation
+                    :implementation-attempt "later" :implemented-at (str (.plusSeconds now 1))})
+    (doseq [id ["a" "b" "c"]]
+      (write-record! root "findings"
+                     {:repair/id id :repair/status :open :repair/class :machine-failure
+                      :failure-kind :build-failed :target "target" :attempt-id id
+                      :opened-at (str now)}))
+    (is (= 1 (count (tripwire/evaluate-wire :T8 (observation)))))
+    (doseq [id ["a" "b" "c"]]
+      (repair/dismiss-superseded-attempt!
+       root id {:authority "test" :actor "codex-1" :reason :superseded}))
+    (is (empty? (tripwire/evaluate-wire :T8 (observation))))
+    (is (= #{"a" "b" "c"} (:closed-repair-ids (observation))))))
 
 (defn- dispatch-finding! [root attempt-id execution]
   (repair/record-system-failure!

@@ -1046,6 +1046,79 @@
          (write-new! (io/file root "dismissals" (str finding-id ".edn")) record)
          record)))))
 
+(defn- retained-attempt-target [root finding]
+  ;; These carriers name this attempt's selected target. Never recursively
+  ;; collect ancestor :target fields: those describe different repairs.
+  (let [ids (distinct (remove nil? [(:target finding)
+                                    (get-in finding [:selected-entry :action :target])
+                                    (get-in finding [:selected-entry :action
+                                                     :repair-obligation :repair/id])]))
+        id (first ids)]
+    (when (and (= 1 (count ids)) (nonblank? id)
+               (some #(= id (:repair/id %)) (records (io/file root "findings"))))
+      id)))
+
+(defn dismiss-superseded-attempt!
+  "Dismiss only from retained target and later, distinct implementation proof.
+  Ancestor targets, caller-supplied proof and ambiguous short attempt aliases
+  cannot establish supersession. This does not validate the target's repair."
+  ([finding-id disposition]
+   (dismiss-superseded-attempt! default-root finding-id disposition))
+  ([root finding-id {:keys [authority reason actor] :as disposition}]
+   (when-not (and (string? finding-id)
+                 (re-matches #"[A-Za-z0-9._-]+" finding-id))
+     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+   (when (get (indexed-records root "dismissals") finding-id)
+     (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+   (let [finding (get (indexed-records root "findings") finding-id)
+         implementations (indexed-records root "implementations")
+         resolutions (indexed-records root "resolutions")]
+     (when-not finding
+       (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+     (when (or (not= :open (:repair/status finding))
+               (get implementations finding-id) (get resolutions finding-id)
+               (get (verified-admissions root) finding-id))
+       (dismissal-refuse! :finding-not-open {:repair/id finding-id}))
+     (when-not (and (= #{:authority :reason :actor} (set (keys disposition)))
+                    (nonblank? authority) (keyword? reason) (nonblank? actor))
+       (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+     (let [target (retained-attempt-target root finding)
+           _ (when-not target
+               (dismissal-refuse! :target-not-resolvable {:repair/id finding-id}))
+           ;; Prefer the actual implementation. A later validation must not
+           ;; disguise a same-attempt implementation as a different repair.
+           impl (get implementations target)
+           record (or impl (get resolutions target))
+           attempt (if impl (:implementation-attempt record)
+                       (:validation-attempt record))
+           failed (:attempt-id finding)
+           timestamp (if impl (:implemented-at record) (:resolved-at record))
+           instant (fn [s] (try (Instant/parse s) (catch Exception _ nil)))
+           opened (instant (:opened-at finding))
+           implemented (instant timestamp)]
+       (when-not (and record (nonblank? attempt) (nonblank? failed)
+                      (if impl (= :awaiting-validation (:repair/status record))
+                          (= :resolved (:repair/status record))))
+         (dismissal-refuse! :target-not-implemented {:repair/id finding-id}))
+       (when (or (= attempt failed)
+                 (str/ends-with? failed (str "--" attempt))
+                 (str/ends-with? attempt (str "--" failed)))
+         (dismissal-refuse! :self-implementation {:repair/id finding-id}))
+       (when-not (and opened implemented (.isAfter ^Instant implemented opened))
+         (dismissal-refuse! :implementation-predates-attempt {:repair/id finding-id}))
+       (let [dismissal {:repair/id finding-id :repair/schema-version 1
+                        :repair/status :dismissed-superseded-attempt
+                        :failed-attempt failed :target-id target
+                        :implementation-record-id (:repair/id record)
+                        :implementation-record-path
+                        (str (io/file root (if impl "implementations" "resolutions")
+                                      (str target ".edn")))
+                        :implementation-attempt attempt :implemented-at timestamp
+                        :authority authority :reason reason :actor actor
+                        :dismissed-at (str (Instant/now))}]
+         (write-new! (io/file root "dismissals" (str finding-id ".edn")) dismissal)
+         dismissal)))))
+
 (defn record-implementation!
   "Record independently reviewed, grounded implementation of a machine repair.
   Evidence is validated according to the discharge contract's artifact shape;
