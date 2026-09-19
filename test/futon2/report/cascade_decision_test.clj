@@ -66,6 +66,23 @@
 
 (def live-c-opts {:live-c {:derived live-c-fixture}})
 
+(deftest wire-live-c-projection-laws
+  (let [joint-want #{[:M-a :x] [:M-a :y] [:M-b :z]}
+        derived {:want #{:alive/M-a :closed/M-b :star/capability}
+                 :weights {:alive/M-a 1/2
+                           :closed/M-b 1/3
+                           :star/capability 1/6}
+                 :lam 1 :entries [] :gaps [] :signature "projection-laws"}
+        p (lc/project-want derived joint-want)
+        spec (lc/cascade-spec derived joint-want joint-want)]
+    (is (= 1/2 (+ (get-in p [:weights [:M-a :x]])
+                   (get-in p [:weights [:M-a :y]])))
+        "expansion over k outcomes conserves the source token's total mass")
+    (is (= 1/3 (get-in p [:weights [:M-b :z]])))
+    (is (not (contains? (:want spec) :star/capability)))
+    (is (some #{":star/capability"}
+              (get-in spec [:live-c :unreached-in-domain])))))
+
 (def receipt
   {:kind :construction-receipt :moves [:interpret :order]
    :family-searched 3 :coverage 1})
