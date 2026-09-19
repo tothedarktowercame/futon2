@@ -315,6 +315,11 @@
             (and (= :opportunity phase) (= :start transition)))
     (wedge-violations cohort-history closed-repair-ids)))
 
+(def livelock-window-ms
+  "How recent the newest finding in a group must be for it to count as the
+  machine circling rather than a backlog. 24h."
+  (* 24 60 60 1000))
+
 (defn livelock-violations
   "Group unresolved findings by the T8 identity and return groups above K=2.
 
@@ -336,23 +341,61 @@
   sameness.
 
   Measured on the live store, 90 findings: 5 groups counting everything, 4
-  once closed findings are dropped, 1 once a discriminator is required — and
-  that one is three open findings against a single repair id, which is the
-  circling T8 exists to catch."
+  once closed findings are dropped, 1 once a discriminator is required.
+
+  THIRD EXCLUSION, and it is about time. A livelock is the machine circling
+  NOW. This had no time dimension at all: it grouped every unresolved finding
+  by signature and fired above two, so the three findings opened between
+  02:51 and 04:14 on 2026-09-15 — which WERE a livelock that morning, 84
+  minutes apart — went on reporting one four days later with no attempt made in
+  between. That is a backlog, and stopping the machine over it (witnesses halt
+  since a8ac1615) meant the only route to discharging those findings was a
+  repair attempt the halt itself prevented. A wire that blocks the repair it
+  demands is not a safety property.
+
+  So a group fires only when its NEWEST member is within `livelock-window-ms`.
+  Nothing about the grouping is loosened: the same three findings from
+  2026-09-15 still trip this on 2026-09-15.
+
+  The trade, stated: a machine circling more slowly than the window — one
+  failure every few days — will not be caught here. That is deliberate. The
+  alternative on offer was halting forever on debris, and a backlog of stale
+  findings is a thing to work through, not a reason to stop. All 50 open
+  findings carry a readable :opened-at (measured 2026-09-19), so nothing is
+  silently dropped for want of a timestamp."
   ([findings] (livelock-violations findings #{}))
   ([findings closed-repair-ids]
-   (let [closed (set closed-repair-ids)]
+   (livelock-violations findings closed-repair-ids (System/currentTimeMillis)))
+  ([findings closed-repair-ids now-ms]
+   (let [closed (set closed-repair-ids)
+         opened-ms (fn [f]
+                     (try (.toEpochMilli (Instant/parse (str (:opened-at f))))
+                          (catch Throwable _ nil)))]
      (->> findings
           (remove #(contains? closed (:repair/id %)))
           (filter #(or (:target %) (:failed-commit %)))
           (group-by (juxt #(or (:failure-kind %) (:repair/class %))
                           :target :failed-commit))
           (keep (fn [[signature records]]
-                  (when (> (count records) 2)
-                    {:kind :duplicate-finding-livelock
-                     :signature signature
-                     :repair-ids (mapv :repair/id records)
-                     :finding-count (count records)})))
+                  (let [newest (when (seq (keep opened-ms records))
+                                 (apply max (keep opened-ms records)))]
+                    ;; Recency SUPPRESSES a halting wire, so absence of a
+                    ;; timestamp must not suppress it: a group nobody can date
+                    ;; cannot be shown to be stale, so it still fires. Fixtures
+                    ;; without :opened-at take this path; all 50 live findings
+                    ;; are datable, so in practice the window decides.
+                    (when (and (> (count records) 2)
+                               (or (nil? newest)
+                                   (<= (- now-ms newest) livelock-window-ms)))
+                      (cond-> {:kind :duplicate-finding-livelock
+                               :signature signature
+                               :repair-ids (mapv :repair/id records)
+                               :finding-count (count records)}
+                        ;; Present only when there is something to say: an
+                        ;; undatable group reports no age rather than a nil one.
+                        newest
+                        (assoc :newest-opened-at (str (Instant/ofEpochMilli newest))
+                               :age-hours (int (/ (- now-ms newest) 3600000.0))))))))
           vec))))
 
 (defn- t8 [{:keys [phase transition findings closed-repair-ids] :as observation}]

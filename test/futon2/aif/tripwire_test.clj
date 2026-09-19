@@ -586,3 +586,41 @@
                        [{:repair/id "a" :failure-kind :build-failed :failed-commit "deadbeef"}
                         {:repair/id "b" :failure-kind :build-failed :failed-commit "deadbeef"}
                         {:repair/id "c" :failure-kind :build-failed :failed-commit "deadbeef"}])))))))
+
+(deftest t8-livelock-is-repetition-now-not-a-backlog
+  ;; The three findings opened 02:51, 03:22 and 04:14 on 2026-09-15 WERE a
+  ;; livelock that morning. With no time dimension they went on reporting one
+  ;; four days later with no attempt in between -- and since witnesses halt
+  ;; (a8ac1615) that stopped every click, while the only honest discharge for
+  ;; those findings needed a repair attempt the halt itself prevented.
+  (let [at (fn [iso] {:repair/id (str "r-" iso) :failure-kind :build-failed
+                      :target "repair-ea1-504ad863--attempt-001" :failed-commit nil
+                      :opened-at iso})
+        group [(at "2026-09-15T02:51:23Z")
+               (at "2026-09-15T03:22:23Z")
+               (at "2026-09-15T04:14:53Z")]
+        ms #(.toEpochMilli (java.time.Instant/parse %))]
+
+    (testing "on the morning it happened, this is exactly what T8 is for"
+      (let [v (tripwire/livelock-violations group #{} (ms "2026-09-15T04:20:00Z"))]
+        (is (= 1 (count v)))
+        (is (= :duplicate-finding-livelock (:kind (first v))))
+        (is (= 3 (:finding-count (first v))))))
+
+    (testing "four days later, with nothing new, it is a backlog and not a halt"
+      (is (empty? (tripwire/livelock-violations group #{} (ms "2026-09-19T00:54:00Z")))))
+
+    (testing "the grouping itself is not loosened -- two is still not a livelock"
+      (is (empty? (tripwire/livelock-violations (take 2 group) #{}
+                                                (ms "2026-09-15T04:20:00Z")))))
+
+    (testing "a group that is still being added to keeps tripping"
+      (is (seq (tripwire/livelock-violations
+                (conj group (at "2026-09-19T00:30:00Z")) #{}
+                (ms "2026-09-19T00:54:00Z")))))
+
+    (testing "the violation says how old the newest member is, so the trip report shows why"
+      (let [v (first (tripwire/livelock-violations
+                      group #{} (ms "2026-09-15T06:14:53Z")))]
+        (is (= 2 (:age-hours v)))
+        (is (= "2026-09-15T04:14:53Z" (:newest-opened-at v)))))))
