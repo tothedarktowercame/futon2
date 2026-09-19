@@ -2209,14 +2209,14 @@
 
 (deftest artifact-binding-refuses-an-actually-ambiguous-abbreviation
   ;; These are two valid commit objects whose independently computed SHA-1s
-  ;; share the seven-hex prefix 6279c88.  Put both into a fixture repository
+  ;; share the seven-hex prefix bd4109e.  Put both into a fixture repository
   ;; so the production git rev-parse seam, rather than an authored resolver
   ;; stub, proves that an ambiguous abbreviation does not resolve.
   (let [repo-file (.toFile (Files/createTempDirectory
                             "wm-ambiguous-commit-"
                             (make-array FileAttribute 0)))
         repo (.getPath repo-file)
-        tree "4b825dc642cb6eb9a060e54bf8d69288fbee4904f"
+        tree "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
         commit-body (fn [stamp]
                       (str "tree " tree "\n"
                            "author Test <t@example.com> " stamp " +0000\n"
@@ -2227,14 +2227,14 @@
       (is (= tree (str/trim (:out (shell/sh "git" "-C" repo
                                              "hash-object" "-w" "-t" "tree"
                                              "--stdin" :in "")))))
-      (is (= "6279c8858e6286ba542c62cea02e8c13fdf00e3f"
+      (is (= "bd4109eaa62d7222dc82cec5ff425fdf25d4bbbb"
              (str/trim (:out (shell/sh "git" "-C" repo "hash-object" "-w"
                                        "-t" "commit" "--stdin"
-                                       :in (commit-body 15772))))))
-      (is (= "6279c88799f41338e30ae0a62b4a517002c62bf7"
+                                       :in (commit-body 973))))))
+      (is (= "bd4109e0bfc3adec9df7828cef12e2f2febce419"
              (str/trim (:out (shell/sh "git" "-C" repo "hash-object" "-w"
                                        "-t" "commit" "--stdin"
-                                       :in (commit-body 19429))))))
+                                       :in (commit-body 13806))))))
       (let [failure
             (try
               (runner/fresh-artifact-binding
@@ -2243,13 +2243,13 @@
                 :ancestor-fn (constantly true)
                 :commit-time-ms-fn (fn [& _] 1500)}
                repo {:repo repo :head "base000" :observed-at-ms 1000}
-               {:artifact-ref "6279c88"})
+               {:artifact-ref "bd4109e"})
               nil
               (catch clojure.lang.ExceptionInfo e (ex-data e)))]
         (is (= :artifact-ref-unresolved (:failure-kind failure)))
-        (is (= "6279c88" (get-in failure [:artifact-binding
+        (is (= "bd4109e" (get-in failure [:artifact-binding
                                            :reported-text-artifact-ref])))
-        (is (= "6279c88" (get-in failure [:artifact-binding
+        (is (= "bd4109e" (get-in failure [:artifact-binding
                                            :text-artifact-ref])))
         (is (= :unresolved (get-in failure [:artifact-binding
                                             :claim-resolution])))
