@@ -44,8 +44,24 @@
 (def run-dir (str (System/getProperty "user.home") "/code/futon2/data/wm-runs"))
 (def max-depth 8)
 
-(defn find-field
-  "Shallowest non-:backtrace path to key k in form, else nil."
+;; ALLOWLIST, NOT DENYLIST (claude-4, 2026-09-19, r110 review finding F1).
+;; The first cut searched anywhere except :backtrace. That is a denylist over
+;; an unbounded key space, so it fails PERMISSIVE: a synthetic record whose
+;; five fields existed only under
+;;   [:some-unrelated-archive :stashed-previous-run :decision ...]
+;; was reported VALID (5/5 ok). A run that did nothing, carrying a stashed copy
+;; of a previous run's quantities, passed the facade detector -- which is the
+;; one thing Joe's uniformity ruling exists to catch.
+;; So: still SEARCH (the lanes have not fixed attachment points yet, and the
+;; printed path is how drift stays visible), but only WITHIN a declared root,
+;; and report anything found outside it as :bad with the offending path rather
+;; than silently ignoring it.
+(def declared-roots
+  "Where this run's own quantities may live. Anything else is somebody else's."
+  #{:decision})
+
+(defn- search
+  "All non-:backtrace paths to key k, shallowest first."
   [form k]
   (letfn [(walk [f path depth]
             (when (and (<= depth max-depth) (map? f))
@@ -54,7 +70,19 @@
                                 (when-not (= kk :backtrace)
                                   (walk vv (conj path kk) (inc depth))))
                               f))))]
-    (first (sort-by count (walk form [] 0)))))
+    (sort-by count (walk form [] 0))))
+
+(defn find-field
+  "Shallowest path to k UNDER a declared root, else nil."
+  [form k]
+  (first (filter #(contains? declared-roots (first %)) (search form k))))
+
+(defn out-of-root
+  "Shallowest path to k OUTSIDE every declared root, else nil. Used to report
+   a near-miss as :bad-location rather than a bare :missing -- a field sitting
+   somewhere else is a different and more interesting fact than its absence."
+  [form k]
+  (first (remove #(contains? declared-roots (first %)) (search form k))))
 
 (defn get-found [form path] (when path (get-in form path)))
 
@@ -114,8 +142,27 @@
 
 (def checks [check-c-source check-rates check-posterior check-u37 check-g-terms])
 
+(def field-keys
+  "The record key each field is found by, for near-miss reporting."
+  {:c-source :c :rates-provenance :rates-provenance
+   :posterior :selection-certificate :u37 :enumeration-completeness
+   :g-terms :g-terms})
+
+(defn- locate-near-miss
+  "A field absent from every declared root but PRESENT somewhere else is a
+   different and more interesting fact than a field that is simply absent: it
+   says this run is carrying somebody else's quantities. Report it as :bad
+   with the offending path rather than as a bare :missing."
+  [r result]
+  (if (not= :missing (:verdict result))
+    result
+    (if-let [elsewhere (some-> (field-keys (:field result)) (->> (out-of-root r)))]
+      (assoc result :verdict :bad :at elsewhere
+             :note "found OUTSIDE the declared root — not this run's quantity")
+      result)))
+
 (defn validity [r]
-  (let [results (mapv #(% r) checks)
+  (let [results (mapv #(locate-near-miss r (% r)) checks)
         missing (filter #(#{:missing :bad} (:verdict %)) results)]
     {:results results
      :verdict (if (seq missing) :invalid :valid)}))
@@ -165,7 +212,18 @@
     #(assoc-in % [:decision :selection-certificate :policies 0 :f-status]
                :computed-not-attached) :posterior]
    ["u37-removed" #(update % :decision dissoc :enumeration-completeness) :u37]
-   ["g-terms-removed" #(update % :decision dissoc :g-terms) :g-terms]])
+   ["g-terms-removed" #(update % :decision dissoc :g-terms) :g-terms]
+   ;; The case that made this checker wrong, kept as a permanent control
+   ;; (claude-4, 2026-09-19). Every quantity is present and correct -- just
+   ;; filed under somebody else's subtree, as a stashed copy of an earlier
+   ;; run. The first cut reported VALID 5/5. A run that did nothing must not
+   ;; validate on another run's numbers, and the only way to know this still
+   ;; holds is to keep asking.
+   ["quantities-relocated-off-root"
+    (fn [rec] {:run/id (:run/id rec) :terminal (:terminal rec)
+               :some-unrelated-archive {:stashed-previous-run
+                                        {:decision (:decision rec)}}})
+    :c-source]])
 
 (defn selftest! []
   (let [base (validity complete-fixture)
@@ -174,10 +232,17 @@
     (doseq [[label f field] perturbations]
       (let [{:keys [results]} (validity (f complete-fixture))
             r (first (filter #(= field (:field %)) results))
-            rejected? (contains? #{:missing :bad :flagged} (:verdict r))]
-        (println (format "  %-28s -> %-18s %s" label
+            rejected? (contains? #{:missing :bad :flagged} (:verdict r))
+            ;; :flagged is NOTICED but does not make a run :invalid. Printing
+            ;; "REJECTED" for both overstated what the flagged case shows --
+            ;; five of these perturbations invalidate a run and one only
+            ;; annotates it (claude-4, r110 finding F3). Say which.
+            invalidates? (contains? #{:missing :bad} (:verdict r))]
+        (println (format "  %-30s -> %-18s %s" label
                          (str (name field) ":" (name (:verdict r)))
-                         (if rejected? "REJECTED" "NOT REJECTED — selftest FAIL")))
+                         (cond (not rejected?) "NOT REJECTED — selftest FAIL"
+                               invalidates?    "REJECTED (invalidates the run)"
+                               :else           "NOTICED (flagged, does NOT invalidate)")))
         (when-not rejected? (reset! ok? false))))
     (if @ok?
       (println "SELFTEST PASS: accepts the complete record, rejects every perturbation")
@@ -185,8 +250,14 @@
 
 ;; ---------------------------------------------------------------- main
 (let [args *command-line-args*]
+  ;; The negative control runs on EVERY invocation (claude-4, r110 finding F2).
+  ;; It previously ran only when "selftest" was the sole argument, so checking
+  ;; real records never exercised it -- "SELFTEST PASS required for exit 0" was
+  ;; true only of the circular invocation. Now every verdict this tool prints
+  ;; carries the evidence that the tool can still say no.
+  (selftest!)
   (if (= ["selftest"] (vec args))
-    (selftest!)
+    nil
     (let [files (run-files args)
           verdicts (doall (for [f files]
                             (report-run! f (edn/read-string
