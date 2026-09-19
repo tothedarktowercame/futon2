@@ -1,0 +1,12 @@
+{:agency-url "http://localhost:7070"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/g_term_decomposition.clj"
+              "src/futon2/aif/cascade_model_manifest.clj"
+              "src/futon2/aif/policy.clj"
+              "src/futon2/aif/full_loop_runner.clj"]
+ :test-paths ["test/futon2/aif/g_term_decomposition_test.clj"
+              "test/fixtures/selection-certificate/before.edn"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.g-term-decomposition-test"]
+ :test-environment {"LC_ALL" "C.UTF-8" "LANG" "C.UTF-8" "TZ" "UTC"}
+ :author "codex-31"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/g-term-decomposition-2026-09-19"}
