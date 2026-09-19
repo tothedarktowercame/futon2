@@ -1,6 +1,7 @@
 (ns futon2.report.selection-nil-receipt-test
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.calibration-cycle :as calibration]
+            [futon2.aif.full-loop-runner :as runner]
             [futon2.report.war-machine :as wm]))
 
 (def scan-vars
@@ -24,7 +25,8 @@
                               [{:ok false :error/code :r12/untied-return} "REFUSED `untied-return`"]]]
     (let [captured (atom nil) render wm/render-war-machine
           action {:type :open-mission :target "fixture/valid-target"}
-          judgement {:selected-action action}
+          judgement {:decision {:action action :controller-score 1.0
+                                :selection-law {:applied :cascade-selection-posterior}}}
           stubs (into {} (for [sym scan-vars]
                            [(ns-resolve 'futon2.report.war-machine sym) (constantly nil)]))]
       (with-redefs-fn
@@ -41,5 +43,5 @@
           (let [result (wm/generate-war-machine 14)]
             (is (= receipt (:r12-admission @captured)))
             (is (= receipt (get-in result [:data :r12-admission])))
-            (is (= action (get-in result [:judgement :selected-action])))
+            (is (= action (:action (#'runner/selected-entry (:judgement result)))))
             (is (.contains (:markdown result) expected))))))))
