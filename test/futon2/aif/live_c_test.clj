@@ -47,7 +47,33 @@
                                             :held {:status :held}
                                             :mystery {}}})]
     (is (= [:star/held] (mapv :token entries)))
-    (is (= [{:kind :capability-status-missing :capability :mystery}] refusals)))
+    (is (= [{:kind :capability-status-missing :capability :mystery}] refusals))))
+
+(deftest mission-wants-project-with-conserved-weight
+  (let [joint-want #{[:M-a :x] [:M-a :y] [:M-b :z]}
+        derived {:want #{:alive/M-a :closed/M-b :star/capability}
+                 :weights {:alive/M-a 1/2
+                           :closed/M-b 1/3
+                           :star/capability 1/6}}
+        p (lc/project-want derived joint-want)]
+    (is (= joint-want (:want p)))
+    (is (= 1/2 (+ (get-in p [:weights [:M-a :x]])
+                   (get-in p [:weights [:M-a :y]])))
+        "a token split over k outcomes retains exactly its source mass")
+    (is (= 1/3 (get-in p [:weights [:M-b :z]])))
+    (is (= #{:star/capability} (:unreached p))
+        "capability-grain stars do not acquire an invented target")))
+
+(deftest projected-cascade-spec-keeps-stars-out-of-want
+  (let [derived {:want #{:alive/M-a :star/capability}
+                 :weights {:alive/M-a 3/4 :star/capability 1/4}
+                 :lam 1 :entries [] :gaps [] :signature "projection-test"}
+        pair [:M-a :declared]
+        spec (lc/cascade-spec derived #{pair} #{pair})]
+    (is (= #{pair} (:want spec)))
+    (is (= 3/4 (get (:weights spec) pair)))
+    (is (some #{":star/capability"}
+              (get-in spec [:live-c :unreached-in-domain])))))
 
 ;; ---------------------------------------------------------------- refusals
 
@@ -56,7 +82,7 @@
                              :missions [] :stars {:value {:capabilities {}}}})]
     (is (seq (:refusals d)))
     (is (nil? (:want d)))
-    (is (= :source-missing (-> d :refusals first :kind))))))
+    (is (= :source-missing (-> d :refusals first :kind)))))
 
 ;; ---------------------------------------------------------------- the live derivation
 
@@ -89,7 +115,7 @@
     ;; the spec the scorer consumes, restricted to a reachable domain
     (let [reachable (-> (:want d) vec (subvec 0 (max 1 (dec (count (:want d))))) set (conj ::outside-domain))
           s (lc/cascade-spec d reachable)]
-      (is (set (:want s)))
+      (is (set? (:want s)))
       (is (:weights s))
       (is (not (contains? (:want s) ::outside-domain)))
       (is (seq (:unreached-in-domain (:live-c s)))))

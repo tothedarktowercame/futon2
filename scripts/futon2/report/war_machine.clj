@@ -6182,18 +6182,15 @@
                          acc (:precedence candidate)))
                (reduce clojure.set/union joint-want (map (partial reduce clojure.set/union #{}) (keys joint-q0)))
                joint-candidates)
-              live-spec (live-c/cascade-spec live-derived joint-reachable)
+              live-spec (live-c/cascade-spec live-derived joint-reachable joint-want)
               live-refusal (:refusal live-spec)
               ;; :no-reachable-want is NOT the same class of refusal as
               ;; :live-c-stale or a source failure. Those two mean "C cannot be
               ;; trusted, do not score". This one means "no live-C want token
               ;; lies in this comparison's outcome domain" -- and today that is
-              ;; true of EVERY real decision, because the live C is derived at
-              ;; MISSION grain (:alive/M-…, :closed/M-…, :star/…) while a
-              ;; cascade comparison's outcomes are target-qualified [target
-              ;; token] pairs. Nothing maps between the two vocabularies. That
-              ;; is the undeclared mission layer of C (:c-mis, WM-13), and it
-              ;; predates this wiring by months.
+              ;; true only when no mission token can project through that
+              ;; mission's own declared wants. Capability-grain :star tokens
+              ;; intentionally remain outside the target-qualified domain.
               ;;
               ;; live-c is right to refuse when ASKED for a spec it cannot
               ;; honestly give -- that law is not touched here. What the CALLER
@@ -6216,10 +6213,10 @@
                                           {:want joint-want
                                            :c {:status :derived-no-overlap
                                                :source :futon2.aif.live-c/cascade-spec
-                                               :reason :mission-grain-c-not-in-cascade-outcome-domain
+                                               :reason :no-live-c-mission-want-in-cascade-outcome-domain
                                                :live-want (:live-want live-refusal)
                                                :reachable (:reachable live-refusal)
-                                               :owed "WM-13: the mission grain of C has no map into the cascade outcome domain"}}
+                                               :unreached-in-domain (:unreached-in-domain live-refusal)}}
                                           {:want (into joint-want (:want live-spec))
                                            :weights (:weights live-spec)
                                            :lam (:lam live-spec)

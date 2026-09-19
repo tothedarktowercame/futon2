@@ -1,0 +1,11 @@
+{:repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/live_c.clj"
+              "scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/aif/live_c_test.clj"
+              "test/futon2/report/cascade_decision_test.clj"]
+ :command ["clojure" "-X:test"
+           ":nses" "[futon2.aif.live-c-test futon2.report.cascade-decision-test]"]
+ :author "wm-live-c"
+ :subject-id "WIRE-live-c"
+ :artifact-dir "/home/joe/code/storage/test-registry/wire-live-c-2026-09-19"
+ :agency-url "http://localhost:7070"}

@@ -224,7 +224,7 @@
             ;; collapse is recorded — duplicate entries would otherwise
             ;; make the normalised weights sum below 1 silently
             by-token (group-by :token (concat alive completion (:entries star)))
-            entries (vec (for [[tok es] (sort-by key by-token)]
+            entries (vec (for [[_token es] (sort-by key by-token)]
                            (reduce (fn [a b]
                                      (if (> (:weight b) (:weight a)) b a))
                                    (first es) (rest es))))
@@ -263,6 +263,43 @@
 ;; The spec the cascade scorer consumes
 ;; ---------------------------------------------------------------------------
 
+(defn- mission-token?
+  [token]
+  (and (keyword? token)
+       (contains? #{"alive" "closed"} (namespace token))))
+
+(defn- token-mission
+  [token]
+  (when (mission-token? token) (name token)))
+
+(defn project-want
+  "Project mission-grain live-C tokens into JOINT-WANT's target-qualified
+  outcome domain.  A mission token receives exactly the pairs that mission
+  itself declared; its weight is divided across them, conserving its total
+  mass.  Capability-grain :star tokens deliberately have no projection."
+  [derived joint-want]
+  (reduce
+   (fn [acc token]
+     (let [mission (token-mission token)
+           pairs (if mission
+                   (set (filter (fn [[target _]] (= mission (name target)))
+                                joint-want))
+                   #{})]
+       (if (seq pairs)
+         (let [share (/ (get (:weights derived) token) (count pairs))]
+           (-> acc
+               (update :want into pairs)
+               (update :weights
+                       (fn [ws]
+                         (reduce #(update %1 %2 (fnil + 0) share) ws pairs)))
+               (assoc-in [:projected-from token]
+                         {:outcomes pairs
+                          :source-weight (get (:weights derived) token)
+                          :outcome-weight share})))
+         (update acc :unreached conj token))))
+   {:want #{} :weights {} :projected-from {} :unreached #{}}
+   (:want derived)))
+
 (defn cascade-spec
   "The live C as the cascade preference spec cascade-model-manifest consumes,
   RESTRICTED to REACHABLE — the token domain of the comparison the spec will
@@ -277,28 +314,50 @@
   not silently kept. Zero-weight extra tokens belong in :universe (there
   they shift every candidate by exactly T·k·ln 2); this spec adds none.
 
+  JOINT-WANT is the tick's set of [target want-token] pairs.  :alive/M and
+  :closed/M project only to M's own declared pairs; :star/capability does not
+  name a target and is therefore left under :unreached-in-domain.
+
   Returns {:want … :weights … :lam 1 :mu 0 :evidence #{} :zeroed #{}
   :live-c provenance}, or the typed refusal :no-reachable-want when no
   live-C want token lies in REACHABLE (an empty belly for this comparison
   refuses rather than scoring pure information gain)."
-  [derived reachable]
-  (if (seq (:refusals derived))
-    {:refusal {:kind :live-c-refused :refusals (:refusals derived)}}
-    (let [in-domain (set/intersection (:want derived) (set reachable))]
-      (if (empty? in-domain)
-        {:refusal {:kind :no-reachable-want
-                   :reachable (count (set reachable))
-                   :live-want (count (:want derived))
-                   :limitation "no live-C want token lies in this comparison's outcome domain; scoring would be pure information gain — the dark room — so it refuses"}}
-        {:want in-domain
-         :weights (select-keys (:weights derived) in-domain)
-         :lam (:lam derived)
-         :mu 0
-         :evidence #{}
-         :zeroed #{}
-         :live-c {:signature (:signature derived)
-                  :n-entries (count (:entries derived))
-                  :n-in-domain (count in-domain)
-                  :unreached-in-domain (vec (sort (map str (set/difference (:want derived) in-domain))))
-                  :gaps (:gaps derived)
-                  :refusals (:refusals derived)}}))))
+  ([derived reachable]
+   ;; Compatibility for callers/tests already supplying live-C's own token
+   ;; domain.  Production uses the target-qualified arity below.
+   (cascade-spec derived reachable nil))
+  ([derived reachable joint-want]
+   (if (seq (:refusals derived))
+     {:refusal {:kind :live-c-refused :refusals (:refusals derived)}}
+     (let [{projected :want projected-weights :weights
+            projected-from :projected-from projected-unreached :unreached}
+           (when joint-want (project-want derived (set joint-want)))
+           candidates (if joint-want projected (:want derived))
+           candidate-weights (if joint-want projected-weights (:weights derived))
+           in-domain (set/intersection candidates (set reachable))
+           unreached (if joint-want
+                       (set/union projected-unreached
+                                  (set (for [[token {:keys [outcomes]}] projected-from
+                                             :when (empty? (set/intersection outcomes in-domain))]
+                                         token)))
+                       (set/difference (:want derived) in-domain))]
+       (if (empty? in-domain)
+         {:refusal {:kind :no-reachable-want
+                    :reachable (count (set reachable))
+                    :live-want (count (:want derived))
+                    :unreached-in-domain (vec (sort (map str unreached)))
+                    :limitation "no projected live-C want lies in this comparison's outcome domain; scoring would be pure information gain — the dark room — so it refuses"}}
+         {:want in-domain
+          :weights (select-keys candidate-weights in-domain)
+          :lam (:lam derived)
+          :mu 0
+          :evidence #{}
+          :zeroed #{}
+          :live-c {:signature (:signature derived)
+                   :n-entries (count (:entries derived))
+                   :n-in-domain (count in-domain)
+                   :projection :mission-declared-wants
+                   :projected-from projected-from
+                   :unreached-in-domain (vec (sort (map str unreached)))
+                   :gaps (:gaps derived)
+                   :refusals (:refusals derived)}})))))

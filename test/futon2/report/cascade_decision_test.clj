@@ -57,13 +57,10 @@
     :test-step-covering-missing-total-repos {:receipt "TS-interpretation" :source "03-R6"}}})
 
 (def live-c-fixture
-  "WIRE-3 test seam: a derived live C whose want token IS in the tick-1
-  joint domain (target-qualified, exactly as the qualification scheme
-  builds the family's tokens), with a fixed weight — so these tests do
-  not read the real corpus (the derivation itself is covered in
-  futon2.aif.live-c-test) and stay deterministic."
-  {:want #{[tick-1-target :test-covers-missing-total-repos]}
-   :weights {[tick-1-target :test-covers-missing-total-repos] 1}
+  "WIRE-live-c test seam: a mission-grain token for the tick target.  The
+  production vocabulary map projects it onto that mission's declared wants."
+  {:want #{(keyword "alive" (name tick-1-target))}
+   :weights {(keyword "alive" (name tick-1-target)) 1}
    :lam 1 :entries [] :gaps [] :refusals nil
    :signature "cascade-decision-test-live-c"})
 
@@ -112,17 +109,12 @@
                                 :sources tick-1-sources})
         r (wm/cascade-decision assembled live-c-opts)
         decision (:decision r)]
-    ;; WIRE-3: the injected live C weights
-    ;; [:wm-tick-001-observation-crash :test-covers-missing-total-repos]
-    ;; at 1 (3x the uniform 1/3 share), and the choice follows the weight:
-    ;; :test-step-covering-missing-total-repos now outranks
-    ;; :aif/placeholder-is-load-bearing (uniform: 0.37005613489124095 and
-    ;; the placeholder pattern won).
-    (is (= :test-step-covering-missing-total-repos
+    ;; A single mission token divides its mass evenly over that mission's
+    ;; three declared wants, so within this one-target family it introduces
+    ;; no relative preference.
+    (is (= :aif/placeholder-is-load-bearing
            (-> decision :action :precedence first :id))
-        "the weighted want token moves the choice to the test-step cascade")
-    (is (= 0.6217118810867193 (:chosen-action-mass decision))
-        "the chosen action's mass is the posterior marginal 0.6217118810867193")
+        "the projected mission mass leaves the one-target argmax unchanged")
     (is (= {:value 1 :status :declared} (:beta decision))
         "β = 1 is recorded :declared")
     (let [posterior (get-in decision [:selection-law :posterior])]
@@ -169,6 +161,13 @@
                                          [:test-step-covering-missing-total-repos])]))
         assembled (assemble* {:targets [tick-1-target b-target]
                                 :sources sources})
+        without-projection
+        (wm/cascade-decision
+         assembled
+         {:live-c {:derived {:want #{:star/no-target}
+                             :weights {:star/no-target 1}
+                             :lam 1 :entries [] :gaps [] :refusals nil
+                             :signature "no-projectable-live-c"}}})
         r (wm/cascade-decision assembled live-c-opts)
         decision (:decision r)
         posterior (get-in decision [:selection-law :posterior])]
@@ -178,6 +177,22 @@
     (is (= :test-step-covering-missing-total-repos
            (-> decision :action :precedence first :id))
         "the weighted tick-1 cascade wins the JOINT selection")
+    (is (= :b-fix
+           (-> without-projection :decision :action :precedence first :id))
+        "without projected live C, the same candidates choose B")
+    (is (not= (-> without-projection :decision :action :precedence first :id)
+              (-> decision :action :precedence first :id))
+        "the projected live C moves the argmax, not merely posterior masses")
+    (is (every? #{:derived-no-overlap}
+                (map #(get-in % [:c :status])
+                     (vals (get-in without-projection
+                                   [:decision :selection-certificate :scoring]))))
+        "the without arm records that no live token entered its domain")
+    (is (every? #{:derived}
+                (map #(get-in % [:c :status])
+                     (vals (get-in decision
+                                   [:selection-certificate :scoring]))))
+        "the with arm records projected live C on every scored candidate")
     (is (= #{tick-1-target b-target}
            (set (map :target (keys posterior))))
         "one posterior spans both targets' candidates")
@@ -205,7 +220,7 @@
         "no unreceipted candidate reached the posterior")
     (is (not (some #(= :C3 (:id %)) (keys posterior)))
         "the dropped candidate is absent from the posterior")
-    (is (= :test-step-covering-missing-total-repos
+    (is (= :aif/placeholder-is-load-bearing
            (-> decision :action :precedence first :id))
         "the remaining family still selects through the gate")))
 
@@ -341,30 +356,19 @@
     (is (= :live-c-refused (:kind d)))
     (is (= [:source-missing] (mapv :kind (:refusals d))))))
 
-(deftest wire-3-live-c-tokens-are-not-in-any-real-tick-domain-today
-  ;; The FINDING, recorded as a test: the real corpus's live-C tokens are
-  ;; namespaced keywords (:alive/M-* :closed/M-* :star/*), while the joint
-  ;; cascade domain is target-qualified [target token] pairs. The two
-  ;; vocabularies are disjoint, so live-c/cascade-spec refuses
-  ;; :no-reachable-want for every real decision. That is the undeclared
-  ;; mission grain of C (:c-mis, WM-13) stated concretely.
-  ;;
-  ;; live-c is RIGHT to refuse when asked for a spec it cannot honestly give,
-  ;; and that law is untouched. What the caller does with the refusal is a
-  ;; separate decision (claude-4, 2026-09-18): a grain mismatch is C having no
-  ;; opinion about these outcomes, not C being broken or stale, so the
-  ;; comparison proceeds on the uniform spec it used before this slice and
-  ;; RECORDS that it did. Halting every production decision would make this
-  ;; wiring answerable for a gap it only revealed.
+(deftest wire-live-c-projects-real-mission-tokens
   (let [assembled (assemble* {:targets [tick-1-target]
                               :sources tick-1-sources})
         d (lc/derive-live-c (lc/read-sources))]
     (is (seq (:want d)) "the real corpus derives a non-empty live C")
     (is (every? keyword? (:want d))
         "live-C tokens are (namespaced) keywords, never [target token] pairs")
-    (is (= :no-reachable-want
-           (:kind (:refusal (lc/cascade-spec d #{[:t "tok"]}))))
-        "asked for a spec over a target-qualified domain, live-c refuses")
+    (let [pair [tick-1-target (first tick-1-want)]
+          matching (assoc d
+                          :want #{(keyword "alive" (name tick-1-target))}
+                          :weights {(keyword "alive" (name tick-1-target)) 1})]
+      (is (= #{pair} (:want (lc/cascade-spec matching #{pair} #{pair})))
+          "mission token projects through that mission's own declared want"))
     (let [decision (wm/cascade-decision assembled {})]
       (is (map? decision)
           "a grain mismatch does not halt the decision")
