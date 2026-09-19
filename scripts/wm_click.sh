@@ -20,7 +20,9 @@ set -uo pipefail
 
 F2="$HOME/code/futon2"; F3C="$HOME/code/futon3c"
 BASE="http://localhost:7070"
-AUTHOR="codex-23"; REVIEWER="codex-22"; REPAIR="codex-24"
+# codex-22 was the charter's reviewer and is no longer on the roster, so the
+# default casting failed preflight on every invocation (claude-4, 2026-09-19).
+AUTHOR="codex-23"; REVIEWER="codex-2"; REPAIR="codex-24"
 ISSUING_CALLER="${WM_ISSUING_CALLER:-caller-unknown}"
 RUN=0; FORCE=0; PROBE=0
 
@@ -106,7 +108,18 @@ cat > /tmp/wm_click_wires.clj <<'CLJ'
                         (boolean (some #(rcw % obs) w))])]
       {:tripping (vec (for [[k kinds deferred?] classified :when (not deferred?)]
                         [k kinds]))
-       :will-defer (vec (for [[k _ deferred?] classified :when deferred?] k))}))
+       :will-defer (vec (for [[k _ deferred?] classified :when deferred?] k))
+       ;; What actually decides the branch. full-loop-runner takes
+       ;;   stop-line = (first open, non-environmental-hold obligation)
+       ;; and when one exists the entry is repair-entry, NOT ordinary
+       ;; selection -- so there is no controller-decision and no selection
+       ;; certificate, and the run record cannot score above 1/5. A deferred
+       ;; tripwire witness is a SYMPTOM of the same backlog, not its cause;
+       ;; this counts the cause.
+       :stop-lines-queued
+       (count (filter #(and (= :open (:repair/status %))
+                            (not= :environmental-hold (:repair/class %)))
+                      ((resolve 'futon2.aif.repair-obligation/open-obligations))))}))
 CLJ
 # proof-eval.sh reads its admin token from its own directory, so it must be
 # invoked from there.
@@ -129,19 +142,26 @@ esac
 case "$wires" in
   *":will-defer []"*) :;;
   *":will-defer ["*)
-    say "will defer to repair" "$(echo "$wires" | sed 's/.*:will-defer //; s/}$//') -- witness names open obligations"
-    # This is a PREDICTION OF THE BRANCH, not a footnote. A deferred witness
-    # makes a repair selectable, and repair-entry is injected at -Inf as
-    # :selection-source :stop-the-line -- it pre-empts policy selection rather
-    # than winning it. So this click will very likely enact a repair, and a
-    # repair run has no controller-decision and no selection certificate: its
-    # run record CANNOT score better than 1/5 under wm_run_validity.bb, and
-    # cannot satisfy E02. Measured on click 1 of 5 (wm-click-599b9255,
-    # 2026-09-19): this line printed, the click enacted
-    # :repair-machine-failure, and the record came back INVALID 0/5.
-    # Spend a budgeted click here only if the repair is what you want.
-    bad "click will repair" "a deferred witness means the stop-the-line branch is selectable; expect a repair run, not a scored selection. Pass --force if the repair IS the work.";;
+    say "will defer to repair" "$(echo "$wires" | sed 's/.*:will-defer \(\[[^]]*\]\).*/\1/') -- witness names open obligations"
+    :;;
   *)  :;;
+esac
+
+# 4b. THE ONE THAT DECIDES WHAT KIND OF RUN THIS IS.
+# An open stop-line obligation pre-empts ordinary selection: the runner takes
+# repair-entry (injected at -Inf, :selection-source :stop-the-line) instead of
+# the cascade's choice, so the run has no controller-decision and no selection
+# certificate and its record cannot score above 1/5 under wm_run_validity.bb.
+# Measured on click 1 of 5 (wm-click-599b9255, 2026-09-19): 20 queued, the
+# click enacted :repair-machine-failure, record INVALID 0/5.
+# An earlier version of this check blamed the deferred tripwire witness. That
+# was the wrong cause: the witness defers BECAUSE the backlog exists, and both
+# are downstream of the queue. Count the queue.
+queued=$(echo "$wires" | sed -n 's/.*:stop-lines-queued \([0-9]*\).*/\1/p')
+case "$queued" in
+  0) say "stop-line queue" "empty -- this click can reach ordinary selection";;
+  "") bad "stop-line queue" "COULD NOT BE READ -- do not assume it is empty";;
+  *)  bad "stop-line queue" "$queued open obligation(s) ahead of ordinary selection; this click will enact a REPAIR and its record cannot score above 1/5. --force if the repair IS the work.";;
 esac
 
 # 5. Seat quota (opt-in: costs one agent turn each).
