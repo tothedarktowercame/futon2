@@ -3594,41 +3594,34 @@
               :ground {:kind :test-witness}}]
     (:attempt/id (cohort/start-attempt! prereg-path data-root term))))
 
-(deftest cohort-stopping-rule-returns-cohort-complete-not-repair
-  "When the cohort stopping rule is reached, run-opportunity! must return
-  :cohort-complete — NOT create a repair obligation. This was the root cause
-  of repair-initialization-6d5da36a: the stopping rule exception was caught
-  by the initialization-failure handler and turned into a spurious repair.
+(deftest cohort-window-exhaustion-records-a-beyond-window-attempt
+  "The cohort target bounds the measured window, not scheduler execution.
+  Once target 1 has one attempt, the next opportunity must be retained and
+  explicitly marked outside the window. This stays hermetic by exercising the
+  cohort boundary directly; invoking the whole runner here would continue to
+  selection and could reach live Agency dispatch.
 
-  This test constructs a genuine exhausted cohort (target 1, 1 attempt already
-  opened) so that the NEXT run-opportunity! call hits start-attempt!'s
-  stopping rule. The assertions are unconditional — not gated on the result."
+  Typed recognition of old :stopping-rule-reached exceptions remains covered
+  separately by stopping-rule-recognition-is-typed-not-textual."
   (let [data-root (tmp-cohort-root)
         prereg-path (str data-root "/cohort.edn")
         _ (tiny-target-prereg prereg-path)
         _ (exhaust-cohort! prereg-path data-root)
-        repair-calls (atom [])
-        queue-calls (atom [])]
-    (with-redefs [cohort/default-preregistration prereg-path
-                  cohort/default-data-root data-root]
-      (let [result (runner/run-opportunity!
-                    {:trigger :test-trigger
-                     :cohort? true
-                     :opportunity-id "test/post-exhaustion"
-                     :semantic-epoch :test
-                     :author "zai-1"
-                     :reviewer "codex-1"
-                     :repair-system-record-fn
-                     (fn [m] (swap! repair-calls conj m)
-                       {:repair/id "should-not-fire"})
-                     :queue-fn (fn [m] (swap! queue-calls conj m)
-                                  {:morning-brief/addendum-id "should-not-queue"})})]
-        (is (= :cohort-complete (:outcome result))
-            "exhausted cohort must return :cohort-complete")
-        (is (empty? @repair-calls)
-            "stopping-rule-reached must not create a repair obligation")
-        (is (empty? @queue-calls)
-            "stopping-rule-reached must not queue a morning-brief item")))))
+        event (cohort/start-attempt!
+               prereg-path data-root
+               {:judgment {:opportunity-id "test/post-window"
+                           :trigger :test-trigger
+                           :machine-state {:tick 2}
+                           :agent-roster []
+                           :code-state {:git-sha "abc" :git-dirty? false
+                                        :resolved-mode-flags {}
+                                        :configuration-digest "test"}
+                           :semantic-epoch :test}
+                :ground {:kind :test-witness}})]
+    (is (true? (:cohort/beyond-window? event)))
+    (is (= {:target 1 :attempted 1} (:cohort/window event)))
+    (is (= "test/post-window"
+           (get-in event [:payload :judgment :opportunity-id])))))
 
 (deftest stopping-rule-recognition-is-typed-not-textual
   "Independent review of 6657f4c (codex-1): recognition must be typed
