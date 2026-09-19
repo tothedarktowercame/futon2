@@ -6264,11 +6264,16 @@
 
    Arity-1 ([scan-data]): no trace persistence.
    Arity-2 ([scan-data opts]): writes trace if `:trace?` is truthy in
-     opts; uses `:trace-dir` if provided or default. Set
-     `:include-advisory-lanes? false` for real actuation, where the selected
-     target is constructed once in the subsequent construction phase. This
-     does not change `wm-decision`: cascade actions are held-for-arming and
-     appended only after policy selection.
+     opts; uses `:trace-dir` if provided or default.
+
+   `:include-advisory-lanes?` IS READ BY NOTHING and this text used to tell you
+     to set it "for real actuation". Its reader was deleted with the flat
+     decision path in 5d55e7a0 (2026-09-17); the four callers that still pass
+     it, and the test asserting the runner passes it, were left behind. No
+     behaviour is wrong -- there are no advisory lanes left to include, so the
+     runner already gets what it was asking for. The key is named here only so
+     that the next person who greps it finds this instead of concluding from
+     four writers and a green test that the option does something.
 
    `:run-id` (RUN11) names the run whose receipt this tick will write; it is
      carried onto the judgement as `:run/id` and persisted by
