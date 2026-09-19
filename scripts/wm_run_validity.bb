@@ -142,11 +142,27 @@
   ;; forcing a rename of a committed, warranted write.
   (let [p (or (find-field r :g-terms)
               (find-field r :g-decomposition)
-              (find-field r :g-term-decomposition))]
-    (if p
-      {:field :g-terms :verdict :ok :at p}
+              (find-field r :g-term-decomposition))
+        v (get-found r p)]
+    (cond
+      (nil? p)
       {:field :g-terms :verdict :missing
-       :note "decomposition fields land with the P-1 lane"})))
+       :note "decomposition fields land with the P-1 lane"}
+
+      ;; The producer labels its own absence. The first cut of this check
+      ;; asked only whether the KEY was there, so a census reading
+      ;; {:status :missing :reason :no-recorded-cascade-selection} scored a
+      ;; point -- found by claude-4 on the 16:30 production click, whose
+      ;; repair branch bypassed cascade selection and still reported
+      ;; g-terms ok. check-u37 above already reads its value; this one did
+      ;; not, and presence of a placeholder is not presence of a quantity.
+      ;; Legacy :g-terms records carry no :status and are unaffected.
+      (and (map? v) (contains? v :status) (not= :present (:status v)))
+      {:field :g-terms :verdict :missing :at p
+       :note (str "census says " (pr-str (:status v))
+                  (when (:reason v) (str ": " (pr-str (:reason v)))))}
+
+      :else {:field :g-terms :verdict :ok :at p})))
 
 (def checks [check-c-source check-rates check-posterior check-u37 check-g-terms])
 
@@ -227,6 +243,14 @@
    ;; run. The first cut reported VALID 5/5. A run that did nothing must not
    ;; validate on another run's numbers, and the only way to know this still
    ;; holds is to keep asking.
+   ;; Second permanent control (claude-4, after click 1 of 5). The census is
+   ;; present and well-formed and says of itself that it has nothing: exactly
+   ;; what the repair branch writes. It must not score.
+   ["g-terms-census-says-missing"
+    #(assoc-in % [:decision :g-terms]
+               {:schema :wm/g-term-decomposition-v1 :status :missing
+                :reason :no-recorded-cascade-selection :policies []})
+    :g-terms]
    ["quantities-relocated-off-root"
     (fn [rec] {:run/id (:run/id rec) :terminal (:terminal rec)
                :some-unrelated-archive {:stashed-previous-run
