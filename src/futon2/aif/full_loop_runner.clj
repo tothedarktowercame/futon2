@@ -512,13 +512,20 @@
                             :run4/operator-selection :authority-attestation
                             :effective-environment])
             terminal-context (terminal-record-context raw-opts result)
+            decision (or (get-in result [:checkpoints :selection :judgment :controller-decision])
+                         (get-in result [:checkpoints :selection :judgment :decision]))
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
                     :traceWritten (boolean (:trace-path result))
-                    :g-term-decomposition (decomposition/from-result result)
+                    ;; Only this run's retained selection supplies validity
+                    ;; quantities. No historical checkpoints or trace lookup.
+                    :decision (assoc (select-keys decision
+                                                  [:selection-law :selection-certificate
+                                                   :enumeration-completeness])
+                                     :g-term-decomposition (decomposition/from-result result))
                     :route route}
                      (:execution-cohort raw-opts)
                      (assoc :execution-cohort

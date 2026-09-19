@@ -191,6 +191,14 @@
   [beta candidates ranked]
   {:beta {:value beta :status :declared}
    :g-term-decomposition (decomposition/census ranked candidates)
+   ;; Retain every candidate's own scorer provenance. Indexing by position
+   ;; preserves the exact candidate association even when action names tie.
+   :scoring (into (sorted-map)
+                  (map-indexed
+                   (fn [i entry]
+                     [i (assoc (select-keys (:certificate entry) [:c :rates-provenance])
+                               :id (:action entry))])
+                   ranked))
    :candidates candidates
    :policies (mapv (fn [c]
                      {:id (:id c)

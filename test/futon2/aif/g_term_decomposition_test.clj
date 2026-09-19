@@ -131,7 +131,7 @@
       (let [written (#'runner/persist-run-record! {:run-record-dir (.getPath dir)}
                                                  "offline-tick-001" "2026-09-19T00:00:00Z" result)
             record (edn/read-string (slurp (:run-record written)))
-            census (:g-term-decomposition record)
+            census (get-in record [:decision :g-term-decomposition])
             ;; Independent probe: use the replay's actual rate input and
             ;; enumerate token observations through A, not the certificate.
             observation (m/token-likelihood rates (ffirst q0) (ffirst q0))
