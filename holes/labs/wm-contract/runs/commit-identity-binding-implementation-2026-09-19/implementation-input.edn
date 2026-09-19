@@ -1,0 +1,33 @@
+{:attempt-id "commit-identity-binding-2026-09-19"
+ :commit "190568dd4296f56189a7e61b1e427eaab381d7af"
+ :reviewer "codex-15"
+ :review-job "invoke-1789846701387-22497-88aa2425"
+ :review-evidence
+ {:job-id "invoke-1789846701387-22497-88aa2425"
+  :reviewer "codex-15"
+  :state "done"
+  :execution {:executed true :tool-events 10 :command-events 10}
+  :valid? true
+  :verdict :approve
+  :review-note "holes/labs/wm-contract/REVIEW-commit-identity-binding-rereview-2026-09-19.md"
+  :review-commit "9a28ad58e29b2e88fd3d6d8f852e7695614fdcb4"}
+ :artifact-binding
+ {:fresh-author? true
+  :disagreement? false
+  :commit-time "2026-09-19T19:10:56+00:00"
+  :author-job "invoke-1789844673816-22476-1d0e441c"
+  :author-window-start "2026-09-19T19:04:34.818670318Z"
+  :author-window-end "2026-09-19T19:18:48.225457238Z"
+  :parent "dfa3f3c5e03991e58c8105c3dae1df9984d0ca39"
+  :descendant? true
+  :commit "190568dd4296f56189a7e61b1e427eaab381d7af"
+  :in-author-window? true
+  :repo "/home/joe/code/futon2"
+  :observed-head "9a28ad58e29b2e88fd3d6d8f852e7695614fdcb4"
+  :corroborates? true}
+ :witness
+ {:resolved? true
+  :dial-moved? true
+  :scope :warranted-artifact-binding-regression
+  :attestation "holes/labs/wm-contract/REVIEW-commit-identity-binding-rereview-2026-09-19.md#bounded-witness-and-schema-3-handoff"
+  :warrant-id "test-registry-6f5b5b769fffd359564648029ad56ea0a69c5f82dd7b2e3e1b23f2f76876bb0e"}}

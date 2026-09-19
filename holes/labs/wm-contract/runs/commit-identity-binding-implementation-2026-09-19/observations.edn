@@ -1,0 +1,23 @@
+{:author-job
+ {:job-id "invoke-1789844673816-22476-1d0e441c"
+  :agent-id "codex-24"
+  :caller "claude-12"
+  :state "done"
+  :started-at "2026-09-19T19:04:34.818670318Z"
+  :finished-at "2026-09-19T19:18:48.225457238Z"
+  :execution {:executed true :tool-events 46 :command-events 46}
+  :artifact-ref "190568dd4296f56189a7e61b1e427eaab381d7af"}
+ :review-job
+ {:job-id "invoke-1789846701387-22497-88aa2425"
+  :agent-id "codex-15"
+  :caller "codex-24"
+  :state "done"
+  :execution {:executed true :tool-events 10 :command-events 10}
+  :artifact-ref "holes/labs/wm-contract/REVIEW-commit-identity-binding-rereview-2026-09-19.md"}
+ :git
+ {:commit "190568dd4296f56189a7e61b1e427eaab381d7af"
+  :parent "dfa3f3c5e03991e58c8105c3dae1df9984d0ca39"
+  :commit-time "2026-09-19T19:10:56+00:00"
+  :observed-head "9a28ad58e29b2e88fd3d6d8f852e7695614fdcb4"
+  :parent-is-ancestor true
+  :commit-is-ancestor-of-head true}}
