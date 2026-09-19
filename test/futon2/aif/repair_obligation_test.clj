@@ -1,5 +1,6 @@
 (ns futon2.aif.repair-obligation-test
   (:require [clojure.edn :as edn]
+            [clojure.pprint :as pp]
             [clojure.java.shell :as shell]
             [clojure.java.io :as io]
             [clojure.string :as str]
@@ -554,3 +555,42 @@
                (edn/read-string
                 (slurp (io/file root "implementations"
                                 "repair-grounded-review.edn")))))))))
+
+(deftest system-finding-replay-accepts-a-finding-written-before-the-pr-str-switch
+  ;; These files were pprinted until 2026-09-19. Measured on a real 19.4 MB
+  ;; finding: pprint 47,306 ms, pr-str 212 ms — and those 47 seconds were spent
+  ;; holding the contended store lock. Replay here is decided by exact bytes,
+  ;; deliberately, so the format change would have turned every replay of an
+  ;; already-stored finding into a :repair-finding-conflict. This pins that it
+  ;; does not.
+  (let [root (temp-root)
+        finding {:attempt-id "cohort--ea1-legacy-bytes--attempt-001"
+                 :repair-class :environmental-hold
+                 :failure-stage :agent-readiness
+                 :outcome :agent-unavailable
+                 :failure-kind :agent-readiness-failed
+                 :error "Agency unavailable"
+                 :opened-at "2026-09-11T14:45:12Z"
+                 :backtrace {:source :disposable}}
+        ;; Publish once, then rewrite the file in the OLD pprint form to stand
+        ;; in for everything already on disk.
+        record (repair/record-system-failure! root finding)
+        path (str root "/findings/" (:repair/id record) ".edn")
+        stored (edn/read-string (slurp path))
+        _ (spit path (with-out-str (pp/pprint stored)))
+        legacy-bytes (count (slurp path))
+        replay (repair/record-system-failure! root finding)]
+
+    (testing "the file on disk really is in the legacy pretty-printed form"
+      (is (re-find #"\n " (slurp path)))
+      (is (> legacy-bytes (count (pr-str stored)))))
+
+    (testing "replaying it is acknowledged, not raised as a byte conflict"
+      (is (= record replay)))
+
+    (testing "a genuinely different finding is still a typed conflict"
+      (is (= :repair-finding-conflict
+             (:reason (ex-data (try (repair/record-system-failure!
+                                     root (assoc finding :error "different evidence"))
+                                    nil
+                                    (catch clojure.lang.ExceptionInfo e e)))))))))

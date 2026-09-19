@@ -162,7 +162,8 @@
     (let [file (io/file path)]
     (io/make-parents file)
     (Files/write (.toPath file)
-                 (.getBytes (with-out-str (pp/pprint value)) "UTF-8")
+                 ;; pr-str, not pprint: see write-new-or-identical! below.
+                 (.getBytes (pr-str value) "UTF-8")
                  (into-array StandardOpenOption
                              [StandardOpenOption/CREATE_NEW
                               StandardOpenOption/WRITE]))
@@ -211,7 +212,19 @@
         file (io/file directory (str record-id ".edn"))
         file-path (.toPath file)
         lock-path (.toPath (io/file directory ".publication.lock"))
-        bytes (.getBytes (with-out-str (pp/pprint value)) "UTF-8")
+        ;; pr-str, not pprint. Measured on a real 19.4 MB finding
+        ;; (repair-ea1-dd81768f...--attempt-001-build-failed) on 2026-09-19:
+        ;; pprint 47,306 ms / 19,412,725 bytes; pr-str 212 ms / 11,988,996
+        ;; bytes. 223x faster and 38% smaller, and those 47 seconds were spent
+        ;; holding with-contended-store-lock, so every other store user waited
+        ;; them out. Nothing reads these files for their layout.
+        bytes (.getBytes (pr-str value) "UTF-8")
+        ;; Replay below is decided by exact bytes, deliberately. Findings
+        ;; written before this change are on disk in pprint form, so a genuine
+        ;; replay of one of them must still be acknowledged rather than raised
+        ;; as a conflict. Computed only on the already-exists path, so the slow
+        ;; serialisation is never on the ordinary write.
+        legacy-bytes (delay (.getBytes (with-out-str (pp/pprint value)) "UTF-8"))
         monitor-key (.getPath directory)
         monitor (get (swap! finding-publication-monitors
                             #(if (contains? % monitor-key)
@@ -252,7 +265,9 @@
                                                     [LinkOption/NOFOLLOW_LINKS]))
                    (not (Files/isSymbolicLink file-path))
                    (= directory (.getCanonicalFile (.getParentFile file)))
-                   (java.util.Arrays/equals bytes (Files/readAllBytes file-path)))
+                   (let [existing (Files/readAllBytes file-path)]
+                     (or (java.util.Arrays/equals bytes existing)
+                         (java.util.Arrays/equals ^bytes @legacy-bytes existing))))
             (.getPath file)
               (throw (ex-info "Immutable repair finding conflicts with existing bytes"
                               {:reason :repair-finding-conflict
@@ -392,7 +407,8 @@
     (when-not (safe-id? record-id) (throw (ex-info "Unsafe repair identity" {})))
     (let [base (historical-directory! root child true)
         target (io/file base (str record-id ".edn"))
-        bytes (.getBytes (with-out-str (pp/pprint value)) "UTF-8")]
+        ;; pr-str, not pprint: see write-new-or-identical! above.
+        bytes (.getBytes (pr-str value) "UTF-8")]
     (when-not (and (= base (.getCanonicalFile (.getParentFile target)))
                    (not (Files/isSymbolicLink (.toPath target))))
       (throw (ex-info "Historical admission output outside authority" {})))
