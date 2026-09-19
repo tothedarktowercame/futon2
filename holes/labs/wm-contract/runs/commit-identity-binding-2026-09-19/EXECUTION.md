@@ -77,3 +77,41 @@ Registry artifacts under
 - passing closure `a471eed0-017d-4714-9dc1-1c55f1510152.closure.edn` — SHA-256 `734a04659409e808dbc9861e95580f2fd81a01d7d57dfd5a08309f79e035d290`
 - passing log `a471eed0-017d-4714-9dc1-1c55f1510152.log` — SHA-256 `5e28a045afbc35a542aaae6684137f0096c6b3d66b88f641621822e215d6c38a`
 
+## Independent-review reconciliation
+
+Codex-15 requested an explicit ambiguous-abbreviation control and a warrant
+refreshed after parallel changes to `repair_obligation.clj`.  Commit
+`d296ad02` added a fixture repository containing two real commit objects with
+the same seven-hex prefix and exercised the production Git resolver.  The
+first registered attempt retained this honest fixture error:
+
+```text
+evidence-id test-registry-d7104d8184b45c23e038b24fea5077a088659f86df16106a13f999055055fdf1
+warrant? false
+results {:assertions 956, :duration-ms 198309, :errors 0, :exit 1, :failures 3, :tests 178}
+```
+
+The fixture had mistyped Git's empty-tree SHA, so its commit objects were not
+written.  Commit `35f1c4c0` corrected only the fixture constants using the
+actual empty tree and the deterministic colliding commits
+`bd4109eaa62d7222dc82cec5ff425fdf25d4bbbb` and
+`bd4109e0bfc3adec9df7828cef12e2f2febce419`.  The real prefix `bd4109e`
+refuses as `:artifact-ref-unresolved`, retains the reported ref, and records
+`:disagreement? false`.
+
+Static gates after the correction again passed: clj-kondo 0 errors/0
+warnings, check-parens `OK`, and `git diff --check` clean.
+
+The corrective fresh registration passed and rebound the subject:
+
+```text
+evidence-id test-registry-6f5b5b769fffd359564648029ad56ea0a69c5f82dd7b2e3e1b23f2f76876bb0e
+warrant? true
+results {:assertions 956, :duration-ms 184639, :errors 0, :exit 0, :failures 0, :tests 178}
+bound wm-binding/commit-identity -> test-registry-6f5b5b769fffd359564648029ad56ea0a69c5f82dd7b2e3e1b23f2f76876bb0e
+```
+
+Passing registry artifacts:
+
+- `34071459-c83b-4e20-980a-d5ff12168082.closure.edn` — SHA-256 `734a04659409e808dbc9861e95580f2fd81a01d7d57dfd5a08309f79e035d290`
+- `34071459-c83b-4e20-980a-d5ff12168082.log` — SHA-256 `0d146d99c50cb1464c10d881c1ce0a59adaaf6ff0df114b878eb19d0fe1b183a`
