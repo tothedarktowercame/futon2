@@ -47,17 +47,51 @@ echo "wm_click preflight"
 code=$(curl -s -o /dev/null -m 10 -w '%{http_code}' "$BASE/api/alpha/agents")
 [ "$code" = "200" ] && say "agency" "up" || { bad "agency" "HTTP $code -- nothing else can be checked"; echo; exit 1; }
 
-# 2. Casting: three distinct seats, all on the roster.
+# 2. Casting: three distinct seats, all on the roster AND idle.
+# ON THE ROSTER IS NOT ENOUGH. full_loop_runner/available? (:827) requires
+# :invoke-ready? true AND status "idle"; the author is checked at :3786 and
+# throws :agent-unavailable before selection is ever reached. On 2026-09-19
+# grants 2 and 3 of the five-click allocation were both spent this way: the
+# click was issued through codex-23, which made codex-23 status "invoking",
+# while codex-23 was also the configured AUTHOR. :failure-detail :busy, twice,
+# for the same reason, and neither run reached a cascade selection. Checking
+# roster membership alone did not see it. Check the status field.
 if [ "$AUTHOR" = "$REVIEWER" ] || [ "$AUTHOR" = "$REPAIR" ] || [ "$REVIEWER" = "$REPAIR" ]; then
   bad "casting" "author/reviewer/repair-reviewer must be three DISTINCT seats"
 else
-  missing=""
+  roster=$(curl -s -m 10 "$BASE/api/alpha/agents")
+  notready=""
   for a in "$AUTHOR" "$REVIEWER" "$REPAIR"; do
-    curl -s -m 10 "$BASE/api/alpha/agents" | grep -q "\"$a\"" || missing="$missing $a"
+    st=$(printf '%s' "$roster" | AGENT="$a" python3 -c '
+import sys, json, os
+a = os.environ["AGENT"]
+d = json.load(sys.stdin)
+ag = d.get("agents", d)
+r = ag.get(a)
+if not isinstance(r, dict):
+    print("absent")
+elif r.get("status") == "idle" and r.get("invoke-ready?") is True:
+    print("idle")
+else:
+    print(str(r.get("status")) + ("" if r.get("invoke-ready?") else "/not-invoke-ready"))
+' 2>/dev/null)
+    [ "$st" = "idle" ] || notready="$notready $a($st)"
   done
-  [ -z "$missing" ] && say "casting" "$AUTHOR / $REVIEWER / $REPAIR on roster" \
-                    || bad "casting" "not on roster:$missing"
+  if [ -z "$notready" ]; then
+    say "casting" "$AUTHOR / $REVIEWER / $REPAIR idle and invoke-ready"
+  else
+    bad "casting" "not idle+invoke-ready:$notready -- the AUTHOR being busy spends the click without selecting"
+  fi
 fi
+
+# 2b. The issuing caller must not be one of the three cast seats.
+# Issuing through a seat marks it "invoking"; if that seat is also the author,
+# the runner's own readiness check fails it. This is how two clicks were lost.
+case "$ISSUING_CALLER" in
+  "$AUTHOR"|"$REVIEWER"|"$REPAIR")
+    bad "issuing caller" "$ISSUING_CALLER is also a cast seat -- issuing marks it busy and the author check will fail";;
+  *) say "issuing caller" "$ISSUING_CALLER (not a cast seat)";;
+esac
 
 # 3. No click already in flight (the boundary is single-flight).
 inflight=$(curl -s -m 15 "$BASE/api/alpha/wm/click" | python3 -c 'import sys,json;d=json.load(sys.stdin);print(d.get("running?"))' 2>/dev/null)
