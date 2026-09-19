@@ -89,6 +89,18 @@
                  (get-in (c/construct-machine-preference
                           context (update loader-input :layers assoc-in [0 :layer/id] :changed))
                          [:refusal :kind]))))
+        (testing "the superseded undeclared c-mis revision refuses"
+          (let [old-layers (mapv #(if (= :c-mis (:layer/id %))
+                                    (-> %
+                                        (assoc :in-ruled-sum :undeclared
+                                               :owed "superseded")
+                                        (dissoc :composition-law :reason))
+                                    %)
+                                 c/fold-declaration)]
+            (is (= :preference-layer-revision-mismatch
+                   (get-in (c/construct-machine-preference
+                            context (assoc loader-input :layers old-layers))
+                           [:refusal :kind])))))
         (testing "unknown outcomes refuse rather than acquire implicit zero mass"
           (is (= :unknown-preference-outcome
                  (get-in (c/preference-mass result [:organization :unknown])

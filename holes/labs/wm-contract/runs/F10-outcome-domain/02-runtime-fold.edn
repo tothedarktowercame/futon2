@@ -1,7 +1,8 @@
 {:check :F10-runtime-fold,
  :facts
  {:authority-keywords
-  #{:grounded-change
+  #{:historical-verification-awaiting-validation
+    :grounded-change
     :artifact-only
     :build-failed
     :grounded-no-change
@@ -12,7 +13,8 @@
     :no-selection
     :agent-unavailable
     :cancelled
-    :substrate-unavailable},
+    :substrate-unavailable
+    :historical-verification-refused},
   :declared-positive-masses
   {:grounded-change 1/2,
    :agent-unavailable 1/8,
@@ -27,6 +29,19 @@
     :dispatch-failed
     :cancelled
     :substrate-unavailable},
+  :disposition-keywords
+  #{:grounded-change
+    :artifact-only
+    :build-failed
+    :grounded-no-change
+    :abstained
+    :incomplete
+    :guardrail-refusal
+    :dispatch-failed
+    :no-selection
+    :agent-unavailable
+    :cancelled
+    :substrate-unavailable},
   :expected-positive-masses
   {:agent-unavailable 1/8,
    :build-failed 1/8,
@@ -36,7 +51,7 @@
   :fold-entries
   [{:layer/id :ruled-outcome-c,
     :in-ruled-sum :yes,
-    :folded? false,
+    :folded? true,
     :basis "futon2:holes/labs/wm-contract/aif-equations.edn:211-214"}
    {:layer/id :c-int,
     :in-ruled-sum :no,
@@ -48,7 +63,7 @@
     :basis
     "futon2:holes/labs/wm-contract/C537-serendipity-shapes-C.md:49-59"}
    {:layer/id :c-mis,
-    :in-ruled-sum :undeclared,
+    :in-ruled-sum :no,
     :folded? false,
     :basis "futon2:src/futon2/aif/mission_c.clj:377,422,500,558"}],
   :lean-correspondence
@@ -79,7 +94,13 @@
      "groundedChange"
      "agentUnavailable"}},
   :mass-sum 1N,
-  :measured-callers [],
+  :measured-callers
+  ["src/futon2/aif/c_fold_config.clj"
+   "src/futon2/aif/efe.clj"
+   "src/futon2/aif/machine_model.clj"],
+  :non-disposition-outcomes
+  #{:historical-verification-awaiting-validation
+    :historical-verification-refused},
   :retyped-named-zeros #{},
   :support
   #{:grounded-change
@@ -97,9 +118,10 @@
   :support-width 12},
  :per-check
  {:c-int-outside true,
-  :c-mis-undeclared true,
+  :c-mis-outside true,
   :c-ser-in-sum true,
   :derived-zeros true,
+  :excluded-close-outcomes true,
   :fold-bases true,
   :fold-entry-ids true,
   :folded-claim-matches-callers true,
@@ -108,13 +130,13 @@
   :no-retyped-zeros true,
   :positive-masses true,
   :ruled-in-sum true,
-  :support-is-authority true,
+  :support-is-disposition-authority true,
   :support-width true},
  :plants
  [{:plant :narrow-support-to-five,
    :landed? true,
    :verdict false,
-   :moved [:support-is-authority :support-width]}
+   :moved [:support-is-disposition-authority :support-width]}
   {:plant :change-mass,
    :landed? true,
    :verdict false,
@@ -123,7 +145,7 @@
    :landed? true,
    :verdict false,
    :moved [:no-retyped-zeros]}
-  {:plant :claim-folded-without-callers,
+  {:plant :claim-unfolded-with-callers,
    :landed? true,
    :verdict false,
    :moved [:folded-claim-matches-callers]}

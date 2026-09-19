@@ -24,6 +24,11 @@
   (set (keys seeded-positive-masses)))
 
 (def non-disposition-outcomes
+  "Attempt-close outcomes that report the administrative state of historical
+   verification, not a predicted terminal flight disposition. They correctly
+   remain valid close outcomes while staying outside machine C's organization
+   support; neither has a disposition preference mass or a row in the fitted
+   disposition kernel."
   #{:historical-verification-awaiting-validation
     :historical-verification-refused})
 
@@ -94,9 +99,10 @@
     :author "futon2.aif.mission-c"
     :basis "futon2:src/futon2/aif/mission_c.clj:377,422,500,558"
     :folded? false
-    :in-ruled-sum :undeclared
+    :in-ruled-sum :no
     :site "futon2:src/futon2/aif/mission_c.clj"
-    :owed "A ruling must decide whether mission-grain C is a region of the tagged sum or a second C outside it."}])
+    :composition-law "Outside the tagged sum: scripts/futon2/report/war_machine.clj:6220-6226 unions mission-projected wants with joint wants, applies live C weights where supplied, and leaves log-preference-fn's uniform lam/|want| share for unnamed wants."
+    :reason "AUTH-C-bridge keeps the ruled-outcome compute-efe fold off the live cascade decision; mission C reaches horizon-g-sparse by its separate live-c/cascade-spec route."}])
 
 (def machine-preference-schema :wm/machine-preference-v1)
 

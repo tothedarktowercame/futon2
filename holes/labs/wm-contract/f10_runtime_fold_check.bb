@@ -63,11 +63,14 @@
         _ (load-file ns-path)
         positive @(resolve 'futon2.aif.ruled-outcome-c/seeded-positive-masses)
         seeded @(resolve 'futon2.aif.ruled-outcome-c/seeded-c)
+        excluded @(resolve 'futon2.aif.ruled-outcome-c/non-disposition-outcomes)
         zeros @(resolve 'futon2.aif.ruled-outcome-c/named-zero-dispositions)
         entries @(resolve 'futon2.aif.ruled-outcome-c/fold-declaration)
         cs (callers)]
     (sorted-map
      :authority-keywords authority
+     :non-disposition-outcomes excluded
+     :disposition-keywords (set/difference authority excluded)
      :declared-positive-masses positive
      :expected-positive-masses expected
      :mass-sum (reduce + (vals (:mass seeded)))
@@ -75,7 +78,7 @@
      :support-width (count (:support seeded))
      :derived-named-zeros zeros
      :retyped-named-zeros (source-retyped-zeros ns-source zeros)
-     :lean-correspondence {:runtime (set (map kebab->camel authority))
+     :lean-correspondence {:runtime (set (map kebab->camel (set/difference authority excluded)))
                            :lean (lean-all (slurp lean-path))}
      :measured-callers cs
      :fold-entries (mapv #(fold-entry entries %)
@@ -90,9 +93,12 @@
     (sorted-map
      :positive-masses (= (:declared-positive-masses f) (:expected-positive-masses f))
      :mass-sum (= 1 (:mass-sum f))
-     :support-is-authority (= (:authority-keywords f) (:support f))
-     :support-width (= (count (:authority-keywords f)) (:support-width f))
-     :derived-zeros (= (set/difference (:authority-keywords f)
+     :excluded-close-outcomes (= #{:historical-verification-awaiting-validation
+                                   :historical-verification-refused}
+                                 (:non-disposition-outcomes f))
+     :support-is-disposition-authority (= (:disposition-keywords f) (:support f))
+     :support-width (= (count (:disposition-keywords f)) (:support-width f))
+     :derived-zeros (= (set/difference (:disposition-keywords f)
                                        (set (keys (:declared-positive-masses f))))
                        (:derived-named-zeros f))
      :no-retyped-zeros (empty? (:retyped-named-zeros f))
@@ -107,7 +113,7 @@
      :ruled-in-sum (= :yes (:in-ruled-sum ruled))
      :c-int-outside (= :no (get-in folds [:c-int :in-ruled-sum]))
      :c-ser-in-sum (= :yes (get-in folds [:c-ser :in-ruled-sum]))
-     :c-mis-undeclared (= :undeclared (get-in folds [:c-mis :in-ruled-sum])))))
+     :c-mis-outside (= :no (get-in folds [:c-mis :in-ruled-sum])))))
 
 (defn failing [f] (vec (sort (keys (remove val (checks f))))))
 
@@ -130,8 +136,8 @@
                      (-> f (assoc-in [:declared-positive-masses :grounded-change] 1/3)
                          (assoc :mass-sum 5/6)))
               (plant :retype-one-named-zero f (assoc f :retyped-named-zeros #{one-zero}))
-              (plant :claim-folded-without-callers f
-                     (update-fold f :ruled-outcome-c :folded? true))
+              (plant :claim-unfolded-with-callers f
+                     (update-fold f :ruled-outcome-c :folded? false))
               (plant :move-c-int-into-sum f
                      (update-fold f :c-int :in-ruled-sum :yes))]
       report (sorted-map :check :F10-runtime-fold

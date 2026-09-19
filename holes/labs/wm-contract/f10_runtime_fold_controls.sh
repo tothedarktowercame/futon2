@@ -59,12 +59,17 @@ PY
 }
 
 run_control support-symbol-drift \
-  ":support cohort/outcome-kinds" ":support observed-dispositions" \
-  ":support-is-authority :support-width"
+  ":support disposition-outcomes" ":support observed-dispositions" \
+  ":support-is-disposition-authority :support-width"
 
 run_control c-mis-placement-drift \
-  ":in-ruled-sum :undeclared" ":in-ruled-sum :no" \
-  ":c-mis-undeclared"
+  ":folded? false
+    :in-ruled-sum :no
+    :site \"futon2:src/futon2/aif/mission_c.clj\"" \
+  ":folded? false
+    :in-ruled-sum :yes
+    :site \"futon2:src/futon2/aif/mission_c.clj\"" \
+  ":c-mis-outside"
 
 run_control missing-basis \
   ":basis \"futon2:src/futon2/aif/preferences.clj:9-24\"" ":basis \"\"" \
@@ -79,13 +84,13 @@ run_control retype-the-named-zeros \
 (def ruled-vertices" \
   ":no-retyped-zeros"
 
-run_control declare-it-folded \
-  ":folded? false
-    :in-ruled-sum :yes
-    :site \"futon2:src/futon2/aif/ruled_outcome_c.clj\"" \
+run_control declare-it-unfolded \
   ":folded? true
     :in-ruled-sum :yes
-    :site \"futon2:src/futon2/aif/ruled_outcome_c.clj\"" \
+    :site \"futon2:src/futon2/aif/efe.clj\"" \
+  ":folded? false
+    :in-ruled-sum :yes
+    :site \"futon2:src/futon2/aif/efe.clj\"" \
   ":folded-claim-matches-callers"
 
 echo "ALL 5 RUNTIME FOLD CONTROLS REJECTED AS REQUIRED, AND THE NULL CONTROL WAS ACCEPTED"
