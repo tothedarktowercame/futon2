@@ -1,6 +1,8 @@
 # Independent review: ordinary selection precedence
 
-Verdict: **CHANGES-REQUESTED**
+Final verdict: **APPROVED** — see the final re-review below.
+
+Initial verdict: **CHANGES-REQUESTED** (retained historical review).
 
 Reviewer: `codex-15`. Author: `codex-2`.
 Review job: `invoke-1789847623191-22503-b9ce22fc`.
@@ -108,3 +110,98 @@ as an approving review in `record-implementation!`.
 
 No code changes, suites, production clicks or repair-store mutations were
 performed. Only this review note was written and committed.
+
+## Final re-review after the authorized reconciliation
+
+Verdict: **APPROVED**.
+
+Reviewer: `codex-15`. Author: `codex-2`.
+THIS approving review job: `invoke-1789847873274-22507-1d2e9d4d`.
+Exact final implementation: `420faeb03f1ec12e7387cd6faf9a482cf2871f02`,
+on prerequisite `8b6827da1fc093b2831d51f348de71a3fec6eccf`.
+The earlier job remains CHANGES-REQUESTED; this new judgment does not
+retroactively turn that job into an approving review.
+
+### Consumed warrant
+
+POST `/api/alpha/test-registry/check` against `/home/joe/code/futon2`
+accepted
+`test-registry-f352e8317f8dd879d2ab5364e09527a3384f344bc2750bcf307c1f12a36f58f7`
+at `2026-09-19T19:58:11.741381977Z` with `:warrant? true`, matched postcheck,
+and run HEAD equal to the exact final implementation above. Submitted review
+paths were `src/futon2/aif/full_loop_runner.clj`,
+`test/futon2/aif/selection_always_test.clj`, and
+`holes/labs/wm-contract/runs/selection-always-2026-09-19/reconciled/register.edn`.
+Only that registration declaration was outside closure.
+
+```text
+run/id: 77ec3714-0e3c-4037-947e-f7d0e1e73cf9
+tests: 4; assertions: 31; failures: 0; errors: 0; exit: 0
+duration-ms: 3875
+```
+
+The updated execution receipt records clean static gates and one corrected
+namespace execution. I inspected the reconciliation diff and consumed its
+warrant; I did not rerun tests.
+
+### Adequacy and closure of the review findings
+
+The reconciliation separates the observed queue from the selected repair
+obligation: singular `stop-line` is now nil unless the selected action is
+explicitly a repair action, and then is matched by selected target. Ordinary
+execution therefore cannot obtain a recovery snapshot from an unrelated
+open obligation. Its recovery reuse/supersession route and the observed
+repair-contract fallback no longer activate from that queue observation.
+The beyond-construction regression supplies an old running author job,
+reaches fresh ordinary dispatch, asserts zero reads of that job, and retains
+its obligation ID/count in the durable record. This directly covers the
+previously untested veto boundary. The measured-acquisition fallback's
+isolation is established by source inspection of its now-nil binding, not
+by a separate measured-acquisition execution.
+
+For explicit historical selection, candidate lookup and execution now use
+the selected obligation. Before execution, the existing
+`historical-revalidation-entry` predicate checks admission identity, open
+machine-failure status and actor agreement/distinctness. Existing transition
+checks remain. The warranted control selects B with A first in memory and
+observes B at both candidate lookup and execution; a wrong-obligation
+admission refuses before the execution port. This closes the second finding
+without deleting historical machinery or relaxing its admission checks.
+
+Against the ruling's three consequences:
+
+1. Ordinary selection retains its transformation, posterior discrimination,
+   controller decision, and observed obligation count/IDs. Repair memory no
+   longer pre-empts the entry or invokes the identified downstream recovery
+   veto/reuse route. Both empty and populated observations remain covered.
+2. External repair/store verbs remain available and unchanged. Explicitly
+   selected repair machinery is scoped to its own obligation. Separately
+   authorized successor validation is preserved; the review does not confuse
+   it with automatic repair-entry diversion.
+3. The two authorized later production clicks and their existing budget are
+   unchanged and unconsumed by this work. The implementation is adequate to
+   proceed to that validation stage; the scoped warrant does not replace it.
+
+### Final bounded witness attestation
+
+`:resolved? true` — bounded to the reviewed precedence defect and the
+currently warranted runner regressions: ordinary selection/execution is
+isolated from unrelated recoverable memory, while explicit historical
+execution binds its selected obligation and refuses mismatched admission.
+
+`:dial-moved? true` — the warranted fixtures now retain ordinary selection
+and its decision/evidence, reach fresh dispatch without reading the old
+recovery job, and execute selected historical B rather than queue-first A.
+These are concrete runner-boundary observations, not a claim of production
+success or durable repair-obligation resolution.
+
+Limits: controlled policy judgment, hermetic stores and execution ports;
+ordinary execution stops at dispatch and historical execution uses a fixture
+port. No live policy-generation, production successor, full legacy runner
+suite, or production click is certified. Obsolete diversion tests have not
+been claimed green. No suite rerun, repair-store mutation, production click,
+code edit or serving-JVM reload was performed by this reviewer. Only this
+review note was amended and committed. If this review is later used for a
+schema-3 implementation record, obtain independently observed evidence for
+THIS completed approving job and the artifact binding; the note alone does
+not substitute for those records.
