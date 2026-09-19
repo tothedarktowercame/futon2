@@ -1,0 +1,4 @@
+evidence-id test-registry-f352e8317f8dd879d2ab5364e09527a3384f344bc2750bcf307c1f12a36f58f7
+warrant? true
+results {:assertions 31, :duration-ms 3875, :errors 0, :exit 0, :failures 0, :tests 4}
+bound wm-runner/selection-always -> test-registry-f352e8317f8dd879d2ab5364e09527a3384f344bc2750bcf307c1f12a36f58f7
