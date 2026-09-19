@@ -5983,6 +5983,25 @@
 ;; result through the E1 decision gate. No flat action ever enters.
 ;; ---------------------------------------------------------------------------
 
+(defn merge-live-cascade-spec
+  "Merge the decision's declared wants with a derived live C spec.
+
+   `:zeroed` is copied unchanged from LIVE-SPEC.  In particular, adding a
+   token to `:want` does not remove an outcome containing that token from
+   `:zeroed`: the preference law applies the exact-zero exclusion after
+   computing utility, so a cross-source want cannot resurrect a zeroed
+   outcome."
+  [joint-want live-spec]
+  {:want (into joint-want (:want live-spec))
+   :weights (:weights live-spec)
+   :lam (:lam live-spec)
+   :mu (:mu live-spec)
+   :evidence (:evidence live-spec)
+   :zeroed (:zeroed live-spec)
+   :c {:status :derived
+       :source :futon2.aif.live-c/cascade-spec
+       :live-c (:live-c live-spec)}})
+
 (defn cascade-decision
   "Joint cascade decision over ASSEMBLED, the output of
   futon2.aif.cascade-problems/assemble. OPTS is reserved (ignored today).
@@ -6217,15 +6236,8 @@
                                                :live-want (:live-want live-refusal)
                                                :reachable (:reachable live-refusal)
                                                :unreached-in-domain (:unreached-in-domain live-refusal)}}
-                                          {:want (into joint-want (:want live-spec))
-                                           :weights (:weights live-spec)
-                                           :lam (:lam live-spec)
-                                           :mu (:mu live-spec)
-                                           :evidence (:evidence live-spec)
-                                           :zeroed (:zeroed live-spec)
-                                           :c {:status :derived
-                                               :source :futon2.aif.live-c/cascade-spec
-                                               :live-c (:live-c live-spec)}})})]
+                                          (merge-live-cascade-spec
+                                           joint-want live-spec))})]
           (when (and (map? ranked) (contains? ranked :status))
             (throw (ex-info "cascade decision refused"
                             (merge {:kind (or (:kind ranked) :rank-refused)}

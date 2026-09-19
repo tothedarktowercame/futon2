@@ -9,7 +9,9 @@
   problems it is the gated abstention. Different T or β across problems
   refuses :incommensurable-family."
   (:require [clojure.test :refer [deftest is]]
+            [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.cascade-problems :as cp]
+            [futon2.aif.cascade-selection :as selection]
             [futon2.aif.live-c :as lc]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.report.war-machine :as wm]))
@@ -65,6 +67,39 @@
    :signature "cascade-decision-test-live-c"})
 
 (def live-c-opts {:live-c {:derived live-c-fixture}})
+
+(deftest cross-source-want-cannot-resurrect-zeroed-outcome
+  ;; Exercise the production merge used by cascade-decision.  The same token
+  ;; is wanted by the decision and excluded as the singleton outcome by live
+  ;; C.  Utility still sees the want, but C's exact-zero override must win all
+  ;; the way through selection at every temperature.
+  (let [token [:M-a :closed]
+        outcome #{token}
+        merged (wm/merge-live-cascade-spec
+                #{token}
+                {:want #{}
+                 :weights {}
+                 :lam 1 :mu 0 :evidence #{}
+                 :zeroed #{outcome}
+                 :live-c {:signature "zero-over-want"}})
+        spec (manifest/preference-spec merged)
+        c (manifest/preference-distribution spec #{token})
+        g (manifest/outcome-risk {outcome 1} c)]
+    (is (contains? (:want merged) token)
+        "the other source's want reached the real merged spec")
+    (is (contains? (:zeroed merged) outcome)
+        "the production merge retained the conflicting exact exclusion")
+    (is (zero? (get c outcome))
+        "zeroed overrides the wanted token's positive utility")
+    (is (= :infinite g))
+    (doseq [temperature [1/10 10]]
+      (is (= 0.0
+             (get (selection/selection-posterior
+                   {:beta temperature
+                    :candidates [{:id :zeroed :habit 1 :f 0 :g g}
+                                 {:id :admissible :habit 1 :f 0 :g 0}]})
+                  :zeroed))
+          (str "zeroed posterior stays 0 at temperature " temperature)))))
 
 (deftest wire-live-c-projection-laws
   (let [joint-want #{[:M-a :x] [:M-a :y] [:M-b :z]}
