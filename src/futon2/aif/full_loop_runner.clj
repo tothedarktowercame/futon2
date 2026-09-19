@@ -15,6 +15,7 @@
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.cascade-sources :as cascade-sources]
+            [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.evidence-manifest :as evidence-manifest]
@@ -519,6 +520,8 @@
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
                     :participants (participants/record-value raw-opts)
+                    :habit-reads (input-receipts/habit-log
+                                  (some-> (:habit-reads/state raw-opts) deref))
                     :declaration-reads (cascade-sources/provenance
                                         (some-> (:declaration-reads/state raw-opts) deref))
                     :click/id (:click-id raw-opts)
@@ -529,7 +532,7 @@
                     ;; quantities. No historical checkpoints or trace lookup.
                     :decision (assoc (select-keys decision
                                                   [:selection-law :selection-certificate
-                                                   :enumeration-completeness])
+                                                   :initial-belief-receipt :enumeration-completeness])
                                      :g-term-decomposition (decomposition/from-result result))
                     :route route}
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
@@ -4835,14 +4838,16 @@
                    (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
         started-at (str (Instant/now))
         raw-opts (assoc raw-opts :participants/state (atom nil)
-                                :declaration-reads/state (atom nil))
+                                :declaration-reads/state (atom nil)
+                                :habit-reads/state (atom []))
         _ (ensure-dispatch-seat! (config raw-opts))
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.
         source-check (refuse-on-runner-source-drift!)
         result
         (try
-      (binding [cascade-sources/*read-occurrences* (:declaration-reads/state raw-opts)]
+      (binding [cascade-sources/*read-occurrences* (:declaration-reads/state raw-opts)
+                input-receipts/*habit-reads* (:habit-reads/state raw-opts)]
         (run-opportunity-core! (assoc raw-opts :run-id run-id
                                      :loaded-code-identity source-check)))
     (catch Throwable e
