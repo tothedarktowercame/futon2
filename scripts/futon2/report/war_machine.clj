@@ -43,6 +43,7 @@
             [futon2.aif.anticipation :as anticipation]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.beta-habit :as beta-habit]
+            [futon2.aif.cascade-habit-store :as cascade-habit]
             [futon2.aif.cascade-model-manifest :as cascade-manifest]
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.cascade-problems :as cascade-problems]
@@ -6250,6 +6251,16 @@
              :cascade-problems assembled}))))))
 
 
+(defn select-and-record-cascade!
+  "Run the existing cascade decision, then durably count its representative.
+   The result is returned unchanged; no learned habit enters the selector."
+  [assembled opts]
+  (let [result (cascade-decision assembled opts)]
+    (cascade-habit/record-selection!
+     (or (:cascade-habit-path opts) cascade-habit/default-path)
+     (:decision result))
+    result))
+
 (defn judge
   "The war machine's inference step.
 
@@ -6617,7 +6628,7 @@
          {:targets (vec (distinct (concat (cascade-problems/substrate-targets)
                                           (keys (:universes cascade-sources)))))
           :sources (assoc cascade-sources :horizon-steps (:value cascade-horizon))})
-        cascade-result (cascade-decision cascade-assembled judge-opts)
+        cascade-result (select-and-record-cascade! cascade-assembled judge-opts)
         wm-decision (:decision cascade-result)
         ;; Strategic habit observes the CASCADE decision's first acting
         ;; pattern (strategic_habit/carry, H4/dd4a3bbe); an abstention

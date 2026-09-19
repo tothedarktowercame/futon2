@@ -6,10 +6,8 @@
    and the semilattice wiring.  Consequently two cascades containing the same
    patterns but connecting them differently are different policies.
 
-   The namespace is deliberately pure and DARK: it does not construct,
-   select, persist, or enact a cascade.  Live use is valid only after the War
-   Machine exposes two or more admissible cascades for the same selected
-   mission and supplies an honest cascade-level score."
+   The namespace is pure: accumulation is persisted by cascade-habit-store.
+   Reading the learned prior into live selection remains a separate wire."
   (:require [clojure.walk :as walk]
             [futon2.aif.policy :as policy]))
 
@@ -49,16 +47,22 @@
   "Stable identity for a complete cascade policy, or nil when it is malformed.
 
    Volatile scores, prose, ranks, and construction telemetry are excluded.
-   Semilattice edge order is ignored, but pattern order in `:shown` is kept."
+   Semilattice edge order is ignored, but pattern order in `:shown` is kept.
+   Empty vectors are valid; IDs are homogeneous strings or keywords, with
+   types and namespaces preserved. Mixed conventions refuse typed."
   [cascade]
   (let [mission (:mission cascade)
         shown (:shown cascade)
-        semilattice (:semilattice cascade)]
+        semilattice (:semilattice cascade)
+        _ (when (and (vector? shown)
+                     (some string? shown) (some keyword? shown))
+            (throw (ex-info "mixed cascade pattern ID conventions"
+                            {:refusal {:kind :mixed-pattern-id-types
+                                       :shown shown}})))]
     (when (and (map? cascade)
                (some? mission)
                (vector? shown)
-               (seq shown)
-               (every? string? shown)
+               (every? #(or (string? %) (keyword? %)) shown)
                (or (map? semilattice) (sequential? semilattice)))
       [:pattern-cascade
        (str mission)
