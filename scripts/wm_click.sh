@@ -159,9 +159,9 @@ esac
 # are downstream of the queue. Count the queue.
 queued=$(echo "$wires" | sed -n 's/.*:stop-lines-queued \([0-9]*\).*/\1/p')
 case "$queued" in
-  0) say "stop-line queue" "empty -- this click can reach ordinary selection";;
+  0) say "stop-line queue" "empty";;
   "") bad "stop-line queue" "COULD NOT BE READ -- do not assume it is empty";;
-  *)  bad "stop-line queue" "$queued open obligation(s) ahead of ordinary selection; this click will enact a REPAIR and its record cannot score above 1/5. --force if the repair IS the work.";;
+  *)  say "stop-line queue" "$queued open obligation(s) -- recorded as evidence in the run record; selection proceeds regardless (RULING-selection-precedence-2026-09-19, futon2 8b6827da)";;
 esac
 
 # 5. Seat quota (opt-in: costs one agent turn each).
