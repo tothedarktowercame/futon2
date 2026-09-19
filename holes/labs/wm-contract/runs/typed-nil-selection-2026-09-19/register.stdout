@@ -1,0 +1,4 @@
+evidence-id test-registry-1aee489d4d02247ab846f8c62a070eb655ddcb914765609bf72b829b307637a7
+warrant? true
+results {:assertions 11, :duration-ms 3270, :errors 0, :exit 0, :failures 0, :tests 2}
+bound wm-selection/typed-nil-refusal -> test-registry-1aee489d4d02247ab846f8c62a070eb655ddcb914765609bf72b829b307637a7

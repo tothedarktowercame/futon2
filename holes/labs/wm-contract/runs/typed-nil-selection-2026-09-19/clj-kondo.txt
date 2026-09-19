@@ -1,0 +1,2 @@
+scripts/futon2/report/war_machine.clj:4586:29: info: Single argument to str already is a string
+linting took 231ms, errors: 0, warnings: 0
