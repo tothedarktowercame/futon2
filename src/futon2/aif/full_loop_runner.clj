@@ -527,6 +527,9 @@
                                                    :enumeration-completeness])
                                      :g-term-decomposition (decomposition/from-result result))
                     :route route}
+                     (get-in result [:checkpoints :selection :judgment :open-stop-lines])
+                     (assoc :open-stop-lines
+                            (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
                      (:execution-cohort raw-opts)
                      (assoc :execution-cohort
                             (select-keys (:execution-cohort raw-opts)
@@ -1404,6 +1407,8 @@
                     (or (< (count leading) 2)
                         (>= distinct-scores 2)))})))
 
+;; Retained for explicit repair callers; ordinary clicks no longer divert here.
+#_{:clj-kondo/ignore [:unused-private-var]}
 (defn- repair-entry [obligation]
   {:action {:type :repair-machine-failure
             :target (:repair/id obligation)
@@ -3781,9 +3786,6 @@
                                    (= (:repair/id historical) (:repair/id %)))
                                  historical-validation-lines))
                      validation-lines)
-            stop-lines (if stop-line
-                         [stop-line]
-                         [])
             supersede-recovery!
             (fn [repair-class failure-kind failure-stage error failure-data]
               (let [successor
@@ -3818,31 +3820,23 @@
                     _ (reset! effective-configuration
                               (or (:effective-run-configuration judgement)
                                   (assoc @effective-configuration :evaluation :not-retained)))]
-                ;; An open machine stop-line has precedence over ordinary
-                ;; selection.  Do not invite an opt-in campaign to claim it
-                ;; selected an action that the runner is forbidden to enact.
-                (if stop-line
-                  judgement
-                  ((or (:judgement-transform-fn opts) identity) judgement))))
+                ;; RULING-selection-precedence-2026-09-19.md: ordinary clicks
+                ;; always select; repair memory is evidence, never a divert.
+                ((or (:judgement-transform-fn opts) identity) judgement)))
             judgement0 judgement0-base
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             ordinary-entry (selected-entry judgement0)
-            historical-admission
-            (when (and stop-line (:historical-verification-candidate-fn opts))
-              ((:historical-verification-candidate-fn opts) stop-line))
-            historical-entry
-            (when historical-admission
-              (historical-revalidation-entry
-               stop-line historical-admission
-               {:author author :repair-reviewer repair-reviewer}))
-            entry (if stop-line
-                    (or historical-entry (repair-entry stop-line))
-                    ordinary-entry)
+            entry ordinary-entry
             historical-action? (= :revalidate-historical-repair
                                   (get-in entry [:action :type]))
             repair-action? (contains? #{:repair-machine-failure
                                         :revalidate-historical-repair}
                                       (get-in entry [:action :type]))
+            historical-admission
+            (when (and historical-action? stop-line
+                       (:historical-verification-candidate-fn opts))
+              ((:historical-verification-candidate-fn opts) stop-line))
+            stop-lines (if (and repair-action? stop-line) [stop-line] [])
             reviewer (if repair-action? repair-reviewer reviewer)
             _ (reset! reviewer-of-record reviewer)
             ;; :operator-actions RETIRED with the flat decision (SPEC
@@ -3875,9 +3869,7 @@
                        :entity-id target
                        :belief (:belief judgement)
                        :run-id (:run/id judgement)})
-            ranked-for-review (if stop-line
-                                [entry]
-                                ;; the candidate population is the cascade
+            ranked-for-review ;; the candidate population is the cascade
                                 ;; decision's own recorded posterior
                                 (vec (map-indexed
                                       (fn [i [candidate p]]
@@ -3888,35 +3880,24 @@
                                         {:rank (inc i) :action candidate
                                          :controller-score p :G-efe p})
                                       (get-in judgement
-                                              [:decision :selection-law :posterior]))))
-            discrimination (when-not stop-line
-                             (selection-discrimination ranked-for-review))
+                                              [:decision :selection-law :posterior])))
+            discrimination (selection-discrimination ranked-for-review)
             selection-cell (if entry
                              (cond->
                               (term {:selected-mission (str target)
                                      :selected-action (:action entry)
-                                     :controller-decision (when-not stop-line
-                                                            (:decision judgement))
-                                     :stop-the-line-obligations
-                                     (mapv #(select-keys % [:repair/id :attempt-id
-                                                            :failed-commit
-                                                            :review-verdict])
-                                           stop-lines)
+                                     :controller-decision (:decision judgement)
                                      :ranked-candidates (mapv #(select-keys % [:rank :action
                                                                                :G-efe
                                                                                :controller-score
                                                                                :habit-prior-bias])
                                                               (take 10 ranked-for-review))
                                      :selection-reasons
-                                     (if stop-line
-                                       {:source :stop-the-line
-                                        :repair-id (:repair/id stop-line)
-                                        :repair-class (:repair/class stop-line)}
-                                       (assoc
-                                        (select-keys (:decision judgement)
-                                                     [:rank :controller-score
-                                                      :selection-boundary :beta])
-                                        :discrimination discrimination))
+                                     (assoc
+                                      (select-keys (:decision judgement)
+                                                   [:rank :controller-score
+                                                    :selection-boundary :beta])
+                                      :discrimination discrimination)
                                      :trace-persistence (if repair-action?
                                                           :repair-action-not-traced
                                                           :after-construction)}
@@ -3930,8 +3911,12 @@
                                           :readiness/selection-transient]
                                          true))
                              (sorry :no-selection {:decision (:decision judgement)}))]
-        (let [selection-cell (assoc-in selection-cell [:judgment :effective-run-configuration]
-                                      @effective-configuration)]
+        (let [selection-cell (-> selection-cell
+                                 (assoc-in [:judgment :effective-run-configuration]
+                                           @effective-configuration)
+                                 (assoc-in [:judgment :open-stop-lines]
+                                           {:count (count open-stop-lines)
+                                            :ids (mapv :repair/id open-stop-lines)}))]
           (reset! pending-selection selection-cell)
           (swap! checkpoints assoc :selection selection-cell))
         (when-not entry
