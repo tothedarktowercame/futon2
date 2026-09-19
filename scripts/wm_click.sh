@@ -79,17 +79,29 @@ cat > /tmp/wm_click_wires.clj <<'CLJ'
 (do (require 'futon2.aif.tripwire 'futon2.aif.repair-obligation)
     (let [cro (resolve 'futon2.aif.tripwire/cross-run-observation)
           evals @(resolve 'futon2.aif.tripwire/wire-evaluators)
+          rcw (resolve 'futon2.aif.tripwire/repair-covered-witness?)
           root @(resolve 'futon2.aif.repair-obligation/default-root)
           obs (cro {:cohort? true}
                    {:phase :opportunity :transition :start
                     :opportunity-id "wm_click-preflight"
                     :trigger :duree-click-on-demand
-                    :cohort? true :repair-root root})]
-      {:tripping (vec (for [[k f] evals
-                            :let [w (try (f (assoc obs :tripwire/force? true))
-                                         (catch Throwable e [{:kind :wire-threw}]))]
-                            :when (seq w)]
-                        [k (mapv :kind w)]))}))
+                    :cohort? true :repair-root root})
+          ;; A repair-covered witness at a pre-selection start does NOT halt
+          ;; the fired click: observe! defers it so the repair can be
+          ;; selected (8f7799b7). Preflight must classify with the SAME
+          ;; predicate the runner will use, or it reports WOULD HALT for a
+          ;; click that would run -- the mirror image of the 2026-09-19 bug
+          ;; where preflight said 13/13 clear seconds before T8 halted.
+          ;; Everything not repair-covered still halts.
+          classified (for [[k f] evals
+                           :let [w (try (f (assoc obs :tripwire/force? true))
+                                        (catch Throwable e [{:kind :wire-threw}]))]
+                           :when (seq w)]
+                       [k (mapv :kind w)
+                        (boolean (some #(rcw % obs) w))])]
+      {:tripping (vec (for [[k kinds deferred?] classified :when (not deferred?)]
+                        [k kinds]))
+       :will-defer (vec (for [[k _ deferred?] classified :when deferred?] k))}))
 CLJ
 # proof-eval.sh reads its admin token from its own directory, so it must be
 # invoked from there.
@@ -105,6 +117,15 @@ case "$wires" in
     # this script exists to keep out of clicks (guardrails.clj:118 does exactly
     # that with (catch Throwable _ false)).
     bad "tripwires" "CHECK DID NOT RUN -- wire status unknown: $wires";;
+esac
+# Repair-covered witnesses do not halt the click (observe! defers them so the
+# repair can be selected). Report them so the operator knows the click will
+# start inside a named repair obligation -- visible, never silent.
+case "$wires" in
+  *":will-defer []"*) :;;
+  *":will-defer ["*)
+    say "will defer to repair" "$(echo "$wires" | sed 's/.*:will-defer //; s/}$//') -- witness names open obligations; repair is selectable";;
+  *)  :;;
 esac
 
 # 5. Seat quota (opt-in: costs one agent turn each).
