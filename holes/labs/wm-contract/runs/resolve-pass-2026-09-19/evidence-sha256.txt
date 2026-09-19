@@ -1,0 +1,8 @@
+a4cd6a8bbf0fe6c649c7bc45c06134ac71375d07cc7ed0bae7b2cae3e0f0ea7d  data/wm-runs/tick-run-record-2026-09-19-1789848916.edn
+b4617a0fa838e499d5bd8ae6e54ddb48b7dd6a7a4256125b890eb40b20914aaa  data/wm-runs/tick-run-record-2026-09-19-1789849189.edn
+00175578ac4e5e2591a587a97eb53116d3d8b8554d7e00ffbe613007e6174625  data/wm-full-loop-machinery-61/wm-contract-machinery-61-v1/attempt-002/002-selection.edn
+5d731fe3d12e0b96f660e0dd05dd86417a4cb43285620a5170a67f001d45f878  data/wm-full-loop-machinery-61/wm-contract-machinery-61-v1/attempt-002/004-dispatch.edn
+49b29835784d8af3e72eebb3f139b655e0ac582e333e3f6e2e6832c7dd7cbe15  data/wm-full-loop-machinery-61/wm-contract-machinery-61-v1/attempt-002/007-closed.edn
+dace812564b868cd2dd14a6651d7bc9d1290caf9157ab1e913f2354ff9fe311e  data/wm-full-loop-machinery-62/wm-contract-machinery-62-v1/attempt-001/002-selection.edn
+b1ffd119978dbc4434d07e2825637c0a333fcd8e2f98a987945ea4c4e9facdf0  data/wm-full-loop-machinery-62/wm-contract-machinery-62-v1/attempt-001/004-dispatch.edn
+2d76098adf16612162f9f13beb8574652953fd52053fd18172fe047741687832  data/wm-full-loop-machinery-62/wm-contract-machinery-62-v1/attempt-001/007-closed.edn

@@ -1,0 +1,8 @@
+:before {:total 43, :statuses {:open 18, :awaiting-validation 25}, :runner-eligible 4}
+{:repair/id "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-003-artifact-binding-mismatch", :outcome :left-awaiting, :reason :no-production-artifact-binding}
+{:repair/id "repair-ea1-b0eeafa0e59b4dc0dd9e0abe1cbbed0e687c5827b3ade8320c98c7f82a79032b--attempt-001-machine-repair-lacks-grounded-review-evidence", :outcome :left-awaiting, :reason :no-production-implementation-review-proof-write}
+{:repair/id "repair-ea1-259a7a93d9a9b63a45020e0ad646c508b9be83097dac6898106a063c1a1eef2e--attempt-001-close-exception", :outcome :resolved, :path "/home/joe/code/futon2/data/wm-repair-obligations/resolutions/repair-ea1-259a7a93d9a9b63a45020e0ad646c508b9be83097dac6898106a063c1a1eef2e--attempt-001-close-exception.edn"}
+{:repair/id "repair-initialization-56485d40-2f54-4882-8917-15a59a473494-initialization-failed", :outcome :resolved, :path "/home/joe/code/futon2/data/wm-repair-obligations/resolutions/repair-initialization-56485d40-2f54-4882-8917-15a59a473494-initialization-failed.edn"}
+{:repair/id "repair-ea1-9b6ce3a47b9bdc24a5fc6a9b9aab4f270af86a4fcb54550d94b89737bb5e4f35--attempt-001-artifact-binding-mismatch", :outcome :left-awaiting, :reason :no-production-artifact-binding}
+{:repair/id "repair-ea1-51a783ff43ce1fb432b0928b2f142d3f07450872ba4b96c005f50d1b29ddcddc--attempt-002-untyped-failure", :outcome :resolved, :path "/home/joe/code/futon2/data/wm-repair-obligations/resolutions/repair-ea1-51a783ff43ce1fb432b0928b2f142d3f07450872ba4b96c005f50d1b29ddcddc--attempt-002-untyped-failure.edn"}
+:after {:total 40, :statuses {:open 18, :awaiting-validation 22}, :runner-eligible 4}
