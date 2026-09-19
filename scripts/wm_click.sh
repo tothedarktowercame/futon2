@@ -90,14 +90,18 @@ inflight=$(curl -s -m 15 "$BASE/api/alpha/wm/click" | python3 -c 'import sys,jso
 # zai-14 "13/13 clear" seconds before T8 halted its click on 2026-09-19.
 # Building the real observation costs ~13s because it parses the whole repair
 # store. That is the honest price of the check.
-cat > /tmp/wm_click_wires.clj <<'CLJ'
+SKIP_EDN="[]"
+[ "${#DISABLE[@]}" -gt 0 ] && SKIP_EDN="[$(printf '"%s",' "${DISABLE[@]}" | sed 's/,$//')]"
+cat > /tmp/wm_click_wires.clj <<CLJ
 (do (require 'futon2.aif.tripwire 'futon2.aif.repair-obligation)
     (let [cro (resolve 'futon2.aif.tripwire/cross-run-observation)
           evals @(resolve 'futon2.aif.tripwire/wire-evaluators)
           root @(resolve 'futon2.aif.repair-obligation/default-root)
-          skip (into #{} (map keyword)
-                     (clojure.edn/read-string
-                       (or (System/getenv "WM_CLICK_SKIP_WIRES") "[]")))
+          ;; The scoped per-run disables, inlined by the shell: preflight must
+          ;; answer the question the fired click will actually face. (The skip
+          ;; set cannot travel by environment -- proof-eval evaluates in the
+          ;; server JVM, whose env is not this shell's.)
+          skip (into #{} (map keyword) ${SKIP_EDN})
           obs (cro {:cohort? true}
                    {:phase :opportunity :transition :start
                     :opportunity-id "wm_click-preflight"
@@ -111,13 +115,8 @@ cat > /tmp/wm_click_wires.clj <<'CLJ'
                         [k (mapv :kind w)]))}))
 CLJ
 # proof-eval.sh reads its admin token from its own directory, so it must be
-# invoked from there. WM_CLICK_SKIP_WIRES carries the scoped per-run disables
-# into the preflight evaluation, so the preflight answers the question the
-# fired click will actually face -- including the disables -- rather than a
-# world the click will never run in.
-SKIP_EDN="[]"
-[ "${#DISABLE[@]}" -gt 0 ] && SKIP_EDN="[$(printf '"%s",' "${DISABLE[@]}" | sed 's/,$//')]"
-wires=$( (cd "$F3C" && WM_CLICK_SKIP_WIRES="$SKIP_EDN" ./scripts/proof-eval.sh -f /tmp/wm_click_wires.clj 2>&1) | tail -1)
+# invoked from there.
+wires=$( (cd "$F3C" && ./scripts/proof-eval.sh -f /tmp/wm_click_wires.clj 2>&1) | tail -1)
 case "$wires" in
   *":tripping []"*)
     say "tripwires" "13/13 clear";;
