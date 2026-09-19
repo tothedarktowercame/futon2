@@ -9,8 +9,7 @@
   live record. It deliberately does NOT pin any live run's verdict: the
   EV-uniform-run-record lanes flipping runs from :invalid to :valid must
   not redden the checker's own warrant."
-  (:require [clojure.java.io :as io]
-            [clojure.java.shell :as shell]
+  (:require [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]))
 
