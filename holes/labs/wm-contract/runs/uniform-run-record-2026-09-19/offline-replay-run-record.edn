@@ -1,0 +1,2807 @@
+{:run/id "offline-tick-001-validity",
+ :runner/source nil,
+ :click/id nil,
+ :startedAt "2026-09-19T00:00:00Z",
+ :selectorSeam "live:validated-selection",
+ :traceWritten false,
+ :decision
+ {:selection-law
+  {:requested :cascade-selection-posterior,
+   :applied :cascade-selection-posterior,
+   :beta 1,
+   :beta-status :declared,
+   :posterior
+   {{:kind :cascade-candidate,
+     :id :C1,
+     :target :wm-tick-001-observation-crash,
+     :precedence
+     [{:id :test-step-covering-missing-total-repos,
+       :authority :documented-interpretation,
+       :produces
+       #{[:wm-tick-001-observation-crash
+          :test-covers-missing-total-repos]},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-throws]},
+          :absent
+          #{[:wm-tick-001-observation-crash
+             :test-covers-missing-total-repos]}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]},
+        :authority :documented-interpretation},
+       :target :wm-tick-001-observation-crash}
+      {:id :aif/structured-observation-vector,
+       :authority :documented-interpretation,
+       :produces
+       #{[:wm-tick-001-observation-crash
+          :summary-without-total-repos-observes-cleanly]},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-throws]},
+          :absent
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :authority :documented-interpretation},
+       :target :wm-tick-001-observation-crash}],
+     :construction-receipt
+     {:kind :construction-receipt,
+      :moves [:interpret :order],
+      :family-searched 3,
+      :coverage 1},
+     :interpretation-receipts
+     {:aif/structured-observation-vector
+      {:receipt "S1-interpretation", :source "03-R6"},
+      :aif/placeholder-is-load-bearing
+      {:receipt "PH-interpretation", :source "03-R6"},
+      :test-step-covering-missing-total-repos
+      {:receipt "TS-interpretation", :source "03-R6"}}}
+    0.37005613489124095,
+    {:kind :cascade-candidate,
+     :id :C2,
+     :target :wm-tick-001-observation-crash,
+     :precedence
+     [{:id :aif/placeholder-is-load-bearing,
+       :authority :documented-interpretation,
+       :produces
+       #{[:wm-tick-001-observation-crash
+          :summary-without-total-repos-observes-cleanly]
+         [:wm-tick-001-observation-crash
+          :active-repo-ratio-absent-default-is-0]},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{[:wm-tick-001-observation-crash
+             :coupling-density-reads-same-key-with-default]
+            [:wm-tick-001-observation-crash
+             :summary-without-total-repos-throws]},
+          :absent
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]},
+        :authority :documented-interpretation},
+       :target :wm-tick-001-observation-crash}
+      {:id :test-step-covering-missing-total-repos,
+       :authority :documented-interpretation,
+       :produces
+       #{[:wm-tick-001-observation-crash
+          :test-covers-missing-total-repos]},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-throws]},
+          :absent
+          #{[:wm-tick-001-observation-crash
+             :test-covers-missing-total-repos]}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]},
+        :authority :documented-interpretation},
+       :target :wm-tick-001-observation-crash}
+      {:id :aif/structured-observation-vector,
+       :authority :documented-interpretation,
+       :produces
+       #{[:wm-tick-001-observation-crash
+          :summary-without-total-repos-observes-cleanly]},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-throws]},
+          :absent
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :authority :documented-interpretation},
+       :target :wm-tick-001-observation-crash}],
+     :construction-receipt
+     {:kind :construction-receipt,
+      :moves [:interpret :order],
+      :family-searched 3,
+      :coverage 1},
+     :interpretation-receipts
+     {:aif/structured-observation-vector
+      {:receipt "S1-interpretation", :source "03-R6"},
+      :aif/placeholder-is-load-bearing
+      {:receipt "PH-interpretation", :source "03-R6"},
+      :test-step-covering-missing-total-repos
+      {:receipt "TS-interpretation", :source "03-R6"}}}
+    0.37005613489124095,
+    {:kind :cascade-candidate,
+     :id :C3,
+     :target :wm-tick-001-observation-crash,
+     :precedence
+     [{:id :aif/structured-observation-vector,
+       :authority :documented-interpretation,
+       :produces
+       #{[:wm-tick-001-observation-crash
+          :summary-without-total-repos-observes-cleanly]},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-throws]},
+          :absent
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :authority :documented-interpretation},
+       :target :wm-tick-001-observation-crash}],
+     :construction-receipt
+     {:kind :construction-receipt,
+      :moves [:interpret :order],
+      :family-searched 3,
+      :coverage 1},
+     :interpretation-receipts
+     {:aif/structured-observation-vector
+      {:receipt "S1-interpretation", :source "03-R6"},
+      :aif/placeholder-is-load-bearing
+      {:receipt "PH-interpretation", :source "03-R6"},
+      :test-step-covering-missing-total-repos
+      {:receipt "TS-interpretation", :source "03-R6"}}}
+    0.18999315465619696,
+    {:kind :cascade-candidate,
+     :id :C0,
+     :target :wm-tick-001-observation-crash,
+     :precedence [],
+     :construction-receipt
+     {:kind :construction-receipt,
+      :construction :empty-cascade,
+      :target :wm-tick-001-observation-crash,
+      :moves [],
+      :coverage 0},
+     :interpretation-receipts
+     {:aif/structured-observation-vector
+      {:receipt "S1-interpretation", :source "03-R6"},
+      :aif/placeholder-is-load-bearing
+      {:receipt "PH-interpretation", :source "03-R6"},
+      :test-step-covering-missing-total-repos
+      {:receipt "TS-interpretation", :source "03-R6"}}}
+    0.06989457556132114},
+   :softmax-weights
+   {{:id :test-step-covering-missing-total-repos,
+     :authority :documented-interpretation,
+     :produces
+     #{[:wm-tick-001-observation-crash
+        :test-covers-missing-total-repos]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]},
+        :absent
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{[:wm-tick-001-observation-crash
+         :test-covers-missing-total-repos]},
+      :authority :documented-interpretation},
+     :target :wm-tick-001-observation-crash}
+    0.37005613489124095,
+    {:id :aif/placeholder-is-load-bearing,
+     :authority :documented-interpretation,
+     :produces
+     #{[:wm-tick-001-observation-crash
+        :summary-without-total-repos-observes-cleanly]
+       [:wm-tick-001-observation-crash
+        :active-repo-ratio-absent-default-is-0]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{[:wm-tick-001-observation-crash
+           :coupling-density-reads-same-key-with-default]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]},
+        :absent
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{[:wm-tick-001-observation-crash
+         :summary-without-total-repos-observes-cleanly]
+        [:wm-tick-001-observation-crash
+         :active-repo-ratio-absent-default-is-0]},
+      :authority :documented-interpretation},
+     :target :wm-tick-001-observation-crash}
+    0.37005613489124095,
+    {:id :aif/structured-observation-vector,
+     :authority :documented-interpretation,
+     :produces
+     #{[:wm-tick-001-observation-crash
+        :summary-without-total-repos-observes-cleanly]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]},
+        :absent
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{[:wm-tick-001-observation-crash
+         :summary-without-total-repos-observes-cleanly]},
+      :authority :documented-interpretation},
+     :target :wm-tick-001-observation-crash}
+    0.18999315465619696,
+    nil 0.06989457556132114},
+   :tie-break-rule :action-name-ascending,
+   :tie-broken? true},
+  :selection-certificate
+  {:beta {:value 1, :status :declared},
+   :g-term-decomposition
+   {:schema :wm/g-term-decomposition-v1,
+    :status :present,
+    :policies
+    [{:id
+      {:kind :cascade-candidate,
+       :id :C1,
+       :target :wm-tick-001-observation-crash,
+       :precedence
+       [{:id :test-step-covering-missing-total-repos,
+         :authority :documented-interpretation,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{[:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]},
+            :absent
+            #{[:wm-tick-001-observation-crash
+               :test-covers-missing-total-repos]}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces
+          #{[:wm-tick-001-observation-crash
+             :test-covers-missing-total-repos]},
+          :authority :documented-interpretation},
+         :target :wm-tick-001-observation-crash}
+        {:id :aif/structured-observation-vector,
+         :authority :documented-interpretation,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{[:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]},
+            :absent
+            #{[:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]},
+          :authority :documented-interpretation},
+         :target :wm-tick-001-observation-crash}],
+       :construction-receipt
+       {:kind :construction-receipt,
+        :moves [:interpret :order],
+        :family-searched 3,
+        :coverage 1},
+       :interpretation-receipts
+       {:aif/structured-observation-vector
+        {:receipt "S1-interpretation", :source "03-R6"},
+        :aif/placeholder-is-load-bearing
+        {:receipt "PH-interpretation", :source "03-R6"},
+        :test-step-covering-missing-total-repos
+        {:receipt "TS-interpretation", :source "03-R6"}}},
+      :terms
+      {:A
+       {:status :present,
+        :value
+        {[:wm-tick-001-observation-crash
+          :coupling-density-reads-same-key-with-default]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash :observe-empty-does-not-throw]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :summary-without-total-repos-observes-cleanly]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :test-covers-missing-total-repos]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :active-repo-ratio-absent-default-is-0]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :summary-without-total-repos-throws]
+         {:false-neg 0, :false-pos 0}},
+        :verdict :degenerate,
+        :reason :identity-kernel},
+       :C
+       {:status :present,
+        :value
+        {:form :constant-spec,
+         :spec
+         {:want
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]
+            [:wm-tick-001-observation-crash
+             :test-covers-missing-total-repos]
+            [:wm-tick-001-observation-crash
+             :active-repo-ratio-absent-default-is-0]},
+          :evidence #{},
+          :lam 1,
+          :mu 1,
+          :zeroed #{},
+          :c
+          {:status :derived-no-overlap,
+           :source :futon2.aif.live-c/cascade-spec,
+           :reason :mission-grain-c-not-in-cascade-outcome-domain,
+           :live-want 2,
+           :reachable 10,
+           :owed
+           "WM-13: the mission grain of C has no map into the cascade outcome domain"}},
+         :universe
+         #{[:wm-tick-001-observation-crash
+            :coupling-density-reads-same-key-with-default]
+           [:wm-tick-001-observation-crash
+            :observe-empty-does-not-throw]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-throws]}},
+        :verdict :degenerate,
+        :reason :constant-across-horizon},
+       :D
+       {:status :present,
+        :value
+        {#{[:wm-tick-001-observation-crash
+            :coupling-density-reads-same-key-with-default]
+           [:wm-tick-001-observation-crash
+            :observe-empty-does-not-throw]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-throws]}
+         1},
+        :verdict :degenerate,
+        :reason :point-mass},
+       :E
+       {:status :present,
+        :value 1,
+        :verdict :degenerate,
+        :reason :unit-habit},
+       :F
+       {:status :present,
+        :value 0,
+        :verdict :degenerate,
+        :reason :zero-consumed-f},
+       :Q
+       {:status :present,
+        :value
+        {:steps
+         [{:tau 1,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :test-covers-missing-total-repos]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}
+          {:tau 2,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]
+              [:wm-tick-001-observation-crash
+               :test-covers-missing-total-repos]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}
+          {:tau 3,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]
+              [:wm-tick-001-observation-crash
+               :test-covers-missing-total-repos]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}],
+         :observation-updates []},
+        :verdict :degenerate,
+        :reason :open-loop-no-conditioning}},
+      :f-provenance
+      {:f-status :computed-not-attached,
+       :reason :non-finite-under-identity-a,
+       :computed-f
+       {:value ##Inf,
+        :status :computed-not-attached,
+        :reason :non-finite-under-identity-a,
+        :source :cascade-free-energy/policy-free-energy,
+        :tau 3,
+        :observed-tokens #{}}}}
+     {:id
+      {:kind :cascade-candidate,
+       :id :C2,
+       :target :wm-tick-001-observation-crash,
+       :precedence
+       [{:id :aif/placeholder-is-load-bearing,
+         :authority :documented-interpretation,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]},
+            :absent
+            #{[:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]
+            [:wm-tick-001-observation-crash
+             :active-repo-ratio-absent-default-is-0]},
+          :authority :documented-interpretation},
+         :target :wm-tick-001-observation-crash}
+        {:id :test-step-covering-missing-total-repos,
+         :authority :documented-interpretation,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{[:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]},
+            :absent
+            #{[:wm-tick-001-observation-crash
+               :test-covers-missing-total-repos]}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces
+          #{[:wm-tick-001-observation-crash
+             :test-covers-missing-total-repos]},
+          :authority :documented-interpretation},
+         :target :wm-tick-001-observation-crash}
+        {:id :aif/structured-observation-vector,
+         :authority :documented-interpretation,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{[:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]},
+            :absent
+            #{[:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]},
+          :authority :documented-interpretation},
+         :target :wm-tick-001-observation-crash}],
+       :construction-receipt
+       {:kind :construction-receipt,
+        :moves [:interpret :order],
+        :family-searched 3,
+        :coverage 1},
+       :interpretation-receipts
+       {:aif/structured-observation-vector
+        {:receipt "S1-interpretation", :source "03-R6"},
+        :aif/placeholder-is-load-bearing
+        {:receipt "PH-interpretation", :source "03-R6"},
+        :test-step-covering-missing-total-repos
+        {:receipt "TS-interpretation", :source "03-R6"}}},
+      :terms
+      {:A
+       {:status :present,
+        :value
+        {[:wm-tick-001-observation-crash
+          :coupling-density-reads-same-key-with-default]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash :observe-empty-does-not-throw]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :summary-without-total-repos-observes-cleanly]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :test-covers-missing-total-repos]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :active-repo-ratio-absent-default-is-0]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :summary-without-total-repos-throws]
+         {:false-neg 0, :false-pos 0}},
+        :verdict :degenerate,
+        :reason :identity-kernel},
+       :C
+       {:status :present,
+        :value
+        {:form :constant-spec,
+         :spec
+         {:want
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]
+            [:wm-tick-001-observation-crash
+             :test-covers-missing-total-repos]
+            [:wm-tick-001-observation-crash
+             :active-repo-ratio-absent-default-is-0]},
+          :evidence #{},
+          :lam 1,
+          :mu 1,
+          :zeroed #{},
+          :c
+          {:status :derived-no-overlap,
+           :source :futon2.aif.live-c/cascade-spec,
+           :reason :mission-grain-c-not-in-cascade-outcome-domain,
+           :live-want 2,
+           :reachable 10,
+           :owed
+           "WM-13: the mission grain of C has no map into the cascade outcome domain"}},
+         :universe
+         #{[:wm-tick-001-observation-crash
+            :coupling-density-reads-same-key-with-default]
+           [:wm-tick-001-observation-crash
+            :observe-empty-does-not-throw]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-throws]}},
+        :verdict :degenerate,
+        :reason :constant-across-horizon},
+       :D
+       {:status :present,
+        :value
+        {#{[:wm-tick-001-observation-crash
+            :coupling-density-reads-same-key-with-default]
+           [:wm-tick-001-observation-crash
+            :observe-empty-does-not-throw]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-throws]}
+         1},
+        :verdict :degenerate,
+        :reason :point-mass},
+       :E
+       {:status :present,
+        :value 1,
+        :verdict :degenerate,
+        :reason :unit-habit},
+       :F
+       {:status :present,
+        :value 0,
+        :verdict :degenerate,
+        :reason :zero-consumed-f},
+       :Q
+       {:status :present,
+        :value
+        {:steps
+         [{:tau 1,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}
+          {:tau 2,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]
+              [:wm-tick-001-observation-crash
+               :test-covers-missing-total-repos]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}
+          {:tau 3,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]
+              [:wm-tick-001-observation-crash
+               :test-covers-missing-total-repos]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}],
+         :observation-updates []},
+        :verdict :degenerate,
+        :reason :open-loop-no-conditioning}},
+      :f-provenance
+      {:f-status :computed-not-attached,
+       :reason :non-finite-under-identity-a,
+       :computed-f
+       {:value ##Inf,
+        :status :computed-not-attached,
+        :reason :non-finite-under-identity-a,
+        :source :cascade-free-energy/policy-free-energy,
+        :tau 3,
+        :observed-tokens #{}}}}
+     {:id
+      {:kind :cascade-candidate,
+       :id :C3,
+       :target :wm-tick-001-observation-crash,
+       :precedence
+       [{:id :aif/structured-observation-vector,
+         :authority :documented-interpretation,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{[:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]},
+            :absent
+            #{[:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]},
+          :authority :documented-interpretation},
+         :target :wm-tick-001-observation-crash}],
+       :construction-receipt
+       {:kind :construction-receipt,
+        :moves [:interpret :order],
+        :family-searched 3,
+        :coverage 1},
+       :interpretation-receipts
+       {:aif/structured-observation-vector
+        {:receipt "S1-interpretation", :source "03-R6"},
+        :aif/placeholder-is-load-bearing
+        {:receipt "PH-interpretation", :source "03-R6"},
+        :test-step-covering-missing-total-repos
+        {:receipt "TS-interpretation", :source "03-R6"}}},
+      :terms
+      {:A
+       {:status :present,
+        :value
+        {[:wm-tick-001-observation-crash
+          :coupling-density-reads-same-key-with-default]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash :observe-empty-does-not-throw]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :summary-without-total-repos-observes-cleanly]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :test-covers-missing-total-repos]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :active-repo-ratio-absent-default-is-0]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :summary-without-total-repos-throws]
+         {:false-neg 0, :false-pos 0}},
+        :verdict :degenerate,
+        :reason :identity-kernel},
+       :C
+       {:status :present,
+        :value
+        {:form :constant-spec,
+         :spec
+         {:want
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]
+            [:wm-tick-001-observation-crash
+             :test-covers-missing-total-repos]
+            [:wm-tick-001-observation-crash
+             :active-repo-ratio-absent-default-is-0]},
+          :evidence #{},
+          :lam 1,
+          :mu 1,
+          :zeroed #{},
+          :c
+          {:status :derived-no-overlap,
+           :source :futon2.aif.live-c/cascade-spec,
+           :reason :mission-grain-c-not-in-cascade-outcome-domain,
+           :live-want 2,
+           :reachable 10,
+           :owed
+           "WM-13: the mission grain of C has no map into the cascade outcome domain"}},
+         :universe
+         #{[:wm-tick-001-observation-crash
+            :coupling-density-reads-same-key-with-default]
+           [:wm-tick-001-observation-crash
+            :observe-empty-does-not-throw]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-throws]}},
+        :verdict :degenerate,
+        :reason :constant-across-horizon},
+       :D
+       {:status :present,
+        :value
+        {#{[:wm-tick-001-observation-crash
+            :coupling-density-reads-same-key-with-default]
+           [:wm-tick-001-observation-crash
+            :observe-empty-does-not-throw]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-throws]}
+         1},
+        :verdict :degenerate,
+        :reason :point-mass},
+       :E
+       {:status :present,
+        :value 1,
+        :verdict :degenerate,
+        :reason :unit-habit},
+       :F
+       {:status :present,
+        :value 0,
+        :verdict :degenerate,
+        :reason :zero-consumed-f},
+       :Q
+       {:status :present,
+        :value
+        {:steps
+         [{:tau 1,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}
+          {:tau 2,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}
+          {:tau 3,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-observes-cleanly]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}],
+         :observation-updates []},
+        :verdict :degenerate,
+        :reason :open-loop-no-conditioning}},
+      :f-provenance
+      {:f-status :computed-not-attached,
+       :reason :non-finite-under-identity-a,
+       :computed-f
+       {:value ##Inf,
+        :status :computed-not-attached,
+        :reason :non-finite-under-identity-a,
+        :source :cascade-free-energy/policy-free-energy,
+        :tau 3,
+        :observed-tokens #{}}}}
+     {:id
+      {:kind :cascade-candidate,
+       :id :C0,
+       :target :wm-tick-001-observation-crash,
+       :precedence [],
+       :construction-receipt
+       {:kind :construction-receipt,
+        :construction :empty-cascade,
+        :target :wm-tick-001-observation-crash,
+        :moves [],
+        :coverage 0},
+       :interpretation-receipts
+       {:aif/structured-observation-vector
+        {:receipt "S1-interpretation", :source "03-R6"},
+        :aif/placeholder-is-load-bearing
+        {:receipt "PH-interpretation", :source "03-R6"},
+        :test-step-covering-missing-total-repos
+        {:receipt "TS-interpretation", :source "03-R6"}}},
+      :terms
+      {:A
+       {:status :present,
+        :value
+        {[:wm-tick-001-observation-crash
+          :coupling-density-reads-same-key-with-default]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash :observe-empty-does-not-throw]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :summary-without-total-repos-observes-cleanly]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :test-covers-missing-total-repos]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :active-repo-ratio-absent-default-is-0]
+         {:false-neg 0, :false-pos 0},
+         [:wm-tick-001-observation-crash
+          :summary-without-total-repos-throws]
+         {:false-neg 0, :false-pos 0}},
+        :verdict :degenerate,
+        :reason :identity-kernel},
+       :C
+       {:status :present,
+        :value
+        {:form :constant-spec,
+         :spec
+         {:want
+          #{[:wm-tick-001-observation-crash
+             :summary-without-total-repos-observes-cleanly]
+            [:wm-tick-001-observation-crash
+             :test-covers-missing-total-repos]
+            [:wm-tick-001-observation-crash
+             :active-repo-ratio-absent-default-is-0]},
+          :evidence #{},
+          :lam 1,
+          :mu 1,
+          :zeroed #{},
+          :c
+          {:status :derived-no-overlap,
+           :source :futon2.aif.live-c/cascade-spec,
+           :reason :mission-grain-c-not-in-cascade-outcome-domain,
+           :live-want 2,
+           :reachable 10,
+           :owed
+           "WM-13: the mission grain of C has no map into the cascade outcome domain"}},
+         :universe
+         #{[:wm-tick-001-observation-crash
+            :coupling-density-reads-same-key-with-default]
+           [:wm-tick-001-observation-crash
+            :observe-empty-does-not-throw]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-throws]}},
+        :verdict :degenerate,
+        :reason :constant-across-horizon},
+       :D
+       {:status :present,
+        :value
+        {#{[:wm-tick-001-observation-crash
+            :coupling-density-reads-same-key-with-default]
+           [:wm-tick-001-observation-crash
+            :observe-empty-does-not-throw]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]
+           [:wm-tick-001-observation-crash
+            :summary-without-total-repos-throws]}
+         1},
+        :verdict :degenerate,
+        :reason :point-mass},
+       :E
+       {:status :present,
+        :value 1,
+        :verdict :degenerate,
+        :reason :unit-habit},
+       :F
+       {:status :present,
+        :value 0,
+        :verdict :degenerate,
+        :reason :zero-consumed-f},
+       :Q
+       {:status :present,
+        :value
+        {:steps
+         [{:tau 1,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}
+          {:tau 2,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}
+          {:tau 3,
+           :belief
+           {#{[:wm-tick-001-observation-crash
+               :coupling-density-reads-same-key-with-default]
+              [:wm-tick-001-observation-crash
+               :observe-empty-does-not-throw]
+              [:wm-tick-001-observation-crash
+               :active-repo-ratio-absent-default-is-0]
+              [:wm-tick-001-observation-crash
+               :summary-without-total-repos-throws]}
+            1}}],
+         :observation-updates []},
+        :verdict :degenerate,
+        :reason :open-loop-no-conditioning}},
+      :f-provenance
+      {:f-status :computed-not-attached,
+       :reason :non-finite-under-identity-a,
+       :computed-f
+       {:value ##Inf,
+        :status :computed-not-attached,
+        :reason :non-finite-under-identity-a,
+        :source :cascade-free-energy/policy-free-energy,
+        :tau 3,
+        :observed-tokens #{}}}}]},
+   :scoring
+   {0
+    {:c
+     {:status :derived-no-overlap,
+      :source :futon2.aif.live-c/cascade-spec,
+      :reason :mission-grain-c-not-in-cascade-outcome-domain,
+      :live-want 2,
+      :reachable 10,
+      :owed
+      "WM-13: the mission grain of C has no map into the cascade outcome domain",
+      :weights-echo nil},
+     :rates-provenance {:status :identity-default},
+     :id
+     {:kind :cascade-candidate,
+      :id :C1,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :test-step-covering-missing-total-repos,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}}},
+    1
+    {:c
+     {:status :derived-no-overlap,
+      :source :futon2.aif.live-c/cascade-spec,
+      :reason :mission-grain-c-not-in-cascade-outcome-domain,
+      :live-want 2,
+      :reachable 10,
+      :owed
+      "WM-13: the mission grain of C has no map into the cascade outcome domain",
+      :weights-echo nil},
+     :rates-provenance {:status :identity-default},
+     :id
+     {:kind :cascade-candidate,
+      :id :C2,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :aif/placeholder-is-load-bearing,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :test-step-covering-missing-total-repos,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}}},
+    2
+    {:c
+     {:status :derived-no-overlap,
+      :source :futon2.aif.live-c/cascade-spec,
+      :reason :mission-grain-c-not-in-cascade-outcome-domain,
+      :live-want 2,
+      :reachable 10,
+      :owed
+      "WM-13: the mission grain of C has no map into the cascade outcome domain",
+      :weights-echo nil},
+     :rates-provenance {:status :identity-default},
+     :id
+     {:kind :cascade-candidate,
+      :id :C3,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}}},
+    3
+    {:c
+     {:status :derived-no-overlap,
+      :source :futon2.aif.live-c/cascade-spec,
+      :reason :mission-grain-c-not-in-cascade-outcome-domain,
+      :live-want 2,
+      :reachable 10,
+      :owed
+      "WM-13: the mission grain of C has no map into the cascade outcome domain",
+      :weights-echo nil},
+     :rates-provenance {:status :identity-default},
+     :id
+     {:kind :cascade-candidate,
+      :id :C0,
+      :target :wm-tick-001-observation-crash,
+      :precedence [],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :construction :empty-cascade,
+       :target :wm-tick-001-observation-crash,
+       :moves [],
+       :coverage 0},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}}}},
+   :candidates
+   [{:f-status :computed-not-attached,
+     :computed-f
+     {:value ##Inf,
+      :status :computed-not-attached,
+      :reason :non-finite-under-identity-a,
+      :source :cascade-free-energy/policy-free-energy,
+      :tau 3,
+      :observed-tokens #{}},
+     :habit 1,
+     :habit-status :declared-neutral,
+     :g 11.434408130577516,
+     :reason :non-finite-under-identity-a,
+     :inputs
+     {:habit
+      {:presence :absent,
+       :supplied-value nil,
+       :value 1,
+       :status :declared-neutral,
+       :reason :absent},
+      :f
+      {:presence :absent,
+       :supplied-value nil,
+       :value 0,
+       :status :declared-neutral,
+       :reason :absent}},
+     :id
+     {:kind :cascade-candidate,
+      :id :C1,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :test-step-covering-missing-total-repos,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :f 0}
+    {:f-status :computed-not-attached,
+     :computed-f
+     {:value ##Inf,
+      :status :computed-not-attached,
+      :reason :non-finite-under-identity-a,
+      :source :cascade-free-energy/policy-free-energy,
+      :tau 3,
+      :observed-tokens #{}},
+     :habit 1,
+     :habit-status :declared-neutral,
+     :g 11.434408130577516,
+     :reason :non-finite-under-identity-a,
+     :inputs
+     {:habit
+      {:presence :absent,
+       :supplied-value nil,
+       :value 1,
+       :status :declared-neutral,
+       :reason :absent},
+      :f
+      {:presence :absent,
+       :supplied-value nil,
+       :value 0,
+       :status :declared-neutral,
+       :reason :absent}},
+     :id
+     {:kind :cascade-candidate,
+      :id :C2,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :aif/placeholder-is-load-bearing,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :test-step-covering-missing-total-repos,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :f 0}
+    {:f-status :computed-not-attached,
+     :computed-f
+     {:value ##Inf,
+      :status :computed-not-attached,
+      :reason :non-finite-under-identity-a,
+      :source :cascade-free-energy/policy-free-energy,
+      :tau 3,
+      :observed-tokens #{}},
+     :habit 1,
+     :habit-status :declared-neutral,
+     :g 12.101074797244184,
+     :reason :non-finite-under-identity-a,
+     :inputs
+     {:habit
+      {:presence :absent,
+       :supplied-value nil,
+       :value 1,
+       :status :declared-neutral,
+       :reason :absent},
+      :f
+      {:presence :absent,
+       :supplied-value nil,
+       :value 0,
+       :status :declared-neutral,
+       :reason :absent}},
+     :id
+     {:kind :cascade-candidate,
+      :id :C3,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :f 0}
+    {:f-status :computed-not-attached,
+     :computed-f
+     {:value ##Inf,
+      :status :computed-not-attached,
+      :reason :non-finite-under-identity-a,
+      :source :cascade-free-energy/policy-free-energy,
+      :tau 3,
+      :observed-tokens #{}},
+     :habit 1,
+     :habit-status :declared-neutral,
+     :g 13.101074797244184,
+     :reason :non-finite-under-identity-a,
+     :inputs
+     {:habit
+      {:presence :absent,
+       :supplied-value nil,
+       :value 1,
+       :status :declared-neutral,
+       :reason :absent},
+      :f
+      {:presence :absent,
+       :supplied-value nil,
+       :value 0,
+       :status :declared-neutral,
+       :reason :absent}},
+     :id
+     {:kind :cascade-candidate,
+      :id :C0,
+      :target :wm-tick-001-observation-crash,
+      :precedence [],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :construction :empty-cascade,
+       :target :wm-tick-001-observation-crash,
+       :moves [],
+       :coverage 0},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :f 0}],
+   :policies
+   [{:id
+     {:kind :cascade-candidate,
+      :id :C1,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :test-step-covering-missing-total-repos,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :beta-declared 1,
+     :habit 1,
+     :habit-status :declared-neutral,
+     :f 0,
+     :f-status :computed-not-attached,
+     :reason :non-finite-under-identity-a}
+    {:id
+     {:kind :cascade-candidate,
+      :id :C2,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :aif/placeholder-is-load-bearing,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :test-step-covering-missing-total-repos,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :beta-declared 1,
+     :habit 1,
+     :habit-status :declared-neutral,
+     :f 0,
+     :f-status :computed-not-attached,
+     :reason :non-finite-under-identity-a}
+    {:id
+     {:kind :cascade-candidate,
+      :id :C3,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :beta-declared 1,
+     :habit 1,
+     :habit-status :declared-neutral,
+     :f 0,
+     :f-status :computed-not-attached,
+     :reason :non-finite-under-identity-a}
+    {:id
+     {:kind :cascade-candidate,
+      :id :C0,
+      :target :wm-tick-001-observation-crash,
+      :precedence [],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :construction :empty-cascade,
+       :target :wm-tick-001-observation-crash,
+       :moves [],
+       :coverage 0},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :beta-declared 1,
+     :habit 1,
+     :habit-status :declared-neutral,
+     :f 0,
+     :f-status :computed-not-attached,
+     :reason :non-finite-under-identity-a}]},
+  :enumeration-completeness
+  {:version :enumeration-completeness/v1,
+   :at "2026-09-19T16:17:13.256275175Z",
+   :code-root "/tmp/uniform-record-12318531695085001691/corpus",
+   :independent-of "scripts/futon2/report/war_machine.clj:6005-6013",
+   :kinds
+   [{:available-count 0,
+     :exclusions-by-reason {},
+     :phantom [],
+     :would-need
+     "a proposer for this kind in the tick's proposer list",
+     :enumerated-count 0,
+     :available-by-repo {},
+     :scan-counts
+     {:files-under-dir 0,
+      :contract-matched 0,
+      :available 0,
+      :excluded 0},
+     :reason :no-proposer-for-kind,
+     :kind :excursion,
+     :verdict :kind-not-enumerated,
+     :missing [],
+     :enumerator
+     {:proposer nil,
+      :pointer "scripts/futon2/report/war_machine.clj:6005-6013"}}
+    {:available-count 1,
+     :exclusions-by-reason {},
+     :phantom [],
+     :enumerated-count 0,
+     :available-by-repo {"repo" 1},
+     :scan-counts
+     {:files-under-dir 1,
+      :contract-matched 1,
+      :available 1,
+      :excluded 0},
+     :kind :mission,
+     :verdict :incomplete,
+     :missing ["M-present"],
+     :enumerator
+     {:proposer :mission-enumerator,
+      :pointer "src/futon2/aif/mission_registry.clj:322"}}
+    {:available-count 0,
+     :exclusions-by-reason {},
+     :phantom [],
+     :enumerated-count 0,
+     :available-by-repo {},
+     :scan-counts
+     {:files-under-dir 0,
+      :contract-matched 0,
+      :available 0,
+      :excluded 0},
+     :kind :ticket,
+     :verdict :complete,
+     :missing [],
+     :enumerator
+     {:proposer :ticket-enumerator,
+      :pointer
+      "src/futon2/aif/mission_registry.clj:ticket-enumerator-proposer"}}],
+   :typed-kind-absences
+   [{:kind :excursion,
+     :available-count 0,
+     :reason :no-proposer-for-kind,
+     :would-need
+     "a proposer for this kind in the tick's proposer list"}],
+   :verdict :incomplete},
+  :g-term-decomposition
+  {:schema :wm/g-term-decomposition-v1,
+   :status :present,
+   :policies
+   [{:id
+     {:kind :cascade-candidate,
+      :id :C1,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :test-step-covering-missing-total-repos,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :terms
+     {:A
+      {:status :present,
+       :value
+       {[:wm-tick-001-observation-crash
+         :coupling-density-reads-same-key-with-default]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash :observe-empty-does-not-throw]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :summary-without-total-repos-observes-cleanly]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :test-covers-missing-total-repos]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :active-repo-ratio-absent-default-is-0]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :summary-without-total-repos-throws]
+        {:false-neg 0, :false-pos 0}},
+       :verdict :degenerate,
+       :reason :identity-kernel},
+      :C
+      {:status :present,
+       :value
+       {:form :constant-spec,
+        :spec
+        {:want
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]},
+         :evidence #{},
+         :lam 1,
+         :mu 1,
+         :zeroed #{},
+         :c
+         {:status :derived-no-overlap,
+          :source :futon2.aif.live-c/cascade-spec,
+          :reason :mission-grain-c-not-in-cascade-outcome-domain,
+          :live-want 2,
+          :reachable 10,
+          :owed
+          "WM-13: the mission grain of C has no map into the cascade outcome domain"}},
+        :universe
+        #{[:wm-tick-001-observation-crash
+           :coupling-density-reads-same-key-with-default]
+          [:wm-tick-001-observation-crash
+           :observe-empty-does-not-throw]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]
+          [:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]}},
+       :verdict :degenerate,
+       :reason :constant-across-horizon},
+      :D
+      {:status :present,
+       :value
+       {#{[:wm-tick-001-observation-crash
+           :coupling-density-reads-same-key-with-default]
+          [:wm-tick-001-observation-crash
+           :observe-empty-does-not-throw]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]}
+        1},
+       :verdict :degenerate,
+       :reason :point-mass},
+      :E
+      {:status :present,
+       :value 1,
+       :verdict :degenerate,
+       :reason :unit-habit},
+      :F
+      {:status :present,
+       :value 0,
+       :verdict :degenerate,
+       :reason :zero-consumed-f},
+      :Q
+      {:status :present,
+       :value
+       {:steps
+        [{:tau 1,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}
+         {:tau 2,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]
+             [:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}
+         {:tau 3,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]
+             [:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}],
+        :observation-updates []},
+       :verdict :degenerate,
+       :reason :open-loop-no-conditioning}},
+     :f-provenance
+     {:f-status :computed-not-attached,
+      :reason :non-finite-under-identity-a,
+      :computed-f
+      {:value ##Inf,
+       :status :computed-not-attached,
+       :reason :non-finite-under-identity-a,
+       :source :cascade-free-energy/policy-free-energy,
+       :tau 3,
+       :observed-tokens #{}}}}
+    {:id
+     {:kind :cascade-candidate,
+      :id :C2,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :aif/placeholder-is-load-bearing,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :test-step-covering-missing-total-repos,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}
+       {:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :terms
+     {:A
+      {:status :present,
+       :value
+       {[:wm-tick-001-observation-crash
+         :coupling-density-reads-same-key-with-default]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash :observe-empty-does-not-throw]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :summary-without-total-repos-observes-cleanly]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :test-covers-missing-total-repos]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :active-repo-ratio-absent-default-is-0]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :summary-without-total-repos-throws]
+        {:false-neg 0, :false-pos 0}},
+       :verdict :degenerate,
+       :reason :identity-kernel},
+      :C
+      {:status :present,
+       :value
+       {:form :constant-spec,
+        :spec
+        {:want
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]},
+         :evidence #{},
+         :lam 1,
+         :mu 1,
+         :zeroed #{},
+         :c
+         {:status :derived-no-overlap,
+          :source :futon2.aif.live-c/cascade-spec,
+          :reason :mission-grain-c-not-in-cascade-outcome-domain,
+          :live-want 2,
+          :reachable 10,
+          :owed
+          "WM-13: the mission grain of C has no map into the cascade outcome domain"}},
+        :universe
+        #{[:wm-tick-001-observation-crash
+           :coupling-density-reads-same-key-with-default]
+          [:wm-tick-001-observation-crash
+           :observe-empty-does-not-throw]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]
+          [:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]}},
+       :verdict :degenerate,
+       :reason :constant-across-horizon},
+      :D
+      {:status :present,
+       :value
+       {#{[:wm-tick-001-observation-crash
+           :coupling-density-reads-same-key-with-default]
+          [:wm-tick-001-observation-crash
+           :observe-empty-does-not-throw]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]}
+        1},
+       :verdict :degenerate,
+       :reason :point-mass},
+      :E
+      {:status :present,
+       :value 1,
+       :verdict :degenerate,
+       :reason :unit-habit},
+      :F
+      {:status :present,
+       :value 0,
+       :verdict :degenerate,
+       :reason :zero-consumed-f},
+      :Q
+      {:status :present,
+       :value
+       {:steps
+        [{:tau 1,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}
+         {:tau 2,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]
+             [:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}
+         {:tau 3,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]
+             [:wm-tick-001-observation-crash
+              :test-covers-missing-total-repos]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}],
+        :observation-updates []},
+       :verdict :degenerate,
+       :reason :open-loop-no-conditioning}},
+     :f-provenance
+     {:f-status :computed-not-attached,
+      :reason :non-finite-under-identity-a,
+      :computed-f
+      {:value ##Inf,
+       :status :computed-not-attached,
+       :reason :non-finite-under-identity-a,
+       :source :cascade-free-energy/policy-free-energy,
+       :tau 3,
+       :observed-tokens #{}}}}
+    {:id
+     {:kind :cascade-candidate,
+      :id :C3,
+      :target :wm-tick-001-observation-crash,
+      :precedence
+      [{:id :aif/structured-observation-vector,
+        :authority :documented-interpretation,
+        :produces
+        #{[:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]},
+           :absent
+           #{[:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]},
+         :authority :documented-interpretation},
+        :target :wm-tick-001-observation-crash}],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :moves [:interpret :order],
+       :family-searched 3,
+       :coverage 1},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :terms
+     {:A
+      {:status :present,
+       :value
+       {[:wm-tick-001-observation-crash
+         :coupling-density-reads-same-key-with-default]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash :observe-empty-does-not-throw]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :summary-without-total-repos-observes-cleanly]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :test-covers-missing-total-repos]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :active-repo-ratio-absent-default-is-0]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :summary-without-total-repos-throws]
+        {:false-neg 0, :false-pos 0}},
+       :verdict :degenerate,
+       :reason :identity-kernel},
+      :C
+      {:status :present,
+       :value
+       {:form :constant-spec,
+        :spec
+        {:want
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]},
+         :evidence #{},
+         :lam 1,
+         :mu 1,
+         :zeroed #{},
+         :c
+         {:status :derived-no-overlap,
+          :source :futon2.aif.live-c/cascade-spec,
+          :reason :mission-grain-c-not-in-cascade-outcome-domain,
+          :live-want 2,
+          :reachable 10,
+          :owed
+          "WM-13: the mission grain of C has no map into the cascade outcome domain"}},
+        :universe
+        #{[:wm-tick-001-observation-crash
+           :coupling-density-reads-same-key-with-default]
+          [:wm-tick-001-observation-crash
+           :observe-empty-does-not-throw]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]
+          [:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]}},
+       :verdict :degenerate,
+       :reason :constant-across-horizon},
+      :D
+      {:status :present,
+       :value
+       {#{[:wm-tick-001-observation-crash
+           :coupling-density-reads-same-key-with-default]
+          [:wm-tick-001-observation-crash
+           :observe-empty-does-not-throw]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]}
+        1},
+       :verdict :degenerate,
+       :reason :point-mass},
+      :E
+      {:status :present,
+       :value 1,
+       :verdict :degenerate,
+       :reason :unit-habit},
+      :F
+      {:status :present,
+       :value 0,
+       :verdict :degenerate,
+       :reason :zero-consumed-f},
+      :Q
+      {:status :present,
+       :value
+       {:steps
+        [{:tau 1,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}
+         {:tau 2,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}
+         {:tau 3,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-observes-cleanly]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}],
+        :observation-updates []},
+       :verdict :degenerate,
+       :reason :open-loop-no-conditioning}},
+     :f-provenance
+     {:f-status :computed-not-attached,
+      :reason :non-finite-under-identity-a,
+      :computed-f
+      {:value ##Inf,
+       :status :computed-not-attached,
+       :reason :non-finite-under-identity-a,
+       :source :cascade-free-energy/policy-free-energy,
+       :tau 3,
+       :observed-tokens #{}}}}
+    {:id
+     {:kind :cascade-candidate,
+      :id :C0,
+      :target :wm-tick-001-observation-crash,
+      :precedence [],
+      :construction-receipt
+      {:kind :construction-receipt,
+       :construction :empty-cascade,
+       :target :wm-tick-001-observation-crash,
+       :moves [],
+       :coverage 0},
+      :interpretation-receipts
+      {:aif/structured-observation-vector
+       {:receipt "S1-interpretation", :source "03-R6"},
+       :aif/placeholder-is-load-bearing
+       {:receipt "PH-interpretation", :source "03-R6"},
+       :test-step-covering-missing-total-repos
+       {:receipt "TS-interpretation", :source "03-R6"}}},
+     :terms
+     {:A
+      {:status :present,
+       :value
+       {[:wm-tick-001-observation-crash
+         :coupling-density-reads-same-key-with-default]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash :observe-empty-does-not-throw]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :summary-without-total-repos-observes-cleanly]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :test-covers-missing-total-repos]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :active-repo-ratio-absent-default-is-0]
+        {:false-neg 0, :false-pos 0},
+        [:wm-tick-001-observation-crash
+         :summary-without-total-repos-throws]
+        {:false-neg 0, :false-pos 0}},
+       :verdict :degenerate,
+       :reason :identity-kernel},
+      :C
+      {:status :present,
+       :value
+       {:form :constant-spec,
+        :spec
+        {:want
+         #{[:wm-tick-001-observation-crash
+            :summary-without-total-repos-observes-cleanly]
+           [:wm-tick-001-observation-crash
+            :test-covers-missing-total-repos]
+           [:wm-tick-001-observation-crash
+            :active-repo-ratio-absent-default-is-0]},
+         :evidence #{},
+         :lam 1,
+         :mu 1,
+         :zeroed #{},
+         :c
+         {:status :derived-no-overlap,
+          :source :futon2.aif.live-c/cascade-spec,
+          :reason :mission-grain-c-not-in-cascade-outcome-domain,
+          :live-want 2,
+          :reachable 10,
+          :owed
+          "WM-13: the mission grain of C has no map into the cascade outcome domain"}},
+        :universe
+        #{[:wm-tick-001-observation-crash
+           :coupling-density-reads-same-key-with-default]
+          [:wm-tick-001-observation-crash
+           :observe-empty-does-not-throw]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-observes-cleanly]
+          [:wm-tick-001-observation-crash
+           :test-covers-missing-total-repos]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]}},
+       :verdict :degenerate,
+       :reason :constant-across-horizon},
+      :D
+      {:status :present,
+       :value
+       {#{[:wm-tick-001-observation-crash
+           :coupling-density-reads-same-key-with-default]
+          [:wm-tick-001-observation-crash
+           :observe-empty-does-not-throw]
+          [:wm-tick-001-observation-crash
+           :active-repo-ratio-absent-default-is-0]
+          [:wm-tick-001-observation-crash
+           :summary-without-total-repos-throws]}
+        1},
+       :verdict :degenerate,
+       :reason :point-mass},
+      :E
+      {:status :present,
+       :value 1,
+       :verdict :degenerate,
+       :reason :unit-habit},
+      :F
+      {:status :present,
+       :value 0,
+       :verdict :degenerate,
+       :reason :zero-consumed-f},
+      :Q
+      {:status :present,
+       :value
+       {:steps
+        [{:tau 1,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}
+         {:tau 2,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}
+         {:tau 3,
+          :belief
+          {#{[:wm-tick-001-observation-crash
+              :coupling-density-reads-same-key-with-default]
+             [:wm-tick-001-observation-crash
+              :observe-empty-does-not-throw]
+             [:wm-tick-001-observation-crash
+              :active-repo-ratio-absent-default-is-0]
+             [:wm-tick-001-observation-crash
+              :summary-without-total-repos-throws]}
+           1}}],
+        :observation-updates []},
+       :verdict :degenerate,
+       :reason :open-loop-no-conditioning}},
+     :f-provenance
+     {:f-status :computed-not-attached,
+      :reason :non-finite-under-identity-a,
+      :computed-f
+      {:value ##Inf,
+       :status :computed-not-attached,
+       :reason :non-finite-under-identity-a,
+       :source :cascade-free-energy/policy-free-energy,
+       :tau 3,
+       :observed-tokens #{}}}}]}},
+ :route
+ [{:fromNode "RUNNER",
+   :toNode "FULL_LOOP_CLOSE",
+   :via :offline-selection-replay,
+   :at_ "2026-09-19T16:17:13.256488144Z"}]}

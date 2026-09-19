@@ -1,0 +1,1 @@
+{:agency-url "http://localhost:7070", :entry-id "test-registry-617bb5ce91010f286ad47a757a0a69ddcf605c2809620406114685d439ea1791", :repo-root "/home/joe/code/futon2", :changed-paths ["src/futon2/aif/policy.clj" "src/futon2/aif/full_loop_runner.clj" "test/futon2/aif/uniform_run_record_test.clj"]}

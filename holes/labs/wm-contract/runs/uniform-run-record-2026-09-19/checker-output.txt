@@ -1,0 +1,20 @@
+complete fixture: :valid
+  c-status-stripped              -> c-source:bad       REJECTED (invalidates the run)
+  rates-removed                  -> rates-provenance:missing REJECTED (invalidates the run)
+  one-candidate-posterior        -> posterior:bad      REJECTED (invalidates the run)
+  f-computed-not-attached        -> posterior:flagged  NOTICED (flagged, does NOT invalidate)
+  u37-removed                    -> u37:missing        REJECTED (invalidates the run)
+  g-terms-removed                -> g-terms:missing    REJECTED (invalidates the run)
+  quantities-relocated-off-root  -> c-source:bad       REJECTED (invalidates the run)
+SELFTEST PASS: accepts the complete record, rejects every perturbation
+
+-- offline-replay-run-record.edn  run offline-tick-001-validity  terminal nil
+   VALID (3/5 ok)
+   c-source           flagged  [:decision :selection-certificate :scoring 0 :c]  typed no-overlap: uniform spec scored this decision
+   rates-provenance   ok       [:decision :selection-certificate :scoring 0 :rates-provenance]  {:status :identity-default}
+   posterior          flagged  [:decision :selection-certificate]  f-not-consumed for 4 polic(ies): selection never used those F values
+   u37                ok       [:decision :enumeration-completeness]  :incomplete
+   g-terms            ok       [:decision :g-term-decomposition]
+
+== summary {:valid 1}
+   (invalid runs do not fail this process: evidence, not a gate)
