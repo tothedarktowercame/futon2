@@ -1,0 +1,7 @@
+{:repo-root "/tmp/futon2-wm01-bindings-warrant"
+ :subject-id "WM-01-bindings"
+ :command ["clojure" "-X:test" ":nses" "[futon2.aif.cascade-free-energy-test]"]
+ :author "codex-wm-bindings"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/wm01-bindings-2026-09-19/execution"
+ :code-paths ["src/futon2/aif/cascade_free_energy.clj"]
+ :test-paths ["test/futon2/aif/cascade_free_energy_test.clj"]}
