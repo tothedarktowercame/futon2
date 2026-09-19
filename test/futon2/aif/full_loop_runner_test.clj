@@ -4885,7 +4885,7 @@
                            {:events [{:type "text" :text base-reply}]}))
         "claiming the pre-dispatch base never corroborates")
     (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                          #"disagrees with observed repository HEAD"
+                          #"does not resolve in the repository"
                           (runner/fresh-artifact-binding
                            opts "/repo" before
                            {:events [{:type "text" :text unrelated-reply}]}))
