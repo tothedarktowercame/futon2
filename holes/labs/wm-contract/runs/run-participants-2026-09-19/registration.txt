@@ -1,0 +1,4 @@
+evidence-id test-registry-b015dbe2b9a3e5eb7b40e89f73704c17c1a0a3cca6398e9e11a866269e693eca
+warrant? true
+results {:assertions 25, :duration-ms 3359, :errors 0, :exit 0, :failures 0, :tests 4}
+bound EV-run-participants -> test-registry-b015dbe2b9a3e5eb7b40e89f73704c17c1a0a3cca6398e9e11a866269e693eca

@@ -1,0 +1,8 @@
+{:subject-id "EV-run-participants"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/full_loop_runner.clj" "src/futon2/aif/run_participants.clj"]
+ :test-paths ["test/futon2/aif/run_participants_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.run-participants-test"]
+ :author "codex-3"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/run-participants-2026-09-19"
+ :index-file "/home/joe/code/futon3c/data/test-registry-validation/subjects.ednlog"}
