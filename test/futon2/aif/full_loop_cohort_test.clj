@@ -554,8 +554,25 @@
                              (term {:outcome :agent-unavailable :grounded? false
                                     :artifact-only? false :duration-ms 1 :resource-use {}}))
       (is (= 1 (:closed-count (cohort/ledger snapshot root))))
-      (is (thrown? clojure.lang.ExceptionInfo
-                   (cohort/start-attempt! snapshot root (assoc-in cell [:judgment :opportunity-id] "run4/two")))))
+      ;; Past the target the attempt runs and is recorded, outside the
+      ;; preregistered window. The stopping rule still fixes what the cohort
+      ;; MEASURES; it no longer decides whether the machine may work at all.
+      (let [beyond (cohort/start-attempt!
+                    snapshot root
+                    (assoc-in cell [:judgment :opportunity-id] "run4/two"))
+            after (cohort/ledger snapshot root)
+            stratum (first (filter #(= :post-preregistration/beyond-window
+                                       (:stratum/id %))
+                                   (:semantic-strata after)))]
+        (is (true? (:cohort/beyond-window? beyond)))
+        (is (= {:target 1 :attempted 1} (:cohort/window beyond)))
+        (is (= 1 (:attempt-count after))
+            "a closed cohort's denominator cannot be moved by a later run")
+        (is (= 0 (:remaining after)))
+        (is (= 2 (:recorded-attempt-count after))
+            "but the attempt keeps its immutable dossier")
+        (is (= 1 (:attempt-count stratum))
+            "and is reported in its own stratum, never pooled")))
     (is (thrown? clojure.lang.ExceptionInfo
                  (cohort/execution-preflight (assoc binding :cohort-id :foreign) false)))
     (spit path (str raw "\n"))

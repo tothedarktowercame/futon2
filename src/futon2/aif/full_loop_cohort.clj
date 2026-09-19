@@ -283,11 +283,30 @@
        :judgment
        :outcome))
 
+(defn beyond-window-attempt?
+  "True when this attempt was opened after the stopping target was already met."
+  [attempt-dir]
+  (boolean (some #(and (= :time-step (:checkpoint/type %))
+                       (true? (:cohort/beyond-window? %)))
+                 (attempt-events attempt-dir))))
+
 (defn- cohort-attempt-dir? [attempt-dir]
+  ;; Two kinds of attempt keep their immutable dossier without consuming the
+  ;; preregistered denominator or the stopping window.
+  ;;
   ;; Cancellation was introduced after cohort 46's outcome taxonomy was
-  ;; preregistered. Keep its immutable dossier, but do not let it consume the
-  ;; preregistered denominator or stopping window.
-  (not= :cancelled (attempt-outcome attempt-dir)))
+  ;; preregistered.
+  ;;
+  ;; Beyond-window attempts are runs asked for after the target was met. A
+  ;; preregistered stopping rule fixes what a cohort MEASURES; it was never
+  ;; meant to decide whether the machine may work at all, and conflating the
+  ;; two turned a finished cohort into a standing refusal to run — an
+  ;; operator-facing bookkeeping obstacle in front of ordinary research (Joe,
+  ;; 2026-09-19). The rule keeps its whole measuring force: nothing opened
+  ;; after the target enters the denominator, so a closed cohort's reported
+  ;; rates cannot be moved by any later run.
+  (and (not= :cancelled (attempt-outcome attempt-dir))
+       (not (beyond-window-attempt? attempt-dir))))
 
 (defn- all-events [dir]
   (mapcat attempt-events (attempt-dirs dir)))
@@ -435,20 +454,25 @@
                cohort-attempt-count (count (filter cohort-attempt-dir?
                                                    all-attempt-dirs))
                ordinal (inc (count all-attempt-dirs))
-               target (get-in p [:stopping-rule :target])]
-           (when (>= cohort-attempt-count target)
-             (throw (ex-info "cohort stopping rule reached"
-                             {:cohort/error :stopping-rule-reached
-                              :target target :attempted cohort-attempt-count})))
-           (let [attempt-id (format-attempt-id
-                             (max (next-global-attempt-number data-root)
-                                  (inc (count (attempt-dirs dir)))))
-                 attempt-dir (io/file dir attempt-id)
-                 event (event-record p attempt-id ordinal 1 :time-step cell)]
-             (Files/createDirectory (.toPath attempt-dir)
-                                    (make-array java.nio.file.attribute.FileAttribute 0))
-             (write-new! (io/file attempt-dir "001-time-step.edn") event)
-             event)))))))
+               target (get-in p [:stopping-rule :target])
+               ;; Past the target the attempt still runs; it is recorded
+               ;; outside the preregistered window rather than refused. See
+               ;; cohort-attempt-dir? for why measuring and permitting are not
+               ;; the same question.
+               beyond-window? (>= cohort-attempt-count target)
+               attempt-id (format-attempt-id
+                           (max (next-global-attempt-number data-root)
+                                (inc (count all-attempt-dirs))))
+               attempt-dir (io/file dir attempt-id)
+               event (cond-> (event-record p attempt-id ordinal 1 :time-step cell)
+                       beyond-window?
+                       (assoc :cohort/beyond-window? true
+                              :cohort/window {:target target
+                                              :attempted cohort-attempt-count}))]
+           (Files/createDirectory (.toPath attempt-dir)
+                                  (make-array java.nio.file.attribute.FileAttribute 0))
+           (write-new! (io/file attempt-dir "001-time-step.edn") event)
+           event))))))
 
 (defn- checkpoint-index [k]
   (.indexOf checkpoint-order k))
@@ -556,10 +580,19 @@
   ([prereg-path data-root]
    (let [p (read-preregistration prereg-path)
          dir (cohort-dir p data-root)
+         beyond-window-ids (into #{} (comp (filter beyond-window-attempt?)
+                                           (map #(:attempt/id (attempt-summary %))))
+                                 (attempt-dirs dir))
          recorded-attempts (mapv attempt-summary (attempt-dirs dir))
          cancelled-attempts (filterv #(= :cancelled (:outcome %))
                                      recorded-attempts)
-         attempts (filterv #(not= :cancelled (:outcome %)) recorded-attempts)
+         beyond-window-attempts (filterv #(contains? beyond-window-ids
+                                                     (:attempt/id %))
+                                         recorded-attempts)
+         attempts (filterv #(and (not= :cancelled (:outcome %))
+                                 (not (contains? beyond-window-ids
+                                                 (:attempt/id %))))
+                           recorded-attempts)
          outcomes (frequencies (keep :outcome attempts))]
      {:cohort/id (:cohort/id p)
       :protocol/version (:protocol/version p)
@@ -580,7 +613,11 @@
       [{:stratum/id :post-preregistration/cancelled
         :reason :outcome-not-in-preregistered-cohort-taxonomy
         :attempt-count (count cancelled-attempts)
-        :attempts cancelled-attempts}]})))
+        :attempts cancelled-attempts}
+       {:stratum/id :post-preregistration/beyond-window
+        :reason :opened-after-the-preregistered-stopping-target-was-met
+        :attempt-count (count beyond-window-attempts)
+        :attempts beyond-window-attempts}]})))
 
 (defn write-ledger!
   ([out-path] (write-ledger! default-preregistration default-data-root out-path))
