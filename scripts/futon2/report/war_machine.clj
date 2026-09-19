@@ -6809,7 +6809,9 @@
            (assoc :cascade-sources
                   (cond (:cascade-sources judge-opts) :supplied-by-caller
                         declared-sources {:declared-files (:files declared-sources)
-                                          :observations (:observations declared-sources)}
+                                          :observations (:observations declared-sources)
+                                          :read-occurrences (:read-occurrences declared-sources)
+                                          :target-collisions (:target-collisions declared-sources)}
                         :else :none-supplied)))
           active-mission)
          mission-c-fields)

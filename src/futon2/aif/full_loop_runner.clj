@@ -14,6 +14,7 @@
             [clojure.pprint :as pp]
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
+            [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.evidence-manifest :as evidence-manifest]
@@ -518,6 +519,8 @@
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
                     :participants (participants/record-value raw-opts)
+                    :declaration-reads (cascade-sources/provenance
+                                        (some-> (:declaration-reads/state raw-opts) deref))
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
@@ -4831,15 +4834,17 @@
   (let [run-id (or (:run-id raw-opts)
                    (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
         started-at (str (Instant/now))
-        raw-opts (assoc raw-opts :participants/state (atom nil))
+        raw-opts (assoc raw-opts :participants/state (atom nil)
+                                :declaration-reads/state (atom nil))
         _ (ensure-dispatch-seat! (config raw-opts))
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.
         source-check (refuse-on-runner-source-drift!)
         result
         (try
-      (run-opportunity-core! (assoc raw-opts :run-id run-id
-                                   :loaded-code-identity source-check))
+      (binding [cascade-sources/*read-occurrences* (:declaration-reads/state raw-opts)]
+        (run-opportunity-core! (assoc raw-opts :run-id run-id
+                                     :loaded-code-identity source-check)))
     (catch Throwable e
       (when (or (= :delivery-qa-gate-failed
                    (:failure-kind (ex-data e)))
