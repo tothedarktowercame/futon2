@@ -360,37 +360,100 @@
             (and (= :opportunity phase) (= :start transition)))
     (livelock-violations findings closed-repair-ids)))
 
-(defn- composition-drift [baseline current]
-  (into []
-        (keep (fn [[namespace expected]]
-                (let [actual (get current namespace)]
-                  (when (not= expected actual)
-                    {:namespace namespace :loaded expected :repo/live actual}))))
-        baseline))
+(defn- loaded-definition-lines
+  "Line of every public fn AS THE RUNNING IMAGE REPORTS IT.
 
-(defn- t10 [{:keys [phase transition composition/current]
-             :as observation}]
+  Var :line metadata comes from the code that was actually compiled, so this is
+  evidence about the image. Everything else in this file that claims to observe
+  loaded code observes the file instead."
+  [namespace]
+  (when-let [loaded (find-ns namespace)]
+    (into (sorted-map)
+          (keep (fn [[sym var]]
+                  (when-let [l (:line (meta var))] [sym l])))
+          (ns-publics loaded))))
+
+(defn- file-definition-lines
+  "Line of every top-level def form AS THE FILE NOW READS.
+
+  Deliberately textual: the comparison is file-against-image, so this side must
+  not be reached through the loaded namespace."
+  [path]
+  (let [file (io/file path)]
+    (when (.isFile file)
+      (with-open [r (io/reader file)]
+        (into (sorted-map)
+              (keep-indexed
+               (fn [i line]
+                 (when-let [m (re-find #"^\(def\S*\s+(?:\^\S+\s+)*([^\s\[(]+)" line)]
+                   [(symbol (second m)) (inc i)])))
+              (line-seq r))))))
+
+(defn image-file-divergence
+  "Public fns whose loaded line differs from the line the file gives them now.
+
+  This is POSITIVE evidence that the running image is not this file. Comparing
+  a file hash against a hash of the same file taken earlier — which is what
+  this wire did until 2026-09-19 — cannot distinguish an edit that was reloaded
+  from one that was not, so it fired on both. T10 tripped 60 times between
+  2026-07-16 and 2026-09-15 and was read as noise; inside that noise, the
+  serving JVM ran a runner 28 hours out of date, ignored the author's correct
+  commit claim, and opened three build-failed findings that became a livelock.
+
+  Only symbols present on BOTH sides are compared, so a def that is public in
+  one and not the other is not mistaken for staleness."
+  [namespace path]
+  (let [loaded (loaded-definition-lines namespace)
+        on-disk (file-definition-lines path)]
+    (when (and (seq loaded) (seq on-disk))
+      (vec (for [[sym line] loaded
+                 :let [disk (get on-disk sym)]
+                 :when (and disk (not= line disk))]
+             {:fn sym :loaded-line line :file-line disk})))))
+
+(defn foreign-var-roots
+  "Public fns in NAMESPACE whose implementation did not come from NAMESPACE.
+
+  A var rebound at runtime -- alter-var-root, with-redefs left in place, a
+  half-applied patch -- keeps its :line but its fn class names the namespace
+  that actually defined it. That is a mixed image, provable from the image
+  alone with no baseline to go stale. Measured clean (zero) across all five
+  tracked namespaces on 2026-09-19 before this was adopted as a halting
+  signal."
+  [namespace]
+  (when-let [loaded (find-ns namespace)]
+    (let [prefix (str (munge (name namespace)) "$")]
+      (vec (for [[sym v] (ns-publics loaded)
+                 :when (and (.isBound ^clojure.lang.Var v) (fn? @v))
+                 :let [cls (.getName (class @v))]
+                 :when (not (str/starts-with? cls prefix))]
+             {:fn sym :implemented-by cls})))))
+
+(defn- t10 [{:keys [phase transition] :as observation}]
   (when (or (:tripwire/force? observation)
             (and (= :opportunity phase) (= :start transition)))
-    (let [current (or current (composition-snapshot))
-          missing (apply dissoc current (keys @composition-baseline))
-          _ (when (seq missing) (swap! composition-baseline merge missing))
-          ;; A baseline fingerprint captured mid-load (the runner's circular
-          ;; require) is EMPTY — a missing observation, not an observation of
-          ;; emptiness. Admit the first real fingerprint exactly once, but only
-          ;; while the source hash is unchanged; a sha mismatch is real
-          ;; evidence regardless. (Shadow run 1: 15 false T10 trips against an
-          ;; empty baseline, 2026-07-16.)
-          _ (doseq [[ns-sym cur] current
-                    :let [base (get @composition-baseline ns-sym)]
-                    :when (and base
-                               (empty? (:public-functions base))
-                               (seq (:public-functions cur))
-                               (= (:source-sha256 base) (:source-sha256 cur)))]
-              (swap! composition-baseline assoc ns-sym cur))
-          drift (composition-drift @composition-baseline current)]
-      (when (seq drift)
-        [{:kind :loaded-file-code-mismatch :drift drift}]))))
+    ;; Halt only on what can be PROVEN. A file whose hash moved may have been
+    ;; reloaded correctly; divergent definition lines cannot have been. Now
+    ;; that a witness stops the run, a wire that fires on suspicion stops it
+    ;; for nothing -- and a wire that fires on everything is how a real
+    ;; staleness went unread 60 times.
+    ;;
+    ;; Known gap, stated rather than papered over: an edit that changes a form
+    ;; in place without moving any definition line leaves the lines agreeing,
+    ;; and this will call that clear.
+    (let [stale (into []
+                      (keep (fn [[ns-sym path]]
+                              (when (find-ns ns-sym)
+                                (let [d (seq (image-file-divergence ns-sym path))
+                                      f (seq (foreign-var-roots ns-sym))]
+                                  (when (or d f)
+                                    (cond-> {:namespace ns-sym :source-path path}
+                                      d (assoc :divergent-count (count d)
+                                               :divergence (vec (take 10 d)))
+                                      f (assoc :foreign-roots (vec (take 10 f)))))))))
+                      runner-namespace-sources)]
+      (when (seq stale)
+        [{:kind :loaded-file-code-mismatch :stale stale}]))))
 
 (defn- timestamp-values [job]
   (concat (keep job [:created-at :started-at :completed-at :updated-at])

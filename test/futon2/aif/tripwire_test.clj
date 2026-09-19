@@ -202,7 +202,11 @@
                  :T8 {:findings (mapv finding ["r1" "r2"])
                       :tripwire/force? true})))))
 
-(deftest t10-composition-coherence-trips-on-mixed-image
+(deftest t10-trips-on-a-var-replaced-at-runtime
+  ;; The old wire simulated a mixed image by rebinding a var and noticing the
+  ;; fn's class name changed against a stored baseline. Same evidence, no
+  ;; baseline: a public fn whose class does not name its own namespace did not
+  ;; come from that namespace's file.
   (let [original @#'repair/open-obligations]
     (try
       (alter-var-root #'repair/open-obligations
@@ -210,10 +214,13 @@
       (is (= :loaded-file-code-mismatch
              (:kind (first (tripwire/evaluate-wire
                             :T10 {:tripwire/force? true})))))
+      (is (seq (tripwire/foreign-var-roots 'futon2.aif.repair-obligation)))
       (finally
         (alter-var-root #'repair/open-obligations
                         (constantly original))))
-    (is (empty? (tripwire/evaluate-wire :T10 {:tripwire/force? true})))))
+    (testing "and goes clear once the image matches its files again"
+      (is (empty? (tripwire/foreign-var-roots 'futon2.aif.repair-obligation)))
+      (is (empty? (tripwire/evaluate-wire :T10 {:tripwire/force? true}))))))
 
 (deftest t11-job-alphabet-trips-on-unknown-state-and-bad-time
   (let [violations
@@ -479,28 +486,23 @@
                  :T1 {:runner/dispatched-turns 2
                       :agency/dispatch-count 2})))))
 
-(deftest t10-empty-baseline-fingerprint-is-no-observation
-  (testing "a baseline captured mid-load (empty fingerprint) admits the first
-real fingerprint instead of tripping — but a sha mismatch still trips"
-    (let [ns-sym 'futon2.aif.tripwire-test-fixture
-          base {ns-sym {:source-path "x.clj" :source-sha256 "abc"
-                        :public-functions {}}}
-          same-sha {ns-sym {:source-path "x.clj" :source-sha256 "abc"
-                            :public-functions {'f "class$f"}}}
-          diff-sha {ns-sym {:source-path "x.clj" :source-sha256 "zzz"
-                            :public-functions {'f "class$f"}}}]
-      (with-redefs [tripwire/composition-baseline (atom base)]
-        (is (nil? (#'tripwire/t10 {:phase :opportunity :transition :start
-                                   :composition/current same-sha}))
-            "empty fingerprint + matching sha admits, no trip")
-        (is (= {'f "class$f"}
-               (get-in @@#'tripwire/composition-baseline
-                       [ns-sym :public-functions]))
-            "first real fingerprint was admitted exactly once"))
-      (with-redefs [tripwire/composition-baseline (atom base)]
-        (is (seq (#'tripwire/t10 {:phase :opportunity :transition :start
-                                  :composition/current diff-sha}))
-            "sha mismatch is real evidence even with an empty baseline fingerprint")))))
+(deftest t10-does-not-trip-on-a-file-that-was-edited-and-reloaded
+  ;; Until 2026-09-19 this wire compared the file's hash against a hash of the
+  ;; same file taken when the observer loaded, so it fired whether or not the
+  ;; namespace had been reloaded. It tripped 60 times between 2026-07-16 and
+  ;; 2026-09-15 and was read as noise -- and inside that noise the serving JVM
+  ;; ran a runner 28 hours out of date, ignored the author's correct commit
+  ;; claim, and opened the three build-failed findings that became a livelock.
+  ;;
+  ;; Every tracked namespace here was edited and reloaded today, so a
+  ;; hash-against-hash wire would fire on all of them. Proven evidence does not.
+  (testing "loaded definition lines agree with the files they were loaded from"
+    (doseq [[ns-sym path] tripwire/runner-namespace-sources
+            :when (find-ns ns-sym)]
+      (is (empty? (tripwire/image-file-divergence ns-sym path))
+          (str ns-sym " image disagrees with " path))))
+  (testing "so the wire is clear"
+    (is (empty? (tripwire/evaluate-wire :T10 {:tripwire/force? true})))))
 
 ;; ---------------------------------------------------------------------------
 ;; Durable trip reports are bounded (2026-09-18)
