@@ -59,7 +59,8 @@
       (is (= provenance (participants/read-role record :issuing-caller)))
       (is (not= record broken))
       (is (not= provenance (participants/read-role broken :issuing-caller)))))
-  (is (= {:status :not-observed} (participants/read-role (write-record {}) :issuing-caller))))
+  (doseq [opts [{} {:issuer-provenance nil}]]
+    (is (= {:status :not-observed} (participants/read-role (write-record opts) :issuing-caller)))))
 
 (deftest wrapper-carries-observation-to-writer
   (let [dir (.toFile (java.nio.file.Files/createTempDirectory

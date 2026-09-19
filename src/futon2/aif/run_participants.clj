@@ -33,9 +33,8 @@
   (let [observed (some-> (:participants/state opts) deref)]
     {:schema :wm/run-participants-v1
      :roles (assoc (merge (zipmap roles (repeat {:status :not-observed})) observed)
-                   :issuing-caller (if (contains? opts :issuer-provenance)
-                                     (:issuer-provenance opts)
-                                     {:status :not-observed}))}))
+                   :issuing-caller (or (:issuer-provenance opts)
+                                       {:status :not-observed}))}))
 
 (defn read-role
   "Old records and missing roles are unrecorded, never inferred absent."
