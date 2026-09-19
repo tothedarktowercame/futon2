@@ -181,6 +181,22 @@
     (is (= 18446744073709551614N (:exact-total result)))
     (is (= :unnormalized-row (get-in result [:refusal :kind])))))
 
+(deftest represented-rational-is-the-coordinate-conversion-authority
+  (doseq [[value representation rational]
+          [[7 :integer 7]
+           [2/3 :ratio 2/3]
+           [0.1M :decimal 1/10]
+           [(float 0.1) :float32 (rationalize (BigDecimal. (double (float 0.1))))]
+           [0.1 :float64 (rationalize (BigDecimal. 0.1))]]]
+    (is (= {:ok true :representation representation :rational rational}
+           (m/represented-rational value))))
+  (is (not= (rationalize 0.1) (:rational (m/represented-rational 0.1)))
+      "Double conversion follows decimal spelling, not the IEEE bit value")
+  (is (= {:ok false :refusal {:kind :unsupported-numeric-type
+                              :type "java.lang.String"}}
+         (m/represented-rational "0.1"))
+      "unsupported coordinates have a named refusal, not an incidental exception"))
+
 (deftest shared-refusals-and-wrapper-projection
   (doseq [[v kind] [[Double/NaN :invalid-mass] [Double/POSITIVE_INFINITY :invalid-mass]
                     [Float/NEGATIVE_INFINITY :invalid-mass] [-1 :invalid-mass]

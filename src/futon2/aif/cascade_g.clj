@@ -40,17 +40,12 @@
       (< m 1) (recur (*' m 2) (dec k))
       :else (plus (log-unit m) (scale k log-two)))))
 
-(defn- rational-value [x]
-  (cond
-    (or (integer? x) (ratio? x)) x
-    (instance? BigDecimal x) (rationalize x)
-    :else (rationalize (BigDecimal. (double x)))))
-
 (defn- row! [mass support path]
   (let [admission (model/distribution-admission mass support)]
     (when-not (:ok admission)
       (refuse! (get-in admission [:refusal :kind]) path))
-    {:admission admission :mass (update-vals mass rational-value)}))
+    {:admission admission
+     :mass (update-vals mass (comp :rational model/represented-rational))}))
 
 (defn step-g
   "Score one observation point. q and a use categorical-ambiguity's unchanged

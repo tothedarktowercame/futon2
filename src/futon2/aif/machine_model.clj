@@ -49,21 +49,36 @@
    error; runs/row-7-belief-state-2026-09-12/readback.edn)."
   1e-12M)
 
-(defn- numeric-representation [v]
-  (cond
-    (integer? v) :integer
-    (ratio? v) :ratio
-    (instance? BigDecimal v) :decimal
-    (instance? Float v) :float32
-    (instance? Double v) :float64
-    :else nil))
+(defn represented-rational
+  "Classify one supported numeric coordinate and return its exact rational
+   represented value. Float and Double deliberately mean the decimal spelling
+   of their widened double value, not their IEEE bits.
 
-(defn- represented-rational [v representation]
-  (case representation
-    (:integer :ratio) v
-    :decimal (rationalize v)
-    ;; rationalize on a float itself uses its decimal spelling, not its bits.
-    (:float32 :float64) (rationalize (BigDecimal. (double v)))))
+   This is the one authority for coordinate conversion. A second copy in a
+   consumer would not be an independent comparator: it would repeat the same
+   three-case reasoning and therefore share its conceptual errors. Unsupported
+   values return a typed refusal instead of leaking an incidental case or Java
+   coercion exception."
+  [v]
+  (cond
+    (integer? v) {:ok true :representation :integer :rational v}
+    (ratio? v) {:ok true :representation :ratio :rational v}
+    (instance? BigDecimal v)
+    {:ok true :representation :decimal :rational (rationalize v)}
+    (instance? Float v)
+    (if (Double/isFinite (double v))
+      {:ok true :representation :float32
+       :rational (rationalize (BigDecimal. (double v)))}
+      {:ok false :refusal {:kind :invalid-mass}})
+    (instance? Double v)
+    (if (Double/isFinite (double v))
+      {:ok true :representation :float64
+       :rational (rationalize (BigDecimal. (double v)))}
+      {:ok false :refusal {:kind :invalid-mass}})
+    :else
+    {:ok false
+     :refusal {:kind :unsupported-numeric-type
+               :type (if (nil? v) "nil" (.getName (class v)))}}))
 
 (defn- representation-class [representations]
   (let [kinds (set (vals representations))
@@ -91,20 +106,18 @@
   [row]
   (if-not (map? row)
     {:ok false :refusal {:kind :missing-distribution :path []}}
-    (let [representations (into {} (map (fn [[k v]] [k (numeric-representation v)])) row)
+    (let [coordinates (update-vals row represented-rational)
+          representations (update-vals coordinates :representation)
           invalid (some (fn [[k v]]
                           (cond
-                            (nil? (get representations k))
-                            {:kind :unsupported-numeric-type :path [k] :type (if (nil? v) "nil" (.getName (class v)))}
-                            (and (#{:float32 :float64} (get representations k))
-                                 (not (Double/isFinite (double v))))
-                            {:kind :invalid-mass :path [k]}
+                            (not (:ok (get coordinates k)))
+                            (assoc (:refusal (get coordinates k)) :path [k])
                             (neg? v) {:kind :invalid-mass :path [k]})) row)]
       (if invalid
         {:ok false :refusal invalid}
         (let [representation (representation-class representations)
               toleranced? (not= :exact-rational representation)
-              total (reduce +' 0 (map (fn [[k v]] (represented-rational v (get representations k))) row))
+              total (reduce +' 0 (map :rational (vals coordinates)))
               deviation (abs (-' total 1))
               bound (if toleranced? (rationalize float-row-tolerance) 0)
               admitted? (<= deviation bound)
