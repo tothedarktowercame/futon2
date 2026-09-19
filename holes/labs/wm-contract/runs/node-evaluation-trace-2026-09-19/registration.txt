@@ -1,0 +1,4 @@
+evidence-id test-registry-22254da5f18d7556332acecb667e879d5771badf66ada7f3e051d10f47418307
+warrant? true
+results {:assertions 132, :duration-ms 5153, :errors 0, :exit 0, :failures 0, :tests 5}
+bound EV-node-level-evaluation-trace -> test-registry-22254da5f18d7556332acecb667e879d5771badf66ada7f3e051d10f47418307
