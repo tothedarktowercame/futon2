@@ -194,6 +194,15 @@
    their distinct constructors. This emits evidence, not a runtime gate."
   [beta candidates ranked]
   {:beta {:value beta :status :declared}
+   ;; A full candidate map is the join key. Nested labels repeat across
+   ;; targets. Copy the actual scorer evaluations, never replay the model.
+   :node-evaluation-traces
+   (mapv (fn [entry]
+           (let [certificate (:certificate entry)]
+             {:id (:action entry)
+              :horizon (:horizon-steps entry)
+              :status (if (contains? certificate :node-evaluations) :recorded :missing)
+              :evaluations (:node-evaluations certificate)})) ranked)
    :g-term-decomposition (decomposition/census ranked candidates)
    ;; Retain every candidate's own scorer provenance. Indexing by position
    ;; preserves the exact candidate association even when action names tie.

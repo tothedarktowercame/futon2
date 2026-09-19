@@ -64,10 +64,13 @@
         steps (loop [tau 1 q q0 result []]
                 (if (> tau horizon-steps)
                   result
-                  (let [next-q (checked (m/rollout (constantly (:precedence candidate)) q 1))
+                  (let [evaluated (m/rollout-evaluation (constantly (:precedence candidate)) q 1)
+                        next-q (checked (:belief evaluated))
                         score (checked (om/query observation-model
                                                  {:op :score :belief next-q :preference preference}))]
-                    (recur (inc tau) next-q (conj result (assoc score :tau tau :belief next-q))))))
+                    (recur (inc tau) next-q
+                           (conj result (assoc score :tau tau :belief next-q
+                                               :node-evaluation (assoc (first (:evaluations evaluated)) :tau tau)))))))
         predicted (:belief (peek steps))
         conditioned (om/query observation-model {:op :condition :belief predicted
                                                  :observation observation :context prediction-context})
@@ -81,6 +84,7 @@
                              :evaluation :exact-enumeration
                              :observation-model observation-model
                              :scope :synthetic-bounded-replay
+                             :node-evaluations (mapv :node-evaluation steps)
                              :steps steps
                              :c {:form :constant-spec :spec (:cascade-spec opts)}
                              :rates-provenance {:source :observation-model/query
