@@ -1,0 +1,102 @@
+{:dimension :silent-lookup-miss
+ :agent "zai-12"
+ :scanned {:paths ["futon2/scripts/futon2/report/"
+                   "futon3c/src/futon3c/wm/"
+                   "p4ng/empirics-futon/"]
+           :files 61}
+ :findings
+ [{:file "futon3c/src/futon3c/wm/guardrails.clj"
+   :line 132
+   :snippet "(if-let [mission-status-fn (requiring-resolve 'futon2.aif.mission-registry/work-target-status)] (mission-status-fn target) {:open? false :open-hole-count 0}) (catch Throwable _ {:open? false :open-hole-count 0})"
+   :why "default-mission-status is the fallback lookup behind open-mission-with-holes? (same file, line ~149). Any Throwable — namespace not loaded, registry read failure, NPE inside work-target-status — is caught and converted to the SAME map shape a healthy 'closed mission, no holes' lookup returns. The failure is indistinguishable from a real negative."
+   :consequence "open-mission-with-holes? returns false, the guardrail that depends on it does not fire, and an action aimed at an open mission is admitted with no error anywhere. This is a lookup failure that silently disarms a gate."
+   :confidence :confirmed
+   :severity :silent-wrong-number}
+  {:file "futon3c/src/futon3c/wm/guardrails.clj"
+   :line 118
+   :snippet "(catch Throwable _ false))"
+   :why "registry-live-mission? wraps the open-missions/live-target resolving-resolves in (catch Throwable _ false). A missing var or a registry exception reads as 'not a live mission target'."
+   :consequence "Same class as the default-mission-status catch one level up: the boolean default is indistinguishable from a genuine negative, so a transport/registry failure silently passes a liveness check."
+   :confidence :confirmed
+   :severity :silent-wrong-number}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 2987
+   :snippet "(filter (fn [e] (when-let [d (parse-iso-date (:evidence/at e))] (>= (compare d since) 0))) entries)"
+   :why "window-entries is the population EVERY health arrow's detect-fn and cnt (count matches) run over. parse-iso-date returns nil for a missing or malformed :evidence/at, when-let yields nil, filter drops the entry. The same pattern recurs at :3065 and :3590 and in the keep at :2996."
+   :consequence "An evidence entry with a bad timestamp — e.g. a violation the operator needs to see — silently falls out of the window and every arrow's violation count is quietly lower; the arrow renders healthier than reality."
+   :confidence :confirmed
+   :severity :silent-wrong-number}
+  {:file "p4ng/empirics-futon/gen_rnode_dossiers.py"
+   :line 373
+   :snippet "for name in sorted(lean_by_node.get(node, ())): if name not in contract_decls: continue ... if resolved[\"line\"] is None: continue"
+   :why "This is the residual of the documented 2026-09-18 defect in the same file (comment block at line 210): the alias fix narrowed the misses but the loop itself still `continue`s past any name that misses contract_decls, or whose union line-lookup returned None, with no census at the point of use. The 2026-09-18 fix removed one alias form; a FOURTH naming form (or an ambiguous alias, which the fix deliberately drops) re-creates the exact silent under-reporting."
+   :consequence "The node is placed at a lower rung with only the generic blocked message ('no equation ... names a Lean declaration ...'), which does not distinguish 'genuine absence' from 'name stopped resolving'. The published rung distribution is quietly wrong; nothing is red."
+   :confidence :confirmed
+   :severity :silent-wrong-number}
+  {:file "p4ng/empirics-futon/gen_fundamentals.py"
+   :line 81
+   :snippet "if not sha or not path: continue ... if cand.exists(): <check drift>"
+   :why "The pin-drift loop skips a source-pin entirely when sha/path fields are missing, and — the worse branch — when the pinned path does not exist on disk, the `if cand.exists():` guard silently bypasses the drift comparison with no else. A pin pointing at a moved or deleted file is exempt from the staleness check the whole E07 slice exists to enforce."
+   :consequence "The census renders as 'current' while an unreadable source was never hashed; the pin-review pass count implicitly includes a pin that was not actually verified."
+   :confidence :confirmed
+   :severity :silent-wrong-number}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 1230
+   :snippet "(keep (fn [[mission row]] (when-let [c (get row \"c_joint\")] [(str mission) (double c)]))"
+   :why "Forward-model centrality rows lacking the \"c_joint\" key are silently dropped from the centrality map. Reachable whenever the centrality producer changes its row schema (key rename, c_joint moved) — every mission then vanishes from the ranking, not just the malformed one."
+   :consequence "Centrality ranking and any count derived from it quietly shrink; a schema drift in the producer reads as 'fewer missions measured', not an error."
+   :confidence :likely
+   :severity :silent-wrong-number}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 5073
+   :snippet "s6-rates (keep #(get-in % [:output-quality :stage6-parse-rate]) batches) ... :max-collection-lag-days (reduce max 0 (keep :collection-lag-days ready))"
+   :why "Batches whose :output-quality map lacks :stage6-parse-rate are dropped from BOTH the numerator and the denominator of the mean; :max-collection-lag-days at :5086 defaults to 0 when every ready batch lacks the key, reporting 'no lag' on a population that was simply unmeasurable."
+   :consequence "Published throughput/quality means and lag numbers are computed over a silently self-selecting subpopulation; the (reduce max 0 ...) default is indistinguishable from a true zero."
+   :confidence :likely
+   :severity :silent-wrong-number}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 4653
+   :snippet "phases (frequencies (keep #(get-in % [:state :phase]) session-heads)) balance-sum (reduce + 0 (keep #(get-in % [:state :balance]) session-heads))"
+   :why "Session heads with a missing/malformed :state map contribute to the printed headcount ('N sessions') but not to the phase frequencies or the balance sum. The three numbers on one operator line are computed over three different silent subpopulations."
+   :consequence "Σ balance and phase counts are quietly lower than the session count implies; an operator reconciling them sees a discrepancy with no error to explain it."
+   :confidence :likely
+   :severity :silent-wrong-number}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 2703
+   :snippet "(keep #(normalize-keyword (:track-id %))) ... n (or (:obsolete-count detail) (count tracks))"
+   :why "Inside family-fired->issue: track-ids that fail to normalize are silently dropped from `tracks`, and the headline count n falls back to (:obsolete-count detail) OR the count of SURVIVING tracks. A malformed track-id yields either the producer's stale count or an undercount, never an error."
+   :consequence "The published 'N overdue pipeline tracers need decisions' number is quietly wrong when track-ids are malformed and :obsolete-count is absent."
+   :confidence :likely
+   :severity :silent-wrong-number}
+  {:file "p4ng/empirics-futon/gen_rnode_dossiers.py"
+   :line 316
+   :snippet "DECL = re.compile(r\"\\b(?:abbrev|structure|def|noncomputable def|axiom|class)\\s+\")"
+   :why "The fundamentals-cap join parses 'declarations-read' free text with a regex that omits theorem|lemma|instance|inductive — the sibling regex in wm_contract_union.py:105 DOES include them. A fundamentals entry whose read-declarations cite only a theorem produces an empty decl set, silently fails the overlap join, and never caps its node."
+   :consequence "The node reads at a lower rung ('formula-transcribed' instead of capped) with no error; the entry falls into the unjoined census which names it but does not say the join regex never could have matched it."
+   :confidence :likely
+   :severity :silent-wrong-number}
+  {:file "futon3c/src/futon3c/wm/needs_you.clj"
+   :line 39
+   :snippet "(or (get-in dT-entry [:action :target]) ... (get-in dT-entry [:action :mission-path]) \"unknown\")"
+   :why "action-target/action-path/action-repo are or-chains ending in a literal \"unknown\" (and the name fallback at line 33). Entries whose action carries none of the four key spellings collapse into one \"unknown\" bucket in operator-facing grouping and counts."
+   :consequence "Distinct actions are silently merged under 'unknown' in operator summaries; a producer adding a fifth key spelling re-creates the collapse with no error."
+   :confidence :speculative
+   :severity :silent-wrong-number}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 2477
+   :snippet "(keep #(second (re-matches #\"wm-trace-(\\d{4}-\\d{2}-\\d{2})\\.edn\" (str %)) files)"
+   :why "Trace-day discovery keeps only files matching one exact filename pattern; a renamed or differently-formatted trace file silently drops out of the day window."
+   :consequence "Coverage counts over trace days quietly shrink when a writer changes the filename convention; nothing distinguishes 'no file' from 'file we chose not to see'."
+   :confidence :speculative
+   :severity :silent-wrong-number}
+  {:file "p4ng/empirics-futon/gen_fundamentals.py"
+   :line 65
+   :snippet "(except Exception: return False)  # dirty_in_git"
+   :why "Any git failure (timeout, missing repo, permission) reads as 'file is not dirty', so the drift classifier routes the pin into the drifted bucket on the strength of a swallowed exception."
+   :consequence "A clean committed pin can be reported as drifted (triggering a spurious re-adjudication dispatch), or the dirty/drift distinction silently misfires in the other direction if the logic is later inverted."
+   :confidence :speculative
+   :severity :cosmetic}]
+ :proposed-check
+ {:name "count-preservation / corrupt-one-key mutation check for aggregations"
+  :how "Two-part mechanical check. (1) Static: find every aggregation site — grep for (keep ..., (filter ... with a when-let/nil-returning predicate, reduce +/max over keeps, and Python 'for x in pop: if not lookup(x): continue' — and require each site to have a sibling census artifact (a dropped-items list that is refused-on-nonempty or printed by name, like gen_rnode_dossiers' `unjoined`). Flag any keep/filter/reduce-over-lookup whose input population has no such census. (2) Dynamic, the stronger half: a mutation harness that takes each generator/reporter's INPUT fixture, corrupts exactly one lookup key (rename one :track-id, one c_joint, one :evidence/at, one union declaration name), reruns, and diffs the output. PASS = output refuses or the diff names the dropped item explicitly. FAIL = output renders valid EDN/PDF with every number present and exactly one item silently missing — that is this defect class, mechanically detected."
+  :false-positive-risk "Legitimate population splits: code that intentionally partitions a population (e.g. gen_model_coverage's 'unclassified' area is rendered and separately counted, rung_claims' blocked message IS the census for its rung) looks like a silent drop to the static grep. The dynamic harness avoids this only if the checker knows which output line is the census; where a drop is reported elsewhere in the same artifact, the static check must trace the census variable, not just its presence."}}

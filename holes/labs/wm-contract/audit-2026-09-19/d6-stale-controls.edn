@@ -1,0 +1,98 @@
+{:dimension :stale-negative-control
+ :agent "zai-14"
+ :scanned {:paths ["/home/joe/code/p4ng/empirics-futon/negative_controls.sh"
+                   "/home/joe/code/p4ng/empirics-futon/pointer_check.bb (registry list)"
+                   "/home/joe/code/futon2/holes/labs/wm-contract/ (live plant targets: variable-situation-accounting.edn, lane-registry, tally, edges, aif-equations, CONVERGENCE.edn, symbol-concordance.edn, RUNTIME-VALIDATION-CATALOG.edn, tension-ledger.edn, F7/F9/U35 run fixtures, aif-control-map-futon.svg)"]
+           :files 20}
+ :findings
+ [;; ---- confirmed: read the control body and the live target ----
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 210
+   :snippet "sed '0,/:status :repaired/s//:status :fixed/' \"$T/tally.edn\" > \"$T/tally-renamed.edn\"   (same shape at :224 for :status :drawn, :231 for :imports [:Pi :eps])"
+   :why "Controls 3, 4b and 4c plant via a sed against a literal that must exist in a committed registry, and none of the three asserts the plant took. I verified all three literals are still present live (tally 61x ':status :repaired', edges 29x ':status :drawn', eq 1x ':imports [:Pi :eps]'), so the controls are green for the right reason TODAY -- but this is byte-for-byte the pattern that rotted 13o/14j: when the literal is renamed or the field moves, sed writes an unmutated copy, the checker correctly accepts it, and the control fires 'tetrahedron accepted a renamed repair status' -- a false accusation against the checker that costs a diagnosis cycle (and tempts someone to 'fix' the checker). The re-fixture of 13o/14j added python 'the plant no longer lands' asserts; these three sed plants got none."
+   :consequence "no silent green today, but on the next registry vocabulary change the publish gate reddens with a misdiagnosed failure, exactly the 13o/14j incident replayed"
+   :confidence :confirmed
+   :severity :stops-a-run}
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 1264
+   :snippet "[ \"$before_sha\" = \"$(cd \"$F2\" && git rev-parse \"HEAD:holes/labs/wm-contract/tension-ledger.edn\")\" ] \\\\"
+   :why "Control 8x's closing assertion compares $before_sha (line 1256, 'git rev-parse HEAD:holes/.../tension-ledger.edn') with the output of the IDENTICAL command on line 1264. HEAD:blob is HEAD:blob by construction; the check can never fail and therefore controls nothing. The working-tree half of 8x (line 1261, git diff --quiet) does the real work, so this is a dead belt-and-braces assertion, not a lost guard -- but it reads as a second, stronger witness that does not exist."
+   :consequence "a reader (or a future edit that weakens the git-diff half) believes the ledger's committed state is independently asserted when it is not"
+   :confidence :confirmed
+   :severity :cosmetic}
+  ;; ---- likely: read the call path, staleness mode is real but not yet live ----
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 2078
+   :snippet "edn \"$CVREG\" \"$T/cv-artifact-reason.edn\" '#(assoc-in % [:rows 8 :certificate :reason] \"\")'   (rows 0 plants at :2036,:2041,:2050,:2056,:2068,:2073,:2083,:2088; rows 8 at :2078,:2093)"
+   :why "Ten convergence controls (14f,14i,14j,14k,14l,14m,14o,14p on rows 0; 14n,14q on rows 8) address rows by INDEX, not by :id. I verified live that rows 0=:observe and 8=:risk, which is what the comments claim -- but the 1c population moved twice in one week (2026-09-13, 2026-09-18) and this ledger is the same family. If a row is inserted, removed or reordered, every plant still changes bytes, the checker still refuses, and the controls stay GREEN while exercising a different row than the comment asserts -- e.g. 14n's 'artifact certificate without reason' would land on whichever row now sits at index 8, which may not be an artifact-certificate row at all (refused for a different reason, or the refusal branch the control names is never taken). This is rot mode 1 in its quiet form: the plant lands, just not on the thing."
+   :consequence "controls remain green after a population reorder while no longer testing the rows they document; a genuinely broken row-shaped rule on the intended row would go unwitnessed"
+   :confidence :likely
+   :severity :silent-wrong-number}
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 505
+   :snippet "grep -q 'schema' \"$T/ls.out\" || fail \"the schema failure does not name the schema\"   (same weakness: 6a greps 'report is missing', 8o greps ':typed-absence')"
+   :why "The assertion greps for control 6b match any stderr containing the word 'schema', not the typed unknown-schema refusal. If gen_lean_state.bb later fails on the planted report for an unrelated schema-mentioning reason (an EDN parse error that echoes a schema string, a renamed keyword in a generic message), the control is green while the unknown-schema branch it exists for rots unexercised. Same shape for 6a ('report is missing' is also the message the absent-report path prints before any schema logic) and 8o's ':typed-absence' grep, which any typed absence anywhere in the output satisfies. The 12-series controls do this right (one distinct :error/<cause> keyword per control); these predate that discipline."
+   :consequence "green control while the specific refusal branch it names is no longer the thing that fired"
+   :confidence :likely
+   :severity :silent-wrong-number}
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 1006
+   :snippet "grep -q '^carriers 88 july 77 foldable 77 old-key-test 0$' \"$T/ro-census.out\""
+   :why "Control 8s pins a literal census of every wm-trace record. I re-ran the census live: 88/77/77 still holds, so it is green for the right reason today -- but this is a pinned moving population with no derived value (unlike 1h/11m, which derive their numbers from the registry): the next recorded run appends a trace file and reddens the publish gate for a correct reason (a new carrier), forcing a re-pin whose cause is 'a run happened', not 'a defect was fixed'. The comment discipline elsewhere (1c) demands a recorded cause per re-pin; this one will generate cause-less re-pins."
+   :consequence "gate reddens on ordinary operation; the re-pin treadmill erodes the convention that pins only move for recorded reasons"
+   :confidence :likely
+   :severity :cosmetic}
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 1334
+   :snippet "grep -q '^uncashed :red defects 0 uncashed-set \\[:wm-ladder/u60-3416e82b-zero-support\\]$'"
+   :why "Control 8z builds its planted ledger from '(last (:tensions l))' of the LIVE curated ledger and then pins the tension id it expects in the output. I verified the live last tension is still :wm-ladder/u60-3416e82b-zero-support -- but the pin hard-codes the id, so the next tension appended to the curated ledger changes which tension the plant mutates while the pin still demands the old id: loud red, and worse, the plant silently becomes a different experiment (whatever the new last tension is) than the comment describes."
+   :consequence "next ledger append reddens the gate AND silently retargets the discrimination onto a different, undocumented tension"
+   :confidence :likely
+   :severity :cosmetic}
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 2224
+   :snippet "grep -q 'rank1-target = decision-target in 0/48' \"$T/f9.out\""
+   :why "Control 15h re-runs the corpus census and pins both the count (48) and the result (0/48). The corpus dirs all exist (verified), but the pin is a population literal: any new recorded tick corpus added to runs/ or a record re-parsed differently reddens the gate with a message that reads as a defect ('corpus target gap moved') when the underlying wiring claim is unchanged. Deriving 0/N (the ratio, not the absolute) would keep the discrimination and drop the treadmill."
+   :consequence "false-red on corpus growth; message blames the checker"
+   :confidence :likely
+   :severity :cosmetic}
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 1990
+   :snippet "grep -q 'ACCEPT 31 rows, 5 case-fold groups, 87 pointer claims over 68 distinct locations resolved' \"$T/sc.out\""
+   :why "Control 13m pins three population numbers (rows / claims / locations). Live today (I ran symbol_concordance_check.bb on the committed registry: exact match), and already re-pinned once (86/67 -> 87/68 on 2026-09-18) for a citation repair that changed no defect. Two of the three numbers (rows, case-fold groups) are structural and stable; claims/locations move on every citation repair, which is ordinary work."
+   :consequence "ordinary registry maintenance reddens the publish gate; the fifth re-pin will be done without a recorded cause, which is how 14l-type drift gets smuggled in"
+   :confidence :likely
+   :severity :cosmetic}
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 304
+   :snippet "grep -q 'pointers in 6 files' \"$T/ptr6.out\""
+   :why "The '6' is the length of pointer_check.bb's hand-maintained registry list (aif-equations + control-map-edges + worklist + symbol-concordance + CONVERGENCE + VERIFY-r-nodes; all six exist live, verified). Adding a pointer-bearing registry (the normal course of this project -- three new registries were added in September alone) requires editing pointer_check.bb AND this pin in lockstep; miss the pin and the gate reds with 'no longer scanning all six registries', a message that sounds like a checker regression when it is an intentional population change."
+   :consequence "false-red framing on registry growth; pin count duplicated in two places with no cross-check"
+   :confidence :likely
+   :severity :cosmetic}
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 1206
+   :snippet "grep -q '^attribution-key false identical false verdict-moved false run-scoped-moved \\[\\] ' ... grep -q 'moved \\[\":live-derivation\" \":run-provenance\" \":why-the-ledger-cannot-be-run-scoped\"\\] scan-moved \\[\":events-by-date\" \":tension-provenance-shapes\"\\]$'"
+   :why "Control 8u pins the EXACT set of ledger-wide fold fields by keyword name. Any refactor of deposit-receipt's output shape (adding a field, renaming :events-by-date) changes the moved-set and reds the gate -- again loud, not silent -- but the pin is so specific that it functions as a schema freeze on the receipt format enforced through a control whose stated purpose is drift detection for one run (2026-09-04-010). Format changes will be diagnosed as 'receipt drift not confined', a misleading message."
+   :consequence "receipt-format refactors produce false accusations of run-scoped drift"
+   :confidence :likely
+   :severity :cosmetic}
+  ;; ---- speculative: not established by live evidence ----
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 1065
+   :snippet "runs [\"2026-09-01-s5\" \"2026-09-04-re5\" \"2026-09-04-010-accepted\" \"2026-09-05-u59-a\" \"2026-09-05-u59-b\" \"2026-09-05-u60\" ...]"
+   :why "Control 8t hard-codes eight historical run ids and depends on user/run-tick-ids and the curated ledger text containing them. The deposited runs' dirs exist (verified for s5/re5/u59-a/u59-b); 2026-09-05-u60 was not verified. If the ledger's prose is ever curated to drop a run mention, the (B) column of the discrimination silently changes meaning while the control's comparison logic still runs -- the verdict pins would catch a flip, but a mere prose edit that changes tick attribution would pass unnoticed."
+   :consequence "prose curation of the ledger can change what 8t measures without reddening it"
+   :confidence :speculative
+   :severity :silent-wrong-number}
+  {:file "p4ng/empirics-futon/negative_controls.sh"
+   :line 63
+   :snippet "bash \"$LAB/production_caller_controls.sh\"; bash \"$LAB/positive_receipt_reattestation_controls.sh\"; bash \"$LAB/dependency_frontier_controls.sh\""
+   :why "Three sub-suites run under bare bash with set -e; their internal PASS/FAIL contract is not visible from this file, and none of them has a plant-took assertion visible from here (not audited inside this pass -- out of remaining budget). If any of them exits 0 on a missing input (a moved file making a loop iterate zero times), it greens silently inside a green parent run -- the exact rot mode 1, one indirection deeper, where NC_SURVEY cannot see it."
+   :consequence "a sub-suite could silently stop testing while the parent prints PASS (133 negative, 53 positive)"
+   :confidence :speculative
+   :severity :silent-wrong-number}]
+ :proposed-check
+ {:name "plant-landed + vacuity probe for control suites"
+  :how "Two mechanical passes over negative_controls.sh, no full 5-10 min run needed. (1) PLANT-LANDED: for every plant step (sed/edn/python mutation), execute the mutation alone into a temp copy and diff against its source; require a non-empty diff AND, for key-addressed plants (assoc-in [:rows N ...], maps keyed by :name/:id), require the addressed key to exist (parse the EDN, check (get-in d path) or the predicate match count >= 1). Flag any sed whose pattern count in the source file is 0 -- that is 13o/14j caught at audit time, not publish time. (2) VACUITY PROBE: for every negative control, run its checker on the UNPLANTED source and evaluate the control's own assertion grep against that output; if the assertion already holds on the good artifact, the control cannot distinguish planted from unplanted and controls nothing (catches the 14l mode and the generic-grep mode of 6b/6a/8o). (3) DEAD-ASSERTION scan: flag any test of the form [ \"$(cmd)\" = \"$(same cmd)\" ] and any pin grep whose pattern is a literal that also occurs in the checker's boilerplate/usage text."
+  :false-positive-risk "The vacuity probe cries wolf on controls that legitimately assert shared output (e.g. a positive control grepping a heading the unmutated render also prints) -- restrict the probe to NEGATIVE controls and to greps that must hold only in the refusal branch. Plant-landed flags a deliberate control whose plant is intentionally the whole-file rewrite (15e-style), which must be whitelisted. The diff-based probe also false-flags whitespace-only replants if diff is used bare; require a semantic (EDN-parsed) inequality for EDN plants."}}

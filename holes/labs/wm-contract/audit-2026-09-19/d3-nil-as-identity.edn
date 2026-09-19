@@ -1,0 +1,83 @@
+{:dimension :nil-as-identity
+ :agent "zai-11"
+ :scanned {:paths ["futon2/src/futon2/aif/"
+                   "futon2/scripts/futon2/report/"
+                   "futon3c/src/futon3c/wm/"]
+           :files 175}
+ :findings
+ [{:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 3318
+   :snippet "(let [by-repo (group-by :mission/repo missions)"
+   :why "scan-mission-detail groups fetched missions by :mission/repo with no nil handling. The sibling scan at line 3139 (frequencies variant) explicitly codes `(or (:mission/repo %) \"unknown\")`, which proves nil :mission/repo is a live case in this same file's data source (fetch-missions over futon3c HTTP). At 3318 every mission without a repo collapses into one nil-key group, and `:repos (keys by-repo)` (line 3340) emits nil into the repo list."
+   :consequence "All repo-less missions — different repos, different dependency chains — are reported as one repo in the mission hex view; dependency info extracted per repo group mixes unrelated missions. Silent wrong grouping in an operator-facing report."
+   :confidence :likely
+   :severity :silent-wrong-number}
+
+  {:file "futon2/src/futon2/aif/find_reconciliation.clj"
+   :line 29
+   :snippet "{:scenarios (indexed scenarios (juxt :treatment :disposition))"
+   :why "snapshot-index builds every identity from optional snapshot fields: scenarios by (juxt :treatment :disposition), rounds by [[treatment disposition] (:round r)], receipts by (conj identity id). `indexed` is bare group-by (line 8). If two different scenarios both lack :treatment (or :disposition), they collapse into one key and `differences` reports :duplicate for distinct scenarios — or masks a real duplicate by merging sides. No nil guard anywhere in the namespace. Could not cheaply locate F11 snapshot files under futon2/data/ to count nils (only tripwire trips matched :treatment), so live occurrence not established."
+   :consequence "Reconciliation diff reports false duplicates or hides real ones between pinned and live F11 snapshots — a wrong verdict on whether pin and live agree, feeding whatever consumes that verdict."
+   :confidence :likely
+   :severity :silent-wrong-number}
+
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 4134
+   :snippet ":by-kind (frequencies (map :kind all-blocks)) :by-slug (frequencies (map :slug all-blocks)) :by-date (frequencies (map :date all-blocks))"
+   :why "Blocks come from repo-blocks over arbitrary on-disk repos. A block line without a slug or a malformed date yields nil; frequencies happily makes nil a count key, and the surrounding code sorts blocks by :date (nil sorts to one end). Rendered tables then show a nil row."
+   :consequence "Unknown/unparsed slug or date silently bucketed as a single nil category; counts attributed to nothing. Display-level only."
+   :confidence :likely
+   :severity :cosmetic}
+
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 4577
+   :snippet "(when-let [groups (not-empty (group-by :kind (vec (:refusals decision))))]"
+   :why "Refusals from a decision are grouped by :kind with no guard; the renderer then calls `(name kind)` (line 4581), which throws on nil. A refusal map without :kind turns 'we do not know the kind' into both a nil merge (all kind-less refusals in one group) and, at render, an NPE/IllegalArgumentException — same class as the war_machine.clj:4754 renderer crash."
+   :consequence "If any decision carries a :kind-less refusal, the report renderer throws instead of degrading. Currently no evidence a kind-less refusal exists, so speculative."
+   :confidence :speculative
+   :severity :cosmetic}
+
+  {:file "futon2/src/futon2/aif/mission_control_graph.clj"
+   :line 64
+   :snippet "(def memories-by-id (into {} (map (juxt :memory/id identity)) memories))"
+   :why "into{} over (juxt :memory/id identity): two memories both missing :memory/id silently overwrite each other (last wins, no duplicate detected). Downstream `(keep memories-by-id (:memory-ids edge))` then cannot find the shadowed memory, so under strict-memory? the edge loses its eligible memories and is silently excluded from support/blocking projections. Edges themselves are validated (validate-edge demands nonblank :mission-id, so the group-bys at lines 94/121 are safe) but memories are not."
+   :consequence "A memory with a missing/duplicated nil id silently vanishes from candidate projections — wrong mission candidate set with no record of the drop."
+   :confidence :speculative
+   :severity :silent-wrong-number}
+
+  {:file "futon2/src/futon2/aif/actuator_a3.clj"
+   :line 510
+   :snippet "(def by-endpoint (into {} (map (juxt :endpoint identity) after)))"
+   :why "Endpoint snapshot entries are indexed by :endpoint with no guard; two entries lacking :endpoint overwrite each other. `(get by-endpoint endpoint)` then feeds record-discharge!, persisting discharge records for a mission."
+   :consequence "A nil/missing :endpoint would collapse distinct snapshot entries and could persist a discharge record attributed to the wrong endpoint. Did not establish that endpoint-snapshot can emit :endpoint-less entries."
+   :confidence :speculative
+   :severity :silent-wrong-number}
+
+  {:file "futon2/src/futon2/aif/shadow_cascade_g.clj"
+   :line 52
+   :snippet "(def sources (into {} (map (juxt :id identity)) (:sources record)))"
+   :why "Record sources indexed by :id; nil-id sources silently overwrite. mission-document then looks up `(get-in sources [cited-source-id :path])` — a shadowed source yields nil path, the document resolution returns nil, and per the docstring callers refuse rather than guess: the refusal is then real but its cause is a lost source, not a missing one."
+   :consequence "Shadow-cascade mission document resolution refuses for the wrong stated reason when two sources both lack :id."
+   :confidence :speculative
+   :severity :silent-wrong-number}
+
+  {:file "futon2/src/futon2/aif/interpretation_evidence.clj"
+   :line 272
+   :snippet "(def sources (into {} (map (juxt :id identity)) (:sources r)))"
+   :why "Same shape as shadow_cascade_g:52 — sources map built with (juxt :id identity), nil-id entries silently collapse. Downstream source lookups miss and the interpreter sees an unresolvable source."
+   :consequence "Interpretation evidence source resolution fails silently for the shadowed source."
+   :confidence :speculative
+   :severity :silent-wrong-number}
+
+  {:file "futon2/src/futon2/aif/live_c.clj"
+   :line 226
+   :snippet "(def by-token (group-by :token (concat alive completion (:entries star))))"
+   :why "Status entries from three roots are grouped by :token; the collapse logic ('strongest statement wins') then reduces each group to one entry. An entry missing :token merges with every other token-less entry across roots, and the wrong entry can win the weight comparison."
+   :consequence "Normalised C-vector weights silently pick the wrong surviving entry when token-less entries coexist; weights are then wrong with no refusal. Did not establish token-less entries occur — status readers appear to always set :token."
+   :confidence :speculative
+   :severity :silent-wrong-number}]
+
+ :proposed-check
+ {:name "nil-identity-guard checker"
+  :how "Static pass over the three scope dirs. (1) Parse with clj-kondo/rewrite-clj and collect every collection-form whose head is group-by, frequencies, distinct-by-equivalence (set over (map f xs)), or `(into {} (map (juxt f identity)))`. (2) For each, extract the key/extractor expression; classify as UNGUARDED when neither (a) the extractor contains an explicit nil escape (`or`, `if-let`, `(get fields i default)`, string default, `:when some?` filter, remove-nil before the call), nor (b) a preceding demand!/validate/throw establishes the field non-nil on the same code path (conservative: only count validations textually within the same let/defn on the same binding). (3) Rank UNGUARDED sites by blast radius: key feeds a loop decision (tripwire/refusal/dedup-count) > key feeds a persisted write > key feeds a report table. A second, dynamic mode: run the checkers' unit namespaces with an instrumented group-by that logs whenever a key contains nil, so 'nil never occurs in practice' becomes measured rather than asserted (this audit found the codebase is already largely guarded — tripwire.clj:347 filters nil discriminators, habit_prior/cascade_prior throw on nil policy keys, war_machine:3270 removes nil sessions, war_machine:6978 has :when c — the residual risk is concentrated in war_machine.clj report paths and the into{}-juxt maps)."
+  :false-positive-risk "Sites where the field is structurally always present (built one line above by the same code, e.g. scan-patterns' 'uncategorized' fallback) will be flagged UNGUARDED; the dynamic mode is the arbiter. Also frequencies used purely for display (nil renders as a bucket) are cosmetic, not defects — the checker should tag those low so they do not drown the loop-decision hits."}}

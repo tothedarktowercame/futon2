@@ -1,0 +1,100 @@
+{:dimension :absent-value-into-total-fn
+ :agent "zai-9"
+ :scanned {:paths ["futon2/src/futon2/aif/" "futon2/scripts/futon2/report/" "futon3c/src/futon3c/wm/"]
+           :files 175}
+ :findings
+ [{:file "futon2/src/futon2/aif/full_loop_runner.clj"
+   :line 784
+   :snippet "(and a (true? (:invoke-ready? a)) (= \"idle\" (name (:status a))))"
+   :why "available? guards against the roster entry being nil (`and a ...`) but not against the entry EXISTING without a :status key. The roster is parsed from the Agency HTTP JSON (`json/parse-string ... true`); any agent entry whose \"status\" field is absent or JSON null parses to a map with a nil :status, and `(name nil)` throws. The same file's restored? (line 789) and agent-failure-detail (line 793) both wrap :status in `(some-> ... name)` — the author guarded the siblings and missed this one."
+   :consequence "available? is on the invoke/actuation path of a click; an agent whose roster entry lacks status throws inside the runner and ends the attempt."
+   :confidence :likely
+   :severity :stops-a-run}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 5279
+   :snippet "(format \"%.2f\" (double urgency)) ... (double (:tau s 1.0))"
+   :why "The portfolio head's judgement summary reads urgency as `(get-in s [:mu :urgency] 0)` and tau as `(:tau s 1.0)`. get-in's default only fires when the PATH is absent — if futon3c /api/alpha/portfolio/state returns {\"mu\": {\"urgency\": null}} or \"tau\": null, the JSON null parses to nil and `(double nil)` throws NPE (verified in-repo: `(double nil)` -> NPE \"Cannot invoke java.lang.Number.doubleValue()\"). Verified the throw by evaluation, and the endpoint is a live HTTP read whose null-freeness this renderer cannot assume."
+   :consequence "generate-war-machine renders inside the runner's selection phase (the 2026-09-18 attempt-002 class), so one null field in a live API response ends the attempt before any action is selected."
+   :confidence :likely
+   :severity :stops-a-run}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 4343
+   :snippet "(format \"%.2f\" (double pressure)"
+   :why "The commit-hygiene queue table destructures {:keys [repo tier pressure count max-age-days action]} and calls `(double pressure)` with NO guard, while the very scan that builds :queues filters with `(pos? (double (or (:pressure %) 0.0)))` (line 4008) and the drain-channel table two pages later uses `(double (or pressure 0))` (line 4455). The scan tolerates an absent :pressure; the render does not. A queue row whose :pressure is nil (a producer change, an odd git state) passes the `(or ...)` filter and then throws in the render."
+   :consequence "render-war-machine throws NPE inside the click's selection phase; whole attempt lost."
+   :confidence :likely
+   :severity :stops-a-run}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 4212
+   :snippet "(name (:reason active-mission))"
+   :why "The unavailable branch of render-active-mission-line calls `(name (:reason active-mission))` unguarded, while its sibling render-mission-focus-line (lines 4235, 4239, 4249) guards every equivalent read with `(or (:reason ...) :unknown)`. Today read-active-mission-clock always tags failures with :reason, so this is a latent contract dependency, not a live bug: any new failure path that returns a map without :endpoint AND without :reason reproduces the 2026-09-18 attempt-002 shape exactly."
+   :consequence "NPE in render inside the selection phase; ends the attempt."
+   :confidence :speculative
+   :severity :stops-a-run}
+  {:file "futon2/src/futon2/aif/full_loop_cohort.clj"
+   :line 775
+   :snippet ":id (str (name (:cohort-id binding)) \"--\" attempt-id)"
+   :why "Execution provenance formats `(name (:cohort-id binding))` where binding is the cohort binding record read from disk. The validation chain above compares `(:cohort-id binding)` for equality with `(:cohort/id activation)` and each event's :cohort/id — all of these pass on nil==nil because the key-set checks only require the KEY to be present, not the value. A directory whose records all carry a nil :cohort/id passes validation and then throws `(name nil)` here."
+   :consequence "Throws while building execution provenance during closed-cohort read; run stops."
+   :confidence :speculative
+   :severity :stops-a-run}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 4612
+   :snippet "[[\"controller-score\" (format \"%.4f\" (double controller-score))] ...]"
+   :why "The free-energy table destructures controller-score / preference-gap-score / coverage-uncertainty-pressure out of `(:free-energy j)` and calls `(double ...)` on each with no guard — same function, same block, as `(:mode-prior j 0)` one line above which DOES default. `(double nil)` throws NPE. Safe only while fe/compute-controller-diagnostics always returns all three keys as finite numbers on every observation shape, including the typed-absent variants."
+   :consequence "NPE in render inside the selection phase; ends the attempt."
+   :confidence :speculative
+   :severity :stops-a-run}
+  {:file "futon2/src/futon2/aif/tripwire.clj"
+   :line 657
+   :snippet "\"wire: \" (name (:trip/wire-id report))"
+   :why "investigation-text formats the wire id of a tripwire report. Reports minted by the current tripper always carry :trip/wire-id, but the report here can also be one re-read from disk for investigation/discharge; a persisted report from before the :trip/wire-id field existed (the trace ledger explicitly supports 'this producer predates the key' records) reaches this `(name nil)` and throws."
+   :consequence "Throws while summoning an investigation for a live tripwire — the operator never gets paged and the discharge path dies."
+   :confidence :speculative
+   :severity :stops-a-run}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 4646
+   :snippet "(namespace (:head-id %))"
+   :why "The AIF-heads grouping filters on `(namespace (:head-id %))`; `namespace` throws on nil exactly like `name`. Every current head producer (portfolio, session, mission) mints :head-id as a keyword, but the filter runs over whatever the heads scan returns — a future head source that emits a record without :head-id throws here before any rendering."
+   :consequence "NPE in render inside the selection phase; ends the attempt."
+   :confidence :speculative
+   :severity :stops-a-run}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 4707
+   :snippet "(str (name (:id fam)) \" (\" (name (:layer fam)) \"): \" (:question fam))"
+   :why "Candidate-invariant family records are rendered with `(name (:id fam))` and `(name (:layer fam))` with no guard (same expression again at line 5584 inside priority minting, and at war_machine_visual.clj:427). The inventory scan builds families from the invariants EDN inventory; a family entry with a missing or nil :layer (a hand-edited inventory file is a real write path) passes `seq` checks and throws here."
+   :consequence "NPE in render/priority minting during the click's selection phase; ends the attempt."
+   :confidence :speculative
+   :severity :stops-a-run}
+  {:file "futon2/src/futon2/aif/full_loop_runner.clj"
+   :line 1355
+   :snippet ":rationale (str \"stop-the-line: \" (name (:repair/class obligation))"
+   :why "repair-entry formats :repair/class of a repair obligation. Constructors in repair_obligation.clj always set it, but obligations are also loaded/replayed from persisted findings (repair_obligation.clj:673 rewrites :repair/class, line 713 reads it), so a persisted obligation predating the field reaches `(name nil)` while the candidate list is being built for selection."
+   :consequence "Throws while composing stop-the-line candidates; click dies before ranking."
+   :confidence :speculative
+   :severity :stops-a-run}
+  {:file "futon2/src/futon2/aif/full_loop_runner.clj"
+   :line 3286
+   :snippet "(name (:cohort/id start-event))"
+   :why "Formats the cohort id out of the first checkpoint event read from disk. The cohort writer always stamps :cohort/id, but events re-read from an attempt directory are external input; an old-format event file without the key throws here during evidence assembly."
+   :consequence "Throws during click evidence assembly; attempt ends."
+   :confidence :speculative
+   :severity :stops-a-run}
+  {:file "futon2/scripts/futon2/report/war_machine_visual.clj"
+   :line 427
+   :snippet "(let [domain-id (get family->domain (name (:id fam)))"
+   :why "Visualiser maps family -> live domain through `(name (:id fam))` unguarded; a family record with nil :id throws. Runs on the visual render path (scheduler), not inside selection, so it kills the visual rather than a click."
+   :consequence "Visualiser render throws; chart lost, click unaffected."
+   :confidence :speculative
+   :severity :cosmetic}
+  {:file "futon2/scripts/futon2/report/war_machine.clj"
+   :line 4336
+   :snippet "\" | grouping: \" (name (:clustering-status commit-hygiene))"
+   :why "The header line renders `(name (:clustering-status commit-hygiene))` unguarded, reached whenever :queues is non-empty. scan-commit-hygiene today sets the key on the available path, but nothing in the render defends a snapshot written by an older/newer scan shape — the exact hand-listed-subset failure shape from 2026-09-18."
+   :consequence "NPE in render inside the selection phase; ends the attempt."
+   :confidence :speculative
+   :severity :stops-a-run}]
+ :proposed-check
+ {:name "nil-exposing call-site differential (graffiti-lint)"
+   :how "AST walk over the three scope paths. Flag every call to name/namespace/symbol/keyword/double/long/float or str/split/subs/str/starts-with? whose head argument is (a) a map lookup `(:k x)`, `(get m k)`, `(get-in m ks)` — including via :keys destructuring that later flows into those fns — when the expression is NOT wrapped in an or/some->/if-let/if-some/when-let guard and the lookup has NO default argument. Then compute the differential per file: the same key already guarded elsewhere in the same file (e.g. `(or (:reason x) :unknown)` at line 4235 but bare `(name (:reason x))` at 4212; `(double (or pressure 0))` at 4455 but `(double pressure)` at 4343) is near-certainly a bug or a missing guard — humans guard consistently within a file, so asymmetry marks the miss. Also special-case `(get-in m ks default)` and `(:k m default)`: the default does NOT protect against a nil VALUE at the path, which is what JSON-null inputs produce; flag those when the source is an HTTP/JSON parse (cheshire/clj-http in the require list). Rank: guarded-sibling-differential > json-sourced-lookup > plain unguarded lookup."
+   :false-positive-risk "Code where the producer provably always supplies the key (typed records built by a constructor, e.g. infer-mode-record always setting :mode) — the lint cannot see the producer contract, so it will flag many currently-safe sites like receipt_construction's `(name (:cohort/id closed))` which is short-circuit-protected by `(keyword? ...)` in the same `and`. The guard-recognizer must understand `and`/`cond->` short-circuiting or it cries wolf on those. Mitigate by ranking, not suppressing: differential findings first, and require a human read for anything not differential."}}

@@ -1,0 +1,95 @@
+{:dimension :unbounded-durable-write
+ :agent "zai-13"
+ :scanned {:paths ["futon2/src/futon2/aif/"
+                   "futon2/scripts/futon2/report/war_machine.clj"
+                   "futon3c/src/futon3c/wm/"]
+           :files 61}
+ :findings
+ [{:file "futon2/src/futon2/aif/full_loop_runner.clj"
+   :line 3392
+   :snippet ":backtrace {:phase-events @phase-events ... :checkpoints @checkpoints :code-state (get-in time-cell [:judgment :code-state])}"
+   :why "The repair finding's :backtrace embeds the ENTIRE deref'd checkpoints atom plus all phase events. Checkpoints carry whole :judgment payloads (measured 11.07 MB and 5.77 MB) — nothing between here and repair_obligation/write-new-or-identical! projects, selects, or elides anything. Reached on every failed/zero-achievement attempt, i.e. most clicks. READERS (the question we were asked): full_loop_runner.clj:598 reads only [:backtrace :code-state :repo]; full_loop_runner.clj:3137 reads only [:backtrace :job-id]; tripwire.clj cross-run-observation (lines 775-825) folds whole finding records but uses only :repair/id and :failure-kind. NO code in the three scanned trees reads :backtrace :checkpoints or any :judgment inside a backtrace back. The multi-megabyte part is write-only."
+   :consequence "19.4 MB findings, 90 MB store; every future fold (tripwire cross-run-observation reads the whole store per opportunity/start) pays parse cost for bytes nobody consumes; store growth is monotone."
+   :confidence :confirmed
+   :severity :stops-a-run}
+  {:file "futon2/src/futon2/aif/repair_obligation.clj"
+   :line 202
+   :snippet "(with-contended-store-lock root ... (.getBytes (with-out-str (pp/pprint value)) \"UTF-8\") ... (.lock lock-channel) ... (.force ch true) (.force parent true))"
+   :why "write-new-or-identical! (and its siblings write-new! at :159 and write-new-durable! at :389) serialise whatever value they are handed with pp/pprint via with-out-str — full byte array materialised in memory — inside the interoceptive store lock AND a per-directory FileChannel lock AND a JVM monitor, then fsync the file and the parent directory. There is no size bound, no elision, no budget anywhere in this namespace. Reachable per finding publication, and findings fire per failed attempt per click."
+   :consequence "The exact 91 MB/~3m43s class: pretty-printing multi-MB EDN under the store lock serialises every other store user for minutes per write; fsync forces make it worse, not better."
+   :confidence :confirmed
+   :severity :stops-a-run}
+  {:file "futon2/src/futon2/aif/full_loop_runner.clj"
+   :line 3477
+   :snippet "brief-ref ((or (:queue-fn opts) brief/queue-item!) brief-item)"
+   :why "brief-item (built at :3409-3470) carries :achievement {:build (get-in @checkpoints [:build :judgment]) :adjudication (get-in @checkpoints [:adjudication :judgment])} — whole checkpoint judgments, multi-MB — and :failure {:backtrace (:backtrace finding)} — the finding's full backtrace from finding #1. brief/queue-item! (morning_brief.clj:109-118) writes it verbatim via write-new! (morning_brief.clj:90-97) with pp/pprint. One file per failed attempt, per click, unbounded. Reachable on every non-grounded outcome; the second queue at full_loop_runner.clj:4782 shows the bounded shape (small map, no judgments), proving the author knows the difference."
+   :consequence "Morning-brief store grows by multi-MB files per failed attempt; brief/items (read back by tripwire.clj:810 grounding-witnesses) then parses them all into memory on later clicks."
+   :confidence :confirmed
+   :severity :stops-a-run}
+  {:file "futon2/src/futon2/aif/full_loop_runner.clj"
+   :line 547
+   :snippet "(assoc :historical-verification (get-in result [:data :repair-obligation]))"
+   :why "persist-run-record! spits (pr-str record) where the record, on a historical-verification outcome, embeds the ENTIRE repair-obligation map — which is a finding record carrying the unbounded :backtrace from finding #1. The run-record is otherwise a bounded projection (routes, ids, pins, select-keys cohort); this one branch re-introduces megabytes. Also :run4/effective-environment-attestation is passed through unselected. Reachable whenever a historical verification attempt completes a click."
+   :consequence "tick-run-record files of tens of MB; runner_service persist-click-run-binding! slurps and edn/read-string's the whole run record per click (runner_service.clj:222-227), so the cost is paid twice."
+   :confidence :likely
+   :severity :stops-a-run}
+  {:file "futon2/src/futon2/aif/tripwire.clj"
+   :line 815
+   :snippet "(merge observation {:cohort-history history :closed-repair-ids closed-ids :findings findings ...})"
+   :why "cross-run-observation (775-825) calls repair-snapshot, which parses the ENTIRE repair store (all 90 MB including the 19.4 MB findings), keeps the whole records in a findings vector, and merges them into the observation at :opportunity/:start — once per cohort click. The 2026-09-18 fix (durable-observation, line 523) bounds only the DISK copy of the trip report; the in-memory observation still carries every finding verbatim, and halt! (line 833) throws ex-info whose ex-data can carry the observation/witness upward into failure handlers."
+   :consequence "Per-click full-store parse + multi-MB resident maps even though only :repair/id, :failure-kind and status are consumed; any future consumer of the observation inherits the unbounded payload."
+   :confidence :confirmed
+   :severity :stops-a-run}
+  {:file "futon2/src/futon2/aif/full_loop_cohort.clj"
+   :line 229
+   :snippet "(Files/write p bytes ...) ;; cells that embed machine-state can run to megabytes"
+   :why "Cohort checkpoint cells are written verbatim (pr-str) under with-cohort-lock (:234-242). The namespace's own comment admits cells run to megabytes (machine-state embeddings). No size bound; one cell per checkpoint per attempt, forever. Reachable on every cohort click via close-attempt!/checkpoint recording."
+   :consequence "Cohort data root grows monotonically; cohort/ledger re-reads every attempt's every cell (attempt-events) and is called by tripwire cross-run-observation per click (tripwire.clj:795-797), so write-side growth converts directly into per-click read cost."
+   :confidence :confirmed
+   :severity :stops-a-run}
+  {:file "futon2/src/futon2/aif/full_loop_cohort.clj"
+   :line 627
+   :snippet "(spit out-path (with-out-str (pp/pprint value)))"
+   :why "write-ledger! / write-ledgers! (:677-687) pretty-print the whole ledger, whose :recorded-attempts carry per-attempt events including [:payload :judgment ...] payloads (the code at :563-568 reads them back, so they are stored whole). Size grows linearly with attempt count and per-attempt judgment size; nothing bounds it. These are on-demand entry points, not per-click, but nothing prevents them being called per click."
+   :consequence "Ledger dumps of tens of MB with pprint layout cost; the HTML twin only uses small scalar fields, so the large part is EDN-only."
+   :confidence :likely
+   :severity :cosmetic}
+  {:file "futon3c/src/futon3c/wm/runner_service.clj"
+   :line 168
+   :snippet "(spit phase-log (str (pr-str event) \"\\n\") :append true)"
+   :why "append-phase! runs per phase event per click (phase-sink). The same event stream (@phase-events) is what finding #1 embeds in backtraces, so events demonstrably reach multi-MB when they carry judgment payloads; there is no projection at this sink either. Not under a lock, append-only, so severity is disk growth plus IO time on the click path."
+   :consequence "Unbounded phase log growth per click; if any event embeds a full judgment, minutes of append IO."
+   :confidence :likely
+   :severity :silent-wrong-number}
+  {:file "futon3c/src/futon3c/wm/needs_you.clj"
+   :line 226
+   :snippet "(spit file (with-out-str (pprint/pprint out)))"
+   :why "emit-needs-you! caps the COUNT of items (cap-items) but not the SIZE of any item, and rewrites the whole file each emit; emit-proctor-finding! reads the whole file back first. Callers in war_machine_pilot.clj:380/403 build items via action->needs-you-item (small), so today's items are bounded — but nothing in this namespace enforces it, and any future caller handing a judgment-bearing map in is unbounded."
+   :consequence "Latent: a single large item defeats the top-k cap entirely."
+   :confidence :speculative
+   :severity :cosmetic}
+  {:file "futon2/src/futon2/aif/realized_recording.clj"
+   :line 241
+   :snippet "(.write writer (pr-str r))"
+   :why "persist! writes the whole record with no size bound. validate! checks shape, not size; records embedding measurement/evidence maps could carry large payloads. Record paths are immutable so growth is per-record, not cumulative per file."
+   :consequence "Individual oversized records; replay verification (immutable-record-conflict compare at :237 reads the file back and compares whole values) pays full cost."
+   :confidence :speculative
+   :severity :cosmetic}
+  {:file "futon2/src/futon2/aif/actuator_a3.clj"
+   :line 826
+   :snippet "(spit log-file (str (pr-str (assoc record :at ...)) \"\\n\") :append true)"
+   :why "log! appends pr-str of an arbitrary record map. Current callers pass bounded reports (hole counts, rejected vectors of small entries), but nothing bounds :rejected or any future field; append log grows monotonically per invocation."
+   :consequence "Latent unbounded append log on the actuator path."
+   :confidence :speculative
+   :severity :cosmetic}
+  {:file "futon2/src/futon2/aif/actuator_a3.clj"
+   :line 561
+   :snippet "(spit (.getOutputStream p) (build-prompt package))"
+   :why "build-prompt renders a package containing :structure-spec, :policy-holes, :endpoint-bindings (:830-834) — repo-derived structures with no size bound — written whole per prompt build."
+   :consequence "Oversized prompt files when a mission's spec/holes grow; read back by whatever consumes the prompt path."
+   :confidence :speculative
+   :severity :cosmetic}]
+ :proposed-check
+ {:name "bounded-writer wrap + deref/projection lint (write-size budget)"
+  :how "Two layers. (1) Mechanical lint: flag every durable write sink — spit, Files/write, .write on a writer/channel, with-out-str pprint feeding a write — whose value expression is (a) a deref of an atom/var (@checkpoints, @phase-events), (b) a whole map threaded from a :judgment/:backtrace/:machine-state-bearing structure (track the key provenance the way we now know it flows: checkpoints -> backtrace -> finding -> brief-item/run-record/cohort-cell), or (c) a function parameter never passed through select-keys/update-in/elision before the write. Every hit must either route through a single approved bounded-writer wrapper or justify itself. (2) Runtime enforcement inside the wrapper: serialize to a byte array first, compare against a byte budget per record (e.g. 256 KB default), and on overflow refuse with a typed :durable-write-over-budget error carrying measured size and top-level key sizes — never silently truncate, because digest-verified immutables (realized_recording, run4 projections) must fail loudly rather than corrupt. Add a store-side invariant: after each publication, record the file size in the store index and refuse publication when a single record exceeds the budget or the store's total growth per click exceeds a ceiling."
+  :false-positive-risk "(a) Legitimately large machine-round-trip stores (cohort cells, run records used for replay/digest verification) would be flagged — they need explicit budget exemptions, which is exactly the decision we want forced. (b) Key-provenance tracking over-approximates: a map that merely contains the key :judgment but holds a small scalar judgment (selection selected-mission) would cry wolf; the check should measure serialized size at the wrapper, not guess from key names alone — lint narrows the sites, runtime measurement decides. (c) pr-str-based stores already exist deliberately (full_loop_cohort comment 2026-07-25): the check must flag SIZE, not printer choice, or it re-litigates a settled decision."}}
