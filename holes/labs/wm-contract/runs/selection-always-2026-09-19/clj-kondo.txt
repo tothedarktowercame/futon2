@@ -1,0 +1,2 @@
+src/futon2/aif/full_loop_runner.clj:2006:19: info: Single argument to str already is a string
+linting took 119ms, errors: 0, warnings: 0
