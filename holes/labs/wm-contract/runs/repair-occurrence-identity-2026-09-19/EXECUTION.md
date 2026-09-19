@@ -77,3 +77,49 @@ Passing artifacts:
 
 No repair-store mutation outside temporary fixtures, finding disposition,
 machine click, or serving-JVM contact occurred.
+
+## Independent review and bounded reconciliation
+
+Codex-1 reviewed the initial implementation in Agency job
+`invoke-1789848531056-22515-dbcfb38d` and retained its CHANGES-REQUESTED
+review at commit `0fcb8db559169bd32a8889a8fab8f369b8d19886`.  The review identified
+three publication-boundary gaps: retry timestamps made an occurrence replay
+conflict, a caller-supplied finding id could disagree with the occurrence,
+and containment callers did not supply distinct observation identities.
+
+Commit `6b10019f` reconciles those findings.  An occurrence is now the exact,
+time-free tuple of origin, event id, failure kind, and its recomputed digest;
+the writer rejects a fabricated digest or caller id mismatch as
+`:occurrence-identity-conflict`.  Retry publication preserves the first
+finding bytes and `:opened-at`, while each containment boundary supplies a
+stable boundary-qualified observation id and appends distinct evidence.
+The runner control now exercises the real temporary store twice and proves
+one finding plus two observation records.
+
+The required gates after reconciliation were:
+
+```text
+clj-kondo --lint src/futon2/aif/repair_obligation.clj src/futon2/aif/full_loop_runner.clj test/futon2/aif/repair_obligation_test.clj test/futon2/aif/full_loop_runner_test.clj test/futon2/aif/repair_occurrence_identity_test.clj
+```
+
+PASS: 0 errors, 0 warnings; one informational pre-existing `str` finding.
+
+```text
+emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/repair_obligation.clj src/futon2/aif/full_loop_runner.clj test/futon2/aif/repair_obligation_test.clj test/futon2/aif/full_loop_runner_test.clj test/futon2/aif/repair_occurrence_identity_test.clj
+```
+
+PASS: `OK`. `git diff --check` also passed.
+
+The one post-reconciliation registry execution passed and rebound the subject:
+
+```text
+evidence-id test-registry-28846bdeeec462f7c7dd001c6bda3ed6e2f7b770fc2c7df723934c5a34814813
+warrant? true
+results {:assertions 26, :errors 0, :exit 0, :failures 0, :tests 7}
+bound repair-store/occurrence-identity -> test-registry-28846bdeeec462f7c7dd001c6bda3ed6e2f7b770fc2c7df723934c5a34814813
+```
+
+Post-reconciliation artifacts:
+
+- `de8c4b67-0d77-4462-8713-ae3765388584.closure.edn` — SHA-256 `159f14540f96d834a23e04c0b3d036247764e56b0691a5efe74b848fcaddcc6e`
+- `de8c4b67-0d77-4462-8713-ae3765388584.log` — SHA-256 `1f33910639591e55f841c7b372bf11e09b7f9954ac08af86e3d66b86bbe39a5a`
