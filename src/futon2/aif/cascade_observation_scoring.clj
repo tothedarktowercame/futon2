@@ -1,0 +1,121 @@
+(ns futon2.aif.cascade-observation-scoring
+  "Bounded cascade scorer for an explicitly declared observation model.
+   Called by efe/rank-cascade-actions; no new selection law and no actuator.
+   G is the prior-predictive horizon sum. F explains an explicitly matched
+   observation at that horizon. The conditioned belief is retained for the
+   next prediction, not substituted into the prediction being evaluated."
+  (:require [clojure.set :as set]
+            [futon2.aif.cascade-model-manifest :as m]
+            [futon2.aif.observation-model :as om]))
+
+(def max-horizon 10)
+(def max-candidates 16)
+
+(defn- subsets [tokens]
+  (reduce (fn [ss t] (into ss (map #(conj % t) ss))) [#{}] (sort-by pr-str tokens)))
+
+(defn- checked [result]
+  (when (and (map? result) (contains? result :status)
+             (not= :computed (:status result)))
+    (throw (ex-info "observation route refused" result)))
+  result)
+
+(defn- candidate-tokens [candidates]
+  (into #{} (mapcat (fn [p]
+                     (concat (:produces p) (get-in p [:guard :needs])
+                             (get-in p [:guard :forbids])
+                             (mapcat :present (get-in p [:guard :clauses]))
+                             (mapcat :absent (get-in p [:guard :clauses])))))
+        (mapcat :precedence candidates)))
+
+(defn- validate-inputs! [q0 candidates opts]
+  (let [{:keys [observation-model horizon-steps prediction-context cascade-spec]} opts
+        universe (:universe observation-model)]
+    (om/validate! observation-model)
+    (when-not (and (pos-int? horizon-steps) (<= horizon-steps max-horizon))
+      (om/refuse! :invalid-bounded-horizon {:limit max-horizon}))
+    (when-not (and (some? (:occurrence-id prediction-context))
+                   (= horizon-steps (:tau prediction-context)))
+      (om/refuse! :missing-prediction-context {}))
+    (when-not (and (vector? candidates) (<= 1 (count candidates) max-candidates)
+                   (every? #(and (= :cascade-candidate (:kind %))
+                                 (some? (:id %)) (vector? (:precedence %))) candidates)
+                   (= (count candidates) (count (set (map :id candidates)))))
+      (om/refuse! :invalid-bounded-candidates {:limit max-candidates}))
+    (when-not (and (map? q0) (seq q0) (m/normalized-exact? q0)
+                   (every? #(and (set? %) (set/subset? % universe)) (keys q0)))
+      (om/refuse! :invalid-state-belief {}))
+    (when-not (set/subset? (candidate-tokens candidates) universe)
+      (om/refuse! :candidate-outside-observation-universe {}))
+    (when-not (and (map? cascade-spec)
+                   (every? #(set? (get cascade-spec %)) [:want :evidence :zeroed])
+                   (every? set? (:zeroed cascade-spec))
+                   (set/subset? (set/union (:want cascade-spec) (:evidence cascade-spec)
+                                           (into #{} cat (:zeroed cascade-spec))) universe))
+      (om/refuse! :invalid-observation-preference {}))
+    ;; Tempering a coupled row requires its own normalization, not a map of
+    ;; tempered marginal rates. Never silently ignore the production option.
+    (when (or (contains? opts :adjudication-rates)
+              (and (contains? opts :zeta) (not= 1 (:zeta opts))))
+      (om/refuse! :conflicting-observation-options {}))))
+
+(defn- score-candidate [q0 candidate opts preference]
+  (let [{:keys [observation-model horizon-steps observation prediction-context]} opts
+        steps (loop [tau 1 q q0 result []]
+                (if (> tau horizon-steps)
+                  result
+                  (let [next-q (checked (m/rollout (constantly (:precedence candidate)) q 1))
+                        score (checked (om/query observation-model
+                                                 {:op :score :belief next-q :preference preference}))]
+                    (recur (inc tau) next-q (conj result (assoc score :tau tau :belief next-q))))))
+        predicted (:belief (peek steps))
+        conditioned (om/query observation-model {:op :condition :belief predicted
+                                                 :observation observation :context prediction-context})
+        g (reduce + (map :g steps))
+        entry {:action candidate :cascade true :cascade-id (:id candidate)
+               :horizon-steps horizon-steps :controller-score g :G-efe g :G-cascade g
+               :observation-model observation-model
+               :prediction {:context prediction-context :initial-belief q0 :belief predicted}
+               :inference conditioned
+               :certificate {:schema :wm/bounded-observation-score-v1
+                             :evaluation :exact-enumeration
+                             :observation-model observation-model
+                             :scope :synthetic-bounded-replay
+                             :steps steps
+                             :c {:form :constant-spec :spec (:cascade-spec opts)}
+                             :rates-provenance {:source :observation-model/query
+                                                :model observation-model}
+                             :f (assoc conditioned :value (:f conditioned))}}]
+    (if (= :computed (:status conditioned))
+      (assoc entry :f (:f conditioned) :posterior (:posterior conditioned))
+      entry)))
+
+(defn rank-cascade-actions
+  "Same arguments as efe's cascade scorer. Presence of :observation-model
+   selects this route, including explicit nil (which refuses).
+   A missing/impossible observation refuses the family with all per-candidate
+   results retained. No candidate is assigned neutral F or silently dropped."
+  [state candidates opts]
+  (let [model (:observation-model opts)]
+    (try
+      (validate-inputs! (:cascade-belief state) candidates opts)
+      (let [preference-fn (checked (m/preference-fn (:cascade-spec opts) (:universe model)))
+            preference (into {} (map (juxt identity preference-fn)) (subsets (:universe model)))
+            entries (mapv #(score-candidate (:cascade-belief state) % opts preference) candidates)
+            failures (filterv #(not= :computed (get-in % [:inference :status])) entries)]
+        (if (seq failures)
+          {:status (if (some #(= :missing (get-in % [:inference :status])) failures)
+                     :missing :contradiction)
+           :kind :observation-family-not-selectable :model model :candidates entries
+           :failures (mapv (fn [e] {:cascade-id (:cascade-id e) :inference (:inference e)}) failures)}
+          (let [sorted (sort-by :controller-score entries)
+                rank-of (zipmap (distinct (map :controller-score sorted)) (range 1 (inc (count sorted))))]
+            (with-meta
+              (mapv (fn [e]
+                      (let [ties (filter #(= (:controller-score e) (:controller-score %)) sorted)]
+                        (cond-> (assoc e :rank (rank-of (:controller-score e)))
+                          (< 1 (count ties)) (assoc :g-tie (mapv :cascade-id ties))))) sorted)
+              {:cascade-scoring {:model model :scope :synthetic-bounded-replay
+                                 :horizon-steps (:horizon-steps opts)}}))))
+      (catch clojure.lang.ExceptionInfo e
+        (merge {:model model} (ex-data e))))))
