@@ -1,0 +1,4 @@
+:before-eligible 7
+:recorded "repair-ea1-259a7a93d9a9b63a45020e0ad646c508b9be83097dac6898106a063c1a1eef2e--attempt-001-close-exception" :status :awaiting-validation :path "/home/joe/code/futon2/data/wm-repair-obligations/implementations/repair-ea1-259a7a93d9a9b63a45020e0ad646c508b9be83097dac6898106a063c1a1eef2e--attempt-001-close-exception.edn"
+:recorded "repair-initialization-56485d40-2f54-4882-8917-15a59a473494-initialization-failed" :status :awaiting-validation :path "/home/joe/code/futon2/data/wm-repair-obligations/implementations/repair-initialization-56485d40-2f54-4882-8917-15a59a473494-initialization-failed.edn"
+:after-eligible 5

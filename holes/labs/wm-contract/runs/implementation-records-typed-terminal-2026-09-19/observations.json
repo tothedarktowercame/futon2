@@ -1,0 +1,39 @@
+{
+  "commit": "06310fcb16d74c0432125f643dc203983b404576",
+  "repo": "/home/joe/code/futon2",
+  "parent": "78607c2c3d4f2f9492915ff4ab1e741dec3639c4",
+  "observed-head": "bdc0f776ffca421b5ed43167b3bc954ea88c0d31",
+  "commit-time": "2026-09-19T18:57:15+00:00",
+  "in-author-window": true,
+  "ancestor-of-head": true,
+  "descendant-of-parent": true,
+  "changed-paths": [
+    "holes/labs/wm-contract/runs/typed-terminal-retention-2026-09-19/register.edn",
+    "src/futon2/aif/full_loop_cohort.clj",
+    "test/futon2/aif/close_terminal_retention_test.clj"
+  ],
+  "author": {
+    "job-id": "invoke-1789844101215-22472-8091d765",
+    "agent-id": "codex-2",
+    "state": "done",
+    "started-at": "2026-09-19T18:55:02.137086412Z",
+    "finished-at": "2026-09-19T18:58:04.077710309Z",
+    "execution": {
+      "executed": true,
+      "tool-events": 16,
+      "command-events": 16
+    }
+  },
+  "review": {
+    "job-id": "invoke-1789844336541-22473-82d2ceff",
+    "agent-id": "codex-23",
+    "state": "done",
+    "started-at": "2026-09-19T18:58:57.527564678Z",
+    "finished-at": "2026-09-19T19:00:44.756224271Z",
+    "execution": {
+      "executed": true,
+      "tool-events": 16,
+      "command-events": 16
+    }
+  }
+}
