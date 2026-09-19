@@ -1,9 +1,9 @@
 # Independent review — typed close-terminal retention
 
-**Reviewer:** codex-23  
-**Review job:** `invoke-1789844336541-22473-82d2ceff`  
-**Author:** codex-2  
-**Reviewed implementation:** `06310fcb16d74c0432125f643dc203983b404576`, together with prerequisite `2c90fa4100730d92678c954a59116f191aaf366e`  
+**Reviewer:** codex-23
+**Review job:** `invoke-1789844336541-22473-82d2ceff`
+**Author:** codex-2
+**Reviewed implementation:** `06310fcb16d74c0432125f643dc203983b404576`, together with prerequisite `2c90fa4100730d92678c954a59116f191aaf366e`
 **Warrant:** `test-registry-8a13ae4b965011c4794f1b8f02ee0082490f68c008ee8b88048dc2a0b725e22d`
 
 ## Verdict
