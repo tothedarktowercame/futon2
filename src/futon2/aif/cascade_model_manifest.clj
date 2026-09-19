@@ -674,10 +674,11 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                           (if (= risk :infinite)
                             {:g :infinite
                              :steps (when record?
-                                      (persistent! (conj! steps {:tau tau :risk :infinite})))}
+                                      (persistent! (conj! steps {:tau tau :risk :infinite
+                                                                 :belief q :rates rates})))}
                             (recur (inc tau) (+ total risk)
                                    (if record?
-                                     (conj! steps {:tau tau :risk risk})
+                                     (conj! steps {:tau tau :risk risk :belief q :rates rates})
                                      steps)))))))))))))
         ;; WIRE-4: non-zero adjudication rates score by the FACTORIZED
         ;; closed forms — O(|universe|) per step, no powerset anywhere:
@@ -817,7 +818,8 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                                            q))]
                                       (recur (inc tau) (+ total risk amb)
                                              (if record?
-                                               (conj! steps {:tau tau :risk risk :ambiguity amb})
+                                               (conj! steps {:tau tau :risk risk :ambiguity amb
+                                                             :belief q :rates rates})
                                                steps)))))))))))))))))))))
 
 (defn horizon-g-sparse
@@ -889,7 +891,22 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
     (if (and (map? g) (contains? g :status))
       {:g g :certificate nil}
       {:g g
-       :certificate {:horizon (:horizon m)
+       :certificate {:consumed-g
+                     {:A (:rates (first steps))
+                      ;; A spec denotes the whole distribution, without
+                      ;; enumerating its exponential outcome space. The live
+                      ;; caller uses this path. A function-valued C cannot be
+                      ;; serialized; absence is explicit, never guessed.
+                      :C (when-not (:c-fn-pointwise m)
+                           {:form :constant-spec :spec (:spec m)
+                            :universe (:universe m)})
+                      :D (:q0 m)
+                      ;; These are the beliefs the risk calculation just
+                      ;; consumed, not a second rollout. This evaluator calls
+                      ;; rollout, with no observation updates, on both paths.
+                      :Q {:steps (mapv #(select-keys % [:tau :belief]) steps)
+                          :observation-updates []}}
+                     :horizon (:horizon m)
                      :steps (mapv (fn [step]
                                    {:tau (:tau step)
                                     :risk (:risk step)

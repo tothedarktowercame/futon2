@@ -16,7 +16,8 @@
 
    Contract: contributes to R6 (softmax action selection) per
    `futon2/docs/futon-aif-completeness.md`."
-  (:require [futon2.aif.hierarchical-budget :as hierarchical-budget]
+  (:require [futon2.aif.g-term-decomposition :as decomposition]
+            [futon2.aif.hierarchical-budget :as hierarchical-budget]
             [futon2.aif.cascade-selection :as cascade-selection]))
 
 (defn select-budgeted-actions
@@ -187,8 +188,9 @@
    accompanying candidates, outside the finite Lean fields. Attached inputs
    map to QuantityStatus.computed; neutral and computedNotAttached retain
    their distinct constructors. This emits evidence, not a runtime gate."
-  [beta candidates]
+  [beta candidates ranked]
   {:beta {:value beta :status :declared}
+   :g-term-decomposition (decomposition/census ranked candidates)
    :candidates candidates
    :policies (mapv (fn [c]
                      {:id (:id c)
@@ -265,7 +267,7 @@
      :actuation-status :pending-downstream-gates
      :actuation-authorized? false
      :beta {:value beta :status :declared}
-     :selection-certificate (selection-certificate beta candidates)
+     :selection-certificate (selection-certificate beta candidates ranked-actions)
      :selection-law
      {:requested :cascade-selection-posterior
       :applied :cascade-selection-posterior

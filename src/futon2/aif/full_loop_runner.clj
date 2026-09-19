@@ -21,6 +21,7 @@
             [futon2.aif.fold :as fold]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
+            [futon2.aif.g-term-decomposition :as decomposition]
             [futon2.aif.limb-evidence :as limb-evidence]
             [futon2.aif.interpretation-evidence :as interpretation-evidence]
             [futon2.aif.interpretation-job :as interpretation-job]
@@ -517,6 +518,7 @@
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
                     :traceWritten (boolean (:trace-path result))
+                    :g-term-decomposition (decomposition/from-result result)
                     :route route}
                      (:execution-cohort raw-opts)
                      (assoc :execution-cohort
