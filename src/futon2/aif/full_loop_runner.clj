@@ -2811,6 +2811,16 @@
                       {:close-retention/refusal :action-occurrence-already-minted})))
     occurrence))
 
+(defn- repair-occurrence
+  "Create or propagate one repair occurrence across containment boundaries.
+  The stable origin and event identity are authority-qualified; local attempt
+  ordinals remain display labels only."
+  [existing origin event-id failure-kind created-at]
+  (or existing
+      (repair/occurrence-identity
+       {:origin origin :event-id event-id :failure-kind failure-kind
+        :created-at created-at})))
+
 (def ^:private limb-record-schemas
   (into #{:wm/limb-receipt-v1 :wm/target-standing-decision-v1
           :wm/entity-revision-pair-v1} interpretation-evidence/schemas))
@@ -3381,6 +3391,12 @@
         execution-provenance (when execution-authority
                                (cohort/execution-provenance execution-authority attempt-id))
         external-attempt-id (or (:id execution-identity) attempt-id)
+        occurrence-origin (str (or (:repo code-state) "wm-runner") "::"
+                               (:run-id opts))
+        occurrence-for (fn [existing event-id failure-kind]
+                         (repair-occurrence existing occurrence-origin
+                                            (str event-id) failure-kind
+                                            (str (Instant/ofEpochMilli started))))
         _ (swap! phase-context assoc :attempt-id attempt-id
                  :external-attempt-id external-attempt-id
                  :execution-identity execution-identity)
@@ -3449,6 +3465,10 @@
                              ((or (:repair-system-record-fn opts)
                                   repair/record-system-failure!)
                               {:attempt-id external-attempt-id
+                               :occurrence
+                               (occurrence-for (:repair/occurrence data)
+                                               external-attempt-id
+                                               (or (:failure-kind data) outcome))
                                :repair-class repair-class
                                :machine-repo (:repo code-state)
                                :target (or (:target data)
@@ -3684,6 +3704,10 @@
                            finding ((or (:repair-system-record-fn opts)
                                         repair/record-system-failure!)
                                     {:attempt-id external-attempt-id
+                                     :occurrence
+                                     (occurrence-for
+                                      (:repair/occurrence failure-data)
+                                      external-attempt-id refusal-kind)
                                      :repair-class :machine-failure
                                      :machine-repo (:repo code-state)
                                      :target (get-in @checkpoints
@@ -3821,6 +3845,12 @@
                     ((or (:repair-system-record-fn opts)
                          repair/record-system-failure!)
                      {:attempt-id attempt-id
+                      :occurrence
+                      (occurrence-for (:repair/occurrence failure-data)
+                                      (or (get-in failure-data
+                                                  [:author-job :job-id])
+                                          external-attempt-id)
+                                      failure-kind)
                       :repair-class repair-class
                       :target (:target stop-line)
                       :selected-entry (:selected-entry stop-line)
@@ -4522,6 +4552,12 @@
                                    ;; finding and the review verdict was
                                    ;; mistyped :initialization-failed).
                                    {:attempt-id external-attempt-id
+                                    :occurrence
+                                    (occurrence-for nil (:job-id review-job)
+                                                    (case (review-verdict review-job)
+                                                      :request-changes
+                                                      :review-request-changes
+                                                      :reject :review-rejected))
                                     :target target
                                     :commit commit
                                     :selected-entry (:selected-entry failure-data)
@@ -4656,6 +4692,9 @@
                 finding ((or (:repair-system-record-fn opts)
                              repair/record-system-failure!)
                          {:attempt-id external-attempt-id
+                          :occurrence
+                          (occurrence-for (:repair/occurrence failure-data)
+                                          external-attempt-id refusal-kind)
                           :repair-class :machine-failure
                           :machine-repo (:repo code-state)
                           :target (get-in @checkpoints
@@ -4717,6 +4756,13 @@
                            ;; recovery-rejection site above: bare ordinals
                            ;; collide across cohorts in the shared store.
                            {:attempt-id external-attempt-id
+                            :occurrence
+                            (occurrence-for (:repair/occurrence failure)
+                                            (:job-id review-job)
+                                            (case verdict
+                                              :request-changes
+                                              :review-request-changes
+                                              :reject :review-rejected))
                             :target (:target failure)
                             :commit (:commit failure)
                             :selected-entry (:selected-entry failure)
@@ -4735,6 +4781,9 @@
                         :author-job (:author-job failure)
                         :review-job review-job
                         :repair-obligation finding
+                        :repair/occurrence
+                        (or (:repair/occurrence failure)
+                            (:repair/occurrence finding))
                         :failure-kind (failure-kind-from e)
                         :feature-card-invalid-reason
                         (:feature-card-invalid-reason failure)
@@ -4804,8 +4853,7 @@
            :data {:cohort/error :stopping-rule-reached
                   :target (:target stopping-rule-data)
                   :attempted (:attempted stopping-rule-data)}}
-          (let [attempt-id (str "initialization-" (UUID/randomUUID))
-                trigger (or (:trigger raw-opts) :duree-click-on-demand)
+          (let [trigger (or (:trigger raw-opts) :duree-click-on-demand)
                 error (if (str/blank? (str (.getMessage e)))
                         "Full-loop initialization failed"
                         (.getMessage e))
@@ -4829,11 +4877,22 @@
                 failure-kind (or (explicit-failure-kind e)
                                  (transport-failure-kind e)
                                  :initialization-failed)
+                occurrence (repair-occurrence
+                            (:repair/occurrence edata)
+                            (str "wm-runner::" run-id)
+                            (str (or (:job-id edata)
+                                     (:trip/id edata)
+                                     (:tripwire/report-id edata)
+                                     run-id))
+                            failure-kind started-at)
+                attempt-id (str "initialization-"
+                                (subs (:occurrence/id occurrence) 4 16))
                 repair-class (repair-class-for failure-kind)
                 finding
                 ((or (:repair-system-record-fn raw-opts)
                      repair/record-system-failure!)
                  {:attempt-id attempt-id
+                  :occurrence occurrence
                   :repair-class repair-class
                   :failure-stage :initialization
                   :outcome :incomplete
@@ -4862,6 +4921,7 @@
              :checkpoints {}
              :morning-brief-ref brief-ref
              :data {:repair-obligation finding
+                    :repair/occurrence occurrence
                     :failure-kind failure-kind
                     :failure-stage :initialization
                     :error error

@@ -3984,6 +3984,35 @@
             :grounded-repair :distinct-production-shaped-successor]
            (:requires (:discharge-contract (first @findings)))))))
 
+(deftest initialization-containment-propagates-stable-occurrence-identity
+  ;; The four T8 echoes were reminted because this boundary generated a fresh
+  ;; UUID on every catch. A retry observation of the same authority-qualified
+  ;; run/event/kind must carry the same occurrence and display attempt id.
+  (let [findings (atom [])
+        opts {:run-id "authority-run/echo-1"
+              :cohort? false
+              :phase-log nil
+              :phase-log-fn
+              (fn [_]
+                (throw (ex-info "T8 halted"
+                                {:failure-kind :tripwire-tripped
+                                 :trip/id "trip-stable-1"})))
+              :repair-system-record-fn
+              (fn [finding]
+                (swap! findings conj finding)
+                (assoc finding :repair/id "repair-occurrence-fixture"))
+              :queue-fn (fn [_])}
+        first-result (runner/run-opportunity! opts)
+        second-result (runner/run-opportunity! opts)
+        occurrences (mapv :occurrence @findings)]
+    (is (= 2 (count occurrences)))
+    (is (= (first occurrences) (second occurrences)))
+    (is (= :tripwire-tripped
+           (:occurrence/failure-kind (first occurrences))))
+    (is (= (:attempt-id first-result) (:attempt-id second-result)))
+    (is (= (get-in first-result [:data :repair/occurrence])
+           (first occurrences)))))
+
 ;; --- revision round 2 (reviewer finding) ------------------------------------
 ;; Consulting transport typing FIRST at the outer boundary was a fail-open: an
 ;; ex-info{:failure-kind :build-failed} wrapping any transport cause had that

@@ -401,6 +401,61 @@
         (when (some? discriminator)
           (str "-" (name discriminator))))))
 
+(defn occurrence-identity
+  "Mint the stable, authority-qualified identity of one failed occurrence.
+
+  ORIGIN names the authority/domain that created the occurrence (normally the
+  runner run id plus repository), EVENT-ID is the durable job/event identity,
+  and FAILURE-KIND is the typed originating failure.  Display ordinals such as
+  attempt-001 are never used as the identity itself.  Reconstructing these
+  exact inputs reconstructs the same id, which is required when containment
+  layers observe the same failure more than once."
+  [{:keys [origin event-id failure-kind created-at]}]
+  (when-not (and (nonblank? origin) (nonblank? event-id)
+                 (keyword? failure-kind))
+    (throw (ex-info "Repair occurrence identity lacks authority"
+                    {:repair-occurrence/refusal :occurrence-identity-invalid
+                     :origin origin :event-id event-id
+                     :failure-kind failure-kind})))
+  (let [subject [origin event-id failure-kind]
+        id (str "occ-" (digest/sha256 (pr-str subject)))]
+    {:occurrence/id id
+     :occurrence/origin origin
+     :occurrence/event-id event-id
+     :occurrence/failure-kind failure-kind
+     :occurrence/created-at (or created-at (str (Instant/now)))}))
+
+(defn- occurrence-finding-id [occurrence]
+  (str "repair-" (:occurrence/id occurrence)))
+
+(defn- occurrence-evidence!
+  "Append one immutable observation of an occurrence.  The finding itself is
+  published/reused by occurrence id; these records retain later observations
+  without minting another open finding."
+  [root occurrence finding-id observation]
+  (let [observation-id (or (:observation/id observation)
+                           (:occurrence/event-id occurrence))
+        record {:schema :wm/repair-occurrence-observation-v1
+                :occurrence/id (:occurrence/id occurrence)
+                :finding/id finding-id
+                :observation/id observation-id
+                :observed-at (or (:observed-at observation)
+                                 (:occurrence/created-at occurrence))
+                :source (or (:source observation)
+                            (:occurrence/origin occurrence))}
+        path (io/file root "occurrence-evidence" (:occurrence/id occurrence)
+                      (str (digest/sha256 (str observation-id)) ".edn"))]
+    (try
+      (write-new! path record)
+      (catch java.nio.file.FileAlreadyExistsException _
+        (let [existing (edn/read-string (slurp path))]
+          (when-not (= existing record)
+            (throw (ex-info "Repair occurrence observation conflicts"
+                            {:reason :repair-occurrence-observation-conflict
+                             :occurrence/id (:occurrence/id occurrence)
+                             :observation/id observation-id}))))))
+    record))
+
 (def review-failure-discharge-contract
   "Typed discharge contract minted onto every independent-review-failure
   finding. Schema-1 findings carried no discharge contract at all, so the
@@ -413,7 +468,7 @@
 (defn record-review-failure!
   ([finding] (record-review-failure! default-root finding))
   ([root {:keys [attempt-id target commit selected-entry reviewer review-job
-                 review-verdict review-text]
+                 review-verdict review-text occurrence observation]
           :as finding}]
    (when-not (and (string? attempt-id) target commit selected-entry reviewer
                   review-job (#{:request-changes :reject} review-verdict)
@@ -423,8 +478,10 @@
    (let [failure-kind (case review-verdict
                         :request-changes :review-request-changes
                         :reject :review-rejected)
-         id (obligation-id attempt-id failure-kind)
-         record {:repair/id id
+         id (if occurrence
+              (occurrence-finding-id occurrence)
+              (obligation-id attempt-id failure-kind))
+         record (cond-> {:repair/id id
                  :repair/schema-version 2
                  :repair/status :open
                  :repair/class :independent-review-failure
@@ -439,8 +496,12 @@
                  :failure-stage :independent-review
                  :failure-kind failure-kind
                  :discharge-contract review-failure-discharge-contract
-                 :opened-at (str (Instant/now))}]
-     (write-new! (io/file root "findings" (str id ".edn")) record)
+                 :opened-at (or (:occurrence/created-at occurrence)
+                                (str (Instant/now)))}
+                  occurrence (assoc :repair/occurrence occurrence))]
+     (write-new-or-identical! root id record)
+     (when occurrence
+       (occurrence-evidence! root occurrence id observation))
      record)))
 
 (defn record-system-failure!
@@ -449,7 +510,8 @@
   holds, and recoverable incomplete work. Selection fields are optional
   because readiness and substrate failures can precede policy selection."
   ([finding] (record-system-failure! default-root finding))
-  ([root {:keys [attempt-id repair-id repair-class failure-stage outcome error]
+  ([root {:keys [attempt-id repair-id repair-class failure-stage outcome error
+                 occurrence observation]
           :as finding}]
    (when-not (and (string? attempt-id)
                   (#{:machine-failure :environmental-hold
@@ -459,8 +521,9 @@
      (throw (ex-info "System stop-the-line finding lacks required provenance"
                      {:finding finding})))
    (let [id (or repair-id
+                (when occurrence (occurrence-finding-id occurrence))
                 (obligation-id attempt-id (:failure-kind finding)))
-         record {:repair/id id
+         record (cond-> {:repair/id id
                  :repair/schema-version 3
                  :repair/status :open
                  :repair/class repair-class
@@ -475,8 +538,13 @@
                  :failure-data (:failure-data finding)
                  :backtrace (:backtrace finding)
                  :discharge-contract (:discharge-contract finding)
-                 :opened-at (or (:opened-at finding) (str (Instant/now)))}]
+                 :opened-at (or (:opened-at finding)
+                                (:occurrence/created-at occurrence)
+                                (str (Instant/now)))}
+                  occurrence (assoc :repair/occurrence occurrence))]
      (write-new-or-identical! root id record)
+     (when occurrence
+       (occurrence-evidence! root occurrence id observation))
      record)))
 
 (defn- indexed-records [root child]

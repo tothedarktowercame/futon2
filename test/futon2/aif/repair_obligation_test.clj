@@ -969,3 +969,88 @@
     ;; UNBOUNDED record, exactly as written before this change.
     (spit path (pr-str record))
     (is (some? (repair/record-system-failure! root base)))))
+
+(deftest occurrence-identity-publishes-once-and-retains-observations
+  (let [root (temp-root)
+        occurrence (repair/occurrence-identity
+                    {:origin "wm/test-authority/run-1"
+                     :event-id "invoke-author-1"
+                     :failure-kind :build-failed
+                     :created-at "2026-09-19T12:00:00Z"})
+        base {:attempt-id "attempt-001"
+              :occurrence occurrence
+              :repair-class :machine-failure
+              :machine-repo "/repo"
+              :target "target-1"
+              :failure-stage :author-wait
+              :outcome :build-failed
+              :failure-kind :build-failed
+              :error "author failed"
+              :discharge-contract {:requires [:distinct-repair-commit]
+                                   :artifact-shape :code-commit}}
+        first-record (repair/record-system-failure!
+                      root (assoc base :observation
+                                  {:observation/id "inner-catch"}))
+        replay (repair/record-system-failure!
+                root (assoc base :observation
+                            {:observation/id "outer-catch"}))
+        evidence-dir (io/file root "occurrence-evidence"
+                              (:occurrence/id occurrence))]
+    (is (= (:repair/id first-record) (:repair/id replay)))
+    (is (= occurrence (:repair/occurrence first-record)))
+    (is (= 1 (count (filter #(.isFile %)
+                            (file-seq (io/file root "findings"))))))
+    (is (= 2 (count (filter #(.isFile %) (file-seq evidence-dir))))
+        "inner and outer observations append evidence, not findings")
+    (is (= :repair-finding-conflict
+           (:reason
+            (ex-data
+             (try (repair/record-system-failure!
+                   root (assoc base :error "semantically different"))
+                  nil
+                  (catch clojure.lang.ExceptionInfo e e)))))
+        "one occurrence id cannot alias conflicting semantic payloads")))
+
+(deftest parallel-occurrence-publication-is-create-new-safe
+  (let [root (temp-root)
+        occurrence (repair/occurrence-identity
+                    {:origin "wm/test-authority/run-parallel"
+                     :event-id "invoke-parallel"
+                     :failure-kind :build-failed
+                     :created-at "2026-09-19T12:00:00Z"})
+        finding {:attempt-id "attempt-001" :occurrence occurrence
+                 :observation {:observation/id "same-observation"}
+                 :repair-class :machine-failure :failure-stage :author-wait
+                 :outcome :build-failed :failure-kind :build-failed
+                 :error "never executed"}
+        records (mapv deref
+                      [(future (repair/record-system-failure! root finding))
+                       (future (repair/record-system-failure! root finding))])]
+    (is (apply = (map :repair/id records)))
+    (is (= 1 (count (filter #(.isFile %)
+                            (file-seq (io/file root "findings"))))))))
+
+(deftest distinct-occurrences-remain-visible-to-t8
+  (let [root (temp-root)
+        now (str (java.time.Instant/now))
+        ids (for [event-id ["job-a" "job-b" "job-c"]]
+              (:repair/id
+               (repair/record-system-failure!
+                root {:attempt-id "attempt-001"
+                      :occurrence
+                      (repair/occurrence-identity
+                       {:origin "wm/test-authority/run-distinct"
+                        :event-id event-id :failure-kind :build-failed
+                        :created-at now})
+                      :repair-class :machine-failure
+                      :target "same-target"
+                      :failure-stage :author-wait :outcome :build-failed
+                      :failure-kind :build-failed :error "failed"})))
+        context {:repair-root root :cohort? true
+                 :tripwire/cohort-history [] :tripwire/a-matrix-events []
+                 :tripwire/grounding-witnesses []}
+        observation (#'tripwire/cross-run-observation
+                     context {:phase :opportunity :transition :start})]
+    (is (= 3 (count (set ids))) "distinct jobs mint distinct occurrences")
+    (is (= 1 (count (tripwire/evaluate-wire :T8 observation)))
+        "occurrence deduplication does not blind repetition detection")))
