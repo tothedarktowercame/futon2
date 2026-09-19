@@ -17,3 +17,9 @@ Codex-15 review `b760e5ab` / job `invoke-1789847623191-22503-b9ce22fc` requested
 Reconciliation `420faeb0` binds singular `stop-line` only when the enacted entry is a repair action, matching its selected target against the observed queue. Thus ordinary recovery reads, reuse, supersession, and discharge-contract fallback see nil; separately authorized successor validation remains unchanged. The retained historical helper validates admission identity and actors before execution; the original transition checks remain.
 
 Corrected namespace executed once: 4 tests / 31 assertions / zero failures/errors, exit 0. New tests reach ordinary fresh dispatch with an unrelated running recovery job and assert no job read; select historical B with A first and assert execution receives B; mismatched admission refuses before execution. Hermetic production-file-set assertions passed. Refreshed bound warrant: `test-registry-f352e8317f8dd879d2ab5364e09527a3384f344bc2750bcf307c1f12a36f58f7`. Corrected spec, stdout/stderr, runner log, closure and clean gates: `runs/selection-always-2026-09-19/reconciled/`. No production clicks.
+
+## Final independent verdict
+
+**APPROVED** after the single reconciliation. Codex-15's final review is committed as `fe6cba1c` in `REVIEW-selection-always-2026-09-19.md`; final review job `invoke-1789847873274-22507-1d2e9d4d` was independently observed done. The committed note consumes the refreshed warrant and approves `420faeb03f1ec12e7387cd6faf9a482cf2871f02`, with bounded regression witness attestation. Reduced live review-job evidence and final commission are retained under `reconciled/`.
+
+Implementation sequence: `8b6827da` then `420faeb0`. Execution receipts: `0770631f`, `2fc59082`. First review: `b760e5ab` (changes requested); final review: `fe6cba1c` (approved). No implementation-record store mutation is part of this packet. Production-shaped validation and the two authorized clicks remain outstanding for the subsequent packet.
