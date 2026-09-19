@@ -2059,8 +2059,11 @@
               "prefix actually preserved from your previous response:\n"
               (pr-str job-prefix-text) "\n\n"))
        "INSTRUCTION: BEGIN your response with one corrected, self-contained "
-       "FULL_LOOP_FEATURE_CARD: {...} line (one EDN map, closing brace within "
-       "the 200-char durable prefix). The marker must be the very first "
+       "FULL_LOOP_FEATURE_CARD: {:built \"...\" :want-coverage \"...\" "
+       ":matches-intent? true :things-to-try [\"command -> observation\"]} "
+       "line. All four named fields are required; legacy :target/:change/:sha "
+       "cards are invalid. Keep the closing brace within the 200-char durable "
+       "prefix. The marker must be the very first "
        "characters of your reply — no prose before it. Then "
        "FULL_LOOP_AUTHOR: DONE <sha>. "
        "Make a new commit ONLY if files must change (artifact-only cure "

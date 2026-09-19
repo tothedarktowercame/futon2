@@ -3360,6 +3360,29 @@
     (is (= true (get-in result [:data :build-retries 0 :cured?])))
     (is (= 1 (count (:build-retries (:data result)))))))
 
+(deftest feature-card-cure-prompt-repeats-the-required-schema
+  ;; Measured reproduction: the initial prompt specified the four-field card,
+  ;; but the cure prompt collapsed it to `{...}`.  The author consequently
+  ;; emitted the legacy :target/:change/:sha shape and the validator correctly
+  ;; rejected it as :built-must-be-a-nonblank-string.  A retry is an executable
+  ;; continuation of the same contract, so it must carry the schema in full.
+  (let [prompt (#'runner/build-cure-prompt
+                "author-x" "repair-x" "abc1234"
+                "Author feature card is invalid: built-must-be-a-nonblank-string (source text)"
+                {:failure-kind :feature-card-missing-or-invalid}
+                "FULL_LOOP_FEATURE_CARD: {:target \"repair-x\" :change \"fix\" :sha \"abc1234\"}")]
+    (doseq [required [":built \"...\""
+                      ":want-coverage \"...\""
+                      ":matches-intent? true"
+                      ":things-to-try [\"command -> observation\"]"]]
+      (is (str/includes? prompt required)
+          (str "cure prompt retains required field " required)))
+    (is (str/includes? prompt
+                       "legacy :target/:change/:sha cards are invalid"))
+    (is (str/includes? prompt "built-must-be-a-nonblank-string"))
+    (is (str/includes? prompt
+                       "FULL_LOOP_FEATURE_CARD: {:target "))))
+
 (deftest card-cure-uses-terminal-commit-when-agency-ref-is-a-path
   ;; Live shape from canary-da9681ce: the substantive author commit was already
   ;; observed, the cure reply began with a valid feature card, but Agency
