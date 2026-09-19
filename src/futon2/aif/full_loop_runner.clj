@@ -30,6 +30,7 @@
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.pattern-registry :as patterns]
+            [futon2.aif.run-participants :as participants]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.trace :as trace]
@@ -516,6 +517,7 @@
                          (get-in result [:checkpoints :selection :judgment :decision]))
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
+                    :participants (participants/record-value raw-opts)
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
@@ -3311,7 +3313,7 @@
         dispatched-turns (atom 0)
         standing-readback-state (atom nil)
         effective-configuration (atom (wm/effective-run-configuration opts))
-        reviewer-of-record (atom reviewer)
+        reviewer-of-record (participants/observe! opts)
         closing? (atom false)
         roster-result (try
                         {:value
@@ -3878,8 +3880,8 @@
                        (:historical-verification-candidate-fn opts))
               ((:historical-verification-candidate-fn opts) stop-line))
             stop-lines (if (and repair-action? stop-line) [stop-line] [])
-            reviewer (if repair-action? repair-reviewer reviewer)
-            _ (reset! reviewer-of-record reviewer)
+            reviewer (participants/select-reviewer! reviewer-of-record
+                                                   repair-action? reviewer repair-reviewer)
             ;; :operator-actions RETIRED with the flat decision (SPEC
             ;; flat-removal H4, 2026-09-17): there are no flat candidates,
             ;; so no operator gates are queued from the judgement.
@@ -4829,6 +4831,7 @@
   (let [run-id (or (:run-id raw-opts)
                    (str (subs (str (Instant/now)) 0 10) "-" (UUID/randomUUID)))
         started-at (str (Instant/now))
+        raw-opts (assoc raw-opts :participants/state (atom nil))
         _ (ensure-dispatch-seat! (config raw-opts))
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.
