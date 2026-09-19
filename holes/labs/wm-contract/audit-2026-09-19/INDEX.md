@@ -32,6 +32,48 @@ verdicts below are mine, from reading the code, not relayed.
   CANNOT-LAND.
 - futon2 `b6da1420` — T10 (found by hand while the swarm ran, same class as d4).
 
+## One d5 conclusion is refuted — do not act on it
+
+`d5-unbounded-write.edn` finding 1 concludes that the 11 MB `:judgment`
+payloads inside `:backtrace :checkpoints` are "safe to elide" because nothing
+reads them back. The reader survey is correct and I reproduced it across
+futon2, futon3c, p4ng, futon0 and futon1b, all file types: the only reads are
+`[:backtrace :code-state :repo]` (full_loop_runner.clj:598),
+`[:backtrace :job-id]` (:3137) and `[:backtrace :trip-report]` in a test.
+
+The conclusion still does not follow. The evidence that diagnosed the T8
+livelock on 2026-09-19 — the `:artifact-binding` map carrying
+`:text-artifact-ref "2e5e7409"`, `:observed-head "9a6a012f..."` and
+`:corroborates? false` — lives at
+
+    [:backtrace :checkpoints :selection    :judgment ...]
+    [:backtrace :checkpoints :construction :judgment ...]
+
+49 occurrences, all inside the payloads declared safe to elide. Had they been
+elided when those findings were written on 2026-09-15, it would not have been
+possible to establish that the author claimed the pre-dispatch head while HEAD
+had genuinely moved, and the chain back to the 28-hour-stale JVM would have
+been unreachable. That diagnosis produced b6da1420.
+
+So: nothing reads them programmatically; they are read by hand, and that is
+what a backtrace is for. "No code reads it" is the wrong test for a diagnostic
+artifact -- under that test every backtrace in every system is dead weight
+until the first time you need one.
+
+What to do instead, if the size is worth attacking:
+- serialise cheaply rather than elide (353cdc29 took a real 19.4 MB finding
+  from 47,306 ms to 212 ms; the cost was the pretty-printer under the lock, not
+  the bytes);
+- elide by reference — write the judgment to a content-addressed blob and keep
+  its digest in the backtrace. `record-finding!` already does this: its
+  backtrace is `{:trip-report <path>}`, a pointer rather than the payload.
+
+The other five confirmed d5 findings stand. Two are unacted:
+tripwire.clj:815 (cross-run-observation still parses the whole 90 MB store into
+memory per click; the 2026-09-18 fix bounded only the disk copy) and
+full_loop_cohort.clj:229 (cohort cells, unbounded, under the cohort lock, re-read
+wholesale by `ledger` per click).
+
 ## Two discriminators that earned their keep
 
 **Does a sibling call site already guard this field?** This is stronger than
