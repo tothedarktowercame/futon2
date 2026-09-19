@@ -49,6 +49,13 @@ remains separate from these explicitly staged changes.
    `revision-runner-tests.log`. Independent re-review approved the revision
    and independently reported the same green namespace. The run then
    grounded the commit and closed with `grounded-change`.
+5. **The shell footer falsely failed after completion.** The third script
+   process returned 141 because its final `ls | head | xargs` presentation
+   pipeline received SIGPIPE under `pipefail`. The durable click was already
+   `grounded-change`. The footer now selects the newest finding in Python
+   and invokes `ls` on that one file. Shell syntax and the exact corrected
+   footer were checked against the production directory without firing
+   another click; the footer exits 0. This is a reporting fix, not a rerun.
 
 ## Runs
 

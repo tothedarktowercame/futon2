@@ -175,4 +175,15 @@ done
 echo; echo "terminal state:"
 curl -s -m 20 "$BASE/api/alpha/wm/click" | python3 -m json.tool | sed -n '1,24p'
 echo; echo "newest repair finding, if the click opened one:"
-ls -t "$F2"/data/wm-repair-obligations/findings/*.edn 2>/dev/null | head -1 | xargs -r ls -l
+# Avoid ls | head under pipefail: SIGPIPE used to turn a completed click into
+# shell exit 141 when the finding directory outgrew the pipe buffer.
+python3 - "$F2/data/wm-repair-obligations/findings" <<'PY'
+from pathlib import Path
+import subprocess
+import sys
+
+newest = max(Path(sys.argv[1]).glob("*.edn"),
+             key=lambda path: path.stat().st_mtime_ns, default=None)
+if newest is not None:
+    subprocess.run(["ls", "-l", str(newest)], check=True)
+PY

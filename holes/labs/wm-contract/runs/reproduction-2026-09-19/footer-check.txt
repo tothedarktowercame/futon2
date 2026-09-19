@@ -1,0 +1,2 @@
+-rw-rw-r-- 1 joe joe 19653 Sep 19 14:33 /home/joe/code/futon2/data/wm-repair-obligations/findings/repair-ea1-b82bec4361658ac9fea3bf2acf2b155ee690554056cb43982b320c2554a19bb7--attempt-001-build-failed.edn
+corrected footer exit: 0
