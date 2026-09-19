@@ -1,8 +1,14 @@
 (ns futon2.aif.cascade-sources-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.cascade-sources :as cs]))
+
+(defn- byte-sha [file]
+  (format "%064x" (java.math.BigInteger.
+                    1 (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                               (java.nio.file.Files/readAllBytes (.toPath (io/file file)))))))
 
 (defn- tmp-dir []
   (doto (.toFile (java.nio.file.Files/createTempDirectory "cascade-sources" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -48,3 +54,63 @@
   (let [dir (tmp-dir)]
     (spit (io/file dir "bad.edn") (pr-str (dissoc source :beta)))
     (is (thrown? clojure.lang.ExceptionInfo (cs/load-declared (.getPath dir))))))
+
+(def pattern-id :cascade-construction/run-it-on-a-real-case)
+(def pattern-path "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg")
+
+(defn- admission [dir receipt]
+  ;; Real declaration/receipt, with no fact observations: this test exercises
+  ;; document admission, not git/HTTP observation ports. No source-read stub.
+  (let [decl (edn/read-string (slurp (io/resource "wm/cascade-sources/M-wm-08-external-f2.edn")))
+        decl (assoc decl :facts [] :interpretation-receipts {pattern-id receipt})]
+    (spit (io/file dir "admission.edn") (pr-str decl))
+    (get-in (cs/load-declared (str dir))
+            [:interpretations (:target decl) :receipts pattern-id])))
+
+(defn- refusal [f]
+  (try (f) nil
+       (catch clojure.lang.ExceptionInfo e (ex-data e))))
+
+(deftest path-only-real-pattern-admission-gets-current-byte-hash
+  (let [dir (tmp-dir)
+        decl (edn/read-string (slurp (io/resource "wm/cascade-sources/M-wm-08-external-f2.edn")))
+        original (get-in decl [:interpretation-receipts pattern-id])
+        expected (byte-sha (io/file "/home/joe/code" pattern-path))]
+    (try
+      (is (= {:path pattern-path} (:source original)) "The actual defective input.")
+      (let [receipt (admission dir original)]
+        (is (= expected (get-in receipt [:source :sha256])))
+        (is (= original (update receipt :source dissoc :sha256)))
+        (println "PATTERN-SOURCE-HASH-RECEIPT" (pr-str {:source (:source receipt)
+                                                       :independent-sha256 expected
+                                                       :scope :offline-admission})))
+      (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))
+
+(deftest missing-and-unreadable-sources-refuse-instead-of-emitting-unhashed-receipts
+  (let [dir (tmp-dir)
+        unreadable (doto (io/file dir "not-a-readable-file") .mkdirs)]
+    (try
+      (doseq [path [(str (io/file dir "missing.flexiarg")) (str unreadable)]]
+        (let [r (refusal #(admission dir {:kind :hand-admitted :source {:path path}}))]
+          (is (= :invalid-cascade-source (:error r)))
+          (is (= :interpretation-source-unreadable (:reason r)))
+          (is (= path (:path r)))))
+      (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))
+
+(deftest hash-is-read-fresh-and-declared-pins-are-not-silently-replaced
+  (let [dir (tmp-dir)
+        file (io/file dir "pattern.flexiarg")
+        receipt {:kind :hand-admitted :source {:path (str file)}}]
+    (try
+      (spit file "first\r\n")
+      (let [first-receipt (admission dir receipt)]
+        (is (= (byte-sha file) (get-in first-receipt [:source :sha256])))
+        (is (= first-receipt (admission dir first-receipt)))
+        ;; Invalid UTF-8 proves the digest is over bytes, not decoded text.
+        (with-open [out (io/output-stream file)] (.write out (byte-array [(unchecked-byte 255) 0])))
+        (let [second-receipt (admission dir receipt)]
+          (is (= (byte-sha file) (get-in second-receipt [:source :sha256])))
+          (is (not= (:source first-receipt) (:source second-receipt))))
+        (is (= :interpretation-source-hash-mismatch
+               (:reason (refusal #(admission dir first-receipt))))))
+      (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))

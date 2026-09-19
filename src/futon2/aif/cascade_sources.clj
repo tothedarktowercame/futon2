@@ -17,6 +17,7 @@
   the decision was built from."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.observation-checks :as oc]))
 
@@ -41,6 +42,31 @@
                   (assoc data :error :invalid-cascade-source :reason reason))))
 
 (defn- file-sha [f] (evidence/sha256 (java.nio.file.Files/readAllBytes (.toPath f))))
+
+(defn- read-receipt-source
+  "Bind a document-backed interpretation to bytes read during admission.
+   Source-less judgement receipts remain judgement receipts. A supplied hash
+   is a pin: disagreement refuses rather than rebinding an old reading."
+  [receipt]
+  (if-not (contains? receipt :source)
+    receipt
+    (let [source (:source receipt)
+          path (:path source)]
+      (when-not (and (string? path) (not (str/blank? path)))
+        (refuse! :interpretation-source-path {:source source}))
+      (let [file (io/file path)
+            file (if (.isAbsolute file) file (io/file oc/repo-root path))
+            hash (try (file-sha file)
+                      (catch java.io.IOException e
+                        (refuse! :interpretation-source-unreadable
+                                 {:path path :exception (.getName (class e))}))
+                      (catch SecurityException e
+                        (refuse! :interpretation-source-unreadable
+                                 {:path path :exception (.getName (class e))})))]
+        (when (and (contains? source :sha256) (not= (:sha256 source) hash))
+          (refuse! :interpretation-source-hash-mismatch
+                   {:path path :declared (:sha256 source) :observed hash}))
+        (assoc receipt :source (assoc source :sha256 hash))))))
 
 (defn- check-file! [path d]
   (when-not (= :wm/cascade-source-v1 (:schema d))
@@ -91,6 +117,8 @@
         (fn [acc f]
           (let [path (.getPath f)
                 d (check-file! path (edn/read-string (slurp f)))
+                receipts (into {} (map (fn [[id receipt]] [id (read-receipt-source receipt)]))
+                               (:interpretation-receipts d))
                 t (:target d)
                 {:keys [universe observations]} (observe-facts (:facts d) (:locators d))]
             (-> acc
@@ -98,7 +126,7 @@
                 (assoc-in [:wants t] (vec (:want d)))
                 (assoc-in [:locators t] (:locators d))
                 (assoc-in [:interpretations t] {:patterns (:patterns d)
-                                                :receipts (:interpretation-receipts d)})
+                                                :receipts receipts})
                 (assoc-in [:candidates t] (vec (:candidates d)))
                 (assoc-in [:beta-by-context (:context d)] {:beta (get-in d [:beta :value]) :status (get-in d [:beta :status])})
                 (assoc-in [:context-by-target t] (:context d))
