@@ -39,8 +39,13 @@ cognitect.test-runner` did not terminate for anybody.
 Reach for evidence first, execution second:
 
 ```bash
-# Already-recorded evidence, no execution, typed refusal when it is stale
-clojure -M -m futon3c.test-registry check <config.edn>
+# Does it STILL hold? Sub-second, on the running futon3c JVM — never launch a
+# JVM to read (Joe's ruling 2026-09-19; a cold `clojure … check` costs ~30 s).
+curl -s -X POST localhost:7070/api/alpha/test-registry/check \
+  -H 'Content-Type: application/json' \
+  -d '{"entry-id":"test-registry-…","repo-root":"/home/joe/code/futon2","changed-paths":[]}'
+# {:check {...} :meaning "validity-now, …"}; GET /api/alpha/evidence/<id> is the
+# MINT verdict (who/what/counts), a different answer from "still holds".
 
 # If you must run, run the narrowest thing that answers the question
 clojure -M:test -n futon2.aif.some-test
