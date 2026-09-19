@@ -202,6 +202,97 @@
                  :T8 {:findings (mapv finding ["r1" "r2"])
                       :tripwire/force? true})))))
 
+(deftest t8-witness-defers-to-repair-at-pre-selection-start
+  ;; 2026-09-15..19 standstill class: a T8 witness over three live, open,
+  ;; repair-selectable findings at :opportunity/:start must NOT halt the run —
+  ;; halting there removes the only route to discharging those findings.
+  (let [root (temp-dir)
+        report-root (temp-dir)
+        now (str (Instant/now))
+        finding (fn [id]
+                  {:repair/id id :repair/status :open
+                   :failure-kind :review-rejected
+                   :target "M-x" :failed-commit "abc"
+                   :opened-at now})
+        opts {:repair-root (.getPath root)
+              :tripwire/report-root (.getPath report-root)
+              :cohort? true
+              :tripwire/disabled-wire-ids
+              (vec (keys (dissoc @tripwire/wire-registry :T8)))}
+        record {:phase :opportunity :transition :start
+                :attempt-id "attempt-defer"}]
+    (doseq [id ["r1" "r2" "r3"]]
+      (write-edn! root "findings" (str id ".edn") (finding id)))
+    (testing "the witness exists (T8 fires on the three findings)"
+      (is (= :duplicate-finding-livelock
+             (:kind (first (tripwire/evaluate-wire
+                            :T8 {:findings (mapv finding ["r1" "r2" "r3"])
+                                 :tripwire/force? true}))))))
+    (testing "observe! defers instead of halting and returns the record"
+      (is (identical? record (tripwire/observe! opts record))))
+    (testing "the deferral is durably recorded, visibly"
+      (let [reports (->> (file-seq report-root)
+                         (filter #(str/ends-with? (.getPath %) ".edn"))
+                         (mapv #(edn/read-string (slurp %))))]
+        (is (= 1 (count reports)) "one deferred report, not one per phase")
+        (is (= :deferred-to-repair (:trip/action (first reports))))
+        (is (= [:T8] (mapv :trip/wire-id reports)))
+        (is (= #{"r1" "r2" "r3"}
+               (set (:trip/deferred-repair-ids (first reports)))))))))
+
+(deftest t8-witness-still-halts-when-no-repair-route-exists
+  ;; Deferral requires every named obligation live AND at least one
+  ;; repair-selectable. All-environmental-hold findings have no stop-line
+  ;; repair route, so the same witness still stops the run.
+  (let [root (temp-dir)
+        now (str (Instant/now))
+        finding (fn [id]
+                  {:repair/id id :repair/status :open
+                   :repair/class :environmental-hold
+                   :failure-kind :review-rejected
+                   :target "M-x" :failed-commit "abc"
+                   :opened-at now})
+        opts {:repair-root (.getPath root)
+              :tripwire/report-root (.getPath (temp-dir))
+              :cohort? true
+              :tripwire/disabled-wire-ids
+              (vec (keys (dissoc @tripwire/wire-registry :T8)))}
+        record {:phase :opportunity :transition :start
+                :attempt-id "attempt-hold"}]
+    (doseq [id ["r1" "r2" "r3"]]
+      (write-edn! root "findings" (str id ".edn") (finding id)))
+    (let [data (halted! opts record)]
+      (is (= :T8 (:tripwire/wire-id data))))))
+
+(deftest deferral-is-pre-selection-only
+  ;; The same repair-covered witness at a phase start after selection (or at
+  ;; any :end) still halts: deferral buys the repair route, nothing else.
+  ;; The findings ride the record directly (the cross-run snapshot only loads
+  ;; at :opportunity/:start), and :tripwire/force? makes T8 evaluate wherever
+  ;; the phase event lands.
+  (let [now (str (Instant/now))
+        finding (fn [id]
+                  {:repair/id id :repair/status :open
+                   :failure-kind :review-rejected
+                   :target "M-x" :failed-commit "abc"
+                   :opened-at now})
+        findings (mapv finding ["r1" "r2" "r3"])
+        opts {:tripwire/report-root (.getPath (temp-dir))
+              :tripwire/disabled-wire-ids
+              (vec (keys (dissoc @tripwire/wire-registry :T8)))}
+        base {:attempt-id "attempt-late"
+              :tripwire/force? true
+              :findings findings
+              :closed-repair-ids #{}}]
+    (testing "a construction-phase start halts"
+      (let [data (halted! opts (merge base {:phase :construction
+                                            :transition :start}))]
+        (is (= :T8 (:tripwire/wire-id data)))))
+    (testing "a selection :end halts"
+      (let [data (halted! opts (merge base {:phase :selection
+                                            :transition :end}))]
+        (is (= :T8 (:tripwire/wire-id data)))))))
+
 (deftest t10-trips-on-a-var-replaced-at-runtime
   ;; The old wire simulated a mixed image by rebinding a var and noticing the
   ;; fn's class name changed against a stored baseline. Same evidence, no

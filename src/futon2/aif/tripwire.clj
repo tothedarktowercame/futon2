@@ -964,6 +964,72 @@
                      :tripwire/witness witness
                      :tripwire/report report-path}))))
 
+(def ^:private pre-selection-phase-start?
+  "The runner's phases at-or-before selection: :opportunity/:start (emitted
+  before anything else), :stop-line-memory/:start (before the ledger is read)
+  and :selection/:start (before the judge runs). A witness deferred here
+  leaves the run able to reach the stop-line repair; the same witness at any
+  later phase start, or at an :end, still halts."
+  (fn [record]
+    (and (= :start (:transition record))
+         (contains? #{:opportunity :stop-line-memory :selection} (:phase record)))))
+
+(defn repair-covered-witness?
+  "True when a witness names open repair obligations (the `:repair-ids` shape,
+  today only T8's livelock witness) that are ALL still live in the ledger and
+  at least one is repair-selectable — open and not an environmental hold, the
+  same filter the runner's :stop-line-memory phase uses to put an obligation in
+  front of selection as a :repair-machine-failure stop-line action.
+
+  Such a witness is the ledger talking about itself. Halting on it at a
+  pre-selection phase start removes the only route to discharging those very
+  obligations — the four-day standstill of 2026-09-15..19, where three stale
+  findings tripped T8 at :opportunity/:start and the demanded repair could
+  never be selected. Deliberately NOT applied to the T7 wedge witness
+  (:repair/id, a single obligation already selected three times with no fresh
+  artifact): there the evidence is that the repair itself is wedged, and
+  re-running it unchanged is circling, not discharge."
+  [witness {:keys [findings closed-repair-ids]}]
+  (when-let [ids (seq (:repair-ids witness))]
+    (let [by-id (into {} (map (fn [f] [(:repair/id f) f])) findings)
+          closed (set closed-repair-ids)
+          repair-class (fn [f] (if (= :system-actuation-failure (:repair/class f))
+                                 :machine-failure (:repair/class f)))
+          live-ids (filterv (fn [id] (and (contains? by-id id)
+                                          (not (contains? closed id))))
+                            ids)]
+      (and (= (count live-ids) (count ids))
+           (boolean (some (fn [id]
+                            (let [f (get by-id id)]
+                              (and (= :open (:repair/status f))
+                                   (not= :environmental-hold (repair-class f)))))
+                          live-ids))))))
+
+(defn- defer!
+  "Record a repair-covered witness WITHOUT halting, so the run can select and
+  enact the repair the witness demands. The trip is still written durably
+  (append-only report, :trip/action :deferred-to-repair) and announced on
+  stderr; it is visible, never silent. No stop-line park, no bell, no
+  handle-action!: the obligation the witness names already exists in the
+  ledger — that is the coverage condition — so the durable record here is
+  evidence, not a second obligation."
+  [opts record {:keys [wire-id witness observation]}]
+  (let [title (get-in @wire-registry [wire-id :title])]
+    (try
+      (write-trip-report! (or (:tripwire/report-root opts) default-trip-root)
+                          {:trip/wire-id wire-id
+                           :trip/witness witness
+                           :trip/observation observation
+                           :trip/action :deferred-to-repair
+                           :trip/deferred-repair-ids (vec (:repair-ids witness))})
+      (catch Throwable e
+        (stderr! "deferred trip report failed; the run still continues to repair" e)))
+    (stderr! (str "DEFER " (name wire-id) " (" title ") at phase "
+                  (:phase record) "/" (:transition record)
+                  ": witness names open repair obligations; continuing so their repair can be selected") nil)
+    (stderr! (str "  witness: " (pr-str witness)) nil))
+  record)
+
 (defn observe!
   "Evaluate enabled wires; a witness stops the run, and nothing else does.
 
@@ -972,6 +1038,13 @@
   to begin with, and it stays total for that case. A wire that YIELDS A WITNESS
   has found a broken machine invariant, and continuing past it is what produced
   6.2 GB of the same complaint recorded 205 times.
+
+  One exception, added 2026-09-19 (Joe: keep the security layer, remove the
+  behaviors that disable the machine at each turn): at a pre-selection phase
+  start, a witness whose evidence is a set of live, repair-selectable open
+  obligations is DEFERRED, not thrown — see `repair-covered-witness?`. The
+  invariant is kept: every other witness still halts, and this one halts too
+  the moment its obligations are no longer dischargeable.
 
   Evaluation stops at the first witness: `for` is lazy and `first` realises one
   element, so no later wire runs and no second report is written. Returns
@@ -998,5 +1071,8 @@
             (stderr! "wire evaluation failed; runner remains untouched" e)
             nil))]
     (when tripped
-      (halt! opts record tripped))
+      (if (and (pre-selection-phase-start? record)
+               (repair-covered-witness? (:witness tripped) (:observation tripped)))
+        (defer! opts record tripped)
+        (halt! opts record tripped)))
     record))
