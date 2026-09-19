@@ -148,6 +148,60 @@
     (first (:precedence action))
     (if (map? action) (:type action) action)))
 
+(defn- selection-input
+  "Record the historical neutral-input rule, including present null/false.
+   These cases consume the same value but are not the same observation."
+  [entry field neutral]
+  (let [value (get entry field)
+        presence (cond
+                   (not (contains? entry field)) :absent
+                   (nil? value) :null
+                   (false? value) :false
+                   :else :present)]
+    {:presence presence
+     :supplied-value value
+     :value (if (= :present presence) value neutral)
+     :status (if (= :present presence) :attached :declared-neutral)
+     :reason (when-not (= :present presence) presence)}))
+
+(defn- selection-candidate
+  [entry]
+  (let [habit (selection-input entry :habit 1)
+        f (selection-input entry :f 0)
+        computed-f (get-in entry [:certificate :f])
+        unattached? (and (not= :attached (:status f))
+                         (= :computed-not-attached (:status computed-f)))
+        f-status (if unattached? :computed-not-attached (:status f))]
+    {:id (:action entry)
+     :habit (:value habit)
+     :habit-status (:status habit)
+     :f (:value f)
+     :f-status f-status
+     :reason (if unattached? (:reason computed-f) (:reason f))
+     :g (:controller-score entry)
+     :inputs {:habit habit :f f}
+     :computed-f computed-f}))
+
+(defn- selection-certificate
+  "One Lean SelectionCertificate per policy; raw computed F stays in the
+   accompanying candidates, outside the finite Lean fields. Attached inputs
+   map to QuantityStatus.computed; neutral and computedNotAttached retain
+   their distinct constructors. This emits evidence, not a runtime gate."
+  [beta candidates]
+  {:beta {:value beta :status :declared}
+   :candidates candidates
+   :policies (mapv (fn [c]
+                     {:id (:id c)
+                      :beta-declared beta
+                      :habit (:habit c)
+                      :habit-status (if (= :attached (:habit-status c))
+                                      :computed (:habit-status c))
+                      :f (:f c)
+                      :f-status (if (= :attached (:f-status c))
+                                  :computed (:f-status c))
+                      :reason (:reason c)})
+                   candidates)})
+
 (defn select-action-cascades
   "Cascade-candidate selection at a DECLARED β (tick 1, R14 requirement).
 
@@ -165,8 +219,10 @@
      acting pattern (the per-state projection of ActionMarginal), with that
      function's declared tie-break rule (:action-name-ascending).
 
-   Entries may carry :habit (default 1 — no habit prior exists yet, a
-   declared neutral input) and :f (default 0 — no F_π on the tick).
+   Entries may carry :habit and :f. Missing, null and false inputs consume
+   the historical neutral values 1 and 0, with their presence recorded.
+   Computed non-finite F remains in the run record, with consumed F = 0.
+   :selection-certificate carries per-policy Lean fields and the input records.
 
    Returns a decision in the historical flat selector's shape (action,
    rank, controller-score, authorization envelope), plus:
@@ -183,12 +239,7 @@
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
   [ranked-actions {:keys [beta]}]
-  (let [candidates (mapv (fn [e]
-                           {:id (:action e)
-                            :habit (or (:habit e) 1)
-                            :f (or (:f e) 0)
-                            :g (:controller-score e)})
-                         ranked-actions)
+  (let [candidates (mapv selection-candidate ranked-actions)
         posterior (cascade-selection/selection-posterior
                    {:beta beta :candidates candidates})
         ;; bayes-choice takes action-of as a MAP (it does (get action-of id)),
@@ -214,6 +265,7 @@
      :actuation-status :pending-downstream-gates
      :actuation-authorized? false
      :beta {:value beta :status :declared}
+     :selection-certificate (selection-certificate beta candidates)
      :selection-law
      {:requested :cascade-selection-posterior
       :applied :cascade-selection-posterior
