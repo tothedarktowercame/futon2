@@ -3,7 +3,8 @@
    occupy one entry per distinct policy; no per-tick history is retained."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [futon2.aif.cascade-prior :as prior])
+            [futon2.aif.cascade-prior :as prior]
+            [futon2.aif.scoring-input-receipts :as receipts])
   (:import [java.io RandomAccessFile]
            [java.nio.file Files StandardCopyOption]
            [java.nio.file.attribute FileAttribute]))
@@ -26,20 +27,45 @@
      :shown (mapv :id (:precedence candidate))
      :semilattice (get candidate :semilattice {})}))
 
-(defn read-state [path]
-  (let [file (io/file path)]
-    (prior/coerce-state (when (.exists file) (edn/read-string (slurp file))))))
+(defn read-snapshot [path]
+  (let [file (io/file path)
+        bytes (when (.exists file) (Files/readAllBytes (.toPath file)))
+        text (when bytes (str (.decode (.newDecoder java.nio.charset.StandardCharsets/UTF_8)
+                                      (java.nio.ByteBuffer/wrap bytes))))
+        state (prior/coerce-state (when text (edn/read-string text)))
+        base-receipt {:status (if bytes :present :absent)
+                 :reason (when-not bytes :store-missing)
+                 :path (.getAbsolutePath file) :snapshot-edn text
+                 :sha256 (when text (receipts/sha text)) :state state}
+        receipt (if receipts/*habit-reads*
+                    (:receipt
+                     (peek (swap! receipts/*habit-reads*
+                                  (fn [reads]
+                                    (conj reads {:purpose receipts/*habit-read-purpose*
+                                                 :receipt (assoc base-receipt :occurrence-index (count reads))})))))
+                    base-receipt)]
+    {:state state :receipt receipt}))
+
+(defn read-state [path] (:state (read-snapshot path)))
 
 (defn attach-habits
   "Read one snapshot and attach E at the selector's joint-menu boundary.
    Missing identities fall back for the whole menu with an explicit reason;
    malformed stored history still refuses. No fabricated policy is counted."
   [path ranked]
-  (let [state (read-state path)
+  (let [{:keys [state receipt]}
+        (binding [receipts/*habit-read-purpose*
+                  (if (= :unspecified receipts/*habit-read-purpose*)
+                    :selection-scoring receipts/*habit-read-purpose*)]
+          (read-snapshot path))
         views (mapv (comp policy-view :action) ranked)]
     (try
       (let [masses (prior/habit-masses state views)
-            keys (mapv prior/policy-key views)]
+            keys (mapv prior/policy-key views)
+            _ (when receipts/*habit-reads*
+                (swap! receipts/*habit-reads* assoc-in
+                       [(:occurrence-index receipt) :consumption]
+                       {:candidate-ids (mapv :action ranked) :policy-keys keys :masses masses}))]
         (mapv (fn [entry key mass]
                 (assoc entry :habit mass
                        :habit-provenance
@@ -87,7 +113,9 @@
            (.mkdirs (.getParentFile file))
            (with-open [lock-file (RandomAccessFile. (str file ".lock") "rw")
                        _lock (.lock (.getChannel lock-file))]
-             (let [state (-> (prior/observe-policy (read-state path) view)
+             (let [state (-> (prior/observe-policy
+                              (binding [receipts/*habit-read-purpose* :selection-update]
+                                (read-state path)) view)
                              (assoc-in [:selection-bases key] selection-basis))]
                (publish! file state))))))
      decision)))

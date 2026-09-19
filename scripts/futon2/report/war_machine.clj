@@ -48,6 +48,7 @@
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.cascade-sources :as cascade-sources]
+            [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.belief :as belief]
             [futon2.aif.calibration-cycle :as calibration-cycle]
@@ -6165,16 +6166,8 @@
               joint-candidates (vec (keep :candidate receipted))
               dropped (vec (keep :dropped receipted))
               ;; Joint belief and want over the target-qualified tokens.
-              joint-q0 (cascade-manifest/observed-belief
-                        (reduce (fn [acc p]
-                                  (let [t (:target p)]
-                                    (clojure.set/union
-                                     acc
-                                     (set (for [[f v] (get-in p
-                                                      [:cascade-problem :facts])
-                                                :when (true? v)]
-                                            [t f])))))
-                                #{} problems))
+              initial-belief-receipt (input-receipts/initial-belief problems)
+              joint-q0 (:value initial-belief-receipt)
               joint-want (reduce (fn [acc p]
                                    (let [t (:target p)]
                                      (into acc (map (fn [w] [t w]))
@@ -6242,10 +6235,11 @@
             (throw (ex-info "cascade decision refused"
                             (merge {:kind (or (:kind ranked) :rank-refused)}
                                    ranked))))
-          (let [decision (assoc (policy/select-action-cascades ranked
-                                                      {:beta beta
-                                                       :cascade-habit-path (:cascade-habit-path opts)})
-                                :horizon-steps T)
+          (let [decision (assoc (binding [input-receipts/*habit-read-purpose* :joint-selection]
+                                  (policy/select-action-cascades ranked
+                                    {:beta beta :cascade-habit-path (:cascade-habit-path opts)}))
+                                :horizon-steps T
+                                :initial-belief-receipt initial-belief-receipt)
                 authorized (controller-authority/authorize decision ranked)
                 emitted (decision-gate/emit! authorized)]
             {:decision (assoc emitted
