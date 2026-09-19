@@ -56,6 +56,17 @@ code=$(curl -s -o /dev/null -m 10 -w '%{http_code}' "$BASE/api/alpha/agents")
 # while codex-23 was also the configured AUTHOR. :failure-detail :busy, twice,
 # for the same reason, and neither run reached a cascade selection. Checking
 # roster membership alone did not see it. Check the status field.
+#
+# "restored" COUNTS AS AVAILABLE (claude-4, 2026-09-19, after a server restart).
+# After futon3c-zone.service restarts, the Agency restores its roster and every
+# seat reads status "restored" until it is next observed working -- 58 of 73 on
+# the 21:33:37Z restart, including all three cast seats, with the only "idle"
+# seats being off-site oxf-*/ams-* that write to another host. Rejecting
+# "restored" therefore blocked every click after any restart, which is a
+# stricter rule than the runner's own. Checked before loosening it: codex-15 was
+# belled while reading "restored" and went accepted -> running -> prompt -> text
+# in nine seconds. The state that actually costs a click is "invoking", which
+# this still rejects.
 if [ "$AUTHOR" = "$REVIEWER" ] || [ "$AUTHOR" = "$REPAIR" ] || [ "$REVIEWER" = "$REPAIR" ]; then
   bad "casting" "author/reviewer/repair-reviewer must be three DISTINCT seats"
 else
@@ -70,7 +81,7 @@ ag = d.get("agents", d)
 r = ag.get(a)
 if not isinstance(r, dict):
     print("absent")
-elif r.get("status") == "idle" and r.get("invoke-ready?") is True:
+elif r.get("status") in ("idle", "restored") and r.get("invoke-ready?") is True:
     print("idle")
 else:
     print(str(r.get("status")) + ("" if r.get("invoke-ready?") else "/not-invoke-ready"))
