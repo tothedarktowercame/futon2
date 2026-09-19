@@ -739,7 +739,12 @@
              :text-artifact-sha text-sha
              :claim-commit-time-ms claim-time-ms
              :descendant? (boolean descendant?)
+             ;; Keep HEAD freshness and returned-claim freshness distinct in
+             ;; the durable binding.  A moved HEAD can be fresh while the
+             ;; claimed ancestor is stale; collapsing those observations made
+             ;; rejection evidence misleading even after the guard was fixed.
              :in-author-window? (boolean in-window?)
+             :claim-in-author-window? (boolean claim-in-window?)
              :corroborates? (boolean corroborates?)
              :disagreement? (and observed-valid? (not corroborates?))
              :commit (when corroborates? (or text-sha observed-head))}))]

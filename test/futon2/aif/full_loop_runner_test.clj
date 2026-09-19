@@ -2239,10 +2239,12 @@
   ;; descendant of the base, an ancestor of head, authored long before the
   ;; dispatch -- corroborated as the author's artifact. The returned commit
   ;; itself must lie in the author window.
-  (let [opts {:repo-head-observation-fn
+  (let [timestamp-queries (atom [])
+        opts {:repo-head-observation-fn
               (fn [repo] {:repo repo :head "concurrent-head" :observed-at-ms 2000})
               :ancestor-fn (constantly true)
               :commit-time-ms-fn (fn [_ commit]
+                                   (swap! timestamp-queries conj commit)
                                    (if (= commit "5ca1e000") 500000000 1500))
               :resolve-commit-sha-fn (fn [_ ref] (when (= ref "5ca1e000") "5ca1e000"))}
         before {:head "base" :observed-at-ms 1000}
@@ -2254,7 +2256,11 @@
     (is (= :artifact-binding-mismatch (:failure-kind failure)))
     (is (get-in failure [:artifact-binding :in-author-window?])
         "the observed head is fresh; it is the CLAIM that is stale")
+    (is (false? (get-in failure [:artifact-binding :claim-in-author-window?]))
+        "binding evidence distinguishes stale claim from fresh observed HEAD")
     (is (= 500000000 (get-in failure [:artifact-binding :claim-commit-time-ms])))
+    (is (= ["concurrent-head" "5ca1e000"] @timestamp-queries)
+        "freshness is queried for both HEAD and the commit actually returned")
     (is (nil? (get-in failure [:artifact-binding :commit])))))
 
 (deftest narrated-artifact-without-new-repo-head-stops-before-review
