@@ -905,11 +905,16 @@
                                   record)))
                         vec)
           finding-ids (set (keep :repair/id findings))
-          statuses (effective-statuses repair-state)
+          ;; Store invariant: every record admitted under resolutions/ or
+          ;; dismissals/ is a closing disposition by construction of the
+          ;; repair store's verbs. Closure therefore follows directory
+          ;; membership, not an ever-growing enumeration of status keywords.
           closed-ids (into #{}
-                           (keep (fn [[id status]]
-                                   (when (#{:resolved :superseded :dismissed-unexecuted} status) id)))
-                           statuses)
+                           (keep (fn [[path {:keys [record]}]]
+                                   (when (or (str/starts-with? path "resolutions/")
+                                             (str/starts-with? path "dismissals/"))
+                                     (:repair/id record))))
+                           repair-state)
           attempts (or (:tripwire/cohort-history opts)
                        (try (:attempts (cohort/ledger))
                             (catch Throwable _ [])))

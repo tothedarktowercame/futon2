@@ -793,7 +793,8 @@
                     (assoc :repair/resolution
                            (get resolutions (:repair/id finding)))
                     (get dismissals (:repair/id finding))
-                    (assoc :repair/status :dismissed-unexecuted
+                    (assoc :repair/status (:repair/status
+                                           (get dismissals (:repair/id finding)))
                            :repair/dismissal
                            (get dismissals (:repair/id finding))))))))))
 
@@ -889,6 +890,83 @@
                         :execution execution
                         :dismissed-at (str (Instant/now))}
                         cause-fix (assoc :cause-fix cause-fix))]
+           (write-new! (io/file root "dismissals" (str finding-id ".edn"))
+                       record)
+           record))))))
+
+(defn dismiss-echo!
+  "Append a closing disposition for a finding whose own retained T8 witness
+  cites only already-disposed source findings. The accepted proof carrier is
+  exactly [:failure-data :tripwire/witness :repair-ids]; callers cannot supply
+  or augment its membership. Findings and their source records remain
+  immutable and audit-visible."
+  ([finding-id disposition]
+   (dismiss-echo! default-root finding-id disposition))
+  ([root finding-id {:keys [authority reason actor cause-note] :as disposition}]
+   (when-not (and (string? finding-id)
+                  (re-matches #"[A-Za-z0-9._-]+" finding-id))
+     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+   (let [dismissals (indexed-records root "dismissals")]
+     (when (contains? dismissals finding-id)
+       (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+     (let [finding (first (filter #(= finding-id (:repair/id %))
+                                  (records (io/file root "findings"))))
+           resolutions (indexed-records root "resolutions")
+           implementation (get (indexed-records root "implementations") finding-id)
+           verification (get (verified-admissions root) finding-id)
+           effective-status (cond
+                              (get resolutions finding-id) :resolved
+                              (or implementation verification) :awaiting-validation
+                              finding (:repair/status finding))
+           source-ids (get-in finding
+                              [:failure-data :tripwire/witness :repair-ids])]
+       (when-not finding
+         (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+       (when-not (= :open effective-status)
+         (dismissal-refuse! :finding-not-open
+                             {:repair/id finding-id :repair/status effective-status}))
+       (when-not (and (vector? source-ids)
+                      (seq source-ids)
+                      (every? #(and (string? %)
+                                    (re-matches #"[A-Za-z0-9._-]+" %))
+                              source-ids)
+                      (= (count source-ids) (count (distinct source-ids))))
+         (dismissal-refuse! :no-witness-retained {:repair/id finding-id}))
+       (let [source-statuses
+             (mapv (fn [source-id]
+                     {:repair/id source-id
+                      :status-at-dismissal
+                      (cond
+                        (get dismissals source-id)
+                        (:repair/status (get dismissals source-id))
+                        (get resolutions source-id)
+                        (:repair/status (get resolutions source-id)))})
+                   source-ids)
+             live-ids (mapv :repair/id
+                            (filter #(nil? (:status-at-dismissal %))
+                                    source-statuses))]
+         (when (seq live-ids)
+           (dismissal-refuse! :sources-not-disposed
+                               {:repair/id finding-id
+                                :live-source-ids live-ids}))
+         (when-not (and (nonblank? authority) (keyword? reason)
+                        (nonblank? actor)
+                        (or (nil? cause-note) (nonblank? cause-note))
+                        (= (cond-> #{:authority :reason :actor}
+                             (some? cause-note) (conj :cause-note))
+                           (set (keys disposition))))
+           (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+         (let [record (cond->
+                       {:repair/id finding-id
+                        :repair/schema-version 1
+                        :repair/status :dismissed-echo
+                        :failed-attempt (:attempt-id finding)
+                        :authority authority
+                        :reason reason
+                        :actor actor
+                        :witness-sources source-statuses
+                        :dismissed-at (str (Instant/now))}
+                        cause-note (assoc :cause-note cause-note))]
            (write-new! (io/file root "dismissals" (str finding-id ".edn"))
                        record)
            record))))))

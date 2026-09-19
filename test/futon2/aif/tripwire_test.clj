@@ -43,6 +43,26 @@
     (spit file (pr-str value))
     file))
 
+(deftest dismissal-directory-membership-closes-t8-source
+  (let [root (temp-dir)
+        finding {:repair/id "echo-1" :repair/status :open
+                 :repair/class :machine-failure
+                 :attempt-id "echo-attempt"}
+        dismissal {:repair/id "echo-1"
+                   :repair/status :dismissed-echo}]
+    (write-edn! root "findings" "echo-1.edn" finding)
+    (write-edn! root "dismissals" "echo-1.edn" dismissal)
+    (let [observation (#'tripwire/cross-run-observation
+                       {:repair-root (.getPath root)
+                        :cohort? true
+                        :tripwire/cohort-history []
+                        :tripwire/a-matrix-events []
+                        :tripwire/grounding-witnesses []}
+                       {:phase :opportunity :transition :start})]
+      (is (contains? (:closed-repair-ids observation) "echo-1"))
+      (is (not (tripwire/repair-covered-witness?
+                {:repair-ids ["echo-1"]} observation))))))
+
 (defn- synthetic-trip-record []
   {:phase :synthetic
    :attempt-id "action-test"

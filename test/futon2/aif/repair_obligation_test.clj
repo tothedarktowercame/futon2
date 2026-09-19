@@ -73,6 +73,73 @@
            (dismissal-refusal
             #(repair/dismiss-unexecuted! root (:repair/id finding) disposition))))))
 
+(defn- echo-finding! [root attempt-id source-ids]
+  (repair/record-system-failure!
+   root {:attempt-id attempt-id
+         :repair-class :machine-failure
+         :failure-stage :initialization
+         :outcome :incomplete
+         :failure-kind :tripwire-tripped
+         :error "T8 echo"
+         :failure-data {:tripwire/wire-id :T8
+                        :tripwire/witness
+                        {:kind :duplicate-finding-livelock
+                         :repair-ids source-ids}}
+         :discharge-contract {:requires [:distinct-repair-commit]
+                              :artifact-shape :code-commit}}))
+
+(deftest dismiss-echo-requires-retained-witness-and-disposed-sources
+  (let [root (temp-root)
+        source-a (dispatch-finding! root "source-a"
+                                    {:executed false :tool-events 0
+                                     :command-events 0})
+        source-b (dispatch-finding! root "source-b"
+                                    {:executed false :tool-events 0
+                                     :command-events 0})
+        echo (echo-finding! root "echo" [(:repair/id source-a)
+                                          (:repair/id source-b)])
+        no-witness (dispatch-finding! root "executed-repair"
+                                      {:executed true :tool-events 1
+                                       :command-events 1})
+        disposition {:authority "Joe/repair-queue/2026-09-19"
+                     :reason :disposed-source-echo
+                     :cause-note "T8 retained both source ids"
+                     :actor "claude-12"}
+        finding-file (io/file root "findings" (str (:repair/id echo) ".edn"))
+        before (java.nio.file.Files/readAllBytes (.toPath finding-file))]
+    (repair/dismiss-unexecuted!
+     root (:repair/id source-a)
+     {:authority "Joe/repair-queue/2026-09-19"
+      :reason :never-executed-dispatch :actor "claude-12"})
+    (let [data (try (repair/dismiss-echo! root (:repair/id echo) disposition)
+                    nil
+                    (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= :sources-not-disposed (:repair-dismissal/refusal data)))
+      (is (= [(:repair/id source-b)] (:live-source-ids data))))
+    (is (= :no-witness-retained
+           (dismissal-refusal
+            #(repair/dismiss-echo! root (:repair/id no-witness) disposition))))
+    (repair/dismiss-unexecuted!
+     root (:repair/id source-b)
+     {:authority "Joe/repair-queue/2026-09-19"
+      :reason :never-executed-dispatch :actor "claude-12"})
+    (let [dismissal (repair/dismiss-echo! root (:repair/id echo) disposition)]
+      (is (= :dismissed-echo (:repair/status dismissal)))
+      (is (= [{:repair/id (:repair/id source-a)
+               :status-at-dismissal :dismissed-unexecuted}
+              {:repair/id (:repair/id source-b)
+               :status-at-dismissal :dismissed-unexecuted}]
+             (:witness-sources dismissal))))
+    (is (not-any? #{(:repair/id echo)}
+                  (map :repair/id (repair/open-obligations root))))
+    (is (= :dismissed-echo
+           (:repair/status (first (repair/obligation-history root "echo")))))
+    (is (java.util.Arrays/equals
+         before (java.nio.file.Files/readAllBytes (.toPath finding-file))))
+    (is (= :already-dismissed
+           (dismissal-refusal
+            #(repair/dismiss-echo! root (:repair/id echo) disposition))))))
+
 (def grounded-review
   {:reviewer "reviewer" :review-job "review-job"
    :witness {:resolved? true :dial-moved? true}})
