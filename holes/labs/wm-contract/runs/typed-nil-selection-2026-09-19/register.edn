@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2"
+ :subject-id "wm-selection/typed-nil-refusal"
+ :command ["clojure" "-M:test" "-n" "futon2.report.selection-nil-receipt-test"]
+ :author "codex-2"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/typed-nil-selection-2026-09-19/execution"
+ :code-paths ["scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/report/selection_nil_receipt_test.clj"]}
