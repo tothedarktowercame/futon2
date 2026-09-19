@@ -57,17 +57,32 @@ inflight=$(curl -s -m 15 "$BASE/api/alpha/wm/click" | python3 -c 'import sys,jso
 [ "$inflight" = "False" ] && say "in flight" "none" || bad "in flight" "a click is already running -- wait for it"
 
 # 4. THE ONE THAT MATTERS: would any tripwire halt this click?
-#    A witness stops the run (futon2 a8ac1615). Evaluating all 13 costs ~1s
-#    here; discovering it inside a click costs the click. This also covers
+#    A witness stops the run (futon2 a8ac1615). Evaluating all 13 against a
+#    real observation costs ~13s here; discovering it inside a click costs the
+#    click. This also covers
 #    committed-but-not-loaded, which T10 proves rather than suspects (b6da1420).
+# The wires must be evaluated against the observation the runner actually
+# builds, not an empty one. Evaluating {:tripwire/force? true} alone gives
+# every cross-run wire (T6, T7, T8) a world with no :findings, so they report
+# clear while checking nothing -- this script shipped with that bug and told
+# zai-14 "13/13 clear" seconds before T8 halted its click on 2026-09-19.
+# Building the real observation costs ~13s because it parses the whole repair
+# store. That is the honest price of the check.
 cat > /tmp/wm_click_wires.clj <<'CLJ'
-(do (require '[futon2.aif.tripwire :as tw])
-    (let [res (into (sorted-map)
-                (for [[k f] @(resolve 'futon2.aif.tripwire/wire-evaluators)]
-                  [k (try (let [w (f {:tripwire/force? true})]
-                            (if (seq w) (mapv :kind w) :clear))
-                          (catch Throwable e [:threw (.getMessage e)]))]))]
-      {:tripping (vec (for [[k v] res :when (vector? v)] [k v]))}))
+(do (require 'futon2.aif.tripwire 'futon2.aif.repair-obligation)
+    (let [cro (resolve 'futon2.aif.tripwire/cross-run-observation)
+          evals @(resolve 'futon2.aif.tripwire/wire-evaluators)
+          root @(resolve 'futon2.aif.repair-obligation/default-root)
+          obs (cro {:cohort? true}
+                   {:phase :opportunity :transition :start
+                    :opportunity-id "wm_click-preflight"
+                    :trigger :duree-click-on-demand
+                    :cohort? true :repair-root root})]
+      {:tripping (vec (for [[k f] evals
+                            :let [w (try (f (assoc obs :tripwire/force? true))
+                                         (catch Throwable e [{:kind :wire-threw}]))]
+                            :when (seq w)]
+                        [k (mapv :kind w)]))}))
 CLJ
 # proof-eval.sh reads its admin token from its own directory, so it must be
 # invoked from there.
