@@ -1,0 +1,4 @@
+evidence-id test-registry-8a13ae4b965011c4794f1b8f02ee0082490f68c008ee8b88048dc2a0b725e22d
+warrant? true
+results {:assertions 21, :duration-ms 4554, :errors 0, :exit 0, :failures 0, :tests 2}
+bound wm-close/typed-terminal-retention -> test-registry-8a13ae4b965011c4794f1b8f02ee0082490f68c008ee8b88048dc2a0b725e22d
