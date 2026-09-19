@@ -1,0 +1,7 @@
+{:agency-url "http://localhost:7070"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/observation_checks.clj"]
+ :test-paths ["test/futon2/aif/observation_checks_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.observation-checks-test"]
+ :author "claude-4"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/observation-checks-2026-09-19/"}
