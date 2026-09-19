@@ -6267,7 +6267,7 @@
      opts; uses `:trace-dir` if provided or default.
 
    `:include-advisory-lanes?` IS READ BY NOTHING and this text used to tell you
-     to set it "for real actuation". Its reader was deleted with the flat
+     to set it \"for real actuation\". Its reader was deleted with the flat
      decision path in 5d55e7a0 (2026-09-17); the four callers that still pass
      it, and the test asserting the runner passes it, were left behind. No
      behaviour is wrong -- there are no advisory lanes left to include, so the

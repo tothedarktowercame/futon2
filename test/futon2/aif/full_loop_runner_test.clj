@@ -766,22 +766,42 @@
   ;; Replays attempt-043: Agency rejected transcript persistence after tool
   ;; use. The failed job cannot count as work; a fresh dispatch must still
   ;; produce a repository-observed commit before review can proceed.
-  (let [{:keys [result dispatches]}
+  ;; invoke-error is the spelling the invoke layer emits TODAY (wm click
+  ;; 2026-09-19-1789780157: codex-23 'Exit 1: [No assistant message
+  ;; returned]', which the old single-code predicate did not recognize and so
+  ;; never retried); invoke-exception is the historical spelling kept for the
+  ;; incident record. Both must retry; each is one deftest body below.
+  (doseq [code ["invoke-error" "invoke-exception"]]
+    (let [{:keys [result dispatches]}
+          (run-feature-card-attempt
+           {:author-card feature-card-claim
+            :cure-card feature-card-claim
+            :initial-author-job
+            {:job-id "feature-author"
+             :state "failed"
+             :artifact-ref nil
+             :terminal-code code
+             :terminal-message "invocation failed below the author contract"
+             :events [{:type "failed" :code code}]}})]
+      (is (= :grounded-change (:outcome result)) (str code " retried"))
+      (is (= ["zai-5" "zai-5" "codex-7"] dispatches)
+          (str code ": one replacement author is dispatched before independent review"))
+      (is (= "feature-author"
+             (get-in result [:data :author-job :author-retries 0 :job-id])))))
+  ;; A groundedness-gate failure must NOT be retried as infrastructure:
+  ;; retrying no-execution-evidence would retry the thing the gate refused.
+  (let [{:keys [dispatches]}
         (run-feature-card-attempt
          {:author-card feature-card-claim
           :cure-card feature-card-claim
           :initial-author-job
-          {:job-id "feature-author"
+          {:job-id "gate-author"
            :state "failed"
            :artifact-ref nil
-           :terminal-code "invoke-exception"
-           :terminal-message "ZAI transcript persistence was rejected"
-           :events [{:type "failed" :code "invoke-exception"}]}})]
-    (is (= :grounded-change (:outcome result)))
-    (is (= ["zai-5" "zai-5" "codex-7"] dispatches)
-        "one replacement author is dispatched before independent review")
-    (is (= "feature-author"
-           (get-in result [:data :author-job :author-retries 0 :job-id])))))
+           :terminal-code "no-execution-evidence"
+           :events [{:type "failed" :code "no-execution-evidence"}]}})]
+    (is (= ["zai-5" "codex-7"] dispatches)
+        "no-execution-evidence is terminal, not infrastructure")))
 
 (deftest retry-prompt-and-artifact-gate-share-the-fresh-head
   (let [head-observations (atom ["base-initial" "base-retry"])

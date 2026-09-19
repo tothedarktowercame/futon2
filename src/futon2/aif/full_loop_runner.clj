@@ -1242,7 +1242,20 @@
 (defn author-infrastructure-failure?
   "True only for an artifact-free Agency invocation failure. These failures
   happen below the author contract, so the runner may retry them once without
-  accepting the failed job as authored work."
+  accepting the failed job as authored work.
+
+  The codes are the invocation LAYER's failure vocabulary, not the author's:
+  invoke-error is what futon3c's invoke path emits today (transport/http.clj
+  finalize-invoke-job!); invoke-submit-failed is its dispatch-side sibling;
+  invoke-exception is the 2026-07-21 attempt-043 spelling this predicate was
+  originally written against. That spelling silently rotted: the layer renamed
+  its code, the predicate kept matching a string nobody emits, and every
+  transient invocation failure became terminal (wm click 2026-09-19-1789780157,
+  codex-23 'Exit 1: [No assistant message returned]' 1.3s after dispatch with
+  zero execution events, retried by nothing). Codes deliberately NOT here:
+  no-execution-evidence is a groundedness gate (retrying it would retry the
+  thing the gate refused); generic error/cancelled are not known to be below
+  the author contract."
   [job]
   (let [event-code (some->> (:events job)
                             (filter #(= "failed" (:type %)))
@@ -1251,7 +1264,8 @@
         failure-code (or (:terminal-code job) event-code)]
     (and (= "failed" (:state job))
          (nil? (:artifact-ref job))
-         (= "invoke-exception" failure-code))))
+         (contains? #{"invoke-error" "invoke-submit-failed" "invoke-exception"}
+                    failure-code))))
 
 (defn- selected-entry
   "The tick's selected entry from a cascade-only decision (SPEC
