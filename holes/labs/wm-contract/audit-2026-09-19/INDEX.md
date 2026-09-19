@@ -5,13 +5,13 @@ kept finding these one at a time as they stopped a run; find the class instead.
 Each dimension was generalised from a defect that had actually stopped a run in
 the preceding 24 hours.
 
-65 findings, 12 `:confirmed`. Files are the agents' raw output, unedited. The
+65 findings, 14 `:confirmed` (counted from the files, not the agents' prose). Files are the agents' raw output, unedited. The
 verdicts below are mine, from reading the code, not relayed.
 
 | file | dimension | agent | n | confirmed |
 |---|---|---|---|---|
 | d1-absent-value.edn | absent value into a fn assuming presence | zai-9 | 13 | 0 |
-| d2-key-list-drift.edn | hand-copied key list vs its source map | zai-10 | 6 | 0 |
+| d2-key-list-drift.edn | hand-copied key list vs its source map | zai-10 | 6 | 2 |
 | d3-nil-as-identity.edn | nil as an identity in group/dedup keys | zai-11 | 9 | 0 |
 | d4-silent-miss.edn | lookup miss becomes a skip, not a refusal | zai-12 | 13 | 5 |
 | d5-unbounded-write.edn | durable write with no size bound | zai-13 | 12 | 5 |
@@ -142,6 +142,29 @@ resources/wm/cascade-sources/*.edn and observes facts per tick). If neither
 reaches any durable record, then "the decision used these declared sources" is
 not a claim any artifact can be asked to support. That is a schema-30 change
 with pinning consequences, so it is queued, not done.
+
+## The summaries drifted from the artifacts, including mine
+
+Counted from the EDN files rather than from anyone's prose:
+
+    d1  13 findings   0 confirmed   3 likely   10 speculative
+    d2   6            2             1           3
+    d3   9            0             3           6
+    d4  13            5             5           3
+    d5  12            5             3           4
+    d6  12            2             8           2
+        --                --
+        65            14
+
+Three agents' bell summaries disagree with their own files on the split —
+zai-13 reported 6 confirmed where its file has 5, and d4 and d6 each shift one
+finding between likely and speculative. And my own first version of the table
+above said 12 confirmed and gave d2 as 0: I built it from a pass that ran
+before d2 had landed and never re-ran it.
+
+Small in itself, and worth recording because it is this audit's own subject.
+The prose and the artifact are a hand-copied pair, and only one of them is
+checkable.
 
 ## Method notes, for the next pass
 
