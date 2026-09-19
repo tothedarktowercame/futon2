@@ -1,0 +1,381 @@
+{:original-commit "4c47b645",
+ :scoring-introduced-by "88419699",
+ :compared-head "428df4c4a438660a2f40868871b340baaeaf911d",
+ :method
+ "Recursive EDN map/sequence comparison; unequal sets and scalars reported whole. Added map keys reported with their complete value.",
+ :original-selection-certificate-count 6,
+ :original-scoring-count 0,
+ :only-scoring-added? true,
+ :cases
+ [{:case 1,
+   :differences
+   [{:path [:selection-certificate :scoring],
+     :change :added,
+     :after
+     {0
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :empty,
+        :precedence [],
+        :construction-receipt
+        {:kind :construction-receipt, :construction :empty-cascade}}},
+      1
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :work,
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "claude-4",
+         :date "2026-09-17",
+         :moves [],
+         :stopped-is-not-success true},
+        :precedence
+        [{:id :cascade-construction/run-it-on-a-real-case,
+          :authority :documented-interpretation,
+          :produces #{:route-a-rehearsal-reported},
+          :guard
+          {:status :interpreted,
+           :operator :and,
+           :clauses
+           [{:status :interpreted,
+             :present
+             #{:external-expectation-validator-exists
+               :independent-expectations-written},
+             :absent #{}}]},
+          :transition
+          {:status :interpreted,
+           :operator :union,
+           :produces #{:route-a-rehearsal-reported},
+           :authority :documented-interpretation}}]}}}}]}
+  {:case 2,
+   :differences
+   [{:path [:selection-certificate :scoring],
+     :change :added,
+     :after
+     {0
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :empty,
+        :precedence [],
+        :construction-receipt
+        {:kind :construction-receipt, :construction :empty-cascade}}},
+      1
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :work,
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "claude-4",
+         :date "2026-09-17",
+         :moves [],
+         :stopped-is-not-success true},
+        :precedence
+        [{:id :cascade-construction/run-it-on-a-real-case,
+          :authority :documented-interpretation,
+          :produces #{:route-a-rehearsal-reported},
+          :guard
+          {:status :interpreted,
+           :operator :and,
+           :clauses
+           [{:status :interpreted,
+             :present
+             #{:external-expectation-validator-exists
+               :independent-expectations-written},
+             :absent #{}}]},
+          :transition
+          {:status :interpreted,
+           :operator :union,
+           :produces #{:route-a-rehearsal-reported},
+           :authority :documented-interpretation}}]}}}}]}
+  {:case 3,
+   :differences
+   [{:path [:selection-certificate :scoring],
+     :change :added,
+     :after
+     {0
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :empty,
+        :precedence [],
+        :construction-receipt
+        {:kind :construction-receipt, :construction :empty-cascade}}},
+      1
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :work,
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "claude-4",
+         :date "2026-09-17",
+         :moves [],
+         :stopped-is-not-success true},
+        :precedence
+        [{:id :cascade-construction/run-it-on-a-real-case,
+          :authority :documented-interpretation,
+          :produces #{:route-a-rehearsal-reported},
+          :guard
+          {:status :interpreted,
+           :operator :and,
+           :clauses
+           [{:status :interpreted,
+             :present
+             #{:external-expectation-validator-exists
+               :independent-expectations-written},
+             :absent #{}}]},
+          :transition
+          {:status :interpreted,
+           :operator :union,
+           :produces #{:route-a-rehearsal-reported},
+           :authority :documented-interpretation}}]}}}}]}
+  {:case 4,
+   :differences
+   [{:path [:selection-certificate :scoring],
+     :change :added,
+     :after
+     {0
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :empty,
+        :precedence [],
+        :construction-receipt
+        {:kind :construction-receipt, :construction :empty-cascade}}},
+      1
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :work,
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "claude-4",
+         :date "2026-09-17",
+         :moves [],
+         :stopped-is-not-success true},
+        :precedence
+        [{:id :cascade-construction/run-it-on-a-real-case,
+          :authority :documented-interpretation,
+          :produces #{:route-a-rehearsal-reported},
+          :guard
+          {:status :interpreted,
+           :operator :and,
+           :clauses
+           [{:status :interpreted,
+             :present
+             #{:external-expectation-validator-exists
+               :independent-expectations-written},
+             :absent #{}}]},
+          :transition
+          {:status :interpreted,
+           :operator :union,
+           :produces #{:route-a-rehearsal-reported},
+           :authority :documented-interpretation}}]}}}}]}
+  {:case 5,
+   :differences
+   [{:path [:selection-certificate :scoring],
+     :change :added,
+     :after
+     {0
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :empty,
+        :precedence [],
+        :construction-receipt
+        {:kind :construction-receipt, :construction :empty-cascade}}},
+      1
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :work,
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "claude-4",
+         :date "2026-09-17",
+         :moves [],
+         :stopped-is-not-success true},
+        :precedence
+        [{:id :cascade-construction/run-it-on-a-real-case,
+          :authority :documented-interpretation,
+          :produces #{:route-a-rehearsal-reported},
+          :guard
+          {:status :interpreted,
+           :operator :and,
+           :clauses
+           [{:status :interpreted,
+             :present
+             #{:external-expectation-validator-exists
+               :independent-expectations-written},
+             :absent #{}}]},
+          :transition
+          {:status :interpreted,
+           :operator :union,
+           :produces #{:route-a-rehearsal-reported},
+           :authority :documented-interpretation}}]}}}}]}
+  {:case 6,
+   :differences
+   [{:path [:selection-certificate :scoring],
+     :change :added,
+     :after
+     {0
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :empty,
+        :precedence [],
+        :construction-receipt
+        {:kind :construction-receipt, :construction :empty-cascade}}},
+      1
+      {:id
+       {:kind :cascade-candidate,
+        :target "M-wm-08-external-f2",
+        :interpretation-receipts
+        #:cascade-construction{:run-it-on-a-real-case
+                               {:kind :hand-admitted,
+                                :by "claude-4",
+                                :date "2026-09-17",
+                                :source
+                                {:path
+                                 "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                                :reading
+                                "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+        :id :work,
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "claude-4",
+         :date "2026-09-17",
+         :moves [],
+         :stopped-is-not-success true},
+        :precedence
+        [{:id :cascade-construction/run-it-on-a-real-case,
+          :authority :documented-interpretation,
+          :produces #{:route-a-rehearsal-reported},
+          :guard
+          {:status :interpreted,
+           :operator :and,
+           :clauses
+           [{:status :interpreted,
+             :present
+             #{:external-expectation-validator-exists
+               :independent-expectations-written},
+             :absent #{}}]},
+          :transition
+          {:status :interpreted,
+           :operator :union,
+           :produces #{:route-a-rehearsal-reported},
+           :authority :documented-interpretation}}]}}}}]}]}
