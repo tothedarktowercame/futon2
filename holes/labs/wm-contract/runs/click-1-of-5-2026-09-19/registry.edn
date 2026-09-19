@@ -1,0 +1,8 @@
+{:agency-url "http://localhost:7070"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["scripts/wm_run_validity.bb"]
+ :test-paths ["test/futon2/aif/run_validity_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.run-validity-test"]
+ :test-environment {"LC_ALL" "C.UTF-8" "LANG" "C.UTF-8" "TZ" "UTC"}
+ :author "claude-4"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/click-1-of-5-2026-09-19/"}

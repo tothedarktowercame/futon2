@@ -1,0 +1,8 @@
+{:agency-url "http://localhost:7070"
+ :repo-root "/home/joe/code/futon3c"
+ :code-paths ["src/futon3c/agents/codex_cli.clj"]
+ :test-paths ["test/futon3c/agents/codex_cli_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon3c.agents.codex-cli-test"]
+ :test-environment {"LC_ALL" "C.UTF-8" "LANG" "C.UTF-8" "TZ" "UTC"}
+ :author "claude-4"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/t8-cause-2026-09-19/"}

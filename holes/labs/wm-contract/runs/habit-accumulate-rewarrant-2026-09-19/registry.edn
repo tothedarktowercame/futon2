@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/cascade_prior.clj" "src/futon2/aif/cascade_habit_store.clj" "scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/report/cascade_habit_accumulation_test.clj" "test/fixtures/habit-accumulation/before.edn"]
+ :command ["clojure" "-M:test" "-n" "futon2.report.cascade-habit-accumulation-test"]
+ :author "claude-4"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/habit-accumulate-rewarrant-2026-09-19"
+ :agency-url "http://localhost:7070"}
