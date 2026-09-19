@@ -47,9 +47,12 @@
           cert (:selection-certificate (select [entry] 2))
           c (first (:candidates cert))]
       (is (= presence (get-in c [:inputs :f :presence])))
-      (is (= presence (get-in c [:inputs :habit :presence])))
+      ;; Malformed action identity cannot read E. The mandatory seam records
+      ;; its whole-menu neutral fallback, overriding any caller habit.
+      (is (= :present (get-in c [:inputs :habit :presence])))
+      (is (= :missing-policy-identity (get-in c [:habit-provenance :reason])))
       (is (= (or (:f extra) 0) (:f c)))
-      (is (= (or (:habit extra) 1) (:habit c)))
+      (is (= 1 (:habit c)))
       (is (= (if (= presence :present) :attached :declared-neutral) (:f-status c)))))
   ;; The guard is reachable for an ATTACHED non-finite F. No new guard added.
   (doseq [f [##Inf ##-Inf ##NaN]]

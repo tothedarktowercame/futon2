@@ -167,7 +167,10 @@
 
 (defn- selection-candidate
   [entry]
-  (let [habit (selection-input entry :habit 1)
+  (let [habit (cond-> (selection-input entry :habit 1)
+                (= :neutral-fallback (get-in entry [:habit-provenance :source]))
+                (assoc :status :declared-neutral
+                       :reason (get-in entry [:habit-provenance :reason])))
         f (selection-input entry :f 0)
         computed-f (get-in entry [:certificate :f])
         unattached? (and (not= :attached (:status f))
@@ -176,6 +179,7 @@
     {:id (:action entry)
      :habit (:value habit)
      :habit-status (:status habit)
+     :habit-provenance (:habit-provenance entry)
      :f (:value f)
      :f-status f-status
      :reason (if unattached? (:reason computed-f) (:reason f))
@@ -229,8 +233,9 @@
      acting pattern (the per-state projection of ActionMarginal), with that
      function's declared tie-break rule (:action-name-ascending).
 
-   Entries may carry :habit and :f. Missing, null and false inputs consume
-   the historical neutral values 1 and 0, with their presence recorded.
+   The learned joint-menu E is read and attached here on every invocation.
+   Missing stable identities consume neutral E with the reason recorded.
+   Entries may carry :f; missing, null and false F consume the neutral 0.
    Computed non-finite F remains in the run record, with consumed F = 0.
    :selection-certificate carries per-policy Lean fields and the input records.
 
@@ -248,8 +253,14 @@
 
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
-  [ranked-actions {:keys [beta]}]
-  (let [candidates (mapv selection-candidate ranked-actions)
+  [ranked-actions {:keys [beta cascade-habit-path]}]
+  ;; Runtime resolution breaks the existing prior -> policy shadow dependency.
+  ;; This is the mandatory live seam, not an optional caller-side attachment.
+  (let [attach (requiring-resolve 'futon2.aif.cascade-habit-store/attach-habits)
+        path (or cascade-habit-path
+                 @(requiring-resolve 'futon2.aif.cascade-habit-store/default-path))
+        ranked-actions (attach path ranked-actions)
+        candidates (mapv selection-candidate ranked-actions)
         posterior (cascade-selection/selection-posterior
                    {:beta beta :candidates candidates})
         ;; bayes-choice takes action-of as a MAP (it does (get action-of id)),

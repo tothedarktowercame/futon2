@@ -7,7 +7,7 @@
    patterns but connecting them differently are different policies.
 
    The namespace is pure: accumulation is persisted by cascade-habit-store.
-   Reading the learned prior into live selection remains a separate wire."
+   Live cascade selection reads its masses through cascade-habit-store."
   (:require [clojure.walk :as walk]
             [futon2.aif.policy :as policy]))
 
@@ -127,22 +127,24 @@
      :recency-decay recency-decay}))
 
 (defn log-priors
-  "Return ln E(pi) aligned with a same-mission feasible cascade menu.
+  "Return ln E(pi) aligned with the joint feasible cascade menu.
 
    Historical counts provide the Dirichlet concentrations. Duplicate policy
    identities split their category mass, keeping the returned probabilities
-   normalized over the concrete menu. Mixed-mission menus fail closed: the
-   strategic mission choice and tactical cascade choice are separate levels."
+   normalized over the concrete menu, including policies from different targets."
   [state cascades]
   (let [{:keys [alpha counts]} (coerce-state state)
         policy-keys (mapv policy-key cascades)
         _ (when (some nil? policy-keys)
             (throw (ex-info "cascade-prior candidate has no stable policy identity"
-                            {:cascades cascades})))
-        missions (set (map second policy-keys))
-        _ (when (> (count missions) 1)
-            (throw (ex-info "cascade-prior menu mixes strategic missions"
-                            {:missions missions})))
+                            {:refusal {:kind :missing-policy-identity} :cascades cascades})))
+        ;; WIRE-habit-read, claude-4 ruling: SPEC-flat-removal H5a collapsed
+        ;; strategic/tactical selection into ONE joint decision. There is one
+        ;; policy space; policy-key's target slot distinguishes its missions.
+        ;; E therefore pulls toward already-worked missions intentionally.
+        ;; Alpha's menu-composition bias (more distinct policies, more mass)
+        ;; exists within a mission too: the old mixed-mission guard never
+        ;; addressed it, and removing that guard introduces no new bias.
         multiplicities (frequencies policy-keys)
         denominator (reduce + 0.0
                             (map #(+ (double (get counts % 0)) alpha)
@@ -152,6 +154,12 @@
                               (double (get multiplicities key)))
                          denominator)))
           policy-keys)))
+
+(defn habit-masses
+  "Convert the joint menu's ln E to positive E for cascade selection.
+   The shadow score seam continues to consume log-priors, unchanged."
+  [state cascades]
+  (mapv #(Math/exp (double %)) (log-priors state cascades)))
 
 (defn attach-log-priors
   "Attach cascade-grain ln E(pi) without selecting or changing a score."

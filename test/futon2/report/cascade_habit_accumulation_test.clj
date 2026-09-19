@@ -61,7 +61,7 @@
                       {:action work :controller-score (if work? 0 5) :f 0.7}])
             ticks [true true false true true false]
             select (fn [work? opts]
-                     {:decision (policy/select-action-cascades (fields work?) {:beta (:beta opts)})})
+                     {:decision (policy/select-action-cascades (fields work?) opts)})
             opts {:beta 2 :cascade-habit-path path}
             recorded (edn/read-string
                       (slurp (io/resource "fixtures/habit-accumulation/before.edn")))
@@ -103,7 +103,7 @@
       (let [assembled (problems/assemble
                        {:targets [fixture/tick-1-target]
                         :sources (locators/locate-all fixture/tick-1-sources)})
-            before (wm/cascade-decision assembled fixture/live-c-opts)
+            before (wm/cascade-decision assembled (assoc fixture/live-c-opts :cascade-habit-path path))
             after (wm/select-and-record-cascade!
                     assembled (assoc fixture/live-c-opts :cascade-habit-path path))]
         ;; Lane route telemetry includes wall-clock timestamps on each run.

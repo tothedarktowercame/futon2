@@ -63,10 +63,6 @@
 
 (deftest policy-level-boundaries-fail-closed
   (is (thrown-with-msg?
-       clojure.lang.ExceptionInfo #"mixes strategic missions"
-       (prior/log-priors (prior/initial-state)
-                         [cascade-a (assoc cascade-b :mission "M-other")])))
-  (is (thrown-with-msg?
        clojure.lang.ExceptionInfo #"no stable policy identity"
        (prior/log-priors (prior/initial-state)
                          [(dissoc cascade-a :semilattice)])))
@@ -103,3 +99,13 @@
        clojure.lang.ExceptionInfo #"finite engineering score"
        (prior/shadow-rank (prior/initial-state)
                           [cascade-a (dissoc cascade-b :cascade-score)]))))
+
+(deftest joint-menu-masses-have-probability-units-and-learned-differences
+  (let [other (assoc cascade-b :mission "M-other")
+        state (reduce prior/observe-policy (prior/initial-state) (repeat 3 other))
+        masses (prior/habit-masses state [cascade-a other])]
+    (is (= [0 3] (mapv #(get (:counts state) (prior/policy-key %) 0) [cascade-a other])))
+    (is (every? true? (map #(< (Math/abs (- %1 %2)) 1e-12) [0.2 0.8] masses)))
+    (is (< (Math/abs (- 1.0 (reduce + masses))) 1e-12))
+    (is (not= (first masses) (second masses)))
+    (is (every? pos? masses))))

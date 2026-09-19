@@ -6233,7 +6233,9 @@
             (throw (ex-info "cascade decision refused"
                             (merge {:kind (or (:kind ranked) :rank-refused)}
                                    ranked))))
-          (let [decision (assoc (policy/select-action-cascades ranked {:beta beta})
+          (let [decision (assoc (policy/select-action-cascades ranked
+                                                      {:beta beta
+                                                       :cascade-habit-path (:cascade-habit-path opts)})
                                 :horizon-steps T)
                 authorized (controller-authority/authorize decision ranked)
                 emitted (decision-gate/emit! authorized)]
@@ -6253,7 +6255,7 @@
 
 (defn select-and-record-cascade!
   "Run the existing cascade decision, then durably count its representative.
-   The result is returned unchanged; no learned habit enters the selector."
+   Selection reads the learned habit first; this records the returned decision unchanged."
   [assembled opts]
   (let [result (cascade-decision assembled opts)]
     (cascade-habit/record-selection!

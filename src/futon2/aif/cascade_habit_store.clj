@@ -1,5 +1,5 @@
 (ns futon2.aif.cascade-habit-store
-  "Record selected cascade representatives without feeding selection. Counts
+  "Persist selected cascade representatives and feed their habit to selection. Counts
    occupy one entry per distinct policy; no per-tick history is retained."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -29,6 +29,35 @@
 (defn read-state [path]
   (let [file (io/file path)]
     (prior/coerce-state (when (.exists file) (edn/read-string (slurp file))))))
+
+(defn attach-habits
+  "Read one snapshot and attach E at the selector's joint-menu boundary.
+   Missing identities fall back for the whole menu with an explicit reason;
+   malformed stored history still refuses. No fabricated policy is counted."
+  [path ranked]
+  (let [state (read-state path)
+        views (mapv (comp policy-view :action) ranked)]
+    (try
+      (let [masses (prior/habit-masses state views)
+            keys (mapv prior/policy-key views)]
+        (mapv (fn [entry key mass]
+                (assoc entry :habit mass
+                       :habit-provenance
+                       {:source :cascade-prior :policy-key key
+                        :count (get (:counts state) key 0)
+                        :alpha (:alpha state) :samples (:samples state)
+                        :multiplicity (get (frequencies keys) key)
+                        :unit :probability-mass}))
+              ranked keys masses))
+      (catch clojure.lang.ExceptionInfo e
+        (if (contains? #{:missing-policy-identity :mixed-pattern-id-types}
+                       (get-in (ex-data e) [:refusal :kind]))
+          (mapv #(assoc % :habit 1
+                        :habit-provenance
+                        {:source :neutral-fallback
+                         :reason (get-in (ex-data e) [:refusal :kind])
+                         :scope :whole-menu}) ranked)
+          (throw e))))))
 
 (defn- publish! [file state]
   (let [parent (.toPath (.getParentFile file))
