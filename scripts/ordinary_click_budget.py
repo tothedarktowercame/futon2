@@ -18,7 +18,32 @@ INTERIM MECHANISM, and it is deliberately the weaker of the two halves:
   CHECK against that ledger rather than the source of truth, and issued-minus-
   recorded is a finding instead of an invisible loss.
 
-THE LIMITATION, stated rather than smoothed, because Joe's grant turns on it:
+THE SECOND LIMITATION, found 2026-09-19 after this script was already the
+authority for the budget: there are TWO callers of runner-service/click!. The
+HTTP endpoint (transport.http/handle-wm-click-start) is one; the other is
+wm.r10-click-adapter/commissioned-click!, which calls (click-fn {}) -- an EMPTY
+options map -- after spending a server-owned single-use R10 commission. It
+never touches the endpoint, and at the runner layer its call is indistinguishable
+from an ordinary one.
+
+An R10 commissioned click is NOT ordinary and must not consume Joe's five: it
+carries its own authorization. But it writes a run record with a :click/id like
+any other, and nothing in that record reliably separates it from an ordinary
+click. So THIS SCRIPT WOULD OVER-COUNT an R10 commissioned click against the
+grant. It cannot currently be fixed here, because the discriminator does not
+exist in the data this script reads.
+
+Two consequences, both stated rather than worked around:
+  - While this script is the authority, an R10 commissioned click silently
+    spends one of Joe's five. The live crontab is empty and R10 is not firing,
+    so the present exposure is nil -- but "nil today" is a fact about the
+    schedule, not about the mechanism.
+  - The durable ledger MUST be written at handle-wm-click-start, NOT at
+    runner-service/click!. A ledger at click! would charge every R10
+    commissioned click to the ordinary budget, which is the same error this
+    script makes, moved into the code that replaces it.
+
+THE FIRST LIMITATION, stated rather than smoothed, because Joe's grant turns on it:
 there is no independent index of issued click ids anywhere in this repo — the
 run record is the only durable trace a click leaves. So a click that dies
 before its run record is written is INVISIBLE TO THIS COUNT, and it consumed
