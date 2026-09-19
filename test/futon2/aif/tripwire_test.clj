@@ -17,18 +17,22 @@
   (.toFile (Files/createTempDirectory "wm-tripwire-test" (make-array java.nio.file.attribute.FileAttribute 0))))
 
 (defn- halted!
-  "Run `observe!` on a record expected to trip, returning the halt's ex-data.
+  "Run `observe!` under halt mode on a record expected to trip, returning the
+  halt's ex-data.
 
-  A witness stops the run as of 2026-09-18: one tripwire, one shutdown. The
-  cases below construct a tripping observation deliberately, so the throw is
-  the expected path — what they actually assert is what the trip recorded on
+  One tripwire, one shutdown was the default from 2026-09-18; since Joe's
+  2026-09-19 ruling (T-wm-excessive-guardrails-19092026) halting is opt-in
+  (`FUTON_WM_TRIPWIRE_HALT=1`), so these cases bind the mode on explicitly.
+  They construct a tripping observation deliberately — the throw is the
+  expected path, and what they actually assert is what the trip recorded on
   its way out."
   [opts record]
-  (let [data (try
-               (tripwire/observe! opts record)
-               ::no-halt
-               (catch clojure.lang.ExceptionInfo e
-                 (ex-data e)))]
+  (let [data (binding [tripwire/*halt-on-witness?* true]
+               (try
+                 (tripwire/observe! opts record)
+                 ::no-halt
+                 (catch clojure.lang.ExceptionInfo e
+                   (ex-data e))))]
     (is (not= ::no-halt data) "expected the tripwire to halt the run")
     (is (= :tripwire-tripped (:failure-kind data)))
     data))
@@ -292,6 +296,40 @@
       (let [data (halted! opts (merge base {:phase :selection
                                             :transition :end}))]
         (is (= :T8 (:tripwire/wire-id data)))))))
+
+(deftest default-mode-records-and-continues
+  ;; Joe's 2026-09-19 ruling (T-wm-excessive-guardrails-19092026): without
+  ;; FUTON_WM_TRIPWIRE_HALT=1 a witness is recorded durably and the run
+  ;; continues — and the identical witness later in the same run does not
+  ;; write a second report (the 09-18 anti-pile-up property, kept without
+  ;; the shutdown).
+  (let [now (str (Instant/now))
+        finding (fn [id]
+                  {:repair/id id :repair/status :open
+                   :failure-kind :review-rejected
+                   :target "M-x" :failed-commit "abc"
+                   :opened-at now})
+        report-root (temp-dir)
+        opts {:tripwire/report-root (.getPath report-root)
+              :run-id (str "test-run-" (System/nanoTime))
+              :tripwire/disabled-wire-ids
+              (vec (keys (dissoc @tripwire/wire-registry :T8)))}
+        record {:phase :construction :transition :start
+                :attempt-id "attempt-note"
+                :tripwire/force? true
+                :findings (mapv finding ["r1" "r2" "r3"])
+                :closed-repair-ids #{}}
+        report-files #(count (filter (fn [f] (.isFile f)) (file-seq report-root)))]
+    (binding [tripwire/*halt-on-witness?* false]
+      (testing "the witness does not stop the run and is written durably"
+        (is (= record (tripwire/observe! opts record))
+            "observe! returns its record unchanged — the run continues")
+        (is (pos? (report-files)) "the trip report was written"))
+      (testing "the same witness in the same run records nothing further"
+        (let [before (report-files)]
+          (is (= record (tripwire/observe! opts record)))
+          (is (= before (report-files))
+              "an identical witness within one run is recorded once"))))))
 
 (deftest t10-trips-on-a-var-replaced-at-runtime
   ;; The old wire simulated a mixed image by rebinding a var and noticing the

@@ -428,7 +428,14 @@
         (into (sorted-map)
               (keep-indexed
                (fn [i line]
-                 (when-let [m (re-find #"^\(def\S*\s+(?:\^\S+\s+)*([^\s\[(]+)" line)]
+                 ;; `(defmethod ...` re-mentions a name the defmulti already
+                 ;; defined; counting each method as a fresh definition made
+                 ;; the file side report the LAST method's line against the
+                 ;; defmulti var's own line -- a manufactured divergence that
+                 ;; halted every opportunity-start in the test world (T10 red,
+                 ;; ~280 failures, 2026-09-19). Dispatch methods are not
+                 ;; definitions; exclude them.
+                 (when-let [m (re-find #"^\(def(?!method)\S*\s+(?:\^\S+\s+)*([^\s\[(]+)" line)]
                    [(symbol (second m)) (inc i)])))
               (line-seq r))))))
 
@@ -462,12 +469,20 @@
   that actually defined it. That is a mixed image, provable from the image
   alone with no baseline to go stale. Measured clean (zero) across all five
   tracked namespaces on 2026-09-19 before this was adopted as a halting
-  signal."
+  signal.
+
+  DYNAMIC vars are excluded: rebinding them with `binding` is the language's
+  sanctioned seam, and the runner itself is built around it
+  (`*r16-park-fn*`, read at full_loop_runner.clj:195, rebound by the test
+  fixture). A thread-local binding under test is not a mixed image; flagging
+  it fired T10 on the test world's own declared override point (2026-09-19)."
   [namespace]
   (when-let [loaded (find-ns namespace)]
     (let [prefix (str (munge (name namespace)) "$")]
       (vec (for [[sym v] (ns-publics loaded)
-                 :when (and (.isBound ^clojure.lang.Var v) (fn? @v))
+                 :when (and (.isBound ^clojure.lang.Var v)
+                            (fn? @v)
+                            (not (.isDynamic ^clojure.lang.Var v)))
                  :let [cls (.getName (class @v))]
                  :when (not (str/starts-with? cls prefix))]
              {:fn sym :implemented-by cls})))))
@@ -935,7 +950,47 @@
              (:tripwire/cross-run-snapshot opts)))
     observation))
 
-(defn- halt! 
+(def ^:dynamic *halt-on-witness?*
+  "One tripwire, one shutdown (Joe, 2026-09-18) — made OPT-IN on 2026-09-19
+  (Joe's ruling in T-wm-excessive-guardrails-19092026: any security system
+  that gets in the way of a real run is not wanted while the machine is being
+  tuned; what is wanted is validation that a run is real). Default: a witness
+  is recorded durably and announced on stderr, and the run continues.
+  `FUTON_WM_TRIPWIRE_HALT=1` restores the 09-18 stop-the-run behavior.
+  Dynamic binding exists for tests."
+  (= "1" (System/getenv "FUTON_WM_TRIPWIRE_HALT")))
+
+(defonce ^:private !noted-trips
+  ;; Run-scoped dedupe for note!: a run that continues past a witness must not
+  ;; re-record the identical witness at every later phase transition — that
+  ;; would resurrect the 2026-09-18 pile-up (205 copies of one complaint) in
+  ;; the non-halting mode. Keyed [run-id wire-id witness-hash]; reset wholesale
+  ;; if it ever grows past 1024 keys (the cost of losing it is one duplicate
+  ;; report, not correctness).
+  (atom #{}))
+
+(defn- note!
+  "Record a witness durably and let the run continue (the default since
+  2026-09-19). Same durable artifact as a halt, same stderr announcement,
+  no throw: the witness is evidence for repair selection and for the
+  operator, not a veto. First occurrence per [run wire witness] writes;
+  repeats within the run are silent."
+  [opts record {:keys [wire-id witness observation]}]
+  (let [title (get-in @wire-registry [wire-id :title])
+        run-key [(:run-id opts) wire-id (hash witness)]]
+    (when-not (contains? @!noted-trips run-key)
+      (swap! !noted-trips (fn [s] (conj (if (> (count s) 1024) #{} s) run-key)))
+      (let [recorded (record-trip! opts {:trip/wire-id wire-id
+                                         :trip/witness witness
+                                         :trip/observation observation})]
+        (stderr! (str "TRIP " (name wire-id) " (" title ") at phase "
+                      (:phase record) "/" (:transition record)
+                      " — recorded; run continues"
+                      " (FUTON_WM_TRIPWIRE_HALT=1 restores one-trip-one-shutdown)") nil)
+        (stderr! (str "  witness: " (pr-str witness)) nil)
+        (stderr! (str "  report:  " (or (:report-path recorded) "(not written)")) nil)))))
+
+(defn- halt!
   "Record the trip, say plainly what tripped, and stop the run.
 
   One tripwire equals one shutdown (Joe, 2026-09-18). The wires exist to say a
@@ -1031,20 +1086,24 @@
   record)
 
 (defn observe!
-  "Evaluate enabled wires; a witness stops the run, and nothing else does.
+  "Evaluate enabled wires; a witness is RECORDED, and by default nothing stops.
 
   Two failures are deliberately kept apart. A wire that THROWS is a bug in the
   wire, and must not take the runner with it — that is why this seam was total
   to begin with, and it stays total for that case. A wire that YIELDS A WITNESS
-  has found a broken machine invariant, and continuing past it is what produced
-  6.2 GB of the same complaint recorded 205 times.
+  has found a broken machine invariant; what happens next is governed by
+  `*halt-on-witness?*`:
 
-  One exception, added 2026-09-19 (Joe: keep the security layer, remove the
-  behaviors that disable the machine at each turn): at a pre-selection phase
-  start, a witness whose evidence is a set of live, repair-selectable open
-  obligations is DEFERRED, not thrown — see `repair-covered-witness?`. The
-  invariant is kept: every other witness still halts, and this one halts too
-  the moment its obligations are no longer dischargeable.
+  - default (since Joe's 2026-09-19 ruling, T-wm-excessive-guardrails-19092026):
+    the witness is written durably and announced, and the run continues —
+    evidence for repair selection and the operator, not a veto. Identical
+    witnesses within one run are recorded once (`note!`), which preserves the
+    09-18 anti-pile-up property (one report, not 205) without the shutdown.
+  - `FUTON_WM_TRIPWIRE_HALT=1`: one tripwire, one shutdown (Joe, 2026-09-18),
+    except that at a pre-selection phase start a witness whose evidence is a
+    set of live, repair-selectable open obligations is DEFERRED, not thrown —
+    see `repair-covered-witness?` — so the run can reach the repair the
+    witness demands.
 
   Evaluation stops at the first witness: `for` is lazy and `first` realises one
   element, so no later wire runs and no second report is written. Returns
@@ -1071,8 +1130,14 @@
             (stderr! "wire evaluation failed; runner remains untouched" e)
             nil))]
     (when tripped
-      (if (and (pre-selection-phase-start? record)
-               (repair-covered-witness? (:witness tripped) (:observation tripped)))
+      (cond
+        (and (pre-selection-phase-start? record)
+             (repair-covered-witness? (:witness tripped) (:observation tripped)))
         (defer! opts record tripped)
-        (halt! opts record tripped)))
+
+        *halt-on-witness?*
+        (halt! opts record tripped)
+
+        :else
+        (note! opts record tripped)))
     record))

@@ -93,3 +93,31 @@ repair what its own guards demand.
 
 — zai-14, for the 2026-09-19 defusal crew (zai-10, zai-11, zai-12, zai-13,
   zai-30, zai-35, claude-4, and Joe's ruling that kept the security layer)
+
+## Addendum: Joe's ruling, 2026-09-19 (recorded by claude-12)
+
+Joe's verdict on the layer itself, later the same day — the guardrails were
+excessive, and the presumption is now inverted:
+
+1. **Any security system that gets in the way of a real run is not wanted at
+   this point.** It obstructs the research needed to tune the machine. These
+   guards are not part of the AIF specification in Lean, are not themselves
+   type-checked (so they degrade), and were not grounded in the AIF terms or
+   equations nor in concrete requirements of use. The defusal described above
+   cost 5% of a week's Zai usage; undoing the layer costs more, against a
+   2-day deadline.
+2. **Validation that a run is a REAL run is wanted.** The bad outcome to
+   prevent is the facade: something that claims to be AIF, was never
+   commissioned, and demonstrably has nothing to do with AIF. Evidence of
+   realness on the run's own records (C source, rates provenance,
+   enumeration-completeness, F_pi presence) serves this; vetoes do not.
+
+The presumption before any audit: none of the guard machinery is relevant
+unless it serves (2). The burden of proof sits with the guard, not with the
+run.
+
+Enacted the same day: witness halts are now OPT-IN
+(`FUTON_WM_TRIPWIRE_HALT=1`); by default a witness is recorded durably once
+per run and the run continues (`futon2.aif.tripwire/observe!`, `note!`). The
+09-18 one-trip-one-shutdown behavior is preserved behind the flag, and the
+anti-pile-up property (one report, not 205) is kept in both modes.
