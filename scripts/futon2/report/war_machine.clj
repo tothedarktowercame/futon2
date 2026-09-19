@@ -1708,7 +1708,8 @@
 
 (defn- carry-enumeration-completeness
   "U37: attach this tick's enumeration-completeness verdict to its DECISION,
-   under `FUTON_WM_ENUMERATION_ASSERT=1`.
+   unless `FUTON_WM_ENUMERATION_ASSERT=0` disarms it (default ON since
+   2026-09-19).
 
    What it answers is a question the tick cannot answer about itself: the
    candidate list is the only evidence the record carries that the proposers

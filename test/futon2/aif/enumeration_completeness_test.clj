@@ -159,8 +159,8 @@
                              (:kinds r)))
           "tickets now participate in completeness"))))
 
-(deftest assertion-flag-defaults-off-test
-  (testing "the live assertion is opt-in: nothing scans unless the flag is set"
-    (is (= (= "1" (System/getenv "FUTON_WM_ENUMERATION_ASSERT"))
+(deftest assertion-flag-defaults-on-test
+  (testing "the live assertion is opt-out (Joe, 2026-09-19): armed unless the flag says 0"
+    (is (= (not= "0" (System/getenv "FUTON_WM_ENUMERATION_ASSERT"))
            ec/*enumeration-assert?*)
         "the var is the environment read, not a hardcoded default")))

@@ -34,19 +34,22 @@
 
 (def ^:dynamic *enumeration-assert?*
   "U37 per-tick enumeration-completeness assertion, read once when this
-   namespace loads. `FUTON_WM_ENUMERATION_ASSERT=1` makes the tick recompute
-   the available population by the independent scan below and attach the typed
-   completeness record to its decision.
+   namespace loads. When armed the tick recomputes the available population
+   by the independent scan below and attaches the typed completeness record
+   to its decision.
 
-   Default OFF, and off is byte-identical: with the flag clear the tick does
-   not scan, does not attach the key, and no selection path reads it. Off is
-   the default because this is a new read on the tick path, not because the
-   scan is expensive -- the three-kind scan measures at 127-196 ms
+   Default ON (Joe, 2026-09-19): the guard exists because a proposer's
+   domain once contracted to four missions with nothing watching
+   (`holes/NOTE-the-whitelist-provenance.md`), and a check that must be
+   remembered at launch does not watch. `FUTON_WM_ENUMERATION_ASSERT=0`
+   disarms it, and off is byte-identical: with the flag cleared the tick
+   does not scan, does not attach the key, and no selection path reads it.
+   The scan costs 127-196 ms
    (`holes/labs/wm-contract/runs/U37-enumeration-completeness/scan-cost-2026-09-03.txt`),
    against a tick that takes tens of seconds.
 
    Dynamic binding exists only for isolated tests."
-  (= "1" (System/getenv "FUTON_WM_ENUMERATION_ASSERT")))
+  (not= "0" (System/getenv "FUTON_WM_ENUMERATION_ASSERT")))
 
 (def default-code-root
   (str (System/getProperty "user.home") "/code"))
