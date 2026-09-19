@@ -1,0 +1,5 @@
+Syntax error reading source at (/tmp/record-nil-selection.clj:7:83).
+Unmatched delimiter: )
+
+Full report at:
+/tmp/clojure-12122256219248737066.edn

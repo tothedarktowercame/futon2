@@ -1,0 +1,3 @@
+:before-eligible 5
+:recorded "repair-ea1-51a783ff43ce1fb432b0928b2f142d3f07450872ba4b96c005f50d1b29ddcddc--attempt-002-untyped-failure" :status :awaiting-validation :path "/home/joe/code/futon2/data/wm-repair-obligations/implementations/repair-ea1-51a783ff43ce1fb432b0928b2f142d3f07450872ba4b96c005f50d1b29ddcddc--attempt-002-untyped-failure.edn"
+:after-eligible 4

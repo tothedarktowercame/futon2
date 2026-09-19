@@ -1,0 +1,8 @@
+{:attempt-id "typed-nil-selection-2026-09-19"
+ :commit "1fcef69d127bc9c0f7205f9cc2824df039e981ad" :reviewer "codex-23" :review-job "invoke-1789845496196-22483-2150813f"
+ :review-evidence {:job-id "invoke-1789845496196-22483-2150813f" :reviewer "codex-23" :state "done" :valid? true :verdict :approve
+ :execution {:executed true :tool-events 8 :command-events 8} :review-note "holes/labs/wm-contract/REVIEW-typed-nil-selection-2026-09-19.md" :review-commit "8f8f14820856942ca16bc3b4dc6d9dd66a982e30"}
+ :artifact-binding {:commit "1fcef69d127bc9c0f7205f9cc2824df039e981ad" :repo "/home/joe/code/futon2" :parent "b8a9399d75c9f71f1ec312fe3579ad0f825fa50f" :observed-head "8f8f14820856942ca16bc3b4dc6d9dd66a982e30"
+ :commit-time "2026-09-19T19:15:31+00:00" :author-job "invoke-1789845193839-22480-725ee819" :fresh-author? true :descendant? true :in-author-window? true :corroborates? true :disagreement? false}
+ :witness {:resolved? true :dial-moved? true :scope :warranted-regression :attestation "holes/labs/wm-contract/REVIEW-typed-nil-selection-2026-09-19.md#witness-attestation"
+ :warrant-id "test-registry-1aee489d4d02247ab846f8c62a070eb655ddcb914765609bf72b829b307637a7"}}

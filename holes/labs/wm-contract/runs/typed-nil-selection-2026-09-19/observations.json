@@ -1,0 +1,31 @@
+{
+  "observed-at": "2026-09-19T19:20:32.930839+00:00",
+  "review": {
+    "job-id": "invoke-1789845496196-22483-2150813f",
+    "agent-id": "codex-23",
+    "state": "done",
+    "started-at": "2026-09-19T19:18:17.171943953Z",
+    "finished-at": "2026-09-19T19:19:35.082648018Z",
+    "execution": {
+      "executed": true,
+      "tool-events": 8,
+      "command-events": 8
+    },
+    "result": "Review note: `holes/labs/wm-contract/REVIEW-typed-nil-selection-2026-09-19.md`\n\nCommit: `8f8f14820856942ca16bc3b4dc6d9dd66a982e30`\n\nVerdict: **APPROVED**\n\nReview job: `invoke-1789845496196-22483-2150813f`\n\nThe note bounds historical carrier attribution to `b30d915e`, confirms the current warrant covers the final regression package with no outside-closure paths, and attests `:resolved? true` / `:dial-moved? true` for the regression\u2014not for production-successor closure."
+  },
+  "author": {
+    "job-id": "invoke-1789845193839-22480-725ee819",
+    "agent-id": "codex-2",
+    "state": "running",
+    "started-at": "2026-09-19T19:13:14.736531290Z",
+    "finished-at": null
+  },
+  "git": {
+    "commit": "1fcef69d127bc9c0f7205f9cc2824df039e981ad",
+    "parent": "b8a9399d75c9f71f1ec312fe3579ad0f825fa50f",
+    "observed-head": "8f8f14820856942ca16bc3b4dc6d9dd66a982e30",
+    "commit-time": "2026-09-19T19:15:31+00:00",
+    "review-commit": "8f8f14820856942ca16bc3b4dc6d9dd66a982e30",
+    "ancestor-checks": true
+  }
+}
