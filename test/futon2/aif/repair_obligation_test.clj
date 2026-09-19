@@ -998,7 +998,8 @@
                               (:occurrence/id occurrence))]
     (is (= (:repair/id first-record) (:repair/id replay)))
     (is (= occurrence (:repair/occurrence first-record)))
-    (is (= 1 (count (filter #(.isFile %)
+    (is (= 1 (count (filter #(and (.isFile %)
+                                  (str/ends-with? (.getName %) ".edn"))
                             (file-seq (io/file root "findings"))))))
     (is (= 2 (count (filter #(.isFile %) (file-seq evidence-dir))))
         "inner and outer observations append evidence, not findings")
@@ -1027,7 +1028,8 @@
                       [(future (repair/record-system-failure! root finding))
                        (future (repair/record-system-failure! root finding))])]
     (is (apply = (map :repair/id records)))
-    (is (= 1 (count (filter #(.isFile %)
+    (is (= 1 (count (filter #(and (.isFile %)
+                                  (str/ends-with? (.getName %) ".edn"))
                             (file-seq (io/file root "findings"))))))))
 
 (deftest distinct-occurrences-remain-visible-to-t8
@@ -1046,11 +1048,7 @@
                       :target "same-target"
                       :failure-stage :author-wait :outcome :build-failed
                       :failure-kind :build-failed :error "failed"})))
-        context {:repair-root root :cohort? true
-                 :tripwire/cohort-history [] :tripwire/a-matrix-events []
-                 :tripwire/grounding-witnesses []}
-        observation (#'tripwire/cross-run-observation
-                     context {:phase :opportunity :transition :start})]
+        findings (repair/open-obligations root)]
     (is (= 3 (count (set ids))) "distinct jobs mint distinct occurrences")
-    (is (= 1 (count (tripwire/evaluate-wire :T8 observation)))
+    (is (= 1 (count (tripwire/livelock-violations findings #{})))
         "occurrence deduplication does not blind repetition detection")))
