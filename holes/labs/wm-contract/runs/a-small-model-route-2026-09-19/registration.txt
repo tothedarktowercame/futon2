@@ -1,0 +1,4 @@
+evidence-id test-registry-3897ac30cd090abcf4d0511fbf66dbea5fb9467687515bdf2c1828461594b645
+warrant? true
+results {:assertions 132, :duration-ms 4608, :errors 0, :exit 0, :failures 0, :tests 7}
+bound A-small-model-route -> test-registry-3897ac30cd090abcf4d0511fbf66dbea5fb9467687515bdf2c1828461594b645

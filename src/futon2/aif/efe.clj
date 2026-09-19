@@ -1036,12 +1036,19 @@
   resolves it. The result's meta records the scoring parameters under
   :cascade-scoring.
 
+  An explicit :observation-model selects the bounded model-query scorer,
+  with occurrence/horizon-matched :observation and :prediction-context.
+  That experimental route returns typed family refusals, never neutral F.
+
   Pure; the existing single-action channel scoring in `rank-actions` is
   unchanged. A mixed list (cascade candidates and :type actions together)
   is the typed refusal :mixed-candidate-kinds — no combined semantics is
   invented."
   [state candidate-actions opts]
-  (let [T (:horizon-steps opts)
+  (if (contains? opts :observation-model)
+    ((requiring-resolve 'futon2.aif.cascade-observation-scoring/rank-cascade-actions)
+     state candidate-actions opts)
+    (let [T (:horizon-steps opts)
         q0 (:cascade-belief state)
         spec-in (or (:cascade-spec opts) {})
         want (:want spec-in)]
@@ -1324,7 +1331,7 @@
                              (if fe-refusal?
                                {:status :refused :source f-source :reason fe}
                                {:status :computed :source f-source
-                                :params (:params fe)})}}))))))
+                                :params (:params fe)})}})))))))
 
 (defn rank-actions
   "Score a sequence of candidate actions and order them by controller-score

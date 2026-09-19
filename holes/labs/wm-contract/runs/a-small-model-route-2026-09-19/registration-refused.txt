@@ -1,0 +1,5 @@
+Execution error (ExceptionInfo) at futon3c.test-registry/fail! (test_registry.clj:44).
+environment-not-configurable
+
+Full report at:
+/tmp/clojure-1257218485729026048.edn
