@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2"
+ :subject-id "wm-binding/commit-identity"
+ :command ["clojure" "-M:test" "-n" "futon2.aif.full-loop-runner-test"]
+ :author "codex-24"
+ :artifact-dir "/home/joe/code/storage/test-registry/wm-binding-commit-identity-2026-09-19"
+ :code-paths ["src/futon2/aif/full_loop_runner.clj"]
+ :test-paths ["test/futon2/aif/full_loop_runner_test.clj"]}
