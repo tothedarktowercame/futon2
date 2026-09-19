@@ -1,0 +1,81 @@
+;; wire-requirements.edn — the 27 ARGUE'd requirements as WIRES.
+;;
+;; Joe, 2026-09-19: warrants certify only needed behaviour, required for
+;; running the machine; the real "wires" of the system are what gets tested
+;; and warranted. The 27 requirements (ARGUE-realness-requirements-2026-09-19)
+;; "are either types of wires, or individual instances of wires, and all
+;; should be reviewable and queriable."
+;;
+;; :wire-form :instance — one producer→consumer seam (an edge, drawn or owed).
+;; :wire-form :type     — a duty that holds across every wire of a class
+;;                        (retention, identity, independence, recording).
+;; :wires — R-node edge(s) from the control map where the seam has one, else
+;;          a named seam. Classifications are claude-12 drafts (2026-09-19)
+;;          for review; the ARGUE basis column is claude-4's, verified.
+;; :subject-id — the test-registry subject that warrants this wire; nil means
+;;          not yet bound (the gap list).
+;;
+;; Queriable via: bb scripts/wire_register.bb  (joins this file with
+;; p4ng/empirics-futon/aif-conformance.edn and the live subjects ledger).
+
+{:as-of "2026-09-19"
+ :sources {:argue "ARGUE-realness-requirements-2026-09-19.md"
+           :conformance "p4ng/empirics-futon/aif-conformance.edn (as-of 2026-09-01, stale — Fig 5A)"
+           :equations "aif-equations.edn"}
+ :requirements
+ [{:id "WM-08" :wire-form :instance :wires [[:find :candidate-set]]
+   :basis "basis-1; wr-2" :note "retrieval builds the set :policy-set quantifies over (feeds R6)"}
+  {:id "WM-08-delivery" :wire-form :instance :wires [[:find :candidate-set]]
+   :basis "basis-1; wr-2" :subject-id nil}
+  {:id "WM-09" :wire-form :instance :wires [[:cascade :discharge]]
+   :basis "basis-1; wr-8" :note "grounded discharge over real cascades"}
+  {:id "WM-09-delivery" :wire-form :instance :wires [[:cascade :discharge]]
+   :basis "basis-1; wr-8"}
+  {:id "WM-09-candidate-contract" :wire-form :type
+   :basis "basis-1; wr-8" :note "contract on every candidate wire: a strategic action id is not a cascade"}
+  {:id "WM-13" :wire-form :instance :wires [[:live-c :preference-spec]]
+   :basis "D-GRAIN-DECLARATION; wr-0" :note "grain-indexed C into the spec (WIRE-live-c seam; C exogenous, R19 stack)"}
+  {:id "WM-13-delivery" :wire-form :instance :wires [[:live-c :preference-spec]]
+   :basis "D-GRAIN-DECLARATION"}
+  {:id "WM-14" :wire-form :instance :wires [[:interpretation :loop]]
+   :basis "wr-19; wr-27 (original attribution failed)" :note "agent interpretation actually runs inside the loop; genesis half core"}
+  {:id "WM-14-delivery" :wire-form :instance :wires [[:interpretation :loop]]
+   :basis "wr-19; wr-27"}
+  {:id "R10" :wire-form :instance :wires [[:R10 :R8]]
+   :basis "Item 2 (amended); wr-26" :note "on-demand click runs the gated path; conformance class: plumbing (domain adaptation)"}
+  {:id "TRACE" :wire-form :type
+   :basis "basis-4 / Item 5; wr-8, wr-7" :subject-id "EV-uniform-run-record"
+   :note "recording duty over ALL wires: one run in which every mandatory edge fires, recorded"}
+  {:id "E01" :wire-form :type
+   :basis "basis-1; wr-18, wr-9" :note "roll-up: model inputs and policy semantics address the real work"}
+  {:id "E02" :wire-form :type
+   :basis "checklist §1(e); wr-8" :note "retention duty: for one run each wire's inputs/outputs retained and joinable"}
+  {:id "E03" :wire-form :type
+   :basis "ticket addendum (2); wr-25" :note "negative-control duty: the checker rejects a perturbed certificate — now the adversarial-fixture acceptance rule"}
+  {:id "E05" :wire-form :instance :wires [[:run :certificate] [:certificate :lean-checker]]
+   :basis "Item 4 / basis-3; wr-18" :note "qualifying run + Lean-computed validation of its certificate"}
+  {:id "E06" :wire-form :type
+   :basis "Item 3 / basis-2" :note "paper claims frame; domain adaptation, downstream of E05"}
+  {:id "E08" :wire-form :instance :wires [[:machine :participant-feedback]]
+   :basis "basis-6 apex; wr-0" :note "post-deadline"}
+  {:id "E10" :wire-form :instance :wires [[:qualifying-run :joe-acceptance]]
+   :basis "consent-gate; stewardship-succession" :note "one recorded approval locus; roster-ratification clause dropped"}
+  {:id "WM-01-numerical-operations" :wire-form :type
+   :basis "checklist §1(c); no war-room ruling (stated)" :subject-id "WM-01-numerical-operations"
+   :note "arithmetic substrate duty on every equation wire; duplicate copies pin-or-remove"}
+  {:id "WM-01-bindings" :wire-form :type
+   :basis "basis-5; wr-8" :note "Lean-declaration↔runtime binding duty per certificate wire"}
+  {:id "EV-find-expectations" :wire-form :instance :wires [[:find :candidate-set]]
+   :basis "basis-5; wr-25" :note "independence duty on the find wire: the finder cannot supply its own expectations"}
+  {:id "OPS-ordinary-run/click" :wire-form :instance :wires [[:authorization :click]]
+   :basis "wr-0, wr-26; AUTH-ordinary-click-budget-2026-09-19.md" :note "standing budgeted authorization, 5 at a time; consumption at issue time"}
+  {:id "OPS-serving-activation" :wire-form :type
+   :basis "Joe's one-JVM policy 2026-08-23" :note "loaded-source identity duty on every serving seam (committed is not loaded)"}
+  {:id "AUTH-observation-commission" :wire-form :type
+   :basis "basis-5; wr-25" :note "observation-independence duty (R2-adjacent): not produced by the party scored on it"}
+  {:id "AUTH-horizon-semantics" :wire-form :instance :wires [[:R13 :R14]]
+   :basis "Item 5 point 3" :note "depth/horizon semantics must not silently default; conformance class: unexplained edge"}
+  {:id "AUTH-mission-preferences" :wire-form :instance :wires [[:mission-layer :live-c]]
+   :basis "D-GRAIN-DECLARATION; wr-0" :note "Joe's authority over mission→C"}
+  {:id "AUTH-history-disposition" :wire-form :instance :wires [[:history :annotated-close]]
+   :basis "basis-5; no war-room ruling (stated)" :note "one named annotated close, bounded"}]}
