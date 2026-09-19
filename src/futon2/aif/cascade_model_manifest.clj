@@ -260,12 +260,26 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
           ;; = 0 or 1) are omitted, as in observed-belief
           (into {} (remove (comp zero? val)) {target theta state (- 1 theta)}))))))
 
+(defn- search-precedence [precedence state record?]
+  (loop [remaining (seq precedence) index 0 search []]
+    (if-let [p (first remaining)]
+      (let [verdict (guard-holds? p state)
+            selected? (true? verdict)
+            search (if record?
+                     (conj search {:index index :pattern-id (:id p)
+                                   :guard-verdict verdict :applied? selected?})
+                     search)]
+        (if selected?
+          {:pattern p :index index :guard-search search}
+          (recur (next remaining) (inc index) search)))
+      {:pattern nil :index nil :guard-search search})))
+
 (defn first-enabled
   "Lean CascadeTransition.firstEnabled: the first pattern in precedence whose
    guard holds at state — present ⊆ s, absent ∩ s = ∅, and produces ⊄ s
    (guard-holds?): a completed pattern is skipped. nil when none holds."
   [precedence state]
-  (first (filter #(true? (guard-holds? % state)) precedence)))
+  (:pattern (search-precedence precedence state false)))
 
 (defn missing-interpretation
   "Lean CascadeTransition.interpret_eq_none_iff: a precedence list is a typed
@@ -275,26 +289,70 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
   (when-let [p (first (filter #(not= :interpreted (get-in % [:guard :status])) precedence))]
     {:status :missing :kind :missing-pattern-interpretation :pattern (:id p)}))
 
+(defn- evaluate-state [precedence state record?]
+  (if-let [refusal (missing-interpretation precedence)]
+    {:kernel refusal :guard-search [] :selected-index nil :pattern-id nil
+     :status :refused}
+    (let [{:keys [pattern index guard-search]} (search-precedence precedence state record?)
+          kernel (if pattern (pattern-kernel pattern state) {state 1})]
+      (cond-> {:kernel kernel}
+        record? (assoc :guard-search guard-search :selected-index index
+                       :pattern-id (:id pattern)
+                       :status (if (contains? kernel :status) :refused :evaluated)
+                       :kernel-kind (if pattern :pattern-kernel :identity))))))
+
 (defn cascade-kernel
   "Lean CascadeTransition.cascadeKernel: pattern-kernel of the first enabled
    pattern, or the identity {state 1} when none is enabled
    (cascadeKernel_of_noEnabled). A precedence containing a pattern without an
    interpretation is the typed hole (interpret_eq_none_iff) and refuses."
   [precedence state]
-  (or (missing-interpretation precedence)
-      (if-let [p (first-enabled precedence state)]
-        (pattern-kernel p state)
-        {state 1})))
+  (:kernel (evaluate-state precedence state false)))
 
 (defn- refusal? [x] (and (map? x) (contains? x :status)))
 
-(defn- push-forward [prec q]
-  (reduce (fn [acc [s mass]]
-            (let [k (cascade-kernel prec s)]
-              (if (refusal? k)
-                (reduced k)
-                (reduce-kv (fn [acc' s' p] (update acc' s' (fnil + 0) (* mass p))) acc k))))
-          {} q))
+(defn- push-forward
+  ([prec q] (:belief (push-forward prec q false)))
+  ([prec q record?]
+  (let [states (when record? (volatile! []))
+        outgoing
+        (reduce (fn [acc [s mass]]
+                  (let [evaluation (evaluate-state prec s record?)
+                        k (:kernel evaluation)
+                        contribution (when-not (refusal? k)
+                                       (reduce-kv (fn [r s' p] (assoc r s' (* mass p))) {} k))]
+                    (when record?
+                      (vswap! states conj (assoc evaluation :state s :mass mass
+                                                :mass-contribution contribution)))
+                    (if (refusal? k)
+                      (reduced k)
+                      (reduce-kv (fn [acc' s' p] (update acc' s' (fnil + 0) p)) acc contribution))))
+                {} q)]
+    (cond-> {:belief outgoing}
+      record? (assoc :evaluation
+                     {:status (if (refusal? outgoing) :refused :evaluated)
+                      :incoming-belief q :states @states :outgoing-belief outgoing
+                      :model {:schema :wm/cascade-evaluation-model-v1
+                              :semantics :first-enabled-union-theta-v1
+                              :precedence (mapv with-pattern-theta prec)}})))))
+
+(defn- rollout* [precedence-fn q0 n record?]
+  (loop [k 0 q q0 evaluations []]
+    (if (= k n)
+      {:belief q :evaluations evaluations}
+      (let [{q' :belief evaluation :evaluation}
+            (push-forward (precedence-fn k) q record?)
+            evaluations (if record? (conj evaluations (assoc evaluation :tau (inc k))) evaluations)]
+        (if (refusal? q')
+          {:belief q' :evaluations evaluations}
+          (recur (inc k) q' evaluations))))))
+
+(defn rollout-evaluation
+  "The actual rollout with per-state evaluation records, not a reconstruction.
+   :evaluations are horizon steps; a refusal retains the attempted step and
+   stops. Each model value records effective theta, including its default."
+  [precedence-fn q0 n]
+  (rollout* precedence-fn q0 n true))
 
 (defn rollout
   "Lean PolicyRollout.rolloutState (mathlib4 07b094c59b): push the
@@ -302,13 +360,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    cascade policy (the action space U is the precedence list). Refusals
    propagate."
   [precedence-fn q0 n]
-  (loop [k 0 q q0]
-    (if (= k n)
-      q
-      (let [q' (push-forward (precedence-fn k) q)]
-        (if (refusal? q')
-          q'
-          (recur (inc k) q'))))))
+  (:belief (rollout* precedence-fn q0 n false)))
 
 (defn normalized-exact? [row]
   (and (map? row) (every? #(and (or (integer? %) (ratio? %)) (<= 0 %)) (vals row))
@@ -663,7 +715,9 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
               (loop [tau 1 total 0.0 steps (transient [])]
                 (if (> tau horizon)
                   {:g (double total) :steps (when record? (persistent! steps))}
-                  (let [q (rollout precedence-fn q0 tau)]
+                  (let [evaluated (when record? (rollout-evaluation precedence-fn q0 tau))
+                        q (if record? (:belief evaluated) (rollout precedence-fn q0 tau))
+                        evaluation (peek (:evaluations evaluated))]
                     (if (refusal? q)
                       {:g q :steps nil}
                       (if-let [s (q-outside q)]
@@ -675,10 +729,10 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                             {:g :infinite
                              :steps (when record?
                                       (persistent! (conj! steps {:tau tau :risk :infinite
-                                                                 :belief q :rates rates})))}
+                                                                 :belief q :rates rates :node-evaluation evaluation})))}
                             (recur (inc tau) (+ total risk)
                                    (if record?
-                                     (conj! steps {:tau tau :risk risk :belief q :rates rates})
+                                     (conj! steps {:tau tau :risk risk :belief q :rates rates :node-evaluation evaluation})
                                      steps)))))))))))))
         ;; WIRE-4: non-zero adjudication rates score by the FACTORIZED
         ;; closed forms — O(|universe|) per step, no powerset anywhere:
@@ -765,7 +819,9 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                       (loop [tau 1 total 0.0 steps (transient [])]
                         (if (> tau horizon)
                           {:g (double total) :steps (when record? (persistent! steps))}
-                          (let [q (rollout precedence-fn q0 tau)]
+                          (let [evaluated (when record? (rollout-evaluation precedence-fn q0 tau))
+                                q (if record? (:belief evaluated) (rollout precedence-fn q0 tau))
+                                evaluation (peek (:evaluations evaluated))]
                             (if (refusal? q)
                               {:g q :steps nil}
                               (if-let [s (q-outside q)]
@@ -819,7 +875,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                       (recur (inc tau) (+ total risk amb)
                                              (if record?
                                                (conj! steps {:tau tau :risk risk :ambiguity amb
-                                                             :belief q :rates rates})
+                                                             :belief q :rates rates :node-evaluation evaluation})
                                                steps)))))))))))))))))))))
 
 (defn horizon-g-sparse
@@ -891,7 +947,8 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
     (if (and (map? g) (contains? g :status))
       {:g g :certificate nil}
       {:g g
-       :certificate {:consumed-g
+       :certificate {:node-evaluations (mapv :node-evaluation steps)
+                     :consumed-g
                      {:A (:rates (first steps))
                       ;; A spec denotes the whole distribution, without
                       ;; enumerating its exponential outcome space. The live
