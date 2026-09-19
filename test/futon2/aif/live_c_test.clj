@@ -70,13 +70,18 @@
     (is (every? #(and (rational? %) (pos? %)) (vals (:weights d))))
     ;; every want token has a weight and vice versa
     (is (= (:want d) (set (keys (:weights d)))))
-    ;; the declared target M-wm-aif-policy-grain-compliance HAS a mission
-    ;; file but NO wholeness row: refusal, not a default weight; its
-    ;; closure is still wanted. M-wm-08-external-f2 has NEITHER a mission
-    ;; file NOR a wholeness row — no live source speaks to it at all.
+    ;; M-first-flights-closure-mechanical-path HAS a mission file but NO
+    ;; wholeness row: refusal, not a default weight; its closure is still
+    ;; wanted. (Re-pinned 2026-09-19 from the live record after
+    ;; mission-wholeness.edn was regenerated, futon6 f51687b: the previous
+    ;; exemplar M-wm-aif-policy-grain-compliance gained a wholeness row —
+    ;; its closure stays wanted, asserted below.) M-wm-08-external-f2 has
+    ;; NEITHER a mission file NOR a wholeness row — no live source speaks
+    ;; to it at all.
     (is (contains? (:want d) :closed/M-wm-aif-policy-grain-compliance))
+    (is (contains? (:want d) :closed/M-first-flights-closure-mechanical-path))
     (is (some #(and (= :mission-not-in-wholeness (:kind %))
-                    (= "M-wm-aif-policy-grain-compliance" (:mission %)))
+                    (= "M-first-flights-closure-mechanical-path" (:mission %)))
               (:gaps d)))
     (is (not (or (contains? (:want d) :closed/M-wm-08-external-f2)
                  (contains? (:want d) :alive/M-wm-08-external-f2))))
