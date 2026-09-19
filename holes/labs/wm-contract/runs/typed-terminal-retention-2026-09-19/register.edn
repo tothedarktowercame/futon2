@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2"
+ :subject-id "wm-close/typed-terminal-retention"
+ :command ["clojure" "-M:test" "-n" "futon2.aif.close-terminal-retention-test"]
+ :author "codex-2"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/typed-terminal-retention-2026-09-19/execution"
+ :code-paths ["src/futon2/aif/full_loop_cohort.clj" "src/futon2/aif/full_loop_runner.clj"]
+ :test-paths ["test/futon2/aif/close_terminal_retention_test.clj" "test/futon2/aif/full_loop_runner_test.clj" "test/futon2/aif/hermetic_repair_fixture.clj"]}

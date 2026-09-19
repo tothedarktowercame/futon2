@@ -548,7 +548,11 @@
                        {:failure-kind :required-checkpoints-missing
                         :missing (vec missing)})))
      (when (seq errors)
-       (throw (ex-info "invalid close outcome" {:errors errors})))
+       (throw (ex-info "invalid close outcome"
+                       {:failure-kind :invalid-close-outcome
+                        :failure-stage :close
+                        :outcome :build-failed
+                        :errors errors})))
      (append-checkpoint! prereg-path data-root attempt-id :closed cell))))
 
 (defn attempt-summary [attempt-dir]
