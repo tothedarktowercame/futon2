@@ -594,3 +594,80 @@
                                      root (assoc finding :error "different evidence"))
                                     nil
                                     (catch clojure.lang.ExceptionInfo e e)))))))))
+
+(deftest durable-finding-copy-is-bounded-with-visible-elision
+  ;; The finding opened 2026-09-19T01:09 was 19,220,142 bytes for one failed
+  ;; attempt, serialised while holding the publication lock. The disk copy is
+  ;; now bounded like tripwire's durable trip reports; the in-memory record
+  ;; stays whole, and the elision is visible, never silent.
+  (let [root (temp-root)
+        ;; ~1500 collection nodes: far over finding-node-budget (1024).
+        huge-checkpoints (zipmap (map #(str "checkpoint-" %) (range 1500))
+                                 (range 1500))
+        finding (repair/record-system-failure!
+                 root {:attempt-id "cohort--ea1-bound--attempt-001"
+                       :repair-class :machine-failure
+                       :machine-repo "/home/joe/code/futon2"
+                       :failure-stage :construction
+                       :outcome :construction-failed
+                       :error "build failed"
+                       :backtrace {:job-id "author-job-9"
+                                   :code-state {:repo "/home/joe/code/futon2"
+                                                :branch "main"}
+                                   :checkpoints huge-checkpoints}
+                       :selected-entry {:action {:type :learn-action-class
+                                                 :payload huge-checkpoints}}})
+        path (str root "/findings/" (:repair/id finding) ".edn")
+        stored (edn/read-string (slurp path))]
+    (testing "the in-memory record is left whole"
+      (is (= huge-checkpoints (get-in finding [:backtrace :checkpoints]))))
+    (testing "small consumer-read keys survive verbatim"
+      (is (= "author-job-9" (get-in stored [:backtrace :job-id])))
+      (is (= "/home/joe/code/futon2"
+             (get-in stored [:backtrace :code-state :repo]))))
+    (testing "oversized entries are visibly elided, not silently dropped"
+      (is (= :exceeds-durable-finding-budget
+             (get-in stored [:backtrace :checkpoints :elided/reason])))
+      (is (pos? (get-in stored [:backtrace :checkpoints :elided/count])))
+      ;; The real 1.7 MB :selected-entry/:action elides whole; this synthetic
+      ;; one is narrow, so the elision lands on its oversized :payload.
+      (is (= :exceeds-durable-finding-budget
+             (get-in stored [:selected-entry :action :payload :elided/reason]))))
+    (testing "the disk copy is small"
+      (is (< (.length (io/file path)) 16384)))
+    (testing "replay of the bounded finding is acknowledged byte-exactly"
+      (is (= finding
+             (repair/record-system-failure!
+              root {:attempt-id "cohort--ea1-bound--attempt-001"
+                    :repair-class :machine-failure
+                    :machine-repo "/home/joe/code/futon2"
+                    :failure-stage :construction
+                    :outcome :construction-failed
+                    :error "build failed"
+                    :backtrace {:job-id "author-job-9"
+                                :code-state {:repo "/home/joe/code/futon2"
+                                             :branch "main"}
+                                :checkpoints huge-checkpoints}
+                    :selected-entry {:action {:type :learn-action-class
+                                              :payload huge-checkpoints}}
+                    :opened-at (:opened-at finding)}))))))
+
+(deftest replay-of-a-pre-bound-raw-finding-is-acknowledged
+  ;; Findings written before the bound are on disk UNBOUNDED. A genuine
+  ;; replay of one must still be acknowledged rather than raised as a byte
+  ;; conflict, so the exists-path also compares the raw pr-str bytes.
+  (let [root (temp-root)
+        base {:attempt-id "cohort--ea1-prebound--attempt-001"
+              :repair-class :machine-failure
+              :failure-stage :construction
+              :outcome :construction-failed
+              :error "build failed"
+              :opened-at "2026-09-19T01:09:43.610753307Z"
+              :backtrace {:checkpoints (zipmap (map str (range 1500))
+                                               (range 1500))}}
+        record (repair/record-system-failure! root base)
+        path (str root "/findings/" (:repair/id record) ".edn")]
+    ;; Stand in for everything already on disk: rewrite the file with the
+    ;; UNBOUNDED record, exactly as written before this change.
+    (spit path (pr-str record))
+    (is (some? (repair/record-system-failure! root base)))))

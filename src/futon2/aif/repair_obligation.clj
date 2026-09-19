@@ -156,6 +156,114 @@
         (do (Thread/sleep 25)
             (recur (inc attempt)))))))
 
+(def ^:private finding-node-budget
+  "Collection nodes one finding entry may carry into a durable finding file.
+  Measured on the real 19.2 MB finding of 2026-09-19
+  (repair-ea1-4e68d87b...--attempt-001-build-failed): :backtrace/:checkpoints
+  alone was 10.1 MB (>4096 nodes) and :selected-entry/:action 1.7 MB, while
+  every subtree a consumer reads back (:failure-data 12 nodes, :backtrace
+  {:job-id,:code-state} 5, :phase-events 34) sits far below this budget.
+  See `durable-finding` for why the disk copy is bounded at all."
+  1024)
+
+(def ^:private finding-string-budget
+  "Characters one scalar string entry may carry into a durable finding file.
+  `within-finding-node-budget?` counts collection nodes, so a megabyte string
+  would pass it; strings are capped separately."
+  8192)
+
+(defn- within-finding-node-budget?
+  "True when V holds at most `finding-node-budget` collection nodes. Same
+  early-exit walk as tripwire's `within-node-budget?`: the cost is the budget,
+  not the size of V, because V is routinely a whole store snapshot."
+  [v]
+  (loop [stack (list v) n 0]
+    (cond
+      (> n finding-node-budget) false
+      (empty? stack) true
+      :else (let [x (first stack) more (rest stack)]
+              (cond
+                (map? x) (recur (into more cat x) (inc n))
+                (coll? x) (recur (into more x) (inc n))
+                :else (recur more n))))))
+
+(defn- describe-elided-finding-value
+  "Stand in for a finding entry too large to store, saying what was there.
+  Same shape as tripwire's `describe-elided`, so both durable copies read the
+  same way."
+  [v]
+  (cond-> {:elided/reason :exceeds-durable-finding-budget
+           :elided/type (cond (map? v) :map
+                              (vector? v) :vector
+                              (set? v) :set
+                              (sequential? v) :seq
+                              (string? v) :string
+                              :else :value)}
+    (coll? v) (assoc :elided/count (bounded-count 100000 v))
+    (map? v) (assoc :elided/keys (vec (take 64 (sort-by str (keys v)))))
+    (string? v) (assoc :elided/count (count v))))
+
+(def ^:private finding-entry-cap
+  "Entries a wide-but-shallow collection may carry into a durable finding
+  file. The node walk counts collections, not scalars, so a map of 1500 scalar
+  entries is a single node; the entry cap closes that hole."
+  512)
+
+(defn- finding-entry-oversized?
+  [v]
+  (or (and (string? v) (> (count v) finding-string-budget))
+      (and (coll? v)
+           (> (bounded-count (inc finding-entry-cap) v) finding-entry-cap))
+      (not (within-finding-node-budget? v))))
+
+(defn- bounded-finding-entry
+  "Bound one entry at depth 2 or deeper: over ANY budget (string length,
+  entry width, or node count) the whole entry is elided; under all of them it
+  keeps its structure with each of its entries bounded the same way."
+  [v]
+  (cond
+    (finding-entry-oversized? v) (describe-elided-finding-value v)
+    (map? v) (reduce-kv (fn [m k x] (assoc m k (bounded-finding-entry x))) {} v)
+    (coll? v) (into (empty v) (map bounded-finding-entry) v)
+    :else v))
+
+(defn- durable-finding
+  "Project a finding RECORD down to what a durable finding file should carry.
+
+  The stop-line path embeds whole backtraces and phase histories: the finding
+  opened 2026-09-19T01:09 was 19,220,142 bytes for one failed attempt, and
+  those bytes were serialised while holding the publication lock. Nothing
+  reads the bulk back — :backtrace/:checkpoints (10.1 MB) and
+  :selected-entry/:action (1.7 MB) have no consumer — while the small keys
+  that ARE read back (:backtrace {:job-id,:code-state {:repo}},
+  :failure-data {:trip/id,:job-id}) sit far under the budget and survive
+  verbatim next to visible elisions.
+
+  A TOP-LEVEL map field recurses into its entries whenever its width is
+  within finding-entry-cap, so a deep-but-narrow field like :backtrace keeps
+  its small keys while its bulk entries are elided; every entry at depth 2 or
+  deeper must itself fit finding-node-budget nodes and finding-entry-cap
+  entries. Total disk size is bounded by (top fields x finding-entry-cap
+  entries x finding-node-budget nodes).
+
+  The in-memory record is left whole (`record-system-failure!` returns the
+  unprojected record); only the disk copy is bounded, matching tripwire's
+  `durable-observation` discipline."
+  [record]
+  (reduce-kv
+   (fn [m k v]
+     (assoc m k
+            (cond
+              (and (map? v)
+                   (> (bounded-count (inc finding-entry-cap) v) finding-entry-cap))
+              (describe-elided-finding-value v)
+
+              (map? v)
+              (reduce-kv (fn [m2 k2 x] (assoc m2 k2 (bounded-finding-entry x))) {} v)
+
+              :else (bounded-finding-entry v))))
+   {} record))
+
 (defn- write-new! [path value]
   (with-contended-store-lock (.getParent (io/file path))
    (fn []
@@ -218,12 +326,17 @@
         ;; bytes. 223x faster and 38% smaller, and those 47 seconds were spent
         ;; holding with-contended-store-lock, so every other store user waited
         ;; them out. Nothing reads these files for their layout.
-        bytes (.getBytes (pr-str value) "UTF-8")
+        ;; The disk copy is BOUNDED, not whole: durable-finding elides entries
+        ;; over finding-node-budget with a visible :elided/ marker. The same
+        ;; lock-holding argument applies to the bulk: 19.2 MB for one finding.
+        bytes (.getBytes (pr-str (durable-finding value)) "UTF-8")
         ;; Replay below is decided by exact bytes, deliberately. Findings
-        ;; written before this change are on disk in pprint form, so a genuine
-        ;; replay of one of them must still be acknowledged rather than raised
-        ;; as a conflict. Computed only on the already-exists path, so the slow
-        ;; serialisation is never on the ordinary write.
+        ;; written before this change are on disk UNBOUNDED (pr-str of the
+        ;; whole record), and before the pr-str switch in pprint form, so a
+        ;; genuine replay of one of them must still be acknowledged rather
+        ;; than raised as a conflict. Computed only on the already-exists
+        ;; path, so neither slow serialisation is ever on the ordinary write.
+        raw-bytes (delay (.getBytes (pr-str value) "UTF-8"))
         legacy-bytes (delay (.getBytes (with-out-str (pp/pprint value)) "UTF-8"))
         monitor-key (.getPath directory)
         monitor (get (swap! finding-publication-monitors
@@ -267,6 +380,7 @@
                    (= directory (.getCanonicalFile (.getParentFile file)))
                    (let [existing (Files/readAllBytes file-path)]
                      (or (java.util.Arrays/equals bytes existing)
+                         (java.util.Arrays/equals ^bytes @raw-bytes existing)
                          (java.util.Arrays/equals ^bytes @legacy-bytes existing))))
             (.getPath file)
               (throw (ex-info "Immutable repair finding conflicts with existing bytes"
