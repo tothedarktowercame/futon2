@@ -1,0 +1,1782 @@
+{:original-commit "9265a89b",
+ :reason :WIRE-habit-read,
+ :method
+ "Recursive EDN map/sequence walk; no normalization or omitted keys. Each tick reads accumulated previous selections.",
+ :only-intended-paths? true,
+ :interpretation
+ "Tick 1 is normalization only. Later unequal masses reflect the recorded counts. All six selected actions remain unchanged; posterior masses change.",
+ :cases
+ [{:case 1,
+   :counts [0 0],
+   :selected-action-unchanged? true,
+   :differences
+   [{:path [:selection-certificate :candidates 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.5}
+    {:path [:selection-certificate :candidates 0 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key [:pattern-cascade "M-wm-08-external-f2" [] {}],
+      :count 0,
+      :alpha 1.0,
+      :samples 0,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      0
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.5}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.5}
+    {:path [:selection-certificate :candidates 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.5}
+    {:path [:selection-certificate :candidates 1 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key
+      [:pattern-cascade
+       "M-wm-08-external-f2"
+       [:cascade-construction/run-it-on-a-real-case]
+       {}],
+      :count 0,
+      :alpha 1.0,
+      :samples 0,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      1
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.5}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.5}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.5}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.5}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path [:selection-certificate :policies 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.5}
+    {:path [:selection-certificate :policies 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path [:selection-certificate :policies 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.5}
+    {:path [:selection-certificate :policies 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :empty,
+       :precedence [],
+       :construction-receipt
+       {:kind :construction-receipt, :construction :empty-cascade}}],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.11920292202211748}
+    {:path [:selection-law :softmax-weights nil],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.11920292202211748}
+    {:path [:softmax-weights nil],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.11920292202211748}]}
+  {:case 2,
+   :counts [0 1],
+   :selected-action-unchanged? true,
+   :differences
+   [{:path [:chosen-action-mass],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9366210616669622}
+    {:path [:selection-certificate :candidates 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.3333333333333333}
+    {:path [:selection-certificate :candidates 0 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key [:pattern-cascade "M-wm-08-external-f2" [] {}],
+      :count 0,
+      :alpha 1.0,
+      :samples 1,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      0
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.3333333333333333}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.3333333333333333}
+    {:path [:selection-certificate :candidates 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.6666666666666666}
+    {:path [:selection-certificate :candidates 1 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key
+      [:pattern-cascade
+       "M-wm-08-external-f2"
+       [:cascade-construction/run-it-on-a-real-case]
+       {}],
+      :count 1,
+      :alpha 1.0,
+      :samples 1,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      1
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.6666666666666666}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.6666666666666666}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.3333333333333333}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.6666666666666666}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path [:selection-certificate :policies 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.3333333333333333}
+    {:path [:selection-certificate :policies 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path [:selection-certificate :policies 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.6666666666666666}
+    {:path [:selection-certificate :policies 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :empty,
+       :precedence [],
+       :construction-receipt
+       {:kind :construction-receipt, :construction :empty-cascade}}],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.06337893833303761}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :work,
+       :construction-receipt
+       {:kind :hand-admitted,
+        :by "claude-4",
+        :date "2026-09-17",
+        :moves [],
+        :stopped-is-not-success true},
+       :precedence
+       [{:id :cascade-construction/run-it-on-a-real-case,
+         :authority :documented-interpretation,
+         :produces #{:route-a-rehearsal-reported},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{:external-expectation-validator-exists
+              :independent-expectations-written},
+            :absent #{}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces #{:route-a-rehearsal-reported},
+          :authority :documented-interpretation}}]}],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9366210616669622}
+    {:path [:selection-law :softmax-weights nil],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.06337893833303761}
+    {:path
+     [:selection-law
+      :softmax-weights
+      {:id :cascade-construction/run-it-on-a-real-case,
+       :authority :documented-interpretation,
+       :produces #{:route-a-rehearsal-reported},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{:external-expectation-validator-exists
+            :independent-expectations-written},
+          :absent #{}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces #{:route-a-rehearsal-reported},
+        :authority :documented-interpretation}}],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9366210616669622}
+    {:path [:softmax-weights nil],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.06337893833303761}
+    {:path
+     [:softmax-weights
+      {:id :cascade-construction/run-it-on-a-real-case,
+       :authority :documented-interpretation,
+       :produces #{:route-a-rehearsal-reported},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{:external-expectation-validator-exists
+            :independent-expectations-written},
+          :absent #{}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces #{:route-a-rehearsal-reported},
+        :authority :documented-interpretation}}],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9366210616669622}]}
+  {:case 3,
+   :counts [0 2],
+   :selected-action-unchanged? true,
+   :differences
+   [{:path [:chosen-action-mass],
+     :change :changed,
+     :before 0.9525741268224334,
+     :after 0.870048506561408}
+    {:path [:selection-certificate :candidates 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.25}
+    {:path [:selection-certificate :candidates 0 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key [:pattern-cascade "M-wm-08-external-f2" [] {}],
+      :count 0,
+      :alpha 1.0,
+      :samples 2,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      0
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.25}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.25}
+    {:path [:selection-certificate :candidates 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.75}
+    {:path [:selection-certificate :candidates 1 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key
+      [:pattern-cascade
+       "M-wm-08-external-f2"
+       [:cascade-construction/run-it-on-a-real-case]
+       {}],
+      :count 2,
+      :alpha 1.0,
+      :samples 2,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      1
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.75}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.75}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.25}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.75}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path [:selection-certificate :policies 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.25}
+    {:path [:selection-certificate :policies 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path [:selection-certificate :policies 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.75}
+    {:path [:selection-certificate :policies 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :empty,
+       :precedence [],
+       :construction-receipt
+       {:kind :construction-receipt, :construction :empty-cascade}}],
+     :change :changed,
+     :before 0.9525741268224334,
+     :after 0.870048506561408}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :work,
+       :construction-receipt
+       {:kind :hand-admitted,
+        :by "claude-4",
+        :date "2026-09-17",
+        :moves [],
+        :stopped-is-not-success true},
+       :precedence
+       [{:id :cascade-construction/run-it-on-a-real-case,
+         :authority :documented-interpretation,
+         :produces #{:route-a-rehearsal-reported},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{:external-expectation-validator-exists
+              :independent-expectations-written},
+            :absent #{}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces #{:route-a-rehearsal-reported},
+          :authority :documented-interpretation}}]}],
+     :change :changed,
+     :before 0.04742587317756678,
+     :after 0.1299514934385922}
+    {:path [:selection-law :softmax-weights nil],
+     :change :changed,
+     :before 0.9525741268224334,
+     :after 0.870048506561408}
+    {:path
+     [:selection-law
+      :softmax-weights
+      {:id :cascade-construction/run-it-on-a-real-case,
+       :authority :documented-interpretation,
+       :produces #{:route-a-rehearsal-reported},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{:external-expectation-validator-exists
+            :independent-expectations-written},
+          :absent #{}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces #{:route-a-rehearsal-reported},
+        :authority :documented-interpretation}}],
+     :change :changed,
+     :before 0.04742587317756678,
+     :after 0.1299514934385922}
+    {:path [:softmax-weights nil],
+     :change :changed,
+     :before 0.9525741268224334,
+     :after 0.870048506561408}
+    {:path
+     [:softmax-weights
+      {:id :cascade-construction/run-it-on-a-real-case,
+       :authority :documented-interpretation,
+       :produces #{:route-a-rehearsal-reported},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{:external-expectation-validator-exists
+            :independent-expectations-written},
+          :absent #{}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces #{:route-a-rehearsal-reported},
+        :authority :documented-interpretation}}],
+     :change :changed,
+     :before 0.04742587317756678,
+     :after 0.1299514934385922}]}
+  {:case 4,
+   :counts [1 2],
+   :selected-action-unchanged? true,
+   :differences
+   [{:path [:chosen-action-mass],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9172430971043684}
+    {:path [:selection-certificate :candidates 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.4}
+    {:path [:selection-certificate :candidates 0 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key [:pattern-cascade "M-wm-08-external-f2" [] {}],
+      :count 1,
+      :alpha 1.0,
+      :samples 3,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      0
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.4}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.4}
+    {:path [:selection-certificate :candidates 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.6}
+    {:path [:selection-certificate :candidates 1 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key
+      [:pattern-cascade
+       "M-wm-08-external-f2"
+       [:cascade-construction/run-it-on-a-real-case]
+       {}],
+      :count 2,
+      :alpha 1.0,
+      :samples 3,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      1
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.6}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.6}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.4}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.6}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path [:selection-certificate :policies 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.4}
+    {:path [:selection-certificate :policies 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path [:selection-certificate :policies 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.6}
+    {:path [:selection-certificate :policies 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :empty,
+       :precedence [],
+       :construction-receipt
+       {:kind :construction-receipt, :construction :empty-cascade}}],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.08275690289563165}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :work,
+       :construction-receipt
+       {:kind :hand-admitted,
+        :by "claude-4",
+        :date "2026-09-17",
+        :moves [],
+        :stopped-is-not-success true},
+       :precedence
+       [{:id :cascade-construction/run-it-on-a-real-case,
+         :authority :documented-interpretation,
+         :produces #{:route-a-rehearsal-reported},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{:external-expectation-validator-exists
+              :independent-expectations-written},
+            :absent #{}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces #{:route-a-rehearsal-reported},
+          :authority :documented-interpretation}}]}],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9172430971043684}
+    {:path [:selection-law :softmax-weights nil],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.08275690289563165}
+    {:path
+     [:selection-law
+      :softmax-weights
+      {:id :cascade-construction/run-it-on-a-real-case,
+       :authority :documented-interpretation,
+       :produces #{:route-a-rehearsal-reported},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{:external-expectation-validator-exists
+            :independent-expectations-written},
+          :absent #{}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces #{:route-a-rehearsal-reported},
+        :authority :documented-interpretation}}],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9172430971043684}
+    {:path [:softmax-weights nil],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.08275690289563165}
+    {:path
+     [:softmax-weights
+      {:id :cascade-construction/run-it-on-a-real-case,
+       :authority :documented-interpretation,
+       :produces #{:route-a-rehearsal-reported},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{:external-expectation-validator-exists
+            :independent-expectations-written},
+          :absent #{}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces #{:route-a-rehearsal-reported},
+        :authority :documented-interpretation}}],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9172430971043684}]}
+  {:case 5,
+   :counts [1 3],
+   :selected-action-unchanged? true,
+   :differences
+   [{:path [:chosen-action-mass],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9366210616669622}
+    {:path [:selection-certificate :candidates 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.3333333333333333}
+    {:path [:selection-certificate :candidates 0 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key [:pattern-cascade "M-wm-08-external-f2" [] {}],
+      :count 1,
+      :alpha 1.0,
+      :samples 4,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      0
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.3333333333333333}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.3333333333333333}
+    {:path [:selection-certificate :candidates 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.6666666666666666}
+    {:path [:selection-certificate :candidates 1 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key
+      [:pattern-cascade
+       "M-wm-08-external-f2"
+       [:cascade-construction/run-it-on-a-real-case]
+       {}],
+      :count 3,
+      :alpha 1.0,
+      :samples 4,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      1
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.6666666666666666}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.6666666666666666}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.3333333333333333}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.6666666666666666}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path [:selection-certificate :policies 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.3333333333333333}
+    {:path [:selection-certificate :policies 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path [:selection-certificate :policies 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.6666666666666666}
+    {:path [:selection-certificate :policies 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :empty,
+       :precedence [],
+       :construction-receipt
+       {:kind :construction-receipt, :construction :empty-cascade}}],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.06337893833303761}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :work,
+       :construction-receipt
+       {:kind :hand-admitted,
+        :by "claude-4",
+        :date "2026-09-17",
+        :moves [],
+        :stopped-is-not-success true},
+       :precedence
+       [{:id :cascade-construction/run-it-on-a-real-case,
+         :authority :documented-interpretation,
+         :produces #{:route-a-rehearsal-reported},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{:external-expectation-validator-exists
+              :independent-expectations-written},
+            :absent #{}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces #{:route-a-rehearsal-reported},
+          :authority :documented-interpretation}}]}],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9366210616669622}
+    {:path [:selection-law :softmax-weights nil],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.06337893833303761}
+    {:path
+     [:selection-law
+      :softmax-weights
+      {:id :cascade-construction/run-it-on-a-real-case,
+       :authority :documented-interpretation,
+       :produces #{:route-a-rehearsal-reported},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{:external-expectation-validator-exists
+            :independent-expectations-written},
+          :absent #{}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces #{:route-a-rehearsal-reported},
+        :authority :documented-interpretation}}],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9366210616669622}
+    {:path [:softmax-weights nil],
+     :change :changed,
+     :before 0.11920292202211753,
+     :after 0.06337893833303761}
+    {:path
+     [:softmax-weights
+      {:id :cascade-construction/run-it-on-a-real-case,
+       :authority :documented-interpretation,
+       :produces #{:route-a-rehearsal-reported},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{:external-expectation-validator-exists
+            :independent-expectations-written},
+          :absent #{}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces #{:route-a-rehearsal-reported},
+        :authority :documented-interpretation}}],
+     :change :changed,
+     :before 0.8807970779778824,
+     :after 0.9366210616669622}]}
+  {:case 6,
+   :counts [1 4],
+   :selected-action-unchanged? true,
+   :differences
+   [{:path [:chosen-action-mass],
+     :change :changed,
+     :before 0.9525741268224334,
+     :after 0.8893096936990083}
+    {:path [:selection-certificate :candidates 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.2857142857142857}
+    {:path [:selection-certificate :candidates 0 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key [:pattern-cascade "M-wm-08-external-f2" [] {}],
+      :count 1,
+      :alpha 1.0,
+      :samples 5,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      0
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.2857142857142857}
+    {:path
+     [:selection-certificate :candidates 0 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.2857142857142857}
+    {:path [:selection-certificate :candidates 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.7142857142857143}
+    {:path [:selection-certificate :candidates 1 :habit-provenance],
+     :change :added,
+     :after
+     {:source :cascade-prior,
+      :policy-key
+      [:pattern-cascade
+       "M-wm-08-external-f2"
+       [:cascade-construction/run-it-on-a-real-case]
+       {}],
+      :count 4,
+      :alpha 1.0,
+      :samples 5,
+      :multiplicity 1,
+      :unit :probability-mass}}
+    {:path [:selection-certificate :candidates 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :presence],
+     :change :changed,
+     :before :absent,
+     :after :present}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :reason],
+     :change :changed,
+     :before :absent,
+     :after nil}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :attached}
+    {:path
+     [:selection-certificate
+      :candidates
+      1
+      :inputs
+      :habit
+      :supplied-value],
+     :change :changed,
+     :before nil,
+     :after 0.7142857142857143}
+    {:path
+     [:selection-certificate :candidates 1 :inputs :habit :value],
+     :change :changed,
+     :before 1,
+     :after 0.7142857142857143}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.2857142857142857}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      0
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :reason],
+     :change :changed,
+     :before :unit-habit,
+     :after :non-unit-habit}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :value],
+     :change :changed,
+     :before 1,
+     :after 0.7142857142857143}
+    {:path
+     [:selection-certificate
+      :g-term-decomposition
+      :policies
+      1
+      :terms
+      :E
+      :verdict],
+     :change :changed,
+     :before :degenerate,
+     :after :non-degenerate}
+    {:path [:selection-certificate :policies 0 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.2857142857142857}
+    {:path [:selection-certificate :policies 0 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path [:selection-certificate :policies 1 :habit],
+     :change :changed,
+     :before 1,
+     :after 0.7142857142857143}
+    {:path [:selection-certificate :policies 1 :habit-status],
+     :change :changed,
+     :before :declared-neutral,
+     :after :computed}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :empty,
+       :precedence [],
+       :construction-receipt
+       {:kind :construction-receipt, :construction :empty-cascade}}],
+     :change :changed,
+     :before 0.9525741268224334,
+     :after 0.8893096936990083}
+    {:path
+     [:selection-law
+      :posterior
+      {:kind :cascade-candidate,
+       :target "M-wm-08-external-f2",
+       :interpretation-receipts
+       #:cascade-construction{:run-it-on-a-real-case
+                              {:kind :hand-admitted,
+                               :by "claude-4",
+                               :date "2026-09-17",
+                               :source
+                               {:path
+                                "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                               :reading
+                               "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+       :id :work,
+       :construction-receipt
+       {:kind :hand-admitted,
+        :by "claude-4",
+        :date "2026-09-17",
+        :moves [],
+        :stopped-is-not-success true},
+       :precedence
+       [{:id :cascade-construction/run-it-on-a-real-case,
+         :authority :documented-interpretation,
+         :produces #{:route-a-rehearsal-reported},
+         :guard
+         {:status :interpreted,
+          :operator :and,
+          :clauses
+          [{:status :interpreted,
+            :present
+            #{:external-expectation-validator-exists
+              :independent-expectations-written},
+            :absent #{}}]},
+         :transition
+         {:status :interpreted,
+          :operator :union,
+          :produces #{:route-a-rehearsal-reported},
+          :authority :documented-interpretation}}]}],
+     :change :changed,
+     :before 0.04742587317756678,
+     :after 0.11069030630099164}
+    {:path [:selection-law :softmax-weights nil],
+     :change :changed,
+     :before 0.9525741268224334,
+     :after 0.8893096936990083}
+    {:path
+     [:selection-law
+      :softmax-weights
+      {:id :cascade-construction/run-it-on-a-real-case,
+       :authority :documented-interpretation,
+       :produces #{:route-a-rehearsal-reported},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{:external-expectation-validator-exists
+            :independent-expectations-written},
+          :absent #{}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces #{:route-a-rehearsal-reported},
+        :authority :documented-interpretation}}],
+     :change :changed,
+     :before 0.04742587317756678,
+     :after 0.11069030630099164}
+    {:path [:softmax-weights nil],
+     :change :changed,
+     :before 0.9525741268224334,
+     :after 0.8893096936990083}
+    {:path
+     [:softmax-weights
+      {:id :cascade-construction/run-it-on-a-real-case,
+       :authority :documented-interpretation,
+       :produces #{:route-a-rehearsal-reported},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{:external-expectation-validator-exists
+            :independent-expectations-written},
+          :absent #{}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces #{:route-a-rehearsal-reported},
+        :authority :documented-interpretation}}],
+     :change :changed,
+     :before 0.04742587317756678,
+     :after 0.11069030630099164}]}],
+ :discriminating-comparison
+ {:counts [0 3],
+  :selected :work,
+  :learned-posterior [0.3129648952316626 0.6870351047683373],
+  :neutral-posterior [0.6456563062257954 0.35434369377420455],
+  :neutral-argmax :empty,
+  :E
+  [{:status :present,
+    :value 0.2,
+    :verdict :non-degenerate,
+    :reason :non-unit-habit}
+   {:status :present,
+    :value 0.8,
+    :verdict :non-degenerate,
+    :reason :non-unit-habit}],
+  :learned-argmax :work,
+  :habits [0.2 0.8],
+  :habit-statuses [:attached :attached]}}
