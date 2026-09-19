@@ -129,7 +129,18 @@ esac
 case "$wires" in
   *":will-defer []"*) :;;
   *":will-defer ["*)
-    say "will defer to repair" "$(echo "$wires" | sed 's/.*:will-defer //; s/}$//') -- witness names open obligations; repair is selectable";;
+    say "will defer to repair" "$(echo "$wires" | sed 's/.*:will-defer //; s/}$//') -- witness names open obligations"
+    # This is a PREDICTION OF THE BRANCH, not a footnote. A deferred witness
+    # makes a repair selectable, and repair-entry is injected at -Inf as
+    # :selection-source :stop-the-line -- it pre-empts policy selection rather
+    # than winning it. So this click will very likely enact a repair, and a
+    # repair run has no controller-decision and no selection certificate: its
+    # run record CANNOT score better than 1/5 under wm_run_validity.bb, and
+    # cannot satisfy E02. Measured on click 1 of 5 (wm-click-599b9255,
+    # 2026-09-19): this line printed, the click enacted
+    # :repair-machine-failure, and the record came back INVALID 0/5.
+    # Spend a budgeted click here only if the repair is what you want.
+    bad "click will repair" "a deferred witness means the stop-the-line branch is selectable; expect a repair run, not a scored selection. Pass --force if the repair IS the work.";;
   *)  :;;
 esac
 
