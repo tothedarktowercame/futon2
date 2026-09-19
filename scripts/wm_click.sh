@@ -11,14 +11,6 @@
 #   scripts/wm_click.sh --run --force   # fire even if a wire would halt (say why)
 #   scripts/wm_click.sh --probe-seats   # also spend one turn per seat on a quota probe
 #
-#   scripts/wm_click.sh --run --disable-wire T8 --because "<recorded reason>"
-#   fires one click with ONE named wire disabled for that run only, via the
-#   runner's per-run :tripwire/disabled-wire-ids seam (tripwire.clj enabled?).
-#   This is the legitimate route past a wire that is halting on findings whose
-#   discharge requires a validating attempt (the T8 livelock on 2026-09-19):
-#   the disable is scoped to the single click, printed, and must carry a
-#   reason. It never touches the process-wide wire registry.
-#
 # Casting defaults to the cohort charter's three worker seats. Override with
 # --author / --reviewer / --repair-reviewer. They must be three DISTINCT seats.
 set -uo pipefail
@@ -26,31 +18,17 @@ set -uo pipefail
 F2="$HOME/code/futon2"; F3C="$HOME/code/futon3c"
 BASE="http://localhost:7070"
 AUTHOR="codex-23"; REVIEWER="codex-22"; REPAIR="codex-24"
-RUN=0; FORCE=0; PROBE=0; DISABLE=(); BECAUSE=""
+RUN=0; FORCE=0; PROBE=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --run) RUN=1;; --force) FORCE=1;; --probe-seats) PROBE=1;;
-    --disable-wire) DISABLE+=("$2"); shift;;
-    --because) BECAUSE="$2"; shift;;
     --author) AUTHOR="$2"; shift;; --reviewer) REVIEWER="$2"; shift;;
     --repair-reviewer) REPAIR="$2"; shift;;
     -h|--help) sed -n '2,20p' "$0"; exit 0;;
     *) echo "wm_click: unknown argument $1" >&2; exit 2;;
   esac; shift
 done
-
-# A scoped, per-run wire disable is a firing-time decision, and it must carry
-# its reason on the command line so the reason lands in shell history and in
-# the operator's report -- a silent disable is the thing the --because gate
-# exists to make impossible.
-if [ "${#DISABLE[@]}" -gt 0 ] || [ -n "$BECAUSE" ]; then
-  [ "$RUN" = "1" ] || { echo "wm_click: --disable-wire only makes sense when firing; pass --run" >&2; exit 2; }
-  [ "${#DISABLE[@]}" -gt 0 ] && [ -z "$BECAUSE" ] \
-    && { echo "wm_click: --disable-wire requires --because \"<recorded reason>\"" >&2; exit 2; }
-  [ "${#DISABLE[@]}" -eq 0 ] && [ -n "$BECAUSE" ] \
-    && { echo "wm_click: --because without --disable-wire does nothing" >&2; exit 2; }
-fi
 
 ok=1
 say() { printf '  %-22s %s\n' "$1" "$2"; }
@@ -95,29 +73,20 @@ cat > /tmp/wm_click_wires.clj <<'CLJ'
     (let [cro (resolve 'futon2.aif.tripwire/cross-run-observation)
           evals @(resolve 'futon2.aif.tripwire/wire-evaluators)
           root @(resolve 'futon2.aif.repair-obligation/default-root)
-          skip (into #{} (map keyword)
-                     (clojure.edn/read-string
-                       (or (System/getenv "WM_CLICK_SKIP_WIRES") "[]")))
           obs (cro {:cohort? true}
                    {:phase :opportunity :transition :start
                     :opportunity-id "wm_click-preflight"
                     :trigger :duree-click-on-demand
                     :cohort? true :repair-root root})]
       {:tripping (vec (for [[k f] evals
-                            :when (not (contains? skip k))
                             :let [w (try (f (assoc obs :tripwire/force? true))
                                          (catch Throwable e [{:kind :wire-threw}]))]
                             :when (seq w)]
                         [k (mapv :kind w)]))}))
 CLJ
 # proof-eval.sh reads its admin token from its own directory, so it must be
-# invoked from there. WM_CLICK_SKIP_WIRES carries the scoped per-run disables
-# into the preflight evaluation, so the preflight answers the question the
-# fired click will actually face -- including the disables -- rather than a
-# world the click will never run in.
-SKIP_EDN="[]"
-[ "${#DISABLE[@]}" -gt 0 ] && SKIP_EDN="[$(printf '"%s",' "${DISABLE[@]}" | sed 's/,$//')]"
-wires=$( (cd "$F3C" && WM_CLICK_SKIP_WIRES="$SKIP_EDN" ./scripts/proof-eval.sh -f /tmp/wm_click_wires.clj 2>&1) | tail -1)
+# invoked from there.
+wires=$( (cd "$F3C" && ./scripts/proof-eval.sh -f /tmp/wm_click_wires.clj 2>&1) | tail -1)
 case "$wires" in
   *":tripping []"*)
     say "tripwires" "13/13 clear";;
@@ -147,11 +116,6 @@ fi
 
 echo
 if [ "$ok" = "1" ]; then echo "preflight PASS"; else echo "preflight FAIL"; fi
-if [ "${#DISABLE[@]}" -gt 0 ]; then
-  echo "scoped disable for this run only: ${DISABLE[*]}"
-  echo "  because: $BECAUSE"
-  echo "  (runner seam :tripwire/disabled-wire-ids; process-wide registry untouched)"
-fi
 if [ "$RUN" != "1" ]; then
   echo "(preflight only; pass --run to fire)"; exit $(( 1 - ok ))
 fi
@@ -163,13 +127,8 @@ fi
 # ---------------------------------------------------------------- fire
 RUNID="$(date -u +%Y-%m-%d)-$(uuidgen 2>/dev/null || date +%s)"
 echo; echo "firing click, run-id $RUNID"
-PAYLOAD="{\"run-id\":\"$RUNID\",\"author\":\"$AUTHOR\",\"reviewer\":\"$REVIEWER\",\"repair-reviewer\":\"$REPAIR\",\"trigger\":\"duree-click-on-demand\""
-if [ "${#DISABLE[@]}" -gt 0 ]; then
-  PAYLOAD="$PAYLOAD,\"tripwire-disabled-wire-ids\":$SKIP_EDN"
-fi
-PAYLOAD="$PAYLOAD}"
 resp=$(curl -s -m 60 -X POST "$BASE/api/alpha/wm/click" -H 'Content-Type: application/json' \
-  -d "$PAYLOAD")
+  -d "{\"run-id\":\"$RUNID\",\"author\":\"$AUTHOR\",\"reviewer\":\"$REVIEWER\",\"repair-reviewer\":\"$REPAIR\",\"trigger\":\"duree-click-on-demand\"}")
 echo "$resp"
 clickid=$(echo "$resp" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("click-id",""))' 2>/dev/null)
 [ -n "$clickid" ] || { echo "no click-id returned; not accepted"; exit 1; }
