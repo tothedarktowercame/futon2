@@ -33,9 +33,10 @@
     prediction at θ < 1 is infinitely surprising, the P8 §2 lesson that
     θ = 1 certainty is what makes contradicted predictions explode.
   - C0-empty: as at θ = 1, F = ##Inf."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-free-energy :as cfe]
-            [futon2.aif.cascade-model-manifest :as m]))
+            [futon2.aif.cascade-model-manifest :as m])
+  (:import (java.nio.file Files)))
 
 (def q0
   (m/observed-belief #{:summary-without-total-repos-throws
@@ -108,7 +109,31 @@
     (is (= ##Inf (:C0-empty f)))
     (is (= ##Inf (:C1-test-first f)))
     (is (zero? (:complexity-term params)))
+    (is (= {:status :bound
+            :declaration "DarkTower.WarMachine.PolicyVariationalFreeEnergy.vfe_posterior_eq"
+            :path cfe/vfe-posterior-source-path
+            :sha256 cfe/vfe-posterior-source-sha256}
+           (:complexity-term-source params)))
     (is (= observed (:observed params)))))
+
+(deftest vfe-posterior-source-binding-refuses-moved-source
+  (testing "the pinned literal still names the real source currently built"
+    (is (= :bound (:status (cfe/vfe-posterior-source)))))
+  (testing "negative control: different bytes cannot admit complexity-term = 0"
+    (let [moved (Files/createTempFile "moved-vfe-posterior" ".lean"
+                                      (make-array java.nio.file.attribute.FileAttribute 0))]
+      (try
+        (Files/write moved (.getBytes "theorem vfe_posterior_eq := by trivial" "UTF-8")
+                     (make-array java.nio.file.OpenOption 0))
+        (with-redefs [cfe/vfe-posterior-source-path (str moved)]
+          (let [r (call 1)]
+            (is (= :missing (:status r)))
+            (is (= :lean-source-hash-mismatch (:kind r)))
+            (is (= cfe/vfe-posterior-source-sha256 (:expected-sha256 r)))
+            (is (not= (:expected-sha256 r) (:actual-sha256 r)))
+            (is (nil? (:params r)))))
+        (finally
+          (Files/deleteIfExists moved))))))
 
 (deftest f-pi-theta-0.9
   (let [{f :f} (call 9/10)

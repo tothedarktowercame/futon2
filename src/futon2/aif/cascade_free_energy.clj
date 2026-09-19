@@ -25,7 +25,43 @@
   and the likelihood's are passed through per candidate. Missing inputs are
   typed refusals; every declared value is recorded under :params."
   (:require [clojure.set :as set]
-            [futon2.aif.cascade-model-manifest :as m]))
+            [futon2.aif.cascade-model-manifest :as m])
+  (:import (java.nio.file Files Paths)
+           (java.security MessageDigest)))
+
+(def vfe-posterior-source-path
+  "/home/joe/code/mathlib4/DarkTower/WarMachine/PolicyVariationalFreeEnergy.lean")
+
+(def vfe-posterior-source-sha256
+  "c260942fe25814e57fa67c949827707026efdb0fd2662d0804a19efb026f0c5b")
+
+(defn- sha256 [bytes]
+  (format "%064x"
+          (BigInteger. 1 (.digest (MessageDigest/getInstance "SHA-256") bytes))))
+
+(defn vfe-posterior-source
+  "Verify the exact Lean source that licenses the complexity-term admission.
+   The path var is intentionally redefinable so the refusal can be exercised
+   against moved-source fixtures."
+  []
+  (try
+    (let [bytes (Files/readAllBytes
+                 (Paths/get vfe-posterior-source-path (make-array String 0)))
+          actual (sha256 bytes)]
+      (if (= vfe-posterior-source-sha256 actual)
+        {:status :bound
+         :declaration "DarkTower.WarMachine.PolicyVariationalFreeEnergy.vfe_posterior_eq"
+         :path vfe-posterior-source-path
+         :sha256 vfe-posterior-source-sha256}
+        {:status :missing :kind :lean-source-hash-mismatch
+         :declaration "DarkTower.WarMachine.PolicyVariationalFreeEnergy.vfe_posterior_eq"
+         :path vfe-posterior-source-path
+         :expected-sha256 vfe-posterior-source-sha256
+         :actual-sha256 actual}))
+    (catch java.io.IOException _
+      {:status :missing :kind :lean-source-unreadable
+       :declaration "DarkTower.WarMachine.PolicyVariationalFreeEnergy.vfe_posterior_eq"
+       :path vfe-posterior-source-path})))
 
 (defn- refusal? [x] (and (map? x) (contains? x :status)))
 
@@ -76,19 +112,24 @@
    documented default when a pattern omits it)."
   [{:keys [q0 candidates tau observed-tokens rates] :as declared}]
   (or (validate declared)
-      (let [universe (set (keys rates))
-            obs (set/intersection (set observed-tokens) universe)
-            f (into {}
-                    (map (fn [{:keys [id precedence]}]
-                           [id (candidate-free-energy rates precedence q0 tau obs)]))
-                    candidates)
-            thetas (into {}
-                         (map (fn [{:keys [id precedence]}]
-                                [id (mapv #(dissoc (m/with-pattern-theta %) :produces :guard :id :clauses)
-                                          precedence)]))
-                         candidates)]
-        {:f f :tau tau
-         :params {:q0 q0 :rates rates :observed obs :universe universe
-                  :complexity-term 0
-                  :complexity-term-reason "exact inference over the finite powerset carrier: the variational posterior is the rollout itself, so B.2 holds with equality (PolicyVariationalFreeEnergy.vfe_posterior_eq)"
-                  :theta thetas}})))
+      (let [lean-source (vfe-posterior-source)]
+        (if (= :missing (:status lean-source))
+          lean-source
+          (let [universe (set (keys rates))
+                obs (set/intersection (set observed-tokens) universe)
+                f (into {}
+                        (map (fn [{:keys [id precedence]}]
+                               [id (candidate-free-energy rates precedence q0 tau obs)]))
+                        candidates)
+                thetas (into {}
+                             (map (fn [{:keys [id precedence]}]
+                                    [id (mapv #(dissoc (m/with-pattern-theta %)
+                                                      :produces :guard :id :clauses)
+                                              precedence)]))
+                             candidates)]
+            {:f f :tau tau
+             :params {:q0 q0 :rates rates :observed obs :universe universe
+                      :complexity-term 0
+                      :complexity-term-reason "exact inference over the finite powerset carrier: the variational posterior is the rollout itself, so B.2 holds with equality (PolicyVariationalFreeEnergy.vfe_posterior_eq)"
+                      :complexity-term-source lean-source
+                      :theta thetas}})))))
