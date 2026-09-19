@@ -1,0 +1,6 @@
+
+Testing futon2.aif.run-participants-test
+PARTICIPANTS-TEST-RECORD {:startedAt "2026-09-19T00:00:00Z", :participants {:schema :wm/run-participants-v1, :roles {:author {:status :present, :identity "author"}, :configured-reviewer {:status :present, :identity "configured"}, :reviewer-of-record {:status :present, :identity "repair"}, :repair-reviewer {:status :present, :identity "repair"}, :issuing-caller {:status :not-observed}}}, :run/id "2026-09-19-participants-test", :click/id nil, :route [{:fromNode "RUNNER", :toNode "FULL_LOOP_CLOSE", :via :incomplete, :at_ "2026-09-19T21:27:05.726624603Z"}], :traceWritten false, :runner/source nil, :decision {:g-term-decomposition {:schema :wm/g-term-decomposition-v1, :status :missing, :reason :no-recorded-cascade-selection, :policies []}}, :selectorSeam "live:validated-selection"}
+
+Ran 4 tests containing 24 assertions.
+0 failures, 0 errors.
