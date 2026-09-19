@@ -1,0 +1,4 @@
+evidence-id test-registry-15940d9edb71eff4d10a9a103d5bd5071a5e8e0f6e9e9d58d4df83ef3560deaf
+warrant? true
+results {:assertions 11, :duration-ms 4863, :errors 0, :exit 0, :failures 0, :tests 1}
+bound repair-store/hermetic-fixtures -> test-registry-15940d9edb71eff4d10a9a103d5bd5071a5e8e0f6e9e9d58d4df83ef3560deaf
