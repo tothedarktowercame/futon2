@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/cascade_prior.clj" "src/futon2/aif/cascade_habit_store.clj" "scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/aif/cascade_prior_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.cascade-prior-test"]
+ :author "codex-33"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/habit-accumulation-2026-09-19"
+ :agency-url "http://localhost:7070"}
