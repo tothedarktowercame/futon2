@@ -445,6 +445,9 @@
                             (:occurrence/origin occurrence))}
         path (io/file root "occurrence-evidence" (:occurrence/id occurrence)
                       (str (digest/sha256 (str observation-id)) ".edn"))]
+    ;; The lock authority requires an existing canonical parent. Directory
+    ;; creation is idempotent; CREATE_NEW still governs the evidence file.
+    (io/make-parents path)
     (try
       (write-new! path record)
       (catch java.nio.file.FileAlreadyExistsException _

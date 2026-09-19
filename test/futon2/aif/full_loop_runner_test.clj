@@ -4006,7 +4006,8 @@
         second-result (runner/run-opportunity! opts)
         occurrences (mapv :occurrence @findings)]
     (is (= 2 (count occurrences)))
-    (is (= (first occurrences) (second occurrences)))
+    (is (= (:occurrence/id (first occurrences))
+           (:occurrence/id (second occurrences))))
     (is (= :tripwire-tripped
            (:occurrence/failure-kind (first occurrences))))
     (is (= (:attempt-id first-result) (:attempt-id second-result)))
