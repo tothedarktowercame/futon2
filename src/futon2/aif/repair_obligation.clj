@@ -381,7 +381,18 @@
                    (let [existing (Files/readAllBytes file-path)]
                      (or (java.util.Arrays/equals bytes existing)
                          (java.util.Arrays/equals ^bytes @raw-bytes existing)
-                         (java.util.Arrays/equals ^bytes @legacy-bytes existing))))
+                         (java.util.Arrays/equals ^bytes @legacy-bytes existing)
+                         ;; Occurrence records retain the FIRST opened-at.
+                         ;; A later observation reconstructs the same semantic
+                         ;; payload with a later observation timestamp; that is
+                         ;; replay, not a second finding or a byte conflict.
+                         (when (:repair/occurrence value)
+                           (try
+                             (= (dissoc (edn/read-string
+                                         (String. existing "UTF-8"))
+                                        :opened-at)
+                                (dissoc (durable-finding value) :opened-at))
+                             (catch Throwable _ false))))))
             (.getPath file)
               (throw (ex-info "Immutable repair finding conflicts with existing bytes"
                               {:reason :repair-finding-conflict
@@ -410,7 +421,7 @@
   attempt-001 are never used as the identity itself.  Reconstructing these
   exact inputs reconstructs the same id, which is required when containment
   layers observe the same failure more than once."
-  [{:keys [origin event-id failure-kind created-at]}]
+  [{:keys [origin event-id failure-kind]}]
   (when-not (and (nonblank? origin) (nonblank? event-id)
                  (keyword? failure-kind))
     (throw (ex-info "Repair occurrence identity lacks authority"
@@ -422,8 +433,26 @@
     {:occurrence/id id
      :occurrence/origin origin
      :occurrence/event-id event-id
-     :occurrence/failure-kind failure-kind
-     :occurrence/created-at (or created-at (str (Instant/now)))}))
+     :occurrence/failure-kind failure-kind}))
+
+(declare occurrence-finding-id)
+
+(defn- validate-occurrence! [occurrence failure-kind repair-id]
+  (when occurrence
+    (let [expected (occurrence-identity
+                    {:origin (:occurrence/origin occurrence)
+                     :event-id (:occurrence/event-id occurrence)
+                     :failure-kind (:occurrence/failure-kind occurrence)})
+          expected-id (occurrence-finding-id expected)]
+      (when-not (and (= (set (keys expected)) (set (keys occurrence)))
+                     (= expected occurrence)
+                     (= failure-kind (:occurrence/failure-kind occurrence))
+                     (or (nil? repair-id) (= repair-id expected-id)))
+        (throw (ex-info "Repair occurrence identity conflicts with finding"
+                        {:repair-occurrence/refusal :occurrence-identity-conflict
+                         :occurrence occurrence :failure-kind failure-kind
+                         :repair-id repair-id :expected-repair-id expected-id})))
+      expected)))
 
 (defn- occurrence-finding-id [occurrence]
   (str "repair-" (:occurrence/id occurrence)))
@@ -439,8 +468,7 @@
                 :occurrence/id (:occurrence/id occurrence)
                 :finding/id finding-id
                 :observation/id observation-id
-                :observed-at (or (:observed-at observation)
-                                 (:occurrence/created-at occurrence))
+                :observed-at (or (:observed-at observation) (str (Instant/now)))
                 :source (or (:source observation)
                             (:occurrence/origin occurrence))}
         path (io/file root "occurrence-evidence" (:occurrence/id occurrence)
@@ -452,7 +480,8 @@
       (write-new! path record)
       (catch java.nio.file.FileAlreadyExistsException _
         (let [existing (edn/read-string (slurp path))]
-          (when-not (= existing record)
+          (when-not (= (dissoc existing :observed-at)
+                       (dissoc record :observed-at))
             (throw (ex-info "Repair occurrence observation conflicts"
                             {:reason :repair-occurrence-observation-conflict
                              :occurrence/id (:occurrence/id occurrence)
@@ -481,6 +510,7 @@
    (let [failure-kind (case review-verdict
                         :request-changes :review-request-changes
                         :reject :review-rejected)
+         occurrence (validate-occurrence! occurrence failure-kind nil)
          id (if occurrence
               (occurrence-finding-id occurrence)
               (obligation-id attempt-id failure-kind))
@@ -499,13 +529,16 @@
                  :failure-stage :independent-review
                  :failure-kind failure-kind
                  :discharge-contract review-failure-discharge-contract
-                 :opened-at (or (:occurrence/created-at occurrence)
+                 :opened-at (or (:opened-at finding)
+                                (:observed-at observation)
                                 (str (Instant/now)))}
                   occurrence (assoc :repair/occurrence occurrence))]
      (write-new-or-identical! root id record)
      (when occurrence
        (occurrence-evidence! root occurrence id observation))
-     record)))
+     (if occurrence
+       (edn/read-string (slurp (io/file root "findings" (str id ".edn"))))
+       record))))
 
 (defn record-system-failure!
   "Record a zero-achievement stop-line without mis-typing every cause as a
@@ -523,8 +556,10 @@
                   (not (str/blank? (str error))))
      (throw (ex-info "System stop-the-line finding lacks required provenance"
                      {:finding finding})))
-   (let [id (or repair-id
-                (when occurrence (occurrence-finding-id occurrence))
+   (let [occurrence (validate-occurrence! occurrence
+                                          (:failure-kind finding) repair-id)
+         id (or (when occurrence (occurrence-finding-id occurrence))
+                repair-id
                 (obligation-id attempt-id (:failure-kind finding)))
          record (cond-> {:repair/id id
                  :repair/schema-version 3
@@ -542,13 +577,15 @@
                  :backtrace (:backtrace finding)
                  :discharge-contract (:discharge-contract finding)
                  :opened-at (or (:opened-at finding)
-                                (:occurrence/created-at occurrence)
+                                (:observed-at observation)
                                 (str (Instant/now)))}
                   occurrence (assoc :repair/occurrence occurrence))]
      (write-new-or-identical! root id record)
      (when occurrence
        (occurrence-evidence! root occurrence id observation))
-     record)))
+     (if occurrence
+       (edn/read-string (slurp (io/file root "findings" (str id ".edn"))))
+       record))))
 
 (defn- indexed-records [root child]
   (into {} (map (juxt :repair/id identity)

@@ -991,13 +991,21 @@
         first-record (repair/record-system-failure!
                       root (assoc base :observation
                                   {:observation/id "inner-catch"}))
+        finding-path (io/file root "findings"
+                              (str (:repair/id first-record) ".edn"))
+        first-bytes (java.nio.file.Files/readAllBytes (.toPath finding-path))
         replay (repair/record-system-failure!
                 root (assoc base :observation
-                            {:observation/id "outer-catch"}))
+                            {:observation/id "outer-catch"
+                             :observed-at "2026-09-19T12:05:00Z"}))
         evidence-dir (io/file root "occurrence-evidence"
                               (:occurrence/id occurrence))]
     (is (= (:repair/id first-record) (:repair/id replay)))
     (is (= occurrence (:repair/occurrence first-record)))
+    (is (= (:opened-at first-record) (:opened-at replay))
+        "a retry retains the first publication timestamp")
+    (is (java.util.Arrays/equals
+         first-bytes (java.nio.file.Files/readAllBytes (.toPath finding-path))))
     (is (= 1 (count (filter #(and (.isFile %)
                                   (str/ends-with? (.getName %) ".edn"))
                             (file-seq (io/file root "findings"))))))
@@ -1011,6 +1019,30 @@
                   nil
                   (catch clojure.lang.ExceptionInfo e e)))))
         "one occurrence id cannot alias conflicting semantic payloads")))
+
+(deftest occurrence-publication-refuses-id-and-payload-aliases-before-write
+  (let [root (temp-root)
+        occurrence (repair/occurrence-identity
+                    {:origin "wm/test-authority/run-alias"
+                     :event-id "job-alias" :failure-kind :build-failed})
+        base {:attempt-id "attempt-001" :occurrence occurrence
+              :repair-class :machine-failure :failure-stage :author-wait
+              :outcome :build-failed :failure-kind :build-failed
+              :error "failed"}
+        refusal (fn [finding]
+                  (try (repair/record-system-failure! root finding) nil
+                       (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+    (is (= :occurrence-identity-conflict
+           (:repair-occurrence/refusal
+            (refusal (assoc base :repair-id "repair-caller-alias")))))
+    (is (= :occurrence-identity-conflict
+           (:repair-occurrence/refusal
+            (refusal (assoc-in base [:occurrence :occurrence/id]
+                               "occ-fabricated")))))
+    (is (empty? (filter #(and (.isFile %)
+                              (str/ends-with? (.getName %) ".edn"))
+                        (file-seq (io/file root "findings"))))
+        "contradictory occurrence evidence publishes no finding")))
 
 (deftest parallel-occurrence-publication-is-create-new-safe
   (let [root (temp-root)

@@ -4014,6 +4014,38 @@
     (is (= (get-in first-result [:data :repair/occurrence])
            (first occurrences)))))
 
+(deftest initialization-retry-reuses-real-finding-and-appends-observation
+  (let [root (.getPath (.toFile (Files/createTempDirectory
+                                 "wm-initialization-occurrence-"
+                                 (make-array FileAttribute 0))))
+        opts {:run-id "authority-run/real-retry"
+              :cohort? false :phase-log nil
+              :phase-log-fn
+              (fn [_]
+                (throw (ex-info "T8 halted"
+                                {:failure-kind :tripwire-tripped
+                                 :trip/id "trip-real-retry"})))
+              :repair-system-record-fn
+              (fn [finding] (repair/record-system-failure! root finding))
+              :queue-fn (fn [_])}
+        first-result (runner/run-opportunity! opts)
+        finding (get-in first-result [:data :repair-obligation])
+        finding-path (io/file root "findings" (str (:repair/id finding) ".edn"))
+        original-bytes (Files/readAllBytes (.toPath finding-path))
+        _ (Thread/sleep 2)
+        second-result (runner/run-opportunity! opts)
+        replay (get-in second-result [:data :repair-obligation])
+        evidence-dir (io/file root "occurrence-evidence"
+                              (get-in finding [:repair/occurrence :occurrence/id]))]
+    (is (= (:repair/id finding) (:repair/id replay)))
+    (is (= (:opened-at finding) (:opened-at replay)))
+    (is (java.util.Arrays/equals
+         original-bytes (Files/readAllBytes (.toPath finding-path))))
+    (is (= 1 (count (filter #(and (.isFile %)
+                                  (str/ends-with? (.getName %) ".edn"))
+                            (file-seq (io/file root "findings"))))))
+    (is (= 2 (count (filter #(.isFile %) (file-seq evidence-dir)))))))
+
 ;; --- revision round 2 (reviewer finding) ------------------------------------
 ;; Consulting transport typing FIRST at the outer boundary was a fail-open: an
 ;; ex-info{:failure-kind :build-failed} wrapping any transport cause had that

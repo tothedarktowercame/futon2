@@ -3397,6 +3397,11 @@
                          (repair-occurrence existing occurrence-origin
                                             (str event-id) failure-kind
                                             (str (Instant/ofEpochMilli started))))
+        observation-for (fn [boundary]
+                          {:observation/id (str (name boundary) "::"
+                                                opportunity-id)
+                           :observed-at (str (Instant/now))
+                           :source occurrence-origin})
         _ (swap! phase-context assoc :attempt-id attempt-id
                  :external-attempt-id external-attempt-id
                  :execution-identity execution-identity)
@@ -3469,6 +3474,7 @@
                                (occurrence-for (:repair/occurrence data)
                                                external-attempt-id
                                                (or (:failure-kind data) outcome))
+                               :observation (observation-for :close-core)
                                :repair-class repair-class
                                :machine-repo (:repo code-state)
                                :target (or (:target data)
@@ -3708,6 +3714,8 @@
                                      (occurrence-for
                                       (:repair/occurrence failure-data)
                                       external-attempt-id refusal-kind)
+                                     :observation
+                                     (observation-for :close-fallback)
                                      :repair-class :machine-failure
                                      :machine-repo (:repo code-state)
                                      :target (get-in @checkpoints
@@ -3851,6 +3859,7 @@
                                                   [:author-job :job-id])
                                           external-attempt-id)
                                       failure-kind)
+                      :observation (observation-for :recovery-supersession)
                       :repair-class repair-class
                       :target (:target stop-line)
                       :selected-entry (:selected-entry stop-line)
@@ -4558,6 +4567,8 @@
                                                       :request-changes
                                                       :review-request-changes
                                                       :reject :review-rejected))
+                                    :observation
+                                    (observation-for :recovery-review)
                                     :target target
                                     :commit commit
                                     :selected-entry (:selected-entry failure-data)
@@ -4695,6 +4706,7 @@
                           :occurrence
                           (occurrence-for (:repair/occurrence failure-data)
                                           external-attempt-id refusal-kind)
+                          :observation (observation-for :outer-close-fallback)
                           :repair-class :machine-failure
                           :machine-repo (:repo code-state)
                           :target (get-in @checkpoints
@@ -4763,6 +4775,7 @@
                                               :request-changes
                                               :review-request-changes
                                               :reject :review-rejected))
+                            :observation (observation-for :review-failure)
                             :target (:target failure)
                             :commit (:commit failure)
                             :selected-entry (:selected-entry failure)
@@ -4893,6 +4906,10 @@
                      repair/record-system-failure!)
                  {:attempt-id attempt-id
                   :occurrence occurrence
+                  :observation
+                  {:observation/id (str "initialization-catch::" started-at)
+                   :observed-at started-at
+                   :source (str "wm-runner::" run-id)}
                   :repair-class repair-class
                   :failure-stage :initialization
                   :outcome :incomplete

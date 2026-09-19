@@ -8,6 +8,8 @@
   ;; make the commissioned controls themselves remain beside their established
   ;; store/runner fixtures.
   (test-vars [#'repair-test/occurrence-identity-publishes-once-and-retains-observations
+              #'repair-test/occurrence-publication-refuses-id-and-payload-aliases-before-write
               #'repair-test/parallel-occurrence-publication-is-create-new-safe
               #'repair-test/distinct-occurrences-remain-visible-to-t8
-              #'runner-test/initialization-containment-propagates-stable-occurrence-identity]))
+              #'runner-test/initialization-containment-propagates-stable-occurrence-identity
+              #'runner-test/initialization-retry-reuses-real-finding-and-appends-observation]))
