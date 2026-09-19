@@ -1,0 +1,8 @@
+{:agency-url "http://localhost:7070"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/cascade_sources.clj"
+              "resources/wm/cascade-sources/M-wm-08-external-f2.edn"]
+ :test-paths ["test/futon2/aif/cascade_sources_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.cascade-sources-test"]
+ :author "codex-31"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/pattern-source-hash-2026-09-19"}

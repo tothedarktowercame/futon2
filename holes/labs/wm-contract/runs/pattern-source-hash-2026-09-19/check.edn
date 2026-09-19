@@ -1,0 +1,1 @@
+{:agency-url "http://localhost:7070", :entry-id "test-registry-8833affea862c7f9348d7f3c00e501d8c209078c8e38c777bd7aca3926c41365", :repo-root "/home/joe/code/futon2", :changed-paths ["src/futon2/aif/cascade_sources.clj" "test/futon2/aif/cascade_sources_test.clj"]}
