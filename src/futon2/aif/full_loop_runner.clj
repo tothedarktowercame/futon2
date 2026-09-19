@@ -678,7 +678,8 @@
           (let [after (observe-repo-head opts repo)
                 before-head (:head before)
                 observed-head (:head after)
-                text-ref (author-claimed-ref author-job)
+                reported-text-ref (author-claimed-ref author-job)
+                job-ref (:artifact-ref author-job)
                 start-ms (:observed-at-ms before)
                 end-ms (:observed-at-ms after)
                 changed? (and before-head observed-head (not= before-head observed-head))
@@ -690,7 +691,23 @@
                                     timestamp-ms
                                     (+ end-ms artifact-window-tolerance-ms)))
                 observed-valid? (and changed? descendant? in-window?)
-                text-sha (resolve-commit-sha opts repo text-ref)
+                reported-text-sha (resolve-commit-sha opts repo reported-text-ref)
+                job-ref-sha (when (and (nil? reported-text-sha)
+                                       (commit-ish? job-ref))
+                              (resolve-commit-sha opts repo job-ref))
+                ;; A DONE carrier can retain a bad long expansion while
+                ;; Agency retains the actual short Git ref separately
+                ;; (repair-ea1-9b6ce3a4). Git rev-parse supplies the
+                ;; unambiguous-prefix check. Never borrow the dispatch-time
+                ;; base stamp as a fallback claim.
+                fallback-sha (when (and job-ref-sha
+                                        (not= job-ref-sha before-head))
+                               job-ref-sha)
+                text-sha (or reported-text-sha fallback-sha)
+                text-ref (if reported-text-sha reported-text-ref
+                             (if fallback-sha job-ref reported-text-ref))
+                resolved-from (cond reported-text-sha :done-line
+                                    fallback-sha :job-artifact-ref)
                 ;; A claimed commit corroborates when it IS the observed
                 ;; head, or when it is the author's own commit that later
                 ;; commits (concurrent machinery deposits, revision-round
@@ -737,6 +754,9 @@
              :author-window-end-ms end-ms
              :text-artifact-ref text-ref
              :text-artifact-sha text-sha
+             :reported-text-artifact-ref reported-text-ref
+             :resolved-from resolved-from
+             :claim-resolution (if text-sha :resolved :unresolved)
              :claim-commit-time-ms claim-time-ms
              :descendant? (boolean descendant?)
              ;; Keep HEAD freshness and returned-claim freshness distinct in
@@ -746,9 +766,11 @@
              :in-author-window? (boolean in-window?)
              :claim-in-author-window? (boolean claim-in-window?)
              :corroborates? (boolean corroborates?)
-             :disagreement? (and observed-valid? (not corroborates?))
+             :disagreement? (and observed-valid? (some? text-sha)
+                                 (not corroborates?))
              :commit (when corroborates? (or text-sha observed-head))}))]
-    (when (:disagreement? binding)
+    (when (or (:disagreement? binding)
+              (= :unresolved (:claim-resolution binding)))
       ;; A claim that does not even LOOK like a commit is not a binding
       ;; disagreement: it is upstream extraction handing us prose (the
       ;; canary-de75cee9 shape -- a file path). unvalidated-artifact-failure
@@ -756,11 +778,17 @@
       ;; the same distinction (round-3 of repair-ea1-3f4cac).
       (let [ref (:text-artifact-ref binding)
             malformed? (and (string? ref) (not (commit-ish? ref)))
-            failure-kind (if malformed? :artifact-ref-malformed
-                                        :artifact-binding-mismatch)]
+            failure-kind (cond
+                           malformed? :artifact-ref-malformed
+                           (= :unresolved (:claim-resolution binding))
+                           :artifact-ref-unresolved
+                           :else :artifact-binding-mismatch)]
         (throw (ex-info
-                (if malformed?
+                (case failure-kind
+                  :artifact-ref-malformed
                   "Author artifact claim is not a commit at all"
+                  :artifact-ref-unresolved
+                  "Author artifact claim does not resolve in the repository"
                   "Author commit claim disagrees with observed repository HEAD")
                 {:outcome :build-failed
                  :failure-kind failure-kind

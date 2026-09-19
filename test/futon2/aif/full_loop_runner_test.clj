@@ -2156,6 +2156,57 @@
     (is (:corroborates? binding))
     (is (false? (:disagreement? binding)))))
 
+(deftest artifact-binding-resolves-unambiguous-structured-abbreviation
+  (let [full "05d8898904e0aeacf0db9fcc7078162f1ddffcf2"
+        bad-expansion "05d88989975d3f82a74c3d8a1c20822be915282a"
+        opts {:repo-head-observation-fn
+              (fn [repo] {:repo repo :head full :observed-at-ms 2000})
+              :resolve-commit-sha-fn
+              (fn [_ ref] (when (= ref "05d88989") full))
+              :ancestor-fn (fn [_ ancestor descendant]
+                             (and (= ancestor "base000") (= descendant full)))
+              :commit-time-ms-fn (fn [& _] 1500)}
+        before {:repo "/repo" :head "base000" :observed-at-ms 1000}
+        binding (runner/fresh-artifact-binding
+                 opts "/repo" before
+                 {:artifact-ref "05d88989"
+                  :result (str "Committed `05d88989`.\n\n"
+                               "FULL_LOOP_AUTHOR: DONE " bad-expansion)})]
+    (is (= full (:commit binding)))
+    (is (= "05d88989" (:text-artifact-ref binding)))
+    (is (= bad-expansion (:reported-text-artifact-ref binding)))
+    (is (= :job-artifact-ref (:resolved-from binding)))
+    (is (= :resolved (:claim-resolution binding)))
+    (is (false? (:disagreement? binding)))))
+
+(deftest artifact-binding-distinguishes-unresolved-from-disagreement
+  (let [opts {:repo-head-observation-fn
+              (fn [repo] {:repo repo :head "observed456" :observed-at-ms 2000})
+              :resolve-commit-sha-fn
+              (fn [_ ref] (case ref "deadbeef" "different-full" nil))
+              :ancestor-fn (fn [_ ancestor descendant]
+                             (or (and (= ancestor "base000")
+                                      (= descendant "observed456"))
+                                 (and (= ancestor "base000")
+                                      (= descendant "different-full"))))
+              :commit-time-ms-fn (fn [& _] 1500)}
+        before {:repo "/repo" :head "base000" :observed-at-ms 1000}
+        failure (fn [ref]
+                  (try (runner/fresh-artifact-binding
+                        opts "/repo" before {:artifact-ref ref})
+                       nil
+                       (catch clojure.lang.ExceptionInfo e (ex-data e))))
+        unknown (failure "0badc0de")
+        different (failure "deadbeef")]
+    (is (= :artifact-ref-unresolved (:failure-kind unknown)))
+    (is (= "0badc0de" (get-in unknown [:artifact-binding
+                                        :text-artifact-ref])))
+    (is (= :unresolved (get-in unknown [:artifact-binding
+                                        :claim-resolution])))
+    (is (false? (get-in unknown [:artifact-binding :disagreement?])))
+    (is (= :artifact-binding-mismatch (:failure-kind different)))
+    (is (true? (get-in different [:artifact-binding :disagreement?])))))
+
 (deftest artifact-binding-takes-the-final-done-line-over-quoted-prior-rounds
   ;; Revision prompts quote the previous round's findings verbatim, so a
   ;; reply can carry an earlier round's DONE line (and prose shas such as
@@ -2224,7 +2275,7 @@
                       (runner/fresh-artifact-binding opts "/repo" before {:artifact-ref claim})
                       nil
                       (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-        (is (= :artifact-binding-mismatch (:failure-kind failure)))
+        (is (= :artifact-ref-unresolved (:failure-kind failure)))
         (is (= "concurrent-head" (get-in failure [:artifact-binding :observed-head])))
         (is (nil? (get-in failure [:artifact-binding :commit])))))
     (let [binding (runner/fresh-artifact-binding
@@ -4879,8 +4930,8 @@
                      {:events [{:type "text" :text sha-reply}]})
                     nil
                     (catch clojure.lang.ExceptionInfo e (ex-data e)))]
-      (is (= :artifact-binding-mismatch (:failure-kind failure))
-          "a commit-shaped but uncorroboratable claim stays a mismatch"))))
+      (is (= :artifact-ref-unresolved (:failure-kind failure))
+          "an unresolved commit-shaped claim names resolution failure"))))
 
 (deftest runner-source-drift-compares-actual-bytes
   ;; Round-2 review: the old check hashed (pr-str byte-array) -- object
