@@ -114,6 +114,35 @@ DIFFERENTIAL: the bugs are where one call site misses a guard its neighbours
 apply to the same field, not where a raw grep matches. Two agents on different
 dimensions converging on it is some evidence it generalises.
 
+## d2 finding 3, narrowed against the artifacts
+
+zai-10 reports that `trace-record` hand-copies judgement keys and omits
+`:cascade-lanes`, `:cascade-horizon`, `:cascade-sources`,
+`:effective-run-configuration` and `:input-status` — "the horizon recorded with
+its authority never lands in any trace".
+
+The projection gap is real: all five are produced by `judge` and read zero
+times by `trace-record`. But not landing in a TRACE is not the same as not
+landing anywhere, so I checked the durable artifacts — 62 trace files under
+data/wm-trace and the cohort 57 cells:
+
+    :cascade-sources               0 traces   0 cohort cells
+    :cascade-horizon               0 traces   0 cohort cells
+    :cascade-lanes                 0 traces   0 cohort cells
+    :effective-run-configuration   0 traces   1 cohort cell
+    :input-status                  3 traces   0 cohort cells
+
+So THREE of the five are genuinely absent from all durable evidence, and two
+reach it by another path — `:effective-run-configuration` through the runner's
+selection checkpoint, `:input-status` through the trace after all.
+
+The narrowed version is the more useful one. The declared cascade sources and
+the horizon are the subject of the WM contract work (e2e1b477: the judge loads
+resources/wm/cascade-sources/*.edn and observes facts per tick). If neither
+reaches any durable record, then "the decision used these declared sources" is
+not a claim any artifact can be asked to support. That is a schema-30 change
+with pinning consequences, so it is queued, not done.
+
 ## Method notes, for the next pass
 
 - Requiring `:why` (why the bad case is reachable) and capping at 15 findings
