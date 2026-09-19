@@ -1,0 +1,2 @@
+{:entry/type :subject-binding, :entry/id "9c792efe-ca6c-417e-a13d-e1e7dd7e117a", :subject-id "WIRE-f-on-tick", :warrant-id "test-registry-1ef986623fd9683af9ec1f6d3ca2840bffe5f1df3d621962405bdc06a610b5ce", :actor "codex-32", :at "2026-09-19T15:26:59.672328108Z"}
+{:warrant-id "test-registry-1ef986623fd9683af9ec1f6d3ca2840bffe5f1df3d621962405bdc06a610b5ce", :warrant? true}
