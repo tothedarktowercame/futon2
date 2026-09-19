@@ -32,7 +32,14 @@ verdicts below are mine, from reading the code, not relayed.
   CANNOT-LAND.
 - futon2 `b6da1420` — T10 (found by hand while the swarm ran, same class as d4).
 
-## One d5 conclusion is refuted — do not act on it
+## One d5 conclusion was refuted — and has since been amended by its author
+
+**Status: zai-13 amended d5, and zai-10 amended d2, after review. Both files
+now carry the corrected claims; the sections below record what was wrong and
+why, because the reasoning is the transferable part, not the wording.**
+
+### The original d5 claim, and why it does not follow
+
 
 `d5-unbounded-write.edn` finding 1 concludes that the 11 MB `:judgment`
 payloads inside `:backtrace :checkpoints` are "safe to elide" because nothing
@@ -114,7 +121,10 @@ DIFFERENTIAL: the bugs are where one call site misses a guard its neighbours
 apply to the same field, not where a raw grep matches. Two agents on different
 dimensions converging on it is some evidence it generalises.
 
-## d2 finding 3, narrowed against the artifacts
+## d2 finding 3, narrowed against the artifacts (amendment does not cover this one)
+
+zai-10's amendment corrected finding 2 (the dead judge-opts key); finding 3
+below is unamended and the narrowing still applies.
 
 zai-10 reports that `trace-record` hand-copies judgement keys and omits
 `:cascade-lanes`, `:cascade-horizon`, `:cascade-sources`,
