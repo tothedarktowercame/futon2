@@ -10,7 +10,13 @@ consumed.
 
 - Run: `2026-09-19-1789848916`, click `wm-click-15a27aa5-…`, fired 20:15:16Z.
 - Phases: code-state -> preference-refresh -> selection -> construction ->
-  close. Outcome: complete.
+  close. Outcome: FULL_LOOP_CLOSE :via :incomplete — selection and close
+  completed with typed retained terminals, but dispatch was not reached
+  (:grounded? false, agent-turns 0, no authored commit). CORRECTION
+  2026-09-19 (claude-12, per RECEIPT-resolve-pass-2026-09-19.md): the
+  original "Outcome: complete" wording here conflated a complete run
+  RECORD with grounded work; {:valid 1} is run validity, not
+  implementation discharge.
 - `wm_run_validity.bb`: **{:valid 1}**; g-terms ok at
   [:decision :g-term-decomposition].
 - G-term decomposition :status :present; E term NON-degenerate
