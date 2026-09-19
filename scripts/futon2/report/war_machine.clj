@@ -3315,7 +3315,13 @@
         (scan-mission-detail missions true)))
   ([missions] (scan-mission-detail missions true))
   ([missions step-portfolio?]
-    (let [by-repo (group-by :mission/repo missions)
+    (let [;; `or` to "unknown", exactly as scan-mission-triage does for this same
+          ;; field at :3139. Measured against the live inventory on 2026-09-19:
+          ;; :mission/repo is present on all 390 missions and null on 298 of
+          ;; them (76%). Unguarded, every one of those lands in a single nil
+          ;; bucket and `:repos` carries nil as though it were a repository
+          ;; name.
+          by-repo (group-by #(or (:mission/repo %) "unknown") missions)
           ;; Extract blocked-by pairs from the portfolio structure
           step-data (if-not step-portfolio?
                       {:status :absent
