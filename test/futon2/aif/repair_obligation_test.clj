@@ -1035,19 +1035,20 @@
 (deftest distinct-occurrences-remain-visible-to-t8
   (let [root (temp-root)
         now (str (java.time.Instant/now))
-        ids (for [event-id ["job-a" "job-b" "job-c"]]
-              (:repair/id
-               (repair/record-system-failure!
-                root {:attempt-id "attempt-001"
-                      :occurrence
-                      (repair/occurrence-identity
-                       {:origin "wm/test-authority/run-distinct"
-                        :event-id event-id :failure-kind :build-failed
-                        :created-at now})
-                      :repair-class :machine-failure
-                      :target "same-target"
-                      :failure-stage :author-wait :outcome :build-failed
-                      :failure-kind :build-failed :error "failed"})))
+        ids (mapv (fn [event-id]
+                    (:repair/id
+                     (repair/record-system-failure!
+                      root {:attempt-id "attempt-001"
+                            :occurrence
+                            (repair/occurrence-identity
+                             {:origin "wm/test-authority/run-distinct"
+                              :event-id event-id :failure-kind :build-failed
+                              :created-at now})
+                            :repair-class :machine-failure
+                            :target "same-target"
+                            :failure-stage :author-wait :outcome :build-failed
+                            :failure-kind :build-failed :error "failed"})))
+                  ["job-a" "job-b" "job-c"])
         findings (repair/open-obligations root)]
     (is (= 3 (count (set ids))) "distinct jobs mint distinct occurrences")
     (is (= 1 (count (tripwire/livelock-violations findings #{})))
