@@ -137,6 +137,28 @@
 ;; ---- 4/5. the producer's floats sit inside the exact scorer's enclosures,
 ;;          and the producer's ORDERING is decided by disjoint enclosures ----
 
+(defn enclosure-width [lo hi]
+  (-' hi lo))
+
+(def margin-multiple 1000)
+
+(defn separated-with-margin? [x y]
+  (> (-' (:lo y) (:hi x))
+     (*' margin-multiple
+         (max (enclosure-width (:lo x) (:hi x))
+              (enclosure-width (:lo y) (:hi y))))))
+
+(deftest narrow-enclosure-margin-control
+  ;; All four endpoints round to 1.0. The first gap is only one width:
+  ;; rounding the widths must not make it pass the 1000-width requirement.
+  (let [w (/ 1 (bigint "1000000000000000000000000"))
+        x {:lo 1 :hi (+' 1 w)}
+        near {:lo (+' 1 (*' 2 w)) :hi (+' 1 (*' 3 w))}
+        far {:lo (+' 1 (*' 2002 w)) :hi (+' 1 (*' 2003 w))}]
+    (is (= w (enclosure-width (:lo x) (:hi x))))
+    (is (false? (separated-with-margin? x near)))
+    (is (true? (separated-with-margin? x far)))))
+
 (defn- cg-step
   "One cascade-g scoring point from the runtime producer's own outputs:
   q_tau by rollout, A rows by token-likelihood, C by preference-distribution."
@@ -175,8 +197,8 @@
         (is (<= alo (+ (double amb-float) 1e-12)))
         (is (>= ahi (- (double amb-float) 1e-12)))
         ;; the enclosure is TIGHT (an actual bound, not a wide interval):
-        (is (< (- (double rhi) (double rlo)) 1e-12) "risk enclosure width < 1e-12")
-        (is (< (- (double ahi) (double alo)) 1e-12) "ambiguity enclosure width < 1e-12")))))
+        (is (< (double (enclosure-width rlo rhi)) 1e-12) "risk enclosure width < 1e-12")
+        (is (< (double (enclosure-width alo ahi)) 1e-12) "ambiguity enclosure width < 1e-12")))))
 
 (deftest exact-kernel-premise-preserved-against-float-c
   ;; q and A are exact-rational admitted (the exact-kernel premise); C is the
@@ -217,7 +239,7 @@
                                        :steps inputs}))))
         with-g (mapv (fn [cand]
                        (let [[lo hi] (enclosure cand)]
-                         {:id (:id cand) :lo (double lo) :hi (double hi)}))
+                         {:id (:id cand) :lo lo :hi hi}))
                      cands)
         by-float (sort-by :hi with-g)
         exact-order (mapv :id by-float)]
@@ -229,14 +251,14 @@
       (is (< (:hi x) (:lo y))
           (str "enclosures of " (:id x) " and " (:id y) " are disjoint")))
     (doseq [e with-g]
-      (is (< (- (:hi e) (:lo e)) 1e-11) (str (:id e) " total enclosure tight")))
-    ;; review follow-up (zai-8, 2026-09-18): an EXPLICIT gap-to-width margin,
-    ;; so a future razor-margin fixture cannot pass disjointness without the
-    ;; enclosures actually deciding the order. Measured margins at this
-    ;; fixture are ~1e14 (gaps 0.15/0.70, widths ~1e-15); 1e3 is a floor.
+      (is (pos? (enclosure-width (:lo e) (:hi e)))
+          (str (:id e) " retains its nonzero rational log remainder"))
+      (is (< (double (enclosure-width (:lo e) (:hi e))) 1e-11)
+          (str (:id e) " total enclosure tight")))
+    ;; codex-1, 2026-09-19: these widths bound the rational log approximation,
+    ;; NOT runtime floating-point error. Preserve rational endpoints through
+    ;; subtraction and comparison. No artificial positive-width floor.
     (doseq [[x y] (partition 2 1 (sort-by :lo with-g))]
-      (let [gap (- (:lo y) (:hi x))
-            width (max (- (:hi x) (:lo x)) (- (:hi y) (:lo y)) 1e-300)]
-        (is (> gap (* 1e3 width))
-            (str (:id x) " vs " (:id y) ": gap " gap
-                 " must exceed 1e3x max width " width))))))
+      (is (separated-with-margin? x y)
+          (str (:id x) " vs " (:id y) ": gap must exceed "
+               margin-multiple "x exact rational width")))))
