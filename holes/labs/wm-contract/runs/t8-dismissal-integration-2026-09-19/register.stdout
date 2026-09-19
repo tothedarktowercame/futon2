@@ -1,0 +1,4 @@
+evidence-id test-registry-4fc6a7eb174f64a25ebdda8052a8587d03378aec1c63e71c447110f779432229
+warrant? true
+results {:assertions 12, :duration-ms 1492, :errors 0, :exit 0, :failures 0, :tests 3}
+bound T8-dismissal-integration -> test-registry-4fc6a7eb174f64a25ebdda8052a8587d03378aec1c63e71c447110f779432229
