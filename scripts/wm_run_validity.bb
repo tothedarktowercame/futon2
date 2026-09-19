@@ -134,7 +134,15 @@
       :else {:field :u37 :verdict :ok :at p :note (pr-str (:verdict v))})))
 
 (defn check-g-terms [r]
-  (let [p (or (find-field r :g-terms) (find-field r :g-decomposition))]
+  ;; :g-term-decomposition is the name the PRODUCER chose (futon2 cd952809,
+  ;; full-loop-runner). I wrote this checker's key list before that landed and
+  ;; then reviewed the producing commit without noticing the mismatch, so the
+  ;; quantity was being written and reported missing at the same time. The
+  ;; producer's name is the better one; the checker accepts it rather than
+  ;; forcing a rename of a committed, warranted write.
+  (let [p (or (find-field r :g-terms)
+              (find-field r :g-decomposition)
+              (find-field r :g-term-decomposition))]
     (if p
       {:field :g-terms :verdict :ok :at p}
       {:field :g-terms :verdict :missing
@@ -146,7 +154,7 @@
   "The record key each field is found by, for near-miss reporting."
   {:c-source :c :rates-provenance :rates-provenance
    :posterior :selection-certificate :u37 :enumeration-completeness
-   :g-terms :g-terms})
+   :g-terms :g-term-decomposition})
 
 (defn- locate-near-miss
   "A field absent from every declared root but PRESENT somewhere else is a
