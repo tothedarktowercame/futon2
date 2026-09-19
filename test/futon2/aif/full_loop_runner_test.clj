@@ -546,6 +546,7 @@
     (is (= (digest/sha256 (pr-str (:patterns j))) (:cascade-sha256 correspondence)))))
 
 (defn isolated-runner-opts []
+  (merge (hermetic/runner-repair-options)
   {:cohort? false
    :phase-log-fn (fn [_])
    :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
@@ -569,7 +570,7 @@
    (fn [_ item]
      {:morning-brief/addendum-id
       (str "qa-" (:attempt-id item))})
-   :queue-fn identity})
+   :queue-fn identity}))
 
 (def feature-card-claim
   {:built "Build-time feature cards now survive grounding into Morning Brief."

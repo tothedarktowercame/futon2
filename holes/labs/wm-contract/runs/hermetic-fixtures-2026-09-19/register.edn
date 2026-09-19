@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2"
+ :subject-id "repair-store/hermetic-fixtures"
+ :command ["clojure" "-M:test" "-n" "futon2.aif.hermetic-retention-test"]
+ :author "codex-2"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/hermetic-fixtures-2026-09-19/execution"
+ :code-paths ["test/futon2/aif/hermetic_repair_fixture.clj" "test/futon2/aif/full_loop_runner_test.clj"]
+ :test-paths ["test/futon2/aif/hermetic_retention_test.clj"]}
