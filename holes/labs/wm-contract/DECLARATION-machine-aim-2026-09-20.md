@@ -194,6 +194,18 @@ closure ("the recorded account carried the steering") is witnessable;
 remains available as corroborating evidence agents may consult; it is
 not an observation kind.
 
+Tested against its exemplar (claude-4, 2026-09-20): the r173 correction
+loop does NOT close today — linkage exists backward-only, from the
+acceptance end, as prose in a string field, across two repos; nothing in
+futon2 points back to p4ng. Chain closure therefore requires a typed
+prompted-by reference on work products (e.g. a `Prompted-by: <repo>
+<sha>` commit trailer, or the same as data in the receipts bundle), each
+resolution being a C3-shaped existence question. This is a PREFERENCE,
+not a gate: nothing refuses a commit lacking the trailer; the machine
+prefers outcomes whose chains close. The first C entry for this token is
+genuinely unsatisfied on all existing history, exemplar included —
+recorded rather than grandfathered.
+
 ## RULING — multi-owner conflict rule (Joe, 2026-09-20)
 
 Joe approved Option 2 ("Fine with me. Hopefully this is less
