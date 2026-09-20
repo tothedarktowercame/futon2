@@ -162,3 +162,19 @@ do); GLM/Zai notices its own mistakes IN TURN. When A returns, the
 judgement channel is MODEL-STRUCTURED: each model's error signal
 arrives through a different, known mechanism, and rates (if adopted)
 attach per channel, not as one agent-assertion blur.
+
+## STATUS CORRECTION — C verdict non-degenerate; closure DECLINED (Joe, 2026-09-20)
+
+Joe declined C's closure on the numbers: the decision reaches 3 of
+live-C's 465 want entries (~0.47% of corpus weight, 549/116104), from
+one declaration; 464 entries sit :unreached-in-domain. The certificate
+verdict (:varies-across-horizon) stands as measured; the closure
+criterion that remains open is COVERAGE — the mechanism works, the
+content is nearly absent. Any record or report citing "C closed
+2026-09-20" is superseded by this note.
+
+Active lead (claude-4): mission_registry.clj:153 already regex-matches
+441 open holes across 86 live missions and DISCARDS the matched lines,
+returning only a count — the corpus's want-content may already be
+written down at line grain and thrown away before it can feed
+declarations or the projection.
