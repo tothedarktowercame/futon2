@@ -1,3 +1,5 @@
+> Superseded gate status: full attribution is complete; see [ATTRIBUTION.md](ATTRIBUTION.md). The historical draft report below is retained.
+
 # D task authority: draft held at the runner regression gate
 
 The narrow scope ruling has been implemented as a draft, not landed source.

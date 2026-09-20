@@ -1,0 +1,11 @@
+{
+  "trip-source": "data/wm-tripwires/trips/trip-63155249-d070-4d14-89fd-5f05279022b8.edn",
+  "trip-sha256": "187118b815b8b4fc094c7013e8d42136e1974b27b3dbcfbe85ca0d1a20cd73a5",
+  "phase-source": "data/wm-full-loop-phases.edn.log",
+  "phase-selection": "e487c964-b81d-4abd-886d-fa135bc90ace",
+  "time-step-source": "data/wm-full-loop-machinery-65/wm-contract-machinery-65-v1/attempt-002/001-time-step.edn",
+  "time-step-sha256": "b41cc344141b49cb493f1a29fba6c5b0d23e9d228181d3419e9c0a7d62c3f53c",
+  "test-log-has-opportunity": false,
+  "production-cohort": "wm-contract-machinery-65-v1",
+  "production-attempt": "attempt-002"
+}

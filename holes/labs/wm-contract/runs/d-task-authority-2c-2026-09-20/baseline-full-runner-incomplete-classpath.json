@@ -1,0 +1,18 @@
+{
+  "base": "aae84fc302207cd79cdf0adf9353706beb2b516a",
+  "cwd": "/home/joe/code/futon2-d-task-baseline",
+  "command": [
+    "clojure",
+    "-Sdeps",
+    "{:paths [\"src\" \"resources\" \".\" \"scripts\" \"test\"]}",
+    "-M",
+    "-e",
+    "(require 'clojure.test 'futon2.aif.full-loop-runner-test)\n(with-redefs-fn {#'futon2.aif.full-loop-runner/canonical-runner-path \"/home/joe/code/futon2-d-task-baseline/src/futon2/aif/full_loop_runner.clj\"}\n (fn [] (let [r (clojure.test/run-tests 'futon2.aif.full-loop-runner-test)]\n (prn r) (System/exit (if (zero? (+ (:fail r) (:error r))) 0 1)))))"
+  ],
+  "exit": 1,
+  "seconds": 171.2553906440735,
+  "source-sha256": "feb72603b319607b24726f8d764306fe2c3e3000ed8c7274ba430b3601902991",
+  "test-sha256": "fd1a2686de62cf1c4b36ba7986c81b3141db80c02b204c83267e6693d6de2be2",
+  "log-sha256": "df889e9e2eaf403715f28592f9a870584a65da168ce0304e306982ef2f7376cc",
+  "source-authority": "exact baseline checkout, loaded/source equality retained"
+}
