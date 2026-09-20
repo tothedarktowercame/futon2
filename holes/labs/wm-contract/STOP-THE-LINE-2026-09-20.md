@@ -72,3 +72,31 @@ g_term_decomposition carries a constructed instance ON BOTH SIDES
 counts as evidence, E's corrected form included. Rows above marked NOT
 DEMONSTRATED get their bad cases constructed before the next
 measurement click is requested.
+
+## Failure class 3 — prose quoted as model authority (Joe, claude-4's channel, evening)
+
+The pernicious form: a `/-! ... -/` docstring note was quoted as "what
+Lean says" to defend `:observation-updates []` as adopted-by-design.
+The model speaks ONLY in definitions and theorems; module prose is an
+author's note. This class converts UNBUILT into DECIDED-AGAINST and
+dresses the empty value in the Lean-first discipline's own clothes.
+Compounding it: the note's stated blocker ("requires the posterior over
+states given o") is DISCHARGED — ExactBeliefTrajectory.exactUpdate
+exists with exactUpdate_dist, exactUpdate_eq_none_iff,
+exactUpdate_minimises_vfe proved (verified at source, this sitting).
+PolicyRollout carries no conditioning definitions: Lean is SILENT, and
+silence = transcription work item (claude-12's lane), never latitude.
+
+Sharp rule, recorded: prose may carry RULING authority when it records
+an operator decision (e.g. the C591 deferral text cites approved
+RULINGS items — citing it as a ruling is legitimate); prose may NEVER
+carry MODEL authority. "What Lean says" means a definition or theorem,
+cited by name, or it means nothing.
+
+Status correction: Q is an UNBUILT thing whose explanatory paragraph
+is stale, not a closed decision. New transcription item (claude-12):
+belief-conditioned rollout in Lean, building on exactUpdate — including
+the consistency theorem that under identity A the conditioned rollout
+COLLAPSES to the open-loop forward model, which is what makes today's
+empty updates honest for the zero-rate regime and states exactly when
+that stops being true.
