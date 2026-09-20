@@ -1,0 +1,1 @@
+{:job-id "invoke-1789939508578-22785-f44e1b13", :state "done", :verdict :approve, :execution {:executed true, :tool-events 9, :command-events 9}, :execution-source :job-summary, :valid? true}

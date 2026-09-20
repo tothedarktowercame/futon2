@@ -1,0 +1,24 @@
+{
+  "schema": "cascade-fold-review-followup-v1",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "independent-reviewer": "claude-4",
+  "review-job": "invoke-1789939508578-22785-f44e1b13",
+  "tests": 4,
+  "assertions": 64,
+  "failures": 0,
+  "errors": 0,
+  "changes": [
+    "correct independent reviewer identity",
+    "pin rejection of ambiguous precedence IDs"
+  ],
+  "sha256": {
+    "test/futon2/aif/cascade_fold_repair_test.clj": "e14899a7cb454969a229db000b1651fba1921f1c043646d713b7a8721d637bbe",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/post-commit-receipt.json": "36ef8d68b47833af49a8efde187a37b6c812547a7f5844038ced9354bfbe77b2",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/review-followup-kondo.log": "f95ffb900a060c65cfe92059ebe047829131f15bcff22f575f71496d72fcd6df",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/review-followup-parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/review-followup-tests.log": "820b256acd0671875ba05a230d3c795db40cb51456b07cac8ac895d5431e6f65",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/independent-review-job.json": "d945a1b6d88e04d3376b8caaab491ba23c595c0ceecd123ef6d0e8a2835383ae",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/computed-independent-review.edn": "dbe9490540b99c32344d70d75539be3bc85050024392c99896f50d20db5f2ade"
+  }
+}

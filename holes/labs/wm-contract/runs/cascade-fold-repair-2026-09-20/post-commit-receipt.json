@@ -3,8 +3,8 @@
   "implementation-commit": "c91261fdbc7b80e903d3203ca53cc865291cae9f",
   "author": "codex-8",
   "requesting-owner": "claude-12",
-  "independent-reviewer": "claude-12",
-  "review-status": "pending",
+  "independent-reviewer": "claude-4",
+  "review-status": "approved",
   "warrant-id": "test-registry-2a63f8df59e059e06b80306347583d918e03fd85b4b52e975218386a7b1c78f0",
   "run-id": "52d2dca2-3887-46ca-9a93-8c1695dec135",
   "results": {
@@ -83,5 +83,6 @@
     "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/repair-path-regression.log": "dbc8c7884a420fba953b3de88691bf83d266956e99ea817a3da21ab8d7a9163f",
     "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/warrant-check-pinned.json": "2b4a8aac251da671593dd1bd8fd0297a9f6f7633d358cf6bef6968039f04cc49",
     "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/warrant-check.json": "34c2636b916fb68f050bb88cc7cf477e9cddbbecd8a6be59ef62fb3fb263aecd"
-  }
+  },
+  "review-job": "invoke-1789939508578-22785-f44e1b13"
 }

@@ -85,3 +85,21 @@
             result (runner/construction-wiring-result construction (constantly raw))]
         (is (= raw (:fold-output result)))
         (is (= :invalid (:status result)))))))
+
+(deftest duplicate-precedence-id-remains-ungrounded
+  (let [entry (recorded-entry "expressions-of-interest")
+        duplicate (first (get-in entry [:action :precedence]))
+        entry (update-in entry [:action :precedence] conj duplicate)
+        result (runner/construction-wiring-result
+                (runner/construct-for-decision entry))
+        holes (get-in result [:fold-output :policy-holes])
+        ambiguous (filter #(= (str (:id duplicate)) (:unfolded-pattern %)) holes)]
+    (is (= :invalid (:status result)))
+    (is (= :fold-output-invalid (:failure-kind result)))
+    (is (= 4 (count holes)))
+    (is (= 2 (count ambiguous)))
+    (is (every? #(not (contains? % :obligation/id)) ambiguous))
+    (is (= #{0 3}
+           (set (keep #(when (= :policy-hole-obligation-id-missing (:finding %))
+                         (:policy-hole/index %))
+                      (:findings result)))))))
