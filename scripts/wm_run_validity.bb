@@ -204,6 +204,17 @@
       (println (format "   %-18s %-8s %s%s" (name field) (name verdict)
                        (if at (pr-str at) "-")
                        (if note (str "  " note) ""))))
+    ;; What the run could NOT do, printed beside what it could. A run records
+    ;; its open stop lines and a reader who takes only the verdict table will
+    ;; not see them: on 2026-09-20 a run reported VALID 4/5 while carrying 45,
+    ;; including the :C1 construction group the machine had been circling for a
+    ;; day, and the reviewer (claude-4) quoted the table and stopped. A recorded
+    ;; status earns its keep only when something consumes it, so this line is
+    ;; unconditional -- it prints 0 as readily as 45.
+    (let [sl (:open-stop-lines r)
+          n (cond (map? sl) (:count sl) (coll? sl) (count sl) :else nil)]
+      (println (format "   %-18s %s" "open-stop-lines"
+                       (if (nil? n) "not recorded" (str n " (ids in record)")))))
     verdict))
 
 (defn run-files [args]
