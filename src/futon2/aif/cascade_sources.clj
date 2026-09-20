@@ -91,6 +91,12 @@
   (when-not (and (number? (get-in d [:beta :value])) (pos? (get-in d [:beta :value]))
                  (#{:declared :learned} (get-in d [:beta :status])))
     (refuse! :beta {:path path :beta (:beta d)}))
+  (doseq [[token locator] (:locators d)
+          field [:class :check]
+          :let [check (get locator field)]
+          :when (#{:C1 :C2} check)]
+    (refuse! :removed-observation-check
+             {:path path :target (:target d) :token token :check check :field field}))
   d)
 
 (defn- observe-facts
@@ -128,8 +134,6 @@
      (when (and (empty? files) *read-occurrences*)
        (swap! *read-occurrences* #(or % [])))
      (when (seq files)
-       (oc/with-registry-runs*
-        (fn []
        (reduce
         (fn [acc f]
           (let [path (.getPath f)
@@ -160,7 +164,7 @@
                             (or collisions {}))))
                 (assoc-in [:observations t] observations))))
         {}
-        files)))))))
+        files)))))
 
 (defn with-context-fn
   "Add the :context-of function cascade-problems needs (it cannot live in data)."

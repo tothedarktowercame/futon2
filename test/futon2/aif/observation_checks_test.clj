@@ -29,7 +29,6 @@
 (deftest refusals
   (is (= :no-locator (:kind (oc/check-path-exists {:repo "futon2" :sha futon2-sha}))))
   (is (= :unknown-sha (:kind (oc/check-path-exists {:repo "futon2" :sha "0000000000" :path "x"}))))
-  (is (= :no-locator (:kind (oc/check-test-warrant {:repo "futon2"}))))
   (let [r (oc/observe {:t-path {:class :C3 :repo "futon2" :sha futon2-sha :path "src/futon2/aif/construction.clj"}
                        :t-judgement {:class :J}
                        :t-unknown {:class :C9}})]
@@ -45,69 +44,6 @@
     (is (false? (oc/decl-present? "-- theorem foo here\n" "theorem foo")))
     (is (true? (oc/decl-present? "(defn check-test-warrant\n  [x])" "(defn check-test-warrant")))))
 
-;; Real warrants (futon3c 33824f0f, ab388662). These call the registry CLI
-;; (a few seconds each) and depend on the warrants still matching the checkout.
-;; The futon2 warrant covers a namespace this file does not, so editing these
-;; checks does not stale it.
-(def futon2-warrant "test-registry-0b4a2378bb224daa499a8012209eff3a35208871e529c7b5c1eb578364496978")
-;; MachineContracts build warrant after the sorry/error parse fix (bundle r15).
-;; It is now STALE -- mathlib4 moved and the registry refuses it :stale-sha,
-;; which is the registry working. Kept deliberately, as the fixture for the
-;; refusal path below; it must never go back into a locator that a positive
-;; assertion depends on. Pinning a warrant id in a test asserts a fact with an
-;; expiry date: on 2026-09-19 this one expired and took three assertions in
-;; c1-lean-warrant red with :observed nil, which read like broken checker logic
-;; and was not (found by claude-12 in registry tranche two; cause established
-;; by claude-4 by evaluating the check, not by re-running the suite).
-(def stale-contracts-warrant "test-registry-d97d4143f16ccf4248c5bfdd964c8ce2642ad0e3177885977d0424fcb145b936")
-
-(defn observed-or-refused
-  "A C1/C2 check against a LIVE warrant has two honest outcomes, and which one
-  you get depends on what has been committed since the warrant was minted --
-  not on whether the machinery works. Asserting `true?` made these tests decay
-  into red as the repo moved (2026-09-17: four assertions red for exactly that
-  reason, while the production tick was observing the same facts correctly).
-
-  So: either the warrant is current and the fact is observed true, or it is
-  refused with a reason that names why. Anything else -- observed false, an
-  untyped nil, a refusal without a kind -- is a real failure."
-  [r]
-  (or (true? (:observed r))
-      (contains? #{:no-current-warrant :working-tree-differs-from-head
-                   :registry-unavailable}
-                 (:kind r))))
-
-(deftest c2-test-warrant
-  (let [r (oc/check-test-warrant {:repo "futon2" :entry-id futon2-warrant :ns "futon2.aif.observation-rates-test"})]
-    (is (observed-or-refused r) (pr-str r))
-    (when (true? (:observed r))
-      (is (string? (get-in r [:cutoff "futon2"])))))
-  ;; a warrant for another namespace, or no warrant, says nothing: refused
-  (is (= :no-current-warrant (:kind (oc/check-test-warrant {:repo "futon2" :entry-id futon2-warrant :ns "futon2.aif.trace-test"}))))
-  (is (= :no-current-warrant (:kind (oc/check-test-warrant {:repo "futon2" :entry-id "test-registry-nonexistent" :ns "futon2.aif.observation-rates-test"})))))
-
-(deftest c1-lean-warrant
-  ;; No :entry-id. check-lean-warrant then resolves the NEWEST warrant for
-  ;; `lake build MODULE` (:entry-id-source :latest-warrant), which is the
-  ;; mechanism it documents and the only one that does not expire.
-  (let [base {:repo "mathlib4" :module "DarkTower.WarMachine.MachineContracts"
-              :path "DarkTower/WarMachine/TokenObservation.lean"}]
-    ;; Holes.lean's sorries in the same build do not count against this file
-    (is (true? (:observed (oc/check-lean-warrant (assoc base :decl "theorem tokenLikelihood_checkable")))))
-    (is (false? (:observed (oc/check-lean-warrant (assoc base :decl "theorem no_such_theorem")))))
-    (is (= :no-current-warrant
-           (:kind (oc/check-lean-warrant (assoc base :module "DarkTower.WarMachine.Other" :decl "theorem tokenLikelihood_checkable")))))
-    ;; a file with sorries in the warrant is observed false
-    (is (false? (:observed (oc/check-lean-warrant (assoc base :path "DarkTower/WarMachine/Holes.lean" :decl "theorem")))))
-    ;; An EXPLICIT stale warrant is refused, not silently replaced by the
-    ;; latest one. This is what the three red assertions were accidentally
-    ;; measuring; asserting it on purpose is the difference between a test
-    ;; that rots and a test of how rot is handled.
-    (is (= :no-current-warrant
-           (:kind (oc/check-lean-warrant
-                   (assoc base :entry-id stale-contracts-warrant
-                          :decl "theorem tokenLikelihood_checkable")))))))
-
 (deftest c5-locus-resolves
   (let [base {:repo "mathlib4" :sha "52d6516922"
               :bundle-path "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json"}
@@ -115,19 +51,3 @@
     ;; every declared clojure-locus resolves at its repo's HEAD
     (is (true? (:observed r)) (pr-str (:evidence r)))
     (is (seq (get-in r [:evidence :clojure-loci])))))
-
-(deftest warrant-found-by-namespace-or-module
-  ;; a locator need not name an entry-id: the newest recorded warrant for the
-  ;; namespace (C2) or module build (C1) is checked
-  (let [r (oc/check-test-warrant {:repo "futon2" :ns "futon2.aif.observation-rates-test"})]
-    (is (observed-or-refused r) (pr-str r))
-    (when (true? (:observed r))
-      (is (= :latest-warrant (get-in r [:evidence :entry-id-source])))))
-  (is (= :no-current-warrant
-         (:kind (oc/check-test-warrant {:repo "futon2" :ns "futon2.aif.never-registered-test"}))))
-  (let [r (oc/check-lean-warrant {:repo "mathlib4" :module "DarkTower.WarMachine.MachineContracts"
-                                  :path "DarkTower/WarMachine/TokenObservation.lean"
-                                  :decl "theorem tokenLikelihood_checkable"})]
-    (is (observed-or-refused r) (pr-str r))
-    (when (true? (:observed r))
-      (is (= :latest-warrant (get-in r [:evidence :entry-id-source]))))))

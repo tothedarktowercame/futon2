@@ -23,7 +23,7 @@
    :want [:goal]
    :locators {:present-file {:class :C3 :repo "futon2" :sha "b81afd97" :path "src/futon2/aif/construction.clj"}
               :absent-file {:class :C3 :repo "futon2" :sha "b81afd97" :path "src/futon2/aif/no_such.clj"}
-              :unlocatable {:class :C2 :repo "futon2" :ns "futon2.aif.none-test"}
+              :unlocatable {:class :C3 :repo "futon2" :sha "0000000000000000000000000000000000000000" :path "missing"}
               :goal {:class :C3 :repo "futon2" :sha "b81afd97" :path "goal"}}
    :patterns {:p/act {:guard {:needs #{:present-file} :forbids #{}} :produces #{:goal}}}
    :interpretation-receipts {:p/act {:kind :hand-admitted}}
