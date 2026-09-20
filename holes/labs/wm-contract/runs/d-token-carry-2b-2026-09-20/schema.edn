@@ -11,6 +11,13 @@
  :continuation-meaning :belief-actually-supplied-as-q0
  :belief {:carrier :token-sets :masses :nonnegative-exact-rationals
           :total 1 :zero-masses :omitted :equality :clojure-equals}
+ :carrier
+ {:universe-path [:carrier :universe]
+  :universe-type :set-of-target-qualified-tokens
+  :states-path [:carrier :states]
+  :states-meaning :support-plus-transition-closure
+  :observation-membership :present-and-absent-subsets-of-universe
+  :infer-universe-from-belief-support false}
  :received-observation
  {:required [:status :occurrence-id :tau :present :absent]
   :status :observed :tau :positive-integer

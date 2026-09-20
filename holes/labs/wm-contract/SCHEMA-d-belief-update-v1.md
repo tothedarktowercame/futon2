@@ -54,6 +54,13 @@ used, not a candidate's future. The carrier records support plus transition
 closure, token universe and measured counts. Provenance fields do not grant
 admission by their presence: D validates the underlying records.
 
+The exact token-universe path is **`[:carrier :universe]`**, a set of
+target-qualified tokens. Q checks both observation sets against this declared
+set; it must not infer the universe from belief support. `[:carrier :states]`
+is the represented token-set state collection (support plus transition
+closure), not the token universe. This spelling is used by the shared examples
+in `5a0f6a3f`; this paragraph makes that existing field explicit.
+
 ## Successful conditioning
 
 `:status :value` has `:posterior` and `:continuation-belief`, both equal to q0,
