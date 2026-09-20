@@ -38,7 +38,7 @@ in-turn) — never one agent-assertion blur.
 |---|---|---|
 | G risk/ambiguity under dependence; the point-mass cancellation control (coupling shifts risk and ambiguity by canceling amounts in total G) | 4 | per-token sums are NOT licensed for coupled distributions until proven; exact enumeration is the interim authority |
 | F observation-to-prediction matching semantics | 4 | independent of A's noise; belongs with the F consumer fix |
-| two-products direct evaluation for fully specified observations under one binary common cause | 3 | cheap lemma over `Fintype.sum_bool`; enables early exact use without the compiler |
+| two-products direct evaluation for fully specified observations under one binary common cause | 3 | DISCHARGED 2026-09-20: `TwoProductEvaluation.mixtureLikelihood_bool` (+ `_products`), sorry-free — now a proven row: implementations may evaluate fully specified observations as two weighted products and MUST agree with that value |
 | parameter-uncertainty layer (variance-WMC): means/variances propagation contracts | 6 | fixed-parameter inference first |
 
 ## Inherited coupling from C's closure (2026-09-20, codex-3 flag)
