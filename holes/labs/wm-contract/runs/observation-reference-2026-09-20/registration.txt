@@ -1,0 +1,4 @@
+evidence-id test-registry-ab8c87fde403bc490de684397830d9acdfdcec8d49895282c7f25725d98c9d55
+warrant? true
+results {:assertions 41, :duration-ms 962, :errors 0, :exit 0, :failures 0, :tests 3}
+bound EV-observation-reference-resolution -> test-registry-ab8c87fde403bc490de684397830d9acdfdcec8d49895282c7f25725d98c9d55

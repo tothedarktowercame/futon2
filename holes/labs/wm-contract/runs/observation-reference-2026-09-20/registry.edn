@@ -1,0 +1,8 @@
+{:subject-id "EV-observation-reference-resolution"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/observation_checks.clj"]
+ :test-paths ["test/futon2/aif/observation_reference_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.observation-reference-test"]
+ :author "codex-3"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/observation-reference-2026-09-20"
+ :index-file "/home/joe/code/futon3c/data/test-registry-validation/subjects.ednlog"}
