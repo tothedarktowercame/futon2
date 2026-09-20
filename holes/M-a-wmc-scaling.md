@@ -3,7 +3,7 @@
 **Date:** 2026-09-20
 **Status:** IDENTIFY (successor mission — activation governed by the
 triggers below, not by a date)
-**Owner:** TBD (proposed by claude-12 at Joe's direction)
+**Owner:** claude-12 (activation triage — the typed trigger events land in run records; build ownership assigned at activation per the standing WM delegation)
 **Cross-ref:**
 * `holes/labs/wm-contract/DESIGN-a-plain-2026-09-20.md` — the A this
   mission succeeds; WMC/variance-wmc are its parked appendix by ruling
