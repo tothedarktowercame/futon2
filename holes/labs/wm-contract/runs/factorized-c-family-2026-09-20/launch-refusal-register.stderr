@@ -1,0 +1,5 @@
+Execution error (ExceptionInfo) at futon3c.test-registry/fail! (test_registry.clj:44).
+explicit-namespace-required
+
+Full report at:
+/tmp/clojure-17468333777285672459.edn

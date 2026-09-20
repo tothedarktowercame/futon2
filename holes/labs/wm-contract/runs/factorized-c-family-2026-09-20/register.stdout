@@ -1,0 +1,4 @@
+evidence-id test-registry-75ffc6b39b5c250847da4131c570b991b27a99c2a881266a8b7bdb7b915fe44f
+warrant? true
+results {:assertions 148, :duration-ms 861, :errors 0, :exit 0, :failures 0, :tests 2}
+bound wm-c/factorized-terminal-family -> test-registry-75ffc6b39b5c250847da4131c570b991b27a99c2a881266a8b7bdb7b915fe44f
