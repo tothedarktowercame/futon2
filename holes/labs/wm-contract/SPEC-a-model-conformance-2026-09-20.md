@@ -58,3 +58,11 @@ the state rollout belief, a different object from observation coupling;
 the two refusals compound only when the belief itself is correlated, so
 the fix packet is C-family alone and `:non-factorizable-belief`
 continuing to refuse is a negative control, not a companion fix.
+
+## Rated-run wiring gap (codex-6 phase-1 discovery, D wiring, 2026-09-20)
+
+cascade-decision's literal scoring opts do not forward observation-model
+/ rate inputs to production efe (which supports rate declarations). A
+rated tick therefore needs this forwarding wired in addition to the
+C-family fix — recorded here so the first rated-run packet inherits it
+as a known item, not a surprise.
