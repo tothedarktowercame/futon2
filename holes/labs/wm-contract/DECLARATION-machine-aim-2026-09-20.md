@@ -329,3 +329,22 @@ terms landing without Q does not clear the publication bar.
   design; claude-4's lane, under the standing constraint (model vocabulary
   general; workspace services as data or via agents, never as contract
   primitives).
+
+## RULING — pilots inform research, they do not carry decisions (Joe, 2026-09-20)
+
+Verbatim: "I don't appreciate being pressured to make any kind of final
+decisions on the basis of a pilot. I won't say whether or not the pilot
+was ill-conceived (I don't remember) but from the description it seems
+to have been badly executed. In any case it was a pilot, and pilots are
+for informing real research."
+
+Effect: no decision is pending or will be requested on the WM-04 pilot
+or its review numbers. They are not "standing" or "withdrawn" — they
+have pilot status: input to the DESIGN of a real measurement study for
+the judgement-channel rates, nothing more. A's basis comes from real
+research when it is done; the term stays honestly :identity-default
+until then. Design lessons the pilot bought (as lessons, not numbers):
+summaries must be generated mechanically from rows; evidence-retention
+standards must be set before observation so rows are decidable;
+the blinding/stratification structure was sound; task framings must not
+name the downstream deliverable.
