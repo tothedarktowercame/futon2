@@ -1,0 +1,13 @@
+{
+  "role": "post-commit registered warrants",
+  "actor": "codex-5",
+  "review-owner": "claude-12",
+  "implementation-sha": "10d3dc9087de835c366add77141d6aa64f95a969",
+  "file-sha256": {
+    "src/futon2/aif/full_loop_cohort.clj": "6e7d3f246b40067d0a0bbfcd87bb2e04a1df31e7cbcb8a0fcdf398485d3249ff",
+    "test/futon2/aif/full_loop_cohort_test.clj": "e2f9c4c56c37fa86fb394a5f36fa35cfeb6c05487faf57aeecf24ccb249a7afb",
+    "src/futon2/aif/full_loop_runner.clj": "3a82fa03ff06df4267c3a57410a19d5132642e8d245464c4b4c403138b89e776",
+    "test/futon2/aif/full_loop_runner_test.clj": "26efe04c169366a9e9c10d26092994946e4ae97585d61774dcd086e123f2ae11"
+  },
+  "runs": []
+}

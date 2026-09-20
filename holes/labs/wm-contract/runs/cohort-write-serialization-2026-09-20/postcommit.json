@@ -1,0 +1,69 @@
+{
+  "role": "post-commit registered warrants",
+  "actor": "codex-5",
+  "review-owner": "claude-12",
+  "implementation-sha": "10d3dc9087de835c366add77141d6aa64f95a969",
+  "file-sha256": {
+    "src/futon2/aif/full_loop_cohort.clj": "6e7d3f246b40067d0a0bbfcd87bb2e04a1df31e7cbcb8a0fcdf398485d3249ff",
+    "test/futon2/aif/full_loop_cohort_test.clj": "e2f9c4c56c37fa86fb394a5f36fa35cfeb6c05487faf57aeecf24ccb249a7afb",
+    "src/futon2/aif/full_loop_runner.clj": "3a82fa03ff06df4267c3a57410a19d5132642e8d245464c4b4c403138b89e776",
+    "test/futon2/aif/full_loop_runner_test.clj": "26efe04c169366a9e9c10d26092994946e4ae97585d61774dcd086e123f2ae11"
+  },
+  "runs": [
+    {
+      "namespace": "futon2.aif.full-loop-cohort-test",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/registry-cohort.edn"
+      ],
+      "utility-cwd": "/home/joe/code/futon3c",
+      "test-repo-root": "/home/joe/code/futon2",
+      "exit": 0,
+      "duration-seconds": 5.367583362851292,
+      "log": "register-cohort.log",
+      "log-sha256": "20542d0601bfefeace057b922973b85d876afb860b58e31c13b547cdaa1b15be",
+      "evidence-id": "test-registry-2e4f5347a6d969d8d98125ed34ba1cb996da073611c58ca1d7362f701c29d59e",
+      "warrant?": true,
+      "results": {
+        "tests": 28,
+        "assertions": 153,
+        "failures": 0,
+        "errors": 0
+      },
+      "test-log": "a481014f-9f9a-4d38-8ba5-c95fad9ea2c4.log",
+      "test-log-sha256": "ce5a9acd89858add9e5b9bb55aa3009d855220796c345afa927a695f3a11d357"
+    },
+    {
+      "namespace": "futon2.aif.full-loop-runner-test",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/registry-runner.edn"
+      ],
+      "utility-cwd": "/home/joe/code/futon3c",
+      "test-repo-root": "/home/joe/code/futon2",
+      "exit": 0,
+      "duration-seconds": 192.77611520094797,
+      "log": "register-runner.log",
+      "log-sha256": "14e20d9fb637d6a879ad9e127b435d94597e000619c21f17c838903580cef317",
+      "evidence-id": "test-registry-0c2d84a3fd1ecffa1dd3a8cd20fbde2f0e173495098e170fb05b8b9aa16212f3",
+      "warrant?": true,
+      "results": {
+        "tests": 180,
+        "assertions": 998,
+        "failures": 0,
+        "errors": 0
+      },
+      "test-log": "7944fc27-2bdd-42c5-83d6-7f99eaf03576.log",
+      "test-log-sha256": "52fa9c263aedf3bcd0d08b4ce3f20c0e1486167d4ecba0c1517ccbefa7ee00b2"
+    }
+  ],
+  "files-unchanged": true
+}

@@ -1,0 +1,4 @@
+evidence-id test-registry-0c2d84a3fd1ecffa1dd3a8cd20fbde2f0e173495098e170fb05b8b9aa16212f3
+warrant? true
+results {:assertions 998, :duration-ms 188696, :errors 0, :exit 0, :failures 0, :tests 180}
+bound cohort-write-serialization/runner -> test-registry-0c2d84a3fd1ecffa1dd3a8cd20fbde2f0e173495098e170fb05b8b9aa16212f3
