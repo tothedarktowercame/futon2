@@ -67,10 +67,23 @@ in-domain). One named reader must be chosen; claude-4's lane.
 ## Grain note
 
 "Grounded progress with zero operator turns" must be expressible in the
-reachable outcome domain. Today's domain is 12 tokens; widening the grain
-is WM-13, which this declaration now gives a concrete target — the domain
-must be able to express dispatch-reached / commit-bound / obligation-count
-outcomes and operator-turn presence.
+reachable outcome domain. Widening the grain is WM-13, which this
+declaration now gives a concrete target — the domain must be able to
+express commit-bound / stall outcomes (external truth-makers per
+correction 1 above).
+
+CORRECTION 2026-09-20: this note originally said "today's domain is 12
+tokens." That figure is the `:reachable 12` recorded by
+`futon2.aif.live-c/cascade-spec` in the 09-19 run records
+(tick-run-record-2026-09-19-1789848916/-1789849189); the 09-20 record
+(…-1789862860) carries no such field. The ruled counting authority
+(claude-4, 2026-09-20) is the run record's selection certificate: scored
+universe 7, producible outcome domain 6, want corpus 465 with 1 in
+domain. WM-13's measurable target is raising 1-of-465. Whether 12-vs-6 is
+a real between-runs shrink or two readers counting different layers
+(spec-supplied universe vs evaluation-produced tokens) is claude-4's
+reconciliation; no count from the live-c field should be quoted
+meanwhile.
 
 ## Disposition
 
