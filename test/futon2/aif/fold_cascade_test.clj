@@ -86,3 +86,22 @@
       (is (= n (count (:policy-holes out))))
       (is (every? :guard-evidence (:policy-holes out)))
       (is (nil? (:coverage-score-delta out))))))
+
+(deftest unparseable-and-empty-guards-never-form-unwitnessed-boxes
+  (let [e (entry true (pinned-locator :C3 "src/futon2/aif/fold.clj"))
+        good (get-in e [:action :precedence 0 :guard])
+        guards [(assoc good :status :unknown)
+                (assoc good :operator :or)
+                (assoc good :clauses [])
+                (assoc-in good [:clauses 0 :status] :unknown)
+                (assoc-in good [:clauses 0 :present] [])
+                nil
+                (assoc good :clauses [{:status :interpreted :present #{} :absent #{}}])]]
+    (doseq [guard guards]
+      (let [out (:fold-output (construct (assoc-in e [:action :precedence 0 :guard] guard)))]
+        (is (= 0 (count (get-in out [:wiring :boxes]))))
+        (is (= 1 (count (:policy-holes out))))
+        (is (some #{:no-observable-guard}
+                  (get-in out [:policy-holes 0 :construction-blockers])))
+        (is (empty? (get-in out [:policy-holes 0 :guard-evidence])))
+        (is (nil? (:coverage-score-delta out)))))))

@@ -1,0 +1,12 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.fold-cascade-test
+{:demonstration :present, :boxes 1, :holes 0, :coverage -1.0, :shape true}
+{:demonstration :missing, :boxes 0, :holes 1, :coverage nil, :shape true}
+{:demonstration :definite-absence, :boxes 1, :holes 0, :coverage -1.0, :shape true}
+{:demonstration :c6-false-is-not-absence, :boxes 0, :holes 1, :coverage nil, :shape true}
+{:demonstration :refused-is-not-absence, :boxes 0, :holes 1, :coverage nil, :shape true}
+
+Ran 5 tests containing 86 assertions.
+0 failures, 0 errors.

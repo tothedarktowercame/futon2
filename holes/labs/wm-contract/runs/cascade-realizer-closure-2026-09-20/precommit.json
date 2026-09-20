@@ -1,0 +1,15 @@
+{
+  "role": "pre-commit-validation",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "independent-reviewer": "claude-2",
+  "review-job": "invoke-1789947598636-22808-85f9818f",
+  "review-scope": "implementation 28a90c73; new regression requested by owner after review",
+  "sha256": {
+    "test/futon2/aif/fold_cascade_test.clj": "ad3b1dcebbae7137740a6558cffab6942350b15c24738fcfba3420e16d9a64f2"
+  },
+  "tests": 5,
+  "assertions": 86,
+  "failures": 0,
+  "errors": 0
+}
