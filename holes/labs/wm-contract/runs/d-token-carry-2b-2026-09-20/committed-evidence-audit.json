@@ -1,0 +1,71 @@
+{
+  "kind": "D-2b-committed-evidence-audit",
+  "audited-head": "43d1c3e808f12c362ef216289d0ce3ab488f4de5",
+  "time-utc": "2026-09-20T19:20:32.879531+00:00",
+  "source-checks": [
+    {
+      "path": "src/futon2/aif/token_belief_predecessor.clj",
+      "sha256": "be33120ad2f014fc37f05f879e973c7bd914c9883f362df66af55b77055e8348",
+      "matches-tested-implementation-and-current-head": true
+    },
+    {
+      "path": "src/futon2/aif/scoring_input_receipts.clj",
+      "sha256": "6266f7929bcd33fb916c955d6fda4a18aae2a339371580adac119facefaa9edc",
+      "matches-tested-implementation-and-current-head": true
+    },
+    {
+      "path": "scripts/futon2/report/war_machine.clj",
+      "sha256": "4103e041f15fe84cd0c6be0951dc2b94a9b5e917a51ba6006365b3d11647bd6c",
+      "matches-tested-implementation-and-current-head": true
+    },
+    {
+      "path": "test/futon2/aif/token_belief_predecessor_test.clj",
+      "sha256": "3897d1812eebeffa851b6fa9ce0b906595bee8143bb792389eb498221fa7cd60",
+      "matches-tested-implementation-and-current-head": true
+    }
+  ],
+  "log-checks": [
+    {
+      "path": "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/precommit-token-belief-predecessor.log",
+      "role": "pre-commit-validation",
+      "sha256": "d2afc89f98c06d8981bfd5d61c751aaac80b2e6eb68063929b2b46654a50bfc3",
+      "committed-and-hash-matched": true
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/register-token-belief-predecessor.log",
+      "role": "post-commit-warrant",
+      "sha256": "2d3b44cffa3d9f21b45732cd26d07b8de1cc2b83538332e4a37a49186bc9a3f7",
+      "committed-and-hash-matched": true
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/precommit-token-belief-carry.log",
+      "role": "pre-commit-validation",
+      "sha256": "1c40d7d09bbea35c2c844a76c3437cc3882f62630ce461cc7431ec7e0a65a42a",
+      "committed-and-hash-matched": true
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/register-token-belief-carry.log",
+      "role": "post-commit-warrant",
+      "sha256": "b0a708bd69a364319637533b37942f8fcf8e4a7c433f791c234f7fd676c8ee4c",
+      "committed-and-hash-matched": true
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/precommit-scoring-input-receipts.log",
+      "role": "pre-commit-validation",
+      "sha256": "23b95b53f8e8ebff9b6bac9542e448deabbda9d6ed37ae90b44d468ff5bd6fb1",
+      "committed-and-hash-matched": true
+    },
+    {
+      "path": "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/register-scoring-input-receipts.log",
+      "role": "post-commit-warrant",
+      "sha256": "f33726f10ec4cca31c82932fd5a11501c1d91d2d4c384ce104594b87561dd9af",
+      "committed-and-hash-matched": true
+    }
+  ],
+  "execution-results-agree": true,
+  "tests": 10,
+  "assertions": 100,
+  "new-test-executions": 0,
+  "production-conditioning": "blocked-on-EV-enactment",
+  "blocker-source": "src/futon2/aif/machine_enactment_correspondence.clj:97"
+}
