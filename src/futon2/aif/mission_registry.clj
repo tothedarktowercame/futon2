@@ -131,12 +131,14 @@
   [line]
   (some-> (re-find #"^\s*(#{1,6})\s+" line) second count))
 
-(defn- open-section-item-count
+(defn- open-section-items
+  "The list items under an open-work heading, retained rather than summed.
+   Same traversal as the count it replaces."
   [lines]
-  (loop [remaining lines
+  (loop [remaining (map-indexed (fn [i l] [(inc i) l]) lines)
          active-level nil
-         n 0]
-    (if-let [line (first remaining)]
+         acc []]
+    (if-let [[n line] (first remaining)]
       (let [level (heading-level line)
             next-active-level (cond
                                 (re-find open-section-heading-pattern line) level
@@ -147,20 +149,55 @@
                              (re-find list-item-pattern line))]
         (recur (rest remaining)
                next-active-level
-               (cond-> n count-line? inc)))
-      n)))
+               (cond-> acc
+                 count-line? (conj {:kind :open-section-item :line n
+                                    :text (str/trim line)}))))
+      acc)))
+
+(defn- hole-identity
+  "Stable identity for a retained hole: the mission id with a SHA-256 prefix of
+   the whitespace-normalised item text, so a hole keeps its identity when the
+   surrounding document is edited and its line number moves."
+  [mission-id text]
+  (let [norm (str/replace (str/trim text) #"\s+" " ")
+        md (java.security.MessageDigest/getInstance "SHA-256")
+        bs (.digest md (.getBytes (str mission-id "\u0000" norm) "UTF-8"))]
+    (str mission-id "#" (apply str (map #(format "%02x" %) (take 6 bs))))))
+
+(defn open-holes
+  "The remaining-work items a mission document states, RETAINED rather than
+   summed away.
+
+   These are the same matches `open-hole-count` has always made -- unchecked
+   tasks, explicit work markers, pending lifecycle lines, and list items under
+   an open-work heading. Until 2026-09-20 only their total survived, so 441
+   stated pieces of remaining work across 86 live missions were recomputed on
+   every run and discarded (Joe: \"a huge embarrassment ... exactly a facade\").
+   They are the missions' own statements of what they want done, and C needs
+   wants; a count cannot project into an outcome domain and an item can.
+
+   One item per (pattern, line) match, exactly as the count was formed -- a line
+   matching two kinds yields two items -- so `(count (open-holes ...))` equals
+   the count this replaced, for every mission. Terminal/draft/inactive states
+   have none."
+  [mission-id status-class lines]
+  (if (contains? #{:complete :inactive :draft} status-class)
+    []
+    (let [numbered (map-indexed (fn [i l] [(inc i) l]) lines)
+          matching (fn [kind pat]
+                     (for [[n l] numbered :when (re-find pat l)]
+                       {:kind kind :line n :text (str/trim l)}))]
+      (mapv (fn [h] (assoc h :id (hole-identity mission-id (:text h))))
+            (concat (matching :unchecked-task unchecked-task-pattern)
+                    (matching :work-marker explicit-work-marker-pattern)
+                    (matching :pending-lifecycle pending-lifecycle-pattern)
+                    (open-section-items lines))))))
 
 (defn- open-hole-count
-  "Conservative per-mission remaining-work count from the mission doc itself.
-   Terminal/draft/inactive mission states force zero; live documents count
-   explicit incomplete work signals only."
-  [status-class lines]
-  (if (contains? #{:complete :inactive :draft} status-class)
-    0
-    (+ (count (filter #(re-find unchecked-task-pattern %) lines))
-       (count (filter #(re-find explicit-work-marker-pattern %) lines))
-       (count (filter #(re-find pending-lifecycle-pattern %) lines))
-       (open-section-item-count lines))))
+  "Count of the retained items. Derived from `open-holes` so the count and the
+   items it summarises cannot disagree."
+  [mission-id status-class lines]
+  (count (open-holes mission-id status-class lines)))
 
 (defn- mission-doc->entry
   [path]
@@ -176,7 +213,8 @@
      :title (mission-title-from-lines mission-id lines)
      :status-line status-line
      :status-class status-class
-     :open-hole-count (open-hole-count status-class lines)}))
+     :open-holes (open-holes mission-id status-class lines)
+     :open-hole-count (open-hole-count mission-id status-class lines)}))
 
 (defn- dedupe-by-id
   "Keep the first entry per mission id (sort order = shortest path = primary
@@ -231,6 +269,11 @@
          :mission/status-line (:status-line entry)
          :mission/status-class (some-> (:status-class entry) name)
          :mission/open-hole-count (some-> (:open-hole-count entry) long)
+         ;; The items the count summarises. Until 2026-09-20 only the total was
+         ;; stored, so every mission's stated remaining work was recomputed and
+         ;; discarded on each scan; a count cannot project into an outcome
+         ;; domain and an item can. Omitted when empty (XTDB drops nil).
+         :mission/open-holes (when (seq (:open-holes entry)) (vec (:open-holes entry)))
          :provenance/repo (repo-of code-root (:path entry))
          :provenance/path (:path entry)
          :provenance/sha256 (sha256-file (:path entry))}))
@@ -359,7 +402,16 @@
      :status-class (if-some [sc (:mission/status-class props)]
                      (keyword sc)
                      :unknown)
-     :open-hole-count (long (or (:mission/open-hole-count props) 0))}))
+     :open-hole-count (long (or (:mission/open-hole-count props) 0))
+     :open-holes (vec (or (:mission/open-holes props) []))
+     ;; A stored count with no stored items means this entity predates hole
+     ;; retention: the mission HAS that many stated wants and substrate cannot
+     ;; name them until re-ingest. Typed so the gap is legible instead of
+     ;; reading as "no holes" -- that silence is the facade being fixed.
+     :open-holes-status (cond
+                          (seq (:mission/open-holes props)) :retained
+                          (pos? (long (or (:mission/open-hole-count props) 0))) :not-ingested
+                          :else :none)}))
 
 (defn load-missions-from-substrate
   "Read the mission registry from substrate-2 (futon1b, :7073) and return the
