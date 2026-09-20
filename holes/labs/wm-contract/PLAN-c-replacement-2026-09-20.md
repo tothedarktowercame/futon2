@@ -103,3 +103,21 @@ out — NOTE-joes-view-of-C §1 Half 2) stays uncaptured by this plan; it
 is not lost (the note holds it) and per the flagged inference it may be
 guards/deontics rather than C mass at all. Nothing in this plan
 forecloses it.
+
+## A-basis note for the return to A (Joe, 2026-09-20, after C dispatch)
+
+Verbatim: "the 9/46 is a very good observation from claude-4 and this
+is something that codex agents are quite good at noticing, we just
+don't typically compute it. But frequent occurrences of 'that's three
+times I have been corrected' show that the underlying data is
+available."
+
+Guidance recorded for when A returns: the 9/46 is one instance of a
+method, not the number. Codex lanes already notice and informally
+tally corrections; dispatches and refusals are logged with both ends
+countable. So the A rate basis can widen from claude-4's one night to
+per-lane, per-era correction ratios computed from the dispatch/refusal
+record — same counted-denominator discipline (never a trawled
+numerator over an unrecorded denominator), self-credit channel only,
+each ratio labeled with its population. Decision on adopting any such
+rate remains deferred with the rest of A.
