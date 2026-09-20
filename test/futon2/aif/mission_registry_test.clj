@@ -30,16 +30,22 @@
     (spit path body)
     (.getAbsolutePath path)))
 
+(defn- write-primary-mission!
+  "Legacy document fixtures model primary checkouts under the tightened contract."
+  [relative-path body]
+  (.mkdirs (io/file *tmpdir* (first (.split ^String relative-path "/")) ".git"))
+  (write-mission! relative-path body))
+
 (deftest load-missions-finds-top-level-mission-docs-test
-  (write-mission! "futon0/holes/missions/M-alpha.md"
+  (write-primary-mission! "futon0/holes/missions/M-alpha.md"
                   (str "**Status:** OPEN\n"
                        "# Mission Alpha\n"))
-  (write-mission! "futon3/holes/missions/M-beta.md"
+  (write-primary-mission! "futon3/holes/missions/M-beta.md"
                   (str "**Status:** COMPLETE\n"
                        "# Mission Beta\n"))
-  (write-mission! "futon3/holes/missions/M-beta.journal/hinge-log.md"
+  (write-primary-mission! "futon3/holes/missions/M-beta.journal/hinge-log.md"
                   "# Not a mission doc\n")
-  (write-mission! "futon5a/holes/missions/M-handoffs/README.md"
+  (write-primary-mission! "futon5a/holes/missions/M-handoffs/README.md"
                   "# Not a top-level mission doc\n")
   (let [doc (mr/load-missions *tmpdir*)
         ids (set (map :id (:missions doc)))]
@@ -48,16 +54,16 @@
     (is (not (contains? ids "README")))))
 
 (deftest load-missions-excludes-sandbox-and-derived-docs-test
-  (write-mission! "futon0/holes/missions/M-alpha.md"
+  (write-primary-mission! "futon0/holes/missions/M-alpha.md"
                   (str "Status: OPEN\n"
                        "# Mission Alpha\n"))
-  (write-mission! "futon0/holes/missions/M-alpha.v1.md"
+  (write-primary-mission! "futon0/holes/missions/M-alpha.v1.md"
                   (str "Status: IDENTIFY (draft 1)\n"
                        "# Mission Alpha v1\n"))
-  (write-mission! "futon0/holes/missions/M-alpha.aif-wiring.md"
+  (write-primary-mission! "futon0/holes/missions/M-alpha.aif-wiring.md"
                   (str "Status: OPEN\n"
                        "# Mission Alpha wiring support\n"))
-  (write-mission! "futon3c/.state/night-shift-frames/frame/checkout/holes/missions/M-sandbox.md"
+  (write-primary-mission! "futon3c/.state/night-shift-frames/frame/checkout/holes/missions/M-sandbox.md"
                   (str "Status: OPEN\n"
                        "# Sandbox Mission\n"))
   (let [doc (mr/load-missions *tmpdir*)
@@ -77,16 +83,16 @@
            (set (map :id openes))))))
 
 (deftest status-line-variants-are-classified-test
-  (write-mission! "futon0/holes/missions/M-plain.md"
+  (write-primary-mission! "futon0/holes/missions/M-plain.md"
                   (str "Status: DONE\n"
                        "# Plain Status\n"))
-  (write-mission! "futon0/holes/missions/M-heading.md"
+  (write-primary-mission! "futon0/holes/missions/M-heading.md"
                   (str "## Status: archived\n"
                        "# Heading Status\n"))
-  (write-mission! "futon0/holes/missions/M-bulleted.md"
+  (write-primary-mission! "futon0/holes/missions/M-bulleted.md"
                   (str "- **Status:** **CLOSED 2026-06-04**\n"
                        "# Bulleted Status\n"))
-  (write-mission! "futon0/holes/missions/M-draft.md"
+  (write-primary-mission! "futon0/holes/missions/M-draft.md"
                   (str "**Status:** SPECIFIED, NOT YET IMPLEMENTED\n"
                        "# Draft Status\n"))
   (let [by-id (->> (:missions (mr/load-missions *tmpdir*))
@@ -98,7 +104,7 @@
     (is (= :draft (get by-id "M-draft")))))
 
 (deftest open-hole-count-uses-representative-mission-work-signals-test
-  (write-mission! "futon0/holes/missions/M-live-work.md"
+  (write-primary-mission! "futon0/holes/missions/M-live-work.md"
                   (str "**Status:** HEAD complete; DERIVE pending; INSTANTIATE next\n"
                        "# Live Work\n"
                        "- [ ] unchecked task\n"
@@ -116,7 +122,7 @@
     (is (= 7 (:open-hole-count mission)))))
 
 (deftest open-hole-count-is-zero-for-closed-missions-test
-  (write-mission! "futon0/holes/missions/M-done.md"
+  (write-primary-mission! "futon0/holes/missions/M-done.md"
                   (str "**Status:** DONE\n"
                        "# Done\n"
                        "- [ ] stale unchecked task from old plan\n"
@@ -160,7 +166,7 @@
     (is (false? (mr/live-mission-target? missions "futon4-d/mission/missing")))))
 
 (deftest mission-status-reports-open-and-hole-count-test
-  (write-mission! "futon0/holes/missions/M-alpha.md"
+  (write-primary-mission! "futon0/holes/missions/M-alpha.md"
                   (str "Status: OPEN\n"
                        "# Alpha\n"
                        "- [ ] remaining task\n"))
@@ -210,15 +216,15 @@
   ;; over-exclusion fix (claude-1 review of a3f8702): "HEAD complete; ... pending",
   ;; "INSTANTIATE (... MAP completed ...)", "PARTIAL (... deferred)", and a
   ;; "MAP ... revised-draft" lead all stay live; a leading COMPLETE is excluded.
-  (write-mission! "futon0/holes/missions/M-subphase-complete.md"
+  (write-primary-mission! "futon0/holes/missions/M-subphase-complete.md"
                   "**Status:** HEAD complete; IDENTIFY drafted; MAP pilot run; DERIVE pending\n# X\n")
-  (write-mission! "futon0/holes/missions/M-instantiate-active.md"
+  (write-primary-mission! "futon0/holes/missions/M-instantiate-active.md"
                   "**Status:** INSTANTIATE (INSTANTIATE-0 active; MAP completed; VERIFY accepted)\n# X\n")
-  (write-mission! "futon0/holes/missions/M-partial-deferred.md"
+  (write-primary-mission! "futon0/holes/missions/M-partial-deferred.md"
                   "**Status:** PARTIAL (Phase 1 shipped; Phases 2-4 deferred)\n# X\n")
-  (write-mission! "futon0/holes/missions/M-map-lead-draft.md"
+  (write-primary-mission! "futon0/holes/missions/M-map-lead-draft.md"
                   "**Status:** MAP / DERIVE all complete. INSTANTIATE in progress; revised-draft landed\n# X\n")
-  (write-mission! "futon0/holes/missions/M-really-complete.md"
+  (write-primary-mission! "futon0/holes/missions/M-really-complete.md"
                   "**Status:** COMPLETE (2026-01-01)\n# X\n")
   (let [open-ids (set (map :id (mr/open-missions (mr/load-missions *tmpdir*))))]
     (is (contains? open-ids "M-subphase-complete"))
@@ -230,13 +236,13 @@
 (deftest finding-2-compound-superseded-status-classifies-inactive
   "Finding-2 (E-live-loop-3): SUPERSEDED-AS-MISSION must classify as :inactive.
    The old exact-match missed compound forms; prefix matching catches them."
-  (write-mission! "futon0/holes/missions/M-superseded-compound.md"
+  (write-primary-mission! "futon0/holes/missions/M-superseded-compound.md"
                   (str "**Status:** SUPERSEDED-AS-MISSION toward Campaign-bayesian\n"
                        "# Superseded Compound\n"))
-  (write-mission! "futon0/holes/missions/M-superseded-plain.md"
+  (write-primary-mission! "futon0/holes/missions/M-superseded-plain.md"
                   (str "**Status:** SUPERSEDED\n"
                        "# Superseded Plain\n"))
-  (write-mission! "futon0/holes/missions/M-archived-compound.md"
+  (write-primary-mission! "futon0/holes/missions/M-archived-compound.md"
                   (str "**Status:** ARCHIVED-LEGACY\n"
                        "# Archived Legacy\n"))
   (let [by-id (->> (:missions (mr/load-missions *tmpdir*))
@@ -261,13 +267,13 @@
   "Worktrees and directory copies under the code root produce duplicate
    mission-doc hits with identical ids. The scan must dedupe by id,
    keeping the primary checkout (shortest path)."
-  (write-mission! "futon3c/holes/missions/M-dup-test.md"
+  (write-primary-mission! "futon3c/holes/missions/M-dup-test.md"
                   (str "**Status:** OPEN\n"
                        "# Dup Test\n"))
-  (write-mission! "futon3c-index-check/holes/missions/M-dup-test.md"
+  (write-primary-mission! "futon3c-index-check/holes/missions/M-dup-test.md"
                   (str "**Status:** OPEN\n"
                        "# Dup Test (copy)\n"))
-  (write-mission! ".worktrees/futon5-x/holes/missions/M-dup-test.md"
+  (write-primary-mission! ".worktrees/futon5-x/holes/missions/M-dup-test.md"
                   (str "**Status:** OPEN\n"
                        "# Dup Test (worktree)\n"))
   (let [doc (mr/load-missions *tmpdir*)
@@ -282,16 +288,16 @@
   "W-candidate-drift-fence: the scan-root fence excludes non-primary checkouts
    (worktrees, directory copies, cross-repo duplicates) BEFORE dedupe, so they
    never enter the candidate pool. This is structural, not heuristic."
-  (write-mission! "futon3c/holes/missions/M-fence-test.md"
+  (write-primary-mission! "futon3c/holes/missions/M-fence-test.md"
                   (str "**Status:** OPEN\n"
                        "# Fence Test\n"))
-  (write-mission! "futon3c-index-check/holes/missions/M-fence-test.md"
+  (write-primary-mission! "futon3c-index-check/holes/missions/M-fence-test.md"
                   (str "**Status:** OPEN\n"
                        "# Fence Test (index-check copy)\n"))
-  (write-mission! "futon5-health-main/holes/missions/M-fence-test.md"
+  (write-primary-mission! "futon5-health-main/holes/missions/M-fence-test.md"
                   (str "**Status:** OPEN\n"
                        "# Fence Test (health-main worktree)\n"))
-  (write-mission! ".worktrees/futon5-x/holes/missions/M-fence-test.md"
+  (write-primary-mission! ".worktrees/futon5-x/holes/missions/M-fence-test.md"
                   (str "**Status:** OPEN\n"
                        "# Fence Test (git worktree)\n"))
   (let [doc (mr/load-missions *tmpdir*)
@@ -332,7 +338,9 @@
           (is (= [primary-path] @parsed-paths)
               "the real parser never sees the worktree; dedupe cannot hide it"))))))
 
-(deftest structural-fence-preserves-plain-directories-and-cross-repo-exclusion
+(deftest structural-fence-excludes-plain-directories-and-cross-repo-duplicates
+  ;; Real-data census: plain directories add only duplicates, no unique IDs.
+  ;; Their exclusion is a measured contract change, not an incidental tightening.
   (let [plain-path (write-mission! "plain/holes/missions/M-plain.md"
                                     "# Plain directory\nStatus: OPEN\n")
         primary-path (write-mission! "futon3/holes/missions/M-primary.md"
@@ -344,8 +352,40 @@
     (is (not (.exists (io/file *tmpdir* "plain" ".git"))))
     (is (.isDirectory (io/file *tmpdir* "futon3b" ".git"))
         "a real primary checkout must still obey the separate cross-repo fence")
-    (is (= {"M-plain" plain-path "M-primary" primary-path}
+    (is (.isFile (io/file plain-path)))
+    (is (= {"M-primary" primary-path}
            (into {} (map (juxt :id :path))
                  (:missions (mr/load-missions-from-files *tmpdir*)))))
     (is (false? (#'mr/primary-checkout? (io/file *tmpdir* "plain")))
-        "preserving plain directories does not classify them as primary")))
+        "plain directories are not primary checkouts")))
+
+
+(deftest top-level-missions-use-the-same-short-worktree-fence
+  (let [primary "primary-checkout-with-a-deliberately-long-name"
+        worktree "wt"
+        paths (into {} (for [repo [primary worktree]
+                             relative ["holes/M-X.md" "holes/missions/M-Y.md"]]
+                         [[repo relative]
+                          (write-mission! (str repo "/" relative)
+                                          "# Mission\nStatus: OPEN\n")]))
+        primary-x (get paths [primary "holes/M-X.md"])
+        primary-y (get paths [primary "holes/missions/M-Y.md"])
+        worktree-x (get paths [worktree "holes/M-X.md"])
+        parsed (atom [])
+        parse-entry @#'mr/mission-doc->entry]
+    (.mkdirs (io/file *tmpdir* primary ".git"))
+    (spit (io/file *tmpdir* worktree ".git") "gitdir: /primary/.git/worktrees/wt\n")
+    (is (< (count worktree-x) (count primary-x)))
+    (doseq [[path stem] [[primary-x "M-X"] [primary-y "M-Y"]]]
+      (is (= stem (#'mr/mission-id-from-path path))))
+    (is (nil? (#'mr/mission-id-from-path (str *tmpdir* "/repo/notes/M-X.md"))))
+    (let [missions (:missions
+                    (with-redefs-fn {#'mr/mission-doc->entry
+                                    (fn [path] (swap! parsed conj path) (parse-entry path))}
+                      #(mr/load-missions-from-files *tmpdir*)))]
+      (is (= {"M-X" primary-x "M-Y" primary-y}
+             (into {} (map (juxt :id :path)) missions)))
+      (is (= 1 (count (filter #(= "M-X" (:id %)) missions))))
+      (is (= 2 (count @parsed)))
+      (is (= #{primary-x primary-y} (set @parsed))
+          "neither worktree layout reaches the real parser"))))

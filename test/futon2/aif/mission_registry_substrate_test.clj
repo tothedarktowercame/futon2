@@ -131,3 +131,29 @@
       (is (= :created (:status (mr/upsert-mission-record!
                                 {:code-root root :path path :existing nil}))))
       (is (zero? @lookups) "an explicit :existing must not trigger a lookup"))))
+
+
+(deftest top-level-upsert-is-admitted-without-substrate-io
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                      "mission-top-level-upsert" (make-array java.nio.file.attribute.FileAttribute 0)))
+        file (io/file root "primary" "holes" "M-top-level.md")]
+    (try
+      (io/make-parents file)
+      (.mkdirs (io/file root "primary" ".git"))
+      (spit file "# Top-level mission\nStatus: ACTIVE\n")
+      (let [path (.getAbsolutePath file)
+            entry (#'mr/mission-doc->entry path)
+            props (into {} (remove (comp nil? val)) (mr/mission-record-props (str root) entry))]
+        (with-redefs [substrate/entities-by-type
+                      (fn [& _] (throw (ex-info "test must not read substrate" {})))
+                      substrate/put-doc!
+                      (fn [& _] (throw (ex-info "test must not write substrate" {})))]
+          (is (= {:id "M-top-level" :status :unchanged}
+                 (mr/upsert-mission-record! {:code-root (str root) :path path
+                                             :existing {:entity/props props}})))
+          (is (= :path-not-admitted
+                 (:reason (mr/upsert-mission-record!
+                           {:path (str (io/file root "primary" "notes" "M-top-level.md"))
+                            :existing nil}))))))
+      (finally
+        (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))

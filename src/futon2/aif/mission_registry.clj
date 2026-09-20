@@ -30,7 +30,7 @@
   (str (System/getProperty "user.home") "/code"))
 
 (def ^:private mission-path-pattern
-  #".*/holes/missions/(M-[^/]+)\.md$")
+  #".*/holes/(?:missions/)?(M-[^/]+)\.md$")
 
 (def ^:private status-line-pattern
   #"(?i)^\s*(?:[-*]\s*)?(?:#+\s*)?(?:\*\*)?Status:?(?:\*\*)?\s*:?\s*(.+)$")
@@ -65,8 +65,9 @@
    Each entry is [pattern source-name]. These exclusions supplement the
    structural .git directory/file check at repository enumeration. They retain
    cross-repo exclusions and known directory-copy exclusions that .git alone
-   cannot distinguish. Plain directories without .git remain eligible; duplicate
-   IDs among admitted directories still rely on the path-length dedupe heuristic.
+   cannot distinguish. Plain directories without .git are excluded by repository
+   enumeration. Dedupe resolves any remaining duplicate IDs among admitted repos;
+   it does not establish checkout authority.
 
    The patterns are deliberately structural (not per-directory-name):
      - /.worktrees/    — the standard git worktree location
@@ -222,8 +223,8 @@
 
 (defn- dedupe-by-id
   "Keep the first entry per mission id after path-length/alphabetic sorting.
-   This resolves remaining duplicates among admitted primary checkouts and
-   plain directories; the sort itself does not establish checkout authority."
+   This resolves remaining duplicates among admitted primary checkouts;
+   the sort itself does not establish checkout authority."
   [entries]
   (let [seen (atom #{})]
     (remove (fn [e]
@@ -349,29 +350,30 @@
   (.isDirectory (io/file repo ".git")))
 
 (defn- mission-scan-repo?
-  "Admit primary checkouts and preserve historical scans of plain directories
-   without .git. A .git file identifies a worktree and is excluded before any
-   mission documents are enumerated; no git subprocess or recursive walk."
+  "Admit only primary checkouts. The measured no-.git directories contribute
+   no unique missions; exclude them alongside .git-file worktrees before
+   enumerating documents, without a subprocess or recursive walk."
   [repo]
-  (or (primary-checkout? repo)
-      (not (.exists (io/file repo ".git")))))
+  (primary-checkout? repo))
 
 (defn load-missions-from-files
-  "The explicit FILE scan. `<code-root>/<repo>/holes/missions/M-*.md` only,
+  "The explicit FILE scan of primary checkouts: `<repo>/holes/M-*.md` and
+   `<repo>/holes/missions/M-*.md` under code-root,
    with the scan-root fences and dedupe documented below. This is the
    ingester's reader (scripts/futon2/aif/mission_substrate_ingest.clj) and the
    form the test suite uses against tmpdirs; the machine's default load
    (`load-missions`, zero-arg) reads substrate-2 and never falls back here."
   ([code-root]
    (let [root (io/file code-root)
-         ;; The contract admits only <code-root>/<repo>/holes/missions/M-*.md.
-         ;; Enumerate exactly those directories. Walking all of ~/code also
-         ;; traversed build trees, worktrees and node_modules before filtering
+         ;; The contract admits M-*.md directly in holes/ or holes/missions/.
+         ;; Enumerate exactly those two directories in each primary checkout.
+         ;; Walking all of ~/code traversed build trees, worktrees and node_modules before filtering
          ;; them out, turning a single construction lookup into minutes of IO.
          mission-files (->> (or (.listFiles root) (make-array File 0))
                             (filter #(.isDirectory ^File %))
                             (filter mission-scan-repo?)
-                            (map #(io/file % "holes" "missions"))
+                            (mapcat #(vector (io/file % "holes")
+                                             (io/file % "holes" "missions")))
                             (filter #(.isDirectory ^File %))
                             (mapcat #(or (.listFiles ^File %)
                                          (make-array File 0))))
@@ -383,8 +385,8 @@
                        ;; Keep cross-repo and known-copy exclusions alongside
                        ;; the structural repository filter above.
                        (remove non-primary-path?)
-                       ;; Resolve duplicate IDs among admitted checkouts/plain
-                       ;; directories by path length, then alphabetically. This
+                       ;; Resolve duplicate IDs among admitted checkouts
+                       ;; by path length, then alphabetically. This
                        ;; heuristic is not evidence of checkout authority.
                        (sort-by (juxt count identity))
                        (map mission-doc->entry)
