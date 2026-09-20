@@ -1,0 +1,6 @@
+
+Testing futon2.aif.cascade-sources-test
+PATTERN-SOURCE-HASH-RECEIPT {:source {:path "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg", :sha256 "3d006bdff9d3af808112139f9c0342bd93d1c4ab38adf550d9c4754a026d9046"}, :independent-sha256 "3d006bdff9d3af808112139f9c0342bd93d1c4ab38adf550d9c4754a026d9046", :scope :offline-admission}
+
+Ran 6 tests containing 22 assertions.
+0 failures, 0 errors.
