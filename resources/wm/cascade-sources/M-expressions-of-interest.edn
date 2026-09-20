@@ -1,0 +1,65 @@
+;; Presence witnesses only (claude-4 disposition, 2026-09-20).
+;; Token names label intended collaboration evidence; C3 verifies only that
+;; the named committed file exists. It does not verify authorship, binding,
+;; ordering, grounding, correctness, or mission completion. No J channel.
+;; These prospective artifacts belong to the mission's community account,
+;; outside WM run bookkeeping. This declaration does not create them.
+;; HEAD is resolved and retained by C3 on each observation, so later committed
+;; witnesses can satisfy the currently unsatisfied want.
+{:schema :wm/cascade-source-v1
+ :target "M-expressions-of-interest"
+ :context :WM
+ :beta {:value 1 :status :declared}
+ :facts [:change-authored-and-bound :premise-refused-before-work
+         :obligation-resolved-through-the-account]
+ :want [:change-authored-and-bound :premise-refused-before-work
+        :obligation-resolved-through-the-account]
+ :locators
+ {:change-authored-and-bound
+  {:class :C3 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/evidence/M-expressions-of-interest/AUTHORED-CHANGE.edn"}
+  :premise-refused-before-work
+  {:class :C3 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/evidence/M-expressions-of-interest/PREMISE-REFUSAL.edn"}
+  :obligation-resolved-through-the-account
+  {:class :C3 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/evidence/M-expressions-of-interest/CORRECTION-PAR.edn"}}
+ :patterns
+ {:coordination/bounded-execution
+  {:guard {:needs #{} :forbids #{:change-authored-and-bound}}
+   :produces #{:change-authored-and-bound}}
+  :futon-theory/stop-the-line
+  {:guard {:needs #{} :forbids #{:premise-refused-before-work}}
+   :produces #{:premise-refused-before-work}}
+  :coordination/par-as-obligation
+  {:guard {:needs #{:premise-refused-before-work}
+           :forbids #{:obligation-resolved-through-the-account}}
+   :produces #{:obligation-resolved-through-the-account}}}
+ :interpretation-receipts
+ {:coordination/bounded-execution
+  {:kind :hand-admitted :by "codex-3" :date "2026-09-20"
+   :source {:path "futon3/library/coordination/bounded-execution.flexiarg"
+            :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+            :sha256 "1dda0e59f99b45582e63b5a2a056ad43d47fd1e0baad1a01d72c8ca116bd06a5"}
+   :reading "Bound a mission-scoped contribution and commit its change witness. Predicted output is the witness file's presence only, not verification of its claims."}
+  :futon-theory/stop-the-line
+  {:kind :hand-admitted :by "codex-3" :date "2026-09-20"
+   :source {:path "futon3/library/futon-theory/stop-the-line.flexiarg"
+            :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+            :sha256 "ba33e0300fa946a5831460bcae1360cb5b9742c6ea72d5765348eeef64998e88"}
+   :reading "Inspect a mission work premise and record a refusal witness when it fails. This is a hand-admitted production hypothesis; presence alone establishes neither a genuine premise defect nor refusal-before-work ordering."}
+  :coordination/par-as-obligation
+  {:kind :hand-admitted :by "codex-3" :date "2026-09-20"
+   :source {:path "futon3/library/coordination/par-as-obligation.flexiarg"
+            :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+            :sha256 "f749561c4b017dcd22e058695693ac98fbed2e9092c3e910a295f9d440b3662a"}
+   :reading "After a refusal witness, record the correction cycle's post-action review with references to its prior steps. The model predicts the PAR witness's presence only; its contents and resolution are not mechanically adjudicated."}}
+ :candidates
+ [{:precedence [:coordination/par-as-obligation :coordination/bounded-execution
+                :futon-theory/stop-the-line]
+   :construction-receipt {:kind :hand-admitted :by "codex-3" :date "2026-09-20"
+                          :moves [] :stopped-is-not-success true}}
+  {:precedence [:coordination/par-as-obligation :futon-theory/stop-the-line
+                :coordination/bounded-execution]
+   :construction-receipt {:kind :hand-admitted :by "codex-3" :date "2026-09-20"
+                          :moves [] :stopped-is-not-success true}}]}
