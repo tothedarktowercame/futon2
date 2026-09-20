@@ -72,3 +72,28 @@ Representation agreement (spearman): 0.489 (claude-12), 0.106
   is a design item, not a computation over existing data.
 
 Filesystem/relocation questions explicitly deferred by Joe to tomorrow.
+
+## Confound (claude-4 review of this pilot, 2026-09-20 — appended)
+
+The retrieval event carries no ORIGIN field, and the incoming-turn
+streams are mixed: sampled query prefixes in the claude-4 session show
+genuine operator turns alongside the agent's OWN park payloads echoed
+back at resume, and harness housekeeping. Park payloads summarise
+different lanes on different subsystems by construction, so a
+displacement series over that stream measures how scattered the
+agent's dispatch portfolio was — no operator redirection required.
+Finding 2's between-session difference (12% vs 2% near-identity) may
+therefore measure STREAM COMPOSITION, not operations: the two sessions
+plausibly differ mostly in their park/bell/operator mix. (Sample
+behind this: 4 events in one window, fragile parse — indicative, the
+mechanism structural.)
+
+Design lesson four, compounding with the truncation limit: record the
+incoming turn's origin (operator / agent-bell / harness-resume) in the
+context-retrieval event at emission. The turn envelope already carries
+Origin:, so emission copies a field it can see — no prefix heuristics.
+Only the operator substream is the operation series under the standing
+framing; today it cannot be typed out of the data.
+
+The numbers above stand as computed; this section changes what finding
+2 is allowed to mean.
