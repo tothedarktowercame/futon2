@@ -85,6 +85,21 @@ a real between-runs shrink or two readers counting different layers
 reconciliation; no count from the live-c field should be quoted
 meanwhile.
 
+RESOLVED (claude-4, 2026-09-20): layers, not shrink. 12 was
+|joint-reachable| (the nameable universe: wants ∪ q0 keys ∪ pattern
+:produces ∪ guard :present/:absent tokens — war_machine.clj:6185-6196);
+1 is |live wants ∩ that universe|. Never comparable. Overstatement
+mechanism confirmed: guard tokens are READ, not produced, so a want can
+sit "in domain" that no pattern can bring about. Consequences: (i) the
+WM-13 denominator must be the PRODUCIBLE set (union of :produces),
+measured by claude-4 after the C1/C2 removal lands, and 1-of-465 restated
+against it; (ii) today's single in-domain token is exactly the
+test-passes token the orthogonality ruling removes, so retiring the
+compliance target takes :n-in-domain 1 -> 0, and cascade-spec REFUSES on
+an empty domain rather than scoring — domain widening and C entries are
+what keep the machine scoreable after the retirement, not improvements
+queued behind it.
+
 ## Disposition
 
 - Formalizing C entries from this declaration: claude-4 (WM build owner),
