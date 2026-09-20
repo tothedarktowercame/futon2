@@ -161,6 +161,10 @@
                                 :sources tick-1-sources})
         r (wm/cascade-decision assembled live-c-opts)
         decision (:decision r)]
+    (is (= (into {} (map (fn [[token locator]] [[tick-1-target token] locator]))
+                         (get-in (first (:problems assembled)) [:cascade-problem :locators]))
+           (get-in decision [:action :observation-locators]))
+        "selected candidates retain the declared checkers with target-qualified tokens")
     ;; A single mission token divides its mass evenly over that mission's
     ;; three declared wants, so within this one-target family it introduces
     ;; no relative preference.

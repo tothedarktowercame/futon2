@@ -20,6 +20,7 @@
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold-classical :as fold-classical]
+            [futon2.aif.fold-cascade :as fold-cascade]
             [futon2.aif.fold :as fold]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
@@ -1460,10 +1461,21 @@
          result0 (when-not port-missing?
                    (if wiring-fn
                      (wiring-fn construction)
-                     (or (:fold (close-loop/act-gate-from-lane-entry construction construction))
-                         (fold-classical/classical-fold (vec (:shown construction)) construction))))
+                     (if (and (= :selected-cascade (:construction-kind construction))
+                              (seq (:interpretation-receipts construction)))
+                       (fold-cascade/realize construction)
+                       (let [result (or (:fold (close-loop/act-gate-from-lane-entry construction construction))
+                                        (fold-classical/classical-fold (vec (:shown construction)) construction))]
+                         (assoc result
+                                :fold/route (if (= "semilattice-fold v1 (descent=BV.seq, co_app=BV.copar)"
+                                                  (get-in result [:wiring :generated-by]))
+                                              :semilattice :classical)
+                                :fold/selection-reason :legacy-construction)))))
          result0 (if (nil? wiring-fn)
-                   (ground-cascade-policy-holes construction result0)
+                   (let [grounded (ground-cascade-policy-holes construction result0)]
+                     (if (= :cascade-interpretation (:fold/route grounded))
+                       (fold-cascade/evaluate grounded)
+                       grounded))
                    result0)
          ;; The classical fold can only name the patterns it could not fold.  A
          ;; stop-line construction additionally owns the real obligation that

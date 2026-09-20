@@ -1,0 +1,36 @@
+{
+  "role": "pre-commit-validation",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "independent-reviewer": "claude-2",
+  "independent-review-status": "pending",
+  "landing-authorization": "invoke-1789947124666-22806-d267f61b",
+  "baseline": "1ed5006eae14ffaabed7d3dd2e0a8b5f7c06bb4e",
+  "base-head": "747f86fd68a0ca34107cc7828164a08f1e0f72ac",
+  "sha256": {
+    "scripts/futon2/report/war_machine.clj": "bc3cbb7348169190d110e7cfebed3741f4f66d14fa18835219f408f04bfde5cc",
+    "src/futon2/aif/full_loop_runner.clj": "41bb6b5cfeeb1543f07f53497aeca035597deaef751455e1307726e1f67300c9",
+    "src/futon2/aif/fold_cascade.clj": "4e194f53badb0d11d789e8793d900b9d6374f668edf2d4dce52e6e32469c10a9",
+    "test/futon2/aif/fold_cascade_test.clj": "64c2ba7d12fd64feae886fa85338aba17c84ade606e228f2fe5fa332cd15f583",
+    "test/futon2/report/cascade_decision_test.clj": "f593d743bf9dd178c10fd0bdac5694dedaa926f65c0ae6a3979c33cc52fca055"
+  },
+  "reused-precommit-evidence": "draft-source-hashes match restored source bytes exactly; full runner 180/998/0/0, realizer 4/51/0/0, repair regression 4/64/0/0",
+  "additional-check": "cascade-decision-test 11/55/0/0",
+  "baseline-attribution": {
+    "fold-realized-test": {
+      "tests": 6,
+      "assertions": 28,
+      "failures": 0,
+      "errors": 3,
+      "comparison": "byte-identical"
+    },
+    "fold-escrow-test": {
+      "tests": 8,
+      "assertions": 30,
+      "failures": 6,
+      "errors": 0,
+      "comparison": "identical except random temporary directory names; exact normalization /tmp/fold-turns-test[0-9]+"
+    }
+  },
+  "store-writes": "held pending Agency-job review"
+}

@@ -6164,6 +6164,9 @@
                                        :id (keyword (str "C" i))
                                        :target t
                                        :precedence (mapv patterns order)
+                                       :observation-locators
+                                       (into {} (map (fn [[token locator]] [(qual token) locator]))
+                                             (:locators cp))
                                        :construction-receipt receipt
                                        :interpretation-receipts
                                        interp-receipts}})))

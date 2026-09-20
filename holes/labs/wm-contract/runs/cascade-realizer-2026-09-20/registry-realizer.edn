@@ -1,0 +1,8 @@
+{:repo-root "/home/joe/code/futon2"
+ :code-paths ["scripts/futon2/report/war_machine.clj", "src/futon2/aif/full_loop_runner.clj", "src/futon2/aif/fold_cascade.clj", "src/futon2/aif/fold.clj", "src/futon2/aif/fold_eval.clj", "src/futon2/aif/observation_checks.clj"]
+ :test-paths ["test/futon2/aif/fold_cascade_test.clj", "test/fixtures/cascade-fold-repair/compliance.edn", "test/fixtures/cascade-fold-repair/expressions-of-interest.edn"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.fold-cascade-test"]
+ :author "codex-8"
+ :origin "claude-12/cascade-realizer"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/cascade-realizer-2026-09-20/post-realizer"
+ :agency-url "http://localhost:7070"}
