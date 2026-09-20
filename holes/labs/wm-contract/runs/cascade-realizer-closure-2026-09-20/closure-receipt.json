@@ -1,0 +1,154 @@
+{
+  "role" : "post-commit-warrant-and-store-closure",
+  "followup-commit" : "df05294b",
+  "requesting-owner" : "claude-12",
+  "store-sequence" : [ {
+    "phase" : "before",
+    "state" : {
+      "finding-id" : "repair-02ca4839-5879-44ea-8f59-2839c540814a-construction-yields-no-boxes",
+      "closed?" : false,
+      "open-zero-box-findings" : [ "repair-02ca4839-5879-44ea-8f59-2839c540814a-construction-yields-no-boxes" ],
+      "violations" : [ ]
+    }
+  }, {
+    "phase" : "implementation",
+    "record" : {
+      "repair/status" : "awaiting-validation",
+      "replacement-commit" : "28a90c731d30fab8d8e7f8ed7bf0a840c6301f3d",
+      "witness" : {
+        "resolved?" : true,
+        "dial-moved?" : true,
+        "scope" : "witnessed-cascade-construction",
+        "evidence" : [ "holes/labs/wm-contract/runs/cascade-realizer-closure-2026-09-20/registration.edn", "holes/labs/wm-contract/runs/cascade-realizer-closure-2026-09-20/review-job.json", "holes/labs/wm-contract/runs/cascade-realizer-2026-09-20/recorded-expressions-replay.edn" ],
+        "positive" : {
+          "input-kind" : "constructed-production-shaped",
+          "boxes" : 1,
+          "policy-holes" : 0,
+          "coverage-score-delta" : -1.0
+        },
+        "negative" : {
+          "boxes" : 0,
+          "policy-holes" : 1,
+          "coverage-score-delta" : null
+        },
+        "recorded-c6-mission" : {
+          "boxes" : 0,
+          "policy-holes" : 3,
+          "coverage-score-delta" : null
+        },
+        "claim" : "construction-capability-not-mission-completion"
+      },
+      "repair/id" : "repair-02ca4839-5879-44ea-8f59-2839c540814a-construction-yields-no-boxes",
+      "implemented-at" : "2026-09-20T23:49:24.400586799Z",
+      "grounded-review-evidence" : {
+        "job-id" : "invoke-1789947598636-22808-85f9818f",
+        "state" : "done",
+        "verdict" : "approve",
+        "execution" : {
+          "executed" : true,
+          "tool-events" : 12,
+          "command-events" : 12
+        },
+        "execution-source" : "job-summary",
+        "valid?" : true,
+        "reviewer" : "claude-2"
+      },
+      "review-job" : "invoke-1789947598636-22808-85f9818f",
+      "artifact-binding" : {
+        "fresh-author?" : true,
+        "disagreement?" : false,
+        "descendant?" : true,
+        "text-artifact-ref" : "28a90c73",
+        "reported-text-artifact-ref" : "28a90c73",
+        "pre-dispatch-head" : "747f86fd68a0ca34107cc7828164a08f1e0f72ac",
+        "resolved-from" : "done-line",
+        "claim-in-author-window?" : true,
+        "author-window-end-ms" : 1789948038842,
+        "author-window-start-ms" : 1789947261040,
+        "commit" : "28a90c731d30fab8d8e7f8ed7bf0a840c6301f3d",
+        "in-author-window?" : true,
+        "observed-commit-time-ms" : 1789947952000,
+        "repo" : "/home/joe/code/futon2",
+        "text-artifact-sha" : "28a90c731d30fab8d8e7f8ed7bf0a840c6301f3d",
+        "observed-head" : "1c7113b6f021273da81e7515f276da9ddea27667",
+        "corroborates?" : true,
+        "claim-commit-time-ms" : 1789947261000,
+        "claim-resolution" : "resolved"
+      },
+      "implementation-attempt" : "invoke-1789947124666-22806-d267f61b",
+      "failed-attempt" : "02ca4839-5879-44ea-8f59-2839c540814a",
+      "reviewer" : "claude-2",
+      "repair/schema-version" : 1
+    }
+  }, {
+    "phase" : "resolution",
+    "record" : {
+      "repair/status" : "resolved",
+      "resolved-at" : "2026-09-20T23:49:28.552133018Z",
+      "replacement-commit" : "28a90c731d30fab8d8e7f8ed7bf0a840c6301f3d",
+      "witness" : {
+        "resolved?" : true,
+        "dial-moved?" : true,
+        "scope" : "witnessed-cascade-construction",
+        "evidence" : [ "holes/labs/wm-contract/runs/cascade-realizer-closure-2026-09-20/registration.edn", "holes/labs/wm-contract/runs/cascade-realizer-closure-2026-09-20/review-job.json", "holes/labs/wm-contract/runs/cascade-realizer-2026-09-20/recorded-expressions-replay.edn" ],
+        "positive" : {
+          "input-kind" : "constructed-production-shaped",
+          "boxes" : 1,
+          "policy-holes" : 0,
+          "coverage-score-delta" : -1.0
+        },
+        "negative" : {
+          "boxes" : 0,
+          "policy-holes" : 1,
+          "coverage-score-delta" : null
+        },
+        "recorded-c6-mission" : {
+          "boxes" : 0,
+          "policy-holes" : 3,
+          "coverage-score-delta" : null
+        },
+        "claim" : "construction-capability-not-mission-completion"
+      },
+      "repair/id" : "repair-02ca4839-5879-44ea-8f59-2839c540814a-construction-yields-no-boxes",
+      "failed-commit" : null,
+      "review-job" : "invoke-1789947598636-22808-85f9818f",
+      "failed-attempt" : "02ca4839-5879-44ea-8f59-2839c540814a",
+      "reviewer" : "claude-2",
+      "validation" : {
+        "production-shaped?" : true,
+        "run-id" : "eaeb4e03-7fa2-4e9d-859d-8cd31921104f",
+        "warrant-id" : "test-registry-cd175e5cd6aafa05a8219f1939d2c344151609c6e6f75bb0fe2393e25322fc2f",
+        "boxes" : 1,
+        "coverage-score-delta" : -1.0,
+        "scope" : "constructed-production-shaped-successor",
+        "recorded-mission-completion?" : false
+      },
+      "validation-attempt" : "eaeb4e03-7fa2-4e9d-859d-8cd31921104f",
+      "repair/schema-version" : 1
+    }
+  }, {
+    "phase" : "after",
+    "state" : {
+      "finding-id" : "repair-02ca4839-5879-44ea-8f59-2839c540814a-construction-yields-no-boxes",
+      "closed?" : true,
+      "open-zero-box-findings" : [ ],
+      "violations" : [ ]
+    }
+  } ],
+  "validation-run" : "eaeb4e03-7fa2-4e9d-859d-8cd31921104f",
+  "warrant-id" : "test-registry-cd175e5cd6aafa05a8219f1939d2c344151609c6e6f75bb0fe2393e25322fc2f",
+  "code-sha" : "dc2aa55d161c11c3f04edcc092ef5001dc0912869bbda53f5f324c8362933981",
+  "author" : "codex-8",
+  "test-sha" : "6e98bd90e2af132f7c484a2eee91bf6117ae0b1c9a65f369a9576dfbc8167a5b",
+  "review-job" : "invoke-1789947598636-22808-85f9818f",
+  "independent-reviewer" : "claude-2",
+  "implementation-commit" : "28a90c731d30fab8d8e7f8ed7bf0a840c6301f3d",
+  "results" : {
+    "assertions" : 86,
+    "duration-ms" : 3763,
+    "errors" : 0,
+    "exit" : 0,
+    "failures" : 0,
+    "tests" : 5
+  }
+}
