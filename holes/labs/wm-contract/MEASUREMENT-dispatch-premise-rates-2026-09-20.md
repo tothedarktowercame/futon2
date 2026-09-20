@@ -57,3 +57,25 @@ A DECLARED experimental rate for the codex-intake self-credit channel:
 record as basis per the declared-as-such precedent. Adoption into any
 live A declaration remains Joe's call; nothing here rates the J locator
 by itself.
+
+## Second channel: Claude (corrected handoffs), same ledger, same window
+
+Population: caller claude-12 -> agent claude-4, state done, n = 68.
+Weak text rule (no installed convention exists between claude seats —
+same instrument caveat as caveat 3): reply opening (500 chars)
+contains a correction marker. Raw hits: 8/68. Hand-classified: ~6 are
+genuine corrections of the SENDER's premise (stale claim, wrong
+factor-health assertion, wrong sequencing fact, wrong record claim);
+~2 are the receiver's own-error admissions miscaught by the rule. So:
+
+| channel | rate | n | convention |
+|---|---|---|---|
+| codex refusal-at-intake | 0.14 (9/64) | 64 | installed (packet-instructed) |
+| claude corrected-handoffs | ~0.09 (6/68) | 68 | none — ad hoc, lower bound |
+
+Convergence worth noting at plausible grade: two independently
+instrumented channels both land in a 0.09-0.15 self-credit error band.
+A declared judgement-channel rate of ~0.1-0.15, labeled with these two
+populations, is Landscape-grounded in exactly Joe's sense. Zai
+(in-turn) channel still unmeasured; the coupling weight p (co-failure
+clustering) is the remaining Landscape estimate.
