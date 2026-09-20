@@ -1,0 +1,87 @@
+{:schema :wm04-pilot-review-v1
+ :observer "zai-17"
+ :reviewer "codex-1"
+ :cutoff {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99"
+          :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b"
+          :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd"
+          :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f"
+          :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"}
+ :rows
+ [{:subject-id "R1-2"
+   :verdict :supported
+   :reason "The cited belief.clj supplies categorical distributions and reconcile-belief-carry, while pattern_reliability.clj/theta labels a different prior-only quantity; neither cited artifact supplies the requested introduction/update/cutoff envelope, supporting the observer's bounded insufficient finding, not repository-wide absence."
+   :flags [{:kind :additional-evidence-limit
+            :detail "belief.clj:510-523 explicitly returns fresh uniform bootstrap on missing carry; this code is not evidence that the application's no-uniform-repair condition was met."}]}
+  {:subject-id "R16-1"
+   :verdict :contradicted
+   :reason "At cutoff enact.clj:162-175 decision-lane-entry projects the candidate to mission, shown pattern IDs and score; enact!:276-321 executes shown and returns a small audit, not the requested full policy/state/guards/history/source-model-revision enactment contract."
+   :flags [{:kind :reason-exceeds-evidence
+            :detail "The cited namespace summary says ranked-actions, but act-gates-with-shown:177-198 explicitly consumes one cascade decision; the summary is stale and does not establish the requested retention or an executed scheduled occurrence."}]}
+  {:subject-id "R3-1"
+   :verdict :supported
+   :reason "belief.clj names the discrete tempered categorical law, explicit status-set, observation-model-v1, transition-model-v1, model-manifest and categorical-filter-step; these provide the declared A/B/state/numeric interpretation claimed, without treating the Gaussian example as the implementation."
+   :flags []}
+  {:subject-id "R4-2"
+   :verdict :supported
+   :reason "C261-transition-kernel-binding.md reports a deterministic controlled-kernel fixture and notation rejection, but its Closure explicitly says only evidence metadata changed; it does not supply live full-policy guarded/history inputs or unhandled-action refusal, supporting the scoped insufficient finding."
+   :flags [{:kind :evidence-description-inaccurate
+            :detail "The note is not merely prospective design: it reports a fixture and Lean rejections; these are nevertheless narrower than this subject's output."}]}
+  {:subject-id "R5-3"
+   :verdict :supported
+   :reason "cascade_g.clj/step-g constructs J and its marginal, returns risk+ambiguity and cross-entropy-minus-MI, and total-g sums a checked common schedule; cascade_g_test.clj and reference.edn supply the cited component correspondence, with reference.py independently calculating Decimal(90) values and retained tests.txt reporting the executed checks."
+   :flags [{:kind :scope-limit
+            :detail "Independent numeric calculation is supported; independent authorship review and production use are explicitly not established by the adjacent wm-10-scorer RECEIPT.md and are not inferred here."}]}
+  {:subject-id "R6-4"
+   :verdict :insufficient-to-review
+   :reason "Reproducing the cutoff search with git grep -E over src and test yields no matches for the three phrases, but that does not establish absence of full-identity/enactor/alternative retention or a semantically equivalent coverage control."
+   :flags [{:kind :reason-exceeds-evidence
+            :detail "Positive absence and the assertion that this is the only relevant repository are not established by the cited lexical search."}
+           {:kind :search-specification-ambiguous
+            :detail "The recorded git grep command omits -E: literal basic-regex pipes do not express the intended alternatives; even the stronger extended-regex search returning zero cannot prove the semantic absence."}]}
+  {:subject-id "R9-3"
+   :verdict :insufficient-to-review
+   :reason "The evidence vector is empty and occurrence is none identified; no reviewer action, subject-specific independence check or source artifact is retained to assess the recorded finding."
+   :flags [{:kind :empty-evidence
+            :detail "No artifact supports the reason's claim about an independence verification on this subject."}]}
+  {:subject-id "WM-06-C5"
+   :verdict :supported
+   :reason "The recursive cutoff tree under holes/labs/wm-contract/runs contains no wm-06 directory, consistent with the observer's expressly limited no-located-envelope-receipt finding; this supports insufficient evidence in that search, not absence of envelope binding elsewhere."
+   :flags [{:kind :search-scope-limit
+            :detail "Directory naming is not semantic coverage; the observer explicitly leaves other repositories unsearched and the review preserves that limitation."}]}
+  {:subject-id "WM-10-C4"
+   :verdict :supported
+   :reason "cascade_g.clj/step-g and total-g implement the stated joint-derived decompositions, positive-marginal/zero-C refusal and checked schedule; cited commit 5b3141da resolves and is an ancestor of cutoff, containing the independent reference calculation, reference.edn and correspondence tests."
+   :flags [{:kind :scope-limit
+            :detail "The implementation is on supplied finite categorical inputs; no empirical A, production consumption or independent authorship review is inferred."}]}
+  {:subject-id "WM-11-C4"
+   :verdict :contradicted
+   :reason "cascade_selection.clj/selection-posterior checks positive beta/habit but not finiteness or F validity, treats invalid nonnumeric/NaN G as excluded, admits numeric infinities to log-sum-exp, and collapses IDs into a mass map without retaining G/F/E/precision; the cited tests do not establish the application's complete-family/domain/retention conditions."
+   :flags [{:kind :reason-exceeds-evidence
+            :detail "The tests cover selected valid cases and four refusals, not arbitrary invalid evidence, duplicate identities or nonfinite score domains; the recorded assertion of retained per-candidate inputs is contrary to the return expression."}]}
+  {:subject-id "WM-14-C2"
+   :verdict :insufficient-to-review
+   :reason "The empty evidence vector identifies neither a retrieval occurrence nor its usefulness assessment; the no-located-assessment reason cannot be independently checked against a cited artifact."
+   :flags [{:kind :empty-evidence :detail "No retrieval result or assessment pointer supplied."}]}
+  {:subject-id "E01-2"
+   :verdict :insufficient-to-review
+   :reason "No evidence is cited for the task-specific applicability argument or its search; a generic reference to the cascade README does not identify a retained interpretation and alternatives for actual work."
+   :flags [{:kind :empty-evidence :detail "The reason mentions a README but the evidence vector supplies no artifact pointer for it."}]}
+  {:subject-id "E08-6"
+   :verdict :insufficient-to-review
+   :reason "The evidence vector is empty and no occurrence is located; there is no retained composed institutional test or independent finding to inspect, nor a bounded search receipt establishing the observer's search."
+   :flags [{:kind :empty-evidence :detail "No actual-work instance or composed-test artifact supplied."}]}
+  {:subject-id "R12-2"
+   :verdict :supported
+   :reason "The cutoff P121/P125/P130 search leads to checklist and completion-list records: COMPLETION-LIST-plop2026-2026-09-12.md:194,198,203 labels the historical claims UNCLASSIFIED and says original execution/replay receipts were not located, supporting the recorded unresolved/insufficient finding rather than a completed Campaign S reconciliation."
+   :flags [{:kind :evidence-description-incomplete
+            :detail "Matches also occur in copied/rendered checklist artifacts and paper-claim-coverage.json, not only the named documents; none of those matches supplies the missing original process records."}]}
+  {:subject-id "R20-3"
+   :verdict :supported
+   :reason "full_loop_runner.clj:3686 onward reads and routes open repair obligations through stop-line-memory; the cited occurrence is this phase, not a retained ruled response with active factors/modes/effective values and trip-to-R14 composition, supporting insufficient evidence at the claimed occurrence only."
+   :flags [{:kind :search-scope-limit
+            :detail "This phase inspection does not establish that no qualifying response record exists elsewhere; the observer's no-located wording is retained."}]}
+  {:subject-id "WM-14-C3"
+   :verdict :supported
+   :reason "interpretation_job.clj:81-103 permits at most one new pattern with source companions and explicit paths and :181 enforces a genesis limit; a permission/validation path is not the requested authored draft with rationale and parent problem, so the cited evidence supports the bounded insufficient finding."
+   :flags [{:kind :search-scope-limit
+            :detail "No authored pattern occurrence is cited; the code alone cannot establish repository-wide absence of drafts."}]}]}
