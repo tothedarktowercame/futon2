@@ -93,3 +93,13 @@ that neither needs nor claims E1. If/when portfolio-approval should
 gate carry admission or the broader E2b chain should go live, the E1
 source installation is Joe's configuration decision, and the
 candidate-to-minted occurrence join needs its own ruling then.
+
+UPDATE (late 2026-09-20): the enactment-record producer LANDED —
+D 2c narrow task authority (328141ab: producer, independent verifier,
+exact-identity predecessor reader; warrants 82d2c936; attribution
+400889ef showing zero introduced failures against a 43+1 pre-existing
+runner baseline). Rated-tick prerequisite 3 is therefore built; live
+carry admission additionally needs a real enacted predecessor
+occurrence at tick time. Remaining prerequisites: scoring-opts
+forwarding (in claude-4's packet) and the adopted declaration's rate
+attachment (same packet).
