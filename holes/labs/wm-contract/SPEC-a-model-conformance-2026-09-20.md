@@ -66,3 +66,19 @@ cascade-decision's literal scoring opts do not forward observation-model
 rated tick therefore needs this forwarding wired in addition to the
 C-family fix — recorded here so the first rated-run packet inherits it
 as a known item, not a surprise.
+
+## Third rated-run prerequisite (codex-6 2b authority stop, 2026-09-20)
+
+No production record binds a prior token-carry occurrence to an ACTUAL
+executed token transition: receipt-construction acting-order is
+simulated, the runner's :selection-enaction is self-asserted
+(selected=selected), war_machine's record is :enactment-plan with
+independent-check-required, and machine_enactment_correspondence
+refuses :production authority outright. This is the closure DAG's open
+EV-enactment obligation surfacing as D's carry-admission blocker. Until
+an enactment-record producer exists (scoped as D 2c, discovery first),
+every live tick takes :carry-no-predecessor + fresh initialization,
+honestly recorded, and live D/Q verdicts stay degenerate REGARDLESS of
+declared rates. Rated-tick prerequisites are therefore three:
+scoring-opts observation-model/rate forwarding; the A declaration; the
+enactment-record producer (EV-enactment).
