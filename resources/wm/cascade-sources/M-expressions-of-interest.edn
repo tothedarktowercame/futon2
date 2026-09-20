@@ -10,6 +10,8 @@
  :target "M-expressions-of-interest"
  :context :WM
  :beta {:value 1 :status :declared}
+ :lam {:value 1 :status :declared}
+ :mu {:value 0 :status :declared}
  :facts [:change-authored-and-bound :premise-refused-before-work
          :obligation-resolved-through-the-account]
  :want [:change-authored-and-bound :premise-refused-before-work

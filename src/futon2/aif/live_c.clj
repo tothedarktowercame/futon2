@@ -235,7 +235,6 @@
           (assoc norm :refusals (concat top-refusals (:refusals star)))
           {:want (into #{} (map :token) entries)
            :weights (:weights norm)
-           :lam 1
            :entries entries
            ;; :gaps are recorded, NON-BLOCKING per-mission/per-capability
            ;; holes (no wholeness row, no capability status): the derivation
@@ -300,6 +299,39 @@
    {:want #{} :weights {} :projected-from {} :unreached #{}}
    (:want derived)))
 
+(defn preference-scales
+  "Read named scales. Legacy callers/declarations omitting a key retain a
+  typed default with its reason; supplied parameters must be exact, declared
+  and satisfy Lean's inequalities. Production declarations supply both."
+  [declaration]
+  (into {}
+        (for [[k fallback valid?] [[:lam 1 pos?] [:mu 0 #(>= % 0)]]]
+          (let [p (if (contains? declaration k)
+                    (get declaration k)
+                    {:value fallback :status :defaulted
+                     :reason :parameter-not-declared})
+                v (:value p)]
+            (when-not (and (or (not (contains? declaration k))
+                              (= :declared (:status p)))
+                           (or (integer? v) (ratio? v)) (valid? v))
+              (throw (ex-info "invalid declared preference scale"
+                              {:kind :invalid-preference-scale :field k :parameter p})))
+            [k p]))))
+
+(defn family-scales
+  "A joint spec needs one pair of scales; preserve each target's authority
+  and refuse incompatible values rather than picking a target."
+  [problems]
+  (let [by-target (into {} (for [p problems]
+                            [(:target p) (or (get-in p [:cascade-problem :preference-scales])
+                                             (preference-scales {}))]))
+        values (distinct (map (fn [s] (mapv #(get-in s [% :value]) [:lam :mu]))
+                              (vals by-target)))]
+    (when (not= 1 (count values))
+      (throw (ex-info "incompatible preference scales"
+                      {:kind :incommensurable-family :preference-scales by-target})))
+    {:lam (ffirst values) :mu (second (first values)) :by-target by-target}))
+
 (defn cascade-spec
   "The live C as the cascade preference spec cascade-model-manifest consumes,
   RESTRICTED to REACHABLE — the token domain of the comparison the spec will
@@ -318,7 +350,7 @@
   :closed/M project only to M's own declared pairs; :star/capability does not
   name a target and is therefore left under :unreached-in-domain.
 
-  Returns {:want … :weights … :lam 1 :mu 0 :evidence #{} :zeroed #{}
+  Returns {:want … :weights … :lam declared-lam :mu declared-mu :evidence #{} :zeroed #{}
   :live-c provenance}, or the typed refusal :no-reachable-want when no
   live-C want token lies in REACHABLE (an empty belly for this comparison
   refuses rather than scoring pure information gain)."
@@ -327,6 +359,9 @@
    ;; domain.  Production uses the target-qualified arity below.
    (cascade-spec derived reachable nil))
   ([derived reachable joint-want]
+   (cascade-spec derived reachable joint-want
+                 (family-scales [{:target :legacy-caller}])))
+  ([derived reachable joint-want scales]
    (if (seq (:refusals derived))
      {:refusal {:kind :live-c-refused :refusals (:refusals derived)}}
      (let [{projected :want projected-weights :weights
@@ -348,12 +383,14 @@
                     :unreached-in-domain (vec (sort (map str unreached)))
                     :limitation "no projected live-C want lies in this comparison's outcome domain; scoring would be pure information gain — the dark room — so it refuses"}}
          {:want in-domain
-          :weights (select-keys candidate-weights in-domain)
-          :lam (:lam derived)
-          :mu 0
+          :weights (into {} (map (fn [[token weight]] [token (* (:lam scales) weight)]))
+                         (select-keys candidate-weights in-domain))
+          :lam (:lam scales)
+          :mu (:mu scales)
           :evidence #{}
           :zeroed #{}
-          :live-c {:signature (:signature derived)
+          :live-c {:preference-scales scales
+                   :signature (:signature derived)
                    :n-entries (count (:entries derived))
                    :n-in-domain (count in-domain)
                    :projection :mission-declared-wants

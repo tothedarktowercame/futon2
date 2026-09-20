@@ -20,6 +20,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.live-c :as live-c]
             [futon2.aif.observation-checks :as oc]))
 
 (def ^:dynamic *read-occurrences*
@@ -142,6 +143,7 @@
                 d (check-file! path (edn/read-string (String. snapshot java.nio.charset.StandardCharsets/UTF_8)))
                 receipts (into {} (map (fn [[id receipt]] [id (read-receipt-source receipt)]))
                                (:interpretation-receipts d))
+                scales (live-c/preference-scales d)
                 t (:target d)
                 {:keys [universe observations]} (observe-facts (:facts d) (:locators d))
                 occurrence {:path path :sha256 hash :target t :observations observations}
@@ -149,6 +151,7 @@
             (-> acc
                 (assoc-in [:universes t] universe)
                 (assoc-in [:wants t] (vec (:want d)))
+                (assoc-in [:preference-scales t] scales)
                 (assoc-in [:locators t] (:locators d))
                 (assoc-in [:interpretations t] {:patterns (:patterns d)
                                                 :receipts receipts})
