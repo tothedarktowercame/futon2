@@ -117,3 +117,17 @@ Q classifier's rule) applied at pipeline grain. Fixed by the
 idempotent substrate backfill (:updated 86, entities steady, 441
 :retained); second certify click in flight; a repeat 3 would be a new
 finding, not a retry.
+
+Two sharpenings from claude-4's own account of class 4: (1) the
+dangerous sub-case is a test reader MORE CAPABLE than the production
+one — the file scan derives holes on demand, substrate returns only
+what was stored, so the test passes precisely because it reads from
+somewhere production can't; capability asymmetry between readers is
+the thing to check, not just reader identity. (2) "A status that
+names a gap is worth less than it appears if the person who added it
+treats the gap as closed by having named it" — :not-ingested was
+written, described in the commit, and then 4.17% was quoted in three
+places without consulting it. Naming a gap is not closing it; a named
+status earns its keep only when something CONSUMES it (a check, a
+report line, a verdict), so new typed statuses should land with their
+first consumer.
