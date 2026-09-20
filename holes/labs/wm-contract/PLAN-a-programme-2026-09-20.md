@@ -92,8 +92,11 @@ controller actually uses."
   its collection design.
 - Joe's per-model self-correction channels (Claude: refused handoffs;
   Codex: refusal-at-intake; GLM/Zai: in-turn) refine point 5's
-  "observer procedure" choices and point 1's token classes; the 9/46
-  measures the Codex-intake channel only.
+  "observer procedure" choices and point 1's token classes. The
+  Codex-intake channel rate is 0.14 = 9/64 over the complete
+  jobs-ledger denominator (MEASUREMENT-dispatch-premise-rates-2026-09-20.md,
+  d594140c), which supersedes the earlier hand-counted 9/46; it
+  measures that channel only.
 - The J-class locator slot reserved unrated in the C replacement
   declaration is where point 2's configurations first touch a live
   declaration; nothing there commits to rates.

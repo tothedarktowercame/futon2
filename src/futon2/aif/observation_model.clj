@@ -2,7 +2,17 @@
   "Bounded observation-model query interface. Models are EDN, including their
    parameters and authority. The enumeration backend is the persistent oracle
    for future compiled backends; callers use query, never backend internals.
-   This version admits declared synthetic experiments only, not calibration."
+   This version admits declared synthetic experiments only, not calibration.
+
+   Parameter uncertainty belongs on the parameter entry, never inline in a
+   rates map: the intended later shape is :parameters {id {:value r
+   :variance v}}, with token rates referencing ids. probability? governs
+   :value alone -- a variance is not a probability and must never be asked
+   to meet that predicate.
+
+   The synthetic-provenance refusal is a gate, not a temporary nuisance:
+   when calibrated rates exist (programme point 5) it WIDENS to require a
+   calibration record. It is never dropped."
   (:require [clojure.set :as set]
             [futon2.aif.cascade-model-manifest :as m]))
 

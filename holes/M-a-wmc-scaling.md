@@ -1,7 +1,8 @@
 # M-a-wmc-scaling: Compiled Observation Queries and Rate Uncertainty for A
 
 **Date:** 2026-09-20
-**Status:** IDENTIFY (successor mission — activates after plop-2026 completion)
+**Status:** IDENTIFY (successor mission — activation governed by the
+triggers below, not by a date)
 **Owner:** TBD (proposed by claude-12 at Joe's direction)
 **Cross-ref:**
 * `holes/labs/wm-contract/DESIGN-a-plain-2026-09-20.md` — the A this
@@ -9,7 +10,10 @@
 * `holes/labs/wm-contract/PLAN-a-programme-2026-09-20.md` points 3, 6
 * `p4ng/wm-walkthroughs/build-loop/closure/CLOSURE-DAG.md` rows
   PILOT-coupled-A-wmc, PILOT-variance-wmc-rate-uncertainty
-* Lean: `DarkTower/WarMachine/{MixedTokenObservation,
+* `futon2/src/futon2/aif/observation_model.clj` — the query interface a
+  WMC backend registers into (`evaluate` is a defmulti on `:backend`);
+  joint events, joint-law G and the `:parameters` map live here
+* Lean, in `/home/joe/code/mathlib4`: `DarkTower/WarMachine/{MixedTokenObservation,
   MixtureJointSeparationWitness, TwoProductEvaluation,
   GTotalMarginalInvariance, GNonPointMassDecomposition}.lean`
 * github.com/nttcslab/variance-wmc (AAAI 2026; C++, BN -> ENC2 CNF ->
@@ -57,30 +61,67 @@ denied:
 ### Acceptance (inherited, not invented)
 
 - WMC-computed queries agree with the exact enumeration record on disk
-  at n <= 10 (the DAG's stated acceptance), on JOINT events, never
-  marginals alone — `MixtureJointSeparationWitness` is the proof that
-  marginal agreement cannot certify (the witness pair matches all
-  marginals and differs 2x on a joint; the recorded sidebyside shows
-  469x). Total-G invariance at matched marginals
-  (`GTotalMarginalInvariance`) and the MI-difference law are further
-  free discriminators.
+  at n <= 10. The DAG row asks for agreement with that record; PLAN
+  point 3 is where the bar is strengthened to JOINT events, never
+  marginals alone. `MixtureJointSeparationWitness` is the proof that
+  marginal agreement cannot certify: the witness pair matches every
+  per-token miss marginal at 1/2 and differs 2x on the all-missed
+  joint (1/2 under the mixture, 1/4 under independence). The recorded
+  run (`holes/labs/wm-contract/runs/coupling-sidebyside-2026-09-18/`;
+  the re-run's JOINT-CONTROL record carries `:ratio 39150625/83521`)
+  shows 468.75x on the `:nothing` joint — the ~469x cited in PLAN
+  point 3.
+- Total-G invariance at matched marginals is a CONTROL, not a
+  discriminator. `GTotalMarginalInvariance.totalG_eq_of_marginals_eq`
+  proves that for a point-mass state and a positive product-form
+  preference, two observation laws with equal token marginals have
+  EQUAL total G; the Lean file names its own witness instance the
+  cancellation control. `observation_model.clj`'s `:score` already
+  tags which regime produced an answer, so this is executable against
+  a field that exists:
+  - `:g-evaluation :point-mass-cross-entropy` with a product-form
+    preference => coupled and independent total G MUST be equal at
+    matched marginals. A WMC backend that separates them there is
+    wrong.
+  - Only `:g-evaluation :risk-plus-ambiguity` (spread belief) can
+    separate them, via the MI-difference law
+    `GNonPointMassDecomposition.totalG_sub_eq_mutualInfo_sub`.
+  The invariance is proven for PRODUCT-form preferences
+  (`cross_term_product`) while `:score` accepts arbitrary preferences
+  over outcome sets, so the control must build its preference in
+  product form; nobody should expect invariance outside those
+  hypotheses.
 - variance-wmc means AND variances verified against small-model
   calculations; a shared estimated rate reused across tokens must not
   silently become several independent uncertain parameters (the
-  paper's parameter-dependence assumptions, programme point 6).
-  Query means/variances alone do not establish credible intervals or
-  ranking uncertainty; those need their own propagation and validation.
+  paper's parameter-dependence assumptions, programme point 6). The
+  model-level `:parameters` map is what makes that expressible: rates
+  citing the same parameter id ARE one parameter. It was adopted into
+  the v1 schema on 2026-09-20, ahead of the first rate-carrying
+  declaration, because bare equal values cannot be told apart from two
+  coincidentally equal independent parameters after the fact — and the
+  variance differs between those readings. Query means/variances alone
+  do not establish credible intervals or ranking uncertainty; those
+  need their own propagation and validation.
+- The compilation target is a requirement, not a preference. The
+  variance algorithm is polynomial time on STRUCTURED d-DNNF and
+  proven intractable on structured DNNF, d-DNNF and FBDD unless P=NP
+  (arxiv 2601.03523). SDD is what makes the variance half of this
+  mission possible at all.
 - Compilation cost, memory, and repeated-query latency measured on
   actual candidate families before any production claim.
 
 ### Activation triggers (per the parked-appendix ruling)
 
-Named trigger, not drift: (a) a live decision's judgement-token
-universe grows past exact-enumeration comfort (order ~12 tokens /
-measured latency), e.g. via hole-retention feeding declarations at
+Named trigger, not drift: (a) a live decision hits
+`:observation-universe-out-of-bounds` — the typed refusal
+`observation_model.clj` raises when a declared universe exceeds
+`max-tokens` (10) — e.g. via hole-retention feeding declarations at
 scale; or (b) a demonstrated case where rate uncertainty at current
-sample sizes flips a ranking. Whoever hits either names it as the
-trigger and this mission leaves IDENTIFY; nobody widens quietly.
+sample sizes flips a ranking. Both are events the record already
+carries, rather than a judgement about when enumeration stops being
+comfortable. Whoever hits either names it as the trigger and this
+mission leaves IDENTIFY; nobody widens quietly.
 
 ### Scope out
 
@@ -94,3 +135,8 @@ a limitation).
 Successor: it exists so the paper's A can be honest about its scale and
 uncertainty limits and point HERE, rather than gesturing at compilers
 mid-design. Nothing in it blocks or is blocked by the current A work.
+
+Plop-2026 completion is the expected ordering, not the activation
+condition — the triggers above govern, and one could fire first.
+Trigger (a)'s premise, hole retention feeding declarations, landed on
+2026-09-20 in futon2 3b5557aa.
