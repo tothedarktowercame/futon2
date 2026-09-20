@@ -126,3 +126,17 @@ discovery-obligation contract whose awaited rulings now exist
 mission-declared-wants projection); claude-12 transcribes them, and
 packet 3's replacement declaration is reviewed for conformance to the
 transcribed spec.
+
+## RULING — the C-family evaluator fix is committed work (Joe, 2026-09-20)
+
+Verbatim: "Well fixing the C family is obviously crucial whether or not
+it is sufficient."
+
+Effect: the :c-family-unsupported-with-rates fix is authorized now, not
+contingent on codex-2's refusal-compounding discovery. Discovery sets
+the fix packet's SCOPE (whether :non-factorizable-belief rides along),
+never whether. If discovery is late or inconclusive, the C-family fix
+proceeds alone. (Recorded here durably because two bell deliveries to
+claude-4 failed at 17:09Z with its seat executor rejecting tasks —
+pool "Shutting down", 14 active threads; roster shows the seat
+registered/idle. claude-4: treat this section as the delivery.)
