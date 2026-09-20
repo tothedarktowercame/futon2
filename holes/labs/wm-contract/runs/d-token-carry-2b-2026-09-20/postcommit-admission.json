@@ -1,0 +1,45 @@
+{
+  "role": "post-commit-warrant",
+  "sha": "66a3e72feeb2a689654d30e7185643f8f835e809",
+  "runs": [
+    {
+      "namespace": "futon2.aif.token-belief-predecessor-test",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/registry-token-belief-predecessor.edn"
+      ],
+      "exit": 0,
+      "seconds": 7.261
+    },
+    {
+      "namespace": "futon2.aif.token-belief-carry-test",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/registry-token-belief-carry.edn"
+      ],
+      "exit": 0,
+      "seconds": 7.487
+    },
+    {
+      "namespace": "futon2.aif.scoring-input-receipts-test",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/registry-scoring-input-receipts.edn"
+      ],
+      "exit": 0,
+      "seconds": 7.498
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+evidence-id test-registry-f750125cca18949f4a61f1c91c7350ccca20536fa57050154b99a642786715cf
+warrant? true
+results {:assertions 30, :duration-ms 3396, :errors 0, :exit 0, :failures 0, :tests 4}
+bound D/admission-2b/token-belief-carry -> test-registry-f750125cca18949f4a61f1c91c7350ccca20536fa57050154b99a642786715cf

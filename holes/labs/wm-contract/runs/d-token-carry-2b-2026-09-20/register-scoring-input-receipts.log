@@ -1,0 +1,4 @@
+evidence-id test-registry-9b1b0b0bf39e34f8b648bc2415b5a264ad9187b9418638fb1fc763b7de14edba
+warrant? true
+results {:assertions 45, :duration-ms 3439, :errors 0, :exit 0, :failures 0, :tests 3}
+bound D/admission-2b/scoring-input-receipts -> test-registry-9b1b0b0bf39e34f8b648bc2415b5a264ad9187b9418638fb1fc763b7de14edba

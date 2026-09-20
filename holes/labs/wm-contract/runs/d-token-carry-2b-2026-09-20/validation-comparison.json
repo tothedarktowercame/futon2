@@ -1,0 +1,80 @@
+{
+  "all-agree": true,
+  "runs": [
+    {
+      "namespace": "futon2.aif.token-belief-predecessor-test",
+      "pre-commit-validation": {
+        "sha": "5a0f6a3f808545fd5d172f3645d358113d6ecc48",
+        "result": {
+          "tests": 3,
+          "assertions": 25,
+          "failures": 0,
+          "errors": 0
+        },
+        "log-sha256": "d2afc89f98c06d8981bfd5d61c751aaac80b2e6eb68063929b2b46654a50bfc3"
+      },
+      "post-commit-warrant": {
+        "sha": "66a3e72feeb2a689654d30e7185643f8f835e809",
+        "result": {
+          "tests": 3,
+          "assertions": 25,
+          "failures": 0,
+          "errors": 0
+        },
+        "log-sha256": "2d3b44cffa3d9f21b45732cd26d07b8de1cc2b83538332e4a37a49186bc9a3f7",
+        "warrant": "test-registry-fa95b2473b136cfc087e049fcf6a384c6e36588bf0a195e8a5b440b3d7456d1a"
+      },
+      "agree": true
+    },
+    {
+      "namespace": "futon2.aif.token-belief-carry-test",
+      "pre-commit-validation": {
+        "sha": "5a0f6a3f808545fd5d172f3645d358113d6ecc48",
+        "result": {
+          "tests": 4,
+          "assertions": 30,
+          "failures": 0,
+          "errors": 0
+        },
+        "log-sha256": "1c40d7d09bbea35c2c844a76c3437cc3882f62630ce461cc7431ec7e0a65a42a"
+      },
+      "post-commit-warrant": {
+        "sha": "66a3e72feeb2a689654d30e7185643f8f835e809",
+        "result": {
+          "tests": 4,
+          "assertions": 30,
+          "failures": 0,
+          "errors": 0
+        },
+        "log-sha256": "b0a708bd69a364319637533b37942f8fcf8e4a7c433f791c234f7fd676c8ee4c",
+        "warrant": "test-registry-f750125cca18949f4a61f1c91c7350ccca20536fa57050154b99a642786715cf"
+      },
+      "agree": true
+    },
+    {
+      "namespace": "futon2.aif.scoring-input-receipts-test",
+      "pre-commit-validation": {
+        "sha": "5a0f6a3f808545fd5d172f3645d358113d6ecc48",
+        "result": {
+          "tests": 3,
+          "assertions": 45,
+          "failures": 0,
+          "errors": 0
+        },
+        "log-sha256": "23b95b53f8e8ebff9b6bac9542e448deabbda9d6ed37ae90b44d468ff5bd6fb1"
+      },
+      "post-commit-warrant": {
+        "sha": "66a3e72feeb2a689654d30e7185643f8f835e809",
+        "result": {
+          "tests": 3,
+          "assertions": 45,
+          "failures": 0,
+          "errors": 0
+        },
+        "log-sha256": "f33726f10ec4cca31c82932fd5a11501c1d91d2d4c384ce104594b87561dd9af",
+        "warrant": "test-registry-9b1b0b0bf39e34f8b648bc2415b5a264ad9187b9418638fb1fc763b7de14edba"
+      },
+      "agree": true
+    }
+  ]
+}

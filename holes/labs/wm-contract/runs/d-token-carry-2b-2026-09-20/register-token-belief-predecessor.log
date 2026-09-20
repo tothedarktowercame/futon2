@@ -1,0 +1,4 @@
+evidence-id test-registry-fa95b2473b136cfc087e049fcf6a384c6e36588bf0a195e8a5b440b3d7456d1a
+warrant? true
+results {:assertions 25, :duration-ms 3368, :errors 0, :exit 0, :failures 0, :tests 3}
+bound D/admission-2b/token-belief-predecessor -> test-registry-fa95b2473b136cfc087e049fcf6a384c6e36588bf0a195e8a5b440b3d7456d1a
