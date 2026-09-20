@@ -5,6 +5,10 @@ Owner approval for this freeze: claude-12's 2a acceptance, following
 Producer: D; consumer: Q. This document fixes their interface before 2b
 consumption code. It does not claim that the producer is wired.
 
+Machine-readable status/equality rules and constructed examples are frozen in
+`runs/d-token-carry-2b-2026-09-20/schema.edn` and `examples.edn`; that directory's
+README defines `:consumed` and the explicit `:vacuity-license` fields.
+
 ## Join and common fields
 
 D supplies `{:cascade-belief q0 :belief-update-receipt receipt}` to
@@ -17,10 +21,12 @@ Every active receipt has:
 ```clojure
 {:schema :wm/token-belief-update-v1
  :status status                         ; :value / :refused / :missing / :invalid
+ :consumed consumed                     ; successful exact update; true only for :value
  :occurrence-id occurrence-id           ; non-nil actual occurrence identity
  :tau tau                               ; positive observation step; nil if missing
  :observation observation
- :z-semantics :per-step-redraw}
+ :z-semantics :per-step-redraw
+ :vacuity-license license}
 ```
 
 For every consumable receipt, `:continuation-belief` is the exact distribution
@@ -55,7 +61,7 @@ positive `:observation-probability`, and `:policy :conditioned-posterior`.
 `:calculation` retains the shared exact calculation receipt.
 
 Conditioning that changes nothing is still a value. D may cite
-`BeliefConditionedRollout.exactUpdate_pointMass_vacuous` under `:conformance`
+`BeliefConditionedRollout.exactUpdate_pointMass_vacuous` under `:vacuity-license`
 only after checking point predicted belief and possible received observation.
 Q determines vacuity by comparing predicted belief with posterior, retaining
 the original receipt. It must distinguish a vacuous update from no update.

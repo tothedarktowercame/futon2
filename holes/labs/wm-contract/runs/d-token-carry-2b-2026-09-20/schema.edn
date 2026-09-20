@@ -1,0 +1,96 @@
+{:schema/version :wm/d-belief-update-contract-v1
+ :receipt-schema :wm/token-belief-update-v1
+ :producer :D
+ :consumer :Q
+ :scope :receipt-interface-not-production-admission
+ :required [:schema :status :consumed :occurrence-id :tau :observation
+            :z-semantics :vacuity-license]
+ :entry-statuses #{:value :refused :invalid :missing}
+ :z-semantics :per-step-redraw
+ :consumed-meaning :successful-exact-observation-update
+ :continuation-meaning :belief-actually-supplied-as-q0
+ :belief {:carrier :token-sets :masses :nonnegative-exact-rationals
+          :total 1 :zero-masses :omitted :equality :clojure-equals}
+ :received-observation
+ {:required [:status :occurrence-id :tau :present :absent]
+  :status :observed :tau :positive-integer
+  :present :token-set :absent :token-set
+  :constraints [:disjoint-present-absent :nonempty-union :within-carrier-universe
+                :occurrence-id-equals-receipt :tau-equals-receipt]}
+ :status-rules
+ {:value
+  {:consumed true
+   :required [:pre-belief :predicted-belief :posterior :continuation-belief
+              :observation-probability :policy :calculation :model :carrier
+              :predecessor :observation-authority]
+   :probability :positive-exact-rational
+   :policy :conditioned-posterior
+   :equalities [[[:posterior] [:continuation-belief]]]
+   :absent [:refused-trajectory :reinitialization]}
+  :refused
+  {:consumed false :kind :belief-update-refused :observation-probability 0
+   :required [:kind :pre-belief :predicted-belief :continuation-belief
+              :observation-probability :policy :refused-trajectory :model
+              :carrier :predecessor :observation-authority]
+   :absent [:posterior]
+   :channel-path [:observation-authority :channel]
+   :channels
+   {:judgement
+    {:policy :refused-observation-discarded
+     :equalities [[[:predicted-belief] [:continuation-belief]]]
+     :absent [:reinitialization]}
+    :checkable
+    {:policy :refused-reinitialized-from-observation
+     :contract :wm/observation-contract-v1
+     :required [:reinitialization :finding]
+     :reinitialization-authority :contract-admitted-checkable-observation
+     :equalities [[[:reinitialization :occurrence-id] [:occurrence-id]]
+                  [[:reinitialization :tau] [:tau]]
+                  [[:reinitialization :observation] [:observation]]
+                  [[:reinitialization :belief] [:continuation-belief]]
+                  [[:reinitialization :initialization-receipt :value]
+                   [:continuation-belief]]]
+     :finding {:kind :model-misfit
+               :reason :checkable-observation-has-zero-predictive-probability}}}}
+  :missing
+  {:consumed false :tau nil
+   :observation {:status :missing :reason :no-observation :tau nil}
+   :required [:pre-belief :predicted-belief :continuation-belief :policy
+              :model :carrier :predecessor]
+   :policy :no-observation-prediction-only
+   :equalities [[[:predicted-belief] [:continuation-belief]]
+                [[:observation :occurrence-id] [:occurrence-id]]]
+   :absent [:posterior :observation-probability :calculation :refused-trajectory]
+   :q-observation-update-events 0}
+  :invalid
+  {:consumed false :required [:kind :detail]
+   :absent [:posterior :continuation-belief]
+   :q-intake :typed-invalid}}
+ :vacuity-license
+ {:required [:status]
+  :statuses #{:licensed :not-licensed :not-applicable}
+  :licensed
+  {:required [:theorem :support :constant-likelihood :predicted-total]
+   :theorems
+   #{DarkTower.WarMachine.BeliefConditionedRollout.exactUpdate_pointMass_vacuous
+     DarkTower.WarMachine.BeliefConditionedRollout.exactUpdate_vacuous_of_const_likelihood}
+   :support :positive-predicted-support
+   :constant-likelihood :positive-exact-rational
+   :predicted-total 1
+   :constraints [:likelihood-constant-on-support
+                 :pointMass-theorem-requires-singleton-support]}
+  :not-licensed {:required [:reason :support] :absent [:theorem]}
+  :not-applicable {:required [:reason] :absent [:theorem]}}
+ :q-join
+ {:receipt-input :belief-update-receipt
+  :belief-input :q0
+  :continuation-equals :q0
+  :received-entry-index 0
+  :receipt-observation-tau :preserved
+  :recondition false
+  :receipt-preserved true}
+ :carry-admission
+ {:certificate-path [:selection-certificate :token-belief-input :carry-admission]
+  :refusals #{:carry-no-predecessor :carry-domain-changed}
+  :continuation :fresh-initialization
+  :active-update-receipt :not-produced}}

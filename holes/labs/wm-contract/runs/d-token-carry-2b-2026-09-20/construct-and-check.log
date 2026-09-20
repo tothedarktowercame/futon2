@@ -1,0 +1,1 @@
+D-SCHEMA-EXAMPLES {:cases 6, :statuses #{:value :invalid :missing :refused}, :real-adapter-assertions :passed, :production-admission :not-claimed}
