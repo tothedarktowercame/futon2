@@ -18,6 +18,8 @@ gated behind it.
 | 7 | monotone coverage: strictly less want progress at equal evidence presence is strictly dispreferred | `preference_lt_of_want_lt` | no declaration structure that rewards stalling (e.g. wants satisfied by the machine's own bookkeeping) — ties to external-truth-maker correction 1 |
 | 8 | single-owner declarations are conservative: the owner dimension extends without rework | `jointReport_subsingleton` | packet 3 may land single-owner now; adding rob/joe/community owners later changes no existing behavior |
 
+| 9 | C reaches the evaluator as a STEP-INDEXED family in `preferenceAt`'s shape: the declared `PreferenceSpec` at its declared step, a stated distribution elsewhere | `ZeroPreferenceExclusion.preferenceAt` (+ `preferenceAt_nonneg`, `preferenceAt_sum`); Holes.lean C591 deferral text: "a time-indexed Cτ family whose terminal member is the ruled outcome-kind distribution" | the producer supplies the family, not one spec applied at every step (`:constant-spec` is the producer collapsing what the model varies). The spec's step placement (terminal, per the C591 text, until ruled otherwise) and the elsewhere-distribution are DECLARED and recorded — never invented per run, and never varied merely to flip a verdict; uniform-over-non-ruled-zero elsewhere is the honest "no opinion before the due step" and is recorded as declared |
+
 Contract-layer obligations OUTSIDE the Lean model (acquisition is
 external by the module headers, still required for conformance):
 producible (in pattern :produces after reinterpretation) and
