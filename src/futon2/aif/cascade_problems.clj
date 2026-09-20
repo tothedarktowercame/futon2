@@ -76,7 +76,7 @@
   (resources/wm/observation-contract.edn). Class J (judgement) is not among
   them: Joe, 2026-09-17, a blinded study on each pass is too heavy, so every
   token the model predicts must be observable by a mechanical check."
-  #{:C3 :C4 :C5})
+  #{:C3 :C4 :C5 :C6})
 
 (defn problem-tokens
   "Every token a target's problem reads or writes: its facts, its want, and
@@ -198,7 +198,7 @@
                                              :produces #{}}}
                                           :refused {:clause …}}}   ; optional
                :wants {target [token …]}
-               :locators {target {token {:class :C3..:C5 …locator}}}
+               :locators {target {token {:class :C3..:C6 …locator}}}
                :candidates {target [{:precedence [pattern-id …]
                                      :construction-receipt …}]}
                :horizon-steps T

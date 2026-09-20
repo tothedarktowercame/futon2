@@ -1,7 +1,7 @@
 (ns futon2.aif.observation-checks
   "Mechanical observation checks for the checkable token classes of the WM-04
   observation contract (futon2 resources/wm/observation-contract.edn, classes
-  C3-C5). Each check reads a repository at a pinned sha and returns either
+  C3-C6). Each check reads a repository at a pinned sha and returns either
   {:observed true|false :check … :evidence …} or a typed refusal
   {:status :missing :kind …}.
 
@@ -13,7 +13,8 @@
   class J, which has no measured rate and is refused at assembly.
 
   Warrant checks are outside the WM observation contract."
-  (:require [clojure.data.json :as json]
+  (:require [clojure.edn :as edn]
+            [clojure.data.json :as json]
             [clojure.java.shell :as sh]
             [clojure.string :as str]))
 
@@ -104,10 +105,46 @@
                                       :contract-found (boolean contract) :clojure-loci resolved
                                       :locus-evidence observations)})))))))))
 
+(defn check-witness-reference
+  "C6: an EDN witness contains {:repo string :sha string}, optionally
+  :entry (a repository path at that commit). Observe only that the referenced
+  commit or entry exists; no claim about its authorship or correctness.
+  Missing witness is false. Malformed or unresolved references refuse."
+  [{:keys [repo sha path] :as locator}]
+  (or (locator-refusal :C6 locator [:repo :sha :path])
+      (let [reference (resolve-reference repo sha)]
+        (if (:status reference) reference
+          (let [evidence (assoc reference :path path)
+                {:keys [exit out]} (git repo "show" (str (:resolved-sha reference) ":" path))]
+            (if-not (zero? exit)
+              {:observed false :check :C6 :evidence (assoc evidence :witness-present false)}
+              (let [witness (try (edn/read-string out)
+                                 (catch Exception _ ::malformed))
+                    bad (when (map? witness)
+                          (or (locator-refusal :C6 witness [:repo :sha])
+                              (when (or (:require-entry locator) (contains? witness :entry))
+                                (locator-refusal :C6 witness [:entry]))))]
+                (cond
+                  (not (map? witness))
+                  (assoc (refuse :invalid-witness {:check :C6}) :evidence evidence)
+                  bad (assoc bad :evidence evidence)
+                  :else
+                  (let [resolved (resolve-reference (:repo witness) (:sha witness))]
+                    (if (:status resolved)
+                      (assoc resolved :evidence (assoc evidence :witness witness))
+                      (let [entry (:entry witness)
+                            present? (or (nil? entry)
+                                         (zero? (:exit (git (:repo witness) "cat-file" "-e"
+                                                            (str (:resolved-sha resolved) ":" entry)))))]
+                        {:observed (boolean present?) :check :C6
+                         :evidence (assoc evidence :witness-present true
+                                          :reference (cond-> resolved entry (assoc :entry entry)))})))))))))))
+
 (def checks
   {:C3 check-path-exists
    :C4 check-decl-in-file
-   :C5 check-registry-entry})
+   :C5 check-registry-entry
+   :C6 check-witness-reference})
 
 (defn- observe* [tokens]
   (reduce-kv
@@ -122,7 +159,7 @@
    tokens))
 
 (defn observe
-  "Observe located tokens through C3/C4/C5. Unknown classes are refused,
+  "Observe located tokens through C3/C4/C5/C6. Unknown classes are refused,
    never observed absent. No warrant service is consulted."
   [tokens]
   (observe* tokens))
