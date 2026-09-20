@@ -82,3 +82,14 @@ honestly recorded, and live D/Q verdicts stay degenerate REGARDLESS of
 declared rates. Rated-tick prerequisites are therefore three:
 scoring-opts observation-model/rate forwarding; the A declaration; the
 enactment-record producer (EV-enactment).
+
+## Operator-side item surfaced by D 2c (2026-09-20, not blocking)
+
+Production E1 (machine portfolio restriction) has no installed source
+configuration — machine_budget_authority.clj:123-127 refuses production
+because the E1 source is EXTERNALLY OWNED. D 2c proceeds under a named
+narrow authority (task-executed-with-artifacts, minted-identity space)
+that neither needs nor claims E1. If/when portfolio-approval should
+gate carry admission or the broader E2b chain should go live, the E1
+source installation is Joe's configuration decision, and the
+candidate-to-minted occurrence join needs its own ruling then.
