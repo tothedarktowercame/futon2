@@ -1,0 +1,45 @@
+{
+  "head": "ca05bedfe4ac4ff7e2e235cce96b7462ccdbec31",
+  "scope": "read-only-authority-compatibility-probe",
+  "executions": [
+    {
+      "name": "lint",
+      "command": [
+        "clj-kondo",
+        "--lint",
+        "holes/labs/wm-contract/runs/d-enactment-2c-authority-2026-09-20/authority_probe.clj"
+      ],
+      "exit": 0,
+      "log-sha256": "847df8fb0121de87f6b50e899f0ab44ec3fd01df6339ede54ef2537882ed7c86"
+    },
+    {
+      "name": "parens",
+      "command": [
+        "emacs",
+        "-Q",
+        "--batch",
+        "-l",
+        "/home/joe/code/futon4/dev/check-parens.el",
+        "--eval",
+        "(arxana-check-parens-cli)",
+        "--",
+        "--strategy",
+        "check-parens",
+        "--no-defaults",
+        "holes/labs/wm-contract/runs/d-enactment-2c-authority-2026-09-20/authority_probe.clj"
+      ],
+      "exit": 0,
+      "log-sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+    },
+    {
+      "name": "probe",
+      "command": [
+        "clojure",
+        "-M",
+        "holes/labs/wm-contract/runs/d-enactment-2c-authority-2026-09-20/authority_probe.clj"
+      ],
+      "exit": 0,
+      "log-sha256": "0e5a320e7500c0a1565ef261038c08f599c1fed18e9351052ba67885fef8b778"
+    }
+  ]
+}

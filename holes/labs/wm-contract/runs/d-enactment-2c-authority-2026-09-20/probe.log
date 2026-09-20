@@ -1,0 +1,1 @@
+{:isolated-control :exact-occurrence-and-action, :existing-candidate-id [:e1-authority-run 4 0], :minted-action-id "action-c682b346-d3a2-41b5-9ad7-b5afceef2cad", :same-action-value true, :e2b-production {:status :refused, :kind :e2b/production-authority-unavailable}, :e2a-with-production-e1 {:status :refused, :kind :r6-r11/production-authority-unavailable}}
