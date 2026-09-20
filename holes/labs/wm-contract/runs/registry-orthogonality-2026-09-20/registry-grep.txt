@@ -1,0 +1,3 @@
+Command: rg -n test-registry|check-record!|with-registry-runs|registry-check-cli|registry-runs|api/alpha/test-registry/check src scripts/futon2 resources/wm
+Exit: 1
+No matches.

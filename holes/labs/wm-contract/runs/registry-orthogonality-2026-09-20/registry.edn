@@ -1,0 +1,8 @@
+{:subject-id "WM-registry-orthogonality"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/observation_checks.clj" "src/futon2/aif/cascade_sources.clj" "src/futon2/aif/cascade_problems.clj" "resources/wm/observation-contract.edn" "resources/wm/cascade-sources"]
+ :test-paths ["test/futon2/aif/registry_orthogonality_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.registry-orthogonality-test"]
+ :author "codex-3"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/registry-orthogonality-2026-09-20"
+ :index-file "/home/joe/code/futon3c/data/test-registry-validation/subjects.ednlog"}

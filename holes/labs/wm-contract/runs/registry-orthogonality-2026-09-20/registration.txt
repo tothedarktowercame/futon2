@@ -1,0 +1,4 @@
+evidence-id test-registry-732e073b105e76f7ac7dc03a30c44e3a8e341edfd4eedf6c64fdfecc28ddb5f9
+warrant? true
+results {:assertions 40, :duration-ms 3416, :errors 0, :exit 0, :failures 0, :tests 2}
+bound WM-registry-orthogonality -> test-registry-732e073b105e76f7ac7dc03a30c44e3a8e341edfd4eedf6c64fdfecc28ddb5f9
