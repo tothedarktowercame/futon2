@@ -1,0 +1,88 @@
+{:schema :wm04-pilot-review-v1
+ :observer "zai-21"
+ :reviewer "codex-4"
+ :cutoff {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99"
+          :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b"
+          :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd"
+          :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f"
+          :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"}
+ :rows
+ [{:subject-id "R14-1"
+   :verdict :supported
+   :reason "policy.clj:58-147,480-489 declares distinct engineering and variational temperature laws and records mode/source; PolicyPrecision.lean:9-43 separately binds positive beta and gamma to the variational posterior."
+   :flags [{:kind :evidence-description-inexact
+            :detail "The runtime mode is :variational-beta-gamma, not :variational; nonfinite/nonpositive rejection here concerns variational beta, while engineering gain is floored."}]}
+  {:subject-id "R16-3"
+   :verdict :supported
+   :reason "The retained run has observe/verify-request/report/yield effects under one board digest, while the status document expressly withholds runtime correspondence and external-handler assurance, supporting the recorded ambiguity about an appropriate external-effect witness."
+   :flags [{:kind :reason-exceeds-evidence
+            :detail "The cited run's certificate actually has :lean/status :pending; :runtime-correspondence :not-proven and :semantic-approval? false describe new certificates in the separate status document, which explicitly does not relabel historical results. The digest is a board digest repeated at each verb, not a distinct digest of each verb."}]}
+  {:subject-id "R3-3"
+   :verdict :insufficient-to-review
+   :reason "ExactBeliefTrajectory defines the propagation/update law and initial q0, but neither citation retains an executed R3 update with its intermediates and named no-observation case; row12_witness.clj instead witnesses concentration accumulation."
+   :flags [{:kind :reason-exceeds-evidence
+            :detail "row12_witness.clj:57-59 labels the prior of a[t+1,o,s] accumulation as declared, not R3 belief initialization; the reason's u39 :no-observation-names-this-tick measurement has no evidence pointer."}
+           {:kind :evidence-description-inexact
+            :detail "ExactBeliefTrajectory's reduction list has entries (a) through (h), not seven."}]}
+  {:subject-id "R5-1"
+   :verdict :supported
+   :reason "F12CascadeDiffArm supplies carrier/conformance alternatives and exposes flat-precedence vacuity, but does not supply the application's actual interpreted cascade family or an account of one response changing another's conditions; the recorded insufficient finding is warranted."
+   :flags [{:kind :blinding-uncertain
+            :detail "Flagged by the review commission; the inspected subjects.json row has no explicit blinding-status field, so this review does not certify blinding."}
+           {:kind :reason-exceeds-evidence
+            :detail "Carrier-arm witnesses are not evidence that WM-08/09's actual family of legal partial constructions was acquired."}]}
+  {:subject-id "R6-1"
+   :verdict :insufficient-to-review
+   :reason "The scanner and exclusion tests exist, but the citations supply neither a cutoff enumeration of included/excluded targets nor evidence that all required registry/authority inputs were used; the adapter explicitly describes itself as heuristic."
+   :flags [{:kind :reason-exceeds-evidence
+            :detail "mission_registry.clj:10-17 reads Status lines rather than a typed substrate, and load-missions:212-231 removes excluded paths without retaining an exclusion census; tests of filters do not establish the requested retained cutoff population."}]}
+  {:subject-id "R8-1"
+   :verdict :supported
+   :reason "PolicyVariationalFreeEnergy pins Parr B.1/B.2 with EReal zero handling, while VariationalFreeEnergyWitness explicitly limits its separate fourteen-channel Gaussian reference to a fixed fixture; the definitions and scopes support the recorded distinction."
+   :flags []}
+  {:subject-id "WM-06-C3"
+   :verdict :supported
+   :reason "AmbiguityBridge distinguishes incompatible carriers, and PreferenceLadderDraft defines proposed tagged carriers and a bridge predicate without an instantiated checked Q/C envelope or validated state-dependent bridge, supporting the bounded insufficient finding."
+   :flags []}
+  {:subject-id "WM-09-C1"
+   :verdict :insufficient-to-review
+   :reason "F12AttributionArm:48-77 supplies a distinct provenance input and oattr constraint, but ignores the prior-cascade argument and returns admission support rather than a retained before-state identity/provenance record; the full stated output is not established."
+   :flags [{:kind :reason-exceeds-evidence
+            :detail "zaifProvenanceNeverTheStopRule only excludes one rule constructor; it does not prove attribution cannot be derived from an output summary. The module explicitly says the single-rule record cannot distinguish emitting-rule attribution from an admission flag, and does not choose the production interface."}]}
+  {:subject-id "WM-10-C6"
+   :verdict :supported
+   :reason "CommitmentTemperature explicitly leaves G opaque and live habit-branch use unestablished and models a controller-head selector, so it cannot establish the required canonical-result consumer with policy/model/schedule identities; insufficient is supported at the cited scope."
+   :flags [{:kind :blinding-uncertain
+            :detail "Flagged by the review commission; the inspected subjects.json row has no explicit blinding-status field, so this review does not certify blinding."}
+           {:kind :historical-model-scope
+            :detail "The module's live-path description is not a cutoff runtime observation: policy.clj at the same cutoff also contains full-score-posterior and select-action-cascades branches. Its controller-head analysis must not become a claim about every cutoff choice path."}]}
+  {:subject-id "WM-11-C1"
+   :verdict :contradicted
+   :reason "The cited two-law path projects ranking actions to type/target/target-class (policy.clj:502-508), and its selection-law map records requested/applied laws rather than revisions (632-642); these records contradict the claimed retention of full candidate provenance."
+   :flags [{:kind :reason-exceeds-evidence
+            :detail "The no-op exclusion is explained in source comments, not a per-candidate exclusion record; the separate cascade selector retains supplied action maps but does not establish model/interpretation revisions, parent/delta or generated/excluded candidate coverage. Two selection laws are not themselves two policies for one mission."}]}
+  {:subject-id "WM-14-C1"
+   :verdict :insufficient-to-review
+   :reason "The evidence contains search descriptions rather than retained interpretation artifacts or an exhaustive search argument; exact WM-08/interpretation-attempt terms cannot establish the absence of a source-bound interpretation under other wording or in p4ng."
+   :flags [{:kind :non-artifact-reference
+            :detail "Both :path-or-ref values are search descriptions, not files at their stated shas; there is no retained result pointer. They are not treated as missing literal file citations."}
+           {:kind :reason-exceeds-evidence
+            :detail "Repeated pinned docs/holes searches found 50 WM-08 file hits in futon2 and none in futon3c, and no exact interpretation-attempt phrase in either; that corroborates search limitations, not the asserted necessity that any qualifying output name WM-08/WM-03. The reason's mathlib4 search is not in the evidence vector."}]}
+  {:subject-id "E03-3"
+   :verdict :supported
+   :reason "observation_admission_test.clj exercises semantic acquisition/authority/digest refusals but contains no generated-certificate boundary or full source/model/occurrence/mandatory-edge tamper matrix, supporting the recorded bounded insufficient finding."
+   :flags []}
+  {:subject-id "E10-1"
+   :verdict :supported
+   :reason "The pinned roster is a checklist-digest-bound current owner/job list, without reviewer history, unavailable-seat records or succession evidence, so it supports insufficiency for the broader responsibility-and-succession application."
+   :flags [{:kind :reason-exceeds-evidence
+            :detail "The evidence vector cites only roster.json, twice; the reason's claims about all roster artifacts and TRANSITION-to-claude-3.md, and the occurrence's ROSTER.md, are not covered by those citations."}]}
+  {:subject-id "R16-4"
+   :verdict :supported
+   :reason "The cited cascade-lane computes only a chosen-cascade acting-order plan (6203-6235) and returns it with independent-check-required certification (6240-6256), with no independent outcome comparison or next-belief/choice continuation on that path."
+   :flags [{:kind :bounded-absence
+            :detail "Supports the reason's explicit on-that-path absence only; refusal to self-certify is not by itself evidence that no independent observer exists elsewhere."}]}
+  {:subject-id "TRACE-1"
+   :verdict :supported
+   :reason "control-map-edges.edn:9-14 explicitly awaits figure-owner synchronization and lists a single R17 node; despite source-backed R3a and conditional/retired edge decisions, it does not establish the requested reconciled universe with R17 variants."
+   :flags []}]}
