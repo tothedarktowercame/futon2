@@ -1,0 +1,114 @@
+{
+  "head": "08f584535facd3b9bd2980d6011e89e44e0c0266",
+  "scope": "read-only-producer-discovery",
+  "files": [
+    {
+      "path": "src/futon2/aif/full_loop_runner.clj",
+      "sha256": "feb72603b319607b24726f8d764306fe2c3e3000ed8c7274ba430b3601902991",
+      "anchors": {
+        "(defn fresh-artifact-binding": [
+          680
+        ],
+        "(defn- persist-run-record!": [
+          499
+        ],
+        "(defmethod construct-selected-action :cascade-candidate": [
+          1446
+        ],
+        "(defn ground-commit!": [
+          2650
+        ],
+        "(defn- run-opportunity-core!": [
+          3295
+        ],
+        "        observe-end! (fn []": [
+          3382
+        ],
+        "        (mint-action-occurrence-once!": [
+          4004
+        ],
+        "                  (checkpoint! :build": [
+          4487
+        ],
+        "                    (checkpoint! :adjudication": [
+          4658
+        ]
+      }
+    },
+    {
+      "path": "src/futon2/aif/close_retention.clj",
+      "sha256": "555ff470065fdba4c92b8869c3911d5b33f14fea91f078baea97c583ec617ead",
+      "anchors": {
+        "(defn mint-occurrence": [
+          70
+        ]
+      }
+    },
+    {
+      "path": "src/futon2/aif/fact_measurement.clj",
+      "sha256": "c0d29ca82a6884b67fb15c8ea46a3b71296c6d67a1c83daff71ef21b5d980035",
+      "anchors": {
+        "(defn begin!": [
+          178
+        ],
+        "(defn finish!": [
+          200
+        ]
+      }
+    },
+    {
+      "path": "src/futon2/aif/cascade_sources.clj",
+      "sha256": "e8ac3c8087a6a2f9c461fe23aa3f7d6d57453baeae0c686a382c34a19e4c1556",
+      "anchors": {
+        "(defn- observe-facts": [
+          103
+        ],
+        "(defn load-declared": [
+          114
+        ]
+      }
+    },
+    {
+      "path": "src/futon2/aif/observation_checks.clj",
+      "sha256": "4440991c7ed32898cb9280c888005cb6b567270a78c88d3261132618902f86d1",
+      "anchors": {
+        "(defn check-path-exists": [
+          41
+        ],
+        "(defn check-decl-in-file": [
+          62
+        ],
+        "(defn check-registry-entry": [
+          83
+        ]
+      }
+    },
+    {
+      "path": "src/futon2/aif/machine_enactment_correspondence.clj",
+      "sha256": "0d5745faa264463f34baf5b7f3c789cdadd846f9409b1739b27e7dd7f2545933",
+      "anchors": {
+        "(defn verify-correspondence": [
+          90
+        ],
+        "    (refuse! :e2b/production-authority-unavailable": [
+          97
+        ]
+      }
+    },
+    {
+      "path": "scripts/futon2/report/war_machine.clj",
+      "sha256": "4103e041f15fe84cd0c6be0951dc2b94a9b5e917a51ba6006365b3d11647bd6c",
+      "anchors": {
+        "        prev-trace-record (peek recent-trace-records)": [
+          6392
+        ],
+        "                               :token-belief-predecessor-trace prev-trace-record": [
+          6674
+        ]
+      }
+    }
+  ],
+  "producer-code-written": false,
+  "live-actuation": false,
+  "tests-rerun": false
+}
