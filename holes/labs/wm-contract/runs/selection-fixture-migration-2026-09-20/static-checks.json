@@ -1,0 +1,28 @@
+[
+  {
+    "check": "lint",
+    "command": [
+      "clj-kondo",
+      "--lint",
+      "test/futon2/aif/full_loop_runner_test.clj"
+    ],
+    "exit": 0,
+    "log-sha256": "69990bc932e74f4f25fae899357f91f3c0ed925be678b0a07c7a367e17700fdd"
+  },
+  {
+    "check": "parens",
+    "command": [
+      "emacs",
+      "-Q",
+      "--batch",
+      "-l",
+      "/home/joe/code/futon4/dev/check-parens.el",
+      "--eval",
+      "(arxana-check-parens-cli)",
+      "--",
+      "test/futon2/aif/full_loop_runner_test.clj"
+    ],
+    "exit": 0,
+    "log-sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+  }
+]

@@ -510,6 +510,26 @@
    :prediction-errors {} :precision-state {} :micro-step-trace []
    :mode :maintain})
 
+(defn explicitly-selected-repair-judgement
+  "Select a repair through the real posterior, against a distinct ordinary
+  candidate. Open repair memory alone does not select this action."
+  ([obligation]
+   (explicitly-selected-repair-judgement obligation nil))
+  ([obligation admission]
+   (let [action (cond-> {:type (if admission
+                                :revalidate-historical-repair
+                                :repair-machine-failure)
+                        :target (:repair/id obligation)
+                        :repair-obligation obligation}
+                  admission (assoc :admission admission))
+         decision (policy/select-action-cascades
+                   [{:action action :controller-score -2.0 :rank 1}
+                    {:action selected-action :controller-score -1.0 :rank 2}]
+                   {:beta 2.0})]
+     (is (= action (:action decision))
+         "the real selector must choose the explicit repair from distinct candidates")
+     (assoc judgement :decision decision))))
+
 (defn synthetic-artifact-binding [_repo before author-job]
   {:fresh-author? true
    :repo "/repo"
@@ -1726,6 +1746,7 @@
                        {:cohort? true
                         :execution-cohort authority
                         :repair-open-fn (constantly [obligation])
+                        :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement obligation)})
                         :construction-wiring-fn (constantly invalid-fold)
                         :repair-system-record-fn
                         (fn [finding]
@@ -2607,9 +2628,13 @@
     (is (= :environmental-hold (:repair-class (first @findings))))
     (is (= ["zai-5"] @dispatches))))
 
-(deftest machine-stop-line-preempts-ordinary-selection-and-awaits-successor-validation
-  (let [dispatches (atom [])
+(deftest open-repair-memory-preserves-selection-and-explicit-repair-awaits-validation
+  (doseq [repair-selected? [false true]]
+   (let [dispatches (atom [])
         implementations (atom [])
+        implementation-records (atom [])
+        resolutions (atom [])
+        store-opts (hermetic/runner-repair-options)
         transform-called? (atom false)
         stop-line {:repair/id "repair-failed-1"
                    :repair/status :open
@@ -2635,14 +2660,23 @@
         (runner/run-opportunity!
          {:cohort? false
           :phase-log-fn (fn [_])
-          :repair-open-fn (constantly [stop-line follow-up unrelated])
+          :repair-open-fn (constantly [unrelated stop-line follow-up])
           :repair-implement-fn (fn [obligation implementation]
-                                 (swap! implementations conj
-                                        [obligation implementation]))
+                                 (swap! implementations conj [obligation implementation])
+                                 (let [record ((:repair-implement-fn store-opts)
+                                               obligation implementation)]
+                                   (swap! implementation-records conj record)
+                                   record))
+          :repair-resolve-fn (fn [& args]
+                               (swap! resolutions conj args)
+                               (throw (ex-info "repair needs a distinct successor" {})))
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                               :codex-7 {:status "idle" :invoke-ready? true}
                               :codex-1 {:status "idle" :invoke-ready? true}})
-          :judge-fn (fn [_] {:judgement judgement})
+          :judge-fn (fn [_]
+                      {:judgement (if repair-selected?
+                                    (explicitly-selected-repair-judgement stop-line)
+                                    judgement)})
           :judgement-transform-fn
           (fn [incoming]
             (reset! transform-called? true)
@@ -2683,20 +2717,40 @@
     (assert-construction-validator-record! result)
     (is (true? (get-in result [:checkpoints :construction :judgment :shape-validation :ok])))
     (is (true? (get-in result [:checkpoints :construction :judgment :correspondence-validation :ok])))
-    (is (false? @transform-called?)
-        "stop-line precedence must bypass optional ordinary-selection transforms")
-    (is (= ["repair-failed-1" "repair-failed-1"]
-           (mapv :target @dispatches)))
-    (is (= ["zai-5" "codex-1"] (mapv :agent @dispatches))
-        "stop-line repair review routes to standing Ground Control")
-    (is (every? #(re-find #"STOP-THE-LINE" (:prompt %)) @dispatches))
-    (is (every? #(re-find #"trusted provenance is mandatory" (:prompt %))
-                @dispatches))
-    (is (every? #(not (re-find #"caller-controlled identity is spoofable"
-                               (:prompt %)))
-                @dispatches))
-    (is (= [stop-line] (mapv first @implementations)))
-    (is (= "good456" (get-in @implementations [0 1 :commit])))))
+    (is (true? @transform-called?)
+        "both ordinary and explicit repair decisions pass through selection transforms")
+    (is (= {:count 3 :ids ["repair-other" "repair-failed-1" "repair-failed-2"]}
+           (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
+        "all observed obligations remain evidence, regardless of what was selected")
+    (if repair-selected?
+      (do
+        (is (= :repair-machine-failure
+               (get-in result [:checkpoints :selection :judgment :selected-action :type])))
+        (is (= ["repair-failed-1" "repair-failed-1"] (mapv :target @dispatches)))
+        (is (= ["zai-5" "codex-1"] (mapv :agent @dispatches))
+            "explicit repair uses the standing independent repair reviewer")
+        (is (every? #(re-find #"STOP-THE-LINE" (:prompt %)) @dispatches))
+        (is (every? #(re-find #"trusted provenance is mandatory" (:prompt %)) @dispatches))
+        (is (every? #(not (re-find #"caller-controlled identity is spoofable" (:prompt %))) @dispatches))
+        (is (= [stop-line] (mapv first @implementations))
+            "only the selected obligation advances, even when it is not first in memory")
+        (is (= "good456" (get-in @implementations [0 1 :commit])))
+        (is (= [:awaiting-validation] (mapv :repair/status @implementation-records))
+            "the real repair store requires a distinct successor after implementation")
+        (is (empty? @resolutions) "implementation does not resolve its own repair")
+        (is (= :awaiting-validation
+               (:repair/status
+                (edn/read-string
+                 (slurp (io/file (:repair-root store-opts) "implementations"
+                                "repair-failed-1.edn")))))
+            "the persisted store record remains awaiting successor validation"))
+      (do
+        (is (= selected-action
+               (get-in result [:checkpoints :selection :judgment :selected-action])))
+        (is (= ["M-selected" "M-selected"] (mapv :target @dispatches)))
+        (is (= ["zai-5" "codex-7"] (mapv :agent @dispatches)))
+        (is (empty? @implementations)
+            "ordinary selection does not consume repair obligations"))))))
 
 (deftest job-activity-prefers-the-latest-parseable-agency-event
   (let [started "2026-07-14T10:00:00Z"
@@ -3161,7 +3215,7 @@
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                               :codex-7 {:status "idle" :invoke-ready? true}
                               :codex-1 {:status "idle" :invoke-ready? true}})
-          :judge-fn (fn [_] {:judgement judgement})
+          :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement stop-line)})
           :refresh-fn (fn [])
           :substrate-preflight-fn (fn [_] {:route :test})
           :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
@@ -3225,7 +3279,7 @@
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                               :codex-7 {:status "idle" :invoke-ready? true}
                               :codex-1 {:status "idle" :invoke-ready? true}})
-          :judge-fn (fn [_] {:judgement judgement})
+          :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement stop-line)})
           :refresh-fn (fn [])
           :substrate-preflight-fn (fn [_] {:route :test})
           :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
@@ -3235,7 +3289,9 @@
           :mission-fn (fn [target] {:id target})
           :construct-fn runner/construct-for-decision
           :construction-wiring-fn enriched-test-fold
-          :dispatch-fn (fn [& args] (swap! dispatches conj args))
+          :dispatch-fn (fn [& args]
+                                       (swap! dispatches conj args)
+                                       (throw (ex-info "unexpected replacement dispatch" {})))
           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
           :ground-fn (fn [& _]
                        {:before {:implementation-entity nil}
@@ -3271,7 +3327,7 @@
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                               :codex-7 {:status "idle" :invoke-ready? true}
                               :codex-1 {:status "idle" :invoke-ready? true}})
-          :judge-fn (fn [_] {:judgement judgement})
+          :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement stop-line)})
           :refresh-fn (fn [])
           :substrate-preflight-fn (fn [_] {:route :test})
           :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
@@ -3281,7 +3337,9 @@
           :mission-fn (fn [target] {:id target})
           :construct-fn runner/construct-for-decision
           :construction-wiring-fn enriched-test-fold
-          :dispatch-fn (fn [& args] (swap! dispatches conj args))
+          :dispatch-fn (fn [& args]
+                                       (swap! dispatches conj args)
+                                       (throw (ex-info "unexpected replacement dispatch" {})))
           :queue-fn identity})]
     (is (= :incomplete (:outcome result)))
     (is (= :recovery-provenance-missing
@@ -3300,6 +3358,7 @@
         (runner/run-opportunity!
          (merge (isolated-runner-opts)
                 {:repair-open-fn (constantly [stop-line])
+                        :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement stop-line)})
                  :read-job-fn (fn [& _] {:job-id "dead-job"
                                          :state "timed-out"})
                  :repair-system-record-fn
@@ -3310,7 +3369,9 @@
                  :repair-supersede-fn
                  (fn [old successor reason]
                    (swap! supersessions conj [old successor reason]))
-                 :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
+                 :dispatch-fn (fn [& args]
+                                       (swap! dispatches conj args)
+                                       (throw (ex-info "unexpected replacement dispatch" {})))}))]
     (is (= :incomplete (:outcome result)))
     (is (= :recovery-job-terminal (get-in result [:data :failure-kind])))
     (is (= :machine-failure (:repair-class (first @successors))))
@@ -3334,6 +3395,7 @@
          (merge (isolated-runner-opts)
                 {:revision-rounds 0
                  :repair-open-fn (constantly [stop-line])
+                        :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement stop-line)})
                  :read-job-fn
                  (fn [& _] {:job-id "rejecting-review" :state "done"
                             :execution successful-execution
@@ -3367,12 +3429,15 @@
         (runner/run-opportunity!
          (merge (isolated-runner-opts)
                 {:repair-open-fn (constantly [stop-line])
+                        :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement stop-line)})
                  :read-job-fn (fn [& _] {:job-id "refusal-job" :state "done"})
                  :repair-system-record-fn
                  #(assoc % :repair/id "repair-refusal-successor")
                  :repair-supersede-fn
                  (fn [& args] (swap! supersessions conj args))
-                 :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
+                 :dispatch-fn (fn [& args]
+                                       (swap! dispatches conj args)
+                                       (throw (ex-info "unexpected replacement dispatch" {})))}))]
     (is (= :recovery-artifact-missing (get-in result [:data :failure-kind])))
     (is (= 1 (count @supersessions)))
     (is (empty? @dispatches))))
@@ -4512,6 +4577,7 @@
         (runner/run-opportunity!
          (merge (isolated-runner-opts)
                 {:repair-open-fn (constantly [stop-line])
+                        :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement stop-line)})
                  :read-job-fn (fn [& _] {:job-id "path-ref-job" :state "done"
                                          :artifact-ref "/eoi_network_test.clj"})
                  :repair-system-record-fn
@@ -4522,7 +4588,9 @@
                      finding))
                  :repair-supersede-fn
                  (fn [& args] (swap! supersessions conj args))
-                 :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
+                 :dispatch-fn (fn [& args]
+                                       (swap! dispatches conj args)
+                                       (throw (ex-info "unexpected replacement dispatch" {})))}))]
     (is (= :recovery-artifact-ref-malformed (get-in result [:data :failure-kind])))
     (is (= "/eoi_network_test.clj"
            (get-in result [:data :error-data :artifact-ref]))
@@ -4559,6 +4627,7 @@
                                            :cohort-id :historical-action-test
                                            :sha256 (digest/sha256 raw)}
                         :repair-open-fn (constantly [stop-line])
+                        :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement stop-line admission)})
                         :historical-verification-candidate-fn (fn [_] admission)
                         :historical-verification-execute-fn
                         (fn [request]
@@ -4569,7 +4638,9 @@
                                  :verification-artifact
                                  {:path "/server/store/verification-evidence/verification-057.edn"
                                   :sha256 (apply str (repeat 64 "b"))}))
-                        :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
+                        :dispatch-fn (fn [& args]
+                                       (swap! dispatches conj args)
+                                       (throw (ex-info "unexpected replacement dispatch" {})))}))]
     (is (= :historical-verification-awaiting-validation (:outcome result)))
     (is (= (:execution-identity result)
            (get-in @executions [0 :execution-identity])))
@@ -4594,6 +4665,7 @@
         result (runner/run-opportunity!
                 (merge (isolated-runner-opts)
                        {:repair-open-fn (constantly [stop-line])
+                        :judge-fn (fn [_] {:judgement (explicitly-selected-repair-judgement stop-line admission)})
                         :historical-verification-candidate-fn (fn [_] admission)
                         :historical-verification-execute-fn
                         (fn [_]
