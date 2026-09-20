@@ -299,12 +299,12 @@
   reads or writes (facts, want, pattern guards and produces) to be observable
   by a mechanical check. The receipt therefore carries :locators, the supplied
   locators restricted to those tokens, and :unlocated-tokens, the tokens with
-  no checkable (C1-C5) locator. Construction does not stop on unlocated tokens,
+  no checkable (C3-C5) locator. Construction does not stop on unlocated tokens,
   since later moves may add or replace patterns. futon2.aif.cascade-problems
   refuses the problem at assembly while any remain, and the receipt names them
   so whoever builds the cascade can add locators.
 
-  Input is as for construct*, plus :locators {token {:class :C1..:C5 ...}}.
+  Input is as for construct*, plus :locators {token {:class :C3..:C5 ...}}.
   Without :facts, :want and :patterns the token set is unknown, and the receipt
   records :locator-coverage :token-set-not-supplied instead of claiming
   coverage."
