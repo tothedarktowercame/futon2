@@ -3,6 +3,7 @@
   (:require [clojure.edn :as edn]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.token-belief-carry :as token-carry]
+            [futon2.aif.token-belief-predecessor :as token-predecessor]
             [futon2.aif.interpretation-evidence :as evidence]))
 
 (def ^:dynamic *habit-reads* nil)
@@ -34,6 +35,8 @@
         stage-path [:selection-certificate :token-belief-stage]
         stage (get-in decision stage-path)
         staged? (contains? (:selection-certificate decision) :token-belief-stage)
+        input (get-in decision [:selection-certificate :token-belief-input])
+        input? (contains? (:selection-certificate decision) :token-belief-input)
         log (:habit-reads record)
         occurrences (:occurrences log)
         errors (cond-> []
@@ -53,7 +56,10 @@
         ;; equalities above still run, including on records without carry.
         errors (cond-> errors
                  (and staged? (not (token-carry/valid-stage? stage initial)))
-                 (conj :token-belief-stage-mismatch))]
+                 (conj :token-belief-stage-mismatch)
+                 (and input? (or (not staged?)
+                                 (not (token-predecessor/valid-input? input stage))))
+                 (conj :token-belief-input-mismatch))]
     {:status (if (and (empty? errors)
                       (every? (fn [c]
                                 (let [p (:habit-provenance c)]
