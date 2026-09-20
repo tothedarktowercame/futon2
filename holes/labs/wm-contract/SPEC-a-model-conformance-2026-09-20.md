@@ -40,3 +40,13 @@ in-turn) — never one agent-assertion blur.
 | F observation-to-prediction matching semantics | 4 | independent of A's noise; belongs with the F consumer fix |
 | two-products direct evaluation for fully specified observations under one binary common cause | 3 | cheap lemma over `Fintype.sum_bool`; enables early exact use without the compiler |
 | parameter-uncertainty layer (variance-WMC): means/variances propagation contracts | 6 | fixed-parameter inference first |
+
+## Inherited coupling from C's closure (2026-09-20, codex-3 flag)
+
+The nonzero-rate factorized evaluator refuses
+`:c-family-unsupported-with-rates` on the step-indexed C family. A typed
+refusal, so the zero-rate measurements that closed C stand. Consequence
+for this programme: before ANY rated run (point 2's coupled/independent
+configurations included), that evaluator must support the step-indexed
+family — otherwise the refusal blocks honestly, which is correct
+behavior and a known coupling, not a surprise.
