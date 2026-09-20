@@ -88,5 +88,21 @@ The authorized sequence is :pre-commit-validation -> code commit on canonical
 `invoke-1789930485459-22720-5316627c`; precedent:
 `../d-exact-adapter-2026-09-20/EXECUTION.md`. No shared JVM was touched.
 
-Post-commit warrant results and implementation SHA will be appended after the
-canonical executions; this file does not yet claim a registry warrant.
+Implementation landed on canonical main as `08f58453` (rebased from
+`0c23be3a` over D documentation-only commits `7d425ff9` / `db756f2e`).
+All source and test namespace bytes match final pre-commit receipts. The only
+hashed input change is schema metadata documenting the existing carrier universe
+path; the generated examples and all executable inputs are unchanged.
+
+Canonical :post-commit-warrant executions both passed and matched pre-commit
+counts exactly: Q 14 tests / 177 assertions; census 6 tests / 78 assertions.
+Zero failures/errors. Full hashes, roles, source SHA and metadata delta are in
+`post-commit-warrants.json`; native output and loaded namespace closure are
+retained in the registry-generated UUID files.
+
+- Q warrant: `test-registry-743f0904f5528b285aa523e8e6baef31815fc75144fe425a6e9af32e01df2608`.
+- Census warrant: `test-registry-ffc360180c1779cdef9bdbb78a963477e56150a6d669084aa440cdbc57032fde`.
+
+Both subjects are bound in the test registry. No D tests were rerun. No shared
+JVM was loaded or restarted. The two author execution roles are deliberate;
+reviewers can read these receipts without rerunning the namespaces.

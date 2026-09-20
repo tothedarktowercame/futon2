@@ -1,0 +1,4 @@
+evidence-id test-registry-ffc360180c1779cdef9bdbb78a963477e56150a6d669084aa440cdbc57032fde
+warrant? true
+results {:assertions 78, :duration-ms 3486, :errors 0, :exit 0, :failures 0, :tests 6}
+bound Q/conditioned-census-regression -> test-registry-ffc360180c1779cdef9bdbb78a963477e56150a6d669084aa440cdbc57032fde

@@ -1,0 +1,4 @@
+evidence-id test-registry-743f0904f5528b285aa523e8e6baef31815fc75144fe425a6e9af32e01df2608
+warrant? true
+results {:assertions 177, :duration-ms 1717, :errors 0, :exit 0, :failures 0, :tests 14}
+bound Q/conditioned-evaluator -> test-registry-743f0904f5528b285aa523e8e6baef31815fc75144fe425a6e9af32e01df2608
