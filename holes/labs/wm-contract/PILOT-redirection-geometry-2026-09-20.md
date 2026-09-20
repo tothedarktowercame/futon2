@@ -97,3 +97,40 @@ framing; today it cannot be typed out of the data.
 
 The numbers above stand as computed; this section changes what finding
 2 is allowed to mean.
+
+## Rerun: operator-only substream (Joe's instruction, 2026-09-20)
+
+Joe: "joe turns can be extracted from the log and we could rerun the
+computation leaving out parks." Done: joe-authored user chat-turns
+since 2026-09-19T12:00 matched to retrieval events by normalized text
+prefix; park resumes excluded (claude-12 session: 74 of 135 joe-
+authored turns were wake/resume echoes; claude-4 session: 0 park-shaped
+among 113).
+
+| series | session | n | median | mean | p10 | p90 | frac=0 | frac>=0.5 |
+|---|---|---|---|---|---|---|---|---|
+| operator-only top1-cos | claude-12 | 56 | 0.708 | 0.692 | 0.563 | 0.820 | 0.02 | 0.93 |
+| operator-only top1-cos | claude-4 | 112 | 0.619 | 0.589 | 0.410 | 0.766 | 0.04 | 0.82 |
+
+Findings:
+
+1. **The confound accounted for the separation.** claude-12's 12%
+   near-identity pairs were park payloads, not operator turns; the
+   operator-only substream shows 2%. The between-session difference
+   from finding 2 disappears and mildly reverses (median 0.708 vs
+   0.619) — the mixed-stream comparison measured stream composition,
+   as the confound section predicted.
+2. **The operator's operation distribution is high-displacement toward
+   both agents**: 93% / 82% of consecutive operator operations
+   displace >= 0.5 in top-1 pattern space, near-identity operations
+   are 2-4%. This is the numerical face of the definitional statement
+   — the operator is almost always moving the work, on every lane.
+3. Caveat: park exclusion used the claude-12 payload style ("Wake:" /
+   resume marker); if claude-4-session resumes are logged as
+   joe-authored turns in another style, its 113 could retain some.
+   Typed origin at emission (design lesson four) retires this class of
+   filter permanently.
+
+B->A vs A->B series (agent responses as positions) requires embedding
+response texts — new computation, deferred with the filesystem
+questions.
