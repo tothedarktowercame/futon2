@@ -1,0 +1,48 @@
+{
+  "runs": [
+    {
+      "namespace": "d-predecessor-task-authority",
+      "tests": 5,
+      "assertions": 31,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "namespace": "token-belief-predecessor",
+      "tests": 3,
+      "assertions": 25,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "namespace": "token-belief-carry",
+      "tests": 4,
+      "assertions": 30,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "namespace": "scoring-input-receipts",
+      "tests": 3,
+      "assertions": 45,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "namespace": "full-loop-runner",
+      "tests": 180,
+      "assertions": 966,
+      "failures": 44,
+      "errors": 1
+    }
+  ],
+  "registered-warrants": [],
+  "gate": "failed",
+  "baseline-reproduction": {
+    "tests": 2,
+    "pass": 3,
+    "failures": 12,
+    "errors": 1,
+    "scope": "two sampled failing vars, not the full baseline namespace"
+  }
+}

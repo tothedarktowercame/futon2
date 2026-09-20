@@ -1,0 +1,1280 @@
+diff --git a/src/futon2/aif/full_loop_runner.clj b/src/futon2/aif/full_loop_runner.clj
+index 2055311c..7912dd5e 100644
+--- a/src/futon2/aif/full_loop_runner.clj
++++ b/src/futon2/aif/full_loop_runner.clj
+@@ -28,6 +28,8 @@
+             [futon2.aif.interpretation-evidence :as interpretation-evidence]
+             [futon2.aif.interpretation-job :as interpretation-job]
+             [futon2.aif.fact-measurement :as measurement]
++            [futon2.aif.task-execution-evidence :as task-execution]
++            [futon2.aif.d-predecessor-task-authority :as d-task]
+             [futon2.aif.receipt-construction :as receipt-construction]
+             [futon2.aif.mission-registry :as missions]
+             [futon2.aif.morning-brief :as brief]
+@@ -534,7 +536,8 @@
+                                                   [:selection-law :selection-certificate
+                                                    :initial-belief-receipt :enumeration-completeness])
+                                      :g-term-decomposition (decomposition/from-result result))
+-                    :route route}
++                    :route route
++                    :d-task-enactment (:d-task-enactment result)}
+                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
+                      (assoc :open-stop-lines
+                             (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
+@@ -629,184 +632,9 @@
+             (concat (action-paths (:action entry)) [(:path mission)]))
+       (:repo code-state)))
+ 
+-(defn- observe-repo-head [opts repo]
+-  (if-let [f (:repo-head-observation-fn opts)]
+-    (f repo)
+-    (let [head (when repo (git repo "rev-parse" "HEAD"))]
+-      {:repo repo
+-       :head (when (and head (zero? (:exit head))) (str/trim (:out head)))
+-       :observed-at-ms (System/currentTimeMillis)})))
+-
+-(defn- resolve-commit-sha [opts repo commit]
+-  (when (and repo (not (str/blank? (str commit))))
+-    (if-let [f (:resolve-commit-sha-fn opts)]
+-      (f repo commit)
+-      (let [result (git repo "rev-parse" (str commit "^{commit}"))]
+-        (when (zero? (:exit result)) (str/trim (:out result)))))))
+-
+-(defn- commit-time-ms [opts repo commit]
+-  (if-let [f (:commit-time-ms-fn opts)]
+-    (f repo commit)
+-    (let [result (git repo "show" "-s" "--format=%cI" commit)]
+-      (when (zero? (:exit result))
+-        (try (.toEpochMilli (Instant/parse (str/trim (:out result))))
+-             (catch Throwable _ nil))))))
+-
+-(defn- ancestor? [opts repo ancestor descendant]
+-  (if-let [f (:ancestor-fn opts)]
+-    (boolean (f repo ancestor descendant))
+-    (zero? (:exit (git repo "merge-base" "--is-ancestor" ancestor descendant)))))
+-
+-(declare job-text commit-ish?)
+-
+-(defn- author-claimed-ref
+-  "The sha the author's own FULL_LOOP_AUTHOR: DONE line claims.  The Agency
+-  job's :artifact-ref is stamped at dispatch with the pre-dispatch head, so
+-  corroborating against it condemns every author who actually commits
+-  (attempt-002, 2026-09-13: observed 9a6a012f, corroborated against the
+-  base 2e5e7409, mismatch).  The text claim is the author's; the job field
+-  is only a fallback for jobs with no readable marker."
+-  [author-job]
+-  ;; LAST match, not first: revision prompts quote prior findings verbatim,
+-  ;; so an earlier round's DONE line can appear inside the reply body ahead
+-  ;; of the author's own final declaration (repair-ea1-3f4cac attempt-002
+-  ;; family). The final DONE line is the author's authoritative claim.
+-  (or (some->> (job-text author-job)
+-               (re-seq #"(?m)^FULL_LOOP_AUTHOR:\s*DONE\b[ \t]*([0-9a-fA-F]{7,40})")
+-               last
+-               second)
+-      (:artifact-ref author-job)))
+-
+-(defn fresh-artifact-binding
+-  "Observe and validate the commit produced by one fresh author dispatch.
+-  The claimed commit must resolve to the validated repository HEAD.
+-  Divergent or missing claims fail closed. Injected observations cannot
+-  override an explicit disagreement."
+-  [opts repo before author-job]
+-  (let [binding
+-        (if-let [f (:author-artifact-observer-fn opts)]
+-          (f repo before author-job)
+-          (let [after (observe-repo-head opts repo)
+-                before-head (:head before)
+-                observed-head (:head after)
+-                reported-text-ref (author-claimed-ref author-job)
+-                job-ref (:artifact-ref author-job)
+-                start-ms (:observed-at-ms before)
+-                end-ms (:observed-at-ms after)
+-                changed? (and before-head observed-head (not= before-head observed-head))
+-                descendant? (and changed?
+-                                 (ancestor? opts repo before-head observed-head))
+-                timestamp-ms (when changed? (commit-time-ms opts repo observed-head))
+-                in-window? (and timestamp-ms start-ms end-ms
+-                                (<= (- start-ms artifact-window-tolerance-ms)
+-                                    timestamp-ms
+-                                    (+ end-ms artifact-window-tolerance-ms)))
+-                observed-valid? (and changed? descendant? in-window?)
+-                reported-text-sha (resolve-commit-sha opts repo reported-text-ref)
+-                job-ref-sha (when (and (nil? reported-text-sha)
+-                                       (commit-ish? job-ref))
+-                              (resolve-commit-sha opts repo job-ref))
+-                ;; A DONE carrier can retain a bad long expansion while
+-                ;; Agency retains the actual short Git ref separately
+-                ;; (repair-ea1-9b6ce3a4). Git rev-parse supplies the
+-                ;; unambiguous-prefix check. Never borrow the dispatch-time
+-                ;; base stamp as a fallback claim.
+-                fallback-sha (when (and job-ref-sha
+-                                        (not= job-ref-sha before-head))
+-                               job-ref-sha)
+-                text-sha (or reported-text-sha fallback-sha)
+-                text-ref (if reported-text-sha reported-text-ref
+-                             (if fallback-sha job-ref reported-text-ref))
+-                resolved-from (cond reported-text-sha :done-line
+-                                    fallback-sha :job-artifact-ref)
+-                ;; A claimed commit corroborates when it IS the observed
+-                ;; head, or when it is the author's own commit that later
+-                ;; commits (concurrent machinery deposits, revision-round
+-                ;; bookkeeping) have moved HEAD past. The claim must still
+-                ;; be a fresh descendant of the pre-dispatch head -- a claim
+-                ;; naming the base or an unrelated sha never corroborates,
+-                ;; so the guard stays fail-closed (review round 2 of
+-                ;; repair-ea1-3f4cac: the unchanged guard was the finding).
+-                claim-descendant?
+-                (and text-sha
+-                     (not= text-sha before-head)
+-                     (ancestor? opts repo before-head text-sha))
+-                ;; Freshness applies to the RETURNED commit, not only the
+-                ;; observed head: a pre-existing side-branch commit merged
+-                ;; during the window is a descendant of the base and an
+-                ;; ancestor of head, yet was not authored by this dispatch.
+-                ;; Round-2 review of repair-ea1-3f4cac (job
+-                ;; invoke-1789420253972) reproduced exactly that: an
+-                ;; out-of-window claim reported :in-author-window? true
+-                ;; because only HEAD's timestamp was ever read.
+-                claim-time-ms (when (and text-sha
+-                                         (not= text-sha observed-head))
+-                                (commit-time-ms opts repo text-sha))
+-                claim-in-window? (if (or (nil? text-sha)
+-                                         (= text-sha observed-head))
+-                                   in-window?
+-                                   (and claim-time-ms start-ms end-ms
+-                                        (<= (- start-ms
+-                                               artifact-window-tolerance-ms)
+-                                            claim-time-ms
+-                                            (+ end-ms
+-                                               artifact-window-tolerance-ms))))
+-                corroborates? (and observed-valid? claim-descendant?
+-                                    claim-in-window?
+-                                    (or (= observed-head text-sha)
+-                                        (ancestor? opts repo text-sha
+-                                                  observed-head)))]
+-            {:fresh-author? true
+-             :repo repo
+-             :pre-dispatch-head before-head
+-             :observed-head observed-head
+-             :observed-commit-time-ms timestamp-ms
+-             :author-window-start-ms start-ms
+-             :author-window-end-ms end-ms
+-             :text-artifact-ref text-ref
+-             :text-artifact-sha text-sha
+-             :reported-text-artifact-ref reported-text-ref
+-             :resolved-from resolved-from
+-             :claim-resolution (if text-sha :resolved :unresolved)
+-             :claim-commit-time-ms claim-time-ms
+-             :descendant? (boolean descendant?)
+-             ;; Keep HEAD freshness and returned-claim freshness distinct in
+-             ;; the durable binding.  A moved HEAD can be fresh while the
+-             ;; claimed ancestor is stale; collapsing those observations made
+-             ;; rejection evidence misleading even after the guard was fixed.
+-             :in-author-window? (boolean in-window?)
+-             :claim-in-author-window? (boolean claim-in-window?)
+-             :corroborates? (boolean corroborates?)
+-             :disagreement? (and observed-valid? (some? text-sha)
+-                                 (not corroborates?))
+-             :commit (when corroborates? (or text-sha observed-head))}))]
+-    (when (or (:disagreement? binding)
+-              (= :unresolved (:claim-resolution binding)))
+-      ;; A claim that does not even LOOK like a commit is not a binding
+-      ;; disagreement: it is upstream extraction handing us prose (the
+-      ;; canary-de75cee9 shape -- a file path). unvalidated-artifact-failure
+-      ;; already classifies this on the build-gate path; this boundary owed
+-      ;; the same distinction (round-3 of repair-ea1-3f4cac).
+-      (let [ref (:text-artifact-ref binding)
+-            malformed? (and (string? ref) (not (commit-ish? ref)))
+-            failure-kind (cond
+-                           malformed? :artifact-ref-malformed
+-                           (= :unresolved (:claim-resolution binding))
+-                           :artifact-ref-unresolved
+-                           :else :artifact-binding-mismatch)]
+-        (throw (ex-info
+-                (case failure-kind
+-                  :artifact-ref-malformed
+-                  "Author artifact claim is not a commit at all"
+-                  :artifact-ref-unresolved
+-                  "Author artifact claim does not resolve in the repository"
+-                  "Author commit claim disagrees with observed repository HEAD")
+-                {:outcome :build-failed
+-                 :failure-kind failure-kind
+-                 :failure-stage :artifact-binding
+-                 :author-job author-job
+-                 :artifact-binding (assoc binding :commit nil)}))))
+-    binding))
++(defn- observe-repo-head [opts repo] (task-execution/observe-repo-head opts repo))
++(defn fresh-artifact-binding [opts repo before job]
++  (task-execution/fresh-artifact-binding opts repo before job))
+ 
+ (defn- primary-repos []
+   (->> (or (.listFiles (io/file "/home/joe/code")) [])
+@@ -1192,8 +1020,11 @@
+                :transient-exhausted))))))))
+ 
+ (defn dispatch!
+-  [{:keys [agency-base]} agent caller mission prompt]
+-  (let [response
++  [{:keys [agency-base d-task-dispatch-state]} agent caller mission prompt]
++  (let [captured (some-> d-task-dispatch-state deref)
++        prompt (if (= :captured (:status captured))
++                 (str (d-task/prompt-binding (:dispatch captured)) "\n" prompt) prompt)
++        response
+         (post-json! (str agency-base "/api/alpha/bell")
+                     {:agent-id agent :caller caller :mission-id (str mission)
+                      :type "request" :mode "work" :prompt prompt})]
+@@ -1657,31 +1488,8 @@
+       (= :advance-ticket (:type action)) (missions/ticket-entry target)
+       :else (mission-entry target))))
+ 
+-(defn- job-text [job]
+-  ;; The prompt itself names all verdict markers, so including it makes every
+-  ;; review look approved. Agency persists the response prefix in
+-  ;; :result-summary; require the reviewer to put its verdict first.
+-  ;; :result is the full response and must be read too: Agency trims event
+-  ;; text at ~2000 chars, so a terminal marker at the end of a longer reply
+-  ;; survives only there (attempt-003 round 2, 2026-09-13: the author's DONE
+-  ;; line was trimmed from the text event and the binding fell back to the
+-  ;; dispatch-time :artifact-ref, condemning a corroborable commit).
+-  (str/join "\n"
+-            (concat (keep identity [(:result-summary job)
+-                                    (:terminal-message job)
+-                                    (:result job)])
+-                    (keep :text (remove #(= "prompt" (:type %)) (:events job))))))
+-
+-(defn- review-verdict [job]
+-  (let [text (job-text job)
+-        marker (some-> (re-find #"(?m)^FULL_LOOP_REVIEW:\s*(APPROVE|REQUEST_CHANGES|REJECT)\b"
+-                                text)
+-                       second)]
+-    (case marker
+-      "APPROVE" :approve
+-      "REQUEST_CHANGES" :request-changes
+-      "REJECT" :reject
+-      :unverifiable)))
++(defn- job-text [job] (task-execution/job-text job))
++(defn- review-verdict [job] (task-execution/review-verdict job))
+ 
+ (defn- author-verdict
+   "Parse the author contract's terminal marker (line-anchored, first match —
+@@ -1846,72 +1654,11 @@
+ (defn- valid-feature-card [job]
+   (:card (feature-card-validation job)))
+ 
+-(def ^:private code-file-pattern
+-  #"(?i)\.(?:clj|cljc|cljs|bb|el|lean|py|js|jsx|ts|tsx|java|go|rs|c|cc|cpp|h|hpp|sh)$")
+-
+-(defn- review-execution-evidence [review-job]
+-  (let [reported (:execution review-job)
+-        reported-executed? (true? (:executed reported))
+-        reported-tool-events (long (or (:tool-events reported) 0))
+-        reported-command-events (long (or (:command-events reported) 0))
+-        ledger-events (->> (:events review-job)
+-                           (filter #(and (= "tool_use" (str (:type %)))
+-                                         (seq (:tools %))))
+-                           vec)
+-        ledger-tool-events (long (count ledger-events))
+-        ledger-command-events (->> ledger-events
+-                                   (filter #(some #{"Bash"} (:tools %)))
+-                                   count
+-                                   long)
+-        reported-valid? (and reported-executed?
+-                             (pos? reported-tool-events))
+-        ledger-executed? (pos? ledger-tool-events)]
+-    {:execution
+-     {:executed (or reported-valid?
+-                    ledger-executed?)
+-      :tool-events (max reported-tool-events ledger-tool-events)
+-      :command-events (max reported-command-events ledger-command-events)}
+-     :source (if (and ledger-executed?
+-                      (or (not reported-valid?)
+-                          (> ledger-tool-events reported-tool-events)))
+-               :job-events
+-               :job-summary)}))
+-
+-(defn- review-execution-gate [files review-job]
+-  (let [code-files (vec (filter #(re-find code-file-pattern (str %)) files))
+-        required? (boolean (seq code-files))
+-        {:keys [execution source]}
+-        (review-execution-evidence review-job)
+-        executed? (true? (:executed execution))
+-        tool-events (:tool-events execution)
+-        passed? (or (not required?)
+-                    (and executed? (pos? tool-events)))]
+-    {:required? required?
+-     :code-files code-files
+-     :executed? executed?
+-     :tool-events tool-events
+-     :execution execution
+-     :execution-source source
+-     :passed? passed?
+-     :failure-kind (when-not passed? :review-execution-evidence-missing)}))
+-
+-(defn independent-review-evidence
+-  "Public read-only validator for an already fetched Agency review job. Uses
+-  the same verdict and execution evidence as full-loop adjudication, but always
+-  requires execution, including when the reviewed artifacts are data files."
+-  [files review-job]
+-  (let [gate (review-execution-gate files review-job)
+-        verdict (review-verdict review-job)]
+-    {:job-id (:job-id review-job)
+-     :state (:state review-job)
+-     :verdict verdict
+-     :execution (:execution gate)
+-     :execution-source (:execution-source gate)
+-     :valid? (and (string? (:job-id review-job))
+-                  (= "done" (:state review-job))
+-                  (= :approve verdict)
+-                  (:executed? gate)
+-                  (:passed? gate))}))
++(defn- review-execution-gate [files job]
++  (task-execution/review-execution-gate files job))
++
++(defn independent-review-evidence [files job]
++  (task-execution/independent-review-evidence files job))
+ 
+ (defn- reviewer-note [job]
+   (or (:reviewer-note job)
+@@ -3296,10 +3043,12 @@
+   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
+   [raw-opts]
+   (let [phase-events (atom [])
++        d-task-dispatch (atom nil)
+         {:keys [trigger cohort? semantic-epoch author reviewer repair-reviewer
+                 window-days]
+          :as opts} (assoc (config raw-opts)
+                          :phase-events phase-events
++                         :d-task-dispatch-state d-task-dispatch
+                          :wm-phase-state (atom nil))
+         _ (when (and (contains? raw-opts :measured-acquisition?)
+                      (not (boolean? (:measured-acquisition? raw-opts))))
+@@ -3314,6 +3063,7 @@
+         checkpoint-events (atom {})
+         selected-entity-belief (atom nil)
+         action-occurrence (atom nil)
++        d-task-context (atom nil)
+         pending-selection (atom nil)
+         selection-persisted? (atom false)
+         dispatched-turns (atom 0)
+@@ -3659,8 +3409,17 @@
+                                                    {:selected-action selected-action
+                                                     :requested-pin
+                                                     (:run4/requested-pin opts)})
++                       d-task-result
++                       (when @action-occurrence
++                         (d-task/complete!
++                          (or (:d-task-evidence-root opts) d-task/default-root)
++                          @d-task-dispatch @d-task-context
++                          (assoc data :files (get-in @checkpoints [:build :judgment :artifacts])
++                                      :historical? (= :historical-verification-awaiting-validation outcome))
++                          #(read-job! opts %)))
+                        result-base (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
+                                :outcome outcome :checkpoints @checkpoints
++                               :d-task-enactment d-task-result
+                                :morning-brief-ref brief-ref
+                                :delivery-qa-ref delivery-qa-ref
+                                :wm/route run-route
+@@ -4011,6 +3770,9 @@
+           :selected-action (:action entry)
+           :now #(Instant/now)
+           :uuid-fn #(UUID/randomUUID)})
++        (reset! d-task-context
++                (d-task/context (:decision judgement) @action-occurrence
++                                (some-> (:declaration-reads/state opts) deref)))
+         (let [interpretation
+               (when (= :receipt (:interpretation-mode opts))
+                 (when-not attempt-evidence-dir
+@@ -4078,7 +3840,7 @@
+           ;; in the cohort and stop-line finding, but cannot reinforce E(pi).
+           (let [trace-path (when-not repair-action?
+                              ((or (:trace-fn opts) trace/write-trace!)
+-                              (assoc judgement :trace/reason
++                              (assoc judgement :d-task-context @d-task-context :trace/reason
+                                      {:kind :routing-rule
+                                       :rule :constructed-selection-persisted
+                                       :question "Does the constructed selection require operator review?"})))
+@@ -4280,6 +4042,11 @@
+                                         :target-repository-head
+                                         (:head head-observation))
+                                  target mission construction stop-lines))
++                _ (reset! d-task-dispatch
++                          (d-task/capture-result
++                           (assoc @d-task-context
++                                  :declaration-reads (some-> (:declaration-reads/state opts) deref)
++                                  :before pre-author-head)))
+                 author-prompt-text
+                 (prompt-for-head pre-author-head)
+                 author-response
+diff --git a/src/futon2/aif/token_belief_predecessor.clj b/src/futon2/aif/token_belief_predecessor.clj
+index 1fe91b94..5307a121 100644
+--- a/src/futon2/aif/token_belief_predecessor.clj
++++ b/src/futon2/aif/token_belief_predecessor.clj
+@@ -1,8 +1,8 @@
+ (ns futon2.aif.token-belief-predecessor
+   "Production token-carry admission. No production enactment authority exists
+-   yet: inspect available predecessor records and explicitly initialize fresh."
++   for portfolio proofs. D task evidence has a separate, narrower authority."
+   (:require [futon2.aif.interpretation-evidence :as evidence]
+-            [futon2.aif.machine-enactment-correspondence :as correspondence]))
++            [futon2.aif.d-predecessor-task-authority :as task]))
+ 
+ (def candidate-paths
+   [[:decision :action] [:selection-enaction] [:enactment]
+@@ -12,14 +12,15 @@
+   "Snapshot exactly the candidate fields inspected in the previous trace.
+    This is not a search of construction history or evidence of execution."
+   [trace]
+-  {:scope :previous-trace-only
++  (cond-> {:scope :previous-trace-only
+    :identity (select-keys trace [:timestamp :run/id :cohort-attempt])
+    :candidates
+    (mapv (fn [path]
+            (let [record (get-in trace path)]
+              {:path path :status (if (nil? record) :absent :present)
+               :record record :sha256 (evidence/value-digest record)}))
+-         candidate-paths)})
++         candidate-paths)}
++    (:d-task-context trace) (assoc :task-context (:d-task-context trace))))
+ 
+ (defn- reject-candidate [{:keys [path status record] :as candidate}]
+   (assoc candidate :admission :refused
+@@ -34,43 +35,60 @@
+                    :else :independent-token-transition-evidence-unestablished)))
+ 
+ (defn production-authority
+-  "Consult the real production verifier. Only its known authority absence
+-   is an admissible continuation here; other defects propagate."
+-  []
+-  (try
+-    (correspondence/verify-correspondence {:mode :production})
+-    (throw (ex-info "Production authority changed; token transition admission requires review"
+-                    {:kind :token-carry-admission-contract-changed}))
+-    (catch clojure.lang.ExceptionInfo e
+-      (if (= :e2b/production-authority-unavailable (:refusal (ex-data e)))
+-        {:status :refused :kind (:refusal (ex-data e))
+-         :verifier 'futon2.aif.machine-enactment-correspondence/verify-correspondence
+-         :mode :production}
+-        (throw e)))))
++  "D carry only: executed-with-artifacts in minted-identity space. This does
++   not replace E2b or establish its E1/E2a portfolio proposition."
++  ([] (production-authority nil))
++  ([expected]
++   (task/read-predecessor task/default-root expected task/agency-job)))
++
++(defn- valid-authority? [a inspection]
++  (and (= task/authority (:authority a)) (= task/scope (:scope a))
++       (case (:status a)
++         :admitted (and (= (get-in inspection [:task-context :occurrence]) (:occurrence a))
++                        (= (get-in inspection [:task-context :carry-occurrence-id]) (:carry-occurrence-id a))
++                        (= :not-established (:candidate-to-minted-join a))
++                        (= :task (:enactment-grain a))
++                        (= :declared-kernel-of-verified-macro-action (:b-authority a))
++                        (string? (:record-sha256 a)) (string? (get-in a [:source :sha256])))
++         :refused (keyword? (:kind a))
++         :invalid (keyword? (:kind a))
++         false)))
+ 
+ (defn input-receipt
+   "Refused carry -> fresh fact initialization -> consumed belief. This is an
+    admission receipt, never an observation update or an impossible observation."
+-  [stage inspection]
++  ([stage inspection]
++   (input-receipt stage inspection (production-authority (:task-context inspection))))
++  ([stage inspection admission]
+   (let [previous (:prospective-prior stage)
+         universe (get-in stage [:prospective-carry :universe])
+-        changed? (and (some? previous) (not= universe (:universe previous)))]
+-    {:schema :wm/token-belief-input-v1
++        changed? (and (some? previous) (not= universe (:universe previous)))
++        admitted? (and (not changed?) (= :admitted (:status admission)))]
++    {:schema :wm/token-belief-input-v2
+      :occurrence-id (:occurrence-id stage)
+      :z-semantics :per-step-redraw
+-     :conditioning-status :not-run
+-     :reason :carry-admission-refused
++     :conditioning-status (if admitted? :not-wired :not-run)
++     :reason (if admitted? :conditioning-consumption-not-wired :carry-admission-refused)
+      :inspection inspection
+      :carry-admission
+-     {:status :refused
+-      :kind (if changed? :carry-domain-changed :carry-no-predecessor)
+-      :authority (production-authority)
++     {:status (if changed? :refused (:status admission))
++      :kind (if changed? :carry-domain-changed
++                (if (= :admitted (:status admission)) :task-execution-verified :carry-no-predecessor))
++      :authority admission
+       :previous-universe (:universe previous) :current-universe universe
+       :inspected (mapv reject-candidate (:candidates inspection))}
+      :initialization (:initialization stage)
+-     :policy :fresh-fact-initialization-after-carry-refusal
++     :policy (if admitted?
++               :fresh-fact-initialization-conditioning-not-wired
++               :fresh-fact-initialization-after-carry-refusal)
+      :continuation-belief (get-in stage [:initialization :value])
+-     :observation-updates []}))
++     :observation-updates []})))
++
++(def legacy-unavailable-authority
++  ;; Historical 2b receipt replay only; never used to admit a new predecessor.
++  {:status :refused :kind :e2b/production-authority-unavailable
++   :verifier 'futon2.aif.machine-enactment-correspondence/verify-correspondence
++   :mode :production})
+ 
+ (defn valid-input?
+   "Replay the refusal chain; preserve the original initializer equality.
+@@ -83,4 +101,8 @@
+          (every? (fn [{:keys [record status sha256]}]
+                    (and (= status (if (nil? record) :absent :present))
+                         (= sha256 (evidence/value-digest record)))) candidates)
+-         (= receipt (input-receipt stage inspection)))))
++         (if (= :wm/token-belief-input-v1 (:schema receipt))
++           (= receipt (assoc (input-receipt stage inspection legacy-unavailable-authority)
++                             :schema :wm/token-belief-input-v1))
++           (and (valid-authority? (get-in receipt [:carry-admission :authority]) inspection)
++                (= receipt (input-receipt stage inspection (get-in receipt [:carry-admission :authority]))))))))
+diff --git a/src/futon2/aif/trace.clj b/src/futon2/aif/trace.clj
+index 4d703667..1861b8fe 100644
+--- a/src/futon2/aif/trace.clj
++++ b/src/futon2/aif/trace.clj
+@@ -560,6 +560,8 @@
+     ;; what was enacted, not just the γ-facing outcome record.
+     (seq (:act-gate-verdicts judge-output))
+     (assoc :act-gate-verdicts (:act-gate-verdicts judge-output))
++    (:d-task-context judge-output)
++    (assoc :d-task-context (:d-task-context judge-output))
+     (:enactment judge-output)
+     (assoc :enactment (:enactment judge-output))
+     ;; B1 learned E(π), dark and present-only: the flag-off trace shape remains
+diff --git a/test/futon2/aif/token_belief_predecessor_test.clj b/test/futon2/aif/token_belief_predecessor_test.clj
+index fd714d90..ef9b9e0d 100644
+--- a/test/futon2/aif/token_belief_predecessor_test.clj
++++ b/test/futon2/aif/token_belief_predecessor_test.clj
+@@ -39,7 +39,7 @@
+         inspected (get-in input [:carry-admission :inspected])]
+     (is (= :match (:verdict comparison)))
+     (is (= :carry-no-predecessor (get-in input [:carry-admission :kind])))
+-    (is (= :e2b/production-authority-unavailable (get-in input [:carry-admission :authority :kind])))
++    (is (= :carry-no-predecessor (get-in input [:carry-admission :authority :kind])))
+     (is (= [:selection-is-not-enactment :selection-self-comparison-is-not-enactment
+             :independent-token-transition-evidence-unestablished :record-absent
+             :plan-is-not-enactment :simulated-order-is-not-enactment]
+diff --git a/src/futon2/aif/d_predecessor_task_authority.clj b/src/futon2/aif/d_predecessor_task_authority.clj
+new file mode 100644
+index 00000000..9999cbd5
+--- /dev/null
++++ b/src/futon2/aif/d_predecessor_task_authority.clj
+@@ -0,0 +1,261 @@
++(ns futon2.aif.d-predecessor-task-authority
++  "D-only executed-with-artifacts authority. Does not establish E1 portfolio
++   membership, the R6-R11 domain, or broader machine-enactment correspondence."
++  (:require [clojure.edn :as edn]
++            [clojure.set :as set]
++            [babashka.http-client :as http]
++            [cheshire.core :as json]
++            [clojure.java.io :as io]
++            [clojure.java.shell :as shell]
++            [clojure.string :as str]
++            [futon2.aif.close-retention :as retention]
++            [futon2.aif.interpretation-evidence :as evidence]
++            [futon2.aif.observation-checks :as observation]
++            [futon2.aif.task-execution-evidence :as execution])
++  (:import (java.nio.file Files StandardOpenOption)
++           (java.io PushbackReader StringReader)))
++
++(def authority :d-predecessor-task-authority-v1)
++(def default-root "data/wm-d-task-enactment")
++(def scope {:certifies :executed-with-artifacts
++            :does-not-establish #{:e1-portfolio-membership :r6-r11-domain
++                                  :machine-enactment-correspondence}})
++(defn- refuse! [kind data]
++  (throw (ex-info "D task predecessor refused" (assoc data :d-predecessor/refusal kind))))
++(defn- require! [p kind data] (when-not p (refuse! kind data)))
++(defn- sha [bytes] (evidence/sha256 bytes))
++(defn- file-bytes [path] (Files/readAllBytes (.toPath (io/file path))))
++(defn- read-one [bytes]
++  (with-open [r (PushbackReader. (StringReader. (String. ^bytes bytes "UTF-8")))]
++    (let [eof (Object.) value (edn/read {:eof eof} r)]
++      (require! (and (not (identical? value eof)) (identical? eof (edn/read {:eof eof} r)))
++                :record-not-one-form {})
++      value)))
++(defn- git! [repo & args]
++  (let [r (apply shell/sh "git" "-C" repo args)]
++    (require! (zero? (:exit r)) :git-evidence-unavailable {:repository repo :arguments (vec args)})
++    (str/trim (:out r))))
++(defn- canonical [path] (.getCanonicalPath (io/file path)))
++
++(defn capture
++  "Retain the minted occurrence and declaration bytes before dispatch.
++   No pre-side token mapping is inferred from interpretation facts."
++  [{:keys [occurrence carry-occurrence-id universe declaration-reads before candidate-id]}]
++  (retention/validate-occurrence occurrence)
++  (require! (and (string? carry-occurrence-id) (set? universe)) :carry-identity-unavailable {})
++  {:schema :wm/d-task-dispatch-v1 :occurrence occurrence
++   :carry-occurrence-id carry-occurrence-id :universe universe
++   :r6-candidate-occurrence candidate-id :candidate-to-minted-join :not-established
++   :before before :before-evidence :not-measured
++   :declarations
++   (mapv (fn [{:keys [path sha256]}]
++           (let [bytes (file-bytes path)]
++             (require! (= sha256 (sha bytes)) :declaration-changed-before-dispatch {:path path})
++             {:path path :sha256 sha256 :snapshot-edn (String. bytes "UTF-8") :snapshot (read-one bytes)}))
++         (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))})
++
++(defn- artifact-tokens
++  "Revision-pair C3/C4 affirmations. Other check classes remain explicit
++   unavailable measurements; their declared locators are never modified."
++  [dispatch repo commit]
++  (vec
++   (for [{:keys [snapshot sha256]} (:declarations dispatch)
++         [token locator] (:locators snapshot)
++         :let [qualified [(:target snapshot) token]]
++         :when (contains? (:universe dispatch) qualified)]
++     (let [same-repo? (= (canonical repo) (canonical (io/file observation/repo-root (:repo locator))))
++           class (:class locator)
++           after-locator (assoc locator :sha commit)
++           result (if (and same-repo? (#{:C3 :C4} class))
++                    ((if (= class :C3) observation/check-path-exists observation/check-decl-in-file)
++                     after-locator)
++                    {:status :missing :kind (if same-repo? :revision-pair-reader-unavailable
++                                                :different-artifact-repository)})]
++       {:token qualified :declaration-sha256 sha256
++        :declared-locator locator :after-locator (when (and same-repo? (#{:C3 :C4} class)) after-locator)
++        :result result}))))
++
++(defn prompt-binding [dispatch]
++  (str "D_TASK_DISPATCH_SHA256: " (evidence/value-digest dispatch)))
++
++(defn claim
++  "Assemble a task claim from final artifact/review inputs. This is not admission."
++  [{:keys [dispatch artifact-binding author-job review-job files repository route]}]
++  {:schema :wm/d-task-enactment-v1 :authority authority :scope scope
++   :enactment-grain :task :b-authority :declared-kernel-of-verified-macro-action
++   :causal-attribution :independent-check-required :route route
++   :dispatch dispatch :artifact-binding artifact-binding
++   :author-job author-job :review-job review-job :files (vec files)
++   :repository repository
++   :revision-pair {:before (get-in dispatch [:before :head])
++                   :after (:commit artifact-binding) :before-evidence :not-measured}
++   :after-token-evidence
++   (when (and (= route :fresh-author) (:commit artifact-binding))
++     (artifact-tokens dispatch repository (:commit artifact-binding)))})
++
++(defn verify!
++  "Verify minted identity, corroborated fresh artifact, independent review and
++   revision-bound token affirmations. Must not transform model-misfit or unknown
++   evidence into successful execution. Portfolio approval is not established.
++   READ-JOB resolves the independently owned Agency job by its exact ID."
++  [record expected read-job]
++  (require! (= :wm/d-task-enactment-v1 (:schema record)) :record-schema-mismatch {})
++  (require! (= (:authority record) authority) :authority-mismatch {})
++  (require! (= (:scope record) scope) :authority-scope-mismatch {})
++  (case (:route record)
++    :recovery (refuse! :recovered-artifact-not-fresh-execution {})
++    :historical (refuse! :historical-verification-not-execution {})
++    :fresh-author nil
++    (refuse! :task-execution-incomplete {}))
++  (let [{:keys [dispatch repository artifact-binding files revision-pair]} record
++        occurrence (retention/validate-occurrence (:occurrence dispatch))
++        author (read-job (get-in record [:author-job :job-id]))
++        reviewer (read-job (get-in record [:review-job :job-id]))
++        before (:before dispatch)
++        final (:commit artifact-binding)]
++    (require! (= occurrence (:occurrence expected)) :occurrence-mismatch {})
++    (require! (= (:carry-occurrence-id expected) (:carry-occurrence-id dispatch)) :carry-occurrence-mismatch {})
++    (require! (= (:universe expected) (:universe dispatch)) :carry-domain-changed {})
++    (require! (= :not-established (:candidate-to-minted-join dispatch)) :unestablished-identity-join {})
++    (require! (and (= :task (:enactment-grain record))
++                   (= :declared-kernel-of-verified-macro-action (:b-authority record)))
++              :kernel-authority-mismatch {})
++    (require! (and (string? (:job-id author)) (string? (:job-id reviewer))
++                   (= (:job-id author) (get-in record [:author-job :job-id]))
++                   (= (:job-id reviewer) (get-in record [:review-job :job-id]))
++                   (= "done" (:state author)) (= "done" (:state reviewer))
++                   (string? (:agent-id author)) (string? (:agent-id reviewer))
++                   (not= (:agent-id author) (:agent-id reviewer))
++                   (not= (:job-id author) (:job-id reviewer))) :independent-jobs-unestablished {})
++    (doseq [job [author reviewer]]
++      (let [prompts (str/join "\n" (keep :text (filter #(= "prompt" (:type %)) (:events job))))]
++        (require! (str/includes? prompts (prompt-binding dispatch))
++                  :job-occurrence-binding-unestablished {:job-id (:job-id job)})))
++    (let [prompts (str/join "\n" (keep :text (filter #(= "prompt" (:type %)) (:events reviewer))))]
++      (require! (and (string? final) (str/includes? prompts final)
++                     (str/includes? prompts (str "Repository: " repository)))
++                :review-artifact-binding-unestablished {}))
++    (require! (:valid? (execution/independent-review-evidence files reviewer))
++              :independent-review-not-passed {})
++    (require! (and (string? final) (re-matches #"[0-9a-f]{40}" final)
++                   (= final (git! repository "rev-parse" (str final "^{commit}")))
++                   (= repository (:repo before))
++                   (= (:head before) (:before revision-pair))
++                   (= final (:after revision-pair))
++                   (= :not-measured (:before-evidence revision-pair))) :revision-pair-invalid {})
++    (git! repository "merge-base" "--is-ancestor" (:head before) final)
++    ;; Reuse the runner's check with the retained post-dispatch observation,
++    ;; while independently re-resolving Git ancestry, commit and timestamps.
++    (let [actual (execution/fresh-artifact-binding
++                  {:repo-head-observation-fn
++                   (fn [_] {:repo repository :head (:observed-head artifact-binding)
++                            :observed-at-ms (:author-window-end-ms artifact-binding)})}
++                  repository
++                  {:repo repository :head (:pre-dispatch-head artifact-binding)
++                   :observed-at-ms (:author-window-start-ms artifact-binding)} author)]
++      (require! (and (:corroborates? actual) (= final (:commit actual))
++                     (= (select-keys artifact-binding [:pre-dispatch-head :observed-head :commit
++                                                      :author-window-start-ms :author-window-end-ms])
++                        (select-keys actual [:pre-dispatch-head :observed-head :commit
++                                            :author-window-start-ms :author-window-end-ms])))
++                :fresh-artifact-unverified {}))
++    (require! (= (:declaration-pins expected)
++                 (mapv #(select-keys % [:path :sha256]) (:declarations dispatch)))
++              :declaration-pins-mismatch {})
++    (doseq [{:keys [sha256 snapshot snapshot-edn]} (:declarations dispatch)]
++      (require! (and (string? snapshot-edn)
++                     (= sha256 (sha (.getBytes ^String snapshot-edn "UTF-8")))
++                     (= snapshot (read-one (.getBytes ^String snapshot-edn "UTF-8"))))
++                :declaration-snapshot-mismatch {}))
++    (let [replayed (artifact-tokens dispatch repository final)
++          affirmations (filter #(true? (get-in % [:result :observed])) replayed)
++          present (set (map :token affirmations))]
++      (require! (= replayed (:after-token-evidence record)) :after-token-evidence-mismatch {})
++      (require! (seq present) :after-token-evidence-unavailable {})
++      {:status :admitted :authority authority :scope scope
++       :occurrence occurrence :carry-occurrence-id (:carry-occurrence-id dispatch)
++       :candidate-to-minted-join :not-established
++       :r6-candidate-occurrence (:r6-candidate-occurrence dispatch)
++       :enactment-grain :task :b-authority :declared-kernel-of-verified-macro-action
++       :declared-action (:action/value occurrence)
++       :revision-pair revision-pair :before-evidence :not-measured
++       :present present :absent #{} :unknown (set/difference (:universe dispatch) present)
++       :causal-attribution :independent-check-required
++       :record-sha256 (evidence/value-digest record)})))
++
++(defn verify [record expected read-job]
++  (try (verify! record expected read-job)
++       (catch clojure.lang.ExceptionInfo e
++         (if-let [kind (:d-predecessor/refusal (ex-data e))]
++           {:status :refused :authority authority :scope scope :kind kind}
++           {:status :invalid :authority authority :scope scope
++            :kind :verification-input-invalid :detail (ex-data e)}))))
++
++(defn- record-file [root occurrence]
++  (retention/validate-occurrence occurrence)
++  (io/file root (str (:action/id occurrence) ".edn")))
++(defn write-claim! [root record]
++  (let [f (record-file root (get-in record [:dispatch :occurrence]))
++        text (str (pr-str record) "\n")]
++    (io/make-parents f)
++    (Files/write (.toPath f) (.getBytes text "UTF-8")
++                 (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW StandardOpenOption/WRITE]))
++    {:path (.getCanonicalPath f) :sha256 (sha (.getBytes text "UTF-8"))}))
++(defn read-predecessor [root expected read-job]
++  (if-not (:occurrence expected)
++    {:status :refused :authority authority :scope scope :kind :carry-no-predecessor}
++    (let [f (record-file root (:occurrence expected))]
++      (if-not (.isFile f)
++        {:status :refused :authority authority :scope scope :kind :carry-no-predecessor}
++        (try (let [bytes (file-bytes f)]
++               (assoc (verify (read-one bytes) expected read-job)
++                      :source {:path (.getCanonicalPath f) :sha256 (sha bytes)}))
++             (catch Exception _ {:status :invalid :authority authority :scope scope
++                                 :kind :predecessor-record-unreadable}))))))
++
++(defn agency-job [job-id]
++  (require! (and (string? job-id) (re-matches #"[A-Za-z0-9_-]+" job-id))
++            :job-id-invalid {})
++  (let [r (http/get (str "http://localhost:7070/api/alpha/invoke/jobs/" job-id)
++                    {:timeout 10000 :throw false})]
++    (require! (= 200 (:status r)) :agency-job-unavailable {:job-id job-id})
++    (:job (json/parse-string (:body r) true))))
++
++(defn context [decision occurrence declaration-reads]
++  (let [carry (get-in decision [:selection-certificate :token-belief-stage :prospective-carry])]
++    {:occurrence occurrence :carry-occurrence-id (:occurrence-id carry)
++     :universe (:universe carry)
++     :candidate-id (or (:r6-candidate-occurrence decision) (:selected/occurrence-id decision))
++     :candidate-to-minted-join :not-established
++     :declaration-pins (vec (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))}))
++
++(defn produce! [root inputs expected read-job]
++  (let [record (claim inputs)
++        verification (verify record expected read-job)
++        source (write-claim! root record)]
++    {:authority authority :scope scope :verification verification :source source}))
++
++(defn capture-result [inputs]
++  (try {:status :captured :dispatch (capture inputs)}
++       (catch Exception e
++         {:status :refused :authority authority :scope scope
++          :kind (or (:d-predecessor/refusal (ex-data e)) :dispatch-evidence-unavailable)})))
++
++(defn complete! [root captured expected data read-job]
++  (if (:historical? data)
++    {:status :refused :authority authority :scope scope
++     :kind :historical-verification-not-execution}
++    (if-not (= :captured (:status captured))
++      (or captured {:status :refused :authority authority :scope scope
++                    :kind :dispatch-evidence-unavailable})
++      (let [inputs {:dispatch (:dispatch captured)
++                    :artifact-binding (:artifact-binding data)
++                    :author-job (:author-job data) :review-job (:review-job data)
++                    :files (:files data) :repository (get-in data [:artifact-binding :repo])
++                    :route (cond (nil? (:commit data)) :incomplete
++                                 (not (true? (get-in data [:artifact-binding :fresh-author?]))) :recovery
++                                 :else :fresh-author)}]
++        (try (produce! root inputs expected read-job)
++             (catch Exception e
++               {:status :refused :authority authority :scope scope
++                :kind (or (:d-predecessor/refusal (ex-data e)) :task-evidence-unavailable)}))))))
+diff --git a/src/futon2/aif/task_execution_evidence.clj b/src/futon2/aif/task_execution_evidence.clj
+new file mode 100644
+index 00000000..61a9d9f6
+--- /dev/null
++++ b/src/futon2/aif/task_execution_evidence.clj
+@@ -0,0 +1,280 @@
++(ns futon2.aif.task-execution-evidence
++  "Shared artifact and review checks used by the runner and D task verifier."
++  (:require [clojure.java.shell :as shell] [clojure.string :as str])
++  (:import (java.time Instant)))
++
++(def artifact-window-tolerance-ms (* 2 60 1000))
++(defn- git [repo & args] (apply shell/sh "git" "-C" repo args))
++(defn commit-ish? [v] (and (string? v) (boolean (re-matches #"(?i)[0-9a-f]{7,40}" v))))
++
++(defn job-text [job]
++  ;; The prompt itself names all verdict markers, so including it makes every
++  ;; review look approved. Agency persists the response prefix in
++  ;; :result-summary; require the reviewer to put its verdict first.
++  ;; :result is the full response and must be read too: Agency trims event
++  ;; text at ~2000 chars, so a terminal marker at the end of a longer reply
++  ;; survives only there (attempt-003 round 2, 2026-09-13: the author's DONE
++  ;; line was trimmed from the text event and the binding fell back to the
++  ;; dispatch-time :artifact-ref, condemning a corroborable commit).
++  (str/join "\n"
++            (concat (keep identity [(:result-summary job)
++                                    (:terminal-message job)
++                                    (:result job)])
++                    (keep :text (remove #(= "prompt" (:type %)) (:events job))))))
++
++(defn review-verdict [job]
++  (let [text (job-text job)
++        marker (some-> (re-find #"(?m)^FULL_LOOP_REVIEW:\s*(APPROVE|REQUEST_CHANGES|REJECT)\b"
++                                text)
++                       second)]
++    (case marker
++      "APPROVE" :approve
++      "REQUEST_CHANGES" :request-changes
++      "REJECT" :reject
++      :unverifiable)))
++
++(defn observe-repo-head [opts repo]
++  (if-let [f (:repo-head-observation-fn opts)]
++    (f repo)
++    (let [head (when repo (git repo "rev-parse" "HEAD"))]
++      {:repo repo
++       :head (when (and head (zero? (:exit head))) (str/trim (:out head)))
++       :observed-at-ms (System/currentTimeMillis)})))
++
++(defn resolve-commit-sha [opts repo commit]
++  (when (and repo (not (str/blank? (str commit))))
++    (if-let [f (:resolve-commit-sha-fn opts)]
++      (f repo commit)
++      (let [result (git repo "rev-parse" (str commit "^{commit}"))]
++        (when (zero? (:exit result)) (str/trim (:out result)))))))
++
++(defn commit-time-ms [opts repo commit]
++  (if-let [f (:commit-time-ms-fn opts)]
++    (f repo commit)
++    (let [result (git repo "show" "-s" "--format=%cI" commit)]
++      (when (zero? (:exit result))
++        (try (.toEpochMilli (Instant/parse (str/trim (:out result))))
++             (catch Throwable _ nil))))))
++
++(defn ancestor? [opts repo ancestor descendant]
++  (if-let [f (:ancestor-fn opts)]
++    (boolean (f repo ancestor descendant))
++    (zero? (:exit (git repo "merge-base" "--is-ancestor" ancestor descendant)))))
++
++
++(defn- author-claimed-ref
++  "The sha the author's own FULL_LOOP_AUTHOR: DONE line claims.  The Agency
++  job's :artifact-ref is stamped at dispatch with the pre-dispatch head, so
++  corroborating against it condemns every author who actually commits
++  (attempt-002, 2026-09-13: observed 9a6a012f, corroborated against the
++  base 2e5e7409, mismatch).  The text claim is the author's; the job field
++  is only a fallback for jobs with no readable marker."
++  [author-job]
++  ;; LAST match, not first: revision prompts quote prior findings verbatim,
++  ;; so an earlier round's DONE line can appear inside the reply body ahead
++  ;; of the author's own final declaration (repair-ea1-3f4cac attempt-002
++  ;; family). The final DONE line is the author's authoritative claim.
++  (or (some->> (job-text author-job)
++               (re-seq #"(?m)^FULL_LOOP_AUTHOR:\s*DONE\b[ \t]*([0-9a-fA-F]{7,40})")
++               last
++               second)
++      (:artifact-ref author-job)))
++
++(defn fresh-artifact-binding
++  "Observe and validate the commit produced by one fresh author dispatch.
++  The claimed commit must resolve to the validated repository HEAD.
++  Divergent or missing claims fail closed. Injected observations cannot
++  override an explicit disagreement."
++  [opts repo before author-job]
++  (let [binding
++        (if-let [f (:author-artifact-observer-fn opts)]
++          (f repo before author-job)
++          (let [after (observe-repo-head opts repo)
++                before-head (:head before)
++                observed-head (:head after)
++                reported-text-ref (author-claimed-ref author-job)
++                job-ref (:artifact-ref author-job)
++                start-ms (:observed-at-ms before)
++                end-ms (:observed-at-ms after)
++                changed? (and before-head observed-head (not= before-head observed-head))
++                descendant? (and changed?
++                                 (ancestor? opts repo before-head observed-head))
++                timestamp-ms (when changed? (commit-time-ms opts repo observed-head))
++                in-window? (and timestamp-ms start-ms end-ms
++                                (<= (- start-ms artifact-window-tolerance-ms)
++                                    timestamp-ms
++                                    (+ end-ms artifact-window-tolerance-ms)))
++                observed-valid? (and changed? descendant? in-window?)
++                reported-text-sha (resolve-commit-sha opts repo reported-text-ref)
++                job-ref-sha (when (and (nil? reported-text-sha)
++                                       (commit-ish? job-ref))
++                              (resolve-commit-sha opts repo job-ref))
++                ;; A DONE carrier can retain a bad long expansion while
++                ;; Agency retains the actual short Git ref separately
++                ;; (repair-ea1-9b6ce3a4). Git rev-parse supplies the
++                ;; unambiguous-prefix check. Never borrow the dispatch-time
++                ;; base stamp as a fallback claim.
++                fallback-sha (when (and job-ref-sha
++                                        (not= job-ref-sha before-head))
++                               job-ref-sha)
++                text-sha (or reported-text-sha fallback-sha)
++                text-ref (if reported-text-sha reported-text-ref
++                             (if fallback-sha job-ref reported-text-ref))
++                resolved-from (cond reported-text-sha :done-line
++                                    fallback-sha :job-artifact-ref)
++                ;; A claimed commit corroborates when it IS the observed
++                ;; head, or when it is the author's own commit that later
++                ;; commits (concurrent machinery deposits, revision-round
++                ;; bookkeeping) have moved HEAD past. The claim must still
++                ;; be a fresh descendant of the pre-dispatch head -- a claim
++                ;; naming the base or an unrelated sha never corroborates,
++                ;; so the guard stays fail-closed (review round 2 of
++                ;; repair-ea1-3f4cac: the unchanged guard was the finding).
++                claim-descendant?
++                (and text-sha
++                     (not= text-sha before-head)
++                     (ancestor? opts repo before-head text-sha))
++                ;; Freshness applies to the RETURNED commit, not only the
++                ;; observed head: a pre-existing side-branch commit merged
++                ;; during the window is a descendant of the base and an
++                ;; ancestor of head, yet was not authored by this dispatch.
++                ;; Round-2 review of repair-ea1-3f4cac (job
++                ;; invoke-1789420253972) reproduced exactly that: an
++                ;; out-of-window claim reported :in-author-window? true
++                ;; because only HEAD's timestamp was ever read.
++                claim-time-ms (when (and text-sha
++                                         (not= text-sha observed-head))
++                                (commit-time-ms opts repo text-sha))
++                claim-in-window? (if (or (nil? text-sha)
++                                         (= text-sha observed-head))
++                                   in-window?
++                                   (and claim-time-ms start-ms end-ms
++                                        (<= (- start-ms
++                                               artifact-window-tolerance-ms)
++                                            claim-time-ms
++                                            (+ end-ms
++                                               artifact-window-tolerance-ms))))
++                corroborates? (and observed-valid? claim-descendant?
++                                    claim-in-window?
++                                    (or (= observed-head text-sha)
++                                        (ancestor? opts repo text-sha
++                                                  observed-head)))]
++            {:fresh-author? true
++             :repo repo
++             :pre-dispatch-head before-head
++             :observed-head observed-head
++             :observed-commit-time-ms timestamp-ms
++             :author-window-start-ms start-ms
++             :author-window-end-ms end-ms
++             :text-artifact-ref text-ref
++             :text-artifact-sha text-sha
++             :reported-text-artifact-ref reported-text-ref
++             :resolved-from resolved-from
++             :claim-resolution (if text-sha :resolved :unresolved)
++             :claim-commit-time-ms claim-time-ms
++             :descendant? (boolean descendant?)
++             ;; Keep HEAD freshness and returned-claim freshness distinct in
++             ;; the durable binding.  A moved HEAD can be fresh while the
++             ;; claimed ancestor is stale; collapsing those observations made
++             ;; rejection evidence misleading even after the guard was fixed.
++             :in-author-window? (boolean in-window?)
++             :claim-in-author-window? (boolean claim-in-window?)
++             :corroborates? (boolean corroborates?)
++             :disagreement? (and observed-valid? (some? text-sha)
++                                 (not corroborates?))
++             :commit (when corroborates? (or text-sha observed-head))}))]
++    (when (or (:disagreement? binding)
++              (= :unresolved (:claim-resolution binding)))
++      ;; A claim that does not even LOOK like a commit is not a binding
++      ;; disagreement: it is upstream extraction handing us prose (the
++      ;; canary-de75cee9 shape -- a file path). unvalidated-artifact-failure
++      ;; already classifies this on the build-gate path; this boundary owed
++      ;; the same distinction (round-3 of repair-ea1-3f4cac).
++      (let [ref (:text-artifact-ref binding)
++            malformed? (and (string? ref) (not (commit-ish? ref)))
++            failure-kind (cond
++                           malformed? :artifact-ref-malformed
++                           (= :unresolved (:claim-resolution binding))
++                           :artifact-ref-unresolved
++                           :else :artifact-binding-mismatch)]
++        (throw (ex-info
++                (case failure-kind
++                  :artifact-ref-malformed
++                  "Author artifact claim is not a commit at all"
++                  :artifact-ref-unresolved
++                  "Author artifact claim does not resolve in the repository"
++                  "Author commit claim disagrees with observed repository HEAD")
++                {:outcome :build-failed
++                 :failure-kind failure-kind
++                 :failure-stage :artifact-binding
++                 :author-job author-job
++                 :artifact-binding (assoc binding :commit nil)}))))
++    binding))
++
++(def ^:private code-file-pattern
++  #"(?i)\.(?:clj|cljc|cljs|bb|el|lean|py|js|jsx|ts|tsx|java|go|rs|c|cc|cpp|h|hpp|sh)$")
++
++(defn- review-execution-evidence [review-job]
++  (let [reported (:execution review-job)
++        reported-executed? (true? (:executed reported))
++        reported-tool-events (long (or (:tool-events reported) 0))
++        reported-command-events (long (or (:command-events reported) 0))
++        ledger-events (->> (:events review-job)
++                           (filter #(and (= "tool_use" (str (:type %)))
++                                         (seq (:tools %))))
++                           vec)
++        ledger-tool-events (long (count ledger-events))
++        ledger-command-events (->> ledger-events
++                                   (filter #(some #{"Bash"} (:tools %)))
++                                   count
++                                   long)
++        reported-valid? (and reported-executed?
++                             (pos? reported-tool-events))
++        ledger-executed? (pos? ledger-tool-events)]
++    {:execution
++     {:executed (or reported-valid?
++                    ledger-executed?)
++      :tool-events (max reported-tool-events ledger-tool-events)
++      :command-events (max reported-command-events ledger-command-events)}
++     :source (if (and ledger-executed?
++                      (or (not reported-valid?)
++                          (> ledger-tool-events reported-tool-events)))
++               :job-events
++               :job-summary)}))
++
++(defn review-execution-gate [files review-job]
++  (let [code-files (vec (filter #(re-find code-file-pattern (str %)) files))
++        required? (boolean (seq code-files))
++        {:keys [execution source]}
++        (review-execution-evidence review-job)
++        executed? (true? (:executed execution))
++        tool-events (:tool-events execution)
++        passed? (or (not required?)
++                    (and executed? (pos? tool-events)))]
++    {:required? required?
++     :code-files code-files
++     :executed? executed?
++     :tool-events tool-events
++     :execution execution
++     :execution-source source
++     :passed? passed?
++     :failure-kind (when-not passed? :review-execution-evidence-missing)}))
++
++(defn independent-review-evidence
++  "Public read-only validator for an already fetched Agency review job. Uses
++  the same verdict and execution evidence as full-loop adjudication, but always
++  requires execution, including when the reviewed artifacts are data files."
++  [files review-job]
++  (let [gate (review-execution-gate files review-job)
++        verdict (review-verdict review-job)]
++    {:job-id (:job-id review-job)
++     :state (:state review-job)
++     :verdict verdict
++     :execution (:execution gate)
++     :execution-source (:execution-source gate)
++     :valid? (and (string? (:job-id review-job))
++                  (= "done" (:state review-job))
++                  (= :approve verdict)
++                  (:executed? gate)
++                  (:passed? gate))}))
++
+diff --git a/test/futon2/aif/d_predecessor_task_authority_test.clj b/test/futon2/aif/d_predecessor_task_authority_test.clj
+new file mode 100644
+index 00000000..8c7d3cb3
+--- /dev/null
++++ b/test/futon2/aif/d_predecessor_task_authority_test.clj
+@@ -0,0 +1,161 @@
++(ns futon2.aif.d-predecessor-task-authority-test
++  (:require [clojure.java.io :as io]
++            [clojure.java.shell :as shell]
++            [clojure.string :as str]
++            [clojure.test :refer [deftest is]]
++            [futon2.aif.close-retention :as retention]
++            [futon2.aif.d-predecessor-task-authority :as task]
++            [futon2.aif.interpretation-evidence :as evidence]
++            [futon2.aif.observation-checks :as observation]
++            [futon2.aif.task-execution-evidence :as execution]
++            [futon2.aif.token-belief-predecessor :as predecessor]
++            [futon2.aif.trace :as trace]
++            [clojure.edn :as edn])
++  (:import (java.nio.file Files) (java.time Instant) (java.util UUID)))
++
++(defn git! [repo & args]
++  (let [r (apply shell/sh "git" "-C" (str repo) args)]
++    (when-not (zero? (:exit r)) (throw (ex-info "fixture git failed" r)))
++    (str/trim (:out r))))
++
++(defn with-artifact
++  ([f] (with-artifact {} f))
++  ([opts f]
++  (let [dir (.toFile (Files/createTempDirectory "d-task-authority-" (make-array java.nio.file.attribute.FileAttribute 0)))
++        repo (io/file dir "repo") root (io/file dir "claims")]
++    (try
++      (.mkdirs repo)
++      (git! repo "init" "-q")
++      (git! repo "config" "user.name" "D fixture")
++      (git! repo "config" "user.email" "d-fixture@example.invalid")
++      (spit (io/file repo "base.txt") "base\n")
++      (git! repo "add" "base.txt")
++      (git! repo "commit" "-qm" "before")
++      (let [before {:repo (str repo) :head (git! repo "rev-parse" "HEAD")
++                    :observed-at-ms (System/currentTimeMillis)}
++            action {:kind :cascade-candidate :id :C0 :target "target"
++                    :precedence [{:id :make-file :theta 1 :produces #{["target" :artifact]}}]}
++            occurrence (retention/mint-occurrence
++                        {:run-id "run" :cohort-id "cohort" :attempt-id "attempt"
++                         :selected-action action :now #(Instant/now) :uuid-fn #(UUID/randomUUID)})
++            declaration (io/file dir "declaration.edn")
++            _ (spit declaration (pr-str {:target "target" :locators
++                                        {:artifact {:class :C3 :repo "repo" :sha (:head before)
++                                                    :path (or (:locator-path opts) "created.clj")}}}))
++            pins [{:path (str declaration)
++                   :sha256 (evidence/sha256 (Files/readAllBytes (.toPath declaration)))}]
++            dispatch (task/capture {:occurrence occurrence :carry-occurrence-id "carry"
++                                    :universe #{["target" :artifact]} :declaration-reads pins :before before})
++            _ (spit (io/file repo "created.clj") "(ns created)\n")
++            _ (git! repo "add" "created.clj")
++            _ (git! repo "commit" "-qm" "execute task")
++            commit (git! repo "rev-parse" "HEAD")
++            author {:job-id "author-job" :agent-id "author" :state "done"
++                    :result (str "FULL_LOOP_AUTHOR: DONE " commit)
++                    :events [{:type "prompt" :text (task/prompt-binding dispatch)}]}
++            reviewer {:job-id "review-job" :agent-id "reviewer" :state "done"
++                      :result "FULL_LOOP_REVIEW: APPROVE"
++                      :events [{:type "prompt" :text (str (task/prompt-binding dispatch) "\nReview " commit "\nRepository: " repo)}
++                               {:type "tool_use" :tools ["Bash"]}]}
++            jobs {"author-job" author "review-job" reviewer}
++            binding (execution/fresh-artifact-binding {} (str repo) before author)
++            inputs {:dispatch dispatch :artifact-binding binding :author-job author
++                    :review-job reviewer :files ["created.clj"] :repository (str repo) :route :fresh-author}
++            expected {:occurrence occurrence :carry-occurrence-id "carry"
++                      :universe #{["target" :artifact]} :declaration-pins pins}]
++        ;; Only repository location and external Agency read ports are local;
++        ;; producer, verifier, Git, occurrence and observation checks are real.
++        (with-redefs [observation/repo-root (str dir)]
++          (f {:inputs inputs :expected expected :jobs jobs :root (str root)
++              :repo repo :commit commit})))
++      (finally
++        (doseq [file (reverse (file-seq dir))] (io/delete-file file true)))))))
++
++(deftest real-producer-verifier-and-exact-reader
++  (with-artifact
++   (fn [{:keys [inputs expected jobs root]}]
++     (let [produced (task/produce! root inputs expected jobs)
++           reread (task/read-predecessor root expected jobs)]
++       (is (= :admitted (get-in produced [:verification :status])))
++       (is (= :admitted (:status reread)))
++       (is (= :executed-with-artifacts (get-in reread [:scope :certifies])))
++       (is (= :not-established (:candidate-to-minted-join reread)))
++       (is (= :not-measured (:before-evidence reread)))
++       (is (= #{["target" :artifact]} (:present reread)))
++       (is (= :declared-kernel-of-verified-macro-action (:b-authority reread)))
++       (is (= :independent-check-required (:causal-attribution reread)))
++       (is (= :carry-no-predecessor (:kind (task/read-predecessor root (dissoc expected :occurrence) jobs))))))))
++
++(deftest independent-evidence-controls
++  (with-artifact
++   (fn [{:keys [inputs expected jobs]}]
++     (let [record (task/claim inputs)
++           check #(task/verify % expected jobs)]
++       (doseq [[route kind] [[:recovery :recovered-artifact-not-fresh-execution]
++                            [:historical :historical-verification-not-execution]
++                            [:incomplete :task-execution-incomplete]]]
++         (is (= kind (:kind (check (assoc record :route route))))))
++       (is (= :carry-domain-changed
++              (:kind (task/verify record (assoc expected :universe #{}) jobs))))
++       (is (= :carry-occurrence-mismatch
++              (:kind (task/verify record (assoc expected :carry-occurrence-id "other") jobs))))
++       (is (= :job-occurrence-binding-unestablished
++              (:kind (check (assoc-in record [:dispatch :declarations 0 :snapshot :target] "forged")))))
++       (is (= :after-token-evidence-mismatch (:kind (check (assoc record :after-token-evidence [])))))
++       (is (= :independent-review-not-passed
++              (:kind (task/verify record expected
++                                  (assoc-in jobs ["review-job" :events]
++                                            [{:type "prompt" :text (get-in jobs ["review-job" :events 0 :text])}])))))
++       (is (= :job-occurrence-binding-unestablished
++              (:kind (task/verify record expected (assoc-in jobs ["review-job" :events 0 :text] "Review another commit")))))
++       (is (= :independent-jobs-unestablished
++              (:kind (task/verify record expected (assoc-in jobs ["review-job" :agent-id] "author")))))
++       (is (not= :admitted (:status (check (assoc-in record [:artifact-binding :commit]
++                                                    (get-in inputs [:dispatch :before :head]))))))))))
++
++(deftest refusal-is-preserved-by-persistence
++  (with-artifact
++   (fn [{:keys [inputs expected jobs root]}]
++     (let [produced (task/produce! root (assoc inputs :route :recovery) expected jobs)
++           reread (task/read-predecessor root expected jobs)]
++       (is (= :refused (get-in produced [:verification :status])))
++       (is (= :recovered-artifact-not-fresh-execution (:kind reread)))
++       (spit (get-in produced [:source :path]) "{:broken")
++       (is (= :invalid (:status (task/read-predecessor root expected jobs))))))))
++
++(deftest absent-artifact-and-unrelated-head-are-not-execution-evidence
++  (with-artifact {:locator-path "never-created.clj"}
++    (fn [{:keys [inputs expected jobs]}]
++      (is (= :after-token-evidence-unavailable
++             (:kind (task/verify (task/claim inputs) expected jobs))))))
++  (with-artifact
++    (fn [{:keys [inputs expected jobs repo]}]
++      (let [record (task/claim inputs)]
++        (spit (io/file repo "unrelated.txt") "unrelated\n")
++        (git! repo "add" "unrelated.txt")
++        (git! repo "commit" "-qm" "unrelated concurrent work")
++        (is (not= :admitted
++                  (:status (task/verify record expected
++                                        (assoc-in jobs ["author-job" :result]
++                                                  (str "FULL_LOOP_AUTHOR: DONE " (git! repo "rev-parse" "HEAD")))))))))))
++
++(deftest trace-to-admission-reader-preserves-authority-scope
++  (with-artifact
++    (fn [{:keys [inputs expected jobs root repo]}]
++      (task/produce! root inputs expected jobs)
++      (let [path (trace/write-trace! {:decision {:action (get-in expected [:occurrence :action/value])}
++                                     :d-task-context expected}
++                                    :dir (str (io/file repo "trace")))
++            retained (edn/read-string (slurp path))
++            stage {:occurrence-id "next-carry" :initialization {:value {#{} 1}}
++                   :prospective-prior {:universe (:universe expected)}
++                   :prospective-carry {:universe (:universe expected)}}]
++        (with-redefs [task/default-root root task/agency-job jobs]
++          (let [inspection (predecessor/inspect-trace retained)
++                input (predecessor/input-receipt stage inspection)]
++            (is (= :admitted (get-in input [:carry-admission :status])))
++            (is (= :executed-with-artifacts (get-in input [:carry-admission :authority :scope :certifies])))
++            (is (predecessor/valid-input? input stage))
++            (is (= :not-wired (:conditioning-status input)))
++            (is (= [] (:observation-updates input)))
++            (is (= {#{} 1} (:continuation-belief input)))))))))

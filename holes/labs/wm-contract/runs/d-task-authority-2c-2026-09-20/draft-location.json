@@ -1,0 +1,17 @@
+{
+  "base": "aae84fc302207cd79cdf0adf9353706beb2b516a",
+  "worktree": "/home/joe/code/futon2-d-task-authority",
+  "branch": "codex6/d-task-authority",
+  "source-hashes": {
+    "src/futon2/aif/d_predecessor_task_authority.clj": "70dddf09a5acd769c14574520bdd5e0f40f6a4e867cdc21f94fee8ba4e561099",
+    "src/futon2/aif/task_execution_evidence.clj": "c46f312c07e783b3c78f227cbdfeefb2f5168cfbfa07f0c585e584a6a5a965a3",
+    "src/futon2/aif/token_belief_predecessor.clj": "6422dd9bcdbf95d5aac3c930adb3880c957435ae5b9bc3fc3e494a608fe09963",
+    "src/futon2/aif/full_loop_runner.clj": "d8b9f610addcf1316023df56358d3cb710f93a93d07df73f103bb166418ae90a",
+    "src/futon2/aif/trace.clj": "e4f91d795daf66367fd15438dbd216147693bf65e244d715ade1a537cb4f6e55",
+    "test/futon2/aif/d_predecessor_task_authority_test.clj": "96d5f7113a4be71acbb085658bcdea600bad1a6af6f53f3add3d1a98fb54813f",
+    "test/futon2/aif/token_belief_predecessor_test.clj": "6fa98b4492922377bbe7c4216511f5c97302cc3be416a3ed4edfdbf32b751c51"
+  },
+  "patch-sha256": "9756b44705c408343971c88b1c30ef529838a9cb3501c1ae4d269647093906ba",
+  "canonical-source-restored": true,
+  "implementation-committed": false
+}

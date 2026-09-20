@@ -1,0 +1,14 @@
+{
+  "base": "aae84fc302207cd79cdf0adf9353706beb2b516a",
+  "overlay-file": "/tmp/d-task-baseline-sczhohwq/futon2/aif/full_loop_runner.clj",
+  "source-sha256": "feb72603b319607b24726f8d764306fe2c3e3000ed8c7274ba430b3601902991",
+  "command": [
+    "clojure",
+    "-Sdeps",
+    "{:paths [\"/tmp/d-task-baseline-sczhohwq\" \"src\" \"resources\" \".\" \"scripts\" \"test\"]}",
+    "-M",
+    "-e",
+    "(require 'clojure.test 'futon2.aif.full-loop-runner-test) (binding [clojure.test/*report-counters* (ref clojure.test/*initial-report-counters*)] (clojure.test/test-vars [#'futon2.aif.full-loop-runner-test/terminal-recovery-job-transitions-to-machine-repair #'futon2.aif.full-loop-runner-test/historical-verification-action-commits-without-author-dispatch]) (prn @clojure.test/*report-counters*) (System/exit (if (zero? (+ (:fail @clojure.test/*report-counters*) (:error @clojure.test/*report-counters*))) 0 1)))"
+  ],
+  "exit": 1
+}
