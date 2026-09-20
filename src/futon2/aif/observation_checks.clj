@@ -238,11 +238,13 @@
       {:entry-id id :entry-id-source :latest-warrant})))
 
 (defn- warrant-evidence [result]
-  {:warrant? (get result "warrant?")
+  (cond-> {:warrant? (get result "warrant?")
    :reason (get result "reason")
    :command (get-in result ["record" "command"])
    :results (get-in result ["record" "results"])
-   :git-head-at-run (get-in result ["record" "git-head"])})
+   :git-head-at-run (get-in result ["record" "git-head"])}
+    (contains? (get result "details") "scope-drift")
+    (assoc :details {:scope-drift (get-in result ["details" "scope-drift"])})))
 
 (defn- head-cutoff
   "The checkout's HEAD at check time, and whether any of PATHS differs from
