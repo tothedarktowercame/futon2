@@ -121,3 +121,33 @@ record — same counted-denominator discipline (never a trawled
 numerator over an unrecorded denominator), self-credit channel only,
 each ratio labeled with its population. Decision on adopting any such
 rate remains deferred with the rest of A.
+
+## CORRECTION — design principles are used, not rated (Joe, 2026-09-20, packet 1 in flight)
+
+Verbatim: "As for the 11 unrated rows, they are all design principles,
+and I don't see why we should 'rate' them as opposed to use them all
+and see if they work. I'm not sure 'ratings' can be decided in advance.
+I'm not sure ratings can or should be used anyway — imagine that they
+were all uniformly weighted, for example, does that tell us 'pick one'
+or 'they all should be used'."
+
+Effect on packet 1: the IAD vector is a PROFILE, not a factor. All 11
+principles reported per candidate (named artifact or typed gap), none
+weighted, nothing collapsed into the mission-value scalar, no
+:unrated machinery (that framing imported rating discipline into
+something that is not a rating). The ranking comes from the existing
+four factors; the full IAD profile rides beside it in the selection
+record; selection is read from both. "See if they work" is a later,
+empirical question: whether profile-complete missions ground better,
+observed over runs, not decided in advance by weights.
+
+## A-basis addendum: per-model self-correction channels (Joe, same turn)
+
+Joe: the 9/46 generalisation is the basis of the zai-scribe APM work.
+Three models, three known self-correction modes: Claude notices its
+handoffs being refused (post-hoc, via handoffs); Codex refuses
+unspecified work at intake (while confident about what it knows how to
+do); GLM/Zai notices its own mistakes IN TURN. When A returns, the
+judgement channel is MODEL-STRUCTURED: each model's error signal
+arrives through a different, known mechanism, and rates (if adopted)
+attach per channel, not as one agent-assertion blur.
