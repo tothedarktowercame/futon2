@@ -1,0 +1,272 @@
+diff --git a/scripts/futon2/report/war_machine.clj b/scripts/futon2/report/war_machine.clj
+index 2caca794..9e67dda9 100644
+--- a/scripts/futon2/report/war_machine.clj
++++ b/scripts/futon2/report/war_machine.clj
+@@ -6164,6 +6164,9 @@
+                                        :id (keyword (str "C" i))
+                                        :target t
+                                        :precedence (mapv patterns order)
++                                       :observation-locators
++                                       (into {} (map (fn [[token locator]] [(qual token) locator]))
++                                             (:locators cp))
+                                        :construction-receipt receipt
+                                        :interpretation-receipts
+                                        interp-receipts}})))
+diff --git a/src/futon2/aif/full_loop_runner.clj b/src/futon2/aif/full_loop_runner.clj
+index 6edae5c3..7eed5848 100644
+--- a/src/futon2/aif/full_loop_runner.clj
++++ b/src/futon2/aif/full_loop_runner.clj
+@@ -20,6 +20,7 @@
+             [futon2.aif.close-retention :as close-retention]
+             [futon2.aif.evidence-manifest :as evidence-manifest]
+             [futon2.aif.fold-classical :as fold-classical]
++            [futon2.aif.fold-cascade :as fold-cascade]
+             [futon2.aif.fold :as fold]
+             [futon2.aif.delivery-qa :as delivery-qa]
+             [futon2.aif.full-loop-cohort :as cohort]
+@@ -1460,10 +1461,21 @@
+          result0 (when-not port-missing?
+                    (if wiring-fn
+                      (wiring-fn construction)
+-                     (or (:fold (close-loop/act-gate-from-lane-entry construction construction))
+-                         (fold-classical/classical-fold (vec (:shown construction)) construction))))
++                     (if (and (= :selected-cascade (:construction-kind construction))
++                              (seq (:interpretation-receipts construction)))
++                       (fold-cascade/realize construction)
++                       (let [result (or (:fold (close-loop/act-gate-from-lane-entry construction construction))
++                                        (fold-classical/classical-fold (vec (:shown construction)) construction))]
++                         (assoc result
++                                :fold/route (if (= "semilattice-fold v1 (descent=BV.seq, co_app=BV.copar)"
++                                                  (get-in result [:wiring :generated-by]))
++                                              :semilattice :classical)
++                                :fold/selection-reason :legacy-construction)))))
+          result0 (if (nil? wiring-fn)
+-                   (ground-cascade-policy-holes construction result0)
++                   (let [grounded (ground-cascade-policy-holes construction result0)]
++                     (if (= :cascade-interpretation (:fold/route grounded))
++                       (fold-cascade/evaluate grounded)
++                       grounded))
+                    result0)
+          ;; The classical fold can only name the patterns it could not fold.  A
+          ;; stop-line construction additionally owns the real obligation that
+diff --git a/src/futon2/aif/fold_cascade.clj b/src/futon2/aif/fold_cascade.clj
+new file mode 100644
+index 00000000..03a8095d
+--- /dev/null
++++ b/src/futon2/aif/fold_cascade.clj
+@@ -0,0 +1,121 @@
++(ns futon2.aif.fold-cascade
++  "Realize declared cascades using production observations, never predicted facts.
++  False establishes a negative guard only for C3/C4 (C4 also requires its file).
++  C6 false cannot establish absence. Receipts warrant interpretations, not truth
++  of their outputs. Unknown guards retain holes; scoring remains fold-eval's."
++  (:require [clojure.java.io :as io]
++            [futon2.aif.fold-eval :as evaluation]
++            [futon2.aif.interpretation-evidence :as evidence]
++            [futon2.aif.observation-checks :as observation]))
++
++(defn- source-witness [receipt]
++  (let [{:keys [path sha256]} (:source receipt)]
++    (when (and (string? path) (string? sha256) (re-matches #"[0-9a-f]{64}" sha256))
++      (try
++        (let [file (io/file observation/repo-root path)
++              actual (evidence/sha256 (java.nio.file.Files/readAllBytes (.toPath file)))]
++          (when (= sha256 actual) {:path path :sha256 actual}))
++        (catch java.io.IOException _ nil)))))
++
++(defn- requirements [guard]
++  (when (and (= :interpreted (:status guard)) (= :and (:operator guard))
++             (vector? (:clauses guard)) (seq (:clauses guard))
++             (every? #(and (= :interpreted (:status %))
++                           (set? (:present %)) (set? (:absent %)))
++                     (:clauses guard)))
++    (vec (mapcat (fn [clause]
++                   (concat (map #(vector % true) (sort-by pr-str (:present clause)))
++                           (map #(vector % false) (sort-by pr-str (:absent clause)))))
++                 (:clauses guard)))))
++
++(defn- condition [observations [token expected]]
++  (let [result (or (get-in observations [:results token])
++                   (get-in observations [:refused token]))
++        observed (:observed result)
++        pin (get-in result [:evidence :resolved-sha])
++        negative-check? (or (= :C3 (:check result))
++                            (and (= :C4 (:check result))
++                                 (true? (get-in result [:evidence :file-present]))))
++        established? (and (nil? (:status result))
++                          (string? pin) (re-matches #"[0-9a-f]{40}" pin)
++                          (boolean? observed) (= expected observed)
++                          (or expected negative-check?))]
++    {:condition (pr-str {:token token :expected expected})
++     :status (if established? :established :unchecked)
++     :witness {:token token :expected expected
++               :observation (or result {:status :missing :kind :observation-unavailable})}}))
++
++(defn realize
++  "Production fold for a selected cascade. Locators are declaration data carried
++  with the selected action. Each call reads them through observation/observe.
++  Guard failures and source failures remain explicit remainders."
++  [construction]
++  (let [patterns (:precedence construction)
++        target (:mission construction)
++        receipts (:interpretation-receipts construction)
++        counts (frequencies (map :id patterns))
++        locators (get-in construction [:selected-action :observation-locators])
++        observations (observation/observe (or locators {}))
++        evaluated
++        (mapv
++         (fn [p]
++           (let [id (:id p) receipt (get receipts id)
++                 source (source-witness receipt)
++                 reqs (requirements (:guard p))
++                 conditions (mapv #(condition observations %) reqs)
++                 outputs (:produces p)
++                 grounded? (and (= 1 (counts id))
++                                (string? target) (seq target) (= target (:target p))
++                                (map? (:construction-receipt construction))
++                                (string? (:reading receipt)) (seq (:reading receipt))
++                                (set? outputs) (seq outputs)
++                                (every? #(and (vector? %) (= 2 (count %))
++                                              (= target (first %)) (keyword? (second %))) outputs))
++                 transition? (and (= :interpreted (get-in p [:transition :status]))
++                                  (= :union (get-in p [:transition :operator]))
++                                  (= outputs (get-in p [:transition :produces])))
++                 ready? (and grounded? source transition? (seq conditions)
++                             (every? #(= :established (:status %)) conditions))]
++             (if ready?
++               {:box {:id (str id) :fits-pattern {:pattern/id (str id)
++                                                 :pattern/revision (:sha256 source)}
++                      :warrant-kind :pattern :interpretation-receipt receipt
++                      :source-witness source :conditions conditions
++                      :produces outputs :transition (:transition p)}}
++               {:hole {:unfolded-pattern (str id)
++                       :guard-evidence conditions
++                       :construction-blockers
++                       (cond-> []
++                         (not grounded?) (conj :ungrounded-interpretation)
++                         (nil? source) (conj :interpretation-source-unverified)
++                         (not transition?) (conj :transition-unverified)
++                         (not (seq conditions)) (conj :no-observable-guard)
++                         (some #(not= :established (:status %)) conditions)
++                         (conj :guard-not-established))}})))
++         patterns)
++        boxes (vec (keep :box evaluated))
++        holes (vec (keep :hole evaluated))
++        ;; An edge records shared declared output/input, with the actual input
++        ;; observation attached. It claims neither execution nor causal discharge.
++        wires (vec (for [a boxes b boxes :when (not= (:id a) (:id b))
++                         c (:conditions b)
++                         :let [w (:witness c)]
++                         :when (and (true? (:expected w))
++                                    (contains? (:produces a) (:token w)))]
++                     {:from (:id a) :to (:id b) :type :wire/declared-dependency
++                      :token (:token w) :witness w}))
++        wiring {:boxes boxes :wires wires :policy-holes holes
++                :generated-by "futon2.aif.fold-cascade/realize"}]
++    {:fold/route :cascade-interpretation
++     :fold/selection-reason :interpretation-receipts-present
++     :observation-evidence observations
++     :wiring wiring :policy-holes holes
++     :coverage-score-delta (evaluation/coverage-score-delta wiring)}))
++
++(defn evaluate
++  "Evaluate after obligation expansion, so retained output obligations are the
++  holes counted by the unchanged evaluator and carried in the wiring."
++  [result]
++  (let [wiring (assoc (:wiring result) :policy-holes (:policy-holes result))]
++    (assoc result :wiring wiring
++           :coverage-score-delta (evaluation/coverage-score-delta wiring))))
+diff --git a/test/futon2/aif/fold_cascade_test.clj b/test/futon2/aif/fold_cascade_test.clj
+new file mode 100644
+index 00000000..8dcbc33a
+--- /dev/null
++++ b/test/futon2/aif/fold_cascade_test.clj
+@@ -0,0 +1,88 @@
++(ns futon2.aif.fold-cascade-test
++  (:require [clojure.edn :as edn]
++            [clojure.java.io :as io]
++            [clojure.java.shell :as shell]
++            [clojure.string :as str]
++            [clojure.test :refer [deftest is]]
++            [futon2.aif.fold :as fold]
++            [futon2.aif.fold-classical :as classical]
++            [futon2.aif.full-loop-runner :as runner]
++            [futon2.aif.interpretation-evidence :as evidence]))
++
++(defn- entry [expected locator]
++  (let [target "construction-observation-control"
++        token [target :source-present]
++        output [target :declared-result]
++        path "futon2/src/futon2/aif/fold.clj"
++        hash (evidence/sha256
++              (java.nio.file.Files/readAllBytes
++               (.toPath (io/file "/home/joe/code" path))))]
++    {:action {:kind :cascade-candidate :id :control :target target
++              :observation-locators {token locator}
++              :construction-receipt {:kind :test-construction :moves []}
++              :interpretation-receipts
++              {:test/pinned-source
++               {:source {:path path :sha256 hash}
++                :reading "Constructed control: a source presence guard gates a declared output."}}
++              :precedence
++              [{:id :test/pinned-source :target target :produces #{output}
++                :guard {:status :interpreted :operator :and
++                        :clauses [{:status :interpreted
++                                   :present (if expected #{token} #{})
++                                   :absent (if expected #{} #{token})}]}
++                :transition {:status :interpreted :operator :union :produces #{output}}}]}}))
++
++(defn- pinned-locator [class path]
++  (let [{:keys [exit out]} (shell/sh "git" "rev-parse" "HEAD")]
++    (assert (zero? exit))
++    {:class class :repo "futon2" :sha (str/trim out) :path path}))
++
++(defn- construct [e]
++  (runner/construction-wiring-result (runner/construct-for-decision e)))
++
++(deftest production-checker-demonstration-pair
++  (doseq [[label expected locator boxes]
++          [[:present true (pinned-locator :C3 "src/futon2/aif/fold.clj") 1]
++           [:missing true (pinned-locator :C3 "does-not-exist-fold-control") 0]
++           [:definite-absence false (pinned-locator :C3 "does-not-exist-fold-control") 1]
++           [:c6-false-is-not-absence false (pinned-locator :C6 "does-not-exist-fold-control") 0]
++           [:refused-is-not-absence false {:class :C3} 0]]]
++    (let [r (construct (entry expected locator))
++          out (:fold-output r)]
++      (is (= :wired (:status r)))
++      (is (= :cascade-interpretation (:fold/route out)))
++      (is (= boxes (count (get-in out [:wiring :boxes]))))
++      (is (= (- 1 boxes) (count (:policy-holes out))))
++      (is (= (pos? boxes) (fold/closes? out)))
++      (is (= (when (pos? boxes) -1.0) (:coverage-score-delta out)))
++      (when (pos? boxes)
++        (is (= (:sha locator)
++               (get-in out [:wiring :boxes 0 :conditions 0 :witness :observation :evidence :resolved-sha]))))
++      (prn {:demonstration label :boxes boxes :holes (count (:policy-holes out))
++            :coverage (:coverage-score-delta out) :shape (get-in r [:shape-validation :ok])}))))
++
++(deftest receipts-and-transitions-cannot-be-fabricated
++  (let [e (entry true (pinned-locator :C3 "src/futon2/aif/fold.clj"))]
++    (doseq [bad [(assoc-in e [:action :interpretation-receipts :test/pinned-source :source :sha256]
++                         (apply str (repeat 64 "0")))
++                 (assoc-in e [:action :precedence 0 :transition :produces] #{})
++                 (assoc-in e [:action :precedence 0 :guard :operator] :or)]]
++      (let [out (:fold-output (construct bad))]
++        (is (empty? (get-in out [:wiring :boxes])))
++        (is (= 1 (count (:policy-holes out))))
++        (is (nil? (:coverage-score-delta out)))))))
++
++(deftest known-rule-still-needs-proof-fields
++  (let [out (classical/classical-fold ["devmap-coherence/prototype-structure-checklist"] {})]
++    (is (= 1 (count (get-in out [:wiring :boxes]))))
++    (is (false? (:ok (fold/validate-fold-output-v1 out))))))
++
++(deftest recorded-inputs-without-observation-locators-retain-holes
++  (doseq [[name n] [["compliance" 1] ["expressions-of-interest" 3]]]
++    (let [e (:selected-entry (edn/read-string
++                             (slurp (str "test/fixtures/cascade-fold-repair/" name ".edn"))))
++          out (:fold-output (construct e))]
++      (is (empty? (get-in out [:wiring :boxes])))
++      (is (= n (count (:policy-holes out))))
++      (is (every? :guard-evidence (:policy-holes out)))
++      (is (nil? (:coverage-score-delta out))))))

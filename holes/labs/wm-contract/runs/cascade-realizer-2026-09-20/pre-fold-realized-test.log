@@ -1,0 +1,252 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.fold-realized-test
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-aif-faithfulness-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-aif-head-004.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn: pin 1B: stored 5597da918926a36a08619417c90c19a8f4121592d31bb07dc9cd5bdb4d957e5b vs reconstructed a61c5069fb3c1e0ff28324c0e69cd4bf7207561a3a626b5f93da5acda9b7deee
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-bayesian-structure-learning-003.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn: pin 1B: stored e6f0fad491d6e67d1bf7020bd959b9c751da5aa81e7d43291619e67d0de1d362 vs reconstructed e3e66928f103f23ded5179506345610f29c030f859803f69fc1193bcc9280efc
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-canon-fingerprint-store-001.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn: pin 1B: stored 62aa0ec4d4b86d6a7d31d39058b36b43462a5e101cd9d38376237e1ec9160879 vs reconstructed abc2e7181354056bc0315ae0a52ead1cdfff06bbbd1b3f7fd5db2167cf6212f3
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn: pin 1B: stored a7de215eb3823510bb14bf14225a22bce7bdb8b9c6d218ce83dabc480c52a42b vs reconstructed c8f10cc9f523fcaf591766c6ed43ddb58963a1bc544b41008cfd1e98a7ba466c
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn: pin 1B: stored d802ed03a4f437c1715e07d50c1a608009ae5db7a35ff4cbd5f2c43d8b4b9e14 vs reconstructed b69d9b082ac7c8ff4091620d488dadf5b075074e253dd7b5620a56dc1ebc4efc
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-futonzero-generative-011.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-learning-loop-010.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn: pin 1B: stored 0b03a758bbb977dccc9077aa7b35092d901422cc03239db2e2c95f6849e209a9 vs reconstructed 5cc88142e545a3e6aca257c67bc2fd25dc47a077b698e29706af63993d823d3f
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn: pin 1B: stored e1db629b2e15be52a9554e1bf906f3f7c90c18f23a1436234d3117fde9386a0f vs reconstructed 0f16a75e627a9bd408abfe4a887021d02798ef2f2e465177d096653b484afb27
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-operational-vocabulary-001.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn: pin 1B: stored c00d458411b346c1c042b62601b71365432ef3774097c10f8f182746c954e747 vs reconstructed e495cf69258594cc3cdca0038822ea124815488c5f51c49865222df98630c6ac
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-reachable-from-boot-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-state-snapshot-witness-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-war-machine-pilot-001.edn [prompt-not-reconstructable]
+
+ERROR in (realized-outcome-grounded-expected-leg-is-two-sided) (actuator_a3.clj:150)
+Uncaught exception, not in assertion.
+expected: nil
+  actual: clojure.lang.ExceptionInfo: actuator-a3: rejected deposits in corpus load
+{:rejected [{:file "/home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn: pin 1B: stored 5597da918926a36a08619417c90c19a8f4121592d31bb07dc9cd5bdb4d957e5b vs reconstructed a61c5069fb3c1e0ff28324c0e69cd4bf7207561a3a626b5f93da5acda9b7deee"} {:file "/home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn: pin 1B: stored e6f0fad491d6e67d1bf7020bd959b9c751da5aa81e7d43291619e67d0de1d362 vs reconstructed e3e66928f103f23ded5179506345610f29c030f859803f69fc1193bcc9280efc"} {:file "/home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn: pin 1B: stored 62aa0ec4d4b86d6a7d31d39058b36b43462a5e101cd9d38376237e1ec9160879 vs reconstructed abc2e7181354056bc0315ae0a52ead1cdfff06bbbd1b3f7fd5db2167cf6212f3"} {:file "/home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn: pin 1B: stored a7de215eb3823510bb14bf14225a22bce7bdb8b9c6d218ce83dabc480c52a42b vs reconstructed c8f10cc9f523fcaf591766c6ed43ddb58963a1bc544b41008cfd1e98a7ba466c"} {:file "/home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn: pin 1B: stored d802ed03a4f437c1715e07d50c1a608009ae5db7a35ff4cbd5f2c43d8b4b9e14 vs reconstructed b69d9b082ac7c8ff4091620d488dadf5b075074e253dd7b5620a56dc1ebc4efc"} {:file "/home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn: pin 1B: stored 0b03a758bbb977dccc9077aa7b35092d901422cc03239db2e2c95f6849e209a9 vs reconstructed 5cc88142e545a3e6aca257c67bc2fd25dc47a077b698e29706af63993d823d3f"} {:file "/home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn: pin 1B: stored e1db629b2e15be52a9554e1bf906f3f7c90c18f23a1436234d3117fde9386a0f vs reconstructed 0f16a75e627a9bd408abfe4a887021d02798ef2f2e465177d096653b484afb27"} {:file "/home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn: pin 1B: stored c00d458411b346c1c042b62601b71365432ef3774097c10f8f182746c954e747 vs reconstructed e495cf69258594cc3cdca0038822ea124815488c5f51c49865222df98630c6ac"}]}
+ at futon2.aif.actuator_a3$deposits_by_id.invokeStatic (actuator_a3.clj:150)
+    futon2.aif.actuator_a3$deposits_by_id.invoke (actuator_a3.clj:143)
+    futon2.aif.actuator_a3$deposits_by_id.invokeStatic (actuator_a3.clj:144)
+    futon2.aif.actuator_a3$deposits_by_id.invoke (actuator_a3.clj:143)
+    futon2.aif.fold_realized_test$learning_loop_deposit_with_clean.invokeStatic (fold_realized_test.clj:31)
+    futon2.aif.fold_realized_test$learning_loop_deposit_with_clean.invoke (fold_realized_test.clj:30)
+    futon2.aif.fold_realized_test$fn__7156$fn__7157.invoke (fold_realized_test.clj:95)
+    futon2.aif.fold_realized_test$fn__7156.invokeStatic (fold_realized_test.clj:94)
+    futon2.aif.fold_realized_test/fn (fold_realized_test.clj:93)
+    clojure.test$test_var$fn__9856.invoke (test.clj:717)
+    clojure.test$test_var.invokeStatic (test.clj:717)
+    clojure.test$test_var.invoke (test.clj:708)
+    clojure.test$test_vars$fn__9882$fn__9887.invoke (test.clj:735)
+    futon2.aif.fold_realized_test$eval7059$fn__7060$fn__7063.invoke (fold_realized_test.clj:23)
+    clojure.core$with_redefs_fn.invokeStatic (core.clj:7582)
+    clojure.core$with_redefs_fn.invoke (core.clj:7566)
+    futon2.aif.fold_realized_test$eval7059$fn__7060.invoke (fold_realized_test.clj:21)
+    clojure.test$compose_fixtures$fn__9850$fn__9851.invoke (test.clj:694)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$compose_fixtures$fn__9850.invoke (test.clj:694)
+    clojure.test$test_vars$fn__9882.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars.invokeStatic (test.clj:731)
+    clojure.test$test_all_vars.invokeStatic (test.clj:737)
+    clojure.test$test_ns.invokeStatic (test.clj:758)
+    clojure.test$test_ns.invoke (test.clj:743)
+    clojure.core$map$fn__5935.invoke (core.clj:2772)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.Cons.next (Cons.java:39)
+    clojure.lang.RT.boundedLength (RT.java:1790)
+    clojure.lang.RestFn.applyTo (RestFn.java:130)
+    clojure.core$apply.invokeStatic (core.clj:669)
+    clojure.test$run_tests.invokeStatic (test.clj:768)
+    clojure.test$run_tests.doInvoke (test.clj:768)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.core$apply.invokeStatic (core.clj:667)
+    clojure.core$apply.invoke (core.clj:662)
+    cognitect.test_runner$test.invokeStatic (test_runner.clj:74)
+    cognitect.test_runner$test.invoke (test_runner.clj:62)
+    cognitect.test_runner$_main.invokeStatic (test_runner.clj:127)
+    cognitect.test_runner$_main.doInvoke (test_runner.clj:115)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyfold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-aif-faithfulness-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-aif-head-004.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn: pin 1B: stored 5597da918926a36a08619417c90c19a8f4121592d31bb07dc9cd5bdb4d957e5b vs reconstructed a61c5069fb3c1e0ff28324c0e69cd4bf7207561a3a626b5f93da5acda9b7deee
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-bayesian-structure-learning-003.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn: pin 1B: stored e6f0fad491d6e67d1bf7020bd959b9c751da5aa81e7d43291619e67d0de1d362 vs reconstructed e3e66928f103f23ded5179506345610f29c030f859803f69fc1193bcc9280efc
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-canon-fingerprint-store-001.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn: pin 1B: stored 62aa0ec4d4b86d6a7d31d39058b36b43462a5e101cd9d38376237e1ec9160879 vs reconstructed abc2e7181354056bc0315ae0a52ead1cdfff06bbbd1b3f7fd5db2167cf6212f3
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn: pin 1B: stored a7de215eb3823510bb14bf14225a22bce7bdb8b9c6d218ce83dabc480c52a42b vs reconstructed c8f10cc9f523fcaf591766c6ed43ddb58963a1bc544b41008cfd1e98a7ba466c
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn: pin 1B: stored d802ed03a4f437c1715e07d50c1a608009ae5db7a35ff4cbd5f2c43d8b4b9e14 vs reconstructed b69d9b082ac7c8ff4091620d488dadf5b075074e253dd7b5620a56dc1ebc4efc
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-futonzero-generative-011.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-learning-loop-010.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn: pin 1B: stored 0b03a758bbb977dccc9077aa7b35092d901422cc03239db2e2c95f6849e209a9 vs reconstructed 5cc88142e545a3e6aca257c67bc2fd25dc47a077b698e29706af63993d823d3f
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn: pin 1B: stored e1db629b2e15be52a9554e1bf906f3f7c90c18f23a1436234d3117fde9386a0f vs reconstructed 0f16a75e627a9bd408abfe4a887021d02798ef2f2e465177d096653b484afb27
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-operational-vocabulary-001.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn: pin 1B: stored c00d458411b346c1c042b62601b71365432ef3774097c10f8f182746c954e747 vs reconstructed e495cf69258594cc3cdca0038822ea124815488c5f51c49865222df98630c6ac
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-reachable-from-boot-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-state-snapshot-witness-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-war-machine-pilot-001.edn [prompt-not-reconstructable]
+To (Var.java:705)
+    clojure.core$apply.invokeStatic (core.clj:667)
+    clojure.main$main_opt.invokeStatic (main.clj:514)
+    clojure.main$main_opt.invoke (main.clj:510)
+    clojure.main$main.invokeStatic (main.clj:664)
+    clojure.main$main.doInvoke (main.clj:616)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.main.main (main.java:40)
+
+ERROR in (staging-gates-on-live-wire) (actuator_a3.clj:150)
+armed (default ON as of 2026-07-08) ⇒ the field is threaded on
+expected: (contains? (fr/with-realized-outcome {:belief {}} {:policy "M-x", :expected-score -0.5} enacted 7) :realized-outcome)
+  actual: clojure.lang.ExceptionInfo: actuator-a3: rejected deposits in corpus load
+{:rejected [{:file "/home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn: pin 1B: stored 5597da918926a36a08619417c90c19a8f4121592d31bb07dc9cd5bdb4d957e5b vs reconstructed a61c5069fb3c1e0ff28324c0e69cd4bf7207561a3a626b5f93da5acda9b7deee"} {:file "/home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn: pin 1B: stored e6f0fad491d6e67d1bf7020bd959b9c751da5aa81e7d43291619e67d0de1d362 vs reconstructed e3e66928f103f23ded5179506345610f29c030f859803f69fc1193bcc9280efc"} {:file "/home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn: pin 1B: stored 62aa0ec4d4b86d6a7d31d39058b36b43462a5e101cd9d38376237e1ec9160879 vs reconstructed abc2e7181354056bc0315ae0a52ead1cdfff06bbbd1b3f7fd5db2167cf6212f3"} {:file "/home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn: pin 1B: stored a7de215eb3823510bb14bf14225a22bce7bdb8b9c6d218ce83dabc480c52a42b vs reconstructed c8f10cc9f523fcaf591766c6ed43ddb58963a1bc544b41008cfd1e98a7ba466c"} {:file "/home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn: pin 1B: stored d802ed03a4f437c1715e07d50c1a608009ae5db7a35ff4cbd5f2c43d8b4b9e14 vs reconstructed b69d9b082ac7c8ff4091620d488dadf5b075074e253dd7b5620a56dc1ebc4efc"} {:file "/home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn: pin 1B: stored 0b03a758bbb977dccc9077aa7b35092d901422cc03239db2e2c95f6849e209a9 vs reconstructed 5cc88142e545a3e6aca257c67bc2fd25dc47a077b698e29706af63993d823d3f"} {:file "/home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn: pin 1B: stored e1db629b2e15be52a9554e1bf906f3f7c90c18f23a1436234d3117fde9386a0f vs reconstructed 0f16a75e627a9bd408abfe4a887021d02798ef2f2e465177d096653b484afb27"} {:file "/home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn: pin 1B: stored c00d458411b346c1c042b62601b71365432ef3774097c10f8f182746c954e747 vs reconstructed e495cf69258594cc3cdca0038822ea124815488c5f51c49865222df98630c6ac"}]}
+ at futon2.aif.actuator_a3$deposits_by_id.invokeStatic (actuator_a3.clj:150)
+    futon2.aif.actuator_a3$deposits_by_id.invoke (actuator_a3.clj:143)
+    futon2.aif.actuator_a3$deposits_by_id.invokeStatic (actuator_a3.clj:144)
+    futon2.aif.actuator_a3$deposits_by_id.invoke (actuator_a3.clj:143)
+    futon2.aif.fold_realized$deposit_for_mission.invokeStatic (fold_realized.clj:109)
+    futon2.aif.fold_realized$deposit_for_mission.invoke (fold_realized.clj:106)
+    futon2.aif.fold_realized$grounded_deposit.invokeStatic (fold_realized.clj:124)
+    futon2.aif.fold_realized$grounded_deposit.invoke (fold_realized.clj:121)
+    futon2.aif.fold_realized$realized_outcome_grounded.invokeStatic (fold_realized.clj:162)
+    futon2.aif.fold_realized$realized_outcome_grounded.invoke (fold_realized.clj:152)
+    futon2.aif.fold_realized$with_realized_outcome.invokeStatic (fold_realized.clj:202)
+    futon2.aif.fold_realized$with_realized_outcome.invoke (fold_realized.clj:188)
+    futon2.aif.fold_realized_test$fn__7205.invokeStatic (fold_realized_test.clj:142)
+    futon2.aif.fold_realized_test/fn (fold_realized_test.clj:134)
+    clojure.test$test_var$fn__9856.invoke (test.clj:717)
+    clojure.test$test_var.invokeStatic (test.clj:717)
+    clojure.test$test_var.invoke (test.clj:708)
+    clojure.test$test_vars$fn__9882$fn__9887.invoke (test.clj:735)
+    futon2.aif.fold_realized_test$eval7059$fn__7060$fn__7063.invoke (fold_realized_test.clj:23)
+    clojure.core$with_redefs_fn.invokeStatic (core.clj:7582)
+    clojure.core$with_redefs_fn.invoke (core.clj:7566)
+    futon2.aif.fold_realized_test$eval7059$fn__7060.invoke (fold_realized_test.clj:21)
+    clojure.test$compose_fixtures$fn__9850$fn__9851.invoke (test.clj:694)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$compose_fixtures$fn__9850.invoke (test.clj:694)
+    clojure.test$test_vars$fn__9882.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars.invokeStatic (test.clj:731)
+    clojure.test$test_all_vars.invokeStatic (test.clj:737)
+    clojure.test$test_ns.invokeStatic (test.clj:758)
+    clojure.test$test_ns.invoke (test.clj:743)
+    clojure.core$map$fn__5935.invoke (core.clj:2772)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.Cons.next (Cons.java:39)
+    clojure.lang.RT.boundedLength (RT.java:1790)
+    clojure.lang.RestFn.applyTo (RestFn.java:130)
+    clojure.core$apply.invokeStatic (core.clj:669)
+    clojure.test$run_tests.invokeStatic (test.clj:768)
+    clojure.test$run_tests.doInvoke (test.clj:768)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.core$apply.invokeStatic (core.clj:667)
+    clojure.core$apply.invoke (core.clj:662)
+    cognitect.test_runner$test.invokeStatic (test_runner.clj:74)
+    cognitect.test_runner$test.invoke (test_runner.clj:62)
+    cognitect.test_runner$_main.invokeStatic (test_runner.clj:127)
+    cognitect.test_runner$_main.doInvoke (test_runner.clj:115)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.core$apply.invokeStatic (core.clj:667)
+    clojure.main$main_opt.invokeStatic (main.clj:514)
+    clojurfold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-aif-faithfulness-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-aif-head-004.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn: pin 1B: stored 5597da918926a36a08619417c90c19a8f4121592d31bb07dc9cd5bdb4d957e5b vs reconstructed a61c5069fb3c1e0ff28324c0e69cd4bf7207561a3a626b5f93da5acda9b7deee
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-bayesian-structure-learning-003.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn: pin 1B: stored e6f0fad491d6e67d1bf7020bd959b9c751da5aa81e7d43291619e67d0de1d362 vs reconstructed e3e66928f103f23ded5179506345610f29c030f859803f69fc1193bcc9280efc
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-canon-fingerprint-store-001.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn: pin 1B: stored 62aa0ec4d4b86d6a7d31d39058b36b43462a5e101cd9d38376237e1ec9160879 vs reconstructed abc2e7181354056bc0315ae0a52ead1cdfff06bbbd1b3f7fd5db2167cf6212f3
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn: pin 1B: stored a7de215eb3823510bb14bf14225a22bce7bdb8b9c6d218ce83dabc480c52a42b vs reconstructed c8f10cc9f523fcaf591766c6ed43ddb58963a1bc544b41008cfd1e98a7ba466c
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn: pin 1B: stored d802ed03a4f437c1715e07d50c1a608009ae5db7a35ff4cbd5f2c43d8b4b9e14 vs reconstructed b69d9b082ac7c8ff4091620d488dadf5b075074e253dd7b5620a56dc1ebc4efc
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-futonzero-generative-011.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-learning-loop-010.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn: pin 1B: stored 0b03a758bbb977dccc9077aa7b35092d901422cc03239db2e2c95f6849e209a9 vs reconstructed 5cc88142e545a3e6aca257c67bc2fd25dc47a077b698e29706af63993d823d3f
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn: pin 1B: stored e1db629b2e15be52a9554e1bf906f3f7c90c18f23a1436234d3117fde9386a0f vs reconstructed 0f16a75e627a9bd408abfe4a887021d02798ef2f2e465177d096653b484afb27
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-operational-vocabulary-001.edn [prompt-not-reconstructable]
+fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn: pin 1B: stored c00d458411b346c1c042b62601b71365432ef3774097c10f8f182746c954e747 vs reconstructed e495cf69258594cc3cdca0038822ea124815488c5f51c49865222df98630c6ac
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-reachable-from-boot-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-state-snapshot-witness-001.edn [prompt-not-reconstructable]
+fold-turn QUARANTINED /home/joe/code/futon6/data/fold-turns/ft-war-machine-pilot-001.edn [prompt-not-reconstructable]
+e.main$main_opt.invoke (main.clj:510)
+    clojure.main$main.invokeStatic (main.clj:664)
+    clojure.main$main.doInvoke (main.clj:616)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.main.main (main.java:40)
+
+ERROR in (realized-outcome-grounded-uses-substrate-dial) (actuator_a3.clj:150)
+Uncaught exception, not in assertion.
+expected: nil
+  actual: clojure.lang.ExceptionInfo: actuator-a3: rejected deposits in corpus load
+{:rejected [{:file "/home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn: pin 1B: stored 5597da918926a36a08619417c90c19a8f4121592d31bb07dc9cd5bdb4d957e5b vs reconstructed a61c5069fb3c1e0ff28324c0e69cd4bf7207561a3a626b5f93da5acda9b7deee"} {:file "/home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-bounded-in-flight-state-008.edn: pin 1B: stored e6f0fad491d6e67d1bf7020bd959b9c751da5aa81e7d43291619e67d0de1d362 vs reconstructed e3e66928f103f23ded5179506345610f29c030f859803f69fc1193bcc9280efc"} {:file "/home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn: pin 1B: stored 62aa0ec4d4b86d6a7d31d39058b36b43462a5e101cd9d38376237e1ec9160879 vs reconstructed abc2e7181354056bc0315ae0a52ead1cdfff06bbbd1b3f7fd5db2167cf6212f3"} {:file "/home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-first-flights-007.edn: pin 1B: stored a7de215eb3823510bb14bf14225a22bce7bdb8b9c6d218ce83dabc480c52a42b vs reconstructed c8f10cc9f523fcaf591766c6ed43ddb58963a1bc544b41008cfd1e98a7ba466c"} {:file "/home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-fold-ansatz-001.edn: pin 1B: stored d802ed03a4f437c1715e07d50c1a608009ae5db7a35ff4cbd5f2c43d8b4b9e14 vs reconstructed b69d9b082ac7c8ff4091620d488dadf5b075074e253dd7b5620a56dc1ebc4efc"} {:file "/home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn: pin 1B: stored 0b03a758bbb977dccc9077aa7b35092d901422cc03239db2e2c95f6849e209a9 vs reconstructed 5cc88142e545a3e6aca257c67bc2fd25dc47a077b698e29706af63993d823d3f"} {:file "/home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-live-geometric-stack-002.edn: pin 1B: stored e1db629b2e15be52a9554e1bf906f3f7c90c18f23a1436234d3117fde9386a0f vs reconstructed 0f16a75e627a9bd408abfe4a887021d02798ef2f2e465177d096653b484afb27"} {:file "/home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn", :reason :prompt-not-reconstructable, :message "fold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn: pin 1B: stored c00d458411b346c1c042b62601b71365432ef3774097c10f8f182746c954e747 vs reconstructed e495cf69258594cc3cdca0038822ea124815488c5f51c49865222df98630c6ac"}]}
+ at futon2.aif.actuator_a3$deposits_by_id.invokeStatic (actuator_a3.clj:150)
+    futon2.aif.actuator_a3$deposits_by_id.invoke (actuator_a3.clj:143)
+    futon2.aif.actuator_a3$deposits_by_id.invokeStatic (actuator_a3.clj:144)
+    futon2.aif.actuator_a3$deposits_by_id.invoke (actuator_a3.clj:143)
+    futon2.aif.fold_realized$deposit_for_mission.invokeStatic (fold_realized.clj:109)
+    futon2.aif.fold_realized$deposit_for_mission.invoke (fold_realized.clj:106)
+    futon2.aif.fold_realized$grounded_deposit.invokeStatic (fold_realized.clj:124)
+    futon2.aif.fold_realized$grounded_deposit.invoke (fold_realized.clj:121)
+    futon2.aif.fold_realized$realized_outcome_grounded.invokeStatic (fold_realized.clj:162)
+    futon2.aif.fold_realized$realized_outcome_grounded.invoke (fold_realized.clj:152)
+    futon2.aif.fold_realized$realized_outcome_grounded.invokeStatic (fold_realized.clj:160)
+    futon2.aif.fold_realized$realized_outcome_grounded.invoke (fold_realized.clj:152)
+    futon2.aif.fold_realized_test$fn__7103$fn__7104.invoke (fold_realized_test.clj:56)
+    futon2.aif.fold_realized_test$fn__7103.invokeStatic (fold_realized_test.clj:55)
+    futon2.aif.fold_realized_test/fn (fold_realized_test.clj:54)
+    clojure.test$test_var$fn__9856.invoke (test.clj:717)
+    clojure.test$test_var.invokeStatic (test.clj:717)
+    clojure.test$test_var.invoke (test.clj:708)
+    clojure.test$test_vars$fn__9882$fn__9887.invoke (test.clj:735)
+    futon2.aif.fold_realized_test$eval7059$fn__7060$fn__7063.invoke (fold_realized_test.clj:23)
+    clojure.core$with_redefs_fn.invokeStatic (core.clj:7582)
+    clojure.core$with_redefs_fn.invoke (core.clj:7566)
+    futon2.aif.fold_realized_test$eval7059$fn__7060.invoke (fold_realized_test.clj:21)
+    clojure.test$compose_fixtures$fn__9850$fn__9851.invoke (test.clj:694)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$compose_fixtures$fn__9850.invoke (test.clj:694)
+    clojure.test$test_vars$fn__9882.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars.invokeStatic (test.clj:731)
+    clojure.test$test_all_vars.invokeStatic (test.clj:737)
+    clojure.test$test_ns.invokeStatic (test.clj:758)
+    clojure.test$test_ns.invoke (test.clj:743)
+    clojure.core$map$fn__5935.invoke (core.clj:2772)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.Cons.next (Cons.java:39)
+    clojure.lang.RT.boundedLength (RT.java:1790)
+    clojure.lang.RestFn.applyTo (RestFn.java:130)
+    clojure.core$apply.invokeStatic (core.clj:669)
+    clojure.test$run_tests.invokeStatic (test.clj:768)
+    clojure.test$run_tests.doInvoke (test.clj:768)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.core$apply.invokeStatic (core.clj:667)
+    clojure.core$apply.invoke (core.clj:662)
+    cognitect.test_runner$test.invokeStatic (test_runner.clj:74)
+    cognitect.test_runner$test.invoke (test_runner.clj:62)
+    cognitect.test_runner$_main.invokeStatic (test_runner.clj:127)
+    cognitect.test_runner$_main.doInvoke (test_runner.clj:115)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.core$apply.invokeStatic (core.clj:667)
+    clojure.main$main_opt.invokeStatic (main.clj:514)
+    clojure.main$main_opt.invoke (main.clj:510)
+    clojure.main$main.invokeStatic (main.clj:664)
+    clojure.main$main.doInvoke (main.clj:616)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.main.main (main.java:40)
+
+Ran 6 tests containing 28 assertions.
+0 failures, 3 errors.

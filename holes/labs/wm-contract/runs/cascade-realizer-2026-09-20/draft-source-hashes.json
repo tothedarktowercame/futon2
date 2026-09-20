@@ -1,0 +1,6 @@
+{
+  "scripts/futon2/report/war_machine.clj": "bc3cbb7348169190d110e7cfebed3741f4f66d14fa18835219f408f04bfde5cc",
+  "src/futon2/aif/full_loop_runner.clj": "41bb6b5cfeeb1543f07f53497aeca035597deaef751455e1307726e1f67300c9",
+  "src/futon2/aif/fold_cascade.clj": "4e194f53badb0d11d789e8793d900b9d6374f668edf2d4dce52e6e32469c10a9",
+  "test/futon2/aif/fold_cascade_test.clj": "64c2ba7d12fd64feae886fa85338aba17c84ade606e228f2fe5fa332cd15f583"
+}
