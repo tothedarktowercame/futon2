@@ -299,3 +299,53 @@
     (is (= 1 (count matches)) "only the primary checkout appears")
     (is (re-find #"futon3c/holes" (:path (first matches)))
         "the primary checkout path is kept, not a worktree or copy")))
+
+
+(deftest structural-worktree-fence-precedes-path-length-dedupe
+  (doseq [[case-name primary-name worktree-name]
+          [["long-worktree" "primary" "primary-scoring-input-receipts"]
+           ["short-worktree" "primary-checkout-with-a-deliberately-long-name" "wt"]]]
+    (binding [*tmpdir* (str (io/file *tmpdir* case-name))]
+      (let [primary-path (write-mission!
+                          (str primary-name "/holes/missions/M-X.md")
+                          "# Primary mission\nStatus: OPEN\n")
+            worktree-path (write-mission!
+                           (str worktree-name "/holes/missions/M-X.md")
+                           "# Worktree mission\nStatus: OPEN\n")
+            parsed-paths (atom [])
+            parse-entry @#'mr/mission-doc->entry]
+        (.mkdirs (io/file *tmpdir* primary-name ".git"))
+        (spit (io/file *tmpdir* worktree-name ".git")
+              "gitdir: /primary/.git/worktrees/fixture\n")
+        (when (= case-name "short-worktree")
+          (is (< (count worktree-path) (count primary-path))
+              "the old path-length sort would select the WRONG copy"))
+        (let [result (with-redefs-fn
+                       {#'mr/mission-doc->entry
+                        (fn [path]
+                          (swap! parsed-paths conj path)
+                          (parse-entry path))}
+                       #(mr/load-missions-from-files *tmpdir*))
+              matches (filter #(= "M-X" (:id %)) (:missions result))]
+          (is (= 1 (count matches)))
+          (is (= primary-path (:path (first matches))))
+          (is (= [primary-path] @parsed-paths)
+              "the real parser never sees the worktree; dedupe cannot hide it"))))))
+
+(deftest structural-fence-preserves-plain-directories-and-cross-repo-exclusion
+  (let [plain-path (write-mission! "plain/holes/missions/M-plain.md"
+                                    "# Plain directory\nStatus: OPEN\n")
+        primary-path (write-mission! "futon3/holes/missions/M-primary.md"
+                                      "# Primary\nStatus: OPEN\n")]
+    (write-mission! "futon3b/holes/missions/M-cross-repo-only.md"
+                    "# Cross-repo exclusion\nStatus: OPEN\n")
+    (.mkdirs (io/file *tmpdir* "futon3" ".git"))
+    (.mkdirs (io/file *tmpdir* "futon3b" ".git"))
+    (is (not (.exists (io/file *tmpdir* "plain" ".git"))))
+    (is (.isDirectory (io/file *tmpdir* "futon3b" ".git"))
+        "a real primary checkout must still obey the separate cross-repo fence")
+    (is (= {"M-plain" plain-path "M-primary" primary-path}
+           (into {} (map (juxt :id :path))
+                 (:missions (mr/load-missions-from-files *tmpdir*)))))
+    (is (false? (#'mr/primary-checkout? (io/file *tmpdir* "plain")))
+        "preserving plain directories does not classify them as primary")))

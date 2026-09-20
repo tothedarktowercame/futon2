@@ -62,9 +62,11 @@
   "Patterns that identify non-primary checkout paths — git worktrees,
    directory copies, and other sources of duplicate mission-doc hits.
 
-   Each entry is [pattern source-name]. The scan-root fence (non-primary-path?)
-   excludes these BEFORE dedupe, so the path-length sort heuristic in dedupe-by-id
-   is a defense-in-depth fallback, not the sole guard against re-pollution.
+   Each entry is [pattern source-name]. These exclusions supplement the
+   structural .git directory/file check at repository enumeration. They retain
+   cross-repo exclusions and known directory-copy exclusions that .git alone
+   cannot distinguish. Plain directories without .git remain eligible; duplicate
+   IDs among admitted directories still rely on the path-length dedupe heuristic.
 
    The patterns are deliberately structural (not per-directory-name):
      - /.worktrees/    — the standard git worktree location
@@ -81,9 +83,8 @@
    [#"futon3b/holes/missions/" "futon3b-cross-repo"]])
 
 (defn- non-primary-path?
-  "True when PATH is a non-primary checkout (worktree, directory copy, or
-   cross-repo duplicate). These are excluded at scan time so the candidate
-   pool reflects only the primary checkout of each repo."
+  "True when PATH matches a known worktree, directory-copy, or cross-repo
+   exclusion. Repository enumeration separately excludes .git-file worktrees."
   [path]
   (some (fn [[pattern _]] (re-find pattern path)) non-primary-path-patterns))
 
@@ -220,9 +221,9 @@
      :open-hole-count (open-hole-count mission-id status-class lines)}))
 
 (defn- dedupe-by-id
-  "Keep the first entry per mission id (sort order = shortest path = primary
-   checkout). Worktrees and directory copies under ~/code/ produce duplicate
-   mission-doc hits with identical ids; this removes them post-scan."
+  "Keep the first entry per mission id after path-length/alphabetic sorting.
+   This resolves remaining duplicates among admitted primary checkouts and
+   plain directories; the sort itself does not establish checkout authority."
   [entries]
   (let [seen (atom #{})]
     (remove (fn [e]
@@ -342,6 +343,19 @@
                               (or (:entity/source existing) "mission-doc-ingest"))))
                {:id id :status (if existing :updated :created)})))))))
 
+(defn- primary-checkout?
+  "A repository is a primary checkout exactly when its .git is a directory."
+  [repo]
+  (.isDirectory (io/file repo ".git")))
+
+(defn- mission-scan-repo?
+  "Admit primary checkouts and preserve historical scans of plain directories
+   without .git. A .git file identifies a worktree and is excluded before any
+   mission documents are enumerated; no git subprocess or recursive walk."
+  [repo]
+  (or (primary-checkout? repo)
+      (not (.exists (io/file repo ".git")))))
+
 (defn load-missions-from-files
   "The explicit FILE scan. `<code-root>/<repo>/holes/missions/M-*.md` only,
    with the scan-root fences and dedupe documented below. This is the
@@ -356,6 +370,7 @@
          ;; them out, turning a single construction lookup into minutes of IO.
          mission-files (->> (or (.listFiles root) (make-array File 0))
                             (filter #(.isDirectory ^File %))
+                            (filter mission-scan-repo?)
                             (map #(io/file % "holes" "missions"))
                             (filter #(.isDirectory ^File %))
                             (mapcat #(or (.listFiles ^File %)
@@ -365,15 +380,12 @@
                        (map #(.getAbsolutePath %))
                        (filter #(re-matches mission-path-pattern %))
                        (remove sandbox-path?)
-                       ;; Scan-root fence (W-candidate-drift-fence): exclude
-                       ;; non-primary checkouts BEFORE dedupe, so worktrees and
-                       ;; directory copies never enter the candidate pool. The
-                       ;; path-length sort + dedupe-by-id below is now
-                       ;; defense-in-depth, not the sole guard.
+                       ;; Keep cross-repo and known-copy exclusions alongside
+                       ;; the structural repository filter above.
                        (remove non-primary-path?)
-                       ;; Sort by path length first (shorter = primary checkout,
-                       ;; not a worktree/copy), then alphabetically. This ensures
-                       ;; dedupe-by-id keeps the primary checkout.
+                       ;; Resolve duplicate IDs among admitted checkouts/plain
+                       ;; directories by path length, then alphabetically. This
+                       ;; heuristic is not evidence of checkout authority.
                        (sort-by (juxt count identity))
                        (map mission-doc->entry)
                        (remove #(derived-mission-id? (:id %)))
