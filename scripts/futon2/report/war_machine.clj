@@ -63,6 +63,7 @@
             [futon2.aif.strategic-habit :as strategic-habit]
             [futon2.aif.mission-c :as mission-c] [futon2.aif.mission-epistemic-value :as mission-epistemic]
             [futon2.aif.mission-gauges :as mission-gauges]
+            [futon2.aif.mission-hole-wants :as mission-hole-wants]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.observation :as obs]
@@ -6619,10 +6620,20 @@
         ;; target is then refused and the decision is the gated abstention.
         ;; No source is invented.
         ;; -----------------------------------------------------------------
+        ;; Missions state their own remaining work; those statements are the
+        ;; wants live-C's per-mission weight needs in order to reach a
+        ;; decision. Without them exactly one mission had declared outcome
+        ;; tokens, so the decision reached 3 of 465 live-C entries (~0.47% of
+        ;; corpus weight) and 464 sat unreached. A hand-written declaration
+        ;; still wins on any target it names.
         declared-sources (when-not (:cascade-sources judge-opts)
                            (cascade-sources/with-context-fn
-                            (cascade-sources/load-declared
-                             (or (:cascade-sources-dir judge-opts) cascade-sources/default-dir))))
+                            (mission-hole-wants/merge-into-sources
+                             (cascade-sources/load-declared
+                              (or (:cascade-sources-dir judge-opts) cascade-sources/default-dir))
+                             mission-registry/default-code-root
+                             (:missions (mission-registry/load-missions))
+                             :WM)))
         cascade-sources (or (:cascade-sources judge-opts) declared-sources {})
         ;; The tick-level horizon: the sources' own :horizon-steps, else the
         ;; declared initial T = 2 (Joe 2026-09-17, p4ng 462aa79), common to

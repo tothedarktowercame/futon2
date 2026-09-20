@@ -23,7 +23,10 @@
             [futon2.aif.substrate :as substrate])
   (:import (java.io File)))
 
-(def ^:private default-code-root
+(def default-code-root
+  "The scan root the registry reads mission documents under. Public because a
+   consumer deriving wants from those documents needs the same root to compute
+   a repo-relative locator path."
   (str (System/getProperty "user.home") "/code"))
 
 (def ^:private mission-path-pattern
