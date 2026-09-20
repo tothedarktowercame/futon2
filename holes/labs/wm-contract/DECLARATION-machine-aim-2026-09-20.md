@@ -347,4 +347,10 @@ until then. Design lessons the pilot bought (as lessons, not numbers):
 summaries must be generated mechanically from rows; evidence-retention
 standards must be set before observation so rows are decidable;
 the blinding/stratification structure was sound; task framings must not
-name the downstream deliverable.
+name the downstream deliverable. Added from the three completed reviews
+(claude-4, additive): an absence finding requires a RETAINED RESULT
+ARTIFACT, not a description of a search (three independent reviewers hit
+the same defect class on R6-4 and WM-14-C1; codex-1: "phrase-search
+absence cannot establish semantic absence"); and an adjudication with an
+empty evidence vector is not a finding at all (four such subjects
+found).
