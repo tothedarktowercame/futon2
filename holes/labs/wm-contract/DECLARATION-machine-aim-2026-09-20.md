@@ -252,6 +252,30 @@ an empty domain rather than scoring — domain widening and C entries are
 what keep the machine scoreable after the retirement, not improvements
 queued behind it.
 
+## STAKES — the fundamentals checklist and the plop-2026 decision (Joe, 2026-09-20)
+
+Verbatim: "Claude-4's short list remains the checklist we will work
+towards addressing, though I suspect there will be other things. Either
+we will complete this tomorrow and I'll decide whether the plop-2026
+paper can go ahead, or we won't and I will retract it."
+
+The checklist (claude-4's fundamentals table): E non-degenerate and
+learning (DONE); C degenerate :constant-across-horizon, 1-of-465
+in-domain; A :identity-default; F computed but not consumed
+(f-not-consumed all four policies); D, Q degenerate.
+
+Status at recording: C is the night's thread (removal + retirement +
+reinterpretation + five owned entries + conflict rule + chain-closure
+token with prompted-by); F is a wiring fix sequenced behind the
+observation-layer change; A needs an observation model (largest open
+build risk for a one-day completion); D/Q are downstream of C/A. Two
+operator dependencies for "complete tomorrow": the compliance-target
+retirement go-ahead (open in claude-4's channel), and a fresh click
+grant — the P-0 budget is consumed 5/5, and completion cannot be
+MEASURED without at least one run asking the specific question "with
+the rebuilt fundamentals, is C non-degenerate, is F consumed, does
+selection separate policies?"
+
 ## Disposition
 
 - Formalizing C entries from this declaration: claude-4 (WM build owner),
