@@ -111,3 +111,13 @@ retained baseline payload and checkpoint/close/ledger continuity;
 cohort 28/153 + runner 180/998 green, warrants registered. No reader
 changes; existing corrupt historical files stay as-is (record, not
 rewrite).
+
+## OPEN ITEM (2026-09-20, from cascade-realizer gate): fold-realized-test pre-existing errors
+
+fold-realized-test errors 3x with "actuator-a3: rejected deposits in
+corpus load" (:prompt-not-reconstructable) on CLEAN baseline 1ed5006e
+— byte-identical logs with and without the realizer draft (attribution
+in cascade-realizer-2026-09-20/STATUS.md). Pre-existing suite debt,
+not introduced; needs its own classification (why are a3's deposits
+unreconstructable — data rot, schema drift, or a real actuator
+defect?). Owner: unassigned.
