@@ -118,8 +118,19 @@ bound; a premise was refused before work was done on it; an obligation
 was resolved without an out-of-band turn) IS the domain widening, and the
 C entries fall out of it. Steps 3 and 4 of claude-4's sequencing merge:
 WM-13 is that one piece of work, not a prerequisite for entry-picking.
-Note the scope: this reaches the flexiarg corpus (futon3/library), not
-only futon2.
+
+SIZING CORRECTION (claude-4, 2026-09-20; retires the scope flag above as
+oversized): the produces-relation is futon2-LOCAL. Of 1404 flexiargs,
+exactly 2 mention :produces and neither is a WM pattern. The library
+supplies pattern identity and text; futon2's cascade-source declarations
+supply the INTERPRETATION (guard + :produces), bound by
+:interpretation-receipts hashing the flexiarg source at a sha. So
+re-expressing outcomes = editing two files in
+futon2/resources/wm/cascade-sources/, each re-admitted against its
+flexiarg source — not corpus stewardship. The library is reached only if
+generalizable outcomes need NEW patterns rather than new interpretations;
+claude-4 finds that boundary by attempting re-interpretation first and
+seeing what cannot be expressed.
 
 ## Grain note
 
