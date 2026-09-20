@@ -45,6 +45,29 @@ repository activity. The machine's q0 was being shaped by warrant currency.
    question "what should the WM believe when a warrant is stale" is
    dissolved rather than answered: the WM does not read warrants.
 
+## Clarification (Joe, 2026-09-20, follow-up — supersedes point 1 above where narrower)
+
+Verbatim: "It may be that 'inside' the machine, agents would want to run
+tests or use warrants, that's fine. My point is that as a feature, we do not
+need to hardwire this into the machine. I'd say, that should be obvious. We
+are building a model of AIF that is adapted to the use case of regulating
+development of the FUTON stack in the first instance, but towards broader
+regulation of collaborative work in general. I don't see how the test
+registry system relates to that aim."
+
+Corrected boundary: the line is model vs agents, not run vs no-run.
+
+- **Agents cast in a run** may run tests and use warrants as ordinary
+  tooling — nothing restricts an author or reviewer seat's toolkit.
+- **The model's observation contract** may not name workspace-specific
+  services as observation kinds. The registry is one instance; the
+  principle is general: observations are expressed in the model's own
+  vocabulary (states, policies, outcomes at pinned references), because the
+  model targets regulation of collaborative work in general, not this
+  workspace. "No registry consultation in-run" in point 1 above is
+  therefore too strong as written; read it as "no registry primitives in
+  the observation contract / belief state."
+
 ## Disposition
 
 - Contract/runner change: claude-4 (WM build owner), scheduled in its Acts.
