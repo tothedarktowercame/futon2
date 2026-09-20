@@ -1,0 +1,4 @@
+evidence-id test-registry-15ff71e5ee7bd4913ce1a41d6528ca2c7dc65a28be42ad2296627e1832afb5d4
+warrant? true
+results {:assertions 52, :duration-ms 889, :errors 0, :exit 0, :failures 0, :tests 4}
+bound wm-f/matched-observation-evidence -> test-registry-15ff71e5ee7bd4913ce1a41d6528ca2c7dc65a28be42ad2296627e1832afb5d4

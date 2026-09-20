@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/matched_observation_evidence.clj"]
+ :test-paths ["test/futon2/aif/matched_observation_evidence_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.matched-observation-evidence-test"]
+ :author "codex-2"
+ :subject-id "wm-f/matched-observation-evidence"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/matched-observation-evidence-2026-09-20/execution"}
