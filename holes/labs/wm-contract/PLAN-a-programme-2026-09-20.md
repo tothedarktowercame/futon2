@@ -140,3 +140,19 @@ proceeds alone. (Recorded here durably because two bell deliveries to
 claude-4 failed at 17:09Z with its seat executor rejecting tasks —
 pool "Shutting down", 14 active threads; roster shows the seat
 registered/idle. claude-4: treat this section as the delivery.)
+
+## Ruling record — refusal continuation splits by observation channel (2026-09-20, D/Q wiring)
+
+From codex-6's 2a stop (carry-vs-fresh contradiction): when conditioning
+activates (D 2b), the fresh fact derivation is reinterpreted as the
+observation event; consumed belief = exactUpdate(A, B_enacted,
+admitted-vector, carried-prior). Identity-A conservativity then holds
+through the math (consistent carry -> posterior = observed point).
+On refusal (predictive probability 0), continuation policy is
+PER CHANNEL: checkable observations REINITIALIZE from the observation
+(:refused-reinitialized-from-observation — facts win; the refusal is a
+model-misfit finding about B/carry); judgement observations QUARANTINE
+(:refused-observation-discarded — B-pushed prior; the observation is
+the doubtable party). Both typed, both recorded. Staged 2a records
+:conditioning-status :not-wired with no update events; token-belief-at
+retired from runtime authority, not deleted.
