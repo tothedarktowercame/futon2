@@ -1,0 +1,53 @@
+# Judge-facing mapping: sid -> full mission document
+
+Stratum labels deliberately omitted. Do not look them up.
+
+- S01: `/home/joe/code/futon2/holes/M-G-over-cascades.md`
+- S02: `/home/joe/code/futon6/holes/missions/M-P3-rational-reconstruction.md`
+- S03: `/home/joe/code/futon6/holes/missions/M-P7-rational-reconstruction.md`
+- S04: `/home/joe/code/futon6/holes/missions/M-P8-rational-reconstruction.md`
+- S05: `/home/joe/code/futon3c/holes/missions/M-action-cost-modelling.md`
+- S06: `/home/joe/code/futon2/holes/missions/M-aif-a-matrix-faithfulness.md`
+- S07: `/home/joe/code/futon2/holes/M-aif-head.md`
+- S08: `/home/joe/code/futon2/holes/missions/M-aif-policy-conditioned-eig.md`
+- S09: `/home/joe/code/futon2/holes/M-aif2.md`
+- S10: `/home/joe/code/futon3c/holes/missions/M-archaeology-control.md`
+- S11: `/home/joe/code/futon3c/holes/missions/M-autoclock-in.md`
+- S12: `/home/joe/code/futon7/holes/M-autonomous-doc-maintenance.md`
+- S13: `/home/joe/code/futon3c/holes/missions/M-bounded-disposition.md`
+- S14: `/home/joe/code/futon0/holes/missions/M-capability-star-map.md`
+- S15: `/home/joe/code/futon3c/holes/missions/M-codex-agent-behaviour.md`
+- S16: `/home/joe/code/futon3c/holes/missions/M-codex-irc-execution.md`
+- S17: `/home/joe/code/futon2/holes/M-composition-aware-reward.md`
+- S18: `/home/joe/code/futon6/holes/missions/M-differentiable-substrate.md`
+- S19: `/home/joe/code/futon2/holes/M-evaluate-policies.md`
+- S20: `/home/joe/code/futon5a/holes/missions/M-explore-aiqa.md`
+- S21: `/home/joe/code/futon5a/holes/missions/M-expressions-of-interest.md`
+- S22: `/home/joe/code/futon2/holes/M-futon1b-port.md`
+- S23: `/home/joe/code/futon3/holes/missions/M-futon3x-e2e.md`
+- S24: `/home/joe/code/futon0/holes/missions/M-futonzero-capability.md`
+- S25: `/home/joe/code/futon4/holes/missions/M-interest-network-coupling.md`
+- S26: `/home/joe/code/futon5a/holes/missions/M-learning-loop.md`
+- S27: `/home/joe/code/futon6/holes/missions/M-live-efe-map.md`
+- S28: `/home/joe/code/futon3a/holes/missions/M-memes-arrows-patterns-diagrams.md`
+- S29: `/home/joe/code/futon2/holes/M-mission-conditional-reward.md`
+- S30: `/home/joe/code/futon2/holes/M-operational-vocabulary.md`
+- S31: `/home/joe/code/futon4/holes/missions/M-peeragogy-rewrite.md`
+- S32: `/home/joe/code/futon3c/holes/missions/M-pilot-appearance.md`
+- S33: `/home/joe/code/futon2/holes/M-points-de-fuite.md`
+- S34: `/home/joe/code/futon3c/holes/missions/M-reachable-from-boot.md`
+- S35: `/home/joe/code/futon7/holes/M-self-documenting-stack.md`
+- S36: `/home/joe/code/futon4/holes/missions/M-self-representing-stack.md`
+- S37: `/home/joe/code/futon3c/holes/missions/M-single-locus.md`
+- S38: `/home/joe/code/futon3c/holes/missions/M-smart-emacs-cursor.md`
+- S39: `/home/joe/code/futon5a/holes/missions/M-stack-stereolithography.md`
+- S40: `/home/joe/code/futon3c/holes/missions/M-state-snapshot-witness.md`
+- S41: `/home/joe/code/futon4/holes/missions/M-three-column-stack.md`
+- S42: `/home/joe/code/futon4/holes/missions/M-vsatarcs-invariants-integration.md`
+- S43: `/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md`
+- S44: `/home/joe/code/futon3c/holes/missions/M-war-machine-first-outing.md`
+- S45: `/home/joe/code/futon3c/holes/missions/M-war-machine-pilot.md`
+- S46: `/home/joe/code/futon5a/holes/missions/M-war-machine-wiring.md`
+- S47: `/home/joe/code/futon2/holes/M-wm-policies.md`
+- S48: `/home/joe/code/futon4/holes/missions/M-writing-ethics.md`
+- S49: `/home/joe/code/futon2/holes/missions/M-zaif-harness-v1.md`
