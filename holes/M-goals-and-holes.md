@@ -197,3 +197,11 @@ Tracked in **`goals-holes-readiness.html`** (the INSTANTIATE card-tracker, backw
 
 ## Phases ahead
 **INSTANTIATE (continuing)** — C-STORE next (substrate-2 overlay, sim-only) + the GPU 應-voice box run (hot-swap, while the forward run has headroom) → **DOCUMENT**. Three CPU channels (stated/incompleteness/mess) + the GPU producer are built; the C-vector assembles (265 open preferences). Checkpoints append as each wave completes.
+
+### tl;dr
+
+- [ ] The WM has a stated-goal set linked to missions through the star-map.
+- [ ] An incompleteness detector records a goal missed by the stated-goal channel and distinguishes it from ordinary work in progress.
+- [ ] A latent-goal probe records a goal omitted from the star-map.
+- [ ] Goal preferences feed the WM's expected-free-energy risk term and link to methods that discharge those goals.
+- [ ] Goal discharge records carry real closure witnesses.

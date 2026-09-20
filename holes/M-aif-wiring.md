@@ -174,3 +174,11 @@ Click any node → a panel teaches **(1) what that piece of Active Inference doe
 **Open for v0.2** (Joe to steer): the per-node *how-it's-wired* text is at the **contract's** fidelity, not yet reconciled against real code call-edges (the §1 no-fabrication bar); deepen each explanation; and the three redraw decisions from §2 (split γ vs channel precision · R18 as a per-node overlay not a node · R15 as a true nested sub-loop) now apply to the SVG.
 
 **Redraw decisions for v0.2** (eyeball v0.1 first): split γ-precision from channel-precision into distinct nodes? Promote R18 from a lens-node to a genuine per-node colour overlay (its true form)? Render R15 as a real nested subgraph containing a *second copy* of the core loop (the upper level parameterising the lower)?
+
+### tl;dr
+
+- [ ] An AIF wiring diagram maps the R criteria to Friston components and brain regions, distinguishing verified code connections from provisional mappings.
+- [ ] Named AIF quantities carry real-or-analogical grounding metadata checked by a failing-test control.
+- [ ] The AIF structure-learning criterion records morphogenesis events and enforces the joint free-energy and expected-free-energy improvement gate.
+- [ ] A consent-gated WM executor observes action consequences and feeds them into belief updates and policy-precision learning.
+- [ ] A hierarchical generative-model design specifies its levels and cross-level belief propagation.

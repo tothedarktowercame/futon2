@@ -140,3 +140,11 @@ Plop-2026 completion is the expected ordering, not the activation
 condition — the triggers above govern, and one could fire first.
 Trigger (a)'s premise, hole retention feeding declarations, landed on
 2026-09-20 in futon2 3b5557aa.
+
+### tl;dr
+
+- [ ] The A query interface has a WMC backend using cached SDD compilations of the declared common-cause model.
+- [ ] WMC marginal and joint queries match exact enumeration, including the matched-marginal total-G invariance control under point beliefs and product preferences.
+- [ ] Compiled query means and variances match small-model calculations while preserving shared rate-parameter identity.
+- [ ] Compiled joint queries compute the state-observation mutual information needed for total G under spread beliefs.
+- [ ] Compilation cost, memory use, and repeated-query latency are measured on actual candidate families.

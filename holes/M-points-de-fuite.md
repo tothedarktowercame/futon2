@@ -420,3 +420,10 @@ The per-mission **orbit / phase-portrait** — scattered turns woven and concent
 - *WS upgrade (Joe, 2026-06-26):* the live overview/orbit run as **async subprocesses** today (zero blocking, Emacs/Emacs-spawned compute). If it feels slow, switch to a **WebSocket push** (server computes, pushes over the agent WS — already operational for `*agents*`). A revisit, not a rebuild.
 
 *(Historical MAP plan, for the record: recognition-first survey of already-recognized acts, the futonic act-vocabulary 咅/香/應, and the notations — catalogued in §2; the MAP→DERIVE convergence superseded "design a symbol set" with "flow the existing per-turn sigils into a control layer.")*
+
+### tl;dr
+
+- [ ] A deterministic turn-level recognizer emits the existing sorry, preference, method, and proof-edge record shapes without re-mining turns.
+- [ ] Inline override notation handles symbolic acts the turn-level recognizer misses or misassigns.
+- [ ] Turn-level method declarations mint their claim nodes and proof edges atomically.
+- [ ] A recorded trial tests whether recognized acts compose into new work directions without a mission scaffold or paid mining pass.
