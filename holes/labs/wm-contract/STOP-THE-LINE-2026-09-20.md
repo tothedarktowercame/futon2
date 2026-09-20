@@ -100,3 +100,20 @@ the consistency theorem that under identity A the conditioned rollout
 COLLAPSES to the open-loop forward model, which is what makes today's
 empty updates honest for the zero-rate regime and states exactly when
 that stops being true.
+
+## Failure class 4 — verified through a different reader than production (claude-4, self-reported, late evening)
+
+The 96/4.17% C-content figure was verified with
+load-missions-from-files (reads documents) while production's
+war_machine reads substrate-2 via mission-registry/load-missions. No
+substrate entity carried :mission/open-holes, so production saw 86
+missions :not-ingested and certified 3 of 466 — the typed status
+existed and went unconsulted. The number was real for the file scan
+and unreachable in the pipeline that certifies.
+
+Rule: a projection claim is verified through THE SAME READER the
+certifying path consumes — the same-source discipline (F's rule, the
+Q classifier's rule) applied at pipeline grain. Fixed by the
+idempotent substrate backfill (:updated 86, entities steady, 441
+:retained); second certify click in flight; a repeat 3 would be a new
+finding, not a retry.
