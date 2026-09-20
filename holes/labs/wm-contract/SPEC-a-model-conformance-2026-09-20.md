@@ -36,7 +36,7 @@ in-turn) — never one agent-assertion blur.
 
 | item | programme point | note |
 |---|---|---|
-| G risk/ambiguity under dependence; the point-mass cancellation control (coupling shifts risk and ambiguity by canceling amounts in total G) | 4 | per-token sums are NOT licensed for coupled distributions until proven; exact enumeration is the interim authority |
+| G risk/ambiguity under dependence; the point-mass cancellation control (coupling shifts risk and ambiguity by canceling amounts in total G) | 4 | FIRST HALF DISCHARGED 2026-09-20: `GTotalMarginalInvariance` (mathlib4 5bb5e50b4a, sorry-free) — for point-mass state and positive product-form C, risk+ambiguity = cross term depending only on per-token marginals and total mass (`totalG_eq_of_marginals_eq`); the witness pair gets identical total G against EVERY such C (`witness_totalG_eq`). Acceptance use: an implementation whose total G differs at matched marginals under these hypotheses has a bug; one whose per-term split does NOT differ between coupled/independent is suspect the other way. Per-token G sums remain unlicensed for coupled kernels — only the TOTAL enjoys the invariance. Non-point-mass beliefs remain queued |
 | F observation-to-prediction matching semantics | 4 | independent of A's noise; belongs with the F consumer fix |
 | two-products direct evaluation for fully specified observations under one binary common cause | 3 | DISCHARGED 2026-09-20: `TwoProductEvaluation.mixtureLikelihood_bool` (+ `_products`), sorry-free — now a proven row: implementations may evaluate fully specified observations as two weighted products and MUST agree with that value |
 | parameter-uncertainty layer (variance-WMC): means/variances propagation contracts | 6 | fixed-parameter inference first |
