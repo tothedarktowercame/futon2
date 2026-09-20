@@ -1,0 +1,87 @@
+{
+  "schema": "cascade-fold-repair-post-commit-v1",
+  "implementation-commit": "c91261fdbc7b80e903d3203ca53cc865291cae9f",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "independent-reviewer": "claude-12",
+  "review-status": "pending",
+  "warrant-id": "test-registry-2a63f8df59e059e06b80306347583d918e03fd85b4b52e975218386a7b1c78f0",
+  "run-id": "52d2dca2-3887-46ca-9a93-8c1695dec135",
+  "results": {
+    "assertions": 58,
+    "duration-ms": 3897,
+    "errors": 0,
+    "exit": 0,
+    "failures": 0,
+    "tests": 3
+  },
+  "mint-warrant": true,
+  "pinned-validity-now": true,
+  "canonical-validity-now": {
+    "warrant": false,
+    "reason": "environment-mismatch",
+    "details": {
+      "expected-only": {
+        "sha256": "c48178854b5067fc68adc5918f26c4a34041e14266df15fc88b757bb0dbf164a",
+        "dependencies": [
+          {
+            "path": "/home/joe/code/futon2-cascade-fold-warrant/test"
+          },
+          {
+            "path": "/home/joe/code/futon2-cascade-fold-warrant/src"
+          },
+          {
+            "path": "/home/joe/code/futon2-cascade-fold-warrant/resources"
+          },
+          {
+            "path": "/home/joe/code/futon2-cascade-fold-warrant"
+          },
+          {
+            "path": "/home/joe/code/futon2-cascade-fold-warrant/scripts"
+          }
+        ]
+      },
+      "observed-only": {
+        "sha256": "bfcc80610ab3cc5c0a02b562155f053f1bd301eb23a8a0028eba32ac6679fce5",
+        "dependencies": [
+          {
+            "path": "/home/joe/code/futon2/test"
+          },
+          {
+            "path": "/home/joe/code/futon2/src"
+          },
+          {
+            "path": "/home/joe/code/futon2/resources"
+          },
+          {
+            "path": "/home/joe/code/futon2"
+          },
+          {
+            "path": "/home/joe/code/futon2/scripts"
+          }
+        ]
+      },
+      "next-action": "reconcile-test-environment"
+    }
+  },
+  "replay-disposition": "branch-3b-contract-valid-incomplete",
+  "successful-construction-demonstrated": false,
+  "findings-closed": false,
+  "shared-jvm-loaded": false,
+  "retained-worktree": "/home/joe/code/futon2-cascade-fold-warrant",
+  "sha256": {
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/REPORT.md": "71af75da3f4ec312f7df41861c8091f342017e147c52d64f4aadcf6ef18d203a",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/kondo.log": "62f058c914653e6f2e29366a322aedba5032ba7879dcf741a70fef57ec936b85",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/post-commit/52d2dca2-3887-46ca-9a93-8c1695dec135.closure.edn": "01531a7d52c1113620dd083b2c344e58d6771a5b006b9d253712092dd8877e04",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/post-commit/52d2dca2-3887-46ca-9a93-8c1695dec135.log": "5f3de6e220ca973cf18f574260de7d4a0aac480c31ba1687f991a789874fe0c7",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/post-commit-registration.log": "1a6e3ab7ac55f0c54cd19015590cfd4d808edbe38ea43b4133976148a7f76a8d",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/pre-commit-receipt.json": "b52c7335f11c4ce4b7473a6282a6702581c86743a7e81769b4c2589eae04b6ff",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/pre-commit.log": "1a1aa6d5ef690cffb506eb0135372f71ee11580165042068fd46af181490d7ae",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/registration-environment-refusal.log": "31d9e445b8393e6d11622e7f9ef67e9b18791b6db86d0ae2c6d59aeda6dfca0c",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/registry.edn": "213377668f640d3128ea40e0c01e3f01900f8fea7c23c667c7abe759911abd76",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/repair-path-regression.log": "dbc8c7884a420fba953b3de88691bf83d266956e99ea817a3da21ab8d7a9163f",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/warrant-check-pinned.json": "2b4a8aac251da671593dd1bd8fd0297a9f6f7633d358cf6bef6968039f04cc49",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/warrant-check.json": "34c2636b916fb68f050bb88cc7cf477e9cddbbecd8a6be59ef62fb3fb263aecd"
+  }
+}

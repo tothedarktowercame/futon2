@@ -1,0 +1,1 @@
+{:record/type :test-registry/refusal, :warrant? false, :reason :environment-not-configurable, :details {:canonical-environment {"LC_ALL" "C.UTF-8", "LANG" "C.UTF-8", "TZ" "UTC"}}}
