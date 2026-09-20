@@ -355,3 +355,20 @@ not a finding at all (four such subjects found). Verdicts assert what
 retained evidence shows; where it shows nothing, the verdict is
 "insufficient", and no methodology for establishing absences is wanted
 or recorded.
+
+## REFINEMENT — operator turns are operations, not observations (Joe, 2026-09-20)
+
+Verbatim: "So, the mathematics is to be trusted; the unfalsifiable part
+is that I am *always* redirecting agents. That is unfalsifiable in the
+sense that every operator turn is an OPERATION on the vector space."
+
+This refines translation point 3 and supersedes the "calibration
+target" framing from the geometry thread: the operator's "always
+redirecting" is definitional, not a rate — every operator turn is an
+operation on the pattern embedding space, endorsement included (an
+operation near the identity). The turn-pair geometry therefore
+characterizes the DISTRIBUTION OF OPERATIONS (magnitude, direction),
+and no distribution outcome can contradict the operator's statement.
+Model placement: operator turns belong to the transition structure
+(dynamics), not to the observation model A. A rates agent assertion
+channels; the operator is not a noisy sensor to be rated.
