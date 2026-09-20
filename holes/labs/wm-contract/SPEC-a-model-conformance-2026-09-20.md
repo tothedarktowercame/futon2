@@ -45,8 +45,16 @@ in-turn) — never one agent-assertion blur.
 
 The nonzero-rate factorized evaluator refuses
 `:c-family-unsupported-with-rates` on the step-indexed C family. A typed
-refusal, so the zero-rate measurements that closed C stand. Consequence
-for this programme: before ANY rated run (point 2's coupled/independent
-configurations included), that evaluator must support the step-indexed
-family — otherwise the refusal blocks honestly, which is correct
-behavior and a known coupling, not a surprise.
+refusal, so the zero-rate measurements that closed C stand.
+
+SCOPE CORRECTED 2026-09-20 (codex-2 discovery, reproduced by claude-4:
+G = 2.652925220802433 on the bounded route, :evaluation
+:exact-enumeration, coupled A with the step-indexed terminal family in
+the certificate): the BOUNDED exact-enumeration route already evaluates
+coupled A with step-indexed C, so point 2's lab configurations do NOT
+wait on this fix. The fix gates production's FACTORIZED route — rated
+ticks — only. Also established there: `:non-factorizable-belief` checks
+the state rollout belief, a different object from observation coupling;
+the two refusals compound only when the belief itself is correlated, so
+the fix packet is C-family alone and `:non-factorizable-belief`
+continuing to refuse is a negative control, not a companion fix.
