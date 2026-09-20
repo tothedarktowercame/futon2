@@ -1,0 +1,4 @@
+evidence-id test-registry-0e6f1d0b6ef8231ad656b765a67440c9fdb43f30b2a80a3e4dfcca8a0ce51c2e
+warrant? true
+results {:assertions 21, :duration-ms 1745, :errors 0, :exit 0, :failures 0, :tests 2}
+bound WM-EoI-replacement-declaration -> test-registry-0e6f1d0b6ef8231ad656b765a67440c9fdb43f30b2a80a3e4dfcca8a0ce51c2e
