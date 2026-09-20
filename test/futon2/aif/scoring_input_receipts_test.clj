@@ -56,9 +56,21 @@
        (is (= :assembled-target-facts (:origin initial)))
        (is (= fixture/tick-1-universe (:facts (first (:inputs initial)))))
        (is (= (:value initial) (get-in second-record [:decision :selection-certificate :node-evaluation-traces 0 :evaluations 0 :incoming-belief])))
+       (let [stage (get-in second-record [:decision :selection-certificate :token-belief-stage])]
+         (is (= :not-wired (:conditioning-status stage)))
+         (is (= [] (:observation-updates stage)))
+         (is (= (:value initial) (:continuation-belief stage)))
+         (is (= (:value initial) (get-in stage [:prospective-carry :belief])))
+         (is (= {:token-count 6 :state-count 64 :support-count 1} (:carrier stage))))
        (doseq [bad [(dissoc second-record :habit-reads)
                     (update second-record :decision dissoc :initial-belief-receipt)
                     (assoc-in second-record [:decision :initial-belief-receipt :origin] :unknown)
+                    (assoc-in second-record [:decision :selection-certificate :token-belief-stage
+                                             :continuation-belief] {#{} 1})
+                    (assoc-in second-record [:decision :selection-certificate :token-belief-stage
+                                             :prospective-carry :belief] {#{} 1})
+                    (assoc-in second-record [:decision :selection-certificate :token-belief-stage
+                                             :observation-updates] [{:status :value}])
                     (update-in second-record [:habit-reads] dissoc :occurrences)
                     (assoc-in second-record [:habit-reads :occurrences]
                               [(assoc (get-in second-record [:habit-reads :occurrences 1]) :receipt next-receipt)])]]

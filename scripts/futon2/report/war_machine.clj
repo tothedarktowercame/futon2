@@ -49,6 +49,7 @@
             [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.scoring-input-receipts :as input-receipts]
+            [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.belief :as belief]
             [futon2.aif.calibration-cycle :as calibration-cycle]
@@ -6172,6 +6173,13 @@
               ;; Joint belief and want over the target-qualified tokens.
               initial-belief-receipt (input-receipts/initial-belief problems)
               joint-q0 (:value initial-belief-receipt)
+              ;; D phase 2a: store prospective carry, explicitly unwired.
+              ;; It does not replace joint-q0 or claim an observation update.
+              token-belief-stage (token-carry/stage
+                                  initial-belief-receipt
+                                  (token-carry/domain-inputs problems)
+                                  (:prospective-token-carry opts)
+                                  (:token-belief-context opts))
               joint-want (reduce (fn [acc p]
                                    (let [t (:target p)]
                                      (into acc (map (fn [w] [t w]))
@@ -6249,6 +6257,8 @@
                                     {:beta beta :cascade-habit-path (:cascade-habit-path opts)}))
                                 :horizon-steps T
                                 :initial-belief-receipt initial-belief-receipt)
+                decision (assoc-in decision [:selection-certificate :token-belief-stage]
+                                   token-belief-stage)
                 authorized (controller-authority/authorize decision ranked)
                 emitted (decision-gate/emit! authorized)]
             {:decision (assoc emitted
@@ -6652,7 +6662,15 @@
          {:targets (vec (distinct (concat (cascade-problems/substrate-targets)
                                           (keys (:universes cascade-sources)))))
           :sources (assoc cascade-sources :horizon-steps (:value cascade-horizon))})
-        cascade-result (select-and-record-cascade! cascade-assembled judge-opts)
+        cascade-result (select-and-record-cascade!
+                        cascade-assembled
+                        (assoc judge-opts
+                               :prospective-token-carry
+                               (get-in prev-trace-record
+                                       [:decision :selection-certificate :token-belief-stage
+                                        :prospective-carry])
+                               :token-belief-context
+                               {:occurrence-id (str "wm-live-selection-" wm-as-of)}))
         wm-decision (:decision cascade-result)
         ;; Strategic habit observes the CASCADE decision's first acting
         ;; pattern (strategic_habit/carry, H4/dd4a3bbe); an abstention

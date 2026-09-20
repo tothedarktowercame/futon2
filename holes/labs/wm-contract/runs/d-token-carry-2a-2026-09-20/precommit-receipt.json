@@ -1,0 +1,92 @@
+{
+  "role": "pre-commit-validation",
+  "head": "1bc98c0498607f6663232468edafb3e57c00567c",
+  "before": {
+    "src/futon2/aif/exact_belief_core.clj": "829d4df30bf297ee5194ee4dae21ed249bc2299ee1faa42f3a126f3d5559db94",
+    "src/futon2/aif/exact_belief_adapter.clj": "36b54e5c94d8284caee11b47c29ec9c1e11d484102990eb9cc6aee6b22b187ae",
+    "src/futon2/aif/cascade_model_manifest.clj": "2366e5f838da81d21fbd0aef9398b42f4dab7d46e0ea23f11d69fae2de6254fb",
+    "src/futon2/aif/token_belief_carry.clj": "9cebcc971ead5b797c1931c2719f3edfe3348495c733b158fe84a47096d8a129",
+    "src/futon2/aif/scoring_input_receipts.clj": "e726b70ce696516b4a14ed1075a2882678403b47b897062d1f09eec9081833ae",
+    "scripts/futon2/report/war_machine.clj": "af6c9f1862fa790efe2643268c9dc3566f98b75e982b7cf7ee3ad3cb2c0a5381",
+    "test/futon2/aif/token_belief_carry_test.clj": "bffcd20d792b0cf869a601b55408451e62c5e8c003d4e3d130cfbd29d9245887",
+    "test/futon2/aif/exact_belief_adapter_test.clj": "21be4ebe1afe9130f334dd279341a4ca1400f68810c285527e28e7b6885f6663",
+    "test/futon2/aif/cascade_model_manifest_test.clj": "945efa249b1c825eed9919454522541f1af8f9d85f7d5e4a7073f3d8974a8b46",
+    "test/futon2/aif/scoring_input_receipts_test.clj": "4a62417abf0f865f0cbe6f4eb9770c2457e16243c1fa1aadd636000455d71f81",
+    "resources/fixtures/d-token-carry/baseline-outcomes.edn": "45f1c3ea47c5a32d7c3ca129312f6bd9354f9f3731ccaeee55b80b8543c05cfe"
+  },
+  "runs": [
+    {
+      "namespace": "futon2.aif.exact-belief-adapter-test",
+      "command": [
+        "clojure",
+        "-M:test",
+        "-m",
+        "cognitect.test-runner",
+        "-n",
+        "futon2.aif.exact-belief-adapter-test"
+      ],
+      "exit": 0,
+      "duration-seconds": 1.19,
+      "log": "holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/precommit-exact-belief-adapter-test.log",
+      "log-sha256": "c539a529fcaf82343cc4afc5c45f9807ecd5c5e7109f5ea7ceec4e882744df95"
+    },
+    {
+      "namespace": "futon2.aif.token-belief-carry-test",
+      "command": [
+        "clojure",
+        "-M:test",
+        "-m",
+        "cognitect.test-runner",
+        "-n",
+        "futon2.aif.token-belief-carry-test"
+      ],
+      "exit": 0,
+      "duration-seconds": 4.013,
+      "log": "holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/precommit-token-belief-carry-test.log",
+      "log-sha256": "9b52799ce20ac46987ca3c2bce02686acbfb5c695403a7f5ccd4d017d32b85d7"
+    },
+    {
+      "namespace": "futon2.aif.scoring-input-receipts-test",
+      "command": [
+        "clojure",
+        "-M:test",
+        "-m",
+        "cognitect.test-runner",
+        "-n",
+        "futon2.aif.scoring-input-receipts-test"
+      ],
+      "exit": 0,
+      "duration-seconds": 3.496,
+      "log": "holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/precommit-scoring-input-receipts-test.log",
+      "log-sha256": "ad7e7c828ad2ff7f37117ce666131605035db917bdb7be2cc0e8e46dd1f55296"
+    },
+    {
+      "namespace": "futon2.aif.cascade-model-manifest-test",
+      "command": [
+        "clojure",
+        "-M:test",
+        "-m",
+        "cognitect.test-runner",
+        "-n",
+        "futon2.aif.cascade-model-manifest-test"
+      ],
+      "exit": 0,
+      "duration-seconds": 1.851,
+      "log": "holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/precommit-cascade-model-manifest-test.log",
+      "log-sha256": "8a81c50239e0fc1cbe46c1cc76820032a5615f24384b6db00975a474f0984e40"
+    }
+  ],
+  "after": {
+    "src/futon2/aif/exact_belief_core.clj": "829d4df30bf297ee5194ee4dae21ed249bc2299ee1faa42f3a126f3d5559db94",
+    "src/futon2/aif/exact_belief_adapter.clj": "36b54e5c94d8284caee11b47c29ec9c1e11d484102990eb9cc6aee6b22b187ae",
+    "src/futon2/aif/cascade_model_manifest.clj": "2366e5f838da81d21fbd0aef9398b42f4dab7d46e0ea23f11d69fae2de6254fb",
+    "src/futon2/aif/token_belief_carry.clj": "9cebcc971ead5b797c1931c2719f3edfe3348495c733b158fe84a47096d8a129",
+    "src/futon2/aif/scoring_input_receipts.clj": "e726b70ce696516b4a14ed1075a2882678403b47b897062d1f09eec9081833ae",
+    "scripts/futon2/report/war_machine.clj": "af6c9f1862fa790efe2643268c9dc3566f98b75e982b7cf7ee3ad3cb2c0a5381",
+    "test/futon2/aif/token_belief_carry_test.clj": "bffcd20d792b0cf869a601b55408451e62c5e8c003d4e3d130cfbd29d9245887",
+    "test/futon2/aif/exact_belief_adapter_test.clj": "21be4ebe1afe9130f334dd279341a4ca1400f68810c285527e28e7b6885f6663",
+    "test/futon2/aif/cascade_model_manifest_test.clj": "945efa249b1c825eed9919454522541f1af8f9d85f7d5e4a7073f3d8974a8b46",
+    "test/futon2/aif/scoring_input_receipts_test.clj": "4a62417abf0f865f0cbe6f4eb9770c2457e16243c1fa1aadd636000455d71f81",
+    "resources/fixtures/d-token-carry/baseline-outcomes.edn": "45f1c3ea47c5a32d7c3ca129312f6bd9354f9f3731ccaeee55b80b8543c05cfe"
+  }
+}

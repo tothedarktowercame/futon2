@@ -1,0 +1,8 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.token-belief-carry-test
+D-2A-CONSERVATIVITY {:outcome-bytes-identical true, :carrier {:token-count 6, :state-count 64, :support-count 1}, :disagreeing-prior-retained-as-prospective true, :conditioning-status :not-wired}
+
+Ran 4 tests containing 30 assertions.
+0 failures, 0 errors.

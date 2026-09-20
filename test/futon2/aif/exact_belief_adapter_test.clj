@@ -1,5 +1,6 @@
 (ns futon2.aif.exact-belief-adapter-test
   (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.exact-belief-adapter :as adapter]))
 
 (def states [#{} #{:judgement}])
@@ -86,6 +87,26 @@
         r (adapter/synthetic-mixture-update states uninformative B #{} uniform)]
     (is (= {#{} 3/8 #{:judgement} 5/8} (:predicted-state r)))
     (is (= (:predicted-state r) (:posterior r)))))
+
+(deftest four-token-set-states-share-one-conditioning-law
+  (let [a [:mission :open] b [:mission :done]
+        [s0 s1 s2 s3 :as carrier] [#{} #{a} #{b} #{a b}]
+        prior {s0 1/2 s1 1/3 s2 1/6 s3 0}
+        B {s0 {s0 1/2 s1 1/2} s1 {s2 1} s2 {s3 1} s3 {s3 1}}
+        A (constantly {:seen 1})
+        result (adapter/exact-update carrier A B :seen prior {:status :declared})
+        predicted {s0 1/4 s1 1/4 s2 1/3 s3 1/6}]
+    (is (= predicted (:predicted-state result)))
+    (is (= predicted (:posterior result)))
+    (is (= (:posterior result) (model/exact-update (fn [_ _] 1) predicted :seen)))
+    (is (= :refused (:status (model/exact-update (fn [_ _] 0) predicted :seen))))
+    (doseq [[q likelihood] [[{s0 0.5 s1 0.5} 1]
+                            [{s0 1} 0.5] [{s0 1} -1] [{s0 1} 2]]]
+      (let [bad (model/exact-update (fn [_ _] likelihood) q :seen)]
+        (is (= :invalid (:status bad)))
+        (is (not (contains? bad :option)))))
+    (is (= :retired-from-runtime (:status model/token-belief-at-runtime-authority)))
+    (is (= :not-wired (:successor-conditioning-status model/token-belief-at-runtime-authority)))))
 
 (deftest posterior-attains-lean-vfe-bound-on-fixture
   ;; Test-only evaluation of PolicyVariationalFreeEnergy.variationalFreeEnergy,

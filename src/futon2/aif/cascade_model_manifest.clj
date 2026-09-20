@@ -2,6 +2,7 @@
   "Partial, source-bound token-frontier model. No scoring or live side effects."
   (:require [clojure.string :as str]
             [clojure.set :as set]
+            [futon2.aif.exact-belief-core :as belief-core]
             [futon2.aif.likelihood-precision :as lprec])
   (:import [java.security MessageDigest]))
 
@@ -1115,25 +1116,38 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    prior-pushed is the map {state (B q_prev)(state)} over states with
    predicted support. Returns the belief map {state mass} summing to 1
    (exactUpdate_dist), or the typed
-   {:status :missing :kind :zero-predictive-probability} exactly when
+   {:status :refused :kind :zero-predictive-probability} exactly when
    P(o) = 0 (exactUpdate_eq_none_iff). Refusals from likelihood-of or
-   prior-pushed propagate."
+   prior-pushed propagate. The numerical calculation is shared with the
+   finite-kernel adapter; malformed rational domains return :invalid."
   [likelihood-of prior-pushed o]
   (cond
     (refusal? prior-pushed) prior-pushed
+    (not (belief-core/distribution? prior-pushed))
+    (belief-core/condition-predicted prior-pushed {} o)
     :else
     (let [likes (into {} (map (fn [s] [s (likelihood-of s o)]) (keys prior-pushed)))
           bad (first (filter refusal? (vals likes)))]
       (if bad
         bad
-        (let [weighted (into {} (map (fn [[s pushed]] [s (* (get likes s) pushed)]) prior-pushed))
-              po (reduce + (vals weighted))]
-          (if (zero? po)
-            {:status :missing :kind :zero-predictive-probability :observation o}
-            (into {} (map (fn [[s w]] [s (/ w po)])) weighted)))))))
+        (let [result (belief-core/condition-predicted prior-pushed likes o)]
+          (case (:status result)
+            :ok (:posterior result)
+            :refused (assoc result :kind :zero-predictive-probability)
+            result))))))
+
+(def token-belief-at-runtime-authority
+  {:status :retired-from-runtime
+   :date "2026-09-20"
+   :successor 'futon2.aif.token-belief-carry
+   :successor-conditioning-status :not-wired
+   :retained-purpose :lean-option-trajectory-correspondence
+   :retired-behavior :zero-evidence-reported-as-missing
+   :numerical-core 'futon2.aif.exact-belief-core/condition-predicted})
 
 (defn token-belief-at
-  "Lean ExactBeliefTrajectory.tokenBeliefAt over the approved carriers
+  "Mathematical reference ONLY; see token-belief-at-runtime-authority.
+   Lean ExactBeliefTrajectory.tokenBeliefAt over the approved carriers
    (P2–P5): μ₀ is the observed token-state belief q₀ (observed-belief,
    P4); step k pushes the current belief through cascade-kernel with the
    precedence list (precedence-fn k) (P3) and then conditions on the

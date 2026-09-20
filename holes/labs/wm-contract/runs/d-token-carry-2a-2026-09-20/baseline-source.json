@@ -1,0 +1,6 @@
+{
+  "head": "1bc98c0498607f6663232468edafb3e57c00567c",
+  "overlay": "/tmp/d-2a-baseline-o09dw883",
+  "baseline-source": "scripts/futon2/report/war_machine.clj",
+  "comparison": "pre-D decision function; current dependencies held constant; no actuation"
+}

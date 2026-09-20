@@ -887,7 +887,7 @@
     (let [obs (fn [k] (if (= k 1) target #{"a"}))
           traj2 (m/token-belief-at rates0 (m/observed-belief s0) plans obs 2)
           traj3 (m/token-belief-at rates0 (m/observed-belief s0) plans obs 3)]
-      (is (= {:status :missing :kind :zero-predictive-probability}
+      (is (= {:status :refused :kind :zero-predictive-probability}
              (select-keys traj2 [:status :kind])))
       ;; the refusal is carried forward
       (is (= traj2 traj3)))
@@ -920,7 +920,7 @@
     ;; while the exact update accepts and computes the 9/10 posterior
     (is (= {:t 9/10 :f 1/10} (m/exact-update a q :t)))
     ;; and the P(o) = 0 falsifier gives the typed refusal
-    (is (= {:status :missing :kind :zero-predictive-probability}
+    (is (= {:status :refused :kind :zero-predictive-probability}
            (select-keys (m/exact-update (fn [_ _] 0) {:t 1} :t) [:status :kind])))))
 
 ;;; WM-06: Q and C meet on ONE outcome domain; zero-preference preserved.

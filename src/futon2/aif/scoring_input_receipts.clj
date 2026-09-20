@@ -2,6 +2,7 @@
   "Read-time state receipts. Uses the declaration provenance status vocabulary."
   (:require [clojure.edn :as edn]
             [futon2.aif.cascade-model-manifest :as model]
+            [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.interpretation-evidence :as evidence]))
 
 (def ^:dynamic *habit-reads* nil)
@@ -30,6 +31,9 @@
   (let [decision (:decision record)
         candidates (get-in decision [:selection-certificate :candidates])
         initial (:initial-belief-receipt decision)
+        stage-path [:selection-certificate :token-belief-stage]
+        stage (get-in decision stage-path)
+        staged? (contains? (:selection-certificate decision) :token-belief-stage)
         log (:habit-reads record)
         occurrences (:occurrences log)
         errors (cond-> []
@@ -44,7 +48,12 @@
                      (not= expected initial) (conj :initial-belief-origin-mismatch)
                      (some #(not= (:value initial) (get-in % [:evaluations 0 :incoming-belief]))
                            (get-in decision [:selection-certificate :node-evaluation-traces]))
-                     (conj :initial-belief-value-mismatch))) errors)]
+                     (conj :initial-belief-value-mismatch))) errors)
+        ;; Phase 2a is an extension: the original origin and incoming-value
+        ;; equalities above still run, including on records without carry.
+        errors (cond-> errors
+                 (and staged? (not (token-carry/valid-stage? stage initial)))
+                 (conj :token-belief-stage-mismatch))]
     {:status (if (and (empty? errors)
                       (every? (fn [c]
                                 (let [p (:habit-provenance c)]

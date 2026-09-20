@@ -1,0 +1,18 @@
+{
+  "role": "pre-commit-validation",
+  "reason": "Added explicit transition-orientation test on the 64-state assembled carrier after initial validation",
+  "command": [
+    "clojure",
+    "-M:test",
+    "-m",
+    "cognitect.test-runner",
+    "-n",
+    "futon2.aif.token-belief-carry-test"
+  ],
+  "head": "1bc98c0498607f6663232468edafb3e57c00567c",
+  "exit": 0,
+  "duration-seconds": 3.96,
+  "test-sha256": "69e835e4d6efdc15d44c828e0894149cc40731a934d23c23c4ba22aecc858fd0",
+  "log-sha256": "1c40d7d09bbea35c2c844a76c3437cc3882f62630ce461cc7431ec7e0a65a42a",
+  "log": "holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/precommit-token-belief-carry-test-real-carrier.log"
+}
