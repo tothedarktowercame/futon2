@@ -1,0 +1,6 @@
+
+Testing futon2.aif.preference-family-test
+C-FAMILY-CONTROLS {:varying {:status :present, :value {:form :constant-spec, :schedule {:placement {:value :terminal, :status :declared}, :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}}, :steps [{:tau 1, :distribution {:universe #{:x}, :zeroed #{}, :weights {}}} {:tau 2, :distribution {:universe #{:x}, :zeroed #{}, :weights {:x 1}}}]}, :verdict :non-degenerate, :reason :varies-across-horizon, :C-steps-count 2}, :constant {:status :present, :value {:form :step-indexed, :schedule nil, :steps [{:tau 1, :distribution {:universe #{:x}, :zeroed #{}, :weights {:x 1}}} {:tau 2, :distribution {:universe #{:x}, :zeroed #{}, :weights {:x 1}}}]}, :verdict :degenerate, :reason :constant-across-horizon, :C-steps-count 2}}
+
+Ran 3 tests containing 20 assertions.
+0 failures, 0 errors.

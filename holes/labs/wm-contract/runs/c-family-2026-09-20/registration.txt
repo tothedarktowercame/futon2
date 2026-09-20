@@ -1,0 +1,4 @@
+evidence-id test-registry-e1771affb8abf09606a9ed8a4dd8262aa0c77ffdfb99a1ade962255ccdc093a6
+warrant? true
+results {:assertions 20, :duration-ms 2746, :errors 0, :exit 0, :failures 0, :tests 3}
+bound WM-step-indexed-C-family -> test-registry-e1771affb8abf09606a9ed8a4dd8262aa0c77ffdfb99a1ade962255ccdc093a6
