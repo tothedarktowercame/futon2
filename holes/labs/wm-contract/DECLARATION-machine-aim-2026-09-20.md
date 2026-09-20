@@ -286,6 +286,14 @@ claude-4 will not promise inside a day. One operator dependency
 remains: the compliance-target retirement go-ahead; claude-4 carries
 that ask and the budget correction in one message from its channel.
 
+Q sequencing and weight (Joe, 2026-09-20, verbatim): "If we don't have
+Q then there is definitely no point to publishing a paper that claims
+to be a model of Active Inference, that's for sure. But, OK, we can
+take it last." So Q is taken last in the build order, and it is
+DISPOSITIVE for the paper: closed-loop conditioning is what makes the
+model Active Inference rather than a scored planner; the other five
+terms landing without Q does not clear the publication bar.
+
 ## Disposition
 
 - Formalizing C entries from this declaration: claude-4 (WM build owner),
