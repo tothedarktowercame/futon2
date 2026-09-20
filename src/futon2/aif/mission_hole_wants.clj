@@ -130,9 +130,33 @@
   [declared code-root missions context]
   (let [{:keys [sources coverage]} (mission-sources code-root missions)
         declared-targets (set (keys (:universes declared)))
-        fresh (remove #(contains? declared-targets (:target %)) sources)
+        ;; `live-c/family-schedule` and `family-scales` require ONE value
+        ;; across every problem in the compared family, and a target carrying
+        ;; none falls back to the defaulted :every-step / default scales. A
+        ;; generated target without them therefore makes the family
+        ;; incommensurable and the tick refuses to select at all -- observed
+        ;; 2026-09-20 in run 2026-09-20-1789940260, which produced no cascade
+        ;; selection because these sources defaulted to :every-step beside a
+        ;; declared :terminal.
+        ;;
+        ;; So ADOPT the one value the declared sources already agree on. This
+        ;; namespace reads documents; it has no authority to choose a schedule
+        ;; or a scale. When the declared sources do not agree on exactly one,
+        ;; generate NOTHING and say why -- an unusable family is worse than an
+        ;; unextended one.
+        one-of (fn [m] (let [vs (distinct (keep #(get m %) declared-targets))]
+                         (when (= 1 (count vs)) (first vs))))
+        schedule (one-of (:preference-schedules declared))
+        scales (one-of (:preference-scales declared))
+        fresh (if (and schedule scales)
+                (remove #(contains? declared-targets (:target %)) sources)
+                [])
         by (fn [k] (into {} (map (juxt :target k)) fresh))]
     (-> declared
+        (update :preference-schedules merge
+                (into {} (map (fn [f] [(:target f) schedule])) fresh))
+        (update :preference-scales merge
+                (into {} (map (fn [f] [(:target f) scales])) fresh))
         (update :universes merge (by :universe))
         (update :wants merge (by :want))
         (update :locators merge (by :locators))
@@ -142,6 +166,11 @@
                 (into {} (map (fn [f] [(:target f) context])) fresh))
         (assoc :mission-hole-coverage
                (assoc coverage
+                      :adopted-schedule schedule
+                      :adopted-scales scales
+                      :not-generated-reason
+                      (when-not (and schedule scales)
+                        :declared-sources-lack-one-agreed-schedule-or-scales)
                       :targets-added (count fresh)
                       :targets-deferred-to-declaration
                       (mapv :target (filter #(contains? declared-targets (:target %)) sources)))))))

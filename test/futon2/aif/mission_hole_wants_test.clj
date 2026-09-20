@@ -54,3 +54,42 @@
 (deftest terminal-missions-state-no-wants
   (doseq [sc [:complete :inactive :draft]]
     (is (nil? (mhw/mission-source "/root" (assoc mission :status-class sc))) (str sc))))
+
+(def ^:private terminal-schedule
+  {:placement {:value :terminal :status :declared}
+   :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}})
+(def ^:private scales {:lam {:value 1 :status :declared} :mu {:value 0 :status :declared}})
+
+(defn- declared-with [schedules scales-map]
+  {:universes {"M-declared" {:t false}} :wants {"M-declared" [:t]}
+   :locators {} :interpretations {} :candidates {} :context-by-target {}
+   :preference-schedules schedules :preference-scales scales-map})
+
+(deftest generated-targets-adopt-the-family-schedule-and-scales
+  (testing "a generated target carries the declared family's schedule and scales"
+    (let [merged (mhw/merge-into-sources
+                  (declared-with {"M-declared" terminal-schedule} {"M-declared" scales})
+                  "/root" [mission] :WM)]
+      (is (= terminal-schedule (get-in merged [:preference-schedules "M-probe"]))
+          "without this the target defaults to :every-step and live-c/family-schedule
+           refuses the whole comparison as :incommensurable-family")
+      (is (= scales (get-in merged [:preference-scales "M-probe"])))
+      (is (= 1 (get-in merged [:mission-hole-coverage :targets-added]))))))
+
+(deftest disagreeing-declared-sources-generate-nothing
+  (testing "two declared schedules mean no single family value to adopt"
+    (let [other {:placement {:value :every-step :status :declared}}
+          declared (-> (declared-with {"M-declared" terminal-schedule "M-two" other}
+                                      {"M-declared" scales "M-two" scales})
+                       (assoc-in [:universes "M-two"] {:t false}))
+          merged (mhw/merge-into-sources declared "/root" [mission] :WM)]
+      (is (= 0 (get-in merged [:mission-hole-coverage :targets-added]))
+          "generating here would produce a family the tick cannot score at all")
+      (is (= :declared-sources-lack-one-agreed-schedule-or-scales
+             (get-in merged [:mission-hole-coverage :not-generated-reason])))
+      (is (nil? (get-in merged [:wants "M-probe"])))))
+  (testing "the generator never invents a value when the declared side has none"
+    (let [merged (mhw/merge-into-sources
+                  (declared-with {} {}) "/root" [mission] :WM)]
+      (is (= 0 (get-in merged [:mission-hole-coverage :targets-added])))
+      (is (nil? (get-in merged [:mission-hole-coverage :adopted-schedule]))))))
