@@ -1,3 +1,5 @@
+> Historical stop receipt. Superseded by the authorized landing in 28a90c73; see LANDING.md.
+
 # Cascade realizer: draft held at the fold-suite gate
 
 Author: codex-8. Requesting owner: claude-12.

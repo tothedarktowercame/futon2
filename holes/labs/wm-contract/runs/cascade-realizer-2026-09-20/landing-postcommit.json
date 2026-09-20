@@ -1,0 +1,79 @@
+{
+  "role": "post-commit-warrant",
+  "implementation-commit": "28a90c731d30fab8d8e7f8ed7bf0a840c6301f3d",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "independent-reviewer": "claude-2",
+  "independent-review-status": "pending Agency job",
+  "sha256": {
+    "scripts/futon2/report/war_machine.clj": "bc3cbb7348169190d110e7cfebed3741f4f66d14fa18835219f408f04bfde5cc",
+    "src/futon2/aif/full_loop_runner.clj": "41bb6b5cfeeb1543f07f53497aeca035597deaef751455e1307726e1f67300c9",
+    "src/futon2/aif/fold_cascade.clj": "4e194f53badb0d11d789e8793d900b9d6374f668edf2d4dce52e6e32469c10a9",
+    "test/futon2/aif/fold_cascade_test.clj": "64c2ba7d12fd64feae886fa85338aba17c84ade606e228f2fe5fa332cd15f583",
+    "test/futon2/report/cascade_decision_test.clj": "f593d743bf9dd178c10fd0bdac5694dedaa926f65c0ae6a3979c33cc52fca055"
+  },
+  "warrants": [
+    {
+      "scope": "realizer",
+      "entry-id": "test-registry-b563ff90af46e0592d8b2f7dfb029ac66a342529b7d37550e402776a83850a1d",
+      "run-id": "12a5969f-fa94-4799-9c30-17ba31f4ecf9",
+      "warrant?": true,
+      "code-sha": "dc2aa55d161c11c3f04edcc092ef5001dc0912869bbda53f5f324c8362933981",
+      "test-sha": "296eccf3ec56f6b25b3a9ab88a0282750cc0dda5e0d1db546c55b4f7e24bdd23",
+      "results": {
+        "tests": 4,
+        "assertions": 51,
+        "failures": 0,
+        "errors": 0,
+        "exit": 0
+      }
+    },
+    {
+      "scope": "decision",
+      "entry-id": "test-registry-873a97f0d0f6a77877c675d536f57ab9985ac33919155a527b40632a3246980e",
+      "run-id": "86a5ecb9-a93e-404b-b3e1-e579f850c997",
+      "warrant?": true,
+      "code-sha": "dc2aa55d161c11c3f04edcc092ef5001dc0912869bbda53f5f324c8362933981",
+      "test-sha": "a6f6a1c39388b814e389c4289230aa100452b9b0b0218221ac7c2cd2a50f31ff",
+      "results": {
+        "tests": 11,
+        "assertions": 55,
+        "failures": 0,
+        "errors": 0,
+        "exit": 0
+      }
+    },
+    {
+      "scope": "repair",
+      "entry-id": "test-registry-9a46c3e56a8de3cce6252dea92e0379dc1099e7d8ecebfe4d8aa43847a243ec4",
+      "run-id": "8b9bfca2-dcb6-498e-9b2f-c36410d30482",
+      "warrant?": true,
+      "code-sha": "dc2aa55d161c11c3f04edcc092ef5001dc0912869bbda53f5f324c8362933981",
+      "test-sha": "a2c230f49e1c20b1c71ab3738b33c58dc204ec2e6813fb930cf0c59c64db78cd",
+      "results": {
+        "tests": 4,
+        "assertions": 64,
+        "failures": 0,
+        "errors": 0,
+        "exit": 0
+      }
+    },
+    {
+      "scope": "runner",
+      "entry-id": "test-registry-4788e2b5db9181772016a257f6e79707b07aed09482ba9f559370157527b7fdb",
+      "run-id": "85213a15-8e21-4f6c-ba9a-3a7a4223ed8d",
+      "warrant?": true,
+      "code-sha": "dc2aa55d161c11c3f04edcc092ef5001dc0912869bbda53f5f324c8362933981",
+      "test-sha": "cd432cf502133e290feea682171389c6411077d42f36fa178236fd6a19598853",
+      "results": {
+        "tests": 180,
+        "assertions": 998,
+        "failures": 0,
+        "errors": 0,
+        "exit": 0
+      }
+    }
+  ],
+  "canonical-checks-passed": true,
+  "discharge": "held; no store writes"
+}
