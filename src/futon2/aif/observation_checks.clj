@@ -39,19 +39,23 @@
   (when-let [missing (seq (remove #(and (string? (get m %)) (not (str/blank? (get m %)))) ks))]
     (refuse :no-locator {:check check :missing (vec missing)})))
 
-(defn- sha-refusal [repo sha]
-  (let [{:keys [exit]} (git repo "cat-file" "-e" (str sha "^{commit}"))]
-    (when-not (zero? exit)
-      (refuse :unknown-sha {:repo repo :sha sha}))))
+(defn- resolve-reference [repo reference]
+  (let [{:keys [exit out]} (git repo "rev-parse" "--verify" "--end-of-options"
+                               (str reference "^{commit}"))]
+    (if (zero? exit)
+      {:repo repo :sha reference :resolved-sha (str/trim out)}
+      (refuse :unknown-sha {:repo repo :sha reference}))))
 
 (defn check-path-exists
-  "C3: `git cat-file -e sha:path` succeeds."
+  "C3: resolve the declared reference once; check the file at that commit."
   [{:keys [repo sha path] :as m}]
   (or (locator-refusal :C3 m [:repo :sha :path])
-      (sha-refusal repo sha)
-      (let [{:keys [exit]} (git repo "cat-file" "-e" (str sha ":" path))]
-        {:observed (zero? exit) :check :C3
-         :evidence {:repo repo :sha sha :path path}})))
+      (let [reference (resolve-reference repo sha)]
+        (if (:status reference) reference
+            (let [{:keys [exit]} (git repo "cat-file" "-e"
+                                     (str (:resolved-sha reference) ":" path))]
+              {:observed (zero? exit) :check :C3
+               :evidence (assoc reference :path path)})))))
 
 (defn decl-present?
   "The declaration head DECL starts a line of TEXT (after optional leading
@@ -64,45 +68,50 @@
             text)))
 
 (defn check-decl-in-file
-  "C4: the file at sha:path has a line starting with the declaration head
-  DECL (anchored, see decl-present?)."
+  "C4: check the anchored declaration head at the resolved commit."
   [{:keys [repo sha path decl] :as m}]
   (or (locator-refusal :C4 m [:repo :sha :path :decl])
-      (sha-refusal repo sha)
-      (let [{:keys [exit out]} (git repo "show" (str sha ":" path))]
-        {:observed (and (zero? exit) (decl-present? out decl)) :check :C4
-         :evidence {:repo repo :sha sha :path path :decl decl
-                    :file-present (zero? exit)}})))
+      (let [reference (resolve-reference repo sha)]
+        (if (:status reference) reference
+            (let [{:keys [exit out]} (git repo "show" (str (:resolved-sha reference) ":" path))]
+              {:observed (and (zero? exit) (decl-present? out decl)) :check :C4
+               :evidence (assoc reference :path path :decl decl :file-present (zero? exit))})))))
 
-(defn- locus-resolves?
-  "A clojure-locus \"repo/path:line\" resolves at the repo's current HEAD:
-  the file exists there and has at least LINE lines."
-  [locus]
-  (when-let [[_ lrepo lpath line] (re-matches #"([^/]+)/(.+):(\d+)" (str locus))]
-    (let [{:keys [exit out]} (git lrepo "show" (str "HEAD:" lpath))]
-      (and (zero? exit)
-           (<= (Long/parseLong line) (count (str/split-lines out)))))))
+(defn- observe-locus [locus]
+  (if-let [[_ repo path line] (re-matches #"([^/]+)/(.+):(\d+)" (str locus))]
+    (let [reference (resolve-reference repo "HEAD")]
+      (if (:status reference)
+        (update reference :data assoc :locus locus)
+        (let [{:keys [exit out]} (git repo "show" (str (:resolved-sha reference) ":" path))]
+          {:observed (boolean (and (zero? exit)
+                                   (<= (Long/parseLong line) (count (str/split-lines out)))))
+           :evidence (assoc reference :path path :line (Long/parseLong line))})))
+    {:observed false :reason :invalid-clojure-locus :locus locus}))
 
 (defn check-registry-entry
-  "C5: the emitted contract bundle JSON at sha:bundle-path contains a contract
-  whose contract-id is `entry` and whose declarations include a non-blank
-  clojure-locus."
+  "C5: resolve the bundle reference and each locus repository HEAD separately.
+   Every content check uses its recorded resolved commit."
   [{:keys [repo sha bundle-path entry] :as m}]
   (or (locator-refusal :C5 m [:repo :sha :bundle-path :entry])
-      (sha-refusal repo sha)
-      (let [{:keys [exit out]} (git repo "show" (str sha ":" bundle-path))]
-        (if-not (zero? exit)
-          (refuse :bundle-not-found {:repo repo :sha sha :bundle-path bundle-path})
-          (let [contract (some #(when (= entry (get % "contract-id")) %)
-                               (get (json/read-str out) "contracts"))
-                loci (vec (keep #(get % "clojure-locus") (get contract "declarations")))
-                resolved (into {} (map (fn [l] [l (boolean (locus-resolves? l))])) loci)]
-            ;; every declared locus must resolve (file present with that many
-            ;; lines at the locus repo's HEAD), not merely be non-blank
-            {:observed (boolean (and contract (seq loci) (every? true? (vals resolved))))
-             :check :C5
-             :evidence {:repo repo :sha sha :bundle-path bundle-path :entry entry
-                        :contract-found (boolean contract) :clojure-loci resolved}})))))
+      (let [reference (resolve-reference repo sha)]
+        (if (:status reference) reference
+          (let [{:keys [exit out]} (git repo "show" (str (:resolved-sha reference) ":" bundle-path))]
+            (if-not (zero? exit)
+              (refuse :bundle-not-found (assoc reference :bundle-path bundle-path))
+              (let [contract (some #(when (= entry (get % "contract-id")) %)
+                                   (get (json/read-str out) "contracts"))
+                    loci (vec (keep #(get % "clojure-locus") (get contract "declarations")))
+                    observations (into {} (map (fn [l] [l (observe-locus l)])) loci)
+                    refusal (some #(when (:status %) %) (vals observations))]
+                (if refusal
+                  (assoc refusal :evidence (assoc reference :bundle-path bundle-path
+                                                 :entry entry :locus-evidence observations))
+                  (let [resolved (into {} (map (fn [[l o]] [l (boolean (:observed o))])) observations)]
+                    {:observed (boolean (and contract (seq loci) (every? true? (vals resolved))))
+                     :check :C5
+                     :evidence (assoc reference :bundle-path bundle-path :entry entry
+                                      :contract-found (boolean contract) :clojure-loci resolved
+                                      :locus-evidence observations)})))))))))
 
 (def futon3c-root "/home/joe/code/futon3c")
 
