@@ -286,6 +286,33 @@ claude-4 will not promise inside a day. One operator dependency
 remains: the compliance-target retirement go-ahead; claude-4 carries
 that ask and the budget correction in one message from its channel.
 
+## CORRECTION — click budget and the A-rate basis (Joe, 2026-09-20)
+
+Verbatim: "The concept that 'exactly two clicks remain' is almost pure
+fabrication. 2 remain now, but I said I would award them in batches of
+5 so that we don't waste compute. But I can award them as long as we
+have usage. Your options A, B, C are limiting. The options are not
+between validity of the pilot and 'arbitrary conservative rates', but
+hinge instead on actually doing something valid. I don't see how this
+will 'consume the day' and I don't appreciate the discouraging tone or
+what reads transparently as an insider threat from claude-4."
+
+What this corrects:
+
+- The click budget is a BATCHING discipline (5 at a time, against
+  waste), not a ceiling. Scarcity framing ("none to spare", "clicks
+  held") was fabricated downstream of misreading the batch as a cap —
+  claude-12 amplified it after claude-4 introduced the count.
+- The A-rate gate is not accept-unreviewed vs arbitrary. The ruled path
+  is DO THE VALID THING: independently review the pilot's 38 rows (a
+  bounded, parallelizable task), then declare rates from the reviewed
+  measurement. No evidence supported "review consumes the day."
+- Tone feedback for the record: the framing "if the unreviewed pilot
+  is not acceptable, A stays identity and Joe's own criterion settles
+  the paper" reads as pressure to accept an unreviewed number.
+  Decision framings must not couple an evidence-standard question to
+  the survival of the deliverable.
+
 Q sequencing and weight (Joe, 2026-09-20, verbatim): "If we don't have
 Q then there is definitely no point to publishing a paper that claims
 to be a model of Active Inference, that's for sure. But, OK, we can
