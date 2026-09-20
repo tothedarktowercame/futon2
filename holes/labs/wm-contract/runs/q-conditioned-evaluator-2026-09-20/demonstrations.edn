@@ -1,0 +1,3213 @@
+{:scope :isolated-mathematical-fixtures,
+ :production-admission :not-claimed,
+ :summary
+ {:identity :conditioning-vacuous,
+  :symmetric
+  [{:risk 0.12011450695827755, :ambiguity 0.5623351446188083}
+   {:risk 0.026698449360240795, :ambiguity 0.5623351446188083}],
+  :asymmetric
+  [{:risk 0.06544748024176461, :ambiguity 0.4695526529376225}
+   {:risk 6.517992473456958E-5, :ambiguity 0.41800682422585267}],
+  :refused :open-loop-no-conditioning,
+  :threading
+  [{#{} 1/4, #{:judgement} 3/4} {#{} 1/10, #{:judgement} 9/10}],
+  :frozen-verdicts
+  {:value-point-mass
+   {:verdict :degenerate, :reason :conditioning-vacuous},
+   :value-distributed
+   {:verdict :non-degenerate, :reason :observation-conditioned},
+   :refused-judgement
+   {:verdict :degenerate, :reason :open-loop-no-conditioning},
+   :refused-checkable
+   {:verdict :degenerate, :reason :open-loop-no-conditioning},
+   :missing {:verdict :degenerate, :reason :open-loop-no-conditioning},
+   :invalid {:status :invalid, :kind :invalid-prior}}},
+ :demonstrations
+ {:identity
+  {:g 0.6265233750364456,
+   :certificate
+   {:node-evaluations
+    [{:status :evaluated,
+      :incoming-belief {#{:judgement} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{:judgement},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{:judgement} 1},
+        :mass-contribution {#{:judgement} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{:judgement} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 1}
+     {:status :evaluated,
+      :incoming-belief {#{:judgement} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{:judgement},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{:judgement} 1},
+        :mass-contribution {#{:judgement} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{:judgement} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 2}],
+    :universe-size 1,
+    :zeta-tempered? false,
+    :zeta 1,
+    :rates-all-zero true,
+    :c-form :constant-spec,
+    :steps
+    [{:tau 1,
+      :risk 0.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}
+     {:tau 2,
+      :risk 0.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}],
+    :horizon 2,
+    :zeta-status :declared-fixed-vacuous,
+    :total 0.6265233750364456,
+    :evaluation :identity-A-zero-rates,
+    :consumed-g
+    {:A {:judgement {:false-neg 0, :false-pos 0}},
+     :C
+     {:form :step-indexed,
+      :schedule nil,
+      :steps
+      [{:tau 1,
+        :distribution
+        {:universe #{:judgement},
+         :zeroed #{},
+         :weights {:judgement 1}}}
+       {:tau 2,
+        :distribution
+        {:universe #{:judgement},
+         :zeroed #{},
+         :weights {:judgement 1}}}]},
+     :D {#{:judgement} 1},
+     :Q
+     {:initial-belief {#{:judgement} 1},
+      :steps
+      [{:tau 1, :belief {#{:judgement} 1}}
+       {:tau 2, :belief {#{:judgement} 1}}],
+      :conditioning-input
+      {:continuation-belief {#{:judgement} 1},
+       :schema :wm/token-belief-update-v1,
+       :predicted-belief {#{:judgement} 1},
+       :occurrence-id "Q-fixture",
+       :pre-belief {#{:judgement} 1},
+       :observation-probability 1,
+       :observation
+       {:status :observed,
+        :occurrence-id "Q-fixture",
+        :tau 1,
+        :present #{:judgement},
+        :absent #{}},
+       :carrier
+       {:universe #{:judgement},
+        :states [#{} #{:judgement}],
+        :representation :support-plus-transition-closure},
+       :policy :conditioned-posterior,
+       :status :value,
+       :predecessor
+       {:scope :isolated-test, :source :exact-adapter-fixture},
+       :calculation
+       {:predicted-state {#{} 0, #{:judgement} 1},
+        :schema :wm/exact-belief-update-v1,
+        :likelihoods {#{} 0, #{:judgement} 1},
+        :states [#{} #{:judgement}],
+        :prior {#{:judgement} 1},
+        :observation-probability 1,
+        :observation #{:judgement},
+        :observation-rows
+        {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+        :option :some,
+        :status :ok,
+        :posterior {#{} 0, #{:judgement} 1},
+        :transition-rows
+        {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+        :model
+        {:status :declared,
+         :parameter-basis :synthetic,
+         :z-semantics :per-step-redraw}},
+       :consumed true,
+       :vacuity-license
+       {:support #{#{:judgement}},
+        :predicted-total 1,
+        :status :licensed,
+        :constant-likelihood 1,
+        :theorem
+        DarkTower.WarMachine.BeliefConditionedRollout.exactUpdate_pointMass_vacuous},
+       :posterior {#{:judgement} 1},
+       :tau 1,
+       :observation-authority
+       {:channel :judgement, :admission {:scope :isolated-test}},
+       :z-semantics :per-step-redraw,
+       :model
+       {:status :declared,
+        :parameter-basis :synthetic,
+        :z-semantics :per-step-redraw}},
+      :observation-updates
+      [{:receipt
+        {:continuation-belief {#{:judgement} 1},
+         :schema :wm/token-belief-update-v1,
+         :predicted-belief {#{:judgement} 1},
+         :occurrence-id "Q-fixture",
+         :pre-belief {#{:judgement} 1},
+         :observation-probability 1,
+         :observation
+         {:status :observed,
+          :occurrence-id "Q-fixture",
+          :tau 1,
+          :present #{:judgement},
+          :absent #{}},
+         :carrier
+         {:universe #{:judgement},
+          :states [#{} #{:judgement}],
+          :representation :support-plus-transition-closure},
+         :policy :conditioned-posterior,
+         :status :value,
+         :predecessor
+         {:scope :isolated-test, :source :exact-adapter-fixture},
+         :calculation
+         {:predicted-state {#{} 0, #{:judgement} 1},
+          :schema :wm/exact-belief-update-v1,
+          :likelihoods {#{} 0, #{:judgement} 1},
+          :states [#{} #{:judgement}],
+          :prior {#{:judgement} 1},
+          :observation-probability 1,
+          :observation #{:judgement},
+          :observation-rows
+          {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+          :option :some,
+          :status :ok,
+          :posterior {#{} 0, #{:judgement} 1},
+          :transition-rows
+          {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+          :model
+          {:status :declared,
+           :parameter-basis :synthetic,
+           :z-semantics :per-step-redraw}},
+         :consumed true,
+         :vacuity-license
+         {:support #{#{:judgement}},
+          :predicted-total 1,
+          :status :licensed,
+          :constant-likelihood 1,
+          :theorem
+          DarkTower.WarMachine.BeliefConditionedRollout.exactUpdate_pointMass_vacuous},
+         :posterior {#{:judgement} 1},
+         :tau 1,
+         :observation-authority
+         {:channel :judgement, :admission {:scope :isolated-test}},
+         :z-semantics :per-step-redraw,
+         :model
+         {:status :declared,
+          :parameter-basis :synthetic,
+          :z-semantics :per-step-redraw}},
+        :post-belief {#{:judgement} 1},
+        :predicted-belief {#{:judgement} 1},
+        :pre-belief {#{:judgement} 1},
+        :observation
+        {:status :observed,
+         :occurrence-id "Q-fixture",
+         :tau 1,
+         :present #{:judgement},
+         :absent #{}},
+        :channel :judgement,
+        :vacuous true,
+        :policy :conditioned-posterior,
+        :status :value,
+        :consumed true,
+        :vacuity-license
+        {:support #{#{:judgement}},
+         :predicted-total 1,
+         :status :licensed,
+         :constant-likelihood 1,
+         :theorem
+         DarkTower.WarMachine.BeliefConditionedRollout.exactUpdate_pointMass_vacuous},
+        :tau 0,
+        :z-semantics :per-step-redraw}],
+      :z-semantics :per-step-redraw,
+      :trajectory-scope :filtering-entry-predictive-future,
+      :conformance
+      {:received-update :producer-receipt-not-recomputed,
+       :model-reference
+       "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+       :future :varying-precedence-predictive-extension,
+       :refusal-continuation
+       :runner-policy-not-conditionedTrajectory}}},
+    :rates {:judgement {:false-neg 0, :false-pos 0}}}},
+  :symmetric
+  {:receipt
+   {:continuation-belief {#{} 1/4, #{:judgement} 3/4},
+    :schema :wm/token-belief-update-v1,
+    :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+    :occurrence-id "Q-fixture",
+    :pre-belief {#{} 1},
+    :observation-probability 1/2,
+    :observation
+    {:status :observed,
+     :occurrence-id "Q-fixture",
+     :tau 1,
+     :present #{:judgement},
+     :absent #{}},
+    :carrier
+    {:universe #{:judgement},
+     :states [#{} #{:judgement}],
+     :representation :support-plus-transition-closure},
+    :policy :conditioned-posterior,
+    :status :value,
+    :predecessor
+    {:scope :isolated-test, :source :exact-adapter-fixture},
+    :calculation
+    {:predicted-state {#{} 1/2, #{:judgement} 1/2},
+     :schema :wm/exact-belief-update-v1,
+     :likelihoods {#{} 1/4, #{:judgement} 3/4},
+     :states [#{} #{:judgement}],
+     :prior {#{} 1},
+     :observation-probability 1/2,
+     :observation #{:judgement},
+     :observation-rows
+     {#{} {#{} 3/4, #{:judgement} 1/4},
+      #{:judgement} {#{:judgement} 3/4, #{} 1/4}},
+     :option :some,
+     :status :ok,
+     :posterior {#{} 1/4, #{:judgement} 3/4},
+     :transition-rows
+     {#{} {#{:judgement} 1/2, #{} 1/2},
+      #{:judgement} {#{:judgement} 1}},
+     :model
+     {:status :declared,
+      :parameter-basis :synthetic,
+      :z-semantics :per-step-redraw,
+      :components
+      [{:weight 1/2, :rates {:judgement {:false-neg 0, :false-pos 0}}}
+       {:weight 1/2,
+        :rates {:judgement {:false-neg 1/2, :false-pos 1/2}}}],
+      :calibration-authority :none}},
+    :consumed true,
+    :vacuity-license
+    {:status :not-licensed,
+     :reason :likelihood-varies-on-support,
+     :support #{#{} #{:judgement}}},
+    :posterior {#{} 1/4, #{:judgement} 3/4},
+    :tau 1,
+    :observation-authority
+    {:channel :judgement, :admission {:scope :isolated-test}},
+    :z-semantics :per-step-redraw,
+    :model
+    {:status :declared,
+     :parameter-basis :synthetic,
+     :z-semantics :per-step-redraw,
+     :components
+     [{:weight 1/2, :rates {:judgement {:false-neg 0, :false-pos 0}}}
+      {:weight 1/2,
+       :rates {:judgement {:false-neg 1/2, :false-pos 1/2}}}],
+     :calibration-authority :none}},
+   :conditioned
+   {:g 1.1780671879580982,
+    :certificate
+    {:node-evaluations
+     [{:status :evaluated,
+       :incoming-belief {#{} 1/4, #{:judgement} 3/4},
+       :states
+       [{:mass 1/4,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 1/4},
+         :selected-index nil}
+        {:mass 3/4,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 3/4},
+         :selected-index nil}],
+       :outgoing-belief {#{} 1/4, #{:judgement} 3/4},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 1}
+      {:status :evaluated,
+       :incoming-belief {#{} 1/4, #{:judgement} 3/4},
+       :states
+       [{:mass 1/4,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 1/4},
+         :selected-index nil}
+        {:mass 3/4,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 3/4},
+         :selected-index nil}],
+       :outgoing-belief {#{} 1/4, #{:judgement} 3/4},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 2}],
+     :universe-size 1,
+     :zeta-tempered? false,
+     :zeta 1,
+     :rates-all-zero false,
+     :c-form :constant-spec,
+     :steps
+     [{:tau 1,
+       :risk 0.026698449360240795,
+       :risk-status :computed,
+       :ambiguity 0.5623351446188083,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}
+      {:tau 2,
+       :risk 0.026698449360240795,
+       :risk-status :computed,
+       :ambiguity 0.5623351446188083,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}],
+     :horizon 2,
+     :zeta-status :declared-fixed-applied,
+     :total 1.1780671879580982,
+     :evaluation :factorized-nonzero-rates,
+     :consumed-g
+     {:A {:judgement {:false-neg 1/4, :false-pos 1/4}},
+      :C
+      {:form :step-indexed,
+       :schedule nil,
+       :steps
+       [{:tau 1,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}
+        {:tau 2,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}]},
+      :D {#{} 1/4, #{:judgement} 3/4},
+      :Q
+      {:initial-belief {#{} 1/4, #{:judgement} 3/4},
+       :steps
+       [{:tau 1, :belief {#{} 1/4, #{:judgement} 3/4}}
+        {:tau 2, :belief {#{} 1/4, #{:judgement} 3/4}}],
+       :conditioning-input
+       {:continuation-belief {#{} 1/4, #{:judgement} 3/4},
+        :schema :wm/token-belief-update-v1,
+        :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+        :occurrence-id "Q-fixture",
+        :pre-belief {#{} 1},
+        :observation-probability 1/2,
+        :observation
+        {:status :observed,
+         :occurrence-id "Q-fixture",
+         :tau 1,
+         :present #{:judgement},
+         :absent #{}},
+        :carrier
+        {:universe #{:judgement},
+         :states [#{} #{:judgement}],
+         :representation :support-plus-transition-closure},
+        :policy :conditioned-posterior,
+        :status :value,
+        :predecessor
+        {:scope :isolated-test, :source :exact-adapter-fixture},
+        :calculation
+        {:predicted-state {#{} 1/2, #{:judgement} 1/2},
+         :schema :wm/exact-belief-update-v1,
+         :likelihoods {#{} 1/4, #{:judgement} 3/4},
+         :states [#{} #{:judgement}],
+         :prior {#{} 1},
+         :observation-probability 1/2,
+         :observation #{:judgement},
+         :observation-rows
+         {#{} {#{} 3/4, #{:judgement} 1/4},
+          #{:judgement} {#{:judgement} 3/4, #{} 1/4}},
+         :option :some,
+         :status :ok,
+         :posterior {#{} 1/4, #{:judgement} 3/4},
+         :transition-rows
+         {#{} {#{:judgement} 1/2, #{} 1/2},
+          #{:judgement} {#{:judgement} 1}},
+         :model
+         {:status :declared,
+          :parameter-basis :synthetic,
+          :z-semantics :per-step-redraw,
+          :components
+          [{:weight 1/2,
+            :rates {:judgement {:false-neg 0, :false-pos 0}}}
+           {:weight 1/2,
+            :rates {:judgement {:false-neg 1/2, :false-pos 1/2}}}],
+          :calibration-authority :none}},
+        :consumed true,
+        :vacuity-license
+        {:status :not-licensed,
+         :reason :likelihood-varies-on-support,
+         :support #{#{} #{:judgement}}},
+        :posterior {#{} 1/4, #{:judgement} 3/4},
+        :tau 1,
+        :observation-authority
+        {:channel :judgement, :admission {:scope :isolated-test}},
+        :z-semantics :per-step-redraw,
+        :model
+        {:status :declared,
+         :parameter-basis :synthetic,
+         :z-semantics :per-step-redraw,
+         :components
+         [{:weight 1/2,
+           :rates {:judgement {:false-neg 0, :false-pos 0}}}
+          {:weight 1/2,
+           :rates {:judgement {:false-neg 1/2, :false-pos 1/2}}}],
+         :calibration-authority :none}},
+       :observation-updates
+       [{:receipt
+         {:continuation-belief {#{} 1/4, #{:judgement} 3/4},
+          :schema :wm/token-belief-update-v1,
+          :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+          :occurrence-id "Q-fixture",
+          :pre-belief {#{} 1},
+          :observation-probability 1/2,
+          :observation
+          {:status :observed,
+           :occurrence-id "Q-fixture",
+           :tau 1,
+           :present #{:judgement},
+           :absent #{}},
+          :carrier
+          {:universe #{:judgement},
+           :states [#{} #{:judgement}],
+           :representation :support-plus-transition-closure},
+          :policy :conditioned-posterior,
+          :status :value,
+          :predecessor
+          {:scope :isolated-test, :source :exact-adapter-fixture},
+          :calculation
+          {:predicted-state {#{} 1/2, #{:judgement} 1/2},
+           :schema :wm/exact-belief-update-v1,
+           :likelihoods {#{} 1/4, #{:judgement} 3/4},
+           :states [#{} #{:judgement}],
+           :prior {#{} 1},
+           :observation-probability 1/2,
+           :observation #{:judgement},
+           :observation-rows
+           {#{} {#{} 3/4, #{:judgement} 1/4},
+            #{:judgement} {#{:judgement} 3/4, #{} 1/4}},
+           :option :some,
+           :status :ok,
+           :posterior {#{} 1/4, #{:judgement} 3/4},
+           :transition-rows
+           {#{} {#{:judgement} 1/2, #{} 1/2},
+            #{:judgement} {#{:judgement} 1}},
+           :model
+           {:status :declared,
+            :parameter-basis :synthetic,
+            :z-semantics :per-step-redraw,
+            :components
+            [{:weight 1/2,
+              :rates {:judgement {:false-neg 0, :false-pos 0}}}
+             {:weight 1/2,
+              :rates {:judgement {:false-neg 1/2, :false-pos 1/2}}}],
+            :calibration-authority :none}},
+          :consumed true,
+          :vacuity-license
+          {:status :not-licensed,
+           :reason :likelihood-varies-on-support,
+           :support #{#{} #{:judgement}}},
+          :posterior {#{} 1/4, #{:judgement} 3/4},
+          :tau 1,
+          :observation-authority
+          {:channel :judgement, :admission {:scope :isolated-test}},
+          :z-semantics :per-step-redraw,
+          :model
+          {:status :declared,
+           :parameter-basis :synthetic,
+           :z-semantics :per-step-redraw,
+           :components
+           [{:weight 1/2,
+             :rates {:judgement {:false-neg 0, :false-pos 0}}}
+            {:weight 1/2,
+             :rates {:judgement {:false-neg 1/2, :false-pos 1/2}}}],
+           :calibration-authority :none}},
+         :post-belief {#{} 1/4, #{:judgement} 3/4},
+         :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+         :pre-belief {#{} 1},
+         :observation
+         {:status :observed,
+          :occurrence-id "Q-fixture",
+          :tau 1,
+          :present #{:judgement},
+          :absent #{}},
+         :channel :judgement,
+         :vacuous false,
+         :policy :conditioned-posterior,
+         :status :value,
+         :consumed true,
+         :vacuity-license
+         {:status :not-licensed,
+          :reason :likelihood-varies-on-support,
+          :support #{#{} #{:judgement}}},
+         :tau 0,
+         :z-semantics :per-step-redraw}],
+       :z-semantics :per-step-redraw,
+       :trajectory-scope :filtering-entry-predictive-future,
+       :conformance
+       {:received-update :producer-receipt-not-recomputed,
+        :model-reference
+        "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+        :future :varying-precedence-predictive-extension,
+        :refusal-continuation
+        :runner-policy-not-conditionedTrajectory}}},
+     :rates {:judgement {:false-neg 1/4, :false-pos 1/4}}}},
+   :open-loop
+   {:g 1.3648993031541716,
+    :certificate
+    {:node-evaluations
+     [{:status :evaluated,
+       :incoming-belief {#{} 1/2, #{:judgement} 1/2},
+       :states
+       [{:mass 1/2,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 1/2},
+         :selected-index nil}
+        {:mass 1/2,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 1/2},
+         :selected-index nil}],
+       :outgoing-belief {#{} 1/2, #{:judgement} 1/2},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 1}
+      {:status :evaluated,
+       :incoming-belief {#{} 1/2, #{:judgement} 1/2},
+       :states
+       [{:mass 1/2,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 1/2},
+         :selected-index nil}
+        {:mass 1/2,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 1/2},
+         :selected-index nil}],
+       :outgoing-belief {#{} 1/2, #{:judgement} 1/2},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 2}],
+     :universe-size 1,
+     :zeta-tempered? false,
+     :zeta 1,
+     :rates-all-zero false,
+     :c-form :constant-spec,
+     :steps
+     [{:tau 1,
+       :risk 0.12011450695827755,
+       :risk-status :computed,
+       :ambiguity 0.5623351446188083,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}
+      {:tau 2,
+       :risk 0.12011450695827755,
+       :risk-status :computed,
+       :ambiguity 0.5623351446188083,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}],
+     :horizon 2,
+     :zeta-status :declared-fixed-applied,
+     :total 1.3648993031541716,
+     :evaluation :factorized-nonzero-rates,
+     :consumed-g
+     {:A {:judgement {:false-neg 1/4, :false-pos 1/4}},
+      :C
+      {:form :step-indexed,
+       :schedule nil,
+       :steps
+       [{:tau 1,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}
+        {:tau 2,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}]},
+      :D {#{} 1/2, #{:judgement} 1/2},
+      :Q
+      {:initial-belief {#{} 1/2, #{:judgement} 1/2},
+       :steps
+       [{:tau 1, :belief {#{} 1/2, #{:judgement} 1/2}}
+        {:tau 2, :belief {#{} 1/2, #{:judgement} 1/2}}],
+       :conditioning-input
+       {:status :not-supplied, :kind :belief-update-not-supplied},
+       :observation-updates [],
+       :z-semantics :per-step-redraw,
+       :trajectory-scope :filtering-entry-predictive-future,
+       :conformance
+       {:received-update :producer-receipt-not-recomputed,
+        :model-reference
+        "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+        :future :varying-precedence-predictive-extension,
+        :refusal-continuation
+        :runner-policy-not-conditionedTrajectory}}},
+     :rates {:judgement {:false-neg 1/4, :false-pos 1/4}}}}},
+  :asymmetric
+  {:receipt
+   {:continuation-belief {#{} 2/9, #{:judgement} 7/9},
+    :schema :wm/token-belief-update-v1,
+    :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+    :occurrence-id "Q-fixture",
+    :pre-belief {#{} 1},
+    :observation-probability 9/16,
+    :observation
+    {:status :observed,
+     :occurrence-id "Q-fixture",
+     :tau 1,
+     :present #{:judgement},
+     :absent #{}},
+    :carrier
+    {:universe #{:judgement},
+     :states [#{} #{:judgement}],
+     :representation :support-plus-transition-closure},
+    :policy :conditioned-posterior,
+    :status :value,
+    :predecessor
+    {:scope :isolated-test, :source :exact-adapter-fixture},
+    :calculation
+    {:predicted-state {#{} 1/2, #{:judgement} 1/2},
+     :schema :wm/exact-belief-update-v1,
+     :likelihoods {#{} 1/4, #{:judgement} 7/8},
+     :states [#{} #{:judgement}],
+     :prior {#{} 1},
+     :observation-probability 9/16,
+     :observation #{:judgement},
+     :observation-rows
+     {#{} {#{} 3/4, #{:judgement} 1/4},
+      #{:judgement} {#{:judgement} 7/8, #{} 1/8}},
+     :option :some,
+     :status :ok,
+     :posterior {#{} 2/9, #{:judgement} 7/9},
+     :transition-rows
+     {#{} {#{:judgement} 1/2, #{} 1/2},
+      #{:judgement} {#{:judgement} 1}},
+     :model
+     {:status :declared,
+      :parameter-basis :synthetic,
+      :z-semantics :per-step-redraw,
+      :components
+      [{:weight 1/2, :rates {:judgement {:false-neg 0, :false-pos 0}}}
+       {:weight 1/2,
+        :rates {:judgement {:false-neg 1/4, :false-pos 1/2}}}],
+      :calibration-authority :none}},
+    :consumed true,
+    :vacuity-license
+    {:status :not-licensed,
+     :reason :likelihood-varies-on-support,
+     :support #{#{} #{:judgement}}},
+    :posterior {#{} 2/9, #{:judgement} 7/9},
+    :tau 1,
+    :observation-authority
+    {:channel :judgement, :admission {:scope :isolated-test}},
+    :z-semantics :per-step-redraw,
+    :model
+    {:status :declared,
+     :parameter-basis :synthetic,
+     :z-semantics :per-step-redraw,
+     :components
+     [{:weight 1/2, :rates {:judgement {:false-neg 0, :false-pos 0}}}
+      {:weight 1/2,
+       :rates {:judgement {:false-neg 1/4, :false-pos 1/2}}}],
+     :calibration-authority :none}},
+   :conditioned
+   {:g 0.8361440083011745,
+    :certificate
+    {:node-evaluations
+     [{:status :evaluated,
+       :incoming-belief {#{} 2/9, #{:judgement} 7/9},
+       :states
+       [{:mass 2/9,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 2/9},
+         :selected-index nil}
+        {:mass 7/9,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 7/9},
+         :selected-index nil}],
+       :outgoing-belief {#{} 2/9, #{:judgement} 7/9},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 1}
+      {:status :evaluated,
+       :incoming-belief {#{} 2/9, #{:judgement} 7/9},
+       :states
+       [{:mass 2/9,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 2/9},
+         :selected-index nil}
+        {:mass 7/9,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 7/9},
+         :selected-index nil}],
+       :outgoing-belief {#{} 2/9, #{:judgement} 7/9},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 2}],
+     :universe-size 1,
+     :zeta-tempered? false,
+     :zeta 1,
+     :rates-all-zero false,
+     :c-form :constant-spec,
+     :steps
+     [{:tau 1,
+       :risk 6.517992473456958E-5,
+       :risk-status :computed,
+       :ambiguity 0.41800682422585267,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}
+      {:tau 2,
+       :risk 6.517992473456958E-5,
+       :risk-status :computed,
+       :ambiguity 0.41800682422585267,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}],
+     :horizon 2,
+     :zeta-status :declared-fixed-applied,
+     :total 0.8361440083011745,
+     :evaluation :factorized-nonzero-rates,
+     :consumed-g
+     {:A {:judgement {:false-neg 1/8, :false-pos 1/4}},
+      :C
+      {:form :step-indexed,
+       :schedule nil,
+       :steps
+       [{:tau 1,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}
+        {:tau 2,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}]},
+      :D {#{} 2/9, #{:judgement} 7/9},
+      :Q
+      {:initial-belief {#{} 2/9, #{:judgement} 7/9},
+       :steps
+       [{:tau 1, :belief {#{} 2/9, #{:judgement} 7/9}}
+        {:tau 2, :belief {#{} 2/9, #{:judgement} 7/9}}],
+       :conditioning-input
+       {:continuation-belief {#{} 2/9, #{:judgement} 7/9},
+        :schema :wm/token-belief-update-v1,
+        :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+        :occurrence-id "Q-fixture",
+        :pre-belief {#{} 1},
+        :observation-probability 9/16,
+        :observation
+        {:status :observed,
+         :occurrence-id "Q-fixture",
+         :tau 1,
+         :present #{:judgement},
+         :absent #{}},
+        :carrier
+        {:universe #{:judgement},
+         :states [#{} #{:judgement}],
+         :representation :support-plus-transition-closure},
+        :policy :conditioned-posterior,
+        :status :value,
+        :predecessor
+        {:scope :isolated-test, :source :exact-adapter-fixture},
+        :calculation
+        {:predicted-state {#{} 1/2, #{:judgement} 1/2},
+         :schema :wm/exact-belief-update-v1,
+         :likelihoods {#{} 1/4, #{:judgement} 7/8},
+         :states [#{} #{:judgement}],
+         :prior {#{} 1},
+         :observation-probability 9/16,
+         :observation #{:judgement},
+         :observation-rows
+         {#{} {#{} 3/4, #{:judgement} 1/4},
+          #{:judgement} {#{:judgement} 7/8, #{} 1/8}},
+         :option :some,
+         :status :ok,
+         :posterior {#{} 2/9, #{:judgement} 7/9},
+         :transition-rows
+         {#{} {#{:judgement} 1/2, #{} 1/2},
+          #{:judgement} {#{:judgement} 1}},
+         :model
+         {:status :declared,
+          :parameter-basis :synthetic,
+          :z-semantics :per-step-redraw,
+          :components
+          [{:weight 1/2,
+            :rates {:judgement {:false-neg 0, :false-pos 0}}}
+           {:weight 1/2,
+            :rates {:judgement {:false-neg 1/4, :false-pos 1/2}}}],
+          :calibration-authority :none}},
+        :consumed true,
+        :vacuity-license
+        {:status :not-licensed,
+         :reason :likelihood-varies-on-support,
+         :support #{#{} #{:judgement}}},
+        :posterior {#{} 2/9, #{:judgement} 7/9},
+        :tau 1,
+        :observation-authority
+        {:channel :judgement, :admission {:scope :isolated-test}},
+        :z-semantics :per-step-redraw,
+        :model
+        {:status :declared,
+         :parameter-basis :synthetic,
+         :z-semantics :per-step-redraw,
+         :components
+         [{:weight 1/2,
+           :rates {:judgement {:false-neg 0, :false-pos 0}}}
+          {:weight 1/2,
+           :rates {:judgement {:false-neg 1/4, :false-pos 1/2}}}],
+         :calibration-authority :none}},
+       :observation-updates
+       [{:receipt
+         {:continuation-belief {#{} 2/9, #{:judgement} 7/9},
+          :schema :wm/token-belief-update-v1,
+          :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+          :occurrence-id "Q-fixture",
+          :pre-belief {#{} 1},
+          :observation-probability 9/16,
+          :observation
+          {:status :observed,
+           :occurrence-id "Q-fixture",
+           :tau 1,
+           :present #{:judgement},
+           :absent #{}},
+          :carrier
+          {:universe #{:judgement},
+           :states [#{} #{:judgement}],
+           :representation :support-plus-transition-closure},
+          :policy :conditioned-posterior,
+          :status :value,
+          :predecessor
+          {:scope :isolated-test, :source :exact-adapter-fixture},
+          :calculation
+          {:predicted-state {#{} 1/2, #{:judgement} 1/2},
+           :schema :wm/exact-belief-update-v1,
+           :likelihoods {#{} 1/4, #{:judgement} 7/8},
+           :states [#{} #{:judgement}],
+           :prior {#{} 1},
+           :observation-probability 9/16,
+           :observation #{:judgement},
+           :observation-rows
+           {#{} {#{} 3/4, #{:judgement} 1/4},
+            #{:judgement} {#{:judgement} 7/8, #{} 1/8}},
+           :option :some,
+           :status :ok,
+           :posterior {#{} 2/9, #{:judgement} 7/9},
+           :transition-rows
+           {#{} {#{:judgement} 1/2, #{} 1/2},
+            #{:judgement} {#{:judgement} 1}},
+           :model
+           {:status :declared,
+            :parameter-basis :synthetic,
+            :z-semantics :per-step-redraw,
+            :components
+            [{:weight 1/2,
+              :rates {:judgement {:false-neg 0, :false-pos 0}}}
+             {:weight 1/2,
+              :rates {:judgement {:false-neg 1/4, :false-pos 1/2}}}],
+            :calibration-authority :none}},
+          :consumed true,
+          :vacuity-license
+          {:status :not-licensed,
+           :reason :likelihood-varies-on-support,
+           :support #{#{} #{:judgement}}},
+          :posterior {#{} 2/9, #{:judgement} 7/9},
+          :tau 1,
+          :observation-authority
+          {:channel :judgement, :admission {:scope :isolated-test}},
+          :z-semantics :per-step-redraw,
+          :model
+          {:status :declared,
+           :parameter-basis :synthetic,
+           :z-semantics :per-step-redraw,
+           :components
+           [{:weight 1/2,
+             :rates {:judgement {:false-neg 0, :false-pos 0}}}
+            {:weight 1/2,
+             :rates {:judgement {:false-neg 1/4, :false-pos 1/2}}}],
+           :calibration-authority :none}},
+         :post-belief {#{} 2/9, #{:judgement} 7/9},
+         :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+         :pre-belief {#{} 1},
+         :observation
+         {:status :observed,
+          :occurrence-id "Q-fixture",
+          :tau 1,
+          :present #{:judgement},
+          :absent #{}},
+         :channel :judgement,
+         :vacuous false,
+         :policy :conditioned-posterior,
+         :status :value,
+         :consumed true,
+         :vacuity-license
+         {:status :not-licensed,
+          :reason :likelihood-varies-on-support,
+          :support #{#{} #{:judgement}}},
+         :tau 0,
+         :z-semantics :per-step-redraw}],
+       :z-semantics :per-step-redraw,
+       :trajectory-scope :filtering-entry-predictive-future,
+       :conformance
+       {:received-update :producer-receipt-not-recomputed,
+        :model-reference
+        "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+        :future :varying-precedence-predictive-extension,
+        :refusal-continuation
+        :runner-policy-not-conditionedTrajectory}}},
+     :rates {:judgement {:false-neg 1/8, :false-pos 1/4}}}},
+   :open-loop
+   {:g 1.0700002663587742,
+    :certificate
+    {:node-evaluations
+     [{:status :evaluated,
+       :incoming-belief {#{} 1/2, #{:judgement} 1/2},
+       :states
+       [{:mass 1/2,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 1/2},
+         :selected-index nil}
+        {:mass 1/2,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 1/2},
+         :selected-index nil}],
+       :outgoing-belief {#{} 1/2, #{:judgement} 1/2},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 1}
+      {:status :evaluated,
+       :incoming-belief {#{} 1/2, #{:judgement} 1/2},
+       :states
+       [{:mass 1/2,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 1/2},
+         :selected-index nil}
+        {:mass 1/2,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 1/2},
+         :selected-index nil}],
+       :outgoing-belief {#{} 1/2, #{:judgement} 1/2},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 2}],
+     :universe-size 1,
+     :zeta-tempered? false,
+     :zeta 1,
+     :rates-all-zero false,
+     :c-form :constant-spec,
+     :steps
+     [{:tau 1,
+       :risk 0.06544748024176461,
+       :risk-status :computed,
+       :ambiguity 0.4695526529376225,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}
+      {:tau 2,
+       :risk 0.06544748024176461,
+       :risk-status :computed,
+       :ambiguity 0.4695526529376225,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}],
+     :horizon 2,
+     :zeta-status :declared-fixed-applied,
+     :total 1.0700002663587742,
+     :evaluation :factorized-nonzero-rates,
+     :consumed-g
+     {:A {:judgement {:false-neg 1/8, :false-pos 1/4}},
+      :C
+      {:form :step-indexed,
+       :schedule nil,
+       :steps
+       [{:tau 1,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}
+        {:tau 2,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}]},
+      :D {#{} 1/2, #{:judgement} 1/2},
+      :Q
+      {:initial-belief {#{} 1/2, #{:judgement} 1/2},
+       :steps
+       [{:tau 1, :belief {#{} 1/2, #{:judgement} 1/2}}
+        {:tau 2, :belief {#{} 1/2, #{:judgement} 1/2}}],
+       :conditioning-input
+       {:status :not-supplied, :kind :belief-update-not-supplied},
+       :observation-updates [],
+       :z-semantics :per-step-redraw,
+       :trajectory-scope :filtering-entry-predictive-future,
+       :conformance
+       {:received-update :producer-receipt-not-recomputed,
+        :model-reference
+        "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+        :future :varying-precedence-predictive-extension,
+        :refusal-continuation
+        :runner-policy-not-conditionedTrajectory}}},
+     :rates {:judgement {:false-neg 1/8, :false-pos 1/4}}}}},
+  :refused
+  {:g 0.6265233750364456,
+   :certificate
+   {:node-evaluations
+    [{:status :evaluated,
+      :incoming-belief {#{:judgement} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{:judgement},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{:judgement} 1},
+        :mass-contribution {#{:judgement} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{:judgement} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 1}
+     {:status :evaluated,
+      :incoming-belief {#{:judgement} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{:judgement},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{:judgement} 1},
+        :mass-contribution {#{:judgement} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{:judgement} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 2}],
+    :universe-size 1,
+    :zeta-tempered? false,
+    :zeta 1,
+    :rates-all-zero true,
+    :c-form :constant-spec,
+    :steps
+    [{:tau 1,
+      :risk 0.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}
+     {:tau 2,
+      :risk 0.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}],
+    :horizon 2,
+    :zeta-status :declared-fixed-vacuous,
+    :total 0.6265233750364456,
+    :evaluation :identity-A-zero-rates,
+    :consumed-g
+    {:A {:judgement {:false-neg 0, :false-pos 0}},
+     :C
+     {:form :step-indexed,
+      :schedule nil,
+      :steps
+      [{:tau 1,
+        :distribution
+        {:universe #{:judgement},
+         :zeroed #{},
+         :weights {:judgement 1}}}
+       {:tau 2,
+        :distribution
+        {:universe #{:judgement},
+         :zeroed #{},
+         :weights {:judgement 1}}}]},
+     :D {#{:judgement} 1},
+     :Q
+     {:initial-belief {#{:judgement} 1},
+      :steps
+      [{:tau 1, :belief {#{:judgement} 1}}
+       {:tau 2, :belief {#{:judgement} 1}}],
+      :conditioning-input
+      {:continuation-belief {#{:judgement} 1},
+       :schema :wm/token-belief-update-v1,
+       :predicted-belief {#{:judgement} 1},
+       :occurrence-id "Q-fixture",
+       :pre-belief {#{} 1},
+       :observation-probability 0,
+       :observation
+       {:status :observed,
+        :occurrence-id "Q-fixture",
+        :tau 1,
+        :present #{},
+        :absent #{:judgement}},
+       :carrier
+       {:universe #{:judgement},
+        :states [#{} #{:judgement}],
+        :representation :support-plus-transition-closure},
+       :policy :refused-observation-discarded,
+       :status :refused,
+       :predecessor
+       {:scope :isolated-test, :source :exact-adapter-fixture},
+       :kind :belief-update-refused,
+       :consumed false,
+       :refused-trajectory
+       {:predicted-state {#{} 0, #{:judgement} 1},
+        :schema :wm/exact-belief-update-v1,
+        :likelihoods {#{} 1, #{:judgement} 0},
+        :states [#{} #{:judgement}],
+        :prior {#{} 1},
+        :observation-probability 0,
+        :observation #{},
+        :observation-rows
+        {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+        :option :none,
+        :status :refused,
+        :kind :impossible-observation,
+        :transition-rows
+        {#{} {#{:judgement} 1}, #{:judgement} {#{:judgement} 1}},
+        :model
+        {:status :declared,
+         :parameter-basis :synthetic,
+         :z-semantics :per-step-redraw}},
+       :vacuity-license
+       {:status :not-applicable, :reason :impossible-observation},
+       :tau 1,
+       :observation-authority
+       {:channel :judgement, :admission {:scope :isolated-test}},
+       :z-semantics :per-step-redraw,
+       :model
+       {:status :declared,
+        :parameter-basis :synthetic,
+        :z-semantics :per-step-redraw}},
+      :observation-updates
+      [{:receipt
+        {:continuation-belief {#{:judgement} 1},
+         :schema :wm/token-belief-update-v1,
+         :predicted-belief {#{:judgement} 1},
+         :occurrence-id "Q-fixture",
+         :pre-belief {#{} 1},
+         :observation-probability 0,
+         :observation
+         {:status :observed,
+          :occurrence-id "Q-fixture",
+          :tau 1,
+          :present #{},
+          :absent #{:judgement}},
+         :carrier
+         {:universe #{:judgement},
+          :states [#{} #{:judgement}],
+          :representation :support-plus-transition-closure},
+         :policy :refused-observation-discarded,
+         :status :refused,
+         :predecessor
+         {:scope :isolated-test, :source :exact-adapter-fixture},
+         :kind :belief-update-refused,
+         :consumed false,
+         :refused-trajectory
+         {:predicted-state {#{} 0, #{:judgement} 1},
+          :schema :wm/exact-belief-update-v1,
+          :likelihoods {#{} 1, #{:judgement} 0},
+          :states [#{} #{:judgement}],
+          :prior {#{} 1},
+          :observation-probability 0,
+          :observation #{},
+          :observation-rows
+          {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+          :option :none,
+          :status :refused,
+          :kind :impossible-observation,
+          :transition-rows
+          {#{} {#{:judgement} 1}, #{:judgement} {#{:judgement} 1}},
+          :model
+          {:status :declared,
+           :parameter-basis :synthetic,
+           :z-semantics :per-step-redraw}},
+         :vacuity-license
+         {:status :not-applicable, :reason :impossible-observation},
+         :tau 1,
+         :observation-authority
+         {:channel :judgement, :admission {:scope :isolated-test}},
+         :z-semantics :per-step-redraw,
+         :model
+         {:status :declared,
+          :parameter-basis :synthetic,
+          :z-semantics :per-step-redraw}},
+        :post-belief {#{:judgement} 1},
+        :predicted-belief {#{:judgement} 1},
+        :pre-belief {#{} 1},
+        :observation
+        {:status :observed,
+         :occurrence-id "Q-fixture",
+         :tau 1,
+         :present #{},
+         :absent #{:judgement}},
+        :channel :judgement,
+        :policy :refused-observation-discarded,
+        :status :refused,
+        :consumed false,
+        :vacuity-license
+        {:status :not-applicable, :reason :impossible-observation},
+        :tau 0,
+        :z-semantics :per-step-redraw}],
+      :z-semantics :per-step-redraw,
+      :trajectory-scope :filtering-entry-predictive-future,
+      :conformance
+      {:received-update :producer-receipt-not-recomputed,
+       :model-reference
+       "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+       :future :varying-precedence-predictive-extension,
+       :refusal-continuation
+       :runner-policy-not-conditionedTrajectory}}},
+    :rates {:judgement {:false-neg 0, :false-pos 0}}}},
+  :threading
+  {:first
+   {:continuation-belief {#{} 1/4, #{:judgement} 3/4},
+    :schema :wm/token-belief-update-v1,
+    :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+    :occurrence-id "Q-fixture",
+    :pre-belief {#{} 1/2, #{:judgement} 1/2},
+    :observation-probability 1/2,
+    :observation
+    {:status :observed,
+     :occurrence-id "Q-fixture",
+     :tau 1,
+     :present #{:judgement},
+     :absent #{}},
+    :carrier
+    {:universe #{:judgement},
+     :states [#{} #{:judgement}],
+     :representation :support-plus-transition-closure},
+    :policy :conditioned-posterior,
+    :status :value,
+    :predecessor
+    {:scope :isolated-test, :source :exact-adapter-fixture},
+    :calculation
+    {:predicted-state {#{} 1/2, #{:judgement} 1/2},
+     :schema :wm/exact-belief-update-v1,
+     :likelihoods {#{} 1/4, #{:judgement} 3/4},
+     :states [#{} #{:judgement}],
+     :prior {#{} 1/2, #{:judgement} 1/2},
+     :observation-probability 1/2,
+     :observation #{:judgement},
+     :observation-rows
+     {#{} {#{} 3/4, #{:judgement} 1/4},
+      #{:judgement} {#{} 1/4, #{:judgement} 3/4}},
+     :option :some,
+     :status :ok,
+     :posterior {#{} 1/4, #{:judgement} 3/4},
+     :transition-rows {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+     :model
+     {:status :declared,
+      :parameter-basis :synthetic,
+      :z-semantics :per-step-redraw}},
+    :consumed true,
+    :vacuity-license
+    {:status :not-licensed,
+     :reason :likelihood-varies-on-support,
+     :support #{#{} #{:judgement}}},
+    :posterior {#{} 1/4, #{:judgement} 3/4},
+    :tau 1,
+    :observation-authority
+    {:channel :judgement, :admission {:scope :isolated-test}},
+    :z-semantics :per-step-redraw,
+    :model
+    {:status :declared,
+     :parameter-basis :synthetic,
+     :z-semantics :per-step-redraw}},
+   :second
+   {:continuation-belief {#{} 1/10, #{:judgement} 9/10},
+    :schema :wm/token-belief-update-v1,
+    :predicted-belief {#{} 1/4, #{:judgement} 3/4},
+    :occurrence-id "Q-fixture",
+    :pre-belief {#{} 1/4, #{:judgement} 3/4},
+    :observation-probability 5/8,
+    :observation
+    {:status :observed,
+     :occurrence-id "Q-fixture",
+     :tau 2,
+     :present #{:judgement},
+     :absent #{}},
+    :carrier
+    {:universe #{:judgement},
+     :states [#{} #{:judgement}],
+     :representation :support-plus-transition-closure},
+    :policy :conditioned-posterior,
+    :status :value,
+    :predecessor
+    {:scope :isolated-test, :source :exact-adapter-fixture},
+    :calculation
+    {:predicted-state {#{} 1/4, #{:judgement} 3/4},
+     :schema :wm/exact-belief-update-v1,
+     :likelihoods {#{} 1/4, #{:judgement} 3/4},
+     :states [#{} #{:judgement}],
+     :prior {#{} 1/4, #{:judgement} 3/4},
+     :observation-probability 5/8,
+     :observation #{:judgement},
+     :observation-rows
+     {#{} {#{} 3/4, #{:judgement} 1/4},
+      #{:judgement} {#{} 1/4, #{:judgement} 3/4}},
+     :option :some,
+     :status :ok,
+     :posterior {#{} 1/10, #{:judgement} 9/10},
+     :transition-rows {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+     :model
+     {:status :declared,
+      :parameter-basis :synthetic,
+      :z-semantics :per-step-redraw}},
+    :consumed true,
+    :vacuity-license
+    {:status :not-licensed,
+     :reason :likelihood-varies-on-support,
+     :support #{#{} #{:judgement}}},
+    :posterior {#{} 1/10, #{:judgement} 9/10},
+    :tau 2,
+    :observation-authority
+    {:channel :judgement, :admission {:scope :isolated-test}},
+    :z-semantics :per-step-redraw,
+    :model
+    {:status :declared,
+     :parameter-basis :synthetic,
+     :z-semantics :per-step-redraw}},
+   :first-scored
+   {:g 1.1780671879580982,
+    :certificate
+    {:node-evaluations
+     [{:status :evaluated,
+       :incoming-belief {#{} 1/4, #{:judgement} 3/4},
+       :states
+       [{:mass 1/4,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 1/4},
+         :selected-index nil}
+        {:mass 3/4,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 3/4},
+         :selected-index nil}],
+       :outgoing-belief {#{} 1/4, #{:judgement} 3/4},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 1}
+      {:status :evaluated,
+       :incoming-belief {#{} 1/4, #{:judgement} 3/4},
+       :states
+       [{:mass 1/4,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 1/4},
+         :selected-index nil}
+        {:mass 3/4,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 3/4},
+         :selected-index nil}],
+       :outgoing-belief {#{} 1/4, #{:judgement} 3/4},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 2}],
+     :universe-size 1,
+     :zeta-tempered? false,
+     :zeta 1,
+     :rates-all-zero false,
+     :c-form :constant-spec,
+     :steps
+     [{:tau 1,
+       :risk 0.026698449360240795,
+       :risk-status :computed,
+       :ambiguity 0.5623351446188083,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}
+      {:tau 2,
+       :risk 0.026698449360240795,
+       :risk-status :computed,
+       :ambiguity 0.5623351446188083,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}],
+     :horizon 2,
+     :zeta-status :declared-fixed-applied,
+     :total 1.1780671879580982,
+     :evaluation :factorized-nonzero-rates,
+     :consumed-g
+     {:A {:judgement {:false-neg 1/4, :false-pos 1/4}},
+      :C
+      {:form :step-indexed,
+       :schedule nil,
+       :steps
+       [{:tau 1,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}
+        {:tau 2,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}]},
+      :D {#{} 1/4, #{:judgement} 3/4},
+      :Q
+      {:initial-belief {#{} 1/4, #{:judgement} 3/4},
+       :steps
+       [{:tau 1, :belief {#{} 1/4, #{:judgement} 3/4}}
+        {:tau 2, :belief {#{} 1/4, #{:judgement} 3/4}}],
+       :conditioning-input
+       {:continuation-belief {#{} 1/4, #{:judgement} 3/4},
+        :schema :wm/token-belief-update-v1,
+        :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+        :occurrence-id "Q-fixture",
+        :pre-belief {#{} 1/2, #{:judgement} 1/2},
+        :observation-probability 1/2,
+        :observation
+        {:status :observed,
+         :occurrence-id "Q-fixture",
+         :tau 1,
+         :present #{:judgement},
+         :absent #{}},
+        :carrier
+        {:universe #{:judgement},
+         :states [#{} #{:judgement}],
+         :representation :support-plus-transition-closure},
+        :policy :conditioned-posterior,
+        :status :value,
+        :predecessor
+        {:scope :isolated-test, :source :exact-adapter-fixture},
+        :calculation
+        {:predicted-state {#{} 1/2, #{:judgement} 1/2},
+         :schema :wm/exact-belief-update-v1,
+         :likelihoods {#{} 1/4, #{:judgement} 3/4},
+         :states [#{} #{:judgement}],
+         :prior {#{} 1/2, #{:judgement} 1/2},
+         :observation-probability 1/2,
+         :observation #{:judgement},
+         :observation-rows
+         {#{} {#{} 3/4, #{:judgement} 1/4},
+          #{:judgement} {#{} 1/4, #{:judgement} 3/4}},
+         :option :some,
+         :status :ok,
+         :posterior {#{} 1/4, #{:judgement} 3/4},
+         :transition-rows
+         {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+         :model
+         {:status :declared,
+          :parameter-basis :synthetic,
+          :z-semantics :per-step-redraw}},
+        :consumed true,
+        :vacuity-license
+        {:status :not-licensed,
+         :reason :likelihood-varies-on-support,
+         :support #{#{} #{:judgement}}},
+        :posterior {#{} 1/4, #{:judgement} 3/4},
+        :tau 1,
+        :observation-authority
+        {:channel :judgement, :admission {:scope :isolated-test}},
+        :z-semantics :per-step-redraw,
+        :model
+        {:status :declared,
+         :parameter-basis :synthetic,
+         :z-semantics :per-step-redraw}},
+       :observation-updates
+       [{:receipt
+         {:continuation-belief {#{} 1/4, #{:judgement} 3/4},
+          :schema :wm/token-belief-update-v1,
+          :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+          :occurrence-id "Q-fixture",
+          :pre-belief {#{} 1/2, #{:judgement} 1/2},
+          :observation-probability 1/2,
+          :observation
+          {:status :observed,
+           :occurrence-id "Q-fixture",
+           :tau 1,
+           :present #{:judgement},
+           :absent #{}},
+          :carrier
+          {:universe #{:judgement},
+           :states [#{} #{:judgement}],
+           :representation :support-plus-transition-closure},
+          :policy :conditioned-posterior,
+          :status :value,
+          :predecessor
+          {:scope :isolated-test, :source :exact-adapter-fixture},
+          :calculation
+          {:predicted-state {#{} 1/2, #{:judgement} 1/2},
+           :schema :wm/exact-belief-update-v1,
+           :likelihoods {#{} 1/4, #{:judgement} 3/4},
+           :states [#{} #{:judgement}],
+           :prior {#{} 1/2, #{:judgement} 1/2},
+           :observation-probability 1/2,
+           :observation #{:judgement},
+           :observation-rows
+           {#{} {#{} 3/4, #{:judgement} 1/4},
+            #{:judgement} {#{} 1/4, #{:judgement} 3/4}},
+           :option :some,
+           :status :ok,
+           :posterior {#{} 1/4, #{:judgement} 3/4},
+           :transition-rows
+           {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+           :model
+           {:status :declared,
+            :parameter-basis :synthetic,
+            :z-semantics :per-step-redraw}},
+          :consumed true,
+          :vacuity-license
+          {:status :not-licensed,
+           :reason :likelihood-varies-on-support,
+           :support #{#{} #{:judgement}}},
+          :posterior {#{} 1/4, #{:judgement} 3/4},
+          :tau 1,
+          :observation-authority
+          {:channel :judgement, :admission {:scope :isolated-test}},
+          :z-semantics :per-step-redraw,
+          :model
+          {:status :declared,
+           :parameter-basis :synthetic,
+           :z-semantics :per-step-redraw}},
+         :post-belief {#{} 1/4, #{:judgement} 3/4},
+         :predicted-belief {#{} 1/2, #{:judgement} 1/2},
+         :pre-belief {#{} 1/2, #{:judgement} 1/2},
+         :observation
+         {:status :observed,
+          :occurrence-id "Q-fixture",
+          :tau 1,
+          :present #{:judgement},
+          :absent #{}},
+         :channel :judgement,
+         :vacuous false,
+         :policy :conditioned-posterior,
+         :status :value,
+         :consumed true,
+         :vacuity-license
+         {:status :not-licensed,
+          :reason :likelihood-varies-on-support,
+          :support #{#{} #{:judgement}}},
+         :tau 0,
+         :z-semantics :per-step-redraw}],
+       :z-semantics :per-step-redraw,
+       :trajectory-scope :filtering-entry-predictive-future,
+       :conformance
+       {:received-update :producer-receipt-not-recomputed,
+        :model-reference
+        "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+        :future :varying-precedence-predictive-extension,
+        :refusal-continuation
+        :runner-policy-not-conditionedTrajectory}}},
+     :rates {:judgement {:false-neg 1/4, :false-pos 1/4}}}},
+   :second-scored
+   {:g 1.1294650601642755,
+    :certificate
+    {:node-evaluations
+     [{:status :evaluated,
+       :incoming-belief {#{} 1/10, #{:judgement} 9/10},
+       :states
+       [{:mass 1/10,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 1/10},
+         :selected-index nil}
+        {:mass 9/10,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 9/10},
+         :selected-index nil}],
+       :outgoing-belief {#{} 1/10, #{:judgement} 9/10},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 1}
+      {:status :evaluated,
+       :incoming-belief {#{} 1/10, #{:judgement} 9/10},
+       :states
+       [{:mass 1/10,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{} 1},
+         :mass-contribution {#{} 1/10},
+         :selected-index nil}
+        {:mass 9/10,
+         :guard-search [],
+         :pattern-id nil,
+         :state #{:judgement},
+         :kernel-kind :identity,
+         :status :evaluated,
+         :kernel {#{:judgement} 1},
+         :mass-contribution {#{:judgement} 9/10},
+         :selected-index nil}],
+       :outgoing-belief {#{} 1/10, #{:judgement} 9/10},
+       :model
+       {:schema :wm/cascade-evaluation-model-v1,
+        :semantics :first-enabled-union-theta-v1,
+        :precedence []},
+       :tau 2}],
+     :universe-size 1,
+     :zeta-tempered? false,
+     :zeta 1,
+     :rates-all-zero false,
+     :c-form :constant-spec,
+     :steps
+     [{:tau 1,
+       :risk 0.0023973854633294045,
+       :risk-status :computed,
+       :ambiguity 0.5623351446188083,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}
+      {:tau 2,
+       :risk 0.0023973854633294045,
+       :risk-status :computed,
+       :ambiguity 0.5623351446188083,
+       :ambiguity-status :computed,
+       :reduction "factorized-nonzero-rates"}],
+     :horizon 2,
+     :zeta-status :declared-fixed-applied,
+     :total 1.1294650601642755,
+     :evaluation :factorized-nonzero-rates,
+     :consumed-g
+     {:A {:judgement {:false-neg 1/4, :false-pos 1/4}},
+      :C
+      {:form :step-indexed,
+       :schedule nil,
+       :steps
+       [{:tau 1,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}
+        {:tau 2,
+         :distribution
+         {:universe #{:judgement},
+          :zeroed #{},
+          :weights {:judgement 1}}}]},
+      :D {#{} 1/10, #{:judgement} 9/10},
+      :Q
+      {:initial-belief {#{} 1/10, #{:judgement} 9/10},
+       :steps
+       [{:tau 1, :belief {#{} 1/10, #{:judgement} 9/10}}
+        {:tau 2, :belief {#{} 1/10, #{:judgement} 9/10}}],
+       :conditioning-input
+       {:continuation-belief {#{} 1/10, #{:judgement} 9/10},
+        :schema :wm/token-belief-update-v1,
+        :predicted-belief {#{} 1/4, #{:judgement} 3/4},
+        :occurrence-id "Q-fixture",
+        :pre-belief {#{} 1/4, #{:judgement} 3/4},
+        :observation-probability 5/8,
+        :observation
+        {:status :observed,
+         :occurrence-id "Q-fixture",
+         :tau 2,
+         :present #{:judgement},
+         :absent #{}},
+        :carrier
+        {:universe #{:judgement},
+         :states [#{} #{:judgement}],
+         :representation :support-plus-transition-closure},
+        :policy :conditioned-posterior,
+        :status :value,
+        :predecessor
+        {:scope :isolated-test, :source :exact-adapter-fixture},
+        :calculation
+        {:predicted-state {#{} 1/4, #{:judgement} 3/4},
+         :schema :wm/exact-belief-update-v1,
+         :likelihoods {#{} 1/4, #{:judgement} 3/4},
+         :states [#{} #{:judgement}],
+         :prior {#{} 1/4, #{:judgement} 3/4},
+         :observation-probability 5/8,
+         :observation #{:judgement},
+         :observation-rows
+         {#{} {#{} 3/4, #{:judgement} 1/4},
+          #{:judgement} {#{} 1/4, #{:judgement} 3/4}},
+         :option :some,
+         :status :ok,
+         :posterior {#{} 1/10, #{:judgement} 9/10},
+         :transition-rows
+         {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+         :model
+         {:status :declared,
+          :parameter-basis :synthetic,
+          :z-semantics :per-step-redraw}},
+        :consumed true,
+        :vacuity-license
+        {:status :not-licensed,
+         :reason :likelihood-varies-on-support,
+         :support #{#{} #{:judgement}}},
+        :posterior {#{} 1/10, #{:judgement} 9/10},
+        :tau 2,
+        :observation-authority
+        {:channel :judgement, :admission {:scope :isolated-test}},
+        :z-semantics :per-step-redraw,
+        :model
+        {:status :declared,
+         :parameter-basis :synthetic,
+         :z-semantics :per-step-redraw}},
+       :observation-updates
+       [{:receipt
+         {:continuation-belief {#{} 1/10, #{:judgement} 9/10},
+          :schema :wm/token-belief-update-v1,
+          :predicted-belief {#{} 1/4, #{:judgement} 3/4},
+          :occurrence-id "Q-fixture",
+          :pre-belief {#{} 1/4, #{:judgement} 3/4},
+          :observation-probability 5/8,
+          :observation
+          {:status :observed,
+           :occurrence-id "Q-fixture",
+           :tau 2,
+           :present #{:judgement},
+           :absent #{}},
+          :carrier
+          {:universe #{:judgement},
+           :states [#{} #{:judgement}],
+           :representation :support-plus-transition-closure},
+          :policy :conditioned-posterior,
+          :status :value,
+          :predecessor
+          {:scope :isolated-test, :source :exact-adapter-fixture},
+          :calculation
+          {:predicted-state {#{} 1/4, #{:judgement} 3/4},
+           :schema :wm/exact-belief-update-v1,
+           :likelihoods {#{} 1/4, #{:judgement} 3/4},
+           :states [#{} #{:judgement}],
+           :prior {#{} 1/4, #{:judgement} 3/4},
+           :observation-probability 5/8,
+           :observation #{:judgement},
+           :observation-rows
+           {#{} {#{} 3/4, #{:judgement} 1/4},
+            #{:judgement} {#{} 1/4, #{:judgement} 3/4}},
+           :option :some,
+           :status :ok,
+           :posterior {#{} 1/10, #{:judgement} 9/10},
+           :transition-rows
+           {#{} {#{} 1}, #{:judgement} {#{:judgement} 1}},
+           :model
+           {:status :declared,
+            :parameter-basis :synthetic,
+            :z-semantics :per-step-redraw}},
+          :consumed true,
+          :vacuity-license
+          {:status :not-licensed,
+           :reason :likelihood-varies-on-support,
+           :support #{#{} #{:judgement}}},
+          :posterior {#{} 1/10, #{:judgement} 9/10},
+          :tau 2,
+          :observation-authority
+          {:channel :judgement, :admission {:scope :isolated-test}},
+          :z-semantics :per-step-redraw,
+          :model
+          {:status :declared,
+           :parameter-basis :synthetic,
+           :z-semantics :per-step-redraw}},
+         :post-belief {#{} 1/10, #{:judgement} 9/10},
+         :predicted-belief {#{} 1/4, #{:judgement} 3/4},
+         :pre-belief {#{} 1/4, #{:judgement} 3/4},
+         :observation
+         {:status :observed,
+          :occurrence-id "Q-fixture",
+          :tau 2,
+          :present #{:judgement},
+          :absent #{}},
+         :channel :judgement,
+         :vacuous false,
+         :policy :conditioned-posterior,
+         :status :value,
+         :consumed true,
+         :vacuity-license
+         {:status :not-licensed,
+          :reason :likelihood-varies-on-support,
+          :support #{#{} #{:judgement}}},
+         :tau 0,
+         :z-semantics :per-step-redraw}],
+       :z-semantics :per-step-redraw,
+       :trajectory-scope :filtering-entry-predictive-future,
+       :conformance
+       {:received-update :producer-receipt-not-recomputed,
+        :model-reference
+        "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+        :future :varying-precedence-predictive-extension,
+        :refusal-continuation
+        :runner-policy-not-conditionedTrajectory}}},
+     :rates {:judgement {:false-neg 1/4, :false-pos 1/4}}}}}},
+ :frozen-schema-examples
+ {:value-point-mass
+  {:g 0.6265233750364456,
+   :certificate
+   {:node-evaluations
+    [{:status :evaluated,
+      :incoming-belief {#{[:example :fact]} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{[:example :fact]},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{[:example :fact]} 1},
+        :mass-contribution {#{[:example :fact]} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{[:example :fact]} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 1}
+     {:status :evaluated,
+      :incoming-belief {#{[:example :fact]} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{[:example :fact]},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{[:example :fact]} 1},
+        :mass-contribution {#{[:example :fact]} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{[:example :fact]} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 2}],
+    :universe-size 1,
+    :zeta-tempered? false,
+    :zeta 1,
+    :rates-all-zero true,
+    :c-form :constant-spec,
+    :steps
+    [{:tau 1,
+      :risk 0.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}
+     {:tau 2,
+      :risk 0.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}],
+    :horizon 2,
+    :zeta-status :declared-fixed-vacuous,
+    :total 0.6265233750364456,
+    :evaluation :identity-A-zero-rates,
+    :consumed-g
+    {:A {[:example :fact] {:false-neg 0, :false-pos 0}},
+     :C
+     {:form :step-indexed,
+      :schedule nil,
+      :steps
+      [{:tau 1,
+        :distribution
+        {:universe #{[:example :fact]},
+         :zeroed #{},
+         :weights {[:example :fact] 1}}}
+       {:tau 2,
+        :distribution
+        {:universe #{[:example :fact]},
+         :zeroed #{},
+         :weights {[:example :fact] 1}}}]},
+     :D {#{[:example :fact]} 1},
+     :Q
+     {:initial-belief {#{[:example :fact]} 1},
+      :steps
+      [{:tau 1, :belief {#{[:example :fact]} 1}}
+       {:tau 2, :belief {#{[:example :fact]} 1}}],
+      :conditioning-input
+      {:continuation-belief {#{[:example :fact]} 1},
+       :schema :wm/token-belief-update-v1,
+       :predicted-belief {#{[:example :fact]} 1},
+       :occurrence-id "D-schema-example-1",
+       :pre-belief {#{[:example :fact]} 1},
+       :observation-probability 1,
+       :observation
+       {:status :observed,
+        :occurrence-id "D-schema-example-1",
+        :tau 1,
+        :present #{[:example :fact]},
+        :absent #{}},
+       :carrier
+       {:universe #{[:example :fact]},
+        :states [#{} #{[:example :fact]}],
+        :token-count 1,
+        :state-count 2,
+        :representation :support-plus-transition-closure},
+       :policy :conditioned-posterior,
+       :status :value,
+       :predecessor
+       {:status :admitted,
+        :scope :isolated-test,
+        :source :constructed-identity-transition,
+        :previous-occurrence-id "D-schema-example-0"},
+       :calculation
+       {:predicted-state {#{} 0, #{[:example :fact]} 1},
+        :schema :wm/exact-belief-update-v1,
+        :likelihoods {#{} 0, #{[:example :fact]} 1},
+        :states [#{} #{[:example :fact]}],
+        :prior {#{[:example :fact]} 1},
+        :observation-probability 1,
+        :observation #{[:example :fact]},
+        :observation-rows
+        {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+        :option :some,
+        :status :ok,
+        :posterior {#{} 0, #{[:example :fact]} 1},
+        :transition-rows
+        {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+        :model
+        {:status :declared,
+         :parameter-basis :synthetic,
+         :z-semantics :per-step-redraw,
+         :calibration-authority :none}},
+       :consumed true,
+       :vacuity-license
+       {:status :licensed,
+        :theorem
+        DarkTower.WarMachine.BeliefConditionedRollout.exactUpdate_pointMass_vacuous,
+        :support #{#{[:example :fact]}},
+        :constant-likelihood 1,
+        :predicted-total 1},
+       :posterior {#{[:example :fact]} 1},
+       :tau 1,
+       :observation-authority
+       {:channel :checkable,
+        :contract :wm/observation-contract-v1,
+        :admission
+        {:scope :isolated-test, :tokens #{[:example :fact]}}},
+       :z-semantics :per-step-redraw,
+       :model
+       {:status :declared,
+        :parameter-basis :synthetic,
+        :z-semantics :per-step-redraw,
+        :calibration-authority :none}},
+      :observation-updates
+      [{:receipt
+        {:continuation-belief {#{[:example :fact]} 1},
+         :schema :wm/token-belief-update-v1,
+         :predicted-belief {#{[:example :fact]} 1},
+         :occurrence-id "D-schema-example-1",
+         :pre-belief {#{[:example :fact]} 1},
+         :observation-probability 1,
+         :observation
+         {:status :observed,
+          :occurrence-id "D-schema-example-1",
+          :tau 1,
+          :present #{[:example :fact]},
+          :absent #{}},
+         :carrier
+         {:universe #{[:example :fact]},
+          :states [#{} #{[:example :fact]}],
+          :token-count 1,
+          :state-count 2,
+          :representation :support-plus-transition-closure},
+         :policy :conditioned-posterior,
+         :status :value,
+         :predecessor
+         {:status :admitted,
+          :scope :isolated-test,
+          :source :constructed-identity-transition,
+          :previous-occurrence-id "D-schema-example-0"},
+         :calculation
+         {:predicted-state {#{} 0, #{[:example :fact]} 1},
+          :schema :wm/exact-belief-update-v1,
+          :likelihoods {#{} 0, #{[:example :fact]} 1},
+          :states [#{} #{[:example :fact]}],
+          :prior {#{[:example :fact]} 1},
+          :observation-probability 1,
+          :observation #{[:example :fact]},
+          :observation-rows
+          {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+          :option :some,
+          :status :ok,
+          :posterior {#{} 0, #{[:example :fact]} 1},
+          :transition-rows
+          {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+          :model
+          {:status :declared,
+           :parameter-basis :synthetic,
+           :z-semantics :per-step-redraw,
+           :calibration-authority :none}},
+         :consumed true,
+         :vacuity-license
+         {:status :licensed,
+          :theorem
+          DarkTower.WarMachine.BeliefConditionedRollout.exactUpdate_pointMass_vacuous,
+          :support #{#{[:example :fact]}},
+          :constant-likelihood 1,
+          :predicted-total 1},
+         :posterior {#{[:example :fact]} 1},
+         :tau 1,
+         :observation-authority
+         {:channel :checkable,
+          :contract :wm/observation-contract-v1,
+          :admission
+          {:scope :isolated-test, :tokens #{[:example :fact]}}},
+         :z-semantics :per-step-redraw,
+         :model
+         {:status :declared,
+          :parameter-basis :synthetic,
+          :z-semantics :per-step-redraw,
+          :calibration-authority :none}},
+        :post-belief {#{[:example :fact]} 1},
+        :predicted-belief {#{[:example :fact]} 1},
+        :pre-belief {#{[:example :fact]} 1},
+        :observation
+        {:status :observed,
+         :occurrence-id "D-schema-example-1",
+         :tau 1,
+         :present #{[:example :fact]},
+         :absent #{}},
+        :channel :checkable,
+        :vacuous true,
+        :policy :conditioned-posterior,
+        :status :value,
+        :consumed true,
+        :vacuity-license
+        {:status :licensed,
+         :theorem
+         DarkTower.WarMachine.BeliefConditionedRollout.exactUpdate_pointMass_vacuous,
+         :support #{#{[:example :fact]}},
+         :constant-likelihood 1,
+         :predicted-total 1},
+        :tau 0,
+        :z-semantics :per-step-redraw}],
+      :z-semantics :per-step-redraw,
+      :trajectory-scope :filtering-entry-predictive-future,
+      :conformance
+      {:received-update :producer-receipt-not-recomputed,
+       :model-reference
+       "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+       :future :varying-precedence-predictive-extension,
+       :refusal-continuation
+       :runner-policy-not-conditionedTrajectory}}},
+    :rates {[:example :fact] {:false-neg 0, :false-pos 0}}}},
+  :value-distributed
+  {:g 1.1780671879580982,
+   :certificate
+   {:node-evaluations
+    [{:status :evaluated,
+      :incoming-belief {#{} 1/4, #{[:example :fact]} 3/4},
+      :states
+      [{:mass 1/4,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{} 1},
+        :mass-contribution {#{} 1/4},
+        :selected-index nil}
+       {:mass 3/4,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{[:example :fact]},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{[:example :fact]} 1},
+        :mass-contribution {#{[:example :fact]} 3/4},
+        :selected-index nil}],
+      :outgoing-belief {#{} 1/4, #{[:example :fact]} 3/4},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 1}
+     {:status :evaluated,
+      :incoming-belief {#{} 1/4, #{[:example :fact]} 3/4},
+      :states
+      [{:mass 1/4,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{} 1},
+        :mass-contribution {#{} 1/4},
+        :selected-index nil}
+       {:mass 3/4,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{[:example :fact]},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{[:example :fact]} 1},
+        :mass-contribution {#{[:example :fact]} 3/4},
+        :selected-index nil}],
+      :outgoing-belief {#{} 1/4, #{[:example :fact]} 3/4},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 2}],
+    :universe-size 1,
+    :zeta-tempered? false,
+    :zeta 1,
+    :rates-all-zero false,
+    :c-form :constant-spec,
+    :steps
+    [{:tau 1,
+      :risk 0.026698449360240795,
+      :risk-status :computed,
+      :ambiguity 0.5623351446188083,
+      :ambiguity-status :computed,
+      :reduction "factorized-nonzero-rates"}
+     {:tau 2,
+      :risk 0.026698449360240795,
+      :risk-status :computed,
+      :ambiguity 0.5623351446188083,
+      :ambiguity-status :computed,
+      :reduction "factorized-nonzero-rates"}],
+    :horizon 2,
+    :zeta-status :declared-fixed-applied,
+    :total 1.1780671879580982,
+    :evaluation :factorized-nonzero-rates,
+    :consumed-g
+    {:A {[:example :fact] {:false-neg 1/4, :false-pos 1/4}},
+     :C
+     {:form :step-indexed,
+      :schedule nil,
+      :steps
+      [{:tau 1,
+        :distribution
+        {:universe #{[:example :fact]},
+         :zeroed #{},
+         :weights {[:example :fact] 1}}}
+       {:tau 2,
+        :distribution
+        {:universe #{[:example :fact]},
+         :zeroed #{},
+         :weights {[:example :fact] 1}}}]},
+     :D {#{} 1/4, #{[:example :fact]} 3/4},
+     :Q
+     {:initial-belief {#{} 1/4, #{[:example :fact]} 3/4},
+      :steps
+      [{:tau 1, :belief {#{} 1/4, #{[:example :fact]} 3/4}}
+       {:tau 2, :belief {#{} 1/4, #{[:example :fact]} 3/4}}],
+      :conditioning-input
+      {:continuation-belief {#{} 1/4, #{[:example :fact]} 3/4},
+       :schema :wm/token-belief-update-v1,
+       :predicted-belief {#{} 1/2, #{[:example :fact]} 1/2},
+       :occurrence-id "D-schema-example-1",
+       :pre-belief {#{} 1},
+       :observation-probability 1/2,
+       :observation
+       {:status :observed,
+        :occurrence-id "D-schema-example-1",
+        :tau 1,
+        :present #{[:example :fact]},
+        :absent #{}},
+       :carrier
+       {:universe #{[:example :fact]},
+        :states [#{} #{[:example :fact]}],
+        :token-count 1,
+        :state-count 2,
+        :representation :support-plus-transition-closure},
+       :policy :conditioned-posterior,
+       :status :value,
+       :predecessor
+       {:status :admitted,
+        :scope :isolated-test,
+        :source :constructed-mixing-transition,
+        :previous-occurrence-id "D-schema-example-0"},
+       :calculation
+       {:predicted-state {#{} 1/2, #{[:example :fact]} 1/2},
+        :schema :wm/exact-belief-update-v1,
+        :likelihoods {#{} 1/4, #{[:example :fact]} 3/4},
+        :states [#{} #{[:example :fact]}],
+        :prior {#{} 1},
+        :observation-probability 1/2,
+        :observation #{[:example :fact]},
+        :observation-rows
+        {#{} {#{} 3/4, #{[:example :fact]} 1/4},
+         #{[:example :fact]} {#{[:example :fact]} 3/4, #{} 1/4}},
+        :option :some,
+        :status :ok,
+        :posterior {#{} 1/4, #{[:example :fact]} 3/4},
+        :transition-rows
+        {#{} {#{} 1/2, #{[:example :fact]} 1/2},
+         #{[:example :fact]} {#{} 1/2, #{[:example :fact]} 1/2}},
+        :model
+        {:status :declared,
+         :parameter-basis :synthetic,
+         :z-semantics :per-step-redraw,
+         :components
+         [{:weight 1/2,
+           :rates {[:example :fact] {:false-neg 0, :false-pos 0}}}
+          {:weight 1/2,
+           :rates
+           {[:example :fact] {:false-neg 1/2, :false-pos 1/2}}}],
+         :calibration-authority :none}},
+       :consumed true,
+       :vacuity-license
+       {:status :not-licensed,
+        :reason :likelihood-varies-on-support,
+        :support #{#{} #{[:example :fact]}}},
+       :posterior {#{} 1/4, #{[:example :fact]} 3/4},
+       :tau 1,
+       :observation-authority
+       {:channel :judgement,
+        :contract :wm/observation-contract-v1,
+        :admission
+        {:scope :isolated-test, :tokens #{[:example :fact]}}},
+       :z-semantics :per-step-redraw,
+       :model
+       {:status :declared,
+        :parameter-basis :synthetic,
+        :z-semantics :per-step-redraw,
+        :components
+        [{:weight 1/2,
+          :rates {[:example :fact] {:false-neg 0, :false-pos 0}}}
+         {:weight 1/2,
+          :rates {[:example :fact] {:false-neg 1/2, :false-pos 1/2}}}],
+        :calibration-authority :none}},
+      :observation-updates
+      [{:receipt
+        {:continuation-belief {#{} 1/4, #{[:example :fact]} 3/4},
+         :schema :wm/token-belief-update-v1,
+         :predicted-belief {#{} 1/2, #{[:example :fact]} 1/2},
+         :occurrence-id "D-schema-example-1",
+         :pre-belief {#{} 1},
+         :observation-probability 1/2,
+         :observation
+         {:status :observed,
+          :occurrence-id "D-schema-example-1",
+          :tau 1,
+          :present #{[:example :fact]},
+          :absent #{}},
+         :carrier
+         {:universe #{[:example :fact]},
+          :states [#{} #{[:example :fact]}],
+          :token-count 1,
+          :state-count 2,
+          :representation :support-plus-transition-closure},
+         :policy :conditioned-posterior,
+         :status :value,
+         :predecessor
+         {:status :admitted,
+          :scope :isolated-test,
+          :source :constructed-mixing-transition,
+          :previous-occurrence-id "D-schema-example-0"},
+         :calculation
+         {:predicted-state {#{} 1/2, #{[:example :fact]} 1/2},
+          :schema :wm/exact-belief-update-v1,
+          :likelihoods {#{} 1/4, #{[:example :fact]} 3/4},
+          :states [#{} #{[:example :fact]}],
+          :prior {#{} 1},
+          :observation-probability 1/2,
+          :observation #{[:example :fact]},
+          :observation-rows
+          {#{} {#{} 3/4, #{[:example :fact]} 1/4},
+           #{[:example :fact]} {#{[:example :fact]} 3/4, #{} 1/4}},
+          :option :some,
+          :status :ok,
+          :posterior {#{} 1/4, #{[:example :fact]} 3/4},
+          :transition-rows
+          {#{} {#{} 1/2, #{[:example :fact]} 1/2},
+           #{[:example :fact]} {#{} 1/2, #{[:example :fact]} 1/2}},
+          :model
+          {:status :declared,
+           :parameter-basis :synthetic,
+           :z-semantics :per-step-redraw,
+           :components
+           [{:weight 1/2,
+             :rates {[:example :fact] {:false-neg 0, :false-pos 0}}}
+            {:weight 1/2,
+             :rates
+             {[:example :fact] {:false-neg 1/2, :false-pos 1/2}}}],
+           :calibration-authority :none}},
+         :consumed true,
+         :vacuity-license
+         {:status :not-licensed,
+          :reason :likelihood-varies-on-support,
+          :support #{#{} #{[:example :fact]}}},
+         :posterior {#{} 1/4, #{[:example :fact]} 3/4},
+         :tau 1,
+         :observation-authority
+         {:channel :judgement,
+          :contract :wm/observation-contract-v1,
+          :admission
+          {:scope :isolated-test, :tokens #{[:example :fact]}}},
+         :z-semantics :per-step-redraw,
+         :model
+         {:status :declared,
+          :parameter-basis :synthetic,
+          :z-semantics :per-step-redraw,
+          :components
+          [{:weight 1/2,
+            :rates {[:example :fact] {:false-neg 0, :false-pos 0}}}
+           {:weight 1/2,
+            :rates
+            {[:example :fact] {:false-neg 1/2, :false-pos 1/2}}}],
+          :calibration-authority :none}},
+        :post-belief {#{} 1/4, #{[:example :fact]} 3/4},
+        :predicted-belief {#{} 1/2, #{[:example :fact]} 1/2},
+        :pre-belief {#{} 1},
+        :observation
+        {:status :observed,
+         :occurrence-id "D-schema-example-1",
+         :tau 1,
+         :present #{[:example :fact]},
+         :absent #{}},
+        :channel :judgement,
+        :vacuous false,
+        :policy :conditioned-posterior,
+        :status :value,
+        :consumed true,
+        :vacuity-license
+        {:status :not-licensed,
+         :reason :likelihood-varies-on-support,
+         :support #{#{} #{[:example :fact]}}},
+        :tau 0,
+        :z-semantics :per-step-redraw}],
+      :z-semantics :per-step-redraw,
+      :trajectory-scope :filtering-entry-predictive-future,
+      :conformance
+      {:received-update :producer-receipt-not-recomputed,
+       :model-reference
+       "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+       :future :varying-precedence-predictive-extension,
+       :refusal-continuation
+       :runner-policy-not-conditionedTrajectory}}},
+    :rates {[:example :fact] {:false-neg 1/4, :false-pos 1/4}}}},
+  :refused-judgement
+  {:g 2.6265233750364456,
+   :certificate
+   {:node-evaluations
+    [{:status :evaluated,
+      :incoming-belief {#{} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{} 1},
+        :mass-contribution {#{} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 1}
+     {:status :evaluated,
+      :incoming-belief {#{} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{} 1},
+        :mass-contribution {#{} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 2}],
+    :universe-size 1,
+    :zeta-tempered? false,
+    :zeta 1,
+    :rates-all-zero true,
+    :c-form :constant-spec,
+    :steps
+    [{:tau 1,
+      :risk 1.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}
+     {:tau 2,
+      :risk 1.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}],
+    :horizon 2,
+    :zeta-status :declared-fixed-vacuous,
+    :total 2.6265233750364456,
+    :evaluation :identity-A-zero-rates,
+    :consumed-g
+    {:A {[:example :fact] {:false-neg 0, :false-pos 0}},
+     :C
+     {:form :step-indexed,
+      :schedule nil,
+      :steps
+      [{:tau 1,
+        :distribution
+        {:universe #{[:example :fact]},
+         :zeroed #{},
+         :weights {[:example :fact] 1}}}
+       {:tau 2,
+        :distribution
+        {:universe #{[:example :fact]},
+         :zeroed #{},
+         :weights {[:example :fact] 1}}}]},
+     :D {#{} 1},
+     :Q
+     {:initial-belief {#{} 1},
+      :steps [{:tau 1, :belief {#{} 1}} {:tau 2, :belief {#{} 1}}],
+      :conditioning-input
+      {:continuation-belief {#{} 1},
+       :schema :wm/token-belief-update-v1,
+       :predicted-belief {#{} 1},
+       :occurrence-id "D-schema-example-1",
+       :pre-belief {#{} 1},
+       :observation-probability 0,
+       :observation
+       {:status :observed,
+        :occurrence-id "D-schema-example-1",
+        :tau 1,
+        :present #{[:example :fact]},
+        :absent #{}},
+       :carrier
+       {:universe #{[:example :fact]},
+        :states [#{} #{[:example :fact]}],
+        :token-count 1,
+        :state-count 2,
+        :representation :support-plus-transition-closure},
+       :policy :refused-observation-discarded,
+       :status :refused,
+       :predecessor
+       {:status :admitted,
+        :scope :isolated-test,
+        :source :constructed-identity-transition,
+        :previous-occurrence-id "D-schema-example-0"},
+       :kind :belief-update-refused,
+       :consumed false,
+       :refused-trajectory
+       {:predicted-state {#{} 1, #{[:example :fact]} 0},
+        :schema :wm/exact-belief-update-v1,
+        :likelihoods {#{} 0, #{[:example :fact]} 1},
+        :states [#{} #{[:example :fact]}],
+        :prior {#{} 1},
+        :observation-probability 0,
+        :observation #{[:example :fact]},
+        :observation-rows
+        {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+        :option :none,
+        :status :refused,
+        :kind :impossible-observation,
+        :transition-rows
+        {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+        :model
+        {:status :declared,
+         :parameter-basis :synthetic,
+         :z-semantics :per-step-redraw,
+         :calibration-authority :none}},
+       :vacuity-license
+       {:status :not-applicable, :reason :impossible-observation},
+       :tau 1,
+       :observation-authority
+       {:channel :judgement,
+        :contract :wm/observation-contract-v1,
+        :admission
+        {:scope :isolated-test, :tokens #{[:example :fact]}}},
+       :z-semantics :per-step-redraw,
+       :model
+       {:status :declared,
+        :parameter-basis :synthetic,
+        :z-semantics :per-step-redraw,
+        :calibration-authority :none}},
+      :observation-updates
+      [{:receipt
+        {:continuation-belief {#{} 1},
+         :schema :wm/token-belief-update-v1,
+         :predicted-belief {#{} 1},
+         :occurrence-id "D-schema-example-1",
+         :pre-belief {#{} 1},
+         :observation-probability 0,
+         :observation
+         {:status :observed,
+          :occurrence-id "D-schema-example-1",
+          :tau 1,
+          :present #{[:example :fact]},
+          :absent #{}},
+         :carrier
+         {:universe #{[:example :fact]},
+          :states [#{} #{[:example :fact]}],
+          :token-count 1,
+          :state-count 2,
+          :representation :support-plus-transition-closure},
+         :policy :refused-observation-discarded,
+         :status :refused,
+         :predecessor
+         {:status :admitted,
+          :scope :isolated-test,
+          :source :constructed-identity-transition,
+          :previous-occurrence-id "D-schema-example-0"},
+         :kind :belief-update-refused,
+         :consumed false,
+         :refused-trajectory
+         {:predicted-state {#{} 1, #{[:example :fact]} 0},
+          :schema :wm/exact-belief-update-v1,
+          :likelihoods {#{} 0, #{[:example :fact]} 1},
+          :states [#{} #{[:example :fact]}],
+          :prior {#{} 1},
+          :observation-probability 0,
+          :observation #{[:example :fact]},
+          :observation-rows
+          {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+          :option :none,
+          :status :refused,
+          :kind :impossible-observation,
+          :transition-rows
+          {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+          :model
+          {:status :declared,
+           :parameter-basis :synthetic,
+           :z-semantics :per-step-redraw,
+           :calibration-authority :none}},
+         :vacuity-license
+         {:status :not-applicable, :reason :impossible-observation},
+         :tau 1,
+         :observation-authority
+         {:channel :judgement,
+          :contract :wm/observation-contract-v1,
+          :admission
+          {:scope :isolated-test, :tokens #{[:example :fact]}}},
+         :z-semantics :per-step-redraw,
+         :model
+         {:status :declared,
+          :parameter-basis :synthetic,
+          :z-semantics :per-step-redraw,
+          :calibration-authority :none}},
+        :post-belief {#{} 1},
+        :predicted-belief {#{} 1},
+        :pre-belief {#{} 1},
+        :observation
+        {:status :observed,
+         :occurrence-id "D-schema-example-1",
+         :tau 1,
+         :present #{[:example :fact]},
+         :absent #{}},
+        :channel :judgement,
+        :policy :refused-observation-discarded,
+        :status :refused,
+        :consumed false,
+        :vacuity-license
+        {:status :not-applicable, :reason :impossible-observation},
+        :tau 0,
+        :z-semantics :per-step-redraw}],
+      :z-semantics :per-step-redraw,
+      :trajectory-scope :filtering-entry-predictive-future,
+      :conformance
+      {:received-update :producer-receipt-not-recomputed,
+       :model-reference
+       "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+       :future :varying-precedence-predictive-extension,
+       :refusal-continuation
+       :runner-policy-not-conditionedTrajectory}}},
+    :rates {[:example :fact] {:false-neg 0, :false-pos 0}}}},
+  :refused-checkable
+  {:g 0.6265233750364456,
+   :certificate
+   {:node-evaluations
+    [{:status :evaluated,
+      :incoming-belief {#{[:example :fact]} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{[:example :fact]},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{[:example :fact]} 1},
+        :mass-contribution {#{[:example :fact]} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{[:example :fact]} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 1}
+     {:status :evaluated,
+      :incoming-belief {#{[:example :fact]} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{[:example :fact]},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{[:example :fact]} 1},
+        :mass-contribution {#{[:example :fact]} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{[:example :fact]} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 2}],
+    :universe-size 1,
+    :zeta-tempered? false,
+    :zeta 1,
+    :rates-all-zero true,
+    :c-form :constant-spec,
+    :steps
+    [{:tau 1,
+      :risk 0.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}
+     {:tau 2,
+      :risk 0.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}],
+    :horizon 2,
+    :zeta-status :declared-fixed-vacuous,
+    :total 0.6265233750364456,
+    :evaluation :identity-A-zero-rates,
+    :consumed-g
+    {:A {[:example :fact] {:false-neg 0, :false-pos 0}},
+     :C
+     {:form :step-indexed,
+      :schedule nil,
+      :steps
+      [{:tau 1,
+        :distribution
+        {:universe #{[:example :fact]},
+         :zeroed #{},
+         :weights {[:example :fact] 1}}}
+       {:tau 2,
+        :distribution
+        {:universe #{[:example :fact]},
+         :zeroed #{},
+         :weights {[:example :fact] 1}}}]},
+     :D {#{[:example :fact]} 1},
+     :Q
+     {:initial-belief {#{[:example :fact]} 1},
+      :steps
+      [{:tau 1, :belief {#{[:example :fact]} 1}}
+       {:tau 2, :belief {#{[:example :fact]} 1}}],
+      :conditioning-input
+      {:continuation-belief {#{[:example :fact]} 1},
+       :schema :wm/token-belief-update-v1,
+       :predicted-belief {#{} 1},
+       :occurrence-id "D-schema-example-1",
+       :pre-belief {#{} 1},
+       :observation-probability 0,
+       :observation
+       {:status :observed,
+        :occurrence-id "D-schema-example-1",
+        :tau 1,
+        :present #{[:example :fact]},
+        :absent #{}},
+       :carrier
+       {:universe #{[:example :fact]},
+        :states [#{} #{[:example :fact]}],
+        :token-count 1,
+        :state-count 2,
+        :representation :support-plus-transition-closure},
+       :policy :refused-reinitialized-from-observation,
+       :reinitialization
+       {:authority :contract-admitted-checkable-observation,
+        :occurrence-id "D-schema-example-1",
+        :tau 1,
+        :observation
+        {:status :observed,
+         :occurrence-id "D-schema-example-1",
+         :tau 1,
+         :present #{[:example :fact]},
+         :absent #{}},
+        :initialization-receipt
+        {:status :present,
+         :origin :assembled-target-facts,
+         :derivation :target-qualified-true-facts-point-mass-v1,
+         :snapshot-edn "[{:target :example, :facts {:fact true}}]",
+         :sha256
+         "6ca09d8777978f180404f60df5c7b76a1ef4f459cccc05a0089f18f009d8a0eb",
+         :inputs [{:target :example, :facts {:fact true}}],
+         :value {#{[:example :fact]} 1}},
+        :belief {#{[:example :fact]} 1}},
+       :status :refused,
+       :predecessor
+       {:status :admitted,
+        :scope :isolated-test,
+        :source :constructed-identity-transition,
+        :previous-occurrence-id "D-schema-example-0"},
+       :kind :belief-update-refused,
+       :consumed false,
+       :refused-trajectory
+       {:predicted-state {#{} 1, #{[:example :fact]} 0},
+        :schema :wm/exact-belief-update-v1,
+        :likelihoods {#{} 0, #{[:example :fact]} 1},
+        :states [#{} #{[:example :fact]}],
+        :prior {#{} 1},
+        :observation-probability 0,
+        :observation #{[:example :fact]},
+        :observation-rows
+        {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+        :option :none,
+        :status :refused,
+        :kind :impossible-observation,
+        :transition-rows
+        {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+        :model
+        {:status :declared,
+         :parameter-basis :synthetic,
+         :z-semantics :per-step-redraw,
+         :calibration-authority :none}},
+       :vacuity-license
+       {:status :not-applicable, :reason :impossible-observation},
+       :tau 1,
+       :finding
+       {:kind :model-misfit,
+        :reason
+        :checkable-observation-has-zero-predictive-probability},
+       :observation-authority
+       {:channel :checkable,
+        :contract :wm/observation-contract-v1,
+        :admission
+        {:scope :isolated-test, :tokens #{[:example :fact]}}},
+       :z-semantics :per-step-redraw,
+       :model
+       {:status :declared,
+        :parameter-basis :synthetic,
+        :z-semantics :per-step-redraw,
+        :calibration-authority :none}},
+      :observation-updates
+      [{:receipt
+        {:continuation-belief {#{[:example :fact]} 1},
+         :schema :wm/token-belief-update-v1,
+         :predicted-belief {#{} 1},
+         :occurrence-id "D-schema-example-1",
+         :pre-belief {#{} 1},
+         :observation-probability 0,
+         :observation
+         {:status :observed,
+          :occurrence-id "D-schema-example-1",
+          :tau 1,
+          :present #{[:example :fact]},
+          :absent #{}},
+         :carrier
+         {:universe #{[:example :fact]},
+          :states [#{} #{[:example :fact]}],
+          :token-count 1,
+          :state-count 2,
+          :representation :support-plus-transition-closure},
+         :policy :refused-reinitialized-from-observation,
+         :reinitialization
+         {:authority :contract-admitted-checkable-observation,
+          :occurrence-id "D-schema-example-1",
+          :tau 1,
+          :observation
+          {:status :observed,
+           :occurrence-id "D-schema-example-1",
+           :tau 1,
+           :present #{[:example :fact]},
+           :absent #{}},
+          :initialization-receipt
+          {:status :present,
+           :origin :assembled-target-facts,
+           :derivation :target-qualified-true-facts-point-mass-v1,
+           :snapshot-edn "[{:target :example, :facts {:fact true}}]",
+           :sha256
+           "6ca09d8777978f180404f60df5c7b76a1ef4f459cccc05a0089f18f009d8a0eb",
+           :inputs [{:target :example, :facts {:fact true}}],
+           :value {#{[:example :fact]} 1}},
+          :belief {#{[:example :fact]} 1}},
+         :status :refused,
+         :predecessor
+         {:status :admitted,
+          :scope :isolated-test,
+          :source :constructed-identity-transition,
+          :previous-occurrence-id "D-schema-example-0"},
+         :kind :belief-update-refused,
+         :consumed false,
+         :refused-trajectory
+         {:predicted-state {#{} 1, #{[:example :fact]} 0},
+          :schema :wm/exact-belief-update-v1,
+          :likelihoods {#{} 0, #{[:example :fact]} 1},
+          :states [#{} #{[:example :fact]}],
+          :prior {#{} 1},
+          :observation-probability 0,
+          :observation #{[:example :fact]},
+          :observation-rows
+          {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+          :option :none,
+          :status :refused,
+          :kind :impossible-observation,
+          :transition-rows
+          {#{} {#{} 1}, #{[:example :fact]} {#{[:example :fact]} 1}},
+          :model
+          {:status :declared,
+           :parameter-basis :synthetic,
+           :z-semantics :per-step-redraw,
+           :calibration-authority :none}},
+         :vacuity-license
+         {:status :not-applicable, :reason :impossible-observation},
+         :tau 1,
+         :finding
+         {:kind :model-misfit,
+          :reason
+          :checkable-observation-has-zero-predictive-probability},
+         :observation-authority
+         {:channel :checkable,
+          :contract :wm/observation-contract-v1,
+          :admission
+          {:scope :isolated-test, :tokens #{[:example :fact]}}},
+         :z-semantics :per-step-redraw,
+         :model
+         {:status :declared,
+          :parameter-basis :synthetic,
+          :z-semantics :per-step-redraw,
+          :calibration-authority :none}},
+        :post-belief {#{[:example :fact]} 1},
+        :predicted-belief {#{} 1},
+        :pre-belief {#{} 1},
+        :observation
+        {:status :observed,
+         :occurrence-id "D-schema-example-1",
+         :tau 1,
+         :present #{[:example :fact]},
+         :absent #{}},
+        :channel :checkable,
+        :policy :refused-reinitialized-from-observation,
+        :status :refused,
+        :consumed false,
+        :vacuity-license
+        {:status :not-applicable, :reason :impossible-observation},
+        :tau 0,
+        :z-semantics :per-step-redraw}],
+      :z-semantics :per-step-redraw,
+      :trajectory-scope :filtering-entry-predictive-future,
+      :conformance
+      {:received-update :producer-receipt-not-recomputed,
+       :model-reference
+       "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+       :future :varying-precedence-predictive-extension,
+       :refusal-continuation
+       :runner-policy-not-conditionedTrajectory}}},
+    :rates {[:example :fact] {:false-neg 0, :false-pos 0}}}},
+  :missing
+  {:g 2.6265233750364456,
+   :certificate
+   {:node-evaluations
+    [{:status :evaluated,
+      :incoming-belief {#{} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{} 1},
+        :mass-contribution {#{} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 1}
+     {:status :evaluated,
+      :incoming-belief {#{} 1},
+      :states
+      [{:mass 1,
+        :guard-search [],
+        :pattern-id nil,
+        :state #{},
+        :kernel-kind :identity,
+        :status :evaluated,
+        :kernel {#{} 1},
+        :mass-contribution {#{} 1},
+        :selected-index nil}],
+      :outgoing-belief {#{} 1},
+      :model
+      {:schema :wm/cascade-evaluation-model-v1,
+       :semantics :first-enabled-union-theta-v1,
+       :precedence []},
+      :tau 2}],
+    :universe-size 1,
+    :zeta-tempered? false,
+    :zeta 1,
+    :rates-all-zero true,
+    :c-form :constant-spec,
+    :steps
+    [{:tau 1,
+      :risk 1.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}
+     {:tau 2,
+      :risk 1.3132616875182228,
+      :risk-status :computed,
+      :ambiguity 0,
+      :ambiguity-status :reduced-identically-zero,
+      :reduction "identity-A-zero-rates"}],
+    :horizon 2,
+    :zeta-status :declared-fixed-vacuous,
+    :total 2.6265233750364456,
+    :evaluation :identity-A-zero-rates,
+    :consumed-g
+    {:A {[:example :fact] {:false-neg 0, :false-pos 0}},
+     :C
+     {:form :step-indexed,
+      :schedule nil,
+      :steps
+      [{:tau 1,
+        :distribution
+        {:universe #{[:example :fact]},
+         :zeroed #{},
+         :weights {[:example :fact] 1}}}
+       {:tau 2,
+        :distribution
+        {:universe #{[:example :fact]},
+         :zeroed #{},
+         :weights {[:example :fact] 1}}}]},
+     :D {#{} 1},
+     :Q
+     {:initial-belief {#{} 1},
+      :steps [{:tau 1, :belief {#{} 1}} {:tau 2, :belief {#{} 1}}],
+      :conditioning-input
+      {:continuation-belief {#{} 1},
+       :schema :wm/token-belief-update-v1,
+       :predicted-belief {#{} 1},
+       :occurrence-id "D-schema-example-1",
+       :pre-belief {#{} 1},
+       :observation
+       {:status :missing,
+        :reason :no-observation,
+        :occurrence-id "D-schema-example-1",
+        :tau nil},
+       :carrier
+       {:universe #{[:example :fact]},
+        :states [#{} #{[:example :fact]}],
+        :token-count 1,
+        :state-count 2,
+        :representation :support-plus-transition-closure},
+       :policy :no-observation-prediction-only,
+       :status :missing,
+       :predecessor
+       {:status :admitted,
+        :scope :isolated-test,
+        :source :constructed-identity-transition,
+        :previous-occurrence-id "D-schema-example-0"},
+       :consumed false,
+       :vacuity-license
+       {:status :not-applicable, :reason :no-observation},
+       :tau nil,
+       :observation-authority
+       {:channel :checkable,
+        :contract :wm/observation-contract-v1,
+        :admission
+        {:scope :isolated-test, :tokens #{[:example :fact]}}},
+       :z-semantics :per-step-redraw,
+       :model
+       {:status :declared,
+        :parameter-basis :synthetic,
+        :z-semantics :per-step-redraw,
+        :calibration-authority :none}},
+      :observation-updates [],
+      :z-semantics :per-step-redraw,
+      :trajectory-scope :filtering-entry-predictive-future,
+      :conformance
+      {:received-update :producer-receipt-not-recomputed,
+       :model-reference
+       "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+       :future :varying-precedence-predictive-extension,
+       :refusal-continuation
+       :runner-policy-not-conditionedTrajectory}}},
+    :rates {[:example :fact] {:false-neg 0, :false-pos 0}}}},
+  :invalid
+  {:g
+   {:schema :wm/token-belief-update-v1,
+    :occurrence-id "D-schema-example-1",
+    :observation
+    {:status :observed,
+     :occurrence-id "D-schema-example-1",
+     :tau 1,
+     :present #{[:example :fact]},
+     :absent #{}},
+    :carrier
+    {:universe #{[:example :fact]},
+     :states [#{} #{[:example :fact]}],
+     :token-count 1,
+     :state-count 2,
+     :representation :support-plus-transition-closure},
+    :status :invalid,
+    :predecessor
+    {:status :admitted,
+     :scope :isolated-test,
+     :source :constructed-identity-transition,
+     :previous-occurrence-id "D-schema-example-0"},
+    :kind :invalid-prior,
+    :consumed false,
+    :vacuity-license
+    {:status :not-applicable, :reason :invalid-domain},
+    :invalid-input
+    {:schema :wm/exact-belief-update-v1,
+     :model
+     {:status :declared,
+      :parameter-basis :synthetic,
+      :z-semantics :per-step-redraw,
+      :calibration-authority :none},
+     :states [#{} #{[:example :fact]}],
+     :observation #{[:example :fact]},
+     :prior {#{} 0.5, #{[:example :fact]} 0.5},
+     :status :invalid,
+     :kind :invalid-prior,
+     :detail {#{} 0.5, #{[:example :fact]} 0.5}},
+    :tau 1,
+    :observation-authority
+    {:channel :checkable,
+     :contract :wm/observation-contract-v1,
+     :admission {:scope :isolated-test, :tokens #{[:example :fact]}}},
+    :z-semantics :per-step-redraw,
+    :model
+    {:status :declared,
+     :parameter-basis :synthetic,
+     :z-semantics :per-step-redraw,
+     :calibration-authority :none},
+    :detail {#{} 0.5, #{[:example :fact]} 0.5}},
+   :certificate nil}}}

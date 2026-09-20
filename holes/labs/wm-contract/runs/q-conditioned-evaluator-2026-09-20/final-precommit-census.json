@@ -1,0 +1,47 @@
+{
+  "role": "pre-commit-validation",
+  "git-head": "43d1c3e808f12c362ef216289d0ce3ab488f4de5",
+  "repo-root": "/home/joe/code/futon2-q-conditioned-evaluator",
+  "sha256": {
+    "src/futon2/aif/conditioned_trajectory.clj": "a65615bc83bc3244d9ac1a1e7db91964598ad221024258441206164a4b502525",
+    "src/futon2/aif/cascade_model_manifest.clj": "4d7c4b0c266d27142a2b49cf350d94493c1e04dced4040cc23c553b40fd7986e",
+    "src/futon2/aif/efe.clj": "ce3021facdb7116d81c8b1a82122d8658b62ab7acc0ca994aa9722354cf78a92",
+    "src/futon2/aif/g_term_decomposition.clj": "f25f5c4ea9b92dfc62178e27cfa69223f47122a485ef02a9835c66e64e2f143e",
+    "src/futon2/aif/exact_belief_adapter.clj": "36b54e5c94d8284caee11b47c29ec9c1e11d484102990eb9cc6aee6b22b187ae",
+    "src/futon2/aif/exact_belief_core.clj": "829d4df30bf297ee5194ee4dae21ed249bc2299ee1faa42f3a126f3d5559db94",
+    "src/futon2/aif/scoring_input_receipts.clj": "6266f7929bcd33fb916c955d6fda4a18aae2a339371580adac119facefaa9edc",
+    "src/futon2/aif/token_belief_predecessor.clj": "be33120ad2f014fc37f05f879e973c7bd914c9883f362df66af55b77055e8348",
+    "scripts/futon2/report/war_machine.clj": "4103e041f15fe84cd0c6be0951dc2b94a9b5e917a51ba6006365b3d11647bd6c",
+    "test/futon2/aif/conditioned_trajectory_test.clj": "4bdecb4043bff30c929dc48dfbb30eae65591cfe9337d5a981cc015bcb5ccf91",
+    "test/futon2/aif/g_term_decomposition_test.clj": "ae168c4ccc1e7478ba43e9b8aa3a6d0d00cf9d32cbd0d02c2ab729832f2d415c",
+    "test/fixtures/selection-certificate/before.edn": "62b8f4d3cce852057a0166a62fcaa8cfe94d76a91b3a696f931007cdd5bbd6c7",
+    "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/schema.edn": "047aaa0d3cc7965f1f4bce8e4b153130f5bc22a6db3447d3cab9c704fb553b7c",
+    "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/examples.edn": "4bdedf978b1285399f34ddcf7ec210684918ef87f80b25452dbb02ab3f3de2b4"
+  },
+  "command": [
+    "clojure",
+    "-M:test",
+    "-m",
+    "cognitect.test-runner",
+    "-n",
+    "futon2.aif.g-term-decomposition-test"
+  ],
+  "exit": 0,
+  "duration-ms": 3439,
+  "post-sha256": {
+    "src/futon2/aif/conditioned_trajectory.clj": "a65615bc83bc3244d9ac1a1e7db91964598ad221024258441206164a4b502525",
+    "src/futon2/aif/cascade_model_manifest.clj": "4d7c4b0c266d27142a2b49cf350d94493c1e04dced4040cc23c553b40fd7986e",
+    "src/futon2/aif/efe.clj": "ce3021facdb7116d81c8b1a82122d8658b62ab7acc0ca994aa9722354cf78a92",
+    "src/futon2/aif/g_term_decomposition.clj": "f25f5c4ea9b92dfc62178e27cfa69223f47122a485ef02a9835c66e64e2f143e",
+    "src/futon2/aif/exact_belief_adapter.clj": "36b54e5c94d8284caee11b47c29ec9c1e11d484102990eb9cc6aee6b22b187ae",
+    "src/futon2/aif/exact_belief_core.clj": "829d4df30bf297ee5194ee4dae21ed249bc2299ee1faa42f3a126f3d5559db94",
+    "src/futon2/aif/scoring_input_receipts.clj": "6266f7929bcd33fb916c955d6fda4a18aae2a339371580adac119facefaa9edc",
+    "src/futon2/aif/token_belief_predecessor.clj": "be33120ad2f014fc37f05f879e973c7bd914c9883f362df66af55b77055e8348",
+    "scripts/futon2/report/war_machine.clj": "4103e041f15fe84cd0c6be0951dc2b94a9b5e917a51ba6006365b3d11647bd6c",
+    "test/futon2/aif/conditioned_trajectory_test.clj": "4bdecb4043bff30c929dc48dfbb30eae65591cfe9337d5a981cc015bcb5ccf91",
+    "test/futon2/aif/g_term_decomposition_test.clj": "ae168c4ccc1e7478ba43e9b8aa3a6d0d00cf9d32cbd0d02c2ab729832f2d415c",
+    "test/fixtures/selection-certificate/before.edn": "62b8f4d3cce852057a0166a62fcaa8cfe94d76a91b3a696f931007cdd5bbd6c7",
+    "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/schema.edn": "047aaa0d3cc7965f1f4bce8e4b153130f5bc22a6db3447d3cab9c704fb553b7c",
+    "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/examples.edn": "4bdedf978b1285399f34ddcf7ec210684918ef87f80b25452dbb02ab3f3de2b4"
+  }
+}

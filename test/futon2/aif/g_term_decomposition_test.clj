@@ -100,9 +100,13 @@
                                    {:distribution {:x 3/4 :y 1/4}}]}
                        :D {#{:x} 1/4 #{:y} 3/4}
                        :E 2 :F 3/2
-                       :Q {:steps [{:tau 1 :belief {#{:x} 1}}]
-                           :observation-updates [{:tau 1 :observation #{:x}}]}}]
-    (is (= :non-degenerate (:verdict (d/verdict term value))) (str term)))
+                       :Q {:initial-belief {#{:x} 1}
+                           :steps [{:tau 1 :belief {#{:x} 1}}]
+                           :observation-updates [{:tau 0 :observation #{:x}
+                                                  :status :value :consumed true :vacuous false
+                                                  :predicted-belief {#{} 1/2 #{:x} 1/2}
+                                                  :post-belief {#{:x} 1}}]}}]
+    (is (= :non-degenerate (:verdict (d/verdict term value {:all-habits [2 1]}))) (str term)))
   (doseq [term d/terms]
     (is (= :missing (:status (d/verdict term nil))))
     (is (not (contains? (d/verdict term nil) :verdict)))))

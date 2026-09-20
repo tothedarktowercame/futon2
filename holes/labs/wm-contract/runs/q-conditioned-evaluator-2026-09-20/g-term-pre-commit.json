@@ -1,0 +1,26 @@
+{
+  "role": "pre-commit-validation",
+  "git-head": "1bc98c0498607f6663232468edafb3e57c00567c",
+  "sha256": {
+    "src/futon2/aif/conditioned_trajectory.clj": "1bfa9ce506007fdcb395d9b8d926896aa3dce349a2f66fdfcc882affe2fc9054",
+    "src/futon2/aif/cascade_model_manifest.clj": "2366e5f838da81d21fbd0aef9398b42f4dab7d46e0ea23f11d69fae2de6254fb",
+    "src/futon2/aif/g_term_decomposition.clj": "ed8c8d4e1811bf2e668ee618058e670ff23278a60c36dc3d8a6d5359d9f9a29e",
+    "test/futon2/aif/g_term_decomposition_test.clj": "ae168c4ccc1e7478ba43e9b8aa3a6d0d00cf9d32cbd0d02c2ab729832f2d415c"
+  },
+  "command": [
+    "clojure",
+    "-M:test",
+    "-m",
+    "cognitect.test-runner",
+    "-n",
+    "futon2.aif.g-term-decomposition-test"
+  ],
+  "exit": 0,
+  "duration-ms": 3178,
+  "post-sha256": {
+    "src/futon2/aif/conditioned_trajectory.clj": "1bfa9ce506007fdcb395d9b8d926896aa3dce349a2f66fdfcc882affe2fc9054",
+    "src/futon2/aif/cascade_model_manifest.clj": "2366e5f838da81d21fbd0aef9398b42f4dab7d46e0ea23f11d69fae2de6254fb",
+    "src/futon2/aif/g_term_decomposition.clj": "ed8c8d4e1811bf2e668ee618058e670ff23278a60c36dc3d8a6d5359d9f9a29e",
+    "test/futon2/aif/g_term_decomposition_test.clj": "ae168c4ccc1e7478ba43e9b8aa3a6d0d00cf9d32cbd0d02c2ab729832f2d415c"
+  }
+}

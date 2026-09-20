@@ -1,0 +1,13 @@
+{:subject-id "Q/conditioned-evaluator"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/conditioned_trajectory.clj"
+              "src/futon2/aif/cascade_model_manifest.clj"
+              "src/futon2/aif/g_term_decomposition.clj"
+              "src/futon2/aif/efe.clj"]
+ :test-paths ["test/futon2/aif/conditioned_trajectory_test.clj"
+              "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/schema.edn"
+              "holes/labs/wm-contract/runs/d-token-carry-2b-2026-09-20/examples.edn"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.conditioned-trajectory-test"]
+ :author "codex-7"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/q-conditioned-evaluator-2026-09-20"
+ :index-file "/home/joe/code/futon3c/data/test-registry-validation/subjects.ednlog"}

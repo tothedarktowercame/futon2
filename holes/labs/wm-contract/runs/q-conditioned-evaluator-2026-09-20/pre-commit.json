@@ -1,0 +1,30 @@
+{
+  "role": "pre-commit-validation",
+  "git-head": "1bc98c0498607f6663232468edafb3e57c00567c",
+  "sha256": {
+    "src/futon2/aif/conditioned_trajectory.clj": "1bfa9ce506007fdcb395d9b8d926896aa3dce349a2f66fdfcc882affe2fc9054",
+    "src/futon2/aif/cascade_model_manifest.clj": "2366e5f838da81d21fbd0aef9398b42f4dab7d46e0ea23f11d69fae2de6254fb",
+    "src/futon2/aif/g_term_decomposition.clj": "ed8c8d4e1811bf2e668ee618058e670ff23278a60c36dc3d8a6d5359d9f9a29e",
+    "src/futon2/aif/exact_belief_adapter.clj": "36b54e5c94d8284caee11b47c29ec9c1e11d484102990eb9cc6aee6b22b187ae",
+    "src/futon2/aif/exact_belief_core.clj": "829d4df30bf297ee5194ee4dae21ed249bc2299ee1faa42f3a126f3d5559db94",
+    "test/futon2/aif/conditioned_trajectory_test.clj": "8443110eb3bf33c7c5298e435394a1e6d79a02953a9047e57746f449761b235d"
+  },
+  "command": [
+    "clojure",
+    "-M:test",
+    "-m",
+    "cognitect.test-runner",
+    "-n",
+    "futon2.aif.conditioned-trajectory-test"
+  ],
+  "exit": 0,
+  "duration-ms": 1454,
+  "post-sha256": {
+    "src/futon2/aif/conditioned_trajectory.clj": "1bfa9ce506007fdcb395d9b8d926896aa3dce349a2f66fdfcc882affe2fc9054",
+    "src/futon2/aif/cascade_model_manifest.clj": "2366e5f838da81d21fbd0aef9398b42f4dab7d46e0ea23f11d69fae2de6254fb",
+    "src/futon2/aif/g_term_decomposition.clj": "ed8c8d4e1811bf2e668ee618058e670ff23278a60c36dc3d8a6d5359d9f9a29e",
+    "src/futon2/aif/exact_belief_adapter.clj": "36b54e5c94d8284caee11b47c29ec9c1e11d484102990eb9cc6aee6b22b187ae",
+    "src/futon2/aif/exact_belief_core.clj": "829d4df30bf297ee5194ee4dae21ed249bc2299ee1faa42f3a126f3d5559db94",
+    "test/futon2/aif/conditioned_trajectory_test.clj": "8443110eb3bf33c7c5298e435394a1e6d79a02953a9047e57746f449761b235d"
+  }
+}

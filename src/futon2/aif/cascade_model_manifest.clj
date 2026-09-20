@@ -2,6 +2,7 @@
   "Partial, source-bound token-frontier model. No scoring or live side effects."
   (:require [clojure.string :as str]
             [clojure.set :as set]
+            [futon2.aif.conditioned-trajectory :as trajectory]
             [futon2.aif.exact-belief-core :as belief-core]
             [futon2.aif.likelihood-precision :as lprec])
   (:import [java.security MessageDigest]))
@@ -719,7 +720,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    iterated. The infinite-risk step records :risk :infinite and stops,
    matching the scalar path's early return. Returns {:g <scalar, :infinite
    or typed refusal> :steps <vector or nil>}."
-  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe zeta]} record?]
+  [{:keys [rates q0 precedence-fn horizon spec c-fn-pointwise universe zeta] :as m} record?]
   (let [bad (rate-bad-token rates)
         zeta (or zeta 1)
         ;; R7 (declared FIXED ζ): temper the per-token observation kernel ONCE,
@@ -733,7 +734,11 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
         ;; :negative-zeta) come from lprec/tempered-rates, one law one place.
         tempered (if (or (= 1 zeta) bad (zero-rates? rates))
                    rates
-                   (lprec/tempered-rates rates zeta))]
+                   (lprec/tempered-rates rates zeta))
+        conditioning (delay (trajectory/intake m))
+        ;; The producer threads our existing transition, once per step.
+        ;; It has no dependency on this manifest and no Bayes implementation.
+        trajectory (delay (trajectory/predictive-steps push-forward precedence-fn q0 record?))]
     (cond
       bad {:g {:status :missing :kind :invalid-adjudication-rate
                :token bad :value (get rates bad)} :steps nil}
@@ -749,6 +754,8 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
       {:g {:status :missing :kind :invalid-horizon :horizon horizon} :steps nil}
       (not (and (ifn? precedence-fn) (map? q0)))
       {:g {:status :missing :kind :invalid-horizon-g-input} :steps nil}
+      (not= :ready (:status @conditioning))
+      {:g @conditioning :steps nil}
       (and (nil? c-fn-pointwise) (nil? spec))
       {:g {:status :missing :kind :missing-preference-spec} :steps nil}
       :else
@@ -795,10 +802,11 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                :steps nil}
               (loop [tau 1 total 0.0 steps (transient [])]
                 (if (> tau horizon)
-                  {:g (double total) :steps (when record? (persistent! steps))}
-                  (let [evaluated (when record? (rollout-evaluation precedence-fn q0 tau))
-                        q (if record? (:belief evaluated) (rollout precedence-fn q0 tau))
-                        evaluation (peek (:evaluations evaluated))]
+                  {:g (double total) :steps (when record? (persistent! steps))
+                   :conditioning @conditioning}
+                  (let [step (nth @trajectory (dec tau))
+                        q (:belief step)
+                        evaluation (:node-evaluation step)]
                     (if (refusal? q)
                       {:g q :steps nil}
                       (if-let [s (q-outside q)]
@@ -807,7 +815,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                          :steps nil}
                         (let [risk (outcome-risk-pointwise q (fn [o] (point-c tau o)))]
                           (if (= risk :infinite)
-                            {:g :infinite
+                            {:g :infinite :conditioning @conditioning
                              :steps (when record?
                                       (persistent! (conj! steps {:tau tau :risk :infinite
                                                                  :belief q :rates rates :node-evaluation evaluation
@@ -894,10 +902,11 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                        :steps nil}
                       (loop [tau 1 total 0.0 steps (transient [])]
                         (if (> tau horizon)
-                          {:g (double total) :steps (when record? (persistent! steps))}
-                          (let [evaluated (when record? (rollout-evaluation precedence-fn q0 tau))
-                                q (if record? (:belief evaluated) (rollout precedence-fn q0 tau))
-                                evaluation (peek (:evaluations evaluated))]
+                          {:g (double total) :steps (when record? (persistent! steps))
+                           :conditioning @conditioning}
+                          (let [step (nth @trajectory (dec tau))
+                                q (:belief step)
+                                evaluation (:node-evaluation step)]
                             (if (refusal? q)
                               {:g q :steps nil}
                               (if-let [s (q-outside q)]
@@ -972,14 +981,17 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    closed-form Z; (2) at zero adjudication rates A is the identity kernel
    (tokenLikelihood_checkable), so Q(o_τ|π) = q_τ and the ambiguity term is
    identically 0 — q_τ comes from rollout and only its support is scored.
-   Non-zero rates refuse with the typed
-   {:status :missing :kind :judgement-rates-not-supported-at-scale}: a
-   declared current limitation, not a silent approximation. C is supplied
+   Non-zero rates use the factorized path under the preconditions below.
+   C is supplied
    either as :c-fn-pointwise (τ ↦ (o ↦ c(o)), step-indexed) or as :spec (a
    preference spec whose :c-schedule declares terminal placement and uniform
    nonzero outcomes elsewhere; absent schedule retains the constant case). :universe is the
    common token universe of the comparison (observation space of C); pass
-   the same universe for every candidate compared. Returns the double
+   the same universe for every candidate compared. Optional :belief-update-receipt
+   is D's received filtering result: its continuation must equal :q0. The
+   observation is consumed at scoring tau=0, once; every future step is
+   predictive. No observation is manufactured for a candidate future.
+   Returns the double
    sum, :infinite when any step's risk is infinite
    (horizonEFE_eq_top_iff), or the first typed refusal. Pure; no wiring.
    WIRE-1: the per-step record this function always had (and discarded)
@@ -1009,7 +1021,10 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
   "WIRE-1 emission slice: horizon-g-sparse with the per-step certificate
    the Lean specification DarkTower/AIF/Certificates.lean (GCertificate)
    requires. Returns {:g <exactly what horizon-g-sparse returns on the
-   same input> :certificate <map or nil>}. The certificate records, per
+   same input> :certificate <map or nil>}. Q records the identical D receipt
+   consumed at entry, with extensional vacuity against the predicted belief,
+   and the actual beliefs used by both sparse scoring branches. It never
+   recomputes the posterior. The certificate records, per
    tau actually iterated, the risk with :risk-status :computed and the
    ambiguity with :ambiguity-status :reduced-identically-zero under the
    named reduction \"identity-A-zero-rates\" — the three QuantityStatus
@@ -1030,7 +1045,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    that did not run; the refusal IS the record. Pure; emits, changes
    nothing."
   [m]
-  (let [{:keys [g steps]} (horizon-g-sparse* m true)]
+  (let [{:keys [g steps conditioning]} (horizon-g-sparse* m true)]
     (if (and (map? g) (contains? g :status))
       {:g g :certificate nil}
       {:g g
@@ -1048,11 +1063,20 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                                               (preference-member (:spec m) (:universe m)
                                                                                  (:horizon m) (:tau step)))}) steps)})
                       :D (:q0 m)
-                      ;; These are the beliefs the risk calculation just
-                      ;; consumed, not a second rollout. This evaluator calls
-                      ;; rollout, with no observation updates, on both paths.
-                      :Q {:steps (mapv #(select-keys % [:tau :belief]) steps)
-                          :observation-updates []}}
+                      ;; Both branches score this same sequential trajectory.
+                      ;; D's received update is consumed once at tau=0; future
+                      ;; horizon steps remain predictive from that belief.
+                      :Q {:initial-belief (:q0 m)
+                          :steps (mapv #(select-keys % [:tau :belief]) steps)
+                          :conditioning-input (:conditioning-input conditioning)
+                          :observation-updates (:observation-updates conditioning)
+                          :z-semantics :per-step-redraw
+                          :trajectory-scope :filtering-entry-predictive-future
+                          :conformance
+                          {:received-update :producer-receipt-not-recomputed
+                           :model-reference "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate"
+                           :future :varying-precedence-predictive-extension
+                           :refusal-continuation :runner-policy-not-conditionedTrajectory}}}
                      :horizon (:horizon m)
                      :steps (mapv (fn [step]
                                    {:tau (:tau step)

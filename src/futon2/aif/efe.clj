@@ -1146,7 +1146,7 @@
             scored (map (fn [action]
                           (let [{:keys [g certificate]}
                                 (cascade-manifest/horizon-g-sparse-cert
-                                 {:rates rates
+                                 (cond-> {:rates rates
                                   :q0 q0
                                   :precedence-fn (constantly (:precedence action))
                                   :horizon T
@@ -1158,7 +1158,12 @@
                                   ;; explicit nil must never override
                                   ;; the declared default of 1.
                                   :zeta (get opts :zeta 1)
-                                  :universe universe})
+                                  :universe universe}
+                                   ;; D produced the filtering result. Q checks
+                                   ;; and consumes that exact receipt at tau=0;
+                                   ;; F's evidence input remains independent.
+                                   (contains? state :belief-update-receipt)
+                                   (assoc :belief-update-receipt (:belief-update-receipt state))))
                                 f-raw (when (and (not fe-refusal?)
                                                  (not (contains? excluded-ids (:id action))))
                                         (get f-by-id (:id action)))

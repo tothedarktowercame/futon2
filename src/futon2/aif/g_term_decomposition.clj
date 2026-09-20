@@ -8,19 +8,52 @@
    compared one policy's mass to exactly 1, which cannot fire with more
    than one candidate: a verdict that could not come out the other way
    (stop-the-line finding, STOP-THE-LINE-2026-09-20.md)."
-  (:require [futon2.aif.cascade-model-manifest :as model]))
+  (:require [futon2.aif.cascade-model-manifest :as model]
+            [futon2.aif.conditioned-trajectory :as trajectory]))
 
 (def terms [:A :C :D :E :F :Q])
+
+(defn- same-belief? [a b]
+  (and (model/normalized-exact? a) (model/normalized-exact? b)
+       (= (into {} (remove (comp zero? val)) a)
+          (into {} (remove (comp zero? val)) b))))
+
+(defn- q-evidence? [value]
+  (and (vector? (:observation-updates value))
+       (every? (fn [update]
+                 (case (:status update)
+                   :value (and (true? (:consumed update))
+                               (model/normalized-exact? (:predicted-belief update))
+                               (same-belief? (:initial-belief value) (:post-belief update))
+                               (boolean? (:vacuous update))
+                               (= (:vacuous update)
+                                  (same-belief? (:predicted-belief update) (:post-belief update)))
+                               (or (not (:vacuous update))
+                                   (and (= :licensed (get-in update [:vacuity-license :status]))
+                                        (= (select-keys (:vacuity-license update)
+                                                        [:status :theorem :support :constant-likelihood :predicted-total])
+                                           (select-keys
+                                            (trajectory/vacuity-license
+                                             (:predicted-belief update)
+                                             (get-in update [:receipt :calculation :likelihoods]))
+                                            [:status :theorem :support :constant-likelihood :predicted-total])))))
+                   :refused (false? (:consumed update))
+                   false))
+               (:observation-updates value))))
 
 (defn verdict
   "Classify a recorded consumed value. Missing evidence has no verdict; it
    must never count as a degenerate value (or a non-degenerate witness).
    :E additionally requires ctx {:all-habits [...]} — the full enumerated
    habit vector. A caller that omits it gets :missing, never a defaulted
-   verdict (that omission was exactly the pre-fix facade)."
+   verdict (that omission was exactly the pre-fix facade). :Q requires
+   successful consumed updates to distinguish conditioning from prediction;
+   unchanged posteriors are still degenerate, and refusals cannot green Q.
+   Missing or inconsistent update evidence has no verdict."
   ([term value] (verdict term value nil))
   ([term value ctx]
-  (if (or (nil? value) (and (= term :C) (or (not (seq (:steps value)))
+  (if (or (nil? value) (and (= term :Q) (not (q-evidence? value)))
+          (and (= term :C) (or (not (seq (:steps value)))
                                                         (some #(nil? (:distribution %)) (:steps value)))))
     {:status :missing :value nil :reason :consumed-value-not-recorded}
     (if (and (= term :E) (not (seq (remove nil? (:all-habits ctx)))))
@@ -44,9 +77,14 @@
                      uniform? (apply == habits)]
                  [uniform? (if uniform? :uniform-habit :informative-habit)])
             :F [(zero? value) (if (zero? value) :zero-consumed-f :nonzero-consumed-f)]
-            :Q [(empty? (:observation-updates value))
-                (if (empty? (:observation-updates value))
-                  :open-loop-no-conditioning :observation-conditioned)])]
+            :Q (let [consumed (filter #(and (= :value (:status %))
+                                            (true? (:consumed %)))
+                                     (:observation-updates value))]
+                 (cond
+                   (empty? consumed) [true :open-loop-no-conditioning]
+                   (every? #(same-belief? (:predicted-belief %) (:post-belief %)) consumed)
+                   [true :conditioning-vacuous]
+                   :else [false :observation-conditioned])))]
       (cond-> {:status :present :value value
        :verdict (if degenerate? :degenerate :non-degenerate) :reason reason}
         (= term :C) (assoc :C-steps-count (count (:steps value)))))))))
