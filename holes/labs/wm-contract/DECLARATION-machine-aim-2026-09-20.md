@@ -267,14 +267,24 @@ in-domain; A :identity-default; F computed but not consumed
 Status at recording: C is the night's thread (removal + retirement +
 reinterpretation + five owned entries + conflict rule + chain-closure
 token with prompted-by); F is a wiring fix sequenced behind the
-observation-layer change; A needs an observation model (largest open
-build risk for a one-day completion); D/Q are downstream of C/A. Two
-operator dependencies for "complete tomorrow": the compliance-target
-retirement go-ahead (open in claude-4's channel), and a fresh click
-grant — the P-0 budget is consumed 5/5, and completion cannot be
-MEASURED without at least one run asking the specific question "with
-the rebuilt fundamentals, is C non-degenerate, is F consumed, does
-selection separate policies?"
+observation-layer change; D/Q are downstream of C/A.
+
+CORRECTED (claude-4, 2026-09-20): (i) no fresh click grant is needed —
+the second budget of five (AUTH-ordinary-click-budget-renewal-2026-09-19
+@ 52f75d1d) has 2 remaining; tomorrow's measurement run is paid for.
+(ii) A is NOT the big build risk: per g_term_decomposition.clj:16-30 it
+de-degenerates by DECLARING any non-zero false-pos/false-neg rate
+(precedent: R7's declared fixed zeta) — deriving rates from retained
+occurrences would be manufacturing numbers, since there are almost no
+observation disagreements to calibrate against. A and D are one chain:
+declared rates -> q0 derivation becomes a posterior over states given
+uncertain observations (today it is point-mass-by-construction,
+:target-qualified-true-facts-point-mass-v1). (iii) Q is the real
+one-day risk: :observation-updates empty is STRUCTURAL in the rollout
+(predicts forward, never conditions on observations) — the one term
+claude-4 will not promise inside a day. One operator dependency
+remains: the compliance-target retirement go-ahead; claude-4 carries
+that ask and the budget correction in one message from its channel.
 
 ## Disposition
 
