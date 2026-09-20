@@ -92,7 +92,7 @@ red: a-estimate needs a-labels annotations; q-witness-flip needs q-resolver
 - Attempt cells: `futon2/data/wm-full-loop-machinery-53/wm-contract-machinery-53-v1/attempt-002/`
 - DAG: `runs/outstanding-dag-2026-09-14/dag.edn` (+ verify_dag.bb) · Ledger: STATUS.edn
 
-## OPEN ITEM (2026-09-20, from selection-fixture migration): cohort serialization boundary admits non-round-trippable EDN
+## RESOLVED (2026-09-20 late): cohort serialization boundary — fixed at the writer (10d3dc90, receipt c7c0545f; reviewed claude-12)
 
 The runner persists dispatch responses with pr-str and reads them back
 with clojure.edn/read-string; a payload carrying functions/atoms
@@ -102,5 +102,12 @@ observers now return valid responses or throw); the WEAKNESS itself is
 explicitly unresolved (codex-5's finding, baseline artifact retained
 at sha 850cb973... in the migration receipt). Fix shape when taken:
 the writer refuses or tags non-round-trippable payloads at WRITE time
-— failures surface where they are caused. Owner: unassigned; small,
-self-contained packet.
+— failures surface where they are caused. RESOLUTION: the writer
+round-trips its emitted string through edn/read-string; success writes
+the ORIGINAL string byte-identically, unreadable values become
+{:payload/status :non-edn-payload :reason :not-round-trippable
+:summary <sanitized 256-char prefix>}. Both-sides tested incl. the
+retained baseline payload and checkpoint/close/ledger continuity;
+cohort 28/153 + runner 180/998 green, warrants registered. No reader
+changes; existing corrupt historical files stay as-is (record, not
+rewrite).
