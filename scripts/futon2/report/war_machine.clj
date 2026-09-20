@@ -5994,6 +5994,7 @@
    outcome."
   [joint-want live-spec]
   {:want (into joint-want (:want live-spec))
+   :c-schedule (:c-schedule live-spec)
    :weights (:weights live-spec)
    :lam (:lam live-spec)
    :mu (:mu live-spec)
@@ -6098,6 +6099,7 @@
                                    :signature-now (:signature-now live-freshness)
                                    :limitation "the corpus changed after C was derived: re-derive before scoring"})))
               preference-scales (live-c/family-scales problems)
+              preference-schedule (live-c/family-schedule problems)
               lanes
               (mapv (fn [problem]
                       (let [lane (cascade-lane (:cascade-problem problem))]
@@ -6196,7 +6198,7 @@
                (reduce clojure.set/union joint-want (map (partial reduce clojure.set/union #{}) (keys joint-q0)))
                joint-candidates)
               live-spec (live-c/cascade-spec live-derived joint-reachable joint-want
-                                              preference-scales)
+                                              preference-scales preference-schedule)
               live-refusal (:refusal live-spec)
               ;; :no-reachable-want is NOT the same class of refusal as
               ;; :live-c-stale or a source failure. Those two mean "C cannot be
@@ -6225,6 +6227,7 @@
                                         :cascade-spec
                                         (if grain-mismatch?
                                           {:want joint-want
+                                           :c-schedule preference-schedule
                                            :lam (:lam preference-scales)
                                            :mu (:mu preference-scales)
                                            :preference-scales preference-scales

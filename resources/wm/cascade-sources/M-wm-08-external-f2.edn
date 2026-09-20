@@ -15,6 +15,8 @@
  :beta {:value 1 :status :declared}
  :lam {:value 1 :status :declared}
  :mu {:value 0 :status :declared}
+ :c-schedule {:placement {:value :terminal :status :declared}
+              :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}}
  :facts [:external-expectation-validator-exists
          :frozen-occurrence-context-captured
          :independent-expectations-written
