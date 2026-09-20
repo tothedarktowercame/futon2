@@ -79,3 +79,45 @@ A declared judgement-channel rate of ~0.1-0.15, labeled with these two
 populations, is Landscape-grounded in exactly Joe's sense. Zai
 (in-turn) channel still unmeasured; the coupling weight p (co-failure
 clustering) is the remaining Landscape estimate.
+
+## Third channel: Zai in-turn/within-frame self-correction (APM scribe, per Joe's pointer)
+
+Joe: "For Zai you may be able to reuse work produced by the apm scribe
+which should lead to new memory entries if it works as designed." It
+works as designed: the scribe-reduce phase writes promotion receipts
+whose :challenge lane RECORDS attempt-over-attempt corrections with
+witnesses (e.g. f197: "attempt-3 corrected attempt-1's plan with
+compile witness; attempt-2 corrected attempt-1's a.e. route with a
+compiling pointwise-domination replacement") and whose :residual fields
+carry scribe-authored corrected-memory obligations.
+
+Counted (campaign jit-all-open-v3, completed scribe-reduce records):
+
+| quantity | count |
+|---|---|
+| completed scribe-reduce records (denominator) | 20 |
+| challenge lanes that ran | 20 |
+| frames recording within-frame self-corrections | 5 (0.25) |
+| correction events recorded | 8 |
+
+Reading: in a quarter of completed frames the earlier attempt carried
+an error the later attempt corrected WITH a witness — the strongest-
+evidenced channel of the three (corrections here are compile-checked,
+not judged). Caveats: within-frame attempt-grain, not turn-grain (the
+scribe records attempt-over-attempt; GLM's in-turn corrections inside
+one attempt are not separately tagged — a mint-time provenance tag
+:self-correction would give turn grain, same design lesson as the
+redirection pilot's origin field); n = 20 frames, one campaign.
+
+## Three-channel summary
+
+| channel | rate | n | evidence grade |
+|---|---|---|---|
+| codex refusal-at-intake | 0.14 | 64 | installed convention |
+| claude corrected-handoffs | ~0.09 | 68 | ad hoc, lower bound |
+| zai within-frame self-correction | 0.25 frames | 20 | compile-witnessed |
+
+All three land in the 0.1-0.25 band; the judgement-channel declared
+rate for a first live A has three independently instrumented
+populations behind it. Remaining Landscape estimate: coupling weight p
+from co-failure clustering.
