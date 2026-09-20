@@ -1,0 +1,8 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.eoi-declaration-test
+EOI-DECLARATION-OBSERVATIONS {:results {:change-authored-and-bound {:observed false, :check :C6, :evidence {:repo "futon5a", :sha "HEAD", :resolved-sha "e1a8c5252f45b8b7e7008943a397657ce80d8911", :path "holes/missions/evidence/M-expressions-of-interest/AUTHORED-CHANGE.edn", :witness-present false}}, :premise-refused-before-work {:observed false, :check :C6, :evidence {:repo "futon5a", :sha "HEAD", :resolved-sha "e1a8c5252f45b8b7e7008943a397657ce80d8911", :path "holes/missions/evidence/M-expressions-of-interest/PREMISE-REFUSAL.edn", :witness-present false}}, :obligation-resolved-through-the-account {:observed false, :check :C6, :evidence {:repo "futon5a", :sha "HEAD", :resolved-sha "e1a8c5252f45b8b7e7008943a397657ce80d8911", :path "holes/missions/evidence/M-expressions-of-interest/CORRECTION-PAR.edn", :witness-present false}}}, :refused {}}
+
+Ran 2 tests containing 21 assertions.
+0 failures, 0 errors.

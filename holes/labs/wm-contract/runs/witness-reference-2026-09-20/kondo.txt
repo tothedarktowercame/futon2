@@ -1,0 +1,3 @@
+src/futon2/aif/observation_checks.clj:78:22: info: Redundant boolean coercion: expression already has type boolean
+src/futon2/aif/observation_checks.clj:139:36: info: Redundant boolean coercion: expression already has type boolean
+linting took 26ms, errors: 0, warnings: 0

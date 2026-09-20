@@ -1,0 +1,6 @@
+
+Testing futon2.aif.witness-reference-test
+NON-RESOLVING-WITNESS {:observed #{}, :results {}, :refused {:probe {:status :missing, :kind :unknown-sha, :data {:repo "fixture", :sha "non-resolving-reference"}, :evidence {:repo "fixture", :sha "HEAD", :resolved-sha "e3ebec9c858a467088f66b358cbb5969167a558b", :path "witness.edn", :witness {:repo "fixture", :sha "non-resolving-reference", :entry "source.clj"}}}}}
+
+Ran 3 tests containing 27 assertions.
+0 failures, 0 errors.

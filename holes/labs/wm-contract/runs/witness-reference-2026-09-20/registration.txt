@@ -1,0 +1,4 @@
+evidence-id test-registry-b14d8112d1ccf22df261381e44e07d113a537910a6eac8a59a36db8d614e7313
+warrant? true
+results {:assertions 27, :duration-ms 2786, :errors 0, :exit 0, :failures 0, :tests 3}
+bound WM-witness-reference-observation -> test-registry-b14d8112d1ccf22df261381e44e07d113a537910a6eac8a59a36db8d614e7313
