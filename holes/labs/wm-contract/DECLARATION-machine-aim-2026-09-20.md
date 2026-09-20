@@ -4,6 +4,37 @@ Joe, 2026-09-20 (operator surface, verbatim): "The initial and primary aim
 of the system is to work while I sleep. It should be regulated by flexiargs
 and a model of my operator turns."
 
+## Thesis-level restatement (Joe, 2026-09-20, later the same night)
+
+Verbatim: "'Can a community of humans and machines doing open-ended work
+leave an account of itself structured enough that the work can steer
+itself -- so that activity becomes inference?' has been advanced as a
+thesis of the whole project, not just the futon2 part. That doesn't
+specify whether I [am] asleep or awake while that work happens (it could
+be both). It also opens the door to working across, say, some other
+company or community, rather [than] just with me. Though of course, that
+company will have their own preferences C, which won't be mine. But this
+just means that my preferences are that the model should be
+generalisable. ... A brittle C that has one warrant-depending term in it
+is a placeholder at best."
+
+What this changes in the reading below:
+
+- "Work while I sleep" is an INSTANCE of the aim, not its definition.
+  The dispreferred outcome (per correction 2) generalizes: a stall is a
+  state where the account of the work is insufficient to steer it and
+  only an out-of-band operator turn can move things — asleep or awake.
+- C is a PARAMETER of the model, not a constant of it. Another
+  community's C must be substitutable; therefore no C entry may encode a
+  workspace implementation detail (the warrant token was the worst
+  case). Generalisability is itself the operator's declared preference.
+- Joe's assessment of the current state, recorded as given: the
+  one-warrant-token C is evidence of satisficing — the machine could
+  satisfy its goal from its own bookkeeping — and is a placeholder at
+  best; the system is not at present able to do anything useful as a
+  steering machine. The 1 -> 0 in-domain drop at retirement is the
+  placeholder being acknowledged, not a regression.
+
 Context: this answers the question surfaced after claude-4's F computation
 came out uniformly -0.0 across policies — the machine had no unsatisfied
 goal (its one want, route-a-rehearsal-reported, already observed true; its
