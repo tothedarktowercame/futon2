@@ -1,0 +1,30 @@
+[
+  {
+    "check": "kondo",
+    "command": [
+      "clj-kondo",
+      "--lint",
+      "src/futon2/aif/full_loop_cohort.clj",
+      "test/futon2/aif/full_loop_cohort_test.clj"
+    ],
+    "exit": 0,
+    "log-sha256": "a0ada6a6df68c4bc52ec914b3c74d203df78ab78c1ccff40bb9fbd69cbd61383"
+  },
+  {
+    "check": "parens",
+    "command": [
+      "emacs",
+      "-Q",
+      "--batch",
+      "-l",
+      "/home/joe/code/futon4/dev/check-parens.el",
+      "--eval",
+      "(arxana-check-parens-cli)",
+      "--",
+      "src/futon2/aif/full_loop_cohort.clj",
+      "test/futon2/aif/full_loop_cohort_test.clj"
+    ],
+    "exit": 0,
+    "log-sha256": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87"
+  }
+]

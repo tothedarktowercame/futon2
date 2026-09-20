@@ -769,3 +769,81 @@
                (:reason (ex-data (try (cohort/resolve-lineage! binding)
                                       nil
                                       (catch clojure.lang.ExceptionInfo e e))))))))))
+
+
+(def retained-dispatch-path
+  "holes/labs/wm-contract/runs/selection-fixture-migration-2026-09-20/baseline-non-readable-dispatch.edn")
+
+(defn retained-runtime-event []
+  ;; The old file cannot be read by the production EDN reader. Reconstitute its
+  ;; captured runtime layout with actual functions/atoms at its #object sites,
+  ;; solely to supply the original input shape to the REAL writer. Production
+  ;; reads below have no custom readers.
+  (let [raw (slurp retained-dispatch-path)]
+    (is (= "850cb9737d9c22ad6d5b35e0e987c8fe27ba2e664a7bd127aaf90026292ec536"
+           (#'cohort/sha256 raw)))
+    (edn/read-string
+     {:readers {'object (fn [[class-name _ description]]
+                          (if (= 'clojure.lang.Atom class-name)
+                            (atom description)
+                            (fn [& _] nil)))}}
+     raw)))
+
+(deftest writer-replaces-retained-runtime-response-and-keeps-ledger-readable
+  (let [event (retained-runtime-event)
+        response (get-in event [:payload :ground :response])
+        root (tmp-root)
+        direct-path (io/file root "retained-event.edn")]
+    (is (thrown? RuntimeException (edn/read-string (pr-str event)))
+        "the reconstructed baseline input still exhibits the exact reader failure")
+    (#'cohort/write-new! direct-path event)
+    (let [saved (cohort/read-edn direct-path)
+          placeholder (get-in saved [:payload :ground :response])]
+      (is (= :non-edn-payload (:payload/status placeholder)))
+      (is (= :not-round-trippable (:reason placeholder)))
+      (is (<= (count (:summary placeholder)) 256))
+      (is (= (dissoc event :payload) (dissoc saved :payload)))
+      (is (= (get-in event [:payload :judgment]) (get-in saved [:payload :judgment]))))
+    ;; Same input passes through the public checkpoint append and the real
+    ;; ledger reader, then another checkpoint and close prove run continuity.
+    (cohort/activate! prereg-path root)
+    (let [attempt (:attempt/id (open! root "serialization/baseline"))]
+      (doseq [checkpoint [:selection :construction]]
+        (cohort/append-checkpoint! prereg-path root attempt checkpoint
+                                   {:sorry {:kind :test}}))
+      (cohort/append-checkpoint! prereg-path root attempt :dispatch
+                                 (assoc-in (:payload event) [:ground :response] response))
+      (doseq [checkpoint [:build :adjudication]]
+        (cohort/append-checkpoint! prereg-path root attempt checkpoint
+                                   {:sorry {:kind :test}}))
+      (cohort/close-attempt! prereg-path root attempt
+                             (term {:outcome :agent-unavailable :grounded? false
+                                    :artifact-only? false :duration-ms 1
+                                    :resource-use {:agent-turns 0}}))
+      (is (= 1 (:closed-count (cohort/ledger prereg-path root)))))))
+
+(defrecord UnreadableTaggedPayload [value])
+
+(deftest writer-preserves-valid-bytes-and-marks-other-unreadable-values
+  (let [root (tmp-root)
+        valid (array-map :first [nil true false 1 1/3 2.5M :tag 'symbol]
+                         :text "line one\nline two"
+                         :nested {:set #{:a :b} :list '(1 2 3)})
+        good-path (io/file root "good.edn")]
+    (#'cohort/write-new! good-path valid)
+    (is (= (seq (.getBytes (str (pr-str valid) "\n") "UTF-8"))
+           (seq (Files/readAllBytes (.toPath good-path))))
+        "valid output is byte-for-byte the prior writer output")
+    (is (= valid (cohort/read-edn good-path)))
+    (doseq [[name value] [["function" (fn [] nil)] ["atom" (atom {:x 1})]
+                         ["object" (Object.)] ["bad-key" {(Object.) :value}]
+                         ["tagged-record" (->UnreadableTaggedPayload :readable-field)]]]
+      (let [path (io/file root (str name ".edn"))]
+        (#'cohort/write-new! path value)
+        (is (= :non-edn-payload (:payload/status (cohort/read-edn path))))))
+    (let [path (io/file root "siblings.edn")]
+      (#'cohort/write-new! path {:valid valid :runtime (atom "\u001b\nprivate")})
+      (let [saved (cohort/read-edn path)]
+        (is (= valid (:valid saved)))
+        (is (= :non-edn-payload (get-in saved [:runtime :payload/status])))
+        (is (not (re-find #"[\p{Cc}\p{Cf}]" (get-in saved [:runtime :summary]))))))))

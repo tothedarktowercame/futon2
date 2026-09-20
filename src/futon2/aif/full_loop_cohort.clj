@@ -220,13 +220,54 @@
 (defn- read-preregistration [source]
   (if (instance? PinnedPreregistration source) (:value source) (read-edn source)))
 
+(defn- printed-edn [value]
+  ;; Validate the exact emitted string with the production reader. EDN types
+  ;; cannot be inferred from Java classes (including custom print methods).
+  (try
+    (let [text (pr-str value)]
+      (try
+        (edn/read-string text)
+        {:text text :readable? true}
+        (catch Exception _ {:text text :readable? false})))
+    (catch Exception _ {:text "<printing failed>" :readable? false})
+    (catch StackOverflowError _ {:text "<printing overflowed>" :readable? false})))
+
+(defn- non-edn-placeholder [text]
+  (let [prefix (-> (subs text 0 (min 256 (count text)))
+                   (str/replace #"[\p{Cc}\p{Cf}]" " ")
+                   (str/replace #"0x[0-9a-fA-F]+" "<address>"))]
+    {:payload/status :non-edn-payload
+     :reason :not-round-trippable
+     :summary (subs prefix 0 (min 256 (count prefix)))}))
+
+(defn- writable-edn [value]
+  (let [{:keys [text readable?]} (printed-edn value)]
+    (if readable?
+      {:value value :text text :changed? false}
+      ;; Preserve event identity and readable sibling fields. A bad collection
+      ;; value (e.g. captured dispatch args) becomes one visible placeholder;
+      ;; unreadable map keys replace the map, avoiding repaired-key collisions.
+      (let [replacement
+            (if (and (map? value)
+                     (every? (comp :readable? printed-edn) (keys value)))
+              (let [fields (mapv (fn [[k v]] [k (writable-edn v)]) value)]
+                (if (some (comp :changed? second) fields)
+                  (into {} (map (fn [[k result]] [k (:value result)])) fields)
+                  ;; A record/custom map printer can be unreadable even when
+                  ;; all fields are EDN. Do not silently erase that defect.
+                  (non-edn-placeholder text)))
+              (non-edn-placeholder text))
+            emitted (printed-edn replacement)]
+        (if (:readable? emitted)
+          {:value replacement :text (:text emitted) :changed? true}
+          (let [placeholder (non-edn-placeholder text)]
+            {:value placeholder :text (pr-str placeholder) :changed? true}))))))
+
 (defn- write-new! [path value]
-  ;; pr-str, not pp/pprint: cohort cells are machine-read EDN, and cells that
-  ;; embed machine-state can run to megabytes — the pretty-writer's per-char
-  ;; STM transactions cost attempt-053 ~4 minutes of silent startup CPU
-  ;; (2026-07-25). pr-str round-trips identically at print cost linear in size.
+  ;; Keep the original pr-str bytes for readable values, including map order.
+  ;; Non-EDN data is evidence of a payload defect, not a reason to halt the run.
   (let [^Path p (if (instance? Path path) path (.toPath (io/file path)))
-        bytes (.getBytes (str (pr-str value) "\n") StandardCharsets/UTF_8)]
+        bytes (.getBytes (str (:text (writable-edn value)) "\n") StandardCharsets/UTF_8)]
     (when-let [parent (.getParent p)] (Files/createDirectories parent (make-array java.nio.file.attribute.FileAttribute 0)))
     (Files/write p bytes (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW
                                                          StandardOpenOption/WRITE]))
