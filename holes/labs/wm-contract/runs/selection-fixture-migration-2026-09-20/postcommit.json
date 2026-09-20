@@ -1,0 +1,64 @@
+{
+  "role": "post-commit registered run",
+  "actor": "codex-5",
+  "review-owner": "claude-12",
+  "implementation-sha": "20e15631badd3951f29cb851155d29e3d71b5f62",
+  "runner-cwd": "/home/joe/code/futon3c",
+  "test-repo-root": "/home/joe/code/futon2",
+  "command": [
+    "clojure",
+    "-M",
+    "-m",
+    "futon3c.test-registry.validation",
+    "register",
+    "/home/joe/code/futon2/holes/labs/wm-contract/runs/selection-fixture-migration-2026-09-20/registry.edn"
+  ],
+  "file-sha256": {
+    "src/futon2/aif/full_loop_runner.clj": "3a82fa03ff06df4267c3a57410a19d5132642e8d245464c4b4c403138b89e776",
+    "src/futon2/aif/policy.clj": "50b7c54b872d8915ddbad225c9cb0d3fd2ec842c08a8d7fa6b9b9293fcd292a6",
+    "src/futon2/aif/full_loop_cohort.clj": "2eeefea826595b96ca122f12570c52cead1929624d29e114df58d3f21ff18215",
+    "src/futon2/aif/repair_obligation.clj": "88d4545a102fdd441ecb712a817c3d66473d870523d8694f7371241c07620ec5",
+    "test/futon2/aif/full_loop_runner_test.clj": "26efe04c169366a9e9c10d26092994946e4ae97585d61774dcd086e123f2ae11",
+    "test/futon2/aif/hermetic_repair_fixture.clj": "7501075b42190147d815ef2162a54e8cd89f29a93a779d0b66cafd32b26306c0"
+  },
+  "started-at": "2026-09-20T21:30:22Z",
+  "exit": 1,
+  "duration-seconds": 178.55395350418985,
+  "log-sha256": "f9a0270a4a8e23e273ce4f6d1bd789758e40129d2eb3cd53d1e256c9d43fffeb",
+  "files-unchanged": true,
+  "results": {
+    "tests": 180,
+    "assertions": 998,
+    "failures": 1,
+    "errors": 0
+  },
+  "warrant?": false,
+  "evidence-id": "test-registry-73c4bd6e0af3ea8d71d63e307918bde5087b49c44a7060d8538b43cc57df63ca",
+  "test-log": "6fa79dfb-f19d-4b5c-8077-944069c055eb.log",
+  "test-log-sha256": "ad5500d04e5ca47def819f07c96c33c1ea09f70c33a674b9c8eaef2ae06a5afa",
+  "unexpected-failure": {
+    "location": "hermetic_repair_fixture.clj:39",
+    "expected": "(= repair-before (file-set production-repair-root))",
+    "added": [
+      "findings/repair-02ca4839-5879-44ea-8f59-2839c540814a-construction-yields-no-boxes.edn",
+      "implementations/repair-occ-09fab69174ee3f5985f572f08db809e27603ceee7e77e300114aa429a182135c.edn",
+      "implementations/repair-occ-2b12c62357a9d7239552128815bf98e1cce2639710643f9c228734beb4186794.edn",
+      "implementations/repair-occ-44296f53f4945831420b3ae6194d6e854a45a965f16a94e8e282fd29c56c8d70.edn",
+      "implementations/repair-occ-45fde4b6e38947f279f69539091086d83693c084b412a149046c629095adef5d.edn",
+      "implementations/repair-occ-7652139c7d8bcd122c524964fcf4ef50f3c7485753ee7503e71db029466c86d4.edn",
+      "implementations/repair-occ-77ab9e427b2c82e1140d0915487aedfdcaef8cf5fb44607f833a8e1efd7d6289.edn",
+      "implementations/repair-occ-b4f456e95d0448d016652c7c820ba85b382cf3f7590f6383c55e5d6f06454bab.edn",
+      "implementations/repair-occ-efcce947097240ebba28aca0f350b3411bcf917a68909de356c470b624903497.edn",
+      "resolutions/repair-occ-09fab69174ee3f5985f572f08db809e27603ceee7e77e300114aa429a182135c.edn",
+      "resolutions/repair-occ-2b12c62357a9d7239552128815bf98e1cce2639710643f9c228734beb4186794.edn",
+      "resolutions/repair-occ-44296f53f4945831420b3ae6194d6e854a45a965f16a94e8e282fd29c56c8d70.edn",
+      "resolutions/repair-occ-45fde4b6e38947f279f69539091086d83693c084b412a149046c629095adef5d.edn",
+      "resolutions/repair-occ-7652139c7d8bcd122c524964fcf4ef50f3c7485753ee7503e71db029466c86d4.edn",
+      "resolutions/repair-occ-77ab9e427b2c82e1140d0915487aedfdcaef8cf5fb44607f833a8e1efd7d6289.edn",
+      "resolutions/repair-occ-b4f456e95d0448d016652c7c820ba85b382cf3f7590f6383c55e5d6f06454bab.edn",
+      "resolutions/repair-occ-efcce947097240ebba28aca0f350b3411bcf917a68909de356c470b624903497.edn"
+    ],
+    "removed": [],
+    "attribution": "not established; stopped at review checkpoint without retry or widening"
+  }
+}

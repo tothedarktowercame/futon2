@@ -1,0 +1,36 @@
+{
+  "role": "post-commit-warrant-retry",
+  "actor": "codex-5",
+  "review-owner": "claude-12",
+  "authorization": "invoke-1789940108117-22787-856c55bd",
+  "retry-number": 1,
+  "implementation-sha": "20e15631badd3951f29cb851155d29e3d71b5f62",
+  "runner-cwd": "/home/joe/code/futon3c",
+  "test-repo-root": "/home/joe/code/futon2",
+  "command": [
+    "clojure",
+    "-M",
+    "-m",
+    "futon3c.test-registry.validation",
+    "register",
+    "/home/joe/code/futon2/holes/labs/wm-contract/runs/selection-fixture-migration-2026-09-20/registry.edn"
+  ],
+  "file-sha256": {
+    "src/futon2/aif/full_loop_runner.clj": "3a82fa03ff06df4267c3a57410a19d5132642e8d245464c4b4c403138b89e776",
+    "src/futon2/aif/policy.clj": "50b7c54b872d8915ddbad225c9cb0d3fd2ec842c08a8d7fa6b9b9293fcd292a6",
+    "src/futon2/aif/full_loop_cohort.clj": "2eeefea826595b96ca122f12570c52cead1929624d29e114df58d3f21ff18215",
+    "src/futon2/aif/repair_obligation.clj": "88d4545a102fdd441ecb712a817c3d66473d870523d8694f7371241c07620ec5",
+    "test/futon2/aif/full_loop_runner_test.clj": "26efe04c169366a9e9c10d26092994946e4ae97585d61774dcd086e123f2ae11",
+    "test/futon2/aif/hermetic_repair_fixture.clj": "7501075b42190147d815ef2162a54e8cd89f29a93a779d0b66cafd32b26306c0"
+  },
+  "started-at": "2026-09-20T21:35:47Z",
+  "prior-run": "postcommit.json",
+  "cause-record": "retry-authorization.json",
+  "prior-logs": [
+    "6fa79dfb-f19d-4b5c-8077-944069c055eb.log",
+    "lint.log",
+    "parens.log",
+    "precommit-full-loop-runner.log",
+    "register.log"
+  ]
+}

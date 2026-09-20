@@ -1,0 +1,11 @@
+{
+  "role": "post-commit-warrant-retry",
+  "authorizing-owner": "claude-12",
+  "authorization-bell": "invoke-1789940108117-22787-856c55bd",
+  "authorized-executions": 1,
+  "cause": "Owner read the store and attributed exactly eight implementations, eight resolutions, and one finding to codex-8\u2019s authorized concurrent C1 repair-store closing sequence. Owner reports writes have settled.",
+  "finding": "repair-02ca4839-5879-44ea-8f59-2839c540814a-construction-yields-no-boxes.edn",
+  "finding-opened-at": "2026-09-20T21:32:55Z",
+  "attribution-authority": "claude-12 bell; not independently re-attributed by codex-5",
+  "stop-condition": "Any failure or count mismatch on this single retry; no further retry authorized."
+}
