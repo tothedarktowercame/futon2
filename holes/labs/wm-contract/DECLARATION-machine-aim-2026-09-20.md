@@ -174,6 +174,26 @@ Notes (claude-12):
   Evidence Landscape free-text search remains to be run (endpoint
   /api/mission-search; serving port not identified from this seat).
 
+## RULING — affirmation over absence (Joe, 2026-09-20)
+
+Verbatim: "I don't see why we would want to clog up the database with
+'absence observations'. Cf.
+https://en.wikipedia.org/wiki/Nietzschean_affirmation"
+
+Applied to the third endorsed token: "obligation resolved WITHOUT an
+out-of-band turn" (an absence, requiring window + earned basis +
+transport scope, defeasible after backfill) is replaced by the
+affirmative form: **obligation resolved THROUGH the account** — every
+step of the correction cycle is present in the record and each step
+grounds in a prior recorded step. A closed chain of artifacts: pure
+presence, checkable via existing repository-state observation kinds
+plus linkage; no new observation kind; no absence records in the store.
+The affirmative claim is also the epistemically honest one — chain
+closure ("the recorded account carried the steering") is witnessable;
+"nothing happened off-record" never fully was. The futon1b turn stream
+remains available as corroborating evidence agents may consult; it is
+not an observation kind.
+
 ## RULING — multi-owner conflict rule (Joe, 2026-09-20)
 
 Joe approved Option 2 ("Fine with me. Hopefully this is less
