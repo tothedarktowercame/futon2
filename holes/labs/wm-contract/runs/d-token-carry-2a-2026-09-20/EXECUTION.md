@@ -78,3 +78,31 @@ Post-commit warrant IDs and comparison are recorded in a follow-up receipt
 commit after registration. Registry configurations are included in this
 directory, one per namespace. Lint and the workspace parens check also run
 before landing. Independent owner review and the 2b checkpoint remain.
+
+## Registered results
+
+Implementation commit: `c300c67b`. All four committed registry runs passed:
+**59 tests, 623 assertions, zero failures/errors**. `validation-comparison.json`
+checks each namespace against its final pre-commit result; counts and success
+agree. `postcommit-receipt.json` records commands, commit and log hashes.
+
+- `futon2.aif.exact-belief-adapter-test`: 7/101; `test-registry-5d237a5d5c530e1d0f91dc0f3a7d5f115661a5c34d69904a03d5dc61e4018be5`.
+- `futon2.aif.token-belief-carry-test`: 4/30; `test-registry-30193d624f56768e283d98a15bbf721750ea2fe82a3a58e95151f23229f6deb4`.
+- `futon2.aif.scoring-input-receipts-test`: 3/45; `test-registry-f0b91d0467d113f1f65e3fec444187e8ba4a513b2c895ca5f2a68d95a88dded1`.
+- `futon2.aif.cascade-model-manifest-test`: 45/447; `test-registry-095cb58eecec126df1f63c7d974fa59ceb2a23feb43b648b295da5116d1952e5`.
+
+Pre-commit validation saw concurrent Q edits in the working manifest; those
+edits were absent from the canonical checkout before registration. The warrants
+therefore cover the committed D-only implementation and its actual load closure,
+not uncommitted Q work. The outcomes still match the captured baseline.
+
+## Recorded live carrier discovery
+
+The newest persisted live run on disk at inspection was
+`2026-09-20-019f6e43-5ea5-40b9-bfe6-1a0e1358d5f3` (started 16:17:55 UTC). Its five
+candidates consume A over **7 target-qualified tokens**, hence **128 token-set
+states**; each recorded D has **one positive state** and reads `:point-mass`.
+`live-carrier.edn` retains the source path/hash, exact token universe and
+per-candidate support counts. This is a read of existing evidence, not a new
+live tick or serving-JVM measurement. The 64-state orientation fixture remains
+a separate constructed test with the same token-set representation.

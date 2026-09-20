@@ -1,0 +1,36 @@
+{
+  "implementation": "c300c67b",
+  "tests": 59,
+  "assertions": 623,
+  "all-agree": true,
+  "rows": [
+    {
+      "namespace": "futon2.aif.exact-belief-adapter-test",
+      "warrant": "test-registry-5d237a5d5c530e1d0f91dc0f3a7d5f115661a5c34d69904a03d5dc61e4018be5",
+      "tests": 7,
+      "assertions": 101,
+      "precommit-and-postcommit-agree": true
+    },
+    {
+      "namespace": "futon2.aif.token-belief-carry-test",
+      "warrant": "test-registry-30193d624f56768e283d98a15bbf721750ea2fe82a3a58e95151f23229f6deb4",
+      "tests": 4,
+      "assertions": 30,
+      "precommit-and-postcommit-agree": true
+    },
+    {
+      "namespace": "futon2.aif.scoring-input-receipts-test",
+      "warrant": "test-registry-f0b91d0467d113f1f65e3fec444187e8ba4a513b2c895ca5f2a68d95a88dded1",
+      "tests": 3,
+      "assertions": 45,
+      "precommit-and-postcommit-agree": true
+    },
+    {
+      "namespace": "futon2.aif.cascade-model-manifest-test",
+      "warrant": "test-registry-095cb58eecec126df1f63c7d974fa59ceb2a23feb43b648b295da5116d1952e5",
+      "tests": 45,
+      "assertions": 447,
+      "precommit-and-postcommit-agree": true
+    }
+  ]
+}

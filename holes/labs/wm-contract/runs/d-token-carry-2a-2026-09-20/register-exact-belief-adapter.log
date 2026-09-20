@@ -1,0 +1,4 @@
+evidence-id test-registry-5d237a5d5c530e1d0f91dc0f3a7d5f115661a5c34d69904a03d5dc61e4018be5
+warrant? true
+results {:assertions 101, :duration-ms 785, :errors 0, :exit 0, :failures 0, :tests 7}
+bound D/staged-2a/exact-belief-adapter -> test-registry-5d237a5d5c530e1d0f91dc0f3a7d5f115661a5c34d69904a03d5dc61e4018be5

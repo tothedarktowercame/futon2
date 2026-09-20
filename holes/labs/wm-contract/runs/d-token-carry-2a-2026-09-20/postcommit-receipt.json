@@ -1,0 +1,66 @@
+{
+  "role": "post-commit-warrant",
+  "head": "c300c67bf82d47dad47e3a513e0b0b90d9eda312",
+  "runs": [
+    {
+      "namespace": "futon2.aif.exact-belief-adapter-test",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/registry-exact-belief-adapter.edn"
+      ],
+      "exit": 0,
+      "duration-seconds": 5.1,
+      "log": "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/register-exact-belief-adapter.log",
+      "log-sha256": "95823f63420af6d49db63c62b0a66e56a0902adfc220d186ad750d69fccc30aa"
+    },
+    {
+      "namespace": "futon2.aif.token-belief-carry-test",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/registry-token-belief-carry.edn"
+      ],
+      "exit": 0,
+      "duration-seconds": 9.619,
+      "log": "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/register-token-belief-carry.log",
+      "log-sha256": "c5115c9cbaabb0c0ab9faa893b32895a0a54d71fdce1af12b27f372e0ae17bb7"
+    },
+    {
+      "namespace": "futon2.aif.scoring-input-receipts-test",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/registry-scoring-input-receipts.edn"
+      ],
+      "exit": 0,
+      "duration-seconds": 9.154,
+      "log": "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/register-scoring-input-receipts.log",
+      "log-sha256": "bebbcae8f301959ca9ea2f4cc1f8c42a4228b3a3def681a7d69ac9c81912122c"
+    },
+    {
+      "namespace": "futon2.aif.cascade-model-manifest-test",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/registry-cascade-model-manifest.edn"
+      ],
+      "exit": 0,
+      "duration-seconds": 7.359,
+      "log": "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-token-carry-2a-2026-09-20/register-cascade-model-manifest.log",
+      "log-sha256": "263849e099ea86ddbbc2faee5300bbfd9c5e8923c6180ebc481649ddfa33e21a"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+evidence-id test-registry-30193d624f56768e283d98a15bbf721750ea2fe82a3a58e95151f23229f6deb4
+warrant? true
+results {:assertions 30, :duration-ms 4571, :errors 0, :exit 0, :failures 0, :tests 4}
+bound D/staged-2a/token-belief-carry -> test-registry-30193d624f56768e283d98a15bbf721750ea2fe82a3a58e95151f23229f6deb4

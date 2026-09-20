@@ -1,0 +1,4 @@
+evidence-id test-registry-095cb58eecec126df1f63c7d974fa59ceb2a23feb43b648b295da5116d1952e5
+warrant? true
+results {:assertions 447, :duration-ms 2166, :errors 0, :exit 0, :failures 0, :tests 45}
+bound D/staged-2a/cascade-model-manifest -> test-registry-095cb58eecec126df1f63c7d974fa59ceb2a23feb43b648b295da5116d1952e5
