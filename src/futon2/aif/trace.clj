@@ -560,6 +560,8 @@
     ;; what was enacted, not just the γ-facing outcome record.
     (seq (:act-gate-verdicts judge-output))
     (assoc :act-gate-verdicts (:act-gate-verdicts judge-output))
+    (:d-task-context judge-output)
+    (assoc :d-task-context (:d-task-context judge-output))
     (:enactment judge-output)
     (assoc :enactment (:enactment judge-output))
     ;; B1 learned E(π), dark and present-only: the flag-off trace shape remains

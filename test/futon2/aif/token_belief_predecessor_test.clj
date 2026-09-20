@@ -39,7 +39,7 @@
         inspected (get-in input [:carry-admission :inspected])]
     (is (= :match (:verdict comparison)))
     (is (= :carry-no-predecessor (get-in input [:carry-admission :kind])))
-    (is (= :e2b/production-authority-unavailable (get-in input [:carry-admission :authority :kind])))
+    (is (= :carry-no-predecessor (get-in input [:carry-admission :authority :kind])))
     (is (= [:selection-is-not-enactment :selection-self-comparison-is-not-enactment
             :independent-token-transition-evidence-unestablished :record-absent
             :plan-is-not-enactment :simulated-order-is-not-enactment]
