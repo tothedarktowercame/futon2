@@ -215,6 +215,40 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
       (into {} (remove (comp zero? val))
             (zipmap subsets (map (partial token-likelihood rates state) subsets))))))
 
+(defn mixture-observation-distribution
+  "Finite latent A(o|s) = sum_z weight_z * tokenLikelihood rates_z s o.
+   Components are a nonempty sequential collection of {:weight q :rates r},
+   all on the same token universe. Weights must be exact nonnegative
+   rationals summing to 1; rates obey observation-distribution's contract.
+   Returns a sparse exact row, or a typed refusal (including invalid
+   zero-weight components). Conforms to MixedTokenObservation's colsum and
+   checkable-marginal laws. Parameters are declarations, not calibration."
+  [components state]
+  (cond
+    (not (and (sequential? components) (seq components)
+              (every? #(and (map? %) (map? (:rates %))) components)))
+    {:status :missing :kind :invalid-mixture-components}
+
+    (not (every? #(let [w (:weight %)]
+                   (and (or (integer? w) (ratio? w)) (<= 0 w 1))) components))
+    {:status :missing :kind :invalid-mixture-weight}
+
+    (not= 1 (reduce + (map :weight components)))
+    {:status :missing :kind :mixture-weights-not-normalized
+     :total (reduce + (map :weight components))}
+
+    (not (apply = (map #(set (keys (:rates %))) components)))
+    {:status :missing :kind :mixture-universe-mismatch}
+
+    :else
+    (let [rows (mapv #(observation-distribution (:rates %) state) components)]
+      (or (some #(when (refusal-map? %) %) rows)
+          (into {} (remove (comp zero? val))
+                (reduce (fn [acc [component row]]
+                          (merge-with + acc
+                                      (update-vals row #(* (:weight component) %))))
+                        {} (map vector components rows)))))))
+
 (defn predict-observations
   "Lean PolicyRollout.predictedOutcome composed with TokenObservation's A:
    Q(o) = Σ_s A(s,o) · q(s) over a state distribution q. With zero rates

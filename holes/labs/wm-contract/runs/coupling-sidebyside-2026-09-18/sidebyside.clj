@@ -4,13 +4,14 @@
 (def s (set (take 5 u)))
 ;; Independent judge: miss 1/10, hallucinate 1/100, all tokens independent.
 (def indep (rates-for u 1/10 1/100))
-;; Coupled judge: common cause. 15% of runs are a "bad day" (miss 1/2);
+;; Declared experimental configuration, not an empirical estimate:
+;; coupled judge with 15% weight on a "bad day" (miss 1/2);
 ;; good-day miss 1/34 chosen so the MARGINAL miss rate is exactly 1/10:
 ;; 17/20 * 1/34 + 3/20 * 1/2 = 1/40 + 3/40 = 4/40 = 1/10.
 (def d-indep (m/observation-distribution indep s))
-(def d-good  (m/observation-distribution (rates-for u 1/34 1/100) s))
-(def d-bad   (m/observation-distribution (rates-for u 1/2  1/100) s))
-(def d-coup  (merge-with + (update-vals d-good #(* 17/20 %)) (update-vals d-bad #(* 3/20 %))))
+(def d-coup (m/mixture-observation-distribution
+             [{:weight 17/20 :rates (rates-for u 1/34 1/100)}
+              {:weight 3/20 :rates (rates-for u 1/2 1/100)}] s))
 (defn seen-marg [d v] (reduce + (map val (filter #(contains? (key %) v) d))))
 (println "marginal P(miss tok0) indep =" (- 1 (seen-marg d-indep "tok0"))
          " coupled =" (- 1 (seen-marg d-coup "tok0")))
