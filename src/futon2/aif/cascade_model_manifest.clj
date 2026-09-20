@@ -635,6 +635,47 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                     (for [[o p] q :when (pos? p)]
                       (* (double p) (- (Math/log (double p)) (double (log-c-of o)))))))))
 
+(defn preference-member
+  "Serializable distribution actually consumed at tau. Weights are additive
+  log weights; zeroed outcomes have exactly zero probability."
+  [spec universe horizon tau]
+  (let [validated (log-preference-fn spec universe)
+        schedule (:c-schedule spec)
+        placement (get-in schedule [:placement :value])
+        uniform? (and (= :terminal placement) (not= tau horizon))]
+    (cond
+      (refusal? validated) validated
+      (not (contains? #{nil :every-step :terminal} placement))
+      {:status :missing :kind :invalid-preference-schedule :schedule schedule}
+      (and uniform? (not= :uniform-over-non-ruled-zero (get-in schedule [:elsewhere :value])))
+      {:status :missing :kind :invalid-preference-schedule :schedule schedule}
+      :else
+      {:universe (set/union (set universe) (set (:want spec)) (set (:evidence spec))
+                           (into #{} cat (:zeroed spec)))
+       :zeroed (set (:zeroed spec))
+       :weights (if uniform? {} (into {} (remove (comp zero? val)) (utility-weights spec)))})))
+
+(defn member-log-probability [member]
+  (let [{:keys [universe zeroed weights]} member
+        utility (fn [o] (reduce + 0.0 (map #(double (get weights % 0)) o)))
+        log-z0 (reduce + 0.0 (map #(Math/log1p (Math/exp (double (get weights % 0)))) universe))
+        log-z (+ log-z0 (Math/log1p (- (reduce + 0.0 (map #(Math/exp (- (double (utility %)) log-z0)) zeroed)))))]
+    (fn [o] (if (contains? zeroed o) ##-Inf (- (double (utility o)) log-z)))))
+
+(defn same-preference-distribution?
+  "Compare whole distributions, not form labels or rollout support. Equal
+  log weights are the fast path. Otherwise their difference must be constant
+  on every nonzero outcome; handles exclusions leaving singleton support."
+  [a b]
+  (and (= (:universe a) (:universe b)) (= (:zeroed a) (:zeroed b))
+       (or (= (:weights a) (:weights b))
+           (let [outcomes (reduce (fn [os t] (mapcat #(vector % (conj % t)) os))
+                                  [#{}] (:universe a))
+                 difference (fn [o] (reduce + 0 (map #(- (get (:weights a) % 0)
+                                                        (get (:weights b) % 0)) o)))
+                 values (map difference (remove (:zeroed a) outcomes))]
+             (or (empty? values) (every? #(= (first values) %) (rest values)))))))
+
 (defn- horizon-g-sparse*
   "The shared evaluation core of horizon-g-sparse. Same refusals, same
    arithmetic, same iteration order; when RECORD? is true the per-step risk
@@ -673,6 +714,9 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
       {:g {:status :missing :kind :invalid-horizon :horizon horizon} :steps nil}
       (not (and (ifn? precedence-fn) (map? q0)))
       {:g {:status :missing :kind :invalid-horizon-g-input} :steps nil}
+      (and (= :terminal (get-in spec [:c-schedule :placement :value]))
+           (not (zero-rates? rates)))
+      {:g {:status :missing :kind :c-family-unsupported-with-rates} :steps nil}
       (and (nil? c-fn-pointwise) (nil? spec))
       {:g {:status :missing :kind :missing-preference-spec} :steps nil}
       :else
@@ -681,12 +725,17 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
       ;; rates now score by the factorized closed forms instead of
       ;; refusing — see the factorized body and its docstring below.
       (if (zero-rates? rates)
-        (let [lpf (when (nil? c-fn-pointwise) (log-preference-fn spec universe))
+        (let [members (when-not c-fn-pointwise
+                        (into {} (for [tau (range 1 (inc horizon))]
+                                   [tau (preference-member spec universe horizon tau)])))
+              lpf (when-not c-fn-pointwise
+                    (or (some #(when (refusal? %) %) (vals members))
+                        (into {} (map (fn [[tau member]] [tau (member-log-probability member)])) members)))
             point-c (cond
                       c-fn-pointwise (fn [tau o] (let [c ((c-fn-pointwise tau) o)]
                                                    (if (zero? c) ##-Inf (Math/log (double c)))))
                       (refusal? lpf) lpf
-                      :else (fn [_tau o] (lpf o)))]
+                      :else (fn [tau o] ((get lpf tau) o)))]
         (if (refusal? point-c)
           {:g point-c :steps nil}
           ;; WM-06 domain meeting: when C is the spec seed, every positive-mass
@@ -729,10 +778,12 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                             {:g :infinite
                              :steps (when record?
                                       (persistent! (conj! steps {:tau tau :risk :infinite
-                                                                 :belief q :rates rates :node-evaluation evaluation})))}
+                                                                 :belief q :rates rates :node-evaluation evaluation
+                                                                 :c-distribution (get members tau)})))}
                             (recur (inc tau) (+ total risk)
                                    (if record?
-                                     (conj! steps {:tau tau :risk risk :belief q :rates rates :node-evaluation evaluation})
+                                     (conj! steps {:tau tau :risk risk :belief q :rates rates :node-evaluation evaluation
+                                                                 :c-distribution (get members tau)})
                                      steps)))))))))))))
         ;; WIRE-4: non-zero adjudication rates score by the FACTORIZED
         ;; closed forms — O(|universe|) per step, no powerset anywhere:
@@ -889,8 +940,8 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    {:status :missing :kind :judgement-rates-not-supported-at-scale}: a
    declared current limitation, not a silent approximation. C is supplied
    either as :c-fn-pointwise (τ ↦ (o ↦ c(o)), step-indexed) or as :spec (a
-   preference spec used as a DECLARED CONSTANT C_τ at every τ — the constant
-   case, not a claim that C_τ is constant in general). :universe is the
+   preference spec whose :c-schedule declares terminal placement and uniform
+   nonzero outcomes elsewhere; absent schedule retains the constant case). :universe is the
    common token universe of the comparison (observation space of C); pass
    the same universe for every candidate compared. Returns the double
    sum, :infinite when any step's risk is infinite
@@ -950,13 +1001,16 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
        :certificate {:node-evaluations (mapv :node-evaluation steps)
                      :consumed-g
                      {:A (:rates (first steps))
-                      ;; A spec denotes the whole distribution, without
-                      ;; enumerating its exponential outcome space. The live
-                      ;; caller uses this path. A function-valued C cannot be
-                      ;; serialized; absence is explicit, never guessed.
+                      ;; Each consumed member denotes the full distribution
+                      ;; via exact additive log weights and zero exclusions.
+                      ;; Function-valued C remains explicitly unrecorded.
                       :C (when-not (:c-fn-pointwise m)
-                           {:form :constant-spec :spec (:spec m)
-                            :universe (:universe m)})
+                           {:form :step-indexed :schedule (get-in m [:spec :c-schedule])
+                            :steps (mapv (fn [step]
+                                           {:tau (:tau step)
+                                            :distribution (or (:c-distribution step)
+                                                              (preference-member (:spec m) (:universe m)
+                                                                                 (:horizon m) (:tau step)))}) steps)})
                       :D (:q0 m)
                       ;; These are the beliefs the risk calculation just
                       ;; consumed, not a second rollout. This evaluator calls
@@ -982,7 +1036,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                                  "identity-A-zero-rates")})
                                  (or steps []))
                      :total g
-                     :c-form (if (:c-fn-pointwise m) :step-indexed :constant-spec)
+                     :c-form (if (or (:c-fn-pointwise m) (:c-schedule (:spec m))) :step-indexed :constant-spec)
                      ;; WIRE-4 provenance: which evaluation path ran and the
                      ;; rates it ran with — a run that scored a real
                      ;; observation model is distinguishable from one that

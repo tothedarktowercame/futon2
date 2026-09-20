@@ -1082,7 +1082,9 @@
                     ;; exists (positive rationals over :want, typed refusal
                     ;; :invalid-preference-spec :field :weights otherwise).
                     (:weights spec-in)
-                    (assoc :weights (:weights spec-in)))
+                    (assoc :weights (:weights spec-in))
+                    (contains? spec-in :c-schedule)
+                    (assoc :c-schedule (:c-schedule spec-in)))
             universe (-> (cascade-candidate-tokens
                           (mapcat :precedence candidate-actions))
                          (into (reduce set/union #{} (keys q0)))

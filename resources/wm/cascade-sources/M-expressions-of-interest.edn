@@ -13,6 +13,8 @@
  :beta {:value 1 :status :declared}
  :lam {:value 1 :status :declared}
  :mu {:value 0 :status :declared}
+ :c-schedule {:placement {:value :terminal :status :declared}
+              :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}}
  :facts [:change-authored-and-bound :premise-refused-before-work
          :obligation-resolved-through-the-account]
  :want [:change-authored-and-bound :premise-refused-before-work

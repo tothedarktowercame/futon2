@@ -114,6 +114,8 @@
                                    (distinct (mapcat :precedence constructed))))
         scales (or (get-in sources [:preference-scales target])
                    (live-c/preference-scales {}))
+        schedule (or (get-in sources [:preference-schedules target])
+                     (live-c/preference-schedule {}))
         beta (beta-for sources target)
         ctx-fn (:context-of sources)
         locators (get-in sources [:locators target])
@@ -170,7 +172,8 @@
                            (cons []
                                  (map #(vec (:precedence %)) constructed))))
         :horizon-steps horizon
-        :cascade-spec {:want (set want)
+        :c-schedule schedule
+        :cascade-spec {:want (set want) :c-schedule schedule
                        :lam (get-in scales [:lam :value])
                        :mu (get-in scales [:mu :value])
                        :preference-scales scales}

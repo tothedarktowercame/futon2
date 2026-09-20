@@ -144,6 +144,7 @@
                 receipts (into {} (map (fn [[id receipt]] [id (read-receipt-source receipt)]))
                                (:interpretation-receipts d))
                 scales (live-c/preference-scales d)
+                schedule (live-c/preference-schedule d)
                 t (:target d)
                 {:keys [universe observations]} (observe-facts (:facts d) (:locators d))
                 occurrence {:path path :sha256 hash :target t :observations observations}
@@ -152,6 +153,7 @@
                 (assoc-in [:universes t] universe)
                 (assoc-in [:wants t] (vec (:want d)))
                 (assoc-in [:preference-scales t] scales)
+                (assoc-in [:preference-schedules t] schedule)
                 (assoc-in [:locators t] (:locators d))
                 (assoc-in [:interpretations t] {:patterns (:patterns d)
                                                 :receipts receipts})

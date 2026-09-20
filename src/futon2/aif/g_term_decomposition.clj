@@ -1,7 +1,8 @@
 (ns futon2.aif.g-term-decomposition
   "Consumed-value census for AGG-single-kl-reduction. Evidence, never a gate.
    Degenerate means the named census reduction, not an invalid AIF value.
-   In particular C means constant over the scored horizon, not uniform.")
+   In particular C means constant over the scored horizon, not uniform."
+  (:require [futon2.aif.cascade-model-manifest :as model]))
 
 (def terms [:A :C :D :E :F :Q])
 
@@ -9,16 +10,20 @@
   "Classify a recorded consumed value. Missing evidence has no verdict; it
    must never count as a degenerate value (or a non-degenerate witness)."
   [term value]
-  (if (nil? value)
+  (if (or (nil? value) (and (= term :C) (or (not (seq (:steps value)))
+                                                        (some #(nil? (:distribution %)) (:steps value)))))
     {:status :missing :value nil :reason :consumed-value-not-recorded}
     (let [[degenerate? reason]
           (case term
             :A (let [identity? (every? #(and (zero? (:false-neg %))
                                              (zero? (:false-pos %))) (vals value))]
                  [identity? (if identity? :identity-kernel :non-identity-kernel)])
-            :C (let [constant? (or (= :constant-spec (:form value))
-                                   (and (seq (:steps value))
-                                        (apply = (map :distribution (:steps value)))))]
+            :C (let [distributions (map :distribution (:steps value))
+                     constant? (every? #(if (and (contains? (first distributions) :universe)
+                                                  (contains? % :universe))
+                                           (model/same-preference-distribution? (first distributions) %)
+                                           (= (first distributions) %))
+                                       (rest distributions))]
                  [constant? (if constant? :constant-across-horizon :varies-across-horizon)])
             :D (let [support (filter (comp pos? val) value)
                      point? (and (= 1 (count support)) (== 1 (val (first support))))]
@@ -28,8 +33,9 @@
             :Q [(empty? (:observation-updates value))
                 (if (empty? (:observation-updates value))
                   :open-loop-no-conditioning :observation-conditioned)])]
-      {:status :present :value value
-       :verdict (if degenerate? :degenerate :non-degenerate) :reason reason})))
+      (cond-> {:status :present :value value
+       :verdict (if degenerate? :degenerate :non-degenerate) :reason reason}
+        (= term :C) (assoc :C-steps-count (count (:steps value)))))))
 
 (defn census
   "Join scoring's consumed A/C/D/Q to selection's consumed E/F, by position

@@ -318,6 +318,27 @@
                               {:kind :invalid-preference-scale :field k :parameter p})))
             [k p]))))
 
+(defn preference-schedule
+  "Declared terminal placement and neutral earlier distribution. Legacy
+  omissions remain explicitly constant, not silently time-varying."
+  [declaration]
+  (if-not (contains? declaration :c-schedule)
+    {:placement {:value :every-step :status :defaulted :reason :schedule-not-declared}}
+    (let [schedule (:c-schedule declaration)]
+      (when-not (and (= {:value :terminal :status :declared} (:placement schedule))
+                     (= {:value :uniform-over-non-ruled-zero :status :declared} (:elsewhere schedule)))
+        (throw (ex-info "invalid preference schedule"
+                        {:kind :invalid-preference-schedule :value schedule})))
+      schedule)))
+
+(defn family-schedule [problems]
+  (let [schedules (distinct (map #(or (get-in % [:cascade-problem :c-schedule])
+                                     (preference-schedule {})) problems))]
+    (when (not= 1 (count schedules))
+      (throw (ex-info "incompatible preference schedules"
+                      {:kind :incommensurable-family :preference-schedules (vec schedules)})))
+    (first schedules)))
+
 (defn family-scales
   "A joint spec needs one pair of scales; preserve each target's authority
   and refuse incompatible values rather than picking a target."
@@ -362,6 +383,8 @@
    (cascade-spec derived reachable joint-want
                  (family-scales [{:target :legacy-caller}])))
   ([derived reachable joint-want scales]
+   (cascade-spec derived reachable joint-want scales (preference-schedule {})))
+  ([derived reachable joint-want scales schedule]
    (if (seq (:refusals derived))
      {:refusal {:kind :live-c-refused :refusals (:refusals derived)}}
      (let [{projected :want projected-weights :weights
@@ -382,7 +405,8 @@
                     :live-want (count (:want derived))
                     :unreached-in-domain (vec (sort (map str unreached)))
                     :limitation "no projected live-C want lies in this comparison's outcome domain; scoring would be pure information gain — the dark room — so it refuses"}}
-         {:want in-domain
+         {:c-schedule schedule
+          :want in-domain
           :weights (into {} (map (fn [[token weight]] [token (* (:lam scales) weight)]))
                          (select-keys candidate-weights in-domain))
           :lam (:lam scales)

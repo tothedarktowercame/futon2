@@ -67,7 +67,7 @@
                   (let [evaluated (m/rollout-evaluation (constantly (:precedence candidate)) q 1)
                         next-q (checked (:belief evaluated))
                         score (checked (om/query observation-model
-                                                 {:op :score :belief next-q :preference preference}))]
+                                                 {:op :score :belief next-q :preference (get-in preference [tau :probabilities])}))]
                     (recur (inc tau) next-q
                            (conj result (assoc score :tau tau :belief next-q
                                                :node-evaluation (assoc (first (:evaluations evaluated)) :tau tau)))))))
@@ -86,7 +86,9 @@
                              :scope :synthetic-bounded-replay
                              :node-evaluations (mapv :node-evaluation steps)
                              :steps steps
-                             :c {:form :constant-spec :spec (:cascade-spec opts)}
+                             :c {:form :step-indexed :schedule (get-in opts [:cascade-spec :c-schedule])
+                                 :steps (mapv (fn [step] {:tau (:tau step)
+                                                         :distribution (get-in preference [(:tau step) :distribution])}) steps)}
                              :rates-provenance {:source :observation-model/query
                                                 :model observation-model}
                              :f (assoc conditioned :value (:f conditioned))}}]
@@ -103,8 +105,13 @@
   (let [model (:observation-model opts)]
     (try
       (validate-inputs! (:cascade-belief state) candidates opts)
-      (let [preference-fn (checked (m/preference-fn (:cascade-spec opts) (:universe model)))
-            preference (into {} (map (juxt identity preference-fn)) (subsets (:universe model)))
+      (let [preference (into {} (for [tau (range 1 (inc (:horizon-steps opts)))]
+                                  (let [member (checked (m/preference-member (:cascade-spec opts) (:universe model)
+                                                                            (:horizon-steps opts) tau))
+                                        log-p (m/member-log-probability member)]
+                                    [tau {:distribution member
+                                          :probabilities (into {} (map (fn [o] [o (Math/exp (log-p o))]))
+                                                               (subsets (:universe model)))}])))
             entries (mapv #(score-candidate (:cascade-belief state) % opts preference) candidates)
             failures (filterv #(not= :computed (get-in % [:inference :status])) entries)]
         (if (seq failures)
