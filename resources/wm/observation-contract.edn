@@ -2,11 +2,11 @@
  :authority {:basis "P5 (Joe, 2026-09-16): checkable tokens observed exactly; judgement tokens need rates"
              :per-pass "Joe, 2026-09-17, emacs REPL to claude-4: \"it seems kind of heavy to do a blinded study with each pass that the WM is supposed to work on.\""
              :recorded "p4ng PLAN-WM-04-unblock-2026-09-17.md, 337c85b"}
- :production-path {:classes #{:C3 :C4 :C5}
+ :production-path {:classes #{:C3 :C4 :C5 :C6}
                    :judgement-class-J :refused-at-assembly
                    :enforced-by "futon2.aif.cascade-problems (705adb39): every problem token needs a checkable locator, else :universe-not-admitted naming the tokens"
                    :J-evidence "futon2 holes/labs/wm-contract/wm04-pilot/PILOT-OBSERVER-ONLY.edn (83f8b5ce): unreviewed pilot; of 38 recorded realised steps, blind observers confirmed 15"
-                   :checks-implemented {:C3 check-path-exists :C4 check-decl-in-file :C5 check-registry-entry}
+                   :checks-implemented {:C3 check-path-exists :C4 check-decl-in-file :C5 check-registry-entry :C6 check-witness-reference}
                    :applicability-reading "claude-7, 2026-09-17: schedule holds; J refusal holds; zero rates hold only for the class tokens as defined here (fixes applied in futon2 725a17f1)"}
  :written "2026-09-17"
  :owner "WM-04"
@@ -26,6 +26,17 @@
   {:id :C5 :kind :checkable :token "the contract bundle at the pinned sha has the named contract-id, and every clojure-locus it declares resolves (file present with at least that many lines at the locus repo HEAD)"
    :check "emitted bundle JSON at pinned sha contains the entry with resolving clojureLocus"
    :check-fn check-registry-entry :inputs {:repo string :sha string :entry string}}
+  {:id :C6 :kind :checkable
+   :token "the EDN witness at the resolved commit contains repo and sha naming a resolvable commit, and, if entry is supplied, that path exists at the referenced commit"
+   :check "read witness at resolved sha:path; resolve its repo+sha to a commit; resolve optional entry at that commit"
+   :check-fn check-witness-reference
+   :inputs {:repo string :sha string :path string}
+   :require-entry "optional locator flag: when true, witness entry is mandatory"
+   :witness {:repo string :sha string :entry :optional-path-string}
+   :missing-witness :observed-false
+   :invalid-witness :typed-refusal
+   :unresolved-reference :typed-refusal
+   :missing-entry :observed-false}
   {:id :J :kind :judgement
    :question "Does this step's stated output exist as an independently locatable artifact satisfying the application's own stated conditions, at cutoff sha X?"
    :verdicts [:exists :does-not-exist :insufficient-evidence :ambiguous]
@@ -39,7 +50,7 @@
             :checkable-without-locator :no-locator
             :unrecorded-cutoff :missing-cutoff
             :judgement-noncategorical [:insufficient-evidence :ambiguous]}
- :classification {:method "scan application text for mechanically nameable stated artifacts (paths, declaration heads, contract/registry entry); C3-C5 only when the stated output itself is such an artifact, else J"
+ :classification {:method "scan application text for mechanically nameable stated artifacts (paths, declaration heads, contract/registry entry); C3-C6 only when the stated output itself is such an artifact, else J"
                   :rule-recorded true :reviewer :R9 :reclassification-expected true}
  :census {:total-cascades 46 :total-nodes 233 :with-application 184
           :checkable 1 :judgement 183 :no-stated-output 49

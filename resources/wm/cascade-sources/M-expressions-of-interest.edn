@@ -1,10 +1,11 @@
 ;; Presence witnesses only (claude-4 disposition, 2026-09-20).
-;; Token names label intended collaboration evidence; C3 verifies only that
-;; the named committed file exists. It does not verify authorship, binding,
+;; C6 resolves each witness's {:repo ... :sha ... :entry ...} reference.
+;; :entry is optional for the authored commit and names the committed record
+;; for refusal/acceptance witnesses. Only object presence is checked. It does not verify authorship, binding,
 ;; ordering, grounding, correctness, or mission completion. No J channel.
 ;; These prospective artifacts belong to the mission's community account,
 ;; outside WM run bookkeeping. This declaration does not create them.
-;; HEAD is resolved and retained by C3 on each observation, so later committed
+;; HEAD is resolved and retained by C6 on each observation, so later committed
 ;; witnesses can satisfy the currently unsatisfied want.
 {:schema :wm/cascade-source-v1
  :target "M-expressions-of-interest"
@@ -16,16 +17,24 @@
          :obligation-resolved-through-the-account]
  :want [:change-authored-and-bound :premise-refused-before-work
         :obligation-resolved-through-the-account]
+ ;; Owners are provenance metadata only: NOT consumed by loading, assembly,
+ ;; projection or scoring. Ownership threading/joint rejection is queued.
+ :entries
+ {:change-authored-and-bound {:owner :community :owner-status :not-consumed}
+  :premise-refused-before-work {:owner :community :owner-status :not-consumed}
+  :obligation-resolved-through-the-account {:owner :community :owner-status :not-consumed}}
  :locators
  {:change-authored-and-bound
-  {:class :C3 :repo "futon5a" :sha "HEAD"
+  {:class :C6 :repo "futon5a" :sha "HEAD"
    :path "holes/missions/evidence/M-expressions-of-interest/AUTHORED-CHANGE.edn"}
   :premise-refused-before-work
-  {:class :C3 :repo "futon5a" :sha "HEAD"
-   :path "holes/missions/evidence/M-expressions-of-interest/PREMISE-REFUSAL.edn"}
+  {:class :C6 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/evidence/M-expressions-of-interest/PREMISE-REFUSAL.edn"
+   :require-entry true}
   :obligation-resolved-through-the-account
-  {:class :C3 :repo "futon5a" :sha "HEAD"
-   :path "holes/missions/evidence/M-expressions-of-interest/CORRECTION-PAR.edn"}}
+  {:class :C6 :repo "futon5a" :sha "HEAD"
+   :path "holes/missions/evidence/M-expressions-of-interest/CORRECTION-PAR.edn"
+   :require-entry true}}
  :patterns
  {:coordination/bounded-execution
   {:guard {:needs #{} :forbids #{:change-authored-and-bound}}
@@ -43,7 +52,7 @@
    :source {:path "futon3/library/coordination/bounded-execution.flexiarg"
             :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2"
             :sha256 "1dda0e59f99b45582e63b5a2a056ad43d47fd1e0baad1a01d72c8ca116bd06a5"}
-   :reading "Bound a mission-scoped contribution and commit its change witness. Predicted output is the witness file's presence only, not verification of its claims."}
+   :reading "Bound a mission-scoped contribution and commit its change witness. Predicted output is the referenced object's presence only, not verification of its claims."}
   :futon-theory/stop-the-line
   {:kind :hand-admitted :by "codex-3" :date "2026-09-20"
    :source {:path "futon3/library/futon-theory/stop-the-line.flexiarg"
@@ -55,7 +64,7 @@
    :source {:path "futon3/library/coordination/par-as-obligation.flexiarg"
             :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2"
             :sha256 "f749561c4b017dcd22e058695693ac98fbed2e9092c3e910a295f9d440b3662a"}
-   :reading "After a refusal witness, record the correction cycle's post-action review with references to its prior steps. The model predicts the PAR witness's presence only; its contents and resolution are not mechanically adjudicated."}}
+   :reading "After a refusal witness, record the correction cycle's post-action review with references to its prior steps. The model predicts the PAR witness's referenced object presence only; its contents and resolution are not mechanically adjudicated."}}
  :candidates
  [{:precedence [:coordination/par-as-obligation :coordination/bounded-execution
                 :futon-theory/stop-the-line]

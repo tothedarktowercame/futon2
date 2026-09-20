@@ -22,7 +22,7 @@
     (is (= wants (set (keys facts))))
     (is (every? false? (vals facts)))
     (is (empty? (:refused observation)))
-    (is (every? #(= :C3 (:check %)) (vals (:results observation))))
+    (is (every? #(= :C6 (:check %)) (vals (:results observation))))
     (is (every? #(re-matches #"[0-9a-f]{40}" (get-in % [:evidence :resolved-sha]))
                 (vals (:results observation))))
     (is (empty? (:refusals result)))

@@ -34,7 +34,7 @@
 
 (deftest reduced-contract-and-loaded-run-record
   (let [contract (edn/read-string (slurp (io/resource "wm/observation-contract.edn")))
-        classes #{:C3 :C4 :C5}
+        classes #{:C3 :C4 :C5 :C6}
         loaded (sources/load-declared)
         record (fixture/record-run #(sources/load-declared))]
     (is (= classes (get-in contract [:production-path :classes])))
