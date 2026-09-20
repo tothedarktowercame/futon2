@@ -163,6 +163,28 @@ Notes (claude-12):
   tonight's operator turn in the affect-events feed). The prior
   discussion is outside the searchable workspace; bind it when it
   surfaces, don't manufacture it.
+  NARROWED 2026-09-20: the pattern index (/api/alpha/patterns/search)
+  holds corpus expressions of both preferences —
+  coordination/bounded-execution ("budgets … prevent hidden coordination
+  costs") for eat-your-tail's cost-explicitness;
+  futon-theory/theory-as-exotype ("without theory-as-exotype, each
+  domain reinvents constraints ad-hoc") and the stewardship/reuse
+  patterns for dont-reinvent-the-wheel. Not the original discussions,
+  but prior pattern-shaped statements of the same preferences; the
+  Evidence Landscape free-text search remains to be run (endpoint
+  /api/mission-search; serving port not identified from this seat).
+
+## RULING — multi-owner conflict rule (Joe, 2026-09-20)
+
+Joe approved Option 2 ("Fine with me. Hopefully this is less
+satisficing, more real, more extensible, etc., and enough to get us
+moving again."): per-owner C vectors scored separately with divergence
+reported; a typed refusal when owners conflict on a token; never a
+weighted average. Disagreement between owners is retained in the
+account, not dissolved into a scalar. Options considered and set aside:
+weighted sum (erases disagreement unrecoverably), declared owner
+precedence (resolves rather than retains; premature with two owners and
+zero observed conflicts).
 
 "Grounded progress with zero operator turns" must be expressible in the
 reachable outcome domain. Widening the grain is WM-13, which this
