@@ -4,16 +4,25 @@
    for future compiled backends; callers use query, never backend internals.
    This version admits declared synthetic experiments only, not calibration.
 
-   Parameter uncertainty belongs on the parameter entry, never inline in a
-   rates map: the intended later shape is :parameters {id {:value r
-   :variance v}}, with token rates referencing ids. probability? governs
-   :value alone -- a variance is not a probability and must never be asked
-   to meet that predicate.
+   Optional :parameters {id {:value exact-rational :basis record#population}}
+   gives rates identity: token rates may be bare probabilities or {:param id}.
+   Repeated references name ONE parameter; equal bare values do not. An id
+   names an instrument and persists across re-measurement: a follow-up
+   declaration changes value/basis, not id. A changed instrument convention or
+   channel requires a NEW id, never a quiet redefinition. This identity rule
+   governs declaration revisions; this stateless validator cannot compare history.
+   Reserved instrument ids: :intake-refusal-fp, :handoff-correction-fp,
+   :frame-selfcorrection-fp, :judgement-default-fp, :judgement-default-fn,
+   :bad-window-p. This schema change attaches no measured rates.
+   Parameter uncertainty belongs on the parameter entry later, never inline
+   in rates. probability? governs :value alone, never :variance. Parameter
+   metadata is retained, but variance propagation is not implemented here.
 
    The synthetic-provenance refusal is a gate, not a temporary nuisance:
    when calibrated rates exist (programme point 5) it WIDENS to require a
    calibration record. It is never dropped."
   (:require [clojure.set :as set]
+            [clojure.string :as str]
             [futon2.aif.cascade-model-manifest :as m]))
 
 (def max-tokens 10)
@@ -24,15 +33,44 @@
 (defn- probability? [x]
   (and (or (integer? x) (ratio? x)) (<= 0 x 1)))
 
-(defn- require-rates! [universe rates]
+(defn- require-parameters! [model]
+  (when (contains? model :parameters)
+    (when-not (and (map? (:parameters model))
+                   (every? (fn [[id entry]]
+                             (and (keyword? id) (map? entry)
+                                  (probability? (:value entry))
+                                  (string? (:basis entry))
+                                  (not (str/blank? (:basis entry)))))
+                           (:parameters model)))
+      (refuse! :invalid-model-parameters {:parameters (:parameters model)}))))
+
+(defn- rate-value! [parameters value]
+  (cond
+    (probability? value) value
+    (and (map? value) (= #{:param} (set (keys value))))
+    (if (contains? parameters (:param value))
+      (get-in parameters [(:param value) :value])
+      (refuse! :unknown-observation-parameter {:param (:param value)}))
+    :else (refuse! :invalid-model-rates {:rate value})))
+
+(defn- require-rates! [universe rates parameters]
+  (when-not (map? rates)
+    (refuse! :invalid-model-rates {:rates rates}))
+  (when (or (contains? rates :variance)
+            (some #(and (map? %) (or (contains? % :variance)
+                                     (some (fn [v] (and (map? v) (contains? v :variance)))
+                                           (vals %)))) (vals rates)))
+    (refuse! :inline-rate-variance {:rates rates}))
   (when-not (and (map? rates) (= universe (set (keys rates)))
-                 (every? #(and (probability? (:false-neg %))
-                               (probability? (:false-pos %))) (vals rates)))
-    (refuse! :invalid-model-rates {:rates rates})))
+                 (every? map? (vals rates)))
+    (refuse! :invalid-model-rates {:rates rates}))
+  (update-vals rates (fn [r] (-> r
+                                (update :false-neg #(rate-value! parameters %))
+                                (update :false-pos #(rate-value! parameters %))))))
 
 (defn validate!
   "Validate a declared bounded model. No rate, independence or authority default."
-  [{:keys [schema backend kind universe rates components provenance] :as model}]
+  [{:keys [schema backend kind universe rates components provenance parameters] :as model}]
   (when-not (= :wm/observation-model-v1 schema)
     (refuse! :invalid-model-schema {}))
   (when-not (= :exact-enumeration backend)
@@ -43,13 +81,14 @@
                  (false? (:calibrated provenance))
                  (string? (:source provenance)) (seq (:source provenance)))
     (refuse! :synthetic-provenance-required {}))
+  (require-parameters! model)
   (case kind
     :exact-checks
-    (do (require-rates! universe rates)
+    (let [resolved (require-rates! universe rates parameters)]
         (when-not (every? #(and (zero? (:false-neg %))
-                                (zero? (:false-pos %))) (vals rates))
+                                (zero? (:false-pos %))) (vals resolved))
           (refuse! :nonzero-checkable-rate {})))
-    :independent-judgement (require-rates! universe rates)
+    :independent-judgement (require-rates! universe rates parameters)
     :coupled-judgement
     (do
       (when-not (and (vector? components) (seq components)
@@ -59,7 +98,7 @@
                      (= 1 (reduce + (map :weight components))))
         (refuse! :invalid-common-cause-mixture {}))
       (doseq [component components]
-        (require-rates! universe (:rates component))))
+        (require-rates! universe (:rates component) parameters)))
     (refuse! :unknown-observation-model {:kind-declared kind}))
   model)
 
@@ -82,8 +121,11 @@
   (if (= :coupled-judgement (:kind model))
     (apply merge-with +
            (for [{:keys [weight rates]} (:components model)]
-             (update-vals (m/observation-distribution rates state) #(* weight %))))
-    (m/observation-distribution (:rates model) state)))
+             (update-vals (m/observation-distribution
+                           (require-rates! (:universe model) rates (:parameters model)) state)
+                          #(* weight %))))
+    (m/observation-distribution
+     (require-rates! (:universe model) (:rates model) (:parameters model)) state)))
 
 (defn- predictive [model belief]
   (apply merge-with +

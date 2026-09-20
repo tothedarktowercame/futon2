@@ -1,0 +1,10 @@
+{:subject-id "A/observation-parameter-identity"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/observation_model.clj"
+              "src/futon2/aif/cascade_model_manifest.clj"
+              "src/futon2/aif/likelihood_precision.clj"]
+ :test-paths ["test/futon2/aif/observation_parameters_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.observation-parameters-test"]
+ :author "codex-1"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/a-parameter-identity-2026-09-20"
+ :index-file "/home/joe/code/futon3c/data/test-registry-validation/subjects.ednlog"}
