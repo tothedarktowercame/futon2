@@ -372,3 +372,21 @@ and no distribution outcome can contradict the operator's statement.
 Model placement: operator turns belong to the transition structure
 (dynamics), not to the observation model A. A rates agent assertion
 channels; the operator is not a noisy sensor to be rated.
+
+## RULING — embedding strategy over algorithm; the library is the single home (Joe, 2026-09-20)
+
+Verbatim: "Yes, and if the mathematics comes back ambiguous, I hazard
+that what we need is a better embedding strategy, not a better
+algorithm. Putting patterns in other places than the library is an
+agent error not an operator error."
+
+Effects: (1) if the turn-pair angle distributions fail to separate, the
+remedy is the representation (embedding model, corpus coverage, source
+text), never a search for cleverer distance functions over a bad space;
+(2) of the two remedies for the coverage gap, RELOCATION is ruled: the
+8 connected-learning flexiargs under p4ng/wm-walkthroughs/collections/
+move to futon3/library, and interpretation receipts re-bind to the new
+paths; the embedding build correctly covers the library and does not
+learn to chase scattered patterns. Prospectively: patterns are authored
+into the library, and placement elsewhere is an agent error to fix, not
+a build target to accommodate.
