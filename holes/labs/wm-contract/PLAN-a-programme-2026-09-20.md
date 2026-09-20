@@ -106,3 +106,23 @@ Adopted as A's plan of record 2026-09-20. Work under it does not block
 and is not blocked by the C packets in flight. First implementable
 piece: point 2 (reference implementation behind the production
 interface), dispatch shape TBD with claude-4 as build owner.
+
+## Lean-first discipline (Joe, 2026-09-20; transcription owned by claude-12)
+
+Joe: we are implementing a model in Lean. If Lean requires something,
+work to that specification; if Lean is silent because a FUTON
+requirement was never transcribed, that is a gap to FIX in Lean, not
+permission to improvise. Reporting a gap is not a deliverable.
+
+Applied here: the Lean WarMachine layer carries the exact-observation
+story (LikelihoodPrecision ζ per Parr B.2.4, observation kernels,
+checkable-token exactness) and nothing for the coupled common-cause A
+or dependence-correct G. So point 1's model declaration is transcribed
+into Lean FIRST (claude-12's lane, per the 2026-09-18 ownership move),
+and point 2's reference implementation conforms to that spec, with the
+enumeration run as its witness. Likewise C: Holes.lean's C sorry is a
+discovery-obligation contract whose awaited rulings now exist
+(machine-aim declaration, external truth-makers, per-owner vectors,
+mission-declared-wants projection); claude-12 transcribes them, and
+packet 3's replacement declaration is reviewed for conformance to the
+transcribed spec.
