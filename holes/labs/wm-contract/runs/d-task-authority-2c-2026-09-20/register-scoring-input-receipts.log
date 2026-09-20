@@ -1,0 +1,4 @@
+evidence-id test-registry-9da2527bfa71147fbb4140127c706092db39d49df839b77c86120fd66bdaa081
+warrant? true
+results {:assertions 45, :duration-ms 4167, :errors 0, :exit 0, :failures 0, :tests 3}
+bound D/task-2c/scoring-input-receipts -> test-registry-9da2527bfa71147fbb4140127c706092db39d49df839b77c86120fd66bdaa081

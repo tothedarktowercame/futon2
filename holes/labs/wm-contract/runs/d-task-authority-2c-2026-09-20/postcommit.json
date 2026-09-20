@@ -1,0 +1,59 @@
+{
+  "role": "post-commit-warrant",
+  "sha": "328141ab",
+  "repo-root": "/home/joe/code/futon2-d-task-warrant",
+  "runs": [
+    {
+      "name": "d-predecessor-task-authority",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-task-authority-2c-2026-09-20/registry-d-predecessor-task-authority.edn"
+      ],
+      "exit": 0,
+      "seconds": 9.600622653961182
+    },
+    {
+      "name": "token-belief-predecessor",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-task-authority-2c-2026-09-20/registry-token-belief-predecessor.edn"
+      ],
+      "exit": 0,
+      "seconds": 8.092800378799438
+    },
+    {
+      "name": "token-belief-carry",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-task-authority-2c-2026-09-20/registry-token-belief-carry.edn"
+      ],
+      "exit": 0,
+      "seconds": 7.899091482162476
+    },
+    {
+      "name": "scoring-input-receipts",
+      "command": [
+        "clojure",
+        "-M",
+        "-m",
+        "futon3c.test-registry.validation",
+        "register",
+        "/home/joe/code/futon2/holes/labs/wm-contract/runs/d-task-authority-2c-2026-09-20/registry-scoring-input-receipts.edn"
+      ],
+      "exit": 0,
+      "seconds": 8.128731727600098
+    }
+  ]
+}

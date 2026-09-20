@@ -1,0 +1,4 @@
+evidence-id test-registry-9f79aff0a085d4cbc138adf0ecedd77b8a8fcb0bacebc973a3ec12b2e8821b65
+warrant? true
+results {:assertions 25, :duration-ms 3706, :errors 0, :exit 0, :failures 0, :tests 3}
+bound D/task-2c/token-belief-predecessor -> test-registry-9f79aff0a085d4cbc138adf0ecedd77b8a8fcb0bacebc973a3ec12b2e8821b65

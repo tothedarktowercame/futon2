@@ -1,0 +1,4 @@
+evidence-id test-registry-925876b6e84354939070e96409d014f19a1705b1159c71ddc2ceabb94a89f3d3
+warrant? true
+results {:assertions 30, :duration-ms 3778, :errors 0, :exit 0, :failures 0, :tests 4}
+bound D/task-2c/token-belief-carry -> test-registry-925876b6e84354939070e96409d014f19a1705b1159c71ddc2ceabb94a89f3d3

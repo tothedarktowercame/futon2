@@ -1,0 +1,4 @@
+evidence-id test-registry-e42e04926b394e9a0eb2c87d0bf1a2dfa6a7d6ce10fc2fc172e573cdd9618f10
+warrant? true
+results {:assertions 31, :duration-ms 2868, :errors 0, :exit 0, :failures 0, :tests 5}
+bound D/task-2c/d-predecessor-task-authority -> test-registry-e42e04926b394e9a0eb2c87d0bf1a2dfa6a7d6ce10fc2fc172e573cdd9618f10

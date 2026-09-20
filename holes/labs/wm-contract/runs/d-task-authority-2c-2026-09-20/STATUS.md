@@ -1,3 +1,5 @@
+> Landed: 328141ab, with matching postcommit warrants. See [EXECUTION.md](EXECUTION.md) and [ATTRIBUTION.md](ATTRIBUTION.md). The original draft report follows as history.
+
 > Superseded gate status: full attribution is complete; see [ATTRIBUTION.md](ATTRIBUTION.md). The historical draft report below is retained.
 
 # D task authority: draft held at the runner regression gate
