@@ -748,9 +748,6 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
       {:g {:status :missing :kind :invalid-horizon :horizon horizon} :steps nil}
       (not (and (ifn? precedence-fn) (map? q0)))
       {:g {:status :missing :kind :invalid-horizon-g-input} :steps nil}
-      (and (= :terminal (get-in spec [:c-schedule :placement :value]))
-           (not (zero-rates? rates)))
-      {:g {:status :missing :kind :c-family-unsupported-with-rates} :steps nil}
       (and (nil? c-fn-pointwise) (nil? spec))
       {:g {:status :missing :kind :missing-preference-spec} :steps nil}
       :else
@@ -857,22 +854,15 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                    :zeroed (count zeroed)
                    :limitation "a non-empty zeroed set makes risk identically infinite under non-zero rates (Q has full support and puts positive mass on an outcome C assigns zero), and it breaks C's product form"}
                :steps nil}
-              (let [lpf (log-preference-fn spec rates-universe)]
+              (let [members (into {} (for [tau (range 1 (inc horizon))]
+                                       [tau (preference-member spec rates-universe horizon tau)]))
+                    lpf (some #(when (refusal? %) %) (vals members))]
                 (if (refusal? lpf)
                   {:g lpf :steps nil}
-                  (let [w (utility-weights spec)
-                        ;; ln c_v = −softplus(−w_v), ln(1−c_v) = −softplus(w_v)
+                  (let [;; ln c_v = −softplus(−w_v), ln(1−c_v) = −softplus(w_v)
                         softplus (fn [x] (if (pos? x)
                                            (+ x (Math/log1p (Math/exp (- x))))
                                            (Math/log1p (Math/exp x))))
-                        ln-c (into {} (map (fn [v]
-                                             (let [wv (double (get w v 0))]
-                                               [v (- (softplus (- wv)))]))
-                                          rates-universe))
-                        ln-1mc (into {} (map (fn [v]
-                                               (let [wv (double (get w v 0))]
-                                                 [v (- (softplus wv))]))
-                                     rates-universe))
                         point-mass? (fn [q] (and (= 1 (count q))
                                                  (= 1 (val (first q)))))
                         marginals (fn [q]
@@ -922,7 +912,17 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                          :step tau :support (count q)
                                          :limitation "the factorized risk form needs a point-mass or product-form rollout belief; a correlated mixture (e.g. a theta < 1 kernel) is refused, not approximated"}
                                      :steps nil}
-                                    (let [risk (reduce + 0.0
+                                    (let [member (get members tau)
+                                          w (:weights member)
+                                          ln-c (into {} (map (fn [v]
+                                                               (let [wv (double (get w v 0))]
+                                                                 [v (- (softplus (- wv)))]))
+                                                            rates-universe))
+                                          ln-1mc (into {} (map (fn [v]
+                                                                 (let [wv (double (get w v 0))]
+                                                                   [v (- (softplus wv))]))
+                                                       rates-universe))
+                                          risk (reduce + 0.0
                                                        (map (fn [v]
                                                               (let [{:keys [false-neg false-pos]} (get rates v)
                                                                     ;; the observation marginal:
@@ -960,7 +960,8 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                                       (recur (inc tau) (+ total risk amb)
                                              (if record?
                                                (conj! steps {:tau tau :risk risk :ambiguity amb
-                                                             :belief q :rates rates :node-evaluation evaluation})
+                                                             :belief q :rates rates :node-evaluation evaluation
+                                                             :c-distribution member})
                                                steps)))))))))))))))))))))
 
 (defn horizon-g-sparse
