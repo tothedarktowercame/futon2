@@ -1,0 +1,60 @@
+{:schema :wm04-pilot-review-v1
+ :observer "zai-18"
+ :reviewer "codex-2"
+ :cutoff {:futon2 "06ecba8cf7143e12c04831dded7450f07d892d99"
+          :futon3 "19f363fad159f768f03bd1f04df7392b69a96b0b"
+          :futon3c "4e9c626635343420edfc819c9421e8c47bc969cd"
+          :mathlib4 "3b19f6225e9dc5cf4cd645e230bb427b003b431f"
+          :p4ng "f5805d864a3a19474fe0c4c8adb0b6e214f7ca48"}
+ :rows
+ [{:subject-id "R13-3" :verdict :contradicted
+   :reason "shadow_cascade_g.clj compute-arm returns total G plus inputs; cascade_model_manifest.clj:579-614 discards intermediate rollouts and contributions, contradicting the claimed retained per-step branch trajectory despite PolicyHorizon.lean's undiscounted sum."
+   :flags [{:kind :reason-exceeds-evidence :detail "Computed intermediate states are claimed as retained states, observations, interpretations and score contributions."}]}
+  {:subject-id "R16-2" :verdict :contradicted
+   :reason "C460-enacted-vs-selected.md sections 3-4 explicitly show a different mission enacted, and enact.clj:323-364 chooses the first passing gate rather than the selected task; the application itself requires executing only the selected interpretation."
+   :flags [{:kind :reason-exceeds-evidence :detail "The reason moves selected/enacted identity to a later obligation although it is explicit in this subject's application."}]}
+  {:subject-id "R3-2" :verdict :supported
+   :reason "ExactBeliefTrajectory.lean:56-59,177-180 defines filtering without occurrence/cutoff/model-identity rejection, while belief.clj supplies filters and model hashes but no cited joined rejection artifact, supporting the recorded insufficient finding."
+   :flags []}
+  {:subject-id "R4-3" :verdict :contradicted
+   :reason "receipt_construction.clj:577-591 retains shadow scores, but shadow_cascade_g.clj compute-arm and cascade_model_manifest.clj:579-614 return aggregate G rather than each predicted step and its model revision as claimed."
+   :flags [{:kind :reason-exceeds-evidence :detail "Wiring a scalar shadow score into construction does not retain complete per-step predictions or model revisions."}]}
+  {:subject-id "R5-4" :verdict :supported
+   :reason "shadow_cascade_g.clj explicitly excludes selection consumption and cascade_selection.clj:18-20 says the G selector is not live, supporting absence of the required actual G-consuming choice at this cutoff."
+   :flags [{:kind :reason-exceeds-evidence :detail "decision_gate.clj validates cascade identity, receipts and posterior mass; it does not itself establish the evidence annotation's assertion that admission uses F rather than G."}]}
+  {:subject-id "R7-1" :verdict :supported
+   :reason "LikelihoodPrecision.lean:8-17 explicitly replaces legacy Gaussian channels with categorical precision and its domain; neither that law nor the cited runtime directory supplies the requested channel-to-term provenance artifact, supporting the recorded insufficiency."
+   :flags []}
+  {:subject-id "WM-06-C2" :verdict :insufficient-to-review
+   :reason "TokenPreference.lean declares a mathematical preference member with external acquisition, but the directory/search references do not retain a complete member-request census sufficient to establish the asserted repository-wide absence."
+   :flags [{:kind :unretained-search-reference :detail "src + holes/labs/wm-contract and repo grep are search descriptions, not retained result artifacts; concrete cited directories exist."}
+           {:kind :reason-exceeds-evidence :detail "A missing request in the supplied loci is promoted to no request anywhere; TokenPreference.lean is a parameterized token preference, not itself a terminal-only member-selection record."}]}
+  {:subject-id "WM-08-C4" :verdict :supported
+   :reason "find_receipt.clj:275-299 checks independent expectations and external designation including vacuity, 00-pin-expectation.edn binds prior futon3 history, and C500 documents checks over recorded rows with their limits."
+   :flags []}
+  {:subject-id "WM-12-C3" :verdict :supported
+   :reason "CHECKLIST-fundamentals.md:87,346 explicitly leaves the history/guard/firing correspondence open, consistent with receipt_construction.clj's declared once-only acting rule and the absent established cross-level alignment."
+   :flags []}
+  {:subject-id "E02-2" :verdict :insufficient-to-review
+   :reason "CHECKLIST-fundamentals.md:289 records remaining acquisition work and evidence_manifest.clj validates manifest entries, but neither settles whether exact independently acquired preimages exist in the asserted repository population."
+   :flags [{:kind :unretained-search-reference :detail "repo grep preimage/commission retention has no retained query scope/results."}
+           {:kind :reason-exceeds-evidence :detail "An incomplete checklist and manifest-only source do not prove that all acquisition records are absent."}]}
+  {:subject-id "E09-3" :verdict :insufficient-to-review
+   :reason "CHECKLIST-fundamentals.md:331 leaves load/demand/currency claims unresolved and capability_zones.clj supplies embedding membership, but those artifacts do not establish absence of all demand/load/choice binding records."
+   :flags [{:kind :reason-exceeds-evidence :detail "Unresolved claims are treated as proof that no binding records exist; no scoped record census or retained grep result is cited."}]}
+  {:subject-id "R14-2" :verdict :insufficient-to-review
+   :reason "interoceptive_commitment.clj:109-169 implements factor composition and interoceptive_manifest.clj:158-179 gates production capture, but neither cited artifact is an actual R20 production snapshot establishing the application's realized composition."
+   :flags [{:kind :reason-exceeds-evidence :detail "Available source and explicit production qualification gates are credited as retained actual production factors without a production capture/activation receipt."}]}
+  {:subject-id "R7-4" :verdict :supported
+   :reason "LikelihoodPrecision.lean provides mathematical sensitivity, while the pinned shadow scorer supplies declared-zero rates and no precision input; a pinned src/futon2/aif search finds no zeta/ζ consumer, supporting absent effective-use evidence."
+   :flags []}
+  {:subject-id "WM-12-C6" :verdict :supported
+   :reason "CHECKLIST-fundamentals.md:125 explicitly retains pending fairness and compounding controls, matching the source/spec search's unproved controls rather than the required enacted semantic-configuration receipt."
+   :flags [{:kind :unretained-search-reference :detail "src + holes/labs is a search scope rather than a retained query/result artifact; the independently read checklist supports the missing required controls."}]}
+  {:subject-id "WM-13-C6" :verdict :supported
+   :reason "FoldCWitness.lean:13-16 explicitly has no folded ruled-sum layers, and c_fold_config.clj:48-70 installs a constant-across-policies seed/kernel with an open observation bridge rather than the required governed folded-member use."
+   :flags []}
+  {:subject-id "WM-14-C5" :verdict :insufficient-to-review
+   :reason "CHECKLIST-fundamentals.md:133 requires a retrieval-feedback path and bounded source searches do not find it, but the unretained repo-wide searches do not establish absence of all failed-strategy/revised-query records."
+   :flags [{:kind :unretained-search-reference :detail "The futon3/futon3c repo grep references retain neither commands nor result populations."}
+           {:kind :reason-exceeds-evidence :detail "The reason asserts no such record anywhere in four repositories from a checklist and unspecified negative searches."}]}]}
