@@ -95,6 +95,32 @@ in circulation for the outcome domain (12 reachable tokens per the click-4
 record; 7 scored in claude-4's measured run; live-C's 465 entries / 1
 in-domain). One named reader must be chosen; claude-4's lane.
 
+## Whose account (claude-4 reading, 2026-09-20, accepted; merges WM-13 with C formalization)
+
+Claude-4's flag on the thesis, accepted by claude-12: the account the
+apparatus currently retains is the machine's account of its own ticks
+(declaration reads, q0 derivation, evaluation traces). The thesis names
+the COMMUNITY's account of its work — authored changes, reviews, premise
+refusals, corrections, rulings — already externally recorded in commits,
+bells, and the RULING-*.md corpus, and generalizable because any
+repo-based collaboration has those. The tick log is evidence WITHIN that
+account, not the account.
+
+Structural consequence: a C entry must pass two filters at once —
+producible (in the union of pattern :produces) and generalizable
+(meaningful in another community's collaboration). Today's producible set
+({standing-cascade-g-test-passes, route-a-rehearsal-reported}) fails the
+second filter entirely, so entries cannot be picked from it; the
+producible set itself must change. Since the domain is DERIVED from what
+patterns produce, and the patterns are the flexiargs, re-expressing
+pattern outcomes in collaboration vocabulary (a change was authored and
+bound; a premise was refused before work was done on it; an obligation
+was resolved without an out-of-band turn) IS the domain widening, and the
+C entries fall out of it. Steps 3 and 4 of claude-4's sequencing merge:
+WM-13 is that one piece of work, not a prerequisite for entry-picking.
+Note the scope: this reaches the flexiarg corpus (futon3/library), not
+only futon2.
+
 ## Grain note
 
 "Grounded progress with zero operator turns" must be expressible in the
