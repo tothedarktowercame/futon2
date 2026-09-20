@@ -55,6 +55,17 @@ feasibility, and perhaps other things. In order to make that more like
 IAD, we could use my adaptation of Ostrom's principles from Table 2 of
 corneli2016institutional.pdf."
 
+CORRECTED (codex-2 stop + claude-4 review, 2026-09-20): the selection
+model exists but is NOT live — H5b (5d55e7a0, Joe-ordered 2026-09-17)
+deleted the judge's call to the enrichment along with the flat decision
+path. Re-calling it requires Joe's ruling that the OUTER loop (mission
+selection) is a distinct layer from the inner cascade decision H5b
+governs; a new outer-loop call site, never re-entering the judge's
+gated path. Also found: doability has been inert since 2026-07-19
+(futon3c off futon2's classpath; every candidate gets the 0.3 unknown;
+FUTON_WM_LIVE_DOABILITY=1 is the fix, reserved to Joe as J7). The
+original text below stands as written for the record:
+
 The selection model exists and is live at the judge boundary:
 `enrich-candidates-with-mission-value` (war_machine.clj:2348) blends
 globally normalized CENTRALITY, active-cascade role (strategic), phase
