@@ -52,7 +52,7 @@
         (is (every? true? (map #(< (Math/abs (- %1 %2)) 1e-12) [0.2 0.8] (:habits r))))
         (is (not= (:neutral-posterior r) (:learned-posterior r)))
         (is (= [:empty :work :work] ((juxt :neutral-argmax :learned-argmax :selected) r)))
-        (is (every? #(= {:verdict :non-degenerate :reason :non-unit-habit}
+        (is (every? #(= {:verdict :non-degenerate :reason :informative-habit}
                         (select-keys % [:verdict :reason])) (:E r)))
         (println "HABIT-READ-EVIDENCE" (pr-str r))))))
 

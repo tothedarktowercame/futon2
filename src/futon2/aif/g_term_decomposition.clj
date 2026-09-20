@@ -1,18 +1,30 @@
 (ns futon2.aif.g-term-decomposition
   "Consumed-value census for AGG-single-kl-reduction. Evidence, never a gate.
    Degenerate means the named census reduction, not an invalid AIF value.
-   In particular C means constant over the scored horizon, not uniform."
+   In particular C means constant over the scored horizon, not uniform;
+   E means the enumerated habit vector is UNIFORM (the prior carries no
+   information beyond enumeration) — a property of the whole vector,
+   evaluated identically for every policy. The pre-2026-09-20 form
+   compared one policy's mass to exactly 1, which cannot fire with more
+   than one candidate: a verdict that could not come out the other way
+   (stop-the-line finding, STOP-THE-LINE-2026-09-20.md)."
   (:require [futon2.aif.cascade-model-manifest :as model]))
 
 (def terms [:A :C :D :E :F :Q])
 
 (defn verdict
   "Classify a recorded consumed value. Missing evidence has no verdict; it
-   must never count as a degenerate value (or a non-degenerate witness)."
-  [term value]
+   must never count as a degenerate value (or a non-degenerate witness).
+   :E additionally requires ctx {:all-habits [...]} — the full enumerated
+   habit vector. A caller that omits it gets :missing, never a defaulted
+   verdict (that omission was exactly the pre-fix facade)."
+  ([term value] (verdict term value nil))
+  ([term value ctx]
   (if (or (nil? value) (and (= term :C) (or (not (seq (:steps value)))
                                                         (some #(nil? (:distribution %)) (:steps value)))))
     {:status :missing :value nil :reason :consumed-value-not-recorded}
+    (if (and (= term :E) (not (seq (remove nil? (:all-habits ctx)))))
+      {:status :missing :value value :reason :habit-vector-not-supplied}
     (let [[degenerate? reason]
           (case term
             :A (let [identity? (every? #(and (zero? (:false-neg %))
@@ -28,26 +40,33 @@
             :D (let [support (filter (comp pos? val) value)
                      point? (and (= 1 (count support)) (== 1 (val (first support))))]
                  [point? (if point? :point-mass :distributed-belief)])
-            :E [(== 1 value) (if (== 1 value) :unit-habit :non-unit-habit)]
+            :E (let [habits (remove nil? (:all-habits ctx))
+                     uniform? (apply == habits)]
+                 [uniform? (if uniform? :uniform-habit :informative-habit)])
             :F [(zero? value) (if (zero? value) :zero-consumed-f :nonzero-consumed-f)]
             :Q [(empty? (:observation-updates value))
                 (if (empty? (:observation-updates value))
                   :open-loop-no-conditioning :observation-conditioned)])]
       (cond-> {:status :present :value value
        :verdict (if degenerate? :degenerate :non-degenerate) :reason reason}
-        (= term :C) (assoc :C-steps-count (count (:steps value)))))))
+        (= term :C) (assoc :C-steps-count (count (:steps value)))))))))
 
 (defn census
   "Join scoring's consumed A/C/D/Q to selection's consumed E/F, by position
    in the selector's own candidate vector. Computed-but-unattached F is
    retained as provenance only and cannot determine F's verdict."
   [ranked candidates]
-  (let [policies
+  (let [all-habits (mapv :habit candidates)
+        policies
         (mapv (fn [entry candidate]
                 (let [values (assoc (get-in entry [:certificate :consumed-g])
                                     :E (:habit candidate) :F (:f candidate))]
                   {:id (:id candidate)
-                   :terms (into {} (map (fn [term] [term (verdict term (get values term))]) terms))
+                   :terms (into {} (map (fn [term]
+                                          [term (if (= term :E)
+                                                  (verdict term (get values term) {:all-habits all-habits})
+                                                  (verdict term (get values term)))])
+                                        terms))
                    :f-provenance (select-keys candidate [:f-status :reason :computed-f])}))
               ranked candidates)
         complete? (and (seq policies)
