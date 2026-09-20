@@ -13,6 +13,8 @@
  :target "M-wm-08-external-f2"
  :context :WM
  :beta {:value 1 :status :declared}
+ :lam {:value 1 :status :declared}
+ :mu {:value 0 :status :declared}
  :facts [:external-expectation-validator-exists
          :frozen-occurrence-context-captured
          :independent-expectations-written

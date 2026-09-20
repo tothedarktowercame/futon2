@@ -6097,6 +6097,7 @@
                                    :signature-derived (:signature-derived live-freshness)
                                    :signature-now (:signature-now live-freshness)
                                    :limitation "the corpus changed after C was derived: re-derive before scoring"})))
+              preference-scales (live-c/family-scales problems)
               lanes
               (mapv (fn [problem]
                       (let [lane (cascade-lane (:cascade-problem problem))]
@@ -6194,7 +6195,8 @@
                          acc (:precedence candidate)))
                (reduce clojure.set/union joint-want (map (partial reduce clojure.set/union #{}) (keys joint-q0)))
                joint-candidates)
-              live-spec (live-c/cascade-spec live-derived joint-reachable joint-want)
+              live-spec (live-c/cascade-spec live-derived joint-reachable joint-want
+                                              preference-scales)
               live-refusal (:refusal live-spec)
               ;; :no-reachable-want is NOT the same class of refusal as
               ;; :live-c-stale or a source failure. Those two mean "C cannot be
@@ -6223,6 +6225,9 @@
                                         :cascade-spec
                                         (if grain-mismatch?
                                           {:want joint-want
+                                           :lam (:lam preference-scales)
+                                           :mu (:mu preference-scales)
+                                           :preference-scales preference-scales
                                            :c {:status :derived-no-overlap
                                                :source :futon2.aif.live-c/cascade-spec
                                                :reason :no-live-c-mission-want-in-cascade-outcome-domain
