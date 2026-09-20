@@ -132,7 +132,37 @@ generalizable outcomes need NEW patterns rather than new interpretations;
 claude-4 finds that boundary by attempting re-interpretation first and
 seeing what cannot be expressed.
 
-## Grain note
+## Endorsement and two further preference entries (Joe, 2026-09-20)
+
+Verbatim, on the three candidate tokens (change-authored-and-bound,
+premise-refused-before-work, obligation-resolved-without-out-of-band-
+turn): "Fine, I like those, partly because *they are not my work* but
+they do align (claude-4 is correct) with my preferences. There would be
+others. E.g. Rob's #1 preference is dont-reinvent-the-wheel. Mine is
+eat-your-tail (loss/error/costs/externalities/etc. should be made
+explicit so that they can be r[e]duced). These have been discussed
+before."
+
+Notes (claude-12):
+
+- The endorsement's stated ground matters: the tokens are NOT the
+  operator's work, yet align with the operator's preferences —
+  participation without ventriloquism. C entries carry OWNERS.
+- **rob/dont-reinvent-the-wheel** — Rob's #1. First named human
+  stakeholder beyond the operator; this is roster content for the
+  participant universe as well as a C entry. Candidate observable shape:
+  an existing pattern/tool was found and reused where rebuilding was
+  available.
+- **joe/eat-your-tail** — losses, errors, costs, externalities made
+  explicit so they can be reduced. As C content: the account must
+  surface its own costs; hidden externalities are dispreferred. Note it
+  is a preference OVER THE ACCOUNT, same genus as the three endorsed
+  tokens — evidence the collaboration-vocabulary direction is right.
+- Provenance hole, retained honestly: Joe says both were discussed
+  before, but no workspace artifact matches the phrases (the only hit is
+  tonight's operator turn in the affect-events feed). The prior
+  discussion is outside the searchable workspace; bind it when it
+  surfaces, don't manufacture it.
 
 "Grounded progress with zero operator turns" must be expressible in the
 reachable outcome domain. Widening the grain is WM-13, which this
