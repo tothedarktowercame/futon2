@@ -1,0 +1,13 @@
+{:repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/full_loop_runner.clj"
+              "src/futon2/aif/fold.clj"
+              "src/futon2/aif/fold_classical.clj"
+              "src/futon2/aif/close_loop.clj"]
+ :test-paths ["test/futon2/aif/cascade_fold_repair_test.clj"
+              "test/fixtures/cascade-fold-repair/compliance.edn"
+              "test/fixtures/cascade-fold-repair/expressions-of-interest.edn"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.cascade-fold-repair-test"]
+ :author "codex-8"
+ :origin "claude-12/cascade-fold-repair-2026-09-20"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/review-followup-post"
+ :agency-url "http://localhost:7070"}
