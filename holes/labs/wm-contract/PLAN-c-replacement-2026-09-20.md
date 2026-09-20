@@ -45,25 +45,56 @@ model per Joe: "use the IAD that we built."
    measurement click; Q assessed from that certificate's fields
    (ambiguity-status, per-step ambiguity, A/D verdicts, F separation).
 
-## The one open word: which mission M*
+## Which mission M* — computed by the outer loop, not picked (Joe, 2026-09-20)
 
-Criteria: high live-C weight (corpus actually wants it); closure
-honestly advanced by the three collaboration tokens; a stated output
-for the J-class locator; something cascade-dispatched work can really
-move. Top of the wholeness ranking (L = T·H) with fit:
+Joe, verbatim: "'Which mission' should come from an AIF *outer loop* —
+that existed in the empirics.tex era version of the system... In terms
+of the selection model, *how* the mission was selected was something we
+were experimenting with, e.g., combining measures of centrality,
+feasibility, and perhaps other things. In order to make that more like
+IAD, we could use my adaptation of Ostrom's principles from Table 2 of
+corneli2016institutional.pdf."
 
-| candidate | L | fit note |
+The selection model exists and is live at the judge boundary:
+`enrich-candidates-with-mission-value` (war_machine.clj:2348) blends
+globally normalized CENTRALITY, active-cascade role (strategic), phase
+DOABILITY, and the Joe-ruled (2026-09-02) mission-grain EPISTEMIC term,
+with declared weights (FUTON_WM_VALUE_WEIGHTS). So step 0 of the packet
+is: run that enrichment over the alive-mission candidate set, extended
+with an IAD readiness vector, and COMMIT the ranked selection record
+with per-factor provenance. The top candidate is M*. Nobody hand-picks.
+
+### The IAD vector, v0 (Table 2, corneli2016, transposed to missions)
+
+Each principle scored per candidate with a NAMED ARTIFACT or a typed
+gap; checkable sub-scores only in v0 — judgement-class sub-scores are
+declared as unrated until A carries rates (consistency with the A
+plan). Table 2's principles (verbatim short form) and their v0 reading:
+
+| # | principle (4P form) | v0 checkable reading per mission |
 |---|---|---|
-| M-or-training-as-learning-system | 86.0 | highest corpus weight |
-| M-self-documenting-stack | 81.0 | thesis-shaped: the stack's account of itself |
-| M-learning-loop | 75.0 | its text IS the B->A->pattern loop; closure conditions are almost verbatim the three tokens |
+| 1A | Producers who can alter the resource clearly defined | mission has a declared owner/cast |
+| 1B | boundaries of the Place well defined | declared repos/paths scope in the mission doc |
+| 2A | Process related to local conditions | pattern interpretations bound to local sources (interpretation receipts) |
+| 2B | benefits proportional to efforts | live-C weight flows to its outcome tokens (the projection) |
+| 3 | affected Producers can modify operational rules | its flexiargs are library-resident (agents may propose edits) |
+| 4A | tests document Producer-Place interaction | tests/receipts exist for the stated outputs |
+| 4B | tests modifiable by Producers | test sources in-tree, not fixtures |
+| 5 | graduated sanctions between Producers | typed refusals exist on its paths |
+| 6 | rapid low-cost conflict-resolution arenas | a live lane/channel (bells) owns it |
+| 7 | rights to devise institutions unchallenged | its lane may author patterns under library discipline |
+| 8 | nested enterprises | placement in the M-/E-/T- hierarchy and scope tree |
 
-Recommendation: **M-learning-loop** — the mission that mines the
-operator-correction pairs into patterns is the activity-becomes-
-inference thesis as a work item, and "a change was authored and bound /
-an obligation resolved through the account" advance it literally, not
-by analogy. But the pick sets what the machine works toward while Joe
-sleeps, so it is C content and the owner decides.
+This is also the first captured piece of C's institutional half
+(NOTE-joes-view-of-C §1 Half 2): the IAD vector scores the *action
+situation* around a mission — HOW work there would be carried out —
+entering selection as a factor rather than as preference mass, which
+matches the flagged inference that institutions may govern rather than
+weigh.
+
+Wholeness shortlist retained as context for reading the selection
+record (not as the choice): M-or-training-as-learning-system L=86.0,
+M-self-documenting-stack L=81.0, M-learning-loop L=75.0.
 
 ## Explicitly out of scope today
 
