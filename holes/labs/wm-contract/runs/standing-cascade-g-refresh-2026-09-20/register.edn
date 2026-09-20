@@ -1,0 +1,9 @@
+{:repo-root "/home/joe/code/futon2"
+ :command ["clojure" "-M:test" "-n" "futon2.vm.standing-enacted-policy-is-cascade-g-test"]
+ :author "codex-15"
+ :output :json
+ :artifact-dir "/home/joe/code/storage/test-registry/standing-cascade-g-refresh-2026-09-20"
+ :code-paths ["resources/wm/cascade-sources/M-wm-aif-policy-grain-compliance.edn"
+              "scripts/futon2/report/war_machine.clj"
+              "src/futon2/aif/cascade_sources.clj"]
+ :test-paths ["test/futon2/vm/standing_enacted_policy_is_cascade_g_test.clj"]}

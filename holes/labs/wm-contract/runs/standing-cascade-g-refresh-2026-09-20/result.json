@@ -1,0 +1,30 @@
+{
+  "entry-id": "test-registry-ad7a88f0fa5b72ce844325cbb23bdaac2c3b235cf60fb50369004fbaa65276df",
+  "results": {
+    "assertions": 5,
+    "duration-ms": 33577,
+    "errors": 0,
+    "exit": 0,
+    "failures": 0,
+    "tests": 1
+  },
+  "git-head": "0304c920f568a34a2277cb90c8245fd723f135fb",
+  "log-artifact": {
+    "ledger": "/home/joe/code/storage/registry-ledger",
+    "path": "/home/joe/code/storage/test-registry/standing-cascade-g-refresh-2026-09-20/a643df5b-4e63-4bce-8eed-95d9ba16bad8.log",
+    "sha256": "37820dfe69c567b78bfbad0ea974deb07cf350f7a19016903fbce0d4814f02f8"
+  },
+  "check": {
+    "warrant?": true,
+    "chain-length": 2,
+    "entry-id": "test-registry-ad7a88f0fa5b72ce844325cbb23bdaac2c3b235cf60fb50369004fbaa65276df",
+    "checked-at": "2026-09-20T02:30:51.889425115Z",
+    "diff-paths": [
+      "resources/wm/cascade-sources/M-wm-aif-policy-grain-compliance.edn",
+      "scripts/futon2/report/war_machine.clj",
+      "src/futon2/aif/cascade_sources.clj",
+      "test/futon2/vm/standing_enacted_policy_is_cascade_g_test.clj"
+    ],
+    "outside-closure": []
+  }
+}
