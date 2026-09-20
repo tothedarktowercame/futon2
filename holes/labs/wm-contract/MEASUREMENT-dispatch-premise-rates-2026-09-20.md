@@ -121,3 +121,37 @@ All three land in the 0.1-0.25 band; the judgement-channel declared
 rate for a first live A has three independently instrumented
 populations behind it. Remaining Landscape estimate: coupling weight p
 from co-failure clustering.
+
+## Coupling weight: co-failure clustering (2026-09-20 evening)
+
+Method: all counted error events from the two instrumented channels
+(9 premise-stops + 6 hand-classified corrections, minus one falling
+outside the hour-bucketed window = 14 events), bucketed by hour against
+all 196 work dispatches across 27 active hours in the ledger window.
+
+| statistic | value |
+|---|---|
+| overall event rate | 0.071 |
+| hours with >=2 events | 4 observed vs 3.06 expected under independence |
+| **event concentration** | **12/14 events in 4 hours holding 21% of dispatches** (independence: ~2.9) |
+| two-condition fit | p(bad window) ~ 4/27 = 0.15; rate_bad = 12/41 = 0.29; rate_good = 2/155 = 0.013 (~22x ratio) |
+
+Reading: the multi-event-hour COUNT is unremarkable, but the
+CONCENTRATION is not — the errors bunch, and they bunch across both
+channels in the same windows (two afternoon hours each hold a
+premise-stop plus two corrections). That cross-channel co-occurrence
+is the shared-condition signature the model's z parameter exists for.
+
+Caveats in the same breath: (1) hour buckets are arbitrary; (2) the
+03:00 cluster (four corrections) coincides with the overnight review
+sweep — co-DETECTION intensity, not necessarily co-failure; the
+premise-stop channel is instrumented uniformly (every dispatch gets
+intake) so its clustering is the cleaner evidence; (3) n = 14 events —
+plausible-grade, wide uncertainty; (4) infra failures (the 17:09
+executor wedge, 3+ simultaneous) excluded as a different failure kind,
+though qualitatively they are the most literal bad-day instance of the
+window.
+
+Declared-as-such candidate: z ~ Bernoulli(p = 0.15) per window,
+per-step-redraw semantics (persistent-z transcription queued), with
+conditional error rates ~0.29 / ~0.013.
