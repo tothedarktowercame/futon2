@@ -1,0 +1,8 @@
+{:subject-id "WM-declared-preference-scales"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["resources/wm/cascade-sources/M-expressions-of-interest.edn" "resources/wm/cascade-sources/M-wm-08-external-f2.edn" "src/futon2/aif/live_c.clj" "src/futon2/aif/cascade_sources.clj" "src/futon2/aif/cascade_problems.clj" "scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/aif/declared_preference_scales_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.declared-preference-scales-test"]
+ :author "codex-3"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/declared-scales-2026-09-20"
+ :index-file "/home/joe/code/futon3c/data/test-registry-validation/subjects.ednlog"}

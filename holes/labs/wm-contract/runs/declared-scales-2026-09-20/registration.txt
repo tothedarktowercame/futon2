@@ -1,0 +1,4 @@
+evidence-id test-registry-78c34bf51ed93728a7c5ac025df5b3fb8aa05f0ce155c31131290972bcdff2c0
+warrant? true
+results {:assertions 27, :duration-ms 3048, :errors 0, :exit 0, :failures 0, :tests 3}
+bound WM-declared-preference-scales -> test-registry-78c34bf51ed93728a7c5ac025df5b3fb8aa05f0ce155c31131290972bcdff2c0
