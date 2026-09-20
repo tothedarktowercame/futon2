@@ -1,0 +1,110 @@
+{:source-finding
+ "data/wm-repair-obligations/findings/repair-occ-7652139c7d8bcd122c524964fcf4ef50f3c7485753ee7503e71db029466c86d4.edn",
+ :selected-entry
+ {:action
+  {:kind :cascade-candidate,
+   :id :C1,
+   :target "M-expressions-of-interest",
+   :precedence
+   [{:id :coordination/par-as-obligation,
+     :authority :documented-interpretation,
+     :produces
+     #{["M-expressions-of-interest"
+        :obligation-resolved-through-the-account]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-expressions-of-interest" :premise-refused-before-work]},
+        :absent
+        #{["M-expressions-of-interest"
+           :obligation-resolved-through-the-account]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-expressions-of-interest"
+         :obligation-resolved-through-the-account]},
+      :authority :documented-interpretation},
+     :target "M-expressions-of-interest"}
+    {:id :coordination/bounded-execution,
+     :authority :documented-interpretation,
+     :produces
+     #{["M-expressions-of-interest" :change-authored-and-bound]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present #{},
+        :absent
+        #{["M-expressions-of-interest" :change-authored-and-bound]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-expressions-of-interest" :change-authored-and-bound]},
+      :authority :documented-interpretation},
+     :target "M-expressions-of-interest"}
+    {:id :futon-theory/stop-the-line,
+     :authority :documented-interpretation,
+     :produces
+     #{["M-expressions-of-interest" :premise-refused-before-work]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present #{},
+        :absent
+        #{["M-expressions-of-interest"
+           :premise-refused-before-work]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-expressions-of-interest" :premise-refused-before-work]},
+      :authority :documented-interpretation},
+     :target "M-expressions-of-interest"}],
+   :construction-receipt
+   {:kind :hand-admitted,
+    :by "codex-3",
+    :date "2026-09-20",
+    :moves [],
+    :stopped-is-not-success true},
+   :interpretation-receipts
+   {:coordination/bounded-execution
+    {:kind :hand-admitted,
+     :by "codex-3",
+     :date "2026-09-20",
+     :source
+     {:path "futon3/library/coordination/bounded-execution.flexiarg",
+      :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+      :sha256
+      "1dda0e59f99b45582e63b5a2a056ad43d47fd1e0baad1a01d72c8ca116bd06a5"},
+     :reading
+     "Bound a mission-scoped contribution and commit its change witness. Predicted output is the referenced object's presence only, not verification of its claims."},
+    :futon-theory/stop-the-line
+    {:kind :hand-admitted,
+     :by "codex-3",
+     :date "2026-09-20",
+     :source
+     {:path "futon3/library/futon-theory/stop-the-line.flexiarg",
+      :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+      :sha256
+      "ba33e0300fa946a5831460bcae1360cb5b9742c6ea72d5765348eeef64998e88"},
+     :reading
+     "Inspect a mission work premise and record a refusal witness when it fails. This is a hand-admitted production hypothesis; presence alone establishes neither a genuine premise defect nor refusal-before-work ordering."},
+    :coordination/par-as-obligation
+    {:kind :hand-admitted,
+     :by "codex-3",
+     :date "2026-09-20",
+     :source
+     {:path "futon3/library/coordination/par-as-obligation.flexiarg",
+      :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+      :sha256
+      "f749561c4b017dcd22e058695693ac98fbed2e9092c3e910a295f9d440b3662a"},
+     :reading
+     "After a refusal witness, record the correction cycle's post-action review with references to its prior steps. The model predicts the PAR witness's referenced object presence only; its contents and resolution are not mechanically adjudicated."}}}}}

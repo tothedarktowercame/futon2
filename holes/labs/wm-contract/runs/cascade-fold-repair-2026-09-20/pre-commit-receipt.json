@@ -1,0 +1,63 @@
+{
+  "schema": "cascade-fold-repair-validation-v1",
+  "author": "codex-8",
+  "reviewer": "claude-12",
+  "review-status": "pending",
+  "issuing-caller": "claude-12",
+  "base-head": "328141ab99fc016a08d6be7120b59edb51b7093a",
+  "validation": {
+    "phase": "pre-commit",
+    "tests": 3,
+    "assertions": 58,
+    "failures": 0,
+    "errors": 0,
+    "repair-path-regression": {
+      "tests": 1,
+      "assertions": 6,
+      "failures": 0,
+      "errors": 0
+    },
+    "clj-kondo": "0 errors, 0 warnings",
+    "check-parens": "OK"
+  },
+  "replays": [
+    {
+      "input": "compliance",
+      "shape-valid": true,
+      "correspondence-valid": true,
+      "boxes": 0,
+      "holes": 1,
+      "coverage-score-delta": null
+    },
+    {
+      "input": "expressions-of-interest",
+      "shape-valid": true,
+      "correspondence-valid": true,
+      "boxes": 0,
+      "holes": 3,
+      "coverage-score-delta": null
+    }
+  ],
+  "negative-controls": [
+    "missing-target",
+    "missing-interpretation",
+    "wrong-target-outputs",
+    "injected-fold-unchanged"
+  ],
+  "disposition": "branch-3b-contract-valid-incomplete",
+  "successful-construction-demonstrated": false,
+  "findings-closed": false,
+  "shared-jvm-loaded": false,
+  "sha256": {
+    "src/futon2/aif/full_loop_runner.clj": "3a82fa03ff06df4267c3a57410a19d5132642e8d245464c4b4c403138b89e776",
+    "test/futon2/aif/cascade_fold_repair_test.clj": "071be422b00db3f9104329fc3a83404484c73e982d7f532280e115bb53d8dd0c",
+    "test/fixtures/cascade-fold-repair/compliance.edn": "b53442229651eac25451c94fe40f199733ce84fa5fc4b417bc39d299e226e120",
+    "test/fixtures/cascade-fold-repair/expressions-of-interest.edn": "eab4b71f1bb42e99beb1f896c2601e472b30e4ce6df54715c722bfc90890ddb3",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/kondo.log": "62f058c914653e6f2e29366a322aedba5032ba7879dcf741a70fef57ec936b85",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/pre-commit.log": "1a1aa6d5ef690cffb506eb0135372f71ee11580165042068fd46af181490d7ae",
+    "holes/labs/wm-contract/runs/cascade-fold-repair-2026-09-20/repair-path-regression.log": "dbc8c7884a420fba953b3de88691bf83d266956e99ea817a3da21ab8d7a9163f",
+    "data/wm-repair-obligations/findings/repair-occ-09fab69174ee3f5985f572f08db809e27603ceee7e77e300114aa429a182135c.edn": "0292b85cc56b7d86eb91245724afd38d144b333c0ea84e72ddf6267d1728cff7",
+    "data/wm-repair-obligations/findings/repair-occ-7652139c7d8bcd122c524964fcf4ef50f3c7485753ee7503e71db029466c86d4.edn": "914f514e5aba533cf181acb7754ba640a3351c6ea52534daf3efc76e2e8f7fa0"
+  }
+}

@@ -1,0 +1,48 @@
+{:source-finding
+ "data/wm-repair-obligations/findings/repair-occ-09fab69174ee3f5985f572f08db809e27603ceee7e77e300114aa429a182135c.edn",
+ :selected-entry
+ {:action
+  {:kind :cascade-candidate,
+   :id :C1,
+   :target "M-wm-aif-policy-grain-compliance",
+   :precedence
+   [{:id :wm-connected-learning/observation-to-next-choice,
+     :authority :documented-interpretation,
+     :produces
+     #{["M-wm-aif-policy-grain-compliance"
+        :standing-cascade-g-test-passes]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-wm-aif-policy-grain-compliance"
+           :judge-loads-declared-cascade-sources]},
+        :absent #{}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-wm-aif-policy-grain-compliance"
+         :standing-cascade-g-test-passes]},
+      :authority :documented-interpretation},
+     :target "M-wm-aif-policy-grain-compliance"}],
+   :construction-receipt
+   {:kind :hand-admitted,
+    :by "claude-4",
+    :date "2026-09-17",
+    :moves [],
+    :stopped-is-not-success true},
+   :interpretation-receipts
+   #:wm-connected-learning{:observation-to-next-choice
+                           {:kind :hand-admitted,
+                            :by "claude-4",
+                            :date "2026-09-17",
+                            :source
+                            {:path
+                             "p4ng/wm-walkthroughs/collections/connected-learning/observation-to-next-choice.flexiarg",
+                             :sha256
+                             "b0407ef81dea874d78bb7697042342d4d8023592a058d66e01e6fa4813186053"},
+                            :reading
+                            "Follow the finding into the next decision: production loads the declared sources and decides from them, so the standing test's enacted decision becomes a cascade decision."}}}}}

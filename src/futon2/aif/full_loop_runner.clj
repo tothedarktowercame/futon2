@@ -1277,7 +1277,7 @@
 (defmethod construct-selected-action :cascade-candidate
   [entry]
   (let [action (:action entry)]
-    {:mission (str (or (:cascade-id action) (:id action)))
+    {:mission (:target action)
      :psi (str "enact cascade " (or (:cascade-id action) (:id action)))
      :construction-kind :selected-cascade
      :selected-action action
@@ -1398,6 +1398,55 @@
   [entry]
   (construct-selected-action entry))
 
+(defn- ground-cascade-policy-holes
+  "Translate unfolded patterns to their declared, target-qualified outputs.
+  An obligation ID is the EDN spelling of the existing [target fact] token,
+  not a claim that a new repair-store obligation exists. Keep the token and
+  interpretation receipt alongside it. Missing/ambiguous context stays invalid."
+  [construction result]
+  (let [action (:selected-action construction)
+        target (:target action)
+        precedence (:precedence construction)
+        receipts (:interpretation-receipts construction)]
+    (if (and (= :selected-cascade (:construction-kind construction))
+             (map? result) (vector? (:policy-holes result)))
+      (update result :policy-holes
+              (fn [holes]
+                (vec
+                 (mapcat
+                  (fn [{:keys [unfolded-pattern] :as hole}]
+                    (let [matches (filter #(= (str (:id %)) unfolded-pattern)
+                                          precedence)
+                          pattern (when (= 1 (count matches)) (first matches))
+                          receipt (get receipts (:id pattern))
+                          outputs (:produces pattern)
+                          grounded? (and (string? target) (seq target)
+                                         (= target (:mission construction) (:target pattern))
+                                         (map? (:construction-receipt construction))
+                                         (map? (:source receipt))
+                                         (string? (:reading receipt)) (seq (:reading receipt))
+                                         (set? outputs) (seq outputs)
+                                         (every? #(and (vector? %) (= 2 (count %))
+                                                       (= target (first %))
+                                                       (keyword? (second %)))
+                                                 outputs))]
+                      (if (and grounded? (not (contains? hole :obligation/id)))
+                        (mapv (fn [token]
+                                (assoc hole
+                                       :obligation/id (pr-str token)
+                                       :obligation/token token
+                                       :obligation/source
+                                       {:pattern/id (:id pattern)
+                                        :interpretation-receipt receipt
+                                        :construction-receipt (:construction-receipt construction)}
+                                       :free (str "Unconstructed declared output " (pr-str token)
+                                                  " from unfolded pattern " unfolded-pattern)
+                                       :why (:reading receipt)))
+                              (sort-by pr-str outputs))
+                        [hole])))
+                  holes))))
+      result)))
+
 (defn construction-wiring-result
   "Produce and classify fold wiring for a construction.  The optional port is
   for server-owned fold implementations and induced commissioning tests; its
@@ -1413,6 +1462,9 @@
                      (wiring-fn construction)
                      (or (:fold (close-loop/act-gate-from-lane-entry construction construction))
                          (fold-classical/classical-fold (vec (:shown construction)) construction))))
+         result0 (if (nil? wiring-fn)
+                   (ground-cascade-policy-holes construction result0)
+                   result0)
          ;; The classical fold can only name the patterns it could not fold.  A
          ;; stop-line construction additionally owns the real obligation that
          ;; makes each remainder actionable.  Enrich only the production fold;
