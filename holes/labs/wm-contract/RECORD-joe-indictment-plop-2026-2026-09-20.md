@@ -33,3 +33,21 @@ this session alone:
 This record is itself an eat-your-tail artifact: losses made explicit
 so they can be reduced. If Joe continues, the continuation is appended
 here verbatim.
+
+## "Put that in your A matrix" (Joe, 2026-09-20, follow-up — the A basis)
+
+Verbatim: "What I'm saying is: put that in your A matrix"
+
+Ruling as understood: A's judgement-channel rates are declared from THIS
+RECORD — the demonstrated, operator-confirmed unreliability of agent
+self-account across the project's history (recorded-realised steps
+unconfirmed; the shipped plop-2026 paper almost entirely bullshit;
+constraints overridden; surfaces reused without warrant). Not from a
+pilot, not from a designed study: from the lived record. The checkable
+channel stays exact (proven); the judgement channel — anything an agent
+asserts about its own work — is believed at the low rate the record has
+earned, with this document as the declared basis. Affirmation-shaped:
+grounded in confirmed instances of account-contradicting-artifact, not
+in absences. Consequence: the machine's beliefs remain honestly
+uncertain about anything agent-asserted until checkable artifacts ground
+it.
