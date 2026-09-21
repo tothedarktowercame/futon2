@@ -3580,7 +3580,7 @@
                           (.getParentFile (io/file attempt-evidence-dir))
                           (io/file (or (:run-record-dir opts) default-run-record-dir)
                                    (str (:run-id opts)) attempt-id))
-                        (str (or (:cohort/id start-event) (:run-id opts)) "/" attempt-id "/retained/route-attestation.edn")
+                        (str (if-let [c (:cohort/id start-event)] (name c) (:run-id opts)) "/" attempt-id "/retained/route-attestation.edn")
                         (route-attestation/receipt
                          {:declarations (:route-attestation opts)
                           :events @checkpoint-events

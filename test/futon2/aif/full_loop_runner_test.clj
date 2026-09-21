@@ -4862,7 +4862,8 @@
                              [:time-step :selection :construction
                               :dispatch :build :adjudication])
           expected-ids (conj expected-ids
-                             (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/token-outcome.edn"))]
+                             (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/token-outcome.edn")
+                             (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/route-attestation.edn"))]
       (is (= expected-ids (mapv :evidence/id (:entries manifest))))
       (is (= expected-ids (:admitted-evidence retained))))
     (doseq [entry (:entries manifest)]
@@ -5231,7 +5232,8 @@
         result (runner/run-opportunity! opts)
         manifest (:close-evidence-manifest result)
         ids (mapv :evidence/id (:entries manifest))]
-    (is (= 14 (count ids)))
+    ;; + retained/route-attestation.edn (improve-4a) joins the manifest.
+    (is (= 15 (count ids)))
     (is (= (mapv #(str "test-cohort-exhaustion/attempt-001/evidence/" (first %))
                   valid-attempt-evidence)
            (subvec ids 10 13)))
@@ -5725,7 +5727,8 @@
            close-event (cohort/read-edn (io/file root "test-cohort-exhaustion"
                                                 (:attempt-id result) "007-closed.edn"))
            receipt (get-in close-event [:payload :judgment :token-outcome-comparison])
-           entry (last (get-in close-event [:payload :close-evidence-manifest :entries]))]
+           entry (first (filter #(clojure.string/ends-with? (:evidence/id %) "/retained/token-outcome.edn")
+                                (get-in close-event [:payload :close-evidence-manifest :entries])))]
        (is (= :grounded-change (:outcome result)))
        ;; Retained files must not disturb the closed attempt's exact file set.
        (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
