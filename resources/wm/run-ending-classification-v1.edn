@@ -1,0 +1,13 @@
+{:schema :wm/run-ending-classification-declaration-v1
+ :kernel/id :wm/run-ending-classification-kernel-v1
+ :mode :record-only
+ :close-judgment-keys [:outcome :grounded? :artifact-only? :failure-kind
+                       :occurrence :route-attestation :route-attestation-ref]
+ :required-close-keys [:outcome :grounded? :artifact-only?]
+ :classes [:focus-increment :associated-increment :elsewhere-useful
+           :known-typed-failure]
+ :facet-map {:focus :focus-increment
+             :associated :associated-increment
+             :useful-elsewhere :elsewhere-useful}
+ :receipt-schemas {:route-attestation :wm/route-attestation-v1
+                   :focus-receipt :wm/focus-receipt-v1}}

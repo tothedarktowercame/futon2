@@ -15,6 +15,7 @@
    'futon2.aif.learning-trial-ledger "/home/joe/code/futon2/src/futon2/aif/learning_trial_ledger.clj"
    'futon2.aif.learning-trial "/home/joe/code/futon2/src/futon2/aif/learning_trial.clj"
    'futon2.aif.route-attestation "/home/joe/code/futon2/src/futon2/aif/route_attestation.clj"
+   'futon2.aif.run-ending-classification "/home/joe/code/futon2/src/futon2/aif/run_ending_classification.clj"
    'futon2.aif.cascade-selection "/home/joe/code/futon2/src/futon2/aif/cascade_selection.clj"
    'futon2.aif.cascade-model-manifest "/home/joe/code/futon2/src/futon2/aif/cascade_model_manifest.clj"
    'futon2.aif.policy "/home/joe/code/futon2/src/futon2/aif/policy.clj"
