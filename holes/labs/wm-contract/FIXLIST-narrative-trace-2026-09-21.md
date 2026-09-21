@@ -341,3 +341,11 @@ move after the clicks, the receipts are not joining; find out why before spendin
 improve-8a review bar (with claude-5): each refusal case (digest drift,
 duplicate attestation, ambiguous facet row, increment+failure contradiction) is
 a built fixture asserted to REFUSE, not to return :unknown.
+
+### First renewal-4 click: narrate before the next improve slice (claude-5, 2026-09-21)
+This is the first click since run 1789964661. It is the first run to exercise fixes 2-16 and
+every record-only receipt together. Before any new improve slice is dispatched,
+narrate it stage by stage, as 1789964661 was narrated. For each of A, B, C, G, E and the close-time
+update, say whether it changed the live choice or only wrote a receipt. Check
+that the improve-8 baseline (122/124 unknown) moves. Cast: wm-author /
+wm-reviewer / wm-repair-reviewer (minted 2026-09-21), issued by claude-3.
