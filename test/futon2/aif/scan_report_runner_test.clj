@@ -36,8 +36,15 @@
                                   (fn [_ options]
                                     (is (true? (:defer-render? options)))
                                     (swap! calls inc)
-                                    {:render-data (assoc scan-test/input :judgement fixture/judgement)
-                                     :judgement fixture/judgement})]
+                                    ;; The renderer needs a full judgement (e.g. the
+                                    ;; free-energy table); the runner fixture's is
+                                    ;; minimal. Take the scan fixture's judgement and
+                                    ;; the runner fixture's belief keys and decision.
+                                    (let [judgement (assoc (merge fixture/judgement
+                                                                  (:judgement scan-test/input))
+                                                           :decision (:decision fixture/judgement))]
+                                      {:render-data (assoc scan-test/input :judgement judgement)
+                                       :judgement judgement}))]
                        (runner/run-opportunity! opts))
               record (edn/read-string (slurp (:run-record result)))
               ref (:scan-report record)]
