@@ -29,9 +29,7 @@
             [futon2.aif.find-receipt :as find]
             [futon2.aif.find-expectations :as fx]
             [futon2.aif.find-designation :as fd])
-  (:import [java.nio.file Files]
-           [java.time Instant]
-           [java.util UUID]))
+  (:import [java.nio.file Files]))
 
 (def run-dir "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/")
 (def redo "holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/redo/")
@@ -158,19 +156,17 @@
                                            {:status :none :reason :pattern-source-missing})}}))
                          (range) (:candidate-judgments old))
         index-id (add! frozen-index)
-        ;; Deterministic occurrence identity: fixed ids, UUIDs derived from a
-        ;; fixed seed, so the committed artifact is byte-stable.
-        seed (atom 0)
-        uuid-fn #(UUID/nameUUIDFromBytes (bytes-of (str "wm08-route-a-" (swap! seed inc))))
-        occurrence (retention/mint-occurrence
-                    {;; The evidence schema requires :run/id to parse as a
-                     ;; UUID; derive it from the rehearsal name so the minted
-                     ;; identity stays deterministic and byte-stable.
-                     :run-id (str (UUID/nameUUIDFromBytes (bytes-of "wm08-route-a-rehearsal")))
-                     :cohort-id ":wm08-route-a"
-                     :attempt-id "attempt-route-a"
-                     :selected-action {:type :advance-mission :target "M-zaif-harness-v1"}
-                     :now #(Instant/parse pinned-at) :uuid-fn uuid-fn})
+        ;; Replay the original v1 identity, not a newly minted v2 occurrence.
+        ;; These are the immutable September 15 rehearsal fields and digest.
+        occurrence (retention/validate-occurrence
+                    {:schema :wm/action-transition-occurrence-v1
+                     :run/id "562c4d61-cdb5-332c-839f-008e7af43a46"
+                     :cohort/id ":wm08-route-a" :attempt/id "attempt-route-a"
+                     :transition/id "transition-f265d49f-3772-3e63-86db-20dc661b1aad"
+                     :action/id "action-025d6478-dbc7-3956-87e6-82847e4aa029"
+                     :action/value {:type :advance-mission :target "M-zaif-harness-v1"}
+                     :action/value-sha256 "8895a2f0e7ac1fc920d740dccdcdea91c48fc18c98357204ce71259efb25fe6c"
+                     :action-at pinned-at})
         identity {:occurrence occurrence :semantic-epoch :wm08-route-a-v1
                   :data-root "/wm08-route-a"
                   :start-event-sha256 (evidence/sha256 (bytes-of "wm08-route-a-start"))

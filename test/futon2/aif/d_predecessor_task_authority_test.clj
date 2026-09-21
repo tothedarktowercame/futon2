@@ -38,6 +38,7 @@
             occurrence (retention/mint-occurrence
                         {:run-id "run" :cohort-id "cohort" :attempt-id "attempt"
                          :selected-action action :now #(Instant/now) :uuid-fn #(UUID/randomUUID)})
+            occurrence ((or (:occurrence-fn opts) identity) occurrence)
             declaration (io/file dir "declaration.edn")
             _ (spit declaration (pr-str (cond-> {:target "target" :locators
                                         {:artifact {:class :C3 :repo "repo" :sha (:head before)

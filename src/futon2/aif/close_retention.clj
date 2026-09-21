@@ -1,10 +1,11 @@
 (ns futon2.aif.close-retention
   "Pure construction and validation of the close-retention v1 carrier."
-  (:require [clojure.string :as str])
-  (:import (java.security MessageDigest)
-           (java.time Instant)))
+  (:require [clojure.string :as str]
+            [futon2.aif.action-identity :as identity])
+  (:import (java.time Instant)))
 
-(def occurrence-schema :wm/action-transition-occurrence-v1)
+(def occurrence-schema :wm/action-transition-occurrence-v2)
+(def legacy-occurrence-schema :wm/action-transition-occurrence-v1)
 (def retention-schema :wm/close-retention-v1)
 (def status-support
   #{:spawned :refined :strengthened :addressed :falsified :foreclosed :reopened})
@@ -29,11 +30,6 @@
     (catch clojure.lang.ExceptionInfo e (throw e))
     (catch Throwable _ (refuse! :timestamp-invalid path))))
 
-(defn- sha256 [s]
-  (let [bytes (.digest (MessageDigest/getInstance "SHA-256")
-                       (.getBytes ^String s "UTF-8"))]
-    (apply str (map #(format "%02x" (bit-and 0xff %)) bytes))))
-
 (defn- minted-id! [kind value path]
   (text! value path)
   (let [prefix (str (name kind) "-")]
@@ -52,7 +48,7 @@
               #{:schema :run/id :cohort/id :attempt/id :transition/id
                 :action/id :action/value :action/value-sha256 :action-at}
               [:occurrence])
-  (when-not (= occurrence-schema (:schema occurrence))
+  (when-not (#{occurrence-schema legacy-occurrence-schema} (:schema occurrence))
     (refuse! :schema-mismatch [:occurrence :schema]))
   (doseq [k [:run/id :cohort/id :attempt/id]]
     (text! (get occurrence k) [:occurrence k]))
@@ -60,12 +56,30 @@
   (minted-id! :action (:action/id occurrence) [:occurrence :action/id])
   (when (nil? (:action/value occurrence))
     (refuse! :action-value-missing [:occurrence :action/value]))
-  (let [actual (sha256 (pr-str (:action/value occurrence)))]
-    (when-not (= actual (:action/value-sha256 occurrence))
+  (let [action (:action/value occurrence)
+        expected (:action/value-sha256 occurrence)
+        actual (when (= occurrence-schema (:schema occurrence)) (identity/digest action))]
+    (when-not (if actual (= expected actual)
+                  (seq (identity/legacy-matches action expected)))
       (refuse! :occurrence-action-drift [:occurrence :action/value-sha256]
-               {:expected (:action/value-sha256 occurrence) :actual actual})))
+               {:expected expected :actual actual})))
   (instant! (:action-at occurrence) [:occurrence :action-at])
   occurrence)
+
+(defn occurrence-identity-receipt
+  "Report the verified encoding without mutating an immutable occurrence.
+   Multiple legacy matches mean the flag did not distinguish these bytes."
+  [occurrence]
+  (validate-occurrence occurrence)
+  (cond-> {:schema :wm/occurrence-identity-verification-v1
+           :occurrence-schema (:schema occurrence)
+           :action/value-sha256 (:action/value-sha256 occurrence)
+           :status :verified}
+    (= legacy-occurrence-schema (:schema occurrence))
+    (assoc :encoding :legacy-pr-str
+           :matched-print-namespace-maps
+           (identity/legacy-matches (:action/value occurrence) (:action/value-sha256 occurrence)))
+    (= occurrence-schema (:schema occurrence)) (assoc :encoding :wm/action-identity-v2)))
 
 (defn mint-occurrence
   "Mint immediately after selection discrimination and before construction.
@@ -79,13 +93,12 @@
     (refuse! :mint-capability-missing [:mint-input]))
   (let [transition-id (str "transition-" (uuid-fn))
         action-id (str "action-" (uuid-fn))
-        action-bytes (pr-str selected-action)
         occurrence {:schema occurrence-schema
                     :run/id run-id :cohort/id cohort-id :attempt/id attempt-id
                     :transition/id transition-id
                     :action/id action-id
                     :action/value selected-action
-                    :action/value-sha256 (sha256 action-bytes)
+                    :action/value-sha256 (identity/digest selected-action)
                     :action-at (str (now))}]
     (validate-occurrence occurrence)))
 

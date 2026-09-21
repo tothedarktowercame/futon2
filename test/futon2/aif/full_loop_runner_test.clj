@@ -5724,6 +5724,8 @@
        (is (= :grounded-change (:outcome result)))
        ;; Retained files must not disturb the closed attempt's exact file set.
        (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
+       (is (= :wm/action-transition-occurrence-v2
+              (get-in close-event [:payload :close-retention :occurrence :schema])))
        (is (= :frozen (get-in result [:checkpoints :selection :judgment
                                      :token-outcome-prediction :status])))
        (is (= 3 (count (:tokens receipt))))
