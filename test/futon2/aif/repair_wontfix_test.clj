@@ -24,6 +24,54 @@
   (try (f) nil (catch clojure.lang.ExceptionInfo e
                  (:repair-dismissal/refusal (ex-data e)))))
 
+(def cleared
+  {:actor "test-reviewer" :reason "Fixture author is now idle and ready."
+   :evidence {:checked-at "2026-09-21T01:00:00Z"
+              :source "fixture-roster"
+              :observation {:status :idle :invoke-ready? true}}})
+
+(deftest cleared-condition-is-an-auditable-dismissal-not-repair
+  (let [root (root) f (record! root "findings" finding) before (slurp f)
+        d (r/dismiss-condition-cleared! root (:repair/id finding) cleared)]
+    (is (= :dismissed-condition-cleared (:repair/status d)))
+    (is (= :condition-cleared (:dismissal/kind d)))
+    (is (= cleared (select-keys d [:actor :reason :evidence])))
+    (is (empty? (r/open-obligations root)))
+    (is (= d (:repair/dismissal (first (r/obligation-history root "test-attempt")))))
+    (is (= before (slurp f)))
+    (is (not (.exists (io/file root "implementations"))))
+    (is (not (.exists (io/file root "resolutions"))))
+    (is (= :already-dismissed
+           (refused #(r/dismiss-condition-cleared! root (:repair/id finding) cleared))))))
+
+(deftest cleared-condition-needs-real-evidence-shape
+  (doseq [bad [(dissoc cleared :evidence) (assoc cleared :evidence nil)
+               (assoc cleared :evidence {})
+               (assoc-in cleared [:evidence :checked-at] "yesterday")
+               (assoc-in cleared [:evidence :source] "")
+               (assoc-in cleared [:evidence :observation] {})
+               (dissoc cleared :actor) (assoc cleared :actor " ")
+               (dissoc cleared :reason) (assoc cleared :reason "")
+               (assoc cleared :override true)]]
+    (let [root (root) f (record! root "findings" finding) before (slurp f)]
+      (is (contains? #{:disposition-invalid :evidence-invalid}
+                     (refused #(r/dismiss-condition-cleared! root (:repair/id finding) bad))))
+      (is (= 1 (count (r/open-obligations root))))
+      (is (not (.exists (io/file root "dismissals"))))
+      (is (= before (slurp f))))))
+
+(deftest cleared-condition-respects-prior-dispositions
+  (doseq [[dir expected] [["resolutions" :already-resolved]
+                         ["dismissals" :already-dismissed]
+                         ["implementations" :finding-not-open]]]
+    (let [root (root) f (record! root "findings" finding)
+          existing (record! root dir {:repair/id (:repair/id finding)})
+          before (slurp existing)]
+      (is (= expected
+             (refused #(r/dismiss-condition-cleared! root (:repair/id finding) cleared))))
+      (is (= before (slurp existing)))
+      (is (= (pr-str finding) (slurp f))))))
+
 (deftest append-only-visible-dismissal
   (let [root (root) f (record! root "findings" finding) before (slurp f)
         d (r/dismiss-wontfix! root (:repair/id finding) disposition)]

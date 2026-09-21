@@ -972,6 +972,47 @@
        (write-new! (io/file root "dismissals" (str finding-id ".edn")) record)
        record))))
 
+(defn dismiss-condition-cleared!
+  "Dismiss a moot environmental hold with a retained, dated re-check.
+  Evidence is {:checked-at ISO-instant :source nonblank-string
+  :observation nonempty-map}. The actor is accountable for its relevance and
+  interpretation; this is neither repair validation nor permanent retirement."
+  ([finding-id disposition]
+   (dismiss-condition-cleared! default-root finding-id disposition))
+  ([root finding-id {:keys [evidence actor reason] :as disposition}]
+   (when-not (and (string? finding-id)
+                  (re-matches #"[A-Za-z0-9._-]+" finding-id))
+     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+   (when-not (and (= #{:evidence :actor :reason} (set (keys disposition)))
+                  (nonblank? actor) (nonblank? reason))
+     (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+   (when-not (and (map? evidence)
+                  (nonblank? (:source evidence))
+                  (map? (:observation evidence)) (seq (:observation evidence))
+                  (nonblank? (:checked-at evidence))
+                  (try (Instant/parse (:checked-at evidence))
+                       (catch Exception _ nil)))
+     (dismissal-refuse! :evidence-invalid {:repair/id finding-id}))
+   (when (get (indexed-records root "dismissals") finding-id)
+     (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+   (when (get (indexed-records root "resolutions") finding-id)
+     (dismissal-refuse! :already-resolved {:repair/id finding-id}))
+   (let [finding (get (indexed-records root "findings") finding-id)]
+     (when-not finding
+       (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+     (when (or (not= :open (:repair/status finding))
+               (get (indexed-records root "implementations") finding-id)
+               (get (verified-admissions root) finding-id))
+       (dismissal-refuse! :finding-not-open {:repair/id finding-id}))
+     (let [record {:repair/id finding-id :repair/schema-version 1
+                   :repair/status :dismissed-condition-cleared
+                   :dismissal/kind :condition-cleared
+                   :failed-attempt (:attempt-id finding)
+                   :evidence evidence :actor actor :reason reason
+                   :dismissed-at (str (Instant/now))}]
+       (write-new! (io/file root "dismissals" (str finding-id ".edn")) record)
+       record))))
+
 (defn dismiss-unexecuted!
   "Append an administrative disposition only when the immutable finding itself
   proves that its dispatched job never executed. This is not a repair success,
