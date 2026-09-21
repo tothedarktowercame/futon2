@@ -268,6 +268,11 @@
    numerical F, and contributes no term. Contradiction has zero policy support.
    Legacy/replay entries without that receipt retain their historical handling.
    :selection-certificate carries per-policy Lean fields and the input records.
+   Optional :near-tie-threshold {:value nonnegative-nats :status :declared}
+   is supplied alongside :beta in opts. There is no default. Its declaration
+   and the policy/action comparisons are recorded in :selection-law; they do
+   not select, abstain, or change the posterior. Existing callers without a
+   declaration report :threshold-undeclared.
 
    Returns a decision in the historical flat selector's shape (action,
    rank, controller-score, authorization envelope), plus:
@@ -290,7 +295,7 @@
 
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
-  [ranked-actions {:keys [beta beta-state cascade-habit-path]}]
+  [ranked-actions {:keys [beta beta-state cascade-habit-path near-tie-threshold]}]
   ;; Runtime resolution breaks the existing prior -> policy shadow dependency.
   ;; This is the mandatory live seam, not an optional caller-side attachment.
   (let [attach (requiring-resolve 'futon2.aif.cascade-habit-store/attach-habits)
@@ -359,7 +364,11 @@
         per-policy-argmax
         (let [[a p] (reduce (fn [[_ bp :as best] [a' p']] (if (> p' bp) [a' p'] best))
                             (sort-by (comp pr-str key) posterior))]
-          {:action a :probability p :first-action (cascade-first-action a)})]
+          {:action a :probability p :first-action (cascade-first-action a)})
+        comparisons (cascade-selection/selection-comparisons
+                     {:beta beta :candidates candidates :posterior posterior
+                      :action-of action-of :choice choice
+                      :near-tie-threshold near-tie-threshold})]
     {:action (:action chosen-entry)
      :rank (or (:rank chosen-entry) 1)
      :controller-score (:controller-score chosen-entry)
@@ -373,10 +382,11 @@
                                                 [:beta :status] beta-status)
                               beta-state (assoc :policy-precision-state beta-state))
      :selection-law
-     {:requested :cascade-selection-posterior
+     (merge comparisons {:requested :cascade-selection-posterior
       :applied :cascade-selection-posterior
       :beta beta
       :beta-status beta-status
+      :near-tie-threshold (get-in comparisons [:policy-comparison :near-tie-threshold])
       :gamma (/ 1.0 beta) :tau beta
       :tau-source (if beta-state :carry-beta :declared-beta)
       :posterior posterior
@@ -392,7 +402,7 @@
       (boolean (some (fn [[a p]]
                        (and (not= a (:action choice))
                             (= p (:mass choice))))
-                     weights))}
+                     weights))})
      :softmax-weights weights
      :chosen-action (:action choice)
      :chosen-action-mass (:mass choice)}))
