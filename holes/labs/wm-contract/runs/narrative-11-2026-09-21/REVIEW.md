@@ -91,3 +91,19 @@ location/digest, absence handling, lack of embedded scan data, and unchanged
 real store file counts. The broader `full-loop-runner-test` likewise requires
 canonical source and was not rerun through this known guard. No guard was
 stubbed or bypassed.
+
+## Registered warrant
+
+Registry check returned `:missing-entry` (`registry-check.log`). After committing
+implementation `73b115ac2115c937730ef7fe8a1c5a598018cf82`, ran in a separate CLI
+process from `/home/joe/code/futon3c`:
+
+```
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-11/holes/labs/wm-contract/runs/narrative-11-2026-09-21/registry.edn
+```
+
+Warrant: `test-registry-3f7868218f1b5ef1333fe62a38cd752ef93a6ce6005dc303376fb3fd1266d6b1`.
+`:warrant? true`, 4 tests, 28 assertions, 0 failures, 0 errors, exit 0.
+The scope is the scan-report namespace (including direct run-record persistence),
+not the guarded click-level namespace. Registration and content-addressed log /
+closure are retained here. No source changed after the warranted commit.
