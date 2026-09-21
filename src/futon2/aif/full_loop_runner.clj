@@ -15,6 +15,7 @@
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.cascade-sources :as cascade-sources]
+            [futon2.aif.cascade-structure :as cascade-structure]
             [futon2.aif.cascade-habit-store :as cascade-habit]
             [futon2.aif.cascade-habit-reinforcement :as habit-reinforcement]
             [futon2.aif.cascade-plan :as cascade-plan]
@@ -1332,7 +1333,7 @@
                             (str (or (:id p) (:cascade-id p)))
                             (str p)))
                   (:precedence action))
-     :semilattice []
+     :cascade-structure (cascade-structure/receipt action)
      :policy-holes []}))
 
 (defmethod construct-selected-action :learn-action-class
@@ -4076,7 +4077,7 @@
                 construction-cell
                 (term (cond-> {:mission (str target)
                               :cascade (select-keys construction
-                                                    [:psi :cascade-score :semilattice
+                                                    [:psi :cascade-score :semilattice :cascade-structure
                                                      :construction-kind
                                                      :selected-action
                                                      :capability-contract

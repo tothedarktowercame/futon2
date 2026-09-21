@@ -1,0 +1,20 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.cascade-structure-test
+
+FAIL in (selected-constructor-replaces-literal-with-receipt) (cascade_structure_test.clj:17)
+cascade candidates never return the literal semilattice slot
+expected: (not (contains? c :semilattice))
+  actual: (not (not true))
+
+FAIL in (selected-constructor-replaces-literal-with-receipt) (cascade_structure_test.clj:18)
+expected: (= :singleton (get-in c [:cascade-structure :shape]))
+  actual: (not (= :singleton nil))
+
+FAIL in (selected-constructor-replaces-literal-with-receipt) (cascade_structure_test.clj:19)
+expected: (= :declared-need-support-v1 (get-in c [:cascade-structure :basis]))
+  actual: (not (= :declared-need-support-v1 nil))
+
+Ran 1 tests containing 3 assertions.
+3 failures, 0 errors.

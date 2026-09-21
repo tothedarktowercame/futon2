@@ -127,9 +127,9 @@
         positions (zipmap (map pattern-id patterns) (map #(+ 24 (* step %)) (range)))
         edges (sort-by pr-str (set (dependency-edges data)))
         valid (filter #(every? (set (keys positions)) %) edges)
-        shape-text (str "shape: " (if shape (display shape)
+        shape-text (or (:shape-caption data) (str "shape: " (if shape (display shape)
                                    (str "not computed in this run"
-                                        (when (= [] semilattice) " (literal semilattice field)"))))]
+                                        (when (= [] semilattice) " (literal semilattice field)")))))]
     (svg (+ bottom 136) "Cascade precedence, dependencies, and wanted-token outcomes"
          (str (txt 24 28 "Cascade and wanted-token outcomes" {"font-size" 18})
               (txt 24 52 (str "Selected target: " (display target)))
