@@ -29,7 +29,10 @@
          "; check " (text (:check observation))
          "; observed " (text (:observed observation))
          "; resolved sha " (text (:resolved-sha evidence))
-         "; evidence " (text evidence) "\n")))
+         ;; :decl is the line the locator searches for, not the line it found
+         (when (contains? evidence :decl)
+           (str "; looked for line " (text (:decl evidence))))
+         "; evidence " (text (dissoc evidence :decl)) "\n")))
 
 (defn- pattern-text [index pattern boxes holes receipts]
   (let [id (if (map? pattern) (:id pattern) pattern)

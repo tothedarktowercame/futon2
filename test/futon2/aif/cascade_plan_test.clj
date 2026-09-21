@@ -36,6 +36,11 @@
                    "holes: none" "wires: none"]]
       (is (str/includes? rendered value) value))
     (is (= 2 (count (re-seq #"; check :C4" rendered))))
+    ;; The C4 :decl is the searched-for line: "- [x]" at 2ea86caf was looked
+    ;; for and not found (the file has "- [ ]" there), so it must not read as
+    ;; evidence of what was found.
+    (is (str/includes? rendered "observed false; resolved sha 2ea86caf9c61a00f34b971f0e17710edfc7b11e6; looked for line - [x]"))
+    (is (not (re-find #"evidence :decl" rendered)))
     (is (= rendered (plan/cascade-plan-text construction)))
     (doseq [prompt (prompts construction)]
       (is (str/includes? prompt (str "PATTERN CASCADE:\n" rendered))))
