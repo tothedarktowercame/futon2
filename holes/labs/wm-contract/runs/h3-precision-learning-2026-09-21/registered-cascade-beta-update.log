@@ -1,0 +1,4 @@
+evidence-id test-registry-14655f9ca5b0a6222916f3f43293433cbe6a2815801ba2c19f3f17c16b0f9027
+warrant? true
+results {:assertions 39, :duration-ms 1609, :errors 0, :exit 0, :failures 0, :tests 8}
+bound H3/precision-learning/cascade-beta-update -> test-registry-14655f9ca5b0a6222916f3f43293433cbe6a2815801ba2c19f3f17c16b0f9027

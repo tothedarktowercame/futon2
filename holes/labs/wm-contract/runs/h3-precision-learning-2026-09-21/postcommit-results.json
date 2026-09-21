@@ -1,0 +1,50 @@
+[
+  {
+    "name": "cascade-beta-update",
+    "role": "post-commit-warrant",
+    "sha": "991e27a4",
+    "exit": 0,
+    "log": "registered-cascade-beta-update.log",
+    "log-sha256": "cb0dd7e302ee40fe86afd62ac924748ff7d9da9512f833645c8ebae78a3bf6cf"
+  },
+  {
+    "name": "policy-precision",
+    "role": "post-commit-warrant",
+    "sha": "991e27a4",
+    "exit": 0,
+    "log": "registered-policy-precision.log",
+    "log-sha256": "b691638fb6b83e431f4337c717427c72de2fee7f15c567bc62f66cb80afd7799"
+  },
+  {
+    "name": "cascade-sources",
+    "role": "post-commit-warrant",
+    "sha": "991e27a4",
+    "exit": 0,
+    "log": "registered-cascade-sources.log",
+    "log-sha256": "29d473566bd881ff145c3dbc377973a7233b673e2063180abbb2f0271fc44a76"
+  },
+  {
+    "name": "d-predecessor-task-authority",
+    "role": "post-commit-warrant",
+    "sha": "991e27a4",
+    "exit": 0,
+    "log": "registered-d-predecessor-task-authority.log",
+    "log-sha256": "4af0d96b891df271b4ca87804d56752763705ee93b304eafccaa9746e98d8ec0"
+  },
+  {
+    "name": "policy-precision-carry",
+    "role": "post-commit-warrant",
+    "sha": "991e27a4",
+    "exit": 0,
+    "log": "registered-policy-precision-carry.log",
+    "log-sha256": "2e0c0898e840f73817394ad5d9c8991aebe0a7c9ada2c563acfe9e65a153cf35"
+  },
+  {
+    "name": "cascade-decision",
+    "role": "post-commit-warrant",
+    "sha": "991e27a4",
+    "exit": 0,
+    "log": "registered-cascade-decision.log",
+    "log-sha256": "81381d0f007eb439e95f41c34c1c56c0de4379be3d29eecd354ecfc159333fcf"
+  }
+]

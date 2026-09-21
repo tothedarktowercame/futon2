@@ -1,0 +1,114 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.policy-precision-carry-test
+
+ERROR in (retrospective-clock-and-unknowns) (policy_precision_carry.clj:11)
+Uncaught exception, not in assertion.
+expected: nil
+  actual: clojure.lang.ExceptionInfo: prediction-refused
+{:kind :prediction-refused, :status :invalid}
+ at futon2.aif.policy_precision_carry$require_BANG_.invokeStatic (policy_precision_carry.clj:11)
+    futon2.aif.policy_precision_carry$require_BANG_.invoke (policy_precision_carry.clj:10)
+    futon2.aif.policy_precision_carry$retrospective_f$iter__9525__9529$fn__9530$fn__9531.invoke (policy_precision_carry.clj:40)
+    futon2.aif.policy_precision_carry$retrospective_f$iter__9525__9529$fn__9530.invoke (policy_precision_carry.clj:38)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.RT.seq (RT.java:535)
+    clojure.core$seq__5467.invokeStatic (core.clj:139)
+    clojure.core.protocols$seq_reduce.invokeStatic (protocols.clj:24)
+    clojure.core.protocols$fn__8236.invokeStatic (protocols.clj:75)
+    clojure.core.protocols/fn (protocols.clj:75)
+    clojure.core.protocols$fn__8178$G__8173__8191.invoke (protocols.clj:13)
+    clojure.core$reduce.invokeStatic (core.clj:6886)
+    clojure.core$into.invokeStatic (core.clj:6958)
+    clojure.core$into.invoke (core.clj:6950)
+    futon2.aif.policy_precision_carry$retrospective_f.invokeStatic (policy_precision_carry.clj:37)
+    futon2.aif.policy_precision_carry$retrospective_f.invoke (policy_precision_carry.clj:30)
+    futon2.aif.policy_precision_carry_test$fn__18453.invokeStatic (policy_precision_carry_test.clj:53)
+    futon2.aif.policy_precision_carry_test/fn (policy_precision_carry_test.clj:52)
+    clojure.test$test_var$fn__9856.invoke (test.clj:717)
+    clojure.test$test_var.invokeStatic (test.clj:717)
+    clojure.test$test_var.invoke (test.clj:708)
+    clojure.test$test_vars$fn__9882$fn__9887.invoke (test.clj:735)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$test_vars$fn__9882.invoke (test.clj:735)
+    futon2.aif.hermetic_repair_fixture$with_hermetic_stores$fn__8394.invoke (hermetic_repair_fixture.clj:37)
+    clojure.core$with_redefs_fn.invokeStatic (core.clj:7582)
+    clojure.core$with_redefs_fn.invoke (core.clj:7566)
+    futon2.aif.hermetic_repair_fixture$with_hermetic_stores.invokeStatic (hermetic_repair_fixture.clj:35)
+    futon2.aif.hermetic_repair_fixture$with_hermetic_stores.invoke (hermetic_repair_fixture.clj:26)
+    clojure.test$compose_fixtures$fn__9850$fn__9851.invoke (test.clj:694)
+    clojure.test$default_fixture.invokeStatic (test.clj:687)
+    clojure.test$default_fixture.invoke (test.clj:683)
+    clojure.test$compose_fixtures$fn__9850.invoke (test.clj:694)
+    clojure.test$test_vars.invokeStatic (test.clj:731)
+    clojure.test$test_all_vars.invokeStatic (test.clj:737)
+    clojure.test$test_ns.invokeStatic (test.clj:758)
+    clojure.test$test_ns.invoke (test.clj:743)
+    clojure.core$map$fn__5935.invoke (core.clj:2772)
+    clojure.lang.LazySeq.sval (LazySeq.java:42)
+    clojure.lang.LazySeq.seq (LazySeq.java:51)
+    clojure.lang.Cons.next (Cons.java:39)
+    clojure.lang.RT.boundedLength (RT.java:1790)
+    clojure.lang.RestFn.applyTo (RestFn.java:130)
+    clojure.core$apply.invokeStatic (core.clj:669)
+    clojure.test$run_tests.invokeStatic (test.clj:768)
+    clojure.test$run_tests.doInvoke (test.clj:768)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.core$apply.invokeStatic (core.clj:667)
+    clojure.core$apply.invoke (core.clj:662)
+    cognitect.test_runner$test.invokeStatic (test_runner.clj:74)
+    cognitect.test_runner$test.invoke (test_runner.clj:62)
+    cognitect.test_runner$_main.invokeStatic (test_runner.clj:127)
+    cognitect.test_runner$_main.doInvoke (test_runner.clj:115)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.core$apply.invokeStatic (core.clj:667)
+    clojure.main$main_opt.invokeStatic (main.clj:514)
+    clojure.main$main_opt.invoke (main.clj:510)
+    clojure.main$main.invokeStatic (main.clj:664)
+    clojure.main$main.doInvoke (main.clj:616)
+    clojure.lang.RestFn.applyTo (RestFn.java:137)
+    clojure.lang.Var.applyTo (Var.java:705)
+    clojure.main.main (main.java:40)
+
+FAIL in (real-task-producer-binds-frozen-family-through-persistence) (policy_precision_carry_test.clj:122)
+expected: (= :updated (:status state))
+  actual: (not (= :updated :held))
+
+FAIL in (real-task-producer-binds-frozen-family-through-persistence) (policy_precision_carry_test.clj:123)
+expected: (< (:beta state) 1)
+  actual: (not (< 1 1))
+
+FAIL in (selector-consumes-carried-beta-with-provenance) (policy_precision_carry_test.clj:95)
+expected: (= :learned (get-in after [:beta :status]))
+  actual: (not (= :learned :declared))
+
+FAIL in (selector-consumes-carried-beta-with-provenance) (policy_precision_carry_test.clj:98)
+expected: (not= (get-in before [:selection-law :posterior]) (get-in after [:selection-law :posterior]))
+  actual: (not (not= {{:kind :cascade-candidate, :id :low, :target "target", :precedence [{:id :low, :theta 1/2, :guard {:clauses [{:present #{}, :absent #{}}]}, :produces #{["target" :artifact]}}]} 0.7310585786300049, {:kind :cascade-candidate, :id :high, :target "target", :precedence [{:id :high, :theta 1/4, :guard {:clauses [{:present #{}, :absent #{}}]}, :produces #{["target" :artifact]}}]} 0.2689414213699951} {{:kind :cascade-candidate, :id :low, :target "target", :precedence [{:id :low, :theta 1/2, :guard {:clauses [{:present #{}, :absent #{}}]}, :produces #{["target" :artifact]}}]} 0.7310585786300049, {:kind :cascade-candidate, :id :high, :target "target", :precedence [{:id :high, :theta 1/4, :guard {:clauses [{:present #{}, :absent #{}}]}, :produces #{["target" :artifact]}}]} 0.2689414213699951}))
+
+FAIL in (selector-consumes-carried-beta-with-provenance) (policy_precision_carry_test.clj:99)
+expected: (thrown? clojure.lang.ExceptionInfo (policy/select-action-cascades ranked {:beta 1, :beta-state state, :cascade-habit-path path}))
+  actual: nil
+
+FAIL in (exactly-once-restart-tamper-and-holds) (policy_precision_carry_test.clj:66)
+expected: (= :updated (:status learned))
+  actual: (not (= :updated :held))
+
+FAIL in (exactly-once-restart-tamper-and-holds) (policy_precision_carry_test.clj:67)
+expected: (< (:beta learned) 1)
+  actual: (not (< 1 1))
+
+FAIL in (exactly-once-restart-tamper-and-holds) (policy_precision_carry_test.clj:68)
+expected: (= :learned (:beta-status learned))
+  actual: (not (= :learned :declared))
+
+FAIL in (exactly-once-restart-tamper-and-holds) (policy_precision_carry_test.clj:69)
+expected: (= :precision-observation-already-consumed (:reason replay))
+  actual: (not (= :precision-observation-already-consumed :prediction-refused))
+
+Ran 6 tests containing 41 assertions.
+9 failures, 1 errors.

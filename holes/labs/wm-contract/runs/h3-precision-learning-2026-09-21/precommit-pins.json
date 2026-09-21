@@ -1,0 +1,19 @@
+{
+  "role": "pre-commit-validation",
+  "base-sha": "38b4c95c40ff5f6d2ff08636acce61e29322a3e6",
+  "repo-root": "/home/joe/code/futon2-h3-validation",
+  "files": {
+    "scripts/futon2/report/war_machine.clj": "2b72313fae607b6da1485dd3a90b89af38d28a822f75cab1bb2c874d071e2ba8",
+    "src/futon2/aif/cascade_problems.clj": "d0cea37d4e607a81da8d2fc38f6ad88028ae26d8452978409acf650dbdd75672",
+    "src/futon2/aif/cascade_sources.clj": "89417d8e6335454a330762a0f0a8ed90f9755d1532ef9edad9b896c0d4df2f63",
+    "src/futon2/aif/d_predecessor_task_authority.clj": "ca81fd114c4a2fd2edd43b368cb2c2ff2a02ecc7e096dab72dba211ab0d6617f",
+    "src/futon2/aif/efe.clj": "36d3aec4edde79c53640eb0b3fa41770358fefd77fe731d6508c7608171327d2",
+    "src/futon2/aif/policy.clj": "0012d611a773bddbffb4688a9d120f968ffe654d63bbcb336c7afdec2144d544",
+    "src/futon2/aif/policy_precision.clj": "ea42a477d25d62bb42c72412df781071b05db6e759451a78a591266202d4e6e4",
+    "test/futon2/aif/cascade_beta_update_test.clj": "c0db8660ff548938e43cb6e25842235b72f9c83a366b805753a1f9b994acbe05",
+    "test/futon2/aif/cascade_sources_test.clj": "0bbb9894a4073b641d50e51763e6d9772cc342d8c101aff2e00c292a00b5b4e4",
+    "test/futon2/aif/d_predecessor_task_authority_test.clj": "3bcfd6bf84b0a6a6d75948f7a859f6e2e8722a53e2ae06b81c5972820a72aa62",
+    "src/futon2/aif/policy_precision_carry.clj": "5bf253bb68662c76094368c686f643e2a7f7680bf6296446fed383f132099079",
+    "test/futon2/aif/policy_precision_carry_test.clj": "949c4c10056ab6ff9c540846dc6668e62acb00c412bcef9f270f4db887fd1282"
+  }
+}

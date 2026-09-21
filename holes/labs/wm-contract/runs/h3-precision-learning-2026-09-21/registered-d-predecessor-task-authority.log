@@ -1,0 +1,4 @@
+evidence-id test-registry-9873b488697d4b047c732018e1f5e25657f48d8221d14d5bcaf940356815d234
+warrant? true
+results {:assertions 41, :duration-ms 1928, :errors 0, :exit 0, :failures 0, :tests 8}
+bound H3/precision-learning/d-predecessor-task-authority -> test-registry-9873b488697d4b047c732018e1f5e25657f48d8221d14d5bcaf940356815d234

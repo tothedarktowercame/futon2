@@ -1,0 +1,4 @@
+evidence-id test-registry-385a2d0ae0d517c20da7af7f3959a8341df55087368ff9fb2cb867912f72a46f
+warrant? true
+results {:assertions 60, :duration-ms 3451, :errors 0, :exit 0, :failures 0, :tests 9}
+bound H3/precision-learning/policy-precision-carry -> test-registry-385a2d0ae0d517c20da7af7f3959a8341df55087368ff9fb2cb867912f72a46f

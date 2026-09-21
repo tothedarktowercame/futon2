@@ -1,0 +1,169 @@
+{
+  "implementation": "991e27a4170983c17e33b80c73fea5f4cd88d5c3",
+  "committed_files_match_precommit": true,
+  "executions_agree": true,
+  "namespaces": [
+    {
+      "namespace": "futon2.aif.cascade-beta-update-test",
+      "counts": {
+        "tests": 8,
+        "assertions": 39,
+        "failures": 0,
+        "errors": 0
+      },
+      "pre-commit-validation": {
+        "namespace": "futon2.aif.cascade-beta-update-test",
+        "role": "pre-commit-validation",
+        "exit": 0,
+        "log": "precommit-cascade-beta-update.log",
+        "log-sha256": "fb732119cd9943ca39b78d3a40a2a3b899be14bd8f61913e2bf39b1bbf3ba331",
+        "sha": "38b4c95c40ff5f6d2ff08636acce61e29322a3e6",
+        "source_state": "base plus files pinned in precommit-pins.json"
+      },
+      "post-commit-warrant": {
+        "name": "cascade-beta-update",
+        "role": "post-commit-warrant",
+        "sha": "991e27a4170983c17e33b80c73fea5f4cd88d5c3",
+        "exit": 0,
+        "log": "registered-cascade-beta-update.log",
+        "log-sha256": "cb0dd7e302ee40fe86afd62ac924748ff7d9da9512f833645c8ebae78a3bf6cf",
+        "warrant": "test-registry-14655f9ca5b0a6222916f3f43293433cbe6a2815801ba2c19f3f17c16b0f9027"
+      }
+    },
+    {
+      "namespace": "futon2.aif.policy-precision-test",
+      "counts": {
+        "tests": 25,
+        "assertions": 138,
+        "failures": 0,
+        "errors": 0
+      },
+      "pre-commit-validation": {
+        "namespace": "futon2.aif.policy-precision-test",
+        "role": "pre-commit-validation",
+        "exit": 0,
+        "log": "precommit-policy-precision.log",
+        "log-sha256": "b307efa21f992f413e486870fc297cdb632bec12ac57f4b0e9e5c22178a4b4ab",
+        "sha": "38b4c95c40ff5f6d2ff08636acce61e29322a3e6",
+        "source_state": "base plus files pinned in precommit-pins.json"
+      },
+      "post-commit-warrant": {
+        "name": "policy-precision",
+        "role": "post-commit-warrant",
+        "sha": "991e27a4170983c17e33b80c73fea5f4cd88d5c3",
+        "exit": 0,
+        "log": "registered-policy-precision.log",
+        "log-sha256": "b691638fb6b83e431f4337c717427c72de2fee7f15c567bc62f66cb80afd7799",
+        "warrant": "test-registry-18973ec27ef8e7e3f204f73c30eb0ca8b1a395213e0bd248c7ca21e4ae019656"
+      }
+    },
+    {
+      "namespace": "futon2.aif.cascade-sources-test",
+      "counts": {
+        "tests": 8,
+        "assertions": 33,
+        "failures": 0,
+        "errors": 0
+      },
+      "pre-commit-validation": {
+        "namespace": "futon2.aif.cascade-sources-test",
+        "role": "pre-commit-validation",
+        "exit": 0,
+        "log": "precommit-cascade-sources.log",
+        "log-sha256": "764a0cef52e2961cc5cf453bfd48e745876e58380020c91e017d6c9f99de900f",
+        "sha": "38b4c95c40ff5f6d2ff08636acce61e29322a3e6",
+        "source_state": "base plus files pinned in precommit-pins.json"
+      },
+      "post-commit-warrant": {
+        "name": "cascade-sources",
+        "role": "post-commit-warrant",
+        "sha": "991e27a4170983c17e33b80c73fea5f4cd88d5c3",
+        "exit": 0,
+        "log": "registered-cascade-sources.log",
+        "log-sha256": "29d473566bd881ff145c3dbc377973a7233b673e2063180abbb2f0271fc44a76",
+        "warrant": "test-registry-2d380fd33beaae81b70f16d954a501835849b5a3b05455b0fcc633c9689f211c"
+      }
+    },
+    {
+      "namespace": "futon2.aif.d-predecessor-task-authority-test",
+      "counts": {
+        "tests": 8,
+        "assertions": 41,
+        "failures": 0,
+        "errors": 0
+      },
+      "pre-commit-validation": {
+        "namespace": "futon2.aif.d-predecessor-task-authority-test",
+        "role": "pre-commit-validation",
+        "exit": 0,
+        "log": "precommit-d-predecessor-task-authority.log",
+        "log-sha256": "d131e9a9967f2bb6da664bc7e20d9917931420c624c9c49d14ccb0881c82f8e4",
+        "sha": "38b4c95c40ff5f6d2ff08636acce61e29322a3e6",
+        "source_state": "base plus files pinned in precommit-pins.json"
+      },
+      "post-commit-warrant": {
+        "name": "d-predecessor-task-authority",
+        "role": "post-commit-warrant",
+        "sha": "991e27a4170983c17e33b80c73fea5f4cd88d5c3",
+        "exit": 0,
+        "log": "registered-d-predecessor-task-authority.log",
+        "log-sha256": "4af0d96b891df271b4ca87804d56752763705ee93b304eafccaa9746e98d8ec0",
+        "warrant": "test-registry-9873b488697d4b047c732018e1f5e25657f48d8221d14d5bcaf940356815d234"
+      }
+    },
+    {
+      "namespace": "futon2.aif.policy-precision-carry-test",
+      "counts": {
+        "tests": 9,
+        "assertions": 60,
+        "failures": 0,
+        "errors": 0
+      },
+      "pre-commit-validation": {
+        "namespace": "futon2.aif.policy-precision-carry-test",
+        "role": "pre-commit-validation",
+        "exit": 0,
+        "log": "precommit-policy-precision-carry.log",
+        "log-sha256": "1baa689ec67d543062ca0d27cce137e85469543284da1653c3f560c06b38db13",
+        "sha": "38b4c95c40ff5f6d2ff08636acce61e29322a3e6",
+        "source_state": "base plus files pinned in precommit-pins.json"
+      },
+      "post-commit-warrant": {
+        "name": "policy-precision-carry",
+        "role": "post-commit-warrant",
+        "sha": "991e27a4170983c17e33b80c73fea5f4cd88d5c3",
+        "exit": 0,
+        "log": "registered-policy-precision-carry.log",
+        "log-sha256": "2e0c0898e840f73817394ad5d9c8991aebe0a7c9ada2c563acfe9e65a153cf35",
+        "warrant": "test-registry-385a2d0ae0d517c20da7af7f3959a8341df55087368ff9fb2cb867912f72a46f"
+      }
+    },
+    {
+      "namespace": "futon2.report.cascade-decision-test",
+      "counts": {
+        "tests": 13,
+        "assertions": 91,
+        "failures": 0,
+        "errors": 0
+      },
+      "pre-commit-validation": {
+        "namespace": "futon2.report.cascade-decision-test",
+        "role": "pre-commit-validation",
+        "exit": 0,
+        "log": "precommit-cascade-decision.log",
+        "log-sha256": "8b5c5865c45047d06ef72ed0049676893676a1c2c7b687a0974f46e5bb33b138",
+        "sha": "38b4c95c40ff5f6d2ff08636acce61e29322a3e6",
+        "source_state": "base plus files pinned in precommit-pins.json"
+      },
+      "post-commit-warrant": {
+        "name": "cascade-decision",
+        "role": "post-commit-warrant",
+        "sha": "991e27a4170983c17e33b80c73fea5f4cd88d5c3",
+        "exit": 0,
+        "log": "registered-cascade-decision.log",
+        "log-sha256": "81381d0f007eb439e95f41c34c1c56c0de4379be3d29eecd354ecfc159333fcf",
+        "warrant": "test-registry-945eae67afd20a16753f7af137bb3bbb087a9f1d445cde6565225e31094ed612"
+      }
+    }
+  ]
+}

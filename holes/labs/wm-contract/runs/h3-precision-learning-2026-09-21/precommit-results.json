@@ -1,0 +1,44 @@
+[
+  {
+    "namespace": "futon2.aif.cascade-beta-update-test",
+    "role": "pre-commit-validation",
+    "exit": 0,
+    "log": "precommit-cascade-beta-update.log",
+    "log-sha256": "fb732119cd9943ca39b78d3a40a2a3b899be14bd8f61913e2bf39b1bbf3ba331"
+  },
+  {
+    "namespace": "futon2.aif.policy-precision-test",
+    "role": "pre-commit-validation",
+    "exit": 0,
+    "log": "precommit-policy-precision.log",
+    "log-sha256": "b307efa21f992f413e486870fc297cdb632bec12ac57f4b0e9e5c22178a4b4ab"
+  },
+  {
+    "namespace": "futon2.aif.cascade-sources-test",
+    "role": "pre-commit-validation",
+    "exit": 0,
+    "log": "precommit-cascade-sources.log",
+    "log-sha256": "764a0cef52e2961cc5cf453bfd48e745876e58380020c91e017d6c9f99de900f"
+  },
+  {
+    "namespace": "futon2.aif.d-predecessor-task-authority-test",
+    "role": "pre-commit-validation",
+    "exit": 0,
+    "log": "precommit-d-predecessor-task-authority.log",
+    "log-sha256": "d131e9a9967f2bb6da664bc7e20d9917931420c624c9c49d14ccb0881c82f8e4"
+  },
+  {
+    "namespace": "futon2.aif.policy-precision-carry-test",
+    "role": "pre-commit-validation",
+    "exit": 0,
+    "log": "precommit-policy-precision-carry.log",
+    "log-sha256": "1baa689ec67d543062ca0d27cce137e85469543284da1653c3f560c06b38db13"
+  },
+  {
+    "namespace": "futon2.report.cascade-decision-test",
+    "role": "pre-commit-validation",
+    "exit": 0,
+    "log": "precommit-cascade-decision.log",
+    "log-sha256": "8b5c5865c45047d06ef72ed0049676893676a1c2c7b687a0974f46e5bb33b138"
+  }
+]

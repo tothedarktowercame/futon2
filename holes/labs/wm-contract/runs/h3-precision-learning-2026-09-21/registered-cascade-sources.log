@@ -1,0 +1,4 @@
+evidence-id test-registry-2d380fd33beaae81b70f16d954a501835849b5a3b05455b0fcc633c9689f211c
+warrant? true
+results {:assertions 33, :duration-ms 1541, :errors 0, :exit 0, :failures 0, :tests 8}
+bound H3/precision-learning/cascade-sources -> test-registry-2d380fd33beaae81b70f16d954a501835849b5a3b05455b0fcc633c9689f211c
