@@ -32,3 +32,4 @@ e5e0ab0ac9609c96a7006d0bff4ea1fd3f5915e45a2a6107ec595f2fbb62e58b  /home/joe/code
 b953a669104c2db9b8a8f96528341516b008d827a41882c347d14faeda573831  holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/registry-today.json.gz
 0ff1cc31e673b3184de390b0636aa79085147b8405d6b107bae0c14879e7f8cb  scripts/wire_register.bb
 4315a5262887a1161e13d7070e4502d7e68260ab2c6a0d77313260d6bbef3820  /home/joe/code/futon3c/src/futon3c/peripheral/tools.clj
+2146b922c352199482fb5e1abfac78d76dbba6e0b3294e4123949037d0bc5b9a  holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/answers-Q1-follow-up-165564f8.md
