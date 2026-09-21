@@ -112,3 +112,7 @@ emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -f arxana-check-pa
 
 Lint: zero errors/warnings; parens: OK. Generated reload forms were only
 parsed/linted, never evaluated. `tests.log` and registry evidence are retained.
+
+Registry warrant: `test-registry-d9c6f2fb6e40582b24099c685c9daeb58684cf7aeff7cdfe44b2c5ebab63a1b0`. Committed implementation
+`a8229020`; stable execution, matched postcheck, 5 tests / 8 assertions, zero failures/errors. This warrant runs only local unit tests,
+not the owner reload artifact or any serving mutation.
