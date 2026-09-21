@@ -1,0 +1,14 @@
+{
+  "head": "3e9a31415156d91de1cef4febfb6fbbe2708f096",
+  "files": {
+    "src/futon2/aif/cascade_sources.clj": "e8ac3c8087a6a2f9c461fe23aa3f7d6d57453baeae0c686a382c34a19e4c1556",
+    "src/futon2/aif/live_c.clj": "b2d5ac4e01fec43ee09c1aa399f65fe6d2d0ba08ffbc93bc1f8440b2a58446ad",
+    "resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn": "7a2739c5dd6aac9291fa39ccdf7132e10c206da36804a0163e000fdff2007a49",
+    "resources/wm/cascade-sources/M-expressions-of-interest.edn": "aa5a9c96bdc7b3c75a1bc6aa6ad68a82ed02c88f3b6802a9a96c964f31da6556",
+    "resources/wm/cascade-sources/M-f11-find-production-successor.edn": "2aabeccbad421c34fe768a6080d83719496c1d827e3ab62d51bb0d344549fb32",
+    "resources/wm/cascade-sources/M-wm-08-external-f2.edn": "f20d004397b2baa849582bb4d64e2ee5e7fab59fef5b17c7821b40388adead90"
+  },
+  "probe_exit": 0,
+  "runtime": "fresh tooling JVM; no shared reload",
+  "source_modified_by_this_task": false
+}
