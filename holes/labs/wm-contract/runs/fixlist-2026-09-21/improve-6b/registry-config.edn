@@ -1,0 +1,6 @@
+{:repo-root "/home/joe/code/futon2-improve-6b"
+ :code-paths ["src/futon2/aif/revision_scanner.clj" "src/futon2/aif/action_identity.clj" "src/futon2/aif/load_identity.clj"]
+ :test-paths ["test/futon2/aif/revision_scanner_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.revision-scanner-test"]
+ :author "codex-11" :origin "improve-6b standalone revision scanner"
+ :artifact-dir "/tmp/improve-6b-registry-artifacts" :agency-url "http://localhost:7070"}

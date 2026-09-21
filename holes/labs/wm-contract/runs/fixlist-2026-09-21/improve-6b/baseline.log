@@ -1,0 +1,55 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.revision-scanner-test
+
+FAIL in (recurrence-is-a-class-and-unanswered-is-visible) (revision_scanner_test.clj:87)
+expected: (= #{:unanswered :recurring-after-revision} (set (map :kind friction)))
+  actual: (not (= #{:unanswered :recurring-after-revision} #{}))
+
+FAIL in (recurrence-is-a-class-and-unanswered-is-visible) (revision_scanner_test.clj:88)
+expected: (= #{"s2"} (set (map :surprise/id friction)))
+  actual: (not (= #{"s2"} #{}))
+
+FAIL in (trailer-and-grades-require-real-git-and-receipts) (revision_scanner_test.clj:54)
+expected: (= 1 (count (:learning-event-candidates result)))
+  actual: (not (= 1 0))
+
+FAIL in (trailer-and-grades-require-real-git-and-receipts) (revision_scanner_test.clj:55)
+expected: (= :committed (get-in result [:learning-event-candidates 0 :grade]))
+  actual: (not (= :committed nil))
+
+FAIL in (trailer-and-grades-require-real-git-and-receipts) (revision_scanner_test.clj:56)
+expected: (= [:committed] (get-in result [:learning-event-candidates 0 :attained-grades]))
+  actual: (not (= [:committed] nil))
+
+FAIL in (trailer-and-grades-require-real-git-and-receipts) (revision_scanner_test.clj:57)
+expected: (= :unknown-surprise-id (get-in result [:flags 0 :kind]))
+  actual: (not (= :unknown-surprise-id nil))
+
+FAIL in (trailer-and-grades-require-real-git-and-receipts) (revision_scanner_test.clj:59)
+expected: (= :loaded (get-in (scan (assoc config :run-files [run])) [:learning-event-candidates 0 :grade]))
+  actual: (not (= :loaded nil))
+
+FAIL in (trailer-and-grades-require-real-git-and-receipts) (revision_scanner_test.clj:61)
+expected: (= :untested (get-in (scan (assoc config :run-files [run])) [:learning-event-candidates 0 :grade]))
+  actual: (not (= :untested nil))
+
+FAIL in (trailer-and-grades-require-real-git-and-receipts) (revision_scanner_test.clj:64)
+expected: (= :consumed (get-in result [:learning-event-candidates 0 :grade]))
+  actual: (not (= :consumed nil))
+
+FAIL in (trailer-and-grades-require-real-git-and-receipts) (revision_scanner_test.clj:65)
+expected: (= [:committed :loaded :consumed] (get-in result [:learning-event-candidates 0 :attained-grades]))
+  actual: (not (= [:committed :loaded :consumed] nil))
+
+FAIL in (trailer-and-grades-require-real-git-and-receipts) (revision_scanner_test.clj:77)
+expected: (= :consumed (get-in (scan (assoc config :run-files [run])) [:learning-event-candidates 0 :grade]))
+  actual: (not (= :consumed nil))
+
+FAIL in (trailer-and-grades-require-real-git-and-receipts) (revision_scanner_test.clj:79)
+expected: (= :committed (get-in (scan (assoc config :run-files [run])) [:learning-event-candidates 0 :grade]))
+  actual: (not (= :committed nil))
+
+Ran 2 tests containing 13 assertions.
+12 failures, 0 errors.
