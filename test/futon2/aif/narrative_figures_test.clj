@@ -45,8 +45,14 @@
     (is (= 1 (count (by-class root "pattern"))))
     (is (= 3 (count wanted)))
     (is (empty? (by-class root "need-edge")))
-    (is (= "want observed-false" (get-in updater [:attrs :class])))
+    (is (= "want predicted-not-observed" (get-in updater [:attrs :class])))
     (is (= "true" (get-in updater [:attrs :data-predicted])))
+    (is (= 2 (count (by-class root "neither"))))
+    (is (str/includes? svg "predicted, not observed"))
+    (is (= "3" (get-in (first (:content updater)) [:attrs :stroke-width])))
+    (is (= 1 (count (by-class root "prediction-edge"))))
+    (is (= ":hole/h6378c65a4012" (get-in (first (by-class root "prediction-edge")) [:attrs :data-token])))
+    (is (= "6 4" (get-in (first (by-class root "prediction-edge")) [:attrs :stroke-dasharray])))
     (is (str/includes? svg "shape: not computed in this run (literal semilattice field)"))
     (is (= svg (figures/cascade-svg data)))))
 
@@ -61,8 +67,8 @@
     (is (= ":P" (get-in (first (by-class root "need-edge")) [:attrs :data-from])))
     (is (= ":Q" (get-in (first (by-class root "need-edge")) [:attrs :data-to])))
     (is (= 1 (count (by-class root "observation-missing"))))
-    (is (= 1 (count (by-class root "observed-true"))))
-    (is (empty? (by-class root "observed-false")))
+    (is (= 1 (count (by-class root "predicted-and-observed"))))
+    (is (empty? (by-class root "predicted-not-observed")))
     (is (str/includes? (figures/cascade-svg data) "shape: :chain"))
     (is (empty? (by-class (parse-svg (figures/cascade-svg (assoc data :wires []))) "need-edge")))
     (is (= 1 (count (by-class (parse-svg (figures/cascade-svg (assoc data :need-edges #{[:P :Q]} :wires []))) "need-edge"))))))
@@ -87,3 +93,29 @@
       (doseq [node (elements root) k [:x :y :x1 :y1 :x2 :y2 :width :height]
               :let [value (get-in node [:attrs k])] :when (and value (not (str/includes? value "%")))]
         (is (Double/isFinite (Double/parseDouble value)))))))
+
+(deftest verdict-styling-and-retained-verdict-authority
+  (let [rows [{:token ["M" :miss] :predicted true :observed false}
+              {:token ["M" :hit] :predicted true :observed true}
+              {:token ["M" :neither] :predicted false :observed false}
+              {:token ["M" :extra] :predicted false :observed true}
+              {:token ["M" :missing] :predicted true :observed {:status :missing}}]
+        data {:target "M" :patterns [{:id :P :produces #{["M" :miss] ["M" :hit]}}] :outcomes rows}
+        svg (figures/cascade-svg data) root (parse-svg svg)
+        rectangle (fn [verdict] (:attrs (first (:content (first (by-class root verdict))))))]
+    (doseq [verdict ["predicted-not-observed" "predicted-and-observed" "neither"
+                     "not-predicted-observed" "observation-missing"]]
+      (is (= 1 (count (by-class root verdict)))))
+    (is (= "#b42318" (:stroke (rectangle "predicted-not-observed"))))
+    (is (= "3" (:stroke-width (rectangle "predicted-not-observed"))))
+    (is (= "#eef0f2" (:fill (rectangle "neither"))))
+    (is (= "#dceee3" (:fill (rectangle "predicted-and-observed"))))
+    (is (= "white" (:fill (rectangle "not-predicted-observed"))))
+    (is (= "#287447" (:stroke (rectangle "not-predicted-observed"))))
+    (is (= "4 3" (:stroke-dasharray (rectangle "observation-missing"))))
+    (is (= 2 (count (by-class root "prediction-edge"))))
+    (is (= svg (figures/cascade-svg data)))
+    (let [receipt (assoc data :outcomes [(assoc (first rows) :verdict :observation-missing)])
+          receipt-root (parse-svg (figures/cascade-svg receipt))]
+      (is (= 1 (count (by-class receipt-root "observation-missing"))))
+      (is (empty? (by-class receipt-root "predicted-not-observed"))))))
