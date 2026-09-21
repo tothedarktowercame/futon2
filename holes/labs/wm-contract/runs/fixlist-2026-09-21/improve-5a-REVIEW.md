@@ -189,3 +189,10 @@ restoring the new file in `finally`. No guard or invariant was bypassed.
 Fresh accounting gates: changed-file clj-kondo and check-parens pass; namespace
 `parameter-novelty-test` 8 tests / 793 assertions, policy-test 8 / 15. The old
 warrant check refused with `:review-diff-required`; a new warrant follows below.
+
+Accounting warrant (supersedes the initial receipt warrant for this namespace):
+`test-registry-6dfb2915396c4e14d9212d023949b6fc6a54862be041faa5597ef4ad7d9bcefa`,
+commit `794f9eec457c4416ea02683a69ee66719aced767`, **8 tests / 793 assertions,
+0 failures / 0 errors**, postcheck matched. Same registry command/config as
+above. The focused grounded runner test was also freshly rerun after this
+accounting change: **1 test / 7 assertions, zero failures/errors**.
