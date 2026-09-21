@@ -165,3 +165,13 @@ U83 requires restating or retiring a task whose queue no longer
 exists. Both declined for admission tonight (correctly — not
 current unmet objectives an agent can read a pattern against);
 both need Joe's word, not build work.
+
+## OPEN ITEM (2026-09-21 ~05:40): futon3c ast-helper burst leak
+
+The 17:01Z 2026-09-20 executor-wedge event fan-out spawned 168
+python_ast_helper.py children of the futon3c JVM in one two-second
+burst; none were reaped and they idled 12.5h until killed 05:40Z
+(JVM verified healthy after; 3 live helpers remain, normal). Fix
+shape when taken: the helper invocation path needs reap-on-error /
+pool bounds so a burst failure cannot orphan its workers. Owner:
+unassigned; futon3c lane.
