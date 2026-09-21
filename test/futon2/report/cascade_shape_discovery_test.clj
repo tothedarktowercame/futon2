@@ -1,8 +1,8 @@
-(ns census
+(ns futon2.report.cascade-shape-discovery-test
   "Discovery-only computation; no production data writes or WM invocation."
   (:require [clojure.edn :as edn]
             [clojure.set :as set]
-            [clojure.test :refer [deftest is run-tests]]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.interpretation-construction :as constructor]
             [futon2.aif.interpretation-construction-test :as fixture]
             [futon2.aif.cascade-policy :as policy]))
@@ -71,6 +71,7 @@
   (is (= :empty-family (:status (family-shape #{})))))
 
 (deftest retained-record-controls
+  (prn {:census census :pq pq-row})
   (is (every? (fn [r] (= (count (:precedence r)) (count (get-in r [:support :family]))))
               (mapcat :candidates census)) "no cyclic SCC collapsed the principal supports")
   (is (= [24 24 3] (mapv #(count (:candidates %)) census)))
@@ -81,6 +82,3 @@
   (is (= :chain (get-in pq-row [:support :shape])))
   (is (= #{#{:P} #{:P :Q}} (get-in pq-row [:support :family]))))
 
-(prn {:census census :pq pq-row})
-(let [r (run-tests 'census)]
-  (when (pos? (+ (:fail r) (:error r))) (System/exit 1)))

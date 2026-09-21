@@ -3,9 +3,9 @@
               "src/futon2/aif/cascade_policy.clj"
               "src/futon2/aif/cascade_model_manifest.clj"
               "holes/labs/wm-contract/runs/fixlist-2026-09-21/fix-9-evidence/input-sha256.txt"]
- :test-paths ["holes/labs/wm-contract/runs/fixlist-2026-09-21/fix-9-evidence/census.clj"
+ :test-paths ["test/futon2/report/cascade_shape_discovery_test.clj"
               "test/futon2/aif/interpretation_construction_test.clj"]
- :command ["clojure" "-M:test" "holes/labs/wm-contract/runs/fixlist-2026-09-21/fix-9-evidence/census.clj"]
+ :command ["clojure" "-M:test" "-m" "cognitect.test-runner" "-n" "futon2.report.cascade-shape-discovery-test"]
  :author "codex-13" :origin "claude-3/narrative-fix-9-discovery"
  :artifact-dir "/home/joe/code/futon2-narrative-9/holes/labs/wm-contract/runs/fixlist-2026-09-21/fix-9-evidence/registered"
  :agency-url "http://localhost:7070"}

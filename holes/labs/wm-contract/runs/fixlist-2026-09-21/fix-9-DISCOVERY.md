@@ -2,8 +2,8 @@
 
 2026-09-21, codex-13; branch `fix/narrative-9`, base `c81e4e00`.
 Discovery only: no production edits, live loads, clicks, store writes, or Lean
-builds. The standalone census and its finite controls are in
-[fix-9-evidence](fix-9-evidence/). Historical input hashes are retained there.
+builds. The discovery test namespace is `futon2.report.cascade-shape-discovery-test`;
+its output and finite-control results are in [fix-9-evidence](fix-9-evidence/). Historical input hashes are retained there.
 
 The records establish a priority list of interpreted patterns and a computable
 **declared token-dependency graph**. They do not establish the upward-closed
@@ -128,8 +128,10 @@ of organisation**, not a count of edges or a temporal ordering. Shared
 prerequisite patterns are a defensible, explicitly limited instance: two
 constructions can share P without one containing the other. F_need measures
 that overlap, including preparatory P in the P/Q case. A direct
-`produces(pattern) ∩ wanted-tokens` family would discard P when P only produces
-Q's prerequisite; that would label P/Q as if only Q existed. More generally,
+`produces(pattern) ∩ wanted-tokens` family maps P to the empty set when P only
+produces Q's prerequisite. Dropping that empty coverage unit erases P; retaining
+it gives a formal bottom meaning “no direct wanted output,” not the fact that
+P enables Q. Neither choice recovers the dependency from coverage alone. More generally,
 shared outputs can be alternative/redundant producers rather than warranted
 co-application. Served-want sets alone do not establish the intended structure.
 
@@ -384,7 +386,7 @@ change, not a side effect of adding an honest label.
 
 ## Reproduction and validation
 
-The standalone census reads only the three canonical run records and executes
+The discovery census reads only the three canonical run records and executes
 the pure P/Q constructor fixture in its own CLI JVM. It emits every candidate's
 priority, need edges, output sets and classified family. No production test
 namespace or source is modified; no fix regression is claimed for this discovery.
@@ -392,9 +394,9 @@ The counterexamples above are finite controls for the proposed label.
 
 ```
 # /home/joe/code/futon2-narrative-9
-clojure -M:test holes/labs/wm-contract/runs/fixlist-2026-09-21/fix-9-evidence/census.clj
-clj-kondo --lint holes/labs/wm-contract/runs/fixlist-2026-09-21/fix-9-evidence/census.clj
-emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/runs/fixlist-2026-09-21/fix-9-evidence/census.clj
+clojure -M:test -m cognitect.test-runner -n futon2.report.cascade-shape-discovery-test
+clj-kondo --lint test/futon2/report/cascade_shape_discovery_test.clj
+emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults test/futon2/report/cascade_shape_discovery_test.clj
 ```
 
 Environment: Linux, Java 21.0.11, Clojure CLI 1.12.5.1664 / Clojure 1.11.1.
