@@ -884,3 +884,13 @@
         "strict append reader must not silently skip damaged active checkpoints")
     (is (= original (slurp quarantine)))
     (is (= original (slurp poison)))))
+
+(deftest opportunity-identity-comes-only-from-the-authoritative-file
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        event (open! root "identity/actual")
+        dir (io/file root (name (:cohort/id event)))
+        decoy (assoc-in event [:payload :judgment :opportunity-id] "identity/decoy")]
+    (spit (io/file dir (:attempt/id event) "002-selection.edn") (pr-str decoy))
+    (is (= #{"identity/actual"} (#'cohort/opened-opportunity-ids dir)))
+    (is (= "attempt-002" (:attempt/id (open! root "identity/decoy"))))))

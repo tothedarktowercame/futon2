@@ -1,0 +1,26 @@
+{
+  "role": "pre-commit-validation",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "reviewer": "claude-2",
+  "review-job": "invoke-1789963375357-22864-360c27c2",
+  "base-head": "c1858291d875dcdbf501aa5d7028e84aa6563d89",
+  "sha256": {
+    "src/futon2/aif/full_loop_cohort.clj": "5830205342bdd69443a319e25d9ae754812e60f45c92363af0b60493a5a01438",
+    "test/futon2/aif/full_loop_cohort_test.clj": "053467d9ff7b93354653305655be982af9ffd76624f62e58b679594f26f62d57"
+  },
+  "results": {
+    "cohort": {
+      "tests": 30,
+      "assertions": 170,
+      "failures": 0,
+      "errors": 0
+    },
+    "history": {
+      "tests": 3,
+      "assertions": 31,
+      "failures": 0,
+      "errors": 0
+    }
+  }
+}

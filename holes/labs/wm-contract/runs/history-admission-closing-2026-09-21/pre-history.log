@@ -1,0 +1,18 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.history-admission-test
+[wm-phase] {:at "2026-09-21T04:09:37.672699110Z", :opportunity-id "wallclock-cron/2026-09-21T04:09:37.672589765Z/85d12dd0-e5bb-4380-a6f6-947abe208b40", :trigger :wallclock-cron, :phase :opportunity, :transition :start}
+[wm-phase] {:at "2026-09-21T04:09:44.430371276Z", :opportunity-id "wallclock-cron/2026-09-21T04:09:37.672589765Z/85d12dd0-e5bb-4380-a6f6-947abe208b40", :trigger :wallclock-cron, :phase :agent-readiness, :transition :start}
+[wm-phase] {:transition :end, :readiness/wake-result :not-needed, :readiness/wake-attempted false, :phase :agent-readiness, :outcome :ok, :duration-ms 0, :at "2026-09-21T04:09:44.430863187Z", :trigger :wallclock-cron, :opportunity-id "wallclock-cron/2026-09-21T04:09:37.672589765Z/85d12dd0-e5bb-4380-a6f6-947abe208b40"}
+[wm-phase] {:at "2026-09-21T04:09:44.432016477Z", :opportunity-id "wallclock-cron/2026-09-21T04:09:37.672589765Z/85d12dd0-e5bb-4380-a6f6-947abe208b40", :trigger :wallclock-cron, :phase :code-state, :transition :start}
+[wm-phase] {:at "2026-09-21T04:09:44.432204609Z", :opportunity-id "wallclock-cron/2026-09-21T04:09:37.672589765Z/85d12dd0-e5bb-4380-a6f6-947abe208b40", :trigger :wallclock-cron, :phase :code-state, :transition :end, :outcome :ok, :duration-ms 0}
+[wm-phase] {:transition :end, :attempt-id "attempt-002", :phase :opportunity, :tripwire/snapshot {:grounded-commit nil, :reviewer-job nil, :grounding-witnesses []}, :outcome :agent-unavailable, :duration-ms 6801, :execution-identity {:kind :runner-execution, :id "ea1-edb96bba9d75ad0ed238678a5f2d7ebf3dbea74f77123402e16898fcc2df7d92--attempt-002"}, :at "2026-09-21T04:09:44.473404613Z", :trigger :wallclock-cron, :opportunity-id "wallclock-cron/2026-09-21T04:09:37.672589765Z/85d12dd0-e5bb-4380-a6f6-947abe208b40", :external-attempt-id "ea1-edb96bba9d75ad0ed238678a5f2d7ebf3dbea74f77123402e16898fcc2df7d92--attempt-002"}
+[wm-phase] {:at "2026-09-21T04:09:44.909626745Z", :opportunity-id "wallclock-cron/2026-09-21T04:09:44.909505227Z/6f3dd909-7ce4-44d9-8457-4ebcab51a2c0", :trigger :wallclock-cron, :phase :opportunity, :transition :start}
+[wm-phase] {:at "2026-09-21T04:09:52.279707784Z", :opportunity-id "wallclock-cron/2026-09-21T04:09:44.909505227Z/6f3dd909-7ce4-44d9-8457-4ebcab51a2c0", :trigger :wallclock-cron, :phase :agent-readiness, :transition :start}
+[wm-phase] {:transition :end, :readiness/wake-result :not-needed, :readiness/wake-attempted false, :phase :agent-readiness, :outcome :ok, :duration-ms 1, :at "2026-09-21T04:09:52.280034746Z", :trigger :wallclock-cron, :opportunity-id "wallclock-cron/2026-09-21T04:09:44.909505227Z/6f3dd909-7ce4-44d9-8457-4ebcab51a2c0"}
+[wm-phase] {:at "2026-09-21T04:09:52.280207129Z", :opportunity-id "wallclock-cron/2026-09-21T04:09:44.909505227Z/6f3dd909-7ce4-44d9-8457-4ebcab51a2c0", :trigger :wallclock-cron, :phase :code-state, :transition :start}
+[wm-phase] {:at "2026-09-21T04:09:52.280311184Z", :opportunity-id "wallclock-cron/2026-09-21T04:09:44.909505227Z/6f3dd909-7ce4-44d9-8457-4ebcab51a2c0", :trigger :wallclock-cron, :phase :code-state, :transition :end, :outcome :ok, :duration-ms 0}
+
+Ran 3 tests containing 31 assertions.
+0 failures, 0 errors.

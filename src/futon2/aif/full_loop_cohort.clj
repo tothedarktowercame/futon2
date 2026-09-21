@@ -400,12 +400,9 @@
   (and (not= :cancelled (attempt-outcome attempt-dir))
        (not (beyond-window-attempt? attempt-dir))))
 
-(defn- all-events [dir]
-  (mapcat #(-> % attempt-history :events) (attempt-dirs dir)))
-
 (defn- opened-opportunity-ids [dir]
-  (->> (all-events dir)
-       (filter #(= :time-step (:checkpoint/type %)))
+  (->> (attempt-dirs dir)
+       (map #(read-edn (io/file % "001-time-step.edn")))
        (keep #(get-in % [:payload :judgment :opportunity-id]))
        set))
 
