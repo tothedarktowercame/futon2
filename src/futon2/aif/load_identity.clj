@@ -19,6 +19,7 @@
    'futon2.aif.cascade-plan "/home/joe/code/futon2/src/futon2/aif/cascade_plan.clj"
    'futon2.aif.job-text-retention "/home/joe/code/futon2/src/futon2/aif/job_text_retention.clj"
    'futon2.aif.scan-report "/home/joe/code/futon2/src/futon2/aif/scan_report.clj"
+   'futon2.aif.kernel-example "/home/joe/code/futon2/src/futon2/aif/kernel_example.clj"
    'futon2.aif.token-outcome "/home/joe/code/futon2/src/futon2/aif/token_outcome.clj"
    'futon2.aif.trace "/home/joe/code/futon2/src/futon2/aif/trace.clj"
    'futon2.aif.mission-hole-wants "/home/joe/code/futon2/src/futon2/aif/mission_hole_wants.clj"

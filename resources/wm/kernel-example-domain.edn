@@ -1,0 +1,22 @@
+{:schema :wm/kernel-example-domain-v1
+ :id :attempt-close-to-disposition-v1
+ :authority "ruled_outcome_c/non-disposition-outcomes; improve-2c record-only join"
+ :mapping
+ {:grounded-change {:status :disposition :value :grounded-change}
+  :grounded-no-change {:status :disposition :value :grounded-no-change}
+  :artifact-only {:status :disposition :value :artifact-only}
+  :abstained {:status :disposition :value :abstained}
+  :no-selection {:status :disposition :value :no-selection}
+  :agent-unavailable {:status :disposition :value :agent-unavailable}
+  :guardrail-refusal {:status :disposition :value :guardrail-refusal}
+  :dispatch-failed {:status :disposition :value :dispatch-failed}
+  :build-failed {:status :disposition :value :build-failed}
+  :substrate-unavailable {:status :disposition :value :substrate-unavailable}
+  :incomplete {:status :disposition :value :incomplete}
+  :cancelled {:status :disposition :value :cancelled}
+  :historical-verification-awaiting-validation
+  {:status :not-a-disposition :administrative :historical-verification-awaiting-validation
+   :reason :historical-verification-is-not-fresh-production}
+  :historical-verification-refused
+  {:status :not-a-disposition :administrative :historical-verification-refused
+   :reason :historical-verification-is-not-fresh-production}}}

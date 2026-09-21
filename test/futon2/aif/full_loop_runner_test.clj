@@ -11,6 +11,7 @@
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.token-outcome-test :as token-fixture]
+            [futon2.aif.kernel-example-test :as kernel-fixture]
             [futon2.aif.token-observation-initialization-test :as initialization-fixture]
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.preference-audit :as preference-audit]
@@ -4862,7 +4863,8 @@
                              [:time-step :selection :construction
                               :dispatch :build :adjudication])
           expected-ids (conj expected-ids
-                             (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/token-outcome.edn"))]
+                             (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/token-outcome.edn")
+                             (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/kernel-example.edn"))]
       (is (= expected-ids (mapv :evidence/id (:entries manifest))))
       (is (= expected-ids (:admitted-evidence retained))))
     (doseq [entry (:entries manifest)]
@@ -5725,7 +5727,8 @@
            close-event (cohort/read-edn (io/file root "test-cohort-exhaustion"
                                                 (:attempt-id result) "007-closed.edn"))
            receipt (get-in close-event [:payload :judgment :token-outcome-comparison])
-           entry (last (get-in close-event [:payload :close-evidence-manifest :entries]))]
+           entry (first (filter #(str/ends-with? (:evidence/id %) "/retained/token-outcome.edn")
+                                (get-in close-event [:payload :close-evidence-manifest :entries])))]
        (is (= :grounded-change (:outcome result)))
        ;; Retained files must not disturb the closed attempt's exact file set.
        (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
@@ -5802,6 +5805,16 @@
            selected (get-in result [:checkpoints :selection :judgment :controller-decision])]
        (is (= :grounded-change (:outcome result)))
        (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
+       (let [example (:kernel-example result)
+             manifest (:close-evidence-manifest result)
+             entry (first (filter #(str/ends-with? (:evidence/id %) "/retained/kernel-example.edn") (:entries manifest)))]
+         ;; This fixture's synthetic author lacks a verifiable D-task artifact;
+         ;; preserve its close disposition with unavailable observations.
+         (is (= :recorded (:status example)))
+         (is (= :grounded-change (get-in example [:disposition :value])))
+         (is (= :unavailable (get-in example [:missingness :observations])))
+         (is (= example (edn/read-string (slurp (:source-path entry)))))
+         (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry))))))
        (is (= :observed-initialization (:conditioning-status input)))
        (is (= input (get-in selected [:selection-certificate :token-belief-input])))
        (is (= :recorded (get-in selected [:selection-certificate :preference-audit :status])))
@@ -5810,3 +5823,30 @@
               (get-in selected [:selection-certificate :precision-family :model :q0])))
        (is (every? #(not (contains? % initialization-fixture/updater))
                    (keys (:continuation-belief input))))))))
+
+
+(deftest aligned-example-retention-binds-real-evidence-and-manifest
+  (kernel-fixture/with-example
+   (fn [{:keys [context expected jobs]}]
+     (let [root (.toFile (Files/createTempDirectory "kernel-retention-" (make-array java.nio.file.attribute.FileAttribute 0)))]
+       (try
+         (let [source (io/file root "task.edn")
+               _ (spit source (pr-str (:record context)))
+               d-result {:source {:path (.getPath source) :sha256 (digest/sha256 (slurp source))}}
+               retained (#'runner/retain-kernel-example! root :cohort "attempt" context d-result expected jobs)
+               manifest (#'runner/checkpoint-evidence-manifest
+                         {} root :cohort "attempt" token-fixture/target
+                         {:kernel-example-entry (:entry retained)})
+               entry (first (:entries manifest))
+               receipt (:receipt retained)]
+           (is (= :recorded (:status receipt)))
+           (is (= :admitted (get-in receipt [:observation-projection :status])))
+           (is (= "cohort/attempt/retained/kernel-example.edn" (:evidence/id entry)))
+           (is (= receipt (edn/read-string (slurp (:source-path entry)))))
+           (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))
+           (spit source "{}")
+           (is (= :evidence-digest-mismatch
+                  (:kernel-example/refusal
+                   (try (#'runner/retain-kernel-example! root :cohort "attempt" context d-result expected jobs)
+                        (catch clojure.lang.ExceptionInfo e (ex-data e)))))))
+         (finally (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))))
