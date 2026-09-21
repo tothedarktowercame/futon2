@@ -1,0 +1,792 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "claude-12",
+    "session-id": "01a0bff8-04c2-78d1-a63d-6e6e187cf074",
+    "execution": {
+      "executed": true,
+      "tool-events": 98,
+      "command-events": 98
+    },
+    "job-id": "invoke-1789961383253-22840-39530df4",
+    "agent-id": "codex-5",
+    "artifact-ref": "561d761e",
+    "started-at": "2026-09-21T03:29:44.252554063Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-21T03:29:43.254111808Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-21T03:29:44.252560846Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-21T03:29:45.270950245Z",
+        "text": "# Fix packet: by-class observation-locator validation in decision_gate (finding repair-occ-7737547f)\n\nJoe-directed, tonight. CONTEXT: during full-loop tick B the machine\nauthored a guard-locator check into src/futon2/aif/decision_gate.clj;\nits independent reviewer rejected it twice and the commits were\nreverted (b0f6deee) \u2014 master is back to 8f60f819. The feature is\nwanted; the rejected implementation conflated locator classes. You\nare authoring the correct version fresh. The reviewer's two rounds\nare the spec:\n\nROUND 1: the guard locator check \"accepts nil, empty, and unsupported\nlocator values \u2014 contains? verifies only key presence.\"\nROUND 2: \"valid-observation-locator? applies :repo/:sha/:path to\nevery class, contrary to the observation handlers. Valid C5\nincorrectly refuses. C4 without :decl incorrectly passes. C5 with\nonly :repo/:sha/:path incorrectly passes.\"\n\nIMPLEMENTATION RULE: the source of truth for what each locator class\nrequires is the PRODUCTION observation handlers \u2014\nsrc/futon2/aif/observation_checks.clj (C3-C6, observe at :161, class\nhandlers at :41-107). Derive per-class required fields from what each\nhandler actually consumes; do not invent a schema beside them. The\nfull-loop dossier (holes/labs/M-aif-full-loop-68/, machinery-68\nattempt-002 review records) has the complete review text if you want\nit verbatim.\n\nCONSTRAINTS: 8f60f819's pooled-nil refusal in decision_gate stays\nintact (it is live and verified); never amend; decision_gate.clj and\nits test are y \u2026[trimmed]"
+      },
+      {
+        "seq": 4,
+        "type": "text",
+        "at": "2026-09-21T03:29:51.282332952Z",
+        "text": "I\u2019ll read the production observation handlers, derive the locator requirements for each class, and add tests that distinguish them while preserving the pooled-nil refusal."
+      },
+      {
+        "seq": 5,
+        "type": "tool_use",
+        "at": "2026-09-21T03:29:55.611606747Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'cat src/futon2/aif/observation_checks.clj; cat src/futon2/aif/decision_gate.clj'"
+        ],
+        "output": [
+          "(ns futon2.aif.observation-checks\n  \"Mechanical observation checks for the checkable token classes of the WM-04\n  observation contract (futon2 resources/wm/observation-contract.edn, classes\n  C3-C6). Each check reads a repository at a pinned sha and returns either\n  {:observed true|false :check \u2026 :evidence \u2026} or a typed refusal\n  {:status :missing :kind \u2026}.\n\n  These observe exactly the fact each check defines: that a path exists, that\n  a declaration head is present in a file, or that a contract entry exist \u2026[trimmed]\u2026 [posterior (get-in decision [:selection-law :posterior])]\n    (when-not (and (map? posterior) (seq posterior))\n      (refuse! :missing-recorded-posterior\n               {:selection-law (:selection-law decision)}))\n    (check-candidate-receipts! posterior)\n    (let [total (reduce + 0.0 (vals posterior))]\n      (when (> (abs (- total 1.0)) mass-tolerance)\n        (refuse! :posterior-not-normalised {:total total})))\n    (when-not (contains? posterior (:action decision))\n      (refuse! :chosen-action-not-a-candidate {:action (:action decision)}))\n    ;; An EMPTY cascade has no first acting pattern, so its key here is nil.\n    ;; Summing those together pools every structurally distinct do-nothing\n    ;; into one key whose mass grows with the roster and cannot lose --\n    ;; 21 of them carried 0.785275 against 0.179031 for the best acting key in\n    ;; run 2026-09-21-1789951020. Absence is not an action and takes no action\n    ;; mass. This mirrors policy.clj's rule and is deliberately NOT shared code:\n    ;; this gate recomputes independently, and `gate-and-selector-agree-on-what-\n    ;; counts-as-an-action` in the tests is what stops the two drifting apart.\n    (let [acting (into {} (filter (fn [[c _]] (some? (first-acting-pattern c)))) posterior)\n          marginals (reduce (fn [m [c p]] (update m (first-acting-pattern c) (fnil + 0.0) p))\n                            {} acting)\n          chosen-pattern (first-acting-pattern (:action decision))]\n      (when (nil? chosen-pattern)\n        (refuse! :chosen-action-is-not-an-action\n                 {:action (:action decision)\n                  :reason :empty-cascade-has-no-first-acting-pattern}))\n      (when (empty? marginals)\n        (refuse! :no-acting-candidate\n                 {:candidates (count posterior)\n                  :reason :every-candidate-is-an-empty-cascade}))\n      (let [best (apply max (vals marginals))]\n        ;; the enacted step is the Bayes action: no first acting pattern may\n        ;; carry more marginal mass than the chosen one (ties are the selector's\n        ;; declared tie-break, so equality is admitted)\n        (when (> (- best (get marginals chosen-pattern 0.0)) mass-tolerance)\n          (refuse! :chosen-not-bayes-action\n                   {:chosen chosen-pattern :chosen-marginal (get marginals chosen-pattern)\n                    :best-marginal best}))))\n    (let [chosen (:action decision)\n          chosen-mass (:chosen-action-mass decision)\n          marginal (marginal-mass posterior (first-acting-pattern chosen))]\n      (when-not (and (number? chosen-mass) (pos? chosen-mass))\n        (refuse! :chosen-mass-not-recorded {:chosen-action-mass chosen-mass}))\n      (when (> (abs (- (double chosen-mass) (double marginal))) mass-tolerance)\n        (refuse! :chosen-mass-not-marginal\n                 {:chosen-action-mass chosen-mass\n                  :recomputed-marginal marginal\n                  :first-acting-pattern (first-acting-pattern chosen)})))))\n\n(defn- abstention?\n  [decision]\n  (and (map? decision) (= :abstained (:status decision))))\n\n(defn- check-abstention!\n  [decision]\n  (let [refusals (:refusals decision)]\n    (when-not (and (sequential? refusals) (seq refusals))\n      (refuse! :empty-refusals {:refusals refusals}))\n    (doseq [r refusals\n            :when (not (and (map? r)\n                            (contains? r :target)\n                            (allowed-refusal-kinds (:kind r))))]\n      (refuse! :unknown-refusal-kind {:refusal r}))))\n\n(defn emit!\n  \"Emit the tick's decision. Returns `decision` unchanged when it is an\n  admissible cascade decision or a typed abstention; otherwise throws\n  ex-info {:error :inadmissible-decision :reason \u2026}. No fallback, no\n  repair, no default.\"\n  [decision]\n  (cond\n    (abstention? decision) (do (check-abstention! decision) decision)\n    (cascade-decision? decision) (do (check-cascade-decision! decision) decision)\n    (and (map? decision) (get-in decision [:action :type]))\n    (refuse! :flat-action {:action-type (get-in decision [:action :type])})\n    :else (refuse! :not-a-decision {:decision decision})))\n"
+        ]
+      },
+      {
+        "seq": 6,
+        "type": "tool_use",
+        "at": "2026-09-21T03:29:55.666045397Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"rg -n 'locator|pooled|deftest' test/futon2/aif/decision_gate_test.clj; rg --files holes/labs/wm-contract "
+        ],
+        "output": [
+          "11:  (:require [clojure.test :refer [deftest is testing]]\n67:(deftest admissible-cascade-decision-passes-the-gate\n76:(deftest admissible-typed-abstention-passes-the-gate\n88:(deftest flat-action-decision-is-refused\n95:(deftest single-pattern-cascade-without-receipts-is-refused\n105:(deftest bare-abstention-with-empty-refusals-is-refused\n110:(deftest chosen-mass-not-the-marginal-is-refused\n133:(deftest missing-beta-is-refused\n141:(deftest flat-action-dressed-as-cascade-decision-is-refused\n148:(deftest non-bayes-choice-is-refused\n163:(deftest posterior-over-non-cascade-is-refused\n175:(deftest gate-and-selector-agree-on-what-counts-as-an-action\n197:(deftest gate-refuses-a-chosen-empty-cascade\n211:(deftest gate-excludes-empty-cascades-from-the-marginal\n212:  ;; The pooled-nil inversion, at the gate: with the empty candidate's mass\nholes/labs/wm-contract/bayesian-model-reduction-positive-receipt.edn\nholes/labs/wm-contract/model-reduction-free-energy-change-positive-receipt.edn\nholes/labs/wm-contract/belief-state-positive-receipt.edn\nholes/labs/wm-contract/model-uncertainty-eig-proof-receipt.edn\nholes/labs/wm-contract/log-multivariate-beta-positive-receipt.edn\nholes/labs/wm-contract/f11_receipt_carrier_controls_checker.sh\nholes/labs/wm-contract/STOP-THE-LINE-2026-09-20.md\nholes/labs/wm-contract/u63_receipt_drift.bb\nholes/labs/wm-contract/C115-r9-declaration-receipt.md\nholes/labs/wm-contract/C376-positive-proof-receipt-adversarial-review.md\nholes/labs/wm-contract/row2_receipts.clj\nholes/labs/wm-contract/parameter-posterior-kernel-positive-receipt.edn\nholes/labs/wm-contract/C194-suite-receipt-freshness.md\nholes/labs/wm-contract/have-want-arrow-positive-receipt.edn\nholes/labs/wm-contract/predictive-outcome-kernel-positive-receipt.edn\nholes/labs/wm-contract/expected-information-gain-positive-receipt.edn\nholes/labs/wm-contract/C349-receipt-validated-fence-capability.md\nholes/labs/wm-contract/parameter-prior-kernel-positive-receipt.edn\nholes/labs/wm-contract/aliveness-positive-receipt.edn\nholes/labs/wm-contract/predictive-outcome-risk-positive-receipt.edn\nholes/labs/wm-contract/positive-receipt-known-stale.edn\nholes/labs/wm-contract/observation-vector-positive-receipt.edn\nholes/labs/wm-contract/positive_receipt_reattestation_check.bb\nholes/labs/wm-contract/C562-F11-receipt-carrier.md\nholes/labs/wm-contract/fold-c-positive-receipt.edn\nholes/labs/wm-contract/C327-workspace-gate-receipt-claim.md\nholes/labs/wm-contract/positive_receipt_reattestation_controls.sh\nholes/labs/wm-contract/expected-free-energy-positive-receipt.edn\nholes/labs/wm-contract/f11_receipt_carrier_check.bb\nholes/labs/wm-contract/act-gate-positive-receipt.edn\nholes/labs/wm-contract/C87-r9-proof-receipt.md\nholes/labs/wm-contract/channel-positive-receipt.edn\nholes/labs/wm-contract/generative-model-positive-receipt.edn\nholes/labs/wm-contract/C379-positive-receipt-acceptance-repair.md\nholes/labs/wm-contract/policy-prior-kernel-positive-receipt.edn\n M scripts/futon2/report/war_machine.clj\n M src/futon2/aif/cascade_problems.clj\n M test/futon2/aif/cascade_problems_test.clj\n M test/futon2/aif/construction_test.clj\n M test/futon2/report/cascade_decision_test.clj\n?? holes/labs/M-aif-full-loop-65/\n?? holes/labs/M-aif-full-loop-66/\n?? holes/labs/M-aif-full-loop-67/\n?? holes/labs/M-aif-full-loop-68/\n?? holes/labs/wm-contract/runs/a-parameter-identity-2026-09-20/e8d96a26-2ad6-4dd4-9278-db98a2b95346.closure.edn\n?? holes/labs/wm-contract/runs/a-parameter-identity-2026-09-20/e8d96a26-2ad6-4dd4-9278-db98a2b95346.log\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/\n?? holes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/\n"
+        ]
+      },
+      {
+        "seq": 7,
+        "type": "tool_use",
+        "at": "2026-09-21T03:30:02.837247361Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"cat test/futon2/aif/decision_gate_test.clj; cat holes/labs/wm-contract/STOP-THE-LINE-2026-09-20.md; rg -n"
+        ],
+        "output": [
+          "(ns futon2.aif.decision-gate-test\n  \"E1 decision-gate fixtures (SPEC-flat-removal-and-cascade-decision, 2026-09-17).\n\n  The admissible cascade case is built with the REAL\n  policy/select-action-cascades over tick 1's four candidates and G\n  (p4ng wm-walkthroughs/build-loop/vm/tick-001/06-R5.edn :computed :G,\n  C0 13.101074797244184, C1 = C2 11.434408130577516,\n  C3 12.101074797244184, common T 3), with construction and interpretation\n  receipts added to every candidate. Every rejection asserts the thrown\n   \u2026[trimmed]\u2026 y RULING authority when it records\nan operator decision (e.g. the C591 deferral text cites approved\nRULINGS items \u2014 citing it as a ruling is legitimate); prose may NEVER\ncarry MODEL authority. \"What Lean says\" means a definition or theorem,\ncited by name, or it means nothing.\n\nStatus correction: Q is an UNBUILT thing whose explanatory paragraph\nis stale, not a closed decision. New transcription item (claude-12):\nbelief-conditioned rollout in Lean, building on exactUpdate \u2014 including\nthe consistency theorem that under identity A the conditioned rollout\nCOLLAPSES to the open-loop forward model, which is what makes today's\nempty updates honest for the zero-rate regime and states exactly when\nthat stops being true.\n\n## Failure class 4 \u2014 verified through a different reader than production (claude-4, self-reported, late evening)\n\nThe 96/4.17% C-content figure was verified with\nload-missions-from-files (reads documents) while production's\nwar_machine reads substrate-2 via mission-registry/load-missions. No\nsubstrate entity carried :mission/open-holes, so production saw 86\nmissions :not-ingested and certified 3 of 466 \u2014 the typed status\nexisted and went unconsulted. The number was real for the file scan\nand unreachable in the pipeline that certifies.\n\nRule: a projection claim is verified through THE SAME READER the\ncertifying path consumes \u2014 the same-source discipline (F's rule, the\nQ classifier's rule) applied at pipeline grain. Fixed by the\nidempotent substrate backfill (:updated 86, entities steady, 441\n:retained); second certify click in flight; a repeat 3 would be a new\nfinding, not a retry.\n\nTwo sharpenings from claude-4's own account of class 4: (1) the\ndangerous sub-case is a test reader MORE CAPABLE than the production\none \u2014 the file scan derives holes on demand, substrate returns only\nwhat was stored, so the test passes precisely because it reads from\nsomewhere production can't; capability asymmetry between readers is\nthe thing to check, not just reader identity. (2) \"A status that\nnames a gap is worth less than it appears if the person who added it\ntreats the gap as closed by having named it\" \u2014 :not-ingested was\nwritten, described in the commit, and then 4.17% was quoted in three\nplaces without consulting it. Naming a gap is not closing it; a named\nstatus earns its keep only when something CONSUMES it (a check, a\nreport line, a verdict), so new typed statuses should land with their\nfirst consumer.\nsrc/futon2/aif/fold_cascade.clj:57:        locators (get-in construction [:selected-action :observation-locators])\nholes/labs/wm-contract/runs/row-22-e6b-store-protocol-2026-09-13/schema-gates/receipt.edn\nholes/labs/wm-contract/runs/row-22-e6b-store-protocol-2026-09-13/schema-gates/lead-independent-review-receipt.json\nholes/labs/wm-contract/runs/row-22-e6b-store-protocol-2026-09-13/gates/receipt.edn\nholes/labs/wm-contract/runs/manifest-writer-seam-2026-09-14/cohort-kondo-receipt.edn\nholes/labs/wm-contract/runs/row-2-admission-2026-09-12/gate-receipts.edn\nholes/labs/wm-contract/runs/row-26-r2-cohort-47-2026-09-13/receipts.edn\nholes/labs/wm-contract/runs/row-26-r2-cohort-47-2026-09-13/run-config.r2.edn\nholes/labs/wm-contract/runs/row-22-e6b-common-state-carrier-2026-09-13/codec-gates/receipt.edn\nholes/labs/wm-contract/runs/row-13-live-accumulation-2026-09-12/migration-receipt.edn\nholes/labs/wm-contract/runs/row-13-live-accumulation-2026-09-12/gate-receipts.edn\nholes/labs/wm-contract/runs/row-12-accumulation-2026-09-12/gate-receipts.edn\nholes/labs/wm-contract/runs/row-22-e6b-composition-contract-2026-09-13/prospective-gates/receipt.edn\nholes/labs/wm-contract/runs/row-22-e6b-composition-contract-2026-09-13/extraction-gates/receipt.edn\nholes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/relation-gates/receipt.edn\nholes/labs/wm-contract/runs/row-22-e6b-feedback-2026-09-13/authorization-time-gates/receipt.edn\nholes/labs/wm-contract/runs/U42-producers/gate-receipt.edn\nholes/labs/wm-contract/runs/wm-build-loop-2026-09-15/r1-review/gate-receipts.json\nholes/labs/wm-contract/runs/wm-build-loop-2026-09-15/p1b-1/gate-receipts.json\n"
+        ]
+      },
+      {
+        "seq": 8,
+        "type": "tool_use",
+        "at": "2026-09-21T03:30:12.728714945Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"rg -n 'guards|observation-locators' src/futon2/aif/construction.clj src/futon2/aif/fold_cascade.clj test/"
+        ],
+        "output": [
+          "src/futon2/aif/fold_cascade.clj:5:  of their outputs. Unknown guards retain holes; scoring remains fold-eval's.\"\nsrc/futon2/aif/fold_cascade.clj:57:        locators (get-in construction [:selected-action :observation-locators])\nsrc/futon2/aif/construction.clj:299:  reads or writes (facts, want, pattern guards and produces) to be observable\ncommit b0f6deee0b68f05fc01337de16cc68b877d4ed7a\nAuthor: Joseph Corneli <joseph.corneli@hyperreal.enterprises>\nDate:   Mon Sep 21 01:15:36 2026 +0000\n\n    Revert the machi \u2026[trimmed]\u2026 ialization-2026-09-20/precommit-start.json\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/a481014f-9f9a-4d38-8ba5-c95fad9ea2c4.log\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/precommit-runner.log\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/static-checks.json\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/register-runner.log\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/DESIGN.md\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/7944fc27-2bdd-42c5-83d6-7f99eaf03576.closure.edn\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/7944fc27-2bdd-42c5-83d6-7f99eaf03576.log\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/register-cohort.log\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/precommit-cohort.log\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/postcommit-start.json\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/development-cohort.log\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/postcommit.json\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/registry-runner.edn\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/validation-comparison.json\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/parens.log\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/kondo.log\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/EXECUTION.md\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/precommit.json\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/a481014f-9f9a-4d38-8ba5-c95fad9ea2c4.closure.edn\n{:paths [\"src\" \"resources\" \".\" \"scripts\"]\n:deps {org.clojure/clojure {:mvn/version \"1.11.1\"}\n       org.clojure/core.logic {:mvn/version \"1.0.1\"}\n       metosin/malli {:mvn/version \"0.16.3\"}\n       org.babashka/http-client {:mvn/version \"0.4.22\"}\n       cheshire/cheshire {:mvn/version \"5.13.0\"}\n       common/common {:local/root \"../futon1/apps/common\"}\n       futon3a/meme-store {:local/root \"../futon3a\"}}\n :aliases\n {:war-machine {:main-opts [\"-m\" \"futon2.report.war-machine-visual\"]}\n  :war-machine-text {:main-opts [\"-m\" \"futon2.report.war-machine\"]}\n  ;; Authoritative real-actuation entrypoint. The historical judgement/fold\n  ;; runner remains available only under its honest diagnostic name.\n  :wm-scheduled {:main-opts [\"-m\" \"futon2.aif.full-loop-cli\" \"tick\"]}\n  ;; RETIRED for clicks (I-0 / M-omni-wm-runner 2026-07-26): do not launch\n  ;; this as a runner process \u2014 clicks run in-process in the serving JVM via\n  ;; POST :7070/api/alpha/wm/click. Alias kept for read-only CLI subcommands\n  ;; (status/brief/review) and tests only. See CLAUDE.md.\n  :wm-full-loop {:main-opts [\"-m\" \"futon2.aif.full-loop-cli\"]}\n  :wm-judgement-only {:main-opts [\"-m\" \"wm-scheduled-run\"]}\n  :wm-preflight {:main-opts [\"-m\" \"wm-preflight\"]}\n  :fold-author {:main-opts [\"-m\" \"fold-author\"]}\n  :wm-outer-loop {:main-opts [\"-m\" \"wm-outer-loop\"]}\n  :manual-overnight-flights {:main-opts [\"scripts/manual_overnight_flights.clj\"]}\n  ;; :run/:run-m/:bench/:viz moved to ../futon2a with the ants simulation (2026-09-18)\n  :build {:deps {io.github.clojure/tools.build\n                 {:mvn/version \"0.9.6\"}}\n          :ns-default build}\n  ;; Virtual-WM requirement tests (p4ng wm-walkthroughs/build-loop/vm/VM-PROTOCOL.md):\n  ;; they assert what the model requires of the real tick and FAIL until the node is\n  ;; wired, so they live outside the default :test path.\n  ;; Run: clojure -M:test:vm-test -m cognitect.test-runner -d vm-test\n  :vm-test {:extra-paths [\"vm-test\"]}\n  :test {:extra-paths [\"test\"]\n         :extra-deps {org.clojure/test.check {:mvn/version \"1.1.1\"}\n                      babashka/fs {:mvn/version \"0.5.25\"}\n                      babashka/process {:mvn/version \"0.5.22\"}\n                      io.github.cognitect-labs/test-runner\n                      {:git/tag \"v0.5.1\" :git/sha \"dfb30dd\"}}\n         :exec-fn cognitect.test-runner.api/test}}}\n"
+        ]
+      },
+      {
+        "seq": 9,
+        "type": "tool_use",
+        "at": "2026-09-21T03:30:12.760390447Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"rg -n 'warrant|register|post-commit' holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21 holes/labs/"
+        ],
+        "output": [
+          "holes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/register-runner.log:2:warrant? true\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/postcommit.json:2:  \"role\": \"post-commit registered warrants\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/postcommit.json:20:        \"register\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/postcommit.json:27:      \"log\": \"register-cohort.log\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/postcommit.json:30:      \"warrant?\": true,\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/postcommit.json:47:        \"register\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/postcommit.json:54:      \"log\": \"register-runner.log\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/postcommit.json:57:      \"warrant?\": true,\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/DESIGN.md:34:SHA-256 is checked by the test, and it is included in the cohort warrant scope:\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/validation-comparison.json:64:    \"post-commit-registered-warrants\": {\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/validation-comparison.json:65:      \"role\": \"post-commit registered warrants\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/validation-comparison.json:83:            \"register\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/validation-comparison.json:90:          \"log\": \"register-cohort.log\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/validation-comparison.json:93:          \"warrant?\": true,\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/validation-comparison.json:110:            \"register\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/validation-comparison.json:117:          \"log\": \"register-runner.log\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/validation-comparison.json:120:          \"warrant?\": true,\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/EXECUTION.md:8:| Namespace | Pre-commit validation | Post-commit registered run |\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/EXECUTION.md:10:| full-loop-cohort-test | 28 tests / 153 assertions / 0 failures / 0 errors | Same; warrant true |\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/EXECUTION.md:11:| full-loop-runner-test | 180 tests / 998 assertions / 0 failures / 0 errors | Same; warrant true |\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/EXECUTION.md:13:Cohort warrant: `test-registry-2e4f5347a6d969d8d98125ed34ba1cb996da073611c58ca1d7362f701c29d59e`.\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/EXECUTION.md:14:Runner warrant: `test-registry-0c2d84a3fd1ecffa1dd3a8cd20fbde2f0e173495098e170fb05b8b9aa16212f3`.\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/EXECUTION.md:15:Both were registered and bound to the subjects in the retained registry specs.\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/EXECUTION.md:23:Loaded-closure artifacts are retained for both registered runs. The baseline\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/EXECUTION.md:24:bad event is also declared explicitly in the cohort warrant's test scope.\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/postcommit-start.json:2:  \"role\": \"post-commit registered warrants\",\nholes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/register-cohort.log:2:warrant? true\n"
+        ]
+      },
+      {
+        "seq": 10,
+        "type": "tool_use",
+        "at": "2026-09-21T03:30:19.775163279Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"git show 7ac238d4:src/futon2/aif/decision_gate.clj | sed -n '85,155p'; cat holes/labs/wm-contract/runs/co"
+        ],
+        "output": [
+          "                   (pos? value))\n      (refuse! :beta-not-recorded\n               {:beta (:beta decision)\n                :required {:value \"positive number\" :status \"#{:declared :learned}\"}}))))\n\n(defn- check-candidate-receipts!\n  [posterior]\n  (doseq [candidate (keys posterior)]\n    (when-not (and (map? candidate) (= :cascade-candidate (:kind candidate)))\n      (refuse! :posterior-over-non-cascade {:candidate candidate}))\n    (when-not (some? (:construction-receipt candidate))\n      (refuse! :missing-cons \u2026[trimmed]\u2026 \",\n      \"log-sha256\": \"20542d0601bfefeace057b922973b85d876afb860b58e31c13b547cdaa1b15be\",\n      \"evidence-id\": \"test-registry-2e4f5347a6d969d8d98125ed34ba1cb996da073611c58ca1d7362f701c29d59e\",\n      \"warrant?\": true,\n      \"results\": {\n        \"tests\": 28,\n        \"assertions\": 153,\n        \"failures\": 0,\n        \"errors\": 0\n      },\n      \"test-log\": \"a481014f-9f9a-4d38-8ba5-c95fad9ea2c4.log\",\n      \"test-log-sha256\": \"ce5a9acd89858add9e5b9bb55aa3009d855220796c345afa927a695f3a11d357\"\n    },\n    {\n      \"namespace\": \"futon2.aif.full-loop-runner-test\",\n      \"command\": [\n        \"clojure\",\n        \"-M\",\n        \"-m\",\n        \"futon3c.test-registry.validation\",\n        \"register\",\n        \"/home/joe/code/futon2/holes/labs/wm-contract/runs/cohort-write-serialization-2026-09-20/registry-runner.edn\"\n      ],\n      \"utility-cwd\": \"/home/joe/code/futon3c\",\n      \"test-repo-root\": \"/home/joe/code/futon2\",\n      \"exit\": 0,\n      \"duration-seconds\": 192.77611520094797,\n      \"log\": \"register-runner.log\",\n      \"log-sha256\": \"14e20d9fb637d6a879ad9e127b435d94597e000619c21f17c838903580cef317\",\n      \"evidence-id\": \"test-registry-0c2d84a3fd1ecffa1dd3a8cd20fbde2f0e173495098e170fb05b8b9aa16212f3\",\n      \"warrant?\": true,\n      \"results\": {\n        \"tests\": 180,\n        \"assertions\": 998,\n        \"failures\": 0,\n        \"errors\": 0\n      },\n      \"test-log\": \"7944fc27-2bdd-42c5-83d6-7f99eaf03576.log\",\n      \"test-log-sha256\": \"52fa9c263aedf3bcd0d08b4ce3f20c0e1486167d4ecba0c1517ccbefa7ee00b2\"\n                     :receipt (receipt target taken evaluations\n                                       :budget-exhausted budget-used horizon\n                                       (best-g evaluate-g family)\n                                       (:checks checks) no-move-findings)}\n\n                    :else\n                    (recur (:proposed-family best)\n                           (conj taken best)\n                           (inc budget-used))))))))))))\n\n(defn construct\n  \"construct* with the construction receipt recording observation locators.\n\n  P5 under Joe's 2026-09-17 answer requires every token the family's problem\n  reads or writes (facts, want, pattern guards and produces) to be observable\n  by a mechanical check. The receipt therefore carries :locators, the supplied\n  locators restricted to those tokens, and :unlocated-tokens, the tokens with\n  no checkable (C3-C5) locator. Construction does not stop on unlocated tokens,\n  since later moves may add or replace patterns. futon2.aif.cascade-problems\n  refuses the problem at assembly while any remain, and the receipt names them\n  so whoever builds the cascade can add locators.\n\n  Input is as for construct*, plus :locators {token {:class :C3..:C5 ...}}.\n  Without :facts, :want and :patterns the token set is unknown, and the receipt\n  records :locator-coverage :token-set-not-supplied instead of claiming\n  coverage.\"\n  [{:keys [facts want patterns locators] :as input}]\n  (let [result (construct* input)]\n    (if-not (:receipt result)\n      result\n      (let [supplied? (and (map? facts) (sequential? want)\n                           (or (map? patterns) (sequential? patterns)))\n            ;; construct* takes patterns as a vector (check-candidates' shape);\n            ;; cascade-problems keys them by id\n            by-id (if (map? patterns) patterns (into {} (map (juxt :id identity)) patterns))\n            tokens (when supplied? (problems/problem-tokens facts want by-id))]\n        (update result :receipt merge\n                (if supplied?\n                  {:locators (select-keys (or locators {}) tokens)\n                   :unlocated-tokens (vec (problems/unlocated-tokens (or locators {}) tokens))}\n                  {:locator-coverage :token-set-not-supplied}))))))\n89:                         (concat (get-in p [:guard :needs]) (get-in p [:guard :forbids])\n90:                                 (mapcat :present (get-in p [:guard :clauses]))\n91:                                 (mapcat :absent (get-in p [:guard :clauses]))\n198:                                            {:guard {:needs #{} :forbids #{}}\n"
+        ]
+      },
+      {
+        "seq": 11,
+        "type": "tool_use",
+        "at": "2026-09-21T03:30:32.190899358Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"rg -n ':guard|:clauses|:needs|:forbids' src/futon2/aif/cascade*.clj | head -55; rg -n 'command|test-runne"
+        ],
+        "output": [
+          "src/futon2/aif/cascade_evaluation_trace.clj:8:  (and (= :interpreted (get-in pattern [:guard :status]))\nsrc/futon2/aif/cascade_evaluation_trace.clj:12:               (get-in pattern [:guard :clauses]))\nsrc/futon2/aif/cascade_evaluation_trace.clj:37:                                 :guard-verdict (enabled? (get precedence i) state)\nsrc/futon2/aif/cascade_evaluation_trace.clj:45:      (not= expected-search guard-search) (conj :guard-search-mismatch)\nsrc/futon2/aif/cascade_observation_scoring.clj:25:           \u2026[trimmed]\u2026 et-in p [:guard :status]))\nsrc/futon2/aif/cascade_model_manifest.clj:441:                                                  (into #{} (mapcat :present) (get-in p [:guard :clauses]))\nsrc/futon2/aif/cascade_model_manifest.clj:444:                              {:kind :guard-unreachable-in-declared-universe :pattern (:id p)\nsrc/futon2/aif/cascade_problems.clj:89:                         (concat (get-in p [:guard :needs]) (get-in p [:guard :forbids])\nsrc/futon2/aif/cascade_problems.clj:90:                                 (mapcat :present (get-in p [:guard :clauses]))\nsrc/futon2/aif/cascade_problems.clj:91:                                 (mapcat :absent (get-in p [:guard :clauses]))\nsrc/futon2/aif/cascade_problems.clj:198:                                            {:guard {:needs #{} :forbids #{}}\nsrc/futon2/aif/cascade_policy.clj:212:  {pattern-id {:guard {:needs #{token} :forbids #{token}}\nsrc/futon2/aif/cascade_policy.clj:215:  unchanged. The guard is one conjunctive clause: every :needs token present,\nsrc/futon2/aif/cascade_policy.clj:216:  every :forbids token absent. Produces are add-only (P10); \u03b8 carries the\nsrc/futon2/aif/cascade_policy.clj:224:   :guard {:status :interpreted :operator :and\nsrc/futon2/aif/cascade_policy.clj:225:           :clauses [{:status :interpreted\nsrc/futon2/aif/cascade_policy.clj:226:                      :present (set (:needs guard))\nsrc/futon2/aif/cascade_policy.clj:227:                      :absent (set (:forbids guard))}]}\nsrc/futon2/aif/cascade_policy.clj:276:    :interpretations {pattern-id {:guard {:needs #{t} :forbids #{t}}\n213:  command once and the ledger holds intent -> run -> closure), then, when a\n219:  spec keys: register-run!'s options (:repo-root :command :author\n244:(defn -main [& [command arg]]\n251:      (case command\n    :want-not-declared\n    :beta-not-declared\n    :no-constructed-candidate})\n\n(def ^:private mass-tolerance\n  \"The chosen-action probability must equal its posterior marginal this\n  closely (SPEC E1: 'within 1e-9').\"\n  1e-9)\n\n(def ^:private checkable-locator-classes #{:C3 :C4 :C5 :C6})\n\n(defn- valid-observation-locator?\n  [locator]\n  (and (map? locator)\n       (checkable-locator-classes (:class locator))\n       (every? #(and (string? %) (not (str/blank? %)))\n               ((juxt :repo :sha :path) locator))))\n\n(defn- refuse!\n  [reason detail]\n  (throw (ex-info \"Inadmissible decision\"\n                  {:error :inadmissible-decision\n                   :reason reason\n                   :detail detail})))\n\n(defn- first-acting-pattern\n  \"The enacted step of a cascade candidate: its first acting pattern (the\n  per-state projection ActionMarginal uses; same rule as policy.clj's\n  cascade-first-action).\"\n  [action]\n  (if (and (map? action) (seq (:precedence action)))\n    (first (:precedence action))\n    (if (map? action) (:type action) action)))\n\n(defn- cascade-decision?\n  [decision]\n2513:    (is (= :guardrail-refusal (:outcome result)))\n2514:    (is (= :guardrail-refusal (get-in result [:data :failure-kind])))\n2519:    (is (= :guardrail-refusal (:failure-kind (first @findings))))\n2544:            :guardrail-refusal]\n2578:      (is (= :guardrail-refusal (:outcome failure)))\n3729:                  :agent-unavailable :substrate-unavailable :guardrail-refusal\n4218:  produced by the real start-attempt! guard, through run-opportunity!'s outer\n4232:                    {;; NOT in :allowed-triggers \u2014 the real guard refuses this\n4260:  \"Fail-closed twin: the guard is not disabled. An ELIGIBLE trigger on the same\n4278:                     ;; cohort guard, before substrate, selection, or a live\n4330:        \"still rejected: the guard narrows the diagnosis, not the gate\")\n4360:  Asserting only that the result is nil would NOT test the guard: git rejects a\n4361:  bogus ref anyway, so deleting the guard leaves the return value unchanged.\n4362:  (Mutation testing showed exactly that.) What the guard actually buys is that a\n4372:      ;; and a well-formed sha DOES reach the probe \u2014 the guard is a filter,\n5036:  ;; Round-2 review of repair-ea1-3f4cac: the mismatch guard was unchanged,\n"
+        ]
+      },
+      {
+        "seq": 12,
+        "type": "text",
+        "at": "2026-09-21T03:30:46.726354850Z",
+        "text": "The handlers require C3/C6 `:repo/:sha/:path`, C4 those fields plus `:decl`, and C5 `:repo/:sha/:bundle-path/:entry`; all must be nonblank strings. I\u2019ll check those requirements for guard-token locators and cross-check the test cases against the production handlers. The gate will validate locator fields, without repeating the observation checks themselves."
+      },
+      {
+        "seq": 13,
+        "type": "tool_use",
+        "at": "2026-09-21T03:31:42.345964239Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' from pathlib import Path p=Path('src/futon2/aif/decision_gate.clj');s=p.read_text().repl"
+        ],
+        "output": [
+          "test/futon2/aif/decision_gate_test.clj:252:1: error: Found an opening ( with no matching )\ntest/futon2/aif/decision_gate_test.clj:253:3: error: Found an opening ( with no matching )\ntest/futon2/aif/decision_gate_test.clj:283:1: error: Found an opening ( with no matching )\ntest/futon2/aif/decision_gate_test.clj:283:1: warning: inline def\ntest/futon2/aif/decision_gate_test.clj:293:87: error: Expected a ) to match ( from line 252\ntest/futon2/aif/decision_gate_test.clj:293:87: error: Expected a ) to match ( from line 253\ntest/futon2/aif/decision_gate_test.clj:294:1: error: Expected a ) to match ( from line 283\nlinting took 20ms, errors: 6, warnings: 1\n"
+        ]
+      },
+      {
+        "seq": 14,
+        "type": "tool_use",
+        "at": "2026-09-21T03:31:55.074742182Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"nl -ba test/futon2/aif/decision_gate_test.clj | tail -65; sed -n '200,260p' /home/joe/code/futon3c/src/fu"
+        ],
+        "output": [
+          "   229\t  (let [pattern {:id :guarded :guard {:status :interpreted :operator :and\n   230\t                                     :clauses [{:present #{:present-token}\n   231\t                                                :absent #{:absent-token}}]}}\n   232\t        action (assoc (cascade-action :guarded [pattern])\n   233\t                      :observation-locators {:present-token locator\n   234\t                                             :absent-token locator})]\n   235\t    (policy/select-action-cascades [{:act \u2026[trimmed]\u2026 dict]} rows]\n      (println subject-id (name verdict) (or warrant-id \"-\")))\n    (println \"SUMMARY\" (pr-str (into (sorted-map) counts)))\n    {:rows rows :summary counts}))\n\n(defn register-and-bind!\n  \"The end-to-end mint: register-run! (the registry runner executes the\n  command once and the ledger holds intent -> run -> closure), then, when a\n  warrant resulted and the spec names a :subject-id, bind it. This is the\n  invocation that existed only in one agent's transcript until 2026-09-19\n  (claude-4, r112: an unregistered verification run 'is a claim, not\n  evidence' precisely because this entry point was missing).\n\n  spec keys: register-run!'s options (:repo-root :command :author\n  :artifact-dir :code-paths :test-paths ...) plus optional :subject-id.\n  Returns {:record ... :binding ...}; no warrant => no binding, and the\n  typed reason is in the record \u2014 this CLI reports, it does not gate.\"\n  [options spec]\n  (record-refusals!\n   (:index-file options) :register-and-bind!\n   {:options (dissoc options :backend) :spec spec}\n   (fn []\n     (let [{:keys [backend] :as options}\n           (resolve-options (merge (select-keys spec [:agency-url]) options))\n           rec (registry/register-run! backend (dissoc spec :subject-id))\n           eid (:evidence/id rec)\n           warrant? (boolean (or (get-in rec [:payload :warrant?]) (:warrant? rec)))\n           binding (when (and warrant? (:subject-id spec))\n                     (bind-subject! options (:subject-id spec) eid\n                                    (:author spec) (str (Instant/now))))]\n       {:record rec :evidence-id eid :warrant? warrant? :binding binding}))))\n\n(def ^:private default-files\n  {:index-file (or (System/getenv \"FUTON3C_VALIDATION_INDEX\")\n                   \"data/test-registry-validation/subjects.ednlog\")\n   :queue-file (or (System/getenv \"FUTON3C_REVALIDATION_QUEUE\")\n                   \"data/test-registry-validation/revalidation.ednlog\")})\n\n(defn -main [& [command arg]]\n  (try\n    (let [config (when (and arg (.isFile (io/file arg)))\n                   (edn/read-string (slurp arg)))\n          options (resolve-options\n                   (merge default-files\n                          (select-keys config [:index-file :queue-file :agency-url])))]\n      (case command\n        \"report\" (report! options)\n        \"register\"\n        (if-not (and arg (.isFile (io/file arg)))\n          (do (binding [*out* *err*]\n                (println \"register needs a spec file: ... validation register <spec.edn>\"))\n              (System/exit 2))\n          (let [spec config\n                {:keys [evidence-id warrant? binding record]}\n                (register-and-bind! options spec)]\n69:    (when-not (zero? (:exit r)) (fail! :command-failed {:command argv :result r}))\n232:    (fail! :unsupported-runner {:command command}))\n256:        _ (when-not (= cp probe-cp) (fail! :probe-classpath-mismatch {:command command}))\n298:  (if (= \"lake\" (first (:command options)))\n634:        (fail! :invalid-lean-module {:command command})))\n644:    (fail! :explicit-namespace-required {:command command})))\n709:                            :command command :env-fingerprint env\n785:                           (= (select-keys intent [:run/id :author :ran-at :code-sha :test-sha :command :env-fingerprint :scope])\n786:                              (select-keys run [:run/id :author :ran-at :code-sha :test-sha :command :env-fingerprint :scope])))\n793:          capture-options (merge (:scope run) {:repo-root repo-root :command (:command run)})\n825:      (when-not (command-successful? (:command run) (:results run))\n858:      (let [reparsed (parse-command-results (:command run) (get-in run [:results :exit])\n926:    (when (and (lean-command? (:command run)) (= :spot-check (:mode policy)))\n929:    (when (some #{\"-v\" \"--var\"} (:command run))\n930:      (fail! :full-scope-command-required {:command (:command run)}))\n935:          command (cond-> (:command run) (= :spot-check (:mode policy)) (into [\"-v\" spot-test]))\n937:                                              {:repo-root repo-root :command command :author reviewer\n"
+        ]
+      },
+      {
+        "seq": 15,
+        "type": "tool_use",
+        "at": "2026-09-21T03:32:12.640300544Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' from pathlib import Path p=Path('test/futon2/aif/decision_gate_test.clj');s=p.read_text("
+        ],
+        "output": [
+          "linting took 18ms, errors: 0, warnings: 0\n"
+        ]
+      },
+      {
+        "seq": 16,
+        "type": "tool_use",
+        "at": "2026-09-21T03:32:12.711017369Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- src/f"
+        ],
+        "output": [
+          "OK\n"
+        ]
+      },
+      {
+        "seq": 17,
+        "type": "tool_use",
+        "at": "2026-09-21T03:32:12.870317748Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'clojure -M:test -m cognitect.test-runner -n futon2.aif.decision-gate-test > /tmp/codex5-locator-developme"
+        ]
+      },
+      {
+        "seq": 18,
+        "type": "tool_use",
+        "at": "2026-09-21T03:32:25.438835044Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"tail -n 10 /tmp/codex5-locator-development.log; sed -n '210,245p' /home/joe/code/futon3c/src/futon3c/test"
+        ],
+        "output": [
+          "\nRunning tests in #{\"test\"}\n\nTesting futon2.aif.decision-gate-test\n\nRan 15 tests containing 404 assertions.\n0 failures, 0 errors.\n\n(defn directory-sha [directory]\n  (let [files (vec (files-under directory))\n        bytes (reduce + (map #(.length %) files))]\n    (when (> bytes max-dependency-directory-bytes)\n      (fail! :dependency-directory-too-large\n             {:path (str directory) :bytes bytes :limit max-dependency-directory-bytes\n              :next-action :declare-a-bounded-test-classpath}))\n    (sha (into (sorted-map)\n               (for [child files]\n                 [(str (.relativize (.toPath directory) (.toPath child))) (file-sha child)])))))\n\n(defn- fingerprint*\n  \"Resolve the test command's actual Clojure classpath and hash JAR bytes and\n  local dependencies. Files under classpath DIRECTORIES are pinned by the LOAD\n  CLOSURE instead (loaded sources plus resources the run opened), not by\n  walking the directory: a classpath may include the repo root itself, and\n  hashing it would stale every warrant on any commit.\n  Other runners need an explicit adapter; they are not silently fingerprinted.\"\n  [{:keys [repo-root command]}]\n  (when-not (and (= \"clojure\" (first command))\n                 (re-matches #\"-M(?::[A-Za-z0-9_+.-]+)+\" (second command)))\n    (fail! :unsupported-runner {:command command}))\n  (let [alias (second command)\n        cp (command! repo-root [\"clojure\" \"-Spath\" alias])\n        paths (str/split cp (re-pattern (java.util.regex.Pattern/quote java.io.File/pathSeparator)))\n        deps (mapv (fn [p]\n                     (let [f (.getCanonicalFile (io/file (if (.isAbsolute (io/file p)) p (str repo-root \"/\" p))))]\n                       (cond\n                         ;; A classpath entry that does not exist loads nothing;\n                         ;; if it appears later the fingerprint differs.\n                         (not (.exists f))\n                         {:path (str f) :sha256 (none :absent)}\n\n                         (.isDirectory f)\n                         ;; Directory classpath entries are pinned by the LOAD\n13:            [futon2.aif.hermetic-repair-fixture :as hermetic]\n26:(defn with-hermetic-traces [f]\n41:(use-fixtures :once hermetic/with-hermetic-stores with-hermetic-traces)\n243:  (is (not= hermetic/production-repair-root repair/default-root))\n244:  (is (not= hermetic/production-trip-root tripwire/default-trip-root)))\n569:  (merge (hermetic/runner-repair-options)\n2637:        store-opts (hermetic/runner-repair-options)\n3774:  explicitly marked outside the window. This stays hermetic by exercising the\n"
+        ]
+      },
+      {
+        "seq": 19,
+        "type": "tool_use",
+        "at": "2026-09-21T03:33:11.201196225Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' from pathlib import Path p=Path('test/futon2/aif/decision_gate_test.clj');s=p.read_text("
+        ]
+      },
+      {
+        "seq": 20,
+        "type": "tool_use",
+        "at": "2026-09-21T03:33:11.278587937Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- src/f"
+        ]
+      },
+      {
+        "seq": 21,
+        "type": "tool_use",
+        "at": "2026-09-21T03:33:11.437973175Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'clojure -M:test -m cognitect.test-runner -n futon2.aif.decision-gate-test > holes/labs/wm-contract/runs/d"
+        ]
+      },
+      {
+        "seq": 22,
+        "type": "tool_use",
+        "at": "2026-09-21T03:33:12.601537316Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'clojure -M:test -m cognitect.test-runner -n futon2.aif.full-loop-runner-test > holes/labs/wm-contract/run"
+        ]
+      },
+      {
+        "seq": 23,
+        "type": "tool_use",
+        "at": "2026-09-21T03:33:24.579983108Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'git diff -- src/futon2/aif/decision_gate.clj; tail -n 12 holes/labs/wm-contract/runs/decision-guard-locat"
+        ],
+        "output": [
+          "diff --git a/src/futon2/aif/decision_gate.clj b/src/futon2/aif/decision_gate.clj\nindex ed941a4b..c62d277e 100644\n--- a/src/futon2/aif/decision_gate.clj\n+++ b/src/futon2/aif/decision_gate.clj\n@@ -11,7 +11,9 @@\n       own :selection-law :posterior and each candidate's precedence \u2014 never\n       trusted from :softmax-weights or :chosen-action-mass), and every candidate\n       carrying a :construction-receipt and :interpretation-receipts (non-empty\n-      whenever the candidate's precedence is non-empty).\n+      \u2026[trimmed]\u2026 unt (:precedence candidate))}))))\n+                :precedence-count (count (:precedence candidate))}))\n+    (check-guard-locators! candidate)))\n \n (defn- marginal-mass\n   \"Sum the recorded posterior over candidates whose first acting pattern is\n\nRunning tests in #{\"test\"}\n\nTesting futon2.aif.decision-gate-test\n\nRan 16 tests containing 407 assertions.\n0 failures, 0 errors.\n[wm-phase] {:at \"2026-09-21T03:33:17.781255810Z\", :opportunity-id \"duree-click-on-demand/2026-09-21T03:33:17.764575802Z/0e1ae251-d653-4ee1-9b23-c24f33a4f7ac\", :trigger :duree-click-on-demand, :attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\", :external-attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\", :execution-identity nil, :phase :reviewer-wait, :transition :start}\n[wm-phase] {:transition :end, :attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\", :phase :reviewer-wait, :outcome :ok, :duration-ms 0, :execution-identity nil, :at \"2026-09-21T03:33:17.781350607Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:33:17.764575802Z/0e1ae251-d653-4ee1-9b23-c24f33a4f7ac\", :external-attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\"}\n[wm-phase] {:at \"2026-09-21T03:33:17.781599764Z\", :opportunity-id \"duree-click-on-demand/2026-09-21T03:33:17.764575802Z/0e1ae251-d653-4ee1-9b23-c24f33a4f7ac\", :trigger :duree-click-on-demand, :attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\", :external-attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\", :execution-identity nil, :phase :grounding, :transition :start}\n[wm-phase] {:transition :end, :attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\", :phase :grounding, :outcome :ok, :duration-ms 0, :execution-identity nil, :at \"2026-09-21T03:33:17.781730970Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:33:17.764575802Z/0e1ae251-d653-4ee1-9b23-c24f33a4f7ac\", :external-attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\"}\n[wm-phase] {:at \"2026-09-21T03:33:17.782435809Z\", :opportunity-id \"duree-click-on-demand/2026-09-21T03:33:17.764575802Z/0e1ae251-d653-4ee1-9b23-c24f33a4f7ac\", :trigger :duree-click-on-demand, :attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\", :external-attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\", :execution-identity nil, :phase :delivery-qa, :transition :start}\n[wm-phase] {:delivery-qa-ref #:morning-brief{:addendum-id \"qa-canary-ab92939d-3953-4e36-96ef-2e84bf10284a\"}, :transition :end, :attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\", :phase :delivery-qa, :outcome :ok, :duration-ms 0, :execution-identity nil, :at \"2026-09-21T03:33:17.782669617Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:33:17.764575802Z/0e1ae251-d653-4ee1-9b23-c24f33a4f7ac\", :field-desk-endpoint \"http://127.0.0.1:7070/api/alpha/morning-brief/addendum\", :external-attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\"}\n[wm-phase] {:transition :end, :attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\", :phase :opportunity, :tripwire/snapshot {:grounded-commit \"feature123\", :reviewer-job {:job-id \"feature-review\", :state \"done\", :execution {:executed true, :tool-events 3, :command-events 3}, :result-summary \"FULL_LOOP_REVIEW: APPROVE\\nFULL_LOOP_REVIEWER_NOTE: Replay steps verified.\"}, :grounding-witnesses [{:before {:implementation-entity nil}, :after {:implementation-entity {:id \"feature-impl\"}}, :resolved? true, :dial-moved? true, :implementation-id \"feature-impl\", :discharge-id \"feature-discharge\"}]}, :outcome :grounded-change, :duration-ms 19, :execution-identity nil, :at \"2026-09-21T03:33:17.783028769Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:33:17.764575802Z/0e1ae251-d653-4ee1-9b23-c24f33a4f7ac\", :external-attempt-id \"canary-ab92939d-3953-4e36-96ef-2e84bf10284a\"}\n[wm-phase] {:at \"2026-09-21T03:33:17.791597341Z\", :opportunity-id \"duree-click-on-demand/2026-09-21T03:33:17.791576702Z/5a701aa7-6223-401f-be2f-313924462936\", :trigger :duree-click-on-demand, :phase :opportunity, :transition :start}\n"
+        ]
+      },
+      {
+        "seq": 24,
+        "type": "tool_use",
+        "at": "2026-09-21T03:33:56.530191697Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' from pathlib import Path p=Path('holes/labs/wm-contract/runs/decision-guard-locators-202"
+        ]
+      },
+      {
+        "seq": 25,
+        "type": "text",
+        "at": "2026-09-21T03:34:06.592397836Z",
+        "text": "The decision-gate tests passed: 16 tests, 407 assertions. They cover valid C3\u2013C6 locators, every required field removed or given an invalid value, the C4/C5 review counterexamples, and a missing locator on an unselected candidate. The full-loop-runner validation is still running; after it passes, I\u2019ll commit and run the registered post-commit checks."
+      },
+      {
+        "seq": 26,
+        "type": "tool_use",
+        "at": "2026-09-21T03:34:14.778593707Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'git diff --check; git diff --cached --name-only; tail -n 3 holes/labs/wm-contract/runs/decision-guard-loc"
+        ],
+        "output": [
+          "[wm-phase] {:delivery-qa-ref #:morning-brief{:addendum-id \"qa-canary-fae2c74d-779c-4132-aac5-9f6f3a385a0e\"}, :transition :end, :attempt-id \"canary-fae2c74d-779c-4132-aac5-9f6f3a385a0e\", :phase :delivery-qa, :outcome :ok, :duration-ms 0, :execution-identity nil, :at \"2026-09-21T03:34:10.407609850Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:34:10.402480938Z/eb2763fb-135e-47dc-bc1f-766e7e72d592\", :field-desk-endpoint \"http://127.0.0.1:7070/api/alpha/morning-brief/addendum\", :external-attempt-id \"canary-fae2c74d-779c-4132-aac5-9f6f3a385a0e\"}\n[wm-phase] {:transition :end, :attempt-id \"canary-fae2c74d-779c-4132-aac5-9f6f3a385a0e\", :phase :opportunity, :tripwire/snapshot {:grounded-commit \"feature123\", :reviewer-job {:job-id \"feature-review\", :state \"done\", :execution {:executed true, :tool-events 3, :command-events 3}, :result-summary \"FULL_LOOP_REVIEW: APPROVE\\nFULL_LOOP_REVIEWER_NOTE: Replay steps verified.\"}, :grounding-witnesses [{:before {:implementation-entity nil}, :after {:implementation-entity {:id \"feature-impl\"}}, :resolved? true, :dial-moved? true, :implementation-id \"feature-impl\", :discharge-id \"feature-discharge\"}]}, :outcome :grounded-change, :duration-ms 5, :execution-identity nil, :at \"2026-09-21T03:34:10.407672457Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:34:10.402480938Z/eb2763fb-135e-47dc-bc1f-766e7e72d592\", :external-attempt-id \"canary-fae2c74d-779c-4132-aac5-9f6f3a385a0e\"}\n[wm-full-loop] REFUSING: serving runner source drifts from /home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj; reload the namespace from the canonical checkout before running attempts.\n"
+        ]
+      },
+      {
+        "seq": 27,
+        "type": "tool_use",
+        "at": "2026-09-21T03:34:23.379731070Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' import json,hashlib from pathlib import Path p=Path('holes/labs/wm-contract/runs/decisio"
+        ],
+        "output": [
+          "{'changed-since-precommit-start': []}\n"
+        ]
+      },
+      {
+        "seq": 28,
+        "type": "tool_use",
+        "at": "2026-09-21T03:35:11.074264062Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'tail -n 4 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/precommit-runner.log'"
+        ],
+        "output": [
+          "[wm-phase] {:transition :end, :attempt-id \"canary-06b1cd9a-092d-41f3-aff7-a2ae043621f6\", :phase :grounding, :outcome :ok, :duration-ms 0, :execution-identity nil, :at \"2026-09-21T03:35:09.089863877Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:35:09.084441045Z/ed4bb955-1a52-4baa-8e99-77fed9c96cff\", :external-attempt-id \"canary-06b1cd9a-092d-41f3-aff7-a2ae043621f6\"}\n[wm-phase] {:at \"2026-09-21T03:35:09.089984573Z\", :opportunity-id \"duree-click-on-demand/2026-09-21T03:35:09.084441045Z/ed4bb955-1a52-4baa-8e99-77fed9c96cff\", :trigger :duree-click-on-demand, :attempt-id \"canary-06b1cd9a-092d-41f3-aff7-a2ae043621f6\", :external-attempt-id \"canary-06b1cd9a-092d-41f3-aff7-a2ae043621f6\", :execution-identity nil, :phase :delivery-qa, :transition :start}\n[wm-phase] {:delivery-qa-ref #:morning-brief{:addendum-id \"qa-canary-06b1cd9a-092d-41f3-aff7-a2ae043621f6\"}, :transition :end, :attempt-id \"canary-06b1cd9a-092d-41f3-aff7-a2ae043621f6\", :phase :delivery-qa, :outcome :ok, :duration-ms 1, :execution-identity nil, :at \"2026-09-21T03:35:09.090033815Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:35:09.084441045Z/ed4bb955-1a52-4baa-8e99-77fed9c96cff\", :field-desk-endpoint \"http://127.0.0.1:7070/api/alpha/morning-brief/addendum\", :external-attempt-id \"canary-06b1cd9a-092d-41f3-aff7-a2ae043621f6\"}\n[wm-phase] {:transition :end, :attempt-id \"canary-06b1cd9a-092d-41f3-aff7-a2ae043621f6\", :phase :opportunity, :tripwire/snapshot {:grounded-commit \"feature123\", :reviewer-job {:job-id \"feature-review\", :state \"done\", :execution {:executed true, :tool-events 3, :command-events 3}, :result-summary \"FULL_LOOP_REVIEW: APPROVE\\nFULL_LOOP_REVIEWER_NOTE: Replay steps verified.\"}, :grounding-witnesses [{:before {:implementation-entity nil}, :after {:implementation-entity {:id \"feature-impl\"}}, :resolved? true, :dial-moved? true, :implementation-id \"feature-impl\", :discharge-id \"feature-discharge\"}]}, :outcome :grounded-change, :duration-ms 6, :execution-identity nil, :at \"2026-09-21T03:35:09.090100119Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:35:09.084441045Z/ed4bb955-1a52-4baa-8e99-77fed9c96cff\", :external-attempt-id \"canary-06b1cd9a-092d-41f3-aff7-a2ae043621f6\"}\n"
+        ]
+      },
+      {
+        "seq": 29,
+        "type": "text",
+        "at": "2026-09-21T03:35:17.780496423Z",
+        "text": "The full-loop-runner tests are still progressing, and the six recorded source/test hashes remain unchanged. The receipt distinguishes locator admission from artifact evidence: a well-formed locator may point to a missing artifact, which the observation handler reports later."
+      },
+      {
+        "seq": 30,
+        "type": "tool_use",
+        "at": "2026-09-21T03:35:57.655859608Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'tail -n 3 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/precommit-runner.log'"
+        ],
+        "output": [
+          "[wm-phase] {:at \"2026-09-21T03:35:57.099730089Z\", :opportunity-id \"duree-click-on-demand/2026-09-21T03:35:57.094398244Z/23862f30-5b6c-4c57-8160-151d6c7da3a7\", :trigger :duree-click-on-demand, :attempt-id \"canary-0ddaa117-b22a-4e5c-9cc2-376112365992\", :external-attempt-id \"canary-0ddaa117-b22a-4e5c-9cc2-376112365992\", :execution-identity nil, :phase :construction, :transition :start}\n[wm-phase] {:transition :end, :attempt-id \"canary-0ddaa117-b22a-4e5c-9cc2-376112365992\", :phase :construction, :outcome :ok, :duration-ms 0, :execution-identity nil, :at \"2026-09-21T03:35:57.099802174Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:35:57.094398244Z/23862f30-5b6c-4c57-8160-151d6c7da3a7\", :external-attempt-id \"canary-0ddaa117-b22a-4e5c-9cc2-376112365992\"}\n[wm-phase] {:transition :end, :attempt-id \"canary-0ddaa117-b22a-4e5c-9cc2-376112365992\", :phase :opportunity, :tripwire/snapshot {:grounded-commit nil, :reviewer-job nil, :grounding-witnesses []}, :outcome :incomplete, :duration-ms 6, :execution-identity nil, :at \"2026-09-21T03:35:57.100448946Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:35:57.094398244Z/23862f30-5b6c-4c57-8160-151d6c7da3a7\", :external-attempt-id \"canary-0ddaa117-b22a-4e5c-9cc2-376112365992\"}\n"
+        ]
+      },
+      {
+        "seq": 31,
+        "type": "tool_use",
+        "at": "2026-09-21T03:36:30.341649584Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'tail -n 3 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/precommit-runner.log'"
+        ],
+        "output": [
+          "[wm-tripwire]   witness: {:kind :missing-durable-stop-line, :attempt-id \"ea1-02d531e341177e2375a56fa33f643d116b0b149e42249e3b49c82811e6aec004--attempt-001\", :statuses #{}} nil\n[wm-tripwire]   report:  /tmp/wm-trip-suite-14980964047880095562/trip-d14c11ac-b05c-44d7-bf9f-4f384d47c12a.edn nil\n[wm-phase] {:transition :end, :attempt-id \"attempt-001\", :phase :opportunity, :tripwire/snapshot {:grounded-commit nil, :reviewer-job nil, :grounding-witnesses []}, :outcome :agent-unavailable, :duration-ms 8395, :execution-identity {:kind :runner-execution, :id \"ea1-02d531e341177e2375a56fa33f643d116b0b149e42249e3b49c82811e6aec004--attempt-001\"}, :at \"2026-09-21T03:36:23.259591023Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:36:14.864183043Z/6f92f34a-8576-4d5d-b5b2-c512ac180654\", :external-attempt-id \"ea1-02d531e341177e2375a56fa33f643d116b0b149e42249e3b49c82811e6aec004--attempt-001\"}\n"
+        ]
+      },
+      {
+        "seq": 32,
+        "type": "text",
+        "at": "2026-09-21T03:36:34.809458439Z",
+        "text": "The runner validation has not finished yet. The gate implementation and its focused tests are ready; I\u2019m waiting for the full-loop result before committing, as required by the packet."
+      },
+      {
+        "seq": 33,
+        "type": "tool_use",
+        "at": "2026-09-21T03:36:37.986334627Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"rg -n '\"'^FAIL|''^ERROR|''^Ran |failures, .*errors'\"' holes/labs/wm-contract/runs/decision-guard-locators"
+        ],
+        "output": [
+          "1966:Ran 180 tests containing 998 assertions.\n1967:0 failures, 0 errors.\n"
+        ]
+      },
+      {
+        "seq": 34,
+        "type": "tool_use",
+        "at": "2026-09-21T03:36:51.675117994Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' from pathlib import Path import hashlib,json,re p=Path('holes/labs/wm-contract/runs/deci"
+        ],
+        "output": [
+          "{'gate': {'role': 'pre-commit-validation', 'exit': 0, 'tests': 16, 'assertions': 407, 'failures': 0, 'errors': 0, 'log-sha256': 'd4d354f1de81f6c0b418e8bb6a8ad4b5fc6ae517e25be6d19acc1981f5c01bab'}, 'runner': {'role': 'pre-commit-validation', 'exit': 0, 'tests': 180, 'assertions': 998, 'failures': 0, 'errors': 0, 'log-sha256': '34af3d78287a1f643e7f8e27ee1c804adff55c40eba69f088fec682bba54ddae'}}\n"
+        ]
+      },
+      {
+        "seq": 35,
+        "type": "tool_use",
+        "at": "2026-09-21T03:36:51.712980993Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'git diff --cached --name-only; git diff --check'"
+        ]
+      },
+      {
+        "seq": 36,
+        "type": "tool_use",
+        "at": "2026-09-21T03:37:05.321886430Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'git add src/futon2/aif/decision_gate.clj test/futon2/aif/decision_gate_test.clj holes/labs/wm-contract/ru"
+        ]
+      },
+      {
+        "seq": 37,
+        "type": "tool_use",
+        "at": "2026-09-21T03:37:05.398595487Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'git diff --cached --stat'"
+        ],
+        "output": [
+          " .../decision-guard-locators-2026-09-21/DESIGN.md   |   49 +\n .../decision-guard-locators-2026-09-21/kondo.log   |    1 +\n .../decision-guard-locators-2026-09-21/parens.log  |    1 +\n .../precommit-gate.log                             |    7 +\n .../precommit-hashes.json                          |   14 +\n .../precommit-results.json                         |   23 +\n .../precommit-runner.log                           | 1967 ++++++++++++++++++++\n .../registry-gate.edn                              |    8 +\n .../registry-runner.edn                            |    8 +\n src/futon2/aif/decision_gate.clj                   |   48 +-\n test/futon2/aif/decision_gate_test.clj             |   83 +-\n 11 files changed, 2205 insertions(+), 4 deletions(-)\n"
+        ]
+      },
+      {
+        "seq": 38,
+        "type": "tool_use",
+        "at": "2026-09-21T03:37:05.492592800Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'git commit -m \"Validate guard observation locators by production class\"'"
+        ],
+        "output": [
+          "[main 561d761e] Validate guard observation locators by production class\n 11 files changed, 2205 insertions(+), 4 deletions(-)\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/DESIGN.md\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/kondo.log\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/parens.log\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/precommit-gate.log\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/precommit-hashes.json\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/precommit-results.json\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/precommit-runner.log\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/registry-gate.edn\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/registry-runner.edn\n"
+        ]
+      },
+      {
+        "seq": 39,
+        "type": "text",
+        "at": "2026-09-21T03:37:12.617235689Z",
+        "text": "Pre-commit validation passed: decision gate 16/407 and full-loop runner 180/998, both with zero failures or errors. Commit `561d761e` contains the fix and that evidence. I\u2019m starting the registered post-commit runs; nothing has been loaded into the serving JVM."
+      },
+      {
+        "seq": 40,
+        "type": "tool_use",
+        "at": "2026-09-21T03:37:17.613950473Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'clojure -M -m futon3c.test-registry.validation register /home/joe/code/futon2/holes/labs/wm-contract/runs"
+        ]
+      },
+      {
+        "seq": 41,
+        "type": "tool_use",
+        "at": "2026-09-21T03:37:29.509324756Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' from pathlib import Path import hashlib,json,subprocess p=Path('holes/labs/wm-contract/r"
+        ]
+      },
+      {
+        "seq": 42,
+        "type": "tool_use",
+        "at": "2026-09-21T03:37:29.544530457Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'tail -n 8 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/register-gate.log'"
+        ],
+        "output": [
+          "evidence-id test-registry-972fb8c12561c76c7f61ca29a3df55c6f69170dacaf77d8a52fdd4b4c0e1cba0\nwarrant? true\nresults {:assertions 407, :duration-ms 2058, :errors 0, :exit 0, :failures 0, :tests 16}\nbound decision-guard-locators/gate -> test-registry-972fb8c12561c76c7f61ca29a3df55c6f69170dacaf77d8a52fdd4b4c0e1cba0\n"
+        ]
+      },
+      {
+        "seq": 43,
+        "type": "tool_use",
+        "at": "2026-09-21T03:37:35.407813876Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'clojure -M -m futon3c.test-registry.validation register /home/joe/code/futon2/holes/labs/wm-contract/runs"
+        ]
+      },
+      {
+        "seq": 44,
+        "type": "tool_use",
+        "at": "2026-09-21T03:38:19.982017574Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'ls -lh holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21; git status --short'"
+        ],
+        "output": [
+          "total 980K\n-rw-rw-r-- 1 joe joe 6.8K Sep 21 03:37 75124456-67eb-4839-aa30-86d879a17d51.closure.edn\n-rw-rw-r-- 1 joe joe  102 Sep 21 03:37 75124456-67eb-4839-aa30-86d879a17d51.log\n-rw-rw-r-- 1 joe joe 2.8K Sep 21 03:33 DESIGN.md\n-rw-rw-r-- 1 joe joe 161K Sep 21 03:38 ff6490b7-722f-4bbc-96c5-d56a2252fcc6.log\n-rw-rw-r-- 1 joe joe   42 Sep 21 03:33 kondo.log\n-rw-rw-r-- 1 joe joe    3 Sep 21 03:33 parens.log\n-rw-rw-r-- 1 joe joe  822 Sep 21 03:37 postcommit-hashes.json\n-rw-rw-r-- 1 joe joe  130 Sep 21 03:33 precommit-gate.log\n-rw-rw-r-- 1 joe joe  824 Sep 21 03:33 precommit-hashes.json\n-rw-rw-r-- 1 joe joe  553 Sep 21 03:36 precommit-results.json\n-rw-rw-r-- 1 joe joe 761K Sep 21 03:36 precommit-runner.log\n-rw-rw-r-- 1 joe joe  311 Sep 21 03:37 register-gate.log\n-rw-rw-r-- 1 joe joe    0 Sep 21 03:37 register-runner.log\n-rw-rw-r-- 1 joe joe  567 Sep 21 03:33 registry-gate.edn\n-rw-rw-r-- 1 joe joe  575 Sep 21 03:33 registry-runner.edn\n M scripts/futon2/report/war_machine.clj\n M src/futon2/aif/interpretation_request.clj\n M src/futon2/aif/mission_hole_wants.clj\n?? holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/75124456-67eb-4839-aa30-86d879a17d51.closure.edn\n?? holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/75124456-67eb-4839-aa30-86d879a17d51.log\n?? holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/ff6490b7-722f-4bbc-96c5-d56a2252fcc6.log\n?? holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/postcommit-hashes.json\n?? holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/register-gate.log\n?? holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/register-runner.log\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/pinned-post-assembly/\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/pinned-post-construction/\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/pinned-post-decision/\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/pinned-post-runner/\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/pinned-post-selection/\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/post-assembly/\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registration-assembly-dirty-canonical.edn\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registration-assembly.edn\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registration-construction.edn\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registration-decision.edn\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registration-runner.edn\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registration-selection.edn\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registry-pinned-assembly.edn\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registry-pinned-construction.edn\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registry-pinned-decision.edn\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registry-pinned-runner.edn\n?? holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/registry-pinned-selection.edn\n?? holes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/\n?? src/futon2/aif/cascade_proposals.clj\n?? test/futon2/aif/cascade_proposals_test.clj\n"
+        ]
+      },
+      {
+        "seq": 45,
+        "type": "text",
+        "at": "2026-09-21T03:38:30.617568213Z",
+        "text": "The decision-gate post-commit run passed with the same 16 tests/407 assertions, and its warrant is registered. The registered full-loop-runner run is in progress. I\u2019ll retain both its test log and loaded-source record in the receipt."
+      },
+      {
+        "seq": 46,
+        "type": "tool_use",
+        "at": "2026-09-21T03:39:12.843133440Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'tail -n 3 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/ff6490b7-722f-4bbc-96c5-d56a2252"
+        ],
+        "output": [
+          "[wm-tripwire]   witness: {:kind :missing-durable-stop-line, :attempt-id \"ea1-34c77115581a731b3299f4faa8a033ce4374596223db94ed7431c6738cd06bae--attempt-001\", :statuses #{}} nil\n[wm-tripwire]   report:  /tmp/wm-trip-suite-11249321099341969305/trip-44e2e2d1-d9ed-46eb-b7cf-68de32521f6a.edn nil\n[wm-phase] {:transition :end, :attempt-id \"attempt-001\", :phase :opportunity, :tripwire/snapshot {:grounded-commit nil, :reviewer-job nil, :grounding-witnesses []}, :outcome :agent-unavailable, :duration-ms 6698, :execution-identity {:kind :runner-execution, :id \"ea1-34c77115581a731b3299f4faa8a033ce4374596223db94ed7431c6738cd06bae--attempt-001\"}, :at \"2026-09-21T03:39:12.328575006Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:39:05.630298612Z/add5563d-06c6-4a67-8c0e-24edf28d4e35\", :external-attempt-id \"ea1-34c77115581a731b3299f4faa8a033ce4374596223db94ed7431c6738cd06bae--attempt-001\"}\n"
+        ]
+      },
+      {
+        "seq": 47,
+        "type": "tool_use",
+        "at": "2026-09-21T03:39:21.953413885Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' from pathlib import Path import json,hashlib p=Path('holes/labs/wm-contract/runs/decisio"
+        ],
+        "output": [
+          "Direct source/test hashes still match: True\nFailure/error headings so far: []\n"
+        ]
+      },
+      {
+        "seq": 48,
+        "type": "text",
+        "at": "2026-09-21T03:39:52.855120253Z",
+        "text": "The registered runner run is still progressing, with no failure or error headings so far. The recorded source/test hashes still match the pre-commit run. I\u2019m waiting for the final result before treating this as a pass."
+      },
+      {
+        "seq": 49,
+        "type": "tool_use",
+        "at": "2026-09-21T03:40:00.610345886Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'tail -n 3 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/register-runner.log'"
+        ]
+      },
+      {
+        "seq": 50,
+        "type": "tool_use",
+        "at": "2026-09-21T03:40:49.594347811Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'tail -n 3 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/ff6490b7-722f-4bbc-96c5-d56a2252"
+        ],
+        "output": [
+          "[wm-tripwire]   witness: {:kind :missing-durable-stop-line, :attempt-id \"ea1-2c3a74d716f24dd9764c3d0e189bf35915d38fcef6d9749877ee4d59d16ec6e8--attempt-001\", :statuses #{}} nil\n[wm-tripwire]   report:  /tmp/wm-trip-suite-11249321099341969305/trip-e85e8556-196a-4ebc-8633-cf9bfb91e9e1.edn nil\n[wm-phase] {:transition :end, :attempt-id \"attempt-001\", :phase :opportunity, :tripwire/snapshot {:grounded-commit nil, :reviewer-job nil, :grounding-witnesses []}, :outcome :agent-unavailable, :duration-ms 6676, :execution-identity {:kind :runner-execution, :id \"ea1-2c3a74d716f24dd9764c3d0e189bf35915d38fcef6d9749877ee4d59d16ec6e8--attempt-001\"}, :at \"2026-09-21T03:40:46.569322664Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:40:39.893286502Z/1ec5dee2-84b3-41fa-b5eb-893da638c4bc\", :external-attempt-id \"ea1-2c3a74d716f24dd9764c3d0e189bf35915d38fcef6d9749877ee4d59d16ec6e8--attempt-001\"}\n"
+        ]
+      },
+      {
+        "seq": 51,
+        "type": "text",
+        "at": "2026-09-21T03:41:16.932552519Z",
+        "text": "The remaining check is the full-loop-runner post-commit warrant. Its integration fixtures are still producing output without failure or error headings. The final receipt will include both run roles, their counts and hashes, and the note that the serving JVM still needs a reload."
+      },
+      {
+        "seq": 52,
+        "type": "tool_use",
+        "at": "2026-09-21T03:41:19.669949972Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'tail -n 4 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/register-runner.log'"
+        ],
+        "output": [
+          "evidence-id test-registry-77d535b998504c6d33e6f52f3d7dc3d589db5949f9f04aa5d5a4fcc2c4c7f93d\nwarrant? false\nresults {:assertions 998, :duration-ms 196169, :errors 0, :exit 0, :failures 0, :tests 180}\n"
+        ]
+      },
+      {
+        "seq": 53,
+        "type": "tool_use",
+        "at": "2026-09-21T03:41:28.173684372Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"sed -n '260,287p' /home/joe/code/futon3c/src/futon3c/test_registry/validation.clj; rg -n 'warrant\\\\?|refu"
+        ],
+        "output": [
+          "                (register-and-bind! options spec)]\n            (println \"evidence-id\" evidence-id)\n            (println \"warrant?\" warrant?)\n            (println \"results\" (pr-str (or (get-in record [:payload :results])\n                                           (:results record))))\n            (when binding\n              (println \"bound\" (:subject-id binding) \"->\" (:warrant-id binding)))\n            (when-not warrant? (System/exit 1))))\n        (do (binding [*out* *err*]\n              (println \"usage: ... validation report [config.edn] | register <spec.edn>\"))\n            (System/exit 2))))\n    (finally (shutdown-agents))))\n42:(defn refusal [reason details]\n43:  {:record/type :test-registry/refusal :warrant? false :reason reason :details details})\n44:(defn- fail! [reason details] (throw (ex-info (name reason) (refusal reason details))))\n181:                     ;; A directory scope is dirty when anything under it is.\n186:                     {:path path :reason :dirty :repo root}\n318:  reasoning as :parser-superseded's v0 classification \u2014 the refusal is wrong\n483:  `:uncommitted` means the current bytes are worktree-dirty (usually a lane\n729:                     (catch Exception e (refusal :closure-unavailable {:error (.getMessage e)})))\n761:                                           (refusal :scope-not-committed\n770:                                           :else (refusal :inputs-changed-during-run post))\n771:                              :warrant? (and stable? (nil? closure-uncommitted)\n816:      (when-not (and (true? (:warrant? run)) (true? (:execution/stable? run))\n818:        (fail! :not-a-warrant {:warrant? (:warrant? run)\n862:          ;; Say WHAT differs. On a v0 record the refusal cannot by itself\n873:      {:warrant? true :record run :chain-length (count chain) :entry-id entry-id\n877:                          (refusal :record-unavailable {:error (.getMessage e)})))))\n889:  (let [synthetic-warrant {:handoff/warrant-status (if (:warrant? check) :warranted :unwarranted)\n908:                 {:handoff/warrant-status (if (true? (:warrant? check)) :warranted :unwarranted)\n922:    (when-not (:warrant? check) (fail! :rerun-required {:check check :policy policy}))\n941:          sufficient? (and (get-in sample [:payload :warrant?])\n948:                  :warrant? sufficient? :outcome (if sufficient? :reviewed :selective-execution-failed)\n977:      (when (or (= false (:warrant? result)) (= false (get-in result [:payload :warrant?])))\n981:                   (or (ex-data e) (refusal :registry-failed {:error (.getMessage e)})))\n-rw-rw-r-- 1 joe joe  6937 Sep 21 03:37 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/75124456-67eb-4839-aa30-86d879a17d51.closure.edn\n-rw-rw-r-- 1 joe joe 23978 Sep 21 03:40 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/ff6490b7-722f-4bbc-96c5-d56a2252fcc6.closure.edn\n[wm-phase] {:transition :end, :attempt-id \"canary-8fa8e025-6467-48e6-87c3-8133786d782d\", :phase :opportunity, :tripwire/snapshot {:grounded-commit nil, :reviewer-job nil, :grounding-witnesses []}, :outcome :build-failed, :duration-ms 6, :execution-identity nil, :at \"2026-09-21T03:40:53.720549147Z\", :trigger :duree-click-on-demand, :opportunity-id \"duree-click-on-demand/2026-09-21T03:40:53.714793610Z/d91656ce-cd27-4fff-bdf9-f617bd005ad4\", :external-attempt-id \"canary-8fa8e025-6467-48e6-87c3-8133786d782d\"}\n\nRan 180 tests containing 998 assertions.\n0 failures, 0 errors.\n"
+        ]
+      },
+      {
+        "seq": 54,
+        "type": "tool_use",
+        "at": "2026-09-21T03:41:33.365466412Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"sed -n '735,778p' /home/joe/code/futon3c/src/futon3c/test_registry.clj; sed -n '1,85p' /home/joe/code/fut"
+        ],
+        "output": [
+          "        closure-uncommitted (when (vector? closure)\n                              (seq (uncommitted-scope repo-root (map :path closure))))\n        post (try {:code (capture-code options) :env (fingerprint options)}\n                  (catch Exception e {:error (.getMessage e)}))\n        ;; HEAD is provenance, not part of the declared input scope.\n        stable? (and (= (dissoc code :git-head)\n                        (dissoc (:code post) :git-head))\n                     (= env (:env post)))\n        record (m \u2026[trimmed]\u2026  is never used for validation warrants.\"\n  [options]\n  (if (and (:backend options) (not (identical? store/!store (:backend options))))\n    options\n    (assoc options :backend\n           (http-backend/make-http-backend\n            (or (:agency-url options)\n                (System/getenv \"FUTON3C_AGENCY_URL\")\n                (System/getenv \"FUTON3C_AGENCY_BASE\")\n                \"http://localhost:7070\")))))\n\n(defn- record-refusals! [file operation attempted-args f]\n  (try\n    (f)\n    (catch clojure.lang.ExceptionInfo original\n      (let [{:keys [reason details]} (ex-data original)]\n        (try\n          (append-edn! file\n                       {:entry/type :refusal :entry/id (str (UUID/randomUUID))\n                        :operation operation :reason reason :details details\n                        :at (str (Instant/now)) :attempted-args attempted-args})\n          (catch Exception append-error\n            ;; Even an unwritable/missing ledger must not replace the refusal.\n            (try\n              (binding [*out* *err*]\n                (println \"validation refusal trace append failed:\"\n                         (str file) (.getMessage append-error)\n                         \"original refusal:\" reason))\n              (catch Exception _ nil)))))\n      (throw original))))\n\n(defn- read-ledger [file]\n  (let [f (io/file file)]\n    (if-not (.isFile f)\n      []\n      (mapv (fn [line]\n              (try (edn/read-string line)\n                   (catch Exception e\n                     (refuse! :ledger-invalid {:path (str f) :error (.getMessage e)}))))\n            (remove str/blank? (str/split-lines (slurp f)))))))\n\n(defn bind-subject!\n  \"Append a subject -> warrant binding. Rebinding preserves prior entries.\"\n  [{:keys [index-file] :as options} subject-id warrant-id actor at]\n  (record-refusals!\n   index-file :bind-subject!\n   {:options (dissoc options :backend) :subject-id subject-id\n1:(ns futon3c.evidence.backend\n2:  \"Backend protocol for evidence persistence.\n5:   The protocol captures the 7 operations that store.clj needs:\n10:  (:require [futon3c.evidence.subject :as subject])\n18:(defprotocol EvidenceBackend\n19:  \"Pluggable persistence layer for the evidence store.\"\n26:    \"Return true if evidence-id exists in the store.\")\n34:    \"Return [EvidenceEntry...] where :evidence/fork-of = id, sorted by time.\")\n60:(defn entry-at\n61:  \"Extract the Instant from an evidence entry, with fallback to epoch.\"\n64:    (parse-instant (:evidence/at entry))\n84:                  (remove #(true? (:evidence/ephemeral? %)) entries))\n86:                  (filter #(subject/equivalent? subject (:evidence/subject %))\n89:        entries (if type (filter #(= type (:evidence/type %)) entries) entries)\n90:        entries (if claim-type (filter #(= claim-type (:evidence/claim-type %)) entries) entries)\n91:        entries (if author (filter #(= author (:evidence/author %)) entries) entries)\n92:        entries (if session-id (filter #(= session-id (:evidence/session-id %)) entries) entries)\n93:        entries (if pattern-id (filter #(= pattern-id (:evidence/pattern-id %)) entries) entries)\n95:                  (filter #(let [et (set (:evidence/tags %))]\n117:    (let [eid (:evidence/id validated)]\n122:            (social-error :duplicate-id \"Evidence id already exists\" :evidence-id eid)\n124:            (and (:evidence/in-reply-to validated)\n125:                 (not (contains? (:entries st) (:evidence/in-reply-to validated))))\n128:                          :in-reply-to (:evidence/in-reply-to validated)\n129:                          :evidence-id eid)\n131:            (and (:evidence/fork-of validated)\n132:                 (not (contains? (:entries st) (:evidence/fork-of validated))))\n135:                          :fork-of (:evidence/fork-of validated)\n136:                          :evidence-id eid)\n146:  (-get [_ evidence-id]\n147:    (get-in @!store [:entries evidence-id]))\n149:  (-exists? [_ evidence-id]\n150:    (contains? (:entries @!store) evidence-id))\n160:  (-forks-of [_ evidence-id]\n162:          forks (filter #(= evidence-id (:evidence/fork-of %)) entries)]\n"
+        ]
+      },
+      {
+        "seq": 55,
+        "type": "tool_use",
+        "at": "2026-09-21T03:41:36.991776964Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"rg -n '\\\\-get|api/alpha/evidence' /home/joe/code/futon3c/src/futon3c/evidence/http_backend.clj\""
+        ],
+        "output": [
+          "64:    (let [resp @(http/post (api-url base-url \"/api/alpha/evidence\")\n76:  (-get [_ evidence-id]\n77:    (let [resp @(http/get (api-url base-url (str \"/api/alpha/evidence/\"\n84:    (some? (backend/-get this evidence-id)))\n96:          url (str (api-url base-url \"/api/alpha/evidence\")\n111:          url (str (api-url base-url \"/api/alpha/evidence/count\")\n126:    (let [resp @(http/get (api-url base-url \"/api/alpha/evidence\")\n"
+        ]
+      },
+      {
+        "seq": 56,
+        "type": "tool_use",
+        "at": "2026-09-21T03:41:48.555956242Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' import urllib.request,json from pathlib import Path id='test-registry-77d535b998504c6d33"
+        ]
+      },
+      {
+        "seq": 57,
+        "type": "tool_use",
+        "at": "2026-09-21T03:41:53.696130115Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' import json from pathlib import Path x=json.loads(Path('holes/labs/wm-contract/runs/deci"
+        ],
+        "output": [
+          "{'ok': True, 'entry': {'evidence/in-reply-to': 'test-registry-67c53db21b8fe67e2a2d75c3b424aee81d37f88a66fb527f2ec764827e3956fd', 'evidence/body': {'payload-edn': '{:author \"codex-5\", :code-files {\"src/futon2/aif/decision_gate.clj\" \"06b7b4dab0f664be17c4783659ba2dbdce4dc43e198a38fb51cea9670c287caf\", \"src/futon2/aif/full_loop_runner.clj\" \"41bb6b5cfeeb1543f07f53497aeca035597deaef751455e1307726e1f67300c9\", \"src/futon2/aif/observation_checks.clj\" \"4440991c7ed32898cb9280c888005cb6b567270a78c88d3261132618902f86d1\", \u2026[trimmed]\u2026 s/test-runner/dfb30dd6605cb6c0efc275e1df1736f6e90d4d73/src\", :sha256 :load-closure-only} {:path \"/home/joe/.m2/repository/metosin/malli/0.16.3/malli-0.16.3.jar\", :sha256 \"55dc52979a81cf55f5661b52f6e5ee21bf597458d1f42f1fdaadb9cc5b6da6c7\"} {:path \"/home/joe/.m2/repository/org/babashka/http-client/0.4.22/http-client-0.4.22.jar\", :sha256 \"24f8671d4e3172da0c4dc4aec834b0c57f724a88ba9116c553b23a917ef78cc3\"} {:path \"/home/joe/.m2/repository/org/clojure/clojure/1.11.1/clojure-1.11.1.jar\", :sha256 \"2381b6e9423ab465151455944903d13a56243d6006b9194afc1bf4f8710cb4de\"} {:path \"/home/joe/.m2/repository/org/clojure/core.logic/1.0.1/core.logic-1.0.1.jar\", :sha256 \"06ffce4a856fddaa9461f377135566c4a8bc758f394e3bd1c3a04138da3b880a\"} {:path \"/home/joe/.m2/repository/org/clojure/test.check/1.1.1/test.check-1.1.1.jar\", :sha256 \"945118163b2c355a5fab96c9ebd01287152555bb2e9641f5cd9ed07fe4bc5078\"} {:path \"/home/joe/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.17.0/jackson-core-2.17.0.jar\", :sha256 \"55be130f6a68038088a261856c4e383ce79957a0fc1a29ecb213a9efd6ef4389\"} {:path \"/home/joe/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.17.0/jackson-dataformat-cbor-2.17.0.jar\", :sha256 \"d7050cb5e622848d5be382848b1792e8244d529e24c84ba1cc27aabf2496fe3b\"} {:path \"/home/joe/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-smile/2.17.0/jackson-dataformat-smile-2.17.0.jar\", :sha256 \"e6b2bf2a53d1f88ec02f1833da24c208aa299876e47d37f7920b1e83e214baab\"} {:path \"/home/joe/.m2/repository/tigris/tigris/0.1.2/tigris-0.1.2.jar\", :sha256 \"49aa648edb6c14e57095a11b391eaee606578323fb79755f92331ac6300f97a0\"} {:path \"/home/joe/.m2/repository/com/cemerick/drawbridge/0.0.7/drawbridge-0.0.7.jar\", :sha256 \"e69ce7eff918fb139caba60156646fa08820df6349925971cb502791f63e5d74\"} {:path \"/home/joe/.m2/repository/com/github/seancorfield/next.jdbc/1.3.909/next.jdbc-1.3.909.jar\", :sha256 \"0125e09d92ce6b0bdd190ce9bf8ad9b6386d14924416559495e447ea5cbb6bb9\"} {:path \"/home/joe/.m2/repository/http-kit/http-kit/2.7.0/http-kit-2.7.0.jar\", :sha256 \"b4bed5f82be653a79d365ccd188c5d25d1750c49f40d5a65919973435ba21774\"} {:path \"/home/joe/code/futon1/apps/nlp-interface/src\", :sha256 :load-closure-only} {:path \"/home/joe/code/futon1/apps/nlp-interface/resources\", :sha256 :load-closure-only} {:path \"/home/joe/.m2/repository/nrepl/nrepl/1.1.0/nrepl-1.1.0.jar\", :sha256 \"5a873b9dfa428b3b4ceb942b097f6d07b88a128b4d9bf1374a1b5ffe3eeb4958\"} {:path \"/home/joe/.m2/repository/org/clojure/data.json/2.5.0/data.json-2.5.0.jar\", :sha256 \"6779c36ee1f90d70f35feb872fb31756aa0e1b8bd6c65e105e780babb4b25704\"} {:path \"/home/joe/.m2/repository/org/clojure/tools.nrepl/0.2.13/tools.nrepl-0.2.13.jar\", :sha256 \"7327a0825a38630775850620ff5874891a2f91d055e894d0e5e3b1fe71d4de2d\"} {:path \"/home/joe/.m2/repository/org/xerial/sqlite-jdbc/3.44.1.0/sqlite-jdbc-3.44.1.0.jar\", :sha256 \"e7f9ac47f4ae61f2e63157a1f97e0750cb6fd90c9d0bf25f188260e732f284fa\"} {:path \"/home/joe/.m2/repository/ring/ring-core/1.11.0/ring-core-1.11.0.jar\", :sha256 \"ec65252eed3eaef407c203069112c9a84d671981cc2d9b57eaca0ea9c4b17f41\"} {:path \"/home/joe/.m2/repository/org/clojure/tools.cli/1.0.206/tools.cli-1.0.206.jar\", :sha256 \"6b97d2691919b9ea944a898fec798a90ecb81a17732916edbc73a6f5afd1f616\"} {:path \"/home/joe/.m2/repository/org/clojure/tools.namespace/1.3.0/tools.namespace-1.3.0.jar\", :sha256 \"127533ab1e1e7a700c8238ad7d58d4b42c418d6d8f34c304711503bc882e3a70\"} {:path \"/home/joe/.m2/repository/borkdude/dynaload/0.3.5/dynaload-0.3.5.jar\", :sha256 \"0887c0cdb9afcecd7c496ea258a32e43aa72e766f3f0632e1bd0f5245ca8c24c\"} {:path \"/home/joe/.m2/repository/borkdude/edamame/1.4.25/edamame-1.4.25.jar\", :sha256 \"801de1b256c5dbd2383601d227fc155e0dc24e80e6e4c98bb61ef29ba53f45ec\"} {:path \"/home/joe/.m2/repository/fipp/fipp/0.6.26/fipp-0.6.26.jar\", :sha256 \"f7cb696cce55afd74c838d5441419c7e5f6d491af185a8e563dfa79796857283\"} {:path \"/home/joe/.m2/repository/mvxcvi/arrangement/2.1.0/arrangement-2.1.0.jar\", :sha256 \"f37251385d220df8951e68d5255abb5197adbcbd8fc6b3d3fca872a2339f39c8\"} {:path \"/home/joe/.m2/repository/org/clojure/core.specs.alpha/\n"
+        ]
+      },
+      {
+        "seq": 58,
+        "type": "tool_use",
+        "at": "2026-09-21T03:42:01.852321710Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' import json from pathlib import Path x=json.loads(Path('holes/labs/wm-contract/runs/deci"
+        ],
+        "output": [
+          "{:postcheck {:details {:count 3, :next-action :commit-before-registering, :paths [\"scripts/futon2/report/war_machine.clj\" \"src/futon2/aif/interpretation_request.clj\" \"src/futon2/aif/mission_hole_wants.clj\"], :reasons {:dirty 3}, :stage :load-closure}, :reason :scope-not-committed, :record/type :test-registry/refusal, :warrant? false}, :warrant? false, :execution/stable? true}\n"
+        ]
+      },
+      {
+        "seq": 59,
+        "type": "text",
+        "at": "2026-09-21T03:42:11.320900157Z",
+        "text": "The runner tests passed again\u2014180 tests, 998 assertions, zero failures/errors\u2014but the registry refused the warrant with `:scope-not-committed`. Its loaded sources include three files with other agents\u2019 uncommitted edits: `war_machine.clj`, `interpretation_request.clj`, and `mission_hole_wants.clj`. The run\u2019s declared inputs were stable. I\u2019ll preserve the refusal and stop here; those edits are outside my ownership, so I won\u2019t commit them or bypass the check."
+      },
+      {
+        "seq": 60,
+        "type": "tool_use",
+        "at": "2026-09-21T03:42:43.241035463Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc \"python3 - <<'PY' from pathlib import Path import hashlib,json p=Path('holes/labs/wm-contract/runs/decisio"
+        ],
+        "output": [
+          "Six direct source/test hashes unchanged; evidence preserved.\nholes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/EXECUTION.md\nholes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/STATUS.md\nholes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/join-audit.edn\nholes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/pre-decision.log\nholes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/pre-proposals.log\nholes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/pre-request.log\nholes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/pre-validation.json\nholes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/pre-wants.log\nholes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/retrieval-demonstration-pin.json\nholes/labs/wm-contract/runs/proposal-supply-b1-2026-09-21/retrieval-demonstration.edn\nscripts/futon2/report/war_machine.clj\nsrc/futon2/aif/cascade_proposals.clj\nsrc/futon2/aif/interpretation_request.clj\nsrc/futon2/aif/mission_hole_wants.clj\ntest/futon2/aif/cascade_proposals_test.clj\n"
+        ]
+      },
+      {
+        "seq": 61,
+        "type": "tool_use",
+        "at": "2026-09-21T03:43:01.909025042Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'git add holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/EXECUTION.md holes/labs/wm-contrac"
+        ]
+      },
+      {
+        "seq": 62,
+        "type": "tool_use",
+        "at": "2026-09-21T03:43:01.967766166Z",
+        "tools": [
+          "bash"
+        ],
+        "previews": [
+          "bash /bin/bash -lc 'git commit --only -m \"Record locator validation runs and blocked runner warrant\" -- holes/labs/wm-contrac"
+        ],
+        "output": [
+          "[main d0cba29d] Record locator validation runs and blocked runner warrant\n 10 files changed, 2083 insertions(+)\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/75124456-67eb-4839-aa30-86d879a17d51.closure.edn\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/75124456-67eb-4839-aa30-86d879a17d51.log\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/EXECUTION.md\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/artifact-hashes.json\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/ff6490b7-722f-4bbc-96c5-d56a2252fcc6.closure.edn\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/ff6490b7-722f-4bbc-96c5-d56a2252fcc6.log\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/postcommit-hashes.json\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/register-gate.log\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/register-runner.log\n create mode 100644 holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/runner-registry-record.json\n"
+        ]
+      },
+      {
+        "seq": 63,
+        "type": "text",
+        "at": "2026-09-21T03:43:14.677103556Z",
+        "text": "Implemented `561d761e`; receipt `d0cba29d`.\n\nPer-class locator validation preserves pooled-nil refusal. Both runs passed:\n- Decision gate: **16/407/0/0**\n- Full-loop runner: **180/998/0/0**\n- Kondo **0/0**, parens **OK**; six recorded hashes unchanged.\n\n**Stopped at runner warrant refusal:** `:scope-not-committed` for other agents\u2019 edits in `war_machine.clj`, `interpretation_request.clj`, and `mission_hole_wants.clj`. Gate warrant registered successfully; runner acceptance remains incomplete. No retry or bypass.\n\n[Receipt](/home/joe/code/futon2/holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/EXECUTION.md) retains evidence and hashes.\n\n**Committed, not loaded:** next tick requires canonical decision-gate reload after review."
+      },
+      {
+        "seq": 64,
+        "type": "done",
+        "at": "2026-09-21T03:43:15.077746180Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 65,
+        "type": "delivery-recorded",
+        "at": "2026-09-21T03:43:17.827527796Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller claude-12 via /api/alpha/invoke/jobs/invoke-1789961383253-22840-39530df4",
+        "recorded-at": "2026-09-21T03:43:17.826521932Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "work",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller claude-12 via /api/alpha/invoke/jobs/invoke-1789961383253-22840-39530df4",
+      "recorded-at": "2026-09-21T03:43:17.826521932Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789961383253-22840-39530df4",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": "invoke-980eab82-9a1e-4b00-bed2-b8a6d3153970",
+    "result-summary": "Implemented `561d761e`; receipt `d0cba29d`. Per-class locator validation preserves pooled-nil refusal. Both runs passed: - Decision gate: **16/407/0/0** - Full-loop runner: **180/998/0/0** - Kondo **0/0**, parens **OK...",
+    "result": "Implemented `561d761e`; receipt `d0cba29d`.\n\nPer-class locator validation preserves pooled-nil refusal. Both runs passed:\n- Decision gate: **16/407/0/0**\n- Full-loop runner: **180/998/0/0**\n- Kondo **0/0**, parens **OK**; six recorded hashes unchanged.\n\n**Stopped at runner warrant refusal:** `:scope-not-committed` for other agents\u2019 edits in `war_machine.clj`, `interpretation_request.clj`, and `mission_hole_wants.clj`. Gate warrant registered successfully; runner acceptance remains incomplete. No retry or bypass.\n\n[Receipt](/home/joe/code/futon2/holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/EXECUTION.md) retains evidence and hashes.\n\n**Committed, not loaded:** next tick requires canonical decision-gate reload after review.",
+    "auto-bellback": {
+      "suppressed?": true,
+      "reason": "parked-on",
+      "park-id": "park-7845aca4-41d8-4374-8c1a-eedda4a2f14c",
+      "at": "2026-09-21T03:43:15.077721423Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-21T03:43:15.077721423Z",
+    "created-at": "2026-09-21T03:29:43.253606502Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

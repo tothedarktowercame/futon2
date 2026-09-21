@@ -1,0 +1,16 @@
+{
+  "CLOSING.md": "9130b21d96f1f3e5fc45213e1939966a2d5eb1849e470713a39c56a78e7a6595",
+  "author-job.json": "08c30d8fd00c74e24fcaacdfbbce4ac5e9d6d444151d2f261f91f5e7978721f8",
+  "close.clj": "4f9aa1788e998e41b865c115b877e236c6e8a2cfb8af7c921355108dfde5643f",
+  "compute-evidence.clj": "9c6f1e9a98af76ad14788e01444aa08bf886cf54ca4aac3030463d0313a314a9",
+  "computed-evidence.edn": "9a8626ce0c3d3f7c984f84c173752635c217bd0795a7295c2d69e8b609125847",
+  "implementations.edn": "20f8c7237a169e25835066f52f9c199d4af21c83a84f4ec61d5c714ebd9e0cc2",
+  "kondo.log": "42f2ef15a8c1b055ba106ea6f360e6e6800fea534b8b4f238ba4a1570207ee33",
+  "parens.log": "a12b7cb43c9d9134b5bb1b35e9096b66775d9e92e7611d1cc92b02edd6782a87",
+  "pin-registration-refusal.edn": "dca14ed45dc6ccc5b5b691f65ded2a84a2bbff8628495691a070800bddbfd8f0",
+  "precommit-pin.log": "ec85822d09ef12d974baa728500148418fc8253b73b32fcf13efde1db683dd2e",
+  "register-pin.log": "6370dd97790b11066b23275400b485da14487529a10d615401cdf5d5958a4c9a",
+  "resolutions.edn": "c3e489a7f17c05fca65420fd341ad68ad26e807715545237de55118b731fedaf",
+  "review-job.json": "90f6dc9cae6c4ea78f4ea36d7c39a26f917451b0097ba80defdaf3db17d54766",
+  "store-closing.log": "e4666f385e880a0f5d73f0a190922b108f8d710b0cd4b037b7cebb628ce337b4"
+}

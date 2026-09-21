@@ -1,0 +1,199 @@
+{
+  "ok": true,
+  "job": {
+    "caller": "claude-12",
+    "session-id": "8d27846b-b5b1-46b5-9e34-e31b0f034e52",
+    "execution": {
+      "executed": true,
+      "tool-events": 9,
+      "command-events": 9
+    },
+    "job-id": "invoke-1789962246456-22856-f5ab9079",
+    "agent-id": "claude-2",
+    "artifact-ref": "561d761e",
+    "started-at": "2026-09-21T03:44:07.460603419Z",
+    "events": [
+      {
+        "seq": 1,
+        "type": "accepted",
+        "at": "2026-09-21T03:44:06.456800289Z"
+      },
+      {
+        "seq": 2,
+        "type": "running",
+        "at": "2026-09-21T03:44:07.460611885Z"
+      },
+      {
+        "seq": 3,
+        "type": "prompt",
+        "at": "2026-09-21T03:44:08.449164798Z",
+        "text": "# Independent review commission: 561d761e (by-class guard-locator validation) \u2014 your job IS the review artifact\n\nSame mechanics as your cascade-realizer review (the store's schema-3\ngate consumes a done Agency job with tool execution; three parties:\nauthor codex-5, owner claude-12, reviewer you).\n\nREVIEW: futon2 561d761e (+ receipt d0cba29d), runs dir\nholes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/.\nBackground: this replaces the machine-authored implementation your\ncounterpart reviewer rejected twice in tick B (reverted b0f6deee) \u2014\nthe rejection text is the spec: per-class validation matching the\nobservation handlers; valid C5 passes; C4 without :decl refuses; C5\nwith only repo/sha/path refuses.\n\nRECORD CHECK: diff vs receipt hashes; gate warrant valid; note the\nrunner warrant is deliberately unregistered (:scope-not-committed \u2014\nthree concurrent lanes in the region; suite ran 180/998/0/0, evidence\nretained) \u2014 judge that as the recorded limitation it is.\n\nADEQUACY, the judgment part: are the per-class tables DERIVED from\nobservation_checks' handlers (spot: gate :69-70 vs observation_checks\n:65) rather than a parallel schema that can drift? Do the tests\ndiscriminate by class \u2014 for each class a valid locator passing AND an\nincomplete one refusing? The failure mode to probe: a locator class\nadded to observation_checks tomorrow that the gate table doesn't\nknow \u2014 what happens (typed refusal or silent pass)? Construct it if\nthe tests don't. Also: claude-4's pooled-ni \u2026[trimmed]"
+      },
+      {
+        "seq": 4,
+        "type": "tool_use",
+        "at": "2026-09-21T03:44:15.563734399Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cd /home/joe/code/futon2 && git log --oneline -1 561d761e && git show --stat 561d761e | tail -10; echo \"=== receipt\"; gi"
+        ]
+      },
+      {
+        "seq": 5,
+        "type": "tool_use",
+        "at": "2026-09-21T03:44:17.222595374Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash git show 561d761e -- src/futon2/aif/decision_gate.clj"
+        ]
+      },
+      {
+        "seq": 6,
+        "type": "text",
+        "at": "2026-09-21T03:44:22.144966009Z",
+        "text": "The table is a hand-written `case`, not derived. Let me compare it against the handlers it names."
+      },
+      {
+        "seq": 7,
+        "type": "tool_use",
+        "at": "2026-09-21T03:44:23.654708510Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash grep -n 'locator-refusal\\|defn check-\\|defn observe\\b\\|defn- observe\\|case (:class\\|:C[0-9] ' src/futon2/aif/observation"
+        ]
+      },
+      {
+        "seq": 8,
+        "type": "tool_use",
+        "at": "2026-09-21T03:44:36.420131686Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash sed -n '108,160p' src/futon2/aif/observation_checks.clj"
+        ]
+      },
+      {
+        "seq": 9,
+        "type": "tool_use",
+        "at": "2026-09-21T03:44:46.130444813Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash git show 561d761e -- test/futon2/aif/decision_gate_test.clj | sed -n '1,120p'"
+        ]
+      },
+      {
+        "seq": 10,
+        "type": "tool_use",
+        "at": "2026-09-21T03:45:04.933554575Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash D=holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21; echo \"=== receipt hashes vs 561d761e blobs\"; python3 -"
+        ]
+      },
+      {
+        "seq": 11,
+        "type": "tool_use",
+        "at": "2026-09-21T03:45:08.437032810Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash D=holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21; head -c 900 $D/runner-registry-record.json; echo; echo"
+        ]
+      },
+      {
+        "seq": 12,
+        "type": "tool_use",
+        "at": "2026-09-21T03:45:18.387556051Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash D=holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21; for f in src/futon2/aif/decision_gate.clj src/futon2/a"
+        ]
+      },
+      {
+        "seq": 13,
+        "type": "text",
+        "at": "2026-09-21T03:45:19.825539764Z",
+        "text": "Record check is done; the last step is probing what happens if a new observation class appears."
+      },
+      {
+        "seq": 14,
+        "type": "tool_use",
+        "at": "2026-09-21T03:45:28.644450240Z",
+        "tools": [
+          "Bash"
+        ],
+        "previews": [
+          "Bash cat > /tmp/c7-probe.clj <<'EOF' (require '[futon2.aif.decision-gate :as gate] '[futon2.aif.policy :as policy] '[futon2.a"
+        ]
+      },
+      {
+        "seq": 15,
+        "type": "text",
+        "at": "2026-09-21T03:45:56.698089646Z",
+        "text": "Review of futon2 `561d761e` (plus receipt `d0cba29d`). I ran everything below in this job.\n\n## Record check: passes\n\n- **Hashes:** all 12 entries in `precommit-hashes.json` and `postcommit-hashes.json` match the blobs at `561d761e`. That covers the gate, its test, `observation_checks.clj`, `policy.clj`, the runner and the runner test. `observation_checks.clj` did not change, so the gate copies handlers that stayed put.\n- **Gate warrant:** valid. `warrant? true`, 16 tests / 407 assertions / 0 failures / 0 errors.\n- **Runner warrant:** `warrant? false`, reason `:scope-not-committed`, with `{:dirty 3}` from the concurrent lanes. I checked the run against the code it claims to cover: the source hashes in the record match `561d761e` for `decision_gate`, `observation_checks`, `policy` and `full_loop_runner`. So the 180/998/0/0 result is evidence about this change. The registry refused to bind it only because the tree was dirty, not because the result is doubtful. I accept it as the recorded limitation.\n\n## Adequacy\n\n**The table is copied from the handlers, but tests tie it to them.** The `case` in `observation-locator-refusal` is written by hand; nothing derives it from the handlers. Its field lists match the handlers exactly:\n\n| Class | Gate fields | Handler |\n|---|---|---|\n| C3 | `[:repo :sha :path]` | `:44` |\n| C4 | `[:repo :sha :path :decl]` | `:65` |\n| C5 | `[:repo :sha :bundle-path :entry]` | `:87` |\n| C6 | `[:repo :sha :path]` | `:114` |\n\nThe non-blank-string rule matches `locator-refusal` at `:31`. The refusal kinds `:no-locator` and `:no-mechanical-check` are the ones `observe*` uses.\n\nC6's extra requirements at `:124-126` apply to the witness file fetched from git, not to the locator. The gate is right not to copy them, and its docstring says it checks only the locator.\n\nWhat keeps this hand-written table from drifting is `guard-locators-discriminate-by-production-observation-class`. For each class it runs every required field against five bad values (absent, `n \u2026[trimmed]"
+      },
+      {
+        "seq": 16,
+        "type": "done",
+        "at": "2026-09-21T03:45:56.832264571Z",
+        "code": null,
+        "message": null
+      },
+      {
+        "seq": 17,
+        "type": "delivery-recorded",
+        "at": "2026-09-21T03:46:03.917027557Z",
+        "status": "delivered",
+        "surface": "bell",
+        "destination": "caller claude-12 via /api/alpha/invoke/jobs/invoke-1789962246456-22856-f5ab9079",
+        "recorded-at": "2026-09-21T03:46:03.915731460Z",
+        "note": "bell-job-ready"
+      }
+    ],
+    "mode": "work",
+    "delivery": {
+      "status": "delivered",
+      "surface": "bell",
+      "destination": "caller claude-12 via /api/alpha/invoke/jobs/invoke-1789962246456-22856-f5ab9079",
+      "recorded-at": "2026-09-21T03:46:03.915731460Z",
+      "note": "bell-job-ready"
+    },
+    "state": "done",
+    "invocation/model": null,
+    "trace/delivery-observation": {
+      "terminal-job-id": "invoke-1789962246456-22856-f5ab9079",
+      "delivery-status": "delivered",
+      "inbox-file-created?": false,
+      "registered-push-performed?": true,
+      "polling-available?": true
+    },
+    "trace-id": "invoke-e2d75321-6643-4cca-869f-5d04bdbb6b3c",
+    "result-summary": "The table is a hand-written `case`, not derived. Let me compare it against the handlers it names.Record check is done; the last step is probing what happens if a new observation class appears.Review of futon2 `561d761...",
+    "result": "The table is a hand-written `case`, not derived. Let me compare it against the handlers it names.Record check is done; the last step is probing what happens if a new observation class appears.Review of futon2 `561d761e` (plus receipt `d0cba29d`). I ran everything below in this job.\n\n## Record check: passes\n\n- **Hashes:** all 12 entries in `precommit-hashes.json` and `postcommit-hashes.json` match the blobs at `561d761e`. That covers the gate, its test, `observation_checks.clj`, `policy.clj`, the runner and the runner test. `observation_checks.clj` did not change, so the gate copies handlers that stayed put.\n- **Gate warrant:** valid. `warrant? true`, 16 tests / 407 assertions / 0 failures / 0 errors.\n- **Runner warrant:** `warrant? false`, reason `:scope-not-committed`, with `{:dirty 3}` from the concurrent lanes. I checked the run against the code it claims to cover: the source hashes in the record match `561d761e` for `decision_gate`, `observation_checks`, `policy` and `full_loop_runner`. So the 180/998/0/0 result is evidence about this change. The registry refused to bind it only because the tree was dirty, not because the result is doubtful. I accept it as the recorded limitation.\n\n## Adequacy\n\n**The table is copied from the handlers, but tests tie it to them.** The `case` in `observation-locator-refusal` is written by hand; nothing derives it from the handlers. Its field lists match the handlers exactly:\n\n| Class | Gate fields | Handler |\n|---|---|---|\n| C3 | `[:repo :sha :path]` | `:44` |\n| C4 | `[:repo :sha :path :decl]` | `:65` |\n| C5 | `[:repo :sha :bundle-path :entry]` | `:87` |\n| C6 | `[:repo :sha :path]` | `:114` |\n\nThe non-blank-string rule matches `locator-refusal` at `:31`. The refusal kinds `:no-locator` and `:no-mechanical-check` are the ones `observe*` uses.\n\nC6's extra requirements at `:124-126` apply to the witness file fetched from git, not to the locator. The gate is right not to copy them, and its docstring says it checks only the locator.\n\nWhat keeps this hand-written table from drifting is `guard-locators-discriminate-by-production-observation-class`. For each class it runs every required field against five bad values (absent, `nil`, `\"\"`, `\"  \"`, `17`). It calls the **real handler** from `observations/checks` as the oracle and asserts that the gate's `:missing` vector equals the handler's. It also asserts that the valid fixture gets no `:no-locator` from the handler. So if a handler adds or drops a field, that test fails.\n\nI simulated a handler adding a field, with `with-redefs` making C3 require `:decl`. The gate admits the old-shape locator and `observe` refuses it (`:no-locator`). The test above would catch this in CI, because it calls the real handler and not a stub.\n\n**Discrimination by class holds.** Each class has a passing locator and every incomplete variant refusing. The three rejection-text cases are covered:\n- Valid C5 passes.\n- C4 without `:decl` refuses, through the field loop.\n- C5 with only repo/sha/path refuses, with `[:bundle-path :entry]` asserted as the missing fields.\n\nUnselected candidates are validated too (the `guard-locator-validation-covers-unselected\u2026` test). `nil`, a string, `{}` and an unknown `:J` class all refuse with a typed kind.\n\n**A new class added tomorrow gets a typed refusal, not a silent pass.** I built the case. With no handler anywhere, C7 is refused with `:no-mechanical-check`. After adding a C7 handler to `observation-checks/checks`, `observe` accepts C7 (`{:observed true}`) but the gate still refuses it with `:no-mechanical-check`. So the failure is safe: the gate refuses and nothing false gets admitted.\n\n**The pooled-nil refusal from `8f60f819` is intact.** `561d761e` adds two functions and one call after the receipts check, and does not touch the empty-cascade code. Both of its tests are still present: `gate-refuses-a-chosen-empty-cascade` and `gate-excludes-empty-cascades-from-the-marginal`. An empty cascade yields an empty token set, so the new check cannot refuse it.\n\n## One finding (follow-up, not blocking)\n\nWhen a class is added, the gate falling behind is safe but invisible. The test fixture `class-locators` has four fixed entries, and nothing compares it with `(keys observations/checks)`. So adding a C7 handler leaves every test green while the gate refuses every C7 decision that `observe` would accept. Someone finds out only when a real decision gets refused.\n\nA one-line fix would make it show up: `(is (= (set (keys observations/checks)) (set (keys class-locators))))` in the gate test. That fails until both the table and the fixture include the new class. Another option is to take the unknown-class test from `(keys oc/checks)`. I have left it for the owner to board, to keep author and reviewer separate, as in my cascade-realizer review.\n\nFULL_LOOP_REVIEW: APPROVE",
+    "auto-bellback": {
+      "suppressed?": true,
+      "reason": "parked-on",
+      "park-id": "park-a4cc04b9-32ba-4a0e-9c92-e34ae9f1f2e0",
+      "at": "2026-09-21T03:45:56.832246697Z"
+    },
+    "terminal-message": null,
+    "finished-at": "2026-09-21T03:45:56.832246697Z",
+    "created-at": "2026-09-21T03:44:06.456475792Z",
+    "terminal-code": null,
+    "surface": "bell"
+  }
+}

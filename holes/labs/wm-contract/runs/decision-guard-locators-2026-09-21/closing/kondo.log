@@ -1,0 +1,8 @@
+test/futon2/aif/decision_gate_test.clj
+linting took 12ms, errors: 0, warnings: 0
+
+holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/closing/close.clj
+linting took 7ms, errors: 0, warnings: 0
+
+holes/labs/wm-contract/runs/decision-guard-locators-2026-09-21/closing/compute-evidence.clj
+linting took 4ms, errors: 0, warnings: 0
