@@ -102,6 +102,33 @@
       (is (= :missing-construction-receipt
              (refusal-of #(gate/emit! decision)))))))
 
+(deftest interpreted-guard-tokens-must-retain-observation-locators
+  (let [target "M-observed"
+        token [target :premise]
+        pattern {:id :p/observed
+                 :target target
+                 :guard {:status :interpreted :operator :and
+                         :clauses [{:status :interpreted
+                                    :present #{token} :absent #{}}]}
+                 :produces #{[target :result]}}
+        candidate {:kind :cascade-candidate :id :C1 :target target
+                   :precedence [pattern]
+                   :construction-receipt {:moves 1}
+                   :interpretation-receipts
+                   {:p/observed {:reading "Observe the premise."}}}
+        decision (policy/select-action-cascades
+                  [{:action candidate :controller-score 1.0}]
+                  {:beta 1.0})]
+    (is (= :missing-observation-locators
+           (refusal-of #(gate/emit! decision))))
+    (let [located (assoc candidate :observation-locators
+                         {token {:class :C6 :repo "futon2" :sha "HEAD"
+                                 :path "evidence.edn"}})
+          located-decision (policy/select-action-cascades
+                            [{:action located :controller-score 1.0}]
+                            {:beta 1.0})]
+      (is (= located-decision (gate/emit! located-decision))))))
+
 (deftest bare-abstention-with-empty-refusals-is-refused
   (testing "an abstention that lists no refusals throws"
     (is (= :empty-refusals

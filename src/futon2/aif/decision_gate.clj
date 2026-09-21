@@ -93,7 +93,25 @@
                (empty? (:interpretation-receipts candidate)))
       (refuse! :empty-interpretation-receipts
                {:candidate candidate
-                :precedence-count (count (:precedence candidate))}))))
+                :precedence-count (count (:precedence candidate))}))
+    ;; Construction evaluates guards against independently observed tokens.
+    ;; Keep that evidence carrier on the selected candidate: a scored policy
+    ;; whose guard tokens have been stripped cannot later be realized, even
+    ;; though the upstream problem was admitted with checkable locators.
+    (let [guard-tokens
+          (set (mapcat (fn [pattern]
+                         (mapcat (fn [clause]
+                                   (concat (:present clause) (:absent clause)))
+                                 (get-in pattern [:guard :clauses])))
+                       (:precedence candidate)))
+          locators (:observation-locators candidate)
+          missing (seq (sort-by pr-str (remove #(contains? locators %)
+                                                guard-tokens)))]
+      (when missing
+        (refuse! :missing-observation-locators
+                 {:candidate-id (or (:id candidate) (:cascade-id candidate))
+                  :target (:target candidate)
+                  :missing-tokens (vec missing)})))))
 
 (defn- marginal-mass
   "Sum the recorded posterior over candidates whose first acting pattern is
