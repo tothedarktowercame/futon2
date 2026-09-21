@@ -436,6 +436,21 @@
          (when (seq held) (str "; held " (shown (mapv #(select-keys % [:token :reason]) held))))
          ".\n")))
 
+(defn novelty-text [d]
+  (let [receipts (get-in d [:selection-certificate :parameter-novelty])]
+    (str "Expected parameter information gain (record-only, not in G): "
+         (if (seq receipts)
+           (str/join "; "
+             (for [r receipts]
+               (str (get-in r [:id :target]) "/" (shown (get-in r [:id :id])) ": "
+                    (if (= :computed (get-in r [:expected-kl :status]))
+                      (str (get-in r [:expected-kl :nats]) " nats")
+                      (str "unavailable (" (shown (get-in r [:expected-kl :reason])) ")"))
+                    " under " (if (seq (:endpoints r))
+                                (str/join ", " (distinct (map #(shown (get-in % [:prior :kind])) (:endpoints r))))
+                                "no eligible prior"))))
+           "not recorded under an undeclared prior") ".\n")))
+
 (defn- selection-text [b]
   (let [d (decision b) rows (candidate-rows b)
         winner (or (:selected-action (judgment b :selection)) (:action d)
@@ -469,6 +484,7 @@
              "Not recorded in this run: action comparison.\n")
          (coverage-text b)
          (preference-audit-text d)
+         (novelty-text d)
          "\n| Target | Cascade | G (nats) | Posterior | Habit | F consumed |\n|---|---|---:|---:|---:|---:|\n"
          (apply str (for [r rows] (str "| " (str/join " | " (map #(shown (get r %)) [:target :cascade-id :G :posterior :habit :F])) " |\n")))
          (figure-link b :selection)

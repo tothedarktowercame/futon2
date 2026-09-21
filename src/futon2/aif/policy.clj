@@ -18,6 +18,7 @@
    `futon2/docs/futon-aif-completeness.md`."
   (:require [futon2.aif.load-identity :as load-identity]
             [futon2.aif.g-term-decomposition :as decomposition]
+            [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.hierarchical-budget :as hierarchical-budget]
             [futon2.aif.cascade-selection :as cascade-selection]))
 
@@ -204,8 +205,9 @@
    accompanying candidates, outside the finite Lean fields. Attached inputs
    map to QuantityStatus.computed; neutral and computedNotAttached retain
    their distinct constructors. This emits evidence, not a runtime gate."
-  [beta candidates ranked]
-  {:beta {:value beta :status :declared}
+  [beta candidates ranked novelty-inputs]
+  {:parameter-novelty (mapv #(novelty/policy-receipt % novelty-inputs) ranked)
+   :beta {:value beta :status :declared}
    ;; A full candidate map is the join key. Nested labels repeat across
    ;; targets. Copy the actual scorer evaluations, never replay the model.
    :node-evaluation-traces
@@ -298,7 +300,7 @@
 
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
-  [ranked-actions {:keys [beta beta-state cascade-habit-path near-tie-threshold]}]
+  [ranked-actions {:keys [beta beta-state cascade-habit-path near-tie-threshold novelty-inputs]}]
   ;; Runtime resolution breaks the existing prior -> policy shadow dependency.
   ;; This is the mandatory live seam, not an optional caller-side attachment.
   (let [attach (requiring-resolve 'futon2.aif.cascade-habit-store/attach-habits)
@@ -381,7 +383,7 @@
      :actuation-status :pending-downstream-gates
      :actuation-authorized? false
      :beta {:value beta :status beta-status}
-     :selection-certificate (cond-> (assoc-in (selection-certificate beta candidates ranked-actions)
+     :selection-certificate (cond-> (assoc-in (selection-certificate beta candidates ranked-actions novelty-inputs)
                                                 [:beta :status] beta-status)
                               beta-state (assoc :policy-precision-state beta-state))
      :selection-law

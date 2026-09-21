@@ -1,0 +1,6 @@
+{:repo-root "/home/joe/code/futon2-narrative-improve-5a"
+ :code-paths ["src/futon2/aif/parameter_novelty.clj" "src/futon2/aif/policy.clj" "src/futon2/aif/run_narrative.clj" "src/futon2/aif/load_identity.clj" "scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/aif/parameter_novelty_test.clj" "test/futon2/report/novelty_discovery_test.clj" "resources/wm/attempt-learning-contract.edn" "resources/wm/learning-trial-prior.edn" "holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-5-evidence/1789964661.edn.gz" "holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-5-evidence/1789952479.edn.gz"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.parameter-novelty-test"]
+ :author "codex-13" :origin "claude-3/narrative-improve-5a"
+ :artifact-dir "/home/joe/code/futon2-narrative-improve-5a/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-5a-evidence/registered" :agency-url "http://localhost:7070"}
