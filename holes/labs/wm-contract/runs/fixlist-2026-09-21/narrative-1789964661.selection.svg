@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg aria-label="Candidate selection: relative G and posterior mass" fill="#25313c" font-family="sans-serif" font-size="13" height="407" role="img" viewBox="0 0 800 407" width="800" xmlns="http://www.w3.org/2000/svg"><title>Candidate selection: relative G and posterior mass</title>
+<rect fill="white" height="100%" width="100%"></rect>
+<text font-size="18" x="24" y="28">Candidate selection</text>
+<text x="24" y="52">Chosen row in blue; dashed line = uniform 1/N; dark tick = habit E.</text>
+<text x="342" y="76">ΔG = G − min G (nats)</text>
+<text x="342" y="94">min G = 15.170069253169533</text>
+<text x="580" y="76">Posterior mass [0, 1]</text>
+<line stroke="#9ca3af" x1="342" x2="342" y1="102" y2="302"></line>
+<line stroke="#9ca3af" x1="580" x2="580" y1="102" y2="302"></line>
+<line stroke="#e5e7eb" x1="770" x2="770" y1="102" y2="302"></line>
+<line class="uniform" data-value="0.3333333333333333" stroke="#9ca3af" stroke-dasharray="4 4" x1="643.3333333333333" x2="643.3333333333333" y1="102" y2="302"></line>
+<g class="candidate chosen" data-cascade=":C1" data-target="M-aif-policy-conditioned-eig"><title>M-aif-policy-conditioned-eig :C1</title>
+<text fill="#176b82" x="24" y="124">M-aif-policy-conditioned-eig</text>
+<text fill="#176b82" x="24" y="142">:C1 · chosen</text>
+<rect class="delta-g" data-value="0.0" fill="#176b82" height="13" width="0.0" x="342" y="112"></rect>
+<text x="342" y="144">0.00000</text>
+<rect class="posterior" data-value="0.3336188600826242" fill="#176b82" height="13" width="63.3875834156986" x="580" y="112"></rect>
+<text x="580" y="144">0.333619</text>
+<line class="habit" data-value="0.3333333333333333" stroke="#111827" stroke-width="2" x1="643.3333333333334" x2="643.3333333333334" y1="110" y2="128"></line>
+</g>
+<g class="candidate" data-cascade=":C1" data-target="M-f11-find-production-successor"><title>M-f11-find-production-successor :C1</title>
+<text fill="#89939e" x="24" y="188">M-f11-find-production-successor</text>
+<text fill="#89939e" x="24" y="206">:C1</text>
+<rect class="delta-g" data-value="0.0012632095216922323" fill="#89939e" height="13" width="183.7772925765806" x="342" y="176"></rect>
+<text x="342" y="208">0.00126321</text>
+<rect class="posterior" data-value="0.333197695627431" fill="#89939e" height="13" width="63.30756216921189" x="580" y="176"></rect>
+<text x="580" y="208">0.333198</text>
+<line class="habit" data-value="0.3333333333333333" stroke="#111827" stroke-width="2" x1="643.3333333333334" x2="643.3333333333334" y1="174" y2="192"></line>
+</g>
+<g class="candidate" data-cascade=":C1" data-target="M-wm-08-external-f2"><title>M-wm-08-external-f2 :C1</title>
+<text fill="#89939e" x="24" y="252">M-wm-08-external-f2</text>
+<text fill="#89939e" x="24" y="270">:C1</text>
+<rect class="delta-g" data-value="0.0013059818531253597" fill="#89939e" height="13" width="190.0" x="342" y="240"></rect>
+<text x="342" y="272">0.00130598</text>
+<rect class="posterior" data-value="0.3331834442899445" fill="#89939e" height="13" width="63.30485441508946" x="580" y="240"></rect>
+<text x="580" y="272">0.333183</text>
+<line class="habit" data-value="0.3333333333333333" stroke="#111827" stroke-width="2" x1="643.3333333333334" x2="643.3333333333334" y1="238" y2="256"></line>
+</g>
+<text x="342" y="320">0</text>
+<text text-anchor="end" x="532" y="320">0.00130598</text>
+<text x="580" y="320">0</text>
+<text text-anchor="end" x="770" y="320">1</text>
+<text x="24" y="346">decided by: not recorded in this run</text>
+<text fill="#68717b" x="24" y="370">Refused candidates: none recorded.</text>
+</svg>
