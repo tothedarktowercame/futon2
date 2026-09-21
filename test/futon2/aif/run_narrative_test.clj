@@ -478,3 +478,9 @@
     (is (str/includes? text "admitted-at-attempt-grain"))
     (is (str/includes? text "record-only illustrative delivery mean 9/11"))
     (is (not (str/includes? text "pattern causality")))))
+
+(deftest closed-surprise-ids-are-visible
+  (is (str/includes?
+       (narrative/narrative-text {:run-id "trial" :checkpoints
+                                 {:closed {:judgment {:surprise-ids ["surprise-123"]}}}})
+       "Surprises: surprise-123.")))

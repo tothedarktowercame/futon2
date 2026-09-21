@@ -5851,8 +5851,19 @@
         closed (get-in (cohort/read-edn (io/file root "test-cohort-exhaustion"
                                                  (:attempt-id result) "007-closed.edn"))
                        [:payload :judgment])
-        receipt (:learning-trial-receipt closed)]
+        receipt (:learning-trial-receipt closed)
+        surprise-path (io/file root "test-cohort-exhaustion" (:attempt-id result) "retained" "surprises.edn")
+        surprises (cohort/read-edn surprise-path)]
     (is (= :grounded-change (:outcome result)))
+    ;; This grounded fixture uses feature123, not a resolvable Git artifact.
+    ;; Missing measurements remain non-surprises; the real artifact helper
+    ;; below separately pins the one-surprise retention/manifest case.
+    (is (= [] surprises))
+    (is (= (mapv :surprise/id surprises) (:surprise-ids closed)))
+    (is (every? #(= :observation-missing (:verdict %))
+                (get-in closed [:token-outcome-comparison :tokens])))
+    (is (some #(= (.getAbsolutePath surprise-path) (:source-path %))
+              (:entries (:close-evidence-manifest result))))
     (is (= :wm/learning-trial-receipt-v2 (:schema receipt)))
     (is (seq (:trials receipt)))
     (is (every? #(and (= :held (:status %)) (false? (:counted? %))) (:trials receipt)))
@@ -5935,3 +5946,34 @@
     (is (= (get-in d [:selection-certificate :parameter-novelty])
            (get-in selection [:selection-certificate :parameter-novelty])))
     (is (= (pr-str (:selection-law d)) (pr-str (:selection-law selection))))))
+
+(deftest surprise-retention-enters-the-real-close-manifest
+  (kernel-fixture/with-example
+   (fn [{:keys [context expected jobs]}]
+     (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                         "surprise-retention" (make-array java.nio.file.attribute.FileAttribute 0)))
+           source (io/file root "d-task.edn")
+           record (:record context)
+           declared-at (str (.minusSeconds (java.time.Instant/parse (:observed-at record)) 1))]
+       (try
+         (spit source (pr-str record))
+         (let [retained (#'runner/retain-token-outcome!
+                         (.getPath root) :cohort "attempt" (:prediction context)
+                         {:source {:path (.getPath source) :sha256 (digest/sha256 (slurp source))}}
+                         (:artifact-sha context)
+                         {:occurrence (:occurrence context) :selection-recorded-at declared-at
+                          :route (:route record) :expected expected :read-job jobs
+                          :ledger-root (.getPath (io/file root "ledger"))})
+               manifest (#'runner/checkpoint-evidence-manifest
+                         {} root :cohort "attempt" token-fixture/target
+                         {:surprise-entry (:surprise-entry retained)})
+               entry (first (:entries manifest))
+               rows (edn/read-string (slurp (:source-path entry)))]
+           (is (= 1 (count rows)))
+           (is (= rows (:surprises retained)))
+           (is (= :B-effect (:model-part (first rows))))
+           (is (= declared-at (get-in rows [0 :expectation :declared-at])))
+           (is (= (:observed-at record) (get-in rows [0 :observation :observed-at])))
+           (is (= "cohort/attempt/retained/surprises.edn" (:evidence/id entry)))
+           (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry))))))
+         (finally (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))))

@@ -305,3 +305,18 @@ examples, improve-4 route/attestation receipts, improve-6 surprise records,
 fix-10a comparisons; output: a versioned, attested class for each closed
 attempt, typed unknown when evidence is missing). improve-2 slice 4 and
 improve-7 slice 2 consume it; neither builds its own.
+
+### improve-6a — citing a surprise in a later revision
+
+Close-time token surprises use the selection-frozen `:positive-marginal-support`
+expectation. Repair findings and refusals without that expectation remain incidents.
+A later revision commit cites each surprise it addresses with a trailer:
+
+```text
+Surprise: <id>
+```
+
+Keep revision kind (structural, parameter, data, operational repair), named model
+part, old/new digests, and loaded/consumed successor evidence distinct (D1–D4 in
+`NOTE-learning-capability-definitions-2026-09-21.md`). This slice records
+`:revision {:status :none-yet}`; it does not scan trailers or infer learning.
