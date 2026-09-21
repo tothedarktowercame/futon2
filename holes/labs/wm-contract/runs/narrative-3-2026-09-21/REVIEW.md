@@ -118,3 +118,27 @@ Kondo: 0 errors/warnings (one pre-existing informational str notice). Parens:
 OK. Fresh namespace outputs and red evidence are beside this note. Registry
 configs cover the two directly executable namespaces; integration is not claimed
 as warranted.
+
+## Registered warrants
+
+Both records return `:warrant? true` for code commit
+`6ad2cf2522d0b66dea38753f38ec8107e59c52b0`:
+
+- Retention: `test-registry-e22ee943ae7f193eda0618bd2e99c90168342c87bd80309b83b61d836bd63279`,
+  run `836b1a41-922c-491f-bca5-d17109a89c78`: 10 tests / 98 assertions,
+  exit 0, 0 failures/errors.
+- Dispatch: `test-registry-6418b4c28970c25c2cdb0aa620adbe392dc82c43a519443df3ed7a0b7c88a8aa`,
+  run `e510cd3f-48a6-43be-ab5e-8c476a80a6a7`: 1 test / 3 assertions,
+  exit 0, 0 failures/errors.
+
+Full returned records are `registration-retention.edn` and
+`registration-dispatch.edn`. Logs and loaded-source closures are under
+`registered-retention/` and `registered-dispatch/`.
+
+Registration commands, one namespace at a time, from `/home/joe/code/futon3c`
+in separate CLI processes:
+
+```
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-3/holes/labs/wm-contract/runs/narrative-3-2026-09-21/registry-retention.edn
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-3/holes/labs/wm-contract/runs/narrative-3-2026-09-21/registry-dispatch.edn
+```
