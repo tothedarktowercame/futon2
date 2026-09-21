@@ -138,3 +138,53 @@ family whose members are step-indexed); only the first exists. Consistent with
 the Q2 answer ("I've declared it to be a priority", time-scoped). The Agency
 example reads as a MAY valence (Q1 follow-up): off-focus work permitted where
 the focus's own work requires it, otherwise dispreferred. Filed as improve-7.
+
+## Q3 — strength, asked per focus
+
+Joe, verbatim:
+
+> So, it doesn't even need to be the declared focus. It just needs to be, let's
+> say, the discovered focus. And, you know, the discovered focus is in the
+> embedding landscape as a graph of where work has happened, for example. And
+> there could be any other way to discover the focus. War Machine itself might
+> have a focus, but, you know, I don't prefer, I dis-prefer random things.
+> Teleports across this landscape. If there's a warrant, if there's a reason
+> why we need to move between one task and another, like, we found some
+> interesting connection, I'm not saying we should discard that. But if we're
+> just randomly selecting missions, I dis-prefer that, right? And this is what
+> AIF is telling us. It's telling us that we should pick the things that we
+> have a high degree of certainty about. And I would say that if I've been
+> working on something for months and I haven't declared it finished, I'd have
+> a high preference to continue focusing on that until such time as it is
+> finished, unless I find some other ... adjacent [topic] ... that's required to
+> get it finished. You could see this in the relationship of missions to
+> excursions, for example. I might prefer to finish the mission, but then I
+> find an interesting excursion that's either relevant to finishing the mission
+> or relevant to some other thread that I had going back in the background. If
+> I had to put a number I'd put 60% on the current focus and 40% on these
+> adjacent topics. And 0% on irrelevant topics. Now, that doesn't mean that I
+> might not be working on multiple things in parallel. That's another thing. I
+> might be working, for example, on setting up a war machine and setting up an
+> APM problem-solving machine. But if you think about it, those are related.
+> Those are semantically related, so I would see them as facets of one overall
+> thought process, not as two distinct multitracked episodes, even though it
+> might sometimes feel that way. So again, this is where the Salingaros
+> measures would be appropriate to understanding how my focus is divided
+> across Emacs, windows, agent sessions, missions.
+
+claude-3's reading (for Joe to correct):
+1. Focus is DISCOVERED, not only declared: e.g. from the embedding landscape as
+   a graph of where work has happened (Embedding Live); other discovery methods
+   allowed. Long-running unfinished work keeps focus until finished.
+2. Preference mass over topics relative to the focus: 60% current focus, 40%
+   adjacent (required to finish the focus, or relevant to a background thread;
+   mission→excursion is the pattern), 0% irrelevant.
+3. A move between tasks is fine when warranted (a found connection, a
+   requirement); an unwarranted jump ("teleport") is dispreferred.
+4. Parallel threads that are semantically related (WM and APM) are facets of
+   one focus, not separate episodes; Salingaros measures describe how focus is
+   divided across Emacs windows, agent sessions and missions.
+5. This answers improve-2 Q3 as a distribution rather than odds, and gives
+   improve-7 its content (focus-conditioned C). Open: whether "0%" is a ruled
+   zero (infinite risk; in IAD terms MAY NOT) or a very small mass, and where
+   the outcome "nothing delivered" sits relative to 60/40.
