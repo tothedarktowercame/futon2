@@ -111,3 +111,17 @@ clj-kondo --lint src/futon2/aif/mission_hole_wants.clj src/futon2/aif/live_c.clj
 emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults src/futon2/aif/mission_hole_wants.clj src/futon2/aif/live_c.clj scripts/futon2/report/war_machine.clj src/futon2/aif/trace.clj src/futon2/aif/full_loop_runner.clj test/futon2/report/coverage_account_test.clj
 git diff --check
 ```
+
+## Registered warrant
+
+Registry returned `:warrant? true`:
+`test-registry-1f931fac4f13f5550a0735161e13bb3a895ccdb28950e322fd17eb4b33ccdfa7`.
+Run `da243b22-56f5-4749-b9f7-c25d3ba43740`, code commit
+`05fd7c967edb8030c45e3b606cc284f07e3000c7`: 5 tests / 41 assertions,
+exit 0, 0 failures/errors. Full record: `registration.edn`; log and loaded-source
+closure under `registered/`. Command from `/home/joe/code/futon3c` in a separate
+CLI process:
+
+```
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-13/holes/labs/wm-contract/runs/narrative-13-2026-09-21/registry.edn
+```
