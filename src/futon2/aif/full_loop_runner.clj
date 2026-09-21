@@ -27,6 +27,7 @@
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.learning-trial :as learning-trial]
             [futon2.aif.route-attestation :as route-attestation]
+            [futon2.aif.kernel-example :as kernel-example]
             [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.fold-cascade :as fold-cascade]
@@ -2868,6 +2869,27 @@
              :expected-sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))
              :admitted-at (str (Instant/now))}}))
 
+(defn- retain-kernel-example!
+  [data-root cohort-id attempt-id inputs d-result expected read-job]
+  (let [source (:source d-result)
+        record (when-let [path (:path source)]
+                 (let [bytes (Files/readAllBytes (.toPath (io/file path)))]
+                   (when-not (= (:sha256 source) (sha256-bytes bytes))
+                     (throw (ex-info "D-task evidence changed before alignment"
+                                     {:kernel-example/refusal :evidence-digest-mismatch})))
+                   (edn/read-string (String. bytes "UTF-8"))))
+        receipt (kernel-example/collect
+                 (assoc inputs :record record :source source :domain (kernel-example/declaration))
+                 expected read-job)
+        file (io/file data-root (name cohort-id) attempt-id "retained" "kernel-example.edn")]
+    (io/make-parents file)
+    (spit file (pr-str receipt))
+    {:receipt receipt
+     :entry {:evidence/id (str (name cohort-id) "/" attempt-id "/retained/kernel-example.edn")
+             :source-path (.getAbsolutePath file)
+             :expected-sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))
+             :admitted-at (str (Instant/now))}}))
+
 (defn- checkpoint-evidence-manifest
   [events data-root cohort-id attempt-id selected-target & [interpretation-context]]
   (let [cohort-name (name cohort-id)
@@ -2971,7 +2993,9 @@
                   (:token-outcome-entry interpretation-context)
                   (conj (:token-outcome-entry interpretation-context))
                   (:route-attestation-entry interpretation-context)
-                  (conj (:route-attestation-entry interpretation-context)))]
+                  (conj (:route-attestation-entry interpretation-context))
+                  (:kernel-example-entry interpretation-context)
+                  (conj (:kernel-example-entry interpretation-context)))]
     (evidence-manifest/build-manifest
      {:entries entries
       :read-bytes (fn [path]
@@ -3586,6 +3610,14 @@
                           :events @checkpoint-events
                           :target (:target selected-action)
                           :token-comparison (:receipt token-comparison)}))
+                       kernel-example-result
+                       (when (and cohort? @action-occurrence)
+                         (retain-kernel-example!
+                          (or (:data-root execution-cohort) cohort/default-data-root)
+                          (:cohort/id start-event) attempt-id
+                          {:prediction (get-in @checkpoints [:selection :judgment :token-outcome-prediction])
+                           :occurrence @action-occurrence :artifact-sha (:commit data) :outcome outcome}
+                          d-task-result @d-task-context #(read-job! opts %)))
                        manifest (when (and cohort? @action-occurrence)
                                   (checkpoint-evidence-manifest
                                    @checkpoint-events
@@ -3598,7 +3630,8 @@
                                    {:occurrence @action-occurrence
                                     :semantic-epoch semantic-epoch
                                     :token-outcome-entry (:entry token-comparison)
-                                    :route-attestation-entry (:entry route-account)}))
+                                    :route-attestation-entry (:entry route-account)
+                                    :kernel-example-entry (:entry kernel-example-result)}))
                        admitted-ids (mapv :evidence/id (:entries manifest))
                        closed (cond->
                                (term (merge {:outcome outcome
@@ -3610,6 +3643,7 @@
                                             :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                             :route-attestation (:receipt route-account)
                                             :route-attestation-ref (:reference route-account)
+                                            :kernel-example (:receipt kernel-example-result)
                                             :morning-brief-ref brief-ref
                                             :delivery-qa-ref delivery-qa-ref
                                             :job-texts @job-text-records
@@ -3645,6 +3679,7 @@
                                             :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                :route-attestation (:receipt route-account)
                                :route-attestation-ref (:reference route-account)
+                               :kernel-example (:receipt kernel-example-result)
                                :morning-brief-ref brief-ref
                                :delivery-qa-ref delivery-qa-ref
                                :wm/route run-route
