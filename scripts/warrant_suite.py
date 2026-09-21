@@ -18,7 +18,8 @@ Usage:
   scripts/warrant_suite.py -j 3 NS...   # limit to named namespaces
 
 Index: data/test-warrants/index.json  {ns: {"entry-id", "git-head", ...}}.
-Registry commands run from futon3c in their own JVMs (never the serving JVM).
+Checks go to the serving JVM's /api/alpha/test-registry/check; runs go to
+futon3c's registry CLI in their own JVMs.
 """
 import argparse
 import json
@@ -27,6 +28,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import urllib.request
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -35,6 +37,7 @@ REPO = Path("/home/joe/code/futon2")
 FUTON3C = Path("/home/joe/code/futon3c")
 INDEX = REPO / "data/test-warrants/index.json"
 ARTIFACTS = Path("/home/joe/code/storage/test-registry/futon2-suite")
+AGENCY = os.environ.get("AGENCY_URL", "http://localhost:7070")
 AUTHOR = os.environ.get("WARRANT_AUTHOR", "claude-3")
 
 
@@ -85,10 +88,20 @@ def git(*args):
 
 
 def check(entry):
+    # Ask the serving JVM (sub-second); a cold `clojure ... check` costs ~30 s
+    # (futon2 CLAUDE.md, Joe's ruling 2026-09-19).
     changed = [p for p in git("diff", "--name-only", entry["git-head"]).splitlines() if p]
-    spec = ("{:entry-id %s :repo-root %s :changed-paths %s :output :json}"
-            % (edn_str(entry["entry-id"]), edn_str(str(REPO)), edn_vec(changed)))
-    return registry("check", spec)
+    body = json.dumps({"entry-id": entry["entry-id"], "repo-root": str(REPO),
+                       "changed-paths": changed}).encode()
+    req = urllib.request.Request(AGENCY + "/api/alpha/test-registry/check", data=body,
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            out = json.loads(r.read())
+    except Exception as e:  # unreachable Agency: treat as not checked
+        return {"warrant?": False, "reason": "check-unavailable: %s" % e}
+    c = out.get("check", out)
+    return {"warrant?": c.get("warrant?"), "reason": c.get("reason")}
 
 
 def run(ns, test_path):
