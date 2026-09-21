@@ -544,8 +544,11 @@
                             (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
                      (:execution-cohort raw-opts)
                      (assoc :execution-cohort
-                            (select-keys (:execution-cohort raw-opts)
-                                         [:cohort-id :sha256]))
+                            (merge (select-keys (:execution-cohort raw-opts)
+                                                [:cohort-id :sha256])
+                                   (cohort/lineage-history (:execution-cohort raw-opts))))
+                     (= :history-identity-unavailable (get-in result [:data :failure-kind]))
+                     (assoc :history-admission-refusal (get-in result [:data :error-data]))
                      (:execution-identity result)
                      (assoc :runner-execution/identity
                             (:execution-identity result)
@@ -3173,6 +3176,8 @@
                                                            :repair-reviewer :trigger
                                                            :semantic-epoch])))
                          :semantic-epoch semantic-epoch}
+                          (seq (:history-exclusions (cohort/lineage-history execution-cohort)))
+                          (assoc :history-exclusions (:history-exclusions (cohort/lineage-history execution-cohort)))
                           execution-authority
                           (assoc :execution-authority execution-authority))
                         {:kind :trigger-opportunity :id opportunity-id})

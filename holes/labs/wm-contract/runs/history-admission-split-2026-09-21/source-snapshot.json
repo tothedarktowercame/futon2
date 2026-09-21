@@ -1,0 +1,13 @@
+{
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "authorization": "invoke-1789962543149-22860-0c2a2ba9",
+  "base-head": "7c872c55bab08d41e573675c96357b8160943a1e",
+  "sha256": {
+    "src/futon2/aif/full_loop_cohort.clj": "4b92aab146584c81dd878a450b8e081aef9d7b3b1976d0f3d2b6aa234e07b80e",
+    "src/futon2/aif/full_loop_runner.clj": "14891f707d86b70e6a122403aa8a7707e8a46cc9944018f4e01db051bacf2ce9",
+    "test/futon2/aif/full_loop_cohort_test.clj": "34914c454b6c7104b55f9d882fbcbc84efc584775f5c52a930ba0bf3288f6572",
+    "test/futon2/aif/history_admission_test.clj": "2e9a17fcd13fbd8502ef781cfc5869febd8132615ccbcb10d7da1206648b5862"
+  },
+  "quarantine-sha256": "9085b8ce5048b4c9a6d66e7d15f7e9c8d291cb91736ce546f7e881df76b80a2d"
+}

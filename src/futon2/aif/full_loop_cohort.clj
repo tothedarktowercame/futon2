@@ -310,14 +310,65 @@
        (sort-by #(.getName %))
        vec))
 
-(defn attempt-events [attempt-dir]
+(defn- attempt-files [attempt-dir]
   (->> (or (.listFiles (io/file attempt-dir)) [])
        (filter #(re-matches #"\d{3}-[a-z-]+\.edn" (.getName %)))
-       (sort-by #(.getName %))
-       (mapv #(read-edn (.getPath %)))))
+       (sort-by #(.getName %))))
+
+(defn attempt-events [attempt-dir]
+  ;; Mutation checks remain strict: never append to a partially read attempt.
+  (mapv #(read-edn (.getPath %)) (attempt-files attempt-dir)))
+
+(defn attempt-history
+  "Read historical checkpoints independently, retaining typed exclusions.
+  The target of an unreadable record cannot be recovered from its bytes;
+  the attempt directory identifies the excluded evidence, without guessing
+  a mission. This reader is not used to authorize checkpoint appends."
+  [attempt-dir]
+  (reduce (fn [result file]
+            (let [read-result
+                  (try {:event (read-edn file)}
+                       (catch Exception e
+                         {:exclusion
+                          {:history/status (if (= "001-time-step.edn" (.getName file))
+                                             :admission-refused :excluded)
+                           :history/refusal :history-discovery-invalid
+                           :target (.getName (io/file attempt-dir))
+                           :target-kind :attempt
+                           :path (.getAbsolutePath file)
+                           :reason :unreadable-or-malformed-record
+                           :error-class (.getName (class e))
+                           :error-message (.getMessage e)}}))]
+              (if-let [exclusion (:exclusion read-result)]
+                (update result :exclusions conj exclusion)
+                (update result :events conj (:event read-result)))))
+          {:events [] :exclusions []} (attempt-files attempt-dir)))
+
+(defn- identity-refusal [attempt-dir]
+  (let [file (io/file attempt-dir "001-time-step.edn")]
+    (try
+      (let [event (read-edn file)]
+        (when-not (and (= :time-step (:checkpoint/type event))
+                       (string? (get-in event [:payload :judgment :opportunity-id]))
+                       (not (str/blank? (get-in event [:payload :judgment :opportunity-id]))))
+          (throw (ex-info "Missing scheduler opportunity identity" {})))
+        nil)
+      (catch Exception e
+        {:failure-kind :history-identity-unavailable
+         :history/status :admission-refused
+         :reason :cannot-prove-not-duplicate
+         :target (.getName (io/file attempt-dir))
+         :target-kind :attempt
+         :path (.getAbsolutePath file)
+         :error-class (.getName (class e))
+         :error-message (.getMessage e)}))))
+
+(defn- refuse-unknown-identities! [dir]
+  (when-let [refusal (some identity-refusal (attempt-dirs dir))]
+    (throw (ex-info "Cannot admit opportunity without historical identity" refusal))))
 
 (defn- attempt-outcome [attempt-dir]
-  (->> (attempt-events attempt-dir)
+  (->> (:events (attempt-history attempt-dir))
        (filter #(= :closed (:checkpoint/type %)))
        last
        :payload
@@ -329,7 +380,7 @@
   [attempt-dir]
   (boolean (some #(and (= :time-step (:checkpoint/type %))
                        (true? (:cohort/beyond-window? %)))
-                 (attempt-events attempt-dir))))
+                 (:events (attempt-history attempt-dir)))))
 
 (defn- cohort-attempt-dir? [attempt-dir]
   ;; Two kinds of attempt keep their immutable dossier without consuming the
@@ -350,7 +401,7 @@
        (not (beyond-window-attempt? attempt-dir))))
 
 (defn- all-events [dir]
-  (mapcat attempt-events (attempt-dirs dir)))
+  (mapcat #(-> % attempt-history :events) (attempt-dirs dir)))
 
 (defn- opened-opportunity-ids [dir]
   (->> (all-events dir)
@@ -488,6 +539,7 @@
        (fn []
          (when-not (.exists (activation-path dir))
            (throw (ex-info "cohort is not activated" {:cohort (:cohort/id p)})))
+         (refuse-unknown-identities! dir)
          (when (contains? (opened-opportunity-ids dir) opportunity-id)
            (throw (ex-info "duplicate scheduler opportunity"
                            {:opportunity-id opportunity-id})))
@@ -505,6 +557,12 @@
                            (max (next-global-attempt-number data-root)
                                 (inc (count all-attempt-dirs))))
                attempt-dir (io/file dir attempt-id)
+               exclusions (vec (mapcat #(-> % attempt-history :exclusions)
+                                       all-attempt-dirs))
+               cell (if (seq exclusions)
+                      (update-in cell [:judgment :history-exclusions]
+                                 #(vec (distinct (concat % exclusions))))
+                      cell)
                event (cond-> (event-record p attempt-id ordinal 1 :time-step cell)
                        beyond-window?
                        (assoc :cohort/beyond-window? true
@@ -597,7 +655,7 @@
      (append-checkpoint! prereg-path data-root attempt-id :closed cell))))
 
 (defn attempt-summary [attempt-dir]
-  (let [events (attempt-events attempt-dir)
+  (let [{:keys [events exclusions]} (attempt-history attempt-dir)
         close (last (filter #(= :closed (:checkpoint/type %)) events))
         selection (last (filter #(= :selection (:checkpoint/type %)) events))
         build (last (filter #(= :build (:checkpoint/type %)) events))
@@ -618,7 +676,8 @@
                                     (:commit artifact-binding)))
                      (:commit artifact-binding))
      :typed-sorries (count (filter #(typed-sorry? (:payload %)) events))
-     :checkpoints (mapv :checkpoint/type events)}))
+     :checkpoints (mapv :checkpoint/type events)
+     :history-exclusions exclusions}))
 
 (defn ledger
   ([] (ledger default-preregistration default-data-root))
@@ -654,6 +713,7 @@
       :attempts attempts
       :recorded-attempt-count (count recorded-attempts)
       :recorded-attempts recorded-attempts
+      :history-exclusions (vec (mapcat :history-exclusions recorded-attempts))
       :semantic-strata
       [{:stratum/id :post-preregistration/cancelled
         :reason :outcome-not-in-preregistered-cohort-taxonomy
@@ -848,6 +908,13 @@
        (= (apply dissoc parent lineage-identity-keys)
           (apply dissoc succ lineage-identity-keys))))
 
+(defn lineage-history
+  "Discovery diagnostics carried alongside the four-field authority binding.
+  These metadata are copied explicitly into run records; they never alter
+  the pinned charter identity or authorize admission. Admission re-reads it."
+  [binding]
+  (::lineage-history (meta binding)))
+
 (defn resolve-lineage!
   "Return the binding for the cohort that should take the next attempt.
 
@@ -869,9 +936,18 @@
       (throw (ex-info "Cohort lineage exceeds its bound"
                       {:reason :cohort-lineage-runaway :from (:cohort-id binding)})))
     (let [raw (slurp (:preregistration b))
-          parent (edn/read-string raw)]
-      (if (pos? (:remaining (ledger (:preregistration b) (:data-root b))))
-        b
+          parent (edn/read-string raw)
+          refusal (some identity-refusal (attempt-dirs (cohort-dir parent (:data-root b))))
+          state (when-not refusal (ledger (:preregistration b) (:data-root b)))
+          exclusions (vec (distinct (concat (:history-exclusions (lineage-history b))
+                                            (:history-exclusions state))))
+          b (with-meta b (assoc (meta b) ::lineage-history
+                               {:history-exclusions exclusions}))]
+      (cond
+        refusal (vary-meta b update ::lineage-history
+                           assoc :history-admission-refusal refusal)
+        (pos? (:remaining state)) b
+        :else
         (let [succ-path (sibling-path (:preregistration b))]
           (if (.exists (io/file succ-path))
             (let [sraw (slurp succ-path)
@@ -882,12 +958,13 @@
                                  :parent (:cohort/id parent)
                                  :claimed (:cohort/id succ)
                                  :path succ-path})))
-              (recur {:preregistration succ-path
-                      :data-root (sibling-path (:data-root b))
-                      :cohort-id (:cohort/id succ)
-                      :sha256 (sha256 sraw)}
+              (recur (with-meta {:preregistration succ-path
+                                 :data-root (sibling-path (:data-root b))
+                                 :cohort-id (:cohort/id succ)
+                                 :sha256 (sha256 sraw)} (meta b))
                      (inc n)))
-            (recur (succeed! (:preregistration b) (:data-root b)) (inc n))))))))
+            (recur (with-meta (succeed! (:preregistration b) (:data-root b))
+                     (meta b)) (inc n))))))))
 
 (defn execution-preflight
   "Read-only pinned cohort identity, activation and capacity validation.
@@ -895,6 +972,7 @@
   ([binding] (execution-preflight binding true))
   ([binding require-capacity?]
    (let [snapshot (pin-preregistration binding)
+         _ (refuse-unknown-identities! (cohort-dir (:value snapshot) (:data-root binding)))
          state (ledger snapshot (:data-root binding))
          activation (:activation state)]
      (when-not (and (= (:cohort-id binding) (:cohort/id activation))
