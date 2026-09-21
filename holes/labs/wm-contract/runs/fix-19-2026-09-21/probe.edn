@@ -1,0 +1,860 @@
+{:schema :wm/loaded-code-probe-v1,
+ :since "4354668b6f8327d26d449c013bd273297ab8e7db",
+ :namespaces
+ [{:namespace futon2.aif.cascade-selection,
+   :path "src/futon2/aif/cascade_selection.clj",
+   :disk-sha256
+   "c04c539336bd6e9e38f6923d6fc658a56dbb0d438fa5045f9e26c0f8c83c9d71",
+   :loaded? true,
+   :loaded-current? :unknown,
+   :reason :no-load-time-source-identity}
+  {:namespace futon2.aif.cascade-model-manifest,
+   :path "src/futon2/aif/cascade_model_manifest.clj",
+   :disk-sha256
+   "25964adb705d8206a5ab7d163a262920a2a286c0bd3d9ebcd5818888e8f067d2",
+   :loaded? true,
+   :loaded-current? :unknown,
+   :reason :no-load-time-source-identity}
+  {:namespace futon2.aif.policy,
+   :path "src/futon2/aif/policy.clj",
+   :disk-sha256
+   "0f4998512d80b86ef2083ef12c599485ea61003a35702d0c2674bf061b505329",
+   :loaded? true,
+   :loaded-current? :unknown,
+   :reason :no-load-time-source-identity}
+  {:namespace futon2.aif.live-c,
+   :path "src/futon2/aif/live_c.clj",
+   :disk-sha256
+   "c469478233fc99ccd67b47c8e7564ccdc2915508e13ed05f62e02c4fa1257f01",
+   :loaded? true,
+   :loaded-current? :unknown,
+   :reason :no-load-time-source-identity}
+  {:namespace futon2.aif.d-predecessor-task-authority,
+   :path "src/futon2/aif/d_predecessor_task_authority.clj",
+   :disk-sha256
+   "9a4637b5fea66a4a1dde383f817031ff0d44d5198a21a2a8e0b09706600e8c9a",
+   :loaded? true,
+   :loaded-current? :unknown,
+   :reason :no-load-time-source-identity}
+  {:namespace futon2.aif.cascade-habit-store,
+   :path "src/futon2/aif/cascade_habit_store.clj",
+   :disk-sha256
+   "89553de7f66aa0dedb2d04773bf7ce9b314ea8f1e61351c079738550fe1d050b",
+   :loaded? true,
+   :loaded-current? :unknown,
+   :reason :no-load-time-source-identity}
+  {:namespace futon2.aif.cascade-habit-reinforcement,
+   :path "src/futon2/aif/cascade_habit_reinforcement.clj",
+   :disk-sha256
+   "ff15440ec7faf44633047391bdbea5e29b5cc9c794dcc862c38f395866a6b360",
+   :loaded? false,
+   :loaded-current? :unknown,
+   :reason :namespace-not-loaded}
+  {:namespace futon2.aif.cascade-plan,
+   :path "src/futon2/aif/cascade_plan.clj",
+   :disk-sha256
+   "7f0eca4e5babca4a359d685357e55f9d93e50fb53379c3cca66c518e53a7347a",
+   :loaded? false,
+   :loaded-current? :unknown,
+   :reason :namespace-not-loaded}
+  {:namespace futon2.aif.job-text-retention,
+   :path "src/futon2/aif/job_text_retention.clj",
+   :disk-sha256
+   "e37f6790b657347c1c35abfc397a31e8931abb210d6557d50be981d88e935156",
+   :loaded? false,
+   :loaded-current? :unknown,
+   :reason :namespace-not-loaded}
+  {:namespace futon2.aif.scan-report,
+   :path "src/futon2/aif/scan_report.clj",
+   :disk-sha256
+   "73017ccdf949cc4fe6a4cf4f1608ed02cb38e8e7e2f03199a77ccd13408d8242",
+   :loaded? false,
+   :loaded-current? :unknown,
+   :reason :namespace-not-loaded}
+  {:namespace futon2.aif.token-outcome,
+   :path "src/futon2/aif/token_outcome.clj",
+   :disk-sha256
+   "ed6c5e5ea0c65cb201824df9f72a69cfc9e7fb9df190aa4b5131c0dc67bad83a",
+   :loaded? false,
+   :loaded-current? :unknown,
+   :reason :namespace-not-loaded}
+  {:namespace futon2.aif.trace,
+   :path "src/futon2/aif/trace.clj",
+   :disk-sha256
+   "53e16b43d09a04b2f16c793f4c26ebe718c48c9d27fa3f6f842fa2deaa232465",
+   :loaded? true,
+   :loaded-current? :unknown,
+   :reason :no-load-time-source-identity}
+  {:namespace futon2.aif.mission-hole-wants,
+   :path "src/futon2/aif/mission_hole_wants.clj",
+   :disk-sha256
+   "7ca6dc0493f44d04ef602a6e53ec04720f5b381baa691112a7c65229f997ba8f",
+   :loaded? true,
+   :loaded-current? :unknown,
+   :reason :no-load-time-source-identity}
+  {:namespace futon2.report.war-machine,
+   :path "scripts/futon2/report/war_machine.clj",
+   :disk-sha256
+   "c53970bf6851561f13b03d7643804cbc73a346aabfae995c58df019983b1b457",
+   :loaded? true,
+   :loaded-current? :unknown,
+   :reason :no-load-time-source-identity}
+  {:namespace futon2.aif.full-loop-runner,
+   :path "src/futon2/aif/full_loop_runner.clj",
+   :disk-sha256
+   "bc16a9823a3defcfffdcbb4f68c0104d89a38353345f879b4f9a8e9bede387b1",
+   :loaded? true,
+   :loaded-current? :unknown,
+   :reason :no-load-time-source-identity}
+  {:namespace futon2.aif.interpretation-construction,
+   :path "src/futon2/aif/interpretation_construction.clj",
+   :disk-sha256
+   "e81493bfb57a3313eb3cda09643e853a8daa11bfdcd2ba89d21626107e0760db",
+   :loaded? false,
+   :loaded-current? :unknown,
+   :reason :namespace-not-loaded}
+  {:namespace futon2.aif.run-narrative,
+   :path "src/futon2/aif/run_narrative.clj",
+   :disk-sha256
+   "dc9e5273101e51a18e0b96bad11d01c4aa28a071842bdc75911d2cf087bf8a98",
+   :loaded? false,
+   :loaded-current? :unknown,
+   :reason :namespace-not-loaded}],
+ :reload-forms
+ ["(require 'futon2.aif.cascade-selection :reload)"
+  "(require 'futon2.aif.cascade-model-manifest :reload)"
+  "(require 'futon2.aif.policy :reload)"
+  "(require 'futon2.aif.live-c :reload)"
+  "(require 'futon2.aif.d-predecessor-task-authority :reload)"
+  "(require 'futon2.aif.cascade-habit-store :reload)"
+  "(require 'futon2.aif.cascade-habit-reinforcement :reload)"
+  "(require 'futon2.aif.cascade-plan :reload)"
+  "(require 'futon2.aif.job-text-retention :reload)"
+  "(require 'futon2.aif.scan-report :reload)"
+  "(require 'futon2.aif.token-outcome :reload)"
+  "(require 'futon2.aif.trace :reload)"
+  "(require 'futon2.aif.mission-hole-wants :reload)"
+  "(require 'futon2.report.war-machine :reload)"
+  "(require 'futon2.aif.full-loop-runner :reload)"
+  "(require 'futon2.aif.interpretation-construction :reload)"
+  "(require 'futon2.aif.run-narrative :reload)"],
+ :post-reload-verification-form
+ "(let [names '[futon2.aif.cascade-selection futon2.aif.cascade-model-manifest futon2.aif.policy futon2.aif.live-c futon2.aif.d-predecessor-task-authority futon2.aif.cascade-habit-store futon2.aif.cascade-habit-reinforcement futon2.aif.cascade-plan futon2.aif.job-text-retention futon2.aif.scan-report futon2.aif.token-outcome futon2.aif.trace futon2.aif.mission-hole-wants futon2.report.war-machine futon2.aif.full-loop-runner futon2.aif.interpretation-construction futon2.aif.run-narrative]] {:captured-at (str (java.time.Instant/now)) :jvm-start-ms (.getStartTime (java.lang.management.ManagementFactory/getRuntimeMXBean)) :classpath (System/getProperty \"java.class.path\") :namespaces (into {} (for [s names] [s (if-let [n (find-ns s)] {:loaded? true :interns (vec (sort (keys (ns-interns n))))} {:loaded? false})])) :tripwire-baseline (when-let [n (find-ns 'futon2.aif.tripwire)] (when-let [v (ns-resolve n 'composition-baseline)] (when (bound? v) (into {} (for [[s x] @(var-get v)] [s (select-keys x [:source-path :source-sha256])])))))})",
+ :unrepresented-paths [],
+ :head "66b379c29dbea036da73f4d5a458f210a37a7f35",
+ :identity-limit
+ :classpath-resource-is-current-disk-not-loaded-bytecode,
+ :repo "/home/joe/code/futon2",
+ :live
+ {:captured-at "2026-09-21T15:09:48.890957332Z",
+  :jvm-start-ms 1789853604384,
+  :classpath
+  "dev:src:resources:library:/home/joe/.m2/repository/cheshire/cheshire/5.11.0/cheshire-5.11.0.jar:/home/joe/.m2/repository/cljs-http/cljs-http/0.1.46/cljs-http-0.1.46.jar:/home/joe/.m2/repository/com/cemerick/drawbridge/0.0.7/drawbridge-0.0.7.jar:/home/joe/.m2/repository/datascript/datascript/1.7.3/datascript-1.7.3.jar:/home/joe/code/futon0/scripts:/home/joe/code/futon1b:/home/joe/code/futon2/src:/home/joe/code/futon2/resources:/home/joe/code/futon2:/home/joe/code/futon2/scripts:/home/joe/code/futon3/inbox-zero-lib/src:/home/joe/code/futon3a/src:/home/joe/code/futon3a/test:/home/joe/code/futon3b/src:/home/joe/code/futon3b/resources:/home/joe/code/futon3b/library:/home/joe/code/futon3b/holes:/home/joe/code/futon5/src:/home/joe/code/futon5/resources:/home/joe/code/futon5/test:/home/joe/.m2/repository/http-kit/http-kit/2.8.1/http-kit-2.8.1.jar:/home/joe/.m2/repository/metosin/malli/0.16.3/malli-0.16.3.jar:/home/joe/.m2/repository/nrepl/nrepl/1.1.0/nrepl-1.1.0.jar:/home/joe/.m2/repository/org/clojure/clojure/1.12.0/clojure-1.12.0.jar:/home/joe/.m2/repository/org/clojure/core.logic/1.1.0/core.logic-1.1.0.jar:/home/joe/.m2/repository/org/clojure/data.json/2.5.0/data.json-2.5.0.jar:/home/joe/.m2/repository/org/clojure/tools.nrepl/0.2.13/tools.nrepl-0.2.13.jar:/home/joe/.m2/repository/reagent/reagent/1.2.0/reagent-1.2.0.jar:/home/joe/.m2/repository/rewrite-clj/rewrite-clj/1.1.49/rewrite-clj-1.1.49.jar:/home/joe/.m2/repository/ring/ring-core/1.11.0/ring-core-1.11.0.jar:/home/joe/.m2/repository/thheller/shadow-cljs/3.1.0/shadow-cljs-3.1.0.jar:/home/joe/code/futon2/web/war-machine/src:/home/joe/code/futon2/web/war-machine/resources:/home/joe/code/futon4/dev/web/webarxana/src:/home/joe/code/futon4/dev/web/webarxana/resources:/home/joe/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.13.3/jackson-dataformat-cbor-2.13.3.jar:/home/joe/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-smile/2.13.3/jackson-dataformat-smile-2.13.3.jar:/home/joe/.m2/repository/tigris/tigris/0.1.2/tigris-0.1.2.jar:/home/joe/.m2/repository/noencore/noencore/0.3.4/noencore-0.3.4.jar:/home/joe/.m2/repository/io/github/tonsky/extend-clj/0.1.0/extend-clj-0.1.0.jar:/home/joe/.m2/repository/persistent-sorted-set/persistent-sorted-set/0.3.0/persistent-sorted-set-0.3.0.jar:/home/joe/.m2/repository/com/xtdb/xtdb-api/2.1.0/xtdb-api-2.1.0.jar:/home/joe/.m2/repository/com/xtdb/xtdb-core/2.1.0/xtdb-core-2.1.0.jar:/home/joe/code/futon1/apps/common/src:/home/joe/code/futon3a/src:/home/joe/code/futon3a/test:/home/joe/.m2/repository/org/babashka/http-client/0.4.23/http-client-0.4.23.jar:/home/joe/code/futon1/apps/nlp-interface/src:/home/joe/code/futon1/apps/nlp-interface/resources:/home/joe/.m2/repository/org/xerial/sqlite-jdbc/3.46.0.0/sqlite-jdbc-3.46.0.0.jar:/home/joe/.m2/repository/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar:/home/joe/.m2/repository/ring/ring-jetty-adapter/1.12.1/ring-jetty-adapter-1.12.1.jar:/home/joe/.m2/repository/borkdude/dynaload/0.3.5/dynaload-0.3.5.jar:/home/joe/.m2/repository/borkdude/edamame/1.4.25/edamame-1.4.25.jar:/home/joe/.m2/repository/mvxcvi/arrangement/2.1.0/arrangement-2.1.0.jar:/home/joe/.m2/repository/org/clojure/test.check/1.1.1/test.check-1.1.1.jar:/home/joe/.m2/repository/org/clojure/core.specs.alpha/0.4.74/core.specs.alpha-0.4.74.jar:/home/joe/.m2/repository/org/clojure/spec.alpha/0.5.238/spec.alpha-0.5.238.jar:/home/joe/.m2/repository/crypto-equality/crypto-equality/1.0.1/crypto-equality-1.0.1.jar:/home/joe/.m2/repository/crypto-random/crypto-random/1.2.1/crypto-random-1.2.1.jar:/home/joe/.m2/repository/org/apache/commons/commons-fileupload2-core/2.0.0-M1/commons-fileupload2-core-2.0.0-M1.jar:/home/joe/.m2/repository/ring/ring-codec/1.2.0/ring-codec-1.2.0.jar:/home/joe/.m2/repository/cider/piggieback/0.6.0/piggieback-0.6.0.jar:/home/joe/.m2/repository/com/bhauman/cljs-test-display/0.1.1/cljs-test-display-0.1.1.jar:/home/joe/.m2/repository/com/cognitect/transit-clj/1.0.333/transit-clj-1.0.333.jar:/home/joe/.m2/repository/com/cognitect/transit-cljs/0.8.280/transit-cljs-0.8.280.jar:/home/joe/.m2/repository/com/google/javascript/closure-compiler/v20250407/closure-compiler-v20250407.jar:/home/joe/.m2/repository/expound/expound/0.9.0/expound-0.9.0.jar:/home/joe/.m2/repository/fipp/fipp/0.6.27/fipp-0.6.27.jar:/home/joe/.m2/repository/hiccup/hiccup/1.0.5/hiccup-1.0.5.jar:/home/joe/.m2/repository/io/methvin/directory-watcher/0.19.0/directory-watcher-0.19.0.jar:/home/joe/.m2/repository/org/clojure/clojurescript/1.12.42/clojurescript-1.12.42.jar:/home/joe/.m2/repository/org/clojure/core.async/1.8.741/core.async-1.8.741.jar:/home/joe/.m2/repository/org/clojure/google-closure-library/0.0-20250515-f04e4c0e/google-closure-library-0.0-20250515-f04e4c0e.jar:/home/joe/.m2/repository/org/clojure/google-closure-library-third-party/0.0-20250515-f04e4c0e/google-closure-library-third-party-0.0-20250515-f04e4c0e.jar:/home/joe/.m2/repository/org/clojure/tools.cli/1.1.230/tools.cli-1.1.230.jar:/home/joe/.m2/repository/org/clojure/tools.reader/1.5.2/tools.reader-1.5.2.jar:/home/joe/.m2/repository/thheller/shadow-client/1.4.0/shadow-client-1.4.0.jar:/home/joe/.m2/repository/thheller/shadow-cljsjs/0.0.22/shadow-cljsjs-0.0.22.jar:/home/joe/.m2/repository/thheller/shadow-undertow/0.3.4/shadow-undertow-0.3.4.jar:/home/joe/.m2/repository/thheller/shadow-util/0.7.0/shadow-util-0.7.0.jar:/home/joe/.m2/repository/ring/ring-defaults/0.5.0/ring-defaults-0.5.0.jar:/home/joe/.m2/repository/ring/ring-json/0.5.1/ring-json-0.5.1.jar:/home/joe/.m2/repository/buddy/buddy-hashers/2.0.167/buddy-hashers-2.0.167.jar:/home/joe/.m2/repository/buddy/buddy-sign/3.6.1-359/buddy-sign-3.6.1-359.jar:/home/joe/.m2/repository/clj-http/clj-http/3.13.0/clj-http-3.13.0.jar:/home/joe/.m2/repository/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.jar:/home/joe/.m2/repository/com/google/protobuf/protobuf-kotlin/4.31.1/protobuf-kotlin-4.31.1.jar:/home/joe/.m2/repository/org/apache/arrow/arrow-algorithm/18.3.0/arrow-algorithm-18.3.0.jar:/home/joe/.m2/repository/org/apache/arrow/arrow-compression/18.3.0/arrow-compression-18.3.0.jar:/home/joe/.m2/repository/org/apache/arrow/arrow-memory-netty/18.3.0/arrow-memory-netty-18.3.0.jar:/home/joe/.m2/repository/org/apache/arrow/arrow-vector/18.3.0/arrow-vector-18.3.0.jar:/home/joe/.m2/repository/org/jetbrains/kotlin/kotlin-stdlib/2.2.0/kotlin-stdlib-2.2.0.jar:/home/joe/.m2/repository/org/jetbrains/kotlinx/kotlinx-serialization-json-jvm/1.8.1/kotlinx-serialization-json-jvm-1.8.1.jar:/home/joe/.m2/repository/org/postgresql/postgresql/42.7.8/postgresql-42.7.8.jar:/home/joe/.m2/repository/clj-commons/clj-yaml/1.0.29/clj-yaml-1.0.29.jar:/home/joe/.m2/repository/com/carrotsearch/hppc/0.10.0/hppc-0.10.0.jar:/home/joe/.m2/repository/com/charleskorn/kaml/kaml-jvm/0.56.0/kaml-jvm-0.56.0.jar:/home/joe/.m2/repository/com/github/seancorfield/next.jdbc/1.3.1048/next.jdbc-1.3.1048.jar:/home/joe/.m2/repository/commons-codec/commons-codec/1.18.0/commons-codec-1.18.0.jar:/home/joe/.m2/repository/hato/hato/1.0.0/hato-1.0.0.jar:/home/joe/.m2/repository/info/sunng/ring-jetty9-adapter/0.38.0/ring-jetty9-adapter-0.38.0.jar:/home/joe/.m2/repository/integrant/integrant/1.0.1/integrant-1.0.1.jar:/home/joe/.m2/repository/io/micrometer/micrometer-core/1.15.1/micrometer-core-1.15.1.jar:/home/joe/.m2/repository/io/micrometer/micrometer-registry-prometheus/1.15.1/micrometer-registry-prometheus-1.15.1.jar:/home/joe/.m2/repository/io/micrometer/micrometer-tracing/1.4.1/micrometer-tracing-1.4.1.jar:/home/joe/.m2/repository/io/micrometer/micrometer-tracing-bridge-otel/1.4.1/micrometer-tracing-bridge-otel-1.4.1.jar:/home/joe/.m2/repository/io/netty/netty-common/4.2.2.Final/netty-common-4.2.2.Final.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-exporter-otlp/1.45.0/opentelemetry-exporter-otlp-1.45.0.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-sdk/1.45.0/opentelemetry-sdk-1.45.0.jar:/home/joe/.m2/repository/metosin/muuntaja/0.6.11/muuntaja-0.6.11.jar:/home/joe/.m2/repository/metosin/reitit-core/0.9.1/reitit-core-0.9.1.jar:/home/joe/.m2/repository/metosin/reitit-http/0.9.1/reitit-http-0.9.1.jar:/home/joe/.m2/repository/metosin/reitit-interceptors/0.9.1/reitit-interceptors-0.9.1.jar:/home/joe/.m2/repository/metosin/reitit-ring/0.9.1/reitit-ring-0.9.1.jar:/home/joe/.m2/repository/metosin/reitit-sieppari/0.9.1/reitit-sieppari-0.9.1.jar:/home/joe/.m2/repository/org/antlr/antlr4/4.13.2/antlr4-4.13.2.jar:/home/joe/.m2/repository/org/antlr/antlr4-runtime/4.13.2/antlr4-runtime-4.13.2.jar:/home/joe/.m2/repository/org/apache/arrow/adbc/adbc-core/0.20.0/adbc-core-0.20.0.jar:/home/joe/.m2/repository/org/apache/arrow/adbc/adbc-driver-manager/0.20.0/adbc-driver-manager-0.20.0.jar:/home/joe/.m2/repository/org/clojure/data.csv/1.1.0/data.csv-1.1.0.jar:/home/joe/.m2/repository/org/clojure/tools.logging/1.3.0/tools.logging-1.3.0.jar:/home/joe/.m2/repository/org/eclipse/jetty/jetty-alpn-server/10.0.15/jetty-alpn-server-10.0.15.jar:/home/joe/.m2/repository/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.10.2/kotlinx-coroutines-core-jvm-1.10.2.jar:/home/joe/.m2/repository/org/roaringbitmap/RoaringBitmap/1.3.0/RoaringBitmap-1.3.0.jar:/home/joe/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar:/home/joe/code/futon1/apps/graph-memory/src:/home/joe/code/futon1/apps/graph-memory/resources:/home/joe/.m2/repository/org/eclipse/jetty/websocket/websocket-jetty-server/11.0.20/websocket-jetty-server-11.0.20.jar:/home/joe/.m2/repository/org/ring-clojure/ring-jakarta-servlet/1.12.1/ring-jakarta-servlet-1.12.1.jar:/home/joe/.m2/repository/com/cognitect/transit-java/1.0.371/transit-java-1.0.371.jar:/home/joe/.m2/repository/com/cognitect/transit-js/0.8.874/transit-js-0.8.874.jar:/home/joe/.m2/repository/org/clojure/core.rrb-vector/0.1.2/core.rrb-vector-0.1.2.jar:/home/joe/.m2/repository/net/java/dev/jna/jna/5.16.0/jna-5.16.0.jar:/home/joe/.m2/repository/org/clojure/tools.analyzer.jvm/1.3.2/tools.analyzer.jvm-1.3.2.jar:/home/joe/.m2/repository/io/undertow/undertow-core/2.3.10.Final/undertow-core-2.3.10.Final.jar:/home/joe/.m2/repository/clojurewerkz/scrypt/1.2.0/scrypt-1.2.0.jar:/home/joe/.m2/repository/buddy/buddy-core/1.12.0-430/buddy-core-1.12.0-430.jar:/home/joe/.m2/repository/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar:/home/joe/.m2/repository/org/apache/httpcomponents/httpasyncclient/4.1.5/httpasyncclient-4.1.5.jar:/home/joe/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar:/home/joe/.m2/repository/org/apache/httpcomponents/httpclient-cache/4.5.14/httpclient-cache-4.5.14.jar:/home/joe/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar:/home/joe/.m2/repository/org/apache/httpcomponents/httpmime/4.5.14/httpmime-4.5.14.jar:/home/joe/.m2/repository/potemkin/potemkin/0.4.7/potemkin-0.4.7.jar:/home/joe/.m2/repository/slingshot/slingshot/0.12.2/slingshot-0.12.2.jar:/home/joe/.m2/repository/ring/ring-anti-forgery/1.3.1/ring-anti-forgery-1.3.1.jar:/home/joe/.m2/repository/ring/ring-headers/0.4.0/ring-headers-0.4.0.jar:/home/joe/.m2/repository/ring/ring-ssl/0.4.0/ring-ssl-0.4.0.jar:/home/joe/.m2/repository/org/jetbrains/kotlinx/kotlinx-serialization-core-jvm/1.8.1/kotlinx-serialization-core-jvm-1.8.1.jar:/home/joe/.m2/repository/org/flatland/ordered/1.15.12/ordered-1.15.12.jar:/home/joe/.m2/repository/org/yaml/snakeyaml/2.3/snakeyaml-2.3.jar:/home/joe/.m2/repository/org/snakeyaml/snakeyaml-engine/2.7/snakeyaml-engine-2.7.jar:/home/joe/.m2/repository/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar:/home/joe/.m2/repository/camel-snake-kebab/camel-snake-kebab/0.4.3/camel-snake-kebab-0.4.3.jar:/home/joe/.m2/repository/org/clojure/java.data/1.3.113/java.data-1.3.113.jar:/home/joe/.m2/repository/com/google/protobuf/protobuf-java/4.31.1/protobuf-java-4.31.1.jar:/home/joe/.m2/repository/org/eclipse/jetty/jetty-server/12.1.1/jetty-server-12.1.1.jar:/home/joe/.m2/repository/org/eclipse/jetty/jetty-util/12.1.1/jetty-util-12.1.1.jar:/home/joe/.m2/repository/org/eclipse/jetty/websocket/jetty-websocket-jetty-api/12.1.1/jetty-websocket-jetty-api-12.1.1.jar:/home/joe/.m2/repository/org/eclipse/jetty/websocket/jetty-websocket-jetty-server/12.1.1/jetty-websocket-jetty-server-12.1.1.jar:/home/joe/.m2/repository/org/ring-clojure/ring-core-protocols/1.14.2/ring-core-protocols-1.14.2.jar:/home/joe/.m2/repository/org/ring-clojure/ring-websocket-protocols/1.14.2/ring-websocket-protocols-1.14.2.jar:/home/joe/.m2/repository/weavejester/dependency/1.0.0/dependency-1.0.0.jar:/home/joe/.m2/repository/io/micrometer/micrometer-commons/1.15.1/micrometer-commons-1.15.1.jar:/home/joe/.m2/repository/io/micrometer/micrometer-observation/1.15.1/micrometer-observation-1.15.1.jar:/home/joe/.m2/repository/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.jar:/home/joe/.m2/repository/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.jar:/home/joe/.m2/repository/io/prometheus/prometheus-metrics-core/1.3.8/prometheus-metrics-core-1.3.8.jar:/home/joe/.m2/repository/io/prometheus/prometheus-metrics-exposition-formats/1.3.8/prometheus-metrics-exposition-formats-1.3.8.jar:/home/joe/.m2/repository/io/prometheus/prometheus-metrics-tracer-common/1.3.8/prometheus-metrics-tracer-common-1.3.8.jar:/home/joe/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar:/home/joe/.m2/repository/io/micrometer/context-propagation/1.1.2/context-propagation-1.1.2.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-extension-trace-propagators/1.43.0/opentelemetry-extension-trace-propagators-1.43.0.jar:/home/joe/.m2/repository/io/opentelemetry/instrumentation/opentelemetry-instrumentation-api-incubator/2.9.0-alpha/opentelemetry-instrumentation-api-incubator-2.9.0-alpha.jar:/home/joe/.m2/repository/io/opentelemetry/semconv/opentelemetry-semconv/1.25.0-alpha/opentelemetry-semconv-1.25.0-alpha.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-exporter-otlp-common/1.45.0/opentelemetry-exporter-otlp-common-1.45.0.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-exporter-sender-okhttp/1.45.0/opentelemetry-exporter-sender-okhttp-1.45.0.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-sdk-extension-autoconfigure-spi/1.45.0/opentelemetry-sdk-extension-autoconfigure-spi-1.45.0.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-sdk-logs/1.45.0/opentelemetry-sdk-logs-1.45.0.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-sdk-metrics/1.45.0/opentelemetry-sdk-metrics-1.45.0.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-sdk-trace/1.45.0/opentelemetry-sdk-trace-1.45.0.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-api/1.45.0/opentelemetry-api-1.45.0.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-sdk-common/1.45.0/opentelemetry-sdk-common-1.45.0.jar:/home/joe/.m2/repository/metosin/jsonista/0.3.13/jsonista-0.3.13.jar:/home/joe/.m2/repository/meta-merge/meta-merge/1.0.0/meta-merge-1.0.0.jar:/home/joe/.m2/repository/lambdaisland/deep-diff/0.0-47/deep-diff-0.0-47.jar:/home/joe/.m2/repository/metosin/spec-tools/0.10.7/spec-tools-0.10.7.jar:/home/joe/.m2/repository/metosin/sieppari/0.0.0-alpha13/sieppari-0.0.0-alpha13.jar:/home/joe/.m2/repository/com/ibm/icu/icu4j/72.1/icu4j-72.1.jar:/home/joe/.m2/repository/org/abego/treelayout/org.abego.treelayout.core/1.0.3/org.abego.treelayout.core-1.0.3.jar:/home/joe/.m2/repository/org/antlr/ST4/4.3.4/ST4-4.3.4.jar:/home/joe/.m2/repository/org/antlr/antlr-runtime/3.5.3/antlr-runtime-3.5.3.jar:/home/joe/.m2/repository/org/apache/arrow/arrow-memory-core/18.3.0/arrow-memory-core-18.3.0.jar:/home/joe/.m2/repository/com/github/luben/zstd-jni/1.5.7-2/zstd-jni-1.5.7-2.jar:/home/joe/.m2/repository/org/apache/commons/commons-compress/1.27.1/commons-compress-1.27.1.jar:/home/joe/.m2/repository/org/apache/arrow/arrow-memory-netty-buffer-patch/18.3.0/arrow-memory-netty-buffer-patch-18.3.0.jar:/home/joe/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.3/jackson-annotations-2.18.3.jar:/home/joe/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.3/jackson-core-2.18.3.jar:/home/joe/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.3/jackson-databind-2.18.3.jar:/home/joe/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.3/jackson-datatype-jsr310-2.18.3.jar:/home/joe/.m2/repository/com/google/flatbuffers/flatbuffers-java/25.2.10/flatbuffers-java-25.2.10.jar:/home/joe/.m2/repository/org/apache/arrow/arrow-format/18.3.0/arrow-format-18.3.0.jar:/home/joe/.m2/repository/org/checkerframework/checker-qual/3.50.0/checker-qual-3.50.0.jar:/home/joe/.m2/repository/org/jetbrains/annotations/23.0.0/annotations-23.0.0.jar:/home/joe/code/futon1/apps/charon/src:/home/joe/code/futon1/apps/charon/resources:/home/joe/.m2/repository/org/slf4j/slf4j-nop/2.0.12/slf4j-nop-2.0.12.jar:/home/joe/.m2/repository/org/eclipse/jetty/jetty-servlet/11.0.20/jetty-servlet-11.0.20.jar:/home/joe/.m2/repository/org/eclipse/jetty/jetty-webapp/11.0.20/jetty-webapp-11.0.20.jar:/home/joe/.m2/repository/org/eclipse/jetty/toolchain/jetty-jakarta-servlet-api/5.0.2/jetty-jakarta-servlet-api-5.0.2.jar:/home/joe/.m2/repository/org/eclipse/jetty/websocket/websocket-jetty-api/11.0.20/websocket-jetty-api-11.0.20.jar:/home/joe/.m2/repository/org/eclipse/jetty/websocket/websocket-jetty-common/11.0.20/websocket-jetty-common-11.0.20.jar:/home/joe/.m2/repository/org/eclipse/jetty/websocket/websocket-servlet/11.0.20/websocket-servlet-11.0.20.jar:/home/joe/.m2/repository/javax/xml/bind/jaxb-api/2.4.0-b180830.0359/jaxb-api-2.4.0-b180830.0359.jar:/home/joe/.m2/repository/org/msgpack/msgpack/0.6.12/msgpack-0.6.12.jar:/home/joe/.m2/repository/org/clojure/core.memoize/1.1.266/core.memoize-1.1.266.jar:/home/joe/.m2/repository/org/clojure/tools.analyzer/1.2.0/tools.analyzer-1.2.0.jar:/home/joe/.m2/repository/org/ow2/asm/asm/9.2/asm-9.2.jar:/home/joe/.m2/repository/org/jboss/logging/jboss-logging/3.4.3.Final/jboss-logging-3.4.3.Final.jar:/home/joe/.m2/repository/org/jboss/threads/jboss-threads/3.5.0.Final/jboss-threads-3.5.0.Final.jar:/home/joe/.m2/repository/org/jboss/xnio/xnio-api/3.8.8.Final/xnio-api-3.8.8.Final.jar:/home/joe/.m2/repository/org/jboss/xnio/xnio-nio/3.8.8.Final/xnio-nio-3.8.8.Final.jar:/home/joe/.m2/repository/com/lambdaworks/scrypt/1.4.0/scrypt-1.4.0.jar:/home/joe/.m2/repository/org/bouncycastle/bcpkix-jdk18on/1.78.1/bcpkix-jdk18on-1.78.1.jar:/home/joe/.m2/repository/org/bouncycastle/bcprov-jdk18on/1.78.1/bcprov-jdk18on-1.78.1.jar:/home/joe/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar:/home/joe/.m2/repository/org/apache/httpcomponents/httpcore-nio/4.4.15/httpcore-nio-4.4.15.jar:/home/joe/.m2/repository/riddley/riddley/0.1.12/riddley-0.1.12.jar:/home/joe/.m2/repository/org/eclipse/jetty/jetty-http/12.1.1/jetty-http-12.1.1.jar:/home/joe/.m2/repository/org/eclipse/jetty/jetty-io/12.1.1/jetty-io-12.1.1.jar:/home/joe/.m2/repository/org/eclipse/jetty/websocket/jetty-websocket-core-server/12.1.1/jetty-websocket-core-server-12.1.1.jar:/home/joe/.m2/repository/org/eclipse/jetty/websocket/jetty-websocket-jetty-common/12.1.1/jetty-websocket-jetty-common-12.1.1.jar:/home/joe/.m2/repository/io/prometheus/prometheus-metrics-config/1.3.8/prometheus-metrics-config-1.3.8.jar:/home/joe/.m2/repository/io/prometheus/prometheus-metrics-model/1.3.8/prometheus-metrics-model-1.3.8.jar:/home/joe/.m2/repository/io/prometheus/prometheus-metrics-exposition-formats-no-protobuf/1.3.8/prometheus-metrics-exposition-formats-no-protobuf-1.3.8.jar:/home/joe/.m2/repository/io/opentelemetry/instrumentation/opentelemetry-instrumentation-api/2.9.0/opentelemetry-instrumentation-api-2.9.0.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-api-incubator/1.45.0-alpha/opentelemetry-api-incubator-1.45.0-alpha.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-exporter-common/1.45.0/opentelemetry-exporter-common-1.45.0.jar:/home/joe/.m2/repository/com/squareup/okhttp3/okhttp/4.12.0/okhttp-4.12.0.jar:/home/joe/.m2/repository/io/opentelemetry/opentelemetry-context/1.45.0/opentelemetry-context-1.45.0.jar:/home/joe/.m2/repository/mvxcvi/puget/1.1.2/puget-1.1.2.jar:/home/joe/.m2/repository/tech/droit/clj-diff/1.0.1/clj-diff-1.0.1.jar:/home/joe/.m2/repository/org/apache/commons/commons-lang3/3.16.0/commons-lang3-3.16.0.jar:/home/joe/.m2/repository/io/netty/netty-buffer/4.1.119.Final/netty-buffer-4.1.119.Final.jar:/home/joe/.m2/repository/org/eclipse/jetty/jetty-security/11.0.20/jetty-security-11.0.20.jar:/home/joe/.m2/repository/org/eclipse/jetty/jetty-xml/11.0.20/jetty-xml-11.0.20.jar:/home/joe/.m2/repository/org/eclipse/jetty/websocket/websocket-core-common/11.0.20/websocket-core-common-11.0.20.jar:/home/joe/.m2/repository/org/eclipse/jetty/websocket/websocket-core-server/11.0.20/websocket-core-server-11.0.20.jar:/home/joe/.m2/repository/javax/activation/javax.activation-api/1.2.0/javax.activation-api-1.2.0.jar:/home/joe/.m2/repository/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar:/home/joe/.m2/repository/org/javassist/javassist/3.18.1-GA/javassist-3.18.1-GA.jar:/home/joe/.m2/repository/org/clojure/core.cache/1.1.234/core.cache-1.1.234.jar:/home/joe/.m2/repository/org/wildfly/client/wildfly-client-config/1.0.1.Final/wildfly-client-config-1.0.1.Final.jar:/home/joe/.m2/repository/org/wildfly/common/wildfly-common/1.5.4.Final/wildfly-common-1.5.4.Final.jar:/home/joe/.m2/repository/org/bouncycastle/bcutil-jdk18on/1.78.1/bcutil-jdk18on-1.78.1.jar:/home/joe/.m2/repository/org/eclipse/jetty/websocket/jetty-websocket-core-common/12.1.1/jetty-websocket-core-common-12.1.1.jar:/home/joe/.m2/repository/io/prometheus/prometheus-metrics-exposition-textformats/1.3.8/prometheus-metrics-exposition-textformats-1.3.8.jar:/home/joe/.m2/repository/com/squareup/okio/okio/3.6.0/okio-3.6.0.jar:/home/joe/.m2/repository/org/clojure/data.priority-map/1.2.0/data.priority-map-1.2.0.jar:/home/joe/.m2/repository/com/squareup/okio/okio-jvm/3.6.0/okio-jvm-3.6.0.jar:/home/joe/.m2/repository/org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar:/home/joe/.m2/repository/org/jetbrains/kotlin/kotlin-stdlib-jdk8/1.9.10/kotlin-stdlib-jdk8-1.9.10.jar:/home/joe/.m2/repository/org/jetbrains/kotlin/kotlin-stdlib-jdk7/1.9.10/kotlin-stdlib-jdk7-1.9.10.jar",
+  :namespaces
+  {futon2.aif.run-narrative {:loaded? false},
+   futon2.aif.cascade-habit-reinforcement {:loaded? false},
+   futon2.aif.full-loop-runner
+   {:loaded? true,
+    :interns
+    [*r16-park-fn*
+     *wm-status-reporting?*
+     action-paths
+     agent-failure-detail
+     agent-readiness!
+     agent-record
+     agent-roster
+     ancestor?
+     append-checkpoint-or-refusal-sorry!
+     artifact-only-files?
+     artifact-window-tolerance-ms
+     author-claimed-ref
+     author-infrastructure-failure?
+     author-prompt
+     author-verdict
+     available?
+     bounded-selection-invoke!
+     build-cure-loop
+     build-cure-prompt
+     build-cure-validation
+     cancel-job!
+     canonical-runner-bytes
+     canonical-runner-path
+     cause-chain
+     checkpoint-evidence-manifest
+     code-file-pattern
+     commit-files
+     commit-ish-pattern
+     commit-ish?
+     commit-time-ms
+     config
+     construct-for-decision
+     construct-selected-action
+     construction-wiring-result
+     cure-commit-candidate
+     default-agency-base
+     default-agent-budget-ms
+     default-author
+     default-author-infrastructure-retries
+     default-build-cure-retries
+     default-phase-log
+     default-repair-reviewer
+     default-reviewer
+     default-revision-rounds
+     default-run-record-dir
+     default-substrate-base
+     default-substrate-health-url
+     deferred-completion-artifact-failure
+     deferred-completion-job-id
+     deferred-completion-snapshot
+     discharge-contract
+     discharge-id
+     discrimination-epsilon
+     discrimination-top-k
+     dispatch!
+     emit-phase!
+     ensure-dispatch-seat!
+     ensure-standing-decision!
+     entity-state-at-close
+     epsilon-distinct-count
+     events-feature-card
+     evidence-deposit-instruction
+     existing-file-ref
+     explicit-failure-kind
+     failure-kind-from
+     feature-artifact-refs
+     feature-card-durable-limit
+     feature-card-keys
+     feature-card-marker
+     feature-card-validation
+     find-commit-repo
+     fresh-artifact-binding
+     git
+     git-repo-for-path
+     ground-cascade-policy-holes
+     ground-commit!
+     grounded-feature-card
+     grounding-construction-props
+     historical-revalidation-entry
+     historical-verification-completion-token
+     implementation-id
+     independent-review-evidence
+     job-last-activity-ms
+     job-start-ms
+     job-text
+     last-error-phase
+     limb-record-schemas
+     machine-repair-repository
+     mint-action-occurrence-once!
+     mission-entry
+     mission-fold-candidate
+     mission-for-decision
+     observation-shaped-step?
+     observe-repo-head
+     observed-route
+     outcome-entity-at-close
+     outcome-from
+     packet-run-route
+     park-r16-stop-line!
+     parse-attempt-evidence
+     persist-run-record!
+     poll-job!
+     post-json!
+     post-wm-status!
+     primary-repos
+     prompt-construction
+     prompt-findings
+     prompt-selected-action
+     read-first-edn-form
+     read-job!
+     readiness
+     readiness-event
+     readiness-wake-timeout-ms
+     recovery-artifact-failure
+     recovery-job-id
+     recovery-snapshot
+     refuse-on-runner-source-drift!
+     repair-class-for
+     repair-entry
+     repair-occurrence
+     repo-state
+     report-wm-phase!
+     report-wm-wait!
+     required-checkpoints
+     resolve-build
+     resolve-commit-sha
+     resolve-liveness-fn
+     resolve-target-build
+     resource-bytes
+     restored?
+     result-feature-card
+     retained-resolution-record
+     review-execution-evidence
+     review-execution-gate
+     review-findings-text
+     review-record
+     review-verdict
+     reviewer-note
+     reviewer-prompt
+     revision-author-prompt
+     revision-reviewer-prompt
+     route-node-str
+     run-opportunity!
+     run-opportunity-core!
+     run-phase!
+     run-revision-round
+     runner-source-drift
+     selected-entry
+     selected-target
+     selection-attempt-summary
+     selection-discrimination
+     selection-enaction-record
+     selection-failure-class
+     selection-response->selection
+     semantic-epoch
+     sha256
+     sha256-bytes
+     socket-closure-kind
+     sorry
+     stack-code-state
+     standing-completion-prompt
+     standing-decision-readback
+     strategic-selection!
+     strategic-selection-attempt
+     strategic-selection-http-invoke!
+     strategic-selection-retry-delay-ms
+     strategic-selection-retry-timeouts-ms
+     substrate-attempt
+     substrate-liveness!
+     substrate-preflight!
+     substrate-readiness!
+     substrate-retry-delay-ms
+     substrate-retry-timeouts-ms
+     summary-feature-card
+     target-repository
+     term
+     terminal-fallback-route
+     terminal-record-context
+     terminal-states
+     text-feature-card
+     throw-if-author-refused!
+     throw-if-cancelled!
+     transport-class-kind
+     transport-failure-classes
+     transport-failure-kind
+     unavailable-socket-messages
+     unvalidated-artifact-failure
+     valid-feature-card
+     valid-standing-decision?
+     validate-revision-evidence-role
+     wake-agent!
+     wake-restored-agent!
+     wm-agent-id
+     wm-status-executor
+     wm-status-payload]},
+   futon2.aif.live-c
+   {:loaded? true,
+    :interns
+    [alive-entries
+     cascade-spec
+     closed?
+     completion-entries
+     derive-live-c
+     exact-pos?
+     family-scales
+     family-schedule
+     file-bytes
+     file-seq-glob
+     mission-file-globs
+     mission-token?
+     normalise-weights
+     preference-scales
+     preference-schedule
+     project-want
+     read-edn-source
+     read-mission-file
+     read-sources
+     sha256
+     signature-of
+     stale?
+     star-graph-path
+     status-line
+     token-mission
+     unreached-stars
+     wholeness-path]},
+   futon2.aif.cascade-model-manifest
+   {:loaded? true,
+    :interns
+    [affirmative-markers
+     build-manifest
+     cascade-kernel
+     classify
+     compile-clause
+     coverage
+     evaluate-state
+     exact-update
+     extract-target
+     extraction-rule
+     first-enabled
+     guard-holds?
+     guard-interpretation
+     horizon-g
+     horizon-g-sparse
+     horizon-g-sparse*
+     horizon-g-sparse-cert
+     independent-belief
+     interpret-pattern
+     log-preference-fn
+     marked?
+     member-log-probability
+     missing-interpretation
+     mixture-observation-distribution
+     normalized-exact?
+     observation-distribution
+     observation-row
+     observed-belief
+     outcome-risk
+     outcome-risk-pointwise
+     outstanding-markers
+     pattern-block
+     pattern-kernel
+     powerset
+     predict-observations
+     preference-distribution
+     preference-fn
+     preference-member
+     preference-spec
+     push-forward
+     rate-bad-token
+     refusal-map?
+     refusal?
+     rollout
+     rollout*
+     rollout-evaluation
+     same-preference-distribution?
+     search-precedence
+     sha256
+     source
+     step-ambiguity
+     stopwords
+     token-belief-at
+     token-belief-at-runtime-authority
+     token-likelihood
+     token-utility
+     tokens
+     transition-row
+     utility-weights
+     with-pattern-theta
+     zero-rates?]},
+   futon2.aif.cascade-plan {:loaded? false},
+   futon2.aif.policy
+   {:loaded? true,
+    :interns
+    [cascade-first-action
+     finite-pos?
+     normalise-scores
+     select-action-cascades
+     select-budgeted-actions
+     selection-candidate
+     selection-certificate
+     selection-input
+     selection-scores
+     softmax-weights]},
+   futon2.aif.d-predecessor-task-authority
+   {:loaded? true,
+    :interns
+    [agency-job
+     artifact-tokens
+     authority
+     canonical
+     capture
+     capture-result
+     claim
+     complete!
+     context
+     default-root
+     file-bytes
+     git!
+     produce!
+     prompt-binding
+     read-one
+     read-predecessor
+     record-file
+     refuse!
+     require!
+     scope
+     sha
+     verify
+     verify!
+     write-claim!]},
+   futon2.aif.job-text-retention {:loaded? false},
+   futon2.aif.token-outcome {:loaded? false},
+   futon2.aif.mission-hole-wants
+   {:loaded? true,
+    :interns
+    [closed-form
+     closure-pattern
+     hole-locator
+     merge-into-sources
+     mission-source
+     mission-sources
+     observable-hole?
+     want-token]},
+   futon2.aif.interpretation-construction {:loaded? false},
+   futon2.aif.scan-report {:loaded? false},
+   futon2.aif.trace
+   {:loaded? true,
+    :interns
+    [*persist-policy-trace-details?*
+     cascade-candidate-id
+     daily-path
+     date-fmt
+     default-tag-reader
+     default-trace-dir
+     futon2-git-version
+     latest-trace-record
+     missing-trace-reason
+     r8-producer-contract
+     read-all-traces
+     read-trace
+     read-trace-range
+     reasoned-trace-route
+     recent-trace-records
+     reduce-traces
+     stringable-cascade-posterior
+     strip-decision
+     today-date-string
+     trace-evidence-fields
+     trace-field-evidence
+     trace-files
+     trace-record
+     trace-schema-version
+     utc-zone
+     wm-version-of
+     wm-version-stamp
+     write-trace!]},
+   futon2.report.war-machine
+   {:loaded? true,
+    :interns
+    [*beta-dark?*
+     *clock-focus?*
+     *clock-selection?*
+     *f-pi-dark?*
+     *f-pi-posterior?*
+     *focus-reconcile?*
+     *input-status*
+     *live-doability?*
+     *mission-c?*
+     *observed-outcomes*
+     *selection-focus?*
+     *task-belief-ladder?*
+     -main
+     accumulation-config
+     accumulation-config-path
+     accumulation-step-for-tick
+     action-target-key
+     active-clock-edge->mission
+     active-mission-statuses
+     active-sessions-D-days
+     active-sessions-N
+     admit-cascade-problem
+     all-repos
+     apply-arena-belief-events
+     apply-morning-brief-events
+     apply-task-belief-ladder
+     arena-ambiguity-mode
+     arena-belief-update-opts
+     arena-goal-outcome-mode
+     arena-graph-feasibility-mode
+     arena-habit-prior-source
+     arena-habit-prior-span-ratio-cap
+     arena-homeostatic-control-mode
+     arena-likelihood-mode
+     arena-mode-flags
+     arena-move-class-intensity-mode
+     arena-predictability-control-mode
+     arena-risk-mode
+     arena-salience-mode
+     arena-structural-pressure-mode
+     arena-tau-mode
+     arrow-health
+     arrow-health-freq-k
+     avoidance-losses
+     batch-input-throughput
+     batch-output-quality
+     batch-patterns
+     beta-dark-carry
+     block-footer-pattern
+     body-snippet
+     bytes-str
+     candidate-identity
+     canonical-mission-endpoint?
+     capability-star-map
+     capability-star-map-cache
+     capability-star-map-path
+     carry-active-mission
+     carry-enumeration-completeness
+     carry-mission-c
+     carry-mission-focus
+     cascade-decision
+     cascade-decision-admitted
+     cascade-lane
+     cascade-mission-tokens
+     cascade-role-map
+     case-history-index
+     case-history-index-memo
+     centrality-cache
+     centrality-joint-map
+     channel-priority-result
+     claim-patterns
+     clock-source
+     collection-lag-days
+     compute-active-sessions-channel
+     compute-delta-t-mission
+     consecutive-non-progress-count
+     contract-path
+     count-commits-since
+     current-clock-targets
+     current-input-status
+     default-mission-value-weights
+     default-session-evidence-limit
+     default-strategy-cascade-path
+     default-wm-trace-dir
+     detect-missions
+     detect-repos
+     effective-run-configuration
+     embeddings-path
+     enrich-candidates-with-mission-value
+     enrich-support-attack
+     evaluate-density
+     evaluate-mark2-batches
+     evaluate-novelty
+     evaluated-run-configuration
+     event-name
+     evidence-at
+     evidence-flow-edges
+     evidence-query-url
+     evidence-text
+     expressions-of-interest-gauges
+     f-pi-dark-readback
+     f-pi-posterior-opts
+     f-pi-posterior-preconditions!
+     family-fired->issue
+     fetch-evidence
+     fetch-evidence-result
+     fetch-hyperedges-by-type
+     fetch-missions
+     focus-reconciliation
+     focus-reconciliation-cases
+     forward-model-centrality-path
+     frames-dir
+     futon1a-penholder
+     futon1a-url
+     futon3c-url
+     futon5a-root
+     generate-war-machine
+     git
+     graph-summary
+     head-priorities
+     health-indicator
+     home
+     http-get-json
+     http-get-json-result
+     hx-prop
+     invariant-model-path
+     invariant-priorities
+     iso->ms
+     judge
+     known-repos
+     lane-step
+     latest-by-key
+     live-doability?
+     load-active-mission
+     load-embeddings
+     load-invariant-inventory
+     loop-arrows
+     mana-snapshot-path
+     mark2-manifests-dir
+     mark2-state-path
+     max-session-evidence-limit
+     merge-live-cascade-spec
+     mission-action-types
+     mission-action?
+     mission-api-timeout-ms
+     mission-c-criteria-path
+     mission-c-criteria-sources
+     mission-c-declared-gauges
+     mission-c-readback
+     mission-doc-index
+     mission-id-for-clock-witness
+     mission-index-endpoint
+     mission-index-operator-gates
+     mission-index-phase
+     mission-nodes
+     mission-priorities
+     mission-value-weights
+     mode-vocabulary-record
+     newer-entry?
+     non-progress-decay-k
+     normalize-hyperedge
+     normalize-keyword
+     normalize-mission-id
+     normalized-centrality-map
+     normalized-phase
+     normalized-value
+     observation-contract
+     open-sorry-census
+     parse-block-footer
+     parse-edn-string
+     parse-iso-date
+     parse-json-keyword-string
+     parse-json-string
+     parse-substrate-edn
+     patterns-index-path
+     pct-str
+     phase-doability
+     phase-doable
+     portfolio-step-for-judge
+     positive-double
+     post-clock-hyperedge!
+     pressure->tier
+     previous-selection-non-progress?
+     process-event->issue
+     r-row-re
+     ranked-candidate-id
+     rationale-dir
+     read-active-mission-clock
+     read-edn-file
+     read-json-file
+     read-strategy-cascade
+     read-vocab-form-between
+     real-endpoints
+     recent-non-progress-count
+     record-input-read!
+     record-selection-clock!
+     render-active-mission-line
+     render-mission-focus-line
+     render-table
+     render-war-machine
+     repair-selection?
+     repo-blocks
+     repo-detect-patterns
+     repo-label-from-path
+     repo-nodes
+     route-tag
+     safe-slurp-json
+     scan-aif-heads
+     scan-annotation-graph
+     scan-blocks
+     scan-frames
+     scan-graph
+     scan-loop-health
+     scan-mark2
+     scan-metabolic-balance
+     scan-mission-detail
+     scan-mission-triage
+     scan-patterns
+     scan-portfolio
+     scan-r-criteria
+     scan-r12-apparatus
+     scan-self-watch
+     scan-sessions
+     scan-strategic-vocabulary
+     scan-support-attack
+     scan-vsatarcs-status
+     scan-window
+     select-and-record-cascade!
+     selected-mission-endpoint
+     selected-mission-focus
+     selection-law-of
+     selection-law-preconditions!
+     self-watch-diagnostic-text
+     session-evidence-limit
+     severity-rank
+     since-str
+     sorry-nodes
+     strategic-vocabulary-path
+     strip-edn-comments
+     substrate-get-edn
+     summarize-self-watch
+     summarize-working-tree-hygiene
+     task-belief-ladder?
+     tau-mode-of
+     temporal-coupling-edges
+     tick-mission-focus
+     tier-glyph
+     tier-max
+     tier-rank
+     trace-corpus-dates
+     trace-outcome
+     trace-record-identity
+     tz
+     unreadable-input?
+     url-encode
+     variational-tau-preconditions!
+     variational-temperature-opts
+     verdict-from-axes
+     vocab-block-between
+     vsatarcs-status-script
+     wm-clock-agent-id
+     wm-clock-type
+     wm-hp-update-type
+     workstream-dependency-edges
+     workstream-nodes
+     write-trace-and-clock!
+     zaif-harness-v1-gauges]},
+   futon2.aif.cascade-habit-store
+   {:loaded? true,
+    :interns
+    [attach-habits
+     default-path
+     monitor
+     policy-view
+     publish!
+     read-snapshot
+     read-state
+     record-selection!
+     selection-basis]},
+   futon2.aif.cascade-selection
+   {:loaded? true,
+    :interns
+    [bayes-choice
+     bayes-choice-tie-rule
+     log-sum-exp
+     refuse!
+     selection-posterior
+     valid-habit?]}},
+  :tripwire-baseline
+  {futon2.aif.full-loop-cohort
+   {:source-path "src/futon2/aif/full_loop_cohort.clj",
+    :source-sha256 nil},
+   futon2.aif.repair-obligation
+   {:source-path "src/futon2/aif/repair_obligation.clj",
+    :source-sha256 nil},
+   futon2.aif.morning-brief
+   {:source-path "src/futon2/aif/morning_brief.clj",
+    :source-sha256 nil},
+   futon2.aif.trace
+   {:source-path "src/futon2/aif/trace.clj", :source-sha256 nil}}},
+ :verification-limit
+ :namespace-presence-only-no-retroactive-byte-identity,
+ :reload-order
+ [futon2.aif.cascade-selection
+  futon2.aif.cascade-model-manifest
+  futon2.aif.policy
+  futon2.aif.live-c
+  futon2.aif.d-predecessor-task-authority
+  futon2.aif.cascade-habit-store
+  futon2.aif.cascade-habit-reinforcement
+  futon2.aif.cascade-plan
+  futon2.aif.job-text-retention
+  futon2.aif.scan-report
+  futon2.aif.token-outcome
+  futon2.aif.trace
+  futon2.aif.mission-hole-wants
+  futon2.report.war-machine
+  futon2.aif.full-loop-runner
+  futon2.aif.interpretation-construction
+  futon2.aif.run-narrative],
+ :base-authority :operator-supplied-not-a-loaded-commit,
+ :probe-form
+ "(let [names '[futon2.aif.cascade-selection futon2.aif.cascade-model-manifest futon2.aif.policy futon2.aif.live-c futon2.aif.d-predecessor-task-authority futon2.aif.cascade-habit-store futon2.aif.cascade-habit-reinforcement futon2.aif.cascade-plan futon2.aif.job-text-retention futon2.aif.scan-report futon2.aif.token-outcome futon2.aif.trace futon2.aif.mission-hole-wants futon2.report.war-machine futon2.aif.full-loop-runner futon2.aif.interpretation-construction futon2.aif.run-narrative]] {:captured-at (str (java.time.Instant/now)) :jvm-start-ms (.getStartTime (java.lang.management.ManagementFactory/getRuntimeMXBean)) :classpath (System/getProperty \"java.class.path\") :namespaces (into {} (for [s names] [s (if-let [n (find-ns s)] {:loaded? true :interns (vec (sort (keys (ns-interns n))))} {:loaded? false})])) :tripwire-baseline (when-let [n (find-ns 'futon2.aif.tripwire)] (when-let [v (ns-resolve n 'composition-baseline)] (when (bound? v) (into {} (for [[s x] @(var-get v)] [s (select-keys x [:source-path :source-sha256])])))))})"}
