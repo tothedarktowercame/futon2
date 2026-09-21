@@ -5236,7 +5236,7 @@
         ids (mapv :evidence/id (:entries manifest))]
     ;; + retained/route-attestation.edn (improve-4a) and retained/kernel-example.edn
     ;; (improve-2c) join the manifest.
-    (is (= 15 (count ids)))
+    (is (= 16 (count ids)))
     (is (= (mapv #(str "test-cohort-exhaustion/attempt-001/evidence/" (first %))
                   valid-attempt-evidence)
            (subvec ids 10 13)))

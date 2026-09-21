@@ -61,6 +61,18 @@
         (is (= :unavailable (get-in failed [:missingness :observations])))
         (is (every? #(= :missing (get-in % [:observed :status])) (:tokens failed)))))))
 
+(deftest unverifiable-execution-keeps-the-disposition
+  ;; The verifier's catch-all refusal (e.g. Agency cannot return the author
+  ;; job) is not an identity mismatch: observations are unavailable.
+  (with-example
+    (fn [{:keys [context expected]}]
+      (let [unreadable (fn [_] (throw (ex-info "job unavailable" {:status 404})))
+            r (example/collect context expected unreadable)]
+        (is (= :recorded (:status r)))
+        (is (= (:outcome context) (get-in r [:disposition :value])))
+        (is (= :unavailable (get-in r [:missingness :observations])))
+        (is (every? #(= :missing (get-in % [:observed :status])) (:tokens r)))))))
+
 (deftest wrong-identities-refuse
   (with-example
     (fn [{:keys [context signed]}]

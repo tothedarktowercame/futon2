@@ -65,8 +65,12 @@
       (require! (= occurrence (get-in record [:dispatch :occurrence])) :observation-occurrence-mismatch))
     (when (contains? #{:occurrence-mismatch :carry-occurrence-mismatch :carry-domain-changed
                        :declaration-pins-mismatch :declaration-snapshot-mismatch
-                       :observation-artifact-binding-mismatch :after-token-evidence-mismatch
-                       :observation-input-invalid} (:kind signed))
+                       :observation-artifact-binding-mismatch :after-token-evidence-mismatch}
+                     (:kind signed))
+      ;; Only identity/binding refusals refuse the example. The verifier's
+      ;; catch-all :observation-input-invalid (e.g. an author job Agency cannot
+      ;; return) leaves execution unverified: observations are unavailable, and
+      ;; the close disposition is still retained.
       (require! false (:kind signed)))
     (when-let [revision (get-in record [:revision-pair :after])]
       (require! (= artifact-sha revision) :observation-artifact-mismatch))
