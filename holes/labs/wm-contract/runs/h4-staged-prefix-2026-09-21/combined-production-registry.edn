@@ -1,0 +1,11 @@
+{:subject-id "H4/staged-production-prefix-receipts"
+ :repo-root "/home/joe/code/futon2-h4-validation-4U8t18"
+ :code-paths ["src/futon2/aif/policy_prefix_evidence.clj" "src/futon2/aif/policy.clj"
+              "src/futon2/aif/cascade_selection.clj" "src/futon2/aif/efe.clj"
+              "src/futon2/aif/observation_model.clj" "src/futon2/aif/matched_observation_evidence.clj"
+              "scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/aif/h4_production_stage_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.h4-production-stage-test"]
+ :author "codex-1"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/h4-staged-prefix-2026-09-21"
+ :index-file "/home/joe/code/futon3c/data/test-registry-validation/subjects.ednlog"}
