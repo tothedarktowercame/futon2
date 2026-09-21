@@ -242,6 +242,16 @@
      acting pattern (the per-state projection of ActionMarginal), with that
      function's declared tie-break rule (:action-name-ascending).
 
+   EMPTY CASCADES DO NOT ENTER THE ACTION MARGINAL. An empty cascade has no
+   first acting pattern, so it is absence, not an action, and absence cannot
+   carry action mass. Pooling them under their shared nil key let their count
+   decide the tick (21 of them summed to 0.785275 and outvoted the best acting
+   key at 0.179031 in run 2026-09-21-1789951020). A key that grows with the
+   roster and cannot lose is not a mechanism. A TYPED no-op is unaffected: it
+   carries :type, keeps its own key, and can still win on its own mass. When
+   NO candidate is acting, this refuses :no-acting-cascade-candidate with the
+   excluded count and mass -- the machine declines by saying so.
+
    The learned joint-menu E is read and attached here on every invocation.
    Missing stable identities consume neutral E with the reason recorded.
    Entries may carry :f; missing, null and false F consume the neutral 0.
@@ -255,9 +265,16 @@
                             :applied :cascade-selection-posterior
                             :beta β :beta-status :declared
                             :posterior {cascade-action-map → p}
-                            :softmax-weights {first-acting-action → p}
+                            :softmax-weights {first-acting-action → summed p}
+                            :action-marginal {first-acting-action → summed p}
+                            :per-policy-argmax {:action :probability :first-action}
+                            :excluded-non-actions {:count :mass :reason}
                             :tie-break-rule <rule>
                             :tie-broken? bool}
+
+   :softmax-weights carries the SUMMED marginal that actually decided; it is
+   recorded beside :per-policy-argmax so a reader can reconstruct a selection
+   — including a disagreement between the two — from the record alone.
      :softmax-weights      {first-acting-action → probability}
 
    `controller-authority/authorize` accepts the result on the admissible set
@@ -272,20 +289,59 @@
         candidates (mapv selection-candidate ranked-actions)
         posterior (cascade-selection/selection-posterior
                    {:beta beta :candidates candidates})
+        ;; An EMPTY cascade contributes NO action. `cascade-first-action`
+        ;; falls through to (:type action), and a cascade candidate with empty
+        ;; :precedence carries no :type, so its key is nil. `bayes-choice`
+        ;; then SUMS mass per key, as an action marginal must -- so every
+        ;; structurally distinct do-nothing pooled under one nil key. In run
+        ;; 2026-09-21-1789951020 that gave 21 empty cascades a combined
+        ;; 0.785275 against 0.179031 for the best acting key, while the
+        ;; per-policy argmax was a THREE-pattern cascade at 0.143225, exactly
+        ;; twice the selected candidate's 0.071389. The machine never judged
+        ;; inaction better; inaction won on aggregation.
+        ;;
+        ;; Absence is not an action and cannot carry action mass. A typed
+        ;; no-op is different: it carries :type, so it keeps its own key and
+        ;; still competes -- and can still win alone.
+        acting? (fn [[a _]] (some? (cascade-first-action a)))
+        acting (into {} (filter acting?) posterior)
+        excluded (into {} (remove acting?) posterior)
+        _ (when (empty? acting)
+            (throw (ex-info "Cascade selection refused"
+                            {:refusal
+                             {:kind :no-acting-cascade-candidate
+                              :detail {:candidates (count posterior)
+                                       :empty-cascades (count excluded)
+                                       :excluded-mass (reduce + 0.0 (vals excluded))
+                                       :reason
+                                       (str "every candidate is an empty cascade; an empty cascade "
+                                            "is not an action and cannot carry action mass")}}})))
         ;; bayes-choice takes action-of as a MAP (it does (get action-of id)),
         ;; so build the per-candidate first-acting-action map, not a function.
         action-of (zipmap (map :action ranked-actions)
                           (map (comp cascade-first-action :action) ranked-actions))
         choice (cascade-selection/bayes-choice
-                posterior action-of)
+                acting action-of)
         chosen-entry (some (fn [e]
                              (when (= (cascade-first-action (:action e))
                                       (:action choice))
                                e))
                            ranked-actions)
-        weights (into {}
-                      (map (fn [[a p]] [(cascade-first-action a) p]))
-                      posterior)]
+        ;; The MARGINAL that decided, summed. This was `into {}`, which
+        ;; OVERWRITES on duplicate keys instead of summing, so the record of
+        ;; the run above showed the winning key carrying 0.035694 when
+        ;; 0.785275 had decided it -- a reader could not reconstruct why it
+        ;; won. A certificate that cannot audit its own selection is not a
+        ;; certificate.
+        weights (reduce-kv (fn [m a p] (update m (cascade-first-action a) (fnil + 0.0) p))
+                           {} acting)
+        ;; Recorded beside the marginal so a future DISAGREEMENT between the
+        ;; two is legible from the record alone, rather than needing someone
+        ;; to recompute the marginal by hand as it did tonight.
+        per-policy-argmax
+        (let [[a p] (reduce (fn [[_ bp :as best] [a' p']] (if (> p' bp) [a' p'] best))
+                            (sort-by (comp pr-str key) posterior))]
+          {:action a :probability p :first-action (cascade-first-action a)})]
     {:action (:action chosen-entry)
      :rank (or (:rank chosen-entry) 1)
      :controller-score (:controller-score chosen-entry)
@@ -303,6 +359,12 @@
       :beta-status :declared
       :posterior posterior
       :softmax-weights weights
+      :action-marginal weights
+      :per-policy-argmax per-policy-argmax
+      :excluded-non-actions
+      {:count (count excluded)
+       :mass (reduce + 0.0 (vals excluded))
+       :reason :empty-cascade-is-not-an-action}
       :tie-break-rule (:tie-break-rule choice)
       :tie-broken?
       (boolean (some (fn [[a p]]
