@@ -7,7 +7,11 @@ this report in `improve-4-evidence/`.
 
 **Finding:** Joe has specified both attested incremental results and preferences
 about the route. Neither requires choosing between outcomes and process again.
-The missing join is an authorised, versioned mapping from a wanted condition to
+Joe’s Q1 follow-up (`165564f8`, A:52–64) supplies the classification frame:
+**IAD operationalizes a preference in a particular situation through a deontic
+valence (MUST, MAY, MAY NOT).** An institution with no engaged preference is not
+turned on. This supersedes treating guards and preferences as independent
+alternatives. The missing join is an authorised, versioned mapping from a wanted condition to
 its admissible evidence, including when and for which occurrence that evidence
 must hold. The test registry supplies execution warrants, not that semantic
 mapping. Existing checkpoints supply some route evidence, not a generic
@@ -29,7 +33,10 @@ historical: `war_machine.clj:6096–6098,6213` now derives and consumes it.
 
 ## 1. Specification inventory and current implementation
 
-Line numbers below are at the hashed inputs, not moving main. Short names:
+Line numbers below are at the hashed inputs, not moving main. A:45–77 refers
+to the follow-up at `165564f8`, retained separately in
+`improve-4-evidence/answers-Q1-follow-up-165564f8.md`; other source/code findings
+remain at the original survey revisions. Short names:
 
 - **N** = `holes/NOTE-joes-view-of-C.md` (explicitly distinguishes quotes,
   records and inferences).
@@ -40,14 +47,22 @@ Line numbers below are at the hashed inputs, not moving main. Short names:
 - **X** = `holes/labs/wm-contract/DRAFT-apex-institutions.md`.
 - **R** = `holes/labs/wm-contract/NOTE-test-registry.md`.
 
-Classification: **P-space** = impossible in the represented action envelope;
-**I-rule** = a rule with an observed check/typed denial or a proposed such rule;
-**C-soft** = valued observation/route, needing a declared preference law, not an
-execution ban. **Design** denotes an instruction about building the model,
-not a new C weight; its relevant enforcement category is stated. Classifying
-an agent's proposal does not ratify it. This inventories the concrete relevant
-statements in the requested corpus, including repeated statements with distinct
-content, rather than attributing every sentence of the agent-written notes to Joe.
+Classification now starts with **(situation condition, engaged preference,
+valence)**. MUST, MAY and MAY NOT describe how a preference is operationalized,
+not its numerical strength. Where the source does not fix a local condition or
+valence, record it as undeclared; do not invent a global MUST from a design
+principle. Active/inactive/unknown applicability is separate from satisfaction.
+
+The table's earlier **P-space / I-rule / C-soft** labels are retained solely as
+an **implementation-mechanism crosswalk**, not competing kinds of institution:
+P-space is feasibility in an action envelope; I-rule is monitoring/typed denial;
+C-soft is a declared preference over observations. **Design** is an instruction
+about constructing the model. One situational institution can involve all three
+mechanisms. A MAY does not create an action or numerical weight; a MUST need not
+be a pre-dispatch gate if its obligation is due later. The 09-17 examples remain
+valid descriptions of enforcement, but no longer answer the beside/inside
+question. This inventories relevant concrete statements in the requested corpus;
+agent-written proposals remain distinguished from Joe's words.
 
 | Specification excerpt and file:line | Class and present implementation evidence |
 |---|---|
@@ -66,6 +81,10 @@ content, rather than attributing every sentence of the agent-written notes to Jo
 | “an incremental work result is okay, and that exists” (A:16–17) | C-soft **not implemented as general warranted incremental credit**. `test_registry.clj:693–774` registers partial-work test scope; it does not imply whole-mission closure. |
 | “preferences about what happened along the way” / “stamp several places … on your route” (A:18–23) | C-soft route plus possible I-rule completion condition; **doc only generically**. The metaphor does not specify which stamps, ordering, repetition, or mandatory completion gate. Concrete existing checkpoints are below. |
 | “prefer if my specification was incorporated into the build result” (A:24–28) | Design implementation instruction; this discovery must lead to observable slices, not another indefinite deferral or demand to restate the specification. |
+| “valences that operationalize preferences” / “IAD … an operator over preferences” (A:52–64, follow-up `165564f8`) | **Primary frame:** situational operationalization with MUST/MAY/MAY NOT. No generic live operator currently joins situation, preference and valence; existing gates are particular mechanisms, not evidence that the whole requested operator is implemented. |
+| “don't apply to every single case” / “applied … particularly” (A:55–58) | Explicit situation predicate required. No global IAD checklist-as-mandatory-gate inferred. Slice 1 records applicable, inactive or unknown separately. |
+| “stamps … must collect” / “may collect” / routes “may or may not be able to take” (A:58–60) | Required and permitted stamps differ; feasibility remains separate from desirability and permission. Exact rule deadlines/boundaries remain local declarations. |
+| “you don't prefer it or you're uninterested … institution isn't turned on” (A:61–64) | No engaged preference means inactive. Missing evidence about engagement is unknown, not evidence of disinterest. No independent institution weight or default global obligation. |
 | “institutions as constraints on behavior … embodying preferences” (I:8, Joe verbatim, exploratory) | P-space/I-rule/C-soft decomposition proposed, **not a universal hard constraint adopted**. I:3–4 explicitly denies a schema ruling. Runner gates implement particular constraints; no generic institution-to-model compiler. |
 | institutions “could consume design patterns” / cascade “just an informational object” / “interpreter for Cascades” (D:7) | Design/I-rule hypothesis; not a proven mathematical duality. **Partial live interpretation**: `cascade_policy` guard/transition interpretation and runner dispatch/fold; no generic institutional interpreter with roles/obligations. `cascade_structure` explicitly records unavailable authority evidence, not institutions. |
 | “Which mission should come from an AIF outer loop” / “use my adaptation of Ostrom's principles from Table 2” (P:50–56) | Design plus I-rule profile; **dark mission-value enrichment**: `war_machine.clj:2361,2378` only definition/self-arity call across src/scripts. No IAD profile hits in futon2 src/scripts or futon3c/src (case-insensitive `iad`, excluding word-substring noise). Do not revive the removed judge path. |
@@ -118,8 +137,11 @@ institutional predicates. `PolicyHorizon.lean:49–63` defines step risk and the
 at τ=1…T; its fixture at :306 demonstrates changing the second member changes
 ranking. `ZeroPreferenceExclusion.lean:40–56` connects infinite risk to selection
 exclusion. Neither theorem stops an actuator or authorizes a new zero. N:71–79
-and N:211–214 explicitly mark the three-way institutional decomposition as an
-inference/open question; this report uses it as requested analysis, not a ruling.
+and N:211–214 mark the older three-way decomposition as inference/open question.
+**The beside/inside question is now answered by A:52–64.** Keep the mechanisms
+for implementation analysis, but subordinate them to Joe’s situational
+operationalization frame. A:66–77 is claude-3’s reading, not additional verbatim
+numerical authority or a ruling about precisely which execution boundary blocks.
 
 ## 2. Attested incremental work: the missing semantic join
 
@@ -151,6 +173,10 @@ Proposed versioned binding (record-only in slice 1):
  :adequacy {:reviewer ... :receipt-id ... :verdict ...}
  :occurrence {:run-id ... :attempt-id ... :role ...}
  :applicability {:kind :persistent-result-or-this-attempt :cutoff ...}
+ :institution {:situation-condition {:id ... :version ... :evidence ...}
+               :preference-ref {:id ... :version ... :authority ...}
+               :valence :must-or-may-or-may-not
+               :activation :active-or-inactive-or-unknown}
  :authority {:declaration ... :version ...}}
 ```
 
@@ -215,12 +241,46 @@ call a server, run reviewed tests, or assert semantic sufficiency from a key alo
 
 ## 3. What route stamps could observe, and which τ
 
+Joe’s follow-up makes the first question: **which preference is engaged in
+this situation, and with which valence?** An institution is a versioned tuple
+`(situation condition, preference it operationalizes, valence)`, with authority
+and evidence for evaluating applicability. Its record distinguishes:
+
+- **Active:** the situation condition holds and the named preference is engaged.
+  Then MUST requires the declared stamp by its boundary/deadline, MAY permits
+  it, and MAY NOT prohibits the declared action/route in that situation.
+- **Inactive:** the situation is outside the rule’s scope, or the named preference
+  is explicitly not engaged. No obligation, penalty or new weight is inferred.
+- **Unknown:** condition or engagement evidence is missing. This is not an
+  inactive institution, permission, a violation, or an observed failed stamp.
+
+The preference’s declared content/strength supplies any soft route valuation;
+MAY itself supplies no reward. A preferred route can still be infeasible or
+prohibited by another applicable rule. A MUST obligation and an inability to
+fulfil it need a recorded conflict/resolution, not silent softening. Evaluate
+activation from the declared rule inputs, never from whether the eventual result
+was convenient. If situations can change, record when activation changes and
+which existing obligation persists, expires or remains unresolved under that rule.
+
+**Where this differs from the older enforcement spectrum:** it does not locate
+institutions either outside C as guards or inside C as weights. It relates them
+to the preference they enact, in a specific situation. Action-space feasibility,
+guard/monitor placement and Cτ valuation remain independent implementation axes.
+The eleven principles still guide institutional design together; “use them all”
+does not mean each design requirement is active globally. The candidate stamps
+below are possible predicates whose local valence must be retained, not automatic
+MUSTs. Numerical strength, sanction severity and exact deadline do not follow
+from the valence word alone.
+
 A stamp is a **checked occurrence of a declared predicate**, with subject, actor,
 role/authority, rule version, evidence digest, event time/order, and verdict
 (satisfied / violated / pending / observation-missing). A planned action, prompt,
 card or checkpoint's mere presence is not a satisfaction stamp. A stamp can
-observe an institutional guard, yet the guard must remain at the execution
-boundary; making compliance preferred never substitutes for enforcing it.
+observe compliance with an active institution. Any required guard remains at its
+declared boundary; making compliance preferred never substitutes for enforcement.
+The observation carries the institution ID, situation/engagement evidence and
+valence alongside the stamp verdict, so inactive and unobserved cannot be
+misreported as fulfilled obligations.
 
 | Candidate stamp | Existing observable evidence and limit | Proposed placement; not current model semantics |
 |---|---|---|
@@ -249,8 +309,9 @@ This is an example schema, **not** a choice of T=3 for production. Preexisting
 warrants belong in initial state; a prerequisite missing at dispatch triggers
 an I-rule denial if the rule says mandatory, not a fake future stamp.
 
-Cτ then prefers particular **observable stamp/result configurations** at the
-specified step. B must predict the actions and monitor updates; A must distinguish
+Cτ then expresses the engaged preference over particular **observable
+stamp/result configurations** at the specified step, with institution activation
+and valence recorded. It does not sum independent weights assigned to institutions. B must predict the actions and monitor updates; A must distinguish
 evidence from assertion. If a process condition depends on an earlier event,
 carry it in state so the declared model remains adequate. Preference over a
 history can be expressed on that augmented state/observation; arbitrary marginal
@@ -277,11 +338,19 @@ penalties, reward sizes, or sanction severity from a principle's name.
 
 ## 4. Slices — one observable behavior each
 
-1. **Record-only attestation/stamp account.** At close, join supplied evidence to
-   versioned criterion declarations; record each binding's applicability,
+1. **Record-only situational operationalization account.** Retain each declared
+   institution as `(situation condition, preference reference, valence)` plus
+   version/authority; record the situation and preference-engagement evidence,
+   active/inactive/unknown verdict and reason. At close, join supplied stamp and
+   attestation evidence to those declarations; record each binding's applicability,
    matching evidence or typed gap, and which existing checkpoint supplied it.
    Preserve all eleven IAD profile entries as artifact/gap statements, never a
-   score. Default behavior/scoring unchanged. Acceptance: frozen reference run
+   score or free-standing institutional weight. An undeclared local tuple is a
+   typed gap, not a newly activated rule. Default behavior/scoring unchanged.
+   Acceptance: same requirement active in its declared situation but inactive
+   elsewhere; explicit unengaged preference is inactive; missing engagement is
+   unknown; MUST/MAY/MAY NOT remain distinct with the same preference reference;
+   no synthesized scalar or global requirement. Also: frozen reference run
    keeps updater-negative despite grounded-change; a scope-matched incremental
    warrant is distinguished from a mission closure; absent binding stays missing;
    prompt/selected-pattern/post-dispatch registration cannot masquerade as the
@@ -331,14 +400,17 @@ Concrete decisions reserved to Joe (not requests to restate the whole theory):
   general desire for route stamps does not choose their sequence for a mission.
 - For WM focus, is an explicitly authorized infrastructure interruption merely
   less preferred, neutral, or outside the task's permitted scope? This determines
-  C-soft versus guard semantics; no numeric odds proposed by the text.
+  how that preference is operationalized in this situation (permitted but less
+  preferred, permitted and neutral, or prohibited); no numeric odds are supplied
+  by the text.
 - After a concrete incremental criterion and route pair are prepared, what relative
   preference strength/composition should distinguish them? Improve-2's unanswered
   budget-scope/odds questions remain; its “what is valued” question is answered.
 - If a graded sanction is to be implemented, who adjudicates the named breach and
   what response applies? Typed denial alone is not that ruling.
 
-None of these questions blocks slice 1. No permission to weaken existing guards,
+The beside/inside question is **not** among the remaining questions: Joe has
+answered it. None of these local implementation questions blocks slice 1. No permission to weaken existing guards,
 weight the eleven principles, or reinterpret completion claims is implied.
 
 ## Reproduction and validation
@@ -378,3 +450,12 @@ retained. This does not revalidate the 102 surveyed warrants.
 clojure -M -m futon3c.test-registry check /home/joe/code/futon2-narrative-improve-4/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/registry.edn
 clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-improve-4/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/registry.edn
 ```
+
+### Follow-up incorporated
+
+Joe’s Q1 follow-up at main `165564f8` is incorporated into the inventory, §3
+and slice 1. The original census and code survey remain pinned to their stated
+revisions. This follow-up changes documentation only; the census test/data and
+its registered warrant are unchanged, so no test execution was repeated.
+Validation: `git diff --check` passed. The retained answer snapshot identifies
+the source without copying newer production changes into this branch.
