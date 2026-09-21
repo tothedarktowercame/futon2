@@ -9,6 +9,9 @@
             [futon2.aif.full-loop-cli :as cli]
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.delivery-qa :as delivery-qa]
+            [futon2.aif.token-outcome-test :as token-fixture]
+            [futon2.aif.token-outcome :as token-outcome]
+            [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
@@ -4854,7 +4857,9 @@
                                       (:attempt-id result) %1 (name %2))
                              (range 1 7)
                              [:time-step :selection :construction
-                              :dispatch :build :adjudication])]
+                              :dispatch :build :adjudication])
+          expected-ids (conj expected-ids
+                             (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/token-outcome.edn"))]
       (is (= expected-ids (mapv :evidence/id (:entries manifest))))
       (is (= expected-ids (:admitted-evidence retained))))
     (doseq [entry (:entries manifest)]
@@ -5221,10 +5226,10 @@
         result (runner/run-opportunity! opts)
         manifest (:close-evidence-manifest result)
         ids (mapv :evidence/id (:entries manifest))]
-    (is (= 13 (count ids)))
+    (is (= 14 (count ids)))
     (is (= (mapv #(str "test-cohort-exhaustion/attempt-001/evidence/" (first %))
                   valid-attempt-evidence)
-           (subvec ids 10)))
+           (subvec ids 10 13)))
     (is (= ids (get-in result [:close-retention :admitted-evidence])))
     (doseq [entry (drop 6 (:entries manifest))]
       (let [bytes (Files/readAllBytes (.toPath (io/file (:source-path entry))))
@@ -5676,3 +5681,87 @@
     (is (= :test-cohort-exhaustion (:discharge/cohort-id discharge)))
     (is (= "cohort-discharge-run" (:discharge/run-id discharge)))
     (is (= (:xt/id discharge) (get-in item [:witness :discharge-id])))))
+
+
+(deftest close-retains-token-mismatch-before-manifest-freeze
+  ;; The runner source-identity guard remains enabled. Run on merged main.
+  (token-fixture/with-artifact
+   (fn [sha]
+     (let [{:keys [root] :as c} (retention-cohort "runner-token-outcome")
+           decision (merge (:decision judgement) (token-fixture/decision))
+           record (io/file root "d-task.edn")
+           _ (spit record (pr-str {:after-token-evidence (token-fixture/measurements sha)}))
+           ;; A fresh-author artifact must bind in the repository the build
+           ;; resolves in (the cohort root), not the synthetic default "/repo".
+           opts (assoc (retention-success-opts c)
+                       :author-artifact-observer-fn
+                       (fn [r before job]
+                         (assoc (synthetic-artifact-binding r before job) :repo root))
+                       ;; The retention fixture's witness has :before nil, which
+                       ;; the close validator rejects for a grounded change.
+                       :ground-fn (fn [& _] {:before {:implementation-entity nil}
+                                             :after {:implementation-entity {:id "retained"}}
+                                             :resolved? true :dial-moved? true
+                                             :implementation-id "retained"
+                                             :discharge-id "retained-discharge"})
+                       :judge-fn (fn [_] {:judgement (assoc judgement :decision decision)})
+                       :poll-fn (fn [_ id]
+                                  (if (= id "retention-author")
+                                    {:job-id id :state "done" :artifact-ref sha
+                                     :result-summary (str "FULL_LOOP_AUTHOR: DONE " sha)
+                                     :feature-card feature-card-claim
+                                     :execution successful-execution}
+                                    {:job-id id :state "done" :execution successful-execution
+                                     :result-summary "FULL_LOOP_REVIEW: APPROVE"})))
+           result (with-redefs [d-task/complete!
+                               (fn [& _] {:source {:path (.getPath record)
+                                                   :sha256 (digest/sha256 (slurp record))}})]
+                    (runner/run-opportunity! opts))
+           close-event (cohort/read-edn (io/file root "test-cohort-exhaustion"
+                                                (:attempt-id result) "007-closed.edn"))
+           receipt (get-in close-event [:payload :judgment :token-outcome-comparison])
+           entry (last (get-in close-event [:payload :close-evidence-manifest :entries]))]
+       (is (= :grounded-change (:outcome result)))
+       ;; Retained files must not disturb the closed attempt's exact file set.
+       (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
+       (is (= :frozen (get-in result [:checkpoints :selection :judgment
+                                     :token-outcome-prediction :status])))
+       (is (= 3 (count (:tokens receipt))))
+       (is (= :predicted-not-observed
+              (:verdict (first (filter #(= token-fixture/updater (:token %)) (:tokens receipt))))))
+       (is (= receipt (edn/read-string (slurp (:source-path entry)))))
+       (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))
+       (is (.isBefore (Instant/parse (:admitted-at entry))
+                      (Instant/parse (:recorded-at close-event))))))))
+
+
+(deftest token-comparison-bytes-are-admitted-and-source-tampering-refuses
+  (token-fixture/with-artifact
+   (fn [sha]
+     (let [root (.toFile (Files/createTempDirectory "comparison-retention-"
+                                                  (make-array FileAttribute 0)))
+           source (io/file root "d-task.edn")]
+       (try
+         (spit source (pr-str {:after-token-evidence (token-fixture/measurements sha)}))
+         (let [d-result {:source {:path (.getPath source) :sha256 (digest/sha256 (slurp source))}}
+               retained (#'runner/retain-token-outcome!
+                         root :cohort "attempt" (token-outcome/freeze-prediction (token-fixture/decision))
+                         d-result sha)
+               manifest (#'runner/checkpoint-evidence-manifest
+                         {} root :cohort "attempt" token-fixture/target
+                         {:token-outcome-entry (:entry retained)})
+               entry (first (:entries manifest))]
+           (is (= 1 (count (:entries manifest))))
+           (is (= (:receipt retained) (edn/read-string (slurp (:source-path entry)))))
+           (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))
+           (is (= :predicted-not-observed
+                  (:verdict (first (filter #(= token-fixture/updater (:token %))
+                                           (get-in retained [:receipt :tokens]))))))
+           (spit source "{}")
+           (is (= :evidence-digest-mismatch
+                  (:token-outcome/refusal
+                   (try (#'runner/retain-token-outcome!
+                         root :cohort "another" nil d-result sha)
+                        nil
+                        (catch clojure.lang.ExceptionInfo e (ex-data e)))))))
+         (finally (doseq [file (reverse (file-seq root))] (.delete file))))))))
