@@ -338,6 +338,66 @@ which is also below the endpoint threshold. This is why the same declared
 55/35/5/5 cannot settle entropy behavior until the observation carrier and
 within-class allocation are specified.
 
+### Confirmed split: known failure is not an unobserved outcome
+
+Follow-up `invoke-1790012152117` confirms .55/.35/.05/.05 for focus,
+associated, useful elsewhere, and **nothing delivered and known**, respectively.
+The last class requires an observed typed failure (including stop-the-line),
+not simply an absent increment. The records already preserve distinctions that
+an outcome classifier must retain:
+
+| Recorded evidence | Meaning and permitted classification |
+|---|---|
+| Token comparison `:predicted-not-observed`, Boolean false with matching artifact | The predicted token was observed absent. The updater example establishes a checkbox mismatch; it does not establish that no attested work increment occurred. |
+| Token comparison `:observation-missing` with `:measurement-unavailable`, `:ambiguous-measurement`, or `:artifact-revision-mismatch` | No admissible answer to that token question. Neither false nor known non-delivery. |
+| Admitted D-task v2 artifact observation, Boolean false | Revision-bound negative evidence with declaration/locator, schedule, artifact and evidence identities. Its authority explicitly does not establish mission completion or causation. |
+| D-task v2 typed refusal, or a token's `{:status :missing :kind ...}` | A failed evidence check or unavailable measurement. A typed **evidence refusal** is not automatically an observed **work failure**. |
+| Occurrence-bound stop-line finding and its repair/lifecycle evidence | Evidence of a known process failure, eligible for the declared failure classifier. Delivery measurements may still be missing; preserve both facts rather than overwrite one with the other. |
+
+Source anchors at this discovery's pinned checkout:
+`src/futon2/aif/token_outcome.clj:48` (`compare-outcomes`),
+`src/futon2/aif/d_predecessor_task_authority.clj:325` (`observation-value`),
+`:330` (`signed-observations`), and `:372` (`verify-observations-v2`).
+`src/futon2/aif/full_loop_runner.clj:212` explicitly distinguishes a stop-line
+record from the durable parked lifecycle transition: recording the former
+alone cannot attest the latter. An outcome classifier must bind the finding
+to the occurrence and state which proposition it establishes.
+
+**Consequence of an explicit fifth outcome called “unobserved”:** the four
+confirmed masses sum to one, leaving C(unobserved)=0. Under mathematical KL,
+any policy with Q(unobserved)>0 has infinite risk: even Q(unobserved)=.01
+contributes .01 log(.01/0)=∞. If every policy can lose its measurement, every
+policy is excluded. This is not a small penalty for poor observability, and
+Joe's 5% for useful interruptions does not supply missing-observation mass.
+These are mathematical consequences of that proposed carrier, not a claim
+that the present scorer has a fifth outcome or implements this extension.
+
+**Alternative requiring an explicit observation model:** keep unobserved as
+an observation mask/epistemic state, with the latent work outcome still in the
+four valued classes. Missing evidence then leaves a distribution over those
+classes; it does not become a fifth valued outcome or a known failure.
+Marginalization needs a declared missingness likelihood. Treating a missing
+measurement as neutral is justified only under an appropriate ignorable
+missingness assumption; selective loss of failure evidence needs its own
+model. Do not drop missing rows and renormalize the remaining outcomes as a
+substitute. Entropy/ambiguity depends on that model, not on assigning every
+missing row the same uncertainty score.
+
+This alternative is **not implemented by the existing observation evaluator**:
+`src/futon2/aif/observation_model.clj:150` (`observation!`) refuses a non-observed
+status or an empty event as `:missing-observation`. Slice 1 must record the
+unresolved classification/model requirement, preserving this refusal. Slice 2
+needs the declared observation semantics before any switch-on.
+
+Accordingly, the numerical .55/.35/.05/.05 tables above remain explicitly
+labelled token-domain counterexamples. In particular, F2's unchanged token
+state cannot be promoted to the confirmed 5% known-failure class. The frozen
+runs do not identify the required predictive attestation/failure kernel, so
+actual confirmed-carrier G, posterior and selection changes remain held;
+reporting the proxy winners as the confirmed policy would fabricate that join.
+The 60/40/0 comparison and 0/.05/.10 sensitivity table quantify the alternative
+carrier assumptions, rather than resolve missing evidence by fiat.
+
 ## 4. Questions, now answered and narrowed
 
 The original concrete questions were:
