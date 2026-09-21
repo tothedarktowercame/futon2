@@ -198,7 +198,38 @@ Joe, verbatim:
 > that. And nothing delivered? Boy. Um... Ask that in a more specific way if
 > you need an answer.
 
-claude-3's reading, PENDING Joe's confirmation: irrelevant is not a hard zero
-but 5%. The spoken order "35, 55, 5" sums to 95; the reading closest to the
-earlier 60/40 is focus 55, adjacent 35, irrelevant 5, with the remaining 5
-open (proposed: "nothing delivered"). Asked back to Joe to confirm.
+(Superseded by the confirmation below.)
+
+### Confirmed split
+
+Joe, verbatim:
+
+> Oh, I also just realized my percentages didn't actually add up right. So
+> yeah, let's allow thirty-five percent for associated work, 55% for focused
+> work, and 5% each: 5% for relevant work that's delivered — or sort of
+> irrelevant work that's delivered, relevant to something else. Let's say
+> interruptions, you know, emergency services, that kind of stuff. And then
+> another 5% for nothing delivered, which is weird because that's not my
+> preference. I don't prefer that nothing's delivered. But at least I'd rather
+> know if nothing was delivered than not know about it. So this 5% is kind of
+> the tax for allowing the possibility of dealing with failure modes, and
+> that's maybe where I would put in things like the stop the line. So, you
+> know, I really value stopping the line when something is going wrong, even
+> though it means that no work is getting delivered at that time. So hopefully
+> that breakdown makes a little bit more sense.
+
+Ruled terminal C over how a run ends, relative to the (discovered) focus:
+
+| outcome class | mass |
+|---|---:|
+| attested increment on the current focus | 0.55 |
+| attested increment on associated (adjacent) work | 0.35 |
+| attested increment on work outside the focus, useful elsewhere (interruptions, emergencies) | 0.05 |
+| nothing delivered, and KNOWN: an observed, typed failure or a stop-the-line | 0.05 |
+
+Notes (claude-3):
+- The last 5% is for knowing that nothing was delivered (a recorded failure
+  mode, stop-the-line), not a preference for non-delivery. An outcome that is
+  not observed at all is not in this class; the split gives it no mass.
+- Implied odds: focus : associated : elsewhere : known-failure =
+  11 : 7 : 1 : 1 (focus vs known failure = ln 11 ≈ 2.40 nats).
