@@ -1,0 +1,3356 @@
+{
+  "rule": "commit-facets-v1; 24h, no merges, fractional commit credit, WM/APM unmerged unless explicit semantic bridge",
+  "heads": {
+    "futon0": "93dfd2a44438ef4737c1e3fb719707575d124656",
+    "futon2": "40762056",
+    "futon3c": "cfa2e00c80dcd0122cceb5732ea31da7cdfcc1f2",
+    "futon4": "5e4501fdf79d0229bb7ab528cf31d76e738f9db3",
+    "futon5a": "1e4ab8d74364dda325ef8aafb7f14696899ac5d9",
+    "futon6": "e10347810d5ad2c4343da50e244bc7de68d42dfd",
+    "mathlib4": "77fdbda5b5629b3c8f6c7f9bbb027da0436ba1b3",
+    "apm-lean": "92a094413008f86d908e26c8c05ab9f2d4832f8d"
+  },
+  "activity": {
+    "2026-09-20": {
+      "until": "2026-09-21T00:00:00Z",
+      "commits": 165,
+      "facet_credit": {
+        "WM": 151.0,
+        "other/unattributed": 14.0
+      },
+      "top_mission_touches": [
+        [
+          "M-a-wmc-scaling",
+          4
+        ],
+        [
+          "M-or-training-as-learning-system",
+          2
+        ],
+        [
+          "M-superpod-mark3",
+          2
+        ],
+        [
+          "M-aif-wiring",
+          1
+        ],
+        [
+          "M-goals-and-holes",
+          1
+        ],
+        [
+          "M-points-de-fuite",
+          1
+        ],
+        [
+          "M-a-sorry-enterprise",
+          1
+        ],
+        [
+          "M-hypergraph-operator",
+          1
+        ],
+        [
+          "M-stack-geometry",
+          1
+        ]
+      ],
+      "rows": [
+        {
+          "repo": "futon2",
+          "sha": "94628159878b026e41b99452fce0ccfec710bbc1",
+          "at": "2026-09-20T23:58:02+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "711bcc315240c98d530ae46238fd5f1d299dc4f2",
+          "at": "2026-09-20T23:50:09+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "df05294b7ea20c8de5eb95fdda78253bd59b1443",
+          "at": "2026-09-20T23:47:47+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1c7113b6f021273da81e7515f276da9ddea27667",
+          "at": "2026-09-20T23:45:52+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d89ae8c854a90c2145f97912492e68a891732e81",
+          "at": "2026-09-20T23:40:49+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "2f6859d1df9ae26d0470d350848de0a8a8a58ed1",
+          "at": "2026-09-20T23:39:25+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "100ab9b00c65fe5386104f4c34e347cef1a8268b",
+          "at": "2026-09-20T23:35:58+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "28a90c731d30fab8d8e7f8ed7bf0a840c6301f3d",
+          "at": "2026-09-20T23:34:21+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "747f86fd68a0ca34107cc7828164a08f1e0f72ac",
+          "at": "2026-09-20T23:32:40+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3d52ea87521ed17a3dc8c644c8615d1e856508a9",
+          "at": "2026-09-20T23:31:17+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "9461eb522a19ce68a4679b12648512c589a36aca",
+          "at": "2026-09-20T23:31:04+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1ed5006eae14ffaabed7d3dd2e0a8b5f7c06bb4e",
+          "at": "2026-09-20T23:07:39+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": [
+            "M-a-wmc-scaling",
+            "M-aif-wiring",
+            "M-goals-and-holes",
+            "M-points-de-fuite"
+          ]
+        },
+        {
+          "repo": "futon2",
+          "sha": "9f3550bdb656528902b20db7ebde17632b067ffd",
+          "at": "2026-09-20T22:30:16+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0d3f5a4d8eb4d19748d4bf9d9b382c4956811a1b",
+          "at": "2026-09-20T22:22:34+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "a05bf13cbbe62295b85240fdd95aac7d5a1a2691",
+          "at": "2026-09-20T21:57:23+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c7c0545fc505a4bc6e7681b17576470b0c67ebd7",
+          "at": "2026-09-20T21:56:43+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3e9650388cebed9da7c3e38934edff9334bd45d9",
+          "at": "2026-09-20T21:55:07+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "056c362a2a36f0f288a75f861b7347d2a5f319c0",
+          "at": "2026-09-20T21:54:18+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "10d3dc9087de835c366add77141d6aa64f95a969",
+          "at": "2026-09-20T21:52:14+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "a38becc9ae6d5477a62da24f6753556395aa6271",
+          "at": "2026-09-20T21:43:08+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "df3f113cdc6542aa28389e60e7fb58bf193ccea1",
+          "at": "2026-09-20T21:40:59+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c05b218280c776583efba5e9cb9a890229a5e08c",
+          "at": "2026-09-20T21:40:19+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "24219601ac3f37ee40518c93bd30e87ead8db216",
+          "at": "2026-09-20T21:35:55+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "20e15631badd3951f29cb851155d29e3d71b5f62",
+          "at": "2026-09-20T21:29:55+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "778976646af95d2626878909102541e6b18263b1",
+          "at": "2026-09-20T21:29:31+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "26a0f7d562ca219fdb9055a49cd61892d9e7d74e",
+          "at": "2026-09-20T21:20:00+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "770d2d958c6525c2f59ce9d1e3d42b2970a1b2fa",
+          "at": "2026-09-20T21:17:45+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "2ca142c5fcd166d42a985c8ad4623a5a66999b86",
+          "at": "2026-09-20T21:17:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "82d2c93631a826ede1ef8f3111b3cd6bcec119b5",
+          "at": "2026-09-20T21:16:43+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c91261fdbc7b80e903d3203ca53cc865291cae9f",
+          "at": "2026-09-20T21:14:56+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "328141ab99fc016a08d6be7120b59edb51b7093a",
+          "at": "2026-09-20T21:14:19+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "400889ef7425ebdf3a89ee3fc9e00311b6b9aba7",
+          "at": "2026-09-20T21:13:27+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "41655601ffe31a371a2132bbe43951c5d91b6b4a",
+          "at": "2026-09-20T21:05:29+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "827ca1833844ad0b47c61a1f227f95d6da8d57fd",
+          "at": "2026-09-20T21:01:06+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": [
+            "M-a-wmc-scaling"
+          ]
+        },
+        {
+          "repo": "futon2",
+          "sha": "ebc93eb40de2277d91084a2a4f161a79062c356f",
+          "at": "2026-09-20T20:58:42+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "9a91508449c69f00a0bce255fcdebe2dbf633f2f",
+          "at": "2026-09-20T20:57:25+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": [
+            "M-a-wmc-scaling"
+          ]
+        },
+        {
+          "repo": "futon2",
+          "sha": "08b49f2d7a9a5c18609c0b23bd6860c304a51c1c",
+          "at": "2026-09-20T20:53:55+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5c49bf72e2d84310681a2fc581fd49bb78f8192c",
+          "at": "2026-09-20T20:52:41+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "aae84fc302207cd79cdf0adf9353706beb2b516a",
+          "at": "2026-09-20T20:47:42+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "6ae06134d4b9197ec0fa83d8b8079d131b195aae",
+          "at": "2026-09-20T20:06:02+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "9a0c14957a89895c4396936723f4e3b23298655d",
+          "at": "2026-09-20T20:05:35+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "fa49ed93444fdd147f441716d8c4d8c05a79874b",
+          "at": "2026-09-20T19:58:39+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "dea71ac387d921b18e2015770370db39c22d0244",
+          "at": "2026-09-20T19:31:46+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e9a5bbf9717385e43223e0414e3bbe6c41815a6d",
+          "at": "2026-09-20T19:30:39+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "ca05bedfe4ac4ff7e2e235cce96b7462ccdbec31",
+          "at": "2026-09-20T19:25:30+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "edaa98c12ae8ae20da046dbd9b9962933734c033",
+          "at": "2026-09-20T19:25:21+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "08f584535facd3b9bd2980d6011e89e44e0c0266",
+          "at": "2026-09-20T19:24:23+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "db756f2eee45692b070c7b684db8b6edf551b5a0",
+          "at": "2026-09-20T19:21:36+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7d425ff9958adda6caf15a0b0d161ef39e80b625",
+          "at": "2026-09-20T19:20:32+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "43d1c3e808f12c362ef216289d0ce3ab488f4de5",
+          "at": "2026-09-20T19:18:42+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "66a3e72feeb2a689654d30e7185643f8f835e809",
+          "at": "2026-09-20T19:17:38+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5a0f6a3f808545fd5d172f3645d358113d6ecc48",
+          "at": "2026-09-20T19:08:55+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "76a84bf0e61ae1699481818bc61393a2e59b0aea",
+          "at": "2026-09-20T19:05:24+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5470dd636a5ab66d9e68e81e9208f298958e7032",
+          "at": "2026-09-20T19:03:09+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3e4ac5308f603305ee6e0c47428adedfd92a5558",
+          "at": "2026-09-20T19:02:06+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c42b780d088a1caed9c7210181ddfab34bd25a0c",
+          "at": "2026-09-20T19:00:57+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "8d1afde8b8432bfb20b0c658b031d3ecb1346c4e",
+          "at": "2026-09-20T18:57:09+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c300c67bf82d47dad47e3a513e0b0b90d9eda312",
+          "at": "2026-09-20T18:54:22+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1bc98c0498607f6663232468edafb3e57c00567c",
+          "at": "2026-09-20T18:39:24+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "172ca152cfad05c6416f4aa9ff87ffb36b14d6d3",
+          "at": "2026-09-20T18:34:37+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d9f5369ec9632ba28cf5f565f94fa71599b1064b",
+          "at": "2026-09-20T18:28:36+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "ec556c0dc0cdde12c0baf2a4c470cf8d3db74df2",
+          "at": "2026-09-20T18:27:53+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "76f8ed25c8a7cdc783dfcd733c6083926c573d02",
+          "at": "2026-09-20T18:21:21+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "fec52dcf47779a13f4462f8bd3076a6d0baf1b3e",
+          "at": "2026-09-20T18:20:02+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "afbbddaa8c0c49d99c1d277234f7ee942372b413",
+          "at": "2026-09-20T18:10:46+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "958677e2ee32467f944e2ec69e30e7512c751845",
+          "at": "2026-09-20T18:07:14+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "a13436da3ad979fa319518980ed11ddbb05def4e",
+          "at": "2026-09-20T18:04:00+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5271311d484fe7ff26d0f29479ae748b4ba790ab",
+          "at": "2026-09-20T18:03:16+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": [
+            "M-a-wmc-scaling"
+          ]
+        },
+        {
+          "repo": "futon2",
+          "sha": "aae630d35dfd84c037571b12c148969c8fde4ebf",
+          "at": "2026-09-20T18:01:09+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5e92b8376541d666a3c19534a01f126e6873c446",
+          "at": "2026-09-20T17:57:28+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3b11c270a18be84595acd82b1fb3efa8ef726cd0",
+          "at": "2026-09-20T17:55:02+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7d4ffedf5e56f9f9c5cb49d2769a72d72342e8b5",
+          "at": "2026-09-20T17:50:42+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "671528836f6241cee9696b29160f0b4f3df059ef",
+          "at": "2026-09-20T17:47:57+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3b5557aa838b05e5accd4861e85351c041d8a5b2",
+          "at": "2026-09-20T17:47:12+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d594140cd6241323f294266d59e1b9e331454c82",
+          "at": "2026-09-20T17:44:24+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "37702836d193c47304a4a9fdc8e9840117ad5f48",
+          "at": "2026-09-20T17:37:03+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "8dab8e32de09c144c5a78f5c9f7aa894dd1b3a07",
+          "at": "2026-09-20T17:35:48+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "dedb92369fb254de9a75bc5ff1194f1fdfc66c2d",
+          "at": "2026-09-20T17:27:42+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c4fd0afdb89b0e53897dff6fc3f124b22ca57edd",
+          "at": "2026-09-20T17:26:06+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "20b5ce43a4de50340ac08c9a84519a750fb75435",
+          "at": "2026-09-20T17:24:23+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e0b999a2e24afce1ba515b3d77e8c6313431f527",
+          "at": "2026-09-20T17:11:00+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "64b47a96e0b505a53e8e3cca0bd642ff01005579",
+          "at": "2026-09-20T17:10:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "4b140f705876a423fab6877f80dae822a9944a5a",
+          "at": "2026-09-20T17:09:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "cee539e64766ed692e12a0956657d6fe3cc1309c",
+          "at": "2026-09-20T17:08:59+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1d249a919413956beba1d147718b6fb6d0a9b5dd",
+          "at": "2026-09-20T17:05:52+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c98a9a2936c7dc116e5ead309c489b8496e038a1",
+          "at": "2026-09-20T16:30:46+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "a6f7421427f0036c89e5bd1d5c4c2f00f96bb11d",
+          "at": "2026-09-20T16:16:36+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c322c22ff2556181d397193653a1550cef3c9070",
+          "at": "2026-09-20T16:15:02+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1a3a76802a5043f33099541f5ae9ba978778700b",
+          "at": "2026-09-20T16:07:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "b7f21803f4359215cb78e77516de93d8fe1c4101",
+          "at": "2026-09-20T15:56:52+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "131ebd8c45a7bb7fbb36cae746c2e75f559d36a1",
+          "at": "2026-09-20T15:55:25+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "4896fcef36af4c683f82142ca14fede1e1fd3bb4",
+          "at": "2026-09-20T15:51:06+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "32c124d985141cfbf80e3b49f92ad949bebb84fa",
+          "at": "2026-09-20T15:49:00+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5e4ac2f8fb44692d83f58cbef7780451ffc9e6d8",
+          "at": "2026-09-20T15:47:40+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "55cab9326797bc7b899ea502bdf155f464f913a6",
+          "at": "2026-09-20T15:46:31+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "a8b6aba4b7d3c846b2c8587b8847bf8733ef316e",
+          "at": "2026-09-20T15:44:41+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "41cf0550b01666d68f60c0455cadf418c2784f89",
+          "at": "2026-09-20T15:41:40+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "02471f6f5c967fe8ea5b7177375a252d88a397e2",
+          "at": "2026-09-20T15:37:35+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e4a6084d4b61a1a053118da58630aefb3a855350",
+          "at": "2026-09-20T15:36:25+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "b100df7ccd7c0e95811a9d4dc5d7c66b28d5feb3",
+          "at": "2026-09-20T15:35:11+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0d4cf81bfad4f58b70f6da63a60073b070b34983",
+          "at": "2026-09-20T15:10:46+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "09a11b0f6db69127f4e3ac6e9fe3396dfb08b19a",
+          "at": "2026-09-20T15:00:37+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "206c7e6bf0e9e4d097582e45cb0824026b950e87",
+          "at": "2026-09-20T14:52:19+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "157b5ab80a155b654f689b38695edfc63dcfba98",
+          "at": "2026-09-20T14:51:16+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7253a50ce4608493c1763f0b07f7070c660bb4bf",
+          "at": "2026-09-20T14:46:40+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "43c5231bbc6dac83894553987eae8a647b12703e",
+          "at": "2026-09-20T14:45:13+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7c05fa65688564fa2a9a3368157015bafc975212",
+          "at": "2026-09-20T14:39:35+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "a5f8ac5872200587da6bd620b15904f038b2b096",
+          "at": "2026-09-20T14:32:36+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "fec97760f0eb87fc7501fc1a88a1f4576b7346b1",
+          "at": "2026-09-20T14:26:58+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "6989aa14b2fbb4f1ef4605f444b68930d1d9b47b",
+          "at": "2026-09-20T04:30:35+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0fe41be8985a26a50bb7e77e4ff73975566ff04e",
+          "at": "2026-09-20T04:27:21+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0cef4bdd033052c4862d635212c1d4b844130db8",
+          "at": "2026-09-20T04:24:52+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "09decc4ed88d0a4b3abe4ad0689b4ccc519ae39f",
+          "at": "2026-09-20T04:16:09+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "86c664f41b8789b5fb5379f806323dba01a6429a",
+          "at": "2026-09-20T04:13:22+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "b4d680ade8278c36d11a5d0111c4a2452674560b",
+          "at": "2026-09-20T03:58:07+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "9e95ddf8c07573552899f44b63c7ca7035f8b802",
+          "at": "2026-09-20T03:57:03+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "73e5e8f32a8491f8799ec6a7d012ebcdad99e68c",
+          "at": "2026-09-20T03:50:37+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "074f0bbdf37f8d50ad440db5fbe871dcf81bf0cb",
+          "at": "2026-09-20T03:49:35+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "61dfb30b7d1b84abf74c1b53b6b2879db3d1e674",
+          "at": "2026-09-20T03:48:43+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "29816ba600c28c30dc4a16847995403c9eaffb50",
+          "at": "2026-09-20T03:44:39+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "ff98b7efdbe1b2b3d148bfd811cd9432cbb375cb",
+          "at": "2026-09-20T03:43:41+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "f14f7a46135401804288234ee26cfd12574943d1",
+          "at": "2026-09-20T03:43:30+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "af90497a2f3fff9da30715396a9530abddf216ae",
+          "at": "2026-09-20T03:37:37+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e45db9aea924f213595fdf8b43954d5005e4857e",
+          "at": "2026-09-20T03:28:34+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "12e9885766c775f834f792da51c59f413046cf4a",
+          "at": "2026-09-20T03:22:42+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "04949c37bf9a4f01b45d0fa37415967404d1cb0f",
+          "at": "2026-09-20T03:20:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "ea74d2d2d4f5957182859c08c6ce19e633b4fb72",
+          "at": "2026-09-20T03:17:00+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7c549a2c2706e61eba5c415d01eceaed73eb1d02",
+          "at": "2026-09-20T03:15:20+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1eaa5e2687bb59a8b0ebf91243cfafde18c4ea50",
+          "at": "2026-09-20T03:05:04+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "bb34b1206881e0397536a6c75bffbbc84ae1cfe7",
+          "at": "2026-09-20T02:58:51+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "817b011aa3188137ac9ef8f5617baf808b0ecea0",
+          "at": "2026-09-20T02:55:12+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "12affc7acd882a68a72c6416a97ad5fa96033724",
+          "at": "2026-09-20T02:52:49+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "59eb7f7b7a5802b82c064717a3bbaa0a1cc12b84",
+          "at": "2026-09-20T02:51:18+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "8973f179bf093f5ee76816a2b5bedcac1d161a90",
+          "at": "2026-09-20T02:48:08+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "09ea53408611eb2ddaa9a70a867888acb13f9a88",
+          "at": "2026-09-20T02:46:18+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "31017f2cd0001c509cb323f100df02cd46964b01",
+          "at": "2026-09-20T02:44:05+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e732fa2b4a75ca0b0832581ef2e815ccdd009d87",
+          "at": "2026-09-20T02:41:55+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c13f624595397dcfdaafd4bccdad174b53ca8b36",
+          "at": "2026-09-20T02:40:43+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "78391df4d6c457e4d3c9043ebb5e67468fb86e41",
+          "at": "2026-09-20T02:39:57+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "dcb30f2aaf94186def2a66ee4ba3a2be0db83cd7",
+          "at": "2026-09-20T02:38:56+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "426ef6f0f9da71586ec67a789a6f383a081bfb8b",
+          "at": "2026-09-20T02:31:53+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "998685a5fcb89c2df087d27049a83e3fb86ba6af",
+          "at": "2026-09-20T02:30:51+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "244ad798b5435b8c5e8fde97f9bc85dce7f9dc5e",
+          "at": "2026-09-20T02:30:06+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0304c920f568a34a2277cb90c8245fd723f135fb",
+          "at": "2026-09-20T00:18:58+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d5c3ecd2f14e06d0ba28b3e3fcdf34723edf635e",
+          "at": "2026-09-20T00:05:38+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon3c",
+          "sha": "3c038bbab9cbdfee270f3a6de6fbf5f93b8e5143",
+          "at": "2026-09-20T22:05:19+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon3c",
+          "sha": "3e0cca6a88573d219ad9183307faa898f2c2315d",
+          "at": "2026-09-20T20:35:17+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon3c",
+          "sha": "e19416f9631b0c12193730310369f00fd84b3284",
+          "at": "2026-09-20T19:58:48+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon3c",
+          "sha": "916417e3d2918813707f5e63dbc478237207e526",
+          "at": "2026-09-20T17:28:06+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon3c",
+          "sha": "efb95336c701e4e1496f5fba9ac9a2e8c637c2fe",
+          "at": "2026-09-20T14:16:38+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon3c",
+          "sha": "3c48cc43547299f7dbd1ca2a253be6b51a3bbc7f",
+          "at": "2026-09-20T13:49:28+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon4",
+          "sha": "5e4501fdf79d0229bb7ab528cf31d76e738f9db3",
+          "at": "2026-09-20T23:10:00+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": [
+            "M-or-training-as-learning-system"
+          ]
+        },
+        {
+          "repo": "futon4",
+          "sha": "ae8b615f56058a89de86a9ff06f7061ac62fdea7",
+          "at": "2026-09-20T23:07:39+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": [
+            "M-or-training-as-learning-system"
+          ]
+        },
+        {
+          "repo": "futon5a",
+          "sha": "1e4ab8d74364dda325ef8aafb7f14696899ac5d9",
+          "at": "2026-09-20T23:07:39+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": [
+            "M-a-sorry-enterprise",
+            "M-hypergraph-operator",
+            "M-stack-geometry"
+          ]
+        },
+        {
+          "repo": "futon6",
+          "sha": "e10347810d5ad2c4343da50e244bc7de68d42dfd",
+          "at": "2026-09-20T23:10:00+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": [
+            "M-superpod-mark3"
+          ]
+        },
+        {
+          "repo": "futon6",
+          "sha": "8efe27e64c44407b929c838ad1ec8cd67b74f87a",
+          "at": "2026-09-20T23:07:39+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": [
+            "M-superpod-mark3"
+          ]
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "b79463e0a2c324f27c9456c43730450ebcfbcfb9",
+          "at": "2026-09-20T21:45:18+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "20a020e79216f22ef70dbc47cad971d8bdb6cd01",
+          "at": "2026-09-20T20:49:51+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "782d9b05da75ce213aa86aa33f801e9ffff68ff3",
+          "at": "2026-09-20T18:24:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "3578a62212484dfc50bc7cea3c10254c41e13de5",
+          "at": "2026-09-20T18:12:46+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "c862ace153a8200f45f9b2250637be14411f8088",
+          "at": "2026-09-20T17:57:28+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "5bb5e50b4a400375fbb883755d9c5b0b2e78630c",
+          "at": "2026-09-20T17:35:37+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "a12c9176fc601c79bf4b50f93e5a539df3d7edfb",
+          "at": "2026-09-20T17:05:52+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "9c63cb9f0a71e8c23321ae8057eb318b47d5b5ac",
+          "at": "2026-09-20T15:48:38+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "4a7063b5e43ecba6df13974afb99c41b374ea8e3",
+          "at": "2026-09-20T15:41:21+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        }
+      ],
+      "focus": "WM"
+    },
+    "2026-09-21": {
+      "until": "2026-09-21T17:31:44Z",
+      "commits": 166,
+      "facet_credit": {
+        "other/unattributed": 9.0,
+        "WM": 157.0
+      },
+      "top_mission_touches": [],
+      "rows": [
+        {
+          "repo": "futon0",
+          "sha": "cb7e043f310af0bb1b406a2593018ce07de08adb",
+          "at": "2026-09-21T17:28:22+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon0",
+          "sha": "db11a65dd235b9bbe8e7c67d6c72f5bbcc3a1eda",
+          "at": "2026-09-21T17:08:36+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon0",
+          "sha": "7176d5959a2be884e1a7e73bc7fa23fb9f9ad9c4",
+          "at": "2026-09-21T16:47:28+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon0",
+          "sha": "989aaf6f41637f5837e4913ad30401adcf47197a",
+          "at": "2026-09-21T16:47:10+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "40762056b2636d94c3b6aa9e416e9c9065705261",
+          "at": "2026-09-21T17:31:44+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1600b795a615d33ed03eeb961a0e6bcfa754f0da",
+          "at": "2026-09-21T17:29:05+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "17fc61c4282630c7a7676c48a263e49f35384306",
+          "at": "2026-09-21T17:23:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1b9d51be6664af457ac6403d056fde043a9d6967",
+          "at": "2026-09-21T17:22:45+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5e21cf76b4dfd064b0e82e74c4a8047ea32597d0",
+          "at": "2026-09-21T17:22:10+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "29d9db012d83d5c59314b3a91276c25b9b81c5dd",
+          "at": "2026-09-21T17:21:35+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3f11447d55cd5eb87be98080b399972a3029b859",
+          "at": "2026-09-21T17:21:03+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e9395bad93c8b571f32fee7b37553e61bb4566d3",
+          "at": "2026-09-21T17:19:06+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "56593d8cc4633656b95cb1eab7fc38631d8d6cd2",
+          "at": "2026-09-21T17:18:00+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e675673b358a87c094376fe48bb6e40ef84a44b2",
+          "at": "2026-09-21T17:09:53+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "56d681c559fb040a7deccaaab2df712870acaf9d",
+          "at": "2026-09-21T17:09:12+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "4765cab48bd177b1ea1a3eda8e5f9d2702f2eac2",
+          "at": "2026-09-21T17:00:11+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "beeea1e379a7e17846eba24d734ff24ec8b8bbb9",
+          "at": "2026-09-21T16:59:24+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "6b42529386d8ef153cb2b6a53a33da3705e0be07",
+          "at": "2026-09-21T16:58:26+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "547239d0c9256b2593ec7686b78d4fc318d0576a",
+          "at": "2026-09-21T16:55:48+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "45f5fed96207adc0443b8c3e4ab6f41115d67540",
+          "at": "2026-09-21T16:52:56+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e5b7cd3b308fbbf2c922d5d8b41a1c05eed3e455",
+          "at": "2026-09-21T16:49:13+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "616c215eb8e662d1862293c12f3dad502ffcb5a3",
+          "at": "2026-09-21T16:48:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e568e5b259cfdcd26f6cbc2f50c6e62a7bcf82fe",
+          "at": "2026-09-21T16:48:27+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "ce164d8f73016f99619889065d3b20be4e53edee",
+          "at": "2026-09-21T16:48:11+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "82f6fed39aaea37b20c289d7e0c896468dd602c9",
+          "at": "2026-09-21T16:46:12+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "35290f4fe3b969762f15a626fcfb16bfe1c2979b",
+          "at": "2026-09-21T16:45:04+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "165564f80055119a1c02ca5da039f28d0424c5f4",
+          "at": "2026-09-21T16:43:24+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "4c202d272123e64b7b1f6b804800089508ee1823",
+          "at": "2026-09-21T16:42:35+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "76cfa3888e4d7a7c147781e98eac91512cd0bb67",
+          "at": "2026-09-21T16:37:28+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "ec92685ddf10e97f015e69c66b900c412be00134",
+          "at": "2026-09-21T16:36:34+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0de21aa44544e2c9350ba20e383763b02bc2ee40",
+          "at": "2026-09-21T16:34:18+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5d3124021561b3a4ac57c27ec1eecf12baa6e6e5",
+          "at": "2026-09-21T16:33:19+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "29e6407cd324483583404f2e6a15a15b81dd07a6",
+          "at": "2026-09-21T16:24:08+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "a566dbfd87eab116b6bdac558b6793ccfd8cbcd3",
+          "at": "2026-09-21T16:23:24+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "a72af80130be48903c34df3dab4ceef0d94ecba1",
+          "at": "2026-09-21T16:23:21+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "8dd1ea73b632c970d2500d215fc3b446677da134",
+          "at": "2026-09-21T16:04:03+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d088e1002a9dd39586723a4203e9b28d831eddc2",
+          "at": "2026-09-21T16:03:58+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "77fea6af3efb795b08efe9ae04192e25b9596a70",
+          "at": "2026-09-21T15:59:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c09b68801e28bd395cadb995f275cfa1716c3128",
+          "at": "2026-09-21T15:54:23+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3185d4fb35218352b8b4400a2f2ac66949cf22c1",
+          "at": "2026-09-21T15:42:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e132fed9906b5bf96150ca66f57c43745290a0f5",
+          "at": "2026-09-21T15:34:14+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c5d2123cf301afbac78e89f2c3b61590d79d45b5",
+          "at": "2026-09-21T15:30:30+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "4d53c37a0a08053ec42468b770775a074d0dd6ee",
+          "at": "2026-09-21T15:30:17+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0bed9df9d68c6a7baa8ef7f7d17e093f0aab44d7",
+          "at": "2026-09-21T15:29:35+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "4c3b4b7a703eb7c8f255f6d4b4e209cb79d92141",
+          "at": "2026-09-21T15:29:25+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "66146c70f8b2877b882820f52e1a6c0f0bb25b4a",
+          "at": "2026-09-21T15:22:58+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "ffb3bd03328adc50478fc94cbfd8427c0876dfbd",
+          "at": "2026-09-21T15:22:52+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1d20ca88808df02b3f919f2809b9630a53b97be9",
+          "at": "2026-09-21T15:22:01+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "acf9de0eb0e8d4e808bf53c9942cd990e40d082a",
+          "at": "2026-09-21T15:19:03+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "78b7d1be31fc83b7dc23e87304f02b5987fc28a3",
+          "at": "2026-09-21T15:17:29+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3b482e15e810430556009cf098e327ef1b67b0b6",
+          "at": "2026-09-21T15:16:35+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "6aab2db55f833b515a208d38efc7494e20903340",
+          "at": "2026-09-21T15:16:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "425bcd76c6e8a8b3c0aba05ee72f3fddc3cc3e25",
+          "at": "2026-09-21T15:15:51+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e965987877b3e884f5408a369042fdfc2e08f321",
+          "at": "2026-09-21T15:13:41+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5d08ec234ee80cfe7b429f4a06e479b8c7bf05ca",
+          "at": "2026-09-21T15:12:42+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "a82290209dc65a8891ae71bbcf9ff2fc2826fcd9",
+          "at": "2026-09-21T15:11:52+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "fa5ca70ca56dc26ca4d221db0d8d481c5c3f0bca",
+          "at": "2026-09-21T15:07:40+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5d4c36489436df8e5a97355226477a17fba9cd61",
+          "at": "2026-09-21T15:05:11+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0ff2c6abd9eda9b203be96d6319cbc33060c983e",
+          "at": "2026-09-21T14:59:48+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "13e64d876bd280796b9978c7313f40a42a4829ee",
+          "at": "2026-09-21T14:51:21+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "792afae2da5e64fb6dc3646e3fc960c817a6e47a",
+          "at": "2026-09-21T14:49:48+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "6e531aae1f8d4cc7e934aed6edd80539354fb24f",
+          "at": "2026-09-21T14:46:53+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "305ef60b52d7613ef25cb6636eb7e9d3bdebea2b",
+          "at": "2026-09-21T14:46:24+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "809ae1e1bda15c11ce5d8cadc85b48df99ee6c81",
+          "at": "2026-09-21T14:45:18+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "923f999caac376cda60ca346465b0b2b99eea302",
+          "at": "2026-09-21T14:44:20+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "ea173054f3e07bfdd63e2fd294873eef5c337f3e",
+          "at": "2026-09-21T14:43:23+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e6848859d17b9f3accb4c0ab21140f1d459d3348",
+          "at": "2026-09-21T14:38:29+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "a472d020cca92be69e7bc5b818e3ea646891a4b0",
+          "at": "2026-09-21T14:34:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "cab63449588b04e1e0360ddc6909cf0c843b46c8",
+          "at": "2026-09-21T14:32:48+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d1d35bcb918d39fbff98211f66bba3a1ebb297e6",
+          "at": "2026-09-21T14:32:29+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "9ed15118016d7989536c3b186a8689191ba0af19",
+          "at": "2026-09-21T14:30:33+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "8e965485d98992bb40a2c50d46b9ca3947d099ef",
+          "at": "2026-09-21T14:30:04+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "73b115ac2115c937730ef7fe8a1c5a598018cf82",
+          "at": "2026-09-21T14:29:20+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "71e4f1a1a0f6af0da6f6b658294ecc7e2957887d",
+          "at": "2026-09-21T14:28:39+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "187296bb94dac5662041b60a27228bdda99a13f5",
+          "at": "2026-09-21T14:28:11+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0bd0fac180a6a28dfaf0c36dac15ef5f1eeeb78b",
+          "at": "2026-09-21T14:24:30+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "f7f02c3c21a291063063ce4f86bed65e0f47584f",
+          "at": "2026-09-21T14:21:28+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "f78481909bd6dd7a52fcb7b390c28b444abc9e51",
+          "at": "2026-09-21T14:15:25+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "05fd7c967edb8030c45e3b606cc284f07e3000c7",
+          "at": "2026-09-21T14:14:41+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d96f9c6189600272220836a95b14c43455207516",
+          "at": "2026-09-21T14:11:48+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "920f3361d81ef3514fe50458dc4fa081519328b0",
+          "at": "2026-09-21T14:06:40+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "b581ee8925d0c8b7131ce4e5ee8cedbce015e98d",
+          "at": "2026-09-21T14:06:27+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "51022ad4db25aaf97115bc0d0e68a9440e9fcd73",
+          "at": "2026-09-21T14:05:31+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "6ad2cf2522d0b66dea38753f38ec8107e59c52b0",
+          "at": "2026-09-21T14:04:30+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "b701baa323e62f7dc19a4891b2bdf42c423fb3b6",
+          "at": "2026-09-21T14:04:05+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7755daa65fa2e3cad209c3ebde60f7bcc4d84d59",
+          "at": "2026-09-21T14:03:07+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "21b7016cf05dd55cb527b17e6747e4a05740a311",
+          "at": "2026-09-21T14:02:23+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "f864905ca9a87deadfaf27debdf7bf77cfb9796a",
+          "at": "2026-09-21T14:01:38+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "42287765253564893a19b2a7a7c2129f6f840555",
+          "at": "2026-09-21T13:56:56+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "4328238d439f0c5811f2e2453caa053b3ff629c5",
+          "at": "2026-09-21T13:56:06+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d3839a8ffd5b6384e4d201e70d34652ec1f39e01",
+          "at": "2026-09-21T13:52:22+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "e8bbc97e913eeed6952f0dd044dfd969692d78b2",
+          "at": "2026-09-21T13:51:15+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d618a33d8ab6bc3eb64f80c1c0e1c8044da7520a",
+          "at": "2026-09-21T13:51:00+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d6ec5f6718c3a740b9f3760a804b20da59404fab",
+          "at": "2026-09-21T13:49:56+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0c42661cca388254bb149433504994061cf09570",
+          "at": "2026-09-21T13:49:38+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3449a63ddae3d27bf367c1b80d69cac14acbd3f0",
+          "at": "2026-09-21T13:49:07+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "05b856f8974b6474f33358a8c48d041b21d5d24d",
+          "at": "2026-09-21T13:45:04+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "4354668b6f8327d26d449c013bd273297ab8e7db",
+          "at": "2026-09-21T05:49:42+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "12234bb6da1c75508ca5b2f029d053b47153b1c3",
+          "at": "2026-09-21T05:48:09+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "ce7b1d044164c0db167e36fac82f635dfcfef105",
+          "at": "2026-09-21T05:47:24+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "98a7b4a741399cef190ee3cda7f660aa8515c23c",
+          "at": "2026-09-21T05:46:13+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "14b89bebec7cdb54c049b9df2a325d0bc4dc1635",
+          "at": "2026-09-21T05:40:38+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "8cd5f442c9200f6f1012c16952ddc9ce13412a99",
+          "at": "2026-09-21T05:36:21+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3bdd226a3937cba0f0163493fdc40bcc07729ed0",
+          "at": "2026-09-21T05:28:31+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "9b7e4f3d8687360261dd4869699d161b9f345fde",
+          "at": "2026-09-21T05:19:47+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1d7167b7d67fae01e1bbe7f2f50049a89c8495c7",
+          "at": "2026-09-21T05:17:56+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7ff19823f325b3e9e05156f8046dc2ef6dbd4a5d",
+          "at": "2026-09-21T05:14:42+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "991e27a4170983c17e33b80c73fea5f4cd88d5c3",
+          "at": "2026-09-21T05:11:47+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "38b4c95c40ff5f6d2ff08636acce61e29322a3e6",
+          "at": "2026-09-21T05:08:03+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1a5407ee179d68769099e7287a8d7ec17b142311",
+          "at": "2026-09-21T05:01:43+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "acc4f3c4640b4092710cceaf9d88f50acaeb0663",
+          "at": "2026-09-21T04:59:12+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "385f54dcf9179cc8e3820a7776f65ea654501b3e",
+          "at": "2026-09-21T04:57:26+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "07736d4c769795c454f24fdcf844fc9d0bc3c217",
+          "at": "2026-09-21T04:55:43+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7088a238ac408e6ff53342ba994391e8540805c4",
+          "at": "2026-09-21T04:53:22+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "3e9a31415156d91de1cef4febfb6fbbe2708f096",
+          "at": "2026-09-21T04:49:44+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "12abf7944ff2317e957faf74377a92d815b8f1f1",
+          "at": "2026-09-21T04:45:17+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "181ba4d114baa46dd371a3a2150fcf9ea5c2df53",
+          "at": "2026-09-21T04:38:03+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+          "at": "2026-09-21T04:28:49+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "2ea86caf9c61a00f34b971f0e17710edfc7b11e6",
+          "at": "2026-09-21T04:20:53+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "fe0f74b84bbf0b27895267dddb1dc42bdb2a5af9",
+          "at": "2026-09-21T04:19:20+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "71d14a8b48b5206f0a290092eae34c742b902bbf",
+          "at": "2026-09-21T04:18:49+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "82e8120ddaafd8cea136ecca57b409d00d9a799f",
+          "at": "2026-09-21T04:17:29+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7f50e3ff7c18ea3f496ae15dabe019657db9ff30",
+          "at": "2026-09-21T04:16:55+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7ff4f05d6ce8c56f56eda3d4cdaa23df588dfd94",
+          "at": "2026-09-21T04:15:15+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "6b4cfd4254fc1aadaf2610dff6cd466592d657f5",
+          "at": "2026-09-21T04:13:19+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "64421320c7c290b63c0f356d0a8c9e0f69ac8e38",
+          "at": "2026-09-21T04:11:13+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "f079c68f2f18ba7ea2625a4e48918034fef5117e",
+          "at": "2026-09-21T04:10:40+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7fef1200fed947749fa8169f4316431e719232b6",
+          "at": "2026-09-21T04:10:26+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c1858291d875dcdbf501aa5d7028e84aa6563d89",
+          "at": "2026-09-21T04:07:56+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "da821ca389222d5a8a0f1046f982c1e4f1cbf0e1",
+          "at": "2026-09-21T04:07:56+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "6402ed8a789c96d02b73b1f79521acd006a5b8ca",
+          "at": "2026-09-21T04:07:34+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "6ace66a8620855de70451db043d1fde2fbdbef43",
+          "at": "2026-09-21T04:02:02+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "707e680f8ef28dbdc40d4f4741a3ec14d75fb9e3",
+          "at": "2026-09-21T03:57:44+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "87f4aa60573fb03e634d4e36bd840dbd3ec9d357",
+          "at": "2026-09-21T03:55:00+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7c872c55bab08d41e573675c96357b8160943a1e",
+          "at": "2026-09-21T03:50:51+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "fcdf5ef4edddf71c14d62524382a81afa1420a09",
+          "at": "2026-09-21T03:49:26+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1139798ce61c512f17161807bad54cbac28f79da",
+          "at": "2026-09-21T03:48:27+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0c88999abb1020c996425bd6de9fe794a4a22217",
+          "at": "2026-09-21T03:45:02+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d0cba29d1400d1287420dbe6009710b3750e490f",
+          "at": "2026-09-21T03:43:01+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "65e523ef72f6fb06f3e5ac858c63d45bc2e08354",
+          "at": "2026-09-21T03:42:45+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "631f3f0492548cab5a0156a4f2385b1c77463602",
+          "at": "2026-09-21T03:40:53+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "88fff61d8883c3c5f2c48ab17dd5772992846278",
+          "at": "2026-09-21T03:38:31+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "da1a43bd4474dd3cf4f8628802ebb10200e319d6",
+          "at": "2026-09-21T03:37:47+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "561d761ea321adadf8aee3291e3cb8f38aee1c53",
+          "at": "2026-09-21T03:37:05+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "9eabd00d3ea064ed496c20cc6ddf8986f4ffc13c",
+          "at": "2026-09-21T03:36:54+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "19a3af6be961f573b760995b830c4592ea3014ef",
+          "at": "2026-09-21T03:36:32+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "6592c58b779c71c30cd4df3dd8626c9a076735e8",
+          "at": "2026-09-21T03:35:55+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "c155d690cc1b27f42094ea55a2159bed82c136d7",
+          "at": "2026-09-21T03:34:34+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+          "at": "2026-09-21T03:30:38+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "72b8c3cc0b93b7d3ea06a8e39aba48df766d45b6",
+          "at": "2026-09-21T03:24:00+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "b0f6deee0b68f05fc01337de16cc68b877d4ed7a",
+          "at": "2026-09-21T01:15:36+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "7ac238d4a34448501bb4e04173f954b366ba1d18",
+          "at": "2026-09-21T01:09:54+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "0f5dff6904bae65e2dfbb191522341016dbf60de",
+          "at": "2026-09-21T01:06:09+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "8f60f819104d66043ac015877fa146612883f3e3",
+          "at": "2026-09-21T00:55:25+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "d168d34890d65d2f5c849ec2d734194ed98f1047",
+          "at": "2026-09-21T00:52:51+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "1a51bc2eee7bfe232fd33aaed3e8de042165c70f",
+          "at": "2026-09-21T00:26:57+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "5bcf11f48b14f07e8935bcbd83074652d601d393",
+          "at": "2026-09-21T00:19:57+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "678e3c27b9fe04ba1b21a9533f1fe09e9f48caae",
+          "at": "2026-09-21T00:18:08+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "f96609740e2da0504fae49b1ad1a4f8e5e632f97",
+          "at": "2026-09-21T00:07:22+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon2",
+          "sha": "29fb2a83130877f3e8926f72ad42ebb3b3ab4b18",
+          "at": "2026-09-21T00:06:16+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon3c",
+          "sha": "cfa2e00c80dcd0122cceb5732ea31da7cdfcc1f2",
+          "at": "2026-09-21T17:20:05+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "futon3c",
+          "sha": "4d8a84a74b143fac5ec1d58742e8de3386f56863",
+          "at": "2026-09-21T00:27:08+00:00",
+          "facets": [
+            "other/unattributed"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "77fdbda5b5629b3c8f6c7f9bbb027da0436ba1b3",
+          "at": "2026-09-21T04:44:02+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "b3d8afa6a002dbe3ce4fe3f384b770b92ea5b1e3",
+          "at": "2026-09-21T04:43:20+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "8569c576fb0b25b5230c09326531fa2c4035845a",
+          "at": "2026-09-21T04:42:25+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        },
+        {
+          "repo": "mathlib4",
+          "sha": "58f99f9890f483a1b6aaafc9e869f5c94e950ab5",
+          "at": "2026-09-21T04:26:59+00:00",
+          "facets": [
+            "WM"
+          ],
+          "missions": []
+        }
+      ],
+      "focus": "WM"
+    }
+  },
+  "embedding": {
+    "war-machine": {
+      "wm_cosine": 0.9999999999999982,
+      "top5": [
+        [
+          "futonzero-prelim-practice",
+          0.42129187021144016
+        ],
+        [
+          "a-sorry-enterprise",
+          0.32436536871398175
+        ],
+        [
+          "recommendation-bindings",
+          0.3075550703188677
+        ],
+        [
+          "learning-loop",
+          0.2964600301422716
+        ],
+        [
+          "web-arxana-missions",
+          0.2415551144052531
+        ]
+      ]
+    },
+    "apm-solutions": {
+      "wm_cosine": -0.011879915602404888,
+      "top5": [
+        [
+          "symbol-grounding",
+          0.9200861072238989
+        ],
+        [
+          "differentiable-code",
+          0.9047300863556458
+        ],
+        [
+          "peripheral-behavior",
+          0.6058076239396901
+        ],
+        [
+          "pattern-inference-engine",
+          0.5729595209331545
+        ],
+        [
+          "arxana-roundtrip",
+          0.5168849712366521
+        ]
+      ]
+    },
+    "expressions-of-interest": {
+      "wm_cosine": 0.01415073952833011,
+      "top5": [
+        [
+          "interest-network-coupling",
+          0.6401420273507814
+        ],
+        [
+          "trip-journal",
+          0.35851571358413226
+        ],
+        [
+          "hypergraph-operator",
+          0.3311341236364311
+        ],
+        [
+          "mission-coherence-patterns",
+          0.30040403781841024
+        ],
+        [
+          "patterns-done-right",
+          0.27325996040992107
+        ]
+      ]
+    },
+    "action-cost-modelling": {
+      "wm_cosine": 0.06775844829301184,
+      "top5": [
+        [
+          "pilot-appearance",
+          0.3056607711150443
+        ],
+        [
+          "vsatarcs-writer",
+          0.2994025666144004
+        ],
+        [
+          "vsatarcs-invariants-integration",
+          0.2837803409017923
+        ],
+        [
+          "peeragogy-rewrite",
+          0.2599054987783849
+        ],
+        [
+          "writing-ethics",
+          0.25361861429161725
+        ]
+      ]
+    },
+    "aif4iad": {
+      "wm_cosine": 0.0922481020900074,
+      "top5": [
+        [
+          "peeragogy-rewrite",
+          0.645684935267513
+        ],
+        [
+          "invariant-queue-extend",
+          0.6376633399336391
+        ],
+        [
+          "webarxana",
+          0.5655855965060702
+        ],
+        [
+          "mission-control",
+          0.5474848666944359
+        ],
+        [
+          "writing-ethics",
+          0.5348467033347795
+        ]
+      ]
+    },
+    "futon-forward-model": {
+      "wm_cosine": 0.03117916097918679,
+      "top5": [
+        [
+          "pattern-retrieval-calibration",
+          0.5332826191163473
+        ],
+        [
+          "a-sorry-enterprise",
+          0.30331468118551974
+        ],
+        [
+          "interim-director",
+          0.27727385910606334
+        ],
+        [
+          "interest-network-coupling",
+          0.1647545874779984
+        ],
+        [
+          "pilot-appearance",
+          0.10548195361155095
+        ]
+      ]
+    },
+    "futonzero-mvp": {
+      "wm_cosine": -0.014803226672651923,
+      "top5": [
+        [
+          "futonzero-capability",
+          0.502366806450657
+        ],
+        [
+          "f6-eval",
+          0.31570531915860617
+        ],
+        [
+          "mission-peripheral",
+          0.28938556595209813
+        ],
+        [
+          "coordination-rewrite",
+          0.2872801506572401
+        ],
+        [
+          "three-column-stack",
+          0.1830508460416096
+        ]
+      ]
+    },
+    "futonzero-generative": {
+      "wm_cosine": 0.0427747379463639,
+      "top5": [
+        [
+          "differentiable-substrate",
+          0.7294733327836856
+        ],
+        [
+          "mission-scopes-into-substrate-2",
+          0.699687546930927
+        ],
+        [
+          "memes-arrows-patterns-diagrams",
+          0.6148187991704823
+        ],
+        [
+          "editorial-assistant",
+          0.39356720497285275
+        ],
+        [
+          "the-perfect-crime",
+          0.3639697306637298
+        ]
+      ]
+    },
+    "self-documenting-stack": {
+      "wm_cosine": 0.03383655091725376,
+      "top5": [
+        [
+          "vsatarcs-invariants-integration",
+          0.4768573591250647
+        ],
+        [
+          "patterns-done-right",
+          0.3420699331090788
+        ],
+        [
+          "invariant-queue-unstuck",
+          0.29966154263812667
+        ],
+        [
+          "peeragogy-rewrite",
+          0.21658285909391692
+        ],
+        [
+          "vsatarcs-writer",
+          0.17715162675456755
+        ]
+      ]
+    },
+    "canon-fingerprint-store": {
+      "wm_cosine": -0.173514931967568,
+      "top5": [
+        [
+          "invariant-violations",
+          0.8033906873086734
+        ],
+        [
+          "alfworld-pattern-discovery",
+          0.8033605662161304
+        ],
+        [
+          "essays-retraction-visibility",
+          0.8033605662161304
+        ],
+        [
+          "substrate-metric.R2-curvature-full-report",
+          0.8033605662161304
+        ],
+        [
+          "vsatarcs-invariants-integration.witness-vsatarcs-fresh",
+          0.8033444593733919
+        ]
+      ]
+    }
+  },
+  "structure_shape": [
+    198,
+    161
+  ],
+  "pins": {
+    "/home/joe/code/futon6/data/mission-structure-embed/mission-embed.json": {
+      "sha256": "57ab4aa46319eed4f29a5b0d9f84c86e14f0d30c8ddca906ef45ca0d9ac100fb",
+      "mtime": "2026-06-25T08:35:46.045454+00:00"
+    },
+    "/home/joe/code/futon6/data/mission-structure-embed/structure-embeddings.npy": {
+      "sha256": "0c2d76be8ed53d4bdc2c52e3cd551baf43d7a31f62d510d0791633ad4ac3abe4",
+      "mtime": "2026-06-25T08:35:46.044454+00:00"
+    },
+    "/home/joe/code/futon6/data/mission-carpet-pos-embed.json": {
+      "sha256": "0699dcf1f410a3ab8abdbac0fdbef947fb7a07df110f896de3058da8a98aed3c",
+      "mtime": "2026-09-21T16:46:03.479280+00:00"
+    },
+    "/home/joe/code/futon6/data/mission-wholeness.edn": {
+      "sha256": "309a4b5dab52eb14ae17983d3a14d1c0163dfdbfceb56ab88e52a711c2ba19da",
+      "mtime": "2026-09-21T17:32:22.184850+00:00"
+    },
+    "/home/joe/code/futon6/data/fold-embed/manifest.json": {
+      "sha256": "be867f6ef93354ba149f5767a1bbb5997cd796ce9e2edc12e29ec3596ec0fba2",
+      "mtime": "2026-07-01T17:50:11.683891+00:00"
+    }
+  }
+}
