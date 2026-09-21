@@ -13,6 +13,7 @@
             [futon2.aif.token-outcome-test :as token-fixture]
             [futon2.aif.token-observation-initialization-test :as initialization-fixture]
             [futon2.aif.token-outcome :as token-outcome]
+            [futon2.aif.preference-audit :as preference-audit]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.full-loop-cohort :as cohort]
@@ -5803,6 +5804,8 @@
        (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
        (is (= :observed-initialization (:conditioning-status input)))
        (is (= input (get-in selected [:selection-certificate :token-belief-input])))
+       (is (= :recorded (get-in selected [:selection-certificate :preference-audit :status])))
+       (is (preference-audit/valid? selected (get-in selected [:selection-certificate :preference-audit])))
        (is (= (:continuation-belief input)
               (get-in selected [:selection-certificate :precision-family :model :q0])))
        (is (every? #(not (contains? % initialization-fixture/updater))
