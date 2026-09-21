@@ -1,0 +1,1632 @@
+{:reference-sha256
+ "8264021ac5f5bc6c251720917c69375795fcc9e1a4a5f263694b6efe51142686",
+ :horizon 2,
+ :inventory
+ [{:path
+   "/home/joe/code/futon2/data/wm-d-task-enactment/action-0bca9db5-cc09-448e-8f05-67c80f543f38.edn",
+   :run "close-retention-success",
+   :selected-target "M-aif-policy-conditioned-eig",
+   :selected-effect-observations [],
+   :revision-pair
+   {:before nil, :after "retained123", :before-evidence :not-measured},
+   :raw-measurements 0,
+   :observations [],
+   :selected-patterns [:apparatus/one-authority-per-question],
+   :verification
+   {:status :refused,
+    :kind :independent-jobs-unestablished,
+    :detail #:d-predecessor{:refusal :independent-jobs-unestablished}},
+   :action-id "action-0bca9db5-cc09-448e-8f05-67c80f543f38",
+   :causal-attribution nil,
+   :sha256
+   "62683b78f9d4e29a6fe1a5bf175ab6b359c613927a00d1a213fd96aa32ba739a",
+   :boolean-by-target {}}
+  {:path
+   "/home/joe/code/futon3c/data/wm-d-task-enactment/action-357124fc-c58f-4a84-984a-6dc277cdf39b.edn",
+   :run "2026-09-21-1789952479",
+   :selected-target "M-expressions-of-interest",
+   :selected-effect-observations [],
+   :revision-pair
+   {:before "8f60f819104d66043ac015877fa146612883f3e3",
+    :after nil,
+    :before-evidence :not-measured},
+   :raw-measurements 0,
+   :observations [],
+   :selected-patterns
+   [:coordination/par-as-obligation
+    :coordination/bounded-execution
+    :futon-theory/stop-the-line],
+   :verification
+   {:status :refused,
+    :kind :deferred-artifact-not-fresh-execution,
+    :detail
+    #:d-predecessor{:refusal :deferred-artifact-not-fresh-execution}},
+   :action-id "action-357124fc-c58f-4a84-984a-6dc277cdf39b",
+   :causal-attribution nil,
+   :sha256
+   "5a9d871eb6885a736bff1b7ca0807ffc8abe321349fff72861f8e66cbaded9f3",
+   :boolean-by-target {}}
+  {:path
+   "/home/joe/code/futon3c/data/wm-d-task-enactment/action-a5d2326d-a73a-447c-8bc7-7f77c8bbc187.edn",
+   :run "2026-09-21-1789964661",
+   :selected-target "M-aif-policy-conditioned-eig",
+   :selected-effect-observations
+   [{:token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
+     :observed false,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "d66d910195744bd064b3ee4750fa2175dc9f0c93578d54220c906a8ae0db4191",
+     :evidence-sha256
+     "461b43405d1cc23d6f3c9cd6e3dea7a80de88043fee8dfc7f76905613c985a75"}],
+   :revision-pair
+   {:before "2ea86caf9c61a00f34b971f0e17710edfc7b11e6",
+    :after "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+    :before-evidence :not-measured},
+   :raw-measurements 11,
+   :observations
+   [{:token ["M-aif-policy-conditioned-eig" :admission/task-stated],
+     :observed true,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "ebe6e07dd4cdf55757bfb1393722f75eeb63ccdb34e33353c6e491cba146c782",
+     :evidence-sha256
+     "2c016dba717995b29ca4e74c7adb52bdebc1c5f130f3d833ecef4ef43c890810"}
+    {:token ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc],
+     :observed false,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "aa41f582df0b0d3d08264c4da9334e0b239f1800fe577b4833bac4e849781819",
+     :evidence-sha256
+     "b337a47cec8ebb004c72f4e7b983f748e7bfa17e87bac1d00d68534104a6c044"}
+    {:token ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b],
+     :observed false,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "77faf05ecdade37629a2d949f02b9f558c97594abc14c8c5c3a76ca246048593",
+     :evidence-sha256
+     "55597a4f668534ff9459a9b35eebc4072f90086af8810fc1d7c0087315a65576"}
+    {:token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
+     :observed false,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "d66d910195744bd064b3ee4750fa2175dc9f0c93578d54220c906a8ae0db4191",
+     :evidence-sha256
+     "461b43405d1cc23d6f3c9cd6e3dea7a80de88043fee8dfc7f76905613c985a75"}
+    {:token ["M-f11-find-production-successor" :admission/task-stated],
+     :observed true,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "1a2bd95f67aeebcf51364b9734acc6d9c060a16cdd048a3a832fa767e39810d6",
+     :evidence-sha256
+     "140817575c6b9eaa1ef151357e65a0ebe14ef34cac63798b6e9063cae1cba9c2"}
+    {:token ["M-f11-find-production-successor" :hole/h2045faa0e7cc],
+     :observed false,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "8f0ad834916cc40b23dad072a7bb68dc891912c202519f94f1f04b886b437530",
+     :evidence-sha256
+     "3f05801e3586b62e27ef5638ca2ae27b782546bb3bf9e5f1a274c3126f3614f5"}
+    {:token ["M-f11-find-production-successor" :hole/h9ab212b3281d],
+     :observed false,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "15cb64d5a306a72e3c7e53d2942dff9c43706ec39329e5ee72e49a4008a0452b",
+     :evidence-sha256
+     "d069e6003982a9b156f74cc05fca6db5460c9ea7d296b0de80fe428c293d7e2e"}
+    {:token
+     ["M-wm-08-external-f2" :external-expectation-validator-exists],
+     :observed true,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "565e53917c665116f39b4d2a3ee592542fb19e9bf75679dbd21912ad939052d0",
+     :evidence-sha256
+     "9303addcfc88f2df7d8ba61c36f5e97459bb34460991947e657e28940ef6f8d1"}
+    {:token
+     ["M-wm-08-external-f2" :frozen-occurrence-context-captured],
+     :observed true,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "aad250bd9929f31d8350463b00e3e3809f9974ee94647615aea8949aedb47f7d",
+     :evidence-sha256
+     "dfb700c92e61389fd99f8b7caf89949b5169e0b9f328dbeb54e93efa6747c709"}
+    {:token ["M-wm-08-external-f2" :independent-expectations-written],
+     :observed true,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "5e7626105e46c9ac4c90a3b5e9e6ca33579d8182ee18435d6e7544d325fa5233",
+     :evidence-sha256
+     "e634d0ef3f94b557e41090d2aa985c376a7dcdd5084a5869386cbfe6df842843"}
+    {:token ["M-wm-08-external-f2" :route-a-rehearsal-reported],
+     :observed true,
+     :schedule
+     {:status :held, :reason :observation-placement-not-declared},
+     :meaning-sha256
+     "18172d696f91323e18559f7539bc9c8a4940f77ec26101c9d69d91544ae34f38",
+     :evidence-sha256
+     "aedb41df1f72a94797796640a578fcf9aca49c90b819c0c4d785a58ca9c2faf0"}],
+   :selected-patterns [:apparatus/one-authority-per-question],
+   :verification {:status :admitted},
+   :action-id "action-a5d2326d-a73a-447c-8bc7-7f77c8bbc187",
+   :causal-attribution :independent-check-required,
+   :sha256
+   "b4e759a9cdb1be48ffad5b82fcb3c7fb13e3608c3c332ee92478a9831f5e7895",
+   :boolean-by-target
+   {"M-aif-policy-conditioned-eig" {true 1, false 3},
+    "M-f11-find-production-successor" {true 1, false 2},
+    "M-wm-08-external-f2" {true 4}}}],
+ :run-inventory
+ [{:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-18-5bf0bbfb-df6c-43e6-a126-2068d49b6969.edn",
+   :sha256
+   "912037ab2f1d8e414914a738c1dc3ece5c0bd91aef11bebbd7aad72955a0dcaa",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-18-r12fix-1789773891.edn",
+   :sha256
+   "a5c65d24da70b3dc30ed8900201c9c7c10cca71aaa34c01c959f372c01ea9bd8",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789779250.edn",
+   :sha256
+   "01ca15fc9791013eeebf9eb03a203283015293a33662b06663d1db7a369b2256",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789780157.edn",
+   :sha256
+   "b76f1fc556d7c8ed6c26818dc557a490ff8f84f8b0c5daa2c4ce44eee75d8c3b",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789827859.edn",
+   :sha256
+   "99cbefcf88a7b43692b3c5f8a66bf6868a7f47edb87b4a1a88da410785e73eea",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828199.edn",
+   :sha256
+   "63ff1dbe0ca7e220e6960e22883da611b599e7a7ee3552a7a471ae04357827d3",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828750.edn",
+   :sha256
+   "80abc12b1c7791fef603ec752e38b3c6d1630f0749b1cf6e6ceaa3c518cd3f25",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789835454.edn",
+   :sha256
+   "ef261e684e38b2f56f2da53b1b99e458715814bef563521fe11ae3e12cde5fd3",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848147.edn",
+   :sha256
+   "306186be7d9d0c58edf4f47662c83fbcd0867a1576d1d2ebf9da9c72b7409f26",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848234.edn",
+   :sha256
+   "179ec6a8fc18aa2ce54d0a6c68859b9717439e86e9c24dca6d006563b63c1cc4",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848916.edn",
+   :sha256
+   "a4cd6a8bbf0fe6c649c7bc45c06134ac71375d07cc7ed0bae7b2cae3e0f0ea7d",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789849189.edn",
+   :sha256
+   "b4617a0fa838e499d5bd8ae6e54ddb48b7dd6a7a4256125b890eb40b20914aaa",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789854206.edn",
+   :sha256
+   "defa18eac04e6c371c1a087bab45d5b875c6312167e06fe933d4307b5341f244",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789856495.edn",
+   :sha256
+   "8fee32d3490ed45ab8b94526bd38802e9fdabd32f2f586f6c3bb8918f829db72",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-postfix-1789776011.edn",
+   :sha256
+   "dc566503a9c6625e1e14cd806a8c2530f11764f4d27bbe21379ad0394da0b15a",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-019f6e43-5ea5-40b9-bfe6-1a0e1358d5f3.edn",
+   :sha256
+   "a9bb54abf0d8dcc59ae96f15df10881332967939603a6bb1118a1b7d067d5505",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-0ea3d13d-4a29-43d6-96a5-77acb4773011.edn",
+   :sha256
+   "824ffd1b38f402925e6f277f8668123090bef36bdbb2c4a62041bc2d34d8a2ba",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789862860.edn",
+   :sha256
+   "e7b46ba7073b651845451ec6d554597dc169d2b1acc45cead8f2837dfd948c49",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789940260.edn",
+   :sha256
+   "74a227d557bf737cb27bb7ba0a14f343ebbf0c4fbfc56c9b252f119d3b9421c8",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789948650.edn",
+   :sha256
+   "395faba6f5d168bcff21a87488597817b37ed6d8c8f0bf9418be75067823139b",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-3ffe98e9-8356-4491-adb5-c3ba574c0c2f.edn",
+   :sha256
+   "95f5888b065e1b7c836f3535ba95bb9bfd072b60661aa7ae6ce64367f7d58bd0",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-785ca6f2-3e7a-4522-90a7-575cab4dd5f8.edn",
+   :sha256
+   "5c1a5ef7f092b6fe69f2f4f3f9bb479394e8ad1b564b0b509845c8117901f67f",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789948972.edn",
+   :sha256
+   "2d94846bc7bc6d2e046d39ddd1b9ebe35cfb3f14c3addb05b512cfbd50bc892f",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789951020.edn",
+   :sha256
+   "5c68dee93b36bde383ab4ecca5ec96856114361534a02ffdedd800fc06f09501",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952178.edn",
+   :sha256
+   "32be1fee9a2bbb3603e2a36381e1f9eaa2dde554e63ee7db3c4e199caa6912b7",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952479.edn",
+   :sha256
+   "031ec7431af2939bdfa15ca941e28cc23e6ec3b2264d99dc8b65b00c82b2e298",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789964661.edn",
+   :sha256
+   "8264021ac5f5bc6c251720917c69375795fcc9e1a4a5f263694b6efe51142686",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-probe-revert-check.edn",
+   :sha256
+   "ae35b169a41ea95267e23f86c6ff6a616488f81449773c16cbe059822f3451a7",
+   :retained-new-schemas {}}
+  {:path
+   "/home/joe/code/futon2/data/wm-runs/tick-run-record-smoke.edn",
+   :sha256
+   "b07fec7545b77516894930afbc4a48d91a924c1776ce9965ec542af14464fa40",
+   :retained-new-schemas {}}],
+ :trace-inventory
+ {:path "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-21.edn",
+  :sha256
+  "85f580aee9434d4cd3d736feee4892adc066c7d4879c3b1037bd1dbe2556c355",
+  :forms
+  [{:run "2026-09-21-1789951020",
+    :observation-keys
+    [:active-repo-ratio
+     :annotation-health
+     :attack-coverage
+     :consulting-pct
+     :coupling-density
+     :depositing-signal
+     :loop-health
+     :mathematics-pct
+     :mission-health
+     :portfolio-pct
+     :sorry-count-norm
+     :stack-pct
+     :support-coverage
+     :ticks-firing-ratio],
+    :accumulation-present? false}
+   {:run "2026-09-21-1789952479",
+    :observation-keys
+    [:active-repo-ratio
+     :annotation-health
+     :attack-coverage
+     :consulting-pct
+     :coupling-density
+     :depositing-signal
+     :loop-health
+     :mathematics-pct
+     :mission-health
+     :portfolio-pct
+     :sorry-count-norm
+     :stack-pct
+     :support-coverage
+     :ticks-firing-ratio],
+    :accumulation-present? false}
+   {:run "2026-09-21-1789964661",
+    :observation-keys
+    [:active-repo-ratio
+     :annotation-health
+     :attack-coverage
+     :consulting-pct
+     :coupling-density
+     :depositing-signal
+     :loop-health
+     :mathematics-pct
+     :mission-health
+     :portfolio-pct
+     :sorry-count-norm
+     :stack-pct
+     :support-coverage
+     :ticks-firing-ratio],
+    :accumulation-present? false}]},
+ :declared-counterfactual-prior [9 1],
+ :trials
+ [{:label :recorded,
+   :theta [1 1 1],
+   :rows
+   [{:target "M-aif-policy-conditioned-eig",
+     :g 15.170069253169533,
+     :posterior 0.3336188600826242,
+     :steps
+     [{:tau 1,
+       :entropy -0.0,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012] 1}}
+      {:tau 2,
+       :entropy -0.0,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012] 1}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.6246189861593985, :ambiguity 0}
+      {:tau 2, :risk 7.5454502670101355, :ambiguity 0}]}
+    {:target "M-f11-find-production-successor",
+     :g 15.171332462691225,
+     :posterior 0.333197695627431,
+     :steps
+     [{:tau 1,
+       :entropy -0.0,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d] 1}}
+      {:tau 2,
+       :entropy -0.0,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d] 1}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.6246189861593985, :ambiguity 0}
+      {:tau 2, :risk 7.546713476531827, :ambiguity 0}]}
+    {:target "M-wm-08-external-f2",
+     :g 15.171375235022659,
+     :posterior 0.3331834442899445,
+     :steps
+     [{:tau 1,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}
+      {:tau 2,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.6246189861593985, :ambiguity 0}
+      {:tau 2, :risk 7.546756248863261, :ambiguity 0}]}],
+   :choice
+   {:action
+    {:id :apparatus/one-authority-per-question,
+     :authority :documented-interpretation,
+     :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+        :absent
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :authority :documented-interpretation},
+     :target "M-aif-policy-conditioned-eig"},
+    :mass 0.3336188600826242,
+    :tie-break-rule :action-name-ascending},
+   :policy-comparison
+   {:contributions
+    {:habit 0.0,
+     :free-energy 0.0,
+     :G 0.0012632095216922323,
+     :total 0.0012632095216922323},
+    :decided-by :G,
+    :near-tie? true},
+   :action-comparison
+   {:comparison-domain :action,
+    :winner
+    {:action
+     {:id :apparatus/one-authority-per-question,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+         :absent
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+       :authority :documented-interpretation},
+      :target "M-aif-policy-conditioned-eig"},
+     :mass 0.3336188600826242},
+    :runner-up
+    {:action
+     {:id :apparatus/done-is-observed-running,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-f11-find-production-successor" :admission/task-stated]},
+         :absent
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+       :authority :documented-interpretation},
+      :target "M-f11-find-production-successor"},
+     :mass 0.333197695627431},
+    :flips
+    {:habit
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/one-authority-per-question,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+           :absent
+           #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+         :authority :documented-interpretation},
+        :target "M-aif-policy-conditioned-eig"},
+       :mass 0.3336188600826242}},
+     :free-energy
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/one-authority-per-question,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+           :absent
+           #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+         :authority :documented-interpretation},
+        :target "M-aif-policy-conditioned-eig"},
+       :mass 0.3336188600826242}},
+     :G
+     {:flipped? true,
+      :winner
+      {:action
+       {:id :apparatus/done-is-observed-running,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-f11-find-production-successor"
+              :admission/task-stated]},
+           :absent
+           #{["M-f11-find-production-successor"
+              :hole/h9ab212b3281d]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+         :authority :documented-interpretation},
+        :target "M-f11-find-production-successor"},
+       :mass 0.3333333333333333}}},
+    :neutralization-support :preserve-exclusions,
+    :decided-by #{:G},
+    :tie-break-rule :action-name-ascending}}
+  {:label :declared-beta-9-1-prior,
+   :theta [9/10 9/10 9/10],
+   :rows
+   [{:target "M-aif-policy-conditioned-eig",
+     :g 14.78899780524177,
+     :posterior 0.3729968606335153,
+     :steps
+     [{:tau 1,
+       :entropy 0.3250829733914482,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012] 9/10}}
+      {:tau 2,
+       :entropy 0.056001534354847345,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012] 99/100}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.299536012767951, :ambiguity 0}
+      {:tau 2, :risk 7.489461792473819, :ambiguity 0}]}
+    {:target "M-f11-find-production-successor",
+     :g 14.790248382668246,
+     :posterior 0.37253069073099465,
+     :steps
+     [{:tau 1,
+       :entropy 0.3250829733914482,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d] 9/10}}
+      {:tau 2,
+       :entropy 0.056001534354847345,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d]
+        99/100}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.299536012767951, :ambiguity 0}
+      {:tau 2, :risk 7.490712369900294, :ambiguity 0}]}
+    {:target "M-wm-08-external-f2",
+     :g 15.171375235022659,
+     :posterior 0.25447244863549057,
+     :steps
+     [{:tau 1,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}
+      {:tau 2,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.6246189861593985, :ambiguity 0}
+      {:tau 2, :risk 7.546756248863261, :ambiguity 0}]}],
+   :choice
+   {:action
+    {:id :apparatus/one-authority-per-question,
+     :authority :documented-interpretation,
+     :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+        :absent
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :authority :documented-interpretation},
+     :target "M-aif-policy-conditioned-eig"},
+    :mass 0.3729968606335153,
+    :tie-break-rule :action-name-ascending},
+   :policy-comparison
+   {:contributions
+    {:habit 0.0,
+     :free-energy 0.0,
+     :G 0.0012505774264752745,
+     :total 0.0012505774264752745},
+    :decided-by :G,
+    :near-tie? true},
+   :action-comparison
+   {:comparison-domain :action,
+    :winner
+    {:action
+     {:id :apparatus/one-authority-per-question,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+         :absent
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+       :authority :documented-interpretation},
+      :target "M-aif-policy-conditioned-eig"},
+     :mass 0.3729968606335153},
+    :runner-up
+    {:action
+     {:id :apparatus/done-is-observed-running,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-f11-find-production-successor" :admission/task-stated]},
+         :absent
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+       :authority :documented-interpretation},
+      :target "M-f11-find-production-successor"},
+     :mass 0.37253069073099465},
+    :flips
+    {:habit
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/one-authority-per-question,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+           :absent
+           #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+         :authority :documented-interpretation},
+        :target "M-aif-policy-conditioned-eig"},
+       :mass 0.3729968606335153}},
+     :free-energy
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/one-authority-per-question,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+           :absent
+           #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+         :authority :documented-interpretation},
+        :target "M-aif-policy-conditioned-eig"},
+       :mass 0.3729968606335153}},
+     :G
+     {:flipped? true,
+      :winner
+      {:action
+       {:id :apparatus/done-is-observed-running,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-f11-find-production-successor"
+              :admission/task-stated]},
+           :absent
+           #{["M-f11-find-production-successor"
+              :hole/h9ab212b3281d]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+         :authority :documented-interpretation},
+        :target "M-f11-find-production-successor"},
+       :mass 0.3333333333333333}}},
+    :neutralization-support :preserve-exclusions,
+    :decided-by #{:G},
+    :tie-break-rule :action-name-ascending}}
+  {:label :one-hypothetical-aif-failure,
+   :theta [9/11 9/10 9/10],
+   :rows
+   [{:target "M-aif-policy-conditioned-eig",
+     :g 14.550757177516852,
+     :posterior 0.4301740873338615,
+     :steps
+     [{:tau 1,
+       :entropy 0.4741393130578373,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012] 9/11}}
+      {:tau 2,
+       :entropy 0.14521593554866646,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+        117/121}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.150479673101561, :ambiguity 0}
+      {:tau 2, :risk 7.400277504415291, :ambiguity 0}]}
+    {:target "M-f11-find-production-successor",
+     :g 14.790248382668246,
+     :posterior 0.3385591355354586,
+     :steps
+     [{:tau 1,
+       :entropy 0.3250829733914482,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d] 9/10}}
+      {:tau 2,
+       :entropy 0.056001534354847345,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d]
+        99/100}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.299536012767951, :ambiguity 0}
+      {:tau 2, :risk 7.490712369900294, :ambiguity 0}]}
+    {:target "M-wm-08-external-f2",
+     :g 15.171375235022659,
+     :posterior 0.2312667771306796,
+     :steps
+     [{:tau 1,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}
+      {:tau 2,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.6246189861593985, :ambiguity 0}
+      {:tau 2, :risk 7.546756248863261, :ambiguity 0}]}],
+   :choice
+   {:action
+    {:id :apparatus/one-authority-per-question,
+     :authority :documented-interpretation,
+     :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+        :absent
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :authority :documented-interpretation},
+     :target "M-aif-policy-conditioned-eig"},
+    :mass 0.4301740873338615,
+    :tie-break-rule :action-name-ascending},
+   :policy-comparison
+   {:contributions
+    {:habit 0.0,
+     :free-energy 0.0,
+     :G 0.23949120515139377,
+     :total 0.23949120515139377},
+    :decided-by :G,
+    :near-tie? false},
+   :action-comparison
+   {:comparison-domain :action,
+    :winner
+    {:action
+     {:id :apparatus/one-authority-per-question,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+         :absent
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+       :authority :documented-interpretation},
+      :target "M-aif-policy-conditioned-eig"},
+     :mass 0.4301740873338615},
+    :runner-up
+    {:action
+     {:id :apparatus/done-is-observed-running,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-f11-find-production-successor" :admission/task-stated]},
+         :absent
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+       :authority :documented-interpretation},
+      :target "M-f11-find-production-successor"},
+     :mass 0.3385591355354586},
+    :flips
+    {:habit
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/one-authority-per-question,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+           :absent
+           #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+         :authority :documented-interpretation},
+        :target "M-aif-policy-conditioned-eig"},
+       :mass 0.4301740873338615}},
+     :free-energy
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/one-authority-per-question,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+           :absent
+           #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+         :authority :documented-interpretation},
+        :target "M-aif-policy-conditioned-eig"},
+       :mass 0.4301740873338615}},
+     :G
+     {:flipped? true,
+      :winner
+      {:action
+       {:id :apparatus/done-is-observed-running,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-f11-find-production-successor"
+              :admission/task-stated]},
+           :absent
+           #{["M-f11-find-production-successor"
+              :hole/h9ab212b3281d]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+         :authority :documented-interpretation},
+        :target "M-f11-find-production-successor"},
+       :mass 0.3333333333333333}}},
+    :neutralization-support :preserve-exclusions,
+    :decided-by #{:G},
+    :tie-break-rule :action-name-ascending}}
+  {:label :one-hypothetical-aif-success,
+   :theta [10/11 9/10 9/10],
+   :rows
+   [{:target "M-aif-policy-conditioned-eig",
+     :g 14.817579098783048,
+     :posterior 0.3663371751548586,
+     :steps
+     [{:tau 1,
+       :entropy 0.30463609734923813,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012] 10/11}}
+      {:tau 2,
+       :entropy 0.04786485027570382,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+        120/121}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.319982888810161, :ambiguity 0}
+      {:tau 2, :risk 7.497596209972887, :ambiguity 0}]}
+    {:target "M-f11-find-production-successor",
+     :g 14.790248382668246,
+     :posterior 0.37648750860900676,
+     :steps
+     [{:tau 1,
+       :entropy 0.3250829733914482,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d] 9/10}}
+      {:tau 2,
+       :entropy 0.056001534354847345,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d]
+        99/100}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.299536012767951, :ambiguity 0}
+      {:tau 2, :risk 7.490712369900294, :ambiguity 0}]}
+    {:target "M-wm-08-external-f2",
+     :g 15.171375235022659,
+     :posterior 0.2571753162361348,
+     :steps
+     [{:tau 1,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}
+      {:tau 2,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.6246189861593985, :ambiguity 0}
+      {:tau 2, :risk 7.546756248863261, :ambiguity 0}]}],
+   :choice
+   {:action
+    {:id :apparatus/done-is-observed-running,
+     :authority :documented-interpretation,
+     :produces
+     #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-f11-find-production-successor" :admission/task-stated]},
+        :absent
+        #{["M-f11-find-production-successor" :hole/h9ab212b3281d]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+      :authority :documented-interpretation},
+     :target "M-f11-find-production-successor"},
+    :mass 0.37648750860900676,
+    :tie-break-rule :action-name-ascending},
+   :policy-comparison
+   {:contributions
+    {:habit 0.0,
+     :free-energy 0.0,
+     :G 0.0273307161148022,
+     :total 0.0273307161148022},
+    :decided-by :G,
+    :near-tie? false},
+   :action-comparison
+   {:comparison-domain :action,
+    :winner
+    {:action
+     {:id :apparatus/done-is-observed-running,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-f11-find-production-successor" :admission/task-stated]},
+         :absent
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+       :authority :documented-interpretation},
+      :target "M-f11-find-production-successor"},
+     :mass 0.37648750860900676},
+    :runner-up
+    {:action
+     {:id :apparatus/one-authority-per-question,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+         :absent
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+       :authority :documented-interpretation},
+      :target "M-aif-policy-conditioned-eig"},
+     :mass 0.3663371751548586},
+    :flips
+    {:habit
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/done-is-observed-running,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-f11-find-production-successor"
+              :admission/task-stated]},
+           :absent
+           #{["M-f11-find-production-successor"
+              :hole/h9ab212b3281d]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+         :authority :documented-interpretation},
+        :target "M-f11-find-production-successor"},
+       :mass 0.37648750860900676}},
+     :free-energy
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/done-is-observed-running,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-f11-find-production-successor"
+              :admission/task-stated]},
+           :absent
+           #{["M-f11-find-production-successor"
+              :hole/h9ab212b3281d]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+         :authority :documented-interpretation},
+        :target "M-f11-find-production-successor"},
+       :mass 0.37648750860900676}},
+     :G
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/done-is-observed-running,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-f11-find-production-successor"
+              :admission/task-stated]},
+           :absent
+           #{["M-f11-find-production-successor"
+              :hole/h9ab212b3281d]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+         :authority :documented-interpretation},
+        :target "M-f11-find-production-successor"},
+       :mass 0.3333333333333333}}},
+    :neutralization-support :preserve-exclusions,
+    :decided-by :robust,
+    :tie-break-rule :action-name-ascending}}
+  {:label :only-aif-switched-prior,
+   :theta [9/10 1 1],
+   :rows
+   [{:target "M-aif-policy-conditioned-eig",
+     :g 14.78899780524177,
+     :posterior 0.422921643013554,
+     :steps
+     [{:tau 1,
+       :entropy 0.3250829733914482,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012] 9/10}}
+      {:tau 2,
+       :entropy 0.056001534354847345,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012] 99/100}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.299536012767951, :ambiguity 0}
+      {:tau 2, :risk 7.489461792473819, :ambiguity 0}]}
+    {:target "M-f11-find-production-successor",
+     :g 15.171332462691225,
+     :posterior 0.28854534923990866,
+     :steps
+     [{:tau 1,
+       :entropy -0.0,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d] 1}}
+      {:tau 2,
+       :entropy -0.0,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d] 1}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.6246189861593985, :ambiguity 0}
+      {:tau 2, :risk 7.546713476531827, :ambiguity 0}]}
+    {:target "M-wm-08-external-f2",
+     :g 15.171375235022659,
+     :posterior 0.2885330077465366,
+     :steps
+     [{:tau 1,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}
+      {:tau 2,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.6246189861593985, :ambiguity 0}
+      {:tau 2, :risk 7.546756248863261, :ambiguity 0}]}],
+   :choice
+   {:action
+    {:id :apparatus/one-authority-per-question,
+     :authority :documented-interpretation,
+     :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+        :absent
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :authority :documented-interpretation},
+     :target "M-aif-policy-conditioned-eig"},
+    :mass 0.422921643013554,
+    :tie-break-rule :action-name-ascending},
+   :policy-comparison
+   {:contributions
+    {:habit 0.0,
+     :free-energy 0.0,
+     :G 0.38233465744945505,
+     :total 0.38233465744945505},
+    :decided-by :G,
+    :near-tie? false},
+   :action-comparison
+   {:comparison-domain :action,
+    :winner
+    {:action
+     {:id :apparatus/one-authority-per-question,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+         :absent
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+       :authority :documented-interpretation},
+      :target "M-aif-policy-conditioned-eig"},
+     :mass 0.422921643013554},
+    :runner-up
+    {:action
+     {:id :apparatus/done-is-observed-running,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-f11-find-production-successor" :admission/task-stated]},
+         :absent
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+       :authority :documented-interpretation},
+      :target "M-f11-find-production-successor"},
+     :mass 0.28854534923990866},
+    :flips
+    {:habit
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/one-authority-per-question,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+           :absent
+           #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+         :authority :documented-interpretation},
+        :target "M-aif-policy-conditioned-eig"},
+       :mass 0.422921643013554}},
+     :free-energy
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/one-authority-per-question,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+           :absent
+           #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+         :authority :documented-interpretation},
+        :target "M-aif-policy-conditioned-eig"},
+       :mass 0.422921643013554}},
+     :G
+     {:flipped? true,
+      :winner
+      {:action
+       {:id :apparatus/done-is-observed-running,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-f11-find-production-successor"
+              :admission/task-stated]},
+           :absent
+           #{["M-f11-find-production-successor"
+              :hole/h9ab212b3281d]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+         :authority :documented-interpretation},
+        :target "M-f11-find-production-successor"},
+       :mass 0.3333333333333333}}},
+    :neutralization-support :preserve-exclusions,
+    :decided-by #{:G},
+    :tie-break-rule :action-name-ascending}}
+  {:label :only-aif-switched-failure,
+   :theta [9/11 1 1],
+   :rows
+   [{:target "M-aif-policy-conditioned-eig",
+     :g 14.550757177516852,
+     :posterior 0.48187032418484405,
+     :steps
+     [{:tau 1,
+       :entropy 0.4741393130578373,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012] 9/11}}
+      {:tau 2,
+       :entropy 0.14521593554866646,
+       :output-marginals
+       {["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+        117/121}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.150479673101561, :ambiguity 0}
+      {:tau 2, :risk 7.400277504415291, :ambiguity 0}]}
+    {:target "M-f11-find-production-successor",
+     :g 15.171332462691225,
+     :posterior 0.2590703783111316,
+     :steps
+     [{:tau 1,
+       :entropy -0.0,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d] 1}}
+      {:tau 2,
+       :entropy -0.0,
+       :output-marginals
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d] 1}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.6246189861593985, :ambiguity 0}
+      {:tau 2, :risk 7.546713476531827, :ambiguity 0}]}
+    {:target "M-wm-08-external-f2",
+     :g 15.171375235022659,
+     :posterior 0.2590592975040236,
+     :steps
+     [{:tau 1,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}
+      {:tau 2,
+       :entropy -0.0,
+       :output-marginals
+       {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1}}],
+     :risk-and-ambiguity
+     [{:tau 1, :risk 7.6246189861593985, :ambiguity 0}
+      {:tau 2, :risk 7.546756248863261, :ambiguity 0}]}],
+   :choice
+   {:action
+    {:id :apparatus/one-authority-per-question,
+     :authority :documented-interpretation,
+     :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+        :absent
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :authority :documented-interpretation},
+     :target "M-aif-policy-conditioned-eig"},
+    :mass 0.48187032418484405,
+    :tie-break-rule :action-name-ascending},
+   :policy-comparison
+   {:contributions
+    {:habit 0.0,
+     :free-energy 0.0,
+     :G 0.6205752851743735,
+     :total 0.6205752851743735},
+    :decided-by :G,
+    :near-tie? false},
+   :action-comparison
+   {:comparison-domain :action,
+    :winner
+    {:action
+     {:id :apparatus/one-authority-per-question,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+         :absent
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+       :authority :documented-interpretation},
+      :target "M-aif-policy-conditioned-eig"},
+     :mass 0.48187032418484405},
+    :runner-up
+    {:action
+     {:id :apparatus/done-is-observed-running,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-f11-find-production-successor" :admission/task-stated]},
+         :absent
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+       :authority :documented-interpretation},
+      :target "M-f11-find-production-successor"},
+     :mass 0.2590703783111316},
+    :flips
+    {:habit
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/one-authority-per-question,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+           :absent
+           #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+         :authority :documented-interpretation},
+        :target "M-aif-policy-conditioned-eig"},
+       :mass 0.48187032418484405}},
+     :free-energy
+     {:flipped? false,
+      :winner
+      {:action
+       {:id :apparatus/one-authority-per-question,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+           :absent
+           #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+         :authority :documented-interpretation},
+        :target "M-aif-policy-conditioned-eig"},
+       :mass 0.48187032418484405}},
+     :G
+     {:flipped? true,
+      :winner
+      {:action
+       {:id :apparatus/done-is-observed-running,
+        :authority :documented-interpretation,
+        :produces
+        #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+        :guard
+        {:status :interpreted,
+         :operator :and,
+         :clauses
+         [{:status :interpreted,
+           :present
+           #{["M-f11-find-production-successor"
+              :admission/task-stated]},
+           :absent
+           #{["M-f11-find-production-successor"
+              :hole/h9ab212b3281d]}}]},
+        :transition
+        {:status :interpreted,
+         :operator :union,
+         :produces
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+         :authority :documented-interpretation},
+        :target "M-f11-find-production-successor"},
+       :mass 0.3333333333333333}}},
+    :neutralization-support :preserve-exclusions,
+    :decided-by #{:G},
+    :tie-break-rule :action-name-ascending}}],
+ :validation
+ :recorded-G-and-posteriors-match-and-record-change-alters-Q-and-G-flip-witness}
