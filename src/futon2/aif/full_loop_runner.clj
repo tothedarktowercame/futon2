@@ -19,6 +19,7 @@
             [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
+            [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.fold-cascade :as fold-cascade]
@@ -2836,6 +2837,28 @@
   (standing-decision-readback evidence-dir target reviewer author
                               discharge-contract resolution-read-fn))
 
+(defn- retain-token-outcome!
+  [data-root cohort-id attempt-id prediction d-result artifact-sha]
+  (let [source (:source d-result)
+        measurements
+        (when-let [path (:path source)]
+          (let [bytes (Files/readAllBytes (.toPath (io/file path)))]
+            (when-not (= (:sha256 source) (sha256-bytes bytes))
+              (throw (ex-info "D-task evidence changed before comparison"
+                              {:token-outcome/refusal :evidence-digest-mismatch})))
+            (:after-token-evidence (edn/read-string (String. bytes "UTF-8")))))
+        receipt (assoc (token-outcome/compare-outcomes prediction measurements artifact-sha)
+                       :measurement-source source
+                       :measurement-verification (:verification d-result))
+        file (io/file data-root (name cohort-id) attempt-id "token-outcome.edn")]
+    (io/make-parents file)
+    (spit file (pr-str receipt))
+    {:receipt receipt
+     :entry {:evidence/id (str (name cohort-id) "/" attempt-id "/token-outcome.edn")
+             :source-path (.getAbsolutePath file)
+             :expected-sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))
+             :admitted-at (str (Instant/now))}}))
+
 (defn- checkpoint-evidence-manifest
   [events data-root cohort-id attempt-id selected-target & [interpretation-context]]
   (let [cohort-name (name cohort-id)
@@ -2935,7 +2958,9 @@
                  :source-path path
                  :admitted-at admitted-at})
               captured-evidence)
-        entries (into checkpoint-entries evidence-entries)]
+        entries (cond-> (into checkpoint-entries evidence-entries)
+                  (:token-outcome-entry interpretation-context)
+                  (conj (:token-outcome-entry interpretation-context)))]
     (evidence-manifest/build-manifest
      {:entries entries
       :read-bytes (fn [path]
@@ -3516,6 +3541,24 @@
                                       (str (Instant/now))))
                        outcome-entity (outcome-entity-at-close
                                        @selected-entity-belief close-state)
+                       d-task-result
+                       (when @action-occurrence
+                         (d-task/complete!
+                          (or (:d-task-evidence-root opts) d-task/default-root)
+                          @d-task-dispatch @d-task-context
+                          (assoc data :dispatch-route @author-dispatch-route
+                                      :artifact-binding (or (:artifact-binding data)
+                                                            (get-in @checkpoints [:build :judgment :validation :artifact-binding]))
+                                      :files (get-in @checkpoints [:build :judgment :artifacts])
+                                      :historical? (= :historical-verification-awaiting-validation outcome))
+                          #(read-job! opts %)))
+                       token-comparison
+                       (when (and cohort? @action-occurrence)
+                         (retain-token-outcome!
+                          (or (:data-root execution-cohort) cohort/default-data-root)
+                          (:cohort/id start-event) attempt-id
+                          (get-in @checkpoints [:selection :judgment :token-outcome-prediction])
+                          d-task-result (:commit data)))
                        manifest (when (and cohort? @action-occurrence)
                                   (checkpoint-evidence-manifest
                                    @checkpoint-events
@@ -3526,7 +3569,8 @@
                                    (or (:target data)
                                        (:selected-mission selection-judgment))
                                    {:occurrence @action-occurrence
-                                    :semantic-epoch semantic-epoch}))
+                                    :semantic-epoch semantic-epoch
+                                    :token-outcome-entry (:entry token-comparison)}))
                        admitted-ids (mapv :evidence/id (:entries manifest))
                        closed (cond->
                                (term (merge {:outcome outcome
@@ -3534,6 +3578,7 @@
                                             :artifact-only? (= :artifact-only outcome)
                                             :outcome-entity outcome-entity
                                             :entity-state-at-close close-state
+                                            :token-outcome-comparison (:receipt token-comparison)
                                             :morning-brief-ref brief-ref
                                             :delivery-qa-ref delivery-qa-ref
                                             :job-texts @job-text-records
@@ -3561,21 +3606,11 @@
                                                    {:selected-action selected-action
                                                     :requested-pin
                                                     (:run4/requested-pin opts)})
-                       d-task-result
-                       (when @action-occurrence
-                         (d-task/complete!
-                          (or (:d-task-evidence-root opts) d-task/default-root)
-                          @d-task-dispatch @d-task-context
-                          (assoc data :dispatch-route @author-dispatch-route
-                                      :artifact-binding (or (:artifact-binding data)
-                                                            (get-in @checkpoints [:build :judgment :validation :artifact-binding]))
-                                      :files (get-in @checkpoints [:build :judgment :artifacts])
-                                      :historical? (= :historical-verification-awaiting-validation outcome))
-                          #(read-job! opts %)))
                        result-base (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
                                :outcome outcome :checkpoints @checkpoints
                                :job-texts @job-text-records
                                :d-task-enactment d-task-result
+                               :token-outcome-comparison (:receipt token-comparison)
                                :morning-brief-ref brief-ref
                                :delivery-qa-ref delivery-qa-ref
                                :wm/route run-route
@@ -3858,6 +3893,8 @@
                              (cond->
                               (term {:selected-mission (str target)
                                      :selected-action (:action entry)
+                                     :token-outcome-prediction
+                                     (token-outcome/freeze-prediction (:decision judgement))
                                      :controller-decision (:decision judgement)
                                      :ranked-candidates ranked-for-review
                                      :selection-reasons
