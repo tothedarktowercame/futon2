@@ -115,12 +115,20 @@
                    :precedence [pattern]
                    :construction-receipt {:moves 1}
                    :interpretation-receipts
-                   {:p/observed {:reading "Observe the premise."}}}
-        decision (policy/select-action-cascades
-                  [{:action candidate :controller-score 1.0}]
-                  {:beta 1.0})]
-    (is (= :missing-observation-locators
-           (refusal-of #(gate/emit! decision))))
+                   {:p/observed {:reading "Observe the premise."}}}]
+    (doseq [locator-map [nil
+                         {token nil}
+                         {token {}}
+                         {token {:class :J :repo "futon2" :sha "HEAD"
+                                 :path "evidence.edn"}}]]
+      (let [invalid-decision
+            (policy/select-action-cascades
+             [{:action (cond-> candidate locator-map
+                         (assoc :observation-locators locator-map))
+               :controller-score 1.0}]
+             {:beta 1.0})]
+        (is (= :missing-observation-locators
+               (refusal-of #(gate/emit! invalid-decision))))))
     (let [located (assoc candidate :observation-locators
                          {token {:class :C6 :repo "futon2" :sha "HEAD"
                                  :path "evidence.edn"}})

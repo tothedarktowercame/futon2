@@ -31,7 +31,7 @@
    chosen mass is not the posterior marginal, and a missing β. There is no
    fallback and no silent default: refusing is the only alternative to
    admitting."
-  )
+  (:require [clojure.string :as str]))
 
 (def ^:private allowed-refusal-kinds
   "The closed set of per-target refusal kinds (SPEC §Decision 4)."
@@ -45,6 +45,15 @@
   "The chosen-action probability must equal its posterior marginal this
   closely (SPEC E1: 'within 1e-9')."
   1e-9)
+
+(def ^:private checkable-locator-classes #{:C3 :C4 :C5 :C6})
+
+(defn- valid-observation-locator?
+  [locator]
+  (and (map? locator)
+       (checkable-locator-classes (:class locator))
+       (every? #(and (string? %) (not (str/blank? %)))
+               ((juxt :repo :sha :path) locator))))
 
 (defn- refuse!
   [reason detail]
@@ -105,8 +114,10 @@
                                  (get-in pattern [:guard :clauses])))
                        (:precedence candidate)))
           locators (:observation-locators candidate)
-          missing (seq (sort-by pr-str (remove #(contains? locators %)
-                                                guard-tokens)))]
+          missing (seq (sort-by pr-str
+                                (remove #(valid-observation-locator?
+                                          (get locators %))
+                                        guard-tokens)))]
       (when missing
         (refuse! :missing-observation-locators
                  {:candidate-id (or (:id candidate) (:cascade-id candidate))
