@@ -1,0 +1,122 @@
+{:machine-evolution
+ {:allowed? true,
+  :rule
+  "Normal machine development may continue during collection; it never permits dropping, replacing, relabelling, or promoting a machinery-test opportunity into a qualifying candidate.",
+  :per-attempt-provenance
+  [:semantic-epoch
+   :git-sha
+   :git-dirty?
+   :resolved-mode-flags
+   :configuration-digest],
+  :epoch-boundary
+  "This cohort begins after ruling packets 1+2 and the standing-readback close threading (futon2 855953a9) and uses the fresh wm-full-loop-machinery-57 root.",
+  :analysis
+  "Report attempts chronologically and as machinery tests only; do not pool them with qualifying-run candidates."},
+ :protocol/version 4,
+ :purpose
+ "Build-phase MACHINERY-TEST cohort for the wm-contract qualifying-run build (WORK-REMAINING row 26). Every attempt is machinery evidence only; none is a qualifying candidate. Successor to exhausted :wm-contract-machinery-56-v1 (both attempts closed as honest independent-review rejections; exercise 7 on O-56 ACCEPTED with the delta: occurrence, cutoff and admission frame all :satisfied-now, exact-target contract visible in admitted cells; sole remaining gap = a completed deposit round). T and R unchanged; S done; T resolution persists (resolved-at 2026-09-15T02:09:36Z, byte-pinned 36877d37). O-57 = the FIRST measured-acquisition close of THIS cohort. REQUIRED AUTHOR STEP (new): before finishing, the author runs the offline deposit preflight -- clojure -M -m futon2.aif.deposit-preflight <evidence-dir> <selected-repair-id> -- and the deposit set must pass green; the worked template at holes/labs/wm-contract/deposit-templates/T-addressed/ is the starting point (adapt entity ids to the selected target; also deposit the supporting-resolved pair for T per the a27b4a64 measured instruction; deposit NO file the preflight does not classify). The exercise-7 :satisfied-now/missing lists (runs/a-labels-exercise7-2026-09-15/) are the evidence spec. Annotation exercise 8 subject = the O-57 close regardless of outcome. Casting: worker seats only per CASTING-AMENDMENT-2026-09-14; author recast to codex-23 because the zai fleet is quota-exhausted until 2026-09-15T10:04 (author codex-23, reviewer codex-22, repair-reviewer codex-24 — three distinct worker seats), passed per click payload. Target 3.",
+ :checkpoint-contract
+ {:closed
+  [:outcome :grounded? :artifact-only? :duration-ms :resource-use],
+  :adjudication [:before :after :witness :build-match :dial],
+  :construction
+  [:mission :cascade :sorries :wiring :patterns :deposit],
+  :cell-shape
+  "Every checkpoint payload is either {:judgment ... :ground ...} or {:sorry {:kind keyword ...}}.",
+  :time-step
+  [:opportunity-id
+   :trigger
+   :machine-state
+   :agent-roster
+   :code-state
+   :semantic-epoch],
+  :dispatch [:agent :availability :job-id :prompt-ref],
+  :build
+  [:artifacts
+   :generated-code
+   :commits
+   :patterns-used
+   :inline-improvements
+   :validation],
+  :selection
+  [:selected-mission
+   :selected-action
+   :ranked-candidates
+   :selection-reasons],
+  :revision-note
+  "A revision round nests inside the :build payload as :revision {:round 2 :commits [...] :review {...}} with both review records under :reviews; checkpoint order and schema unchanged from protocol 4."},
+ :casting
+ {:author "codex-23",
+  :reviewer "codex-22",
+  :repair-reviewer "codex-24"},
+ :grounded-success
+ {:outcome :grounded-change,
+  :requires
+  [:independent-before-witness
+   :independent-after-witness
+   :resolved-adjudication
+   :dial-moved],
+  :artifact-only-counts? false},
+ :succeeds-sha256
+ "7bad74448dbec3bd977bd4757d879dcf4881c36056da3a3b9c314191d0cafdeb",
+ :succeeds :wm-contract-machinery-68-v1,
+ :required-before-close
+ #{:adjudication :construction :dispatch :build :selection},
+ :activation :separate-append-only-marker,
+ :analysis
+ {:primary
+  [:attempt-count
+   :grounded-change-rate
+   :grounded-no-change-rate
+   :dispatch-rate
+   :completion-rate
+   :revision-round-conversion-rate],
+  :secondary
+  [:mission-selection-frequency
+   :selection-reason-frequency
+   :expected-versus-realized-calibration
+   :agent-availability
+   :elapsed-time
+   :resource-use
+   :patterns-used
+   :inline-improvement-frequency
+   :semantic-epoch-results
+   :code-version-trajectory
+   :substrate-state-distribution
+   :selection-transient-frequency],
+  :reporting
+  "Report attempts and all typed sorries; identify every record as machinery-test evidence and never as a qualifying candidate; report eligible attempts, complete limb bundles, valid entity pairs and accepted rubric results separately; insufficiency is a valid result."},
+ :status :preregistered,
+ :checkpoint-order
+ [:time-step
+  :selection
+  :construction
+  :dispatch
+  :build
+  :adjudication
+  :closed],
+ :population
+ "Reviewed on-demand build-phase machinery-test opportunities for the wm-contract qualifying-run build",
+ :allowed-triggers #{:duree-click-continuous :duree-click-on-demand},
+ :stopping-rule
+ {:unit :trigger-opportunity,
+  :target 2,
+  :rule
+  "Count the first 2 distinct eligible trigger opportunities after activation, in order.",
+  :counts-as-attempt
+  [:selected-and-dispatched
+   :abstained
+   :no-selection
+   :agent-unavailable
+   :substrate-unavailable
+   :guardrail-refusal
+   :dispatch-failed
+   :build-failed
+   :grounded-no-change
+   :grounded-change],
+  :excluded
+  [:manual-test :replay :duplicate-opportunity :pre-activation],
+  :replacement
+  "None. Failed, unavailable, abstaining, and no-change opportunities remain in the denominator."},
+ :registered-on "2026-09-21",
+ :cohort/id :wm-contract-machinery-69-v1}
