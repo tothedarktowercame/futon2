@@ -26,6 +26,7 @@
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.g-term-decomposition :as decomposition]
             [futon2.aif.limb-evidence :as limb-evidence]
+            [futon2.aif.job-text-retention :as job-texts]
             [futon2.aif.interpretation-evidence :as interpretation-evidence]
             [futon2.aif.interpretation-job :as interpretation-job]
             [futon2.aif.fact-measurement :as measurement]
@@ -1044,7 +1045,7 @@
       (println (str "clojure -M:wm-full-loop cancel " job-id
                     " operator-request"))
       (flush))
-    response))
+    (vary-meta response assoc ::job-texts/dispatched-prompt prompt)))
 
 (defn cancel-job!
   "Cancel one Agency job through its single-finalizer endpoint. The Agency
@@ -3229,6 +3230,17 @@
           (.getAbsolutePath
            (io/file (or (:data-root execution-cohort) cohort/default-data-root)
                     (name (:cohort/id start-event)) attempt-id "evidence")))
+        job-text-records (atom [])
+        job-text-dir (if attempt-evidence-dir
+                       (.getParentFile (io/file attempt-evidence-dir))
+                       (io/file (or (:run-record-dir opts) default-run-record-dir)
+                                (str (:run-id opts)) attempt-id))
+        ;; All author/reviewer/revision/repair ports share this attempt's
+        ;; retention, including injected ports. No additional Agency reads.
+        opts (job-texts/wrap-ports opts job-text-dir job-text-records
+                                   (or (:dispatch-fn opts) dispatch!)
+                                   (or (:poll-fn opts) poll-job!)
+                                   (or (:read-job-fn opts) read-job!))
         measurement-state (atom nil)
         measurement-artifact (atom nil)
         measurement-end (atom nil)
@@ -3267,24 +3279,27 @@
                  :external-attempt-id external-attempt-id
                  :execution-identity execution-identity)
         checkpoint! (fn [checkpoint cell]
-                      ;; The in-memory checkpoint denotes the same admitted
-                      ;; event as the durable cohort.  Never publish it before
-                      ;; an enabled durable append has succeeded.
-                      (when cohort?
-                        (let [append (fn [c]
-                                       (if cohort-source
-                                         (cohort/append-checkpoint!
-                                          cohort-source
-                                          (:data-root execution-cohort)
-                                          attempt-id checkpoint c)
-                                         (cohort/append-checkpoint!
-                                          attempt-id checkpoint c)))]
-                          (append-checkpoint-or-refusal-sorry!
-                           append
-                           #(swap! checkpoint-events assoc checkpoint %)
-                           checkpoint cell)))
-                      (swap! checkpoints assoc checkpoint cell)
-                      cell)
+                      (let [cell (if (#{:dispatch :build} checkpoint)
+                                   (job-texts/checkpoint-cell cell @job-text-records)
+                                   cell)]
+                        ;; The in-memory checkpoint denotes the same admitted
+                        ;; event as the durable cohort.  Never publish it before
+                        ;; an enabled durable append has succeeded.
+                        (when cohort?
+                          (let [append (fn [c]
+                                         (if cohort-source
+                                           (cohort/append-checkpoint!
+                                            cohort-source
+                                            (:data-root execution-cohort)
+                                            attempt-id checkpoint c)
+                                           (cohort/append-checkpoint!
+                                            attempt-id checkpoint c)))]
+                            (append-checkpoint-or-refusal-sorry!
+                             append
+                             #(swap! checkpoint-events assoc checkpoint %)
+                             checkpoint cell)))
+                        (swap! checkpoints assoc checkpoint cell)
+                        cell))
         persist-selection!
         (fn [trace-path]
           (when (and @pending-selection (not @selection-persisted?))
@@ -3491,6 +3506,7 @@
                                             :entity-state-at-close close-state
                                             :morning-brief-ref brief-ref
                                             :delivery-qa-ref delivery-qa-ref
+                                            :job-texts @job-text-records
                                             :duration-ms (- (System/currentTimeMillis) started)
                                             :resource-use
                                             {:agent-turns @dispatched-turns}}
@@ -3528,6 +3544,7 @@
                           #(read-job! opts %)))
                        result-base (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
                                :outcome outcome :checkpoints @checkpoints
+                               :job-texts @job-text-records
                                :d-task-enactment d-task-result
                                :morning-brief-ref brief-ref
                                :delivery-qa-ref delivery-qa-ref
@@ -3652,7 +3669,7 @@
                                                       @dispatched-turns}
                                        :sorry {:kind refusal-kind
                                                :refusal-data failure-data}}
-                           closed (term sorry-data
+                           closed (term (assoc sorry-data :job-texts @job-text-records)
                                         {:kind :full-loop-close-failure
                                          :attempt-id attempt-id})
                            closed-event (when cohort?
@@ -4575,7 +4592,7 @@
                             :resource-use {:agent-turns @dispatched-turns}
                             :sorry {:kind refusal-kind
                                     :refusal-data failure-data}}
-                closed (term sorry-data
+                closed (term (assoc sorry-data :job-texts @job-text-records)
                              {:kind :full-loop-close-failure
                               :attempt-id attempt-id})
                 closed-event (when cohort?
