@@ -1,0 +1,35 @@
+{
+  "role": "pre-commit-validation",
+  "base": "88fff61d8883c3c5f2c48ab17dd5772992846278",
+  "files": {
+    "src/futon2/aif/interpretation_request.clj": "abb916d4ff37c21355ff860cf9079e41d3a54b8a1deddbfb98d330cdc7e5335d",
+    "src/futon2/aif/cascade_proposals.clj": "2637867204253d8aa3e7f0074a303793603b236fc0cfd5cb033d1b7f71f4c81b",
+    "src/futon2/aif/mission_hole_wants.clj": "d46e3775b7d5a3041709c3e2b6651b0dc0d33af19aa075ea5241144c0bdbafc3",
+    "scripts/futon2/report/war_machine.clj": "b90f701eabd27253c76c9bef133d94c0edf34494fa9c4874945a8c1b1d04cf17",
+    "test/futon2/aif/cascade_proposals_test.clj": "ab518695485721ac6fed707ba51218bd1f0a2fb40edcd2144f75c014251b3014"
+  },
+  "runs": [
+    {
+      "namespace": "futon2.aif.cascade-proposals-test",
+      "log": "pre-proposals.log",
+      "exit": 0,
+      "tests": 6,
+      "assertions": 36
+    },
+    {
+      "namespace": "futon2.aif.interpretation-request-test",
+      "log": "pre-request.log",
+      "exit": 0
+    },
+    {
+      "namespace": "futon2.aif.mission-hole-wants-test",
+      "log": "pre-wants.log",
+      "exit": 0
+    },
+    {
+      "namespace": "futon2.report.cascade-decision-test",
+      "log": "pre-decision.log",
+      "exit": 0
+    }
+  ]
+}

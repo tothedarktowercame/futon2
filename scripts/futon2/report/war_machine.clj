@@ -48,6 +48,7 @@
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.cascade-sources :as cascade-sources]
+            [futon2.aif.cascade-proposals :as cascade-proposals]
             [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.token-belief-predecessor :as token-predecessor]
@@ -6316,6 +6317,8 @@
                         :dropped-candidates dropped)
         result (cascade-decision-admitted admitted opts)]
     (cond-> (assoc result :dropped-candidates dropped)
+      (:proposal-supply assembled)
+      (assoc-in [:decision :selection-certificate :proposal-supply] (:proposal-supply assembled))
       (empty? (:problems admitted))
       (assoc-in [:decision :reason] :no-acting-cascade-candidate))))
 
@@ -6696,7 +6699,7 @@
         cascade-horizon (if-let [h (:horizon-steps cascade-sources)]
                           {:value h :authority :cascade-sources}
                           {:value 2 :authority "p4ng 462aa79 (Joe 2026-09-17: initial T=2)"})
-        cascade-assembled
+        raw-cascade-assembled
         (cascade-problems/assemble
          ;; The targets are the substrate's missions AND every target that has
          ;; a declared source. A declared target was previously invisible
@@ -6707,6 +6710,12 @@
          {:targets (vec (distinct (concat (cascade-problems/substrate-targets)
                                           (keys (:universes cascade-sources)))))
           :sources (assoc cascade-sources :horizon-steps (:value cascade-horizon))})
+        cascade-assembled
+        (cascade-proposals/record-supply
+         raw-cascade-assembled cascade-sources
+         (or (:cascade-proposal-supply judge-opts)
+             (cascade-proposals/load-proposals
+              (or (:cascade-proposals-dir judge-opts) cascade-proposals/default-dir))))
         cascade-result (select-and-record-cascade!
                         cascade-assembled
                         (assoc judge-opts

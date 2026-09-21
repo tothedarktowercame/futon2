@@ -140,42 +140,17 @@
                                                    :retriever-rank (inc i) :raw row :judgment :unjudged}))))
             {:candidates [] :failures []} (map-indexed vector rows))))
 
-(defn prepare!
-  "ACTION is the authorized input, not a selection proposal. Ports allow hermetic tests.
-  On double retrieval failure, ex-data retains the full partial request and source list."
-  ([action identity] (prepare! action identity {}))
-  ([action identity {:keys [resolve-fn revision-fn retrieve-fn retriever-specs library-fn now on-capture]
-                     :or {resolve-fn resolve-target revision-fn revision retrieve-fn python-retrieve!
-                          retriever-specs retrievers library-fn library-paths on-capture (fn [_]) now #(str (Instant/now))}}]
-   (need! (and (= 2 (count retriever-specs))
-               (= #{:embedding :tier0} (set (map :kind retriever-specs))))
-          :interpretation/retriever-set-invalid {})
-   (evidence/validate-identity identity)
-   (need! (= action (get-in identity [:occurrence :action/value]))
-          :interpretation/action-mismatch {:identity identity})
-   (need! (#{:advance-mission :open-mission :advance-ticket} (:type action))
-          :interpretation/action-type-unsupported {:action action})
-   (need! (= (:data-root identity) (.getCanonicalPath (io/file (:data-root identity))))
-          :interpretation/attempt-path-invalid {:identity identity})
-   (let [cohort (str/replace-first (get-in identity [:occurrence :cohort/id]) #"^:" "")
-         attempt (get-in identity [:occurrence :attempt/id])
-         _ (doseq [s [cohort attempt]]
-             (need! (and (string? s) (re-matches #"[A-Za-z0-9_-]+" s))
-                    :interpretation/attempt-path-invalid {:identity identity}))
-         root (io/file (:data-root identity) cohort attempt)
-         start (read-bytes (io/file root "001-time-step.edn"))
-         _ (need! (= (:start-event-sha256 identity) (evidence/sha256 start))
-                  :interpretation/attempt-identity-mismatch {:identity identity})
-         event (edn/read-string (String. start "UTF-8"))
-         _ (need! (and (= attempt (:attempt/id event))
-                        (= cohort (str/replace-first (str (:cohort/id event)) #"^:" "")))
-                  :interpretation/attempt-identity-mismatch {:identity identity})
-         _ (need! (= (:semantic-epoch identity) (get-in event [:payload :judgment :semantic-epoch]))
-                  :interpretation/attempt-identity-mismatch {:identity identity})
-         entry (resolve-fn action)
-         _ (need! (and (= (:target action) (:id entry)) (:path entry))
-                  :interpretation/target-unresolved {:action action})
-         dir (io/file root "evidence")
+(defn- captured-request!
+  "Pin target and retrieval inputs; return unjudged candidates only.
+   Shared by authorized interpretation requests and preselection proposals."
+  [action identity root entry {:keys [revision-fn retrieve-fn retriever-specs library-fn now on-capture]
+                         :or {revision-fn revision retrieve-fn python-retrieve!
+                              retriever-specs retrievers library-fn library-paths
+                              on-capture (fn [_]) now #(str (Instant/now))}}]
+  (need! (and (= 2 (count retriever-specs))
+              (= #{:embedding :tier0} (set (map :kind retriever-specs))))
+         :interpretation/retriever-set-invalid {})
+  (let [dir (io/file root "evidence")
          _ (.mkdirs dir)
          target-pin (pin! dir (:path entry) revision-fn)
          _ (on-capture (:source target-pin))
@@ -238,4 +213,63 @@
      (need! (= #{:embedding :tier0} (set (map :kind retriever-specs)))
             :interpretation/retriever-set-invalid {:request request})
      (need! (some #(empty? (:failures %)) runs) :interpretation/retrieval-unavailable {:request request})
-     request)))
+     request))
+
+(defn prepare!
+  "ACTION is the authorized input, not a selection proposal. Ports allow hermetic tests.
+  On double retrieval failure, ex-data retains the full partial request and source list."
+  ([action identity] (prepare! action identity {}))
+  ([action identity {:keys [resolve-fn] :or {resolve-fn resolve-target} :as options}]
+   (evidence/validate-identity identity)
+   (need! (= action (get-in identity [:occurrence :action/value]))
+          :interpretation/action-mismatch {:identity identity})
+   (need! (#{:advance-mission :open-mission :advance-ticket} (:type action))
+          :interpretation/action-type-unsupported {:action action})
+   (need! (= (:data-root identity) (.getCanonicalPath (io/file (:data-root identity))))
+          :interpretation/attempt-path-invalid {:identity identity})
+   (let [cohort (str/replace-first (get-in identity [:occurrence :cohort/id]) #"^:" "")
+         attempt (get-in identity [:occurrence :attempt/id])
+         _ (doseq [s [cohort attempt]]
+             (need! (and (string? s) (re-matches #"[A-Za-z0-9_-]+" s))
+                    :interpretation/attempt-path-invalid {:identity identity}))
+         root (io/file (:data-root identity) cohort attempt)
+         start (read-bytes (io/file root "001-time-step.edn"))
+         _ (need! (= (:start-event-sha256 identity) (evidence/sha256 start))
+                  :interpretation/attempt-identity-mismatch {:identity identity})
+         event (edn/read-string (String. start "UTF-8"))
+         _ (need! (and (= attempt (:attempt/id event))
+                        (= cohort (str/replace-first (str (:cohort/id event)) #"^:" "")))
+                  :interpretation/attempt-identity-mismatch {:identity identity})
+         _ (need! (= (:semantic-epoch identity) (get-in event [:payload :judgment :semantic-epoch]))
+                  :interpretation/attempt-identity-mismatch {:identity identity})
+         entry (resolve-fn action)
+         _ (need! (and (= (:target action) (:id entry)) (:path entry))
+                  :interpretation/target-unresolved {:action action})]
+     (captured-request! action identity root entry options))))
+
+(defn- proposal-shape [r]
+  (-> r
+      (assoc :schema :wm/cascade-proposal-request-v1 :status :proposed
+             :origin :retrieval-proposed)
+      (dissoc :identity)
+      (update :target dissoc :action)))
+
+(defn prepare-proposal!
+  "Preselection evidence capture, not an authorized action or interpretation.
+   Reuses the pinned retrieval path without minting execution identity. Never
+   infer applicability or token production from signature prose."
+  ([target kind root] (prepare-proposal! target kind root {}))
+  ([target kind root {:keys [resolve-fn] :or {resolve-fn resolve-target} :as options}]
+   (need! (and (string? target) (not (str/blank? target)) (#{:mission :ticket} kind))
+          :interpretation/proposal-target-invalid {:target target :kind kind})
+   (let [lookup {:type (if (= kind :ticket) :advance-ticket :open-mission) :target target}
+         entry (resolve-fn lookup)]
+     (need! (and (= target (:id entry)) (:path entry))
+            :interpretation/target-unresolved {:target target})
+     (try
+       (proposal-shape (captured-request! lookup nil (io/file root) entry options))
+       (catch clojure.lang.ExceptionInfo e
+         (let [data (dissoc (ex-data e) :identity :action)]
+           (throw (ex-info (.getMessage e)
+                           (cond-> data (:request data) (update :request proposal-shape))
+                           e))))))))

@@ -27,14 +27,6 @@
   present, never that an unchecked one is absent."
   (:require [clojure.string :as str]))
 
-(def closure-pattern
-  "The interpretation under which closing a stated hole is an action at all:
-   `aif/grounded-actuation-not-reobservation` -- the act writes an ungameable
-   witness to a substrate OUTSIDE the generative model, and that witness feeds
-   the next decision. Ticking a mission's own checkbox in its own document is
-   that witness; re-scoring the model's opinion of itself is not."
-  :aif/grounded-actuation-not-reobservation)
-
 (defn observable-hole?
   "A retained hole whose closure some check can witness. Only unchecked tasks
    have one: the line carries a checkbox that closing it flips."
@@ -89,19 +81,10 @@
          ;; Stated and not yet witnessed closed. Never :unknown: the check runs.
          :universe (zipmap tokens (repeat false))
          :locators (into {} (map (fn [h] [(want-token h) (hole-locator code-root mission h)])) holes)
-         :interpretation
-         {:patterns {closure-pattern {:guard {:needs #{} :forbids (set tokens)}
-                                      :produces (set tokens)}}}
-         :candidates [{:precedence [closure-pattern]
-                       :construction-receipt
-                       {:kind :derived-from-mission-document
-                        :by "futon2.aif.mission-hole-wants"
-                        :source {:path (str (:path mission))}
-                        :reading (str "The mission states " (count holes)
-                                      " unchecked task(s); closing one writes a "
-                                      "checked item to its own document, outside "
-                                      "the model, which the next scan reads.")
-                        :stopped-is-not-success true}}]
+         ;; A stated want does not establish any pattern's applicability.
+         ;; Agent-authored declarations supply interpretations through the loader.
+         :interpretation {:patterns {} :receipts {}}
+         :candidates []
          :holes (mapv (fn [h] (select-keys h [:id :kind :line :text])) holes)}))))
 
 (defn mission-sources

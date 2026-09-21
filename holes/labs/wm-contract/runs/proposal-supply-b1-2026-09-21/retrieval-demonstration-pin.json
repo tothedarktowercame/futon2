@@ -1,0 +1,5 @@
+{
+  "bundle": "/home/joe/code/futon2/data/wm-cascade-proposals/8961ab24-0c3a-4e7c-adbd-7413b5e3e5fa/proposal.edn",
+  "sha256": "c0e734cd2a00fe841fa53da059a2681f3f91b695dd8f0167191105206586468c",
+  "retention": "canonical local proposal store; source companions retained there; not loaded into serving JVM"
+}
