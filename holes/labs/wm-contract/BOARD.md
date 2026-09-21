@@ -135,3 +135,25 @@ five-click post-mortem): (a) pre-click checks must ROUND-TRIP a
 decision record through the reader, not merely compute one; (b) a
 loaded-namespaces-vs-disk probe for tick-critical namespaces (two
 clicks died on committed-but-unloaded code). Owner: unassigned.
+
+## RULING NEEDED (morning, from item-5 discovery): who admits a machine-proposed interpretation?
+
+Supply path (b) is designed: worklist ticket -> :assures
+{pattern, signature} -> pinned apparatus pattern for evidenced ticket
+links; pinned-tension retrieval for other wants; retrieval similarity
+and prose signatures never count as applicability (codex-8 discovery,
+invoke-1789960853067). The open design decision: generated proposals
+need INTERPRETATION RECEIPTS (a reading of the pattern against the
+target — the field the three hand-admitted cascades carry with
+author/date/pin), and every existing receipt was a deliberate agent
+act. Options: (i) proposals enter :proposed and an agent lane reviews
+and admits the reading (interpretation admission becomes reviewed
+work inside the Act cycle); (ii) a typed hole-kind applicability
+mapping is added to the 14 apparatus patterns (0/14 today) so
+admission is mechanical where the mapping is exact; (iii) both — (ii)
+where typed, (i) elsewhere. Also in scope: mission_hole_wants
+assigning ONE generic pattern to every mission is the "generic
+closure pattern" the sketch bans; it should become a decline or a
+real per-mission proposal. Packet (a) (no empty candidates, uniform
+admission, recorded declines) is dispatched separately and does not
+wait on this.
