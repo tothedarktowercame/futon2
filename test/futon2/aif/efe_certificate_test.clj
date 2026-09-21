@@ -472,18 +472,19 @@
                                          candidates
                                          {:horizon-steps 1 :cascade-spec spec})
         by-id (into {} (map (juxt :cascade-id identity)) ranked)
-        decision (policy/select-action-cascades ranked {:beta 1})]
+        decision (try (policy/select-action-cascades ranked {:beta 1})
+                      (catch clojure.lang.ExceptionInfo e (ex-data e)))]
     ;; mechanism (identity): the offender ALONE is excluded — its G is the
     ;; :infinite record, its certificate stops at the infinite step, and the
     ;; safe candidate scores normally.
     (is (= :infinite (:G-efe (:offender by-id))))
     (is (= :infinite (:total (:certificate (:offender by-id)))))
     (is (number? (:G-efe (:safe by-id))))
-    ;; CONCLUSION: the zeroed outcome's candidate is never selected —
-    ;; selection-posterior gives it exactly 0 and chooses the safe one.
-    (is (= 0.0 (get-in decision [:selection-law :posterior
-                                 (:action (:offender by-id))])))
-    (is (= :safe (get-in decision [:action :id])))))
+    ;; The only supported candidate is empty, which is NOT an action.
+    ;; Abstain rather than selecting the zero-support offender or granting
+    ;; an empty cascade action authority.
+    (is (= :no-acting-cascade-candidate (get-in decision [:refusal :kind])))
+    (is (not (contains? decision :action)))))
 
 (deftest wm06-zero-preference-conclusion-holds-on-the-factorized-path
   (let [{:keys [q0 candidates spec]} (wm06-family)

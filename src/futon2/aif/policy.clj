@@ -175,17 +175,26 @@
         computed-f (get-in entry [:certificate :f])
         unattached? (and (not= :attached (:status f))
                          (= :computed-not-attached (:status computed-f)))
-        f-status (if unattached? :computed-not-attached (:status f))]
+        prefix (:f-prefix entry)
+        _ (when (and prefix
+                     (or (not= (:action entry) (:policy prefix))
+                         (not (#{:computed :not-supplied :zero-support} (:status prefix)))))
+            (throw (ex-info "Invalid policy prefix" {:kind :invalid-policy-prefix :prefix prefix})))
+        f (if prefix {:status (:status prefix) :value (:f prefix)
+                          :presence :prefix-receipt :reason (:reason prefix)} f)
+        f-status (if prefix (:status prefix)
+                     (if unattached? :computed-not-attached (:status f)))]
     {:id (:action entry)
      :habit (:value habit)
      :habit-status (:status habit)
      :habit-provenance (:habit-provenance entry)
      :f (:value f)
      :f-status f-status
-     :reason (if unattached? (:reason computed-f) (:reason f))
+     :reason (if (and unattached? (not prefix)) (:reason computed-f) (:reason f))
      :g (:controller-score entry)
      :inputs {:habit habit :f f}
-     :computed-f computed-f}))
+     :computed-f computed-f
+     :f-prefix (:f-prefix entry)}))
 
 (defn- selection-certificate
   "One Lean SelectionCertificate per policy; raw computed F stays in the
@@ -222,7 +231,8 @@
                       :f (:f c)
                       :f-status (if (= :attached (:f-status c))
                                   :computed (:f-status c))
-                      :reason (:reason c)})
+                      :reason (:reason c)
+                      :f-prefix (:f-prefix c)})
                    candidates)})
 
 (defn select-action-cascades
@@ -254,8 +264,9 @@
 
    The learned joint-menu E is read and attached here on every invocation.
    Missing stable identities consume neutral E with the reason recorded.
-   Entries may carry :f; missing, null and false F consume the neutral 0.
-   Computed non-finite F remains in the run record, with consumed F = 0.
+   Production attaches :f-prefix: missing history is :not-supplied with no
+   numerical F, and contributes no term. Contradiction has zero policy support.
+   Legacy/replay entries without that receipt retain their historical handling.
    :selection-certificate carries per-policy Lean fields and the input records.
 
    Returns a decision in the historical flat selector's shape (action,
@@ -306,7 +317,7 @@
         acting? (fn [[a _]] (some? (cascade-first-action a)))
         acting (into {} (filter acting?) posterior)
         excluded (into {} (remove acting?) posterior)
-        _ (when (empty? acting)
+        _ (when (not-any? pos? (vals acting))
             (throw (ex-info "Cascade selection refused"
                             {:refusal
                              {:kind :no-acting-cascade-candidate
@@ -314,8 +325,7 @@
                                        :empty-cascades (count excluded)
                                        :excluded-mass (reduce + 0.0 (vals excluded))
                                        :reason
-                                       (str "every candidate is an empty cascade; an empty cascade "
-                                            "is not an action and cannot carry action mass")}}})))
+                                       "no acting candidate has positive posterior support"}}})))
         ;; bayes-choice takes action-of as a MAP (it does (get action-of id)),
         ;; so build the per-candidate first-acting-action map, not a function.
         action-of (zipmap (map :action ranked-actions)
@@ -323,8 +333,9 @@
         choice (cascade-selection/bayes-choice
                 acting action-of)
         chosen-entry (some (fn [e]
-                             (when (= (cascade-first-action (:action e))
-                                      (:action choice))
+                             (when (and (pos? (get posterior (:action e) 0.0))
+                                        (= (cascade-first-action (:action e))
+                                           (:action choice)))
                                e))
                            ranked-actions)
         ;; The MARGINAL that decided, summed. This was `into {}`, which

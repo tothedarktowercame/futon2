@@ -1119,12 +1119,13 @@
             ;; source at this call site.
             f-source :cascade-free-energy/policy-free-energy
             observed-tokens (set (or (:evidence spec) #{}))
-            fe (cascade-free-energy/policy-free-energy
+            fe (when-not (:f-prefix-production? opts)
+                 (cascade-free-energy/policy-free-energy
                 {:q0 q0
                  :candidates (vec candidate-actions)
                  :tau T
                  :observed-tokens observed-tokens
-                 :rates rates})
+                 :rates rates}))
             fe-refusal? (and (map? fe) (contains? fe :status))
             f-by-id (when-not fe-refusal? (:f fe))
             ;; A refused F is NEVER silently defaulted to 0: the candidate
@@ -1262,6 +1263,12 @@
                                             ;; reason). Never a bare 0.
                                             :f
                                             (cond
+                                              (:f-prefix-production? opts)
+                                              {:status :not-supplied
+                                               :source :policy-prefix-evidence
+                                               :reason :no-admitted-policy-prefix
+                                               :pending-dependency :d-conditioning-consumption-and-policy-prefix-admission}
+
                                               (and (number? f-raw) (not f-finite?))
                                               {:value f-raw
                                                :status :computed-not-attached

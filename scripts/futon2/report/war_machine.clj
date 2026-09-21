@@ -72,6 +72,7 @@
             [futon2.aif.observation :as obs]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.policy :as policy]
+            [futon2.aif.policy-prefix-evidence :as policy-prefix]
             [futon2.aif.policy-free-energy :as policy-free-energy]
             [futon2.aif.policy-precision :as policy-precision]
             [futon2.aif.realized-outcome :as ro]
@@ -224,7 +225,12 @@
   (= "1" (System/getenv "FUTON_WM_BETA_DARK")))
 
 (def ^:dynamic *f-pi-posterior?*
-  "RUN9 / stage S4 live-posterior switch, read once when this namespace loads.
+  "RETIRED production switch: retained for historical S4 replay/tests only.
+   Current cascade production uses policy-prefix/production-ranked, independent
+   of this environment variable. No admitted prefix currently exists: D
+   conditioning-consumption and policy-prefix admission remain pending.
+
+   Historical RUN9 / stage S4 switch, read once when this namespace loads.
    `FUTON_WM_FPI_POSTERIOR=1` puts the F_pi the dark readback computed INTO
    the live policy posterior at the one seam I2 (b2) built --
    `policy/softmax-weights`, score = ln E - G/tau - F_pi (parr2022 B.9).
@@ -5865,7 +5871,8 @@
                   sourced (when (map? locators)
                             (observation-rates/sourced-rates
                              nil nil nil locators (observation-contract)))
-                  base-opts {:horizon-steps (get-in @state [:R13 :cascade-rollout])
+                  base-opts {:f-prefix-production? true
+                             :horizon-steps (get-in @state [:R13 :cascade-rollout])
                              :cascade-spec cascade-spec}]
               (cond
                 ;; no locators on the problem: previous behaviour, the
@@ -5897,7 +5904,7 @@
     ;; so the lane's route carries each node exactly once.
     (step :R14 "futon2.aif.policy/select-action-cascades"
           (fn []
-            (let [decision (policy/select-action-cascades (get @state :R5)
+            (let [decision (policy/select-action-cascades (policy-prefix/production-ranked (get @state :R5) nil)
                                                           {:beta beta})
                   ;; The candidates' :precedence carries manifest pattern MAPS
                   ;; (that is what R4/R5 consume), so select-action-cascades
@@ -6210,7 +6217,8 @@
                   (throw (ex-info "cascade decision refused" live-refusal)))
               ranked (efe/rank-actions {:cascade-belief joint-q0}
                                        joint-candidates
-                                       {:horizon-steps T
+                                       {:f-prefix-production? true
+                                        :horizon-steps T
                                         :cascade-spec
                                         (if grain-mismatch?
                                           {:want joint-want
@@ -6231,7 +6239,9 @@
                             (merge {:kind (or (:kind ranked) :rank-refused)}
                                    ranked))))
           (let [decision (assoc (binding [input-receipts/*habit-read-purpose* :joint-selection]
-                                  (policy/select-action-cascades ranked
+                                  (policy/select-action-cascades
+                                    (policy-prefix/production-ranked ranked
+                                      (select-keys token-belief-input [:conditioning-status :reason :observation-updates]))
                                     {:beta beta :cascade-habit-path (:cascade-habit-path opts)}))
                                 :horizon-steps T
                                 :initial-belief-receipt initial-belief-receipt)

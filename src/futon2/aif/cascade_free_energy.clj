@@ -15,8 +15,8 @@
     universe.
 
   This is Parr et al. 2022 eq. B.2 evaluated at the exact posterior: because
-  the variational posterior here IS the predictive rollout (exact inference
-  over the finite powerset carrier), the complexity term
+  exact-posterior conditioning attains the bound (the predictive rollout is
+  NOT generally that posterior), the complexity term at that posterior
   E_Q[ln Q(s|π) − ln P(o,s|π)] + ln P(o|π) vanishes and
   F(π) = −ln P(o|π) exactly — the equality case of the B.2 bound
   (mathlib4 DarkTower.WarMachine.PolicyVariationalFreeEnergy.vfe_posterior_eq).
@@ -130,6 +130,6 @@
             {:f f :tau tau
              :params {:q0 q0 :rates rates :observed obs :universe universe
                       :complexity-term 0
-                      :complexity-term-reason "exact inference over the finite powerset carrier: the variational posterior is the rollout itself, so B.2 holds with equality (PolicyVariationalFreeEnergy.vfe_posterior_eq)"
+                      :complexity-term-reason "minimum VFE attained by exact-posterior conditioning, not by identifying prediction with posterior (PolicyVariationalFreeEnergy.vfe_posterior_eq)"
                       :complexity-term-source lean-source
                       :theta thetas}})))))

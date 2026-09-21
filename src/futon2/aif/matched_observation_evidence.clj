@@ -15,7 +15,9 @@
     (+ (Math/log (.doubleValue (.shiftRight n shift)))
        (* shift (Math/log 2.0)))))
 
-(defn- surprisal [p]
+(defn surprisal
+  "Negative log of a positive exact probability, without double underflow."
+  [p]
   (let [d (double p)]
     (if (pos? d)
       (- (Math/log d))

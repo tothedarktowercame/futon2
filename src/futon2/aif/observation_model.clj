@@ -23,7 +23,8 @@
    calibration record. It is never dropped."
   (:require [clojure.set :as set]
             [clojure.string :as str]
-            [futon2.aif.cascade-model-manifest :as m]))
+            [futon2.aif.cascade-model-manifest :as m]
+            [futon2.aif.matched-observation-evidence :as evidence]))
 
 (def max-tokens 10)
 
@@ -181,7 +182,7 @@
         (if (zero? p)
           {:status :contradiction :kind :impossible-observation
            :probability 0 :f ##Inf :observation observation :context context}
-          {:probability p :f (- (Math/log (double p)))
+          {:probability p :f (evidence/surprisal p)
            :posterior (into {} (for [[s w] weights :when (pos? w)] [s (/ w p)]))
            :observation observation :context context})))
     :score
