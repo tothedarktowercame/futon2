@@ -131,3 +131,25 @@ emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-ch
 ```
 
 Lint: zero errors/warnings (two existing informational messages). Parens: OK.
+
+## Registered warrant
+
+After the registry check returned `:missing-entry`, registered the rule namespace
+on committed implementation `ea173054f3e07bfdd63e2fd294873eef5c337f3e`:
+
+```
+# From /home/joe/code/futon3c, separate CLI process:
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-8/holes/labs/wm-contract/runs/narrative-8-2026-09-21/registry.edn
+```
+
+Warrant `test-registry-77d00f772a6ea1addd57ca353adac2ebf43387fac186acd8e88de7e196fcb40e`:
+`:warrant? true`, 3 tests, 43 assertions, exit 0, zero errors/failures.
+Registration plus content-addressed log/closure are retained here. This warrants
+the rule and direct persistence tests, not the blocked runner-level test.
+
+The retained compatibility probe was separately linted and paren-checked with
+`clj-kondo --lint holes/labs/wm-contract/runs/narrative-8-2026-09-21/compat.clj`
+and the same `arxana-check-parens-cli` command with that file as its argument.
+Both pass (`compat-lint.log`, `compat-parens.log`). Its final dynamic resolution
+of fix-10a's producer was executed again successfully (`compat.log`). No
+production or test-namespace code changed after the warranted commit.
