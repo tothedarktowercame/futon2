@@ -113,3 +113,7 @@ emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -f arxana-check-pa
 
 The committed configs request warrants only for the two new complete green
 namespaces, never for the failing full runner run. Full logs are retained.
+
+Registry load warrant: `test-registry-8bfb4ba7fcfa3541825cc8133f6d791aa0ee4383ddb4007aaaa5bc05fb76c7bf`; implementation `1d20ca88`; results `{:assertions 12, :duration-ms 1726, :errors 0, :exit 0, :failures 0, :tests 3}`, stable execution and matched postcheck.
+
+Registry runner warrant: `test-registry-ad84c89618a2b4a6ae73e3357d456ca067f7f5bae3216ebbc19ee310b1ed02c0`; implementation `1d20ca88`; results `{:assertions 45, :duration-ms 4886, :errors 0, :exit 0, :failures 0, :tests 3}`, stable execution and matched postcheck.
