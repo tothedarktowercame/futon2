@@ -8,6 +8,7 @@
             [clojure.string :as str]
             [futon2.aif.cascade-plan :as plan]
             [futon2.aif.cascade-structure :as structure]
+            [futon2.aif.route-attestation :as route-attestation]
             [futon2.aif.narrative-figures :as figures]))
 
 (load-identity/register! *ns* *file*)
@@ -514,7 +515,8 @@
       :closed (str "The attempt closed with outcome " (shown (:outcome j)) " after " (shown (:duration-ms j)) " ms. "
                    "The recorded entity state at close has status " (shown (get-in j [:entity-state-at-close :status]))
                    " and reason " (shown (get-in j [:entity-state-at-close :reason])) ". "
-                   "Its Morning Brief reference is " (shown (:morning-brief-ref j)) ".\n"))))
+                   "Its Morning Brief reference is " (shown (:morning-brief-ref j)) ".\n\n"
+                   (route-attestation/paragraph (:route-attestation j))))))
 
 (defn narrative-text [b]
   (str "# Run " (:run-id b) "\n\nA narrative of retained evidence; no selection, observation, or actuation was rerun.\n\n"

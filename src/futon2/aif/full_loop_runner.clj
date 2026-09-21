@@ -25,6 +25,7 @@
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.token-outcome :as token-outcome]
+            [futon2.aif.route-attestation :as route-attestation]
             [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.fold-cascade :as fold-cascade]
@@ -551,6 +552,7 @@
                     :repair/discharge (:repair/discharge result)
                     :repair/publication (:repair/publication result)
                     :d-task-enactment (:d-task-enactment result)
+                    :route-attestation-ref (:route-attestation-ref result)
                     :job-liveness (vec (some-> (:job-liveness/state raw-opts) deref))}
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
                      (assoc :open-stop-lines
@@ -2960,7 +2962,9 @@
               captured-evidence)
         entries (cond-> (into checkpoint-entries evidence-entries)
                   (:token-outcome-entry interpretation-context)
-                  (conj (:token-outcome-entry interpretation-context)))]
+                  (conj (:token-outcome-entry interpretation-context))
+                  (:route-attestation-entry interpretation-context)
+                  (conj (:route-attestation-entry interpretation-context)))]
     (evidence-manifest/build-manifest
      {:entries entries
       :read-bytes (fn [path]
@@ -3562,6 +3566,18 @@
                           (:cohort/id start-event) attempt-id
                           (get-in @checkpoints [:selection :judgment :token-outcome-prediction])
                           d-task-result (:commit data)))
+                       route-account
+                       (route-attestation/retain!
+                        (if attempt-evidence-dir
+                          (.getParentFile (io/file attempt-evidence-dir))
+                          (io/file (or (:run-record-dir opts) default-run-record-dir)
+                                   (str (:run-id opts)) attempt-id))
+                        (str (or (:cohort/id start-event) (:run-id opts)) "/" attempt-id "/retained/route-attestation.edn")
+                        (route-attestation/receipt
+                         {:declarations (:route-attestation opts)
+                          :events @checkpoint-events
+                          :target (:target selected-action)
+                          :token-comparison (:receipt token-comparison)}))
                        manifest (when (and cohort? @action-occurrence)
                                   (checkpoint-evidence-manifest
                                    @checkpoint-events
@@ -3573,7 +3589,8 @@
                                        (:selected-mission selection-judgment))
                                    {:occurrence @action-occurrence
                                     :semantic-epoch semantic-epoch
-                                    :token-outcome-entry (:entry token-comparison)}))
+                                    :token-outcome-entry (:entry token-comparison)
+                                    :route-attestation-entry (:entry route-account)}))
                        admitted-ids (mapv :evidence/id (:entries manifest))
                        closed (cond->
                                (term (merge {:outcome outcome
@@ -3582,6 +3599,8 @@
                                             :outcome-entity outcome-entity
                                             :entity-state-at-close close-state
                                             :token-outcome-comparison (:receipt token-comparison)
+                                            :route-attestation (:receipt route-account)
+                                            :route-attestation-ref (:reference route-account)
                                             :morning-brief-ref brief-ref
                                             :delivery-qa-ref delivery-qa-ref
                                             :job-texts @job-text-records
@@ -3614,6 +3633,8 @@
                                :job-texts @job-text-records
                                :d-task-enactment d-task-result
                                :token-outcome-comparison (:receipt token-comparison)
+                               :route-attestation (:receipt route-account)
+                               :route-attestation-ref (:reference route-account)
                                :morning-brief-ref brief-ref
                                :delivery-qa-ref delivery-qa-ref
                                :wm/route run-route
