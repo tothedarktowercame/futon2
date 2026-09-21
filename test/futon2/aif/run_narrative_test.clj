@@ -260,7 +260,9 @@
        (is (str/includes? text "[:form 2 :mu-pre]"))
        (is (str/includes? text "[:form 2 :observation]"))
        (is (str/includes? text "Not recorded in this run: scan account"))
-       (is (not (str/includes? text "999")))))))
+       ;; Not a bare "999": source citations carry the random temp-dir path.
+       (is (not (str/includes? text ":wrong")))
+       (is (not (str/includes? text "= 999")))))))
 
 (def updater ["M-one" :hole/h6378c65a4012])
 (def other-want ["M-one" :hole/other])
