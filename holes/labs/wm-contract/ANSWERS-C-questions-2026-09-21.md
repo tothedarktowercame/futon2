@@ -75,3 +75,49 @@ claude-3's reading (for Joe to correct):
 3. So neither pure "beside C" nor pure "inside C": IAD maps (situation,
    preference) → valence; MUST/MAY NOT act as guards on the route, MAY carries
    the preference's weight into Cτ.
+
+## Q2 — budget scope: should adding an unrelated mission weaken existing missions' odds?
+
+Options put: (a) portfolio budget, today — adding any source dilutes all;
+(b) per-target budget; (c) no shared budget — each source's weight stands alone.
+
+Joe, verbatim:
+
+> So, this is an interesting question. I would say value [is] very related to
+> probability ... The probability of being selected sounds a lot like an analog
+> of value. So if we have a high probability [for] the mission, because it's a
+> focus — say we're focusing on building the war machine, for example — it's
+> high probability for lots of reasons. I've declared it to be a priority.
+> We've done a lot of recent work on it, so we've got a habit of working on it
+> and so forth. I presumably value the completion of that work. Or I may even
+> enjoy doing the work for its own right. Whatever. So if I add some other
+> mission, first of all, it's most likely I'd add another mission that's like a
+> related spinoff of that war machine work. And indeed, I did that recently by
+> creating a WMC mission. Then I didn't say, let's go start working on that
+> mission. I said, let's create that as a spin-off and stick with what we're
+> working on now, maybe come back to the other one later. But that doesn't mean
+> that that value persists forever. Because once the War Machine is complete,
+> no doubt I'll move on to other things. Maybe I'll get back to my WMC mission,
+> for example. So I don't see how adding an additional mission changes the
+> value of any existing mission much. And again, if every mission is equally
+> likely to be selected, that just means that we don't have a very good model
+> of value. So I think that answers your question.
+
+claude-3's reading (for Joe to correct):
+1. Budget scope: not (a). Adding a mission (the WMC spin-off,
+   holes/M-a-wmc-scaling.md) should not materially change an existing
+   mission's value → (c), no shared budget.
+2. A declared priority/focus is a source of value in its own right ("I've
+   declared it to be a priority"), and it is time-scoped: it holds while the
+   focus lasts and lapses when the work completes; a spin-off is created
+   without being given focus.
+3. Near-uniform selection over missions is a symptom of a poor value model,
+   not a neutral default.
+4. Joe lists several reasons for high selection probability: declared priority,
+   recent work/habit, valuing completion, enjoying the work. In the AIF model
+   these land in different places: habit is E (fix-8 now learns it only from
+   observed wants), valued completion is C over outcomes, enjoying the work is
+   a process preference (C over the route, improve-4), declared priority is a
+   declaration C does not yet read. They combine in the posterior over
+   policies, which is the "probability of being selected"; keeping them in
+   separate terms avoids counting the same reason twice.
