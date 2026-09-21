@@ -22,25 +22,28 @@
   ([f] (with-artifact {} f))
   ([opts f]
   (let [dir (.toFile (Files/createTempDirectory "d-task-authority-" (make-array java.nio.file.attribute.FileAttribute 0)))
-        repo (io/file dir "repo") root (io/file dir "claims")]
+        repo (io/file dir "repo") root (io/file dir "claims")
+        target (get opts :target "target")]
     (try
       (.mkdirs repo)
       (git! repo "init" "-q")
       (git! repo "config" "user.name" "D fixture")
       (git! repo "config" "user.email" "d-fixture@example.invalid")
       (spit (io/file repo "base.txt") "base\n")
-      (git! repo "add" "base.txt")
+      (doseq [[path text] (:before-files opts)]
+        (let [file (io/file repo path)] (io/make-parents file) (spit file text)))
+      (git! repo "add" ".")
       (git! repo "commit" "-qm" "before")
       (let [before {:repo (str repo) :head (git! repo "rev-parse" "HEAD")
                     :observed-at-ms (System/currentTimeMillis)}
-            action (or (:action opts) {:kind :cascade-candidate :id :C0 :target "target"
-                    :precedence [{:id :make-file :theta 1 :produces #{["target" :artifact]}}]})
+            action (or (:action opts) {:kind :cascade-candidate :id :C0 :target target
+                    :precedence [{:id :make-file :theta 1 :produces #{[target :artifact]}}]})
             occurrence (retention/mint-occurrence
                         {:run-id "run" :cohort-id "cohort" :attempt-id "attempt"
                          :selected-action action :now #(Instant/now) :uuid-fn #(UUID/randomUUID)})
             occurrence ((or (:occurrence-fn opts) identity) occurrence)
             declaration (io/file dir "declaration.edn")
-            _ (spit declaration (pr-str (cond-> {:target "target" :locators
+            _ (spit declaration (pr-str (cond-> {:target target :locators
                                         {:artifact {:class :C3 :repo "repo" :sha (:head before)
                                                     :path (or (:locator-path opts) "created.clj")}}}
                                           (:locators opts)
@@ -50,7 +53,7 @@
             pins [{:path (str declaration)
                    :sha256 (evidence/sha256 (Files/readAllBytes (.toPath declaration)))}]
             dispatch (task/capture {:occurrence occurrence :carry-occurrence-id "carry"
-                                    :universe (or (:universe opts) #{["target" :artifact]}) :declaration-reads pins :before before})
+                                    :universe (or (:universe opts) #{[target :artifact]}) :declaration-reads pins :before before})
             _ (spit (io/file repo "created.clj") "(ns created)\n")
             _ (git! repo "add" "created.clj")
             _ (git! repo "commit" "-qm" "execute task")
@@ -67,7 +70,7 @@
             inputs {:dispatch dispatch :artifact-binding binding :author-job author
                     :review-job reviewer :files ["created.clj"] :repository (str repo) :route :fresh-author}
             expected {:occurrence occurrence :carry-occurrence-id "carry"
-                      :universe (or (:universe opts) #{["target" :artifact]}) :declaration-pins pins}]
+                      :universe (or (:universe opts) #{[target :artifact]}) :declaration-pins pins}]
         ;; Only repository location and external Agency read ports are local;
         ;; producer, verifier, Git, occurrence and observation checks are real.
         (with-redefs [observation/repo-root (str dir)]

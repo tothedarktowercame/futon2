@@ -6174,7 +6174,11 @@
                                   initial-belief-receipt
                                   (token-carry/domain-inputs problems)
                                   (:prospective-token-carry opts)
-                                  (:token-belief-context opts))
+                                  (let [contexts (into {} (keep (fn [p]
+                                                   (when-let [c (get-in p [:cascade-problem :token-initialization])]
+                                                     [(:target p) c]))) problems)]
+                                    (cond-> (:token-belief-context opts)
+                                      (seq contexts) (assoc :observation-initialization contexts))))
               token-belief-input (token-predecessor/input-receipt
                                   token-belief-stage
                                   (token-predecessor/inspect-trace
