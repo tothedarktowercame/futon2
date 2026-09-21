@@ -170,3 +170,44 @@
        (is (thrown-with-msg? clojure.lang.ExceptionInfo #"overwrite retained evidence"
                             (narrative/render-run! root run output)))
        (is (= "PATTERN CASCADE: kept" (slurp output)))))))
+
+(deftest scan-account-and-unit-labelled-coverage-reach-the-narrative
+  (fixture
+   (fn [{:keys [root run record record-path attempt-dir output]}]
+     (let [scan (retain (io/file attempt-dir "scan.md") "The retained perceive-stage scan.")
+           coverage {:source-tokens {:unit :source-token :total 4 :reached 2}
+                     :projected-outcome-tokens {:unit :target-qualified-outcome-token :count 3}}]
+       (write-record record-path (assoc record :scan-report scan
+                                       :live-c-coverage coverage
+                                       :mission-hole-coverage {:holes-retained 3 :holes-projected 2}))
+       (narrative/render-run! root run output)
+       (let [text (slurp output)]
+         (is (str/includes? text "[Retained scan account]"))
+         (is (str/includes? text (:sha256 scan)))
+         (is (str/includes? text "C reached 2 of 4 source tokens, with 3 projected outcome tokens"))
+         (is (str/includes? text "mission-hole census retained 3 holes and projected 2"))
+         (is (str/includes? text "[:live-c-coverage]")))))))
+
+(deftest older-runs-explicitly-lack-scan-and-coverage
+  (fixture
+   (fn [{:keys [root run]}]
+     (let [text (narrative/narrative-text (narrative/load-run root run))]
+       (is (str/includes? text "Not recorded in this run: scan account"))
+       (is (str/includes? text "not recorded in this run: live C coverage"))
+       (is (str/includes? text "not recorded in this run: mission-hole coverage"))))))
+
+(deftest trace-coverage-fallback-preserves-unit-and-absence-meaning
+  (fixture
+   (fn [{:keys [root run]}]
+     (let [live {:source-tokens {:unit :source-token :total 4 :reached 2}
+                 :projected-outcome-tokens {:unit :target-qualified-outcome-token :count 3}}
+           bundle (assoc-in (narrative/load-run root run) [:trace :live-c-coverage] live)]
+       (is (str/includes? (narrative/narrative-text bundle)
+                          "C reached 2 of 4 source tokens, with 3 projected outcome tokens"))
+       (is (str/includes? (narrative/narrative-text bundle) "[:form 2 :live-c-coverage]"))
+       (let [wrong (assoc-in bundle [:trace :live-c-coverage :source-tokens :unit] :source-entry)]
+         (is (not (str/includes? (narrative/narrative-text wrong) "C reached 2"))))
+       (let [absent (assoc-in bundle [:record :live-c-coverage]
+                              {:status :absent :reason :no-admitted-cascade-problems})]
+         (is (str/includes? (narrative/narrative-text absent) ":no-admitted-cascade-problems"))
+         (is (not (str/includes? (narrative/narrative-text absent) "C reached 2"))))))))
