@@ -434,3 +434,14 @@
        (is (str/includes? (slurp output) caption))
        (is (not (str/includes? (slurp output) "semilattice field is not computed")))
        (is (str/includes? (slurp (str (subs output 0 (- (count output) 3)) ".cascade.svg")) caption))))))
+
+(deftest closed-learning-trial-line-is-explicitly-hypothetical
+  (let [text (narrative/learning-trial-text
+              {:checkpoints {:closed {:judgment
+                                      {:learning-trial-receipt
+                                       {:trials [{:pattern :apparatus/one-authority-per-question
+                                                  :effect ["M-aif" :updater] :status :held
+                                                  :reason :observation-placement-not-declared
+                                                  :shadow {:if-counted-rollout {:theta 9/11}}}]}}}}})]
+    (is (str/includes? text "held (observation-placement-not-declared)"))
+    (is (str/includes? text "shadow theta would be 9/11 under the illustrative prior"))))

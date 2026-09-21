@@ -516,6 +516,15 @@
                    " and reason " (shown (get-in j [:entity-state-at-close :reason])) ". "
                    "Its Morning Brief reference is " (shown (:morning-brief-ref j)) ".\n"))))
 
+(defn learning-trial-text [b]
+  (apply str
+         (for [trial (:trials (:learning-trial-receipt (judgment b :closed)))]
+           (str "Learning trial for " (:pattern trial) " → " (pr-str (:effect trial))
+                ": " (name (:status trial)) " (" (name (:reason trial)) ")"
+                (when-let [theta (get-in trial [:shadow :if-counted-rollout :theta])]
+                  (str "; shadow theta would be " theta " under the illustrative prior"))
+                ".\n"))))
+
 (defn narrative-text [b]
   (str "# Run " (:run-id b) "\n\nA narrative of retained evidence; no selection, observation, or actuation was rerun.\n\n"
        (apply str
@@ -527,7 +536,7 @@
                        (str "Not recorded in this run: checkpoint. The remaining evidence does not establish this stage's outcome.\n"
                             (when (= stage :selection) (coverage-text b))))
                      (when (= stage :time-step) (str (perceive-text b) (scan-account b)))
-                     (when (= stage :closed) (outcome-text b))
+                     (when (= stage :closed) (str (outcome-text b) (learning-trial-text b)))
                      "\nCited facts:\n"
                      (cite (or path (:record-path b)) (if path [:payload :judgment] [:cohort-attempt]))
                      (when (= stage :time-step) (cite (:record-path b) [:startedAt]))

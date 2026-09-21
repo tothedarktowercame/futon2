@@ -1,0 +1,1615 @@
+{:action
+ {:kind :cascade-candidate,
+  :id :C1,
+  :target "M-aif-policy-conditioned-eig",
+  :precedence
+  [{:id :apparatus/one-authority-per-question,
+    :authority :documented-interpretation,
+    :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+    :guard
+    {:status :interpreted,
+     :operator :and,
+     :clauses
+     [{:status :interpreted,
+       :present
+       #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+       :absent
+       #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+    :transition
+    {:status :interpreted,
+     :operator :union,
+     :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+     :authority :documented-interpretation},
+    :target "M-aif-policy-conditioned-eig"}],
+  :observation-locators
+  {["M-aif-policy-conditioned-eig" :admission/task-stated]
+   {:class :C4,
+    :repo "futon2",
+    :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+    :path "holes/missions/M-aif-policy-conditioned-eig.md",
+    :decl
+    "- [ ] **Mint the shared posterior updater, then unify the two paths through"},
+   ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+   {:class :C4,
+    :repo "futon2",
+    :sha "HEAD",
+    :path "holes/missions/M-aif-policy-conditioned-eig.md",
+    :decl
+    "- [x] **Mint the shared posterior updater, then unify the two paths through"},
+   ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc]
+   {:class :C4,
+    :repo "futon2",
+    :sha "HEAD",
+    :path "holes/missions/M-aif-policy-conditioned-eig.md",
+    :decl
+    "- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the"},
+   ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b]
+   {:class :C4,
+    :repo "futon2",
+    :sha "HEAD",
+    :path "holes/missions/M-aif-policy-conditioned-eig.md",
+    :decl
+    "- [x] **Collect a default-off EIG shadow and calibration packet.** Prior"}},
+  :construction-receipt
+  {:kind :hand-admitted,
+   :by "codex-1",
+   :date "2026-09-21",
+   :moves [],
+   :stopped-is-not-success true,
+   :reading
+   "One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied."},
+  :interpretation-receipts
+  #:apparatus{:one-authority-per-question
+              {:kind :hand-admitted,
+               :by "codex-1",
+               :date "2026-09-21",
+               :source
+               {:path
+                "futon3/library/apparatus/one-authority-per-question.flexiarg",
+                :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+                :sha256
+                "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"},
+               :reading
+               "For the shared-updater task, make one A4a/BMR updater the authority for both hypothetical and observed posterior changes, route both callers through it, and demonstrate equal posterior state and provenance on a pinned observation plus refusal of an unknown outcome before recording this task complete.",
+               :scope-limit
+               "This reading covers the shared-updater task only; it neither supplies the generative experiment model nor completes the typed-Q or calibration tasks.",
+               :target-source
+               {:repo "futon2",
+                :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+                :sha256
+                "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478",
+                :path "holes/missions/M-aif-policy-conditioned-eig.md",
+                :hole-id "M-aif-policy-conditioned-eig#6378c65a4012",
+                :line 195},
+               :observation-limit
+               "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}}},
+ :candidates
+ [{:f-status :computed-not-attached,
+   :computed-f
+   {:value ##Inf,
+    :status :computed-not-attached,
+    :reason :non-finite-under-identity-a,
+    :source :cascade-free-energy/policy-free-energy,
+    :tau 2,
+    :observed-tokens #{}},
+   :habit 0.3333333333333333,
+   :habit-status :attached,
+   :g 15.170069253169533,
+   :reason :non-finite-under-identity-a,
+   :inputs
+   {:habit
+    {:presence :present,
+     :supplied-value 0.3333333333333333,
+     :value 0.3333333333333333,
+     :status :attached,
+     :reason nil},
+    :f
+    {:presence :absent,
+     :supplied-value nil,
+     :value 0,
+     :status :declared-neutral,
+     :reason :absent}},
+   :id
+   {:kind :cascade-candidate,
+    :id :C1,
+    :target "M-aif-policy-conditioned-eig",
+    :precedence
+    [{:id :apparatus/one-authority-per-question,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+         :absent
+         #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+       :authority :documented-interpretation},
+      :target "M-aif-policy-conditioned-eig"}],
+    :observation-locators
+    {["M-aif-policy-conditioned-eig" :admission/task-stated]
+     {:class :C4,
+      :repo "futon2",
+      :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [ ] **Mint the shared posterior updater, then unify the two paths through"},
+     ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+     {:class :C4,
+      :repo "futon2",
+      :sha "HEAD",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [x] **Mint the shared posterior updater, then unify the two paths through"},
+     ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc]
+     {:class :C4,
+      :repo "futon2",
+      :sha "HEAD",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the"},
+     ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b]
+     {:class :C4,
+      :repo "futon2",
+      :sha "HEAD",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [x] **Collect a default-off EIG shadow and calibration packet.** Prior"}},
+    :construction-receipt
+    {:kind :hand-admitted,
+     :by "codex-1",
+     :date "2026-09-21",
+     :moves [],
+     :stopped-is-not-success true,
+     :reading
+     "One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied."},
+    :interpretation-receipts
+    #:apparatus{:one-authority-per-question
+                {:kind :hand-admitted,
+                 :by "codex-1",
+                 :date "2026-09-21",
+                 :source
+                 {:path
+                  "futon3/library/apparatus/one-authority-per-question.flexiarg",
+                  :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+                  :sha256
+                  "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"},
+                 :reading
+                 "For the shared-updater task, make one A4a/BMR updater the authority for both hypothetical and observed posterior changes, route both callers through it, and demonstrate equal posterior state and provenance on a pinned observation plus refusal of an unknown outcome before recording this task complete.",
+                 :scope-limit
+                 "This reading covers the shared-updater task only; it neither supplies the generative experiment model nor completes the typed-Q or calibration tasks.",
+                 :target-source
+                 {:repo "futon2",
+                  :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+                  :sha256
+                  "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478",
+                  :path
+                  "holes/missions/M-aif-policy-conditioned-eig.md",
+                  :hole-id "M-aif-policy-conditioned-eig#6378c65a4012",
+                  :line 195},
+                 :observation-limit
+                 "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}}},
+   :habit-provenance
+   {:source :cascade-prior,
+    :policy-key
+    [:pattern-cascade
+     "M-aif-policy-conditioned-eig"
+     [:apparatus/one-authority-per-question]
+     {}],
+    :count 0,
+    :alpha 1.0,
+    :samples 16,
+    :multiplicity 1,
+    :unit :probability-mass},
+   :f 0}
+  {:f-status :computed-not-attached,
+   :computed-f
+   {:value ##Inf,
+    :status :computed-not-attached,
+    :reason :non-finite-under-identity-a,
+    :source :cascade-free-energy/policy-free-energy,
+    :tau 2,
+    :observed-tokens #{}},
+   :habit 0.3333333333333333,
+   :habit-status :attached,
+   :g 15.171332462691225,
+   :reason :non-finite-under-identity-a,
+   :inputs
+   {:habit
+    {:presence :present,
+     :supplied-value 0.3333333333333333,
+     :value 0.3333333333333333,
+     :status :attached,
+     :reason nil},
+    :f
+    {:presence :absent,
+     :supplied-value nil,
+     :value 0,
+     :status :declared-neutral,
+     :reason :absent}},
+   :id
+   {:kind :cascade-candidate,
+    :id :C1,
+    :target "M-f11-find-production-successor",
+    :precedence
+    [{:id :apparatus/done-is-observed-running,
+      :authority :documented-interpretation,
+      :produces
+      #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-f11-find-production-successor" :admission/task-stated]},
+         :absent
+         #{["M-f11-find-production-successor" :hole/h9ab212b3281d]}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+       :authority :documented-interpretation},
+      :target "M-f11-find-production-successor"}],
+    :observation-locators
+    {["M-f11-find-production-successor" :admission/task-stated]
+     {:class :C4,
+      :repo "futon2",
+      :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+     ["M-f11-find-production-successor" :hole/h9ab212b3281d]
+     {:class :C4,
+      :repo "futon2",
+      :sha "HEAD",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+     ["M-f11-find-production-successor" :hole/h2045faa0e7cc]
+     {:class :C4,
+      :repo "futon2",
+      :sha "HEAD",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution."}},
+    :construction-receipt
+    {:kind :hand-admitted,
+     :by "codex-1",
+     :date "2026-09-21",
+     :moves [],
+     :stopped-is-not-success true,
+     :reading
+     "One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied."},
+    :interpretation-receipts
+    #:apparatus{:done-is-observed-running
+                {:kind :hand-admitted,
+                 :by "codex-1",
+                 :date "2026-09-21",
+                 :source
+                 {:path
+                  "futon3/library/apparatus/done-is-observed-running.flexiarg",
+                  :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+                  :sha256
+                  "301a19b722382997e8e1d455be1c40605ebc987c998aedd5ce5302bcb4a70653"},
+                 :reading
+                 "For F11's acceptance task, require the finder to act at its applied interface on the committed library and retain the ordinary gate and runtime evidence before recording completion; a committed reconciliation module or a stopped run is not that observation.",
+                 :scope-limit
+                 "This is the activation-and-live-evidence reading of the pattern, not a claim that its standing-comparator mechanism or F1-F4 laws have been implemented. It does not produce the separate repair-024 successor disposition.",
+                 :target-source
+                 {:repo "futon2",
+                  :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+                  :sha256
+                  "811395799523bf1ccc52d50d38113f61dc6f5d1e2dfd4a2105d6012c3da3c111",
+                  :path
+                  "holes/missions/M-f11-find-production-successor.md",
+                  :hole-id
+                  "M-f11-find-production-successor#9ab212b3281d",
+                  :line 101},
+                 :observation-limit
+                 "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}}},
+   :habit-provenance
+   {:source :cascade-prior,
+    :policy-key
+    [:pattern-cascade
+     "M-f11-find-production-successor"
+     [:apparatus/done-is-observed-running]
+     {}],
+    :count 0,
+    :alpha 1.0,
+    :samples 16,
+    :multiplicity 1,
+    :unit :probability-mass},
+   :f 0}
+  {:f-status :computed-not-attached,
+   :computed-f
+   {:value ##Inf,
+    :status :computed-not-attached,
+    :reason :non-finite-under-identity-a,
+    :source :cascade-free-energy/policy-free-energy,
+    :tau 2,
+    :observed-tokens #{}},
+   :habit 0.3333333333333333,
+   :habit-status :attached,
+   :g 15.171375235022659,
+   :reason :non-finite-under-identity-a,
+   :inputs
+   {:habit
+    {:presence :present,
+     :supplied-value 0.3333333333333333,
+     :value 0.3333333333333333,
+     :status :attached,
+     :reason nil},
+    :f
+    {:presence :absent,
+     :supplied-value nil,
+     :value 0,
+     :status :declared-neutral,
+     :reason :absent}},
+   :id
+   {:kind :cascade-candidate,
+    :id :C1,
+    :target "M-wm-08-external-f2",
+    :precedence
+    [{:id :cascade-construction/run-it-on-a-real-case,
+      :authority :documented-interpretation,
+      :produces #{["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+      :guard
+      {:status :interpreted,
+       :operator :and,
+       :clauses
+       [{:status :interpreted,
+         :present
+         #{["M-wm-08-external-f2" :independent-expectations-written]
+           ["M-wm-08-external-f2"
+            :external-expectation-validator-exists]},
+         :absent #{}}]},
+      :transition
+      {:status :interpreted,
+       :operator :union,
+       :produces
+       #{["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+       :authority :documented-interpretation},
+      :target "M-wm-08-external-f2"}],
+    :observation-locators
+    {["M-wm-08-external-f2" :external-expectation-validator-exists]
+     {:class :C4,
+      :repo "futon2",
+      :sha "ad1b8f08",
+      :path "src/futon2/aif/find_expectations.clj",
+      :decl "(defn validate-external!"},
+     ["M-wm-08-external-f2" :frozen-occurrence-context-captured]
+     {:class :C3,
+      :repo "futon2",
+      :sha "ad1b8f08",
+      :path
+      "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/FROZEN-CONTEXT.edn"},
+     ["M-wm-08-external-f2" :independent-expectations-written]
+     {:class :C3,
+      :repo "futon2",
+      :sha "ad1b8f08",
+      :path
+      "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn"},
+     ["M-wm-08-external-f2" :route-a-rehearsal-reported]
+     {:class :C3,
+      :repo "futon2",
+      :sha "HEAD",
+      :path
+      "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md"}},
+    :construction-receipt
+    {:kind :hand-admitted,
+     :by "claude-4",
+     :date "2026-09-17",
+     :moves [],
+     :stopped-is-not-success true},
+    :interpretation-receipts
+    #:cascade-construction{:run-it-on-a-real-case
+                           {:kind :hand-admitted,
+                            :by "claude-4",
+                            :date "2026-09-17",
+                            :source
+                            {:path
+                             "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg",
+                             :sha256
+                             "3d006bdff9d3af808112139f9c0342bd93d1c4ab38adf550d9c4754a026d9046"},
+                            :reading
+                            "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}}},
+   :habit-provenance
+   {:source :cascade-prior,
+    :policy-key
+    [:pattern-cascade
+     "M-wm-08-external-f2"
+     [:cascade-construction/run-it-on-a-real-case]
+     {}],
+    :count 0,
+    :alpha 1.0,
+    :samples 16,
+    :multiplicity 1,
+    :unit :probability-mass},
+   :f 0}],
+ :posterior
+ {{:kind :cascade-candidate,
+   :id :C1,
+   :target "M-aif-policy-conditioned-eig",
+   :precedence
+   [{:id :apparatus/one-authority-per-question,
+     :authority :documented-interpretation,
+     :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+        :absent
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+      :authority :documented-interpretation},
+     :target "M-aif-policy-conditioned-eig"}],
+   :observation-locators
+   {["M-aif-policy-conditioned-eig" :admission/task-stated]
+    {:class :C4,
+     :repo "futon2",
+     :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [ ] **Mint the shared posterior updater, then unify the two paths through"},
+    ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+    {:class :C4,
+     :repo "futon2",
+     :sha "HEAD",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [x] **Mint the shared posterior updater, then unify the two paths through"},
+    ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc]
+    {:class :C4,
+     :repo "futon2",
+     :sha "HEAD",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the"},
+    ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b]
+    {:class :C4,
+     :repo "futon2",
+     :sha "HEAD",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [x] **Collect a default-off EIG shadow and calibration packet.** Prior"}},
+   :construction-receipt
+   {:kind :hand-admitted,
+    :by "codex-1",
+    :date "2026-09-21",
+    :moves [],
+    :stopped-is-not-success true,
+    :reading
+    "One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied."},
+   :interpretation-receipts
+   #:apparatus{:one-authority-per-question
+               {:kind :hand-admitted,
+                :by "codex-1",
+                :date "2026-09-21",
+                :source
+                {:path
+                 "futon3/library/apparatus/one-authority-per-question.flexiarg",
+                 :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+                 :sha256
+                 "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"},
+                :reading
+                "For the shared-updater task, make one A4a/BMR updater the authority for both hypothetical and observed posterior changes, route both callers through it, and demonstrate equal posterior state and provenance on a pinned observation plus refusal of an unknown outcome before recording this task complete.",
+                :scope-limit
+                "This reading covers the shared-updater task only; it neither supplies the generative experiment model nor completes the typed-Q or calibration tasks.",
+                :target-source
+                {:repo "futon2",
+                 :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+                 :sha256
+                 "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478",
+                 :path
+                 "holes/missions/M-aif-policy-conditioned-eig.md",
+                 :hole-id "M-aif-policy-conditioned-eig#6378c65a4012",
+                 :line 195},
+                :observation-limit
+                "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}}}
+  0.3336188600826242,
+  {:kind :cascade-candidate,
+   :id :C1,
+   :target "M-f11-find-production-successor",
+   :precedence
+   [{:id :apparatus/done-is-observed-running,
+     :authority :documented-interpretation,
+     :produces
+     #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-f11-find-production-successor" :admission/task-stated]},
+        :absent
+        #{["M-f11-find-production-successor" :hole/h9ab212b3281d]}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces
+      #{["M-f11-find-production-successor" :hole/h9ab212b3281d]},
+      :authority :documented-interpretation},
+     :target "M-f11-find-production-successor"}],
+   :observation-locators
+   {["M-f11-find-production-successor" :admission/task-stated]
+    {:class :C4,
+     :repo "futon2",
+     :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+     :path "holes/missions/M-f11-find-production-successor.md",
+     :decl
+     "- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+    ["M-f11-find-production-successor" :hole/h9ab212b3281d]
+    {:class :C4,
+     :repo "futon2",
+     :sha "HEAD",
+     :path "holes/missions/M-f11-find-production-successor.md",
+     :decl
+     "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+    ["M-f11-find-production-successor" :hole/h2045faa0e7cc]
+    {:class :C4,
+     :repo "futon2",
+     :sha "HEAD",
+     :path "holes/missions/M-f11-find-production-successor.md",
+     :decl
+     "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution."}},
+   :construction-receipt
+   {:kind :hand-admitted,
+    :by "codex-1",
+    :date "2026-09-21",
+    :moves [],
+    :stopped-is-not-success true,
+    :reading
+    "One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied."},
+   :interpretation-receipts
+   #:apparatus{:done-is-observed-running
+               {:kind :hand-admitted,
+                :by "codex-1",
+                :date "2026-09-21",
+                :source
+                {:path
+                 "futon3/library/apparatus/done-is-observed-running.flexiarg",
+                 :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+                 :sha256
+                 "301a19b722382997e8e1d455be1c40605ebc987c998aedd5ce5302bcb4a70653"},
+                :reading
+                "For F11's acceptance task, require the finder to act at its applied interface on the committed library and retain the ordinary gate and runtime evidence before recording completion; a committed reconciliation module or a stopped run is not that observation.",
+                :scope-limit
+                "This is the activation-and-live-evidence reading of the pattern, not a claim that its standing-comparator mechanism or F1-F4 laws have been implemented. It does not produce the separate repair-024 successor disposition.",
+                :target-source
+                {:repo "futon2",
+                 :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+                 :sha256
+                 "811395799523bf1ccc52d50d38113f61dc6f5d1e2dfd4a2105d6012c3da3c111",
+                 :path
+                 "holes/missions/M-f11-find-production-successor.md",
+                 :hole-id
+                 "M-f11-find-production-successor#9ab212b3281d",
+                 :line 101},
+                :observation-limit
+                "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}}}
+  0.333197695627431,
+  {:kind :cascade-candidate,
+   :id :C1,
+   :target "M-wm-08-external-f2",
+   :precedence
+   [{:id :cascade-construction/run-it-on-a-real-case,
+     :authority :documented-interpretation,
+     :produces #{["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+     :guard
+     {:status :interpreted,
+      :operator :and,
+      :clauses
+      [{:status :interpreted,
+        :present
+        #{["M-wm-08-external-f2" :independent-expectations-written]
+          ["M-wm-08-external-f2"
+           :external-expectation-validator-exists]},
+        :absent #{}}]},
+     :transition
+     {:status :interpreted,
+      :operator :union,
+      :produces #{["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+      :authority :documented-interpretation},
+     :target "M-wm-08-external-f2"}],
+   :observation-locators
+   {["M-wm-08-external-f2" :external-expectation-validator-exists]
+    {:class :C4,
+     :repo "futon2",
+     :sha "ad1b8f08",
+     :path "src/futon2/aif/find_expectations.clj",
+     :decl "(defn validate-external!"},
+    ["M-wm-08-external-f2" :frozen-occurrence-context-captured]
+    {:class :C3,
+     :repo "futon2",
+     :sha "ad1b8f08",
+     :path
+     "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/FROZEN-CONTEXT.edn"},
+    ["M-wm-08-external-f2" :independent-expectations-written]
+    {:class :C3,
+     :repo "futon2",
+     :sha "ad1b8f08",
+     :path
+     "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn"},
+    ["M-wm-08-external-f2" :route-a-rehearsal-reported]
+    {:class :C3,
+     :repo "futon2",
+     :sha "HEAD",
+     :path
+     "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md"}},
+   :construction-receipt
+   {:kind :hand-admitted,
+    :by "claude-4",
+    :date "2026-09-17",
+    :moves [],
+    :stopped-is-not-success true},
+   :interpretation-receipts
+   #:cascade-construction{:run-it-on-a-real-case
+                          {:kind :hand-admitted,
+                           :by "claude-4",
+                           :date "2026-09-17",
+                           :source
+                           {:path
+                            "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg",
+                            :sha256
+                            "3d006bdff9d3af808112139f9c0342bd93d1c4ab38adf550d9c4754a026d9046"},
+                           :reading
+                           "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}}}
+  0.3331834442899445},
+ :terms
+ {:A
+  {:status :present,
+   :value
+   {["M-wm-08-external-f2" :independent-expectations-written]
+    {:false-neg 0, :false-pos 0},
+    ["M-wm-08-external-f2" :frozen-occurrence-context-captured]
+    {:false-neg 0, :false-pos 0},
+    ["M-aif-policy-conditioned-eig" :admission/task-stated]
+    {:false-neg 0, :false-pos 0},
+    ["M-f11-find-production-successor" :hole/h9ab212b3281d]
+    {:false-neg 0, :false-pos 0},
+    ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+    {:false-neg 0, :false-pos 0},
+    ["M-f11-find-production-successor" :admission/task-stated]
+    {:false-neg 0, :false-pos 0},
+    ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc]
+    {:false-neg 0, :false-pos 0},
+    ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b]
+    {:false-neg 0, :false-pos 0},
+    ["M-f11-find-production-successor" :hole/h2045faa0e7cc]
+    {:false-neg 0, :false-pos 0},
+    ["M-wm-08-external-f2" :external-expectation-validator-exists]
+    {:false-neg 0, :false-pos 0},
+    ["M-wm-08-external-f2" :route-a-rehearsal-reported]
+    {:false-neg 0, :false-pos 0}},
+   :verdict :degenerate,
+   :reason :identity-kernel},
+  :C
+  {:status :present,
+   :value
+   {:form :step-indexed,
+    :schedule
+    {:placement {:value :terminal, :status :declared},
+     :elsewhere
+     {:value :uniform-over-non-ruled-zero, :status :declared}},
+    :steps
+    [{:tau 1,
+      :distribution
+      {:universe
+       #{["M-wm-08-external-f2" :independent-expectations-written]
+         ["M-wm-08-external-f2" :frozen-occurrence-context-captured]
+         ["M-aif-policy-conditioned-eig" :admission/task-stated]
+         ["M-f11-find-production-successor" :hole/h9ab212b3281d]
+         ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+         ["M-f11-find-production-successor" :admission/task-stated]
+         ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc]
+         ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b]
+         ["M-f11-find-production-successor" :hole/h2045faa0e7cc]
+         ["M-wm-08-external-f2" :external-expectation-validator-exists]
+         ["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+       :zeroed #{},
+       :weights {}}}
+     {:tau 2,
+      :distribution
+      {:universe
+       #{["M-wm-08-external-f2" :independent-expectations-written]
+         ["M-wm-08-external-f2" :frozen-occurrence-context-captured]
+         ["M-aif-policy-conditioned-eig" :admission/task-stated]
+         ["M-f11-find-production-successor" :hole/h9ab212b3281d]
+         ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+         ["M-f11-find-production-successor" :admission/task-stated]
+         ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc]
+         ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b]
+         ["M-f11-find-production-successor" :hole/h2045faa0e7cc]
+         ["M-wm-08-external-f2" :external-expectation-validator-exists]
+         ["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+       :zeroed #{},
+       :weights
+       {["M-f11-find-production-successor" :hole/h9ab212b3281d]
+        5/116898,
+        ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+        229/175347,
+        ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc]
+        229/175347,
+        ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b]
+        229/175347,
+        ["M-f11-find-production-successor" :hole/h2045faa0e7cc]
+        5/116898,
+        ["M-wm-08-external-f2" :route-a-rehearsal-reported] 1/6}}}]},
+   :verdict :non-degenerate,
+   :reason :varies-across-horizon,
+   :C-steps-count 2},
+  :D
+  {:status :present,
+   :value
+   {#{["M-wm-08-external-f2" :independent-expectations-written]
+      ["M-wm-08-external-f2" :frozen-occurrence-context-captured]
+      ["M-aif-policy-conditioned-eig" :admission/task-stated]
+      ["M-f11-find-production-successor" :admission/task-stated]
+      ["M-wm-08-external-f2" :external-expectation-validator-exists]
+      ["M-wm-08-external-f2" :route-a-rehearsal-reported]}
+    1},
+   :verdict :degenerate,
+   :reason :point-mass},
+  :E
+  {:status :present,
+   :value 0.3333333333333333,
+   :verdict :degenerate,
+   :reason :uniform-habit},
+  :F
+  {:status :present,
+   :value 0,
+   :verdict :degenerate,
+   :reason :zero-consumed-f},
+  :Q
+  {:status :present,
+   :value
+   {:initial-belief
+    {#{["M-wm-08-external-f2" :independent-expectations-written]
+       ["M-wm-08-external-f2" :frozen-occurrence-context-captured]
+       ["M-aif-policy-conditioned-eig" :admission/task-stated]
+       ["M-f11-find-production-successor" :admission/task-stated]
+       ["M-wm-08-external-f2" :external-expectation-validator-exists]
+       ["M-wm-08-external-f2" :route-a-rehearsal-reported]}
+     1},
+    :steps
+    [{:tau 1,
+      :belief
+      {#{["M-wm-08-external-f2" :independent-expectations-written]
+         ["M-wm-08-external-f2" :frozen-occurrence-context-captured]
+         ["M-aif-policy-conditioned-eig" :admission/task-stated]
+         ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+         ["M-f11-find-production-successor" :admission/task-stated]
+         ["M-wm-08-external-f2" :external-expectation-validator-exists]
+         ["M-wm-08-external-f2" :route-a-rehearsal-reported]}
+       1}}
+     {:tau 2,
+      :belief
+      {#{["M-wm-08-external-f2" :independent-expectations-written]
+         ["M-wm-08-external-f2" :frozen-occurrence-context-captured]
+         ["M-aif-policy-conditioned-eig" :admission/task-stated]
+         ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+         ["M-f11-find-production-successor" :admission/task-stated]
+         ["M-wm-08-external-f2" :external-expectation-validator-exists]
+         ["M-wm-08-external-f2" :route-a-rehearsal-reported]}
+       1}}],
+    :conditioning-input
+    {:status :not-supplied, :kind :belief-update-not-supplied},
+    :observation-updates [],
+    :z-semantics :per-step-redraw,
+    :trajectory-scope :filtering-entry-predictive-future,
+    :conformance
+    {:received-update :producer-receipt-not-recomputed,
+     :model-reference
+     "DarkTower.WarMachine.ExactBeliefTrajectory.exactUpdate",
+     :future :varying-precedence-predictive-extension,
+     :refusal-continuation :runner-policy-not-conditionedTrajectory}},
+   :verdict :degenerate,
+   :reason :open-loop-no-conditioning}},
+ :source-record
+ {:dispatch
+  {:schema :wm/d-task-dispatch-v1,
+   :carry-occurrence-id
+   "wm-live-selection-2026-09-21T04:26:02.252761599Z",
+   :before-evidence :not-measured,
+   :r6-candidate-occurrence nil,
+   :candidate-to-minted-join :not-established,
+   :universe
+   #{["M-wm-08-external-f2" :independent-expectations-written]
+     ["M-wm-08-external-f2" :frozen-occurrence-context-captured]
+     ["M-aif-policy-conditioned-eig" :admission/task-stated]
+     ["M-f11-find-production-successor" :hole/h9ab212b3281d]
+     ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+     ["M-f11-find-production-successor" :admission/task-stated]
+     ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc]
+     ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b]
+     ["M-f11-find-production-successor" :hole/h2045faa0e7cc]
+     ["M-wm-08-external-f2" :external-expectation-validator-exists]
+     ["M-wm-08-external-f2" :route-a-rehearsal-reported]},
+   :declarations
+   [{:path
+     "/home/joe/code/futon2/resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn",
+     :sha256
+     "7a2739c5dd6aac9291fa39ccdf7132e10c206da36804a0163e000fdff2007a49",
+     :snapshot-edn
+     ";; Agent-authored applicability, not inferred from retrieval or :assures.\n{:schema :wm/cascade-source-v1\n :target \"M-aif-policy-conditioned-eig\"\n :context :WM\n :beta {:value 1 :status :declared}\n :lam {:value 1 :status :declared}\n :mu {:value 0 :status :declared}\n :c-schedule {:placement {:value :terminal :status :declared}\n              :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}}\n :facts [:admission/task-stated :hole/h6378c65a4012 :hole/h0e270aa090bc :hole/h42fceb4ad48b]\n :want [:hole/h6378c65a4012 :hole/h0e270aa090bc :hole/h42fceb4ad48b]\n :locators\n {:admission/task-stated\n  {:class :C4 :repo \"futon2\" :sha \"cb2045b8279853fbd48d6a07c1e2da952f2e338f\"\n   :path \"holes/missions/M-aif-policy-conditioned-eig.md\"\n   :decl \"- [ ] **Mint the shared posterior updater, then unify the two paths through\"}\n  :hole/h6378c65a4012\n  {:class :C4 :repo \"futon2\" :sha \"HEAD\"\n   :path \"holes/missions/M-aif-policy-conditioned-eig.md\"\n   :decl \"- [x] **Mint the shared posterior updater, then unify the two paths through\"}\n  :hole/h0e270aa090bc\n  {:class :C4 :repo \"futon2\" :sha \"HEAD\"\n   :path \"holes/missions/M-aif-policy-conditioned-eig.md\"\n   :decl \"- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the\"}\n  :hole/h42fceb4ad48b\n  {:class :C4 :repo \"futon2\" :sha \"HEAD\"\n   :path \"holes/missions/M-aif-policy-conditioned-eig.md\"\n   :decl \"- [x] **Collect a default-off EIG shadow and calibration packet.** Prior\"}}\n :patterns\n {:apparatus/one-authority-per-question\n  {:guard {:needs #{:admission/task-stated} :forbids #{:hole/h6378c65a4012}}\n   :produces #{:hole/h6378c65a4012}}}\n :interpretation-receipts\n {:apparatus/one-authority-per-question\n  {:kind :hand-admitted :by \"codex-1\" :date \"2026-09-21\"\n   :source {:path \"futon3/library/apparatus/one-authority-per-question.flexiarg\"\n            :revision \"7fc6a05004aa3e601e53eba633d62213da0af4b2\"\n            :sha256 \"42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1\"}\n   :reading \"For the shared-updater task, make one A4a/BMR updater the authority for both hypothetical and observed posterior changes, route both callers through it, and demonstrate equal posterior state and provenance on a pinned observation plus refusal of an unknown outcome before recording this task complete.\"\n   :scope-limit \"This reading covers the shared-updater task only; it neither supplies the generative experiment model nor completes the typed-Q or calibration tasks.\"\n   :target-source {:repo \"futon2\" :revision \"cb2045b8279853fbd48d6a07c1e2da952f2e338f\"\n                   :sha256 \"2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478\"\n                   :path \"holes/missions/M-aif-policy-conditioned-eig.md\"\n                   :hole-id \"M-aif-policy-conditioned-eig#6378c65a4012\" :line 195}\n   :observation-limit \"C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here.\"}}\n :candidates\n [{:precedence [:apparatus/one-authority-per-question]\n   :construction-receipt\n   {:kind :hand-admitted :by \"codex-1\" :date \"2026-09-21\"\n    :moves [] :stopped-is-not-success true\n    :reading \"One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied.\"}}]}\n",
+     :snapshot
+     {:schema :wm/cascade-source-v1,
+      :beta {:value 1, :status :declared},
+      :candidates
+      [{:precedence [:apparatus/one-authority-per-question],
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "codex-1",
+         :date "2026-09-21",
+         :moves [],
+         :stopped-is-not-success true,
+         :reading
+         "One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied."}}],
+      :patterns
+      #:apparatus{:one-authority-per-question
+                  {:guard
+                   {:needs #{:admission/task-stated},
+                    :forbids #{:hole/h6378c65a4012}},
+                   :produces #{:hole/h6378c65a4012}}},
+      :c-schedule
+      {:placement {:value :terminal, :status :declared},
+       :elsewhere
+       {:value :uniform-over-non-ruled-zero, :status :declared}},
+      :locators
+      {:admission/task-stated
+       {:class :C4,
+        :repo "futon2",
+        :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+        :path "holes/missions/M-aif-policy-conditioned-eig.md",
+        :decl
+        "- [ ] **Mint the shared posterior updater, then unify the two paths through"},
+       :hole/h6378c65a4012
+       {:class :C4,
+        :repo "futon2",
+        :sha "HEAD",
+        :path "holes/missions/M-aif-policy-conditioned-eig.md",
+        :decl
+        "- [x] **Mint the shared posterior updater, then unify the two paths through"},
+       :hole/h0e270aa090bc
+       {:class :C4,
+        :repo "futon2",
+        :sha "HEAD",
+        :path "holes/missions/M-aif-policy-conditioned-eig.md",
+        :decl
+        "- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the"},
+       :hole/h42fceb4ad48b
+       {:class :C4,
+        :repo "futon2",
+        :sha "HEAD",
+        :path "holes/missions/M-aif-policy-conditioned-eig.md",
+        :decl
+        "- [x] **Collect a default-off EIG shadow and calibration packet.** Prior"}},
+      :lam {:value 1, :status :declared},
+      :interpretation-receipts
+      #:apparatus{:one-authority-per-question
+                  {:kind :hand-admitted,
+                   :by "codex-1",
+                   :date "2026-09-21",
+                   :source
+                   {:path
+                    "futon3/library/apparatus/one-authority-per-question.flexiarg",
+                    :revision
+                    "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+                    :sha256
+                    "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"},
+                   :reading
+                   "For the shared-updater task, make one A4a/BMR updater the authority for both hypothetical and observed posterior changes, route both callers through it, and demonstrate equal posterior state and provenance on a pinned observation plus refusal of an unknown outcome before recording this task complete.",
+                   :scope-limit
+                   "This reading covers the shared-updater task only; it neither supplies the generative experiment model nor completes the typed-Q or calibration tasks.",
+                   :target-source
+                   {:repo "futon2",
+                    :revision
+                    "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+                    :sha256
+                    "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478",
+                    :path
+                    "holes/missions/M-aif-policy-conditioned-eig.md",
+                    :hole-id
+                    "M-aif-policy-conditioned-eig#6378c65a4012",
+                    :line 195},
+                   :observation-limit
+                   "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}},
+      :context :WM,
+      :want
+      [:hole/h6378c65a4012 :hole/h0e270aa090bc :hole/h42fceb4ad48b],
+      :mu {:value 0, :status :declared},
+      :target "M-aif-policy-conditioned-eig",
+      :facts
+      [:admission/task-stated
+       :hole/h6378c65a4012
+       :hole/h0e270aa090bc
+       :hole/h42fceb4ad48b]}}
+    {:path
+     "/home/joe/code/futon2/resources/wm/cascade-sources/M-expressions-of-interest.edn",
+     :sha256
+     "aa5a9c96bdc7b3c75a1bc6aa6ad68a82ed02c88f3b6802a9a96c964f31da6556",
+     :snapshot-edn
+     ";; Presence witnesses only (claude-4 disposition, 2026-09-20).\n;; C6 resolves each witness's {:repo ... :sha ... :entry ...} reference.\n;; :entry is optional for the authored commit and names the committed record\n;; for refusal/acceptance witnesses. Only object presence is checked. It does not verify authorship, binding,\n;; ordering, grounding, correctness, or mission completion. No J channel.\n;; These prospective artifacts belong to the mission's community account,\n;; outside WM run bookkeeping. This declaration does not create them.\n;; HEAD is resolved and retained by C6 on each observation, so later committed\n;; witnesses can satisfy the currently unsatisfied want.\n{:schema :wm/cascade-source-v1\n :target \"M-expressions-of-interest\"\n :context :WM\n :beta {:value 1 :status :declared}\n :lam {:value 1 :status :declared}\n :mu {:value 0 :status :declared}\n :c-schedule {:placement {:value :terminal :status :declared}\n              :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}}\n :facts [:change-authored-and-bound :premise-refused-before-work\n         :obligation-resolved-through-the-account]\n :want [:change-authored-and-bound :premise-refused-before-work\n        :obligation-resolved-through-the-account]\n ;; Owners are provenance metadata only: NOT consumed by loading, assembly,\n ;; projection or scoring. Ownership threading/joint rejection is queued.\n :entries\n {:change-authored-and-bound {:owner :community :owner-status :not-consumed}\n  :premise-refused-before-work {:owner :community :owner-status :not-consumed}\n  :obligation-resolved-through-the-account {:owner :community :owner-status :not-consumed}}\n :locators {}\n :patterns\n {:coordination/bounded-execution\n  {:guard {:needs #{} :forbids #{:change-authored-and-bound}}\n   :produces #{:change-authored-and-bound}}\n  :futon-theory/stop-the-line\n  {:guard {:needs #{} :forbids #{:premise-refused-before-work}}\n   :produces #{:premise-refused-before-work}}\n  :coordination/par-as-obligation\n  {:guard {:needs #{:premise-refused-before-work}\n           :forbids #{:obligation-resolved-through-the-account}}\n   :produces #{:obligation-resolved-through-the-account}}}\n :interpretation-receipts\n {:coordination/bounded-execution\n  {:kind :hand-admitted :by \"codex-3\" :date \"2026-09-20\"\n   :source {:path \"futon3/library/coordination/bounded-execution.flexiarg\"\n            :sha \"7fc6a05004aa3e601e53eba633d62213da0af4b2\"\n            :sha256 \"1dda0e59f99b45582e63b5a2a056ad43d47fd1e0baad1a01d72c8ca116bd06a5\"}\n   :reading \"Bound a mission-scoped contribution and commit its change witness. Predicted output is the referenced object's presence only, not verification of its claims.\"}\n  :futon-theory/stop-the-line\n  {:kind :hand-admitted :by \"codex-3\" :date \"2026-09-20\"\n   :source {:path \"futon3/library/futon-theory/stop-the-line.flexiarg\"\n            :sha \"7fc6a05004aa3e601e53eba633d62213da0af4b2\"\n            :sha256 \"ba33e0300fa946a5831460bcae1360cb5b9742c6ea72d5765348eeef64998e88\"}\n   :reading \"Inspect a mission work premise and record a refusal witness when it fails. This is a hand-admitted production hypothesis; presence alone establishes neither a genuine premise defect nor refusal-before-work ordering.\"}\n  :coordination/par-as-obligation\n  {:kind :hand-admitted :by \"codex-3\" :date \"2026-09-20\"\n   :source {:path \"futon3/library/coordination/par-as-obligation.flexiarg\"\n            :sha \"7fc6a05004aa3e601e53eba633d62213da0af4b2\"\n            :sha256 \"f749561c4b017dcd22e058695693ac98fbed2e9092c3e910a295f9d440b3662a\"}\n   :reading \"After a refusal witness, record the correction cycle's post-action review with references to its prior steps. The model predicts the PAR witness's referenced object presence only; its contents and resolution are not mechanically adjudicated.\"}}\n :candidates\n [{:precedence [:coordination/par-as-obligation :coordination/bounded-execution\n                :futon-theory/stop-the-line]\n   :construction-receipt {:kind :hand-admitted :by \"codex-3\" :date \"2026-09-20\"\n                          :moves [] :stopped-is-not-success true}}\n  {:precedence [:coordination/par-as-obligation :futon-theory/stop-the-line\n                :coordination/bounded-execution]\n   :construction-receipt {:kind :hand-admitted :by \"codex-3\" :date \"2026-09-20\"\n                          :moves [] :stopped-is-not-success true}}]}\n",
+     :snapshot
+     {:schema :wm/cascade-source-v1,
+      :beta {:value 1, :status :declared},
+      :entries
+      {:change-authored-and-bound
+       {:owner :community, :owner-status :not-consumed},
+       :premise-refused-before-work
+       {:owner :community, :owner-status :not-consumed},
+       :obligation-resolved-through-the-account
+       {:owner :community, :owner-status :not-consumed}},
+      :candidates
+      [{:precedence
+        [:coordination/par-as-obligation
+         :coordination/bounded-execution
+         :futon-theory/stop-the-line],
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "codex-3",
+         :date "2026-09-20",
+         :moves [],
+         :stopped-is-not-success true}}
+       {:precedence
+        [:coordination/par-as-obligation
+         :futon-theory/stop-the-line
+         :coordination/bounded-execution],
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "codex-3",
+         :date "2026-09-20",
+         :moves [],
+         :stopped-is-not-success true}}],
+      :patterns
+      {:coordination/bounded-execution
+       {:guard {:needs #{}, :forbids #{:change-authored-and-bound}},
+        :produces #{:change-authored-and-bound}},
+       :futon-theory/stop-the-line
+       {:guard {:needs #{}, :forbids #{:premise-refused-before-work}},
+        :produces #{:premise-refused-before-work}},
+       :coordination/par-as-obligation
+       {:guard
+        {:needs #{:premise-refused-before-work},
+         :forbids #{:obligation-resolved-through-the-account}},
+        :produces #{:obligation-resolved-through-the-account}}},
+      :c-schedule
+      {:placement {:value :terminal, :status :declared},
+       :elsewhere
+       {:value :uniform-over-non-ruled-zero, :status :declared}},
+      :locators {},
+      :lam {:value 1, :status :declared},
+      :interpretation-receipts
+      {:coordination/bounded-execution
+       {:kind :hand-admitted,
+        :by "codex-3",
+        :date "2026-09-20",
+        :source
+        {:path
+         "futon3/library/coordination/bounded-execution.flexiarg",
+         :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+         :sha256
+         "1dda0e59f99b45582e63b5a2a056ad43d47fd1e0baad1a01d72c8ca116bd06a5"},
+        :reading
+        "Bound a mission-scoped contribution and commit its change witness. Predicted output is the referenced object's presence only, not verification of its claims."},
+       :futon-theory/stop-the-line
+       {:kind :hand-admitted,
+        :by "codex-3",
+        :date "2026-09-20",
+        :source
+        {:path "futon3/library/futon-theory/stop-the-line.flexiarg",
+         :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+         :sha256
+         "ba33e0300fa946a5831460bcae1360cb5b9742c6ea72d5765348eeef64998e88"},
+        :reading
+        "Inspect a mission work premise and record a refusal witness when it fails. This is a hand-admitted production hypothesis; presence alone establishes neither a genuine premise defect nor refusal-before-work ordering."},
+       :coordination/par-as-obligation
+       {:kind :hand-admitted,
+        :by "codex-3",
+        :date "2026-09-20",
+        :source
+        {:path
+         "futon3/library/coordination/par-as-obligation.flexiarg",
+         :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+         :sha256
+         "f749561c4b017dcd22e058695693ac98fbed2e9092c3e910a295f9d440b3662a"},
+        :reading
+        "After a refusal witness, record the correction cycle's post-action review with references to its prior steps. The model predicts the PAR witness's referenced object presence only; its contents and resolution are not mechanically adjudicated."}},
+      :context :WM,
+      :want
+      [:change-authored-and-bound
+       :premise-refused-before-work
+       :obligation-resolved-through-the-account],
+      :mu {:value 0, :status :declared},
+      :target "M-expressions-of-interest",
+      :facts
+      [:change-authored-and-bound
+       :premise-refused-before-work
+       :obligation-resolved-through-the-account]}}
+    {:path
+     "/home/joe/code/futon2/resources/wm/cascade-sources/M-f11-find-production-successor.edn",
+     :sha256
+     "2aabeccbad421c34fe768a6080d83719496c1d827e3ab62d51bb0d344549fb32",
+     :snapshot-edn
+     ";; Agent-authored applicability, not inferred from retrieval or :assures.\n{:schema :wm/cascade-source-v1\n :target \"M-f11-find-production-successor\"\n :context :WM\n :beta {:value 1 :status :declared}\n :lam {:value 1 :status :declared}\n :mu {:value 0 :status :declared}\n :c-schedule {:placement {:value :terminal :status :declared}\n              :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}}\n :facts [:admission/task-stated :hole/h9ab212b3281d :hole/h2045faa0e7cc]\n :want [:hole/h9ab212b3281d :hole/h2045faa0e7cc]\n :locators\n {:admission/task-stated\n  {:class :C4 :repo \"futon2\" :sha \"cb2045b8279853fbd48d6a07c1e2da952f2e338f\"\n   :path \"holes/missions/M-f11-find-production-successor.md\"\n   :decl \"- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence.\"}\n  :hole/h9ab212b3281d\n  {:class :C4 :repo \"futon2\" :sha \"HEAD\"\n   :path \"holes/missions/M-f11-find-production-successor.md\"\n   :decl \"- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence.\"}\n  :hole/h2045faa0e7cc\n  {:class :C4 :repo \"futon2\" :sha \"HEAD\"\n   :path \"holes/missions/M-f11-find-production-successor.md\"\n   :decl \"- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution.\"}}\n :patterns\n {:apparatus/done-is-observed-running\n  {:guard {:needs #{:admission/task-stated} :forbids #{:hole/h9ab212b3281d}}\n   :produces #{:hole/h9ab212b3281d}}}\n :interpretation-receipts\n {:apparatus/done-is-observed-running\n  {:kind :hand-admitted :by \"codex-1\" :date \"2026-09-21\"\n   :source {:path \"futon3/library/apparatus/done-is-observed-running.flexiarg\"\n            :revision \"7fc6a05004aa3e601e53eba633d62213da0af4b2\"\n            :sha256 \"301a19b722382997e8e1d455be1c40605ebc987c998aedd5ce5302bcb4a70653\"}\n   :reading \"For F11's acceptance task, require the finder to act at its applied interface on the committed library and retain the ordinary gate and runtime evidence before recording completion; a committed reconciliation module or a stopped run is not that observation.\"\n   :scope-limit \"This is the activation-and-live-evidence reading of the pattern, not a claim that its standing-comparator mechanism or F1-F4 laws have been implemented. It does not produce the separate repair-024 successor disposition.\"\n   :target-source {:repo \"futon2\" :revision \"cb2045b8279853fbd48d6a07c1e2da952f2e338f\"\n                   :sha256 \"811395799523bf1ccc52d50d38113f61dc6f5d1e2dfd4a2105d6012c3da3c111\"\n                   :path \"holes/missions/M-f11-find-production-successor.md\"\n                   :hole-id \"M-f11-find-production-successor#9ab212b3281d\" :line 101}\n   :observation-limit \"C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here.\"}}\n :candidates\n [{:precedence [:apparatus/done-is-observed-running]\n   :construction-receipt\n   {:kind :hand-admitted :by \"codex-1\" :date \"2026-09-21\"\n    :moves [] :stopped-is-not-success true\n    :reading \"One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied.\"}}]}\n",
+     :snapshot
+     {:schema :wm/cascade-source-v1,
+      :beta {:value 1, :status :declared},
+      :candidates
+      [{:precedence [:apparatus/done-is-observed-running],
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "codex-1",
+         :date "2026-09-21",
+         :moves [],
+         :stopped-is-not-success true,
+         :reading
+         "One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied."}}],
+      :patterns
+      #:apparatus{:done-is-observed-running
+                  {:guard
+                   {:needs #{:admission/task-stated},
+                    :forbids #{:hole/h9ab212b3281d}},
+                   :produces #{:hole/h9ab212b3281d}}},
+      :c-schedule
+      {:placement {:value :terminal, :status :declared},
+       :elsewhere
+       {:value :uniform-over-non-ruled-zero, :status :declared}},
+      :locators
+      {:admission/task-stated
+       {:class :C4,
+        :repo "futon2",
+        :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+        :path "holes/missions/M-f11-find-production-successor.md",
+        :decl
+        "- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+       :hole/h9ab212b3281d
+       {:class :C4,
+        :repo "futon2",
+        :sha "HEAD",
+        :path "holes/missions/M-f11-find-production-successor.md",
+        :decl
+        "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+       :hole/h2045faa0e7cc
+       {:class :C4,
+        :repo "futon2",
+        :sha "HEAD",
+        :path "holes/missions/M-f11-find-production-successor.md",
+        :decl
+        "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution."}},
+      :lam {:value 1, :status :declared},
+      :interpretation-receipts
+      #:apparatus{:done-is-observed-running
+                  {:kind :hand-admitted,
+                   :by "codex-1",
+                   :date "2026-09-21",
+                   :source
+                   {:path
+                    "futon3/library/apparatus/done-is-observed-running.flexiarg",
+                    :revision
+                    "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+                    :sha256
+                    "301a19b722382997e8e1d455be1c40605ebc987c998aedd5ce5302bcb4a70653"},
+                   :reading
+                   "For F11's acceptance task, require the finder to act at its applied interface on the committed library and retain the ordinary gate and runtime evidence before recording completion; a committed reconciliation module or a stopped run is not that observation.",
+                   :scope-limit
+                   "This is the activation-and-live-evidence reading of the pattern, not a claim that its standing-comparator mechanism or F1-F4 laws have been implemented. It does not produce the separate repair-024 successor disposition.",
+                   :target-source
+                   {:repo "futon2",
+                    :revision
+                    "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+                    :sha256
+                    "811395799523bf1ccc52d50d38113f61dc6f5d1e2dfd4a2105d6012c3da3c111",
+                    :path
+                    "holes/missions/M-f11-find-production-successor.md",
+                    :hole-id
+                    "M-f11-find-production-successor#9ab212b3281d",
+                    :line 101},
+                   :observation-limit
+                   "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}},
+      :context :WM,
+      :want [:hole/h9ab212b3281d :hole/h2045faa0e7cc],
+      :mu {:value 0, :status :declared},
+      :target "M-f11-find-production-successor",
+      :facts
+      [:admission/task-stated
+       :hole/h9ab212b3281d
+       :hole/h2045faa0e7cc]}}
+    {:path
+     "/home/joe/code/futon2/resources/wm/cascade-sources/M-wm-08-external-f2.edn",
+     :sha256
+     "f20d004397b2baa849582bb4d64e2ee5e7fab59fef5b17c7821b40388adead90",
+     :snapshot-edn
+     ";; Second declared production target (claude-4, 2026-09-17).\n;;\n;; The point of this file is that the machine now has something to CHOOSE\n;; between. With one target the tick's decision was formal: act, or don't. This\n;; target's want is NOT satisfied — the Route A rehearsal has produced no\n;; report — so acting here is worth more than acting on the first target, whose\n;; want already holds. That difference is the first real choice the machine has\n;; been given.\n;;\n;; Facts are observed each tick through their locators; nothing here asserts a\n;; fact value. Interpretation and construction are hand-admitted and say so.\n{:schema :wm/cascade-source-v1\n :target \"M-wm-08-external-f2\"\n :context :WM\n :beta {:value 1 :status :declared}\n :lam {:value 1 :status :declared}\n :mu {:value 0 :status :declared}\n :c-schedule {:placement {:value :terminal :status :declared}\n              :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}}\n :facts [:external-expectation-validator-exists\n         :frozen-occurrence-context-captured\n         :independent-expectations-written\n         :route-a-rehearsal-reported]\n :want [:route-a-rehearsal-reported]\n :locators\n {:external-expectation-validator-exists\n  {:class :C4 :repo \"futon2\" :sha \"ad1b8f08\" :path \"src/futon2/aif/find_expectations.clj\"\n   :decl \"(defn validate-external!\"}\n  :frozen-occurrence-context-captured\n  {:class :C3 :repo \"futon2\" :sha \"ad1b8f08\"\n   :path \"holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/FROZEN-CONTEXT.edn\"}\n  :independent-expectations-written\n  {:class :C3 :repo \"futon2\" :sha \"ad1b8f08\"\n   :path \"holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn\"}\n  ;; A WANT is observed at HEAD, never at a pinned sha. Pinned at a past sha\n  ;; it could never become true: the work that satisfies it happens after the\n  ;; pin, so the machine would keep choosing it forever and never notice it\n  ;; was done. Facts ABOUT existing artifacts stay pinned; wants track HEAD.\n  :route-a-rehearsal-reported\n  {:class :C3 :repo \"futon2\" :sha \"HEAD\"\n   :path \"holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md\"}}\n :patterns\n {:cascade-construction/run-it-on-a-real-case\n  {:guard {:needs #{:external-expectation-validator-exists\n                    :independent-expectations-written}\n           :forbids #{}}\n   :produces #{:route-a-rehearsal-reported}}}\n :interpretation-receipts\n {:cascade-construction/run-it-on-a-real-case\n  {:kind :hand-admitted :by \"claude-4\" :date \"2026-09-17\"\n   :source {:path \"futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg\"}\n   :reading \"A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report.\"}}\n :candidates\n [{:precedence [:cascade-construction/run-it-on-a-real-case]\n   :construction-receipt {:kind :hand-admitted :by \"claude-4\" :date \"2026-09-17\"\n                          :moves [] :stopped-is-not-success true}}]}\n",
+     :snapshot
+     {:schema :wm/cascade-source-v1,
+      :beta {:value 1, :status :declared},
+      :candidates
+      [{:precedence [:cascade-construction/run-it-on-a-real-case],
+        :construction-receipt
+        {:kind :hand-admitted,
+         :by "claude-4",
+         :date "2026-09-17",
+         :moves [],
+         :stopped-is-not-success true}}],
+      :patterns
+      #:cascade-construction{:run-it-on-a-real-case
+                             {:guard
+                              {:needs
+                               #{:external-expectation-validator-exists
+                                 :independent-expectations-written},
+                               :forbids #{}},
+                              :produces
+                              #{:route-a-rehearsal-reported}}},
+      :c-schedule
+      {:placement {:value :terminal, :status :declared},
+       :elsewhere
+       {:value :uniform-over-non-ruled-zero, :status :declared}},
+      :locators
+      {:external-expectation-validator-exists
+       {:class :C4,
+        :repo "futon2",
+        :sha "ad1b8f08",
+        :path "src/futon2/aif/find_expectations.clj",
+        :decl "(defn validate-external!"},
+       :frozen-occurrence-context-captured
+       {:class :C3,
+        :repo "futon2",
+        :sha "ad1b8f08",
+        :path
+        "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/FROZEN-CONTEXT.edn"},
+       :independent-expectations-written
+       {:class :C3,
+        :repo "futon2",
+        :sha "ad1b8f08",
+        :path
+        "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn"},
+       :route-a-rehearsal-reported
+       {:class :C3,
+        :repo "futon2",
+        :sha "HEAD",
+        :path
+        "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md"}},
+      :lam {:value 1, :status :declared},
+      :interpretation-receipts
+      #:cascade-construction{:run-it-on-a-real-case
+                             {:kind :hand-admitted,
+                              :by "claude-4",
+                              :date "2026-09-17",
+                              :source
+                              {:path
+                               "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg"},
+                              :reading
+                              "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+      :context :WM,
+      :want [:route-a-rehearsal-reported],
+      :mu {:value 0, :status :declared},
+      :target "M-wm-08-external-f2",
+      :facts
+      [:external-expectation-validator-exists
+       :frozen-occurrence-context-captured
+       :independent-expectations-written
+       :route-a-rehearsal-reported]}}],
+   :before
+   {:repo "/home/joe/code/futon2",
+    :head "2ea86caf9c61a00f34b971f0e17710edfc7b11e6",
+    :observed-at-ms 1789964797089},
+   :occurrence
+   {:schema :wm/action-transition-occurrence-v1,
+    :attempt/id "attempt-001",
+    :run/id "2026-09-21-1789964661",
+    :action/value
+    {:kind :cascade-candidate,
+     :id :C1,
+     :target "M-aif-policy-conditioned-eig",
+     :precedence
+     [{:id :apparatus/one-authority-per-question,
+       :authority :documented-interpretation,
+       :produces
+       #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+       :guard
+       {:status :interpreted,
+        :operator :and,
+        :clauses
+        [{:status :interpreted,
+          :present
+          #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+          :absent
+          #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+       :transition
+       {:status :interpreted,
+        :operator :union,
+        :produces
+        #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+        :authority :documented-interpretation},
+       :target "M-aif-policy-conditioned-eig"}],
+     :observation-locators
+     {["M-aif-policy-conditioned-eig" :admission/task-stated]
+      {:class :C4,
+       :repo "futon2",
+       :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+       :path "holes/missions/M-aif-policy-conditioned-eig.md",
+       :decl
+       "- [ ] **Mint the shared posterior updater, then unify the two paths through"},
+      ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]
+      {:class :C4,
+       :repo "futon2",
+       :sha "HEAD",
+       :path "holes/missions/M-aif-policy-conditioned-eig.md",
+       :decl
+       "- [x] **Mint the shared posterior updater, then unify the two paths through"},
+      ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc]
+      {:class :C4,
+       :repo "futon2",
+       :sha "HEAD",
+       :path "holes/missions/M-aif-policy-conditioned-eig.md",
+       :decl
+       "- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the"},
+      ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b]
+      {:class :C4,
+       :repo "futon2",
+       :sha "HEAD",
+       :path "holes/missions/M-aif-policy-conditioned-eig.md",
+       :decl
+       "- [x] **Collect a default-off EIG shadow and calibration packet.** Prior"}},
+     :construction-receipt
+     {:kind :hand-admitted,
+      :by "codex-1",
+      :date "2026-09-21",
+      :moves [],
+      :stopped-is-not-success true,
+      :reading
+      "One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied."},
+     :interpretation-receipts
+     #:apparatus{:one-authority-per-question
+                 {:kind :hand-admitted,
+                  :by "codex-1",
+                  :date "2026-09-21",
+                  :source
+                  {:path
+                   "futon3/library/apparatus/one-authority-per-question.flexiarg",
+                   :revision
+                   "7fc6a05004aa3e601e53eba633d62213da0af4b2",
+                   :sha256
+                   "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"},
+                  :reading
+                  "For the shared-updater task, make one A4a/BMR updater the authority for both hypothetical and observed posterior changes, route both callers through it, and demonstrate equal posterior state and provenance on a pinned observation plus refusal of an unknown outcome before recording this task complete.",
+                  :scope-limit
+                  "This reading covers the shared-updater task only; it neither supplies the generative experiment model nor completes the typed-Q or calibration tasks.",
+                  :target-source
+                  {:repo "futon2",
+                   :revision
+                   "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+                   :sha256
+                   "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478",
+                   :path
+                   "holes/missions/M-aif-policy-conditioned-eig.md",
+                   :hole-id
+                   "M-aif-policy-conditioned-eig#6378c65a4012",
+                   :line 195},
+                  :observation-limit
+                  "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}}},
+    :action-at "2026-09-21T04:26:22.875207114Z",
+    :action/value-sha256
+    "721dfd52def94b1d53ff22cf8e11cb40e98b9e2acca77cb699741e51182e9e2e",
+    :action/id "action-a5d2326d-a73a-447c-8bc7-7f77c8bbc187",
+    :transition/id "transition-670b91ca-e77e-4b8b-a2d0-75bb9033f105",
+    :cohort/id ":wm-contract-machinery-69-v1"}},
+  :route :fresh-author,
+  :after-token-evidence
+  [{:token ["M-aif-policy-conditioned-eig" :admission/task-stated],
+    :declaration-sha256
+    "7a2739c5dd6aac9291fa39ccdf7132e10c206da36804a0163e000fdff2007a49",
+    :declared-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [ ] **Mint the shared posterior updater, then unify the two paths through"},
+    :after-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [ ] **Mint the shared posterior updater, then unify the two paths through"},
+    :result
+    {:observed true,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [ ] **Mint the shared posterior updater, then unify the two paths through",
+      :file-present true}}}
+   {:token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
+    :declaration-sha256
+    "7a2739c5dd6aac9291fa39ccdf7132e10c206da36804a0163e000fdff2007a49",
+    :declared-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "HEAD",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [x] **Mint the shared posterior updater, then unify the two paths through"},
+    :after-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [x] **Mint the shared posterior updater, then unify the two paths through"},
+    :result
+    {:observed false,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [x] **Mint the shared posterior updater, then unify the two paths through",
+      :file-present true}}}
+   {:token ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc],
+    :declaration-sha256
+    "7a2739c5dd6aac9291fa39ccdf7132e10c206da36804a0163e000fdff2007a49",
+    :declared-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "HEAD",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the"},
+    :after-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the"},
+    :result
+    {:observed false,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the",
+      :file-present true}}}
+   {:token ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b],
+    :declaration-sha256
+    "7a2739c5dd6aac9291fa39ccdf7132e10c206da36804a0163e000fdff2007a49",
+    :declared-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "HEAD",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [x] **Collect a default-off EIG shadow and calibration packet.** Prior"},
+    :after-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path "holes/missions/M-aif-policy-conditioned-eig.md",
+     :decl
+     "- [x] **Collect a default-off EIG shadow and calibration packet.** Prior"},
+    :result
+    {:observed false,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [x] **Collect a default-off EIG shadow and calibration packet.** Prior",
+      :file-present true}}}
+   {:token ["M-f11-find-production-successor" :admission/task-stated],
+    :declaration-sha256
+    "2aabeccbad421c34fe768a6080d83719496c1d827e3ab62d51bb0d344549fb32",
+    :declared-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+     :path "holes/missions/M-f11-find-production-successor.md",
+     :decl
+     "- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+    :after-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path "holes/missions/M-f11-find-production-successor.md",
+     :decl
+     "- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+    :result
+    {:observed true,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence.",
+      :file-present true}}}
+   {:token ["M-f11-find-production-successor" :hole/h9ab212b3281d],
+    :declaration-sha256
+    "2aabeccbad421c34fe768a6080d83719496c1d827e3ab62d51bb0d344549fb32",
+    :declared-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "HEAD",
+     :path "holes/missions/M-f11-find-production-successor.md",
+     :decl
+     "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+    :after-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path "holes/missions/M-f11-find-production-successor.md",
+     :decl
+     "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+    :result
+    {:observed false,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence.",
+      :file-present true}}}
+   {:token ["M-f11-find-production-successor" :hole/h2045faa0e7cc],
+    :declaration-sha256
+    "2aabeccbad421c34fe768a6080d83719496c1d827e3ab62d51bb0d344549fb32",
+    :declared-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "HEAD",
+     :path "holes/missions/M-f11-find-production-successor.md",
+     :decl
+     "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution."},
+    :after-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path "holes/missions/M-f11-find-production-successor.md",
+     :decl
+     "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution."},
+    :result
+    {:observed false,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution.",
+      :file-present true}}}
+   {:token
+    ["M-wm-08-external-f2" :external-expectation-validator-exists],
+    :declaration-sha256
+    "f20d004397b2baa849582bb4d64e2ee5e7fab59fef5b17c7821b40388adead90",
+    :declared-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "ad1b8f08",
+     :path "src/futon2/aif/find_expectations.clj",
+     :decl "(defn validate-external!"},
+    :after-locator
+    {:class :C4,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path "src/futon2/aif/find_expectations.clj",
+     :decl "(defn validate-external!"},
+    :result
+    {:observed true,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path "src/futon2/aif/find_expectations.clj",
+      :decl "(defn validate-external!",
+      :file-present true}}}
+   {:token ["M-wm-08-external-f2" :frozen-occurrence-context-captured],
+    :declaration-sha256
+    "f20d004397b2baa849582bb4d64e2ee5e7fab59fef5b17c7821b40388adead90",
+    :declared-locator
+    {:class :C3,
+     :repo "futon2",
+     :sha "ad1b8f08",
+     :path
+     "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/FROZEN-CONTEXT.edn"},
+    :after-locator
+    {:class :C3,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path
+     "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/FROZEN-CONTEXT.edn"},
+    :result
+    {:observed true,
+     :check :C3,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path
+      "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/FROZEN-CONTEXT.edn"}}}
+   {:token ["M-wm-08-external-f2" :independent-expectations-written],
+    :declaration-sha256
+    "f20d004397b2baa849582bb4d64e2ee5e7fab59fef5b17c7821b40388adead90",
+    :declared-locator
+    {:class :C3,
+     :repo "futon2",
+     :sha "ad1b8f08",
+     :path
+     "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn"},
+    :after-locator
+    {:class :C3,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path
+     "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn"},
+    :result
+    {:observed true,
+     :check :C3,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path
+      "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn"}}}
+   {:token ["M-wm-08-external-f2" :route-a-rehearsal-reported],
+    :declaration-sha256
+    "f20d004397b2baa849582bb4d64e2ee5e7fab59fef5b17c7821b40388adead90",
+    :declared-locator
+    {:class :C3,
+     :repo "futon2",
+     :sha "HEAD",
+     :path
+     "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md"},
+    :after-locator
+    {:class :C3,
+     :repo "futon2",
+     :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+     :path
+     "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md"},
+    :result
+    {:observed true,
+     :check :C3,
+     :evidence
+     {:repo "futon2",
+      :sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :resolved-sha "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+      :path
+      "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md"}}}],
+  :revision-pair
+  {:before "2ea86caf9c61a00f34b971f0e17710edfc7b11e6",
+   :after "7a9daa0f2ef9850aff01f1631dbc93c59625b586",
+   :before-evidence :not-measured}}}

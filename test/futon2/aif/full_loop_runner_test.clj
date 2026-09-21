@@ -5810,3 +5810,26 @@
               (get-in selected [:selection-certificate :precision-family :model :q0])))
        (is (every? #(not (contains? % initialization-fixture/updater))
                    (keys (:continuation-belief input))))))))
+
+(deftest feature-card-close-retains-learning-receipt-without-changing-selection
+  ;; Canonical runner-source guard stays enabled; owner runs after merge.
+  (let [{:keys [root] :as c} (retention-cohort "learning-trial-feature-card")
+        frozen (edn/read-string (slurp "test/fixtures/learning-trial/1789964661.edn"))
+        d (assoc (merge (:decision judgement) (token-fixture/decision))
+                 :selection-law {:posterior (:posterior frozen)})
+        {:keys [result]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :runner-options {:cohort? true :execution-cohort (:binding c)
+                           :d-task-evidence-root (str (io/file root "d-task"))
+                           :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}})
+        closed (get-in result [:checkpoints :closed :judgment])
+        receipt (:learning-trial-receipt closed)]
+    (is (= :grounded-change (:outcome result)))
+    (is (= :wm/learning-trial-receipt-v1 (:schema receipt)))
+    (is (seq (:trials receipt)))
+    (is (every? #(and (= :held (:status %)) (false? (:counted? %))) (:trials receipt)))
+    (is (= receipt (get-in closed [:token-outcome-comparison :learning-trial-receipt])))
+    (is (= (pr-str (:selection-law d))
+           (pr-str (get-in result [:checkpoints :selection :judgment :controller-decision :selection-law]))))
+    (is (map? (cohort/closed-execution (:binding c) (:attempt-id result))))))

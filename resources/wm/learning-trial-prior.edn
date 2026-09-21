@@ -1,0 +1,8 @@
+{:schema :wm/learning-trial-prior-v1
+ :authority :illustrative
+ :mode :record-only
+ :trial-grain :pattern-effect-firing
+ :alpha 9 :beta 1
+ :production-theta :unchanged
+ :execution-clock-contract :not-declared
+ :reading "Sensitivity calculation only. Held observations do not update a learned parameter. A per-firing execution and observation-placement contract is still required."}
