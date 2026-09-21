@@ -1,5 +1,6 @@
 (ns futon2.aif.full-loop-runner-test
-  (:require [babashka.http-client :as http]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -5078,19 +5079,19 @@
         b (.getBytes "same source bytes" "UTF-8")
         c (.getBytes "different source bytes" "UTF-8")]
     (with-redefs-fn
-      {#'runner/resource-bytes (fn [] a)}
+      {#'load-identity/registry (atom {'futon2.aif.full-loop-runner {:sha256 (load-identity/sha256 a)}})}
       (fn []
         (is (= :current (:runner/source-check
                          (#'runner/runner-source-drift (fn [_] b))))
             "two distinct but equal byte arrays are :current, not drift")))
     (with-redefs-fn
-      {#'runner/resource-bytes (fn [] a)}
+      {#'load-identity/registry (atom {'futon2.aif.full-loop-runner {:sha256 (load-identity/sha256 a)}})}
       (fn []
         (is (= :drift (:runner/source-check
                        (#'runner/runner-source-drift (fn [_] c))))
             "different bytes are drift")))
     (with-redefs-fn
-      {#'runner/resource-bytes (fn [] a)}
+      {#'load-identity/registry (atom {'futon2.aif.full-loop-runner {:sha256 (load-identity/sha256 a)}})}
       (fn []
         (is (= :unavailable (:runner/source-check
                              (#'runner/runner-source-drift (fn [_] nil))))
@@ -5102,7 +5103,7 @@
   ;; core execution; the refusal carries the typed check.
   (let [core-ran (atom false)]
     (with-redefs-fn
-      {#'runner/resource-bytes (fn [] (.getBytes "stale" "UTF-8"))
+      {#'load-identity/registry (atom {'futon2.aif.full-loop-runner {:sha256 (load-identity/sha256 (.getBytes "stale" "UTF-8"))}})
        #'runner/canonical-runner-bytes (fn [] (.getBytes "fresh" "UTF-8"))
        #'runner/run-opportunity-core!
        (fn [_] (reset! core-ran true) {:attempt-id "x" :outcome :no-op-change})}
@@ -5123,7 +5124,7 @@
   (let [record-dir (.getPath (.toFile (Files/createTempDirectory
                                        "wm-src-record-" (make-array FileAttribute 0))))]
     (with-redefs-fn
-      {#'runner/resource-bytes (fn [] (.getBytes "live" "UTF-8"))
+      {#'load-identity/registry (atom {'futon2.aif.full-loop-runner {:sha256 (load-identity/sha256 (.getBytes "live" "UTF-8"))}})
        #'runner/canonical-runner-bytes (fn [] (.getBytes "live" "UTF-8"))
        #'runner/run-opportunity-core!
        (fn [_] {:attempt-id "s" :outcome :no-op-change
@@ -5134,6 +5135,8 @@
           (is (= :current (get-in r [:runner/source :runner/source-check])))
           (is (contains? record :runner/source)
               "the tick record persists the identity")
+          (is (= :unregistered (get-in record [:runner/source :namespaces 'futon2.aif.policy :status]))
+              "the durable report retains missing namespace registrations")
           (is (= :current (get-in record [:runner/source :runner/source-check]))
               "recorded identity is the one that gated the run"))))))
 

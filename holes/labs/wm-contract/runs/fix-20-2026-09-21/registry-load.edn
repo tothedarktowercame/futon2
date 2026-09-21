@@ -1,0 +1,6 @@
+{:repo-root "/home/joe/code/futon2-fix-20"
+ :code-paths ["src/futon2/aif/load_identity.clj"]
+ :test-paths ["test/futon2/aif/load_identity_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.load-identity-test"]
+ :author "codex-11"
+ :artifact-dir "/home/joe/code/futon2-fix-20/holes/labs/wm-contract/runs/fix-20-2026-09-21"}

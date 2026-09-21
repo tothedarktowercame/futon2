@@ -1,7 +1,10 @@
 (ns futon2.aif.token-outcome
   "Selection-time token prediction and post-build comparison. No belief update."
-  (:require [futon2.aif.cascade-model-manifest :as model]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.interpretation-evidence :as evidence]))
+
+(load-identity/register! *ns* *file*)
 
 (defn freeze-prediction
   "Freeze the scorer's terminal rollout for ALL wants of the selected target.

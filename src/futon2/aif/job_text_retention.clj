@@ -1,10 +1,13 @@
 (ns futon2.aif.job-text-retention
   "Retain the prompt and final reply already held by a runner; no Agency IO."
-  (:require [clojure.java.io :as io]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.java.io :as io]
             [clojure.string :as str])
   (:import [java.nio.charset StandardCharsets]
            [java.nio.file Files StandardOpenOption FileAlreadyExistsException]
            [java.security MessageDigest]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- digest [^bytes bytes]
   (apply str (map #(format "%02x" (bit-and 255 %))

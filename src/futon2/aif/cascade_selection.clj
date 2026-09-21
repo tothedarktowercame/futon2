@@ -22,7 +22,10 @@
    (PolicyTemperature), habit must be positive (habit prior mass), and at
    least one candidate must have finite G (selectionPosterior is undefined
    otherwise — division by a zero total)."
-  (:require [clojure.math :as math]))
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.math :as math]))
+
+(load-identity/register! *ns* *file*)
 
 ;; ---------------------------------------------------------------------------
 ;; Refusals (typed, matching cascade-g's {:refusal {:kind ...}} convention)

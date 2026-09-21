@@ -1,11 +1,14 @@
 (ns futon2.aif.cascade-model-manifest
   "Partial, source-bound token-frontier model. No scoring or live side effects."
-  (:require [clojure.string :as str]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.string :as str]
             [clojure.set :as set]
             [futon2.aif.conditioned-trajectory :as trajectory]
             [futon2.aif.exact-belief-core :as belief-core]
             [futon2.aif.likelihood-precision :as lprec])
   (:import [java.security MessageDigest]))
+
+(load-identity/register! *ns* *file*)
 
 (def affirmative-markers
   ["instantiated" "accepted" "done" "landed" "live" "built" "merged" "agreed" "dark" "shadow"])

@@ -46,7 +46,8 @@
    stamp (git sha + dirty flag, the resolved mode/flag set, and
    `trace-schema-version`). Present-only; see `wm-version-stamp` /
    `wm-version-of`."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
@@ -56,6 +57,8 @@
   (:import (java.io PushbackReader)
            (java.time Instant LocalDate ZoneId)
            (java.time.format DateTimeFormatter)))
+
+(load-identity/register! *ns* *file*)
 
 (def ^:private default-trace-dir
   (str (System/getProperty "user.home") "/code/futon2/data/wm-trace"))

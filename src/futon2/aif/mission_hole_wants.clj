@@ -25,7 +25,10 @@
 
   The witness is affirmation-shaped: the observation is that a CHECKED item is
   present, never that an unchecked one is absent."
-  (:require [clojure.string :as str]))
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.string :as str]))
+
+(load-identity/register! *ns* *file*)
 
 (defn observable-hole?
   "A retained hole whose closure some check can witness. Only unchecked tasks

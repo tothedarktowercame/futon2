@@ -1,0 +1,2 @@
+[wm-full-loop] REFUSING: serving runner source drifts from /home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj; reload the namespace from the canonical checkout before running attempts.
+{:test 3, :pass 12, :fail 0, :error 0}

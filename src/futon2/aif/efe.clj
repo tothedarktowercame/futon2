@@ -28,7 +28,8 @@
    Theory: AIF Expected Free Energy decomposition. In the production default,
    ambiguity is Gaussian observation entropy and risk is outcome divergence
    from C. The separately named controller controls are not EFE terms."
-  (:require [clojure.set :as set]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.set :as set]
             [futon2.aif.cascade-free-energy :as cascade-free-energy]
             [futon2.aif.cascade-model-manifest :as cascade-manifest]
             [futon2.aif.forward-model :as fm]
@@ -39,6 +40,8 @@
             [futon2.aif.disposition-risk :as disposition]
             [futon2.aif.machine-q-risk :as machine-q-risk]
             [futon2.aif.move-class-intensity :as move-intensity]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- ^:clj-kondo/ignore ambiguity
   "R5b epistemic term over per-channel predicted variances.

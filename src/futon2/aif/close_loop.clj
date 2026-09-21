@@ -24,9 +24,12 @@
    ⇒ nil ⇒ abstain, byte-identical to today. Flag defaults FALSE: with it off
    (or no turn-fn injected) the output map is unchanged, key-for-key —
    finding 6's repair stays dark until 2g arming (Joe's word)."
-  (:require [futon2.aif.fold-classical :as fc]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.fold-classical :as fc]
             [futon2.aif.fold-semilattice :as fs]
             [futon2.aif.fold-llm :as fl]))
+
+(load-identity/register! *ns* *file*)
 
 (def ^:dynamic *escrow-replay?*
   "ON as of 2g (operator-armed 2026-07-05, E-live-loop-2 — the ruling that

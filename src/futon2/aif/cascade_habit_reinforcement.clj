@@ -1,7 +1,10 @@
 (ns futon2.aif.cascade-habit-reinforcement
   "Declared close rule: one count only when a predicted wanted token was observed."
-  (:require [futon2.aif.cascade-habit-store :as store]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.cascade-habit-store :as store]
             [futon2.aif.cascade-prior :as prior]))
+
+(load-identity/register! *ns* *file*)
 
 (def rule-id :wm/cascade-habit-observed-want-v1)
 (def comparison-interface
