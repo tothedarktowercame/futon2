@@ -310,3 +310,20 @@ CLI 1.12.5.1664. Registry evidence is retained beside the numeric results.
 Discovery controls run on existing production functions; no claim of a
 pre-fix failure or implemented live novelty. The missing model/observation
 bindings and factorization assumptions above are substantive limits.
+
+Registered warrant:
+`test-registry-82cc7fc79a3b1973f1db0c6887735fc0aa309e1c71007f5fa8c297dcce4996b5`,
+commit `5e21cf76b4dfd064b0e82e74c4a8047ea32597d0`, postcheck `:matched`,
+2 tests / 346 assertions / 0 failures / 0 errors / exit 0. Full warrant and
+runner artifacts are in `improve-5-evidence/`. Exact registry command (from
+`/home/joe/code/futon3c`):
+
+```
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-improve-5/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-5-evidence/registry.edn
+```
+
+The immediately preceding `check` command with the same config failed to load
+canonical `futon2/aif/load_identity.clj:49:96` (unmatched delimiter); its log is
+retained. The subsequent registry run loaded successfully without any changes
+or workaround by this author. The warrant binds the isolated worktree's
+actual loaded dependency closure and passing results.
