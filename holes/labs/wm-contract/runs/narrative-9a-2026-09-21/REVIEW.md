@@ -79,3 +79,11 @@ emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-ch
 Environment: Linux; Java 21.0.11; Clojure CLI 1.12.5.1664 / Clojure 1.11.1.
 Logs adjacent. Registry config scopes the pure/constructor regression namespace;
 its warrant does not claim the blocked end-to-end runner check passed.
+
+Registered warrant: `test-registry-51b7198a7894a57f72d053cfd068a7fefd8fe3e26ea64af8dfa9ecb936d9da4b`, on `0bed9df9d68c6a7baa8ef7f7d17e093f0aab44d7`: `:warrant? true`, 6 tests / 63 assertions, zero failures/errors, exit 0. Registration and content-addressed closure/log are adjacent. The preliminary registry check returned `:missing-entry` before this new registration.
+
+From `/home/joe/code/futon3c`:
+
+```sh
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-9a/holes/labs/wm-contract/runs/narrative-9a-2026-09-21/registry.edn
+```
