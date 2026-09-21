@@ -5815,15 +5815,21 @@
   ;; Canonical runner-source guard stays enabled; owner runs after merge.
   (let [{:keys [root] :as c} (retention-cohort "learning-trial-feature-card")
         frozen (edn/read-string (slurp "test/fixtures/learning-trial/1789964661.edn"))
-        d (assoc (merge (:decision judgement) (token-fixture/decision))
-                 :selection-law {:posterior (:posterior frozen)})
+        ;; Replace only the posterior: the runner needs the law's :applied
+        ;; marker to treat this as a cascade selection.
+        d (assoc-in (merge (:decision judgement) (token-fixture/decision))
+                    [:selection-law :posterior] (:posterior frozen))
         {:keys [result]}
         (run-feature-card-attempt
          {:author-card feature-card-claim
           :runner-options {:cohort? true :execution-cohort (:binding c)
                            :d-task-evidence-root (str (io/file root "d-task"))
                            :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}})
-        closed (get-in result [:checkpoints :closed :judgment])
+        ;; The close judgment is the cohort's durable close event; the
+        ;; returned :checkpoints map stops at adjudication.
+        closed (get-in (cohort/read-edn (io/file root "test-cohort-exhaustion"
+                                                 (:attempt-id result) "007-closed.edn"))
+                       [:payload :judgment])
         receipt (:learning-trial-receipt closed)]
     (is (= :grounded-change (:outcome result)))
     (is (= :wm/learning-trial-receipt-v1 (:schema receipt)))
