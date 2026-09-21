@@ -1,0 +1,16 @@
+
+Running tests in #{"test"}
+
+Testing futon2.report.cascade-habit-selection-test
+
+FAIL in (selection-does-not-reinforce) (cascade_habit_selection_test.clj:20)
+selection leaves the habit store byte-identical
+expected: (= before (slurp path))
+  actual: (not (= "{:version 1, :policy-grain :pattern-cascade, :alpha 1.0, :counts {}, :samples 0, :recency-decay :none}\n" "{:version 1, :policy-grain :pattern-cascade, :alpha 1.0, :counts {[:pattern-cascade \":wm-tick-001-observation-crash\" [:aif/placeholder-is-load-bearing :test-step-covering-missing-total-repos :aif/structured-observation-vector] {}] 1}, :samples 1, :recency-decay :none, :selection-bases {[:pattern-cascade \":wm-tick-001-observation-crash\" [:aif/placeholder-is-load-bearing :test-step-covering-missing-total-repos :aif/structured-observation-vector] {}] :first-ranked-sharing-chosen-action}}\n"))
+
+FAIL in (selection-does-not-reinforce) (cascade_habit_selection_test.clj:21)
+expected: (not (.exists (io/file (str path ".lock"))))
+  actual: (not (not true))
+
+Ran 1 tests containing 3 assertions.
+2 failures, 0 errors.

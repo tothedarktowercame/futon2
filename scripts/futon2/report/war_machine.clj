@@ -43,7 +43,6 @@
             [futon2.aif.anticipation :as anticipation]
             [futon2.aif.policy-depth :as policy-depth]
             [futon2.aif.beta-habit :as beta-habit]
-            [futon2.aif.cascade-habit-store :as cascade-habit]
             [futon2.aif.cascade-model-manifest :as cascade-manifest]
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.cascade-problems :as cascade-problems]
@@ -6374,14 +6373,11 @@
 
 
 (defn select-and-record-cascade!
-  "Run the existing cascade decision, then durably count its representative.
-   Selection reads the learned habit first; this records the returned decision unchanged."
+  "Select using the existing habit snapshot, without reinforcing the selection.
+   The trace retains the decision; the run record labels its selection event
+   separately from the outcome-based reinforcement performed at close."
   [assembled opts]
-  (let [result (cascade-decision assembled opts)]
-    (cascade-habit/record-selection!
-     (or (:cascade-habit-path opts) cascade-habit/default-path)
-     (:decision result))
-    result))
+  (cascade-decision assembled opts))
 
 (defn judge
   "The war machine's inference step.

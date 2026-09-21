@@ -15,6 +15,8 @@
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.cascade-sources :as cascade-sources]
+            [futon2.aif.cascade-habit-store :as cascade-habit]
+            [futon2.aif.cascade-habit-reinforcement :as habit-reinforcement]
             [futon2.aif.cascade-plan :as cascade-plan]
             [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.scan-report :as scan-report]
@@ -536,6 +538,9 @@
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
+                    :selection-event (habit-reinforcement/selection-event decision)
+                    :habit-reinforcement (or (:habit-reinforcement result)
+                                             (habit-reinforcement/evaluate decision (:outcome result) nil))
                     :scan-report (scan-report/retain!
                                   target (some-> (:scan-report/state raw-opts) deref)
                                   (or (:scan-render-fn raw-opts) wm/render-war-machine))
@@ -3622,7 +3627,12 @@
                        retained (get-in closed-event [:payload :close-retention])
                        retained-manifest
                        (get-in closed-event [:payload :close-evidence-manifest])
-                       result (cond-> (assoc result-base :repair/discharge discharge-result)
+                       result (cond-> (assoc result-base :repair/discharge discharge-result
+                                            :habit-reinforcement
+                                            (habit-reinforcement/close!
+                                             (or (:cascade-habit-path opts) cascade-habit/default-path)
+                                             (:controller-decision selection-judgment)
+                                             outcome (:token-outcome-comparison result-base)))
                                 retained (assoc :close-retention retained)
                                 retained-manifest
                                 (assoc :close-evidence-manifest retained-manifest))]
@@ -3765,7 +3775,7 @@
                                   (wm/generate-war-machine
                                    days
                                    (assoc (select-keys opts [:accumulate-strategic-habit?
-                                                            :run-id :loaded-code-identity])
+                                                            :run-id :loaded-code-identity :cascade-habit-path])
                                           :include-advisory-lanes? false
                                           :defer-render? true))))
             judgement0-base
@@ -4012,10 +4022,9 @@
                              :failure-stage :construction
                              :target target
                              :wiring-refusal (:fold-output wiring-result)})))
-          ;; A selected action enters the canonical trace—and therefore the
-          ;; learned habit prior—only after its production construction path
-          ;; has been demonstrated. Failed selections remain fully auditable
-          ;; in the cohort and stop-line finding, but cannot reinforce E(pi).
+          ;; A constructed selection enters the canonical trace as an event.
+          ;; Cascade habit reinforcement requires observed token outcomes at close;
+          ;; neither selection nor successful construction reinforces it.
           (let [trace-path (when-not repair-action?
                              ((or (:trace-fn opts) trace/write-trace!)
                               (assoc judgement :d-task-context @d-task-context :trace/reason

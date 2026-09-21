@@ -1,0 +1,2 @@
+{:observed true, :verdict :predicted-and-observed, :reinforcement :increment, :delta 1}
+{:observed false, :verdict :predicted-not-observed, :reinforcement :none, :delta 0}
