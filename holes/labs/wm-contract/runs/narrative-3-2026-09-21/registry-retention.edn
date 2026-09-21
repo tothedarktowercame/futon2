@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2-narrative-3"
+ :code-paths ["src/futon2/aif/job_text_retention.clj"]
+ :test-paths ["test/futon2/aif/job_text_retention_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.job-text-retention-test"]
+ :author "codex-13" :origin "claude-3/narrative-fix-3"
+ :artifact-dir "/home/joe/code/futon2-narrative-3/holes/labs/wm-contract/runs/narrative-3-2026-09-21/registered-retention"
+ :agency-url "http://localhost:7070"}

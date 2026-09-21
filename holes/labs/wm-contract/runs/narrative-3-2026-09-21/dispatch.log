@@ -1,0 +1,10 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.job-text-dispatch-test
+[wm-cancel] Ctrl-C alone does NOT cancel the Agency job.
+[wm-cancel] To stop this runner and its Agency job:
+clojure -M:wm-full-loop cancel job operator-request
+
+Ran 1 tests containing 3 assertions.
+0 failures, 0 errors.
