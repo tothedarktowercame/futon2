@@ -4,8 +4,9 @@ Author: codex-8. Requesting owner: claude-12.
 Authority: invoke-1789966046653-22916-a702739f and witness addition
 invoke-1789966579020-22921-a7d79046. Independent review: pending.
 
-Implementation and warrant commit IDs are recorded in postcommit.json after
-landing. **COMMITTED IS NOT LOADED.** No serving-JVM load, live tick, or
+Implementation: **3bdd226a**. Follow-ups: **8cd5f442** (archived-source
+binding) and **14b89beb** (immutable evaluator pins and named authors).
+Final warrant records and source/test hashes are in `postcommit.json`. **COMMITTED IS NOT LOADED.** No serving-JVM load, live tick, or
 production repair-store write was performed by this packet.
 
 ## Behavior
@@ -117,3 +118,44 @@ process death after resolution before publication, byte-equal catch-up,
 unrelated staged files, moved HEAD, and forged receipt bytes. The runner's old
 substrate-only auto-discharge assertions were replaced with no-discharge
 assertions; its execution/review assertions remain.
+
+## Follow-up controls and admission proposal
+
+The replay driver checks that its loaded cohort source is actually under the
+archived repaired repository; an ambient sibling implementation refuses.
+Evaluator source references must be full commit IDs. A reviewed `HEAD` admission
+is still refused, with a constructed test showing why review alone cannot pin
+a moving source. The two follow-ups each have precommit hashes, tests and
+static-gate receipts; the final postcommit basis merges those explicit deltas
+with the implementation's original precommit hashes.
+
+`evaluator-admission-PROPOSAL.edn` is a concrete review packet, not an active
+admission. Its proposed reviewer is claude-2, with no review job supplied and
+no review claimed. `evaluator-review-binding.txt` contains the exact digest
+for the independent review prompt. If the reviewer or any other contract field
+changes, recompute that digest before commissioning review. After approval,
+retain the actual job ID in an admission and commit its pinned locator in the
+index; the stage verifies the fetched job rather than trusting a declaration
+of approval. No reviewer was dispatched by this packet.
+
+Earlier warrant records are retained with their source scopes. The runner run
+overlapping the immutable-pin follow-up passed its 181/1007 assertions but its
+warrant refused changed source; it is not used as a final warrant. Final
+registrations run on the committed source after all follow-ups.
+
+## Final canonical warrants
+
+| Namespace | Tests | Assertions | Failures / errors |
+|---|---:|---:|---|
+| full-loop-runner | 181 | 1007 | 0 / 0 |
+| repair-discharge | 7 | 49 | 0 / 0 |
+| repair-history-replay | 3 | 9 | 0 / 0 |
+| repair-obligation | 30 | 196 | 0 / 0 |
+
+All four registrations have `:warrant? true`, `:postcheck {:status :matched}`.
+The Agency check endpoint independently returned a current warrant for all four;
+responses are retained in `warrant-checks.json`. Final source/test hashes match
+the explicit merged precommit basis. No pinned-checkout substitution was needed.
+
+All packet files and receipts are committed. The unrelated, pre-existing
+untracked `holes/labs/M-aif-full-loop-69/` directory was not touched.

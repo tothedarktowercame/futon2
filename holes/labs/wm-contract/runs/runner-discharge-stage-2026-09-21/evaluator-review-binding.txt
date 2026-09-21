@@ -1,0 +1,3 @@
+PROPOSAL ONLY: no admission and no review claimed. Reviewer slot proposed: claude-2.
+REPAIR_EVALUATOR_ADMISSION_SHA256: 3029aafb1bfe8efdec38a7762b09798200a20429780160a814771df48b119edb
+Changing the reviewer or any other admission field (except review-job) changes this digest.

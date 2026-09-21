@@ -1,0 +1,260 @@
+{
+  "source-followups" : [ "8cd5f442c9200f6f1012c16952ddc9ce13412a99", "14b89bebec7cdb54c049b9df2a325d0bc4dc1635" ],
+  "role" : "post-commit-warrant",
+  "requesting-owner" : "claude-12",
+  "matches-precommit-basis?" : true,
+  "precommit-basis" : [ "precommit.json", "source-binding-precommit.json", "immutable-pin-precommit.json" ],
+  "author" : "codex-8",
+  "earlier-records" : [ {
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "run/id" : "96419170-1d18-4cde-a125-2553a46e8312",
+    "code-sha" : "dad870d03dec5911ad3ae36fa68511535c5327bfb80cf5db57f592504e6dfaf9",
+    "scope" : "superseded-scope",
+    "test-sha" : "8b9c63a2224b5a78aa2b3770edb99ba8e2985df1ddc1b423e234e887182db4f3",
+    "entry-id" : "test-registry-5be1478df8e27e99e8dce9149c51739ab3b44d0ccfee666e8c8ed5553974c96c",
+    "log" : "register-store-before-pin-followup.log",
+    "git-head" : "8cd5f442c9200f6f1012c16952ddc9ce13412a99",
+    "results" : {
+      "assertions" : 196,
+      "duration-ms" : 2249,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 30
+    }
+  }, {
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "run/id" : "ae7cd48a-d161-4c83-8bc9-a59909bb3b74",
+    "code-sha" : "dad870d03dec5911ad3ae36fa68511535c5327bfb80cf5db57f592504e6dfaf9",
+    "scope" : "superseded-scope",
+    "test-sha" : "2e0d57d10c99e3dd5cd0df460f401b581586c7b90959ed4fe96de7b13feb34fc",
+    "entry-id" : "test-registry-d9316b15e868fe1ce1b002f2e6fff9d83dffe02a8e03edf8867354e0c616f763",
+    "log" : "register-unit-before-pin-followup.log",
+    "git-head" : "8cd5f442c9200f6f1012c16952ddc9ce13412a99",
+    "results" : {
+      "assertions" : 44,
+      "duration-ms" : 1855,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 6
+    }
+  }, {
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "run/id" : "0f39e601-6316-4b7b-a424-69becf68c15b",
+    "code-sha" : "6e6c6f91c6dbee88270887e27519ec137ef69d82cb888a1dcfe142285cd0f22e",
+    "scope" : "superseded-scope",
+    "test-sha" : "2e0d57d10c99e3dd5cd0df460f401b581586c7b90959ed4fe96de7b13feb34fc",
+    "entry-id" : "test-registry-f23ec133a5609a7e718165384f12ef568ca652b0a50edb49cec507fa8ad15e07",
+    "log" : "register-unit-initial.log",
+    "git-head" : "3bdd226a3937cba0f0163493fdc40bcc07729ed0",
+    "results" : {
+      "assertions" : 44,
+      "duration-ms" : 2761,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 6
+    }
+  }, {
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "run/id" : "e7f0a344-52ce-4c59-94aa-c84bf549b50d",
+    "code-sha" : "6e6c6f91c6dbee88270887e27519ec137ef69d82cb888a1dcfe142285cd0f22e",
+    "scope" : "superseded-scope",
+    "test-sha" : "9ca7d9c3559160d822d3febb631e401744deba28e4eb707a8456ceb5a28cfd9d",
+    "entry-id" : "test-registry-5cb832726f8447ab999b34edf2671f22ea9545169afaadc0e98723636f84df6f",
+    "log" : "register-replay-initial.log",
+    "git-head" : "3bdd226a3937cba0f0163493fdc40bcc07729ed0",
+    "results" : {
+      "assertions" : 8,
+      "duration-ms" : 9875,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 2
+    }
+  }, {
+    "warrant?" : false,
+    "postcheck" : {
+      "details" : {
+        "count" : 1,
+        "next-action" : "commit-before-registering",
+        "paths" : [ "src/futon2/aif/repair_discharge_evidence.clj" ],
+        "reasons" : {
+          "dirty" : 1
+        },
+        "stage" : "load-closure"
+      },
+      "reason" : "scope-not-committed",
+      "record/type" : "test-registry/refusal",
+      "warrant?" : false
+    },
+    "run/id" : "3e6d44d1-0f23-402e-9686-df5c5d76e074",
+    "code-sha" : "dad870d03dec5911ad3ae36fa68511535c5327bfb80cf5db57f592504e6dfaf9",
+    "scope" : "superseded-scope",
+    "test-sha" : "2e96947f9eadbbd65aa707617da4d1db900f9eaebaf7ab000178cf419384de81",
+    "entry-id" : "test-registry-05da93204142bea53cce74d70c5049207437b935ddae8d85ff941864d0f57c82",
+    "log" : "register-runner-before-pin-followup.log",
+    "git-head" : "8cd5f442c9200f6f1012c16952ddc9ce13412a99",
+    "results" : {
+      "assertions" : 1007,
+      "duration-ms" : 176233,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 181
+    }
+  }, {
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "run/id" : "43361204-2ee4-40fe-ab9c-a688e14a4348",
+    "code-sha" : "dad870d03dec5911ad3ae36fa68511535c5327bfb80cf5db57f592504e6dfaf9",
+    "scope" : "superseded-scope",
+    "test-sha" : "9fb2f02a0ef4a9266290cf7c6c617567f530dab01693a97c63db39ccaee0db09",
+    "entry-id" : "test-registry-c8b635a0c47854329332e9a48fc0a78e61342f49bbfc686ddc760caffedbeebc",
+    "log" : "register-replay-before-pin-followup.log",
+    "git-head" : "8cd5f442c9200f6f1012c16952ddc9ce13412a99",
+    "results" : {
+      "assertions" : 9,
+      "duration-ms" : 8895,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 3
+    }
+  }, {
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "run/id" : "53c8d2f5-709a-47c8-844d-7f6a99d94ea7",
+    "code-sha" : "6e6c6f91c6dbee88270887e27519ec137ef69d82cb888a1dcfe142285cd0f22e",
+    "scope" : "superseded-scope",
+    "test-sha" : "2e96947f9eadbbd65aa707617da4d1db900f9eaebaf7ab000178cf419384de81",
+    "entry-id" : "test-registry-4b3f79dacf48001614ce9c7f4aeb12ea04c27ab60747aebbf3a153f0387c0eff",
+    "log" : "register-runner-initial.log",
+    "git-head" : "3bdd226a3937cba0f0163493fdc40bcc07729ed0",
+    "results" : {
+      "assertions" : 1007,
+      "duration-ms" : 178137,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 181
+    }
+  } ],
+  "repo-root" : "/home/joe/code/futon2",
+  "independent-review" : "pending",
+  "quarantine-sha256" : "9085b8ce5048b4c9a6d66e7d15f7e9c8d291cb91736ce546f7e881df76b80a2d",
+  "sha256" : {
+    "src/futon2/aif/repair_history_replay.clj" : "c805d0d2e3b2ea2aae2f4fe7918f1594f511ecda96c00c3f51ac31506f4c6e0e",
+    "test/futon2/aif/full_loop_runner_test.clj" : "b247b9bc8903b4fde7440350c89667d0a1e08b03e81aff4dd2ac7b85a961ada9",
+    "src/futon2/aif/full_loop_runner.clj" : "3ffc4f0b4e74806c6d4e6546806bd4a4532f0cb6cfa59eaa029f3605aaa85638",
+    "src/futon2/aif/repair_discharge_evidence.clj" : "5000333b5bd11ebae3de14583ce969d2c938455d9ede6263953707d5e7c87fc3",
+    "src/futon2/aif/repair_evaluators.clj" : "cf262d4a2871f2d8ef5cb9e35e9736bfd656a1eae778d105ba8a3c6d40bd47e4",
+    ".gitignore" : "e45c7bb4348596255cb0ad9739f0b24790e59a072a2edf740b0aef7e07cfe459",
+    "src/futon2/aif/repair_obligation.clj" : "a4caf1279609395ffcd1575f9ec4c155fdef98d2f46f506c8bd03d4098767d82",
+    "resources/wm/repair-evaluator-admissions.edn" : "5c6bd8b534a04640986ce086ebeb369636100e57567ebed337f761586d774fce",
+    "test/futon2/aif/repair_history_replay_test.clj" : "c13f09cf917cb8a70dd40a557a14619ce7626ccf49902e71ee82f479bd04b282",
+    "src/futon2/aif/repair_discharge_receipt.clj" : "bb4bb81dd87bc31db81045252616c2fee4431df784351da8ff2b5305470ebf9f",
+    "src/futon2/aif/repair_discharge.clj" : "bdc8dbfef68fcc38fa9f381834e80f41f9b613a8fc588b15b069b240364f093a",
+    "test/futon2/aif/repair_discharge_test.clj" : "4ceacd97aed69a4cccfbd0c0a3c7c9e72fc804c133afec43b93e073a8d6158c0"
+  },
+  "independent-reviewer" : null,
+  "warrants" : [ {
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "run/id" : "3c57ba41-1f91-4930-bf32-1975abbcab21",
+    "code-sha" : "34949d1ac6b17b92962ed758e12621413e9ca9f2f9949c3e36b593f3bdfe8719",
+    "scope" : "unit",
+    "test-sha" : "eaa39abc589883ad5aa69f0c2e4b7e477c94c0e27a207a04309b890a039d4b16",
+    "entry-id" : "test-registry-d0a22d50265ee716d4f267524842ace0302b2cb73415f5260eec3f97194f3f2e",
+    "log" : "register-unit.log",
+    "git-head" : "14b89bebec7cdb54c049b9df2a325d0bc4dc1635",
+    "results" : {
+      "assertions" : 49,
+      "duration-ms" : 1723,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 7
+    }
+  }, {
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "run/id" : "665df57b-5ebd-4510-afc9-225ff5375082",
+    "code-sha" : "34949d1ac6b17b92962ed758e12621413e9ca9f2f9949c3e36b593f3bdfe8719",
+    "scope" : "replay",
+    "test-sha" : "9fb2f02a0ef4a9266290cf7c6c617567f530dab01693a97c63db39ccaee0db09",
+    "entry-id" : "test-registry-e71de297955cd87b339849928725d640f7adfcc1a3503234e6584e716d8d8556",
+    "log" : "register-replay.log",
+    "git-head" : "14b89bebec7cdb54c049b9df2a325d0bc4dc1635",
+    "results" : {
+      "assertions" : 9,
+      "duration-ms" : 7795,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 3
+    }
+  }, {
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "run/id" : "27df3a57-a9b2-465d-92bb-446dfe578cfb",
+    "code-sha" : "34949d1ac6b17b92962ed758e12621413e9ca9f2f9949c3e36b593f3bdfe8719",
+    "scope" : "store",
+    "test-sha" : "8b9c63a2224b5a78aa2b3770edb99ba8e2985df1ddc1b423e234e887182db4f3",
+    "entry-id" : "test-registry-295c251bf7e218de03918db7e6adc721cb9818a63dfa2170e51f8e0ddbf028a8",
+    "log" : "register-store.log",
+    "git-head" : "14b89bebec7cdb54c049b9df2a325d0bc4dc1635",
+    "results" : {
+      "assertions" : 196,
+      "duration-ms" : 2001,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 30
+    }
+  }, {
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "run/id" : "2c10237b-45f0-4b38-9d70-e0cf630d9f88",
+    "code-sha" : "34949d1ac6b17b92962ed758e12621413e9ca9f2f9949c3e36b593f3bdfe8719",
+    "scope" : "runner",
+    "test-sha" : "2e96947f9eadbbd65aa707617da4d1db900f9eaebaf7ab000178cf419384de81",
+    "entry-id" : "test-registry-8c8a309eab73c40de7a7206d203cda35fc47eb22dd7dcd7d45e1648d3649e72f",
+    "log" : "register-runner.log",
+    "git-head" : "14b89bebec7cdb54c049b9df2a325d0bc4dc1635",
+    "results" : {
+      "assertions" : 1007,
+      "duration-ms" : 178534,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 181
+    }
+  } ],
+  "implementation-commit" : "3bdd226a3937cba0f0163493fdc40bcc07729ed0"
+}
