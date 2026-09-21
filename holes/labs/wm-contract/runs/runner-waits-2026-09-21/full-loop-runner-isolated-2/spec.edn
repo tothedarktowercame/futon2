@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2-codex2-runner-waits"
+ :subject-id "wm-runner/waits-full-loop-runner"
+ :command ["clojure" "-M:test" "-n" "futon2.aif.full-loop-runner-test"]
+ :author "codex-2"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/runner-waits-2026-09-21/full-loop-runner-isolated-2"
+ :code-paths ["src/futon2/aif/full_loop_runner.clj" "src/futon2/aif/tripwire.clj" "src/futon2/aif/d_predecessor_task_authority.clj"]
+ :test-paths ["test/futon2/aif/full_loop_runner_test.clj"]}

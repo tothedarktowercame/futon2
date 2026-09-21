@@ -1,0 +1,23 @@
+(require '[clojure.edn :as edn] '[clojure.pprint :as pprint]
+         '[futon2.aif.d-predecessor-task-authority :as task])
+(let [claim (edn/read-string (slurp "/home/joe/code/futon3c/data/wm-d-task-enactment/action-357124fc-c58f-4a84-984a-6dc277cdf39b.edn"))
+      build (edn/read-string (slurp "data/wm-full-loop-machinery-68/wm-contract-machinery-68-v1/attempt-002/005-build.edn"))
+      dispatch (edn/read-string (slurp "data/wm-full-loop-machinery-68/wm-contract-machinery-68-v1/attempt-002/004-dispatch.edn"))
+      binding (get-in build [:payload :judgment :validation :artifact-binding])
+      d (:dispatch claim)
+      expected {:occurrence (:occurrence d) :carry-occurrence-id (:carry-occurrence-id d)
+                :universe (:universe d) :declaration-pins (mapv #(select-keys % [:path :sha256]) (:declarations d))}
+      jobs (into {} (map (juxt :job-id identity) [(:author-job claim) (:review-job claim)]))
+      root (str (java.nio.file.Files/createTempDirectory "tick-b-replay-" (make-array java.nio.file.attribute.FileAttribute 0)))
+      result (task/complete! root {:status :captured :dispatch d} expected
+                             (assoc claim :artifact-binding binding :commit (:commit binding)
+                                          :dispatch-route (case (get-in dispatch [:payload :ground :kind])
+                                                            :agency-dispatch :fresh-author
+                                                            :agency-recovered-completion :recovery))
+                             jobs)
+      reread (edn/read-string (slurp (get-in result [:source :path])))]
+  (pprint/pprint {:historical-source (:route claim) :replayed-route (:route reread)
+                 :binding-retained? (= binding (:artifact-binding reread))
+                 :verification (:verification result) :scratch-root root})
+  (assert (= :fresh-author (:route reread)))
+  (assert (= :independent-review-not-passed (get-in result [:verification :kind]))))

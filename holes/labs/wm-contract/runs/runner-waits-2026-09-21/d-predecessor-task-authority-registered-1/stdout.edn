@@ -1,0 +1,4 @@
+evidence-id test-registry-65107da74e3a5230e4b217fc45ddb457e2e191fad7d5da451529f178dfa15adb
+warrant? true
+results {:assertions 41, :duration-ms 3556, :errors 0, :exit 0, :failures 0, :tests 8}
+bound wm-runner/waits-d-predecessor-task-authority -> test-registry-65107da74e3a5230e4b217fc45ddb457e2e191fad7d5da451529f178dfa15adb

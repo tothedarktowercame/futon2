@@ -1,0 +1,100 @@
+{:clojure.main/message
+ "Execution error (ExceptionInfo) at futon3c.test-registry/fail! (test_registry.clj:44).\nscope-not-committed\n",
+ :clojure.main/triage
+ {:clojure.error/class clojure.lang.ExceptionInfo,
+  :clojure.error/line 44,
+  :clojure.error/cause "scope-not-committed",
+  :clojure.error/symbol futon3c.test-registry/fail!,
+  :clojure.error/source "test_registry.clj",
+  :clojure.error/phase :execution},
+ :clojure.main/trace
+ {:via
+  [{:type clojure.lang.ExceptionInfo,
+    :message "scope-not-committed",
+    :data
+    {:record/type :test-registry/refusal,
+     :warrant? false,
+     :reason :scope-not-committed,
+     :details
+     {:stage :scope,
+      :paths ["src/futon2/aif/d_predecessor_task_authority.clj"],
+      :count 1,
+      :reasons {:dirty 1},
+      :next-action :commit-before-registering}},
+    :at
+    [futon3c.test_registry$fail_BANG_
+     invokeStatic
+     "test_registry.clj"
+     44]}],
+  :trace
+  [[futon3c.test_registry$fail_BANG_
+    invokeStatic
+    "test_registry.clj"
+    44]
+   [futon3c.test_registry$fail_BANG_ invoke "test_registry.clj" 44]
+   [futon3c.test_registry$require_committed_scope_BANG_
+    invokeStatic
+    "test_registry.clj"
+    199]
+   [futon3c.test_registry$require_committed_scope_BANG_
+    invoke
+    "test_registry.clj"
+    196]
+   [futon3c.test_registry$register_run_BANG_
+    invokeStatic
+    "test_registry.clj"
+    704]
+   [futon3c.test_registry$register_run_BANG_
+    invoke
+    "test_registry.clj"
+    693]
+   [futon3c.test_registry.validation$register_and_bind_BANG_$fn__7835
+    invoke
+    "validation.clj"
+    230]
+   [futon3c.test_registry.validation$record_refusals_BANG_
+    invokeStatic
+    "validation.clj"
+    52]
+   [futon3c.test_registry.validation$record_refusals_BANG_
+    invoke
+    "validation.clj"
+    50]
+   [futon3c.test_registry.validation$register_and_bind_BANG_
+    invokeStatic
+    "validation.clj"
+    224]
+   [futon3c.test_registry.validation$register_and_bind_BANG_
+    invoke
+    "validation.clj"
+    211]
+   [futon3c.test_registry.validation$_main
+    invokeStatic
+    "validation.clj"
+    260]
+   [futon3c.test_registry.validation$_main
+    doInvoke
+    "validation.clj"
+    244]
+   [clojure.lang.RestFn applyTo "RestFn.java" 140]
+   [clojure.lang.Var applyTo "Var.java" 707]
+   [clojure.core$apply invokeStatic "core.clj" 667]
+   [clojure.main$main_opt invokeStatic "main.clj" 515]
+   [clojure.main$main_opt invoke "main.clj" 511]
+   [clojure.main$main invokeStatic "main.clj" 665]
+   [clojure.main$main doInvoke "main.clj" 617]
+   [clojure.lang.RestFn applyTo "RestFn.java" 140]
+   [clojure.lang.Var applyTo "Var.java" 707]
+   [clojure.main main "main.java" 40]],
+  :cause "scope-not-committed",
+  :data
+  {:record/type :test-registry/refusal,
+   :warrant? false,
+   :reason :scope-not-committed,
+   :details
+   {:stage :scope,
+    :paths ["src/futon2/aif/d_predecessor_task_authority.clj"],
+    :count 1,
+    :reasons {:dirty 1},
+    :next-action :commit-before-registering}}}}
+

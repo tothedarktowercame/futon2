@@ -1,0 +1,10 @@
+complete fixture: :valid
+  c-status-stripped              -> c-source:bad       REJECTED (invalidates the run)
+  rates-removed                  -> rates-provenance:missing REJECTED (invalidates the run)
+  one-candidate-posterior        -> posterior:bad      REJECTED (invalidates the run)
+  f-computed-not-attached        -> posterior:flagged  NOTICED (flagged, does NOT invalidate)
+  u37-removed                    -> u37:missing        REJECTED (invalidates the run)
+  g-terms-removed                -> g-terms:missing    REJECTED (invalidates the run)
+  g-terms-census-says-missing    -> g-terms:missing    REJECTED (invalidates the run)
+  quantities-relocated-off-root  -> c-source:bad       REJECTED (invalidates the run)
+SELFTEST PASS: accepts the complete record, rejects every perturbation

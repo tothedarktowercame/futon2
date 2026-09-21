@@ -1,0 +1,5 @@
+Execution error (ExceptionInfo) at futon3c.test-registry/fail! (test_registry.clj:44).
+scope-not-committed
+
+Full report at:
+/tmp/clojure-15225355719291561573.edn

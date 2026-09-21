@@ -1,0 +1,4 @@
+evidence-id test-registry-9adb61e45a2b3f0776446e12c08bb50f58a6413a18a65f36df10c3ed55f3899f
+warrant? true
+results {:assertions 1005, :duration-ms 185360, :errors 0, :exit 0, :failures 0, :tests 180}
+bound wm-runner/waits-full-loop-runner -> test-registry-9adb61e45a2b3f0776446e12c08bb50f58a6413a18a65f36df10c3ed55f3899f

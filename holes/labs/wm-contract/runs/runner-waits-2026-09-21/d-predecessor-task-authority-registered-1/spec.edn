@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2"
+ :subject-id "wm-runner/waits-d-predecessor-task-authority"
+ :command ["clojure" "-M:test" "-n" "futon2.aif.d-predecessor-task-authority-test"]
+ :author "codex-2"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/runner-waits-2026-09-21/d-predecessor-task-authority-registered-1"
+ :code-paths ["src/futon2/aif/d_predecessor_task_authority.clj"]
+ :test-paths ["test/futon2/aif/d_predecessor_task_authority_test.clj" "test/fixtures/tick-b-enactment.edn"]}

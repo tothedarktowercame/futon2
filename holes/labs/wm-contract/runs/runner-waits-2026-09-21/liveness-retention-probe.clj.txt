@@ -1,0 +1,12 @@
+(require '[futon2.aif.full-loop-runner :as runner] '[clojure.edn :as edn])
+(let [root (str (java.nio.file.Files/createTempDirectory "liveness-retention-" (make-array java.nio.file.attribute.FileAttribute 0)))
+      observation {:kind :stalled-job :job-id "fixture-long-author" :silent-for-ms 2700000 :waiting? true}
+      result (#'runner/persist-run-record!
+              {:run-record-dir root :job-liveness/state (atom [observation])}
+              "liveness-fixture" "2026-09-21T00:00:00Z"
+              {:wm/route [{:node :RUNNER :at "2026-09-21T00:00:00Z"}
+                          {:node :FULL_LOOP_CLOSE :via :build-failed :at "2026-09-21T01:00:00Z"}]})
+      record (edn/read-string (slurp (:run-record result)))]
+  (assert (= [observation] (:job-liveness record)))
+  (prn {:retained (:job-liveness record) :record-path (:run-record result)}))
+(shutdown-agents)

@@ -1,0 +1,14 @@
+{:historical-source :recovery,
+ :replayed-route :fresh-author,
+ :binding-retained? true,
+ :verification
+ {:status :refused,
+  :authority :d-predecessor-task-authority-v1,
+  :scope
+  {:certifies :executed-with-artifacts,
+   :does-not-establish
+   #{:e1-portfolio-membership
+     :r6-r11-domain
+     :machine-enactment-correspondence}},
+  :kind :job-occurrence-binding-unestablished},
+ :scratch-root "/tmp/tick-b-replay-9824002205974983542"}

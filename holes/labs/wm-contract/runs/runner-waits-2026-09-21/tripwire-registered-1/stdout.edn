@@ -1,0 +1,4 @@
+evidence-id test-registry-52a3a81bc500312ca558bc6d28908aaeed05f11332b392b648a1a4c1a646babc
+warrant? true
+results {:assertions 129, :duration-ms 18537, :errors 0, :exit 0, :failures 0, :tests 41}
+bound wm-runner/waits-tripwire -> test-registry-52a3a81bc500312ca558bc6d28908aaeed05f11332b392b648a1a4c1a646babc

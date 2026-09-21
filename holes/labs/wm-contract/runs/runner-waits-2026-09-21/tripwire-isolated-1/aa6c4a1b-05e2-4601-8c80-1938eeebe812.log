@@ -1,0 +1,48 @@
+
+Testing futon2.aif.tripwire-test
+[wm-tripwire] HALT T1 (turn conservation) tripped at phase :synthetic/ nil
+[wm-tripwire]   witness: {:kind :turn-conservation, :runner/dispatched-turns 2, :agency/dispatch-count 1} nil
+[wm-tripwire]   report:  /tmp/trip-stop.edn nil
+[wm-tripwire]   the run is stopped; fix the condition above nil
+[wm-tripwire] HALT T1 (turn conservation) tripped at phase :synthetic/ nil
+[wm-tripwire]   witness: {:kind :turn-conservation, :runner/dispatched-turns 2, :agency/dispatch-count 1} nil
+[wm-tripwire]   report:  /tmp/trip-summon.edn nil
+[wm-tripwire]   the run is stopped; fix the condition above nil
+[wm-tripwire] HALT T1 (turn conservation) tripped at phase :synthetic/ nil
+[wm-tripwire]   witness: {:kind :turn-conservation, :runner/dispatched-turns 2, :agency/dispatch-count 1} nil
+[wm-tripwire]   report:  /tmp/trip-record.edn nil
+[wm-tripwire]   the run is stopped; fix the condition above nil
+[wm-tripwire] HALT T8 (duplicate-finding livelock) tripped at phase :opportunity/:start nil
+[wm-tripwire]   witness: {:kind :duplicate-finding-livelock, :signature [:review-rejected "M-x" "abc"], :repair-ids ["r1" "r3" "r2"], :finding-count 3, :newest-opened-at "2026-09-21T05:01:03.631Z", :age-hours 0} nil
+[wm-tripwire]   report:  /tmp/wm-tripwire-test9460721505237000567/trip-56b706a2-48ac-473f-907c-40d3e8763875.edn nil
+[wm-tripwire]   the run is stopped; fix the condition above nil
+[wm-tripwire] HALT T1 (turn conservation) tripped at phase :synthetic/ nil
+[wm-tripwire]   witness: {:kind :turn-conservation, :runner/dispatched-turns 2, :agency/dispatch-count 1} nil
+[wm-tripwire]   report:  /tmp/trip-real-roster.edn nil
+[wm-tripwire]   the run is stopped; fix the condition above nil
+[wm-tripwire] DEFER T8 (duplicate-finding livelock) at phase :opportunity/:start: witness names open repair obligations; continuing so their repair can be selected nil
+[wm-tripwire]   witness: {:kind :duplicate-finding-livelock, :signature [:review-rejected "M-x" "abc"], :repair-ids ["r1" "r3" "r2"], :finding-count 3, :newest-opened-at "2026-09-21T05:01:11.672Z", :age-hours 0} nil
+[wm-tripwire] trip during trip handling; degraded to durable :record nil
+[wm-tripwire] HALT T1 (turn conservation) tripped at phase :synthetic/ nil
+[wm-tripwire]   witness: {:kind :turn-conservation, :runner/dispatched-turns 2, :agency/dispatch-count 1} nil
+[wm-tripwire]   report:  (not written) nil
+[wm-tripwire]   the run is stopped; fix the condition above nil
+[wm-tripwire] trip report action failed; runner remains untouched -War Machine tripwire T1 tripped: turn conservation
+[wm-tripwire] HALT T1 (turn conservation) tripped at phase :synthetic/ nil
+[wm-tripwire]   witness: {:kind :turn-conservation, :runner/dispatched-turns 2, :agency/dispatch-count 1} nil
+[wm-tripwire]   report:  (not written) nil
+[wm-tripwire]   the run is stopped; fix the condition above nil
+[wm-tripwire] TRIP T8 (duplicate-finding livelock) at phase :construction/:start — recorded; run continues (FUTON_WM_TRIPWIRE_HALT=1 restores one-trip-one-shutdown) nil
+[wm-tripwire]   witness: {:kind :duplicate-finding-livelock, :signature [:review-rejected "M-x" "abc"], :repair-ids ["r1" "r2" "r3"], :finding-count 3, :newest-opened-at "2026-09-21T05:01:18.627Z", :age-hours 0} nil
+[wm-tripwire]   report:  /tmp/wm-tripwire-test10313725070852835277/trip-c64fa14d-f572-45c1-abd8-3b82ad7513cc.edn nil
+[wm-tripwire] HALT T8 (duplicate-finding livelock) tripped at phase :construction/:start nil
+[wm-tripwire]   witness: {:kind :duplicate-finding-livelock, :signature [:review-rejected "M-x" "abc"], :repair-ids ["r1" "r2" "r3"], :finding-count 3, :newest-opened-at "2026-09-21T05:01:18.629Z", :age-hours 0} nil
+[wm-tripwire]   report:  /tmp/wm-tripwire-test11581079197681073443/trip-f716de7f-4e44-46e6-b3ed-e591b2867f63.edn nil
+[wm-tripwire]   the run is stopped; fix the condition above nil
+[wm-tripwire] HALT T8 (duplicate-finding livelock) tripped at phase :selection/:end nil
+[wm-tripwire]   witness: {:kind :duplicate-finding-livelock, :signature [:review-rejected "M-x" "abc"], :repair-ids ["r1" "r2" "r3"], :finding-count 3, :newest-opened-at "2026-09-21T05:01:18.629Z", :age-hours 0} nil
+[wm-tripwire]   report:  /tmp/wm-tripwire-test11581079197681073443/trip-925d8999-fcbc-456f-ac19-854b99559b55.edn nil
+[wm-tripwire]   the run is stopped; fix the condition above nil
+
+Ran 41 tests containing 129 assertions.
+0 failures, 0 errors.
