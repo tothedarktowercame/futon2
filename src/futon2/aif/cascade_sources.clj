@@ -16,12 +16,16 @@
   (every check result or refusal). :read-occurrences is the ordered provenance
   authority: unlike the legacy per-target maps it preserves duplicate targets.
   :target-collisions surfaces those duplicates without deciding merge policy."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.token-initialization-policy :as token-policy]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.live-c :as live-c]
             [futon2.aif.observation-checks :as oc]))
+
+(load-identity/register! *ns* *file*)
 
 (def ^:dynamic *read-occurrences*
   "Optional run-owned atom. Nil means no completed declaration read or empty scan observed."
@@ -156,6 +160,9 @@
                 snapshot (java.nio.file.Files/readAllBytes (.toPath f))
                 hash (evidence/sha256 snapshot)
                 d (check-file! path (edn/read-string (String. snapshot java.nio.charset.StandardCharsets/UTF_8)))
+                policy (get d :token-initialization token-policy/disabled)
+                _ (when-not (token-policy/valid-policy? policy)
+                    (refuse! :invalid-token-initialization-policy {:path path :value policy}))
                 receipts (into {} (map (fn [[id receipt]] [id (read-receipt-source receipt)]))
                                (:interpretation-receipts d))
                 scales (live-c/preference-scales d)
@@ -168,9 +175,13 @@
                     (refuse! :incommensurable-family {:context (:context d)
                                                      :rates [prior-beta this-beta]}))
                 {:keys [universe observations]} (observe-facts (:facts d) (:locators d))
-                occurrence {:path path :sha256 hash :target t :observations observations}
+                occurrence {:path path :sha256 hash :target t :observations observations
+                            :token-initialization-policy policy}
                 _ (when *read-occurrences* (swap! *read-occurrences* (fnil conj []) occurrence))]
             (-> acc
+                (assoc-in [:token-initialization t]
+                          {:policy policy :declaration-sha256 hash :locators (:locators d)
+                           :schedule observation-clock :observations observations})
                 (assoc-in [:universes t] universe)
                 (assoc-in [:wants t] (vec (:want d)))
                 (assoc-in [:preference-scales t] scales)

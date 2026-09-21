@@ -1,8 +1,11 @@
 (ns futon2.aif.token-belief-carry
-  "Staged token carry (D phase 2a). Fresh fact initialization still supplies
-   scoring. Prospective carry is durable evidence, NOT a consumed posterior.
-   Conditioning and enacted-predecessor admission belong to phase 2b."
-  (:require [futon2.aif.cascade-problems :as problems]))
+  "Versioned initialization staging. V1 retains the historical no-update chain;
+   V2 records the declaration and fresh evidence for input-receipt admission.
+   Prospective carry identifies the predecessor, never a predicted posterior."
+  (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.cascade-problems :as problems]))
+
+(load-identity/register! *ns* *file*)
 
 (defn domain-inputs [assembled-problems]
   (mapv (fn [{:keys [target cascade-problem]}]
@@ -16,7 +19,7 @@
                                             (:interpretations declaration))]
          [target token])))
 
-(defn stage
+(defn- legacy-stage
   "Record initialization -> no update -> consumed value. Context identifies
    this selection occurrence, not a fabricated observation; tau stays nil
    until an actual observation supplies it. Previous carry is retained for
@@ -49,6 +52,21 @@
                          :belief belief
                          :initialization-sha256 (:sha256 initialization)}}))
 
+(defn stage [initialization inputs previous context]
+  (let [base (legacy-stage initialization inputs previous context)]
+    (if-let [observations (:observation-initialization context)]
+      (assoc base :schema :wm/token-belief-stage-v2
+             :conditioning-status :awaiting-observation-admission
+             :consumed-source :pending-input-receipt
+             :observation {:status :pending :reason :input-admission-required
+                           :occurrence-id (:occurrence-id base) :placement :next-selection}
+             :prospective-carry (-> (:prospective-carry base)
+                                    (dissoc :belief)
+                                    (assoc :schema :wm/prospective-token-carry-v2
+                                           :conditioning-status :see-token-belief-input))
+             :observation-initialization observations)
+      base)))
+
 (defn valid-stage?
   "Check the staged chain against the independently checked initialization.
    An asserted posterior, invented update, changed carry or consumed value
@@ -60,4 +78,6 @@
                 (:domain-inputs receipt)))
        (= receipt (stage initialization (:domain-inputs receipt)
                          (:prospective-prior receipt)
-                         {:occurrence-id (:occurrence-id receipt)}))))
+                         (cond-> {:occurrence-id (:occurrence-id receipt)}
+                           (= :wm/token-belief-stage-v2 (:schema receipt))
+                           (assoc :observation-initialization (:observation-initialization receipt)))))))

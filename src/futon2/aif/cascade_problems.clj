@@ -28,8 +28,11 @@
     5 :beta-not-declared            no declared β for the target's context
 
   A missing :horizon-steps refuses ALL targets (:horizon-not-declared)."
-  (:require [futon2.aif.mission-registry :as registry]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.mission-registry :as registry]
             [futon2.aif.live-c :as live-c]))
+
+(load-identity/register! *ns* *file*)
 
 (defn substrate-targets
   "The target listing the tick's substrate scans already produce: the SAME
@@ -179,7 +182,8 @@
                        :preference-scales scales}
         :preference-scales scales
         :beta beta
-        :locators locators}
+        :locators locators
+        :token-initialization (get-in sources [:token-initialization target])}
        :constructed-candidates
        (mapv #(select-keys % [:candidate-id :precedence :construction-receipt]) constructed)
        :interpretation-receipts

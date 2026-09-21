@@ -394,3 +394,19 @@
        :status :refused :authority observation-authority :scope observation-scope
        :kind (or (:d-predecessor/refusal (ex-data e)) :observation-input-invalid)
        :detail (ex-data e)})))
+
+(defn read-observations-v2
+  "Read only the previous attempt's exact action file; keep the v1 reader unchanged."
+  [root expected read-job]
+  (let [missing {:schema :wm/d-task-token-observations-v2 :status :refused
+                 :authority observation-authority :scope observation-scope
+                 :kind :carry-no-predecessor}]
+    (if-not (:occurrence expected)
+      missing
+      (try
+        (let [f (record-file root (:occurrence expected))]
+          (if-not (.isFile f) missing
+            (let [bytes (file-bytes f)]
+              (assoc (verify-observations-v2 (read-one bytes) expected read-job)
+                     :source {:path (.getCanonicalPath f) :sha256 (sha bytes)}))))
+        (catch Exception _ (assoc missing :status :invalid :kind :predecessor-record-unreadable))))))

@@ -11,6 +11,7 @@
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.token-outcome-test :as token-fixture]
+            [futon2.aif.token-observation-initialization-test :as initialization-fixture]
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.morning-brief :as brief]
@@ -5770,3 +5771,39 @@
                         nil
                         (catch clojure.lang.ExceptionInfo e (ex-data e)))))))
          (finally (doseq [file (reverse (file-seq root))] (.delete file))))))))
+
+
+(deftest admitted-token-initialization-survives-runner-close
+  ;; Same grounded retention fixture as close-retains-token-mismatch-before-manifest-freeze.
+  ;; Source identity remains enabled; the owner runs this on merged main.
+  (initialization-fixture/with-two-ticks
+   (fn [{decision :second}]
+     (let [{:keys [root] :as c} (retention-cohort "runner-token-initialization")
+           input (get-in decision [:selection-certificate :token-belief-input])
+           opts (assoc (retention-success-opts c)
+                       :author-artifact-observer-fn
+                       (fn [r before job]
+                         (assoc (synthetic-artifact-binding r before job) :repo root))
+                       :ground-fn (fn [& _] {:before {:implementation-entity nil}
+                                             :after {:implementation-entity {:id "retained"}}
+                                             :resolved? true :dial-moved? true
+                                             :implementation-id "retained"
+                                             :discharge-id "retained-discharge"})
+                       :judge-fn (fn [_] {:judgement (assoc judgement :decision decision)})
+                       :poll-fn (fn [_ id]
+                                  (if (= id "retention-author")
+                                    {:job-id id :state "done" :artifact-ref "retained123"
+                                     :result-summary "FULL_LOOP_AUTHOR: DONE retained123"
+                                     :feature-card feature-card-claim :execution successful-execution}
+                                    {:job-id id :state "done" :execution successful-execution
+                                     :result-summary "FULL_LOOP_REVIEW: APPROVE"})))
+           result (runner/run-opportunity! opts)
+           selected (get-in result [:checkpoints :selection :judgment :controller-decision])]
+       (is (= :grounded-change (:outcome result)))
+       (is (map? (cohort/closed-execution (:binding c) "attempt-001")))
+       (is (= :observed-initialization (:conditioning-status input)))
+       (is (= input (get-in selected [:selection-certificate :token-belief-input])))
+       (is (= (:continuation-belief input)
+              (get-in selected [:selection-certificate :precision-family :model :q0])))
+       (is (every? #(not (contains? % initialization-fixture/updater))
+                   (keys (:continuation-belief input))))))))

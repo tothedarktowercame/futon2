@@ -1,8 +1,12 @@
 (ns futon2.aif.token-belief-predecessor
   "Production token-carry admission. No production enactment authority exists
    for portfolio proofs. D task evidence has a separate, narrower authority."
-  (:require [futon2.aif.interpretation-evidence :as evidence]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.token-initialization-policy :as policy]
             [futon2.aif.d-predecessor-task-authority :as task]))
+
+(load-identity/register! *ns* *file*)
 
 (def candidate-paths
   [[:decision :action] [:selection-enaction] [:enactment]
@@ -54,11 +58,11 @@
          :invalid (keyword? (:kind a))
          false)))
 
-(defn input-receipt
+(defn- legacy-input-receipt
   "Refused carry -> fresh fact initialization -> consumed belief. This is an
    admission receipt, never an observation update or an impossible observation."
   ([stage inspection]
-   (input-receipt stage inspection (production-authority (:task-context inspection))))
+   (legacy-input-receipt stage inspection (production-authority (:task-context inspection))))
   ([stage inspection admission]
   (let [previous (:prospective-prior stage)
         universe (get-in stage [:prospective-carry :universe])
@@ -84,6 +88,49 @@
      :continuation-belief (get-in stage [:initialization :value])
      :observation-updates []})))
 
+(defn observation-authority [expected]
+  (task/read-observations-v2 task/default-root expected task/agency-job))
+
+(defn- valid-observation-authority? [a inspection]
+  (and (= :wm/d-task-token-observations-v2 (:schema a))
+       (= task/observation-authority (:authority a)) (= task/observation-scope (:scope a))
+       (case (:status a)
+         :admitted
+         (and (valid-authority? (assoc (:execution-verification a) :source (:source a)) inspection)
+              (= (:occurrence a) (get-in a [:execution-verification :occurrence]))
+              (= (:carry-occurrence-id a) (get-in a [:execution-verification :carry-occurrence-id]))
+              (= (:revision-pair a) (get-in a [:execution-verification :revision-pair]))
+              (= :not-authorized (:consumption a))
+              (= :independent-check-required (:causal-attribution a)))
+         :refused (keyword? (:kind a))
+         :invalid (keyword? (:kind a))
+         false)))
+
+(defn input-receipt
+  "V3 authorizes only declared next-selection initialization from signed checks.
+   The old execution admission remains separate (including for precision carry)."
+  ([stage inspection]
+   (input-receipt stage inspection (production-authority (:task-context inspection))
+                  (when (policy/enabled? (:observation-initialization stage))
+                    (observation-authority (:task-context inspection)))))
+  ([stage inspection admission]
+   (input-receipt stage inspection admission nil))
+  ([stage inspection admission observations]
+   (let [legacy (legacy-input-receipt stage inspection admission)]
+     (if-not (= :wm/token-belief-stage-v2 (:schema stage)) legacy
+       (let [outcome (if (and (policy/enabled? (:observation-initialization stage))
+                              (not (valid-observation-authority? observations inspection)))
+                       {:status :refused :kind :observation-authority-invalid
+                        :observation-updates [] :continuation-belief (get-in stage [:initialization :value])}
+                       (policy/apply-observations stage inspection observations))]
+         (assoc legacy :schema :wm/token-belief-input-v3
+                :conditioning-status (if (some #(= :updated (:status %)) (:observation-updates outcome))
+                                       :observed-initialization :not-run)
+                :reason (:kind outcome) :policy (:observation-initialization stage)
+                :observation-authority observations :observation-initialization outcome
+                :observation-updates (:observation-updates outcome)
+                :continuation-belief (:continuation-belief outcome)))))))
+
 (def legacy-unavailable-authority
   ;; Historical 2b receipt replay only; never used to admit a new predecessor.
   {:status :refused :kind :e2b/production-authority-unavailable
@@ -91,8 +138,9 @@
    :mode :production})
 
 (defn valid-input?
-  "Replay the refusal chain; preserve the original initializer equality.
-   This validates retained evidence, not the external origin of its snapshots."
+  "Replay each version under its own policy. V1/V2 preserve fresh initialization;
+   V3 replays signed observation updates. External snapshot origin is checked
+   by the production reader, not by this retained-receipt replay."
   [receipt stage]
   (let [inspection (:inspection receipt)
         candidates (:candidates inspection)]
@@ -101,8 +149,16 @@
          (every? (fn [{:keys [record status sha256]}]
                    (and (= status (if (nil? record) :absent :present))
                         (= sha256 (evidence/value-digest record)))) candidates)
-         (if (= :wm/token-belief-input-v1 (:schema receipt))
-           (= receipt (assoc (input-receipt stage inspection legacy-unavailable-authority)
+         (case (:schema receipt)
+           :wm/token-belief-input-v1
+           (= receipt (assoc (legacy-input-receipt stage inspection legacy-unavailable-authority)
                              :schema :wm/token-belief-input-v1))
+           :wm/token-belief-input-v2
            (and (valid-authority? (get-in receipt [:carry-admission :authority]) inspection)
-                (= receipt (input-receipt stage inspection (get-in receipt [:carry-admission :authority]))))))))
+                (= receipt (legacy-input-receipt stage inspection (get-in receipt [:carry-admission :authority]))))
+           :wm/token-belief-input-v3
+           (and (= :wm/token-belief-stage-v2 (:schema stage))
+                (valid-authority? (get-in receipt [:carry-admission :authority]) inspection)
+                (= receipt (input-receipt stage inspection (get-in receipt [:carry-admission :authority])
+                                          (:observation-authority receipt))))
+           false))))

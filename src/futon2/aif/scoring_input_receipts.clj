@@ -1,10 +1,13 @@
 (ns futon2.aif.scoring-input-receipts
   "Read-time state receipts. Uses the declaration provenance status vocabulary."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.edn :as edn]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.token-belief-predecessor :as token-predecessor]
             [futon2.aif.interpretation-evidence :as evidence]))
+
+(load-identity/register! *ns* *file*)
 
 (def ^:dynamic *habit-reads* nil)
 (def ^:dynamic *habit-read-purpose* :unspecified)
@@ -49,11 +52,13 @@
                                        (:inputs initial)))]
                    (cond-> errors
                      (not= expected initial) (conj :initial-belief-origin-mismatch)
-                     (some #(not= (:value initial) (get-in % [:evaluations 0 :incoming-belief]))
+                     (some #(not= (if (= :wm/token-belief-input-v3 (:schema input))
+                                      (:continuation-belief input) (:value initial))
+                                  (get-in % [:evaluations 0 :incoming-belief]))
                            (get-in decision [:selection-certificate :node-evaluation-traces]))
                      (conj :initial-belief-value-mismatch))) errors)
-        ;; Phase 2a is an extension: the original origin and incoming-value
-        ;; equalities above still run, including on records without carry.
+        ;; V3 replays signed updates before accepting its consumed q0. Historical
+        ;; versions still require the original initializer equality.
         errors (cond-> errors
                  (and staged? (not (token-carry/valid-stage? stage initial)))
                  (conj :token-belief-stage-mismatch)

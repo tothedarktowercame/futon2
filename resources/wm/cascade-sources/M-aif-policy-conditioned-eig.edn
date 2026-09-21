@@ -2,6 +2,10 @@
 {:schema :wm/cascade-source-v1
  :target "M-aif-policy-conditioned-eig"
  :context :WM
+ :token-initialization {:schema :wm/token-initialization-policy-v1 :enabled false
+                        :placement :next-selection :unknown :fresh-initialization
+                        :temporal-order :same-revision-only
+                        :historical :declared-revision-only}
  :beta {:value 1 :status :declared}
  :lam {:value 1 :status :declared}
  :mu {:value 0 :status :declared}
