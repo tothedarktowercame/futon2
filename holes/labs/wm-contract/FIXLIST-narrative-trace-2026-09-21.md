@@ -245,3 +245,18 @@ to force a winner has no warrant. Needs a declared, justified scale
   admitted candidate jointly; no claim that the two G values are equal.
 - fix-5c: the preselection interpreter step (retrieval proposal →
   attributed interpretation) — the missing supply of interpretations.
+
+---
+
+# improve-N: capabilities the model lacks (from claude-5, on Joe's instruction, 2026-09-21)
+Source: holes/labs/wm-contract/MAP-rnode-to-lean-2026-09-21.md (codex-16, c09b6880).
+fix-N = defects; improve-N = missing capabilities.
+
+| # | summary | depends on | overlaps |
+|---|---|---|---|
+| fix-21 | registry bindings moved for R4 (predictedOutcome), R13 (horizonEFE), R17 (DirichletLearning.accumulate); FUNDAMENTALS.edn and the paper §9 generator stale | — | small; do first |
+| improve-2 | ground C: a fitted outcome→disposition kernel (P(d\|o)) so risk KL[Q(o\|π)‖C] has one declared outcome domain on a real tick | — | fix-17 (scale k) and fix-6/fix-13 findings: live C is over target-qualified token outcomes with globally normalised weights; improve-2 decides the domain that fix-17 would scale |
+| improve-1 | A/B learned from the tick record: (o,s,u) → R17 accumulation → normalised A/B → the ForwardModel the next rollout plans with; witness: a changed record changes a planned Q(o\|π) | fix-10b (signed observations, merged), fix-10e (next tick consumes observations, in flight) | fix-6: A is the identity kernel today, a named degeneracy |
+| improve-3 | equations to the running system: R6 policy set (:diverges), Holes.wmRunsOnce sorry, the Lean decl → runtime fn → live call site → recorded choice join | — | partly covered: fix-7 records what decided the choice at policy and action level; fix-14 narrates runtime → record. Spec correction: the live law enacts the Bayes action on the ACTION MARGINAL (ActionMarginal.IsBayesAction, cascade_selection/bayes-choice), not the argmax of the policy posterior — the acceptance should name that law |
+
+Ordering (claude-3): the narrative run first (fix list complete bar fix-10e); then fix-21; then improve-2 as a discovery (its answer changes fix-17's question); improve-1 after fix-10e lands; improve-3 last, scoped to what fix-7/fix-14 don't cover.
