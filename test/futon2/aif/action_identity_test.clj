@@ -36,6 +36,11 @@
         token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]]
     (is (= action reordered))
     (is (= (identity/digest action) (identity/digest reordered)))
+    (let [ascending (sorted-set :a :m :z)
+          descending (into (sorted-set-by #(compare %2 %1)) ascending)]
+      (is (not= (vec ascending) (vec descending)))
+      (is (= (identity/digest (assoc action :tokens ascending))
+             (identity/digest (assoc action :tokens descending)))))
     (doseq [changed [(assoc-in action [:precedence 0 :produces] #{:different-token})
                      (assoc-in action [:precedence 0 :guard :operator] :or)
                      (assoc-in action [:observation-locators token :path] "different.md")
