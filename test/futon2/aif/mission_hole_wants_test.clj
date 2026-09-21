@@ -1,5 +1,6 @@
 (ns futon2.aif.mission-hole-wants-test
   (:require [clojure.test :refer [deftest is testing]]
+            [clojure.edn :as edn]
             [futon2.aif.mission-hole-wants :as mhw]))
 
 (def ^:private mission
@@ -93,3 +94,12 @@
                   (declared-with {} {}) "/root" [mission] :WM)]
       (is (= 0 (get-in merged [:mission-hole-coverage :targets-added])))
       (is (nil? (get-in merged [:mission-hole-coverage :adopted-schedule]))))))
+
+(deftest want-tokens-survive-a-print-read-round-trip
+  (testing "a hex-digest id yields a keyword the READER accepts"
+    (doseq [id ["2f9b03b16170" "abc123" "sha256#730434653957" "0000"]]
+      (let [tok (mhw/want-token {:id id})]
+        (is (= tok (edn/read-string (pr-str tok)))
+            (str "unreadable token from id " id
+                 " -- it would print into a run record and throw on the next read"))
+        (is (= [tok] (edn/read-string (pr-str [tok]))) "also inside a collection")))))

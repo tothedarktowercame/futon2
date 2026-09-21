@@ -43,11 +43,19 @@
        (re-find #"^[-*]\s+\[\s\]\s+\S" (str (:text hole)))))
 
 (defn want-token
-  "The outcome token for a hole, from its stable content-addressed id."
+  "The outcome token for a hole, from its stable content-addressed id.
+
+  The name is prefixed with `h` because the ids are hex digests and Clojure's
+  READER rejects a keyword whose name starts with a digit -- `:hole/2f9b03b16170`
+  prints without complaint and then throws `Invalid token` when anything reads
+  the record back. That is what killed the tick of 2026-09-21-1789948972 at
+  :initialization, after the token had already travelled through scoring and
+  been written to a run record. The prefix is unconditional so the mapping from
+  id to token stays injective."
   [hole]
   (let [id (str (:id hole))
         h (str/index-of id "#")]
-    (keyword "hole" (if h (subs id (inc h)) id))))
+    (keyword "hole" (str "h" (if h (subs id (inc h)) id)))))
 
 (defn closed-form
   "The line the document carries once this hole is closed: the same item with
