@@ -42,12 +42,14 @@
             _ (spit declaration (pr-str (cond-> {:target "target" :locators
                                         {:artifact {:class :C3 :repo "repo" :sha (:head before)
                                                     :path (or (:locator-path opts) "created.clj")}}}
+                                          (:locators opts)
+                                          (update :locators merge (:locators opts))
                                           (:observation-schedule opts)
                                           (assoc :observation-schedule (:observation-schedule opts)))))
             pins [{:path (str declaration)
                    :sha256 (evidence/sha256 (Files/readAllBytes (.toPath declaration)))}]
             dispatch (task/capture {:occurrence occurrence :carry-occurrence-id "carry"
-                                    :universe #{["target" :artifact]} :declaration-reads pins :before before})
+                                    :universe (or (:universe opts) #{["target" :artifact]}) :declaration-reads pins :before before})
             _ (spit (io/file repo "created.clj") "(ns created)\n")
             _ (git! repo "add" "created.clj")
             _ (git! repo "commit" "-qm" "execute task")
@@ -64,7 +66,7 @@
             inputs {:dispatch dispatch :artifact-binding binding :author-job author
                     :review-job reviewer :files ["created.clj"] :repository (str repo) :route :fresh-author}
             expected {:occurrence occurrence :carry-occurrence-id "carry"
-                      :universe #{["target" :artifact]} :declaration-pins pins}]
+                      :universe (or (:universe opts) #{["target" :artifact]}) :declaration-pins pins}]
         ;; Only repository location and external Agency read ports are local;
         ;; producer, verifier, Git, occurrence and observation checks are real.
         (with-redefs [observation/repo-root (str dir)]
