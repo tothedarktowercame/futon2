@@ -1,0 +1,3 @@
+evidence-id test-registry-77d535b998504c6d33e6f52f3d7dc3d589db5949f9f04aa5d5a4fcc2c4c7f93d
+warrant? false
+results {:assertions 998, :duration-ms 196169, :errors 0, :exit 0, :failures 0, :tests 180}
