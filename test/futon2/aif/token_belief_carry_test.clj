@@ -46,9 +46,32 @@
         previous (assoc (:prospective-carry stage) :belief {#{} 1})
         next-decision (decision previous)
         next-stage (get-in next-decision [:selection-certificate :token-belief-stage])
-        baseline (slurp (io/resource "fixtures/d-token-carry/baseline-outcomes.edn"))]
-    (is (= baseline (str (pr-str (outcomes first-decision)) "\n")))
-    (is (= baseline (str (pr-str (outcomes next-decision)) "\n")))
+        baseline (edn/read-string
+                  (slurp (io/resource "fixtures/d-token-carry/baseline-outcomes.edn")))
+        ;; c155d690 removed the empty diagnostic C0 from executable scoring.
+        ;; Derive the authorized renormalization from the retained old fixture,
+        ;; never from the decision under test. Candidate metadata may grow.
+        old-acting (into {} (filter (comp seq :precedence key))
+                         (get-in baseline [:selection-law :posterior]))
+        acting-mass (reduce + (vals old-acting))
+        expected (into {} (map (fn [[a p]] [(:id a) (/ p acting-mass)])) old-acting)
+        posterior (get-in first-decision [:selection-law :posterior])
+        actual (into {} (map (fn [[a p]] [(:id a) p])) posterior)]
+    ;; The invariant is prospective carry cannot change *this* decision,
+    ;; including the complete law and all candidate metadata, byte for byte.
+    (is (= (pr-str (outcomes first-decision)) (pr-str (outcomes next-decision))))
+    (is (= #{:C1 :C2 :C3} (set (keys actual))))
+    (doseq [[id p] expected]
+      (is (< (Math/abs (- p (get actual id Double/NaN))) 1.0e-12) (str id)))
+    (is (= (select-keys (:action baseline) [:id :target :precedence])
+           (select-keys (:action first-decision) [:id :target :precedence])))
+    (is (< (Math/abs (- (get expected :C2) (:chosen-action-mass first-decision))) 1.0e-12))
+    (is (= (:beta baseline) (:beta first-decision)))
+    (is (= (vec (repeat (count expected) (first (:D baseline))))
+           (:D (outcomes first-decision))))
+    (is (= (:value (first (:D baseline)))
+           (get-in first-decision [:initial-belief-receipt :value])))
+    (is (not= (:belief previous) (get-in first-decision [:initial-belief-receipt :value])))
     (is (not= (:belief previous) (:continuation-belief next-stage)))
     (is (= previous (:prospective-prior next-stage)))
     (is (= :not-admitted-for-consumption (:prospective-prior-authority next-stage)))
