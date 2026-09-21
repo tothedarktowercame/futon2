@@ -1,0 +1,235 @@
+{:observed-at "2026-09-21T14:15:43.122656191Z",
+ :horizon 2,
+ :source-directory
+ "/home/joe/code/futon2/resources/wm/cascade-sources",
+ :source-files
+ [{:path
+   "/home/joe/code/futon2/resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn",
+   :sha256
+   "7a2739c5dd6aac9291fa39ccdf7132e10c206da36804a0163e000fdff2007a49",
+   :target "M-aif-policy-conditioned-eig"}
+  {:path
+   "/home/joe/code/futon2/resources/wm/cascade-sources/M-expressions-of-interest.edn",
+   :sha256
+   "aa5a9c96bdc7b3c75a1bc6aa6ad68a82ed02c88f3b6802a9a96c964f31da6556",
+   :target "M-expressions-of-interest"}
+  {:path
+   "/home/joe/code/futon2/resources/wm/cascade-sources/M-f11-find-production-successor.edn",
+   :sha256
+   "2aabeccbad421c34fe768a6080d83719496c1d827e3ab62d51bb0d344549fb32",
+   :target "M-f11-find-production-successor"}
+  {:path
+   "/home/joe/code/futon2/resources/wm/cascade-sources/M-wm-08-external-f2.edn",
+   :sha256
+   "f20d004397b2baa849582bb4d64e2ee5e7fab59fef5b17c7821b40388adead90",
+   :target "M-wm-08-external-f2"}],
+ :facts
+ {"M-aif-policy-conditioned-eig"
+  {:admission/task-stated true,
+   :hole/h6378c65a4012 false,
+   :hole/h0e270aa090bc false,
+   :hole/h42fceb4ad48b false},
+  "M-expressions-of-interest"
+  {:change-authored-and-bound :unknown,
+   :premise-refused-before-work :unknown,
+   :obligation-resolved-through-the-account :unknown},
+  "M-f11-find-production-successor"
+  {:admission/task-stated true,
+   :hole/h9ab212b3281d false,
+   :hole/h2045faa0e7cc false},
+  "M-wm-08-external-f2"
+  {:external-expectation-validator-exists true,
+   :frozen-occurrence-context-captured true,
+   :independent-expectations-written true,
+   :route-a-rehearsal-reported true}},
+ :observations
+ {"M-aif-policy-conditioned-eig"
+  {:results
+   {:admission/task-stated
+    {:observed true,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+      :resolved-sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [ ] **Mint the shared posterior updater, then unify the two paths through",
+      :file-present true}},
+    :hole/h6378c65a4012
+    {:observed false,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "HEAD",
+      :resolved-sha "767cd51ec2985ae14080b810f1a1e4794c059a4c",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [x] **Mint the shared posterior updater, then unify the two paths through",
+      :file-present true}},
+    :hole/h0e270aa090bc
+    {:observed false,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "HEAD",
+      :resolved-sha "767cd51ec2985ae14080b810f1a1e4794c059a4c",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the",
+      :file-present true}},
+    :hole/h42fceb4ad48b
+    {:observed false,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "HEAD",
+      :resolved-sha "767cd51ec2985ae14080b810f1a1e4794c059a4c",
+      :path "holes/missions/M-aif-policy-conditioned-eig.md",
+      :decl
+      "- [x] **Collect a default-off EIG shadow and calibration packet.** Prior",
+      :file-present true}}},
+   :refused {}},
+  "M-expressions-of-interest"
+  {:results {},
+   :refused
+   {:change-authored-and-bound
+    {:status :missing, :kind :no-mechanical-check, :data {:class nil}},
+    :premise-refused-before-work
+    {:status :missing, :kind :no-mechanical-check, :data {:class nil}},
+    :obligation-resolved-through-the-account
+    {:status :missing,
+     :kind :no-mechanical-check,
+     :data {:class nil}}}},
+  "M-f11-find-production-successor"
+  {:results
+   {:admission/task-stated
+    {:observed true,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+      :resolved-sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence.",
+      :file-present true}},
+    :hole/h9ab212b3281d
+    {:observed false,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "HEAD",
+      :resolved-sha "767cd51ec2985ae14080b810f1a1e4794c059a4c",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence.",
+      :file-present true}},
+    :hole/h2045faa0e7cc
+    {:observed false,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "HEAD",
+      :resolved-sha "767cd51ec2985ae14080b810f1a1e4794c059a4c",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution.",
+      :file-present true}}},
+   :refused {}},
+  "M-wm-08-external-f2"
+  {:results
+   {:external-expectation-validator-exists
+    {:observed true,
+     :check :C4,
+     :evidence
+     {:repo "futon2",
+      :sha "ad1b8f08",
+      :resolved-sha "ad1b8f08aaa19681ecebe85c8da85576d809bb25",
+      :path "src/futon2/aif/find_expectations.clj",
+      :decl "(defn validate-external!",
+      :file-present true}},
+    :frozen-occurrence-context-captured
+    {:observed true,
+     :check :C3,
+     :evidence
+     {:repo "futon2",
+      :sha "ad1b8f08",
+      :resolved-sha "ad1b8f08aaa19681ecebe85c8da85576d809bb25",
+      :path
+      "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/FROZEN-CONTEXT.edn"}},
+    :independent-expectations-written
+    {:observed true,
+     :check :C3,
+     :evidence
+     {:repo "futon2",
+      :sha "ad1b8f08",
+      :resolved-sha "ad1b8f08aaa19681ecebe85c8da85576d809bb25",
+      :path
+      "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn"}},
+    :route-a-rehearsal-reported
+    {:observed true,
+     :check :C3,
+     :evidence
+     {:repo "futon2",
+      :sha "HEAD",
+      :resolved-sha "767cd51ec2985ae14080b810f1a1e4794c059a4c",
+      :path
+      "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md"}}},
+   :refused {}}},
+ :assembly-refusals
+ [{:target "M-expressions-of-interest",
+   :kind :universe-not-admitted,
+   :missing :locators,
+   :tokens-without-checkable-locator
+   [:change-authored-and-bound
+    :obligation-resolved-through-the-account
+    :premise-refused-before-work]}],
+ :rows
+ [{:target "M-aif-policy-conditioned-eig",
+   :submitted 1,
+   :admitted 1,
+   :declines [],
+   :refusal nil}
+  {:target "M-f11-find-production-successor",
+   :submitted 1,
+   :admitted 1,
+   :declines [],
+   :refusal nil}
+  {:target "M-wm-08-external-f2",
+   :submitted 1,
+   :admitted 0,
+   :declines
+   [{:target "M-wm-08-external-f2",
+     :stage :candidate-admission,
+     :candidate :C1,
+     :missing-evidence [:new-wanted-token-within-horizon],
+     :reason :no-new-wanted-token,
+     :evidence
+     {:semantics
+      :positive-terminal-probability-of-initially-absent-want,
+      :horizon 2,
+      :initialization :fresh-target-facts,
+      :wanted-tokens #{:route-a-rehearsal-reported},
+      :initial-facts
+      {:external-expectation-validator-exists true,
+       :frozen-occurrence-context-captured true,
+       :independent-expectations-written true,
+       :route-a-rehearsal-reported true},
+      :prediction-source :cascade-model-manifest/rollout,
+      :new-wanted-tokens #{},
+      :initial-state
+      #{:external-expectation-validator-exists
+        :frozen-occurrence-context-captured
+        :independent-expectations-written
+        :route-a-rehearsal-reported},
+      :initial-wanted-tokens #{:route-a-rehearsal-reported},
+      :terminal-wanted-belief {#{:route-a-rehearsal-reported} 1}}}
+    {:target "M-wm-08-external-f2",
+     :stage :target-admission,
+     :reason :no-admissible-candidate,
+     :missing-evidence [:new-wanted-token-within-horizon]}],
+   :refusal
+   {:target "M-wm-08-external-f2",
+    :kind :no-constructed-candidate,
+    :missing [:new-wanted-token-within-horizon]}}]}

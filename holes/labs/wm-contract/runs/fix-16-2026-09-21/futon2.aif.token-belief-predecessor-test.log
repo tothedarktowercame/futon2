@@ -1,0 +1,8 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.token-belief-predecessor-test
+D-2B-ADMISSION {:kind :carry-no-predecessor, :candidate-reasons [:selection-is-not-enactment :selection-self-comparison-is-not-enactment :independent-token-transition-evidence-unestablished :record-absent :plan-is-not-enactment :simulated-order-is-not-enactment], :conditioning-status :not-run, :outcome-bytes-identical true}
+
+Ran 3 tests containing 25 assertions.
+0 failures, 0 errors.

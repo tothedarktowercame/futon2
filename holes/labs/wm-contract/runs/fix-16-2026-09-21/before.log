@@ -1,0 +1,66 @@
+#'futon2.report.war-machine/-main
+
+Testing futon2.report.new-wanted-token-admission-test
+
+FAIL in (horizon-is-a-real-boundary) (new_wanted_token_admission_test.clj:45)
+expected: (= :no-new-wanted-token (:reason (candidate-decline short)))
+  actual: (not (= :no-new-wanted-token nil))
+
+FAIL in (horizon-is-a-real-boundary) (new_wanted_token_admission_test.clj:46)
+expected: (= {#{} 1} (get-in (candidate-decline short) [:evidence :terminal-wanted-belief]))
+  actual: (not (= {#{} 1} nil))
+
+FAIL in (all-refused-uses-existing-abstention) (new_wanted_token_admission_test.clj:64)
+expected: (= :abstained (get-in r [:decision :status]))
+  actual: (not (= :abstained nil))
+
+FAIL in (all-refused-uses-existing-abstention) (new_wanted_token_admission_test.clj:65)
+expected: (= :no-acting-cascade-candidate (get-in r [:decision :reason]))
+  actual: (not (= :no-acting-cascade-candidate nil))
+
+FAIL in (all-refused-uses-existing-abstention) (new_wanted_token_admission_test.clj:66)
+expected: (= :no-constructed-candidate (get-in r [:decision :refusals 0 :kind]))
+  actual: (not (= :no-constructed-candidate nil))
+
+FAIL in (all-refused-uses-existing-abstention) (new_wanted_token_admission_test.clj:67)
+expected: (empty? (:lanes r))
+  actual: (not (empty? [{:target "M-wm-08-external-f2", :route [{:node :R1, :via "futon2.aif.cascade-model-manifest/observed-belief", :at "2026-09-21T14:21:50.662976369Z"} {:node :R6, :via "futon2.aif.cascade-policy/candidate-space", :at "2026-09-21T14:21:50.663316265Z"}], :refusal {:kind :candidate-space/refusal, :message "candidate space refused", :data {:finding :candidate-space/refusal, :law :interpretation-outside-repository, :outside [:cascade-construction/run-it-on-a-real-case]}}, :candidates [], :null-comparison {:role :per-target-diagnostic-baseline, :used-for-joint-selection? false, :candidates []}}]))
+
+FAIL in (all-refused-uses-existing-abstention) (new_wanted_token_admission_test.clj:68)
+expected: (= :no-new-wanted-token (:reason (first (:dropped-candidates r))))
+  actual: (not (= :no-new-wanted-token nil))
+
+FAIL in (missing-horizon-is-not-a-no-progress-finding) (new_wanted_token_admission_test.clj:58)
+expected: (= :candidate-prediction-refused (:reason drop))
+  actual: (not (= :candidate-prediction-refused nil))
+
+FAIL in (missing-horizon-is-not-a-no-progress-finding) (new_wanted_token_admission_test.clj:59)
+expected: (= :missing-common-horizon (get-in drop [:evidence :refusal :kind]))
+  actual: (not (= :missing-common-horizon nil))
+
+FAIL in (recorded-no-op-is-refused) (new_wanted_token_admission_test.clj:24)
+expected: (nil? (:problem f2))
+  actual: (not (nil? {:target "M-wm-08-external-f2", :interpretation-receipts #:cascade-construction{:run-it-on-a-real-case {:kind :hand-admitted, :by "claude-4", :date "2026-09-17", :source {:path "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg", :sha256 "3d006bdff9d3af808112139f9c0342bd93d1c4ab38adf550d9c4754a026d9046"}, :reading "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}}, :constructed-candidates [{:candidate-id :C1, :precedence [:cascade-construction/run-it-on-a-real-case], :construction-receipt {:kind :hand-admitted, :by "claude-4", :date "2026-09-17", :moves [], :stopped-is-not-success true}}], :cascade-problem {:facts {:external-expectation-validator-exists true, :frozen-occurrence-context-captured true, :independent-expectations-written true, :route-a-rehearsal-reported true}, :want [:route-a-rehearsal-reported], :horizon-steps 2, :beta 1, :locators {:external-expectation-validator-exists {:class :C4, :repo "futon2", :sha "ad1b8f08", :path "src/futon2/aif/find_expectations.clj", :decl "(defn validate-external!"}, :frozen-occurrence-context-captured {:class :C3, :repo "futon2", :sha "ad1b8f08", :path "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/FROZEN-CONTEXT.edn"}, :independent-expectations-written {:class :C3, :repo "futon2", :sha "ad1b8f08", :path "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/EXPECTATIONS.edn"}, :route-a-rehearsal-reported {:class :C3, :repo "futon2", :sha "HEAD", :path "holes/labs/wm-contract/runs/wm-08-external-f2-2026-09-16/ROUTE-A-REHEARSAL.md"}}, :interpretations #:cascade-construction{:run-it-on-a-real-case {:guard {:needs #{:external-expectation-validator-exists :independent-expectations-written}, :forbids #{}}, :produces #{:route-a-rehearsal-reported}}}, :precedences [[:cascade-construction/run-it-on-a-real-case]]}}))
+
+FAIL in (recorded-no-op-is-refused) (new_wanted_token_admission_test.clj:25)
+expected: (= :no-new-wanted-token (:reason drop))
+  actual: (not (= :no-new-wanted-token nil))
+
+FAIL in (recorded-no-op-is-refused) (new_wanted_token_admission_test.clj:26)
+expected: (= #{:route-a-rehearsal-reported} (get-in drop [:evidence :initial-wanted-tokens]))
+  actual: (not (= #{:route-a-rehearsal-reported} nil))
+
+FAIL in (recorded-no-op-is-refused) (new_wanted_token_admission_test.clj:27)
+expected: (= {#{:route-a-rehearsal-reported} 1} (get-in drop [:evidence :terminal-wanted-belief]))
+  actual: (not (= {#{:route-a-rehearsal-reported} 1} nil))
+
+FAIL in (recorded-no-op-is-refused) (new_wanted_token_admission_test.clj:28)
+expected: (= #{} (get-in drop [:evidence :new-wanted-tokens]))
+  actual: (not (= #{} nil))
+
+FAIL in (recorded-no-op-is-refused) (new_wanted_token_admission_test.clj:29)
+expected: (= 2 (get-in drop [:evidence :horizon]))
+  actual: (not (= 2 nil))
+
+Ran 6 tests containing 22 assertions.
+15 failures, 0 errors.
