@@ -1,0 +1,20 @@
+{
+  "role": "pre-commit-validation",
+  "base": "6b4cfd4254fc1aadaf2610dff6cd466592d657f5",
+  "files": {
+    "src/futon2/aif/repair_proposals.clj": "241dc12ff5b3abc26538bec8817cbcf0ed8f9479adf9a9c65df6794dcc55f42f",
+    "src/futon2/aif/cascade_proposals.clj": "7247e75302aa77b21fb54ac3673ef13cd23cfaad312f3328902c235438ba8154",
+    "scripts/futon2/report/war_machine.clj": "31fe9d24ce0fba84baac8d845fc651133ae1fee2fca23b04f3cd16f5c79ea196",
+    "test/futon2/aif/repair_proposals_test.clj": "85ffdf31d7fadc1fe18f63f2308ba6d04d7377a3494e53db0734349ab6f19a5b"
+  },
+  "runs": [
+    {
+      "namespace": "futon2.aif.cascade-proposals-test",
+      "exit": 0
+    },
+    {
+      "namespace": "futon2.report.cascade-decision-test",
+      "exit": 0
+    }
+  ]
+}

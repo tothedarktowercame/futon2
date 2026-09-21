@@ -7,7 +7,9 @@
             [clojure.java.io :as io]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.interpretation-request :as request]
-            [futon2.aif.mission-registry :as registry])
+            [futon2.aif.mission-registry :as registry]
+            [futon2.aif.repair-proposals :as repairs]
+            [futon2.aif.repair-obligation :as repair])
   (:import [java.nio.file Files StandardOpenOption]
            [java.util UUID]))
 
@@ -110,6 +112,16 @@
       :declines (vec (mapcat :declines records))
       :files (mapv str files)})))
 
+(defn load-supply
+  "Combine retained retrieval evidence with a fresh open-repair-store read."
+  [{:keys [proposal-dir repair-root]}]
+  (let [retrieved (load-proposals (or proposal-dir default-dir))
+        findings (repairs/supply (or repair-root repair/default-root))]
+    (-> retrieved
+        (update :proposals into (:proposals findings))
+        (update :declines into (:declines findings))
+        (assoc :repair-scan (:repair-scan findings)))))
+
 (defn -main [target kind dir]
   (try
     (println (pr-str (generate-retrieval! target (keyword kind) (or dir default-dir))))
@@ -121,10 +133,16 @@
    Execution still uses ONLY the existing declaration loader and admission gate."
   [assembled sources supply]
   (let [by-id (into {} (map (juxt :proposal-id identity)) (:proposals supply))
+        repair-targets (set (concat
+                             (map repairs/target-id (get-in supply [:repair-scan :open-finding-ids]))
+                             (map :target (filter #(= :repair-finding-proposed (:origin %)) (:proposals supply)))))
+        withheld (filter #(contains? repair-targets (:target %)) (:problems assembled))
+        repair-declines (mapv #(decline (:target %) :repair-closure-observation-unavailable
+                                       [:produced-resolution-evidence]) withheld)
         admissions
         (vec (for [[target interp] (:interpretations sources)
                    [pattern receipt] (:receipts interp)
-                   :when (:proposal-id receipt)]
+                   :when (and (:proposal-id receipt) (not (contains? repair-targets target)))]
                (let [proposal (get by-id (:proposal-id receipt))]
                  (when-not (and proposal (= target (:target proposal))
                                 (= (if (keyword? pattern) (subs (str pattern) 1) (str pattern)) (:pattern proposal))
@@ -147,6 +165,14 @@
                                   [:interpretation-receipt :guard :produces :locators])
                          :proposal-id (:proposal-id p)))]
     (-> assembled
+        (cond-> (seq withheld)
+          (assoc :problems (vec (remove #(contains? repair-targets (:target %)) (:problems assembled)))))
+        (update :refusals #(into (vec %)
+                                (map (fn [p] {:target (:target p)
+                                              :kind :universe-not-admitted
+                                              :reason :repair-closure-observation-unavailable
+                                              :missing :locators}) withheld)))
+        (update :dropped-candidates into repair-declines)
         (assoc :proposal-supply (assoc supply :admissions admissions
                                       :exact-assurance {:status :unavailable
                                                         :reason :typed-target-link-evidence-missing}))

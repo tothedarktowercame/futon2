@@ -6699,6 +6699,11 @@
         cascade-horizon (if-let [h (:horizon-steps cascade-sources)]
                           {:value h :authority :cascade-sources}
                           {:value 2 :authority "p4ng 462aa79 (Joe 2026-09-17: initial T=2)"})
+        cascade-proposal-supply
+        (or (:cascade-proposal-supply judge-opts)
+            (cascade-proposals/load-supply
+             {:proposal-dir (:cascade-proposals-dir judge-opts)
+              :repair-root (:repair-obligations-root judge-opts)}))
         raw-cascade-assembled
         (cascade-problems/assemble
          ;; The targets are the substrate's missions AND every target that has
@@ -6708,14 +6713,13 @@
          ;; machine ignored work it had been given because a registry did not
          ;; list it.
          {:targets (vec (distinct (concat (cascade-problems/substrate-targets)
-                                          (keys (:universes cascade-sources)))))
+                                          (keys (:universes cascade-sources))
+                                          (map :target (:proposals cascade-proposal-supply)))))
           :sources (assoc cascade-sources :horizon-steps (:value cascade-horizon))})
         cascade-assembled
         (cascade-proposals/record-supply
          raw-cascade-assembled cascade-sources
-         (or (:cascade-proposal-supply judge-opts)
-             (cascade-proposals/load-proposals
-              (or (:cascade-proposals-dir judge-opts) cascade-proposals/default-dir))))
+         cascade-proposal-supply)
         cascade-result (select-and-record-cascade!
                         cascade-assembled
                         (assoc judge-opts
