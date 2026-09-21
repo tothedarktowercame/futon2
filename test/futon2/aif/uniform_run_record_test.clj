@@ -47,7 +47,7 @@
       (is (= (:action entry) (get-in scoring [i :id])))
       (is (= (:certificate entry) (dissoc (get scoring i) :id))))))
 
-(deftest offline-tick-record-is-valid-with-flags-preserved
+(deftest offline-tick-record-preserves-validity-and-missing-prefix
   (let [dir (temp-dir)
         before (counts)
         mission (io/file dir "corpus/repo/holes/missions/M-present.md")]
@@ -87,17 +87,39 @@
         (is (= :incomplete (get-in carried [:enumeration-completeness :verdict])))
         (is (some #(= ["M-present"] (:missing %))
                   (get-in carried [:enumeration-completeness :kinds])))
-        (is (every? #(= :computed-not-attached (:f-status %))
-                    (get-in carried [:selection-certificate :policies])))
+        ;; H4 acc4f3c4 deliberately stopped computing future-rollout F.
+        ;; Missing observed history is neither a computed value nor measured 0.
+        (let [policies (get-in carried [:selection-certificate :policies])
+              census (:g-term-decomposition carried)]
+          (is (= 3 (count policies)))
+          (doseq [p policies]
+            (is (= :not-supplied (:f-status p)))
+            (is (nil? (:f p)))
+            (is (= :no-admitted-policy-prefix (:reason p)))
+            (is (= (:id p) (get-in p [:f-prefix :policy])))
+            (is (= :d-conditioning-consumption-and-policy-prefix-admission
+                   (get-in p [:f-prefix :pending-dependency]))))
+          (is (= :missing (:status census)))
+          (is (= (set (map :id policies)) (set (map :id (:policies census)))))
+          (doseq [p (:policies census)]
+            (is (= {:status :missing :value nil :reason :consumed-value-not-recorded}
+                   (get-in p [:terms :F])))
+            (doseq [term [:A :C :D :E :Q]]
+              (is (= :present (get-in p [:terms term :status])) (str term)))))
         (is (every? #(= :derived-no-overlap (get-in % [:c :status]))
                     (vals (get-in carried [:selection-certificate :scoring]))))
         (is (zero? (:exit check)) (pr-str check))
         (is (str/includes? (:out check) "SELFTEST PASS"))
-        (is (str/includes? (:out check) "VALID (3/5 ok)") (:out check))
+        ;; Anchor the verdict: the old "VALID" substring also matched INVALID.
+        (is (re-find #"(?m)^\s+INVALID \(3/5 ok\)\s*$" (:out check)) (:out check))
+        (is (= {"c-source" "flagged" "rates-provenance" "ok"
+                "posterior" "ok" "u37" "ok" "g-terms" "missing"}
+               (into {} (map (fn [line]
+                               (let [[_ field verdict] (re-find #"^\s+(\S+)\s+(\S+)" line)]
+                                 [field verdict]))) lines)))
         (is (= 5 (count lines)))
         (doseq [line lines]
-          (is (str/includes? line "[:decision") line)
-          (is (not (re-find #"\s(missing|bad)\s" line)) line))
+          (is (str/includes? line "[:decision") line))
         (println "UNIFORM-RUN-RECORD-RECEIPT"
                  (pr-str {:scope :offline-selection-replay :source :vm/tick-001
                           :injected-sources [:live-c :enumeration-corpus :locators]

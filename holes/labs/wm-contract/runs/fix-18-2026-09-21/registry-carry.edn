@@ -1,0 +1,6 @@
+{:repo-root "/home/joe/code/futon2-fix-18"
+ :code-paths ["scripts/futon2/report/war_machine.clj" "src/futon2/aif/token_belief_carry.clj"]
+ :test-paths ["test/futon2/aif/token_belief_carry_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.token-belief-carry-test"]
+ :author "codex-11"
+ :artifact-dir "/home/joe/code/futon2-fix-18/holes/labs/wm-contract/runs/fix-18-2026-09-21"}
