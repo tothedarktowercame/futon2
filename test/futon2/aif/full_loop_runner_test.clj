@@ -9,6 +9,7 @@
             [futon2.aif.full-loop-cli :as cli]
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.delivery-qa :as delivery-qa]
+            [futon2.aif.morning-brief :as brief]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
@@ -488,12 +489,11 @@
 
 ;; SPEC flat-removal H4 (2026-09-17): the runner's selected entry is a
 ;; CASCADE candidate, and the judgement's decision is a real
-;; select-action-cascades decision. The target identity "M-selected" is kept
-;; as the chosen cascade's id so mission-file fixtures keep matching.
+;; select-action-cascades decision. Mission and cascade identities are distinct.
 (def selected-action
-  {:kind :cascade-candidate :cascade-id "M-selected" :id "M-selected"
+  {:kind :cascade-candidate :cascade-id :test/selected :id :test/selected :target "M-selected"
    :precedence [:test/selected-pattern]
-   :construction-receipt {:cascade/id "M-selected" :moves 1
+   :construction-receipt {:cascade/id :test/selected :moves 1
                           :family-searched :unit :coverage 1}
    :interpretation-receipts [{:pattern :test/selected-pattern
                               :admitted-by :test-suite}]})
@@ -607,7 +607,7 @@
            reviewer-events cure-card cure-summary cure-commit build-cure-retries
            cure-observed-commit
            initial-author-job operator-actions delivery-qa-fn
-           judgement-transform-fn]
+           judgement-transform-fn runner-options]
     :or {grounded? true artifacts? false
          cure-observed-commit ::from-artifact-ref}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
@@ -706,7 +706,8 @@
               (when delivery-qa-fn
                 {:delivery-qa-fn delivery-qa-fn})
               (when judgement-transform-fn
-                {:judgement-transform-fn judgement-transform-fn}))
+                {:judgement-transform-fn judgement-transform-fn})
+              runner-options)
         result (runner/run-opportunity! opts)]
     {:result result :item (first @queued)
      :queued-operator-actions @queued-operator-actions
@@ -5631,3 +5632,73 @@
                  (:target action) root)
                 nil
                 (catch clojure.lang.ExceptionInfo e (:repair-discharge/refusal (ex-data e))))))))
+
+
+(deftest cascade-selection-carries-mission-through-readers
+  ;; Exact action copied from the recorded decision's :per-policy-argmax.
+  (let [action (edn/read-string
+                (slurp "test/fixtures/narrative-trace/selected-action-1789964661.edn"))
+        mission-id "M-aif-policy-conditioned-eig"
+        entry {:action action}
+        prompts (atom [])
+        mission-reads (atom [])
+        {:keys [docs opts]} (substrate-fixture)
+        {:keys [result item]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :judgement-transform-fn
+          #(assoc % :decision
+                  (policy/select-action-cascades
+                   [{:action action :controller-score -2.0 :rank 1}]
+                   {:beta 2.0}))
+          :runner-options
+          {:mission-fn (fn [target]
+                         (swap! mission-reads conj target)
+                         (get {mission-id {:id mission-id :title "Shared posterior updater"}}
+                              target))
+           :dispatch-fn (fn [_ agent _ _ prompt]
+                          (swap! prompts conj prompt)
+                          {:job-id (if (= agent "zai-5")
+                                     "feature-author" "feature-review")})
+           :ground-fn (fn [& args]
+                        (apply runner/ground-commit!
+                               (concat (butlast args) [(merge (last args) opts)])))}})
+        selection (get-in result [:checkpoints :selection :judgment])
+        construction (get-in result [:checkpoints :construction :judgment])
+        implementation (get @docs "full-loop/implementation/feature123")
+        discharge (first (filter #(= :discharge (:entity/type %)) (vals @docs)))
+        root (.toFile (Files/createTempDirectory "mission-brief-" (make-array FileAttribute 0)))]
+    (is (= mission-id (#'runner/selected-target entry)))
+    (is (= :grounded-change (:outcome result)))
+    (is (= [mission-id] @mission-reads))
+    (is (str/includes? (first @prompts) (str "SELECTED TARGET: " (pr-str mission-id))))
+    (is (str/includes? (first @prompts) "Shared posterior updater"))
+    (is (not (str/includes? (first @prompts) "SELECTED TARGET: :C1")))
+    (doseq [target [(:selected-mission selection) (:mission construction)
+                    (:implementation/target implementation) (:discharge/mission discharge)
+                    (:selected-target item) (#'cli/selected-target result)
+                    (:delivery/selected-target (edn/read-string (:body (delivery-qa/qa-note item))))]]
+      (is (= mission-id target))
+      (is (not= ":C1" target)))
+    (is (= :C1 (:selected-cascade selection)))
+    (is (= :C1 (:selected-cascade construction)))
+    (is (= :C1 (:implementation/selected-cascade implementation)))
+    (is (= :C1 (:discharge/selected-cascade discharge)))
+    (try
+      (brief/queue-item! (.getPath root) item)
+      (is (= mission-id (:selected-target (first (brief/items (.getPath root))))))
+      (finally
+        (doseq [file (reverse (file-seq root))] (io/delete-file file true))))
+    (is (= mission-id
+           (:target (#'tripwire/record-finding!
+                     {:tripwire/repair-record-fn identity}
+                     {:trip/observation item :trip/wire-id :test :trip/id "mission-test"}
+                     "test-report"))))))
+
+(deftest non-cascade-target-precedence-is-unchanged
+  (doseq [[action target] [[{:type :repair-machine-failure :target "repair-1"} "repair-1"]
+                           [{:cascade-id :old-cascade :id :old-id :target "mission"} :old-cascade]
+                           [{:id :old-id :target "mission"} :old-id]
+                           [{:target-class :class} :class]
+                           [{:type :action} :action]]]
+    (is (= target (#'runner/selected-target {:action action})))))

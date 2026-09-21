@@ -1183,11 +1183,18 @@
 
 
 (defn- selected-target [entry]
-  (or (get-in entry [:action :cascade-id])
-      (get-in entry [:action :id])
-      (get-in entry [:action :target])
-      (get-in entry [:action :target-class])
-      (get-in entry [:action :type])))
+  (if (= :cascade-candidate (get-in entry [:action :kind]))
+    (get-in entry [:action :target])
+    (or (get-in entry [:action :cascade-id])
+        (get-in entry [:action :id])
+        (get-in entry [:action :target])
+        (get-in entry [:action :target-class])
+        (get-in entry [:action :type]))))
+
+(defn- selected-cascade [entry]
+  (when (= :cascade-candidate (get-in entry [:action :kind]))
+    (or (get-in entry [:action :cascade-id])
+        (get-in entry [:action :id]))))
 
 (defn epsilon-distinct-count
   "Count numerically distinct finite values modulo epsilon."
@@ -2455,6 +2462,10 @@
                            :selected-action selected-action})))))
     (cond-> {:implementation/construction-kind kind
              :implementation/selected-action selected-action}
+      (selected-cascade {:action selected-action})
+      (assoc :implementation/selected-cascade
+             (selected-cascade {:action selected-action}))
+
       actuation-contract
       (assoc :implementation/actuation-contract actuation-contract)
 
@@ -2486,7 +2497,7 @@
                          :implementation/reviewer reviewer
                          :implementation/review-job (:job-id review-job)}
                         construction-props)
-        discharge {:xt/id (discharge-id attempt-id)
+        discharge (cond-> {:xt/id (discharge-id attempt-id)
                    :entity/type :discharge
                    :entity/name (str "Full-loop discharge " attempt-id)
                    :entity/source "wm-full-loop"
@@ -2496,7 +2507,10 @@
                    :discharge/proof-query (str "GET /api/alpha/entity/" impl-id)
                    :discharge/reviewer reviewer
                    :discharge/review-job (:job-id review-job)
-                   :discharge/at (str (Instant/now))}]
+                   :discharge/at (str (Instant/now))}
+                    (selected-cascade {:action (:selected-action construction)})
+                    (assoc :discharge/selected-cascade
+                           (selected-cascade {:action (:selected-action construction)})))]
     (when before
       (throw (ex-info "Implementation commit already grounded"
                       {:outcome :grounded-no-change :implementation-id impl-id})))
@@ -3403,6 +3417,9 @@
                                       (:ranked-candidates selection-judgment)
                                       :selection-reasons
                                       (:selection-reasons selection-judgment)})}
+                         (:selected-cascade selection-judgment)
+                         (assoc :selected-cascade (:selected-cascade selection-judgment))
+
                          (seq (:reviews data))
                          (assoc :reviews (:reviews data))
 
@@ -3813,6 +3830,8 @@
                                      (and historical-action? (:run4/requested-pin opts))
                                      (assoc :run4/requested-pin (:run4/requested-pin opts)
                                             :run4/enacted-action (:action entry))))
+                               (selected-cascade entry)
+                               (assoc-in [:judgment :selected-cascade] (selected-cascade entry))
                                (:readiness/selection-transient judgement0)
                                (assoc-in [:judgment
                                           :readiness/selection-transient]
@@ -3966,6 +3985,8 @@
                               :patterns (vec (:shown construction))
                               :deposit nil
                               :trace-path trace-path}
+                               (selected-cascade entry)
+                               (assoc :selected-cascade (selected-cascade entry))
                                interpretation
                                (assoc :receipted-construction (:receipted-construction construction)
                                       :interpretation-receipt (:receipt interpretation)
