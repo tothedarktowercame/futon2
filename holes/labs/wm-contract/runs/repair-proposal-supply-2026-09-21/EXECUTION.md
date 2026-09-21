@@ -78,4 +78,20 @@ no proposed finding id appears among the read resolution/dismissal records.
 
 No reload, author dispatch, resolution, dismissal, or admission was performed
 against production by this packet. Committed is not loaded. Registered
-post-commit evidence follows in the receipt commit.
+post-commit evidence is retained in the receipt commit.
+
+## Registered evidence
+
+Implementation `7f50e3ff`. All three namespaces agree pre/post: 24 tests,
+158 assertions, no failures/errors. `validation-comparison.json` carries both
+roles and actual SHAs; changed-file hashes at each registered SHA match the
+pre-validation bytes. Retained evidence-store envelopes were hash-checked.
+
+- repairs: `test-registry-9508a2a6a8de60b2617642019a94ca591a6b97de628bd304753418795f4846f3` at `82e8120ddaafd8cea136ecca57b409d00d9a799f`.
+- proposals: `test-registry-b972b2f8d6dbae1997411a29ebdb1a50db6dc136edf3f5393e5c316556064716` at `82e8120ddaafd8cea136ecca57b409d00d9a799f`.
+- decision: `test-registry-6d95d27c78df1b4c0ea9e2532bd36a8d530af759d62fe07a9a97661d0a8d403e` at `82e8120ddaafd8cea136ecca57b409d00d9a799f`.
+
+All files from this lane are committed. Other lanes had untracked evidence in
+`history-admission-closing-2026-09-21` and `condition-cleared-2026-09-21` during
+landing; their owner was notified via `invoke-1789964283826-22887-2be9e50a`.
+They were neither staged nor deleted by this lane.

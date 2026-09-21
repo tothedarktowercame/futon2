@@ -1,0 +1,4 @@
+evidence-id test-registry-6d95d27c78df1b4c0ea9e2532bd36a8d530af759d62fe07a9a97661d0a8d403e
+warrant? true
+results {:assertions 91, :duration-ms 5194, :errors 0, :exit 0, :failures 0, :tests 13}
+bound repair-proposal-supply/decision -> test-registry-6d95d27c78df1b4c0ea9e2532bd36a8d530af759d62fe07a9a97661d0a8d403e

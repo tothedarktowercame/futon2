@@ -1,0 +1,70 @@
+{
+  "pre-commit": {
+    "role": "pre-commit-validation",
+    "base": "6b4cfd4254fc1aadaf2610dff6cd466592d657f5",
+    "files": {
+      "src/futon2/aif/repair_proposals.clj": "241dc12ff5b3abc26538bec8817cbcf0ed8f9479adf9a9c65df6794dcc55f42f",
+      "src/futon2/aif/cascade_proposals.clj": "9df828feac6a23b0f89bfe7860f8d0912f11ef04f4bff66d311c4e845df4a718",
+      "scripts/futon2/report/war_machine.clj": "31fe9d24ce0fba84baac8d845fc651133ae1fee2fca23b04f3cd16f5c79ea196",
+      "test/futon2/aif/repair_proposals_test.clj": "949a23428908743376b87e9cfbabc8bc2b1fddd493cb2fb35151559fefdcd713"
+    },
+    "runs": [
+      {
+        "namespace": "futon2.aif.repair-proposals-test",
+        "exit": 0
+      },
+      {
+        "namespace": "futon2.aif.cascade-proposals-test",
+        "exit": 0
+      },
+      {
+        "namespace": "futon2.report.cascade-decision-test",
+        "exit": 0
+      }
+    ]
+  },
+  "post-commit": [
+    {
+      "namespace": "repairs",
+      "role": "post-commit-warrant",
+      "sha": "82e8120ddaafd8cea136ecca57b409d00d9a799f",
+      "warrant": "test-registry-9508a2a6a8de60b2617642019a94ca591a6b97de628bd304753418795f4846f3",
+      "results": {
+        "tests": 5,
+        "assertions": 31,
+        "failures": 0,
+        "errors": 0
+      },
+      "pre-post-agreement": true,
+      "committed-file-hashes-match-pre-validation": true
+    },
+    {
+      "namespace": "proposals",
+      "role": "post-commit-warrant",
+      "sha": "82e8120ddaafd8cea136ecca57b409d00d9a799f",
+      "warrant": "test-registry-b972b2f8d6dbae1997411a29ebdb1a50db6dc136edf3f5393e5c316556064716",
+      "results": {
+        "tests": 6,
+        "assertions": 36,
+        "failures": 0,
+        "errors": 0
+      },
+      "pre-post-agreement": true,
+      "committed-file-hashes-match-pre-validation": true
+    },
+    {
+      "namespace": "decision",
+      "role": "post-commit-warrant",
+      "sha": "82e8120ddaafd8cea136ecca57b409d00d9a799f",
+      "warrant": "test-registry-6d95d27c78df1b4c0ea9e2532bd36a8d530af759d62fe07a9a97661d0a8d403e",
+      "results": {
+        "tests": 13,
+        "assertions": 91,
+        "failures": 0,
+        "errors": 0
+      },
+      "pre-post-agreement": true,
+      "committed-file-hashes-match-pre-validation": true
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+evidence-id test-registry-9508a2a6a8de60b2617642019a94ca591a6b97de628bd304753418795f4846f3
+warrant? true
+results {:assertions 31, :duration-ms 2924, :errors 0, :exit 0, :failures 0, :tests 5}
+bound repair-proposal-supply/repairs -> test-registry-9508a2a6a8de60b2617642019a94ca591a6b97de628bd304753418795f4846f3
