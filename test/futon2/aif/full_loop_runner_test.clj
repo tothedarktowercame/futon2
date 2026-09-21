@@ -5321,6 +5321,79 @@
       (is (= expected (get-in close [:payload :judgment :sorry :kind])))
       (is (.exists close-path)))))
 
+(deftest explanation-invalid-close-readmits-retained-receipts
+  ;; Canonical runner-source guard blocks this in a worktree; owner runs on main.
+  ;; This is the attempt-002 failure shape: :explanation was nested under the
+  ;; map-valued :evidence instead of being review-grade top-level prose.
+  (let [{:keys [root] :as c} (retention-cohort "runner-failure-receipts")
+        close-path (io/file root "test-cohort-exhaustion" "attempt-001"
+                            "007-closed.edn")
+        opts (assoc (retention-success-opts c)
+                    :delivery-qa-fn
+                    (fn [_ item]
+                      (write-attempt-evidence!
+                       root "01-standing.edn"
+                       {:schema :wm/target-standing-decision-v1
+                        :entity/id "M-selected"
+                        :decision :approve
+                        :decided-by "codex-7"
+                        :implementation-author "zai-5"
+                        :decided-at "2026-09-21T23:43:25Z"
+                        :evidence {:commit "abc123"
+                                   :explanation "nested, therefore invalid"}})
+                      {:morning-brief/addendum-id
+                       (str "qa-" (:attempt-id item))}))
+        result (runner/run-opportunity! opts)
+        close (cohort/read-edn close-path)
+        judgment (get-in close [:payload :judgment])
+        receipt (:run-ending-classification judgment)
+        manifest-ids (set (map :evidence/id
+                               (get-in close [:payload
+                                              :close-evidence-manifest :entries])))
+        retained-dir (io/file root "test-cohort-exhaustion" "attempt-001"
+                              "retained")
+        retained-names (set (map #(.getName ^java.io.File %)
+                                 (filter #(.isFile ^java.io.File %)
+                                         (seq (.listFiles retained-dir)))))
+        admitted-retained
+        (set (keep #(second (re-find #"/retained/(.+)$" %)) manifest-ids))]
+    (is (= :build-failed (:outcome result)))
+    (is (= :explanation-invalid (:failure-kind judgment)))
+    (is (= retained-names admitted-retained))
+    (is (run-ending/verify-close close receipt))
+    (is (= (:class (run-ending/classify {:close close})) (:class receipt)))
+    (is (= :known-typed-failure (:class receipt)))
+    (is (= :explanation-invalid (:failure-kind receipt)))))
+
+(deftest failure-close-evidence-reclassifies-final-judgment
+  (let [root (.getPath (.toFile
+                        (Files/createTempDirectory
+                         "failure-close-evidence-" (make-array FileAttribute 0))))
+        attempt-dir (io/file root "cohort" "attempt")
+        retained-dir (io/file attempt-dir "retained")
+        checkpoint (io/file attempt-dir "001-time-step.edn")
+        prior-receipt (io/file retained-dir "token-outcome.edn")
+        judgment {:outcome :build-failed :grounded? false
+                  :artifact-only? false :failure-kind :explanation-invalid}
+        events {:time-step {:event/sequence 1 :checkpoint/type :time-step}}]
+    (try
+      (io/make-parents checkpoint)
+      (spit checkpoint "{:checkpoint :time-step}")
+      (io/make-parents prior-receipt)
+      (spit prior-receipt "{:schema :test/prior-receipt}")
+      (let [{:keys [run-ending manifest]}
+            (#'runner/failure-close-evidence! events root :cohort "attempt" judgment)]
+        (is (= :known-typed-failure (:class run-ending)))
+        (is (= :explanation-invalid (:failure-kind run-ending)))
+        (is (= #{"cohort/attempt/001-time-step.edn"
+                 "cohort/attempt/retained/token-outcome.edn"
+                 "cohort/attempt/retained/run-ending-classification.edn"}
+               (set (map :evidence/id (:entries manifest)))))
+        (is (run-ending/verify-close judgment run-ending)))
+      (finally
+        (doseq [file (reverse (file-seq (io/file root)))]
+          (io/delete-file file true))))))
+
 (deftest arbitrary-close-throwable-produces-typed-close
   (let [{:keys [root] :as c} (retention-cohort "runner-close-throwable")
         close-path (io/file root "test-cohort-exhaustion" "attempt-001"
