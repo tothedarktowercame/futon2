@@ -116,3 +116,10 @@ Registry publication follows the implementation commit because the registry
 requires committed scope. Its warranted command is the equivalent
 `clojure -M:test -n futon2.aif.learning-trial-test`; the explicit `-m` form above
 was separately run because registry command validation does not accept it.
+
+Final implementation: `e568e5b2`. Registry warrant:
+`test-registry-ea7382996b11557b5a57d0ba8e3be0f984e1809ba4f89e841a32b92c74a36a8b`.
+`clojure -M -m futon3c.test-registry run /tmp/improve-1a-registry.edn`
+returned `:warrant? true`, 3 tests / 38 assertions / exit 0. Fresh scoped
+`check /tmp/improve-1a-registry-check.edn` also returned `:warrant? true`.
+This warrants the pure learning-trial acceptance, not runner close execution.
