@@ -2934,6 +2934,49 @@
              :expected-sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))
              :admitted-at (str (Instant/now))}}))
 
+(defn- failure-close-evidence!
+  "Reclassify a close-time failure and admit every receipt already retained.
+
+  This boundary deliberately does not re-parse evidence/: malformed limb
+  evidence is the failure being closed. Checkpoints and retained receipts are
+  immutable inputs to the final failure close; only the run-ending receipt is
+  replaced because its projection must describe that final judgment."
+  [events data-root cohort-id attempt-id close-judgment]
+  (let [cohort-name (name cohort-id)
+        attempt-dir (io/file data-root cohort-name attempt-id)
+        retained-dir (io/file attempt-dir "retained")
+        route-file (io/file retained-dir "route-attestation.edn")
+        route (when (.isFile route-file) (cohort/read-edn route-file))
+        run-ending (retain-run-ending!
+                    data-root cohort-id attempt-id
+                    {:close close-judgment
+                     :occurrence (:occurrence close-judgment)
+                     :route-attestation route})
+        checkpoint-entries
+        (mapv (fn [{:keys [event/sequence checkpoint/type]}]
+                (let [filename (format "%03d-%s.edn" sequence (name type))]
+                  {:evidence/id (str cohort-name "/" attempt-id "/" filename)
+                   :source-path (.getAbsolutePath (io/file attempt-dir filename))
+                   :admitted-at (str (Instant/now))}))
+              (sort-by :event/sequence (vals events)))
+        retained-files (if (.isDirectory retained-dir)
+                         (sort-by #(.getName ^java.io.File %)
+                                  (filter #(.isFile ^java.io.File %)
+                                          (seq (.listFiles retained-dir))))
+                         [])
+        retained-entries
+        (mapv (fn [^java.io.File file]
+                {:evidence/id (str cohort-name "/" attempt-id "/retained/"
+                                   (.getName file))
+                 :source-path (.getAbsolutePath file)
+                 :admitted-at (str (Instant/now))})
+              retained-files)
+        manifest (evidence-manifest/build-manifest
+                  {:entries (into checkpoint-entries retained-entries)
+                   :read-bytes #(Files/readAllBytes (.toPath (io/file %)))})]
+    {:run-ending (:receipt run-ending)
+     :manifest manifest}))
+
 (defn- checkpoint-evidence-manifest
   [events data-root cohort-id attempt-id selected-target & [interpretation-context]]
   (let [cohort-name (name cohort-id)
@@ -3858,10 +3901,20 @@
                                                          :started-at])
                                      :discharge-contract
                                      (discharge-contract :machine-failure)})
+                           route-file (when cohort?
+                                        (io/file (or (:data-root execution-cohort)
+                                                     cohort/default-data-root)
+                                                 (name (:cohort/id start-event))
+                                                 attempt-id "retained"
+                                                 "route-attestation.edn"))
+                           route (when (and route-file (.isFile route-file))
+                                   (cohort/read-edn route-file))
                            sorry-data {:effective-run-configuration @effective-configuration
                                        :outcome :build-failed
                                        :grounded? false
                                        :artifact-only? false
+                                       :occurrence @action-occurrence
+                                       :route-attestation route
                                        :failure-kind refusal-kind
                                        :failure-stage :close
                                        :error (.getMessage e)
@@ -3879,9 +3932,33 @@
                                                       @dispatched-turns}
                                        :sorry {:kind refusal-kind
                                                :refusal-data failure-data}}
-                           closed (term (assoc sorry-data :job-texts @job-text-records)
-                                        {:kind :full-loop-close-failure
-                                         :attempt-id attempt-id})
+                           failure-evidence
+                           (when (and cohort? @action-occurrence)
+                             (failure-close-evidence!
+                              @checkpoint-events
+                              (or (:data-root execution-cohort)
+                                  cohort/default-data-root)
+                              (:cohort/id start-event) attempt-id sorry-data))
+                           admitted-ids (mapv :evidence/id
+                                              (get-in failure-evidence
+                                                      [:manifest :entries]))
+                           closed (cond->
+                                   (term (assoc sorry-data
+                                                :job-texts @job-text-records
+                                                :run-ending-classification
+                                                (:run-ending failure-evidence))
+                                         {:kind :full-loop-close-failure
+                                          :attempt-id attempt-id})
+                                    failure-evidence
+                                    (assoc :retention-inputs
+                                           {:occurrence @action-occurrence
+                                            :state {:status :absent
+                                                    :reason :independent-observation-unavailable}
+                                            :model {:status :absent
+                                                    :reason :declared-model-identity-unthreaded}
+                                            :admitted-evidence admitted-ids}
+                                           :evidence-manifest
+                                           (:manifest failure-evidence)))
                            closed-event (when cohort?
                                           (if cohort-source
                                             (cohort/close-attempt!
