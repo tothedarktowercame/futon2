@@ -1,0 +1,17 @@
+[2.058s][warning][os,thread] Failed to start thread "GC Thread#17" - pthread_create failed (EAGAIN) for attributes: stacksize: 1024k, guardsize: 4k, detached.
+[2.058s][error  ][gc,task  ] GC(14) Failed to create worker thread
+
+Testing futon2.aif.policy-prefix-evidence-test
+[2.187s][warning][os,thread] Failed to start thread "GC Thread#17" - pthread_create failed (EAGAIN) for attributes: stacksize: 1024k, guardsize: 4k, detached.
+[2.187s][error  ][gc,task  ] GC(15) Failed to create worker thread
+[2.275s][warning][os,thread] Failed to start thread "GC Thread#17" - pthread_create failed (EAGAIN) for attributes: stacksize: 1024k, guardsize: 4k, detached.
+[2.276s][error  ][gc,task  ] GC(16) Failed to create worker thread
+[2.392s][warning][os,thread] Failed to start thread "GC Thread#17" - pthread_create failed (EAGAIN) for attributes: stacksize: 1024k, guardsize: 4k, detached.
+[2.392s][error  ][gc,task  ] GC(17) Failed to create worker thread
+H4-SYNTHETIC-ARITHMETIC-ONLY {:f [1.3862943611198906 0.2876820724517809], :posterior {{:kind :cascade-candidate, :id :a, :precedence [:a]} 0.24999999999999994, {:kind :cascade-candidate, :id :b, :precedence [:b]} 0.7499999999999999}}
+H4-STAGED-PRODUCTION-SHAPE {:id {:kind :cascade-candidate, :id :a, :target "H4-control", :precedence [{:id :make-x, :authority :documented-interpretation, :produces #{:x}, :guard {:status :interpreted, :operator :and, :clauses [{:status :interpreted, :present #{}, :absent #{}}]}, :transition {:status :interpreted, :operator :union, :produces #{:x}, :authority :documented-interpretation}}]}, :f nil, :f-status :not-supplied, :f-prefix {:schema :wm/policy-prefix-evidence-v1, :policy {:kind :cascade-candidate, :id :a, :target "H4-control", :precedence [{:id :make-x, :authority :documented-interpretation, :produces #{:x}, :guard {:status :interpreted, :operator :and, :clauses [{:status :interpreted, :present #{}, :absent #{}}]}, :transition {:status :interpreted, :operator :union, :produces #{:x}, :authority :documented-interpretation}}]}, :status :not-supplied, :z-semantics :per-step-redraw, :reason :no-admitted-policy-prefix, :conditioning {:conditioning-status :not-wired, :observation-updates []}, :pending-dependency :d-conditioning-consumption-and-policy-prefix-admission}}
+
+Ran 8 tests containing 43 assertions.
+0 failures, 0 errors.
+[2.512s][warning][os,thread] Failed to start thread "GC Thread#17" - pthread_create failed (EAGAIN) for attributes: stacksize: 1024k, guardsize: 4k, detached.
+[2.512s][error  ][gc,task  ] GC(18) Failed to create worker thread
