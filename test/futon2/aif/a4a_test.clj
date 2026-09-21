@@ -46,6 +46,44 @@
             "B" [1.1 1.1]}
            (:concentrations result)))))
 
+(deftest shared-posterior-updater-unifies-hypothetical-and-observed-evidence
+  (let [state (a4a/corpus->concentration
+               {:capabilities ["capability-A"]
+                :edges [["capability-A" "outcome-1"]
+                        ["capability-A" "outcome-2"]]
+                :discharges []})
+        observation {:schema a4a/observation-schema
+                     :capability "capability-A" :outcome "outcome-2"
+                     :evidence/id "pinned-observation-1"}
+        hypothetical (a4a/hypothetical-posterior state observation)
+        observed (a4a/observed-posterior state observation)
+        h-receipt (last (:posterior-update-receipts hypothetical))
+        o-receipt (last (:posterior-update-receipts observed))]
+    (is (= {"capability-A" [1.1 2.1]} (:concentrations hypothetical)))
+    (is (= (:concentrations hypothetical) (:concentrations observed)))
+    (is (= a4a/updater-id (:updater/id h-receipt) (:updater/id o-receipt)))
+    (is (= (dissoc h-receipt :observation/source)
+           (dissoc o-receipt :observation/source)))
+    (is (= [:hypothetical :observed]
+           [(:observation/source h-receipt) (:observation/source o-receipt)]))
+    (is (= :unknown-outcome
+           (:a4a-posterior/refusal
+            (try
+              (a4a/hypothetical-posterior state (assoc observation :outcome "absent"))
+              nil
+              (catch clojure.lang.ExceptionInfo e (ex-data e))))))))
+
+(deftest corpus-realised-path-is-the-shared-updater
+  (let [result (a4a/corpus->concentration
+                {:capabilities ["A"] :edges [["A" "m1"]] :discharges []})
+        receipt (first (:posterior-update-receipts result))]
+    (is (= a4a/posterior-schema (:schema result)))
+    (is (= a4a/updater-id (:updater/id receipt)))
+    (is (= :observed (:observation/source receipt)))
+    (is (= "a4a-corpus/0" (:evidence/id receipt)))
+    (is (= [0.1] (:before receipt)))
+    (is (= [1.1] (:after receipt)))))
+
 (deftest concept-merge-sign-pin
   (let [reduced (a4a/reduce-concepts synthetic-merge-corpus)
         scores (score-by-pair reduced)

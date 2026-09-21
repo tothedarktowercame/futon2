@@ -192,7 +192,7 @@ single `git revert` of the one commit that added this section, whose sha is
 named in
 `holes/labs/wm-contract/proposals/STRAWMAN-M-aif-policy-conditioned-eig.md`.
 
-- [ ] **Mint the shared posterior updater, then unify the two paths through
+- [x] **Mint the shared posterior updater, then unify the two paths through
   it.** Hypothetical evidence and its later observed counterpart routed through
   one A4a/BMR updater with only the observation source changed, so that a pinned
   observation fixture yields equal posterior state and provenance on both paths
@@ -204,7 +204,13 @@ named in
   than updating a state, so the object both paths would share has to be minted
   before it can be shared. That is why this item leads with minting it, which
   the strawman it came from did not
-  (`runs/B2-strawman/01-consumer-and-updater-probe.edn` `:E3`).
+  (`runs/B2-strawman/01-consumer-and-updater-probe.edn` `:E3`). **Completed
+  2026-09-21:** `a4a/update-posterior` is the sole Dirichlet transition
+  authority; the existing corpus-realised path and the hypothetical path call
+  `observed-posterior` / `hypothetical-posterior`, which differ only in the
+  recorded source. `a4a-test` pins equal state and shared updater provenance
+  and checks typed refusal of an unknown outcome. This does not supply the
+  generative experiment model, typed-Q boundary, or calibration packet.
 - [ ] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the
   R13→R4 and R4→R5 payloads.** The policy payload and the predictive-kernel
   payload defined with model/source pins, outcome-domain identity, a

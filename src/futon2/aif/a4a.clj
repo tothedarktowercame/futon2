@@ -12,6 +12,10 @@
   "Uniform Dirichlet prior concentration for every capability/mission cell."
   0.1)
 
+(def posterior-schema :a4a/dirichlet-posterior-v1)
+(def observation-schema :a4a/capability-outcome-observation-v1)
+(def updater-id :a4a/shared-dirichlet-updater-v1)
+
 (defn- raw-id
   [x]
   (if (map? x)
@@ -75,12 +79,55 @@
   [xs]
   (vec (sort-by str (distinct (remove str/blank? (map stable-id xs))))))
 
-(defn- increment-cell
-  [matrix outcomes-by-id [capability mission]]
-  (let [outcome-index (get outcomes-by-id mission)]
-    (if (and (contains? matrix capability) outcome-index)
-      (update-in matrix [capability outcome-index] + 1.0)
-      matrix)))
+(defn update-posterior
+  "The single authority for hypothetical and realised A4a Dirichlet updates.
+
+   SOURCE is provenance only; it cannot change the posterior transition. Unknown
+   capabilities/outcomes and malformed evidence fail closed."
+  [state observation]
+  (let [{:keys [capability outcome source evidence/id weight]
+         :or {weight 1.0}} observation
+        outcomes-by-id (zipmap (:outcomes state) (range))
+        outcome-index (get outcomes-by-id (stable-id outcome))
+        capability (stable-id capability)
+        weight (double weight)
+        refusal (cond
+                  (not= posterior-schema (:schema state)) :unsupported-posterior
+                  (not= observation-schema (:schema observation)) :unsupported-observation
+                  (not (#{:hypothetical :observed} source)) :unknown-observation-source
+                  (not (contains? (:concentrations state) capability)) :unknown-capability
+                  (nil? outcome-index) :unknown-outcome
+                  (or (not (Double/isFinite weight)) (not (pos? weight))) :invalid-weight
+                  (not (and (string? id) (not (str/blank? id)))) :missing-evidence-id)]
+    (when refusal
+      (throw (ex-info "A4a posterior update refused"
+                      {:a4a-posterior/refusal refusal
+                       :capability capability :outcome outcome :source source})))
+    (let [before (get-in state [:concentrations capability])
+          after (update before outcome-index + weight)
+          receipt {:schema :a4a/posterior-update-receipt-v1
+                   :updater/id updater-id
+                   :posterior/schema posterior-schema
+                   :evidence/id id
+                   :observation/source source
+                   :capability capability
+                   :outcome (stable-id outcome)
+                   :outcome/index outcome-index
+                   :weight weight
+                   :before before :after after}]
+      (-> state
+          (assoc-in [:concentrations capability] after)
+          (update :posterior-update-receipts (fnil conj []) receipt)))))
+
+(defn hypothetical-posterior
+  "Route a simulated observation through the shared updater."
+  [state observation]
+  (update-posterior state (assoc observation :source :hypothetical)))
+
+(defn observed-posterior
+  "Route an observed corpus event through the shared updater."
+  [state observation]
+  (update-posterior state (assoc observation :source :observed)))
 
 (defn corpus->concentration
   "Build the capability x mission concentration matrix from a corpus.
@@ -101,16 +148,21 @@
                                            (map first discharge-pairs)))
         outcomes (sorted-ids (concat (map second edge-pairs)
                                      (map second discharge-pairs)))
-        outcomes-by-id (into {} (map-indexed (fn [i outcome] [outcome i]) outcomes))
         empty-row (vec (repeat (count outcomes) prior))
         initial (into {} (map (fn [capability] [capability empty-row]) capability-ids))
-        matrix (reduce #(increment-cell %1 outcomes-by-id %2)
-                       initial
-                       (concat edge-pairs discharge-pairs))]
-    {:capabilities capability-ids
-     :outcomes outcomes
-     :concentrations matrix
-     :prior prior}))
+        state {:schema posterior-schema
+               :capabilities capability-ids
+               :outcomes outcomes
+               :concentrations initial
+               :prior prior
+               :posterior-update-receipts []}
+        observations (map-indexed
+                      (fn [i [capability outcome]]
+                        {:schema observation-schema
+                         :capability capability :outcome outcome
+                         :evidence/id (str "a4a-corpus/" i)})
+                      (concat edge-pairs discharge-pairs))]
+    (reduce observed-posterior state observations)))
 
 (defn- concentration-input
   [x]
