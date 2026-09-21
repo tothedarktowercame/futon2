@@ -110,11 +110,38 @@
                 :when (seq (set/intersection (set (:produces p)) (needs (:guard q))))]
             [(pattern-id p) (pattern-id q)])))
 
+(def ^:private verdict-styles
+  {:predicted-not-observed {:label "predicted, not observed" :fill "#f9dfdc" :stroke "#b42318" :width 3}
+   :predicted-and-observed {:label "predicted and observed" :fill "#dceee3" :stroke "#287447" :width 1}
+   :neither {:label "neither predicted nor observed" :fill "#eef0f2" :stroke "#89939e" :width 1}
+   :not-predicted-observed {:label "not predicted, observed" :fill "white" :stroke "#287447" :width 2}
+   :observation-missing {:label "observation missing" :fill "white" :stroke "#89939e" :width 1 :dash "4 3"}
+   :comparison-missing {:label "comparison not recorded" :fill "white" :stroke "#89939e" :width 1 :dash "4 3"}})
+
+(defn- comparison-verdict [{:keys [verdict predicted observed] :as row}]
+  ;; Receipt verdicts are authoritative. Older rows reconstruct the comparison
+  ;; from declared produces and the retained boolean observation, never its absence.
+  (if (contains? row :verdict)
+    (if (contains? verdict-styles verdict) verdict :comparison-missing)
+    (cond
+      (not (boolean? observed)) :observation-missing
+      (not (or (boolean? predicted) (finite? predicted))) :comparison-missing
+      (if (boolean? predicted) predicted (pos? predicted))
+      (if observed :predicted-and-observed :predicted-not-observed)
+      observed :not-predicted-observed
+      :else :neither)))
+
+(defn- verdict-rect [x y width height style]
+  (tag "rect" (cond-> {"x" x "y" y "width" width "height" height "rx" 5
+                       "fill" (:fill style) "stroke" (:stroke style) "stroke-width" (:width style)}
+                (:dash style) (assoc "stroke-dasharray" (:dash style)))))
+
 (defn cascade-svg
   "Precedence locates boxes, but does not imply dependency arrows. Wanted-token
-  fills report observations; an unknown observation never becomes false."
+  styles report comparison verdicts; dashed arrows show declared produces."
   [{:keys [target patterns outcomes shape semilattice prediction-source] :as data}]
-  (let [n (count patterns) boxw (max 150 (min 330 (- (/ 510 (max 1 n)) 24)))
+  (let [outcomes (vec (sort-by (comp pr-str :token) outcomes))
+        n (count patterns) boxw (max 150 (min 330 (- (/ 510 (max 1 n)) 24)))
         step (+ boxw 24) wantx (max 570 (+ 24 (* n step))) width (+ wantx 230)
         chars (max 16 (int (/ (- boxw 16) 7)))
         token-label #(if (and (vector? %) (= target (first %))) (display (second %)) (pr-str %))
@@ -123,17 +150,17 @@
                                        (if (seq (:produces p)) (mapcat #(wrap-lines (token-label %) chars) (sort-by pr-str (:produces p)))
                                            [(if (contains? p :produces) "none" "not recorded")]) ["not recorded"]))) patterns)
         boxh (+ 22 (* 16 (apply max 1 (map count labels))))
-        bottom (max (+ 110 boxh) (+ 100 (* 64 (count outcomes))))
+        bottom (max (+ 110 boxh) (+ 110 boxh 24 (* 10 n)) (+ 100 (* 78 (count outcomes))))
         positions (zipmap (map pattern-id patterns) (map #(+ 24 (* step %)) (range)))
         edges (sort-by pr-str (set (dependency-edges data)))
         valid (filter #(every? (set (keys positions)) %) edges)
         shape-text (str "shape: " (if shape (display shape)
                                    (str "not computed in this run"
                                         (when (= [] semilattice) " (literal semilattice field)"))))]
-    (svg (+ bottom 136) "Cascade precedence, dependencies, and wanted-token outcomes"
+    (svg (+ bottom 180) "Cascade precedence, dependencies, and wanted-token outcomes"
          (str (txt 24 28 "Cascade and wanted-token outcomes" {"font-size" 18})
               (txt 24 52 (str "Selected target: " (display target)))
-              (txt 24 75 "Patterns in precedence order; arrows show need-edges / wires only.")
+              (txt 24 75 "Solid arrows: need-edges / wires. Dashed arrows: model prediction.")
               (tag "defs" {} (tag "marker" {"id" "arrow" "markerWidth" 8 "markerHeight" 8 "refX" 7 "refY" 4 "orient" "auto"}
                                    (tag "path" {"d" "M0,0 L8,4 L0,8 Z" "fill" "#68717b"})))
               (apply str (for [[i [p q]] (map-indexed vector valid)
@@ -142,26 +169,48 @@
                            (tag "path" {"class" "need-edge" "data-from" (display p) "data-to" (display q)
                                         "d" (str "M" x1 ",110 C" x1 "," y " " x2 "," y " " x2 ",110")
                                         "fill" "none" "stroke" "#68717b" "marker-end" "url(#arrow)"})))
+              (apply str
+                     (for [[pi p] (map-indexed vector patterns)
+                           [wi row] (map-indexed vector outcomes)
+                           :when (contains? (set (:produces p)) (:token row))
+                           :let [x (+ (positions (pattern-id p)) boxw)
+                                 y (+ 110 (/ boxh 2.0)) wy (+ 142 (* 78 wi))
+                                 lane (+ 110 boxh 16 (* 10 pi))]]
+                       (str (tag "path" {"class" "prediction-edge" "data-from" (display (pattern-id p))
+                                    "data-token" (token-label (:token row))
+                                    "d" (if (= pi (dec n))
+                                          (str "M" x "," y " C" (+ x 60) "," y " " (- wantx 60) "," wy " " wantx "," wy)
+                                          (str "M" (- x (/ boxw 2.0)) "," (+ 110 boxh)
+                                               " V" lane " H" (- wantx 18) " V" wy " H" wantx))
+                                    "fill" "none" "stroke" "#68717b" "stroke-dasharray" "6 4"})
+                            (tag "polygon" {"class" "prediction-arrowhead" "fill" "#68717b"
+                                            "points" (str (- wantx 3) "," wy " " (- wantx 12) "," (- wy 4)
+                                                          " " (- wantx 12) "," (+ wy 4))}))))
               (apply str (for [[i lines] (map-indexed vector labels) :let [x (+ 24 (* step i))]]
                            (tag "g" {"class" "pattern" "data-pattern" (display (pattern-id (nth patterns i)))}
                                 (tag "rect" {"x" x "y" 110 "width" boxw "height" boxh "rx" 5 "fill" "#f6f7f8" "stroke" "#68717b"})
                                 (text-lines (+ x 8) 132 lines {"font-size" 12}))))
               (when (empty? patterns) (txt 24 132 "Patterns: not recorded in this run."))
               (txt wantx 96 "Wanted tokens")
-              (apply str (for [[i row] (map-indexed vector (sort-by (comp pr-str :token) outcomes))
-                               :let [observed (:observed row) y (+ 110 (* 64 i))
-                                     state (cond (true? observed) "observed-true" (false? observed) "observed-false" :else "observation-missing")
-                                     fill (case state "observed-true" "#dceee3" "observed-false" "#f9dfdc" "white")]]
-                           (tag "g" {"class" (str "want " state) "data-token" (token-label (:token row))
+              (apply str (for [[i row] (map-indexed vector outcomes)
+                               :let [observed (:observed row) y (+ 110 (* 78 i))
+                                     verdict (comparison-verdict row) style (verdict-styles verdict)]]
+                           (tag "g" {"class" (str "want " (name verdict)) "data-token" (token-label (:token row))
                                      "data-predicted" (display (:predicted row))}
-                                (tag "rect" {"x" wantx "y" y "width" 208 "height" 52 "rx" 5 "fill" fill "stroke" "#68717b"})
+                                (verdict-rect wantx y 208 64 style)
                                 (txt (+ wantx 8) (+ y 18) (token-label (:token row)) {"font-size" 12})
-                                (txt (+ wantx 8) (+ y 34) (str "prediction: " (display (:predicted row))) {"font-size" 11})
-                                (txt (+ wantx 8) (+ y 47) (str "observed: " (if (boolean? observed) (str observed) "not recorded")) {"font-size" 11}))))
+                                (txt (+ wantx 8) (+ y 34) (:label style) {"font-size" 11 "font-weight" "bold"})
+                                (txt (+ wantx 8) (+ y 49) (str "prediction: " (display (:predicted row))) {"font-size" 10})
+                                (txt (+ wantx 8) (+ y 60) (str "observed: " (if (boolean? observed) (str observed) "not recorded")) {"font-size" 10}))))
               (when (empty? outcomes) (txt wantx 132 "Wanted tokens: not recorded." {"font-size" 11}))
               (txt 24 (+ bottom 30) shape-text)
-              (txt 24 (+ bottom 52) "Outline: observation not recorded. Green / red fill: observed true / false.")
-              (txt 24 (+ bottom 96) (str "Model prediction: " (display prediction-source)))
+              (txt wantx (+ bottom 26) "Comparison verdicts" {"font-weight" "bold"})
+              (apply str (for [[i verdict] (map-indexed vector [:predicted-not-observed :predicted-and-observed
+                                                               :neither :not-predicted-observed :observation-missing])
+                               :let [style (verdict-styles verdict) y (+ bottom 38 (* 22 i))]]
+                           (str (verdict-rect wantx y 12 12 style)
+                                (txt (+ wantx 20) (+ y 10) (:label style) {"font-size" 10}))))
+              (text-lines 24 (+ bottom 96) (wrap-lines (str "Model prediction: " (display prediction-source)) 70))
               (txt 24 (+ bottom 74) (str (count valid) " dependency arrow(s)."
                                         (when (not= (count valid) (count edges))
                                           (str " " (- (count edges) (count valid)) " wire(s) have unrecorded endpoints.")))))
