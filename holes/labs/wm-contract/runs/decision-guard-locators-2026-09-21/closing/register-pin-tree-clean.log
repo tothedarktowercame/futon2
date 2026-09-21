@@ -1,0 +1,4 @@
+evidence-id test-registry-9ecbe022e430a9f5817edafaee1f22bb259d8430aff5734d2567c826c6b140db
+warrant? true
+results {:assertions 408, :duration-ms 1864, :errors 0, :exit 0, :failures 0, :tests 16}
+bound decision-guard-locators/gate -> test-registry-9ecbe022e430a9f5817edafaee1f22bb259d8430aff5734d2567c826c6b140db
