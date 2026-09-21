@@ -1,0 +1,140 @@
+{:provenance
+ {:historical :reconstructed-not-live-close,
+  :inputs
+  [{:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789964661.edn",
+    :sha256
+    "8264021ac5f5bc6c251720917c69375795fcc9e1a4a5f263694b6efe51142686"}
+   {:path
+    "/home/joe/code/futon2/data/wm-full-loop-machinery-69/wm-contract-machinery-69-v1/attempt-001/002-selection.edn",
+    :sha256
+    "b21ea17e855a19d8ef711e230eb7569689ea021f0d2a9c16b0a1c051ea099076"}
+   {:path
+    "/home/joe/code/futon3c/data/wm-d-task-enactment/action-a5d2326d-a73a-447c-8bc7-7f77c8bbc187.edn",
+    :sha256
+    "b4e759a9cdb1be48ffad5b82fcb3c7fb13e3608c3c332ee92478a9831f5e7895"}]},
+ :live
+ {:schema :wm/revision-scan-v1,
+  :mode :record-only,
+  :as-of "2026-09-21T18:20:59Z",
+  :declaration
+  {:repos ["/home/joe/code/futon2"],
+   :surprise-files [],
+   :run-files
+   ["/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-18-5bf0bbfb-df6c-43e6-a126-2068d49b6969.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-18-r12fix-1789773891.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789779250.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789780157.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789827859.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828199.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828750.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789835454.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848147.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848234.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848916.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789849189.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789854206.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789856495.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-postfix-1789776011.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-019f6e43-5ea5-40b9-bfe6-1a0e1358d5f3.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-0ea3d13d-4a29-43d6-96a5-77acb4773011.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789862860.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789940260.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789948650.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-3ffe98e9-8356-4491-adb5-c3ba574c0c2f.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-785ca6f2-3e7a-4522-90a7-575cab4dd5f8.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789948972.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789951020.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952178.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952479.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789964661.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-probe-revert-check.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-smoke.edn"],
+   :as-of "2026-09-21T18:20:59Z",
+   :unanswered-after-seconds 21600,
+   :interval-reason
+   "Six hours: within-working-day follow-up signal, not a claim that learning must occur on this deadline.",
+   :bindings
+   [{:repo "/home/joe/code/futon2",
+     :path "src/futon2/aif/cascade_model_manifest.clj",
+     :namespace futon2.aif.cascade-model-manifest,
+     :model-part :B-effect}
+    {:repo "/home/joe/code/futon2",
+     :path
+     "resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn",
+     :target "M-aif-policy-conditioned-eig",
+     :model-part :B-effect,
+     :loaded-evidence :unavailable-for-declarations}]},
+  :surprise-count 0,
+  :learning-event-candidates [],
+  :friction-candidates [],
+  :flags []},
+ :historical-replay
+ {:schema :wm/revision-scan-v1,
+  :mode :record-only,
+  :as-of "2026-09-21T18:20:59Z",
+  :declaration
+  {:repos ["/home/joe/code/futon2"],
+   :surprise-files
+   ["/home/joe/code/futon2-improve-6b/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6b/historical-surprises.edn"],
+   :run-files
+   ["/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-18-5bf0bbfb-df6c-43e6-a126-2068d49b6969.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-18-r12fix-1789773891.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789779250.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789780157.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789827859.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828199.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828750.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789835454.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848147.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848234.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848916.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789849189.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789854206.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789856495.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-postfix-1789776011.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-019f6e43-5ea5-40b9-bfe6-1a0e1358d5f3.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-0ea3d13d-4a29-43d6-96a5-77acb4773011.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789862860.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789940260.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789948650.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-3ffe98e9-8356-4491-adb5-c3ba574c0c2f.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-785ca6f2-3e7a-4522-90a7-575cab4dd5f8.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789948972.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789951020.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952178.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952479.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789964661.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-probe-revert-check.edn"
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-smoke.edn"],
+   :as-of "2026-09-21T18:20:59Z",
+   :unanswered-after-seconds 21600,
+   :interval-reason
+   "Six hours: within-working-day follow-up signal, not a claim that learning must occur on this deadline.",
+   :bindings
+   [{:repo "/home/joe/code/futon2",
+     :path "src/futon2/aif/cascade_model_manifest.clj",
+     :namespace futon2.aif.cascade-model-manifest,
+     :model-part :B-effect}
+    {:repo "/home/joe/code/futon2",
+     :path
+     "resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn",
+     :target "M-aif-policy-conditioned-eig",
+     :model-part :B-effect,
+     :loaded-evidence :unavailable-for-declarations}]},
+  :surprise-count 1,
+  :learning-event-candidates [],
+  :friction-candidates
+  [{:kind :unanswered,
+    :surprise/id
+    "surprise-12ae64452b8a9cbf6abd336686b6aa4583e656ce301c3fd3c3bf47d23bcf9bae",
+    :expectation-class
+    {:rule :positive-marginal-support,
+     :target "M-aif-policy-conditioned-eig",
+     :token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
+     :action-class :cascade-candidate,
+     :patterns [:apparatus/one-authority-per-question],
+     :model-part :B-effect},
+    :since "2026-09-21T04:26:36.986447255Z",
+    :clock-basis :declaration-time-proxy}],
+  :flags []}}
