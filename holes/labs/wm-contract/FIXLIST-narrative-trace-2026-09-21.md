@@ -281,3 +281,14 @@ term, plus improve-1's finding that near-uniform C makes risk reward outcome
 entropy.
 
 | improve-7 | focus-conditioned C: a declared, time-scoped operator focus (mission-clock carrier) concentrates Cτ on the focus's outcomes; near-uniform C only when no focus is declared; off-focus work carries a MAY valence where the focus requires it (Joe via claude-5, 2026-09-21; ANSWERS-C-questions) | improve-2 Q3 strength (now to be asked per focus); improve-4 valences | filed; the strength question is re-framed per focus |
+
+## improve-5 accounting decision (claude-3, 2026-09-21, with claude-5 as second reader)
+Novelty enters live G as a joint state/parameter EFE with θ latent: Q(o|π)
+marginalises over θ, ambiguity is E_θ H(Y|θ), so risk + ambiguity =
+−E ln C − I(θ;Y). Parameter information gain then appears once with
+coefficient 1, and there is no κ. Rejected: subtracting κ·I from identity-A
+predictive risk, which already contains −H(Y) and would make the epistemic
+coefficient 1+κ, a free weight that exists only to undo a double count. How
+much learning is worth becomes a question about the priors and about C's
+strength (improve-2 Q3, asked per focus under improve-7), not about a weight.
+Slice 1 (record-only receipt) records the terms in this decomposition.
