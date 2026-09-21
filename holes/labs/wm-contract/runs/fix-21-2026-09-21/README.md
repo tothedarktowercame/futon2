@@ -126,3 +126,7 @@ Renderer attempts used `LEAN_STATE_REPORT`/`LEAN_STATE_OUTPUT` and
 report directory. Both refused before producing TeX; their exit-1 logs are
 retained. The source-only probe queries `lake --version`; it never invokes
 `lake build` or `lake env lean` in this mode.
+
+Unit-test registry warrant: `test-registry-ff5cbd27292235d1c4b25aca9157740794890d0f7338ffcf1e9b9bf56d58cdb5`; implementation
+`a72af801`; results `{:assertions 7, :duration-ms 1669, :errors 0, :exit 0, :failures 0, :tests 2}`; stable execution and matched postcheck. This warrants the name-index
+unit tests, not Lean elaboration or the blocked TeX render.
