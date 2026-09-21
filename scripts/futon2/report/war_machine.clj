@@ -6285,7 +6285,10 @@
                 decision (assoc-in decision [:selection-certificate :token-belief-input]
                                    token-belief-input)
                 decision (input-receipts/with-preference-audit decision)
-                decision (focus-receipt/attach decision)
+                ;; :focus-as-of pins the receipt's clock for replay comparisons.
+                decision (if-let [as-of (:focus-as-of opts)]
+                           (focus-receipt/attach decision (focus-receipt/read-inputs) {:as-of as-of})
+                           (focus-receipt/attach decision))
                 authorized (controller-authority/authorize decision ranked)
                 emitted (decision-gate/emit! authorized)]
             {:decision (assoc emitted

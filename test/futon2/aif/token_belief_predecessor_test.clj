@@ -84,7 +84,12 @@
            input-path [:decision :selection-certificate :token-belief-input]
            record (-> record
                       (assoc :habit-reads (receipts/habit-log []))
-                      (assoc-in [:decision :selection-certificate :candidates] []))]
+                      (assoc-in [:decision :selection-certificate :candidates] [])
+                      ;; Both receipts are derived from the candidates just
+                      ;; cleared, so the validator rightly refuses them; they
+                      ;; have their own tests (improve-2a, improve-7a).
+                      (update-in [:decision :selection-certificate]
+                                 dissoc :focus-receipt :preference-audit))]
        (is (= (get-in d [:selection-certificate :token-belief-input]) (get-in record input-path)))
        (is (= :carry-no-predecessor (get-in record (into input-path [:carry-admission :kind]))))
        (is (= :valid (:status (receipts/validate-record record))))

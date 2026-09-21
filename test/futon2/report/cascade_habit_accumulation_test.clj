@@ -112,9 +112,11 @@
       (let [assembled (problems/assemble
                        {:targets [fixture/tick-1-target]
                         :sources (locators/locate-all fixture/tick-1-sources)})
-            before (wm/cascade-decision assembled (assoc fixture/live-c-opts :cascade-habit-path path))
-            after (wm/select-and-record-cascade!
-                    assembled (assoc fixture/live-c-opts :cascade-habit-path path))]
+            ;; The focus receipt (improve-7a) stamps wall-clock :as-of; pin it.
+            opts (assoc fixture/live-c-opts :cascade-habit-path path
+                        :focus-as-of "2026-09-21T18:00:00Z")
+            before (wm/cascade-decision assembled opts)
+            after (wm/select-and-record-cascade! assembled opts)]
         ;; Lane route telemetry includes wall-clock timestamps on each run.
         ;; Compare the complete live decision, including its certificate.
         (is (= (pr-str (:decision before)) (pr-str (:decision after))))
