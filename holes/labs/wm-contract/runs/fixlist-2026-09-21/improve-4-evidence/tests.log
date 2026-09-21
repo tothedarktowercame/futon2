@@ -1,0 +1,8 @@
+
+Running tests in #{"test"}
+
+Testing futon2.report.c-process-discovery-test
+{:mission-mention-warrants 6, :entries 218, :binding-records 144, :semantic-key-warrants 0, :want-subjects [{:entry/type :subject-binding, :entry/id "8d7e5671-dae0-4a0a-8e40-112d63891da7", :subject-id "proposal-supply-b1/wants", :warrant-id "test-registry-05a32cf9755f69ae88e8c323aa06b4cad8650836a17561c87cdba1901ab65139", :actor "codex-6", :at "2026-09-21T03:43:29.533638861Z"}], :live-subjects 88, :mission-subjects [], :registered-warrants 102, :kinds {:run 109, :intent 109}}
+
+Ran 2 tests containing 7 assertions.
+0 failures, 0 errors.

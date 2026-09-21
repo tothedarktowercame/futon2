@@ -1,0 +1,9 @@
+{:repo-root "/home/joe/code/futon2-narrative-improve-4"
+ :code-paths ["test/futon2/report/c_process_discovery_test.clj"]
+ :test-paths ["test/futon2/report/c_process_discovery_test.clj"
+              "holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/registry-today.json.gz"
+              "holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/subjects.ednlog.gz"]
+ :command ["clojure" "-M:test" "-n" "futon2.report.c-process-discovery-test"]
+ :author "codex-13" :origin "claude-3/narrative-improve-4-discovery"
+ :artifact-dir "/home/joe/code/futon2-narrative-improve-4/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/registered"
+ :agency-url "http://localhost:7070"}

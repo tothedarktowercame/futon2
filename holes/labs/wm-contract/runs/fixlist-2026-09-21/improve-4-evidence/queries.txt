@@ -1,0 +1,15 @@
+Read-only GETs, 2026-09-21 ~16:38 UTC; no authentication or mutation.
+http://localhost:7070/api/alpha/evidence/count?tag=test-registry
+  count=667 (all dates)
+http://localhost:7070/api/alpha/evidence?tag=test-registry&limit=100000
+  412 recent-window entries; NOT all dates (server implicit since)
+http://localhost:7070/api/alpha/evidence?tag=test-registry&limit=100000&before=2026-09-19T16%3A37%3A43.016511157Z
+  curl --max-time 55: exit 28, 0 bytes; no historical completeness claim
+http://localhost:7070/api/alpha/evidence?tag=test-registry&limit=100000&since=2026-09-21T00%3A00%3A00Z
+  218 entries; retained compressed verbatim as registry-today.json.gz
+http://localhost:7070/api/alpha/evidence/count?tag=test-registry&since=2026-09-21T00%3A00%3A00Z
+  count=218; today-count.json
+Read file /home/joe/code/futon3c/data/test-registry-validation/subjects.ednlog
+  retained compressed verbatim as subjects.ednlog.gz
+Read primary paper https://metameso.org/~joe/papers/corneli2016institutional.pdf
+  Table 2, PDF page 3; no builds.
