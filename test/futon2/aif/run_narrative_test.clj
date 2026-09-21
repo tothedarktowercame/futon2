@@ -445,3 +445,17 @@
                                                   :shadow {:if-counted-rollout {:theta 9/11}}}]}}}}})]
     (is (str/includes? text "held (observation-placement-not-declared)"))
     (is (str/includes? text "shadow theta would be 9/11 under the illustrative prior"))))
+
+(deftest admitted-attempt-learning-has-no-held-reason
+  (let [text (narrative/learning-trial-text
+              {:checkpoints {:closed {:judgment
+                                      {:learning-trial-receipt
+                                       {:trials [{:selected-cascade {:id :C1}
+                                                  :effect ["M-one" :done]
+                                                  :status :admitted-at-attempt-grain
+                                                  :reason nil :counted? true
+                                                  :attempt-beta {:delivery-mean 9/11}}]}}}}})]
+    (is (str/includes? text "Attempt learning trial for cascade :C1"))
+    (is (str/includes? text "admitted-at-attempt-grain"))
+    (is (str/includes? text "record-only illustrative delivery mean 9/11"))
+    (is (not (str/includes? text "pattern causality")))))
