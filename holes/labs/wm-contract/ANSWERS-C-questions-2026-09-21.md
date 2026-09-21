@@ -316,3 +316,9 @@ claude-3's reading, for C:
    per run, scored against this preference.
 Needs before it can enter C: a mission-status census whose closure test uses
 the witnesses in (3), not a status-line regex.
+
+Baseline (claude-5 census, futon2 16abf75a, runs/mission-census-2026-09-21/,
+witness-based closure test): 642 mission docs; closed-witnessed 71,
+closed-unwitnessed 45, open 359, undetermined 167. Retirement candidates 307 by
+age alone (open, untouched 30+ days), not judged. The stock for the WM measure
+is 359 open, plus 167 that cannot be scored until classified.
