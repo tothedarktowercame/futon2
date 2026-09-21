@@ -1,0 +1,205 @@
+# Fix list: defects found by narrating run 2026-09-21-1789964661
+(claude-3, 2026-09-21, for Joe. Source: a stage-by-stage reading of the
+records of the grounded-change run 2026-09-21-1789964661; reference
+records under `data/wm-runs/tick-run-record-2026-09-21-1789964661.edn`
+and `data/wm-full-loop-machinery-69/wm-contract-machinery-69-v1/attempt-001/`.)
+
+Goal: a next run whose stage-by-stage narrative describes a machine that
+works: it chooses among real alternatives for a stated reason, forms a
+cascade with structure, and gives the author a build plan it can act on.
+Each fix has a failure story (what the record shows now), a success story
+(what the record should show), and an acceptance test.
+
+Kinds: **fix** = implement; **discovery** = find out why and propose,
+no production change (the fix follows as its own item after review).
+Lanes: fixes in the same **file group** must be sequential (shared
+worktree); different groups can run in parallel.
+
+| # | kind | file group | summary |
+|---|---|---|---|
+| fix-1 | fix | runner | author is told `:C1`, not the mission |
+| fix-2 | fix | runner | the build plan drops the cascade's content |
+| fix-3 | fix | runner | prompts and transcripts are not retained |
+| fix-4 | fix | runner | `:ranked-candidates` mislabels posterior as G |
+| fix-5 | discovery | read-only | only 3 hand-written candidates; 441 wants yield none |
+| fix-6 | discovery | read-only | G does not separate the candidates |
+| fix-7 | fix | policy | the discrimination guard cannot fail |
+| fix-8 | fix | habit | habit learns from selection, not from outcome |
+| fix-9 | discovery→fix | runner (construction) | `:semilattice []` is a literal |
+| fix-10 | discovery | read-only | no belief update at close |
+| fix-11 | fix | war_machine | the scan's own account is discarded |
+| fix-12 | fix | runner (grounding) | discharge id collides across cohorts |
+| fix-13 | fix | war_machine | coverage account not saved; 113→5 drop unexplained |
+| fix-14 | fix | new ns | trace renderer: run id → narrative page |
+| fix-15 | doc | p4ng | paper claims that outrun the records |
+
+---
+
+## fix-1 — the author is told the candidate id, not the mission
+**Failure story.** `selected-target` (`src/futon2/aif/full_loop_runner.clj:1185`)
+prefers `:cascade-id`/`:id` over `:target`. For a cascade candidate the
+id is `:C1`, so: the author prompt says `SELECTED TARGET: :C1` (phase
+log); the mission record is looked up by `:C1` and is nil; the selection
+checkpoint says `:selected-mission ":C1"`; futon1b holds
+`:implementation/target ":C1"` and `:discharge/mission ":C1"`. The
+author built commit 7a9daa0f without being told which mission it served.
+**Success story.** For a `:cascade-candidate` the selected target is the
+candidate's `:target` ("M-aif-policy-conditioned-eig"); the cascade id
+stays available separately as `:selected-cascade`. The prompt names the
+mission and includes its record; every consumer (checkpoints, grounding
+entities, brief item, delivery QA, tripwire observation) carries the
+mission id.
+**Acceptance.** A test that feeds a cascade-candidate entry shaped like
+the 1789964661 selection through the prompt builder and the
+checkpoint/grounding writers and asserts the mission id (not `:C1`)
+appears in each; and that a non-cascade action still resolves as before.
+
+## fix-2 — the build plan drops the cascade's content
+**Failure story.** `author-prompt` (`full_loop_runner.clj:1844-1920`)
+passes `select-keys [:mission :psi :shown :semilattice …]`, i.e.
+`{:psi "enact cascade :C1" :shown [pattern-id] :semilattice []}`. The
+box, its established guard conditions, the interpretation `:reading`,
+`:scope-limit`, and flexiarg path are all dropped. The author receives a
+pattern name and nothing about what the pattern requires or produces.
+**Success story.** The prompt carries, per pattern in precedence order:
+flexiarg path + sha, the interpretation reading and scope limit, guard
+clauses with which conditions are established (and by which C3/C4
+check), what it produces, and holes with construction blockers; plus the
+wires between boxes. The author can say which pattern its change enacts.
+**Acceptance.** Prompt-builder test on the 1789964661 construction
+(`003-construction.edn`) asserting each of those fields appears; a
+prompt-size bound so large cascades don't blow up the packet.
+**Depends on** fix-1 (same function region).
+
+## fix-3 — prompts and transcripts are not retained
+**Failure story.** The dispatch checkpoint holds only
+`:prompt-ref "agency-job:invoke-…"`. The prompt text exists only in
+`/tmp/futon3c-invoke-jobs.edn` (ephemeral); author and reviewer
+transcripts survive as tool-event counts. A narrative cannot quote the
+build plan or show how the work was done.
+**Success story.** The dossier retains the author and reviewer prompt
+text (with sha256) and the final reply text of each job, under the
+attempt directory, referenced from the dispatch/build checkpoints.
+**Acceptance.** Runner test with a stubbed Agency returning a job with
+prompt + result: the files exist under the attempt dir, their sha256
+matches the checkpoint reference.
+
+## fix-4 — `:ranked-candidates` mislabels posterior mass as G
+**Failure story.** In `002-selection.edn`,
+`:ranked-candidates` (`full_loop_runner.clj:3779-3800`) puts posterior
+mass under `:G-efe` and `:controller-score`, ranks by map-iteration
+order, and keeps only the first 10. A plot drawn from it is wrong.
+**Success story.** Each ranked entry carries `:target`, `:cascade-id`,
+`:G`, `:habit`, `:F` + `:f-status`, `:posterior`, sorted by posterior
+descending, all candidates (or an explicit `:truncated-from N`).
+**Acceptance.** Test on the 1789964661 selection certificate: three
+entries, G values 15.17007/15.17133/15.17138, posteriors in descending
+order, no field holding a value of another kind.
+
+## fix-5 (discovery) — why the machine chose among 3 hand-written cascades
+**Failure story.** The 441 stated mission items (99 checkbox wants)
+enter C but generate targets with `:candidates []`, which admission
+refuses (`cascade_problems.clj:125-156`). The live choice was among 3
+single-pattern cascades hand-admitted by codex-1 that night. Retrieval
+(embedding k=40, tier0 k=8) produces proposals that are never admitted
+without an agent writing the declaration.
+**Success story (for the discovery).** A note that says, with counts from
+a current tick: how many targets, proposals, admitted candidates; which
+stage removes each; and a concrete proposal for how a want gets a
+constructed candidate without an agent hand-writing it and without
+treating retrieval rank as applicability. Then a fix item.
+
+## fix-6 (discovery) — why G doesn't separate the candidates
+**Failure story.** G = 15.17007 / 15.17133 / 15.17138 nats; the winner
+led by 0.0013 nats. In runs 1789951020/1789952479 all 24 G values were
+within 0.003 nats and habit E decided. The six-term census reads A
+identity, D point-mass, E uniform, F zero, Q open-loop — only C varies.
+**Success story (for the discovery).** A per-candidate decomposition of
+G into the terms that differ vs the common offset (likely the ~463
+unreachable wants), showing which term produces the 0.0013 nats, and a
+proposal for what would make G discriminate (scoring only
+reachable/relevant wants, a non-identity A, a longer horizon…).
+
+## fix-7 — the discrimination guard cannot fail
+**Failure story.** The selection guard passes with ε = 1e-6, so a 0.0013
+nat lead (posterior 0.3336 vs 0.3332) is recorded as
+`:discrimination {:passes? true}`. Nothing in the record says the choice
+was effectively a tie.
+**Success story.** The selection record states what decided it:
+`:decided-by` ∈ {`:G`, `:habit`, `:free-energy`, `:tie-break`} with the
+posterior margin and each term's contribution to the margin, and a
+near-tie flag with a declared threshold. (Recording, not abstaining.)
+**Acceptance.** Construct the bad case: the 1789964661 three candidates
+→ flagged near-tie. The 1789952479 case → `:decided-by :habit`. A
+constructed well-separated case → `:decided-by :G`, no flag.
+
+## fix-8 — habit learns from selection, not outcome
+**Failure story.** `select-and-record-cascade!` bumps the habit count
+(`data/wm-habit/cascade-prior.edn`) at selection time, before the
+build's outcome is known. Since E decided earlier runs, the machine
+reinforces what it picked, whether or not it worked.
+**Success story.** Habit is updated at close from the attempt outcome
+(grounded change vs failure/refusal), with the selection event recorded
+separately; the update rule is written down in the record.
+**Acceptance.** Tests: a selected-then-failed attempt does not increase
+that cascade's habit; a grounded change does; the selection event is
+still logged.
+
+## fix-9 (discovery → fix) — `:semilattice []` is a literal
+**Failure story.** `construct-selected-action :cascade-candidate`
+(`full_loop_runner.clj:1297`) writes `:semilattice []`. Cascades are
+1–3-pattern ordered lists; the recorded one has one box and no wires.
+In Alexander's terms (A City is Not a Tree) that is a chain, not a
+semilattice. The organiser (`cascade_policy/organise`,
+`F12RuledCarrier.lean`) exists but is not on the serving path.
+**Success story.** The construction records the actual order structure
+computed from the wires (produces → guard), with an honest shape label
+(`:singleton`/`:chain`/`:tree`/`:semilattice`, the last only when two
+sets overlap without one containing the other), and the organiser is
+either on the serving path or its absence is recorded. Discovery first:
+what it takes to put `organise` on the path.
+
+## fix-10 (discovery) — no belief update at close
+**Failure story.** `007-closed.edn`: `:entity-state-at-close {:status
+:absent :reason :in-force-belief-row-unavailable}`. The run changed the
+repo but not what the machine believes.
+**Success story (for the discovery).** Where the in-force belief row
+should come from, why it is unavailable, and the smallest change that
+lets the close condition belief on the observed outcome.
+
+## fix-11 — the scan's own account is discarded
+**Failure story.** `render-war-machine` produces a markdown account of
+the scan and judgement; the runner discards it.
+**Success story.** It is written beside the run record
+(`data/wm-runs/…-scan.md`) and referenced from the run record.
+**Acceptance.** Runner test asserts the file exists and is referenced.
+
+## fix-12 — discharge id collides across cohorts
+**Failure story.** futon1b entity `full-loop/discharge/attempt-001` is
+keyed only by attempt ordinal; the next cohort's attempt-001 overwrites
+it (PUT replaces the document).
+**Success story.** The id includes the cohort id (and run id).
+**Acceptance.** Test: two cohorts' attempt-001 produce distinct ids.
+
+## fix-13 — coverage account not saved
+**Failure story.** C's reach fell from 113/468 to 5/468 between runs
+1789952479 and 1789964661; the per-tick `:mission-hole-coverage`
+account (`mission_hole_wants.clj:158`) is not persisted, so the drop
+cannot be explained from records.
+**Success story.** The coverage account is in the run record; the drop
+is explained (probably c155d690 removing empty cascades before scoring).
+
+## fix-14 — trace renderer
+After fixes 1–4 and 11. A tool that takes a run id and writes a
+stage-by-stage narrative page (checkpoint order: time-step → selection →
+construction → dispatch → build → adjudication → closed) with a
+selection plot, the cascade as drawn from its wires, the prompt as the
+author saw it, commit + review, close — citing file paths and the Lean
+names the code corresponds to (stated as docstring correspondence, not
+runtime use). Published to the web docroot.
+
+## fix-15 — paper claims that outrun the records (doc, no dispatch)
+NOTE-restatement-2026-09-20: "441 items … enter the decision as
+first-class sources" — they enter C only; `g_term_decomposition` cited as
+if a theorem — it is a Clojure namespace; "selected on its own merits" —
+habit E decided the earlier picks.
