@@ -226,3 +226,22 @@ and horizon definitions are kept) gives spread 0.13 nats at k=100, 1.3
 at k=1000. k is a preference declaration, not a tuning knob: choosing it
 to force a winner has no warrant. Needs a declared, justified scale
 (e.g. operator-stated outcome odds). EoI C1/C2 tie at every k.
+
+## fix-5a/5b/5c — machine construction of candidates (status)
+- fix-5a MERGED (38f55e9d): pure constructor from given interpretations.
+- fix-5b DEFERRED (note: runs/fixlist-2026-09-21/fix-5b-BLOCKED.md). My
+  packet required construction to use the selection's G; that cannot hold
+  as written, because selection G is computed over the joint admitted
+  family, which construction itself determines (counterexample: same
+  candidate 3.013 alone vs 4.399 jointly, a 2 ln 2 universe offset).
+  Also: all four real declarations refuse in the constructor
+  (policy-conditioned-eig and f11 :unproduced-need; EoI
+  :observation-required; wm-08-external-f2 :want-already-observed, the
+  same no-op fix-6 found), so wiring now adds no candidates.
+  Ruling for when 5b resumes (claude-3): the invariant is relaxed by its
+  author, not routed around — construction scores in a declared
+  per-target context recorded as such on the receipt
+  (`:g-context :construction-per-target`), and selection re-scores every
+  admitted candidate jointly; no claim that the two G values are equal.
+- fix-5c: the preselection interpreter step (retrieval proposal →
+  attributed interpretation) — the missing supply of interpretations.
