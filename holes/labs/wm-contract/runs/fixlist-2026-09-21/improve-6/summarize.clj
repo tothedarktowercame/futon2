@@ -1,0 +1,35 @@
+#!/usr/bin/env bb
+(ns summarize (:require [clojure.edn :as edn] [clojure.pprint :as pp]))
+(def inventory (edn/read-string (slurp (first *command-line-args*))))
+(def events (:events inventory))
+(defn category [k] (filter #(= k (:category %)) events))
+(defn bounds [xs]
+  (let [ds (sort (keep :date xs))]
+    {:count (count xs) :first (first ds) :last (last ds) :undated (count (remove :date xs))}))
+(defn groups [xs f] (into (sorted-map) (for [[k v] (group-by f xs)] [(pr-str k) (bounds v)])))
+(def findings (category :repair-findings))
+(def resolutions (into {} (map (juxt #(get-in % [:identity :repair/id]) identity) (category :repair-resolutions))))
+(def dismissals (into {} (map (juxt #(get-in % [:identity :repair/id]) identity) (category :repair-dismissals))))
+(defn since [e] (and (:date e) (not (neg? (compare (:date e) "2026-09-07")))))
+(defn repair-id [e] (get-in e [:identity :repair/id]))
+(def pending (remove #(or (contains? resolutions (repair-id %)) (contains? dismissals (repair-id %))) findings))
+(assert (= (count findings) (count (set (map repair-id findings)))))
+(assert (= (count (category :repair-resolutions)) (count resolutions)))
+(pp/pprint
+ {:source-summary (:summary inventory)
+  :finding-classes (groups findings #(get-in % [:fields :repair/class]))
+  :finding-kinds (groups findings #(get-in % [:fields :failure-kind]))
+  :review-rejections (bounds (filter #(= :independent-review-failure (get-in % [:fields :repair/class])) findings))
+  :review-verdicts (groups findings #(get-in % [:fields :review-verdict]))
+  :recent-findings (bounds (filter since findings))
+  :recent-pending (bounds (filter since pending))
+  :recent-pending-by-kind (groups (filter since pending) #(get-in % [:fields :failure-kind]))
+  :resolution-dismissal-overlap (vec (filter #(contains? dismissals %) (keys resolutions)))
+  :pending-findings (mapv #(select-keys % [:date :file :identity :fields]) pending)
+  :recent-joins (vec (for [f findings :let [r (get resolutions (repair-id f))]
+                          :when (and r (or (since f) (since r)))]
+                      {:finding f :resolution r}))
+  :d-task-repositories (groups (category :d-task-artifact) #(get-in % [:fields :repository]))
+  :raw-observation-polarities (groups (category :raw-signed-observation) #(get-in % [:fields :verdict]))
+  :typed-statuses (:typed-statuses inventory)
+  :candidate-drops (vec (category :candidate-drop))})

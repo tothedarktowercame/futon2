@@ -1,0 +1,22 @@
+Environment: /home/joe/code/futon2-improve-6, branch fix/narrative-improve-6, base b25126c2.
+babashka v1.13.219
+Python 3.12.3
+
+bb holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/inventory.clj > holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/inventory.edn
+exit 0; 1345 files, 1366 forms, 328483225 bytes; errors [].
+
+bb holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/summarize.clj holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/inventory.edn > holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/summary.edn
+exit 0; unique finding IDs and resolution IDs asserted.
+
+python3 holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/history.py > holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/history.json
+exit 0.
+
+clj-kondo --lint holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/inventory.clj holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/summarize.clj
+linting took 24ms, errors: 0, warnings: 0
+
+emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -f arxana-check-parens-cli -- holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/inventory.clj holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6/summarize.clj
+OK
+
+Local Markdown links and quoted CSV totals: PASS
+Summary assertions: 29 recent joins, 42 findings without disposition joins, 64 recent findings: PASS
+No production namespace or test was changed; no test-suite warrant claimed.
