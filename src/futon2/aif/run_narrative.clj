@@ -1,11 +1,12 @@
 (ns futon2.aif.run-narrative
-  "Read retained run evidence and write only the requested Markdown output.
+  "Read retained run evidence and write Markdown with two adjacent SVG figures.
   CLI: clojure -M -m futon2.aif.run-narrative <run-id> [out.md].
   FUTON2_NARRATIVE_ROOT selects the evidence checkout (default current directory)."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.cascade-plan :as plan]))
+            [futon2.aif.cascade-plan :as plan]
+            [futon2.aif.narrative-figures :as figures]))
 
 (def checkpoint-order [:time-step :selection :construction :dispatch :build :adjudication :closed])
 
@@ -367,6 +368,52 @@
            (when ref (str " (" (shown (or (:reason ref) :retained-file-unavailable)) ")")) ".\n"
            (cite (:record-path b) [:scan-report])))))
 
+(defn figure-paths
+  "The three outputs share a basename and parent directory."
+  [output]
+  (let [stem (subs (str output) 0 (- (count (str output)) 3))]
+    {:selection (str stem ".selection.svg") :cascade (str stem ".cascade.svg")}))
+
+(defn figure-data
+  "Adapt the same retained selection and outcome evidence used by the prose."
+  [b]
+  (let [d (decision b) a (selected-action b) c (construction b)
+        [receipt] (outcome-receipt b)
+        old (when-not receipt (historical-outcomes b))
+        target (:target a)
+        _ (when (and (get-in receipt [:prediction :target])
+                     (not= target (get-in receipt [:prediction :target])))
+            (throw (ex-info "Token comparison identifies a different selected target" {})))
+        wanted (some #(when (= target (:target %)) (get-in % [:declaration :want]))
+                     (get-in d [:selection-certificate :token-belief-stage :domain-inputs]))
+        produces (into #{} (mapcat :produces (:precedence a)))
+        outcomes (or (seq (if receipt (:tokens receipt) (:tokens old)))
+                     (for [w wanted] {:token [target w] :predicted (if receipt
+                                                      (some #(when (= [target w] (:token %)) (:predicted %))
+                                                            (get-in receipt [:prediction :wanted]))
+                                                      (contains? produces [target w]))
+                                      :observed {:status :missing}}))
+        declines (or (get-in d [:selection-certificate :dropped-candidates]) (:dropped-candidates d)
+                     (get-in b [:record :dropped-candidates])
+                     (get-in b [:trace :dropped-candidates])
+                     (get-in b [:trace :cascade-problems :dropped-candidates]))]
+    {:selection {:rows (vec (candidate-rows b)) :chosen a
+                 :decided-by (get-in d [:selection-law :action-comparison :decided-by])
+                 :declines (filterv #(or (:candidate %) (= :candidate-admission (:stage %))) declines)}
+     :cascade {:target target :patterns (:precedence c)
+               :need-edges (or (:need-edges c) (:need-edges a))
+               :wires (get-in c [:wiring :wires])
+               :shape (or (get-in c [:order-structure :shape]) (:shape c))
+               :semilattice (:semilattice c)
+               :prediction-source (if receipt "retained comparison receipt" "declared produces (reconstructed)")
+               :outcomes (filter #(= target (first (:token %))) outcomes)}}))
+
+(defn- figure-link [b kind]
+  (if-let [path (get-in b [:figure-refs kind])]
+    (str "\n![" (if (= kind :selection) "Selection: relative G and posterior" "Cascade: precedence and wanted-token outcomes")
+         "](<" (.toASCIIString (java.net.URI. nil nil path nil nil)) ">)\n")
+    (str "\n" (name kind) " figure not emitted; use render-run! to write standalone SVGs.\n")))
+
 (defn- selection-text [b]
   (let [d (decision b) rows (candidate-rows b)
         winner (or (:selected-action (judgment b :selection)) (:action d)
@@ -401,7 +448,7 @@
          (coverage-text b)
          "\n| Target | Cascade | G (nats) | Posterior | Habit | F consumed |\n|---|---|---:|---:|---:|---:|\n"
          (apply str (for [r rows] (str "| " (str/join " | " (map #(shown (get r %)) [:target :cascade-id :G :posterior :habit :F])) " |\n")))
-         "\n[Selection plot placeholder — slice 14b.]\n"
+         (figure-link b :selection)
          (if (seq (get-in d [:selection-certificate :candidates]))
            "\nG and posterior are read separately from the certificate and selection law; legacy checkpoint G-efe is not treated as G.\n"
            "\nG and posterior use explicit ranked-candidates fields; legacy G-efe is not treated as G.\n"))))
@@ -426,6 +473,7 @@
                  (str "There are " (if (some? wires) (count wires) "an unrecorded number of") " recorded wires; no stronger structure is inferred. "))
              (if (= [] (:semilattice c)) "The semilattice field is not computed (literal []).\n\n"
                  (str "The semilattice field records " (shown (:semilattice c)) "; this is not a proof of structure.\n\n"))
+             (figure-link b :cascade)
              (plan-quote b)))
       :dispatch (str "The runner dispatched agent " (shown (:agent j)) " as job " (shown (:job-id j)) ". "
                      "Its prompt reference is " (shown (:prompt-ref j)) ", with availability recorded as " (shown (:availability j)) ".\n")
@@ -473,7 +521,9 @@
 (defn render-run! [root run-id output]
   (when-not (str/ends-with? (str output) ".md")
     (throw (ex-info "Narrative output must be a Markdown path" {:output output})))
-  (let [bundle (load-run root run-id)
+  (let [outputs (figure-paths output)
+        bundle (assoc (load-run root run-id) :figure-refs
+                      (into {} (for [[k p] outputs] [k (.getName (io/file p))])))
         paths (concat [(:record-path bundle) (:trace-path bundle) (:phase-path bundle) (:binding-path bundle)]
                       (keep :path (vals (:checkpoints bundle)))
                       (when-let [p (:path (d-task-source bundle))]
@@ -483,11 +533,19 @@
                       (for [job (jobs bundle) kind [:prompt :reply]
                             :let [p (get-in job [kind :path])] :when p]
                         (if (.isAbsolute (io/file p)) p (str (io/file root p)))))
-        _ (when (some #(= (.getCanonicalPath (io/file output))
-                          (.getCanonicalPath (io/file %))) paths)
+        _ (when (some (set (map #(.getCanonicalPath (io/file %)) (cons output (vals outputs))))
+                      (map #(.getCanonicalPath (io/file %)) paths))
             (throw (ex-info "Output would overwrite retained evidence" {:output output})))
-        content (narrative-text bundle)]
-    ;; Parent must already exist. No caches, directories, stores, or sidecars.
+        _ (when-not (= 3 (count (set (map #(.getCanonicalPath (io/file %)) (cons output (vals outputs))))))
+            (throw (ex-info "Narrative output paths alias each other" {:output output :figures outputs})))
+        content (narrative-text bundle)
+        data (figure-data bundle)
+        selection (figures/selection-svg (:selection data))
+        cascade (figures/cascade-svg (:cascade data))]
+    ;; Resolve and validate all evidence before writing any of the three outputs.
+    ;; Parents must already exist; no caches, directories, or other side effects.
+    (spit (:selection outputs) selection)
+    (spit (:cascade outputs) cascade)
     (spit output content)
     (str output)))
 

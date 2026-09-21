@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg aria-label="Cascade precedence, dependencies, and wanted-token outcomes" fill="#25313c" font-family="sans-serif" font-size="13" height="428" role="img" viewBox="0 0 800 428" width="800" xmlns="http://www.w3.org/2000/svg"><title>Cascade precedence, dependencies, and wanted-token outcomes</title>
+<rect fill="white" height="100%" width="100%"></rect>
+<text font-size="18" x="24" y="28">Cascade and wanted-token outcomes</text>
+<text x="24" y="52">Selected target: M-aif-policy-conditioned-eig</text>
+<text x="24" y="75">Patterns in precedence order; arrows show need-edges / wires only.</text>
+<defs><marker id="arrow" markerHeight="8" markerWidth="8" orient="auto" refX="7" refY="4"><path d="M0,0 L8,4 L0,8 Z" fill="#68717b"></path>
+</marker>
+</defs>
+<g class="pattern" data-pattern=":apparatus/one-authority-per-question"><rect fill="#f6f7f8" height="70" rx="5" stroke="#68717b" width="330" x="24" y="110"></rect>
+<text font-size="12" x="32" y="132">:apparatus/one-authority-per-question</text>
+<text font-size="12" x="32" y="148">produces:</text>
+<text font-size="12" x="32" y="164">:hole/h6378c65a4012</text>
+</g>
+<text x="570" y="96">Wanted tokens</text>
+<g class="want observed-false" data-predicted="false" data-token=":hole/h0e270aa090bc"><rect fill="#f9dfdc" height="52" rx="5" stroke="#68717b" width="208" x="570" y="110"></rect>
+<text font-size="12" x="578" y="128">:hole/h0e270aa090bc</text>
+<text font-size="11" x="578" y="144">prediction: false</text>
+<text font-size="11" x="578" y="157">observed: false</text>
+</g>
+<g class="want observed-false" data-predicted="false" data-token=":hole/h42fceb4ad48b"><rect fill="#f9dfdc" height="52" rx="5" stroke="#68717b" width="208" x="570" y="174"></rect>
+<text font-size="12" x="578" y="192">:hole/h42fceb4ad48b</text>
+<text font-size="11" x="578" y="208">prediction: false</text>
+<text font-size="11" x="578" y="221">observed: false</text>
+</g>
+<g class="want observed-false" data-predicted="true" data-token=":hole/h6378c65a4012"><rect fill="#f9dfdc" height="52" rx="5" stroke="#68717b" width="208" x="570" y="238"></rect>
+<text font-size="12" x="578" y="256">:hole/h6378c65a4012</text>
+<text font-size="11" x="578" y="272">prediction: true</text>
+<text font-size="11" x="578" y="285">observed: false</text>
+</g>
+<text x="24" y="322">shape: not computed in this run (literal semilattice field)</text>
+<text x="24" y="344">Outline: observation not recorded. Green / red fill: observed true / false.</text>
+<text x="24" y="388">Model prediction: declared produces (reconstructed)</text>
+<text x="24" y="366">0 dependency arrow(s).</text>
+</svg>

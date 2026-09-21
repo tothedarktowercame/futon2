@@ -1,0 +1,56 @@
+{:run/id "2026-09-21-1789964661",
+ :selection
+ {:rows
+  [{:target "M-aif-policy-conditioned-eig",
+    :cascade-id :C1,
+    :G 15.170069253169533,
+    :posterior 0.3336188600826242,
+    :habit 0.3333333333333333,
+    :F 0}
+   {:target "M-f11-find-production-successor",
+    :cascade-id :C1,
+    :G 15.171332462691225,
+    :posterior 0.333197695627431,
+    :habit 0.3333333333333333,
+    :F 0}
+   {:target "M-wm-08-external-f2",
+    :cascade-id :C1,
+    :G 15.171375235022659,
+    :posterior 0.3331834442899445,
+    :habit 0.3333333333333333,
+    :F 0}],
+  :chosen {:target "M-aif-policy-conditioned-eig", :id :C1}},
+ :cascade
+ {:prediction-source "declared produces (reconstructed)"
+ :target "M-aif-policy-conditioned-eig",
+  :patterns
+  [{:id :apparatus/one-authority-per-question,
+    :authority :documented-interpretation,
+    :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+    :guard
+    {:status :interpreted,
+     :operator :and,
+     :clauses
+     [{:status :interpreted,
+       :present
+       #{["M-aif-policy-conditioned-eig" :admission/task-stated]},
+       :absent
+       #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]},
+    :transition
+    {:status :interpreted,
+     :operator :union,
+     :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]},
+     :authority :documented-interpretation},
+    :target "M-aif-policy-conditioned-eig"}],
+  :semilattice [],
+  :wires [],
+  :outcomes
+  [{:token ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc],
+    :predicted false,
+    :observed false}
+   {:token ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b],
+    :predicted false,
+    :observed false}
+   {:token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
+    :predicted true,
+    :observed false}]}}

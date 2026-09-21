@@ -80,9 +80,10 @@
        (is (not (str/includes? text "structure is a semilattice")))
        (is (str/includes? text "[:form 2 :cascade-problems]"))
        (is (str/includes? text "selection 11 ms"))
-       (is (= (inc (count before)) (count after)))
-       (is (= before (dissoc after output)))
-       (is (= text (narrative/narrative-text (narrative/load-run root run))))))))
+       (is (= (+ 3 (count before)) (count after)))
+       (is (= before (apply dissoc after output (vals (narrative/figure-paths output)))))
+       (is (= text (narrative/narrative-text (assoc (narrative/load-run root run) :figure-refs
+                                                     {:selection "narrative.selection.svg" :cascade "narrative.cascade.svg"}))))))))
 
 (defn retain [path text]
   (spit path text)
@@ -299,7 +300,7 @@
          (is (not (str/includes? text "| :hole/unrelated |")))
          (is (str/includes? text "not wanted-token completion"))
          (is (str/includes? text (str evidence-path)))
-         (is (= before (dissoc (file-snapshot base) output))))
+         (is (= before (apply dissoc (file-snapshot base) output (vals (narrative/figure-paths output))))))
        (io/delete-file evidence-path)
        (narrative/render-run! root run output)
        (is (str/includes? (slurp output) "Not recorded in this run: D-task record"))))))
@@ -364,3 +365,51 @@
        (is (thrown-with-msg? clojure.lang.ExceptionInfo #"overwrite retained evidence"
                             (narrative/render-run! root run output)))
        (is (= evidence (edn/read-string (slurp output))))))))
+
+(deftest rendering-emits-two-standalone-figures
+  (fixture
+   (fn [{:keys [root run output]}]
+     (narrative/render-run! root run output)
+     (let [stem (subs output 0 (- (count output) 3))]
+       (is (.isFile (io/file (str stem ".selection.svg"))))
+       (is (.isFile (io/file (str stem ".cascade.svg"))))
+       (is (str/includes? (slurp output) "![Selection"))
+       (is (str/includes? (slurp output) "![Cascade"))))))
+
+(deftest svg-outputs-are-repeatable-and-cannot-overwrite-evidence
+  (fixture
+   (fn [{:keys [root run output base attempt-dir]}]
+     (narrative/render-run! root run output)
+     (let [snapshot (file-snapshot base)]
+       (narrative/render-run! root run output)
+       (is (= snapshot (file-snapshot base))))
+     (let [svg (:selection (narrative/figure-paths output))
+           retained (retain svg "retained evidence at a colliding SVG path")
+           closed (io/file attempt-dir "007-closed.edn")
+           event (edn/read-string (slurp closed))]
+       (write-record closed (assoc-in event [:payload :judgment :job-texts]
+                                     [{:job-id "author-job" :prompt retained}]))
+       (let [snapshot (file-snapshot base)]
+         (is (thrown-with-msg? clojure.lang.ExceptionInfo #"overwrite retained evidence"
+                              (narrative/render-run! root run output)))
+         (is (= snapshot (file-snapshot base))))))))
+
+(deftest figure-inputs-use-recorded-declines-and-comparison-receipts
+  (fixture
+   (fn [context]
+     (let [{:keys [root run]} (outcome-fixture context)
+           receipt {:status :compared :prediction {:target "M-one"}
+                    :tokens [{:token updater :predicted 0.75 :observed false :verdict :predicted-not-observed}]}
+           b (-> (narrative/load-run root run)
+                 (assoc-in [:trace :cascade-problems :dropped-candidates]
+                           [{:target "M-refused" :candidate :C2 :stage :candidate-admission :reason :no-new-wanted-token}])
+                 (assoc-in [:checkpoints :closed :judgment :token-outcome-comparison] receipt)
+                 (assoc-in [:checkpoints :construction :judgment :cascade :order-structure :shape] :singleton))
+           data (narrative/figure-data b)]
+       (is (= :no-new-wanted-token (get-in data [:selection :declines 0 :reason])))
+       (is (= :singleton (get-in data [:cascade :shape])))
+       (is (= 0.75 (:predicted (first (get-in data [:cascade :outcomes])))))
+       (is (false? (:observed (first (get-in data [:cascade :outcomes])))))
+       (let [refused (assoc-in b [:checkpoints :closed :judgment :token-outcome-comparison]
+                              {:status :refused :prediction {:target "M-one"}})]
+         (is (every? #(nil? (:predicted %)) (get-in (narrative/figure-data refused) [:cascade :outcomes]))))))))
