@@ -379,3 +379,21 @@ the hard-zero refusal, reserved mass, epsilon behavior, F2 counterexample and
 fix-7 diagnosis. This is not a claim that a production focus mechanism passed
 tests. No baseline-failure claim is appropriate for this discovery. Validation
 and the scoped registry warrant are recorded below.
+
+Validation at `c18b982a`, Java 21.0.11 / Clojure 1.11.1:
+
+- `clojure -M:test -m cognitect.test-runner -n futon2.report.focus-discovery-test`:
+  **1 test / 17 assertions / 0 failures / 0 errors**, plus the probe's explicit
+  baseline/normalization assertions during load.
+- Fresh standalone replay exit 0; `cmp` against committed `replay.edn` exit 0
+  (byte-identical). Python AST syntax check passed; discovery command exit 0.
+- `clj-kondo --lint` on the probe and test: 0 errors / 0 warnings. Both passed
+  `futon4/dev/check-parens.el`; `git diff --check` clean.
+- Scoped warrant
+  `test-registry-2a10a80a5e01775ff2a3a438a3a810ab31816c5ec108912a13ba1d5466fd8115`:
+  registered replay **1/17, exit 0**; fresh check `:warrant? true`,
+  `:outside-closure []`. It pins the Clojure probe, both frozen model fixtures
+  and the research test; it does not certify the proposed discovery rule,
+  semantic classifications, or live external embedding snapshots. Commands:
+  `clojure -M -m futon3c.test-registry run /tmp/improve-7-registry.edn` and
+  `check /tmp/improve-7-registry-check.edn` from futon3c, own CLI process.
