@@ -1,0 +1,192 @@
+
+Testing futon2.aif.selection-discrimination-test
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:36)
+1789964661
+expected: (= (:chosen-action d) (get-in a [:winner :action]))
+  actual: (not (= {:id :apparatus/one-authority-per-question, :authority :documented-interpretation, :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}, :guard {:status :interpreted, :operator :and, :clauses [{:status :interpreted, :present #{["M-aif-policy-conditioned-eig" :admission/task-stated]}, :absent #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}}]}, :transition {:status :interpreted, :operator :union, :produces #{["M-aif-policy-conditioned-eig" :hole/h6378c65a4012]}, :authority :documented-interpretation}, :target "M-aif-policy-conditioned-eig"} nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:39)
+1789964661
+expected: (= :acting-policy (:comparison-domain p))
+  actual: (not (= :acting-policy nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:40)
+1789964661
+expected: (= :action (:comparison-domain a))
+  actual: (not (= :action nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:43)
+1789964661
+expected: (= :G (:decided-by p))
+  actual: (not (= :G nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:44)
+1789964661
+expected: (= #{:G} (:decided-by a))
+  actual: (not (= #{:G} nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:45)
+1789964661
+expected: (true? (get-in a [:flips :G :flipped?]))
+  actual: (not (true? nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:46)
+1789964661
+expected: (= :apparatus/done-is-observed-running (get-in a [:flips :G :winner :action :id]))
+  actual: (not (= :apparatus/done-is-observed-running nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:48)
+1789964661
+expected: (approx (double (/ 443 350694)) (get-in p [:contributions :G]))
+  actual: (not (approx 0.001263209521691275 nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:49)
+1789964661
+expected: (true? (:near-tie? p))
+  actual: (not (true? nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:57)
+1789964661
+expected: (and (number? (get-in p [:winner :posterior])) (number? (get-in p [:runner-up :posterior])) (approx (Math/log (/ (get-in p [:winner :posterior]) (get-in p [:runner-up :posterior]))) (get-in p [:contributions :total])))
+  actual: false
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:62)
+1789964661
+expected: (= #{:free-energy :habit :G} (set (keys (:flips a))))
+  actual: (not (= #{:free-energy :habit :G} #{}))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:63)
+1789964661
+expected: (= :computed-not-attached (get-in p [:winner :f-status]))
+  actual: (not (= :computed-not-attached nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:36)
+1789952479
+expected: (= (:chosen-action d) (get-in a [:winner :action]))
+  actual: (not (= {:id :coordination/par-as-obligation, :authority :documented-interpretation, :produces #{["M-expressions-of-interest" :obligation-resolved-through-the-account]}, :guard {:status :interpreted, :operator :and, :clauses [{:status :interpreted, :present #{["M-expressions-of-interest" :premise-refused-before-work]}, :absent #{["M-expressions-of-interest" :obligation-resolved-through-the-account]}}]}, :transition {:status :interpreted, :operator :union, :produces #{["M-expressions-of-interest" :obligation-resolved-through-the-account]}, :authority :documented-interpretation}, :target "M-expressions-of-interest"} nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:39)
+1789952479
+expected: (= :acting-policy (:comparison-domain p))
+  actual: (not (= :acting-policy nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:40)
+1789952479
+expected: (= :action (:comparison-domain a))
+  actual: (not (= :action nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:51)
+1789952479
+expected: (= :habit (:decided-by p))
+  actual: (not (= :habit nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:52)
+1789952479
+expected: (= :robust (:decided-by a))
+  actual: (not (= :robust nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:54)
+1789952479
+expected: (= 0.0 (get-in p [:contributions :G]))
+  actual: (not (= 0.0 nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:55)
+1789952479
+expected: (approx (Math/log 5) (get-in p [:contributions :habit]))
+  actual: (not (approx 1.6094379124341003 nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:56)
+1789952479
+expected: (= :C2 (get-in p [:runner-up :id :id]))
+  actual: (not (= :C2 nil))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:57)
+1789952479
+expected: (and (number? (get-in p [:winner :posterior])) (number? (get-in p [:runner-up :posterior])) (approx (Math/log (/ (get-in p [:winner :posterior]) (get-in p [:runner-up :posterior]))) (get-in p [:contributions :total])))
+  actual: false
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:62)
+1789952479
+expected: (= #{:free-energy :habit :G} (set (keys (:flips a))))
+  actual: (not (= #{:free-energy :habit :G} #{}))
+
+FAIL in (recorded-runs) (selection_discrimination_test.clj:63)
+1789952479
+expected: (= :computed-not-attached (get-in p [:winner :f-status]))
+  actual: (not (= :computed-not-attached nil))
+
+FAIL in (free-energy-sign-and-status) (selection_discrimination_test.clj:95)
+expected: (= {:habit 0.0, :free-energy 4.0, :G -1.0, :total 3.0} (:contributions p))
+  actual: (not (= {:habit 0.0, :free-energy 4.0, :G -1.0, :total 3.0} nil))
+
+FAIL in (free-energy-sign-and-status) (selection_discrimination_test.clj:96)
+expected: (= :free-energy (:decided-by p))
+  actual: (not (= :free-energy nil))
+
+FAIL in (free-energy-sign-and-status) (selection_discrimination_test.clj:97)
+expected: (= #{:free-energy} (:decided-by a))
+  actual: (not (= #{:free-energy} nil))
+
+FAIL in (free-energy-sign-and-status) (selection_discrimination_test.clj:102)
+expected: (= :not-supplied (get-in p [:winner :f-status]))
+  actual: (not (= :not-supplied nil))
+
+FAIL in (free-energy-sign-and-status) (selection_discrimination_test.clj:104)
+expected: (= 0.0 (get-in p [:contributions :free-energy]))
+  actual: (not (= 0.0 nil))
+
+FAIL in (declared-and-undeclared-thresholds) (selection_discrimination_test.clj:71)
+expected: (= :G (:decided-by p))
+  actual: (not (= :G nil))
+
+FAIL in (declared-and-undeclared-thresholds) (selection_discrimination_test.clj:72)
+expected: (= 2.0 (get-in p [:contributions :G]))
+  actual: (not (= 2.0 nil))
+
+FAIL in (declared-and-undeclared-thresholds) (selection_discrimination_test.clj:73)
+expected: (false? (:near-tie? p))
+  actual: (not (false? nil))
+
+FAIL in (declared-and-undeclared-thresholds) (selection_discrimination_test.clj:74)
+expected: (= :threshold-undeclared (get-in (select (simple 0 2) {:beta 1} nil) [:selection-law :policy-comparison :near-tie?]))
+  actual: (not (= :threshold-undeclared nil))
+
+FAIL in (declared-and-undeclared-thresholds) (selection_discrimination_test.clj:77)
+expected: (= :threshold-invalid (get-in (select (simple 0 2) {:beta 1, :near-tie-threshold {:value -1, :status :declared}} nil) [:selection-law :policy-comparison :near-tie?]))
+  actual: (not (= :threshold-invalid nil))
+
+FAIL in (exclusions-and-pooled-single-action) (selection_discrimination_test.clj:116)
+expected: (= :no-competing-action (:runner-up a))
+  actual: (not (= :no-competing-action nil))
+
+FAIL in (exclusions-and-pooled-single-action) (selection_discrimination_test.clj:117)
+expected: (= :robust (:decided-by a))
+  actual: (not (= :robust nil))
+
+FAIL in (exclusions-and-pooled-single-action) (selection_discrimination_test.clj:122)
+expected: (= :compared (get-in d [:selection-law :policy-comparison :status]))
+  actual: (not (= :compared nil))
+
+FAIL in (exclusions-and-pooled-single-action) (selection_discrimination_test.clj:123)
+expected: (= :no-competing-action (get-in d [:selection-law :action-comparison :runner-up]))
+  actual: (not (= :no-competing-action nil))
+
+FAIL in (exact-ties-and-single-action) (selection_discrimination_test.clj:83)
+expected: (= :tie-break (get-in law [:policy-comparison :decided-by]))
+  actual: (not (= :tie-break nil))
+
+FAIL in (exact-ties-and-single-action) (selection_discrimination_test.clj:84)
+expected: (= :tie-break (get-in law [:action-comparison :decided-by]))
+  actual: (not (= :tie-break nil))
+
+FAIL in (exact-ties-and-single-action) (selection_discrimination_test.clj:86)
+expected: (= :no-competing-policy (get-in law [:policy-comparison :status]))
+  actual: (not (= :no-competing-policy nil))
+
+FAIL in (exact-ties-and-single-action) (selection_discrimination_test.clj:87)
+expected: (= :no-competing-action (get-in law [:action-comparison :runner-up]))
+  actual: (not (= :no-competing-action nil))
+
+Ran 5 tests containing 51 assertions.
+41 failures, 0 errors.

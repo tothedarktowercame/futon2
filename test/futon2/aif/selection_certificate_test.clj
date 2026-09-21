@@ -20,8 +20,16 @@
   ;; Both arms cross the same EDN read boundary before byte comparison:
   ;; sets in the original in-memory record can print in another order.
   (doseq [{:keys [ranked beta decision-bytes]} (:cases (baseline))]
-    (is (= (pr-str (edn/read-string decision-bytes))
-           (pr-str (dissoc (select ranked beta) :selection-certificate))))))
+    ;; Precision metadata was added after this historical snapshot. Assert
+    ;; its values explicitly; compare every original decision field unchanged.
+    ;; Only the new diagnostic records are projected away (tested independently
+    ;; against the frozen narrative runs in selection-discrimination-test).
+    (is (= (pr-str (update (edn/read-string decision-bytes) :selection-law
+                          assoc :gamma (/ 1.0 beta) :tau beta :tau-source :declared-beta))
+           (pr-str (-> (select ranked beta)
+                       (dissoc :selection-certificate)
+                       (update :selection-law dissoc
+                               :policy-comparison :action-comparison :near-tie-threshold)))))))
 
 (deftest computed-and-consumed-are-distinct
   (let [{:keys [ranked beta]} (first (:cases (baseline)))

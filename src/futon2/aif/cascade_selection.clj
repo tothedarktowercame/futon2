@@ -156,3 +156,85 @@
                           (if (> m' best-m) [a' m'] best))
                         (first ordered) (rest ordered))]
       {:action a :mass (double m) :tie-break-rule bayes-choice-tie-rule})))
+
+(defn- ordered-masses [m]
+  (sort-by (fn [[id p]] [(- p) (pr-str id)]) (filter (comp pos? val) m)))
+
+(defn- consumed-f [c]
+  ;; Exactly selection-posterior's absent-prefix semantics. Legacy unattached
+  ;; F already carries its neutral consumed value; retain its status below.
+  (if (= :not-supplied (:f-status c)) 0.0 (double (:f c))))
+
+(defn- threshold-record [declaration total]
+  (let [v (:value declaration)
+        status (cond
+                 (nil? declaration) :undeclared
+                 (and (= :declared (:status declaration))
+                      (number? v) (Double/isFinite (double v)) (not (neg? v))) :declared
+                 :else :invalid)]
+    {:near-tie-threshold (if (= :undeclared status) {:status :undeclared} declaration)
+     :near-tie? (case status
+                  :declared (if (number? total) (<= (abs total) v) :no-competing-policy)
+                  :undeclared :threshold-undeclared
+                  :invalid :threshold-invalid)}))
+
+(defn selection-comparisons
+  "Recording only. Compare the top two positive-mass ACTING policies, then
+   diagnose the actual action marginal using the same posterior/Bayes code.
+   Policy ties use printed identity ascending; equal positive contributions
+   use the declared order [:habit :free-energy :G]. Neither chooses an action.
+   Neutralizations preserve zero-support F and non-finite G exclusions: these
+   are support constraints, not finite score contributions. Missing or invalid
+   near-tie declarations are typed telemetry, never new selection gates."
+  [{:keys [beta candidates posterior action-of choice near-tie-threshold]}]
+  (let [by-id (into {} (map (juxt :id identity)) candidates)
+        acting (into {} (filter (fn [[id _]] (some? (get action-of id)))) posterior)
+        [[w wp] [r rp]] (ordered-masses acting)
+        wc (get by-id w) rc (get by-id r)
+        policy-row (fn [c p]
+                     (assoc (select-keys c [:id :habit :f :f-status :computed-f :reason])
+                            :posterior p))
+        terms (when r
+                (let [habit (- (math/log (double (:habit wc))) (math/log (double (:habit rc))))
+                      f (- (consumed-f rc) (consumed-f wc))
+                      g (/ (- (double (:g rc)) (double (:g wc))) (double beta))]
+                  {:habit habit :free-energy f :G g :total (+ habit f g)}))
+        dominant (when terms
+                   (if (zero? (:total terms)) :tie-break
+                       (first (sort-by #(- (get terms %))
+                                       (filter #(pos? (get terms %)) [:habit :free-energy :G])))))
+        policy-record (merge
+                       {:comparison-domain :acting-policy
+                        :status (if r :compared :no-competing-policy)
+                        :winner (policy-row wc wp)
+                        :runner-up (if r (policy-row rc rp) :no-competing-policy)
+                        :contributions terms :decided-by (or dominant :no-competing-policy)
+                        :tie-break-rule :policy-printed-identity-ascending
+                        :contribution-tie-order [:habit :free-energy :G]}
+                       (threshold-record near-tie-threshold (:total terms)))
+        marginal (reduce-kv (fn [m id p] (update m (get action-of id) (fnil + 0.0) p)) {} acting)
+        other (first (remove #(= (key %) (:action choice)) (ordered-masses marginal)))
+        tied? (and other (= (val other) (:mass choice)))
+        flips (into {}
+                    (for [term [:habit :free-energy :G]]
+                      (let [neutral (mapv
+                                     (fn [c]
+                                       (case term
+                                         :habit (assoc c :habit 1.0)
+                                         :free-energy (if (= :zero-support (:f-status c)) c
+                                                        (assoc c :f 0.0 :f-status :attached))
+                                         :G (if (and (number? (:g c)) (Double/isFinite (double (:g c))))
+                                              (assoc c :g 0.0) c))) candidates)
+                            post (selection-posterior {:beta beta :candidates neutral})
+                            active (into {} (filter (fn [[id _]] (some? (get action-of id)))) post)
+                            next-choice (bayes-choice active action-of)]
+                        [term {:flipped? (not= (:action choice) (:action next-choice))
+                               :winner (select-keys next-choice [:action :mass])}])))
+        flipped (into #{} (keep (fn [[term result]] (when (:flipped? result) term))) flips)]
+    {:policy-comparison policy-record
+     :action-comparison
+     {:comparison-domain :action :winner (select-keys choice [:action :mass])
+      :runner-up (if other {:action (key other) :mass (val other)} :no-competing-action)
+      :flips flips :neutralization-support :preserve-exclusions
+      :decided-by (cond tied? :tie-break (seq flipped) flipped :else :robust)
+      :tie-break-rule (:tie-break-rule choice)}}))

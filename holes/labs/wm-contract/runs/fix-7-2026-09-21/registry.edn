@@ -1,0 +1,10 @@
+{:subject-id "WM-narrative-fix-7-selection-discrimination"
+ :repo-root "/home/joe/code/futon2-fix-7"
+ :code-paths ["src/futon2/aif/cascade_selection.clj" "src/futon2/aif/policy.clj"]
+ :test-paths ["test/futon2/aif/selection_discrimination_test.clj"
+              "test/fixtures/narrative-discrimination/1789964661.edn"
+              "test/fixtures/narrative-discrimination/1789952479.edn"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.selection-discrimination-test"]
+ :author "codex-11"
+ :artifact-dir "/home/joe/code/futon2-fix-7/holes/labs/wm-contract/runs/fix-7-2026-09-21"
+ :index-file "/home/joe/code/futon3c/data/test-registry-validation/subjects.ednlog"}
