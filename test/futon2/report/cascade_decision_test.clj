@@ -332,14 +332,13 @@
                               :horizon-steps 3
                               :beta-by-context {:x {:beta 1}}
                               :context-of (fn [_] :x)}})
-        r (wm/cascade-decision
-           assembled
-           ;; this test's own live C: its want token must be in THIS
-           ;; family's domain, or the reachable restriction rightly
-           ;; refuses (see the wire-3 production-state test below).
-           {:live-c {:derived (assoc live-c-fixture
+        ;; This test's C must be in this family's domain.
+        opts {:live-c {:derived (assoc live-c-fixture
                                       :want #{[:A :done]}
-                                      :weights {[:A :done] 1})}})
+                                      :weights {[:A :done] 1})}}
+        r (wm/cascade-decision assembled opts)
+        both (wm/cascade-decision
+              (assoc-in assembled [:problems 1 :cascade-problem :facts :open] true) opts)
         decision (:decision r)
         posterior (get-in decision [:selection-law :posterior])
         by (fn [t id]
@@ -348,11 +347,16 @@
         [_ a-p] (by :A :C1)
         [_ b-p] (by :B :C1)]
     (is (some? a-p))
-    (is (some? b-p))
-    (is (= 2 (count posterior))
-        "only the two nonempty target-qualified candidates are scored")
-    (is (> (double a-p) (double b-p))
-        "A's candidate, whose OWN fact satisfies the guard, carries more posterior mass (lower G)")
+    (is (nil? b-p))
+    (is (= 1 (count posterior))
+        "B cannot borrow A's true fact: its blocked candidate is declined before scoring")
+    (is (= [:B :no-new-wanted-token]
+           ((juxt :target :reason) (first (:dropped-candidates r)))))
+    (is (= {#{} 1} (get-in r [:dropped-candidates 0 :evidence :terminal-wanted-belief])))
+    (is (= #{:A :B} (set (map :target (keys (get-in both [:decision :selection-law :posterior])))))
+        "when each target's OWN fact enables its candidate, both are admitted")
+    (is (= 2 (count (get-in both [:decision :selection-law :action-marginal])))
+        "same pattern id on distinct targets must remain distinct actions")
     (is (= :A (get-in decision [:action :target]))
         "the decision's action carries its :target")
     (is (= :p (-> decision :action :precedence first :id)))

@@ -6016,6 +6016,20 @@
        :source :futon2.aif.live-c/cascade-spec
        :live-c (:live-c live-spec)}})
 
+(defn- cascade-family-parameters
+  "Validate the declared comparison BEFORE admission can remove a target.
+   A declined candidate cannot hide incompatible horizons or temperatures."
+  [problems]
+  (let [Ts (distinct (map #(get-in % [:cascade-problem :horizon-steps]) problems))
+        betas (distinct (map #(get-in % [:cascade-problem :beta]) problems))]
+    (when (not= 1 (count Ts))
+      (throw (ex-info "cascade decision refused"
+                      {:kind :incommensurable-family :horizon-steps (vec Ts)})))
+    (when (not= 1 (count betas))
+      (throw (ex-info "cascade decision refused"
+                      {:kind :incommensurable-family :beta (vec betas)})))
+    {:horizon-steps (first Ts) :beta (first betas)}))
+
 (defn- cascade-decision-admitted
   "Joint cascade decision over ASSEMBLED, the output of
   futon2.aif.cascade-problems/assemble. OPTS is reserved (ignored today).
@@ -6054,19 +6068,7 @@
                   {:status :abstained :refusals (:refusals assembled)})
        :lanes []
        :cascade-problems assembled}
-      (let [Ts (distinct (map #(get-in % [:cascade-problem :horizon-steps])
-                              problems))
-            betas (distinct (map #(get-in % [:cascade-problem :beta]) problems))]
-        (when (not= 1 (count Ts))
-          (throw (ex-info "cascade decision refused"
-                          {:kind :incommensurable-family
-                           :horizon-steps (vec Ts)})))
-        (when (not= 1 (count betas))
-          (throw (ex-info "cascade decision refused"
-                          {:kind :incommensurable-family
-                           :beta (vec betas)})))
-        (let [T (first Ts)
-              beta (first betas)
+      (let [{T :horizon-steps beta :beta} (cascade-family-parameters problems)
               ;; WIRE-3: the derived live C enters the joint preference
               ;; spec. Derived from Joe's three named sources at decision
               ;; time; a STALE C (the corpus changed after the derivation)
@@ -6276,8 +6278,45 @@
                               (assoc :dropped-candidates dropped)))
                           lanes)
              :dropped-candidates dropped
-             :cascade-problems assembled}))))))
+             :cascade-problems assembled})))))
 
+
+(defn- candidate-want-progress
+  "Use the scorer/constructor's rollout, on this target's fresh true facts.
+   The production D initializer currently consumes exactly these facts;
+   prospective carry has no consumption authority. Add-only transitions make
+   positive terminal probability for an initially absent want a new predicted
+   satisfaction. This is a prediction, never an observed discharge."
+  [{:keys [facts want interpretations horizon-steps]} precedence]
+  (if-not (pos-int? horizon-steps)
+    {:reason :candidate-prediction-refused
+     :evidence {:horizon horizon-steps
+                :refusal {:kind :missing-common-horizon}}}
+    (let [initial (set (for [[token value] facts :when (true? value)] token))
+          wanted (set want)
+          initial-wanted (clojure.set/intersection wanted initial)
+          patterns (mapv #(cascade-policy/token-interpretation % (get interpretations %)) precedence)
+          terminal (cascade-manifest/rollout
+                    (constantly patterns) (cascade-manifest/observed-belief initial) horizon-steps)
+          evidence {:horizon horizon-steps :wanted-tokens wanted
+                    :initial-facts facts :initial-state initial
+                    :initial-wanted-tokens initial-wanted
+                    :prediction-source :cascade-model-manifest/rollout
+                    :initialization :fresh-target-facts
+                    :semantics :positive-terminal-probability-of-initially-absent-want}]
+      (if (:status terminal)
+        {:reason :candidate-prediction-refused
+         :evidence (assoc evidence :refusal terminal)}
+        (let [projected (reduce-kv (fn [m state mass]
+                                     (if (pos? mass)
+                                       (update m (clojure.set/intersection wanted state) (fnil + 0) mass)
+                                       m)) {} terminal)
+              new-wanted (clojure.set/difference
+                          (reduce clojure.set/union #{} (keys projected)) initial-wanted)]
+          (when (empty? new-wanted)
+            {:reason :no-new-wanted-token
+             :evidence (assoc evidence :terminal-wanted-belief projected
+                              :new-wanted-tokens new-wanted)}))))))
 
 (defn- admit-cascade-problem
   "Check every executable order before lane construction or scoring. Keep each
@@ -6306,7 +6345,14 @@
                                          (some #{:construction-receipt} missing) :construction-receipt-unmatched
                                          :else :interpretation-receipts-missing)
                                :missing-evidence missing}}
-                    {:candidate pair})))
+                    (if-let [no-progress (candidate-want-progress (:cascade-problem problem) precedence)]
+                      {:decline (merge {:target target :stage :candidate-admission
+                                        :candidate candidate-id
+                                        :missing-evidence [(if (= :no-new-wanted-token (:reason no-progress))
+                                                             :new-wanted-token-within-horizon
+                                                             :prediction-within-declared-horizon)]}
+                                       no-progress)}
+                      {:candidate pair}))))
               pairs)
         admitted (vec (keep :candidate checked))
         declines (vec (keep :decline checked))
@@ -6329,7 +6375,9 @@
   "Admit explicitly paired nonempty constructions, record every decline, then
   score/select only admitted candidates. An all-declined family abstains."
   [assembled opts]
-  (let [admissions (mapv admit-cascade-problem (:problems assembled))
+  (let [_ (when (seq (:problems assembled))
+            (cascade-family-parameters (:problems assembled)))
+        admissions (mapv admit-cascade-problem (:problems assembled))
         dropped (vec (concat (:dropped-candidates assembled)
                              (map (fn [r] {:target (:target r) :stage :assembly
                                            :reason (:kind r) :missing-evidence [(:missing r)]})
