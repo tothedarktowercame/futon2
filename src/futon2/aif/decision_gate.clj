@@ -11,7 +11,9 @@
       own :selection-law :posterior and each candidate's precedence — never
       trusted from :softmax-weights or :chosen-action-mass), and every candidate
       carrying a :construction-receipt and :interpretation-receipts (non-empty
-      whenever the candidate's precedence is non-empty).
+      whenever the candidate's precedence is non-empty). Guard tokens in
+      every candidate carry locators with the fields required by their
+      production observation class (C3-C6).
 
       EMPTY CASCADES TAKE NO ACTION MASS. A candidate with no precedence has
       no first acting pattern; pooling those under a shared nil key let their
@@ -31,7 +33,7 @@
    chosen mass is not the posterior marginal, and a missing β. There is no
    fallback and no silent default: refusing is the only alternative to
    admitting."
-  )
+  (:require [clojure.string :as str]))
 
 (def ^:private allowed-refusal-kinds
   "The closed set of per-target refusal kinds (SPEC §Decision 4)."
@@ -52,6 +54,45 @@
                   {:error :inadmissible-decision
                    :reason reason
                    :detail detail})))
+
+(defn- observation-locator-refusal
+  "Field requirements follow observation-checks' check-path-exists (C3),
+  check-decl-in-file (C4), check-registry-entry (C5), and
+  check-witness-reference (C6). As in their locator-refusal, required values
+  are non-blank strings; extra fields are allowed. This checks the locator,
+  not whether its referenced artifact exists or the observation is true."
+  [locator]
+  (if-not (map? locator)
+    {:kind :invalid-observation-locator}
+    (if-let [fields (case (:class locator)
+                     :C3 [:repo :sha :path]
+                     :C4 [:repo :sha :path :decl]
+                     :C5 [:repo :sha :bundle-path :entry]
+                     :C6 [:repo :sha :path]
+                     nil)]
+      (let [missing (filterv #(let [v (get locator %)]
+                               (not (and (string? v) (not (str/blank? v)))))
+                             fields)]
+        (when (seq missing)
+          {:kind :no-locator :class (:class locator) :missing missing}))
+      {:kind :no-mechanical-check :class (:class locator)})))
+
+(defn- check-guard-locators!
+  [candidate]
+  (let [tokens (set (mapcat (fn [pattern]
+                              (mapcat #(concat (:present %) (:absent %))
+                                      (get-in pattern [:guard :clauses])))
+                            (:precedence candidate)))
+        refusals (into {} (keep (fn [token]
+                                 (when-let [r (observation-locator-refusal
+                                               (get (:observation-locators candidate) token))]
+                                   [token r]))) tokens)]
+    (when (seq refusals)
+      (refuse! :missing-observation-locators
+               {:candidate-id (or (:id candidate) (:cascade-id candidate))
+                :target (:target candidate)
+                :missing-tokens (vec (sort-by pr-str (keys refusals)))
+                :locator-refusals refusals}))))
 
 (defn- first-acting-pattern
   "The enacted step of a cascade candidate: its first acting pattern (the
@@ -93,7 +134,8 @@
                (empty? (:interpretation-receipts candidate)))
       (refuse! :empty-interpretation-receipts
                {:candidate candidate
-                :precedence-count (count (:precedence candidate))}))))
+                :precedence-count (count (:precedence candidate))}))
+    (check-guard-locators! candidate)))
 
 (defn- marginal-mass
   "Sum the recorded posterior over candidates whose first acting pattern is

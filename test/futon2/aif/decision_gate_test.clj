@@ -10,7 +10,8 @@
   :reason, not just that something threw."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.decision-gate :as gate]
-            [futon2.aif.policy :as policy]))
+            [futon2.aif.policy :as policy]
+            [futon2.aif.observation-checks :as observations]))
 
 ;; --- tick 1 (06-R5.edn) candidates, with receipts --------------------------
 
@@ -222,3 +223,83 @@
     (is (some? (:chosen-action decision)) "the selector chose an acting cascade")
     (is (= decision (gate/emit! decision))
         "and the gate admits it rather than preferring the excluded nil mass")))
+
+
+(defn- located-guard-decision [locator]
+  (let [pattern {:id :guarded :guard {:status :interpreted :operator :and
+                                     :clauses [{:present #{:present-token}
+                                                :absent #{:absent-token}}]}}
+        action (assoc (cascade-action :guarded [pattern])
+                      :observation-locators {:present-token locator
+                                             :absent-token locator})]
+    (policy/select-action-cascades [{:action action :controller-score 1.0}]
+                                   {:beta 1.0})))
+
+(defn- locator-error [decision]
+  (try (gate/emit! decision) nil
+       (catch clojure.lang.ExceptionInfo e (ex-data e))))
+
+(def ^:private class-locators
+  ;; Real checkout references let the production handlers exercise their own
+  ;; field checks. Artifact presence is separate from locator admissibility.
+  {:C3 {:class :C3 :repo "futon2" :sha "HEAD" :path "deps.edn"}
+   :C4 {:class :C4 :repo "futon2" :sha "HEAD"
+        :path "src/futon2/aif/decision_gate.clj" :decl "(ns futon2.aif.decision-gate"}
+   :C5 {:class :C5 :repo "futon2" :sha "HEAD"
+        :bundle-path "nonexistent-locator-test-bundle.json" :entry "contract"}
+   :C6 {:class :C6 :repo "futon2" :sha "HEAD" :path "nonexistent-locator-test-witness.edn"}})
+
+(deftest guard-locators-discriminate-by-production-observation-class
+  (doseq [[class locator] class-locators]
+    (testing (str class " admits its own fields, without imposing another class's")
+      (let [decision (located-guard-decision locator)
+            result ((get observations/checks class) locator)]
+        (is (= decision (gate/emit! decision)))
+        (is (not= :no-locator (:kind result)) (pr-str result))
+        (is (or (contains? result :observed) (= :bundle-not-found (:kind result))))))
+    ;; Test every required field, absent and present with invalid values.
+    ;; The real production handler is the oracle; none of its ports are stubbed.
+    (doseq [field (keys (dissoc locator :class))
+            bad [::absent nil "" "  " 17]]
+      (let [broken (if (= ::absent bad) (dissoc locator field) (assoc locator field bad))
+            actual ((get observations/checks class) broken)
+            error (locator-error (located-guard-decision broken))]
+        (is (= :no-locator (:kind actual)))
+        (is (= :inadmissible-decision (:error error)))
+        (is (= :missing-observation-locators (:reason error)))
+        (doseq [token [:present-token :absent-token]]
+          (is (= (:missing (:data actual))
+                 (get-in error [:detail :locator-refusals token :missing])))))))
+  (testing "generic path fields cannot stand in for C5 bundle-path and entry"
+    (let [error (locator-error (located-guard-decision
+                                {:class :C5 :repo "futon2" :sha "HEAD" :path "deps.edn"}))]
+      (is (= :missing-observation-locators (:reason error)))
+      (is (= [:bundle-path :entry]
+             (get-in error [:detail :locator-refusals :present-token :missing])))))
+  (testing "extra fields are permitted by handlers and gate"
+    (let [decision (located-guard-decision (assoc (:C5 class-locators) :path "extra"))]
+      (is (= decision (gate/emit! decision))))))
+
+(deftest missing-empty-and-unsupported-guard-locators-refuse-typed
+  (doseq [[locator kind] [[nil :invalid-observation-locator]
+                          ["unsupported" :invalid-observation-locator]
+                          [{} :no-mechanical-check]
+                          [{:class :J :repo "futon2" :sha "HEAD" :path "deps.edn"}
+                           :no-mechanical-check]]]
+    (let [error (locator-error (located-guard-decision locator))]
+      (is (= :inadmissible-decision (:error error)))
+      (is (= :missing-observation-locators (:reason error)))
+      (is (= [:absent-token :present-token] (get-in error [:detail :missing-tokens])))
+      (is (= kind (get-in error [:detail :locator-refusals :present-token :kind]))))))
+
+
+(deftest guard-locator-validation-covers-unselected-candidates-and-missing-maps
+  (let [good (:action (located-guard-decision (:C3 class-locators)))
+        bad (-> good (assoc :cascade-id :unlocated) (dissoc :observation-locators))
+        decision (policy/select-action-cascades
+                   [{:action good :controller-score 1.0}
+                    {:action bad :controller-score 10.0}] {:beta 1.0})
+        error (locator-error decision)]
+    (is (= good (:action decision)))
+    (is (= :missing-observation-locators (:reason error)))
+    (is (= :unlocated (get-in error [:detail :candidate-id])))))
