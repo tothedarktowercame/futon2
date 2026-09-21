@@ -1,0 +1,281 @@
+{:replays
+ [{:utility-law-changes
+   {:all-consumed-weights-sum-one
+    {:G [14.879814080965762 14.887215547893067 14.887466161897377],
+     :spread 0.0076520809316154015,
+     :G-odds-factor 1.0076814329230799},
+    :projected-live-weights-sum-one-fallback-unchanged
+    {:G [15.382919933140176 15.69844699866724 15.709130759351002],
+     :spread 0.32621082621082564,
+     :G-odds-factor 1.3857074815368446},
+    :each-target-weights-sum-one
+    {:G [15.639353935572451 15.472687268905787 15.972687268905787],
+     :spread 0.5,
+     :G-odds-factor 1.6487212707001282}},
+   :universe-size 11,
+   :run "1789964661",
+   :source-entries 468,
+   :fallback-weights
+   {["M-wm-08-external-f2" :route-a-rehearsal-reported] 1/6},
+   :wanted-tokens 6,
+   :all-consumed-total 19951/116898,
+   :projected-live-total 78/19483,
+   :projected-tokens 5,
+   :current
+   {:G [15.170069253169533 15.171332462691225 15.171375235022659],
+    :spread 0.0013059818531253597,
+    :G-odds-factor 1.0013068350187915},
+   :sha256
+   "8264021ac5f5bc6c251720917c69375795fcc9e1a4a5f263694b6efe51142686",
+   :projected-sources 3,
+   :outcome-renormalization-only
+   {:terminal-outcomes 3,
+    :terminal-risk
+    [1.0977560750757327 1.099019284597424 1.0990620569288583],
+    :spread 0.0013059818531255818},
+   :marginal-varying-only
+   {:token-count 2, :spread 0.001305981853125517}}
+  {:utility-law-changes
+   {:all-consumed-weights-sum-one
+    {:G
+     [170.91771329536726
+      170.91771329536726
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395
+      170.94564146046395],
+     :spread 0.027928165096682278,
+     :G-odds-factor 1.0283218123701898},
+    :projected-live-weights-sum-one-fallback-unchanged
+    {:G
+     [170.98093971543744
+      170.98093971543744
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078
+      171.03916434159078],
+     :spread 0.05822462615333279,
+     :G-odds-factor 1.0599530621503763},
+    :each-target-weights-sum-one
+    {:G
+     [180.1364667922529
+      180.1364667922529
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955
+      180.80313345891955],
+     :spread 0.6666666666666572,
+     :G-odds-factor 1.9477340410546573}},
+   :universe-size 123,
+   :run "1789952479",
+   :source-entries 468,
+   :fallback-weights
+   {["M-canon-fingerprint-store" :hole/hae4a98689e37] 1/120,
+    ["M-canon-fingerprint-store" :hole/hf6110df5c7b0] 1/120,
+    ["M-canon-fingerprint-store" :hole/hb0224092661b] 1/120,
+    ["M-canon-fingerprint-store" :hole/h72b677883cde] 1/120,
+    ["M-canon-fingerprint-store" :hole/h3b2303097926] 1/120,
+    ["M-canon-fingerprint-store" :hole/h61f4c17570aa] 1/120,
+    ["M-wm-08-external-f2" :route-a-rehearsal-reported] 1/120},
+   :wanted-tokens 120,
+   :all-consumed-total 87367/779320,
+   :projected-live-total 3143/58449,
+   :projected-tokens 113,
+   :current
+   {:G
+    [170.558868022824
+     170.558868022824
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495
+     170.56199895748495],
+    :spread 0.0031309346609589284,
+    :G-odds-factor 1.0031358411561868},
+   :sha256
+   "031ec7431af2939bdfa15ca941e28cc23e6ec3b2264d99dc8b65b00c82b2e298",
+   :projected-sources 26,
+   :outcome-renormalization-only
+   {:terminal-outcomes 3,
+    :terminal-risk
+    [1.0975697325965572
+     1.0975697325965572
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437
+     1.1007006672575437],
+    :spread 0.003130934660986462},
+   :marginal-varying-only
+   {:token-count 3, :spread 0.003130934660986501}}],
+ :disposition
+ {:pinned
+  {:sample-size 3,
+   :support
+   [:abstained
+    :agent-unavailable
+    :artifact-only
+    :build-failed
+    :cancelled
+    :dispatch-failed
+    :grounded-change
+    :grounded-no-change
+    :guardrail-refusal
+    :incomplete
+    :no-selection
+    :substrate-unavailable],
+   :source
+   {:ledger "holes/labs/M-aif-full-loop-46/ledger.edn",
+    :sha256
+    "1f195e907fe9ab77b576a9973a058ada6e9c61510ef70309a8803744b13f8044"},
+   :conditioning
+   {:grain :checkpoint-trajectory,
+    :reason
+    "The cohort ledger retains an ordered checkpoint trajectory but no channel-valued observation vector; action and payload fields are not substituted for observations."},
+   :risk 0.6931471805599453},
+  :refitted
+  {:sample-size 3,
+   :support
+   [:abstained
+    :agent-unavailable
+    :artifact-only
+    :build-failed
+    :cancelled
+    :dispatch-failed
+    :grounded-change
+    :grounded-no-change
+    :guardrail-refusal
+    :historical-verification-awaiting-validation
+    :historical-verification-refused
+    :incomplete
+    :no-selection
+    :substrate-unavailable],
+   :source
+   {:ledger "holes/labs/M-aif-full-loop-46/ledger.edn",
+    :sha256
+    "1f195e907fe9ab77b576a9973a058ada6e9c61510ef70309a8803744b13f8044"},
+   :supported-outcomes [:grounded-change],
+   :conditioning
+   {:grain :checkpoint-trajectory,
+    :reason
+    "The cohort ledger retains an ordered checkpoint trajectory but no channel-valued observation vector; action and payload fields are not substituted for observations."},
+   :refusal
+   {:distribution :predicted,
+    :outside
+    [:historical-verification-awaiting-validation
+     :historical-verification-refused],
+    :reason :outcome-outside-disposition-support,
+    :refused? true}}},
+ :patterns
+ {:root "/home/joe/code/futon3/library",
+  :files 1404,
+  :inventory-sha256
+  "4df1162e35ed3f4bc95c003e039742661d9d248540a63d9e43e07b364bc3ce09",
+  :header-counts
+  {"aif-delta" 5,
+   "benefit" 0,
+   "confidence" 6,
+   "cost" 0,
+   "energy" 8,
+   "epistemic-value" 10,
+   "hamming-weight" 256,
+   "how" 647,
+   "odds" 0,
+   "preference" 0,
+   "priority" 0,
+   "probability" 0,
+   "score" 0,
+   "utility" 0,
+   "violation-signature" 71,
+   "weight" 0,
+   "why" 932}},
+ :validation
+ "All 27 frozen Gs reproduce within 1e-8. Shared outcome conditioning and removal of fixed coordinates preserve spread; utility renormalizations are distinct C changes."}
