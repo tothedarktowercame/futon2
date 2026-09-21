@@ -281,3 +281,86 @@
              (catch Exception e
                {:status :refused :authority authority :scope scope
                 :kind (or (:d-predecessor/refusal (ex-data e)) :task-evidence-unavailable)}))))))
+
+(def observation-authority :d-task-token-observations-v2)
+(def observation-scope
+  {:certifies :revision-bound-checkable-observations
+   :does-not-establish #{:causal-attribution :mission-completion
+                        :belief-conditioning :machine-enactment-correspondence}})
+
+(defn- checked-observation [locator]
+  (case (:class locator)
+    :C3 (observation/check-path-exists locator)
+    :C4 (observation/check-decl-in-file locator)
+    {:status :missing :kind :revision-pair-reader-unavailable}))
+
+(defn- observation-value [result]
+  (if (boolean? (:observed result))
+    (:observed result)
+    {:status :missing :kind (or (:kind result) :observation-unavailable)}))
+
+(defn- signed-observations [record]
+  (let [dispatch (:dispatch record)
+        rows (group-by :token (:after-token-evidence record))
+        final (get-in record [:revision-pair :after])]
+    (into
+     (sorted-map-by #(compare (pr-str %1) (pr-str %2)))
+     (for [[target token :as qualified] (sort-by pr-str (:universe dispatch))]
+       (let [declarations (filter #(= target (get-in % [:snapshot :target])) (:declarations dispatch))
+             _ (require! (= 1 (count declarations)) :observation-declaration-ambiguous {:token qualified})
+             {:keys [snapshot sha256]} (first declarations)
+             declared (set (concat (:facts snapshot) (:want snapshot) (keys (:locators snapshot))))
+             _ (require! (contains? declared token) :observation-token-unbound {:token qualified})
+             locator (get-in snapshot [:locators token])
+             matches (get rows qualified)
+             _ (require! (<= (count matches) 1) :observation-token-ambiguous {:token qualified})
+             measurement (first matches)
+             result (or (:result measurement) {:status :missing :kind :no-locator})
+             _ (when (boolean? (:observed result))
+                 (require! (and (= final (get-in result [:evidence :resolved-sha]))
+                                (= sha256 (:declaration-sha256 measurement))
+                                (= locator (:declared-locator measurement)))
+                           :observation-artifact-binding-mismatch {:token qualified}))
+             ;; A revision-pair measurement is NOT the pinned historical proposition.
+             ;; Preserve both questions, including missing historical revisions.
+             historical? (and (string? (:sha locator)) (not= "HEAD" (:sha locator)))
+             meaning {:token qualified :declaration-sha256 sha256 :locator locator}
+             schedule (cascade-sources/observation-schedule snapshot)]
+         [qualified
+          (cond-> {:meaning meaning :meaning-sha256 (evidence/value-digest meaning)
+                   :schedule schedule :schedule-sha256 (evidence/value-digest schedule)
+                   :artifact-observation {:temporal-scope :artifact-revision
+                                          :artifact-sha final :observed (observation-value result)
+                                          :measurement measurement
+                                          :evidence-sha256 (evidence/value-digest result)}
+                   :consumption :not-authorized}
+            historical?
+            (assoc :declared-revision-observation
+                   (let [historical (checked-observation locator)]
+                     {:temporal-scope :declared-revision :locator locator
+                      :observed (observation-value historical) :result historical
+                      :evidence-sha256 (evidence/value-digest historical)})))])))))
+
+(defn verify-observations-v2
+  "Opt-in signed observations, with unchanged v1 execution verification first.
+   V1 producers/readers and their byte representation remain untouched. This
+   projection grants no scheduled conditioning or causal authority."
+  [record expected read-job]
+  (try
+    (let [execution (verify! record expected read-job)]
+      {:schema :wm/d-task-token-observations-v2 :status :admitted
+       :authority observation-authority :scope observation-scope
+       :execution-verification execution
+       :occurrence (:occurrence execution)
+       :carry-occurrence-id (:carry-occurrence-id execution)
+       :universe (get-in record [:dispatch :universe])
+       :revision-pair (:revision-pair record)
+       :record-sha256 (evidence/value-digest record)
+       :observations (signed-observations record)
+       :causal-attribution :independent-check-required
+       :consumption :not-authorized})
+    (catch clojure.lang.ExceptionInfo e
+      {:schema :wm/d-task-token-observations-v2
+       :status :refused :authority observation-authority :scope observation-scope
+       :kind (or (:d-predecessor/refusal (ex-data e)) :observation-input-invalid)
+       :detail (ex-data e)})))
