@@ -1848,6 +1848,8 @@
   ([role evidence-dir author reviewer]
    (evidence-deposit-instruction role evidence-dir author reviewer false))
   ([role evidence-dir author reviewer measured-acquisition?]
+   (evidence-deposit-instruction role evidence-dir author reviewer measured-acquisition? nil))
+  ([role evidence-dir author reviewer measured-acquisition? target]
   (when evidence-dir
     (str "\nDEPOSIT INSTRUCTION ("
          (if measured-acquisition?
@@ -1867,10 +1869,21 @@
                 (when measured-acquisition?
                   (str "MEASURED-ONLY ADDITION: for EVERY repair id under data/wm-repair-obligations/resolutions/ whose resolution embeds a :successor-relation, also deposit a supporting-resolved-*.edn revision pair with :entity/id set to THAT repair id (:before = its findings/ bytes, :after = its resolutions/ bytes; supporting-* naming because it is not the selected target). These retained-store captures are observation evidence for the later boundary; they cannot be reconstructed after the cutoff.\n")))
            :reviewer
-           (str "REVIEWER " reviewer " (not author " author ") deposits the same-target standing decision:\n"
-                ":wm/target-standing-decision-v1 keys [:schema :entity/id :decision :decided-by :implementation-author :decided-at :evidence].\n"
-                "Include a review-grade :explanation of at least 80 characters.\n"
-                "Set :decided-by to your reviewer id and :implementation-author to " author "; a self-decided record refuses.\n"))
+           ;; A key list alone was not enough: on 2026-09-21 (run
+           ;; 2026-09-21-1790033693) a fresh reviewer seat wrote :decision
+           ;; :approve, nested :explanation under a map-valued :evidence and
+           ;; used its own :entity/id, and the close refused a grounded change
+           ;; as :explanation-invalid. Give the exact shape.
+           (str "REVIEWER " reviewer " (not author " author ") deposits the same-target standing decision, exactly this shape (one flat map, these eight keys, no others):\n"
+                "{:schema :wm/target-standing-decision-v1\n"
+                " :entity/id " (if target (pr-str target) "\"<the selected target, exactly>\"") "\n"
+                " :decision :resolved   ; or :still-live -- :resolved = this target's stated work is now done; :still-live = it remains open. Not your review verdict.\n"
+                " :decided-by " (pr-str reviewer) "\n"
+                " :implementation-author " (pr-str author) "\n"
+                " :decided-at \"<ISO-8601 instant, e.g. 2026-09-21T23:43:25Z>\"\n"
+                " :evidence [\"<commit sha>\" \"<other evidence id>\"]   ; a non-empty VECTOR of strings\n"
+                " :explanation \"<review-grade prose, at least 80 characters>\"}   ; top level, not inside :evidence\n"
+                ":entity/id must be the target exactly; :decided-by must differ from :implementation-author (a self-decided record refuses).\n"))
          "Any invalid deposit refuses the whole close: deposit carefully or not at all.\n"
          "EVERY non-EDN file must be referenced by exactly one record's :file/:stdout-file/:stderr-file field; an unreferenced byproduct (cohort-55 attempt-003: a stray derived.stderr) is parsed as EDN, fails, and refuses the whole close.\n"))))
 
@@ -1999,7 +2012,7 @@
          (str "Prior STOP-THE-LINE findings to discharge explicitly: "
               (pr-str (prompt-findings stop-lines)) "\n"))
        (evidence-deposit-instruction :reviewer attempt-evidence-dir author reviewer
-                                     measured-acquisition?)
+                                     measured-acquisition? target)
        "\n"
        "Inspect the commit rather than trusting the summary. Verify that it is substantive "
        "rather than artifact-only, is in scope for the selected target, preserves invariants, "
@@ -2084,7 +2097,7 @@
          (str "Prior STOP-THE-LINE findings remain in force: "
               (pr-str (prompt-findings stop-lines)) "\n"))
        (evidence-deposit-instruction :reviewer attempt-evidence-dir author reviewer
-                                     measured-acquisition?)
+                                     measured-acquisition? target)
        "\nInspect the amendment commit and its delta from the prior reviewed commit. "
        "Do not edit or commit. Execute the repository-required static checks and "
        "relevant tests yourself; an APPROVE without executed tool evidence is invalid.\n\n"

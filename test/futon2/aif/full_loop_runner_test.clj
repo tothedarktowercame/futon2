@@ -20,6 +20,7 @@
             [futon2.aif.preference-audit :as preference-audit]
             [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.run-ending-classification :as run-ending]
+            [futon2.aif.limb-evidence :as limb-evidence]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.full-loop-cohort :as cohort]
@@ -1210,7 +1211,7 @@
       (is (not (re-find #":wm/target-standing-decision-v1" prompt))))
     (doseq [prompt [reviewer revision-reviewer]]
       (is (re-find #":wm/target-standing-decision-v1" prompt))
-      (is (re-find #":explanation of at least 80 characters" prompt))
+      (is (re-find #":explanation \"<review-grade prose, at least 80 characters>\"}   ; top level" prompt))
       (is (re-find #"a self-decided record refuses" prompt))
       (is (not (re-find #":wm/limb-receipt-v1" prompt))))))
 
@@ -6047,3 +6048,25 @@
     (is (run-ending/verify-close close receipt))
     (is (= receipt (edn/read-string (slurp (:source-path entry)))))
     (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))))
+
+(deftest reviewer-standing-template-passes-the-close-validator
+  ;; Run 2026-09-21-1790033693 lost a grounded change because the reviewer
+  ;; prompt listed keys but not the shape the close validates. Pin the prompt
+  ;; to the validator: fill the template's placeholders and validate it.
+  (let [target "M-aif-policy-conditioned-eig"
+        text (#'runner/evidence-deposit-instruction
+              :reviewer "/tmp/evidence" "wm-author" "wm-reviewer" false target)
+        template (subs text (str/index-of text "{:schema :wm/target-standing-decision-v1")
+                       (inc (str/index-of text "}" (str/index-of text ":explanation"))))
+        filled (-> template
+                   (str/replace #";[^\n]*" "")
+                   (str/replace "\"<ISO-8601 instant, e.g. 2026-09-21T23:43:25Z>\""
+                                "\"2026-09-21T23:43:25Z\"")
+                   (str/replace "[\"<commit sha>\" \"<other evidence id>\"]"
+                                "[\"aeb352f87368fb3280b3fb92ddd8e7f7c5fccc08\"]")
+                   (str/replace "\"<review-grade prose, at least 80 characters>\""
+                                (pr-str (apply str (repeat 90 "x")))))
+        record (edn/read-string filled)]
+    (is (= target (:entity/id record)))
+    (is (= record (limb-evidence/validate-standing-decision record)))
+    (is (not (str/includes? filled "<")))))
