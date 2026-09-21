@@ -1,0 +1,14 @@
+(require '[futon2.aif.full-loop-cohort :as c]
+         '[futon2.aif.full-loop-cohort-test :as t]
+         '[clojure.java.io :as io])
+(let [root (t/tmp-root)
+      _ (c/activate! t/prereg-path root)
+      first-event (t/open! root "same-opportunity")
+      file (io/file root (name (:cohort/id first-event)) (:attempt/id first-event) "001-time-step.edn")
+      before (try (t/open! root "same-opportunity") :unexpected-admission
+                  (catch Exception e (.getMessage e)))]
+  (spit file "{:unreadable :hole/2f9b03b16170}")
+  (let [after (try (select-keys (t/open! root "same-opportunity") [:attempt/id :attempt/ordinal])
+                   (catch Exception e {:refusal (.getMessage e)}))]
+    (prn {:scratch-root root :before before :after after
+          :history-exclusions (:history-exclusions (c/ledger t/prereg-path root))})))

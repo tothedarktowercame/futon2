@@ -1,0 +1,204 @@
+diff --git a/src/futon2/aif/full_loop_cohort.clj b/src/futon2/aif/full_loop_cohort.clj
+index aa435f0a..d2c79623 100644
+--- a/src/futon2/aif/full_loop_cohort.clj
++++ b/src/futon2/aif/full_loop_cohort.clj
+@@ -310,14 +310,41 @@
+        (sort-by #(.getName %))
+        vec))
+ 
+-(defn attempt-events [attempt-dir]
++(defn- attempt-files [attempt-dir]
+   (->> (or (.listFiles (io/file attempt-dir)) [])
+        (filter #(re-matches #"\d{3}-[a-z-]+\.edn" (.getName %)))
+-       (sort-by #(.getName %))
+-       (mapv #(read-edn (.getPath %)))))
++       (sort-by #(.getName %))))
++
++(defn attempt-events [attempt-dir]
++  ;; Mutation checks remain strict: never append to a partially read attempt.
++  (mapv #(read-edn (.getPath %)) (attempt-files attempt-dir)))
++
++(defn attempt-history
++  "Read historical checkpoints independently, retaining typed exclusions.
++  The target of an unreadable record cannot be recovered from its bytes;
++  the attempt directory identifies the excluded evidence, without guessing
++  a mission. This reader is not used to authorize checkpoint appends."
++  [attempt-dir]
++  (reduce (fn [result file]
++            (let [read-result
++                  (try {:event (read-edn file)}
++                       (catch Exception e
++                         {:exclusion
++                          {:history/status :excluded
++                           :history/refusal :history-discovery-invalid
++                           :target (.getName (io/file attempt-dir))
++                           :target-kind :attempt
++                           :path (.getAbsolutePath file)
++                           :reason :unreadable-or-malformed-record
++                           :error-class (.getName (class e))
++                           :error-message (.getMessage e)}}))]
++              (if-let [exclusion (:exclusion read-result)]
++                (update result :exclusions conj exclusion)
++                (update result :events conj (:event read-result)))))
++          {:events [] :exclusions []} (attempt-files attempt-dir)))
+ 
+ (defn- attempt-outcome [attempt-dir]
+-  (->> (attempt-events attempt-dir)
++  (->> (:events (attempt-history attempt-dir))
+        (filter #(= :closed (:checkpoint/type %)))
+        last
+        :payload
+@@ -329,7 +356,7 @@
+   [attempt-dir]
+   (boolean (some #(and (= :time-step (:checkpoint/type %))
+                        (true? (:cohort/beyond-window? %)))
+-                 (attempt-events attempt-dir))))
++                 (:events (attempt-history attempt-dir)))))
+ 
+ (defn- cohort-attempt-dir? [attempt-dir]
+   ;; Two kinds of attempt keep their immutable dossier without consuming the
+@@ -350,7 +377,7 @@
+        (not (beyond-window-attempt? attempt-dir))))
+ 
+ (defn- all-events [dir]
+-  (mapcat attempt-events (attempt-dirs dir)))
++  (mapcat #(-> % attempt-history :events) (attempt-dirs dir)))
+ 
+ (defn- opened-opportunity-ids [dir]
+   (->> (all-events dir)
+@@ -505,6 +532,12 @@
+                            (max (next-global-attempt-number data-root)
+                                 (inc (count all-attempt-dirs))))
+                attempt-dir (io/file dir attempt-id)
++               exclusions (vec (mapcat #(-> % attempt-history :exclusions)
++                                       all-attempt-dirs))
++               cell (if (seq exclusions)
++                      (update-in cell [:judgment :history-exclusions]
++                                 #(vec (distinct (concat % exclusions))))
++                      cell)
+                event (cond-> (event-record p attempt-id ordinal 1 :time-step cell)
+                        beyond-window?
+                        (assoc :cohort/beyond-window? true
+@@ -597,7 +630,7 @@
+      (append-checkpoint! prereg-path data-root attempt-id :closed cell))))
+ 
+ (defn attempt-summary [attempt-dir]
+-  (let [events (attempt-events attempt-dir)
++  (let [{:keys [events exclusions]} (attempt-history attempt-dir)
+         close (last (filter #(= :closed (:checkpoint/type %)) events))
+         selection (last (filter #(= :selection (:checkpoint/type %)) events))
+         build (last (filter #(= :build (:checkpoint/type %)) events))
+@@ -618,7 +651,8 @@
+                                     (:commit artifact-binding)))
+                      (:commit artifact-binding))
+      :typed-sorries (count (filter #(typed-sorry? (:payload %)) events))
+-     :checkpoints (mapv :checkpoint/type events)}))
++     :checkpoints (mapv :checkpoint/type events)
++     :history-exclusions exclusions}))
+ 
+ (defn ledger
+   ([] (ledger default-preregistration default-data-root))
+@@ -654,6 +688,7 @@
+       :attempts attempts
+       :recorded-attempt-count (count recorded-attempts)
+       :recorded-attempts recorded-attempts
++      :history-exclusions (vec (mapcat :history-exclusions recorded-attempts))
+       :semantic-strata
+       [{:stratum/id :post-preregistration/cancelled
+         :reason :outcome-not-in-preregistered-cohort-taxonomy
+@@ -869,8 +904,12 @@
+       (throw (ex-info "Cohort lineage exceeds its bound"
+                       {:reason :cohort-lineage-runaway :from (:cohort-id binding)})))
+     (let [raw (slurp (:preregistration b))
+-          parent (edn/read-string raw)]
+-      (if (pos? (:remaining (ledger (:preregistration b) (:data-root b))))
++          parent (edn/read-string raw)
++          state (ledger (:preregistration b) (:data-root b))
++          exclusions (vec (distinct (concat (:history-exclusions b)
++                                            (:history-exclusions state))))
++          b (cond-> b (seq exclusions) (assoc :history-exclusions exclusions))]
++      (if (pos? (:remaining state))
+         b
+         (let [succ-path (sibling-path (:preregistration b))]
+           (if (.exists (io/file succ-path))
+@@ -885,9 +924,11 @@
+               (recur {:preregistration succ-path
+                       :data-root (sibling-path (:data-root b))
+                       :cohort-id (:cohort/id succ)
+-                      :sha256 (sha256 sraw)}
++                      :sha256 (sha256 sraw)
++                      :history-exclusions exclusions}
+                      (inc n)))
+-            (recur (succeed! (:preregistration b) (:data-root b)) (inc n))))))))
++            (recur (cond-> (succeed! (:preregistration b) (:data-root b))
++                     (seq exclusions) (assoc :history-exclusions exclusions)) (inc n))))))))
+ 
+ (defn execution-preflight
+   "Read-only pinned cohort identity, activation and capacity validation.
+diff --git a/src/futon2/aif/full_loop_runner.clj b/src/futon2/aif/full_loop_runner.clj
+index 7eed5848..148061b5 100644
+--- a/src/futon2/aif/full_loop_runner.clj
++++ b/src/futon2/aif/full_loop_runner.clj
+@@ -545,7 +545,7 @@
+                      (:execution-cohort raw-opts)
+                      (assoc :execution-cohort
+                             (select-keys (:execution-cohort raw-opts)
+-                                         [:cohort-id :sha256]))
++                                         [:cohort-id :sha256 :history-exclusions]))
+                      (:execution-identity result)
+                      (assoc :runner-execution/identity
+                             (:execution-identity result)
+@@ -3173,6 +3173,8 @@
+                                                            :repair-reviewer :trigger
+                                                            :semantic-epoch])))
+                          :semantic-epoch semantic-epoch}
++                          (seq (:history-exclusions execution-cohort))
++                          (assoc :history-exclusions (:history-exclusions execution-cohort))
+                           execution-authority
+                           (assoc :execution-authority execution-authority))
+                         {:kind :trigger-opportunity :id opportunity-id})
+diff --git a/test/futon2/aif/full_loop_cohort_test.clj b/test/futon2/aif/full_loop_cohort_test.clj
+index 638ef4be..018f4685 100644
+--- a/test/futon2/aif/full_loop_cohort_test.clj
++++ b/test/futon2/aif/full_loop_cohort_test.clj
+@@ -847,3 +847,40 @@
+         (is (= valid (:valid saved)))
+         (is (= :non-edn-payload (get-in saved [:runtime :payload/status])))
+         (is (not (re-find #"[\p{Cc}\p{Cf}]" (get-in saved [:runtime :summary]))))))))
++
++(deftest unreadable-history-is-recorded-without-killing-initialization
++  (let [root (tmp-root)
++        _ (cohort/activate! prereg-path root)
++        first-event (open! root "history/poisoned")
++        attempt (:attempt/id first-event)
++        dir (io/file root (name (:cohort/id first-event)) attempt)
++        poison (io/file dir "002-selection.edn")
++        quarantine (io/file "/home/joe/code/futon2/data/wm-quarantine/machinery-67-attempt-001/002-selection.edn")
++        original (slurp quarantine)
++        binding {:preregistration prereg-path :data-root root
++                 :cohort-id (:cohort/id first-event)
++                 :sha256 (@#'cohort/sha256 (slurp prereg-path))}]
++    (io/copy quarantine poison)
++    (let [history (cohort/attempt-history dir)
++          exclusion (first (:exclusions history))
++          resolved (cohort/resolve-lineage! binding)
++          next-event (open! root "history/next")
++          state (cohort/ledger prereg-path root)
++          next-path (io/file root (name (:cohort/id next-event))
++                             (:attempt/id next-event) "001-time-step.edn")]
++      (is (= [first-event] (:events history)) "readable control is consumed")
++      (is (= 1 (count (:exclusions history))))
++      (is (= :history-discovery-invalid (:history/refusal exclusion)))
++      (is (= :unreadable-or-malformed-record (:reason exclusion)))
++      (is (= attempt (:target exclusion)))
++      (is (= (.getAbsolutePath poison) (:path exclusion)))
++      (is (= [exclusion] (:history-exclusions resolved)))
++      (is (= [exclusion] (:history-exclusions state)))
++      (is (= 2 (:attempt-count state)) "damaged attempt still consumes its opportunity")
++      (is (= [exclusion] (get-in next-event [:payload :judgment :history-exclusions])))
++      (is (= next-event (cohort/read-edn next-path)) "persisted exclusion round-trips")
++      (is (= exclusion (edn/read-string (pr-str exclusion)))))
++    (is (thrown? RuntimeException (cohort/attempt-events dir))
++        "strict append reader must not silently skip damaged active checkpoints")
++    (is (= original (slurp quarantine)))
++    (is (= original (slurp poison)))))

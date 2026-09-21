@@ -1,0 +1,4 @@
+src/futon2/aif/full_loop_runner.clj:1825:19: info: Single argument to str already is a string
+test/futon2/aif/full_loop_cohort_test.clj:851:1: error: Found an opening ( with no matching )
+test/futon2/aif/full_loop_cohort_test.clj:887:1: error: Expected a ) to match ( from line 851
+linting took 202ms, errors: 2, warnings: 0
