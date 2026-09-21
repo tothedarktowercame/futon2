@@ -98,6 +98,7 @@
 (deftest missing-evaluator-rejected-review-and-real-store-refusal
   (doseq [[alter expected]
           [[#(assoc % :evaluators {}) :evidence-unavailable]
+           [#(assoc % :author "") :review-not-approved]
            [#(assoc % :read-job (assoc (:read-job %) "review-A"
                                       (assoc (get (:read-job %) "review-A") :result "FULL_LOOP_REVIEW: REJECT")))
             :review-not-approved]
@@ -166,3 +167,17 @@
       (is (= :receipt-worktree-conflict
              (:reason (receipt/publication-result! root repo "repair-fixture"))))
       (is (= "{:status :resolved}" (slurp path))))))
+
+(deftest a-reviewed-moving-source-reference-is-still-not-a-pin
+  (let [{:keys [repo base finding]} (fixture)
+        locator (get-in base [:evaluators :fixture-kind])
+        declaration (assoc (evidence/read-one (slurp (io/file repo "admission.edn"))) :source-sha "HEAD")
+        revised (commit! repo "admission.edn" (pr-str declaration))
+        reviewed (job "evaluator-job" "evaluator-reviewer"
+                      (str "REPAIR_EVALUATOR_ADMISSION_SHA256: "
+                           (digest/value-digest (dissoc declaration :review-job))))]
+    (is (= :evaluator-source-not-pinned
+           (try (evidence/admitted-evaluator! (assoc locator :sha revised) (:registry base) finding
+                                              (constantly reviewed))
+                nil
+                (catch clojure.lang.ExceptionInfo e (:repair-discharge/refusal (ex-data e))))))))

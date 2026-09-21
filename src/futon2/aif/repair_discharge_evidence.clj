@@ -67,7 +67,8 @@
 
 (defn review! [files author reviewer job]
   (let [gate (assoc (execution/independent-review-evidence files job) :reviewer reviewer)]
-    (require! (and (string? author) (string? reviewer) (not= author reviewer)
+    (require! (and (string? author) (not (str/blank? author))
+                   (string? reviewer) (not (str/blank? reviewer)) (not= author reviewer)
                    (= reviewer (:agent-id job)) (:valid? gate))
               :review-not-approved {:reviewer reviewer :gate gate})
     gate))
@@ -92,6 +93,10 @@
         prompts (str/join "\n" (keep :text (filter #(= "prompt" (:type %)) (:events job))))]
     (require! (= :wm/repair-evaluator-admission-v1 (:schema admission)) :evaluator-admission-invalid {})
     (require! (= failure-kind (:failure-kind finding)) :evaluator-kind-mismatch {})
+    (require! (and (string? source-sha) (re-matches #"[0-9a-f]{40}" source-sha)
+                   (= source-sha (str/trim (git! repo "rev-parse" "--verify" "--end-of-options"
+                                               (str source-sha "^{commit}")))))
+              :evaluator-source-not-pinned {})
     (require! (and implementation (fn? (:evaluate implementation))) :no-repair-evaluator {:evaluator evaluator})
     (require! (and (seq source-paths) (= (set source-paths) (set (keys (:loaded-source implementation)))))
               :evaluator-source-closure-mismatch {})

@@ -1,0 +1,17 @@
+{
+  "role": "pre-commit-validation",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "reason": "A moving source ref does not pin the evaluator reviewed by its admission; reject even with a matching executed review",
+  "sha256": {
+    "src/futon2/aif/repair_discharge_evidence.clj": "5000333b5bd11ebae3de14583ce969d2c938455d9ede6263953707d5e7c87fc3",
+    "test/futon2/aif/repair_discharge_test.clj": "4ceacd97aed69a4cccfbd0c0a3c7c9e72fc804c133afec43b93e073a8d6158c0"
+  },
+  "results": {
+    "tests": 7,
+    "assertions": 49,
+    "failures": 0,
+    "errors": 0,
+    "exit": 0
+  }
+}
