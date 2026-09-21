@@ -38,4 +38,36 @@
   {:ticket :U81 :pattern "apparatus/success-must-not-resemble-failure" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
   {:ticket :U82 :pattern "apparatus/model-upstream-and-coupled" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
   {:ticket :U83 :pattern "apparatus/the-system-stops-on-schedule" :worklist-status :blocked :decision :declined :reason "The retained blocker says the named 73-item queue no longer exists and replacement with the new bulletin is different work; retirement or restated acceptance is required."}
- ]}
+ ]
+ :mission-hole-follow-up
+ {:authority "claude-12 redirect invoke-1789961494601-22843-5ddb807a"
+  :date "2026-09-21"
+  :basis "Retained substrate mission holes, checked against pinned mission text; applicability is signed by codex-1, not inferred from an assurance join."
+  :counts {:admitted 2 :declined 2}
+  :admitted ["M-aif-policy-conditioned-eig#6378c65a4012"
+             "M-f11-find-production-successor#9ab212b3281d"]
+  :declined
+  [{:target "M-daily-scan" :hole-id "M-daily-scan#55f8fe32c265"
+    :reason "The retained partial-audit heading is unchecked, but its continuation records the named pattern-rule-systems fork resolved by Joe and superseded by fresh probes. I cannot turn that stale heading into the old audit task without reconciling its scope."
+    :revision "c5b72885e99ef4a08a90b875ba7b6fe8e03bd934"
+    :evidence "futon7/holes/missions/M-daily-scan.md:362-367"}
+   {:target "M-forum-refactor"
+    :task "- [ ] R8 (authoritative-transcript): evidence store is the authority"
+    :reason "The document's status is DONE and substrate status-class is complete with no retained open holes. An unchecked historical criterion is not an outstanding mission task."
+    :revision "4d8a84a74b143fac5ec1d58742e8de3386f56863"
+    :evidence "futon3c/holes/missions/M-forum-refactor.md:3-10,247"}]
+  :validation
+  {:mode :short-lived-tooling-jvm :wm-clicks 0
+   :entrypoint "futon2.aif.cascade-sources/load-declared"
+   :new-targets 2 :retained-wants 5 :observed-false-wants 5
+   :pinned-task-statements-observed-true 2 :new-target-locator-refusals 0
+   :retained-want-sets-equal-substrate true
+   :assembled-family-targets 4 :assembly-refusals 0 :target-collisions 0
+   :assembly-horizon 1 :horizon-scope :validation-only
+   :family-schedule :terminal :family-scales {:lam 1 :mu 0}
+   :edn-one-form-files 3 :parens :pass
+   :source-revision-hash-bindings-verified 4
+   :checkbox-controls {:checked-matches 5 :unchecked-rejected 5
+                       :unanchored-mention-rejected 5}
+   :clj-kondo :not-applicable-no-clojure-changed}
+  :limits "Two selected holes only, not a census. Other checkbox wants on each admitted mission are preserved. The original 0/14 assurance-join decision remains historical and unchanged."}}

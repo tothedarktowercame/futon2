@@ -1,0 +1,47 @@
+;; Agent-authored applicability, not inferred from retrieval or :assures.
+{:schema :wm/cascade-source-v1
+ :target "M-f11-find-production-successor"
+ :context :WM
+ :beta {:value 1 :status :declared}
+ :lam {:value 1 :status :declared}
+ :mu {:value 0 :status :declared}
+ :c-schedule {:placement {:value :terminal :status :declared}
+              :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}}
+ :facts [:admission/task-stated :hole/h9ab212b3281d :hole/h2045faa0e7cc]
+ :want [:hole/h9ab212b3281d :hole/h2045faa0e7cc]
+ :locators
+ {:admission/task-stated
+  {:class :C4 :repo "futon2" :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f"
+   :path "holes/missions/M-f11-find-production-successor.md"
+   :decl "- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence."}
+  :hole/h9ab212b3281d
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "holes/missions/M-f11-find-production-successor.md"
+   :decl "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence."}
+  :hole/h2045faa0e7cc
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "holes/missions/M-f11-find-production-successor.md"
+   :decl "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution."}}
+ :patterns
+ {:apparatus/done-is-observed-running
+  {:guard {:needs #{:admission/task-stated} :forbids #{:hole/h9ab212b3281d}}
+   :produces #{:hole/h9ab212b3281d}}}
+ :interpretation-receipts
+ {:apparatus/done-is-observed-running
+  {:kind :hand-admitted :by "codex-1" :date "2026-09-21"
+   :source {:path "futon3/library/apparatus/done-is-observed-running.flexiarg"
+            :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+            :sha256 "301a19b722382997e8e1d455be1c40605ebc987c998aedd5ce5302bcb4a70653"}
+   :reading "For F11's acceptance task, require the finder to act at its applied interface on the committed library and retain the ordinary gate and runtime evidence before recording completion; a committed reconciliation module or a stopped run is not that observation."
+   :scope-limit "This is the activation-and-live-evidence reading of the pattern, not a claim that its standing-comparator mechanism or F1-F4 laws have been implemented. It does not produce the separate repair-024 successor disposition."
+   :target-source {:repo "futon2" :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f"
+                   :sha256 "811395799523bf1ccc52d50d38113f61dc6f5d1e2dfd4a2105d6012c3da3c111"
+                   :path "holes/missions/M-f11-find-production-successor.md"
+                   :hole-id "M-f11-find-production-successor#9ab212b3281d" :line 101}
+   :observation-limit "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}}
+ :candidates
+ [{:precedence [:apparatus/done-is-observed-running]
+   :construction-receipt
+   {:kind :hand-admitted :by "codex-1" :date "2026-09-21"
+    :moves [] :stopped-is-not-success true
+    :reading "One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied."}}]}

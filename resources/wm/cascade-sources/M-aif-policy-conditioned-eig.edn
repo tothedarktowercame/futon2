@@ -1,0 +1,51 @@
+;; Agent-authored applicability, not inferred from retrieval or :assures.
+{:schema :wm/cascade-source-v1
+ :target "M-aif-policy-conditioned-eig"
+ :context :WM
+ :beta {:value 1 :status :declared}
+ :lam {:value 1 :status :declared}
+ :mu {:value 0 :status :declared}
+ :c-schedule {:placement {:value :terminal :status :declared}
+              :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}}
+ :facts [:admission/task-stated :hole/h6378c65a4012 :hole/h0e270aa090bc :hole/h42fceb4ad48b]
+ :want [:hole/h6378c65a4012 :hole/h0e270aa090bc :hole/h42fceb4ad48b]
+ :locators
+ {:admission/task-stated
+  {:class :C4 :repo "futon2" :sha "cb2045b8279853fbd48d6a07c1e2da952f2e338f"
+   :path "holes/missions/M-aif-policy-conditioned-eig.md"
+   :decl "- [ ] **Mint the shared posterior updater, then unify the two paths through"}
+  :hole/h6378c65a4012
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "holes/missions/M-aif-policy-conditioned-eig.md"
+   :decl "- [x] **Mint the shared posterior updater, then unify the two paths through"}
+  :hole/h0e270aa090bc
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "holes/missions/M-aif-policy-conditioned-eig.md"
+   :decl "- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the"}
+  :hole/h42fceb4ad48b
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "holes/missions/M-aif-policy-conditioned-eig.md"
+   :decl "- [x] **Collect a default-off EIG shadow and calibration packet.** Prior"}}
+ :patterns
+ {:apparatus/one-authority-per-question
+  {:guard {:needs #{:admission/task-stated} :forbids #{:hole/h6378c65a4012}}
+   :produces #{:hole/h6378c65a4012}}}
+ :interpretation-receipts
+ {:apparatus/one-authority-per-question
+  {:kind :hand-admitted :by "codex-1" :date "2026-09-21"
+   :source {:path "futon3/library/apparatus/one-authority-per-question.flexiarg"
+            :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+            :sha256 "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"}
+   :reading "For the shared-updater task, make one A4a/BMR updater the authority for both hypothetical and observed posterior changes, route both callers through it, and demonstrate equal posterior state and provenance on a pinned observation plus refusal of an unknown outcome before recording this task complete."
+   :scope-limit "This reading covers the shared-updater task only; it neither supplies the generative experiment model nor completes the typed-Q or calibration tasks."
+   :target-source {:repo "futon2" :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f"
+                   :sha256 "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478"
+                   :path "holes/missions/M-aif-policy-conditioned-eig.md"
+                   :hole-id "M-aif-policy-conditioned-eig#6378c65a4012" :line 195}
+   :observation-limit "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}}
+ :candidates
+ [{:precedence [:apparatus/one-authority-per-question]
+   :construction-receipt
+   {:kind :hand-admitted :by "codex-1" :date "2026-09-21"
+    :moves [] :stopped-is-not-success true
+    :reading "One interpreted pattern, one order; only the selected task is produced. All other retained checkbox wants remain represented and are not claimed satisfied."}}]}
