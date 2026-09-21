@@ -132,3 +132,26 @@ field remains compared, including posterior values and selection.
 
 Registry config: [registry.edn](registry.edn). Registry results are recorded
 after committing the implementation, as required by the committed-scope gate.
+
+Implementation commit: `b701baa3`. From `/home/joe/code/futon3c`:
+
+```sh
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-fix-7/holes/labs/wm-contract/runs/fix-7-2026-09-21/registry.edn
+```
+
+Issued warrant (`registry-result.edn`): `:warrant? true`,
+`:execution/stable? true`, `:postcheck {:status :matched}`;
+5 tests / 51 assertions / 0 failures / 0 errors / exit 0, 2889 ms.
+Run id `14b7083d-8af1-4c52-bdef-97361dc2c751`;
+evidence id `test-registry-7c52fcb35134fc5c4f08e3f56635c069d5cef45ab8aaebaf94954b5a2a759219`.
+The warrant covers the new recorded-run regression namespace and its fixtures;
+the other six namespace runs are separate fresh logs, not claimed as part of
+that warrant.
+
+The post-commit read-only check also returned `:warrant? true`, chain length
+2, using `clojure -M -m futon3c.test-registry check` with
+[registry-check.edn](registry-check.edn). That config supplies the issued
+`:entry-id` and the full changed-path list; the run config alone does not
+supply the entry id required by `check`. The check output retains its explicit
+`:outside-closure` list, including the separately-tested certificate namespace
+and documentation artifacts.
