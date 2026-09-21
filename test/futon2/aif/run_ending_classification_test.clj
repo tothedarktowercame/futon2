@@ -112,7 +112,10 @@
 
 (def discovery-known-failures
   {"wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/007-closed.edn" :evidence-not-single-edn
-   "wm-full-loop/wm-outer-loop-43-v1/attempt-053/007-closed.edn" :operator-terminated})
+   "wm-full-loop/wm-outer-loop-43-v1/attempt-053/007-closed.edn" :operator-terminated
+   ;; First renewal-4 click (run 2026-09-21-1790033693), closed by the failure
+   ;; path before fix-23, so its judgment carries no receipt.
+   "wm-full-loop-machinery-69/wm-contract-machinery-69-v1/attempt-002/007-closed.edn" :explanation-invalid})
 
 (deftest discovery-cohort-replay
   ;; The data root grows with every click, so pin the discovery's claims
@@ -133,3 +136,15 @@
     (is (<= 124 (count legacy)))
     (is (every? #{:unknown :known-typed-failure} (map (comp :class second) legacy)))
     (is (= discovery-known-failures known))))
+
+(deftest recorded-occurrence-cohort-form-is-the-same-identity
+  ;; Runner occurrences store :cohort/id as (str keyword), with the colon.
+  (let [event {:checkpoint/type :closed :cohort/id :cohort :attempt/id "attempt-001"
+               :payload {:judgment base-close}}]
+    (doseq [cohort ["cohort" ":cohort"]]
+      (is (= :recorded (:status (kernel/classify
+                                 {:close event :occurrence (assoc occurrence :cohort/id cohort)
+                                  :route-attestation route :focus-receipt (focus :focus)})))))
+    (is (= :identity-mismatch
+           (:kind (kernel/classify {:close event :occurrence (assoc occurrence :cohort/id "other")
+                                    :route-attestation route :focus-receipt (focus :focus)}))))))

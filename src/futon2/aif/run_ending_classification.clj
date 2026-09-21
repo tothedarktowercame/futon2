@@ -46,7 +46,10 @@
         event-id (when event? {:cohort/id (:cohort/id close) :attempt/id (:attempt/id close)})]
     (when occurrence (retention/validate-occurrence occurrence))
     (when (and event-id occurrence
-               (or (not= (name (:cohort/id close)) (:cohort/id occurrence))
+               ;; Occurrences record the cohort as (str keyword), e.g.
+               ;; ":wm-contract-machinery-69-v1"; accept that and the bare name.
+               (or (not (contains? #{(name (:cohort/id close)) (str (:cohort/id close))}
+                                   (:cohort/id occurrence)))
                    (not= (:attempt/id close) (:attempt/id occurrence))))
       (refuse! :identity-mismatch))
     {:close event-id

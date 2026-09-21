@@ -5359,6 +5359,9 @@
         (set (keep #(second (re-find #"/retained/(.+)$" %)) manifest-ids))]
     (is (= :build-failed (:outcome result)))
     (is (= :explanation-invalid (:failure-kind judgment)))
+    ;; Not vacuous: the receipts written before the failure are really there.
+    (is (every? retained-names ["token-outcome.edn" "route-attestation.edn"
+                                "run-ending-classification.edn"]))
     (is (= retained-names admitted-retained))
     (is (run-ending/verify-close close receipt))
     (is (= (:class (run-ending/classify {:close close})) (:class receipt)))
