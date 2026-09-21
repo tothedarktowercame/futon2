@@ -1,0 +1,48 @@
+{:snapshot-at "2026-09-21T16:38:32.422231718Z",
+ :today
+ {:entries 218,
+  :kinds {:run 109, :intent 109},
+  :warrants 102,
+  :warrants-with-semantic-keys [],
+  :warrants-mentioning-mission
+  [{:id
+    "test-registry-74194b7339582b1d167ab11501f046e6bfc7d8aa230386f150f355dd2638cd55",
+    :mentions
+    #{"M-f11-find-production-successor"
+      "M-wm-08-external-f2"
+      "M-expressions-of-interest"
+      "M-aif-policy-conditioned-eig"},
+    :origin "fix-10e next token initialization"}
+   {:id
+    "test-registry-37fd314017d58bdef529732b98ddccf3db3f54f8a8e8a7c6d83c9ac13c40ce00",
+    :mentions #{"M-aif-policy-conditioned-eig"},
+    :origin "fix-10a pure token outcome comparison"}
+   {:id
+    "test-registry-2511cc224730fc724dc51ab16ba1a9ef4d5950b1c0cda3a91d1158c7178fcd6b",
+    :mentions #{"M-aif-policy-conditioned-eig"},
+    :origin "claude-3/narrative-fix-5a"}
+   {:id
+    "test-registry-2d380fd33beaae81b70f16d954a501835849b5a3b05455b0fcc633c9689f211c",
+    :mentions #{"M-wm-08-external-f2"},
+    :origin "agency-local"}
+   {:id
+    "test-registry-b972b2f8d6dbae1997411a29ebdb1a50db6dc136edf3f5393e5c316556064716",
+    :mentions #{"M-wm-08-external-f2"},
+    :origin "claude-12/repair-proposal-supply"}
+   {:id
+    "test-registry-f02006ccbe1e3b9dae242dceeac76bb4536cf53a6764febffe5a9ecdcd0d5c12",
+    :mentions #{"M-wm-08-external-f2"},
+    :origin "claude-12/proposal-supply-b1"}],
+  :mention-count 6},
+ :subject-index
+ {:records 144,
+  :live 88,
+  :mission-bindings [],
+  :want-bindings
+  [{:entry/type :subject-binding,
+    :entry/id "8d7e5671-dae0-4a0a-8e40-112d63891da7",
+    :subject-id "proposal-supply-b1/wants",
+    :warrant-id
+    "test-registry-05a32cf9755f69ae88e8c323aa06b4cad8650836a17561c87cdba1901ab65139",
+    :actor "codex-6",
+    :at "2026-09-21T03:43:29.533638861Z"}]}}
