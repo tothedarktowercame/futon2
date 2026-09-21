@@ -1,0 +1,41 @@
+{:schema :wm/cascade-admission-ledger-v1
+ :author "codex-1"
+ :date "2026-09-21"
+ :status :blocked-current-target-admission
+ :scope "Evidenced worklist assurance pairs only; no retrieval-derived applicability."
+ :sources {:worklist {:repo "futon2"
+                      :revision "72b8c3cc0b93b7d3ea06a8e39aba48df766d45b6"
+                      :path "holes/labs/wm-contract/worklist.edn"}
+           :patterns {:repo "futon3"
+                      :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
+                      :path "library/apparatus"}}
+ :counts {:joined 14 :admitted 0 :declined 14}
+ :interpretation-limit "A ticket identity is legal for the assembler. These declines do not assert that the pattern never applied; they decline manufacturing current work from historical completion or contradicted requirements. No declarations or rates were attached."
+ :historical-readings
+ [{:ticket :U70
+   :pattern "apparatus/one-authority-per-question"
+   :reading "For U70, the worklist is the authority for ticket and assurance identity; generating the dependency frontier from that worklist avoids maintaining a second independent pattern-to-ticket index."
+   :evidence "holes/labs/wm-contract/runs/U70-dependency-frontier.edn"
+   :limit "The retained commissioning result and done status are historical evidence, not a newly unmet want."}
+  {:ticket :U73
+   :pattern "apparatus/monitors-measure-the-work"
+   :reading "For U73, commissioning the stall monitor against an induced stall, a healthy whole-row change, and the old projection mutant tests whether its cursor actually tracks changes to the work item."
+   :evidence "holes/labs/wm-contract/runs/U73-stall-detector-commissioning.edn"
+   :limit "The retained run reports exits 3, 0, and 3; these runs were read, not rerun in this admission review."}]
+ :next-needed "An evidenced assurance for an outstanding target, or an explicit restatement of U80/U83, would permit a current-work admission review. Transferring an assurance to another target requires evidence, not a renamed declaration."
+ :rows [
+  {:ticket :U70 :pattern "apparatus/one-authority-per-question" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U71 :pattern "apparatus/pin-moves-with-the-population" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U72 :pattern "apparatus/replayable-not-precious" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U73 :pattern "apparatus/monitors-measure-the-work" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U74 :pattern "apparatus/done-is-observed-running" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U75 :pattern "apparatus/evidence-to-disposition-once" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U76 :pattern "apparatus/new-failure-class-is-a-design-defect" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U77 :pattern "apparatus/every-wait-has-a-deadline" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U78 :pattern "apparatus/repairs-name-defects-not-neighborhoods" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U79 :pattern "apparatus/default-to-the-cheap-error" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U80 :pattern "apparatus/loudness-is-conserved" :worklist-status :blocked :decision :declined :reason "The retained blocker says the requested seven not-retiring bases contradict the authoritative closability audit; choosing a new requirement would override an unresolved owner ruling."}
+  {:ticket :U81 :pattern "apparatus/success-must-not-resemble-failure" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U82 :pattern "apparatus/model-upstream-and-coupled" :worklist-status :done :decision :declined :reason "The authoritative row is done. This join alone supplies no outstanding target or authorized replay objective; I decline presenting its completed output as newly unmet work."}
+  {:ticket :U83 :pattern "apparatus/the-system-stops-on-schedule" :worklist-status :blocked :decision :declined :reason "The retained blocker says the named 73-item queue no longer exists and replacement with the new bulletin is different work; retirement or restated acceptance is required."}
+ ]}
