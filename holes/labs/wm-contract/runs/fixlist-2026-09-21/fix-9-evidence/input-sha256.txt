@@ -1,0 +1,8 @@
+5c68dee93b36bde383ab4ecca5ec96856114361534a02ffdedd800fc06f09501  /home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789951020.edn
+031ec7431af2939bdfa15ca941e28cc23e6ec3b2264d99dc8b65b00c82b2e298  /home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952479.edn
+8264021ac5f5bc6c251720917c69375795fcc9e1a4a5f263694b6efe51142686  /home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789964661.edn
+85f580aee9434d4cd3d736feee4892adc066c7d4879c3b1037bd1dbe2556c355  /home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-21.edn
+5b4ac5a3c590058fee4661713c962ee01cde03e4afdc5e57b22d4cc7bca5b15c  /home/joe/code/futon2/data/wm-full-loop-machinery-69/wm-contract-machinery-69-v1/attempt-001/003-construction.edn
+c8cff86e20348c02f8dbb41eaaa516bbf57529f6bc7bc525f547f58c5fbc2270  /home/joe/code/mathlib4/DarkTower/WarMachine/F12RuledCarrier.lean
+29a234ede1d061e25a89b9ec1f531c97d49a1842444ad3f803eccf8a1d2263c7  /home/joe/code/p4ng/app-snatch.tex
+d7ec5b68d1049a86d7a6c3c71eb61f50eb0e351a1d2d212affa6e5636032260f  /home/joe/code/p4ng/sec-glossary.tex
