@@ -15,6 +15,7 @@
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.cascade-sources :as cascade-sources]
+            [futon2.aif.cascade-plan :as cascade-plan]
             [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
@@ -1877,7 +1878,9 @@
               "\nThe mission record above is the compact finding projection. "
               "Read the full finding for its backtrace and nested evidence; "
               "the discharge contract is unchanged.\n"))
-       "PATTERN CASCADE: " (pr-str (select-keys cascade-entry
+       "PATTERN CASCADE:\n" (cascade-plan/cascade-plan-text cascade-entry)
+       "Name in your reply which pattern(s) your change enacts.\n"
+       "CONSTRUCTION CONTRACT: " (pr-str (select-keys cascade-entry
                                                   [:mission :psi :shown :semilattice
                                                    :cascade-score
                                                    :construction-kind
@@ -1962,6 +1965,7 @@
        "Repository: " repo "\n"
        "CONSTRUCTION CONTRACT: "
        (pr-str (prompt-construction construction)) "\n"
+       "PATTERN CASCADE:\n" (cascade-plan/cascade-plan-text construction)
        "Author job evidence: " (pr-str (select-keys author-job
                                                      [:job-id :state :artifact-ref
                                                       :repo-observed-artifact-ref
@@ -3930,7 +3934,12 @@
                               (construction-wiring-result
                                construction
                                (:construction-wiring-fn opts)
-                               false))]
+                               false))
+              ;; Present the same validated observations as the checkpoint;
+              ;; prompts must not re-observe mutable repository state.
+              construction (when construction
+                             (assoc construction :wiring (:wiring wiring-result)
+                                                 :fold-output (:fold-output wiring-result)))]
           (when-not construction
             (throw (ex-info "No construction for selected decision"
                             {:outcome :construction-failed
