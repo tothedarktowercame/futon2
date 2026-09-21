@@ -1,0 +1,27 @@
+{
+  "futon2-head": "181ba4d114baa46dd371a3a2150fcf9ea5c2df53",
+  "files": {
+    "src/futon2/aif/policy.clj": "f4e67d5cc1e1bcc6184ec47f58c813e2a366158d1bf13823f9f73aa2a8e70f23",
+    "src/futon2/aif/policy_precision.clj": "0b3ef7cc7689ecfb0313c33a5cf7d03e97d827d1e9a429c86220c09b662092e4",
+    "src/futon2/aif/cascade_selection.clj": "389590f4a91c45ba4921ea971b14305282cd14f001cae238e478bbf4974f9304",
+    "src/futon2/aif/cascade_habit_store.clj": "0c354ae215d22abb721bcb78481c30a0f6c8f233acea990ae5a6ccc8f0d96a32",
+    "src/futon2/aif/cascade_sources.clj": "e8ac3c8087a6a2f9c461fe23aa3f7d6d57453baeae0c686a382c34a19e4c1556",
+    "src/futon2/aif/efe.clj": "ce3021facdb7116d81c8b1a82122d8658b62ab7acc0ca994aa9722354cf78a92",
+    "src/futon2/aif/trace.clj": "e4f91d795daf66367fd15438dbd216147693bf65e244d715ade1a537cb4f6e55",
+    "src/futon2/aif/d_predecessor_task_authority.clj": "70dddf09a5acd769c14574520bdd5e0f40f6a4e867cdc21f94fee8ba4e561099",
+    "src/futon2/aif/token_belief_predecessor.clj": "6422dd9bcdbf95d5aac3c930adb3880c957435ae5b9bc3fc3e494a608fe09963",
+    "src/futon2/aif/full_loop_runner.clj": "14891f707d86b70e6a122403aa8a7707e8a46cc9944018f4e01db051bacf2ce9",
+    "scripts/futon2/report/war_machine.clj": "31fe9d24ce0fba84baac8d845fc651133ae1fee2fca23b04f3cd16f5c79ea196",
+    "test/futon2/aif/cascade_beta_update_test.clj": "4c7beb7b7b6119df30cb44f07b2e26604667e41c52b4c548ee88c1f29bcd8d35"
+  },
+  "mathlib4": {
+    "head": "77fdbda5b5629b3c8f6c7f9bbb027da0436ba1b3",
+    "path": "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean",
+    "sha256": "7591fa968efce642a78ae2f600d9a79711df41f2761d791b1c0700a098e813cd"
+  },
+  "p4ng": {
+    "head": "c4991ef8716e5dc7b7c483e8882b6ad24f2ca2e4",
+    "path": "/home/joe/code/p4ng/wm-walkthroughs/build-loop/closure/PROPOSAL-policy-precision-learning.md",
+    "sha256": "0e35e217d5ad71fcbfd539011d075548b08554f579d42b899234b4e290270ff5"
+  }
+}
