@@ -31,6 +31,9 @@
 
 (def here (.getCanonicalFile (io/file (or (System/getenv "WM_CONTRACT_DIR")
                                           "/home/joe/code/futon2/holes/labs/wm-contract"))))
+(load-file (str (io/file here "../../../checks/lean_declaration_names.clj")))
+(require '[checks.lean-declaration-names :as declaration-names])
+
 (def mathlib (.getCanonicalFile (io/file (or (System/getenv "MATHLIB_ROOT")
                                              "/home/joe/code/mathlib4"))))
 (def corpus-rel (or (System/getenv "WM_LEAN_DIR") "DarkTower/WarMachine"))
@@ -115,12 +118,16 @@
         code (strip-comments raw)
         raw-lines (str/split-lines raw)
         lines (str/split-lines code)
+        prefixes (declaration-names/namespace-prefixes lines)
         rel (str corpus-rel "/" (.getName f))
         decls (keep-indexed
                (fn [idx ^String line]
                  (when-let [m (re-find decl-re line)]
                    {:kind (nth m 1)
                     :name (nth m 2)
+                    :qualified-name (when-let [name (nth m 2)]
+                                      (str (when (seq (nth prefixes idx))
+                                             (str (nth prefixes idx) ".")) name))
                     :path rel
                     :line (inc idx)}))
                lines)
@@ -191,12 +198,7 @@
 ;; Corpus-wide declaration index: name -> first defining site.  Used by both
 ;; joins; a name that is not here resolves to "not found", never to a guess.
 (def decl-index
-  (reduce (fn [acc d]
-            (if (and (:name d) (not (contains? acc (:name d))))
-              (assoc acc (:name d) (select-keys d [:path :line :kind]))
-              acc))
-          {}
-          (mapcat :decl-index scans)))
+  (declaration-names/index-declarations (mapcat :decl-index scans)))
 
 (def started-at (str (Instant/now)))
 (def t-start (System/currentTimeMillis))

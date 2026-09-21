@@ -1,0 +1,196 @@
+{:generator-missing-before
+ [:observe
+  :policy-free-energy
+  :belief-update
+  :belief-state
+  :risk
+  :depth
+  :temperature
+  :action
+  :state-prediction-error
+  :state-belief-update
+  :likelihood-precision],
+ :generator-missing-after [],
+ :historical-census-sha "4199d8ebe02c01c54753d4c62720986b084be0c8",
+ :changes-since-historical-census
+ [{:equation :observe,
+   :node :R2,
+   :before
+   {:declared-lean "ObservationProcess.observationAfter",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "ObservationProcess.observationAfter",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/ObservationProcess.lean",
+     :line 34,
+     :kind "def"}}}
+  {:equation :free-energy,
+   :node :R8,
+   :before
+   {:declared-lean "variationalFreeEnergy",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/Holes.lean",
+     :line 7094,
+     :kind "def"}},
+   :after
+   {:declared-lean "variationalFreeEnergy",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/Holes.lean",
+     :line 7155,
+     :kind "def"}}}
+  {:equation :policy-free-energy,
+   :node :R8,
+   :before
+   {:declared-lean "PolicyVariationalFreeEnergy.variationalFreeEnergy",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "PolicyVariationalFreeEnergy.variationalFreeEnergy",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/PolicyVariationalFreeEnergy.lean",
+     :line 43,
+     :kind "def"}}}
+  {:equation :belief-update,
+   :node :R3,
+   :before
+   {:declared-lean "LaplaceBeliefUpdate.beliefUpdate",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "LaplaceBeliefUpdate.beliefUpdate",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/LaplaceBeliefUpdate.lean",
+     :line 33,
+     :kind "def"}}}
+  {:equation :belief-state,
+   :node :R1,
+   :before
+   {:declared-lean "ExactBeliefTrajectory.exactBeliefAt",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "ExactBeliefTrajectory.exactBeliefAt",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/ExactBeliefTrajectory.lean",
+     :line 177,
+     :kind "def"}}}
+  {:equation :forward-model,
+   :node :R4,
+   :before
+   {:declared-lean "predictedOutcome",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/PolicyRollout.lean",
+     :line 114,
+     :kind "def"}},
+   :after
+   {:declared-lean
+    "DarkTower.WarMachine.PolicyRollout.predictedOutcome",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/PolicyRollout.lean",
+     :line 114,
+     :kind "def"}}}
+  {:equation :risk,
+   :node :R5,
+   :before
+   {:declared-lean "OutcomeRiskKL.outcomeRisk",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "OutcomeRiskKL.outcomeRisk",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/OutcomeRiskKL.lean",
+     :line 33,
+     :kind "def"}}}
+  {:equation :depth,
+   :node :R13,
+   :before
+   {:declared-lean "PolicyHorizon.horizonEFE",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "DarkTower.WarMachine.PolicyHorizon.horizonEFE",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/PolicyHorizon.lean",
+     :line 61,
+     :kind "def"}}}
+  {:equation :temperature,
+   :node :R14,
+   :before
+   {:declared-lean "PolicyPrecision.policyPrecision",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "MachineTemperature.machineTemperature",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/MachineTemperature.lean",
+     :line 42,
+     :kind "def"}}}
+  {:equation :action,
+   :node :R16,
+   :before
+   {:declared-lean "ActionMarginal.IsBayesAction",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "ActionMarginal.IsBayesAction",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/ActionMarginal.lean",
+     :line 26,
+     :kind "def"}}}
+  {:equation :dirichlet-accumulation,
+   :node :R17,
+   :before
+   {:declared-lean "accumulate",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/DirichletLearning.lean",
+     :line 60,
+     :kind "def"}},
+   :after
+   {:declared-lean "DarkTower.WarMachine.DirichletLearning.accumulate",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/DirichletLearning.lean",
+     :line 60,
+     :kind "def"}}}
+  {:equation :state-prediction-error,
+   :node :R3a,
+   :before
+   {:declared-lean "StatePredictionError.statePredictionError",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "StatePredictionError.statePredictionError",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/StatePredictionError.lean",
+     :line 60,
+     :kind "def"}}}
+  {:equation :state-belief-update,
+   :node :R3,
+   :before
+   {:declared-lean "ExactBeliefTrajectory.exactUpdate",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "ExactBeliefTrajectory.exactUpdate",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/ExactBeliefTrajectory.lean",
+     :line 56,
+     :kind "def"}}}
+  {:equation :likelihood-precision,
+   :node :R7,
+   :before
+   {:declared-lean "LikelihoodPrecision.precisionLikelihood",
+    :lean {:found false, :resolution :not-found}},
+   :after
+   {:declared-lean "LikelihoodPrecision.precisionLikelihood",
+    :lean
+    {:found true,
+     :path "DarkTower/WarMachine/LikelihoodPrecision.lean",
+     :line 32,
+     :kind "def"}}}]}

@@ -1,0 +1,1 @@
+gen_lean_state: ERROR report records no type-check run; a Lean-state claim without a build is refused {}
