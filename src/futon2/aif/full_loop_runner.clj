@@ -2452,8 +2452,23 @@
 (defn- implementation-id [commit]
   (str "full-loop/implementation/" commit))
 
-(defn- discharge-id [attempt-id]
-  (str "full-loop/discharge/" attempt-id))
+(defn- discharge-id
+  "An attempt ordinal is local to a cohort store. Include the run identity as
+  well: cohort names are reusable across stores/re-runs. Nil cohort denotes a
+  non-cohort opportunity; the run id is still mandatory. Encoding components
+  separately prevents slashes or percent escapes from aliasing another id."
+  [cohort-id run-id attempt-id]
+  (let [component (fn [value]
+                    (let [s (if (keyword? value) (subs (str value) 1) value)]
+                      (when-not (and (string? s) (not (str/blank? s)))
+                        (throw (ex-info "Discharge requires a complete execution identity"
+                                        {:failure-kind :discharge-identity-invalid
+                                         :cohort-id cohort-id :run-id run-id
+                                         :attempt-id attempt-id})))
+                      (java.net.URLEncoder/encode s "UTF-8")))]
+    (str "full-loop/discharge/"
+         (when (some? cohort-id) (str "cohort/" (component cohort-id) "/"))
+         "run/" (component run-id) "/attempt/" (component attempt-id))))
 
 (defn- grounding-construction-props
   "Return durable construction provenance, revalidating production actions at
@@ -2497,7 +2512,8 @@
 
 (defn ground-commit!
   [attempt-id target author reviewer repo commit files construction review-job opts]
-  (let [impl-id (implementation-id commit)
+  (let [discharge-ref (discharge-id (:cohort-id opts) (:run-id opts) attempt-id)
+        impl-id (implementation-id commit)
         before (substrate/entity-by-id impl-id opts)
         construction-props (grounding-construction-props target construction)
         implementation (merge
@@ -2513,17 +2529,21 @@
                          :implementation/reviewer reviewer
                          :implementation/review-job (:job-id review-job)}
                         construction-props)
-        discharge (cond-> {:xt/id (discharge-id attempt-id)
+        discharge (cond-> {:xt/id discharge-ref
                    :entity/type :discharge
                    :entity/name (str "Full-loop discharge " attempt-id)
                    :entity/source "wm-full-loop"
                    :discharge/mission (str target)
+                   :discharge/run-id (:run-id opts)
+                   :discharge/attempt-id attempt-id
                    :discharge/endpoint impl-id
                    :discharge/type :implementation/commit
                    :discharge/proof-query (str "GET /api/alpha/entity/" impl-id)
                    :discharge/reviewer reviewer
                    :discharge/review-job (:job-id review-job)
                    :discharge/at (str (Instant/now))}
+                    (:cohort-id opts)
+                    (assoc :discharge/cohort-id (:cohort-id opts))
                     (selected-cascade {:action (:selected-action construction)})
                     (assoc :discharge/selected-cascade
                            (selected-cascade {:action (:selected-action construction)})))]
@@ -2553,7 +2573,7 @@
        :resolved? (= commit (get-in after [:props :implementation/commit]))
        :dial-moved? (and (nil? before) (some? after))
        :implementation-id impl-id
-       :discharge-id (discharge-id attempt-id)})))
+       :discharge-id discharge-ref})))
 
 (defn- term [judgment ground]
   {:judgment judgment :ground ground})
@@ -4494,7 +4514,8 @@
                         (run-phase! opts @phase-context :grounding
                                     #((or (:ground-fn opts) ground-commit!)
                                       attempt-id target author reviewer repo commit files
-                                      construction review-job opts))]
+                                      construction review-job
+                                      (assoc opts :cohort-id (:cohort/id start-event))))]
                     ;; Discharge runs once, AFTER the immutable execution close.
                     ;; A grounded substrate insertion alone never resolves a
                     ;; finding, and an unrelated memory item is not a successor.
