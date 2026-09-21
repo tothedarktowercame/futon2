@@ -1,0 +1,13 @@
+{
+  "head": "f079c68f2f18ba7ea2625a4e48918034fef5117e",
+  "source": {
+    "src/futon2/aif/full_loop_cohort.clj": "5830205342bdd69443a319e25d9ae754812e60f45c92363af0b60493a5a01438",
+    "test/futon2/aif/full_loop_cohort_test.clj": "053467d9ff7b93354653305655be982af9ffd76624f62e58b679594f26f62d57"
+  },
+  "evidence": {
+    "probe.clj": "3f6e33678fbe111446576c57cbf957f5b54215df41260f23190d0de8078668bd",
+    "probe-results.edn": "3c49f29c733221c15bfb2ed0d926dce38390c932e41979d8f204d99d1936f954",
+    "REPORT.md": "4ab42fe083c1eb09468a457922b25b42b1f00541c62a18744e1536e350d19989",
+    "cohort.log": "72f5f17078071010030f90ce2d54ed193016673579b4d22d544ed17d83ea5c7a"
+  }
+}
