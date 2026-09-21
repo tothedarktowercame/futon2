@@ -447,3 +447,11 @@ Validation at `c18b982a`, Java 21.0.11 / Clojure 1.11.1:
   semantic classifications, or live external embedding snapshots. Commands:
   `clojure -M -m futon3c.test-registry run /tmp/improve-7-registry.edn` and
   `check /tmp/improve-7-registry-check.edn` from futon3c, own CLI process.
+
+Follow-up validation at `537f39f4`: the fixed-elsewhere/no-increment arms and
+observation-grain entropy controls pass **2 tests / 26 assertions / 0 failures /
+0 errors** under the same namespace command. Probe/test lint 0/0 and parens OK.
+Updated scoped warrant:
+`test-registry-39f0b15d78a099f5ab76f2f0bfe3f14cbcbf578e602fe39cb1c211675333771f`,
+fresh check `:warrant? true`, `:outside-closure []`. This supersedes the earlier
+warrant for the expanded replay script/test, with the same scope limitations.
