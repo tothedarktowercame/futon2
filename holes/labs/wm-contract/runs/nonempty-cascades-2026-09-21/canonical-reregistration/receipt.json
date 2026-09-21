@@ -1,0 +1,108 @@
+{
+  "repo-root" : "/home/joe/code/futon2",
+  "head" : "6ace66a8620855de70451db043d1fde2fbdbef43",
+  "authorization" : "invoke-1789963377231-22865-21f8ad82",
+  "author" : "codex-8",
+  "requesting-owner" : "claude-12",
+  "sha256" : {
+    "src/futon2/aif/cascade_problems.clj" : "31738964e88272e483d7850b6fb79746d6c9332b7215e787b3344e1184b13bb0",
+    "scripts/futon2/report/war_machine.clj" : "b90f701eabd27253c76c9bef133d94c0edf34494fa9c4874945a8c1b1d04cf17",
+    "test/futon2/aif/cascade_problems_test.clj" : "77df9c31b02c7e41ce68ecb5736b47f16ae5a44170f4493668dbcada876abd20",
+    "test/futon2/report/cascade_decision_test.clj" : "1ba93d7cb41a3722c5ed6dbcc66711ff29879123bf26bf135fb23b7b4c9093bb",
+    "test/futon2/aif/construction_test.clj" : "f760eabcd13bc3bef0ed53ce67ffd42badc66cbcd35f0762f74b943a0c7e670f",
+    "test/futon2/aif/selection_certificate_test.clj" : "079283f2eccf0e9e2b8c84c6b1e943e1c01334b2ab7fbbdba05a1db3890df719",
+    "test/futon2/aif/full_loop_runner_test.clj" : "26efe04c169366a9e9c10d26092994946e4ae97585d61774dcd086e123f2ae11"
+  },
+  "role" : "canonical-reregistration",
+  "warrants" : [ {
+    "scope" : "assembly",
+    "entry-id" : "test-registry-0fb2869496c9806cf014061cef5de5b78c597a625e166bd9c14674fb066ef2a2",
+    "run-id" : "d2cebe11-8ab0-4e18-ab48-8a1653514cbb",
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "code-sha" : "81733e394f16d6a6bea02a3a05f93d03968a64b9e667a4b66afb78915742d4c0",
+    "test-sha" : "6a7979b902234ae0bb372c90e1061ffc25b9ce748f3abfed3b767f87e4654ce9",
+    "results" : {
+      "assertions" : 30,
+      "duration-ms" : 3303,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 6
+    }
+  }, {
+    "scope" : "decision",
+    "entry-id" : "test-registry-f08d640acf6072bbf8944a265a7265e8f40e82893218db0b2401de4fa2d99f5f",
+    "run-id" : "4c9aacfe-017f-49f7-af48-c381151fbb42",
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "code-sha" : "81733e394f16d6a6bea02a3a05f93d03968a64b9e667a4b66afb78915742d4c0",
+    "test-sha" : "29f552596bdd36beec77c9972dacca5f6dd1b1efc396880231bfe3e06933cca0",
+    "results" : {
+      "assertions" : 91,
+      "duration-ms" : 5167,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 13
+    }
+  }, {
+    "scope" : "construction",
+    "entry-id" : "test-registry-35d6cf4678d662a5115da35f8f742af799abaf789b9fc93ab0f644cd4bbbb984",
+    "run-id" : "b77bd58d-1797-4fe7-8c18-268d23de6ba5",
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "code-sha" : "81733e394f16d6a6bea02a3a05f93d03968a64b9e667a4b66afb78915742d4c0",
+    "test-sha" : "910f129581e9e8063445e9bf65c26a022832b532775cdeb233f036e6ecd10493",
+    "results" : {
+      "assertions" : 34,
+      "duration-ms" : 1271,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 8
+    }
+  }, {
+    "scope" : "selection",
+    "entry-id" : "test-registry-fc4d8cecd6dfadc0b20e7abcc7611fa9b3c9654d79f247e10a66843b754f8333",
+    "run-id" : "54ebc82a-c1fc-4f2a-a47a-fe932258f8cc",
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "code-sha" : "81733e394f16d6a6bea02a3a05f93d03968a64b9e667a4b66afb78915742d4c0",
+    "test-sha" : "cf874225c3983b526426d2cad3a55525c6f73091041c8d8798cc2053ae918fbf",
+    "results" : {
+      "assertions" : 109,
+      "duration-ms" : 4724,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 9
+    }
+  }, {
+    "scope" : "runner",
+    "entry-id" : "test-registry-53b55b6994d70fe4bfa31ff55bc1094ff3a9d78b97f3a0dbcfc5caed897ed1ac",
+    "run-id" : "78d189d6-6418-425f-9a16-e6c8381b987d",
+    "warrant?" : true,
+    "postcheck" : {
+      "status" : "matched"
+    },
+    "code-sha" : "81733e394f16d6a6bea02a3a05f93d03968a64b9e667a4b66afb78915742d4c0",
+    "test-sha" : "5b18d17c55d41ffa8caa8d282b936dad195dbf862479c6fca70716f03f172dec",
+    "results" : {
+      "assertions" : 998,
+      "duration-ms" : 182800,
+      "errors" : 0,
+      "exit" : 0,
+      "failures" : 0,
+      "tests" : 180
+    }
+  } ]
+}

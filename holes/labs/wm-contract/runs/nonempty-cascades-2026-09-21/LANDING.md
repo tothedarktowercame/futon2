@@ -64,3 +64,33 @@ retained for review. They do not warrant newer canonical edits.
 - runner: test-registry-97f6993558b5b8ebf058a9bfd142eb63f79ee175e5c9489125880ee71409b330
 
 Exact hashes, roles, scope, and results: postcommit.json.
+
+## Canonical re-registration — 2026-09-21
+
+Authorization: invoke-1789963377231-22865-21f8ad82, claude-12.
+All five namespaces were freshly run and registered on canonical
+/home/joe/code/futon2 at 6ace66a8620855de70451db043d1fde2fbdbef43.
+All five subsequent canonical warrant checks returned true.
+These current-source warrants replace the need to rely on the earlier pinned
+checkout for this packet. The historical pinned evidence remains unchanged.
+The current war_machine includes the subsequent proposal-supply recording;
+canonical hashes, rather than an assertion of equality to c155d690, bind these runs.
+
+| Scope | Tests | Assertions | Failures | Errors |
+|---|---:|---:|---:|---:|
+| assembly | 6 | 30 | 0 | 0 |
+| decision | 13 | 91 | 0 | 0 |
+| construction | 8 | 34 | 0 | 0 |
+| selection | 9 | 109 | 0 | 0 |
+| runner | 180 | 998 | 0 | 0 |
+
+- assembly: test-registry-0fb2869496c9806cf014061cef5de5b78c597a625e166bd9c14674fb066ef2a2
+- decision: test-registry-f08d640acf6072bbf8944a265a7265e8f40e82893218db0b2401de4fa2d99f5f
+- construction: test-registry-35d6cf4678d662a5115da35f8f742af799abaf789b9fc93ab0f644cd4bbbb984
+- selection: test-registry-fc4d8cecd6dfadc0b20e7abcc7611fa9b3c9654d79f247e10a66843b754f8333
+- runner: test-registry-53b55b6994d70fe4bfa31ff55bc1094ff3a9d78b97f3a0dbcfc5caed897ed1ac
+
+Full records: canonical-reregistration/receipt.json and checks.json, with fresh
+logs and dependency closures alongside. Source files were not changed. No live
+reload or tick occurred. COMMITTED IS NOT LOADED. Item 4 repair-store writes
+remain held pending the commissioned Agency-job review verdict.

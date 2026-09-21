@@ -1,0 +1,16 @@
+{
+  "repo-root": "/home/joe/code/futon2",
+  "head": "6ace66a8620855de70451db043d1fde2fbdbef43",
+  "authorization": "invoke-1789963377231-22865-21f8ad82",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "sha256": {
+    "src/futon2/aif/cascade_problems.clj": "31738964e88272e483d7850b6fb79746d6c9332b7215e787b3344e1184b13bb0",
+    "scripts/futon2/report/war_machine.clj": "b90f701eabd27253c76c9bef133d94c0edf34494fa9c4874945a8c1b1d04cf17",
+    "test/futon2/aif/cascade_problems_test.clj": "77df9c31b02c7e41ce68ecb5736b47f16ae5a44170f4493668dbcada876abd20",
+    "test/futon2/report/cascade_decision_test.clj": "1ba93d7cb41a3722c5ed6dbcc66711ff29879123bf26bf135fb23b7b4c9093bb",
+    "test/futon2/aif/construction_test.clj": "f760eabcd13bc3bef0ed53ce67ffd42badc66cbcd35f0762f74b943a0c7e670f",
+    "test/futon2/aif/selection_certificate_test.clj": "079283f2eccf0e9e2b8c84c6b1e943e1c01334b2ab7fbbdba05a1db3890df719",
+    "test/futon2/aif/full_loop_runner_test.clj": "26efe04c169366a9e9c10d26092994946e4ae97585d61774dcd086e123f2ae11"
+  }
+}
