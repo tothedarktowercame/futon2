@@ -19,6 +19,7 @@
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.preference-audit :as preference-audit]
             [futon2.aif.focus-receipt :as focus-receipt]
+            [futon2.aif.run-ending-classification :as run-ending]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.full-loop-cohort :as cohort]
@@ -5999,3 +6000,48 @@
     (is (= (get-in d [:selection-certificate :focus-receipt])
            (get-in selected [:selection-certificate :focus-receipt])))
     (is (= (pr-str (:selection-law d)) (pr-str (:selection-law selected))))))
+
+(deftest run-ending-receipt-enters-manifest
+  (let [root (.toFile (Files/createTempDirectory "run-ending-retention-"
+                                                 (make-array FileAttribute 0)))]
+    (try
+      (let [retained (#'runner/retain-run-ending!
+                      root :cohort "attempt"
+                      {:close {:outcome :incomplete :grounded? false
+                               :artifact-only? false :failure-kind :typed-stop}})
+            manifest (#'runner/checkpoint-evidence-manifest
+                      {} root :cohort "attempt" "target"
+                      {:run-ending-entry (:entry retained)})
+            entry (first (:entries manifest))]
+        (is (= :known-typed-failure (get-in retained [:receipt :class])))
+        (is (= "cohort/attempt/retained/run-ending-classification.edn"
+               (:evidence/id entry)))
+        (is (= (:receipt retained) (edn/read-string (slurp (:source-path entry)))))
+        (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))
+        (is (= 1 (count (:entries manifest)))))
+      (finally (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))
+
+(deftest feature-card-close-retains-verifiable-run-ending-receipt
+  ;; Canonical runner-source guard blocks this in a worktree; owner runs on main.
+  (let [{:keys [root] :as c} (retention-cohort "run-ending-feature-card")
+        d (focus-receipt/attach
+           (merge (:decision judgement) (token-fixture/decision))
+           (focus-receipt/read-inputs) {:as-of "2026-09-21T18:00:00Z"})
+        {:keys [result]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :runner-options {:cohort? true :execution-cohort (:binding c)
+                           :d-task-evidence-root (str (io/file root "d-task"))
+                           :learning-trial-ledger-root (str (io/file root "learning-ledger"))
+                           :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}})
+        close-file (io/file root "test-cohort-exhaustion" (:attempt-id result) "007-closed.edn")
+        close (cohort/read-edn close-file)
+        receipt (get-in close [:payload :judgment :run-ending-classification])
+        entry (first (filter #(str/ends-with? (:evidence/id %)
+                                              "/retained/run-ending-classification.edn")
+                             (get-in close [:payload :close-evidence-manifest :entries])))]
+    (is (= :grounded-change (:outcome result)))
+    (is (= :wm/run-ending-classification-receipt-v1 (:schema receipt)))
+    (is (run-ending/verify-close close receipt))
+    (is (= receipt (edn/read-string (slurp (:source-path entry)))))
+    (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))))

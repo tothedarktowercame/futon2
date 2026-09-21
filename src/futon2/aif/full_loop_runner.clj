@@ -27,6 +27,7 @@
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.surprise :as surprise]
             [futon2.aif.route-attestation :as route-attestation]
+            [futon2.aif.run-ending-classification :as run-ending]
             [futon2.aif.kernel-example :as kernel-example]
             [futon2.aif.attempt-learning :as attempt-learning]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
@@ -2906,6 +2907,20 @@
              :expected-sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))
              :admitted-at (str (Instant/now))}}))
 
+(defn- retain-run-ending!
+  [data-root cohort-id attempt-id input]
+  (let [receipt (run-ending/classify input)
+        file (io/file data-root (name cohort-id) attempt-id "retained"
+                      "run-ending-classification.edn")]
+    (io/make-parents file)
+    (spit file (pr-str receipt))
+    {:receipt receipt
+     :entry {:evidence/id (str (name cohort-id) "/" attempt-id
+                               "/retained/run-ending-classification.edn")
+             :source-path (.getAbsolutePath file)
+             :expected-sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))
+             :admitted-at (str (Instant/now))}}))
+
 (defn- checkpoint-evidence-manifest
   [events data-root cohort-id attempt-id selected-target & [interpretation-context]]
   (let [cohort-name (name cohort-id)
@@ -3013,7 +3028,9 @@
                   (:route-attestation-entry interpretation-context)
                   (conj (:route-attestation-entry interpretation-context))
                   (:kernel-example-entry interpretation-context)
-                  (conj (:kernel-example-entry interpretation-context)))]
+                  (conj (:kernel-example-entry interpretation-context))
+                  (:run-ending-entry interpretation-context)
+                  (conj (:run-ending-entry interpretation-context)))]
     (evidence-manifest/build-manifest
      {:entries entries
       :read-bytes (fn [path]
@@ -3639,6 +3656,38 @@
                           {:prediction (get-in @checkpoints [:selection :judgment :token-outcome-prediction])
                            :occurrence @action-occurrence :artifact-sha (:commit data) :outcome outcome}
                           d-task-result @d-task-context #(read-job! opts %)))
+                       close-judgment-base
+                       (merge {:outcome outcome
+                               :grounded? (= :grounded-change outcome)
+                               :artifact-only? (= :artifact-only outcome)
+                               :occurrence @action-occurrence
+                               :outcome-entity outcome-entity
+                               :entity-state-at-close close-state
+                               :surprise-ids (mapv :surprise/id (:surprises token-comparison))
+                               :token-outcome-comparison (:receipt token-comparison)
+                               :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
+                               :route-attestation (:receipt route-account)
+                               :route-attestation-ref (:reference route-account)
+                               :kernel-example (:receipt kernel-example-result)
+                               :morning-brief-ref brief-ref
+                               :delivery-qa-ref delivery-qa-ref
+                               :job-texts @job-text-records
+                               :duration-ms (- (System/currentTimeMillis) started)
+                               :resource-use {:agent-turns @dispatched-turns}}
+                              (select-keys data
+                                           [:witness :effective-run-configuration
+                                            :standing-readback :failure-kind]))
+                       run-ending-result
+                       (when (and cohort? @action-occurrence)
+                         (retain-run-ending!
+                          (or (:data-root execution-cohort) cohort/default-data-root)
+                          (:cohort/id start-event) attempt-id
+                          {:close close-judgment-base
+                           :occurrence @action-occurrence
+                           :route-attestation (:receipt route-account)
+                           :focus-receipt (get-in selection-judgment
+                                                  [:controller-decision :selection-certificate
+                                                   :focus-receipt])}))
                        manifest (when (and cohort? @action-occurrence)
                                   (checkpoint-evidence-manifest
                                    @checkpoint-events
@@ -3653,29 +3702,13 @@
                                     :token-outcome-entry (:entry token-comparison)
                                     :surprise-entry (:surprise-entry token-comparison)
                                     :route-attestation-entry (:entry route-account)
-                                    :kernel-example-entry (:entry kernel-example-result)}))
+                                    :kernel-example-entry (:entry kernel-example-result)
+                                    :run-ending-entry (:entry run-ending-result)}))
                        admitted-ids (mapv :evidence/id (:entries manifest))
                        closed (cond->
-                               (term (merge {:outcome outcome
-                                            :grounded? (= :grounded-change outcome)
-                                            :artifact-only? (= :artifact-only outcome)
-                                            :outcome-entity outcome-entity
-                                            :entity-state-at-close close-state
-                                            :surprise-ids (mapv :surprise/id (:surprises token-comparison))
-                               :token-outcome-comparison (:receipt token-comparison)
-                                            :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
-                                            :route-attestation (:receipt route-account)
-                                            :route-attestation-ref (:reference route-account)
-                                            :kernel-example (:receipt kernel-example-result)
-                                            :morning-brief-ref brief-ref
-                                            :delivery-qa-ref delivery-qa-ref
-                                            :job-texts @job-text-records
-                                            :duration-ms (- (System/currentTimeMillis) started)
-                                            :resource-use
-                                            {:agent-turns @dispatched-turns}}
-                                            (select-keys data
-                                                         [:witness :effective-run-configuration
-                                                          :standing-readback]))
+                               (term (assoc close-judgment-base
+                                            :run-ending-classification
+                                            (:receipt run-ending-result))
                                      {:kind :full-loop-outcome :attempt-id attempt-id})
                                 (and cohort? @action-occurrence)
                                 (assoc :retention-inputs
@@ -3704,6 +3737,7 @@
                                :route-attestation (:receipt route-account)
                                :route-attestation-ref (:reference route-account)
                                :kernel-example (:receipt kernel-example-result)
+                               :run-ending-classification (:receipt run-ending-result)
                                :morning-brief-ref brief-ref
                                :delivery-qa-ref delivery-qa-ref
                                :wm/route run-route
