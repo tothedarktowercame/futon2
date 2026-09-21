@@ -5,7 +5,8 @@
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
             [futon2.aif.full-loop-runner :as runner]
-            [futon2.aif.intrinsic-values :as iv]))
+            [futon2.aif.intrinsic-values :as iv]
+            [futon2.aif.policy :as policy]))
 
 (def ^:private state
   {:observation {:loop-health 0.9
@@ -50,14 +51,18 @@
           "harvested load and predictive variance separate the EFE core")
       (is (every? #(= :beta-predictive (:g-ambiguity-source %)) field))
       (is (every? #(contains? % :c-zone-load) field))
-      (is (true? (:passes? (runner/selection-discrimination field)))))))
+      (is (true? (:passes? (runner/selection-discrimination
+                              (runner/ranked-candidates
+                               {:decision (policy/select-action-cascades field {:beta 1.0})}))))))))
 
 (deftest prior-only-posteriors-degrade-to-flat-refusal
   (let [field (discrimination-field)]
     (is (every? #(= 0.25 (:G-ambiguity %)) field))
     (is (every? #(zero? (get-in % [:c-zone-load :mass])) field))
     (is (= 1 (count (distinct (map :G-efe field)))))
-    (is (false? (:passes? (runner/selection-discrimination field))))))
+    (is (false? (:passes? (runner/selection-discrimination
+                              (runner/ranked-candidates
+                               {:decision (policy/select-action-cascades field {:beta 1.0})})))))))
 
 (deftest non-gap-actions-remain-byte-identical
   (let [action {:type :no-op}

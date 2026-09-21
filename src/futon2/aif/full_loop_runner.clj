@@ -1202,56 +1202,68 @@
            []
            values)))
 
+(defn ranked-candidates
+  "All recorded policy candidates, descending by posterior mass. Certificate
+  quantities join on the full action, since cascade IDs repeat across targets.
+  Equal masses use the declared action-name rule on the first acting pattern
+  (as in policy/select-action-cascades); equal first actions then use the full
+  printed candidate for deterministic display order. This is a policy ranking,
+  not the action marginal that selects the enacted action.
+
+  :G-efe remains an alias of :G for existing CLI readers. Missing certificate
+  quantities remain nil, with :f-status :not-recorded; never infer them from
+  posterior mass."
+  [judgement]
+  (let [decision (:decision judgement)
+        posterior (get-in decision [:selection-law :posterior])
+        rule (get-in decision [:selection-law :tie-break-rule])
+        certificates (into {} (map (juxt :id identity)
+                                   (get-in decision [:selection-certificate :candidates])))
+        first-action (fn [action]
+                       (if (and (map? action) (seq (:precedence action)))
+                         (first (:precedence action))
+                         (if (map? action) (:type action) action)))
+        tied? (some #(> % 1) (vals (frequencies (map second posterior))))]
+    (when (and tied? (not= :action-name-ascending rule))
+      (throw (ex-info "Cannot rank a posterior tie without its declared rule"
+                      {:failure-kind :unsupported-ranking-tie-rule :tie-break-rule rule})))
+    (->> posterior
+         (sort-by (fn [[action probability]]
+                    [(- probability) (str (first-action action)) (pr-str action)]))
+         (map-indexed
+          (fn [i [action probability]]
+            (let [certificate (get certificates action)]
+              {:rank (inc i) :action action
+               :target (:target action)
+               :cascade-id (or (:cascade-id action) (:id action))
+               :G (:g certificate) :G-efe (:g certificate)
+               :habit (:habit certificate) :F (:f certificate)
+               :f-status (get certificate :f-status :not-recorded)
+               :posterior probability})))
+         vec)))
+
 (defn selection-discrimination
-  "Fail-closed diagnostic for the leading feasible policy set. A single
-  candidate needs no discrimination; two or more candidates must contain at
-  least two epsilon-distinct controller-score values.
-
-  Uses :controller-score (the actual policy ranking key) rather than :G-efe
-  (the pure risk+ambiguity core) for the discrimination gate. Rationale:
-  :G-efe is structurally identical for actions whose forward-model predictions
-  are identical (e.g. multiple :learn-action-class gap-actions with different
-  :intrinsic-value). The :controller-score includes the intrinsic-value
-  adjustment (via risk-control) which provides genuine discrimination without
-  habit-prior contamination: in :habit-prior mode (the live config), structural
-  pressure leaves :controller-score and goes to :habit-prior-bias, so habit
-  priors cannot hide a flat estimator through :controller-score.
-
-  Both :controller-score AND :G-efe must be finite for the gate to pass —
-  invalid canonical EFE on any candidate fails closed.
-
-  :G-efe spread is reported as telemetry (:valid-g-count, :distinct-g) with
-  its original G semantics; :valid-score-count / :distinct-score are the new
-  gate fields."
+  "Diagnostic on the leading posterior masses. Retains the existing epsilon
+  and top-k rule: all masses must be finite and two or more candidates need
+  at least two epsilon-distinct masses. G is not the quantity this diagnostic
+  compares. Near-tie attribution is separate work (narrative fix-7)."
   ([ranked] (selection-discrimination ranked {}))
   ([ranked {:keys [top-k epsilon]
             :or {top-k discrimination-top-k
                  epsilon discrimination-epsilon}}]
    (let [leading (vec (take top-k ranked))
-         score-values (mapv :controller-score leading)
-         valid-scores (filterv #(and (number? %)
-                                     (Double/isFinite (double %)))
-                               score-values)
-         distinct-scores (epsilon-distinct-count valid-scores epsilon)
-         ;; Telemetry: also report G-efe spread for audit (original G semantics)
-         g-values (mapv :G-efe leading)
-         valid-g (filterv #(and (number? %)
-                                (Double/isFinite (double %)))
-                          g-values)
-         distinct-g (epsilon-distinct-count valid-g epsilon)]
+         values (mapv :posterior leading)
+         valid (filterv #(and (number? %) (Double/isFinite (double %))) values)
+         distinct-values (epsilon-distinct-count valid epsilon)]
      {:candidate-count (count leading)
-      :valid-score-count (count valid-scores)
-      :distinct-score distinct-scores
-      :valid-g-count (count valid-g)
-      :distinct-g distinct-g
+      :valid-posterior-count (count valid)
+      :distinct-posterior distinct-values
       :epsilon epsilon
       :top-k top-k
-      :score-values score-values
-      :g-values g-values
-      :passes? (and (= (count valid-scores) (count leading))
-                    (= (count valid-g) (count leading))
+      :posterior-values values
+      :passes? (and (= (count valid) (count leading))
                     (or (< (count leading) 2)
-                        (>= distinct-scores 2)))})))
+                        (>= distinct-values 2)))})))
 
 ;; Retained for explicit repair callers; ordinary clicks no longer divert here.
 #_{:clj-kondo/ignore [:unused-private-var]}
@@ -3776,29 +3788,14 @@
                        :entity-id target
                        :belief (:belief judgement)
                        :run-id (:run/id judgement)})
-            ranked-for-review ;; the candidate population is the cascade
-                                ;; decision's own recorded posterior
-                                (vec (map-indexed
-                                      (fn [i [candidate p]]
-                                        ;; the discrimination guard reads
-                                        ;; :controller-score and :G-efe; on the
-                                        ;; posterior the comparable quantity is
-                                        ;; the posterior mass itself
-                                        {:rank (inc i) :action candidate
-                                         :controller-score p :G-efe p})
-                                      (get-in judgement
-                                              [:decision :selection-law :posterior])))
+            ranked-for-review (ranked-candidates judgement)
             discrimination (selection-discrimination ranked-for-review)
             selection-cell (if entry
                              (cond->
                               (term {:selected-mission (str target)
                                      :selected-action (:action entry)
                                      :controller-decision (:decision judgement)
-                                     :ranked-candidates (mapv #(select-keys % [:rank :action
-                                                                               :G-efe
-                                                                               :controller-score
-                                                                               :habit-prior-bias])
-                                                              (take 10 ranked-for-review))
+                                     :ranked-candidates ranked-for-review
                                      :selection-reasons
                                      (assoc
                                       (select-keys (:decision judgement)
@@ -3852,7 +3849,7 @@
                              :review-role (if repair-action?
                                             :ground-control :ordinary)}))))
         (when (and discrimination (not (:passes? discrimination)))
-          (throw (ex-info "Leading feasible policies have no G discrimination"
+          (throw (ex-info "Leading feasible policies have no posterior discrimination"
                           {:outcome :policy-nondiscrimination
                            :failure-kind :policy-nondiscrimination
                            :failure-stage :selection

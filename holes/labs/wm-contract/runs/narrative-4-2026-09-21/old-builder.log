@@ -1,0 +1,85 @@
+
+Testing futon2.aif.ranked-candidates-test
+
+FAIL in (ranking-retains-more-than-ten-and-uses-action-tie-rule) (ranked_candidates_test.clj:52)
+expected: (= 12 (count rows))
+  actual: (not (= 12 10))
+
+FAIL in (ranking-retains-more-than-ten-and-uses-action-tie-rule) (ranked_candidates_test.clj:53)
+expected: (= (mapv :target (reverse actions)) (mapv :target rows))
+  actual: (not (= ["M11" "M10" "M9" "M8" "M7" "M6" "M5" "M4" "M3" "M2" "M1" "M0"] [nil nil nil nil nil nil nil nil nil nil]))
+
+FAIL in (ranking-retains-more-than-ten-and-uses-action-tie-rule) (ranked_candidates_test.clj:54)
+expected: (= (vec (range 1 13)) (mapv :rank rows))
+  actual: (not (= [1 2 3 4 5 6 7 8 9 10 11 12] [1 2 3 4 5 6 7 8 9 10]))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:25)
+expected: (= {:passes? true, :epsilon 1.0E-6, :top-k 5} (select-keys (runner/selection-discrimination rows) [:passes? :epsilon :top-k]))
+  actual: (not (= {:passes? true, :epsilon 1.0E-6, :top-k 5} {:passes? false, :epsilon 1.0E-6, :top-k 5}))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:27)
+expected: (= (mapv :g cs) (mapv :G rows))
+  actual: (not (= [15.170069253169533 15.171332462691225 15.171375235022659] [nil nil nil]))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:28)
+expected: (= [0.3336188600826242 0.333197695627431 0.3331834442899445] (mapv :posterior rows))
+  actual: (not (= [0.3336188600826242 0.333197695627431 0.3331834442899445] [nil nil nil]))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:31)
+expected: (= (mapv (fn* [p1__18796#] (get-in p1__18796# [:id :target])) cs) (mapv :target rows))
+  actual: (not (= ["M-aif-policy-conditioned-eig" "M-f11-find-production-successor" "M-wm-08-external-f2"] [nil nil nil]))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:32)
+expected: (= [:C1 :C1 :C1] (mapv :cascade-id rows))
+  actual: (not (= [:C1 :C1 :C1] [nil nil nil]))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:33)
+expected: (= (mapv :habit cs) (mapv :habit rows))
+  actual: (not (= [0.3333333333333333 0.3333333333333333 0.3333333333333333] [nil nil nil]))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:34)
+expected: (= (mapv :f cs) (mapv :F rows))
+  actual: (not (= [0 0 0] [nil nil nil]))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:35)
+expected: (= (mapv :f-status cs) (mapv :f-status rows))
+  actual: (not (= [:computed-not-attached :computed-not-attached :computed-not-attached] [nil nil nil]))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:37)
+expected: (not= (:G row) (:posterior row))
+  actual: (not (not= nil nil))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:38)
+expected: (= (:G row) (:G-efe row))
+  actual: (not (= nil 0.3331834442899445))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:39)
+expected: (not (contains? row :controller-score))
+  actual: (not (not true))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:37)
+expected: (not= (:G row) (:posterior row))
+  actual: (not (not= nil nil))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:38)
+expected: (= (:G row) (:G-efe row))
+  actual: (not (= nil 0.333197695627431))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:39)
+expected: (not (contains? row :controller-score))
+  actual: (not (not true))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:37)
+expected: (not= (:G row) (:posterior row))
+  actual: (not (not= nil nil))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:38)
+expected: (= (:G row) (:G-efe row))
+  actual: (not (= nil 0.3336188600826242))
+
+FAIL in (recorded-certificate-keeps-quantities-and-identities) (ranked_candidates_test.clj:39)
+expected: (not (contains? row :controller-score))
+  actual: (not (not true))
+
+Ran 4 tests containing 34 assertions.
+20 failures, 0 errors.
