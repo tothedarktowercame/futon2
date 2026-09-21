@@ -1,5 +1,6 @@
 (ns futon2.aif.close-retention-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.close-retention :as close]))
 
 (defn- refusal [f]
@@ -75,3 +76,16 @@
            (refusal #(block {:state (assoc observed
                                       :state-at "2026-09-14T09:59:00Z"
                                       :observed-at "2026-09-14T09:58:00Z")}))))))
+
+
+(deftest occurrence-identity-does-not-inherit-reader-printer
+  (let [o (binding [*print-namespace-maps* false]
+            (close/mint-occurrence
+             {:run-id "test" :cohort-id "test" :attempt-id "test"
+              :selected-action {:interpretation-receipts {:apparatus/one-authority {:reading "one"}}}
+              :now (constantly "2026-09-21T04:24:00Z")
+              :uuid-fn (constantly "00000000-0000-0000-0000-000000000001")}))
+        reread (edn/read-string (pr-str o))]
+    (is (nil? (binding [*print-namespace-maps* true]
+                (refusal #(close/validate-occurrence reread)))))
+    (is (= :wm/action-transition-occurrence-v2 (:schema o)))))

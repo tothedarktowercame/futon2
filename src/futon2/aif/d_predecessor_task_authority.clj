@@ -10,6 +10,7 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.close-retention :as retention]
+            [futon2.aif.action-identity :as identity]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.policy-precision-carry :as precision-carry]
             [futon2.aif.interpretation-evidence :as evidence]
@@ -101,7 +102,7 @@
    (when (and (= route :fresh-author) (:commit artifact-binding))
      (artifact-tokens dispatch repository (:commit artifact-binding)))})
 
-(defn verify!
+(defn- verify-execution!
   "Verify minted identity, corroborated fresh artifact, independent review and
    revision-bound token affirmations. Must not transform model-misfit or unknown
    evidence into successful execution. Portfolio approval is not established.
@@ -203,6 +204,30 @@
        :precision-family (when-let [family (:precision-family dispatch)]
                            (precision-carry/validate-binding! family occurrence))
        :record-sha256 (evidence/value-digest record)})))
+
+(defn- verify-with-identity! [record expected read-job]
+  (let [receipt (retention/occurrence-identity-receipt (get-in record [:dispatch :occurrence]))
+        modes (:matched-print-namespace-maps receipt)]
+    (if (seq modes)
+      ;; Legacy prompt/dispatch hashes used the same ambient printer as the
+      ;; occurrence. Replay only recognized modes that match the stored action
+      ;; digest, and require ALL existing execution checks in the chosen mode.
+      (loop [[mode & more] modes]
+        (let [result (try {:verification (identity/with-printer
+                                         mode #(verify-execution! record expected read-job))}
+                          (catch clojure.lang.ExceptionInfo e {:error e}))]
+          (if-let [error (:error result)]
+            (if (seq more) (recur more) (throw error))
+            (assoc result :identity-verification
+                   (assoc receipt :execution-print-namespace-maps mode)))))
+      {:verification (verify-execution! record expected read-job)
+       :identity-verification receipt})))
+
+(defn verify!
+  "Verify execution unchanged; legacy records replay their verified printer
+   mode rather than inheriting the reader's CLI/server print settings."
+  [record expected read-job]
+  (:verification (verify-with-identity! record expected read-job)))
 
 (defn verify [record expected read-job]
   (try (verify! record expected read-job)
@@ -350,8 +375,10 @@
    projection grants no scheduled conditioning or causal authority."
   [record expected read-job]
   (try
-    (let [execution (verify! record expected read-job)]
-      {:schema :wm/d-task-token-observations-v2 :status :admitted
+    (let [{execution :verification identity-receipt :identity-verification}
+          (verify-with-identity! record expected read-job)]
+      {:schema :wm/d-task-token-observations-v2
+       :occurrence-identity-verification identity-receipt :status :admitted
        :authority observation-authority :scope observation-scope
        :execution-verification execution
        :occurrence (:occurrence execution)

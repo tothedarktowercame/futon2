@@ -2,7 +2,8 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.d-predecessor-task-authority :as task]
             [futon2.aif.d-predecessor-task-authority-test :as fixture]
-            [futon2.aif.interpretation-evidence :as evidence]))
+            [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.action-identity :as identity]))
 
 (def fixture-options
   {:universe #{["target" :artifact] ["target" :missing-file]
@@ -98,3 +99,29 @@
           (is (= :revision-pair-invalid
                  (:kind (task/verify-observations-v2
                          (assoc-in record [:revision-pair :after] "other") expected jobs)))))))))
+
+
+(deftest legacy-d-task-replays-the-matching-printer-without-caller-bindings
+  (doseq [writer-mode [false true]]
+    (identity/with-printer
+     writer-mode
+     #(fixture/with-artifact
+       {:action {:kind :cascade-candidate :id :C0 :target "target"
+                 :receipts {:example/receipt {:reading "bound"}}
+                 :precedence [{:id :make-file :produces #{["target" :artifact]}}]}
+        :occurrence-fn (fn [o] (assoc o :schema :wm/action-transition-occurrence-v1
+                                     :action/value-sha256
+                                     (identity/sha256 (identity/printed writer-mode (:action/value o)))))}
+       (fn [{:keys [inputs expected jobs]}]
+         (let [record (task/claim inputs)
+               old (task/verify record expected jobs)
+               result (identity/with-printer (not writer-mode)
+                        (fn [] (task/verify-observations-v2 record expected jobs)))]
+           (is (= :admitted (:status result)))
+           (is (= old (:execution-verification result)))
+           (is (= writer-mode
+                  (get-in result [:occurrence-identity-verification :execution-print-namespace-maps])))
+           (is (true? (get-in result [:observations ["target" :artifact] :artifact-observation :observed])))
+           (is (= :independent-jobs-unestablished
+                  (:kind (task/verify-observations-v2
+                          record expected (assoc-in jobs ["review-job" :agent-id] "author")))))))))))
