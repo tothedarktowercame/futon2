@@ -1,6 +1,7 @@
 (ns futon2.aif.scoring-input-receipts
   "Read-time state receipts. Uses the declaration provenance status vocabulary."
   (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.preference-audit :as preference-audit]
             [clojure.edn :as edn]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.token-belief-carry :as token-carry]
@@ -24,6 +25,9 @@
      :derivation :target-qualified-true-facts-point-mass-v1
      :snapshot-edn snapshot :sha256 (sha snapshot) :inputs inputs :value value}))
 
+(defn with-preference-audit [decision]
+  (preference-audit/attach decision))
+
 (defn habit-log [state]
   {:status (cond (nil? state) :not-observed (empty? state) :absent :else :present)
    :reason (when (and (some? state) (empty? state)) :never-read)
@@ -43,6 +47,9 @@
         log (:habit-reads record)
         occurrences (:occurrences log)
         errors (cond-> []
+                 (and (contains? (:selection-certificate decision) :preference-audit)
+                      (not (preference-audit/valid? decision (get-in decision [:selection-certificate :preference-audit]))))
+                 (conj :preference-audit-mismatch)
                  (or (nil? log) (= :not-observed (:status log))) (conj :habit-receipts-not-observed)
                  (and (seq candidates) (not= :present (:status initial)))
                  (conj :initial-belief-receipt-not-observed))

@@ -6281,6 +6281,7 @@
                                    token-belief-stage)
                 decision (assoc-in decision [:selection-certificate :token-belief-input]
                                    token-belief-input)
+                decision (input-receipts/with-preference-audit decision)
                 authorized (controller-authority/authorize decision ranked)
                 emitted (decision-gate/emit! authorized)]
             {:decision (assoc emitted

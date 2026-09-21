@@ -30,6 +30,7 @@
    'futon2.aif.close-loop "/home/joe/code/futon2/src/futon2/aif/close_loop.clj"
    'futon2.aif.close-retention "/home/joe/code/futon2/src/futon2/aif/close_retention.clj"
    'futon2.aif.action-identity "/home/joe/code/futon2/src/futon2/aif/action_identity.clj"
+   'futon2.aif.preference-audit "/home/joe/code/futon2/src/futon2/aif/preference_audit.clj"
    'futon2.aif.token-initialization-policy "/home/joe/code/futon2/src/futon2/aif/token_initialization_policy.clj"
    'futon2.aif.token-belief-carry "/home/joe/code/futon2/src/futon2/aif/token_belief_carry.clj"
    'futon2.aif.token-belief-predecessor "/home/joe/code/futon2/src/futon2/aif/token_belief_predecessor.clj"

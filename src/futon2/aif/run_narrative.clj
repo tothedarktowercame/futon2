@@ -419,6 +419,22 @@
          "](<" (.toASCIIString (java.net.URI. nil nil path nil nil)) ">)\n")
     (str "\n" (name kind) " figure not emitted; use render-run! to write standalone SVGs.\n")))
 
+(defn preference-audit-text [d]
+  (let [audit (get-in d [:selection-certificate :preference-audit])
+        rows (get-in audit [:selected-target-odds :rows])
+        computed (filter #(= :computed (:status %)) rows)
+        held (remove #(= :computed (:status %)) rows)]
+    (str "\nC preference audit (source budget: "
+         (shown (get-in audit [:source-budget :domain])) ", "
+         (shown (get-in audit [:source-budget :count])) " source entries): "
+         (if (seq computed)
+           (str "C prefers " (str/join "; " (map #(str (shown (:token %)) " present over absent by "
+                                                       (String/format java.util.Locale/ROOT "%.6f" (to-array [(double (:present-to-absent %))]))
+                                                       " : 1") computed)))
+           "wanted-token odds are held or not recorded")
+         (when (seq held) (str "; held " (shown (mapv #(select-keys % [:token :reason]) held))))
+         ".\n")))
+
 (defn- selection-text [b]
   (let [d (decision b) rows (candidate-rows b)
         winner (or (:selected-action (judgment b :selection)) (:action d)
@@ -451,6 +467,7 @@
          (if action (str "The action comparison records decided-by " (shown (:decided-by action)) ".\n")
              "Not recorded in this run: action comparison.\n")
          (coverage-text b)
+         (preference-audit-text d)
          "\n| Target | Cascade | G (nats) | Posterior | Habit | F consumed |\n|---|---|---:|---:|---:|---:|\n"
          (apply str (for [r rows] (str "| " (str/join " | " (map #(shown (get r %)) [:target :cascade-id :G :posterior :habit :F])) " |\n")))
          (figure-link b :selection)
