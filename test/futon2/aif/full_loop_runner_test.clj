@@ -2631,7 +2631,7 @@
     (is (= :environmental-hold (:repair-class (first @findings))))
     (is (= ["zai-5"] @dispatches))))
 
-(deftest open-repair-memory-preserves-selection-and-explicit-repair-awaits-validation
+(deftest open-repair-memory-preserves-selection-and-repair-requires-evaluator
   (doseq [repair-selected? [false true]]
    (let [dispatches (atom [])
         implementations (atom [])
@@ -2735,18 +2735,14 @@
         (is (every? #(re-find #"STOP-THE-LINE" (:prompt %)) @dispatches))
         (is (every? #(re-find #"trusted provenance is mandatory" (:prompt %)) @dispatches))
         (is (every? #(not (re-find #"caller-controlled identity is spoofable" (:prompt %))) @dispatches))
-        (is (= [stop-line] (mapv first @implementations))
-            "only the selected obligation advances, even when it is not first in memory")
-        (is (= "good456" (get-in @implementations [0 1 :commit])))
-        (is (= [:awaiting-validation] (mapv :repair/status @implementation-records))
-            "the real repair store requires a distinct successor after implementation")
-        (is (empty? @resolutions) "implementation does not resolve its own repair")
-        (is (= :awaiting-validation
-               (:repair/status
-                (edn/read-string
-                 (slurp (io/file (:repair-root store-opts) "implementations"
-                                "repair-failed-1.edn")))))
-            "the persisted store record remains awaiting successor validation"))
+        (is (empty? @implementations)
+            "substrate grounding cannot register an implementation without evaluator evidence")
+        (is (= :evidence-unavailable (get-in result [:repair/discharge :status])))
+        (is (empty? @implementation-records))
+        (is (empty? @resolutions) "a canary does not resolve its own repair")
+        (is (not (.exists (io/file (:repair-root store-opts) "implementations"
+                                  "repair-failed-1.edn"))))
+      )
       (do
         (is (= selected-action
                (get-in result [:checkpoints :selection :judgment :selected-action])))
@@ -3241,13 +3237,9 @@
     (is (= :grounded-change (:outcome result)))
     (is (= ["codex-1"] @dispatches)
         "deferred-completion dispatches only the standing Ground Control reviewer")
-    (is (= :agency-deferred-completion
-           (get-in result [:checkpoints :dispatch :ground :kind])))
-    (is (= :deferred-completion
-           (get-in result [:checkpoints :dispatch :judgment :availability])))
-    (is (= stop-line (ffirst @resolutions)))
-    (is (= :deferred-existing-artifact
-           (get-in @resolutions [0 1 :validation :kind])))))
+    ;; Substrate insertion is not a finding-specific repair observation.
+    (is (empty? @resolutions))
+    (is (= :evidence-unavailable (get-in result [:repair/discharge :status])))))
 
 (deftest recoverable-late-review-completion-skips-both-replacement-turns
   (let [dispatches (atom [])
@@ -3303,7 +3295,8 @@
           :queue-fn identity})]
     (is (= :grounded-change (:outcome result)))
     (is (empty? @dispatches))
-    (is (= stop-line (ffirst @resolutions)))))
+    (is (empty? @resolutions)
+        "recovered review alone cannot discharge without an admitted evaluator")))
 
 (deftest reviewer-deferred-completion-without-author-provenance-fails-before-dispatch
   (let [dispatches (atom [])
@@ -5618,3 +5611,23 @@
     (is (= :not-reached (:evaluation configuration)))
     (is (= trace/*persist-policy-trace-details?* (:policy-details? configuration)))
     (is (not (contains? configuration :effective-depth)))))
+
+(deftest t-repair-prompt-uses-the-pinned-native-finding
+  (let [root (tmp-cohort-root)
+        finding {:repair/id "repair-native" :repair/class :machine-failure
+                 :discharge-contract {:artifact-shape :code-commit
+                                      :requires [:grounded-repair]}}
+        file (io/file root "findings/repair-native.edn")
+        _ (io/make-parents file)
+        _ (spit file (pr-str finding))
+        action {:type :cascade-candidate :target "T-repair-native" :repair/id "repair-native"
+                :discharge-contract (:discharge-contract finding)
+                :finding-source {:path (.getCanonicalPath file) :sha256 (digest/sha256 (slurp file))}
+                :interpretation-receipts {:p {:kind :hand-admitted :reading "test"}}}]
+    (is (= finding (#'runner/mission-for-decision {:action action} (:target action) root)))
+    (is (= :finding-admission-unestablished
+           (try (#'runner/mission-for-decision
+                 {:action (assoc-in action [:finding-source :sha256] "stale")}
+                 (:target action) root)
+                nil
+                (catch clojure.lang.ExceptionInfo e (:repair-discharge/refusal (ex-data e))))))))

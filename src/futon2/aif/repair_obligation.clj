@@ -1304,6 +1304,64 @@
          (write-new! (io/file root "dismissals" (str finding-id ".edn")) dismissal)
          dismissal)))))
 
+(defn discharge-record
+  "Read one immutable record, retaining its exact UTF-8 bytes for a derived
+   discharge receipt. No pending queue membership is required."
+  [root child id]
+  (when-not (and (#{"findings" "implementations" "resolutions"} child)
+                 (string? id) (re-matches #"[A-Za-z0-9][A-Za-z0-9._-]*" id))
+    (throw (ex-info "Invalid discharge store key" {:child child :repair/id id})))
+  (let [file (io/file root child (str id ".edn"))]
+    (when (.exists file)
+      (let [capture (capture-under! root file)
+            bytes (Files/readAllBytes (.toPath file))
+            text (:text capture)]
+        (when-not (and (java.util.Arrays/equals bytes (.getBytes text "UTF-8"))
+                       (= id (get-in capture [:value :repair/id])))
+          (throw (ex-info "Discharge store record binding invalid" {:path (str file)})))
+        {:id id :path (str child "/" id ".edn") :sha256 (:sha256 capture)
+         :edn-text text :value (:value capture)}))))
+
+(defn discharge-resolution-ids
+  "Enumerate the authority, not the open queue, so resolved-but-unpublished
+   findings survive a crash. Each record is validated separately by its caller."
+  [root]
+  (->> (or (.listFiles (io/file root "resolutions")) [])
+       (filter #(.isFile ^java.io.File %))
+       (map #(.getName ^java.io.File %))
+       (filter #(str/ends-with? % ".edn"))
+       (map #(subs % 0 (- (count %) 4))) sort vec))
+
+(defn record-discharge-operation!
+  "Append an intent or outcome through the store. Content-addressed operation
+   records are replay-idempotent only when the existing exact value agrees."
+  [root kind value]
+  (when-not (#{:intent :outcome} kind)
+    (throw (ex-info "Unknown discharge operation" {:kind kind})))
+  (let [record {:schema :wm/repair-discharge-operation-v1 :kind kind :value value}
+        text (pr-str record)
+        _ (when-not (= record (strict-read text :discharge-operation))
+            (throw (ex-info "Unreadable discharge operation" {:kind kind})))
+        id (digest/sha256 text)
+        path (io/file root "discharge-operations" (str id ".edn"))]
+    (try
+      (write-new! path record)
+      (catch java.nio.file.FileAlreadyExistsException e
+        (when-not (= record (strict-read (slurp path) path)) (throw e))))
+    {:id id :path (.getCanonicalPath path) :kind kind}))
+
+(defn- discharge-context! [phase obligation record]
+  (when-let [context (:repair/discharge-context record)]
+    (when-not (and (= :wm/repair-discharge-context-v1 (:schema context))
+                   (= phase (:phase context))
+                   (= (:repair/id obligation) (:repair/id context))
+                   (= (:attempt-id record) (get-in context [:close :attempt/id]))
+                   (= (:review-job record) (get-in context [:review-job :job-id]))
+                   (= context (strict-read (pr-str context) :discharge-context)))
+      (throw (ex-info "Discharge context does not bind the store transition"
+                      {:phase phase :repair/id (:repair/id obligation)})))
+    context))
+
 (defn record-implementation!
   "Record independently reviewed, grounded implementation of a machine repair.
   Evidence is validated according to the discharge contract's artifact shape;
@@ -1314,7 +1372,8 @@
    (record-implementation! default-root obligation implementation))
   ([root obligation {:keys [attempt-id commit reviewer review-job witness]
                      :as implementation}]
-   (let [shape (artifact-shape obligation)
+   (let [context (discharge-context! :implementation obligation implementation)
+         shape (artifact-shape obligation)
          ;; Every conjunct of the historical guard, refusing identically but
          ;; NAMING what failed. The 2026-09-12 stop-line failure (repair-ea1-
          ;; 7093...-untyped-failure) refused here on attempt-distinctness while
@@ -1360,6 +1419,9 @@
                     :review-job review-job
                     :witness witness
                     :implemented-at (str (Instant/now))}
+                    context
+                    (assoc :repair/phase :implementation
+                           :repair/discharge-context context)
                     (= 3 (:repair/schema-version obligation))
                     (assoc :grounded-review-evidence
                            (:review-evidence implementation)
@@ -1407,7 +1469,8 @@
   ([obligation resolution] (resolve! default-root obligation resolution))
   ([root obligation {:keys [attempt-id commit reviewer review-job witness]
                      :as resolution}]
-   (let [implementation (:repair/implementation obligation)
+   (let [context (discharge-context! :successor-validation obligation resolution)
+         implementation (:repair/implementation obligation)
          shape (artifact-shape obligation)
          recoverable? (= :incomplete-recoverable (:repair/class obligation))
          environmental? (= :environmental-hold (:repair/class obligation))
@@ -1453,6 +1516,9 @@
                              (artifact-record shape resolution))
                          :validation-artifact
                          (artifact-record shape resolution))
+                  context
+                  (assoc :repair/phase :successor-validation
+                         :repair/discharge-context context)
                   (:successor-relation resolution)
                   (assoc :successor-relation (:successor-relation resolution)))]
      (write-new! (io/file root "resolutions"

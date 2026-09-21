@@ -37,6 +37,9 @@
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.run-participants :as participants]
             [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.repair-discharge :as repair-discharge]
+            [futon2.aif.repair-discharge-receipt :as discharge-receipt]
+            [futon2.aif.repair-evaluators :as repair-evaluators]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.trace :as trace]
             [futon2.aif.tripwire :as tripwire]
@@ -538,6 +541,8 @@
                                                    :initial-belief-receipt :enumeration-completeness])
                                      :g-term-decomposition (decomposition/from-result result))
                     :route route
+                    :repair/discharge (:repair/discharge result)
+                    :repair/publication (:repair/publication result)
                     :d-task-enactment (:d-task-enactment result)
                     :job-liveness (vec (some-> (:job-liveness/state raw-opts) deref))}
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
@@ -1534,9 +1539,13 @@
    :enacted enacted
    :evidence evidence})
 
-(defn- mission-for-decision [entry target]
+(defn- mission-for-decision [entry target & [repair-root]]
   (let [action (:action entry)]
     (cond
+      (and (:repair/id action) (= target (str "T-" (:repair/id action))))
+      (:finding (repair-discharge/bind-selected!
+                 (or repair-root repair/default-root) action (:interpretation-receipts action)))
+
       (= :repair-machine-failure (:type action))
       (:repair-obligation action)
 
@@ -3506,10 +3515,34 @@
                                                   (:data-root execution-cohort)
                                                   attempt-id closed)
                            (cohort/close-attempt! attempt-id closed)))
+                       discharge-result
+                       (repair-discharge/finalize-run!
+                        {:root (or (:repair-root opts) repair/default-root)
+                         :repo (or (:discharge-receipt-repo opts) "/home/joe/code/futon2")
+                         :action selected-action
+                         :interpretation (:interpretation-receipts selected-action)
+                         :closed-event closed-event
+                         :close-path (when closed-event
+                                       (str (io/file (or (:data-root execution-cohort) cohort/default-data-root)
+                                                     (name (:cohort/id closed-event)) attempt-id "007-closed.edn")))
+                         :close {:attempt/id (or (:id execution-identity)
+                                                 (when closed-event
+                                                   (str (name (:cohort/id closed-event)) "--" attempt-id)))
+                                 :run/id (:run-id opts) :closed-at (:recorded-at closed-event)
+                                 :grounded? (= :grounded-change outcome)}
+                         :artifact {:repo (get-in data [:artifact-binding :repo]) :commit (:commit data)}
+                         :artifact-binding (:artifact-binding data)
+                         :files (get-in @checkpoints [:build :judgment :artifacts])
+                         :author author :reviewer @reviewer-of-record
+                         :review-job (:review-job data)
+                         :read-job #((or (:read-job-fn opts) read-job!) opts %)
+                         :evaluators (:repair-evaluators opts) :registry repair-evaluators/registry
+                         :producer {:run/id (:run-id opts) :attempt/id external-attempt-id
+                                    :runner-source-sha256 (get-in opts [:loaded-code-identity :runner/sha256])}})
                        retained (get-in closed-event [:payload :close-retention])
                        retained-manifest
                        (get-in closed-event [:payload :close-evidence-manifest])
-                       result (cond-> result-base
+                       result (cond-> (assoc result-base :repair/discharge discharge-result)
                                 retained (assoc :close-retention retained)
                                 retained-manifest
                                 (assoc :close-evidence-manifest retained-manifest))]
@@ -3646,11 +3679,6 @@
             historical-validation-lines
             (filterv #(and (= :awaiting-validation (:repair/status %))
                            (map? (:repair/verification %)))
-                     validation-lines)
-            ordinary-validation-lines
-            (filterv #(not (some (fn [historical]
-                                   (= (:repair/id historical) (:repair/id %)))
-                                 historical-validation-lines))
                      validation-lines)
             selection-judge (or (:judge-fn opts)
                                 (fn [days]
@@ -3875,7 +3903,7 @@
                           #(hash-map
                             :mission (if-let [mission-fn (:mission-fn opts)]
                                        (mission-fn target)
-                                       (mission-for-decision entry target))
+                                       (mission-for-decision entry target (:repair-root opts)))
                             :construction (if interpretation
                                             (:construction interpretation)
                                             ((or (:construct-fn opts) construct-for-decision) entry))))
@@ -4440,61 +4468,9 @@
                                     #((or (:ground-fn opts) ground-commit!)
                                       attempt-id target author reviewer repo commit files
                                       construction review-job opts))]
-                    (when (seq stop-lines)
-                      (run-phase!
-                       opts @phase-context :stop-line-resolution
-                       #(doseq [obligation stop-lines]
-                          (if (= :incomplete-recoverable
-                                 (:repair/class obligation))
-                            ;; r6 rule applies here too: the bare
-                            ;; cohort-local ordinal ("attempt-001")
-                            ;; collides with the OBLIGATION's own
-                            ;; attempt-id, and record-side distinctness
-                            ;; refuses it as
-                            ;; :implementation-attempt-not-distinct. The
-                            ;; authority-qualified external id is unique
-                            ;; across the shared findings store. The
-                            ;; repair-ea1-b0eeafa0 attempt-001 run (2026-09-13
-                            ;; 22:39) was refused exactly there: grounded,
-                            ;; approved, witnessed review evidence present,
-                            ;; and still unable to close.
-                            ((or (:repair-resolve-fn opts) repair/resolve!)
-                             obligation
-                             {:attempt-id external-attempt-id :commit commit
-                              :reviewer reviewer
-                              :review-job (:job-id review-job)
-                              :witness witness
-                              :validation {:kind :deferred-existing-artifact
-                                           :production-shaped? true
-                                           :completes-attempt (:attempt-id obligation)}})
-                            ((or (:repair-implement-fn opts)
-                                 repair/record-implementation!)
-                             obligation
-                             {:attempt-id external-attempt-id :commit commit
-                              :reviewer reviewer
-                              :review-job (:job-id review-job)
-                              :review-evidence
-                              (assoc (independent-review-evidence files review-job)
-                                     :reviewer reviewer)
-                              :artifact-binding artifact-binding
-                              :witness witness})))))
-                    ;; A successfully grounded deferred-completion is itself a real,
-                    ;; production-shaped successor.  It may therefore validate
-                    ;; an older implemented machine repair while discharging
-                    ;; its own deferred-completion obligation.
-                    (when (and (seq ordinary-validation-lines)
-                               (:resolved? witness) (:dial-moved? witness))
-                      (run-phase!
-                       opts @phase-context :stop-line-validation
-                       #(doseq [obligation ordinary-validation-lines]
-                          ((or (:repair-resolve-fn opts) repair/resolve!)
-                           obligation
-                           {:attempt-id attempt-id :commit commit
-                            :reviewer @reviewer-of-record
-                            :review-job (:job-id review-job)
-                            :witness witness
-                            :validation {:kind :production-shaped-successor
-                                         :production-shaped? true}}))))
+                    ;; Discharge runs once, AFTER the immutable execution close.
+                    ;; A grounded substrate insertion alone never resolves a
+                    ;; finding, and an unrelated memory item is not a successor.
                     (checkpoint! :adjudication
                                  (term {:before (:before witness)
                                         :after (:after witness)
@@ -4686,6 +4662,9 @@
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.
         source-check (refuse-on-runner-source-drift!)
+        publication (discharge-receipt/catch-up!
+                     (or (:repair-root raw-opts) repair/default-root)
+                     (or (:discharge-receipt-repo raw-opts) "/home/joe/code/futon2"))
         result
         (try
       (binding [cascade-sources/*read-occurrences* (:declaration-reads/state raw-opts)
@@ -4800,11 +4779,10 @@
                     :error-data edata}}))))
       (finally
         (post-wm-status! (config raw-opts)
-                         {:source "wm-full-loop" :status "idle"})))]
+                         {:source "wm-full-loop" :status "idle"})))
+        final-result (assoc result :runner/source source-check :repair/publication publication)]
     ;; The SAME identity annotates the result persist-run-record! sees; the
     ;; tick record therefore carries :runner/source (round-2 review: the
     ;; durable record never included it).
-    (merge (assoc result :runner/source source-check)
-           {:run/id run-id}
-           (persist-run-record! raw-opts run-id started-at
-                                (assoc result :runner/source source-check)))))
+    (merge final-result {:run/id run-id}
+           (persist-run-record! raw-opts run-id started-at final-result))))

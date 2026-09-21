@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/repair_discharge.clj" "src/futon2/aif/repair_discharge_evidence.clj" "src/futon2/aif/repair_discharge_receipt.clj" "src/futon2/aif/repair_evaluators.clj" "src/futon2/aif/repair_history_replay.clj" "src/futon2/aif/repair_obligation.clj" "src/futon2/aif/full_loop_runner.clj" "resources/wm/repair-evaluator-admissions.edn"]
+ :test-paths ["test/futon2/aif/full_loop_runner_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.full-loop-runner-test"]
+ :author "codex-8" :origin "claude-12/runner-discharge"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/runner-discharge-stage-2026-09-21/post-runner"
+ :agency-url "http://localhost:7070"}

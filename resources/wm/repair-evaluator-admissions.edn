@@ -1,0 +1,3 @@
+;; Registering evaluator code is not admission. Add a locator only after its
+;; authored contract has an executed independent review bound to its digest.
+{:schema :wm/repair-evaluator-index-v1 :evaluators {}}

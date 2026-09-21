@@ -1,0 +1,90 @@
+{
+  "role": "pre-commit-validation",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "independent-review": "pending",
+  "base": "9b7e4f3d8687360261dd4869699d161b9f345fde",
+  "sha256": {
+    "src/futon2/aif/repair_discharge.clj": "bdc8dbfef68fcc38fa9f381834e80f41f9b613a8fc588b15b069b240364f093a",
+    "src/futon2/aif/repair_discharge_evidence.clj": "523427c3ea45e4a57954417051d1b59051e2e612980e0f1470fccb818064381a",
+    "src/futon2/aif/repair_discharge_receipt.clj": "bb4bb81dd87bc31db81045252616c2fee4431df784351da8ff2b5305470ebf9f",
+    "src/futon2/aif/repair_evaluators.clj": "6ee819e11e6a95433a9db93ea7c5eab3fcc9f6a27316e276be00c57140a58c34",
+    "src/futon2/aif/repair_history_replay.clj": "5b005984e8e29c215200deadece40f51aa51180ad72e32f26727b03675271c64",
+    "src/futon2/aif/repair_obligation.clj": "a4caf1279609395ffcd1575f9ec4c155fdef98d2f46f506c8bd03d4098767d82",
+    "src/futon2/aif/full_loop_runner.clj": "3ffc4f0b4e74806c6d4e6546806bd4a4532f0cb6cfa59eaa029f3605aaa85638",
+    "test/futon2/aif/repair_discharge_test.clj": "4eb6fa5b199294cf8aa52e4011086972e6e33db2ec7e8e619e0d05e1c0e96e4e",
+    "test/futon2/aif/repair_history_replay_test.clj": "12447f7773710417c58dd6666043d384ba44ae10720f394cbd1b866cad606653",
+    "test/futon2/aif/full_loop_runner_test.clj": "b247b9bc8903b4fde7440350c89667d0a1e08b03e81aff4dd2ac7b85a961ada9",
+    "resources/wm/repair-evaluator-admissions.edn": "5c6bd8b534a04640986ce086ebeb369636100e57567ebed337f761586d774fce",
+    ".gitignore": "e45c7bb4348596255cb0ad9739f0b24790e59a072a2edf740b0aef7e07cfe459"
+  },
+  "quarantine-sha256": "9085b8ce5048b4c9a6d66e7d15f7e9c8d291cb91736ce546f7e881df76b80a2d",
+  "commands": {
+    "runner": [
+      "clojure",
+      "-M:test",
+      "-m",
+      "cognitect.test-runner",
+      "-n",
+      "futon2.aif.full-loop-runner-test"
+    ],
+    "unit": [
+      "clojure",
+      "-M:test",
+      "-m",
+      "cognitect.test-runner",
+      "-n",
+      "futon2.aif.repair-discharge-test"
+    ],
+    "replay": [
+      "clojure",
+      "-M:test",
+      "-m",
+      "cognitect.test-runner",
+      "-n",
+      "futon2.aif.repair-history-replay-test"
+    ],
+    "store": [
+      "clojure",
+      "-M:test",
+      "-m",
+      "cognitect.test-runner",
+      "-n",
+      "futon2.aif.repair-obligation-test"
+    ]
+  },
+  "results": {
+    "runner": {
+      "tests": 181,
+      "assertions": 1007,
+      "failures": 0,
+      "errors": 0,
+      "exit": 0,
+      "log": "pre-runner-final.log"
+    },
+    "unit": {
+      "tests": 6,
+      "assertions": 44,
+      "failures": 0,
+      "errors": 0,
+      "exit": 0,
+      "log": "pre-unit.log"
+    },
+    "replay": {
+      "tests": 2,
+      "assertions": 8,
+      "failures": 0,
+      "errors": 0,
+      "exit": 0,
+      "log": "pre-replay.log"
+    },
+    "store": {
+      "tests": 30,
+      "assertions": 196,
+      "failures": 0,
+      "errors": 0,
+      "exit": 0,
+      "log": "pre-store.log"
+    }
+  }
+}
