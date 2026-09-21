@@ -5233,7 +5233,7 @@
         result (runner/run-opportunity! opts)
         manifest (:close-evidence-manifest result)
         ids (mapv :evidence/id (:entries manifest))]
-    (is (= 14 (count ids)))
+    (is (= 15 (count ids)))
     (is (= (mapv #(str "test-cohort-exhaustion/attempt-001/evidence/" (first %))
                   valid-attempt-evidence)
            (subvec ids 10 13)))
