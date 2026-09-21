@@ -625,3 +625,13 @@ Updated scoped warrant:
 `test-registry-39f0b15d78a099f5ab76f2f0bfe3f14cbcbf578e602fe39cb1c211675333771f`,
 fresh check `:warrant? true`, `:outside-closure []`. This supersedes the earlier
 warrant for the expanded replay script/test, with the same scope limitations.
+
+Hierarchy follow-up at `a4646c41`: **4 tests / 38 assertions / 0 failures /
+0 errors** under the same namespace command. Probe/test clj-kondo 0/0,
+check-parens OK, diff whitespace check clean. The added controls check local
+conditioning's exact log(.55) G shift, the earlier menu's empty focus support,
+and stationarity before/after an exit gate. New scoped warrant:
+`test-registry-b8adc9b604bc275d38952256036c52f07925c41bbc5b5801fba6dbeeef824d89`,
+fresh check `:warrant? true`, `:outside-closure []`; same research-only scope.
+Commands: `run /tmp/improve-7-registry.edn` and
+`check /tmp/improve-7-hierarchy-registry-check.edn` via the registry CLI above.
