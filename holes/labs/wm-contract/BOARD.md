@@ -121,3 +121,17 @@ in cascade-realizer-2026-09-20/STATUS.md). Pre-existing suite debt,
 not introduced; needs its own classification (why are a3's deposits
 unreconstructable — data rot, schema drift, or a real actuator
 defect?). Owner: unassigned.
+
+## REOPENED (2026-09-21): pr-str/read-string boundary — second costume
+
+The cohort-writer fix (10d3dc90) closed the dispatch-response
+instance; click 5 died on the same boundary at record MINTING:
+want-token produced :hole/2f9b03b16170 (digit-leading keyword name —
+pr-str writes it, the reader rejects it), fixed at 29fb2a83
+(injective h-prefix, both-sides tests). General item: round-trip
+guards belong at every record write/mint boundary; two demonstrated
+costumes now exist to test against. Also for preflight (from the
+five-click post-mortem): (a) pre-click checks must ROUND-TRIP a
+decision record through the reader, not merely compute one; (b) a
+loaded-namespaces-vs-disk probe for tick-critical namespaces (two
+clicks died on committed-but-unloaded code). Owner: unassigned.
