@@ -260,3 +260,27 @@ claude-3's reading (for Joe to correct):
    occupancy is the global split; a fast level whose Cτ is conditioned on the
    current partition. This is the map's R15 (hierarchy and timescale), for
    which no dynamics exist yet in Lean or code.
+
+### Example: the War Machine's own work classes
+
+Joe, verbatim:
+
+> I mean, here's a good example for the war machine itself. How many ticks are
+> spent on self-repair? Versus how many are spent on greenfield or incremental
+> work. We can break down the classes of work that the machine works on, and
+> they're all preferred, but if all it ever does is repair, that's not
+> preferred.
+
+claude-3's reading: a preference over the long-run distribution of work classes
+across ticks (self-repair, incremental, greenfield): each class is preferred,
+but an occupancy concentrated on repair is not. The same two-level structure
+as the focus split: a global occupancy preference over classes, with per-tick
+work inside one class.
+
+Rough census from the retained cohort attempts (claude-3, heuristic
+classification; script and output in runs/fixlist-2026-09-21/work-class-census/):
+134 attempts, 2026-07-14 .. 2026-09-21. Self-repair 58; mission work 25
+(cascade 12 + older advance-mission 13); learn-action-class 26 (22 with no
+selection); no selection 23. 2026-09-13..15: 23 self-repair, 0 mission work.
+2026-09-19..21: 12 mission work, 5 self-repair. Grounded changes: 19 from
+self-repair, 5 from mission work.

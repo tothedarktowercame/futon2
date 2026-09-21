@@ -1,0 +1,20 @@
+:attempts 134
+:by-class {:other-learn-action-class 26, :other-address-sorry 2, :none 23, :self-repair 58, :other-advance-mission 13, :mission-work 12}
+nil {:none 1}
+"2026-07-14" {:other-learn-action-class 3, :other-address-sorry 2}
+"2026-07-15" {:other-learn-action-class 21, :none 2, :other-advance-mission 2}
+"2026-07-16" {:other-advance-mission 6, :none 1, :self-repair 9}
+"2026-07-17" {:other-learn-action-class 1}
+"2026-07-18" {:none 2, :self-repair 8, :other-advance-mission 1}
+"2026-07-19" {:other-advance-mission 1, :other-learn-action-class 1, :self-repair 1}
+"2026-07-21" {:self-repair 6, :other-advance-mission 3, :none 2}
+"2026-07-25" {:none 8, :self-repair 3}
+"2026-07-27" {:self-repair 3}
+"2026-09-13" {:self-repair 6}
+"2026-09-14" {:self-repair 9, :none 1}
+"2026-09-15" {:self-repair 8}
+"2026-09-18" {:none 1}
+"2026-09-19" {:self-repair 5, :none 2, :mission-work 4}
+"2026-09-20" {:mission-work 4, :none 3}
+"2026-09-21" {:mission-work 4}
+:class-x-outcome ([[:mission-work :build-failed] 1] [[:mission-work :grounded-change] 1] [[:mission-work :guardrail-refusal] 1] [[:mission-work :incomplete] 9] [[:none :agent-unavailable] 11] [[:none :incomplete] 8] [[:none :not-closed] 2] [[:none :substrate-unavailable] 2] [[:other-address-sorry :grounded-change] 2] [[:other-advance-mission :build-failed] 6] [[:other-advance-mission :grounded-change] 4] [[:other-advance-mission :incomplete] 2] [[:other-advance-mission :not-closed] 1] [[:other-learn-action-class :grounded-change] 3] [[:other-learn-action-class :incomplete] 1] [[:other-learn-action-class :no-selection] 22] [[:self-repair :agent-unavailable] 2] [[:self-repair :build-failed] 29] [[:self-repair :grounded-change] 19] [[:self-repair :incomplete] 1] [[:self-repair :not-closed] 7])
