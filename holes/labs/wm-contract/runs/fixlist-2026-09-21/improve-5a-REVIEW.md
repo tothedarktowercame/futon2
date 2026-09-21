@@ -122,3 +122,18 @@ war_machine.clj). `futon4/dev/check-parens.el` on all seven changed/new Clojure
 files: OK. `git diff --check`: clean. Java 21.0.11, Clojure 1.11.1,
 CLI 1.12.5.1664. Logs/configs and registered warrant are in
 `improve-5a-evidence/`; registry pre-check returned typed `:missing-entry`.
+
+Registered warrant:
+`test-registry-43385829fbc755fd1e4fa6c96997846e75c8e064bfc38a4dcd0b85a8aca75560`,
+implementation commit `ccbcf210aa31bb2130954a8ea6438e0a922ee414`,
+postcheck `:matched`, **5 tests / 54 assertions / 0 failures / 0 errors**.
+Exact registration command, from `/home/joe/code/futon3c` in a separate CLI:
+
+```
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-improve-5a/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-5a-evidence/registry.edn
+```
+
+The other namespace and focused runner results are fresh command logs, not
+claims that this single warrant covers their executions. In total the completed
+commands cover 131 tests / 720 assertions; the interrupted full runner command
+is excluded from that total.
