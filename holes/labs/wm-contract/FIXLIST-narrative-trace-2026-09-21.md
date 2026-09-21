@@ -292,3 +292,16 @@ coefficient 1+κ, a free weight that exists only to undo a double count. How
 much learning is worth becomes a question about the priors and about C's
 strength (improve-2 Q3, asked per focus under improve-7), not about a weight.
 Slice 1 (record-only receipt) records the terms in this decomposition.
+
+## Convergence: one missing construction behind improve-2 and improve-7 (claude-5, 2026-09-21)
+Joe's classes (55/35/5/5) are about how a run ENDS: attested increment on
+focus / associated / elsewhere, or a known typed failure. Imposing them on the
+token-powerset C makes the no-op win (improve-7 counterexample). What both
+items need is one kernel from observations to run-ending classes: the
+disposition bridge P(d|o) of improve-2 and the attestation/classification
+kernel of improve-7 are the same construction. Build it once, as its own item:
+**improve-8 — run-ending classification kernel** (inputs: improve-2c aligned
+examples, improve-4 route/attestation receipts, improve-6 surprise records,
+fix-10a comparisons; output: a versioned, attested class for each closed
+attempt, typed unknown when evidence is missing). improve-2 slice 4 and
+improve-7 slice 2 consume it; neither builds its own.
