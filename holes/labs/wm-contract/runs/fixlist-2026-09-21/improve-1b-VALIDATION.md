@@ -165,3 +165,11 @@ Kondo: 0 errors / 0 warnings (existing informational runner `str` diagnostic).
 Parens: `OK`. Diff check clean. Registry publication follows the implementation
 commit; its accepted command spelling is `clojure -M:test -n
 futon2.aif.attempt-learning-test`, equivalent to the separately run command above.
+
+Implementation commit: `56593d8c`. Registry warrant:
+`test-registry-b596b8af5d51aea39982941224d321f4ba89cc271594169adbd44d569c546d10`.
+From futon3c, `clojure -M -m futon3c.test-registry run
+/tmp/improve-1b-registry.edn` returned `:warrant? true`, 3 tests / 33 assertions,
+exit 0. Fresh `check /tmp/improve-1b-registry-check.edn` also returned
+`:warrant? true`. This covers the attempt admission/ledger acceptance, not the
+full grounded runner close blocked by source identity.
