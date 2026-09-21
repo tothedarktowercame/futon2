@@ -18,6 +18,7 @@
             [futon2.aif.token-observation-initialization-test :as initialization-fixture]
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.preference-audit :as preference-audit]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.full-loop-cohort :as cohort]
@@ -5978,3 +5979,23 @@
            (is (= "cohort/attempt/retained/surprises.edn" (:evidence/id entry)))
            (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry))))))
          (finally (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))))
+
+(deftest feature-card-selection-retains-record-only-focus
+  ;; Passing grounded fixture; keep the canonical runner source guard enabled.
+  (let [{:keys [root] :as c} (retention-cohort "focus-receipt-feature-card")
+        d (focus-receipt/attach
+           (merge (:decision judgement) (token-fixture/decision))
+           (focus-receipt/read-inputs) {:as-of "2026-09-21T18:00:00Z"})
+        {:keys [result]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :runner-options {:cohort? true :execution-cohort (:binding c)
+                           :d-task-evidence-root (str (io/file root "d-task"))
+                           :learning-trial-ledger-root (str (io/file root "learning-ledger"))
+                           :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}})
+        selected (get-in result [:checkpoints :selection :judgment :controller-decision])]
+    (is (= :grounded-change (:outcome result)))
+    (is (map? (cohort/closed-execution (:binding c) (:attempt-id result))))
+    (is (= (get-in d [:selection-certificate :focus-receipt])
+           (get-in selected [:selection-certificate :focus-receipt])))
+    (is (= (pr-str (:selection-law d)) (pr-str (:selection-law selected))))))
