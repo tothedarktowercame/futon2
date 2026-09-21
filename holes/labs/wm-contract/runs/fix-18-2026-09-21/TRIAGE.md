@@ -88,3 +88,12 @@ clj-kondo: **0 errors, 0 warnings**; check-parens: **OK**; diff-check clean.
 These are test-contract repairs: the old assertions fail on main as reproduced
 above; no production defect or unresolved (b)/(c) finding was identified.
 No WM clicks, shared checkout edits or shared JVM loads occurred.
+
+## Registry warrants
+
+Implementation commit: `792afae2`. Both runs executed committed code in the
+isolated worktree, returned warrant=true and stable execution, with matched
+postchecks. Configs, complete receipts, logs and closures are retained here.
+
+- carry: `test-registry-737fcb8ac49e9a0a22f08e68e83d43ad77b8af8eb219f28348849cc89c3c81b7`; `{:assertions 39, :duration-ms 4847, :errors 0, :exit 0, :failures 0, :tests 4}`.
+- uniform: `test-registry-3598eb4cd0b7ff40fff12996855330eef1c04429465c6b60907326a8d88c51c9`; `{:assertions 67, :duration-ms 3814, :errors 0, :exit 0, :failures 0, :tests 3}`.
