@@ -211,3 +211,156 @@
                               {:status :absent :reason :no-admitted-cascade-problems})]
          (is (str/includes? (narrative/narrative-text absent) ":no-admitted-cascade-problems"))
          (is (not (str/includes? (narrative/narrative-text absent) "C reached 2"))))))))
+
+
+(deftest final-review-is-deduplicated-by-content
+  (fixture
+   (fn [{:keys [root run attempt-dir output]}]
+     (let [final "FULL_LOOP_REVIEW: APPROVE\nThe final judgment is supported."
+           raw (str "FULL_LOOP_REVIEW: interim preview...\nI'll inspect the change.\n" final)
+           reply (retain (io/file attempt-dir "review.txt") (str "Different transport preamble.\n" final "\n"))
+           build (io/file attempt-dir "005-build.edn")
+           event (edn/read-string (slurp build))]
+       (write-record build (-> event
+                               (assoc-in [:payload :judgment :validation :review-text] raw)
+                               (assoc-in [:payload :judgment :job-texts]
+                                         [{:job-id "review-a" :role :reviewer :reply reply}
+                                          {:job-id "review-b" :role :reviewer :reply reply}])))
+       (narrative/render-run! root run output)
+       (let [text (slurp output)]
+         (is (= 1 (count (re-seq #"The final judgment is supported\." text))))
+         (is (not (str/includes? text "I'll inspect")))
+         (is (not (str/includes? text "interim preview")))
+         (is (str/includes? text (:path reply)))
+         (is (str/includes? text "Full review text")))))))
+
+(deftest perceive-uses-only-the-matching-trace-form
+  (fixture
+   (fn [{:keys [root run trace-path output]}]
+     (spit trace-path
+           (str (pr-str {:run/id "wrong-run" :mode :wrong :observation {:wrong 999}}) "\n"
+                (pr-str {:run/id run :mode :stop-the-line
+                         :free-energy {:controller-score 0.417 :per-channel {:x {:gap 0.9} :y {:gap 0.1}}}
+                         :observation {:x 0.8 :y 0.2}
+                         :mu-pre {:one {:done 0.1} :two {:done 0.9}}
+                         :mu-post {:one {:done 0.2} :two {:done 0.9}}
+                         :wm/route [{:node :R20} {:node :R12}]})))
+     (narrative/render-run! root run output)
+     (let [text (first (str/split (second (str/split (slurp output) #"## time-step")) #"## selection"))]
+       (is (str/includes? text "mode :stop-the-line"))
+       (is (str/includes? text "stop-the-line active"))
+       (is (str/includes? text "controller-score 0.417"))
+       (is (str/includes? text "2 observation channels"))
+       (is (str/includes? text ":x = 0.8"))
+       (is (str/includes? text "1 of 2 belief rows changed"))
+       (is (str/includes? text ":R20 → :R12"))
+       (is (str/includes? text "[:form 2 :mu-pre]"))
+       (is (str/includes? text "[:form 2 :observation]"))
+       (is (str/includes? text "Not recorded in this run: scan account"))
+       (is (not (str/includes? text "999")))))))
+
+(def updater ["M-one" :hole/h6378c65a4012])
+(def other-want ["M-one" :hole/other])
+
+(defn outcome-fixture [{:keys [root run attempt-dir record record-path] :as context}]
+  (let [selection (io/file attempt-dir "002-selection.edn")
+        event (edn/read-string (slurp selection))
+        action (assoc (get-in event [:payload :judgment :selected-action])
+                      :precedence [{:id :apparatus/one-authority-per-question :produces #{updater}}])
+        d (-> (get-in event [:payload :judgment :controller-decision])
+              (assoc :action action)
+              (assoc-in [:selection-certificate :token-belief-stage :domain-inputs]
+                        [{:target "M-one" :declaration {:want #{(second updater) (second other-want)}}}]))
+        measurement (fn [token observed] {:token token :result {:observed observed :check :C4
+                                                               :evidence {:resolved-sha "artifact"}}})
+        evidence {:dispatch {:occurrence {:run/id run :action/value action}}
+                  :revision-pair {:after "artifact"}
+                  :after-token-evidence [(measurement updater false) (measurement other-want false)
+                                         (measurement ["M-one" :admission/task-stated] true)
+                                         (measurement ["M-other" :hole/unrelated] true)]}
+        path (io/file root "data/action-fixture.edn")
+        ref (retain path (pr-str evidence))]
+    (write-record selection (-> event (assoc-in [:payload :judgment :selected-action] action)
+                                (assoc-in [:payload :judgment :controller-decision] d)))
+    (write-record record-path (assoc record :d-task-enactment {:source (dissoc ref :status)}))
+    (assoc context :evidence evidence :evidence-path path :action action)))
+
+(deftest closed-compares-wanted-tokens-and-preserves-negative-observations
+  (fixture
+   (fn [context]
+     (let [{:keys [root run output base evidence-path]} (outcome-fixture context)
+           before (file-snapshot base)]
+       (narrative/render-run! root run output)
+       (let [text (last (str/split (slurp output) #"## closed"))]
+         (is (str/includes? text "| :hole/h6378c65a4012 | true | false |"))
+         (is (str/includes? text "model prediction"))
+         (is (str/includes? text "predicted true but observed false"))
+         (is (not (str/includes? text "| :admission/task-stated |")))
+         (is (not (str/includes? text "| :hole/unrelated |")))
+         (is (str/includes? text "not wanted-token completion"))
+         (is (str/includes? text (str evidence-path)))
+         (is (= before (dissoc (file-snapshot base) output))))
+       (io/delete-file evidence-path)
+       (narrative/render-run! root run output)
+       (is (str/includes? (slurp output) "Not recorded in this run: D-task record"))))))
+
+(deftest retained-comparison-receipt-is-preferred-even-when-refused
+  (fixture
+   (fn [context]
+     (let [{:keys [root run evidence-path]} (outcome-fixture context)
+           _ (spit evidence-path "unreadable because a receipt is authoritative")
+           receipt {:schema :wm/token-outcome-comparison-v1 :status :compared
+                    :artifact-sha "artifact"
+                    :prediction {:target "M-one" :prediction-rule :positive-marginal-support}
+                    :tokens [{:token updater :predicted 0.8 :observed false :verdict :predicted-not-observed
+                              :measurement {:result {:check :C4}}}]}
+           b (assoc-in (narrative/load-run root run)
+                       [:checkpoints :closed :judgment :token-outcome-comparison] receipt)
+           text (narrative/narrative-text b)]
+       (is (str/includes? text "comparison receipt is preferred"))
+       (is (str/includes? text "| :hole/h6378c65a4012 | 0.8 | false |"))
+       (is (str/includes? text "[:payload :judgment :token-outcome-comparison]"))
+       (is (not (str/includes? text "table reconstructs model prediction")))
+       (is (str/includes? (narrative/narrative-text
+                          (assoc-in b [:checkpoints :closed :judgment :token-outcome-comparison]
+                                    (assoc receipt :status :refused :reason :prediction-unavailable :tokens nil)))
+                         "Not recorded in this run: completed token comparison (:prediction-unavailable)"))
+       (is (thrown-with-msg? clojure.lang.ExceptionInfo #"different selected target"
+                            (narrative/narrative-text
+                             (assoc-in b [:checkpoints :closed :judgment :token-outcome-comparison :prediction :target]
+                                       "M-elsewhere"))))))))
+
+(deftest missing-or-unpinned-observation-is-not-false-and-evidence-is-checked
+  (fixture
+   (fn [context]
+     (let [{:keys [root run evidence evidence-path record record-path]} (outcome-fixture context)
+           save! (fn [d] (let [ref (retain evidence-path (pr-str d))]
+                           (write-record record-path (assoc record :d-task-enactment {:source ref}))))]
+       (save! (assoc-in evidence [:after-token-evidence 0 :result :evidence :resolved-sha] "wrong-commit"))
+       (let [text (narrative/narrative-text (narrative/load-run root run))]
+         (is (str/includes? text "Not recorded in this run: after-build measurement for :hole/h6378c65a4012"))
+         (is (not (str/includes? text "predicted true but observed false"))))
+       (save! (update evidence :after-token-evidence conj (first (:after-token-evidence evidence))))
+       (is (str/includes? (narrative/narrative-text (narrative/load-run root run))
+                          "Not recorded in this run: after-build measurement for :hole/h6378c65a4012"))
+       (save! (assoc-in evidence [:dispatch :occurrence :run/id] "different-run"))
+       (is (thrown-with-msg? clojure.lang.ExceptionInfo #"different run"
+                            (narrative/narrative-text (narrative/load-run root run))))
+       (let [ref (retain evidence-path (str (pr-str evidence) "\n{}"))]
+         (write-record record-path (assoc record :d-task-enactment {:source ref})))
+       (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Expected one retained D-task record"
+                            (narrative/narrative-text (narrative/load-run root run))))
+       (save! evidence)
+       (spit evidence-path "tampered")
+       (is (thrown-with-msg? clojure.lang.ExceptionInfo #"digest mismatch"
+                            (narrative/narrative-text (narrative/load-run root run))))))))
+
+(deftest d-task-evidence-cannot-be-overwritten-as-output
+  (fixture
+   (fn [context]
+     (let [{:keys [root run record record-path output evidence]} (outcome-fixture context)
+           ref (retain output (pr-str evidence))]
+       (write-record record-path (assoc record :d-task-enactment {:source ref}))
+       (is (thrown-with-msg? clojure.lang.ExceptionInfo #"overwrite retained evidence"
+                            (narrative/render-run! root run output)))
+       (is (= evidence (edn/read-string (slurp output))))))))

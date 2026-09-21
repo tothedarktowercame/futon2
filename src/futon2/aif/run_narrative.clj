@@ -124,7 +124,8 @@
 
 (defn- jobs [b]
   (->> checkpoint-order (mapcat #(get-in b [:checkpoints % :judgment :job-texts]))
-       (reduce (fn [m row] (assoc m (:job-id row) row)) (sorted-map)) vals))
+       (reduce (fn [rows row]
+                 (conj (filterv #(not= (:job-id row) (:job-id %)) rows) row)) [])))
 
 (defn- retained-text [b ref]
   (when (= :present (:status ref))
@@ -138,6 +139,173 @@
           (String. bytes java.nio.charset.StandardCharsets/UTF_8))))))
 
 (defn- quote-text [s] (str/join "\n" (map #(str "> " %) (str/split-lines s))))
+
+(defn- perceive-text [b]
+  (let [t (:trace b) observation (:observation t) pre (:mu-pre t) post (:mu-post t)
+        row-ids (into (set (keys pre)) (keys post))
+        gaps (get-in t [:free-energy :per-channel])
+        sampled (take 4 (sort-by (fn [[k _]] [(- (double (or (get-in gaps [k :gap]) 0))) (str k)]) observation))]
+    (str "\n"
+         (if (contains? t :mode)
+           (str "The machine perceived in mode " (shown (:mode t)) ", with stop-the-line "
+                (if (= :stop-the-line (:mode t)) "active" "inactive according to the mode") ". ")
+           "Not recorded in this run: mode and stop-the-line status. ")
+         (if-let [energy (:free-energy t)]
+           (str "Its recorded free-energy account is "
+                (if (map? energy)
+                  (str/join ", " (for [k [:controller-score :preference-gap-score :coverage-uncertainty-pressure]]
+                                    (str (name k) " " (shown (get energy k)))))
+                  (shown energy))
+                (when (seq (:avoided-active energy))
+                  (str "; active avoided channels are " (str/join ", " (map shown (:avoided-active energy))))) ". ")
+           "Not recorded in this run: free energy. ")
+         (if (map? observation)
+           (str "It received " (count observation) " observation channels; "
+                (if (seq gaps) "the largest recorded preference gaps" "a sample ordered by channel name")
+                " give " (str/join ", " (for [[k v] sampled]
+                                           (str (shown k) " = " (shown v)
+                                                (when-let [gap (get-in gaps [k :gap])] (str " (gap " gap ")"))))) ". ")
+           "Not recorded in this run: observation channels. ")
+         (if (and (map? pre) (map? post))
+           (str (count (filter #(not= (find pre %) (find post %)) row-ids)) " of " (count row-ids)
+                " belief rows changed from mu-pre to mu-post (including added or removed rows). ")
+           "Not recorded in this run: paired mu-pre and mu-post belief rows. ")
+         (if (contains? t :wm/route)
+           (str "The recorded route is " (str/join " → " (map #(shown (:node %)) (:wm/route t))) ".\n")
+           "Not recorded in this run: route.\n")
+         "\n"
+         (apply str (for [k [:mode :free-energy :observation :mu-pre :mu-post :wm/route]]
+                      (cite (:trace-path b) [:form (:trace-form b) k]))))))
+
+(defn- final-review [text]
+  (when text
+    (->> (str/split (str/replace text #"\r\n?" "\n") #"(?m)(?=^FULL_LOOP_REVIEW:)")
+         (filter #(str/starts-with? % "FULL_LOOP_REVIEW:")) last
+         (#(when % (str/trim %))))))
+
+(defn- review-text [b]
+  (let [checkpoint {:text (get-in (judgment b :build) [:validation :review-text])
+                    :path (get-in b [:checkpoints :build :path])
+                    :keys [:payload :judgment :validation :review-text]}
+        replies (for [job (jobs b)]
+                  {:text (retained-text b (:reply job)) :path (get-in job [:reply :path])
+                   :keys [:text] :role (:role job) :job-id (:job-id job)})
+        reviews (filter :final (map #(assoc % :final (final-review (:text %))) (cons checkpoint replies)))
+        chosen (or (final-review (:text checkpoint)) (:final (last reviews)))
+        ;; Deduplicate the final block itself, regardless of transport preamble or job id.
+        sources (distinct (map #(select-keys % [:path :keys]) (filter #(= chosen (:final %)) reviews)))]
+    (str (if chosen
+           (str "\nFinal review statement:\n\n" (quote-text chosen) "\n\nFull review text (including any earlier discussion) lives in:\n\n"
+                (apply str (for [{:keys [path keys]} sources] (cite path keys))))
+           "\nNot recorded in this run: final FULL_LOOP_REVIEW statement.\n")
+         (apply str (for [{:keys [text path keys role job-id]} replies]
+                      (cond
+                        (and text (or (= :reviewer role) (final-review text)))
+                        (str "\nFull review text for job " job-id " is retained at the following source.\n\n" (cite path keys))
+                        text (str "\nRetained reply for " (shown role) " job " job-id ":\n\n"
+                                  (quote-text text) "\n" (cite path keys))
+                        :else (str "\nNot recorded in this run: retained reply for job " job-id ".\n"))))
+         (when-not (seq (jobs b)) "\nNot recorded in this run: job-texts transcript references.\n"))))
+
+(defn- selected-action [b]
+  (or (:selected-action (judgment b :selection)) (:action (decision b))))
+
+(defn- outcome-receipt [b]
+  (if (contains? (judgment b :closed) :token-outcome-comparison)
+    [(:token-outcome-comparison (judgment b :closed))
+     (get-in b [:checkpoints :closed :path]) [:payload :judgment :token-outcome-comparison]]
+    [(get-in b [:record :token-outcome-comparison]) (:record-path b) [:token-outcome-comparison]]))
+
+(defn- d-task-source [b]
+  (or (get-in b [:record :d-task-enactment :source])
+      (get-in (judgment b :closed) [:d-task-enactment :source])))
+
+(defn- historical-outcomes [b]
+  (let [ref (d-task-source b)
+        text (when (:path ref) (retained-text b (assoc ref :status :present)))
+        d (when text
+            (with-open [r (java.io.PushbackReader. (java.io.StringReader. text))]
+              (let [value (edn/read {:eof ::eof} r)]
+                (when (or (= ::eof value) (not= ::eof (edn/read {:eof ::eof} r)))
+                  (throw (ex-info "Expected one retained D-task record" {:path (:path ref)})))
+                value)))
+        action (selected-action b) target (:target action)
+        domains (get-in (decision b) [:selection-certificate :token-belief-stage :domain-inputs])
+        wanted (some #(when (= target (:target %)) (get-in % [:declaration :want])) domains)
+        produces (into #{} (mapcat :produces (:precedence action)))
+        artifact (get-in d [:revision-pair :after])
+        rows (:after-token-evidence d)]
+    (cond
+      (nil? d) {:missing "D-task record" :source ref}
+      (not= (:run-id b) (get-in d [:dispatch :occurrence :run/id]))
+      (throw (ex-info "D-task record identifies a different run" {:path (:path ref)}))
+      (not= action (get-in d [:dispatch :occurrence :action/value]))
+      (throw (ex-info "D-task record identifies a different selected action" {:path (:path ref)}))
+      (nil? wanted) {:missing "selected target's wanted tokens" :source ref}
+      :else
+      {:source ref :artifact artifact :measurements rows
+       :tokens (for [want (sort-by pr-str wanted)
+                     :let [token [target want] measurements (filter #(= token (:token %)) rows)
+                           measurement (first measurements)
+                           result (:result measurement)
+                           valid? (and (= 1 (count measurements)) (boolean? (:observed result))
+                                       artifact (= artifact (get-in result [:evidence :resolved-sha])))]]
+                 {:token token :predicted (contains? produces token)
+                  :observed (if valid? (:observed result)
+                                {:status :missing :kind :missing-ambiguous-or-unpinned-measurement})
+                  :measurement measurement})})))
+
+(defn- outcome-text [b]
+  (let [[receipt path keys] (outcome-receipt b)
+        old (when-not receipt (historical-outcomes b))
+        target (:target (selected-action b))
+        _ (when (and receipt (get-in receipt [:prediction :target])
+                     (not= target (get-in receipt [:prediction :target])))
+            (throw (ex-info "Token comparison identifies a different selected target" {:path path})))
+        rows (if receipt (:tokens receipt) (:tokens old))
+        rows (filter #(= target (first (:token %))) rows)
+        misses (filter #(and (false? (:observed %))
+                             (if receipt (= :predicted-not-observed (:verdict %))
+                                 (true? (:predicted %)))) rows)]
+    (str "\nHere, grounded change means a reviewed commit recorded in futon1b, not wanted-token completion.\n"
+         (cite "src/futon2/aif/full_loop_runner.clj" ['ground-commit!])
+         (if receipt
+           (str "The retained token-outcome comparison receipt is preferred; its status is " (shown (:status receipt))
+                ", with model prediction rule " (shown (get-in receipt [:prediction :prediction-rule])) ".\n"
+                (cite path keys)
+                (when-let [sha (:artifact-sha receipt)] (str "Observed at artifact commit `" sha "`.\n"))
+                (when (and (= :compared (:status receipt)) (empty? rows))
+                  "Not recorded in this run: selected target wanted-token comparisons.\n")
+                (when-not (= :compared (:status receipt))
+                  (str "Not recorded in this run: completed token comparison (" (shown (:reason receipt)) ").\n")))
+           (str "Not recorded in this run: token-outcome comparison receipt. "
+                (if (:missing old)
+                  (str "Not recorded in this run: " (:missing old) ".\n")
+                  (str "The table reconstructs model prediction from the selected cascade's declared :produces: true means produced; false means not declared as an output, not a full rollout prediction. "
+                       "The D-task record retains " (count (:measurements old)) " after-build measurements ("
+                       (count (filter #(true? (get-in % [:result :observed])) (:measurements old))) " true, "
+                       (count (filter #(false? (get-in % [:result :observed])) (:measurements old))) " false), at artifact commit `"
+                       (:artifact old) "`; these measurements alone do not establish causation.\n"))))
+         (when (seq rows)
+           (str "\nSelected target: " target ".\n\n"
+                "| Wanted token | model prediction | Observed after build | Establishing check |\n|---|---|---|---|\n"
+                (apply str (for [row rows]
+                             (str "| " (shown (second (:token row))) " | " (shown (:predicted row)) " | "
+                                  (shown (:observed row)) " | " (shown (get-in row [:measurement :result :check])) " |\n")))
+                (apply str (for [row rows :when (not (boolean? (:observed row)))]
+                             (str "\nNot recorded in this run: after-build measurement for " (shown (second (:token row))) ".\n")))
+                (apply str (for [row misses]
+                             (str "\nToken " (shown (second (:token row))) " was predicted true but observed false"
+                                  (when (number? (:predicted row)) (str " (positive marginal support " (:predicted row) ")")) ".\n")))))
+         (when-not receipt
+           (let [[dp dk] (decision-source b)]
+             (str (cite dp (conj dk :selection-certificate :token-belief-stage :domain-inputs))
+                  (cite (get-in b [:checkpoints :selection :path]) [:payload :judgment :selected-action :precedence])
+                  (cite (:record-path b) [:d-task-enactment :source])
+                  (when-let [p (get-in old [:source :path])]
+                    (str "D-task SHA-256: `" (get-in old [:source :sha256]) "`.\n"
+                         (cite p [:dispatch :occurrence]) (cite p [:revision-pair :after])
+                         (cite p [:after-token-evidence])))))))))
 
 (defn- plan-quote [b]
   (let [author-id (:job-id (judgment b :dispatch))
@@ -265,15 +433,7 @@
                   "The recorded changed artifacts are " (shown (:artifacts j)) ". "
                   "Author execution evidence records " (shown (get-in j [:validation :author :command-events]))
                   " command events; reviewer execution records " (shown (get-in j [:validation :reviewer :command-events])) ".\n"
-                  (if-let [review (get-in j [:validation :review-text])]
-                    (str "\nRetained review statement:\n\n" (quote-text review) "\n")
-                    "\nNot recorded in this run: review text in build checkpoint.\n")
-                  (apply str (for [job (jobs b) :let [reply (retained-text b (:reply job))]]
-                               (if reply
-                                 (str "\nRetained reply for " (shown (:role job)) " job " (:job-id job) ":\n\n"
-                                      (quote-text reply) "\n" (cite (get-in job [:reply :path]) [:text]))
-                                 (str "\nNot recorded in this run: retained reply for job " (:job-id job) ".\n"))))
-                  (when-not (seq (jobs b)) "\nNot recorded in this run: job-texts transcript references.\n"))
+                  (review-text b))
       :adjudication (str "The recorded build match says review-approved " (shown (get-in j [:build-match :review-approved?]))
                          " for commit " (shown (get-in j [:build-match :commit])) ". "
                          "Grounding returned implementation " (shown (get-in j [:witness :implementation-id]))
@@ -294,7 +454,8 @@
                        (body b stage)
                        (str "Not recorded in this run: checkpoint. The remaining evidence does not establish this stage's outcome.\n"
                             (when (= stage :selection) (coverage-text b))))
-                     (when (= stage :time-step) (scan-account b))
+                     (when (= stage :time-step) (str (perceive-text b) (scan-account b)))
+                     (when (= stage :closed) (outcome-text b))
                      "\nCited facts:\n"
                      (cite (or path (:record-path b)) (if path [:payload :judgment] [:cohort-attempt]))
                      (when (= stage :time-step) (cite (:record-path b) [:startedAt]))
@@ -315,6 +476,8 @@
   (let [bundle (load-run root run-id)
         paths (concat [(:record-path bundle) (:trace-path bundle) (:phase-path bundle) (:binding-path bundle)]
                       (keep :path (vals (:checkpoints bundle)))
+                      (when-let [p (:path (d-task-source bundle))]
+                        [(if (.isAbsolute (io/file p)) p (str (io/file root p)))])
                       (when-let [p (get-in bundle [:record :scan-report :path])]
                         [(if (.isAbsolute (io/file p)) p (str (io/file root p)))])
                       (for [job (jobs bundle) kind [:prompt :reply]
