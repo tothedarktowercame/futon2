@@ -78,21 +78,66 @@
                :counts {:success success :failure failure :identities (mapv :identity rows)}
                :alpha (+ (:alpha prior) success) :beta (+ (:beta prior) failure)}))))
 
-(defn- pragmatic-cost [certificate]
-  (let [rates (get-in certificate [:consumed-g :A])
-        beliefs (get-in certificate [:consumed-g :Q :steps])
-        preferences (get-in certificate [:consumed-g :C :steps])]
-    (if (and (map? rates) (every? #(= {:false-pos 0 :false-neg 0} %) (vals rates))
-             (seq beliefs) (= (count beliefs) (count preferences))
-             (every? #(model/normalized-exact? (:belief %)) beliefs)
-             (every? #(map? (:distribution %)) preferences))
-      {:status :computed :basis :identity-A-expected-negative-log-C
-       :steps (mapv (fn [b c]
-                      (let [logc (model/member-log-probability (:distribution c))]
-                        {:tau (:tau b) :nats (- (reduce-kv (fn [v state mass]
-                                                         (+ v (* mass (logc state)))) 0 (:belief b)))}))
-                    beliefs preferences)}
-      (absent :pragmatic-cost-not-derived-for-this-observation-model))))
+(defn- binary-entropy [p]
+  (- (reduce + 0.0 (for [x [p (- 1.0 p)] :when (pos? x)] (* x (Math/log x))))))
+
+(defn- prior-mean [{:keys [kind theta alpha beta]}]
+  (if (= :known-parameter kind) theta (/ (double alpha) (+ alpha beta))))
+
+(defn- conditional-entropy
+  "E_theta H(Bernoulli(theta)); computed directly, not H(p) minus the KL receipt."
+  [{:keys [kind theta alpha beta]}]
+  (if (= :known-parameter kind) (binary-entropy theta)
+    (let [n (+ alpha beta) p (/ (double alpha) n) q (/ (double beta) n)]
+      (- (digamma (inc n)) (* p (digamma (inc alpha))) (* q (digamma (inc beta)))))))
+
+(defn theta-latent-terms
+  "Terminal endpoint EFE, with theta marginalized in risk and conditioned in
+   ambiguity. The supported model has fixed background state and independently
+   declared endpoint channels. No coefficient, score mutation, or powerset walk."
+  [certificate endpoints information]
+  (let [q (get-in certificate [:consumed-g :Q :steps])
+        terminal (into {} (filter (comp pos? val)) (:belief (last q)))
+        c (:distribution (last (get-in certificate [:consumed-g :C :steps])))
+        effects (set (map #(get-in % [:family :effect]) endpoints))]
+    (cond
+      (not= :computed (:status information)) (absent (:reason information))
+      (not= 1 (count terminal)) (absent :non-deterministic-background-unsupported)
+      (not (and (set? (:universe c)) (map? (:weights c))
+                (set/subset? effects (:universe c)))) (absent :preference-member-unavailable)
+      :else
+      (let [base (set/difference (ffirst terminal) effects)
+            probabilities (into {} (map (fn [e] [(get-in e [:family :effect]) (prior-mean (:prior e))])) endpoints)
+            support-excluded? (some (fn [z]
+                                      (and (= base (set/difference z effects))
+                                           (every? (fn [[t p]] (if (contains? z t) (pos? p) (< p 1))) probabilities))) (:zeroed c))]
+        (if support-excluded? (absent :predictive-support-excluded-by-C)
+          (let [;; This reference outcome has positive predictive probability;
+                ;; C has additive log weights outside its excluded outcomes.
+                reference (into base (for [[t p] probabilities :when (= 1.0 (double p))] t))
+                logc (model/member-log-probability c)
+                cost (- (+ (logc reference)
+                           (reduce + 0.0 (for [[t p] probabilities]
+                                           (* (- p (if (contains? reference t) 1.0 0.0))
+                                              (double (get-in c [:weights t] 0)))))))
+                predictive-h (reduce + 0.0 (map binary-entropy (vals probabilities)))
+                ambiguity (reduce + 0.0 (map (comp conditional-entropy :prior) endpoints))
+                risk (- cost predictive-h)
+                lhs (+ risk ambiguity) rhs (- cost (:nats information))
+                residual (- lhs rhs) tolerance (* 1e-10 (max 1.0 (abs lhs) (abs rhs)))]
+            (if-not (every? #(Double/isFinite (double %)) [cost predictive-h ambiguity risk lhs rhs])
+              (absent :non-finite-accounting)
+              {:status :computed :accounting :theta-latent-efe-v1 :scope :attempt-endpoint
+               :tau (:tau (last q)) :multiplicity 1 :units :nats
+               :predictive-distribution {:form :independent-endpoint-bernoulli
+                                         :theta-treatment :marginalized :fixed-state base
+                                         :probabilities probabilities}
+               :predictive-entropy predictive-h :risk-marginal risk
+               :ambiguity-conditional ambiguity :pragmatic-cost cost
+               :information-gain (:nats information) :efe lhs
+               :identity {:formula :risk-plus-conditional-ambiguity-equals-cost-minus-information
+                          :lhs lhs :rhs rhs :residual residual :tolerance tolerance
+                          :status (if (<= (abs residual) tolerance) :checked :failed)}})))))))
 
 (defn policy-receipt
   "One policy, actual retained trajectory, and explicit prospective endpoint model.
@@ -142,7 +187,6 @@
                           :else {:status :computed :nats (reduce + 0.0 (map #(get-in % [:expected-kl :nats]) endpoints))})]
     {:schema :wm/parameter-novelty-v1 :mode :record-only :id a
      :focus {:status :no-focus-declared}
-     :shadow-kappa {:status :undeclared :scope :no-focus-declared :consumed-in-G? false}
      :parameter-model {:kind :attempt-endpoint :authority (:authority model) :production-B-consumption :none
                        :binding (or (:source model) (absent :parameter-model-source-unavailable))}
      :trial-grain :selected-cascade-effect-attempt :units :nats :tau horizon :multiplicity 1
@@ -152,8 +196,8 @@
      :factorization (if (> (count eligible) 1) (or witness (absent :factorization-unavailable))
                         {:status :not-required :reason :at-most-one-endpoint})
      :eligible-endpoints eligible :endpoints endpoints :expected-kl information
-     :terms {:G (:controller-score entry)
-             :risk (if (seq (:steps c)) (mapv #(select-keys % [:tau :risk :risk-status]) (:steps c)) (absent :risk-not-recorded))
-             :ambiguity (if (seq (:steps c)) (mapv #(select-keys % [:tau :ambiguity :ambiguity-status]) (:steps c)) (absent :ambiguity-not-recorded))
-             :pragmatic-cost (pragmatic-cost c)
+     :terms {:serving-G (:controller-score entry)
+             :theta-latent (theta-latent-terms c endpoints information)
+             :serving-risk (if (seq (:steps c)) (mapv #(select-keys % [:tau :risk :risk-status]) (:steps c)) (absent :risk-not-recorded))
+             :serving-ambiguity (if (seq (:steps c)) (mapv #(select-keys % [:tau :ambiguity :ambiguity-status]) (:steps c)) (absent :ambiguity-not-recorded))
              :novelty information :novelty-consumed-in-G? false}}))

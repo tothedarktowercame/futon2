@@ -23,7 +23,7 @@
 (def entry {:action action :controller-score 1.0
             :certificate {:horizon 2 :consumed-g {:D {#{} 1}
                           :Q {:steps [{:tau 1 :belief {#{token} 1}} {:tau 2 :belief {#{token} 1}}]}
-                          :C {:steps [{:distribution {:weights {}}} {:distribution {:weights {token 1}}}]}}
+                          :C {:steps [{:distribution {:weights {}}} {:distribution {:universe #{token} :zeroed #{} :weights {token 1}}}]}}
                           :steps [{:tau 1 :risk 0.5 :ambiguity 0} {:tau 2 :risk 0.5 :ambiguity 0}]}})
 (def inputs {:contract (attempt/declared-contract)
              :prior {:schema :wm/learning-trial-prior-v1 :authority :illustrative :mode :record-only :alpha 9 :beta 1}
@@ -61,7 +61,8 @@
   (let [t2 [:M :other] a (assoc-in action [:precedence 0 :produces] #{token t2})
         e (-> entry (assoc :action a)
               (assoc-in [:certificate :consumed-g :Q :steps 1 :belief] {#{token t2} 1})
-              (assoc-in [:certificate :consumed-g :C :steps 1 :distribution :weights t2] 1))
+              (assoc-in [:certificate :consumed-g :C :steps 1 :distribution :weights t2] 1)
+              (update-in [:certificate :consumed-g :C :steps 1 :distribution :universe] conj t2))
         x (assoc inputs :models {a (get-in inputs [:models action])})]
     (is (= :factorization-unavailable (get-in (novelty/policy-receipt e x) [:expected-kl :reason])))
     (is (= :factorization-unavailable
@@ -130,3 +131,54 @@
     (is (.contains text "Expected parameter information gain (record-only, not in G):"))
     (is (.contains text "illustrative"))
     (is (.contains text "nats"))))
+
+(deftest theta-latent-accounting-on-frozen-menus
+  ;; Independently enumerate the marginal outcomes for the frozen small menus;
+  ;; production uses the equivalent additive-log-C formula without a powerset.
+  (doseq [run ["1789964661" "1789952479"]
+          e (frozen-ranked run)
+          [a b] [[1 1] [9 1] [90 10]]]
+    (let [effects (:eligible-endpoints (novelty/policy-receipt e inputs))
+          m (assoc (get-in inputs [:models action]) :factorization
+                   {:status :declared-independent :effects effects :source "sensitivity fixture"})
+          x (-> inputs (assoc :models {(:action e) m})
+                (assoc-in [:prior :alpha] a) (assoc-in [:prior :beta] b))
+          r (novelty/policy-receipt e x)
+          terms (get-in r [:terms :theta-latent])
+          terminal (last (get-in e [:certificate :consumed-g :Q :steps]))
+          member (:distribution (last (get-in e [:certificate :consumed-g :C :steps])))
+          q (frozen/endpoint-q (ffirst (:belief terminal)) (set effects) (/ (double a) (+ a b)))
+          logc (model/member-log-probability member)
+          cost (- (reduce + (for [[state mass] q :when (pos? mass)] (* mass (logc state)))))
+          risk (reduce + (for [[state mass] q :when (pos? mass)] (* mass (- (Math/log mass) (logc state)))))
+          ;; Integer-prior digamma differences via harmonic numbers are a
+          ;; separate computation of the conditional Bernoulli entropy.
+          conditional (* (count effects)
+                         (- (double (frozen/harmonic (+ a b)))
+                            (* (/ a (+ a b)) (double (frozen/harmonic a)))
+                            (* (/ b (+ a b)) (double (frozen/harmonic b)))))]
+      (is (not (contains? r :shadow-kappa)))
+      (is (= :checked (get-in terms [:identity :status])))
+      (is (frozen/close? cost (:pragmatic-cost terms)))
+      (is (frozen/close? risk (:risk-marginal terms)))
+      (is (frozen/close? conditional (:ambiguity-conditional terms)))
+      (is (frozen/close? (- cost (get-in r [:expected-kl :nats])) (:efe terms)))
+      (is (= 2 (:tau terms)))
+      (is (= 1 (:multiplicity terms)))
+      (is (= (:controller-score e) (get-in r [:terms :serving-G]))))))
+
+(deftest known-noise-cancels-and-excluded-support-is-held
+  (let [x (assoc-in inputs [:models action :prior] {:kind :known-parameter :theta 0.5})
+        r (receipt x) terms (get-in r [:terms :theta-latent])]
+    (is (= 0.0 (:information-gain terms)))
+    (is (frozen/close? (Math/log 2) (:ambiguity-conditional terms)))
+    (is (frozen/close? (:pragmatic-cost terms) (:efe terms)))
+    (is (= :checked (get-in terms [:identity :status]))))
+  (let [e (assoc-in entry [:certificate :consumed-g :C :steps 1 :distribution :zeroed] #{#{}})]
+    (is (= :predictive-support-excluded-by-C
+           (get-in (novelty/policy-receipt e inputs) [:terms :theta-latent :reason])))))
+
+(deftest theta-latent-receipt-is-required
+  (let [r (receipt inputs)]
+    (is (= :checked (get-in r [:terms :theta-latent :identity :status])))
+    (is (not (contains? r :shadow-kappa)))))

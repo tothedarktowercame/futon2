@@ -1,0 +1,1 @@
+{:record/type :test-registry/refusal, :warrant? false, :reason :review-diff-required, :details {}}

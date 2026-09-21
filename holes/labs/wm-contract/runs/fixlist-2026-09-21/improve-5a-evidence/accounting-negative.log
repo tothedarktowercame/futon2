@@ -1,0 +1,15 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.parameter-novelty-test
+
+FAIL in (theta-latent-receipt-is-required) (parameter_novelty_test.clj:183)
+expected: (= :checked (get-in r [:terms :theta-latent :identity :status]))
+  actual: (not (= :checked nil))
+
+FAIL in (theta-latent-receipt-is-required) (parameter_novelty_test.clj:184)
+expected: (not (contains? r :shadow-kappa))
+  actual: (not (not true))
+
+Ran 1 tests containing 3 assertions.
+2 failures, 0 errors.

@@ -11,9 +11,12 @@ effect/route family and digest; prior kind and separate learned counts;
 ledger snapshot path/SHA256 (or typed absence); declared observation contract
 value/version/digest; prospective observation model; τ=T, multiplicity=1,
 attempt grain and nats; factorization declaration or typed absence; expected
-KL; explicit `:no-focus-declared`; undeclared, unconsumed shadow κ scoped to
-that no-focus state. Risk and ambiguity retain scorer steps; expected pragmatic
-cost is separately derived for identity A, otherwise explicitly unavailable.
+KL and explicit `:no-focus-declared`. There is no shadow κ. Existing scorer
+risk/ambiguity remain under `:serving-risk` / `:serving-ambiguity`, with G under
+`:serving-G`. `:terms :theta-latent` records the terminal attempt model's
+marginal predictive risk, conditional ambiguity, pragmatic cost, parameter
+information gain and EFE, with a numerical identity check. These are separate
+from the serving score and do not change its accounting in this slice.
 No re-scan, re-rollout or score change is performed to attach the receipt.
 
 `parameter-novelty/read-inputs` reads the contract's absolute ledger path once
@@ -72,7 +75,7 @@ its existing retention carries the augmented certificate.
 
 | Namespace | Tests / assertions | Result |
 |---|---:|---|
-| futon2.aif.parameter-novelty-test | 5 / 54 | pass |
+| futon2.aif.parameter-novelty-test | 8 / 793 | pass (accounting follow-up) |
 | futon2.aif.policy-test | 8 / 15 | pass |
 | futon2.aif.run-narrative-test | 25 / 121 | pass |
 | futon2.aif.load-identity-test | 3 / 12 | pass |
@@ -134,6 +137,55 @@ clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-improve-
 ```
 
 The other namespace and focused runner results are fresh command logs, not
-claims that this single warrant covers their executions. In total the completed
-commands cover 131 tests / 720 assertions; the interrupted full runner command
+claims that this single warrant covers their executions. At that initial implementation, the completed
+commands covered 131 tests / 720 assertions; the interrupted full runner command
 is excluded from that total.
+
+
+## Accounting follow-up: θ latent, novelty once
+
+Implements the accounting decision recorded on main in FIXLIST §“improve-5
+accounting decision”: `risk_marginal + ambiguity_conditional = pragmatic_cost
+− I(theta;Y)`. Novelty's coefficient is 1; no κ appears in the receipt. The
+strength question is about priors and C's strength per focus, not an extra
+learning weight. No sensitivity sweep is added.
+
+The supported illustrative model holds background terminal state fixed and
+uses the declared independent endpoint channels. The predictive distribution
+is retained as that fixed state plus Bernoulli means (θ marginalized).
+Predictive entropy is the sum of marginal binary entropies; expected −log C
+uses the scorer's actual additive log-weight preference member. Conditional
+ambiguity is evaluated directly by digamma moments of Beta, not by subtracting
+the receipt's information gain from predictive entropy. Risk is cost minus
+predictive entropy. The receipt independently records both sides of the stated
+identity, residual, tolerance and `:checked` / `:failed` status. τ=T and
+multiplicity=1 remain explicit. Non-deterministic background or C that excludes
+positive predictive support gives a typed absence for this finite accounting;
+it is not silently treated as a finite identity or zero uncertainty.
+
+Tests enumerate marginal outcomes independently for every one of the 27 frozen
+candidates at Beta(1,1), Beta(9,1), Beta(90,10), compare direct KL and expected
+cost against the factorized calculation, and compute conditional entropy using
+integer harmonic sums. Each checks the identity, τ=T, multiplicity and unchanged
+serving G. The known fair-coin control has H(Y|θ)=ln2 and I=0, hence EFE equals
+cost; an excluded-support control remains held. Both full frozen decisions and
+posteriors remain unchanged apart from receipt fields.
+
+The preceding receipt implementation (`ccbcf210`) fails the new targeted
+regression, with **2 failures / 0 errors**:
+
+```
+expected: (= :checked (get-in r [:terms :theta-latent :identity :status]))
+  actual: (not (= :checked nil))
+expected: (not (contains? r :shadow-kappa))
+  actual: (not (not true))
+```
+
+This was tested by temporarily restoring only `parameter_novelty.clj` from
+that commit in the isolated worktree, running
+`clojure -M:test -m cognitect.test-runner -n futon2.aif.parameter-novelty-test
+-v futon2.aif.parameter-novelty-test/theta-latent-receipt-is-required`, then
+restoring the new file in `finally`. No guard or invariant was bypassed.
+Fresh accounting gates: changed-file clj-kondo and check-parens pass; namespace
+`parameter-novelty-test` 8 tests / 793 assertions, policy-test 8 / 15. The old
+warrant check refused with `:review-diff-required`; a new warrant follows below.
