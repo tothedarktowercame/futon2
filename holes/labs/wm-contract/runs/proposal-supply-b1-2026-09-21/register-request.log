@@ -1,0 +1,4 @@
+evidence-id test-registry-975f71c580e32b6f8d3758034885dc4156296947b6f9c0ac0c7e63e50cf15ccd
+warrant? true
+results {:assertions 60, :duration-ms 2025, :errors 0, :exit 0, :failures 0, :tests 6}
+bound proposal-supply-b1/request -> test-registry-975f71c580e32b6f8d3758034885dc4156296947b6f9c0ac0c7e63e50cf15ccd

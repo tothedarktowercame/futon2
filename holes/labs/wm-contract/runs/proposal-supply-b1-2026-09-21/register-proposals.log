@@ -1,0 +1,4 @@
+evidence-id test-registry-f02006ccbe1e3b9dae242dceeac76bb4536cf53a6764febffe5a9ecdcd0d5c12
+warrant? true
+results {:assertions 36, :duration-ms 3455, :errors 0, :exit 0, :failures 0, :tests 6}
+bound proposal-supply-b1/proposals -> test-registry-f02006ccbe1e3b9dae242dceeac76bb4536cf53a6764febffe5a9ecdcd0d5c12
