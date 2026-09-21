@@ -7218,7 +7218,9 @@
   "Collect all strategic scans, run judgement layer, and render.
    Returns {:data ... :judgement ... :markdown ...}. The optional second
    argument is passed to `judge`; `:step-mission-detail-portfolio?` additionally
-   controls the scan-phase portfolio step and defaults true."
+   controls the scan-phase portfolio step and defaults true. With :defer-render?
+   true, returns :render-data instead of :markdown so the click can retain the
+   same scans/judgement and render evidence after selection."
   ([days] (generate-war-machine days {}))
   ([days judge-opts]
   (binding [*input-status* (atom {:read-paths #{} :issues []})]
@@ -7297,25 +7299,17 @@
           judgement (judge scan-data judge-opts)
           input-status (current-input-status)
           scan-data (assoc scan-data :input-status input-status)
-          judgement (assoc judgement :input-status input-status)]
-      {:data scan-data
-       :judgement judgement
-       :markdown (render-war-machine {:self-watch self-watch
-                                      :loop-health loop-health
-                                      :support-attack support-attack
-                                      :mission-triage mission-triage
-                                      :graph graph
-                                      :portfolio portfolio
-                                      :metabolic-balance metabolic-balance
-                                      :commit-hygiene commit-hygiene
-                                      :blocks blocks
-                                      :r-criteria r-criteria
-                                      :r12-apparatus r12-apparatus
-                                      :r12-admission r12-admission
-                                      :vsatarcs-status vsatarcs-status
-                                      :judgement judgement
-                                      :input-status input-status
-                                      :now now :days days})}))))
+          judgement (assoc judgement :input-status input-status)
+          render-data (assoc (select-keys scan-data
+                                          [:self-watch :loop-health :support-attack :mission-triage
+                                           :graph :portfolio :metabolic-balance :commit-hygiene
+                                           :blocks :r-criteria :r12-apparatus :r12-admission
+                                           :vsatarcs-status :input-status])
+                             :judgement judgement :now now :days days)]
+      (assoc {:data scan-data :judgement judgement}
+             (if (:defer-render? judge-opts) :render-data :markdown)
+             (if (:defer-render? judge-opts) render-data
+                 (render-war-machine render-data)))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Main

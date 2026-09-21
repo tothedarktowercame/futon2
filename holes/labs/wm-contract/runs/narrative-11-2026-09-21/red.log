@@ -1,0 +1,15 @@
+
+Running tests in #{"test"}
+
+Testing futon2.report.scan-report-test
+
+FAIL in (run-record-retains-reference-and-survives-render-failure) (scan_report_test.clj:74)
+expected: (= status (:status ref))
+  actual: (not (= :present nil))
+
+FAIL in (run-record-retains-reference-and-survives-render-failure) (scan_report_test.clj:74)
+expected: (= status (:status ref))
+  actual: (not (= :absent nil))
+
+Ran 3 tests containing 18 assertions.
+2 failures, 0 errors.

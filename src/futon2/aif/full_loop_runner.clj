@@ -17,6 +17,7 @@
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.cascade-plan :as cascade-plan]
             [futon2.aif.scoring-input-receipts :as input-receipts]
+            [futon2.aif.scan-report :as scan-report]
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.evidence-manifest :as evidence-manifest]
@@ -535,6 +536,9 @@
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
+                    :scan-report (scan-report/retain!
+                                  target (some-> (:scan-report/state raw-opts) deref)
+                                  (or (:scan-render-fn raw-opts) wm/render-war-machine))
                     ;; This tick's accounts travel with its retained decision;
                     ;; never reconstruct them from a newer trace or corpus.
                     :mission-hole-coverage (or (:mission-hole-coverage decision)
@@ -3762,18 +3766,25 @@
                                    days
                                    (assoc (select-keys opts [:accumulate-strategic-habit?
                                                             :run-id :loaded-code-identity])
-                                          :include-advisory-lanes? false))))
+                                          :include-advisory-lanes? false
+                                          :defer-render? true))))
             judgement0-base
             (run-phase!
              opts @phase-context :selection
              #(let [_ (swap! effective-configuration assoc :evaluation :started)
-                    judgement (:judgement (selection-judge window-days))
+                    generated (selection-judge window-days)
+                    judgement (:judgement generated)
                     _ (reset! effective-configuration
                               (or (:effective-run-configuration judgement)
-                                  (assoc @effective-configuration :evaluation :not-retained)))]
-                ;; RULING-selection-precedence-2026-09-19.md: ordinary clicks
-                ;; always select; repair memory is evidence, never a divert.
-                ((or (:judgement-transform-fn opts) identity) judgement)))
+                                  (assoc @effective-configuration :evaluation :not-retained)))
+                    ;; RULING-selection-precedence-2026-09-19.md: ordinary clicks
+                    ;; always select; repair memory is evidence, never a divert.
+                    judgement ((or (:judgement-transform-fn opts) identity) judgement)]
+                (when-let [state (:scan-report/state opts)]
+                  ;; Capture exactly the judgement used below, never rescan.
+                  (reset! state (assoc (or (:render-data generated) (:data generated))
+                                       :judgement judgement)))
+                judgement))
             judgement0 judgement0-base
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             ordinary-entry (selected-entry judgement0)
@@ -4728,7 +4739,8 @@
         raw-opts (assoc raw-opts :participants/state (atom nil)
                                 :declaration-reads/state (atom nil)
                                 :habit-reads/state (atom [])
-                                :job-liveness/state (atom []))
+                                :job-liveness/state (atom [])
+                                :scan-report/state (atom nil))
         _ (ensure-dispatch-seat! (config raw-opts))
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.

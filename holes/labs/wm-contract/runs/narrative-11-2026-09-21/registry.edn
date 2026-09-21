@@ -1,0 +1,8 @@
+{:repo-root "/home/joe/code/futon2-narrative-11"
+ :code-paths ["src/futon2/aif/scan_report.clj" "src/futon2/aif/full_loop_runner.clj"
+              "scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/report/scan_report_test.clj" "test/futon2/report/selection_nil_receipt_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.report.scan-report-test"]
+ :author "codex-13" :origin "claude-3/narrative-fix-11"
+ :artifact-dir "/home/joe/code/futon2-narrative-11/holes/labs/wm-contract/runs/narrative-11-2026-09-21/registered"
+ :agency-url "http://localhost:7070"}

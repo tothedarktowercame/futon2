@@ -1,0 +1,3 @@
+scripts/futon2/report/war_machine.clj:4598:29: info: Single argument to str already is a string
+src/futon2/aif/full_loop_runner.clj:1866:19: info: Single argument to str already is a string
+linting took 271ms, errors: 0, warnings: 0
