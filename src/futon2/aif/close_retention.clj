@@ -1,8 +1,11 @@
 (ns futon2.aif.close-retention
   "Pure construction and validation of the close-retention v1 carrier."
-  (:require [clojure.string :as str])
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.string :as str])
   (:import (java.security MessageDigest)
            (java.time Instant)))
+
+(load-identity/register! *ns* *file*)
 
 (def occurrence-schema :wm/action-transition-occurrence-v1)
 (def retention-schema :wm/close-retention-v1)

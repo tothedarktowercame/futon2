@@ -1,0 +1,19 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.runner-load-identity-test
+
+FAIL in (runner-must-compare-the-captured-digest) (runner_load_identity_test.clj:12)
+expected: (= :drift (:runner/source-check r))
+  actual: (not (= :drift :current))
+
+FAIL in (runner-must-compare-the-captured-digest) (runner_load_identity_test.clj:13)
+expected: (= :stale (get-in r [:namespaces (quote futon2.aif.full-loop-runner) :status]))
+  actual: (not (= :stale nil))
+
+FAIL in (runner-must-compare-the-captured-digest) (runner_load_identity_test.clj:14)
+expected: (= :unregistered (get-in r [:namespaces (quote futon2.aif.policy) :status]))
+  actual: (not (= :unregistered nil))
+
+Ran 1 tests containing 3 assertions.
+3 failures, 0 errors.

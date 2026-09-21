@@ -31,7 +31,8 @@
    after a successful trace append. Its separate default-off read is carried
    only as report/trace evidence; selection never consumes it.
    Pattern:   war-machine/operational-not-decorative"
-  (:require [babashka.http-client :as http]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn]
             [clojure.java.io :as io]
@@ -84,6 +85,8 @@
             [futon2.aif.trace :as trace])
   (:import (java.time Instant LocalDate ZoneId ZonedDateTime)
            (java.time.format DateTimeFormatter)))
+
+(load-identity/register! *ns* *file*)
 
 ;; ---------------------------------------------------------------------------
 ;; Config

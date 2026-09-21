@@ -16,9 +16,12 @@
 
    Contract: contributes to R6 (softmax action selection) per
    `futon2/docs/futon-aif-completeness.md`."
-  (:require [futon2.aif.g-term-decomposition :as decomposition]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.g-term-decomposition :as decomposition]
             [futon2.aif.hierarchical-budget :as hierarchical-budget]
             [futon2.aif.cascade-selection :as cascade-selection]))
+
+(load-identity/register! *ns* *file*)
 
 (defn select-budgeted-actions
   "R11 policy boundary for collective, hierarchical action selection.

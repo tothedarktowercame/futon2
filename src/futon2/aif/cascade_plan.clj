@@ -1,6 +1,9 @@
 (ns futon2.aif.cascade-plan
   "Pure presentation of recorded construction evidence; never observes or infers guards."
-  (:require [clojure.string :as str]))
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.string :as str]))
+
+(load-identity/register! *ns* *file*)
 
 (def max-plan-chars 24000)
 

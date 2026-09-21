@@ -2,10 +2,13 @@
   "Read retained run evidence and write only the requested Markdown output.
   CLI: clojure -M -m futon2.aif.run-narrative <run-id> [out.md].
   FUTON2_NARRATIVE_ROOT selects the evidence checkout (default current directory)."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.cascade-plan :as plan]))
+
+(load-identity/register! *ns* *file*)
 
 (def checkpoint-order [:time-step :selection :construction :dispatch :build :adjudication :closed])
 

@@ -36,11 +36,14 @@
   weights are normalised so their sum is lam, matching the uniform law's
   total, so a weighted spec and a uniform spec of the same want are the
   same strength of preference, differently distributed."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str])
   (:import [java.security MessageDigest]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- file-bytes [f]
   (java.nio.file.Files/readAllBytes (.toPath f)))

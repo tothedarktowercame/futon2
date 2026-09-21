@@ -1,11 +1,14 @@
 (ns futon2.aif.scan-report
   "Retain a rendering of this tick's supplied scan and judgement, without scanning."
-  (:require [clojure.java.io :as io]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.java.io :as io]
             [clojure.string :as str])
   (:import [java.nio.charset StandardCharsets]
            [java.nio.file Files StandardCopyOption]
            [java.security MessageDigest]
            [java.util UUID]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- absence [reason error]
   (cond-> {:status :absent :reason reason}

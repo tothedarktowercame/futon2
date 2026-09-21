@@ -1,7 +1,8 @@
 (ns futon2.aif.d-predecessor-task-authority
   "D-only executed-with-artifacts authority. Does not establish E1 portfolio
    membership, the R6-R11 domain, or broader machine-enactment correspondence."
-  (:require [clojure.edn :as edn]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.edn :as edn]
             [clojure.set :as set]
             [babashka.http-client :as http]
             [cheshire.core :as json]
@@ -16,6 +17,8 @@
             [futon2.aif.task-execution-evidence :as execution])
   (:import (java.nio.file Files StandardOpenOption)
            (java.io PushbackReader StringReader)))
+
+(load-identity/register! *ns* *file*)
 
 (def authority :d-predecessor-task-authority-v1)
 (def default-root "data/wm-d-task-enactment")

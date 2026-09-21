@@ -2,11 +2,14 @@
   "Pure, bounded construction from GIVEN interpretations, not retrieval/admission.
   Searches backward from all wants, then checks each order with the existing
   first-enabled model. Model reachability is not an observed discharge."
-  (:require [clojure.set :as set]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [clojure.set :as set]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.cascade-policy :as policy]
             [futon2.aif.construction :as construction]
             [futon2.aif.construction-moves :as moves]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- refuse [kind & [details]]
   (merge {:status :refused :kind kind :candidates []} details))

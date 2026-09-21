@@ -6,7 +6,8 @@
   resulting commit, records a typed implementation/discharge in Futon1b, queues
   Morning Brief QA, and closes every preregistered checkpoint. The deterministic
   fold executor is not an actuator here."
-  (:require [babashka.http-client :as http]
+  (:require [futon2.aif.load-identity :as load-identity]
+            [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -56,6 +57,8 @@
            [java.time Instant]
            [java.util UUID]
            [java.util.concurrent Executors ThreadFactory]))
+
+(load-identity/register! *ns* *file*)
 
 (def default-agency-base "http://127.0.0.1:7070")
 (def default-substrate-base "http://127.0.0.1:7073")
@@ -432,16 +435,6 @@
      {:node :FULL_LOOP_CLOSE :via (or (:outcome result) :unknown)
       :at (str (Instant/now))}]))
 
-(defn- resource-bytes
-  "The loaded full_loop_runner.clj as the JVM actually compiled it."
-  []
-  (try
-    (when-let [res (.getResource (ClassLoader/getSystemClassLoader)
-                    "futon2/aif/full_loop_runner.clj")]
-      (with-open [in (.openStream res)]
-        (.readAllBytes in)))
-    (catch Throwable _ nil)))
-
 (def ^:private canonical-runner-path
   "/home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj")
 
@@ -461,33 +454,28 @@
        (catch Throwable _ nil)))
 
 (defn runner-source-drift
-  "Compare the loaded runner bytecode source against the canonical checkout.
-
-  Attempt-003 of repair-ea1-3f4cac (2026-09-13 22:22) was a FALSE
-  artifact-binding mismatch: the reply's DONE line named the observed head
-  exactly (33ca99b0), but the serving JVM was running runner code older than
-  the corroboration fix merged hours earlier, so the stale dispatch-time job
-  stamp (decea980) was compared instead. The repairs lived in git; the JVM
-  never reloaded them, and nothing said so."
+  "Compare source digests sampled during namespace loading with canonical disk.
+   :namespaces reports the registered and explicitly required decision/close
+   scope, including unregistered namespaces. This is not bytecode identity:
+   edits during compilation, partial loads and later Var mutation are outside
+   the capture guarantee. Only this runner's :drift retains refusal authority."
   ([]
-   (runner-source-drift (fn [_] (canonical-runner-bytes))))
+   (runner-source-drift (fn [path]
+                          (if (= path canonical-runner-path)
+                            (canonical-runner-bytes)
+                            (load-identity/read-bytes path)))))
   ([canonical-read]
-   (let [loaded (resource-bytes)
-         canonical (canonical-read canonical-runner-path)]
-     (cond
-       (or (nil? loaded) (nil? canonical))
-       {:runner/source-check :unavailable
-        :runner/loaded-present? (some? loaded)
-        :runner/canonical-present? (some? canonical)}
-
-       (= (sha256-bytes loaded) (sha256-bytes canonical))
-       {:runner/source-check :current
-        :runner/sha256 (sha256-bytes loaded)}
-
-       :else
-       {:runner/source-check :drift
-        :runner/loaded-sha256 (sha256-bytes loaded)
-        :runner/canonical-sha256 (sha256-bytes canonical)}))))
+   (let [reports (load-identity/report load-identity/required-sources canonical-read)
+         own (get reports 'futon2.aif.full-loop-runner)
+         loaded (get-in own [:loaded-source :sha256])
+         disk (:disk-sha256 own)]
+     (cond-> {:runner/source-check (case (:status own) :stale :drift (:status own))
+              :runner/loaded-present? (some? loaded)
+              :runner/canonical-present? (some? disk)
+              :runner/loaded-sha256 loaded :runner/canonical-sha256 disk
+              :identity-kind :source-digest-at-namespace-load
+              :namespaces reports}
+       (= :current (:status own)) (assoc :runner/sha256 loaded)))))
 
 (defn- refuse-on-runner-source-drift!
   "Check BEFORE the attempt runs and refuse consumption on drift (round-2
