@@ -521,10 +521,16 @@
 (defn learning-trial-text [b]
   (apply str
          (for [trial (:trials (:learning-trial-receipt (judgment b :closed)))]
-           (str "Learning trial for " (:pattern trial) " → " (pr-str (:effect trial))
-                ": " (name (:status trial)) " (" (name (:reason trial)) ")"
-                (when-let [theta (get-in trial [:shadow :if-counted-rollout :theta])]
-                  (str "; shadow theta would be " theta " under the illustrative prior"))
+           (str (if (:selected-cascade trial)
+                  (str "Attempt learning trial for cascade " (get-in trial [:selected-cascade :id]))
+                  (str "Learning trial for " (:pattern trial)))
+                " → " (pr-str (:effect trial)) ": " (name (:status trial))
+                (when-let [reason (:reason trial)] (str " (" (name reason) ")"))
+                (if-let [delivery (get-in trial [:attempt-beta :delivery-mean])]
+                  (str "; record-only illustrative delivery mean " delivery " for this single attempt")
+                  (when-let [theta (get-in trial [:shadow :if-counted-rollout :theta])]
+                    (str (if (:selected-cascade trial) "; per-firing sensitivity shadow theta would be "
+                             "; shadow theta would be ") theta " under the illustrative prior")))
                 ".\n"))))
 
 (defn narrative-text [b]

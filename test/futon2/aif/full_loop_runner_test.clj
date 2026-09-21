@@ -1,5 +1,7 @@
 (ns futon2.aif.full-loop-runner-test
   (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.learning-trial-ledger :as learning-ledger]
+            [futon2.aif.attempt-learning-test :as attempt-fixture]
             [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn :as edn]
@@ -40,7 +42,8 @@
                                   (make-array FileAttribute 0)))]
     (try
       (with-redefs-fn {#'trace/default-trace-dir (.getPath root)
-                       #'runner/default-run-record-dir (.getPath run-record-root)} f)
+                       #'runner/default-run-record-dir (.getPath run-record-root)
+                       #'learning-ledger/default-root (str (io/file root "learning-ledger"))} f)
       (finally
         (doseq [file (reverse (file-seq root))] (io/delete-file file true))
         (doseq [file (reverse (file-seq run-record-root))]
@@ -5840,6 +5843,7 @@
          {:author-card feature-card-claim
           :runner-options {:cohort? true :execution-cohort (:binding c)
                            :d-task-evidence-root (str (io/file root "d-task"))
+                           :learning-trial-ledger-root (str (io/file root "learning-ledger"))
                            :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}})
         ;; The close judgment is the cohort's durable close event; the
         ;; returned :checkpoints map stops at adjudication.
@@ -5848,7 +5852,7 @@
                        [:payload :judgment])
         receipt (:learning-trial-receipt closed)]
     (is (= :grounded-change (:outcome result)))
-    (is (= :wm/learning-trial-receipt-v1 (:schema receipt)))
+    (is (= :wm/learning-trial-receipt-v2 (:schema receipt)))
     (is (seq (:trials receipt)))
     (is (every? #(and (= :held (:status %)) (false? (:counted? %))) (:trials receipt)))
     (is (= receipt (get-in closed [:token-outcome-comparison :learning-trial-receipt])))
@@ -5881,3 +5885,26 @@
                    (try (#'runner/retain-kernel-example! root :cohort "attempt" context d-result expected jobs)
                         (catch clojure.lang.ExceptionInfo e (ex-data e)))))))
          (finally (doseq [file (reverse (file-seq root))] (io/delete-file file true))))))))
+
+(deftest signed-attempt-learning-is-retained-and-deduplicated-before-close
+  (attempt-fixture/with-trial
+   (fn [{:keys [source-record comparison occurrence route expected read-job]} ledger-root]
+     (let [root (io/file ledger-root "attempts")
+           source (io/file ledger-root "d-task.edn")
+           _ (io/make-parents source)
+           _ (spit source (pr-str source-record))
+           d-result {:source {:path (.getPath source) :sha256 (digest/sha256 (slurp source))}}
+           context {:occurrence occurrence :route route :expected expected :read-job read-job
+                    :ledger-root ledger-root}
+           retain #(-> (#'runner/retain-token-outcome!
+                        (.getPath root) :cohort "attempt" (:prediction comparison) d-result
+                        (:artifact-sha comparison) context) :receipt :learning-trial-receipt)
+           receipt (retain)
+           file (io/file root "cohort/attempt/retained/token-outcome.edn")
+           retained (edn/read-string (slurp file))
+           ledger-bytes (slurp (io/file ledger-root "attempts.edn"))]
+       (is (= receipt (:learning-trial-receipt retained)))
+       (is (= 2 (count (:trials receipt))))
+       (is (every? #(and (= :admitted-at-attempt-grain (:status %)) (:counted? %)) (:trials receipt)))
+       (is (every? #(= :duplicate-replay (:reason %)) (:trials (retain))))
+       (is (= ledger-bytes (slurp (io/file ledger-root "attempts.edn"))))))))

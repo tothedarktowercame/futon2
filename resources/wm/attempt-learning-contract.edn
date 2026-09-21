@@ -1,0 +1,11 @@
+{:schema :wm/attempt-learning-contract-v1
+ :authority :declared
+ :mode :record-only
+ :trial-grain :selected-cascade-effect-attempt
+ :occurrence-schema :wm/action-transition-occurrence-v2
+ :observation-schema :wm/d-task-token-observations-v2
+ :selection-condition :effect-absent-and-predicted-positive
+ :placement :post-build-artifact-revision
+ :calibration "This selected cascade delivers this declared effect when dispatched through this route."
+ :does-not-establish #{:pattern-causality :individual-pattern-firing :production-parameter-update}
+ :ledger "/home/joe/code/futon2/data/wm-learning-trials/attempts.edn"}

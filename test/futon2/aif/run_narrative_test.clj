@@ -464,3 +464,17 @@
          (is (str/includes? text "MUST stamps met :increment; missing none; MAY stamps none"))
          (is (str/includes? text "attested increments :increment"))
          (is (str/includes? text "not independently verified")))))))
+
+(deftest admitted-attempt-learning-has-no-held-reason
+  (let [text (narrative/learning-trial-text
+              {:checkpoints {:closed {:judgment
+                                      {:learning-trial-receipt
+                                       {:trials [{:selected-cascade {:id :C1}
+                                                  :effect ["M-one" :done]
+                                                  :status :admitted-at-attempt-grain
+                                                  :reason nil :counted? true
+                                                  :attempt-beta {:delivery-mean 9/11}}]}}}}})]
+    (is (str/includes? text "Attempt learning trial for cascade :C1"))
+    (is (str/includes? text "admitted-at-attempt-grain"))
+    (is (str/includes? text "record-only illustrative delivery mean 9/11"))
+    (is (not (str/includes? text "pattern causality")))))

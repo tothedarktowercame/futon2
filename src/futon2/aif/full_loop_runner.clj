@@ -25,9 +25,10 @@
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.token-outcome :as token-outcome]
-            [futon2.aif.learning-trial :as learning-trial]
             [futon2.aif.route-attestation :as route-attestation]
             [futon2.aif.kernel-example :as kernel-example]
+            [futon2.aif.attempt-learning :as attempt-learning]
+            [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.fold-cascade :as fold-cascade]
@@ -2853,10 +2854,12 @@
         receipt (assoc (token-outcome/compare-outcomes prediction measurements artifact-sha)
                        :measurement-source source
                        :measurement-verification (:verification d-result))
-        learning (learning-trial/receipt
+        learning (attempt-learning/receipt
                   {:comparison receipt :source-record source-record
                    :occurrence (or (:occurrence context) (get-in source-record [:dispatch :occurrence]))
-                   :route (or (:route context) (:route source-record))})
+                   :route (or (:route context) (:route source-record))
+                   :expected (:expected context) :read-job (:read-job context)})
+        learning (learning-ledger/record! (or (:ledger-root context) learning-ledger/default-root) learning)
         receipt (assoc receipt :learning-trial-receipt learning)
         ;; retained/, not the attempt dir itself (closed-execution's exact
         ;; file set) nor evidence/ (enumerated into the manifest separately).
@@ -3597,7 +3600,9 @@
                           (:cohort/id start-event) attempt-id
                           (get-in @checkpoints [:selection :judgment :token-outcome-prediction])
                           d-task-result (:commit data)
-                          {:occurrence @action-occurrence :route @author-dispatch-route}))
+                          {:occurrence @action-occurrence :route @author-dispatch-route
+                           :expected @d-task-context :read-job #(read-job! opts %)
+                           :ledger-root (or (:learning-trial-ledger-root opts) learning-ledger/default-root)}))
                        route-account
                        (route-attestation/retain!
                         (if attempt-evidence-dir
