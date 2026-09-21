@@ -292,3 +292,18 @@ coefficient 1+κ, a free weight that exists only to undo a double count. How
 much learning is worth becomes a question about the priors and about C's
 strength (improve-2 Q3, asked per focus under improve-7), not about a weight.
 Slice 1 (record-only receipt) records the terms in this decomposition.
+
+### improve-6a — citing a surprise in a later revision
+
+Close-time token surprises use the selection-frozen `:positive-marginal-support`
+expectation. Repair findings and refusals without that expectation remain incidents.
+A later revision commit cites each surprise it addresses with a trailer:
+
+```text
+Surprise: <id>
+```
+
+Keep revision kind (structural, parameter, data, operational repair), named model
+part, old/new digests, and loaded/consumed successor evidence distinct (D1–D4 in
+`NOTE-learning-capability-definitions-2026-09-21.md`). This slice records
+`:revision {:status :none-yet}`; it does not scan trailers or infer learning.

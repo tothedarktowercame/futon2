@@ -1,0 +1,56 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.surprise-test
+
+FAIL in (only-observed-mismatches-to-a-declared-expectation) (surprise_test.clj:65)
+expected: (= :D-or-external (:model-part row))
+  actual: (not (= :D-or-external nil))
+
+FAIL in (only-observed-mismatches-to-a-declared-expectation) (surprise_test.clj:66)
+expected: (= :observed-outside-predicted-support-cause-unattributed (:model-part-reason row))
+  actual: (not (= :observed-outside-predicted-support-cause-unattributed nil))
+
+FAIL in (historical-updater-surprise-is-stable-and-record-only) (surprise_test.clj:32)
+The retained updater mismatch must produce exactly one surprise
+expected: (= 1 (count rows))
+  actual: (not (= 1 0))
+
+FAIL in (historical-updater-surprise-is-stable-and-record-only) (surprise_test.clj:33)
+expected: (= historical/updater (:token row))
+  actual: (not (= ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012] nil))
+
+FAIL in (historical-updater-surprise-is-stable-and-record-only) (surprise_test.clj:34)
+expected: (= :predicted-not-observed (:verdict row))
+  actual: (not (= :predicted-not-observed nil))
+
+FAIL in (historical-updater-surprise-is-stable-and-record-only) (surprise_test.clj:35)
+expected: (= :B-effect (:model-part row))
+  actual: (not (= :B-effect nil))
+
+FAIL in (historical-updater-surprise-is-stable-and-record-only) (surprise_test.clj:36)
+expected: (= :none-yet (get-in row [:revision :status]))
+  actual: (not (= :none-yet nil))
+
+FAIL in (historical-updater-surprise-is-stable-and-record-only) (surprise_test.clj:37)
+expected: (= {:status :not-recorded} (get-in row [:observation :observed-at]))
+  actual: (not (= {:status :not-recorded} nil))
+
+FAIL in (historical-updater-surprise-is-stable-and-record-only) (surprise_test.clj:38)
+expected: (= :positive-marginal-support (get-in row [:expectation :rule]))
+  actual: (not (= :positive-marginal-support nil))
+
+FAIL in (historical-updater-surprise-is-stable-and-record-only) (surprise_test.clj:39)
+expected: (= {:expected-observed true} (get-in row [:expectation :tolerance]))
+  actual: (not (= {:expected-observed true} nil))
+
+FAIL in (historical-updater-surprise-is-stable-and-record-only) (surprise_test.clj:40)
+expected: (string? (:surprise/id row))
+  actual: (not (string? nil))
+
+FAIL in (historical-updater-surprise-is-stable-and-record-only) (surprise_test.clj:44)
+expected: (not= (:surprise/id row) (:surprise/id (first (records (assoc-in input [:comparison :prediction :model-id] "revised")))))
+  actual: (not (not= nil nil))
+
+Ran 2 tests containing 20 assertions.
+12 failures, 0 errors.

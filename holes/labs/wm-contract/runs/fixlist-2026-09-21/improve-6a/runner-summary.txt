@@ -1,0 +1,7 @@
+Full log: /tmp/improve-6a-runner.log
+SHA256: 5b87c099ab58371d799927ad3f36b5f9434975b2d6ce52c761ffaecc2c4edbb3
+Serving runner source drifts from the canonical checkout: 88 errors
+
+Ran 188 tests containing 591 assertions.
+0 failures, 88 errors.
+Guard was not bypassed. New retention helper subsequently run separately: retention.log.

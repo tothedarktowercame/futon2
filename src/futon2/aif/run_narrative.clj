@@ -544,7 +544,9 @@
                        (str "Not recorded in this run: checkpoint. The remaining evidence does not establish this stage's outcome.\n"
                             (when (= stage :selection) (coverage-text b))))
                      (when (= stage :time-step) (str (perceive-text b) (scan-account b)))
-                     (when (= stage :closed) (str (outcome-text b) (learning-trial-text b)))
+                     (when (= stage :closed) (str (outcome-text b) (learning-trial-text b)
+                          (when-let [ids (seq (get-in b [:checkpoints :closed :judgment :surprise-ids]))]
+                            (str "Surprises: " (str/join ", " ids) ".\n"))))
                      "\nCited facts:\n"
                      (cite (or path (:record-path b)) (if path [:payload :judgment] [:cohort-attempt]))
                      (when (= stage :time-step) (cite (:record-path b) [:startedAt]))

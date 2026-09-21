@@ -16,7 +16,8 @@
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.observation-checks :as observation]
             [futon2.aif.task-execution-evidence :as execution])
-  (:import (java.nio.file Files StandardOpenOption)
+  (:import (java.time Instant)
+           (java.nio.file Files StandardOpenOption)
            (java.io PushbackReader StringReader)))
 
 (load-identity/register! *ns* *file*)
@@ -89,6 +90,9 @@
 (defn claim
   "Assemble a task claim from final artifact/review inputs. This is not admission."
   [{:keys [dispatch artifact-binding author-job review-job files repository route]}]
+  (let [measurements (when (and (= route :fresh-author) (:commit artifact-binding))
+                       (artifact-tokens dispatch repository (:commit artifact-binding)))
+        observed-at (str (Instant/now))]
   {:schema :wm/d-task-enactment-v1 :authority authority :scope scope
    :enactment-grain :task :b-authority :declared-kernel-of-verified-macro-action
    :causal-attribution :independent-check-required
@@ -98,9 +102,9 @@
    :repository repository
    :revision-pair {:before (get-in dispatch [:before :head])
                    :after (:commit artifact-binding) :before-evidence :not-measured}
-   :after-token-evidence
-   (when (and (= route :fresh-author) (:commit artifact-binding))
-     (artifact-tokens dispatch repository (:commit artifact-binding)))})
+   :after-token-evidence measurements
+   ;; Completion time of this artifact measurement pass, not the build clock.
+   :observed-at observed-at}))
 
 (defn- verify-execution!
   "Verify minted identity, corroborated fresh artifact, independent review and

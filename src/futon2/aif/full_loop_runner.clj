@@ -25,6 +25,7 @@
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.token-outcome :as token-outcome]
+            [futon2.aif.surprise :as surprise]
             [futon2.aif.route-attestation :as route-attestation]
             [futon2.aif.kernel-example :as kernel-example]
             [futon2.aif.attempt-learning :as attempt-learning]
@@ -2861,12 +2862,24 @@
                    :expected (:expected context) :read-job (:read-job context)})
         learning (learning-ledger/record! (or (:ledger-root context) learning-ledger/default-root) learning)
         receipt (assoc receipt :learning-trial-receipt learning)
+        surprises (surprise/records
+                   {:comparison receipt
+                    :occurrence (or (:occurrence context) (get-in source-record [:dispatch :occurrence]))
+                    :declared-at (:selection-recorded-at context)
+                    :observed-at (:observed-at source-record)})
+        surprise-file (io/file data-root (name cohort-id) attempt-id "retained" "surprises.edn")
         ;; retained/, not the attempt dir itself (closed-execution's exact
         ;; file set) nor evidence/ (enumerated into the manifest separately).
         file (io/file data-root (name cohort-id) attempt-id "retained" "token-outcome.edn")]
     (io/make-parents file)
     (spit file (pr-str receipt))
-    {:receipt receipt
+    (spit surprise-file (pr-str surprises))
+    {:surprises surprises
+     :surprise-entry {:evidence/id (str (name cohort-id) "/" attempt-id "/retained/surprises.edn")
+                      :source-path (.getAbsolutePath surprise-file)
+                      :expected-sha256 (sha256-bytes (Files/readAllBytes (.toPath surprise-file)))
+                      :admitted-at (str (Instant/now))}
+     :receipt receipt
      :entry {:evidence/id (str (name cohort-id) "/" attempt-id "/retained/token-outcome.edn")
              :source-path (.getAbsolutePath file)
              :expected-sha256 (sha256-bytes (Files/readAllBytes (.toPath file)))
@@ -2995,6 +3008,8 @@
         entries (cond-> (into checkpoint-entries evidence-entries)
                   (:token-outcome-entry interpretation-context)
                   (conj (:token-outcome-entry interpretation-context))
+                  (:surprise-entry interpretation-context)
+                  (conj (:surprise-entry interpretation-context))
                   (:route-attestation-entry interpretation-context)
                   (conj (:route-attestation-entry interpretation-context))
                   (:kernel-example-entry interpretation-context)
@@ -3601,6 +3616,7 @@
                           (get-in @checkpoints [:selection :judgment :token-outcome-prediction])
                           d-task-result (:commit data)
                           {:occurrence @action-occurrence :route @author-dispatch-route
+                           :selection-recorded-at (get-in @checkpoint-events [:selection :recorded-at])
                            :expected @d-task-context :read-job #(read-job! opts %)
                            :ledger-root (or (:learning-trial-ledger-root opts) learning-ledger/default-root)}))
                        route-account
@@ -3635,6 +3651,7 @@
                                    {:occurrence @action-occurrence
                                     :semantic-epoch semantic-epoch
                                     :token-outcome-entry (:entry token-comparison)
+                                    :surprise-entry (:surprise-entry token-comparison)
                                     :route-attestation-entry (:entry route-account)
                                     :kernel-example-entry (:entry kernel-example-result)}))
                        admitted-ids (mapv :evidence/id (:entries manifest))
@@ -3644,7 +3661,8 @@
                                             :artifact-only? (= :artifact-only outcome)
                                             :outcome-entity outcome-entity
                                             :entity-state-at-close close-state
-                                            :token-outcome-comparison (:receipt token-comparison)
+                                            :surprise-ids (mapv :surprise/id (:surprises token-comparison))
+                               :token-outcome-comparison (:receipt token-comparison)
                                             :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                             :route-attestation (:receipt route-account)
                                             :route-attestation-ref (:reference route-account)
@@ -3680,6 +3698,7 @@
                                :outcome outcome :checkpoints @checkpoints
                                :job-texts @job-text-records
                                :d-task-enactment d-task-result
+                               :surprise-ids (mapv :surprise/id (:surprises token-comparison))
                                :token-outcome-comparison (:receipt token-comparison)
                                             :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                :route-attestation (:receipt route-account)
