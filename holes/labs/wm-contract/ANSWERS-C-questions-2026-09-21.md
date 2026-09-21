@@ -41,3 +41,37 @@ claude-3's reading (for Joe to correct):
    and is unused; the IAD vector is not wired.
 3. Instruction: incorporate the existing written specification into the build,
    rather than leave it as documentation.
+
+## Q1 follow-up — are institutions beside C (rules that refuse) or inside it (route preferences)?
+
+claude-3 asked: is the split "a stamp the race requires is a rule that refuses;
+a route you'd rather take is a weighted preference over the route" right?
+
+Joe, verbatim:
+
+> So, indeed. Ostrom's institutions talk about rules that can fire. So you may
+> be permitted, or you may have to. They have deontics. You may, you may not.
+> Or you must. Okay. And those are valences that operationalize preferences in
+> my case. So if you look at my considerations for design requirements, those
+> would be preferences, but those preferences don't apply to every single case.
+> The design requirements are not requirements that must be applied globally,
+> but they must be applied ... particularly. So yeah, you got stamps that you
+> must collect. You have stamps that you may collect. You have routes that are
+> preferential and you may or may not be able to take those routes. So I would
+> say IAD is kind of an operator over preferences, because otherwise you say,
+> well, I may be able to do something, but you don't care because you don't
+> prefer it or you're uninterested. That institution isn't turned on. So yeah,
+> I would say IAD operationalizes preferences.
+
+claude-3's reading (for Joe to correct):
+1. Preferences come first (C over outcomes and over the route, Cτ). An
+   institution is an operator over them: in a particular action situation it
+   gives a preference a deontic valence — MUST (a required stamp: the attempt
+   does not count without it), MAY (a permitted stamp or route, weighted by
+   the preference it operationalizes), MAY NOT (forbidden).
+2. Institutions are situational, not global: a design requirement applies in
+   the situations its rule names ("applied particularly"), and is inert where
+   no preference is engaged ("that institution isn't turned on").
+3. So neither pure "beside C" nor pure "inside C": IAD maps (situation,
+   preference) → valence; MUST/MAY NOT act as guards on the route, MAY carries
+   the preference's weight into Cτ.
