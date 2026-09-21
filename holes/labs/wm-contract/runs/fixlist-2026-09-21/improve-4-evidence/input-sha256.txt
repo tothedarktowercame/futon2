@@ -30,3 +30,5 @@ e5e0ab0ac9609c96a7006d0bff4ea1fd3f5915e45a2a6107ec595f2fbb62e58b  /home/joe/code
 7591fa968efce642a78ae2f600d9a79711df41f2761d791b1c0700a098e813cd  /home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean
 090c026115afd352cfd59cd00cf77a63953238adcfb6a59df3d19fe76a66ab47  holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/subjects.ednlog.gz
 b953a669104c2db9b8a8f96528341516b008d827a41882c347d14faeda573831  holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/registry-today.json.gz
+0ff1cc31e673b3184de390b0636aa79085147b8405d6b107bae0c14879e7f8cb  scripts/wire_register.bb
+4315a5262887a1161e13d7070e4502d7e68260ab2c6a0d77313260d6bbef3820  /home/joe/code/futon3c/src/futon3c/peripheral/tools.clj

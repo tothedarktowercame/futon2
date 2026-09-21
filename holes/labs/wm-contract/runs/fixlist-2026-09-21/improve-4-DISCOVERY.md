@@ -54,7 +54,7 @@ content, rather than attributing every sentence of the agent-written notes to Jo
 | “C has to do with outcomes” (N:34–36) | C-soft, **live**: token-set outcome preferences in `cascade_model_manifest.clj:678–706`, `efe.clj:1152`; Lean `PolicyHorizon.lean:49–63` computes risk over observations. Does not decide what a completion token attests. |
 | “my preference is also about how the outcome is pursued” / “Ostrom's institutional theory with its deontics” (N:45–48) | C-soft plus I-rule distinction, **doc only as a general institutional model**. Particular review gates exist (runner:3956), but no institutional route observation enters C. |
 | “not just 'harmony' either” / “design requirements / institutions” / “priority at some given moment” (N:49–52) | C-soft temporal/context preference; **partial**: terminal schedule exists, institutional/context priorities do not follow from it. `contextual_preferences.clj:1–3` explicitly describes fixture binding; not live Joe-derived institutional content. |
-| IRC reply “cannot not land on IRC” (N:53–55) | P-space **example**, not a request for a C penalty. Futon3c peripheral registry constructs distinct runners (`peripheral/registry.clj:1–10`); no claim here that this audit commissioned the IRC invariant. |
+| IRC reply “cannot not land on IRC” (N:53–55) | P-space **example**, not a request for a C penalty. Futon3c peripheral registry constructs distinct runners (`peripheral/registry.clj:1–10`); `peripheral/tools.clj:27–32,86–106` checks tool membership/scope before dispatch with typed denial. These checks implement a constrained envelope, not proof that every IRC path was commissioned here. |
 | institution “checks for duplication and denies such duplicated submissions” (N:55–56) | I-rule **example**, not evidence of a WM duplication policy. No such generic institution is passed to cascade C; a future guard must name duplicate identity and the refusal boundary. |
 | “prefer to focus on the WM topics” rather than interspersed infrastructure (N:57–58) | C-soft **doc only** as this explicit route criterion. Current wanted-token projection is not a measured interruption/focus observation. No ban on infrastructure inferred. |
 | “dispreference for a highly chaotic unfocused workstate” / “it is carried state” (N:59–64) | C-soft with history; **partial** live aliveness source, no attested focus/history monitor. A one-step stamp without carried state cannot measure this. |
@@ -72,6 +72,16 @@ content, rather than attributing every sentence of the agent-written notes to Jo
 | “all design principles … use them all and see if they work” / “not sure ratings can or should be used” (P:138–143) | Design/I-rule arrangements; **doc only as eleven-item profile**. P:145–153 supersedes P:80–104's proposed scoring. No IAD score, uniform weighting, or scalar readiness inferred. |
 | reviewer “reruns the tests — strictly a waste” (R:3–6, recorded observation); “VERIFIES THE RECORD” (R:15, specification prose) | I-rule monitoring, **live registry**: `test_registry.clj:776–875` record checking; `915–954` separate review/adequacy/sample. Not called from WM token observation. |
 | scope “wherever tests and handoffs are run” (R:78); environment “toolchain, JVM, dependency hashes” (R:79–80); “spot-check one test per review by default” (R:81–84) | I-rule **implemented registry facilities**: fingerprint:222–300, review!:915–954; R9 author check:923. Later futon2 `AGENTS.md:33–55` says check before run, refusal means run; do not read the earlier sampling prose as permission to rerun all suites. |
+
+One additional direct statement found at the implementation boundary:
+`script` source `scripts/wire_register.bb:4–7` quotes Joe (09-19): “certify
+only needed behaviour, required for running the machine” and asks for a
+“clear list of the areas that are being tested and warranted”. This is an
+I-rule evidence/coverage requirement. That read-only script joins declared
+wire subjects to `test-registry-validation/subjects.ednlog`; it is a real
+inventory consumer, not a mission-want observer. `test_registry/validation.clj:81–102`
+implements append-only subject binding; :214–235 can bind a successful new run.
+The index's strings need a separate semantic contract before they discharge wants.
 
 The eleven IAD entries are a design checklist, not eleven soft preferences to
 sum. The requested plan transcribes/adapts Table 2; the original paper's Table 2
@@ -356,3 +366,15 @@ of the surveyed warrants, commissioned institutions, or an implemented C change.
 Fresh checks: **2 tests / 7 assertions, zero failures/errors**; clj-kondo zero
 errors/warnings; check-parens OK. Explicit dated list count and separate dated
 count endpoint both returned 218. No existing production suite was rerun.
+
+Registered discovery warrant: `test-registry-0d6acecd57a7e07e8c96bf58192b89f05aa4c668a38972311d968e24f81ce207` on `35290f4f`;
+`:warrant? true`, 2 tests / 7 assertions, zero failures/errors, exit 0.
+The initial check returned `:missing-entry`; registration then ran the pinned
+snapshot census. The full registration and content-addressed log/closure are
+retained. This does not revalidate the 102 surveyed warrants.
+
+```sh
+# Separate CLI process in /home/joe/code/futon3c
+clojure -M -m futon3c.test-registry check /home/joe/code/futon2-narrative-improve-4/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/registry.edn
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-improve-4/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-4-evidence/registry.edn
+```
