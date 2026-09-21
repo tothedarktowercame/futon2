@@ -13,6 +13,13 @@
       carrying a :construction-receipt and :interpretation-receipts (non-empty
       whenever the candidate's precedence is non-empty).
 
+      EMPTY CASCADES TAKE NO ACTION MASS. A candidate with no precedence has
+      no first acting pattern; pooling those under a shared nil key let their
+      COUNT decide a tick (2026-09-21-1789951020). They are excluded from the
+      recomputed marginal, a chosen action that is itself an empty cascade is
+      refused :chosen-action-is-not-an-action, and an all-empty roster is
+      refused :no-acting-candidate.
+
    2. A typed abstention {:status :abstained :refusals […] } with a NON-EMPTY
       list of per-target refusals, each {:target … :kind k …} with k one of
       :universe-not-admitted :no-admitted-interpretation :want-not-declared
@@ -111,17 +118,34 @@
         (refuse! :posterior-not-normalised {:total total})))
     (when-not (contains? posterior (:action decision))
       (refuse! :chosen-action-not-a-candidate {:action (:action decision)}))
-    (let [marginals (reduce (fn [m [c p]] (update m (first-acting-pattern c) (fnil + 0.0) p))
-                            {} posterior)
-          chosen-pattern (first-acting-pattern (:action decision))
-          best (apply max (vals marginals))]
-      ;; the enacted step is the Bayes action: no first acting pattern may
-      ;; carry more marginal mass than the chosen one (ties are the selector's
-      ;; declared tie-break, so equality is admitted)
-      (when (> (- best (get marginals chosen-pattern 0.0)) mass-tolerance)
-        (refuse! :chosen-not-bayes-action
-                 {:chosen chosen-pattern :chosen-marginal (get marginals chosen-pattern)
-                  :best-marginal best})))
+    ;; An EMPTY cascade has no first acting pattern, so its key here is nil.
+    ;; Summing those together pools every structurally distinct do-nothing
+    ;; into one key whose mass grows with the roster and cannot lose --
+    ;; 21 of them carried 0.785275 against 0.179031 for the best acting key in
+    ;; run 2026-09-21-1789951020. Absence is not an action and takes no action
+    ;; mass. This mirrors policy.clj's rule and is deliberately NOT shared code:
+    ;; this gate recomputes independently, and `gate-and-selector-agree-on-what-
+    ;; counts-as-an-action` in the tests is what stops the two drifting apart.
+    (let [acting (into {} (filter (fn [[c _]] (some? (first-acting-pattern c)))) posterior)
+          marginals (reduce (fn [m [c p]] (update m (first-acting-pattern c) (fnil + 0.0) p))
+                            {} acting)
+          chosen-pattern (first-acting-pattern (:action decision))]
+      (when (nil? chosen-pattern)
+        (refuse! :chosen-action-is-not-an-action
+                 {:action (:action decision)
+                  :reason :empty-cascade-has-no-first-acting-pattern}))
+      (when (empty? marginals)
+        (refuse! :no-acting-candidate
+                 {:candidates (count posterior)
+                  :reason :every-candidate-is-an-empty-cascade}))
+      (let [best (apply max (vals marginals))]
+        ;; the enacted step is the Bayes action: no first acting pattern may
+        ;; carry more marginal mass than the chosen one (ties are the selector's
+        ;; declared tie-break, so equality is admitted)
+        (when (> (- best (get marginals chosen-pattern 0.0)) mass-tolerance)
+          (refuse! :chosen-not-bayes-action
+                   {:chosen chosen-pattern :chosen-marginal (get marginals chosen-pattern)
+                    :best-marginal best}))))
     (let [chosen (:action decision)
           chosen-mass (:chosen-action-mass decision)
           marginal (marginal-mass posterior (first-acting-pattern chosen))]

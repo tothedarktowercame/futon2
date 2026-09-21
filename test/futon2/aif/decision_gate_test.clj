@@ -169,3 +169,56 @@
                            (-> posterior (dissoc c) (assoc {:type :advance-ticket :target "T-42"} p)))]
       (is (= :posterior-over-non-cascade
              (refusal-of #(gate/emit! forged)))))))
+
+;; --- empty cascades take no action mass (2026-09-21) -----------------------
+
+(deftest gate-and-selector-agree-on-what-counts-as-an-action
+  ;; The gate recomputes the marginal INDEPENDENTLY and shares no code with
+  ;; the selector -- deliberately, since not trusting the selector's outputs is
+  ;; the whole point of the gate. That independence is also how the two drifted:
+  ;; excluding empty cascades in policy.clj alone made the gate refuse a
+  ;; correct decision with :chosen-not-bayes-action (chosen-marginal 0.17286
+  ;; vs best 0.79267, caught pre-click on 2026-09-21). This pins that the two
+  ;; private rules still classify the same things as actions.
+  (let [selector-rule @#'policy/cascade-first-action
+        gate-rule @#'gate/first-acting-pattern
+        cases [(cascade-action :empty [])
+               (cascade-action :one [:pattern-sov])
+               (cascade-action :many [:pattern-ph :pattern-test])
+               {:kind :no-op :type :abstain/stand-down}]]
+    (doseq [a cases]
+      (is (= (selector-rule a) (gate-rule a))
+          (str "selector and gate must agree on the first acting action of " (pr-str a))))
+    (is (nil? (selector-rule (cascade-action :empty [])))
+        "an empty cascade has no acting action, under both rules")
+    (is (some? (selector-rule {:kind :no-op :type :abstain/stand-down}))
+        "a TYPED no-op does have one, so it keeps its own key")))
+
+(deftest gate-refuses-a-chosen-empty-cascade
+  ;; The exact bad case: a decision naming an empty cascade as its action.
+  ;; Before this rule the gate admitted it, because nil was just another key.
+  (let [decision (tick1-decision)
+        empty-action (cascade-action :C0-empty [])
+        posterior (get-in decision [:selection-law :posterior])
+        forged (-> decision
+                   (assoc :action empty-action)
+                   (assoc :chosen-action nil)
+                   (assoc :chosen-action-mass (get posterior empty-action)))]
+    (is (= :chosen-action-is-not-an-action
+           (refusal-of #(gate/emit! forged)))
+        "an empty cascade cannot be the enacted step")))
+
+(deftest gate-excludes-empty-cascades-from-the-marginal
+  ;; The pooled-nil inversion, at the gate: with the empty candidate's mass
+  ;; excluded, the acting candidate the selector chose must still be the Bayes
+  ;; action rather than losing to a nil key.
+  (let [decision (tick1-decision)
+        posterior (get-in decision [:selection-law :posterior])
+        empty-mass (->> posterior
+                        (filter (fn [[a _]] (empty? (:precedence a))))
+                        (map val)
+                        (reduce + 0.0))]
+    (is (pos? empty-mass) "the fixture really does contain a scoring empty cascade")
+    (is (some? (:chosen-action decision)) "the selector chose an acting cascade")
+    (is (= decision (gate/emit! decision))
+        "and the gate admits it rather than preferring the excluded nil mass")))
