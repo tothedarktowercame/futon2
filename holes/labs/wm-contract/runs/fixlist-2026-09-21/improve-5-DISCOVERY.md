@@ -256,13 +256,29 @@ not sufficient evidence that it changes even the legacy channel choice.
 
 ## 4. Concrete decision and slices
 
-Joe's strength question: **holding route, habit, cost and predicted delivery
-rate equal, should .0372703 nats more expected parameter learning justify
-.00113689 nats worse pragmatic score?** That is the A/F control above: yes at
-κ=1; no below κ≈.03050. More generally, name a tolerated expected loss of a
-specified warranted result for that amount of learning. The pragmatic weights
-must represent Joe's results/process preferences first (improve-2 Q3); changing
-β scales G relative to habit/F and is not a substitute for κ's relative scale.
+Joe's strength question is **per declared focus**: while War Machine is the
+focus, how much is learning about a WM pattern's delivery reliability worth
+against delivering a specified warranted WM increment, holding route, habit
+and cost equal? Name the increment and the tolerated loss in its delivery
+probability for a stated gain in parameter information. Do not infer one global
+learning/pragmatic strength from this answer.
+
+The numerical A/F control above offers a scale illustration: .0372703 nats
+more learning offsets .00113689 nats worse pragmatic score at κ=1, but not below
+κ≈.03050. Those numbers use the frozen near-uniform C; they are **not** a
+calibration of WM-focused C. Recompute the comparison using the declared
+focus-conditioned C before asking Joe to set its strength. The pragmatic
+weights must represent his results/process preferences first (improve-2 Q3);
+changing β scales G relative to habit/F and does not set κ's relative scale.
+
+Source: `holes/labs/wm-contract/ANSWERS-C-questions-2026-09-21.md`, final section,
+“Relayed by claude-5”: near-uniform C may be a no-focus DEFAULT-MODE baseline;
+under focus, “I have a focus. I have a preference.” Improve-7 supplies the
+focus-conditioned family C(focus,τ); focus and within-horizon τ are distinct
+indices. Record the declared focus and its validity interval (or explicit
+no-focus status), without inferring focus from habit. Necessary Agency work
+can serve a WM focus; an off-focus label alone does not establish irrelevance.
+
 Also decide whether this is extra learning preference on predictive risk or
 a joint state/parameter EFE with conditional ambiguity. The model designers
 must supply the observation/joint-effect contract; it is not Joe's job to invent
@@ -272,7 +288,9 @@ missing endpoint likelihoods.
    revision, family (target/cascade/effect/route), observation contract/version,
    τ=T, trial grain, units=nats, eligible endpoints, joint/factorization witness,
    expected KL, and typed absence reasons. Keep illustrative and learned priors
-   distinct. Record shadow κ and separated pragmatic/ambiguity/novelty terms;
+   distinct. Bind the focus declaration/version (or explicit no-focus status),
+   the focus-conditioned C reference and the scope of shadow κ; record separated
+   pragmatic/ambiguity/novelty terms;
    selection bytes unchanged. No retroactive learning from bare outcome labels.
    Tests: Beta identities above; same mean/different concentration; known-noise
    control; one attempt counted once across T=2; no double count of duplicate
@@ -282,8 +300,8 @@ missing endpoint likelihoods.
 2. **Declared switch, default off:** connect a declared parameterized attempt B
    and observation likelihood, consume only validated improve-1b trials; decide
    the entropy accounting explicitly. Enter `−κI` only with all model bindings
-   satisfied. Receipt records switch, κ, decomposition and counterfactual κ=0
-   choice. Extend fix-7 to isolate novelty removal from risk/ambiguity removal;
+   satisfied. Receipt records switch, focus-scoped κ, focus-conditioned C,
+   decomposition and counterfactual κ=0 choice within the same focus. Extend fix-7 to isolate novelty removal from risk/ambiguity removal;
    otherwise it can only say `:G`. Test the equal-mean concentration action flip
    plus unchanged decisions with switch off. A malformed model gives typed
    refusal/absence under the declared contract, never a heuristic replacement.
