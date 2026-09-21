@@ -167,6 +167,38 @@
            (apply str (map #(cite (:phase-path b) [:form (:form %) :duration-ms]) rows)))
       "\nNot recorded in this run: matching phase duration.\n")))
 
+(defn- coverage-source [b k]
+  (if (contains? (:record b) k)
+    [(get-in b [:record k]) (:record-path b) [k]]
+    [(get-in b [:trace k]) (:trace-path b) [:form (:trace-form b) k]]))
+
+(defn- coverage-text [b]
+  (let [[live] (coverage-source b :live-c-coverage)
+        [holes] (coverage-source b :mission-hole-coverage)
+        source (:source-tokens live) outcomes (:projected-outcome-tokens live)]
+    (str (if (and (= :source-token (:unit source))
+                  (= :target-qualified-outcome-token (:unit outcomes))
+                  (every? number? [(:reached source) (:total source) (:count outcomes)]))
+           (str "C reached " (:reached source) " of " (:total source)
+                " source tokens, with " (:count outcomes) " projected outcome tokens")
+           (str "not recorded in this run: live C coverage"
+                (when live (str " (" (shown (or (:reason live) :counts-or-units-unavailable)) ")"))))
+         "; "
+         (if (every? number? [(:holes-retained holes) (:holes-projected holes)])
+           (str "mission-hole census retained " (:holes-retained holes) " holes and projected " (:holes-projected holes))
+           "not recorded in this run: mission-hole coverage") ".\n")))
+
+(defn- scan-account [b]
+  (let [ref (get-in b [:record :scan-report])
+        content (retained-text b ref)]
+    (if content
+      (str "\n[Retained scan account](<" (:path ref) ">), SHA-256 `" (:sha256 ref) "`. "
+           "This is the saved perceive-stage account, not a fresh scan.\n"
+           (cite (:record-path b) [:scan-report]))
+      (str "\nNot recorded in this run: scan account"
+           (when ref (str " (" (shown (or (:reason ref) :retained-file-unavailable)) ")")) ".\n"
+           (cite (:record-path b) [:scan-report])))))
+
 (defn- selection-text [b]
   (let [d (decision b) rows (candidate-rows b)
         winner (or (:selected-action (judgment b :selection)) (:action d)
@@ -194,10 +226,11 @@
            (str "The computed full G spread is " (- (apply max gs) (apply min gs)) " nats. ")
              "Not recorded in this run: comparable G values. ")
          (if policy (str "The policy comparison records decided-by " (shown (:decided-by policy))
-                         ", near-tie " (shown (:near-tie? policy)) ", threshold " (shown (:near-tie-threshold policy)) ". ")
-             "Not recorded in this run: policy comparison and near-tie threshold; no near-tie verdict is inferred. ")
+                         ", near-tie " (shown (:near-tie? policy)) ", threshold " (shown (:near-tie-threshold policy)) "; ")
+             "Not recorded in this run: policy comparison and near-tie threshold; no near-tie verdict is inferred; ")
          (if action (str "The action comparison records decided-by " (shown (:decided-by action)) ".\n")
              "Not recorded in this run: action comparison.\n")
+         (coverage-text b)
          "\n| Target | Cascade | G (nats) | Posterior | Habit | F consumed |\n|---|---|---:|---:|---:|---:|\n"
          (apply str (for [r rows] (str "| " (str/join " | " (map #(shown (get r %)) [:target :cascade-id :G :posterior :habit :F])) " |\n")))
          "\n[Selection plot placeholder — slice 14b.]\n"
@@ -257,8 +290,11 @@
               (for [stage checkpoint-order
                     :let [{:keys [path judgment]} (get-in b [:checkpoints stage])]]
                 (str "## " (name stage) "\n\n"
-                     (if judgment (body b stage)
-                         "Not recorded in this run: checkpoint. The remaining evidence does not establish this stage's outcome.\n")
+                     (if (or judgment (and (= stage :selection) (seq (decision b))))
+                       (body b stage)
+                       (str "Not recorded in this run: checkpoint. The remaining evidence does not establish this stage's outcome.\n"
+                            (when (= stage :selection) (coverage-text b))))
+                     (when (= stage :time-step) (scan-account b))
                      "\nCited facts:\n"
                      (cite (or path (:record-path b)) (if path [:payload :judgment] [:cohort-attempt]))
                      (when (= stage :time-step) (cite (:record-path b) [:startedAt]))
@@ -267,6 +303,9 @@
                          (str (cite p (conj k :selection-certificate :candidates))
                             (cite p (conj k :selection-law))
                             (cite (:trace-path b) [:form (:trace-form b) :cascade-problems])
+                            (apply str (for [key [:live-c-coverage :mission-hole-coverage]
+                                             :let [[_ path keys] (coverage-source b key)]]
+                                         (cite path keys)))
                             "\nDocstring correspondence, not runtime Lean execution: `src/futon2/aif/cascade_selection.clj` namespace docstring cites `PolicySelection.lean` at `a434947c63`, `selectionPosterior`.\n")))
                      (timing b stage) "\n")))))
 
@@ -276,6 +315,8 @@
   (let [bundle (load-run root run-id)
         paths (concat [(:record-path bundle) (:trace-path bundle) (:phase-path bundle) (:binding-path bundle)]
                       (keep :path (vals (:checkpoints bundle)))
+                      (when-let [p (get-in bundle [:record :scan-report :path])]
+                        [(if (.isAbsolute (io/file p)) p (str (io/file root p)))])
                       (for [job (jobs bundle) kind [:prompt :reply]
                             :let [p (get-in job [kind :path])] :when p]
                         (if (.isAbsolute (io/file p)) p (str (io/file root p)))))
