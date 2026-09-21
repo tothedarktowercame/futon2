@@ -93,7 +93,9 @@
         facet-rows (filterv #(and (= target (:target %))
                                   (contains? (:facet-map d) (:class %)))
                             (:candidates focus-receipt))
-        _ (when (> (count facet-rows) 1) (refuse! :ambiguous-facet-rows))
+        ;; Several candidates can share the attested target (one per cascade
+        ;; action); that is one relation. Only disagreeing classes are ambiguous.
+        _ (when (> (count (distinct (map :class facet-rows))) 1) (refuse! :ambiguous-facet-rows))
         facet (:class (first facet-rows))
         class (cond
                 (seq missing-close) :unknown

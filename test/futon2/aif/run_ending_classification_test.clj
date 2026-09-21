@@ -99,27 +99,37 @@
     (is (not (kernel/verify-close (assoc-in event [:payload :judgment :grounded?] false) receipt)))
     (is (kernel/verify-close (assoc-in event [:payload :judgment :duration-ms] 999) receipt))))
 
-(deftest frozen-decision-is-byte-identical
-  (let [d {:selection-certificate {:candidates [{:id :C1 :G 1.25}]
-                                  :g-components {:risk 1.0 :ambiguity 0.25}}
-           :g-term-decomposition {:C1 {:risk 1.0 :ambiguity 0.25}}
-           :selection-law {:posterior {:C1 0.75 :C2 0.25}}}
-        receipt (result base-close :focus (focus :focus))
-        attached (assoc d :run-ending-classification receipt)]
-    (is (= d (dissoc attached :run-ending-classification)))
-    (is (= (pr-str (:selection-certificate d)) (pr-str (:selection-certificate attached))))
-    (is (= (pr-str (:selection-law d)) (pr-str (:selection-law attached))))
-    (is (= (pr-str (:g-term-decomposition d)) (pr-str (:g-term-decomposition attached))))
-    (is (= (pr-str (get-in d [:selection-law :posterior]))
-           (pr-str (get-in attached [:selection-law :posterior]))))))
+;; No byte-identity test here: the kernel runs at close, after the selection
+;; checkpoint is written, and reads nothing selection consumes. A test that
+;; assoc/dissoc'd a synthetic map could not fail, so it was removed (claude-3).
+
+(deftest same-class-rows-for-one-target-are-one-relation
+  (let [r (result base-close :focus (assoc (focus :focus) :candidates
+                                           [{:target target :class :focus}
+                                            {:target target :class :focus}]))]
+    (is (= :recorded (:status r)))
+    (is (= :focus-increment (:class r)))))
+
+(def discovery-known-failures
+  {"wm-full-loop-machinery-55/wm-contract-machinery-55-v1/attempt-003/007-closed.edn" :evidence-not-single-edn
+   "wm-full-loop/wm-outer-loop-43-v1/attempt-053/007-closed.edn" :operator-terminated})
 
 (deftest discovery-cohort-replay
+  ;; The data root grows with every click, so pin the discovery's claims
+  ;; rather than its total: every close written before this kernel existed
+  ;; (no :run-ending-classification in its judgment) is :unknown or a typed
+  ;; failure, never an increment; and the two named records are the typed
+  ;; failures. 124 was the count at 6d59236f.
   (let [root (io/file "/home/joe/code/futon2/data")
+        prefix (str (.getPath root) "/")
         files (filter #(and (.isFile %) (= "007-closed.edn" (.getName %))) (file-seq root))
-        results (for [file files :let [close (edn/read-string (slurp file))]]
-                  (kernel/classify {:close close}))]
-    (is (= 124 (count results)))
-    (is (= {:unknown 122 :known-typed-failure 2}
-           (frequencies (map :class results))))
-    (is (= #{:operator-terminated :evidence-not-single-edn}
-           (set (keep :failure-kind results))))))
+        legacy (for [file files
+                     :let [close (edn/read-string (slurp file))]
+                     :when (not (contains? (get-in close [:payload :judgment])
+                                           :run-ending-classification))]
+                 [(subs (.getPath file) (count prefix)) (kernel/classify {:close close})])
+        known (into {} (for [[path r] legacy :when (= :known-typed-failure (:class r))]
+                         [path (:failure-kind r)]))]
+    (is (<= 124 (count legacy)))
+    (is (every? #{:unknown :known-typed-failure} (map (comp :class second) legacy)))
+    (is (= discovery-known-failures known))))
