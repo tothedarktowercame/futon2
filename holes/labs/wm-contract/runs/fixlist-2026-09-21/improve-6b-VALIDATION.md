@@ -156,3 +156,15 @@ expected: (= :committed (get-in result [:learning-event-candidates 0 :grade]))
 
 Another failing assertion pins the missing unknown-ID flag. Logs are retained
 in `improve-6b/`; no production gate or invariant was bypassed.
+
+Final-source warrant (after adding repository pins and receipt fingerprints):
+`test-registry-4f93f46a4431e9271c67018dda9b6b76f64c8010d4e64a029b15e530db7a87db`.
+Registry run: 2 tests / 13 assertions, 0 failures/errors, exit 0, 737 ms test
+duration; matched postcheck. Fresh `check` returned `:warrant? true`.
+Configs, run and check receipts are committed in `improve-6b/`.
+
+```sh
+# From /home/joe/code/futon3c, own CLI process:
+clojure -M -m futon3c.test-registry run /tmp/improve-6b-registry.edn
+clojure -M -m futon3c.test-registry check /tmp/improve-6b-registry-check.edn
+```
