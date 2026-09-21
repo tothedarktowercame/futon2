@@ -69,3 +69,30 @@ IDs, and checks are recorded in the JSON/EDN receipts beside this file.
 No live tick, shared-JVM load, or actuation was performed.
 COMMITTED IS NOT LOADED. The serving JVM needs the authorized canonical reload
 before a validation click exercises this repair.
+
+## Completed landing
+
+Implementation: 707e680f8ef28dbdc40d4f4741a3ec14d75fb9e3.
+Precommit and canonical postcommit results agree:
+
+| Namespace | Tests | Assertions | Failures | Errors |
+|---|---:|---:|---:|---:|
+| full-loop-cohort | 29 | 168 | 0 | 0 |
+| history-admission | 3 | 31 | 0 | 0 |
+| full-loop-runner | 180 | 998 | 0 | 0 |
+
+All three warrants were registered on the canonical checkout and checked valid
+there (warrant-checks.json); no worktree substitution was needed.
+Actual postcommit demonstration run records are retained as
+poison-proceeds-run-record.edn and identity-refuses-run-record.edn, with source
+paths and hashes in demonstration-records.json. These are scratch-history
+runs with isolated repair stores, not live validation clicks.
+
+The serving runner-service passes the configured binding directly to
+run-opportunity! (futon3c/src/futon3c/wm/runner_service.clj:416), preserving its
+metadata; the runner explicitly persists those diagnostics as ordinary data.
+The authoritative binding validator remains unchanged.
+
+- cohort: test-registry-529ccec1880cac350ec8bc4b564359c2420a47c36e6f21921c46a93e22dbdce5
+- history: test-registry-59bb44df879126ea8b9fbff32bd52a4805d6bb56250ff3ba3a93e9297bec1e53
+- runner: test-registry-94ab086fee8712c465c2c7eb559383625354be5a70b09768fb936a4ddb74933a

@@ -1,0 +1,12 @@
+{
+  "poison-proceeds": {
+    "source": "/tmp/full-loop-cohort-test12966816879911344407/tick-run-record-2026-09-21-afc34396-bc65-4a01-9560-c6530513372f.edn",
+    "retained": "poison-proceeds-run-record.edn",
+    "sha256": "a36464d5d174d2c6bfaf701a69c06943916c587312602ee110494a27ce88ad24"
+  },
+  "identity-refuses": {
+    "source": "/tmp/full-loop-cohort-test13836138549207019013/tick-run-record-2026-09-21-285ea0d3-8668-4827-9aa3-6abb6e0739c7.edn",
+    "retained": "identity-refuses-run-record.edn",
+    "sha256": "ab75fc1ebb9c0a181918448bb76fa118904c14de37637084f511950359d574ac"
+  }
+}

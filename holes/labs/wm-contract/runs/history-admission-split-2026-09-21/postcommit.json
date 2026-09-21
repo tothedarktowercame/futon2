@@ -1,0 +1,74 @@
+{
+  "role": "post-commit-warrant",
+  "requesting-owner": "claude-12",
+  "author": "codex-8",
+  "repo-root": "/home/joe/code/futon2",
+  "independent-review": "pending Agency job",
+  "quarantine-sha256": "9085b8ce5048b4c9a6d66e7d15f7e9c8d291cb91736ce546f7e881df76b80a2d",
+  "sha256": {
+    "src/futon2/aif/full_loop_cohort.clj": "4b92aab146584c81dd878a450b8e081aef9d7b3b1976d0f3d2b6aa234e07b80e",
+    "src/futon2/aif/full_loop_runner.clj": "14891f707d86b70e6a122403aa8a7707e8a46cc9944018f4e01db051bacf2ce9",
+    "test/futon2/aif/full_loop_cohort_test.clj": "34914c454b6c7104b55f9d882fbcbc84efc584775f5c52a930ba0bf3288f6572",
+    "test/futon2/aif/history_admission_test.clj": "2e9a17fcd13fbd8502ef781cfc5869febd8132615ccbcb10d7da1206648b5862"
+  },
+  "warrants": [
+    {
+      "scope": "cohort",
+      "entry-id": "test-registry-529ccec1880cac350ec8bc4b564359c2420a47c36e6f21921c46a93e22dbdce5",
+      "run-id": "049fa50b-6295-4b96-839a-6c4ecd83aa01",
+      "warrant?": true,
+      "code-sha": "f9d2e9f5a59d1a46e35746b850afdcd8f27a5e52fe7be7191ca7abd9b429f3d9",
+      "test-sha": "51eba6438f0731cfabcbfbc49aeb37ef3d465d7f92e6b23ff3e7e7014f470fc2",
+      "postcheck": {
+        "status": "matched"
+      },
+      "results": {
+        "assertions": 168,
+        "duration-ms": 1495,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 29
+      }
+    },
+    {
+      "scope": "history",
+      "entry-id": "test-registry-59bb44df879126ea8b9fbff32bd52a4805d6bb56250ff3ba3a93e9297bec1e53",
+      "run-id": "98d61944-5d9b-4f90-808d-a66b0c5140e8",
+      "warrant?": true,
+      "code-sha": "f9d2e9f5a59d1a46e35746b850afdcd8f27a5e52fe7be7191ca7abd9b429f3d9",
+      "test-sha": "789c02354376e21be40c94a3cdd500e1f5bfd33d9a075ef12080c6c57f71e92e",
+      "postcheck": {
+        "status": "matched"
+      },
+      "results": {
+        "assertions": 31,
+        "duration-ms": 15906,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 3
+      }
+    },
+    {
+      "scope": "runner",
+      "entry-id": "test-registry-94ab086fee8712c465c2c7eb559383625354be5a70b09768fb936a4ddb74933a",
+      "run-id": "95d24380-1e8e-47df-be51-b7b44bf0fb67",
+      "warrant?": true,
+      "code-sha": "f9d2e9f5a59d1a46e35746b850afdcd8f27a5e52fe7be7191ca7abd9b429f3d9",
+      "test-sha": "5b18d17c55d41ffa8caa8d282b936dad195dbf862479c6fca70716f03f172dec",
+      "postcheck": {
+        "status": "matched"
+      },
+      "results": {
+        "assertions": 998,
+        "duration-ms": 182371,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 180
+      }
+    }
+  ],
+  "implementation-commit": "707e680f8ef28dbdc40d4f4741a3ec14d75fb9e3"
+}
