@@ -10,6 +10,7 @@
 (def required-sources
   "Explicit decision/close scope; absent registrations are never current."
   {'futon2.aif.learning-trial "/home/joe/code/futon2/src/futon2/aif/learning_trial.clj"
+   'futon2.aif.route-attestation "/home/joe/code/futon2/src/futon2/aif/route_attestation.clj"
    'futon2.aif.cascade-selection "/home/joe/code/futon2/src/futon2/aif/cascade_selection.clj"
    'futon2.aif.cascade-model-manifest "/home/joe/code/futon2/src/futon2/aif/cascade_model_manifest.clj"
    'futon2.aif.policy "/home/joe/code/futon2/src/futon2/aif/policy.clj"

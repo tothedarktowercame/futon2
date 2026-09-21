@@ -445,3 +445,22 @@
                                                   :shadow {:if-counted-rollout {:theta 9/11}}}]}}}}})]
     (is (str/includes? text "held (observation-placement-not-declared)"))
     (is (str/includes? text "shadow theta would be 9/11 under the illustrative prior"))))
+
+(deftest closed-route-and-attestation-is-explicit-even-without-declarations
+  (fixture
+   (fn [{:keys [root run]}]
+     (is (str/includes? (narrative/narrative-text (narrative/load-run root run))
+                        "Route and attestation: none declared")))))
+
+(deftest closed-route-account-paragraph
+  (fixture
+   (fn [{:keys [root run attempt-dir]}]
+     (let [path (io/file attempt-dir "007-closed.edn")
+           record (edn/read-string (slurp path))
+           b {:criterion {:id :increment} :valence :must :status :matched :applicability {:status :active}}
+           r {:status :declared :bindings [b] :increments [b]}]
+       (write-record path (assoc-in record [:payload :judgment :route-attestation] r))
+       (let [text (narrative/narrative-text (narrative/load-run root run))]
+         (is (str/includes? text "MUST stamps met :increment; missing none; MAY stamps none"))
+         (is (str/includes? text "attested increments :increment"))
+         (is (str/includes? text "not independently verified")))))))
