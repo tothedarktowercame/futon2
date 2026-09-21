@@ -133,6 +133,7 @@
     (is (.contains text "nats"))))
 
 (deftest theta-latent-accounting-on-frozen-menus
+  (let [kappa-controls (atom 0)]
   ;; Independently enumerate the marginal outcomes for the frozen small menus;
   ;; production uses the equivalent additive-log-C formula without a powerset.
   (doseq [run ["1789964661" "1789952479"]
@@ -159,13 +160,26 @@
                             (* (/ b (+ a b)) (double (frozen/harmonic b)))))]
       (is (not (contains? r :shadow-kappa)))
       (is (= :checked (get-in terms [:identity :status])))
+      ;; Negative control (claude-5): the kappa-bonus form -- identity-A
+      ;; predictive risk, no conditional ambiguity, minus kappa*I -- must fail
+      ;; the same check for every kappa > 0, so the check catches double counting.
+      (let [info (get-in r [:expected-kl :nats])
+            rhs (- cost info)]
+        ;; With no eligible endpoint I = 0 and the two forms coincide.
+        (when (pos? info)
+          (swap! kappa-controls inc)
+          (doseq [kappa [0.5 1.0 2.0]]
+            (is (= :failed (:status (novelty/identity-check (- risk (* kappa info)) rhs)))
+                (str "kappa " kappa))))
+        (is (= :checked (:status (novelty/identity-check (+ risk conditional) rhs)))))
       (is (frozen/close? cost (:pragmatic-cost terms)))
       (is (frozen/close? risk (:risk-marginal terms)))
       (is (frozen/close? conditional (:ambiguity-conditional terms)))
       (is (frozen/close? (- cost (get-in r [:expected-kl :nats])) (:efe terms)))
       (is (= 2 (:tau terms)))
       (is (= 1 (:multiplicity terms)))
-      (is (= (:controller-score e) (get-in r [:terms :serving-G]))))))
+      (is (= (:controller-score e) (get-in r [:terms :serving-G])))))
+    (is (pos? @kappa-controls) "the kappa control must run on some case with I > 0")))
 
 (deftest known-noise-cancels-and-excluded-support-is-held
   (let [x (assoc-in inputs [:models action :prior] {:kind :known-parameter :theta 0.5})

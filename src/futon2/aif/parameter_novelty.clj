@@ -91,6 +91,16 @@
     (let [n (+ alpha beta) p (/ (double alpha) n) q (/ (double beta) n)]
       (- (digamma (inc n)) (* p (digamma (inc alpha))) (* q (digamma (inc beta)))))))
 
+(defn identity-check
+  "Does LHS (an EFE's risk + ambiguity) equal RHS (pragmatic cost minus
+   parameter information gain)? Holds for the theta-latent EFE; a kappa-bonus
+   EFE (identity-A risk minus kappa*I) fails it for every kappa > 0."
+  [lhs rhs]
+  (let [residual (- lhs rhs) tolerance (* 1e-10 (max 1.0 (abs lhs) (abs rhs)))]
+    {:formula :risk-plus-conditional-ambiguity-equals-cost-minus-information
+     :lhs lhs :rhs rhs :residual residual :tolerance tolerance
+     :status (if (<= (abs residual) tolerance) :checked :failed)}))
+
 (defn theta-latent-terms
   "Terminal endpoint EFE, with theta marginalized in risk and conditioned in
    ambiguity. The supported model has fixed background state and independently
@@ -123,8 +133,7 @@
                 predictive-h (reduce + 0.0 (map binary-entropy (vals probabilities)))
                 ambiguity (reduce + 0.0 (map (comp conditional-entropy :prior) endpoints))
                 risk (- cost predictive-h)
-                lhs (+ risk ambiguity) rhs (- cost (:nats information))
-                residual (- lhs rhs) tolerance (* 1e-10 (max 1.0 (abs lhs) (abs rhs)))]
+                lhs (+ risk ambiguity) rhs (- cost (:nats information))]
             (if-not (every? #(Double/isFinite (double %)) [cost predictive-h ambiguity risk lhs rhs])
               (absent :non-finite-accounting)
               {:status :computed :accounting :theta-latent-efe-v1 :scope :attempt-endpoint
@@ -135,9 +144,7 @@
                :predictive-entropy predictive-h :risk-marginal risk
                :ambiguity-conditional ambiguity :pragmatic-cost cost
                :information-gain (:nats information) :efe lhs
-               :identity {:formula :risk-plus-conditional-ambiguity-equals-cost-minus-information
-                          :lhs lhs :rhs rhs :residual residual :tolerance tolerance
-                          :status (if (<= (abs residual) tolerance) :checked :failed)}})))))))
+               :identity (identity-check lhs rhs)})))))))
 
 (defn policy-receipt
   "One policy, actual retained trajectory, and explicit prospective endpoint model.
