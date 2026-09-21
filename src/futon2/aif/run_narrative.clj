@@ -7,6 +7,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.cascade-plan :as plan]
+            [futon2.aif.cascade-structure :as structure]
             [futon2.aif.narrative-figures :as figures]))
 
 (load-identity/register! *ns* *file*)
@@ -406,7 +407,8 @@
      :cascade {:target target :patterns (:precedence c)
                :need-edges (or (:need-edges c) (:need-edges a))
                :wires (get-in c [:wiring :wires])
-               :shape (or (get-in c [:order-structure :shape]) (:shape c))
+               :shape (or (get-in c [:cascade-structure :shape]) (get-in c [:order-structure :shape]) (:shape c))
+               :shape-caption (when (:cascade-structure c) (structure/description (:cascade-structure c)))
                :semilattice (:semilattice c)
                :prediction-source (if receipt "retained comparison receipt" "declared produces (reconstructed)")
                :outcomes (filter #(= target (first (:token %))) outcomes)}}))
@@ -474,8 +476,10 @@
                         (get-in c [:selected-action :retrieval]))) " for this selected cascade. "
              (if (and (= 1 (count patterns)) (= [] wires)) "Its observed structure is a singleton, with no wires. "
                  (str "There are " (if (some? wires) (count wires) "an unrecorded number of") " recorded wires; no stronger structure is inferred. "))
-             (if (= [] (:semilattice c)) "The semilattice field is not computed (literal []).\n\n"
-                 (str "The semilattice field records " (shown (:semilattice c)) "; this is not a proof of structure.\n\n"))
+             (if-let [receipt (:cascade-structure c)]
+               (str (structure/description receipt) ".\n\n")
+               (if (= [] (:semilattice c)) "The semilattice field is not computed (literal []).\n\n"
+                   (str "The semilattice field records " (shown (:semilattice c)) "; this is not a proof of structure.\n\n")))
              (figure-link b :cascade)
              (plan-quote b)))
       :dispatch (str "The runner dispatched agent " (shown (:agent j)) " as job " (shown (:job-id j)) ". "

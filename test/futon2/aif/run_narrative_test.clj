@@ -3,7 +3,9 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.run-narrative :as narrative]))
+            [futon2.aif.run-narrative :as narrative]
+            [futon2.aif.cascade-structure :as structure]
+            [futon2.aif.cascade-policy :as policy]))
 
 (deftest narrative-entrypoint-exists
   (let [renderer (try (requiring-resolve 'futon2.aif.run-narrative/render-run!)
@@ -413,3 +415,20 @@
        (let [refused (assoc-in b [:checkpoints :closed :judgment :token-outcome-comparison]
                               {:status :refused :prediction {:target "M-one"}})]
          (is (every? #(nil? (:predicted %)) (get-in (narrative/figure-data refused) [:cascade :outcomes]))))))))
+
+(deftest recorded-cascade-structure-labels-markdown-and-svg
+  (fixture
+   (fn [{:keys [root run output attempt-dir]}]
+     (let [a {:target "M-one" :kind :cascade-candidate :id :C1
+              :precedence [(policy/token-interpretation :p/one
+                            {:guard {:needs #{} :forbids #{}} :produces #{["M-one" :done]}})]}
+           receipt (structure/receipt a)
+           caption "shape: singleton (basis: declared need-support; authority structure not recorded)"
+           path (io/file attempt-dir "003-construction.edn")
+           checkpoint (edn/read-string (slurp path))]
+       (write-record path (assoc-in checkpoint [:payload :judgment :cascade]
+                                   {:selected-action a :cascade-structure receipt}))
+       (narrative/render-run! root run output)
+       (is (str/includes? (slurp output) caption))
+       (is (not (str/includes? (slurp output) "semilattice field is not computed")))
+       (is (str/includes? (slurp (str (subs output 0 (- (count output) 3)) ".cascade.svg")) caption))))))
