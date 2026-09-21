@@ -25,18 +25,7 @@
  {:change-authored-and-bound {:owner :community :owner-status :not-consumed}
   :premise-refused-before-work {:owner :community :owner-status :not-consumed}
   :obligation-resolved-through-the-account {:owner :community :owner-status :not-consumed}}
- :locators
- {:change-authored-and-bound
-  {:class :C6 :repo "futon5a" :sha "HEAD"
-   :path "holes/missions/evidence/M-expressions-of-interest/AUTHORED-CHANGE.edn"}
-  :premise-refused-before-work
-  {:class :C6 :repo "futon5a" :sha "HEAD"
-   :path "holes/missions/evidence/M-expressions-of-interest/PREMISE-REFUSAL.edn"
-   :require-entry true}
-  :obligation-resolved-through-the-account
-  {:class :C6 :repo "futon5a" :sha "HEAD"
-   :path "holes/missions/evidence/M-expressions-of-interest/CORRECTION-PAR.edn"
-   :require-entry true}}
+ :locators {}
  :patterns
  {:coordination/bounded-execution
   {:guard {:needs #{} :forbids #{:change-authored-and-bound}}
