@@ -84,7 +84,8 @@ clojure -M:test -e '(require (quote futon2.aif.full-loop-runner-test)) (binding 
 ```
 
 The updated grounded `feature-card-close-retains-learning-receipt-without-changing-selection`
-test reads `007-closed.edn`, checks one surprise, its IDs and manifest entry,
+test reads `007-closed.edn`, checks the retained empty surprise vector (its
+`feature123` artifact has missing measurements), its IDs and manifest entry,
 unchanged selection-law bytes, and successful `closed-execution`. **Owner must
 run this on main after merge**, as requested; this worktree cannot certify it.
 The helper does not bypass the runner guard; it tests the retention API directly.
@@ -105,3 +106,27 @@ The baseline log is retained without rewriting it as a 21-assertion run.
 Kondo on every changed Clojure file: 0 errors, 0 warnings (one pre-existing
 single-string `str` informational message in the runner). check-parens: OK.
 No serving JVM changes, clicks, production model updates or Lean builds.
+
+Registry warrant for the pure surprise/replay namespace:
+`test-registry-71d28c4427f5cb4e0337183efee9fe446c1c031e59391373ce3bf0708ab8fbef`.
+Run: 2 tests / 21 assertions, exit 0, matched postcheck; fresh registry check
+returned `:warrant? true`. Full config/run/check records are in `improve-6a/`.
+From futon3c:
+
+```sh
+clojure -M -m futon3c.test-registry run /tmp/improve-6a-registry.edn
+clojure -M -m futon3c.test-registry check /tmp/improve-6a-registry-check.edn
+```
+
+The registry's logical command is `["clojure" "-M:test" "-n"
+"futon2.aif.surprise-test"]`; its own runner supplies execution. An initial
+config using the direct CLI's `-m cognitect.test-runner` spelling was refused
+`:explicit-namespace-required` before execution; corrected to the documented
+registry shape. The warrant does **not** certify the guarded runner integration.
+
+Final fixture inspection: the grounded feature-card fixture claims `feature123`
+in a scratch directory without a Git artifact. Its missing measurements must
+produce **zero** surprises, not a fabricated updater failure. Its close test
+checks that case; the separate real-artifact retention test checks exactly one
+surprise and manifest admission. The final grounded assertions still require the
+owner's main-checkout run. Kondo and check-parens passed on that test adjustment.

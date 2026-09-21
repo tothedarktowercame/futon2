@@ -5854,9 +5854,13 @@
         surprise-path (io/file root "test-cohort-exhaustion" (:attempt-id result) "retained" "surprises.edn")
         surprises (cohort/read-edn surprise-path)]
     (is (= :grounded-change (:outcome result)))
-    (is (= 1 (count surprises)))
+    ;; This grounded fixture uses feature123, not a resolvable Git artifact.
+    ;; Missing measurements remain non-surprises; the real artifact helper
+    ;; below separately pins the one-surprise retention/manifest case.
+    (is (= [] surprises))
     (is (= (mapv :surprise/id surprises) (:surprise-ids closed)))
-    (is (= :predicted-not-observed (:verdict (first surprises))))
+    (is (every? #(= :observation-missing (:verdict %))
+                (get-in closed [:token-outcome-comparison :tokens])))
     (is (some #(= (.getAbsolutePath surprise-path) (:source-path %))
               (:entries (:close-evidence-manifest result))))
     (is (= :wm/learning-trial-receipt-v2 (:schema receipt)))
