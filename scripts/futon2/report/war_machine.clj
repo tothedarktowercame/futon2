@@ -50,6 +50,7 @@
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.cascade-proposals :as cascade-proposals]
             [futon2.aif.scoring-input-receipts :as input-receipts]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.token-belief-carry :as token-carry]
             [futon2.aif.token-belief-predecessor :as token-predecessor]
             [futon2.aif.receipt-construction :as receipt-construction]
@@ -6284,6 +6285,7 @@
                 decision (assoc-in decision [:selection-certificate :token-belief-input]
                                    token-belief-input)
                 decision (input-receipts/with-preference-audit decision)
+                decision (focus-receipt/attach decision)
                 authorized (controller-authority/authorize decision ranked)
                 emitted (decision-gate/emit! authorized)]
             {:decision (assoc emitted

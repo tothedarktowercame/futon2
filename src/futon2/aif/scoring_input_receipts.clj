@@ -2,6 +2,7 @@
   "Read-time state receipts. Uses the declaration provenance status vocabulary."
   (:require [futon2.aif.load-identity :as load-identity]
             [futon2.aif.preference-audit :as preference-audit]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [clojure.edn :as edn]
             [futon2.aif.cascade-model-manifest :as model]
             [futon2.aif.token-belief-carry :as token-carry]
@@ -47,6 +48,9 @@
         log (:habit-reads record)
         occurrences (:occurrences log)
         errors (cond-> []
+                 (and (contains? (:selection-certificate decision) :focus-receipt)
+                      (not (focus-receipt/valid? decision (get-in decision [:selection-certificate :focus-receipt]))))
+                 (conj :focus-receipt-mismatch)
                  (and (contains? (:selection-certificate decision) :preference-audit)
                       (not (preference-audit/valid? decision (get-in decision [:selection-certificate :preference-audit]))))
                  (conj :preference-audit-mismatch)

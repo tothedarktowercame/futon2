@@ -420,6 +420,16 @@
          "](<" (.toASCIIString (java.net.URI. nil nil path nil nil)) ">)\n")
     (str "\n" (name kind) " figure not emitted; use render-run! to write standalone SVGs.\n")))
 
+(defn focus-text [d]
+  (let [r (get-in d [:selection-certificate :focus-receipt])]
+    (str "\nDiscovered focus: " (or (get-in r [:discovery :focus]) "unknown")
+         "; candidate classes: "
+         (if (seq (:candidates r))
+           (str/join "; " (map #(str (:target %) "/" (shown (get-in % [:candidate-id :id]))
+                                    " = " (name (:class %))) (:candidates r)))
+           "not recorded")
+         " (record-only).\n")))
+
 (defn preference-audit-text [d]
   (let [audit (get-in d [:selection-certificate :preference-audit])
         rows (get-in audit [:selected-target-odds :rows])
@@ -484,6 +494,7 @@
              "Not recorded in this run: action comparison.\n")
          (coverage-text b)
          (preference-audit-text d)
+         (focus-text d)
          (novelty-text d)
          "\n| Target | Cascade | G (nats) | Posterior | Habit | F consumed |\n|---|---|---:|---:|---:|---:|\n"
          (apply str (for [r rows] (str "| " (str/join " | " (map #(shown (get r %)) [:target :cascade-id :G :posterior :habit :F])) " |\n")))
