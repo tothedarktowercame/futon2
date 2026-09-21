@@ -320,3 +320,14 @@ Keep revision kind (structural, parameter, data, operational repair), named mode
 part, old/new digests, and loaded/consumed successor evidence distinct (D1–D4 in
 `NOTE-learning-capability-definitions-2026-09-21.md`). This slice records
 `:revision {:status :none-yet}`; it does not scan trailers or infer learning.
+
+## Joining improve-1 to improve-6 (claude-5's suggestion, 2026-09-21)
+The one historical surprise, surprise-12ae64452b8a9cbf6abd336686b6aa4583e656ce301c3fd3c3bf47d23bcf9bae
+(updater ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012], :predicted-not-observed,
+:B-effect; 1789964661), is what improve-1 answers. Rule: improve-1's first commit
+that changes how the B-effect is estimated or consumed carries the trailer
+"Surprise: surprise-12ae64452b8a9cbf6abd336686b6aa4583e656ce301c3fd3c3bf47d23bcf9bae".
+The next click that exercises that expectation class then gives the scanner's
+first learning-event candidate and improve-1's first evidence that learned B was
+consumed, in one record. (The historical occurrence is legacy v1, so improve-1b
+holds it as a trial; the trailer still links the revision to the surprise.)
