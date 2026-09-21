@@ -168,3 +168,16 @@ emacs --batch -Q -l /home/joe/code/futon4/dev/check-parens.el -f arxana-check-pa
 Registry configs for the new regression and the updated joint-decision
 namespace are retained beside this note. Warrants cover those namespaces;
 they do not claim that the three failing namespaces passed.
+
+## Committed registry evidence
+
+Implementation commit: `187296bb`. Both registry runs returned `:warrant? true`,
+`:execution/stable? true`, and `:postcheck {:status :matched}`.
+
+- Admission: `test-registry-1bb33fba6d5f8460ed2cebf0f67bd1d79f8a95d14508150e30c86d112b87219b`; 6 tests, 22 assertions, zero failures/errors.
+- Joint decision: `test-registry-99fdd47c26fb4dc8ba3969d5f6f8edb41a51f55ca810df6d6c3581497816ebcb`; 13 tests, 94 assertions, zero failures/errors.
+
+The retained check configs use the implementation commit's complete changed-path
+list. Each warrant covers its own test namespace and production dependency
+closure; report artifacts and the census script are outside those test closures.
+The census was separately executed and the script passed both static gates.
