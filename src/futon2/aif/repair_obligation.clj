@@ -936,6 +936,42 @@
   (throw (ex-info "Unexecuted repair finding dismissal refused"
                   (assoc data :repair-dismissal/refusal reason))))
 
+(defn dismiss-wontfix!
+  "Append an operator-authorized WONTFIX disposition, never a repair success.
+  Authority must cite the operator ruling; reason must state this finding's
+  evidence of permanent unfixability. These are accountable human judgments,
+  not facts inferred from age, a missing agent, or a failed readiness check.
+  An implementation awaiting validation must complete its existing route."
+  ([finding-id disposition]
+   (dismiss-wontfix! default-root finding-id disposition))
+  ([root finding-id {:keys [authority reason actor] :as disposition}]
+   (when-not (and (string? finding-id)
+                  (re-matches #"[A-Za-z0-9._-]+" finding-id))
+     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+   (doseq [[k v] [[:authority authority] [:reason reason] [:actor actor]]]
+     (when-not (nonblank? v)
+       (dismissal-refuse! :disposition-invalid {:repair/id finding-id :field k})))
+   (when-not (= #{:authority :reason :actor} (set (keys disposition)))
+     (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+   (when (get (indexed-records root "dismissals") finding-id)
+     (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+   (when (get (indexed-records root "resolutions") finding-id)
+     (dismissal-refuse! :already-resolved {:repair/id finding-id}))
+   (let [finding (get (indexed-records root "findings") finding-id)]
+     (when-not finding
+       (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+     (when (or (not= :open (:repair/status finding))
+               (get (indexed-records root "implementations") finding-id)
+               (get (verified-admissions root) finding-id))
+       (dismissal-refuse! :finding-not-open {:repair/id finding-id}))
+     (let [record {:repair/id finding-id :repair/schema-version 1
+                   :repair/status :dismissed-wontfix :dismissal/kind :wontfix
+                   :failed-attempt (:attempt-id finding)
+                   :authority authority :reason reason :actor actor
+                   :dismissed-at (str (Instant/now))}]
+       (write-new! (io/file root "dismissals" (str finding-id ".edn")) record)
+       record))))
+
 (defn dismiss-unexecuted!
   "Append an administrative disposition only when the immutable finding itself
   proves that its dispatched job never executed. This is not a repair success,

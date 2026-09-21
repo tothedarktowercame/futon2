@@ -1,0 +1,8 @@
+{:subject-id "repair-store/dismiss-wontfix"
+ :repo-root "/home/joe/code/futon2"
+ :code-paths ["src/futon2/aif/repair_obligation.clj"]
+ :test-paths ["test/futon2/aif/repair_wontfix_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.repair-wontfix-test"]
+ :author "codex-1"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/wontfix-transition-2026-09-21"
+ :index-file "/home/joe/code/futon3c/data/test-registry-validation/subjects.ednlog"}
