@@ -7,6 +7,7 @@
             [futon2.aif.repair-discharge-evidence :as evidence]
             [futon2.aif.repair-discharge-test :as fixture]
             [futon2.aif.repair-evaluators :as evaluators]
+            [futon2.aif.repair-history-replay :as replay]
             [futon2.aif.repair-obligation :as repair]))
 
 (def repo "/home/joe/code/futon2")
@@ -69,3 +70,8 @@
         observation (evaluators/history-artifact-read! request)]
     (is (false? (get-in observation [:recorded-failure :reproduced-before?])))
     (is (false? (get-in observation [:successor :passed?])))))
+
+(deftest replay-refuses-an-ambient-cohort-implementation
+  (is (= :repaired-source-mismatch
+         (try (replay/evaluate {:repaired-root (fixture/tmp)}) nil
+              (catch clojure.lang.ExceptionInfo e (:repair-evaluator/refusal (ex-data e)))))))

@@ -1,0 +1,18 @@
+{
+  "role": "pre-commit-validation",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "reason": "Bind replay implementation to archived repair source instead of ambient dependencies",
+  "sha256": {
+    "src/futon2/aif/repair_history_replay.clj": "c805d0d2e3b2ea2aae2f4fe7918f1594f511ecda96c00c3f51ac31506f4c6e0e",
+    "src/futon2/aif/repair_evaluators.clj": "cf262d4a2871f2d8ef5cb9e35e9736bfd656a1eae778d105ba8a3c6d40bd47e4",
+    "test/futon2/aif/repair_history_replay_test.clj": "c13f09cf917cb8a70dd40a557a14619ce7626ccf49902e71ee82f479bd04b282"
+  },
+  "results": {
+    "tests": 3,
+    "assertions": 9,
+    "failures": 0,
+    "errors": 0,
+    "exit": 0
+  }
+}

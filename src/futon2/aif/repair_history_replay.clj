@@ -13,7 +13,14 @@
                   (.digest (MessageDigest/getInstance "SHA-256") bytes))))
 
 (defn evaluate [request]
-  (let [{:keys [finding finding-pin close artifact input scratch prereg]} request
+  (let [{:keys [finding finding-pin close artifact input scratch prereg repaired-root]} request
+        actual-source (.getCanonicalPath (io/file (io/resource "futon2/aif/full_loop_cohort.clj")))
+        expected-source (when repaired-root
+                          (.getCanonicalPath (io/file repaired-root "src/futon2/aif/full_loop_cohort.clj")))
+        _ (when-not (= expected-source actual-source)
+            (throw (ex-info "Replay loaded cohort outside the repaired revision"
+                            {:repair-evaluator/refusal :repaired-source-mismatch
+                             :expected expected-source :actual actual-source})))
         bytes (Files/readAllBytes (.toPath (io/file (:path input))))
         _ (when-not (= (:sha256 input) (digest bytes))
             (throw (ex-info "Recorded failure input changed" {:path (:path input)})))

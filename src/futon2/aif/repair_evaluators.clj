@@ -58,6 +58,7 @@
                           :evaluator-source-changed {})
         (spit in (evidence/canonical-text
                   (assoc request :input input :scratch (.getPath (io/file tool "cohort"))
+                         :repaired-root (.getCanonicalPath scratch)
                          :prereg (.getPath (io/file scratch "holes/labs/M-aif-full-loop-40/cohort.edn")))))
         (command! (.getPath tool)
                   ["clojure" "-Sdeps"
