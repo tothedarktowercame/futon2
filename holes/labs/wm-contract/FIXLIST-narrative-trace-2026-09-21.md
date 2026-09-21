@@ -32,6 +32,8 @@ worktree); different groups can run in parallel.
 | fix-13 | fix | war_machine | coverage account not saved; 113→5 drop unexplained |
 | fix-14 | fix | new ns | trace renderer: run id → narrative page |
 | fix-15 | doc | p4ng | paper claims that outrun the records |
+| fix-16 | fix | admission | a candidate that adds no wanted token is admitted |
+| fix-17 | decision | preference | the preference scale makes G differences ~1e-3 nats |
 
 ---
 
@@ -203,3 +205,24 @@ NOTE-restatement-2026-09-20: "441 items … enter the decision as
 first-class sources" — they enter C only; `g_term_decomposition` cited as
 if a theorem — it is a Clojure namespace; "selected on its own merits" —
 habit E decided the earlier picks.
+
+## fix-16 — a candidate that adds no wanted token is admitted
+(From fix-6.) In 1789964661 the M-wm-08-external-f2 candidate's wanted
+token (weight 1/6) and its prerequisites are already present in D, so
+its predicted terminal state equals the initial state: G − B = 0. The
+machine scored a no-op alongside two real candidates. Same class as the
+empty cascades removed in c155d690.
+**Success.** Candidate admission refuses (typed, recorded) a candidate
+whose predicted trajectory newly satisfies no wanted token.
+**Acceptance.** The 1789964661 F2 candidate is refused with that reason;
+the other two are admitted; a candidate adding one token is admitted.
+
+## fix-17 (decision) — the preference scale
+(From fix-6.) G differences are sums of newly satisfied terminal weights;
+global normalisation over 468 sources makes those weights ~1e-3–1e-5
+(229/175347, 5/116898), so any habit ratio dominates. Scaling all
+terminal log weights by one declared k (C renormalised, so the Lean KL
+and horizon definitions are kept) gives spread 0.13 nats at k=100, 1.3
+at k=1000. k is a preference declaration, not a tuning knob: choosing it
+to force a winner has no warrant. Needs a declared, justified scale
+(e.g. operator-stated outcome odds). EoI C1/C2 tie at every k.
