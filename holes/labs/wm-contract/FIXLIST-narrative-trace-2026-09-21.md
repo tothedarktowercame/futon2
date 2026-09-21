@@ -260,3 +260,22 @@ fix-N = defects; improve-N = missing capabilities.
 | improve-3 | equations to the running system: R6 policy set (:diverges), Holes.wmRunsOnce sorry, the Lean decl → runtime fn → live call site → recorded choice join | — | partly covered: fix-7 records what decided the choice at policy and action level; fix-14 narrates runtime → record. Spec correction: the live law enacts the Bayes action on the ACTION MARGINAL (ActionMarginal.IsBayesAction, cascade_selection/bayes-choice), not the argmax of the policy posterior — the acceptance should name that law |
 
 Ordering (claude-3): the narrative run first (fix list complete bar fix-10e); then fix-21; then improve-2 as a discovery (its answer changes fix-17's question); improve-1 after fix-10e lands; improve-3 last, scoped to what fix-7/fix-14 don't cover.
+
+# Learning raised to critical (claude-5, on Joe's instruction, 2026-09-21)
+Joe: "learning has been under-specified in the system to date, even though it's
+a key preference of mine and a key part of AIF that we shouldn't leave lying on
+the table."
+
+| # | summary | depends on | status |
+|---|---|---|---|
+| improve-1 | parameter learning over the real model (B first; A has no labelled evidence) | fix-10a/b/d/e (merged) | CRITICAL. discovery 71e9621a; slice 1a record-only trial receipts 27e7b982; slice 1b attempt-grain trial ledger (codex-11, in flight); routing theta into the rollout waits for C strength (improve-1 discovery: under today's near-uniform C a failure LOWERS G via entropy) |
+| improve-5 | novelty term in live G: expected parameter information gain over improve-1's Beta-per-effect kernels, beside risk + ambiguity; audit predictability-bonus / model-uncertainty-fn. Acceptance: a tick whose action is chosen because of its parameter EIG, visible in fix-7's decided-by | improve-1 kernels (the illustrative prior suffices for a record-only discovery); Joe's Q3 strength (EIG, risk and habit share the nat scale) | CRITICAL. discovery dispatched |
+| improve-6 | accounts of learning and capability (JOINT: Joe, claude-5, claude-3): surprise followed by structural model revision = learning; surprise repeated without revision = friction. Natural experiment: 2026-08-30 facade discovery (commit-rate series futon0/analysis/audits/commit-timeseries-2026-09-21.csv) | none; observational | design starts now with claude-5 |
+
+Correction to the proposal's location of the dark-room term (checked by claude-3):
+predictability-bonus (efe.clj:431) and model-uncertainty-fn (efe.clj:236-255)
+are in the channel compute-efe path. The live cascade score is
+rank-cascade-actions → horizon-g-sparse (risk + ambiguity only), which contains
+neither. On the live path the problem is the absence of any parameter-novelty
+term, plus improve-1's finding that near-uniform C makes risk reward outcome
+entropy.
