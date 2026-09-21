@@ -288,6 +288,56 @@ for the required attestation/known-failure classes or slow local-focus state.
 The computed scores above are explicit diagnostic alternatives, not estimates
 of that missing model.
 
+### Supplement: fixed 5% elsewhere, varying no-increment mass
+
+Follow-up `invoke-1790012034279` requested the controlled consequence table.
+Hold elsewhere at .05 and focus:adjacent at 11:7; let rho=N be 0, .05 or .10.
+Then F=(.95−rho)×11/18 and A=(.95−rho)×7/18. This avoids changing two independent
+budgets while varying the no-increment assumption. These remain **token-domain
+counterexamples**, not the attested/known-failure semantics Joe confirmed.
+
+| rho | F / A / I / N | Focus : N odds; log odds | Latest A/F/F2 posterior; choice | Earlier EOI1/EOI2/F2 posterior; choice |
+|---|---|---|---|---|
+| 0 | .580556/.369444/.05/0 | ∞; ∞ | .500316/.499684/0; A | .833333/.166667/0; EOI |
+| .05 | .55/.35/.05/.05 | 11:1; **2.397895 nats** | .207509/.207247/.585244; **F2** | 2.985e−37/5.971e−38/.041667; **F2** |
+| .10 | .519444/.330556/.05/.10 | 5.194444:1; **1.647590 nats** | .125452/.125293/.749255; **F2** | 1.493e−37/2.985e−38/.041667; **F2** |
+
+At rho=0 latest G=(15.682155,15.683418,∞); at rho=.10 it is
+(15.793380,15.794644,14.006222). Earlier EOI G=173.554600 for either rho;
+F2 G=∞ at zero, 91.021266 at .05, 90.328119 at .10. Latest policy/action
+decided-by remain G/#{G}; earlier zero-rho is habit/robust, positive-rho G/#{G}.
+Complete rows are in the expanded replay artifact.
+
+**Comparison to the entropy experiments:** “above about 1 nat” is a scale
+heuristic, not a universal completion threshold. For improve-5's Bernoulli
+attempt endpoint, changing p=.9 to q=9/11 gives
+
+```
+ΔG = (p−q) log(C_success/C_failure) − [h(q)−h(p)]
+critical log odds = [h(q)−h(p)]/(p−q) = 1.821799707 nats.
+```
+
+Thus class odds 11:1 exceed this threshold: on that binary class carrier the
+failure update increases G by **.047135092 nats**, instead of rewarding the
+extra entropy. At rho=.10 the class log odds 1.647590 fall below it and ΔG is
+**−.014253548 nats**. Associated : N is 7:1 (1.945910 nats) at rho=.05;
+elsewhere : N is 1:1 (0 nats). At literal 60/40/0/0, positive probability of a
+failure outcome incurs infinite risk, not merely a large finite preference.
+
+Improve-1 uses a different grain: p1=theta and p2=1−(1−theta)^2, entropy at
+**both** steps, terminal utility only. Its displayed formula gives a threshold
+**10.333605607 nats** for the same .9→9/11 change. Even ln(11) leaves
+ΔG=**−.182980428 nats** there. The research test checks both thresholds.
+Do not claim that 11:1 automatically fixes both models, transfer an attempt
+likelihood to firings, or add parameter novelty twice.
+
+Finally, class odds are not every token's odds. The powerset experiment's
+cardinality factors turn class-level 11:1 into updater .354569:1 at the initial
+context; the categorical increment example gives 3.588319:1 (about 1.278 nats),
+which is also below the endpoint threshold. This is why the same declared
+55/35/5/5 cannot settle entropy behavior until the observation carrier and
+within-class allocation are specified.
+
 ## 4. Questions, now answered and narrowed
 
 The original concrete questions were:

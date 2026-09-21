@@ -126,6 +126,156 @@
       :target "M-aif-policy-conditioned-eig",
       :topic-class :focus,
       :outcome-class :focus,
+      :G 15.682154860701282,
+      :posterior 0.500315802338429}
+     {:id :C1,
+      :target "M-f11-find-production-successor",
+      :topic-class :focus,
+      :outcome-class :focus,
+      :G 15.683418070222974,
+      :posterior 0.4996841976615704}
+     {:id :C1,
+      :target "M-wm-08-external-f2",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}],
+    :outcome-domain
+    :frozen-token-powerset-plus-unrepresented-class-atoms,
+    :case :elsewhere-5-nothing-zero,
+    :log-class-normalizers
+    {:focus 7.6817387435763305,
+     :adjacent ##-Inf,
+     :irrelevant ##-Inf,
+     :nothing 4.245684627566031},
+    :choice
+    {:action
+     {:id :apparatus/one-authority-per-question,
+      :target "M-aif-policy-conditioned-eig"},
+     :mass 0.500315802338429,
+     :tie-break-rule :action-name-ascending},
+    :class-masses
+    {:focus 0.5805555555555556,
+     :adjacent 0.3694444444444444,
+     :irrelevant 0.05,
+     :nothing 0.0},
+    :unrepresented-class-mass
+    {:adjacent 0.3694444444444444, :irrelevant 0.05}}
+   {:policy-decided-by :G,
+    :selection-refusal nil,
+    :odds-at-initial-context
+    [{:token ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds 0.16743526906398526}
+     {:token ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds 0.16743526906398526}
+     {:token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds 0.16743526906398526}
+     {:token ["M-f11-find-production-successor" :hole/h2045faa0e7cc],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000427732461834,
+      :odds 0.16722389676969113}
+     {:token ["M-f11-find-production-successor" :hole/h9ab212b3281d],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000427732461834,
+      :odds 0.16722389676969113}
+     {:token ["M-wm-08-external-f2" :route-a-rehearsal-reported],
+      :absent-class :nothing,
+      :present-class :nothing,
+      :old-odds 1.181360412865646,
+      :odds 1.1813604128656463}],
+    :new-want-counts {:focus 5},
+    :action-decided-by #{:G},
+    :rows
+    [{:id :C1,
+      :target "M-aif-policy-conditioned-eig",
+      :topic-class :focus,
+      :outcome-class :focus,
+      :G 15.793380495811505,
+      :posterior 0.1254517058363728}
+     {:id :C1,
+      :target "M-f11-find-production-successor",
+      :topic-class :focus,
+      :outcome-class :focus,
+      :G 15.794643705333197,
+      :posterior 0.12529333409645213}
+     {:id :C1,
+      :target "M-wm-08-external-f2",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G 14.006222040052808,
+      :posterior 0.7492549600671745}],
+    :outcome-domain
+    :frozen-token-powerset-plus-unrepresented-class-atoms,
+    :case :elsewhere-5-nothing-10,
+    :log-class-normalizers
+    {:focus 7.6817387435763305,
+     :adjacent ##-Inf,
+     :irrelevant ##-Inf,
+     :nothing 4.245684627566031},
+    :choice
+    {:action
+     {:id :cascade-construction/run-it-on-a-real-case,
+      :target "M-wm-08-external-f2"},
+     :mass 0.7492549600671745,
+     :tie-break-rule :action-name-ascending},
+    :class-masses
+    {:focus 0.5194444444444445,
+     :adjacent 0.33055555555555555,
+     :irrelevant 0.05,
+     :nothing 0.1},
+    :unrepresented-class-mass
+    {:adjacent 0.33055555555555555, :irrelevant 0.05}}
+   {:policy-decided-by :G,
+    :selection-refusal nil,
+    :odds-at-initial-context
+    [{:token ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds :infinite}
+     {:token ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds :infinite}
+     {:token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds :infinite}
+     {:token ["M-f11-find-production-successor" :hole/h2045faa0e7cc],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000427732461834,
+      :odds :infinite}
+     {:token ["M-f11-find-production-successor" :hole/h9ab212b3281d],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000427732461834,
+      :odds :infinite}
+     {:token ["M-wm-08-external-f2" :route-a-rehearsal-reported],
+      :absent-class :nothing,
+      :present-class :nothing,
+      :old-odds 1.181360412865646,
+      :odds :both-ruled-zero}],
+    :new-want-counts {:focus 5},
+    :action-decided-by #{:G},
+    :rows
+    [{:id :C1,
+      :target "M-aif-policy-conditioned-eig",
+      :topic-class :focus,
+      :outcome-class :focus,
       :G 15.649210704981929,
       :posterior 0.500315802338429}
      {:id :C1,
@@ -751,7 +901,1553 @@
      :posterior 0.0333124408287407,
      :target "M-wm-08-external-f2"}]},
   :cases
-  [{:policy-decided-by nil,
+  [{:policy-decided-by :habit,
+    :selection-refusal nil,
+    :odds-at-initial-context
+    [{:token ["M-G-wm-wiring" :hole/h1ab6bc65d724],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-G-wm-wiring" :hole/h2c0505676418],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-G-wm-wiring" :hole/h43027c2b7983],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-G-wm-wiring" :hole/h4e8aa67266ba],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-G-wm-wiring" :hole/h5cbe3963f4a7],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-G-wm-wiring" :hole/h90725d6838b7],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-G-wm-wiring" :hole/h9cfe63d2a246],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-G-wm-wiring" :hole/h9e4e4e84f6f5],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-action-cost-modelling" :hole/h68dbc60a7584],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds :infinite}
+     {:token ["M-action-cost-modelling" :hole/h6e84a77745cb],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds :infinite}
+     {:token ["M-action-cost-modelling" :hole/h730434653957],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds :infinite}
+     {:token ["M-action-cost-modelling" :hole/ha664b5558c56],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds :infinite}
+     {:token ["M-action-cost-modelling" :hole/hb7f5a89877eb],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds :infinite}
+     {:token ["M-action-cost-modelling" :hole/hbe5e9b666bbc],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds :infinite}
+     {:token ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds :infinite}
+     {:token ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds :infinite}
+     {:token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds :infinite}
+     {:token ["M-aif4iad" :hole/h13d1eb6f866c],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds :infinite}
+     {:token ["M-aif4iad" :hole/h1c61520ceac2],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds :infinite}
+     {:token ["M-aif4iad" :hole/h232aac21afac],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds :infinite}
+     {:token ["M-aif4iad" :hole/h2c55e0813b71],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds :infinite}
+     {:token ["M-aif4iad" :hole/h2ce732017791],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds :infinite}
+     {:token ["M-aif4iad" :hole/h5df0883537b7],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds :infinite}
+     {:token ["M-aif4iad" :hole/h86c3e4588627],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds :infinite}
+     {:token ["M-aif4iad" :hole/h996b16d3e771],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds :infinite}
+     {:token ["M-aif4iad" :hole/he8f6baf8532e],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds :infinite}
+     {:token ["M-aif4iad" :hole/hfdd1346c3658],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h0eddb589303a],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h0f9f0d1ef2ab],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h25cd7ef284b1],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h2c8b16965904],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h33744b6d0571],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h343fb86fd75b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h3c97fcf8cc2b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h3d72f678b54a],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h536b3140b1cd],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h64615c0bf314],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h700e35c0fe96],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h88f1229021d7],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h90826c1146bc],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h9136ef3e0f79],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h9211761cbed8],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/h9ffc3c66e295],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/ha17fb12d9b8e],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/hb16c1b83201c],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/hb575f8b310ad],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/hce113b0bcb17],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/hd88ab8463af8],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/hda93dda6010b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-apm-capability-ratchet" :hole/heb8409b4b779],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds :infinite}
+     {:token ["M-canon-fingerprint-store" :hole/h3b2303097926],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds :infinite}
+     {:token ["M-canon-fingerprint-store" :hole/h61f4c17570aa],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds :infinite}
+     {:token ["M-canon-fingerprint-store" :hole/h72b677883cde],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds :infinite}
+     {:token ["M-canon-fingerprint-store" :hole/hae4a98689e37],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds :infinite}
+     {:token ["M-canon-fingerprint-store" :hole/hb0224092661b],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds :infinite}
+     {:token ["M-canon-fingerprint-store" :hole/hf6110df5c7b0],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds :infinite}
+     {:token ["M-chipwitz-corps" :hole/h056f5583d59e],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds :infinite}
+     {:token ["M-chipwitz-corps" :hole/h09128afee45a],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds :infinite}
+     {:token ["M-chipwitz-corps" :hole/h2c51566a32b4],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds :infinite}
+     {:token ["M-chipwitz-corps" :hole/h4bd2d74d8763],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds :infinite}
+     {:token ["M-chipwitz-corps" :hole/h5963cec1a3df],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds :infinite}
+     {:token ["M-chipwitz-corps" :hole/hb9354e61ab3e],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds :infinite}
+     {:token ["M-daily-scan" :hole/h55f8fe32c265],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0017466347150825,
+      :odds :infinite}
+     {:token ["M-daily-scan" :hole/hb1ba19f964f5],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0017466347150825,
+      :odds :infinite}
+     {:token ["M-dionysus-winddown" :hole/h1707682aa399],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-dionysus-winddown" :hole/h2f9b03b16170],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-dionysus-winddown" :hole/h8913c1961787],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-dionysus-winddown" :hole/ha9c6131ad053],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-dionysus-winddown" :hole/hd1c412cad223],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-dionysus-winddown" :hole/hd58f18adb12e],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-dionysus-winddown" :hole/hfb5a1f905f24],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-distributed-frontiermath" :hole/h022fc0e7fab5],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-distributed-frontiermath" :hole/h16025dd5deeb],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-distributed-frontiermath" :hole/h8606857c4374],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-distributed-frontiermath" :hole/hd4bfb746db9b],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds :infinite}
+     {:token ["M-expressions-of-interest" :change-authored-and-bound],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.001566693314137,
+      :odds :infinite}
+     {:token
+      ["M-expressions-of-interest"
+       :obligation-resolved-through-the-account],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.001566693314137,
+      :odds :infinite}
+     {:token
+      ["M-expressions-of-interest" :premise-refused-before-work],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.001566693314137,
+      :odds :infinite}
+     {:token ["M-f11-find-production-successor" :hole/h2045faa0e7cc],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000427732461834,
+      :odds :infinite}
+     {:token ["M-f11-find-production-successor" :hole/h9ab212b3281d],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000427732461834,
+      :odds :infinite}
+     {:token ["M-federated-agency-hardening" :hole/h260a1b85a356],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008814983190197,
+      :odds :infinite}
+     {:token ["M-federated-agency-hardening" :hole/hb8a6fa5239dc],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008814983190197,
+      :odds :infinite}
+     {:token ["M-federated-agency-hardening" :hole/hd6dd12860265],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008814983190197,
+      :odds :infinite}
+     {:token ["M-federated-agency-hardening" :hole/hf4b4e2392af5],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008814983190197,
+      :odds :infinite}
+     {:token ["M-futon-forward-model" :hole/h30576d62bffb],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds :infinite}
+     {:token ["M-futon-forward-model" :hole/h3547e9033d0d],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds :infinite}
+     {:token ["M-futon-forward-model" :hole/h6adae34e06ad],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds :infinite}
+     {:token ["M-futon-forward-model" :hole/h8b2289908aa2],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds :infinite}
+     {:token ["M-futon-forward-model" :hole/ha3f46a5c0073],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds :infinite}
+     {:token ["M-futon-forward-model" :hole/he92ac929f4c4],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds :infinite}
+     {:token ["M-futonzero-generative" :hole/h46ed944f95da],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0019008959320426,
+      :odds :infinite}
+     {:token ["M-futonzero-generative" :hole/hb5b297019e1e],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0019008959320426,
+      :odds :infinite}
+     {:token ["M-futonzero-mvp" :hole/h012c22f2f840],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds :infinite}
+     {:token ["M-futonzero-mvp" :hole/h0bf75e0e1112],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds :infinite}
+     {:token ["M-futonzero-mvp" :hole/h6618be8fcdc6],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds :infinite}
+     {:token ["M-futonzero-mvp" :hole/h877c2296c0a7],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds :infinite}
+     {:token ["M-futonzero-mvp" :hole/hae74888084c6],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds :infinite}
+     {:token ["M-futonzero-mvp" :hole/hd4e4d3ab0ea4],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds :infinite}
+     {:token ["M-futonzero-mvp" :hole/heccb32318c8f],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds :infinite}
+     {:token ["M-futonzero-mvp" :hole/hfa9ca51fc80f],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds :infinite}
+     {:token ["M-kangaroo" :hole/h40dbfc082f77],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds :infinite}
+     {:token ["M-kangaroo" :hole/h625bf9588b21],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds :infinite}
+     {:token ["M-kangaroo" :hole/h6e670ac8054e],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds :infinite}
+     {:token ["M-kangaroo" :hole/hb674018208b0],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds :infinite}
+     {:token ["M-kangaroo" :hole/he91ecffec2e7],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds :infinite}
+     {:token ["M-kangaroo" :hole/hf27981fd598b],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds :infinite}
+     {:token ["M-self-documenting-stack" :hole/hc2a9dfb6ffda],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.006953179572104,
+      :odds :infinite}
+     {:token ["M-usage-hacking" :hole/h14d8c34e01f3],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-usage-hacking" :hole/h1cae28671f48],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-usage-hacking" :hole/h201759e2d7fa],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-usage-hacking" :hole/h3d340ddee61e],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-usage-hacking" :hole/h488d4eeea966],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-usage-hacking" :hole/h570008e13568],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-usage-hacking" :hole/h626638483174],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-usage-hacking" :hole/h87150eef7aae],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds :infinite}
+     {:token ["M-wm-08-external-f2" :route-a-rehearsal-reported],
+      :absent-class :nothing,
+      :present-class :nothing,
+      :old-odds 1.008368152207447,
+      :odds :both-ruled-zero}
+     {:token ["M-wm-aif-policy-grain-compliance" :hole/h26fc1070c3e6],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000213863944027,
+      :odds :infinite}
+     {:token ["M-wm-aif-policy-grain-compliance" :hole/h4d3638710e7b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000213863944027,
+      :odds :infinite}
+     {:token ["M-wm-aif-policy-grain-compliance" :hole/ha04170c8d22b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000213863944027,
+      :odds :infinite}
+     {:token ["M-wm-aif-policy-grain-compliance" :hole/hbc48e7c4dbdf],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000213863944027,
+      :odds :infinite}],
+    :new-want-counts {:irrelevant 61, :focus 40, :adjacent 18},
+    :action-decided-by :robust,
+    :rows
+    [{:id :C1,
+      :target "M-expressions-of-interest",
+      :topic-class :irrelevant,
+      :outcome-class :irrelevant,
+      :G 173.55460029637786,
+      :posterior 0.8333333333333243}
+     {:id :C2,
+      :target "M-expressions-of-interest",
+      :topic-class :irrelevant,
+      :outcome-class :irrelevant,
+      :G 173.55460029637786,
+      :posterior 0.16666666666666674}
+     {:id :C0,
+      :target "M-dionysus-winddown",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-daily-scan",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-distributed-frontiermath",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-G-wm-wiring",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-f11-find-production-successor",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-kangaroo",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-chipwitz-corps",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-expressions-of-interest",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-wm-aif-policy-grain-compliance",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-canon-fingerprint-store",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-self-documenting-stack",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-apm-capability-ratchet",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-usage-hacking",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-futonzero-mvp",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-action-cost-modelling",
+      :topic-class :adjacent,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-aif4iad",
+      :topic-class :adjacent,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-federated-agency-hardening",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-futonzero-generative",
+      :topic-class :adjacent,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-aif-policy-conditioned-eig",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-futon-forward-model",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C0,
+      :target "M-wm-08-external-f2",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}
+     {:id :C1,
+      :target "M-wm-08-external-f2",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G ##Inf,
+      :posterior 0.0}],
+    :outcome-domain
+    :frozen-token-powerset-plus-unrepresented-class-atoms,
+    :case :elsewhere-5-nothing-zero,
+    :log-class-normalizers
+    {:focus 42.98833645672847,
+     :adjacent 15.258398452235657,
+     :irrelevant 85.31322908194491,
+     :nothing 2.776764069436886},
+    :choice
+    {:action
+     {:id :coordination/par-as-obligation,
+      :target "M-expressions-of-interest"},
+     :mass 0.999999999999991,
+     :tie-break-rule :action-name-ascending},
+    :class-masses
+    {:focus 0.5805555555555556,
+     :adjacent 0.3694444444444444,
+     :irrelevant 0.05,
+     :nothing 0.0},
+    :unrepresented-class-mass {}}
+   {:policy-decided-by :G,
+    :selection-refusal nil,
+    :odds-at-initial-context
+    [{:token ["M-G-wm-wiring" :hole/h1ab6bc65d724],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds 1.7859930035984185E-17}
+     {:token ["M-G-wm-wiring" :hole/h2c0505676418],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds 1.7859930035984185E-17}
+     {:token ["M-G-wm-wiring" :hole/h43027c2b7983],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds 1.7859930035984185E-17}
+     {:token ["M-G-wm-wiring" :hole/h4e8aa67266ba],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds 1.7859930035984185E-17}
+     {:token ["M-G-wm-wiring" :hole/h5cbe3963f4a7],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds 1.7859930035984185E-17}
+     {:token ["M-G-wm-wiring" :hole/h90725d6838b7],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds 1.7859930035984185E-17}
+     {:token ["M-G-wm-wiring" :hole/h9cfe63d2a246],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds 1.7859930035984185E-17}
+     {:token ["M-G-wm-wiring" :hole/h9e4e4e84f6f5],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000106931400299,
+      :odds 1.7859930035984185E-17}
+     {:token ["M-action-cost-modelling" :hole/h68dbc60a7584],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds 1.2559732459529354E-5}
+     {:token ["M-action-cost-modelling" :hole/h6e84a77745cb],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds 1.2559732459529354E-5}
+     {:token ["M-action-cost-modelling" :hole/h730434653957],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds 1.2559732459529354E-5}
+     {:token ["M-action-cost-modelling" :hole/ha664b5558c56],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds 1.2559732459529354E-5}
+     {:token ["M-action-cost-modelling" :hole/hb7f5a89877eb],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds 1.2559732459529354E-5}
+     {:token ["M-action-cost-modelling" :hole/hbe5e9b666bbc],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0010156454182215,
+      :odds 1.2559732459529354E-5}
+     {:token ["M-aif-policy-conditioned-eig" :hole/h0e270aa090bc],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds 1.7883078791722666E-17}
+     {:token ["M-aif-policy-conditioned-eig" :hole/h42fceb4ad48b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds 1.7883078791722666E-17}
+     {:token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0013068350187917,
+      :odds 1.7883078791722666E-17}
+     {:token ["M-aif4iad" :hole/h13d1eb6f866c],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds 1.2547096500723857E-5}
+     {:token ["M-aif4iad" :hole/h1c61520ceac2],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds 1.2547096500723857E-5}
+     {:token ["M-aif4iad" :hole/h232aac21afac],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds 1.2547096500723857E-5}
+     {:token ["M-aif4iad" :hole/h2c55e0813b71],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds 1.2547096500723857E-5}
+     {:token ["M-aif4iad" :hole/h2ce732017791],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds 1.2547096500723857E-5}
+     {:token ["M-aif4iad" :hole/h5df0883537b7],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds 1.2547096500723857E-5}
+     {:token ["M-aif4iad" :hole/h86c3e4588627],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds 1.2547096500723857E-5}
+     {:token ["M-aif4iad" :hole/h996b16d3e771],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds 1.2547096500723857E-5}
+     {:token ["M-aif4iad" :hole/he8f6baf8532e],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds 1.2547096500723857E-5}
+     {:token ["M-aif4iad" :hole/hfdd1346c3658],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0000085545028763,
+      :odds 1.2547096500723857E-5}
+     {:token ["M-apm-capability-ratchet" :hole/h0eddb589303a],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h0f9f0d1ef2ab],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h25cd7ef284b1],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h2c8b16965904],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h33744b6d0571],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h343fb86fd75b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h3c97fcf8cc2b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h3d72f678b54a],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h536b3140b1cd],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h64615c0bf314],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h700e35c0fe96],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h88f1229021d7],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h90826c1146bc],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h9136ef3e0f79],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h9211761cbed8],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/h9ffc3c66e295],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/ha17fb12d9b8e],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/hb16c1b83201c],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/hb575f8b310ad],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/hce113b0bcb17],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/hd88ab8463af8],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/hda93dda6010b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-apm-capability-ratchet" :hole/heb8409b4b779],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0001703599687148,
+      :odds 1.786278164388097E-17}
+     {:token ["M-canon-fingerprint-store" :hole/h3b2303097926],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds 7.202077895945241E-37}
+     {:token ["M-canon-fingerprint-store" :hole/h61f4c17570aa],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds 7.202077895945241E-37}
+     {:token ["M-canon-fingerprint-store" :hole/h72b677883cde],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds 7.202077895945241E-37}
+     {:token ["M-canon-fingerprint-store" :hole/hae4a98689e37],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds 7.202077895945241E-37}
+     {:token ["M-canon-fingerprint-store" :hole/hb0224092661b],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds 7.202077895945241E-37}
+     {:token ["M-canon-fingerprint-store" :hole/hf6110df5c7b0],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.008368152207447,
+      :odds 7.202077895945241E-37}
+     {:token ["M-chipwitz-corps" :hole/h056f5583d59e],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds 7.142411790903559E-37}
+     {:token ["M-chipwitz-corps" :hole/h09128afee45a],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds 7.142411790903559E-37}
+     {:token ["M-chipwitz-corps" :hole/h2c51566a32b4],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds 7.142411790903559E-37}
+     {:token ["M-chipwitz-corps" :hole/h4bd2d74d8763],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds 7.142411790903559E-37}
+     {:token ["M-chipwitz-corps" :hole/h5963cec1a3df],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds 7.142411790903559E-37}
+     {:token ["M-chipwitz-corps" :hole/hb9354e61ab3e],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000142575454491,
+      :odds 7.142411790903559E-37}
+     {:token ["M-daily-scan" :hole/h55f8fe32c265],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0017466347150825,
+      :odds 7.15478496561516E-37}
+     {:token ["M-daily-scan" :hole/hb1ba19f964f5],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0017466347150825,
+      :odds 7.15478496561516E-37}
+     {:token ["M-dionysus-winddown" :hole/h1707682aa399],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-dionysus-winddown" :hole/h2f9b03b16170],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-dionysus-winddown" :hole/h8913c1961787],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-dionysus-winddown" :hole/ha9c6131ad053],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-dionysus-winddown" :hole/hd1c412cad223],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-dionysus-winddown" :hole/hd58f18adb12e],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-dionysus-winddown" :hole/hfb5a1f905f24],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-distributed-frontiermath" :hole/h022fc0e7fab5],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-distributed-frontiermath" :hole/h16025dd5deeb],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-distributed-frontiermath" :hole/h8606857c4374],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-distributed-frontiermath" :hole/hd4bfb746db9b],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0004363729636219,
+      :odds 7.145426670058731E-37}
+     {:token ["M-expressions-of-interest" :change-authored-and-bound],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.001566693314137,
+      :odds 7.153499768355136E-37}
+     {:token
+      ["M-expressions-of-interest"
+       :obligation-resolved-through-the-account],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.001566693314137,
+      :odds 7.153499768355136E-37}
+     {:token
+      ["M-expressions-of-interest" :premise-refused-before-work],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.001566693314137,
+      :odds 7.153499768355136E-37}
+     {:token ["M-f11-find-production-successor" :hole/h2045faa0e7cc],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000427732461834,
+      :odds 1.78605029783091E-17}
+     {:token ["M-f11-find-production-successor" :hole/h9ab212b3281d],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000427732461834,
+      :odds 1.78605029783091E-17}
+     {:token ["M-federated-agency-hardening" :hole/h260a1b85a356],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008814983190197,
+      :odds 7.148605893317614E-37}
+     {:token ["M-federated-agency-hardening" :hole/hb8a6fa5239dc],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008814983190197,
+      :odds 7.148605893317614E-37}
+     {:token ["M-federated-agency-hardening" :hole/hd6dd12860265],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008814983190197,
+      :odds 7.148605893317614E-37}
+     {:token ["M-federated-agency-hardening" :hole/hf4b4e2392af5],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008814983190197,
+      :odds 7.148605893317614E-37}
+     {:token ["M-futon-forward-model" :hole/h30576d62bffb],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds 7.148728199380055E-37}
+     {:token ["M-futon-forward-model" :hole/h3547e9033d0d],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds 7.148728199380055E-37}
+     {:token ["M-futon-forward-model" :hole/h6adae34e06ad],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds 7.148728199380055E-37}
+     {:token ["M-futon-forward-model" :hole/h8b2289908aa2],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds 7.148728199380055E-37}
+     {:token ["M-futon-forward-model" :hole/ha3f46a5c0073],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds 7.148728199380055E-37}
+     {:token ["M-futon-forward-model" :hole/he92ac929f4c4],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0008986224795764,
+      :odds 7.148728199380055E-37}
+     {:token ["M-futonzero-generative" :hole/h46ed944f95da],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0019008959320426,
+      :odds 1.2570839688136727E-5}
+     {:token ["M-futonzero-generative" :hole/hb5b297019e1e],
+      :absent-class :nothing,
+      :present-class :adjacent,
+      :old-odds 1.0019008959320426,
+      :odds 1.2570839688136727E-5}
+     {:token ["M-futonzero-mvp" :hole/h012c22f2f840],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds 7.146358891865376E-37}
+     {:token ["M-futonzero-mvp" :hole/h0bf75e0e1112],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds 7.146358891865376E-37}
+     {:token ["M-futonzero-mvp" :hole/h6618be8fcdc6],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds 7.146358891865376E-37}
+     {:token ["M-futonzero-mvp" :hole/h877c2296c0a7],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds 7.146358891865376E-37}
+     {:token ["M-futonzero-mvp" :hole/hae74888084c6],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds 7.146358891865376E-37}
+     {:token ["M-futonzero-mvp" :hole/hd4e4d3ab0ea4],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds 7.146358891865376E-37}
+     {:token ["M-futonzero-mvp" :hole/heccb32318c8f],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds 7.146358891865376E-37}
+     {:token ["M-futonzero-mvp" :hole/hfa9ca51fc80f],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0005668940152144,
+      :odds 7.146358891865376E-37}
+     {:token ["M-kangaroo" :hole/h40dbfc082f77],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds 7.1448969369956186E-37}
+     {:token ["M-kangaroo" :hole/h625bf9588b21],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds 7.1448969369956186E-37}
+     {:token ["M-kangaroo" :hole/h6e670ac8054e],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds 7.1448969369956186E-37}
+     {:token ["M-kangaroo" :hole/hb674018208b0],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds 7.1448969369956186E-37}
+     {:token ["M-kangaroo" :hole/he91ecffec2e7],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds 7.1448969369956186E-37}
+     {:token ["M-kangaroo" :hole/hf27981fd598b],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.00036220465308,
+      :odds 7.1448969369956186E-37}
+     {:token ["M-self-documenting-stack" :hole/hc2a9dfb6ffda],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.006953179572104,
+      :odds 7.191971722799968E-37}
+     {:token ["M-usage-hacking" :hole/h14d8c34e01f3],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds 7.142386332815239E-37}
+     {:token ["M-usage-hacking" :hole/h1cae28671f48],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds 7.142386332815239E-37}
+     {:token ["M-usage-hacking" :hole/h201759e2d7fa],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds 7.142386332815239E-37}
+     {:token ["M-usage-hacking" :hole/h3d340ddee61e],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds 7.142386332815239E-37}
+     {:token ["M-usage-hacking" :hole/h488d4eeea966],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds 7.142386332815239E-37}
+     {:token ["M-usage-hacking" :hole/h570008e13568],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds 7.142386332815239E-37}
+     {:token ["M-usage-hacking" :hole/h626638483174],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds 7.142386332815239E-37}
+     {:token ["M-usage-hacking" :hole/h87150eef7aae],
+      :absent-class :nothing,
+      :present-class :irrelevant,
+      :old-odds 1.0000106931400299,
+      :odds 7.142386332815239E-37}
+     {:token ["M-wm-08-external-f2" :route-a-rehearsal-reported],
+      :absent-class :nothing,
+      :present-class :nothing,
+      :old-odds 1.008368152207447,
+      :odds 1.0083681522074466}
+     {:token ["M-wm-aif-policy-grain-compliance" :hole/h26fc1070c3e6],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000213863944027,
+      :odds 1.7860121014717072E-17}
+     {:token ["M-wm-aif-policy-grain-compliance" :hole/h4d3638710e7b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000213863944027,
+      :odds 1.7860121014717072E-17}
+     {:token ["M-wm-aif-policy-grain-compliance" :hole/ha04170c8d22b],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000213863944027,
+      :odds 1.7860121014717072E-17}
+     {:token ["M-wm-aif-policy-grain-compliance" :hole/hbc48e7c4dbdf],
+      :absent-class :nothing,
+      :present-class :focus,
+      :old-odds 1.0000213863944027,
+      :odds 1.7860121014717072E-17}],
+    :new-want-counts {:irrelevant 61, :focus 40, :adjacent 18},
+    :action-decided-by #{:G},
+    :rows
+    [{:id :C1,
+      :target "M-expressions-of-interest",
+      :topic-class :irrelevant,
+      :outcome-class :irrelevant,
+      :G 173.55460029637786,
+      :posterior 1.4926473142947703E-37}
+     {:id :C2,
+      :target "M-expressions-of-interest",
+      :topic-class :irrelevant,
+      :outcome-class :irrelevant,
+      :G 173.55460029637786,
+      :posterior 2.9852946285895745E-38}
+     {:id :C0,
+      :target "M-dionysus-winddown",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.1249999999999993}
+     {:id :C0,
+      :target "M-daily-scan",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-distributed-frontiermath",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-G-wm-wiring",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-f11-find-production-successor",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-kangaroo",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-chipwitz-corps",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-expressions-of-interest",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-wm-aif-policy-grain-compliance",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-canon-fingerprint-store",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-self-documenting-stack",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-apm-capability-ratchet",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-usage-hacking",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-futonzero-mvp",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-action-cost-modelling",
+      :topic-class :adjacent,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-aif4iad",
+      :topic-class :adjacent,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-federated-agency-hardening",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-futonzero-generative",
+      :topic-class :adjacent,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-aif-policy-conditioned-eig",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-futon-forward-model",
+      :topic-class :irrelevant,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C0,
+      :target "M-wm-08-external-f2",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}
+     {:id :C1,
+      :target "M-wm-08-external-f2",
+      :topic-class :focus,
+      :outcome-class :nothing,
+      :G 90.32811903797088,
+      :posterior 0.04166666666666653}],
+    :outcome-domain
+    :frozen-token-powerset-plus-unrepresented-class-atoms,
+    :case :elsewhere-5-nothing-10,
+    :log-class-normalizers
+    {:focus 42.98833645672847,
+     :adjacent 15.258398452235657,
+     :irrelevant 85.31322908194491,
+     :nothing 2.776764069436886},
+    :choice
+    {:action
+     {:id :cascade-construction/run-it-on-a-real-case,
+      :target "M-wm-08-external-f2"},
+     :mass 0.04166666666666653,
+     :tie-break-rule :action-name-ascending},
+    :class-masses
+    {:focus 0.5194444444444445,
+     :adjacent 0.33055555555555555,
+     :irrelevant 0.05,
+     :nothing 0.1},
+    :unrepresented-class-mass {}}
+   {:policy-decided-by nil,
     :selection-refusal
     {:kind :no-admissible-candidate,
      :detail {:n-candidates 24, :n-infinite 24}},

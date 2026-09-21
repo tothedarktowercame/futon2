@@ -69,7 +69,9 @@
                                {:topic-class (topic (get-in r [:candidate :id :target]))
                                 :outcome-class (:outcome-class r) :G (:g r)
                                 :posterior (get posterior (get-in r [:candidate :id]) 0)})) rows)}))
-(def cases [[:literal-60-40-zero {:focus 0.6 :adjacent 0.4 :irrelevant 0.0 :nothing 0.0}]
+(def cases [[:elsewhere-5-nothing-zero {:focus (* 0.95 (/ 11.0 18)) :adjacent (* 0.95 (/ 7.0 18)) :irrelevant 0.05 :nothing 0.0}]
+            [:elsewhere-5-nothing-10 {:focus (* 0.85 (/ 11.0 18)) :adjacent (* 0.85 (/ 7.0 18)) :irrelevant 0.05 :nothing 0.1}]
+            [:literal-60-40-zero {:focus 0.6 :adjacent 0.4 :irrelevant 0.0 :nothing 0.0}]
             [:hard-zero-nothing-10 {:focus 0.54 :adjacent 0.36 :irrelevant 0.0 :nothing 0.1}]
             [:epsilon-nothing-zero {:focus 0.5999994 :adjacent 0.3999996 :irrelevant 0.000001 :nothing 0.0}]
             [:epsilon-nothing-10 {:focus 0.5399994 :adjacent 0.3599996 :irrelevant 0.000001 :nothing 0.1}]
