@@ -153,3 +153,34 @@ and the same `arxana-check-parens-cli` command with that file as its argument.
 Both pass (`compat-lint.log`, `compat-parens.log`). Its final dynamic resolution
 of fix-10a's producer was executed again successfully (`compat.log`). No
 production or test-namespace code changed after the warranted commit.
+
+## Assertion-by-assertion replacement of the old accumulation contract
+
+The owner confirmed that the six failures predate this fix and reproduce at
+`e9ee4a73`. Line numbers below refer to that revision's
+`cascade_habit_accumulation_test.clj`; this change does not treat those failures
+as evidence of a regression introduced today.
+
+| Old line / assertion | What it pinned | Replacement under the outcome rule |
+| --- | --- | --- |
+| 78, `before = after` | Entire decisions equalled pre-migration `before.edn` snapshots. | Compare the bare selector and selection wrapper on the **same current input and unchanged store snapshot**, before close. No current output is saved as a new golden snapshot. Independent count/rule assertions determine the required behavior. |
+| 79, store exists | Selection created durable habit state. | Six explicit closes with observed predicted wants create the store. The separate selection regression proves selection does not create a lock or change existing bytes. |
+| 80, samples = 6 | Six selections each counted once. | Six successful token-comparison receipts each count once. |
+| 81, counts = 2/4 | The empty policy won twice and the acting policy four times. | Two distinct **acting** policies win twice/four times, and their explicit observed-outcome closes produce those exact counts. |
+| 82, first key has empty shown vector | The empty policy was selected and reinforced. | Assert the first policy's distinct target identity. Empty-policy identity remains tested in `identities-include-empty-and-preserve-types`; empty identity no longer implies an eligible acting selection. |
+| 83, second key preserves the production pattern keyword | Policy identity preserves the production pattern ID. | Retained unchanged. |
+| 84, selection bases | Every count was labelled as a selected representative. | Assert `:reinforcement-bases` names `:wm/cascade-habit-observed-want-v1` for both policies. |
+| 85, first log prior = ln(0.375) | Dirichlet mass from 2 counts and alpha 1. | Retained analytically: `(2 + 1) / (6 + 2) = 0.375`, now from witnessed outcomes. |
+| 86, second log prior = ln(0.625) | Dirichlet mass from 4 counts and alpha 1. | Retained analytically: `(4 + 1) / (6 + 2) = 0.625`, now from witnessed outcomes. |
+| 91, samples = 106 | Another 100 raw selection writes persisted. | Another 100 explicit observed-outcome closes persist, each reopening the store. |
+| 92, two count entries | Repeated history does not create one entry per tick. | Retained unchanged for the two acting policies after 106 outcome reinforcements. |
+
+The namespace's real-assembly test also changes its former one-sample/count-one
+expectation to **zero samples and empty counts after selection**, while retaining
+complete decision equality. The stronger new selection test seeds a real store
+and asserts byte-for-byte text equality before/after selection; the rule tests
+separately cover false/missing observations and grounding without evidence.
+
+This mapping documents tests already included in `ea173054`; no code or test
+changes were necessary in response to the owner's note. Existing passing logs
+and the registered warrant therefore remain applicable without rerunning.
