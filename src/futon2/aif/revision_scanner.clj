@@ -25,9 +25,9 @@
    :patterns (mapv :id (get-in s [:occurrence :action/value :precedence]))
    :model-part (:model-part s)})
 
-(defn revisions [repo]
+(defn revisions [repo revision]
   (vec
-   (for [chunk (str/split (git repo "log" "--format=%x1e%H%x00%cI%x00%(trailers:key=Surprise,valueonly)") #"\u001e")
+   (for [chunk (str/split (git repo "log" "--format=%x1e%H%x00%cI%x00%(trailers:key=Surprise,valueonly)" revision) #"\u001e")
          :when (not (str/blank? chunk))
          :let [[sha at trailers] (str/split chunk #"\u0000" 3)]
          id (distinct (remove str/blank? (map str/trim (str/split-lines (or trailers "")))))]
@@ -123,14 +123,16 @@
   [{:keys [repos surprise-files run-files bindings as-of unanswered-after-seconds] :as config}]
   (when-not (and (instant as-of) (pos-int? unanswered-after-seconds))
     (throw (ex-info "Declare scan time and positive unanswered interval" {})))
-  (let [surprises (mapcat (fn [p] (map #(assoc % :record-path p) (read-record p))) surprise-files)
+  (let [heads (into (sorted-map) (map (fn [repo]
+                                        [repo (str/trim (git repo "rev-parse" (get-in config [:revisions repo] "HEAD")))]) repos))
+        surprises (mapcat (fn [p] (map #(assoc % :record-path p) (read-record p))) surprise-files)
         grouped (group-by :surprise/id surprises)
         conflicts (set (for [[id rows] grouped
                              :when (> (count (set (map #(dissoc % :record-path) rows))) 1)] id))
         valid (into {} (for [[id rows] grouped :when (and id (not (conflicts id))
                                                         (= :wm/surprise-v1 (:schema (first rows))))]
                          [id (first rows)]))
-        revisions (filter #(not (after? (:at %) as-of)) (mapcat revisions repos))
+        revisions (filter #(not (after? (:at %) as-of)) (mapcat #(revisions % (heads %)) repos))
         unknown (filter #(not (contains? valid (:surprise/id %))) revisions)
         joined (filter #(and (contains? valid (:surprise/id %))
                              (after? (:at %) (let [s (valid (:surprise/id %)) t (get-in s [:observation :observed-at])]
@@ -161,7 +163,10 @@
                        :consumption-established? (boolean (some #(and (= revision (:revision %))
                                                                                     (= :consumed (:grade %))) candidates))})]
     {:schema :wm/revision-scan-v1 :mode :record-only :as-of as-of
-     :declaration config :surprise-count (count valid)
+     :repo-heads heads
+     :input-digests (mapv #(hash-map :path % :sha256 (identity/sha256 (slurp %)))
+                         (distinct (concat surprise-files run-files)))
+     :declaration (assoc config :revisions heads) :surprise-count (count valid)
      :learning-event-candidates candidates :friction-candidates (vec (concat unanswered recurrences))
      :flags (vec (concat (map #(assoc % :kind :unknown-surprise-id) unknown)
                          (map #(hash-map :kind :conflicting-surprise-records :surprise/id %) conflicts)))}))

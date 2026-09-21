@@ -14,9 +14,129 @@
     :sha256
     "b4e759a9cdb1be48ffad5b82fcb3c7fb13e3608c3c332ee92478a9831f5e7895"}]},
  :live
- {:schema :wm/revision-scan-v1,
+ {:surprise-count 0,
+  :schema :wm/revision-scan-v1,
+  :learning-event-candidates [],
   :mode :record-only,
-  :as-of "2026-09-21T18:20:59Z",
+  :input-digests
+  [{:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-18-5bf0bbfb-df6c-43e6-a126-2068d49b6969.edn",
+    :sha256
+    "912037ab2f1d8e414914a738c1dc3ece5c0bd91aef11bebbd7aad72955a0dcaa"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-18-r12fix-1789773891.edn",
+    :sha256
+    "a5c65d24da70b3dc30ed8900201c9c7c10cca71aaa34c01c959f372c01ea9bd8"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789779250.edn",
+    :sha256
+    "01ca15fc9791013eeebf9eb03a203283015293a33662b06663d1db7a369b2256"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789780157.edn",
+    :sha256
+    "b76f1fc556d7c8ed6c26818dc557a490ff8f84f8b0c5daa2c4ce44eee75d8c3b"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789827859.edn",
+    :sha256
+    "99cbefcf88a7b43692b3c5f8a66bf6868a7f47edb87b4a1a88da410785e73eea"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828199.edn",
+    :sha256
+    "63ff1dbe0ca7e220e6960e22883da611b599e7a7ee3552a7a471ae04357827d3"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828750.edn",
+    :sha256
+    "80abc12b1c7791fef603ec752e38b3c6d1630f0749b1cf6e6ceaa3c518cd3f25"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789835454.edn",
+    :sha256
+    "ef261e684e38b2f56f2da53b1b99e458715814bef563521fe11ae3e12cde5fd3"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848147.edn",
+    :sha256
+    "306186be7d9d0c58edf4f47662c83fbcd0867a1576d1d2ebf9da9c72b7409f26"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848234.edn",
+    :sha256
+    "179ec6a8fc18aa2ce54d0a6c68859b9717439e86e9c24dca6d006563b63c1cc4"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848916.edn",
+    :sha256
+    "a4cd6a8bbf0fe6c649c7bc45c06134ac71375d07cc7ed0bae7b2cae3e0f0ea7d"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789849189.edn",
+    :sha256
+    "b4617a0fa838e499d5bd8ae6e54ddb48b7dd6a7a4256125b890eb40b20914aaa"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789854206.edn",
+    :sha256
+    "defa18eac04e6c371c1a087bab45d5b875c6312167e06fe933d4307b5341f244"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789856495.edn",
+    :sha256
+    "8fee32d3490ed45ab8b94526bd38802e9fdabd32f2f586f6c3bb8918f829db72"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-postfix-1789776011.edn",
+    :sha256
+    "dc566503a9c6625e1e14cd806a8c2530f11764f4d27bbe21379ad0394da0b15a"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-019f6e43-5ea5-40b9-bfe6-1a0e1358d5f3.edn",
+    :sha256
+    "a9bb54abf0d8dcc59ae96f15df10881332967939603a6bb1118a1b7d067d5505"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-0ea3d13d-4a29-43d6-96a5-77acb4773011.edn",
+    :sha256
+    "824ffd1b38f402925e6f277f8668123090bef36bdbb2c4a62041bc2d34d8a2ba"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789862860.edn",
+    :sha256
+    "e7b46ba7073b651845451ec6d554597dc169d2b1acc45cead8f2837dfd948c49"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789940260.edn",
+    :sha256
+    "74a227d557bf737cb27bb7ba0a14f343ebbf0c4fbfc56c9b252f119d3b9421c8"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789948650.edn",
+    :sha256
+    "395faba6f5d168bcff21a87488597817b37ed6d8c8f0bf9418be75067823139b"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-3ffe98e9-8356-4491-adb5-c3ba574c0c2f.edn",
+    :sha256
+    "95f5888b065e1b7c836f3535ba95bb9bfd072b60661aa7ae6ce64367f7d58bd0"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-785ca6f2-3e7a-4522-90a7-575cab4dd5f8.edn",
+    :sha256
+    "5c1a5ef7f092b6fe69f2f4f3f9bb479394e8ad1b564b0b509845c8117901f67f"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789948972.edn",
+    :sha256
+    "2d94846bc7bc6d2e046d39ddd1b9ebe35cfb3f14c3addb05b512cfbd50bc892f"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789951020.edn",
+    :sha256
+    "5c68dee93b36bde383ab4ecca5ec96856114361534a02ffdedd800fc06f09501"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952178.edn",
+    :sha256
+    "32be1fee9a2bbb3603e2a36381e1f9eaa2dde554e63ee7db3c4e199caa6912b7"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952479.edn",
+    :sha256
+    "031ec7431af2939bdfa15ca941e28cc23e6ec3b2264d99dc8b65b00c82b2e298"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789964661.edn",
+    :sha256
+    "8264021ac5f5bc6c251720917c69375795fcc9e1a4a5f263694b6efe51142686"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-probe-revert-check.edn",
+    :sha256
+    "ae35b169a41ea95267e23f86c6ff6a616488f81449773c16cbe059822f3451a7"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-smoke.edn",
+    :sha256
+    "b07fec7545b77516894930afbc4a48d91a924c1776ce9965ec542af14464fa40"}],
+  :as-of "2026-09-21T18:24:58Z",
+  :friction-candidates [],
   :declaration
   {:repos ["/home/joe/code/futon2"],
    :surprise-files [],
@@ -50,7 +170,7 @@
     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789964661.edn"
     "/home/joe/code/futon2/data/wm-runs/tick-run-record-probe-revert-check.edn"
     "/home/joe/code/futon2/data/wm-runs/tick-run-record-smoke.edn"],
-   :as-of "2026-09-21T18:20:59Z",
+   :as-of "2026-09-21T18:24:58Z",
    :unanswered-after-seconds 21600,
    :interval-reason
    "Six hours: within-working-day follow-up signal, not a claim that learning must occur on this deadline.",
@@ -64,15 +184,153 @@
      "resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn",
      :target "M-aif-policy-conditioned-eig",
      :model-part :B-effect,
-     :loaded-evidence :unavailable-for-declarations}]},
-  :surprise-count 0,
-  :learning-event-candidates [],
-  :friction-candidates [],
+     :loaded-evidence :unavailable-for-declarations}],
+   :revisions
+   {"/home/joe/code/futon2"
+    "7b6654e1f26b5465c35d1f4408334711ad71c134"}},
+  :repo-heads
+  {"/home/joe/code/futon2" "7b6654e1f26b5465c35d1f4408334711ad71c134"},
   :flags []},
  :historical-replay
- {:schema :wm/revision-scan-v1,
+ {:surprise-count 1,
+  :schema :wm/revision-scan-v1,
+  :learning-event-candidates [],
   :mode :record-only,
-  :as-of "2026-09-21T18:20:59Z",
+  :input-digests
+  [{:path
+    "/home/joe/code/futon2-improve-6b/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-6b/historical-surprises.edn",
+    :sha256
+    "dccc30f7cfe974607a35d52c2abb24adb7c481a6ca0c770d100e1e99c5b15af4"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-18-5bf0bbfb-df6c-43e6-a126-2068d49b6969.edn",
+    :sha256
+    "912037ab2f1d8e414914a738c1dc3ece5c0bd91aef11bebbd7aad72955a0dcaa"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-18-r12fix-1789773891.edn",
+    :sha256
+    "a5c65d24da70b3dc30ed8900201c9c7c10cca71aaa34c01c959f372c01ea9bd8"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789779250.edn",
+    :sha256
+    "01ca15fc9791013eeebf9eb03a203283015293a33662b06663d1db7a369b2256"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789780157.edn",
+    :sha256
+    "b76f1fc556d7c8ed6c26818dc557a490ff8f84f8b0c5daa2c4ce44eee75d8c3b"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789827859.edn",
+    :sha256
+    "99cbefcf88a7b43692b3c5f8a66bf6868a7f47edb87b4a1a88da410785e73eea"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828199.edn",
+    :sha256
+    "63ff1dbe0ca7e220e6960e22883da611b599e7a7ee3552a7a471ae04357827d3"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789828750.edn",
+    :sha256
+    "80abc12b1c7791fef603ec752e38b3c6d1630f0749b1cf6e6ceaa3c518cd3f25"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789835454.edn",
+    :sha256
+    "ef261e684e38b2f56f2da53b1b99e458715814bef563521fe11ae3e12cde5fd3"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848147.edn",
+    :sha256
+    "306186be7d9d0c58edf4f47662c83fbcd0867a1576d1d2ebf9da9c72b7409f26"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848234.edn",
+    :sha256
+    "179ec6a8fc18aa2ce54d0a6c68859b9717439e86e9c24dca6d006563b63c1cc4"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789848916.edn",
+    :sha256
+    "a4cd6a8bbf0fe6c649c7bc45c06134ac71375d07cc7ed0bae7b2cae3e0f0ea7d"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789849189.edn",
+    :sha256
+    "b4617a0fa838e499d5bd8ae6e54ddb48b7dd6a7a4256125b890eb40b20914aaa"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789854206.edn",
+    :sha256
+    "defa18eac04e6c371c1a087bab45d5b875c6312167e06fe933d4307b5341f244"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-1789856495.edn",
+    :sha256
+    "8fee32d3490ed45ab8b94526bd38802e9fdabd32f2f586f6c3bb8918f829db72"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-19-postfix-1789776011.edn",
+    :sha256
+    "dc566503a9c6625e1e14cd806a8c2530f11764f4d27bbe21379ad0394da0b15a"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-019f6e43-5ea5-40b9-bfe6-1a0e1358d5f3.edn",
+    :sha256
+    "a9bb54abf0d8dcc59ae96f15df10881332967939603a6bb1118a1b7d067d5505"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-0ea3d13d-4a29-43d6-96a5-77acb4773011.edn",
+    :sha256
+    "824ffd1b38f402925e6f277f8668123090bef36bdbb2c4a62041bc2d34d8a2ba"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789862860.edn",
+    :sha256
+    "e7b46ba7073b651845451ec6d554597dc169d2b1acc45cead8f2837dfd948c49"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789940260.edn",
+    :sha256
+    "74a227d557bf737cb27bb7ba0a14f343ebbf0c4fbfc56c9b252f119d3b9421c8"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-1789948650.edn",
+    :sha256
+    "395faba6f5d168bcff21a87488597817b37ed6d8c8f0bf9418be75067823139b"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-3ffe98e9-8356-4491-adb5-c3ba574c0c2f.edn",
+    :sha256
+    "95f5888b065e1b7c836f3535ba95bb9bfd072b60661aa7ae6ce64367f7d58bd0"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-20-785ca6f2-3e7a-4522-90a7-575cab4dd5f8.edn",
+    :sha256
+    "5c1a5ef7f092b6fe69f2f4f3f9bb479394e8ad1b564b0b509845c8117901f67f"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789948972.edn",
+    :sha256
+    "2d94846bc7bc6d2e046d39ddd1b9ebe35cfb3f14c3addb05b512cfbd50bc892f"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789951020.edn",
+    :sha256
+    "5c68dee93b36bde383ab4ecca5ec96856114361534a02ffdedd800fc06f09501"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952178.edn",
+    :sha256
+    "32be1fee9a2bbb3603e2a36381e1f9eaa2dde554e63ee7db3c4e199caa6912b7"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789952479.edn",
+    :sha256
+    "031ec7431af2939bdfa15ca941e28cc23e6ec3b2264d99dc8b65b00c82b2e298"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789964661.edn",
+    :sha256
+    "8264021ac5f5bc6c251720917c69375795fcc9e1a4a5f263694b6efe51142686"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-probe-revert-check.edn",
+    :sha256
+    "ae35b169a41ea95267e23f86c6ff6a616488f81449773c16cbe059822f3451a7"}
+   {:path
+    "/home/joe/code/futon2/data/wm-runs/tick-run-record-smoke.edn",
+    :sha256
+    "b07fec7545b77516894930afbc4a48d91a924c1776ce9965ec542af14464fa40"}],
+  :as-of "2026-09-21T18:24:58Z",
+  :friction-candidates
+  [{:kind :unanswered,
+    :surprise/id
+    "surprise-12ae64452b8a9cbf6abd336686b6aa4583e656ce301c3fd3c3bf47d23bcf9bae",
+    :expectation-class
+    {:rule :positive-marginal-support,
+     :target "M-aif-policy-conditioned-eig",
+     :token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
+     :action-class :cascade-candidate,
+     :patterns [:apparatus/one-authority-per-question],
+     :model-part :B-effect},
+    :since "2026-09-21T04:26:36.986447255Z",
+    :clock-basis :declaration-time-proxy}],
   :declaration
   {:repos ["/home/joe/code/futon2"],
    :surprise-files
@@ -107,7 +365,7 @@
     "/home/joe/code/futon2/data/wm-runs/tick-run-record-2026-09-21-1789964661.edn"
     "/home/joe/code/futon2/data/wm-runs/tick-run-record-probe-revert-check.edn"
     "/home/joe/code/futon2/data/wm-runs/tick-run-record-smoke.edn"],
-   :as-of "2026-09-21T18:20:59Z",
+   :as-of "2026-09-21T18:24:58Z",
    :unanswered-after-seconds 21600,
    :interval-reason
    "Six hours: within-working-day follow-up signal, not a claim that learning must occur on this deadline.",
@@ -121,20 +379,10 @@
      "resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn",
      :target "M-aif-policy-conditioned-eig",
      :model-part :B-effect,
-     :loaded-evidence :unavailable-for-declarations}]},
-  :surprise-count 1,
-  :learning-event-candidates [],
-  :friction-candidates
-  [{:kind :unanswered,
-    :surprise/id
-    "surprise-12ae64452b8a9cbf6abd336686b6aa4583e656ce301c3fd3c3bf47d23bcf9bae",
-    :expectation-class
-    {:rule :positive-marginal-support,
-     :target "M-aif-policy-conditioned-eig",
-     :token ["M-aif-policy-conditioned-eig" :hole/h6378c65a4012],
-     :action-class :cascade-candidate,
-     :patterns [:apparatus/one-authority-per-question],
-     :model-part :B-effect},
-    :since "2026-09-21T04:26:36.986447255Z",
-    :clock-basis :declaration-time-proxy}],
+     :loaded-evidence :unavailable-for-declarations}],
+   :revisions
+   {"/home/joe/code/futon2"
+    "7b6654e1f26b5465c35d1f4408334711ad71c134"}},
+  :repo-heads
+  {"/home/joe/code/futon2" "7b6654e1f26b5465c35d1f4408334711ad71c134"},
   :flags []}}

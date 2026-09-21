@@ -18,7 +18,9 @@ snapshot**, not a production consumer or an append to the calibration ledger.
 
 The real declaration is `improve-6b/live-config.edn`: only canonical **futon2**
 is a declared Git repository. Git's reachable HEAD history, including merges,
-is scanned. Proper `Surprise: <id>` trailers are read with Git's trailer parser,
+is scanned. The output pins each repository HEAD and hashes every input receipt;
+`:revisions` in the saved config permits replay against those exact commits.
+Proper `Surprise: <id>` trailers are read with Git's trailer parser,
 not a regex over arbitrary prose. Merge file changes are against the first
 parent. Every citation retains repository, commit, committer time and changed
 paths. IDs not present in the supplied surprise files are flagged

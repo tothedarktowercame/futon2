@@ -45,13 +45,13 @@
                         {:repo repo :path "resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn"
                          :target "M-aif-policy-conditioned-eig" :model-part :B-effect
                          :loaded-evidence :unavailable-for-declarations}]})
-(spit (io/file output "live-config.edn") (pr-str config))
-(spit (io/file output "historical-config.edn") (pr-str (assoc config :surprise-files [replay-path])))
 (def result {:provenance {:historical :reconstructed-not-live-close
                           :inputs (mapv #(hash-map :path % :sha256 (identity/sha256 (slurp %)))
                                         [run-path selection-path task-path])}
              :live (scanner/scan config)
              :historical-replay (scanner/scan (assoc config :surprise-files [replay-path]))})
+(spit (io/file output "live-config.edn") (pr-str (get-in result [:live :declaration])))
+(spit (io/file output "historical-config.edn") (pr-str (get-in result [:historical-replay :declaration])))
 (with-open [w (io/writer (io/file output "real-results.edn"))] (pp/pprint result w))
 (prn {:live-surprises (get-in result [:live :surprise-count])
       :historical-surprises (get-in result [:historical-replay :surprise-count])
