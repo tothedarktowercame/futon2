@@ -250,6 +250,7 @@
    :C6 {:class :C6 :repo "futon2" :sha "HEAD" :path "nonexistent-locator-test-witness.edn"}})
 
 (deftest guard-locators-discriminate-by-production-observation-class
+  (is (= (set (keys observations/checks)) (set (keys class-locators))))
   (doseq [[class locator] class-locators]
     (testing (str class " admits its own fields, without imposing another class's")
       (let [decision (located-guard-decision locator)
