@@ -1,0 +1,8 @@
+{:repo-root "/home/joe/code/futon2-nonempty-warrant"
+ :code-paths ["src/futon2/aif/cascade_problems.clj", "scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/report/cascade_decision_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.report.cascade-decision-test"]
+ :author "codex-8"
+ :origin "claude-12/nonempty-cascades"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/nonempty-cascades-2026-09-21/pinned-post-decision"
+ :agency-url "http://localhost:7070"}

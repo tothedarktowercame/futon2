@@ -1,0 +1,106 @@
+{
+  "role": "post-commit-warrant",
+  "implementation-commit": "c155d690cc1b27f42094ea55a2159bed82c136d7",
+  "author": "codex-8",
+  "requesting-owner": "claude-12",
+  "independent-review": "pending",
+  "sha256": {
+    "src/futon2/aif/cascade_problems.clj": "31738964e88272e483d7850b6fb79746d6c9332b7215e787b3344e1184b13bb0",
+    "scripts/futon2/report/war_machine.clj": "9f2f58bf822226bba235f0155b26f28b489483c6e185a36d44eb60cc05bcc4b1",
+    "test/futon2/aif/cascade_problems_test.clj": "77df9c31b02c7e41ce68ecb5736b47f16ae5a44170f4493668dbcada876abd20",
+    "test/futon2/report/cascade_decision_test.clj": "1ba93d7cb41a3722c5ed6dbcc66711ff29879123bf26bf135fb23b7b4c9093bb",
+    "test/futon2/aif/construction_test.clj": "f760eabcd13bc3bef0ed53ce67ffd42badc66cbcd35f0762f74b943a0c7e670f"
+  },
+  "warrants": [
+    {
+      "scope": "assembly",
+      "entry-id": "test-registry-67896344fec255792d10f36756f40a751d3f3cac3b2de7ec776308d731bf4a6e",
+      "run-id": "42509306-1307-4bf6-93d9-5167b350b2f0",
+      "warrant?": true,
+      "code-sha": "f94ce33ee349dc5b5772c3fda7092b246f419d8471a0c737f7e5e2c6c3eafc14",
+      "test-sha": "6a7979b902234ae0bb372c90e1061ffc25b9ce748f3abfed3b767f87e4654ce9",
+      "results": {
+        "assertions": 30,
+        "duration-ms": 4636,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 6
+      }
+    },
+    {
+      "scope": "decision",
+      "entry-id": "test-registry-2c762e6b9dea1d5474d87c2c3b59ff23b8ce3c035f494fbdbb59880d52f454af",
+      "run-id": "489c232f-8527-4d2d-a094-3fec84482e8d",
+      "warrant?": true,
+      "code-sha": "f94ce33ee349dc5b5772c3fda7092b246f419d8471a0c737f7e5e2c6c3eafc14",
+      "test-sha": "29f552596bdd36beec77c9972dacca5f6dd1b1efc396880231bfe3e06933cca0",
+      "results": {
+        "assertions": 91,
+        "duration-ms": 7116,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 13
+      }
+    },
+    {
+      "scope": "construction",
+      "entry-id": "test-registry-8db35310204ad0dbdb643c94b0428bf7eee15ccc06699ef4d1dbbf30738415a9",
+      "run-id": "eea6040d-b421-4c5c-98cd-c9ec5ac8fb5a",
+      "warrant?": true,
+      "code-sha": "f94ce33ee349dc5b5772c3fda7092b246f419d8471a0c737f7e5e2c6c3eafc14",
+      "test-sha": "910f129581e9e8063445e9bf65c26a022832b532775cdeb233f036e6ecd10493",
+      "results": {
+        "assertions": 34,
+        "duration-ms": 1667,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 8
+      }
+    },
+    {
+      "scope": "selection",
+      "entry-id": "test-registry-a6684487fe71b0c48b5ce47aeb97291f684d7e9289a89f000be0358c06bec441",
+      "run-id": "c37b7480-310d-4352-b9a2-04a17c9b81d8",
+      "warrant?": true,
+      "code-sha": "f94ce33ee349dc5b5772c3fda7092b246f419d8471a0c737f7e5e2c6c3eafc14",
+      "test-sha": "cf874225c3983b526426d2cad3a55525c6f73091041c8d8798cc2053ae918fbf",
+      "results": {
+        "assertions": 109,
+        "duration-ms": 5551,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 9
+      }
+    },
+    {
+      "scope": "runner",
+      "entry-id": "test-registry-97f6993558b5b8ebf058a9bfd142eb63f79ee175e5c9489125880ee71409b330",
+      "run-id": "ee606426-8e78-46eb-9e04-f0a7883c0782",
+      "warrant?": true,
+      "code-sha": "f94ce33ee349dc5b5772c3fda7092b246f419d8471a0c737f7e5e2c6c3eafc14",
+      "test-sha": "5b18d17c55d41ffa8caa8d282b936dad195dbf862479c6fca70716f03f172dec",
+      "results": {
+        "assertions": 998,
+        "duration-ms": 204325,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 180
+      }
+    }
+  ],
+  "repo-root": "/home/joe/code/futon2-nonempty-warrant",
+  "pinned-checks-passed": true,
+  "canonical-registration-refusal": {
+    "reason": "scope-not-committed",
+    "path": "src/futon2/aif/decision_gate.clj",
+    "evidence": "registration-assembly-dirty-canonical.edn"
+  },
+  "scope-limitation": "Pinned c155d690 checkout, not concurrently edited canonical main; checkout retained for review.",
+  "serving-jvm-loaded": false,
+  "live-tick-run": false
+}

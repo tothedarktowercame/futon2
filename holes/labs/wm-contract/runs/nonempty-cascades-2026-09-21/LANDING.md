@@ -46,3 +46,21 @@ Part (b), generated interpretation admission, is not implemented.
 No live tick, shared-JVM load, or repair-store closing was performed.
 COMMITTED IS NOT LOADED: the serving JVM still needs the owning deployment
 workflow to load the committed canonical namespaces before the next tick.
+
+## Landing and warrant scope
+
+Implementation commit: c155d690cc1b27f42094ea55a2159bed82c136d7.
+All five final postcommit registrations passed. Runner: 180/998/0/0.
+The canonical assembly test passed but its warrant was refused because
+decision_gate.clj was concurrently dirty. The refusal is preserved.
+All five warrants were therefore issued and checked against the clean
+pinned checkout /home/joe/code/futon2-nonempty-warrant at c155d690,
+retained for review. They do not warrant newer canonical edits.
+
+- assembly: test-registry-67896344fec255792d10f36756f40a751d3f3cac3b2de7ec776308d731bf4a6e
+- decision: test-registry-2c762e6b9dea1d5474d87c2c3b59ff23b8ce3c035f494fbdbb59880d52f454af
+- construction: test-registry-8db35310204ad0dbdb643c94b0428bf7eee15ccc06699ef4d1dbbf30738415a9
+- selection: test-registry-a6684487fe71b0c48b5ce47aeb97291f684d7e9289a89f000be0358c06bec441
+- runner: test-registry-97f6993558b5b8ebf058a9bfd142eb63f79ee175e5c9489125880ee71409b330
+
+Exact hashes, roles, scope, and results: postcommit.json.
