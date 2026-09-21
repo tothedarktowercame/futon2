@@ -189,7 +189,7 @@
       (is (= [] (:refusals assembled)))
       (is (= 1 (count (:problems assembled))))
       (is (= [receipt]
-             (get-in assembled [:problems 0 :construction-receipts]))))))
+             (mapv :construction-receipt (get-in assembled [:problems 0 :constructed-candidates])))))))
 
 ;; ------------------------------------------------------- refusals/wants
 (deftest typed-refusals-and-observed-want

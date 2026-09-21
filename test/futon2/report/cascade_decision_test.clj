@@ -262,14 +262,16 @@
         ;; longer be matched, so its candidate must be dropped, recorded,
         ;; and never passed through unreceipted.
         stripped (update-in assembled
-                            [:problems 0 :construction-receipts]
-                            #(vec (butlast %)))
+                            [:problems 0 :constructed-candidates 2]
+                            dissoc :construction-receipt)
         r (wm/cascade-decision stripped live-c-opts)
         decision (:decision r)
         posterior (get-in decision [:selection-law :posterior])]
     (is (= [{:target tick-1-target
              :candidate :C3
-             :reason :construction-receipt-unmatched}]
+             :stage :candidate-admission
+             :reason :construction-receipt-unmatched
+             :missing-evidence [:construction-receipt]}]
            (:dropped-candidates r))
         "the unmatched candidate is dropped with a recorded reason")
     (is (every? #(some? (:construction-receipt %)) (keys posterior))
@@ -347,12 +349,8 @@
         [_ b-p] (by :B :C1)]
     (is (some? a-p))
     (is (some? b-p))
-    ;; B's :p candidate never establishes [:B :done]: its guard is blocked
-    ;; (B's own :open is false and A's :open true does NOT reach it), so it
-    ;; scores exactly like B's empty cascade — equal G ⇒ equal posterior
-    ;; mass at equal habit.
-    (is (< (Math/abs (- (double b-p) (double (second (by :B :C0))))) 1e-9)
-        "B's guard is not satisfied by A's fact: B's same-id candidate scores like B's empty cascade (identity stall)")
+    (is (= 2 (count posterior))
+        "only the two nonempty target-qualified candidates are scored")
     (is (> (double a-p) (double b-p))
         "A's candidate, whose OWN fact satisfies the guard, carries more posterior mass (lower G)")
     (is (= :A (get-in decision [:action :target]))
@@ -439,3 +437,42 @@
                      (get-in [:decision :token-qualification]))]
       (is (= :target-token-pair (:scheme spec-c))
           "the decision states the qualification scheme its outcomes use"))))
+
+
+(deftest real-candidates-have-no-empty-sibling-and-keep-their-own-receipts
+  (let [assembled (assemble* {:targets [tick-1-target] :sources tick-1-sources})
+        pairs (get-in assembled [:problems 0 :constructed-candidates])
+        marked (mapv (fn [i p] (assoc-in p [:construction-receipt :test-marker] i))
+                     (range) pairs)
+        reordered (assoc-in assembled [:problems 0 :constructed-candidates] (vec (reverse marked)))
+        r (wm/cascade-decision reordered live-c-opts)
+        candidates (keys (get-in r [:decision :selection-law :posterior]))]
+    (is (= (count pairs) (count candidates)))
+    (is (every? #(seq (:precedence %)) candidates))
+    (is (empty? (:dropped-candidates r)))
+    (is (every? #(seq (:precedence %)) (mapcat :candidates (:lanes r))))
+    (is (every? #(false? (get-in % [:null-comparison :used-for-joint-selection?])) (:lanes r)))
+    (is (every? #(empty? (:precedence %))
+                (mapcat #(get-in % [:null-comparison :candidates]) (:lanes r))))
+    (doseq [c candidates]
+      (let [pair (some #(when (= (:candidate-id %) (:id c)) %) marked)]
+        (is (= (:construction-receipt pair) (:construction-receipt c)))
+        (is (= (:precedence pair) (mapv :id (:precedence c))))))))
+
+(deftest all-declined-family-is-a-recorded-abstention
+  (let [assembled (assemble* {:targets [tick-1-target] :sources tick-1-sources})]
+    (doseq [[label broken]
+            [[:no-receipts (assoc-in assembled [:problems 0 :interpretation-receipts] {})]
+             [:partial-receipts (assoc-in assembled [:problems 0 :interpretation-receipts]
+                                         {:not-used {:source "irrelevant"}})]
+             [:empty-orders (update-in assembled [:problems 0 :constructed-candidates]
+                                       #(mapv (fn [p] (assoc p :precedence [])) %))]
+             [:no-pairs (assoc-in assembled [:problems 0 :constructed-candidates] [])]]]
+      (let [r (wm/cascade-decision broken live-c-opts)
+            declines (:dropped-candidates r)]
+        (is (= :abstained (get-in r [:decision :status])) (str label))
+        (is (= :no-acting-cascade-candidate (get-in r [:decision :reason])))
+        (is (empty? (get-in r [:decision :selection-law :posterior])))
+        (is (empty? (:lanes r)))
+        (is (= 1 (count (filter #(= :target-admission (:stage %)) declines))))
+        (is (every? #(and (= tick-1-target (:target %)) (:reason %) (seq (:missing-evidence %))) declines))))))

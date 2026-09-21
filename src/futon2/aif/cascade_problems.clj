@@ -56,7 +56,8 @@
   (filter (fn [c] (and (vector? (:precedence c))
                        (seq (:precedence c))
                        (some? (:construction-receipt c))))
-          (or candidates [])))
+          (map-indexed (fn [i c] (assoc c :candidate-id (keyword (str "C" (inc i)))))
+                       (or candidates []))))
 
 (defn- beta-for
   "β for TARGET's context, or nil. `:beta-by-context` maps
@@ -166,11 +167,8 @@
         :interpretations patterns
         :repository {:patterns (set (keys patterns))
                      :stands-on #{}}
-        ;; the family: the target's constructed cascades plus its empty
-        ;; cascade, always present, always first.
-        :precedences (vec (distinct
-                           (cons []
-                                 (map #(vec (:precedence %)) constructed))))
+        ;; Only constructed nonempty orders enter the executable family.
+        :precedences (mapv :precedence constructed)
         :horizon-steps horizon
         :c-schedule schedule
         :cascade-spec {:want (set want) :c-schedule schedule
@@ -180,8 +178,8 @@
         :preference-scales scales
         :beta beta
         :locators locators}
-       :construction-receipts
-       (mapv :construction-receipt constructed)
+       :constructed-candidates
+       (mapv #(select-keys % [:candidate-id :precedence :construction-receipt]) constructed)
        :interpretation-receipts
        ;; the interpretations source's own receipts, carried so the E1 gate
        ;; can require them per candidate without the caller reaching back
@@ -209,7 +207,7 @@
                :context-of (fn [target] context)}}
 
   Returns {:problems [{:target … :cascade-problem {…}
-                       :construction-receipts […]}]
+                       :constructed-candidates [{:candidate-id … :precedence […] :construction-receipt …}]}]
            :refusals [{:target … :kind … :missing …}]}. Every target lands
   in exactly one of the two. A missing :horizon-steps refuses ALL targets
   (:horizon-not-declared). Pure: no substrate reads here — inject the
@@ -223,4 +221,16 @@
       (let [assembled (map (partial assemble-one sources horizon)
                            (or targets []))]
         {:problems (vec (remove :kind assembled))
-         :refusals (vec (filter :kind assembled))}))))
+         :refusals (vec (filter :kind assembled))
+         :dropped-candidates
+         (vec (for [target targets
+                    [i candidate] (map-indexed vector (get-in sources [:candidates target]))
+                    :when (empty? (constructed-candidates [candidate]))]
+                {:target target :candidate (keyword (str "C" (inc i))) :stage :construction-admission
+                 :reason :unconstructed-proposal
+                 :missing-evidence (cond-> []
+                                     (not (and (vector? (:precedence candidate))
+                                               (seq (:precedence candidate))))
+                                     (conj :nonempty-precedence)
+                                     (nil? (:construction-receipt candidate))
+                                     (conj :construction-receipt))}))}))))

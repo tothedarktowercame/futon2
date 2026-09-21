@@ -89,16 +89,16 @@
         "a fully supplied target lands in :problems, not :refusals")
     (let [problem (first problems)]
       (is (= target (:target problem)))
-      (is (= [receipt receipt receipt] (:construction-receipts problem))
+      (is (= [receipt receipt receipt] (mapv :construction-receipt (:constructed-candidates problem)))
           "each candidate's construction receipt travels with the problem")
       (let [lane (wm/cascade-lane (:cascade-problem problem))]
         (is (and (nil? (:refusal lane)) (nil? (:stopped-at lane)))
             "the real cascade-lane accepts the assembled problem end-to-end")
         (is (= [:R1 :R6 :R13 :R4 :R5 :R14 :R16 :R9] (mapv :node (:route lane)))
             "the lane runs the full node sequence on the assembled problem")))
-    ;; the family always includes the empty cascade, first
-    (is (= [] (first (get-in (first problems) [:cascade-problem :precedences])))
-        "the target's empty cascade is always in the family, first")))
+    (is (= (mapv :precedence candidates)
+           (get-in (first problems) [:cascade-problem :precedences]))
+        "only the real constructed orders enter the family")))
 
 (deftest h2-refusals-in-order
   ;; 1 :universe-not-admitted — no universe at all (horizon still declared,
@@ -204,3 +204,16 @@
         r (cp/assemble {:targets [target] :sources judged})]
     (is (= [some-token] (:tokens-without-checkable-locator (first (:refusals r)))))
     (is (= 1 (count (:problems (cp/assemble {:targets [target] :sources located})))))))
+
+
+(deftest filtered-empty-proposals-are-recorded-without-renumbering-real-ones
+  (let [r (assemble* {:targets [target]
+                      :sources (assoc-in full-sources [:candidates target]
+                                         [{:precedence [] :construction-receipt receipt}
+                                          (first candidates)])})
+        p (first (:problems r))]
+    (is (= [:C2] (mapv :candidate-id (:constructed-candidates p))))
+    (is (= [(get-in candidates [0 :precedence])] (get-in p [:cascade-problem :precedences])))
+    (is (= [{:target target :candidate :C1 :stage :construction-admission
+             :reason :unconstructed-proposal :missing-evidence [:nonempty-precedence]}]
+           (:dropped-candidates r)))))

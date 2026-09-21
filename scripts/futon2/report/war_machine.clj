@@ -6007,7 +6007,7 @@
        :source :futon2.aif.live-c/cascade-spec
        :live-c (:live-c live-spec)}})
 
-(defn cascade-decision
+(defn- cascade-decision-admitted
   "Joint cascade decision over ASSEMBLED, the output of
   futon2.aif.cascade-problems/assemble. OPTS is reserved (ignored today).
 
@@ -6109,71 +6109,41 @@
                         {:target (:target problem)
                          :route (:route lane)
                          :refusal (when (:stopped-at lane) (:refusal lane))
-                         :candidates (:candidates lane)}))
+                         :candidates (filterv #(seq (:precedence %)) (:candidates lane))
+                         :null-comparison
+                         {:role :per-target-diagnostic-baseline
+                          :used-for-joint-selection? false
+                          :candidates (filterv #(empty? (:precedence %)) (:candidates lane))}}))
                     problems)
-              ;; Build the JOINT family with target-qualified tokens and
-              ;; target-carrying pattern maps, and carry each candidate's
-              ;; H2 receipts (matched by precedence: the receipts are
-              ;; parallel to the problem's constructed precedences). A
-              ;; candidate whose construction receipt cannot be matched, or
-              ;; whose target supplied no interpretation receipts, is
-              ;; dropped with a recorded reason — never passed through
-              ;; unreceipted. The empty cascade is constructed trivially
-              ;; and carries a self-describing empty receipt.
+              ;; Admission has already paired each order with its own receipt.
               qualification (fn [target token] [target token])
-              receipted
-              (mapcat
-               (fn [problem]
-                 (let [t (:target problem)
-                       cp (:cascade-problem problem)
-                       qual (partial qualification t)
-                       patterns
-                       (into {}
-                             (map (fn [[id {:keys [guard produces]}]]
-                                    [id (-> (cascade-policy/token-interpretation
-                                             id {:guard
-                                                 {:needs (set (map qual
-                                                                   (:needs guard)))
-                                                  :forbids (set (map qual
-                                                                     (:forbids guard)))}
-                                                 :produces (set (map qual produces))})
-                                            (assoc :target t))]))
-                             (:interpretations cp))
-                       interp-receipts (:interpretation-receipts problem)
-                       receipts (:construction-receipts problem)]
-                   (map-indexed
-                    (fn [i order]
-                      (let [receipt (if (zero? i)
-                                      {:kind :construction-receipt
-                                       :construction :empty-cascade
-                                       :target t :moves [] :coverage 0}
-                                      (nth receipts (dec i) nil))]
-                        (cond
-                          (nil? receipt)
-                          {:dropped {:target t
-                                     :candidate (keyword (str "C" i))
-                                     :reason :construction-receipt-unmatched}}
-
-                          (and (seq order) (empty? interp-receipts))
-                          {:dropped {:target t
-                                     :candidate (keyword (str "C" i))
-                                     :reason :interpretation-receipts-missing}}
-
-                          :else
-                          {:candidate {:kind :cascade-candidate
-                                       :id (keyword (str "C" i))
-                                       :target t
-                                       :precedence (mapv patterns order)
-                                       :observation-locators
-                                       (into {} (map (fn [[token locator]] [(qual token) locator]))
-                                             (:locators cp))
-                                       :construction-receipt receipt
-                                       :interpretation-receipts
-                                       interp-receipts}})))
-                    (:precedences cp))))
-               problems)
-              joint-candidates (vec (keep :candidate receipted))
-              dropped (vec (keep :dropped receipted))
+              joint-candidates
+              (vec
+               (mapcat
+                (fn [problem]
+                  (let [t (:target problem)
+                        cp (:cascade-problem problem)
+                        qual (partial qualification t)
+                        patterns
+                        (into {}
+                              (map (fn [[id {:keys [guard produces]}]]
+                                     [id (-> (cascade-policy/token-interpretation
+                                              id {:guard {:needs (set (map qual (:needs guard)))
+                                                          :forbids (set (map qual (:forbids guard)))}
+                                                  :produces (set (map qual produces))})
+                                             (assoc :target t))]))
+                              (:interpretations cp))]
+                    (mapv (fn [{:keys [candidate-id precedence construction-receipt]}]
+                            {:kind :cascade-candidate :id candidate-id :target t
+                             :precedence (mapv patterns precedence)
+                             :observation-locators
+                             (into {} (map (fn [[token locator]] [(qual token) locator]))
+                                   (:locators cp))
+                             :construction-receipt construction-receipt
+                             :interpretation-receipts (:interpretation-receipts problem)})
+                          (:constructed-candidates problem))))
+                problems))
+              dropped (:dropped-candidates assembled)
               ;; Joint belief and want over the target-qualified tokens.
               initial-belief-receipt (input-receipts/initial-belief problems)
               ;; Retain prospective carry without granting it enactment authority.
@@ -6282,6 +6252,72 @@
                           lanes)
              :dropped-candidates dropped
              :cascade-problems assembled}))))))
+
+
+(defn- admit-cascade-problem
+  "Check every executable order before lane construction or scoring. Keep each
+  rejection with its target and missing evidence; never replace it with []."
+  [problem]
+  (let [target (:target problem)
+        pairs (:constructed-candidates problem)
+        patterns (get-in problem [:cascade-problem :interpretations])
+        receipts (:interpretation-receipts problem)
+        checked
+        (mapv (fn [{:keys [candidate-id precedence construction-receipt] :as pair}]
+                (let [missing (cond-> []
+                                (not (and (vector? precedence) (seq precedence)))
+                                (conj :nonempty-precedence)
+                                (nil? construction-receipt) (conj :construction-receipt)
+                                (some #(not (map? (get patterns %))) precedence)
+                                (conj :pattern-interpretation)
+                                (or (not (seq receipts))
+                                    (some #(not (and (map? (get receipts %)) (seq (get receipts %)))) precedence))
+                                (conj :interpretation-receipt))]
+                  (if (seq missing)
+                    {:decline {:target target :stage :candidate-admission
+                               :candidate candidate-id
+                               :reason (cond
+                                         (some #{:nonempty-precedence} missing) :empty-cascade
+                                         (some #{:construction-receipt} missing) :construction-receipt-unmatched
+                                         :else :interpretation-receipts-missing)
+                               :missing-evidence missing}}
+                    {:candidate pair})))
+              pairs)
+        admitted (vec (keep :candidate checked))
+        declines (vec (keep :decline checked))
+        target-decline (when (empty? admitted)
+                         {:target target :stage :target-admission
+                          :reason :no-admissible-candidate
+                          :missing-evidence (if (seq declines)
+                                              (vec (distinct (mapcat :missing-evidence declines)))
+                                              [:constructed-candidate])})]
+    {:problem (when (seq admitted)
+                (-> problem
+                    (assoc :constructed-candidates admitted)
+                    (assoc-in [:cascade-problem :precedences] (mapv :precedence admitted))))
+     :declines (cond-> declines target-decline (conj target-decline))
+     :refusal (when target-decline
+                {:target target :kind :no-constructed-candidate
+                 :missing (:missing-evidence target-decline)})}))
+
+(defn cascade-decision
+  "Admit explicitly paired nonempty constructions, record every decline, then
+  score/select only admitted candidates. An all-declined family abstains."
+  [assembled opts]
+  (let [admissions (mapv admit-cascade-problem (:problems assembled))
+        dropped (vec (concat (:dropped-candidates assembled)
+                             (map (fn [r] {:target (:target r) :stage :assembly
+                                           :reason (:kind r) :missing-evidence [(:missing r)]})
+                                  (:refusals assembled))
+                             (mapcat :declines admissions)))
+        admitted (assoc assembled
+                        :problems (vec (keep :problem admissions))
+                        :refusals (into (vec (:refusals assembled)) (keep :refusal admissions))
+                        :dropped-candidates dropped)
+        result (cascade-decision-admitted admitted opts)]
+    (cond-> (assoc result :dropped-candidates dropped)
+      (empty? (:problems admitted))
+      (assoc-in [:decision :reason] :no-acting-cascade-candidate))))
 
 
 (defn select-and-record-cascade!
