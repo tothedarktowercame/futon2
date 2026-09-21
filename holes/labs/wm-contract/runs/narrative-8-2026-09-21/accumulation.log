@@ -1,0 +1,8 @@
+
+Running tests in #{"test"}
+
+Testing futon2.report.cascade-habit-accumulation-test
+HABIT-ACCUMULATION-RECEIPT {:classes-at-106 2, :decision-byte-comparisons 6, :counts {[:pattern-cascade "M-wm-08-external-f2" [:cascade-construction/run-it-on-a-real-case] {}] 4, [:pattern-cascade "M-other" [:test/other-acting-pattern] {}] 2}, :bytes-at-six 504, :clicks 0, :scope :offline-outcome-replay, :probabilities [0.375 0.625], :bytes-at-106 508, :ticks 6, :log-priors [-0.9808292530117262 -0.4700036292457356]}
+
+Ran 5 tests containing 32 assertions.
+0 failures, 0 errors.

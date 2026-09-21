@@ -1,0 +1,8 @@
+
+Running tests in #{"test"}
+
+Testing futon2.report.cascade-habit-read-test
+HABIT-READ-EVIDENCE {:counts [0 3], :selected :work, :learned-posterior [0.3129648952316626 0.6870351047683373], :neutral-posterior [0.6456563062257954 0.35434369377420455], :neutral-argmax :empty, :E [{:status :present, :value 0.2, :verdict :non-degenerate, :reason :informative-habit} {:status :present, :value 0.8, :verdict :non-degenerate, :reason :informative-habit}], :learned-argmax :work, :habits [0.2 0.8], :habit-statuses [:attached :attached]}
+
+Ran 3 tests containing 14 assertions.
+0 failures, 0 errors.

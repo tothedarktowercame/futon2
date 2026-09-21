@@ -76,7 +76,9 @@
 (deftest missing-identity-records-whole-menu-fallback
   (with-store
     (fn [path]
-      (let [ranked [{:action {:id :bad} :controller-score 0}]
+      (let [;; Keep an explicit acting action: empty/no-action candidates are
+      ;; refused by policy before this habit-fallback assertion can run.
+      ranked [{:action {:id :bad :type :test/acting} :controller-score 0}]
             result (policy/select-action-cascades ranked {:beta 2 :cascade-habit-path path})
             c (first (get-in result [:selection-certificate :candidates]))]
         (is (= 1 (:habit c)))

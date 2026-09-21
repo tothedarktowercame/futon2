@@ -1,6 +1,6 @@
 (ns futon2.aif.cascade-habit-store
-  "Persist selected cascade representatives and feed their habit to selection. Counts
-   occupy one entry per distinct policy; no per-tick history is retained."
+  "Persist warranted cascade reinforcement and feed its habit to selection.
+   Counts occupy one entry per distinct policy; no per-tick history is retained."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.cascade-prior :as prior]
@@ -99,23 +99,31 @@
                                StandardCopyOption/REPLACE_EXISTING]))
       (finally (Files/deleteIfExists temporary)))))
 
+(defn- record-policy! [path decision purpose basis-field basis]
+  (let [view (policy-view (:action decision))]
+    (when-let [key (and view (prior/policy-key view))]
+      (locking monitor
+        (let [file (.getAbsoluteFile (io/file path))]
+          (.mkdirs (.getParentFile file))
+          (with-open [lock-file (RandomAccessFile. (str file ".lock") "rw")
+                      _lock (.lock (.getChannel lock-file))]
+            (let [state (-> (prior/observe-policy
+                             (binding [receipts/*habit-read-purpose* purpose]
+                               (read-state path)) view)
+                            (assoc-in [basis-field key] basis))]
+              (publish! file state))))))
+    decision))
+
 (defn record-selection!
-  "Persist one observation of a receipted selected representative. Return the
-   exact decision object. Abstentions and unconstructible actions count nothing.
-   The JVM monitor and stable sidecar file lock serialize read/fold/replace,
-   including writers in separate processes. Invalid stored state is not reset."
+  "Legacy offline-history writer, retained for historical replay fixtures.
+   Live selection must not call this: reinforcement belongs to the close rule."
   ([decision] (record-selection! default-path decision))
   ([path decision]
-   (let [view (policy-view (:action decision))]
-     (when-let [key (and view (prior/policy-key view))]
-       (locking monitor
-         (let [file (.getAbsoluteFile (io/file path))]
-           (.mkdirs (.getParentFile file))
-           (with-open [lock-file (RandomAccessFile. (str file ".lock") "rw")
-                       _lock (.lock (.getChannel lock-file))]
-             (let [state (-> (prior/observe-policy
-                              (binding [receipts/*habit-read-purpose* :selection-update]
-                                (read-state path)) view)
-                             (assoc-in [:selection-bases key] selection-basis))]
-               (publish! file state))))))
-     decision)))
+   (record-policy! path decision :selection-update :selection-bases selection-basis)))
+
+(defn record-reinforcement!
+  "Persist one warranted policy observation under the declared close rule.
+   The monitor and sidecar lock serialize read/fold/replace across processes.
+   Invalid stored state refuses rather than resetting history."
+  [path decision rule-id]
+  (record-policy! path decision :outcome-reinforcement :reinforcement-bases rule-id))

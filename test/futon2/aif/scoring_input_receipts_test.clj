@@ -17,25 +17,25 @@
 (defn run-record [path]
   (runner-fixture/with-dir
    (fn [dir]
-     (with-redefs-fn
-       {#'habit/default-path path
-        #'runner/ensure-dispatch-seat! (constantly nil)
-        #'runner/refuse-on-runner-source-drift! (constantly {:test-only true})
-        #'runner/post-wm-status! (fn [& _] nil)
-        #'runner/run-opportunity-core!
-        (fn [_]
-          (let [assembled (problems/assemble
-                           {:targets [fixture/tick-1-target]
-                            :sources (locators/locate-all fixture/tick-1-sources)})
-                decision (:decision (wm/select-and-record-cascade!
-                                     assembled (assoc fixture/live-c-opts :cascade-habit-path path)))]
-            {:outcome :incomplete :checkpoints {:selection {:judgment {:controller-decision decision}}}}))}
-       (fn [] (edn/read-string (slurp (:run-record (runner/run-opportunity! {:run-record-dir (str dir)})))))))))
+     (let [reads (atom [])]
+       (binding [receipts/*habit-reads* reads]
+         (let [assembled (problems/assemble
+                          {:targets [fixture/tick-1-target]
+                           :sources (locators/locate-all fixture/tick-1-sources)})
+               decision (:decision (wm/select-and-record-cascade!
+                                    assembled (assoc fixture/live-c-opts :cascade-habit-path path)))
+               saved (#'runner/persist-run-record!
+                      {:run-record-dir (str dir) :habit-reads/state reads}
+                      "scoring-fixture" "2026-09-21"
+                      {:outcome :incomplete
+                       :checkpoints {:selection {:judgment {:controller-decision decision}}}})]
+           (edn/read-string (slurp (:run-record saved)))))))))
 
 (deftest actual-scoring-snapshots-and-initial-origin
   (store-fixture/with-store
    (fn [path]
-     (let [first-record (run-record path)
+     (let [_ (habit/record-selection! path {:action (first (store-fixture/menu))})
+           first-record (run-record path)
            second-record (run-record path)
            third-record (run-record path)
            candidates (get-in second-record [:decision :selection-certificate :candidates])
@@ -44,11 +44,11 @@
            initial (get-in second-record [:decision :initial-belief-receipt])]
        (is (= :valid (:status (receipts/validate-record first-record))))
        (is (= :valid (:status (receipts/validate-record second-record))))
-       (is (= [:selection-scoring :joint-selection :selection-update] (mapv :purpose (get-in second-record [:habit-reads :occurrences]))))
+       (is (= [:selection-scoring :joint-selection] (mapv :purpose (get-in second-record [:habit-reads :occurrences]))))
        (is (= 1 (:occurrence-index receipt)))
        (is (= 1 (get-in receipt [:state :samples])))
-       (is (= 2 (get-in next-receipt [:state :samples])))
-       (is (not= (:sha256 receipt) (:sha256 next-receipt)))
+       (is (= 1 (get-in next-receipt [:state :samples])))
+       (is (= (:sha256 receipt) (:sha256 next-receipt)))
        (is (= (:sha256 receipt) (receipts/sha (:snapshot-edn receipt))))
        (doseq [c candidates]
          (is (= (get-in receipt [:state :counts (get-in c [:habit-provenance :policy-key])] 0)
@@ -73,7 +73,7 @@
                                              :observation-updates] [{:status :value}])
                     (update-in second-record [:habit-reads] dissoc :occurrences)
                     (assoc-in second-record [:habit-reads :occurrences]
-                              [(assoc (get-in second-record [:habit-reads :occurrences 1]) :receipt next-receipt)])]]
+                              [(assoc (get-in second-record [:habit-reads :occurrences 1]) :receipt (assoc next-receipt :sha256 "wrong-snapshot"))])]]
          (is (not= second-record bad))
          (is (= :invalid (:status (receipts/validate-record bad)))))
        (println "SCORING-INPUT-RECEIPTS-RECORD" (pr-str second-record))))))
