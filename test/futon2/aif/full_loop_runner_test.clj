@@ -4868,6 +4868,7 @@
                               :dispatch :build :adjudication])
           expected-ids (conj expected-ids
                              (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/token-outcome.edn")
+                             (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/surprises.edn")
                              (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/route-attestation.edn")
                              (str "test-cohort-exhaustion/" (:attempt-id result) "/retained/kernel-example.edn"))]
       (is (= expected-ids (mapv :evidence/id (:entries manifest))))
@@ -5239,8 +5240,8 @@
         manifest (:close-evidence-manifest result)
         ids (mapv :evidence/id (:entries manifest))]
     ;; + retained/route-attestation.edn (improve-4a) and retained/kernel-example.edn
-    ;; (improve-2c) join the manifest.
-    (is (= 16 (count ids)))
+    ;; (improve-2c) and retained/surprises.edn (improve-6a) join the manifest.
+    (is (= 17 (count ids)))
     (is (= (mapv #(str "test-cohort-exhaustion/attempt-001/evidence/" (first %))
                   valid-attempt-evidence)
            (subvec ids 10 13)))
