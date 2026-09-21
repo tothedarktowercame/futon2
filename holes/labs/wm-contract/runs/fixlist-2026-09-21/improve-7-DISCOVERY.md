@@ -479,7 +479,8 @@ process state separately typed when formalizing R15.
 ### Slow state, exit observations and stationary occupancy
 
 Proposed carried state (separate from token q0, seven-status entity belief and
-habit E): `{:schema :wm/focus-state-v1 :partition ... :focus-id ...
+habit E): `{:schema :wm/slow-context-v1 :axis :focus-partition
+:axis-declaration-sha256 ... :partition ... :focus-id ...
 :entered-at ... :previous-state-digest ... :entry-receipt ...
 :rule-digest ... :as-of ... :valid-through ...}`. The four partition tags are
 focus, associated, useful-elsewhere and known-failure; focus-id names the
@@ -537,6 +538,86 @@ under stated recurrence/duration assumptions, and preservation of missingness.
 No current Lean result supplies these laws.
 
 
+### The second axis: work class, with declared evidence rather than names
+
+Joe's “Example: the War Machine's own work classes” is the same two-level
+structure on a **different carrier**, not a second interpretation of the
+55/35/5/5 numbers. Generalize the proposed slow context with an `:axis` and
+versioned axis declaration: `:focus-partition` or `:work-class`. The latter's
+values are `:self-repair`, `:incremental`, `:greenfield`; its desired occupancy
+and timescale are **undeclared**. “All preferred, not all repair” constrains
+that declaration but supplies neither numeric shares nor a repair quota.
+A WM repair can simultaneously be focus-partition F and work-class self-repair.
+Carry both coordinates when needed, each with its own evidence and entry time;
+do not put the seven labels into one exclusive enumeration. Independent
+marginals do not determine a joint transition or joint C. Declare the coupling
+before consuming both axes, to avoid counting one repair receipt twice as value.
+A diagnosed failure on the focus axis is distinct from work undertaken to repair
+it on the work-class axis.
+
+The owner's census is pinned at futon2 `94230d57f12e407dcc816258f74f515c3ae9c2df`,
+`runs/fixlist-2026-09-21/work-class-census/{census.clj,output.edn}`. Its 134
+selection-checkpoint rows comprise 58 self-repair, 12 cascade mission-work,
+13 other advance-mission, 26 learn-action-class, 2 address-sorry, and 23 none.
+Thus 25 “mission work” combines two labels; it does **not** separate incremental
+from greenfield. Sept 13–15 has **23 repair selections and one none row**, not
+24 observed repair executions. The script recursively enumerates selection
+files, uses either selected-action or controller-decision/action, infers repair
+from a type or presence of a repair key, and joins the close outcome. These are
+useful heuristic counts, not yet a deduplicated executed-tick work ledger.
+In particular, 22 learn-action-class rows close as no-selection.
+
+**Proposed declared classifier `:wm/work-class-assignment-v1`:** use a retained
+selection occurrence as the accounting identity and the actual selected action
+as the assignment subject. Record the action-identity version/digest,
+selection-checkpoint digest, axis/rule digest and all evidence locators in a
+new assignment receipt. The existing checkpoint locations inspected by the
+census are `002-selection.edn` at `[:payload :judgment :selected-action]` and
+legacy `[:payload :judgment :controller-decision :action]`; name the fallback
+in the receipt. An action-type match nominates a rule, never proves its premise.
+
+| Assigned work class | Required declared evidence |
+|---|---|
+| Self-repair | Selected action and construction bind a particular WM failure/capability-gap obligation; resolve its identity and finding/contract, and establish that the work restores or enables the machine's operation. `:repair-machine-failure` plus the bound obligation is the direct route. |
+| Incremental | Mission/work declaration identifies an existing capability or artifact at a pinned before revision, specifies the increment and its acceptance witness, and binds this scope to the selected action. |
+| Greenfield | Mission/work declaration identifies a new capability boundary, a checkable baseline showing that capability absent at the pinned revision, and the intended acceptance witness, bound to the selected action. A new filename alone is insufficient. |
+| Typed unclassified / conflicting / no-selection | A required declaration, identity or baseline is missing; multiple classes claim the same indivisible scope; or there is no actual selection. Keep these outside the classified-share numerator and visible in the denominator/coverage account. |
+
+Existing construction routes supply evidence **candidates**:
+`full_loop_runner.clj:1372` constructs `:machine-stop-line-repair`, and `:1332`
+constructs `:capability-gap-repair` with a capability contract. The latter can
+qualify as self-repair when its bound scope is the WM, but a learn-action-class
+label by itself cannot. `:1315` constructs `:selected-cascade` and retains its
+interpretation receipts; it has no incremental/greenfield discriminator.
+The feature-card keys at `:1632` include built/want coverage and review fields,
+not an authoritative work-class declaration. Do not infer greenfield from a
+successful outcome or incremental from any cascade. Mixed repair-plus-feature
+scope needs either separate accounted work units or an explicit mixed-scope
+rule; silently giving repair precedence would reproduce the heuristic.
+
+Keep assignment and execution observation separate. A selection receipt says
+what work was chosen; an occurrence-bound dispatch/job plus retained build/
+close evidence says whether it was attempted or performed. Record these as
+separate statuses on the same assignment, with failure and missingness intact.
+`007-closed.edn` outcome is an outcome axis, not the work class. For a
+**per-tick selection** ledger, count each retained selection occurrence once,
+including an explicit no-selection bucket; deduplicate duplicate copies and
+record retry relationships. For executed-work or time occupancy, join the
+corresponding execution/timing evidence and report missing coverage rather
+than reuse selection counts. The declaration must choose the accounting unit
+before any long-run stationary claim.
+
+Extend slice 1 with this record-only assignment (roughly 100–200 additional
+lines plus tests once the declaration schema is agreed). Its first work-axis
+tests: an identity-bound repair obligation qualifies; a stray `:repair/id`
+without the referenced finding stays unclassified; a cascade without a scope
+baseline cannot become incremental/greenfield; a no-selection close cannot
+count as performed capability repair. Replay the census with heuristic and
+declared counts side by side, retaining every unclassified row. Slow-state
+entry/exit tests then cover repair discharge, incremental acceptance and new
+capability acceptance. No switch-on, new numeric work-class budget or quota
+forcing exits is part of this discovery.
+
 1. **Record only, ~200–350 lines plus tests:** freeze discovery rule/version,
    commit/source/time window, active/background facet graph, previous focus and
    completion/transition status, distinguishing inferred from retained partition.
@@ -561,7 +642,8 @@ No current Lean result supplies these laws.
    declared; improve-4 and aligned kernel examples supply relevant receipts.
 3. **Separate slow state/occupancy slice:** version a sticky focus transition
    rule and its completion/warrant inputs using the state and duration contract
-   above. Test the stationary law and the evidence-gating counterexample; never
+   above, parameterized by the axis declaration (focus partition or work class).
+   Test the stationary law and the evidence-gating counterexample; never
    claim ungated stationarity for a gated runtime. Record occupancy separately from E
    (avoid rewarding the same recent commit twice as preference and habit).
    Test unfinished focus surviving quiet windows, explicit completion exit,
@@ -635,3 +717,9 @@ and stationarity before/after an exit gate. New scoped warrant:
 fresh check `:warrant? true`, `:outside-closure []`; same research-only scope.
 Commands: `run /tmp/improve-7-registry.edn` and
 `check /tmp/improve-7-hierarchy-registry-check.edn` via the registry CLI above.
+
+
+Work-class follow-up: documentation only; census source/output inspected at
+`94230d57`, runner source anchors checked in this worktree, `git diff --check`
+passed. The existing hierarchy replay warrant above is unchanged; it does not
+certify this proposed classifier or turn the heuristic census into attested data.
