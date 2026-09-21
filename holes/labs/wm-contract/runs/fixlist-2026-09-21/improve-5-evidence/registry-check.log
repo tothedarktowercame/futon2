@@ -1,0 +1,5 @@
+Syntax error reading source at (futon2/aif/load_identity.clj:49:96).
+Unmatched delimiter: )
+
+Full report at:
+/tmp/clojure-561041496479326362.edn

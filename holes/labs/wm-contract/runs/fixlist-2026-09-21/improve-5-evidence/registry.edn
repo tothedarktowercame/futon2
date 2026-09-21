@@ -1,0 +1,9 @@
+{:repo-root "/home/joe/code/futon2-narrative-improve-5"
+ :code-paths ["test/futon2/report/novelty_discovery_test.clj"]
+ :test-paths ["test/futon2/report/novelty_discovery_test.clj"
+              "holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-5-evidence/1789964661.edn.gz"
+              "holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-5-evidence/1789952479.edn.gz"]
+ :command ["clojure" "-M:test" "-n" "futon2.report.novelty-discovery-test"]
+ :author "codex-13" :origin "claude-3/narrative-improve-5-discovery"
+ :artifact-dir "/home/joe/code/futon2-narrative-improve-5/holes/labs/wm-contract/runs/fixlist-2026-09-21/improve-5-evidence/registered"
+ :agency-url "http://localhost:7070"}
