@@ -99,3 +99,19 @@ clojure -M:test -m cognitect.test-runner -n futon2.aif.full-loop-runner-test
   `/tmp/narrative-4-runner.log`. The guard is unchanged and was not bypassed.
   This is not a passing integration warrant; canonical revalidation is needed
   after owner review/merge, as discussed in the handoff.
+
+## Registered pure-test warrant
+
+Registry registration succeeded with `:warrant? true` for the ranking namespace:
+`test-registry-aa4da1010dc045ba224b4bdd6aadbf329921dae7c22e3ff8ceb09fb9bfd7d971`.
+Run `7c70218e-2368-4bd4-b677-4d4a11fe2b83`, code commit
+`e8bbc97e913eeed6952f0dd044dfd969692d78b2`: 6 tests, 36 assertions, exit 0,
+0 failures/errors. Full returned record: `registration-ranking.edn`; log and
+loaded-source closure: `registered-ranking/`. This warrants the pure ranking
+namespace, not the source-guard-blocked integration namespace.
+
+Registration command (from `/home/joe/code/futon3c`, separate CLI process):
+
+```
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-4/holes/labs/wm-contract/runs/narrative-4-2026-09-21/registry-ranking.edn
+```
