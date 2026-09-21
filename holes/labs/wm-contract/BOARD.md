@@ -157,3 +157,11 @@ closure pattern" the sketch bans; it should become a decline or a
 real per-mission proposal. Packet (a) (no empty candidates, uniform
 admission, recorded declines) is dispatched separately and does not
 wait on this.
+
+## MORNING LIST addition (2026-09-21): U80 / U83 (from codex-1's decline ledger)
+The only two non-completed rows in the evidenced worklist join are
+ruling-shaped: U80 requires resolving contradictory requirements;
+U83 requires restating or retiring a task whose queue no longer
+exists. Both declined for admission tonight (correctly — not
+current unmet objectives an agent can read a pattern against);
+both need Joe's word, not build work.
