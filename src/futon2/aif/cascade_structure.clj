@@ -1,7 +1,10 @@
 (ns futon2.aif.cascade-structure
   "Record-only shape of declared prerequisite supports; never authority or execution."
   (:require [clojure.set :as set]
-            [futon2.aif.interpretation-evidence :as evidence]))
+            [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.load-identity :as load-identity]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- closure [seed edges]
   (loop [seen seed]

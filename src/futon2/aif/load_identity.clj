@@ -28,7 +28,9 @@
    'futon2.aif.run-narrative "/home/joe/code/futon2/src/futon2/aif/run_narrative.clj"
    'futon2.aif.efe "/home/joe/code/futon2/src/futon2/aif/efe.clj"
    'futon2.aif.close-loop "/home/joe/code/futon2/src/futon2/aif/close_loop.clj"
-   'futon2.aif.close-retention "/home/joe/code/futon2/src/futon2/aif/close_retention.clj"})
+   'futon2.aif.close-retention "/home/joe/code/futon2/src/futon2/aif/close_retention.clj"
+   'futon2.aif.action-identity "/home/joe/code/futon2/src/futon2/aif/action_identity.clj"
+   'futon2.aif.cascade-structure "/home/joe/code/futon2/src/futon2/aif/cascade_structure.clj"})
 
 (defn sha256 [bytes]
   (when bytes

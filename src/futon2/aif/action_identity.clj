@@ -1,7 +1,10 @@
 (ns futon2.aif.action-identity
   "Versioned, total EDN action identity; never a projection that drops fields."
+  (:require [futon2.aif.load-identity :as load-identity])
   (:import [java.security MessageDigest]
            [java.util Date UUID]))
+
+(load-identity/register! *ns* *file*)
 
 (defn- refuse! [value]
   (throw (ex-info "Unsupported action identity value"
