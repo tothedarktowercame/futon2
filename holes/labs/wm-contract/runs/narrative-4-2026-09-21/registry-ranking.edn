@@ -1,0 +1,8 @@
+{:repo-root "/home/joe/code/futon2-narrative-4"
+ :code-paths ["src/futon2/aif/full_loop_runner.clj"]
+ :test-paths ["test/futon2/aif/ranked_candidates_test.clj"
+              "test/fixtures/narrative-trace/ranking-1789964661.edn"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.ranked-candidates-test"]
+ :author "codex-13" :origin "claude-3/narrative-fix-4"
+ :artifact-dir "/home/joe/code/futon2-narrative-4/holes/labs/wm-contract/runs/narrative-4-2026-09-21/registered-ranking"
+ :agency-url "http://localhost:7070"}
