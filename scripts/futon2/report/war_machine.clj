@@ -72,6 +72,7 @@
             [futon2.aif.observation :as obs]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.policy :as policy]
+            [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.policy-prefix-evidence :as policy-prefix]
             [futon2.aif.policy-free-energy :as policy-free-energy]
             [futon2.aif.policy-precision :as policy-precision]
@@ -6272,7 +6273,8 @@
                                     (policy-prefix/production-ranked ranked
                                       (select-keys token-belief-input [:conditioning-status :reason :observation-updates]))
                                     {:beta (:beta beta-state) :beta-state beta-state
-                                     :cascade-habit-path (:cascade-habit-path opts)}))
+                                     :cascade-habit-path (:cascade-habit-path opts)
+                                     :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))
                                 :horizon-steps T
                                 :initial-belief-receipt initial-belief-receipt)
                 decision (assoc-in decision [:selection-certificate :precision-family]

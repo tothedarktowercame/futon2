@@ -1,0 +1,15 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.parameter-novelty-test
+
+FAIL in (frozen-certificate-and-decision-bytes) (parameter_novelty_test.clj:120)
+expected: (= (count ranked) (count (get-in enriched [:selection-certificate :parameter-novelty])))
+  actual: (not (= 3 0))
+
+FAIL in (frozen-certificate-and-decision-bytes) (parameter_novelty_test.clj:120)
+expected: (= (count ranked) (count (get-in enriched [:selection-certificate :parameter-novelty])))
+  actual: (not (= 24 0))
+
+Ran 5 tests containing 52 assertions.
+2 failures, 0 errors.

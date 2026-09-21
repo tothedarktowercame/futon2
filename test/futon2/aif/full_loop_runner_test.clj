@@ -1,5 +1,6 @@
 (ns futon2.aif.full-loop-runner-test
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.aif.parameter-novelty-test :as novelty-fixture]
+            [futon2.aif.load-identity :as load-identity]
             [futon2.aif.learning-trial-ledger :as learning-ledger]
             [futon2.aif.attempt-learning-test :as attempt-fixture]
             [babashka.http-client :as http]
@@ -5908,3 +5909,29 @@
        (is (every? #(and (= :admitted-at-attempt-grain (:status %)) (:counted? %)) (:trials receipt)))
        (is (every? #(= :duplicate-replay (:reason %)) (:trials (retain))))
        (is (= ledger-bytes (slurp (io/file ledger-root "attempts.edn"))))))))
+
+(deftest grounded-close-retains-parameter-novelty-selection-receipt
+  ;; Runner source-authority guard stays enabled; owner runs on canonical main.
+  (let [{:keys [root] :as c} (retention-cohort "parameter-novelty")
+        ranked (novelty-fixture/frozen-ranked "1789964661")
+        select! (requiring-resolve 'futon2.aif.policy/select-action-cascades)
+        d (select! ranked {:beta 1 :cascade-habit-path (str (io/file root "habit.edn"))
+                           :novelty-inputs novelty-fixture/inputs})
+        {:keys [result]}
+        (with-redefs [brief/default-root (str (io/file root "morning-brief"))]
+          (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :runner-options {:cohort? true :execution-cohort (:binding c)
+                           :d-task-evidence-root (str (io/file root "d-task"))
+                           :learning-trial-ledger-root (str (io/file root "learning-ledger"))
+                           :judge-fn (fn [_] {:judgement (assoc judgement :decision d)})}}))
+        attempt-dir (io/file root "test-cohort-exhaustion" (:attempt-id result))
+        selection (get-in (cohort/read-edn (io/file attempt-dir "002-selection.edn"))
+                          [:payload :judgment :controller-decision])
+        closed (get-in (cohort/read-edn (io/file attempt-dir "007-closed.edn")) [:payload :judgment])]
+    (is (= :grounded-change (:outcome result)))
+    (is (map? closed))
+    (is (= 3 (count (get-in selection [:selection-certificate :parameter-novelty]))))
+    (is (= (get-in d [:selection-certificate :parameter-novelty])
+           (get-in selection [:selection-certificate :parameter-novelty])))
+    (is (= (pr-str (:selection-law d)) (pr-str (:selection-law selection))))))

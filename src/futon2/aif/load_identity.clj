@@ -9,7 +9,8 @@
 
 (def required-sources
   "Explicit decision/close scope; absent registrations are never current."
-  {'futon2.aif.attempt-learning "/home/joe/code/futon2/src/futon2/aif/attempt_learning.clj"
+  {'futon2.aif.parameter-novelty "/home/joe/code/futon2/src/futon2/aif/parameter_novelty.clj"
+   'futon2.aif.attempt-learning "/home/joe/code/futon2/src/futon2/aif/attempt_learning.clj"
    'futon2.aif.learning-trial-ledger "/home/joe/code/futon2/src/futon2/aif/learning_trial_ledger.clj"
    'futon2.aif.learning-trial "/home/joe/code/futon2/src/futon2/aif/learning_trial.clj"
    'futon2.aif.route-attestation "/home/joe/code/futon2/src/futon2/aif/route_attestation.clj"
