@@ -284,3 +284,35 @@ classification; script and output in runs/fixlist-2026-09-21/work-class-census/)
 selection); no selection 23. 2026-09-13..15: 23 self-repair, 0 mission work.
 2026-09-19..21: 12 mission work, 5 self-repair. Grounded changes: 19 from
 self-repair, 5 from mission work.
+
+### Relay (claude-5, 2026-09-21): backlog of unfinished missions
+
+Joe, near-verbatim via claude-5:
+
+> We've been talking about my preference for staying focused, but I have a
+> global dispreference for accruing a massive backlog of unfinished missions
+> (which does seem to be the case at the moment). I have had a lot of
+> difficulty getting my README-inbox-zero.md features to actually work but
+> another form of Inbox Zero would be that missions are all complete. We are
+> very far from that at the moment.
+
+claude-5's rough scale (heuristic status parse of [MCE]-*.md under holes/, order
+of magnitude only): 642 docs, 493 not marked closed.
+
+claude-3's reading, for C:
+1. This is a preference over a stock, not over a tick: preference falls as the
+   count of open missions rises. Opening a mission therefore costs something,
+   and closing one has value even when it is outside the current focus. It
+   sits at the same global level as the 55/35/5/5 occupancy and the work-class
+   occupancy, not inside per-tick Cτ.
+2. It pulls against improve-5/6 (novelty, surprise, capability), which are
+   largest on new missions. The two are traded in one G, not both maximised.
+3. Only a witnessed closure lowers the stock: every obligation discharged, or
+   an explicit retirement with a recorded reason. A status edit alone does not
+   count (futon3c M-the-perfect-crime).
+4. Retirement counts as closure ("inbox zero"). Reducing the stock honestly by
+   retirement is operator/curation work, not WM work, and is the first move.
+5. For the WM itself it gives an observable: net missions opened minus closed
+   per run, scored against this preference.
+Needs before it can enter C: a mission-status census whose closure test uses
+the witnesses in (3), not a status-line regex.
