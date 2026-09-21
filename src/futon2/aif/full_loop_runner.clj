@@ -25,6 +25,7 @@
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.token-outcome :as token-outcome]
+            [futon2.aif.learning-trial :as learning-trial]
             [futon2.aif.evidence-manifest :as evidence-manifest]
             [futon2.aif.fold-classical :as fold-classical]
             [futon2.aif.fold-cascade :as fold-cascade]
@@ -2836,18 +2837,24 @@
                               discharge-contract resolution-read-fn))
 
 (defn- retain-token-outcome!
-  [data-root cohort-id attempt-id prediction d-result artifact-sha]
+  [data-root cohort-id attempt-id prediction d-result artifact-sha & [context]]
   (let [source (:source d-result)
-        measurements
+        source-record
         (when-let [path (:path source)]
           (let [bytes (Files/readAllBytes (.toPath (io/file path)))]
             (when-not (= (:sha256 source) (sha256-bytes bytes))
               (throw (ex-info "D-task evidence changed before comparison"
                               {:token-outcome/refusal :evidence-digest-mismatch})))
-            (:after-token-evidence (edn/read-string (String. bytes "UTF-8")))))
+            (edn/read-string (String. bytes "UTF-8"))))
+        measurements (:after-token-evidence source-record)
         receipt (assoc (token-outcome/compare-outcomes prediction measurements artifact-sha)
                        :measurement-source source
                        :measurement-verification (:verification d-result))
+        learning (learning-trial/receipt
+                  {:comparison receipt :source-record source-record
+                   :occurrence (or (:occurrence context) (get-in source-record [:dispatch :occurrence]))
+                   :route (or (:route context) (:route source-record))})
+        receipt (assoc receipt :learning-trial-receipt learning)
         ;; retained/, not the attempt dir itself (closed-execution's exact
         ;; file set) nor evidence/ (enumerated into the manifest separately).
         file (io/file data-root (name cohort-id) attempt-id "retained" "token-outcome.edn")]
@@ -3561,7 +3568,8 @@
                           (or (:data-root execution-cohort) cohort/default-data-root)
                           (:cohort/id start-event) attempt-id
                           (get-in @checkpoints [:selection :judgment :token-outcome-prediction])
-                          d-task-result (:commit data)))
+                          d-task-result (:commit data)
+                          {:occurrence @action-occurrence :route @author-dispatch-route}))
                        manifest (when (and cohort? @action-occurrence)
                                   (checkpoint-evidence-manifest
                                    @checkpoint-events
@@ -3582,6 +3590,7 @@
                                             :outcome-entity outcome-entity
                                             :entity-state-at-close close-state
                                             :token-outcome-comparison (:receipt token-comparison)
+                                            :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                             :morning-brief-ref brief-ref
                                             :delivery-qa-ref delivery-qa-ref
                                             :job-texts @job-text-records
@@ -3614,6 +3623,7 @@
                                :job-texts @job-text-records
                                :d-task-enactment d-task-result
                                :token-outcome-comparison (:receipt token-comparison)
+                                            :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                :morning-brief-ref brief-ref
                                :delivery-qa-ref delivery-qa-ref
                                :wm/route run-route
