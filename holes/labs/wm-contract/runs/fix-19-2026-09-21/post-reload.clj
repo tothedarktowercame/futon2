@@ -1,0 +1,7 @@
+; Read-only structural verification, NOT a loaded-byte identity certificate.
+(let [report (let [names '[futon2.aif.cascade-selection futon2.aif.cascade-model-manifest futon2.aif.policy futon2.aif.live-c futon2.aif.d-predecessor-task-authority futon2.aif.cascade-habit-store futon2.aif.cascade-habit-reinforcement futon2.aif.cascade-plan futon2.aif.job-text-retention futon2.aif.scan-report futon2.aif.token-outcome futon2.aif.trace futon2.aif.mission-hole-wants futon2.report.war-machine futon2.aif.full-loop-runner futon2.aif.interpretation-construction futon2.aif.run-narrative]] {:captured-at (str (java.time.Instant/now)) :jvm-start-ms (.getStartTime (java.lang.management.ManagementFactory/getRuntimeMXBean)) :classpath (System/getProperty "java.class.path") :namespaces (into {} (for [s names] [s (if-let [n (find-ns s)] {:loaded? true :interns (vec (sort (keys (ns-interns n))))} {:loaded? false})])) :tripwire-baseline (when-let [n (find-ns 'futon2.aif.tripwire)] (when-let [v (ns-resolve n 'composition-baseline)] (when (bound? v) (into {} (for [[s x] @(var-get v)] [s (select-keys x [:source-path :source-sha256])])))))})]
+  (assoc report :all-listed-namespaces-loaded?
+         (every? :loaded? (vals (:namespaces report)))
+         :fix-16-helper-present?
+         (boolean (some #{'candidate-want-progress}
+                        (get-in report [:namespaces 'futon2.report.war-machine :interns])))))
