@@ -1,0 +1,6 @@
+
+lean_state_probe: 202 modules, 3436 declarations, 36964 source lines
+lean_state_probe: type-check not-run -- 0/0 exit 0, 0 error diagnostics, 0 ms
+lean_state_probe: sorry 5 source / 0 Lean-reported (typecheck-not-run); axioms 0
+lean_state_probe: glossary join 48/56 resolve; equation carriers 21/21 declared, 10 resolve
+lean_state_probe: wrote holes/labs/wm-contract/runs/fix-21-2026-09-21/census-before.edn

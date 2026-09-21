@@ -1,0 +1,6 @@
+{:repo-root "/home/joe/code/futon2-fix-21"
+ :code-paths ["checks/lean_declaration_names.clj" "holes/labs/wm-contract/lean_state_probe.bb"]
+ :test-paths ["test/checks/lean_declaration_names_test.clj"]
+ :command ["clojure" "-M:test" "-n" "checks.lean-declaration-names-test"]
+ :author "codex-11"
+ :artifact-dir "/home/joe/code/futon2-fix-21/holes/labs/wm-contract/runs/fix-21-2026-09-21"}

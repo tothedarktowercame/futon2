@@ -1,0 +1,23 @@
+----- Error --------------------------------------------------------------------
+Type:     java.lang.AssertionError
+Message:  Assert failed: :depth did not resolve to its checked declaration: {:found false, :resolution :not-found}
+(= {:found true, :path path, :line line, :kind "def"} (get rows id))
+Location: /home/joe/code/futon2-fix-21/holes/labs/wm-contract/runs/fix-21-2026-09-21/verify_bindings.clj:4:3
+
+----- Context ------------------------------------------------------------------
+1: (require '[clojure.edn :as edn])
+2: (let [report (edn/read-string (slurp (first *command-line-args*)))
+3:       rows (into {} (map (juxt :equation :lean)) (get-in report [:equation-lean-join :rows]))]
+4:   (doseq [[id path line] [[:forward-model "DarkTower/WarMachine/PolicyRollout.lean" 114]
+     ^--- Assert failed: :depth did not resolve to its checked declaration: {:found false, :resolution :not-found}
+(= {:found true, :path path, :line line, :kind "def"} (get rows id))
+5:                         [:depth "DarkTower/WarMachine/PolicyHorizon.lean" 61]
+6:                         [:dirichlet-accumulation "DarkTower/WarMachine/DirichletLearning.lean" 60]]]
+7:     (assert (= {:found true :path path :line line :kind "def"} (get rows id))
+8:             (str id " did not resolve to its checked declaration: " (pr-str (get rows id)))))
+9:   (println "PASS: R4/R13/R17 resolve to checked source declaration locations"))
+
+----- Stack trace --------------------------------------------------------------
+user - /home/joe/code/futon2-fix-21/holes/labs/wm-contract/runs/fix-21-2026-09-21/verify_bindings.clj:4:3
+user - /home/joe/code/futon2-fix-21/holes/labs/wm-contract/runs/fix-21-2026-09-21/verify_bindings.clj:2:1
+
