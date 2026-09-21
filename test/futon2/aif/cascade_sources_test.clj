@@ -114,3 +114,36 @@
         (is (= :interpretation-source-hash-mismatch
                (:reason (refusal #(admission dir first-receipt))))))
       (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))
+
+(deftest observation-clock-is-declared-and-independent-of-preferences
+  (let [dir (tmp-dir)
+        bare (assoc source :facts [] :locators {})
+        f (io/file dir "clock.edn")
+        load! (fn [d] (spit f (pr-str d)) (cs/load-declared (str dir)))]
+    (try
+      (is (= {:status :held :reason :observation-placement-not-declared}
+             (get-in (load! bare) [:observation-schedules "M-fixture"])))
+      (doseq [bad [nil 7 {} {:tau :not-a-step}
+                   {:tau {:value -1 :status :declared}}
+                   {:tau {:value 1.5 :status :declared}}
+                   {:tau {:value 1 :status :defaulted}}]]
+        (is (= :invalid-observation-schedule
+               (:reason (refusal #(load! (assoc bare :observation-schedule bad)))))))
+      (let [clock {:tau {:value 1 :status :declared}}
+            d (assoc bare :observation-schedule clock)
+            c {:placement {:value :terminal :status :declared}
+               :elsewhere {:value :uniform-over-non-ruled-zero :status :declared}}]
+        (is (= clock (get-in (load! d) [:observation-schedules "M-fixture"])))
+        (is (= clock (get-in (load! (assoc d :c-schedule c))
+                            [:observation-schedules "M-fixture"]))))
+      (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))
+
+(deftest initialized-context-rates-cannot-overwrite-each-other
+  (let [dir (tmp-dir) bare (assoc source :facts [] :locators {})]
+    (try
+      (spit (io/file dir "one.edn") (pr-str bare))
+      (spit (io/file dir "two.edn")
+            (pr-str (assoc bare :target "M-other" :beta {:value 2 :status :declared})))
+      (is (= :incommensurable-family
+             (:reason (refusal #(cs/load-declared (str dir))))))
+      (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))

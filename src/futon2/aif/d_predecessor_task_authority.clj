@@ -9,6 +9,8 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.close-retention :as retention]
+            [futon2.aif.cascade-sources :as cascade-sources]
+            [futon2.aif.policy-precision-carry :as precision-carry]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.observation-checks :as observation]
             [futon2.aif.task-execution-evidence :as execution])
@@ -40,13 +42,15 @@
 (defn capture
   "Retain the minted occurrence and declaration bytes before dispatch.
    No pre-side token mapping is inferred from interpretation facts."
-  [{:keys [occurrence carry-occurrence-id universe declaration-reads before candidate-id]}]
+  [{:keys [occurrence carry-occurrence-id universe declaration-reads before candidate-id precision-family]}]
   (retention/validate-occurrence occurrence)
   (require! (and (string? carry-occurrence-id) (set? universe)) :carry-identity-unavailable {})
   {:schema :wm/d-task-dispatch-v1 :occurrence occurrence
    :carry-occurrence-id carry-occurrence-id :universe universe
    :r6-candidate-occurrence candidate-id :candidate-to-minted-join :not-established
    :before before :before-evidence :not-measured
+   :precision-family (when precision-family
+                       (precision-carry/validate-binding! precision-family occurrence))
    :declarations
    (mapv (fn [{:keys [path sha256]}]
            (let [bytes (file-bytes path)]
@@ -169,6 +173,14 @@
                      (= sha256 (sha (.getBytes ^String snapshot-edn "UTF-8")))
                      (= snapshot (read-one (.getBytes ^String snapshot-edn "UTF-8"))))
                 :declaration-snapshot-mismatch {}))
+    (when-let [family (:precision-family dispatch)]
+      (precision-carry/validate-binding! family occurrence)
+      (let [target (get-in family [:selected-action :target])
+            declarations (filter #(= target (get-in % [:snapshot :target])) (:declarations dispatch))]
+        (require! (= 1 (count declarations)) :precision-selected-declaration-unestablished {})
+        (require! (= (cascade-sources/observation-schedule (:snapshot (first declarations)))
+                     (get-in family [:observation-schedules target]))
+                  :precision-observation-schedule-mismatch {})))
     (let [replayed (artifact-tokens dispatch repository final)
           affirmations (filter #(true? (get-in % [:result :observed])) replayed)
           present (set (map :token affirmations))]
@@ -183,6 +195,8 @@
        :revision-pair revision-pair :before-evidence :not-measured
        :present present :absent #{} :unknown (set/difference (:universe dispatch) present)
        :causal-attribution :independent-check-required
+       :precision-family (when-let [family (:precision-family dispatch)]
+                           (precision-carry/validate-binding! family occurrence))
        :record-sha256 (evidence/value-digest record)})))
 
 (defn verify [record expected read-job]
@@ -227,6 +241,7 @@
   (let [carry (get-in decision [:selection-certificate :token-belief-stage :prospective-carry])]
     {:occurrence occurrence :carry-occurrence-id (:occurrence-id carry)
      :universe (:universe carry)
+     :precision-family (get-in decision [:selection-certificate :precision-family])
      :candidate-id (or (:r6-candidate-occurrence decision) (:selected/occurrence-id decision))
      :candidate-to-minted-join :not-established
      :declaration-pins (vec (distinct (map #(select-keys % [:path :sha256]) declaration-reads)))}))

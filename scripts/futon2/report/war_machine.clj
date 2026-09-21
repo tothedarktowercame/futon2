@@ -75,6 +75,7 @@
             [futon2.aif.policy-prefix-evidence :as policy-prefix]
             [futon2.aif.policy-free-energy :as policy-free-energy]
             [futon2.aif.policy-precision :as policy-precision]
+            [futon2.aif.policy-precision-carry :as precision-carry]
             [futon2.aif.realized-outcome :as ro]
             [futon2.aif.selection-rationale :as selection-rationale]
             [futon2.aif.precision :as precision]
@@ -6238,13 +6239,26 @@
             (throw (ex-info "cascade decision refused"
                             (merge {:kind (or (:kind ranked) :rank-refused)}
                                    ranked))))
-          (let [decision (assoc (binding [input-receipts/*habit-read-purpose* :joint-selection]
+          (let [precision-model (get-in (meta ranked) [:cascade-scoring :precision-model])
+                schedules (into {} (map (fn [p] [(:target p) (get-in p [:cascade-problem :observation-schedule])]) problems))
+                model-id (precision-carry/model-identity precision-model
+                           (mapv (fn [e] {:id (:action e)}) ranked) schedules)
+                admission (get-in token-belief-input [:carry-admission :authority])
+                beta-state (precision-carry/advance
+                            {:previous (get-in opts [:token-belief-predecessor-trace :decision
+                                                    :selection-certificate :policy-precision-state])
+                             :initialized-beta beta :model-id model-id :admission admission
+                             :family (:precision-family admission)})
+                decision (assoc (binding [input-receipts/*habit-read-purpose* :joint-selection]
                                   (policy/select-action-cascades
                                     (policy-prefix/production-ranked ranked
                                       (select-keys token-belief-input [:conditioning-status :reason :observation-updates]))
-                                    {:beta beta :cascade-habit-path (:cascade-habit-path opts)}))
+                                    {:beta (:beta beta-state) :beta-state beta-state
+                                     :cascade-habit-path (:cascade-habit-path opts)}))
                                 :horizon-steps T
                                 :initial-belief-receipt initial-belief-receipt)
+                decision (assoc-in decision [:selection-certificate :precision-family]
+                                   (precision-carry/family decision precision-model schedules))
                 decision (assoc-in decision [:selection-certificate :token-belief-stage]
                                    token-belief-stage)
                 decision (assoc-in decision [:selection-certificate :token-belief-input]
@@ -6325,7 +6339,15 @@
                         :problems (vec (keep :problem admissions))
                         :refusals (into (vec (:refusals assembled)) (keep :refusal admissions))
                         :dropped-candidates dropped)
-        result (cascade-decision-admitted admitted opts)]
+        result (cascade-decision-admitted admitted opts)
+        previous-beta (get-in opts [:token-belief-predecessor-trace :decision
+                                    :selection-certificate :policy-precision-state])
+        result (if (and (empty? (:problems admitted)) previous-beta)
+                 (assoc-in result [:decision :selection-certificate :policy-precision-state]
+                           (precision-carry/advance {:previous previous-beta
+                             :initialized-beta (:initialized-beta previous-beta)
+                             :model-id (:model-id previous-beta)}))
+                 result)]
     (cond-> (assoc result :dropped-candidates dropped)
       (:proposal-supply assembled)
       (assoc-in [:decision :selection-certificate :proposal-supply] (:proposal-supply assembled))

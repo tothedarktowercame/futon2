@@ -88,7 +88,7 @@
                   (<= (Math/abs (f mid)) tolerance))
             {:bracketed? true :beta mid :evaluations n
              :bracket-width width}
-            (if (pos? (f mid))
+            (if (pos? (* (f lo) (f mid)))
               (recur mid hi (inc n))
               (recur lo mid (inc n)))))))))
 
@@ -264,7 +264,13 @@
          beta-floor (double beta-floor)
          beta-ceiling (double beta-ceiling)
          g-values (checked-vector :g-values g-values)
-         f-pi-values (checked-vector :f-pi-values f-pi-values)
+         f-pi-values (let [xs (vec f-pi-values)]
+                       (when-not (and (seq xs)
+                                      (every? #(or (finite-number? %) (= ##Inf %)) xs)
+                                      (some finite-number? xs))
+                         (fail! "F requires finite evidence or positive infinity, with finite support"
+                                {:error :invalid-policy-evidence :value xs}))
+                       (mapv double xs))
          log-priors (when-not (= :none log-prior-placement)
                       (checked-vector :log-priors log-priors))]
      (when-not (= (count g-values) (count f-pi-values))
@@ -571,52 +577,6 @@
 ;; with equal G (both interior in π) contributes exactly zero to (π − π₀)·G,
 ;; so B.19 already treats ties correctly. A merge would distort F.
 
-(defn- cascade-residual
-  "Eq. 2.7's residual with EXACT infinite-F handling: pi_0 = softmax(-gamma*G)
-   over ALL candidates (F never enters pi_0), pi = softmax(-F - gamma*G) over
-   the finite-F candidates ONLY, with probability exactly 0 on the
-   excluded ones — the exact limit of F → infinity, never a large finite
-   stand-in. Residual: beta-prior + (pi - pi_0) . G - beta, in beta units,
-   same statement as `fixed-point-residual` above.
-
-   FINITE-IDX are the indices of the finite-F candidates INTO all-g (index
-   based, because two candidates may share a G — one excluded, one not — and
-   a G-keyed join would conflate them)."
-  [beta-prior beta all-g finite-idx finite-g finite-f]
-  (let [gamma (/ 1.0 beta)
-        pi-0 (softmax (mapv (fn [g] (- (* gamma g))) all-g))
-        pi (softmax (mapv (fn [f g] (+ (- f) (- (* gamma g)))) finite-f finite-g))
-        pi-all (reduce (fn [v [i p]] (assoc v i p))
-                       (vec (repeat (count all-g) 0.0))
-                       (map vector finite-idx pi))
-        dot (reduce + (map (fn [p0 p g] (* (- p p0) g)) pi-0 pi-all all-g))]
-    (- (+ beta-prior dot) beta)))
-
-(defn- bisect-cascade
-  "Same bracket discipline as `bisect-beta`: the ends are checked for opposite
-   signs and reported, never assumed."
-  [beta-prior lo hi all-g finite-idx finite-g finite-f tolerance max-iterations]
-  (let [f #(cascade-residual beta-prior % all-g finite-idx finite-g finite-f)
-        f-lo (f lo)
-        f-hi (f hi)]
-    (if (pos? (* f-lo f-hi))
-      {:bracketed? false :beta nil :evaluations 2
-       :residual-at-floor f-lo :residual-at-ceiling f-hi}
-      (loop [lo lo hi hi n 2]
-        (let [mid (* 0.5 (+ lo hi))
-              width (- hi lo)]
-          (if (or (>= n max-iterations)
-                  (<= width (* 1.0e-15 (max 1.0 (Math/abs mid))))
-                  (<= (Math/abs (f mid)) tolerance))
-            (let [residual-at-root (f mid)]
-              {:bracketed? true :beta mid :evaluations n
-               :bracket-width width
-               :residual residual-at-root
-               :converged? (<= (Math/abs residual-at-root) tolerance)})
-            (if (pos? (f mid))
-              (recur mid hi (inc n))
-              (recur lo mid (inc n)))))))))
-
 (defn- cascade-f-by-id
   "Resolve each candidate's F from f-by-id, refusing typed on a missing or
    non-number entry (no silent default F). ##Inf is a legal value: it is the
@@ -628,7 +588,7 @@
            {:error :invalid-f-by-id :value f-by-id}))
   (mapv (fn [c]
           (let [f (get f-by-id (:id c) ::absent)]
-            (when (or (= f ::absent) (not (number? f)))
+            (when (or (= f ::absent) (not (or (finite-number? f) (= ##Inf f))))
               (fail! "every candidate needs a numeric F in f-by-id"
                      {:error (if (= f ::absent) :missing-f :invalid-f)
                       :candidate (:id c) :value f}))
@@ -639,8 +599,8 @@
   "One per-context β update over cascade candidates (approved method,
    PROPOSAL-policy-precision-learning.md §1–§4; update site R3, read site R14).
 
-   PREV-STATES is {context beta-state}; the context's entry is coerced with
-   `coerce-state`, and a MISSING entry gives `initial-beta-state` — recorded
+   PREV-STATES is {context beta-state}; an invalid carried rate refuses,
+   and a MISSING entry gives `initial-beta-state` — recorded
    as such via :beta-source :initial, never silently defaulted inside the
    solve (the prior β itself is always recorded under :beta-prior).
 
@@ -656,10 +616,9 @@
    INFINITE F. A candidate whose prediction the observation contradicts has
    F = ##Inf, whose exact posterior probability is 0. It is EXCLUDED from π
    with probability exactly 0 and KEPT in π₀ (F never enters π₀) — the exact
-   limit, never a large finite stand-in. With at least one excluded candidate
-   the residual is eq. 2.7's with that exact treatment (`cascade-residual`,
-   bisected with the same end-sign discipline as `converge-beta`); with no
-   exclusion the solve DELEGATES to the aligned `converge-beta` unchanged.
+   limit, never a large finite stand-in. All cases use `converge-beta`, with the retained positive habit weights
+   in BOTH policy distributions. Positive-infinite G candidates are outside
+   selection support and are recorded as excluded before the update.
 
    Returns {context new-state} merged into prev-states (other contexts
    untouched). The new state records :context, :beta-source, :beta-prior,
@@ -673,37 +632,43 @@
             (fail! "prev-states must be a map" {:error :invalid-prev-states}))
         had-state? (contains? prev-states context)
         state (if had-state?
-                (coerce-state (get prev-states context))
+                (let [s (get prev-states context)]
+                  (when-not (and (map? s) (finite-number? (:beta s)) (pos? (:beta s)))
+                    (fail! "persisted beta state is invalid" {:error :invalid-beta-state}))
+                  s)
                 (initial-beta-state))
         beta-prior (beta-for state)
-        cs (cascade-f-by-id candidates f-by-id)
+        _ (when-not (and (seq candidates)
+                          (every? #(some? (:id %)) candidates)
+                          (= (count candidates) (count (set (map :id candidates)))))
+            (fail! "candidate identities must be nonempty and unique" {:error :invalid-candidate-identities}))
+        _ (when-not (every? #(or (finite-number? (:g %)) (= ##Inf (:g %))) candidates)
+            (fail! "G must be finite or positive infinity" {:error :invalid-g}))
+        excluded-g (filterv #(= ##Inf (:g %)) candidates)
+        cs (cascade-f-by-id (filterv #(finite-number? (:g %)) candidates) f-by-id)
         all-g (mapv (comp double :g) cs)
+        habits (mapv #(get % :habit 1.0) cs)
+        _ (when-not (every? #(and (finite-number? %) (pos? %)) habits)
+            (fail! "habit weights must be finite and positive" {:error :invalid-habit}))
         finite-idx (vec (keep-indexed (fn [i c]
                                         (when (Double/isFinite (double (:f c))) i))
                                       cs))
         finite (mapv cs finite-idx)
         infinite (vec (remove (fn [c] (Double/isFinite (double (:f c)))) cs))
-        finite-g (mapv (comp double :g) finite)
-        finite-f (mapv (comp double :f) finite)
-        {:keys [tolerance max-iterations beta-floor beta-ceiling]
-         :or {tolerance 1.0e-9 max-iterations 4096
-              beta-floor 1.0e-6 beta-ceiling 1.0e6}} opts
+        finite-f (mapv (comp double :f) cs)
         solve (cond
+                (empty? cs) {:status :no-finite-g-candidates}
                 (empty? finite)
-                {:status :no-finite-f-candidates
+                {:status :no-finite-f-candidates :finding :model-contradiction
                  :excluded-infinite-f (mapv :id infinite)}
-
-                (seq infinite)
-                (bisect-cascade beta-prior (double beta-floor) (double beta-ceiling)
-                                all-g finite-idx finite-g finite-f
-                                (double tolerance) (long max-iterations))
-
                 :else
                 (converge-beta beta-prior all-g finite-f
-                               (dissoc opts :identity-fn :score-fn)))
+                               (assoc (dissoc opts :identity-fn :score-fn)
+                                      :log-priors (mapv #(Math/log (double %)) habits)
+                                      :log-prior-placement :both)))
         solved? (boolean (and (:converged? solve)
                               (not (false? (:bracketed? solve)))
-                              (number? (:beta solve))))
+                              (finite-number? (:beta-posterior solve))))
         new-state (cond->
                     {:context context
                      :status (if solved? :present :absent)
@@ -714,13 +679,15 @@
                      :beta-source (if solved? :converged-posterior
                                       (if had-state? :held-unsolved :held-absent))
                      :beta-prior beta-prior
-                     :beta (if solved? (or (:beta-posterior solve) (:beta solve)) beta-prior)
+                     :beta (if solved? (:beta-posterior solve) beta-prior)
                      :solved-tick-count (cond-> (long (:solved-tick-count state 0))
                                           solved? inc)
                      :prior-was-absent (not had-state?)
                      :candidates (mapv :id cs)
                      :g (mapv (fn [c] [(:id c) (double (:g c))]) cs)
                      :f (mapv (fn [c] [(:id c) (:f c)]) cs)
-                     :excluded-infinite-f (mapv :id infinite)}
-                    true (assoc :solve (dissoc solve :pi :pi-0)))]
+                     :excluded-infinite-f (mapv :id infinite)
+                     :excluded-infinite-g (mapv :id excluded-g)
+                     :habits (mapv vector (mapv :id cs) habits)}
+                    true (assoc :solve solve))]
     (assoc prev-states context new-state)))

@@ -1320,7 +1320,11 @@
            :disposition-risk-events []
            :refused? false
            :f-exclusions f-exclusions
-           :cascade-scoring {:universe universe
+           :cascade-scoring {:precision-model {:q0 q0 :rates rates :horizon T
+                                               :preference-spec spec :zeta (get opts :zeta 1)
+                                               :transition-semantics :first-enabled-union-theta-v1
+                                               :z-semantics :per-step-redraw}
+                             :universe universe
                              :horizon T
                              :spec spec
                              :rates (if (:rates-provenance opts)

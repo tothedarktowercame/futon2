@@ -33,15 +33,17 @@
       (git! repo "commit" "-qm" "before")
       (let [before {:repo (str repo) :head (git! repo "rev-parse" "HEAD")
                     :observed-at-ms (System/currentTimeMillis)}
-            action {:kind :cascade-candidate :id :C0 :target "target"
-                    :precedence [{:id :make-file :theta 1 :produces #{["target" :artifact]}}]}
+            action (or (:action opts) {:kind :cascade-candidate :id :C0 :target "target"
+                    :precedence [{:id :make-file :theta 1 :produces #{["target" :artifact]}}]})
             occurrence (retention/mint-occurrence
                         {:run-id "run" :cohort-id "cohort" :attempt-id "attempt"
                          :selected-action action :now #(Instant/now) :uuid-fn #(UUID/randomUUID)})
             declaration (io/file dir "declaration.edn")
-            _ (spit declaration (pr-str {:target "target" :locators
+            _ (spit declaration (pr-str (cond-> {:target "target" :locators
                                         {:artifact {:class :C3 :repo "repo" :sha (:head before)
-                                                    :path (or (:locator-path opts) "created.clj")}}}))
+                                                    :path (or (:locator-path opts) "created.clj")}}}
+                                          (:observation-schedule opts)
+                                          (assoc :observation-schedule (:observation-schedule opts)))))
             pins [{:path (str declaration)
                    :sha256 (evidence/sha256 (Files/readAllBytes (.toPath declaration)))}]
             dispatch (task/capture {:occurrence occurrence :carry-occurrence-id "carry"

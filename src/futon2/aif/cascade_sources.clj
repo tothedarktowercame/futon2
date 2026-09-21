@@ -84,6 +84,21 @@
                    {:path path :declared (:sha256 source) :observed hash}))
         (assoc receipt :source (assoc source :sha256 hash))))))
 
+(defn observation-schedule
+  "A declared observation clock, independent of C's preference placement.
+   Omission is held, never inferred from the preference schedule or horizon."
+  [declaration]
+  (if-not (contains? declaration :observation-schedule)
+    {:status :held :reason :observation-placement-not-declared}
+    (let [schedule (:observation-schedule declaration)
+          tau (:tau schedule)]
+      (when-not (and (map? schedule) (= #{:tau} (set (keys schedule)))
+                     (map? tau) (= #{:value :status} (set (keys tau)))
+                     (= :declared (:status tau))
+                     (integer? (:value tau)) (<= 0 (:value tau)))
+        (refuse! :invalid-observation-schedule {:value schedule}))
+      schedule)))
+
 (defn- check-file! [path d]
   (when-not (= :wm/cascade-source-v1 (:schema d))
     (refuse! :schema {:path path :schema (:schema d)}))
@@ -145,7 +160,13 @@
                                (:interpretation-receipts d))
                 scales (live-c/preference-scales d)
                 schedule (live-c/preference-schedule d)
+                observation-clock (observation-schedule d)
                 t (:target d)
+                prior-beta (get-in acc [:beta-by-context (:context d)])
+                this-beta {:beta (get-in d [:beta :value]) :status (get-in d [:beta :status])}
+                _ (when (and prior-beta (not= prior-beta this-beta))
+                    (refuse! :incommensurable-family {:context (:context d)
+                                                     :rates [prior-beta this-beta]}))
                 {:keys [universe observations]} (observe-facts (:facts d) (:locators d))
                 occurrence {:path path :sha256 hash :target t :observations observations}
                 _ (when *read-occurrences* (swap! *read-occurrences* (fnil conj []) occurrence))]
@@ -154,6 +175,7 @@
                 (assoc-in [:wants t] (vec (:want d)))
                 (assoc-in [:preference-scales t] scales)
                 (assoc-in [:preference-schedules t] schedule)
+                (assoc-in [:observation-schedules t] observation-clock)
                 (assoc-in [:locators t] (:locators d))
                 (assoc-in [:interpretations t] {:patterns (:patterns d)
                                                 :receipts receipts})

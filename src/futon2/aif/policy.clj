@@ -290,7 +290,7 @@
 
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
-  [ranked-actions {:keys [beta cascade-habit-path]}]
+  [ranked-actions {:keys [beta beta-state cascade-habit-path]}]
   ;; Runtime resolution breaks the existing prior -> policy shadow dependency.
   ;; This is the mandatory live seam, not an optional caller-side attachment.
   (let [attach (requiring-resolve 'futon2.aif.cascade-habit-store/attach-habits)
@@ -298,6 +298,13 @@
                  @(requiring-resolve 'futon2.aif.cascade-habit-store/default-path))
         ranked-actions (attach path ranked-actions)
         candidates (mapv selection-candidate ranked-actions)
+        _ (when (and beta-state
+                     (not (and ((requiring-resolve 'futon2.aif.policy-precision-carry/intact?) beta-state)
+                               (= beta (:beta beta-state))
+                               (= beta (:tau beta-state))
+                               (= (/ 1.0 beta) (:gamma beta-state)))))
+            (throw (ex-info "precision carry consumption mismatch" {:kind :precision-consumption-mismatch})))
+        beta-status (if beta-state (:beta-status beta-state) :declared)
         posterior (cascade-selection/selection-posterior
                    {:beta beta :candidates candidates})
         ;; An EMPTY cascade contributes NO action. `cascade-first-action`
@@ -361,13 +368,17 @@
      :requires-operator-override? false
      :actuation-status :pending-downstream-gates
      :actuation-authorized? false
-     :beta {:value beta :status :declared}
-     :selection-certificate (selection-certificate beta candidates ranked-actions)
+     :beta {:value beta :status beta-status}
+     :selection-certificate (cond-> (assoc-in (selection-certificate beta candidates ranked-actions)
+                                                [:beta :status] beta-status)
+                              beta-state (assoc :policy-precision-state beta-state))
      :selection-law
      {:requested :cascade-selection-posterior
       :applied :cascade-selection-posterior
       :beta beta
-      :beta-status :declared
+      :beta-status beta-status
+      :gamma (/ 1.0 beta) :tau beta
+      :tau-source (if beta-state :carry-beta :declared-beta)
       :posterior posterior
       :softmax-weights weights
       :action-marginal weights

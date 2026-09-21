@@ -171,6 +171,8 @@
         :precedences (mapv :precedence constructed)
         :horizon-steps horizon
         :c-schedule schedule
+        :observation-schedule (get-in sources [:observation-schedules target]
+                                      {:status :held :reason :observation-placement-not-declared})
         :cascade-spec {:want (set want) :c-schedule schedule
                        :lam (get-in scales [:lam :value])
                        :mu (get-in scales [:mu :value])

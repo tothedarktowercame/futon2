@@ -137,3 +137,52 @@
     (is (= :absent (:status st))
         "all candidates contradicted: no finite F remains, the state is held
         absent with the reason, never solved by substitution")))
+
+(def informative-menu [{:id :low :precedence [:low] :g 0.0}
+                       {:id :high :precedence [:high] :g 1.0}])
+(defn- informative [f & [menu opts]]
+  (:WM (pp/cascade-beta-update {} :WM (or menu informative-menu) f (or opts {}))))
+
+(deftest finite-wrapper-really-consumes-solved-posterior
+  (let [low (informative {:low 0 :high 2})
+        high (informative {:low 2 :high 0})
+        offset (informative {:low 7 :high 9})]
+    (is (= :converged-posterior (:beta-source low)))
+    (is (< (Math/abs (- 0.81206788662324 (:beta low))) 1e-8))
+    (is (= (:beta low) (get-in low [:solve :beta-posterior])))
+    (is (> (:beta high) 1))
+    (is (< (Math/abs (- (:beta low) (:beta offset))) 1e-8))
+    (is (< (Math/abs (- 1 (:beta (informative {:low 4 :high 4})))) 1e-8))
+    (is (seq (get-in low [:solve :pi])))
+    (is (seq (get-in low [:solve :pi-0])))))
+
+(deftest habits-and-impossible-observations-share-one-solver
+  (let [menu (mapv #(assoc % :habit (if (= :low (:id %)) 7 1)) informative-menu)
+        finite (informative {:low 0 :high 2} menu)
+        boundary (informative {:low 0 :high ##Inf} menu)
+        unit (informative {:low 0 :high ##Inf})
+        beta (:beta boundary)
+        e (/ 7 (+ 7 (Math/exp (- (/ 1.0 beta)))))]
+    (is (= :both (get-in finite [:solve :log-prior-placement])))
+    (is (= [1.0 0.0] (get-in boundary [:solve :pi])))
+    (is (< (Math/abs (- e (first (get-in boundary [:solve :pi-0])))) 1e-10))
+    (is (not= (:beta boundary) (:beta unit)))
+    (is (= :model-contradiction (get-in (informative {:low ##Inf :high ##Inf}) [:solve :finding])))
+    (is (= (:beta boundary) (:beta (informative {:low 0 :high ##Inf} (vec (reverse menu))))))))
+
+(deftest invalid-evidence-is-not-impossible-evidence
+  (doseq [f [##NaN ##-Inf :missing]]
+    (is (thrown? clojure.lang.ExceptionInfo (informative {:low 0 :high f}))))
+  (is (thrown? clojure.lang.ExceptionInfo
+               (informative {:low 0 :high 1} [(assoc (first informative-menu) :g ##NaN)])))
+  (is (thrown? clojure.lang.ExceptionInfo
+               (informative {:low 0} [(first informative-menu) (first informative-menu)])))
+  (is (thrown? clojure.lang.ExceptionInfo
+               (pp/cascade-beta-update {:WM {:beta ##NaN}} :WM informative-menu {:low 0 :high 1} {})))
+  (let [held (informative {:low 0 :high 2} nil {:beta-floor 2 :beta-ceiling 3})
+        exhausted (informative {:low 0 :high 2} nil {:max-iterations 0})
+        outside (informative {:low 0} [(assoc (first informative-menu) :g ##Inf)])]
+    (is (= :bracket-not-straddling (:reason held)))
+    (is (= 1.0 (:beta held)))
+    (is (= :not-converged (:reason exhausted)))
+    (is (= :no-finite-g-candidates (:reason outside)))))
