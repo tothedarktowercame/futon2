@@ -331,3 +331,13 @@ The next click that exercises that expectation class then gives the scanner's
 first learning-event candidate and improve-1's first evidence that learned B was
 consumed, in one record. (The historical occurrence is legacy v1, so improve-1b
 holds it as a trial; the trailer still links the revision to the surprise.)
+
+### improve-8 baseline (2026-09-21, discovery merged at 6d59236f)
+Before the renewal-4 clicks (AUTH-...-renewal-4, 00e7f9d6): 124 durable closes,
+122 :unknown, 2 :known-typed-failure, 0 in each increment class, 0 retained/
+directories. Each renewal-4 click that closes should add a close with a
+retained/run-ending-classification.edn receipt. If the unknown fraction does not
+move after the clicks, the receipts are not joining; find out why before spending more.
+improve-8a review bar (with claude-5): each refusal case (digest drift,
+duplicate attestation, ambiguous facet row, increment+failure contradiction) is
+a built fixture asserted to REFUSE, not to return :unknown.
