@@ -119,3 +119,11 @@ emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-ch
 
 Environment: Linux, Java 21.0.11; Clojure CLI 1.12.5.1664 / Clojure 1.11.1.
 Registry warrant covers the pure/temp-file tests, not the blocked runner test.
+
+Registered warrant: `test-registry-2fc3d02f79eea2a3089b4d3ef784b2b89194d86514f8b236d1876512938298b2` on `6b42529386d8ef153cb2b6a53a33da3705e0be07`: `:warrant? true`, 8 tests / 43 assertions, zero failures/errors, exit 0. Initial registry check returned `:missing-entry`.
+
+```sh
+# Separate CLI in /home/joe/code/futon3c
+clojure -M -m futon3c.test-registry check /home/joe/code/futon2-narrative-improve-4a/holes/labs/wm-contract/runs/narrative-improve-4a-2026-09-21/registry.edn
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-improve-4a/holes/labs/wm-contract/runs/narrative-improve-4a-2026-09-21/registry.edn
+```
