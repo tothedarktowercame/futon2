@@ -1030,7 +1030,8 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
    named reduction \"identity-A-zero-rates\" — the three QuantityStatus
    constructors stay distinct, so a 0 value alone never carries the
    distinction (Certificates.lean rule 2). :c-form is :constant-spec when
-   C came from :spec and :step-indexed when :c-fn-pointwise was supplied.
+   C came from a :spec without a :c-schedule, and :step-indexed when
+   :c-fn-pointwise was supplied or the :spec carries a :c-schedule.
    :rates-all-zero and :universe-size are read off the actual rates map
    of this call. WIRE-4: :evaluation names the path that ran
    (:identity-A-zero-rates versus :factorized-nonzero-rates), :rates

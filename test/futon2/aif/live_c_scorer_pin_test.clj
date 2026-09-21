@@ -95,7 +95,10 @@
     (is (number? g) (pr-str g))
     (is (map? certificate))
     (testing "float-carrier-1 vocabulary, not coverage: what THIS seam's certificate records"
-      (is (= :constant-spec (:c-form certificate)) "C came from the spec, declared")
+      ;; The live spec carries a :c-schedule (c322c22f: uniform C before the
+      ;; terminal step, weighted C at it), so its C is step-indexed.
+      (is (some? (:c-schedule spec)))
+      (is (= :step-indexed (:c-form certificate)) "C came from the spec's declared schedule")
       (is (= :identity-A-zero-rates (:evaluation certificate))
           "the live regime today: an explicit default, never a structural ceiling (W13-4)")
       ;; The per-input :admissions tags (:q/:a :exact, :c :float-carried) are
