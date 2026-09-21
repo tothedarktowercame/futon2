@@ -32,3 +32,31 @@
     (is (> (Math/log 11) endpoint))
     (is (< (Math/log (/ 187.0 36)) endpoint))
     (is (< (Math/log 11) firing))))
+
+(deftest local-focus-conditioning-is-not-a-global-mixture
+  (let [[latest earlier] @(ns-resolve 'improve-7-replay 'results)
+        case-of (fn [r k] (first (filter #(= k (:case %)) (:cases r))))
+        local (case-of latest :local-focus-token-proxy)
+        global (case-of latest :global-split-on-token-powerset-counterexample)]
+    (is (= "M-aif-policy-conditioned-eig" (get-in local [:choice :action :target])))
+    (is (= "M-wm-08-external-f2" (get-in global [:choice :action :target])))
+    (is (= :no-admissible-candidate
+           (get-in (case-of earlier :local-focus-token-proxy) [:selection-refusal :kind])))
+    ;; Conditioning on F divides C by .55 on its support: terminal G shifts
+    ;; by log(.55) for each policy with terminal state in that class.
+    (doseq [[l g] (map vector (take 2 (:rows local)) (take 2 (:rows global)))]
+      (is (< (abs (- (:G l) (:G g) (Math/log 0.55))) 1e-8)))
+    (is (= Double/POSITIVE_INFINITY (:G (last (:rows local)))))
+    (is (= #{:G} (:action-decided-by local)))))
+
+(deftest stationarity-does-not-survive-an-unmodelled-exit-gate
+  (let [pi [55/100 35/100 5/100 5/100]
+        alpha 1/100
+        transition (mapv (fn [i] (mapv (fn [j] (+ (if (= i j) (- 1 alpha) 0)
+                                                  (* alpha (pi j)))) (range 4))) (range 4))
+        advance (fn [t] (mapv (fn [j] (reduce + (map-indexed (fn [i p] (* p (get-in t [i j]))) pi))) (range 4)))
+        gated (assoc transition 0 [1 0 0 0])]
+    (is (= pi (advance transition)))
+    (is (every? #(= 1 (reduce + %)) transition))
+    (is (not= pi (advance gated)))
+    (is (> (first (advance gated)) (first pi)))))

@@ -154,7 +154,7 @@ a bell saying “do this,” and a successful commit have distinct authority rol
 Record unclassified separately from positively irrelevant; **absence of an
 adjacency receipt must not become a hard-zero ban**.
 
-## 3. Explicit C sensitivity and frozen replay
+## 3. Global (unconditioned) C sensitivity and local conditioned replay
 
 ### Candidate classification used in the experiment
 
@@ -287,6 +287,48 @@ identifiable from these frozen token models: they have no predictive kernel
 for the required attestation/known-failure classes or slow local-focus state.
 The computed scores above are explicit diagnostic alternatives, not estimates
 of that missing model.
+
+### Partition-conditioned per-tick C: distinguish inference from retained state
+
+The pinned answers' “Global estimate vs local focus” section and follow-up
+`invoke-1790012276836` make the hierarchy explicit. The preceding mixtures
+are **global, unconditioned C diagnostics**, not Joe's requested per-tick C.
+The work-history rule in §1 discovers WM focus for both frozen runs' date.
+Thus the replay assigns both **inferred local partition F = WM focus**, not
+“elsewhere” merely because the earlier selector chose EOI. Neither frozen
+record retains an authenticated slow partition or entry/exit receipt: their
+actual local state is unavailable. This retrospective assignment must be
+recorded as an inference, not inserted into the historical record as fact.
+
+For a sharp conditioning diagnostic, let
+`C_terminal(s | z=F) = C_global(s) 1[class(s)=F] / .55`.
+Equivalently replace the proxy's masses by 1/0/0/0, preserving within-focus
+weights and the earlier horizon-step C. This is the limiting case of local
+concentration, not evidence that Joe specified exact local zeros. A softened
+local preference or an anticipated warranted exit requires a declared kernel;
+the global split cannot identify that softness or exit probability.
+
+| Run | Global .55/.35/.05/.05 token proxy | Local F-conditioned token proxy |
+|---|---|---|
+| 1789964661 | G A/F/F2 = 15.736222 / 15.737485 / 14.699369; posterior .207509 / .207247 / .585244; F2 selected | G = **15.138385 / 15.139648 / ∞**; posterior **.500316 / .499684 / 0**; **updater selected**, policy G / action #{G} |
+| 1789952479 | EOI G 173.554600, F2 G 91.021266; F2 selected | **All 24 G = ∞**; `:no-admissible-candidate`, no posterior or decided-by |
+
+On F-supported terminal predictions, G_local − G_global = log(.55) =
+−.597837001; relative odds among those policies are unchanged. In the latest
+run F2 is excluded because it predicts no **new** focus token, despite its
+focus target. The earlier menu has no policy producing a new focus token:
+conditioning preferences cannot supply one. Compared with the old global
+60/40/0/0 arm, local conditioning shifts finite latest G by log(.6), keeping
+the updater and its posterior; both arms refuse the earlier menu.
+
+At the initial token context each updater present/absent comparison is now
+infinite, since absence lies outside F; F2's comparison has both states ruled
+zero and is undefined. These are support effects of this proxy, not warranted
+local attestation odds. Within F, odds still use the original exp(weight).
+The actual attested-outcome conditioned C remains held for the same missing
+kernel as the global case. Keep missing observations separate as below.
+The new `:local-focus-token-proxy` arm in `replay.edn` retains every candidate
+and odds row, and the research test checks the G shift and support refusals.
 
 ### Supplement: fixed 5% elsewhere, varying no-increment mass
 
@@ -427,14 +469,80 @@ switch-on, phrased for the specific ambiguity rather than re-asking for strength
 These are timescale/transition and witness declarations, not a request for
 another arbitrary k. The clarified global split is not a mandated per-tick
 mixture. Stationary occupancy does not determine residence times or a transition
-kernel. Also, known failure is an *outcome*, not a work partition to deliberately
-occupy; keep that distinction when formalizing R15.
+kernel. The requested hierarchy includes a known-failure partition: represent
+that as a diagnosed/stop-line state entered on evidence, not a task the agent
+should manufacture to spend 5% of its time. Keep delivery outcome and slow
+process state separately typed when formalizing R15.
 
 ## 5. Handoff-sized slices
 
+### Slow state, exit observations and stationary occupancy
+
+Proposed carried state (separate from token q0, seven-status entity belief and
+habit E): `{:schema :wm/focus-state-v1 :partition ... :focus-id ...
+:entered-at ... :previous-state-digest ... :entry-receipt ...
+:rule-digest ... :as-of ... :valid-through ...}`. The four partition tags are
+focus, associated, useful-elsewhere and known-failure; focus-id names the
+project/facet region, not just the broad tag. Unestablished state is typed
+missing, not automatically known-failure. A continuation carries the frozen
+state and evidence hashes; expiry requests re-observation without granting an
+exit. Preserve the parent focus and return condition on an excursion stack.
+
+The slow transition consumes an occurrence-bound completion attestation for
+the active work, an authorized from/to move warrant with purpose and return
+condition, or a diagnosed failure/stop-line finding. A failure state exits on
+its repair/discharge evidence. A commit, unchecked box, retrieval neighbor or
+quiet day alone cannot fire an exit. The fast scorer receives a frozen
+`C_tau(outcome | partition, focus-id, rule)` plus the prediction/observation
+kernel. If planning includes exits, its predictive slow transition must model
+the future **exit evidence**, not silently change partitions at every fast step.
+
+A concrete stationary construction illustrates what the global numbers fix.
+For pi=(.55,.35,.05,.05), an ungated transition family is
+
+```
+T_alpha(i,j) = (1-alpha) 1[i=j] + alpha pi_j,  0 < alpha <= 1.
+pi T_alpha = pi.
+E[dwell ticks in i] = 1 / (alpha (1-pi_i)).
+```
+
+Alpha sets the slow timescale once, independently of candidate G and the tick's
+winner. Pi does not set alpha. At illustrative alpha=.01 (not a proposed
+operating parameter), dwell means are 222.22 / 153.85 / 105.26 / 105.26 ticks.
+Different desired dwell ratios require a richer transition family. More
+generally declare stationary flows f_ij with equal total incoming/outgoing
+flow at every i, sum[j!=i] f_ij <= pi_i, and T_ij=f_ij/pi_i off diagonal.
+Self-loops fill each row. Balanced flows guarantee pi T=pi; dwell times and
+allowed edges constrain feasible flows. This provides a checkable construction,
+not an arbitrary per-tick strength chosen to get a winner.
+
+**The evidence-gated invariant is additional:** blocking T_alpha's proposed
+exits until evidence arrives generally destroys its claimed stationary law.
+The test includes the exact bad case: focus has no exit evidence and its row
+becomes absorbing; pi T != pi. Never bypass the exit check to recover the
+numbers. To claim both requirements, model exit-evidence arrival and durations
+on an extended (partition, active work, age, evidence) state. For a semi-Markov
+model with embedded-chain stationary weights nu_i and mean dwell d_i, the
+partition occupancy is proportional to nu_i d_i. Fit/declare those quantities
+and verify the resulting marginal against pi; if completion never arrives,
+finite dwell/stationarity may not exist. Until such a model and observations
+exist, 55/35/5/5 is a desired long-run occupancy, not a proved property of the
+runtime. Deviations are reportable evidence, not permission to force a move.
+
+R15 in `MAP-rnode-to-lean-2026-09-21.md:45` has declared edges to R13/R16,
+but no hierarchy/timescale dynamics theorem. The fast planning horizon is not
+this slow transition. Future formal obligations are normalization and support
+of each conditional C, evidence-authorized transitions, stationary marginal
+under stated recurrence/duration assumptions, and preservation of missingness.
+No current Lean result supplies these laws.
+
+
 1. **Record only, ~200–350 lines plus tests:** freeze discovery rule/version,
    commit/source/time window, active/background facet graph, previous focus and
-   completion/transition status. Classify each candidate with source-attributed
+   completion/transition status, distinguishing inferred from retained partition.
+   Record global and partition-conditioned C separately, the carried-state
+   proposal, exit-evidence availability and held stationary-kernel status.
+   Classify each candidate with source-attributed
    relation or typed unknown. Record class-level C masses and the explicit
    outcome-domain map; record any computable diagnostic C, unrepresented mass,
    normalizers, odds and held attestation/kernel fields. G/E/posterior bytes
@@ -452,7 +560,9 @@ occupy; keep that distinction when formalizing R15.
    production-ready until the prediction→attestation observation model is
    declared; improve-4 and aligned kernel examples supply relevant receipts.
 3. **Separate slow state/occupancy slice:** version a sticky focus transition
-   rule and its completion/warrant inputs; record occupancy separately from E
+   rule and its completion/warrant inputs using the state and duration contract
+   above. Test the stationary law and the evidence-gating counterexample; never
+   claim ungated stationarity for a gated runtime. Record occupancy separately from E
    (avoid rewarding the same recent commit twice as preference and habit).
    Test unfinished focus surviving quiet windows, explicit completion exit,
    warranted excursion/return, missing evidence, and repair-only lock-in.
