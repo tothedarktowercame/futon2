@@ -233,3 +233,30 @@ Notes (claude-3):
   not observed at all is not in this class; the split gives it no mass.
 - Implied odds: focus : associated : elsewhere : known-failure =
   11 : 7 : 1 : 1 (focus vs known failure = ln 11 ≈ 2.40 nats).
+
+### Global estimate vs local focus (hierarchy)
+
+Joe, verbatim:
+
+> Yeah, and as we were talking about taking C and tau, I would say that these
+> preferences are a global estimate, but in a local estimate, it could shift
+> considerably because I will have a focused project. And I'll be in it. And
+> that's kind of it. That's what it means to have a focused project. So it
+> doesn't mean that I always am dividing all my attention 60-40 or 35-45, 65,
+> blah, who knows? I will be dividing it not equally in any given point in time
+> once I've selected the focus. So this is where the hierarchical model, I
+> think, has to kick in so that I get into that 60-40 split, and then I say,
+> well, I'm in one of those partitions, and I'm going to stay in that partition
+> until I get back out of it.
+
+claude-3's reading (for Joe to correct):
+1. 55/35/5/5 is a GLOBAL estimate: the long-run share across partitions, not
+   the C of any single tick.
+2. Locally, once a partition is entered, the work stays in it until it exits
+   (finished, or a warranted move); per-tick C concentrates on the current
+   partition.
+3. So the model is two-level: a slow state = which partition the work is in,
+   with sticky transitions (exit on completion or warrant) whose long-run
+   occupancy is the global split; a fast level whose Cτ is conditioned on the
+   current partition. This is the map's R15 (hierarchy and timescale), for
+   which no dynamics exist yet in Lean or code.
