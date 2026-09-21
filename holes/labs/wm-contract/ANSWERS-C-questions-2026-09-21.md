@@ -188,3 +188,17 @@ claude-3's reading (for Joe to correct):
    improve-7 its content (focus-conditioned C). Open: whether "0%" is a ruled
    zero (infinite risk; in IAD terms MAY NOT) or a very small mass, and where
    the outcome "nothing delivered" sits relative to 60/40.
+
+## Q3 follow-up — the zero, and "nothing delivered"
+
+Joe, verbatim:
+
+> Okay, if we really have to put numbers on it, sure, we can make it. We can
+> add that extra, let's call it 35%, 55%, and 5%. We'll do a breakdown like
+> that. And nothing delivered? Boy. Um... Ask that in a more specific way if
+> you need an answer.
+
+claude-3's reading, PENDING Joe's confirmation: irrelevant is not a hard zero
+but 5%. The spoken order "35, 55, 5" sums to 95; the reading closest to the
+earlier 60/40 is focus 55, adjacent 35, irrelevant 5, with the remaining 5
+open (proposed: "nothing delivered"). Asked back to Joe to confirm.
