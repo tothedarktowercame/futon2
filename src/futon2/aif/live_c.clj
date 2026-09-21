@@ -398,14 +398,32 @@
                                   (set (for [[token {:keys [outcomes]}] projected-from
                                              :when (empty? (set/intersection outcomes in-domain))]
                                          token)))
-                       (set/difference (:want derived) in-domain))]
+                       (set/difference (:want derived) in-domain))
+           ;; Account from the projection consumed above, without re-reading
+           ;; sources or confusing a source token with its many outcomes.
+           unit (if joint-want :target-qualified-outcome-token :source-token)
+           coverage {:status :computed
+                     :projection (if joint-want :mission-declared-wants :identity)
+                     :source-signature (:signature derived)
+                     :source-entries {:unit :source-entry :count (count (:entries derived))}
+                     :source-tokens {:unit :source-token :total (count (:want derived))
+                                     :projected (if joint-want (count projected-from) (count candidates))
+                                     :reached (- (count (:want derived)) (count unreached))
+                                     :unreached (count unreached)}
+                     :projected-outcome-tokens {:unit unit :count (count candidates) :tokens candidates}
+                     :in-domain-outcome-tokens {:unit unit :count (count in-domain) :tokens in-domain}
+                     :comparison-domain {:unit unit :count (count (set reachable)) :tokens (set reachable)}
+                     :projected-from projected-from
+                     :unreached-source-tokens unreached}]
        (if (empty? in-domain)
-         {:refusal {:kind :no-reachable-want
+         {:live-c-coverage coverage
+          :refusal {:kind :no-reachable-want
                     :reachable (count (set reachable))
                     :live-want (count (:want derived))
                     :unreached-in-domain (vec (sort (map str unreached)))
                     :limitation "no projected live-C want lies in this comparison's outcome domain; scoring would be pure information gain — the dark room — so it refuses"}}
-         {:c-schedule schedule
+         {:live-c-coverage coverage
+          :c-schedule schedule
           :want in-domain
           :weights (into {} (map (fn [[token weight]] [token (* (:lam scales) weight)]))
                          (select-keys candidate-weights in-domain))

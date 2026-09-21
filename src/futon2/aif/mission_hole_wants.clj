@@ -103,6 +103,9 @@
                 :holes-retained retained
                 :holes-projected projected
                 :holes-not-projected (- retained projected)
+                :retained-by-kind (frequencies (map :kind (mapcat :open-holes live)))
+                :projected-by-kind (frequencies (map :kind (filter observable-hole?
+                                                                  (mapcat :open-holes live))))
                 :not-projected-by-kind
                 (frequencies (map :kind (remove observable-hole?
                                                 (mapcat :open-holes live))))

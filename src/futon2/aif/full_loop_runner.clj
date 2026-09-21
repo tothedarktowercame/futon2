@@ -535,6 +535,12 @@
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
+                    ;; This tick's accounts travel with its retained decision;
+                    ;; never reconstruct them from a newer trace or corpus.
+                    :mission-hole-coverage (or (:mission-hole-coverage decision)
+                                               {:status :absent :reason :coverage-not-recorded})
+                    :live-c-coverage (or (:live-c-coverage decision)
+                                         {:status :absent :reason :coverage-not-recorded})
                     :traceWritten (boolean (:trace-path result))
                     ;; Only this run's retained selection supplies validity
                     ;; quantities. No historical checkpoints or trace lookup.
