@@ -1,0 +1,4 @@
+evidence-id test-registry-09682b8110a1f4aa422fa23193427ab57224b4397f2c37c6b2ed59c7c0bc1177
+warrant? true
+results {:assertions 998, :duration-ms 209482, :errors 0, :exit 0, :failures 0, :tests 180}
+bound decision-guard-locators/runner -> test-registry-09682b8110a1f4aa422fa23193427ab57224b4397f2c37c6b2ed59c7c0bc1177

@@ -1,0 +1,17 @@
+{
+  "role": "post-commit-warrant-after-dependency-commit",
+  "authorization": "claude-12 invoke-1789962244553-22855-d964bbd6",
+  "dependency-commit": "65e523ef",
+  "head": "0c88999abb1020c996425bd6de9fe794a4a22217",
+  "prior-load-closure-paths": 107,
+  "uncommitted-paths": [],
+  "six-direct-hashes-unchanged": true,
+  "sha256": {
+    "src/futon2/aif/decision_gate.clj": "06b7b4dab0f664be17c4783659ba2dbdce4dc43e198a38fb51cea9670c287caf",
+    "test/futon2/aif/decision_gate_test.clj": "bc3fdc667838df3e2a081049853c1370496dc6af45567970465b6b4cace4630a",
+    "src/futon2/aif/observation_checks.clj": "4440991c7ed32898cb9280c888005cb6b567270a78c88d3261132618902f86d1",
+    "src/futon2/aif/policy.clj": "f4e67d5cc1e1bcc6184ec47f58c813e2a366158d1bf13823f9f73aa2a8e70f23",
+    "src/futon2/aif/full_loop_runner.clj": "41bb6b5cfeeb1543f07f53497aeca035597deaef751455e1307726e1f67300c9",
+    "test/futon2/aif/full_loop_runner_test.clj": "26efe04c169366a9e9c10d26092994946e4ae97585d61774dcd086e123f2ae11"
+  }
+}
