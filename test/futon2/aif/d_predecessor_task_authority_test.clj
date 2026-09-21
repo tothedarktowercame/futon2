@@ -159,3 +159,62 @@
             (is (= :not-wired (:conditioning-status input)))
             (is (= [] (:observation-updates input)))
             (is (= {#{} 1} (:continuation-belief input)))))))))
+
+
+(deftest failed-fresh-author-is-not-a-recovered-artifact
+  ;; Tick B: completed fresh revision, retained binding, rejected second review.
+  (with-artifact
+    (fn [{:keys [inputs expected jobs root]}]
+      (let [jobs (assoc-in jobs ["review-job" :result]
+                           "FULL_LOOP_REVIEW: REQUEST_CHANGES locator contract")
+            data (assoc inputs :commit (get-in inputs [:artifact-binding :commit])
+                               :dispatch-route :fresh-author)
+            result (task/complete! root {:status :captured :dispatch (:dispatch inputs)}
+                                   expected data jobs)
+            claim (edn/read-string (slurp (get-in result [:source :path])))]
+        (is (= :fresh-author (:route claim)))
+        (is (= (:artifact-binding inputs) (:artifact-binding claim)))
+        (is (= :independent-review-not-passed (get-in result [:verification :kind])))))))
+
+(deftest absent-binding-is-not-positive-recovery-evidence
+  (with-artifact
+    (fn [{:keys [inputs expected jobs root]}]
+      (doseq [[data expected-kind]
+              [[(dissoc (assoc inputs :commit "present" :dispatch-route :fresh-author)
+                         :artifact-binding) :binding-not-retained]
+               [(assoc inputs :commit "present" :dispatch-route :recovery)
+                :recovered-artifact-not-fresh-execution]
+               [(assoc inputs :commit "present") :dispatch-not-retained]]]
+        (let [result (task/complete! (str root "/" (name expected-kind))
+                                    {:status :captured :dispatch (:dispatch inputs)}
+                                    expected data jobs)]
+          (is (= expected-kind (get-in result [:verification :kind]))))))))
+
+(deftest tick-b-retained-dossier-replay
+  (let [fixture (edn/read-string (slurp "test/fixtures/tick-b-enactment.edn"))
+        dispatch (:dispatch fixture)
+        expected {:occurrence (:occurrence dispatch)
+                  :carry-occurrence-id (:carry-occurrence-id dispatch)
+                  :universe (:universe dispatch)}
+        jobs (into {} (map (juxt :job-id identity)
+                           [(:author-job fixture) (:review-job fixture)]))
+        root (.toFile (Files/createTempDirectory "tick-b-replay-"
+                       (make-array java.nio.file.attribute.FileAttribute 0)))]
+    (try
+      ;; The observation port is not under test. Do not read live repositories;
+      ;; the literal replay receipt also exercises the real readers separately.
+      (with-redefs [observation/check-path-exists (constantly {:status :missing})
+                    observation/check-decl-in-file (constantly {:status :missing})]
+        (let [result (task/complete! (str root) {:status :captured :dispatch dispatch}
+                                    expected
+                                    (assoc fixture :dispatch-route :fresh-author
+                                      :commit (get-in fixture [:artifact-binding :commit])) jobs)
+              claim (edn/read-string (slurp (get-in result [:source :path])))]
+          (is (= :fresh-author (:route claim)))
+          (is (true? (get-in claim [:artifact-binding :fresh-author?])))
+          (is (= :request-changes (execution/review-verdict (:review-job claim))))
+          ;; Preserve the real next refusal; never turn a rejected run green.
+          (is (= :job-occurrence-binding-unestablished
+                 (get-in result [:verification :kind])))))
+      (finally
+        (doseq [f (reverse (file-seq root))] (io/delete-file f true))))))

@@ -105,6 +105,8 @@
   (case (:route record)
     :recovery (refuse! :recovered-artifact-not-fresh-execution {})
     :historical (refuse! :historical-verification-not-execution {})
+    :binding-not-retained (refuse! :binding-not-retained {})
+    :dispatch-not-retained (refuse! :dispatch-not-retained {})
     :fresh-author nil
     (refuse! :task-execution-incomplete {}))
   (let [{:keys [dispatch repository artifact-binding files revision-pair]} record
@@ -252,9 +254,12 @@
                     :artifact-binding (:artifact-binding data)
                     :author-job (:author-job data) :review-job (:review-job data)
                     :files (:files data) :repository (get-in data [:artifact-binding :repo])
-                    :route (cond (nil? (:commit data)) :incomplete
-                                 (not (true? (get-in data [:artifact-binding :fresh-author?]))) :recovery
-                                 :else :fresh-author)}]
+                    :route (cond
+                             (= :recovery (:dispatch-route data)) :recovery
+                             (nil? (:commit data)) :incomplete
+                             (nil? (:artifact-binding data)) :binding-not-retained
+                             (= :fresh-author (:dispatch-route data)) :fresh-author
+                             :else :dispatch-not-retained)}]
         (try (produce! root inputs expected read-job)
              (catch Exception e
                {:status :refused :authority authority :scope scope

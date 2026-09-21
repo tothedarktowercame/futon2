@@ -199,12 +199,14 @@ Futon1b, queue Morning Brief QA, and close every cohort checkpoint. Defaults are
 corresponding `FUTON_WM_*_AGENT` environment variables replace them.
 The laptop authority defaults to Futon1b on `127.0.0.1:7073`;
 `FUTON_SUBSTRATE_URL` (or `FUTON1B_URL`) overrides it on other hosts. Agent jobs
-use an explicit absolute recovery budget (45 minutes by default) because Agency
-does not yet expose a trustworthy activity heartbeat. Budget expiry is typed as
-recoverable `:incomplete`: the loop never interrupts the live job, and a later
-click reuses a completed author artifact rather than spending a second author
-turn. Configure the bound with `--agent-budget-seconds` or
-`FUTON_WM_AGENT_BUDGET_MS`. Every opportunity proves the semantic entity route
+are awaited until Agency reports a terminal state. Elapsed time never abandons
+a live author or reviewer job. Silence exceeding `:agent-silence-ms` (default
+45 minutes) emits a `:stalled-job` observation with job ID and observed silence
+duration; it reaches the phase log/T9 and the run record's `:job-liveness`.
+The validity report prints it beside the verdict, without adding a veto.
+Legacy `--agent-budget-seconds` / `FUTON_WM_AGENT_BUDGET_MS` no longer bound
+job waiting. Missing timestamps are explicitly measured from the first poll.
+Every opportunity proves the semantic entity route
 before dispatching either agent. Before any dispatch, the leading feasible
 policy set must contain at least two distinct finite `G-efe` values when it has
 more than one member; a flat or missing estimate stops the line as policy

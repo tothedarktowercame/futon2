@@ -278,13 +278,15 @@
         (seq invalid-edges) (conj {:kind :invalid-repair-status-edge
                                    :edges invalid-edges})))))
 
-(defn- t9 [{:keys [transition phase duration-ms phase-budget-ms]}]
-  (when (and (= :end transition) (number? duration-ms)
+(defn- t9 [{:keys [transition phase duration-ms phase-budget-ms job-liveness]}]
+  (if (= :stalled-job (:kind job-liveness))
+    [job-liveness]
+    (when (and (= :end transition) (number? duration-ms)
              (number? phase-budget-ms) (pos? phase-budget-ms)
              (> duration-ms (* 2 phase-budget-ms)))
     [{:kind :phase-budget-exceeded :phase phase :duration-ms duration-ms
       :budget-ms phase-budget-ms :multiple (/ (double duration-ms)
-                                               phase-budget-ms)}]))
+                                               phase-budget-ms)}])))
 
 (defn wedge-violations
   "Return a T7 witness when the same unresolved stop-line occupies the last

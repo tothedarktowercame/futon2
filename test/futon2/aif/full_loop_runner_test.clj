@@ -1973,6 +1973,9 @@
           "FULL_LOOP_REVIEW: REJECT amendment still violates the contract"])
         build (get-in result [:checkpoints :build :judgment])]
     (is (= :build-failed (:outcome result)))
+    (is (true? (get-in result [:data :artifact-binding :fresh-author?])))
+    (is (= (get-in build [:validation :artifact-binding])
+           (get-in result [:data :artifact-binding])))
     (is (= [:request-changes :reject]
            (mapv :verdict (:reviews build))))
     (is (= [:request-changes :reject]
@@ -2764,33 +2767,28 @@
                       {:at nil}]})))
     (is (nil? (runner/job-last-activity-ms {:events [{:at "bad"}]})))))
 
-(deftest polling-budget-expiry-suspends-without-interrupting-live-work
-  (let [posts (atom [])
-        old-event (str (.minusSeconds (Instant/now) 120))]
-    (with-redefs [http/get
+(deftest long-author-completes-and-silence-is-only-evidence
+  (let [clock (atom 0) observations (atom []) state (atom [])
+        reads (atom 0)]
+    (with-redefs [runner/read-job!
                   (fn [_ _]
-                    {:status 200
-                     :body (json/generate-string
-                            {:job {:job-id "job-1" :agent-id "zai-5"
-                                   :state "running"
-                                   :started-at old-event
-                                   :events [{:at old-event}]}})})
-                  http/post
-                  (fn [url opts]
-                    (swap! posts conj {:url url :opts opts})
-                    {:status 200 :body "{\"ok\":true}"})]
-      (let [failure
-            (try
-              (runner/poll-job! {:agency-base "http://agency"
-                                 :agent-budget-ms 1000
-                                 :poll-ms 1}
-                                "job-1")
-              nil
-              (catch clojure.lang.ExceptionInfo e e))]
-        (is (= :incomplete (:outcome (ex-data failure))))
-        (is (= :agent-budget-expired (:failure-kind (ex-data failure))))
-        (is (empty? @posts)
-            "an untrusted timeout must never destroy live work")))))
+                    {:job-id "long-author" :state (if (= 4 (swap! reads inc)) "done" "running")
+                     :started-at "1970-01-01T00:00:00Z"})
+                  runner/emit-phase! (fn [_ _ record] (swap! observations conj record))]
+      (let [job (runner/poll-job!
+                 {:agent-budget-ms 1 :agent-silence-ms 10 :poll-ms 1
+                  :job-liveness/state state :now-ms-fn #(deref clock)
+                  :poll-sleep-fn (fn [_] (swap! clock + 10))}
+                 "long-author")]
+        (is (= "done" (:state job)))
+        (is (= 4 @reads))
+        (is (= 1 (count @state)) "one observation per silent interval")
+        (is (= {:kind :stalled-job :job-id "long-author" :job-state "running"
+                :silent-for-ms 10 :observed-at "1970-01-01T00:00:00.010Z"
+                :activity-basis :agency-timestamp :waiting? true}
+               (first @state)))
+        (is (= @state (mapv :job-liveness @observations)))
+        (is (= @state (tripwire/evaluate-wire :T9 (first @observations))))))))
 
 (deftest readiness-observation-failure-is-closed-and-remembered
   (let [findings (atom [])
@@ -3452,19 +3450,19 @@
          (#'runner/review-verdict
           {:result-summary "prose mentions FULL_LOOP_REVIEW: APPROVE only"}))))
 
-(deftest missing-agency-timestamps-still-obey-wall-clock-budget
-  (with-redefs [http/get
-                (fn [& _]
-                  {:status 200
-                   :body (json/generate-string
-                          {:job {:job-id "job-no-clock" :state "running"}})})]
-    (let [failure (try
-                    (runner/poll-job! {:agency-base "http://agency"
-                                       :agent-budget-ms 1 :poll-ms 1}
-                                      "job-no-clock")
-                    nil
-                    (catch clojure.lang.ExceptionInfo e e))]
-      (is (= :agent-budget-expired (:failure-kind (ex-data failure)))))))
+(deftest missing-agency-timestamps-observe-silence-without-ending-wait
+  (let [clock (atom 0) reads (atom 0) state (atom [])]
+    (with-redefs [runner/read-job!
+                  (fn [_ _] {:job-id "no-clock"
+                             :state (if (= 3 (swap! reads inc)) "done" "running")})
+                  runner/emit-phase! (fn [& _])]
+      (is (= "done" (:state
+                     (runner/poll-job!
+                      {:agent-budget-ms 1 :agent-silence-ms 5 :poll-ms 1
+                       :job-liveness/state state :now-ms-fn #(deref clock)
+                       :poll-sleep-fn (fn [_] (swap! clock + 10))} "no-clock"))))
+      (is (= :first-poll (:activity-basis (first @state))))
+      (is (= 10 (:silent-for-ms (first @state)))))))
 
 (deftest wm-phase-status-is-visible-and-opportunity-end-clears-it
   (is (= {:source "wm-full-loop"

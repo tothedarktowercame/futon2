@@ -538,7 +538,8 @@
                                                    :initial-belief-receipt :enumeration-completeness])
                                      :g-term-decomposition (decomposition/from-result result))
                     :route route
-                    :d-task-enactment (:d-task-enactment result)}
+                    :d-task-enactment (:d-task-enactment result)
+                    :job-liveness (vec (some-> (:job-liveness/state raw-opts) deref))}
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
                      (assoc :open-stop-lines
                             (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
@@ -1077,15 +1078,6 @@
                  (if (or (nil? latest) (> timestamp latest)) timestamp latest))
                nil)))
 
-(defn- job-start-ms [job]
-  (->> (keep job [:created-at :started-at])
-       (keep (fn [timestamp]
-               (try
-                 (.toEpochMilli (Instant/parse timestamp))
-                 (catch Exception _ nil))))
-       seq
-       (#(when % (apply min %)))))
-
 (defn read-job!
   [{:keys [agency-base]} job-id]
   (let [r (http/get (str agency-base "/api/alpha/invoke/jobs/" job-id)
@@ -1097,35 +1089,41 @@
     (:job (json/parse-string (:body r) true))))
 
 (defn poll-job!
-  "Wait for an Agency terminal state. Agency does not currently emit a
-  trustworthy activity heartbeat, so the bound is honestly an absolute job
-  budget. Expiry suspends the loop as recoverable `:incomplete`; it never
-  interrupts or destroys a possibly productive job."
-  [{:keys [agent-budget-ms poll-ms] :as opts} job-id]
-  (let [first-poll-ms (System/currentTimeMillis)]
-  (loop []
-    (let [job (read-job! opts job-id)]
-      (report-wm-wait! opts job first-poll-ms)
-      (cond
-        (contains? terminal-states (:state job)) job
-
-        (and agent-budget-ms
-             (pos? agent-budget-ms)
-             (some-> (or (job-start-ms job) first-poll-ms)
-                     (+ agent-budget-ms)
-                     (<= (System/currentTimeMillis))))
-        (throw (ex-info "Agency job exceeded the absolute recovery budget"
-                        {:outcome :incomplete
-                         :failure-kind :agent-budget-expired
-                         :job-id job-id
-                         :agent-id (:agent-id job)
-                         :agent-budget-ms agent-budget-ms
-                         :job-state (:state job)
-                         :last-observed-activity
-                         (some-> (job-last-activity-ms job)
-                                 Instant/ofEpochMilli str)}))
-
-        :else (do (Thread/sleep poll-ms) (recur)))))))
+  "Wait for the Agency terminal state. Silence is observable evidence, never
+  permission to abandon or replace a live author/reviewer job."
+  [{:keys [poll-ms] :as opts} job-id]
+  (let [clock (or (:now-ms-fn opts) #(System/currentTimeMillis))
+        pause (or (:poll-sleep-fn opts) #(Thread/sleep %))
+        first-poll-ms (clock)
+        threshold (or (:agent-silence-ms opts) default-agent-budget-ms)]
+    (loop [reported-activity nil]
+      (let [job (read-job! opts job-id)
+            now (clock)
+            activity (or (job-last-activity-ms job) first-poll-ms)
+            silent-for (max 0 (- now activity))]
+        (report-wm-wait! opts job first-poll-ms)
+        (if (contains? terminal-states (:state job))
+          job
+          (let [stalled? (and (>= silent-for threshold)
+                              (not= activity reported-activity))]
+            (when stalled?
+              (let [record {:kind :stalled-job :job-id job-id
+                            :job-state (:state job) :silent-for-ms silent-for
+                            :observed-at (str (Instant/ofEpochMilli now))
+                            :activity-basis (if (job-last-activity-ms job)
+                                              :agency-timestamp :first-poll)
+                            :waiting? true}
+                    phase (some-> (:wm-phase-state opts) deref)]
+                (when-let [state (:job-liveness/state opts)]
+                  (swap! state conj record))
+                ;; The ruling makes this observation non-halting even when the
+                ;; legacy opt-in tripwire halt switch is set.
+                (binding [tripwire/*halt-on-witness?* false]
+                  (emit-phase! opts (:context phase)
+                               {:phase (or (:phase phase) :agent-wait)
+                                :transition :liveness :job-liveness record}))))
+            (pause (or poll-ms 2000))
+            (recur (if stalled? activity reported-activity))))))))
 
 (defn author-infrastructure-failure?
   "True only for an artifact-free Agency invocation failure. These failures
@@ -3111,6 +3109,7 @@
   [raw-opts]
   (let [phase-events (atom [])
         d-task-dispatch (atom nil)
+        author-dispatch-route (atom nil)
         {:keys [trigger cohort? semantic-epoch author reviewer repair-reviewer
                 window-days]
          :as opts} (assoc (config raw-opts)
@@ -3483,7 +3482,10 @@
                          (d-task/complete!
                           (or (:d-task-evidence-root opts) d-task/default-root)
                           @d-task-dispatch @d-task-context
-                          (assoc data :files (get-in @checkpoints [:build :judgment :artifacts])
+                          (assoc data :dispatch-route @author-dispatch-route
+                                      :artifact-binding (or (:artifact-binding data)
+                                                            (get-in @checkpoints [:build :judgment :validation :artifact-binding]))
+                                      :files (get-in @checkpoints [:build :judgment :artifacts])
                                       :historical? (= :historical-verification-awaiting-validation outcome))
                           #(read-job! opts %)))
                        result-base (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
@@ -4099,6 +4101,7 @@
                                   artifact-ref
                                   (assoc :artifact-ref artifact-ref))))))
                 fresh-author? (nil? recovered-author-job)
+                _ (reset! author-dispatch-route (if fresh-author? :fresh-author :recovery))
                 author-repo (when fresh-author?
                               (target-repository opts entry mission code-state))
                 pre-author-head (when fresh-author?
@@ -4376,6 +4379,7 @@
                     (let [failure-data
                           (cond->
                            {:outcome :build-failed :author-job author-job
+                           :artifact-binding artifact-binding
                            :review-job review-job :commit commit
                            :target target
                            :selected-entry
@@ -4634,6 +4638,7 @@
                                     (some-> @checkpoints :selection :judgment
                                             :selected-mission))
                         :commit (:commit failure)
+                        :artifact-binding (:artifact-binding failure)
                         :witness (:witness failure)
                         :author-job (:author-job failure)
                         :review-job review-job
@@ -4675,7 +4680,8 @@
         started-at (str (Instant/now))
         raw-opts (assoc raw-opts :participants/state (atom nil)
                                 :declaration-reads/state (atom nil)
-                                :habit-reads/state (atom []))
+                                :habit-reads/state (atom [])
+                                :job-liveness/state (atom []))
         _ (ensure-dispatch-seat! (config raw-opts))
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.

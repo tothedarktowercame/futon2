@@ -215,6 +215,7 @@
           n (cond (map? sl) (:count sl) (coll? sl) (count sl) :else nil)]
       (println (format "   %-18s %s" "open-stop-lines"
                        (if (nil? n) "not recorded" (str n " (ids in record)")))))
+    (println "   job-liveness      " (pr-str (get r :job-liveness :not-recorded)))
     verdict))
 
 (defn run-files [args]
