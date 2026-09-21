@@ -407,3 +407,23 @@ Fresh discovery checks: **2 tests / 15 assertions, zero failures/errors**;
 clj-kondo **zero warnings/errors**; check-parens **OK**. These validate the finite
 classifier controls, the 51-row census, absence of cyclic support collapse, and
 the actual P/Q constructor result. They do not validate a new serving path.
+
+Registered discovery warrant:
+`test-registry-c444e5b23357a91ce929efc3305719aae316fc87162e37a2e5647960a37a5599`,
+on `78b7d1be31fc83b7dc23e87304f02b5987fc28a3`: `:warrant? true`, 2 tests,
+15 assertions, zero errors/failures, exit 0. This warrants the discovery
+computation and controls, not an implemented serving classifier or a universal
+semilattice theorem. Historical data and external paper/Lean inputs are
+identified by `input-sha256.txt`; recheck those hashes when reproducing the
+historical claims.
+
+Registration command (separate CLI process, from `/home/joe/code/futon3c`):
+
+```
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-narrative-9/holes/labs/wm-contract/runs/fixlist-2026-09-21/fix-9-evidence/registry.edn
+```
+
+The registry requires its `clojure -M:test -n <namespace>` command form, so the
+original standalone computation was moved into the named discovery test
+namespace; no registry guard was changed. Registration, content-addressed log,
+and closure are retained in the evidence directory.
