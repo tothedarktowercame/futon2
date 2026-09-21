@@ -6016,6 +6016,16 @@
        :source :futon2.aif.live-c/cascade-spec
        :live-c (:live-c live-spec)}})
 
+(defn assemble-cascade-problems
+  "Assemble the tick's sources and retain its mission-hole census unchanged.
+  Supplied sources without a census are marked absent, never recomputed from
+  today's mission files. Admission refusals remain on the same assembly."
+  [{:keys [sources] :as input}]
+  (assoc (cascade-problems/assemble input)
+         :mission-hole-coverage
+         (or (:mission-hole-coverage sources)
+             {:status :absent :reason :source-coverage-not-supplied})))
+
 (defn- cascade-decision-admitted
   "Joint cascade decision over ASSEMBLED, the output of
   futon2.aif.cascade-problems/assemble. OPTS is reserved (ignored today).
@@ -6266,6 +6276,7 @@
                 authorized (controller-authority/authorize decision ranked)
                 emitted (decision-gate/emit! authorized)]
             {:decision (assoc emitted
+                              :live-c-coverage (:live-c-coverage live-spec)
                               :token-qualification
                               {:scheme :target-token-pair
                                :form "[target token]"
@@ -6348,7 +6359,14 @@
                              :initialized-beta (:initialized-beta previous-beta)
                              :model-id (:model-id previous-beta)}))
                  result)]
-    (cond-> (assoc result :dropped-candidates dropped)
+    (cond-> (-> result
+                (assoc :dropped-candidates dropped)
+                (assoc-in [:decision :mission-hole-coverage]
+                          (or (:mission-hole-coverage assembled)
+                              {:status :absent :reason :source-coverage-not-supplied}))
+                (update :decision #(assoc % :live-c-coverage
+                                           (or (:live-c-coverage %)
+                                               {:status :absent :reason :no-admitted-cascade-problems}))))
       (:proposal-supply assembled)
       (assoc-in [:decision :selection-certificate :proposal-supply] (:proposal-supply assembled))
       (empty? (:problems admitted))
@@ -6737,7 +6755,7 @@
              {:proposal-dir (:cascade-proposals-dir judge-opts)
               :repair-root (:repair-obligations-root judge-opts)}))
         raw-cascade-assembled
-        (cascade-problems/assemble
+        (assemble-cascade-problems
          ;; The targets are the substrate's missions AND every target that has
          ;; a declared source. A declared target was previously invisible
          ;; unless it also existed as a substrate mission, so a fully located

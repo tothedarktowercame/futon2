@@ -1,0 +1,22 @@
+#'futon2.aif.full-loop-runner/persist-run-record!
+
+Testing futon2.report.coverage-account-test
+
+FAIL in (run-record-persists-the-same-tick-accounts) (coverage_account_test.clj:99)
+expected: (map? (:mission-hole-coverage record))
+  actual: (not (map? nil))
+
+FAIL in (run-record-persists-the-same-tick-accounts) (coverage_account_test.clj:100)
+expected: (= (:mission-hole-coverage decision) (:mission-hole-coverage record))
+  actual: (not (= {:holes-retained 3, :projected-by-kind {:unchecked-task 2}, :retained-by-kind {:unchecked-task 2, :work-marker 1}, :missions-projected 2, :holes-projected 2, :targets-deferred-to-declaration ["M-a"], :targets-added 1, :not-projected-by-kind {:work-marker 1}, :adopted-scales {:lam {:value 1, :status :declared}, :mu {:value 0, :status :declared}}, :adopted-schedule {:placement {:value :terminal, :status :declared}, :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}}, :holes-not-projected 1, :live-missions 2, :not-generated-reason nil, :reason-not-projected "no check can witness closure: the item carries no checkbox to flip"} nil))
+
+FAIL in (run-record-persists-the-same-tick-accounts) (coverage_account_test.clj:101)
+expected: (map? (:live-c-coverage record))
+  actual: (not (map? nil))
+
+FAIL in (run-record-persists-the-same-tick-accounts) (coverage_account_test.clj:102)
+expected: (= (:live-c-coverage decision) (:live-c-coverage record))
+  actual: (not (= {:unreached-source-tokens #{:closed/M-b :star/capability}, :source-entries {:unit :source-entry, :count 4}, :comparison-domain {:unit :target-qualified-outcome-token, :count 3, :tokens #{["M-a" :x] ["M-a" :z] ["M-a" :y]}}, :source-signature "206df949e58dc3fdbd6f8aed8b6bea44da37f6d5b582ccd80883ab9e25bf06e0", :status :computed, :source-tokens {:unit :source-token, :total 4, :projected 2, :reached 2, :unreached 2}, :projected-outcome-tokens {:unit :target-qualified-outcome-token, :count 3, :tokens #{["M-a" :x] ["M-a" :z] ["M-a" :y]}}, :projected-from {:closed/M-a {:outcomes #{["M-a" :x] ["M-a" :z] ["M-a" :y]}, :source-weight 1/5, :outcome-weight 1/15}, :alive/M-a {:outcomes #{["M-a" :x] ["M-a" :z] ["M-a" :y]}, :source-weight 2/5, :outcome-weight 2/15}}, :in-domain-outcome-tokens {:unit :target-qualified-outcome-token, :count 3, :tokens #{["M-a" :x] ["M-a" :z] ["M-a" :y]}}, :projection :mission-declared-wants} nil))
+
+Ran 5 tests containing 41 assertions.
+4 failures, 0 errors.

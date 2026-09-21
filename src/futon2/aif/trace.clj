@@ -452,6 +452,10 @@
     ;; the cascade decision's recorded posterior.
     :decision (strip-decision (:decision judge-output))
     :cascade-problems (:cascade-problems judge-output)
+    :mission-hole-coverage (or (get-in judge-output [:decision :mission-hole-coverage])
+                               {:status :absent :reason :coverage-not-recorded})
+    :live-c-coverage (or (get-in judge-output [:decision :live-c-coverage])
+                        {:status :absent :reason :coverage-not-recorded})
     :mode (:mode judge-output)}
     (contains? judge-output :horizon-steps)
     ;; Row 15 depth capture. A present nil is the observed scorer input, not a
