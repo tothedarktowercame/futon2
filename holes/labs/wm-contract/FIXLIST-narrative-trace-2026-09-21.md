@@ -279,3 +279,5 @@ rank-cascade-actions → horizon-g-sparse (risk + ambiguity only), which contain
 neither. On the live path the problem is the absence of any parameter-novelty
 term, plus improve-1's finding that near-uniform C makes risk reward outcome
 entropy.
+
+| improve-7 | focus-conditioned C: a declared, time-scoped operator focus (mission-clock carrier) concentrates Cτ on the focus's outcomes; near-uniform C only when no focus is declared; off-focus work carries a MAY valence where the focus requires it (Joe via claude-5, 2026-09-21; ANSWERS-C-questions) | improve-2 Q3 strength (now to be asked per focus); improve-4 valences | filed; the strength question is re-framed per focus |

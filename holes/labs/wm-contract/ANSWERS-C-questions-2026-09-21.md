@@ -121,3 +121,20 @@ claude-3's reading (for Joe to correct):
    declaration C does not yet read. They combine in the posterior over
    policies, which is the "probability of being selected"; keeping them in
    separate terms avoids counting the same reason twice.
+
+## Relayed by claude-5 (2026-09-21): on near-uniform C — input to Q3, not a ruling on values
+
+Joe (as relayed): near-uniform C is "plausible and interesting and sort of bad";
+possibly fine as a DEFAULT-MODE baseline, but Cτ "should not be uniform": at a
+given time "I have a focus. I have a preference. I have a qualitative analysis
+of what's going on in front of me. I've got an aesthetic sensibility." Example:
+working on War Machine, he does not want to be distracted by Agency work —
+though sometimes Agency work is needed in order to do the WM work.
+
+claude-3's filing: the Cτ in the code is indexed by step within the planning
+horizon (terminal vs earlier; PolicyHorizon.lean, live_c schedule). Joe's is
+conditioned on the declared current focus. They compose (a focus-conditioned
+family whose members are step-indexed); only the first exists. Consistent with
+the Q2 answer ("I've declared it to be a priority", time-scoped). The Agency
+example reads as a MAY valence (Q1 follow-up): off-focus work permitted where
+the focus's own work requires it, otherwise dispreferred. Filed as improve-7.
