@@ -1,0 +1,76 @@
+{
+  "role": "post-commit-warrant",
+  "requesting-owner": "claude-12",
+  "author": "codex-8",
+  "repo-root": "/home/joe/code/futon2",
+  "independent-review": "claude-2 APPROVE invoke-1789963375357-22864-360c27c2",
+  "quarantine-sha256": "9085b8ce5048b4c9a6d66e7d15f7e9c8d291cb91736ce546f7e881df76b80a2d",
+  "sha256": {
+    "src/futon2/aif/full_loop_cohort.clj": "5830205342bdd69443a319e25d9ae754812e60f45c92363af0b60493a5a01438",
+    "test/futon2/aif/full_loop_cohort_test.clj": "053467d9ff7b93354653305655be982af9ffd76624f62e58b679594f26f62d57"
+  },
+  "warrants": [
+    {
+      "warrant?": true,
+      "postcheck": {
+        "status": "matched"
+      },
+      "code-sha": "6d4a1b95846ac097b44aff037faa7fd56ad91adc7d2c83a34b7c208e7e29927c",
+      "scope": "cohort",
+      "test-sha": "414a8a654b95e7045f20a6c8091ebc3b323665fcade1e662938686fdb623fa4e",
+      "repo-root": "/home/joe/code/futon2",
+      "entry-id": "test-registry-112be586845f74e6cdf3a4b8c26be23c18c9ffa8761b4892b2e679d73ceae3d6",
+      "run-id": "534c17eb-1427-430d-9050-d61b32300bb1",
+      "results": {
+        "assertions": 170,
+        "duration-ms": 1584,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 30
+      }
+    },
+    {
+      "warrant?": true,
+      "postcheck": {
+        "status": "matched"
+      },
+      "code-sha": "6d4a1b95846ac097b44aff037faa7fd56ad91adc7d2c83a34b7c208e7e29927c",
+      "scope": "history",
+      "test-sha": "789c02354376e21be40c94a3cdd500e1f5bfd33d9a075ef12080c6c57f71e92e",
+      "repo-root": "/home/joe/code/futon2-history-closing-tooling",
+      "entry-id": "test-registry-617209e530b1f3fd0d54c05813ade948dcc69f0cdda8474dc9119538f0b7d066",
+      "run-id": "8decba32-5014-4e07-9bf2-b7c23ef17c18",
+      "results": {
+        "assertions": 31,
+        "duration-ms": 18384,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 3
+      }
+    },
+    {
+      "warrant?": true,
+      "postcheck": {
+        "status": "matched"
+      },
+      "code-sha": "6d4a1b95846ac097b44aff037faa7fd56ad91adc7d2c83a34b7c208e7e29927c",
+      "scope": "runner",
+      "test-sha": "5b18d17c55d41ffa8caa8d282b936dad195dbf862479c6fca70716f03f172dec",
+      "repo-root": "/home/joe/code/futon2-history-closing-tooling",
+      "entry-id": "test-registry-b41d8e75ea3d4899ef3764e17c8363a49c7dcd286785d0fd7ec90d617382efe1",
+      "run-id": "7a5938a7-a750-4da2-bef4-d1a0615c0541",
+      "results": {
+        "assertions": 998,
+        "duration-ms": 186985,
+        "errors": 0,
+        "exit": 0,
+        "failures": 0,
+        "tests": 180
+      }
+    }
+  ],
+  "implementation-commit": "7fef1200fed947749fa8169f4316431e719232b6",
+  "repair-replacement-commit": "707e680f8ef28dbdc40d4f4741a3ec14d75fb9e3"
+}

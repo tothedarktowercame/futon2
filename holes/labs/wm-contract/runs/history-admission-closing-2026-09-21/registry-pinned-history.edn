@@ -1,0 +1,7 @@
+{:repo-root "/home/joe/code/futon2-history-closing-tooling"
+ :code-paths ["src/futon2/aif/full_loop_cohort.clj" "src/futon2/aif/full_loop_runner.clj"]
+ :test-paths ["test/futon2/aif/history_admission_test.clj"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.history-admission-test"]
+ :author "codex-8" :origin "claude-12/history-admission-followup"
+ :artifact-dir "/home/joe/code/futon2/holes/labs/wm-contract/runs/history-admission-closing-2026-09-21/pinned-post-history"
+ :agency-url "http://localhost:7070"}

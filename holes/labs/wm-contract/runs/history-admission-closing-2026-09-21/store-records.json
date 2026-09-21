@@ -1,0 +1,13 @@
+{
+  "repair-id": "repair-occ-f9f4e9708737cb15163f92d0d31419aae2097c5095ffdf6b5c4a3dc08d7057ba",
+  "records": {
+    "implementations": {
+      "path": "data/wm-repair-obligations/implementations/repair-occ-f9f4e9708737cb15163f92d0d31419aae2097c5095ffdf6b5c4a3dc08d7057ba.edn",
+      "sha256": "296e3a7423991d1ba7a50cf68765b87b3759a4b9a87fbf930deef9c8935fd33f"
+    },
+    "resolutions": {
+      "path": "data/wm-repair-obligations/resolutions/repair-occ-f9f4e9708737cb15163f92d0d31419aae2097c5095ffdf6b5c4a3dc08d7057ba.edn",
+      "sha256": "1410ccae502828da0e7eb221461b0777246695e6cc6c45a6556c5744ce921a65"
+    }
+  }
+}
