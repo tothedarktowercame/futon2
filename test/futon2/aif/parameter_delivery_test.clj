@@ -1,21 +1,24 @@
 (ns futon2.aif.parameter-delivery-test
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.epistemic-value :as epistemic-value]
             [futon2.aif.machine-model :as machine-model]
             [futon2.aif.machine-parameters :as parameters]
             [futon2.aif.parameter-delivery :as delivery]))
 
 ;; --- Lean fixture: ExpectedInformationGainWitness.binaryFixture ---
-;; one policy "inspect", one outcome :datum of predictive mass 1, uniform
-;; prior over [:a :b], point posterior on :a (with :b at mass 0 in the
-;; support, exercising the 0·log 0 convention) ⇒ EIG = log 2.
+;; one policy "inspect", two equiprobable outcomes, uniform prior over
+;; [:a :b], and the corresponding point posteriors.  Their mixture reconstructs
+;; the prior, exercising the canonical Bayes-coherence gate, and EIG = log 2.
 (def fixture-kernels
   {:model {:id "eig-witness" :revision "v1"}
    :theta [:a :b]
    :prior-kernel {"inspect" {:a 1/2 :b 1/2}}
-   :posterior-kernel {["inspect" :datum] {:ok true :evidence 1.0
-                                          :mass {:a 1.0 :b 0.0}}}
-   :posterior-predictive {"inspect" {:datum 1.0}}})
+   :posterior-kernel {["inspect" :datum-a] {:ok true :evidence 1/2
+                                            :mass {:a 1.0 :b 0.0}}
+                      ["inspect" :datum-b] {:ok true :evidence 1/2
+                                            :mass {:a 0.0 :b 1.0}}}
+   :posterior-predictive {"inspect" {:datum-a 1/2 :datum-b 1/2}}})
 
 (deftest lean-binary-fixture
   (is (< (Math/abs (- (delivery/expected-information-gain fixture-kernels "inspect")
@@ -23,38 +26,55 @@
          1e-12)
       "ExpectedInformationGainWitness.binaryFixture: EIG = log 2"))
 
+(deftest delivery-uses-the-canonical-information-kernel
+  (let [prior (get-in fixture-kernels [:prior-kernel "inspect"])
+        posteriors (into {} (map (fn [outcome]
+                                   [outcome (get-in fixture-kernels
+                                                    [:posterior-kernel
+                                                     ["inspect" outcome] :mass])]))
+                         [:datum-a :datum-b])
+        model {:prior prior
+               :predicted-observations {:datum-a 1/2 :datum-b 1/2}
+               :posteriors posteriors}]
+    (is (= (epistemic-value/kl-divergence (:datum-a posteriors) prior)
+           (delivery/parameter-information-gain
+            fixture-kernels "inspect" :datum-a)))
+    (is (= (epistemic-value/expected-information-gain model)
+           (delivery/expected-information-gain fixture-kernels "inspect")))))
+
 (deftest zero-mass-theta-contributes-zero
   ;; posterior support containing a zero-mass θ (0·log 0 := 0) gives the same
   ;; value as a posterior without it.
   (let [with-zero fixture-kernels
-        without-zero (assoc-in fixture-kernels [:posterior-kernel ["inspect" :datum] :mass]
+        without-zero (assoc-in fixture-kernels [:posterior-kernel ["inspect" :datum-a] :mass]
                                {:a 1.0})]
-    (is (= (delivery/parameter-information-gain with-zero "inspect" :datum)
-           (delivery/parameter-information-gain without-zero "inspect" :datum)))))
+    (is (= (delivery/parameter-information-gain with-zero "inspect" :datum-a)
+           (delivery/parameter-information-gain without-zero "inspect" :datum-a)))))
 
 (deftest refusals
   ;; :zero-evidence-conditioning — posterior entry not :ok
-  (let [k (assoc-in fixture-kernels [:posterior-kernel ["inspect" :datum]]
+  (let [k (assoc-in fixture-kernels [:posterior-kernel ["inspect" :datum-a]]
                     {:ok false :refusal {:kind :zero-evidence-conditioning}})]
     (is (= :zero-evidence-conditioning
-           (:kind (delivery/parameter-information-gain k "inspect" :datum))))
+           (:kind (delivery/parameter-information-gain k "inspect" :datum-a))))
     ;; a positive predictive mass whose posterior is refused refuses the EIG
     (is (= :zero-evidence-conditioning
            (:kind (delivery/expected-information-gain k "inspect")))))
   ;; :zero-prior-in-posterior-support — Lean's positivePrior hypothesis
   (let [k (-> fixture-kernels
               (assoc-in [:prior-kernel "inspect"] {:a 0.0 :b 1.0})
-              (assoc-in [:posterior-kernel ["inspect" :datum] :mass] {:a 1.0}))]
+              (assoc-in [:posterior-kernel ["inspect" :datum-a] :mass] {:a 1.0}))]
     (is (= :zero-prior-in-posterior-support
-           (:kind (delivery/parameter-information-gain k "inspect" :datum)))))
+           (:kind (delivery/parameter-information-gain k "inspect" :datum-a)))))
   ;; a zero predictive mass outcome contributes 0 and never consults the
   ;; posterior — even a refused one.
   (let [k {:prior-kernel {"p" {:a 1/2 :b 1/2}}
            :posterior-kernel {["p" :silent] {:ok false
                                              :refusal {:kind :zero-evidence-conditioning}}
-                              ["p" :heard] {:ok true :evidence 1.0 :mass {:a 1.0 :b 0.0}}}
+                              ["p" :heard] {:ok true :evidence 1.0
+                                             :mass {:a 1/2 :b 1/2}}}
            :posterior-predictive {"p" {:silent 0.0 :heard 1.0}}}]
-    (is (= (Math/log 2) (delivery/expected-information-gain k "p")))))
+    (is (zero? (delivery/expected-information-gain k "p")))))
 
 ;; --- real row-11 kernels, built exactly as machine-parameters-test does ---
 (def dir "holes/labs/wm-contract/runs/row-11-parameters")

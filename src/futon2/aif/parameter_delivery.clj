@@ -14,7 +14,8 @@
    inside G is a separate, unapproved change (SPEC-flat-removal S2 / D3
    amendment 4). g-with-information-gain returns :g exactly as the injected
    g-fn produced it."
-  (:require [futon2.aif.machine-parameters :as machine-parameters]))
+  (:require [futon2.aif.epistemic-value :as epistemic-value]
+            [futon2.aif.machine-parameters :as machine-parameters]))
 
 (def delivery-schema :wm/parameter-delivery-v1)
 
@@ -41,11 +42,7 @@
         (if zero-prior
           (refused :zero-prior-in-posterior-support
                    [:posterior-kernel [policy-id outcome] (ffirst zero-prior)])
-          (double (reduce (fn [acc [theta p]]
-                            (if (pos? p)
-                              (+ acc (* p (Math/log (/ p (get prior theta)))))
-                              acc))
-                          0 mass)))))))
+          (epistemic-value/kl-divergence mass prior))))))
 
 (defn expected-information-gain
   "Predictive-outcome expectation of parameter-information-gain for one
@@ -56,14 +53,23 @@
   (let [predictive (get-in kernels [:posterior-predictive policy-id])]
     (if (nil? predictive)
       (refused :unknown-policy [:posterior-predictive policy-id])
-      (reduce (fn [acc [outcome q]]
-                (if-not (pos? q)
-                  acc
-                  (let [pig (parameter-information-gain kernels policy-id outcome)]
-                    (if (= :refused (:status pig))
-                      (reduced pig)
-                      (+ acc (* (double q) pig))))))
-              0.0 predictive))))
+      (let [positive-predictive (into {} (filter (comp pos? val)) predictive)
+            refusal (some (fn [[outcome _]]
+                            (let [pig (parameter-information-gain
+                                       kernels policy-id outcome)]
+                              (when (= :refused (:status pig)) pig)))
+                          positive-predictive)]
+        (if refusal
+          refusal
+          (epistemic-value/expected-information-gain
+           {:prior (get-in kernels [:prior-kernel policy-id])
+            :predicted-observations positive-predictive
+            :posteriors
+            (into {} (map (fn [[outcome _]]
+                            [outcome
+                             (get-in kernels
+                                     [:posterior-kernel [policy-id outcome] :mass])]))
+                  positive-predictive)}))))))
 
 (defn delivery
   "Deliver the observation-bound record. :a-identity (identity of the A the
