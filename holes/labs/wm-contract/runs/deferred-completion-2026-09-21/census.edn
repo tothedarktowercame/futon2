@@ -1,0 +1,13 @@
+{:at "2026-09-21T05:11:07.876901306Z",
+ :root "/home/joe/code/futon2/data/wm-repair-obligations",
+ :open-count 42,
+ :open-classes
+ {:machine-failure 28,
+  :environmental-hold 11,
+  :independent-review-failure 3},
+ :outstanding [],
+ :historical
+ [{:repair/id "repair-attempt-006-late-author-artifact",
+   :attempt-id "attempt-006",
+   :failure-kind :late-author-artifact,
+   :failure-stage :author-wait}]}

@@ -93,7 +93,8 @@
    (fn [{:keys [inputs expected jobs]}]
      (let [record (task/claim inputs)
            check #(task/verify % expected jobs)]
-       (doseq [[route kind] [[:recovery :recovered-artifact-not-fresh-execution]
+       (doseq [[route kind] [[:deferred-completion :deferred-artifact-not-fresh-execution]
+                            [:recovery :deferred-artifact-not-fresh-execution]
                             [:historical :historical-verification-not-execution]
                             [:incomplete :task-execution-incomplete]]]
          (is (= kind (:kind (check (assoc record :route route))))))
@@ -120,8 +121,10 @@
    (fn [{:keys [inputs expected jobs root]}]
      (let [produced (task/produce! root (assoc inputs :route :recovery) expected jobs)
            reread (task/read-predecessor root expected jobs)]
+       (is (= :deferred-completion
+              (:route (edn/read-string (slurp (get-in produced [:source :path]))))))
        (is (= :refused (get-in produced [:verification :status])))
-       (is (= :recovered-artifact-not-fresh-execution (:kind reread)))
+       (is (= :deferred-artifact-not-fresh-execution (:kind reread)))
        (spit (get-in produced [:source :path]) "{:broken")
        (is (= :invalid (:status (task/read-predecessor root expected jobs))))))))
 
@@ -185,7 +188,7 @@
               [[(dissoc (assoc inputs :commit "present" :dispatch-route :fresh-author)
                          :artifact-binding) :binding-not-retained]
                [(assoc inputs :commit "present" :dispatch-route :recovery)
-                :recovered-artifact-not-fresh-execution]
+                :deferred-artifact-not-fresh-execution]
                [(assoc inputs :commit "present") :dispatch-not-retained]]]
         (let [result (task/complete! (str root "/" (name expected-kind))
                                     {:status :captured :dispatch (:dispatch inputs)}

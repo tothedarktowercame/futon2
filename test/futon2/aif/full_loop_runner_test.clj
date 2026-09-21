@@ -3190,7 +3190,7 @@
 (deftest recoverable-late-author-completion-skips-second-author-turn
   (let [dispatches (atom [])
         resolutions (atom [])
-        stop-line {:repair/id "repair-attempt-006-recovery"
+        stop-line {:repair/id "repair-attempt-006-deferred-completion"
                    :repair/status :open
                    :repair/class :incomplete-recoverable
                    :attempt-id "attempt-006"
@@ -3240,9 +3240,13 @@
           :queue-fn identity})]
     (is (= :grounded-change (:outcome result)))
     (is (= ["codex-1"] @dispatches)
-        "recovery dispatches only the standing Ground Control reviewer")
+        "deferred-completion dispatches only the standing Ground Control reviewer")
+    (is (= :agency-deferred-completion
+           (get-in result [:checkpoints :dispatch :ground :kind])))
+    (is (= :deferred-completion
+           (get-in result [:checkpoints :dispatch :judgment :availability])))
     (is (= stop-line (ffirst @resolutions)))
-    (is (= :recovered-existing-artifact
+    (is (= :deferred-existing-artifact
            (get-in @resolutions [0 1 :validation :kind])))))
 
 (deftest recoverable-late-review-completion-skips-both-replacement-turns
@@ -3252,7 +3256,7 @@
                     :artifact-ref "1a7e1234567890abcdef1234567890abcdef1234"
                     :feature-card feature-card-claim
                     :execution successful-execution}
-        stop-line {:repair/id "repair-attempt-007-review-recovery"
+        stop-line {:repair/id "repair-attempt-007-review-deferred-completion"
                    :repair/status :open
                    :repair/class :incomplete-recoverable
                    :attempt-id "attempt-007"
@@ -3301,7 +3305,7 @@
     (is (empty? @dispatches))
     (is (= stop-line (ffirst @resolutions)))))
 
-(deftest reviewer-recovery-without-author-provenance-fails-before-dispatch
+(deftest reviewer-deferred-completion-without-author-provenance-fails-before-dispatch
   (let [dispatches (atom [])
         stop-line {:repair/id "repair-legacy-review"
                    :repair/status :open
@@ -3317,7 +3321,7 @@
           :repair-open-fn (constantly [stop-line])
           :repair-system-record-fn
           (fn [finding]
-            (assoc finding :repair/id "repair-recovery-provenance"))
+            (assoc finding :repair/id "repair-deferred-completion-provenance"))
           :repair-supersede-fn (fn [& _] {:repair/status :superseded})
           :read-job-fn (fn [_ job-id]
                          {:job-id job-id :state "done"
@@ -3340,11 +3344,11 @@
                                        (throw (ex-info "unexpected replacement dispatch" {})))
           :queue-fn identity})]
     (is (= :incomplete (:outcome result)))
-    (is (= :recovery-provenance-missing
+    (is (= :deferred-completion-provenance-missing
            (get-in result [:data :failure-kind])))
     (is (empty? @dispatches))))
 
-(deftest terminal-recovery-job-transitions-to-machine-repair
+(deftest terminal-deferred-completion-job-transitions-to-machine-repair
   (let [successors (atom [])
         supersessions (atom [])
         dispatches (atom [])
@@ -3371,9 +3375,9 @@
                                        (swap! dispatches conj args)
                                        (throw (ex-info "unexpected replacement dispatch" {})))}))]
     (is (= :incomplete (:outcome result)))
-    (is (= :recovery-job-terminal (get-in result [:data :failure-kind])))
+    (is (= :deferred-completion-job-terminal (get-in result [:data :failure-kind])))
     (is (= :machine-failure (:repair-class (first @successors))))
-    (is (= :recovery-job-terminal (last (first @supersessions))))
+    (is (= :deferred-completion-job-terminal (last (first @supersessions))))
     (is (empty? @dispatches))))
 
 (deftest recovered-review-rejection-hands-line-to-one-review-finding
@@ -3416,7 +3420,7 @@
     (is (= "repair-review-reject"
            (get-in result [:data :repair-obligation :repair/id])))))
 
-(deftest done-author-recovery-without-artifact-transitions-before-dispatch
+(deftest done-author-deferred-completion-without-artifact-transitions-before-dispatch
   (let [supersessions (atom [])
         dispatches (atom [])
         stop-line {:repair/id "repair-refusal" :repair/status :open
@@ -3436,7 +3440,7 @@
                  :dispatch-fn (fn [& args]
                                        (swap! dispatches conj args)
                                        (throw (ex-info "unexpected replacement dispatch" {})))}))]
-    (is (= :recovery-artifact-missing (get-in result [:data :failure-kind])))
+    (is (= :deferred-completion-artifact-missing (get-in result [:data :failure-kind])))
     (is (= 1 (count @supersessions)))
     (is (empty? @dispatches))))
 
@@ -4472,7 +4476,7 @@
     (is (nil? (runner/unvalidated-artifact-failure false "/eoi_network_test.clj" nil)))
     (is (nil? (runner/unvalidated-artifact-failure true nil nil)))))
 
-;; --- card recovery from the author's own text events ------------------------
+;; --- card deferred-completion from the author's own text events ------------------------
 ;; repair-canary-de75cee9: Agency concatenates the author's separate text
 ;; blocks into :result with NO separator, so a card that began its own block
 ;; ends up abutting the previous block's last word:
@@ -4498,7 +4502,7 @@
       (is (= "a carrier" (:built card)))
       (is (= ["bb test -> 4 tests"] (:things-to-try card))))))
 
-(deftest event-recovery-does-not-widen-the-gate
+(deftest event-deferred-completion-does-not-widen-the-gate
   (testing "a marker quoted MID-event never matches"
     (let [job {:result-summary "prose"
                :result "prose"
@@ -4522,7 +4526,7 @@
            (:reason (#'runner/feature-card-validation
                      {:result-summary "" :result ""}))))))
 
-(deftest earlier-recovery-paths-still-win
+(deftest earlier-deferred-completion-paths-still-win
   (testing "a leading card in the summary is still the fast path"
     (let [job {:result-summary canary-card-text
                :events [{:type "text" :text canary-card-text}]}]
@@ -4533,34 +4537,34 @@
                :events [{:type "text" :text canary-card-text}]}]
       (is (= :result (:source (#'runner/feature-card-validation job)))))))
 
-(deftest recovery-artifact-failure-separates-malformed-from-missing
-  (testing "a completed recovery with no artifact-ref is still reported missing"
-    (is (= :recovery-artifact-missing
-           (:failure-kind (runner/recovery-artifact-failure
+(deftest deferred-completion-artifact-failure-separates-malformed-from-missing
+  (testing "a completed deferred-completion with no artifact-ref is still reported missing"
+    (is (= :deferred-completion-artifact-missing
+           (:failure-kind (runner/deferred-completion-artifact-failure
                            :author-wait {:job-id "j" :state "done"})))))
   (testing "a path scraped into artifact-ref is malformed, not missing"
     ;; The measured value from canary-da9681ce's author job, whose real commit
     ;; was f285e40 in futon2.
-    (let [failure (runner/recovery-artifact-failure
+    (let [failure (runner/deferred-completion-artifact-failure
                    :author-wait {:job-id "j" :state "done"
                                  :artifact-ref "/eoi_network_test.clj"})]
-      (is (= :recovery-artifact-ref-malformed (:failure-kind failure)))
+      (is (= :deferred-completion-artifact-ref-malformed (:failure-kind failure)))
       (is (= "/eoi_network_test.clj" (:artifact-ref failure))
           "the offending value is carried so the fault is locatable")))
   (testing "a commit-shaped ref has nothing to report"
-    (is (nil? (runner/recovery-artifact-failure
+    (is (nil? (runner/deferred-completion-artifact-failure
                :author-wait {:job-id "j" :state "done"
                              :artifact-ref "f285e40f6cd150410d66c7f8c555660dba9d4003"}))))
-  (testing "the gate does not widen past a completed author-wait recovery"
-    (is (nil? (runner/recovery-artifact-failure :author-wait nil)))
-    (is (nil? (runner/recovery-artifact-failure
+  (testing "the gate does not widen past a completed author-wait deferred-completion"
+    (is (nil? (runner/deferred-completion-artifact-failure :author-wait nil)))
+    (is (nil? (runner/deferred-completion-artifact-failure
                :reviewer-wait {:job-id "j" :state "done"
                                :artifact-ref "/eoi_network_test.clj"})))
-    (is (nil? (runner/recovery-artifact-failure
+    (is (nil? (runner/deferred-completion-artifact-failure
                :author-wait {:job-id "j" :state "running"
                              :artifact-ref "/eoi_network_test.clj"})))))
 
-(deftest done-author-recovery-with-a-non-commit-artifact-is-refused-before-dispatch
+(deftest done-author-deferred-completion-with-a-non-commit-artifact-is-refused-before-dispatch
   ;; Outer boundary: the typed refusal must reach run-opportunity!'s result,
   ;; not stop at the predicate. Without the shape check the snapshot was adopted
   ;; as the authored turn and its path became the reviewed commit.
@@ -4589,7 +4593,7 @@
                  :dispatch-fn (fn [& args]
                                        (swap! dispatches conj args)
                                        (throw (ex-info "unexpected replacement dispatch" {})))}))]
-    (is (= :recovery-artifact-ref-malformed (get-in result [:data :failure-kind])))
+    (is (= :deferred-completion-artifact-ref-malformed (get-in result [:data :failure-kind])))
     (is (= "/eoi_network_test.clj"
            (get-in result [:data :error-data :artifact-ref]))
         "the offending value survives into the durable failure record")
@@ -4598,7 +4602,7 @@
         "and into the successor obligation, so the fault is locatable later")
     (is (= 1 (count @supersessions)))
     (is (empty? @dispatches)
-        "no replacement turn is dispatched on a typed recovery refusal")))
+        "no replacement turn is dispatched on a typed deferred-completion refusal")))
 
 (deftest historical-verification-action-commits-without-author-dispatch
   (let [dispatches (atom []) executions (atom [])

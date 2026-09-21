@@ -1,0 +1,13 @@
+{:schema :wm/deferred-completion-disposition-v1
+ :as-of "2026-09-21T05:11:07.876901306Z"
+ :root "/home/joe/code/futon2/data/wm-repair-obligations"
+ :outstanding-findings [] :outstanding-referenced-jobs []
+ :historical [{:repair/id "repair-attempt-006-late-author-artifact"
+               :job-id "invoke-1784158547590-592-baa93319"
+               :disposition :retired :reason :already-resolved
+               :effective-store-status :resolved
+               :resolved-at "2026-07-16T09:08:32.774857211Z"
+               :agency-read {:http-status 404 :error :invoke-job-not-found}
+               :artifact "a707b6fff76da6ca55327f91324a10b79d96231a"
+               :store-mutation? false}]
+ :store-mutations []}

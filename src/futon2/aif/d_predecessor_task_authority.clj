@@ -87,7 +87,8 @@
   [{:keys [dispatch artifact-binding author-job review-job files repository route]}]
   {:schema :wm/d-task-enactment-v1 :authority authority :scope scope
    :enactment-grain :task :b-authority :declared-kernel-of-verified-macro-action
-   :causal-attribution :independent-check-required :route route
+   :causal-attribution :independent-check-required
+   :route (case route :recovery :deferred-completion route)
    :dispatch dispatch :artifact-binding artifact-binding
    :author-job author-job :review-job review-job :files (vec files)
    :repository repository
@@ -107,7 +108,8 @@
   (require! (= (:authority record) authority) :authority-mismatch {})
   (require! (= (:scope record) scope) :authority-scope-mismatch {})
   (case (:route record)
-    :recovery (refuse! :recovered-artifact-not-fresh-execution {})
+    ;; Legacy claims remain readable, but neither spelling certifies execution.
+    (:recovery :deferred-completion) (refuse! :deferred-artifact-not-fresh-execution {})
     :historical (refuse! :historical-verification-not-execution {})
     :binding-not-retained (refuse! :binding-not-retained {})
     :dispatch-not-retained (refuse! :dispatch-not-retained {})
@@ -270,7 +272,7 @@
                     :author-job (:author-job data) :review-job (:review-job data)
                     :files (:files data) :repository (get-in data [:artifact-binding :repo])
                     :route (cond
-                             (= :recovery (:dispatch-route data)) :recovery
+                             (#{:recovery :deferred-completion} (:dispatch-route data)) :deferred-completion
                              (nil? (:commit data)) :incomplete
                              (nil? (:artifact-binding data)) :binding-not-retained
                              (= :fresh-author (:dispatch-route data)) :fresh-author

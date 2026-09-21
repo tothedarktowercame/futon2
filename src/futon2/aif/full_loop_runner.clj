@@ -1633,7 +1633,7 @@
             (catch Exception _ nil)))))))
 
 (defn- events-feature-card
-  "Last recovery path: the author's own text EVENTS, each checked for the
+  "Last extraction fallback: the author's own text EVENTS, each checked for the
   marker at its start.
 
   Agency concatenates the author's separate text blocks into :result with NO
@@ -1644,7 +1644,7 @@
   :marker-not-at-durable-prefix, which says the author put prose before the
   marker. The author did put prose before it, but in an EARLIER block; the
   concatenation is what destroyed the line boundary, so the diagnosis blamed
-  the wrong layer and a recoverable card was thrown away.
+  the wrong layer and an extractable card was thrown away.
 
   This does NOT widen the gate. The marker must still begin its block — a
   marker quoted mid-sentence inside an event never matches, exactly as line
@@ -1774,7 +1774,7 @@
         proof-ref (assoc :proof-ref proof-ref)
         note (assoc :reviewer-note note)))))
 
-(declare recovery-job-id resolve-build resolve-target-build)
+(declare deferred-completion-job-id resolve-build resolve-target-build)
 
 (defn- prompt-findings [stop-lines]
   (mapv (fn [finding]
@@ -1783,7 +1783,7 @@
                                :failed-commit :review-verdict :review-text
                                :target :failure-kind :failure-stage :failure-outcome :failure-error
                                :discharge-contract])
-                 :failure-job-id (recovery-job-id finding)))
+                 :failure-job-id (deferred-completion-job-id finding)))
         stop-lines))
 
 (defn- prompt-selected-action [action]
@@ -3031,23 +3031,23 @@
      :environmental-hold
      {:requires [:cleared-precondition :grounded-production-shaped-successor]}
      :incomplete-recoverable
-     {:requires [:recover-existing-author-artifact :independent-review
+     {:requires [:complete-existing-author-artifact :independent-review
                  :grounded-existing-commit]}
      {:requires [:grounded-production-shaped-successor]})
    :artifact-shape :code-commit))
 
-(defn- recovery-job-id [obligation]
+(defn- deferred-completion-job-id [obligation]
   (or (get-in obligation [:failure-data :job-id])
       (get-in obligation [:backtrace :job-id])
       (:author-job-id obligation)))
 
-(defn- recovery-snapshot
-  "Read, but never restart, the Agency job named by a recoverable finding."
+(defn- deferred-completion-snapshot
+  "Read, but never restart, the Agency job named by an incomplete-recoverable finding."
   [opts obligation]
   (when (and (= :incomplete-recoverable (:repair/class obligation))
-             (recovery-job-id obligation))
+             (deferred-completion-job-id obligation))
     ((or (:read-job-fn opts) read-job!)
-     opts (recovery-job-id obligation))))
+     opts (deferred-completion-job-id obligation))))
 
 (defn unvalidated-artifact-failure
   "Which failure, if any, a fresh author's unvalidated artifact-ref represents.
@@ -3070,12 +3070,12 @@
        :artifact-ref text-commit
        :message "Agency artifact-ref is not a commit"})))
 
-(defn recovery-artifact-failure
-  "Which failure, if any, a completed author-wait recovery snapshot represents.
+(defn deferred-completion-artifact-failure
+  "Which failure, if any, a completed author-wait deferred-completion snapshot represents.
 
-  The recovery path adopted a snapshot as the authored turn on the strength of
+  The deferred-completion path adopted a snapshot as the authored turn on the strength of
   `(:artifact-ref snapshot)` being merely PRESENT, and then — because
-  fresh-author? is false for a recovery — took that value as the commit with no
+  fresh-author? is false for a deferred-completion — took that value as the commit with no
   repository observation and no shape check. `unvalidated-artifact-failure`
   guards only the fresh-author side, so this was the one remaining place a
   non-commit ref became the reviewed commit.
@@ -3083,26 +3083,26 @@
   It is not hypothetical: canary-da9681ce's author job carried
   :artifact-ref \"/eoi_network_test.clj\" — a path, stale from an unrelated job
   in another repository — while its actual commit was f285e40 in futon2.
-  Recovering that job would have adopted the path.
+  Completing that job would have adopted the path.
 
   A missing ref and a non-commit ref are different faults and must not share the
   \"completed without an artifact\" message: one says the turn produced nothing,
   the other says extraction produced something that is not a commit. Returns nil
   when there is nothing to report."
-  [recovery-stage snapshot]
+  [deferred-completion-stage snapshot]
   (when (and snapshot
-             (= :author-wait recovery-stage)
+             (= :author-wait deferred-completion-stage)
              (= "done" (:state snapshot)))
     (let [artifact-ref (:artifact-ref snapshot)]
       (cond
         (nil? artifact-ref)
-        {:failure-kind :recovery-artifact-missing
-         :message "Recovered author job completed without an artifact"}
+        {:failure-kind :deferred-completion-artifact-missing
+         :message "Deferred author job completed without an artifact"}
 
         (not (commit-ish? artifact-ref))
-        {:failure-kind :recovery-artifact-ref-malformed
+        {:failure-kind :deferred-completion-artifact-ref-malformed
          :artifact-ref artifact-ref
-         :message "Recovered author job artifact-ref is not a commit"}))))
+         :message "Deferred author job artifact-ref is not a commit"}))))
 
 (defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
@@ -3685,7 +3685,7 @@
                         (first (filter #(= (:repair/id %)
                                            (get-in entry [:action :target]))
                                        open-stop-lines)))
-            supersede-recovery!
+            supersede-deferred-completion!
             (fn [repair-class failure-kind failure-stage error failure-data]
               (let [successor
                     ((or (:repair-system-record-fn opts)
@@ -3697,7 +3697,7 @@
                                                   [:author-job :job-id])
                                           external-attempt-id)
                                       failure-kind)
-                      :observation (observation-for :recovery-supersession)
+                      :observation (observation-for :deferred-completion-supersession)
                       :repair-class repair-class
                       :target (:target stop-line)
                       :selected-entry (:selected-entry stop-line)
@@ -4022,71 +4022,71 @@
                                :repair-obligation transition
                                :verification-attempt execution-identity}))))
           (let [snapshot (when stop-line
-                           (recovery-snapshot opts stop-line))
-                recovery-stage (:failure-stage stop-line)
+                           (deferred-completion-snapshot opts stop-line))
+                deferred-completion-stage (:failure-stage stop-line)
                 _ (when (and snapshot (not= "done" (:state snapshot)))
                     (if (contains? terminal-states (:state snapshot))
-                      (let [error (str "Recovery job terminated as "
+                      (let [error (str "Deferred completion job terminated as "
                                        (:state snapshot))
                             successor
-                            (supersede-recovery!
-                             :machine-failure :recovery-job-terminal
-                             recovery-stage error
+                            (supersede-deferred-completion!
+                             :machine-failure :deferred-completion-job-terminal
+                             deferred-completion-stage error
                              {:job-id (:job-id snapshot)
                               :job-state (:state snapshot)})]
                         (throw (ex-info error
                                         {:outcome :incomplete
-                                         :failure-kind :recovery-job-terminal
-                                         :failure-stage recovery-stage
+                                         :failure-kind :deferred-completion-job-terminal
+                                         :failure-stage deferred-completion-stage
                                          :repair-obligation successor})))
                       (throw
                        (ex-info
-                        "Recovery job is still active; no replacement turn dispatched"
+                        "Deferred completion job is still active; no replacement turn dispatched"
                         {:outcome :incomplete
-                         :failure-kind :recovery-job-not-complete
-                         :failure-stage recovery-stage
+                         :failure-kind :deferred-completion-job-not-complete
+                         :failure-stage deferred-completion-stage
                          :repair-obligation stop-line
                          :job-id (:job-id snapshot)
                          :job-state (:state snapshot)}))))
-                recovered-review-job (when (and snapshot
-                                                (= :reviewer-wait recovery-stage))
+                deferred-review-job (when (and snapshot
+                                                (= :reviewer-wait deferred-completion-stage))
                                        snapshot)
-                recovered-author-job
+                deferred-author-job
                 (cond
                   ;; Deliberately unchanged. A commit-shape check here would be
-                  ;; unreachable in effect: recovery-artifact-failure below
+                  ;; unreachable in effect: deferred-completion-artifact-failure below
                   ;; refuses a malformed ref before this value is ever used as
                   ;; the commit, and a non-done snapshot has already thrown
                   ;; above. A second guard would look like defence and be tested
                   ;; by nothing.
-                  (and snapshot (= :author-wait recovery-stage)
+                  (and snapshot (= :author-wait deferred-completion-stage)
                        (:artifact-ref snapshot))
                   snapshot
 
-                  recovered-review-job
+                  deferred-review-job
                   (get-in stop-line [:failure-data :author-job]))
-                _ (when (and recovered-review-job
-                             (nil? recovered-author-job))
+                _ (when (and deferred-review-job
+                             (nil? deferred-author-job))
                     (let [error
-                          "Reviewer recovery lacks the original author-job provenance"
+                          "Reviewer deferred-completion lacks the original author-job provenance"
                           successor
-                          (supersede-recovery!
-                           :machine-failure :recovery-provenance-missing
+                          (supersede-deferred-completion!
+                           :machine-failure :deferred-completion-provenance-missing
                            :reviewer-wait error
-                           {:job-id (:job-id recovered-review-job)})]
+                           {:job-id (:job-id deferred-review-job)})]
                       (throw
                        (ex-info error
                                 {:outcome :incomplete
-                                 :failure-kind :recovery-provenance-missing
+                                 :failure-kind :deferred-completion-provenance-missing
                                  :failure-stage :reviewer-wait
                                  :repair-obligation successor}))))
-                _ (when-let [failure (recovery-artifact-failure recovery-stage
+                _ (when-let [failure (deferred-completion-artifact-failure deferred-completion-stage
                                                                 snapshot)]
                     (let [error (:message failure)
                           failure-kind (:failure-kind failure)
                           artifact-ref (:artifact-ref failure)
                           successor
-                          (supersede-recovery!
+                          (supersede-deferred-completion!
                            :machine-failure failure-kind
                            :author-wait error
                            (cond-> {:job-id (:job-id snapshot)
@@ -4100,8 +4100,8 @@
                                          :repair-obligation successor}
                                   artifact-ref
                                   (assoc :artifact-ref artifact-ref))))))
-                fresh-author? (nil? recovered-author-job)
-                _ (reset! author-dispatch-route (if fresh-author? :fresh-author :recovery))
+                fresh-author? (nil? deferred-author-job)
+                _ (reset! author-dispatch-route (if fresh-author? :fresh-author :deferred-completion))
                 author-repo (when fresh-author?
                               (target-repository opts entry mission code-state))
                 pre-author-head (when fresh-author?
@@ -4123,11 +4123,11 @@
                 (prompt-for-head pre-author-head)
                 author-response
                 (run-phase! opts @phase-context :author-dispatch
-                            #(if recovered-author-job
-                               {:job-id (:job-id recovered-author-job)
+                            #(if deferred-author-job
+                               {:job-id (:job-id deferred-author-job)
                                 :state "done"
-                                :recovered? true
-                                :recovers (:attempt-id stop-line)}
+                                :deferred-completion? true
+                                :completes-attempt (:attempt-id stop-line)}
                                (do
                                  (swap! dispatched-turns inc)
                                  ((or (:dispatch-fn opts) dispatch!) opts author
@@ -4136,20 +4136,20 @@
                 author-job-id (:job-id author-response)]
             (checkpoint! :dispatch
                          (term {:agent author
-                                :availability (if recovered-author-job
-                                                :recovered-completion
+                                :availability (if deferred-author-job
+                                                :deferred-completion
                                                 :invoke-ready)
                                 :job-id author-job-id
                                 :prompt-ref (str "agency-job:" author-job-id)
-                                :recovers (when recovered-author-job
+                                :completes-attempt (when deferred-author-job
                                             (:attempt-id stop-line))}
-                               {:kind (if recovered-author-job
-                                        :agency-recovered-completion
+                               {:kind (if deferred-author-job
+                                        :agency-deferred-completion
                                         :agency-dispatch)
                                 :response author-response}))
             (let [initial-author-job
-                  (if recovered-author-job
-                    recovered-author-job
+                  (if deferred-author-job
+                    deferred-author-job
                     (try
                       (run-phase! opts @phase-context :author-wait
                                   #((or (:poll-fn opts) poll-job!)
@@ -4272,10 +4272,10 @@
                               artifact-snapshot
                               (assoc :tripwire/snapshot artifact-snapshot))
                        :reviewer-dispatch
-                       #(if recovered-review-job
-                          {:job-id (:job-id recovered-review-job)
-                           :state "done" :recovered? true
-                           :recovers (:attempt-id stop-line)}
+                       #(if deferred-review-job
+                          {:job-id (:job-id deferred-review-job)
+                           :state "done" :deferred-completion? true
+                           :completes-attempt (:attempt-id stop-line)}
                           (do
                             (swap! dispatched-turns inc)
                             ((or (:dispatch-fn opts) dispatch!) opts reviewer
@@ -4284,8 +4284,8 @@
                                               target construction repo commit
                                               author-job stop-lines)))))
                       review-job
-                      (if recovered-review-job
-                        recovered-review-job
+                      (if deferred-review-job
+                        deferred-review-job
                         (try
                           (run-phase! opts @phase-context :reviewer-wait
                                       #((or (:poll-fn opts) poll-job!) opts
@@ -4393,8 +4393,8 @@
                                    :review-execution-evidence-missing
                                    :failure-stage :reviewer-wait
                                    :review-gate review-gate))
-                          recovery-rejection
-                          (when (and recovered-review-job
+                          deferred-completion-rejection
+                          (when (and deferred-review-job
                                      (= :incomplete-recoverable
                                         (:repair/class stop-line)))
                             (let [finding
@@ -4416,7 +4416,7 @@
                                                       :review-request-changes
                                                       :reject :review-rejected))
                                     :observation
-                                    (observation-for :recovery-review)
+                                    (observation-for :deferred-completion-review)
                                     :target target
                                     :commit commit
                                     :selected-entry (:selected-entry failure-data)
@@ -4426,15 +4426,15 @@
                                     :review-text (job-text review-job)})]
                               ((or (:repair-supersede-fn opts)
                                    repair/supersede!)
-                               stop-line finding :recovered-review-rejected)
+                               stop-line finding :deferred-review-rejected)
                               finding))]
                       (throw (ex-info (if (:passed? review-gate)
                                         "Independent review did not approve"
                                         "Independent review lacks execution evidence")
                                       (cond-> failure-data
-                                        recovery-rejection
+                                        deferred-completion-rejection
                                         (assoc :repair-obligation
-                                               recovery-rejection))))))
+                                               deferred-completion-rejection))))))
                   (let [witness
                         (run-phase! opts @phase-context :grounding
                                     #((or (:ground-fn opts) ground-commit!)
@@ -4464,9 +4464,9 @@
                               :reviewer reviewer
                               :review-job (:job-id review-job)
                               :witness witness
-                              :validation {:kind :recovered-existing-artifact
+                              :validation {:kind :deferred-existing-artifact
                                            :production-shaped? true
-                                           :recovers (:attempt-id obligation)}})
+                                           :completes-attempt (:attempt-id obligation)}})
                             ((or (:repair-implement-fn opts)
                                  repair/record-implementation!)
                              obligation
@@ -4478,10 +4478,10 @@
                                      :reviewer reviewer)
                               :artifact-binding artifact-binding
                               :witness witness})))))
-                    ;; A successfully grounded recovery is itself a real,
+                    ;; A successfully grounded deferred-completion is itself a real,
                     ;; production-shaped successor.  It may therefore validate
                     ;; an older implemented machine repair while discharging
-                    ;; its own recoverable obligation.
+                    ;; its own deferred-completion obligation.
                     (when (and (seq ordinary-validation-lines)
                                (:resolved? witness) (:dial-moved? witness))
                       (run-phase!
@@ -4613,7 +4613,7 @@
                           ((or (:repair-record-fn opts)
                                repair/record-review-failure!)
                            ;; Authority-qualified for the same reason as the
-                           ;; recovery-rejection site above: bare ordinals
+                           ;; deferred-completion-rejection site above: bare ordinals
                            ;; collide across cohorts in the shared store.
                            {:attempt-id external-attempt-id
                             :occurrence

@@ -206,6 +206,17 @@ duration; it reaches the phase log/T9 and the run record's `:job-liveness`.
 The validity report prints it beside the verdict, without adding a veto.
 Legacy `--agent-budget-seconds` / `FUTON_WM_AGENT_BUDGET_MS` no longer bound
 job waiting. Missing timestamps are explicitly measured from the first poll.
+The dormant **deferred-completion** path can consume a completed Agency job
+only when ordinary selection chooses its matching `:incomplete-recoverable`
+finding. It is never an ambient substitute for fresh authoring. It preserves
+completion of jobs orphaned by a runner crash mid-wait; it does not implement
+a general restart protocol or discover orphan jobs automatically. Historical
+findings retain their existing class name. New route and dispatch labels use
+`:deferred-completion`; legacy claim spelling is accepted only by the reader.
+Both spellings remain categorically refused for enactment certification until
+occurrence/revision admission rules are approved. Malformed or missing artifact
+references still refuse; an arbitrary job string cannot become a commit.
+
 Every opportunity proves the semantic entity route
 before dispatching either agent. Before any dispatch, the leading feasible
 policy set must contain at least two distinct finite `G-efe` values when it has

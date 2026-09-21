@@ -1,0 +1,93 @@
+{:repair/status :resolved,
+ :resolved-at "2026-07-16T09:08:32.774857211Z",
+ :replacement-commit "a707b6fff76da6ca55327f91324a10b79d96231a",
+ :witness
+ {:before {:implementation-entity nil},
+  :after
+  {:implementation-entity
+   {:id
+    "full-loop/implementation/a707b6fff76da6ca55327f91324a10b79d96231a",
+    :name
+    "Reviewed implementation a707b6fff76da6ca55327f91324a10b79d96231a",
+    :type :implementation/commit,
+    :external-id nil,
+    :source "wm-full-loop",
+    :props
+    #:implementation{:files
+                     ["data/capability-mining/capability-hypergraph.edn"
+                      "data/capability-mining/operator-turns.edn"
+                      "holes/missions/M-learning-loop.md"
+                      "scripts/capability_graph_ingest.clj"
+                      "scripts/capability_graph_ingest_test.clj"
+                      "scripts/capability_mining.clj"
+                      "scripts/capability_mining_test.clj"],
+                     :review-job "invoke-1784192819549-605-d9755a96",
+                     :target "repair-attempt-006-late-author-artifact",
+                     :selected-action
+                     {:type :repair-machine-failure,
+                      :target
+                      "repair-attempt-006-late-author-artifact",
+                      :repair-obligation
+                      {:discharge-contract
+                       {:requires
+                        [:recover-existing-author-artifact
+                         :independent-review
+                         :grounded-existing-commit]},
+                       :repair/status :open,
+                       :opened-at "2026-07-16T09:03:21.362493768Z",
+                       :repair/class :incomplete-recoverable,
+                       :repair/id
+                       "repair-attempt-006-late-author-artifact",
+                       :backtrace
+                       {:author-job-id
+                        "invoke-1784158547590-592-baa93319",
+                        :cohort-close
+                        "data/wm-full-loop/wm-outer-loop-40-v1/attempt-006/007-closed.edn"},
+                       :failure-data
+                       {:job-id "invoke-1784158547590-592-baa93319",
+                        :commit
+                        "a707b6fff76da6ca55327f91324a10b79d96231a"},
+                       :failure-error
+                       "Author job completed after the obsolete timeout and produced an unreviewed, ungrounded commit",
+                       :failure-kind :late-author-artifact,
+                       :attempt-id "attempt-006",
+                       :failure-stage :author-wait,
+                       :target "M-learning-loop",
+                       :repair/schema-version 3,
+                       :failure-outcome :incomplete},
+                      :rationale
+                      "stop-the-line: incomplete-recoverable from attempt-006"},
+                     :repair-contract
+                     {:repair-id
+                      "repair-attempt-006-late-author-artifact",
+                      :repair-class :incomplete-recoverable,
+                      :failed-attempt "attempt-006",
+                      :failure-stage :author-wait,
+                      :failure-kind :late-author-artifact,
+                      :discharge
+                      {:requires
+                       [:recover-existing-author-artifact
+                        :independent-review
+                        :grounded-existing-commit]}},
+                     :reviewer "claude-6",
+                     :construction-kind :machine-stop-line-repair,
+                     :commit
+                     "a707b6fff76da6ca55327f91324a10b79d96231a",
+                     :repository "/home/joe/code/futon5a",
+                     :author "codex-7"}}},
+  :resolved? true,
+  :dial-moved? true,
+  :implementation-id
+  "full-loop/implementation/a707b6fff76da6ca55327f91324a10b79d96231a",
+  :discharge-id "full-loop/discharge/attempt-007"},
+ :repair/id "repair-attempt-006-late-author-artifact",
+ :failed-commit nil,
+ :review-job "invoke-1784192819549-605-d9755a96",
+ :failed-attempt "attempt-006",
+ :reviewer "claude-6",
+ :validation
+ {:kind :recovered-existing-artifact,
+  :production-shaped? true,
+  :recovers "attempt-006"},
+ :validation-attempt "attempt-007",
+ :repair/schema-version 1}

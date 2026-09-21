@@ -1,0 +1,25 @@
+{:discharge-contract
+ {:requires
+  [:recover-existing-author-artifact
+   :independent-review
+   :grounded-existing-commit]},
+ :repair/status :open,
+ :opened-at "2026-07-16T09:03:21.362493768Z",
+ :repair/class :incomplete-recoverable,
+ :repair/id "repair-attempt-006-late-author-artifact",
+ :backtrace
+ {:author-job-id "invoke-1784158547590-592-baa93319",
+  :cohort-close
+  "data/wm-full-loop/wm-outer-loop-40-v1/attempt-006/007-closed.edn"},
+ :failure-data
+ {:job-id "invoke-1784158547590-592-baa93319",
+  :commit "a707b6fff76da6ca55327f91324a10b79d96231a"},
+ :failure-error
+ "Author job completed after the obsolete timeout and produced an unreviewed, ungrounded commit",
+ :failure-kind :late-author-artifact,
+ :attempt-id "attempt-006",
+ :selected-entry nil,
+ :failure-stage :author-wait,
+ :target "M-learning-loop",
+ :repair/schema-version 3,
+ :failure-outcome :incomplete}
