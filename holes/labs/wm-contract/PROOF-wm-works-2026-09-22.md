@@ -251,7 +251,10 @@ candidates automatically, or that every click is fast.
   - The action marginal has a unique maximum. The numeric comparison is stated. The
     recorded `:tie-break-rule` field is not used as evidence either way.
   - The action chosen under the full law differs from the action chosen under `log E − F`
-    alone at the same γ, both computed on the summed action marginals. This counterfactual is
+    alone at the same γ, both computed on the summed action marginals. Or, amended by Joe
+    (2026-09-22): `log E − F` alone has no unique maximum, and the full law does. A tie
+    resolved by the name-order tie-break is "not a decision but a lexicographic
+    implementation of a coin-flip", so G breaking it is G deciding. This counterfactual is
     the whole evidence that G decided. It is a requirement on the demonstration input, not a
     runtime rule: an ordinary click where G reinforces habit is lawful.
   - All inputs and outputs are recorded against the ⟨1⟩2 snapshot.
@@ -348,7 +351,8 @@ candidates automatically, or that every click is fast.
   receipts show, on the live input:
   - a unique maximum of the eligible action marginal;
   - that the full law's action differs from the action under `log E − F` alone at the same γ,
-    on the summed action marginals;
+    on the summed action marginals, or that `log E − F` alone ties and the full law has a
+    unique maximum (Joe's amendment at ⟨1⟩3);
   - the functions from ⟨1⟩3 doing the computing, with the ⟨1⟩1 load identity holding.
 
   There is no comparison with the ⟨1⟩2 snapshot. That snapshot was only the working material
@@ -405,9 +409,9 @@ candidates automatically, or that every click is fast.
 | THEOREM / ASSUME | SIGN | SIGN | |
 | ⟨1⟩1 | SIGN | SIGN | |
 | ⟨1⟩2 | SIGN | SIGN | |
-| ⟨1⟩3 | SIGN | SIGN | |
+| ⟨1⟩3 | SIGN | SIGN | amended by Joe 2026-09-22 (tie-break is a coin flip) |
 | ⟨1⟩4 | SIGN | SIGN | |
-| ⟨1⟩5 | SIGN | SIGN | |
+| ⟨1⟩5 | SIGN | SIGN | amended by Joe 2026-09-22 (tie-break is a coin flip) |
 | ⟨1⟩6 | SIGN | SIGN | |
 | ⟨1⟩7 | SIGN | SIGN | |
 | ⟨1⟩8 | SIGN | SIGN | |
