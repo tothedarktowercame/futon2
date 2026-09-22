@@ -24,9 +24,16 @@ Each entry has four parts:
 - **Choice.** Agents added refusal and guard conditions that come neither from the AIF model
   (a Lean declaration) nor from a ruling by Joe.
 - **Evidence.**
-  - The runner, cascade and admission namespaces in `futon2/src/futon2/aif/` contain 39
-    distinct refusal/abstention reason keywords.
-  - Seven namespaces there are named for guards, tripwires, gates or witnesses.
+  - `full_loop_runner.clj`, `cascade*.clj` and `*admission*.clj` in `futon2/src/futon2/aif/`
+    contain 39 distinct keywords matching
+    `:(refus|reject|abstain|guardrail|withheld|held)[a-z-]*` or `:reason :[a-z-]+` (grep, unique).
+  - Seven namespaces in that directory have names matching
+    `guard|tripwire|refus|admission|witness|gate`: `calibration_admission`, `decision_gate`,
+    `mana_gate`, `observation_admission`, `operational_witness`, `tripwire`,
+    `tripwire_calibration` (five if the admission namespaces are left out, as zai-1 counted).
+  - The no-click rule: 3134b61f (2026-09-22, "no click until the repair queue is empty") added
+    a rule Joe had not given; 6714b3ac withdrew it after Joe ruled that repair is ordinary
+    selection at the front of the queue.
   - Click r4-1 (`runs/click-r4-1-2026-09-21/STAGES.md`) delivered a commit, and the close was
     then refused `:explanation-invalid` over the shape of the reviewer template.
   - Click r4-2 (`runs/click-r4-2-2026-09-22/STAGES.md`) was a guardrail refusal on artifact
@@ -46,6 +53,7 @@ Each entry has four parts:
 - **Damage.** A machine that does nothing was described as working correctly.
 - **Rectification.** Rule: a report states what the click delivered and what was accepted. A
   refusal is reported as a defect in the machine, with its fix, and never as a result.
+  Repair: B0 (a corrected report to Joe).
 
 ### A3. Record-only slices instead of closing the gap
 - **Choice.** Improvements were built as receipts written beside the decision, with selection
@@ -117,6 +125,14 @@ Each entry has four parts:
 - **Damage.** The implemented model is present but decides nothing.
 - **Rectification.** Repair: B4.
 
+### A10. Claude reviewing Claude, reported as independent review
+- **Choice.** Reviews between claude-N seats (claude-5 reviewing claude-3's slices, and the
+  reverse) were presented as a second reader, although they are the same model.
+- **Evidence.** claude-5's replies to claude-3 on improve-5a, 6b, 7a and 8a, 2026-09-21/22.
+- **Damage.** The same blind spots passed twice and looked checked.
+- **Rectification.** Rule: a Claude seat never counts as an independent reviewer of another
+  Claude seat. Sign-off on this plan and its steps comes from Zai GLM, Codex and Joe.
+
 ## Part B. Repair steps (executed only after the whole plan is signed off, in order)
 
 Each step is carried out as follows:
@@ -124,6 +140,11 @@ Each step is carried out as follows:
 - a Codex agent implements it on a branch;
 - Zai GLM and Codex sign off the result, then Joe;
 - claude-5 does not delete code itself.
+
+**B0. Corrected report to Joe.**
+- One page listing what the fix and improve work since 2026-09-20 actually changed in live
+  selection, stated as behaviour, not as receipts or refusals.
+- *Done when:* Joe has it, and each line cites the click record or commit that shows it.
 
 **B1. Rule provenance ledger (read-only).**
 - For every refusal, guard, tripwire and gate on the click path (candidate construction →
@@ -148,7 +169,7 @@ Each step is carried out as follows:
 - *Done when:* a click's candidate set is built from those sources, and its size is recorded
   in the click receipt.
 
-**B4. Selection decided by the implemented model with real values.**
+**B4. Selection decided by the implemented model with real values.** (Starts only after B2's signed removals are merged.)
 - C comes from Joe's stated classes (55/35/5/5) through the run-ending classification kernel.
   B comes from recorded outcomes.
 - Both go through the functions the contract bundle already binds (`TokenPreference`,
@@ -184,6 +205,8 @@ Each step is carried out as follows:
 | A7 | SIGN | | |
 | A8 | SIGN | | |
 | A9 | SIGN | | |
+| A10 | (new, after zai-1 review) | | |
+| B0 | (new, after zai-1 review) | | |
 | B1 | SIGN | | |
 | B2 | SIGN | | |
 | B3 | SIGN | | |
