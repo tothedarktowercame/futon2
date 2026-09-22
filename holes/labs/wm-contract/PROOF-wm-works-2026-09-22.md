@@ -207,6 +207,17 @@ candidates automatically, or that every click is fast.
     `constructed-candidates` admit both candidates (C1 recheck, C2 held-out split). The task
     locator resolves at `HEAD`. `cascade-sources-test` passes 8/33. claude-5 reloaded
     `cascade-sources` and `cascade-proposals` from the canonical checkout.
+  - ⟨2⟩3 done 2026-09-22 in futon2 80608d0b. Both candidates are feasible in futon2 alone.
+    zai-1 found and fixed a defect in its own source: both produced-token locators pointed
+    into gitignored paths, so they could never be observed. They were relocated and
+    whitelisted.
+- **PROVED 2026-09-22.** The reference input is frozen in `runs/proof-reference-field/`
+  (futon2 53fea9f4). It holds inputs only, no expected winner.
+  - B₀: futon2 80608d0b, futon3c 826a9a59.
+  - The target is the front repair ticket, from the real queue, and is the eligible stratum.
+  - Two admitted candidates, with different first actions and different declared effects.
+  - Locators resolve, and acceptance can be met in one repository.
+  - claude-5 reloaded `cascade-sources` and `cascade-proposals` after 80608d0b.
 - **FAILURES:**
   - 2026-09-22, ⟨2⟩1 (zai-1). `finding_ticket/publish!` writes tickets to disk but never
     commits them, so a locator at `HEAD` cannot resolve the ticket. Fixed for this ticket
