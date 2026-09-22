@@ -1889,9 +1889,33 @@
 
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head attempt-evidence-dir
-                             measured-acquisition?]}
+                             measured-acquisition? surprise-root
+                             surprise-lookup-fn]}
                       target mission cascade-entry stop-lines]
-  (str author ": FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; "
+  (let [surprise-result (when surprise-root
+                          (try
+                            ((or surprise-lookup-fn surprise/records-for-action)
+                             surprise-root (:selected-action cascade-entry))
+                            (catch Throwable e
+                              {:status :unavailable
+                               :kind :surprise-store-unreadable
+                               :exception-class (.getName (class e))})))
+        surprise-text
+        (case (:status surprise-result)
+          :ok (apply str
+                     (for [{:keys [surprise/id token model-part]}
+                           (:records surprise-result)]
+                       (str "RECORDED SURPRISE: " id
+                            " token " (pr-str token)
+                            " kind " (pr-str model-part) ". "
+                            "If your commit revises this model part, end its commit message "
+                            "with this trailer line:\nSurprise: " id "\n")))
+          :unavailable
+          (str "SURPRISE LOOKUP NOTE: "
+               (pr-str (select-keys surprise-result
+                                    [:status :kind :path :exception-class])) "\n")
+          nil)]
+    (str author ": FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; "
        reviewer " is the independent reviewer.\n\n"
        "Implement one bounded, substantive advancement of the selected War Machine action. "
        "This is NOT a request for a fold-turn deposit, wiring diagram, report-only artifact, "
@@ -1925,6 +1949,7 @@
                                                    :capability-contract
                                                    :actuation-contract
                                                    :repair-contract])) "\n"
+       surprise-text
        (when (seq stop-lines)
          (str "STOP-THE-LINE REPAIR OBLIGATIONS: "
               (pr-str (prompt-findings stop-lines))
@@ -1964,7 +1989,7 @@
        "   tail fails artifact binding and closes the attempt (cohort-55\n"
        "   attempt-001 died exactly this way).\n"
        "If no safe substantive parcel is possible, make no commit and finish with "
-       "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
+       "FULL_LOOP_AUTHOR: REFUSE <typed reason>.")))
 
 (defn- build-cure-prompt
   "Construct the cure re-emission prompt sent to the SAME author agent when a
@@ -4473,6 +4498,10 @@
                 (fn [head-observation]
                   (author-prompt (assoc prompt-opts
                                         :reviewer reviewer
+                                        :surprise-root
+                                        (or (:surprise-root opts)
+                                            (:data-root execution-cohort)
+                                            cohort/default-data-root)
                                         :target-repository author-repo
                                         :target-repository-head
                                         (:head head-observation))
