@@ -1,0 +1,107 @@
+{:source-root
+ "data/wm-full-loop-machinery-71/wm-contract-machinery-71-v1/attempt-002/",
+ :extraction
+ "Verbatim values at the listed judgment paths; no reconstructed evidence.",
+ :build
+ {:validation
+  {:artifact-binding
+   {:fresh-author? true,
+    :disagreement? false,
+    :descendant? true,
+    :text-artifact-ref "c8c652302446d95597e79b80df3e93c5fde68f29",
+    :reported-text-artifact-ref
+    "c8c652302446d95597e79b80df3e93c5fde68f29",
+    :pre-dispatch-head "4c0d4f663789ee363bfa467ca882a86ffde1d4ae",
+    :resolved-from :done-line,
+    :claim-in-author-window? true,
+    :author-window-end-ms 1790111367252,
+    :author-window-start-ms 1790110896822,
+    :commit "c8c652302446d95597e79b80df3e93c5fde68f29",
+    :in-author-window? true,
+    :observed-commit-time-ms 1790111344000,
+    :repo "/home/joe/code/futon2",
+    :text-artifact-sha "c8c652302446d95597e79b80df3e93c5fde68f29",
+    :observed-head "c8c652302446d95597e79b80df3e93c5fde68f29",
+    :corroborates? true,
+    :claim-commit-time-ms nil,
+    :claim-resolution :resolved}}},
+ :adjudication
+ {:build-match
+  {:commit "c8c652302446d95597e79b80df3e93c5fde68f29",
+   :review-approved? true}},
+ :selection {:controller-decision {:action {}}},
+ :close
+ {:accepted-increment
+  {:accepted? :refused,
+   :reason :predicate-evaluation-failed,
+   :message "nth not supported on this type: PersistentArrayMap"}},
+ :token-outcome-comparison
+ {:status :compared,
+  :artifact-sha "c8c652302446d95597e79b80df3e93c5fde68f29",
+  :tokens
+  [{:token ["M-f11-find-production-successor" :hole/h2045faa0e7cc],
+    :predicted 0,
+    :observed false,
+    :verdict :neither,
+    :measurement
+    {:token ["M-f11-find-production-successor" :hole/h2045faa0e7cc],
+     :declaration-sha256
+     "744dfb97df5e0fda004f25db9795261e384a71614a5c81745cdc1654c73f2875",
+     :declared-locator
+     {:class :C4,
+      :repo "futon2",
+      :sha "HEAD",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution."},
+     :after-locator
+     {:class :C4,
+      :repo "futon2",
+      :sha "c8c652302446d95597e79b80df3e93c5fde68f29",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution."},
+     :result
+     {:observed false,
+      :check :C4,
+      :evidence
+      {:repo "futon2",
+       :sha "c8c652302446d95597e79b80df3e93c5fde68f29",
+       :resolved-sha "c8c652302446d95597e79b80df3e93c5fde68f29",
+       :path "holes/missions/M-f11-find-production-successor.md",
+       :decl
+       "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution.",
+       :file-present true}}}}
+   {:token ["M-f11-find-production-successor" :hole/h9ab212b3281d],
+    :predicted 1,
+    :observed true,
+    :verdict :predicted-and-observed,
+    :measurement
+    {:token ["M-f11-find-production-successor" :hole/h9ab212b3281d],
+     :declaration-sha256
+     "744dfb97df5e0fda004f25db9795261e384a71614a5c81745cdc1654c73f2875",
+     :declared-locator
+     {:class :C4,
+      :repo "futon2",
+      :sha "HEAD",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+     :after-locator
+     {:class :C4,
+      :repo "futon2",
+      :sha "c8c652302446d95597e79b80df3e93c5fde68f29",
+      :path "holes/missions/M-f11-find-production-successor.md",
+      :decl
+      "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence."},
+     :result
+     {:observed true,
+      :check :C4,
+      :evidence
+      {:repo "futon2",
+       :sha "c8c652302446d95597e79b80df3e93c5fde68f29",
+       :resolved-sha "c8c652302446d95597e79b80df3e93c5fde68f29",
+       :path "holes/missions/M-f11-find-production-successor.md",
+       :decl
+       "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence.",
+       :file-present true}}}}]}}

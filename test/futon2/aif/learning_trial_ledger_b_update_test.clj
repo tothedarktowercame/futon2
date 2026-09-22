@@ -1,7 +1,8 @@
 (ns futon2.aif.learning-trial-ledger-b-update-test
   "PROOF-wm-works ⟨1⟩4: the B update against the REAL ledger and the REAL
   r4-1/r4-2 closes' predicate verdicts. No live click."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.attempt-learning :as attempt]
             [futon2.aif.learning-trial-ledger :as ledger]))
@@ -22,17 +23,27 @@
     (is (= :record-only (:mode v1)))))
 
 (deftest reader-interprets-old-trials-never-duplicates
-  (let [rows (ledger/read-trials ledger/default-root)]
-    (is (= 2 (count rows)) "the real ledger holds two trials (2026-09-22 adds)")
-    ;; every row is readable, with identity and family, exactly as recorded
-    (is (every? #(some? (:family %)) rows))
-    (is (every? #(contains? % :contract-version) rows))
-    ;; reading twice does not duplicate
-    (is (= (count rows) (count (ledger/read-trials ledger/default-root))))
-    ;; the v1 interpretation marker is derived, not stored: rows read under
-    ;; v2 carry no :consumption veto of their own
-    (is (every? #(not= :not-authorized (get-in % [:row :consumption]))
-                (filter #(= :v2 (:contract-version %)) rows)))))
+  (let [snapshot (slurp (io/file ledger/default-root "attempts.edn"))
+        recorded (with-open [reader (java.io.PushbackReader. (java.io.StringReader. snapshot))]
+                   (loop [rows []]
+                     (let [row (edn/read {:eof ::eof} reader)]
+                       (if (= ::eof row) rows (recur (conj rows row))))))
+        tmp (java.io.File/createTempFile "ledger-read-snapshot" ".edn")]
+    (try
+      (spit tmp snapshot)
+      (let [rows (ledger/read-trials nil tmp)]
+        (is (seq recorded) "the retained ledger exercises old-trial interpretation")
+        (is (= recorded (mapv :row rows)) "every recorded row is read once, unchanged")
+        ;; every row is readable, with identity and family, exactly as recorded
+        (is (every? #(some? (:family %)) rows))
+        (is (every? #(contains? % :contract-version) rows))
+        ;; reading twice does not duplicate
+        (is (= rows (ledger/read-trials nil tmp)))
+        ;; the v1 interpretation marker is derived, not stored: rows read under
+        ;; v2 carry no :consumption veto of their own
+        (is (every? #(not= :not-authorized (get-in % [:row :consumption]))
+                    (filter #(= :v2 (:contract-version %)) rows))))
+      (finally (.delete tmp)))))
 
 (deftest accepted-occurrence-updates-exactly-once
   ;; An accepted-increment verdict over a family with no prior trials: one

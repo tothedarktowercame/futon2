@@ -1,12 +1,9 @@
 (ns futon2.aif.full-loop-runner-1-4-wiring-test
-  "PROOF-wm-works ⟨1⟩4 (final handoff): the runner CALLS the accepted-increment
-  predicate and the B update at the right points. Read-only tests against
-  real records: replayed real closes through the predicate itself (the same
-  call the runner now makes), the exactly-once B update, and no update on
-  refused closes. No live click; no stubs — the real predicate, the real
-  ledger, the real close files."
-  (:require [clojure.test :refer [deftest is]]
+  "Close adapter and ledger integration, with retained and constructed cases."
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.accepted-increment :as ai]
+            [futon2.aif.accepted-increment-test :as fixtures]
             [futon2.aif.learning-trial-ledger :as ledger]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
@@ -20,11 +17,8 @@
    :path (str "holes/tickets/" t ".md")
    :decl "**Status:** DONE"})
 
-(deftest replayed-r4-2-close-records-false-and-writes-nothing
-  ;; The runner now evaluates the predicate with the r4-2 close's own inputs:
-  ;; a revision-refusal close with no reviewed after-revision. The typed
-  ;; result is recorded ON the close (the runner's :accepted-increment key);
-  ;; the B update is not called (the guard sees accepted? false).
+(deftest constructed-missing-commit-records-false-and-writes-nothing
+  ;; Constructed no-commit case; actual retained inputs are replayed below.
   (let [verdict (ai/accepted-increment
                  {:binding {:repo "/home/joe/code/futon2"
                             :commit nil
@@ -45,10 +39,8 @@
     (is (= :close-not-accepted (:learning-ledger/refusal update))
         "the B update refuses: the close was not accepted")))
 
-(deftest replayed-r4-1-close-records-false-and-writes-nothing
-  ;; r4-1's binding did not corroborate (:explanation-invalid reviewer claim):
-  ;; the runner's predicate call records false with :failed :a, and the close
-  ;; proceeds as the failure it is — verify-close passing changes nothing.
+(deftest constructed-stale-binding-records-false-and-writes-nothing
+  ;; Constructed non-corroborating binding; actual retained inputs are below.
   (let [verdict (ai/accepted-increment
                  {:binding {:repo "/home/joe/code/futon2"
                             :commit "aeb352f87368fb328b3a92ddd8e7aeb996d5f9ba0a"
@@ -86,12 +78,12 @@
                   :after-revision "HEAD"})
         tmp (.toFile (java.nio.file.Files/createTempDirectory
                       "runner-14-ledger" (make-array java.nio.file.attribute.FileAttribute 0)))
-        _ (spit (clojure.java.io/file tmp "attempts.edn") "")
+        _ (spit (io/file tmp "attempts.edn") "")
         r1 (ledger/b-update {:family :apparatus/one-authority-per-question
                              :occurrence-identity "runner-14-occurrence"
                              :accepted-verdict (assoc verdict :observed true)
                              :ledger-root (.getPath tmp)})
-        _ (spit (clojure.java.io/file tmp "attempts.edn")
+        _ (spit (io/file tmp "attempts.edn")
                 (str "{:schema :wm/attempt-learning-count-v1 :identity \"runner-14-occurrence\""
                      " :family :apparatus/one-authority-per-question"
                      " :increment {:success 1 :failure 0}}\n")
@@ -105,3 +97,13 @@
     (is (= 3/4 (:theta r1)) "cold Laplace success")
     (is (= :already-recorded (:status r2)))
     (is (= (:theta r1) (:theta r2)) "the second run writes nothing")))
+
+(deftest retained-closes-through-runner-adapter-cannot-update-b
+  (doseq [label ["r4-1" "r4-2" "machinery-71-attempt-002"]]
+    (let [verdict (ai/evaluate-close (fixtures/retained-input label))
+          update (try (ledger/b-update {:family :apparatus/done-is-observed-running
+                                        :occurrence-identity (str label "-adapter-replay")
+                                        :accepted-verdict verdict})
+                      (catch Exception e (ex-data e)))]
+      (is (= :no-acceptance-declared (:accepted? verdict)) label)
+      (is (= :close-not-accepted (:learning-ledger/refusal update)) label))))

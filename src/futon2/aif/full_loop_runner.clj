@@ -3754,25 +3754,12 @@
                        ;; The predicate is evidence, never a gate: any error
                        ;; evaluating it is recorded as a typed :refused
                        ;; result, and the close proceeds.
-                       (try
-                         (accepted-increment/accepted-increment
-                          {:binding (get-in @checkpoints [:build :judgment :validation :artifact-binding])
-                           :produced-tokens (into {}
-                                                  (keep (fn [[token row]]
-                                                          (when (map? row)
-                                                            [token {:class :C4
-                                                                    :repo "futon2"
-                                                                    :sha "HEAD"
-                                                                    :path (get-in row [:measurement :after-locator :path])
-                                                                    :decl (get-in row [:measurement :after-locator :decl])}])))
-                                                (get-in token-comparison [:receipt :tokens]))
-                           :acceptance (get-in selection-judgment
-                                               [:controller-decision :action :accepted-increment :acceptance])
-                           :after-revision (:commit data)})
-                         (catch Exception e
-                           {:accepted? :refused
-                            :reason :predicate-evaluation-failed
-                            :message (.getMessage e)}))
+                       (accepted-increment/evaluate-close
+                        {:binding (get-in @checkpoints [:build :judgment :validation :artifact-binding])
+                         :token-rows (get-in token-comparison [:receipt :tokens])
+                         :acceptance (get-in selection-judgment
+                                             [:controller-decision :action :accepted-increment :acceptance])
+                         :after-revision (:commit data)})
                        close-judgment-base
                        (merge {:outcome outcome
                                :grounded? (= :grounded-change outcome)

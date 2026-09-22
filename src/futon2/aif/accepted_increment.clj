@@ -104,3 +104,26 @@
                   :produced-token-results b-results
                   :acceptance-token (:token acceptance)
                   :acceptance-result c-result}})))
+
+(defn evaluate-close
+  "Runner adapter for token-outcome/compare-outcomes' vector of row maps.
+   Keep each producer's complete after-locator, including its bound revision.
+   Missing measurements remain missing; evaluation errors are evidence, never
+   exceptions that prevent writing the close."
+  [{:keys [binding token-rows acceptance after-revision]}]
+  (try
+    (accepted-increment
+     {:binding binding
+      :produced-tokens
+      (into {} (map (fn [row]
+                      (when-not (and (map? row) (contains? row :token))
+                        (throw (ex-info "Expected a token comparison row map"
+                                        {:row row})))
+                      [(:token row) (get-in row [:measurement :after-locator])]))
+            token-rows)
+      :acceptance acceptance
+      :after-revision after-revision})
+    (catch Exception e
+      {:accepted? :refused
+       :reason :predicate-evaluation-failed
+       :message (.getMessage e)})))

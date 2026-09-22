@@ -1,11 +1,8 @@
 (ns futon2.aif.accepted-increment-test
-  "PROOF-wm-works ⟨1⟩4: the accepted-increment predicate against REAL
-  records — the retained r4-1 and r4-2 closes and the live reference
-  source. No fabricated attestations; the true case is constructed over
-  the real repository state (a genuinely DONE-checked locator path in the
-  real ticket file's git history is not available, so the true case uses
-  a locator that IS true at HEAD through the real checker)."
-  (:require [clojure.test :refer [deftest is]]
+  "Predicate unit cases and verbatim retained checkpoint regressions."
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.accepted-increment :as ai]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
@@ -20,7 +17,7 @@
    :path (str "holes/tickets/" t ".md")
    :decl "**Status:** DONE"})
 
-(deftest r4-2-close-is-false-naming-conjunct-a
+(deftest constructed-missing-commit-is-false-naming-conjunct-a
   ;; r4-2 (machinery-70 attempt-001) is a revision-REFUSAL close: the author
   ;; refused :artifact-binding-scope-conflict, so there is no reviewed
   ;; after-revision bound to this occurrence. The predicate must be false
@@ -42,7 +39,7 @@
     (is (= :a (:failed r)) "no reviewed after-revision: conjunct (a) unmet")
     (is (= :no-reviewed-commit (:reason r)))))
 
-(deftest r4-1-close-is-false-naming-its-failing-conjunct
+(deftest constructed-stale-binding-is-false-naming-its-failing-conjunct
   ;; r4-1 (machinery-69 attempt-002) delivered a commit but the close was
   ;; :build-failed / :explanation-invalid: the reviewer never approved in
   ;; the shape the close reads, so the binding does not corroborate. The
@@ -100,3 +97,57 @@
             :acceptance nil
             :after-revision "HEAD"})]
     (is (= :no-acceptance-declared (:accepted? r)) (pr-str r))))
+
+(defn retained-input [label]
+  (let [f (edn/read-string
+           (slurp (io/resource (str "fixtures/accepted-increment/" label ".edn"))))]
+    {:binding (get-in f [:build :validation :artifact-binding])
+     :token-rows (get-in f [:token-outcome-comparison :tokens])
+     :acceptance (get-in f [:selection :controller-decision :action
+                            :accepted-increment :acceptance])
+     :after-revision (get-in f [:adjudication :build-match :commit])}))
+
+(deftest real-live-row-maps-preserve-both-observations-and-revision
+  (let [input (retained-input "machinery-71-attempt-002")
+        rows (:token-rows input)
+        verdict (ai/evaluate-close input)
+        results (get-in verdict [:evidence :produced-token-results])]
+    (is (vector? rows))
+    (is (every? map? rows))
+    (is (= :no-acceptance-declared (:accepted? verdict))
+        "The actual selection declares no acceptance; do not invent one.")
+    (is (= (into {} (map (juxt :token :observed)) rows)
+           (into {} (map (fn [[t r]] [t (:observed r)])) results)))
+    (is (= #{(:after-revision input)}
+           (set (map #(get-in % [:evidence :resolved-sha]) (vals results)))))))
+
+(deftest retained-older-shapes-do-not-throw
+  (doseq [label ["r4-1" "r4-2"]]
+    (let [input (retained-input label)
+          verdict (ai/evaluate-close input)]
+      (is (= :no-acceptance-declared (:accepted? verdict)) label)
+      (is (= (count (:token-rows input))
+             (count (get-in verdict [:evidence :produced-token-results]))) label)))
+  (is (nil? (:token-rows (retained-input "r4-1"))))
+  (is (every? #(nil? (:measurement %)) (:token-rows (retained-input "r4-2")))))
+
+(deftest each-conjunct-still-required
+  ;; Counterfactuals, explicitly separate from the unchanged record replay:
+  ;; declare acceptance using the actual measured true/false locators.
+  (let [input (retained-input "machinery-71-attempt-002")
+        [false-row true-row] (:token-rows input)
+        declaration (fn [row] {:token (:token row)
+                              :locator (get-in row [:measurement :after-locator])})
+        good (assoc input :token-rows [true-row] :acceptance (declaration true-row))]
+    (is (true? (:accepted? (ai/evaluate-close good))))
+    (is (= :a (:failed (ai/evaluate-close (assoc good :binding nil)))))
+    (is (= :b (:failed (ai/evaluate-close (assoc good :token-rows [false-row true-row])))))
+    (is (= :c (:failed (ai/evaluate-close (assoc good :acceptance (declaration false-row))))))
+    (is (= :b (:failed (ai/evaluate-close
+                       (assoc good :token-rows [(assoc true-row :measurement nil)])))))))
+
+(deftest genuine-adapter-error-is-typed-evidence
+  (let [r (ai/evaluate-close (assoc (retained-input "machinery-71-attempt-002")
+                                   :token-rows [[:not-a-row]]))]
+    (is (= :refused (:accepted? r)))
+    (is (= :predicate-evaluation-failed (:reason r)))))

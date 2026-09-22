@@ -1,0 +1,24 @@
+{:source-root
+ "data/wm-full-loop-machinery-70/wm-contract-machinery-70-v1/attempt-001/",
+ :extraction
+ "Verbatim values at the listed judgment paths; no reconstructed evidence.",
+ :build {:validation {}},
+ :adjudication {:build-match nil},
+ :selection {:controller-decision {:action {}}},
+ :close {},
+ :token-outcome-comparison
+ {:status :compared,
+  :artifact-sha nil,
+  :tokens
+  [{:token ["M-f11-find-production-successor" :hole/h2045faa0e7cc],
+    :predicted 0,
+    :observed {:status :missing, :kind :measurement-unavailable},
+    :verdict :observation-missing,
+    :measurement nil,
+    :reason :measurement-unavailable}
+   {:token ["M-f11-find-production-successor" :hole/h9ab212b3281d],
+    :predicted 1,
+    :observed {:status :missing, :kind :measurement-unavailable},
+    :verdict :observation-missing,
+    :measurement nil,
+    :reason :measurement-unavailable}]}}
