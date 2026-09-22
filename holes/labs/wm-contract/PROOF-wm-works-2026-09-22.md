@@ -209,25 +209,17 @@ candidates automatically, or that every click is fast.
 
 ### ⟨1⟩4. The producers the close and the update need exist before the live click.
 
-- **CHECK.** The live source records and stores are only read. Outputs go to an isolated
-  replay directory.
-  - **Failure path.** On the real r4-1 and r4-2 closes
-    (`data/wm-full-loop-machinery-69/.../attempt-002/007-closed.edn`,
-    `data/wm-full-loop-machinery-70/.../attempt-001/007-closed.edn`), the producers give a
-    measured false or `:missing` correctly, and never invent an attestation.
-  - **Positive path.** On a retained real close that did deliver work (one of the 29
-    `:grounded-change` closes), post-build measurement, the run-ending attestation, the focus
-    relation and the accepted-increment predicate give the outputs that record supports.
-    That predicate is the target's existing acceptance, met for this occurrence, with the
-    reviewed commits bound to it. If no retained close carries the evidence a positive
-    output needs, that is recorded here, and the positive path is first exercised live at
-    ⟨1⟩6–⟨1⟩8. No historical close is relabelled.
-  - The runner calls measurement, attestation and the predicate *before* constructing the
-    close, where it already assembles observations (`full_loop_runner.clj:3697-3755`).
-  - The B update is **not** written before the close. It is written once the close is
-    accepted, keyed by occurrence id, so it happens exactly once and a failed or interrupted
-    close writes none. In the replay directory, the update is shown to be computed and
-    written once, and a second run on the same occurrence is shown to write nothing.
+- **CHECK.**
+  - Post-build measurement, the run-ending attestation, the focus relation and the
+    accepted-increment predicate are implemented. The predicate is the target's existing
+    acceptance, met for this occurrence, with the reviewed commits bound to it.
+  - The runner calls them *before* constructing the close, where it already assembles
+    observations (`full_loop_runner.clj:3697-3755`).
+  - Run read-only on the real r4-1 and r4-2 closes, they give a measured false or `:missing`
+    correctly, and never invent an attestation.
+  - The B update is written only after a close is accepted, keyed by occurrence id, so a
+    failed or interrupted close writes none. Persistence and consumption are shown live at
+    ⟨1⟩8.
 - **FAILURES:** —
 
 ### ⟨1⟩5. One live click on the reference target is decided by G.
