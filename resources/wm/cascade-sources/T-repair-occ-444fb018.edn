@@ -1,70 +1,130 @@
 ;; Agent-authored applicability, not inferred from retrieval or :assures.
-;; PROOF-wm-works 1.2 2.1: offline interpretation for the front repair ticket.
-;; Written here, NOT published; 2.2 moves it into resources/wm/cascade-sources/
-;; and wires it. PRECONDITION for :admission/task-stated to resolve: the ticket
-;; file is currently UNTRACKED in git (found 2026-09-22, zai-1; the
-;; finding->ticket path writes to disk but nobody committed it) -- commit the
-;; ticket before publication or that locator refuses at load. The two
-;; produced-token locators are C3 path-exists checks against paths the actions
-;; will create; they resolve (observed=false) today and turn true when each
-;; action's work is committed.
+;; PROOF-wm-works 1.3 rewrite (codex-20 finding, Joe 2026-09-22): the earlier
+;; version modelled FILE CREATION, not the repair the ticket requires
+;; ("verify the precondition and restore it if it remains unavailable",
+;; ticket.md:15). This version models the OBSTRUCTION and its REMOVAL: tokens
+;; are observations and evidence, not files; C1's effect is observing the
+;; condition (the cleared branch reaches acceptance directly; the
+;; still-present branch stops without claiming completion — see the
+;; scope-limit in the recheck receipt); C2's declaration only ENABLES
+;; collecting prospective observations, and restoration needs the evidence,
+;; not the declaration. No numbers: theta stays the documented default, no u.
 {:schema :wm/cascade-source-v1
  :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
  :context :WM
  :beta {:value 1 :status :declared}
  :facts [:admission/task-stated]
- :want [:repair/verified-dated-recheck :repair/restored-held-out-split]
+ :want [:restoration-accepted]
  :locators
  {:admission/task-stated
   {:class :C4 :repo "futon2" :sha "HEAD"
    :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
    :decl "# Verify or restore guardrail refusal"}
-  :repair/verified-dated-recheck
+  :repair/obstruction-observed-cleared
   {:class :C3 :repo "futon2" :sha "HEAD"
    :path "resources/wm/rechecks/repair-occ-444fb018-dated-recheck.edn"}
-  :repair/restored-held-out-split
+  :repair/split-declared-valid
   {:class :C3 :repo "futon2" :sha "HEAD"
-   :path "resources/wm/eig/held-out-split.edn"}}
+   :path "resources/wm/eig/held-out-split.edn"}
+  :repair/held-out-observations-collected
+  {:class :C3 :repo "futon2" :sha "HEAD"
+   :path "resources/wm/eig/held-out-observations.edn"}
+  :repair/calibration-evidence-present
+  {:class :C3 :repo "futon2" :sha "HEAD"
+   :path "resources/wm/eig/held-out-calibration.edn"}
+  :restoration-accepted
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
+   :decl "**Status:** DONE"}}
  :patterns
  {:apparatus/done-is-observed-running
-  {:guard {:needs #{:admission/task-stated} :forbids #{:repair/verified-dated-recheck}}
-   :produces #{:repair/verified-dated-recheck}}
+  {:guard {:needs #{:admission/task-stated} :forbids #{:repair/obstruction-observed-cleared}}
+   :produces #{:repair/obstruction-observed-cleared}}
+  :apparatus/evidence-to-disposition-once
+  {:guard {:needs #{:repair/obstruction-observed-cleared} :forbids #{:restoration-accepted}}
+   :produces #{:restoration-accepted}}
   :aif/declare-the-conditioning
-  {:guard {:needs #{:admission/task-stated} :forbids #{:repair/restored-held-out-split}}
-   :produces #{:repair/restored-held-out-split}}}
+  {:guard {:needs #{:admission/task-stated} :forbids #{:repair/split-declared-valid}}
+   :produces #{:repair/split-declared-valid}}
+  :aif/measurement-window-hygiene
+  {:guard {:needs #{:repair/split-declared-valid} :forbids #{:repair/held-out-observations-collected}}
+   :produces #{:repair/held-out-observations-collected}}
+  :aif/two-layer-calibration
+  {:guard {:needs #{:repair/held-out-observations-collected} :forbids #{:repair/calibration-evidence-present}}
+   :produces #{:repair/calibration-evidence-present}}
+  :contracts/holder-states-the-claim
+  {:guard {:needs #{:repair/calibration-evidence-present} :forbids #{:restoration-accepted}}
+   :produces #{:restoration-accepted}}}
  :interpretation-receipts
  {:apparatus/done-is-observed-running
   {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
    :source {:path "futon3/library/apparatus/done-is-observed-running.flexiarg"}
-   :reading "The ticket's verification route: RUN the precondition probe the click-3 refusal was about (does a preregistered held-out split exist for the EIG calibration route?), retain the dated check with its source and result, and complete the ticket's scoped work on that observed disposition -- cleared or still unavailable -- without claiming the underlying EIG work. Completion is the observed recheck record, not an assertion that the precondition was checked. DECLARED EFFECT: produces exactly :repair/verified-dated-recheck (a dated disposition record under resources/wm/rechecks/ (git-whitelisted so the C3 locator can observe it)); no model code, no new declaration resource, no calibration claims."
-   :scope-limit "Covers the verify branch of the ticket only. Does not author the split, does not restore anything, does not touch eig-shadow or selection."
+   :reading "The ticket's verify branch RUNS the precondition probe and records what it OBSERVES. The token is the observation disposition, not a file: :repair/obstruction-observed-cleared means the dated recheck observed the obstruction cleared. DECLARED EFFECT: produces exactly :repair/obstruction-observed-cleared."
+   :scope-limit "Models the cleared branch, which the ticket's 'if it has cleared' route accepts directly. The still-present branch is NOT claimed as completion: if the recheck observes the obstruction present, this cascade stops after the observation and the ticket stays open for the restore route -- the kernel's guard chain simply does not reach acceptance, and no completion token is produced. A single declared-source pattern cannot carry both observation outcomes (the kernel transition is deterministic, cascade_model_manifest.clj:282); the present-branch is therefore represented by NOT reaching the terminal, which is exactly the ticket's semantics."
    :target-source {:repo "futon2"
                    :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
                    :section "Scoped task"}
-   :observation-limit "C3 observes the retained record file existing in the repository, not the quality of the recheck; ticket review judges the content."}
+   :observation-limit "C3 observes the dated recheck record; the record's content (cleared or present) is judged by ticket review, and a record asserting 'present' does not satisfy this token."}
+  :apparatus/evidence-to-disposition-once
+  {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
+   :source {:path "futon3/library/apparatus/evidence-to-disposition-once.flexiarg"}
+   :reading "The ticket's 'if it has cleared, retain a dated recheck' branch: the dated observation IS the disposition; acceptance converts it once into the ticket's DONE state. DECLARED EFFECT: produces exactly :restoration-accepted from :repair/obstruction-observed-cleared."
+   :scope-limit "Only the cleared-branch acceptance. Does not accept on a present-observation or on any declaration."
+   :target-source {:repo "futon2"
+                   :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
+                   :section "Acceptance evidence"}
+   :observation-limit "C4 observes the ticket's Status line reading DONE; ordinary ticket review guards the transition."}
   :aif/declare-the-conditioning
   {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
    :source {:path "futon3/library/aif/declare-the-conditioning.flexiarg"}
-   :reading "The ticket's restoration route, in the pattern's own discipline: declare the conditioning BEFORE outcomes exist. Author and commit a preregistered held-out split declaration (which observations are held out, the split's locator, the no-result/failure/timeout classes per C2 of the parent mission) plus its explicit no-result handling, as the resource the withdrawn :aif/two-layer-calibration route needs. The declared split makes the precondition exist; it does not and must not fabricate post-split outcomes. DECLARED EFFECT: produces exactly :repair/restored-held-out-split (a new declaration resource at resources/wm/eig/held-out-split.edn); a precondition artefact, not a measured calibration result."
-   :scope-limit "Covers the restore branch of the ticket only: one declaration resource and its no-result classes. Does not run the calibration, collect shadow packets, or re-enable the withdrawn route in selection."
+   :reading "The restore branch begins by declaring the held-out split before any outcomes exist. DECLARED EFFECT: produces exactly :repair/split-declared-valid -- a valid preregistered split declaration. The declaration ENABLES collecting prospective observations; it supplies no evidence itself."
+   :scope-limit "One declaration resource. Does not collect observations, does not calibrate, does not restore, does not satisfy the ticket by existing."
    :target-source {:repo "futon2"
                    :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
                    :section "Scoped task"}
-   :observation-limit "C3 observes the declaration resource existing in the repository; the split's eventual empirical use is future work under the parent mission."}}
+   :observation-limit "C3 observes the split declaration resource; its validity is judged by declaration review against parent-mission C2's class requirements."}
+  :aif/measurement-window-hygiene
+  {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
+   :source {:path "futon3/library/aif/measurement-window-hygiene.flexiarg"}
+   :reading "With a valid split declared, the prospective held-out observations are COLLECTED through the split's window: the measurements the calibration layer needs. DECLARED EFFECT: produces exactly :repair/held-out-observations-collected from :repair/split-declared-valid."
+   :scope-limit "Collection only. Does not score, calibrate, or accept anything; outcomes that fail the window's hygiene are retained, not discarded."
+   :target-source {:repo "futon2"
+                   :path "holes/missions/M-aif-policy-conditioned-eig.md"
+                   :section "Completion criteria C9"}
+   :observation-limit "C3 observes the collected-observations record; sufficiency for calibration is the next pattern's guard, not this token."}
+  :aif/two-layer-calibration
+  {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
+   :source {:path "futon3/library/aif/two-layer-calibration.flexiarg"}
+   :reading "The collected observations become calibration EVIDENCE: held-out log-loss/Brier and predicted-versus-realised entropy reductions, the two-layer separation this pattern disciplines. DECLARED EFFECT: produces exactly :repair/calibration-evidence-present from :repair/held-out-observations-collected."
+   :scope-limit "Evidence only. Does not claim the obstruction removed unless the evidence says so, and does not accept the ticket."
+   :target-source {:repo "futon2"
+                   :path "holes/missions/M-aif-policy-conditioned-eig.md"
+                   :section "Completion criteria C9"}
+   :observation-limit "C3 observes the calibration evidence record; the evidence's verdict on the precondition is content judged at review."}
+  :contracts/holder-states-the-claim
+  {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
+   :source {:path "futon3/library/contracts/holder-states-the-claim.flexiarg"}
+   :reading "With calibration evidence present, the holder states the restoration claim and the ticket is accepted: the restore branch's terminal. DECLARED EFFECT: produces exactly :restoration-accepted from :repair/calibration-evidence-present."
+   :scope-limit "Restoration acceptance on evidence only. A declaration without collected observations and calibration evidence never reaches this guard."
+   :target-source {:repo "futon2"
+                   :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
+                   :section "Acceptance evidence"}
+   :observation-limit "C4 observes the ticket's Status line reading DONE; ordinary ticket review guards the transition."}}
  :candidates
- [{:precedence [:apparatus/done-is-observed-running]
+ [{:precedence [:apparatus/done-is-observed-running :apparatus/evidence-to-disposition-once]
    :construction-receipt
    {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
     :moves [] :stopped-is-not-success true
-    :reading "First action: run the precondition probe, retain the dated disposition. Declared effect: :repair/verified-dated-recheck only -- a record of what was found, no repository state beyond it."}}
-  {:precedence [:aif/declare-the-conditioning]
+    :reading "C1, the verify route: observe the condition (cleared branch), then accept on the dated observation. Reaches :restoration-accepted in 2 steps. If the observation is 'present', the cascade stops after step 1 and claims nothing."}}
+  {:precedence [:aif/declare-the-conditioning :aif/measurement-window-hygiene :aif/two-layer-calibration :contracts/holder-states-the-claim]
    :construction-receipt
    {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
     :moves [] :stopped-is-not-success true
-    :reading "First action: author and commit the preregistered held-out split declaration with no-result handling. Declared effect: :repair/restored-held-out-split only -- a new declaration resource the withdrawn calibration route names as its precondition."}}]}
-;; Compatible past outcome records (2.4, Joe's ruling 2026-09-22, 444c8f3f):
-;; NONE for this repair family. The single attempts.edn trial
-;; (apparatus/one-authority-per-question -> M-aif-policy-conditioned-eig
-;; shared-updater hole, success 1) is a different pattern and token; it is not
-;; claimed as evidence for either candidate. B is therefore the declared prior
-;; for both candidates, distinguishable by their declared effects above.
+    :reading "C2, the restore route: declare the split, collect prospective observations, calibrate, then accept on the evidence. Reaches :restoration-accepted in 4 steps; the declaration alone reaches nothing."}}]}
+;; Manifest expressibility note: "observe the condition" IS expressible as a
+;; deterministic union transition (cascade_model_manifest.clj:282 pattern
+;; kernel), one outcome per pattern; the recheck's two possible observations
+;; are represented as reach/not-reach of the cleared branch (see the
+;; scope-limit), so no manifest extension is needed for this source.
+;; Compatible past outcomes: NONE for any of these tokens (attempts.edn's
+;; single trial is a different pattern and token family; not claimed).
