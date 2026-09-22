@@ -6289,26 +6289,50 @@
               ;; receipt attachment). :focus-as-of pins it for replay; no
               ;; consumer computes its own now.
               decision-as-of (or (:focus-as-of opts) (str (java.time.Instant/now)))
-              ;; codex-20 correction 2: establish the focus from evidence
-              ;; available AT the decision time -- the latest window whose
-              ;; valid-through is not after the decision -- so an earlier
-              ;; replay never receives a later focus as its "previous".
-              focus-as-of (str (java.time.Instant/ofEpochMilli
-                                (reduce max
-                                        (concat [0]
-                                                (for [w (:windows focus-inputs)
-                                                      :when (not (.isAfter (java.time.Instant/parse (:valid-through w))
-                                                                           (java.time.Instant/parse decision-as-of)))]
-                                                  (inst-ms (java.time.Instant/parse (:valid-through w))))))))
-              focus-established (focus-receipt/discover focus-inputs focus-as-of nil)
-              focus-info (if (= :unknown (:status focus-established))
-                           ;; unknown branch carries the CAPTURED decision
-                           ;; timestamp, not the historical focus one
-                           (assoc focus-established :as-of decision-as-of)
-                           (focus-receipt/discover focus-inputs
-                                                   decision-as-of
-                                                   {:focus (:focus focus-established)
-                                                    :as-of focus-as-of}))
+              ;; codex-20 correction 2 (revised): FIRST use the discovery
+              ;; that is VALID AT the decision time (the window covering it --
+              ;; a window's valid-through is its validity endpoint, not the
+              ;; moment its evidence becomes available; a decision inside a
+              ;; window discovers from that window). Only when NO window
+              ;; covers the decision time is a prior focus retained -- from
+              ;; the latest window that ENDED before the decision, never
+              ;; from evidence dated after it.
+              decision-instant (java.time.Instant/parse decision-as-of)
+              covering-as-of (some (fn [w]
+                                     (when (and (not (.isAfter (java.time.Instant/parse (:from w))
+                                                               decision-instant))
+                                                (not (.isAfter decision-instant
+                                                               (java.time.Instant/parse (:valid-through w)))))
+                                       (:valid-through w)))
+                                   (:windows focus-inputs))
+              retention-as-of (when (nil? covering-as-of)
+                                (let [ended (for [w (:windows focus-inputs)
+                                                  :when (.isBefore (java.time.Instant/parse (:valid-through w))
+                                                                   decision-instant)]
+                                              (inst-ms (java.time.Instant/parse (:valid-through w))))]
+                                  (when (seq ended)
+                                    (str (java.time.Instant/ofEpochMilli (reduce max ended))))))
+              focus-established (focus-receipt/discover
+                                 focus-inputs
+                                 (or covering-as-of retention-as-of decision-as-of)
+                                 nil)
+              focus-info (if (some? covering-as-of)
+                           ;; a window covers the decision time: the
+                           ;; decision-time discovery itself
+                           (focus-receipt/discover focus-inputs decision-as-of nil)
+                           (if (= :unknown (:status focus-established))
+                             ;; no covering window and no legitimately
+                             ;; established prior: unknown, carrying the
+                             ;; CAPTURED decision timestamp
+                             (assoc focus-established :as-of decision-as-of)
+                             ;; after all windows: retain the legitimately
+                             ;; established prior focus (discovered at
+                             ;; retention-as-of), evaluate at the decision
+                             ;; time, original evidence date kept
+                             (focus-receipt/discover focus-inputs
+                                                     decision-as-of
+                                                     {:focus (:focus focus-established)
+                                                      :as-of retention-as-of})))
               class-universe (reduce clojure.set/union
                                      (set joint-reachable)
                                      [(set joint-want)
@@ -6424,7 +6448,7 @@
                           {:as-of decision-as-of
                            :previous-focus (when (:focus focus-established)
                                              {:focus (:focus focus-established)
-                                              :as-of focus-as-of})
+                                              :as-of (or retention-as-of covering-as-of)})
                            :relation-context relation-context
                            :classifications target-classifications})
                 authorized (controller-authority/authorize decision ranked)

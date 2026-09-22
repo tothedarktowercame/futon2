@@ -400,3 +400,81 @@
     (is (= :class-unknown-no-scalar-g (:kind ranked))
         "the family-level refusal names the unresolved target's no-scalar kind")
     (is (= tz (:target ranked)) "the refusal names the unresolved target")))
+
+
+;; codex-20 correction 2 (revised): window semantics and production context.
+(deftest decision-inside-a-window-discovers-from-it
+  ;; 2026-09-21T12:00Z is INSIDE window 2 (from 2026-09-21T00:00,
+  ;; valid-through 2026-09-22T17:31:44): the discovery at the decision time.
+  (let [inputs (focus/read-inputs)
+        r (focus/discover inputs "2026-09-21T12:00:00Z" nil)]
+    (is (= :discovered (:status r)) (pr-str (select-keys r [:status :reason])))
+    (is (= "WM" (:focus r)))))
+
+(deftest production-focus-context-is-exercised
+  ;; Exercise the production wiring shape (the covering/retention selection
+  ;; war_machine.clj uses) rather than hand-built contexts: inside a window
+  ;; -> discovered; after all windows -> retained with the original date.
+  (let [inputs (focus/read-inputs)
+        ctx (fn [decision-as-of]
+              (let [di (java.time.Instant/parse decision-as-of)
+                    cov (some (fn [w]
+                                (when (and (not (.isAfter (java.time.Instant/parse (:from w)) di))
+                                           (not (.isAfter di (java.time.Instant/parse (:valid-through w)))))
+                                  (:valid-through w)))
+                              (:windows inputs))
+                    ended (for [w (:windows inputs)
+                                :when (.isBefore (java.time.Instant/parse (:valid-through w)) di)]
+                            (inst-ms (java.time.Instant/parse (:valid-through w))))
+                    ret (when (seq ended)
+                          (str (java.time.Instant/ofEpochMilli (reduce max ended))))
+                    est (focus/discover inputs (or cov ret decision-as-of) nil)]
+                (if (some? cov)
+                  (focus/discover inputs decision-as-of nil)
+                  (if (= :unknown (:status est))
+                    (assoc est :as-of decision-as-of)
+                    (focus/discover inputs decision-as-of
+                                    {:focus (:focus est) :as-of ret})))))
+        inside (ctx "2026-09-21T12:00:00Z")
+        after (ctx "2099-01-01T00:00:00Z")]
+    (is (= :discovered (:status inside)))
+    (is (= "WM" (:focus inside)))
+    (is (= :retained (:status after)))
+    (is (= "WM" (:focus after)))
+    (is (= "2026-09-22T17:31:44Z" (:retained-evidence-as-of after))
+        "the original evidence date is kept")))
+
+(deftest production-relation-context-resolves-from-futon3c
+  ;; The PRODUCTION context expression (war_machine.clj:6311's shape:
+  ;; mission-registry/default-code-root + "/futon2" + relative dirs), run in
+  ;; a JVM whose working directory is futon3c. Reverting the production
+  ;; paths to bare relatives would resolve them against futon3c and fail.
+  (let [f2-root (str (System/getProperty "user.home") "/code/futon2")
+        f3c (str (System/getProperty "user.home") "/code/futon3c")
+        script (io/file (System/getProperty "java.io.tmpdir") "class_observation_scoring_prod_ctx_probe.clj")]
+    (spit script
+          (str "(require '[futon2.aif.focus-receipt :as focus]\n"
+               "        '[futon2.aif.mission-registry :as registry])\n"
+               "(let [root (str registry/default-code-root \"/futon2\")\n"
+               "      inputs (focus/read-inputs)\n"
+               "      est (focus/discover inputs \"2026-09-22T17:31:44Z\" nil)\n"
+               "      ret (focus/discover inputs \"2099-01-01T00:00:00Z\"\n"
+               "                            {:focus (:focus est) :as-of \"2026-09-22T17:31:44Z\"})\n"
+               "      c (focus/classify-target inputs ret \"2099-01-01T00:00:00Z\"\n"
+               "                               \"T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade\"\n"
+               "                               {:ticket-dir (str root \"/holes/tickets\")\n"
+               "                                :findings-dir (str root \"/data/wm-repair-obligations/findings\")})]\n"
+               "  (println :cwd (System/getProperty \"user.dir\"))\n"
+               "  (println :class (:class c) :kind (get-in c [:derived-via :kind])))\n"))
+    (let [cp (->> (str/split (str/trim (:out (clojure.java.shell/sh "clojure" "-Spath" :dir f2-root))) #":")
+                  (map #(if (.isAbsolute (io/file %)) % (str f2-root "/" %)))
+                  (str/join ":"))
+          out (clojure.java.shell/sh "java" "-cp" cp "clojure.main"
+                                     (str (.getPath script))
+                                     :dir f3c)
+          lines (str/split-lines (:out out))]
+      (is (zero? (:exit out)) (str (:err out)))
+      (is (= f3c (first (keep #(second (re-matches #":cwd (.+)" %)) lines)))
+          "the probe really ran from futon3c")
+      (is (some #(re-find #":class :focus :kind :ticket-parent" %) lines)
+          (str "the PRODUCTION context expression classifies from futon3c: " (pr-str lines))))))
