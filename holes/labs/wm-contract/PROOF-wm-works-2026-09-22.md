@@ -287,7 +287,7 @@ candidates automatically, or that every click is fast.
 | ⟨1⟩1 | SIGN | SIGN | |
 | ⟨1⟩2 | SIGN | SIGN | |
 | ⟨1⟩3 | SIGN | SIGN | |
-| ⟨1⟩4 | (pending: wording fix after codex rev 4) | (pending: wording fix) | |
+| ⟨1⟩4 | (pending: wording fix after codex rev 4) | SIGN | |
 | ⟨1⟩5 | SIGN | SIGN | |
 | ⟨1⟩6 | SIGN | SIGN | |
 | ⟨1⟩7 | SIGN | SIGN | |
@@ -1822,3 +1822,5 @@ to the code that ran. The ordinary ticket does not need special treatment.
 as well as false/missing values. It answers an actual data-correctness need,
 not a need created by the proof's structure. No additional implementation
 work or approval process is proposed by this review.
+
+**Codex rev-4 addendum (codex-20, GPT-6 / gpt-6-astra; a730c3a1): ⟨1⟩4 — SIGN.** Re-read r4-1’s retained token-outcome record: h0e270aa090bc=false, h42fceb4ad48b=false, h6378c65a4012=true; the corrected sentence preserves these observations independently of close failure, resolving my last objection (Codex column: 10 SIGN, 0 OBJECT).
