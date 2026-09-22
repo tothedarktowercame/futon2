@@ -6294,8 +6294,13 @@
                                 (reduce max (map #(inst-ms (java.time.Instant/parse (:valid-through %)))
                                                   (:windows focus-inputs)))))
               focus-info (focus-receipt/discover focus-inputs focus-as-of nil)
+              class-universe (reduce clojure.set/union
+                                     (set joint-reachable)
+                                     [(set joint-want)
+                                      (set (mapcat identity (keys joint-q0)))
+                                      (set (mapcat identity (keys (:value initial-belief-receipt))))])
               class-model (class-observation-model
-                           {:universe (set joint-reachable)
+                           {:universe class-universe
                             :acceptance joint-want
                             :target-class (into {}
                                                 (for [p problems

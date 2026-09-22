@@ -124,7 +124,7 @@
                      (every? (fn [[_pref-tau pref]]
                                (and (map? pref)
                                     (every? #(contains? (set class-universe) %) (keys pref))
-                                    (probability? (reduce + (vals pref)))))
+                                    (= 1 (reduce + (vals pref)))))
                              class-preference))
         (refuse! :invalid-class-preference {:class-preference class-preference})))
     (refuse! :unknown-observation-model {:kind-declared kind}))
@@ -189,29 +189,33 @@
     (refuse! :missing-observation {:observation observation})))
 
 (defn- class-of-state
-  "PROOF-wm-works 1.3 build 2/3: a state's run-ending class. A state carrying
-   one or more acceptance tokens takes the class of those tokens' targets
-   (mass over distinct classes splits equally when several targets are
-   accepted in one state); a state carrying none has not ended -- at the
-   horizon that is :stop-the-line per Joe's ruling (unmeasured/not reached),
-   before it :ending/not-yet-evaluated."
-  [{:keys [acceptance target-class]} state terminal?]
-  (let [accepted (filter #(contains? state %) acceptance)
-        classes (distinct (for [token accepted
-                                :let [t (first token)]
-                                :when (contains? target-class t)]
-                            (get target-class t)))]
-    (cond (seq classes)
-          (zipmap classes (repeat (/ 1 (count classes))))
-          terminal? {:stop-the-line 1}
-          :else {:ending/not-yet-evaluated 1})))
+  "PROOF-wm-works 1.3 handoff A (codex-20): the CANDIDATE's own target's
+   ending class. Before the horizon every state emits
+   :ending/not-yet-evaluated UNCONDITIONALLY (an acceptance reached early is
+   still not-yet-evaluated: only the horizon's state is the ending). At the
+   horizon a state carrying an acceptance token of the candidate's OWN target
+   takes that target's class -- tokens of other targets are never averaged
+   in and never count as this candidate's ending -- and a state carrying none
+   of its target's acceptance is :stop-the-line per Joe's ruling
+   (unmeasured/not reached). One target per candidate: the emission is
+   deterministic and ambiguity is genuinely 0."
+  [{:keys [acceptance target-class]} state target terminal?]
+  (if-not terminal?
+    {:ending/not-yet-evaluated 1}
+    (let [own (some (fn [token] (when (and (= target (first token))
+                                           (contains? state token))
+                                  token))
+                    acceptance)]
+      (if (and own (contains? target-class target))
+        {(get target-class target) 1}
+        {:stop-the-line 1}))))
 
 (defn- class-predictive
-  [{:keys [horizon] :as model} belief tau]
+  [{:keys [horizon] :as model} belief tau target]
   (let [terminal? (>= tau horizon)]
     (apply merge-with +
            (for [[state mass] belief]
-             (update-vals (class-of-state model state terminal?) #(* mass %))))))
+             (update-vals (class-of-state model state target terminal?) #(* mass %))))))
 
 (defn- class-preference-for
   [model tau]
@@ -221,13 +225,17 @@
     pref))
 
 (defn- class-preference!
-  "Class preferences are keyed by class keyword, not token subset."
+  "Class preferences are keyed by class keyword, not token subset, and must
+   be a NORMALISED distribution (handoff A: a total inside [0,1] -- including
+   0 -- silently flattens every risk and is refused)."
   [model preference]
   (when-not (and (map? preference) (seq preference)
                  (every? #(and (contains? (set (:class-universe model)) (key %))
                                (probability? (val %))) preference)
-                 (probability? (reduce + (vals preference))))
-    (refuse! :invalid-observation-preference {:preference preference}))
+                 (= 1 (reduce + (vals preference))))
+    (refuse! :invalid-observation-preference {:preference preference
+                                              :total (when (map? preference)
+                                                       (reduce + (vals preference)))}))
   preference)
 
 (defmulti evaluate
@@ -235,7 +243,7 @@
   (fn [model _request] (:backend model)))
 
 (defmethod evaluate :exact-enumeration
-  [model {:keys [op state belief event observation context preference tau]}]
+  [model {:keys [op state belief event observation context preference tau target]}]
   (if (= :class-emission (:kind model))
     (case op
       :score
@@ -246,9 +254,12 @@
         (when-not (and (map? belief) (seq belief) (m/normalized-exact? belief)
                        (every? set? (keys belief)))
           (refuse! :invalid-state-belief {:belief belief}))
-        (let [tau (or tau (:horizon model))
+        (let [_ (when (nil? target)
+                  (refuse! :missing-scoring-target
+                           {:reason "class emission is per candidate: the candidate's target must travel with the score query"}))
+              tau (or tau (:horizon model))
               pref (class-preference! model (class-preference-for model tau))
-              prediction (class-predictive model belief tau)
+              prediction (class-predictive model belief tau target)
               risk (m/outcome-risk (ordered prediction) pref)]
           ;; Deterministic emission: ambiguity is exactly 0 at every step;
           ;; before the horizon the single :ending/not-yet-evaluated symbol

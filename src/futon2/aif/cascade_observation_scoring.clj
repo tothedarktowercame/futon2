@@ -53,12 +53,24 @@
                        (= (count candidates) (count (set (map :id candidates))))))
       (om/refuse! :invalid-bounded-candidates
                   {:limit (when-not (= :class-emission (:kind observation-model)) max-candidates)}))
+    (when (= :class-emission (:kind observation-model))
+      ;; The class scorer still rolls B through the token transition model,
+      ;; so B's token domain holds: set-shaped q0 states, q0 support and
+      ;; candidate tokens inside the declared universe, and the model's
+      ;; horizon equal to the rollout horizon (handoff A, codex-20).
+      (when-not (= (:horizon observation-model) horizon-steps)
+        (om/refuse! :class-horizon-mismatch
+                    {:model (:horizon observation-model) :rollout horizon-steps})))
     (when-not (and (map? q0) (seq q0) (m/normalized-exact? q0)
-                   (or (= :class-emission (:kind observation-model))
-                       (every? #(and (set? %) (set/subset? % universe)) (keys q0))))
-      (om/refuse! :invalid-state-belief {}))
-    (when-not (or (= :class-emission (:kind observation-model))
-                  (set/subset? (candidate-tokens candidates) universe))
+                   (every? #(and (set? %) (set/subset? % universe)) (keys q0)))
+      (om/refuse! :invalid-state-belief
+                   {:non-set-states (count (remove set? (keys q0)))
+                    :outside-states (vec (sort-by pr-str (for [st (keys q0)
+                                                               :when (and (set? st)
+                                                                          (seq (set/difference st universe)))]
+                                                           {:state st
+                                                            :outside (vec (sort-by pr-str (set/difference st universe)))})))}))
+    (when-not (set/subset? (candidate-tokens candidates) universe)
       (om/refuse! :candidate-outside-observation-universe {}))
     (when-not (and (map? cascade-spec)
                    (every? #(set? (get cascade-spec %)) [:want :evidence :zeroed])
@@ -84,7 +96,14 @@
                   (let [evaluated (m/rollout-evaluation (constantly (:precedence candidate)) q 1)
                         next-q (checked (:belief evaluated))
                         score (checked (om/query observation-model
-                                                 {:op :score :belief next-q :preference (get-in preference [tau :probabilities])}))]
+                                                 ;; PROOF-wm-works 1.3 handoff A:
+                                                 ;; the actual step tau and the
+                                                 ;; candidate's own target (its
+                                                 ;; attributable ending) travel
+                                                 ;; with every score query.
+                                                 {:op :score :belief next-q :tau tau
+                                                  :target (:target candidate)
+                                                  :preference (get-in preference [tau :probabilities])}))]
                     (recur (inc tau) next-q
                            (conj result (assoc score :tau tau :belief next-q
                                                :node-evaluation (assoc (first (:evaluations evaluated)) :tau tau)))))))
