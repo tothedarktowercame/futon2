@@ -122,3 +122,22 @@ the implementation commit; its result will be retained beside this report.
 - **Stop the line:** change the generic queue eligibility/gate to hold when the
   unresolved front ticket cannot proceed, as Joe ruled. The merged queue planner
   currently skips unadmitted strata; this slice does not alter it.
+
+## Registered warrant
+
+Implementation commit: `29e4d7fc48c78108b61acb53eb534316594686b3`.
+
+`test-registry-eeefcd2eb9a5480c47f644591d2ab0c3f220d7eb963c8298f7ef0e3ca1af7f5c`:
+`:warrant? true`, postcheck `:matched`, 6 tests / 38 assertions, zero
+failures/errors, exit 0. Registration, content-pinned log and load closure are
+retained adjacent. This scoped warrant covers finding-ticket publication;
+the four other namespace runs above are separately reported CLI validations.
+
+Command, cwd `/home/joe/code/futon3c` (independent CLI JVM):
+
+```
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-finding-to-ticket/holes/labs/wm-contract/runs/finding-to-ticket-2026-09-22/registry.edn
+```
+
+The authorized test-registry evidence registration is the only evidence-store
+write; no live repair store, ticket directory or queue declaration was changed.
