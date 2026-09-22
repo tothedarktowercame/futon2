@@ -113,6 +113,11 @@ candidates automatically, or that every click is fast.
     The chain is intact on click 3's `repair-occ-444fb018…`: finding file → ticket → queue
     entry. Hops 3–4 were observed live; hops 1–2 were verified in code and converge on the
     same writer. claude-5 spot-checked the files and the cited functions.
+  - ⟨2⟩4 done 2026-09-22. All four lifecycle behaviours were already present, with evidence:
+    resume an open attempt (`full_loop_cohort.clj:575`), closed is final (`:601-602`), a
+    retry gets a new global id (`:416-425`), and prior commits are recognised as base
+    (`task_execution_evidence.clj:83-176`). Bad-case tests against the real cohort code were
+    added in futon2 f22e407d (3 tests; 33/179 passing). There was no src change.
   - Note: the futon3c click boundary's grant budget (Joe's renewal documents) is Joe's own
     rationing and is not removed by this step.
 - **FAILURES:** —
