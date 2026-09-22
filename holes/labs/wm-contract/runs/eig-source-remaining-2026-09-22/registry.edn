@@ -1,0 +1,11 @@
+{:repo-root "/home/joe/code/futon2-eig-source-remaining"
+ :code-paths ["resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn"
+              "src/futon2/aif/cascade_sources.clj" "src/futon2/aif/cascade_problems.clj"
+              "src/futon2/aif/observation_checks.clj" "scripts/futon2/report/war_machine.clj"]
+ :test-paths ["test/futon2/report/eig_source_remaining_test.clj"
+              "test/fixtures/eig-source-remaining/mission-after-updater.md"
+              "test/fixtures/M-aif-policy-conditioned-eig-pre-aeb352f8.md"]
+ :command ["clojure" "-M:test" "-m" "cognitect.test-runner" "-n" "futon2.report.eig-source-remaining-test"]
+ :author "codex-10" :origin "claude-3/eig-source-remaining"
+ :artifact-dir "/home/joe/code/futon2-eig-source-remaining/holes/labs/wm-contract/runs/eig-source-remaining-2026-09-22/registered"
+ :agency-url "http://localhost:7070"}
