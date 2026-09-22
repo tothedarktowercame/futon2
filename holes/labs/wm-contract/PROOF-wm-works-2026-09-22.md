@@ -86,7 +86,8 @@ candidates automatically, or that every click is fast.
   transition family, and the observable outcome differences that the discrimination in ⟨1⟩3
   will rely on.
 
-  The snapshot freezes *inputs*, not expected answers. Evaluating it read-only never
+  The snapshot freezes *inputs*, not expected answers. It never names an expected chosen
+  action, so the candidates cannot be built to reach a predetermined winner. Evaluating it read-only never
   executes its work. It is executed once, at ⟨1⟩5.
 - **PROOF.**
   - ⟨2⟩1. Interpretation. `mission_hole_wants.clj:74-91` leaves `:interpretation` and
@@ -185,13 +186,17 @@ candidates automatically, or that every click is fast.
     - The output is an input the production horizon scorer consumes, without changing this
       sub-step later.
   - ⟨2⟩3. B from recorded outcomes.
-    - A new version of `resources/wm/attempt-learning-contract.edn` (its mode and version
-      are checked by `attempt_learning.clj:15-21`) authorises production consumption. Joe's
+    - A new version of `resources/wm/attempt-learning-contract.edn` authorises production
+      consumption. The same change updates the `supported-contract?` pin in
+      `attempt_learning.clj:15-21`, which checks the mode and version, so the code accepts
+      exactly the new version, and the check is not loosened. Joe's
       signature on this plan is that authorisation.
     - The trial events in `data/wm-learning-trials/attempts.edn` stay immutable. The new
       consumer contract states how old compatible events are interpreted, without
       replacement events that would count the same trial twice.
-    - A production reader is built; `learning_trial_ledger.clj` has none today.
+    - A production reader is built; `learning_trial_ledger.clj` has none today. It honours the
+      ⟨1⟩1 ledger cutoff when evaluating the reference input, so that trial events from later
+      runs (such as ⟨1⟩2's click) do not enter the frozen B.
     - The step states which transition a whole-attempt outcome informs.
     - The step establishes persistence, deduplication, and continuity of meaning and domain
       (`:carry-domain-changed`: migrate, or reinitialise with a record; the identity check
@@ -228,6 +233,11 @@ candidates automatically, or that every click is fast.
     selection.
   - The receipts join the inputs actually consumed, the policy scores, the eligible action
     marginal and the chosen action, and these equal ⟨1⟩3's.
+  - If the live input has drifted from the snapshot (for example, a new candidate entered the
+    queue), ⟨1⟩3's computation is rerun read-only on the live input, and the chosen action is
+    shown to be the one that computation gives. If the drift removes a reference candidate
+    or changes the eligible stratum, Joe is told and decides whether to re-freeze. The
+    click never stops silently.
   - The load-identity evidence from ⟨1⟩2 holds for this run.
 - **FAILURES:** —
 
