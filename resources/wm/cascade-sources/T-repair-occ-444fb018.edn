@@ -21,7 +21,7 @@
    :decl "# Verify or restore guardrail refusal"}
   :repair/verified-dated-recheck
   {:class :C3 :repo "futon2" :sha "HEAD"
-   :path "data/wm-repair-obligations/rechecks/repair-occ-444fb018-dated-recheck.edn"}
+   :path "resources/wm/rechecks/repair-occ-444fb018-dated-recheck.edn"}
   :repair/restored-held-out-split
   {:class :C3 :repo "futon2" :sha "HEAD"
    :path "resources/wm/eig/held-out-split.edn"}}
@@ -36,7 +36,7 @@
  {:apparatus/done-is-observed-running
   {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
    :source {:path "futon3/library/apparatus/done-is-observed-running.flexiarg"}
-   :reading "The ticket's verification route: RUN the precondition probe the click-3 refusal was about (does a preregistered held-out split exist for the EIG calibration route?), retain the dated check with its source and result, and complete the ticket's scoped work on that observed disposition -- cleared or still unavailable -- without claiming the underlying EIG work. Completion is the observed recheck record, not an assertion that the precondition was checked. DECLARED EFFECT: produces exactly :repair/verified-dated-recheck (a dated disposition record under data/wm-repair-obligations/rechecks/); no model code, no new declaration resource, no calibration claims."
+   :reading "The ticket's verification route: RUN the precondition probe the click-3 refusal was about (does a preregistered held-out split exist for the EIG calibration route?), retain the dated check with its source and result, and complete the ticket's scoped work on that observed disposition -- cleared or still unavailable -- without claiming the underlying EIG work. Completion is the observed recheck record, not an assertion that the precondition was checked. DECLARED EFFECT: produces exactly :repair/verified-dated-recheck (a dated disposition record under resources/wm/rechecks/ (git-whitelisted so the C3 locator can observe it)); no model code, no new declaration resource, no calibration claims."
    :scope-limit "Covers the verify branch of the ticket only. Does not author the split, does not restore anything, does not touch eig-shadow or selection."
    :target-source {:repo "futon2"
                    :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"

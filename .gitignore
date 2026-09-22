@@ -46,6 +46,12 @@ resources/wm/*
 !resources/wm/observation-contract.edn
 !resources/wm/repair-evaluator-admissions.edn
 !resources/wm/cascade-sources/
+# PROOF-wm-works 1.2 2.3 (2026-09-22, zai-1): completion-evidence resources for
+# the repair-ticket candidates. C3 locators read git at a commit; without these
+# whitelists the produced tokens could never be observed true (data/* and
+# resources/wm/* are ignored above). Same pattern as WM-04 S-1 below/above.
+!resources/wm/rechecks/
+!resources/wm/eig/
 
 # local file that shouldn't be tracked here
 LICENSE
