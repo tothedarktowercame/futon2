@@ -20,7 +20,9 @@
                (io/file "/home/joe/code/futon2")
                (io/file root "ticket-publication"))]
     {:ticket-dir (str (io/file repo "holes/tickets"))
-     :queue-path (str (io/file repo "resources/wm/ticket-queue.edn"))}))
+     :queue-path (if (= repo (io/file "/home/joe/code/futon2"))
+                   queue/live-path
+                   (str (io/file repo "resources/wm/ticket-queue.edn")))}))
 
 (defn- description [value]
   (let [s (str/replace (str value) #"[\r\n]+" " ")]

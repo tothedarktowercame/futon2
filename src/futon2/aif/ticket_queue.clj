@@ -35,9 +35,16 @@
                     {:kind :invalid-ticket-queue :declaration declaration})))
   declaration)
 
+;; The live queue is runtime state written by enqueue!, so it lives under the
+;; untracked data/ root. resources/wm/ticket-queue.edn stays the versioned empty
+;; declaration: writing entries (and a .lock) into a tracked resource dirtied
+;; the shared checkout and made every default-reading test depend on live data.
+(def live-path "/home/joe/code/futon2/data/wm-ticket-queue/queue.edn")
+
 (defn read-declaration
   "Read one declaration; missing or malformed configuration refuses."
-  ([] (read-declaration (io/resource "wm/ticket-queue.edn")))
+  ([] (read-declaration (let [live (io/file live-path)]
+                          (if (.isFile live) live (io/resource "wm/ticket-queue.edn")))))
   ([source]
    (with-open [reader (java.io.PushbackReader. (io/reader source))]
      (let [declaration (edn/read {:eof ::eof} reader)]

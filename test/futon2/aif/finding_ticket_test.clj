@@ -148,3 +148,9 @@
         (is (thrown-with-msg? clojure.lang.ExceptionInfo #"traverses a link"
               (queue/enqueue! path {:ticket "T-ordinary" :inserted-at "2026-09-22T00:00:00Z"})))
         (is (= "unchanged" (slurp outside)))))))
+
+(deftest canonical-store-queue-is-untracked-runtime-state
+  ;; The live queue must not be written into a tracked resource.
+  (let [{:keys [queue-path ticket-dir]} (publisher/destinations publisher/canonical-store)]
+    (is (= "/home/joe/code/futon2/data/wm-ticket-queue/queue.edn" queue-path))
+    (is (= "/home/joe/code/futon2/holes/tickets" ticket-dir))))
