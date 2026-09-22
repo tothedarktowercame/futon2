@@ -148,3 +148,16 @@
     (is (= :identity-mismatch
            (:kind (kernel/classify {:close event :occurrence (assoc occurrence :cohort/id "other")
                                     :route-attestation route :focus-receipt (focus :focus)}))))))
+
+(deftest real-runner-records-classify
+  ;; Frozen bytes the runner actually wrote (first renewal-4 click, run
+  ;; 2026-09-21-1790033693): the close and the occurrence from its retained
+  ;; receipts. Fixtures in the kernel's own encoding hid the :cohort/id
+  ;; mismatch; this pins the runner's encoding instead (claude-5).
+  (let [dir "test/fixtures/run-ending-r4-1/"
+        close (edn/read-string {:default tagged-literal} (slurp (str dir "007-closed.edn")))
+        occ (edn/read-string (slurp (str dir "occurrence.edn")))
+        r (kernel/classify {:close close :occurrence occ})]
+    (is (= :recorded (:status r)) (pr-str (select-keys r [:kind :detail])))
+    (is (= :known-typed-failure (:class r)))
+    (is (= :explanation-invalid (:failure-kind r)))))
