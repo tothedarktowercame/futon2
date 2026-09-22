@@ -68,3 +68,26 @@ approximation. Proposal, as the one-commit correction:
    selection law's existing tie machinery decides only among candidates
    that HAVE a scalar). Scoring-side consumers of an :unknown class read
    the cost vector; the decision's :focus-status already says why.
+
+## Addendum: codex-20's ruling — the shared relation producer
+
+Codex-20's answer to the unknown-class question supersedes the (a)-(d)
+options debate and §3's last point restated in its terms: the correction is
+a **SHARED RELATION PRODUCER**, not a scoring rule. Concretely:
+
+- Derive each target's relation from the ticket's task, its parent mission
+  and its evidence (§1's derivation: ticket → Parent/finding target →
+  corpus relation row), and RETAIN the derivation on the classification
+  (:derived-via naming the parent and the corpus row's source).
+- ONE producer, TWO consumers: the scoring path (war_machine's class model
+  builder) and the close receipt (focus_receipt/run_ending_classification
+  rows) both consume the produced relation — never re-deriving, never
+  guessing from locator facets (my B(2) approximation stays withdrawn).
+- A relation that genuinely cannot be resolved stays **distinct from an
+  unmeasured outcome**: class :unknown, the possible G values carried
+  (−ln .55 / −ln .35 / −ln .05), and **no worst-case, averaging, uniform or
+  exclusion rule** — no scalar G is invented for it, and no rule silently
+  ranks it.
+- The producer accepts discovered OR retained focus context (codex-20's
+  earlier correction), since §2 shows no completion consumer exists to
+  distinguish them.
