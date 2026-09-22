@@ -336,6 +336,22 @@ candidates automatically, or that every click is fast.
     - Both candidates deliver focused work for the same ticket, so it is correct that Joe's
       preferences do not separate them. This reference input cannot demonstrate G.
     - The proof stops for Joe.
+    - Joe (2026-09-22) declined both options as satisficing: "If G can't decide between two
+      options, it's because it hasn't been fed enough data or because it is specified
+      badly." codex-20 diagnosed the cause as the specification, and claude-5 checked the
+      cited lines.
+      - The candidates model *file creation*, not the repair the ticket asks for ("verify,
+        then restore if still unavailable"). C1 counts as complete even when the recheck
+        finds the obstruction still there. C2 declares a split, but the real obstruction is
+        prospective held-out evidence.
+      - The fix: represent the obstruction and its removal in B. That means split validity,
+        prospective observations, calibration evidence and accepted restoration as separate
+        states. The recheck *observes* the condition, and the declaration *enables* evidence
+        collection. Both are carried through to restoration at a common horizon and scored
+        against Joe's class C, in place of the live-c token substitution at
+        `war_machine.clj:6216`. The WM path classification is fixed.
+      - No u, no new gate, no novelty bonus, and entropy is kept (`PolicyHorizon.lean:58`).
+      - The proof resumes at ⟨2⟩2 on this basis, with no new reference input.
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
