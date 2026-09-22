@@ -315,25 +315,25 @@ The review sections below the table refer to revision 1 numbering (B1–B7); rev
 | Part | Zai GLM | Codex | Joe |
 |---|---|---|---|
 | A1 | SIGN | SIGN | |
-| A2 | (rev 2: re-sign) | (rev 2: re-sign) | |
+| A2 | SIGN | (rev 2: re-sign) | |
 | A3 | SIGN | SIGN | |
 | A4 | SIGN | SIGN | |
 | A5 | SIGN | SIGN | |
-| A6 | (rev 2: re-sign) | (rev 2: re-sign) | |
+| A6 | SIGN | (rev 2: re-sign) | |
 | A7 | SIGN | SIGN | |
-| A8 | (rev 2: re-sign) | (rev 2: re-sign) | |
-| A9 | (rev 2: re-sign) | (rev 2: re-sign) | |
+| A8 | SIGN | (rev 2: re-sign) | |
+| A9 | SIGN | (rev 2: re-sign) | |
 | A10 | SIGN | SIGN | |
-| B0 | | | |
-| B1 | | | |
-| B2 | | | |
-| B3 | | | |
-| B4 | | | |
-| B5 | | | |
-| B6 | | | |
-| B7 | | | |
-| B8 | | | |
-| B9 | | | |
+| B0 | SIGN | | |
+| B1 | SIGN | | |
+| B2 | SIGN | | |
+| B3 | SIGN | | |
+| B4 | SIGN | | |
+| B5 | SIGN | | |
+| B6 | SIGN | | |
+| B7 | SIGN | | |
+| B8 | SIGN | | |
+| B9 | SIGN | | |
 
 ## Zai GLM review
 
@@ -742,3 +742,118 @@ The proposed direction is repairable, but Part B as written is not sufficient
 to take a real task through accepted close with learned, outcome-sensitive
 selection at a checkable speed. Revise the objected entries and add the missing
 producer/consumer steps; this review authorizes no machine changes.
+
+## Zai GLM review (rev 2)
+
+**Reviewer model:** Zai GLM (zai-1), GLM-5.x.
+
+Scope: only the revised entries (A2, A6, A8, A9, B0–B9) of revision 1e3999dd,
+checked read-only against futon2 main and mathlib4. Every file:line citation
+below was opened by me; where I could not confirm something I say so.
+
+### Per-entry verdicts
+
+- **A2 (revised) — SIGN.** The honest withdrawal of the bell evidence (marked
+  "not retrieved here") is an improvement over the original. The new evidence
+  checks: both renewal-4 closes are refusals (verified in rev 1), and
+  `task_execution_evidence.clj:181-210` really is a check that rejects a
+  mismatched artifact claim (`:disagreement?` / `:unresolved` path) — the
+  separation of right-refusals from stoppers is therefore grounded in a real
+  line, not a hypothetical.
+- **A6 (revised) — SIGN.** The correction of my rev-1 echo ("selection
+  unchanged") is right and now honest: `policy.clj:358-374` (ticket-queue plan
+  feeding eligible targets) and `ticket_queue.clj:89` (`defn plan`) verify that
+  selection did change in that respect. The reframed defect — no accepted
+  increment, model paths unclosed — is the true one, and the ownership rule
+  ("the click delivers accepted work") is the correct tightening.
+- **A8 (revised) — SIGN.** codex-20's correction is real and the new text is
+  accurate: `cascade_problems.clj:39-47` does read target identities from the
+  registry, and `mission_hole_wants.clj:74-91` supplies wants/universes/locators
+  but leaves `:interpretation {:patterns {} :receipts {}}` and `:candidates []`
+  — I read both. The defect is correctly relocated from "tasks not read" to
+  "tasks read but never turned into candidates", and the rectification (authoring
+  workflow, not another reader) follows.
+- **A9 (revised) — SIGN.** The correction is verified: the bound law is
+  `σ(log E − F − γG)` (DarkTower PolicySelection, doc lines 8 and 28), and the
+  habit prior is part of the selection namespaces (`cascade_policy.clj:22`,
+  `valid-habit?`, `:habit` candidate form) — so a habit-chosen action is the
+  implemented model, not a bypass of it. The reframed defect (outcomes do not
+  discriminate; near-uniform C, declared B) is the provable one, and B6/B7
+  target it directly.
+- **B0 — SIGN.** Sharpened from rev 1 with the three-way separation and the
+  r4-2 example (12 manifest entries, `:known-typed-failure`, still not
+  accepted — all verified in rev 1). Done-when unchanged and checkable.
+- **B1 — SIGN.** A real improvement over the rev-1 keyword ledger: it
+  enumerates decision *sites in all forms* (literals, throws, false returns,
+  filters, caught errors) on the defined path from `scripts/wm_click.sh`
+  (which exists, `--force` and its shell refusals included) through the futon3c
+  boundary to close. Bounded by A4's anti-discovery rule. Done-when checkable.
+- **B2 — SIGN.** "None located" is not permission to weaken an invariant; each
+  change must name the surviving invariant, a passing legitimate case, and the
+  still-rejected invalid case; no test deletion, no workarounds, producer-side
+  fixes. This matches the workspace's workarounds-forbidden rule exactly and
+  improves on rev 1's "removals with tests changed accordingly".
+- **B3 — SIGN.** The root cause is correctly identified and verified:
+  `full_loop_runner.clj:1926-1928` is the repository artifact contract limiting
+  commits to the target repository, which is exactly what blocked r4-2. Both
+  remedies (multi-repo parcel, or decomposition with acceptance unchanged) are
+  real options, and "removing the artifact check does not count" is explicit.
+- **B4 — SIGN.** All cited anchors verify: `mission_registry.clj` substrate
+  reads, `data/wm-ticket-queue/queue.edn` exists,
+  `cascade_proposals.clj:136-174` really does decline repair targets
+  (`:repair-closure-observation-unavailable`), and
+  `cascade_sources.clj:106 check-file!` exists. The done-when — a previously
+  candidateless task and a front-queue repair both getting admissible
+  candidates, and at least one target with two meaningfully different first
+  actions — is checkable and feeds A9's sensitivity test.
+- **B5 — SIGN.** Timing data exists to start from: the narratives record phase
+  durations (r4-2 author-wait 194 222 ms; r4-1 selection 47 390 ms,
+  construction 10 417 ms). Joe-agreed budgets before B4 goes live is the right
+  order. Minor: cite the exact source file for the "345–410 s dispatch-to-build"
+  totals (see Missing).
+- **B6 — SIGN.** Every cited line verifies: `token_outcome.clj:54`
+  (measured-false vs missing-observation),
+  `run_ending_classification.clj:98-113` (attested-class ambiguity handling),
+  `d_predecessor_task_authority.clj:134` and
+  `token_belief_predecessor.clj:79` (both `:carry-domain-changed`, identity
+  check retained). The "refusal is not a measured failure" rule is the right
+  one.
+- **B7 — SIGN.** This fixes the main weakness I was prepared to object to.
+  Rev 1's B4 used holder labels and a `:decided-by :G` string as done-when;
+  rev 2 explicitly says those are not evidence, requires controlled
+  perturbation of C and B to move live scores as predicted, a competing-action
+  case to change the chosen action, and the E/F/G law and ticket-front rule to
+  remain intact. Joe's 55/35/5/5 stays fixed as preference; only its projection
+  is learned. The no-powerset rule addresses the fix list's no-op
+  counterexample. `learning_trial_ledger.clj` lacking a production reader is
+  consistent with what I see there.
+- **B8 — SIGN.** Serial clicks, classify→repair→verify→next, no repeated
+  deterministic failure, retry/idempotency handling, unfixable-same-day
+  blockers recorded honestly, and Joe agreeing the judging evidence before the
+  run. Checkable and honest about what can't be fixed in a day.
+- **B9 — SIGN.** Stronger than rev 1's B7: one real observed outcome, exactly
+  one update to the named B parameter, survival across reload/replay, and a
+  frozen-input with/without comparison in a discriminating case. Duplicate
+  replays and changed meanings excluded. Falsifiable and checkable.
+
+### Missing (rev 2; none block sign-off)
+
+1. **B1 completeness is still self-attested.** The done-when ("the finite
+   call-path inventory is covered") has no mechanical check. Same suggestion as
+   my rev 1, still unadopted: ship a check (test or spec) that fails when a
+   decision site on the defined path has no inventory row — the bad-case test
+   the workspace habit asks for. Not a condition of my sign-off, but Codex or
+   Joe may want it before B2 starts.
+2. **B5's totals need a citation.** "345–410 s from dispatch to build in
+   r4-1/r4-2" — I verified phase durations exist in the narratives, but not
+   these totals. Name the file and the arithmetic.
+3. **Freeze has no violation response.** claude-5 owns coordinating the freeze
+   across lanes, but the plan says nothing about what happens if a lane clicks
+   or commits anyway. One sentence: a violation is recorded, reported to Joe
+   and the signers, and the step affected re-runs.
+
+Verdict: **14 SIGN, 0 OBJECT** (A2, A6, A8, A9, B0–B9). Revision 2 corrects
+the overstated evidence in A6/A8/A9 honestly, and Part B is now ordered by
+dependency with checkable done-whens that do not accept labels as evidence.
+The three Missing items are improvements, not blockers. From my side the plan
+is ready for codex-20's re-sign-off of these entries and then Joe.
