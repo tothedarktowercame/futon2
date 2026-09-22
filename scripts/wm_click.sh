@@ -280,38 +280,55 @@ fi
 waited_since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 t0=$(date +%s)
 echo "waiting for cast seats and single-flight boundary (since $waited_since; max 30 min)"
-while :; do
-  if cast_report; then break; fi
-  if [ $(( $(date +%s) - t0 )) -gt 1800 ]; then
-    echo
-    cannot "casting wait" "30 minutes elapsed since $waited_since; seat/click state above is the terminal account"
-    echo "cannot launch (exit 3)"
-    exit 3
-  fi
-  sleep 20
-done
+clickid=""
+while [ -z "$clickid" ]; do
+  while :; do
+    if cast_report; then break; fi
+    if [ $(( $(date +%s) - t0 )) -gt 1800 ]; then
+      echo
+      cannot "casting wait" "30 minutes elapsed since $waited_since; seat/click state above is the terminal account"
+      echo "cannot launch (exit 3)"
+      exit 3
+    fi
+    sleep 20
+  done
 
-# ---------------------------------------------------------------- fire
-RUNID="$(date -u +%Y-%m-%d)-$(uuidgen 2>/dev/null || date +%s)"
-echo; echo "firing click, run-id $RUNID"
-payload=$(python3 - "$RUNID" "$AUTHOR" "$REVIEWER" "$REPAIR" "$ISSUING_CALLER" <<'PYJSON'
+  # ---------------------------------------------------------------- fire
+  RUNID="$(date -u +%Y-%m-%d)-$(uuidgen 2>/dev/null || date +%s)"
+  echo; echo "firing click, run-id $RUNID"
+  payload=$(python3 - "$RUNID" "$AUTHOR" "$REVIEWER" "$REPAIR" "$ISSUING_CALLER" <<'PYJSON'
 import json, sys
 print(json.dumps(dict(zip(
     ["run-id", "author", "reviewer", "repair-reviewer", "issuing-caller"],
     sys.argv[1:]), trigger="duree-click-on-demand")))
 PYJSON
 )
-resp=$(curl -s -m 60 -X POST "$BASE/api/alpha/wm/click" -H 'Content-Type: application/json' \
-  -d "$payload")
-echo "$resp"
-clickid=$(echo "$resp" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("click-id",""))' 2>/dev/null)
-[ -n "$clickid" ] || { echo "no click-id returned; not accepted"; exit 1; }
+  resp=$(curl -s -m 60 -X POST "$BASE/api/alpha/wm/click" -H 'Content-Type: application/json' \
+    -d "$payload")
+  echo "$resp"
+  # The server answers {:rejected :already-running :click-id <THE OTHER CLICK>}
+  # when another caller started a click between our wait and this POST
+  # (runner_service.clj click!). That id is not ours: go back to waiting.
+  rejected=$(echo "$resp" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("rejected") or "")' 2>/dev/null)
+  if [ -n "$rejected" ]; then
+    echo "launch not accepted ($rejected); another click holds the boundary -- waiting again"
+    sleep 20
+    continue
+  fi
+  clickid=$(echo "$resp" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("click-id",""))' 2>/dev/null)
+  [ -n "$clickid" ] || { echo "no click-id returned; not accepted"; exit 1; }
+done
+echo "tracking our click: $clickid"
 
 t0=$(date +%s)
 while :; do
   sleep 20
   s=$(curl -s -m 20 "$BASE/api/alpha/wm/click")
   running=$(echo "$s" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("running?"))' 2>/dev/null)
+  cur=$(echo "$s" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("click-id") or "")' 2>/dev/null)
+  if [ -n "$cur" ] && [ "$cur" != "$clickid" ]; then
+    echo "status now shows a different click ($cur); ours ($clickid) has finished"; break
+  fi
   phase=$(echo "$s" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("phase"))' 2>/dev/null)
   echo "[$(( $(date +%s) - t0 ))s] running=$running phase=$phase"
   [ "$running" = "False" ] && break
