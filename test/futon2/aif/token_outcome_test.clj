@@ -48,7 +48,10 @@
       (command repo "init" "-q")
       (let [mission (io/file repo "holes/missions/M-aif-policy-conditioned-eig.md")]
         (io/make-parents mission)
-        (spit mission (slurp "holes/missions/M-aif-policy-conditioned-eig.md")))
+        ;; Frozen at abde70b9, before the first renewal-4 click's commit
+        ;; aeb352f8 ticked the updater hole. Copying the live mission file made
+        ;; every "predicted, not observed" fixture depend on today's HEAD.
+        (spit mission (slurp "test/fixtures/M-aif-policy-conditioned-eig-pre-aeb352f8.md")))
       (command repo "add" ".")
       (command repo "-c" "user.name=Fixture" "-c" "user.email=fixture@example.invalid"
                "commit" "-qm" "mission before unrelated build")

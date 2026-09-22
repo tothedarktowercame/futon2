@@ -35,7 +35,7 @@
    {:target target :locators fixture-locators
     :universe (set (map q (keys fixture-locators)))
     :before-files {"holes/missions/M-aif-policy-conditioned-eig.md"
-                   (slurp "holes/missions/M-aif-policy-conditioned-eig.md")}}
+                   (slurp "test/fixtures/M-aif-policy-conditioned-eig-pre-aeb352f8.md")}}
    (fn [{:keys [inputs expected jobs root] :as env}]
      (task/produce! root inputs expected jobs)
      (let [signed (task/read-observations-v2 root expected jobs)

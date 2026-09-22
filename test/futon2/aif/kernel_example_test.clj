@@ -20,7 +20,7 @@
      {:action action :target want/target :locators locators
       :universe (conj (set (map want/qualify (keys locators))) [want/target :artifact])
       :before-files {"holes/missions/M-aif-policy-conditioned-eig.md"
-                     (slurp "holes/missions/M-aif-policy-conditioned-eig.md")}}
+                     (slurp "test/fixtures/M-aif-policy-conditioned-eig-pre-aeb352f8.md")}}
      (fn [{:keys [inputs expected jobs commit]}]
        (let [record (task/claim inputs)
              prediction (outcome/freeze-prediction (assoc decision :action action))
