@@ -118,6 +118,14 @@ candidates automatically, or that every click is fast.
     retry gets a new global id (`:416-425`), and prior commits are recognised as base
     (`task_execution_evidence.clj:83-176`). Bad-case tests against the real cohort code were
     added in futon2 f22e407d (3 tests; 33/179 passing). There was no src change.
+  - ⟨2⟩5 done 2026-09-22.
+    - Timing: `scripts/wm_click_timing.py` (futon2 53906859), read-only. For r4-2, wall 478 s =
+      agent wait 346 + machine 133. For click 3, 601 = 463 + 138. Of the machine time, about
+      120 s is time-step → selection.
+    - Load identity: `scripts/wm_load_identity.sh` (a23dd4db), built on
+      `load_identity/report`. After claude-5 reloaded `load-identity`, `eig-shadow`,
+      `interpretation-construction` and `run-narrative` from the canonical checkout, the
+      readout shows 42/42 click-path namespaces current, 0 unknown.
   - Note: the futon3c click boundary's grant budget (Joe's renewal documents) is Joe's own
     rationing and is not removed by this step.
 - **FAILURES:** —
