@@ -417,6 +417,15 @@ candidates automatically, or that every click is fast.
     - Repeated retention advances the original evidence date (`focus_receipt.clj:64`).
 
     Next: discovery of where target relations and focus completion are recorded, then fixes.
+  - Discovery in futon2 2e2f08f4 and da5a329b (zai-1): target relations live in the focus
+    corpus; a ticket's relation derives through its `Parent:` mission. Focus completion is
+    recorded nowhere. Repeated retention was fixed by claude-5 (9b0e74bf). The shared
+    relation producer is being built.
+  - Joe ruled (2026-09-22) on the completion gap: "focus on a task (mission, excursion,
+    ticket) would complete when that completes. Similarly for a subtask thereof." So the
+    completion consumer reads the task's own completion, at whatever grain the focus names.
+    Queued as the follow-up to the shared relation producer; it does not block ⟨1⟩3, whose
+    focus (WM) is not complete.
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
