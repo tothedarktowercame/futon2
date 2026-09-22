@@ -379,6 +379,10 @@ candidates automatically, or that every click is fast.
     false (bad case checked). The source declares `:horizon-steps 4`. The probe at T = 4 shows
     C1 reaching nothing and C2 reaching acceptance at step 4. Open item: `load-declared` does
     not lift a source's `:horizon-steps` into the tick (`war_machine.clj:6821`).
+  - Horizon lift done in futon2 1de6aadc. It takes the maximum over declaring sources and
+    records which ones declared. With none declared, the key is absent and T = 2 stays.
+    `check-file!` refuses a bad value. Tests pass, 11/41. claude-5 reloaded it. The tick now
+    reads T = 4 for this family.
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
