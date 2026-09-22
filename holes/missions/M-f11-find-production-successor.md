@@ -111,3 +111,20 @@ Exact replay is tested. This is a substantive acceptance seam, but it does not
 close either task above: the full committed 24-pattern run, persisted ordinary
 gate packet, Lean `find` discharge/amendment, and repair-024 successor judgment
 remain outstanding.
+
+### Fresh 24-pattern applied observation, 2026-09-22
+
+`holes/labs/M-f11-find-production-successor/run-applied-acceptance.sh` executes
+the genuine `find-snatch/-main` applied interface against futon3's committed
+Snatch library in an isolated temporary layout, so its fixed output path cannot
+rewrite the sibling repository. The retained result covers 24 patterns, 34
+rounds in six scenarios, all six F4 checks, and zero drift; its digest exactly
+matches the independently pinned fixture. `acceptance.edn` binds those counts,
+the library revision, and all three output digests.
+
+This closes the missing fresh runtime observation, but the ordinary-acceptance
+checkbox remains open: the mandated F11 negative-control suite currently
+rejects the amended Lean interface for the wrong reason because
+`f11_conformance_check.bb` still searches for the retired `def find ... :=
+sorry` signature. That stale gate must be repaired and rerun before completion
+is recorded. The separate repair-024 successor disposition is unchanged.

@@ -1,0 +1,8 @@
+g1/snatcher recall 2/2 acting=[:exchange-when-both-sides-gain :probe-before-committing] selected=[:ask-for-surplus-not-surrender :exchange-when-both-sides-gain :price-the-final-round-as-final :probe-before-committing]
+g1/sharer recall 2/2 acting=[:escalate-only-as-far-as-you-can-lose :probe-before-committing] selected=[:ask-for-surplus-not-surrender :escalate-only-as-far-as-you-can-lose :exchange-when-both-sides-gain :price-the-final-round-as-final :probe-before-committing]
+g1/cautious recall 2/2 acting=[:an-unmodelled-response-stops-the-line :probe-before-committing] selected=[:an-unmodelled-response-stops-the-line :ask-for-surplus-not-surrender :exchange-when-both-sides-gain :probe-before-committing]
+g4/snatcher recall 3/3 acting=[:consult-the-remedy-before-exiting :probe-before-committing :re-enter-after-observed-repair] selected=[:a-free-mark-is-always-worth-assigning :ask-for-surplus-not-surrender :consult-the-remedy-before-exiting :exchange-when-both-sides-gain :price-the-final-round-as-final :probe-before-committing :re-enter-after-observed-repair]
+g2/snatcher recall 3/3 acting=[:exchange-when-both-sides-gain :forced-play-needs-a-loss-floor :probe-before-committing] selected=[:ask-for-surplus-not-surrender :exchange-when-both-sides-gain :forced-play-needs-a-loss-floor :price-the-final-round-as-final :probe-before-committing]
+g5/sharer recall 2/2 acting=[:escalate-only-as-far-as-you-can-lose :probe-before-committing] selected=[:ask-for-surplus-not-surrender :escalate-only-as-far-as-you-can-lose :exchange-when-both-sides-gain :price-the-final-round-as-final :probe-before-committing :use-talk-to-make-a-testable-offer]
+F4 6/6; drift mismatches 0; wrote checks/find-snatch.edn
+find-snatch: PASS exit-convention=0-pass/1-fail

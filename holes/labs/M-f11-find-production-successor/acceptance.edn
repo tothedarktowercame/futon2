@@ -1,0 +1,20 @@
+{:schema :wm/f11-applied-acceptance-v1,
+ :mode :runtime-validation,
+ :interface :find-snatch/-main,
+ :repository
+ {:path "/home/joe/code/futon3/library/snatch",
+  :commit "e58576cec0f14c3da4667ed452d522c561487ee8",
+  :pattern-count 24},
+ :observation
+ {:scenario-count 6,
+  :round-count 34,
+  :f4-passes 6,
+  :drift-mismatches 0},
+ :artifacts
+ {:result-sha256
+  "c11673ea7164e90b10cc378ab6b2dfe14e545449d85e0dde70d5c2282e2430ce",
+  :stdout-sha256
+  "e132e20815dd2aff173684164f6cdc2e7c1be2ed168d8a91a7e8f0e4694da025",
+  :stderr-sha256
+  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+ :status :passed}
