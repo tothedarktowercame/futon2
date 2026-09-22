@@ -468,6 +468,20 @@ candidates automatically, or that every click is fast.
   - The B update is written only after a close is accepted, keyed by occurrence id, so a
     failed or interrupted close writes none. Persistence and consumption are shown live at
     ⟨1⟩8.
+- **PROGRESS.** Discovery in futon2 d845f59e (zai-1):
+  - measurement exists (`d_predecessor_task_authority/complete!` → `produce!` →
+    `signed-observations`, called at `full_loop_runner.clj:3700`); r4-2 measured nothing
+    because its close refused before any reviewed revision existed;
+  - attestation exists, and the close receipt's focus rows now use `classify-target`; on
+    historical closes the class is honestly unknown, because the decision's certificate is
+    absent;
+  - the accepted-increment predicate does not exist. `verify-close` checks the record's
+    integrity, not the work, which is why r4-2's failure close passed it;
+  - the B update does not exist: no production reader, and the contract is still
+    record-only.
+
+  Build order: the accepted-increment predicate, then the B update, then wiring measurement
+  and attestation into the reference close.
 - **FAILURES:** —
 
 ### ⟨1⟩5. One live click on the reference target is decided by G.
