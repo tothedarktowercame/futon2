@@ -4,6 +4,7 @@
   real loaders, the real qualifier (replicated from war_machine.clj:6145)
   and the real bounded scorer rank-cascade-actions. No stubs."
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.set :as set]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-observation-scoring :as cos]
@@ -335,3 +336,67 @@
                                    {:ticket-dir "/nonexistent"
                                     :findings-dir "data/wm-repair-obligations/findings"})]
       (is (= :finding-target (:kind (:derived-via c)))) (pr-str c))))
+
+;; codex-20 corrections on bf6ee6f3: cwd-independence, replay-evidence, family stop.
+(deftest relation-context-is-working-directory-independent
+  ;; The ticket/finding directories must resolve from ANY working directory
+  ;; (the serving JVM runs from futon3c). Spawn a clojure subprocess with a
+  ;; different cwd and assert the reference ticket still classifies :focus.
+  (let [f2-root (str (System/getProperty "user.home") "/code/futon2")
+        script (io/file (System/getProperty "java.io.tmpdir") "class_observation_scoring_cwd_probe.clj")]
+    (spit script
+          "(require '[futon2.aif.focus-receipt :as focus])\n"
+          )
+    (spit script
+          (str "(require '[futon2.aif.focus-receipt :as focus])\n"
+               "(let [inputs (focus/read-inputs)\n"
+               "      est (focus/discover inputs \"2026-09-22T17:31:44Z\" nil)\n"
+               "      ret (focus/discover inputs \"2026-09-30T00:00:00Z\"\n"
+               "                            {:focus (:focus est) :as-of \"2026-09-22T17:31:44Z\"})\n"
+               "      root (str (System/getProperty \"user.home\") \"/code/futon2\")\n"
+               "      c (focus/classify-target inputs ret \"2026-09-30T00:00:00Z\"\n"
+               "                               \"T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade\"\n"
+               "                               {:ticket-dir (str root \"/holes/tickets\")\n"
+               "                                :findings-dir (str root \"/data/wm-repair-obligations/findings\")})]\n"
+               "  (println :cwd (System/getProperty \"user.dir\"))\n"
+               "  (println :class (:class c) :kind (get-in c [:derived-via :kind])))\n"))
+    (let [f3c (str (System/getProperty "user.home") "/code/futon3c")
+          ;; -Spath emits repo-RELATIVE entries; anchoring each to f2-root
+          ;; lets the JVM run from futon3c on futon2's classpath.
+          cp (->> (str/split (str/trim (:out (clojure.java.shell/sh "clojure" "-Spath" :dir f2-root))) #":")
+                  (map #(if (.isAbsolute (io/file %)) % (str f2-root "/" %)))
+                  (str/join ":"))
+          _ (assert (seq cp) "classpath")
+          out (clojure.java.shell/sh "java" "-cp" cp "clojure.main"
+                                     (str (.getPath script))
+                                     :dir f3c)
+          lines (str/split-lines (:out out))]
+      (is (zero? (:exit out)) (str (:err out)))
+      (is (= f3c (first (keep #(second (re-matches #":cwd (.+)" %)) lines)))
+          "the probe really ran from futon3c")
+      (is (some #(re-find #":class :focus :kind :ticket-parent" %) lines)
+          (str "from futon3c cwd the ticket still classifies: " (pr-str lines))))))
+
+(deftest family-stops-when-any-acceptance-target-is-unresolved
+  ;; Records today's behaviour (Joe is deciding on it; this does not endorse
+  ;; it): one known (:focused) and one unresolved acceptance-reaching
+  ;; candidate -> the whole family refuses; the known candidate is NOT
+  ;; selected.
+  (let [ta "A" tz "T-unresolvable"
+        mk (fn [target]
+             (let [pat (cpol/token-interpretation :p {:guard {:needs #{[target :s]}
+                                                              :forbids #{[target :done]}}
+                                                    :produces #{[target :done]}})]
+               {:kind :cascade-candidate :id :C1 :target target
+                :precedence [(assoc pat :id :p :target target)]}))
+        q0 {#{[ta :s] [tz :s]} 1}
+        universe #{[ta :s] [ta :done] [tz :s] [tz :done]}
+        acceptance #{[ta :done] [tz :done]}
+        model (class-model {:universe universe :acceptance acceptance :horizon 1
+                            ;; the ticket target has no relation anywhere
+                            :target-class {ta :focused tz :unknown}})
+        ranked (rank q0 [(mk ta) (mk tz)] model 1 acceptance)]
+    (is (map? ranked) "the family scorer refuses rather than ranking")
+    (is (= :class-unknown-no-scalar-g (:kind ranked))
+        "the family-level refusal names the unresolved target's no-scalar kind")
+    (is (= tz (:target ranked)) "the refusal names the unresolved target")))

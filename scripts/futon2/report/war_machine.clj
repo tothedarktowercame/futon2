@@ -6289,12 +6289,22 @@
               ;; receipt attachment). :focus-as-of pins it for replay; no
               ;; consumer computes its own now.
               decision-as-of (or (:focus-as-of opts) (str (java.time.Instant/now)))
+              ;; codex-20 correction 2: establish the focus from evidence
+              ;; available AT the decision time -- the latest window whose
+              ;; valid-through is not after the decision -- so an earlier
+              ;; replay never receives a later focus as its "previous".
               focus-as-of (str (java.time.Instant/ofEpochMilli
-                                (reduce max (map #(inst-ms (java.time.Instant/parse (:valid-through %)))
-                                                  (:windows focus-inputs)))))
+                                (reduce max
+                                        (concat [0]
+                                                (for [w (:windows focus-inputs)
+                                                      :when (not (.isAfter (java.time.Instant/parse (:valid-through w))
+                                                                           (java.time.Instant/parse decision-as-of)))]
+                                                  (inst-ms (java.time.Instant/parse (:valid-through w))))))))
               focus-established (focus-receipt/discover focus-inputs focus-as-of nil)
               focus-info (if (= :unknown (:status focus-established))
-                           focus-established
+                           ;; unknown branch carries the CAPTURED decision
+                           ;; timestamp, not the historical focus one
+                           (assoc focus-established :as-of decision-as-of)
                            (focus-receipt/discover focus-inputs
                                                    decision-as-of
                                                    {:focus (:focus focus-established)
@@ -6308,8 +6318,14 @@
               ;; classify-target the close receipt uses, same focus context
               ;; (discovered or retained), ticket parents derived through the
               ;; recorded Parent line.
-              relation-context {:ticket-dir "holes/tickets"
-                                :findings-dir "data/wm-repair-obligations/findings"}
+              ;; codex-20 correction 1: anchor the evidence directories to
+              ;; the canonical futon2 repository root (the registry's own
+              ;; default-code-root convention: <home>/code + the futon2
+              ;; checkout the machinery runs from), never the JVM's working
+              ;; directory -- the serving JVM runs from futon3c.
+              f2-root (str mission-registry/default-code-root "/futon2")
+              relation-context {:ticket-dir (str f2-root "/holes/tickets")
+                                :findings-dir (str f2-root "/data/wm-repair-obligations/findings")}
               target-classifications
               (into {}
                     (for [p problems
