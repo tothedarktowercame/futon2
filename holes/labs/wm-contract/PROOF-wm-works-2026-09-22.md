@@ -190,7 +190,21 @@ candidates automatically, or that every click is fast.
   - r4-2: 90 proposals, 0 admission joins;
   - click 3: three candidates, all from routes declared by hand;
   - fix-5: 441 wants yielded none.
-- **FAILURES:** —
+- **PROGRESS.** Target survey by zai-1 (futon2 506790e4,
+  `runs/proof-steps/1-2-reference-target.md`) recommends the front repair ticket
+  T-repair-occ-444fb018…: it is eligible now, has two different first actions, and each is
+  feasible in one repository.
+- **FAILURES:**
+  - 2026-09-22, ⟨2⟩4 (claude-5). No recorded outcome evidence can tell the reference
+    candidates apart.
+    - `attempts.edn` holds one trial (a different pattern, success 1), and there are none for
+      the repair family.
+    - Of the 46 closes under `data/wm-full-loop-*`, only one records which pattern was
+      acted on.
+    - The machine has not run successfully often enough to have an outcome history per
+      action.
+    - Under execution rule 2 the proof stops here, and Joe decides.
+
 
 ### ⟨1⟩3. On the reference input, evaluated read-only, the full selection law chooses a unique action, and G changes that choice.
 
