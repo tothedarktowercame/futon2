@@ -10,8 +10,10 @@
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
+;; This fixture describes the original updater-only attempt, paired with the
+;; pre-aeb352f8 mission below. Later live source alternatives are not that attempt.
 (def declaration
-  (edn/read-string (slurp "resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn")))
+  (edn/read-string (slurp (io/resource "fixtures/eig-source-remaining/updater-only-declaration.edn"))))
 (def target (:target declaration))
 (defn qualify [t] [target t])
 (def updater (qualify :hole/h6378c65a4012))
