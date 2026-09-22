@@ -57,10 +57,19 @@
   - `8f97757b`: withdrawal of the two-layer calibration candidate;
   - ticket `T-repair-occ-444fb018…`: now at the front of the queue.
 
-  For each: keep or revert. The decisions are recorded here before ⟨1⟩1. If the ticket is
-  kept, it is not resolved from outside: under Joe's rule, repair is ordinary selection at
-  the front of the queue, so it becomes a candidate target for ⟨1⟩2. It does not stop
-  ⟨1⟩1's click.
+  For each: keep or revert. The decisions are recorded here before ⟨1⟩1.
+
+  For the ticket, Joe's ruling applies (bbae7593, 2026-09-22, verbatim): "what happens if
+  something (of whatever shape) goes into the queue and isn't resolved. That, I think, is a
+  stop-the-line failure (not a looping machine) requiring repair from outside." The same
+  commit records claude-3's reading: "Clicks refuse until the ticket is resolved or
+  reworked from outside." The ticket has had no attempt yet.
+
+  Joe decides one of these, recorded here:
+  - (a) the ticket is an ordinary front candidate for ⟨1⟩2, and stop-the-line applies only
+    after an attempt on it closes unresolved;
+  - (b) it is resolved from outside before ⟨1⟩1;
+  - (c) it is reverted.
 - A4. Joe names any of the 13 preflight tripwires that protect an invariant a click would
   corrupt, for example by writing to the wrong store. Only those may still block. All others
   report. Recorded here before ⟨1⟩1.
@@ -81,7 +90,8 @@
     wm-reviewer lanes) and are always registered. CHECK: preflight finds them without
     intervention.
   - ⟨2⟩2. Preflight reports and does not refuse. Its 13 tripwires and seat checks print their
-    findings, and the click fires unless Agency is down. CHECK: a click fires while a tripwire
+    findings, and the click fires unless Agency is down or a tripwire Joe named under A4
+    trips. CHECK: a click fires while a tripwire
     reports.
     The finding-to-ticket path is unchanged: a finding still opens a ticket, and the ticket
     enters the ordinary queue. It never stops the click.
@@ -140,8 +150,10 @@
     (the fix list's no-op counterexample).
   - `:unknown` and missing evidence are handled as the mapping states, never counted as a
     class.
-  - The mapping is applied to the reference candidates' *current* predicted observations, and
-    the values are recorded.
+  - The mapping is applied to the reference candidates' predicted observations from the
+    *declared-prior* rollout (`PolicyRollout.predictedOutcome` with the declared, unlearned
+    B), so this check runs before ⟨1⟩5. The values are recorded. They are marked superseded
+    when ⟨1⟩5's learned B lands; ⟨1⟩5 records the new ones.
 - **PROOF.** ⟨2⟩1. The mapping reuses improve-8's classification kernel, run on predicted
   rather than attested observations.
 - **FAILURES:** —
@@ -157,7 +169,8 @@
     sent ⟨1⟩6 back.)
   - The values are recorded.
 - **PROOF.**
-  - ⟨2⟩1. Amend the learning-trial contract. `data/wm-learning-trials/attempts.edn` declares
+  - ⟨2⟩1. Amend the learning-trial contract by adding a new version of the pinned entry, not
+    by editing it in place. `data/wm-learning-trials/attempts.edn` declares
     `:mode :record-only`, `:consumption :not-authorized`, and `:does-not-establish` a
     production parameter update. This step changes that declaration, so that B may be read
     in production. Joe's signature on this plan is the authorisation, recorded here.
@@ -173,6 +186,14 @@
   difference is large enough that `σ(log E − F − γG)` ranks the candidates differently from
   habit alone. The tie-break `:action-name-ascending` (`cascade_selection.clj:126-129`) is not
   invoked.
+- **Also recorded at this step:** the other terms of `σ(log E − F − γG)` on the reference field,
+  each with its value and source:
+  - E, the habit prior;
+  - F, the variational free energy of each policy from past evidence;
+  - γ, the precision.
+
+  If F or E outweighs the G difference, the failure is logged here, and the work at this step
+  is to trace that term to the data it came from. This step owns E, F and γ.
 - **Known failures carried in:**
   - r4-1: G 9.70476 vs 9.70602, decided by habit;
   - click 3: G identical at 9.704307, decided by the tie-break.
