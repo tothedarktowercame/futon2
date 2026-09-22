@@ -482,6 +482,13 @@ candidates automatically, or that every click is fast.
 
   Build order: the accepted-increment predicate, then the B update, then wiring measurement
   and attestation into the reference close.
+  - The accepted-increment predicate is built: futon2 b8bc1d7c,
+    `futon2.aif.accepted-increment/accepted-increment`. It requires all of a fresh reviewed
+    binding, the candidate's declared produced tokens observed true, and the target's own
+    acceptance observed true; a target without a mechanical acceptance gives
+    `:no-acceptance-declared`. Tested on the real closes: r4-2 fails on the binding (no
+    reviewed revision), r4-1 fails because its binding does not corroborate. `verify-close`
+    is untouched. claude-5 reloaded it.
 - **FAILURES:** —
 
 ### ⟨1⟩5. One live click on the reference target is decided by G.
