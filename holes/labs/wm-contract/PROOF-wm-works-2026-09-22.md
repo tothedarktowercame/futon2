@@ -541,6 +541,15 @@ candidates automatically, or that every click is fast.
 - **If the live input does not discriminate** (for example, the queue has changed), that is
   recorded under FAILURES as an ordinary click. The step then waits for a later click whose
   own receipts meet the check. Nothing is pinned or tuned to force one.
+- **PROGRESS.** Pre-flight by zai-1, read-only in the serving JVM (futon2 bb45f0e8):
+  the queue holds exactly the reference ticket at its front, unchanged since the freeze; both
+  candidates are admitted with every locator resolving at HEAD; the ticket classifies
+  `:focus` by its parent on a retained WM focus; G(C2) = 0.5978 and G(C1) = 2.9957, a unique
+  maximum at C2 while `log E − F` alone still ties exactly. Nothing was adjusted to match the
+  freeze.
+  - Cast: `wm-repair-reviewer` and `codex-24` are off the roster, so claude-5 cast
+    `wm-author` / `wm-reviewer` with `codex-13` as repair reviewer rather than have the
+    script wait 30 minutes for an absent seat.
 - **FAILURES:** —
 
 ### ⟨1⟩6. The chosen work reaches an accepted close.
