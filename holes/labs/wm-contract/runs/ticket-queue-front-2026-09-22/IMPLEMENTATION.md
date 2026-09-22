@@ -76,4 +76,13 @@ clojure -M:test -m cognitect.test-runner -n futon2.aif.selection-certificate-tes
 
 Results respectively: 8/43, 8/15, 16/408, 13/94, 5/51, 3/12, 8/108 tests/assertions, all passing. The certificate namespace's one slow Lean compiler test was explicitly excluded; no Lean source/math changed. No full-loop runner test was added or run: no runner source changed, and the actual report-to-selector-to-gate integration is tested in this namespace. Owner canonical click validation remains separate from this slice.
 
-`clj-kondo` on all six changed/new Clojure files: 0 errors, 0 warnings (one pre-existing informational `str` message in war_machine). `check-parens` on those files and the queue declaration: OK. `git diff --check` and staged equivalent: clean. Raw outputs are retained alongside this note. A scoped registry warrant will be retained in the follow-up evidence commit; registry evidence is the only requested evidence-store write, never a live task/model store mutation.
+`clj-kondo` on all six changed/new Clojure files: 0 errors, 0 warnings (one pre-existing informational `str` message in war_machine). `check-parens` on those files and the queue declaration: OK. `git diff --check` and staged equivalent: clean. Raw outputs are retained alongside this note. Scoped warrant: `test-registry-ab1e1ec26d7cd6774cda4c0e45f0d09e962ede6b97f38875ef3bbbcfebf30297`, run at implementation commit `978c5067`, 8 tests / 43 assertions, 0 failures/errors, exit 0, postcheck matched. Fresh `test-registry check` returned `:warrant? true`. The exact configuration, result and check receipt are retained here. Registry evidence is the only requested evidence-store write, never a live task/model store mutation.
+
+Registry commands ran in a standalone CLI process from `/home/joe/code/futon3c` (no source edits there):
+
+```sh
+clojure -M -m futon3c.test-registry run /tmp/ticket-queue-registry.edn
+clojure -M -m futon3c.test-registry check /tmp/ticket-queue-registry-check.edn
+```
+
+The warrant records the isolated worktree environment, not canonical/main; the owner should use the registry's environment check when merging. The detached baseline worktree was returned clean after retaining the output.
