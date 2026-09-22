@@ -313,7 +313,15 @@ candidates automatically, or that every click is fast.
     qualifier, C1's one-step belief adds `[T :repair/verified-dated-recheck]` and C2's adds
     `[T :repair/restored-held-out-split]`, so the predictions differ. Paths that bypass the
     joint selector stay bare, and those are not the live path.
-- **FAILURES:** —
+- **FAILURES:**
+  - 2026-09-22, ⟨2⟩2 (zai-1 discovery d1c46758; claude-5). On the reference input the two
+    candidates are symmetric in everything the scorer reads: the same run-ending class, the
+    same coverage, θ = 1 (no recorded rates), no habit history. The live token C is also
+    flat between them. The one lawful difference is structural: C2's acceptance leaves
+    outcomes unmeasured, and C1's does not. Separating them needs a preference value for an
+    explicit `:unknown` outcome, which only Joe can set. Proof stops under rule 2.
+    - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
+      as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
 ### ⟨1⟩4. The producers the close and the update need exist before the live click.
 
