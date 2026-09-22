@@ -301,6 +301,22 @@ candidates automatically, or that every click is fast.
   - ⟨2⟩4. The full score is computed as described in the CHECK.
   - If lawfully derived terms do not discriminate on this input, the proof stops under
     execution rule 2. Valid preferences and evidence are never tuned.
+- **PROVED 2026-09-22** under Joe's amendment, on the frozen reference input, read-only
+  through the serving JVM (futon2 20082379, `runs/proof-steps/1-3-check.md`; arithmetic
+  checked by claude-5).
+  - The ticket classifies `:focus` by its parent mission, on a retained WM focus.
+  - T = 4, declared by the source. Steps 1–3 contribute exactly 0; the class KL is at step 4.
+  - G(C2) = ln(1/0.55) = 0.5978, G(C1) = ln 20 = 2.9957. Joe's 55 against 5 is what separates
+    them.
+  - E is a cold-start uniform 1.0 for both. F is recorded absent with a reason, not 0. γ = 1.
+  - The summed action marginal over first actions is C2 0.9167 / C1 0.0833: a unique maximum
+    at C2.
+  - `log E − F` alone is an exact 0.5/0.5 tie and chooses nothing; only the name-order
+    tie-break resolves it. G turns that coin flip into a decision, which is Joe's amendment.
+  - Recorded honestly: name order would also pick C2, since "aif/…" sorts before
+    "apparatus/…", so G agrees with the coin flip rather than overturning it. The wiring was
+    replicated by hand around the real contracted functions; the tick itself is exercised at
+    ⟨1⟩5.
 - **Known failures carried in:**
   - r4-1: G 9.70476 vs 9.70602, decided by habit;
   - click 3: G identical at 9.704307, decided by name order.
