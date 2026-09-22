@@ -452,6 +452,80 @@
           "the next cohort attempt is admitted but retains a unique ordinal")
       (is (= 1 (:attempt-count (cohort/ledger prereg-path root)))))))
 
+;; PROOF-wm-works ⟨1⟩1 ⟨2⟩4: attempt lifecycle bad cases, against the real
+;; cohort code and the real preregistration (no stubs).
+
+(deftest append-to-a-closed-attempt-is-rejected
+  ;; (b): a closed attempt is final. Appending any further checkpoint --
+  ;; including a second close -- must throw, and the attempt's event files
+  ;; must be unchanged afterwards.
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        attempt (:attempt/id (open! root "clock/closed-final"))
+        _ (append-required! root attempt)
+        close (term {:outcome :agent-unavailable :grounded? false
+                     :artifact-only? false :duration-ms 1
+                     :resource-use {:agent-turns 0}})
+        _ (cohort/close-attempt! prereg-path root attempt close)
+        events-before (count (.listFiles (io/file root
+                                                   (name (:cohort/id (cohort/read-edn prereg-path)))
+                                                   attempt)))]
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"already closed"
+                          (cohort/append-checkpoint!
+                           prereg-path root attempt :build
+                           {:sorry {:kind :test-build}})))
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"already closed"
+                          (cohort/close-attempt! prereg-path root attempt close)))
+    (is (= events-before
+           (count (.listFiles (io/file root
+                                       (name (:cohort/id (cohort/read-edn prereg-path)))
+                                       attempt))))
+        "a rejected append leaves the closed dossier byte-identical in file count")))
+
+(deftest resume-appends-under-the-same-open-attempt-id
+  ;; (a): an interrupted attempt that is still open (no 007-closed.edn)
+  ;; resumes under the SAME attempt id: further checkpoints append with
+  ;; increasing sequence numbers.
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        attempt (:attempt/id (open! root "clock/resume-me"))
+        _ (append-required! root attempt) ; interrupted here: no close
+        resumed (cohort/append-checkpoint!
+                 prereg-path root attempt :adjudication
+                 {:sorry {:kind :test-resumed-adjudication}})]
+    (is (= attempt (:attempt/id resumed))
+        "resumption keeps the attempt id")
+    (is (= 7 (:event/sequence resumed))
+        "the resumed checkpoint continues the sequence")))
+
+(deftest retry-after-an-abandoned-attempt-uses-a-new-id
+  ;; (c)+(d): a retry starts a NEW attempt id; the abandoned attempt keeps
+  ;; its events (never rewritten) and is never counted as accepted work
+  ;; (no close, no outcome in the ledger).
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        abandoned (:attempt/id (open! root "clock/abandoned"))
+        _ (append-required! root abandoned) ; produced work, then interrupted
+        events-before (sort (.listFiles (io/file root
+                                                  (name (:cohort/id (cohort/read-edn prereg-path)))
+                                                  abandoned)))
+        retry (:attempt/id (open! root "clock/retry"))]
+    (is (not= abandoned retry) "the retry gets a new attempt id")
+    ;; The abandoned attempt's dossier is untouched by the retry:
+    (is (= events-before
+           (sort (.listFiles (io/file root
+                                      (name (:cohort/id (cohort/read-edn prereg-path)))
+                                      abandoned)))))
+    ;; Abandoned work is not accepted work: no close event, no outcome.
+    (let [events (cohort/attempt-events
+                  (io/file root (name (:cohort/id (cohort/read-edn prereg-path))) abandoned))]
+      (is (not (some #(= :closed (:checkpoint/type %)) events))
+          "the abandoned attempt has no close")
+      (is (= nil (:outcome (cohort/attempt-summary
+                            (io/file root (name (:cohort/id (cohort/read-edn prereg-path)))
+                                     abandoned))))
+          "no outcome is attributed to the abandoned attempt"))))
+
 (deftest fresh-ledger-renders-without-legacy-rows
   (let [root (tmp-root)
         value (cohort/ledger prereg-path root)
