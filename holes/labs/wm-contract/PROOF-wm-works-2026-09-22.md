@@ -204,15 +204,188 @@ the update that the next selection consumes.
 
 | Step | Zai GLM | Codex | Joe |
 |---|---|---|---|
-| Execution rules | | | |
-| THEOREM / ASSUME | | | |
-| ⟨1⟩1 | | | |
-| ⟨1⟩2 | | | |
-| ⟨1⟩3 | | | |
-| ⟨1⟩4 | | | |
-| ⟨1⟩5 | | | |
-| ⟨1⟩6 | | | |
-| ⟨1⟩7 | | | |
-| ⟨1⟩8 | | | |
-| ⟨1⟩9 | | | |
-| ⟨1⟩10 | | | |
+| Execution rules | SIGN | | |
+| THEOREM / ASSUME | SIGN | | |
+| ⟨1⟩1 | SIGN | | |
+| ⟨1⟩2 | SIGN | | |
+| ⟨1⟩3 | SIGN | | |
+| ⟨1⟩4 | OBJECT | | |
+| ⟨1⟩5 | SIGN | | |
+| ⟨1⟩6 | SIGN | | |
+| ⟨1⟩7 | SIGN | | |
+| ⟨1⟩8 | SIGN | | |
+| ⟨1⟩9 | SIGN | | |
+| ⟨1⟩10 | SIGN | | |
+
+## Zai GLM review
+
+**Reviewer model:** Zai GLM (zai-1), GLM-5.x. Adversarial standard, as in my
+580dd866 review of the repair plan: each item signed only after a stated
+attempt to break it against the code, records and click histories.
+
+Verification base (read-only): `machine-contracts/machine-contracts.json`
+(16 contracts / 36 declarations — both counts reproduce exactly),
+`scripts/wm_click.sh`, `cascade_selection.clj:126-129`, the three STAGES
+files, `data/wm-learning-trials/attempts.edn`, `data/wm-ticket-queue/queue.edn`,
+commits 6d45e8b7 / d1e9e96b / 8f97757b.
+
+### Execution rules — SIGN
+
+Attack: rule 3 ("merged / tests green / receipt written do not prove a step")
+could be read as *requiring* a new verification apparatus per step — red tape.
+It survives: every CHECK named in ⟨1⟩1–⟨1⟩10 is a read of an artifact a click
+already produces (receipt, close file, ledger) or a recorded figure; none adds
+a gate. One note for rule 4 (failure logs never deleted): keep them in this
+file or a sibling markdown, not a new store.
+
+### THEOREM / ASSUME — SIGN
+
+Attack on A1's counts: I recounted the bundle — 16 contracts, 36 declarations
+in the `declarations` arrays. Both exact. A2 defers B₀ to Joe's signature:
+fine. A3 carries my freeze findings (d1e9e96b, 8f97757b, the front ticket)
+with keep-or-revert to Joe — carried in. One ordering hazard from A3 is in
+Missing item 2.
+
+### ⟨1⟩1 — SIGN, one wording fix
+
+Attack: "no manual steps between the command and the close" is ambiguous —
+the author and reviewer agents take multiple turns between them; if "manual
+steps" included agent turns, the check can never pass. It must mean *no human
+intervention and no `--force`*, with agent turns allowed. Say so. The
+machine-compute / agent-wait split is carried in (my 580dd866 finding). ⟨2⟩2's
+"preflight reports and does not refuse" correctly implements Joe's rule that
+checks report and do not block — but see Missing item 5 on which tripwires, if
+any, still protect an invariant.
+
+### ⟨1⟩2 — SIGN, one decision owed
+
+Attack: the check could be satisfied by an easy hand-picked target. It
+survives: the target must come from the registry or the ticket queue, not a
+hand-declared route (click 3's failure mode is named), and the candidates must
+have different first actions and resolvable locators. Feasibility as a
+property of construction, not a new gate — my finding, carried in correctly.
+Owed before build: ⟨2⟩1 says "the step states who writes" the interpretation
+(offline agent vs click-time author) — that decision changes the whole shape
+of the workflow and is not yet made. Decide it before implementation, not
+during.
+
+### ⟨1⟩3 — SIGN
+
+Attack: "receipts name the contracted functions" is close to the label-as-
+evidence trap I objected to in the repair plan's rev 1. It survives here
+because ⟨1⟩6 and ⟨1⟩7 check *values* from these functions, not names; ⟨1⟩3 is
+provenance, not proof of discrimination. Adequate as written.
+
+### ⟨1⟩4 — OBJECT
+
+Two attacks land:
+
+1. **"Predicted outcome distributions that are not equal" is too weak.** Any
+   epsilon difference passes; ⟨1⟩6 then needs a G gap large enough to outrank
+   habit, and with epsilon-level separation it will fail — sending work back
+   to ⟨1⟩4, which the no-back-loop rule forbids. Strengthen the criterion the
+   way ⟨1⟩5 already does: separation must exceed the recorded habit difference
+   between the candidates (or name a Joe-agreed margin).
+2. **The existing learning contract disclaims this step's purpose.** I read
+   `data/wm-learning-trials/attempts.edn`: the recorded trial's contract is
+   `:mode :record-only`, `:consumption :not-authorized`, and explicitly
+   `:does-not-establish #{:individual-pattern-firing :pattern-causality
+   :production-parameter-update}`. A builder implementing ⟨2⟩1 (production
+   reader of the ledger) will hit a standing, signed disclaimer that forbids
+   using this data for production B. The step must name that contract
+   amendment (record-only → production update rule, with Joe's sign-off) as
+   part of the work; otherwise the check passes only by violating a declared
+   contract — exactly the class of defect Part A confesses.
+
+### ⟨1⟩5 — SIGN
+
+Attack: the prospective-mapping design (how `:unknown` is treated,
+normalisation) is unspecified, so two builders could produce different C's.
+Survives: the check constrains the *outcome* (expected log-preference
+separation exceeding habit difference) and holds Joe's 55/35/5/5 fixed, and
+the no-powerset rule blocks the known no-op. The design freedom is real but
+the criterion is not gameable by it.
+
+### ⟨1⟩6 — SIGN
+
+My tie-break finding (580dd866 Missing 1) is carried in by name and line, and
+the check requires the tie-break NOT to be invoked. Attack: "ranks differently
+from habit alone" could pass via a tie-break flip on an irrelevant
+perturbation — but the check is on the reference field's recorded G values vs
+habit, not on perturbations, so it holds. Survived.
+
+### ⟨1⟩7 — SIGN, one runnability fix
+
+Attack: "the live JVM's loaded source matches B₀ plus the merged steps" is
+not runnable as written — a person cannot see pass/fail without a command.
+Fix: name the command (compare loaded-resource hashes against the canonical
+checkout at the recorded commits, or a cold restart from that checkout before
+the click). Amendment, not objection; everything else (receipts naming
+⟨1⟩3–⟨1⟩6's functions, no tie-break) is checkable.
+
+### ⟨1⟩8 — SIGN
+
+Attack: the check demands an accepted close but says nothing about mid-build
+death — timeouts, partial commits, resume, retries counting abandoned work as
+accepted. The old repair plan's B8 specified this; the proof plan dropped it.
+The FAILURES log records such an event but prescribes no behavior. See
+Missing item 3. The check itself is sound and is the first plan line that
+makes "accepted increment" the criterion rather than a narration.
+
+### ⟨1⟩9 — SIGN
+
+Attack: "true or false and not `:missing`" could be satisfied by a measurement
+that always reads the checkbox, not the work. Survives: the kernel's
+attestation (`run_ending_classification.clj:98-113`) and the receipt/kernel
+agreement requirement are in the check, and click 1 showed real
+after-build measurement is possible on a grounded close.
+
+### ⟨1⟩10 — SIGN
+
+Attack: "the next click's receipts show it consumed the updated B" could pass
+if the next click coincidentally chose the same action. Survives: the frozen
+reference field recompute (with/without the update, predicted outcome changes
+as the update rule says) is the discriminating part; the next-click receipt is
+corroboration. Exactly-once, reload survival, and the carry rules are carried
+in.
+
+### 580dd866 findings: carried in?
+
+- Tie-break → ⟨1⟩6/⟨1⟩7, by name and line. Carried.
+- Agent-wait vs compute split → ⟨1⟩1 CHECK. Carried (as recording; the old
+  budget-agreement step is gone — I take that as Joe's red-tape ruling).
+- Feasibility not a gate → ⟨1⟩2 ⟨2⟩3. Carried.
+- Freeze decisions → ASSUME A3. Carried (ordering hazard in Missing 2).
+- Guard→finding→ticket coupling → **NOT carried.** If preflight stops
+  refusing (⟨1⟩1 ⟨2⟩2), does the finding path that opened
+  T-repair-occ-444fb018 still fire? Unaddressed. Missing item 4.
+- Who authors interpretations → named at ⟨1⟩2 ⟨2⟩1 but still undecided.
+  Missing item 1.
+
+### Missing
+
+1. **⟨1⟩2 ⟨2⟩1: decide the interpretation author** (offline authoring agent
+   vs click-time author) before implementation begins.
+2. **A3 ordering hazard:** if Joe *keeps* the front repair ticket
+   T-repair-occ-444fb018, it is stop-the-line and has no cascade source, so
+   ⟨1⟩1's click fails before the plan starts. Joe's keep/revert must either
+   revert it, resolve it from outside, or feed it to ⟨1⟩2's construction —
+   decided before ⟨1⟩1, not at it.
+3. **⟨1⟩8 has no failure behavior for mid-build death** (timeout, partial
+   commit, resume; retries must not double-count or accept abandoned work).
+   Add it to ⟨1⟩8 or the execution rules.
+4. **Preflight de-blocking vs the finding path:** state whether tripwire
+   findings still open repair tickets when they no longer block; if not, the
+   machine loses its only proven path from defect to ticket.
+5. **Which tripwires, if any, still block.** "The click fires unless Agency
+   is down" removes all blocking; if any of the 13 tripwires protects an
+   invariant that firing would corrupt (authority, store locks), Joe should
+   name it rather than discover it by corruption.
+6. **⟨1⟩4's separation margin and contract amendment** (the OBJECT above).
+7. **⟨1⟩7's loaded-source check needs its command named.**
+
+Verdict: **11 SIGN, 1 OBJECT (⟨1⟩4)**. The structure is right: strict order,
+no back loops, checks on artifacts a click already produces, and the theorem's
+four clauses map one-to-one onto ⟨1⟩2/⟨1⟩7, ⟨1⟩4–⟨1⟩6, ⟨1⟩8 and ⟨1⟩9–⟨1⟩10.
+The single objection is a required strengthening, not a rejection. This
+review authorizes no machine changes.
