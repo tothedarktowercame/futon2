@@ -274,16 +274,16 @@ candidates automatically, or that every click is fast.
 
 | Step | Zai GLM | Codex | Joe |
 |---|---|---|---|
-| Execution rules | SIGN | | |
-| THEOREM / ASSUME | SIGN | | |
-| ⟨1⟩1 | SIGN | | |
-| ⟨1⟩2 | SIGN | | |
-| ⟨1⟩3 | SIGN | | |
-| ⟨1⟩4 | SIGN | | |
-| ⟨1⟩5 | SIGN | | |
-| ⟨1⟩6 | SIGN | | |
-| ⟨1⟩7 | SIGN | | |
-| ⟨1⟩8 | SIGN | | |
+| Execution rules | SIGN | SIGN | |
+| THEOREM / ASSUME | SIGN | SIGN | |
+| ⟨1⟩1 | SIGN | SIGN | |
+| ⟨1⟩2 | SIGN | OBJECT | |
+| ⟨1⟩3 | SIGN | OBJECT | |
+| ⟨1⟩4 | SIGN | OBJECT | |
+| ⟨1⟩5 | SIGN | OBJECT | |
+| ⟨1⟩6 | SIGN | SIGN | |
+| ⟨1⟩7 | SIGN | SIGN | |
+| ⟨1⟩8 | SIGN | SIGN | |
 
 The review sections below refer to earlier revisions (1–2) and their step numbering.
 
@@ -1128,3 +1128,279 @@ repairs live inside steps, the G-matters check is a real counterfactual, every
 carried-in failure mode from clicks 1–3 is named at the step it would bite,
 and the red-tape failure mode is closed by rule 5. The four Missing items are
 wording and enforcement notes. This review authorizes no machine changes.
+
+
+## Codex review (rev 3)
+
+**Reviewer: codex-20; model: GPT-6 (gpt-6-astra).**
+
+**Verdict: 6 SIGN, 4 OBJECT on the 10 revision-3 table entries.** Reviewed
+`b0314ca8` (restructure `a2b24c38`, Zai review `733dbd31`, and its applied
+amendments). The four objections are ⟨1⟩2–⟨1⟩5. This is a substantially
+better dependency structure, but the current CHECKs still permit failures of
+its claimed implications. No machine changes, clicks, reloads, tests or
+learning writes were made for this review. I re-read the relevant selection,
+queue, checkpoint and learning source and the actual r4-1/r4-2 close records;
+local arithmetic was used to check the counterexamples.
+
+### Disposition of my earlier objections
+
+| Earlier finding (289e98e2 / ec4e3701) | Revision-3 disposition |
+|---|---|
+| Field first; distinguish replay from execution | **Mostly answered.** Inputs now precede evaluation and the reference work executes once. New step 2's non-reference execution is not guaranteed to be selectable; see below. |
+| Bundle correspondence is not composition; C is stipulated; demonstration scope | **Answered.** A1 and the theorem say this explicitly. |
+| Pause/keep-revert and named tripwire blockers | **Withdrawn, remain withdrawn.** Joe's ruling is incorporated. No further decision or sign-off is requested on them. |
+| Dangling Part C authority | **Operationally answered.** Management rules are quoted directly as authority. The introductory reference to a nonexistent Part C remains an editorial cleanup only, not an objection. |
+| Command/click/attempt/new-close identity | **Answered in the specification.** Step 2 requires the identity join. |
+| Open interruption versus final closed attempt | **Answered in the specification.** Resume applies only to open attempts; retries receive a new id and recognize existing commits. |
+| Wait/compute/overlap accounting | **Answered in the specification.** Named intervals and no time-budget gate. |
+| Finding-to-ticket coupling | **Answered in the CHECK.** One named finding must be followed through publication and queue identity; merely printing a trip no longer suffices. |
+| Offline interpretation author, loader, derivation, feasibility and eligible target | **Answered.** Step 1 names the author, actual loader, substantive derivation and queue stratum; feasibility stays a property, not a new gate. |
+| Compatible historical outcome evidence and no manufactured differences | **Answered.** Step 1 identifies evidence and permits an honest inability to proceed. It does not promise lawful data must discriminate. |
+| Aggregate/entity/token carriers and consumed q0 | **Answered as implementation work inside step 3.** Recompute from pinned inputs and show the rollout/scorer consumes that q0. |
+| Prospective predictions versus actual attestations; unknown mass; risk carrier | **Answered as implementation work inside step 3.** These definitions must exist before its top-level CHECK can pass. No fabricated close attestations are authorized. |
+| Prior/learned-B ordering and insufficient expected-log-C inequality | **Answered structurally.** Scoring and its inputs now belong to one step and the invalid inequality is gone. A different loophole remains in its alternative margin condition. |
+| Immutable trials, versioned consumer/pin, cutoff, parameter placement, persistence/carry | **Answered as named work in step 3.** Old trial events remain immutable, the pin changes with the new contract, and the frozen cutoff excludes later events. |
+| F confounding, action marginal and tie-rule field | **Mostly answered.** The principal counterfactual uses log E − F, policies are summed by action, and unique maximum replaces absence of the tie-rule field. The alternative CHECK is weaker than the principal one. |
+| Loaded-source evidence, missing coverage | **Answered as specified evidence.** load-identity replaces invented reflection/reload metadata. Unknown coverage cannot count as a matching captured digest. Its existing source-sampling limits remain. |
+| Producers available before execution; accepted increment distinct from verify-close | **Answered in placement and predicate.** Step 4 now owns the producers. Its read-only/persistence CHECK and update-before-close ordering still need definition. |
+| Actual classifier recomputation and measured false versus missing | **Answered.** Step 7 retains the substantive CHECK I signed. |
+| Exactly-once update, frozen non-B comparison, next actual consumption | **Answered.** Step 8 retains the substantive CHECK I signed. |
+| Live/reference correspondence without forced selection | **Partly answered.** Drift is explicit, but the new drift branch must preserve all of step 3's claims, not just matching the recomputed winner. |
+
+These dispositions accept the plan's specified work; they do not assert it is
+already implemented. The former numerical counterexample is no longer an
+objection to the new full-law computation. The attacks below concern the
+remaining logical and execution gaps.
+
+### Execution rules — SIGN
+
+**Attack:** a failed proof CHECK could become an excuse to prevent an ordered
+click, or repairs inside sub-steps could conceal changing the data until the
+CHECK passes. Rules 2 and 5 explicitly forbid both. Component work belongs to
+the step that needs it, and an inability to establish the claim is reported
+rather than cured by tuning evidence. I find no new per-step approval chain
+or production veto in these rules. The four amendments requested below are
+definitions of existing CHECKs, not additional run permissions.
+
+### THEOREM / ASSUME — SIGN
+
+**Attack:** infer universal performance or automatic candidate supply from
+one good run, or claim C was learned merely because B was. The theorem now
+bounds the demonstration and distinguishes stipulated C, inferred B and
+composition from component correspondence. Those objections are answered.
+A1/A2 are assumptions to instantiate, not a claim that implementation is
+already correct. The weaker wording “G's contribution ... is shown” is
+reasonable, but the steps/Q.E.D. currently claim the stronger “G changed the
+choice”; choose one meaning consistently as discussed under step 3.
+
+### ⟨1⟩1 — SIGN
+
+**Attack:** supply different action names without compatible historical data,
+or an infeasible task behind the real front target. The CHECK now names
+meaning-compatible outcome evidence, actual eligibility, usable acceptance,
+observations, revisions and the cutoff. Derivations come from the task and
+patterns; the expected winner is not frozen. The selection loader, rather
+than a private shape validator, supplies the candidates. This establishes
+usable *inputs* for step 3, which is allowed to report that lawful data do not
+prove discrimination. It does not wrongly claim that differing evidence
+necessarily guarantees a different chosen action.
+
+### ⟨1⟩2 — OBJECT
+
+**Attack:** let the reference target prepared in step 1 be the first admitted
+front ticket. `ticket_queue.clj:89–115` gives it the eligible stratum and
+`policy.clj:358–374` chooses inside that stratum. The ordinary command can
+therefore select the reference target, while this CHECK forbids consuming it
+and requires a *different* target. Step 1 has passed; step 2 cannot obtain
+its required witness without changing the queue, suppressing a candidate,
+pinning a different target, or changing the reference setup. None is
+licensed by “use the ordinary command.” This is an order problem, not a
+reason to add a firing gate.
+
+**Required amendment:** give the lifecycle CHECK a witness it can lawfully
+obtain. For example, perform the non-reference lifecycle execution before the
+reference decision is fixed, or use an already-retained qualifying invocation
+for the same implementation and leave fresh end-to-end execution to step 5.
+If another approach is intended, state how the ordinary selector supplies the
+non-reference target without altering the rules. Do not require an unrelated
+click merely to satisfy ceremony when retained evidence answers the claim.
+
+The newly specified identity, loading, finding/ticket, lifecycle and timing
+properties are otherwise substantially improved. “Nothing refuses firing”
+and “never launches into an occupied seat / second active click” should be
+implemented as command acceptance plus an explicit runtime wait/terminal
+account, not restoration of a preflight busy-seat veto. Joe's firing ruling
+is accepted; this is a request to make the lifecycle behavior concrete.
+
+### ⟨1⟩3 — OBJECT
+
+**Attack:** the first branch proves a changed action, but its “Alternatively”
+branch does not. With two policies/first actions, F = 0, γ = 1 and
+E = [0.6, 0.4], the base margin favors action 1 by log(1.5) = 0.405465.
+Under the stipulated C, identity A and one step, take class predictions
+Q1 = [1,0,0,0] and Q2 = [0.5,0,0,0.5]. Then:
+
+```text
+G1 = KL(Q1 || C) = 0.597837001
+G2 = KL(Q2 || C) = 1.103637457
+G contribution to action 1's log margin = 0.505800456
+```
+
+G's margin exceeds the base margin, so the alternative passes. Yet both the
+base and full law choose action 1. The heading and Q.E.D. assertion that G
+*changes* the choice have not been established. This is a reinforcing
+contribution, not an action reversal. With several policies per action,
+margin decomposition must moreover use the summed action masses: generally
+`log(sum(exp(score)))` cannot be decomposed into one winning policy's G.
+
+**Required amendment:** either retain the actual action-change branch as the
+CHECK for the stated strong claim, or explicitly accept reinforcing/dominant
+contribution as the intended theorem and adjust the heading and Q.E.D. to
+match. Define any alternative margin on the actual winning action versus its
+competitor using full and base action marginals, with direction and sign,
+not an unsigned policy-level difference. Do not demand altered parameters
+just because real G reinforces a good habit choice.
+
+The q0, prospective class kernel, unknown-mass treatment, scored carrier,
+versioned learning consumer, cutoff and full production score are now
+appropriately owned inside this step. They can be repaired before its CHECK
+passes. The exact principal counterfactual (base versus full action) addresses
+my old F-confounding objection. The remaining objection is the weaker
+alternative and the claim made from it, not a request to re-prove Lean.
+
+### ⟨1⟩4 — OBJECT
+
+**Attack 1 — the CHECK's effects contradict its wording.** “Run on an existing
+real close, read-only” can recompute measurements and a proposed update, but
+cannot by itself show a new production B update “applied exactly once and
+persisted.” `learning_trial_ledger/record!` writes and syncs a durable file;
+that is not a read-only operation. Name what remains read-only (the source
+close, artifacts and live stores), and where the requested persistence witness
+comes from: an already-recorded matching update or an explicitly isolated
+replay destination. A pure computed delta must not be called persisted.
+This clarifies the existing CHECK, rather than adds another test gate.
+
+**Attack 2 — an arbitrary real close can prove only the failure branch.** The
+examples cited by Zai do not demonstrate accepted increment production:
+r4-1's actual `...machinery-69/.../attempt-002/007-closed.edn` is
+`:build-failed`, `:grounded? false`; r4-2's `...machinery-70/.../attempt-001/007-closed.edn`
+is `:guardrail-refusal`, class `:known-typed-failure`, with a held
+`:observation-missing` trial. They are useful real inputs, but returning
+false/missing on them correctly does not exercise production of an accepted
+attestation or a usable learned update. Name the retained source records and
+the independently expected outputs for the positive path needed at steps
+6–8. Do not relabel a failed historical close or manufacture its attestation
+to obtain that witness. If no usable record exists, state the remaining
+producer-validation work here instead of claiming the CHECK already has one.
+
+**Attack 3 — durable update before final close.** “The runner calls all four
+before constructing the close” includes committing the B update. But the
+manifest/close validation can still fail after the measured trial is made:
+`full_loop_runner.clj:3697–3836` constructs observations/retained records,
+then the manifest and close; `full_loop_cohort.clj:630–652` can reject that
+close. An interruption can also occur between durable update and close.
+
+**Required amendment:** distinguish constructing an update from making it
+consumable, and specify the authority for that consumption. If the trial
+means accepted delivery, commit/consume it from the final durable judgment
+with retry/recovery keyed to the same occurrence. If it means an independently
+measured effect regardless of close acceptance, say that explicitly in the
+step-3 parameter contract and preserve the final close outcome separately.
+In either case, specify how recovery joins the update and close without
+rewriting history or counting twice. The existing record-only ledger's
+position in the runner is not proof that the same timing is correct for a
+production model mutation. Otherwise step 4 passes an offline example while
+step 8 fails on the real close/reload boundary and needs the producer rebuilt.
+
+### ⟨1⟩5 — OBJECT
+
+**Attack:** additive drift preserves both original reference candidates and
+the eligible target, but adds a third action that dominates both the base and
+full score. Step 3's old field may have reversed the base winner; recomputing
+on the larger field now selects the added action with *or without* G. The new
+CHECK asks only that the live action equal the recomputed action. It can pass
+while the asserted G effect no longer holds. Zai's Missing item 1 explicitly
+said “G again changing it”; that part was lost in the amendment.
+
+A concrete score example (base scores are log E − F up to a common offset):
+
+```text
+old base [0, 0.2],     old G [0, 1]   -> base action 2, full action 1
+new base [0, 0.2, 10], new G [0, 1, 0] -> base action 3, full action 3
+```
+
+All actions can be in the same target stratum and all E masses positive after
+normalization. No reference candidate was removed, so the explicit re-freeze
+condition does not catch it. Also, “these equal step 3's” and permission to
+use changed inputs need one authoritative comparison record, not two
+incompatible baselines.
+
+**Required amendment:** for any allowed drift, evaluate *all* applicable
+step-3 CHECK predicates on the input actually consumed: complete model terms,
+unique eligible action maximum, and whichever G-contribution claim the
+revised theorem adopts. Retain the new input identity and its relation to the
+original snapshot as the live proof instance. If the check fails, record the
+proof failure at step 5; the click is not blocked. Never alter the selector
+or suppress fresh evidence to preserve the old answer.
+
+This input identity includes the actual ledger frontier and model state, not
+just candidate additions. Step 3 rightly honors the old cutoff during replay;
+ordinary live selection may legitimately consume later events. Record and
+recompute the actual consumed snapshot rather than pretending it used the old
+cutoff or forcing production to ignore newer learned data.
+
+### ⟨1⟩6 — SIGN
+
+**Attack:** `verify-close` can return true for failure or a commit from another
+attempt. The new CHECK requires the target's accepted-increment predicate,
+required evidence and reviewed commits bound to this occurrence. That is the
+right acceptance property, conditional on step 4 establishing the predicate
+and its producers. No new acceptance gate is authorized by this SIGN.
+
+### ⟨1⟩7 — SIGN
+
+**Attack:** record the classifier's label without measurements or trust only
+the saved projection. The CHECK requires post-build true/false observations
+and recomputation using the actual attestation and focus inputs. It retains
+the acceptance property I previously signed. The outputs must belong to the
+same occurrence/revisions as step 6, not a convenient historical example.
+
+### ⟨1⟩8 — SIGN
+
+**Attack:** update metadata changes but actual predictions do not, or the next
+task's completion merely changes the selected action. The frozen non-B
+comparison and actual consumed parameter identity/value distinguish these
+cases; the reference task is not executed twice. Exactly-once and reload
+survival are explicit. This CHECK remains sound; step 4 must supply a defined
+close/update persistence boundary so it is achievable without a late redesign.
+
+### ⟨1⟩9 — Q.E.D. not yet established
+
+No separate approval row or gate is requested for this conclusion. The present
+step-3 alternative does not prove that G changed the action, and drift can
+remove even the property demonstrated on the original field. Step 4 does not
+yet specify a runnable persistence witness and final-close/update relation.
+Resolve those implications before claiming the conjunction. Steps 6–8 are
+otherwise suitable inspections of the single execution's results.
+
+### Missing / minimal amendments
+
+1. **A lawful lifecycle witness before consuming the reference work.** Resolve
+   step 2's non-reference-target requirement under the ordinary queue; do not
+   introduce a selection override or a new firing refusal to satisfy it.
+2. **One precise G-contribution claim.** Remove the non-equivalent alternative,
+   or state that dominant reinforcement is sufficient and align the theorem,
+   action-marginal calculation and Q.E.D. with that weaker claim.
+3. **A concrete step-4 witness and persistence boundary.** Identify source
+   records, expected positive producer outputs, the read-only versus durable
+   operations, and recovery/consumption semantics relative to the final close.
+   Existing failed closes do not become accepted by replaying them.
+4. **Full revalidation of the proof claim on actual drifted inputs.** Rerun
+   the existing step-3 predicates, retain the consumed input/ledger identity,
+   and report a failed proof without blocking the click.
+
+No pause/keep-revert issue, tripwire firing authority question, extra
+per-step sign-off, speed budget, admission screen, or new negative-control
+suite is being reintroduced. The revision resolves most earlier objections;
+these four concern obtaining the promised witness and what it actually proves.
