@@ -562,6 +562,19 @@ candidates automatically, or that every click is fast.
        was loaded and its facts observed in the same tick, and zai-1's pre-flight minutes
        earlier had both candidates admitted through the loaders — so admission differs
        between the pre-flight path and the live tick.
+       - Cause (zai-1, futon2 debf995f): the ticket was withheld before selection, not
+         failed at admission. `cascade_proposals.clj:136-141` `record-supply` builds
+         `repair-targets` from the open findings' ids and removes those problems from the
+         assembly, recording `:repair-closure-observation-unavailable`. The reference
+         ticket's finding is open by definition, so every finding-ticket is withheld until
+         its own repair closes. The pre-flight ran loader + assemble; the tick also runs the
+         supply withhold.
+       - Resolution (claude-5, not escalated): the withhold exists because the constructor
+         cannot build a repair proposal while it cannot observe closure. A hand-authored,
+         admitted declared source supplies that construction, and Joe's later ruling
+         (2026-09-22, 6714b3ac) makes repair ordinary selection at the front of the queue. So
+         the withhold applies to generated proposals with no declared source, not to a target
+         that has one.
     2. **The accepted-increment predicate threw on the live path**: the close records
        `{:accepted? :refused :reason :predicate-evaluation-failed :message "nth not supported
        on this type: PersistentArrayMap"}`. It behaved as designed in not blocking the close,
