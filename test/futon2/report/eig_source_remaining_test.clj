@@ -16,6 +16,10 @@
 (def typed-q :hole/h0e270aa090bc)
 (def shadow :hole/h42fceb4ad48b)
 (def new-patterns #{:contracts/every-entry-has-a-falsifier :aif/two-layer-calibration})
+;; The calibration route was withdrawn after run 2026-09-22-1790053967 (it
+;; cannot produce its token until held-out evidence exists); its reading and
+;; pin stay declared, so pin checks still cover both patterns.
+(def routed-patterns #{:contracts/every-entry-has-a-falsifier})
 (defn declaration [] (edn/read-string (slurp (io/resource source-resource))))
 
 (defn with-declaration [decl f]
@@ -67,11 +71,11 @@
         (is (true? (get-in sources [:universes target updater])))
         (is (false? (get-in sources [:universes target typed-q])))
         (is (false? (get-in sources [:universes target shadow])))
-        (is (= 2 (count actions)) "Two executable alternatives must survive admission")
-        (is (= new-patterns first-patterns))
-        (is (= #{[target typed-q] [target shadow]} produced))
+        (is (= 1 (count actions)) "Only the typed-Q route is executable now")
+        (is (= routed-patterns first-patterns))
+        (is (= #{[target typed-q]} produced))
         (is (not (contains? produced [target updater])) "No admitted action produces the completed updater again")
-        (is (= 2 (count traces)))
+        (is (= 1 (count traces)))
         (is (every? #(= 2 (:horizon %)) traces))
         (is (some #(= :no-new-wanted-token (:reason %)) (:dropped-candidates result))
             "The retained updater candidate is correctly declined")
@@ -79,7 +83,7 @@
         (is (not (.exists (io/file dir "absent-habit.edn"))))))))
 
 (deftest each-new-order-alone-progresses-within-the-common-horizon
-  (doseq [pattern new-patterns]
+  (doseq [pattern routed-patterns]
     (let [decl (declaration)
           candidate (first (filter #(= [pattern] (:precedence %)) (:candidates decl)))]
       (is (some? candidate))

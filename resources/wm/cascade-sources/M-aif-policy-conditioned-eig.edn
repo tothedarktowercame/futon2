@@ -88,8 +88,10 @@
    {:kind :hand-admitted :by "codex-10" :date "2026-09-22"
     :moves [] :stopped-is-not-success true
     :reading "One bounded payload-correspondence task after the shared updater: establish the typed-Q acceptance with refuting behaviors. Only the typed-boundary want is produced; no shadow/calibration or updater completion is claimed."}}
-  {:precedence [:aif/two-layer-calibration]
-   :construction-receipt
-   {:kind :hand-admitted :by "codex-10" :date "2026-09-22"
-    :moves [] :stopped-is-not-success true
-    :reading "One bounded default-off shadow/calibration task after the shared updater, using the existing declared-Q fixture independently of the risk-boundary repair. Only the shadow-packet want is produced, conditional on actually completing both evidence layers. This is a model prediction of the work, not a claim that empirical evidence already exists."}}]}
+ ;; Withdrawn 2026-09-22 (claude-3) after run 2026-09-22-1790053967: the
+ ;; :aif/two-layer-calibration route cannot produce its token until a
+ ;; preregistered held-out split and post-split outcomes exist (reviewer
+ ;; REQUEST_CHANGES; author REFUSE :prospective-held-out-evidence-unavailable).
+ ;; It won every G tie by name order, so it would be selected and refused on
+ ;; every click. Restore when that evidence has a locator. Reading kept above.
+]}
