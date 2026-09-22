@@ -111,6 +111,11 @@
   (when-not (and (number? (get-in d [:beta :value])) (pos? (get-in d [:beta :value]))
                  (#{:declared :learned} (get-in d [:beta :status])))
     (refuse! :beta {:path path :beta (:beta d)}))
+  ;; A source-declared common horizon must be a positive integer when present
+  ;; (PROOF-wm-works 1.3 build 2/3, 2026-09-22); absence declares nothing.
+  (when (contains? d :horizon-steps)
+    (when-not (and (integer? (:horizon-steps d)) (pos? (:horizon-steps d)))
+      (refuse! :invalid-horizon-steps {:path path :value (:horizon-steps d)})))
   (doseq [[token locator] (:locators d)
           field [:class :check]
           :let [check (get locator field)]
@@ -154,7 +159,7 @@
      (when (and (empty? files) *read-occurrences*)
        (swap! *read-occurrences* #(or % [])))
      (when (seq files)
-       (reduce
+       (let [merged (reduce
         (fn [acc f]
           (let [path (.getPath f)
                 snapshot (java.nio.file.Files/readAllBytes (.toPath f))
@@ -200,9 +205,31 @@
                           (if (contains? (:universes acc) t)
                             (assoc collisions t :multiple-declarations)
                             (or collisions {}))))
+                (update :horizon-steps-declarations
+                        (fn [ds]
+                          (if (contains? d :horizon-steps)
+                            (conj (or ds [])
+                                  {:source (.getName ^java.io.File f)
+                                   :horizon-steps (:horizon-steps d)})
+                            ds)))
                 (assoc-in [:observations t] observations))))
-        {}
-        files)))))
+                  {} files)]
+          ;; Lift the source-declared common horizon into the merged map the
+          ;; tick reads (war_machine.clj:6821): the MAXIMUM of the declared
+          ;; values -- the horizon must cover the longest declared episode,
+          ;; and with terminal scoring shorter episodes simply reach their
+          ;; end state earlier. No refusal on disagreement (it is not a
+          ;; conflict); sources declaring nothing contribute nothing, and
+          ;; with none declared the key stays absent so the runner's T=2
+          ;; default path is untouched. :horizon-steps stays a plain integer
+          ;; (the tick reads it as the value); :horizon-steps-declarations
+          ;; carries the per-file records so the judgement's :authority can
+          ;; name the declaring sources.
+          (cond-> merged
+            (seq (:horizon-steps-declarations merged))
+            (assoc :horizon-steps
+                   (apply max (map :horizon-steps
+                                   (:horizon-steps-declarations merged))))))))))
 
 (defn with-context-fn
   "Add the :context-of function cascade-problems needs (it cannot live in data)."

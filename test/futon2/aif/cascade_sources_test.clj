@@ -147,3 +147,32 @@
       (is (= :incommensurable-family
              (:reason (refusal #(cs/load-declared (str dir))))))
       (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))
+
+;; PROOF-wm-works 1.3 build 2/3 (2026-09-22): lift source-declared
+;; :horizon-steps into the merged sources map (max over declarers; absent
+;; when none declare; shape error when non-positive-integer).
+(deftest horizon-steps-lift-takes-the-max-and-names-the-declarers
+  (let [dir (tmp-dir)]
+    (spit (io/file dir "a.edn") (pr-str (assoc source :target "M-a" :horizon-steps 2)))
+    (spit (io/file dir "b.edn") (pr-str (assoc source :target "M-b" :horizon-steps 4)))
+    (let [s (cs/load-declared (.getPath dir))]
+      (is (= 4 (:horizon-steps s)) "the horizon covers the longest declared episode")
+      (is (= #{{:source "a.edn" :horizon-steps 2} {:source "b.edn" :horizon-steps 4}}
+             (set (:horizon-steps-declarations s)))
+          "both declarers are recorded by file name with their values"))))
+
+(deftest horizon-steps-absent-when-no-source-declares
+  (let [dir (tmp-dir)]
+    (spit (io/file dir "m.edn") (pr-str source))
+    (let [s (cs/load-declared (.getPath dir))]
+      (is (not (contains? s :horizon-steps)))
+      (is (nil? (:horizon-steps-declarations s))
+          "the T=2 default path reads :horizon-steps' absence, untouched"))))
+
+(deftest non-positive-integer-horizon-steps-refuses
+  (doseq [bad [0 -1 "4" 2.5]]
+    (let [dir (tmp-dir)]
+      (spit (io/file dir "bad-horizon.edn") (pr-str (assoc source :horizon-steps bad)))
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo #"invalid-horizon-steps"
+                            (cs/load-declared (.getPath dir)))
+          (str "value " (pr-str bad) " must refuse")))))
