@@ -233,6 +233,12 @@ candidates automatically, or that every click is fast.
 
   There is no comparison with the ⟨1⟩2 snapshot. That snapshot was only the working material
   for developing ⟨1⟩3 read-only.
+- **How the click reaches the reference target.** The target is entered as an ordinary
+  ticket in the queue, the normal way work is requested, and ordinary selection picks it up.
+  It is never pinned or steered around the selector.
+- **If the live input does not discriminate** (for example, the queue has changed), that is
+  recorded under FAILURES as an ordinary click. The step then waits for a later click whose
+  own receipts meet the check. Nothing is pinned or tuned to force one.
 - **FAILURES:** —
 
 ### ⟨1⟩6. The chosen work reaches an accepted close.
@@ -271,17 +277,17 @@ candidates automatically, or that every click is fast.
 - ⟨1⟩4, ⟨1⟩6 and ⟨1⟩7 give an accepted close with a measured, attested outcome.
 - ⟨1⟩8 gives the update, consumed by the next selection.
 
-## Sign-off (revision 4: rows ⟨1⟩1–⟨1⟩5 need fresh review; ⟨1⟩6–⟨1⟩8 unchanged since revision 3)
+## Sign-off (a row is cleared whenever its step changes; only the reviewer fills its own column) (revision 4: rows ⟨1⟩1–⟨1⟩5 need fresh review; ⟨1⟩6–⟨1⟩8 unchanged since revision 3)
 
 | Step | Zai GLM | Codex | Joe |
 |---|---|---|---|
 | Execution rules | SIGN | SIGN | |
 | THEOREM / ASSUME | SIGN | SIGN | |
-| ⟨1⟩1 | SIGN | SIGN | |
-| ⟨1⟩2 | SIGN | OBJECT | |
-| ⟨1⟩3 | SIGN | OBJECT | |
-| ⟨1⟩4 | SIGN | OBJECT | |
-| ⟨1⟩5 | SIGN | OBJECT | |
+| ⟨1⟩1 | SIGN | (pending: rev 4 renumbered) | |
+| ⟨1⟩2 | SIGN | (pending: rev 4) | |
+| ⟨1⟩3 | SIGN | (pending: rev 4) | |
+| ⟨1⟩4 | (pending: changed bff7ead0) | (pending: rev 4) | |
+| ⟨1⟩5 | (pending: changed after Zai rev 4) | (pending: rev 4) | |
 | ⟨1⟩6 | SIGN | SIGN | |
 | ⟨1⟩7 | SIGN | SIGN | |
 | ⟨1⟩8 | SIGN | SIGN | |
