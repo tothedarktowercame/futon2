@@ -577,7 +577,12 @@ candidates automatically, or that every click is fast.
          that has one.
     2. **The accepted-increment predicate threw on the live path**: the close records
        `{:accepted? :refused :reason :predicate-evaluation-failed :message "nth not supported
-       on this type: PersistentArrayMap"}`. It behaved as designed in not blocking the close,
+       on this type: PersistentArrayMap"}`.
+       - Fixed by codex-20 in futon2 74dc5de1: the runner destructured the recorded token
+         rows as `[token row]` pairs when they are maps. Verbatim fixtures from
+         machinery-71 attempt-002 and from r4-1/r4-2 now pin the real shapes. On that close
+         the predicate returns `:no-acceptance-declared`, which is honest: the mission it
+         selected declares no mechanical acceptance. claude-5 reloaded both namespaces. It behaved as designed in not blocking the close,
        and no B update was written, which is correct for a close it did not accept. But its
        tests passed on constructed inputs while the live shape differs.
   - What did work: the class scoring is live. The certificate records
