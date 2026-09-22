@@ -222,8 +222,10 @@ candidates automatically, or that every click is fast.
   - 2026-09-22, ⟨2⟩1 (zai-1). `finding_ticket/publish!` writes tickets to disk but never
     commits them, so a locator at `HEAD` cannot resolve the ticket. Fixed for this ticket
     (claude-5, ae69f5e7). Proposed fix (zai-1): `publish!` commits the ticket file by explicit path
-    inside its store lock (`finding_ticket.clj:77`). It is queued as ordinary work, outside
-    the proof's path, because this ticket is already committed.
+    inside its store lock (`finding_ticket.clj:77`). Implemented by codex-12 in futon2 021024cf
+    (ticket-only pathspec commit inside the store lock; a held `index.lock` gives a typed
+    failure, with the ticket and queue entry kept; tested on real git, 8/60). claude-5
+    reloaded `finding-ticket`.
   - 2026-09-22, ⟨2⟩4 (claude-5). No recorded outcome evidence can tell the reference
     candidates apart.
     - `attempts.edn` holds one trial (a different pattern, success 1), and there are none for
