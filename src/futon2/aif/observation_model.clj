@@ -117,7 +117,7 @@
       (when-not (and (set? acceptance) (set/subset? acceptance universe))
         (refuse! :invalid-class-acceptance {:acceptance acceptance}))
       (when-not (and (map? target-class)
-                     (every? #(contains? #{:focused :related :unrelated} (val %)) target-class))
+                     (every? #(contains? #{:focused :related :unrelated :unknown} (val %)) target-class))
         (refuse! :invalid-target-class {:target-class target-class}))
       (when-not (and (map? class-preference)
                      (= (set (range 1 (inc horizon))) (set (keys class-preference)))
@@ -206,8 +206,13 @@
                                            (contains? state token))
                                   token))
                     acceptance)]
+      ;; A target whose class is :unknown (unknown or ambiguous focus) is
+      ;; SCORED in Joe's unmeasured bucket (stop-the-line) but never
+      ;; silently classed :unrelated: the model's :target-class carries the
+      ;; :unknown record and the decision's :focus-status says so.
       (if (and own (contains? target-class target))
-        {(get target-class target) 1}
+        (let [c (get target-class target)]
+        (if (= :unknown c) {:stop-the-line 1} {c 1}))
         {:stop-the-line 1}))))
 
 (defn- class-predictive

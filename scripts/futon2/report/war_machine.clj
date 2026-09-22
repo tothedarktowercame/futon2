@@ -6062,17 +6062,26 @@
                   :source "PROOF-wm-works 1.3; Joe 2026-09-22 ruling (55/35/5/5; unmeasured -> stop-the-line)"}}))
 
 (defn- facet-class-of-target
-  "A target's class by its evidence locators' facets against the current
-   discovered focus and its same-focus background (focus_receipt's own
-   regexes and window; read-only)."
+  "PROOF-wm-works 1.3 handoff B(2): a target's class by the SAME target
+   relation the close classifier uses -- every evidence locator's facet
+   (focus_receipt's own regexes), never just the first. One facet: focus /
+   same-focus background / unrelated. Facets that would give DIFFERENT
+   classes are ambiguous exactly as run_ending_classification refuses
+   ambiguous facet rows at close: the class is recorded :unknown, never
+   averaged and never silently first-facet. An unknown focus makes every
+   target's class :unknown (never :unrelated)."
   [focus-info paths]
   (let [facets @#'futon2.aif.focus-receipt/facets
-        f (first (facets paths))
         focus (:focus focus-info)
         background (set (get-in focus-info [:facet-graph :background]))]
-    (cond (= f focus) :focused
-          (contains? background f) :related
-          :else :unrelated)))
+    (if (or (nil? focus) (= :unknown (:status focus-info)))
+      :unknown
+      (let [classes (distinct
+                     (for [f (facets paths)]
+                       (cond (= f focus) :focused
+                             (contains? background f) :related
+                             :else :unrelated)))]
+        (if (= 1 (count classes)) (first classes) :unknown)))))
 
 (defn- cascade-family-parameters
   "Validate the declared comparison BEFORE admission can remove a target.
@@ -6286,14 +6295,25 @@
               ;; machinery: the class model is the :observation-model the
               ;; bounded scorer consumes; live-c is still derived, freshness-
               ;; checked and recorded above -- it no longer enters the score.
-              ;; Pin the focus read to the frozen discovery corpus's latest
-              ;; valid-through (the inputs are retrospective-pinned history),
-              ;; so a live now outside every window does not read as unknown.
+              ;; PROOF-wm-works 1.3 handoff B(1): evaluate the focus at the
+              ;; decision's ACTUAL time. The corpus is retrospective-pinned
+              ;; history, so the established focus is first discovered at the
+              ;; corpus's latest valid-through and then RETAINED at now by
+              ;; focus_receipt's persistence semantics; with no established
+              ;; focus the status is :unknown and every target's class is
+              ;; recorded :unknown -- never :unrelated, and the decision says
+              ;; so under :focus-status rather than refusing to fire.
               focus-inputs (focus-receipt/read-inputs)
               focus-as-of (str (java.time.Instant/ofEpochMilli
                                 (reduce max (map #(inst-ms (java.time.Instant/parse (:valid-through %)))
                                                   (:windows focus-inputs)))))
-              focus-info (focus-receipt/discover focus-inputs focus-as-of nil)
+              focus-established (focus-receipt/discover focus-inputs focus-as-of nil)
+              focus-info (if (= :unknown (:status focus-established))
+                           focus-established
+                           (focus-receipt/discover focus-inputs
+                                                   (str (java.time.Instant/now))
+                                                   {:focus (:focus focus-established)
+                                                    :as-of focus-as-of}))
               class-universe (reduce clojure.set/union
                                      (set joint-reachable)
                                      [(set joint-want)
@@ -6376,7 +6396,17 @@
                                    token-belief-stage)
                 decision (assoc-in decision [:selection-certificate :token-belief-input]
                                    token-belief-input)
-                decision (input-receipts/with-preference-audit decision)
+                decision (assoc (input-receipts/with-preference-audit decision)
+                                :focus-status
+                                {:status (:status focus-info)
+                                 :focus (:focus focus-info)
+                                 :as-of (:as-of focus-info)
+                                 :target-class (into {}
+                                                     (for [p problems]
+                                                       [(:target p)
+                                                        (facet-class-of-target
+                                                         focus-info
+                                                         (keep :path (vals (get-in p [:cascade-problem :locators]))))]))})
                 ;; :focus-as-of pins the receipt's clock for replay comparisons.
                 decision (if-let [as-of (:focus-as-of opts)]
                            (focus-receipt/attach decision (focus-receipt/read-inputs) {:as-of as-of})

@@ -11,7 +11,8 @@
             [futon2.aif.cascade-sources :as cs]
             [futon2.aif.observation-model :as om]
             [futon2.aif.scoring-input-receipts :as ir]
-            [futon2.aif.trace :as trace]))
+            [futon2.aif.trace :as trace]
+            [futon2.report.war-machine :as war-machine]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 (def joe-c {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100})
@@ -62,7 +63,7 @@
      :class-preference (into {} (for [tau (range 1 (inc horizon))]
                                   [tau (if (= tau horizon) joe-c {not-yet 1})]))
      :provenance {:status :synthetic :calibrated false
-                  :source "PROOF-wm-works 1.3 handoff A test"}}))
+                  :source "PROOF-wm-works 1.3; Joe 2026-09-22 ruling (55/35/5/5; unmeasured -> stop-the-line)"}}))
 
 (defn- rank [q0 candidates model horizon acceptance]
   (cos/rank-cascade-actions
@@ -212,3 +213,56 @@
     (is (= 0.4 (get out "B/:C1")))
     ;; targetless candidates keep the bare id
     (is (= {":C1" 1.0} (serialise {{:kind :cascade-candidate :id :C1 :precedence []} 1.0})))))
+
+;; PROOF-wm-works 1.3 handoff B: target class via the target relation; an
+;; unknown focus is recorded, never silently :unrelated; class provenance.
+(deftest target-class-unknown-focus-is-never-unrelated
+  (let [ta "A" tb "B"
+        ;; two facets for tb -> ambiguous -> :unknown; unknown focus -> both :unknown
+        classes @#'war-machine/facet-class-of-target]
+    (is (= :unknown (classes {:status :unknown :focus nil :facet-graph {:background []}}
+                             ["resources/wm/eig/x.edn"]))
+        "unknown focus: the target class is :unknown, never :unrelated")
+    (is (= :focused (classes {:status :retained :focus "WM" :facet-graph {:background ["APM"]}}
+                             ["resources/wm/rechecks/x.edn"])))
+    (is (= :related (classes {:status :retained :focus "WM" :facet-graph {:background ["APM"]}}
+                             ["src/apm/thing.clj"])))
+    (is (= :unknown (classes {:status :retained :focus "WM" :facet-graph {:background ["APM"]}}
+                             ["resources/wm/eig/x.edn" "src/apm/thing.clj"]))
+        "locators spanning two classes are ambiguous exactly as close refuses ambiguity")))
+
+(deftest unknown-class-target-scores-stop-line-but-records-unknown
+  (let [ta "A"
+        model (class-model {:universe #{[ta :s] [ta :done]} :acceptance #{[ta :done]}
+                            :horizon 1 :target-class {ta :unknown}})
+        score (om/query model {:op :score :belief {#{[ta :s] [ta :done]} 1} :tau 1 :target ta
+                               :preference joe-c})]
+    (is (= :computed (:status score)) (pr-str (dissoc score :model)))
+    (is (= {:stop-the-line 1} (:prediction score))
+        "unknown class scores in the unmeasured bucket")
+    (is (= :unknown (get-in score [:model :target-class ta]))
+        "the record says :unknown, never :unrelated")))
+
+(deftest swap-test-carries-class-provenance
+  (let [ta "A" tb "B"
+        mk (fn [target]
+             (let [pat (cpol/token-interpretation :p {:guard {:needs #{[target :s]}
+                                                              :forbids #{[target :done]}}
+                                                    :produces #{[target :done]}})]
+               {:kind :cascade-candidate :id :C1 :target target
+                :precedence [(assoc pat :id :p :target target)]}))
+        q0 {#{[ta :s] [tb :s]} 1}
+        universe #{[ta :s] [ta :done] [tb :s] [tb :done]}
+        acceptance #{[ta :done] [tb :done]}
+        run (fn [target-class]
+              (let [model (class-model {:universe universe :acceptance acceptance :horizon 1
+                                        :target-class target-class})]
+                [model (rank q0 [(mk ta) (mk tb)] model 1 acceptance)]))
+        [m1 r1] (run {ta :focused tb :unrelated})
+        [_m2 r2] (run {ta :unrelated tb :focused})]
+    (is (= ta (get-in (first r1) [:action :target])))
+    (is (= tb (get-in (first r2) [:action :target])) "the swap flips the maximum")
+    ;; provenance: the class C and its ruling ride on the model and the spec
+    (is (= :class-emission (:kind m1)))
+    (is (= joe-c (get-in m1 [:class-preference 1])))
+    (is (re-find #"Joe 2026-09-22" (get-in m1 [:provenance :source])))))
