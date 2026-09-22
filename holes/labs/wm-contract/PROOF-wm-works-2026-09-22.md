@@ -308,10 +308,11 @@ candidates automatically, or that every click is fast.
       produced tokens are observed false.
     - A is the identity.
     - Rollout and scoring read the same `:cascade-belief` slot.
-  - Open: the reference source declares bare pattern tokens, but q₀ holds target-qualified
-    pairs, so in zai-1's probe no guard fires and the two candidates predict identically.
-    Past clicks show qualified produces, so the live path may qualify tokens somewhere. Being
-    settled next.
+  - ⟨2⟩1 settled 2026-09-22 (futon2 4ef0f7b6). The joint cascade decision qualifies tokens
+    as `[target token]` at `scripts/futon2/report/war_machine.clj:6145-6168`. Through that
+    qualifier, C1's one-step belief adds `[T :repair/verified-dated-recheck]` and C2's adds
+    `[T :repair/restored-held-out-split]`, so the predictions differ. Paths that bypass the
+    joint selector stay bare, and those are not the live path.
 - **FAILURES:** —
 
 ### ⟨1⟩4. The producers the close and the update need exist before the live click.
