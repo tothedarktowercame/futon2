@@ -152,7 +152,7 @@ candidates automatically, or that every click is fast.
   - Timing: wall 923.9 s; agent turn ≤ 768.0 s; machine ≥ 155.9 s.
 - **FAILURES:** —
 
-### ⟨1⟩2. The reference input is prepared: a real, eligible decision with at least two alternatives, and outcome evidence that can distinguish them.
+### ⟨1⟩2. The reference input is prepared: a real, eligible decision with at least two alternatives whose declared effects differ.
 
 - **CHECK.** A frozen snapshot in `runs/proof-reference-field/` contains:
   - the task and queue state;
@@ -164,9 +164,10 @@ candidates automatically, or that every click is fast.
   - the observation and prior evidence, the learning-ledger cutoff, and the model
     configuration.
 
-  It also names past outcome evidence, compatible in meaning, for each candidate's action and
-  transition family, and the observable outcome differences that the discrimination in ⟨1⟩3
-  will rely on.
+  It also states, for each candidate, the outcomes it declares it will produce, and the
+  difference between them that the discrimination in ⟨1⟩3 will rely on. It lists any past
+  outcome evidence, compatible in meaning, that exists for those action families; none is
+  required.
 
   The snapshot freezes *inputs*, not expected answers. Evaluating it read-only never
   executes its work. It is executed once, at ⟨1⟩5.
@@ -183,9 +184,11 @@ candidates automatically, or that every click is fast.
     the evidence available. This is a property of the candidates, not a new gate. Examples to
     avoid: r4-2 needed mathlib4; click 3's candidate needed held-out evidence that does not
     exist.
-  - ⟨2⟩4. Evidence for B. If no past outcomes compatible in meaning exist for the candidates'
-    action families, that is recorded here. A different real target is chosen, or the proof
-    stops and Joe is told. Differences are never manufactured.
+  - ⟨2⟩4. Evidence for B. Amended by Joe, 2026-09-22: "if we use data when it exists and
+    the prior otherwise, we will get unstuck on the first round and never have to look
+    back." Past outcomes are used where they exist. Where none exist, B is the declared
+    prior: each candidate's declared effects. Differences between candidates come from
+    their declared effects, never from tuning.
 - **Known failures carried in:**
   - r4-2: 90 proposals, 0 admission joins;
   - click 3: three candidates, all from routes declared by hand;
@@ -204,6 +207,8 @@ candidates automatically, or that every click is fast.
     - The machine has not run successfully often enough to have an outcome history per
       action.
     - Under execution rule 2 the proof stops here, and Joe decides.
+    - Joe decided (2026-09-22): option (a), use data where it exists and the declared prior
+      otherwise. ⟨2⟩4 and ⟨1⟩3 ⟨2⟩3 are amended accordingly. The proof resumes at ⟨1⟩2.
 
 
 ### ⟨1⟩3. On the reference input, evaluated read-only, the full selection law chooses a unique action, and G changes that choice.
@@ -246,7 +251,9 @@ candidates automatically, or that every click is fast.
     - Ambiguity (A) and horizon placement are made consistent with that choice.
     - The output is an input the production horizon scorer consumes, without changing this
       sub-step later.
-  - ⟨2⟩3. B from recorded outcomes.
+  - ⟨2⟩3. B from the declared prior, updated by recorded outcomes where they exist (Joe,
+    2026-09-22). With no outcomes for a family, B for that family is its declared prior; the
+    first accepted outcome at ⟨1⟩8 starts the update.
     - A new version of `resources/wm/attempt-learning-contract.edn` authorises production
       consumption. The same change updates the `supported-contract?` pin in
       `attempt_learning.clj:15-21`, which checks the mode and version, so the code accepts
