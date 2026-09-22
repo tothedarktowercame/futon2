@@ -211,7 +211,7 @@ named in
   recorded source. `a4a-test` pins equal state and shared updater provenance
   and checks typed refusal of an unknown outcome. This does not supply the
   generative experiment model, typed-Q boundary, or calibration packet.
-- [ ] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the
+- [x] **Give the risk consumer a typed `Q(o|pi)` boundary, and specify the
   R13→R4 and R4→R5 payloads.** The policy payload and the predictive-kernel
   payload defined with model/source pins, outcome-domain identity, a
   normalization receipt and executable falsifiers, such that the same
@@ -230,6 +230,18 @@ named in
   and 1.170904 for the same row permuted. Outcome identity does not survive that
   boundary, and nothing refuses it
   (`runs/B2-strawman/01-consumer-and-updater-probe.edn` `:E4`).
+  **Completed 2026-09-22:** `machine-q-risk/predictive-payload-row!` is the
+  shared R4→R5 admission seam for a versioned payload carrying the R13→R4
+  policy identity/pins, model identity, reading/source pins, outcome-domain
+  identity, the outcome-keyed mass and its normalization receipt.
+  `risk-payload` passes that admitted row to the risk
+  calculation; the EIG consumer receives the same admitted map. The regression
+  constructs the row through the real `machine-q` transition/observation
+  composition, proves both consumers accept it, and retains simultaneous
+  outcome-relabelling plus domain, pin and receipt mismatch falsifiers. The
+  risk adapter no longer hard-codes a twelve-outcome carrier; it requires a
+  non-empty unique support and exact Q/C support agreement instead. This does
+  not enable EIG in selection or claim R13/R4/R5 deployment.
 - [ ] **Collect a default-off EIG shadow and calibration packet.** Prior
   entropy, expected posterior entropy, EIG, degeneracy reasons and later
   realised information gain persisted without affecting selection, reported with

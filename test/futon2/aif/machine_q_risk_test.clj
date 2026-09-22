@@ -1,5 +1,7 @@
 (ns futon2.aif.machine-q-risk-test
   (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.epistemic-value :as eig]
+            [futon2.aif.machine-q :as machine-q]
             [futon2.aif.machine-q-risk :as risk]))
 
 (def support (mapv #(keyword (str "o" %)) (range 12)))
@@ -40,3 +42,74 @@
         result (risk/risk (q :float mass) (c mass))]
     (is (= :float-carried (get-in result [:admission :Q])))
     (is (zero? (:risk result)))))
+
+(defn payload [support mass]
+  {:schema :wm/predictive-outcome-row-v1
+   :policy/id :inspect
+   :policy {:id :inspect :pins {:policy "policy-sha"}}
+   :model model
+   :source {:reading :machine-q/F1 :pins {:model "model-sha"
+                                          :source "source-sha"}}
+   :outcome-domain {:id :evidence-v1 :support support}
+   :mass mass
+   :normalization {:residual 0.0}})
+
+(deftest one-payload-serves-risk-and-eig-with-relabeling-falsifier
+  (let [outcomes [:ordinary :no-result :failure :timeout :conflict :missing]
+        declared-mass (zipmap outcomes [1/2 1/4 1/8 1/16 1/32 1/32])
+        generator {:states [:evidence-state]
+                   :outcomes outcomes
+                   :transition {[:evidence-state :inspect]
+                                {:evidence-state 1.0}}
+                   :observation {:evidence-state declared-mass}}
+        reading {:id :machine-q/F1
+                 :plan {:inspect :inspect}
+                 :belief-mass (fn [_ _] 1.0)}
+        kernel (machine-q/predictive-outcome-kernel
+                (machine-q/generative-model! generator)
+                (machine-q/q-reading! reading generator)
+                {})
+        mass (get-in kernel [:rows :inspect])
+        p (payload outcomes mass)
+        admitted (risk/predictive-payload-row! p)
+        preference {:model model :support outcomes :mass mass
+                    :provenance {:source "preference-sha"}}
+        prior {:a 1/2 :b 1/2}
+        posteriors (zipmap outcomes (repeat prior))
+        eig-model {:prior prior :predicted-observations admitted
+                   :posteriors posteriors}
+        permutation (zipmap outcomes (reverse outcomes))
+        relabel (fn [row] (into {} (map (fn [[o probability]]
+                                          [(permutation o) probability])) row))
+        relabelled-support (mapv permutation outcomes)
+        relabelled-mass (relabel mass)
+        relabelled-payload (payload relabelled-support relabelled-mass)
+        relabelled-preference {:model model :support relabelled-support
+                               :mass relabelled-mass
+                               :provenance {:source "preference-sha"}}]
+    (is (= mass admitted))
+    (is (zero? (:risk (risk/risk-payload p preference))))
+    (is (zero? (eig/expected-information-gain eig-model)))
+    (is (= (:risk (risk/risk-payload p preference))
+           (:risk (risk/risk-payload relabelled-payload relabelled-preference))))
+    (is (= (eig/expected-information-gain eig-model)
+           (eig/expected-information-gain
+            {:prior prior :predicted-observations
+             (risk/predictive-payload-row! relabelled-payload)
+             :posteriors (relabel posteriors)})))))
+
+(deftest predictive-payload-refuses-domain-pin-and-receipt-mismatches
+  (let [outcomes [:ordinary :missing]
+        p (payload outcomes {:ordinary 3/4 :missing 1/4})]
+    (is (= :missing-pins
+           (refusal #(risk/predictive-payload-row!
+                      (assoc-in p [:source :pins] {})))))
+    (is (= :policy-payload-mismatch
+           (refusal #(risk/predictive-payload-row!
+                      (assoc-in p [:policy :pins] {})))))
+    (is (= :outcome-domain-mismatch
+           (refusal #(risk/predictive-payload-row!
+                      (assoc-in p [:outcome-domain :support] [:ordinary])))))
+    (is (= :normalization-receipt-mismatch
+           (refusal #(risk/predictive-payload-row!
+                      (assoc-in p [:normalization :residual] 0.1)))))))
