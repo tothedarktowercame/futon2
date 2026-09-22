@@ -197,7 +197,15 @@ candidates automatically, or that every click is fast.
   `runs/proof-steps/1-2-reference-target.md`) recommends the front repair ticket
   T-repair-occ-444fb018…: it is eligible now, has two different first actions, and each is
   feasible in one repository.
+  - ⟨2⟩1 done 2026-09-22 in futon2 0aacc7ec
+    (`runs/proof-steps/1-2-cascade-source-T-repair-occ-444fb018.edn`, zai-1). Two candidates
+    are read from the ticket's own two routes, and `check-file!` passes.
+    - A: dated recheck → `:repair/verified-dated-recheck`.
+    - B: preregistered held-out split → `:repair/restored-held-out-split`.
 - **FAILURES:**
+  - 2026-09-22, ⟨2⟩1 (zai-1). `finding_ticket/publish!` writes tickets to disk but never
+    commits them, so a locator at `HEAD` cannot resolve the ticket. Fixed for this ticket
+    (claude-5, ae69f5e7). The general fix is part of ⟨2⟩2.
   - 2026-09-22, ⟨2⟩4 (claude-5). No recorded outcome evidence can tell the reference
     candidates apart.
     - `attempts.edn` holds one trial (a different pattern, success 1), and there are none for
