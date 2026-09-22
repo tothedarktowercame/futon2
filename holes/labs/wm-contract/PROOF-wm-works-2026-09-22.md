@@ -2,7 +2,7 @@
 
 **Author:** claude-5, 2026-09-22, at Joe's direction.
 **Form:** Lamport-style structured proof.
-**Status:** DRAFT revision 3, restructured after codex-20 review 289e98e2 (Codex order: prepare input → command → G decides (read-only) → producers → execute once → inspect).
+**Status:** DRAFT revision 4 (after codex-20 rev-3 review 0628f87d: command step first, strong G claim only, producers read-only with the B update after the close). Revision 3 was restructured after codex-20 review 289e98e2 (Codex order: prepare input → command → G decides (read-only) → producers → execute once → inspect).
 - Sign-off: Zai GLM (adversarial), then Codex, then Joe.
 - This plan supersedes Part B of `REPAIR-PLAN-2026-09-22.md`. Parts A and C of that plan stay
   in force.
@@ -70,7 +70,42 @@ candidates automatically, or that every click is fast.
 
 ---
 
-### ⟨1⟩1. The reference input is prepared: a real, eligible decision with at least two alternatives, and outcome evidence that can distinguish them.
+### ⟨1⟩1. One command fires a click that runs to a close, and the loaded code is known.
+
+- **CHECK.**
+  - `scripts/wm_click.sh --run` fires on whatever target ordinary selection picks. The
+    reference input is prepared afterwards, at ⟨1⟩2, so there is nothing to avoid. It fires with no `--force` and no human
+    intervention. The agents' own turns are part of the click.
+  - The command, click id and attempt id are bound to a close newly written by that run.
+  - The load-identity record (`load_identity.clj:63-108`) for every namespace on the click
+    path shows its captured source digest equal to the canonical file. Namespaces not
+    covered are listed as unknown, never omitted.
+- **PROOF.**
+  - ⟨2⟩1. Firing. `wm_click.sh` has no refusal path except Agency being unreachable. Its
+    tripwire and preflight refusals (around lines 111–233) are removed from firing. The
+    tripwires keep acting during the run as designed.
+  - ⟨2⟩2. Casting. The seats for this execution are named in advance. A seat that is busy or
+    unavailable is reported with a terminal account. The script never launches into an
+    occupied seat, and never starts a second active click.
+  - ⟨2⟩3. Finding → ticket. When a tripwire trips during a run, the existing chain still
+    runs to completion: `tripwire.clj` `note!` → `record-trip!` / `handle-action!` → the
+    repair finding writer (`tripwire.clj:750`, `repair_obligation.clj`) → an ordinary
+    ticket and queue entry. The CHECK follows one named finding through to its ticket id.
+  - ⟨2⟩4. Lifecycle. An interrupted attempt that is still open can be resumed under the
+    same attempt id. A closed attempt is final: `full_loop_cohort.clj:601-602` rejects
+    appending to it. A retry starts a new attempt and recognises commits already produced.
+    Abandoned work is never counted as accepted, and immutable records are never rewritten.
+  - ⟨2⟩5. Timing. The recorded intervals are defined as agent wait (waiting on the
+    author's or reviewer's turn), machine time, and overlap, so that wall time is neither
+    misattributed nor double-counted. Both figures are reported. This is reporting only,
+    with no budget gate.
+- **Known failures carried in:**
+  - r4-1: `:explanation-invalid` (reviewer template shape; fixed by 6d45e8b7);
+  - r4-2: `:guardrail-refusal` (artifact scope);
+  - grants 2 and 3: lost to casting.
+- **FAILURES:** —
+
+### ⟨1⟩2. The reference input is prepared: a real, eligible decision with at least two alternatives, and outcome evidence that can distinguish them.
 
 - **CHECK.** A frozen snapshot in `runs/proof-reference-field/` contains:
   - the task and queue state;
@@ -110,41 +145,6 @@ candidates automatically, or that every click is fast.
   - fix-5: 441 wants yielded none.
 - **FAILURES:** —
 
-### ⟨1⟩2. One command fires a click that runs to a close, and the loaded code is known.
-
-- **CHECK.**
-  - On a target *other than* the reference target, so that the reference work is not
-    consumed, `scripts/wm_click.sh --run` fires with no `--force` and no human
-    intervention. The agents' own turns are part of the click.
-  - The command, click id and attempt id are bound to a close newly written by that run.
-  - The load-identity record (`load_identity.clj:63-108`) for every namespace on the click
-    path shows its captured source digest equal to the canonical file. Namespaces not
-    covered are listed as unknown, never omitted.
-- **PROOF.**
-  - ⟨2⟩1. Firing. `wm_click.sh` has no refusal path except Agency being unreachable. Its
-    tripwire and preflight refusals (around lines 111–233) are removed from firing. The
-    tripwires keep acting during the run as designed.
-  - ⟨2⟩2. Casting. The seats for this execution are named in advance. A seat that is busy or
-    unavailable is reported with a terminal account. The script never launches into an
-    occupied seat, and never starts a second active click.
-  - ⟨2⟩3. Finding → ticket. When a tripwire trips during a run, the existing chain still
-    runs to completion: `tripwire.clj` `note!` → `record-trip!` / `handle-action!` → the
-    repair finding writer (`tripwire.clj:750`, `repair_obligation.clj`) → an ordinary
-    ticket and queue entry. The CHECK follows one named finding through to its ticket id.
-  - ⟨2⟩4. Lifecycle. An interrupted attempt that is still open can be resumed under the
-    same attempt id. A closed attempt is final: `full_loop_cohort.clj:601-602` rejects
-    appending to it. A retry starts a new attempt and recognises commits already produced.
-    Abandoned work is never counted as accepted, and immutable records are never rewritten.
-  - ⟨2⟩5. Timing. The recorded intervals are defined as agent wait (waiting on the
-    author's or reviewer's turn), machine time, and overlap, so that wall time is neither
-    misattributed nor double-counted. Both figures are reported. This is reporting only,
-    with no budget gate.
-- **Known failures carried in:**
-  - r4-1: `:explanation-invalid` (reviewer template shape; fixed by 6d45e8b7);
-  - r4-2: `:guardrail-refusal` (artifact scope);
-  - grants 2 and 3: lost to casting.
-- **FAILURES:** —
-
 ### ⟨1⟩3. On the reference input, evaluated read-only, the full selection law chooses a unique action, and G changes that choice.
 
 - **CHECK.**
@@ -157,9 +157,10 @@ candidates automatically, or that every click is fast.
   - The action marginal has a unique maximum. The numeric comparison is stated. The
     recorded `:tie-break-rule` field is not used as evidence either way.
   - The action chosen under the full law differs from the action chosen under `log E − F`
-    alone at the same γ. Alternatively, G's contribution to the winning margin is stated and
-    exceeds the margin from `log E − F`.
-  - All inputs and outputs are recorded against the ⟨1⟩1 snapshot.
+    alone at the same γ, both computed on the summed action marginals. This counterfactual is
+    the whole evidence that G decided. It is a requirement on the demonstration input, not a
+    runtime rule: an ordinary click where G reinforces habit is lawful.
+  - All inputs and outputs are recorded against the ⟨1⟩2 snapshot.
 - **PROOF.** Each sub-step produces an input that the next sub-step consumes, and each is
   checked by recomputing it from the pinned inputs.
   - ⟨2⟩1. q₀. Name the observation likelihood A, the initial and carried belief, the source
@@ -208,29 +209,37 @@ candidates automatically, or that every click is fast.
 
 ### ⟨1⟩4. The producers the close and the update need exist before the live click.
 
-- **CHECK.** Run on an existing real close, read-only, these produce correct output:
-  - post-build measurement of the wanted tokens against the reviewed revisions, where a
-    measured false is valid and a missing observation is not false;
-  - a run-ending attestation and focus relation;
-  - the accepted-increment predicate, meaning the target's existing acceptance met for this
-    occurrence, with the reviewed commits bound to it (no additional gates);
-  - the B update, applied exactly once and persisted.
-
-  The runner calls all four *before* constructing the close. It already obtains D-task
-  observations, learning trials and route attestation there
-  (`full_loop_runner.clj:3697-3755`).
+- **CHECK.** The live source records and stores are only read. Outputs go to an isolated
+  replay directory.
+  - **Failure path.** On the real r4-1 and r4-2 closes
+    (`data/wm-full-loop-machinery-69/.../attempt-002/007-closed.edn`,
+    `data/wm-full-loop-machinery-70/.../attempt-001/007-closed.edn`), the producers give a
+    measured false or `:missing` correctly, and never invent an attestation.
+  - **Positive path.** On a retained real close that did deliver work (one of the 29
+    `:grounded-change` closes), post-build measurement, the run-ending attestation, the focus
+    relation and the accepted-increment predicate give the outputs that record supports.
+    That predicate is the target's existing acceptance, met for this occurrence, with the
+    reviewed commits bound to it. If no retained close carries the evidence a positive
+    output needs, that is recorded here, and the positive path is first exercised live at
+    ⟨1⟩6–⟨1⟩8. No historical close is relabelled.
+  - The runner calls measurement, attestation and the predicate *before* constructing the
+    close, where it already assembles observations (`full_loop_runner.clj:3697-3755`).
+  - The B update is **not** written before the close. It is written once the close is
+    accepted, keyed by occurrence id, so it happens exactly once and a failed or interrupted
+    close writes none. In the replay directory, the update is shown to be computed and
+    written once, and a second run on the same occurrence is shown to write nothing.
 - **FAILURES:** —
 
 ### ⟨1⟩5. One live click on the reference target is decided by G.
 
-- **CHECK.** A click fired by ⟨1⟩2's command runs on the live queue, as it stands. Its own
+- **CHECK.** A click fired by ⟨1⟩1's command runs on the live queue, as it stands. Its own
   receipts show, on the live input:
   - a unique maximum of the eligible action marginal;
   - that the full law's action differs from the action under `log E − F` alone at the same γ,
-    or that G's contribution exceeds the `log E − F` margin;
-  - the functions from ⟨1⟩3 doing the computing, with the ⟨1⟩2 load identity holding.
+    on the summed action marginals;
+  - the functions from ⟨1⟩3 doing the computing, with the ⟨1⟩1 load identity holding.
 
-  There is no comparison with the ⟨1⟩1 snapshot. That snapshot was only the working material
+  There is no comparison with the ⟨1⟩2 snapshot. That snapshot was only the working material
   for developing ⟨1⟩3 read-only.
 - **FAILURES:** —
 
@@ -264,13 +273,13 @@ candidates automatically, or that every click is fast.
 
 ### ⟨1⟩9. Q.E.D.
 
-- ⟨1⟩1 and ⟨1⟩5 give a choice among real alternatives on a real input.
-- ⟨1⟩3 shows that the full law chose the action and that G changed the choice. There, C is
+- ⟨1⟩2 and ⟨1⟩5 give a choice among real alternatives, made on the live input.
+- ⟨1⟩3 and ⟨1⟩5 show that the full law chose the action and that G changed the choice. There, C is
   Joe's stipulated preference and B is inferred from recorded outcomes.
 - ⟨1⟩4, ⟨1⟩6 and ⟨1⟩7 give an accepted close with a measured, attested outcome.
 - ⟨1⟩8 gives the update, consumed by the next selection.
 
-## Sign-off (revision 3; every row needs fresh review)
+## Sign-off (revision 4: rows ⟨1⟩1–⟨1⟩5 need fresh review; ⟨1⟩6–⟨1⟩8 unchanged since revision 3)
 
 | Step | Zai GLM | Codex | Joe |
 |---|---|---|---|
