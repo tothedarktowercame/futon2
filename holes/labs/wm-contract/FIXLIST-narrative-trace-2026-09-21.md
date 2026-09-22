@@ -363,3 +363,12 @@ historical surprise (surprise-12ae6445…) is only in improve-6b's scanner input
 (runs/fixlist-2026-09-21/improve-6b/historical-surprises.edn), so the prompt would
 not have named it. That no longer matters for this surprise, because aeb352f8
 ticked the hole. Future close-time surprises are found.
+
+### Stop the line means fix now (Joe, 2026-09-22)
+Joe: "my interpretation of 'stop the line' would be that all of those should be
+fixed immediately not left as obligations." At click 2's preflight, 10
+obligations were open (2026-09-14 .. 2026-09-21), carried as evidence under the
+selection-precedence ruling. Rule from now: no further click until the open,
+non-environmental queue is empty. Triage is dispatched to codex-10
+(runs/stopline-2026-09-22/TRIAGE.md). Each obligation closes through the store's
+verbs; each fix still needed is its own packet.
