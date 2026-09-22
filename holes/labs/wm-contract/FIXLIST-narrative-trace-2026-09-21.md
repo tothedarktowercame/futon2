@@ -407,3 +407,18 @@ repair. The repair-front discovery (9505ac11) proposed repair-specific
 admission, transport, precedence and reviewer routing. That is the wrong layer,
 and its slice 1 was withdrawn before it changed anything. Discovery:
 codex-13, runs/repairs-as-tickets-2026-09-22/.
+
+### From click 2 (claude-5, 2026-09-22)
+1. After-build measurement :missing. Only 2 of 126 closes carry a token-outcome
+   receipt (the two renewal-4 clicks), so a rate cannot be measured yet. Click 1
+   measured all 3 tokens. Click 2 measured none (both :measurement-unavailable):
+   the attempt ended at revision-wait with no grounded artifact to observe.
+   Watch this on the next clicks. If :missing recurs on attempts that do reach a
+   grounded artifact, it comes before C and B, because improve-1/5/6 need an
+   observed outcome.
+2. Artifact-scope check at admission. M-f11 :C1 was admitted although its
+   acceptance needs mathlib4 (Holes.lean) and the artifact contract allows
+   futon2 only. The author refused this at close, costing a click. Candidate: at
+   admission, refuse with a typed reason a cascade whose acceptance names files
+   outside its declared artifact repositories. Or declare mathlib4 for M-f11.
+   Not dispatched yet. The repairs-as-tickets work comes first.
