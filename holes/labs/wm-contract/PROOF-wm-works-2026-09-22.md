@@ -52,27 +52,6 @@
   specification. Their theorems are not re-proved here.
 - A2. The codebase at a baseline commit B₀ of futon2, futon3c and mathlib4, fixed when Joe
   signs.
-- A3. Joe has decided each change made after the plan was drafted (16d4482c, 05:14Z):
-  - `d1e9e96b`: EIG shadow code;
-  - `8f97757b`: withdrawal of the two-layer calibration candidate;
-  - ticket `T-repair-occ-444fb018…`: now at the front of the queue.
-
-  For each: keep or revert. The decisions are recorded here before ⟨1⟩1.
-
-  For the ticket, Joe's ruling applies (bbae7593, 2026-09-22, verbatim): "what happens if
-  something (of whatever shape) goes into the queue and isn't resolved. That, I think, is a
-  stop-the-line failure (not a looping machine) requiring repair from outside." The same
-  commit records claude-3's reading: "Clicks refuse until the ticket is resolved or
-  reworked from outside." The ticket has had no attempt yet.
-
-  Joe decides one of these, recorded here:
-  - (a) the ticket is an ordinary front candidate for ⟨1⟩2, and stop-the-line applies only
-    after an attempt on it closes unresolved;
-  - (b) it is resolved from outside before ⟨1⟩1;
-  - (c) it is reverted.
-- A4. Joe names any of the 13 preflight tripwires that protect an invariant a click would
-  corrupt, for example by writing to the wrong store. Only those may still block. All others
-  report. Recorded here before ⟨1⟩1.
 
 **PROVE:** the THEOREM, by ⟨1⟩1–⟨1⟩10.
 
@@ -89,19 +68,22 @@
   - ⟨2⟩1. Casting: author, reviewer and repair seats are named once (the wm-author and
     wm-reviewer lanes) and are always registered. CHECK: preflight finds them without
     intervention.
-  - ⟨2⟩2. Preflight reports and does not refuse. Its 13 tripwires and seat checks print their
-    findings, and the click fires unless Agency is down or a tripwire Joe named under A4
-    trips. CHECK: a click fires while a tripwire
-    reports.
-    The finding-to-ticket path is unchanged: a finding still opens a ticket, and the ticket
-    enters the ordinary queue. It never stops the click.
+  - ⟨2⟩2. Nothing blocks firing except Agency being down. The 13 tripwires (T1–T13,
+    `tripwire.clj:600`) exist to ensure correct behaviour *during* a run (Joe, 2026-09-22);
+    they were never meant to decide whether a click may fire. Any place where a tripwire, or
+    a preflight check in `wm_click.sh`, refuses or halts the firing of a click is a defect
+    removed in this step. Tripwires keep acting during the run as designed. A finding still
+    opens a ticket in the ordinary queue, and a ticket never stops a click. CHECK: `wm_click.sh
+    --run` has no refusal path other than Agency being unreachable, and a click fires while a
+    tripwire reports.
   - ⟨2⟩3. The close accepts well-formed work. The reviewer's standing decision is produced in
     the shape the close reads (fixed on 2026-09-21 by 6d45e8b7). CHECK: a close is not refused
     `:explanation-invalid` for work the reviewer approved.
 - **Known failures carried in:**
   - r4-1: `:explanation-invalid` (reviewer template shape);
   - r4-2: `:guardrail-refusal` (artifact scope);
-  - grants 2 and 3: lost to casting (comments in `wm_click.sh`).
+  - grants 2 and 3: lost to casting (comments in `wm_click.sh`);
+  - `wm_click.sh` refuses to fire when preflight tripwires would halt (lines ~111-233).
 - **FAILURES:** —
 
 ### ⟨1⟩2. The reference field: a real target with at least two admissible candidates that begin with different actions.
