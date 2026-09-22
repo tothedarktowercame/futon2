@@ -349,3 +349,10 @@ narrate it stage by stage, as 1789964661 was narrated. For each of A, B, C, G, E
 update, say whether it changed the live choice or only wrote a receipt. Check
 that the improve-8 baseline (122/124 unknown) moves. Cast: wm-author /
 wm-reviewer / wm-repair-reviewer (minted 2026-09-21), issued by claude-3.
+
+### Open: one encoding for :cohort/id (claude-5, 2026-09-22)
+Runner occurrences write :cohort/id as (str keyword), with a leading colon;
+checkpoints write the keyword. The run-ending kernel (49481139) and route
+attestation (56d681c5) both have to accept either form. The cleaner fix is to
+normalise it once, at write time. That changes occurrence identity values that
+are already hashed into ids, so it needs its own slice and a migration note.
