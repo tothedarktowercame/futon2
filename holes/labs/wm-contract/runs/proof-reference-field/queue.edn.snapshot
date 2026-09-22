@@ -1,0 +1,1 @@
+{:schema :wm/ticket-queue-v1, :placement :front, :order [:inserted-at :ticket], :within-stratum :cascade-selection-posterior, :entries [{:ticket "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade", :inserted-at "2026-09-22T05:13:31.542488602Z"}]}
