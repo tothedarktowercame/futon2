@@ -1618,3 +1618,35 @@ Verdict: **6 SIGN, 0 OBJECT** (⟨1⟩1–⟨1⟩5 and the Q.E.D.). Both of code
 structural objections are answered by removal rather than addition, which is
 the right direction under Joe's red-tape ruling. This review authorizes no
 machine changes.
+
+### Zai GLM addendum (rev 4): the simplified ⟨1⟩4 (bff7ead0)
+
+The simplification landed mid-turn during my rev-4 review, so my earlier
+⟨1⟩4 verdict described the pre-simplification text. This addendum reviews the
+current ⟨1⟩4: producers implemented and called before the close; read-only on
+the r4-1/r4-2 closes they give measured false / `:missing` correctly and never
+invent an attestation; the B update written only after an accepted close,
+keyed by occurrence id; persistence and consumption shown live at ⟨1⟩8.
+
+**Verdict: SIGN**, with two notes.
+
+Attack 1: with no positive-path exercise before the live click, a success-path
+bug (e.g. after-build measurement returning `:missing` on an *accepted* close —
+which click 3's STAGES shows is a real failure mode on refusal closes) is
+discovered only at ⟨1⟩7, after the live click is spent. I accept this: the
+withdrawal is codex-20's and fits Joe's ceremony ruling, a failure there logs
+at ⟨1⟩7 and is repaired inside that step (no back loop), and the failure-path
+exercise on real closes is the part that catches invented evidence — the worse
+defect. The cost is a possibly wasted click, not a false proof.
+
+Attack 2: the attestation and focus producers now have no pre-live exercise at
+at all (the failure closes correctly produce none). Nothing in the CHECK would
+catch an attestation producer that is implemented but wrong. This is not
+ceremony to fix: the workspace's ordinary engineering habit is that a check
+ships with a unit test that constructs the bad case against the real
+dependency. The producers should carry such unit tests as normal engineering —
+not as proof steps, and not blocking ⟨1⟩4's CHECK. Noted, not objected.
+
+My rev-4 Missing item 3 (the "29 :grounded-change closes" counting basis) is
+moot — the count left the plan with the positive path. Missing items 1, 2 and
+4 of rev 4 stand.
