@@ -1185,6 +1185,52 @@
     (is (re-find #"at most 200 characters" prompt))
     (is (re-find #"closing brace is inside the 200-character limit" prompt))))
 
+(deftest author-prompt-names-only-selected-token-surprises
+  (let [root (.toFile (Files/createTempDirectory
+                       "author-surprises-" (make-array FileAttribute 0)))
+        empty-root (.toFile (Files/createTempDirectory
+                             "author-surprises-empty-" (make-array FileAttribute 0)))
+        file (io/file root "cohort" "attempt-001" "retained" "surprises.edn")
+        action {:target "M-selected"
+                :precedence [{:id :selected-pattern
+                              :produces #{["M-selected" :selected-token]}}]}
+        construction {:selected-action action}
+        opts {:author "author" :reviewer "reviewer"
+              :target-repository "/repo" :target-repository-head "base123"}
+        matching {:schema :wm/surprise-v1 :surprise/id "surprise-matching"
+                  :token ["M-selected" :selected-token] :model-part :B-effect}
+        other {:schema :wm/surprise-v1 :surprise/id "surprise-other"
+               :token ["M-selected" :different-token] :model-part :D-prediction}]
+    (try
+      (io/make-parents file)
+      (spit file (pr-str [matching other]))
+      (let [baseline (#'runner/author-prompt opts "M-selected" {:id "M-selected"}
+                                             construction [])
+            no-match (#'runner/author-prompt (assoc opts :surprise-root
+                                                    (.getAbsolutePath empty-root))
+                                             "M-selected" {:id "M-selected"}
+                                             construction [])
+            matched (#'runner/author-prompt (assoc opts :surprise-root
+                                                   (.getAbsolutePath root))
+                                            "M-selected" {:id "M-selected"}
+                                            construction [])
+            unreadable (#'runner/author-prompt
+                        (assoc opts :surprise-root
+                               (str (io/file root "does-not-exist")))
+                        "M-selected" {:id "M-selected"} construction [])]
+        (is (= baseline no-match))
+        (is (str/includes? matched
+                           (str "RECORDED SURPRISE: surprise-matching token "
+                                "[\"M-selected\" :selected-token] kind :B-effect.")))
+        (is (str/includes? matched "trailer line:\nSurprise: surprise-matching\n"))
+        (is (not (str/includes? matched "surprise-other")))
+        (is (str/includes? unreadable
+                           ":kind :surprise-store-unreadable")))
+      (finally
+        (doseq [dir [root empty-root]
+                child (reverse (file-seq dir))]
+          (io/delete-file child true))))))
+
 (deftest prompts-name-role-specific-limb-evidence-deposits
   (let [dir "/tmp/cohort/attempt-001/evidence"
         opts {:author "author" :reviewer "reviewer"
