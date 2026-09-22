@@ -215,8 +215,9 @@ candidates automatically, or that every click is fast.
     acceptance, met for this occurrence, with the reviewed commits bound to it.
   - The runner calls them *before* constructing the close, where it already assembles
     observations (`full_loop_runner.clj:3697-3755`).
-  - Run read-only on the real r4-1 and r4-2 closes, they give a measured false or `:missing`
-    correctly, and never invent an attestation.
+  - Run read-only on the real r4-1 and r4-2 closes, they reproduce each recorded observation
+    as it is: measured true, measured false, or `:missing` (r4-1's failed close contains both
+    true and false measurements). They never invent an attestation.
   - The B update is written only after a close is accepted, keyed by occurrence id, so a
     failed or interrupted close writes none. Persistence and consumption are shown live at
     ⟨1⟩8.
@@ -286,7 +287,7 @@ candidates automatically, or that every click is fast.
 | ⟨1⟩1 | SIGN | SIGN | |
 | ⟨1⟩2 | SIGN | SIGN | |
 | ⟨1⟩3 | SIGN | SIGN | |
-| ⟨1⟩4 | SIGN | OBJECT | |
+| ⟨1⟩4 | (pending: wording fix after codex rev 4) | (pending: wording fix) | |
 | ⟨1⟩5 | SIGN | SIGN | |
 | ⟨1⟩6 | SIGN | SIGN | |
 | ⟨1⟩7 | SIGN | SIGN | |
