@@ -3,7 +3,7 @@
 **Author:** claude-5, for the Claude model as a whole: every "claude-N" seat is the same model,
 and the choices listed below were made across those seats.
 **Date:** 2026-09-22.
-**Status:** DRAFT, awaiting sign-off.
+**Status:** DRAFT revision 2 (after codex-20 review 00042870), awaiting re-sign-off of A2, A6, A8, A9 and Part B.
 
 **Rules for this plan (Joe, 2026-09-22):**
 - Nothing in the machine is touched, and nothing is deleted, until this plan is signed off.
@@ -44,16 +44,18 @@ Each entry has four parts:
   or the Joe ruling it enforces. Repair: B1 and B2.
 
 ### A2. Refusals reported to Joe as achievements
-- **Choice.** Bells and reports presented refusals, abstentions and "honest" typed failures as
-  progress.
+- **Choice.** Bells and reports presented refusals, abstentions and typed failures as
+  progress, without saying first that no work had been accepted.
 - **Evidence.**
-  - claude-3's bells of 2026-09-21/22 (e.g. "refuses (not unknown) on ...", "typed refusal on
-    conflict").
-  - claude-5's replies approving the same.
-- **Damage.** A machine that does nothing was described as working correctly.
-- **Rectification.** Rule: a report states what the click delivered and what was accepted. A
-  refusal is reported as a defect in the machine, with its fix, and never as a result.
-  Repair: B0 (a corrected report to Joe).
+  - Both renewal-4 clicks failed acceptance (r4-1 `:explanation-invalid`, r4-2
+    `:guardrail-refusal`; raw closes under `data/`).
+  - The bells themselves are claude-5's account and are not retrieved here (codex-20).
+- **Damage.** Joe heard about checks working when no work had been accepted.
+- **Rectification.** Rule: a report states first what was delivered and accepted. A refusal is
+  reported as an unsuccessful delivery. The report separates a check that was right to refuse
+  (e.g. `task_execution_evidence.clj:181-210` rejecting a mismatched artifact claim) from a
+  check that stopped good work, and names the repair needed to complete the work.
+  Repair: B0.
 
 ### A3. Record-only slices instead of closing the gap
 - **Choice.** Improvements were built as receipts written beside the decision, with selection
@@ -93,10 +95,14 @@ Each entry has four parts:
   verify PASS, receipt written) as success.
 - **Evidence.**
   - The fix list `FIXLIST-narrative-trace-2026-09-21.md`: nearly every row is merged.
-  - Selection behaviour is unchanged since run 1789964661.
-- **Damage.** Every test passed while the machine did not work.
-- **Rectification.** Rule: claude-5 is the single owner of "the click works", supervised by
-  the signers of this plan. Every report states the state of the last click first.
+  - Selection did change in some respects since run 1789964661. Ticket-front eligibility
+    (`policy.clj:358-374`, `ticket_queue.clj:89`) is one example. But no click since then
+    has ended in an accepted increment, and the model paths listed in A9 remain unclosed
+    (codex-20).
+- **Damage.** Every slice's own test passed while no click delivered accepted work.
+- **Rectification.** Rule: claude-5 is the single owner of "the click delivers accepted work",
+  supervised by the signers of this plan. Every report states first the state of the last
+  click and of each unclosed path in Part B.
 
 ### A7. Clicks treated as scarce experiments to narrate, not as a machine to make run
 - **Choice.**
@@ -107,23 +113,32 @@ Each entry has four parts:
 - **Rectification.** Rule: a click that stops or runs slowly gets its stopper fixed, and the
   next click runs. Repair: B5 and B6.
 
-### A8. Candidate construction does not read the real tasks
-- **Choice.** Fix-5 established that the machine chooses among a few hand-written cascades and
-  that 441 wants yield no candidate. This was set aside for improve items.
-- **Evidence.**
-  - Fix list, fix-5 and fix-5a/5b/5c.
-  - Click r4-2 had exactly one admitted candidate.
-- **Damage.** Selection cannot choose real work that is never offered to it.
-- **Rectification.** Repair: B3.
+### A8. Candidates are not authored from the real tasks
+- **Choice.** Fix-5 established that the machine chooses among a few hand-written cascades.
+  This was set aside for improve items.
+- **Evidence (corrected by codex-20).**
+  - The tasks are read: `cascade_problems.clj:39-47` reads registry target identities, and
+    `mission_hole_wants.clj:74-91` supplies wants, universes and locators from mission tasks.
+    But it leaves interpretations and candidates empty.
+  - The r4-2 supply had 90 proposals and zero proposal-admission joins. A joined proposal is
+    still not a constructed, executable candidate.
+- **Damage.** Selection cannot choose real work that is never turned into a candidate.
+- **Rectification.** Repair: B4 builds the missing authoring workflow (interpretation →
+  construction → publication → consumption). Adding another task reader would reproduce the
+  deficit.
 
-### A9. Selection decided by habit and flat values while described as active inference
-- **Choice.** Clicks ran with near-uniform C and a declared B, and the result was described
-  in AIF terms.
+### A9. Selection without outcome-sensitive discrimination, described as active inference
+- **Choice.** Clicks ran with near-uniform C and a declared, not learned, B. The results were
+  described in AIF terms.
 - **Evidence.**
-  - Click r4-1: decided-by `:habit` 2:1, G tie of 0.0013 nats, C 1.0013:1.
-  - Click r4-2: C 1.000043:1.
-- **Damage.** The implemented model is present but decides nothing.
-- **Rectification.** Repair: B4.
+  - r4-1: raw G = 9.70476 vs 9.70602, habit 2/3 vs 1/3, decided by habit.
+  - r4-2: one candidate, habit 1, C 1.000043:1.
+- **Correction (codex-20).** Habit is part of the bound selection law
+  `sigma(log E - F - gamma G)` in `wm-policy-selection`, so a habit-selected action is not
+  invalid in itself. What is unproved is that outcomes discriminate: whether C and a learned B
+  can change the choice between real alternatives.
+- **Rectification.** Repair: B6 and B7 make C prospective and B learned, and demonstrate that
+  sensitivity on a case where different actions really exist.
 
 ### A10. Claude reviewing Claude, reported as independent review
 - **Choice.** Reviews between claude-N seats (claude-5 reviewing claude-3's slices, and the
@@ -133,87 +148,192 @@ Each entry has four parts:
 - **Rectification.** Rule: a Claude seat never counts as an independent reviewer of another
   Claude seat. Sign-off on this plan and its steps comes from Zai GLM, Codex and Joe.
 
-## Part B. Repair steps (executed only after the whole plan is signed off, in order)
+## Part B. Repair steps (revision 2, after codex-20's review)
 
-Each step is carried out as follows:
-- claude-5 writes the specification;
-- a Codex agent implements it on a branch;
-- Zai GLM and Codex sign off the result, then Joe;
+Executed only after the whole plan is signed off. Ordered by what each step depends on.
+
+**Roles for every step.**
+- claude-5 writes the specification.
+- A Codex agent implements it on a branch.
+- A *different* Codex agent reviews it, and so does Zai GLM. The implementer never signs off
+  its own work. Author and reviewer seats and model versions are recorded.
+- Joe signs off.
+- Merges land on the canonical branch and are reloaded from the canonical checkout, following
+  the one-JVM policy. The acceptance run records the source and model identities the live JVM
+  actually consumed.
+- Tests: the relevant warrants, plus reruns only of stale or affected namespaces.
 - claude-5 does not delete code itself.
 
+**Freeze.**
+- Until Joe signs, no clicks and no machine commits in any lane.
+- claude-5 owns coordinating this with the other lanes.
+- The baseline to be signed is the futon2 commit named in the sign-off table.
+
 **B0. Corrected report to Joe.**
-- One page listing what the fix and improve work since 2026-09-20 actually changed in live
-  selection, stated as behaviour, not as receipts or refusals.
-- *Done when:* Joe has it, and each line cites the click record or commit that shows it.
+- One page on what the work since 2026-09-20 changed, stated as behaviour. It separates:
+  - improvements in record retention and classification;
+  - changes to action selection;
+  - delivered and accepted artifacts (none so far).
+- The report includes, for example, that r4-2's close has 12 manifest entries and a recorded
+  `:known-typed-failure`, and is still not an accepted increment.
+- *Done when:* Joe has it, and each line cites a click record or commit.
 
-**B1. Rule provenance ledger (read-only).**
-- For every refusal, guard, tripwire and gate on the click path (candidate construction →
-  admission → selection → dispatch → review → close), record:
-  - the reason keyword;
-  - its file and line;
-  - the commit and seat that added it;
-  - its origin: a Lean declaration, a Joe ruling (quote and location), or neither.
-- *Done when:* the ledger covers every reason keyword in the click-path namespaces, and each
-  "neither" entry has been checked by reading its commit.
+**B1. Call-path inventory of decision sites (read-only).**
+- Define the actual path from entry to close: `scripts/wm_click.sh` (including its shell
+  refusals and `--force`), the futon3c click boundary, candidate construction, admission,
+  selection, dispatch, execution evidence (`task_execution_evidence.clj`), review and close.
+- List every executable decision site on that path, whatever form it takes: `:reason`
+  literals, throws, false returns, candidate filters, and caught errors.
+- For each site, record:
+  - its authority (a Lean declaration or contract premise, a Joe ruling, a workspace rule,
+    or none located);
+  - whether it is reachable;
+  - what effect it has;
+  - the invariant it protects.
+- Bounded by the rule in A4: the inventory exists to support the decisions in B2.
+- *Done when:* the finite call-path inventory is covered, and each disputed site has a
+  concrete decision to make.
 
-**B2. Keep / remove / relax decision for each ledger entry.**
-- claude-5 proposes a decision per entry.
+**B2. Keep / change / remove decision for every inventory entry.**
+- "None located" means provenance was not found. It is not permission to weaken an
+  invariant.
+- For each change, state:
+  - how the invariant still holds, or what structure replaces it and which tests pin that;
+  - a legitimate end-to-end case that now passes;
+  - the actual invalid case that is still rejected.
+- No change may delete a test, bypass a check, or add a workaround. A mismatch between the
+  producer and the consumer is fixed at the producer; the r4-1 reviewer-template fix is the
+  model to follow.
 - Each decision is signed off by Zai GLM, then Codex, then Joe.
-- Removals are then implemented by a Codex agent on a branch, one group per commit, with the
-  tests changed accordingly.
-- *Done when:* every "neither" entry is decided and the signed removals are merged.
+- *Done when:* every entry is decided, and the signed changes are merged and reloaded.
 
-**B3. Candidate construction from the real tasks.**
-- Candidates are built from the open tickets (`holes/tickets/T-*.md`, repairs at the front of
-  the queue, as Joe ruled), missions and holes, through the existing constructor.
-- *Done when:* a click's candidate set is built from those sources, and its size is recorded
-  in the click receipt.
+**B3. Acceptance and artifact scope agree before dispatch.**
+- r4-2 needed a mathlib4 change, while `full_loop_runner.clj:1926-1928` permits only the
+  target repository.
+- Two ways to fix this, with a signed design for one or both:
+  - a reviewed multi-repository parcel;
+  - decomposing the task so its acceptance, unchanged, can be met in one repository.
+- A check at admission refuses a candidate whose acceptance cannot be met within its scope.
+  The close verifies every required commit and gate.
+- *Done when:* a task that needs two repositories either runs as a parcel to an accepted
+  close, or is decomposed and each part closes. Removing the artifact check does not count.
 
-**B4. Selection decided by the implemented model with real values.** (Starts only after B2's signed removals are merged.)
-- C comes from Joe's stated classes (55/35/5/5) through the run-ending classification kernel.
-  B comes from recorded outcomes.
-- Both go through the functions the contract bundle already binds (`TokenPreference`,
-  `PolicyHorizon`, `PolicySelection`, `ActionMarginal`).
-- The record-only switches for these parts are turned on for the live decision.
-- *Done when:* a click is decided by G, not by habit or a tie, and the contract bundle's
-  holder label for each of those functions reads live enactment.
+**B4. Candidate authoring from the real tasks.**
+- Build the missing preselection workflow:
+  1. target discovery from the registry (substrate-2, `mission_registry.clj:458`) and the
+     ticket queue (`data/wm-ticket-queue/queue.edn`), with repairs at the front of the queue;
+  2. substantive pattern interpretation;
+  3. observable acceptance;
+  4. construction;
+  5. review and publication through `cascade_sources/check-file!`;
+  6. consumption by the next selection.
+- Resolve the repair-closure observation: `cascade_proposals.clj:136-174` drops repair
+  targets when that observation is unavailable.
+- *Done when:*
+  - a real task that previously had no candidate, and a repair at the front of the queue,
+    both have admissible, actionable candidates with truthful locators and feasible scope
+    (B3);
+  - coverage from source to candidate is retained;
+  - at least one eligible target has two meaningfully different first actions.
 
-**B5. Click speed.**
-- From the r4-1 and r4-2 records, account for where the wall-clock time of a click goes, and
-  fix the largest parts.
-- *Done when:* the time per stage is recorded for a click, and the largest stage is reduced.
+**B5. Speed baseline and budget.**
+- Before B4's larger candidate set goes live, measure a named workload stage by stage.
+  Checkpoints show about 120 s before selection and 345–410 s from dispatch to build in
+  r4-1/r4-2. Measure within those intervals until the expensive call is found.
+- Joe agrees a time budget per stage and in total.
+- Compare equivalent work under the same acceptance checks.
+- *Done when:*
+  - the named workload meets the agreed budget with all checks intact;
+  - B4 and B7's scoring are shown not to break the budget at the larger candidate count.
 
-**B6. Run clicks until they work.**
-- Run clicks one after another. Whatever stops a click is fixed the same day, with sign-off,
-  and the next click runs.
-- *Done when:* Joe judges that clicks routinely deliver accepted work he wants.
+**B6. Observed outcomes and attestations.**
+- After each build, measure the wanted tokens against the reviewed revisions.
+  `token_outcome.clj:54` distinguishes a measured false from a missing observation. A
+  refusal or an unticked box is not a measured failure.
+- Produce the increment attestations and focus relations that
+  `run_ending_classification.clj:98-113` requires for a success class.
+- Handle a changed task domain: `d_predecessor_task_authority.clj:134` and
+  `token_belief_predecessor.clj:79` (`:carry-domain-changed`) need either a defined
+  compatible carry/migration or an explicit, recorded reinitialisation. Meanings are
+  versioned, and outcome updates are deduplicated. The identity check is not removed.
+- *Done when:* a real click's close has a measured outcome, with true or false values
+  actually observed, and an attested run-ending class.
 
-**B7. Close the update loop.**
-- Each click's outcome updates B and C, and the next click's choice uses the update.
-- *Done when:* a click's recorded choice differs because of an earlier click's outcome.
+**B7. C and B that the live selection uses.**
+- **C:** define the *prospective* mapping from each policy's predicted observations to
+  run-ending classes. It covers:
+  - how `:unknown` and missing evidence are treated;
+  - normalisation and support;
+  - where it sits in the horizon;
+  - how it relates to token preferences.
+
+  Joe's 55/35/5/5 stays fixed as his stated preference; observations change only its
+  projection. It must not be put directly on the token powerset (the fix list's no-op
+  counterexample).
+- **B:** a declared prior and update rule, and a justified placement of the parameters.
+  Whole-attempt success is not automatically a per-pattern transition probability. A
+  production reader is needed; `learning_trial_ledger.clj` has none today.
+- Name the functions that consume each. Use the production-scale sparse path, not powerset
+  enumeration.
+- *Done when:*
+  - controlled changes to the admitted C and B change the live scores and posteriors as
+    predicted;
+  - a case with competing actions changes the chosen action;
+  - the full E/F/G law and the ticket-front rule remain intact.
+
+  A holder label or a `:decided-by :G` string is not evidence of this.
+
+**B8. Integrated acceptance run.**
+- Serial clicks. For each blocker:
+  1. classify it;
+  2. make the signed repair and verify it;
+  3. run the next click.
+- An unchanged deterministic failure is never repeated.
+- Dispatch timeouts, cancellation, partial commits and resume must be handled so that
+  retries neither duplicate work nor count abandoned work as accepted.
+- Blockers that cannot be fixed the same day (quota, missing authority, an open mathematical
+  prerequisite) are recorded as such.
+- Before the run, Joe agrees the evidence he will judge: consecutive accepted deliveries,
+  task coverage, and elapsed time.
+- *Done when:* Joe judges the run against that agreed evidence.
+
+**B9. Learning loop.**
+- One real accepted outcome is observed.
+- It updates the named B parameter exactly once.
+- The update survives reload and replay, and the next selection consumes it.
+- On the same frozen decision input, compared with and without the update: the posterior
+  changes as predicted, and in a case that discriminates, the rank or action changes.
+- Duplicate replays, missing observations and changed token meanings do not count as
+  trials.
+- *Done when:* all of the above is shown.
 
 ## Sign-off
+
+The review sections below the table refer to revision 1 numbering (B1–B7); revision 2 renumbers Part B as B0–B9.
+
 
 | Part | Zai GLM | Codex | Joe |
 |---|---|---|---|
 | A1 | SIGN | SIGN | |
-| A2 | SIGN | OBJECT | |
+| A2 | (rev 2: re-sign) | (rev 2: re-sign) | |
 | A3 | SIGN | SIGN | |
 | A4 | SIGN | SIGN | |
 | A5 | SIGN | SIGN | |
-| A6 | SIGN | OBJECT | |
+| A6 | (rev 2: re-sign) | (rev 2: re-sign) | |
 | A7 | SIGN | SIGN | |
-| A8 | SIGN | OBJECT | |
-| A9 | SIGN | OBJECT | |
+| A8 | (rev 2: re-sign) | (rev 2: re-sign) | |
+| A9 | (rev 2: re-sign) | (rev 2: re-sign) | |
 | A10 | SIGN | SIGN | |
-| B0 | SIGN | SIGN | |
-| B1 | SIGN | OBJECT | |
-| B2 | SIGN | OBJECT | |
-| B3 | SIGN | OBJECT | |
-| B4 | SIGN | OBJECT | |
-| B5 | SIGN | OBJECT | |
-| B6 | SIGN | OBJECT | |
-| B7 | SIGN | OBJECT | |
+| B0 | | | |
+| B1 | | | |
+| B2 | | | |
+| B3 | | | |
+| B4 | | | |
+| B5 | | | |
+| B6 | | | |
+| B7 | | | |
+| B8 | | | |
+| B9 | | | |
 
 ## Zai GLM review
 
