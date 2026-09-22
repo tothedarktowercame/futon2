@@ -124,3 +124,13 @@
   (let [r (focus/discover inputs "2026-09-30T00:00:00Z" nil)]
     (is (= :unknown (:status r)))
     (is (nil? (:focus r)))))
+
+(deftest repeated-retention-keeps-the-original-evidence-date
+  ;; Bad case from codex-20's review of c188d583: retaining a result that
+  ;; was itself retained advanced the evidence date to the earlier
+  ;; receipt's own as-of.
+  (let [first-r (focus/discover inputs "2026-09-30T00:00:00Z"
+                                {:focus "WM" :as-of "2026-09-22T17:31:44Z"})
+        second-r (focus/discover inputs "2026-10-05T00:00:00Z" first-r)]
+    (is (= :retained (:status second-r)))
+    (is (= "2026-09-22T17:31:44Z" (:retained-evidence-as-of second-r)))))

@@ -61,7 +61,11 @@
      :reason (cond (nil? window) (when-not retained? :discovery-window-unavailable)
                    (nil? focus) :no-unique-attributed-focus)
      :focus (if (or window retained?) focus nil) :as-of as-of
-     :retained-evidence-as-of (when retained? (:as-of previous))
+     ;; Retaining an already-retained focus keeps the ORIGINAL evidence
+     ;; date, not the previous receipt's own as-of (codex-20 review of
+     ;; c188d583: repeated retention advanced 17:31:44 -> 18:00:00).
+     :retained-evidence-as-of (when retained? (or (:retained-evidence-as-of previous)
+                                                  (:as-of previous)))
      :window (if window (assoc (dissoc window :commits)
                               :source-until (:until window)
                               :until (if (at-or-before? as-of (:until window)) as-of (:until window)))
