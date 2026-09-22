@@ -135,6 +135,21 @@ candidates automatically, or that every click is fast.
       da0bfe5e: mixed interval labelled, totals given as bounds).
   - Note: the futon3c click boundary's grant budget (Joe's renewal documents) is Joe's own
     rationing and is not removed by this step.
+- **PROVED 2026-09-22.** CHECK run by claude-5 after codex-20's major-step review.
+  - Command: `scripts/wm_click.sh --run` from futon2, with no `--force` and no human
+    intervention.
+  - Click `wm-click-117f822a-6809-401c-a959-865d21a55f82`, run `2026-09-22-1790060806`,
+    started 07:06:46Z. The close
+    `data/wm-full-loop-machinery-71/wm-contract-machinery-71-v1/attempt-001/007-closed.edn`
+    was newly written at 07:23:07Z.
+  - Binding
+    `futon3c/data/wm-click-run-bindings/click-run-binding-wm-click-117f822a-….edn` has
+    status verified and durability confirmed, and binds the click id, attempt-001 and the run
+    id.
+  - Outcome `:grounded-change` (whether it counts as accepted is judged at ⟨1⟩6, not here).
+  - Load identity: 69 click-path namespaces, 42 current. The 27 unregistered ones were
+    reloaded from the canonical checkouts before firing.
+  - Timing: wall 923.9 s; agent turn ≤ 768.0 s; machine ≥ 155.9 s.
 - **FAILURES:** —
 
 ### ⟨1⟩2. The reference input is prepared: a real, eligible decision with at least two alternatives, and outcome evidence that can distinguish them.
