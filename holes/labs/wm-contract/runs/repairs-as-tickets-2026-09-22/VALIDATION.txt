@@ -1,0 +1,39 @@
+2026-09-22, independent CLI process; cwd /home/joe/code/futon2-repairs-as-tickets
+Branch fix/repairs-as-tickets, source base b188bcc2.
+No production namespaces changed; no production tests invoked; no store writes.
+
+Command:
+clojure -M holes/labs/wm-contract/runs/repairs-as-tickets-2026-09-22/probe.clj > holes/labs/wm-contract/runs/repairs-as-tickets-2026-09-22/probe-output.edn
+Exit 0, stderr empty. Fresh output captured-at 2026-09-22T01:19:48.701899020Z.
+Output: 44 open findings; 29 machine-failure, 3 independent-review-failure,
+12 environmental-hold; 22 awaiting-validation, 22 open.
+Store files 292 before / 292 after, same file set true.
+Two ticket IDs, zero matching source declarations, two universe-not-admitted refusals.
+DONE declaration true; OPEN false; embedded example false; registry status complete.
+
+Command:
+clj-kondo --lint holes/labs/wm-contract/runs/repairs-as-tickets-2026-09-22/probe.clj
+linting took 8ms, errors: 0, warnings: 0
+Exit 0.
+
+Command:
+emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --no-defaults holes/labs/wm-contract/runs/repairs-as-tickets-2026-09-22/probe.clj
+OK
+Exit 0.
+
+Inventory searches (read-only, at base revision):
+rg -n 'revalidate-historical|repair-machine-failure|T-repair-|:repair/id|:repair-target' src scripts --glob '*.clj'
+Retained in repair-sites.txt (221 lines).
+Expanded runner repair/stop-line/deferred/historical call-site survey retained in runner-sites.txt.
+Additional files and generic ticket paths read directly; inventory classification is in DISCOVERY.md.
+
+Frozen original finding copied byte-for-byte from:
+/home/joe/code/futon2/data/wm-repair-obligations/findings/repair-occ-6c6ecaf858aff5c7f9aeef1b92ad205e7ed31ed29882e89fa52f2724d3d039c8.edn
+sha256sum result retained in finding.sha256.
+
+Commands:
+git diff --cached --check
+git diff --check
+Both exit 0, no output.
+sha256sum -c holes/labs/wm-contract/runs/repairs-as-tickets-2026-09-22/finding.sha256
+finding.edn: OK (exit 0).
