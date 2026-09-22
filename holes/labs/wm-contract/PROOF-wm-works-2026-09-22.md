@@ -406,6 +406,17 @@ candidates automatically, or that every click is fast.
     The normalisation test was corrected. The trace posterior keys by target-qualified id,
     so two targets' `:C1` no longer overwrite each other; no other code reads the serialised
     ids. Not yet reloaded, because B also changes `war_machine.clj`.
+  - Handoff B in futon2 c188d583 and 11203e5d (zai-1). codex-20 requires corrections; not
+    reloaded.
+    - An unknown classification is scored as stop-the-line (`observation_model.clj:209`).
+    - Scoring and close classification are still two implementations: on the reference
+      source, scoring gives `:focused` while the close's focus receipt gives `:unknown
+      :relation-not-declared` (`war_machine.clj:6064` vs `focus_receipt.clj:80`).
+    - Retention never checks whether a focus was completed (`focus_receipt.clj:47,71`;
+      `war_machine.clj:6306`).
+    - Repeated retention advances the original evidence date (`focus_receipt.clj:64`).
+
+    Next: discovery of where target relations and focus completion are recorded, then fixes.
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
