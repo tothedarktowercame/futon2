@@ -108,3 +108,19 @@
     ;; existing behaviour unchanged:
     (is (= #{"WM"} (facets ["src/futon2/aif/policy.clj"])))
     (is (= #{"WM"} (facets ["holes/labs/wm-contract/PROOF-wm-works.md"])))))
+
+;; PROOF-wm-works 1.3 handoff B(1): an established focus is RETAINED at the
+;; actual time when no discovery window covers it; a genuinely unknown focus
+;; stays :unknown.
+(deftest established-focus-is-retained-past-the-last-window
+  (let [previous {:focus "WM" :as-of "2026-09-22T17:31:44Z"}
+        r (focus/discover inputs "2026-09-30T00:00:00Z" previous)]
+    (is (= :retained (:status r)))
+    (is (= "WM" (:focus r)))
+    (is (= "2026-09-22T17:31:44Z" (:retained-evidence-as-of r))
+        "the original evidence date is retained, not today's")))
+
+(deftest no-established-focus-stays-unknown-past-the-last-window
+  (let [r (focus/discover inputs "2026-09-30T00:00:00Z" nil)]
+    (is (= :unknown (:status r)))
+    (is (nil? (:focus r)))))

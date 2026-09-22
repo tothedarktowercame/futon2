@@ -45,11 +45,23 @@
         winners (vec (sort (for [[f c] credits :when (= c best)] f)))
         discovered (when (and (= 1 (count winners)) (not= "other/unattributed" (first winners))) (first winners))
         focus (or (:focus previous) discovered)
-        edges (filterv #(at-or-before? (:effective-from %) as-of) (:facet-edges inputs))]
-    {:status (if (and window focus) :discovered :unknown)
-     :reason (cond (nil? window) :discovery-window-unavailable
+        edges (filterv #(at-or-before? (:effective-from %) as-of) (:facet-edges inputs))
+        ;; PROOF-wm-works 1.3 handoff B(1): an established focus that has not
+        ;; been completed is RETAINED at the actual time even when no
+        ;; discovery window covers it -- the docstring's own persistence
+        ;; semantics ("previous focus persists: this slice has no
+        ;; completion/transition authority"). The retention is explicit
+        ;; (:focus-origin :retained, :focus-status :retained, original
+        ;; evidence date under :retained-evidence-as-of); a genuinely
+        ;; unknown focus (no previous, no window) stays :unknown.
+        retained? (and (nil? window) (:focus previous))]
+    {:status (cond (and window focus) :discovered
+                   retained? :retained
+                   :else :unknown)
+     :reason (cond (nil? window) (when-not retained? :discovery-window-unavailable)
                    (nil? focus) :no-unique-attributed-focus)
-     :focus (when window focus) :as-of as-of
+     :focus (if (or window retained?) focus nil) :as-of as-of
+     :retained-evidence-as-of (when retained? (:as-of previous))
      :window (if window (assoc (dissoc window :commits)
                               :source-until (:until window)
                               :until (if (at-or-before? as-of (:until window)) as-of (:until window)))
@@ -58,7 +70,8 @@
      :previous-focus (or previous (absent :previous-focus-not-retained))
      :completion (absent :completion-authority-not-consumed)
      :transition {:status :held :reason :record-only-no-transition-authority}
-     :focus-origin (if (:focus previous) :retained-unfinished-focus :commit-facets)
+     :focus-origin (if retained? :retained-unfinished-focus
+                       (if (:focus previous) :retained-unfinished-focus :commit-facets))
      :facet-graph {:active (if focus [focus] [])
                    :background (vec (sort (set (keep (fn [e]
                                                       (cond (= focus (:from e)) (:to e)
