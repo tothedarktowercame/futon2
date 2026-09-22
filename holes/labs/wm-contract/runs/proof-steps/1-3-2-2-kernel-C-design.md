@@ -159,3 +159,34 @@ exactly the kind of decision rule 2 reserves for Joe.
   The regex fix is necessary (Case 2 is the honest world) but not
   sufficient: Joe must either rule a structural u-scheme or accept a
   different reference input.
+
+## Addendum 2 (2026-09-22): under Joe's amended check (tie → unique maximum counts as G deciding)
+
+With log E − F a tie and F not supplied, the full law σ(ln E − F − γG)
+reduces to ranking by −G: the unique maximum is simply the strictly lower G.
+
+- **Case 1 (code as-is, both unrelated at 5%): PASSES the amended check for
+  any u > 0, with a unique maximum at C2 — and the DIRECTION is
+  u-INDEPENDENT** (G(C2) = ln 20 − H(u) < ln 20 = G(C1) for every u ∈ (0,1),
+  minimum at u = 1/2). So no invented u is needed here — only u > 0, which
+  is structurally declared (C2's acceptance names unmeasured outcome
+  classes; the EXISTENCE of unmeasured mass is declared, its magnitude never
+  enters). But the demonstration is hollow in a specific way: the choice is
+  made by −H(Q) over two equal-preference slots — Joe's 55/35/5/5 and his
+  stop-line ruling are both inert — and it rides on the facet-regex gap that
+  classes a WM repair as unrelated.
+- **Case 2 (regex fixed, both focus at 55%): FAILS "no invented u" as it
+  stands.** The winner flips at u\* ≈ 0.219, so G depends on u's VALUE,
+  which is nowhere declared. The structural scheme (u = unmeasured-declared
+  classes / all declared classes → 3/4) would give a unique maximum at C1 —
+  agreeing with the name-order pick, which the amended check now accepts —
+  but the scheme itself is Joe's to rule.
+
+**Revised verdict:** with the amended check, Case 1 technically passes
+without any invented number (u's existence is declared; its value is
+irrelevant to the direction) — but it decides via a regex defect plus
+entropy between two equal slots, with Joe's entire preference structure
+inert. Case 2 is the honest world and needs one Joe ruling: bless the
+structural u-scheme (unique maximum at C1, direction then value-independent
+at 3/4 ≫ u\*) or choose a different reference input. I recommend presenting
+exactly this trade to Joe rather than banking the Case 1 pass.
