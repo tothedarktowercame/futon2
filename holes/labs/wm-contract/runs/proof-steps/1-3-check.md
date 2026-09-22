@@ -87,3 +87,94 @@ before "apparatus/…".)
 - F is explicitly not-supplied by the class model at selection
   (unconditioned); the score therefore did not subtract an F term, and
   the record says so rather than silently zeroing it.
+
+## Addendum: build-2 fallout — the two runner-test failures (read-only discovery)
+
+claude-5 is right that these are build 2's, not pre-existing: my stash check
+was invalid for two reasons claude-5 named (the test compares serving source
+to the canonical checkout, so a stashed tree ERRORS rather than failing; and
+tests run in their own JVM, so reloads cannot mask anything). The failing
+assertions are exactly what class scoring replaced.
+
+### 1. Where the precision-model q0 is dropped (file:line)
+
+The class path's scorer writes its meta at
+`cascade_observation_scoring.clj:170-176`: the ranked vector's meta carries
+only `{:cascade-scoring {:model model :scope :synthetic-bounded-replay
+:horizon-steps …}}` — **no :precision-model, hence no :q0**. The token path
+that the runner test asserts writes it at `efe.clj:1326`:
+`{:cascade-scoring {:precision-model {:q0 q0 :rates rates :horizon T
+:preference-spec spec :zeta …}}}` — attached only by the token scorer
+(efe/rank-cascade-actions' non-observation-model branch). war_machine.clj:6409
+reads `(get-in (meta ranked) [:cascade-scoring :precision-model])` → nil under
+the class path. The q0 itself is NOT lost — it is `(:cascade-belief state)`
+passed INTO the scorer, and each entry's certificate carries the per-step
+beliefs (`score-candidate`'s `:prediction {:initial-belief q0 …}`) — what is
+missing is the meta-level :precision-model slot the precision-family/carry
+machinery reads. So: dropped by omission in
+cascade_observation_scoring.clj:170-176, not by any computation.
+
+### 2. What the preference audit should record under class C
+
+The audit's :recorded status requires `common?`
+(preference_audit.clj:66-68): every scored candidate's `[:c :value]` equal and
+every `(:scoring certificate)` row carrying the same consumed-preference
+provenance. The token path wrote those rows (policy.clj:227's
+`:rates-provenance`/`:c` select-keys); the class path's certificate rows come
+from score-candidate (cascade_observation_scoring.clj:88-101) and carry
+`:rates-provenance {:source :observation-model/query :model observation-model}`
+plus `:c {:form :step-indexed :schedule … :steps …}` — the shape differs, and
+`preference-audit`'s attach sees no shared token preference, so it holds with
+`:shared-consumed-preference-not-retained`. Two viable options, not implemented:
+
+- **(a) record the class preference:** teach preference-audit to accept a
+  class-scoring provenance — when the certificate's scoring rows share the
+  class observation model (:kind :class-emission) and the model's
+  :class-preference at the horizon is Joe's fixed 55/35/5/5, the audit records
+  THAT as the consumed preference with its provenance (status :recorded, a
+  :consumed-preference-kind :class-emission field). The audit stays meaningful
+  — "one preference was consumed by every scored candidate" — with the
+  class rather than token vocabulary.
+- **(b) an honest typed status:** a deliberate `{:status :held :reason
+  :class-scoring-consumes-class-c}` — but then (checked): the runner test's
+  assertion changes deliberately, and `scoring_input_receipts.clj:54-56`'s
+  validate-record* only rejects a :preference-audit-mismatch when
+  `preference-audit/valid?` fails — valid? (:150+, build/rebuild equality) is
+  unaffected by a held status, so the record validator still accepts it.
+  `wm_run_validity.bb` does NOT reference preference-audit or precision-family
+  at all (grep: zero hits), so validity scoring is untouched either way.
+
+I recommend (a): the certificate ⟨1⟩5 reads should say what was actually
+consumed, and :recorded is true in substance — Joe's class C WAS consumed by
+every scored candidate.
+
+### 3. Every consumer of :preference-audit / :precision-family
+
+- `scoring_input_receipts.clj:29-30` (with-preference-audit — attaches it to
+  every decision) and `:54-56` (validate-record*: rejects only on
+  preference-audit-mismatch via preference-audit/valid?, which compares
+  rebuild equality — a held audit does not mismatch).
+- `run_narrative.clj:433-434, :496` (preference-audit-text — renders the
+  audit into the run narrative; a held audit renders its reason, degraded but
+  honest).
+- `war_machine.clj:6409` (precision-model → model-id → the
+  precision-carry/advance chain → `:policy-precision-state` on the
+  certificate): with nil it produces nil model-id — precision_carry.clj:70-75
+  holds (:precision-model-invalid / identity-mismatch paths) rather than
+  crashing; the state's hold is recorded, and the carry chain reinitialises
+  rather than advancing.
+- `policy.clj:227` (the token certificate's own :scoring rows — the writer,
+  not a consumer).
+- The close path: nothing in the close judgment or run-ending
+  classification reads either field (grep over run_ending_classification.clj:
+  zero hits); the accepted-increment predicate and B update (⟨1⟩4) do not read
+  them.
+- `wm_run_validity.bb`: zero references — validity scoring treats both as
+  absent-and-fine.
+
+So the blast radius of the current :held/nil-q0 state is: one narrative
+degradation, one precision-carry hold, and the runner test's two assertions.
+Nothing downstream refuses or misjudges a close. The fix is a certificate
+honesty question, exactly as claude-5 framed it — best resolved by option (a)
+plus attaching the class-path q0 into the precision-model meta (the q0 exists;
+the slot is simply not written on the class path).
