@@ -374,6 +374,11 @@ candidates automatically, or that every click is fast.
     - live F inspected, not assumed tied.
 
     Built in three handoffs: source inputs, class observation scorer, then F.
+  - Build 1 (source inputs) done in futon2 aac7ae01. All six tokens are observed at
+    initialisation. C4 locators read each disposition line: a FAILED calibration record stays
+    false (bad case checked). The source declares `:horizon-steps 4`. The probe at T = 4 shows
+    C1 reaching nothing and C2 reaching acceptance at step 4. Open item: `load-declared` does
+    not lift a source's `:horizon-steps` into the tick (`war_machine.clj:6821`).
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
