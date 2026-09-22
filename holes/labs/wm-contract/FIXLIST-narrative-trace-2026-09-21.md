@@ -372,3 +372,20 @@ selection-precedence ruling. Rule from now: no further click until the open,
 non-environmental queue is empty. Triage is dispatched to codex-10
 (runs/stopline-2026-09-22/TRIAGE.md). Each obligation closes through the store's
 verbs; each fix still needed is its own packet.
+
+### Correction (Joe, 2026-09-22): repair is ordinary selection, first in the queue
+Joe: "there should be no distinction between ordinary selection and repair, but
+repair should go to the front of the queue. The mechanism absolutely exists. It
+is the standard mechanism." This withdraws claude-3's "no click until the queue
+is empty" rule (3134b61f). Clicks are how repairs get done.
+
+The runner before 8b6827da diverted a click to repair-entry and skipped
+selection, so the repair had no controller decision and no certificate. From
+8b6827da on, selection runs but open obligations never enter it, and repair-entry
+and historical-revalidation-entry are no longer called. Neither version matches
+Joe's rule. The change needed: open, non-environmental obligations enter ordinary
+selection as candidates ranked ahead of mission candidates, and the selection
+certificate records that precedence. Rows 3-10 of runs/stopline-2026-09-22/TRIAGE.md
+already have code fixes and need the production-shaped validation that
+resolve! requires (historical-revalidation-entry). Rows 1-2 need a correct
+evidence deposit. A click that selects each one is what supplies both.
