@@ -417,6 +417,15 @@ candidates automatically, or that every click is fast.
     - Repeated retention advances the original evidence date (`focus_receipt.clj:64`).
 
     Next: discovery of where target relations and focus completion are recorded, then fixes.
+  - **Build 2 complete 2026-09-22** (zai-1, reviewed by claude-5 and codex-20; commits
+    daf2124e, 62fcfa1e, 163fd25d, c188d583, 11203e5d, 9b0e74bf, 84f81cb4, bf6ee6f3,
+    10ca9526, eabe81fe). The live joint decision scores prospective endings against Joe's
+    55/35/5/5 through a terminal-only class observation model, and `classify-target` is the
+    one classification used by both scoring and the close receipt. claude-5 reloaded all
+    seven namespaces from the canonical checkout.
+    - Open, with Joe: one target whose relation cannot be resolved refuses the whole family.
+      The behaviour is pinned by a test, not endorsed.
+    - Open: nothing consumes a focus's completion (Joe's ruling recorded above).
   - Discovery in futon2 2e2f08f4 and da5a329b (zai-1): target relations live in the focus
     corpus; a ticket's relation derives through its `Parent:` mission. Focus completion is
     recorded nowhere. Repeated retention was fixed by claude-5 (9b0e74bf). The shared
