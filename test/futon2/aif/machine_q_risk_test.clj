@@ -2,7 +2,8 @@
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.epistemic-value :as eig]
             [futon2.aif.machine-q :as machine-q]
-            [futon2.aif.machine-q-risk :as risk]))
+            [futon2.aif.machine-q-risk :as risk]
+            [futon2.aif.machine-q-test :as f1]))
 
 (def support (mapv #(keyword (str "o" %)) (range 12)))
 (def model {:id "m" :revision "r1"})
@@ -55,27 +56,22 @@
    :normalization {:residual 0.0}})
 
 (deftest one-payload-serves-risk-and-eig-with-relabeling-falsifier
-  (let [outcomes [:ordinary :no-result :failure :timeout :conflict :missing]
-        declared-mass (zipmap outcomes [1/2 1/4 1/8 1/16 1/32 1/32])
-        generator {:states [:evidence-state]
-                   :outcomes outcomes
-                   :transition {[:evidence-state :inspect]
-                                {:evidence-state 1.0}}
-                   :observation {:evidence-state declared-mass}}
-        reading {:id :machine-q/F1
-                 :plan {:inspect :inspect}
-                 :belief-mass (fn [_ _] 1.0)}
+  (let [outcomes f1/alphabet
         kernel (machine-q/predictive-outcome-kernel
-                (machine-q/generative-model! generator)
-                (machine-q/q-reading! reading generator)
+                (machine-q/generative-model! f1/model)
+                (machine-q/q-reading! f1/reading f1/model)
                 {})
-        mass (get-in kernel [:rows :inspect])
+        mass (get-in kernel [:rows :acquisition])
         p (payload outcomes mass)
         admitted (risk/predictive-payload-row! p)
-        preference {:model model :support outcomes :mass mass
+        uniform (zipmap outcomes (repeat (/ 1 (count outcomes))))
+        preference {:model model :support outcomes :mass uniform
                     :provenance {:source "preference-sha"}}
-        prior {:a 1/2 :b 1/2}
-        posteriors (zipmap outcomes (repeat prior))
+        prior mass
+        point (fn [chosen]
+                (into {} (map (fn [o] [o (if (= o chosen) 1.0 0.0)]))
+                      outcomes))
+        posteriors (into {} (map (fn [o] [o (point o)])) outcomes)
         eig-model {:prior prior :predicted-observations admitted
                    :posteriors posteriors}
         permutation (zipmap outcomes (reverse outcomes))
@@ -85,18 +81,29 @@
         relabelled-mass (relabel mass)
         relabelled-payload (payload relabelled-support relabelled-mass)
         relabelled-preference {:model model :support relabelled-support
-                               :mass relabelled-mass
+                               :mass (relabel uniform)
                                :provenance {:source "preference-sha"}}]
     (is (= mass admitted))
-    (is (zero? (:risk (risk/risk-payload p preference))))
-    (is (zero? (eig/expected-information-gain eig-model)))
+    (is (pos? (:risk (risk/risk-payload p preference))))
+    (is (pos? (eig/expected-information-gain eig-model)))
     (is (= (:risk (risk/risk-payload p preference))
            (:risk (risk/risk-payload relabelled-payload relabelled-preference))))
     (is (= (eig/expected-information-gain eig-model)
            (eig/expected-information-gain
-            {:prior prior :predicted-observations
+            {:prior relabelled-mass :predicted-observations
              (risk/predictive-payload-row! relabelled-payload)
-             :posteriors (relabel posteriors)})))))
+             :posteriors
+             (into {} (map (fn [[observation posterior]]
+                             [(permutation observation) (relabel posterior)]))
+                   posteriors)})))
+    (is (re-find
+         #"does not reconstruct prior"
+         (try
+           (eig/expected-information-gain
+            (assoc eig-model :posteriors
+                   (assoc posteriors :ordinary (:missing posteriors))))
+           "no exception"
+           (catch clojure.lang.ExceptionInfo e (ex-message e)))))))
 
 (deftest predictive-payload-refuses-domain-pin-and-receipt-mismatches
   (let [outcomes [:ordinary :missing]
@@ -107,6 +114,12 @@
     (is (= :policy-payload-mismatch
            (refusal #(risk/predictive-payload-row!
                       (assoc-in p [:policy :pins] {})))))
+    (is (= :policy-payload-mismatch
+           (refusal #(risk/predictive-payload-row!
+                      (dissoc p :policy/id)))))
+    (is (= :policy-payload-mismatch
+           (refusal #(risk/predictive-payload-row!
+                      (assoc-in p [:policy :id] :different-policy)))))
     (is (= :outcome-domain-mismatch
            (refusal #(risk/predictive-payload-row!
                       (assoc-in p [:outcome-domain :support] [:ordinary])))))

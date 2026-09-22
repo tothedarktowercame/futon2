@@ -12,6 +12,9 @@
   (and (map? x) (string? (:id x)) (seq (:id x))
        (string? (:revision x)) (seq (:revision x))))
 
+(defn- policy-id? [x]
+  (or (keyword? x) (and (string? x) (seq x))))
+
 (defn- validate-row! [x kind pin-key]
   (when-not (map? x) (refuse! :malformed-map [kind]))
   (doseq [field [:model :support :mass]]
@@ -47,7 +50,8 @@
     (refuse! :payload-schema-mismatch [:payload :schema]))
   (when-not (identity? model)
     (refuse! :model-revision-mismatch [:payload :model]))
-  (when-not (and (map? policy) (= policy-id (:id policy))
+  (when-not (and (policy-id? policy-id) (map? policy)
+                 (policy-id? (:id policy)) (= policy-id (:id policy))
                  (map? (:pins policy)) (seq (:pins policy)))
     (refuse! :policy-payload-mismatch [:payload :policy]))
   (when-not (and (map? source) (keyword? (:reading source))
