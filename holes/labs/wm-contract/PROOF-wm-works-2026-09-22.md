@@ -442,6 +442,13 @@ candidates automatically, or that every click is fast.
     - Open, with Joe: one target whose relation cannot be resolved refuses the whole family.
       The behaviour is pinned by a test, not endorsed.
     - Open: nothing consumes a focus's completion (Joe's ruling recorded above).
+    - Regression found by claude-5 (2026-09-22): `full-loop-runner-test`'s
+      `admitted-token-initialization-survives-runner-close` fails two assertions under class
+      scoring — the preference audit is `:held :shared-consumed-preference-not-retained`, and
+      `precision-family :model :q0` is nil. zai-1 reported these as pre-existing; they are
+      not. That test errors outside the canonical checkout, so a worktree or stash comparison
+      cannot show it failing, and test runs use their own JVM, so no reload affects them. The
+      certificate a live click writes is what ⟨1⟩5 reads, so this is fixed before the click.
   - Discovery in futon2 2e2f08f4 and da5a329b (zai-1): target relations live in the focus
     corpus; a ticket's relation derives through its `Parent:` mission. Focus completion is
     recorded nowhere. Repeated retention was fixed by claude-5 (9b0e74bf). The shared
