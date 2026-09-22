@@ -19,7 +19,10 @@
         today (focus/discover inputs (:as-of context) nil)]
     (is (= ["WM" "WM"] (mapv :focus [yesterday today])))
     (is (= [165 166] (mapv :commit-count [yesterday today])))
-    (is (= [151 157] (mapv #(get-in % [:facet-credit "WM"]) [yesterday today])))
+    ;; 158 rose from 157 with the resources/wm/ facet fix (PROOF-wm-works 1.3,
+    ;; 2026-09-22): one more commit under resources/wm/ in the frozen corpus
+    ;; (22 such paths exist) now correctly credits WM.
+    (is (= [151 158] (mapv #(get-in % [:facet-credit "WM"]) [yesterday today])))
     (is (= [] (get-in yesterday [:facet-graph :background])))
     (is (= ["APM"] (get-in today [:facet-graph :background])))
     (is (= ["WM"] (get-in (focus/discover inputs (:as-of context) {:focus "APM"}) [:facet-graph :background])))
@@ -84,3 +87,24 @@
     (is (= :unknown (get-in a [:candidates 0 :class])))
     (is (= :embedding-node-not-retained (get-in a [:candidates 0 :embedding :reason])))
     (is (= :unknown (get-in (focus/build d {:status :absent} context) [:discovery :status])))))
+
+;; PROOF-wm-works 1.3 (2026-09-22): resources/wm/ paths are WM work. The
+;; private facets fn is exercised directly (var-resolved) because the public
+;; discover reads the frozen commit-facets corpus, which predates these paths.
+(deftest resources-wm-paths-facet-as-wm
+  (let [facets @#'focus/facets]
+    (is (= #{"WM"} (facets ["resources/wm/rechecks/repair-occ-444fb018-dated-recheck.edn"])))
+    (is (= #{"WM"} (facets ["resources/wm/eig/held-out-split.edn"])))
+    (is (= #{"WM"} (facets ["resources/wm/cascade-sources/T-repair-occ-444fb018.edn"])))
+    ;; near-misses: a longer segment, wm elsewhere in the name, and a
+    ;; non-resources wm path must NOT facet as WM.
+    (is (= #{"other/unattributed"} (facets ["resources/wmx/thing.edn"])))
+    (is (= #{"other/unattributed"} (facets ["src/swarm/model.clj"])))
+    (is (= #{"other/unattributed"} (facets ["resources/wm2/x.edn"])))
+    (is (= #{"other/unattributed"} (facets ["docs/wm-notes.md"])))
+    ;; (resources/war_machine-ish legitimately matches the pre-existing
+    ;; war_machine prefix rule — trailing anchor was never required there —
+    ;; so it is not a near-miss; resources/wm2 is.)
+    ;; existing behaviour unchanged:
+    (is (= #{"WM"} (facets ["src/futon2/aif/policy.clj"])))
+    (is (= #{"WM"} (facets ["holes/labs/wm-contract/PROOF-wm-works.md"])))))

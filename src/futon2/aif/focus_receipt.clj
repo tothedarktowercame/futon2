@@ -17,7 +17,12 @@
     (catch Exception _ (absent :discovery-inputs-unavailable))))
 
 (defn- facets [paths]
-  (let [wm #"(^|/)(wm-contract|WarMachine|aif)(/|$)|(^|/)(war_machine|wm_|M-war-machine|M-wm-|M-G-wm|M-aif-policy)"
+  ;; resources/wm/ counts as WM (PROOF-wm-works 1.3, 2026-09-22): the machine's
+  ;; own runtime resources live there (cascade-sources, rechecks, eig), and
+  ;; classing them unrelated mis-faceted every WM repair. The segment must be
+  ;; exactly wm (anchored by / on both sides), so wmx/, wm/ inside other names,
+  ;; or a path merely containing "wm" still does not match.
+  (let [wm #"(^|/)(wm-contract|WarMachine|aif)(/|$)|(^|/)resources/wm(/|$)|(^|/)(war_machine|wm_|M-war-machine|M-wm-|M-G-wm|M-aif-policy)"
         apm #"(^|/)(apm|apm-lean)(/|$)|(^|/)(M-apm-|apm_|apm-|countdown_manifest)|^problems/"
         result (cond-> #{} (some #(re-find wm %) paths) (conj "WM")
                        (some #(re-find apm %) paths) (conj "APM"))]
