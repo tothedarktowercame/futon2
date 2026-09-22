@@ -10,16 +10,36 @@
 
 (load-identity/register! *ns* *file*)
 (def contract-resource "wm/attempt-learning-contract.edn")
+(def contract-v2-resource "wm/attempt-learning-contract-v2.edn")
 (defn declared-contract [] (edn/read-string (slurp (io/resource contract-resource))))
+(defn declared-contract-v2 []
+  "PROOF-wm-works ⟨1⟩4: the v2 contract authorising production consumption.
+   Joe's signature on the proof plan is the authorisation (cited in the
+   resource). The v1 resource stays untouched and still reads old events."
+  (edn/read-string (slurp (io/resource contract-v2-resource))))
 
 (defn- supported-contract? [contract]
-  (= (select-keys contract [:schema :authority :mode :trial-grain :occurrence-schema :observation-schema :placement :selection-condition])
+  ;; PROOF-wm-works ⟨1⟩4: two supported shapes. v2
+  ;; (:mode :production-consumption) is the live contract; v1
+  ;; (:mode :record-only) remains recognised so historical events read.
+  (contains?
+   #{;; v2: production consumption authorised by the proof plan's signature
+     {:schema :wm/attempt-learning-contract-v2 :authority :declared
+      :mode :production-consumption
+      :trial-grain :selected-cascade-effect-attempt
+      :occurrence-schema :wm/action-transition-occurrence-v2
+      :observation-schema :wm/d-task-token-observations-v2
+      :placement :post-build-artifact-revision
+      :selection-condition :effect-absent-and-predicted-positive}
+     ;; v1: the record-only original, for reading old events
      {:schema :wm/attempt-learning-contract-v1 :authority :declared :mode :record-only
       :trial-grain :selected-cascade-effect-attempt
       :occurrence-schema :wm/action-transition-occurrence-v2
       :observation-schema :wm/d-task-token-observations-v2
       :placement :post-build-artifact-revision
-      :selection-condition :effect-absent-and-predicted-positive}))
+      :selection-condition :effect-absent-and-predicted-positive}}
+   (select-keys contract [:schema :authority :mode :trial-grain :occurrence-schema
+                          :observation-schema :placement :selection-condition])))
 
 (defn receipt
   "Verify signed endpoints using the existing execution authority and supplied

@@ -1,0 +1,15 @@
+{:schema :wm/attempt-learning-contract-v2
+ :authority :declared
+ :mode :production-consumption
+ :authority-basis "Joe's signature on PROOF-wm-works-2026-09-22.md (⟨1⟩2 ruling 27f5b8d8: B uses recorded outcomes where they exist and each candidate's DECLARED effects as the prior otherwise; ⟨1⟩3 sub-step 2.3 names this amendment with the plan signature as the authorisation)"
+ :supersedes :wm/attempt-learning-contract-v1
+ :v1-interpretation "Every trial recorded under v1 is a whole-attempt outcome for its declared effect family at the selected-cascade grain, admitted with :consumption :not-authorized at write time. Under v2 the SAME events are read as the transition evidence for the attempt's selected pattern family: no event is rewritten, duplicated or re-counted; the v1 :consumption field is honoured as a historical record of the write-time contract, not as a live veto."
+ :trial-grain :selected-cascade-effect-attempt
+ :occurrence-schema :wm/action-transition-occurrence-v2
+ :observation-schema :wm/d-task-token-observations-v2
+ :selection-condition :effect-absent-and-predicted-positive
+ :placement :post-build-artifact-revision
+ :calibration "This selected cascade delivers this declared effect when dispatched through this route."
+ :consumption "A whole-attempt outcome informs the selected pattern family's theta (its declared effect's transition probability) and nothing wider: the attempt exercised exactly that family through its declared effect, so the outcome is evidence about that family's transition, not about sibling families, the cascade grain, or any controller term. Exactly one update per occurrence identity, written only after an accepted-increment close."
+ :does-not-establish #{:pattern-causality :individual-pattern-firing}
+ :ledger "/home/joe/code/futon2/data/wm-learning-trials/attempts.edn"}

@@ -52,6 +52,9 @@ resources/wm/*
 # resources/wm/* are ignored above). Same pattern as WM-04 S-1 below/above.
 !resources/wm/rechecks/
 !resources/wm/eig/
+# PROOF-wm-works 1.4: the v2 attempt-learning contract authorising production
+# consumption (Joe plan signature as authority) is a machine-read resource.
+!resources/wm/attempt-learning-contract-v2.edn
 
 # local file that shouldn't be tracked here
 LICENSE
