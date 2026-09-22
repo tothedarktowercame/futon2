@@ -383,6 +383,18 @@ candidates automatically, or that every click is fast.
     records which ones declared. With none declared, the key is absent and T = 2 stays.
     `check-file!` refuses a bad value. Tests pass, 11/41. claude-5 reloaded it. The tick now
     reads T = 4 for this family.
+  - Build 2 (class observation scorer) in futon2 daf2124e, zai-1. **Not reloaded.** codex-20
+    reproduced defects in an isolated process:
+    - `tau` is never passed, so every step is scored as terminal (G = 2·ln 20 over two steps);
+    - acceptance before T emits a class (infinite G);
+    - the numeric tests assert the reverse of their comments;
+    - token-domain validation was wrongly relaxed;
+    - multi-target states are averaged into classes, and ambiguity is still reported as 0;
+    - the preference is not required to be normalised;
+    - focus is backdated to the corpus window;
+    - the first locator facet is used instead of `focus_receipt`'s target relation.
+
+    Fixes are split into scorer correctness (handoff A) and focus/facet meaning (handoff B).
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
