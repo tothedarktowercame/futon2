@@ -283,11 +283,11 @@ candidates automatically, or that every click is fast.
 |---|---|---|---|
 | Execution rules | SIGN | SIGN | |
 | THEOREM / ASSUME | SIGN | SIGN | |
-| ⟨1⟩1 | SIGN | (pending: rev 4 renumbered) | |
-| ⟨1⟩2 | SIGN | (pending: rev 4) | |
-| ⟨1⟩3 | SIGN | (pending: rev 4) | |
-| ⟨1⟩4 | SIGN | (pending: rev 4) | |
-| ⟨1⟩5 | SIGN | (pending: rev 4) | |
+| ⟨1⟩1 | SIGN | SIGN | |
+| ⟨1⟩2 | SIGN | SIGN | |
+| ⟨1⟩3 | SIGN | SIGN | |
+| ⟨1⟩4 | SIGN | OBJECT | |
+| ⟨1⟩5 | SIGN | SIGN | |
 | ⟨1⟩6 | SIGN | SIGN | |
 | ⟨1⟩7 | SIGN | SIGN | |
 | ⟨1⟩8 | SIGN | SIGN | |
@@ -1670,3 +1670,154 @@ moot — the count left the plan with the positive path. Missing items 1, 2 and
 - I also note the cleared-cell convention adopted in 4ba432d0 (a changed step
   clears its sign-off cells; only the reviewer refills their own) — correct,
   and it answers my rev-4 Missing item 2 as a rule, not just an apology.
+
+
+## Codex review (rev 4)
+
+**Reviewer: codex-20; model: GPT-6 (gpt-6-astra).**
+
+Reviewed `17317870`, including the simplified step 4 and ordinary-ticket
+step 5. **Fresh verdicts: 4 SIGN, 1 OBJECT for steps 1–5. Overall table:
+9 SIGN, 1 OBJECT.** Only my five requested cells are changed. The remaining
+objection is a concrete mismatch between the step-4 wording and its named
+input record, not another structural redesign. This is plan review, not
+certification that the implementation or live demonstration has happened.
+
+I re-read the operative plan, Zai's rev-4 review/addenda and
+`token_outcome.clj:54–90`, and parsed the two retained token-outcome records
+read-only. No click, model update, reload, test run or machine change was made.
+
+### ⟨1⟩1 — SIGN
+
+**Attack:** the ordinary selector chooses the very work the proof previously
+required preserving for a later demonstration. The restriction is now gone:
+this step runs first on whatever target selection chooses, and the working
+input is prepared afterwards. No target override, special preliminary ticket
+or proof-only firing gate is needed. Command/click/attempt/new-close binding
+prevents crediting an unrelated old close. The loading evidence, actual
+finding-to-ticket join, runtime seat handling, open-resume/final-close
+semantics and timing account remain specified. A failed terminal close can
+prove lifecycle completion here; it does not prove accepted delivery, which
+belongs to step 6. My former objection is resolved.
+
+### ⟨1⟩2 — SIGN
+
+**Attack:** two differently named policies might be the same first action,
+have no relevant historical evidence, or require impossible work. The CHECK
+requires different first actions, compatible outcome evidence, actual
+eligibility and feasible acceptance with a recorded task/pattern derivation.
+It uses the loader selection consumes. This is usable development input for
+step 3, not an assumption that any real data must force discrimination.
+
+The snapshot has a legitimate purpose as reproducible input to the read-only
+calculation. It must not become a requirement that live selection stay equal
+to it. The current step 5 explicitly rejects that requirement. Interpret
+“before any click” in the interpretation sub-step as before a click consuming
+these candidates, not as undoing the newly first command step. That is an
+editorial clarification, not a new prerequisite. Likewise the reference
+input need not be protected from ordinary changes to the queue.
+
+### ⟨1⟩3 — SIGN
+
+**Attack:** G merely reinforces the base winner but passes the former
+alternative margin condition. That alternative has been removed. Full versus
+base action choice is now compared on summed action marginals, holding the
+other inputs fixed; a changed choice establishes the stated counterfactual.
+A unique full-law maximum avoids attributing that choice to the name-order
+tie-break. A base-law tie resolved by its declared tie rule is still a
+well-defined base choice; there is no need for an extra rule requiring its
+maximum to be unique.
+
+The CHECK records every term and its source, distinguishes absent F, and
+places q0, predictive class mapping, C, learned B, parameter placement and
+carrier composition inside the step that consumes them. Those are substantive
+implementation obligations, not assertions that listing functions proves
+composition. Failed discrimination is reported without tuning lawful data.
+The explicit distinction between a demonstration requirement and a runtime
+rule means legitimate habit-reinforcing clicks remain allowed. My numerical
+and causal objections are resolved; no further margin condition is needed.
+
+### ⟨1⟩4 — OBJECT: preserve the actual true observation in r4-1
+
+**Attack:** run the CHECK literally on its named historical inputs. The
+sentence says they “give a measured false or `:missing` correctly,” but the
+retained r4-1 record contains a measured **true**, independently of the later
+close failure:
+
+`data/wm-full-loop-machinery-69/wm-contract-machinery-69-v1/attempt-002/retained/token-outcome.edn`
+
+| Token suffix (target M-aif-policy-conditioned-eig) | Observed | Verdict |
+|---|---|---|
+| `h0e270aa090bc` | false | `:neither` |
+| `h42fceb4ad48b` | false | `:neither` |
+| `h6378c65a4012` | **true** | `:predicted-and-observed` |
+
+r4-2's corresponding record under
+`data/wm-full-loop-machinery-70/wm-contract-machinery-70-v1/attempt-001/retained/token-outcome.edn`
+has two missing observations (`:measurement-unavailable`). These are different
+cases. `token-outcome/compare-outcomes` compares the measurements and artifact
+revision; it does not rewrite observed true to false merely because final
+acceptance fails. A failed certification and an observed effect can coexist.
+
+**Minimal correction:** replace that bullet with “On the real r4-1 and r4-2
+evidence, preserve the recorded true, false and missing observations correctly;
+never infer a successful close or invent an attestation from them.” The table
+above supplies the exact expected input/output distinction. This modifies
+only the existing CHECK's statement; no new fixture, producer, guard or gate
+is requested. I am withholding this one SIGN until the text no longer risks
+instructing the builder to erase a true measurement.
+
+The *other* step-4 objections are resolved. Producers are implemented and
+called before close construction; a historical failure need not become an
+accepted example to unlock the live attempt. Durable B updates are deferred
+until acceptance and keyed by occurrence, with actual persistence/reload
+behavior witnessed at step 8. There is no read-only claim to have performed
+a new write and no extra persistence rehearsal. Step 3 still owns the precise
+trial meaning and parameter placement; final acceptance must not be confused
+with the truth value of every measured token.
+
+### ⟨1⟩5 — SIGN
+
+**Attack:** the live queue changes or supplies a field where G does not alter
+the base choice. The live CHECK now independently requires the full
+counterfactual and a unique eligible action maximum on that click's own
+inputs. It cannot pass just by agreeing with an old expected winner or a
+weaker margin condition. An ordinary non-discriminating click is recorded and
+does not prove the step; it is not prevented from running.
+
+Requesting the work through an ordinary ticket is an ordinary use of the
+machine, not a new priority privilege or a target pin. It does not promise
+when that ticket will be selected. A later qualifying click may supply the
+witness. Its occurrence must remain the one whose accepted close, measured
+outcome and update are inspected in steps 6–8; an accepted close from a
+different non-discriminating click cannot be substituted. The existing
+“this occurrence” wording is sufficient for that join, so no new ceremony is
+required. My selection, drift and contribution objections are resolved.
+
+### Q.E.D. — valid conditional composition, not yet an achieved result
+
+The intended implication now works: a qualifying live step-5 selection gives
+the real full-law/counterfactual action, steps 6–7 establish the same
+occurrence's accepted measured outcome, and step 8 demonstrates its update
+and actual subsequent consumption. The development snapshot is no longer
+needed to prove identity with the live input. No part claims universal task
+coverage or a speed bound.
+
+The step-4 factual correction above is still owed before I sign the complete
+plan. Separately, none of these review SIGNs substitutes for running the
+CHECKs; Q.E.D. follows only when their recorded witnesses exist. No additional
+Q.E.D. sign-off gate is being introduced.
+
+### Joe's red-tape test / remaining item
+
+The protected preliminary target, live snapshot matching, drift/refreeze
+process, forced historical success and extra persistence rehearsal are gone;
+I request none of them back. The strong counterfactual is explicitly for the
+demonstration, not an admission rule for ordinary clicks. Feasibility is a
+property of the task, timing is reporting, and load identity ties a result
+to the code that ran. The ordinary ticket does not need special treatment.
+
+**One required amendment:** correct step 4 to preserve r4-1's true measurement
+as well as false/missing values. It answers an actual data-correctness need,
+not a need created by the proof's structure. No additional implementation
+work or approval process is proposed by this review.
