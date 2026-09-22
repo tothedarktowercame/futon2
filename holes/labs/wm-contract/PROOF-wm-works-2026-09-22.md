@@ -271,16 +271,16 @@ candidates automatically, or that every click is fast.
 
 | Step | Zai GLM | Codex | Joe |
 |---|---|---|---|
-| Execution rules | | | |
-| THEOREM / ASSUME | | | |
-| ⟨1⟩1 | | | |
-| ⟨1⟩2 | | | |
-| ⟨1⟩3 | | | |
-| ⟨1⟩4 | | | |
-| ⟨1⟩5 | | | |
-| ⟨1⟩6 | | | |
-| ⟨1⟩7 | | | |
-| ⟨1⟩8 | | | |
+| Execution rules | SIGN | | |
+| THEOREM / ASSUME | SIGN | | |
+| ⟨1⟩1 | SIGN | | |
+| ⟨1⟩2 | SIGN | | |
+| ⟨1⟩3 | SIGN | | |
+| ⟨1⟩4 | SIGN | | |
+| ⟨1⟩5 | SIGN | | |
+| ⟨1⟩6 | SIGN | | |
+| ⟨1⟩7 | SIGN | | |
+| ⟨1⟩8 | SIGN | | |
 
 The review sections below refer to earlier revisions (1–2) and their step numbering.
 
@@ -982,3 +982,146 @@ versus runtime-composition and C-source corrections; ⟨1⟩1 still has the
 independent lifecycle/reference/acceptance issues stated above. The numerical
 counterexample and the remaining ordering, carrier, loaded-source and close
 findings are unchanged. No machine work was performed for this update.
+
+## Zai GLM review (rev 3)
+
+**Reviewer model:** Zai GLM (zai-1), GLM-5.x. Full adversarial pass over every
+row of a2b24c38, standard as in 580dd866/f4ab52a7: each CHECK attacked before
+signing; every new file:line claim opened read-only.
+
+New claims verified: `load_identity.clj` digest-vs-canonical comparison
+(:63-108); `cascade_selection.clj:95-116` is the NaN/absent-term pathology
+comment (absent is not 0 — real) and `:132-163` the action marginal with its
+tie-break rule; `tripwire.clj:750 record-finding!` → repair-obligation chain;
+`full_loop_cohort.clj:601-602` throws on appending to a closed attempt;
+`resources/wm/attempt-learning-contract.edn` exists and `attempt_learning.clj:15-21`
+pins `:mode :record-only` in `supported-contract?`; `full_loop_runner.clj:3697-3755`
+obtains D-task observations, route attestation and kernel receipt into the
+close; `wm_click.sh:111-233` is the firing-refusal block.
+
+### Execution rules — SIGN
+
+Attack: rule 1 ("repairs happen inside sub-steps ⟨2⟩ of the step that needs
+them") could hide unbounded scope creep — a sub-step that rebuilds half the
+machine inside ⟨1⟩3. Survives: each sub-step is checked by recomputation from
+pinned inputs, and rule 5 keeps the proof's order from ever becoming a rule
+against running the machine — the red-tape failure mode Joe named is closed in
+both directions. Rule 2's "never adjust preferences, evidence or parameters to
+force a check to pass" is the anti-Goodhart line this plan needed from the
+start.
+
+### THEOREM / ASSUME — SIGN
+
+Attack: the theorem is now scoped as "a demonstration on one decision input" —
+weaker than rev 2's implied generality. That is not a defect but honesty: the
+old framing overclaimed. A1's new admission (the bundle checks correspondence,
+not composition) correctly puts composition inside the proof. Counts (16/36)
+re-verified in my earlier passes.
+
+### ⟨1⟩1 — SIGN, one bias guard owed
+
+Attacks: (a) the target could be hand-picked easy — survives, the target must
+come from the registry/queue in the eligible stratum and candidates must carry
+recorded derivations, with the author's seat not establishing them alone;
+(b) ⟨2⟩4's honesty rule (no compatible evidence → different target or stop,
+differences never manufactured) closes the manufacturing loophole I would have
+used. Owed: the snapshot names "the observable outcome differences that ⟨1⟩3
+will rely on" — state explicitly that it names *evidence*, never an expected
+chosen action, so construction cannot be steered toward a predetermined winner
+(Missing 2).
+
+### ⟨1⟩2 — SIGN, one freeze-integrity note
+
+Attacks: (a) firing on a *non-reference* target could consume reference work —
+prevented by construction; (b) ⟨2⟩1 removes the firing-refusal block — that is
+Joe's quoted ruling (tripwires never decide firing), not new license; (c) the
+finding→ticket chain (⟨2⟩3) is followed to a ticket id, so my coupling concern
+from 580dd866 is now carried in and checkable. Lifecycle (⟨2⟩4) and the
+three-way timing definition (⟨2⟩5: agent wait / machine / overlap, no budget
+gate) answer my earlier split correctly. Note (Missing 4): the ⟨1⟩2 click may
+itself produce a learning-trial event; the reader built in ⟨1⟩3 ⟨2⟩3 must
+enforce the ⟨1⟩1 ledger cutoff, or B silently includes post-freeze evidence
+and the "frozen inputs" claim breaks.
+
+### ⟨1⟩3 — SIGN
+
+This is the step the whole plan turns on, so three attacks:
+(a) *Could the G-matters check pass vacuously?* The check requires the full-law
+choice to differ from the `log E − F`-alone choice (or G's contribution to
+exceed that margin) — a genuine counterfactual, and codex-20's numerical
+counterexample against rev 2 cannot recur because C, B and the score are all
+sub-steps of the one step, checked against pinned inputs.
+(b) *Absent-as-zero:* the plan pins `cascade_selection.clj:95-116`, the exact
+NaN pathology; absent is recorded absent. Verified real.
+(c) *Unknown mass renormalisation* (my old "least-observed looks best" attack)
+is explicitly forbidden, and the class-carrier vs token-carrier KL distinction
+is named. The tie-break is excluded as evidence. Survived everything I had.
+
+### ⟨1⟩4 — SIGN
+
+Attack: the producers are tested on "an existing real close" — does one exist
+with usable properties? Yes: r4-2's close is real, retained and typed, and
+click 1's grounded close carries real after-build measurement. Running the four
+producers read-only there, before any live click, is the right order (it fixes
+the r4-1 failure mode of discovering shape defects inside a close). Verified
+the runner already assembles these inputs at `full_loop_runner.clj:3697-3755`.
+
+### ⟨1⟩5 — SIGN, one brittleness owed
+
+Attack: between read-only ⟨1⟩3 and live ⟨1⟩5 the queue can change — a new
+candidate entering would make live scores differ from ⟨1⟩3's, and the check
+("equal ⟨1⟩3's") would fail for an environmental reason, not a machine defect.
+The plan refuses to pin the target (correctly), so this can happen. Owed
+(Missing 1): allow the check to pass when the live input differs only by
+additions, with the recomputed choice shown and G again changing it — or state
+that a changed input is logged at ⟨1⟩5 and the reference re-frozen only at
+Joe's word. Without that, an innocent queue drift stops the proof.
+
+### ⟨1⟩6 — SIGN
+
+`verify-close` alone is explicitly not enough, with r4-2 named as the case
+that passed it on a failure (verified in its STAGES: verify-close true, close
+`:known-typed-failure`). The accepted-increment predicate is bound to reviewed
+commits and existing acceptance, "no additional gates". Survived.
+
+### ⟨1⟩7 — SIGN
+
+The classifier is rerun on the actual close, attestation and focus inputs —
+not only the projection `verify-close` compares. That closes the
+label-as-evidence hole. Measured true/false, never `:missing`. Survived.
+
+### ⟨1⟩8 — SIGN
+
+Attack: "the next live selection... on whatever compatible task it runs" could
+consume the update on a domain-changed task. Survives: ⟨1⟩3 ⟨2⟩3 establishes
+the carry rules, and the with/without recompute on frozen non-B inputs is the
+discriminating check; no replay of the reference task as new work; exactly-once
+with reload survival. Survived.
+
+### Red tape audit
+
+Nothing in rev 3 adds a check, gate or sign-off Joe did not ask for: firing
+never refuses, feasibility is a property, timing is reporting without a budget
+gate, A3/A4 are gone per Joe, and rule 5 positively forbids using the proof's
+order against running the machine. Clean.
+
+### Missing (rev 3)
+
+1. **⟨1⟩5 queue-drift brittleness:** allow the identity-match check to tolerate
+   additive input changes with the recomputed choice shown, or route a changed
+   input to Joe for re-freezing — never a silent stop.
+2. **⟨1⟩1 bias guard:** say the snapshot names evidence, never an expected
+   chosen action.
+3. **`attempt_learning.clj:15-21` pins `:mode :record-only`** in
+   `supported-contract?` — the new contract version must update this pin in
+   the same change, named in ⟨1⟩3 ⟨2⟩3, or the code rejects the new contract
+   (or the check gets loosened without one).
+4. **⟨1⟩2's click outcome vs the ⟨1⟩1 cutoff:** the production reader must
+   enforce the frozen ledger cutoff, so the non-reference click's own trial
+   event cannot enter B before ⟨1⟩3.
+
+Verdict: **9 SIGN, 0 OBJECT.** Rev 3 is structurally the strongest version:
+repairs live inside steps, the G-matters check is a real counterfactual, every
+carried-in failure mode from clicks 1–3 is named at the step it would bite,
+and the red-tape failure mode is closed by rule 5. The four Missing items are
+wording and enforcement notes. This review authorizes no machine changes.
