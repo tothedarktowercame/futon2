@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg aria-label="Cascade precedence, dependencies, and wanted-token outcomes" fill="#25313c" font-family="sans-serif" font-size="13" height="436" role="img" viewBox="0 0 800 436" width="800" xmlns="http://www.w3.org/2000/svg"><title>Cascade precedence, dependencies, and wanted-token outcomes</title>
+<rect fill="white" height="100%" width="100%"></rect>
+<text font-size="18" x="24" y="28">Cascade and wanted-token outcomes</text>
+<text x="24" y="52">Selected target: M-f11-find-production-successor</text>
+<text x="24" y="75">Solid arrows: need-edges / wires. Dashed arrows: model prediction.</text>
+<defs><marker id="arrow" markerHeight="8" markerWidth="8" orient="auto" refX="7" refY="4"><path d="M0,0 L8,4 L0,8 Z" fill="#68717b"></path>
+</marker>
+</defs>
+<path class="prediction-edge" d="M354,145.0 C414,145.0 510,220 570,220" data-from=":apparatus/done-is-observed-running" data-token=":hole/h9ab212b3281d" fill="none" stroke="#68717b" stroke-dasharray="6 4"></path>
+<polygon class="prediction-arrowhead" fill="#68717b" points="567,220 558,216 558,224"></polygon>
+<g class="pattern" data-pattern=":apparatus/done-is-observed-running"><rect fill="#f6f7f8" height="70" rx="5" stroke="#68717b" width="330" x="24" y="110"></rect>
+<text font-size="12" x="32" y="132">:apparatus/done-is-observed-running</text>
+<text font-size="12" x="32" y="148">produces:</text>
+<text font-size="12" x="32" y="164">:hole/h9ab212b3281d</text>
+</g>
+<text x="570" y="96">Wanted tokens</text>
+<g class="want observation-missing" data-predicted="0" data-token=":hole/h2045faa0e7cc"><rect fill="white" height="64" rx="5" stroke="#89939e" stroke-dasharray="4 3" stroke-width="1" width="208" x="570" y="110"></rect>
+<text font-size="12" x="578" y="128">:hole/h2045faa0e7cc</text>
+<text font-size="11" font-weight="bold" x="578" y="144">observation missing</text>
+<text font-size="10" x="578" y="159">prediction: 0</text>
+<text font-size="10" x="578" y="170">observed: not recorded</text>
+</g>
+<g class="want observation-missing" data-predicted="1" data-token=":hole/h9ab212b3281d"><rect fill="white" height="64" rx="5" stroke="#89939e" stroke-dasharray="4 3" stroke-width="1" width="208" x="570" y="188"></rect>
+<text font-size="12" x="578" y="206">:hole/h9ab212b3281d</text>
+<text font-size="11" font-weight="bold" x="578" y="222">observation missing</text>
+<text font-size="10" x="578" y="237">prediction: 1</text>
+<text font-size="10" x="578" y="248">observed: not recorded</text>
+</g>
+<text x="24" y="286">shape: singleton (basis: declared need-support; authority structure not recorded)</text>
+<text font-weight="bold" x="570" y="282">Comparison verdicts</text>
+<rect fill="#f9dfdc" height="12" rx="5" stroke="#b42318" stroke-width="3" width="12" x="570" y="294"></rect>
+<text font-size="10" x="590" y="304">predicted, not observed</text>
+<rect fill="#dceee3" height="12" rx="5" stroke="#287447" stroke-width="1" width="12" x="570" y="316"></rect>
+<text font-size="10" x="590" y="326">predicted and observed</text>
+<rect fill="#eef0f2" height="12" rx="5" stroke="#89939e" stroke-width="1" width="12" x="570" y="338"></rect>
+<text font-size="10" x="590" y="348">neither predicted nor observed</text>
+<rect fill="white" height="12" rx="5" stroke="#287447" stroke-width="2" width="12" x="570" y="360"></rect>
+<text font-size="10" x="590" y="370">not predicted, observed</text>
+<rect fill="white" height="12" rx="5" stroke="#89939e" stroke-dasharray="4 3" stroke-width="1" width="12" x="570" y="382"></rect>
+<text font-size="10" x="590" y="392">observation missing</text>
+<text x="24" y="352">Model prediction: retained comparison receipt</text>
+<text x="24" y="330">0 dependency arrow(s).</text>
+</svg>
