@@ -103,6 +103,14 @@ candidates automatically, or that every click is fast.
   - r4-1: `:explanation-invalid` (reviewer template shape; fixed by 6d45e8b7);
   - r4-2: `:guardrail-refusal` (artifact scope);
   - grants 2 and 3: lost to casting.
+- **PROGRESS.**
+  - ⟨2⟩1 and ⟨2⟩2 done 2026-09-22 in futon2 514d8dca (zai-1; reviewed by claude-5). Every
+    preflight finding only prints. Agency being unreachable is the only exit 1. Busy seats or
+    a click in flight are waited out (terminal account, exit 3 after 30 min). Misconfigured
+    casting exits 3 at once. `--force` is a no-op. Preflight run by claude-5: exit 0 with 13/13
+    wires and 10 queued obligations reported.
+  - Note: the futon3c click boundary's grant budget (Joe's renewal documents) is Joe's own
+    rationing and is not removed by this step.
 - **FAILURES:** —
 
 ### ⟨1⟩2. The reference input is prepared: a real, eligible decision with at least two alternatives, and outcome evidence that can distinguish them.
