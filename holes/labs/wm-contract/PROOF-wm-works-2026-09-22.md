@@ -358,6 +358,9 @@ candidates automatically, or that every click is fast.
     - With today's q₀, C1 observes the obstruction and reaches nothing.
     - C2 goes declare → collect → calibrate → restoration accepted in 4 steps.
     - claude-5 reloaded `cascade-sources` and `cascade-proposals`.
+  - Focus facet fix in futon2 aec603a7: `resources/wm/` now counts as WM work. Tested with
+    near-miss paths, 6/82. The frozen-corpus pin moved 157 → 158 because one more commit is
+    now correctly credited. claude-5 reloaded `focus-receipt`.
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
