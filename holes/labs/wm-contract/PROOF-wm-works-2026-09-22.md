@@ -2,249 +2,287 @@
 
 **Author:** claude-5, 2026-09-22, at Joe's direction.
 **Form:** Lamport-style structured proof.
-**Status:** DRAFT rev 2 (after Zai review f4ab52a7): ⟨1⟩4/⟨1⟩5 swapped so C precedes B; the rest amended per Zai's Missing list.
+**Status:** DRAFT revision 3, restructured after codex-20 review 289e98e2 (Codex order: prepare input → command → G decides (read-only) → producers → execute once → inspect).
 - Sign-off: Zai GLM (adversarial), then Codex, then Joe.
 - This plan supersedes Part B of `REPAIR-PLAN-2026-09-22.md`. Parts A and C of that plan stay
   in force.
 
 ## How this proof is executed
 
-1. **Order.** Steps are proved strictly in order. Step ⟨1⟩k is not started until ⟨1⟩(k−1) is
-   proved.
-2. **No back loops.**
-   - Every step is checked on the **reference field** fixed in ⟨1⟩2.
-   - Each step's criterion is written to be strong enough that the next step can use it.
-   - When a step fails, the failure is recorded under that step, and the work stays at that
-     step until its criterion holds. The work does not move to another component.
-   - If a failure shows that an earlier step's criterion was too weak, the proof stops. Joe
-     decides whether to amend that criterion. An agent never does this silently.
+1. **Order.** Top-level steps ⟨1⟩k are proved strictly in order. Work that repairs a component
+   happens inside the sub-steps ⟨2⟩ of the step that needs it. That is part of proving the
+   step, not a loop back.
+2. **When a step cannot be proved** from lawfully derived data, the proof stops and the fact is
+   reported to Joe. Preferences, evidence or parameters are never adjusted to force a check
+   to pass. Joe decides what happens next. An agent never amends an earlier step silently.
 3. **A step is proved** when its CHECK is run and passes, and the result is recorded under the
-   step with the commit, the click id or the record path. "Merged", "tests green" and
-   "receipt written" do not prove a step.
-4. **Failure log.** Each step has a FAILURES list. Each entry records:
-   - the date;
-   - what was tried;
-   - what the check showed;
-   - the cause found.
+   step with the commit, the click id or the record path. "Merged", "tests green", "receipt
+   written" and `verify-close` alone do not prove a step.
+4. **Failure log.** Each step has a FAILURES list: date, what was tried, what the check
+   showed, and the cause found. Entries are never deleted.
+5. **Running the machine and advancing the proof are separate.** Joe can order a click at any
+   time; the click reports where the proof stands. The proof's order is never turned into a
+   rule against running the machine.
+6. **Management rules** (Joe, 2026-09-22, quoted here as the authority):
+   - "the machine runs when you say run": nothing refuses a click except Agency being
+     unreachable;
+   - the 13 tripwires exist to ensure correct behaviour during a run, and never decide
+     whether a click may fire;
+   - no new check, guard, gate, grant, negative control or sign-off unless Joe asks for it by
+     name;
+   - every report opens with the step reached and whether its check passed;
+   - each step's work is implemented by a Codex agent and reviewed by a different agent.
+     claude-5 writes the instructions and runs the CHECK.
 
-   Entries are never deleted.
-5. **Management rules** (Part C of the repair plan, as Joe gave them on 2026-09-22):
-   - The machine runs when Joe says run. Checks before a click report; they do not block,
-     unless running is impossible.
-   - No new check, guard, gate, grant, negative control or sign-off is added unless Joe asks
-     for it by name.
-   - Every report opens with the step reached and whether its check passed.
-   - Work is implemented by a Codex agent. A different agent reviews it. claude-5 writes each
-     step's instructions and runs its check.
+   Joe's queue rulings stand unchanged:
+   - "repair fixes are not different from other fixes, they are just moved to the front of
+     the queue" (bbae7593);
+   - "what happens if something (of whatever shape) goes into the queue and isn't resolved.
+     That, I think, is a stop-the-line failure (not a looping machine) requiring repair from
+     outside" (bbae7593).
+
+   This proof does not change either ruling.
 
 ---
 
-**THEOREM.** One click, fired by one command:
-- chooses among real alternatives built from the real tasks;
-- makes that choice by expected free energy G, computed from preferences C and a transition
-  model B that are built from real data;
-- delivers the chosen work to an accepted close;
-- feeds the measured outcome back, so that the next selection's B has changed.
+**THEOREM.** On a real decision input:
+- one click, fired by one command, chooses among real alternatives built from the real
+  tasks;
+- the choice is made by the full selection law `σ(log E − F − γG)`, with G computed from
+  Joe's stipulated preference C and a transition model B inferred from recorded outcomes;
+- G's contribution to the choice is shown;
+- the chosen work reaches an accepted close with a measured, attested outcome;
+- that outcome updates B, and the next selection consumes the update.
+
+This is a demonstration on one decision input. It is not a claim that every task gets
+candidates automatically, or that every click is fast.
 
 **ASSUME:**
 - A1. The Lean model in `mathlib4/DarkTower/WarMachine/` and the contract bundle
   `machine-contracts/machine-contracts.json` (16 contracts, 36 declarations) are the
-  specification. Their theorems are not re-proved here.
-- A2. The codebase at a baseline commit B₀ of futon2, futon3c and mathlib4, fixed when Joe
-  signs.
+  specification. The bundle checks that each runtime function corresponds to its
+  declaration. It does not prove the functions are composed correctly, and establishing
+  that composition is part of this proof.
+- A2. The baseline B₀ comprises the futon2, futon3c and mathlib4 commits, together with the
+  runtime data and configuration the reference input uses. It is fixed when Joe signs.
 
-**PROVE:** the THEOREM, by ⟨1⟩1–⟨1⟩10.
+**PROVE:** the THEOREM, by ⟨1⟩1–⟨1⟩8.
 
 ---
 
-### ⟨1⟩1. A click can be fired by one command, and it runs to a close.
+### ⟨1⟩1. The reference input is prepared: a real, eligible decision with at least two alternatives, and outcome evidence that can distinguish them.
 
-- **CHECK.**
-  - `scripts/wm_click.sh --run` (or its replacement) reaches a written `007-closed.edn`, with
-    no `--force` and no human intervention between the command and the close. The agents'
-    own turns (author, reviewer) are part of the click.
-  - The time is recorded as two figures: machine compute and agent wait.
+- **CHECK.** A frozen snapshot in `runs/proof-reference-field/` contains:
+  - the task and queue state;
+  - the target, taken from the real tasks (the registry via substrate-2, or
+    `data/wm-ticket-queue/queue.edn`) and in the eligible queue stratum, not behind an
+    admitted front ticket;
+  - at least two admissible candidates with different first actions, their identities,
+    locators and revisions;
+  - the observation and prior evidence, the learning-ledger cutoff, and the model
+    configuration.
+
+  It also names past outcome evidence, compatible in meaning, for each candidate's action and
+  transition family, and the observable outcome differences that the discrimination in ⟨1⟩3
+  will rely on.
+
+  The snapshot freezes *inputs*, not expected answers. Evaluating it read-only never
+  executes its work. It is executed once, at ⟨1⟩5.
 - **PROOF.**
-  - ⟨2⟩1. Casting: author, reviewer and repair seats are named once (the wm-author and
-    wm-reviewer lanes) and are always registered. CHECK: preflight finds them without
-    intervention.
-  - ⟨2⟩2. Nothing blocks firing except Agency being down. The 13 tripwires (T1–T13,
-    `tripwire.clj:600`) exist to ensure correct behaviour *during* a run (Joe, 2026-09-22);
-    they were never meant to decide whether a click may fire. Any place where a tripwire, or
-    a preflight check in `wm_click.sh`, refuses or halts the firing of a click is a defect
-    removed in this step. Tripwires keep acting during the run as designed. A finding still
-    opens a ticket in the ordinary queue, and a ticket never stops a click. CHECK: `wm_click.sh
-    --run` has no refusal path other than Agency being unreachable, and a click fires while a
-    tripwire reports.
-  - ⟨2⟩3. The close accepts well-formed work. The reviewer's standing decision is produced in
-    the shape the close reads (fixed on 2026-09-21 by 6d45e8b7). CHECK: a close is not refused
-    `:explanation-invalid` for work the reviewer approved.
-- **Known failures carried in:**
-  - r4-1: `:explanation-invalid` (reviewer template shape);
-  - r4-2: `:guardrail-refusal` (artifact scope);
-  - grants 2 and 3: lost to casting (comments in `wm_click.sh`);
-  - `wm_click.sh` refuses to fire when preflight tripwires would halt (lines ~111-233).
-- **FAILURES:** —
-
-### ⟨1⟩2. The reference field: a real target with at least two admissible candidates that begin with different actions.
-
-- **CHECK.** One click's candidate receipt shows all of the following:
-  - a target taken from the real tasks (the registry via substrate-2, or
-    `data/wm-ticket-queue/queue.edn`), not a route declared by hand;
-  - at least two admitted candidates for it;
-  - different first actions for those candidates;
-  - locators that resolve, and acceptance that can be met within the artifact scope.
-
-  That target and candidate set are frozen as the **reference field** in
-  `runs/proof-reference-field/`. Every later step is checked on it.
-- **PROOF.**
-  - ⟨2⟩1. Interpretation. `mission_hole_wants.clj:74-91` supplies wants but leaves
-    `:interpretation` and `:candidates` empty. Build the interpretation of the target's
-    patterns. They are written by an offline authoring agent (a Codex seat) *before* the click,
-    because selection needs candidates to exist before it runs. The click-time author builds
-    the chosen candidate; it does not invent the alternatives.
-  - ⟨2⟩2. Construction and publication through `cascade_sources/check-file!`, consumed by the
-    next selection.
-  - ⟨2⟩3. Feasibility. Each candidate's acceptance can be met in the repositories and with the
-    evidence available. This is a property of the candidates built in ⟨2⟩1–⟨2⟩2, not a new
-    gate. Examples to avoid: r4-2 needed mathlib4; click 3's candidate needed held-out
-    evidence that does not exist.
+  - ⟨2⟩1. Interpretation. `mission_hole_wants.clj:74-91` leaves `:interpretation` and
+    `:candidates` empty. An offline Codex seat writes the interpretation before any click,
+    reading the task against its patterns, the observed guards and the outcomes they
+    produce. "Not declared by hand" means the candidate is derived from that reading, and
+    the derivation is recorded. The author's seat alone does not establish it.
+  - ⟨2⟩2. Publication. The candidates are published through the loader selection actually
+    reads (`cascade_sources.clj` `load-declared`; `check-file!` only validates shape). The
+    CHECK shows selection reading them.
+  - ⟨2⟩3. Feasibility. Each candidate's acceptance can be met in the repositories and with
+    the evidence available. This is a property of the candidates, not a new gate. Examples to
+    avoid: r4-2 needed mathlib4; click 3's candidate needed held-out evidence that does not
+    exist.
+  - ⟨2⟩4. Evidence for B. If no past outcomes compatible in meaning exist for the candidates'
+    action families, that is recorded here. A different real target is chosen, or the proof
+    stops and Joe is told. Differences are never manufactured.
 - **Known failures carried in:**
   - r4-2: 90 proposals, 0 admission joins;
   - click 3: three candidates, all from routes declared by hand;
   - fix-5: 441 wants yielded none.
 - **FAILURES:** —
 
-### ⟨1⟩3. Observation and belief on the reference field are computed from data.
-
-- **CHECK.** On the reference field, the click's receipts show the belief state computed by
-  the contracted functions (`wm-machine-observe`, `wm-machine-belief-state`, `wm-exact-belief`)
-  from the recorded tokens, and the values are recorded.
-- **FAILURES:** —
-
-### ⟨1⟩4. C: a prospective preference over run-ending classes.
+### ⟨1⟩2. One command fires a click that runs to a close, and the loaded code is known.
 
 - **CHECK.**
-  - A mapping from a candidate's predicted observations to the run-ending classes (attested
-    increment on focus / associated / elsewhere, known typed failure) is implemented and
-    named. It uses the same class definitions as `run_ending_classification.clj`.
-  - C over those classes is Joe's 55/35/5/5, held fixed. It is not put on the token powerset
-    (the fix list's no-op counterexample).
-  - `:unknown` and missing evidence are handled as the mapping states, never counted as a
-    class.
-  - The mapping is applied to the reference candidates' predicted observations from the
-    *declared-prior* rollout (`PolicyRollout.predictedOutcome` with the declared, unlearned
-    B), so this check runs before ⟨1⟩5. The values are recorded. They are marked superseded
-    when ⟨1⟩5's learned B lands; ⟨1⟩5 records the new ones.
-- **PROOF.** ⟨2⟩1. The mapping reuses improve-8's classification kernel, run on predicted
-  rather than attested observations.
-- **FAILURES:** —
-
-### ⟨1⟩5. B from recorded outcomes: under ⟨1⟩4's C, the candidates' predictions differ by more than habit.
-
-- **CHECK.**
-  - B's parameters on the reference field come from recorded outcomes of past actions, with a
-    declared prior and update rule. The source is named.
-  - `PolicyRollout.predictedOutcome` is computed for each reference candidate.
-  - The expected log-preference under ⟨1⟩4's C differs between the candidates by more than
-    their recorded log-habit difference. (Zai 1.4: "not equal" was too weak and would have
-    sent ⟨1⟩6 back.)
-  - The values are recorded.
+  - On a target *other than* the reference target, so that the reference work is not
+    consumed, `scripts/wm_click.sh --run` fires with no `--force` and no human
+    intervention. The agents' own turns are part of the click.
+  - The command, click id and attempt id are bound to a close newly written by that run.
+  - The load-identity record (`load_identity.clj:63-108`) for every namespace on the click
+    path shows its captured source digest equal to the canonical file. Namespaces not
+    covered are listed as unknown, never omitted.
 - **PROOF.**
-  - ⟨2⟩1. Amend the learning-trial contract by adding a new version of the pinned entry, not
-    by editing it in place. `data/wm-learning-trials/attempts.edn` declares
-    `:mode :record-only`, `:consumption :not-authorized`, and `:does-not-establish` a
-    production parameter update. This step changes that declaration, so that B may be read
-    in production. Joe's signature on this plan is the authorisation, recorded here.
-  - ⟨2⟩2. A production reader of the ledger. `learning_trial_ledger.clj` has none today.
-  - ⟨2⟩3. Parameter placement: which transition a whole-attempt outcome informs.
-  - ⟨2⟩4. The carry across a change in task domain (`:carry-domain-changed`) is migrated or
-    explicitly reinitialised. The identity check stays.
+  - ⟨2⟩1. Firing. `wm_click.sh` has no refusal path except Agency being unreachable. Its
+    tripwire and preflight refusals (around lines 111–233) are removed from firing. The
+    tripwires keep acting during the run as designed.
+  - ⟨2⟩2. Casting. The seats for this execution are named in advance. A seat that is busy or
+    unavailable is reported with a terminal account. The script never launches into an
+    occupied seat, and never starts a second active click.
+  - ⟨2⟩3. Finding → ticket. When a tripwire trips during a run, the existing chain still
+    runs to completion: `tripwire.clj` `note!` → `record-trip!` / `handle-action!` → the
+    repair finding writer (`tripwire.clj:750`, `repair_obligation.clj`) → an ordinary
+    ticket and queue entry. The CHECK follows one named finding through to its ticket id.
+  - ⟨2⟩4. Lifecycle. An interrupted attempt that is still open can be resumed under the
+    same attempt id. A closed attempt is final: `full_loop_cohort.clj:601-602` rejects
+    appending to it. A retry starts a new attempt and recognises commits already produced.
+    Abandoned work is never counted as accepted, and immutable records are never rewritten.
+  - ⟨2⟩5. Timing. The recorded intervals are defined as agent wait (waiting on the
+    author's or reviewer's turn), machine time, and overlap, so that wall time is neither
+    misattributed nor double-counted. Both figures are reported. This is reporting only,
+    with no budget gate.
+- **Known failures carried in:**
+  - r4-1: `:explanation-invalid` (reviewer template shape; fixed by 6d45e8b7);
+  - r4-2: `:guardrail-refusal` (artifact scope);
+  - grants 2 and 3: lost to casting.
 - **FAILURES:** —
 
-### ⟨1⟩6. G separates the reference candidates.
+### ⟨1⟩3. On the reference input, evaluated read-only, the full selection law chooses a unique action, and G changes that choice.
 
-- **CHECK.** On the reference field, `PolicyHorizon.horizonEFE` gives G values whose
-  difference is large enough that `σ(log E − F − γG)` ranks the candidates differently from
-  habit alone. The tie-break `:action-name-ascending` (`cascade_selection.clj:126-129`) is not
-  invoked.
-- **Also recorded at this step:** the other terms of `σ(log E − F − γG)` on the reference field,
-  each with its value and source:
-  - E, the habit prior;
-  - F, the variational free energy of each policy from past evidence;
-  - γ, the precision.
-
-  If F or E outweighs the G difference, the failure is logged here, and the work at this step
-  is to trace that term to the data it came from. This step owns E, F and γ.
+- **CHECK.**
+  - The production scorer computes, for every eligible policy after the ticket-front
+    restriction:
+    - E, F (absent is recorded as absent, not as 0; see `cascade_selection.clj:95-116`), γ,
+      and G with all of its terms at the declared precision and horizon;
+    - the action marginal `ActionMarginal`, which sums the policies sharing a first action
+      (`cascade_selection.clj:132-163`).
+  - The action marginal has a unique maximum. The numeric comparison is stated. The
+    recorded `:tie-break-rule` field is not used as evidence either way.
+  - The action chosen under the full law differs from the action chosen under `log E − F`
+    alone at the same γ. Alternatively, G's contribution to the winning margin is stated and
+    exceeds the margin from `log E − F`.
+  - All inputs and outputs are recorded against the ⟨1⟩1 snapshot.
+- **PROOF.** Each sub-step produces an input that the next sub-step consumes, and each is
+  checked by recomputing it from the pinned inputs.
+  - ⟨2⟩1. q₀. Name the observation likelihood A, the initial and carried belief, the source
+    observations and the carrier mappings. The contracted functions have different carriers:
+    `observation.clj:103` gives aggregate channels, `belief.clj:510` reconciles entity
+    beliefs, and the exact token filter is in `cascade_model_manifest.clj`. The CHECK shows
+    that this q₀ is the one the rollout and the scorer consume. Absent observations stay
+    absent; they are never rendered as zero.
+  - ⟨2⟩2. The prospective ending kernel and C.
+    - C over the run-ending classes (focus / associated / elsewhere / known failure) is Joe's
+      55/35/5/5, stipulated and held fixed.
+    - The kernel maps a policy's predicted observations to a normalised distribution over
+      those classes. It reuses the class definitions and pure logic from
+      `run_ending_classification.clj`, but it is distinct from the close classifier, which
+      needs an actual close, attestation and focus relation (`:69-113`). Predictions are
+      never passed off as attestations.
+    - Unknown probability mass has a stated treatment. It is never silently dropped and
+      renormalised, because that makes the least-observed action look best.
+    - The step states which carrier risk is evaluated on (token or class), and which
+      contracted function computes it. Aggregation changes KL, so the class carrier is not
+      assumed to equal the token-space G.
+    - Ambiguity (A) and horizon placement are made consistent with that choice.
+    - The output is an input the production horizon scorer consumes, without changing this
+      sub-step later.
+  - ⟨2⟩3. B from recorded outcomes.
+    - A new version of `resources/wm/attempt-learning-contract.edn` (its mode and version
+      are checked by `attempt_learning.clj:15-21`) authorises production consumption. Joe's
+      signature on this plan is that authorisation.
+    - The trial events in `data/wm-learning-trials/attempts.edn` stay immutable. The new
+      consumer contract states how old compatible events are interpreted, without
+      replacement events that would count the same trial twice.
+    - A production reader is built; `learning_trial_ledger.clj` has none today.
+    - The step states which transition a whole-attempt outcome informs.
+    - The step establishes persistence, deduplication, and continuity of meaning and domain
+      (`:carry-domain-changed`: migrate, or reinitialise with a record; the identity check
+      stays). ⟨1⟩8 depends on this.
+  - ⟨2⟩4. The full score is computed as described in the CHECK.
+  - If lawfully derived terms do not discriminate on this input, the proof stops under
+    execution rule 2. Valid preferences and evidence are never tuned.
 - **Known failures carried in:**
   - r4-1: G 9.70476 vs 9.70602, decided by habit;
-  - click 3: G identical at 9.704307, decided by the tie-break.
+  - click 3: G identical at 9.704307, decided by name order.
 - **FAILURES:** —
 
-### ⟨1⟩7. A live click on the reference field is decided by G.
+### ⟨1⟩4. The producers the close and the update need exist before the live click.
 
-- **CHECK.** A click fired by ⟨1⟩1's command, on the reference field, records a selection
-  consistent with ⟨1⟩6's values:
-  - the receipts name the functions used in ⟨1⟩3–⟨1⟩6;
-  - the tie-break is not invoked;
-  - the live JVM's loaded source matches B₀ plus the merged steps. The command reads the JVM
-    start time and the reload records through the read-only reflection route, and lists every
-    namespace on the click path whose file changed after its last load. It must list none.
+- **CHECK.** Run on an existing real close, read-only, these produce correct output:
+  - post-build measurement of the wanted tokens against the reviewed revisions, where a
+    measured false is valid and a missing observation is not false;
+  - a run-ending attestation and focus relation;
+  - the accepted-increment predicate, meaning the target's existing acceptance met for this
+    occurrence, with the reviewed commits bound to it (no additional gates);
+  - the B update, applied exactly once and persisted.
+
+  The runner calls all four *before* constructing the close. It already obtains D-task
+  observations, learning trials and route attestation there
+  (`full_loop_runner.clj:3697-3755`).
 - **FAILURES:** —
 
-### ⟨1⟩8. The selected work is delivered and the close accepts it.
-
-- **CHECK.** The ⟨1⟩7 click's close is an accepted increment:
-  - the author's commit is reviewed;
-  - every required commit and gate is verified;
-  - `verify-close` is true.
-- **If the build dies mid-way** (timeout, cancellation, partial commit), the attempt is
-  recorded as abandoned, never as accepted. A resume continues the same attempt id. A retry
-  starts a new attempt and does not duplicate commits. An unchanged deterministic failure is
-  not rerun: it is logged here and fixed first.
-- **FAILURES:** —
-
-### ⟨1⟩9. The outcome is measured and attested.
+### ⟨1⟩5. One live click on the reference input chooses the action ⟨1⟩3 computed.
 
 - **CHECK.**
-  - The ⟨1⟩8 close records the wanted tokens as measured after the build, true or false and
-    not `:missing`.
-  - It records an attested run-ending class from `run_ending_classification.clj`.
-  - The receipt and the kernel agree.
+  - A click fired by ⟨1⟩2's command runs on the live queue.
+  - Its decision input corresponds to the ⟨1⟩1 snapshot, shown by matching task, candidate,
+    evidence and configuration identities. The target is not pinned around ordinary
+    selection.
+  - The receipts join the inputs actually consumed, the policy scores, the eligible action
+    marginal and the chosen action, and these equal ⟨1⟩3's.
+  - The load-identity evidence from ⟨1⟩2 holds for this run.
 - **FAILURES:** —
 
-### ⟨1⟩10. The outcome updates B, and the next selection uses the update.
+### ⟨1⟩6. The chosen work reaches an accepted close.
+
+- **CHECK.** For this occurrence, the accepted-increment predicate from ⟨1⟩4 holds, bound to
+  the reviewed commits and the required evidence. `verify-close` alone is not enough; r4-2
+  passed it on a failure.
+- **FAILURES:** —
+
+### ⟨1⟩7. The outcome is measured and attested.
 
 - **CHECK.**
-  - The ⟨1⟩9 outcome updates the named B parameter exactly once, and the update survives a
-    reload.
-  - On the frozen reference field, recomputing ⟨1⟩4–⟨1⟩6 with and without the update changes
-    the predicted outcome, as the update rule says it should.
-  - The next click's receipts show that it consumed the updated B.
+  - The close records the wanted tokens as measured after the build, true or false and not
+    `:missing`.
+  - It records the attested run-ending class.
+  - The classifier, rerun on the actual close, attestation and focus inputs (not only the
+    projection `verify-close` compares), agrees with the recorded class.
 - **FAILURES:** —
 
-### ⟨1⟩11. Q.E.D.
+### ⟨1⟩8. The outcome updates B once, and the next selection consumes it.
 
-⟨1⟩2 and ⟨1⟩7 give a choice among real alternatives, made by G. ⟨1⟩4 and ⟨1⟩5 establish
-that G is built from C and B drawn from data. ⟨1⟩8 gives the accepted close, and ⟨1⟩9–⟨1⟩10
-the update that the next selection consumes.
+- **CHECK.**
+  - The named B parameter is updated exactly once and survives a reload.
+  - Recomputing ⟨1⟩3 on the frozen non-B inputs, with and without the update, changes the
+    predictions as the update rule states.
+  - The next live selection's receipt shows the updated parameter's identity and value
+    being consumed, on whatever compatible task it runs.
+  - The reference task is not replayed as new work, and its outcome is not counted twice.
+- **FAILURES:** —
 
-## Sign-off
+### ⟨1⟩9. Q.E.D.
+
+- ⟨1⟩1 and ⟨1⟩5 give a choice among real alternatives on a real input.
+- ⟨1⟩3 shows that the full law chose the action and that G changed the choice. There, C is
+  Joe's stipulated preference and B is inferred from recorded outcomes.
+- ⟨1⟩4, ⟨1⟩6 and ⟨1⟩7 give an accepted close with a measured, attested outcome.
+- ⟨1⟩8 gives the update, consumed by the next selection.
+
+## Sign-off (revision 3; every row needs fresh review)
 
 | Step | Zai GLM | Codex | Joe |
 |---|---|---|---|
-| Execution rules | SIGN | OBJECT | |
-| THEOREM / ASSUME | SIGN | OBJECT | |
-| ⟨1⟩1 | SIGN | OBJECT | |
-| ⟨1⟩2 | SIGN | OBJECT | |
-| ⟨1⟩3 | SIGN | OBJECT | |
-| ⟨1⟩4 | SIGN | OBJECT | |
-| ⟨1⟩5 | SIGN | OBJECT | |
-| ⟨1⟩6 | SIGN | OBJECT | |
-| ⟨1⟩7 | SIGN | OBJECT | |
-| ⟨1⟩8 | SIGN | OBJECT | |
-| ⟨1⟩9 | SIGN | SIGN | |
-| ⟨1⟩10 | SIGN | SIGN | |
+| Execution rules | | | |
+| THEOREM / ASSUME | | | |
+| ⟨1⟩1 | | | |
+| ⟨1⟩2 | | | |
+| ⟨1⟩3 | | | |
+| ⟨1⟩4 | | | |
+| ⟨1⟩5 | | | |
+| ⟨1⟩6 | | | |
+| ⟨1⟩7 | | | |
+| ⟨1⟩8 | | | |
+
+The review sections below refer to earlier revisions (1–2) and their step numbering.
 
 ## Zai GLM review
 
