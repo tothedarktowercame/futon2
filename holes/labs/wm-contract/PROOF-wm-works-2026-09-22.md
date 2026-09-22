@@ -301,6 +301,17 @@ candidates automatically, or that every click is fast.
 - **Known failures carried in:**
   - r4-1: G 9.70476 vs 9.70602, decided by habit;
   - click 3: G identical at 9.704307, decided by name order.
+- **PROGRESS.**
+  - ⟨2⟩1 q₀ discovery done 2026-09-22 in futon2 a7fc369e (`runs/proof-steps/1-3-2-1-q0.md`,
+    zai-1).
+    - q₀ is a point mass on `[T-repair-occ-444fb018 :admission/task-stated]`. Both
+      produced tokens are observed false.
+    - A is the identity.
+    - Rollout and scoring read the same `:cascade-belief` slot.
+  - Open: the reference source declares bare pattern tokens, but q₀ holds target-qualified
+    pairs, so in zai-1's probe no guard fires and the two candidates predict identically.
+    Past clicks show qualified produces, so the live path may qualify tokens somewhere. Being
+    settled next.
 - **FAILURES:** —
 
 ### ⟨1⟩4. The producers the close and the update need exist before the live click.
