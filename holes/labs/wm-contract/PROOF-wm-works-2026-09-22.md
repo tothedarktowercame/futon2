@@ -1501,3 +1501,114 @@ consistent G-contribution claims, and separating proposed from durable updates.
 No additional run restriction, rehearsal, historical-success prerequisite,
 ledger cutoff on production, re-freeze approval, or snapshot comparison is
 requested by this review.
+
+## Zai GLM review (rev 4)
+
+**Reviewer model:** Zai GLM (zai-1), GLM-5.x. Adversarial, as before.
+
+**First, a flag on the table.** The Zai GLM column for rows ⟨1⟩2–⟨1⟩5 was
+pre-filled SIGN before this review ran — signs carrying my name that I had not
+written. That is the exact pattern Joe rejected in my first review. I have
+reviewed those rows now and set my own verdicts below; the table now carries
+them. Nobody fills my column but me.
+
+Verification base additions for rev 4 (read-only): both cited close files
+exist (`wm-full-loop-machinery-69/.../attempt-002/007-closed.edn`,
+`wm-full-loop-machinery-70/.../attempt-001/007-closed.edn`); I count **31**
+close files under `data/` containing `:grounded-change` (the plan says 29 —
+same order; see Missing 3).
+
+### ⟨1⟩1 (now first, fires on whatever ordinary selection picks) — SIGN
+
+Attack: firing on an arbitrary target could consume the reference work —
+eliminated by construction, since the reference input no longer exists when
+⟨1⟩1 runs; it is prepared afterwards at ⟨1⟩2. The old "non-reference target"
+witness was a requirement that served only the proof's own structure, and it
+is gone — this is the red-tape test applied correctly, not a weakening: the
+check (command → bound close, load identity, finding-to-ticket chain,
+lifecycle, timing) is unchanged and all its anchors verified in my rev-3 pass.
+
+### ⟨1⟩2 (unchanged text, now after the click) — SIGN
+
+Attack: with ⟨1⟩5 no longer comparing against the snapshot, does freezing it
+still serve a need, or is it now structure-serving red tape? It survives the
+test: the frozen snapshot is the stable input on which ⟨1⟩3's read-only
+computation is developed and checked, and ⟨1⟩8's with/without recompute needs
+exactly such a frozen non-B baseline. Two needs, both real. My rev-3 notes
+(evidence-not-winner bias guard, ledger cutoff) are carried in the text.
+
+### ⟨1⟩3 (counterfactual branch only) — SIGN
+
+Attack: could the surviving check pass without G mattering? The removed
+"alternatively, G margin" branch was the one codex-20's counterexample broke;
+what remains is the strong form — the full-law action differs from the
+`log E − F` action on summed action marginals — plus the explicit statement
+that this is a requirement on the *demonstration input*, not a runtime rule (a
+click where G reinforces habit is lawful). That statement is important and
+correct. All anchors (absent-not-zero, action marginal, tie-break exclusion)
+verified in rev 3 and unchanged.
+
+### ⟨1⟩4 (read-only producers, B update after acceptance) — SIGN
+
+Attacks: (a) the positive path could relabel a historical close — forbidden
+explicitly ("No historical close is relabelled"), with the honest fallback
+that the positive path may be first exercised live at ⟨1⟩6–⟨1⟩8; (b) the B
+update could be written on a failed close — now written only after
+acceptance, keyed by occurrence id, with a second-run-writes-nothing
+demonstration in the replay directory. Exactly-once by construction, not by
+assertion. The isolated replay directory keeps live stores untouched. Both
+cited close paths exist; see Missing 3 on the count.
+
+### ⟨1⟩5 (live click, no snapshot matching) — SIGN, one gap owed
+
+Attack: the check demands a unique action-marginal maximum AND the
+counterfactual ON THE LIVE INPUT — but the live input is whatever the queue
+gives. If ordinary selection picks a target with one candidate (r4-2's shape)
+or a non-discriminating field, both bullets fail for environmental reasons,
+and nothing in the step says what happens then. Joe removed the snapshot
+matching (rightly — it was structure-serving), but the step must still say:
+if the live click's input does not discriminate, that is recorded under
+⟨1⟩5's FAILURES and the step is proved by a later click whose input does —
+never by pinning the queue or steering selection (Missing 1). With that line,
+the check is honest; without it, ⟨1⟩5 quietly becomes a requirement that the
+machine select the reference target.
+
+### Q.E.D. — SIGN
+
+Attack: with no snapshot matching, ⟨1⟩3 (reference input) and ⟨1⟩5 (live
+input) may be different inputs — does the Q.E.D. still follow? It does,
+through ⟨1⟩5's own second bullet: the counterfactual is required on the live
+input's receipts, so "G changed the choice" is proved where the choice was
+actually made; ⟨1⟩3 supplies the component-level demonstration on the frozen
+input. The clause mapping is now correct.
+
+### Joe's red-tape test, applied
+
+Removed this revision because they served only the proof's structure:
+- the "non-reference target" witness at ⟨1⟩1;
+- the snapshot-identity matching at ⟨1⟩5.
+Remaining requirements that could look like red tape, tested:
+- the ⟨1⟩2 freeze — serves ⟨1⟩3's stable input and ⟨1⟩8's recompute baseline
+  (kept, with need);
+- the FAILURES log — a record of what happened, blocks nothing;
+- load identity — tells everyone what code actually ran; a real need.
+Nothing in rev 4 adds a requirement whose only customer is the proof.
+
+### Missing (rev 4)
+
+1. **⟨1⟩5's non-discriminating-input case:** state that it is recorded and the
+   step waits for a discriminating click; never pinning or steering.
+2. **The Zai column pre-fill** (noted above): only the reviewer fills their
+   own column.
+3. **The "29 :grounded-change closes" count:** state the counting basis; I
+   find 31 close files under `data/` containing `:grounded-change`, some
+   possibly duplicates of the same retained closes.
+4. **How the live click comes to run on the reference target at all** without
+   pinning: presumably because the reference target's ticket/candidate is at
+   the front of the ordinary queue; say so, so the ⟨1⟩2 "eligible stratum"
+   clause and ⟨1⟩5 line up.
+
+Verdict: **6 SIGN, 0 OBJECT** (⟨1⟩1–⟨1⟩5 and the Q.E.D.). Both of codex-20's
+structural objections are answered by removal rather than addition, which is
+the right direction under Joe's red-tape ruling. This review authorizes no
+machine changes.
