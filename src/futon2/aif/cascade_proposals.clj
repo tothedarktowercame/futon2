@@ -133,10 +133,31 @@
    Execution still uses ONLY the existing declaration loader and admission gate."
   [assembled sources supply]
   (let [by-id (into {} (map (juxt :proposal-id identity)) (:proposals supply))
-        repair-targets (set (concat
-                             (map repairs/target-id (get-in supply [:repair-scan :open-finding-ids]))
-                             (map :target (filter #(= :repair-finding-proposed (:origin %)) (:proposals supply)))))
-        withheld (filter #(contains? repair-targets (:target %)) (:problems assembled))
+        ;; PROOF-wm-works ⟨1⟩5 (claude-5 handoff, per Joe's 6714b3ac ruling):
+        ;; the withhold protects against the CONSTRUCTOR being unable to
+        ;; build a repair proposal while it cannot observe closure. A target
+        ;; with an ADMITTED DECLARED cascade source in this assembly — its
+        ;; problem came from cs/load-declared with its own interpretations
+        ;; and candidates — has that construction supplied by declaration,
+        ;; so there is nothing left to protect against: it is NOT withheld,
+        ;; and is recorded as supplied-by-declaration with its source path.
+        ;; Generated :repair-finding-proposed proposals and repair targets
+        ;; with no declared source keep the unchanged withhold.
+        declared-source-targets (set (for [[t _] (:interpretations sources)
+                                           :when (seq (get-in sources [:candidates t]))]
+                                      t))
+        generated-repair-targets (set (map :target
+                                          (filter #(= :repair-finding-proposed (:origin %))
+                                                  (:proposals supply))))
+        scan-repair-targets (set (map repairs/target-id
+                                      (get-in supply [:repair-scan :open-finding-ids])))
+        repair-targets (set (concat scan-repair-targets generated-repair-targets))
+        withheld (filter #(and (contains? repair-targets (:target %))
+                               (not (contains? declared-source-targets (:target %))))
+                         (:problems assembled))
+        supplied-by-declaration (filter #(and (contains? repair-targets (:target %))
+                                              (contains? declared-source-targets (:target %)))
+                                        (:problems assembled))
         repair-declines (mapv #(decline (:target %) :repair-closure-observation-unavailable
                                        [:produced-resolution-evidence]) withheld)
         admissions
@@ -166,13 +187,28 @@
                          :proposal-id (:proposal-id p)))]
     (-> assembled
         (cond-> (seq withheld)
-          (assoc :problems (vec (remove #(contains? repair-targets (:target %)) (:problems assembled)))))
+          (assoc :problems (vec (remove #(and (contains? repair-targets (:target %))
+                                              (not (contains? declared-source-targets (:target %))))
+                                        (:problems assembled)))))
         (update :refusals #(into (vec %)
                                 (map (fn [p] {:target (:target p)
                                               :kind :universe-not-admitted
                                               :reason :repair-closure-observation-unavailable
                                               :missing :locators}) withheld)))
         (update :dropped-candidates into repair-declines)
+        ;; the distinction a reader needs: declared-source repair targets are
+        ;; SUPPLIED, not withheld, with the rule that applied
+        (assoc :repair-withhold-distinction
+               {:supplied-by-declaration
+                (vec (for [p supplied-by-declaration]
+                       {:target (:target p)
+                        :rule :declared-source-supersedes-withhold
+                        :source-paths (vec (for [[_ rec] (get-in sources
+                                                                 [:interpretations (:target p) :receipts])]
+                                             (get-in rec [:source :path])))}))
+                :withheld-generated-or-sourceless
+                (vec (for [p withheld] {:target (:target p)
+                                        :rule :repair-closure-observation-unavailable}))})
         (assoc :proposal-supply (assoc supply :admissions admissions
                                       :exact-assurance {:status :unavailable
                                                         :reason :typed-target-link-evidence-missing}))
