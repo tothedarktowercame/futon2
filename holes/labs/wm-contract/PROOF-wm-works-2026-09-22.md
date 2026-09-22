@@ -235,8 +235,8 @@ the update that the next selection consumes.
 | ⟨1⟩1 | SIGN | | |
 | ⟨1⟩2 | SIGN | | |
 | ⟨1⟩3 | SIGN | | |
-| ⟨1⟩4 | (rev 2: now C; re-sign) | | |
-| ⟨1⟩5 | (rev 2: now B, strengthened; re-sign) | | |
+| ⟨1⟩4 | SIGN | | |
+| ⟨1⟩5 | SIGN | | |
 | ⟨1⟩6 | SIGN | | |
 | ⟨1⟩7 | SIGN | | |
 | ⟨1⟩8 | SIGN | | |
@@ -415,3 +415,112 @@ no back loops, checks on artifacts a click already produces, and the theorem's
 four clauses map one-to-one onto ⟨1⟩2/⟨1⟩7, ⟨1⟩4–⟨1⟩6, ⟨1⟩8 and ⟨1⟩9–⟨1⟩10.
 The single objection is a required strengthening, not a rejection. This
 review authorizes no machine changes.
+
+## Zai GLM review (rev 2)
+
+**Reviewer model:** Zai GLM (zai-1), GLM-5.x. Adversarial, as before: each
+changed part attacked against the code and records before signing.
+
+### The swap: C before B — SIGN
+
+Attack on the new order: does C-first reintroduce a back loop between ⟨1⟩3 and
+⟨1⟩6? Traced link by link: ⟨1⟩3 supplies the belief state; ⟨1⟩4's C-mapping
+needs *predicted observations* for the reference candidates — before ⟨1⟩5's
+outcome-updated B exists, these can only come from the current declared-prior
+rollout (see Missing 1); ⟨1⟩5 then supplies the outcome-updated B and the
+separation check; ⟨1⟩6 consumes both. The weakened joint I objected to
+(epsilon "not equal") is gone: ⟨1⟩5's criterion is now exactly the
+habit-difference margin, which is what ⟨1⟩6 needs to outrank habit. No back
+loop: if ⟨1⟩6 still fails, the cause is F or γ (see Missing 2), which is not
+any earlier step's criterion being too weak — it is a component no step owns,
+and rule 2 correctly stops the proof for Joe to amend.
+
+### A3 (ticket as ordinary front candidate) — SIGN, with a required Joe line
+
+Attack: A3 asserts the front ticket "does not stop ⟨1⟩1's click", but the fix
+list row committed as bbae7593 records Joe's ruling "an unresolved front
+ticket stops the line". These conflict. A3's reading (repair is ordinary
+selection at the front, from 6714b3ac) is plausible, but the supersession of a
+recorded Joe ruling cannot be claude-5's interpretation — Joe must say it in
+his signature or A3 must quote his ruling superseding bbae7593. Requiring the
+line, not objecting: the keep/revert decision is already Joe's.
+
+### A4 (Joe names blocking tripwires) — SIGN
+
+Verified the count: `tripwire.clj:600` defines exactly 13 wire evaluators
+(T1–T13). The assumption correctly bounds Joe's decision to a real, finite
+list, and only named tripwires may block — nothing here adds ceremony.
+
+### ⟨1⟩1 — SIGN, one reconciliation
+
+"No human intervention; the agents' own turns are part of the click" fixes my
+wording attack. The finding→ticket path stays and never stops a click —
+carried in. One inconsistency: ⟨2⟩2 still says "the click fires unless Agency
+is down", which contradicts A4's named blocking tripwires. Reconcile: "unless
+Agency is down or an A4-named tripwire blocks" (Missing 3).
+
+### ⟨1⟩2 ⟨2⟩1 (offline Codex-authored interpretations) — SIGN
+
+The decision was made and it is the right one: candidates must exist before
+selection runs, so the alternatives are authored offline, and the click-time
+author builds only the chosen one — which also removes the incentive for the
+author to steer selection. Attack on the thin boundary between an
+"offline-authored interpretation" and a "hand-declared route": the CHECK still
+requires the *target* to come from the registry or queue and the candidates to
+have different first actions, and management rules put a different agent on
+review. Survived.
+
+### ⟨1⟩4 (now C) — SIGN, two clarifications
+
+The class definitions reuse `run_ending_classification.clj`, C is Joe's
+55/35/5/5 held fixed, `:unknown` never counts as a class, no token powerset —
+all the constraints I wanted. Clarifications: (a) name the source of the
+"current predicted observations" the mapping is applied to at this step —
+before ⟨1⟩5 it can only be the declared-prior rollout (Missing 1); (b) state
+that ⟨1⟩4's recorded values are superseded when ⟨1⟩5's outcome-updated B lands
+(⟨1⟩10's recompute covers it, but say it) (Missing 4).
+
+### ⟨1⟩5 (now B, strengthened) — SIGN, one required line
+
+The separation criterion now exceeds the recorded log-habit difference — the
+back loop is removed at the source, and the entry credits the fix to my
+objection. ⟨2⟩1 names the attempts.edn contract amendment with Joe's plan
+signature as authorisation — my second objection, answered. Required line: the
+ledger pins `meaning-sha256` and meanings are versioned; the amendment must
+re-version the ledger entry, not edit the declaration in place (Missing 5).
+
+### ⟨1⟩7 (loaded-source command) — SIGN
+
+The command is now runnable and checkable: JVM start time plus reload records,
+listing click-path namespaces whose file changed after last load, must list
+none. Survived my attack (a stale-namespace check a person can run and see).
+
+### ⟨1⟩8 (build-death handling) — SIGN
+
+Abandoned-never-accepted, resume keeps the attempt id, retry starts a new
+attempt without duplicating commits, deterministic failures are not rerun.
+Attack: resume-after-death is a new machine capability, possibly substantial —
+but it is spec'd as behavior with checkable outcomes, which is what this plan
+is for. Survived.
+
+### Missing (rev 2)
+
+1. **⟨1⟩4's predicted observations have no named source** before ⟨1⟩5's B.
+   Name it (the declared-prior rollout) so the check is runnable on day one.
+2. **No step owns F or γ.** G = σ(log E − F − γG): ⟨1⟩4 owns E's source,
+   ⟨1⟩5 owns B — but the risk/free-energy term F and the precision γ have no
+   step establishing them from data. If F cancels E at ⟨1⟩6, the proof stops
+   with no owning step. Add their provenance to ⟨1⟩3 or ⟨1⟩6's content.
+3. **⟨1⟩1 ⟨2⟩2 contradicts A4**: "fires unless Agency is down" vs Joe-named
+   blocking tripwires. One clause fixes it.
+4. **⟨1⟩4's recorded values are on prior predictions**; mark them superseded
+   by ⟨1⟩5's B so a later reader is not misled.
+5. **⟨1⟩5 ⟨2⟩1 must re-version the ledger**, not edit the meaning-pinned
+   declaration in place.
+6. **A3 must carry Joe's explicit supersession of the stop-the-line ruling**
+   (bbae7593), not an interpretation of it.
+
+Verdict: **9 SIGN, 0 OBJECT** on the changed parts and the new order. My two
+rev-1 objections are both answered at the source. The six Missing items are
+wording and ownership fixes; none changes the plan's structure. This review
+authorizes no machine changes.
