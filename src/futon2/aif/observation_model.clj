@@ -206,14 +206,19 @@
                                            (contains? state token))
                                   token))
                     acceptance)]
-      ;; A target whose class is :unknown (unknown or ambiguous focus) is
-      ;; SCORED in Joe's unmeasured bucket (stop-the-line) but never
-      ;; silently classed :unrelated: the model's :target-class carries the
-      ;; :unknown record and the decision's :focus-status says so.
-      (if (and own (contains? target-class target))
-        (let [c (get target-class target)]
-        (if (= :unknown c) {:stop-the-line 1} {c 1}))
-        {:stop-the-line 1}))))
+      ;; codex-20 ruling, handoff B: a target whose relation genuinely cannot
+      ;; be resolved gets NO scalar G -- no stop-the-line scoring, no worst
+      ;; case, no averaging, no uniform, no exclusion. The refusal carries
+      ;; the possible terminal costs under Joe's C so the certificate states
+      ;; them; selection proceeds only over candidates that have a scalar.
+      (let [c (and own (contains? target-class target) (get target-class target))]
+        (if (= :unknown c)
+          (refuse! :class-unknown-no-scalar-g
+                   {:target target
+                    :possible-costs {:focused (- (Math/log 0.55))
+                                     :related (- (Math/log 0.35))
+                                     :unrelated (- (Math/log 0.05))}})
+          (if c {c 1} {:stop-the-line 1}))))))
 
 (defn- class-predictive
   [{:keys [horizon] :as model} belief tau target]

@@ -12,7 +12,8 @@
             [futon2.aif.observation-model :as om]
             [futon2.aif.scoring-input-receipts :as ir]
             [futon2.aif.trace :as trace]
-            [futon2.report.war-machine :as war-machine]))
+            [futon2.report.war-machine :as war-machine]
+            [futon2.aif.focus-receipt :as focus]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 (def joe-c {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100})
@@ -216,33 +217,6 @@
 
 ;; PROOF-wm-works 1.3 handoff B: target class via the target relation; an
 ;; unknown focus is recorded, never silently :unrelated; class provenance.
-(deftest target-class-unknown-focus-is-never-unrelated
-  (let [ta "A" tb "B"
-        ;; two facets for tb -> ambiguous -> :unknown; unknown focus -> both :unknown
-        classes @#'war-machine/facet-class-of-target]
-    (is (= :unknown (classes {:status :unknown :focus nil :facet-graph {:background []}}
-                             ["resources/wm/eig/x.edn"]))
-        "unknown focus: the target class is :unknown, never :unrelated")
-    (is (= :focused (classes {:status :retained :focus "WM" :facet-graph {:background ["APM"]}}
-                             ["resources/wm/rechecks/x.edn"])))
-    (is (= :related (classes {:status :retained :focus "WM" :facet-graph {:background ["APM"]}}
-                             ["src/apm/thing.clj"])))
-    (is (= :unknown (classes {:status :retained :focus "WM" :facet-graph {:background ["APM"]}}
-                             ["resources/wm/eig/x.edn" "src/apm/thing.clj"]))
-        "locators spanning two classes are ambiguous exactly as close refuses ambiguity")))
-
-(deftest unknown-class-target-scores-stop-line-but-records-unknown
-  (let [ta "A"
-        model (class-model {:universe #{[ta :s] [ta :done]} :acceptance #{[ta :done]}
-                            :horizon 1 :target-class {ta :unknown}})
-        score (om/query model {:op :score :belief {#{[ta :s] [ta :done]} 1} :tau 1 :target ta
-                               :preference joe-c})]
-    (is (= :computed (:status score)) (pr-str (dissoc score :model)))
-    (is (= {:stop-the-line 1} (:prediction score))
-        "unknown class scores in the unmeasured bucket")
-    (is (= :unknown (get-in score [:model :target-class ta]))
-        "the record says :unknown, never :unrelated")))
-
 (deftest swap-test-carries-class-provenance
   (let [ta "A" tb "B"
         mk (fn [target]
@@ -266,3 +240,48 @@
     (is (= :class-emission (:kind m1)))
     (is (= joe-c (get-in m1 [:class-preference 1])))
     (is (re-find #"Joe 2026-09-22" (get-in m1 [:provenance :source])))))
+
+;; PROOF-wm-works 1.3 handoff B build: the shared relation producer.
+(deftest shared-relation-producer-classifies-both-paths-alike
+  (let [inputs (focus/read-inputs)
+        established (focus/discover inputs "2026-09-22T17:31:44Z" nil)
+        retained (focus/discover inputs "2026-09-30T00:00:00Z"
+                                  {:focus (:focus established) :as-of "2026-09-22T17:31:44Z"})
+        ctx {:ticket-dir "holes/tickets"
+             :findings-dir "data/wm-repair-obligations/findings"}]
+    ;; the reference ticket derives :focused via its Parent in BOTH focus
+    ;; contexts, with the derivation recorded
+    (is (= :retained (:status retained)))
+    (doseq [disc [established retained]]
+      (let [c (focus/classify-target inputs disc (:as-of disc) t ctx)]
+        (is (= :focus (:class c)) (pr-str c))
+        (is (= :ticket-parent (get-in c [:derived-via :derived-via])))
+        (is (= "M-aif-policy-conditioned-eig" (get-in c [:derived-via :parent])))))
+    ;; an M- target reads its corpus row directly, no derivation
+    (let [c (focus/classify-target inputs retained (:as-of retained)
+                                   "M-aif-policy-conditioned-eig" ctx)]
+      (is (= :focus (:class c)))
+      (is (nil? (:derived-via c))))
+    ;; retained focus reaches classification (the receipt side reads the
+    ;; same statuses through the same function)
+    (is (contains? #{:discovered :retained} (:status retained)))))
+
+(deftest unknown-relation-gets-no-scalar-g
+  (let [ta "T-no-parent-no-finding"
+        ;; no ticket file, no finding record: relation unresolvable
+        c (focus/classify-target (focus/read-inputs)
+                                 (focus/discover (focus/read-inputs) "2026-09-30T00:00:00Z"
+                                                 {:focus "WM" :as-of "2026-09-22T17:31:44Z"})
+                                 "2026-09-30T00:00:00Z" ta
+                                 {:ticket-dir "/nonexistent-tickets"
+                                  :findings-dir "/nonexistent-findings"})]
+    (is (= :unknown (:class c)) (pr-str c))
+    ;; and the class model refuses the scalar with the possible costs
+    (let [model (class-model {:universe #{[ta :s] [ta :done]} :acceptance #{[ta :done]}
+                              :horizon 1 :target-class {ta :unknown}})
+          r (om/query model {:op :score :belief {#{[ta :s] [ta :done]} 1} :tau 1 :target ta
+                             :preference joe-c})]
+      (is (not= :computed (:status r)))
+      (is (= :class-unknown-no-scalar-g (:kind r)))
+      (is (= {:focused (- (Math/log 0.55)) :related (- (Math/log 0.35)) :unrelated (- (Math/log 0.05))}
+             (:possible-costs r))))))

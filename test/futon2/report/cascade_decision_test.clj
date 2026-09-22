@@ -10,6 +10,7 @@
   refuses :incommensurable-family."
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-model-manifest :as manifest]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.live-c :as lc]
@@ -66,7 +67,21 @@
    :lam 1 :entries [] :gaps [] :refusals nil
    :signature "cascade-decision-test-live-c"})
 
-(def live-c-opts {:live-c {:derived live-c-fixture}})
+(def live-c-opts
+  ;; PROOF-wm-works 1.3 handoff B: the synthetic targets have no corpus
+  ;; relations, and under the shared relation producer an unresolved relation
+  ;; gets no scalar G -- so the fixture injects a corpus with relations for
+  ;; its own targets (the same injection seam as :live-c).
+  {:live-c {:derived live-c-fixture}
+   :focus-inputs (assoc (futon2.aif.focus-receipt/read-inputs)
+                        :relations [{:target :wm-tick-001-observation-crash :facet "WM"
+                                     :relation "focus"
+                                     :source {:repo "fixture" :commit "0" :path "test" :section "fixture"}
+                                     :effective-from "2026-01-01T00:00:00Z"}
+                                    {:target :B :facet "WM"
+                                     :relation "focus"
+                                     :source {:repo "fixture" :commit "0" :path "test" :section "fixture"}
+                                     :effective-from "2026-01-01T00:00:00Z"}])})
 
 (deftest cross-source-want-cannot-resurrect-zeroed-outcome
   ;; Exercise the production merge used by cascade-decision.  The same token

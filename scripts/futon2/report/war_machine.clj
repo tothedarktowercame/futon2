@@ -6061,28 +6061,6 @@
      :provenance {:status :synthetic :calibrated false
                   :source "PROOF-wm-works 1.3; Joe 2026-09-22 ruling (55/35/5/5; unmeasured -> stop-the-line)"}}))
 
-(defn- facet-class-of-target
-  "PROOF-wm-works 1.3 handoff B(2): a target's class by the SAME target
-   relation the close classifier uses -- every evidence locator's facet
-   (focus_receipt's own regexes), never just the first. One facet: focus /
-   same-focus background / unrelated. Facets that would give DIFFERENT
-   classes are ambiguous exactly as run_ending_classification refuses
-   ambiguous facet rows at close: the class is recorded :unknown, never
-   averaged and never silently first-facet. An unknown focus makes every
-   target's class :unknown (never :unrelated)."
-  [focus-info paths]
-  (let [facets @#'futon2.aif.focus-receipt/facets
-        focus (:focus focus-info)
-        background (set (get-in focus-info [:facet-graph :background]))]
-    (if (or (nil? focus) (= :unknown (:status focus-info)))
-      :unknown
-      (let [classes (distinct
-                     (for [f (facets paths)]
-                       (cond (= f focus) :focused
-                             (contains? background f) :related
-                             :else :unrelated)))]
-        (if (= 1 (count classes)) (first classes) :unknown)))))
-
 (defn- cascade-family-parameters
   "Validate the declared comparison BEFORE admission can remove a target.
    A declined candidate cannot hide incompatible horizons or temperatures."
@@ -6303,7 +6281,9 @@
               ;; focus the status is :unknown and every target's class is
               ;; recorded :unknown -- never :unrelated, and the decision says
               ;; so under :focus-status rather than refusing to fire.
-              focus-inputs (focus-receipt/read-inputs)
+              ;; injectable like :live-c (tests supply synthetic corpora);
+              ;; production reads the canonical resource.
+              focus-inputs (or (:focus-inputs opts) (focus-receipt/read-inputs))
               focus-as-of (str (java.time.Instant/ofEpochMilli
                                 (reduce max (map #(inst-ms (java.time.Instant/parse (:valid-through %)))
                                                   (:windows focus-inputs)))))
@@ -6319,15 +6299,27 @@
                                      [(set joint-want)
                                       (set (mapcat identity (keys joint-q0)))
                                       (set (mapcat identity (keys (:value initial-belief-receipt))))])
+              ;; THE shared relation producer (codex-20 ruling): the SAME
+              ;; classify-target the close receipt uses, same focus context
+              ;; (discovered or retained), ticket parents derived through the
+              ;; recorded Parent line.
+              relation-context {:ticket-dir "holes/tickets"
+                                :findings-dir "data/wm-repair-obligations/findings"}
+              target-classifications
+              (into {}
+                    (for [p problems
+                          :let [t (:target p)]]
+                      [t (focus-receipt/classify-target
+                          focus-inputs focus-info (:as-of focus-info) t relation-context)]))
+              ;; relation vocabulary -> scorer classes (the close side maps
+              ;; the same keywords through the facet-map)
+              scorer-class {:focus :focused :associated :related :useful-elsewhere :unrelated}
               class-model (class-observation-model
                            {:universe class-universe
                             :acceptance joint-want
                             :target-class (into {}
-                                                (for [p problems
-                                                      :let [t (:target p)]]
-                                                  [t (facet-class-of-target
-                                                      focus-info
-                                                      (keep :path (vals (get-in p [:cascade-problem :locators]))))]))
+                                                (for [[t c] target-classifications]
+                                                  [t (get scorer-class (:class c) :unknown)]))
                             :horizon T})
               ranked (efe/rank-actions {:cascade-belief joint-q0}
                                        joint-candidates
@@ -6401,16 +6393,17 @@
                                 {:status (:status focus-info)
                                  :focus (:focus focus-info)
                                  :as-of (:as-of focus-info)
-                                 :target-class (into {}
-                                                     (for [p problems]
-                                                       [(:target p)
-                                                        (facet-class-of-target
-                                                         focus-info
-                                                         (keep :path (vals (get-in p [:cascade-problem :locators]))))]))})
+                                 :target-class target-classifications})
                 ;; :focus-as-of pins the receipt's clock for replay comparisons.
-                decision (if-let [as-of (:focus-as-of opts)]
-                           (focus-receipt/attach decision (focus-receipt/read-inputs) {:as-of as-of})
-                           (focus-receipt/attach decision))
+                ;; the SAME retained-focus context the scorer used reaches
+                ;; the receipt attachment (handoff B: one focus context, two
+                ;; consumers)
+                decision (focus-receipt/attach
+                          decision focus-inputs
+                          {:as-of (or (:focus-as-of opts) (str (java.time.Instant/now)))
+                           :previous-focus (when (:focus focus-established)
+                                             {:focus (:focus focus-established)
+                                              :as-of focus-as-of})})
                 authorized (controller-authority/authorize decision ranked)
                 emitted (decision-gate/emit! authorized)]
             {:decision (assoc emitted

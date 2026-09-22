@@ -3,6 +3,8 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [futon2.aif.action-identity :as identity]
+            [clojure.edn :as edn]
+            [clojure.string :as str]
             [futon2.aif.load-identity :as load-identity])
   (:import [java.time Instant]))
 
@@ -82,17 +84,65 @@
                                                             (= focus (:to e)) (:from e))) edges))))
                    :edges edges}}))
 
+(defn ticket-parent
+  "PROOF-wm-works 1.3 shared relation producer: a ticket's Parent line
+   (holes/tickets/T-*.md, 'Parent: <mission>')."
+  [ticket-file]
+  (try
+    (some->> (slurp ticket-file)
+             str/split-lines
+             (some #(second (re-matches #"^\*\*Parent:\*\*\s+(\S+)" %))))
+    (catch Exception _ nil)))
+
+(defn classify-target
+  "THE shared relation producer (codex-20 ruling, handoff B): one
+   classification for BOTH the scoring path and the close receipt. Accepts a
+   :discovered OR :retained focus (no completion consumer distinguishes
+   them). M- targets read their corpus relation; T- targets derive through
+   the ticket's Parent line (or the finding record's target) to the parent's
+   corpus row, with :derived-via recording the derivation. Unresolvable
+   relations are :unknown with a reason -- distinct from an unmeasured
+   outcome, and never guessed."
+  ([inputs discovery as-of target]
+   (classify-target inputs discovery as-of target nil))
+  ([inputs discovery as-of target {:keys [ticket-dir findings-dir]}]
+   (let [direct (first (filter #(and (= target (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs)))
+         parent (when (and (nil? direct) (string? target) (str/starts-with? target "T-"))
+                  (or (when ticket-dir
+                        (ticket-parent (io/file ticket-dir (str target ".md"))))
+                      (when findings-dir
+                        (try
+                          (some-> (edn/read-string (slurp (io/file findings-dir (str (subs target 2) ".edn"))))
+                                  (:target))
+                          (catch Exception _ nil)))))
+         relation-row (or direct
+                          (when parent
+                            (first (filter #(and (= parent (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs)))))
+         derived (when (and parent relation-row)
+                   {:derived-via :ticket-parent :parent parent
+                    :source (if direct nil (str "ticket " target))})
+         facets (set (concat (get-in discovery [:facet-graph :active]) (get-in discovery [:facet-graph :background])))
+         eligible (and (contains? #{:discovered :retained} (:status discovery)) (:source relation-row)
+                       (contains? #{"focus" "associated" "useful-elsewhere"} (:relation relation-row))
+                       (or (= "useful-elsewhere" (:relation relation-row)) (facets (:facet relation-row))))]
+     {:target target
+      :class (if eligible (keyword (:relation relation-row)) :unknown)
+      :relation (if eligible
+                  relation-row
+                  {:status :absent
+                   :reason (cond (nil? relation-row) (if (and (string? target) (str/starts-with? target "T-")) :no-parent-relation :relation-not-declared)
+                                 (not (contains? #{:discovered :retained} (:status discovery))) :focus-not-established
+                                 :else :relation-outside-focus-facets)})
+      :derived-via derived})))
+
 (defn- classification [inputs discovery as-of candidate]
   (let [id (:id candidate) target (:target id)
-        relation (first (filter #(and (= target (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs)))
-        facets (set (concat (get-in discovery [:facet-graph :active]) (get-in discovery [:facet-graph :background])))
-        eligible (and (= :discovered (:status discovery)) (:source relation)
-                      (contains? #{"focus" "associated" "useful-elsewhere"} (:relation relation))
-                      (or (= "useful-elsewhere" (:relation relation)) (facets (:facet relation))))
-        class (if eligible (keyword (:relation relation)) :unknown)
+        {:keys [class relation derived-via]} (classify-target inputs discovery as-of target)
+        relation (if (= :unknown class) (or relation (absent :relation-not-declared)) relation)
         node (when (string? target) (subs target (if (.startsWith ^String target "M-") 2 0)))]
     {:candidate-id id :target target :class class
-     :relation (if eligible relation (absent (if relation :focus-not-established :relation-not-declared)))
+     :relation (if (= :unknown class) relation relation)
+     :derived-via derived-via
      :embedding (if (some #{node} (get-in inputs [:embedding :nodes]))
                   {:status :present :node node :authority :presence-only}
                   (absent :embedding-node-not-retained))
