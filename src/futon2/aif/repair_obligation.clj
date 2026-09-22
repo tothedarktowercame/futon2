@@ -12,7 +12,8 @@
             [clojure.string :as str]
             [futon2.aif.c-fold-config :as digest]
             [futon2.aif.interoceptive-store-lock :as store-lock]
-            [futon2.aif.substrate :as substrate])
+            [futon2.aif.substrate :as substrate]
+            [futon2.aif.finding-ticket :as finding-ticket])
   (:import [java.nio ByteBuffer]
            [java.nio.channels FileChannel]
            [java.nio.file Files StandardOpenOption LinkOption OpenOption]
@@ -499,9 +500,10 @@
 
 (defn record-review-failure!
   ([finding] (record-review-failure! default-root finding))
+  ([root finding] (record-review-failure! root finding (finding-ticket/destinations root)))
   ([root {:keys [attempt-id target commit selected-entry reviewer review-job
                  review-verdict review-text occurrence observation]
-          :as finding}]
+          :as finding} publication]
    (when-not (and (string? attempt-id) target commit selected-entry reviewer
                   review-job (#{:request-changes :reject} review-verdict)
                   (not (str/blank? (str review-text))))
@@ -534,6 +536,7 @@
                                 (str (Instant/now)))}
                   occurrence (assoc :repair/occurrence occurrence))]
      (write-new-or-identical! root id record)
+     (with-contended-store-lock root #(finding-ticket/publish! root id publication))
      (when occurrence
        (occurrence-evidence! root occurrence id observation))
      (if occurrence
@@ -546,9 +549,10 @@
   holds, and recoverable incomplete work. Selection fields are optional
   because readiness and substrate failures can precede policy selection."
   ([finding] (record-system-failure! default-root finding))
+  ([root finding] (record-system-failure! root finding (finding-ticket/destinations root)))
   ([root {:keys [attempt-id repair-id repair-class failure-stage outcome error
                  occurrence observation]
-          :as finding}]
+          :as finding} publication]
    (when-not (and (string? attempt-id)
                   (#{:machine-failure :environmental-hold
                      :incomplete-recoverable} repair-class)
@@ -581,6 +585,7 @@
                                 (str (Instant/now)))}
                   occurrence (assoc :repair/occurrence occurrence))]
      (write-new-or-identical! root id record)
+     (with-contended-store-lock root #(finding-ticket/publish! root id publication))
      (when occurrence
        (occurrence-evidence! root occurrence id observation))
      (if occurrence

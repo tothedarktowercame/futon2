@@ -1,0 +1,10 @@
+{:repo-root "/home/joe/code/futon2-finding-to-ticket"
+ :code-paths ["src/futon2/aif/finding_ticket.clj" "src/futon2/aif/ticket_publication_io.clj"
+              "src/futon2/aif/ticket_queue.clj" "src/futon2/aif/repair_obligation.clj"
+              "src/futon2/aif/load_identity.clj"]
+ :test-paths ["test/futon2/aif/finding_ticket_test.clj" "test/fixtures/finding-ticket/machine.edn"
+              "test/fixtures/finding-ticket/environment.edn"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.finding-ticket-test"]
+ :author "codex-13" :origin "claude-3/finding-to-ticket"
+ :artifact-dir "/home/joe/code/futon2-finding-to-ticket/holes/labs/wm-contract/runs/finding-to-ticket-2026-09-22/registered"
+ :agency-url "http://localhost:7070"}
