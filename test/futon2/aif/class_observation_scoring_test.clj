@@ -3,7 +3,8 @@
   observation model scores the reference input's real candidates through the
   real loaders, the real qualifier (replicated from war_machine.clj:6145)
   and the real bounded scorer rank-cascade-actions. No stubs."
-  (:require [clojure.set :as set]
+  (:require [clojure.java.io :as io]
+            [clojure.set :as set]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-observation-scoring :as cos]
             [futon2.aif.cascade-policy :as cpol]
@@ -255,7 +256,7 @@
     (doseq [disc [established retained]]
       (let [c (focus/classify-target inputs disc (:as-of disc) t ctx)]
         (is (= :focus (:class c)) (pr-str c))
-        (is (= :ticket-parent (get-in c [:derived-via :derived-via])))
+        (is (= :ticket-parent (:kind (:derived-via c))))
         (is (= "M-aif-policy-conditioned-eig" (get-in c [:derived-via :parent])))))
     ;; an M- target reads its corpus row directly, no derivation
     (let [c (focus/classify-target inputs retained (:as-of retained)
@@ -285,3 +286,52 @@
       (is (= :class-unknown-no-scalar-g (:kind r)))
       (is (= {:focused (- (Math/log 0.55)) :related (- (Math/log 0.35)) :unrelated (- (Math/log 0.05))}
              (:possible-costs r))))))
+
+;; codex-20 corrections 1-3 on 84f81cb4.
+(deftest receipt-and-scorer-agree-through-real-receipt-construction
+  (let [inputs (focus/read-inputs)
+        ctx {:ticket-dir "holes/tickets"
+             :findings-dir "data/wm-repair-obligations/findings"}
+        established (focus/discover inputs "2026-09-22T17:31:44Z" nil)
+        retained (focus/discover inputs "2026-09-30T00:00:00Z"
+                                  {:focus (:focus established) :as-of "2026-09-22T17:31:44Z"})
+        scorer-classification (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t ctx)
+        ;; a real decision certificate carrying the reference candidate
+        decision {:selection-certificate
+                  {:candidates [{:id {:kind :cascade-candidate :id :C2 :target t}}]}}
+        receipt (focus/build decision inputs
+                             {:as-of "2026-09-30T00:00:00Z"
+                              :previous-focus {:focus (:focus established) :as-of "2026-09-22T17:31:44Z"}
+                              :relation-context ctx
+                              :classifications {t scorer-classification}})
+        row (first (:candidates receipt))]
+    (is (= (:class scorer-classification) (:class row))
+        "the receipt's class equals the scorer's on the reference ticket")
+    (is (= (:derived-via scorer-classification) (:derived-via row))
+        "both carry the same derivation")))
+
+(deftest parent-parser-accepts-both-formats-and-neither
+  (let [tmp (.toFile (java.nio.file.Files/createTempDirectory "tickets"
+                                                             (make-array java.nio.file.attribute.FileAttribute 0)))]
+    (spit (io/file tmp "T-plain.md") "# T\n\nParent: M-plain-parent\n")
+    (spit (io/file tmp "T-bold.md") "# T\n\n**Parent:** M-bold-parent\n")
+    (spit (io/file tmp "T-none.md") "# T\n\nno parent line\n")
+    (is (= "M-plain-parent" (focus/ticket-parent (io/file tmp "T-plain.md"))))
+    (is (= "M-bold-parent" (focus/ticket-parent (io/file tmp "T-bold.md"))))
+    (is (nil? (focus/ticket-parent (io/file tmp "T-none.md"))))))
+
+(deftest parent-source-kind-is-recorded
+  (let [inputs (focus/read-inputs)
+        established (focus/discover inputs "2026-09-22T17:31:44Z" nil)
+        retained (focus/discover inputs "2026-09-30T00:00:00Z"
+                                  {:focus (:focus established) :as-of "2026-09-22T17:31:44Z"})]
+    ;; the real ticket has BOTH a Parent line and a finding: ticket wins, kind recorded
+    (let [c (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t
+                                   {:ticket-dir "holes/tickets"
+                                    :findings-dir "data/wm-repair-obligations/findings"})]
+      (is (= :ticket-parent (:kind (:derived-via c)))) (pr-str c))
+    ;; findings-only: the finding fallback supplies the parent, kind says so
+    (let [c (focus/classify-target inputs retained "2026-09-30T00:00:00Z" t
+                                   {:ticket-dir "/nonexistent"
+                                    :findings-dir "data/wm-repair-obligations/findings"})]
+      (is (= :finding-target (:kind (:derived-via c)))) (pr-str c))))

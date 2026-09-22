@@ -6284,6 +6284,11 @@
               ;; injectable like :live-c (tests supply synthetic corpora);
               ;; production reads the canonical resource.
               focus-inputs (or (:focus-inputs opts) (focus-receipt/read-inputs))
+              ;; codex-20 correction 3: ONE decision time, captured once and
+              ;; used by BOTH consumers (scoring's focus context and the
+              ;; receipt attachment). :focus-as-of pins it for replay; no
+              ;; consumer computes its own now.
+              decision-as-of (or (:focus-as-of opts) (str (java.time.Instant/now)))
               focus-as-of (str (java.time.Instant/ofEpochMilli
                                 (reduce max (map #(inst-ms (java.time.Instant/parse (:valid-through %)))
                                                   (:windows focus-inputs)))))
@@ -6291,7 +6296,7 @@
               focus-info (if (= :unknown (:status focus-established))
                            focus-established
                            (focus-receipt/discover focus-inputs
-                                                   (str (java.time.Instant/now))
+                                                   decision-as-of
                                                    {:focus (:focus focus-established)
                                                     :as-of focus-as-of}))
               class-universe (reduce clojure.set/union
@@ -6400,10 +6405,12 @@
                 ;; consumers)
                 decision (focus-receipt/attach
                           decision focus-inputs
-                          {:as-of (or (:focus-as-of opts) (str (java.time.Instant/now)))
+                          {:as-of decision-as-of
                            :previous-focus (when (:focus focus-established)
                                              {:focus (:focus focus-established)
-                                              :as-of focus-as-of})})
+                                              :as-of focus-as-of})
+                           :relation-context relation-context
+                           :classifications target-classifications})
                 authorized (controller-authority/authorize decision ranked)
                 emitted (decision-gate/emit! authorized)]
             {:decision (assoc emitted

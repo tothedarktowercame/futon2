@@ -86,12 +86,13 @@
 
 (defn ticket-parent
   "PROOF-wm-works 1.3 shared relation producer: a ticket's Parent line
-   (holes/tickets/T-*.md, 'Parent: <mission>')."
+   (holes/tickets/T-*.md). Accepts both the real format 'Parent: <mission>'
+   and the bolded '**Parent:** <mission>' (codex-20 correction 2)."
   [ticket-file]
   (try
     (some->> (slurp ticket-file)
              str/split-lines
-             (some #(second (re-matches #"^\*\*Parent:\*\*\s+(\S+)" %))))
+             (some #(second (re-matches #"^\*{0,2}Parent:\*{0,2}\s+(\S+)" %))))
     (catch Exception _ nil)))
 
 (defn classify-target
@@ -107,20 +108,22 @@
    (classify-target inputs discovery as-of target nil))
   ([inputs discovery as-of target {:keys [ticket-dir findings-dir]}]
    (let [direct (first (filter #(and (= target (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs)))
-         parent (when (and (nil? direct) (string? target) (str/starts-with? target "T-"))
-                  (or (when ticket-dir
-                        (ticket-parent (io/file ticket-dir (str target ".md"))))
-                      (when findings-dir
-                        (try
-                          (some-> (edn/read-string (slurp (io/file findings-dir (str (subs target 2) ".edn"))))
-                                  (:target))
-                          (catch Exception _ nil)))))
+         parent-source (when (and (nil? direct) (string? target) (str/starts-with? target "T-"))
+                         (or (when ticket-dir
+                             (when-let [p (ticket-parent (io/file ticket-dir (str target ".md")))]
+                               {:kind :ticket-parent :parent p :source (str "ticket " target)}))
+                           (when findings-dir
+                             (try
+                               (when-let [p (-> (edn/read-string (slurp (io/file findings-dir (str (subs target 2) ".edn"))))
+                                                (:target))]
+                                 {:kind :finding-target :parent p :source (str "finding " (subs target 2))})
+                               (catch Exception _ nil)))))
+         parent (:parent parent-source)
          relation-row (or direct
                           (when parent
                             (first (filter #(and (= parent (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs)))))
-         derived (when (and parent relation-row)
-                   {:derived-via :ticket-parent :parent parent
-                    :source (if direct nil (str "ticket " target))})
+         derived (when (and parent-source relation-row (nil? direct))
+                   parent-source)
          facets (set (concat (get-in discovery [:facet-graph :active]) (get-in discovery [:facet-graph :background])))
          eligible (and (contains? #{:discovered :retained} (:status discovery)) (:source relation-row)
                        (contains? #{"focus" "associated" "useful-elsewhere"} (:relation relation-row))
@@ -148,14 +151,30 @@
                   (absent :embedding-node-not-retained))
      :outcome (absent :attested-outcome-not-inferred-from-prediction)}))
 
-(defn build [decision inputs {:keys [as-of previous-focus]}]
-  (let [discovery (discover inputs as-of previous-focus)
-        candidates (get-in decision [:selection-certificate :candidates])]
+(defn build
+  ([decision inputs context]
+   (let [{:keys [as-of previous-focus relation-context classifications]} context
+         discovery (discover inputs as-of previous-focus)
+         candidates (get-in decision [:selection-certificate :candidates])
+         ;; codex-20 correction 1: the receipt uses the SAME classification
+         ;; the scoring path resolved when one is supplied (one decision, one
+         ;; classification), else classifies with the same relation context.
+         classify (fn [target]
+                    (or (get classifications target)
+                        (classify-target inputs discovery as-of target relation-context)))]
     {:schema :wm/focus-receipt-v1 :mode :record-only
      :inputs inputs :inputs-sha256 (identity/digest inputs)
      :context {:as-of as-of :previous-focus previous-focus}
      :rule (:rule inputs) :heads (:heads inputs) :discovery discovery
-     :candidates (mapv #(classification inputs discovery as-of %) candidates)
+     :candidates (mapv (fn [c]
+                         (let [t (:target (:id c))
+                               {:keys [class relation derived-via]} (classify t)
+                               node (when (string? t) (subs t (if (.startsWith ^String t "M-") 2 0)))]
+                           (-> (classification inputs discovery as-of c)
+                               (assoc :class class
+                                      :relation (if (= :unknown class) relation relation)
+                                      :derived-via derived-via))))
+                       candidates)
      :global-preference (assoc (:global-preference inputs)
                                :temporal-status (if (and (get-in inputs [:global-preference :effective-from])
                                                          (at-or-before? (get-in inputs [:global-preference :effective-from]) as-of))
@@ -170,7 +189,7 @@
                                                  :declared-masses (get-in inputs [:global-preference :masses])}}
      :attestation (absent :attestation-join-not-wired)
      :kernel (absent :predictive-attestation-kernel-not-declared)
-     :local-C {:status :held :reason :conditional-outcome-kernel-unavailable}}))
+     :local-C {:status :held :reason :conditional-outcome-kernel-unavailable}})))
 
 (defn attach
   ([decision] (attach decision (read-inputs) {:as-of (str (Instant/now))}))

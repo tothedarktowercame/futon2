@@ -81,6 +81,10 @@
                                     {:target :B :facet "WM"
                                      :relation "focus"
                                      :source {:repo "fixture" :commit "0" :path "test" :section "fixture"}
+                                     :effective-from "2026-01-01T00:00:00Z"}
+                                    {:target :A :facet "WM"
+                                     :relation "focus"
+                                     :source {:repo "fixture" :commit "0" :path "test" :section "fixture"}
                                      :effective-from "2026-01-01T00:00:00Z"}])})
 
 (deftest cross-source-want-cannot-resurrect-zeroed-outcome
@@ -235,7 +239,8 @@
         without-projection
         (wm/cascade-decision
          assembled
-         {:live-c {:derived {:want #{:star/no-target}
+         {:focus-inputs (:focus-inputs live-c-opts)
+          :live-c {:derived {:want #{:star/no-target}
                              :weights {:star/no-target 1}
                              :lam 1 :entries [] :gaps [] :refusals nil
                              :signature "no-projectable-live-c"}}})
@@ -343,7 +348,8 @@
                               :beta-by-context {:x {:beta 1}}
                               :context-of (fn [_] :x)}})
         ;; This test's C must be in this family's domain.
-        opts {:live-c {:derived (assoc live-c-fixture
+        opts {:focus-inputs (:focus-inputs live-c-opts)
+              :live-c {:derived (assoc live-c-fixture
                                       :want #{[:A :done]}
                                       :weights {[:A :done] 1})}}
         r (wm/cascade-decision assembled opts)
@@ -437,7 +443,7 @@
                           :weights {(keyword "alive" (name tick-1-target)) 1})]
       (is (= #{pair} (:want (lc/cascade-spec matching #{pair} #{pair})))
           "mission token projects through that mission's own declared want"))
-    (let [decision (wm/cascade-decision assembled {})]
+    (let [decision (wm/cascade-decision assembled {:focus-inputs (:focus-inputs live-c-opts)})]
       (is (map? decision)
           "a grain mismatch does not halt the decision")
       (is (some? (get-in decision [:decision :action]))
@@ -447,7 +453,7 @@
         (is (some? c) "candidates were scored")))
     ;; and the grain mismatch is RECORDED, not silent: uniform-because-no-overlap
     ;; must never be mistaken for C-was-derived-and-agreed.
-    (let [spec-c (-> (wm/cascade-decision assembled {})
+    (let [spec-c (-> (wm/cascade-decision assembled {:focus-inputs (:focus-inputs live-c-opts)})
                      (get-in [:decision :token-qualification]))]
       (is (= :target-token-pair (:scheme spec-c))
           "the decision states the qualification scheme its outcomes use"))))
