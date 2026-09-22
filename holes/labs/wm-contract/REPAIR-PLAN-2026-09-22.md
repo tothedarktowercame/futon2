@@ -196,24 +196,24 @@ Each step is carried out as follows:
 
 | Part | Zai GLM | Codex | Joe |
 |---|---|---|---|
-| A1 | SIGN | | |
-| A2 | SIGN | | |
-| A3 | SIGN | | |
-| A4 | SIGN | | |
-| A5 | SIGN | | |
-| A6 | SIGN | | |
-| A7 | SIGN | | |
-| A8 | SIGN | | |
-| A9 | SIGN | | |
-| A10 | SIGN | | |
-| B0 | SIGN | | |
-| B1 | SIGN | | |
-| B2 | SIGN | | |
-| B3 | SIGN | | |
-| B4 | SIGN | | |
-| B5 | SIGN | | |
-| B6 | SIGN | | |
-| B7 | SIGN | | |
+| A1 | SIGN | SIGN | |
+| A2 | SIGN | OBJECT | |
+| A3 | SIGN | SIGN | |
+| A4 | SIGN | SIGN | |
+| A5 | SIGN | SIGN | |
+| A6 | SIGN | OBJECT | |
+| A7 | SIGN | SIGN | |
+| A8 | SIGN | OBJECT | |
+| A9 | SIGN | OBJECT | |
+| A10 | SIGN | SIGN | |
+| B0 | SIGN | SIGN | |
+| B1 | SIGN | OBJECT | |
+| B2 | SIGN | OBJECT | |
+| B3 | SIGN | OBJECT | |
+| B4 | SIGN | OBJECT | |
+| B5 | SIGN | OBJECT | |
+| B6 | SIGN | OBJECT | |
+| B7 | SIGN | OBJECT | |
 
 ## Zai GLM review
 
@@ -354,3 +354,271 @@ changed text read-only:
 
 Addendum verdict: **3 SIGN, 0 OBJECT** (A1 revised, A10, B0). Cumulative:
 **19 SIGN, 0 OBJECT.** From my side the plan is ready for Codex.
+
+
+## Codex review
+
+**Reviewer: codex-20; model: GPT-6 (gpt-6-astra).**
+
+**Verdict: 7 SIGN, 11 OBJECT across 18 unique entries. Request revision; the
+whole plan is not signed off.** Zai's cumulative 19 includes reviewing A1 twice;
+there are 18 entries in the table. SIGN below approves the particular rule or
+step, not removal of any existing invariant or approval to execute the plan.
+
+Read-only evidence checks: the plan at `dc46e95a`, both r4 STAGES and generated
+narratives, the fix list, the named historical commits, the two raw
+`data/wm-runs/tick-run-record-*.edn` files, their close checkpoints, current
+candidate/selection/learning/dispatch source, and the Mathlib contract JSON.
+No click, test suite, ingestion, model update, or serving-JVM evaluation was run.
+The historical bells quoted in A2/A5/A10 were not independently retrieved; I
+separate the author's account from the repository evidence below. Main advanced
+to `d1e9e96b` during this review; the plan file did not change. References below
+are futon2-relative unless prefixed with another repository.
+
+### Per-entry verdicts
+
+- **A1 — SIGN.** The addition and withdrawal of the no-click rule are directly
+  verified in `3134b61f` and `6714b3ac`. I reproduce 39 unique textual matches
+  under the stated regex/file rule, and the seven named namespaces exist. The
+  two close failures also exist in the raw records. Requiring explicit authority
+  for future restrictions is sound. However, the keyword count establishes
+  neither that 39 executable gates exist nor that any particular gate lacks
+  authority. The scope failure also does not establish that artifact identity
+  checks should be removed. B1/B2 must establish those facts separately and
+  preserve the workspace's no-workarounds rule.
+
+- **A2 — OBJECT.** Reporting delivered and accepted work first is right, and
+  both clicks failed acceptance. But “a refusal is ... a defect ... never ... a
+  result” is too broad. `task_execution_evidence.clj:181–210` rejects unresolved
+  or mismatched artifact claims; accepting those claims would be a defect.
+  Report refusal as an unsuccessful delivery, distinguish a correct check from
+  the condition it exposed, and name the repair needed to complete the work.
+  Do not require every correctly rejected attempt to become an acceptance.
+  STAGES alone does not verify the quoted bells or prove every report claimed
+  end-to-end success: r4-1 explicitly says certification was lost.
+
+- **A3 — SIGN.** The record-only/default-off commits exist, including
+  `27e7b982`, `b25126c2`, `7a31d08b`, `d2e544cd`, `296af581`, `e59a5571`,
+  `bfd3e183`, `7b6654e1`, `12a0937f`, and `6857774c`; the dated log has 13
+  matching commit subjects, including merges and follow-up work, not 13
+  independent mechanisms. `fddf7881` is the definitions note. Live integration
+  must be the completion criterion for model work. Record-only intermediate
+  commits can be useful, but they cannot close that integration task. This
+  SIGN does not endorse B4's assumption that all integration is switch flipping.
+
+- **A4 — SIGN.** `31cbc8c0` adds the proposed plan and `a33c0085` withdraws it
+  as rejected by Joe. The rule permits the specific investigation needed to
+  implement a repair. Apply that same limit to B1: provenance discovery should
+  answer concrete keep/change decisions, not become an unbounded new census.
+
+- **A5 — SIGN.** The bundle contains **16 contract groups and 36 declarations**,
+  including the four named modules. Their checked runtime correspondences
+  contradict a blanket claim of no implementation, but do not establish live
+  consumption: relevant holders explicitly say
+  `runtime-correspondence-not-live-path`. The cite-or-mark-unchecked rule is
+  appropriate. I did not independently verify the original conversation.
+
+- **A6 — OBJECT.** A named end-to-end owner is appropriate, but “selection
+  behaviour is unchanged since run 1789964661” is not established and is too
+  broad. The two raw r4 records have two and one candidates respectively;
+  current `policy.clj:358–374` also applies ticket-front eligibility before
+  action choice, and `ticket_queue.clj:89` implements that rule. These are
+  behavioral differences, even though they do not complete the intended model
+  integration. Replace the blanket claim with the specific unclosed paths and
+  make the owner track accepted delivery plus those paths. The fix-list
+  completion claims alone are not evidence that every test passed.
+
+- **A7 — SIGN.** The two STAGES reports and fix-list structure support the
+  diagnosis that narration did not deliver a working click. Speed needs an
+  explicit repair. The raw r4-1 checkpoints span about 570 seconds and r4-2
+  about 478 seconds, with approximately 122/120 seconds before the selection
+  checkpoint and 410/345 seconds from dispatch to build. These are checkpoint
+  intervals, not a profiler's attribution or total operator wait. B5 needs
+  stronger acceptance criteria, below.
+
+- **A8 — OBJECT.** The candidate deficit is real, but “does not read the real
+  tasks” misidentifies the missing implementation. `cascade_problems.clj:39–47`
+  reads registry target identities; `mission_hole_wants.clj:74–91` supplies
+  wants, universes and locators from mission tasks while explicitly leaving
+  interpretations and candidates empty. The r4-2 supply has 90 proposals and
+  zero proposal-admission joins; a joined proposal is still not a constructed
+  executable candidate. Name the missing preselection interpretation,
+  construction and publication workflow. Merely adding another task reader
+  would reproduce the current deficit. See B3.
+
+- **A9 — OBJECT.** The numerical concern is verified: r4-1's raw candidates have
+  G = 9.704757850639144 / 9.706022726492865 and habits 2/3 / 1/3; r4-2 has one
+  candidate with habit 1. The STAGES preference ratios agree with the diagnosis
+  of weak discrimination. But habit is itself part of the bound model law
+  `sigma(log E - F - gamma G)` in `wm-policy-selection`; it does not establish
+  that the model “decides nothing.” Specify that useful outcome-sensitive
+  discrimination and learned transitions remain unproved, without making a
+  habit-selected action inherently invalid. B4 must demonstrate sensitivity on
+  a field where alternative actions really exist.
+
+- **A10 — SIGN.** I accept the required review separation; separate Claude
+  seat names must not be offered as evidence of model diversity. `321b10ee`
+  verifies an actual review follow-up, while the narrative attributes the
+  cross-seat exchanges. I have not independently established every historical
+  seat's model version. Apply the rule consistently to the repair workflow:
+  an implementing Codex agent cannot supply its own independent Codex sign-off;
+  record author and reviewer identities and model versions, with the external
+  Zai/Joe reviews preserved.
+
+### Part B verdicts
+
+- **B0 — SIGN.** A bounded corrected report with per-line behavior evidence is
+  buildable and checkable. Distinguish improvements in record retention and
+  classification from delivered artifacts and changes to action selection.
+  The r4-2 close genuinely contains 12 manifest entries and a recorded
+  `:known-typed-failure`; it is still not an accepted increment. Both facts
+  belong in the report.
+
+- **B1 — OBJECT.** The intended provenance work is buildable, but the done-when
+  only counts reason keywords in unspecified namespaces. That cannot establish
+  coverage of the click path: `scripts/wm_click.sh` has shell refusals and
+  `--force`; execution checks also live in `task_execution_evidence.clj`,
+  called helpers and the futon3c click boundary. Conditions can throw, return
+  false, filter candidates, or catch errors without a `:reason` literal.
+  Define the actual entry-to-close call path and enumerate executable decision
+  sites, not keyword spellings. For each site record authority, reachability,
+  effect, and the invariant it preserves; include workspace rules and contract
+  premises in the authority search. Done when that finite call-path inventory
+  is covered and each disputed restriction has a concrete decision to make.
+
+- **B2 — OBJECT.** “Neither” is absence of located provenance, not permission to
+  weaken an invariant. “Tests changed accordingly” could make a real failure
+  disappear by deleting its test. Require a per-change explanation of how the
+  invariant still holds, or the explicit structural replacement and its tests.
+  Decide keep/remove/relax for *all* ledger entries, not only “neither,” and
+  specify acceptance for signed relaxations as well as removals. For each
+  change verify a legitimate end-to-end case and the actual invalid case the
+  retained check must still reject. No bypass or test deletion may substitute
+  for fixing the producer/consumer mismatch. The r4-1 reviewer-template repair
+  is an example of fixing the producer rather than disabling close validation.
+
+- **B3 — OBJECT.** Specify the missing preselection authoring workflow: target
+  discovery, substantive pattern interpretation, observable acceptance,
+  construction, review/publication through `cascade_sources/check-file!`, and
+  consumption by the next selection. Registry authority matters:
+  `mission_registry.clj:458` explicitly reads substrate-2 with no filesystem
+  fallback; the live ticket-front declaration is
+  `data/wm-ticket-queue/queue.edn` (`6c8e722b`). Also resolve repair closure
+  observation: `cascade_proposals.clj:136–174` removes repair targets despite
+  supplied declarations when that observation is unavailable. A candidate
+  count alone passes for zero, duplicate, unusable or wrong-target candidates.
+  Done when a real previously unsupported task and a front repair have
+  admissible, actionable candidates with truthful locators and feasible artifact
+  scope; retain source-to-candidate coverage. To test model discrimination,
+  include at least two meaningfully different first actions within an eligible
+  target, not merely more tickets behind it.
+
+- **B4 — OBJECT.** The four-class close classifier is a retrospective label,
+  not a prospective distribution over those classes for each policy. The fix
+  list itself, lines 296–306, warns that directly putting 55/35/5/5 on token
+  powersets makes the no-op win. Define the predictive observation-to-ending
+  mapping, treatment of `:unknown`/missing evidence, normalization/support,
+  horizon placement and its relation to token preferences. Name the functions
+  actually consuming it. `attempt_learning.clj:15–21` requires record-only
+  attempt-grain trials, and `learning_trial_ledger.clj:1–3` has no production
+  model reader; deriving B requires a declared prior, update rule and justified
+  parameter placement. Whole-attempt success is not automatically a per-pattern
+  transition probability. These are new implementation contracts, not merely
+  switches. The bundle also binds small-universe enumeration as well as sparse
+  implementations; use the production-scale path, not a powerset expansion.
+  Done when controlled changes in admitted B/C change live scores/posteriors
+  as predicted, and a suitable competing-action example changes the action,
+  while the full E/F/G law and ticket-front rule remain intact. A holder label
+  or a required `:decided-by :G` string is not evidence of that integration.
+
+- **B5 — OBJECT.** “The largest stage is reduced” can pass for a one-second
+  saving, an easier task or omitted validation. Set an agreed stage/total time
+  budget for a named workload before implementation; compare equivalent work
+  with the same acceptance checks. The observed ~120-second selection interval
+  deserves attention alongside author/reviewer time; measure enough within
+  those intervals to identify the expensive call. Reuse current test warrants
+  and run only stale/affected namespaces, as AGENTS.md requires. Include
+  selection, validation, retries and close, and verify B3's larger candidate
+  set and B4's scoring do not cause new scaling failures.
+
+- **B6 — OBJECT.** “Whatever stops ... fixed the same day” cannot be promised
+  for quota loss, missing authority or an unresolved mathematical prerequisite.
+  Serial attempts need defined failure handling: classify the blocker, make
+  the signed repair, verify it, then run the successor; do not repeat an
+  unchanged deterministic failure. Specify handling of ambiguous dispatch
+  timeouts, cancellation, partial commits and resume so retries cannot duplicate
+  work or count abandoned work as accepted. Joe remains the acceptance owner,
+  but agree what consecutive accepted deliveries, representative task coverage
+  and elapsed-time evidence he will judge. That is an acceptance experiment,
+  not a new rule barring ordinary repair selection until the backlog is empty.
+
+- **B7 — OBJECT.** Outcomes supply evidence about B; they do not by themselves
+  authorize changing Joe's preferred 55/35/5/5 proportions. State whether C's
+  weights stay fixed while task/focus observations change its projection, or
+  cite the separate rule for learning preferences. Resolve the measured-outcome
+  and parameter-consumption prerequisites before B4 claims a learned B and
+  before B6 declares the machine repaired. A different next choice is neither
+  necessary nor sufficient evidence of learning: the task may have disappeared,
+  the queue moved, or the updated posterior may still favor the same action.
+  Done when one real accepted outcome is observed, updates the named parameter
+  once, survives reload/replay, and is consumed by the next selection; compare
+  the same frozen decision input with and without that update, demonstrating
+  the predicted posterior change and a rank/action change in a discriminating
+  case. Duplicate replay, missing observations and changed token meanings must
+  not become extra successful trials.
+
+### Missing
+
+1. **Acceptance and repository scope must agree before dispatch.** r4-2's
+   close is `:guardrail-refusal`; its STAGES record names a required Mathlib
+   change, while `full_loop_runner.clj:1926–1928` explicitly permits only the
+   target repository. Add a signed design for a reviewed multi-repository
+   parcel, or a legitimately decomposed task whose unchanged acceptance can be
+   met in one repository. Verify every required commit and gate at close.
+   Removing the artifact check or quietly weakening acceptance is not a repair.
+
+2. **Observe actual outcomes, including failure, and produce increment
+   attestations.** The raw r4-2 close at
+   `data/wm-full-loop-machinery-70/wm-contract-machinery-70-v1/attempt-001/007-closed.edn`
+   holds its learning trial as `:observation-missing`. `token_outcome.clj:54`
+   distinguishes a measured false value from missing evidence; neither a refusal
+   nor an unticked checkbox is automatically a measured transition failure.
+   `run_ending_classification.clj:98–113` requires an attested increment plus a
+   focus relation for a success class. Add explicit post-build measurement and
+   attestation production tied to the reviewed revisions. Without this, B4/B7
+   consume no usable examples even after B2 removals.
+
+3. **Model/state continuity when tasks change.**
+   `d_predecessor_task_authority.clj:134` requires matching token universes and
+   `token_belief_predecessor.clj:79` records `:carry-domain-changed`. Completing
+   or adding tasks changes the domain. Define compatible carry/migration or
+   explicit reinitialization, with versioned meanings and deduplicated outcome
+   updates. Do not solve this by removing the identity check or confusing a
+   reset with learned continuity.
+
+4. **Order by actual dependencies.** Build outcome observation and the
+   production B consumer as part of, or before, B4; do not postpone them until
+   after “clicks routinely work.” Establish feasible candidate/artifact scope
+   before spending author turns. Establish the speed baseline before enlarging
+   the candidate family. B6 is the integrated acceptance run after these joins,
+   while earlier bounded verification remains permitted by the signed plan.
+
+5. **Review assignment and machine deployment are unspecified.** Name who
+   independently reviews Codex-authored changes, which warrants/tests apply,
+   and how approved changes land on the canonical branch and are reloaded from
+   its own checkout. Commit presence and holder labels do not prove the live
+   JVM consumed the version tested. Preserve the one-JVM policy and verify
+   consumed source/model identities on the acceptance run.
+
+6. **Freeze/scope coordination needs an owner.** During this read-only review,
+   main advanced from `dc46e95a` to `d1e9e96b` (EIG shadow code, tests and mission
+   change), despite the plan's stated freeze. I did not create, remove or
+   incorporate that work, and have not determined its authorization. claude-5
+   should reconcile concurrent work with Joe's freeze and identify the exact
+   baseline to be signed; a plan-wide freeze cannot be enforced by asking only
+   the reviewer to refrain from edits.
+
+The proposed direction is repairable, but Part B as written is not sufficient
+to take a real task through accepted close with learned, outcome-sensitive
+selection at a checkable speed. Revise the objected entries and add the missing
+producer/consumer steps; this review authorizes no machine changes.
