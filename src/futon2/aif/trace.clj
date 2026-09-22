@@ -106,7 +106,15 @@
                       {:refusal :cascade-candidate-unidentifiable
                        :path [:decision :selection-law :posterior]
                        :candidate candidate})))
-    (str id)))
+    ;; PROOF-wm-works 1.3 handoff A(b), codex-20: joint families legitimately
+    ;; reuse :C1/:C2 per target; a bare id would make one target's posterior
+    ;; entry OVERWRITE the other's at serialisation. The stable identity is
+    ;; target-qualified whenever the candidate declares its target; a
+    ;; targetless candidate keeps the bare id (single-target families read
+    ;; exactly as before).
+    (if (and (map? candidate) (some? (:target candidate)) (not= :cascade-id candidate))
+      (str (:target candidate) "/" id)
+      (str id))))
 
 (defn- stringable-cascade-posterior
   "Re-key the decision's recorded posterior {candidate-map → p} by candidate

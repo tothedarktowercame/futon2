@@ -10,7 +10,8 @@
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.cascade-sources :as cs]
             [futon2.aif.observation-model :as om]
-            [futon2.aif.scoring-input-receipts :as ir]))
+            [futon2.aif.scoring-input-receipts :as ir]
+            [futon2.aif.trace :as trace]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 (def joe-c {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100})
@@ -175,12 +176,39 @@
       (is (= tb (:winner r2))))))
 
 (deftest unnormalised-class-preference-refuses
-  (doseq [bad [{:focused 0} {:focused 1/2 :related 1/2 :unrelated 0 :stop-the-line 0}]]
-    (let [ta "A"
-          model (class-model {:universe #{[ta :s]} :acceptance #{[ta :done]}
-                              :horizon 1 :target-class {ta :focused}})
-          ;; sneak the bad preference in at the horizon
-          model (assoc-in model [:class-preference 1] bad)
-          r (om/query model {:op :score :belief {#{[ta :s]} 1} :tau 1 :target ta
-                             :preference bad})]
-      (is (not= :computed (:status r)) (pr-str (dissoc r :model))))))
+  ;; The acceptance token is in the universe, so the model itself validates
+  ;; and the only defect is the preference total (codex-20 review of
+  ;; 62fcfa1e: the earlier version failed on :invalid-class-acceptance and
+  ;; one "bad" case summed to 1).
+  (let [ta "A"
+        model (class-model {:universe #{[ta :s] [ta :done]} :acceptance #{[ta :done]}
+                            :horizon 1 :target-class {ta :focused}})
+        joe {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100}
+        score (fn [pref]
+                (om/query (assoc-in model [:class-preference 1] pref)
+                          {:op :score :belief {#{[ta :s]} 1} :tau 1 :target ta
+                           :preference pref}))]
+    (is (= :computed (:status (score joe))) "normalised control passes")
+    (doseq [bad [{:focused 0 :related 0 :unrelated 0 :stop-the-line 0}
+                 {:focused 1/4 :related 1/4 :unrelated 0 :stop-the-line 0}]]
+      (let [r (try (score bad) (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+        (is (= :invalid-class-preference (:kind r))
+            (pr-str (dissoc r :model)))))))
+
+(deftest posterior-serialisation-keeps-both-targets-c1
+  ;; handoff A(b): two targets both naming :C1 must serialise as two distinct
+  ;; posterior entries -- neither overwrites the other.
+  (let [a {:kind :cascade-candidate :id :C1 :target "A" :precedence []}
+        b {:kind :cascade-candidate :id :C1 :target "B" :precedence []}
+        serialise (fn [posterior]
+                        (let [strip @#'trace/strip-decision]
+                          (get-in (strip {:status :cascade-selection-posterior-implied
+                                          :selection-law {:applied :cascade-selection-posterior
+                                                          :posterior posterior}})
+                                  [:selection-law :posterior])))
+        out (serialise {a 0.6 b 0.4})]
+    (is (= 2 (count out)) (pr-str out))
+    (is (= 0.6 (get out "A/:C1")))
+    (is (= 0.4 (get out "B/:C1")))
+    ;; targetless candidates keep the bare id
+    (is (= {":C1" 1.0} (serialise {{:kind :cascade-candidate :id :C1 :precedence []} 1.0})))))
