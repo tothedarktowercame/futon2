@@ -44,6 +44,7 @@
             [futon2.aif.interpretation-job :as interpretation-job]
             [futon2.aif.fact-measurement :as measurement]
             [futon2.aif.task-execution-evidence :as task-execution]
+            [futon2.aif.accepted-increment :as accepted-increment]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.mission-registry :as missions]
@@ -3737,6 +3738,41 @@
                           {:prediction (get-in @checkpoints [:selection :judgment :token-outcome-prediction])
                            :occurrence @action-occurrence :artifact-sha (:commit data) :outcome outcome}
                           d-task-result @d-task-context #(read-job! opts %)))
+                       ;; PROOF-wm-works ⟨1⟩4 (final handoff): evaluate the
+                       ;; accepted-increment predicate for THIS occurrence
+                       ;; before the close is constructed, reading the
+                       ;; producers' own results for its conjuncts: (a) the
+                       ;; artifact binding the build checkpoint retained
+                       ;; (task-execution-evidence's verdict fields), (b) the
+                       ;; token comparison's measured rows (the measurement
+                       ;; producer's output), (c) the selected cascade's
+                       ;; declared acceptance locator. The typed result is
+                       ;; recorded ON the close; a false predicate never
+                       ;; refuses anything -- the close proceeds as the
+                       ;; failure it is.
+                       accepted-increment-result
+                       ;; The predicate is evidence, never a gate: any error
+                       ;; evaluating it is recorded as a typed :refused
+                       ;; result, and the close proceeds.
+                       (try
+                         (accepted-increment/accepted-increment
+                          {:binding (get-in @checkpoints [:build :judgment :validation :artifact-binding])
+                           :produced-tokens (into {}
+                                                  (keep (fn [[token row]]
+                                                          (when (map? row)
+                                                            [token {:class :C4
+                                                                    :repo "futon2"
+                                                                    :sha "HEAD"
+                                                                    :path (get-in row [:measurement :after-locator :path])
+                                                                    :decl (get-in row [:measurement :after-locator :decl])}])))
+                                                (get-in token-comparison [:receipt :tokens]))
+                           :acceptance (get-in selection-judgment
+                                               [:controller-decision :action :accepted-increment :acceptance])
+                           :after-revision (:commit data)})
+                         (catch Exception e
+                           {:accepted? :refused
+                            :reason :predicate-evaluation-failed
+                            :message (.getMessage e)}))
                        close-judgment-base
                        (merge {:outcome outcome
                                :grounded? (= :grounded-change outcome)
@@ -3747,6 +3783,7 @@
                                :surprise-ids (mapv :surprise/id (:surprises token-comparison))
                                :token-outcome-comparison (:receipt token-comparison)
                                :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
+                               :accepted-increment accepted-increment-result
                                :route-attestation (:receipt route-account)
                                :route-attestation-ref (:reference route-account)
                                :kernel-example (:receipt kernel-example-result)
@@ -3815,6 +3852,7 @@
                                :surprise-ids (mapv :surprise/id (:surprises token-comparison))
                                :token-outcome-comparison (:receipt token-comparison)
                                             :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
+                               :accepted-increment accepted-increment-result
                                :route-attestation (:receipt route-account)
                                :route-attestation-ref (:reference route-account)
                                :kernel-example (:receipt kernel-example-result)
@@ -3834,12 +3872,38 @@
                                                   (:data-root execution-cohort)
                                                   attempt-id closed)
                            (cohort/close-attempt! attempt-id closed)))
+                       ;; PROOF-wm-works ⟨1⟩4 (final handoff): the B update
+                       ;; is applied AFTER the close is written and ONLY
+                       ;; when the predicate result recorded on that close is
+                       ;; {:accepted? true} — a close that failed to construct
+                       ;; (closed-event nil) or was refused writes no update.
+                       ;; Occurrence-keyed exactly once; the ledger's own
+                       ;; identity deduplication enforces the second run —
+                       ;; this call never bypasses it (b-update reports
+                       ;; :already-recorded rather than appending).
+                       b-update-result
+                       (when (and closed-event
+                                  (true? (:accepted? accepted-increment-result)))
+                         (try
+                           (learning-ledger/b-update
+                            {:family (get-in selection-judgment
+                                             [:controller-decision :action :precedence 0 :id])
+                             :occurrence-identity (get-in accepted-increment-result
+                                                           [:evidence :binding :commit])
+                             :accepted-verdict accepted-increment-result
+                             :ledger-root (or (:learning-trial-ledger-root opts)
+                                              learning-ledger/default-root)})
+                           (catch Exception e
+                             {:status :refused
+                              :reason (:learning-ledger/refusal (ex-data e))
+                              :message (.getMessage e)})))
                        discharge-result
                        (repair-discharge/finalize-run!
                         {:root (or (:repair-root opts) repair/default-root)
                          :repo (or (:discharge-receipt-repo opts) "/home/joe/code/futon2")
                          :action selected-action
                          :interpretation (:interpretation-receipts selected-action)
+                         :b-update b-update-result
                          :closed-event closed-event
                          :close-path (when closed-event
                                        (str (io/file (or (:data-root execution-cohort) cohort/default-data-root)
