@@ -86,8 +86,7 @@ candidates automatically, or that every click is fast.
   transition family, and the observable outcome differences that the discrimination in ⟨1⟩3
   will rely on.
 
-  The snapshot freezes *inputs*, not expected answers. It never names an expected chosen
-  action, so the candidates cannot be built to reach a predetermined winner. Evaluating it read-only never
+  The snapshot freezes *inputs*, not expected answers. Evaluating it read-only never
   executes its work. It is executed once, at ⟨1⟩5.
 - **PROOF.**
   - ⟨2⟩1. Interpretation. `mission_hole_wants.clj:74-91` leaves `:interpretation` and
@@ -194,9 +193,7 @@ candidates automatically, or that every click is fast.
     - The trial events in `data/wm-learning-trials/attempts.edn` stay immutable. The new
       consumer contract states how old compatible events are interpreted, without
       replacement events that would count the same trial twice.
-    - A production reader is built; `learning_trial_ledger.clj` has none today. It honours the
-      ⟨1⟩1 ledger cutoff when evaluating the reference input, so that trial events from later
-      runs (such as ⟨1⟩2's click) do not enter the frozen B.
+    - A production reader is built; `learning_trial_ledger.clj` has none today.
     - The step states which transition a whole-attempt outcome informs.
     - The step establishes persistence, deduplication, and continuity of meaning and domain
       (`:carry-domain-changed`: migrate, or reinitialise with a record; the identity check
@@ -224,21 +221,17 @@ candidates automatically, or that every click is fast.
   (`full_loop_runner.clj:3697-3755`).
 - **FAILURES:** —
 
-### ⟨1⟩5. One live click on the reference input chooses the action ⟨1⟩3 computed.
+### ⟨1⟩5. One live click on the reference target is decided by G.
 
-- **CHECK.**
-  - A click fired by ⟨1⟩2's command runs on the live queue.
-  - Its decision input corresponds to the ⟨1⟩1 snapshot, shown by matching task, candidate,
-    evidence and configuration identities. The target is not pinned around ordinary
-    selection.
-  - The receipts join the inputs actually consumed, the policy scores, the eligible action
-    marginal and the chosen action, and these equal ⟨1⟩3's.
-  - If the live input has drifted from the snapshot (for example, a new candidate entered the
-    queue), ⟨1⟩3's computation is rerun read-only on the live input, and the chosen action is
-    shown to be the one that computation gives. If the drift removes a reference candidate
-    or changes the eligible stratum, Joe is told and decides whether to re-freeze. The
-    click never stops silently.
-  - The load-identity evidence from ⟨1⟩2 holds for this run.
+- **CHECK.** A click fired by ⟨1⟩2's command runs on the live queue, as it stands. Its own
+  receipts show, on the live input:
+  - a unique maximum of the eligible action marginal;
+  - that the full law's action differs from the action under `log E − F` alone at the same γ,
+    or that G's contribution exceeds the `log E − F` margin;
+  - the functions from ⟨1⟩3 doing the computing, with the ⟨1⟩2 load identity holding.
+
+  There is no comparison with the ⟨1⟩1 snapshot. That snapshot was only the working material
+  for developing ⟨1⟩3 read-only.
 - **FAILURES:** —
 
 ### ⟨1⟩6. The chosen work reaches an accepted close.
