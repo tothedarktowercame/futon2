@@ -489,6 +489,12 @@ candidates automatically, or that every click is fast.
     `:no-acceptance-declared`. Tested on the real closes: r4-2 fails on the binding (no
     reviewed revision), r4-1 fails because its binding does not corroborate. `verify-close`
     is untouched. claude-5 reloaded it.
+  - The B update is built: futon2 9291cdb2. A v2 contract authorises production use, citing
+    Joe's signature; v1 and its events stay immutable and readable. The rule is
+    θ' = (successes + ½)/(trials + 1) over the selected pattern family's whole-attempt
+    outcomes, placed on that family's own θ. It writes only for a close the predicate
+    accepts, keyed by occurrence, exactly once; r4-1 and r4-2 write nothing. claude-5
+    reloaded it.
 - **FAILURES:** —
 
 ### ⟨1⟩5. One live click on the reference target is decided by G.
