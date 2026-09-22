@@ -109,6 +109,10 @@ candidates automatically, or that every click is fast.
     a click in flight are waited out (terminal account, exit 3 after 30 min). Misconfigured
     casting exits 3 at once. `--force` is a no-op. Preflight run by claude-5: exit 0 with 13/13
     wires and 10 queued obligations reported.
+  - ⟨2⟩3 done 2026-09-22 in futon2 0e185460 (`runs/proof-steps/1-1-2-3-finding-to-ticket.md`).
+    The chain is intact on click 3's `repair-occ-444fb018…`: finding file → ticket → queue
+    entry. Hops 3–4 were observed live; hops 1–2 were verified in code and converge on the
+    same writer. claude-5 spot-checked the files and the cited functions.
   - Note: the futon3c click boundary's grant budget (Joe's renewal documents) is Joe's own
     rationing and is not removed by this step.
 - **FAILURES:** —
