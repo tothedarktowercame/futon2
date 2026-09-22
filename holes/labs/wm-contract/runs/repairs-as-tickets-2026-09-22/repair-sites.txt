@@ -1,0 +1,221 @@
+scripts/futon2/report/war_machine.clj:2251:    (or (= :repair-machine-failure (:type previous-action))
+src/futon2/aif/limb_evidence.clj:55:  (let [required #{:schema :repair/id :limb :command :exit :stdout-sha256
+src/futon2/aif/limb_evidence.clj:67:  (text! (:repair/id record) [:limb-receipt :repair/id])
+src/futon2/aif/tripwire.clj:132:            (let [id (:repair/id record)
+src/futon2/aif/tripwire.clj:178:                                    (:repair/id record))))
+src/futon2/aif/tripwire.clj:273:                            {:repair/id id :from before :to after}))))
+src/futon2/aif/tripwire.clj:306:        :repair/id repair-id
+src/futon2/aif/tripwire.clj:377:          (remove #(contains? closed (:repair/id %)))
+src/futon2/aif/tripwire.clj:394:                               :repair-ids (mapv :repair/id records)
+src/futon2/aif/tripwire.clj:909:          finding-ids (set (keep :repair/id findings))
+src/futon2/aif/tripwire.clj:918:                                     (:repair/id record))))
+src/futon2/aif/tripwire.clj:940:                                finding (some #(when (= selected (:repair/id %))
+src/futon2/aif/tripwire.clj:1044:  front of selection as a :repair-machine-failure stop-line action.
+src/futon2/aif/tripwire.clj:1051:  (:repair/id, a single obligation already selected three times with no fresh
+src/futon2/aif/tripwire.clj:1056:    (let [by-id (into {} (map (fn [f] [(:repair/id f) f])) findings)
+src/futon2/aif/repair_obligation.clj:517:         record (cond-> {:repair/id id
+src/futon2/aif/repair_obligation.clj:564:         record (cond-> {:repair/id id
+src/futon2/aif/repair_obligation.clj:591:  (into {} (map (juxt :repair/id identity)
+src/futon2/aif/repair_obligation.clj:685:    (throw (ex-info "Unsafe repair identity" {:repair/id repair-id})))
+src/futon2/aif/repair_obligation.clj:696:    (when-not (and (= (:repair-id value) (get-in finding [:value :repair/id]))
+src/futon2/aif/repair_obligation.clj:703:                      {:repair/id (:repair-id value)})))
+src/futon2/aif/repair_obligation.clj:705:     :repair/id (:repair-id value) :repair/schema-version 1
+src/futon2/aif/repair_obligation.clj:737:     (write-new-durable! root "verifications" (:repair/id record) record)
+src/futon2/aif/repair_obligation.clj:789:                    (= repair-id (:repair/id record) (:repair/id admission))
+src/futon2/aif/repair_obligation.clj:831:       (throw (ex-info "Historical successor evidence refused" {:repair/id repair-id})))
+src/futon2/aif/repair_obligation.clj:839:                             {:repair/id repair-id}))))))
+src/futon2/aif/repair_obligation.clj:852:                                      (= #{:schema :repair/id :repair/schema-version
+src/futon2/aif/repair_obligation.clj:877:                 [(:repair/id stored) stored])))
+src/futon2/aif/repair_obligation.clj:895:                    (get implementations (:repair/id finding))
+src/futon2/aif/repair_obligation.clj:897:                           (get implementations (:repair/id finding)))
+src/futon2/aif/repair_obligation.clj:898:                    (get verifications (:repair/id finding))
+src/futon2/aif/repair_obligation.clj:899:                    (assoc :repair/verification (get verifications (:repair/id finding)))
+src/futon2/aif/repair_obligation.clj:900:                    (get resolutions (:repair/id finding))
+src/futon2/aif/repair_obligation.clj:902:                           (get resolutions (:repair/id finding)))
+src/futon2/aif/repair_obligation.clj:903:                    (get dismissals (:repair/id finding))
+src/futon2/aif/repair_obligation.clj:905:                                           (get dismissals (:repair/id finding)))
+src/futon2/aif/repair_obligation.clj:907:                           (get dismissals (:repair/id finding))))))))))
+src/futon2/aif/repair_obligation.clj:912:   (let [resolved (set (map :repair/id (records (io/file root "resolutions"))))
+src/futon2/aif/repair_obligation.clj:913:         dismissed (set (map :repair/id (records (io/file root "dismissals"))))
+src/futon2/aif/repair_obligation.clj:917:          (remove #(or (contains? resolved (:repair/id %))
+src/futon2/aif/repair_obligation.clj:918:                       (contains? dismissed (:repair/id %))))
+src/futon2/aif/repair_obligation.clj:923:                    (if-let [verification (get verifications (:repair/id finding))]
+src/futon2/aif/repair_obligation.clj:927:                                                    (:repair/id finding))]
+src/futon2/aif/repair_obligation.clj:950:     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:953:       (dismissal-refuse! :disposition-invalid {:repair/id finding-id :field k})))
+src/futon2/aif/repair_obligation.clj:955:     (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:957:     (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:959:     (dismissal-refuse! :already-resolved {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:962:       (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:966:       (dismissal-refuse! :finding-not-open {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:967:     (let [record {:repair/id finding-id :repair/schema-version 1
+src/futon2/aif/repair_obligation.clj:985:     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:988:     (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:995:     (dismissal-refuse! :evidence-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:997:     (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:999:     (dismissal-refuse! :already-resolved {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1002:       (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1006:       (dismissal-refuse! :finding-not-open {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1007:     (let [record {:repair/id finding-id :repair/schema-version 1
+src/futon2/aif/repair_obligation.clj:1029:     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1032:       (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1033:     (let [finding (first (filter #(= finding-id (:repair/id %))
+src/futon2/aif/repair_obligation.clj:1044:         (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1047:                             {:repair/id finding-id :repair/status effective-status}))
+src/futon2/aif/repair_obligation.clj:1050:         (dismissal-refuse! :finding-executed {:repair/id finding-id})
+src/futon2/aif/repair_obligation.clj:1056:         (dismissal-refuse! :execution-not-retained {:repair/id finding-id})
+src/futon2/aif/repair_obligation.clj:1064:         (dismissal-refuse! :disposition-invalid {:repair/id finding-id})
+src/futon2/aif/repair_obligation.clj:1068:                       {:repair/id finding-id
+src/futon2/aif/repair_obligation.clj:1093:     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1096:       (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1097:     (let [finding (first (filter #(= finding-id (:repair/id %))
+src/futon2/aif/repair_obligation.clj:1109:         (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1112:                             {:repair/id finding-id :repair/status effective-status}))
+src/futon2/aif/repair_obligation.clj:1119:         (dismissal-refuse! :no-witness-retained {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1122:                     {:repair/id source-id
+src/futon2/aif/repair_obligation.clj:1130:             live-ids (mapv :repair/id
+src/futon2/aif/repair_obligation.clj:1135:                               {:repair/id finding-id
+src/futon2/aif/repair_obligation.clj:1143:           (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1145:                       {:repair/id finding-id
+src/futon2/aif/repair_obligation.clj:1172:     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1175:       (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1176:     (let [finding (first (filter #(= finding-id (:repair/id %))
+src/futon2/aif/repair_obligation.clj:1192:         (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1195:                             {:repair/id finding-id :repair/status effective-status}))
+src/futon2/aif/repair_obligation.clj:1199:                             {:repair/id finding-id
+src/futon2/aif/repair_obligation.clj:1203:         (dismissal-refuse! :resolution-not-retained {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1206:                             {:repair/id finding-id
+src/futon2/aif/repair_obligation.clj:1215:         (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1221:                     {:repair/id finding-id
+src/futon2/aif/repair_obligation.clj:1240:                                                     :repair-obligation :repair/id])]))
+src/futon2/aif/repair_obligation.clj:1243:               (some #(= id (:repair/id %)) (records (io/file root "findings"))))
+src/futon2/aif/repair_obligation.clj:1255:     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1257:     (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1262:       (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1266:       (dismissal-refuse! :finding-not-open {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1269:       (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1272:               (dismissal-refuse! :target-not-resolvable {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1287:         (dismissal-refuse! :target-not-implemented {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1291:         (dismissal-refuse! :self-implementation {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1293:         (dismissal-refuse! :implementation-predates-attempt {:repair/id finding-id}))
+src/futon2/aif/repair_obligation.clj:1294:       (let [dismissal {:repair/id finding-id :repair/schema-version 1
+src/futon2/aif/repair_obligation.clj:1297:                        :implementation-record-id (:repair/id record)
+src/futon2/aif/repair_obligation.clj:1313:    (throw (ex-info "Invalid discharge store key" {:child child :repair/id id})))
+src/futon2/aif/repair_obligation.clj:1320:                       (= id (get-in capture [:value :repair/id])))
+src/futon2/aif/repair_obligation.clj:1357:                   (= (:repair/id obligation) (:repair/id context))
+src/futon2/aif/repair_obligation.clj:1362:                      {:phase phase :repair/id (:repair/id obligation)})))
+src/futon2/aif/repair_obligation.clj:1388:                  (not (:repair/id obligation))
+src/futon2/aif/repair_obligation.clj:1413:                   {:repair/id (:repair/id obligation)
+src/futon2/aif/repair_obligation.clj:1437:                            (str (:repair/id obligation) ".edn"))
+src/futon2/aif/repair_obligation.clj:1450:                  (:repair/id successor)
+src/futon2/aif/repair_obligation.clj:1451:                  (not= (:repair/id obligation) (:repair/id successor))
+src/futon2/aif/repair_obligation.clj:1456:   (let [record {:repair/id (:repair/id obligation)
+src/futon2/aif/repair_obligation.clj:1460:                 :successor-repair-id (:repair/id successor)
+src/futon2/aif/repair_obligation.clj:1464:                          (str (:repair/id obligation) ".edn"))
+src/futon2/aif/repair_obligation.clj:1480:                     (:repair/id obligation) attempt-id reviewer review-job
+src/futon2/aif/repair_obligation.clj:1498:                 {:repair/id (:repair/id obligation)
+src/futon2/aif/repair_obligation.clj:1525:                          (str (:repair/id obligation) ".edn"))
+src/futon2/aif/repair_obligation.clj:1552:    (successor-refuse! :successor-missing {:repair/id (:repair/id obligation)}))
+src/futon2/aif/repair_obligation.clj:1553:  (let [repair-keys #{:attempt/id :run/id :repair/id :closed-at :commit
+src/futon2/aif/repair_obligation.clj:1555:        successor-keys #{:attempt/id :run/id :repair/id :closed-at
+src/futon2/aif/repair_obligation.clj:1561:        repair-id (:repair/id obligation)]
+src/futon2/aif/repair_obligation.clj:1589:    (when-not (and (= repair-id (:repair/id repair-close))
+src/futon2/aif/repair_obligation.clj:1590:                   (= repair-id (:repair/id successor-close)))
+src/futon2/aif/repair_obligation.clj:1592:                         {:repair/id repair-id
+src/futon2/aif/repair_obligation.clj:1593:                          :repair-close/id (:repair/id repair-close)
+src/futon2/aif/repair_obligation.clj:1594:                          :successor-close/id (:repair/id successor-close)}))
+src/futon2/aif/repair_obligation.clj:1607:                      :repair/id repair-id
+src/futon2/aif/repair_obligation.clj:1638:    (when-not (and cutoff-at (= repair-id (:repair/id finding)))
+src/futon2/aif/repair_obligation.clj:1640:                         {:repair/id repair-id :cutoff cutoff}))
+src/futon2/aif/repair_obligation.clj:1641:    (when (and resolution (not= repair-id (:repair/id resolution)))
+src/futon2/aif/repair_obligation.clj:1643:                         {:repair/id repair-id
+src/futon2/aif/repair_obligation.clj:1644:                          :resolution-repair-id (:repair/id resolution)}))
+src/futon2/aif/repair_obligation.clj:1647:                         (= repair-id (:repair/id resolution))
+src/futon2/aif/repair_obligation.clj:1651:       :repair/id repair-id
+src/futon2/aif/repair_discharge.clj:20:  (let [legacy? (#{:repair-machine-failure :revalidate-historical-repair} (:type action))
+src/futon2/aif/repair_discharge.clj:21:        id (if legacy? (get-in action [:repair-obligation :repair/id]) (:repair/id action))]
+src/futon2/aif/repair_discharge.clj:22:    (when (or id (and (string? (:target action)) (.startsWith ^String (:target action) "T-repair-")))
+src/futon2/aif/repair_discharge.clj:27:        (evidence/require! finding :finding-unavailable {:repair/id id})
+src/futon2/aif/repair_discharge.clj:32:                            :finding-binding-mismatch {:repair/id id})
+src/futon2/aif/repair_discharge.clj:41:           :finding-admission-unestablished {:repair/id id}))
+src/futon2/aif/repair_discharge.clj:46:         {:repair/id (:repair/id context) :commit (get-in context [:artifact :commit])
+src/futon2/aif/repair_discharge.clj:53:         {:repair/id (:repair/id context) :production-shaped? true
+src/futon2/aif/repair_discharge.clj:76:        (let [id (:repair/id finding)
+src/futon2/aif/repair_discharge.clj:87:                                  :unsupported-discharge-contract {:repair/id id})
+src/futon2/aif/repair_discharge.clj:100:                       :repair/id id :close close :artifact artifact :artifact-binding artifact-binding
+src/futon2/aif/repair_discharge.clj:113:                {:status :awaiting-successor :repair/id id :phase :implementation
+src/futon2/aif/repair_discharge.clj:117:              (evidence/require! (= (select-keys context [:close :artifact :review-job :artifact-binding :repair/id :producer])
+src/futon2/aif/repair_discharge.clj:119:                                                [:close :artifact :review-job :artifact-binding :repair/id :producer]))
+src/futon2/aif/repair_discharge.clj:120:                                :existing-implementation-conflict {:repair/id id})
+src/futon2/aif/repair_discharge.clj:121:              {:status :awaiting-successor :repair/id id :phase :implementation :repair/discharged? false})
+src/futon2/aif/repair_discharge.clj:125:              (evidence/require! previous :implementation-context-unavailable {:repair/id id})
+src/futon2/aif/repair_discharge.clj:149:           :repair/id @id-state :repair/discharged? false :stage @stage
+src/futon2/aif/repair_evaluators.clj:36:  (let [input (get-in admission [:inputs (:repair/id finding)])
+src/futon2/aif/repair_evaluators.clj:43:                      :recorded-failure-input-unavailable {:repair/id (:repair/id finding)})
+src/futon2/aif/repair_discharge_evidence.clj:52:                 (not (#{"." ".."} id))) :unsafe-repair-id {:repair/id id})
+src/futon2/aif/repair_discharge_evidence.clj:122:        identity {:repair/id (:repair/id finding) :finding-sha256 (:sha256 finding-pin)
+src/futon2/aif/repair_discharge_evidence.clj:136:    {:resolved? true :dial-moved? true :repair/id (:repair/id finding)
+src/futon2/aif/tripwire_calibration.clj:69:                    {:repair/id id :failure-kind :independent-review-rejected
+src/futon2/aif/full_loop_runner.clj:223:    (let [repair-id (:repair/id finding)
+src/futon2/aif/full_loop_runner.clj:368:        repair-route? (= :repair-machine-failure (:type selected-action))
+src/futon2/aif/full_loop_runner.clj:371:             (= :revalidate-historical-repair
+src/futon2/aif/full_loop_runner.clj:419:      (= :repair-machine-failure (:type selected-action))
+src/futon2/aif/full_loop_runner.clj:422:               :repair-id (get-in selected-action [:repair-obligation :repair/id])
+src/futon2/aif/full_loop_runner.clj:642:    (when (and (= :repair-machine-failure (:type action))
+src/futon2/aif/full_loop_runner.clj:1292:  {:action {:type :repair-machine-failure
+src/futon2/aif/full_loop_runner.clj:1293:            :target (:repair/id obligation)
+src/futon2/aif/full_loop_runner.clj:1374:(defmethod construct-selected-action :repair-machine-failure
+src/futon2/aif/full_loop_runner.clj:1378:    {:mission (:repair/id obligation)
+src/futon2/aif/full_loop_runner.clj:1380:               (:repair/id obligation))
+src/futon2/aif/full_loop_runner.clj:1384:     {:repair-id (:repair/id obligation)
+src/futon2/aif/full_loop_runner.clj:1407:             (= (:repair/id obligation) (:repair/id admission))
+src/futon2/aif/full_loop_runner.clj:1412:    {:rank 0 :action {:type :revalidate-historical-repair
+src/futon2/aif/full_loop_runner.clj:1413:                      :target (:repair/id obligation)
+src/futon2/aif/full_loop_runner.clj:1417:(defmethod construct-selected-action :revalidate-historical-repair
+src/futon2/aif/full_loop_runner.clj:1578:      (and (:repair/id action) (= target (str "T-" (:repair/id action))))
+src/futon2/aif/full_loop_runner.clj:1582:      (= :repair-machine-failure (:type action))
+src/futon2/aif/full_loop_runner.clj:1824:                              [:repair/id :repair/class :attempt-id
+src/futon2/aif/full_loop_runner.clj:1864:                ":wm/limb-receipt-v1 keys [:schema :repair/id :limb :command :exit :stdout-sha256 :stderr-sha256 :recorded-at].\n"
+src/futon2/aif/full_loop_runner.clj:1933:       (pr-str (if (:repair/id mission)
+src/futon2/aif/full_loop_runner.clj:1936:       (when-let [repair-id (:repair/id mission)]
+src/futon2/aif/full_loop_runner.clj:3634:                                              :repair-id (:repair/id finding)
+src/futon2/aif/full_loop_runner.clj:4070:            historical-action? (= :revalidate-historical-repair
+src/futon2/aif/full_loop_runner.clj:4072:            repair-action? (contains? #{:repair-machine-failure
+src/futon2/aif/full_loop_runner.clj:4073:                                        :revalidate-historical-repair}
+src/futon2/aif/full_loop_runner.clj:4078:                        (first (filter #(= (:repair/id %)
+src/futon2/aif/full_loop_runner.clj:4102:                      :backtrace {:supersedes (:repair/id stop-line)}
+src/futon2/aif/full_loop_runner.clj:4180:                                            :ids (mapv :repair/id open-stop-lines)}))]
+src/futon2/aif/full_loop_runner.clj:4369:                             (= (:repair/id stop-line) (:repair/id transition))
+src/futon2/aif/full_loop_runner.clj:4400:                                  :repair-id (:repair/id transition)
+src/futon2/aif/full_loop_runner.clj:4869:                                              % [:repair/id :repair/status
+src/futon2/aif/full_loop_runner.clj:5134:                            :repair-id (:repair/id finding)
+src/futon2/aif/interoceptive_commitment.clj:61:                    (safe-id? (:repair/id record)))
+src/futon2/aif/interoceptive_commitment.clj:66:                  {:path path :repair/id (:repair/id record)
+src/futon2/aif/interoceptive_commitment.clj:73:                  {:path path :stage stage :repair/id (:repair/id record)
+src/futon2/aif/interoceptive_commitment.clj:81:     (let [id (:repair/id row) old (get idx id)]
+src/futon2/aif/interoceptive_commitment.clj:84:                  {:repair/id id :statuses [(:repair/status old)
+src/futon2/aif/interoceptive_commitment.clj:90:                  {:repair/id id :statuses [(:repair/status old)
+src/futon2/aif/interoceptive_commitment.clj:105:         (assoc idx trip-id (:repair/id row)))
+src/futon2/aif/interoceptive_commitment.clj:151:                              {:trip/id id :repair/id repair-id}))
+src/futon2/aif/interoceptive_commitment.clj:153:                     {:trip/id id :repair/id repair-id :reason :discharged
+src/futon2/aif/interoceptive_commitment.clj:155:                     {:trip/id id :repair/id repair-id :status status
+src/futon2/aif/repair_history_replay.clj:60:     :identity {:repair/id (:repair/id finding) :finding-sha256 (:sha256 finding-pin)
+src/futon2/aif/full_loop_cli.clj:598:          (add! (str "   Repair history: " (:repair/id obligation)
+src/futon2/aif/repair_discharge_receipt.clj:28:    (evidence/require! (= :resolved (:repair/status resolution)) :resolution-not-successful {:repair/id id})
+src/futon2/aif/repair_discharge_receipt.clj:29:    (evidence/require! (and context implementation-context) :resolution-context-unavailable {:repair/id id})
+src/futon2/aif/repair_discharge_receipt.clj:33:          (= id (:repair/id context) (:repair/id implementation-context) (:repair/id relation))
+src/futon2/aif/repair_discharge_receipt.clj:47:     :resolution-binding-invalid {:repair/id id})
+src/futon2/aif/repair_discharge_receipt.clj:48:    {:schema :wm/repair-discharge-v1 :repair/id id :target (str "T-" id)
+src/futon2/aif/repair_discharge_receipt.clj:64:    (evidence/require! (= (derive root id) value) :receipt-store-mismatch {:repair/id id})
+src/futon2/aif/repair_discharge_receipt.clj:66:      (evidence/require! (and (= id (:repair/id (evidence/read-one (:edn-text record))))
+src/futon2/aif/repair_discharge_receipt.clj:76:    {:status :receipt-committed :repair/id id :repair/discharged? true
+src/futon2/aif/repair_discharge_receipt.clj:128:                        {:status :publication-refused :repair/id id :repair/discharged? false
+src/futon2/aif/repair_proposals.clj:38:                    {:proposal/refusal :repair-id-invalid :repair/id id})))
+src/futon2/aif/repair_proposals.clj:42:        _ (when-not (= id (:repair/id finding))
+src/futon2/aif/repair_proposals.clj:44:                            {:proposal/refusal :repair-id-mismatch :repair/id id})))
+src/futon2/aif/repair_proposals.clj:49:      {:decline {:target target :repair/id id :stage :proposal-supply
+src/futon2/aif/repair_proposals.clj:52:      (let [trail (assoc (select-keys finding [:repair/id :repair/schema-version :repair/class
+src/futon2/aif/repair_proposals.clj:63:                                              :repair/id id}
+src/futon2/aif/repair_proposals.clj:67:                    :repair/id id :proposal-id (evidence/value-digest trail)
+src/futon2/aif/repair_proposals.clj:76:         entries (mapv #(finding-proposal root (:repair/id %)) open)]
+src/futon2/aif/repair_proposals.clj:81:                    :open-finding-ids (mapv :repair/id open)

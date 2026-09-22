@@ -1,0 +1,285 @@
+53:            [futon2.aif.repair-obligation :as repair]
+54:            [futon2.aif.repair-discharge :as repair-discharge]
+55:            [futon2.aif.repair-discharge-receipt :as discharge-receipt]
+56:            [futon2.aif.repair-evaluators :as repair-evaluators]
+74:(def default-repair-reviewer "codex-1")
+167:  Attempt-002 of repair-ea1-3f4cac (2026-09-13) recorded TWO delivery losses
+214:(defn park-r16-stop-line!
+217:  The repair obligation is the dependency: resolving it is what permits a
+218:  later continuation. A stop-line record alone is not a parked lifecycle
+223:    (let [repair-id (:repair/id finding)
+224:          _ (when-not (and (string? repair-id) (not (str/blank? repair-id)))
+225:              (throw (ex-info "R16 stop-line has no durable repair identity"
+226:                              {:failure-kind :r16-park-repair-id-missing
+237:                    :awaiting [repair-id]
+241:                              :repair-id repair-id}})
+248:        (throw (ex-info "R16 stop-line park registration failed"
+252:                         :repair-id repair-id
+264:           :repair-reviewer
+266:               default-repair-reviewer)
+368:        repair-route? (= :repair-machine-failure (:type selected-action))
+371:             (= :revalidate-historical-repair
+377:      (into [{:node :STOP_LINE :via :repair-obligation
+382:      (and repair-route? (not historical-route?)
+384:      (into [{:node :STOP_LINE :via :repair-obligation
+419:      (= :repair-machine-failure (:type selected-action))
+422:               :repair-id (get-in selected-action [:repair-obligation :repair/id])
+451:  false drift (round-2 review of repair-ea1-3f4cac attempt-003: the fresh-JVM
+557:                    :repair/discharge (:repair/discharge result)
+558:                    :repair/publication (:repair/publication result)
+562:                     (get-in result [:checkpoints :selection :judgment :open-stop-lines])
+563:                     (assoc :open-stop-lines
+564:                            (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
+587:                            (get-in result [:data :repair-obligation]))
+634:  (let [repaired-action (get-in action [:repair-obligation :selected-entry :action])]
+637:             (:mission-path repaired-action) (:pattern-path repaired-action)])))
+639:(defn- machine-repair-repository [entry]
+641:        obligation (:repair-obligation action)]
+642:    (when (and (= :repair-machine-failure (:type action))
+643:               (= :machine-failure (:repair/class obligation)))
+649:      ;; A machine repair belongs to the repository containing the failed
+653:      ;; for a repair committed to the War Machine in futon2.
+654:      (machine-repair-repository entry)
+751:   (let [{:keys [agency-base author reviewer repair-reviewer] :as opts}
+755:                                        :repair-reviewer
+759:                    (for [agent (distinct [author reviewer repair-reviewer])
+950:  ex-data so a repair obligation carries the evidence of EVERY attempt
+1289:;; Retained for explicit repair callers; ordinary clicks no longer divert here.
+1291:(defn- repair-entry [obligation]
+1292:  {:action {:type :repair-machine-failure
+1293:            :target (:repair/id obligation)
+1294:            :repair-obligation obligation
+1295:            :rationale (str "stop-the-line: " (name (:repair/class obligation))
+1340:       :construction-kind :capability-gap-repair
+1374:(defmethod construct-selected-action :repair-machine-failure
+1377:        obligation (:repair-obligation action)]
+1378:    {:mission (:repair/id obligation)
+1379:     :psi (str "repair and validate stop-the-line obligation "
+1380:               (:repair/id obligation))
+1381:     :construction-kind :machine-stop-line-repair
+1383:     :repair-contract
+1384:     {:repair-id (:repair/id obligation)
+1385:      :repair-class (:repair/class obligation)
+1391:      ;; floor so :discharge is never nil in a repair construction.
+1393:                     (discharge-contract (:repair/class obligation)))}
+1395:     :semilattice [{:from :failure-backtrace :to :repair-implementation}
+1396:                   {:from :repair-implementation :to :independent-review}
+1401:  "Admit a verified historical repair as a distinct selectable action. This
+1404:  (when (and (= :open (:repair/status obligation))
+1405:             (= :machine-failure (:repair/class obligation))
+1406:             (= :wm/historical-repair-admission-v1 (:schema admission))
+1407:             (= (:repair/id obligation) (:repair/id admission))
+1408:             (= :awaiting-validation (:repair/status admission))
+1410:             (= (get-in admission [:actors :reviewer]) (:repair-reviewer casting))
+1411:             (not= (:author casting) (:repair-reviewer casting)))
+1412:    {:rank 0 :action {:type :revalidate-historical-repair
+1413:                      :target (:repair/id obligation)
+1414:                      :repair-obligation obligation
+1417:(defmethod construct-selected-action :revalidate-historical-repair
+1421:     :construction-kind :historical-repair-revalidation
+1444:  not a claim that a new repair-store obligation exists. Keep the token and
+1499:         repair-id (get-in construction [:repair-contract :repair-id])
+1520:         ;; stop-line construction additionally owns the real obligation that
+1524:         result (if (and (nil? wiring-fn) (map? result0) (seq repair-id)
+1530:                                           :free (str "Unfolded repair pattern " unfolded-pattern)
+1531:                                           :why (str "Required by stop-line obligation " repair-id)
+1532:                                           :obligation/id repair-id))
+1575:(defn- mission-for-decision [entry target & [repair-root]]
+1578:      (and (:repair/id action) (= target (str "T-" (:repair/id action))))
+1579:      (:finding (repair-discharge/bind-selected!
+1580:                 (or repair-root repair/default-root) action (:interpretation-receipts action)))
+1582:      (= :repair-machine-failure (:type action))
+1583:      (:repair-obligation action)
+1821:(defn- prompt-findings [stop-lines]
+1824:                              [:repair/id :repair/class :attempt-id
+1829:        stop-lines))
+1835:    (:repair-obligation action)
+1836:    (assoc :repair-obligation
+1837:           (first (prompt-findings [(:repair-obligation action)])))))
+1842:                        :actuation-contract :repair-contract :shown :semilattice])
+1864:                ":wm/limb-receipt-v1 keys [:schema :repair/id :limb :command :exit :stdout-sha256 :stderr-sha256 :recorded-at].\n"
+1866:                "For a repair target, capture its immutable ORIGINAL obligation record bytes under data/wm-repair-obligations/ as :before and the DERIVED-STATE readback record as :after (repair-derived-state output bytes; still :open is honest, but capture the readback record, never a second copy of the finding -- identical before/after bytes refuse :revision-unchanged, which orphaned cohort-54 attempt-001).\n"
+1867:                "Name that :wm/entity-revision-pair-v1 file subject-*.edn and set :entity/id to the exact selected repair id.\n"
+1870:                  (str "MEASURED-ONLY ADDITION: for EVERY repair id under data/wm-repair-obligations/resolutions/ whose resolution embeds a :successor-relation, also deposit a supporting-resolved-*.edn revision pair with :entity/id set to THAT repair id (:before = its findings/ bytes, :after = its resolutions/ bytes; supporting-* naming because it is not the selected target). These retained-store captures are observation evidence for the later boundary; they cannot be reconstructed after the cutoff.\n")))
+1894:                      target mission cascade-entry stop-lines]
+1933:       (pr-str (if (:repair/id mission)
+1936:       (when-let [repair-id (:repair/id mission)]
+1938:              (pr-str (str (io/file repair/default-root "findings"
+1939:                                   (str repair-id ".edn"))))
+1951:                                                   :repair-contract])) "\n"
+1953:       (when (seq stop-lines)
+1955:              (pr-str (prompt-findings stop-lines))
+2025:                        author-job stop-lines]
+2036:       (when (seq stop-lines)
+2038:              (pr-str (prompt-findings stop-lines)) "\n"))
+2105:   revision-author-job initial-review-job stop-lines]
+2121:       (when (seq stop-lines)
+2123:              (pr-str (prompt-findings stop-lines)) "\n"))
+2157:   repo commit files author-job artifact-binding review-job review-gate stop-lines]
+2171:            ;; repair-canary-067cd51a, where prior-commits carried the base
+2173:            ;; repair under review.
+2268:                  effective-author-job review-job stop-lines))))
+2385:  outcome, same failure-kind, same repair-obligation path) with :build-retries
+2533:        repair-contract (:repair-contract construction)]
+2554:      repair-contract
+2555:      (assoc :implementation/repair-contract repair-contract)
+2610:    ;; refusing an actually-grounded repair.  Await visibility, bounded.
+2721:  synthetic initialization identity (repair-initialization-a9177cab,
+2722:  2026-09-13: one invalid construction cell produced two stop-line findings
+2744:(defn- repair-occurrence
+2745:  "Create or propagate one repair occurrence across containment boundaries.
+2750:      (repair/occurrence-identity
+2785:  receives the exact repair id."
+2822:  [repair-id]
+2823:  (let [file (io/file repair/default-root "resolutions" (str repair-id ".edn"))]
+2835:  names the selected repair obligation itself and must use its exact id;
+2877:  ;; (RULING-repair-subject-positive-status-2026-09-14 §5, packet 1)
+3124:  attempt-057/058 (HttpTimeoutException) were repaired while
+3130:  which would demand a distinct repair commit and an independent review for a
+3230:(defn- repair-class-for [failure-kind]
+3244:    ;; the machine-repair contract. Budget and availability map above.
+3261:(defn- discharge-contract [repair-class]
+3263:   (case repair-class
+3265:     {:requires [:distinct-repair-commit :independent-review
+3266:                 :grounded-repair :distinct-production-shaped-successor]}
+3268:     ;; Mirrors repair/review-failure-discharge-contract: a rejected commit
+3271:     {:requires [:distinct-repair-commit :independent-review
+3272:                 :grounded-repair :distinct-production-shaped-successor]}
+3289:  (when (and (= :incomplete-recoverable (:repair/class obligation))
+3355:        {:keys [trigger cohort? semantic-epoch author reviewer repair-reviewer
+3409:                                       (keyword repair-reviewer)
+3410:                                       author reviewer repair-reviewer])
+3417:                                                           :repair-reviewer :trigger
+3447:        ;; All author/reviewer/revision/repair ports share this attempt's
+3479:                         (repair-occurrence existing occurrence-origin
+3547:                       existing-finding (:repair-obligation data)
+3548:                       repair-class (or (:repair/class existing-finding)
+3549:                                        (repair-class-for
+3555:                             ((or (:repair-system-record-fn opts)
+3556:                                  repair/record-system-failure!)
+3559:                               (occurrence-for (:repair/occurrence data)
+3563:                               :repair-class repair-class
+3587:                               (discharge-contract repair-class)})))
+3589:                                   :repair-obligation
+3593:                         (park-r16-stop-line! opts external-attempt-id finding))
+3634:                                              :repair-id (:repair/id finding)
+3838:                       (repair-discharge/finalize-run!
+3839:                        {:root (or (:repair-root opts) repair/default-root)
+3858:                         :evaluators (:repair-evaluators opts) :registry repair-evaluators/registry
+3864:                       result (cond-> (assoc result-base :repair/discharge discharge-result
+3905:                           finding ((or (:repair-system-record-fn opts)
+3906:                                        repair/record-system-failure!)
+3910:                                      (:repair/occurrence failure-data)
+3914:                                     :repair-class :machine-failure
+3948:                                       :repair-obligation finding
+4028:      (let [open-stop-lines
+4029:            (run-phase! opts @phase-context :stop-line-memory
+4030:                        #((or (:repair-open-fn opts) repair/open-obligations)))
+4032:            (->> open-stop-lines
+4033:                 (filter #(or (= :awaiting-validation (:repair/status %))
+4034:                              (= :environmental-hold (:repair/class %))))
+4038:            (filterv #(and (= :awaiting-validation (:repair/status %))
+4039:                           (map? (:repair/verification %)))
+4059:                    ;; always select; repair memory is evidence, never a divert.
+4070:            historical-action? (= :revalidate-historical-repair
+4072:            repair-action? (contains? #{:repair-machine-failure
+4073:                                        :revalidate-historical-repair}
+4077:            stop-line (when repair-action?
+4078:                        (first (filter #(= (:repair/id %)
+4080:                                       open-stop-lines)))
+4082:            (fn [repair-class failure-kind failure-stage error failure-data]
+4084:                    ((or (:repair-system-record-fn opts)
+4085:                         repair/record-system-failure!)
+4088:                      (occurrence-for (:repair/occurrence failure-data)
+4094:                      :repair-class repair-class
+4095:                      :target (:target stop-line)
+4096:                      :selected-entry (:selected-entry stop-line)
+4102:                      :backtrace {:supersedes (:repair/id stop-line)}
+4103:                      :discharge-contract (discharge-contract repair-class)})]
+4104:                ((or (:repair-supersede-fn opts) repair/supersede!)
+4105:                 stop-line successor failure-kind)
+4108:            (when (and historical-action? stop-line
+4110:              ((:historical-verification-candidate-fn opts) stop-line))
+4111:            stop-lines (if (and repair-action? stop-line) [stop-line] [])
+4113:                                                   repair-action? reviewer repair-reviewer)
+4128:                                     :repair-reviewer repair-reviewer)))
+4160:                                     :trace-persistence (if repair-action?
+4161:                                                          :repair-action-not-traced
+4178:                                 (assoc-in [:judgment :open-stop-lines]
+4179:                                           {:count (count open-stop-lines)
+4180:                                            :ids (mapv :repair/id open-stop-lines)}))]
+4206:                             :review-role (if repair-action?
+4260:                                       (mission-for-decision entry target (:repair-root opts)))
+4298:          (let [trace-path (when-not repair-action?
+4312:                                                     :repair-contract])
+4349:                       stop-line historical-admission
+4350:                       {:author author :repair-reviewer repair-reviewer})
+4355:                               :repair-obligation stop-line})))
+4361:                               :repair-obligation stop-line})))
+4366:                               :obligation stop-line
+4368:              (when-not (and (= :wm/historical-repair-admission-v1 (:schema transition))
+4369:                             (= (:repair/id stop-line) (:repair/id transition))
+4370:                             (= :awaiting-validation (:repair/status transition))
+4386:                                 :repair-obligation stop-line})))
+4400:                                  :repair-id (:repair/id transition)
+4401:                                  :repair-status :awaiting-validation
+4402:                                  :repair-resolved? false
+4406:              (throw (ex-info "Historical repair verification admitted for validation"
+4410:                               :repair-obligation transition
+4412:          (let [snapshot (when stop-line
+4413:                           (deferred-completion-snapshot opts stop-line))
+4414:                deferred-completion-stage (:failure-stage stop-line)
+4429:                                         :repair-obligation successor})))
+4436:                         :repair-obligation stop-line
+4455:                  (get-in stop-line [:failure-data :author-job]))
+4470:                                 :repair-obligation successor}))))
+4488:                                         :repair-obligation successor}
+4508:                                 target mission construction stop-lines))
+4522:                                :completes-attempt (:attempt-id stop-line)}
+4537:                                            (:attempt-id stop-line))}
+4659:                         (vec (keep :failed-commit stop-lines))})
+4670:                           :completes-attempt (:attempt-id stop-line)}
+4677:                                              author-job stop-lines)))))
+4704:                       artifact-binding review-job review-gate stop-lines)
+4746:                                      [:selected-action :repair-obligation
+4748:                              (:discharge-contract stop-line)
+4755:                       (or (:repair-resolution-read-fn opts)
+4791:                                        (:repair/class stop-line)))
+4793:                                  ((or (:repair-record-fn opts)
+4794:                                       repair/record-review-failure!)
+4819:                              ((or (:repair-supersede-fn opts)
+4820:                                   repair/supersede!)
+4821:                               stop-line finding :deferred-review-rejected)
+4828:                                        (assoc :repair-obligation
+4869:                                              % [:repair/id :repair/status
+4870:                                                 :repair/verification])
+4892:                finding ((or (:repair-system-record-fn opts)
+4893:                             repair/record-system-failure!)
+4896:                          (occurrence-for (:repair/occurrence failure-data)
+4899:                          :repair-class :machine-failure
+4920:                            :repair-obligation finding
+4946:                       :repair-obligation (:repair-obligation completion)
+4951:                review-finding (when (and (nil? (:repair-obligation failure))
+4954:                          ((or (:repair-record-fn opts)
+4955:                               repair/record-review-failure!)
+4961:                            (occurrence-for (:repair/occurrence failure)
+4975:                finding (or review-finding (:repair-obligation failure))]
+4986:                        :repair-obligation finding
+4987:                        :repair/occurrence
+4988:                        (or (:repair/occurrence failure)
+4989:                            (:repair/occurrence finding))
+5008:  stop-line findings. Failures after cohort start are closed by the core state
+5014:  completion. Returning :cohort-complete avoids spurious repair obligations
+5032:                     (or (:repair-root raw-opts) repair/default-root)
+5079:                ;; therefore charged to the machine, demanding a repair commit
+5093:                occurrence (repair-occurrence
+5094:                            (:repair/occurrence edata)
+5103:                repair-class (repair-class-for failure-kind)
+5105:                ((or (:repair-system-record-fn raw-opts)
+5106:                     repair/record-system-failure!)
+5113:                  :repair-class repair-class
+5120:                  :discharge-contract (discharge-contract repair-class)})
+5134:                            :repair-id (:repair/id finding)
+5140:             :data {:repair-obligation finding
+5141:                    :repair/occurrence occurrence
+5149:        final-result (assoc result :runner/source source-check :repair/publication publication)]
