@@ -172,7 +172,29 @@
                       (let [ties (filter #(= (:controller-score e) (:controller-score %)) sorted)]
                         (cond-> (assoc e :rank (rank-of (:controller-score e)))
                           (< 1 (count ties)) (assoc :g-tie (mapv :cascade-id ties))))) sorted)
-              {:cascade-scoring {:model model :scope :synthetic-bounded-replay
-                                 :horizon-steps (:horizon-steps opts)}}))))
+              {:cascade-scoring (cond-> {:model model :scope :synthetic-bounded-replay
+                                         :horizon-steps (:horizon-steps opts)}
+                                  ;; PROOF-wm-works ⟨1⟩4/⟨1⟩5 (claude-5
+                                  ;; handoff): the class path's ranked meta
+                                  ;; carries a :precision-model describing
+                                  ;; the model ACTUALLY consumed — never a
+                                  ;; token precision model, never fields not
+                                  ;; consumed. Fields precision-carry needs
+                                  ;; that the class path has no honest value
+                                  ;; for stay typed-absent with a reason.
+                                  (= :class-emission (:kind model))
+                                  (assoc :precision-model
+                                         {:kind :class-emission
+                                          :q0 (:cascade-belief state)
+                                          :horizon (:horizon-steps opts)
+                                          :class-preference (get-in model [:class-preference (:horizon-steps opts)])
+                                          :provenance (:provenance model)
+                                          ;; the token model's :rates /
+                                          ;; :preference-spec have no class
+                                          ;; counterpart — typed absent
+                                          :rates {:status :absent
+                                                  :reason :class-emission-has-no-token-rates}
+                                          :preference-spec {:status :absent
+                                                            :reason :class-preference-not-a-token-spec}}))}))))
       (catch clojure.lang.ExceptionInfo e
         (merge {:model model} (ex-data e))))))

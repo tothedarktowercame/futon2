@@ -62,9 +62,51 @@
           projected (:projected-from live)
           common? (and (seq policies) (seq steps)
                        (every? #(= c (get-in % [:terms :C :value])) policies)
-                       (every? #(= provenance (:c %)) (vals (:scoring certificate))))]
-      (if-not common?
-        {:schema :wm/preference-audit-v1 :status :held :reason :shared-consumed-preference-not-retained}
+                       (every? #(= provenance (:c %)) (vals (:scoring certificate))))
+          ;; PROOF-wm-works ⟨1⟩4/⟨1⟩5: class-scoring decisions. When EVERY
+          ;; scored candidate consumed the SAME :class-emission model and the
+          ;; SAME class preference (Joe's fixed class C), the audit records
+          ;; what was actually consumed — status :recorded with the class
+          ;; preference, its provenance, and the horizon step at which it
+          ;; applied. Mixed models, differing preferences or missing
+          ;; provenance still hold with their reason. The token path above
+          ;; is untouched.
+          class-models (distinct
+                        (keep (fn [[_ sc]] (get-in sc [:rates-provenance :model]))
+                              (:scoring certificate)))
+          class-common? (when (= 1 (count class-models))
+                          (let [m (first class-models)]
+                            (when (= :class-emission (:kind m))
+                              {:model m
+                               :class-preference (get-in m [:class-preference (:horizon m)])
+                               :applied-at-step (:horizon m)})))
+          class-provenance-complete? (and class-common?
+                                          (map? (:class-preference class-common?))
+                                          (some? (get-in class-common? [:model :provenance]))
+                                          ;; ONE shared class preference across every scored
+                                          ;; candidate: distinct models are already 1; the
+                                          ;; preference maps must also be equal
+                                          (= 1 (count (distinct
+                                                       (for [[_ sc] (:scoring certificate)
+                                                             :let [m (get-in sc [:rates-provenance :model])]
+                                                             :when (= :class-emission (:kind m))]
+                                                         (get-in m [:class-preference (:horizon m)]))))))]
+      (cond
+        ;; class path: one shared class model + one shared class preference
+        (and class-common? class-provenance-complete?)
+        {:schema :wm/preference-audit-v1
+         :status :recorded
+         :consumed-preference-kind :class-emission
+         :class-preference (:class-preference class-common?)
+         :class-preference-provenance (get-in class-common? [:model :provenance])
+         :applied-at-step (:applied-at-step class-common?)
+         :note "every scored candidate consumed this class preference at the horizon step; the token-weight rows below are absent because no token preference was consumed"}
+        ;; neither shared-token nor shared-class: held
+        (not common?)
+        (if (and (seq class-models) (not (and class-common? class-provenance-complete?)))
+          {:schema :wm/preference-audit-v1 :status :held :reason :class-preference-not-shared-or-unprovenanced}
+          {:schema :wm/preference-audit-v1 :status :held :reason :shared-consumed-preference-not-retained})
+        :else
         (let [fallback-tokens (set/difference want (set (keys echo)))
               fallback (if (and (seq want) (number? lam) (= 0 mu) (map? echo))
                          {:status :computed

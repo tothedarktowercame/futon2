@@ -15,7 +15,8 @@
             [futon2.aif.scoring-input-receipts :as ir]
             [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as war-machine]
-            [futon2.aif.focus-receipt :as focus]))
+            [futon2.aif.focus-receipt :as focus]
+            [futon2.aif.preference-audit :as preference-audit]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 (def joe-c {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100})
@@ -478,3 +479,37 @@
           "the probe really ran from futon3c")
       (is (some #(re-find #":class :focus :kind :ticket-parent" %) lines)
           (str "the PRODUCTION context expression classifies from futon3c: " (pr-str lines))))))
+
+;; claude-5 handoff: the class certificate says what was actually consumed.
+(deftest class-decision-audit-records-the-class-preference
+  (let [cert {:scoring {0 {:rates-provenance {:source :observation-model/query
+                                              :model {:kind :class-emission
+                                                      :horizon 4
+                                                      :class-preference {4 joe-c}
+                                                      :provenance {:status :synthetic
+                                                                   :source "Joe 2026-09-22 ruling"}}}}}}
+        d {:selection-certificate cert}
+        audit (preference-audit/build d)]
+    (is (= :recorded (:status audit)) (pr-str audit))
+    (is (= :class-emission (:consumed-preference-kind audit)))
+    (is (= joe-c (:class-preference audit)))
+    (is (= 4 (:applied-at-step audit)))
+    (is (preference-audit/valid? d audit) "the recorded audit round-trips")))
+
+(deftest class-decision-with-differing-preferences-still-holds
+  (let [cert {:scoring {0 {:rates-provenance {:source :observation-model/query
+                                              :model {:kind :class-emission :horizon 4
+                                                      :class-preference {4 joe-c}
+                                                      :provenance {:source "t"}}}}
+              1 {:rates-provenance {:source :observation-model/query
+                                    :model {:kind :class-emission :horizon 4
+                                            :class-preference {4 {:focused 1 :related 0 :unrelated 0 :stop-the-line 0}}
+                                            :provenance {:source "t"}}}}}}
+        audit (preference-audit/build {:selection-certificate cert})]
+    (is (= :held (:status audit)) (pr-str audit))
+    (is (= :class-preference-not-shared-or-unprovenanced (:reason audit))))
+  ;; provenance missing
+  (let [cert {:scoring {0 {:rates-provenance {:model {:kind :class-emission :horizon 4
+                                                      :class-preference {4 joe-c}}}}}}
+        audit (preference-audit/build {:selection-certificate cert})]
+    (is (= :held (:status audit)) (pr-str audit))))
