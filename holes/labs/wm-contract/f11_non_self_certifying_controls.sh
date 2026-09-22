@@ -99,7 +99,7 @@ plant r2-own-output CitesTheSelectedPattern \
 # R3: the citation erasure must DROP the citation. Keeping a citation-dependent
 # receipt makes the two erasures unequal.
 plant r3-citation-erasure FindResultC.erase \
-  'receipts := fun p => (r.receipts p).map (·.toReceipt)' \
+  'receipts := fun p => (r.receipts p).map (·.toLegacyReceipt)' \
   'receipts := fun p => (r.receipts p).map (fun c => { citesTextOrEdges := c.citedText = p, scoreAlone := False })'
 
 # R6/floor: the faithful citing witness must SELECT on the recorded repository.

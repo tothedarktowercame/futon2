@@ -98,7 +98,7 @@ F1–F4, amend Lean, complete production-finder acceptance, or resolve repair-02
 No Lean witness or dependency changed, so focused Lean builds and their
 negative controls remain part of the outstanding acceptance work below.
 
-- [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence.
+- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence.
 - [ ] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution.
 
 ### Applied-interface acceptance receipt, 2026-09-22
@@ -122,9 +122,12 @@ rounds in six scenarios, all six F4 checks, and zero drift; its digest exactly
 matches the independently pinned fixture. `acceptance.edn` binds those counts,
 the library revision, and all three output digests.
 
-This closes the missing fresh runtime observation, but the ordinary-acceptance
-checkbox remains open: the mandated F11 negative-control suite currently
-rejects the amended Lean interface for the wrong reason because
-`f11_conformance_check.bb` still searches for the retired `def find ... :=
-sorry` signature. That stale gate must be repaired and rerun before completion
-is recorded. The separate repair-024 successor disposition is unchanged.
+This closes the missing fresh runtime observation. The conformance gate now
+reads the amended opaque applied signature and `F11AppliedConformance`, binds
+its source pins to the retained 24-pattern run, and has planted controls for
+signature drift, source drift, `sorry`, declaration loss, F4 violation, and
+determinism. Those controls pass, as do the focused Lean build and the existing
+F11 carrier controls. The old remainder probe is a historical pre-ruling
+classifier for `def find ... := sorry`; it is superseded by this applied gate,
+not counted as a test of the amended signature. Ordinary F11 acceptance is
+therefore complete. The separate repair-024 successor disposition is unchanged.
