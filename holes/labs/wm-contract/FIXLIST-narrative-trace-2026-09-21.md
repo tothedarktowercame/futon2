@@ -422,3 +422,18 @@ codex-13, runs/repairs-as-tickets-2026-09-22/.
    admission, refuse with a typed reason a cascade whose acceptance names files
    outside its declared artifact repositories. Or declare mathlib4 for M-f11.
    Not dispatched yet. The repairs-as-tickets work comes first.
+
+### Ruling (Joe, 2026-09-22): repair fixes are ordinary fixes
+"repair fixes are not different from other fixes, they are just moved to the
+front of the queue. The current behaviour described here is not correct. The
+new behaviour is." So a repair ticket closes like any other ticket: its reviewed
+closure resolves the finding. There is no second, distinct validation run. The
+store's two-stage rule (record-implementation! then resolve! with a distinct
+production-shaped attempt) is the behaviour to replace, not a constraint.
+
+The edge case: "what happens if something (of whatever shape) goes into the
+queue and isn't resolved. That, I think, is a stop-the-line failure (not a
+looping machine) requiring repair from outside." Reading: when a front-of-queue
+ticket's attempt closes without resolving it, the line stops. Clicks refuse
+until the ticket is resolved or reworked from outside. The machine does not
+retry it. This applies to any front ticket, whether or not it came from a repair.
