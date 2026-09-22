@@ -38,6 +38,10 @@ FUTON3C = Path("/home/joe/code/futon3c")
 INDEX = REPO / "data/test-warrants/index.json"
 ARTIFACTS = Path("/home/joe/code/storage/test-registry/futon2-suite")
 AGENCY = os.environ.get("AGENCY_URL", "http://localhost:7070")
+# These write the same on-disk artifact (wm08 Route-A re-expression under
+# holes/labs/wm-contract/runs/F13-model-manifest-2026-09-15/redo/), so running
+# them concurrently makes one read the other's half-written companions.
+SERIAL = {"futon2.aif.wm08-route-a-test", "futon2.aif.wm08-f4-designation-wiring-test"}
 AUTHOR = os.environ.get("WARRANT_AUTHOR", "claude-3")
 
 
@@ -145,9 +149,15 @@ def main():
         return ns, ("minted" if new["warrant?"] else "failed"), new
 
     tally = {}
-    with ThreadPoolExecutor(max_workers=a.j) as pool:
-        for fut in as_completed([pool.submit(one, ns) for ns in nss]):
-            ns, status, entry = fut.result()
+    def results():
+        with ThreadPoolExecutor(max_workers=a.j) as pool:
+            yield from (f.result() for f in as_completed(
+                [pool.submit(one, ns) for ns in nss if ns not in SERIAL]))
+        for ns in sorted(n for n in nss if n in SERIAL):
+            yield one(ns)
+
+    for ns, status, entry in results():
+        if True:
             tally[status.split(":")[0]] = tally.get(status.split(":")[0], 0) + 1
             if status in ("minted", "failed"):
                 index[ns] = entry
