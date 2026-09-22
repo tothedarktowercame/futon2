@@ -356,3 +356,10 @@ checkpoints write the keyword. The run-ending kernel (49481139) and route
 attestation (56d681c5) both have to accept either form. The cleaner fix is to
 normalise it once, at write time. That changes occurrence identity values that
 are already hashed into ids, so it needs its own slice and a migration note.
+
+### improve-6c merged (a827cbd0): known gap
+The author-prompt lookup reads <data-root>/**/retained/surprises.edn. The one
+historical surprise (surprise-12ae6445…) is only in improve-6b's scanner input
+(runs/fixlist-2026-09-21/improve-6b/historical-surprises.edn), so the prompt would
+not have named it. That no longer matters for this surprise, because aeb352f8
+ticked the hole. Future close-time surprises are found.
