@@ -320,6 +320,9 @@ candidates automatically, or that every click is fast.
     flat between them. The one lawful difference is structural: C2's acceptance leaves
     outcomes unmeasured, and C1's does not. Separating them needs a preference value for an
     explicit `:unknown` outcome, which only Joe can set. Proof stops under rule 2.
+    - Joe ruled (2026-09-22): "55=focused mission, 35=related, 5=unrelated, 5=stop-the-line.
+      I'd class 'unmeasured outcome' within the last category." So there is no new outcome:
+      an unmeasured outcome is stop-the-line (5%). The proof resumes at ⟨2⟩2.
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
