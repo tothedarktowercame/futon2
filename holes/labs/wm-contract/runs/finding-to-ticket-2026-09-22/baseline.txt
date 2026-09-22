@@ -1,0 +1,10 @@
+Baseline source: #object[java.net.URL 0x299ea986 file:/tmp/finding-ticket-before.Wa9emJ/futon2/aif/repair_obligation.clj]
+
+FAIL in (isolated-store-boundary-publishes-without-extra-configuration) (finding_ticket_test.clj:136)
+expected: (.isFile (ticket-path opts record))
+  actual: false
+
+FAIL in (isolated-store-boundary-publishes-without-extra-configuration) (finding_ticket_test.clj:137)
+expected: (.isFile (io/file (:queue-path opts)))
+  actual: false
+{:test 1, :pass 0, :fail 2, :error 0}

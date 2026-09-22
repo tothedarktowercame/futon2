@@ -18,6 +18,8 @@
    'futon2.aif.run-ending-classification "/home/joe/code/futon2/src/futon2/aif/run_ending_classification.clj"
    'futon2.aif.cascade-selection "/home/joe/code/futon2/src/futon2/aif/cascade_selection.clj"
    'futon2.aif.cascade-model-manifest "/home/joe/code/futon2/src/futon2/aif/cascade_model_manifest.clj"
+   'futon2.aif.finding-ticket "/home/joe/code/futon2/src/futon2/aif/finding_ticket.clj"
+   'futon2.aif.ticket-publication-io "/home/joe/code/futon2/src/futon2/aif/ticket_publication_io.clj"
    'futon2.aif.ticket-queue "/home/joe/code/futon2/src/futon2/aif/ticket_queue.clj"
    'futon2.aif.policy "/home/joe/code/futon2/src/futon2/aif/policy.clj"
    'futon2.aif.live-c "/home/joe/code/futon2/src/futon2/aif/live_c.clj"

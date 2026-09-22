@@ -3,7 +3,9 @@
    eligibility; it supplies neither candidates nor model quantities."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [futon2.aif.load-identity :as load-identity])
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.interoceptive-store-lock :as store-lock]
+            [futon2.aif.ticket-publication-io :as publication])
   (:import [java.time Instant]))
 
 (load-identity/register! *ns* *file*)
@@ -34,13 +36,41 @@
   declaration)
 
 (defn read-declaration
-  "Read one declared resource; missing or malformed configuration refuses."
-  []
-  (with-open [reader (java.io.PushbackReader. (io/reader (io/resource "wm/ticket-queue.edn")))]
-    (let [declaration (edn/read {:eof ::eof} reader)]
-      (when-not (= ::eof (edn/read {:eof ::eof} reader))
-        (throw (ex-info "Multiple ticket queue forms" {:kind :invalid-ticket-queue})))
-      (validate! declaration))))
+  "Read one declaration; missing or malformed configuration refuses."
+  ([] (read-declaration (io/resource "wm/ticket-queue.edn")))
+  ([source]
+   (with-open [reader (java.io.PushbackReader. (io/reader source))]
+     (let [declaration (edn/read {:eof ::eof} reader)]
+       (when-not (= ::eof (edn/read {:eof ::eof} reader))
+         (throw (ex-info "Multiple ticket queue forms" {:kind :invalid-ticket-queue})))
+       (validate! declaration)))))
+
+(defonce ^:private writer-monitors (atom {}))
+
+(defn enqueue!
+  "Append an ordinary ticket once, preserving its original insertion time.
+   Conflicting retries refuse. The caller supplies the declaration path;
+   a new isolated queue starts from the versioned empty declaration."
+  [path entry]
+  (validate! (assoc empty-declaration :entries [entry]))
+  (let [file (publication/checked-file! path)
+        key (.getCanonicalPath file)
+        monitor (get (swap! writer-monitors #(if (contains? % key) % (assoc % key (Object.)))) key)]
+    (io/make-parents file)
+    (locking monitor
+      (store-lock/with-lock-at
+        (str key ".lock")
+        (fn []
+          (publication/checked-file! file)
+          (let [declaration (if (.exists file) (read-declaration file) empty-declaration)
+                existing (some #(when (= (:ticket entry) (:ticket %)) %) (:entries declaration))]
+            (when (and existing (not= existing entry))
+              (throw (ex-info "Ticket already has a different insertion time"
+                              {:kind :ticket-queue-entry-conflict :existing existing :entry entry})))
+            (if existing declaration
+                (let [updated (validate! (update declaration :entries conj entry))]
+                  (publication/publish-text! file (str (pr-str updated) "\n") true)
+                  updated))))))))
 
 (defn supported?
   "Selection's existing support constraints, before floating-point underflow."
