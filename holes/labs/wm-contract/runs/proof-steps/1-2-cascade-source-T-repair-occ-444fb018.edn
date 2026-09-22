@@ -1,0 +1,70 @@
+;; Agent-authored applicability, not inferred from retrieval or :assures.
+;; PROOF-wm-works 1.2 2.1: offline interpretation for the front repair ticket.
+;; Written here, NOT published; 2.2 moves it into resources/wm/cascade-sources/
+;; and wires it. PRECONDITION for :admission/task-stated to resolve: the ticket
+;; file is currently UNTRACKED in git (found 2026-09-22, zai-1; the
+;; finding->ticket path writes to disk but nobody committed it) -- commit the
+;; ticket before publication or that locator refuses at load. The two
+;; produced-token locators are C3 path-exists checks against paths the actions
+;; will create; they resolve (observed=false) today and turn true when each
+;; action's work is committed.
+{:schema :wm/cascade-source-v1
+ :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+ :context :WM
+ :beta {:value 1 :status :declared}
+ :facts [:admission/task-stated]
+ :want [:repair/verified-dated-recheck :repair/restored-held-out-split]
+ :locators
+ {:admission/task-stated
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
+   :decl "# Verify or restore guardrail refusal"}
+  :repair/verified-dated-recheck
+  {:class :C3 :repo "futon2" :sha "HEAD"
+   :path "data/wm-repair-obligations/rechecks/repair-occ-444fb018-dated-recheck.edn"}
+  :repair/restored-held-out-split
+  {:class :C3 :repo "futon2" :sha "HEAD"
+   :path "resources/wm/eig/held-out-split.edn"}}
+ :patterns
+ {:apparatus/done-is-observed-running
+  {:guard {:needs #{:admission/task-stated} :forbids #{:repair/verified-dated-recheck}}
+   :produces #{:repair/verified-dated-recheck}}
+  :aif/declare-the-conditioning
+  {:guard {:needs #{:admission/task-stated} :forbids #{:repair/restored-held-out-split}}
+   :produces #{:repair/restored-held-out-split}}}
+ :interpretation-receipts
+ {:apparatus/done-is-observed-running
+  {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
+   :source {:path "futon3/library/apparatus/done-is-observed-running.flexiarg"}
+   :reading "The ticket's verification route: RUN the precondition probe the click-3 refusal was about (does a preregistered held-out split exist for the EIG calibration route?), retain the dated check with its source and result, and complete the ticket's scoped work on that observed disposition -- cleared or still unavailable -- without claiming the underlying EIG work. Completion is the observed recheck record, not an assertion that the precondition was checked. DECLARED EFFECT: produces exactly :repair/verified-dated-recheck (a dated disposition record under data/wm-repair-obligations/rechecks/); no model code, no new declaration resource, no calibration claims."
+   :scope-limit "Covers the verify branch of the ticket only. Does not author the split, does not restore anything, does not touch eig-shadow or selection."
+   :target-source {:repo "futon2"
+                   :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
+                   :section "Scoped task"}
+   :observation-limit "C3 observes the retained record file existing in the repository, not the quality of the recheck; ticket review judges the content."}
+  :aif/declare-the-conditioning
+  {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
+   :source {:path "futon3/library/aif/declare-the-conditioning.flexiarg"}
+   :reading "The ticket's restoration route, in the pattern's own discipline: declare the conditioning BEFORE outcomes exist. Author and commit a preregistered held-out split declaration (which observations are held out, the split's locator, the no-result/failure/timeout classes per C2 of the parent mission) plus its explicit no-result handling, as the resource the withdrawn :aif/two-layer-calibration route needs. The declared split makes the precondition exist; it does not and must not fabricate post-split outcomes. DECLARED EFFECT: produces exactly :repair/restored-held-out-split (a new declaration resource at resources/wm/eig/held-out-split.edn); a precondition artefact, not a measured calibration result."
+   :scope-limit "Covers the restore branch of the ticket only: one declaration resource and its no-result classes. Does not run the calibration, collect shadow packets, or re-enable the withdrawn route in selection."
+   :target-source {:repo "futon2"
+                   :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
+                   :section "Scoped task"}
+   :observation-limit "C3 observes the declaration resource existing in the repository; the split's eventual empirical use is future work under the parent mission."}}
+ :candidates
+ [{:precedence [:apparatus/done-is-observed-running]
+   :construction-receipt
+   {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
+    :moves [] :stopped-is-not-success true
+    :reading "First action: run the precondition probe, retain the dated disposition. Declared effect: :repair/verified-dated-recheck only -- a record of what was found, no repository state beyond it."}}
+  {:precedence [:aif/declare-the-conditioning]
+   :construction-receipt
+   {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
+    :moves [] :stopped-is-not-success true
+    :reading "First action: author and commit the preregistered held-out split declaration with no-result handling. Declared effect: :repair/restored-held-out-split only -- a new declaration resource the withdrawn calibration route names as its precondition."}}]}
+;; Compatible past outcome records (2.4, Joe's ruling 2026-09-22, 444c8f3f):
+;; NONE for this repair family. The single attempts.edn trial
+;; (apparatus/one-authority-per-question -> M-aif-policy-conditioned-eig
+;; shared-updater hole, success 1) is a different pattern and token; it is not
+;; claimed as evidence for either candidate. B is therefore the declared prior
+;; for both candidates, distinguishable by their declared effects above.
