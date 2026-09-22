@@ -8,7 +8,13 @@
 (defonce registry (atom {}))
 
 (def required-sources
-  "Explicit decision/close scope; absent registrations are never current."
+  "Explicit decision/close scope; absent registrations are never current.
+  Click-path coverage (codex-20 review, 2026-09-22): the declared set includes
+  every namespace the click path actually loads, found by reading
+  futon3c.wm.runner-service -> futon2.aif.full-loop-runner requires (not by
+  guessing), so namespaces that never register themselves (e.g.
+  full-loop-cohort, tripwire, the futon3c runner service) show as
+  :unregistered instead of silently disappearing."
   {'futon2.aif.parameter-novelty "/home/joe/code/futon2/src/futon2/aif/parameter_novelty.clj"
    'futon2.aif.surprise "/home/joe/code/futon2/src/futon2/aif/surprise.clj"
    'futon2.aif.attempt-learning "/home/joe/code/futon2/src/futon2/aif/attempt_learning.clj"
@@ -50,7 +56,35 @@
    'futon2.aif.eig-shadow "/home/joe/code/futon2/src/futon2/aif/eig_shadow.clj"
    'futon2.aif.cascade-sources "/home/joe/code/futon2/src/futon2/aif/cascade_sources.clj"
    'futon2.aif.cascade-problems "/home/joe/code/futon2/src/futon2/aif/cascade_problems.clj"
-   'futon2.aif.cascade-structure "/home/joe/code/futon2/src/futon2/aif/cascade_structure.clj"})
+   'futon2.aif.cascade-structure "/home/joe/code/futon2/src/futon2/aif/cascade_structure.clj"
+   ;; --- click-path additions (runner-service -> full-loop-runner requires) ---
+   'futon3c.wm.runner-service "/home/joe/code/futon3c/src/futon3c/wm/runner_service.clj"
+   'futon2.aif.c-fold-config "/home/joe/code/futon2/src/futon2/aif/c_fold_config.clj"
+   'futon2.aif.c-vector "/home/joe/code/futon2/src/futon2/aif/c_vector.clj"
+   'futon2.aif.evidence-manifest "/home/joe/code/futon2/src/futon2/aif/evidence_manifest.clj"
+   'futon2.aif.fold "/home/joe/code/futon2/src/futon2/aif/fold.clj"
+   'futon2.aif.fold-classical "/home/joe/code/futon2/src/futon2/aif/fold_classical.clj"
+   'futon2.aif.fold-cascade "/home/joe/code/futon2/src/futon2/aif/fold_cascade.clj"
+   'futon2.aif.delivery-qa "/home/joe/code/futon2/src/futon2/aif/delivery_qa.clj"
+   'futon2.aif.full-loop-cohort "/home/joe/code/futon2/src/futon2/aif/full_loop_cohort.clj"
+   'futon2.aif.g-term-decomposition "/home/joe/code/futon2/src/futon2/aif/g_term_decomposition.clj"
+   'futon2.aif.limb-evidence "/home/joe/code/futon2/src/futon2/aif/limb_evidence.clj"
+   'futon2.aif.interpretation-evidence "/home/joe/code/futon2/src/futon2/aif/interpretation_evidence.clj"
+   'futon2.aif.interpretation-job "/home/joe/code/futon2/src/futon2/aif/interpretation_job.clj"
+   'futon2.aif.fact-measurement "/home/joe/code/futon2/src/futon2/aif/fact_measurement.clj"
+   'futon2.aif.task-execution-evidence "/home/joe/code/futon2/src/futon2/aif/task_execution_evidence.clj"
+   'futon2.aif.receipt-construction "/home/joe/code/futon2/src/futon2/aif/receipt_construction.clj"
+   'futon2.aif.mission-registry "/home/joe/code/futon2/src/futon2/aif/mission_registry.clj"
+   'futon2.aif.morning-brief "/home/joe/code/futon2/src/futon2/aif/morning_brief.clj"
+   'futon2.aif.pattern-registry "/home/joe/code/futon2/src/futon2/aif/pattern_registry.clj"
+   'futon2.aif.run-participants "/home/joe/code/futon2/src/futon2/aif/run_participants.clj"
+   'futon2.aif.repair-obligation "/home/joe/code/futon2/src/futon2/aif/repair_obligation.clj"
+   'futon2.aif.repair-discharge "/home/joe/code/futon2/src/futon2/aif/repair_discharge.clj"
+   'futon2.aif.repair-discharge-receipt "/home/joe/code/futon2/src/futon2/aif/repair_discharge_receipt.clj"
+   'futon2.aif.repair-evaluators "/home/joe/code/futon2/src/futon2/aif/repair_evaluators.clj"
+   'futon2.aif.substrate "/home/joe/code/futon2/src/futon2/aif/substrate.clj"
+   'futon2.aif.tripwire "/home/joe/code/futon2/src/futon2/aif/tripwire.clj"
+   'futon2.report.cascade-lane "/home/joe/code/futon2/scripts/futon2/report/cascade_lane.clj"})
 
 (defn sha256 [bytes]
   (when bytes
