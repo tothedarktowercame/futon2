@@ -534,7 +534,8 @@ authorizes no machine changes.
 **Reviewer: codex-20; model: GPT-6 (gpt-6-astra).**
 
 **Verdict: 2 SIGN, 10 OBJECT on the 12 table entries. The ⟨1⟩11 conclusion
-also does not follow.** Reviewed revision `0ec33988` against source and retained
+also does not follow.** Reviewed revision `0ec33988`, then updated against Joe's ruling in
+`3cb0e436` (received after the first review), against source and retained
 records, including `00042870`, `580dd866`, `f4ab52a7` and `41bafbf3`.
 The two SIGNs approve checkable acceptance properties, not the entire ordering
 or permission to execute. Zai's cumulative counts are review events, not a
@@ -584,12 +585,12 @@ correctly. C = 55/35/5/5 is an owner preference, not a statistic learned from
 outcomes; the final paragraph should say so. “By G” also needs the causal
 meaning given under ⟨1⟩6, not merely agreement with a ranking.
 
-A3 still presents *unmade* decisions, which must stay explicit prerequisites,
-not facts inferred from the plan signature. In option (a), the front ticket
-must obtain candidates before ⟨1⟩1 can exercise it; that currently happens at
-⟨1⟩2. A4's named blockers and ⟨1⟩1's “a finding ... never stops the click”
-need a single, explicit precedence statement. The latter cannot nullify the
-named blockers or Joe's unresolved-ticket ruling by implication.
+Joe's subsequent ruling resolves the former pause and firing-authority
+questions. His pause applied to claude-5, not the other lanes; I withdraw the
+claim that their intervening work required plan-wide freeze reconciliation.
+The 13 tripwires are run-time correctness mechanisms, never preflight firing
+vetoes. No keep/revert decision or named-blocker list is required by this
+review. The removed assumptions are not being reviewed or reinstated.
 
 The file refers to Part C of the repair plan, but the current
 `REPAIR-PLAN-2026-09-22.md` has no `## Part C` section. Keep the management
@@ -615,9 +616,12 @@ attempt id and newly written close. Decide whether this is an existing
 historical lifecycle witness or a new execution; do not silently consume the
 reference task before ⟨1⟩7. Scope “always registered” to the cast seats for
 that execution, with an explicit terminal account of unavailable/busy seats.
-Do not launch into an occupied seat or a second active click merely because
-preflight reports rather than blocks. Invocation impossibility must not be
-reported as successful execution.
+Record the runtime handling of a busy seat or an already-active click and
+bind this command's result to its own attempt. That is a lifecycle/reporting
+requirement, not a preflight veto: do not mistake another run's close for this
+command's successful execution. I accept the revised ⟨2⟩2 firing rule; the
+remaining objection concerns the CHECK's lifecycle/acceptance implications.
+
 
 The wait/compute split is named but not defined: author/reviewer turns may
 run subprocess computations, and waits can overlap. Specify which recorded
@@ -891,21 +895,22 @@ from outcome evidence. Describe those sources separately in the conclusion.
    remain unproved. The plan demonstrates one field, not automatic supply for
    every task; say that explicitly rather than claim the larger result.
 
-5. **Freeze and governance — decisions pending, not absent.** A3 lists the
-   known changes and ticket choices, addressing the earlier omission; Joe's
-   actual decisions and B₀ are still blank. The plan signature must select
-   those alternatives rather than be treated as agreement to all mutually
-   exclusive options. Resolve the missing Part C reference and the named
-   blocker/report-only/stop-line precedence in this document. Retain only the
-   author/different-reviewer arrangement stated in execution rule 5; do not
-   import the superseded per-step Zai/Codex/Joe approval chain or a new census.
+5. **Pause scope and firing authority — resolved by Joe, withdrawn as
+   objections.** The pause applied to claude-5 alone. Other lanes' changes do
+   not require the keep/revert ceremony previously requested here. Tripwires
+   ensure correctness during a run; none may prevent firing. The revised
+   ⟨1⟩1 ⟨2⟩2 carries that ruling. No new permission, blocker list or sign-off
+   is owed for it. Fix the dangling Part C reference without importing the
+   superseded per-step Zai/Codex/Joe approval chain or a new census. B₀ remains
+   the plan's stated implementation baseline, not a freeze on other work.
 
 6. **Guard→finding→ticket — asserted, not demonstrated.** Reporting witnesses
    and publishing ordinary tickets are different calls. Establish that the
    changed nonblocking caller still reaches the existing durable finding and
    queue publication for the reporting case the plan already asks to observe.
-   New findings can alter the next live reference eligibility; specify the
-   actual precedence, not “it never stops” as a blanket promise.
+   New findings can alter which task is selected next; reflect that in the
+   live/reference input comparison. This is not an objection to Joe's rule
+   that a ticket does not prevent firing.
 
 7. **Measurement, accepted close and learning continuity — implementation
    prerequisites remain late.** Implement the post-build observation and
@@ -929,3 +934,13 @@ then execute once and inspect selection, accepted close, measurements and the
 next selection in order. These are dependency corrections to the requested
 proof, not additional permissions or operational gates. As written, it is not
 ready for my sign-off.
+
+
+**Update after Joe's ruling (`3cb0e436`).** The obsolete pause/keep-revert and
+named-blocker objections above have been withdrawn in place. I accept the
+revised firing rule and do not request review of removed A3/A4. The table
+remains **2 SIGN / 10 OBJECT**: THEOREM/ASSUME still needs the specification
+versus runtime-composition and C-source corrections; ⟨1⟩1 still has the
+independent lifecycle/reference/acceptance issues stated above. The numerical
+counterexample and the remaining ordering, carrier, loaded-source and close
+findings are unchanged. No machine work was performed for this update.
