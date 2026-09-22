@@ -395,6 +395,17 @@ candidates automatically, or that every click is fast.
     - the first locator facet is used instead of `focus_receipt`'s target relation.
 
     Fixes are split into scorer correctness (handoff A) and focus/facet meaning (handoff B).
+  - Fix A done in futon2 62fcfa1e and 163fd25d (zai-1). codex-20 reproduced its earlier
+    probes against it:
+    - a two-step candidate that never reaches acceptance: G = ln 20, once;
+    - acceptance before T: G = 0;
+    - only the candidate's own target's class counts;
+    - a mixed belief splits;
+    - the domain checks are restored.
+
+    The normalisation test was corrected. The trace posterior keys by target-qualified id,
+    so two targets' `:C1` no longer overwrite each other; no other code reads the serialised
+    ids. Not yet reloaded, because B also changes `war_machine.clj`.
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
