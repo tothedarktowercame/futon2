@@ -6,26 +6,35 @@ no gate; exit 0 on success, 2 on bad arguments or an unreadable attempt.
 
 Wall time is decomposed over the intervals between consecutive checkpoint
 events (00N-*.edn, ordered by :event/sequence, timed by :recorded-at).
-Agent wait is exactly these checkpoint pairs:
-  dispatch -> build        the author's turn (author-wait)
-  build    -> adjudication the reviewer's turn (reviewer-wait)
-Machine time is every other interval. The checkpoints are written strictly in
-sequence, so the intervals do not overlap; overlap is therefore 0 and
-  wall = wait + machine - overlap
-holds by construction (printed with the arithmetic so it can be checked).
-Inside the author's-turn interval the machinery does a small amount of work
-after the author finishes (build-resolution); this report attributes the whole
-interval to agent wait, which OVERCOUNTS wait slightly and never undercounts
-it -- noted in the output, not corrected by guessing sub-phase boundaries.
+Agent-turn intervals are exactly these checkpoint pairs:
+  dispatch -> build        the author's turn AND the build-resolution /
+                           build-cure machine work that follows it in the same
+                           interval (full_loop_runner.clj ~4621); the attempt
+                           checkpoints do not record a phase split inside it,
+                           so it is reported as NOT SEPARABLE and the totals
+                           are given as bounds rather than a false split.
+  build    -> adjudication the reviewer's turn (in recorded clicks the
+                           reviewer's turn also falls inside the dispatch->build
+                           interval, so this pair reads near zero).
+Machine intervals are all the others, measured exactly.
+Checkpoints are written strictly in sequence, so intervals never overlap:
+  wall = (agent-turn intervals) + (machine intervals)          [overlap 0]
+and since the dispatch->build interval mixes agent and machine time:
+  machine >= measured machine intervals
+  agent wait <= agent-turn intervals  (upper bound; overcounts, never
+  undercounts -- the build-resolution tail is inside)
+No sub-interval split is invented (codex-20 review, 2026-09-22).
 """
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
-WAIT_PAIRS = {
-    ("dispatch", "build"): "author's turn (author-wait)",
-    ("build", "adjudication"): "reviewer's turn (reviewer-wait)",
+TURN_PAIRS = {
+    ("dispatch", "build"):
+        "author turn + build resolution, not separable from the records",
+    ("build", "adjudication"):
+        "reviewer's turn (reviewer-wait)",
 }
 
 
@@ -55,36 +64,36 @@ def main(argv):
     events.sort(key=lambda e: e["seq"])
 
     wall = (events[-1]["at"] - events[0]["at"]).total_seconds()
-    wait = 0.0
+    turn = 0.0
     print(f"attempt {d.name}: {len(events)} checkpoints "
           f"{events[0]['at'].isoformat()} -> {events[-1]['at'].isoformat()}")
-    print(f"{'interval':<38}{'seconds':>10}  class")
-    intervals = []
+    print(f"{'interval':<62}{'seconds':>10}  class")
     for a, b in zip(events, events[1:]):
         seconds = (b["at"] - a["at"]).total_seconds()
-        label = WAIT_PAIRS.get((a["type"], b["type"]))
+        label = TURN_PAIRS.get((a["type"], b["type"]))
         if label:
-            wait += seconds
-            intervals.append((f"{a['type']}->{b['type']} ({label})", seconds, "agent wait"))
+            turn += seconds
+            row = f"{a['type']}->{b['type']} ({label})"
+            print(f"{row:<62}{seconds:>10.1f}  agent turn (mixed)")
         else:
-            intervals.append((f"{a['type']}->{b['type']}", seconds, "machine"))
-    for label, seconds, cls in intervals:
-        print(f"{label:<38}{seconds:>10.1f}  {cls}")
-    machine = wall - wait
+            print(f"{a['type']}->{b['type']}".ljust(62)
+                  + f"{seconds:>10.1f}  machine (exact)")
+    machine_exact = wall - turn
     overlap = 0.0  # sequential :recorded-at; see docstring
     print()
-    print(f"wall time    {wall:>10.1f} s")
-    print(f"agent wait   {wait:>10.1f} s  (checkpoint pairs named above)")
-    print(f"machine      {machine:>10.1f} s  (all other intervals; "
-          f"author's-turn interval includes the build-resolution machine tail, "
-          f"so wait is overcounted, never undercounted)")
-    print(f"overlap      {overlap:>10.1f} s  (checkpoints are sequential)")
-    print("note: in recorded clicks the reviewer's turn also falls inside the "
-          "dispatch->build interval, so agent wait concentrates there and the "
-          "build->adjudication pair is near zero; totals are unaffected.")
-    print(f"check: wall = wait + machine - overlap -> "
-          f"{wait:.1f} + {machine:.1f} - {overlap:.1f} = {wait + machine - overlap:.1f} "
-          f"(wall {wall:.1f})")
+    print(f"wall time      {wall:>10.1f} s   (exact: first -> last :recorded-at)")
+    print(f"agent-turn     {turn:>10.1f} s   (mixed intervals above; "
+          f"agent wait <= this)")
+    print(f"machine        {machine_exact:>10.1f} s   (exact intervals only; "
+          f"machine >= this -- the build-resolution tail is inside the "
+          f"agent-turn interval)")
+    print(f"overlap        {overlap:>10.1f} s   (checkpoints are sequential)")
+    print(f"check: wall = agent-turn + machine-exact - overlap -> "
+          f"{turn:.1f} + {machine_exact:.1f} - {overlap:.1f} = "
+          f"{turn + machine_exact - overlap:.1f} (wall {wall:.1f})")
+    print("bounds: agent wait <= "
+          f"{turn:.1f} s; machine >= {machine_exact:.1f} s; "
+          "no split inside dispatch->build is invented.")
     return 0
 
 
