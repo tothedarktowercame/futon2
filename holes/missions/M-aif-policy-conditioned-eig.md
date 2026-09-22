@@ -240,3 +240,12 @@ named in
   `scripts/` and `test/`, and `holes/labs/M-aif-policy-conditioned-eig/` — the
   directory section 4 of this mission names for the shadow artifact — does not
   exist (`runs/B2-strawman/02-read-and-replay-probes.edn` `:E5`).
+
+  **Implementation advance 2026-09-22:** `futon2.aif.eig-shadow/collect` now
+  emits a default-off record-only packet with separate model-relative and
+  empirical layers. It pins the model source, records prior/expected posterior
+  entropy, EIG and degeneracy, proves the off-mode selection value unchanged,
+  and routes the same observation through both sides of the shared A4a updater.
+  Missing held-out evidence is retained as a typed held empirical layer rather
+  than promoted to calibration. This task remains open until a preregistered
+  held-out run supplies the persisted empirical packet and replay artifacts.
