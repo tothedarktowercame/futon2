@@ -90,3 +90,72 @@ passes WITHOUT any tuned number. **If Joe declines to rule a value for
 without inventing numbers** — the declared effects are perfectly symmetric
 (same class, same coverage, same θ, no recorded rates) — and under execution
 rule 2 the proof stops for Joe's decision, exactly as it did at ⟨1⟩2.
+
+## Addendum (2026-09-22, after Joe's ruling 27f5b8d8): what G does under C = 55/35/5/5, unmeasured → stop-the-line
+
+Joe's C over [focus, related, unrelated, stop-line] = [.55, .35, .05, .05].
+Risk = KL(Q‖C) = Σ q ln(q/c) (lower G better); log E − F is a tie (no habit
+history), resolved by name order to :C1 (`:apparatus/…` sorts before
+`:aif/…`). Focus today: the discovered facet from
+`resources/wm/focus/commit-facets-v1.json` (two windows, 165/166 commits,
+WM↔APM same-focus edge) — with the commit mass under `src/futon2/aif/` (the
+regex matches `/aif/`), **focus = WM**.
+
+### Case (1) — code as it is (both candidates' commits facet `other/unattributed` → class unrelated, 5%)
+
+| | G |
+|---|---|
+| C1 (point mass at unrelated) | ln(1/.05) = **2.996** |
+| C2, u=0.10 | 2.671 |
+| C2, u=0.25 | 2.433 |
+| C2, u=0.50 | 2.303 |
+| C2, u=0.75 | 2.433 |
+
+**G picks C2 for EVERY u > 0** — mathematically forced, not a coincidence:
+unrelated and stop-line carry the SAME c = .05, and KL is convex, so any
+mixture of two equal-c slots beats a point mass in one of them:
+G(C2) = ln 20 − H(u) < ln 20. Two consequences: (i) Joe's ruling is inert
+here — moving C2's unmeasured share between two 5% slots changes nothing
+(claude-5's point (a), confirmed exactly); (ii) G changing the choice (C1 by
+tie-break → C2 by G) would PASS the counterfactual — but it passes **because
+of the facet-regex gap**: the WM repair is classed unrelated, and the win
+comes from entropy, not from Joe's preference. That is a defect deciding the
+demonstration, not the model.
+
+### Case (2) — regex fixed (resources/wm/ … matches WM → both candidates class focus, 55%)
+
+| | G |
+|---|---|
+| C1 (point mass at focus) | ln(1/.55) = **0.598** |
+| C2, u=0.10 | 0.513 — **C2 wins** |
+| C2, u=0.20 | 0.577 — C2 wins |
+| C2, u=0.25 | 0.635 — **C1 wins** |
+| C2, u=0.50 | 1.104 — C1 wins |
+| C2, u=0.75 | 1.834 — C1 wins |
+
+Crossover at **u\* ≈ 0.219**. The direction genuinely depends on u.
+
+### Is u declared anywhere? NO — plainly.
+
+The source file declares no number; the parent mission's C2 names the
+no-result/failure/timeout classes with no shares; the split itself is C2's
+own future work product and does not exist at selection time. **Any specific
+u at selection time is invented.** The only non-invented route is a
+STRUCTURAL derivation Joe would have to bless — e.g. u = (declared
+unmeasured outcome classes) / (all declared outcome classes) of the
+candidate's acceptance (C2 declares {split-present, no-result, failure,
+timeout} → u = 3/4; C1 declares {recheck-present} → u = 0). Note this
+scheme's value (0.75) sits WELL past the crossover, so it would pick C1 —
+but the scheme itself is a modeling choice that flips winners, which is
+exactly the kind of decision rule 2 reserves for Joe.
+
+### Verdict
+
+- As the code is: G picks C2 for any u > 0, differing from the tie-break's
+  C1 — but on the strength of a regex defect, with Joe's ruling inert.
+- With the regex fixed: the winner depends on u, and u is nowhere declared;
+  every concrete u is invented unless Joe rules a structural derivation.
+- **Either way the ⟨1⟩3 counterfactual cannot be computed lawfully today.**
+  The regex fix is necessary (Case 2 is the honest world) but not
+  sufficient: Joe must either rule a structural u-scheme or accept a
+  different reference input.
