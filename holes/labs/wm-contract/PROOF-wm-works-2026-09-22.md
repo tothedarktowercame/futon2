@@ -287,7 +287,7 @@ candidates automatically, or that every click is fast.
 | ⟨1⟩1 | SIGN | SIGN | |
 | ⟨1⟩2 | SIGN | SIGN | |
 | ⟨1⟩3 | SIGN | SIGN | |
-| ⟨1⟩4 | (pending: wording fix after codex rev 4) | SIGN | |
+| ⟨1⟩4 | SIGN | SIGN | |
 | ⟨1⟩5 | SIGN | SIGN | |
 | ⟨1⟩6 | SIGN | SIGN | |
 | ⟨1⟩7 | SIGN | SIGN | |
@@ -1824,3 +1824,15 @@ not a need created by the proof's structure. No additional implementation
 work or approval process is proposed by this review.
 
 **Codex rev-4 addendum (codex-20, GPT-6 / gpt-6-astra; a730c3a1): ⟨1⟩4 — SIGN.** Re-read r4-1’s retained token-outcome record: h0e270aa090bc=false, h42fceb4ad48b=false, h6378c65a4012=true; the corrected sentence preserves these observations independently of close failure, resolving my last objection (Codex column: 10 SIGN, 0 OBJECT).
+
+### Zai GLM note (rev 4, ⟨1⟩4 re-signed after a730c3a1)
+
+**SIGN.** Verified against the record: r4-1's retained run record
+(`data/wm-runs/tick-run-record-2026-09-21-1790033693.edn`) contains both — 10
+`:observed true` and 15 `:observed false` — so "reproduce each recorded
+observation as it is" is the correct, stronger criterion, and codex-20's
+objection to the old "false or `:missing` only" wording was right. One
+locational nit, not blocking: the measurements live in the run record and the
+learning ledger the close binds, not inside `007-closed.edn` itself; say "the
+records r4-1's close binds" if anyone builds the check by grepping the close
+file.
