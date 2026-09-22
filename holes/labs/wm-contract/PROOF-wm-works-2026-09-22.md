@@ -202,10 +202,17 @@ candidates automatically, or that every click is fast.
     are read from the ticket's own two routes, and `check-file!` passes.
     - A: dated recheck → `:repair/verified-dated-recheck`.
     - B: preregistered held-out split → `:repair/restored-held-out-split`.
+  - ⟨2⟩2 done 2026-09-22 in futon2 22b1971c. The source was published to
+    `resources/wm/cascade-sources/T-repair-occ-444fb018.edn`. The real `load-declared` and
+    `constructed-candidates` admit both candidates (C1 recheck, C2 held-out split). The task
+    locator resolves at `HEAD`. `cascade-sources-test` passes 8/33. claude-5 reloaded
+    `cascade-sources` and `cascade-proposals` from the canonical checkout.
 - **FAILURES:**
   - 2026-09-22, ⟨2⟩1 (zai-1). `finding_ticket/publish!` writes tickets to disk but never
     commits them, so a locator at `HEAD` cannot resolve the ticket. Fixed for this ticket
-    (claude-5, ae69f5e7). The general fix is part of ⟨2⟩2.
+    (claude-5, ae69f5e7). Proposed fix (zai-1): `publish!` commits the ticket file by explicit path
+    inside its store lock (`finding_ticket.clj:77`). It is queued as ordinary work, outside
+    the proof's path, because this ticket is already committed.
   - 2026-09-22, ⟨2⟩4 (claude-5). No recorded outcome evidence can tell the reference
     candidates apart.
     - `attempts.edn` holds one trial (a different pattern, success 1), and there are none for
