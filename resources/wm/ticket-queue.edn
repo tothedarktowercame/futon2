@@ -1,0 +1,7 @@
+;; Any ordinary ticket can be placed at the front. One ticket is a stratum;
+;; insertion time then ticket id orders strata; the policy law decides within.
+{:schema :wm/ticket-queue-v1
+ :placement :front
+ :order [:inserted-at :ticket]
+ :within-stratum :cascade-selection-posterior
+ :entries []}

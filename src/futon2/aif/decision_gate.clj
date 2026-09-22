@@ -9,8 +9,11 @@
       to the MARGINAL of the recorded cascade posterior over candidates whose
       first acting pattern is that action (recomputed here from the decision's
       own :selection-law :posterior and each candidate's precedence — never
-      trusted from :softmax-weights or :chosen-action-mass), and every candidate
-      carrying a :construction-receipt and :interpretation-receipts (non-empty
+      trusted from :softmax-weights or :chosen-action-mass).
+      An optional declared ticket queue restricts eligibility to its earliest
+      admitted ticket; the same policy law chooses within that stratum. Both
+      the full-family and conditional posterior remain recorded and checked.
+      Every candidate carries a :construction-receipt and :interpretation-receipts (non-empty
       whenever the candidate's precedence is non-empty). Guard tokens in
       every candidate carry locators with the fields required by their
       production observation class (C3-C6).
@@ -33,7 +36,9 @@
    chosen mass is not the posterior marginal, and a missing β. There is no
    fallback and no silent default: refusing is the only alternative to
    admitting."
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [futon2.aif.cascade-selection :as selection]
+            [futon2.aif.ticket-queue :as ticket-queue]))
 
 (def ^:private allowed-refusal-kinds
   "The closed set of per-target refusal kinds (SPEC §Decision 4)."
@@ -147,6 +152,50 @@
                    (map val))
              + 0.0 posterior))
 
+(defn- check-queue!
+  "Independently check the declared order and recompute both choices. The
+   unrestricted posterior remains authoritative for recorded global mass;
+   the same policy law is normalized within the declared eligible stratum."
+  [decision posterior acting]
+  (let [receipt (get-in decision [:selection-certificate :ticket-queue])
+        law-receipt (get-in decision [:selection-law :ticket-queue])]
+    (when (or receipt law-receipt)
+      (when-not (= receipt law-receipt)
+        (refuse! :ticket-queue-certificate-mismatch {}))
+      (let [declaration (ticket-queue/validate! (:declaration receipt))
+            candidates (get-in decision [:selection-certificate :candidates])
+            _ (when-not (= (set (keys posterior)) (set (map :id candidates)))
+                (refuse! :ticket-queue-candidates-mismatch {}))
+            supported (set (map (comp :target :id) (filter ticket-queue/supported? candidates)))
+            ordered (sort-by (juxt #(java.time.Instant/parse (:inserted-at %)) :ticket)
+                             (:entries declaration))
+            front (first (filter #(contains? supported (:ticket %)) ordered))
+            targets (if front [(:ticket front)] [])
+            ids (set (map :id (filter #(and (seq (get-in % [:id :precedence]))
+                                          (= (:ticket front) (get-in % [:id :target]))) candidates)))
+            conditional (when front
+                          (selection/selection-posterior
+                           {:beta (get-in decision [:beta :value])
+                            :candidates (filterv #(contains? ids (:id %)) candidates)}))
+            action-of (into {} (map (fn [id] [id (first-acting-pattern id)])) (keys posterior))
+            unrestricted (selection/bayes-choice acting action-of)
+            choice (if conditional (selection/bayes-choice conditional action-of) unrestricted)]
+        (when-not (and (= :wm/ticket-queue-selection-v1 (:schema receipt))
+                       (seq (:entries declaration))
+                       (= targets (:eligible-targets receipt))
+                       (= (mapv #(select-keys % [:ticket :inserted-at]) (:entries receipt)) (vec ordered))
+                       (= (mapv #(if (contains? supported (:ticket %)) :admitted :not-admitted) ordered)
+                          (mapv :status (:entries receipt)))
+                       (= (if front :front-stratum :no-admitted-front-entry) (:status receipt))
+                       (= (if front :ticket-queue :unrestricted-policy) (:decided-by receipt))
+                       (= conditional (:stratum-posterior receipt))
+                       (= unrestricted (:unrestricted-choice receipt))
+                       (= choice (:choice receipt))
+                       (= (:action choice) (first-acting-pattern (:action decision)))
+                       (or (nil? front) (= (:ticket front) (get-in decision [:action :target]))))
+          (refuse! :ticket-queue-choice-invalid {:eligible-targets targets}))
+        conditional))))
+
 (defn- check-cascade-decision!
   [decision]
   (check-beta! decision)
@@ -171,7 +220,11 @@
     (let [acting (into {} (filter (fn [[c _]] (some? (first-acting-pattern c)))) posterior)
           marginals (reduce (fn [m [c p]] (update m (first-acting-pattern c) (fnil + 0.0) p))
                             {} acting)
-          chosen-pattern (first-acting-pattern (:action decision))]
+          chosen-pattern (first-acting-pattern (:action decision))
+          conditional (check-queue! decision posterior acting)
+          eligible-marginals (if conditional
+                               (reduce-kv (fn [m c p] (update m (first-acting-pattern c) (fnil + 0.0) p)) {} conditional)
+                               marginals)]
       (when (nil? chosen-pattern)
         (refuse! :chosen-action-is-not-an-action
                  {:action (:action decision)
@@ -180,18 +233,24 @@
         (refuse! :no-acting-candidate
                  {:candidates (count posterior)
                   :reason :every-candidate-is-an-empty-cascade}))
-      (let [best (apply max (vals marginals))]
-        ;; the enacted step is the Bayes action: no first acting pattern may
+      (let [best (apply max (vals eligible-marginals))]
+        ;; the enacted step is the Bayes action in the declared stratum: no first acting pattern may
         ;; carry more marginal mass than the chosen one (ties are the selector's
         ;; declared tie-break, so equality is admitted)
-        (when (> (- best (get marginals chosen-pattern 0.0)) mass-tolerance)
+        (when (> (- best (get eligible-marginals chosen-pattern 0.0)) mass-tolerance)
           (refuse! :chosen-not-bayes-action
                    {:chosen chosen-pattern :chosen-marginal (get marginals chosen-pattern)
                     :best-marginal best}))))
     (let [chosen (:action decision)
           chosen-mass (:chosen-action-mass decision)
           marginal (marginal-mass posterior (first-acting-pattern chosen))]
-      (when-not (and (number? chosen-mass) (pos? chosen-mass))
+      (when-not (and (number? chosen-mass)
+                     (if (seq (get-in decision [:selection-certificate :ticket-queue :eligible-targets]))
+                       ;; A finite-support queued policy can underflow in the
+                       ;; full family; the checked conditional mass is positive.
+                       (and (not (neg? chosen-mass))
+                            (pos? (get-in decision [:selection-certificate :ticket-queue :choice :mass])))
+                       (pos? chosen-mass)))
         (refuse! :chosen-mass-not-recorded {:chosen-action-mass chosen-mass}))
       (when (> (abs (- (double chosen-mass) (double marginal))) mass-tolerance)
         (refuse! :chosen-mass-not-marginal

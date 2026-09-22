@@ -1,0 +1,119 @@
+
+Running tests in #{"test"}
+
+Testing futon2.aif.ticket-queue-test
+
+FAIL in (finite-underflow-is-not-inadmission) (ticket_queue_test.clj:91)
+expected: (= "T-a" (get-in d [:action :target]))
+  actual: (not (= "T-a" "M-main"))
+
+FAIL in (finite-underflow-is-not-inadmission) (ticket_queue_test.clj:92)
+expected: (zero? (:chosen-action-mass d))
+  actual: (not (zero? 1.0))
+
+FAIL in (finite-underflow-is-not-inadmission) (ticket_queue_test.clj:93)
+expected: (let [mass (get-in (receipt d) [:choice :mass])] (and (number? mass) (pos? mass)))
+  actual: false
+
+FAIL in (queue-consumer-has-no-origin-specific-input) (ticket_queue_test.clj:143)
+expected: (some? source)
+  actual: (not (some? nil))
+
+FAIL in (queue-consumer-has-no-origin-specific-input) (ticket_queue_test.clj:147)
+expected: (= :invalid-ticket-queue (try (select roster opts (queue (assoc (entry "T-documentation" early) :origin :arbitrary))) nil (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))
+  actual: (not (= :invalid-ticket-queue nil))
+
+FAIL in (policy-law-still-decides-within-the-front-ticket) (ticket_queue_test.clj:82)
+expected: (= :p/fast (get-in d [:action :id]))
+  actual: (not (= :p/fast :p/mission))
+
+FAIL in (policy-law-still-decides-within-the-front-ticket) (ticket_queue_test.clj:83)
+expected: (= 2 (count (:stratum-posterior (receipt d))))
+  actual: (not (= 2 0))
+
+FAIL in (invalid-declaration-refuses-instead-of-defaulting) (ticket_queue_test.clj:137)
+expected: (= :invalid-ticket-queue (try (select roster opts q) nil (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))
+  actual: (not (= :invalid-ticket-queue nil))
+
+FAIL in (invalid-declaration-refuses-instead-of-defaulting) (ticket_queue_test.clj:137)
+expected: (= :invalid-ticket-queue (try (select roster opts q) nil (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))
+  actual: (not (= :invalid-ticket-queue nil))
+
+FAIL in (invalid-declaration-refuses-instead-of-defaulting) (ticket_queue_test.clj:137)
+expected: (= :invalid-ticket-queue (try (select roster opts q) nil (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))
+  actual: (not (= :invalid-ticket-queue nil))
+
+FAIL in (invalid-declaration-refuses-instead-of-defaulting) (ticket_queue_test.clj:137)
+expected: (= :invalid-ticket-queue (try (select roster opts q) nil (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))
+  actual: (not (= :invalid-ticket-queue nil))
+
+FAIL in (invalid-declaration-refuses-instead-of-defaulting) (ticket_queue_test.clj:137)
+expected: (= :invalid-ticket-queue (try (select roster opts q) nil (catch clojure.lang.ExceptionInfo e (:kind (ex-data e)))))
+  actual: (not (= :invalid-ticket-queue nil))
+
+FAIL in (oldest-and-id-order-independent-of-input-order) (ticket_queue_test.clj:70)
+expected: (= "T-a" (get-in (select rows opts (apply queue entries)) [:action :target]))
+  actual: (not (= "T-a" "T-b"))
+
+FAIL in (oldest-and-id-order-independent-of-input-order) (ticket_queue_test.clj:70)
+expected: (= "T-a" (get-in (select rows opts (apply queue entries)) [:action :target]))
+  actual: (not (= "T-a" "T-b"))
+
+FAIL in (oldest-and-id-order-independent-of-input-order) (ticket_queue_test.clj:70)
+expected: (= "T-a" (get-in (select rows opts (apply queue entries)) [:action :target]))
+  actual: (not (= "T-a" "T-b"))
+
+FAIL in (oldest-and-id-order-independent-of-input-order) (ticket_queue_test.clj:70)
+expected: (= "T-a" (get-in (select rows opts (apply queue entries)) [:action :target]))
+  actual: (not (= "T-a" "T-b"))
+
+FAIL in (oldest-and-id-order-independent-of-input-order) (ticket_queue_test.clj:72)
+expected: (= "T-a" (get-in (select rows opts (queue (entry "T-b" early) (entry "T-a" early))) [:action :target]))
+  actual: (not (= "T-a" "T-b"))
+
+FAIL in (oldest-and-id-order-independent-of-input-order) (ticket_queue_test.clj:72)
+expected: (= "T-a" (get-in (select rows opts (queue (entry "T-b" early) (entry "T-a" early))) [:action :target]))
+  actual: (not (= "T-a" "T-b"))
+
+FAIL in (oldest-and-id-order-independent-of-input-order) (ticket_queue_test.clj:74)
+expected: (= "T-a" (get-in (select [b a] opts (queue (entry "T-b" early) (entry "T-a" "2026-09-20T01:00:00+01:00"))) [:action :target]))
+  actual: (not (= "T-a" "T-b"))
+
+FAIL in (front-ticket-wins-with-full-family-evidence) (ticket_queue_test.clj:49)
+expected: (= "T-documentation" (get-in front [:action :target]))
+  actual: (not (= "T-documentation" "M-main"))
+
+FAIL in (front-ticket-wins-with-full-family-evidence) (ticket_queue_test.clj:50)
+expected: (= :ticket-queue (:decided-by r))
+  actual: (not (= :ticket-queue nil))
+
+FAIL in (front-ticket-wins-with-full-family-evidence) (ticket_queue_test.clj:51)
+expected: (= ["T-documentation"] (:eligible-targets r))
+  actual: (not (= ["T-documentation"] nil))
+
+FAIL in (front-ticket-wins-with-full-family-evidence) (ticket_queue_test.clj:52)
+expected: (= (:chosen-action ordinary) (get-in r [:unrestricted-choice :action]))
+  actual: (not (= {:id :p/mission, :target "M-main", :guard {:clauses [{:present #{}, :absent #{}}]}, :produces #{}} nil))
+
+FAIL in (front-ticket-wins-with-full-family-evidence) (ticket_queue_test.clj:57)
+expected: (= :unrestricted (get-in front [:selection-law :action-comparison :selection-domain]))
+  actual: (not (= :unrestricted nil))
+
+FAIL in (front-ticket-wins-with-full-family-evidence) (ticket_queue_test.clj:59)
+expected: (= :ticket-queue-choice-invalid (gate-reason (-> front (assoc-in [:selection-certificate :ticket-queue :eligible-targets] ["M-main"]) (assoc-in [:selection-law :ticket-queue :eligible-targets] ["M-main"]))))
+  actual: (not (= :ticket-queue-choice-invalid nil))
+
+FAIL in (ordinary-refusal-does-not-block-admitted-candidates) (ticket_queue_test.clj:115)
+expected: (= :not-admitted (get-in (receipt d) [:entries 0 :status]))
+  actual: (not (= :not-admitted nil))
+
+FAIL in (ordinary-refusal-does-not-block-admitted-candidates) (ticket_queue_test.clj:116)
+expected: (= :universe-not-admitted (get-in (receipt d) [:entries 0 :refusals 0 :kind]))
+  actual: (not (= :universe-not-admitted nil))
+
+FAIL in (ordinary-refusal-does-not-block-admitted-candidates) (ticket_queue_test.clj:121)
+expected: (= :no-admitted-front-entry (get-in r [:decision :selection-certificate :ticket-queue :status]))
+  actual: (not (= :no-admitted-front-entry nil))
+
+Ran 8 tests containing 43 assertions.
+28 failures, 0 errors.
