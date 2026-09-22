@@ -6,9 +6,21 @@
 # that would have predicted that is now checkable in about a second, and the
 # checks are easy to skip if they live in a checklist instead of a file.
 #
+# FIRING POLICY (PROOF-wm-works ⟨1⟩1 ⟨2⟩1/⟨2⟩2, Joe 2026-09-22): the machine
+# runs when Joe says run. Nothing here refuses a click except Agency being
+# unreachable (exit 1). Preflight checks PRINT their findings and never stop
+# firing. Casting and the single-flight boundary are waited out, not refused:
+# --run polls until the cast seats are free and no click is in flight, then
+# fires. A wait longer than 30 minutes, or a casting misconfiguration that
+# cannot be waited out, is a terminal account and exit 3 -- reported, never a
+# silent refusal and never a success. The tripwires keep acting DURING a run
+# exactly as before; this script only no longer vetoes firing in advance.
+#
 #   scripts/wm_click.sh                 # PREFLIGHT ONLY. Default. Fires nothing.
-#   scripts/wm_click.sh --run           # preflight, then fire if preflight passes
-#   scripts/wm_click.sh --run --force   # fire even if a wire would halt (say why)
+#                                       Prints findings, exits 0 when Agency is up.
+#   scripts/wm_click.sh --run           # print findings, wait for seats/single-flight, then fire
+#   scripts/wm_click.sh --run --force   # --force is a NO-OP, accepted so existing
+#                                       # callers do not break (firing no longer needs it)
 #   scripts/wm_click.sh --probe-seats   # also spend one turn per seat on a quota probe
 #
 # Identify the issuer with --issuing-caller NAME or WM_ISSUING_CALLER.
@@ -24,30 +36,39 @@ BASE="http://localhost:7070"
 # default casting failed preflight on every invocation (claude-4, 2026-09-19).
 AUTHOR="codex-23"; REVIEWER="codex-2"; REPAIR="codex-24"
 ISSUING_CALLER="${WM_ISSUING_CALLER:-caller-unknown}"
-RUN=0; FORCE=0; PROBE=0
+RUN=0; PROBE=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --run) RUN=1;; --force) FORCE=1;; --probe-seats) PROBE=1;;
+    --run) RUN=1;;
+    --force) :;; # no-op since firing never refuses; kept for old callers
+    --probe-seats) PROBE=1;;
     --issuing-caller) ISSUING_CALLER="$2"; shift;;
     --author) AUTHOR="$2"; shift;; --reviewer) REVIEWER="$2"; shift;;
     --repair-reviewer) REPAIR="$2"; shift;;
-    -h|--help) sed -n '2,20p' "$0"; exit 0;;
+    -h|--help) sed -n '2,28p' "$0"; exit 0;;
     *) echo "wm_click: unknown argument $1" >&2; exit 2;;
   esac; shift
 done
 
-ok=1
 say() { printf '  %-22s %s\n' "$1" "$2"; }
-bad() { ok=0; printf '  %-22s %s\n' "$1" "$2"; }
+# A preflight finding: printed, never blocks firing (see FIRING POLICY above).
+finding() { printf '  %-22s FINDING: %s\n' "$1" "$2"; }
+# A terminal account: this launch cannot proceed and waiting cannot fix it.
+# Reported as "cannot launch" (exit 3) -- not a refusal of a healthy click,
+# not a success.
+cannot() { printf '  %-22s CANNOT LAUNCH: %s\n' "$1" "$2"; }
 
 echo "wm_click preflight"
 
-# 1. Agency reachable.
+# 1. Agency reachable. The one condition that stops everything.
 code=$(curl -s -o /dev/null -m 10 -w '%{http_code}' "$BASE/api/alpha/agents")
-[ "$code" = "200" ] && say "agency" "up" || { bad "agency" "HTTP $code -- nothing else can be checked"; echo; exit 1; }
+[ "$code" = "200" ] && say "agency" "up" || { cannot "agency" "HTTP $code -- Agency unreachable, nothing else can be checked"; echo; exit 1; }
 
 # 2. Casting: three distinct seats, all on the roster AND idle.
+# Misconfiguration (non-distinct seats) cannot be waited out: terminal now.
+# Busy seats CAN be waited out: when firing, we poll (see the wait loop below).
+#
 # ON THE ROSTER IS NOT ENOUGH. full_loop_runner/available? (:827) requires
 # :invoke-ready? true AND status "idle"; the author is checked at :3786 and
 # throws :agent-unavailable before selection is ever reached. On 2026-09-19
@@ -66,12 +87,30 @@ code=$(curl -s -o /dev/null -m 10 -w '%{http_code}' "$BASE/api/alpha/agents")
 # stricter rule than the runner's own. Checked before loosening it: codex-15 was
 # belled while reading "restored" and went accepted -> running -> prompt -> text
 # in nine seconds. The state that actually costs a click is "invoking", which
-# this still rejects.
+# this still treats as busy.
+misconfigured=0
 if [ "$AUTHOR" = "$REVIEWER" ] || [ "$AUTHOR" = "$REPAIR" ] || [ "$REVIEWER" = "$REPAIR" ]; then
-  bad "casting" "author/reviewer/repair-reviewer must be three DISTINCT seats"
-else
+  cannot "casting" "author/reviewer/repair-reviewer must be three DISTINCT seats (got $AUTHOR / $REVIEWER / $REPAIR)"
+  misconfigured=1
+fi
+
+# 2b. The issuing caller must not be one of the three cast seats.
+# Issuing through a seat marks it "invoking"; if that seat is also the author,
+# the runner's own readiness check fails it. This is how two clicks were lost.
+# A misconfiguration cannot be waited out: terminal now.
+case "$ISSUING_CALLER" in
+  "$AUTHOR"|"$REVIEWER"|"$REPAIR")
+    cannot "issuing caller" "$ISSUING_CALLER is also a cast seat -- issuing marks it busy and the author check will fail"
+    misconfigured=1;;
+  *) say "issuing caller" "$ISSUING_CALLER (not a cast seat)";;
+esac
+[ "$misconfigured" = "0" ] || { echo; echo "cannot launch (exit 3)"; exit 3; }
+
+# cast_report: print the casting/single-flight state once; return 0 when all
+# three seats are idle-or-restored + invoke-ready AND no click is in flight.
+cast_report() {
+  local roster notready="" a st inf
   roster=$(curl -s -m 10 "$BASE/api/alpha/agents")
-  notready=""
   for a in "$AUTHOR" "$REVIEWER" "$REPAIR"; do
     st=$(printf '%s' "$roster" | AGENT="$a" python3 -c '
 import sys, json, os
@@ -88,30 +127,27 @@ else:
 ' 2>/dev/null)
     [ "$st" = "idle" ] || notready="$notready $a($st)"
   done
+  # 3. No click already in flight (the boundary is single-flight). An
+  # unreadable endpoint counts as busy: we do not fire into an unknown state.
+  inf=$(curl -s -m 15 "$BASE/api/alpha/wm/click" | python3 -c 'import sys,json;d=json.load(sys.stdin);print(d.get("running?"))' 2>/dev/null)
   if [ -z "$notready" ]; then
     say "casting" "$AUTHOR / $REVIEWER / $REPAIR idle and invoke-ready"
   else
-    bad "casting" "not idle+invoke-ready:$notready -- the AUTHOR being busy spends the click without selecting"
+    say "casting" "busy (waiting):$notready -- a busy AUTHOR would spend the click without selecting"
   fi
-fi
-
-# 2b. The issuing caller must not be one of the three cast seats.
-# Issuing through a seat marks it "invoking"; if that seat is also the author,
-# the runner's own readiness check fails it. This is how two clicks were lost.
-case "$ISSUING_CALLER" in
-  "$AUTHOR"|"$REVIEWER"|"$REPAIR")
-    bad "issuing caller" "$ISSUING_CALLER is also a cast seat -- issuing marks it busy and the author check will fail";;
-  *) say "issuing caller" "$ISSUING_CALLER (not a cast seat)";;
-esac
-
-# 3. No click already in flight (the boundary is single-flight).
-inflight=$(curl -s -m 15 "$BASE/api/alpha/wm/click" | python3 -c 'import sys,json;d=json.load(sys.stdin);print(d.get("running?"))' 2>/dev/null)
-[ "$inflight" = "False" ] && say "in flight" "none" || bad "in flight" "a click is already running -- wait for it"
+  if [ "$inf" = "False" ]; then
+    say "in flight" "none"
+  else
+    say "in flight" "click running ($inf) -- single-flight boundary, waiting"
+  fi
+  [ -z "$notready" ] && [ "$inf" = "False" ]
+}
 
 # 4. THE ONE THAT MATTERS: would any tripwire halt this click?
-#    A witness stops the run (futon2 a8ac1615). Evaluating all 13 against a
-#    real observation costs ~13s here; discovering it inside a click costs the
-#    click. This also covers
+#    (Reported as a finding since the firing-policy change: the tripwires act
+#    during the run; preflight no longer vetoes.) A witness stops the run
+#    (futon2 a8ac1615). Evaluating all 13 against a real observation costs
+#    ~13s here; discovering it inside a click costs the click. This also covers
 #    committed-but-not-loaded, which T10 proves rather than suspects (b6da1420).
 # The wires must be evaluated against the observation the runner actually
 # builds, not an empty one. Evaluating {:tripwire/force? true} alone gives
@@ -123,7 +159,7 @@ inflight=$(curl -s -m 15 "$BASE/api/alpha/wm/click" | python3 -c 'import sys,jso
 # NOTE (kept from the withdrawn --disable-wire route, reverted 2026-09-19 by
 # zai-30 under zai-14's handoff; claude-4 stood the route down and is fixing
 # T8 instead): if a preflight skip set is ever re-introduced here, it CANNOT
-# travel by environment -- proof-eval evaluates this form inside the server
+# travel by environment--proof-eval evaluates this form inside the server
 # JVM, whose env is not this shell's, so a var like WM_CLICK_SKIP_WIRES on the
 # proof-eval command line never reaches the code (measured, ab5ca8fa). Inline
 # any such literal into the generated form.
@@ -173,13 +209,15 @@ case "$wires" in
   *":tripping []"*)
     say "tripwires" "13/13 clear";;
   *":tripping ["*)
-    bad "tripwires" "WOULD HALT: $(echo "$wires" | sed 's/.*:tripping //; s/}}$//')";;
+    # Finding, not a veto: the wire halts the RUN if it trips live, and the
+    # run records that honestly. Preflight reports it so the operator knows.
+    finding "tripwires" "WOULD HALT if tripped live: $(echo "$wires" | sed 's/.*:tripping //; s/}}$//')";;
   *)
     # Third outcome, kept distinct on purpose. "The check could not run" is not
     # "a wire would halt", and reporting the two the same way is the defect
     # this script exists to keep out of clicks (guardrails.clj:118 does exactly
     # that with (catch Throwable _ false)).
-    bad "tripwires" "CHECK DID NOT RUN -- wire status unknown: $wires";;
+    finding "tripwires" "CHECK DID NOT RUN -- wire status unknown: $wires";;
 esac
 # Repair-covered witnesses do not halt the click (observe! defers them so the
 # repair can be selected). Report them so the operator knows the click will
@@ -201,11 +239,13 @@ esac
 # click enacted :repair-machine-failure, record INVALID 0/5.
 # An earlier version of this check blamed the deferred tripwire witness. That
 # was the wrong cause: the witness defers BECAUSE the backlog exists, and both
-# are downstream of the queue. Count the queue.
+# are downstream of the queue. Count the queue. Reported as evidence either
+# way; selection proceeds regardless (RULING-selection-precedence-2026-09-19,
+# futon2 8b6827da).
 queued=$(echo "$wires" | sed -n 's/.*:stop-lines-queued \([0-9]*\).*/\1/p')
 case "$queued" in
   0) say "stop-line queue" "empty";;
-  "") bad "stop-line queue" "COULD NOT BE READ -- do not assume it is empty";;
+  "") finding "stop-line queue" "COULD NOT BE READ -- do not assume it is empty";;
   *)  say "stop-line queue" "$queued open obligation(s) -- recorded as evidence in the run record; selection proceeds regardless (RULING-selection-precedence-2026-09-19, futon2 8b6827da)";;
 esac
 
@@ -219,19 +259,37 @@ Reply with exactly one line: your model id, and whether you currently have
 usage quota available to run a coding turn. Nothing else.
 EOF
 )
-    case "$r" in *available*) say "quota $a" "ok";; *) bad "quota $a" "$r";; esac
+    case "$r" in *available*) say "quota $a" "ok";; *) finding "quota $a" "$r";; esac
   done
 fi
 
 echo
-if [ "$ok" = "1" ]; then echo "preflight PASS"; else echo "preflight FAIL"; fi
 if [ "$RUN" != "1" ]; then
-  echo "(preflight only; pass --run to fire)"; exit $(( 1 - ok ))
+  # Print the casting/single-flight state once, informationally. Findings only;
+  # preflight never refuses, so busy seats here are a report, not a block.
+  cast_report || true
+  echo
+  echo "preflight complete (findings above are informational; preflight never refuses; exit 0)"
+  exit 0
 fi
-if [ "$ok" != "1" ] && [ "$FORCE" != "1" ]; then
-  echo "refusing to fire. Fix the above, or pass --force and say in your report why."
-  exit 1
-fi
+
+# Casting wait (⟨1⟩1 ⟨2⟩2): never launch into an occupied seat and never start
+# a second active click. Instead of refusing, WAIT: poll every 20 s, printing
+# each poll, until cast_report clears. After 30 minutes, print a terminal
+# account and exit 3 (cannot launch -- reported, not a refusal, not a success).
+waited_since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+t0=$(date +%s)
+echo "waiting for cast seats and single-flight boundary (since $waited_since; max 30 min)"
+while :; do
+  if cast_report; then break; fi
+  if [ $(( $(date +%s) - t0 )) -gt 1800 ]; then
+    echo
+    cannot "casting wait" "30 minutes elapsed since $waited_since; seat/click state above is the terminal account"
+    echo "cannot launch (exit 3)"
+    exit 3
+  fi
+  sleep 20
+done
 
 # ---------------------------------------------------------------- fire
 RUNID="$(date -u +%Y-%m-%d)-$(uuidgen 2>/dev/null || date +%s)"
