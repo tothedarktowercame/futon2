@@ -397,3 +397,13 @@ But cascade-proposals/record-supply withholds every repair target, with decline
 So the targets never become candidates, and nothing ranks them first. The fix
 belongs in that path, not in runner repair-entry. Discovery: codex-11,
 runs/repair-front-2026-09-22/.
+Further correction (Joe, 2026-09-22): "repairs should go to the front of the
+queue tagged as T- items so by the time they are available they shouldn't be
+tagged specifically as 'repairs' just 'tickets' so there is something wrong
+with the bookkeeping which is treating repairs as special items." So a repair
+finding becomes an ordinary ticket (holes/tickets/T-*.md, the existing ticket
+registry), placed at the front. After that no layer should know it came from a
+repair. The repair-front discovery (9505ac11) proposed repair-specific
+admission, transport, precedence and reviewer routing. That is the wrong layer,
+and its slice 1 was withdrawn before it changed anything. Discovery:
+codex-13, runs/repairs-as-tickets-2026-09-22/.
