@@ -1,6 +1,7 @@
 (ns futon2.aif.finding-ticket-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as sh]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.finding-ticket :as publisher]
@@ -154,3 +155,51 @@
   (let [{:keys [queue-path ticket-dir]} (publisher/destinations publisher/canonical-store)]
     (is (= "/home/joe/code/futon2/data/wm-ticket-queue/queue.edn" queue-path))
     (is (= "/home/joe/code/futon2/holes/tickets" ticket-dir))))
+
+(defn- git! [repo & args]
+  (let [result (apply sh/sh "git" "-C" (str repo) args)]
+    (when-not (zero? (:exit result))
+      (throw (ex-info "Git fixture command failed" result)))
+    (str/trim (:out result))))
+
+(deftest publication-commits-only-ticket-and-recovers-from-index-lock
+  (doseq [locked? [false true]]
+    (with-roots
+      (fn [root store opts]
+        (let [repo (io/file root "project")
+              record (fixture "machine")
+              id (:repair/id record)
+              relative (str "holes/tickets/T-" id ".md")
+              index-lock (io/file repo ".git/index.lock")]
+          (.mkdirs repo)
+          (git! repo "init" "-q")
+          (git! repo "config" "user.name" "Ticket test")
+          (git! repo "config" "user.email" "ticket@example.invalid")
+          (git! repo "commit" "--allow-empty" "-qm" "Fixture base")
+          (spit (io/file repo "unrelated.txt") "Already staged\n")
+          (git! repo "add" "--" "unrelated.txt")
+          (when locked? (spit index-lock "held by test"))
+          (repair/record-system-failure! store (input record) opts)
+          (let [receipt-file (io/file store "ticket-links" (str id ".edn"))
+                receipt (edn/read-string (slurp receipt-file))]
+            (if locked?
+              (do
+                (is (= :failed (get-in receipt [:publication/git :status])))
+                (is (= :ticket-git-publication-failed (get-in receipt [:publication/git :kind])))
+                (is (= 3 (get-in receipt [:publication/git :attempts])))
+                (is (.isFile (ticket-path opts record)))
+                (is (= 1 (count (:entries (queue/read-declaration (:queue-path opts))))))
+                (is (= "held by test" (slurp index-lock)))
+                (.delete index-lock)
+                (is (= :committed (:status (:publication/git (publisher/publish! store id opts))))))
+              (is (= :committed (get-in receipt [:publication/git :status]))))
+            (is (= (slurp (ticket-path opts record))
+                   (:out (sh/sh "git" "-C" (str repo) "show" (str "HEAD:" relative)))))
+            (is (= relative (git! repo "diff-tree" "--no-commit-id" "--name-only" "-r" "HEAD")))
+            (is (= "unrelated.txt" (git! repo "diff" "--cached" "--name-only")))
+            (is (= (str "Publish repair ticket T-" id " (finding " id ")")
+                   (git! repo "log" "-1" "--format=%s")))
+            (let [head (git! repo "rev-parse" "HEAD") bytes (slurp receipt-file)]
+              (publisher/publish! store id opts)
+              (is (= head (git! repo "rev-parse" "HEAD")))
+              (is (= bytes (slurp receipt-file))))))))))

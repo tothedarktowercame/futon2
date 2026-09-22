@@ -2,6 +2,7 @@
   "Creation/provenance boundary only. Published tickets have ordinary fields."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as sh]
             [clojure.string :as str]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.interoceptive-store-lock :as store-lock]
@@ -51,10 +52,49 @@
          "Finding: [" (:repair/id finding) "](" source ")\n\n"
          "Finding SHA-256: `" sha "`\n")))
 
+(defn- git [repo & args]
+  (try (apply sh/sh "git" "-C" (str repo) args)
+       (catch java.io.IOException e {:exit -1 :err (.getMessage e)})))
+
+(defn- commit-ticket-once! [path ticket id]
+  (let [discovery (git (.getParentFile path) "rev-parse" "--show-toplevel")]
+    (if-not (zero? (:exit discovery))
+      (assoc discovery :stage :repository)
+      (let [repo (str/trim (:out discovery))
+            relative (str (.relativize (.toPath (io/file repo)) (.toPath path)))
+            present (git repo "cat-file" "-e" (str "HEAD:" relative))
+            unchanged? (and (zero? (:exit present))
+                            (zero? (:exit (git repo "diff" "--quiet" "HEAD" "--" relative))))
+            add (when-not unchanged? (git repo "add" "--" relative))
+            commit (cond unchanged? {:exit 0 :unchanged? true}
+                         (not (zero? (:exit add))) (assoc add :stage :add)
+                         :else (assoc (git repo "commit" "-m"
+                                          (str "Publish repair ticket " ticket " (finding " id ")")
+                                          "--" relative) :stage :commit))]
+        (if-not (zero? (:exit commit)) commit
+          (let [head (git repo "rev-parse" "HEAD")]
+            (if-not (zero? (:exit head)) (assoc head :stage :head)
+              {:exit 0 :status :committed :commit (str/trim (:out head))
+               :repo repo :path relative :unchanged? (boolean (:unchanged? commit))})))))))
+
+(defn- commit-ticket! [path ticket id previous]
+  (loop [attempt 1]
+    (let [result (commit-ticket-once! path ticket id)]
+      (cond
+        (zero? (:exit result))
+        (if (and (:unchanged? result) (= :committed (:status previous)))
+          previous
+          (assoc (dissoc result :exit :unchanged?) :attempts attempt))
+        (< attempt 3) (do (Thread/sleep 50) (recur (inc attempt)))
+        :else {:status :failed :kind :ticket-git-publication-failed
+               :attempts attempt :stage (:stage result)
+               :exit (:exit result) :error (:err result)}))))
+
 (defn publish!
   "Read the durable finding, publish without replacing ticket edits, enqueue,
-   then retain :finding/ticket in an immutable store-side publication receipt.
-   Retrying after either publication completes the missing half."
+   commit only the ticket under the store lock. Immutable finding provenance is
+   retained alongside the latest Git publication result; a retry can repair a
+   failed commit without losing the ticket or queue entry."
   ([root id] (publish! root id (destinations root)))
   ([root id {:keys [ticket-dir queue-path]}]
    (when-not (and (string? id) (re-matches #"[A-Za-z0-9][A-Za-z0-9._-]*" id))
@@ -74,16 +114,20 @@
                                    :finding-sha256 (identity/sha256 bytes)
                                    :queue-path (.getAbsolutePath (io/file queue-path))}}
          receipt-file (io/file root "ticket-links" (str id ".edn"))]
-     (publication/publish-text! path (ticket-text finding (.getPath source) (identity/sha256 bytes)) false)
-     (queue/enqueue! queue-path entry)
      (store-lock/with-store-lock-for root
        (fn []
+         (publication/publish-text! path (ticket-text finding (.getPath source) (identity/sha256 bytes)) false)
+         (queue/enqueue! queue-path entry)
          (publication/publish-text! receipt-file (pr-str receipt) false)
          ;; Retain the first publication's byte pin. The store accepts legacy
          ;; equivalent serializations on replay; that does not rewrite the
          ;; original ticket or its historical provenance receipt.
          (let [retained (edn/read-string (slurp receipt-file))]
            (when-not (= (update receipt :finding/ticket dissoc :finding-sha256)
-                        (update retained :finding/ticket dissoc :finding-sha256))
+                        (update (dissoc retained :publication/git) :finding/ticket dissoc :finding-sha256))
              (throw (ex-info "Ticket provenance conflicts" {:kind :finding-ticket-link-conflict})))
-           retained))))))
+           (let [result (assoc retained :publication/git
+                               (commit-ticket! path ticket id (:publication/git retained)))]
+             (when-not (= retained result)
+               (publication/publish-text! receipt-file (pr-str result) true))
+             result)))))))
