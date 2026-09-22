@@ -73,6 +73,7 @@
             [futon2.aif.observation :as obs]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.policy :as policy]
+            [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.policy-prefix-evidence :as policy-prefix]
             [futon2.aif.policy-free-energy :as policy-free-energy]
@@ -6275,6 +6276,8 @@
                                       (select-keys token-belief-input [:conditioning-status :reason :observation-updates]))
                                     {:beta (:beta beta-state) :beta-state beta-state
                                      :cascade-habit-path (:cascade-habit-path opts)
+                                     :ticket-queue (:ticket-queue opts)
+                                     :ticket-queue-refusals (:ticket-queue-refusals opts)
                                      :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))
                                 :horizon-steps T
                                 :initial-belief-receipt initial-belief-receipt)
@@ -6412,7 +6415,18 @@
                         :problems (vec (keep :problem admissions))
                         :refusals (into (vec (:refusals assembled)) (keep :refusal admissions))
                         :dropped-candidates dropped)
-        result (cascade-decision-admitted admitted opts)
+        queue (ticket-queue/validate! (if (contains? opts :ticket-queue)
+                                       (:ticket-queue opts) (ticket-queue/read-declaration)))
+        result (cascade-decision-admitted admitted
+                 (assoc opts :ticket-queue queue
+                        :ticket-queue-refusals (vec (concat (:refusals admitted) dropped))))
+        ;; An all-refused family still retains the queue's inadmissible entries.
+        result (if (and (empty? (:problems admitted)) (seq (:entries queue)))
+                 (assoc-in result [:decision :selection-certificate :ticket-queue]
+                           (assoc (ticket-queue/plan queue [] (:refusals admitted))
+                                  :unrestricted-choice nil :choice nil :stratum-posterior nil
+                                  :decided-by :abstention))
+                 result)
         previous-beta (get-in opts [:token-belief-predecessor-trace :decision
                                     :selection-certificate :policy-precision-state])
         result (if (and (empty? (:problems admitted)) previous-beta)
@@ -6813,6 +6827,9 @@
             (cascade-proposals/load-supply
              {:proposal-dir (:cascade-proposals-dir judge-opts)
               :repair-root (:repair-obligations-root judge-opts)}))
+        ticket-queue-declaration
+        (ticket-queue/validate! (if (contains? judge-opts :ticket-queue)
+                                  (:ticket-queue judge-opts) (ticket-queue/read-declaration)))
         raw-cascade-assembled
         (assemble-cascade-problems
          ;; The targets are the substrate's missions AND every target that has
@@ -6823,7 +6840,8 @@
          ;; list it.
          {:targets (vec (distinct (concat (cascade-problems/substrate-targets)
                                           (keys (:universes cascade-sources))
-                                          (map :target (:proposals cascade-proposal-supply)))))
+                                          (map :target (:proposals cascade-proposal-supply))
+                                          (map :ticket (:entries ticket-queue-declaration)))))
           :sources (assoc cascade-sources :horizon-steps (:value cascade-horizon))})
         cascade-assembled
         (cascade-proposals/record-supply
@@ -6832,6 +6850,7 @@
         cascade-result (select-and-record-cascade!
                         cascade-assembled
                         (assoc judge-opts
+                               :ticket-queue ticket-queue-declaration
                                :token-belief-predecessor-trace prev-trace-record
                                :prospective-token-carry
                                (get-in prev-trace-record

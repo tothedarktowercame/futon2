@@ -1,0 +1,8 @@
+{:repo-root "/home/joe/code/futon2-ticket-queue-front"
+ :code-paths ["src/futon2/aif/ticket_queue.clj" "src/futon2/aif/policy.clj" "src/futon2/aif/decision_gate.clj" "src/futon2/aif/load_identity.clj" "scripts/futon2/report/war_machine.clj" "resources/wm/ticket-queue.edn"]
+ :test-paths ["test/futon2/aif/ticket_queue_test.clj" "test/fixtures/ticket-queue/before.edn"]
+ :command ["clojure" "-M:test" "-n" "futon2.aif.ticket-queue-test"]
+ :author "codex-11" :origin "Generic ticket queue front slice 1"
+ :artifact-dir "/tmp/ticket-queue-registry-artifacts" :agency-url "http://localhost:7070"
+ :entry-id "test-registry-ab1e1ec26d7cd6774cda4c0e45f0d09e962ede6b97f38875ef3bbbcfebf30297"
+ :changed-paths ["src/futon2/aif/ticket_queue.clj" "src/futon2/aif/policy.clj" "src/futon2/aif/decision_gate.clj" "src/futon2/aif/load_identity.clj" "scripts/futon2/report/war_machine.clj" "resources/wm/ticket-queue.edn" "test/futon2/aif/ticket_queue_test.clj" "test/fixtures/ticket-queue/before.edn"]}

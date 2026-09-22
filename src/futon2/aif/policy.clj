@@ -20,7 +20,8 @@
             [futon2.aif.g-term-decomposition :as decomposition]
             [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.hierarchical-budget :as hierarchical-budget]
-            [futon2.aif.cascade-selection :as cascade-selection]))
+            [futon2.aif.cascade-selection :as cascade-selection]
+            [futon2.aif.ticket-queue :as ticket-queue]))
 
 (load-identity/register! *ns* *file*)
 
@@ -293,14 +294,20 @@
                             :tie-break-rule <rule>
                             :tie-broken? bool}
 
-   :softmax-weights carries the SUMMED marginal that actually decided; it is
+   With :ticket-queue, the declared earliest admitted ticket is the eligible
+   stratum. The same law selects within it; the unrestricted comparisons and
+   full posterior stay unchanged. Its conditional choice is recorded separately
+   under :ticket-queue in the certificate and selection law.
+
+   :softmax-weights carries the unrestricted SUMMED marginal; it is
    recorded beside :per-policy-argmax so a reader can reconstruct a selection
    — including a disagreement between the two — from the record alone.
      :softmax-weights      {first-acting-action → probability}
 
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
-  [ranked-actions {:keys [beta beta-state cascade-habit-path near-tie-threshold novelty-inputs]}]
+  [ranked-actions {:keys [beta beta-state cascade-habit-path near-tie-threshold novelty-inputs
+                                 ticket-queue ticket-queue-refusals] :as opts}]
   ;; Runtime resolution breaks the existing prior -> policy shadow dependency.
   ;; This is the mandatory live seam, not an optional caller-side attachment.
   (let [attach (requiring-resolve 'futon2.aif.cascade-habit-store/attach-habits)
@@ -347,10 +354,23 @@
         ;; so build the per-candidate first-acting-action map, not a function.
         action-of (zipmap (map :action ranked-actions)
                           (map (comp cascade-first-action :action) ranked-actions))
-        choice (cascade-selection/bayes-choice
-                acting action-of)
+        unrestricted-choice (cascade-selection/bayes-choice acting action-of)
+        queue-plan (when (contains? opts :ticket-queue)
+                     (ticket-queue/plan ticket-queue candidates ticket-queue-refusals))
+        eligible-targets (set (:eligible-targets queue-plan))
+        ;; Reuse the same law in the eligible stratum. Recomputing its
+        ;; normalization avoids treating numerical underflow as inadmission.
+        stratum-candidates (when (seq eligible-targets)
+                             (filterv #(and (seq (get-in % [:id :precedence]))
+                                            (contains? eligible-targets (get-in % [:id :target]))) candidates))
+        stratum-posterior (when (seq stratum-candidates)
+                            (cascade-selection/selection-posterior {:beta beta :candidates stratum-candidates}))
+        choosing-posterior (or stratum-posterior acting)
+        choice (if stratum-posterior
+                 (cascade-selection/bayes-choice stratum-posterior action-of)
+                 unrestricted-choice)
         chosen-entry (some (fn [e]
-                             (when (and (pos? (get posterior (:action e) 0.0))
+                             (when (and (pos? (get choosing-posterior (:action e) 0.0))
                                         (= (cascade-first-action (:action e))
                                            (:action choice)))
                                e))
@@ -372,8 +392,18 @@
           {:action a :probability p :first-action (cascade-first-action a)})
         comparisons (cascade-selection/selection-comparisons
                      {:beta beta :candidates candidates :posterior posterior
-                      :action-of action-of :choice choice
-                      :near-tie-threshold near-tie-threshold})]
+                      :action-of action-of :choice unrestricted-choice
+                      :near-tie-threshold near-tie-threshold})
+        queue-receipt (when queue-plan
+                        (assoc queue-plan
+                               :unrestricted-choice unrestricted-choice
+                               :choice choice
+                               :stratum-posterior stratum-posterior
+                               :decided-by (if stratum-posterior :ticket-queue :unrestricted-policy)))
+        comparisons (cond-> comparisons
+                      queue-receipt (assoc :ticket-queue queue-receipt)
+                      queue-receipt (assoc-in [:action-comparison :selection-domain] :unrestricted)
+                      queue-receipt (assoc-in [:policy-comparison :selection-domain] :unrestricted))]
     {:action (:action chosen-entry)
      :rank (or (:rank chosen-entry) 1)
      :controller-score (:controller-score chosen-entry)
@@ -385,7 +415,8 @@
      :beta {:value beta :status beta-status}
      :selection-certificate (cond-> (assoc-in (selection-certificate beta candidates ranked-actions novelty-inputs)
                                                 [:beta :status] beta-status)
-                              beta-state (assoc :policy-precision-state beta-state))
+                              beta-state (assoc :policy-precision-state beta-state)
+                              queue-receipt (assoc :ticket-queue queue-receipt))
      :selection-law
      (merge comparisons {:requested :cascade-selection-posterior
       :applied :cascade-selection-posterior
@@ -407,7 +438,9 @@
       (boolean (some (fn [[a p]]
                        (and (not= a (:action choice))
                             (= p (:mass choice))))
-                     weights))})
+                     (if stratum-posterior
+                       (reduce-kv (fn [m a p] (update m (get action-of a) (fnil + 0.0) p)) {} stratum-posterior)
+                       weights)))})
      :softmax-weights weights
      :chosen-action (:action choice)
-     :chosen-action-mass (:mass choice)}))
+     :chosen-action-mass (get weights (:action choice))}))
