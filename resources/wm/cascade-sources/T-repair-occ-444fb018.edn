@@ -38,7 +38,8 @@
    :decl "**Status:** DONE"}}
  :patterns
  {:apparatus/done-is-observed-running
-  {:guard {:needs #{:admission/task-stated} :forbids #{:repair/obstruction-observed-cleared}}
+  {:guard {:needs #{:admission/task-stated :repair/calibration-evidence-present}
+           :forbids #{:repair/obstruction-observed-cleared}}
    :produces #{:repair/obstruction-observed-cleared}}
   :apparatus/evidence-to-disposition-once
   {:guard {:needs #{:repair/obstruction-observed-cleared} :forbids #{:restoration-accepted}}
@@ -59,7 +60,7 @@
  {:apparatus/done-is-observed-running
   {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
    :source {:path "futon3/library/apparatus/done-is-observed-running.flexiarg"}
-   :reading "The ticket's verify branch RUNS the precondition probe and records what it OBSERVES. The token is the observation disposition, not a file: :repair/obstruction-observed-cleared means the dated recheck observed the obstruction cleared. DECLARED EFFECT: produces exactly :repair/obstruction-observed-cleared."
+   :reading "The ticket's verify branch RUNS the precondition probe and records what it OBSERVES. The token is the observation disposition, not a file: :repair/obstruction-observed-cleared means the dated recheck observed the obstruction cleared. The condition the ticket's precondition names is the held-out EVIDENCE: the refused click-3 candidate needed a preregistered held-out split AND post-split outcomes. The recheck therefore observes CLEARED exactly when that evidence exists -- the guard requires :repair/calibration-evidence-present (the terminal form of the held-out evidence this source already defines: observations collected, then calibrated). With today's evidence absent (all three evidence C3 locators false), the recheck observes the obstruction PRESENT and this cascade produces nothing further -- no false completion; if the evidence were already present, C1 correctly reaches acceptance on its short path. DECLARED EFFECT: produces exactly :repair/obstruction-observed-cleared, only when the held-out calibration evidence is present."
    :scope-limit "Models the cleared branch, which the ticket's 'if it has cleared' route accepts directly. The still-present branch is NOT claimed as completion: if the recheck observes the obstruction present, this cascade stops after the observation and the ticket stays open for the restore route -- the kernel's guard chain simply does not reach acceptance, and no completion token is produced. A single declared-source pattern cannot carry both observation outcomes (the kernel transition is deterministic, cascade_model_manifest.clj:282); the present-branch is therefore represented by NOT reaching the terminal, which is exactly the ticket's semantics."
    :target-source {:repo "futon2"
                    :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
