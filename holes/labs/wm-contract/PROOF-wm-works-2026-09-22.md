@@ -286,8 +286,8 @@ candidates automatically, or that every click is fast.
 | ⟨1⟩1 | SIGN | (pending: rev 4 renumbered) | |
 | ⟨1⟩2 | SIGN | (pending: rev 4) | |
 | ⟨1⟩3 | SIGN | (pending: rev 4) | |
-| ⟨1⟩4 | (pending: changed bff7ead0) | (pending: rev 4) | |
-| ⟨1⟩5 | (pending: changed after Zai rev 4) | (pending: rev 4) | |
+| ⟨1⟩4 | SIGN | (pending: rev 4) | |
+| ⟨1⟩5 | SIGN | (pending: rev 4) | |
 | ⟨1⟩6 | SIGN | SIGN | |
 | ⟨1⟩7 | SIGN | SIGN | |
 | ⟨1⟩8 | SIGN | SIGN | |
@@ -1650,3 +1650,23 @@ not as proof steps, and not blocking ⟨1⟩4's CHECK. Noted, not objected.
 My rev-4 Missing item 3 (the "29 :grounded-change closes" counting basis) is
 moot — the count left the plan with the positive path. Missing items 1, 2 and
 4 of rev 4 stand.
+
+### Zai GLM note (rev 4, rows ⟨1⟩4 and ⟨1⟩5 re-signed)
+
+- **⟨1⟩4 — SIGN.** Reviewed in my addendum (c035d49e, committed after
+  bff7ead0): the ceremony withdrawal costs at most a wasted click, never a
+  false proof; the failure-path exercise on the r4-1/r4-2 closes is the part
+  that catches invented evidence. The attestation/focus producers should
+  carry ordinary bad-case unit tests as engineering; that note stands and does
+  not block this CHECK.
+- **⟨1⟩5 — SIGN.** The two clauses I required are now in the step verbatim:
+  the reference target enters as an ordinary ticket and is never pinned or
+  steered, and a non-discriminating live click is recorded under FAILURES as
+  an ordinary click with the step waiting for a later one. Attack retired:
+  the step can no longer become a de facto pinning requirement, and it can no
+  longer fail silently on queue drift. The check itself (unique action-
+  marginal maximum, live counterfactual, ⟨1⟩3 functions, load identity) is
+  unchanged from the text I signed in rev 4.
+- I also note the cleared-cell convention adopted in 4ba432d0 (a changed step
+  clears its sign-off cells; only the reviewer refills their own) — correct,
+  and it answers my rev-4 Missing item 2 as a rule, not just an apology.
