@@ -580,6 +580,11 @@ candidates automatically, or that every click is fast.
          `:declared-source-supersedes-withhold` with its source path; generated proposals and
          sourceless repair targets keep the old withhold. Tested through the tick's own
          assembly path with the real supply scan. claude-5 reloaded it.
+    3. **The re-fire was refused: the click budget is spent.** With both fixes reloaded,
+       claude-5 re-fired at 22:17:29Z and the boundary answered HTTP 409
+       `ordinary-click-budget-exhausted`, 5 of 5 consumed under
+       `AUTH-ordinary-click-budget-renewal-4-2026-09-21.md @ 00e7f9d6`. That is Joe's own
+       rationing, not a machine defect, and only Joe renews it. ⟨1⟩5 waits for a renewal.
     2. **The accepted-increment predicate threw on the live path**: the close records
        `{:accepted? :refused :reason :predicate-evaluation-failed :message "nth not supported
        on this type: PersistentArrayMap"}`.
