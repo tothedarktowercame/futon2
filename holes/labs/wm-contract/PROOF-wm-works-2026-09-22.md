@@ -326,6 +326,16 @@ candidates automatically, or that every click is fast.
     - Joe ruled (2026-09-22): "55=focused mission, 35=related, 5=unrelated, 5=stop-the-line.
       I'd class 'unmeasured outcome' within the last category." So there is no new outcome:
       an unmeasured outcome is stop-the-line (5%). The proof resumes at ⟨2⟩2.
+  - 2026-09-22, ⟨2⟩2 (zai-1, futon2 0c627f06; arithmetic checked by claude-5). Under Joe's
+    ruling G still cannot separate the reference candidates lawfully.
+    - As the code is now, both commits are classed unrelated (5%), the same weight as
+      stop-the-line, so the ruling changes nothing. G picks C2 only because of the entropy
+      term, for any unmeasured share u > 0.
+    - With the focus regex fixed, both are classed focus (55%). G's direction then turns on u
+      (crossover u ≈ 0.22), and no file declares u.
+    - Both candidates deliver focused work for the same ticket, so it is correct that Joe's
+      preferences do not separate them. This reference input cannot demonstrate G.
+    - The proof stops for Joe.
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
