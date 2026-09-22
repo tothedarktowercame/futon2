@@ -352,6 +352,12 @@ candidates automatically, or that every click is fast.
         `war_machine.clj:6216`. The WM path classification is fixed.
       - No u, no new gate, no novelty bonus, and entropy is kept (`PolicyHorizon.lean:58`).
       - The proof resumes at ⟨2⟩2 on this basis, with no new reference input.
+  - Source rewritten in futon2 929d509f and 71a0d949 (zai-1, reviewed by claude-5). The
+    tokens are now observations and evidence, not files. The recheck observes "cleared" only
+    when the calibration evidence is present.
+    - With today's q₀, C1 observes the obstruction and reaches nothing.
+    - C2 goes declare → collect → calibrate → restoration accepted in 4 steps.
+    - claude-5 reloaded `cascade-sources` and `cascade-proposals`.
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
