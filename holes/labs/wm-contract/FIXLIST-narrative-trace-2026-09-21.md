@@ -389,3 +389,11 @@ certificate records that precedence. Rows 3-10 of runs/stopline-2026-09-22/TRIAG
 already have code fixes and need the production-shaped validation that
 resolve! requires (historical-revalidation-entry). Rows 1-2 need a correct
 evidence deposit. A click that selects each one is what supplies both.
+Where the standard mechanism breaks: futon2 7f50e3ff (2026-09-21) already
+feeds open repair findings into the ordinary proposal supply
+(repair_proposals.clj -> cascade-proposals/load-supply -> selection targets).
+But cascade-proposals/record-supply withholds every repair target, with decline
+:repair-closure-observation-unavailable, missing [:produced-resolution-evidence].
+So the targets never become candidates, and nothing ranks them first. The fix
+belongs in that path, not in runner repair-entry. Discovery: codex-11,
+runs/repair-front-2026-09-22/.
