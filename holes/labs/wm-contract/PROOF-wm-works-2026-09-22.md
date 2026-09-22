@@ -2,7 +2,7 @@
 
 **Author:** claude-5, 2026-09-22, at Joe's direction.
 **Form:** Lamport-style structured proof.
-**Status:** DRAFT.
+**Status:** DRAFT rev 2 (after Zai review f4ab52a7): ⟨1⟩4/⟨1⟩5 swapped so C precedes B; the rest amended per Zai's Missing list.
 - Sign-off: Zai GLM (adversarial), then Codex, then Joe.
 - This plan supersedes Part B of `REPAIR-PLAN-2026-09-22.md`. Parts A and C of that plan stay
   in force.
@@ -57,7 +57,13 @@
   - `8f97757b`: withdrawal of the two-layer calibration candidate;
   - ticket `T-repair-occ-444fb018…`: now at the front of the queue.
 
-  For each: keep or revert. The decisions are recorded here before ⟨1⟩1.
+  For each: keep or revert. The decisions are recorded here before ⟨1⟩1. If the ticket is
+  kept, it is not resolved from outside: under Joe's rule, repair is ordinary selection at
+  the front of the queue, so it becomes a candidate target for ⟨1⟩2. It does not stop
+  ⟨1⟩1's click.
+- A4. Joe names any of the 13 preflight tripwires that protect an invariant a click would
+  corrupt, for example by writing to the wrong store. Only those may still block. All others
+  report. Recorded here before ⟨1⟩1.
 
 **PROVE:** the THEOREM, by ⟨1⟩1–⟨1⟩10.
 
@@ -67,7 +73,8 @@
 
 - **CHECK.**
   - `scripts/wm_click.sh --run` (or its replacement) reaches a written `007-closed.edn`, with
-    no `--force` and no manual steps between the command and the close.
+    no `--force` and no human intervention between the command and the close. The agents'
+    own turns (author, reviewer) are part of the click.
   - The time is recorded as two figures: machine compute and agent wait.
 - **PROOF.**
   - ⟨2⟩1. Casting: author, reviewer and repair seats are named once (the wm-author and
@@ -76,6 +83,8 @@
   - ⟨2⟩2. Preflight reports and does not refuse. Its 13 tripwires and seat checks print their
     findings, and the click fires unless Agency is down. CHECK: a click fires while a tripwire
     reports.
+    The finding-to-ticket path is unchanged: a finding still opens a ticket, and the ticket
+    enters the ordinary queue. It never stops the click.
   - ⟨2⟩3. The close accepts well-formed work. The reviewer's standing decision is produced in
     the shape the close reads (fixed on 2026-09-21 by 6d45e8b7). CHECK: a close is not refused
     `:explanation-invalid` for work the reviewer approved.
@@ -99,8 +108,9 @@
 - **PROOF.**
   - ⟨2⟩1. Interpretation. `mission_hole_wants.clj:74-91` supplies wants but leaves
     `:interpretation` and `:candidates` empty. Build the interpretation of the target's
-    patterns. The step states who writes it: an offline authoring agent, or the author at click
-    time.
+    patterns. They are written by an offline authoring agent (a Codex seat) *before* the click,
+    because selection needs candidates to exist before it runs. The click-time author builds
+    the chosen candidate; it does not invent the alternatives.
   - ⟨2⟩2. Construction and publication through `cascade_sources/check-file!`, consumed by the
     next selection.
   - ⟨2⟩3. Feasibility. Each candidate's acceptance can be met in the repositories and with the
@@ -120,31 +130,41 @@
   from the recorded tokens, and the values are recorded.
 - **FAILURES:** —
 
-### ⟨1⟩4. B and Q(o|π): the candidates' predicted outcomes differ.
+### ⟨1⟩4. C: a prospective preference over run-ending classes.
 
 - **CHECK.**
-  - On the reference field, B's parameters come from recorded outcomes of past actions, with a
-    declared prior and update rule. The source is named.
-  - `PolicyRollout.predictedOutcome` gives the reference candidates predicted outcome
-    distributions that are **not equal**.
-  - The values are recorded.
-- **PROOF.**
-  - ⟨2⟩1. A production reader of the learning-trial ledger. `learning_trial_ledger.clj` has
-    none today.
-  - ⟨2⟩2. Parameter placement: which transition a whole-attempt outcome informs.
-  - ⟨2⟩3. The carry across a change in task domain (`:carry-domain-changed`) is either
-    migrated or explicitly reinitialised. The identity check stays.
+  - A mapping from a candidate's predicted observations to the run-ending classes (attested
+    increment on focus / associated / elsewhere, known typed failure) is implemented and
+    named. It uses the same class definitions as `run_ending_classification.clj`.
+  - C over those classes is Joe's 55/35/5/5, held fixed. It is not put on the token powerset
+    (the fix list's no-op counterexample).
+  - `:unknown` and missing evidence are handled as the mapping states, never counted as a
+    class.
+  - The mapping is applied to the reference candidates' *current* predicted observations, and
+    the values are recorded.
+- **PROOF.** ⟨2⟩1. The mapping reuses improve-8's classification kernel, run on predicted
+  rather than attested observations.
 - **FAILURES:** —
 
-### ⟨1⟩5. C: preferences separate the reference candidates' predicted outcomes.
+### ⟨1⟩5. B from recorded outcomes: under ⟨1⟩4's C, the candidates' predictions differ by more than habit.
 
 - **CHECK.**
-  - C is built prospectively from Joe's stated classes (55/35/5/5, held fixed) through a
-    mapping from each candidate's predicted observations to run-ending classes. It is not put
-    on the token powerset.
-  - The expected log-preference of the reference candidates' predicted outcomes differs by
-    more than the recorded habit difference between them.
+  - B's parameters on the reference field come from recorded outcomes of past actions, with a
+    declared prior and update rule. The source is named.
+  - `PolicyRollout.predictedOutcome` is computed for each reference candidate.
+  - The expected log-preference under ⟨1⟩4's C differs between the candidates by more than
+    their recorded log-habit difference. (Zai 1.4: "not equal" was too weak and would have
+    sent ⟨1⟩6 back.)
   - The values are recorded.
+- **PROOF.**
+  - ⟨2⟩1. Amend the learning-trial contract. `data/wm-learning-trials/attempts.edn` declares
+    `:mode :record-only`, `:consumption :not-authorized`, and `:does-not-establish` a
+    production parameter update. This step changes that declaration, so that B may be read
+    in production. Joe's signature on this plan is the authorisation, recorded here.
+  - ⟨2⟩2. A production reader of the ledger. `learning_trial_ledger.clj` has none today.
+  - ⟨2⟩3. Parameter placement: which transition a whole-attempt outcome informs.
+  - ⟨2⟩4. The carry across a change in task domain (`:carry-domain-changed`) is migrated or
+    explicitly reinitialised. The identity check stays.
 - **FAILURES:** —
 
 ### ⟨1⟩6. G separates the reference candidates.
@@ -164,7 +184,9 @@
   consistent with ⟨1⟩6's values:
   - the receipts name the functions used in ⟨1⟩3–⟨1⟩6;
   - the tie-break is not invoked;
-  - the live JVM's loaded source matches B₀ plus the merged steps.
+  - the live JVM's loaded source matches B₀ plus the merged steps. The command reads the JVM
+    start time and the reload records through the read-only reflection route, and lists every
+    namespace on the click path whose file changed after its last load. It must list none.
 - **FAILURES:** —
 
 ### ⟨1⟩8. The selected work is delivered and the close accepts it.
@@ -173,6 +195,10 @@
   - the author's commit is reviewed;
   - every required commit and gate is verified;
   - `verify-close` is true.
+- **If the build dies mid-way** (timeout, cancellation, partial commit), the attempt is
+  recorded as abandoned, never as accepted. A resume continues the same attempt id. A retry
+  starts a new attempt and does not duplicate commits. An unchanged deterministic failure is
+  not rerun: it is logged here and fixed first.
 - **FAILURES:** —
 
 ### ⟨1⟩9. The outcome is measured and attested.
@@ -197,7 +223,7 @@
 ### ⟨1⟩11. Q.E.D.
 
 ⟨1⟩2 and ⟨1⟩7 give a choice among real alternatives, made by G. ⟨1⟩4 and ⟨1⟩5 establish
-that G is built from B and C drawn from data. ⟨1⟩8 gives the accepted close, and ⟨1⟩9–⟨1⟩10
+that G is built from C and B drawn from data. ⟨1⟩8 gives the accepted close, and ⟨1⟩9–⟨1⟩10
 the update that the next selection consumes.
 
 ## Sign-off
@@ -209,8 +235,8 @@ the update that the next selection consumes.
 | ⟨1⟩1 | SIGN | | |
 | ⟨1⟩2 | SIGN | | |
 | ⟨1⟩3 | SIGN | | |
-| ⟨1⟩4 | OBJECT | | |
-| ⟨1⟩5 | SIGN | | |
+| ⟨1⟩4 | (rev 2: now C; re-sign) | | |
+| ⟨1⟩5 | (rev 2: now B, strengthened; re-sign) | | |
 | ⟨1⟩6 | SIGN | | |
 | ⟨1⟩7 | SIGN | | |
 | ⟨1⟩8 | SIGN | | |
