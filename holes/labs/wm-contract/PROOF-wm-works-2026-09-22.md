@@ -575,6 +575,11 @@ candidates automatically, or that every click is fast.
          (2026-09-22, 6714b3ac) makes repair ordinary selection at the front of the queue. So
          the withhold applies to generated proposals with no declared source, not to a target
          that has one.
+       - Narrowed by zai-1 in futon2 d6565a01: a repair target with candidates in the
+         declared sources is no longer withheld, and is recorded as
+         `:declared-source-supersedes-withhold` with its source path; generated proposals and
+         sourceless repair targets keep the old withhold. Tested through the tick's own
+         assembly path with the real supply scan. claude-5 reloaded it.
     2. **The accepted-increment predicate threw on the live path**: the close records
        `{:accepted? :refused :reason :predicate-evaluation-failed :message "nth not supported
        on this type: PersistentArrayMap"}`.
