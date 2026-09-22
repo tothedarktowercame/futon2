@@ -13,25 +13,43 @@
  :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
  :context :WM
  :beta {:value 1 :status :declared}
- :facts [:admission/task-stated]
+ :facts [:admission/task-stated
+         :repair/obstruction-observed-cleared
+         :repair/split-declared-valid
+         :repair/held-out-observations-collected
+         :repair/calibration-evidence-present
+         :restoration-accepted]
  :want [:restoration-accepted]
+ ;; Source-declared common horizon (codex-20 item 4): 4 = the longest
+ ;; candidate path to :restoration-accepted (C2's declare -> collect ->
+ ;; calibrate -> accept), common to BOTH candidates, read by the tick from
+ ;; the merged sources map's :horizon-steps (war_machine.clj:6821), not a
+ ;; per-candidate T. NOTE (zai-1, 2026-09-22): cascade-sources/load-declared
+ ;; does not yet LIFT a source file's :horizon-steps into that map -- the
+ ;; tick still reads T=2 until the lift is added (reported, not implemented
+ ;; in this handoff).
+ :horizon-steps 4
  :locators
  {:admission/task-stated
   {:class :C4 :repo "futon2" :sha "HEAD"
    :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
    :decl "# Verify or restore guardrail refusal"}
   :repair/obstruction-observed-cleared
-  {:class :C3 :repo "futon2" :sha "HEAD"
-   :path "resources/wm/rechecks/repair-occ-444fb018-dated-recheck.edn"}
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "resources/wm/rechecks/repair-occ-444fb018-dated-recheck.edn"
+   :decl "RECHECK-DISPOSITION-CLEARED"}
   :repair/split-declared-valid
-  {:class :C3 :repo "futon2" :sha "HEAD"
-   :path "resources/wm/eig/held-out-split.edn"}
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "resources/wm/eig/held-out-split.edn"
+   :decl "HELD-OUT-SPLIT-DECLARED"}
   :repair/held-out-observations-collected
-  {:class :C3 :repo "futon2" :sha "HEAD"
-   :path "resources/wm/eig/held-out-observations.edn"}
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "resources/wm/eig/held-out-observations.edn"
+   :decl "HELD-OUT-OBSERVATIONS-COLLECTED"}
   :repair/calibration-evidence-present
-  {:class :C3 :repo "futon2" :sha "HEAD"
-   :path "resources/wm/eig/held-out-calibration.edn"}
+  {:class :C4 :repo "futon2" :sha "HEAD"
+   :path "resources/wm/eig/held-out-calibration.edn"
+   :decl "CALIBRATION-EVIDENCE-PASSING"}
   :restoration-accepted
   {:class :C4 :repo "futon2" :sha "HEAD"
    :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
@@ -65,7 +83,7 @@
    :target-source {:repo "futon2"
                    :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
                    :section "Scoped task"}
-   :observation-limit "C3 observes the dated recheck record; the record's content (cleared or present) is judged by ticket review, and a record asserting 'present' does not satisfy this token."}
+   :observation-limit "C4 observes the record's DISPOSITION LINE: the recheck record must carry a line starting RECHECK-DISPOSITION-CLEARED, written only when the dated check observed the obstruction cleared; a record whose disposition line reads RECHECK-DISPOSITION-PRESENT does not satisfy this token (decl-present?'s token boundary rejects differing heads)."}
   :apparatus/evidence-to-disposition-once
   {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
    :source {:path "futon3/library/apparatus/evidence-to-disposition-once.flexiarg"}
@@ -83,7 +101,7 @@
    :target-source {:repo "futon2"
                    :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
                    :section "Scoped task"}
-   :observation-limit "C3 observes the split declaration resource; its validity is judged by declaration review against parent-mission C2's class requirements."}
+   :observation-limit "C4 observes the declaration's DISPOSITION LINE: HELD-OUT-SPLIT-DECLARED is written only when the split parses with its required fields (locator, held-out set, no-result/failure/timeout classes); a malformed declaration carries no such line and the token stays false."}
   :aif/measurement-window-hygiene
   {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
    :source {:path "futon3/library/aif/measurement-window-hygiene.flexiarg"}
@@ -92,7 +110,7 @@
    :target-source {:repo "futon2"
                    :path "holes/missions/M-aif-policy-conditioned-eig.md"
                    :section "Completion criteria C9"}
-   :observation-limit "C3 observes the collected-observations record; sufficiency for calibration is the next pattern's guard, not this token."}
+   :observation-limit "C4 observes the collection DISPOSITION LINE: HELD-OUT-OBSERVATIONS-COLLECTED is written only when the collection window closed with its observations retained; sufficiency for calibration is the next pattern's guard, not this token."}
   :aif/two-layer-calibration
   {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
    :source {:path "futon3/library/aif/two-layer-calibration.flexiarg"}
@@ -101,7 +119,7 @@
    :target-source {:repo "futon2"
                    :path "holes/missions/M-aif-policy-conditioned-eig.md"
                    :section "Completion criteria C9"}
-   :observation-limit "C3 observes the calibration evidence record; the evidence's verdict on the precondition is content judged at review."}
+   :observation-limit "C4 observes the evidence's DISPOSITION LINE: CALIBRATION-EVIDENCE-PASSING is written only when the calibration record reports a passing result (held-out log-loss/Brier within the split's declared bounds); a record reporting FAILURE (or any non-passing verdict) carries a different disposition line and this token stays FALSE."}
   :contracts/holder-states-the-claim
   {:kind :hand-admitted :by "zai-1" :date "2026-09-22"
    :source {:path "futon3/library/contracts/holder-states-the-claim.flexiarg"}
