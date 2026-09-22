@@ -449,6 +449,12 @@ candidates automatically, or that every click is fast.
       not. That test errors outside the canonical checkout, so a worktree or stash comparison
       cannot show it failing, and test runs use their own JVM, so no reload affects them. The
       certificate a live click writes is what ⟨1⟩5 reads, so this is fixed before the click.
+      Fixed in futon2 37d40709: the class path's meta records the model actually consumed
+      (kind, q₀, horizon, Joe's class preference and its provenance), with the token model's
+      rates and preference spec typed-absent rather than invented; and the preference audit
+      records the class preference when every candidate consumed the same one, holding with a
+      reason otherwise. The whole runner namespace passes (197/1148), both failures gone, and
+      the token path is unchanged. claude-5 reloaded nine namespaces.
   - Discovery in futon2 2e2f08f4 and da5a329b (zai-1): target relations live in the focus
     corpus; a ticket's relation derives through its `Parent:` mission. Focus completion is
     recorded nowhere. Repeated retention was fixed by claude-5 (9b0e74bf). The shared
@@ -502,6 +508,19 @@ candidates automatically, or that every click is fast.
     outcomes, placed on that family's own θ. It writes only for a close the predicate
     accepts, keyed by occurrence, exactly once; r4-1 and r4-2 write nothing. claude-5
     reloaded it.
+- **PROVED 2026-09-22.** All four producers exist and are called before the close.
+  - Measurement and attestation were already there and are untouched
+    (`full_loop_runner.clj:3697-3755`).
+  - The accepted-increment predicate (b8bc1d7c) is evaluated in that same block and its typed
+    result is recorded on the close. It is evidence, never a gate: a false or unevaluable
+    predicate is recorded and the close proceeds.
+  - The B update (9291cdb2) runs after the close is written, only for a close the predicate
+    accepted, keyed by occurrence, exactly once.
+  - Wiring in 5320dc6f, tested by replaying the real r4-1 and r4-2 closes (both record false
+    and write nothing) and a constructed accepted occurrence (one update; a second run writes
+    none).
+  - Caveat: conjunct (c) reads the selected action's declared acceptance map; the live click
+    at ⟨1⟩5 confirms it travels end to end.
 - **FAILURES:** —
 
 ### ⟨1⟩5. One live click on the reference target is decided by G.
