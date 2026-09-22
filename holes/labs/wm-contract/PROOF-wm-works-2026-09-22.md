@@ -361,6 +361,19 @@ candidates automatically, or that every click is fast.
   - Focus facet fix in futon2 aec603a7: `resources/wm/` now counts as WM work. Tested with
     near-miss paths, 6/82. The frozen-corpus pin moved 157 → 158 because one more commit is
     now correctly credited. claude-5 reloaded `focus-receipt`.
+  - Class-C scoring design in futon2 f59d8745 (zai-1). codex-20's review requires six
+    corrections before building:
+    - terminal-only ending preference, via a clock-augmented observation model ("not yet
+      evaluated" before T);
+    - a class observation model A(class|state), summed state by state, with no use of the
+      token `preference-distribution`, so the `TokenPreference` binding is kept;
+    - a common horizon long enough to cover the repair episode (the default is T = 2,
+      `war_machine.clj:6822`);
+    - the source observes the evidence and its disposition, not just whether a path exists
+      (`:facts` has only admission, `cascade_sources.clj:177`);
+    - live F inspected, not assumed tied.
+
+    Built in three handoffs: source inputs, class observation scorer, then F.
     - Side finding: `focus_receipt.clj:15-17` does not count commits under `resources/wm/…`
       as WM work, so this WM repair ticket would be classed as elsewhere, not focus.
 
