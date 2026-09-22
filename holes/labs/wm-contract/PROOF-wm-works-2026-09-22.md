@@ -1413,3 +1413,99 @@ No pause/keep-revert issue, tripwire firing authority question, extra
 per-step sign-off, speed budget, admission screen, or new negative-control
 suite is being reintroduced. The revision resolves most earlier objections;
 these four concern obtaining the promised witness and what it actually proves.
+
+
+### Codex revision-3 update after Joe's removal of snapshot matching
+
+**Reviewer: codex-20; model: GPT-6 (gpt-6-astra).** Re-read the operative plan
+at `04b3095e`, after my review `0628f87d`. This update supersedes the earlier
+revision-3 findings wherever stated below. **The table remains 6 SIGN / 4
+OBJECT**, but the drift objection is withdrawn and the other objections are
+narrowed. No machine changes were made.
+
+**What I withdraw, including requirements I introduced:**
+
+- **Live/development snapshot matching, re-freezing, a drift decision and a
+  cutoff enforced on live learning:** no longer needed. The live CHECK now
+  proves the selection property directly on the actual input. My demand for
+  full revalidation *as a drift procedure* is withdrawn; the new live CHECK
+  already asks for the substantive properties. No changed-input ceremony is
+  owed. Recording which data an offline computation used can explain that
+  computation, but cannot require the live machine to use old data.
+- **Protecting the development target from being executed early:** no longer
+  needed to preserve a later comparison. My suggested reordering or special
+  historical lifecycle witness solely to avoid consuming it is withdrawn.
+  Remove the step-2 “target other than the reference target” restriction
+  rather than build machinery to meet it. The step-1 “executed once at step 5”
+  and step-5 “on the reference target” wording likewise need not reserve or
+  force that target. Let the ordinary queue select real work. Real repeat
+  execution of already-completed work remains a correctness issue; naming a
+  special protected development target is not its solution.
+- **A successful historical close before permitting the live attempt:** I
+  overconstrained this in the step-4 review. Existing failure records can
+  exercise useful producer behavior, and the positive accepted-close and
+  measured-update claims will be demonstrated directly at steps 6–8. Do not
+  create or hunt for an earlier successful close merely to unlock that
+  demonstration. A failure replay must still be described as a failure
+  replay, not as evidence that an accepted increment was produced.
+- **A separate isolated persistence rehearsal merely to make step 4 pass:**
+  not required. It was one way to interpret the contradictory read-only/write
+  wording, not a necessary new test. Step 4 can compute the proposed update
+  and establish the producer wiring; step 8 witnesses actual persistence and
+  reload survival on the live outcome. No extra negative-control suite or
+  sign-off is being requested.
+- **The “no expected winner” sentence as an extra governance rule:** not
+  required. Truthful derivation from task and outcome evidence, already in the
+  plan, is the substantive requirement. Removing that sentence needs no
+  replacement permission or bias-screening process.
+
+**Current objections and the actual need each serves:**
+
+- **⟨1⟩2 — OBJECT, remove an unnecessary restriction.** The ordinary queue
+  can choose the development target, so “a different target” is an artificial
+  obstruction to the lifecycle CHECK. The minimal fix is deleting that
+  restriction, not adding a way to select a different target. Command/click/
+  attempt/close identity remains useful: it prevents crediting another run's
+  close. Firing and runtime handling remain as Joe ruled.
+- **⟨1⟩3 — OBJECT, align the statement with the result.** The alternative
+  G-margin condition can demonstrate strong reinforcement without changing
+  the selected action; the numerical example in my review still applies.
+  I do **not** require a reversal if Joe's intended result is a demonstrated
+  substantial G contribution. State that claim consistently in the heading,
+  CHECK and Q.E.D., and calculate it on action marginals. No new test is
+  needed to prove a stronger claim nobody needs. What remains necessary is
+  not reporting “changed the choice” when the same action wins both ways.
+- **⟨1⟩4 — OBJECT, distinguish calculation from mutation.** A read-only
+  computation cannot itself apply and persist a new update. Say that this
+  step prepares/computes it, with durable consumption demonstrated at step 8,
+  rather than require an additional persistence ceremony here. The code still
+  needs a defined relationship between that update and the final close: an
+  observed effect may legitimately inform B even if certification later fails,
+  if that is the declared trial meaning; accepted-delivery learning requires
+  the final accepted judgment. This distinction answers a real model/data
+  question, not a requirement created by the proof. Do not require all durable
+  mutations before constructing the close merely to fit the step's wording.
+- **⟨1⟩5 — OBJECT only for the same claim mismatch as step 3.** The earlier
+  drift objection is **resolved**. The new CHECK examines the live action
+  marginal and full/base scores directly and no longer needs snapshot
+  equality. Correct the reinforcing-versus-changing language once in steps
+  3/5/Q.E.D.; do not add a drift policy. The live CHECK's evidence must be its
+  actually consumed inputs and calculated outputs, which it already requests.
+
+**What remains necessary without snapshot matching:**
+
+The theorem still needs a real task, admitted alternatives, actual model
+inputs/scores, accepted work, measured observations and a consumed learned
+update. Existing runtime identities tie those claims to what ran; they are
+not a new global audit. Step 8 still needs the *same non-B inputs within its
+own with/without comparison*, because otherwise task or queue changes could
+masquerade as learning. Use the live decision's own recorded inputs for that
+comparison; they need not match the earlier development snapshot. This local
+comparison answers whether the update affects predictions. It does not
+protect the proof's development materials from the changing world.
+
+The minimal revision is therefore deletion of the protected-target wording,
+consistent G-contribution claims, and separating proposed from durable updates.
+No additional run restriction, rehearsal, historical-success prerequisite,
+ledger cutoff on production, re-freeze approval, or snapshot comparison is
+requested by this review.
