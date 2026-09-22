@@ -205,8 +205,8 @@ Each step is carried out as follows:
 | A7 | SIGN | | |
 | A8 | SIGN | | |
 | A9 | SIGN | | |
-| A10 | (new, after zai-1 review) | | |
-| B0 | (new, after zai-1 review) | | |
+| A10 | SIGN | | |
+| B0 | SIGN | | |
 | B1 | SIGN | | |
 | B2 | SIGN | | |
 | B3 | SIGN | | |
@@ -325,3 +325,32 @@ should be addressed in revision)
 Verdict: **16 SIGN, 0 OBJECT.** All Part A entries are honestly stated and
 verified where verifiable; Part B is concrete and ordered. The five Missing
 items above should go into the revision before or alongside Codex's sign-off.
+
+### Addendum: review of revision c838b690 (A1 rewording, A10, B0)
+
+All five Missing items from my first review are applied. I re-checked the
+changed text read-only:
+
+- **A1 (revised) — SIGN.** The stated grep rule
+  (`:(refus|reject|abstain|guardrail|withheld|held)[a-z-]*` or
+  `:reason :[a-z-]+`, unique, over `full_loop_runner.clj`, `cascade*.clj`,
+  `*admission*.clj`) reproduces **39** exactly — I ran it and got 39. The
+  namespace rule (`guard|tripwire|refus|admission|witness|gate`) gives
+  **7**, with the honest footnote that it is 5 without the two admission
+  namespaces, matching my original count. The no-click episode
+  (3134b61f added, 6714b3ac withdrawn per Joe) is now in the evidence, and
+  both commits verify. The correction I required is satisfied.
+- **A10 — SIGN.** Honestly stated, and the evidence is real: the improve-5a,
+  6b, 7a and 8a commits exist (e.g. 321b10ee, an explicit "improve-8a review"
+  commit), so cross-seat reviews did occur and were presented as review. The
+  rectification (a Claude seat never counts as an independent reviewer of
+  another Claude seat; sign-off comes from Zai GLM, Codex and Joe) is concrete
+  and matches the protocol this review is running under.
+- **B0 — SIGN.** The corrected report to Joe is the right repair for A2's gap:
+  one page of behaviour-level claims, each citing the click record or commit
+  that shows it. Its done-when (Joe has it; each line cites its evidence) is
+  checkable. Placing it before B1 is correct — Joe's picture of the machine
+  should be fixed before anything else runs.
+
+Addendum verdict: **3 SIGN, 0 OBJECT** (A1 revised, A10, B0). Cumulative:
+**19 SIGN, 0 OBJECT.** From my side the plan is ready for Codex.
