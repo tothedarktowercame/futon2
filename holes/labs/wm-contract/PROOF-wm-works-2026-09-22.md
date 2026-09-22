@@ -126,6 +126,13 @@ candidates automatically, or that every click is fast.
       `load_identity/report`. After claude-5 reloaded `load-identity`, `eig-shadow`,
       `interpretation-construction` and `run-narrative` from the canonical checkout, the
       readout shows 42/42 click-path namespaces current, 0 unknown.
+  - Major-step review (codex-20, 2026-09-22) found three defects, all fixed:
+    - a rejected `already-running` launch was tracked as our click (claude-5, 830dafae);
+    - load identity omitted undeclared click-path namespaces (zai-1, b442053e: +27, now
+      69 listed; 27 show as unregistered, and claude-5 reloaded all 27 from the canonical
+      checkouts before the CHECK);
+    - timing claimed an author-wait / machine split the records cannot make (zai-1,
+      da0bfe5e: mixed interval labelled, totals given as bounds).
   - Note: the futon3c click boundary's grant budget (Joe's renewal documents) is Joe's own
     rationing and is not removed by this step.
 - **FAILURES:** —
