@@ -550,7 +550,27 @@ candidates automatically, or that every click is fast.
   - Cast: `wm-repair-reviewer` and `codex-24` are off the roster, so claude-5 cast
     `wm-author` / `wm-reviewer` with `codex-13` as repair reviewer rather than have the
     script wait 30 minutes for an absent seat.
-- **FAILURES:** —
+- **FAILURES:**
+  - 2026-09-22, the live click. Click `wm-click-41d88e5d-8e33-4f9e-9df2-d9493a4311bb`, run
+    `2026-09-22-1790110142`, fired at 20:49:02Z by claude-5 with `wm-author` / `wm-reviewer`
+    / `codex-13`. It ran to a close (machinery-71 attempt-002, `:grounded-change`, binding
+    verified), so the machine ran; the step's own check fails on two counts.
+    1. **It did not act on the reference target.** The run record has
+       `:ticket-queue {:eligible-targets [] … :status :no-admitted-front-entry}`, so the
+       ticket-front restriction admitted nothing and selection fell through to the
+       unrestricted choice, `:C1` on `M-f11-find-production-successor`. The ticket's source
+       was loaded and its facts observed in the same tick, and zai-1's pre-flight minutes
+       earlier had both candidates admitted through the loaders — so admission differs
+       between the pre-flight path and the live tick.
+    2. **The accepted-increment predicate threw on the live path**: the close records
+       `{:accepted? :refused :reason :predicate-evaluation-failed :message "nth not supported
+       on this type: PersistentArrayMap"}`. It behaved as designed in not blocking the close,
+       and no B update was written, which is correct for a close it did not accept. But its
+       tests passed on constructed inputs while the live shape differs.
+  - What did work: the class scoring is live. The certificate records
+    `:preference-audit {:status :recorded :consumed-preference-kind :class-emission
+    :class-preference {:focused 11/20 :related 7/20 :unrelated 1/20 :stop-the-line 1/20}}` —
+    Joe's numbers, consumed by the live decision.
 
 ### ⟨1⟩6. The chosen work reaches an accepted close.
 
