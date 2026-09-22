@@ -24,3 +24,16 @@ The new namespace checks both first actions survive joint selection, each also s
 `emacs --batch -l /home/joe/code/futon4/dev/check-parens.el --eval '(arxana-check-parens-cli)' -- --files resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn test/futon2/report/eig_source_remaining_test.clj test/futon2/aif/token_outcome_test.clj`: OK.
 
 `git diff --check`: clean. All commands ran from `/home/joe/code/futon2-eig-source-remaining` in separate CLI processes. The scoped registry run is recorded separately after committing its source scope.
+
+## Scoped warrant
+
+Evidence ID: `test-registry-feb34f71eed9922f01c2e527dd241292c6532dfff9d0c0854e501a60fa3f096d`. Registered at source HEAD `d4f5c9fd8c18d857f3fd2ffb98d8bf6a8492d4ab`: 3 tests / 20 assertions, 0 failures/errors, matched postcheck, `:warrant? true`. The subsequent check also returned `:warrant? true`, `:outside-closure []`. Full results, execution log and loaded-file closure are in `registered/`.
+
+Commands (own CLI JVM, working directory `/home/joe/code/futon3c`):
+
+```
+clojure -M -m futon3c.test-registry run /home/joe/code/futon2-eig-source-remaining/holes/labs/wm-contract/runs/eig-source-remaining-2026-09-22/registry.edn
+clojure -M -m futon3c.test-registry check /home/joe/code/futon2-eig-source-remaining/holes/labs/wm-contract/runs/eig-source-remaining-2026-09-22/check.edn
+```
+
+The registry requires its logical `clojure -M:test -n <namespace>` command and instruments that command with its own runner; the initial explicit `-m cognitect.test-runner` form was refused before execution. The committed config uses the supported logical form. This warrant covers the new admission namespace and declared/loaded scope, not the separately executed historical outcome test. Pattern bytes were checked by the real admission loader during the run; external library files are not claimed as part of the registry's repo-relative scope. Registry evidence append is the only external write, explicitly requested for this packet. No WM production store was changed.

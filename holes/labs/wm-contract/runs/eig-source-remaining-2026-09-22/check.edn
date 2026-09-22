@@ -1,0 +1,6 @@
+{:entry-id "test-registry-feb34f71eed9922f01c2e527dd241292c6532dfff9d0c0854e501a60fa3f096d"
+ :repo-root "/home/joe/code/futon2-eig-source-remaining"
+ :changed-paths ["resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn"
+                 "test/futon2/report/eig_source_remaining_test.clj"
+                 "test/fixtures/eig-source-remaining/mission-after-updater.md"]
+ :agency-url "http://localhost:7070"}
