@@ -37,21 +37,38 @@
     (when-not (and (some? (:occurrence-id prediction-context))
                    (= horizon-steps (:tau prediction-context)))
       (om/refuse! :missing-prediction-context {}))
-    (when-not (and (vector? candidates) (<= 1 (count candidates) max-candidates)
+    (when-not (and (vector? candidates)
+                   (<= 1 (count candidates)
+                       ;; The class-emission model scores candidates
+                       ;; independently over at most five classes -- the
+                       ;; enumeration cap guards powerset cost that this
+                       ;; model does not pay (PROOF-wm-works 1.3 build 2/3).
+                       (if (= :class-emission (:kind observation-model)) Long/MAX_VALUE max-candidates))
                    (every? #(and (= :cascade-candidate (:kind %))
                                  (some? (:id %)) (vector? (:precedence %))) candidates)
-                   (= (count candidates) (count (set (map :id candidates)))))
-      (om/refuse! :invalid-bounded-candidates {:limit max-candidates}))
+                   ;; Id uniqueness guards the token path's id-keyed posterior
+                   ;; record; joint families legitimately reuse :C1/:C2 per
+                   ;; target, and the class path keys by the full candidate.
+                   (or (= :class-emission (:kind observation-model))
+                       (= (count candidates) (count (set (map :id candidates))))))
+      (om/refuse! :invalid-bounded-candidates
+                  {:limit (when-not (= :class-emission (:kind observation-model)) max-candidates)}))
     (when-not (and (map? q0) (seq q0) (m/normalized-exact? q0)
-                   (every? #(and (set? %) (set/subset? % universe)) (keys q0)))
+                   (or (= :class-emission (:kind observation-model))
+                       (every? #(and (set? %) (set/subset? % universe)) (keys q0))))
       (om/refuse! :invalid-state-belief {}))
-    (when-not (set/subset? (candidate-tokens candidates) universe)
+    (when-not (or (= :class-emission (:kind observation-model))
+                  (set/subset? (candidate-tokens candidates) universe))
       (om/refuse! :candidate-outside-observation-universe {}))
     (when-not (and (map? cascade-spec)
                    (every? #(set? (get cascade-spec %)) [:want :evidence :zeroed])
                    (every? set? (:zeroed cascade-spec))
-                   (set/subset? (set/union (:want cascade-spec) (:evidence cascade-spec)
-                                           (into #{} cat (:zeroed cascade-spec))) universe))
+                   ;; The want/evidence/zeroed subset-of-universe check is
+                   ;; the token preference's domain rule; the class model's
+                   ;; preference lives over classes, so only the shape holds.
+                   (or (= :class-emission (:kind observation-model))
+                       (set/subset? (set/union (:want cascade-spec) (:evidence cascade-spec)
+                                               (into #{} cat (:zeroed cascade-spec))) universe)))
       (om/refuse! :invalid-observation-preference {}))
     ;; Tempering a coupled row requires its own normalization, not a map of
     ;; tempered marginal rates. Never silently ignore the production option.
@@ -105,13 +122,23 @@
   (let [model (:observation-model opts)]
     (try
       (validate-inputs! (:cascade-belief state) candidates opts)
-      (let [preference (into {} (for [tau (range 1 (inc (:horizon-steps opts)))]
-                                  (let [member (checked (m/preference-member (:cascade-spec opts) (:universe model)
-                                                                            (:horizon-steps opts) tau))
-                                        log-p (m/member-log-probability member)]
-                                    [tau {:distribution member
-                                          :probabilities (into {} (map (fn [o] [o (Math/exp (log-p o))]))
-                                                               (subsets (:universe model)))}])))
+      (let [preference (if (= :class-emission (:kind model))
+                         ;; PROOF-wm-works 1.3 build 2/3: the class model
+                         ;; carries its own per-tau class preference (Joe's
+                         ;; ruling at the horizon, unit mass on
+                         ;; :ending/not-yet-evaluated before it); classes are
+                         ;; NOT routed through preference-member, which is the
+                         ;; token-subset construction bound to
+                         ;; TokenPreference.preference and stays untouched.
+                         (into {} (for [tau (range 1 (inc (:horizon-steps opts)))]
+                                    [tau {:probabilities (get-in model [:class-preference tau])}]))
+                         (into {} (for [tau (range 1 (inc (:horizon-steps opts)))]
+                                    (let [member (checked (m/preference-member (:cascade-spec opts) (:universe model)
+                                                                              (:horizon-steps opts) tau))
+                                          log-p (m/member-log-probability member)]
+                                      [tau {:distribution member
+                                            :probabilities (into {} (map (fn [o] [o (Math/exp (log-p o))]))
+                                                                 (subsets (:universe model)))}]))))
             entries (mapv #(score-candidate (:cascade-belief state) % opts preference) candidates)
             failures (filterv #(not= :computed (get-in % [:inference :status])) entries)]
         (if (seq failures)

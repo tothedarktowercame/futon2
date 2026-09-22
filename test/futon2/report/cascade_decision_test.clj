@@ -227,28 +227,23 @@
         r (wm/cascade-decision assembled live-c-opts)
         decision (:decision r)
         posterior (get-in decision [:selection-law :posterior])]
-    ;; WIRE-3: the live C's weight on tick-1's :test-covers token (1 vs
-    ;; the uniform 1/3 share) now outranks B's lower-G cascade — the
-    ;; derived preference redistributes which target the machine acts on.
-    (is (= :test-step-covering-missing-total-repos
+    ;; PROOF-wm-works 1.3 build 2/3 (2026-09-22): the joint decision now
+    ;; scores prospective outcomes against Joe's CLASS C (55/35/5/5; the
+    ;; class observation model), so live-c's token projection no longer
+    ;; moves the argmax — it is derived, freshness-checked and recorded,
+    ;; never scored. The old WIRE-3 assertions (live-c weight flips the
+    ;; winner; :c :status :derived / :derived-no-overlap on every scored
+    ;; candidate) tested the replaced substitution and are retired here.
+    ;; Both fixture targets facet :unrelated with no acceptance-class
+    ;; difference, so selection falls to the class-equal G and B's short
+    ;; cascade wins in both arms.
+    (is (= :b-fix
            (-> decision :action :precedence first :id))
-        "the weighted tick-1 cascade wins the JOINT selection")
+        "with class scoring the joint selection records a real winner")
     (is (= :b-fix
            (-> without-projection :decision :action :precedence first :id))
-        "without projected live C, the same candidates choose B")
-    (is (not= (-> without-projection :decision :action :precedence first :id)
-              (-> decision :action :precedence first :id))
-        "the projected live C moves the argmax, not merely posterior masses")
-    (is (every? #{:derived-no-overlap}
-                (map #(get-in % [:c :status])
-                     (vals (get-in without-projection
-                                   [:decision :selection-certificate :scoring]))))
-        "the without arm records that no live token entered its domain")
-    (is (every? #{:derived}
-                (map #(get-in % [:c :status])
-                     (vals (get-in decision
-                                   [:selection-certificate :scoring]))))
-        "the with arm records projected live C on every scored candidate")
+        "the live-c projection no longer moves the argmax (recorded, not scored)")
+
     (is (= #{tick-1-target b-target}
            (set (map :target (keys posterior))))
         "one posterior spans both targets' candidates")

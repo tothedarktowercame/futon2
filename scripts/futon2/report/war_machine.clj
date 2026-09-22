@@ -6031,6 +6031,49 @@
          (or (:mission-hole-coverage sources)
              {:status :absent :reason :source-coverage-not-supplied})))
 
+(defn- class-observation-model
+  "PROOF-wm-works 1.3 build 2/3: the class observation model for the joint
+   family. Emission is deterministic: before the common horizon every state
+   emits :ending/not-yet-evaluated (preference 1, risk exactly 0); AT the
+   horizon each state emits its run-ending class -- an acceptance token
+   reached on a target whose facet is the current focus is :focused, a
+   same-focus-edge facet :related, another facet :unrelated, and a state
+   reaching nothing is :stop-the-line (Joe 2026-09-22: an unmeasured or
+   unreached outcome belongs to stop-the-line). Class C at the horizon is
+   Joe's fixed {focused .55, related .35, unrelated .05, stop-the-line .05};
+   the token preference path (preference-member, live-c weights) is NOT
+   replaced -- this is an additional observation model the bounded scorer
+   consumes, and live-c is still derived and recorded."
+  [{:keys [universe acceptance target-class horizon]}]
+  (let [not-yet :ending/not-yet-evaluated
+        joe-c {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100}
+        class-pref (into {} (for [tau (range 1 (inc horizon))]
+                              [tau (if (= tau horizon) joe-c {not-yet 1})]))]
+    {:schema :wm/observation-model-v1
+     :backend :exact-enumeration
+     :kind :class-emission
+     :universe universe
+     :horizon horizon
+     :class-universe [:focused :related :unrelated :stop-the-line not-yet]
+     :acceptance acceptance
+     :target-class target-class
+     :class-preference class-pref
+     :provenance {:status :synthetic :calibrated false
+                  :source "PROOF-wm-works 1.3; Joe 2026-09-22 ruling (55/35/5/5; unmeasured -> stop-the-line)"}}))
+
+(defn- facet-class-of-target
+  "A target's class by its evidence locators' facets against the current
+   discovered focus and its same-focus background (focus_receipt's own
+   regexes and window; read-only)."
+  [focus-info paths]
+  (let [facets @#'futon2.aif.focus-receipt/facets
+        f (first (facets paths))
+        focus (:focus focus-info)
+        background (set (get-in focus-info [:facet-graph :background]))]
+    (cond (= f focus) :focused
+          (contains? background f) :related
+          :else :unrelated)))
+
 (defn- cascade-family-parameters
   "Validate the declared comparison BEFORE admission can remove a target.
    A declined candidate cannot hide incompatible horizons or temperatures."
@@ -6237,12 +6280,53 @@
               grain-mismatch? (= :no-reachable-want (:kind live-refusal))
               _ (when (and live-refusal (not grain-mismatch?))
                   (throw (ex-info "cascade decision refused" live-refusal)))
+              ;; PROOF-wm-works 1.3 build 2/3: score the joint family with
+              ;; the CLASS observation model (Joe's 55/35/5/5 at the horizon,
+              ;; zero risk before it) ALONGSIDE the untouched token
+              ;; machinery: the class model is the :observation-model the
+              ;; bounded scorer consumes; live-c is still derived, freshness-
+              ;; checked and recorded above -- it no longer enters the score.
+              ;; Pin the focus read to the frozen discovery corpus's latest
+              ;; valid-through (the inputs are retrospective-pinned history),
+              ;; so a live now outside every window does not read as unknown.
+              focus-inputs (focus-receipt/read-inputs)
+              focus-as-of (str (java.time.Instant/ofEpochMilli
+                                (reduce max (map #(inst-ms (java.time.Instant/parse (:valid-through %)))
+                                                  (:windows focus-inputs)))))
+              focus-info (focus-receipt/discover focus-inputs focus-as-of nil)
+              class-model (class-observation-model
+                           {:universe (set joint-reachable)
+                            :acceptance joint-want
+                            :target-class (into {}
+                                                (for [p problems
+                                                      :let [t (:target p)]]
+                                                  [t (facet-class-of-target
+                                                      focus-info
+                                                      (keep :path (vals (get-in p [:cascade-problem :locators]))))]))
+                            :horizon T})
               ranked (efe/rank-actions {:cascade-belief joint-q0}
                                        joint-candidates
                                        {:f-prefix-production? true
                                         :horizon-steps T
+                                        :observation-model class-model
+                                        :prediction-context {:occurrence-id (str "class-score-" (java.time.Instant/now))
+                                                             :tau T}
                                         :cascade-spec
-                                        (if grain-mismatch?
+                                        (if (= :class-emission (:kind class-model))
+                                          ;; PROOF-wm-works 1.3 build 2/3: with
+                                          ;; the class observation model, the
+                                          ;; scoring preference is the class C
+                                          ;; (on the model, Joe's ruling), and
+                                          ;; live-c is RECORD-ONLY -- derived
+                                          ;; and freshness-checked above, never
+                                          ;; in the score.
+                                          {:want joint-want
+                                           :evidence #{}
+                                           :zeroed #{}
+                                           :c {:status :class-observation
+                                               :source "PROOF-wm-works 1.3; Joe 2026-09-22 ruling (55/35/5/5; unmeasured -> stop-the-line)"
+                                               :live-c-recorded (select-keys live-derived [:signature :sources-read])}}
+                                          (if grain-mismatch?
                                           {:want joint-want
                                            :c-schedule preference-schedule
                                            :lam (:lam preference-scales)
@@ -6255,7 +6339,7 @@
                                                :reachable (:reachable live-refusal)
                                                :unreached-in-domain (:unreached-in-domain live-refusal)}}
                                           (merge-live-cascade-spec
-                                           joint-want live-spec))})]
+                                           joint-want live-spec)))})]
           (when (and (map? ranked) (contains? ranked :status))
             (throw (ex-info "cascade decision refused"
                             (merge {:kind (or (:kind ranked) :rank-refused)}
@@ -6820,7 +6904,9 @@
         ;; declared initial T = 2 (Joe 2026-09-17, p4ng 462aa79), common to
         ;; the compared family. Recorded on the judgement with its authority.
         cascade-horizon (if-let [h (:horizon-steps cascade-sources)]
-                          {:value h :authority :cascade-sources}
+                          {:value h
+                           :authority {:source :cascade-sources
+                                       :declarations (:horizon-steps-declarations cascade-sources)}}
                           {:value 2 :authority "p4ng 462aa79 (Joe 2026-09-17: initial T=2)"})
         cascade-proposal-supply
         (or (:cascade-proposal-supply judge-opts)
