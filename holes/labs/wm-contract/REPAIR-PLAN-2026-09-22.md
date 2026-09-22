@@ -175,19 +175,130 @@ Each step is carried out as follows:
 
 | Part | Zai GLM | Codex | Joe |
 |---|---|---|---|
-| A1 | | | |
-| A2 | | | |
-| A3 | | | |
-| A4 | | | |
-| A5 | | | |
-| A6 | | | |
-| A7 | | | |
-| A8 | | | |
-| A9 | | | |
-| B1 | | | |
-| B2 | | | |
-| B3 | | | |
-| B4 | | | |
-| B5 | | | |
-| B6 | | | |
-| B7 | | | |
+| A1 | SIGN | | |
+| A2 | SIGN | | |
+| A3 | SIGN | | |
+| A4 | SIGN | | |
+| A5 | SIGN | | |
+| A6 | SIGN | | |
+| A7 | SIGN | | |
+| A8 | SIGN | | |
+| A9 | SIGN | | |
+| B1 | SIGN | | |
+| B2 | SIGN | | |
+| B3 | SIGN | | |
+| B4 | SIGN | | |
+| B5 | SIGN | | |
+| B6 | SIGN | | |
+| B7 | SIGN | | |
+
+## Zai GLM review
+
+**Reviewer model:** Zai GLM (zai-1), GLM-5.x — as Joe asked.
+
+Method: read-only checks against the live checkout of futon2 (branch main) and the
+mathlib4 contract bundle on 2026-09-22. I opened the STAGES.md files for r4-1 and
+r4-2, the fix list, the contract JSON, the named commits, and grepped the aif
+namespaces myself. Where I could not independently reproduce a number, I say so
+below rather than signing blind.
+
+### Per-entry verdicts
+
+- **A1 — SIGN (with one factual correction required).** The substance is fully
+  verified: r4-1's close refused `:build-failed / :explanation-invalid` over the
+  reviewer template shape after a commit had been delivered (STAGES.md lines
+  16–17, 49), and r4-2's close is `:guardrail-refusal` on artifact-binding scope
+  (STAGES.md lines 14–17). Refusal/abstention keywords are abundant in the
+  runner/cascade/admission namespaces. **Correction:** I count **5** namespaces
+  under `src/futon2/aif/` named for guards/tripwires/gates/witnesses
+  (tripwire, tripwire_calibration, decision_gate, mana_gate,
+  operational_witness), not 7; and I could not independently reproduce the exact
+  count "39 distinct reason keywords" (a broad grep of those namespaces yields
+  50+ loosely matching keywords, which is compatible with 39 under a stricter
+  definition). Fix the numbers or state the counting rule; the defect stands
+  either way.
+- **A2 — SIGN.** The STAGES records themselves show refusals narrated as
+  calibrated progress ("verify-close true" presented as the achievement of a
+  click that delivered nothing), which is the same defect in writing. I did not
+  re-read claude-3's bells; I take that part on the confession. The
+  rectification (report what was delivered and accepted; a refusal is a defect,
+  never a result) is concrete and checkable against any future report.
+- **A3 — SIGN.** The 2026-09-20/21 git log is dense with record-only and
+  default-off slices (my grep of the log finds ~14 matching commits including
+  fix-10e's default-off), and `fddf7881` exists and is claude-5's improve-6
+  definitions note. The rectification ("changes the live click or it is not
+  done") plus B4 is the right repair.
+- **A4 — SIGN.** Commits `31cbc8c0` (offline-scoring plan) and `a33c0085`
+  (withdrawal, "rejected by Joe") both exist in main as described. The
+  rectification is a clean rule and checkable.
+- **A5 — SIGN.** `FUNDAMENTALS.edn` exists at
+  `holes/labs/wm-contract/FUNDAMENTALS.edn`; the contract bundle
+  `mathlib4/DarkTower/WarMachine/machine-contracts/machine-contracts.json`
+  exists and contains exactly **36** contracts, with TokenPreference /
+  PolicyHorizon / PolicySelection / ActionMarginal present. The confession is
+  accurate and the rule (cite file/line or say unchecked) is enforceable.
+- **A6 — SIGN.** `FIXLIST-narrative-trace-2026-09-21.md` exists, its rows are
+  overwhelmingly merged, and it opens from run 1789964661 (whose records exist
+  under `data/wm-runs/`). Single ownership of "the click works" is the right
+  fix.
+- **A7 — SIGN.** The STAGES files are exactly the stage-by-stage narrations
+  described, and the fix list contains **zero** mentions of timing/wall-clock/
+  duration (grep count 0). B5/B6 are the right repairs.
+- **A8 — SIGN.** Fix list fix-5 reads "only 3 hand-written candidates; 441
+  wants yield none", and the failure story confirms the 441 stated mission
+  items. r4-2 STAGES confirms exactly one admitted cascade. B3 is the right
+  repair and its done-when (candidate set size in the click receipt) is
+  checkable; `holes/tickets/T-*.md` exists as a source.
+- **A9 — SIGN.** All cited numbers verified verbatim in the STAGES files:
+  r4-1 decided-by `:habit` 2:1, G tie 0.0013 nats, C 1.0013:1; r4-2 C
+  1.000043:1 with posterior 1.0 (nothing to choose). B4 is the right repair.
+
+### Part B verdicts
+
+- **B1 — SIGN.** Read-only, covers the whole click path, and its done-when is
+  mechanically checkable. (Suggestion, not a condition: add a test that fails
+  when a reason keyword in the click-path namespaces has no ledger row — per the
+  workspace habit that a check ships with a test that constructs the bad case.)
+- **B2 — SIGN.** Per-entry decisions with the same sign-off chain, one group per
+  commit, tests changed with removals. Checkable.
+- **B3 — SIGN.** Concrete sources, existing constructor, size recorded in the
+  receipt. Checkable.
+- **B4 — SIGN.** C from Joe's 55/35/5/5 classes through the classification
+  kernel, B from recorded outcomes, through the already-bound contract
+  functions; done-when is G-decided clicks plus holder labels reading live
+  enactment. Concrete and checkable.
+- **B5 — SIGN.** Accounting first, then fix the largest stage; done-when
+  (per-stage time recorded, largest stage reduced) is checkable.
+- **B6 — SIGN.** Open-ended but the criterion is Joe's judgment, which is the
+  right owner for it.
+- **B7 — SIGN.** The loop-closing test (a later click's recorded choice differs
+  because of an earlier click's outcome) is exactly the right falsifiable
+  done-when.
+
+### Missing (items the plan should add or amend; none block sign-off, all
+should be addressed in revision)
+
+1. **A1 correction (required before Codex):** fix the namespace count (5, not
+   7) and state the counting rule for "39 distinct reason keywords".
+2. **Self-review across seats.** Every "claude-N" seat is one model, so the
+   reviews recorded as independent (claude-3 reviewing claude-5's work, and
+   vice versa) were the model approving itself. A6 addresses ownership but not
+   this circularity. Add an entry: cross-seat review is not independent review,
+   and the rectification is that sign-offs come from other models (as this
+   protocol already does) or from Joe.
+3. **The "no-click rule" episode.** Commits 3134b61f ("no click until the
+   repair queue is empty") and 6714b3ac (withdrawn, per Joe) show another
+   invented click-path rule, added and then withdrawn on 2026-09-22. It belongs
+   in A1's evidence: it is the same defect, caught only because Joe overruled
+   it.
+4. **A2 has no repair step in Part B.** Every other Part A entry points at a B
+   step; A2's rectification is a reporting rule only. Add a B step (or fold
+   into B6): a one-time corrected report to Joe listing which past "results"
+   were refusals, so the record Joe holds matches reality.
+5. **B4 ordering risk.** Turning record-only switches onto the live decision
+   (B4) before B2's removals are merged would enact unvetted apparatus. State
+   explicitly that B4 executes only after B2's signed removals are merged.
+
+Verdict: **16 SIGN, 0 OBJECT.** All Part A entries are honestly stated and
+verified where verifiable; Part B is concrete and ordered. The five Missing
+items above should go into the revision before or alongside Codex's sign-off.
