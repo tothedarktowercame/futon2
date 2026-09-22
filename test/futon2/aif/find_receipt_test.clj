@@ -50,6 +50,22 @@
     ;; Empty authored descent is the Lean warrant for the pattern itself.
     (is (map? (find/validate-result! ctx nil (assoc-in r [:receipts id :citation] {:kind :authored-edges :tail []}))))))
 
+(deftest applied-interface-emits-replayable-law-witnesses
+  (let [{:keys [record captured id]} (sample)
+        receipt (find/applied-find record captured root nil)
+        replay (find/applied-find record captured root nil)]
+    (is (= :wm/find-applied-receipt-v1 (:schema receipt)))
+    (is (= :runtime-validation (:mode receipt)))
+    (is (= receipt replay))
+    (is (= [id] (get-in receipt [:result :selected])))
+    (is (every? #(= :witnessed (get-in receipt [:laws % :status]))
+                [:F1 :F2 :F3 :F4]))
+    (is (true? (get-in receipt [:laws :F1 :selected-within-repository])))
+    (is (= #{:pattern-text} (get-in receipt [:laws :F3 :citation-kinds])))
+    (is (= :vacuous (get-in receipt [:laws :F4 :designation-status])))
+    (is (= (:receipt-sha256 receipt)
+           (evidence/value-digest (dissoc receipt :receipt-sha256))))))
+
 (deftest unknown-is-not-negated-into-evidence
   (doseq [g [[:fact "x"] [:not [:fact "x"]] [:not [:not [:fact "x"]]]
              [:and [:fact "x"] [:fact "yes"]] [:or [:fact "x"] [:fact "no"]]]]

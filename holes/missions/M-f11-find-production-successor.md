@@ -100,3 +100,14 @@ negative controls remain part of the outstanding acceptance work below.
 
 - [ ] Complete F11's ordinary acceptance and persist its runtime validation evidence.
 - [ ] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution.
+
+### Applied-interface acceptance receipt, 2026-09-22
+
+The runtime finder now exposes `find-receipt/applied-find`: one call executes
+the existing F1--F4 validator and returns a content-addressed
+`:wm/find-applied-receipt-v1` binding the interpreted input, captured repository,
+external F4 designation, validated result, and one explicit witness per law.
+Exact replay is tested. This is a substantive acceptance seam, but it does not
+close either task above: the full committed 24-pattern run, persisted ordinary
+gate packet, Lean `find` discharge/amendment, and repair-024 successor judgment
+remain outstanding.

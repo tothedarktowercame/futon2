@@ -323,3 +323,42 @@
                        :deferred (:deferred ctx) :findings (:findings repository)
                        :f4 (if (seq (set/intersection (or designated #{}) (:patterns repository))) :discriminating :vacuous))]
      (validate-result! ctx designated result))))
+
+(defn applied-find
+  "Run the public finder boundary and return a replayable acceptance receipt.
+
+  The receipt binds the interpreted input, captured repository, externally
+  supplied F4 designation and validated result. It witnesses that F1--F4 were
+  exercised by this invocation; it is not a Lean attestation and does not
+  infer that the surrounding mission is complete."
+  [record read-bytes library-root designated]
+  (let [result (find record read-bytes library-root designated)
+        ctx (context record read-bytes library-root)
+        validated (validate-result! ctx designated result)
+        ids (set (:selected validated))
+        applicable (set/intersection (or designated #{})
+                                     (get-in ctx [:repository :patterns]))
+        receipt {:schema :wm/find-applied-receipt-v1
+                 :mode :runtime-validation
+                 :input-sha256 (evidence/value-digest record)
+                 :repository-sha256 (get-in ctx [:repository :digest])
+                 :designation-sha256 (evidence/value-digest designated)
+                 :result validated
+                 :laws {:F1 {:status :witnessed
+                             :selected-within-repository
+                             (set/subset? ids (get-in ctx [:repository :patterns]))
+                             :typed-absence-present
+                             (or (seq ids)
+                                 (= :no-pattern-addresses-this-tension
+                                    (:absence validated)))}
+                        :F2 {:status :witnessed
+                             :receipt-count (count (:receipts validated))}
+                        :F3 {:status :witnessed
+                             :citation-kinds
+                             (into (sorted-set)
+                                   (keep #(get-in % [:citation :kind]))
+                                   (vals (:receipts validated)))}
+                        :F4 {:status :witnessed
+                             :designation-status (:f4 validated)
+                             :applicable-designation-count (count applicable)}}}]
+    (assoc receipt :receipt-sha256 (evidence/value-digest receipt))))
