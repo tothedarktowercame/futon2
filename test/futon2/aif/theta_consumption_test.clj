@@ -245,3 +245,55 @@
     (is (= :no-recorded-trials (:status ft)) "not attributed to this pattern")
     (is (= 1 (:unattributed-rows ft))
         "and the ledger says one row could not be attributed at all")))
+
+(deftest frozen-input-recompute-against-the-banked-trials
+  ;; PROOF-wm-works ⟨1⟩8, the discriminating half. The ⟨1⟩10 sign-off note
+  ;; names this recompute — the frozen non-B inputs scored with and without
+  ;; the update — as what discriminates, with the next click's receipt as
+  ;; corroboration. Until the theta identity was fixed (f5e380b7) the reader
+  ;; matched nothing, so this could only be run against an authored theta;
+  ;; it now runs against the REAL banked trials.
+  (let [root "data/wm-learning-trials"
+        keys- (->> (ledger/read-trials root) (map :theta-key) (filter keyword?) distinct)
+        thetas (into {} (for [k keys-] [k (ledger/pattern-theta k root)]))
+        holder (get thetas :contracts/holder-states-the-claim)
+        g-of (fn [ranked id]
+               (double (:controller-score
+                        (first (filter #(= id (get-in % [:action :id])) ranked)))))
+        base (:ranked (score-with-thetas {}))
+        real (:ranked (score-with-thetas thetas))]
+    ;; what the ledger actually holds, read not authored
+    (is (= 1/8 (:theta holder)) (pr-str holder))
+    (is (= [3 0] [(:trials-count holder) (:successes holder)]))
+
+    ;; WITHOUT the update: the frozen numbers, unchanged
+    (is (< (Math/abs (- (g-of base :C2) (Math/log (/ 1 0.55)))) 0.001))
+    (is (< (Math/abs (- (g-of base :C1) (Math/log 20))) 0.001))
+
+    ;; WITH it: three attempts that never delivered the acceptance make the
+    ;; candidate carrying that pattern score worse, which is the direction
+    ;; the update rule states. G is a cost here, so worse means larger.
+    (is (> (g-of real :C2) (g-of base :C2))
+        (pr-str {:baseline (g-of base :C2) :recorded (g-of real :C2)}))
+
+    ;; and it is THAT pattern's trials doing it: holder's theta alone
+    ;; reproduces the whole shift, and the other three families' recorded
+    ;; thetas together move nothing. Without this a passing "G changed"
+    ;; could come from any plumbing that happened to touch the score.
+    (is (= (g-of (:ranked (score-with-thetas (select-keys thetas [:contracts/holder-states-the-claim]))) :C2)
+           (g-of real :C2)))
+    (is (= (g-of (:ranked (score-with-thetas (dissoc thetas :contracts/holder-states-the-claim))) :C2)
+           (g-of base :C2)))
+
+    ;; C1 does not move, and that is correct rather than a missed
+    ;; consumption: its predicted outcome already falls in the
+    ;; least-preferred class, so its score sits at -ln 0.05 = ln 20, the
+    ;; worst value available. No theta can push it below a floor.
+    (is (= (g-of real :C1) (g-of base :C1)))
+    (is (< (Math/abs (- (g-of real :C1) (- (Math/log 0.05)))) 0.001))
+
+    ;; The update moves mass away from C2 without flipping the choice: it
+    ;; still ranks first. A recompute that reversed the decision would be a
+    ;; different claim and is not what happened.
+    (is (< (g-of real :C2) (g-of real :C1))
+        "C2 still preferred, by less")))
