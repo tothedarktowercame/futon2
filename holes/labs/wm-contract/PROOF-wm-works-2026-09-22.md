@@ -541,6 +541,21 @@ candidates automatically, or that every click is fast.
 - **If the live input does not discriminate** (for example, the queue has changed), that is
   recorded under FAILURES as an ordinary click. The step then waits for a later click whose
   own receipts meet the check. Nothing is pinned or tuned to force one.
+- **PROVED 2026-09-23.** Click `wm-click-e3e4479c…`, run `2026-09-23-1790131591`, fired by
+  zai-1 with `scripts/wm_click.sh --run` under Joe's sixth grant (renewal-5 @ c24c903b, one
+  of five spent). Verified from the records by claude-5.
+  - The machine chose the reference target through the queue: the run record has
+    `:decided-by :ticket-queue`, `:eligible-targets ["T-repair-occ-444fb018…"]`, and a
+    stratum posterior keyed on that ticket's `:C2`.
+  - It acted: commit `ee22106c` "Declare prospective EIG held-out split" —
+    `resources/wm/eig/held-out-split.edn`, `held_out_split.clj`, its test, and the ticket's
+    own progress note. Reviewed and closed `:grounded-change` (machinery-72 attempt-001),
+    binding verified.
+  - The certificate records Joe's class preference as what was consumed
+    (`:preference-audit :recorded :class-emission`, 11/20 · 7/20 · 1/20 · 1/20), with the
+    precision family carrying q₀ and T = 4.
+  - The predicate ran and recorded `{:accepted? :no-acceptance-declared}`; no B update was
+    written, which is correct for a close it did not accept.
 - **PROGRESS.** Pre-flight by zai-1, read-only in the serving JVM (futon2 bb45f0e8):
   the queue holds exactly the reference ticket at its front, unchanged since the freeze; both
   candidates are admitted with every locator resolving at HEAD; the ticket classifies
