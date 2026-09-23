@@ -148,11 +148,67 @@
   "The action a ranked cascade entry contributes to the action marginal at
   this step: its first acting pattern; a non-cascade entry (e.g. the explicit
   no-op) contributes its :type. Purely additive helper of
-  `select-action-cascades`."
+  `select-action-cascades`.
+
+  PROOF-wm-works ⟨1⟩6 reporting note: this is the CHAIN HEAD (the first
+  DECLARED pattern), not necessarily the step that would be enacted now —
+  the enacted step is the first pattern whose guard holds at the current
+  state (cascade-model-manifest/first-enabled over the qualified pattern
+  maps and the current belief), which moves down the chain as earlier limbs
+  complete. The law, the tie-break and every existing join key use the
+  chain head; the enacted step is recorded ALONGSIDE it (see
+  enacted-step-of) and never redefines this key."
   [action]
   (if (and (map? action) (seq (:precedence action)))
     (first (:precedence action))
     (if (map? action) (:type action) action)))
+
+(defn enacted-step-of
+  "PROOF-wm-works ⟨1⟩6: the step the machine would actually take now — the
+  first pattern in the cascade's precedence whose guard holds at the
+  current state (Lean CascadeTransition.firstEnabled semantics), resolved
+  against the belief the decision scored from. Returns the chain head's id
+  when it is itself the enabled step, and nil when no pattern is enabled
+  (the empty-cascade case). Additive: nothing downstream changes key."
+  [action state-tokens]
+  (when (and (map? action) (seq (:precedence action)))
+    (let [;; the live qualifier's pattern maps carry interpreted guards; a
+          ;; bare token-interpretation shape needs the manifest's interpreted
+          ;; form — normalize through token-interpretation when the guard has
+          ;; no :clauses (the additive shapes both occur in records)
+          precedence (vec
+                      (for [p (:precedence action)]
+                        (if (= :interpreted (get-in p [:guard :status]))
+                          p
+                          (try
+                            ((requiring-resolve 'futon2.aif.cascade-policy/token-interpretation)
+                             (:id p) {:guard (into {} (for [cl (get-in p [:guard :clauses])]
+                                                         (cond-> []
+                                                           (seq (:present cl)) (conj :needs)
+                                                           (seq (:absent cl)) (conj :forbids)))
+                                      ;; token-interpretation takes flat sets
+                                      )
+                              :produces (:produces p)})
+                            (catch Exception _ p)))))
+          ;; simpler: use the guard clauses directly with first-enabled by
+          ;; building the interpreted shape here
+          interpreted (vec
+                       (for [p (:precedence action)]
+                         (cond
+                           (= :interpreted (get-in p [:guard :status])) p
+                           :else {:id (:id p)
+                                  :guard (if (seq (get-in p [:guard :clauses]))
+                                           {:status :interpreted
+                                            :clauses (get-in p [:guard :clauses])}
+                                           {:status :interpreted
+                                            :clauses [{:present (get-in p [:guard :present] #{})
+                                                       :absent (get-in p [:guard :absent] #{})}]})
+                                  :produces (:produces p)})))
+          enabled (try
+                    ((requiring-resolve 'futon2.aif.cascade-model-manifest/first-enabled)
+                      interpreted state-tokens)
+                    (catch Exception _ nil))]
+      (some-> enabled :id))))
 
 (defn- selection-input
   "Record the historical neutral-input rule, including present null/false.
@@ -313,6 +369,9 @@
   (let [attach (requiring-resolve 'futon2.aif.cascade-habit-store/attach-habits)
         path (or cascade-habit-path
                  @(requiring-resolve 'futon2.aif.cascade-habit-store/default-path))
+        ;; ⟨1⟩6: the ORIGINAL entries carry the prediction context the
+        ;; enacted-step record reads; attach may rebuild entries without it
+        original-ranked ranked-actions
         ranked-actions (attach path ranked-actions)
         candidates (mapv selection-candidate ranked-actions)
         _ (when (and beta-state
@@ -394,6 +453,21 @@
                      {:beta beta :candidates candidates :posterior posterior
                       :action-of action-of :choice unrestricted-choice
                       :near-tie-threshold near-tie-threshold})
+        ;; PROOF-wm-works ⟨1⟩6: the record carries BOTH action identities,
+        ;; each labelled: the chain head (the marginal's existing key, the
+        ;; law's and the tie-break's identity — unchanged) and the step that
+        ;; would be enacted now under the current belief. Additive only.
+        enacted-steps (into {}
+                            (for [e original-ranked
+                                  :let [a (:action e)
+                                        head (if (map? a) (get (cascade-first-action a) :id) a)
+                                        ;; the belief the decision scored from:
+                                        ;; the entry's prediction initial belief
+                                        ;; (a state-set) or a fallback that
+                                        ;; enables nothing (nil step)
+                                        state (or (some-> (get-in e [:prediction :initial-belief]) keys first)
+                                                  (some-> (get-in e [:prediction :belief]) keys first))]]
+                              [head (enacted-step-of a state)]))
         queue-receipt (when queue-plan
                         (assoc queue-plan
                                :unrestricted-choice unrestricted-choice
@@ -428,6 +502,10 @@
       :posterior posterior
       :softmax-weights weights
       :action-marginal weights
+      ;; ⟨1⟩6: the step the machine would actually take now, keyed by the
+      ;; same chain-head id the marginal uses — labelled, additive, and
+      ;; never a substitute for the marginal's own key
+      :enacted-steps enacted-steps
       :per-policy-argmax per-policy-argmax
       :excluded-non-actions
       {:count (count excluded)
