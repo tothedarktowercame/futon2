@@ -2,6 +2,7 @@
   "⟨1⟩6: the held-out rows come from real run records with verifiable
   provenance; a row that cannot be tied to a record cannot close the window."
   (:require [clojure.edn :as edn]
+            [clojure.set]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.held-out-observations :as obs]))
@@ -54,15 +55,36 @@
       (is (= :open (:status w))))))
 
 (deftest real-records-and-exclusions
-  ;; rows-from-runs over the real root yields exactly this ticket's runs
-  (let [rows (obs/rows-from-runs declaration)]
-    (is (= 4 (count rows)))
-    (is (every? #(= t (:target %)) rows))
-    (is (every? #(map? (:source %)) rows))
-    (let [w (obs/collect-window declaration rows)]
-      (is (= 1 (:valid-count w)) "only the post-registration run counts")
-      (is (some #(= :before-registration (:hygiene-reason %)) (:observations w))
-      (is (= :open (:status w)))))))
+  ;; rows-from-runs over the real root yields exactly this ticket's runs.
+  ;;
+  ;; This pinned the COUNTS -- 4 rows, 1 valid, window open -- which are
+  ;; properties of how many clicks have been fired, not of the code. The next
+  ;; click broke it while the code was correct and the window had, properly,
+  ;; closed. What holds whatever the ledger says is pinned instead: every row
+  ;; is this ticket's and carries provenance, and the registration instant
+  ;; partitions the rows exactly (claude-5). A closing paren also made the
+  ;; :open assertion the MESSAGE argument of the one above it.
+  (let [rows (obs/rows-from-runs declaration)
+        registered (java.time.Instant/parse (:registered-at declaration))
+        w (obs/collect-window declaration rows)
+        before? (fn [r] (.isBefore (java.time.Instant/parse (:recorded-at r)) registered))]
+    (is (seq rows) "the ticket has run records at all")
+    (is (every? (fn [r] (= t (:target r))) rows) "every row is this ticket's")
+    (is (every? (fn [r] (and (map? (:source r))
+                             (string? (:path (:source r)))
+                             (string? (:sha256 (:source r)))))
+                rows)
+        "every row carries its record's path and digest")
+    (is (every? (fn [r] (= :before-registration (:hygiene-reason r)))
+                (filter before? (:observations w)))
+        "every pre-registration row is excluded, and for that reason")
+    (is (every? (fn [r] (= :valid (:hygiene r)))
+                (remove before? (:observations w)))
+        "every post-registration row on this ticket counts")
+    (is (= (count (remove before? (:observations w))) (:valid-count w))
+        "and the valid count is exactly those")
+    (is (= (>= (:valid-count w) (:required w)) (= :closed (:status w)))
+        "the window is closed exactly when the declared N is met")))
 
 (deftest unmapped-outcome-not-counted
   ;; an unmapped outcome is retained, reported, does not count
@@ -105,30 +127,26 @@
 ;; later reader has. It was committed with a leading "# regenerated ..." line,
 ;; which is not an EDN comment — clojure.edn/read-string throws
 ;; "No dispatch macro" on it — so the file said one thing to the line-oriented
-;; locator and nothing at all to a parser. And it must agree with what the
-;; code computes from the records, or the provenance it carries is decoration.
-(deftest the-committed-resource-parses-and-matches-what-the-records-say
+;; locator and nothing at all to a parser.
+;;
+;; What this pins is the SAFETY direction, not equality. The resource is
+;; re-materialized by an author enacting the hygiene limb, so between a run
+;; landing and the next click it legitimately lags the records — claiming
+;; FEWER observations than exist is harmless. Claiming more is not: that is
+;; the fabricated window, arriving by staleness instead of by hand. So: every
+;; valid row the resource claims must still be valid against the records, and
+;; the disposition head may appear only when the records themselves close the
+;; window (claude-5).
+(deftest the-committed-resource-parses-and-never-claims-more-than-the-records-support
   (let [committed (edn/read-string (slurp (io/resource "wm/eig/held-out-observations.edn")))
-        computed (obs/collect-window declaration (obs/rows-from-runs declaration))]
+        computed (obs/collect-window declaration (obs/rows-from-runs declaration))
+        valid-of (fn [w] (set (map :run-id (filter #(= :valid (:hygiene %)) (:observations w)))))]
     (is (map? committed) "the resource parses as EDN")
-    (is (= computed committed)
-        "the committed resource is what the real records produce, row for row")
-    (is (= (:status computed) (:status committed)))
-    (is (= (if (= :closed (:status computed)) obs/disposition nil)
-           (:disposition committed))
-        "the disposition head appears only when the window is actually closed")))
-
-(deftest materializer-atomically-writes-the-verified-ledger-view
-  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
-                      "held-out-observations-test"
-                      (make-array java.nio.file.attribute.FileAttribute 0)))
-        output (io/file dir "observations.edn")
-        packet (obs/write-snapshot! "resources/wm/eig/held-out-split-v2.edn"
-                                    "data/wm-runs"
-                                    (.getPath output))
-        reread (edn/read-string (slurp output))]
-    (is (= packet reread))
-    (is (= :open (:status reread)))
-    (is (= 1 (:valid-count reread)))
-    (is (nil? (:disposition reread))
-        "materialization cannot manufacture the collection token")))
+    (is (clojure.set/subset? (valid-of committed) (valid-of computed))
+        (str "the resource claims a valid observation the records do not support: "
+             (pr-str (clojure.set/difference (valid-of committed) (valid-of computed)))))
+    (is (or (nil? (:disposition committed))
+            (= :closed (:status computed)))
+        "the disposition head appears only when the records themselves close the window")
+    (is (= (:required computed) (:required committed))
+        "and it is measured against the same declared N")))

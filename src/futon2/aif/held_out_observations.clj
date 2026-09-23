@@ -243,7 +243,14 @@
          tmp (io/file (.getParentFile target)
                       (str "." (.getName target) "." (java.util.UUID/randomUUID) ".tmp"))]
      (io/make-parents target)
-     (spit tmp (with-out-str (pprint/pprint packet)))
+     ;; the artifact says where it came from: it is the C4 locator's subject
+     ;; and the only thing a later reader has (claude-5)
+     (spit tmp (str ";; Regenerated from the durable run records through\n"
+                    ";; futon2.aif.held-out-observations/write-snapshot!.\n"
+                    ";; Do not hand-edit: every row's :source names the record it was read\n"
+                    ";; from and its digest, and collect-window refuses a row it cannot tie\n"
+                    ";; back to that file.\n"
+                    (with-out-str (pprint/pprint packet))))
      (Files/move (.toPath tmp) (.toPath target)
                  (into-array java.nio.file.StandardCopyOption
                              [java.nio.file.StandardCopyOption/ATOMIC_MOVE
