@@ -166,3 +166,31 @@
      :read-back (let [again (read-trials (or ledger-root default-root))]
                   {:trials (count again)
                    :same-family-count (count (filter #(= family (:family %)) again))})}))
+
+(defn family-theta
+  "PROOF-wm-works ⟨1⟩8 second half: the scorer's read of the recorded
+   trials. Returns the b-update rule's posterior for FAMILY — (successes +
+   1/2)/(trials + 1) over the family's whole-attempt outcomes — WITH
+   provenance: {:theta … :status :recorded-trials :trials-count n
+   :successes n :identities […]}. A family with no trials:
+   {:status :no-recorded-trials}. An unreadable or malformed ledger:
+   {:status :defaulted :reason …} — NEVER a refusal; the caller keeps the
+   documented default with the typed reason recorded."
+  ([family] (family-theta family default-root))
+  ([family root]
+   (try
+     (let [rows (filter #(= family (:family %)) (read-trials root))
+           n (count rows)
+           successes (count (filter (comp true? :observed) rows))]
+       (if (zero? n)
+         {:status :no-recorded-trials}
+         {:theta (/ (+ successes 1/2) (+ n 1))
+          :status :recorded-trials
+          :trials-count n
+          :successes successes
+          :identities (vec (keep :identity rows))}))
+     (catch Exception e
+       {:status :defaulted
+        :reason (or (:learning-ledger/refusal (ex-data e))
+                    :ledger-unreadable)
+        :message (.getMessage e)}))))

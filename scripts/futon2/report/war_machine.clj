@@ -6359,6 +6359,47 @@
               ;; relation vocabulary -> scorer classes (the close side maps
               ;; the same keywords through the facet-map)
               scorer-class {:focus :focused :associated :related :useful-elsewhere :unrelated}
+              ;; ⟨1⟩8 second half: the scorer CONSUMES the recorded theta.
+              ;; Where the model is assembled for scoring (not inside the
+              ;; kernel): each candidate's pattern whose family has recorded
+              ;; trials takes its theta from the ledger, with provenance on
+              ;; the pattern; a family with no trials keeps the documented
+              ;; default; an unreadable ledger leaves the default with a
+              ;; typed reason. Nothing is a gate. The kernel keeps reading
+              ;; theta off the pattern — only the pattern's theta source
+              ;; changes.
+              ledger-root-for-theta (or (:learning-trial-ledger-root opts)
+                                         learning-ledger/default-root)
+              theta-consumption
+              (into {}
+                    (for [c joint-candidates
+                          p (:precedence c)
+                          :let [family (:id p)]]
+                      [family (try
+                                (learning-ledger/family-theta family ledger-root-for-theta)
+                                (catch Exception e
+                                  {:status :defaulted :reason :ledger-read-failed}))] ))
+              joint-candidates
+              (mapv (fn [c]
+                      (update c :precedence
+                              (fn [ps]
+                                (mapv (fn [p]
+                                        (let [ft (get theta-consumption (:id p))]
+                                          (cond
+                                            ;; recorded trials: theta from the ledger
+                                            (= :recorded-trials (:status ft))
+                                            (assoc p :theta (:theta ft)
+                                                     :theta-source :recorded-trials
+                                                     :theta-provenance (select-keys ft [:trials-count :successes :identities]))
+                                            ;; unreadable: documented default, typed reason kept
+                                            (= :defaulted (:status ft))
+                                            (assoc p :theta 1
+                                                     :theta-source :documented-default
+                                                     :theta-default-reason (:reason ft))
+                                            ;; no trials: the kernel's own default, unchanged
+                                            :else p)))
+                                      ps))))
+                    joint-candidates)
               class-model (class-observation-model
                            {:universe class-universe
                             :acceptance joint-want
@@ -6434,6 +6475,15 @@
                 decision (assoc-in decision [:selection-certificate :token-belief-input]
                                    token-belief-input)
                 decision (assoc (input-receipts/with-preference-audit decision)
+                                :theta-consumption
+                                (into {}
+                                      (for [[fam ft] theta-consumption]
+                                        [fam (if (= :recorded-trials (:status ft))
+                                               {:theta (:theta ft) :status :recorded-trials
+                                                :trials-count (:trials-count ft)
+                                                :identities (:identities ft)}
+                                               {:status (:status ft)
+                                                :reason (:reason ft)})]))
                                 :focus-status
                                 {:status (:status focus-info)
                                  :focus (:focus focus-info)
