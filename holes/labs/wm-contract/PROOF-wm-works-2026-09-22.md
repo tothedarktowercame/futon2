@@ -644,8 +644,19 @@ candidates automatically, or that every click is fast.
       own C4 locator, the conjunct that failed the click before.
     - (c) fails, and is the only failing conjunct: `:acceptance-not-observed`, the ticket's
       Status still OPEN. No B update, stopped at (c) and named.
-  - So the step waits on the repair's later limbs, run by the next clicks. Two of the five
-    clicks under renewal-5 are spent.
+  - Third limb, 2026-09-23: zai-1 stopped on feasibility before firing (futon2 4b5f8e5b), so
+    no click was spent. The declaration's held-out set is machinery-72 `attempt-002` and
+    `attempt-003`, and its window closes when all of them have a durable close. attempt-002
+    closed today; attempt-003 does not exist, because it is what the NEXT click on this
+    ticket creates. So the observations limb cannot be accepted yet, and firing for it would
+    repeat click 3's `:prospective-held-out-evidence-unavailable`.
+  - Also found: the action marginal is keyed on the chain HEAD's name
+    (`:aif/declare-the-conditioning`) while the step that would be enacted is the next
+    pattern in the chain (`:aif/measurement-window-hygiene`). The record names a different
+    action from the one the machine would take.
+  - So the step waits on the repair's later limbs. Two of the five clicks under renewal-5 are
+    spent; the repair needs about four more: one to create attempt-003 and close the window,
+    then observations, calibration, and acceptance.
 
 ### ⟨1⟩7. The outcome is measured and attested.
 
