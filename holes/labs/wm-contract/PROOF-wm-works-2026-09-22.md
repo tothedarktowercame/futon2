@@ -788,7 +788,23 @@ candidates automatically, or that every click is fast.
   - The next live selection's receipt shows the updated parameter's identity and value
     being consumed, on whatever compatible task it runs.
   - The reference task is not replayed as new work, and its outcome is not counted twice.
-- **FAILURES:** —
+- **The discriminating half is settled, 2026-09-23** (futon2 46b931a2). The ⟨1⟩10 sign-off
+  names the frozen-input recompute — the frozen non-B inputs scored with and without the
+  update — as what discriminates here, with the next click's receipt as corroboration. It now
+  runs against the REAL banked trials rather than an authored θ, which the identity fix made
+  possible.
+  - `:contracts/holder-states-the-claim` has three attempts and no acceptances, θ = 1/8, and
+    it sits in C2's precedence. Scoring the frozen reference input with the recorded θ moves
+    G(C2) from 0.5978 to 1.8892 — worse, the direction three undelivered attempts imply —
+    and the posterior from 0.917 to 0.751, without flipping the choice.
+  - G(C1) does not move, correctly: it is already at −ln 0.05 = ln 20, the floor its
+    least-preferred class sets, so no θ can push it lower. The test says this, because
+    insensitivity there would otherwise read as a consumption that never happened.
+  - Two assertions stop a vacuous pass: holder's θ alone reproduces the whole shift, and the
+    other three recorded families together move nothing.
+  - **The corroboration half is not available without a click.** The third click ran before
+    the identity fix and scored every pattern with `:theta-source :documented-default`, so no
+    recorded run shows the updated parameter being consumed.
 
 ### ⟨1⟩9. Q.E.D.
 
