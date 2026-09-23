@@ -117,3 +117,18 @@
     (is (= (if (= :closed (:status computed)) obs/disposition nil)
            (:disposition committed))
         "the disposition head appears only when the window is actually closed")))
+
+(deftest materializer-atomically-writes-the-verified-ledger-view
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "held-out-observations-test"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))
+        output (io/file dir "observations.edn")
+        packet (obs/write-snapshot! "resources/wm/eig/held-out-split-v2.edn"
+                                    "data/wm-runs"
+                                    (.getPath output))
+        reread (edn/read-string (slurp output))]
+    (is (= packet reread))
+    (is (= :open (:status reread)))
+    (is (= 1 (:valid-count reread)))
+    (is (nil? (:disposition reread))
+        "materialization cannot manufacture the collection token")))

@@ -2,6 +2,7 @@
   "Pure hygiene boundary for a preregistered held-out observation window."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.pprint :as pprint]
             [futon2.aif.held-out-split :as split]
             [futon2.aif.load-identity :as load-identity]))
 
@@ -224,4 +225,34 @@
          :unmapped? (nil? mapped)
          :source {:path rel :sha256 (sha256-of f)}})))))
 
+(defn snapshot
+  "Compute the collection packet from the declaration and durable run ledger."
+  ([declaration] (snapshot declaration "data/wm-runs"))
+  ([declaration run-root]
+   (collect-window declaration (rows-from-runs declaration run-root))))
+
+(defn write-snapshot!
+  "Atomically materialize the collection packet. The disposition is therefore
+  written only when collect-window has verified enough durable source rows."
+  ([declaration-path output-path]
+   (write-snapshot! declaration-path "data/wm-runs" output-path))
+  ([declaration-path run-root output-path]
+   (let [declaration (edn/read-string (slurp declaration-path))
+         packet (snapshot declaration run-root)
+         target (io/file output-path)
+         tmp (io/file (.getParentFile target)
+                      (str "." (.getName target) "." (java.util.UUID/randomUUID) ".tmp"))]
+     (io/make-parents target)
+     (spit tmp (with-out-str (pprint/pprint packet)))
+     (Files/move (.toPath tmp) (.toPath target)
+                 (into-array java.nio.file.StandardCopyOption
+                             [java.nio.file.StandardCopyOption/ATOMIC_MOVE
+                              java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
+     packet)))
+
+(defn -main [& _]
+  (let [packet (write-snapshot! "resources/wm/eig/held-out-split-v2.edn"
+                                "resources/wm/eig/held-out-observations.edn")]
+    (println (pr-str (select-keys packet
+                                 [:status :valid-count :missing-count :disposition])))))
 
