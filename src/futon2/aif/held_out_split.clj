@@ -7,7 +7,7 @@
 (load-identity/register! *ns* *file*)
 
 (def schema :wm/eig-held-out-split-v1)
-(def disposition "HELD-OUT-SPLIT-DECLARED")
+(def disposition 'HELD-OUT-SPLIT-DECLARED)
 (def required-outcomes #{:result :no-result :failure :timeout})
 
 (defn- refuse! [reason data]

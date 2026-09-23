@@ -2,7 +2,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
-            [futon2.aif.held-out-split :as split]))
+            [futon2.aif.held-out-split :as split]
+            [futon2.aif.observation-checks :as checks]))
 
 (def valid
   {:schema split/schema
@@ -24,6 +25,8 @@
   (is (= valid (split/validate valid)))
   (let [declared (-> "wm/eig/held-out-split.edn" io/resource slurp edn/read-string)]
     (is (= declared (split/validate declared)))
+    (is (checks/decl-present? (slurp (io/resource "wm/eig/held-out-split.edn"))
+                              "HELD-OUT-SPLIT-DECLARED"))
     (is (false? (get-in declared [:claims :observations-collected?])))))
 
 (deftest malformed-or-retrospective-declarations-refuse
