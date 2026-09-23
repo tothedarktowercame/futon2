@@ -721,6 +721,27 @@ candidates automatically, or that every click is fast.
       and the restore route cannot reach acceptance on this evidence. That would be an
       honest negative result about the machine's predictions, and the declaration is not to
       be amended to avoid it.
+  - Sixth limb, 2026-09-23: click `wm-click-6a4dddf5`, run `2026-09-23-1790189901`,
+    machinery-74 attempt-002. **The second chain limb is discharged.** The author ran
+    the materializer over the durable records and the window published its disposition
+    (`a2137f88`); `[T :repair/held-out-observations-collected]` now reads TRUE through
+    its own C4 locator, and the close records `:failed :c :reason
+    :acceptance-not-observed` — conjunct (b) PASSES on a token that was measured and
+    found true, and the ticket's own Status is the only thing left failing.
+    - Chain state, observed through the declared locators at `96f166dc`:
+      `:repair/split-declared-valid` true, `:repair/held-out-observations-collected`
+      true, `:repair/calibration-evidence-present` false (its file does not exist yet).
+      The next enacted step is `:aif/two-layer-calibration`.
+    - Found in review of the materialization: `render-packet` pattern-replaced whatever
+      `pprint` emitted, so whether the head cleared C4 depended on where `:disposition`
+      fell in the printed map. As the last key it produced
+      `HELD-OUT-OBSERVATIONS-COLLECTED}`, and `decl-present?` requires the head to be
+      followed by whitespace, `:`, `(`, `{`, `[` or end of line. The committed file
+      passed because at nine keys the hash order put `:disposition` first. Spliced
+      deterministically in `96f166dc`, with `write-snapshot!` refusing to write a closed
+      packet whose head the predicate itself cannot see. Had a key been added, the
+      artifact would have said `:status :closed` while the token read false — the same
+      mismatch this ticket opened on.
   - **In-process completion (futon2 b27f2a1a, 97152006), per Joe's method ruling.** The real
     close assembly, the acceptance predicate and the B update call site are driven over the
     recorded occurrences, with fixtures — labelled as such, in a throwaway repo outside
