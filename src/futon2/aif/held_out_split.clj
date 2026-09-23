@@ -100,6 +100,15 @@
     (when-not (= :none calibration-authority)
       (refuse! :premature-calibration-authority
                {:calibration-authority calibration-authority}))
+    ;; Without a registration instant, membership can only be decided by
+    ;; date, and a run from earlier the same day -- outcome already known --
+    ;; falls inside the window. A prospective split that cannot say what it
+    ;; is prospective TO is not prospective (claude-5's review of d55e28f0).
+    (when-not (and (string? (:registered-at declaration))
+                   (re-matches #"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"
+                               (:registered-at declaration)))
+      (refuse! :missing-registration-instant
+               {:registered-at (:registered-at declaration)}))
     (let [mintable (mintable-window? declaration)]
       (when-not (true? mintable)
         (refuse! :window-not-mintable
@@ -112,28 +121,32 @@
 (defn window-membership
   "Which attempts are in the window, given the run records that exist.
    Each RUN-RECORD is {:target … :recorded-at … :run-id …}; a record is a
-   member when its target equals the declaration's ticket and its
-   recorded-at is after the starting point. Returns {:members […] :not-members […]}
-   with the reason for each non-member, plainly."
+   member when its target is the declaration's ticket AND its recorded-at
+   is strictly after :registered-at -- the instant the declaration was
+   registered. Returns {:members […] :not-members […]} with a plain reason
+   for each non-member.
+
+   The instant, not the date, and not the commit sha. Comparing dates put
+   a run from earlier the SAME DAY inside the window, so a run whose
+   outcome was already known counted as held-out -- the retrospective
+   inclusion this whole supersession exists to remove (claude-5's review of
+   d55e28f0). :starting-point stays as provenance, naming the commit that
+   registered the declaration; it is not what membership is decided by,
+   because a sha does not order against a timestamp."
   [declaration run-records]
-  (let [ticket (get declaration :ticket/id)]
+  (let [ticket (get declaration :ticket/id)
+        registered-at (:registered-at declaration)]
     (reduce
-     (fn [acc {:keys [target recorded-at run-id] :as r}]
-       (let [in? (and (= ticket target)
-                      ;; the starting point is a commit; run records after
-                      ;; the supersession commit qualify by run-id ordering
-                      ;; (run ids are timestamps) — use the recorded-at
-                      ;; against the declaration's own date
-                      (let [start (get-in declaration [:starting-point :sha])
-                            declared-on (:declared-on declaration)]
-                        (<= (compare (subs (str declared-on) 0 10)
-                                     (subs (str recorded-at) 0 10))
-                            0)))]
-         (if in?
+     (fn [acc {:keys [target recorded-at run-id]}]
+       (let [right-target? (= ticket target)
+             after? (and registered-at recorded-at
+                         (pos? (compare (str recorded-at) (str registered-at))))]
+         (if (and right-target? after?)
            (update acc :members conj {:run-id run-id :recorded-at recorded-at})
-           (update acc :not-members conj {:run-id run-id
-                                          :reason (if (not= ticket target)
-                                                    :different-target
-                                                    :before-starting-point)}))))
+           (update acc :not-members conj
+                   {:run-id run-id
+                    :reason (cond (not right-target?) :different-target
+                                  (nil? registered-at) :declaration-has-no-registered-at
+                                  :else :before-registration)}))))
      {:members [] :not-members []}
      run-records)))

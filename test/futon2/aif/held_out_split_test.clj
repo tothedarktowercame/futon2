@@ -71,8 +71,12 @@
       (is (= :window-not-mintable (:held-out-split/refusal r)) (pr-str r)))))
 
 (deftest window-membership-over-todays-attempts
+  ;; Every run that exists TODAY was recorded before the v2 declaration was
+  ;; registered, so the window is correctly EMPTY: nothing already run can
+  ;; be held out. The earlier version of this test asserted the ticket's own
+  ;; already-closed run was a member, which is the retrospective inclusion
+  ;; the supersession exists to remove (claude-5's review of d55e28f0).
   (let [d (edn/read-string (slurp (io/resource "wm/eig/held-out-split-v2.edn")))
-          ;; the run records that exist today (target + recorded-at shapes)
           records [{:run-id "2026-09-23-1790136186"
                     :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
                     :recorded-at "2026-09-23T04:03:00Z"}
@@ -80,7 +84,40 @@
                     :target "M-f11-find-production-successor"
                     :recorded-at "2026-09-22T20:00:00Z"}]
           m (split/window-membership d records)]
-      (is (= 1 (count (:members m))) (pr-str m))
-      (is (= "2026-09-23-1790136186" (get-in (first (:members m)) [:run-id])))
-      (is (= :different-target (get-in (first (:not-members m)) [:reason]))
-          "the non-member states its reason")))
+      (is (empty? (:members m))
+          "nothing already run is held out")
+      (is (= [:before-registration :different-target]
+             (mapv :reason (:not-members m)))
+          "and each non-member states which rule excluded it")))
+
+(deftest a-run-recorded-before-registration-is-not-held-out
+  ;; The bad case the date comparison let through: the ticket's own second
+  ;; click ran earlier on the SAME DAY the v2 declaration was written, so
+  ;; its outcome was already known. It must not be a member (claude-5's
+  ;; review of d55e28f0).
+  (let [decl (edn/read-string (slurp (io/file "resources/wm/eig/held-out-split-v2.edn")))
+        ticket (:ticket/id decl)
+        {:keys [members not-members]}
+        (split/window-membership
+         decl
+         [{:run-id "2026-09-23-1790136186" :target ticket
+           :recorded-at "2026-09-23T03:23:06Z"}      ; before registration
+          {:run-id "2026-09-23-1790161992" :target ticket
+           :recorded-at "2026-09-23T11:13:12Z"}      ; before registration
+          {:run-id "2026-09-24-1790200000" :target ticket
+           :recorded-at "2026-09-24T09:00:00Z"}      ; after: genuinely held out
+          {:run-id "2026-09-24-1790200001" :target "M-f11-find-production-successor"
+           :recorded-at "2026-09-24T10:00:00Z"}])]
+    (is (= ["2026-09-24-1790200000"] (mapv :run-id members))
+        (pr-str members))
+    (is (= #{:before-registration :different-target}
+           (set (map :reason not-members)))
+        (pr-str not-members))))
+
+(deftest a-declaration-without-a-registration-instant-refuses
+  (let [decl (-> (edn/read-string (slurp (io/file "resources/wm/eig/held-out-split-v2.edn")))
+                 (dissoc :registered-at))]
+    (is (= :missing-registration-instant
+           (try (split/validate-v2 decl) nil
+                (catch clojure.lang.ExceptionInfo e
+                  (:held-out-split/refusal (ex-data e))))))))

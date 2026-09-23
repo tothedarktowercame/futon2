@@ -3,6 +3,9 @@
  HELD-OUT-SPLIT-DECLARED
  :ticket/id "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
  :declared-on "2026-09-23"
+ ;; membership is decided against this instant: a run recorded before it
+ ;; already has a known outcome and cannot be held out
+ :registered-at "2026-09-23T12:20:00Z"
  :supersedes "resources/wm/eig/held-out-split.edn"
  :supersedes-reason "The v1 declaration named its held-out set as cohort/attempt directory labels (machinery-72 attempt-002, attempt-003). Every click opens a NEW cohort, so attempt-003 under machinery-72 will never be minted; the window could not close. This declaration names its window by identities the runner actually mints."
  :model {:theta :a4a/dirichlet-posterior-v1
