@@ -3944,7 +3944,12 @@
                                                 [:controller-decision :action :accepted-increment :acceptance])
                                          (cascade-sources/acceptance-of
                                           (:target (get-in selection-judgment [:controller-decision :action]))))
-                         :after-revision (:commit data)})
+                         :after-revision (:commit data)
+                         ;; ⟨1⟩6 finding 3: the enacted step's DECLARED
+                         ;; products, so (b) can fail when nothing was
+                         ;; measured rather than falling through to (c)
+                         :declared-tokens (vec (sort-by pr-str (map (fn [tok] (if (vector? tok) (second tok) tok))
+                                                                    (:produces pattern))))})
                          :criterion-step enacted-step
                          :measured-tokens (vec (sort-by pr-str produced))))
                        close-judgment-base

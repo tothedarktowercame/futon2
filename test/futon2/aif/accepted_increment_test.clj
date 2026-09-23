@@ -198,3 +198,57 @@
             :after-revision "HEAD"})]
     (is (false? (:accepted? r)))
     (is (= :b (:failed r)))))
+
+;; ⟨1⟩6 finding 3 (claude-5 review): (b) must distinguish "declared
+;; products, nothing measured" from "declared nothing".
+(deftest declared-products-unmeasured-fails-b
+  ;; The bad case: one declared token, ZERO measured rows, a good binding
+  ;; and a true acceptance. BEFORE the :declared-tokens input this returned
+  ;; {:accepted? true} — (b) fell through empty and (c) passed on the true
+  ;; acceptance. AFTER: {:accepted? false :failed :b
+  ;; :reason :no-declared-product-measured}.
+  (let [r (ai/accepted-increment
+           {:binding {:repo "futon2" :commit "c" :pre-dispatch-head "p"
+                      :descendant? true :corroborates? true
+                      :claim-in-author-window? true}
+            :produced-tokens {}
+            :declared-tokens [:repair/held-out-observations-collected]
+            :acceptance {:token :admission/task-stated
+                         :locator {:class :C4 :repo "futon2" :sha "HEAD"
+                                   :path (str "holes/tickets/" t ".md")
+                                   :decl "# Verify or restore guardrail refusal"}}
+            :after-revision "HEAD"})]
+    (is (false? (:accepted? r)) (pr-str r))
+    (is (= :b (:failed r)))
+    (is (= :no-declared-product-measured (:reason r)))
+    (is (= [:repair/held-out-observations-collected]
+           (get-in r [:evidence :declared-tokens])))))
+
+(deftest declared-with-rows-behaves-as-now
+  ;; declared tokens WITH measurement rows: unchanged behaviour
+  (let [r (ai/accepted-increment
+           {:binding {:repo "futon2" :commit "c" :pre-dispatch-head "p"
+                      :descendant? true :corroborates? true
+                      :claim-in-author-window? true}
+            :produced-tokens {[:admission/task-stated] {:class :C4 :repo "futon2" :sha "HEAD"
+                                                         :path (str "holes/tickets/" t ".md")
+                                                         :decl "# Verify or restore guardrail refusal"}}
+            :declared-tokens [:admission/task-stated]
+            :acceptance {:token :admission/task-stated
+                         :locator {:class :C4 :repo "futon2" :sha "HEAD"
+                                   :path (str "holes/tickets/" t ".md")
+                                   :decl "# Verify or restore guardrail refusal"}}
+            :after-revision "HEAD"})]
+    (is (true? (:accepted? r)) (pr-str r))))
+
+(deftest declaration-free-candidate-still-reaches-no-acceptance
+  ;; genuinely declaration-free AND measurement-free: (b) does not fire
+  (let [r (ai/accepted-increment
+           {:binding {:repo "futon2" :commit "c" :pre-dispatch-head "p"
+                      :descendant? true :corroborates? true
+                      :claim-in-author-window? true}
+            :produced-tokens {}
+            :declared-tokens []
+            :acceptance nil
+            :after-revision "HEAD"})]
+    (is (= :no-acceptance-declared (:accepted? r)) (pr-str r))))

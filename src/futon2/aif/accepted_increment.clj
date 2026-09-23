@@ -39,8 +39,15 @@
                         :pre-dispatch-head plus fresh-artifact-binding's
                         verdict fields — :descendant? :corroborates?
                         :observed-valid? :claim-in-author-window?)
-      :produced-tokens  {token locator} — the selected candidate's DECLARED
-                        produced tokens with the locators the source declared
+      :produced-tokens  {token locator} — the measured rows' tokens with
+                        their locators (from the measurement producer)
+      :declared-tokens  (optional) the enacted step's :produces — the
+                        tokens the candidate DECLARED it would produce.
+                        When tokens are declared but produced-tokens is
+                        empty (nothing was measured), (b) fails with
+                        :no-declared-product-measured naming the declared
+                        tokens. A candidate genuinely declaring nothing is
+                        unaffected.
       :acceptance       the target's own acceptance declaration as
                         {:token t :locator l}, or nil
       :after-revision   the reviewed after-revision sha (nil when the
@@ -50,7 +57,7 @@
    {:accepted? false :failed :a|:b|:c :evidence …} or
    {:accepted? :no-acceptance-declared :target …}. Each failure names its
    conjunct and carries the evidence it used."
-  [{:keys [binding produced-tokens acceptance after-revision]}]
+  [{:keys [binding produced-tokens declared-tokens acceptance after-revision]}]
   (let [;; (a) fresh binding: the binding's own verdict fields, exactly the
         ;; ones task-execution-evidence/fresh-artifact-binding computes.
         a-ok (and (map? binding)
@@ -90,6 +97,17 @@
       {:accepted? false :failed :b
        :reason :declared-product-not-observed-true
        :evidence {:failed-tokens b-bad :all-results b-results}}
+
+      ;; ⟨1⟩6 (claude-5 review finding 3): a candidate that DECLARED
+      ;; products but whose produced-tokens is EMPTY measured nothing —
+      ;; (b) must fail rather than fall through to (c). Evidence, never
+      ;; a gate: the close still gets written.
+      (and (seq declared-tokens) (empty? produced-tokens))
+      {:accepted? false :failed :b
+       :reason :no-declared-product-measured
+       :evidence {:declared-tokens (vec declared-tokens)
+                  :measured-tokens 0
+                  :note "the enacted step declared these products and no measurement row existed for any of them"}}
 
       (not c-ok)
       {:accepted? false :failed :c
