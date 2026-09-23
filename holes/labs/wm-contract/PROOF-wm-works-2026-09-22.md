@@ -2463,3 +2463,31 @@ therefore needs one more piece of apparatus: the consumption side of the
 B update, wired from the ledger to the scorer, with the frozen-input
 comparison the plan's ⟨1⟩8 check specifies. That is real work, not a
 click.
+
+## ⟨1⟩7 settlement (zai-1, 2026-09-23, read-only)
+
+Settled on the two existing closes, each reported separately; no clicks,
+no fixtures, no substitutions.
+
+**machinery-72 attempt-002** — Part 1 (measured, not missing): **PASS**.
+All six wanted tokens have d-task rows with boolean observed values
+(task-stated true, split-declared-valid true, the other four false); no
+`:missing`. Part 2 (attested class recorded): **FAIL** — the receipt
+exists and `verify-close` is true, but `:class` is **:unknown** with
+`:missing [:attested-increment]`. Part 3 (rerun agreement): **PASS** — the
+rerun reproduces :unknown from the same inputs; the agreement is genuine.
+
+**machinery-73 attempt-001** — Part 1: **PASS** (same six tokens, boolean,
+none missing). Part 2: **FAIL** — same cause: `:class :unknown`,
+`:missing [:attested-increment]`, receipt present, `verify-close` true.
+(The receipt is not absent — both closes carry receipts; both record
+unknown honestly.) Part 3: **PASS** as an agreement.
+
+**⟨1⟩7 CHECK: NOT MET — part 2 fails on both closes.** Part 1 and part 3
+settled PASS on both; part 2 requires an attested increment, which
+requires an accepted increment — the honest coupling to ⟨1⟩6, which has
+not landed. Recorded as half-settled, not softened. The runnability
+command ran: `bash scripts/wm_load_identity.sh` →
+`counts: {"current" 42, "unavailable" 2, "unregistered" 27}` — loaded
+source matches the canonical checkout; the unregistered are listed never
+omitted.
