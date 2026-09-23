@@ -168,27 +168,56 @@
                 (get-in r [:evidence :produced-token-results])))))
 
 (deftest fixture-accepted-close-writes-the-b-update
-  ;; With the accepted verdict, the runner's B-update call site's guard
-  ;; passes and b-update runs — exactly once, occurrence-keyed.
-  (let [tmp (.toFile (java.nio.file.Files/createTempDirectory
+  ;; With the PREDICATE'S OWN accepted verdict (from the full-chain fixture,
+  ;; not a hand-built map), the runner's B-update call site's guard passes
+  ;; and b-update runs — exactly once, occurrence-keyed by the verdict's own
+  ;; binding commit. The second call reads the row the RUNNER'S OWN PATH
+  ;; wrote: the append goes through learning-trial-ledger/record! with the
+  ;; identity the call site itself derives (the binding commit), so the
+  ;; exactly-once is pinned against the real row shape.
+  (let [repo (fixture-repo)
+        head (:head repo)
+        verdict (ai/accepted-increment
+                 {:binding {:repo (:repo repo) :commit head
+                            :pre-dispatch-head "4b825dc642cb6eb9a060e54bf8d69288fbed4b0"
+                            :descendant? true :corroborates? true :claim-in-author-window? true}
+                  :produced-tokens
+                  {[t :repair/calibration-evidence-present]
+                   (locator-in repo head
+                               {:class :C4 :path "resources/wm/eig/held-out-calibration.edn"
+                                :decl "CALIBRATION-EVIDENCE-PASSING"})}
+                  :acceptance
+                  {:token :restoration-accepted
+                   :locator (locator-in repo head
+                                        {:class :C4 :path (str "holes/tickets/" t ".md")
+                                         :decl "**Status:** DONE"})}
+                  :after-revision head})
+        _ (is (true? (:accepted? verdict)) "precondition: the predicate accepts")
+        tmp (.toFile (java.nio.file.Files/createTempDirectory
                       "limbs-b-update" (make-array java.nio.file.attribute.FileAttribute 0)))
         _ (spit (io/file tmp "attempts.edn") "")
-        verdict {:accepted? true :observed true
-                 :evidence {:acceptance-result {:observed true}}}
+        occurrence-identity (get-in verdict [:evidence :binding :commit])
         r1 (ledger/b-update {:family :aif/two-layer-calibration
-                             :occurrence-identity "fixture-limbs-occurrence"
+                             :occurrence-identity occurrence-identity
                              :accepted-verdict verdict
                              :ledger-root (.getPath tmp)})
-        _ (spit (io/file tmp "attempts.edn")
-                (str "{:schema :wm/attempt-learning-count-v1 :identity \"fixture-limbs-occurrence\""
-                     " :family :aif/two-layer-calibration"
-                     " :increment {:success 1 :failure 0}}\n")
-                :append true)
+        ;; the runner's own append path: record! a row carrying the same
+        ;; identity the call site derives from the verdict
+        _ (ledger/record! (.getPath tmp)
+                                   {:trials [{:status :admitted-at-attempt-grain
+                                              :deduplication {:identity occurrence-identity}
+                                              :learning-family :aif/two-layer-calibration
+                                              ;; record! derives the increment from
+                                              ;; :after-observation — the real producer's
+                                              ;; field — so the runner-written row is honest
+                                              :after-observation true}]})
         r2 (ledger/b-update {:family :aif/two-layer-calibration
-                             :occurrence-identity "fixture-limbs-occurrence"
+                             :occurrence-identity occurrence-identity
                              :accepted-verdict verdict
                              :ledger-root (.getPath tmp)})]
     (is (= :updated (:status r1)) (pr-str r1))
     (is (= 3/4 (:theta r1)) "cold Laplace success")
-    (is (= :already-recorded (:status r2)) "exactly once")
-    (is (= (:theta r1) (:theta r2)))))
+    (is (= :already-recorded (:status r2)) "exactly once: the second call sees the runner-written row")
+    (is (= (:theta r1) (:theta r2)))
+    (is (= 1 (count (ledger/read-trials (.getPath tmp))))
+        "exactly one row, written by the runner's record! seam")))

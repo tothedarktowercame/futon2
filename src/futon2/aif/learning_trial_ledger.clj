@@ -141,7 +141,15 @@
         successes (count (filter true? (map :observed mine)))
         trials-n (count mine)
         trials' (+ trials-n (if already 0 1))
-        successes' (+ successes (if already 0 (if (true? (:observed accepted-verdict)) 1 0)))
+        ;; the observation comes from the verdict's own evidence: the
+        ;; predicate's accepted shape carries it under
+        ;; [:evidence :acceptance-result :observed] (a hand-built shape may
+        ;; carry a top-level :observed — both are honoured)
+        verdict-observed (or (when (contains? accepted-verdict :observed)
+                              (true? (:observed accepted-verdict)))
+                            (true? (get-in accepted-verdict
+                                           [:evidence :acceptance-result :observed])))
+        successes' (+ successes (if already 0 (if verdict-observed 1 0)))
         theta (/ (+ successes' 1/2) (+ trials' 1))]
     {:status (if already :already-recorded :updated)
      :family family
