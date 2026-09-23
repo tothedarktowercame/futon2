@@ -271,3 +271,31 @@
             :after-revision "HEAD"})]
     (is (= :no-acceptance-declared (:accepted? r)) (pr-str r))
     (is (nil? (:failed r)) "and it is not reported as a (b) failure")))
+
+;; claude-5, 2026-09-23, auditing the first accepted increment on a real
+;; occurrence. The success branch recorded only :commit and :pre-dispatch-head,
+;; while the :failed :a branch recorded the whole binding — so a reader of an
+;; ACCEPTED close could not check the three verdict flags conjunct (a) turned
+;; on, and the record was thinnest exactly where it is consumed. (a) does
+;; demand all three with `true?` and no defaults, so nothing accepted was ever
+;; in doubt; it just could not be established from the close by itself.
+(deftest an-accepted-close-records-the-flags-a-turned-on
+  (let [r (ai/accepted-increment
+           {:binding {:repo "futon2" :commit "c" :pre-dispatch-head "p"
+                      :descendant? true :corroborates? true
+                      :claim-in-author-window? true}
+            :produced-tokens {[:admission/task-stated]
+                              {:class :C4 :repo "futon2" :sha "HEAD"
+                               :path (str "holes/tickets/" t ".md")
+                               :decl "# Verify or restore guardrail refusal"}}
+            :acceptance {:token :admission/task-stated
+                         :locator {:class :C4 :repo "futon2" :sha "HEAD"
+                                   :path (str "holes/tickets/" t ".md")
+                                   :decl "# Verify or restore guardrail refusal"}}
+            :after-revision "HEAD"})
+        b (get-in r [:evidence :binding])]
+    (is (true? (:accepted? r)) (pr-str r))
+    (is (= {:descendant? true :corroborates? true :claim-in-author-window? true}
+           (select-keys b [:descendant? :corroborates? :claim-in-author-window?]))
+        "the accepted close carries the flags (a) required, not just the commits")
+    (is (and (:commit b) (:pre-dispatch-head b)) "and still carries both commits")))

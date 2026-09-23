@@ -117,8 +117,21 @@
 
       :else
       {:accepted? true
+       ;; The three verdict flags are recorded HERE, on success, and not only
+       ;; on the :failed :a branch. They were trimmed away: an accepted close
+       ;; carried {:commit :pre-dispatch-head} while a REFUSED one carried the
+       ;; whole binding, so the durable record was most detailed exactly when
+       ;; the verdict was negative and thinnest when positive -- the opposite
+       ;; of what a later reader needs, since the accepted increment is the
+       ;; thing the proof's later steps consume. (a) did demand all three with
+       ;; `true?` and no defaults, so no past acceptance is in doubt; they
+       ;; simply could not be checked from the close alone (claude-5,
+       ;; 2026-09-23, auditing the first accepted increment).
        :evidence {:binding {:commit (:commit binding)
-                            :pre-dispatch-head (:pre-dispatch-head binding)}
+                            :pre-dispatch-head (:pre-dispatch-head binding)
+                            :descendant? (:descendant? binding)
+                            :corroborates? (:corroborates? binding)
+                            :claim-in-author-window? (:claim-in-author-window? binding)}
                   :produced-token-results b-results
                   :acceptance-token (:token acceptance)
                   :acceptance-result c-result}})))

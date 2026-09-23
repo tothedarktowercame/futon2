@@ -804,6 +804,33 @@ candidates automatically, or that every click is fast.
       whose guard (needs obstruction-observed-cleared, forbids restoration-accepted)
       holds now, and which produces `:restoration-accepted`.
     - Budget: one ordinary click remains of the seven. One step, one click, no slack.
+  - Ninth limb, 2026-09-23: click `wm-click-8d3cc877`, run `2026-09-23-1790199409`,
+    machinery-76 attempt-002. **`:accepted? true`.** The predicate returns an accepted
+    increment on a real occurrence for the first time, and ⟨1⟩6 is discharged.
+    - `:criterion-step {:id :apparatus/evidence-to-disposition-once,
+      :source :recorded-decision}`; the author committed `97e17e10` moving the ticket
+      OPEN → DONE, the reviewer approved, and the close records `:accepted? true`,
+      `:failed nil`.
+    - All six declared tokens observe true through their own locators at `69c6346a`:
+      `:admission/task-stated`, `:repair/split-declared-valid`,
+      `:repair/held-out-observations-collected`, `:repair/calibration-evidence-present`,
+      `:repair/obstruction-observed-cleared`, `:restoration-accepted`.
+    - **Audited for vacuity before being claimed**, since three conjuncts passed
+      emptily earlier in this same occurrence:
+      (b) measured one row, `[T :restoration-accepted]` observed true at the increment's
+      own commit `97e17e10` — not an empty `produced-tokens`, not the chain head;
+      (c) observed `**Status:** DONE` through C4 at `69c6346a`;
+      (a) required `:descendant?`, `:corroborates?` and `:claim-in-author-window?` to be
+      literally `true` (`true?`, no defaults, `evaluate-close` passes the binding
+      straight through), so all three held.
+    - One finding from that audit, fixed forward rather than retroactively: the success
+      branch recorded only `{:commit :pre-dispatch-head}` while the `:failed :a` branch
+      recorded the whole binding, so an ACCEPTED close was the one place the three
+      verdict flags could not be checked from the record — thinnest exactly where ⟨1⟩7
+      and ⟨1⟩8 consume it. Now recorded on success too (`futon2`, this commit). The
+      close for this occurrence is left as written.
+    - Budget: renewal-6 is exhausted, 7 of 7. One of those seven bought nothing (see the
+      consumption note in the authorization).
   - **In-process completion (futon2 b27f2a1a, 97152006), per Joe's method ruling.** The real
     close assembly, the acceptance predicate and the B update call site are driven over the
     recorded occurrences, with fixtures — labelled as such, in a throwaway repo outside
