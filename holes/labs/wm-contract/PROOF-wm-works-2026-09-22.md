@@ -659,6 +659,23 @@ candidates automatically, or that every click is fast.
     (`:aif/declare-the-conditioning`) while the step that would be enacted is the next
     pattern in the chain (`:aif/measurement-window-hygiene`). The record names a different
     action from the one the machine would take.
+  - **In-process completion (futon2 b27f2a1a, 97152006), per Joe's method ruling.** The real
+    close assembly, the acceptance predicate and the B update call site are driven over the
+    recorded occurrences, with fixtures — labelled as such, in a throwaway repo outside
+    futon2's data — standing in for attempt-003's close, the collected observations, the
+    passing calibration and a ticket written DONE.
+    - Real attempt-001: not accepted. Real attempt-002: not accepted, failing only at (c).
+    - With the fixtures, the observations limb's token is observable through its own
+      unweakened locator, and the predicate returns `{:accepted? true}` with all three parts
+      satisfied and its evidence listed. The declared chain closes as written; nothing was
+      weakened to make it close.
+    - The B update then writes once, and a second call reads the row the runner's own append
+      wrote and reports `:already-recorded` with the same θ.
+    - **A real defect surfaced by driving the real shapes** (claude-5's review asked for the
+      predicate's own verdict instead of a hand-built one): `b-update` read a top-level
+      `:observed` that the predicate's accepted shape never carries, so an accepted outcome
+      was counted as a failure — θ 1/4 instead of 3/4. Fixed at the consumer in 97152006; the
+      hand-built verdict had been hiding it. claude-5 reloaded `learning-trial-ledger`.
   - **Method change, Joe 2026-09-23:** "I don't see why you need to keep running these things
     to test each one on a live machine. Why can't you build in the tests into the code like
     anyone else?" He is right on the record: every defect the live clicks found — the repair
