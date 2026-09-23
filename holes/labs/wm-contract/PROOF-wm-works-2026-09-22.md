@@ -773,6 +773,37 @@ candidates automatically, or that every click is fast.
       outcome is observed at that run's own `:artifact-sha`, not at the locator's `HEAD`.
       Without that, a later click's edit to the ticket would decide an earlier run's
       recorded outcome.
+  - Eighth limb, 2026-09-23: click `wm-click-19769c74`, run `2026-09-23-1790196782`,
+    machinery-76 attempt-001. **The decision changed route.** It selected `:C1` — the
+    VERIFY branch (`:apparatus/done-is-observed-running` →
+    `:apparatus/evidence-to-disposition-once`) — not `:C2`, which it had taken on the
+    previous five clicks.
+    - That is the policy working as declared, not a wobble. C1's reading, admitted
+      2026-09-22, is that the recheck observes CLEARED exactly when the held-out
+      evidence exists, its guard needing `:repair/calibration-evidence-present`. Until
+      the seventh limb that guard was false and C1 could reach nothing; once C2's
+      evidence was complete, C1 became a shorter path to the same terminal token and
+      won on G. The record also shows what C2 would have enacted had it won:
+      `:enacted-steps {... :aif/declare-the-conditioning :contracts/holder-states-the-claim}`
+      — C2 is likewise at its final acceptance step.
+    - The author enacted `:apparatus/done-is-observed-running`, committing a dated
+      recheck (`75d83105`) that pins the calibration record's digest, validates its
+      schema, passing status and C4 head, records `:observed :cleared`, and **left
+      ticket acceptance to the next limb** — as did the reviewer, who approved and wrote
+      that "final ticket disposition remains outstanding". Neither reached for the
+      acceptance they were not asked for.
+    - Close: `:criterion-step {:id :apparatus/done-is-observed-running,
+      :source :recorded-decision}`, measured `[T :repair/obstruction-observed-cleared]`,
+      `:failed :c :acceptance-not-observed`.
+    - **Token state at `25247100`, every one observed through its own declared locator:**
+      `:admission/task-stated` true, `:repair/split-declared-valid` true,
+      `:repair/held-out-observations-collected` true,
+      `:repair/calibration-evidence-present` true,
+      `:repair/obstruction-observed-cleared` true, `:restoration-accepted` FALSE.
+      Five of six. The one remaining step is `:apparatus/evidence-to-disposition-once`,
+      whose guard (needs obstruction-observed-cleared, forbids restoration-accepted)
+      holds now, and which produces `:restoration-accepted`.
+    - Budget: one ordinary click remains of the seven. One step, one click, no slack.
   - **In-process completion (futon2 b27f2a1a, 97152006), per Joe's method ruling.** The real
     close assembly, the acceptance predicate and the B update call site are driven over the
     recorded occurrences, with fixtures — labelled as such, in a throwaway repo outside
