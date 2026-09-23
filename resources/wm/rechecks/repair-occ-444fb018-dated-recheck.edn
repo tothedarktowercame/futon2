@@ -1,0 +1,20 @@
+{:schema :wm/repair-recheck-v1,
+ :ticket/id
+ "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade",
+ :checked-at "2026-09-23T20:59:00.221371442Z",
+ :condition :held-out-calibration-evidence-present,
+ :source
+ {:path "resources/wm/eig/held-out-calibration.edn",
+  :sha256
+  "ed208210ed0a5bd21a133eefa348e6e5f75736a7d90a4c213624c799d3514d75"},
+ :checks
+ {:parseable? true,
+  :schema? true,
+  :status-passing? true,
+  :claim-present? true,
+  :disposition? true,
+  :c4-head? true},
+ :observed :cleared
+ :disposition
+RECHECK-DISPOSITION-CLEARED
+}
