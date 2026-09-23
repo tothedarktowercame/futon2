@@ -1,0 +1,71 @@
+;; Regenerated from the preregistered split, the observations packet
+;; and each held-out run's frozen prediction through
+;; futon2.aif.held-out-calibration/write-snapshot!.
+;; Do not hand-edit: every scored row names the close record it was
+;; read from and its digest.
+{:schema :wm/eig-held-out-calibration-v1,
+ :ticket/id
+ "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade",
+ :claims
+ {:calibration-evidence-present? true, :restoration-accepted? false},
+ :window
+ {:next-n 2,
+  :contributing ["2026-09-23-1790184736" "2026-09-23-1790187227"],
+  :excluded
+  [{:run-id "2026-09-23-1790189901",
+    :reason :outside-declared-window}]},
+ :bounds
+ {:mean-log-loss {:lte 1.3862943611198906}, :mean-brier {:lte 0.25}},
+ :rows
+ [{:run-id "2026-09-23-1790184736",
+   :token
+   ["T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+    :restoration-accepted],
+   :predicted 15/64,
+   :realised false,
+   :prediction-rule :positive-marginal-support,
+   :artifact-sha "a2d8aba0ae57126b22b9afa9c7ff0888a54afdaa",
+   :source
+   {:path "data/wm-runs/tick-run-record-2026-09-23-1790184736.edn",
+    :sha256
+    "1c966e891b3954f3621cb0125a03209209066bfa1237ab492434ba6e5e1fe488"},
+   :close-source
+   {:path
+    "data/wm-full-loop-machinery-73/wm-contract-machinery-73-v1/attempt-002/007-closed.edn",
+    :sha256
+    "d2083146add5706b13843a5aa23ae0ca290f3a30df74cbd45a9f04e5ec5193e5"}}
+  {:run-id "2026-09-23-1790187227",
+   :token
+   ["T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+    :restoration-accepted],
+   :predicted 19/100,
+   :realised false,
+   :prediction-rule :positive-marginal-support,
+   :artifact-sha "1dab7a119b80f490739ed92cd64557b241d2cc94",
+   :source
+   {:path "data/wm-runs/tick-run-record-2026-09-23-1790187227.edn",
+    :sha256
+    "75cc887916d156a8f164f2e73d7430e0a62a411734f5ebfe5fac37ff264d28fd"},
+   :close-source
+   {:path
+    "data/wm-full-loop-machinery-74/wm-contract-machinery-74-v1/attempt-001/007-closed.edn",
+    :sha256
+    "73485f7ca836cc0a193bf26dfa1e52a8c3b812e8cb431022a9ea866db8dd7be3"}}],
+ :split
+ {:schema :wm/eig-held-out-split-v2,
+  :registered-at "2026-09-23T12:20:00Z",
+  :starting-point
+  {:kind :git-commit,
+   :sha "e153bb7e",
+   :described
+   "the commit recording the supersession decision; the window opens after it"}},
+ :status :passing,
+ :failing-reasons [],
+ :metrics
+ {:mean-log-loss 0.2388919082823489,
+  :mean-brier 0.0455158203125,
+  :mean-predicted-entropy-reduction 0.17778124736135273,
+  :mean-realised-entropy-reduction 0.4542552722775964}
+ :disposition
+CALIBRATION-EVIDENCE-PASSING
+}
