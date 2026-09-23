@@ -654,9 +654,15 @@ candidates automatically, or that every click is fast.
     (`:aif/declare-the-conditioning`) while the step that would be enacted is the next
     pattern in the chain (`:aif/measurement-window-hygiene`). The record names a different
     action from the one the machine would take.
-  - So the step waits on the repair's later limbs. Two of the five clicks under renewal-5 are
-    spent; the repair needs about four more: one to create attempt-003 and close the window,
-    then observations, calibration, and acceptance.
+  - **Method change, Joe 2026-09-23:** "I don't see why you need to keep running these things
+    to test each one on a live machine. Why can't you build in the tests into the code like
+    anyone else?" He is right on the record: every defect the live clicks found — the repair
+    withhold, the predicate's row shape, the acceptance criterion missing from the author
+    brief, the action-name mismatch — was an ordinary code defect, and each fix shipped with
+    a test that would have caught it without a click. Live clicks are for the end-to-end
+    claim only (⟨1⟩1, ⟨1⟩5, both proved). ⟨1⟩6–⟨1⟩8 are to be driven in-process over the
+    occurrences already recorded, with fixtures for the states no recorded occurrence yet
+    holds. No further clicks are requested; three remain unspent.
 
 ### ⟨1⟩7. The outcome is measured and attested.
 
