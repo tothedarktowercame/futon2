@@ -777,7 +777,23 @@ candidates automatically, or that every click is fast.
   - It records the attested run-ending class.
   - The classifier, rerun on the actual close, attestation and focus inputs (not only the
     projection `verify-close` compares), agrees with the recorded class.
-- **FAILURES:** —
+- **NOT MET, 2026-09-23** (zai-1, read-only on both existing closes; futon2 84cea158,
+  af036914; values verified by claude-5 through the EDN reader). Detail in the ⟨1⟩7
+  settlement section at the end of this file.
+  - Part 1, tokens measured and not `:missing`: **PASS on both closes.** All six wanted
+    tokens carry d-task rows with boolean values — task-stated true, split-declared-valid
+    true at `0798f96a`, the other four false.
+  - Part 2, the attested run-ending class: **FAIL on both closes.** Each receipt exists and
+    `verify-close` is true, but the class is `:unknown` with `:missing [:attested-increment]`.
+    The kernel is behaving correctly: there is no attested increment because there is no
+    accepted increment.
+  - Part 3, the classifier rerun agreeing: **PASS on both closes** — the rerun reproduces
+    `:unknown` from the same inputs. The agreement is real; the class it agrees on is unknown.
+  - Runnability fix from the signed note, run: `scripts/wm_load_identity.sh` reports
+    `{current 42, unavailable 2, unregistered 27}` — loaded source matches the canonical
+    checkout, with the unregistered listed rather than omitted.
+  - So ⟨1⟩7 is coupled to ⟨1⟩6: part 2 needs an accepted increment to attest. No read-only
+    recomputation can produce an attestation the machine never wrote.
 
 ### ⟨1⟩8. The outcome updates B once, and the next selection consumes it.
 
@@ -812,7 +828,12 @@ candidates automatically, or that every click is fast.
 - ⟨1⟩3 and ⟨1⟩5 show that the full law chose the action and that G changed the choice. There, C is
   Joe's stipulated preference and B is inferred from recorded outcomes.
 - ⟨1⟩4, ⟨1⟩6 and ⟨1⟩7 give an accepted close with a measured, attested outcome.
-- ⟨1⟩8 gives the update, consumed by the next selection.
+  **Not established (2026-09-23):** ⟨1⟩4's producers exist and are called, and ⟨1⟩7's
+  measurement passes on both closes, but no accepted close exists, so ⟨1⟩6 and ⟨1⟩7's
+  attestation are open. See the VERDICT section.
+- ⟨1⟩8 gives the update, consumed by the next selection. **Partly established:** the
+  frozen-input recompute against the banked trials is settled; the next selection consuming
+  it is not shown.
 
 ## Sign-off (a row is cleared whenever its step changes; only the reviewer fills its own column) (revision 4: rows ⟨1⟩1–⟨1⟩5 need fresh review; ⟨1⟩6–⟨1⟩8 unchanged since revision 3)
 
@@ -2380,11 +2401,32 @@ four parts it rests on.
 
 ### VERDICT
 
-**Proved for ⟨1⟩1–⟨1⟩5; demonstrated in-process for ⟨1⟩6–⟨1⟩8; not yet
-proved end to end.** No live click has produced an accepted close, so the
-theorem's third and fourth clauses rest on fixtures standing in for states
-the machine has not reached. Everything the machine itself did — selecting,
-delivering, closing, refusing honestly — was done live and is recorded.
+**Proved for ⟨1⟩1–⟨1⟩5; ⟨1⟩8's discriminating half proved against the
+banked trials; ⟨1⟩6 and ⟨1⟩7 not met; the theorem not proved end to end.**
+Revised 2026-09-23 after the walkthrough (zai-1 46d762d0, 84cea158,
+af036914; claude-5 46b931a2), replacing the earlier wording, which was
+wrong in both directions: it called ⟨1⟩6 demonstrated when it is blocked,
+and it called ⟨1⟩8 a fixture demonstration when its discriminating half now
+runs against real recorded trials.
+
+**The whole remaining gap is a single event: one accepted close on the
+reference occurrence.** Three separate checks wait on it and on nothing
+else.
+- ⟨1⟩6 needs it by definition. The predicate works and the declared chain
+  closes when the states exist (97152006), but the ticket reads OPEN, and
+  reaching acceptance needs more attempts on it than the three remaining
+  clicks allow. Joe has declined to renew. Recorded as blocked, not
+  restated to fit what is reachable.
+- ⟨1⟩7 part 2 needs an attested run-ending class, and the kernel records
+  `:unknown :missing [:attested-increment]` on both existing closes because
+  there is no accepted increment to attest. Parts 1 and 3 pass on both.
+- ⟨1⟩8's corroboration half needs a click whose receipt shows the updated
+  parameter consumed; the only click since the identity fix ran before it
+  and scored everything at the documented default.
+
+What the machine itself did — selecting its own work through the queue,
+delivering it, closing it, and refusing honestly when its own checks failed
+— was done live and is recorded.
 
 ### 1. WHAT IS ESTABLISHED, with evidence
 
