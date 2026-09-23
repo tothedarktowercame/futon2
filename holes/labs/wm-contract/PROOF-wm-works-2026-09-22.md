@@ -659,6 +659,41 @@ candidates automatically, or that every click is fast.
     (`:aif/declare-the-conditioning`) while the step that would be enacted is the next
     pattern in the chain (`:aif/measurement-window-hygiene`). The record names a different
     action from the one the machine would take.
+  - Fourth limb, 2026-09-23: click `wm-click-c830a554`, run `2026-09-23-1790184736`,
+    machinery-73 attempt-002. **The first close on this occurrence where the machine
+    dispatched and measured the step it would actually take.** Three defects were fixed
+    first, each found by review rather than by a click:
+    - The dispatch and conjunct (b) both read `precedence 0`, the chain head, whose effect
+      `:repair/split-declared-valid` has held since `0798f96a`. The selection record has
+      named the enacted step since `b1979ce2` and nothing read it. Fixed in `a4dc67f6`;
+      the fix was **inert in production** — it threaded from an entry key `selected-entry`
+      does not build, so the resolver always took the chain-head fallback while all four of
+      its tests passed on hand-assembled actions. Fixed and pinned by a live-path test in
+      `a651e3a4`.
+    - Conjunct (b) was satisfied by measuring **nothing**: `b-bad` filters `b-results`, so
+      empty `produced-tokens` yields no bad tokens and evaluation falls through to (c).
+      Before `a4dc67f6` the row filter compared a bare token against a set of
+      `[target token]` pairs, so it could never match — (b) had never discriminated on any
+      recorded close, and the three earlier `:failed :c` results rested on it. Fixed in
+      `6afacb5b`; `:declared-tokens` and `:measured-tokens` were the same value on the
+      record until `031d9452`.
+    - futon3 `21a9199` moved five pinned interpretation sources at 17:17 that day, and
+      `load-declared` refuses the whole set on the first mismatch, so every dispatch stopped.
+      Re-pinned in `031d9452` after reading each diff — only `@why`/`@how` prose moved, no
+      `! conclusion`, `@violation-signature` or declared effect. `cascade-sources-test` now
+      names a drifted pin before a click can spend itself on one.
+    - The close records `:criterion-step {:id :aif/measurement-window-hygiene,
+      :source :recorded-decision}`, `:measured-tokens
+      [[T :repair/held-out-observations-collected]]`, and
+      `:failed :b :reason :declared-product-not-observed-true`. (b) is false because the
+      token was measured and read false — not because nothing was measured and not because
+      the head was already true.
+    - The author enacted that limb: a prospective collection boundary
+      (`held_out_observations.clj`, `b1829656`) and an open-window resource, and **refused to
+      write the token**, recording `:valid-count 0` because no post-registration durable
+      close existed yet. The reviewer found that malformed instants could close the window;
+      the author fixed it (`a2d8aba0`) and the reviewer approved. Outcome
+      `:grounded-no-change`, which opened machine-repair ticket `T-repair-occ-487ca3f2`.
   - **In-process completion (futon2 b27f2a1a, 97152006), per Joe's method ruling.** The real
     close assembly, the acceptance predicate and the B update call site are driven over the
     recorded occurrences, with fixtures — labelled as such, in a throwaway repo outside
