@@ -203,9 +203,25 @@
 ;;
 ;;   predicted-entropy-reduction  H(p0) - H(p)   -- how far the frozen
 ;;     prediction sharpened the belief away from no information;
-;;   realised-entropy-reduction   H(p) - H(y) = H(p)  -- the uncertainty
-;;     the prediction still carried that observing the outcome removed
-;;     (an observed binary outcome is degenerate, H = 0).
+;;   realised-entropy-reduction   ln p(y) - ln p0(y) = ln p(y) + ln 2
+;;     -- the information the OBSERVED outcome actually delivered relative
+;;     to the same prior. Negative when the prediction was worse than no
+;;     information at all.
+;;
+;; The realised leg was H(p) - H(y) = H(p), which does not mention y: it
+;; returned the same number whether the prediction was right or wrong, and
+;; predicted + realised was ln 2 identically, so "predicted versus realised"
+;; was x versus ln 2 - x -- a comparison the outcome could not move. Flipping
+;; both realised outcomes on the real predictions changed mean log-loss from
+;; 0.2389 to 1.5558 and left the realised reduction at 0.51537 (claude-5,
+;; reviewing 409d86fb). The pattern this cascade step cites separates internal
+;; consistency from externally witnessed outcomes; a realised quantity that
+;; witnesses nothing external cannot carry that separation.
+;;
+;; Neither formula is preregistered -- the declaration names the two metrics
+;; and no prior, and only the PRIMARY metrics appear in :passing-bounds. So
+;; these are descriptive, they gate nothing, and correcting the definition
+;; moves no verdict.
 ;;
 ;; Both are reported per the declaration; only the primary metrics gate
 ;; the disposition.
@@ -218,6 +234,14 @@
 (defn- binary-entropy [p]
   (let [p (clamp p)]
     (- (+ (* p (Math/log p)) (* (- 1.0 p) (Math/log (- 1.0 p)))))))
+
+(defn- realised-information-gain
+  "Information the observed outcome Y delivered, in nats, relative to the
+   maximum-entropy binary prior: ln p(y) + ln 2. Negative when the frozen
+   prediction was worse than no information."
+  [p y]
+  (let [p (clamp p)]
+    (+ (Math/log (if (pos? y) p (- 1.0 p))) (Math/log 2.0))))
 
 (defn- row-log-loss [p y]
   (let [p (clamp p)]
@@ -245,7 +269,7 @@
                                     :predicted-entropy-reduction
                                     (- (Math/log 2.0) (binary-entropy p))
                                     :realised-entropy-reduction
-                                    (binary-entropy p))))
+                                    (realised-information-gain p y))))
                      contributing)
         mean-log-loss (mean (map :log-loss scored))
         mean-brier (mean (map :brier scored))

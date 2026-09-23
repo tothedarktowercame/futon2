@@ -162,3 +162,35 @@
     (println "REAL CALIBRATION:"
              (pr-str (select-keys result [:status :failing-reasons :metrics
                                           :window :disposition])))))
+
+;; claude-5, reviewing 409d86fb. The realised leg was H(p) - H(y) = H(p),
+;; which never mentions y: it returned the same number whether the prediction
+;; was right or wrong, and predicted + realised came to ln 2 identically, so
+;; "predicted versus realised" was x versus ln 2 - x. Nothing observed could
+;; move it. The secondary metrics gate nothing, so this changes no verdict --
+;; but the cascade step cites a pattern that separates internal consistency
+;; from externally witnessed outcomes, and a realised quantity that witnesses
+;; nothing external cannot carry that separation.
+(deftest the-realised-leg-moves-with-the-outcome
+  (let [rows (fn [realised]
+               {:rows [{:run-id "r1" :predicted 15/64 :realised realised}
+                       {:run-id "r2" :predicted 19/100 :realised realised}]
+                :excluded []})
+        as-false (cal/calibrate declaration (rows false))
+        as-true (cal/calibrate declaration (rows true))
+        realised-of #(get-in % [:metrics :mean-realised-entropy-reduction])
+        predicted-of #(get-in % [:metrics :mean-predicted-entropy-reduction])]
+    ;; the primary metrics already discriminate; this pins that they do
+    (is (< (get-in as-false [:metrics :mean-log-loss])
+           (get-in as-true [:metrics :mean-log-loss]))
+        "precondition: flipping the outcome worsens log-loss")
+    (is (not= (realised-of as-false) (realised-of as-true))
+        "the realised leg must differ when what was realised differs")
+    (is (> (realised-of as-false) 0.0)
+        "outcomes the prediction favoured deliver positive information")
+    (is (neg? (realised-of as-true))
+        "outcomes it bet against deliver negative information — worse than the prior")
+    ;; and the two legs are no longer a constant sum
+    (is (not= (+ (predicted-of as-false) (realised-of as-false))
+              (+ (predicted-of as-true) (realised-of as-true)))
+        "predicted + realised is not a constant the outcome cannot move")))
