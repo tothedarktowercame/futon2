@@ -1,0 +1,13 @@
+{:schema :wm/eig-held-out-observations-v1
+ :split {:schema :wm/eig-held-out-split-v2
+         :ticket/id "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+         :registered-at "2026-09-23T12:20:00Z"
+         :starting-point {:kind :git-commit :sha "e153bb7e"}}
+ :status :open
+ :required 2
+ :valid-count 0
+ :missing-count 2
+ :observations []
+ :claims {:window-closed? false
+          :calibration-evidence-present? false
+          :restoration-accepted? false}}
