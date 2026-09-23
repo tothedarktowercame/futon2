@@ -676,6 +676,20 @@ candidates automatically, or that every click is fast.
       `:observed` that the predicate's accepted shape never carries, so an accepted outcome
       was counted as a failure — θ 1/4 instead of 3/4. Fixed at the consumer in 97152006; the
       hand-built verdict had been hiding it. claude-5 reloaded `learning-trial-ledger`.
+  - **⟨1⟩8's second half, the consumption side** (futon2 a04d0c50 + the missing require,
+    zai-1's job died mid-edit and claude-5 finished it). `learning-trial-ledger/family-theta`
+    returns the update rule's posterior for a family with the trial identities behind it,
+    `:no-recorded-trials` when it has none, and a typed `:defaulted` on an unreadable ledger
+    — never a refusal. The joint decision reads it where the model is assembled and sets each
+    pattern's θ and `:theta-source`; the kernel still takes θ off the pattern.
+    - With an empty ledger the frozen input reproduces the recorded numbers exactly:
+      G(C2) = ln(1/0.55), G(C1) = ln 20.
+    - With one recorded success the family's θ is 3/4 and the predicted mass on the produced
+      token moves from 1 to 3/4 — the direction the update implies.
+    - claude-5's finishing fix: the test built a pattern map by hand, which lacks the
+      interpretation fields the manifest requires, so the rollout refused instead of running.
+      It now varies θ on the real interpreted pattern. Five namespaces reloaded.
+    - Still not shown by a live click.
   - **Method change, Joe 2026-09-23:** "I don't see why you need to keep running these things
     to test each one on a live machine. Why can't you build in the tests into the code like
     anyone else?" He is right on the record: every defect the live clicks found — the repair
