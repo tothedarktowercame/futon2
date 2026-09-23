@@ -3990,15 +3990,15 @@
                        ;; :contracts/holder-states-the-claim at index 3, so
                        ;; the hardcoded 0 credited the wrong pattern
                        ;; (claude-2's review, 2026-09-23).
-                       b-update-pattern
-                       (let [action (get-in selection-judgment [:controller-decision :action])
-                             effect [(:target action)
-                                     (get-in accepted-increment-result
-                                             [:evidence :acceptance-token])]]
-                         (learning-ledger/producer-of (:precedence action) effect))
                        b-update-result
                        (when (and closed-event
                                   (true? (:accepted? accepted-increment-result)))
+                         (let [action (get-in selection-judgment [:controller-decision :action])
+                               effect [(:target action)
+                                       (get-in accepted-increment-result
+                                               [:evidence :acceptance-token])]
+                               b-update-pattern (learning-ledger/producer-of
+                                                 (:precedence action) effect)]
                          (if-not (keyword? b-update-pattern)
                            ;; typed-none: the record does not say which
                            ;; pattern to credit, so nothing is written
@@ -4006,6 +4006,9 @@
                          (try
                            (learning-ledger/b-update
                             {:family b-update-pattern
+                             ;; the occurrence as production identifies it;
+                             ;; the commit sha is provenance, not the key
+                             :occurrence @action-occurrence
                              :occurrence-identity (get-in accepted-increment-result
                                                            [:evidence :binding :commit])
                              :accepted-verdict accepted-increment-result
@@ -4014,7 +4017,7 @@
                            (catch Exception e
                              {:status :refused
                               :reason (:learning-ledger/refusal (ex-data e))
-                              :message (.getMessage e)}))))
+                              :message (.getMessage e)})))))
                        discharge-result
                        (repair-discharge/finalize-run!
                         {:root (or (:repair-root opts) repair/default-root)

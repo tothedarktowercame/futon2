@@ -4,6 +4,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
+            [futon2.aif.action-identity :as action-identity]
             [futon2.aif.attempt-learning :as attempt]
             [futon2.aif.learning-trial-ledger :as ledger]))
 
@@ -53,13 +54,24 @@
   (let [verdict {:accepted? true :observed true
                  :evidence {:acceptance-result {:observed true}}}
         family :apparatus/one-authority-per-question
-        identity-1 "wm-test-occurrence-0001"
+        ;; The two sides of the join are produced the way production
+        ;; produces them: the row's :identity is a DIGEST of
+        ;; {:occurrence :effect :grain} (attempt_learning/receipt), while
+        ;; the caller passes the occurrence map itself. The earlier fixture
+        ;; used one authored string for both, so it pinned its own choice
+        ;; of string and passed while the production join could never match
+        ;; (claude-2's review, 2026-09-23).
+        occurrence {:action/id "action-b3f1" :action/value-sha256 "ff08" :transition/id "transition-77c2"}
+        effect [:some-target :the/effect]
+        dedup-key {:occurrence occurrence :effect effect :grain :selected-cascade-effect-attempt}
+        identity-1 (action-identity/digest dedup-key)
         tmp (.toFile (java.nio.file.Files/createTempDirectory
                       "b-update-ledger" (make-array java.nio.file.attribute.FileAttribute 0)))
         ;; empty family history in the temp ledger
         _ (spit (io/file tmp "attempts.edn") "")
         r1 (ledger/b-update {:family family
-                             :occurrence-identity identity-1
+                             :occurrence occurrence
+                             :occurrence-identity "a-commit-sha"
                              :accepted-verdict verdict
                              :ledger-root (.getPath tmp)})
         ;; the accepted close's append, through record! -- the real writer.
@@ -69,15 +81,15 @@
         ;; emit (claude-2's review, 2026-09-23).
         _ (ledger/record! (.getPath tmp)
                           {:trials [{:status :admitted-at-attempt-grain
-                                     :deduplication {:identity identity-1}
+                                     :deduplication {:identity identity-1 :inputs dedup-key}
                                      :learning-family "a-trial-configuration-digest"
-                                     :effect [:some-target :the/effect]
+                                     :effect effect
                                      :selected-cascade
-                                     {:precedence [{:id family
-                                                    :produces #{[:some-target :the/effect]}}]}
+                                     {:precedence [{:id family :produces #{effect}}]}
                                      :after-observation true}]})
         r2 (ledger/b-update {:family family
-                             :occurrence-identity identity-1
+                             :occurrence occurrence
+                             :occurrence-identity "a-commit-sha"
                              :accepted-verdict verdict
                              :ledger-root (.getPath tmp)})]
     (is (= :updated (:status r1)) (pr-str r1))
@@ -85,6 +97,11 @@
     ;; (0 + 1 + 1/2) / (0 + 1 + 1) = 3/4
     (is (= 3/4 (:theta r1)) (pr-str r1))
     (is (= :already-recorded (:status r2)) (pr-str r2))
+    ;; the read-back field's whole job is to show the value survives a
+    ;; read: it counted on the configuration digest and so reported 0
+    ;; forever (claude-2's finding 3); nothing asserted it
+    (is (= 1 (get-in r2 [:read-back :same-family-count]))
+        (pr-str (:read-back r2)))
     (is (= (:theta r1) (:theta r2)) "re-running writes nothing: same theta")
     ;; the update survives being read back (read from the ledger itself)
     (is (= 1 (count (ledger/read-trials (.getPath tmp))))

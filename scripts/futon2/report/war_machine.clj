@@ -6391,7 +6391,16 @@
                                             (= :recorded-trials (:status ft))
                                             (assoc p :theta (:theta ft)
                                                      :theta-source :recorded-trials
-                                                     :theta-provenance (select-keys ft [:trials-count :successes :identities]))
+                                                     ;; :targets and :unattributed-rows are
+                                                     ;; provenance the decision record must
+                                                     ;; carry, not just the reader's return:
+                                                     ;; a 1/8 from three attempts on ONE
+                                                     ;; target reads differently from three
+                                                     ;; targets, and unattributed rows are
+                                                     ;; how a join mismatch becomes visible
+                                                     ;; (claude-2's review, 2026-09-23)
+                                                     :theta-provenance (select-keys ft [:trials-count :successes :identities
+                                                                                        :targets :unattributed-rows]))
                                             ;; unreadable: documented default, typed reason kept
                                             (= :defaulted (:status ft))
                                             (assoc p :theta 1

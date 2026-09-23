@@ -102,10 +102,16 @@
    digest is not a parameter key: it can only be matched again on an
    identical target and precedence, so a theta stored under it could never
    transfer. Two identities for one thing is what hid this bug, so the key
-   is derived here rather than written a second time."
+   is derived here rather than written a second time.
+
+   Both banked row shapes are read: the 2026-09-21 top-level shape as well
+   as the :trial-nested one, so a top-level row attributes instead of
+   degrading silently to :no-declared-producer (claude-2's review)."
   [row]
-  (producer-of (get-in row [:trial :selected-cascade :precedence])
-               (get-in row [:trial :effect])))
+  (producer-of (or (get-in row [:trial :selected-cascade :precedence])
+                   (get-in row [:selected-cascade :precedence]))
+               (or (get-in row [:trial :effect])
+                   (:effect row))))
 
 (defn read-trials
   "PROOF-wm-works ⟨1⟩4: the production reader. Reads every recorded trial
@@ -163,7 +169,7 @@
    (trials + 1) over the family's whole-attempt outcomes — a Laplace update
    on the family's declared-effect transition, starting from the neutral
    1/2 prior when no history exists."
-  [{:keys [family occurrence-identity accepted-verdict ledger-root]}]
+  [{:keys [family occurrence occurrence-identity accepted-verdict ledger-root]}]
   (when-not (map? accepted-verdict)
     (throw (ex-info "B update requires the accepted-increment verdict"
                     {:learning-ledger/refusal :missing-accepted-verdict})))
@@ -178,9 +184,23 @@
         ;; a first-trial value regardless of history (claude-2's review,
         ;; 2026-09-23). The key is :theta-key, derived by producer-of.
         mine (filter #(= family (:theta-key %)) trials)
-        ;; Exactly once: the occurrence's own identity must not already be
-        ;; among the family's recorded trials.
-        already (some #(= occurrence-identity (:identity %)) mine)
+        ;; one contribution per recorded occurrence, as pattern-theta does:
+        ;; two functions whose docstrings name the same posterior must not
+        ;; disagree (claude-2's review)
+        mine (vals (into {} (map (juxt :identity identity)) mine))
+        ;; Exactly once. OCCURRENCE-IDENTITY is a commit sha; the row's
+        ;; :identity is a digest of {:occurrence :effect :grain}, so the two
+        ;; can never be equal and every occurrence looked new -- it
+        ;; double-counted an attempt whose row record! had already banked
+        ;; at the close (claude-2's review, 2026-09-23). The occurrence is
+        ;; matched as production identifies it: attempt_learning stores the
+        ;; dedup key in plain form beside the digest, so the occurrence map
+        ;; is compared directly, no digest reconstruction. The commit sha
+        ;; stays as recorded provenance; it is not the key.
+        occurrence-of (fn [r] (or (get-in r [:row :trial :deduplication :inputs :occurrence])
+                                  (get-in r [:row :deduplication :inputs :occurrence])))
+        already (boolean (when occurrence
+                           (some #(= occurrence (occurrence-of %)) mine)))
         successes (count (filter true? (map :observed mine)))
         trials-n (count mine)
         trials' (+ trials-n (if already 0 1))
@@ -197,6 +217,7 @@
     {:status (if already :already-recorded :updated)
      :family family
      :occurrence-identity occurrence-identity
+     :occurrence occurrence
      :theta theta
      :rule "theta_post = (successes' + 1/2) / (trials' + 1): Laplace (beta 1/2,1/2) over the family's whole-attempt outcomes, counting this occurrence once (trials'/successes' include it if and only if it is not already recorded)"
      :trials-read trials-n
@@ -208,7 +229,11 @@
      ;; occurrence).
      :read-back (let [again (read-trials (or ledger-root default-root))]
                   {:trials (count again)
-                   :same-family-count (count (filter #(= family (:family %)) again))})}))
+                   ;; by the PARAMETER key: this counted on :family, the
+                   ;; configuration digest, so the field whose job is to
+                   ;; show the value survives a read-back reported 0
+                   ;; forever (claude-2's review)
+                   :same-family-count (count (filter #(= family (:theta-key %)) again))})}))
 
 (defn pattern-theta
   "PROOF-wm-works ⟨1⟩8 second half: the scorer's read of the recorded
@@ -237,14 +262,23 @@
   ([pattern-id] (pattern-theta pattern-id default-root))
   ([pattern-id root]
    (try
-     (let [rows (filter #(= pattern-id (:theta-key %)) (read-trials root))
+     (let [all (read-trials root)
+           ;; A row whose key is a typed status (no declaring pattern, or
+           ;; several) is not the same as an absent row, and the difference
+           ;; must be visible: a qualification mismatch at the join would
+           ;; otherwise read as silence rather than as "6 rows, 6
+           ;; unattributed" (claude-2's answer to the quiet-degradation
+           ;; question, 2026-09-23).
+           unattributed (count (filter #(map? (:theta-key %)) all))
+           rows (filter #(= pattern-id (:theta-key %)) all)
            ;; one contribution per recorded occurrence
            rows (vals (into {} (map (juxt :identity identity)) rows))
            n (count rows)
            successes (count (filter (comp true? :observed) rows))]
        (if (zero? n)
-         {:status :no-recorded-trials}
+         {:status :no-recorded-trials :unattributed-rows unattributed}
          {:theta (/ (+ successes 1/2) (+ n 1))
+          :unattributed-rows unattributed
           :status :recorded-trials
           :trials-count n
           :successes successes

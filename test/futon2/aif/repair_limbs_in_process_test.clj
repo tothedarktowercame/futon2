@@ -6,6 +6,7 @@
   states no recorded occurrence holds yet. No locator, guard or conjunct is
   weakened; no fixture touches the real data directories."
   (:require [clojure.java.io :as io]
+            [futon2.aif.action-identity :as action-identity]
             [clojure.string :as str]
             [futon2.aif.observation-checks :as checks]
             [clojure.test :refer [deftest is]]
@@ -196,23 +197,35 @@
         tmp (.toFile (java.nio.file.Files/createTempDirectory
                       "limbs-b-update" (make-array java.nio.file.attribute.FileAttribute 0)))
         _ (spit (io/file tmp "attempts.edn") "")
+        ;; the commit sha is the verdict's provenance; the OCCURRENCE is
+        ;; what production identifies the attempt by, and the row's
+        ;; :identity is a digest of {:occurrence :effect :grain}. Passing
+        ;; one authored string as both was what made the earlier
+        ;; "exactly once" assertion vacuous (claude-2's review, 2026-09-23).
         occurrence-identity (get-in verdict [:evidence :binding :commit])
+        occurrence {:action/id "action-limbs-1"
+                    :action/value-sha256 occurrence-identity
+                    :transition/id "transition-limbs-1"}
+        effect [t :calibration/evidence-passing]
+        dedup-key {:occurrence occurrence :effect effect
+                   :grain :selected-cascade-effect-attempt}
+        row-identity (action-identity/digest dedup-key)
         r1 (ledger/b-update {:family :aif/two-layer-calibration
+                             :occurrence occurrence
                              :occurrence-identity occurrence-identity
                              :accepted-verdict verdict
                              :ledger-root (.getPath tmp)})
-        ;; the runner's own append path: record! a row carrying the same
-        ;; identity the call site derives from the verdict
+        ;; the runner's own append path, in the production shape
         _ (ledger/record! (.getPath tmp)
                                    {:trials [{:status :admitted-at-attempt-grain
-                                              :deduplication {:identity occurrence-identity}
+                                              :deduplication {:identity row-identity :inputs dedup-key}
                                               ;; :learning-family is the trial-CONFIGURATION
                                               ;; digest, not the parameter key; the key is
                                               ;; DERIVED from the recorded precedence and
                                               ;; effect, exactly as the production writer
                                               ;; leaves them (claude-2's grain ruling)
                                               :learning-family "a-trial-configuration-digest"
-                                              :effect [t :calibration/evidence-passing]
+                                              :effect effect
                                               :selected-cascade
                                               {:precedence [{:id :aif/declare-the-conditioning
                                                              :produces #{[t :repair/split-declared-valid]}}
@@ -223,6 +236,7 @@
                                               ;; field — so the runner-written row is honest
                                               :after-observation true}]})
         r2 (ledger/b-update {:family :aif/two-layer-calibration
+                             :occurrence occurrence
                              :occurrence-identity occurrence-identity
                              :accepted-verdict verdict
                              :ledger-root (.getPath tmp)})]

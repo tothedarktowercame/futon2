@@ -202,3 +202,46 @@
     (is (= 3/4 (:theta falsifier)) "one attempt, accepted")
     (is (= :no-recorded-trials (:status untried))
         "a pattern with no trials keeps the documented default")))
+
+(deftest top-level-row-shape-still-attributes
+  ;; read-trials handles two banked row shapes; theta-key must read both,
+  ;; or a top-level-shaped row degrades silently to :no-declared-producer
+  ;; (claude-2's finding 4).
+  (let [tmp (.toFile (java.nio.file.Files/createTempDirectory
+                      "theta-shape" (make-array java.nio.file.attribute.FileAttribute 0)))
+        effect [t :repair/split-declared-valid]
+        row {:schema :wm/attempt-learning-count-v1
+             :identity "top-level-occ-1"
+             :family "a-trial-configuration-digest"
+             :observed true
+             :increment {:success 1 :failure 0}
+             :effect effect
+             :selected-cascade {:precedence [{:id :aif/declare-the-conditioning
+                                              :produces #{effect}}]}}
+        _ (spit (io/file tmp "attempts.edn") (str (pr-str row) "\n"))
+        ft (ledger/pattern-theta :aif/declare-the-conditioning (.getPath tmp))]
+    (is (= :recorded-trials (:status ft)) (pr-str ft))
+    (is (= 3/4 (:theta ft)))
+    (is (= 0 (:unattributed-rows ft)) "the row attributed; nothing unexplained")))
+
+(deftest unattributable-rows-are-counted-not-silent
+  ;; A row whose effect no pattern in its own precedence declares cannot be
+  ;; attributed. It must be VISIBLE as unattributed rather than read as an
+  ;; absent row -- that count is how a qualification mismatch at the join
+  ;; shows up at all (claude-2's answer to the quiet-degradation question).
+  (let [tmp (.toFile (java.nio.file.Files/createTempDirectory
+                      "theta-unattributed" (make-array java.nio.file.attribute.FileAttribute 0)))
+        row {:schema :wm/attempt-learning-count-v1
+             :identity "unattributable-1"
+             :family "a-trial-configuration-digest"
+             :observed true
+             :increment {:success 1 :failure 0}
+             :effect [t :repair/split-declared-valid]
+             ;; the precedence declares a DIFFERENT token
+             :selected-cascade {:precedence [{:id :aif/declare-the-conditioning
+                                              :produces #{[t :something/else]}}]}}
+        _ (spit (io/file tmp "attempts.edn") (str (pr-str row) "\n"))
+        ft (ledger/pattern-theta :aif/declare-the-conditioning (.getPath tmp))]
+    (is (= :no-recorded-trials (:status ft)) "not attributed to this pattern")
+    (is (= 1 (:unattributed-rows ft))
+        "and the ledger says one row could not be attributed at all")))
