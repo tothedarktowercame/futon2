@@ -3,6 +3,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pprint]
+            [clojure.string :as str]
             [futon2.aif.held-out-split :as split]
             [futon2.aif.load-identity :as load-identity]))
 
@@ -231,6 +232,18 @@
   ([declaration run-root]
    (collect-window declaration (rows-from-runs declaration run-root))))
 
+(defn render-packet
+  "Render parseable EDN with a verified disposition at the exact C4 line head."
+  [packet]
+  (let [rendered (with-out-str (pprint/pprint packet))]
+    (if (= disposition (:disposition packet))
+      (-> rendered
+          (str/replace (str ":disposition " disposition ",")
+                       (str ":disposition,\n" disposition))
+          (str/replace (str ":disposition " disposition)
+                       (str ":disposition\n" disposition)))
+      rendered)))
+
 (defn write-snapshot!
   "Atomically materialize the collection packet. The disposition is therefore
   written only when collect-window has verified enough durable source rows."
@@ -250,7 +263,7 @@
                     ";; Do not hand-edit: every row's :source names the record it was read\n"
                     ";; from and its digest, and collect-window refuses a row it cannot tie\n"
                     ";; back to that file.\n"
-                    (with-out-str (pprint/pprint packet))))
+                    (render-packet packet)))
      (Files/move (.toPath tmp) (.toPath target)
                  (into-array java.nio.file.StandardCopyOption
                              [java.nio.file.StandardCopyOption/ATOMIC_MOVE
@@ -262,4 +275,3 @@
                                 "resources/wm/eig/held-out-observations.edn")]
     (println (pr-str (select-keys packet
                                  [:status :valid-count :missing-count :disposition])))))
-

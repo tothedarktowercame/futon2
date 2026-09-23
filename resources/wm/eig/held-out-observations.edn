@@ -1,23 +1,9 @@
 ;; Regenerated from the durable run records through
-;; futon2.aif.held-out-observations/rows-from-runs + collect-window.
+;; futon2.aif.held-out-observations/write-snapshot!.
 ;; Do not hand-edit: every row's :source names the record it was read
 ;; from and its digest, and collect-window refuses a row it cannot tie
 ;; back to that file.
 {:schema :wm/eig-held-out-observations-v1,
- :split
- {:schema :wm/eig-held-out-split-v2,
-  :ticket/id
-  "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade",
-  :registered-at "2026-09-23T12:20:00Z",
-  :starting-point
-  {:kind :git-commit,
-   :sha "e153bb7e",
-   :described
-   "the commit recording the supersession decision; the window opens after it"}},
- :status :open,
- :required 2,
- :valid-count 1,
- :missing-count 1,
  :observations
  [{:hygiene :invalid,
    :unmapped? false,
@@ -74,8 +60,38 @@
    :recorded-at "2026-09-23T17:32:23.355238001Z",
    :target
    "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade",
-   :run-id "2026-09-23-1790184736"}],
+   :run-id "2026-09-23-1790184736"}
+  {:hygiene :valid,
+   :unmapped? false,
+   :close-sha256
+   "75cc887916d156a8f164f2e73d7430e0a62a411734f5ebfe5fac37ff264d28fd",
+   :source
+   {:path "data/wm-runs/tick-run-record-2026-09-23-1790187227.edn",
+    :sha256
+    "75cc887916d156a8f164f2e73d7430e0a62a411734f5ebfe5fac37ff264d28fd"},
+   :hygiene-reason nil,
+   :outcome-class :no-result,
+   :recorded-at "2026-09-23T18:13:55.566516548Z",
+   :target
+   "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade",
+   :run-id "2026-09-23-1790187227"}],
  :claims
- {:window-closed? false,
+ {:window-closed? true,
   :calibration-evidence-present? false,
-  :restoration-accepted? false}}
+  :restoration-accepted? false},
+ :disposition,
+HELD-OUT-OBSERVATIONS-COLLECTED
+ :missing-count 0,
+ :split
+ {:schema :wm/eig-held-out-split-v2,
+  :ticket/id
+  "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade",
+  :registered-at "2026-09-23T12:20:00Z",
+  :starting-point
+  {:kind :git-commit,
+   :sha "e153bb7e",
+   :described
+   "the commit recording the supersession decision; the window opens after it"}},
+ :status :closed,
+ :required 2,
+ :valid-count 2}

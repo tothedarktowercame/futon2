@@ -4,6 +4,7 @@
   (:require [clojure.edn :as edn]
             [clojure.set]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.held-out-observations :as obs]))
 
@@ -148,5 +149,11 @@
     (is (or (nil? (:disposition committed))
             (= :closed (:status computed)))
         "the disposition head appears only when the records themselves close the window")
+    (is (= obs/disposition (:disposition committed))
+        "the now-complete prospective window publishes its disposition")
+    (is (some #{"HELD-OUT-OBSERVATIONS-COLLECTED"}
+              (str/split-lines
+               (slurp (io/resource "wm/eig/held-out-observations.edn"))))
+        "the verified disposition is an exact C4 line head")
     (is (= (:required computed) (:required committed))
         "and it is measured against the same declared N")))
