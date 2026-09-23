@@ -3757,8 +3757,19 @@
                        (accepted-increment/evaluate-close
                         {:binding (get-in @checkpoints [:build :judgment :validation :artifact-binding])
                          :token-rows (get-in token-comparison [:receipt :tokens])
-                         :acceptance (get-in selection-judgment
-                                             [:controller-decision :action :accepted-increment :acceptance])
+                         ;; ⟨1⟩6 part 1: the acceptance declaration travels
+                         ;; from the decision to the close. First the slot the
+                         ;; class decision may populate; when it does not (the
+                         ;; class path populates no action-level acceptance),
+                         ;; the SELECTED candidate's own declared acceptance
+                         ;; from its cascade source — carried with provenance
+                         ;; (source file, target). A target whose source
+                         ;; declares none yields nil, and the predicate says
+                         ;; :no-acceptance-declared, never invented language.
+                         :acceptance (or (get-in selection-judgment
+                                                [:controller-decision :action :accepted-increment :acceptance])
+                                         (cascade-sources/acceptance-of
+                                          (:target (get-in selection-judgment [:controller-decision :action]))))
                          :after-revision (:commit data)})
                        close-judgment-base
                        (merge {:outcome outcome

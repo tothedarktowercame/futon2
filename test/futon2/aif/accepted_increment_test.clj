@@ -3,7 +3,8 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
-            [futon2.aif.accepted-increment :as ai]))
+            [futon2.aif.accepted-increment :as ai]
+            [futon2.aif.cascade-sources :as cs]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 
@@ -151,3 +152,19 @@
                                    :token-rows [[:not-a-row]]))]
     (is (= :refused (:accepted? r)))
     (is (= :predicate-evaluation-failed (:reason r)))))
+
+;; ⟨1⟩6 part 1: the acceptance declaration travels from the source to the close.
+(deftest acceptance-of-extracts-the-declared-acceptance-with-provenance
+  (let [t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+        a (cs/acceptance-of t)]
+    (is (some? a) "the reference ticket's source declares an acceptance")
+    (is (= :restoration-accepted (:token a)))
+    (is (= :C4 (:class (:locator a))))
+    (is (= "**Status:** DONE" (:decl (:locator a))))
+    (is (= t (get-in a [:provenance :target])))
+    (is (re-find #"T-repair-occ-444fb018\.edn" (str (get-in a [:provenance :source-file]))))
+    (is (some? (get-in a [:provenance :source-sha256])))))
+
+(deftest acceptance-of-yields-nil-when-nothing-declared
+  ;; a target with no cascade source at all declares no acceptance
+  (is (nil? (cs/acceptance-of "T-nonexistent-target-0000"))))

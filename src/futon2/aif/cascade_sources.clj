@@ -231,6 +231,28 @@
                    (apply max (map :horizon-steps
                                    (:horizon-steps-declarations merged))))))))))
 
+(defn acceptance-of
+  "PROOF-wm-works ⟨1⟩6 part 1: a target's OWN acceptance declaration from its
+   cascade source — the declared want token with its locator, carried WITH
+   provenance (which source file and target declared it). A source declaring
+   no want, or a want with no locator, declares no acceptance: nil, never
+   invented. Sources are read from DIR (default the canonical dir); callers
+   that already hold the sources may pass them via :sources."
+  ([target]
+   (acceptance-of target nil))
+  ([target {:keys [dir sources]}]
+   (let [srcs (or sources (load-declared (or dir default-dir)))
+         want (first (get-in srcs [:wants target]))
+         locator (get-in srcs [:locators target want])
+         file (some (fn [f] (when (= target (:target f)) f)) (:files srcs))]
+     (when (and (some? want) (map? locator))
+       {:token want
+        :locator locator
+        :provenance {:source-file (:path file)
+                     :source-sha256 (:sha256 file)
+                     :target target
+                     :declaration :cascade-source-want-locator}}))))
+
 (defn with-context-fn
   "Add the :context-of function cascade-problems needs (it cannot live in data)."
   [sources]
