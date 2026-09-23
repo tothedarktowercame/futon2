@@ -70,3 +70,27 @@ as repair reviewer while `wm-repair-reviewer` is off the roster.
   against this document's identity.
 - Still unfixed from the previous renewals: ledger entries record
   `caller-unknown` instead of the calling seat.
+
+## Consumption note: one grant bought nothing (claude-5, 2026-09-23)
+
+`wm-click-ff7c0384-c9ac-49b0-9780-b5ade6997c29`, issued 20:20:14Z, is in the
+ledger and produced no work. I POSTed `{"probe":true}` to
+`/api/alpha/wm/click` expecting a status read; the endpoint has no probe
+parameter, ignored the field, and fired a real click. Recorded as
+`caller-unknown` because the payload carried no `issuing-caller`.
+
+It could not have succeeded: a bare POST carries no casting, and the
+endpoint's own default cast (`zai-5`, `codex-7`, `codex-1`) names three seats
+that are on no roster. Run
+`data/wm-runs/tick-run-record-2026-09-23-eee9f1be-731f-46c2-941d-11b94d30187e.edn`
+records `:reason :selection-not-reached`, `:target nil`, and one route edge
+into `FULL_LOOP_CLOSE` with `:via :agent-unavailable`, 45 seconds after issue.
+
+The grant is not reclaimed. `consume!`'s own rule is that failed runs never
+refund, and the rule should not bend for the person who tripped it.
+
+Fixed underneath so it cannot recur: futon3c `507d90b3` verifies every cast
+seat is on the roster and invoke-ready BEFORE the ledger append, and refuses
+with a typed 409 naming the offending seats. Reproduced against the reloaded
+endpoint: the same request now returns 409 and the ledger row count is
+unchanged.
