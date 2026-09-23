@@ -31,7 +31,8 @@
    after a successful trace append. Its separate default-off read is carried
    only as report/trace evidence; selection never consumes it.
    Pattern:   war-machine/operational-not-decorative"
-  (:require [futon2.aif.load-identity :as load-identity]
+  (:require [futon2.aif.learning-trial-ledger :as learning-ledger]
+            [futon2.aif.load-identity :as load-identity]
             [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn]
