@@ -620,7 +620,23 @@ candidates automatically, or that every click is fast.
 - **CHECK.** For this occurrence, the accepted-increment predicate from ⟨1⟩4 holds, bound to
   the reviewed commits and the required evidence. `verify-close` alone is not enough; r4-2
   passed it on a failure.
-- **FAILURES:** —
+- **NOT YET MET, 2026-09-23**, on machinery-72 attempt-001. The predicate's three parts, on
+  the real records (zai-1: plug 8527577e, conjunct fix 75a892e2, notes 319c84d7 and b7cb7dd9;
+  ruling and review by claude-5):
+  - (a) holds: `ee22106c` is bound to this occurrence, a fresh descendant, corroborated.
+  - (b) fails: the split file exists at that revision, but its disposition is written as an
+    EDN value (`:disposition "HELD-OUT-SPLIT-DECLARED"`), while the declared C4 locator
+    requires that head at the start of a line.
+  - (c) would also fail: the ticket's Status still reads OPEN, as the delivered work itself
+    says.
+  - Found on the way: the producer had measured the candidate's own token all along;
+    `compare-outcomes` only ever compared the prediction's wanted list. Fixed at the consumer.
+  - The cause of (b) is upstream of the predicate: nothing told the author what shape its
+    acceptance required. Fixed in futon2 6a2f7a19 — the author and revision prompts now carry
+    each declared token, its locator kind, path and exact required head with the line-initial
+    rule, rendered from the declarations themselves. Not a gate: an unrenderable criterion
+    dispatches with a typed-absent note. claude-5 reloaded four namespaces.
+  - So the step waits on the repair's later limbs, run by the next clicks.
 
 ### ⟨1⟩7. The outcome is measured and attested.
 
