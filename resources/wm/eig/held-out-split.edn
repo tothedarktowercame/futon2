@@ -1,0 +1,23 @@
+{:schema :wm/eig-held-out-split-v1
+ :disposition "HELD-OUT-SPLIT-DECLARED"
+ :ticket/id "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+ :declared-on "2026-09-23"
+ :model {:theta :a4a/dirichlet-posterior-v1
+         :policy-family :wm/pattern-cascade
+         :prediction-source :wm/eig-shadow-packet-v1}
+ :locator {:root "data/wm-full-loop-machinery-72/wm-contract-machinery-72-v1"
+           :record "<attempt-id>/007-closed.edn"}
+ :training-set ["attempt-001"]
+ :held-out-set ["attempt-002" "attempt-003"]
+ :outcome-classes [:result :no-result :failure :timeout]
+ :window {:opens-after {:event :git-commit-containing-declaration}
+          :minimum-observations 2
+          :close-when :all-held-out-attempts-have-durable-close}
+ :primary-metrics [:log-loss :brier]
+ :secondary-metrics [:predicted-entropy-reduction :realised-entropy-reduction]
+ :passing-bounds {:mean-log-loss {:lte 1.3862943611198906}
+                  :mean-brier {:lte 0.25}}
+ :calibration-authority :none
+ :claims {:observations-collected? false
+          :calibration-evidence-present? false
+          :restoration-accepted? false}}

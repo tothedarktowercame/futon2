@@ -54,6 +54,7 @@
    'futon2.aif.token-belief-predecessor "/home/joe/code/futon2/src/futon2/aif/token_belief_predecessor.clj"
    'futon2.aif.scoring-input-receipts "/home/joe/code/futon2/src/futon2/aif/scoring_input_receipts.clj"
    'futon2.aif.eig-shadow "/home/joe/code/futon2/src/futon2/aif/eig_shadow.clj"
+   'futon2.aif.held-out-split "/home/joe/code/futon2/src/futon2/aif/held_out_split.clj"
    'futon2.aif.cascade-sources "/home/joe/code/futon2/src/futon2/aif/cascade_sources.clj"
    'futon2.aif.cascade-problems "/home/joe/code/futon2/src/futon2/aif/cascade_problems.clj"
    'futon2.aif.cascade-structure "/home/joe/code/futon2/src/futon2/aif/cascade_structure.clj"
