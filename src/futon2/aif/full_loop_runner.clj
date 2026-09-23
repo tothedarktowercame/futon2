@@ -1317,7 +1317,13 @@
 
 (defmethod construct-selected-action :cascade-candidate
   [entry]
-  (let [action (:action entry)]
+  (let [;; ⟨1⟩6: the enacted steps the DECISION recorded (keyed by chain
+        ;; head), threaded onto the action once, here — the initial
+        ;; dispatch, the revision dispatch and the (b) filter all read
+        ;; this same field; none resolves it independently.
+        action (assoc (:action entry)
+                      :enacted-steps
+                      (get-in entry [:decision :selection-law :enacted-steps]))]
     {:mission (:target action)
      :psi (str "enact cascade " (or (:cascade-id action) (:id action)))
      :construction-kind :selected-cascade
@@ -1888,6 +1894,33 @@
          "Any invalid deposit refuses the whole close: deposit carefully or not at all.\n"
          "EVERY non-EDN file must be referenced by exactly one record's :file/:stdout-file/:stderr-file field; an unreferenced byproduct (cohort-55 attempt-003: a stray derived.stderr) is parsed as EDN, fails, and refuses the whole close.\n"))))
 
+(defn- enacted-step-pattern
+  "⟨1⟩6 (dispatch reads the ENACTED step): the pattern in ACTION's
+   :precedence whose :id equals the enacted-step id the DECISION recorded
+   for this candidate's chain head — read from the recorded
+   :enacted-steps, never recomputed here. Falls back to the chain head
+   with a typed reason when the decision carries no entry for this head or
+   names a step outside this candidate's precedence. Never throws, never
+   gates."
+  [action]
+  (let [action (or (:selected-action action) action)
+        precedence (vec (:precedence action))
+        head (first precedence)
+        head-id (:id head)
+        enacted-steps (get-in action [:enacted-steps])
+        recorded (get enacted-steps head-id)]
+    (if (and (some? recorded)
+             (some #(= recorded (:id %)) precedence))
+      {:pattern (first (filter #(= recorded (:id %)) precedence))
+       :enacted-step {:id recorded :source :recorded-decision}}
+      {:pattern head
+       :enacted-step {:id (some-> head :id)
+                      :source :chain-head-fallback
+                      :reason (cond
+                                (nil? enacted-steps) :no-recorded-enacted-steps
+                                (nil? recorded) :no-entry-for-head
+                                :else :recorded-step-not-in-precedence)}})))
+
 (defn- acceptance-criterion-block
   "PROOF-wm-works ⟨1⟩6 (claude-5 ruling): the dispatch states the acceptance
    criterion VERBATIM. For the SELECTED candidate: each declared produced
@@ -1904,7 +1937,11 @@
           ;; produced token can never be rendered as [nil token].
           action (or (:selected-action action) action)
           target (:target action)
-          first-action (first (:precedence action))
+          ;; ⟨1⟩6: the ENACTED step, read from the recorded decision's
+          ;; :enacted-steps (threaded onto the action by
+          ;; construct-selected-action); typed fallback to the head.
+          {:keys [pattern enacted-step]} (enacted-step-pattern action)
+          first-action pattern
           ;; the live qualifier produces [target token] pairs; hand-built
           ;; entries may carry bare tokens — handle both
           produced (vec (sort-by pr-str (map (fn [tok] (if (vector? tok) (second tok) tok))
@@ -1933,6 +1970,8 @@
                             (render-locator [target (:token acceptance)] (:locator acceptance)))]
       (if (or (seq produced-lines) acceptance-line)
         (str "ACCEPTANCE CRITERIA (the tests your work will be measured against):\n"
+             ;; the step this criterion belongs to, and where it came from
+             "Criterion step: " (pr-str enacted-step) "\n"
              (when (seq produced-lines)
                (str "Your action's declared produced tokens, measured at the after-revision:\n"
                     (clojure.string/join "\n" produced-lines) "\n"))
@@ -3836,8 +3875,22 @@
                          ;; comparison rows above remain the (c)-facing and
                          ;; surprise-facing record, untouched.
                          :token-rows
-                         (let [produced (set (get-in selection-judgment
-                                                     [:controller-decision :action :precedence 0 :produces]))
+                         (let [;; ⟨1⟩6: conjunct (b) measures the ENACTED
+                               ;; step's produced tokens, read from the
+                               ;; decision's recorded :enacted-steps via the
+                               ;; same resolver the dispatch uses — never
+                               ;; precedence 0.
+                               decision-action (get-in selection-judgment
+                                                       [:controller-decision :action])
+                               decision-action (if (contains? decision-action :enacted-steps)
+                                                 decision-action
+                                                 (assoc decision-action
+                                                        :enacted-steps
+                                                        (get-in selection-judgment
+                                                                [:controller-decision :selection-law :enacted-steps])))
+                               {:keys [pattern enacted-step]} (enacted-step-pattern decision-action)
+                               produced (set (map (fn [tok] (if (vector? tok) (second tok) tok))
+                                                  (:produces pattern)))
                                ;; the d-task source record's after-token rows
                                ;; cover the whole declared universe (the
                                ;; candidate's own tokens included); read
