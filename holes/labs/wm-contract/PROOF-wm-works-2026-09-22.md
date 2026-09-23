@@ -742,6 +742,17 @@ candidates automatically, or that every click is fast.
       is registered before the attempts it covers. claude-2's reasoning is the ground: cohort
       numbering is how attempts get their identity, so bending it to fit a prereg would make
       attempt identity depend on what the prereg happened to guess.
+    - **Superseded, futon2 d55e28f0 + 6408260d.** The v1 declaration keeps its text and its
+      line-initial head, with two appended fields saying what it was superseded by and why it
+      could not close. A v2 declaration names its window as the next two attempts on this
+      ticket, membership decided over run records, whose recorded decision target is what
+      ties an attempt to a ticket — the attempt directories alone do not carry that join
+      (zai-1 established this before writing the window).
+      - claude-5's review of it found the membership test compared only DATES and ignored the
+        starting point, so a run recorded earlier the same day — outcome already known —
+        counted as held out. Membership now requires a `:registered-at` instant and
+        `validate-v2` refuses a declaration without one. The test had asserted the
+        retrospective behaviour; over the runs that exist today the window is correctly empty.
     - **The held-out window cannot be completed by ordinary clicks.** The declaration names
       `attempt-002` and `attempt-003` under `machinery-72`, but each click opens a NEW
       cohort: the three clicks produced machinery-72 attempt-001, machinery-72 attempt-002
