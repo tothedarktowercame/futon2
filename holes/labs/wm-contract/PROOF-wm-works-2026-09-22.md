@@ -689,7 +689,40 @@ candidates automatically, or that every click is fast.
     - claude-5's finishing fix: the test built a pattern map by hand, which lacks the
       interpretation fields the manifest requires, so the rollout refused instead of running.
       It now varies θ on the real interpreted pattern. Five namespaces reloaded.
+    - **The identity was wrong, found by claude-2 (futon2 f5e380b7, 2026-09-23).** The
+      ledger's `:family` is a digest of the whole trial *configuration* (target, cascade,
+      patterns, effect, route), which `record!` uses to detect a revised meaning. Two readers
+      were using it as the parameter key, which can never equal a pattern id, so the scorer
+      read nothing and `b-update`'s own trial count was always 0 — its reported θ was always
+      a first-trial value. The key is now derived: `producer-of` finds the pattern in the
+      trial's recorded precedence that declares the trial's effect; none or several give a
+      typed status rather than a guess. `full_loop_runner` credited precedence 0, the chain
+      head, instead of the pattern that declared the accepted effect.
+      - Reconstructing the digest at read time is impossible: `author-dispatch-route` is nil
+        at selection (`full_loop_runner.clj:3423,4657` against `:4381`), so `:route` is
+        either missing or a stale value from the previous attempt.
+      - On the banked ledger the correct read is not empty:
+        `:contracts/holder-states-the-claim` has three attempts and no acceptances, θ = 1/8,
+        and it sits in C2's precedence. The bug was hiding a live value.
+      - The tests set `:learning-family` to a pattern-id keyword — a shape
+        `attempt-learning/receipt` cannot emit — so both sides of the identity were authored
+        by the test. They now write through `record!` in the production shape and assert
+        against the banked ledger with no authored constants.
     - Still not shown by a live click.
+  - **Third click under renewal-5, 2026-09-23** (`wm-click-b765f91f`, run
+    `2026-09-23-1790161992`, machinery-73 attempt-001, `:grounded-change`). It took the
+    ticket through the queue again (`:decided-by :ticket-queue`), and the record now names
+    both identities: `:enacted-steps {:aif/declare-the-conditioning
+    :aif/measurement-window-hygiene}` — the observations limb, as expected. The predicate
+    returned `{:accepted? false :failed :c}`; no B update.
+    - Every pattern scored with `:theta-source :documented-default`: this click ran before
+      f5e380b7, so it is a live instance of the identity bug.
+    - **The held-out window cannot be completed by ordinary clicks.** The declaration names
+      `attempt-002` and `attempt-003` under `machinery-72`, but each click opens a NEW
+      cohort: the three clicks produced machinery-72 attempt-001, machinery-72 attempt-002
+      and machinery-73 attempt-001. claude-5 and zai-1 both said earlier that the next click
+      would create attempt-003; that was wrong. Unless the same cohort retries, the declared
+      window stays open forever, and the repair cannot reach its own acceptance.
   - **Method change, Joe 2026-09-23:** "I don't see why you need to keep running these things
     to test each one on a live machine. Why can't you build in the tests into the code like
     anyone else?" He is right on the record: every defect the live clicks found — the repair
