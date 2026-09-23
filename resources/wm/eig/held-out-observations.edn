@@ -1,13 +1,2 @@
-{:schema :wm/eig-held-out-observations-v1
- :split {:schema :wm/eig-held-out-split-v2
-         :ticket/id "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
-         :registered-at "2026-09-23T12:20:00Z"
-         :starting-point {:kind :git-commit :sha "e153bb7e"}}
- :status :open
- :required 2
- :valid-count 0
- :missing-count 2
- :observations []
- :claims {:window-closed? false
-          :calibration-evidence-present? false
-          :restoration-accepted? false}}
+# regenerated from real run records 2026-09-23
+{:schema :wm/eig-held-out-observations-v1, :split {:schema :wm/eig-held-out-split-v2, :ticket/id "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade", :registered-at "2026-09-23T12:20:00Z", :starting-point {:kind :git-commit, :sha "e153bb7e", :described "the commit recording the supersession decision; the window opens after it"}}, :status :open, :required 2, :valid-count 1, :missing-count 1, :observations [{:hygiene :invalid, :unmapped? false, :close-sha256 "898a57cff55c20f35cf713796a56d5d8584f51f1c4a7897e091cabe22bdd4bc2", :source {:path "data/wm-runs/tick-run-record-2026-09-23-1790136186.edn", :sha256 "898a57cff55c20f35cf713796a56d5d8584f51f1c4a7897e091cabe22bdd4bc2"}, :hygiene-reason :before-registration, :outcome-class :result, :recorded-at "2026-09-23T04:05:34.095541773Z", :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade", :run-id "2026-09-23-1790136186"} {:hygiene :valid, :unmapped? false, :close-sha256 "1c966e891b3954f3621cb0125a03209209066bfa1237ab492434ba6e5e1fe488", :source {:path "data/wm-runs/tick-run-record-2026-09-23-1790184736.edn", :sha256 "1c966e891b3954f3621cb0125a03209209066bfa1237ab492434ba6e5e1fe488"}, :hygiene-reason nil, :outcome-class :no-result, :recorded-at "2026-09-23T17:34:24.627183410Z", :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade", :run-id "2026-09-23-1790184736"} {:hygiene :invalid, :unmapped? false, :close-sha256 "5fa17f6936968f94257cbcf3035d4b03be29857e972cecbe49e7114360b8ce01", :source {:path "data/wm-runs/tick-run-record-2026-09-23-1790161992.edn", :sha256 "5fa17f6936968f94257cbcf3035d4b03be29857e972cecbe49e7114360b8ce01"}, :hygiene-reason :before-registration, :outcome-class :result, :recorded-at "2026-09-23T11:15:22.741897827Z", :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade", :run-id "2026-09-23-1790161992"} {:hygiene :invalid, :unmapped? false, :close-sha256 "7314951f0ad6d339d561a9f7ec4f5dc14042873e4602873dddb590701ba61f25", :source {:path "data/wm-runs/tick-run-record-2026-09-23-1790131591.edn", :sha256 "7314951f0ad6d339d561a9f7ec4f5dc14042873e4602873dddb590701ba61f25"}, :hygiene-reason :before-registration, :outcome-class :result, :recorded-at "2026-09-23T02:49:23.004527517Z", :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade", :run-id "2026-09-23-1790131591"}], :claims {:window-closed? false, :calibration-evidence-present? false, :restoration-accepted? false}}

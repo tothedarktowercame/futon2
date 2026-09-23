@@ -1,63 +1,79 @@
 (ns futon2.aif.held-out-observations-test
+  "⟨1⟩6: the held-out rows come from real run records with verifiable
+  provenance; a row that cannot be tied to a record cannot close the window."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.test :refer [deftest is testing]]
-            [futon2.aif.held-out-observations :as observations]))
+            [clojure.test :refer [deftest is]]
+            [futon2.aif.held-out-observations :as obs]))
+
+(def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 
 (def declaration
   (edn/read-string (slurp (io/resource "wm/eig/held-out-split-v2.edn"))))
 
-(defn row [id outcome]
-  {:run-id id
-   :target (:ticket/id declaration)
-   :recorded-at "2026-09-24T09:00:00Z"
-   :close-sha256 (apply str (repeat 64 "a"))
-   :outcome-class outcome})
+(defn- fabricated-rows []
+  ;; two rows that pass every ORIGINAL hygiene check — distinct run-ids,
+  ;; instants after registration, 64-hex digests, declared outcome classes —
+  ;; but name run records that DO NOT EXIST
+  [{:run-id "2026-09-25-1799999999"
+    :target t
+    :recorded-at "2026-09-25T10:00:00Z"
+    :close-sha256 (apply str (repeat 64 "a"))
+    :outcome-class :no-result
+    :source {:path "data/wm-runs/tick-run-record-2026-09-25-1799999999.edn"
+             :sha256 (apply str (repeat 64 "a"))}}
+   {:run-id "2026-09-26-1799999998"
+    :target t
+    :recorded-at "2026-09-26T10:00:00Z"
+    :close-sha256 (apply str (repeat 64 "b"))
+    :outcome-class :no-result
+    :source {:path "data/wm-runs/tick-run-record-2026-09-26-1799999998.edn"
+             :sha256 (apply str (repeat 64 "b"))}}])
 
-(deftest open-window-retains-every-row-without-claiming-disposition
-  (let [result (observations/collect-window
-                declaration
-                [(row "run-1" :failure)
-                 (assoc (row "run-wrong" :result) :target "another-ticket")])]
-    (is (= :open (:status result)))
-    (is (= 2 (count (:observations result))) "failed hygiene is retained")
-    (is (= [:valid :invalid] (mapv :hygiene (:observations result))))
-    (is (= :different-target (get-in result [:observations 1 :hygiene-reason])))
-    (is (nil? (:disposition result)))
-    (is (= 1 (:missing-count result)))))
+(deftest fabricated-window-cannot-close
+  ;; BEFORE this change: two such rows closed the window (status :closed,
+  ;; window-closed? true) and would have made the C4 locator observe
+  ;; HELD-OUT-OBSERVATIONS-COLLECTED. AFTER: each is :hygiene :invalid with
+  ;; :source-missing and the window stays open.
+  (let [w (obs/collect-window declaration (fabricated-rows))]
+    (is (= :open (:status w)) (pr-str (select-keys w [:status])))
+    (is (zero? (:valid-count w)))
+    (is (= :source-missing (-> w :observations first :hygiene-reason)))
+    (is (= :source-missing (-> w :observations second :hygiene-reason)))))
 
-(deftest window-closes-only-on-two-distinct-valid-prospective-rows
-  (let [closed (observations/collect-window declaration
-                                             [(row "run-1" :no-result)
-                                              (row "run-2" :timeout)])
-        duplicate (observations/collect-window declaration
-                                                [(row "run-1" :result)
-                                                 (row "run-1" :result)])]
-    (is (= :closed (:status closed)))
-    (is (= observations/disposition (:disposition closed)))
-    (is (= :open (:status duplicate)))
-    (is (= :duplicate-run-id
-           (get-in duplicate [:observations 1 :hygiene-reason])))))
+(deftest doctored-row-disagrees-with-source
+  ;; a row whose source names the REAL record with the RIGHT digest but
+  ;; whose outcome-class disagrees with what the record says
+  (let [rows (obs/rows-from-runs declaration)
+        real (first (filter #(= "2026-09-23-1790184736" (:run-id %)) rows)) ;; outcome :grounded-no-change → :no-result
+        doctored (assoc real :outcome-class :result)]
+    (is (some #(= "2026-09-23-1790184736" (:run-id %)) rows))
+    (let [w (obs/collect-window declaration [doctored])]
+      (is (= :row-disagrees-with-source
+             (-> w :observations first :hygiene-reason)))
+      (is (= :open (:status w))))))
 
-(deftest retrospective-and-untyped-outcomes-do-not-close
-  (testing "the rows stay inspectable even though neither counts"
-    (let [result (observations/collect-window
-                  declaration
-                  [(assoc (row "old" :result) :recorded-at "2026-09-23T11:00:00Z")
-                   (row "novel" :invented)])]
-      (is (= :open (:status result)))
-      (is (= [:before-registration :unknown-outcome-class]
-             (mapv :hygiene-reason (:observations result)))))))
+(deftest real-records-and-exclusions
+  ;; rows-from-runs over the real root yields exactly this ticket's runs
+  (let [rows (obs/rows-from-runs declaration)]
+    (is (= 4 (count rows)))
+    (is (every? #(= t (:target %)) rows))
+    (is (every? #(map? (:source %)) rows))
+    (let [w (obs/collect-window declaration rows)]
+      (is (= 1 (:valid-count w)) "only the post-registration run counts")
+      (is (some #(= :before-registration (:hygiene-reason %)) (:observations w))
+      (is (= :open (:status w)))))))
 
-(deftest malformed-instants-are-retained-but-cannot-close-window
-  (let [result (observations/collect-window
-                declaration
-                [(assoc (row "bad-1" :result) :recorded-at "zzzz")
-                 (assoc (row "bad-2" :failure) :recorded-at "not-an-instant")])]
-    (is (= :open (:status result)))
-    (is (= 0 (:valid-count result)))
-    (is (= 2 (:missing-count result)))
-    (is (nil? (:disposition result)))
-    (is (= [:invalid :invalid] (mapv :hygiene (:observations result))))
-    (is (= [:malformed-recorded-at :malformed-recorded-at]
-           (mapv :hygiene-reason (:observations result))))))
+(deftest unmapped-outcome-not-counted
+  ;; an unmapped outcome is retained, reported, does not count
+  (let [rows (obs/rows-from-runs declaration)
+        real (first (filter #(= "2026-09-23-1790184736" (:run-id %)) rows))
+        unmapped-val (:unmapped-outcome
+                     (edn/read-string
+                      (slurp (io/resource "wm/eig/held-out-outcome-class-mapping.edn"))))
+        unmapped-row (assoc real :outcome-class unmapped-val :unmapped? true)]
+    (let [w (obs/collect-window declaration [unmapped-row])]
+      (is (= :unclassified-outcome-not-counted
+             (-> w :observations first :hygiene-reason)))
+      (is (zero? (:valid-count w)))
+      (is (= :open (:status w))))))
