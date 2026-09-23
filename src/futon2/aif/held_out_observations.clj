@@ -8,14 +8,23 @@
 (def schema :wm/eig-held-out-observations-v1)
 (def disposition 'HELD-OUT-OBSERVATIONS-COLLECTED)
 
+(defn- parse-instant [value]
+  (when (string? value)
+    (try
+      (java.time.Instant/parse value)
+      (catch java.time.format.DateTimeParseException _ nil))))
+
 (defn- valid-row?
   [declaration {:keys [run-id target recorded-at close-sha256 outcome-class]}]
-  (and (string? run-id)
-       (= (:ticket/id declaration) target)
-       (string? recorded-at)
-       (pos? (compare recorded-at (:registered-at declaration)))
-       (boolean (re-matches #"[0-9a-f]{64}" (or close-sha256 "")))
-       (contains? (set (:outcome-classes declaration)) outcome-class)))
+  (let [observed-at (parse-instant recorded-at)
+        registered-at (parse-instant (:registered-at declaration))]
+    (and (string? run-id)
+         (= (:ticket/id declaration) target)
+         observed-at
+         registered-at
+         (.isAfter observed-at registered-at)
+         (boolean (re-matches #"[0-9a-f]{64}" (or close-sha256 "")))
+         (contains? (set (:outcome-classes declaration)) outcome-class))))
 
 (defn collect-window
   "Retain every supplied row and close only the first declared N distinct,
@@ -27,12 +36,15 @@
         retained (mapv (fn [row]
                          (let [duplicate? (contains? @seen (:run-id row))
                                _ (vswap! seen conj (:run-id row))
+                               observed-at (parse-instant (:recorded-at row))
+                               registered-at (parse-instant (:registered-at declaration))
                                reason (cond
                                         duplicate? :duplicate-run-id
                                         (not= (:ticket/id declaration) (:target row)) :different-target
                                         (not (string? (:recorded-at row))) :missing-recorded-at
-                                        (not (pos? (compare (:recorded-at row)
-                                                            (:registered-at declaration)))) :before-registration
+                                        (nil? observed-at) :malformed-recorded-at
+                                        (nil? registered-at) :malformed-registration-instant
+                                        (not (.isAfter observed-at registered-at)) :before-registration
                                         (not (re-matches #"[0-9a-f]{64}" (or (:close-sha256 row) ""))) :invalid-close-digest
                                         (not (contains? (set (:outcome-classes declaration))
                                                         (:outcome-class row))) :unknown-outcome-class)]

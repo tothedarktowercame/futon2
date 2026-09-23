@@ -48,3 +48,16 @@
       (is (= :open (:status result)))
       (is (= [:before-registration :unknown-outcome-class]
              (mapv :hygiene-reason (:observations result)))))))
+
+(deftest malformed-instants-are-retained-but-cannot-close-window
+  (let [result (observations/collect-window
+                declaration
+                [(assoc (row "bad-1" :result) :recorded-at "zzzz")
+                 (assoc (row "bad-2" :failure) :recorded-at "not-an-instant")])]
+    (is (= :open (:status result)))
+    (is (= 0 (:valid-count result)))
+    (is (= 2 (:missing-count result)))
+    (is (nil? (:disposition result)))
+    (is (= [:invalid :invalid] (mapv :hygiene (:observations result))))
+    (is (= [:malformed-recorded-at :malformed-recorded-at]
+           (mapv :hygiene-reason (:observations result))))))
