@@ -708,6 +708,21 @@ candidates automatically, or that every click is fast.
         `attempt-learning/receipt` cannot emit — so both sides of the identity were authored
         by the test. They now write through `record!` in the production shape and assert
         against the banked ledger with no authored constants.
+    - **claude-2's review of that fix (futon2 6cf508b6)** found two more wrong numbers, both
+      made reachable by the fix itself:
+      - the exactly-once guard compared a commit sha against the row's `:identity`, a digest
+        of `{:occurrence :effect :grain}`, so every occurrence looked new and the attempt
+        whose row `record!` had already banked was counted twice — θ 3/10 where counting once
+        gives 1/8. The occurrence map is now compared directly, as production identifies it;
+      - `:read-back`'s `:same-family-count` still counted on the configuration digest, so the
+        field whose job is to show the value survives a read reported 0 forever.
+      Also: `theta-key` now reads the older top-level row shape, and `pattern-theta` counts
+      rows it cannot attribute and surfaces that count with the contributing targets on the
+      decision, so a join mismatch reads as "six rows, six unattributed" rather than silence.
+    - **The test guarding exactly-once was vacuous**: it used one authored string for both
+      sides of the join, pinning its own choice of string. The same shape was in the limbs
+      test, which failed loudly once the key was real. Both now digest the dedup key the way
+      `attempt-learning` does and pass the occurrence separately.
     - Still not shown by a live click.
   - **Third click under renewal-5, 2026-09-23** (`wm-click-b765f91f`, run
     `2026-09-23-1790161992`, machinery-73 attempt-001, `:grounded-change`). It took the
