@@ -71,9 +71,49 @@
         unmapped-val (:unmapped-outcome
                      (edn/read-string
                       (slurp (io/resource "wm/eig/held-out-outcome-class-mapping.edn"))))
-        unmapped-row (assoc real :outcome-class unmapped-val :unmapped? true)]
-    (let [w (obs/collect-window declaration [unmapped-row])]
-      (is (= :unclassified-outcome-not-counted
-             (-> w :observations first :hygiene-reason)))
+        unmapped-row (assoc real :outcome-class unmapped-val :unmapped? true)
+        w (obs/collect-window declaration [unmapped-row])]
+    (is (= :unclassified-outcome-not-counted
+           (-> w :observations first :hygiene-reason)))
+    (is (zero? (:valid-count w)))
+    (is (= :open (:status w)))))
+
+;; claude-5, reviewing 61c573a8. :recorded-at was the one field a row could
+;; state freely: verify-source! checked run-id, target and outcome-class
+;; against the record and not the instant. That instant is what decides
+;; membership — three of this ticket's four runs are excluded by
+;; :before-registration and nothing else — so a doctored one moves a run whose
+;; outcome was already known into the held-out window, which is the single
+;; thing the split exists to prevent.
+(deftest a-doctored-instant-cannot-move-a-known-run-into-the-window
+  (let [rows (obs/rows-from-runs declaration)
+        before (first (filter #(= "2026-09-23-1790161992" (:run-id %)) rows))]
+    (is (some? before) "precondition: the 11:13 run is among the rows")
+    (is (= :before-registration
+           (-> (obs/collect-window declaration [before]) :observations first :hygiene-reason))
+        "precondition: it is excluded only by its instant")
+    ;; move it past registration, changing nothing else
+    (let [doctored (assoc before :recorded-at "2026-09-23T13:00:00Z")
+          w (obs/collect-window declaration [doctored])]
+      (is (= :row-disagrees-with-source
+             (-> w :observations first :hygiene-reason))
+          "the instant is checked against the record, not taken on trust")
       (is (zero? (:valid-count w)))
       (is (= :open (:status w))))))
+
+;; The resource is the artifact the C4 locator observes and the only thing a
+;; later reader has. It was committed with a leading "# regenerated ..." line,
+;; which is not an EDN comment — clojure.edn/read-string throws
+;; "No dispatch macro" on it — so the file said one thing to the line-oriented
+;; locator and nothing at all to a parser. And it must agree with what the
+;; code computes from the records, or the provenance it carries is decoration.
+(deftest the-committed-resource-parses-and-matches-what-the-records-say
+  (let [committed (edn/read-string (slurp (io/resource "wm/eig/held-out-observations.edn")))
+        computed (obs/collect-window declaration (obs/rows-from-runs declaration))]
+    (is (map? committed) "the resource parses as EDN")
+    (is (= computed committed)
+        "the committed resource is what the real records produce, row for row")
+    (is (= (:status computed) (:status committed)))
+    (is (= (if (= :closed (:status computed)) obs/disposition nil)
+           (:disposition committed))
+        "the disposition head appears only when the window is actually closed")))

@@ -2,13 +2,12 @@
   "Pure hygiene boundary for a preregistered held-out observation window."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.string :as str]
             [futon2.aif.held-out-split :as split]
             [futon2.aif.load-identity :as load-identity]))
 
 (load-identity/register! *ns* *file*)
 
-(import (java.nio.file Files) (java.security MessageDigest))
+(import (java.nio.file Files))
 
 (def schema :wm/eig-held-out-observations-v1)
 (def disposition 'HELD-OUT-OBSERVATIONS-COLLECTED)
@@ -42,54 +41,92 @@
     (apply str (map #(format "%02x" %)
                     (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)))))
 
-(defn- record-outcome
-  "The run record's own recorded outcome, read from its decision outcome."
-  [record]
-  (let [m (re-find #":outcome :([a-z-]+)" (pr-str record))]
-    (some-> m second keyword)))
+(def ^:dynamic *repo-root*
+  "The checkout a row's repo-relative :source path resolves against. Rows
+   store repo-RELATIVE paths so the resource stays portable and its claims
+   stay checkable; resolution needs a root, and the reader's working
+   directory is not one -- verifying from the serving JVM (cwd futon3c)
+   marked every row :source-missing (claude-5, reviewing 61c573a8)."
+  "/home/joe/code/futon2")
 
-(defn- record-recorded-at
-  "The record's own recorded-at (its earliest durable timestamp), read from
-  the record's :recorded-at when present, else the latest of its phase
-  timestamps (a record is generated at its close)."
+(defn- resolve-source [path]
+  (let [f (io/file path)]
+    (if (.isAbsolute f) f (io/file *repo-root* path))))
+
+(defn- read-record
+  "The run record, parsed. Records carry tagged literals, so the reader needs
+   a default; nil when it will not parse at all."
+  [file]
+  (try
+    (edn/read-string {:default (fn [_tag value] value)} (slurp file))
+    (catch Exception _ nil)))
+
+;; The four fields below are read STRUCTURALLY. They were read by regex over
+;; (pr-str record) -- over a megabyte of printed structure in which :outcome
+;; and :recorded-at each occur many times, so the row took whichever happened
+;; to print first rather than the run's own (claude-5, reviewing 61c573a8).
+
+(defn- record-run-id [record] (:run/id record))
+
+(defn- record-target
+  "The recorded decision's target -- the field the split's own locator names
+   as deciding membership."
   [record]
-  (or (some->> (re-find #":recorded-at \"([^\"]+)\"" (pr-str record)) second)
-      (->> (re-seq #":at \"([^\"]+)\"" (pr-str record))
-           (map second)
-           sort
-           last)))
+  (get-in record [:selection-event :target]))
+
+(defn- record-instant
+  "The run's START. The declaration holds out runs recorded after its
+   registration instant; a run that was already UNDERWAY at registration
+   could have had its outcome determined before it, so the start is the
+   conservative boundary and the close is not."
+  [record]
+  (:startedAt record))
+
+(defn- record-outcome
+  "The run's ending, as the runner records it: the route edge into
+   FULL_LOOP_CLOSE carries it under :via."
+  [record]
+  (some->> (:route record)
+           (filter (fn [edge] (= "FULL_LOOP_CLOSE" (:toNode edge))))
+           first
+           :via))
 
 (defn- verify-source!
   "Typed provenance check: the row's source file exists, its digest matches,
    and the row's own fields agree with the record's contents. Returns a
-   reason keyword when the tie fails; nil when it holds."
+   reason keyword when the tie fails; nil when it holds.
+
+   :recorded-at is checked too. It had been the one field a row could state
+   freely, and it is the field that decides membership -- a doctored instant
+   moves a run that happened BEFORE registration into the window, which is
+   the single thing the held-out split exists to prevent (claude-5,
+   reviewing 61c573a8)."
   [{:keys [run-id target recorded-at outcome-class source]}]
-  (cond
-    (not (and (map? source) (string? (:path source)) (string? (:sha256 source))))
-    :no-source
-    (not (.exists (io/file (:path source))))
-    :source-missing
-    (not= (:sha256 source) (sha256-of (:path source)))
-    :source-digest-mismatch
-    :else
-    (let [text (slurp (:path source))
-          record (try (edn/read-string text) (catch Exception _ nil))
-          record-run-id (second (re-find #":run/id \"([^\"]+)\"" text))
-          record-target (or (second (re-find #":eligible-targets \[\"([^\"]+)\"\]" text))
-                            (second (re-find #":selected-target \"([^\"]+)\"" text)))
-          record-outcome-kw (record-outcome record)
-          mapping (:mapping (read-mapping))
-          mapped (get mapping record-outcome-kw)
-          ;; the row's outcome-class must be what the mapping says for THIS
-          ;; record's outcome — including the unclassified case
-          outcome-ok? (if (nil? mapped)
-                        (= (:unmapped-outcome (read-mapping)) outcome-class)
-                        (= mapped outcome-class))]
-      (cond
-        (not= run-id record-run-id) :row-disagrees-with-source
-        (not= target record-target) :row-disagrees-with-source
-        (not outcome-ok?) :row-disagrees-with-source
-        :else nil))))
+  (let [file (when (and (map? source) (string? (:path source)))
+               (resolve-source (:path source)))]
+    (cond
+      (not (and (map? source) (string? (:path source)) (string? (:sha256 source))))
+      :no-source
+      (not (.exists file))
+      :source-missing
+      (not= (:sha256 source) (sha256-of file))
+      :source-digest-mismatch
+      :else
+      (let [record (read-record file)
+            mapping-entry (read-mapping)
+            mapped (get (:mapping mapping-entry) (record-outcome record))
+            ;; the row's outcome-class must be what the mapping says for THIS
+            ;; record's outcome -- including the unclassified case
+            outcome-ok? (if (nil? mapped)
+                          (= (:unmapped-outcome mapping-entry) outcome-class)
+                          (= mapped outcome-class))]
+        (cond
+          (nil? record) :source-unreadable
+          (not= run-id (record-run-id record)) :row-disagrees-with-source
+          (not= target (record-target record)) :row-disagrees-with-source
+          (not= recorded-at (record-instant record)) :row-disagrees-with-source
+          (not outcome-ok?) :row-disagrees-with-source
+          :else nil)))))
 
 (defn collect-window
   "Retain every supplied row and close only the first declared N distinct,
@@ -162,27 +199,29 @@
          mapping (:mapping mapping-entry)
          unmapped (:unmapped-outcome mapping-entry)
          ticket (:ticket/id declaration)
-         files (->> (file-seq (io/file run-root))
-                    (filter #(.isFile %))
-                    (filter #(.endsWith (.getName %) ".edn"))
-                    (filter #(.startsWith (.getName %) "tick-run-record-")))]
+         root (io/file run-root)
+         root-abs (.getPath (if (.isAbsolute root) root (io/file *repo-root* run-root)))
+         files (->> (file-seq (io/file root-abs))
+                    (filter (fn [f] (.isFile f)))
+                    (filter (fn [f] (.endsWith (.getName f) ".edn")))
+                    (filter (fn [f] (.startsWith (.getName f) "tick-run-record-")))
+                    (sort-by (fn [f] (.getName f))))]
      (vec
       (for [f files
-            :let [digest (sha256-of f)
-                  text (slurp f)
-                  record (try (edn/read-string text) (catch Exception _ nil))
-                  target-match (and record
-                                    (or (= ticket (second (re-find #":eligible-targets \[\"([^\"]+)\"\]" text)))
-                                        (= ticket (second (re-find #":selected-target \"([^\"]+)\"" text)))))
-                  outcome (record-outcome record)
-                  mapped (get mapping outcome)]
-            :when target-match]
-        {:run-id (str (second (re-find #":run/id \"([^\"]+)\"" text)))
+            :let [record (read-record f)]
+            :when (and record (= ticket (record-target record)))
+            :let [mapped (get mapping (record-outcome record))
+                  ;; repo-RELATIVE, so the resource stays portable and an
+                  ;; auditor can re-verify it from any checkout
+                  rel (let [full (.getPath f)
+                            prefix (str *repo-root* "/")]
+                        (if (.startsWith full prefix) (subs full (count prefix)) full))]]
+        {:run-id (record-run-id record)
          :target ticket
-         :recorded-at (record-recorded-at record)
-         :close-sha256 digest
+         :recorded-at (record-instant record)
+         :close-sha256 (sha256-of f)
          :outcome-class (if (nil? mapped) unmapped mapped)
          :unmapped? (nil? mapped)
-         :source {:path (.getPath f) :sha256 digest}})))))
+         :source {:path rel :sha256 (sha256-of f)}})))))
 
 
