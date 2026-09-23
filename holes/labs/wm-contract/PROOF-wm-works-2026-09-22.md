@@ -636,7 +636,16 @@ candidates automatically, or that every click is fast.
     each declared token, its locator kind, path and exact required head with the line-initial
     rule, rendered from the declarations themselves. Not a gate: an unrenderable criterion
     dispatches with a typed-absent note. claude-5 reloaded four namespaces.
-  - So the step waits on the repair's later limbs, run by the next clicks.
+  - Second limb, 2026-09-23: click `wm-click-8b290466…`, run `2026-09-23-1790136186`,
+    machinery-72 attempt-002, `:grounded-change`, the ticket's `:C2` again through the
+    stratum. Commit `0798f96a` rewrote the disposition as a line-initial head, and the author
+    did that from the brief alone.
+    - (a) holds, (b) now HOLDS — `[T :repair/split-declared-valid]` observed true through its
+      own C4 locator, the conjunct that failed the click before.
+    - (c) fails, and is the only failing conjunct: `:acceptance-not-observed`, the ticket's
+      Status still OPEN. No B update, stopped at (c) and named.
+  - So the step waits on the repair's later limbs, run by the next clicks. Two of the five
+    clicks under renewal-5 are spent.
 
 ### ⟨1⟩7. The outcome is measured and attested.
 
