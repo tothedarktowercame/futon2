@@ -3756,7 +3756,42 @@
                        ;; result, and the close proceeds.
                        (accepted-increment/evaluate-close
                         {:binding (get-in @checkpoints [:build :judgment :validation :artifact-binding])
-                         :token-rows (get-in token-comparison [:receipt :tokens])
+                         ;; ⟨1⟩6 ruling: conjunct (b) reads the SELECTED
+                         ;; candidate's OWN declared produced tokens (the
+                         ;; first action's :produces), measured at the
+                         ;; after-revision by the measurement producer (the
+                         ;; d-task evidence's after-token rows cover the whole
+                         ;; declared universe, including the candidate's own
+                         ;; tokens). The horizon's predicted chain stays in
+                         ;; the prediction record — it is NOT the measure of
+                         ;; what this attempt produced. The prediction-filtered
+                         ;; comparison rows above remain the (c)-facing and
+                         ;; surprise-facing record, untouched.
+                         :token-rows
+                         (let [produced (set (get-in selection-judgment
+                                                     [:controller-decision :action :precedence 0 :produces]))
+                               ;; the d-task source record's after-token rows
+                               ;; cover the whole declared universe (the
+                               ;; candidate's own tokens included); read
+                               ;; through the same source port the comparison
+                               ;; used, digested and re-read
+                               src (get-in d-task-result [:source :path])
+                               record (when src
+                                        (try
+                                          (let [bytes (Files/readAllBytes (.toPath (io/file src)))]
+                                            (when (= (get-in d-task-result [:source :sha256])
+                                                     (sha256-bytes bytes))
+                                              (edn/read-string (String. bytes "UTF-8"))))
+                                          (catch Exception _ nil)))
+                               evidence (:after-token-evidence record)]
+                           (vec (for [row (vec evidence)
+                                      :when (contains? produced (second (:token row)))]
+                                  {:token (:token row)
+                                   ;; the d-task row itself carries
+                                   ;; :after-locator and :result; the
+                                   ;; predicate reads
+                                   ;; [:measurement :after-locator]
+                                   :measurement row})))
                          ;; ⟨1⟩6 part 1: the acceptance declaration travels
                          ;; from the decision to the close. First the slot the
                          ;; class decision may populate; when it does not (the

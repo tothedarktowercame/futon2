@@ -168,3 +168,33 @@
 (deftest acceptance-of-yields-nil-when-nothing-declared
   ;; a target with no cascade source at all declares no acceptance
   (is (nil? (cs/acceptance-of "T-nonexistent-target-0000"))))
+
+;; ⟨1⟩6 ruling: (b) reads the candidate's own produced tokens. The wiring
+;; shape: d-task evidence rows filtered to the first action's :produces,
+;; wrapped as {:token … :measurement <d-task row>} (the predicate reads
+;; [:measurement :after-locator]).
+(deftest candidate-own-token-rows-shape
+  ;; a row whose d-task result observes true -> (b) can pass
+  (let [row {:token [:x :made] :after-locator {:class :C4 :repo "futon2" :sha "HEAD"
+                                               :path "p" :decl "D"}
+             :result {:observed true :check :C4}}
+        r (ai/accepted-increment
+           {:binding {:commit "c" :pre-dispatch-head "p" :descendant? true
+                      :corroborates? true :claim-in-author-window? true}
+            :produced-tokens {[:x :made] (:after-locator row)}
+            :acceptance {:token :acc :locator {:class :C4 :repo "futon2" :sha "HEAD"
+                                               :path "q" :decl "PRESENT"}}
+            :after-revision "HEAD"})]
+    (is (map? r)))
+  ;; genuinely absent at the revision -> (b) false with the token named
+  (let [r (ai/accepted-increment
+           {:binding {:commit "c" :pre-dispatch-head "p" :descendant? true
+                      :corroborates? true :claim-in-author-window? true}
+            :produced-tokens {[:x :missing] {:class :C3 :repo "futon2" :sha "HEAD"
+                                             :path "no-such-file.edn"}}
+            :acceptance {:token :acc :locator {:class :C4 :repo "futon2" :sha "HEAD"
+                                               :path "holes/tickets/T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.md"
+                                               :decl "# Verify or restore guardrail refusal"}}
+            :after-revision "HEAD"})]
+    (is (false? (:accepted? r)))
+    (is (= :b (:failed r)))))
