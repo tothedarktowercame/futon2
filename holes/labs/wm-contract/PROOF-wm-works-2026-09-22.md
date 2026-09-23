@@ -742,6 +742,37 @@ candidates automatically, or that every click is fast.
       packet whose head the predicate itself cannot see. Had a key been added, the
       artifact would have said `:status :closed` while the token read false — the same
       mismatch this ticket opened on.
+  - Seventh limb, 2026-09-23: click `wm-click-b0f9220a`, run `2026-09-23-1790193054`,
+    machinery-75 attempt-001. **The third and last evidence limb is discharged. Only the
+    ticket's own acceptance is left.** Observed at `f0adf39a` through the declared
+    locators: `:repair/split-declared-valid` true,
+    `:repair/held-out-observations-collected` true,
+    `:repair/calibration-evidence-present` true, `:restoration-accepted` FALSE. The close
+    records `:criterion-step {:id :aif/two-layer-calibration, :source :recorded-decision}`,
+    measures that limb's token, and fails only at (c).
+    - The calibration passes its preregistered bounds: mean log-loss 0.23889 against
+      ln 4, mean Brier 0.04552 against 0.25, over the two runs the declaration held out
+      (`1790184736` predicted 15/64, `1790187227` predicted 19/100, both realising
+      `:restoration-accepted` false). `1790189901` is valid but excluded
+      `:outside-declared-window`. The committed record equals what the boundary computes
+      from the real inputs, checked independently.
+    - **What passing here does and does not establish.** Two samples, and a mean-log-loss
+      bound of ln 4 is only violated by being wrong at better than 0.75 confidence. The
+      machine predicted acceptance at 0.16–0.23 and acceptance did not occur, so it was
+      unconfident and correct — but almost any honestly unconfident prediction clears
+      this bound. The bound stands as registered; its weakness is recorded, not repaired.
+    - The boundary was built off-click (`409d86fb`, kimi-2) and reviewed (`10416634`).
+      The review found `:realised-entropy-reduction` defined as `H(p) − H(y) = H(p)`,
+      which never mentions the outcome: flipping both realised outcomes moved mean
+      log-loss 0.2389 → 1.5558 and left the realised leg at 0.51537 exactly, with
+      predicted + realised equal to ln 2 identically. Now `ln p(y) + ln 2`. The secondary
+      metrics gate nothing and neither formula is preregistered, so this moved no verdict
+      — but the step cites a pattern separating internal consistency from externally
+      witnessed outcomes, and the old leg witnessed nothing external.
+    - Also from kimi-2, not specified in the handoff and worth keeping: each realised
+      outcome is observed at that run's own `:artifact-sha`, not at the locator's `HEAD`.
+      Without that, a later click's edit to the ticket would decide an earlier run's
+      recorded outcome.
   - **In-process completion (futon2 b27f2a1a, 97152006), per Joe's method ruling.** The real
     close assembly, the acceptance predicate and the B update call site are driven over the
     recorded occurrences, with fixtures — labelled as such, in a throwaway repo outside
