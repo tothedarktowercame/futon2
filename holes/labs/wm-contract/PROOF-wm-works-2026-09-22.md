@@ -650,6 +650,11 @@ candidates automatically, or that every click is fast.
     closed today; attempt-003 does not exist, because it is what the NEXT click on this
     ticket creates. So the observations limb cannot be accepted yet, and firing for it would
     repeat click 3's `:prospective-held-out-evidence-unavailable`.
+  - Fixed in futon2 b1979ce2: the decision now records `:enacted-steps` (chain head → the
+    step whose guard holds at the current state) alongside the marginal. zai-1 established
+    first that the head is the intended identity for the law, the tie-break and every
+    downstream join, so the fix is additive and no winner changes. claude-5 reloaded `policy`
+    and `war-machine`.
   - Also found: the action marginal is keyed on the chain HEAD's name
     (`:aif/declare-the-conditioning`) while the step that would be enacted is the next
     pattern in the chain (`:aif/measurement-window-hygiene`). The record names a different
