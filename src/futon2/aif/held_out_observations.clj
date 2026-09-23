@@ -5,7 +5,8 @@
             [clojure.pprint :as pprint]
             [clojure.string :as str]
             [futon2.aif.held-out-split :as split]
-            [futon2.aif.load-identity :as load-identity]))
+            [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.observation-checks :as checks]))
 
 (load-identity/register! *ns* *file*)
 
@@ -233,16 +234,28 @@
    (collect-window declaration (rows-from-runs declaration run-root))))
 
 (defn render-packet
-  "Render parseable EDN with a verified disposition at the exact C4 line head."
+  "Render parseable EDN with the disposition at an exact C4 line head.
+
+   The head is SPLICED, not pattern-replaced. The replace-based version
+   rewrote whatever pprint happened to emit, so the result depended on where
+   :disposition fell in the printed map: as the LAST key it produced
+   `HELD-OUT-OBSERVATIONS-COLLECTED}`, and the C4 predicate requires the head
+   to be followed by whitespace, `:`, `(`, `{`, `[` or end of line -- `}` is
+   none of those. The committed resource passed only because at nine keys the
+   hash order happened to put :disposition first; adding a key could flip it,
+   and the file would then say :status :closed while the locator read the
+   token FALSE, with nothing reporting the disagreement (claude-5, reviewing
+   a2137f88).
+
+   So: print the packet without the disposition, then append the key and the
+   head on their own lines before the closing brace. Layout-independent, and
+   `,` is whitespace in EDN so the form still reads."
   [packet]
-  (let [rendered (with-out-str (pprint/pprint packet))]
-    (if (= disposition (:disposition packet))
-      (-> rendered
-          (str/replace (str ":disposition " disposition ",")
-                       (str ":disposition,\n" disposition))
-          (str/replace (str ":disposition " disposition)
-                       (str ":disposition\n" disposition)))
-      rendered)))
+  (if-not (= disposition (:disposition packet))
+    (with-out-str (pprint/pprint packet))
+    (let [body (str/trimr (with-out-str (pprint/pprint (dissoc packet :disposition))))
+          inner (str/trimr (subs body 0 (str/last-index-of body "}")))]
+      (str inner "\n :disposition\n" disposition "\n}\n"))))
 
 (defn write-snapshot!
   "Atomically materialize the collection packet. The disposition is therefore
@@ -256,6 +269,15 @@
          tmp (io/file (.getParentFile target)
                       (str "." (.getName target) "." (java.util.UUID/randomUUID) ".tmp"))]
      (io/make-parents target)
+     ;; A closed packet whose rendering the C4 predicate cannot see is the one
+     ;; artifact never worth writing: it claims the window closed while the
+     ;; token reads false. Checked with the predicate ITSELF rather than a
+     ;; re-implementation, so the two cannot drift (claude-5).
+     (when (and (= disposition (:disposition packet))
+                (not (checks/decl-present? (render-packet packet) (str disposition))))
+       (throw (ex-info "Refusing to write a closed window whose disposition head the C4 check cannot observe"
+                       {:held-out/refusal :disposition-head-not-observable
+                        :path output-path :decl (str disposition)})))
      ;; the artifact says where it came from: it is the C4 locator's subject
      ;; and the only thing a later reader has (claude-5)
      (spit tmp (str ";; Regenerated from the durable run records through\n"

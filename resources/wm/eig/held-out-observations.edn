@@ -74,13 +74,25 @@
    :recorded-at "2026-09-23T18:13:55.566516548Z",
    :target
    "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade",
-   :run-id "2026-09-23-1790187227"}],
+   :run-id "2026-09-23-1790187227"}
+  {:hygiene :valid,
+   :unmapped? false,
+   :close-sha256
+   "7e2e25424bfa499df91757ca42f91abaa2dffeaa8a000230bae29f6a44b3b45b",
+   :source
+   {:path "data/wm-runs/tick-run-record-2026-09-23-1790189901.edn",
+    :sha256
+    "7e2e25424bfa499df91757ca42f91abaa2dffeaa8a000230bae29f6a44b3b45b"},
+   :hygiene-reason nil,
+   :outcome-class :no-result,
+   :recorded-at "2026-09-23T18:58:28.166817788Z",
+   :target
+   "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade",
+   :run-id "2026-09-23-1790189901"}],
  :claims
  {:window-closed? true,
   :calibration-evidence-present? false,
   :restoration-accepted? false},
- :disposition,
-HELD-OUT-OBSERVATIONS-COLLECTED
  :missing-count 0,
  :split
  {:schema :wm/eig-held-out-split-v2,
@@ -94,4 +106,7 @@ HELD-OUT-OBSERVATIONS-COLLECTED
    "the commit recording the supersession decision; the window opens after it"}},
  :status :closed,
  :required 2,
- :valid-count 2}
+ :valid-count 3
+ :disposition
+HELD-OUT-OBSERVATIONS-COLLECTED
+}

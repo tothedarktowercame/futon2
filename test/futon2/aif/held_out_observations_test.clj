@@ -4,9 +4,9 @@
   (:require [clojure.edn :as edn]
             [clojure.set]
             [clojure.java.io :as io]
-            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
-            [futon2.aif.held-out-observations :as obs]))
+            [futon2.aif.held-out-observations :as obs]
+            [futon2.aif.observation-checks :as checks]))
 
 (def t "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 
@@ -149,11 +149,53 @@
     (is (or (nil? (:disposition committed))
             (= :closed (:status computed)))
         "the disposition head appears only when the records themselves close the window")
-    (is (= obs/disposition (:disposition committed))
-        "the now-complete prospective window publishes its disposition")
-    (is (some #{"HELD-OUT-OBSERVATIONS-COLLECTED"}
-              (str/split-lines
-               (slurp (io/resource "wm/eig/held-out-observations.edn"))))
-        "the verified disposition is an exact C4 line head")
+    ;; a2137f88 asserted the committed resource IS closed. That is true today
+    ;; and false the moment a fresh split is registered, which is the same
+    ;; count-pinning that broke real-records-and-exclusions one click earlier.
+    ;; What must hold either way: a published disposition is one the C4 check
+    ;; can actually observe (claude-5).
+    (when (:disposition committed)
+      (is (= obs/disposition (:disposition committed)))
+      (is (checks/decl-present? (slurp (io/resource "wm/eig/held-out-observations.edn"))
+                                (str obs/disposition))
+          "a published disposition is observable through the real C4 predicate"))
     (is (= (:required computed) (:required committed))
         "and it is measured against the same declared N")))
+
+;; claude-5, reviewing a2137f88. render-packet pattern-replaced whatever pprint
+;; emitted, so whether the head cleared C4 depended on where :disposition fell
+;; in the printed map. As the LAST key it produced
+;; `HELD-OUT-OBSERVATIONS-COLLECTED}`, and the predicate requires the head to be
+;; followed by whitespace, `:`, `(`, `{`, `[` or end of line — `}` is none of
+;; those. The committed resource passed by an accident of hash order at nine
+;; keys. Checked against the REAL predicate, not a re-reading of its rule.
+(deftest disposition-head-is-observable-whatever-the-key-order
+  (doseq [packet [{:schema :x :status :closed :disposition obs/disposition}
+                  {:disposition obs/disposition :schema :x :status :closed}
+                  {:a 1 :disposition obs/disposition :b 2}
+                  (assoc (zipmap (map #(keyword (str "k" %)) (range 12)) (range 12))
+                         :disposition obs/disposition)]]
+    (let [rendered (obs/render-packet packet)]
+      (is (checks/decl-present? rendered (str obs/disposition))
+          (str "C4 cannot see the head in: " (pr-str (apply str (take-last 70 rendered)))))
+      (is (= obs/disposition (:disposition (edn/read-string rendered)))
+          "and it still reads back as EDN"))))
+
+;; The artifact never worth writing: :status :closed with a head the locator
+;; cannot see. The post-condition uses the predicate itself, so stubbing the
+;; renderer is the way to exercise it.
+(deftest write-snapshot-refuses-an-unobservable-closed-window
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "held-out-write" (make-array java.nio.file.attribute.FileAttribute 0)))
+        out (str dir "/observations.edn")
+        decl-path (.getPath (io/file (io/resource "wm/eig/held-out-split-v2.edn")))]
+    (with-redefs [obs/render-packet (fn [packet]
+                                      (str "{:status :closed :disposition "
+                                           (:disposition packet) "}\n"))]
+      (let [thrown (try (obs/write-snapshot! decl-path "data/wm-runs" out)
+                        nil
+                        (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+        (is (= :disposition-head-not-observable (:held-out/refusal thrown))
+            (str "expected a refusal, got " (pr-str thrown)))
+        (is (not (.exists (io/file out)))
+            "and nothing was written")))))
