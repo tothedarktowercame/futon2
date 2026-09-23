@@ -51,8 +51,8 @@
   :futon-theory/stop-the-line
   {:kind :hand-admitted :by "codex-3" :date "2026-09-20"
    :source {:path "futon3/library/futon-theory/stop-the-line.flexiarg"
-            :sha "7fc6a05004aa3e601e53eba633d62213da0af4b2"
-            :sha256 "ba33e0300fa946a5831460bcae1360cb5b9742c6ea72d5765348eeef64998e88"}
+            :sha "21a9199ff95e850cdad64e35c81de04eade48256"
+            :sha256 "71aea166f7c63351c40820d019ba1c358039b212ffe7a1ba250b0e3cc423b83e"}
    :reading "Inspect a mission work premise and record a refusal witness when it fails. This is a hand-admitted production hypothesis; presence alone establishes neither a genuine premise defect nor refusal-before-work ordering."}
   :coordination/par-as-obligation
   {:kind :hand-admitted :by "codex-3" :date "2026-09-20"

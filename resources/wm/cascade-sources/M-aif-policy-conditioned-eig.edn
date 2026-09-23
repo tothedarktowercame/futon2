@@ -44,8 +44,8 @@
  {:apparatus/one-authority-per-question
   {:kind :hand-admitted :by "codex-1" :date "2026-09-21"
    :source {:path "futon3/library/apparatus/one-authority-per-question.flexiarg"
-            :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
-            :sha256 "42371c5db7fa2cfbd82688b63aac9ab85518cc0baad7eeb69ccca94aca9bcda1"}
+            :revision "21a9199ff95e850cdad64e35c81de04eade48256"
+            :sha256 "b367ff7d0f8d122ea943f4507fe0c44c58ca08b61076935818ab84299c04a957"}
    :reading "For the shared-updater task, make one A4a/BMR updater the authority for both hypothetical and observed posterior changes, route both callers through it, and demonstrate equal posterior state and provenance on a pinned observation plus refusal of an unknown outcome before recording this task complete."
    :scope-limit "This reading covers the shared-updater task only; it neither supplies the generative experiment model nor completes the typed-Q or calibration tasks."
    :target-source {:repo "futon2" :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f"
@@ -56,8 +56,8 @@
   :contracts/every-entry-has-a-falsifier
   {:kind :hand-admitted :by "codex-10" :date "2026-09-22"
    :source {:path "futon3/library/contracts/every-entry-has-a-falsifier.flexiarg"
-            :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
-            :sha256 "c69aa0b7b3f9ebddb2d98eb5a4a8185a4c324861c7a07d8b7f374ecf740a2598"}
+            :revision "21a9199ff95e850cdad64e35c81de04eade48256"
+            :sha256 "ae7e7a5730bdcc9a358353052b7667e2d24c8eae85597c19f9175b72abf1bf89"}
    :reading "The task explicitly asks for R13-to-R4 policy and R4-to-R5 predictive-kernel payloads with executable falsifiers. Apply the pattern's correspondence discipline to those interfaces: define a typed, outcome-keyed Q(o|pi) payload with model/source pins, outcome-domain identity and a normalization receipt; make the risk consumer and existing EIG fixture accept the same constructed machine-Q row. Exercise a plausible wrong implementation with a simultaneous outcome relabelling/permutation control and a mismatched-domain or pin refusal, rather than copying expected constants from the implementation. Retain the payload specification and passing behavioral evidence before declaring this task complete."
    :scope-limit "This instantiates the pattern's falsifier mechanism for payload correspondence; it does not claim a new Lean theorem or completed R13/R4/R5 alignment. Preserve the existing risk definition: repair outcome identity at the typed boundary, not pragmatic preferences or controller terms. F1 owns constructing the generative experiment model; use its declared fixture, do not invent probabilities. Do not redo F1's already discharged Q(pi)/Gaussian-telemetry rejection work, reimplement the shared updater, or enable EIG in selection."
    :target-source {:repo "futon2" :revision "f4b390324774ee308efb920ff00357f4a9a0c644"
@@ -68,8 +68,8 @@
   :aif/two-layer-calibration
   {:kind :hand-admitted :by "codex-10" :date "2026-09-22"
    :source {:path "futon3/library/aif/two-layer-calibration.flexiarg"
-            :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
-            :sha256 "0b9c0c25c8e9aef566d1d8f23f95c49f6abf200966271958f1bf17287b90b03f"}
+            :revision "21a9199ff95e850cdad64e35c81de04eade48256"
+            :sha256 "76a281cd37088f9de561ff72f8d5874180d12fe2b1103f190e57d5cc196c8366"}
    :reading "The requested EIG shadow can validate its own arithmetic while failing to predict evidence. Apply the pattern's separation of consistency from witnessed outcomes: keep coherent model-relative EIG/reduction checks and off-mode byte-identical selection replay in one layer, and evaluate preregistered held-out evidence with log-loss/Brier and predicted-versus-realised entropy reduction in a separately labelled empirical layer. Persist prior entropy, expected posterior entropy, EIG, model/source pins, degeneracy reasons and later realised information gain, together with winner/abstain/scale effects, in the mission's shadow packet. Use the shared updater for hypothetical and observed evidence. Neither an internal consistency pass nor a winner-changing ablation substitutes for the held-out packet."
    :scope-limit "Collect and report a default-off shadow only; Joe retains the later decision to replace or weight the proxy. This reading does not author F1's generative experiment model, invent missing probabilities or held-out outcomes, claim causal calibration from a self-produced score, or complete the separate typed-risk boundary. If the declared model or prospective evidence is unavailable, retain that absence and leave this task open; preparation alone does not produce its completion token."
    :target-source {:repo "futon2" :revision "f4b390324774ee308efb920ff00357f4a9a0c644"

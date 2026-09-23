@@ -252,3 +252,22 @@
             :acceptance nil
             :after-revision "HEAD"})]
     (is (= :no-acceptance-declared (:accepted? r)) (pr-str r))))
+
+;; claude-5, reviewing 6afacb5b: the new (b) clause sits AFTER the
+;; :no-acceptance-declared clause, so a candidate that declared products,
+;; measured none, and has no mechanical acceptance still reports
+;; :no-acceptance-declared rather than :failed :b. That is the ⟨1⟩4 contract
+;; — a target with no acceptance declaration is never true, whatever else
+;; happened — and it is the ordering the four original pins depend on. Pinned
+;; here so a future reorder has to argue with a test rather than slip past.
+(deftest no-acceptance-declared-outranks-the-unmeasured-b-failure
+  (let [r (ai/accepted-increment
+           {:binding {:repo "futon2" :commit "c" :pre-dispatch-head "p"
+                      :descendant? true :corroborates? true
+                      :claim-in-author-window? true}
+            :produced-tokens {}
+            :declared-tokens [:repair/held-out-observations-collected]
+            :acceptance nil
+            :after-revision "HEAD"})]
+    (is (= :no-acceptance-declared (:accepted? r)) (pr-str r))
+    (is (nil? (:failed r)) "and it is not reported as a (b) failure")))

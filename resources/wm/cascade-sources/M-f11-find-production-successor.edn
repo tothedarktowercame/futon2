@@ -34,8 +34,8 @@
  {:apparatus/done-is-observed-running
   {:kind :hand-admitted :by "codex-1" :date "2026-09-21"
    :source {:path "futon3/library/apparatus/done-is-observed-running.flexiarg"
-            :revision "7fc6a05004aa3e601e53eba633d62213da0af4b2"
-            :sha256 "301a19b722382997e8e1d455be1c40605ebc987c998aedd5ce5302bcb4a70653"}
+            :revision "21a9199ff95e850cdad64e35c81de04eade48256"
+            :sha256 "7f0c05735928fef7fdd95fcfcb369ae4bc39d2191d0a76104e2b4e26ec7621f9"}
    :reading "For F11's acceptance task, require the finder to act at its applied interface on the committed library and retain the ordinary gate and runtime evidence before recording completion; a committed reconciliation module or a stopped run is not that observation."
    :scope-limit "This is the activation-and-live-evidence reading of the pattern, not a claim that its standing-comparator mechanism or F1-F4 laws have been implemented. It does not produce the separate repair-024 successor disposition."
    :target-source {:repo "futon2" :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f"

@@ -3888,8 +3888,39 @@
                                                       (get-in selection-judgment
                                                               [:controller-decision :selection-law :enacted-steps])))
                              {:keys [pattern enacted-step]} (enacted-step-pattern decision-action)
-                             produced (set (map (fn [tok] (if (vector? tok) (second tok) tok))
-                                                (:produces pattern)))]
+                             declared (set (map (fn [tok] (if (vector? tok) (second tok) tok))
+                                                (:produces pattern)))
+                             ;; the rows the measurement producer actually
+                             ;; supplied for those declared tokens -- computed
+                             ;; here so :declared-tokens and :measured-tokens
+                             ;; on the record are DIFFERENT quantities. They
+                             ;; briefly were not: both read (:produces pattern),
+                             ;; so a close that measured nothing still reported
+                             ;; its declared set under :measured-tokens
+                             ;; (claude-5, reviewing 6afacb5b).
+                             measured-rows
+                             (let [;; the d-task source record's after-token rows
+                                   ;; cover the whole declared universe (the
+                                   ;; candidate's own tokens included); read
+                                   ;; through the same source port the comparison
+                                   ;; used, digested and re-read
+                                   src (get-in d-task-result [:source :path])
+                                   record (when src
+                                            (try
+                                              (let [bytes (Files/readAllBytes (.toPath (io/file src)))]
+                                                (when (= (get-in d-task-result [:source :sha256])
+                                                         (sha256-bytes bytes))
+                                                  (edn/read-string (String. bytes "UTF-8"))))
+                                              (catch Exception _ nil)))
+                                   evidence (:after-token-evidence record)]
+                               (vec (for [row (vec evidence)
+                                          :when (contains? declared (second (:token row)))]
+                                      {:token (:token row)
+                                       ;; the d-task row itself carries
+                                       ;; :after-locator and :result; the
+                                       ;; predicate reads
+                                       ;; [:measurement :after-locator]
+                                       :measurement row})))]
                         (assoc
                          (accepted-increment/evaluate-close
                         {:binding (get-in @checkpoints [:build :judgment :validation :artifact-binding])
@@ -3908,29 +3939,7 @@
                          ;; produced tokens (resolved above from the
                          ;; decision's recorded :enacted-steps) — never
                          ;; precedence 0.
-                         :token-rows
-                         (let [;; the d-task source record's after-token rows
-                               ;; cover the whole declared universe (the
-                               ;; candidate's own tokens included); read
-                               ;; through the same source port the comparison
-                               ;; used, digested and re-read
-                               src (get-in d-task-result [:source :path])
-                               record (when src
-                                        (try
-                                          (let [bytes (Files/readAllBytes (.toPath (io/file src)))]
-                                            (when (= (get-in d-task-result [:source :sha256])
-                                                     (sha256-bytes bytes))
-                                              (edn/read-string (String. bytes "UTF-8"))))
-                                          (catch Exception _ nil)))
-                               evidence (:after-token-evidence record)]
-                           (vec (for [row (vec evidence)
-                                      :when (contains? produced (second (:token row)))]
-                                  {:token (:token row)
-                                   ;; the d-task row itself carries
-                                   ;; :after-locator and :result; the
-                                   ;; predicate reads
-                                   ;; [:measurement :after-locator]
-                                   :measurement row})))
+                         :token-rows measured-rows
                          ;; ⟨1⟩6 part 1: the acceptance declaration travels
                          ;; from the decision to the close. First the slot the
                          ;; class decision may populate; when it does not (the
@@ -3948,10 +3957,9 @@
                          ;; ⟨1⟩6 finding 3: the enacted step's DECLARED
                          ;; products, so (b) can fail when nothing was
                          ;; measured rather than falling through to (c)
-                         :declared-tokens (vec (sort-by pr-str (map (fn [tok] (if (vector? tok) (second tok) tok))
-                                                                    (:produces pattern))))})
+                         :declared-tokens (vec (sort-by pr-str declared))})
                          :criterion-step enacted-step
-                         :measured-tokens (vec (sort-by pr-str produced))))
+                         :measured-tokens (vec (sort-by pr-str (map :token measured-rows)))))
                        close-judgment-base
                        (merge {:outcome outcome
                                :grounded? (= :grounded-change outcome)

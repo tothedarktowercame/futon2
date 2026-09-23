@@ -176,3 +176,44 @@
       (is (thrown-with-msg? clojure.lang.ExceptionInfo #"invalid-horizon-steps"
                             (cs/load-declared (.getPath dir)))
           (str "value " (pr-str bad) " must refuse")))))
+
+;; claude-5, 2026-09-23. Every declared interpretation source is pinned by
+;; sha256, and load-declared refuses the WHOLE set on the first mismatch —
+;; so one prose edit to one flexiarg in futon3 stops every WM dispatch with
+;; :interpretation-source-hash-mismatch, and the first sign of it is a click
+;; that cannot render an acceptance criterion. That happened: futon3 21a9199
+;; ("Repair @why and @how after the 2026-09-05 rationale-backfill lanes")
+;; moved five pinned flexiargs at 17:17, and the machine went from green to
+;; refusing in under an hour. This test names the drifted path instead, so
+;; the next library edit fails HERE rather than inside a spent click.
+;;
+;; Scope: the :source pins only — the ones read-receipt-source actually
+;; enforces. :target-source pins (mission files in futon2) are not checked by
+;; the loader and several are already stale; asserting on them would make
+;; this fail for a condition that stops nothing, which is how a check gets
+;; ignored.
+;;
+;; A mismatch is NOT automatically re-pinned: read the source diff first. If
+;; only rationale metadata moved (@why/@how and the like, which no :reading
+;; quotes and no locator observes), re-pin and say so. If the pattern's
+;; conclusion, violation signature or declared effect moved, the reading
+;; itself has to be re-derived — the pin is what makes that distinction
+;; possible, and re-pinning past it would erase it.
+(deftest every-pinned-interpretation-source-still-matches-its-file
+  (let [repo-root (io/file "/home/joe/code")
+        pins (for [f (file-seq (io/file "resources/wm/cascade-sources"))
+                   :when (.endsWith (.getName f) ".edn")
+                   :let [d (edn/read-string (slurp f))]
+                   [pattern receipt] (:interpretation-receipts d)
+                   :let [source (:source receipt)]
+                   :when (and (map? source) (string? (:path source)) (string? (:sha256 source)))]
+               (let [p (:path source)
+                     file (first (filter #(.exists %) [(io/file p) (io/file repo-root p)]))]
+                 {:declaration (.getName f) :pattern pattern :path p
+                  :status (cond (nil? file) :file-missing
+                                (= (:sha256 source) (byte-sha file)) :matches
+                                :else :drifted)}))]
+    (is (seq pins) "the declarations carry :source pins at all")
+    (is (= [] (vec (remove #(= :matches (:status %)) pins)))
+        (str "a pinned interpretation source moved; load-declared will refuse "
+             "every cascade until this is read and re-pinned or reverted"))))
