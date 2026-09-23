@@ -1187,7 +1187,14 @@
         {:action action
          :rank (or (:rank decision) 1)
          :G-efe (:controller-score decision)
-         :controller-score (:controller-score decision)})
+         :controller-score (:controller-score decision)
+         ;; ⟨1⟩6: carry the decision's recorded enacted steps onto the entry
+         ;; so construct-selected-action can thread them onto the action.
+         ;; Only this map, not the whole decision: the entry travels into
+         ;; stop-lines and mission lookup, and the action itself must NOT
+         ;; grow a key (its value is digested into the occurrence identity,
+         ;; the trial configuration and the dedup key).
+         :enacted-steps (get-in decision [:selection-law :enacted-steps])})
       :else nil)))
 
 ;; resolve-pinned-selection and pinned-refusal! (RUN4) RETIRED with the flat
@@ -1321,9 +1328,13 @@
         ;; head), threaded onto the action once, here — the initial
         ;; dispatch, the revision dispatch and the (b) filter all read
         ;; this same field; none resolves it independently.
-        action (assoc (:action entry)
-                      :enacted-steps
-                      (get-in entry [:decision :selection-law :enacted-steps]))]
+        ;; claude-5's review of a4dc67f6: this read [:decision :selection-law
+        ;; :enacted-steps], and selected-entry builds no :decision key, so the
+        ;; field was nil on every live dispatch and the resolver always took
+        ;; the chain-head fallback -- the fix was inert in production while
+        ;; its tests passed on hand-assembled actions. selected-entry now
+        ;; carries :enacted-steps and this reads it from there.
+        action (assoc (:action entry) :enacted-steps (:enacted-steps entry))]
     {:mission (:target action)
      :psi (str "enact cascade " (or (:cascade-id action) (:id action)))
      :construction-kind :selected-cascade
@@ -3861,7 +3872,26 @@
                        ;; The predicate is evidence, never a gate: any error
                        ;; evaluating it is recorded as a typed :refused
                        ;; result, and the close proceeds.
-                       (accepted-increment/evaluate-close
+                       ;;
+                       ;; The resolver runs ONCE here, outside the call, so
+                       ;; the step conjunct (b) measured travels onto the
+                       ;; recorded result. Without it a reader cannot tell a
+                       ;; (b) that measured the enacted step's token from one
+                       ;; that measured nothing at all -- and (b) is satisfied
+                       ;; either way (claude-5, reviewing a4dc67f6).
+                       (let [decision-action (get-in selection-judgment
+                                                     [:controller-decision :action])
+                             decision-action (if (contains? decision-action :enacted-steps)
+                                               decision-action
+                                               (assoc decision-action
+                                                      :enacted-steps
+                                                      (get-in selection-judgment
+                                                              [:controller-decision :selection-law :enacted-steps])))
+                             {:keys [pattern enacted-step]} (enacted-step-pattern decision-action)
+                             produced (set (map (fn [tok] (if (vector? tok) (second tok) tok))
+                                                (:produces pattern)))]
+                        (assoc
+                         (accepted-increment/evaluate-close
                         {:binding (get-in @checkpoints [:build :judgment :validation :artifact-binding])
                          ;; ⟨1⟩6 ruling: conjunct (b) reads the SELECTED
                          ;; candidate's OWN declared produced tokens (the
@@ -3874,24 +3904,12 @@
                          ;; what this attempt produced. The prediction-filtered
                          ;; comparison rows above remain the (c)-facing and
                          ;; surprise-facing record, untouched.
+                         ;; ⟨1⟩6: conjunct (b) measures the ENACTED step's
+                         ;; produced tokens (resolved above from the
+                         ;; decision's recorded :enacted-steps) — never
+                         ;; precedence 0.
                          :token-rows
-                         (let [;; ⟨1⟩6: conjunct (b) measures the ENACTED
-                               ;; step's produced tokens, read from the
-                               ;; decision's recorded :enacted-steps via the
-                               ;; same resolver the dispatch uses — never
-                               ;; precedence 0.
-                               decision-action (get-in selection-judgment
-                                                       [:controller-decision :action])
-                               decision-action (if (contains? decision-action :enacted-steps)
-                                                 decision-action
-                                                 (assoc decision-action
-                                                        :enacted-steps
-                                                        (get-in selection-judgment
-                                                                [:controller-decision :selection-law :enacted-steps])))
-                               {:keys [pattern enacted-step]} (enacted-step-pattern decision-action)
-                               produced (set (map (fn [tok] (if (vector? tok) (second tok) tok))
-                                                  (:produces pattern)))
-                               ;; the d-task source record's after-token rows
+                         (let [;; the d-task source record's after-token rows
                                ;; cover the whole declared universe (the
                                ;; candidate's own tokens included); read
                                ;; through the same source port the comparison
@@ -3927,6 +3945,8 @@
                                          (cascade-sources/acceptance-of
                                           (:target (get-in selection-judgment [:controller-decision :action]))))
                          :after-revision (:commit data)})
+                         :criterion-step enacted-step
+                         :measured-tokens (vec (sort-by pr-str produced))))
                        close-judgment-base
                        (merge {:outcome outcome
                                :grounded? (= :grounded-change outcome)

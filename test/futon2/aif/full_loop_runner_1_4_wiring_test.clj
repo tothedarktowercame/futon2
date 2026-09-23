@@ -79,22 +79,49 @@
         tmp (.toFile (java.nio.file.Files/createTempDirectory
                       "runner-14-ledger" (make-array java.nio.file.attribute.FileAttribute 0)))
         _ (spit (io/file tmp "attempts.edn") "")
+        ;; The occurrence this attempt ran, as production identifies it.
+        occurrence {:run/id "runner-14" :attempt/id "attempt-001"}
+        effect ["T-runner-14" :apparatus/authority-stated]
+        ;; claude-5, 2026-09-23: the banked row used to be hand-spat as a
+        ;; string, and 6cf508b6 (the theta-key re-keying) left it unreadable
+        ;; -- no :trial, so theta-key could not attribute it, and b-update was
+        ;; never passed the :occurrence it dedupes on, so r2 could not have
+        ;; reported :already-recorded whatever the ledger said. The row is now
+        ;; banked through the PRODUCTION writer, record!, so the test cannot
+        ;; drift from the shape the runner actually appends.
+        bank! (fn []
+                (ledger/record!
+                 (.getPath tmp)
+                 {:contract :v2
+                  :trials [{:status :admitted-at-attempt-grain
+                            :learning-family :cfg/runner-14-configuration-digest
+                            :meaning-sha256 "runner-14-meaning"
+                            :after-observation true
+                            :effect effect
+                            :selected-cascade
+                            {:precedence [{:id :apparatus/one-authority-per-question
+                                           :produces #{effect}}]}
+                            :deduplication {:identity "runner-14-occurrence"
+                                            :inputs {:occurrence occurrence}}}]}))
         r1 (ledger/b-update {:family :apparatus/one-authority-per-question
+                             :occurrence occurrence
                              :occurrence-identity "runner-14-occurrence"
                              :accepted-verdict (assoc verdict :observed true)
                              :ledger-root (.getPath tmp)})
-        _ (spit (io/file tmp "attempts.edn")
-                (str "{:schema :wm/attempt-learning-count-v1 :identity \"runner-14-occurrence\""
-                     " :family :apparatus/one-authority-per-question"
-                     " :increment {:success 1 :failure 0}}\n")
-                :append true)
+        ;; the close writes the row through record!, as the runner does
+        banked (bank!)
         r2 (ledger/b-update {:family :apparatus/one-authority-per-question
+                             :occurrence occurrence
                              :occurrence-identity "runner-14-occurrence"
                              :accepted-verdict (assoc verdict :observed true)
                              :ledger-root (.getPath tmp)})]
     (is (true? (:accepted? verdict)) (pr-str verdict))
     (is (= :updated (:status r1)))
     (is (= 3/4 (:theta r1)) "cold Laplace success")
+    (is (= [:appended] (mapv #(get-in % [:ledger :status]) (:trials banked)))
+        (str "the row must be APPENDED, not held -- a held row would leave the "
+             "ledger empty and r2 would read :updated for the wrong reason: "
+             (pr-str (mapv (juxt :status :reason) (:trials banked)))))
     (is (= :already-recorded (:status r2)))
     (is (= (:theta r1) (:theta r2)) "the second run writes nothing")))
 

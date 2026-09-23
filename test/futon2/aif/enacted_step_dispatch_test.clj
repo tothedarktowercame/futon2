@@ -118,3 +118,32 @@
     (is (= :aif/declare-the-conditioning (:id pattern)) "falls back to the head")
     (is (= :recorded-step-not-in-precedence (:reason enacted-step)))
     (is (string? (criterion-block action)) "still dispatches")))
+
+;; claude-5's review of a4dc67f6. Every case above hands the resolver an action
+;; with :enacted-steps already assoc'd onto it, so all four passed while the
+;; live dispatch was unchanged: the threading site read [:decision :selection-law
+;; :enacted-steps] off the entry, and selected-entry builds no :decision key.
+;; Driving the real recorded decision through the real entry shape and the real
+;; construct-for-decision is the check the suite was missing — it fails on
+;; a4dc67f6 and passes after the entry carries :enacted-steps.
+(deftest case-5-the-live-path-threads-it-not-just-a-hand-assembled-action
+  (let [dec (get-in m73-selection [:payload :judgment :controller-decision])]
+    (is (map? dec) "precondition: the recorded decision is readable")
+    (let [;; selected-entry's shape, reproduced from the recorded decision
+          entry (@#'flr/selected-entry {:decision dec})
+          construction (flr/construct-for-decision entry)
+          action (:selected-action construction)
+          {:keys [pattern enacted-step]} (@#'flr/enacted-step-pattern action)]
+      (is (= :selected-cascade (:construction-kind construction))
+          "precondition: this is the cascade-candidate construction path")
+      (is (= (get-in dec [:selection-law :enacted-steps]) (:enacted-steps action))
+          "the decision's enacted steps reach the constructed action")
+      (is (= :aif/measurement-window-hygiene (:id pattern))
+          "and the resolver picks the enacted step, not the chain head")
+      (is (= :recorded-decision (:source enacted-step))
+          "from the recorded decision — NOT the chain-head fallback")
+      ;; and the criterion the author would actually be given
+      (let [block (criterion-block action)]
+        (is (string? block))
+        (is (re-find #"HELD-OUT-OBSERVATIONS-COLLECTED" block)
+            "the live dispatch states the enacted step's criterion")))))
