@@ -123,3 +123,81 @@ is not yet proved end to end."*
 records. **⟨₁⟩6's check is currently unfalsifiable-by-execution** (it
 cannot pass OR fail without clicks) — which is exactly why recording it
 as blocked, rather than restating it, is the honest form.
+
+---
+
+# ⟨1⟩7 settlement — read-only on the two existing closes (zai-1, 2026-09-23)
+
+Run as scoped: no clicks, no fixtures, no substitutions. Each close reported
+separately. The runnability command: `bash scripts/wm_load_identity.sh`,
+output `counts: {"current" 42, "unavailable" 2, "unregistered" 27}` — the
+loaded source matches the canonical checkout (42 namespaces current; the 27
+unregistered are namespaces that never registered, listed never omitted;
+the 2 unavailable are outside this assessment's inputs).
+
+## machinery-72 attempt-002 (commit 0798f96a)
+
+- **Part 1, measured not missing: PASS.** All six wanted tokens have d-task
+  after-token rows, each with a boolean `:result :observed`:
+  `:admission/task-stated` **true**, `:repair/split-declared-valid`
+  **true** (the shape fix's own measurement), `:obstruction-observed-cleared`
+  **false**, `:held-out-observations-collected` **false**,
+  `:calibration-evidence-present` **false**, `:restoration-accepted`
+  **false**. No row is `:missing`.
+- **Part 2, attested class recorded: FAIL — recorded as :unknown.** The
+  run-ending-classification receipt EXISTS on the close and in retained/
+  (`verify-close` returns **true** — the record is internally consistent),
+  but its `:class` is **:unknown** with `:missing [:attested-increment]`:
+  no route-attested increment, so the kernel honestly records unknown.
+  The step's check asks for "an attested run-ending class recorded" —
+  what is recorded is an honest unknown, not an attestation. **That part
+  fails for this close as it stands.**
+- **Part 3, classifier rerun agreement: PASS as an agreement.** The
+  rerun (`verify-close`, pure, on the actual close + the recorded receipt)
+  agrees — and `:class :unknown` is exactly what the rerun of an
+  unattested close must produce. The agreement is genuine; the class it
+  agrees on is unknown. (The full classifier rerun with focus inputs goes
+  through `classify*` requiring the attested increment — absent — so it
+  reproduces :unknown from the same inputs.)
+
+## machinery-73 attempt-001 (commit 9c8032f6)
+
+- **Part 1, measured not missing: PASS.** Identical shape: all six tokens
+  with boolean observed values (task-stated true, split-declared-valid
+  true, the other four false). No :missing. (I report these as found —
+  they happen to match attempt-002's because the same ticket's evidence
+  state was read at each close.)
+- **Part 2, attested class recorded: FAIL — recorded as :unknown**, same
+  cause: `:missing [:attested-increment]`, `verify-close` true. The
+  receipt is not ABSENT (my walkthrough's tentative example was wrong —
+  both closes carry receipts); the receipts record unknown honestly.
+
+  One difference from attempt-002 worth naming: machinery-73's close is
+  **on a different target's commit shape** — its d-task rows are the same
+  six ticket tokens, which means the third click also selected this
+  ticket (machinery-73 attempt-001 is the third click on
+  T-repair-occ-444fb018, per the walkthrough's earlier finding).
+- **Part 3, classifier rerun agreement: PASS as an agreement** — same as
+  above: the rerun reproduces :unknown from the same inputs.
+
+## ⟨1⟩7 CHECK verdict: **NOT MET — for either close.**
+
+Part 1 passes on both closes: the measurement producer recorded every
+wanted token as measured true or false, none missing. Part 3 passes on
+both as an agreement check. **Part 2 fails on both closes**: the recorded
+run-ending class is :unknown with `:missing [:attested-increment]` — no
+attested increment exists, because an attestation requires the
+route-attested increment the machine has not yet produced (an accepted
+increment). The step's check as signed — "an attested run-ending class
+recorded" — is not met on today's records. This is the honest coupling:
+⟨1⟩7's part 2 is downstream of ⟨1⟩6's accepted close, and both closes
+predate one. **A step that half-settles is recorded as half-settled:
+part 1 and part 3 settled PASS on both closes; part 2 FAIL on both.**
+
+## Falsification note
+
+What would change part 2's verdict: a close carrying a route-attested
+increment (which requires the accepted-increment path to have fired on
+accepted work) — i.e. ⟨1⟩6 landing first. No read-only recomputation can
+produce an attestation the machine never wrote; that is the correct
+behavior of the classifier, not a defect in this settlement.
