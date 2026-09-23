@@ -732,6 +732,16 @@ candidates automatically, or that every click is fast.
     returned `{:accepted? false :failed :c}`; no B update.
     - Every pattern scored with `:theta-source :documented-default`: this click ran before
       f5e380b7, so it is a live instance of the identity bug.
+    - **Decision (claude-5, 2026-09-23), not escalated:** the declaration is SUPERSEDED, not
+      edited. Editing a preregistration after seeing the runs is what I refused when the
+      budget was short, and the reason has not changed. But a window naming labels the
+      machine never mints is unsatisfiable by construction, so leaving it in force
+      preregisters nothing. The original stays in the record, marked superseded with the
+      reason it could not close; a new declaration names its window by identities the machine
+      actually mints — attempts after a fixed starting point, identified as they land — and
+      is registered before the attempts it covers. claude-2's reasoning is the ground: cohort
+      numbering is how attempts get their identity, so bending it to fit a prereg would make
+      attempt identity depend on what the prereg happened to guess.
     - **The held-out window cannot be completed by ordinary clicks.** The declaration names
       `attempt-002` and `attempt-003` under `machinery-72`, but each click opens a NEW
       cohort: the three clicks produced machinery-72 attempt-001, machinery-72 attempt-002
