@@ -1888,6 +1888,55 @@
          "Any invalid deposit refuses the whole close: deposit carefully or not at all.\n"
          "EVERY non-EDN file must be referenced by exactly one record's :file/:stdout-file/:stderr-file field; an unreferenced byproduct (cohort-55 attempt-003: a stray derived.stderr) is parsed as EDN, fails, and refuses the whole close.\n"))))
 
+(defn- acceptance-criterion-block
+  "PROOF-wm-works ⟨1⟩6 (claude-5 ruling): the dispatch states the acceptance
+   criterion VERBATIM. For the SELECTED candidate: each declared produced
+   token with its locator (kind, exact path; for C4 the exact required
+   declaration head and the line-initial rule), and the target's own
+   acceptance locator (cascade-sources/acceptance-of — never restated by
+   hand). A candidate whose locators cannot be rendered still dispatches:
+   the block is typed-absent with a reason. Nothing here is a gate."
+  [{:keys [action]}]
+  (try
+    (let [target (:target action)
+          first-action (first (:precedence action))
+          ;; the live qualifier produces [target token] pairs; hand-built
+          ;; entries may carry bare tokens — handle both
+          produced (vec (sort-by pr-str (map (fn [tok] (if (vector? tok) (second tok) tok))
+                                             (:produces first-action))))
+          sources (cascade-sources/load-declared)
+          render-locator (fn [token locator]
+                           (str "  " (pr-str token) " — "
+                                (case (:class locator)
+                                  :C3 (str "C3 path-exists: the file " (:path locator)
+                                           " must exist in the repository")
+                                  :C4 (str "C4 declaration-head: the file " (:path locator)
+                                           " must contain the exact head \"" (:decl locator)
+                                           "\" at the start of a line")
+                                  (str "unsupported locator class " (:class locator)))))
+          produced-lines (when (seq produced)
+                           (for [token produced
+                                 :let [qualified (if (vector? token) token [target token])
+                                       bare (if (vector? token) (second token) token)
+                                       locator (get-in sources [:locators target bare])]]
+                             (if (map? locator)
+                               (render-locator qualified locator)
+                               (str "  " (pr-str qualified)
+                                    " — LOCATOR NOT DECLARED: the token has no locator in the source"))))
+          acceptance (cascade-sources/acceptance-of target)
+          acceptance-line (when acceptance
+                            (render-locator [target (:token acceptance)] (:locator acceptance)))]
+      (if (or (seq produced-lines) acceptance-line)
+        (str "ACCEPTANCE CRITERIA (the tests your work will be measured against):\n"
+             (when (seq produced-lines)
+               (str "Your action's declared produced tokens, measured at the after-revision:\n"
+                    (clojure.string/join "\n" produced-lines) "\n"))
+             (when acceptance-line
+               (str "The target's own acceptance declaration:\n" acceptance-line "\n")))
+        {:status :absent :reason :no-renderable-criteria}))
+    (catch Exception e
+      {:status :absent :reason :criterion-rendering-failed :message (.getMessage e)})))
+
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head attempt-evidence-dir
                              measured-acquisition? surprise-root
@@ -1924,6 +1973,10 @@
        "SELECTED TARGET: " (pr-str target) "\n"
        "TARGET REPOSITORY: " (pr-str target-repository) "\n"
        "TARGET REPOSITORY BASE HEAD: " (pr-str target-repository-head) "\n"
+       (let [block (acceptance-criterion-block {:action cascade-entry})]
+         (if (map? block)
+           (str "ACCEPTANCE CRITERIA: not stated (" (name (:reason block)) ")\n")
+           block))
        "REPOSITORY ARTIFACT CONTRACT: Make and commit the complete parcel only in "
        "TARGET REPOSITORY. The artifact gate observes only that repository. Paths and "
        "actions nested in the mission record are context, not permission to commit in "
@@ -2086,6 +2139,16 @@
        "commits in the existing repository.\n\n"
        "SELECTED TARGET: " (pr-str target) "\n"
        "CONSTRUCTION CONTRACT: " (pr-str (prompt-construction construction)) "\n"
+       ;; ⟨1⟩6: the retry knows the test it must satisfy — the same block the
+       ;; first dispatch stated, rendered from the candidate's own
+       ;; declarations (carried on the construction record).
+       (let [action (:selected-action construction)]
+         (if (map? action)
+           (let [block (acceptance-criterion-block {:action action})]
+             (if (map? block)
+               (str "ACCEPTANCE CRITERIA: not stated (" (name (:reason block)) ")\n")
+               block))
+           ""))
        "YOUR PRIOR COMMIT SHAS: " (pr-str prior-commits) "\n"
        "REVIEWER VERDICT AND FINDINGS (VERBATIM):\n"
        findings "\n\n"
