@@ -3982,13 +3982,30 @@
                        ;; identity deduplication enforces the second run —
                        ;; this call never bypasses it (b-update reports
                        ;; :already-recorded rather than appending).
+                       ;; The parameter the outcome informs is the pattern
+                       ;; that DECLARED the accepted effect, not the head of
+                       ;; the precedence: on the reference ticket's C2 the
+                       ;; head is :aif/declare-the-conditioning while
+                       ;; :restoration-accepted is declared by
+                       ;; :contracts/holder-states-the-claim at index 3, so
+                       ;; the hardcoded 0 credited the wrong pattern
+                       ;; (claude-2's review, 2026-09-23).
+                       b-update-pattern
+                       (let [action (get-in selection-judgment [:controller-decision :action])
+                             effect [(:target action)
+                                     (get-in accepted-increment-result
+                                             [:evidence :acceptance-token])]]
+                         (learning-ledger/producer-of (:precedence action) effect))
                        b-update-result
                        (when (and closed-event
                                   (true? (:accepted? accepted-increment-result)))
+                         (if-not (keyword? b-update-pattern)
+                           ;; typed-none: the record does not say which
+                           ;; pattern to credit, so nothing is written
+                           {:status :not-attributed :attribution b-update-pattern}
                          (try
                            (learning-ledger/b-update
-                            {:family (get-in selection-judgment
-                                             [:controller-decision :action :precedence 0 :id])
+                            {:family b-update-pattern
                              :occurrence-identity (get-in accepted-increment-result
                                                            [:evidence :binding :commit])
                              :accepted-verdict accepted-increment-result
@@ -3997,7 +4014,7 @@
                            (catch Exception e
                              {:status :refused
                               :reason (:learning-ledger/refusal (ex-data e))
-                              :message (.getMessage e)})))
+                              :message (.getMessage e)}))))
                        discharge-result
                        (repair-discharge/finalize-run!
                         {:root (or (:repair-root opts) repair/default-root)

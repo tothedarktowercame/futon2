@@ -206,7 +206,18 @@
         _ (ledger/record! (.getPath tmp)
                                    {:trials [{:status :admitted-at-attempt-grain
                                               :deduplication {:identity occurrence-identity}
-                                              :learning-family :aif/two-layer-calibration
+                                              ;; :learning-family is the trial-CONFIGURATION
+                                              ;; digest, not the parameter key; the key is
+                                              ;; DERIVED from the recorded precedence and
+                                              ;; effect, exactly as the production writer
+                                              ;; leaves them (claude-2's grain ruling)
+                                              :learning-family "a-trial-configuration-digest"
+                                              :effect [t :calibration/evidence-passing]
+                                              :selected-cascade
+                                              {:precedence [{:id :aif/declare-the-conditioning
+                                                             :produces #{[t :repair/split-declared-valid]}}
+                                                            {:id :aif/two-layer-calibration
+                                                             :produces #{[t :calibration/evidence-passing]}}]}
                                               ;; record! derives the increment from
                                               ;; :after-observation — the real producer's
                                               ;; field — so the runner-written row is honest

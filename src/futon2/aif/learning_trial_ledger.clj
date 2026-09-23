@@ -72,6 +72,41 @@
 ;; PROOF-wm-works ⟨1⟩4: the production reader and the B update.
 ;; ---------------------------------------------------------------------------
 
+(defn producer-of
+  "The pattern in PRECEDENCE that declares EFFECT among its :produces.
+   Exactly one declaring pattern -> that pattern's :id; none or several ->
+   a typed status, never a guess.
+
+   The declared consumption grain (attempt-learning-contract v2) is \"the
+   selected pattern family's theta (its declared effect's transition
+   probability)\", and the same contract's :does-not-establish names
+   :individual-pattern-firing. So attribution is BY DECLARATION: the pattern
+   that declared the effect, not the pattern that can be shown to have
+   produced it. With two declaring patterns the record genuinely does not
+   say which fired, so it contributes to nothing and says so (claude-2's
+   grain ruling, 2026-09-23)."
+  [precedence effect]
+  (let [producers (filter #(contains? (set (:produces %)) effect) precedence)]
+    (cond
+      (= 1 (count producers)) (:id (first producers))
+      (empty? producers) {:status :no-declared-producer :effect effect}
+      :else {:status :ambiguous-producer :effect effect
+             :candidates (mapv :id producers)})))
+
+(defn theta-key
+  "The parameter key a recorded trial contributes to: the pattern that
+   declared the trial's effect within the precedence that trial recorded.
+   Derived from what the event already stores -- the ledger's :family is a
+   digest of the whole trial CONFIGURATION (target, cascade, patterns,
+   effect, route), which `record!` uses to detect :revised-meaning. That
+   digest is not a parameter key: it can only be matched again on an
+   identical target and precedence, so a theta stored under it could never
+   transfer. Two identities for one thing is what hid this bug, so the key
+   is derived here rather than written a second time."
+  [row]
+  (producer-of (get-in row [:trial :selected-cascade :precedence])
+               (get-in row [:trial :effect])))
+
 (defn read-trials
   "PROOF-wm-works ⟨1⟩4: the production reader. Reads every recorded trial
    (v1 record-only events included — interpreted, never duplicated or
@@ -98,6 +133,9 @@
                                   ;; the TOP LEVEL (the 2026-09-21 write shape)
                                   (:identity row))
                     :family (or (:learning-family row) (:family row))
+                    ;; the parameter key, derived (see theta-key): the
+                    ;; :family above is the trial-CONFIGURATION digest
+                    :theta-key (theta-key row)
                     :observed (if (contains? row :observed)
                                 (:observed row)
                                 (pos? (:success (:increment row))))
@@ -134,7 +172,12 @@
                     {:learning-ledger/refusal :close-not-accepted
                      :verdict accepted-verdict})))
   (let [trials (read-trials (or ledger-root default-root))
-        mine (filter #(= family (:family %)) trials)
+        ;; FAMILY is a pattern id -- the parameter key. It was compared
+        ;; against :family, the trial-CONFIGURATION digest, so it never
+        ;; matched: trials-n was always 0 and the reported theta was always
+        ;; a first-trial value regardless of history (claude-2's review,
+        ;; 2026-09-23). The key is :theta-key, derived by producer-of.
+        mine (filter #(= family (:theta-key %)) trials)
         ;; Exactly once: the occurrence's own identity must not already be
         ;; among the family's recorded trials.
         already (some #(= occurrence-identity (:identity %)) mine)
@@ -167,19 +210,36 @@
                   {:trials (count again)
                    :same-family-count (count (filter #(= family (:family %)) again))})}))
 
-(defn family-theta
+(defn pattern-theta
   "PROOF-wm-works ⟨1⟩8 second half: the scorer's read of the recorded
-   trials. Returns the b-update rule's posterior for FAMILY — (successes +
-   1/2)/(trials + 1) over the family's whole-attempt outcomes — WITH
-   provenance: {:theta … :status :recorded-trials :trials-count n
-   :successes n :identities […]}. A family with no trials:
-   {:status :no-recorded-trials}. An unreadable or malformed ledger:
-   {:status :defaulted :reason …} — NEVER a refusal; the caller keeps the
-   documented default with the typed reason recorded."
-  ([family] (family-theta family default-root))
-  ([family root]
+   trials, keyed by PATTERN-ID -- the grain the kernel applies theta at
+   (cascade-model-manifest/with-pattern-theta) and the grain the v2
+   contract declares its consumption at. Returns the b-update rule's
+   posterior -- (successes + 1/2)/(trials + 1) over the trials that
+   attribute to this pattern -- WITH provenance: {:theta … :status
+   :recorded-trials :trials-count n :successes n :identities […] :targets
+   […]}. No trials: {:status :no-recorded-trials}. An unreadable or
+   malformed ledger: {:status :defaulted :reason …} -- NEVER a refusal; the
+   caller keeps the documented default with the typed reason recorded.
+
+   :targets is provenance the reviewer needs: trials POOL ACROSS TARGETS,
+   which is the claim that reliability is a property of the pattern rather
+   than of the pattern-on-this-target. Key it by target instead and every
+   key holds one or two trials forever, so nothing is ever learned; but the
+   pooling is an assumption, so the contributing targets are recorded and a
+   reader can see that a 1/8 came from three attempts on ONE target
+   (claude-2, 2026-09-23).
+
+   A pattern declaring several tokens pools its trials across those
+   effects: the kernel fires the whole :produces set at once, so theta
+   reads as the pattern's per-token delivery rate -- the approximation the
+   Lean InterpretedPattern already makes."
+  ([pattern-id] (pattern-theta pattern-id default-root))
+  ([pattern-id root]
    (try
-     (let [rows (filter #(= family (:family %)) (read-trials root))
+     (let [rows (filter #(= pattern-id (:theta-key %)) (read-trials root))
+           ;; one contribution per recorded occurrence
+           rows (vals (into {} (map (juxt :identity identity)) rows))
            n (count rows)
            successes (count (filter (comp true? :observed) rows))]
        (if (zero? n)
@@ -188,7 +248,8 @@
           :status :recorded-trials
           :trials-count n
           :successes successes
-          :identities (vec (keep :identity rows))}))
+          :identities (vec (sort (keep :identity rows)))
+          :targets (vec (distinct (keep #(first (get-in % [:row :trial :effect])) rows)))}))
      (catch Exception e
        {:status :defaulted
         :reason (or (:learning-ledger/refusal (ex-data e))

@@ -1,7 +1,7 @@
 (ns futon2.aif.theta-consumption-test
   "PROOF-wm-works ⟨1⟩8 second half: the scorer consumes the recorded theta.
   In-process, on the frozen reference input, through the real
-  family-theta reader and the real class scorer."
+  pattern-theta reader and the real class scorer."
   (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.cascade-model-manifest :as m]
@@ -82,16 +82,31 @@
                       "theta-consumption" (make-array java.nio.file.attribute.FileAttribute 0)))
         _ (spit (io/file tmp "attempts.edn") "")
         ;; the runner's own append seam with :after-observation (the honest field)
+        ;; The row is written in the shape the PRODUCTION writer produces:
+        ;; the parameter key is DERIVED from the trial's own recorded
+        ;; precedence and effect (learning-trial-ledger/theta-key), never
+        ;; named by the test. The earlier version of this test set
+        ;; :learning-family to a pattern-id keyword -- a shape
+        ;; attempt-learning/receipt cannot emit, since it digests the trial
+        ;; configuration there -- so both sides of the identity were
+        ;; authored here and the real write path was never exercised
+        ;; (claude-2's review, 2026-09-23).
         _ (ledger/record! (.getPath tmp)
                           {:trials [{:status :admitted-at-attempt-grain
                                      :deduplication {:identity "tc-occ-1"}
-                                     :learning-family :aif/declare-the-conditioning
+                                     :learning-family "a-trial-configuration-digest"
+                                     :effect [t :repair/split-declared-valid]
+                                     :selected-cascade
+                                     {:precedence [{:id :aif/measurement-window-hygiene
+                                                    :produces #{[t :repair/held-out-observations-collected]}}
+                                                   {:id :aif/declare-the-conditioning
+                                                    :produces #{[t :repair/split-declared-valid]}}]}
                                      :after-observation true}]})
-        ft (ledger/family-theta :aif/declare-the-conditioning (.getPath tmp))
+        ft (ledger/pattern-theta :aif/declare-the-conditioning (.getPath tmp))
         _ (is (= :recorded-trials (:status ft)) (pr-str ft))
         _ (is (= 3/4 (:theta ft)) "one success from cold: the update rule's posterior")
         _ (is (= ["tc-occ-1"] (:identities ft)))
-        ;; the family-theta reader drives the scorer's pattern thetas
+        ;; the pattern-theta reader drives the scorer's pattern thetas
         {:keys [ranked]} (score-with-thetas {:aif/declare-the-conditioning ft})
         by-id (into {} (map (juxt #(get-in % [:action :id]) identity)) ranked)
         g-with (:controller-score (by-id :C2))
@@ -143,7 +158,7 @@
   (let [tmp (.toFile (java.nio.file.Files/createTempDirectory
                       "theta-malformed" (make-array java.nio.file.attribute.FileAttribute 0)))
         _ (spit (io/file tmp "attempts.edn") "not-edn-at-all {{{")
-        ft (ledger/family-theta :aif/declare-the-conditioning (.getPath tmp))
+        ft (ledger/pattern-theta :aif/declare-the-conditioning (.getPath tmp))
         _ (is (contains? #{:defaulted :no-recorded-trials :recorded-trials} (:status ft)))
         ;; the scorer shape: a defaulted theta maps to the documented default
         thetas (if (= :defaulted (:status ft))
@@ -167,3 +182,23 @@
     (let [k (m/pattern-kernel explicit #{})]
       (is (= 1/2 (get k #{:a})) "the kernel spreads mass per the explicit theta")
       (is (= 1/2 (get k #{})) "and keeps the complementary mass"))))
+
+(deftest banked-ledger-reads-the-recorded-theta
+  ;; The assertion that would have caught the identity bug: read the REAL
+  ;; banked ledger, no authored constants, no fixture. Before the fix this
+  ;; returned :no-recorded-trials for every pattern, because the reader
+  ;; filtered on the trial-configuration digest rather than on the pattern
+  ;; that declared the effect (claude-2, 2026-09-23).
+  (let [root "data/wm-learning-trials"
+        holder (ledger/pattern-theta :contracts/holder-states-the-claim root)
+        falsifier (ledger/pattern-theta :contracts/every-entry-has-a-falsifier root)
+        untried (ledger/pattern-theta :aif/two-layer-calibration root)]
+    (is (= :recorded-trials (:status holder)) (pr-str holder))
+    (is (= 1/8 (:theta holder)) "three attempts, none accepted")
+    (is (= 3 (:trials-count holder)))
+    (is (= 0 (:successes holder)))
+    ;; provenance a reviewer needs: the 1/8 is three attempts on ONE target
+    (is (= 1 (count (:targets holder))) (pr-str (:targets holder)))
+    (is (= 3/4 (:theta falsifier)) "one attempt, accepted")
+    (is (= :no-recorded-trials (:status untried))
+        "a pattern with no trials keeps the documented default")))

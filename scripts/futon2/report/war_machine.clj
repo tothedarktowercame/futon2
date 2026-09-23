@@ -6377,7 +6377,7 @@
                           p (:precedence c)
                           :let [family (:id p)]]
                       [family (try
-                                (learning-ledger/family-theta family ledger-root-for-theta)
+                                (learning-ledger/pattern-theta family ledger-root-for-theta)
                                 (catch Exception e
                                   {:status :defaulted :reason :ledger-read-failed}))] ))
               joint-candidates

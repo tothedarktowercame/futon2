@@ -62,13 +62,20 @@
                              :occurrence-identity identity-1
                              :accepted-verdict verdict
                              :ledger-root (.getPath tmp)})
-        ;; the accepted close's record! append (the existing writer) lands
-        ;; the occurrence; simulate by appending the row the ledger accepts
-        _ (spit (io/file tmp "attempts.edn")
-                (str "{:schema :wm/attempt-learning-count-v1 :identity " (pr-str identity-1)
-                     " :family " (pr-str family)
-                     " :increment {:success 1 :failure 0}}\n")
-                :append true)
+        ;; the accepted close's append, through record! -- the real writer.
+        ;; The parameter key is DERIVED from the trial's recorded precedence
+        ;; and effect, so the row must carry them; hand-writing a :family
+        ;; equal to the pattern id was a shape the production writer cannot
+        ;; emit (claude-2's review, 2026-09-23).
+        _ (ledger/record! (.getPath tmp)
+                          {:trials [{:status :admitted-at-attempt-grain
+                                     :deduplication {:identity identity-1}
+                                     :learning-family "a-trial-configuration-digest"
+                                     :effect [:some-target :the/effect]
+                                     :selected-cascade
+                                     {:precedence [{:id family
+                                                    :produces #{[:some-target :the/effect]}}]}
+                                     :after-observation true}]})
         r2 (ledger/b-update {:family family
                              :occurrence-identity identity-1
                              :accepted-verdict verdict
