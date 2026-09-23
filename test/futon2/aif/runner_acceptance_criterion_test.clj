@@ -49,7 +49,6 @@
         c2 (f {:action {:kind :cascade-candidate :id :C2 :target t
                         :precedence [{:id :aif/declare-the-conditioning
                                       :produces #{:repair/split-declared-valid}}]}})
-        c3-target "T-with-c3"
         ;; absent: no acceptance, no produced tokens
         absent (f {:action {:kind :cascade-candidate :id :CX :target "T-no-such-target"
                             :precedence [{:id :nothing :produces #{}}]}})]
@@ -58,14 +57,23 @@
     (is (map? absent))
     (is (= :no-renderable-criteria (:reason absent)) (pr-str absent))))
 
+(deftest initial-dispatch-cascade-entry-keeps-target-and-locator
+  (let [f @#'flr/acceptance-criterion-block
+        action (reference-entry :C2)
+        rendered (f {:action {:mission t :selected-action action}})]
+    (is (string? rendered) (pr-str rendered))
+    (is (.contains rendered
+                   (pr-str [t :repair/split-declared-valid])))
+    (is (not (.contains rendered "[nil :repair/split-declared-valid]")))
+    (is (.contains rendered "resources/wm/eig/held-out-split.edn"))
+    (is (not (.contains rendered "LOCATOR NOT DECLARED")))))
+
 (deftest c3-path-locator-renders-path-and-kind
   ;; a C3 produced-token locator renders the path and its kind: use the
   ;; reference ticket's C2 acceptance path but as a C3 via a synthetic entry
   ;; over a real source locator — the render function is the unit under
   ;; test; assert through a real locator shape from the source.
-  (let [sources (cs/with-context-fn (cs/load-declared))
-        loc (get-in sources [:locators t :restoration-accepted])
-        f @#'flr/acceptance-criterion-block
+  (let [f @#'flr/acceptance-criterion-block
         ;; synthesize: target the ticket but produce the token whose locator
         ;; we render as C3 by class-swap on a copy
         rendered (f {:action {:kind :cascade-candidate :id :CT :target t

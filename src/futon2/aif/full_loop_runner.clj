@@ -1898,7 +1898,12 @@
    the block is typed-absent with a reason. Nothing here is a gate."
   [{:keys [action]}]
   (try
-    (let [target (:target action)
+    (let [;; Initial dispatch supplies the construction/cascade entry, whose
+          ;; executable action lives under :selected-action. Revision prompts
+          ;; supply the action directly. Normalize both at this boundary so a
+          ;; produced token can never be rendered as [nil token].
+          action (or (:selected-action action) action)
+          target (:target action)
           first-action (first (:precedence action))
           ;; the live qualifier produces [target token] pairs; hand-built
           ;; entries may carry bare tokens — handle both
