@@ -1,0 +1,30 @@
+{:schema :wm/eig-held-out-split-v2
+ :disposition
+ HELD-OUT-SPLIT-DECLARED
+ :ticket/id "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+ :declared-on "2026-09-23"
+ :supersedes "resources/wm/eig/held-out-split.edn"
+ :supersedes-reason "The v1 declaration named its held-out set as cohort/attempt directory labels (machinery-72 attempt-002, attempt-003). Every click opens a NEW cohort, so attempt-003 under machinery-72 will never be minted; the window could not close. This declaration names its window by identities the runner actually mints."
+ :model {:theta :a4a/dirichlet-posterior-v1
+         :policy-family :wm/pattern-cascade
+         :prediction-source :wm/eig-shadow-packet-v1}
+ :locator {:root "data/wm-runs"
+           :record "tick-run-record-<run-id>.edn"
+           :membership "a run is in the window when its recorded decision :target equals :ticket/id and its recorded-at is after the fixed starting point below"}
+ :starting-point {:kind :git-commit
+                  :sha "e153bb7e"
+                  :described "the commit recording the supersession decision; the window opens after it"}
+ :window {:opens-after {:event :git-commit-containing-declaration}
+          :shape :next-n-attempts-on-ticket
+          :next-n 2
+          :minimum-observations 2
+          :close-when :n-attempts-on-ticket-have-durable-closes}
+ :outcome-classes [:result :no-result :failure :timeout]
+ :primary-metrics [:log-loss :brier]
+ :secondary-metrics [:predicted-entropy-reduction :realised-entropy-reduction]
+ :passing-bounds {:mean-log-loss {:lte 1.3862943611198906}
+                  :mean-brier {:lte 0.25}}
+ :calibration-authority :none
+ :claims {:observations-collected? false
+          :calibration-evidence-present? false
+          :restoration-accepted? false}}

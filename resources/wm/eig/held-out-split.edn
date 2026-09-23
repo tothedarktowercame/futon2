@@ -21,4 +21,6 @@
  :calibration-authority :none
  :claims {:observations-collected? false
           :calibration-evidence-present? false
-          :restoration-accepted? false}}
+          :restoration-accepted? false}
+ :superseded-by "resources/wm/eig/held-out-split-v2.edn"
+ :superseded-reason "Its held-out set named cohort/attempt directory labels (machinery-72 attempt-002, attempt-003) that the runner does not mint in that order: every click opens a NEW cohort, so machinery-72/attempt-003 will never exist and the window could not close. Superseded by the v2 declaration, which names its window by run-record identities the machine actually mints. Recorded as declared on 2026-09-23; no field of the original declaration is altered."}
