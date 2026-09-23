@@ -2273,3 +2273,110 @@ locational nit, not blocking: the measurements live in the run record and the
 learning ledger the close binds, not inside `007-closed.edn` itself; say "the
 records r4-1's close binds" if anyone builds the check by grepping the close
 file.
+
+## ⟨1⟩9 — the conclusion (zai-1, 2026-09-23, per claude-5's final handoff)
+
+Read-only over the record. No code, no clicks. The verdict first, then the
+four parts it rests on.
+
+### VERDICT
+
+**Proved for ⟨1⟩1–⟨1⟩5; demonstrated in-process for ⟨1⟩6–⟨1⟩8; not yet
+proved end to end.** No live click has produced an accepted close, so the
+theorem's third and fourth clauses rest on fixtures standing in for states
+the machine has not reached. Everything the machine itself did — selecting,
+delivering, closing, refusing honestly — was done live and is recorded.
+
+### 1. WHAT IS ESTABLISHED, with evidence
+
+- **⟨1⟩1 — one command to a bound close.** Click `wm-click-117f822a…`
+  (run 2026-09-22-1790060806, machinery-71 attempt-001) closed
+  `:grounded-change`; wiring `514d8dca` (firing never refuses),
+  `1de6aadc` (the horizon lift), `d6565a01` (the withhold narrowed).
+- **⟨1⟩2 — the frozen reference input.** The front repair ticket, two
+  candidates modelling the obstruction and its removal, frozen at
+  `53fea9f4`; the ticket-class derivation and the evidence tokens added at
+  `929d509f`/`aac7ae01`; the rewrite that made the model represent the
+  repair at `71a0d949`.
+- **⟨1⟩3 — the full law choosing where habit alone ties.** On the frozen
+  input, through the live code: G(C2) = ln(1/0.55) = 0.5978, G(C1) = ln 20
+  = 2.9957, the separation being Joe's 55-vs-5 through the class C
+  (`daf2124e`, `62fcfa1e`, `bf6ee6f3`, `163fd25d`); log E − F alone is an
+  exact 0.5/0.5 tie; the class certificate records what was consumed
+  (`37d40709`); the shared relation producer and the retained-focus
+  semantics (`c188d583`, `11203e5d`, `10ca9526`, `eabe81fe`, `d6565a01`).
+  Joe's amendment stands: turning the tie into a unique maximum counts as
+  G deciding.
+- **⟨1⟩4 — the producers exist and are called before the close.** The
+  measurement chain and route attestation were already production paths
+  (`d845f59e`); the accepted-increment predicate was built (`b8bc1d7c`),
+  the B update (`9291cdb2`), and both wired into the close path
+  (`5320dc6f`) — the predicate recorded on the close, the update only
+  after a written accepted close.
+- **⟨1⟩5 — the live click choosing the reference target and delivering
+  work.** Click `wm-click-e3e4479c…` (run 2026-09-23-1790131591,
+  machinery-72 attempt-001): `:decided-by :ticket-queue` with the ticket as
+  the only eligible target, the stratum posterior on its :C2, commit
+  `ee22106c` delivering the split declaration and closing
+  `:grounded-change`. The second click `wm-click-8b290466…` (attempt-002,
+  commit `0798f96a`) then produced an artifact satisfying its own declared
+  locator — (a) and (b) true, (c) honestly false — proving the
+  dispatch-carries-the-criterion fix (`6a2f7a19`) in one round.
+
+### 2. WHAT IS NOT ESTABLISHED, plainly
+
+- **The accepted close, the measurement of an accepted outcome, and the B
+  update are shown IN-PROCESS over fixtures** (`b27f2a1a`, `97152006`):
+  a held-out-observations record standing in for the completed window, a
+  passing calibration record, and a ticket with Status DONE — each a state
+  no recorded occurrence holds. The fixtures satisfy every locator, guard
+  and conjunct exactly as declared, and no STOP condition arose — the
+  declared chain CAN close as written — but no live click has yet closed
+  one.
+- **⟨1⟩8's second half — the NEXT selection consuming the updated B — is
+  not shown at all.** The B-update test pins the exactly-once write and
+  its read-back; nothing anywhere demonstrates a later selection whose
+  choice differs because of a recorded outcome.
+
+### 3. WHAT THE PROOF COST AND FOUND — five real defects, each with its fix
+
+1. **The repair withhold demoted every finding-ticket** before ranking
+   (the ⟨1⟩5 first fire's `:no-admitted-front-entry`); narrowed to
+   generated/sourceless targets at `d6565a01`, per Joe's 6714b3ac ruling.
+2. **The predicate's row shape** — the comparison rows carried the
+   predicted chain, not the candidate's own produced tokens, so a first
+   limb could never register; fixed at the call site in `75a892e2`.
+3. **The acceptance criterion missing from the author brief** — the
+   machine asked for work without stating its test; the dispatch now
+   carries the criterion verbatim (`6a2f7a19`), and the very next click's
+   author passed its own locator.
+4. **The marginal naming the chain head** while the enacted step moves
+   down the chain — both identities now recorded labelled (`b1979ce2`),
+   no join or winner changed.
+5. **b-update counting an accepted outcome as a failure** — it read a
+   top-level `:observed` the predicate never carries; the accepted
+   verdict would have learned theta 1/4 where the truth is 3/4, quietly.
+   Found by feeding the predicate's own verdict through (`97152006`),
+   fixed at the consumer. A proof that found five real defects is worth
+   more than one that found none.
+
+### 4. WHAT WOULD FINISH IT
+
+The smallest remaining thing is **ordinary clicks on the repair's own
+limbs** — the machine's selection, dispatch and acceptance machinery need
+no further apparatus work. The sequence: one click creates machinery-72
+attempt-003 (closing the declared window), the observations limb becomes
+feasible, then calibration, then acceptance — the states the fixtures
+stand in for, reached by the machine itself. The third-limb pre-flight
+(`4b5f8e5b`) verified the machine already refuses to spend a click on a
+limb whose acceptance cannot be met, so the clicks will not be wasted.
+
+The one honest caveat on apparatus: ⟨1⟩8's second half (the next selection
+consuming the updated B and its choice differing) is not merely unrun —
+**no mechanism currently connects the B update to the next selection's
+rollout**. The theta b-update computes is recorded but nothing reads it
+back into the pattern kernel's θ. Finishing the theorem end to end
+therefore needs one more piece of apparatus: the consumption side of the
+B update, wired from the ledger to the scorer, with the frozen-input
+comparison the plan's ⟨1⟩8 check specifies. That is real work, not a
+click.
