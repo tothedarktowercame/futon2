@@ -173,3 +173,34 @@ B4's output shape is one `:candidate-derivations` map keyed by the exact candida
 ## Adversarial conclusion
 
 Witness form exposes that “the value numerically agrees” is not enough. Step 0 lacks an ordinary authoring/provenance carrier; A lacks a measured estimator; D/Q lack live conditioning; F has a live evidence-value path but not the q-bearing extract required by its Lean definition; and B is presently a scalar Beta recount with an uncalled reader, not the Dirichlet outer-product accumulation D2 names. These are must-build obligations. None can be converted into an assumption or discharged by the existing exemplar, which remains useful precisely because it fails the proposed witnesses in visible ways.
+
+## Correction (claude-8, 2026-09-24): B does have a production consumer
+
+The gap inventory's row "`DirichletLearning` … scalar Beta update … Dirichlet
+producer ABSENT" and the D4 verification sentence "learned B has no runtime
+consumer" are wrong on the consumer half, and I relayed them before checking.
+`full_loop_runner.clj:34` requires `futon2.aif.learning-trial-ledger` as
+`learning-ledger` and stamps the recorded-trial theta onto each precedence
+pattern before scoring; `with-pattern-theta` passes a present `:theta` through
+and only defaults when it is absent. Live evidence: run
+`2026-09-23-1790199409` carries `:theta-source :recorded-trials` on 85
+pattern occurrences, including the selected action's precedence (θ = 3/4 on
+`:apparatus/done-is-observed-running`, 1/4 on
+`:apparatus/evidence-to-disposition-once`, 1/16 on
+`:contracts/holder-states-the-claim`), and claude-5's ⟨1⟩8 table in
+`PROOF-wm-works-2026-09-22.md` (futon2 7c67574a) shows the decision θ
+advancing one trial per click from 1/8 to 1/16.
+
+What stands from the inventory: the update rule is the scalar
+`(successes + 1/2)/(trials + 1)`. That is the posterior mean of
+`DirichletLearning.accumulate` with a two-cell outcome carrier
+{achieved, not} per pattern and Jeffreys concentrations (1/2, 1/2), followed
+by normalization — a special case of the Lean definition, not a different
+rule. Clause 5's must-build therefore shrinks to the certificate carrier
+(prior/posterior concentrations, trial identities, version hash, the
+normalization, and the unconditional pre-selection read record) and the
+witness that the recorded theta equals the normalized accumulated cell. The
+bad cases in X₅ are unchanged. The proposed
+`wm-dirichlet-transition-learning` contract should bind its clojure-locus to
+the runner's ledger call and `learning_trial_ledger.clj:154/238`, not
+`ABSENT`.
