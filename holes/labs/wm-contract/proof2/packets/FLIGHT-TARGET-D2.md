@@ -244,3 +244,99 @@ lifecycle file exists for it):
 clojure -M -m futon2.aif.flight-driver M-f11-find-production-successor \
   --seat kimi-6 --repo futon2 --path holes/missions/M-f11-find-production-successor.md
 ```
+
+## 7. Addendum 2 (Joe's correction, via claude-8: do not rank on precomputed locators)
+
+§6's property 1 measured how much the owner pre-did, not what the machine can
+do — the machine is to take any open mission and compute reasonable completion
+criteria on the fly. Property 1 is therefore **retracted as a ranking gate**
+and replaced by a per-mission report of what the machine must compute:
+
+- **Extraction needed** (no criteria in any recognised form): the ~40
+  checkbox-only or criteria-free missions — M-wm-aif-policy-grain-compliance,
+  M-forum-refactor, M-action-cost-modelling, M-dionysus-winddown,
+  M-apm-capability-ratchet, alleycat-scorecard, … The machine must extract
+  criteria from the mission's prose before anything can be verdicted.
+- **Verdict computation needed** (criteria present, verdicts unstated):
+  M-f11-find-production-successor, M-omni-wm-runner,
+  M-essays-retraction-visibility, E-campaign-spec-grounding, M-war-machine-pilot,
+  M-aif-policy-conditioned-eig, M-aif-a-matrix-faithfulness,
+  M-aif-gap-epistemic-affordance, M-apm-demonstration, M-live-efe-map,
+  E-fold-engine, M-essays-edit-cycle, M-essays-diachronic-model,
+  M-self-improvement-loop, E-ticks-firing-ratio-likelihood (EXECUTED — verdicts
+  would land Met; degenerate for a flight), M-becoming-nomad
+  (operator-personal).
+- **Nothing to compute**: M-futon-seams (excluded by scope).
+
+Ranking, by faithfulness (does what the reader sees, plus what extraction from
+the mission's own text yields, cover the done-definition?) then property 2:
+
+1. **M-f11-find-production-successor** — verdict computation only; done-definition
+   covered (Acceptance bullets + the repair-024 disjunct; extraction below);
+   property 2 holds today (validated interpretation, guard fact `:hole/h9ab212b3281d`
+   true at HEAD). **First.**
+2. **M-omni-wm-runner** — verdict computation plus one extraction that matters
+   (the Acceptance bullets never state the mission's core criterion — "a click
+   runs in-process" appears only in Scope; extraction finds it, §7.1). Property
+   2 probable, unwritten readings. **Second.**
+3. **M-essays-retraction-visibility** — verdict computation only (extraction
+   ≈ identity); property 2 probable but enactment substrate is futon4 Elisp.
+   **Third.**
+4. E-campaign-spec-grounding (authoring work, owner codex-5, SCOPED);
+   E-ticks (degenerate); then §5 rows 6–7 unchanged. The extraction-needed
+   class ranks below all of these on faithfulness grounds alone: with no
+   stated criteria, coverage of the done-definition is unverifiable until the
+   extractor exists and its output is checkable against the text.
+
+### 7.1 Extracted completion criteria, top three (hand reference for an extractor)
+
+Each criterion cued to the sentence it comes from. "Reader-visible" = the
+criteria reader already returns it; "extraction-only" = only an extractor over
+the prose would yield it.
+
+**M-f11-find-production-successor** (futon2, `holes/missions/M-f11-find-production-successor.md`):
+
+| # | extracted criterion | cue (sentence it comes from) |
+|---|---|---|
+| F1 | The F2 falsifier is reconciled against current library state. | Acceptance: "Reconcile the F2 falsifier against current library state." (reader-visible bullet) |
+| F2 | A conformant implementation acts at the applied `find` interface. | "Supply a conformant implementation at the applied interface." (reader-visible) |
+| F3 | F1–F4 are stated in Lean, each witnessed on a real find over the committed 24-pattern library. | "State F1–F4 in Lean and witness each on a real find over the committed library." (reader-visible) |
+| F4 | The `find` sorry formerly at `DarkTower/WarMachine/Holes.lean:264` is discharged or amended. | "Discharge or amend the `find` sorry." + Objective: "discharge or amend the `find` sorry formerly anchored at `DarkTower/WarMachine/Holes.lean:264`" (reader-visible bullet; the anchor location is extraction-only, from the Objective sentence) |
+| F5 | F12's gates ran: focused Lean builds, negative controls, pointer checks, clj-kondo, paren checks. | "Run the same gates as F12, including focused Lean builds, negative controls, pointer checks, clj-kondo for scripts, and paren checks." (reader-visible) |
+| F6 | Unrelated work preserved; residual limitations reported, not called success. | "Preserve unrelated work and report any residual limitation without calling it success." (reader-visible) |
+| F7 | Repair-024 disposition published: strict successful successor link, or the typed failure retained without resolution — and only after ordinary gates produce strict durable terminal evidence. | Checkbox L102 (reader-visible) + the boundary sentence "Repair-024 is resolved only after this mission's ordinary gates produce strict durable terminal evidence." (extraction-only: it conditions F7 on F1–F6, a dependency no bullet states) |
+
+**M-omni-wm-runner** (futon3c, `holes/missions/M-omni-wm-runner.md`):
+
+| # | extracted criterion | cue |
+|---|---|---|
+| O1 | Parcel A tests green; ladder timeouts, override pinning, typed exhaustion, injectable-seam preference all covered by new tests. | Acceptance bullet 1 (reader-visible) |
+| O2 | Parcel B: single-flight guard 409s a second click; endpoint contract tests; registry status transitions; **no new JVM/process spawn during a stubbed click** (`pgrep java` unchanged). | Acceptance bullet 2 (reader-visible) |
+| O3 | Gates pass on both parcels: clj-kondo, check-parens, `clojure -X:test` on touched namespaces. | Acceptance bullet 3 (reader-visible) |
+| O4 | **A durée click (`once` semantics) runs in-process in the serving futon3c JVM on a dedicated thread, triggered over HTTP** — the mission's actual done-definition; the Acceptance bullets test it only under stubs. | Scope: "one durée click (`once` semantics) runs in-process in the futon3c JVM on a dedicated thread; HTTP trigger + status" (extraction-only; no bullet states it) |
+| O5 | Continuous mode, the futon0 scan JVM, store heap, and the turn-commits relay are out of scope — a faithful closure must not require them. | Scope: "**Out (follow-ups):** `continuous` mode; the transient futon0 scan JVM …" (extraction-only; a negative criterion — the extractor must produce scope-outs too, or a flight could be failed on work the mission declined) |
+
+**M-essays-retraction-visibility** (futon4, `holes/missions/M-essays-retraction-visibility.md`):
+
+| # | extracted criterion | cue |
+|---|---|---|
+| R1 | Opening a section with `:retracted t` manifest annotations shows them in the notes pane, not filtered away. | Exit criteria bullet 1 (reader-visible) |
+| R2 | Persisted and live-pending retractions have a coherent visual treatment; the state transition is understandable. | bullet 2 (reader-visible) |
+| R3 | Targeted ERT coverage lands in `test/arxana-browser-essays-test.el`. | bullet 3 (reader-visible) |
+| R4 | A checkpoint with test counts and a one-line live-behavior note is appended to the parent mission. | bullet 4 (reader-visible) |
+
+Extraction adds nothing here — which is itself the finding: this mission's
+reader-visible criteria ARE its done-definition, the property that makes it
+the cleanest faithfulness baseline of the three.
+
+### 7.2 What an extractor must additionally produce (from the three tables)
+
+The cues show the extractor's required range, beyond bullet-lifting: (i)
+anchor data buried in prose (F4's file:line); (ii) cross-criteria dependencies
+stated only in boundary sentences (F7 on F1–F6); (iii) core criteria that
+never became bullets (O4); (iv) negative criteria from scope-out lists (O5).
+An extractor tested against these three missions and producing exactly these
+tables — cues included — would have demonstrated the same role for criteria
+that claude-1's mission-C plays for outcomes.
+
+Everything else in the packet stands.
