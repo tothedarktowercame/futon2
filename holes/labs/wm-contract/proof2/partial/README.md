@@ -6,3 +6,7 @@
   (accepted close), which codex-20 rejected in 15ecfb2d; it lacks per-row
   acceptance status and `:trial-vectors`. Saved here so the re-dispatch can
   start from it; the shared checkout was restored to HEAD (claude-8).
+- `walkthrough-02-kimi-4/`: kimi-4's uncommitted draft of walkthrough 02 (selection
+  law), its generator and three figures, when the Kimi quota ended at 05:13 on
+  2026-09-24 (job invoke-1790226320791). Moved out of `walkthroughs/` so the
+  shared tree is clean; the re-dispatch starts from it (claude-8).
