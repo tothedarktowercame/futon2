@@ -150,6 +150,101 @@
       (is (nil? (repair/discharge-record root "implementations" "repair-fixture"))))
     (is (= :awaiting-successor (:status (discharge/finalize! a))))))
 
+(deftest ticket-queue-action-binds-through-the-ticket-link
+  ;; The 2026-09-23 bad case, nine times in discharge-operations/: the
+  ;; selected ticket-queue action carries :target "T-repair-…" and NO
+  ;; :repair/id, and bind-selected! refused {:stage :binding
+  ;; :reason :unsafe-repair-id}. The store's own ticket-links record (written
+  ;; by finding-ticket/publish!) supplies the id and the byte pin.
+  (let [{:keys [root base]} (fixture)
+        finding-record (repair/discharge-record root "findings" "repair-fixture")
+        link {:schema :wm/finding-ticket-v1 :finding/id "repair-fixture"
+              :finding/ticket {:id "T-repair-fixture"
+                               :path "holes/tickets/T-repair-fixture.md"
+                               :finding-path (.getCanonicalPath (io/file root "findings/repair-fixture.edn"))
+                               :finding-sha256 (:sha256 finding-record)}}
+        _ (io/make-parents (io/file root "ticket-links/repair-fixture.edn"))
+        _ (spit (io/file root "ticket-links/repair-fixture.edn") (pr-str link))
+        ;; Exactly the shape the assembled cascade candidate has: no
+        ;; :repair/id, no :finding-source, no :discharge-contract.
+        action {:kind :cascade-candidate :id :C1 :target "T-repair-fixture"
+                :precedence [{:id :pattern/fixture}]}
+        receipts {:p {:kind :hand-admitted :reading "fixture"}}
+        a (assoc (attempt base "A" "2026-09-21T00:00:01Z")
+                 :action action :interpretation receipts)
+        result (discharge/finalize! a)]
+    (is (= :awaiting-successor (:status result)) (pr-str result))
+    (is (= "repair-fixture" (:repair/id result)))
+    (is (some? (repair/discharge-record root "implementations" "repair-fixture"))
+        "binding reached the finding and recorded the implementation")))
+
+(deftest ticket-target-without-a-ticket-link-refuses-by-name
+  ;; A T-repair- target the store never published a ticket for must refuse
+  ;; with a typed reason naming the target -- not bind to nil, not throw
+  ;; untyped, and not the old :unsafe-repair-id.
+  (let [{:keys [root base]} (fixture)
+        action {:kind :cascade-candidate :id :C1 :target "T-repair-occ-missing"
+                :precedence [{:id :pattern/fixture}]}
+        a (assoc (attempt base "A" "2026-09-21T00:00:01Z")
+                 :action action :interpretation {:p {:kind :hand-admitted :reading "fixture"}})
+        result (discharge/finalize! a)]
+    (is (= :evidence-unavailable (:status result)) (pr-str result))
+    (is (= :binding (:stage result)))
+    (is (= :finding-ticket-link-unavailable (:reason result)))
+    (is (= "T-repair-occ-missing" (:target (evidence/read-one (:error-data-edn result)))))
+    (is (nil? (repair/discharge-record root "implementations" "repair-fixture")))))
+
+(deftest ticket-link-to-a-missing-finding-refuses-by-name
+  ;; The link exists but the finding is gone: refuse naming the finding.
+  (let [{:keys [root base]} (fixture)
+        link {:schema :wm/finding-ticket-v1 :finding/id "repair-fixture"
+              :finding/ticket {:id "T-repair-fixture" :finding-sha256 "irrelevant"}}
+        _ (io/make-parents (io/file root "ticket-links/repair-fixture.edn"))
+        _ (spit (io/file root "ticket-links/repair-fixture.edn") (pr-str link))
+        _ (.delete (io/file root "findings/repair-fixture.edn"))
+        action {:kind :cascade-candidate :id :C1 :target "T-repair-fixture"
+                :precedence [{:id :pattern/fixture}]}
+        a (assoc (attempt base "A" "2026-09-21T00:00:01Z")
+                 :action action :interpretation {:p {:kind :hand-admitted :reading "fixture"}})
+        result (discharge/finalize! a)]
+    (is (= :evidence-unavailable (:status result)) (pr-str result))
+    (is (= :binding (:stage result)))
+    (is (= :finding-unavailable (:reason result)))
+    (is (= "repair-fixture" (:repair/id (evidence/read-one (:error-data-edn result)))))))
+
+(deftest non-ticket-target-without-an-id-is-still-not-applicable
+  ;; No :repair/id and no T-repair- prefix: binding does not engage at all,
+  ;; exactly as before.
+  (let [{:keys [base]} (fixture)
+        action {:kind :cascade-candidate :id :C1 :target "M-some-mission"
+                :precedence [{:id :pattern/fixture}]}
+        a (assoc (attempt base "A" "2026-09-21T00:00:01Z")
+                 :action action :interpretation {:p {:kind :hand-admitted :reading "fixture"}})]
+    (is (= {:status :not-applicable :repair/discharged? false}
+           (discharge/finalize! a)))))
+
+(deftest presented-evidence-is-still-held-to-itself
+  ;; A ticket-linked action that DOES present a pin or contract is held to
+  ;; it: a stale pin refuses even though the link's pin is good.
+  (let [{:keys [root base finding]} (fixture)
+        finding-record (repair/discharge-record root "findings" "repair-fixture")
+        link {:schema :wm/finding-ticket-v1 :finding/id "repair-fixture"
+              :finding/ticket {:id "T-repair-fixture"
+                               :finding-sha256 (:sha256 finding-record)}}
+        _ (io/make-parents (io/file root "ticket-links/repair-fixture.edn"))
+        _ (spit (io/file root "ticket-links/repair-fixture.edn") (pr-str link))
+        pin {:path (.getCanonicalPath (io/file root "findings/repair-fixture.edn"))
+             :sha256 "stale"}
+        action {:kind :cascade-candidate :id :C1 :target "T-repair-fixture"
+                :precedence [{:id :pattern/fixture}]
+                :finding-source pin :discharge-contract (:discharge-contract finding)}
+        a (assoc (attempt base "A" "2026-09-21T00:00:01Z")
+                 :action action :interpretation {:p {:kind :hand-admitted :reading "fixture"}})
+        result (discharge/finalize! a)]
+    (is (= :evidence-unavailable (:status result)) (pr-str result))
+    (is (= :finding-admission-unestablished (:reason result)))
+    (is (nil? (repair/discharge-record root "implementations" "repair-fixture")))))
+
 (deftest head-movement-and-forged-receipt-refuse
   (let [{:keys [root repo base]} (fixture)
         _ (discharge/finalize! (attempt base "A" "2026-09-21T00:00:01Z"))

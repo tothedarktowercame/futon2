@@ -12,18 +12,57 @@
   #{:distinct-repair-commit :independent-review :grounded-repair
     :distinct-production-shaped-successor})
 
+(defn- ticket-link
+  "Reverse-lookup a T- ticket in the store's own ticket-links records, written
+   by finding-ticket/publish! at publication from the finding's durable bytes
+   (schema :wm/finding-ticket-v1). The join is the recorded
+   [:finding/ticket :id], not the \"T-\" <> finding-id naming convention.
+   Returns the link record, or nil when the store links no finding to this
+   ticket."
+  [root ticket]
+  (let [dir (io/file root "ticket-links")]
+    (when (.isDirectory dir)
+      (some (fn [^java.io.File f]
+              (when (and (.isFile f) (.endsWith (.getName f) ".edn"))
+                (let [record (evidence/read-one (slurp f))]
+                  (when (and (= :wm/finding-ticket-v1 (:schema record))
+                             (= ticket (get-in record [:finding/ticket :id])))
+                    record))))
+            (sort-by #(.getName ^java.io.File %) (.listFiles dir))))))
+
 (defn bind-selected!
   "A prefix is not admission. T candidates must retain the native id, finding
    byte pin, verbatim contract and interpretation admission. Legacy explicit
-   repair actions carry the finding itself and use the same authoritative read."
+   repair actions carry the finding itself and use the same authoritative read.
+
+   A ticket-queue action names its finding by target alone: it carries
+   :target \"T-repair-…\" and no :repair/id, :finding-source pin or contract
+   (the assembled cascade candidate keeps only :target, :precedence,
+   :construction-receipt and :interpretation-receipts). The store already
+   records that join: publish! wrote ticket-links/<finding-id>.edn from the
+   finding's own bytes. When the action presents no native id, the id and the
+   byte pin come from that publication receipt; the pin is still compared
+   against the CURRENT finding bytes below, so a finding altered since
+   publication refuses admission, and an action that DOES present an id, pin
+   or contract is held to every one of them exactly as before."
   [root action interpretation]
   (let [legacy? (#{:repair-machine-failure :revalidate-historical-repair} (:type action))
-        id (if legacy? (get-in action [:repair-obligation :repair/id]) (:repair/id action))]
-    (when (or id (and (string? (:target action)) (.startsWith ^String (:target action) "T-repair-")))
+        native-id (if legacy? (get-in action [:repair-obligation :repair/id]) (:repair/id action))
+        ticket-target? (and (string? (:target action))
+                            (.startsWith ^String (:target action) "T-repair-"))
+        link (when (and (not legacy?) (nil? native-id) ticket-target?)
+               (ticket-link root (:target action)))
+        id (or native-id (:finding/id link))]
+    (when (or id ticket-target?)
+      (evidence/require! (some? id) :finding-ticket-link-unavailable
+                         {:target (:target action)})
       (evidence/safe-id! id)
       (let [record (repair/discharge-record root "findings" id)
             finding (:value record)
-            pin (:finding-source action)]
+            pin (or (:finding-source action)
+                    (when link
+                      {:path (.getCanonicalPath (io/file root "findings" (str id ".edn")))
+                       :sha256 (get-in link [:finding/ticket :finding-sha256])}))]
         (evidence/require! finding :finding-unavailable {:repair/id id})
         (if legacy?
           (evidence/require! (and (= id (:target action))
@@ -37,7 +76,11 @@
                 (= (:sha256 record) (:sha256 pin))
                 (= (.getCanonicalPath (io/file root "findings" (str id ".edn")))
                    (:path pin))
-                (= (:discharge-contract finding) (:discharge-contract action)))
+                (if (contains? action :discharge-contract)
+                  (= (:discharge-contract finding) (:discharge-contract action))
+                  ;; A ticket-linked action never carried the contract; the
+                  ;; finding read from the store is the only contract source.
+                  (some? link)))
            :finding-admission-unestablished {:repair/id id}))
         {:finding finding :finding-record record :target (str "T-" id)}))))
 
