@@ -168,8 +168,10 @@
 ;; presents the full law. When F is absent for a candidate, selection-posterior
 ;; omits the term (line 112: `(if (= :not-supplied (:f-status c)) 0.0 …)`) —
 ;; the arithmetic is UNCHANGED by this receipt; the receipt only says which law
-;; actually ran. Per Joe's 2026-09-19 ruling, F absence is typed evidence on
-;; the record, not a refusal: nothing here refuses or defers selection.
+;; actually ran. F absence is typed evidence on the record, not a refusal,
+;; for an engineering reason: F is absent on every recorded click, so a
+;; refusal would halt selection everywhere and hide what ran; the receipt
+;; keeps the machine running AND makes the record say which law it ran.
 ;; ---------------------------------------------------------------------------
 
 (defn f-consumed-record
