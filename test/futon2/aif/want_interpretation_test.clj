@@ -228,3 +228,12 @@
     (is (= declared (get-in merged [:interpretations "M-futon-seams" :patterns
                                     :writing-coherence/meet-the-reader-where-they-are])))
     (is (= [] (get-in merged [:machine-interpretations "M-futon-seams"])))))
+
+(deftest a-string-spelled-id-canonicalises
+  ;; D17 sibling of the un-namespaced refusal: the same proposal with its
+  ;; id as a namespaced string validates under the canonical keyword
+  (let [resp (assoc (response :writing-coherence/meet-the-reader-where-they-are)
+                    :pattern "writing-coherence/meet-the-reader-where-they-are")
+        v (validate document resp (seams-sources))]
+    (is (= :valid (:status v)) (pr-str (:reasons v)))
+    (is (= [:writing-coherence/meet-the-reader-where-they-are] (keys (:interpretation v))))))
