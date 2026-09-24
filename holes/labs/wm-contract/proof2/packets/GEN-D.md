@@ -388,3 +388,372 @@ form B-C will give `:trial-vectors` (the extract schema accepts it
 whatever its shape within §1.3's value forms); and whether 64 is the
 largest carrier L will see (§6 records the risk and the lemma
 obligation, not a forecast).
+
+## Revision 2 — 2026-09-24 (codex-12; specification, not implementation)
+
+This appendix supersedes conflicting prescriptions in §§1–8 without rewriting
+that history. It addresses all five corrections in `reviews/GEN-D-codex-21.md`
+(7c334441), the B population/encoding objections in
+`reviews/B-D-codex-20.md` (15ecfb2d), and SPEC-N review amendment 3. None of
+those reviews supplies an empirical premise: the reasons below are record
+contents, source definitions, and the distinction between a recorded operand
+and a calculated result. This remains subject to independent re-review.
+
+Revision pins for this appendix: **R2** = futon2
+`d1b011ab9dc54ee0740309752bfc110174bc554f`; **L2** = mathlib4
+`41a3691f4b65a06b2a6a1d52b759b6690b583c48`.
+Unprefixed source paths are futon2-relative; bare
+`learning_trial_ledger.clj` and `full_loop_runner.clj` abbreviate files under
+`src/futon2/aif/`. `WM/` abbreviates mathlib4
+`DarkTower/WarMachine/`. SC always means the full path
+`[:decision :selection-certificate]`, including for `:certificate-schema`.
+The original R/L pins above remain the citations for the original text.
+
+### R2.1 Independent source-path/presence/value verification
+
+**Proposed GEN-E contract, not an existing checker:** an independently
+implemented verifier receives (i) a preregistered clause path-schema and its
+hash, (ii) the immutable source-record identities fixed independently of the
+extractor, and (iii) the proposed extract. It does not accept the extractor's
+`:agrees`, `:present`, path list or hashes as its verification result.
+
+1. Reopen each source by its registered raw SHA-256, check those raw bytes,
+   parse with the declared single-form/ledger-to-EOF rule, and reject malformed
+   or extra forms. Whitespace/comments followed by EOF are not extra forms.
+   Obtain the schema at SC `:certificate-schema`; undeclared or unsupported
+   schema yields a diagnostic extract, never positive schema standing.
+2. Instantiate the **verifier's** fixed path-schema over every recorded
+   candidate id and every required family/trial row. The schema declares
+   record role, physical envelope path, expected value type, required/optional
+   status, permitted absence variants, content-reference rule and identity
+   joins. Do not instantiate from the extractor's list. Missing sections do
+   not reduce the obligations: retain the missing section as a failed required
+   obligation. Require exact equality between this obligation set and the
+   extract's source entries (no omission, duplication, alias substitution or
+   unrecognized source entry). Optional paths still receive presence checks.
+3. Resolve paths component by component: maps use membership plus lookup;
+   vectors use checked integer bounds; a non-container intermediate component
+   is `:invalid-path-carrier`. Distinguish **key absent**, **present nil**,
+   **present typed absence**, and **present value**. Missing is not nil and
+   nil is not zero. Classify absence by the registered value schema, not any
+   arbitrary nested `:status`. Preserve the complete source absence form.
+4. Resolve content refs only through the registered immutable content store.
+   Check both the canonical hash of the recorded ref map and the resolved
+   object's canonical hash against the ref. Retain its complete resolution
+   chain, refuse missing content/cycles/hash disagreement, and never search
+   a live ledger for an alternative value. An unresolved reference produces
+   a verifier finding alongside the unchanged source ref, not an invented
+   source absence map.
+5. Independently encode the resolved typed source value by CERT-S §3 and
+   compare its bytes with the proposed extract's source value. Numeric `=`
+   is insufficient: ratio versus double, set versus vector, signed zero,
+   nil versus missing must remain distinguishable. Check presence first,
+   then type/value. A lawful double-to-tag representation is the declared
+   codec, not a new production number. Validate candidate small ids at
+   SC `:candidates i :id :id` plus recomputed payload hashes across sections;
+   validate producer/consumer value-hash and `:consumed-at` identity joins.
+6. Output an independent verdict bound to source hashes, path-schema hash,
+   extract hash and verifier loaded-source identity. Example findings:
+   `:source-presence-mismatch`, `:source-value-mismatch`,
+   `:source-type-mismatch`, `:required-path-omitted`, `:content-unavailable`,
+   `:hash-disagrees`, `:carrier-malformed`, `:carrier-incompatible`.
+   An honestly extracted missing value can pass transcription fidelity but
+   fails the positive clause's completeness requirement. These are separate
+   verdicts. An extractor filling it cannot pass even transcription fidelity.
+
+The first B path-schema must enumerate the physical B entry specified in
+R2.3 and **each** of its carrier, prior/posterior, ordered trial, acceptance,
+commit-point, dedup, version and normalization fields; the selected family
+cannot be inferred by omitting other families. Its consumed-side paths are
+SC `:model-inputs <id> :B`, SC `:B-read :predecessor-chain`, and SC
+`:candidates i :id :precedence j :theta` with sibling `:theta-source` and
+recorded producer/consumer joins. A scalar theta is not a replacement for
+missing concentration/trial paths. Full clause-5 standing additionally needs
+those read/temporal joins; an arithmetic-only extract labels its narrower scope.
+
+**Mandatory absent-to-recount negative, before positives:** use a
+schema-declared synthetic close fixture at the physical B path with prior
+`[[1/2] [1/2]]`, posterior `{:status :missing :reason :not-recorded}`, and an
+unrelated field containing `3/2`. A separate one-success ledger permits a
+recount `[[3/2] [1/2]]`. Give the verifier a corrupt extract claiming that
+recount is a present posterior, with otherwise correct raw/ref/extract hashes.
+Step 3 independently reads typed absence: require
+`:source-presence-mismatch` at the exact posterior path. Repeat with the
+posterior key omitted (same finding), present nil (invalid required value,
+not absence), and posterior omitted from the extract
+(`:required-path-omitted`). A correct absent extract passes fidelity and fails
+completeness. An unrelated `3/2` cannot rescue any case. These are specified
+acceptance tests, **not executed results from a nonexistent verifier**.
+
+Replace §2's “every number already occurs” rule: production operands must
+come from their **designated source locations**, not numerical membership in
+any record. Bookkeeping (form count, enumeration index) lives under
+`:generated-metadata`; proof calculations (bounds, sums, proof terms) under
+`:proof-witnesses`. Neither namespace may satisfy a production source path.
+The verifier may recalculate the right side to check an equality; it may not
+use that result as the missing recorded left side. Separate implementation
+and independently reopening registered bytes prevents self-attestation; it
+still leaves parser/hash/codec correctness in the explicit extraction trust
+boundary, not a filesystem theorem inferred from Lean.
+
+### R2.2 The exemplar has incompatible recorded carriers
+
+Read-only reinspection used `bb`, `clojure.edn/read` with
+`{:default tagged-literal :eof ::eof}`, PushbackReader, and a second read
+requiring EOF. Raw SHA-256 for
+`data/wm-runs/tick-run-record-2026-09-23-1790131591.edn` again equals
+`7314951f0ad6d339d561a9f7ec4f5dc14042873e4602873dddb590701ba61f25`.
+Let T be the string
+`T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade`.
+
+| Exact path after SC | Observed carrier; diagnostic cardinality |
+|---|---|
+| `[:token-belief-input :carry-admission :current-universe]` | Six `[T token]` pairs: `:admission/task-stated`, `:repair/obstruction-observed-cleared`, `:repair/split-declared-valid`, `:repair/held-out-observations-collected`, `:repair/calibration-evidence-present`, `:restoration-accepted`. Literal powerset size 64. |
+| `[:scoring 0 :rates-provenance :model :universe]` | Seven set members: the same pairs **except** obstruction-cleared, plus bare string T and bare keyword `:admission/task-stated`. Literal powerset size 128; malformed as a target-qualified fact carrier. |
+| `[:candidates 0 :computed-f :model :universe]` | Same seven members as the preceding row; same malformed carrier. A computed-F diagnostic is not evidence of selection consumption. |
+| `[:token-belief-stage :prospective-prior :universe]` | Three pairs under `M-f11-find-production-successor`: `:admission/task-stated`, `:hole/h9ab212b3281d`, `:hole/h2045faa0e7cc`; literal powerset size 8. The role/join to the other carriers is not established by this count. |
+| `[:token-belief-stage :initialization :value]` | Exactly `{#{[T :admission/task-stated]} 1}`. This establishes support size one at this path, not a uniquely identified model universe. |
+
+The six-member measurement in §6 is therefore path-specific, **not** a
+measurement of the uniquely consumed carrier. Do not zip the bare string and
+keyword into a pair, insert the missing fact, or discard the M-f11 carrier by
+name. Preserve all source values and report malformed/incompatible carriers.
+No claim that 64 states suffice for this record's full witness survives.
+Theoretical 4096/16384 matrix-cell counts for 64/128 states are only generated
+metadata; enumeration size does not establish semantic validity. Any sparse
+proof must cover the declared full carrier through a separately proved
+embedding/equivalence with its support-closure hypotheses, not assume update
+or rollout stays inside a chosen sparse subset.
+
+### R2.3 Proposed shared B encoding and commit-point amendment
+
+This is a **proposed amendment to CERT-S §1 B, A13/A14 and THEOREM W5/P5**,
+not a claim that the rejected B-D already defines this schema or B-C implements
+it. Use a successor certificate/extract schema, proposed
+`:wm/proof2-certificate-v2` / `:wm/proof2-extract-v2`; old records stay unchanged.
+
+**Population and visibility.** At R2, `learning_trial_ledger.clj:24–69`
+appends admitted measurement rows, writing/syncing at 61–63;
+`full_loop_runner.clj:3161` invokes that append while retaining comparison
+evidence. `learning_trial_ledger.clj:173–179` separately guards the later
+`b-update` with accepted-close status. The reader at `:273–285` filters by
+pattern key, collapses identities and computes theta; it does not filter by
+accepted close. Thus the B visibility/commit point is **rows appended at
+comparison**, not accepted close. Record append sequence/content identity and
+read snapshot boundary, not merely a later close timestamp. Accepted
+measurement, counted ledger row and accepted increment are distinct fields.
+No filtering out refused closes is allowed as an extraction “repair.”
+
+**Physical encoding proposal.** The canonical close envelope address is
+`[:payload :judgment :b-update]` (logical `[:b-update]` in CERT-S). It contains
+the following value or a content ref fixed by the close, with the update's
+earlier comparison/append identity preserved. Resolved content is the B value
+itself, not another envelope. Both physical and logical paths must appear in
+the path-schema. A retained file may hold that content under
+`<attempt>/retained/`; its filename alone is not the immutable join.
+At R2 `full_loop_runner.clj:4247–4279` writes a post-close retained
+`b-update.edn`, using `:carrier` or typed absence. That is **not** proof of the
+proposed close-bound reference or comparison-time carrier: the binding and
+producer order remain B-C/B-R obligations. Extraction cannot add them later.
+
+For each parameter, use `:families {<pattern-id> <family-value>}`; pattern id
+is the theta key, distinct from a trial-configuration digest. A family value
+has these mandatory fields, with exact field schemas rather than “any shape”:
+
+- `:carrier {:outcomes [:achieved :not-achieved] :states [:attempt]
+  :shape [2 1] :grain :occurrence-effect :meaning-sha256 <hash>}`.
+  Arrays are **outcome-major matrices**, two vectors each of length one.
+  Family keys are not another state axis; each family has its own Fin 2 × Fin 1.
+- `:prior-concentrations` and `:posterior-concentrations`: positive exact
+  rational matrices in those axes. This replaces B-D's named-cell maps and
+  CERT-S's unindexed vectors by an explicit versioned encoding. No extractor
+  converts an old map to this producer carrier and calls it recorded.
+- `:trial-identities`: ordered vector of **content refs to complete immutable
+  counted ledger rows**, in identity order (ascending dedup-identity string).
+  Each row's dedup identity is separate from its recomputed content hash.
+- `:trial-vectors`: equally long vector; entry j contains `:identity`,
+  `:source-row-ref`, `:outcome` (`[1 0]` or `[0 1]`), `:state-belief [1]`,
+  `:carrier-sha256`, and the recorded acceptance/attribution reference. Entry j
+  must join identity/ref j exactly. Boolean true maps to achieved; false to
+  not-achieved. Missing/non-Boolean observations refuse, never map to false.
+  Check exact one-hotness, normalized singleton, lengths and every carrier
+  key. `[2]` or a token-state map cannot be an admitted state vector.
+- `:row-dispositions`: full ordered source-row census with ledger position,
+  row ref, dedup identity, admission status, close acceptance (true/refused/
+  typed unavailable), attribution and counted/excluded reason. It preserves
+  rows excluded from `:trial-identities` and joins the immutable snapshot.
+  `:dedup` explicitly records append admission and read-side collapse; identical
+  repeats contribute once, conflicting same-identity rows are a provenance
+  failure, not silently merged. Existing `into {}` at ledger `:275` is
+  last-wins and does not establish this conflict check.
+- `:normalization {:outcome :achieved :state :attempt
+  :numerator <recorded-rational> :denominator <recorded-rational>
+  :theta <recorded-rational> :rule <versioned-definition-id>}`; verify the
+  numerator equals posterior[0][0], denominator equals the sum over outcomes
+  at state 0, denominator > 0, theta equals their quotient. These are recorded
+  operands checked against a formula, never filled by GEN-E.
+- `:commit-point`, `:snapshot-ref`, `:version`, `:value-sha256`, producer
+  identity and consumption joins: bind the family, carrier meaning, prior,
+  ordered rows/vectors, dispositions and normalization. Version hashes a
+  specified semantic payload excluding its own hash fields; term hashes
+  likewise name their value subject explicitly. Temporal successor claims
+  additionally require the independent `:B-read` joins, not the close alone.
+
+B-C must produce vectors/arrays contemporaneously from the actual population;
+GEN-E only verifies and transcribes them. If the writer cannot retain per-row
+close acceptance when appending, it records typed unavailable then; a later
+close record can link its acceptance without rewriting the earlier row.
+No missing field is inferred from a later recount. A future read needs an
+immutable snapshot with the consumed row population; a mutable ledger path
+and timestamp alone do not define a version.
+
+The exact normalization definition owed to B-N is, for finite O at fixed s,
+`theta(a,o,s) = a.conc o s / (sum o' : O, a.conc o' s)`.
+For O=Fin 2, S=Fin 1, achieved=0, state=0, Jeffreys prior in both cells and
+n normalized one-hot trials with s successes, this yields
+`(s+1/2)/(n+1)`. It does **not** divide a fixed outcome across states (which
+would give 1 in Fin 1), nor sum all families. R2's scalar formula is at ledger
+`:280`; L2 `WM/DirichletLearning.lean:50–66,82–85` supplies accumulation,
+not that interpretation of whole-attempt observations as token posteriors.
+Amend A13/W5 to name the admitted occurrence/effect measurement and explicit
+singleton mapping. Until that amendment is reviewed, arithmetic specialization
+is not full W5 compliance. Duplicate [i,i] must fail the dedup/identity check;
+Lean accumulation correctly adds both if actually given both.
+
+### R2.4 Typed hashing, enumeration and a defined machine-F operand
+
+Source-value hash and enumeration are different objects. Preserve sets as sets
+and maps as maps under CERT-S §3's canonical UTF-8 codec. Record a separate
+`:generated-metadata :enumerations` entry with source path/hash, canonical
+ordering rule, ordered elements, and bijection check. A vector representing
+an enumeration is never hashed as though it were the source set. Preserve
+candidate and trial vector order; do not reorder semantic vectors. Hash an
+extract payload without its own digest/verifier receipt; hash verification and
+proof receipts separately. Recompute ref-map and resolved-value hashes as
+R2.1 requires. The source entry's hash never covers itself or proof metadata.
+
+Adopt SPEC-N §3, replacing original §1.5/AM-2. Finite binary64 encoding decodes
+to an exact rational, preserving original raw signed-zero/hex identity. A
+round-tripping decimal printer need not lose bits; the error is interpreting
+its displayed decimal as an exact decimal rational or treating an approximation
+as the ideal real. The declared output codec remains `#wm/double "<hex>"`.
+
+**Proposed amendment to CERT-S F and THEOREM W3/W6:** name the scalar path
+SC `:model-inputs <id> :F :total`; name the ordered symbolic-input path SC
+`:model-inputs <id> :F :f-prefix`, and the expression declaration/version at
+SC `:model-inputs <id> :F :ideal-expression`. The latter identifies the
+mathematical definition, not an independently asserted numerical value.
+These are proposed paths, not observed exemplar fields. On successful verified
+finite decoding, emit the following mathematical construction (API names owed
+to NUM-R/L; no undefined real or axiom):
+
+```
+h := the independently checked hex string at the scalar source path
+r : ℚ := the literal rational returned by DecodeExact(h)
+prove decode_binding : DecodeExact(h) = some r
+machineFTotal : ℝ := (r : ℝ)
+idealFTotal : EReal := the declared prefix-VFE expression on recorded inputs
+```
+
+For finite ideal F, prove SPEC-N's interval relation between `machineFTotal`
+and the real expression. Do not define machineFTotal from idealFTotal.
+If decoding fails or F is absent, emit the typed diagnostic and no inhabited
+machine-F operand; do not select zero, an arbitrary real or a default branch.
+Mathematical top is a separate support case, not a nonfinite hex literal.
+A rational sum of decoded doubles is not an exact mathematical prefix F.
+
+The authoritative proposed numeric entries remain SC `:numeric-refinement`,
+keyed by full scalar path. Each entry explicitly names source value hash,
+candidate small id **and** payload hash, codec/decoding, expression/input refs,
+proof-artifact hash and budget identity. Candidate/policy/decomposition aliases
+must independently resolve to the same scalar value/hash with their candidate
+joins checked; nested prefix refinement fields are refs to this authoritative
+collection, not unchecked copies. Action-marginal entries name **all** owning
+candidate joins. This is an extension of CERT-S, requiring version review,
+not permission to silently change v1. A strict policy-score gap means a proved
+ideal-score gap, not a gap between rounded point estimates even with injective
+policy-to-action mapping (SPEC-N review amendment 1).
+
+### R2.5 Emitter independence and corrected witness precedents
+
+Replace the “both sides reduce to the same def” rule. Literal finite equalities
+can legitimately close by reduction, `rfl` or `norm_num`. The forbidden step is
+**constructing the recorded operand from the model formula under test**.
+
+Proposed independently checked emitter grammar: each source-operand declaration
+is generated solely from the verified source entry, using literals, finite
+constructors/indexing and the reviewed exact numeric decoder/cast. Bind every
+cell/leaf to a source path plus index and source hash. A separate checker walks
+the emitted operand definitions and their transitive dependencies, checks this
+restricted grammar, and compares the decoded literal carrier to the verified
+extract. It must not trust the emitter's self-reported dependency list. Recorded
+posterior definitions may not call `accumulate`, normalize priors/trials, invoke
+the scorer, or depend on the asserted model output. The theorem's other operand
+names the reviewed model definition applied to separately sourced inputs.
+Proof terms may evaluate arithmetic and unfold both sides; this does not change
+operand provenance. Carrier positivity proofs can depend on verified literals,
+but cannot introduce assumed empirical equalities. Enforce no extra source
+operand axioms, kernel proof checking and transitive axiom audit separately.
+
+Negative controls: a forged `postConc := accumulate prior trials h` fails the
+operand grammar even if its theorem proves by rfl. Changing a source trial cell
+while leaving the emitted literal unchanged fails source/operand equality;
+changing it in both places but keeping an inconsistent recorded posterior must
+fail the arithmetic proposition. Parser/import failures are invalid negatives.
+The absent-to-recount case fails the earlier provenance verifier even if its
+forged arithmetic theorem compiles. No implementation of these gates is claimed.
+
+Corrected source precedents (opened at L2):
+
+| Source | What it supplies, and does not |
+|---|---|
+| `WM/DirichletLearning.lean:19–21,50–66,82–85,98–104` | Positive concentration structure, step, accumulate, pointwise equation, append theorem. Corrects original 46/58/77 anchors. Does not supply source extraction or the new normalization schema. |
+| `WM/ExpectedFreeEnergyWitness.lean:15–29,44–53` | Literal Q/C and reference value; `onePointFixture` at 50 proved by norm_num at 53. A finite fixture precedent, not immutable-record provenance. |
+| `WM/DirichletConcentrationsNegative.lean:5–11` | Expected unsolved `False` goal under `#guard_msgs`; semantic positivity negative. Does not test absent-source reconstruction. No fresh build claimed here. |
+| `WM/MachineObservationWitness.lean:3–6` | Readback cross-reference in a header. No structured provenance-manifest or symbolic hex/log codec established by that header. |
+| `WM/MachinePolicyFreeEnergyWitness.lean:6–8,18,55` | The actual symbolic-log precedent, with separate floating deltas; not a binary64 decoder or certified floating-error bound. |
+
+At R2 `checks/lean_sorry_category_check.clj:7,51–60` is a fixed-Holes source
+check, not the proposed general transitive import audit. Source/hash identities
+alone also do not establish execution: `src/futon2/aif/load_identity.clj:101–131`
+records loaded bytes and checks them against disk; an extractor/verifier receipt
+must bind what actually ran. Broader emitter/axiom/absence gates remain owed.
+
+### R2.6 Amendment register, falsifiers and next work
+
+All changes to external contracts in this appendix are **proposed amendments**:
+
+1. **CERT-S / GEN-E:** successor version, independent fixed-path fidelity and
+   completeness checks; physical close envelope/ref; typed source hashing
+   separate from enumeration/metadata; explicit B arrays/axes/ordered vectors,
+   statuses, dedup and commit/read snapshot fields (R2.1–R2.4).
+2. **ASSUME A13/A14 and THEOREM W5/P5:** distinguish comparison-time admitted
+   measurements from accepted increments; name actual append visibility and
+   snapshot consumption; fixed-state outcome normalization and explicit
+   singleton mapping. Neither an accepted-close filter nor a token-posterior
+   interpretation may be inserted by the extractor (R2.3).
+3. **CERT-S F and THEOREM W3/W6:** decoded machine scalar versus ideal prefix
+   expression/refinement, precise scalar path and alias joins (R2.4), following
+   SPEC-N; no exact-rational mathematical log total.
+4. **THEOREM extraction/emission wording, A16 verification contract:** replace
+   number-membership/self-reported independence with independent path/value
+   verification and operand dependency checking. This operationalizes A16;
+   it does not relax missingness or permit reconstructed production facts.
+
+**Exact row falsifier:** a required posterior is omitted or explicitly missing,
+but the extract contains `[[3/2] [1/2]]` obtained from a ledger recount. Correct
+hashes and correct Lean arithmetic do not save it: R2.1 requires independent
+`:source-presence-mismatch`. **Emitter falsifier:** a posterior defined by
+`accumulate` rather than transcribed source cells fails R2.5 before proof credit,
+even if its equality compiles. Both negative checks require implementation and
+independent registration/execution before any positive evaluation.
+
+**Unblocks after re-review:** GEN-E's independent transcription verifier and
+negative fixtures; a B-C/B-N shared carrier contract and GEN-B's operand gate.
+It does not establish those implementations, a valid exemplar carrier, read
+continuity, W5 standing or theorem success. Missing definitions are precisely
+the proposed schema, fixed-state normalization, decoder/refinement interface
+and independently checked operand grammar above, not questions deferred to
+an operator. Validation here was read-only source inspection, exemplar
+EOF/path inspection and raw SHA-256 reproduction; no Lean build, click,
+shared-JVM evaluation or data write occurred.
