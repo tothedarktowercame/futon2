@@ -557,6 +557,19 @@
               (set (map :target (:targets carrier)))))
       (contains? carrier :status))))
 
+(defn chosen-summary
+  "The chosen cascade on a tick's DECISION, for the run record: its target,
+  candidate, pattern order and the :unreached-wants of its construction
+  receipt. A typed absence when nothing was chosen."
+  [decision]
+  (if-let [action (:action decision)]
+    {:target (:target action)
+     :candidate (:id action)
+     :precedence (mapv #(or (:id %) %) (:precedence action))
+     :unreached-wants (vec (get-in action [:construction-receipt :unreached-wants]))
+     :construction-kind (get-in action [:construction-receipt :kind])}
+    {:status :absent :reason :no-chosen-action}))
+
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -613,7 +626,10 @@
                                                   [:selection-law :selection-certificate
                                                    :initial-belief-receipt :enumeration-completeness])
                                      :g-term-decomposition (decomposition/from-result result)
-                                     :abstention abstention)
+                                     :abstention abstention
+                                     ;; the chosen plan, so a flight can read
+                                     ;; what it left unreached from the record
+                                     :chosen (chosen-summary decision))
                     :route route
                     :repair/discharge (:repair/discharge result)
                     :repair/publication (:repair/publication result)

@@ -5,7 +5,10 @@
 
   Kept apart from futon2.aif.flight so the flight core stays pure and its
   tests need no runner."
-  (:require [clojure.java.io :as io]
+  (:require [babashka.http-client]
+            [cheshire.core]
+            [clojure.edn]
+            [clojure.java.io :as io]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.interpretation-construction :as ic]
             [futon2.aif.observation-checks :as checks]
@@ -83,7 +86,7 @@
         (let [job (poll! opts job-id)]
           {:seat seat :job-id job-id :state (:state job) :text (job-text job)})))))
 
-(defn- target-view
+(defn target-view
   "The flight target's sources as the tick would see them: the flight's
   wants, locators and observations, and the published interpretations."
   [store flight wants sources]
@@ -213,3 +216,66 @@
          :needs (vec (for [a asked :when (not= :published (:outcome a))]
                        (merge {:kind (:outcome a) :missing :interpretation}
                               (select-keys a [:want :request-id :seat :job-id]))))}))))
+
+;; ---------------------------------------------------------------------------
+;; Clicks through the serving JVM (POST /api/alpha/wm/click)
+
+(defn record-summary
+  "What the flight needs from a click's RUN RECORD (tick-run-record-<run-id>)
+  for TARGET: the chosen plan's :unreached-wants (the record's
+  [:decision :chosen], when it is this target's) and, when the tick
+  abstained, the target's own decline from [:decision :abstention]."
+  [target run-id record]
+  (let [chosen (get-in record [:decision :chosen])
+        carrier (get-in record [:decision :abstention])
+        mine (when (= :abstained (:status carrier))
+               (or (first (filter #(= target (:target %)) (:targets carrier)))
+                   {:kind :target-not-in-refusals :missing :refusal}))]
+    (cond-> {:click-id run-id
+             :chosen (when (= target (:target chosen)) (select-keys chosen [:candidate :precedence]))
+             :unreached-wants (vec (when (= target (:target chosen)) (:unreached-wants chosen)))}
+      mine (assoc :abstention (select-keys mine [:target :kind :missing :declines]))
+      (nil? record) (assoc :abstention {:kind :run-record-missing :missing :run-record}))))
+
+(defn http-click-fn
+  "A flight click function over the serving JVM: POST /api/alpha/wm/click
+  with the flight as flight-edn and a dated run id, wait until that click is
+  no longer running, then read its run record. The click is an ordinary
+  click: it goes through the same budget and cast-seat preflight. A click
+  the server does not start is recorded as an abstention
+  (:click-not-started), never retried. Ports are injectable for tests."
+  [{:keys [agency-base run-record-dir caller poll-ms post! get-status! read-record! sleep! today]
+    :or {agency-base "http://localhost:7070" caller "wm-flight" poll-ms 5000
+         run-record-dir runner/default-run-record-dir
+         sleep! #(Thread/sleep (long %))
+         today #(subs (str (java.time.Instant/now)) 0 10)}}]
+  (let [post! (or post! (fn [body] (let [r (babashka.http-client/post
+                                            (str agency-base "/api/alpha/wm/click")
+                                            {:headers {"Content-Type" "application/json"}
+                                             :body (cheshire.core/generate-string body)
+                                             :throw false})]
+                                     {:status (:status r) :body (cheshire.core/parse-string (:body r) true)})))
+        get-status! (or get-status! (fn [] (-> (babashka.http-client/get (str agency-base "/api/alpha/wm/click")
+                                                                         {:throw false})
+                                               :body (cheshire.core/parse-string true))))
+        read-record! (or read-record! (fn [run-id]
+                                        (let [f (io/file run-record-dir (str "tick-run-record-" run-id ".edn"))]
+                                          (when (.isFile f) (clojure.edn/read-string {:default tagged-literal} (slurp f))))))]
+    (fn [judge-opts]
+      (let [flight (:flight judge-opts)
+            target (:target flight)
+            run-id (str (today) "-" (:flight/id flight) "-click-" (:click flight))
+            {:keys [status body]} (post! {:flight-edn (pr-str flight) :run-id run-id
+                                          :issuing-caller caller :trigger "duree-click-on-demand"})
+            click-id (:click-id body)]
+        (if-not (and (= 200 status) click-id)
+          {:click-id run-id
+           :unreached-wants []
+           :abstention {:kind :click-not-started :missing :click :status status
+                        :detail (select-keys body [:error :message :rejected])}}
+          (do (loop []
+                (let [s (get-status!)]
+                  (when (and (:running? s) (= click-id (:click-id s)))
+                    (sleep! poll-ms)
+                    (recur))))
+              (assoc (record-summary target run-id (read-record! run-id)) :server-click-id click-id)))))))
