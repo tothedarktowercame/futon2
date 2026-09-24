@@ -6099,14 +6099,60 @@
          (or (:mission-hole-coverage sources)
              {:status :absent :reason :source-coverage-not-supplied})))
 
+(def construction-move-cost
+  {:value 0
+   :authority {:by "claude-10" :date "2026-09-24" :ruling :none-found
+               :reason "a construction move is computation inside the tick, not in G's units; cost 1 made the constructor decline M-aif-eig's plan (gain 0.33, :acting-worth-more)"
+               :commit "891b4af6"}})
+
+(defn construction-budget
+  "The constructor's search bounds: the sources' declaration, else
+  claude-10's bounds (no ruling found)."
+  [sources]
+  (if-let [b (:construction-budget sources)]
+    {:value b :authority {:source :cascade-sources}}
+    {:value {:max-moves 4 :max-expansions 20000}
+     :authority {:by "claude-10" :date "2026-09-24" :ruling :none-found :commit "891b4af6"}}))
+
+(defn resolve-cascade-horizon
+  "The tick's common horizon over TARGETS (E-cascade-real D14/D16). A
+  declared :horizon-steps wins. Otherwise it is computed: the largest number
+  of admitted interpretations on any target, or the longest declared
+  candidate order if that is longer, and at least 1. A plan applies each
+  interpretation at most once, so at that horizon no plan over the admitted
+  interpretations is cut short (:beyond-horizon cannot arise). One value for
+  the whole family, since differing T in one family is :incommensurable-family.
+  Replaces the fallback literal T=2 (p4ng 462aa79), which refused 4-step chains
+  as unreachable and pre-empted the typed absence."
+  [sources targets]
+  (if-let [h (:horizon-steps sources)]
+    {:value h :authority {:source :cascade-sources
+                          :declarations (:horizon-steps-declarations sources)}}
+    (let [per-target (into (sorted-map)
+                           (for [t targets
+                                 :let [n (count (get-in sources [:interpretations t :patterns]))
+                                       longest (reduce max 0 (map (comp count :precedence)
+                                                                  (get-in sources [:candidates t])))]
+                                 :when (pos? (max n longest))]
+                             [t (max n longest)]))]
+      {:value (max 1 (reduce max 0 (vals per-target)))
+       :authority {:source :computed
+                   :rule "max over the tick's targets of admitted interpretations (or longest declared order); a plan applies each at most once"
+                   :by "claude-10" :date "2026-09-24" :ruling :none-found
+                   :per-target per-target}})))
+
 (defn assemble-cascade-problems-with-published
   "assemble-cascade-problems after merging the interpretations the machine
-  published for the input's targets (D11 part 3, futon2.aif.want-interpretation):
-  a want answered through the request seam constructs on the next tick
-  without anyone promoting it by hand."
+  published for the input's targets (D11 part 3, futon2.aif.want-interpretation)
+  and resolving the common horizon over the merged sources: a want answered
+  through the request seam constructs on the next tick without anyone
+  promoting it by hand, and the horizon counts its interpretation. The
+  result carries :cascade-horizon."
   [store input]
-  (assemble-cascade-problems
-   (update input :sources want-interpretation/merge-published store (:targets input))))
+  (let [merged (update input :sources want-interpretation/merge-published store (:targets input))
+        horizon (resolve-cascade-horizon (:sources merged) (:targets merged))]
+    (assoc (assemble-cascade-problems (assoc-in merged [:sources :horizon-steps] (:value horizon)))
+           :cascade-horizon horizon)))
 
 (defn- class-observation-model
   "PROOF-wm-works 1.3 build 2/3: the class observation model for the joint
@@ -7128,14 +7174,6 @@
                              (:missions (mission-registry/load-missions))
                              :WM)))
         cascade-sources (or (:cascade-sources judge-opts) declared-sources {})
-        ;; The tick-level horizon: the sources' own :horizon-steps, else the
-        ;; declared initial T = 2 (Joe 2026-09-17, p4ng 462aa79), common to
-        ;; the compared family. Recorded on the judgement with its authority.
-        cascade-horizon (if-let [h (:horizon-steps cascade-sources)]
-                          {:value h
-                           :authority {:source :cascade-sources
-                                       :declarations (:horizon-steps-declarations cascade-sources)}}
-                          {:value 2 :authority "p4ng 462aa79 (Joe 2026-09-17: initial T=2)"})
         cascade-proposal-supply
         (or (:cascade-proposal-supply judge-opts)
             (cascade-proposals/load-supply
@@ -7159,7 +7197,9 @@
                                           (keys (:universes cascade-sources))
                                           (map :target (:proposals cascade-proposal-supply))
                                           (map :ticket (:entries ticket-queue-declaration)))))
-          :sources (cond-> (assoc cascade-sources :horizon-steps (:value cascade-horizon))
+          ;; the horizon is resolved after the flight's input and the
+          ;; published interpretations are merged (resolve-cascade-horizon)
+          :sources (cond-> cascade-sources
                      ;; A target with admitted interpretations and no
                      ;; declared candidate is constructed here rather than
                      ;; refused (E-cascade-real D4). G is the lane's own
@@ -7172,10 +7212,12 @@
                      (not (contains? cascade-sources :construction))
                      (assoc :construction
                             {:construct interpretation-construction/construct
-                             :budget (or (:construction-budget cascade-sources)
-                                         {:max-moves 4 :max-expansions 20000})
-                             :move-cost 0
+                             :budget (:value (construction-budget cascade-sources))
+                             :move-cost (:value construction-move-cost)
                              :evaluate-g constructed-candidate-g}))}))
+        ;; The tick-level horizon, common to the compared family, recorded
+        ;; on the judgement (selection and abstention) with its authority.
+        cascade-horizon (:cascade-horizon raw-cascade-assembled)
         cascade-assembled
         (cascade-proposals/record-supply
          raw-cascade-assembled cascade-sources
@@ -7346,6 +7388,11 @@
                   :cascade-problems (:cascade-problems cascade-result)
                   :cascade-lanes (:lanes cascade-result)
                   :cascade-horizon cascade-horizon
+                  ;; what decided a constructed plan was worth taking, beside
+                  ;; the horizon: values with their authority
+                  :construction-parameters
+                  {:budget (construction-budget cascade-sources)
+                   :move-cost construction-move-cost}
                   :wm/route route3
                   :input-status (current-input-status)})
            strategic-habit-state
