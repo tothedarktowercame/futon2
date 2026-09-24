@@ -7,6 +7,13 @@
 ;; are the reader's own :met-decl locators (stated criterion text + "**Met.**"),
 ;; computed by mission-criteria/criteria, not re-typed here.
 ;;
+;; UPDATE (kimi-6, 2026-09-24, claude-8's SEAMS-INTERP update): the first flight's
+;; open exits are ARGUE and DOCUMENT ONLY. The DERIVE and INSTANTIATE
+;; interpretations below are kept, each marked "not a first-flight want (exit
+;; reads Met at ee86811c)". ARGUE's interpretation consumes DOCUMENT's account
+;; (guard needs :exit/h54d16050a9dc), and its receipt forbids softening the
+;; negative inevitability finding -- see :scope-limit there.
+;;
 ;; State at the pin: MAP :exit/h66b2ffcf3e0b, DERIVE :exit/h2d3a87958b38,
 ;; VERIFY :exit/h26178f291d86 and INSTANTIATE :exit/h4ef5c183bc55 all read
 ;; "**Met.**" (DERIVE and INSTANTIATE were restated by the mission owner in
@@ -18,11 +25,17 @@
  {:contracts/every-entry-has-a-falsifier
   {:guard {:needs #{:exit/h66b2ffcf3e0b}         ; MAP met: the survey is complete
            :forbids #{:exit/h2d3a87958b38}}
+   ;; NOT A FIRST-FLIGHT WANT (exit reads Met at ee86811c): kept as the
+   ;; documented warrant for the exit's shape; :forbids correctly makes it
+   ;; inapplicable while the token observes true.
    :produces #{:exit/h2d3a87958b38}}             ; DERIVE exit
 
   :cascade-construction/run-it-on-a-real-case
   {:guard {:needs #{:exit/h26178f291d86}         ; VERIFY met: structural checks pass
            :forbids #{:exit/h4ef5c183bc55}}
+   ;; NOT A FIRST-FLIGHT WANT (exit reads Met at ee86811c): kept as the
+   ;; documented warrant for the exit's shape; :forbids correctly makes it
+   ;; inapplicable while the token observes true.
    :produces #{:exit/h4ef5c183bc55}}             ; INSTANTIATE exit
 
   :writing-coherence/meet-the-reader-where-they-are
@@ -82,8 +95,8 @@
    :source {:path "futon3/library/writing-coherence/plain-language-thesis.flexiarg"
             :revision "9c248d5229ea47ba04a2f228cf923ef20cde9169"
             :sha256 "ca0744c5a35aacb35d6290287941518ad91b2e9c66597dcf92a7fbf58827e511"}
-   :reading "ARGUE's exit has two halves and the mission has answered the first: the inevitability half is measured and the answer is negative (selection margins 2/7 from the problem statement; the design is defensible, not inevitable), and the mission states the phase closes when DOCUMENT is written -- the plain-language argument is DOCUMENT's product. Apply the pattern's standalone-claim discipline: the mission's top-level design claim stated in plain language, readable by someone who has not read the cascades, with the measured margin recorded rather than flattered. The guard requires DOCUMENT met because the mission itself makes the plain-language half DOCUMENT's."
-   :scope-limit "This reading produces the exit by discharging the half the mission deferred, with the negative measurement kept on the record. It does not argue inevitability the measurement already answered negatively -- a reading that claimed it would contradict the mission's own ARGUE section -- and it does not write the docbook entry, which is DOCUMENT's move."
+   :reading "ARGUE's exit has two halves and the mission has answered the first: the inevitability half is measured and the answer is negative (selection margins 2/7 from the problem statement; the design is defensible, not inevitable), and the mission states the phase closes when DOCUMENT is written -- the plain-language argument is DOCUMENT's product. Apply the pattern's standalone-claim discipline: the mission's top-level design claim stated in plain language, readable by someone who has not read the cascades, with the measured margin recorded rather than flattered. The guard CONSUMES DOCUMENT's account (:exit/h54d16050a9dc must be observed first), because the mission itself makes the plain-language half DOCUMENT's. On forbidding a softened finding: no token in the mission's current vocabulary expresses \"the 2/7 margin finding stands\", so the guard cannot carry it as a :forbids token; the constraint is pinned two ways instead -- this receipt's :target-source binds the interpretation to the mission revision whose ARGUE section records the negative measurement, and :scope-limit names softening as out of scope, so an enactment that softens the finding is off this reading by definition."
+   :scope-limit "This reading produces the exit by discharging the half the mission deferred, with the negative measurement kept on the record. SOFTENING THE FINDING IS OUT OF SCOPE: closing ARGUE must not reverse, reword away, or omit the measured result that the design is defensible rather than inevitable (2 of 7 patterns reachable from the problem statement, neither candidate dominating); an enactment that does any of those is not an enactment of this interpretation. It does not argue inevitability the measurement already answered negatively, and it does not write the docbook entry, which is DOCUMENT's move."
    :target-source {:repo "futon3c" :revision "d05cb75570ea1a33a96c5fb23b437bf395da98a5"
                    :sha256 "ee86811ca0e63efd24c3a355aa243b6c94aba153b6a3594199d480d7f98fb40f"
                    :path "holes/missions/M-futon-seams.md"

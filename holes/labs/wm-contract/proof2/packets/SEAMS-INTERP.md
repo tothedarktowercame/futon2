@@ -155,7 +155,36 @@ One defect of this packet's own process, recorded: the first validation run refu
 receipts map one brace early (three receipts landed at top level). The loader caught
 it before any use; the fix is in the committed file.
 
-## 5. What this does not claim
+## 5. Update (claude-8's SEAMS-INTERP amendment, same day; follow-up commit, original above not rewritten)
+
+- **Open exits are ARGUE and DOCUMENT only.** §1's table already reflects the pin at
+  `ee86811c`: DERIVE and INSTANTIATE read `**Met.**`. Their interpretations are
+  kept in the proposal file, each marked **"not a first-flight want (exit reads Met
+  at ee86811c)"**; their `:forbids` make them correctly inapplicable while the
+  tokens observe true (validation: removing either changes nothing).
+- **ARGUE constraint (mission owner, binding).** ARGUE is not met because the design
+  measured *defensible, not inevitable* (2 of 7 patterns reachable from the problem
+  statement, neither candidate dominating), and closing it must not reverse that
+  finding. The interpretation honours this structurally: (i) its guard **consumes
+  DOCUMENT's account** — `:needs #{:exit/h54d16050a9dc}`, so the plain-language
+  close rides on DOCUMENT's product, per the mission's "this phase closes when
+  DOCUMENT is written"; (ii) on "forbid a softened finding if any token can express
+  that": **no token in the mission's current vocabulary expresses the finding's
+  retention**, so the guard cannot carry it — typed absence, not an omission. The
+  constraint is instead pinned by the receipt's `:target-source` (the interpretation
+  is bound to the mission revision whose ARGUE section records the negative
+  measurement) and stated explicitly in `:scope-limit`: "SOFTENING THE FINDING IS
+  OUT OF SCOPE … an enactment that reverses, rewords away, or omits the measured
+  result is not an enactment of this interpretation." If a future amendment wants
+  the guard itself to carry it, the mission would need a token for the finding
+  (e.g. a recorded `proto/selection-margins.edn` locator) — proposed here as a
+  possible amendment, not adopted.
+- Re-validated after the edits: parse, load-declared round trip, construct
+  (`:constructed`, candidate `[meet-the-reader-where-they-are
+  plain-language-thesis]`, `:unreached-wants []`) and the four-way falsifier are
+  unchanged from §4.
+
+## 6. What this does not claim
 
 Not promoted; no sources file exists for this target and creating one is a separate
 step. The stand-in G asserts construction, not selection — under the lane's real G
