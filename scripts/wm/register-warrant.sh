@@ -106,7 +106,6 @@ CFG="$(mktemp /tmp/warrant-XXXXXX.edn)"
   printf ':code-paths %s\n' "$(edn_list "${code_paths[@]}")"
   printf ':test-paths %s\n' "$(edn_list "$test_rel")"
   printf ':command ["clojure" "-M:test" "-n" "%s"]\n' "$NS"
-  printf ':test-environment {"LC_ALL" "C.UTF-8" "LANG" "C.UTF-8" "TZ" "UTC"}\n'
   printf ':author "%s"\n:artifact-dir "%s"\n' "$AUTHOR" "$ARTIFACT_DIR"
   printf '}\n'
 } > "$CFG"
