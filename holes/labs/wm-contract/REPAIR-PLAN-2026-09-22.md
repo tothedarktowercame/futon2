@@ -932,3 +932,55 @@ open).
 Verdict: **19 SIGN, 1 OBJECT (B5)**. The single objection is a required
 reframing, not a rejection of the step. This review authorizes no machine
 changes.
+
+## Amendment: B4 done-when, tightened to PROOF-2 step 0 (proposed 2026-09-24)
+
+Proposed by claude-8 with codex-3's PROOF-2 THEOREM draft (futon2 637fbb32,
+`PROOF-2-THEOREM-draft-2026-09-24.md`, "Step 0 CHECK") as its source, at
+claude-4's request on taking the B4 drop. This section is an amendment
+proposal appended under A20's rule that a material change clears earlier
+signatures: it does not alter the signed B4 text above, and it takes effect
+for B4's drop only when Codex and Zai GLM have signed it. Nothing here
+authorizes a click.
+
+**Why.** B4's done-when above is satisfied by a candidate set that PROOF-2's
+step 0 would reject: it does not require a per-candidate derivation record,
+it does not forbid `:hand-admitted` construction anywhere in a candidate's
+source chain, and it does not bind candidate ids across the certificate.
+Built to the text above, B4 would pass and W₀ would still fail on its first
+attempt. The proof's bar is the machine's bar; the done-when should say so.
+
+**B4 done-when (amended).** In addition to the three conditions above:
+
+4. Every candidate the scorer receives has an entry in a new certificate map
+   `[:decision :selection-certificate :candidate-derivations <candidate-id>]`
+   containing `:source-kind`, `:source-id`, `:source-revision`,
+   `:source-content-sha256`, `:discovered-at`, `:interpretation`,
+   `:construction`, `:review-publication`, `:admission`, `:acceptance`,
+   `:locators`, `:scope`, `:normalized-cascade-sha256`, the emitted
+   transition rows, and `:status :admitted`.
+5. Candidate ids join bijectively across `:candidate-derivations`,
+   `:candidates`, `:policies`, `:scoring` and the action-marginal mapping on
+   the same certificate. P₀ asserts these were the candidates supplied to the
+   scorer, not a parallel census.
+6. No entry, and nothing in its transitive source chain, carries
+   `:hand-admitted`, proof-fixture, or reference-field provenance. The
+   PROOF-wm-works reference field is a regression fixture only.
+7. The runtime emits, per candidate, the normalized pattern slots, the
+   initial token state `s₀`, and the transition rows, sufficient to generate
+   W₀'s Lean witness module without rereading source.
+8. "Two meaningfully different first actions" is decided by the predeclared
+   equivalence relation in the THEOREM draft's Step 0 CHECK (normalized tuple
+   N(π) plus non-effect-equivalence at `s₀`), not by id, prose or order.
+   Two bad extracts must fail before the done-when is credited: a clone
+   under fresh ids, and a genuinely different pair with `:hand-admitted`
+   provenance.
+
+**Sequencing note (claude-4, 2026-09-24).** Items 1–5 of B4 and the emission
+side of the amended conditions 4 and 7 are authoring-side and need no click.
+Condition 5's join and the original condition 6 (consumption by the next
+selection) require an ordinary click and wait on the board.
+
+| | Zai GLM | Codex | Joe |
+|---|---|---|---|
+| B4 amendment | | | |
