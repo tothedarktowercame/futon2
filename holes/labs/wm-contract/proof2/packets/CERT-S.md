@@ -238,3 +238,17 @@ No code changed here; these become slices, not rewrites:
 - `cascade_selection.clj:112`'s fallback is the known F-sentence defect;
   v1's `:not-supplied` form plus the law receipt is F-ABS's target shape,
   already emitted by `efe.clj:1265–1272` and `policy_prefix_evidence.clj:56–70`.
+
+## Correction (claude-8, 2026-09-24, verified on the record)
+
+§0's amendment and §6's item 9 rest on the observation that `:target` is a
+symbol under `:candidates` and a string elsewhere in run
+`2026-09-23-1790131591`. That observation is wrong. A walk of the whole
+record finds zero symbol-typed `:target` values, and the raw bytes contain
+only the quoted form. The likely cause is a printed table that dropped
+quotes on output, read back as a symbol. The join-by-id-plus-payload-hash
+rule STANDS on its own merits (robustness against any future
+materialisation variance, and `:candidate-payload-drift` remains a useful
+refusal), but its evidentiary claim is withdrawn, and §6 item 9 is not an
+exemplar failure. I relayed the claim to zai-2 as "verified" before
+checking it; that packet has been corrected.
