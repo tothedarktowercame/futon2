@@ -81,10 +81,15 @@
 ;; with no trailing zero hex digit in the fraction (except the all-zero
 ;; fraction itself). Normals print leading 1 with -1022 ≤ e ≤ 1023; subnormals
 ;; print leading 0 with e = -1022; zeros print "0x0.0p0" / "-0x0.0p0".
+;; The exponent text is canonical only as "0", a positive integer without
+;; leading zeros, or a negative nonzero integer without leading zeros
+;; ("p00", "p-0", "p01" are not toHexString output); the grammar bounds it to
+;; six digits so parsing cannot overflow, and the range check below refuses
+;; anything outside the printed binary64 range with a typed reason.
 ;; ---------------------------------------------------------------------------
 
 (def ^:private hex-grammar
-  #"^(-?)0x([01])\.([0-9a-f]+)p(-?[0-9]+)$")
+  #"^(-?)0x([01])\.([0-9a-f]+)p(0|-?[1-9][0-9]{0,5})$")
 
 (defn- pow2
   "Exact 2^e as a rational for any integer e."
@@ -121,14 +126,17 @@
         (let [n'-bits (.bitLength (.setBit n (* 4 k)))]
           (when (or (> n'-bits 53) (< e -1022) (> e 1023))
             (refuse! :double-not-binary64
-                    {:form s :significand-bits n'-bits :exponent e})))
+                    {:form s :significand-bits n'-bits :exponent e
+                     :reason (if (> n'-bits 53) :significand-too-wide :exponent-out-of-range)})))
         ;; leading 0: zero (e = 0, N = 0) or subnormal — canonical toHexString
-        ;; prints subnormals with exactly 13 fraction hex digits at e = -1022
+        ;; prints subnormals at e = -1022 with 1..13 fraction hex digits
+        ;; (trailing zeros stripped, so "0x0.8p-1022" = 2^-1023 is canonical);
+        ;; more than 13 digits would put the fraction M at or above 2^52.
         (if zero-value?
           (when-not (zero? e)
             (refuse! :double-not-binary64
                     {:form s :reason :zero-with-nonzero-exponent}))
-          (when (or (not= -1022 e) (not= 13 k))
+          (when (or (not= -1022 e) (> k 13))
             (refuse! :double-not-binary64
                     {:form s :exponent e :fraction-hex-digits k}))))
       (let [;; SPEC-N §3: decode = sign × N' × 2^(e−4k), where N' is the

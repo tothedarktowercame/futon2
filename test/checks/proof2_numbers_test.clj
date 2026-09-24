@@ -23,8 +23,8 @@
     (is (= {:rational -1/16 :raw {:form :ratio :printed "-1/16"}}
            (num/decode-exact -1/16)))))
 
-(deftest unreduced-and-swapped-ratios-refuse
-  (testing "BAD CASE (the packet's swapped-form trap): a ratio that arrives
+(deftest unreduced-ratios-refuse
+  (testing "BAD CASE: a ratio that arrives
             NON-reduced — 4/6 with numerator and denominator in the wrong
             (unreduced) form — must refuse, not be normalised silently into
             2/3. Without the coprime check this decodes to a value the record
@@ -52,7 +52,7 @@
   (testing "BAD CASE: 0.333 presented where an exact ratio is required. A
             decimal literal is a rounded binary value, not the rational 1/3;
             without this refusal it would be silently consumed as an exact
-            input. EDN doubles, floats and BigDecimals all refuse."
+            input. EDN doubles and BigDecimals refuse (a Float instance takes the same branch; the EDN reader never produces one)."
     (is (= :decimal-literal (refusal-kind #(num/decode-exact 0.333))))
     (is (= :decimal-literal (refusal-kind #(num/decode-exact 1.0))))
     (is (= :decimal-literal (refusal-kind #(num/decode-exact 0.1M))))))
@@ -84,11 +84,38 @@
            (refusal-kind #(num/decode-exact (wm-double "0x1.40p-1")))))
     (is (= :double-non-canonical-hex
            (refusal-kind #(num/decode-exact (wm-double "1.0p0"))))))
-  (testing "subnormal exponent / digit-count discipline"
+  (testing "subnormal discipline: canonical short subnormals decode exactly
+            (toHexString strips trailing zeros, so 0x0.1p-1022 = 2^-1026 and
+            0x0.8p-1022 = 2^-1023 are canonical); a subnormal at any exponent
+            other than -1022 is refused. Without the 1..13 digit rule the two
+            positives are wrongly refused (NUM-R-codex-4 R1)."
+    (is (= (/ 1 (.shiftLeft BigInteger/ONE 1026))
+           (:rational (num/decode-exact (wm-double "0x0.1p-1022")))))
+    (is (= (/ 1 (.shiftLeft BigInteger/ONE 1023))
+           (:rational (num/decode-exact (wm-double "0x0.8p-1022")))))
     (is (= :double-not-binary64
-           (refusal-kind #(num/decode-exact (wm-double "0x0.1p-1022")))))
+           (refusal-kind #(num/decode-exact (wm-double "0x0.0000000000001p-1000"))))))
+  (testing "BAD CASE (NUM-R-codex-4 R2): non-canonical exponent spellings
+            refuse — leading zeros and negative zero are not toHexString
+            output. Without the canonical exponent grammar 0x1.0p00 decodes
+            to 1 with a non-canonical raw identity."
+    (is (= :double-non-canonical-hex
+           (refusal-kind #(num/decode-exact (wm-double "0x1.0p00")))))
+    (is (= :double-non-canonical-hex
+           (refusal-kind #(num/decode-exact (wm-double "0x1.0p-0")))))
+    (is (= :double-non-canonical-hex
+           (refusal-kind #(num/decode-exact (wm-double "0x1.0p01"))))))
+  (testing "BAD CASE (NUM-R-codex-4 R3): oversized exponents of either sign
+            are typed refusals, never an untyped NumberFormatException.
+            Without the bounded grammar Long/parseLong throws."
+    (is (contains? #{:double-non-canonical-hex :double-not-binary64}
+                   (refusal-kind #(num/decode-exact (wm-double "0x1.0p9223372036854775808")))))
+    (is (contains? #{:double-non-canonical-hex :double-not-binary64}
+                   (refusal-kind #(num/decode-exact (wm-double "0x1.0p-9223372036854775809")))))
     (is (= :double-not-binary64
-           (refusal-kind #(num/decode-exact (wm-double "0x0.0000000000001p-1000")))))))
+           (refusal-kind #(num/decode-exact (wm-double "0x1.0p1024")))))
+    (is (= :double-not-binary64
+           (refusal-kind #(num/decode-exact (wm-double "0x1.0p-1023")))))))
 
 (deftest spec-n-example-decodes-exactly
   (testing "SPEC-N §3's pinned example: 0x1.62e42fefa39efp-1 decodes to
