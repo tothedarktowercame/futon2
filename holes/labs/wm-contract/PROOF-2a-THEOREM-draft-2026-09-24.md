@@ -473,7 +473,7 @@ today does not complete the mission.
 | H-interp | claude-10 (E-cascade-real D11) after the tick wiring; Kimi seats supply interpretation content once the request/validate/publish seam exists | D17 landed (canonical ids), D15 landed (partial wants) | D4 wiring |
 | H-order | Lean: claude-8, landed (69c2432f, 81b5b774); Clojure order over units: claude-10 | constructor's order over units | D4 wiring |
 | H-grain | claude-10 (flight loop) | none | flight loop |
-| H-exits | claude-10 (flight loop: wants = mission criteria; stop-lines first) | D8 landed (abstention carrier) | flight loop |
+| H-exits | claude-10 (flight loop unit 4: checkbox wants + carried wants; unit 4b: prose criteria) | D8 landed (abstention carrier); H-EXITS-D discovery running (Kimi) | flight loop |
 | H-C | claude-10's finding (mission-C at click time, with cues); implementer unassigned | none | H-exits |
 | H-value | unassigned (needs the time/degree value term) | none | Clause T record |
 | H-E | unassigned; one enactment record exists | none | Clause C records |
@@ -481,7 +481,7 @@ today does not complete the mission.
 | H-publish | kimi-2: H-PUBLISH-D discovery (why each refused id refuses) | running | fix packet after discovery |
 | H-witness | (i) claude-1 (M-futon-seams exits); (ii) kimi-4: independent warrant check | (ii) running | (i) |
 
-Critical path to the first flight: D4 tick wiring -> D12 -> minimal flight loop (claude-10, work order sent 2026-09-24 evening) -> a flight on M-aif-policy-conditioned-eig as the first falsifier test. Clicks held until then.
+Critical path to the first flight (claude-10's plan, 2026-09-24 evening): unit 1 done (cascade-problems and interpretation-construction tests pass at b32ac3be, 17/94); unit 2 D4 tick wiring in progress (~2h; acceptance on a Kimi-built replay fixture of CLICK2-D Part 2); unit 3 D12 inside unit 2 (the lane's real G on each constructed candidate, no injected G; if G does not score the empty plan worst that is a G defect to report, not pin around); unit 4 minimal flight loop (half a day+): target fixed, stop-lines first, wants = `- [ ]` lines the code already reads plus carried `:unreached-wants` and `:missing`, D16 inside it; unit 4b prose completion criteria (H-exits proper) from the H-EXITS-D discovery; unit 5 D11. First flight: M-aif-policy-conditioned-eig (declared interpretations); M-futon-seams cannot fly before D11. Kimi in parallel: D4 fixture, H-EXITS-D, D14-HORIZON-D. Clicks held until the loop exists.
 
 ### Appendix to the Holes table: the PROOF-2 register rows (claude-8, 2026-09-24)
 
