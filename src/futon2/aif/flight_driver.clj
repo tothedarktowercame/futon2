@@ -34,6 +34,7 @@
     (if-let [[x & more] (seq xs)]
       (cond
         (= "--run" x) (recur more (assoc out :run? true))
+        (= "--read" x) (recur more (assoc out :read? true))
         (str/starts-with? x "--") (let [[v & rest] more]
                                     (when-not v (throw (ex-info (str x " needs a value") {:arg x})))
                                     (recur rest (assoc out (keyword (subs x 2)) v)))
@@ -136,6 +137,25 @@
      :status (:status flown) :closure-scope (:closure-scope flown) :needs (:needs flown)
      :open-questions (:open-questions flown)}))
 
+(defn read-only!
+  "The read step alone (D11 part 5): ask the seat for the readings the plan
+  lists, publish the valid ones, and return them with the plan as it stands
+  afterwards. No interpretation request, no click."
+  [{:keys [seat store sources] :as opts} planned]
+  (let [store (or store wi/default-store)
+        f (flight-for (assoc opts :id (:flight-id planned)))
+        answer (fr/agency-answer-fn {:seat seat :caller "wm-flight" :opts (runner/config {})})
+        notify! (fn [owner tgt prompt] (runner/dispatch! (runner/config {}) owner "wm-flight" tgt prompt))
+        read ((fr/read-fn {:store store :answer-fn answer :notify! notify! :caller "joe"}) f sources)
+        published (wi/read-published store (:target opts))]
+    {:readings (:asked read)
+     :needs (:needs read)
+     :published-locators (into {} (for [[t {:keys [locator receipt]}] (:locators published)]
+                                    [t {:locator locator :cue (:cue receipt) :reading (:reading receipt)
+                                        :observed-at-validation (:observed-at-validation receipt)
+                                        :answered-by (:answered-by receipt)}]))
+     :plan-after (plan (assoc opts :id (:flight-id planned)))}))
+
 (defn main*
   "The driver without process exit: returns {:plan … :ran …}. :ran is nil
   unless ARGS carry --run."
@@ -146,12 +166,16 @@
         opts (assoc opts :sources (load-sources))
         planned (plan opts)]
     {:plan planned
+     :read (when (and (:read? opts) (not (:run? opts))) (read-only! opts planned))
      :ran (when (:run? opts) (run-flight! opts (assoc planned :run? true)))}))
 
 (defn -main [& args]
-  (let [{:keys [plan ran]} (main* args)]
+  (let [{:keys [plan ran read]} (main* args)]
     (pp/pprint plan)
-    (if ran
-      (pp/pprint ran)
-      (println "\nPlan only. Nothing sent, nothing written. Add --run to fly this flight once."))
+    (cond
+      ran (pp/pprint ran)
+      read (do (println "\n;; --read: the read step only (no interpretation request, no click)")
+               (pp/pprint read))
+      :else
+      (println "\nPlan only. Nothing sent, nothing written. Add --read to run the read step only, --run to fly this flight once."))
     (shutdown-agents)))

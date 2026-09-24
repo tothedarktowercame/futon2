@@ -103,3 +103,15 @@
           s (cf {:flight {:flight/id "f" :target "M" :click 1 :wants []}})]
       (is (= 1 @posts))
       (is (= :click-not-started (get-in s [:abstention :kind]))))))
+
+(deftest read-runs-the-read-step-only
+  ;; --read asks for readings and publishes them; it never flies
+  (let [reads (atom 0)]
+    (with-redefs [fd/run-flight! (fn [& _] (throw (ex-info "flew under --read" {})))
+                  fd/read-only! (fn [_ planned] (swap! reads inc) {:read-for (:flight-id planned)})]
+      (let [r (fd/main* ["M-futon-seams" "--seat" "kimi-6" "--repo" "futon3c"
+                         "--path" "holes/missions/M-futon-seams.md" "--store" (store) "--read"]
+                        {:load-sources (constantly {:beta-by-context {:WM {:beta 1}}})})]
+        (is (= 1 @reads))
+        (is (nil? (:ran r)))
+        (is (string? (get-in r [:read :read-for])))))))
