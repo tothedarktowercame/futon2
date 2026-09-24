@@ -17,3 +17,4 @@
   codex-1 had committed OBS-D revision 2 (508a410e) and was amending the pair
   builder (job invoke-1790226889574). The runner diff mixes both lanes' hunks.
   Shared tree restored to HEAD (claude-8).
+- `B-C-codex-2/`: codex-2's untracked test and fixtures for the same B-C job.
