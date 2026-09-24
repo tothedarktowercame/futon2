@@ -25,6 +25,7 @@
             [futon2.aif.close-loop :as close-loop]
             [futon2.aif.close-retention :as close-retention]
             [futon2.aif.token-outcome :as token-outcome]
+            [futon2.aif.token-outcome-pair :as token-outcome-pair]
             [futon2.aif.surprise :as surprise]
             [futon2.aif.route-attestation :as route-attestation]
             [futon2.aif.increment-attestation :as increment-attestation]
@@ -3141,6 +3142,17 @@
         receipt (assoc (token-outcome/compare-outcomes prediction measurements artifact-sha)
                        :measurement-source source
                        :measurement-verification (:verification d-result))
+        ;; OBS-P (strategy row 18): the occurrence-bound measurement pairs
+        ;; travel beside the comparison. No independent truth channel
+        ;; exists at this seam today, so every pair's truth leg is the
+        ;; typed absence :no-independent-truth-channel (OBS-D §4) and no
+        ;; pair is estimable -- an honest emission, not a substituted value.
+        receipt (assoc receipt :token-outcome-pairs
+                       (token-outcome-pair/pairs-from-comparison
+                        {:comparison receipt
+                         :occurrence (or (:occurrence context)
+                                         (get-in source-record [:dispatch :occurrence]))
+                         :reviewed-revision artifact-sha}))
         learning (attempt-learning/receipt
                   {:comparison receipt :source-record source-record
                    :occurrence (or (:occurrence context) (get-in source-record [:dispatch :occurrence]))
@@ -4232,6 +4244,37 @@
                              {:status :refused
                               :reason (:learning-ledger/refusal (ex-data e))
                               :message (.getMessage e)})))))
+                       ;; B-C (PROOF-2 strategy row 34): the concentration
+                       ;; carrier rides the update result (:carrier, built
+                       ;; by learning-ledger/b-update from the rows the
+                       ;; update consumed). Persist it beside the close's
+                       ;; other retained evidence -- the close event itself
+                       ;; was already written above, so retained/ is the
+                       ;; honest emission point (same placement rule as
+                       ;; token-outcome.edn). Typed absence, never a
+                       ;; substituted number: a close without an accepted
+                       ;; eligible outcome records why.
+                       b-update-retained
+                       (when closed-event
+                         (let [f (io/file (or (:data-root execution-cohort)
+                                              cohort/default-data-root)
+                                          (name (:cohort/id closed-event))
+                                          attempt-id "retained" "b-update.edn")
+                               content (or (:carrier b-update-result)
+                                           {:status :missing
+                                            :reason (cond
+                                                      (nil? b-update-result)
+                                                      :close-not-accepted
+                                                      (= :not-attributed (:status b-update-result))
+                                                      :not-attributed
+                                                      (= :refused (:status b-update-result))
+                                                      :update-refused
+                                                      :else :no-eligible-outcome)
+                                            :detail (select-keys b-update-result
+                                                                 [:status :reason :attribution])})]
+                           (io/make-parents f)
+                           (spit f (pr-str content))
+                           {:path (.getPath f)}))
                        discharge-result
                        (repair-discharge/finalize-run!
                         {:root (or (:repair-root opts) repair/default-root)
@@ -4239,6 +4282,7 @@
                          :action selected-action
                          :interpretation (:interpretation-receipts selected-action)
                          :b-update b-update-result
+                         :b-update-retained b-update-retained
                          :closed-event closed-event
                          :close-path (when closed-event
                                        (str (io/file (or (:data-root execution-cohort) cohort/default-data-root)
