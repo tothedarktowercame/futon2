@@ -1,0 +1,701 @@
+{:schema :e-cascade-real/probe-inputs-v1,
+ :coverage
+ {:holes-retained 585,
+  :projected-by-kind {:unchecked-task 116},
+  :retained-by-kind
+  {:work-marker 141,
+   :pending-lifecycle 226,
+   :unchecked-task 116,
+   :open-section-item 102},
+  :missions-projected 19,
+  :holes-projected 116,
+  :not-projected-by-kind
+  {:work-marker 141, :pending-lifecycle 226, :open-section-item 102},
+  :holes-not-projected 469,
+  :live-missions 218,
+  :reason-not-projected
+  "no check can witness closure: the item carries no checkbox to flip"},
+ :pool-size 10,
+ :targets
+ [{:target "M-action-cost-modelling",
+   :want
+   [:hole/h730434653957
+    :hole/h6e84a77745cb
+    :hole/h68dbc60a7584
+    :hole/hb7f5a89877eb
+    :hole/ha664b5558c56
+    :hole/hbe5e9b666bbc],
+   :universe
+   #:hole{:h730434653957 false,
+          :h6e84a77745cb false,
+          :h68dbc60a7584 false,
+          :hb7f5a89877eb false,
+          :ha664b5558c56 false,
+          :hbe5e9b666bbc false},
+   :locators
+   #:hole{:h730434653957
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-action-cost-modelling.md",
+           :decl
+           "- [x] **Cost-signal lands**: Each candidate action in the WM's ranked-actions carries a `:scale` (or equivalently expressive) annotation, sourceable from at least one of shape (a)/(b)/(c)"},
+          :h6e84a77745cb
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-action-cost-modelling.md",
+           :decl
+           "- [x] **Work-breakdown gate fires**: When the WM's top recommendation is `:multi-session` or larger, the live next-move-live tile renders a \"needs work breakdown\" CTA instead of \"→ address-sorry X\""},
+          :h68dbc60a7584
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-action-cost-modelling.md",
+           :decl
+           "- [x] **Mission-or-Campaign decision is operator-visible**: The CTA either points to \"this is a Mission\" (existing futonic structure) or \"this requires a Campaign\" (new structure if we confirm it's needed; or the absence is operator-explicit)"},
+          :hb7f5a89877eb
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-action-cost-modelling.md",
+           :decl
+           "- [x] **The live test case discriminates**: After the layer ships, the 5 currently-tied sorries no longer present as equivalent. At minimum, `:minute`/`:hour` ranks above `:campaign` regardless of EFE score"},
+          :ha664b5558c56
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-action-cost-modelling.md",
+           :decl
+           "- [x] **M-live-geometric-stack decision recorded**: Either substrate-2 exposes per-action T-delta queries (shape (c) lands), OR a finding is filed on M-live-geometric-stack identifying the action-projection-query gap, with the 5-tied-sorries 2-orders-of-magnitude-cost-spread as the test case"},
+          :hbe5e9b666bbc
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-action-cost-modelling.md",
+           :decl
+           "- [x] **Campaign structure resolved**: Either ships as a new futon-stack structural element with documentation in `mission-lifecycle.md` (or its sibling), OR is explicitly rejected as \"Missions suffice\" with rationale"}},
+   :holes
+   [{:id "M-action-cost-modelling#730434653957",
+     :kind :unchecked-task,
+     :line 110,
+     :text
+     "- [ ] **Cost-signal lands**: Each candidate action in the WM's ranked-actions carries a `:scale` (or equivalently expressive) annotation, sourceable from at least one of shape (a)/(b)/(c)"}
+    {:id "M-action-cost-modelling#6e84a77745cb",
+     :kind :unchecked-task,
+     :line 111,
+     :text
+     "- [ ] **Work-breakdown gate fires**: When the WM's top recommendation is `:multi-session` or larger, the live next-move-live tile renders a \"needs work breakdown\" CTA instead of \"→ address-sorry X\""}
+    {:id "M-action-cost-modelling#68dbc60a7584",
+     :kind :unchecked-task,
+     :line 112,
+     :text
+     "- [ ] **Mission-or-Campaign decision is operator-visible**: The CTA either points to \"this is a Mission\" (existing futonic structure) or \"this requires a Campaign\" (new structure if we confirm it's needed; or the absence is operator-explicit)"}
+    {:id "M-action-cost-modelling#b7f5a89877eb",
+     :kind :unchecked-task,
+     :line 113,
+     :text
+     "- [ ] **The live test case discriminates**: After the layer ships, the 5 currently-tied sorries no longer present as equivalent. At minimum, `:minute`/`:hour` ranks above `:campaign` regardless of EFE score"}
+    {:id "M-action-cost-modelling#a664b5558c56",
+     :kind :unchecked-task,
+     :line 114,
+     :text
+     "- [ ] **M-live-geometric-stack decision recorded**: Either substrate-2 exposes per-action T-delta queries (shape (c) lands), OR a finding is filed on M-live-geometric-stack identifying the action-projection-query gap, with the 5-tied-sorries 2-orders-of-magnitude-cost-spread as the test case"}
+    {:id "M-action-cost-modelling#be5e9b666bbc",
+     :kind :unchecked-task,
+     :line 115,
+     :text
+     "- [ ] **Campaign structure resolved**: Either ships as a new futon-stack structural element with documentation in `mission-lifecycle.md` (or its sibling), OR is explicitly rejected as \"Missions suffice\" with rationale"}]}
+  {:target "M-canon-fingerprint-store",
+   :want
+   [:hole/hae4a98689e37
+    :hole/hf6110df5c7b0
+    :hole/h61f4c17570aa
+    :hole/h72b677883cde
+    :hole/hb0224092661b
+    :hole/h3b2303097926],
+   :universe
+   #:hole{:hae4a98689e37 false,
+          :hf6110df5c7b0 false,
+          :h61f4c17570aa false,
+          :h72b677883cde false,
+          :hb0224092661b false,
+          :h3b2303097926 false},
+   :locators
+   #:hole{:hae4a98689e37
+          {:class :C4,
+           :repo "futon6",
+           :sha "HEAD",
+           :path "holes/missions/M-canon-fingerprint-store.md",
+           :decl
+           "- [x] **F1** — SQLite `canon_store.db`: schema with **scope bindings** (`role`, `scope`,"},
+          :hf6110df5c7b0
+          {:class :C4,
+           :repo "futon6",
+           :sha "HEAD",
+           :path "holes/missions/M-canon-fingerprint-store.md",
+           :decl
+           "- [x] **F2** — reducer + **in-run** query over SQLite; incremental state-merge; **most-cited-first"},
+          :h61f4c17570aa
+          {:class :C4,
+           :repo "futon6",
+           :sha "HEAD",
+           :path "holes/missions/M-canon-fingerprint-store.md",
+           :decl
+           "- [x] **F3** (alongside, per §8b) — per-binding canon posterior consuming the store as prior (§3.2 of"},
+          :h72b677883cde
+          {:class :C4,
+           :repo "futon6",
+           :sha "HEAD",
+           :path "holes/missions/M-canon-fingerprint-store.md",
+           :decl
+           "- [x] **F4** — literature-lifted strategy-merge proposer (§5); validate on held-out gold, no-regression."},
+          :hb0224092661b
+          {:class :C4,
+           :repo "futon6",
+           :sha "HEAD",
+           :path "holes/missions/M-canon-fingerprint-store.md",
+           :decl
+           "- [x] **F5** — Stage 5 closes the loop: read store on startup → prior → MAP-append → incremental REDUCE."},
+          :h3b2303097926
+          {:class :C4,
+           :repo "futon6",
+           :sha "HEAD",
+           :path "holes/missions/M-canon-fingerprint-store.md",
+           :decl
+           "- [x] **(follow-on, separate deliverable)** proof fingerprints = OEIS-of-steps (§2.1) — defer until"}},
+   :holes
+   [{:id "M-canon-fingerprint-store#ae4a98689e37",
+     :kind :unchecked-task,
+     :line 291,
+     :text
+     "- [ ] **F1** — SQLite `canon_store.db`: schema with **scope bindings** (`role`, `scope`,"}
+    {:id "M-canon-fingerprint-store#f6110df5c7b0",
+     :kind :unchecked-task,
+     :line 294,
+     :text
+     "- [ ] **F2** — reducer + **in-run** query over SQLite; incremental state-merge; **most-cited-first"}
+    {:id "M-canon-fingerprint-store#61f4c17570aa",
+     :kind :unchecked-task,
+     :line 296,
+     :text
+     "- [ ] **F3** (alongside, per §8b) — per-binding canon posterior consuming the store as prior (§3.2 of"}
+    {:id "M-canon-fingerprint-store#72b677883cde",
+     :kind :unchecked-task,
+     :line 298,
+     :text
+     "- [ ] **F4** — literature-lifted strategy-merge proposer (§5); validate on held-out gold, no-regression."}
+    {:id "M-canon-fingerprint-store#b0224092661b",
+     :kind :unchecked-task,
+     :line 299,
+     :text
+     "- [ ] **F5** — Stage 5 closes the loop: read store on startup → prior → MAP-append → incremental REDUCE."}
+    {:id "M-canon-fingerprint-store#3b2303097926",
+     :kind :unchecked-task,
+     :line 300,
+     :text
+     "- [ ] **(follow-on, separate deliverable)** proof fingerprints = OEIS-of-steps (§2.1) — defer until"}]}
+  {:target "M-chipwitz-corps",
+   :want
+   [:hole/hb9354e61ab3e
+    :hole/h09128afee45a
+    :hole/h5963cec1a3df
+    :hole/h2c51566a32b4
+    :hole/h4bd2d74d8763
+    :hole/h056f5583d59e],
+   :universe
+   #:hole{:hb9354e61ab3e false,
+          :h09128afee45a false,
+          :h5963cec1a3df false,
+          :h2c51566a32b4 false,
+          :h4bd2d74d8763 false,
+          :h056f5583d59e false},
+   :locators
+   #:hole{:hb9354e61ab3e
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-chipwitz-corps.md",
+           :decl
+           "- [x] DERIVE: the warrant threshold — what cascade C-score / match quality"},
+          :h09128afee45a
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-chipwitz-corps.md",
+           :decl
+           "- [x] Typed PXR channel (sibling of `futon3c.aif.discipline-events`): PSR +"},
+          :h5963cec1a3df
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-chipwitz-corps.md",
+           :decl
+           "- [x] Wire the choice-point check into the pilot flow (warrant-finder"},
+          :h2c51566a32b4
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-chipwitz-corps.md",
+           :decl
+           "- [x] `:pxr` evidence kind in `futon3c.aif.calibration` (FutonZero"},
+          :h4bd2d74d8763
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-chipwitz-corps.md",
+           :decl
+           "- [x] No-warrant asks → sorry-mining hook (library gap → registry candidate)."},
+          :h056f5583d59e
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-chipwitz-corps.md",
+           :decl
+           "- [x] Relation to `library/corps/` patterns: name which corps disciplines"}},
+   :holes
+   [{:id "M-chipwitz-corps#b9354e61ab3e",
+     :kind :unchecked-task,
+     :line 85,
+     :text
+     "- [ ] DERIVE: the warrant threshold — what cascade C-score / match quality"}
+    {:id "M-chipwitz-corps#09128afee45a",
+     :kind :unchecked-task,
+     :line 88,
+     :text
+     "- [ ] Typed PXR channel (sibling of `futon3c.aif.discipline-events`): PSR +"}
+    {:id "M-chipwitz-corps#5963cec1a3df",
+     :kind :unchecked-task,
+     :line 90,
+     :text
+     "- [ ] Wire the choice-point check into the pilot flow (warrant-finder"}
+    {:id "M-chipwitz-corps#2c51566a32b4",
+     :kind :unchecked-task,
+     :line 92,
+     :text
+     "- [ ] `:pxr` evidence kind in `futon3c.aif.calibration` (FutonZero"}
+    {:id "M-chipwitz-corps#4bd2d74d8763",
+     :kind :unchecked-task,
+     :line 94,
+     :text
+     "- [ ] No-warrant asks → sorry-mining hook (library gap → registry candidate)."}
+    {:id "M-chipwitz-corps#056f5583d59e",
+     :kind :unchecked-task,
+     :line 95,
+     :text
+     "- [ ] Relation to `library/corps/` patterns: name which corps disciplines"}]}
+  {:target "M-daily-scan",
+   :want [:hole/h55f8fe32c265 :hole/hb1ba19f964f5],
+   :universe #:hole{:h55f8fe32c265 false, :hb1ba19f964f5 false},
+   :locators
+   #:hole{:h55f8fe32c265
+          {:class :C4,
+           :repo "futon7",
+           :sha "HEAD",
+           :path "holes/missions/M-daily-scan.md",
+           :decl
+           "- [x] **Partial audit** of other static probes for named-vs-queried misalignment:"},
+          :hb1ba19f964f5
+          {:class :C4,
+           :repo "futon7",
+           :sha "HEAD",
+           :path "holes/missions/M-daily-scan.md",
+           :decl
+           "- [x] **Optional (standing-task)**: extend brief render to include README excerpt / paper-link-presence per the surface-render-shallowness promotion."}},
+   :holes
+   [{:id "M-daily-scan#55f8fe32c265",
+     :kind :unchecked-task,
+     :line 362,
+     :text
+     "- [ ] **Partial audit** of other static probes for named-vs-queried misalignment:"}
+    {:id "M-daily-scan#b1ba19f964f5",
+     :kind :unchecked-task,
+     :line 369,
+     :text
+     "- [ ] **Optional (standing-task)**: extend brief render to include README excerpt / paper-link-presence per the surface-render-shallowness promotion."}]}
+  {:target "M-distributed-frontiermath",
+   :want
+   [:hole/h16025dd5deeb
+    :hole/hd4bfb746db9b
+    :hole/h8606857c4374
+    :hole/h022fc0e7fab5],
+   :universe
+   #:hole{:h16025dd5deeb false,
+          :hd4bfb746db9b false,
+          :h8606857c4374 false,
+          :h022fc0e7fab5 false},
+   :locators
+   #:hole{:h16025dd5deeb
+          {:class :C4,
+           :repo "futon6",
+           :sha "HEAD",
+           :path "holes/missions/M-distributed-frontiermath.md",
+           :decl
+           "- [x] claude-2 Mentor session started on workspace2 (REPL-driven, not auto-invoke)"},
+          :hd4bfb746db9b
+          {:class :C4,
+           :repo "futon6",
+           :sha "HEAD",
+           :path "holes/missions/M-distributed-frontiermath.md",
+           :decl
+           "- [x] zcodex reachable from `#math` (currently configured same as codex; may need Rob's bridge)"},
+          :h8606857c4374
+          {:class :C4,
+           :repo "futon6",
+           :sha "HEAD",
+           :path "holes/missions/M-distributed-frontiermath.md",
+           :decl "- [x] Rob has IRC access to `#math`"},
+          :h022fc0e7fab5
+          {:class :C4,
+           :repo "futon6",
+           :sha "HEAD",
+           :path "holes/missions/M-distributed-frontiermath.md",
+           :decl
+           "- [x] Tickle bell-driven orchestration wired for FM-001 phase transitions"}},
+   :holes
+   [{:id "M-distributed-frontiermath#16025dd5deeb",
+     :kind :unchecked-task,
+     :line 209,
+     :text
+     "- [ ] claude-2 Mentor session started on workspace2 (REPL-driven, not auto-invoke)"}
+    {:id "M-distributed-frontiermath#d4bfb746db9b",
+     :kind :unchecked-task,
+     :line 210,
+     :text
+     "- [ ] zcodex reachable from `#math` (currently configured same as codex; may need Rob's bridge)"}
+    {:id "M-distributed-frontiermath#8606857c4374",
+     :kind :unchecked-task,
+     :line 211,
+     :text "- [ ] Rob has IRC access to `#math`"}
+    {:id "M-distributed-frontiermath#022fc0e7fab5",
+     :kind :unchecked-task,
+     :line 212,
+     :text
+     "- [ ] Tickle bell-driven orchestration wired for FM-001 phase transitions"}]}
+  {:target "M-federated-agency-hardening",
+   :want
+   [:hole/hd6dd12860265
+    :hole/hb8a6fa5239dc
+    :hole/h260a1b85a356
+    :hole/hf4b4e2392af5],
+   :universe
+   #:hole{:hd6dd12860265 false,
+          :hb8a6fa5239dc false,
+          :h260a1b85a356 false,
+          :hf4b4e2392af5 false},
+   :locators
+   #:hole{:hd6dd12860265
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-federated-agency-hardening.md",
+           :decl
+           "- [x] Laptop federates with the tunnel OFF (no 17070 listener anywhere)."},
+          :hb8a6fa5239dc
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-federated-agency-hardening.md",
+           :decl
+           "- [x] Rebooting either box requires zero human action: uplink reconnects within"},
+          :h260a1b85a356
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-federated-agency-hardening.md",
+           :decl
+           "- [x] `oxf=http://127.0.0.1:17070` peer entry removable from dev-linode-env once"},
+          :hf4b4e2392af5
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-federated-agency-hardening.md",
+           :decl
+           "- [x] Invariants hold: uplink routes to agents that already exist (I-2); no"}},
+   :holes
+   [{:id "M-federated-agency-hardening#d6dd12860265",
+     :kind :unchecked-task,
+     :line 858,
+     :text
+     "- [ ] Laptop federates with the tunnel OFF (no 17070 listener anywhere)."}
+    {:id "M-federated-agency-hardening#b8a6fa5239dc",
+     :kind :unchecked-task,
+     :line 859,
+     :text
+     "- [ ] Rebooting either box requires zero human action: uplink reconnects within"}
+    {:id "M-federated-agency-hardening#260a1b85a356",
+     :kind :unchecked-task,
+     :line 861,
+     :text
+     "- [ ] `oxf=http://127.0.0.1:17070` peer entry removable from dev-linode-env once"}
+    {:id "M-federated-agency-hardening#f4b4e2392af5",
+     :kind :unchecked-task,
+     :line 863,
+     :text
+     "- [ ] Invariants hold: uplink routes to agents that already exist (I-2); no"}]}
+  {:target "M-futon-forward-model",
+   :want
+   [:hole/h6adae34e06ad
+    :hole/he92ac929f4c4
+    :hole/h8b2289908aa2
+    :hole/h30576d62bffb
+    :hole/ha3f46a5c0073
+    :hole/h3547e9033d0d],
+   :universe
+   #:hole{:h6adae34e06ad false,
+          :he92ac929f4c4 false,
+          :h8b2289908aa2 false,
+          :h30576d62bffb false,
+          :ha3f46a5c0073 false,
+          :h3547e9033d0d false},
+   :locators
+   #:hole{:h6adae34e06ad
+          {:class :C4,
+           :repo "futon7",
+           :sha "HEAD",
+           :path "holes/M-futon-forward-model.md",
+           :decl "- [x] `clj-kondo` clean on the new `.clj` files."},
+          :he92ac929f4c4
+          {:class :C4,
+           :repo "futon7",
+           :sha "HEAD",
+           :path "holes/M-futon-forward-model.md",
+           :decl
+           "- [x] `futon4/dev/check-parens.el` clean on the new `.clj`/`.bb`."},
+          :h8b2289908aa2
+          {:class :C4,
+           :repo "futon7",
+           :sha "HEAD",
+           :path "holes/M-futon-forward-model.md",
+           :decl
+           "- [x] `clojure -X:test` (futon3c) passes incl. the new test ns."},
+          :h30576d62bffb
+          {:class :C4,
+           :repo "futon7",
+           :sha "HEAD",
+           :path "holes/M-futon-forward-model.md",
+           :decl
+           "- [x] `bb futon7/holes/M-futon-forward-model.manifold-reader.bb` runs clean + prints the observation summary."},
+          :ha3f46a5c0073
+          {:class :C4,
+           :repo "futon7",
+           :sha "HEAD",
+           :path "holes/M-futon-forward-model.md",
+           :decl
+           "- [x] NO real-world side-effects, NO XTDB writes, NO sending — read-only + pure logic only."},
+          :h3547e9033d0d
+          {:class :C4,
+           :repo "futon7",
+           :sha "HEAD",
+           :path "holes/M-futon-forward-model.md",
+           :decl
+           "- [x] **bell claude-1 back with a summary + commit shas.**"}},
+   :holes
+   [{:id "M-futon-forward-model#6adae34e06ad",
+     :kind :unchecked-task,
+     :line 445,
+     :text "- [ ] `clj-kondo` clean on the new `.clj` files."}
+    {:id "M-futon-forward-model#e92ac929f4c4",
+     :kind :unchecked-task,
+     :line 446,
+     :text
+     "- [ ] `futon4/dev/check-parens.el` clean on the new `.clj`/`.bb`."}
+    {:id "M-futon-forward-model#8b2289908aa2",
+     :kind :unchecked-task,
+     :line 447,
+     :text
+     "- [ ] `clojure -X:test` (futon3c) passes incl. the new test ns."}
+    {:id "M-futon-forward-model#30576d62bffb",
+     :kind :unchecked-task,
+     :line 448,
+     :text
+     "- [ ] `bb futon7/holes/M-futon-forward-model.manifold-reader.bb` runs clean + prints the observation summary."}
+    {:id "M-futon-forward-model#a3f46a5c0073",
+     :kind :unchecked-task,
+     :line 449,
+     :text
+     "- [ ] NO real-world side-effects, NO XTDB writes, NO sending — read-only + pure logic only."}
+    {:id "M-futon-forward-model#3547e9033d0d",
+     :kind :unchecked-task,
+     :line 450,
+     :text
+     "- [ ] **bell claude-1 back with a summary + commit shas.**"}]}
+  {:target "M-futonzero-generative",
+   :want [:hole/h46ed944f95da :hole/hb5b297019e1e],
+   :universe #:hole{:h46ed944f95da false, :hb5b297019e1e false},
+   :locators
+   #:hole{:h46ed944f95da
+          {:class :C4,
+           :repo "futon0",
+           :sha "HEAD",
+           :path "holes/missions/M-futonzero-generative.md",
+           :decl
+           "- [x] G-SIM clearance — field-simulator adequacy; first MEASURED calibration pairs now accruing via the WM pilot loop"},
+          :hb5b297019e1e
+          {:class :C4,
+           :repo "futon0",
+           :sha "HEAD",
+           :path "holes/missions/M-futonzero-generative.md",
+           :decl
+           "- [x] G-REWARD clearance — anti-laundered reward; Pudding Prover G1 arrow-witness binding"}},
+   :holes
+   [{:id "M-futonzero-generative#46ed944f95da",
+     :kind :unchecked-task,
+     :line 202,
+     :text
+     "- [ ] G-SIM clearance — field-simulator adequacy; first MEASURED calibration pairs now accruing via the WM pilot loop"}
+    {:id "M-futonzero-generative#b5b297019e1e",
+     :kind :unchecked-task,
+     :line 203,
+     :text
+     "- [ ] G-REWARD clearance — anti-laundered reward; Pudding Prover G1 arrow-witness binding"}]}
+  {:target "M-kangaroo",
+   :want
+   [:hole/h625bf9588b21
+    :hole/hf27981fd598b
+    :hole/hb674018208b0
+    :hole/he91ecffec2e7
+    :hole/h6e670ac8054e
+    :hole/h40dbfc082f77],
+   :universe
+   #:hole{:h625bf9588b21 false,
+          :hf27981fd598b false,
+          :hb674018208b0 false,
+          :he91ecffec2e7 false,
+          :h6e670ac8054e false,
+          :h40dbfc082f77 false},
+   :locators
+   #:hole{:h625bf9588b21
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-kangaroo.md",
+           :decl
+           "- [x] W1 keystone settled with evidence: a warm process answers ≥2 consecutive"},
+          :hf27981fd598b
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-kangaroo.md",
+           :decl
+           "- [x] A warm-routed turn is measurably faster than cold on a large session"},
+          :hb674018208b0
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-kangaroo.md",
+           :decl
+           "- [x] Warm-process crash falls back to cold resume without stranding the turn."},
+          :he91ecffec2e7
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-kangaroo.md",
+           :decl
+           "- [x] Flag OFF = byte-for-byte cold behavior; ON = warm routing."},
+          :h6e670ac8054e
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-kangaroo.md",
+           :decl
+           "- [x] Exactly one warm process per agent identity; idle eviction works + is"},
+          :h40dbfc082f77
+          {:class :C4,
+           :repo "futon3c",
+           :sha "HEAD",
+           :path "holes/missions/M-kangaroo.md",
+           :decl
+           "- [x] (stretch) REPL + agency share one warm process per agent."}},
+   :holes
+   [{:id "M-kangaroo#625bf9588b21",
+     :kind :unchecked-task,
+     :line 262,
+     :text
+     "- [ ] W1 keystone settled with evidence: a warm process answers ≥2 consecutive"}
+    {:id "M-kangaroo#f27981fd598b",
+     :kind :unchecked-task,
+     :line 264,
+     :text
+     "- [ ] A warm-routed turn is measurably faster than cold on a large session"}
+    {:id "M-kangaroo#b674018208b0",
+     :kind :unchecked-task,
+     :line 266,
+     :text
+     "- [ ] Warm-process crash falls back to cold resume without stranding the turn."}
+    {:id "M-kangaroo#e91ecffec2e7",
+     :kind :unchecked-task,
+     :line 267,
+     :text
+     "- [ ] Flag OFF = byte-for-byte cold behavior; ON = warm routing."}
+    {:id "M-kangaroo#6e670ac8054e",
+     :kind :unchecked-task,
+     :line 268,
+     :text
+     "- [ ] Exactly one warm process per agent identity; idle eviction works + is"}
+    {:id "M-kangaroo#40dbfc082f77",
+     :kind :unchecked-task,
+     :line 270,
+     :text
+     "- [ ] (stretch) REPL + agency share one warm process per agent."}]}
+  {:target "M-wm-aif-policy-grain-compliance",
+   :want
+   [:hole/h26fc1070c3e6
+    :hole/h4d3638710e7b
+    :hole/ha04170c8d22b
+    :hole/hbc48e7c4dbdf],
+   :universe
+   #:hole{:h26fc1070c3e6 false,
+          :h4d3638710e7b false,
+          :ha04170c8d22b false,
+          :hbc48e7c4dbdf false},
+   :locators
+   #:hole{:h26fc1070c3e6
+          {:class :C4,
+           :repo "futon2",
+           :sha "HEAD",
+           :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+           :decl
+           "- [x] **Adapt one non-threshold diversity source for Slice 1b.** A read-only"},
+          :h4d3638710e7b
+          {:class :C4,
+           :repo "futon2",
+           :sha "HEAD",
+           :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+           :decl
+           "- [x] **Make cascade scoring prefix-local and auditable.** Recompute every"},
+          :ha04170c8d22b
+          {:class :C4,
+           :repo "futon2",
+           :sha "HEAD",
+           :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+           :decl
+           "- [x] **Specify and persist the cascade-habit return event.** A distinct"},
+          :hbc48e7c4dbdf
+          {:class :C4,
+           :repo "futon2",
+           :sha "HEAD",
+           :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+           :decl
+           "- [x] **Run a dark end-to-end hierarchy shadow.** Candidate construction,"}},
+   :holes
+   [{:id "M-wm-aif-policy-grain-compliance#26fc1070c3e6",
+     :kind :unchecked-task,
+     :line 199,
+     :text
+     "- [ ] **Adapt one non-threshold diversity source for Slice 1b.** A read-only"}
+    {:id "M-wm-aif-policy-grain-compliance#4d3638710e7b",
+     :kind :unchecked-task,
+     :line 214,
+     :text
+     "- [ ] **Make cascade scoring prefix-local and auditable.** Recompute every"}
+    {:id "M-wm-aif-policy-grain-compliance#a04170c8d22b",
+     :kind :unchecked-task,
+     :line 226,
+     :text
+     "- [ ] **Specify and persist the cascade-habit return event.** A distinct"}
+    {:id "M-wm-aif-policy-grain-compliance#bc48e7c4dbdf",
+     :kind :unchecked-task,
+     :line 236,
+     :text
+     "- [ ] **Run a dark end-to-end hierarchy shadow.** Candidate construction,"}]}]}
