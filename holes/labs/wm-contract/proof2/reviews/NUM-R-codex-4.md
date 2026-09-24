@@ -84,3 +84,9 @@ The decoder consumes already-read Clojure values, not record bytes. Its own comm
 ## 5. Required resubmission
 
 Repair R1–R3 in the author lane, correct the swapped-ratio and Float coverage descriptions, and add tests for the observed defects. Retain the exact log and posterior-residual fixtures. Register the changed namespace once with new content hashes and submit the new diff for independent review; the current warrant remains evidence for the old bytes only. No theorem clause, numeric refinement bridge, or live certificate is certified by this review.
+
+## Record correction: pre-existing author warrant
+
+A subsequent record check found the author's already registered warrant, `test-registry-f296b198658b608d8c00fe29d66ac4ae12fdcee39e0828cec02ef29c00166fa3`, run `741c74cb-d5f4-4c49-8b92-0a233dfc22ad`, dated `2026-09-24T05:11:37.415053546Z`. Retrieved its evidence entry read-only and independently verified the SHA-256 of `:payload-edn` against the id/body digest. It records commit `604ecfd724fc0488ec1425b15433472ca869fbae`, command `["clojure" "-M:test" "-n" "checks.proof2-numbers-test"]`, the same narrow scope and source/test hashes listed above, `:warrant? true`, matched postcheck, stable execution, and 8 tests/32 assertions with zero failures/errors. Its log hash is the same `e490cb0b…636cb5c`; independently verified the corresponding content-addressed log in the registry ledger.
+
+The commit's `PENDING-REGISTRATION` text was not evidence that no later warrant existed. Registration followed the commit; an absent warrant id in that immutable commit message is not a defect. My registered run had already completed before this correction arrived and duplicated valid existing evidence unnecessarily. No additional tests were executed for this correction. Use the author's warrant for the unchanged packet; the review's R1–R3 counterexamples and REJECT verdict are unchanged. The namespace deviation is accepted for the classpath reasons in §4.
