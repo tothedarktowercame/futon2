@@ -1,0 +1,38 @@
+;; CLICK2-D Part 2 replay input for M-wm-08-external-f2
+;; The exact map cascade_problems/constructed-from-interpretations
+;; hands to interpretation-construction/construct once :construction
+;; is wired in. :budget is fixture-declared (no :construction exists
+;; upstream at the pinned sha); :evaluate-g is a function and is
+;; injected by the test, not stored. Observations as observed at the
+;; pinned futon2 sha in sources-manifest.edn.
+{:observation
+ {:external-expectation-validator-exists true,
+  :frozen-occurrence-context-captured true,
+  :independent-expectations-written true,
+  :route-a-rehearsal-reported true},
+ :horizon 4,
+ :fixture/schema :wm/click2-replay-v1,
+ :interpretation-receipts
+ #:cascade-construction{:run-it-on-a-real-case
+                        {:kind :hand-admitted,
+                         :by "claude-4",
+                         :date "2026-09-17",
+                         :source
+                         {:path
+                          "futon3/library/cascade-construction/run-it-on-a-real-case.flexiarg",
+                          :sha256
+                          "3cb90507689605127f21440765fb47045b0c2e405238685642fc4e2dd3250582"},
+                         :reading
+                         "A validator and an independent expectation set exist but have never met a real retrieval; running them on the real case is what turns two artifacts into evidence, and its output is the rehearsal report."}},
+ :interpretations
+ #:cascade-construction{:run-it-on-a-real-case
+                        {:guard
+                         {:needs
+                          #{:external-expectation-validator-exists
+                            :independent-expectations-written},
+                          :forbids #{}},
+                         :produces #{:route-a-rehearsal-reported}}},
+ :budget {:max-moves 8, :max-expansions 10000},
+ :want [:route-a-rehearsal-reported],
+ :move-cost 1,
+ :target "M-wm-08-external-f2"}

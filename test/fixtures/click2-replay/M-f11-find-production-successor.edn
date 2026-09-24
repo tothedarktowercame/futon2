@@ -1,0 +1,49 @@
+;; CLICK2-D Part 2 replay input for M-f11-find-production-successor
+;; The exact map cascade_problems/constructed-from-interpretations
+;; hands to interpretation-construction/construct once :construction
+;; is wired in. :budget is fixture-declared (no :construction exists
+;; upstream at the pinned sha); :evaluate-g is a function and is
+;; injected by the test, not stored. Observations as observed at the
+;; pinned futon2 sha in sources-manifest.edn.
+{:observation
+ {:hole/h2045faa0e7cc false,
+  :hole/h9ab212b3281d true,
+  :admission/task-stated true},
+ :horizon 4,
+ :fixture/schema :wm/click2-replay-v1,
+ :interpretation-receipts
+ #:apparatus{:done-is-observed-running
+             {:kind :hand-admitted,
+              :by "codex-1",
+              :date "2026-09-21",
+              :source
+              {:path
+               "futon3/library/apparatus/done-is-observed-running.flexiarg",
+               :revision "21a9199ff95e850cdad64e35c81de04eade48256",
+               :sha256
+               "7f0c05735928fef7fdd95fcfcb369ae4bc39d2191d0a76104e2b4e26ec7621f9"},
+              :reading
+              "For F11's acceptance task, require the finder to act at its applied interface on the committed library and retain the ordinary gate and runtime evidence before recording completion; a committed reconciliation module or a stopped run is not that observation.",
+              :scope-limit
+              "This is the activation-and-live-evidence reading of the pattern, not a claim that its standing-comparator mechanism or F1-F4 laws have been implemented. It does not produce the separate repair-024 successor disposition.",
+              :target-source
+              {:repo "futon2",
+               :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+               :sha256
+               "811395799523bf1ccc52d50d38113f61dc6f5d1e2dfd4a2105d6012c3da3c111",
+               :path
+               "holes/missions/M-f11-find-production-successor.md",
+               :hole-id "M-f11-find-production-successor#9ab212b3281d",
+               :line 101},
+              :observation-limit
+              "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."}},
+ :interpretations
+ #:apparatus{:done-is-observed-running
+             {:guard
+              {:needs #{:admission/task-stated},
+               :forbids #{:hole/h9ab212b3281d}},
+              :produces #{:hole/h9ab212b3281d}}},
+ :budget {:max-moves 8, :max-expansions 10000},
+ :want [:hole/h9ab212b3281d :hole/h2045faa0e7cc],
+ :move-cost 1,
+ :target "M-f11-find-production-successor"}

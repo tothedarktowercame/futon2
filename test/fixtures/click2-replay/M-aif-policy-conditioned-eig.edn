@@ -1,0 +1,103 @@
+;; CLICK2-D Part 2 replay input for M-aif-policy-conditioned-eig
+;; The exact map cascade_problems/constructed-from-interpretations
+;; hands to interpretation-construction/construct once :construction
+;; is wired in. :budget is fixture-declared (no :construction exists
+;; upstream at the pinned sha); :evaluate-g is a function and is
+;; injected by the test, not stored. Observations as observed at the
+;; pinned futon2 sha in sources-manifest.edn.
+{:observation
+ {:hole/h42fceb4ad48b false,
+  :hole/h6378c65a4012 true,
+  :hole/h0e270aa090bc true,
+  :admission/task-stated true},
+ :horizon 4,
+ :fixture/schema :wm/click2-replay-v1,
+ :interpretation-receipts
+ {:apparatus/one-authority-per-question
+  {:kind :hand-admitted,
+   :by "codex-1",
+   :date "2026-09-21",
+   :source
+   {:path
+    "futon3/library/apparatus/one-authority-per-question.flexiarg",
+    :revision "21a9199ff95e850cdad64e35c81de04eade48256",
+    :sha256
+    "b367ff7d0f8d122ea943f4507fe0c44c58ca08b61076935818ab84299c04a957"},
+   :reading
+   "For the shared-updater task, make one A4a/BMR updater the authority for both hypothetical and observed posterior changes, route both callers through it, and demonstrate equal posterior state and provenance on a pinned observation plus refusal of an unknown outcome before recording this task complete.",
+   :scope-limit
+   "This reading covers the shared-updater task only; it neither supplies the generative experiment model nor completes the typed-Q or calibration tasks.",
+   :target-source
+   {:repo "futon2",
+    :revision "cb2045b8279853fbd48d6a07c1e2da952f2e338f",
+    :sha256
+    "2efa713f8b896d7e8557c2dea669f805202ba4c1de88a6d5f2c064fc804da478",
+    :path "holes/missions/M-aif-policy-conditioned-eig.md",
+    :hole-id "M-aif-policy-conditioned-eig#6378c65a4012",
+    :line 195},
+   :observation-limit
+   "C4 observes the mission's checked completion declaration, not the truth of its supporting evidence. Completion requires the mission's acceptance work; merely ticking the checkbox is not the action admitted here."},
+  :contracts/every-entry-has-a-falsifier
+  {:kind :hand-admitted,
+   :by "codex-10",
+   :date "2026-09-22",
+   :source
+   {:path
+    "futon3/library/contracts/every-entry-has-a-falsifier.flexiarg",
+    :revision "21a9199ff95e850cdad64e35c81de04eade48256",
+    :sha256
+    "ae7e7a5730bdcc9a358353052b7667e2d24c8eae85597c19f9175b72abf1bf89"},
+   :reading
+   "The task explicitly asks for R13-to-R4 policy and R4-to-R5 predictive-kernel payloads with executable falsifiers. Apply the pattern's correspondence discipline to those interfaces: define a typed, outcome-keyed Q(o|pi) payload with model/source pins, outcome-domain identity and a normalization receipt; make the risk consumer and existing EIG fixture accept the same constructed machine-Q row. Exercise a plausible wrong implementation with a simultaneous outcome relabelling/permutation control and a mismatched-domain or pin refusal, rather than copying expected constants from the implementation. Retain the payload specification and passing behavioral evidence before declaring this task complete.",
+   :scope-limit
+   "This instantiates the pattern's falsifier mechanism for payload correspondence; it does not claim a new Lean theorem or completed R13/R4/R5 alignment. Preserve the existing risk definition: repair outcome identity at the typed boundary, not pragmatic preferences or controller terms. F1 owns constructing the generative experiment model; use its declared fixture, do not invent probabilities. Do not redo F1's already discharged Q(pi)/Gaussian-telemetry rejection work, reimplement the shared updater, or enable EIG in selection.",
+   :target-source
+   {:repo "futon2",
+    :revision "f4b390324774ee308efb920ff00357f4a9a0c644",
+    :sha256
+    "3bdc0ef28322d178ce5f55df118418fd992326c5464fc17e78d0c10cb0e9bdaa",
+    :path "holes/missions/M-aif-policy-conditioned-eig.md",
+    :hole-id "M-aif-policy-conditioned-eig#0e270aa090bc",
+    :line 214},
+   :observation-limit
+   "C4 observes a checked completion statement, not whether the typed boundary or falsifiers are correct. Completion requires the task's specified shared-Q acceptance and retained test evidence; ticking the checkbox alone is insufficient."},
+  :aif/two-layer-calibration
+  {:kind :hand-admitted,
+   :by "codex-10",
+   :date "2026-09-22",
+   :source
+   {:path "futon3/library/aif/two-layer-calibration.flexiarg",
+    :revision "21a9199ff95e850cdad64e35c81de04eade48256",
+    :sha256
+    "76a281cd37088f9de561ff72f8d5874180d12fe2b1103f190e57d5cc196c8366"},
+   :reading
+   "The requested EIG shadow can validate its own arithmetic while failing to predict evidence. Apply the pattern's separation of consistency from witnessed outcomes: keep coherent model-relative EIG/reduction checks and off-mode byte-identical selection replay in one layer, and evaluate preregistered held-out evidence with log-loss/Brier and predicted-versus-realised entropy reduction in a separately labelled empirical layer. Persist prior entropy, expected posterior entropy, EIG, model/source pins, degeneracy reasons and later realised information gain, together with winner/abstain/scale effects, in the mission's shadow packet. Use the shared updater for hypothetical and observed evidence. Neither an internal consistency pass nor a winner-changing ablation substitutes for the held-out packet.",
+   :scope-limit
+   "Collect and report a default-off shadow only; Joe retains the later decision to replace or weight the proxy. This reading does not author F1's generative experiment model, invent missing probabilities or held-out outcomes, claim causal calibration from a self-produced score, or complete the separate typed-risk boundary. If the declared model or prospective evidence is unavailable, retain that absence and leave this task open; preparation alone does not produce its completion token.",
+   :target-source
+   {:repo "futon2",
+    :revision "f4b390324774ee308efb920ff00357f4a9a0c644",
+    :sha256
+    "3bdc0ef28322d178ce5f55df118418fd992326c5464fc17e78d0c10cb0e9bdaa",
+    :path "holes/missions/M-aif-policy-conditioned-eig.md",
+    :hole-id "M-aif-policy-conditioned-eig#42fceb4ad48b",
+    :line 233},
+   :observation-limit
+   "C4 observes the mission's completion declaration only. Require both the retained shadow/replay artifacts and actual held-out calibration evidence before checking it; a held or missing empirical layer is not completion."}},
+ :interpretations
+ {:apparatus/one-authority-per-question
+  {:guard
+   {:needs #{:admission/task-stated}, :forbids #{:hole/h6378c65a4012}},
+   :produces #{:hole/h6378c65a4012}},
+  :contracts/every-entry-has-a-falsifier
+  {:guard
+   {:needs #{:hole/h6378c65a4012}, :forbids #{:hole/h0e270aa090bc}},
+   :produces #{:hole/h0e270aa090bc}},
+  :aif/two-layer-calibration
+  {:guard
+   {:needs #{:hole/h6378c65a4012}, :forbids #{:hole/h42fceb4ad48b}},
+   :produces #{:hole/h42fceb4ad48b}}},
+ :budget {:max-moves 8, :max-expansions 10000},
+ :want [:hole/h6378c65a4012 :hole/h0e270aa090bc :hole/h42fceb4ad48b],
+ :move-cost 1,
+ :target "M-aif-policy-conditioned-eig"}

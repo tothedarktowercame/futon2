@@ -1,0 +1,37 @@
+;; Manifest for the CLICK2-D Part 2 replay fixtures in this directory.
+;; Method (rebuilt offline, no clicks, no writes under data/):
+;;   cascade-sources/load-declared + with-context-fn, then the exact map
+;;   cascade-problems/constructed-from-interpretations builds per target
+;;   (problem-tokens -> observation with :unknown read as not established,
+;;    interpretations select-keys [:guard :produces], interpretation
+;;    receipts, declared horizon 4, move-cost default 1).
+;; :budget and :evaluate-g are NOT upstream: the pinned sha carries no
+;; :construction injection (5922c56e added the injection point, but the
+;; production sources map has no :construction key), so :budget is
+;; fixture-declared {:max-moves 8 :max-expansions 10000} and the test
+;; injects :evaluate-g as a stand-in (functions cannot live in EDN).
+{:fixture/schema :wm/click2-replay-manifest-v1
+ :futon2-sha "f25d08801f6711ea1cb3a6bb155dc1019a2fdf7e"
+ :c4-observations-taken-at "f25d08801f6711ea1cb3a6bb155dc1019a2fdf7e"
+ :method [:cascade-sources/load-declared
+          :cascade-sources/with-context-fn
+          :cascade-problems/problem-tokens
+          :unknown-read-as-not-established]
+ :declared-horizon 4
+ :declared-files
+ {"resources/wm/cascade-sources/M-aif-policy-conditioned-eig.edn"
+  "9ee0fcec08629b791c55a0c966675a9ac2708af7a664ec991c37bcb1c8c823b3"
+  "resources/wm/cascade-sources/M-expressions-of-interest.edn"
+  "c59d8d9eaf88cee7e55a1eb1e0a0086a303766920134105e049ef2b0a488cd19"
+  "resources/wm/cascade-sources/M-f11-find-production-successor.edn"
+  "8c12e02fec0e0a96f5f9c3c912232cb2b861c53990a2331c7e733ae2d9730fe9"
+  "resources/wm/cascade-sources/M-wm-08-external-f2.edn"
+  "12b9a813d83c8c97ef33cd7d38b40b74a6ccc3084e2eb8a584cca92206b7daa3"
+  "resources/wm/cascade-sources/T-repair-occ-444fb018.edn"
+  "a163748fe914e5ff7e623b2874c9240f06e4cfeac4c78e34d816133e4d99e140"}
+ :fixtures
+ {"M-f11-find-production-successor" "M-f11-find-production-successor.edn"
+  "M-aif-policy-conditioned-eig" "M-aif-policy-conditioned-eig.edn"
+  "M-wm-08-external-f2" "M-wm-08-external-f2.edn"
+  "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+  "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade.edn"}}
