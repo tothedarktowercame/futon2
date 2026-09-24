@@ -124,7 +124,7 @@
              {:path path :target (:target d) :token token :check check :field field}))
   d)
 
-(defn- canonical-pattern-id
+(defn canonical-pattern-id
   "D17: one canonical pattern-id form, the namespaced keyword. Authors have
   written the same id in three spellings -- seat A keywords, seat B
   namespaced strings (the E-cascade-real probe files on disk; the D17 note

@@ -15,8 +15,14 @@
 
   Parts 2 and 3 are separate commits. Nothing here interprets: retrieval
   candidates are unjudged, and the response is the answerer's."
-  (:require [clojure.string :as str]
-            [futon2.aif.interpretation-request :as ireq]))
+  (:require [clojure.java.io :as io]
+            [clojure.set :as set]
+            [clojure.string :as str]
+            [futon2.aif.cascade-problems :as cp]
+            [futon2.aif.cascade-sources :as cs]
+            [futon2.aif.interpretation-evidence :as evidence]
+            [futon2.aif.interpretation-request :as ireq])
+  (:import [java.nio.file Files]))
 
 (defn unproduced-wants
   "Wants that are not true in UNIVERSE and that no pattern in PATTERNS
@@ -78,3 +84,111 @@
                                        (fn [src text] [(citation-for src text criterion)])
                                        options)]
     (request (assoc m :retrieval (select-keys r [:target :sources :retrieval])))))
+
+;; ---------------------------------------------------------------------------
+;; Part 2: validating a response
+
+(def receipt-keys [:reading :scope-limit :by])
+
+(defn- library-file [code-root path] (io/file code-root path))
+
+(defn- receipt-reasons
+  "Why RECEIPT does not warrant pattern ID: the source must be the library
+  file for ID, present, with the sha256 of its bytes."
+  [code-root id {:keys [source] :as receipt}]
+  (let [path (:path source)
+        expected (str "futon3/library/" (namespace id) "/" (name id) ".flexiarg")
+        f (when (string? path) (library-file code-root path))]
+    (cond-> []
+      (some #(str/blank? (str (get receipt %))) receipt-keys)
+      (conj {:reason :receipt-incomplete :missing (vec (filter #(str/blank? (str (get receipt %))) receipt-keys))})
+      (not= expected path)
+      (conj {:reason :source-not-the-pattern-file :expected expected :path path})
+      (and f (not (.isFile f)))
+      (conj {:reason :source-missing :path path})
+      (and f (.isFile f) (not= (:sha256 source) (evidence/sha256 (Files/readAllBytes (.toPath f)))))
+      (conj {:reason :source-sha-mismatch :path path :declared (:sha256 source)}))))
+
+(defn- guard-reasons
+  "Guard tokens must be ones the target already knows: its facts, its wants,
+  or another interpretation's products. A new token would have no locator,
+  so no check could ever observe it."
+  [interp known]
+  (let [tokens (set (concat (get-in interp [:guard :needs]) (get-in interp [:guard :forbids])))
+        unknown (set/difference tokens known)]
+    (cond-> [] (seq unknown) (conj {:reason :guard-token-unknown :tokens (vec (sort-by str unknown))}))))
+
+(defn- constraint-reasons
+  "Owner constraints {:want w :requires r :by … :reason …}: an interpretation
+  producing W must need R, so W is reachable only through R."
+  [interp constraints]
+  (vec (for [{:keys [want requires] :as c} constraints
+             :when (and (contains? (set (:produces interp)) want)
+                        (not (contains? (set (get-in interp [:guard :needs])) requires)))]
+         {:reason :owner-constraint-violated :constraint c})))
+
+(defn validate-response
+  "Validate RESPONSE to REQUEST against the target's SOURCES (the tick's
+  sources map, with :construction supplied). RESPONSE is
+  {:pattern id :guard … :produces … :receipt …} or {:decline {:reason …}}.
+
+  Checks, in order, all reported: id canonical (the loader's own rule);
+  receipt names the pattern's library file with matching sha256 and states
+  reading, scope-limit and by; :produces contains the requested want; guard
+  tokens are known; owner CONSTRAINTS hold; the constructor, with this
+  interpretation added, builds a candidate using it that reaches the want;
+  ADMIT (the tick's admission, injected) accepts that problem.
+
+  Returns {:status :valid :interpretation {id {...}} :receipt … :candidate …},
+  {:status :declined …} or {:status :rejected :reasons [...]}."
+  [request response {:keys [code-root sources constraints admit]
+                     :or {code-root "/home/joe/code"}}]
+  (let [target (:target request)
+        want (get-in request [:want :token])]
+    (if-let [decline (:decline response)]
+      {:status :declined :target target :want want :decline decline}
+      (let [id (try (cs/canonical-pattern-id (:pattern response) :want-response :pattern)
+                    (catch clojure.lang.ExceptionInfo _ nil))
+            interp {:guard {:needs (set (get-in response [:guard :needs]))
+                            :forbids (set (get-in response [:guard :forbids]))}
+                    :produces (set (:produces response))}
+            patterns (get-in sources [:interpretations target :patterns])
+            known (set (concat (keys (get-in sources [:universes target]))
+                               (get-in sources [:wants target])
+                               (mapcat :produces (vals patterns))))
+            static (vec (concat
+                         (when-not id [{:reason :invalid-pattern-id :value (:pattern response)}])
+                         (when id (receipt-reasons code-root id (:receipt response)))
+                         (when-not (contains? (:produces interp) want)
+                           [{:reason :does-not-produce-the-want :want want}])
+                         (guard-reasons interp known)
+                         (constraint-reasons interp constraints)))]
+        (if (seq static)
+          {:status :rejected :target target :want want :reasons static}
+          (let [trial (-> sources
+                          (assoc-in [:interpretations target :patterns id] interp)
+                          (assoc-in [:interpretations target :receipts id] (:receipt response))
+                          (update :candidates dissoc target))
+                {:keys [problems refusals]} (cp/assemble {:targets [target] :sources trial})
+                problem (first problems)
+                using (first (filter #(and (some #{id} (:precedence %))
+                                           (not-any? (fn [u] (= want (:token u)))
+                                                     (get-in % [:construction-receipt :unreached-wants])))
+                                     (:constructed-candidates problem)))
+                admitted (when (and using admit) (admit problem))]
+            (cond
+              (nil? problem)
+              {:status :rejected :target target :want want
+               :reasons [{:reason :construction-refused :refusal (first refusals)}]}
+              (nil? using)
+              {:status :rejected :target target :want want
+               :reasons [{:reason :no-candidate-reaches-the-want-through-it
+                          :candidates (mapv #(select-keys % [:precedence]) (:constructed-candidates problem))}]}
+              (and admit (:refusal admitted))
+              {:status :rejected :target target :want want
+               :reasons [{:reason :admission-refused :refusal (:refusal admitted)}]}
+              :else
+              {:status :valid :target target :want want
+               :interpretation {id interp}
+               :receipt (:receipt response)
+               :candidate (select-keys using [:precedence :construction-receipt])})))))))
