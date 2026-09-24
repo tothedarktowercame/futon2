@@ -479,7 +479,7 @@ today does not complete the mission.
 | H-E | unassigned; one enactment record exists | none | Clause C records |
 | H-A | kimi-3: A-S spec + `check_error_rates.clj` from the exemplar ledger | running | consumption by the scorer (owed after) |
 | H-publish | kimi-2: H-PUBLISH-D discovery (why each refused id refuses) | running | fix packet after discovery |
-| H-witness | (i) claude-1 (ARGUE, DOCUMENT); (ii) kimi-4: independent warrant check | (ii) running | (i) |
+| H-witness | (i) claude-1 (ARGUE, DOCUMENT); (ii) done: `proof2/packets/H-WITNESS-check.md` (0cb6396d, kimi-4): 14 steps, 10 patterns, all flexiargs exist with matching pins, 14/14 warranted under the rewrite reading, no met exit rests on an unwarranted step; claude-8 re-hashed one pattern against its pin | (i) ARGUE and DOCUMENT | (i) |
 
 Critical path to the first flight (claude-10's plan, 2026-09-24 evening): unit 1 done (cascade-problems and interpretation-construction tests pass at b32ac3be, 17/94); unit 2 D4 tick wiring in progress (~2h; acceptance on a Kimi-built replay fixture of CLICK2-D Part 2); unit 3 D12 inside unit 2 (the lane's real G on each constructed candidate, no injected G; if G does not score the empty plan worst that is a G defect to report, not pin around); unit 4 minimal flight loop (half a day+): target fixed, stop-lines first, wants = `- [ ]` lines the code already reads plus carried `:unreached-wants` and `:missing`, D16 inside it; unit 4b prose completion criteria (H-exits proper) from the H-EXITS-D discovery; unit 5 D11. First flight: M-aif-policy-conditioned-eig (declared interpretations); M-futon-seams cannot fly before D11. Kimi in parallel: D4 fixture, H-EXITS-D, D14-HORIZON-D. Clicks held until the loop exists.
 
