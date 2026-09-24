@@ -45,5 +45,5 @@
               :produces #{:hole/h9ab212b3281d}}},
  :budget {:max-moves 8, :max-expansions 10000},
  :want [:hole/h9ab212b3281d :hole/h2045faa0e7cc],
- :move-cost 1,
+ :move-cost 0,
  :target "M-f11-find-production-successor"}

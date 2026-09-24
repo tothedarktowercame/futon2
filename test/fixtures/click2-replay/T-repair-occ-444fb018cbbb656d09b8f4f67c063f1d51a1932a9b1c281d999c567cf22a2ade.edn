@@ -162,6 +162,6 @@
    :produces #{:restoration-accepted}}},
  :budget {:max-moves 8, :max-expansions 10000},
  :want [:restoration-accepted],
- :move-cost 1,
+ :move-cost 0,
  :target
  "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"}

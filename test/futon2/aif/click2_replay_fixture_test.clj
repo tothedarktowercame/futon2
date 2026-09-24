@@ -9,7 +9,7 @@
   in sources-manifest.edn, :unknown read as not established per
   cascade-problems' own caller reading), :interpretations
   (select-keys [:guard :produces]) with :interpretation-receipts,
-  declared :horizon 4, :move-cost 1 (the assembly default), and a
+  declared :horizon 4, :move-cost 0 (the tick's value since 891b4af6; with the lane's real G a cost of 1 declines M-aif-eig's plan, gain 0.33, so the stand-in G below is why the fixture would construct at either cost), and a
   fixture-declared :budget (no :construction exists upstream at the pinned
   sha, so no upstream budget exists). :evaluate-g is a function and cannot
   live in EDN; the test injects a stand-in that prefers any non-empty

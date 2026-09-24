@@ -34,5 +34,5 @@
                          :produces #{:route-a-rehearsal-reported}}},
  :budget {:max-moves 8, :max-expansions 10000},
  :want [:route-a-rehearsal-reported],
- :move-cost 1,
+ :move-cost 0,
  :target "M-wm-08-external-f2"}
