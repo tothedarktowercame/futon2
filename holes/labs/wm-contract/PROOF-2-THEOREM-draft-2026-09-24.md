@@ -179,10 +179,14 @@ Witness form exposes that “the value numerically agrees” is not enough. Step
 The gap inventory's row "`DirichletLearning` … scalar Beta update … Dirichlet
 producer ABSENT" and the D4 verification sentence "learned B has no runtime
 consumer" are wrong on the consumer half, and I relayed them before checking.
-`full_loop_runner.clj:34` requires `futon2.aif.learning-trial-ledger` as
-`learning-ledger` and stamps the recorded-trial theta onto each precedence
-pattern before scoring; `with-pattern-theta` passes a present `:theta` through
-and only defaults when it is absent. Live evidence: run
+The consumer is the selection judge, `scripts/futon2/report/war_machine.clj:6380-6393`
+(`generate-war-machine`), which calls `learning-ledger/pattern-theta` per
+pattern family and stamps `:theta` and `:theta-source :recorded-trials` onto
+each precedence pattern before scoring; `with-pattern-theta` passes a present
+`:theta` through and only defaults when it is absent. The miss was a grep
+scoped to `src/`: the judge lives under `scripts/`. (An earlier version of
+this correction cited `full_loop_runner.clj:34`; that namespace requires the
+ledger for the write side, `record!` and `b-update`, not the read.) Live evidence: run
 `2026-09-23-1790199409` carries `:theta-source :recorded-trials` on 85
 pattern occurrences, including the selected action's precedence (θ = 3/4 on
 `:apparatus/done-is-observed-running`, 1/4 on
@@ -202,5 +206,5 @@ normalization, and the unconditional pre-selection read record) and the
 witness that the recorded theta equals the normalized accumulated cell. The
 bad cases in X₅ are unchanged. The proposed
 `wm-dirichlet-transition-learning` contract should bind its clojure-locus to
-the runner's ledger call and `learning_trial_ledger.clj:154/238`, not
-`ABSENT`.
+`war_machine.clj:6380` (read) and `learning_trial_ledger.clj:154/238`
+(write and rule), not `ABSENT`.
