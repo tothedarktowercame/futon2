@@ -5,7 +5,9 @@
   warrant still refuses to attest — :unknown with
   :missing [:attested-increment]. The second case is the one that matters:
   an attestation that cannot be absent is not an attestation."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [babashka.http-client]
+            [cheshire.core]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.action-identity :as identity]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.increment-attestation :as attestation]
@@ -109,6 +111,78 @@
         receipt (route/receipt {:declarations doubled :events (events evidence)
                                 :target target})]
     (is (= :duplicate-criterion (:reason (first (:bindings receipt)))))))
+
+(deftest registration-command-covers-the-scope-tests
+  (let [command (attestation/registration-command declarations)]
+    (is (= ["clojure" "-X:test" ":nses"] (take 3 command)))
+    (doseq [test-ns (:tests (:scope criterion))]
+      (is (re-find (re-pattern test-ns) (nth command 3))))))
+
+(deftest registration-reports-the-registrys-verdict
+  ;; Passing run: the registry executed the command and minted a warrant;
+  ;; the client reports the id. The body sent names what to run, never what
+  ;; happened.
+  (let [sent (atom nil)]
+    (with-redefs [babashka.http-client/post
+                  (fn [url request]
+                    (reset! sent {:url url :body (cheshire.core/parse-string (:body request) true)})
+                    {:status 200
+                     :body (cheshire.core/generate-string
+                            {:evidence/id warrant-id :warrant? true
+                             :postcheck {:status "matched"}})})]
+      (let [result (attestation/register-warrant-http
+                    {:agency-base "http://agency"}
+                    {:repo "/home/joe/code/futon2" :author "wm-author"
+                     :artifact-dir "/tmp/x"})]
+        (is (= "http://agency/api/alpha/test-registry/run" (:url @sent)))
+        (is (not (some #(contains? (:body @sent) %) ["warrant?" "results" "outcome"])))
+        (is (true? (:warrant? result)))
+        (is (= warrant-id (:evidence/id result)))))))
+
+(deftest a-failing-command-registers-no-warrant-and-no-increment
+  ;; The bad case, built and watched: the registry executed the command,
+  ;; it failed, the mint refused. The client reports warrant? false with
+  ;; the reason, the runner's gate supplies no evidence, and the close
+  ;; still classifies :unknown with :missing [:attested-increment].
+  (with-redefs [babashka.http-client/post
+                (fn [_ _]
+                  {:status 200
+                   :body (cheshire.core/generate-string
+                          {:record/type "test-registry/refusal" :warrant? false
+                           :reason "command-failed" :details {:exit 1}})})]
+    (let [registration (attestation/register-warrant-http
+                        {:agency-base "http://agency"}
+                        {:repo "/home/joe/code/futon2" :author "wm-author"
+                         :artifact-dir "/tmp/x"})]
+      (is (false? (:warrant? registration)))
+      (is (= "command-failed" (:reason registration)))
+      ;; The runner only looks up evidence when registration warranted; the
+      ;; lookup over a warrant-less store finds nothing either way.
+      (is (nil? (evidence-with [(entry warrant-id (assoc run-record :warrant? false))])))
+      (let [receipt (route/receipt {:declarations declarations :events (events nil)
+                                    :target target})
+            result (classify-close receipt)]
+        (is (= :unknown (:class result)))
+        (is (= [:attested-increment] (:missing result)))))))
+
+(deftest an-unreachable-registry-is-visible-and-warrant-less
+  (with-redefs [babashka.http-client/post
+                (fn [_ _] (throw (java.net.ConnectException. "refused")))]
+    (let [registration (attestation/register-warrant-http
+                        {:agency-base "http://agency"}
+                        {:repo "/home/joe/code/futon2" :author "wm-author"
+                         :artifact-dir "/tmp/x"})]
+      (is (false? (:warrant? registration)))
+      (is (= :registry-unreachable (:reason registration)))
+      (is (string? (get-in registration [:details :message])))))
+  (with-redefs [babashka.http-client/post (fn [_ _] {:status 503 :body ""})]
+    (let [registration (attestation/register-warrant-http
+                        {:agency-base "http://agency"}
+                        {:repo "/home/joe/code/futon2" :author "wm-author"
+                         :artifact-dir "/tmp/x"})]
+      (is (false? (:warrant? registration)))
+      (is (= :registry-http-error (:reason registration)))
+      (is (= 503 (:status registration))))))
 
 (deftest an-increment-on-a-typed-failure-refuses
   (let [evidence (evidence-with [warrant-entry])

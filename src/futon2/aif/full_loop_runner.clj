@@ -5120,8 +5120,25 @@
                   ;; build — an increment on a failing run would contradict
                   ;; the typed failure — and only when a qualifying warrant
                   ;; exists; otherwise :increment is absent by construction.
-                  (let [increment-evidence
+                  (let [;; Register first, then look up: the warrant the
+                        ;; lookup finds is the one this attempt just earned.
+                        ;; Registration runs the criterion's test namespaces
+                        ;; through the registry, which sets :warrant? from
+                        ;; the run itself; every failure mode is recorded in
+                        ;; the build judgment and supplies no evidence.
+                        increment-registration
                         (when approved?
+                          ((or (:warrant-registration-fn opts)
+                               increment-attestation/register-warrant-http)
+                           opts {:repo repo :author author
+                                 :artifact-dir
+                                 (str (or attempt-evidence-dir
+                                          (io/file (or (:run-record-dir opts)
+                                                       default-run-record-dir)
+                                                   (str (:run-id opts)) attempt-id))
+                                      "/test-registry")}))
+                        increment-evidence
+                        (when (and approved? (true? (:warrant? increment-registration)))
                           ((or (:increment-evidence-fn opts)
                                increment-attestation/increment-evidence)
                            opts {:author author
@@ -5147,6 +5164,9 @@
                                          revision
                                          (assoc :revision revision
                                                 :reviews reviews)
+                                         increment-registration
+                                         (assoc :increment-registration
+                                                (dissoc increment-registration :record))
                                          increment-evidence
                                          (assoc :increment increment-evidence))
                                        {:kind :git-commit-and-independent-review

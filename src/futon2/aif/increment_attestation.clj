@@ -31,6 +31,62 @@
 (defn- url-encode [s]
   (URLEncoder/encode (str s) StandardCharsets/UTF_8))
 
+(def registration-timeout-ms (* 10 60 1000))
+
+(defn registration-command
+  "The command the runner registers: the criterion scopes' test namespaces
+  over the repository's :test alias. Derived from the declarations, never
+  supplied by the caller — the registry executes what this names and sets
+  :warrant? from the run it actually performed."
+  [decls]
+  (let [tests (into [] (distinct (mapcat #(get-in % [:scope :tests]) (:criteria decls))))]
+    ["clojure" "-X:test" ":nses" (pr-str (mapv symbol tests))]))
+
+(defn register-warrant-http
+  "Register the attempt's increment warrant through
+  POST /api/alpha/test-registry/run and report the typed outcome. The body
+  names what to run, never what happened. Every failure mode is visible
+  and warrant-less: a refusal (tests failed, scope uncommitted), an
+  unreachable registry, a non-200 — all return {:warrant? false ...} with
+  the reason, so a reader can tell 'the tests failed' from 'the registry
+  was unreachable'."
+  [opts {:keys [repo author artifact-dir]}]
+  (let [decls (or (:route-attestation opts) (declarations))]
+    (try
+      (let [body (json/generate-string
+                  {:repo-root repo
+                   :command (registration-command decls)
+                   :author author
+                   :artifact-dir artifact-dir
+                   :code-paths (or (:warrant-code-paths opts) ["src"])
+                   :test-paths (or (:warrant-test-paths opts) ["test"])})
+            r (http/post (str (:agency-base opts) "/api/alpha/test-registry/run")
+                         {:body body
+                          :headers {"content-type" "application/json"}
+                          :timeout registration-timeout-ms
+                          :throw false})
+            parsed (when (string? (:body r))
+                     (try (json/parse-string (:body r) true)
+                          (catch Exception _ nil)))]
+        (cond
+          (= "test-registry/refusal" (:record/type parsed))
+          {:warrant? false :reason (:reason parsed) :details (:details parsed)
+           :at (str (Instant/now))}
+
+          (and (= 200 (:status r)) (contains? parsed :warrant?))
+          {:warrant? (true? (:warrant? parsed))
+           :evidence/id (:evidence/id parsed)
+           :postcheck (:postcheck parsed)
+           :at (str (Instant/now))}
+
+          :else
+          {:warrant? false :reason :registry-http-error :status (:status r)
+           :at (str (Instant/now))}))
+      (catch Throwable t
+        {:warrant? false :reason :registry-unreachable
+         :details {:message (.getMessage t)}
+         :at (str (Instant/now))}))))
+
 (defn warrant-entries-http
   "Default warrant port: test-registry entries in the evidence store behind
   the Agency HTTP boundary, filtered server-side by the :test-registry tag
