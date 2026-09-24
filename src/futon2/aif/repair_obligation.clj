@@ -1474,17 +1474,35 @@
                    record))))))))))
 
 (defn- finding-diagnosis-anchors
-  "Mechanical anchors extracted from a finding's OWN retained bytes, tying
-   the diagnosis to code: every .clj path the finding names, every
-   namespaced-keyword token (6+ chars after the slash) in its
-   :failure-error/:failure-data text, and its [:failure-data :kind]
-   keyword. The caller supplies none of this."
+  "Mechanical anchors tying a finding's DIAGNOSIS to code: namespaced-keyword
+   tokens (6+ chars after the slash) in its failure fields, and its
+   [:failure-data :kind]. The caller supplies none of this.
+
+   Two things this deliberately does NOT do, both found by probing the first
+   version (claude-5, 2026-09-24):
+
+   It reads only the failure fields, never (pr-str finding). Every finding
+   carries :repair/status and :repair/schema-version, so a pr-str of the
+   whole record made those anchors -- and any commit whose message or diff
+   contained the literal \":repair/status\" then \"spoke to\" any finding.
+   A probe dismissed a fold-gate finding with a commit whose only connection
+   was the line (def x {:repair/status :open}). :repair/-namespaced tokens
+   are dropped besides, so a future field cannot reopen that door.
+
+   It does not accept a .clj path as an anchor. A path says the commit
+   touched a file the finding names, not that it addressed the condition: a
+   probe dismissed a finding naming full_loop_runner.clj with a commit whose
+   message was \"fix a typo in a docstring\". A finding whose only link to
+   code is a filename refuses :repair-not-evidenced, and needs a disposition
+   that can carry a human judgment rather than a weaker mechanical one."
   [finding]
-  (let [text (pr-str finding)
-        clj-paths (map first (re-seq #"([\w./-]+\.clj)\b" text))
-        kw-tokens (map first (re-seq #"(:[\w.$!?*+-]+/[\w.$!?*+-]{6,})" text))
+  (let [text (pr-str (select-keys finding [:failure-error :failure-data
+                                           :failure-kind :failure-stage]))
+        kw-tokens (->> (re-seq #"(:[\w.$!?*+-]+/[\w.$!?*+-]{6,})" text)
+                       (map first)
+                       (remove #(str/starts-with? % ":repair/")))
         kind (some-> (get-in finding [:failure-data :kind]) name)]
-    (vec (distinct (concat clj-paths kw-tokens (when kind [kind]))))))
+    (vec (distinct (concat kw-tokens (when kind [kind]))))))
 
 (defn- git-out [repo & args]
   (let [{:keys [exit out]} (apply git-command repo args)]

@@ -1251,3 +1251,69 @@
     (is (= 3 (count (set ids))) "distinct jobs mint distinct occurrences")
     (is (= 1 (count (tripwire/livelock-violations findings #{})))
         "occurrence deduplication does not blind repetition detection")))
+
+(deftest dismiss-repaired-elsewhere-refuses-a-commit-that-merely-coincides
+  ;; Both cases below DISMISSED against the first version of the anchor rule
+  ;; (claude-5's probes, 2026-09-24). Neither commit addresses its finding.
+  (let [repo (temp-root)
+        git (fn [& args]
+              (let [r (apply shell/sh "git" "-C" repo args)]
+                (when-not (zero? (:exit r)) (throw (ex-info "fixture git failed" r)))
+                (str/trim (:out r))))
+        fire (fn [root finding sha]
+               (spit (io/file root "findings" (str (:repair/id finding) ".edn"))
+                     (pr-str finding))
+               (dismissal-refusal
+                #(repair/dismiss-repaired-elsewhere!
+                  root (:repair/id finding)
+                  {:authority "fixture" :reason :repaired-elsewhere
+                   :actor "test" :commit sha})))]
+    (git "init") (git "config" "user.email" "fixture@example.invalid")
+    (git "config" "user.name" "fixture")
+    (.mkdirs (io/file repo "src/futon2/aif"))
+    (spit (io/file repo "src/futon2/aif/full_loop_runner.clj") "(ns futon2.aif.full-loop-runner)\n")
+    (git "add" ".")
+    (git "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T10:00:00Z" "-m" "seed")
+    ;; (1) a commit that touches a file the finding names, about something else
+    (spit (io/file repo "src/futon2/aif/full_loop_runner.clj")
+          "(ns futon2.aif.full-loop-runner)\n;; tidy a docstring typo\n")
+    ;; (2) and mentions the schema key every finding in the store carries
+    (spit (io/file repo "notes.clj") "(def x {:repair/status :open})\n")
+    (git "add" ".")
+    (git "-c" "commit.gpgsign=false" "commit" "--date=2026-09-21T09:00:00Z"
+         "-m" "fix a typo in a docstring")
+    (let [sha (git "rev-parse" "HEAD")
+          base {:repair/schema-version 3 :repair/class :machine-failure
+                :repair/status :open :attempt-id "a1"
+                :failure-stage :selection :failure-outcome :incomplete
+                :opened-at "2026-09-20T20:00:00Z" :machine-repo repo}]
+      (testing "a filename the finding mentions is no anchor at all"
+        ;; A path says the commit touched a file the finding names, not that
+        ;; it addressed the condition. It is not an anchor, so a finding
+        ;; whose only link to code is a filename has none and refuses here
+        ;; rather than at the match.
+        (let [root (temp-root)]
+          (.mkdirs (io/file root "findings"))
+          (is (= :diagnosis-anchor-absent
+                 (fire root (assoc base
+                                   :repair/id "finding-path-anchor"
+                                   :failure-kind :untyped-failure
+                                   :failure-error (str "Exception thrown at "
+                                                       "src/futon2/aif/full_loop_runner.clj"
+                                                       " during selection")
+                                   :failure-data {:detail "nothing to do with typos"})
+                       sha)))
+          (is (empty? (.listFiles (io/file root "dismissals"))))))
+      (testing "the finding's own :repair/ schema keys are not anchors"
+        ;; Otherwise every finding is evidenced by any commit touching the
+        ;; repair store -- including the commit that added this route.
+        (let [root (temp-root)]
+          (.mkdirs (io/file root "findings"))
+          (is (= :diagnosis-anchor-absent
+                 (fire root (assoc base
+                                   :repair/id "finding-schema-anchor"
+                                   :failure-kind :fold-output-invalid
+                                   :failure-error "the fold gate refused policy holes"
+                                   :failure-data {:detail "unrelated to bookkeeping"})
+                       sha)))
+          (is (empty? (.listFiles (io/file root "dismissals")))))))))
