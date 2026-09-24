@@ -22,33 +22,24 @@ or its conditioning of other patterns. Those readings have no clause yet
 ## Theorem
 
 "Not fake" means not a fake War Machine: a real one, which does the work.
-It does not mean an accurate record of a machine that fails. A record
-that accurately documents a failure (a typed absence, an open clause, a
-stop) is evidence that the machine is not yet real, and never counts toward
-the theorem. Where a clause below finds an absence, that is work to do on the
-machine.
+This file is a theorem about that machine. A typed absence, an open clause or
+a stop is a HOLE in the proof, not an outcome it permits: the theorem is not
+proved while any remains, and each is listed under "Holes" below with the
+work on the machine that closes it.
 
-**THEOREM (PROOF-2a).** Given a mission, excursion or task `M` whose
-completion criteria are stated in its text, a flight of the War Machine on
-`M` ends in one of two ways:
+**THEOREM (PROOF-2a).** Let `M` be a mission, excursion or task whose
+completion criteria are stated in its text and are reached by the field of
+cascades warranted by the pattern library. Then a flight of the War Machine
+on `M` completes `M`: every completion criterion is met, each with evidence
+that a check confirms (Clause C and clauses 1–6 at mission grain), and the
+completion is the machine's own, which is what the per-click conditions below
+establish.
 
-1. **Completed.** Every completion criterion of `M` is met, each with
-   evidence that a check confirms (Clause C and clauses 1–6 at mission
-   grain).
-2. **Typed stop.** A named criterion is unmet, and the record shows that no
-   cascade in the field warranted by the pattern library reaches it within the
-   stated search bounds: the constructor's search ran to exhaustion, not to a
-   missing input it could have computed.
-
-and in either case the outcome is the machine's own, which is what the
-per-click conditions below establish.
-
-**Falsifier for the theorem as a whole.** A mission that an agent has
-completed using only library-warranted steps, each with a receipt, is a
-mission the field reaches. A flight that stops on it with a typed stop is a
-counterexample. M-futon-seams is the first such mission (below, "What the
-worked example teaches"). A machine that always stops does not satisfy the
-theorem on it.
+**Hypothesis witness.** A mission that an agent has completed using only
+library-warranted steps, each with a receipt, satisfies the hypothesis. For
+such a mission a flight that does not complete it is a counterexample.
+M-futon-seams is the first such mission (below, "What the worked example
+teaches").
 
 **Per-click conditions** (what rules out a fake: fixtures, hand-built inputs,
 values that were never consumed). The implementation is not fake with respect to the
@@ -70,9 +61,9 @@ mission-grain cascade spanning every phase; the enactment is the whole run;
 clause 4's attempts count across the mission. This is the grain at which
 `Q(o|π)` is read in `futon4/holes/mission-lifecycle-wm-alignment.md` §3c ("at
 mission grain … the catalog IS the playout record"). Every clause below is
-stated per click, and a click is at this grain. A run that stops before the
-completion criteria are met ends with a typed stop naming the unmet criterion
-and why, not with a partial click counted as done.
+stated per click, and a click is at this grain. A run that ends before the
+completion criteria are met is a counterexample to the theorem, not a partial
+click counted as done.
 
 Worked example against this grain: click-001 (M-futon-seams) targeted one
 instance's three wants; the rest of the mission was carried by claude-1, with
@@ -340,9 +331,8 @@ to be read, and the War Machine should read them when it needs them: C is
 computed at click time from the mission text, as a step of the click with
 its own receipt (each outcome cued to the span it came from; each served-by
 link to the instance want it names), not required as a record prepared in
-advance. A mission is never refused for lacking a precomputed C. Clause T's
-value term is a typed absence only when that step runs and finds no stated
-outcome, and the absence then names the sections it read.
+advance. A mission is never refused for lacking a precomputed C. If that step finds
+no stated outcome, that is a hole (below), not a value of the term.
 
 Consequence for W_t: the certificate carries the extracted C and its cues, so
 a reviewer can check the extraction against the text. Consequence for the
@@ -423,3 +413,20 @@ PROOF-2a it implies.
    strict descendants, a grep regex that passed a tree with a branch left, a
    re-anchoring tool that reported moves it had not made, a layout check that
    measured only titles. Each is a row in the check ledger (item 3).
+
+## Holes (2026-09-24)
+
+The theorem is not proved while any of these remains. Each names the work on
+the machine that closes it. On M-futon-seams each is a place where a flight
+today does not complete the mission.
+
+| hole | what the machine must do | where it showed |
+|---|---|---|
+| H-interp | turn mission text into interpreted patterns (guard, produces, receipt) | every cascade was written by claude-1 (E-cascade-real D11) |
+| H-order | build the containment order from the interpretations | authored; the constructor returns a precedence only |
+| H-grain | choose the grain, with a check before enactment | click-001's first enactment built the wrong grain |
+| H-exits | take the mission's completion criteria as the flight's wants | MAP's table, ARGUE and DOCUMENT were done outside any click |
+| H-C | read the mission's outcomes at click time, with cues | mission-C was written by hand (claude-1) |
+| H-value | a value term with timing and degree of attainment | no weighting reproduces the mission's own ranking |
+| H-E | a habit prior from enacted cascades | one enactment record exists |
+| H-A | observation error rates measured per check kind | 22 ledger rows; declared rates were used first |
