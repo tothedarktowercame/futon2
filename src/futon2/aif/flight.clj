@@ -68,6 +68,9 @@
         questioned (select-keys (reading/published-locator-questions store target)
                                 (remove (set (keys machine)) (map :token (:unlocated w))))
         observe-loc (or observe #(contains? (:observed (checks/observe {::t %})) ::t))
+        mission-sha (when text (reading/text-sha text))
+        text-constraints (criteria/constraints target (or text ""))
+        read-constraints (reading/published-constraints store target mission-sha)
         still-unlocated (vec (remove #(or (contains? machine (:token %)) (contains? questioned (:token %)))
                                      (:unlocated w)))]
     {:wants (vec (distinct (remove (set (keys questioned))
@@ -84,10 +87,24 @@
               ;; step asks for them before the click (never a refusal)
               :readings-needed {:criteria? (empty? cs)
                                 :locators (mapv :token still-unlocated)
+                                ;; dependencies stated in forms the reader does
+                                ;; not recognise are read once per text
+                                :constraints? (and (some? text) (nil? read-constraints))
+                                :mission-sha mission-sha
                                 :sections-read (vec (keep #(second (re-matches #"^#+\s+(.*)$" %))
                                                           (str/split-lines (str text))))}
               ;; ordering constraints the mission states in its own words
-              :constraints (criteria/constraints target (or text ""))
+              ;; the text's own recognised form, plus a reading's (by
+              ;; :machine-reading) for the text as it stands
+              :constraints (update text-constraints :requires into (:constraints read-constraints))
+              :constraint-questions (:questions read-constraints)
+              ;; every token an edge may join: each want's criterion and each
+              ;; fact's own line
+              :known-tokens (vec (concat
+                                  (for [c (:criteria w)] {:token (:token c) :text (:stated c)})
+                                  (for [[t l] (get-in sources [:locators target])
+                                        :when (string? (:decl l))]
+                                    {:token t :text (:decl l)})))
               ;; token -> the criterion it was read from, for the D11 request
               :criteria-by-token (merge
                                   ;; a checkbox want's criterion is its own task

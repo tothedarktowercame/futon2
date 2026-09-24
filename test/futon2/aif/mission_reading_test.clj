@@ -52,9 +52,18 @@
                   :cue {:quote words} :reading "the check names the artifact the criterion asks for" :by "kimi-6"})
          "\n```")))
 
-(defn- answer-with [f]
+(defn- answer-with
+  "A stubbed seat answering with F; a constraints request (asked once per
+  text) is answered with no edges unless F handles :constraints itself."
+  [f & [{:keys [constraints]}]]
   (let [n (atom 0)]
-    (fn [issued] {:seat "kimi-6" :job-id (str "job-" (swap! n inc)) :state "done" :text (f issued)})))
+    (fn [issued]
+      {:seat "kimi-6" :job-id (str "job-" (swap! n inc)) :state "done"
+       :text (if (and (= :constraints (:kind issued)) (not constraints))
+               (str "```edn\n" (pr-str {:schema mr/constraints-schema :constraints [] :by "kimi-6"}) "\n```")
+               (f issued))})))
+
+(defn- of-kind [k asked] (filter #(= k (:kind %)) asked))
 
 (deftest validate-locator-cases
   (let [issued {:kind :locator :target target :want {:token :exit/hx}
@@ -94,7 +103,8 @@
     (testing "before: six criteria, all unlocated, six locator readings needed"
       (is (= 6 (count (:wants before))))
       (is (= 6 (count (get-in before [:source :readings-needed :locators])))))
-    (is (= (repeat 6 :published) (map :outcome (:asked read))))
+    (is (= (repeat 6 :published) (map :outcome (of-kind :locator (:asked read)))))
+    (is (= [:published] (map :outcome (of-kind :constraints (:asked read)))) "the text's dependencies read once")
     (is (empty? (:needs read)))
     (testing "after: every criterion located by a machine locator and observed; nothing left to refuse"
       (is (= [] (get-in after [:source :unlocated])))
@@ -131,8 +141,8 @@
         read ((fr/read-fn {:store s :answer-fn (answer-with replies) :observe observe}) f {})
         after (flight/click-wants f {})]
     (is (= {:criteria? true} (select-keys (get-in before [:source :readings-needed]) [:criteria?])))
-    (is (= [:criteria :locator] (mapv :kind (:asked read))) "criteria first, then a locator for the extracted one")
-    (is (= [:published :published] (mapv :outcome (:asked read))))
+    (is (= [:criteria :locator :constraints] (mapv :kind (:asked read))) "criteria first, then a locator for the extracted one, then the dependencies")
+    (is (= [:published :published :published] (mapv :outcome (:asked read))))
     (is (= :machine-reading (get-in after [:source :criteria-from])))
     (is (= 1 (count (:wants after))))
     (is (= [] (get-in after [:source :unlocated])))))
@@ -145,7 +155,7 @@
                                                  :criteria [{:statement "x" :cue {:lines [5 5] :quote "Words that are not there."}}]})
                              "\n```"))
         read ((fr/read-fn {:store s :answer-fn (answer-with bad) :observe observe}) f {})]
-    (is (= [:rejected] (mapv :outcome (:asked read))))
+    (is (= [:rejected] (mapv :outcome (of-kind :criteria (:asked read)))))
     (is (= [{:kind :rejected :missing :criteria}] (mapv #(select-keys % [:kind :missing]) (:needs read))))
     (is (nil? (:criteria (wi/read-published s "M-bare"))))))
 
@@ -278,7 +288,7 @@
         after (flight/click-wants f {})
         sorry-token (some (fn [[t c]] (when (str/includes? (:stated c) "`find` sorry") t))
                           (get-in (flight/click-wants (f11-flight (store)) {}) [:source :criteria-by-token]))]
-    (is (= {:published 5 :questions 1} (frequencies (map :outcome (:asked read)))))
+    (is (= {:published 5 :questions 1} (frequencies (map :outcome (of-kind :locator (:asked read))))))
     (is (= [sorry-token] (mapv :want (filter #(= :owner-question (:kind %)) (:needs read)))))
     (is (= 5 (count (:wants after))) "the questioned criterion is not a want")
     (is (some #(and (= sorry-token (:token %)) (= :owner-question (:reason %))) (get-in after [:source :out-of-view])))
@@ -286,3 +296,44 @@
       (is (= :rejected (:status (mr/validate-locator {:criterion {:stated "x"}}
                                                      {:questions [{:question "which?" :alternatives ["a" "b"]}]}
                                                      {:text f11-text})))))))
+
+;; ---------------------------------------------------------------------------
+;; Constraints the text states in forms the reader does not recognise
+;; (M-f11 line 48: 'Repair-024 is resolved only after this mission's ordinary
+;; gates produce strict durable terminal evidence.')
+
+(def line-48 {:lines [48 49] :quote "Repair-024 is resolved only after this mission's ordinary gates produce strict\ndurable terminal evidence. A failure—especially"})
+(def checkbox :hole/h2045faa0e7cc)
+(def acceptance-box :hole/h9ab212b3281d)
+
+(deftest validate-constraints-cases
+  (let [issued {:kind :constraints :known [{:token checkbox} {:token acceptance-box}]}
+        v #(mr/validate-constraints issued % f11-text)
+        edge {:want checkbox :requires acceptance-box :cue line-48}]
+    (is (= [{:want checkbox :requires acceptance-box :by :machine-reading :line 48 :quote (:quote line-48)}]
+           (:constraints (v {:constraints [edge]}))))
+    (is (= :valid (:status (v {:constraints []}))) "none stated is an answer")
+    (testing "one bad edge refuses the reply"
+      (is (= :rejected (:status (v {:constraints [edge (assoc edge :requires :exit/hnot-a-known-token)]}))))
+      (is (= :rejected (:status (v {:constraints [(assoc edge :requires checkbox)]}))))
+      (is (= :rejected (:status (v {:constraints [(assoc-in edge [:cue :quote] "not the text")]})))))))
+
+(deftest the-line-48-dependency-is-read-and-reaches-the-plan
+  (let [s (store)
+        f (f11-flight s)
+        sources {:wants {target [checkbox]}
+                 :locators {target {checkbox {:class :C4 :decl "- [x] Publish the strict successful successor link for repair-024, or retain the typed failure without resolution."}
+                                    acceptance-box {:class :C4 :decl "- [x] Complete F11's ordinary acceptance and persist its runtime validation evidence."}}}}
+        reply (fn [issued]
+                (case (:kind issued)
+                  :constraints (str "```edn\n" (pr-str {:schema mr/constraints-schema :by "kimi-6"
+                                                        :constraints [{:want checkbox :requires acceptance-box :cue line-48}]}) "\n```")
+                  (locator-reply issued)))
+        before (flight/click-wants f sources)
+        _ ((fr/read-fn {:store s :answer-fn (answer-with reply {:constraints true}) :observe observe}) f sources)
+        after (flight/click-wants f sources)]
+    (is (true? (get-in before [:source :readings-needed :constraints?])))
+    (is (some #(= acceptance-box (:token %)) (get-in before [:source :known-tokens])) "facts are joinable, not only wants")
+    (is (= [{:want checkbox :requires acceptance-box :by :machine-reading :line 48}]
+           (mapv #(select-keys % [:want :requires :by :line]) (get-in after [:source :constraints :requires]))))
+    (is (false? (get-in after [:source :readings-needed :constraints?])) "read once for this text")))

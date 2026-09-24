@@ -87,7 +87,10 @@
      ;; D11 part 5: what the mission does not state, and the reading step
      ;; would compute before the first click instead of refusing
      :readings-it-would-request
-     {:criteria (when (get-in src [:readings-needed :criteria?])
+     {:constraints (when (get-in src [:readings-needed :constraints?])
+                     {:mission-sha (get-in src [:readings-needed :mission-sha])
+                      :tokens-an-edge-may-join (count (:known-tokens src))})
+      :criteria (when (get-in src [:readings-needed :criteria?])
                   {:sections-read (get-in src [:readings-needed :sections-read])})
       :locators (vec (for [t (get-in src [:readings-needed :locators])
                            :let [c (get-in src [:criteria-by-token t])]]
@@ -95,8 +98,9 @@
      ;; questions an earlier criteria reading raised, and who they go to
      :owner-questions (reading/published-questions store target)
      :open-wants (vec (remove #(true? (get universe %)) (:wants cw)))
-     :constraints (mapv #(select-keys % [:want :requires :phase :through :line :by])
+     :constraints (mapv #(select-keys % [:want :requires :phase :through :line :by :quote])
                         (get-in src [:constraints :requires]))
+     :constraint-questions (get-in src [:constraint-questions])
      :requests-it-would-issue
      (vec (for [t unproduced
                 :let [c (get-in src [:criteria-by-token t])]]

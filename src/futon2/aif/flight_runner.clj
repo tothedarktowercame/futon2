@@ -354,7 +354,20 @@
                            (fn [issued resp] (reading/validate-locator issued resp (assoc (select-keys opts [:observe]) :text text)))
                            (fn [issued resp v who] (reading/publish-locator! store issued resp v who))
                            (fn [issued resp v who] (reading/publish-locator-questions! store issued resp v who)))))
-          asked (vec (concat (when criteria-entry [criteria-entry]) locator-entries))
+          ;; ordering dependencies stated in forms the reader does not
+          ;; recognise, read once per text (after criteria, so extracted
+          ;; ones are among the tokens an edge may join)
+          cw2 (flight/click-wants flight sources)
+          constraints-entry
+          (when (get-in cw2 [:source :readings-needed :constraints?])
+            (read-one opts (reading/constraints-request target mission
+                                                        (get-in cw2 [:source :readings-needed :mission-sha])
+                                                        (get-in cw2 [:source :known-tokens]))
+                      reading/constraints-schema
+                      (fn [issued resp] (reading/validate-constraints issued resp text))
+                      (fn [issued resp v who] (reading/publish-constraints! store issued resp v who))))
+          asked (vec (concat (when criteria-entry [criteria-entry]) locator-entries
+                             (when constraints-entry [constraints-entry])))
           ;; questions the criteria reading raised: sent to the owner the
           ;; mission names (else recorded for the requisition's caller),
           ;; never a refusal
@@ -362,7 +375,10 @@
                           (when (= :published (:outcome criteria-entry))
                             (reading/published-questions store target))
                           (for [e locator-entries :when (= :questions (:outcome e)) q (:questions e)]
-                            (assoc q :want (:want e) :request-id (:request-id e)))))
+                            (assoc q :want (:want e) :request-id (:request-id e)))
+                          (when (= :published (:outcome constraints-entry))
+                            (map #(assoc % :request-id (:request-id constraints-entry))
+                                 (get-in (flight/click-wants flight sources) [:source :constraint-questions])))))
           owner (reading/mission-owner text)
           addressed (or owner caller "requisition-caller")
           notified (when (and (seq questions) owner notify!)
@@ -370,7 +386,7 @@
       {:asked asked
        :needs (vec (concat
                     (for [a asked :when (not (#{:published :questions} (:outcome a)))]
-                      (merge {:kind (:outcome a) :missing (if (= :criteria (:kind a)) :criteria :locator)}
+                      (merge {:kind (:outcome a) :missing (case (:kind a) :criteria :criteria :constraints :constraints :locator)}
                              (select-keys a [:want :request-id :seat :job-id])))
                     (for [q questions]
                       {:kind :owner-question :missing :owner-answer :to addressed

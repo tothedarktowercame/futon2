@@ -31,9 +31,13 @@
 (def default-store wi/default-store)
 (def locator-schema :wm/locator-response-v1)
 (def criteria-schema :wm/criteria-response-v1)
+(def constraints-schema :wm/constraints-response-v1)
 (def checkable #{:C3 :C4 :C5 :C6})
 (def class-fields {:C3 [:repo :sha :path] :C4 [:repo :sha :path :decl]
                    :C5 [:repo :sha :bundle-path :entry] :C6 [:repo :sha :path]})
+
+(defn text-sha [^String text]
+  (wi/content-id :text text))
 
 (defn- sha1-12 [^String s]
   (let [d (.digest (MessageDigest/getInstance "SHA-1") (.getBytes s "UTF-8"))]
@@ -58,14 +62,31 @@
    :mission mission :sections-read (vec sections-read)
    :asks "the mission's completion criteria as it states them (goal, done-when, outcome sentences, phase exits), each cued to the exact lines of the mission at HEAD, or a typed decline naming the sections read"})
 
+(defn constraints-request
+  "Ask for the ordering dependencies the mission states in any form among
+  its wants and facts: KNOWN is [{:token … :text …}], each want's criterion
+  or fact's own line, so an edge names tokens the flight already has."
+  [target mission mission-sha known]
+  {:schema :wm/constraints-request-v1 :kind :constraints :target target
+   :want {:token :constraints :mission-sha mission-sha}
+   :mission mission :known (vec known)
+   :asks (str "every ordering dependency the mission text states between these tokens (X only after Y, X requires Y, X closes only through Y), "
+              "each as {:want X :requires Y :cue {:lines [first last] :quote \"exact mission text\"}}; none is a valid answer; "
+              "if a stated dependency is unclear about which token it means, ask anchored questions instead")})
+
 (defn prompt [issued]
-  (let [schema (if (= :locator (:kind issued)) locator-schema criteria-schema)]
+  (let [schema (case (:kind issued) :locator locator-schema :constraints constraints-schema criteria-schema)]
     (str "The War Machine asks for a reading (D11 part 5). Request " (:request-id issued) ":\n\n```edn\n"
          (pr-str issued) "\n```\n\nREPLY GRAMMAR: exactly one fenced ```edn block holding "
-         (if (= :locator (:kind issued))
+         (cond
+           (= :constraints (:kind issued))
+           (str "{:schema " schema " :constraints [{:want :token :requires :token :cue {:lines [first last] :quote \"exact text\"}} …] "
+                ":questions [{:question \"…\" :span {:lines [a b] :quote \"…\"} :alternatives [\"…\" \"…\"]}] :by \"seat\"} (both may be empty)")
+           (= :locator (:kind issued))
            (str "{:schema " schema " :locator {:class :C3|:C4|:C5|:C6 :repo … :sha \"HEAD\" :path … (:decl for C4)} "
                 ":cue {:quote \"words of the criterion this locator decides\"} :reading \"why observing it decides the criterion\" :by \"seat\"}, "
                 "or, if the criterion is genuinely unclear, {:schema " schema " :questions [{:question \"…\" :span {:lines [first last] :quote \"exact mission text\"} :alternatives [\"reading A\" \"reading B\"]}] :by \"seat\"}")
+           :else
            (str "{:schema " schema " :criteria [{:statement \"…\" :cue {:lines [first last] :quote \"exact text of those lines\"}} …] "
                 ":questions [{:question \"…\" :span {:lines [first last] :quote \"exact text\"} :alternatives [\"reading A\" \"reading B\"]} …] :by \"seat\"} "
                 "(criteria where the text is clear, questions anchored to the spans that are not; either may be empty but not both)"))
@@ -251,3 +272,53 @@
 
 (defn published-locator-questions [store target]
   (into {} (for [[t {:keys [questions]}] (get-in (wi/read-published store target) [:locator-questions])] [t questions])))
+
+(defn validate-constraints
+  "A constraints reading is valid when every edge joins two distinct tokens
+  the request listed, its cue is exactly the mission TEXT at its lines, and
+  every question is anchored (question-reasons). One bad edge or question
+  refuses the whole reply. An empty reply is valid: the text states none."
+  [issued response text]
+  (let [lines (vec (str/split-lines (str text)))
+        known (set (map :token (:known issued)))
+        bad (vec (for [{:keys [want requires cue] :as e} (:constraints response)
+                       :let [at (at-lines lines cue)]
+                       :when (or (not (known want)) (not (known requires)) (= want requires)
+                                 (nil? at) (not= at (:quote cue)))]
+                   {:reason (cond (not (and (known want) (known requires))) :edge-token-unknown
+                                  (= want requires) :edge-to-itself
+                                  :else :cue-does-not-resolve)
+                    :edge (select-keys e [:want :requires])}))
+        bad-q (question-reasons (:questions response) text)]
+    (if (or (seq bad) (seq bad-q))
+      {:status :rejected :reasons (into bad bad-q)}
+      {:status :valid
+       :constraints (mapv (fn [{:keys [want requires cue]}]
+                            {:want want :requires requires :by :machine-reading
+                             :line (first (:lines cue)) :quote (:quote cue)})
+                          (:constraints response))
+       :questions (mapv #(select-keys % [:question :span :alternatives]) (:questions response))})))
+
+(defn publish-constraints!
+  [store issued response validated answered-by]
+  (bound! store issued)
+  (when-not (= :valid (:status validated))
+    (throw (ex-info "only a validated reading is published" {:interpretation/refusal :reading/not-validated})))
+  (let [target (:target issued)
+        prior (or (wi/read-published store target)
+                  {:schema :wm/machine-interpretations-v1 :target target :patterns {} :receipts {} :records {}})
+        rec (assoc prior :constraints-read
+                   {:constraints (:constraints validated) :questions (:questions validated)
+                    :mission-sha (get-in issued [:want :mission-sha])
+                    :receipt {:kind :machine-read-constraints :request-id (:request-id issued)
+                              :response-id (wi/content-id :response response)
+                              :answered-by answered-by :validator @wi/validator}})]
+    (wi/write-atomic! (io/file store (str target ".edn")) rec)
+    rec))
+
+(defn published-constraints
+  "The constraints reading for TARGET, if it was read from this MISSION-SHA
+  (a changed text is read again)."
+  [store target mission-sha]
+  (let [r (get-in (wi/read-published store target) [:constraints-read])]
+    (when (and r (= mission-sha (:mission-sha r))) r)))
