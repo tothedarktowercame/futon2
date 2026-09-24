@@ -21,7 +21,29 @@ or its conditioning of other patterns. Those readings have no clause yet
 
 ## Theorem
 
-**THEOREM (PROOF-2a).** The implementation is not fake with respect to the
+**THEOREM (PROOF-2a).** Given a mission, excursion or task `M` whose
+completion criteria are stated in its text, a flight of the War Machine on
+`M` ends in one of two ways:
+
+1. **Completed.** Every completion criterion of `M` is met, each with
+   evidence that a check confirms (Clause C and clauses 1–6 at mission
+   grain).
+2. **Typed stop.** A named criterion is unmet, and the record shows that no
+   cascade in the field warranted by the pattern library reaches it within the
+   stated search bounds: the constructor's search ran to exhaustion, not to a
+   missing input it could have computed.
+
+and in either case the outcome is the machine's own, which is what the
+per-click conditions below establish.
+
+**Falsifier for the theorem as a whole.** A mission that an agent has
+completed using only library-warranted steps, each with a receipt, is a
+mission the field reaches. A flight that stops on it with a typed stop is a
+counterexample. M-futon-seams is the first such mission (below, "What the
+worked example teaches"). A machine that always stops does not satisfy the
+theorem on it.
+
+**Per-click conditions.** The implementation is not fake with respect to the
 named War Machine Lean model iff, for every click required by clauses T and
 0–6, the provenance proposition `P_k` identifies the values actually
 consumed, the concrete Lean proposition `W_k` checks on those values, and the
@@ -45,10 +67,10 @@ completion criteria are met ends with a typed stop naming the unmet criterion
 and why, not with a partial click counted as done.
 
 Worked example against this grain: click-001 (M-futon-seams) targeted one
-instance's three wants. The mission's own exits (MAP's table, ARGUE,
-DOCUMENT) were met, where they were, by the owning agent outside any click,
-and the work was spread over many rounds. That is the wrong grain of click,
-the same error clause C catches in an enactment one level down.
+instance's three wants; the rest of the mission was carried by claude-1, with
+each step warranted by a library pattern and a receipt. That record is what a
+flight on this mission consists of; the steps claude-1 supplied that the
+machine does not yet do are listed as the gaps below.
 
 ### Clause T — the machine chooses its target (new; AR-32)
 
@@ -367,9 +389,23 @@ PROOF-2a it implies.
    and from operator turns disagree in sign on the two candidates, each on 1–3
    citations; neither records applied cascades. → E is estimated from Clause C
    enactment records, filled forward.
-0. **The worked example used the wrong grain of click.** Its click targeted
-   one instance, and the mission's exits were met outside any click, across
-   many rounds. → a click is a flight: one mission end to end (section above).
+0. **What stands between the War Machine and completing this mission.**
+   claude-1 carried M-futon-seams with library-warranted steps
+   (count-every-card-back for the sites, choose-the-grain-where-state-lives
+   for the grain, test-by-reproducing-behaviour for the redirect test, ...),
+   so the field reaches the mission's criteria. The steps the machine did not
+   do, and would have to for the theorem to hold on this mission:
+   (a) turning the mission text into interpreted patterns (guard, produces,
+       receipt): done by claude-1 for every cascade (E-cascade-real D11);
+   (b) the containment order the carrier is built on: authored; the
+       constructor returns a precedence, not an order;
+   (c) choosing the grain: by hand with no check before enactment (method
+       step 3 in the mission's DERIVE);
+   (d) the phase exits no instance's cascade asks for (MAP's table, ARGUE,
+       DOCUMENT): produced outside any click, because the only click was at
+       instance grain.
+   Each is a place where the flight would today end in a stop that the
+   falsifier above counts against the machine.
 8. **Working out of order cost a wrong-grain enactment.** The mission gained
    artefacts for five later phases while at IDENTIFY; the first enactment
    worked from the defect description rather than a DERIVE that had met its
