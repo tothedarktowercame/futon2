@@ -49,6 +49,7 @@
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.interpretation-construction :as interpretation-construction]
+            [futon2.aif.want-interpretation :as want-interpretation]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.candidate-derivations :as candidate-derivations]
             [futon2.aif.cascade-proposals :as cascade-proposals]
@@ -6098,6 +6099,15 @@
          (or (:mission-hole-coverage sources)
              {:status :absent :reason :source-coverage-not-supplied})))
 
+(defn assemble-cascade-problems-with-published
+  "assemble-cascade-problems after merging the interpretations the machine
+  published for the input's targets (D11 part 3, futon2.aif.want-interpretation):
+  a want answered through the request seam constructs on the next tick
+  without anyone promoting it by hand."
+  [store input]
+  (assemble-cascade-problems
+   (update input :sources want-interpretation/merge-published store (:targets input))))
+
 (defn- class-observation-model
   "PROOF-wm-works 1.3 build 2/3: the class observation model for the joint
    family. Emission is deterministic: before the common horizon every state
@@ -7135,7 +7145,8 @@
         (ticket-queue/validate! (if (contains? judge-opts :ticket-queue)
                                   (:ticket-queue judge-opts) (ticket-queue/read-declaration)))
         raw-cascade-assembled
-        (assemble-cascade-problems
+        (assemble-cascade-problems-with-published
+         (or (:machine-interpretations-dir judge-opts) want-interpretation/default-store)
          ;; The targets are the substrate's missions AND every target that has
          ;; a declared source. A declared target was previously invisible
          ;; unless it also existed as a substrate mission, so a fully located

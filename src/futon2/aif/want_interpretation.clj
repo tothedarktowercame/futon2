@@ -15,14 +15,17 @@
 
   Parts 2 and 3 are separate commits. Nothing here interprets: retrieval
   candidates are unjudged, and the response is the answerer's."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.pprint :as pp]
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.cascade-sources :as cs]
             [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.interpretation-request :as ireq])
-  (:import [java.nio.file Files]))
+  (:import [java.nio.file Files StandardCopyOption]
+           [java.time Instant]))
 
 (defn unproduced-wants
   "Wants that are not true in UNIVERSE and that no pattern in PATTERNS
@@ -192,3 +195,88 @@
                :interpretation {id interp}
                :receipt (:receipt response)
                :candidate (select-keys using [:precedence :construction-receipt])})))))))
+
+;; ---------------------------------------------------------------------------
+;; Part 3: publication into the sources the tick reads
+
+(def default-store
+  "Machine-published interpretations, one file per target. Kept apart from
+  resources/wm/cascade-sources (hand-written declarations), which win on any
+  pattern they both name."
+  "/home/joe/code/futon2/data/wm-interpretations")
+
+(defn- content-id [kind x]
+  (str (name kind) "-" (subs (evidence/sha256 (.getBytes (pr-str x) "UTF-8")) 0 16)))
+
+(defn- target-file [store target] (io/file store (str target ".edn")))
+
+(defn read-published
+  "The machine-published interpretations for TARGET, or nil."
+  [store target]
+  (let [f (target-file store target)]
+    (when (.isFile f) (edn/read-string (slurp f)))))
+
+(defn- write-atomic! [^java.io.File f x]
+  (.mkdirs (.getParentFile f))
+  (let [tmp (io/file (.getParentFile f) (str "." (.getName f) "." (System/nanoTime) ".tmp"))]
+    (spit tmp (with-out-str (pp/pprint x)))
+    (Files/move (.toPath tmp) (.toPath f)
+                (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE StandardCopyOption/REPLACE_EXISTING]))))
+
+(defn publish!
+  "Publish a VALIDATED result (validate-response :status :valid) for REQUEST
+  and RESPONSE into STORE. The request and response are kept whole under
+  content ids; the interpretation's receipt carries both ids, the checks it
+  passed and the answerer's own receipt. Refuses anything not :valid, and a
+  pattern id already published for this target with a different reading
+  (republishing the same one is a no-op). Returns the target's record."
+  [store request response validated & [{:keys [now] :or {now #(str (Instant/now))}}]]
+  (when-not (= :valid (:status validated))
+    (throw (ex-info "only a validated response is published"
+                    {:interpretation/refusal :want/not-validated :status (:status validated)})))
+  (let [target (:target request)
+        [id interp] (first (:interpretation validated))
+        request-id (content-id :request (dissoc request :retrieval))
+        response-id (content-id :response response)
+        prior (or (read-published store target)
+                  {:schema :wm/machine-interpretations-v1 :target target
+                   :patterns {} :receipts {} :records {}})
+        existing (get-in prior [:patterns id])]
+    (when (and existing (not= existing interp))
+      (throw (ex-info "a different interpretation of this pattern is already published"
+                      {:interpretation/refusal :want/conflicting-publication :pattern id
+                       :published existing :offered interp})))
+    (let [record (-> prior
+                     (assoc-in [:patterns id] interp)
+                     (assoc-in [:receipts id]
+                               (assoc (:receipt validated)
+                                      :kind :machine-requested
+                                      :request-id request-id :response-id response-id
+                                      :want (:want validated)
+                                      :validated {:checks [:canonical-id :library-source-sha :produces-want
+                                                           :guard-tokens-known :owner-constraints
+                                                           :constructs-through-it :admitted]
+                                                  :candidate (:candidate validated)
+                                                  :at (now)}))
+                     (assoc-in [:records request-id] request)
+                     (assoc-in [:records response-id] response))]
+      (when-not existing (write-atomic! (target-file store target) record))
+      record)))
+
+(defn merge-published
+  "SOURCES with each of TARGETS' machine-published interpretations merged
+  in. A hand-written declaration wins on any pattern id it names. Records which ids came from
+  the store under :machine-interpretations."
+  [sources store targets]
+  (reduce (fn [srcs target]
+            (if-let [{:keys [patterns receipts]} (read-published store target)]
+              (let [declared (set (keys (get-in srcs [:interpretations target :patterns])))
+                    fresh (remove (comp declared key) patterns)]
+                (-> srcs
+                    (update-in [:interpretations target :patterns] merge (into {} fresh))
+                    (update-in [:interpretations target :receipts] merge
+                               (select-keys receipts (map key fresh)))
+                    (assoc-in [:machine-interpretations target] (vec (sort-by str (map key fresh))))))
+              srcs))
+          sources
+          targets))

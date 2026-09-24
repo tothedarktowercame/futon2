@@ -164,3 +164,67 @@
 
 (deftest a-decline-is-recorded-not-rejected
   (is (= :declined (:status (validate argue {:decline {:reason :no-library-pattern}} (seams-sources))))))
+
+;; ---------------------------------------------------------------------------
+;; Part 3: publication, and the next tick constructing from it
+
+(defn- temp-store []
+  (let [d (.toFile (Files/createTempDirectory "wm-interp-store" (make-array FileAttribute 0)))]
+    (swap! roots conj d) (.getCanonicalPath d)))
+
+(deftest published-interpretations-construct-on-the-next-tick
+  (let [store (temp-store)
+        s0 (seams-sources)
+        doc-resp (response :writing-coherence/meet-the-reader-where-they-are)
+        doc (validate document doc-resp s0)
+        _ (wi/publish! store (req document) doc-resp doc)
+        arg-resp (response :writing-coherence/plain-language-thesis)
+        arg (validate argue arg-resp (wi/merge-published s0 store ["M-futon-seams"]))
+        rec (wi/publish! store (req argue) arg-resp arg)
+        {:keys [problems refusals]}
+        (futon2.report.war-machine/assemble-cascade-problems-with-published
+         store {:targets ["M-futon-seams"] :sources s0})]
+    (is (= :valid (:status arg)) "ARGUE validates against the published DOCUMENT reading")
+    (is (= #{:writing-coherence/meet-the-reader-where-they-are :writing-coherence/plain-language-thesis}
+           (set (keys (:patterns rec)))))
+    (is (= :machine-requested (get-in rec [:receipts :writing-coherence/plain-language-thesis :kind])))
+    (is (= 4 (count (:records rec))) "two requests and two responses kept whole")
+    (is (empty? refusals) (pr-str refusals))
+    (is (= [[:writing-coherence/meet-the-reader-where-they-are :writing-coherence/plain-language-thesis]]
+           (get-in (first problems) [:cascade-problem :precedences])))))
+
+(deftest only-validated-responses-publish
+  (let [store (temp-store)
+        bad (assoc (response :writing-coherence/plain-language-thesis) :produces #{document})
+        v (validate argue bad (seams-sources))]
+    (is (= :want/not-validated
+           (try (wi/publish! store (req argue) bad v) nil
+                (catch clojure.lang.ExceptionInfo e (:interpretation/refusal (ex-data e))))))
+    (is (nil? (wi/read-published store "M-futon-seams")))))
+
+(deftest a-conflicting-reading-of-a-published-pattern-refuses
+  (let [store (temp-store)
+        resp (response :writing-coherence/meet-the-reader-where-they-are)
+        v (validate document resp (seams-sources))
+        _ (wi/publish! store (req document) resp v)
+        other (update-in v [:interpretation :writing-coherence/meet-the-reader-where-they-are :guard :needs]
+                         conj :exit/h66b2ffcf3e0b)]
+    (is (= :want/conflicting-publication
+           (try (wi/publish! store (req document) resp other) nil
+                (catch clojure.lang.ExceptionInfo e (:interpretation/refusal (ex-data e))))))
+    (testing "republishing the same reading is a no-op"
+      (is (map? (wi/publish! store (req document) resp v))))))
+
+(deftest a-hand-declaration-wins-over-a-published-reading
+  (let [store (temp-store)
+        resp (response :writing-coherence/meet-the-reader-where-they-are)
+        v (validate document resp (seams-sources))
+        _ (wi/publish! store (req document) resp v)
+        declared {:guard {:needs #{instantiate} :forbids #{}} :produces #{document :exit/hdeclared}}
+        merged (wi/merge-published
+                (assoc-in (seams-sources) [:interpretations "M-futon-seams" :patterns
+                                           :writing-coherence/meet-the-reader-where-they-are] declared)
+                store ["M-futon-seams"])]
+    (is (= declared (get-in merged [:interpretations "M-futon-seams" :patterns
+                                    :writing-coherence/meet-the-reader-where-they-are])))
+    (is (= [] (get-in merged [:machine-interpretations "M-futon-seams"])))))
