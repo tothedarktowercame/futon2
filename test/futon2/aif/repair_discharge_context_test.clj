@@ -9,7 +9,8 @@
   record-implementation!) must refuse :discharge-context-missing before
   writing, so an unpublishable record can never be written again.
 
-  Tests 1-4 use a temp store root; data/ is only READ, in the pin."
+  Tests 1-4 use a temp store root; the pin reads fixture copies of the
+  class-B records (test/fixtures/repair-obligations/class-b), not data/."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
@@ -187,11 +188,12 @@
    "repair-initialization-a9177cab-e783-464e-83e2-21a6371484a4-initialization-failed"])
 
 (deftest pin-class-b-records-lack-the-context-today
-  ;; READ-ONLY over data/: the A1 change refuses future context-free writes;
-  ;; the legacy records themselves are A2's disposition decision and are
-  ;; deliberately untouched.
+  ;; The A1 change refuses future context-free writes; the legacy records
+  ;; themselves are A2's disposition decision and are deliberately untouched.
+  ;; Reads verbatim fixture copies (see the README there), so a pinned
+  ;; worktree, which has no data/, can run this.
   (doseq [id class-b-ids]
-    (let [f (io/file "data/wm-repair-obligations/resolutions" (str id ".edn"))]
+    (let [f (io/file "test/fixtures/repair-obligations/class-b" (str id ".edn"))]
       (is (.isFile f) (str id " exists on record"))
       (is (nil? (:repair/discharge-context (edn/read-string (slurp f))))
           (str id " lacks :repair/discharge-context today")))))
