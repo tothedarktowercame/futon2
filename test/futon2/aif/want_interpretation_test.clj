@@ -132,6 +132,13 @@
                     :budget {:max-moves 4 :max-expansions 20000} :move-cost 0
                     :evaluate-g futon2.report.war-machine/constructed-candidate-g}}))
 
+(def library-root
+  "Pinned copies of the library files the first flight's readings cite
+  (futon3/library/writing-coherence/{meet-the-reader-where-they-are,
+  plain-language-thesis}.flexiarg), laid out under futon3/library/ so the
+  receipts' paths resolve unchanged."
+  (.getCanonicalPath (io/file "test/fixtures/want-interp-library")))
+
 (def argue :exit/hac75428b9c97)
 (def document :exit/h54d16050a9dc)
 (def instantiate :exit/h4ef5c183bc55)
@@ -147,7 +154,10 @@
 (defn- validate [want resp sources]
   (wi/validate-response (req want) resp
                         {:sources sources :constraints [owner-constraint]
-                         :admit #'futon2.report.war-machine/admit-cascade-problem}))
+                         :admit #'futon2.report.war-machine/admit-cascade-problem
+                         ;; the two library files' bytes, pinned: the receipt
+                         ;; sha check must not depend on live futon3
+                         :code-root library-root}))
 
 (defn- admit-into [sources {:keys [interpretation receipt]}]
   (let [[id interp] (first interpretation)]

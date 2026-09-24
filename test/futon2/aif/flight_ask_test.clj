@@ -72,6 +72,8 @@
   (let [f (seams-flight)
         wants (flight/click-wants f tick-sources)]
     ((fr/ask-fn (cond-> {:store (.getCanonicalPath store) :answer-fn answer-fn
+                         ;; pinned library bytes (see want-interpretation-test)
+                         :code-root (.getCanonicalPath (io/file "test/fixtures/want-interp-library"))
                          :request-options (request-options)}
                   declared (assoc :constraints declared)))
      f wants tick-sources)))
