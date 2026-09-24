@@ -1,0 +1,68 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {:aif/two-layer-calibration
+  {:guard {:needs #{}, :forbids #{:hole/h46ed944f95da}},
+   :produces #{:hole/h46ed944f95da}},
+  :futon-theory/crime-relocates-to-a-scarcer-witness
+  {:guard
+   {:needs #{:hole/h46ed944f95da}, :forbids #{:hole/hb5b297019e1e}},
+   :produces #{:hole/hb5b297019e1e}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h46ed944f95da
+        {:class :C4,
+         :repo "futon0",
+         :sha "HEAD",
+         :path "holes/missions/M-futonzero-generative.md",
+         :decl
+         "- [x] G-SIM clearance — field-simulator adequacy; first MEASURED calibration pairs now accruing via the WM pilot loop"},
+        :hb5b297019e1e
+        {:class :C4,
+         :repo "futon0",
+         :sha "HEAD",
+         :path "holes/missions/M-futonzero-generative.md",
+         :decl
+         "- [x] G-REWARD clearance — anti-laundered reward; Pudding Prover G1 arrow-witness binding"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {:aif/two-layer-calibration
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/aif/two-layer-calibration.flexiarg",
+    :sha256
+    "76a281cd37088f9de561ff72f8d5874180d12fe2b1103f190e57d5cc196c8366"},
+   :reading
+   "G-SIM clearance is field-simulator adequacy with the first MEASURED calibration pairs accruing via the WM pilot loop. The pattern separates simulator-internal consistency from witnessed outcomes: adequacy is earned in the empirical layer by measured pairs, never by the simulator agreeing with itself.",
+   :scope-limit
+   "Covers the adequacy-by-measured-pairs discipline; the simulator's construction and the pilot loop's mechanics are the mission's own work."},
+  :futon-theory/crime-relocates-to-a-scarcer-witness
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/futon-theory/crime-relocates-to-a-scarcer-witness.flexiarg",
+    :sha256
+    "faa366f4cebf604a080f478823542a63136fe543c314a9269cee708f06928fce"},
+   :reading
+   "G-REWARD clearance is anti-laundered reward with the Pudding Prover G1 arrow-witness binding. The pattern: a laundering failure is never killed by one fix — it relocates to a scarcer witness — so the defense is a ladder of progressively scarcer witnesses terminating in a witnessed real outcome. The arrow-witness binding is one rung of that ladder, not the whole defense.",
+   :scope-limit
+   "Covers the witness-ladder reading of the binding; it warns explicitly that this rung will not be the last, and does not name the next rung."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want [:hole/h46ed944f95da :hole/hb5b297019e1e],
+ :mu {:value 0, :status :declared},
+ :target "M-futonzero-generative",
+ :facts [:hole/h46ed944f95da :hole/hb5b297019e1e]}

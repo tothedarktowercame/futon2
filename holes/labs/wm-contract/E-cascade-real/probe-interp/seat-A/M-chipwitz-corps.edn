@@ -1,0 +1,158 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {:futon-theory/derive-exits-on-a-minted-sorry
+  {:guard {:needs #{}, :forbids #{:hole/hb9354e61ab3e}},
+   :produces #{:hole/hb9354e61ab3e}},
+  :musn/use-requires-evidence
+  {:guard
+   {:needs #{:hole/hb9354e61ab3e}, :forbids #{:hole/h09128afee45a}},
+   :produces #{:hole/h09128afee45a}},
+  :orchestration/pattern-warranted-choice-point
+  {:guard
+   {:needs #{:hole/h09128afee45a}, :forbids #{:hole/h5963cec1a3df}},
+   :produces #{:hole/h5963cec1a3df}},
+  :aif/two-layer-calibration
+  {:guard
+   {:needs #{:hole/h5963cec1a3df}, :forbids #{:hole/h2c51566a32b4}},
+   :produces #{:hole/h2c51566a32b4}},
+  :math-strategy/missing-dependency-protocol
+  {:guard
+   {:needs #{:hole/h2c51566a32b4}, :forbids #{:hole/h4bd2d74d8763}},
+   :produces #{:hole/h4bd2d74d8763}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:hb9354e61ab3e
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] DERIVE: the warrant threshold — what cascade C-score / match quality"},
+        :h09128afee45a
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] Typed PXR channel (sibling of `futon3c.aif.discipline-events`): PSR +"},
+        :h5963cec1a3df
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] Wire the choice-point check into the pilot flow (warrant-finder"},
+        :h2c51566a32b4
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] `:pxr` evidence kind in `futon3c.aif.calibration` (FutonZero"},
+        :h4bd2d74d8763
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] No-warrant asks → sorry-mining hook (library gap → registry candidate)."},
+        :h056f5583d59e
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] Relation to `library/corps/` patterns: name which corps disciplines"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {:futon-theory/derive-exits-on-a-minted-sorry
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/futon-theory/derive-exits-on-a-minted-sorry.flexiarg",
+    :sha256
+    "a831c996d169a37aa75972df6225cb0dc143115f7b2acc391f0d8ac55762d3dd"},
+   :reading
+   "The task line itself begins 'DERIVE: the warrant threshold — what cascade C-score / match quality'. The pattern names DERIVE's exit condition: a minted typed sorry — an explicit have→want arrow for the threshold, persisted, before any ARGUE about values. Deriving the threshold IS minting that arrow, not picking a number.",
+   :scope-limit
+   "Covers the derivation of the threshold question and its typed-sorry exit; it does not supply the threshold value, which the mission's later tasks must earn."},
+  :musn/use-requires-evidence
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/musn/use-requires-evidence.flexiarg",
+    :sha256
+    "a1496439d075c5bdcac2027e5c3f56bb30014c87c8b9c92a765ddbe78a9cc29b"},
+   :reading
+   "The task asks for a typed PXR channel carrying PSR+ records. The pattern is the same discipline: a use-mode selection must leave a PUR and at least one evidence record before turn end — no audit-trail-free pattern use. The PXR channel types that obligation as a sibling of discipline-events.",
+   :scope-limit
+   "Covers the evidence-carrier obligation of the channel; the channel's exact record schema is the mission's design work, not this pattern's."},
+  :orchestration/pattern-warranted-choice-point
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/orchestration/pattern-warranted-choice-point.flexiarg",
+    :sha256
+    "b62b00deb1415fa9e25dfa986e16254a4d9497bb0d934ec2642b380227c00fe9"},
+   :reading
+   "The task wires the choice-point check into the pilot flow. The pattern: every choice-point in an autonomous loop should carry the patterns that warrant it, and the gated fork surfaces with its warrant and the one specific gap — exactly what wiring a warrant-finder check into the pilot must produce.",
+   :scope-limit
+   "Covers the choice-point wiring and its legibility; it does not derive the warrant threshold (the DERIVE task) or make the pilot's warrants good ones."},
+  :aif/two-layer-calibration
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/aif/two-layer-calibration.flexiarg",
+    :sha256
+    "76a281cd37088f9de561ff72f8d5874180d12fe2b1103f190e57d5cc196c8366"},
+   :reading
+   "The task adds a :pxr evidence kind in futon3c.aif.calibration. The pattern's two-layer discipline says how such an evidence kind must behave: pattern-relative consistency in one layer, witnessed outcomes in a separately labelled empirical layer, so a :pxr row can never be read as calibrated from self-produced scores alone.",
+   :scope-limit
+   "Covers the calibration layering of the new evidence kind; it does not populate the calibration data."},
+  :math-strategy/missing-dependency-protocol
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/math-strategy/missing-dependency-protocol.flexiarg",
+    :sha256
+    "7ac0fd890c50c9026f46a16722361b50c3e2cb37aa2fae660aebfd8887c4785d"},
+   :reading
+   "The task routes no-warrant asks to a sorry-mining hook (library gap → registry candidate). The pattern: when work stalls for lack of a pattern, establish the gap is real, localize it at exactly one sorry, and write beside it what was searched and what is left to build — which is precisely a gap-to-candidate hook.",
+   :scope-limit
+   "Covers the gap-localization and recording; it does not guarantee the mined sorry becomes a good library pattern."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/hb9354e61ab3e
+  :hole/h09128afee45a
+  :hole/h5963cec1a3df
+  :hole/h2c51566a32b4
+  :hole/h4bd2d74d8763
+  :hole/h056f5583d59e],
+ :mu {:value 0, :status :declared},
+ :target "M-chipwitz-corps",
+ :facts
+ [:hole/hb9354e61ab3e
+  :hole/h09128afee45a
+  :hole/h5963cec1a3df
+  :hole/h2c51566a32b4
+  :hole/h4bd2d74d8763
+  :hole/h056f5583d59e]}

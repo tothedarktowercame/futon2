@@ -1,0 +1,146 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {:social/verify-before-compose
+  {:guard
+   {:needs #{},
+    :forbids
+    #{:hole/h6adae34e06ad :hole/h8b2289908aa2 :hole/he92ac929f4c4}},
+   :produces
+   #{:hole/h6adae34e06ad :hole/h8b2289908aa2 :hole/he92ac929f4c4}},
+  :aif/shared-kernel-predictive-forward-model
+  {:guard
+   {:needs
+    #{:hole/h6adae34e06ad :hole/h8b2289908aa2 :hole/he92ac929f4c4},
+    :forbids #{:hole/h30576d62bffb}},
+   :produces #{:hole/h30576d62bffb}},
+  :peripherals/read-only-first-then-extend
+  {:guard
+   {:needs #{:hole/h30576d62bffb}, :forbids #{:hole/ha3f46a5c0073}},
+   :produces #{:hole/ha3f46a5c0073}},
+  :orchestration/recorded-handoff
+  {:guard
+   {:needs #{:hole/ha3f46a5c0073}, :forbids #{:hole/h3547e9033d0d}},
+   :produces #{:hole/h3547e9033d0d}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h6adae34e06ad
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl "- [x] `clj-kondo` clean on the new `.clj` files."},
+        :he92ac929f4c4
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl
+         "- [x] `futon4/dev/check-parens.el` clean on the new `.clj`/`.bb`."},
+        :h8b2289908aa2
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl
+         "- [x] `clojure -X:test` (futon3c) passes incl. the new test ns."},
+        :h30576d62bffb
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl
+         "- [x] `bb futon7/holes/M-futon-forward-model.manifold-reader.bb` runs clean + prints the observation summary."},
+        :ha3f46a5c0073
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl
+         "- [x] NO real-world side-effects, NO XTDB writes, NO sending — read-only + pure logic only."},
+        :h3547e9033d0d
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl
+         "- [x] **bell claude-1 back with a summary + commit shas.**"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {:social/verify-before-compose
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/social/verify-before-compose.flexiarg",
+    :sha256
+    "b702e1c5a199eb4c910c018fdc42857ef3d00a98c80881b05cc7f12c6320a891"},
+   :reading
+   "Three tasks are one verification discipline: clj-kondo clean, check-parens clean, and the test suite passing with the new test ns. The pattern: each namespace must load cleanly and pass its own proof tests before being composed with others — the three gate tasks are its verification steps for this mission's new files.",
+   :scope-limit
+   "Covers the pre-composition verification gates; it does not make the verified code correct, only checked before composition."},
+  :aif/shared-kernel-predictive-forward-model
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/aif/shared-kernel-predictive-forward-model.flexiarg",
+    :sha256
+    "33873d4998b46c5284705eec629a29d6a7a8e4761798d0cf6b56d67afff0b4d7"},
+   :reading
+   "The task runs the manifold-reader and prints the observation summary. The mission is a forward-model reader; the pattern extracts the deterministic dynamics core into a pure shared kernel that both the live step and the predictive call use — the reader is the pure-kernel consumer, reading the same manifold the live step would act on, with no shadow dynamics to drift.",
+   :scope-limit
+   "Covers the reader being the pure kernel's consumer; it does not validate the manifold data itself."},
+  :peripherals/read-only-first-then-extend
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/peripherals/read-only-first-then-extend.flexiarg",
+    :sha256
+    "ffe10550fc9d3c85725b0a086a1e9e3c5eae2f93319a67e90a073698022a1180"},
+   :reading
+   "The task: NO real-world side-effects, NO XTDB writes, NO sending — read-only + pure logic only. The pattern: a new peripheral's first instantiation is read-only — observing, displaying, not writing; write capability comes later only if observation shows what writes need to look like.",
+   :scope-limit
+   "Covers the read-only instantiation discipline; whether a write-capable second instantiation is ever warranted is a later decision this reading does not make."},
+  :orchestration/recorded-handoff
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/orchestration/recorded-handoff.flexiarg",
+    :sha256
+    "232ec874e6061ce48f7edc39cc6a7029c7005a934c5769abd26cf4ed93c30620"},
+   :reading
+   "The task line is literal: 'bell claude-1 back with a summary + commit shas.' The pattern's return leg is exactly that: bell-back summary plus commit shas on return, recorded in the owning mission document, so the handoff is auditable by the same instruments as the rest of the mission.",
+   :scope-limit
+   "Covers the return-leg record; the work reported in the summary is the other tasks'."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/h6adae34e06ad
+  :hole/he92ac929f4c4
+  :hole/h8b2289908aa2
+  :hole/h30576d62bffb
+  :hole/ha3f46a5c0073
+  :hole/h3547e9033d0d],
+ :mu {:value 0, :status :declared},
+ :target "M-futon-forward-model",
+ :facts
+ [:hole/h6adae34e06ad
+  :hole/he92ac929f4c4
+  :hole/h8b2289908aa2
+  :hole/h30576d62bffb
+  :hole/ha3f46a5c0073
+  :hole/h3547e9033d0d]}

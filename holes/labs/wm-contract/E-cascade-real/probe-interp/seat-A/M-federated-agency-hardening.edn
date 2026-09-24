@@ -1,0 +1,121 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {:realtime/listener-leases
+  {:guard {:needs #{}, :forbids #{:hole/hd6dd12860265}},
+   :produces #{:hole/hd6dd12860265}},
+  :realtime/rendezvous-handshake
+  {:guard
+   {:needs #{:hole/hd6dd12860265}, :forbids #{:hole/hb8a6fa5239dc}},
+   :produces #{:hole/hb8a6fa5239dc}},
+  :agency/state-atomicity
+  {:guard
+   {:needs #{:hole/hb8a6fa5239dc}, :forbids #{:hole/h260a1b85a356}},
+   :produces #{:hole/h260a1b85a356}},
+  :agency/single-routing-authority
+  {:guard
+   {:needs #{:hole/h260a1b85a356}, :forbids #{:hole/hf4b4e2392af5}},
+   :produces #{:hole/hf4b4e2392af5}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:hd6dd12860265
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-federated-agency-hardening.md",
+         :decl
+         "- [x] Laptop federates with the tunnel OFF (no 17070 listener anywhere)."},
+        :hb8a6fa5239dc
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-federated-agency-hardening.md",
+         :decl
+         "- [x] Rebooting either box requires zero human action: uplink reconnects within"},
+        :h260a1b85a356
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-federated-agency-hardening.md",
+         :decl
+         "- [x] `oxf=http://127.0.0.1:17070` peer entry removable from dev-linode-env once"},
+        :hf4b4e2392af5
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-federated-agency-hardening.md",
+         :decl
+         "- [x] Invariants hold: uplink routes to agents that already exist (I-2); no"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {:realtime/listener-leases
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/realtime/listener-leases.flexiarg",
+    :sha256
+    "6affc9e2f4fcf25ea5b4f9db84c40645121e844b500eccfdc283225f91867987"},
+   :reading
+   "The task: laptop federates with the tunnel OFF — no 17070 listener anywhere. The pattern prevents phantom listeners by versioning identities and expiring old instances, which is the discipline that keeps 'no listener' a checkable state rather than an assumption about what some stale process is doing.",
+   :scope-limit
+   "Covers listener hygiene; the federation routing itself is the later tasks' work."},
+  :realtime/rendezvous-handshake
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/realtime/rendezvous-handshake.flexiarg",
+    :sha256
+    "bed1e0dbbf24a019269c8e52d613f32f95bad51c9301dc3142de55485ac43e45"},
+   :reading
+   "The task: rebooting either box requires zero human action — uplink reconnects within the stated bound. The pattern starts work only after a signed hello+ack handshake confirms coherent reception, which is the mechanism that makes a reconnect automatic and its success observable instead of silent.",
+   :scope-limit
+   "Covers the reconnect handshake; it does not set the latency bound the task names."},
+  :agency/state-atomicity
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/agency/state-atomicity.flexiarg",
+    :sha256
+    "98e0cd20486c735aca868acce3a912db37d58711f5680ae9b3d6fcf4b23beab7"},
+   :reading
+   "The task: the oxf=http://127.0.0.1:17070 peer entry must be removable from dev-linode-env once the tunnel is off. The pattern: a state transition completes fully or reverts with an explicit error — no half-removed peer entry leaving config and runtime in disagreement.",
+   :scope-limit
+   "Covers the atomicity of the removal; which entries should exist afterwards is a config decision, not the pattern's."},
+  :agency/single-routing-authority
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/agency/single-routing-authority.flexiarg",
+    :sha256
+    "df6bf568dee5ded23e3cf08530605b12abe375a3351676fe082305713a1dbf07"},
+   :reading
+   "The task: invariants hold — uplink routes to agents that already exist (I-2). The pattern: one agent, one routing path, one source of truth. Routing to existing agents only is exactly the single-authority discipline — no second route table that can invent destinations.",
+   :scope-limit
+   "Covers the routing-authority invariant; the enumerated I-2 invariant list may contain items this reading does not discharge."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/hd6dd12860265
+  :hole/hb8a6fa5239dc
+  :hole/h260a1b85a356
+  :hole/hf4b4e2392af5],
+ :mu {:value 0, :status :declared},
+ :target "M-federated-agency-hardening",
+ :facts
+ [:hole/hd6dd12860265
+  :hole/hb8a6fa5239dc
+  :hole/h260a1b85a356
+  :hole/hf4b4e2392af5]}

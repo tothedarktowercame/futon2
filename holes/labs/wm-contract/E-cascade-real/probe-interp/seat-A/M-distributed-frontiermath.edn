@@ -1,0 +1,104 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {:agent/student-dispatch
+  {:guard {:needs #{}, :forbids #{:hole/h16025dd5deeb}},
+   :produces #{:hole/h16025dd5deeb}},
+  :f6/stratum-bridge
+  {:guard {:needs #{}, :forbids #{:hole/h8606857c4374}},
+   :produces #{:hole/h8606857c4374 :hole/hd4bfb746db9b}},
+  :orchestration/recorded-handoff
+  {:guard
+   {:needs #{:hole/h16025dd5deeb :hole/hd4bfb746db9b},
+    :forbids #{:hole/h022fc0e7fab5}},
+   :produces #{:hole/h022fc0e7fab5}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h16025dd5deeb
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-distributed-frontiermath.md",
+         :decl
+         "- [x] claude-2 Mentor session started on workspace2 (REPL-driven, not auto-invoke)"},
+        :hd4bfb746db9b
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-distributed-frontiermath.md",
+         :decl
+         "- [x] zcodex reachable from `#math` (currently configured same as codex; may need Rob's bridge)"},
+        :h8606857c4374
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-distributed-frontiermath.md",
+         :decl "- [x] Rob has IRC access to `#math`"},
+        :h022fc0e7fab5
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-distributed-frontiermath.md",
+         :decl
+         "- [x] Tickle bell-driven orchestration wired for FM-001 phase transitions"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {:agent/student-dispatch
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/agent/student-dispatch.flexiarg",
+    :sha256
+    "de2acae2abce39219770f881b5fd7be32127866f70213f9442875062fb24a468"},
+   :reading
+   "The task starts a claude-2 Mentor session on workspace2, REPL-driven, not auto-invoke. The pattern dispatches an agent as a student-explorer, not a junior-developer-verifier: problem context, what has been tried, candidate directions, a structured report format. A mentor session is exactly that dispatch shape.",
+   :scope-limit
+   "Covers the session's dispatch shape; the mathematical content of the mentoring is out of scope for the pattern."},
+  :f6/stratum-bridge
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/f6/stratum-bridge.flexiarg",
+    :sha256
+    "f473399c3c28271101590a536368999e686291f23101ac8f13a41d69113302da"},
+   :reading
+   "Two tasks are one bridge in two directions: Rob needs IRC access to #math, and zcodex must be reachable from #math (possibly via Rob's bridge). The pattern connects work across strata that cannot see each other, so one bridging move covers both access tasks.",
+   :scope-limit
+   "Covers the bridging; it does not verify the collaborators' work, and a bridge configured but unused does not complete the later orchestration task."},
+  :orchestration/recorded-handoff
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/orchestration/recorded-handoff.flexiarg",
+    :sha256
+    "232ec874e6061ce48f7edc39cc6a7029c7005a934c5769abd26cf4ed93c30620"},
+   :reading
+   "The task wires tickle bell-driven orchestration for FM-001 phase transitions. The pattern models each handoff as a recorded object with a lifecycle — spec at dispatch, job-id on send, bell-back on return — which is what bell-driven phase transitions need to be auditable rather than a tangle of messages.",
+   :scope-limit
+   "Covers the handoff recording of the transitions; the phase machine's correctness (right transitions at right times) is separate."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/h16025dd5deeb
+  :hole/hd4bfb746db9b
+  :hole/h8606857c4374
+  :hole/h022fc0e7fab5],
+ :mu {:value 0, :status :declared},
+ :target "M-distributed-frontiermath",
+ :facts
+ [:hole/h16025dd5deeb
+  :hole/hd4bfb746db9b
+  :hole/h8606857c4374
+  :hole/h022fc0e7fab5]}

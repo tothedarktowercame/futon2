@@ -1,0 +1,122 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {:peripherals/read-only-first-then-extend
+  {:guard {:needs #{}, :forbids #{:hole/h26fc1070c3e6}},
+   :produces #{:hole/h26fc1070c3e6}},
+  :sidecar/append-only-semantic-audit
+  {:guard
+   {:needs #{:hole/h26fc1070c3e6}, :forbids #{:hole/h4d3638710e7b}},
+   :produces #{:hole/h4d3638710e7b}},
+  :futon-theory/minimum-viable-events
+  {:guard
+   {:needs #{:hole/h4d3638710e7b}, :forbids #{:hole/ha04170c8d22b}},
+   :produces #{:hole/ha04170c8d22b}},
+  :musn/use-requires-evidence
+  {:guard
+   {:needs #{:hole/ha04170c8d22b}, :forbids #{:hole/hbc48e7c4dbdf}},
+   :produces #{:hole/hbc48e7c4dbdf}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h26fc1070c3e6
+        {:class :C4,
+         :repo "futon2",
+         :sha "HEAD",
+         :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+         :decl
+         "- [x] **Adapt one non-threshold diversity source for Slice 1b.** A read-only"},
+        :h4d3638710e7b
+        {:class :C4,
+         :repo "futon2",
+         :sha "HEAD",
+         :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+         :decl
+         "- [x] **Make cascade scoring prefix-local and auditable.** Recompute every"},
+        :ha04170c8d22b
+        {:class :C4,
+         :repo "futon2",
+         :sha "HEAD",
+         :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+         :decl
+         "- [x] **Specify and persist the cascade-habit return event.** A distinct"},
+        :hbc48e7c4dbdf
+        {:class :C4,
+         :repo "futon2",
+         :sha "HEAD",
+         :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+         :decl
+         "- [x] **Run a dark end-to-end hierarchy shadow.** Candidate construction,"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {:peripherals/read-only-first-then-extend
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/peripherals/read-only-first-then-extend.flexiarg",
+    :sha256
+    "ffe10550fc9d3c85725b0a086a1e9e3c5eae2f93319a67e90a073698022a1180"},
+   :reading
+   "Slice 1b adapts one non-threshold diversity source as a read-only source. The pattern: a new peripheral's first instantiation is read-only — observing, not writing — which is the task's stated shape verbatim.",
+   :scope-limit
+   "Covers the read-only adaptation; whether the source later earns a write path is a separate, later decision."},
+  :sidecar/append-only-semantic-audit
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/sidecar/append-only-semantic-audit.flexiarg",
+    :sha256
+    "20b4c6ea725c9636f768742d372d0862eb3a872bb21b42ba14724c96be892f4e"},
+   :reading
+   "The task makes cascade scoring prefix-local and auditable, recomputing every score from the prefix. The pattern keeps semantic writes append-only with provenance at the boundary, so every scored step is inspectable against what was actually recorded rather than reconstructed from overwritten state.",
+   :scope-limit
+   "Covers the auditable-by-construction property; the recompute's numerical agreement is the mission's test work, not the pattern's."},
+  :futon-theory/minimum-viable-events
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/futon-theory/minimum-viable-events.flexiarg",
+    :sha256
+    "d5175bbdefcec675a103d87550b38698c9892c55130833233e487b5b53b4b840"},
+   :reading
+   "The task specifies and persists the cascade-habit return event — a distinct event for the habit's return. The pattern: log the minimum events required for full auditability — every decision point, not every keystroke. The return event is exactly a named decision point made durable.",
+   :scope-limit
+   "Covers the event's specification and persistence; it does not make downstream consumers read it."},
+  :musn/use-requires-evidence
+  {:kind :hand-admitted,
+   :by "kimi-6",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/musn/use-requires-evidence.flexiarg",
+    :sha256
+    "a1496439d075c5bdcac2027e5c3f56bb30014c87c8b9c92a765ddbe78a9cc29b"},
+   :reading
+   "The task runs a dark end-to-end hierarchy shadow: candidate construction through selection with no actuation. A shadow that leaves no records proves nothing; the pattern requires the run to produce a PUR and at least one evidence record, which is what makes a dark run a measurement rather than a story.",
+   :scope-limit
+   "Covers the evidence obligation of the shadow run; the shadow's fidelity to the real path is the mission's own validation work."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/h26fc1070c3e6
+  :hole/h4d3638710e7b
+  :hole/ha04170c8d22b
+  :hole/hbc48e7c4dbdf],
+ :mu {:value 0, :status :declared},
+ :target "M-wm-aif-policy-grain-compliance",
+ :facts
+ [:hole/h26fc1070c3e6
+  :hole/h4d3638710e7b
+  :hole/ha04170c8d22b
+  :hole/hbc48e7c4dbdf]}
