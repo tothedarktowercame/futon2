@@ -1,0 +1,215 @@
+diff --git a/src/futon2/aif/learning_trial_ledger.clj b/src/futon2/aif/learning_trial_ledger.clj
+index a4f30b16..33ba93e0 100644
+--- a/src/futon2/aif/learning_trial_ledger.clj
++++ b/src/futon2/aif/learning_trial_ledger.clj
+@@ -1,8 +1,9 @@
+ (ns futon2.aif.learning-trial-ledger
+-  "Append-only record-only counts. Read solely for deduplication/meaning admission,
+-   never by a production model. OS lock serializes independent writers."
++  "Append-only comparison-time trials, consumed by pattern-theta.
++   OS lock serializes independent writers; close acceptance is separate evidence."
+   (:require [clojure.edn :as edn]
+             [clojure.java.io :as io]
++            [clojure.string]
+             [futon2.aif.action-identity :as identity]
+             [futon2.aif.load-identity :as load-identity])
+   (:import [java.io RandomAccessFile PushbackReader StringReader]))
+@@ -126,7 +127,7 @@
+    event appears exactly once (the ledger's own deduplication identity is
+    the join key; a duplicate append would have been refused at write time)."
+   ([root] (read-trials root (io/file root "attempts.edn")))
+-  ([root file]
++  ([_root file]
+    (locking mutex
+      (if-not (.exists (io/file file))
+        []
+@@ -151,6 +152,189 @@
+                     :row row})
+                  (records (String. bytes "UTF-8")))))))))
+ 
++;; B-C records the population the judge reads, not accepted-close eligibility.
++(defn- exact-tree? [x]
++  (cond (number? x) (or (integer? x) (ratio? x))
++        (map? x) (every? exact-tree? (mapcat identity x))
++        (coll? x) (every? exact-tree? x)
++        :else true))
++
++(defn- canonical-text [x]
++  (cond
++    (map? x) (str "{" (clojure.string/join " "
++                        (for [[k v] (sort-by (comp canonical-text key) x)]
++                          (str (canonical-text k) " " (canonical-text v)))) "}")
++    (set? x) (str "#{" (clojure.string/join " " (sort (map canonical-text x))) "}")
++    (sequential? x) (str (if (vector? x) "[" "(")
++                         (clojure.string/join " " (map canonical-text x))
++                         (if (vector? x) "]" ")"))
++    (double? x) (str "#wm/double " (pr-str (Double/toHexString x)))
++    :else (identity/printed false x)))
++
++(defn carrier-hash
++  "CERT-S canonical EDN/UTF-8 SHA-256; preserves set and sequence kinds."
++  [x] (str "sha256:" (identity/sha256 (canonical-text x))))
++
++(defn- occurrence-key [x]
++  (let [k (select-keys x [:action/id :action/value-sha256 :transition/id])]
++    (when (and (= 3 (count k)) (every? some? (vals k))) k)))
++
++(defn- row-occurrence [r]
++  (occurrence-key (or (get-in r [:row :trial :deduplication :inputs :occurrence])
++                      (get-in r [:row :deduplication :inputs :occurrence]))))
++
++(defn close-files
++  "Read-only discovery of closed checkpoints under explicit cohort data roots."
++  [roots]
++  (vec (sort-by str
++               (for [root roots f (file-seq (io/file root))
++                     :when (and (.isFile f) (= "007-closed.edn" (.getName f)))] f))))
++
++(defn- close-status [judgment source]
++  (let [v (:accepted-increment judgment)]
++    (if (contains? v :accepted?)
++      {:status :recorded :accepted? (:accepted? v)
++       :reason (if (contains? v :reason) (:reason v)
++                   {:status :missing :reason :reason-not-recorded})
++       :source source}
++      {:status :missing :reason :acceptance-not-recorded :source source})))
++
++(defn annotate-close-statuses
++  "Attach close acceptance without filtering trials. Join all three occurrence
++   identity fields, never target/attempt alone. CURRENT is the judgment being
++   serialized into this close, not an assertion that a prior file exists."
++  [rows files current current-path]
++  (let [keys-needed (set (keep row-occurrence rows))
++        entries (reduce
++                 (fn [out f]
++                   (let [text (slurp f)
++                         event (edn/read-string {:default tagged-literal} text)
++                         j (get-in event [:payload :judgment])
++                         k (occurrence-key (:occurrence j))]
++                     (if (contains? keys-needed k)
++                       (update out k (fnil conj [])
++                               (close-status j {:path (str f)
++                                                :raw-sha256 (identity/sha256 text)
++                                                :key-path [:payload :judgment :accepted-increment]}))
++                       out))) {} files)
++        current-key (occurrence-key (:occurrence current))
++        entries (if (and current-key (contains? keys-needed current-key))
++                  (update entries current-key (fnil conj [])
++                          (close-status current {:path current-path
++                                                 :key-path [:payload :judgment :accepted-increment]
++                                                 :placement :same-close})) entries)]
++    (mapv (fn [r]
++            (let [k (row-occurrence r) matches (get entries k)]
++              (assoc r :close-acceptance
++                     (cond
++                       (nil? k) {:status :missing :reason :occurrence-not-recorded}
++                       (= 1 (count matches)) (first matches)
++                       (seq matches) {:status :missing :reason :ambiguous-close
++                                      :sources (mapv :source matches)}
++                       :else {:status :missing :reason :close-not-found})))) rows)))
++
++(defn concentration-carrier
++  "One separate O×S array per theta-key: O=[:achieved :not], S=[:singleton].
++   Population: rows appended at comparison, regardless of close acceptance.
++   Normalization sums OUTCOMES at FIXED state, never states or families.
++   Concentrations and trial vectors are exact rationals. Duplicate identities
++   collapse last-wins as pattern-theta does, ordered by first append position;
++   conflicting duplicates are exposed, not claimed to be protected by dedup."
++  [family rows dedup]
++  (let [mine (vec (filter #(= family (:theta-key %)) rows))
++        ids (vec (distinct (map :identity mine)))
++        by-id (into {} (map (juxt :identity identity)) mine)
++        ordered (mapv by-id ids)
++        _ (doseq [r ordered]
++            (when-not (and (string? (:identity r)) (boolean? (:observed r)))
++              (throw (ex-info "Trial cannot supply a one-hot vector"
++                              {:learning-ledger/refusal :invalid-trial :identity (:identity r)}))))
++        trials (mapv (fn [r]
++                       {:identity (:identity r) :theta-key family
++                        :observed (:observed r)
++                        :content-ref (carrier-hash (:row r))
++                        :source {:ledger-identity (:identity r)}
++                        :close-acceptance (or (:close-acceptance r)
++                                              {:status :missing :reason :close-not-looked-up})}) ordered)
++        vectors (mapv (fn [r] {:identity (:identity r)
++                              :outcome (if (:observed r) [1 0] [0 1])
++                              :state-belief [1]}) ordered)
++        successes (count (filter :observed ordered))
++        n (count ordered)
++        a (+ 1/2 successes) b (+ 1/2 (- n successes))
++        prior [[1/2] [1/2]] posterior [[a] [b]]
++        conflicts (vec (for [[id rs] (group-by :identity mine)
++                             :when (> (count (distinct rs)) 1)] id))
++        value {:schema :wm/b-update-carrier-v2 :family family
++               :population :rows-appended-at-comparison
++               :axes {:outcomes [:achieved :not] :states [:singleton]}
++               :prior-concentrations prior :posterior-concentrations posterior
++               :trial-identities trials :trial-vectors vectors
++               :dedup {:upstream dedup
++                       :read-side {:layer :read-identity :input-count (count mine)
++                                   :counted-count n :collapsed-count (- (count mine) n)
++                                   :conflicting-identities (vec (sort conflicts))
++                                   :policy :last-row-wins}}
++               :normalization {:axis :outcomes-at-fixed-state :state :singleton
++                               :conc-achieved a :conc-not b :theta (/ a (+ a b))}}
++        version (carrier-hash (select-keys value [:schema :family :axes
++                                                  :prior-concentrations :posterior-concentrations
++                                                  :trial-vectors]))]
++    (assoc value :version version :value-sha256 (carrier-hash value))))
++
++(defn carrier-refusal
++  "Validate GEN-E's exact singleton input; an invented token posterior is not
++   a singleton belief. No missing vector or number is silently synthesized."
++  [c]
++  (let [vs (:trial-vectors c) ts (:trial-identities c)
++        expected (mapv (fn [r] (if (:observed r) [1 0] [0 1])) ts)
++        successes (count (filter :observed ts)) n (count ts)
++        a (+ 1/2 successes) b (+ 1/2 (- n successes))]
++    (cond
++      (not (map? c)) :carrier-not-a-map
++      (not (exact-tree? c)) :inexact-number
++      (not= {:outcomes [:achieved :not] :states [:singleton]} (:axes c)) :carrier-axis-mismatch
++      (not (vector? vs)) :trial-vectors-missing
++      (or (some #(contains? % :token-belief) ts)
++          (some #(not= [1] (:state-belief %)) vs)) :token-posterior-not-a-trial
++      (not= (mapv :identity ts) (mapv :identity vs)) :trial-identity-mismatch
++      (not= (count ts) (count (set (map :identity ts)))) :duplicate-trial-identity
++      (not= expected (mapv :outcome vs)) :trial-vector-mismatch
++      (not= [[1/2] [1/2]] (:prior-concentrations c)) :prior-mismatch
++      (not= [[a] [b]] (:posterior-concentrations c)) :posterior-mismatch
++      (not= {:axis :outcomes-at-fixed-state :state :singleton
++             :conc-achieved a :conc-not b :theta (/ a (+ a b))}
++            (:normalization c)) :normalization-mismatch
++      (not= (:version c) (carrier-hash (select-keys c [:schema :family :axes
++                                                     :prior-concentrations :posterior-concentrations
++                                                     :trial-vectors]))) :version-mismatch
++      (not= (:value-sha256 c) (carrier-hash (dissoc c :version :value-sha256))) :value-hash-mismatch
++      :else nil)))
++
++(defn close-b-update
++  "Snapshot comparison-appended rows for this close, including refused closes.
++   Unavailable ledger/close reads emit typed absence, never a prior-as-fallback.
++   This is a producer receipt; no assertion of subsequent scorer consumption."
++  [{:keys [ledger-root close-path close-judgment close-record-files learning-trial-receipt]}]
++  (try
++    (if-not (.isFile (io/file ledger-root "attempts.edn"))
++      {:status :missing :reason :ledger-unavailable}
++      (let [rows (annotate-close-statuses (read-trials ledger-root) close-record-files
++                                        close-judgment close-path)
++            families (sort-by str (distinct (filter keyword? (map :theta-key rows))))]
++        {:status :recorded :population :rows-appended-at-comparison
++         :ledger-path (str (io/file ledger-root "attempts.edn"))
++         :unattributed-identities (mapv :identity (remove #(keyword? (:theta-key %)) rows))
++         :families (into {} (for [family families]
++                             [family (concentration-carrier
++                                      family rows
++                                      {:layer :ledger-identity
++                                       :trials (mapv #(select-keys % [:status :reason :counted? :ledger])
++                                                     (:trials learning-trial-receipt))})]))}))
++    (catch Exception e
++      {:status :missing :reason :ledger-or-close-read-failed
++       :detail (or (:learning-ledger/refusal (ex-data e)) (.getMessage e))})))
++
+ (defn b-update
+   "The B update, applied ONLY after a close the accepted-increment predicate
+    accepts (the caller passes the predicate's verdict; this function refuses

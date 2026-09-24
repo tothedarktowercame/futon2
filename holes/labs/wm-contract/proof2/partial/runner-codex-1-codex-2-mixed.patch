@@ -1,0 +1,84 @@
+diff --git a/src/futon2/aif/full_loop_runner.clj b/src/futon2/aif/full_loop_runner.clj
+index c639b77b..11cb7a22 100644
+--- a/src/futon2/aif/full_loop_runner.clj
++++ b/src/futon2/aif/full_loop_runner.clj
+@@ -4122,6 +4122,28 @@
+                               (select-keys data
+                                            [:witness :effective-run-configuration
+                                             :standing-readback :failure-kind]))
++                       ;; Comparison-time appends are already visible to the judge.
++                       ;; Record that population irrespective of close acceptance.
++                       b-update-snapshot
++                       (learning-ledger/close-b-update
++                        {:ledger-root (or (:learning-trial-ledger-root opts)
++                                          learning-ledger/default-root)
++                         :close-path (when cohort?
++                                       (str (io/file (or (:data-root execution-cohort)
++                                                         cohort/default-data-root)
++                                                     (name (:cohort/id start-event))
++                                                     attempt-id "007-closed.edn")))
++                         :close-judgment close-judgment-base
++                         :learning-trial-receipt (:learning-trial-receipt close-judgment-base)
++                         :close-record-files
++                         (learning-ledger/close-files
++                          (or (:learning-trial-close-roots opts)
++                              (filter #(and (.isDirectory %)
++                                            (.startsWith (.getName %) "wm-full-loop"))
++                                      (.listFiles (.getParentFile
++                                                   (io/file (or (:learning-trial-ledger-root opts)
++                                                                learning-ledger/default-root)))))))})
++                       close-judgment-base (assoc close-judgment-base :b-update b-update-snapshot)
+                        run-ending-result
+                        (when (and cohort? @action-occurrence)
+                          (retain-run-ending!
+@@ -4172,7 +4194,8 @@
+                                                    {:selected-action selected-action
+                                                     :requested-pin
+                                                     (:run4/requested-pin opts)})
+-                       result-base (cond-> {:attempt-id attempt-id :opportunity-id opportunity-id
++                       result-base (cond-> {:b-update b-update-snapshot
++                               :attempt-id attempt-id :opportunity-id opportunity-id
+                                :outcome outcome :checkpoints @checkpoints
+                                :job-texts @job-text-records
+                                :d-task-enactment d-task-result
+@@ -4244,36 +4267,16 @@
+                              {:status :refused
+                               :reason (:learning-ledger/refusal (ex-data e))
+                               :message (.getMessage e)})))))
+-                       ;; B-C (PROOF-2 strategy row 34): the concentration
+-                       ;; carrier rides the update result (:carrier, built
+-                       ;; by learning-ledger/b-update from the rows the
+-                       ;; update consumed). Persist it beside the close's
+-                       ;; other retained evidence -- the close event itself
+-                       ;; was already written above, so retained/ is the
+-                       ;; honest emission point (same placement rule as
+-                       ;; token-outcome.edn). Typed absence, never a
+-                       ;; substituted number: a close without an accepted
+-                       ;; eligible outcome records why.
++                       ;; Retained copy of the SAME snapshot embedded in the closed
++                       ;; judgment, not an accepted-close-only recomputation.
+                        b-update-retained
+                        (when closed-event
+                          (let [f (io/file (or (:data-root execution-cohort)
+                                               cohort/default-data-root)
+                                           (name (:cohort/id closed-event))
+-                                          attempt-id "retained" "b-update.edn")
+-                               content (or (:carrier b-update-result)
+-                                           {:status :missing
+-                                            :reason (cond
+-                                                      (nil? b-update-result)
+-                                                      :close-not-accepted
+-                                                      (= :not-attributed (:status b-update-result))
+-                                                      :not-attributed
+-                                                      (= :refused (:status b-update-result))
+-                                                      :update-refused
+-                                                      :else :no-eligible-outcome)
+-                                            :detail (select-keys b-update-result
+-                                                                 [:status :reason :attribution])})]
++                                          attempt-id "retained" "b-update.edn")]
+                            (io/make-parents f)
+-                           (spit f (pr-str content))
++                           (spit f (pr-str b-update-snapshot))
+                            {:path (.getPath f)}))
+                        discharge-result
+                        (repair-discharge/finalize-run!
