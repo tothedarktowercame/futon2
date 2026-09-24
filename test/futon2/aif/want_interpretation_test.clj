@@ -246,7 +246,7 @@
     (is (= declared (get-in merged [:interpretations "M-futon-seams" :patterns
                                     :writing-coherence/meet-the-reader-where-they-are])))
     (is (= [] (get-in merged [:machine-interpretations "M-futon-seams"])))
-    (testing "the overruled published reading stays visible (AR-31)"
+    (testing "the overruled published reading stays visible (AR-39)"
       (let [[o] (get-in merged [:machine-interpretations-overridden "M-futon-seams"])]
         (is (= :writing-coherence/meet-the-reader-where-they-are (:id o)))
         (is (not= (:published-sha o) (:declared-sha o)))

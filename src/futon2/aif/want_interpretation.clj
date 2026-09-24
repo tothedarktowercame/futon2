@@ -357,7 +357,7 @@
                     fresh (remove (comp declared key) patterns)
                     reading-sha #(evidence/sha256 (.getBytes (pr-str (select-keys % [:guard :produces])) "UTF-8"))
                     ;; hand wins, but a published reading it overrode stays
-                    ;; visible on the merged sources (AR-31)
+                    ;; visible on the merged sources (AR-39)
                     overridden (vec (for [[id p] patterns
                                           :let [d (get declared-map id)]
                                           :when (and d (not= (reading-sha d) (reading-sha p)))]
