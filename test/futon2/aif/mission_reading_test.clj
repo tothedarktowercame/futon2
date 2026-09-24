@@ -324,6 +324,13 @@
     (is (= :valid (:status (v {:constraints []}))) "none stated is an answer")
     (testing "one bad edge refuses the reply"
       (is (= :rejected (:status (v {:constraints [edge (assoc edge :requires :exit/hnot-a-known-token)]}))))
+      ;; An unlisted token on the :want side refuses too; the edge is
+      ;; otherwise good, so only the :want check can reject it.
+      (let [r (v {:constraints [edge (assoc edge :want :exit/hnot-a-known-token)]})]
+        (is (= :rejected (:status r)))
+        (is (= [{:reason :edge-token-unknown
+                 :edge {:want :exit/hnot-a-known-token :requires acceptance-box}}]
+               (:reasons r))))
       (is (= :rejected (:status (v {:constraints [(assoc edge :requires checkbox)]}))))
       (is (= :rejected (:status (v {:constraints [(assoc-in edge [:cue :quote] "not the text")]})))))))
 
