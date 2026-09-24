@@ -1,0 +1,72 @@
+;; Classification of the 22 rows of the M-futon-seams exemplar check ledger
+;; (futon3c/holes/labs/M-futon-seams/exemplar/check-ledger.edn, schema
+;; :m-futon-seams/check-ledger-v1) for A-S Revision 2: eligibility by truth
+;; KIND, not by the presence of free-text :truth-source.
+;;
+;; Classifier: kimi-4, 2026-09-24 — the independent warrant checker of
+;; H-WITNESS-check, not the ledger's author (claude-10) and not claude-1.
+;; Each row's kind is judged from its :truth-source, :cause and :fixed-in:
+;; a row whose truth-source is the check's own output, or that names no
+;; independent act, is :self-truthed with the reason, unsoftened. In this
+;; ledger every row names an independent act, so no row is :self-truthed;
+;; that is a finding about this ledger, not a default. Kinds:
+;;   :constructed-bad-case      input built so the answer is known
+;;   :later-review              re-reading of the artefact by an agent or human
+;;   :independent-recomputation a second mechanism deriving the truth
+{:classification-source
+ {:classifier "kimi-4"
+  :classified-at "2026-09-24"
+  :basis "per-row reading of :truth-source/:cause/:fixed-in in check-ledger.edn (read-only); classifier is the H-WITNESS-check independent checker"
+  :ledger "futon3c/holes/labs/M-futon-seams/exemplar/check-ledger.edn"}
+
+ ;; ---- :test
+ :t1 {:kind :independent-recomputation
+      :reason "live proof-eval of the routing decisions agreed (claude-10) — a second evaluation mechanism, not the test suite"}
+ :t2 {:kind :constructed-bad-case
+      :reason "constructed bad case: the prefix rule, known to skip 22 :codex agents"}
+ :t3 {:kind :later-review
+      :reason "request-review! read to call roles/seat-for (review of the code)"}
+ :t4 {:kind :constructed-bad-case
+      :reason "constructed bad case: HEAD~ request-review!, both reviews go to claude-1"}
+ :t5 {:kind :later-review
+      :reason "review of the three seat-for call sites"}
+
+ ;; ---- :grep
+ :g1 {:kind :later-review
+      :reason "reading http.clj directly: two prefix branches — the file read by a person, not the regex's verdict"}
+ :g2 {:kind :constructed-bad-case
+      :reason "constructed bad case: 8e5c431e^ with only the first branch converted; :cause names the [^)]* defect"}
+ :g3 {:kind :later-review
+      :reason "review of the conversion"}
+ :g4 {:kind :later-review
+      :reason "reading http.clj (independent re-read against the new regex's verdict)"}
+ :g5 {:kind :constructed-bad-case
+      :reason "constructed bad case: one-branch input"}
+ :g6 {:kind :later-review
+      :reason "review of the conversion"}
+
+ ;; ---- :validator
+ :v1 {:kind :independent-recomputation
+      :reason "record built from recomputed values — the values re-derived, not taken from proof2a_check"}
+ :v2 {:kind :constructed-bad-case
+      :reason "nine extracts, each constructed to violate its named condition"}
+ :v3 {:kind :later-review
+      :reason "PROOF-2a W_0 text requires :machine-constructed — truth read off the spec against the record; :fixed-in 86d3f88e"}
+ :v4 {:kind :independent-recomputation
+      :reason "reflexive recomputation (proof2a_check, claude-10): the lower unit is the meet; :fixed-in 4d748660"}
+ :v5 {:kind :constructed-bad-case
+      :reason "constructed bad case: corrupted receipt hashes"}
+ :v6 {:kind :constructed-bad-case
+      :reason "constructed bad case: annotation shifted by one character"}
+ :v7 {:kind :later-review
+      :reason "claude-1 re-read: four notes still stale after '27 moved'; :fixed-in 83eb2b9e sentinels"}
+
+ ;; ---- :layout
+ :l1 {:kind :independent-recomputation
+      :reason "element screenshot (claude-10) against Joe's measure — a separate capture, not the layout script's verdict; :fixed-in 4e5a1350"}
+ :l2 {:kind :later-review
+      :reason "claude-1: body sample was the TOC's small print — review of what the check measured; :fixed-in 0addf90d"}
+ :l3 {:kind :independent-recomputation
+      :reason "element screenshot — an independently judged capture of the same page"}
+ :l4 {:kind :independent-recomputation
+      :reason "element screenshots of Figures 1 and 5 (claude-10)"}}

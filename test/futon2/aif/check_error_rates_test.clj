@@ -1,7 +1,12 @@
 (ns futon2.aif.check-error-rates-test
-  "Pins A-S / H-A: the 22-row exemplar ledger's per-kind counts verbatim,
-  the falsifier refusals, and the insufficient-count typed absence. Reads
-  the ledger at test time, read-only."
+  "Pins A-S / H-A, Revision 2: eligibility by truth KIND. The 22-row
+  exemplar ledger runs under the recorded classification fixture
+  (test/fixtures/check-ledger-classification/m-futon-seams-v1.edn); the
+  per-kind counts are pinned to what that classification yields. The
+  one-arg form (no classification) is pinned to exclude every row as
+  :unclassified. claude-8's review bad case (six self-truthed rows with
+  free-text :truth-source) is a test verbatim. Reads the ledger and the
+  fixture at test time, read-only."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
@@ -12,9 +17,18 @@
            ".." "futon3c" "holes" "labs" "M-futon-seams" "exemplar"
            "check-ledger.edn"))
 
-(defn- read-ledger []
-  (with-open [r (java.io.PushbackReader. (io/reader ledger-path))]
+(def classification-path
+  (io/file (System/getProperty "user.dir")
+           "test" "fixtures" "check-ledger-classification"
+           "m-futon-seams-v1.edn"))
+
+(defn- read-edn [path]
+  (with-open [r (java.io.PushbackReader. (io/reader path))]
     (edn/read r)))
+
+(defn- read-ledger [] (read-edn ledger-path))
+
+(defn- read-classification [] (read-edn classification-path))
 
 (deftest ledger-present-and-right-schema
   (let [ledger (read-ledger)]
@@ -22,10 +36,37 @@
     (is (= :m-futon-seams/check-ledger-v1 (:schema ledger)))
     (is (= 22 (count (:rows ledger))))))
 
-(deftest per-kind-counts-pinned-verbatim
+(deftest classification-present-and-covers-every-row
+  (let [ledger (read-ledger)
+        classification (read-classification)]
+    (is (.exists classification-path) "classification fixture must be readable")
+    (is (some? (:classification-source classification))
+        "the classification names who classified and when")
+    (doseq [row (:rows ledger)]
+      (is (contains? classification (:id row))
+          (str "every ledger row is classified: " (:id row))))))
+
+(deftest one-arg-form-excludes-everything-unclassified
   (let [rates (cer/measured-rates (read-ledger))]
-    (is (= #{} (set (::cer/excluded-ids rates)))
-        "every exemplar row has an independent :truth-source")
+    (is (= (into {} (map (fn [row] [(:id row) :unclassified]))
+                 (:rows (read-ledger)))
+           (::cer/excluded-ids rates))
+        "a ledger nobody has classified: every row excluded :unclassified")
+    (is (= {:status :absent :reason :no-classification}
+           (::cer/classification-source rates)))
+    (doseq [kind [:test :grep :validator :layout]]
+      (is (= :insufficient (:status (get rates kind)))
+          (str "kind " kind " is a typed absence when nothing is eligible"))
+      (is (= 0 (:n (get rates kind))))
+      (is (not (contains? (get rates kind) :fp-rate)))
+      (is (not (contains? (get rates kind) :fn-rate))))))
+
+(deftest per-kind-counts-pinned-verbatim
+  (let [rates (cer/measured-rates (read-ledger) (read-classification))]
+    (is (= {} (::cer/excluded-ids rates))
+        "the classification admits all 22 rows: every row names an
+        independent act; none is self-truthed (a finding, not a default)")
+    (is (= "kimi-4" (get-in rates [::cer/classification-source :classifier])))
     (testing ":test — 5 runs, no errors"
       (is (= {:n 5 :n-true 3 :n-false 2 :false-pass 0 :false-fail 0}
              (select-keys (:test rates)
@@ -52,7 +93,7 @@
         (is (not (contains? layout :fn-rate)))))))
 
 (deftest measured-rate-values-pinned
-  (let [rates (cer/measured-rates (read-ledger))]
+  (let [rates (cer/measured-rates (read-ledger) (read-classification))]
     (testing "Jeffreys-smoothed rates"
       (is (= 0.3 (:fp-rate (:grep rates))))
       (is (= 0.125 (:fn-rate (:test rates))))
@@ -63,6 +104,44 @@
               rate-key [:fp-interval :fn-interval]]
         (let [{:keys [lo hi]} (get-in rates [kind rate-key])]
           (is (<= 0.0 lo hi 1.0)))))))
+
+(deftest claude-8-review-bad-case-verbatim
+  (testing "six rows with :truth true :passed true and :truth-source \"the
+  check itself passed, so it held\" are NOT eligible — free text is not a
+  kind (the exact case claude-8 ran against cc831860, where n = 6 and
+  nothing was excluded)"
+    (let [bad-rows (vec (repeat 6 {:id :s1 :kind :selfcheck :check "c" :input "i"
+                                   :truth true :passed true
+                                   :truth-source "the check itself passed, so it held"}))
+          bad-rows (mapv #(assoc %1 :id (keyword (str "s" (inc %2))))
+                         bad-rows (range 6))
+          ledger {:schema :m-futon-seams/check-ledger-v1 :rows bad-rows}]
+      (testing "unclassified (no kind anywhere): excluded :unclassified"
+        (let [rates (cer/measured-rates ledger)]
+          (is (= 6 (count (::cer/excluded-ids rates))))
+          (is (every? #(= :unclassified %) (vals (::cer/excluded-ids rates))))
+          (is (= :insufficient (:status (:selfcheck rates))))
+          (is (= 0 (:n (:selfcheck rates))))))
+      (testing "classified :self-truthed: excluded :self-truthed"
+        (let [classification {:classification-source {:classifier "test"}
+                              :s1 :self-truthed :s2 :self-truthed :s3 :self-truthed
+                              :s4 :self-truthed :s5 :self-truthed :s6 :self-truthed}
+              rates (cer/measured-rates ledger classification)]
+          (is (= {:s1 :self-truthed :s2 :self-truthed :s3 :self-truthed
+                  :s4 :self-truthed :s5 :self-truthed :s6 :self-truthed}
+                 (::cer/excluded-ids rates)))
+          (is (= :insufficient (:status (:selfcheck rates))))
+          (is (= 0 (:n (:selfcheck rates)))))))))
+
+(deftest truth-kind-on-row-wins-over-map
+  (let [ledger {:schema :m-futon-seams/check-ledger-v1
+                :rows [{:id :r1 :kind :test :check "c" :input "i"
+                        :truth true :passed true
+                        :truth-kind :constructed-bad-case}]}
+        rates (cer/measured-rates ledger nil)]
+    (is (= {} (::cer/excluded-ids rates))
+        "a :truth-kind on the row itself makes it eligible without a map")
+    (is (= 1 (:n (:test rates))))))
 
 (deftest falsifier-declared-rates-refused
   (let [ledger (read-ledger)
@@ -90,19 +169,11 @@
     (is (= :rates-over-absence (:reason (cer/rates-measured? forged ledger)))
         "rates must not be asserted where the kind is a typed absence")))
 
-(deftest self-truthed-rows-excluded
-  (let [ledger (read-ledger)
-        adulterated (update ledger :rows conj
-                            {:id :x1 :kind :grep :check "c" :input "i"
-                             :truth true :passed true})
-        rates (cer/measured-rates adulterated)]
-    (is (= [:x1] (::cer/excluded-ids rates))
-        "a row without :truth-source is excluded, never counted")
-    (is (= 6 (:n (:grep rates))))))
-
 (deftest measured-rates-round-trip-accepted
-  (let [ledger (read-ledger)]
-    (is (true? (cer/rates-measured? (cer/measured-rates ledger) ledger)))))
+  (let [ledger (read-ledger)
+        classification (read-classification)]
+    (is (true? (cer/rates-measured? (cer/measured-rates ledger classification)
+                                    ledger)))))
 
 (deftest wrong-schema-ledger-throws-typed
   (is (thrown? clojure.lang.ExceptionInfo
