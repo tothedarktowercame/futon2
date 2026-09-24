@@ -831,6 +831,32 @@ candidates automatically, or that every click is fast.
       close for this occurrence is left as written.
     - Budget: renewal-6 is exhausted, 7 of 7. One of those seven bought nothing (see the
       consumption note in the authorization).
+  - **Correction, 2026-09-24: the `grounded-no-change` outcomes above were a
+    substrate readback failure, not honest reports of achieving nothing.**
+    Established by kimi-6, verified by claude-5 against the records.
+    - `:resolved?` is `(= commit (get-in after [:props :implementation/commit]))`
+      (`full_loop_runner.clj:2743`) and `grounded?` requires it. In every close from
+      17:44 on 2026-09-23 the implementation entity's `:props` reads back as an EDN
+      STRING, so `get-in` returns nil and the comparison fails against a commit the
+      entity does in fact name.
+    - The boundary is sharp and matches the cause: closes at or before 11:20 have MAP
+      props and no `:theta`; every close from 17:44 has STRING props containing
+      `:theta 3/4`. `f5e380b7` (11:34) and `6cf508b6` (11:46) put Ratio thetas into the
+      precedence maps that `ground-commit!` writes into `:entity/props`. XTDB cannot
+      store a Ratio (kimi-6's check against a throwaway node); futon1b's
+      `put-doc-with-rescue!` (`migration/ingest.clj:97`) swallows the failure
+      — `(catch Exception _ false)` — and escalates to `stringify-deep-colls`, which
+      `pr-str`s every top-level collection value including `:props`. The write reports
+      success with a document the caller did not write.
+    - So the sixth through ninth limbs' `grounded-no-change` outcomes are wrong about
+      the runs. The ninth moved the dial and produced `:accepted? true` while being
+      recorded as achieving nothing. **The accepted increment itself is unaffected** —
+      it is computed from the binding, the produced-token locators and the acceptance
+      locator, none of which read the substrate entity. ⟨1⟩6 stands.
+    - What is affected: six spurious `:machine-failure` stop-lines, and nine failed
+      discharges. `grounded?` is NOT to be relaxed to clear them — had it been lax,
+      six obligations would have discharged against entities whose props cannot be
+      read as props.
   - **In-process completion (futon2 b27f2a1a, 97152006), per Joe's method ruling.** The real
     close assembly, the acceptance predicate and the B update call site are driven over the
     recorded occurrences, with fixtures — labelled as such, in a throwaway repo outside
