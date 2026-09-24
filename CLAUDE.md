@@ -50,8 +50,8 @@ curl -s -X POST localhost:7070/api/alpha/test-registry/check \
 # drift = a lane is mid-edit (wait); committed drift = superseded (re-mint).
 
 # If you must run, run the narrowest thing that answers the question
-clojure -M:test -n futon2.aif.some-test
-clojure -M:test -n futon2.aif.some-test -v futon2.aif.some-test/one-case
+clojure -M:test -m cognitect.test-runner -n futon2.aif.some-test
+clojure -M:test -m cognitect.test-runner -n futon2.aif.some-test -v futon2.aif.some-test/one-case
 ```
 
 A check refuses — `:stale-sha`, `:environment-mismatch`,
