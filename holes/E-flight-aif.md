@@ -166,7 +166,7 @@ other missions.
 
 ## Corpus
 
-`futon6/data/mission-triples/`: 81 mission EDN files (plus one non-mission),
+`futon6/data/mission-triples/`: 81 EDN files (missions and a few excursions, plus `_summary.json`),
 each a hole (have/want quoted from the mission file), a cascade of pattern
 citations with offsets, and hyperedges. Field presence (grep, 2026-09-24):
 `:satiety` 81, `:hyperedges` 81, `:witness` 7, `:owed` 0, `:realized` 0. So
