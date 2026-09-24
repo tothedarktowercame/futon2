@@ -225,7 +225,7 @@
   {:construct (requiring-resolve 'futon2.aif.interpretation-construction/construct)
    :budget {:max-moves 4 :max-expansions 2000} :move-cost 1
    ;; the empty cascade reaches no want, so it scores worst, as the live G does
-   :evaluate-g (fn [c] (if (empty? (:precedence c)) 1.0e9 (double (count (:precedence c)))))})
+   :evaluate-g (fn [_problem c] (if (empty? (:precedence c)) 1.0e9 (double (count (:precedence c)))))})
 
 (defn- receipts-for [patterns]
   (into {} (for [k (keys patterns)] [k {:source :test}])))

@@ -48,6 +48,7 @@
             [futon2.aif.cascade-model-manifest :as cascade-manifest]
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.cascade-problems :as cascade-problems]
+            [futon2.aif.interpretation-construction :as interpretation-construction]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.candidate-derivations :as candidate-derivations]
             [futon2.aif.cascade-proposals :as cascade-proposals]
@@ -5780,15 +5781,22 @@
   builder's work and never part of the tick. R9: the tick never marks its
   own enactment confirmed — the claim is :independent-check-required with
   the enactor recorded. Any node's typed refusal stops the lane and is
-  returned with the route so far: {:route … :refusal … :stopped-at <node>}."
-  [problem]
+  returned with the route so far: {:route … :refusal … :stopped-at <node>}.
+
+  With OPTS {:through :R5} the lane stops after R5 and returns
+  {:route … :candidates … :predictions … :ranked …}: G for every candidate,
+  no selection and no β needed. The constructor scores a candidate this
+  way, with the same G selection uses (see `constructed-candidate-g`)."
+  ([problem] (cascade-lane problem {}))
+  ([problem {:keys [through]}]
   (let [{:keys [facts want interpretations repository precedences horizon-steps
                 cascade-spec beta]} problem
         route (atom [])
         state (atom {})
         stopped (atom nil)
+        halted (atom false)
         step (fn [node via f]
-               (when-not @stopped
+               (when-not (or @stopped @halted)
                  (swap! route conj {:node node :via via
                                     :at (str (Instant/now))})
                  (let [r (lane-step f)]
@@ -5906,6 +5914,7 @@
                                            :basis (:basis sourced)
                                            :labels :none-admitted
                                            :contract :wm/observation-contract-v1}}))))))
+    (when (= :R5 through) (reset! halted true))
     ;; R14 — selection at the DECLARED β (no default: a missing β is
     ;; selection-posterior's typed refusal :invalid-temperature), then
     ;; authorize the decision on the same :R14 node — one node, both legs,
@@ -5940,7 +5949,7 @@
     ;; only a literal-true fact is true; absent, false and :unknown are
     ;; literal false (an :unknown guard value would never fire a :not, per
     ;; 08-R16's precedent and receipt_construction's own tests).
-    (when-not @stopped
+    (when-not (or @stopped @halted)
       (step :R16 "futon2.aif.receipt-construction/acting-order"
             (fn []
               (let [chosen (get (:decision (get @state :R14)) :action)
@@ -5973,10 +5982,17 @@
                  :acting-order (receipt-construction/acting-order
                                 sk-interpretations facts-closed
                                 chosen-precedence)}))))
-    (if @stopped
+    (cond
+      @stopped
       {:route @route
        :refusal (:refusal @stopped)
        :stopped-at (:node @stopped)}
+      @halted
+      {:route @route
+       :candidates (:candidates (:R4 @state))
+       :predictions (:predictions (:R4 @state))
+       :ranked (:R5 @state)}
+      :else
       (let [s @state
             _ (swap! route conj {:node :R9
                                  :via "futon2.report.war-machine/cascade-lane"
@@ -5993,7 +6009,40 @@
          :enactment-plan (:R16 s)
          :certification {:status :independent-check-required
                          :enactor "futon2.report.war-machine/cascade-lane"
-                         :claim :enactment-plan}}))))
+                         :claim :enactment-plan}})))))
+
+(defn constructed-candidate-g
+  "G of one constructed CANDIDATE on its target's PROBLEM (a cascade problem
+  without :precedences), computed by the lane's own R1-R5 over a fixed
+  family: the single-pattern order of every interpretation enabled on the
+  problem's facts, plus the candidate's own order. (R6's law O4 refuses an
+  order whose pattern cannot fire, so disabled patterns are left out.) Fixing the family keeps the universe G is taken
+  over the same for every candidate the constructor compares, the empty
+  cascade included (R6 always adds it as C0). This is the
+  constructor's :evaluate-g, so a constructed plan is taken only if the same
+  G selection uses scores it better than the empty family -- no G is
+  injected or pinned (E-cascade-real D12). A lane refusal is thrown with its
+  data, and the constructor carries it as its refusal."
+  [problem candidate]
+  (let [prec (vec (:precedence candidate))
+        true-facts (set (for [[t v] (:facts problem) :when (true? v)] t))
+        enabled? (fn [[_ {:keys [guard]}]]
+                   (and (every? true-facts (:needs guard))
+                        (not-any? true-facts (:forbids guard))))
+        singles (mapv (comp vector key)
+                      (sort-by (comp pr-str key) (filter enabled? (:interpretations problem))))
+        family (vec (distinct (cond-> singles (seq prec) (conj prec))))
+        lane (cascade-lane (assoc problem :precedences family) {:through :R5})]
+    (when (:refusal lane)
+      (throw (ex-info "constructed-candidate-g: lane refused"
+                      {:constructor/refusal :lane-refused :refusal (:refusal lane)
+                       :stopped-at (:stopped-at lane)})))
+    (let [id-of (into {} (map (fn [c] [(:id c) (mapv :id (:precedence c))]) (:candidates lane)))
+          entry (first (filter #(= prec (get id-of (:cascade-id %))) (:ranked lane)))]
+      (when-not entry
+        (throw (ex-info "constructed-candidate-g: candidate not ranked"
+                        {:constructor/refusal :candidate-not-ranked :precedence prec})))
+      (double (:G-efe entry)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Joint cascade decision over assembled problems (SPEC-flat-removal H5a).
@@ -7081,7 +7130,23 @@
                                           (keys (:universes cascade-sources))
                                           (map :target (:proposals cascade-proposal-supply))
                                           (map :ticket (:entries ticket-queue-declaration)))))
-          :sources (assoc cascade-sources :horizon-steps (:value cascade-horizon))})
+          :sources (cond-> (assoc cascade-sources :horizon-steps (:value cascade-horizon))
+                     ;; A target with admitted interpretations and no
+                     ;; declared candidate is constructed here rather than
+                     ;; refused (E-cascade-real D4). G is the lane's own
+                     ;; (D12). The bounds are claude-10's, 2026-09-24, no
+                     ;; ruling found; sources may declare their own. Move
+                     ;; cost 0: a construction move is computation inside
+                     ;; the tick, not in G's units, and a positive cost made
+                     ;; the constructor decline a plan G preferred (M-aif-eig:
+                     ;; improvement 0.33 < cost 1, :acting-worth-more).
+                     (not (contains? cascade-sources :construction))
+                     (assoc :construction
+                            {:construct interpretation-construction/construct
+                             :budget (or (:construction-budget cascade-sources)
+                                         {:max-moves 4 :max-expansions 20000})
+                             :move-cost 0
+                             :evaluate-g constructed-candidate-g}))})
         cascade-assembled
         (cascade-proposals/record-supply
          raw-cascade-assembled cascade-sources

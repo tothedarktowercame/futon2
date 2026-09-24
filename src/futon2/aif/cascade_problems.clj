@@ -98,8 +98,10 @@
 ;; A target with admitted interpretations but no declared candidate gets its
 ;; candidates from the constructor, when the sources supply :construction
 ;; {:construct futon2.aif.interpretation-construction/construct
-;;  :budget … :move-cost … :evaluate-g (fn [candidate] G)}. The constructor
-;; is injected because its namespace already depends on this one. Without
+;;  :budget … :move-cost … :evaluate-g (fn [problem candidate] G)}. The
+;; constructor is injected because its namespace already depends on this
+;; one. PROBLEM is the target's cascade problem without :precedences, so
+;; the caller can score a candidate with the same G selection uses. Without
 ;; :construction nothing is constructed and the existing refusal stands.
 ;; The universe supplies the observation. A token the universe holds as
 ;; :unknown is passed as not established (false): construction only asks
@@ -109,7 +111,7 @@
 ;; read are listed on each candidate's receipt.) A token absent from the
 ;; universe makes the constructor refuse, carried on the target's refusal.
 (defn- constructed-from-interpretations
-  [sources horizon target universe patterns want]
+  [sources horizon target universe patterns want base-problem]
   (when-let [{:keys [construct budget move-cost evaluate-g]} (:construction sources)]
     (let [receipts (or (get-in sources [:interpretations target :receipts]) {})
           tokens (problem-tokens universe want patterns)
@@ -121,11 +123,12 @@
                                   :interpretations (into {} (for [[k p] patterns] [k (select-keys p [:guard :produces])]))
                                   :interpretation-receipts receipts
                                   :horizon horizon :move-cost (or move-cost 1)
-                                  :budget budget :evaluate-g evaluate-g})]
+                                  :budget budget
+                                  :evaluate-g (fn [candidate] (evaluate-g base-problem candidate))})]
       (if (= :constructed (:status result))
         {:candidates (mapv #(assoc-in % [:construction-receipt :unknown-read-as-not-established] (vec unknown))
                            (:candidates result))}
-        {:construction-refusal (select-keys result [:kind :tokens :patterns :findings])}))))
+        {:construction-refusal (dissoc result :status :candidates)}))))
 
 (defn unlocated-tokens
   "Tokens with no locator of a checkable class."
@@ -141,17 +144,6 @@
         interp (get-in sources [:interpretations target])
         patterns (:patterns interp)
         want (get-in sources [:wants target])
-        declared (get-in sources [:candidates target])
-        built (when (and (empty? (constructed-candidates declared))
-                         (map? patterns) (seq patterns) (sequential? want) (seq want) (map? universe))
-                (constructed-from-interpretations sources horizon target universe patterns want))
-        candidates (or (:candidates built) declared)
-        constructed (vec (constructed-candidates candidates))
-        ;; every pattern of every candidate must have an admitted
-        ;; interpretation; an uninterpreted pattern is exactly a missing
-        ;; admitted interpretation.
-        uninterpreted (seq (remove (set (keys patterns))
-                                   (distinct (mapcat :precedence constructed))))
         scales (or (get-in sources [:preference-scales target])
                    (live-c/preference-scales {}))
         schedule (or (get-in sources [:preference-schedules target])
@@ -159,6 +151,45 @@
         beta (beta-for sources target)
         ctx-fn (:context-of sources)
         locators (get-in sources [:locators target])
+        base-problem {:facts universe
+                      :want (vec want)
+                      :interpretations patterns
+                      :repository {:patterns (set (keys patterns))
+                                   :stands-on #{}}
+                      :horizon-steps horizon
+                      :c-schedule schedule
+                      :observation-schedule (get-in sources [:observation-schedules target]
+                                                    {:status :held :reason :observation-placement-not-declared})
+                      :cascade-spec {:want (set want) :c-schedule schedule
+                                     :lam (get-in scales [:lam :value])
+                                     :mu (get-in scales [:mu :value])
+                                     :preference-scales scales}
+                      :preference-scales scales
+                      :beta beta
+                      :locators locators
+                      :token-initialization (get-in sources [:token-initialization target])}
+        declared (get-in sources [:candidates target])
+        ;; A declared candidate that produces no want still open (every token
+        ;; it produces is already true) cannot advance the target, so it does
+        ;; not stop construction: the machine builds from the interpretations
+        ;; instead of re-selecting work that is done.
+        open-wants (set (remove #(true? (get universe %)) want))
+        advancing (filter (fn [c] (some (fn [pid] (seq (filter open-wants (get-in patterns [pid :produces]))))
+                                        (:precedence c)))
+                          (constructed-candidates declared))
+        built (when (and (empty? advancing)
+                         (map? patterns) (seq patterns) (sequential? want) (seq want) (map? universe))
+                (constructed-from-interpretations sources horizon target universe patterns want
+                                                  base-problem))
+        ;; Once construction ran, its result stands: declared candidates that
+        ;; advance nothing are not a fallback for a constructor refusal.
+        candidates (if built (or (:candidates built) []) declared)
+        constructed (vec (constructed-candidates candidates))
+        ;; every pattern of every candidate must have an admitted
+        ;; interpretation; an uninterpreted pattern is exactly a missing
+        ;; admitted interpretation.
+        uninterpreted (seq (remove (set (keys patterns))
+                                   (distinct (mapcat :precedence constructed))))
         unlocated (when (and (map? universe) (map? patterns))
                     (unlocated-tokens locators (problem-tokens universe want patterns)))]
     (cond
@@ -205,25 +236,8 @@
       :else
       {:target target
        :cascade-problem
-       {:facts universe
-        :want (vec want)
-        :interpretations patterns
-        :repository {:patterns (set (keys patterns))
-                     :stands-on #{}}
-        ;; Only constructed nonempty orders enter the executable family.
-        :precedences (mapv :precedence constructed)
-        :horizon-steps horizon
-        :c-schedule schedule
-        :observation-schedule (get-in sources [:observation-schedules target]
-                                      {:status :held :reason :observation-placement-not-declared})
-        :cascade-spec {:want (set want) :c-schedule schedule
-                       :lam (get-in scales [:lam :value])
-                       :mu (get-in scales [:mu :value])
-                       :preference-scales scales}
-        :preference-scales scales
-        :beta beta
-        :locators locators
-        :token-initialization (get-in sources [:token-initialization target])}
+       ;; Only constructed nonempty orders enter the executable family.
+       (assoc base-problem :precedences (mapv :precedence constructed))
        :constructed-candidates
        (mapv #(select-keys % [:candidate-id :precedence :construction-receipt]) constructed)
        :interpretation-receipts
