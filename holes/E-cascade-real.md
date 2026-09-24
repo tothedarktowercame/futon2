@@ -151,6 +151,32 @@ the chance: when the machine runs out, no step asks an agent for the
 interpretations a target lacks. Asked claude-1 about its work interpreting
 Joe's speech acts in pattern terms (job invoke-1790257263157-23671-d7e9076d).
 
+claude-1's answer (2026-09-24; files checked by claude-10). The loop lives in
+futon3c: `emacs/session-turn-analysis.el` (records each operator turn and
+bells a delegate seat, `session-mode-analysis-agent`, now kimi-1),
+`scripts/session_turn_analysis.py` (validator: pattern ids must resolve to a
+real flexiarg, cue spans exact, malformed records refused with a typed
+reason), `scripts/xlate.py` (BM25 over the pattern library),
+`scripts/turn_batch.py` (`55ece9ac`, blocks of historical turns split across
+seats). Corpora: `~/.emacs-graph/session-turn-analysis/`,
+`~/code/storage/operator-turns/`. Per fragment it records intent, target,
+rationale, relations, cue spans, pattern refs with `source_sha256`, and
+pattern rejections with reasons. Its counts, as claude-1 reported them (not
+re-derived): 145 live turns interpreted, 113 candidate proposals, 79
+rejections; on one block kimi-4 cited patterns on 1% of fragments and kimi-5
+on 33%.
+
+Against the interpretation shape: the pattern and the receipt are there;
+the guard (`:needs`/`:forbids`) and `:produces` are not, because the
+records are about what Joe said, not about a target's state. claude-1 names
+a token vocabulary as the missing piece. For missions one exists already:
+`src/futon2/aif/mission_hole_wants.clj` projects each mission's unchecked
+`- [ ]` tasks into `:hole/h…` want tokens with a checkbox observation (99
+of 441 retained holes are observable this way). Those are tokens a seat can
+write `:produces` and `:needs` against. What transfers from claude-1's loop:
+the block-dispatch harness, refuse-with-typed-reason validation, and
+rejections (close to `:forbids` in prose).
+
 **D12. Nothing at the call site can say whether a constructed plan is worth
 taking.** The constructor takes a plan only if its G beats the empty
 family, but G is computed later, in `select-and-record-cascade!`. I2 had to
