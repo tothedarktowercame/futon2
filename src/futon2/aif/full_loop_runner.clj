@@ -2804,8 +2804,30 @@
     (when before
       (throw (ex-info "Implementation commit already grounded"
                       {:outcome :grounded-no-change :implementation-id impl-id})))
-    (substrate/put-doc! implementation opts)
-    (substrate/put-doc! discharge opts)
+    ;; The store reports a rescued write on its success envelope (:rescue
+    ;; :ok/:rescued-1/:rescued-2, present on every futon1b response). A
+    ;; rescued document no longer has the shape this function wrote --
+    ;; rescue stage 2 pr-strs :entity/props into a string -- and the
+    ;; readback witness below then compares against the degraded shape,
+    ;; which is how six 2026-09-23 groundings recorded :resolved? false
+    ;; over ten silent hours even though every one of those responses said
+    ;; :rescued-2. The static storable-grounding-doc guard cannot catch
+    ;; the whole class: Arrow column typing is stateful, so a value whose
+    ;; type is fine can still fail against a column shaped by earlier
+    ;; documents. What the store DID is the only complete evidence, and it
+    ;; is on the envelope. Missing key is not evidence: older futon1b and
+    ;; stubbed writers return no :rescue and pass exactly as before.
+    (doseq [[which doc] [[:implementation implementation] [:discharge discharge]]]
+      (let [response (substrate/put-doc! doc opts)
+            stage (:rescue response)]
+        (when (and (some? stage) (not= :ok stage))
+          (throw (ex-info "Grounding write was rescued by the store"
+                          {:outcome :grounding-failed
+                           :failure-kind :grounding-write-rescued
+                           :failure-stage :grounding
+                           :rescue stage
+                           :document which
+                           :doc-id (:xt/id doc)})))))
     ;; The substrate indexes asynchronously, so an immediate readback can
     ;; miss a successful write: r5 attempt-001 (2026-09-13) grounded
     ;; f9896cf6, the entity is durably present, but the instant readback saw

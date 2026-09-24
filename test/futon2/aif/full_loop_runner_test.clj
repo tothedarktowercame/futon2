@@ -1787,6 +1787,46 @@
                           (f {:p (.pow java.math.BigInteger/TEN 40)}))
         "a BigInteger beyond i64 refuses")))
 
+(deftest grounding-refuses-a-rescued-write
+  ;; Every futon1b success envelope carries :rescue. On all six 2026-09-23
+  ;; groundings it said :rescued-2 -- the document no longer had the shape
+  ;; the caller wrote -- and ground-commit! discarded it. A missing key is
+  ;; NOT a rescue (older futon1b, stubbed writers) and must pass.
+  (let [construction {:construction-kind :cascade
+                      :selected-action (recorded-trials-action)}]
+    (let [reads (atom 0)
+          opts {:run-id "grounding-test-run"
+                :entity-by-id-fn (fn [_] (swap! reads inc) nil)
+                :put-doc-fn (fn [_] {:ok true :rescue :rescued-2})}]
+      (try
+        (runner/ground-commit!
+         "attempt-rescue" "T-repair-occ-grounding"
+         "codex-6" "claude-7" "/repo" "rescued1"
+         ["holes/tickets/T-repair-occ-grounding.md"] construction
+         {:job-id "review-rescue"} opts)
+        (is false "a rescued grounding write must refuse")
+        (catch clojure.lang.ExceptionInfo e
+          (is (= :grounding-failed (:outcome (ex-data e))))
+          (is (= :grounding-write-rescued (:failure-kind (ex-data e))))
+          (is (= :grounding (:failure-stage (ex-data e))))
+          (is (= :rescued-2 (:rescue (ex-data e))))
+          (is (= :implementation (:document (ex-data e))))
+          (is (= "full-loop/implementation/rescued1" (:doc-id (ex-data e))))))
+      (is (= 1 @reads)
+          "only the pre-write existence check ran; the post-write readback never happened"))
+    (let [{:keys [docs opts]} (substrate-fixture)
+          opts (update opts :put-doc-fn
+                       (fn [f] (fn [doc] (assoc (f doc) :rescue :ok))))
+          result (runner/ground-commit!
+                  "attempt-clean" "T-repair-occ-grounding"
+                  "codex-6" "claude-7" "/repo" "cleanok"
+                  ["holes/tickets/T-repair-occ-grounding.md"] construction
+                  {:job-id "review-clean"} opts)]
+      (is (:resolved? result))
+      (is (:dial-moved? result))
+      (is (some? (get @docs "full-loop/implementation/cleanok"))
+          "an explicit :rescue :ok writes exactly as before"))))
+
 
 (deftest construction-failure-opens-system-stop-line-and-does-not-write-trace
   (let [findings (atom [])
