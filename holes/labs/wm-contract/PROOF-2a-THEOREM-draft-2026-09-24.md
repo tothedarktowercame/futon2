@@ -54,14 +54,23 @@ choice; Wₜ must fail. (b) An abstaining record with a non-empty `T_f`; Wₜ mu
 fail. (c) An abstaining record whose exclusions omit what-would-make-feasible;
 the empty-support branch of Wₜ must fail.
 
-Wₜ is a witness condition, not a gate. Under the 2026-09-19 ruling (nothing
-halts runs during tuning) a click that fails it still runs; it is not
-credited.
+Wₜ is a witness condition, not a gate: a click that fails it still runs; it
+is not credited.
 
 **Missing definition.** Target-grain scoring needs a G per target. The
 natural candidate is the best candidate cascade's G for that target, which
 makes Clause T depend on clause 0 being satisfiable for every feasible
 target. This is stated here, not settled.
+
+**Declared cost ordering (from the worked example).** M-futon-seams chooses
+its target ("Pick one instance and declare its interface — not all eight")
+by a declared cost ordering (declare first: free; retrofit in code:
+mechanical; retrofit in prompt text: worst), which is neither a feasibility
+exclusion nor a G. `Pₜ` therefore also carries `:cost-ordering` (the declared
+ranking, its source span, and how it entered the choice: as a prior over
+targets, a tie-break, or not at all). Wₜ adds: if a cost ordering is
+declared, the record states how it entered, and the chosen target is
+consistent with that statement.
 
 ### Clause 0 — an ordinary, semantically nontrivial, machine-constructed field exists (restated; AR-33, AR-34)
 
@@ -72,9 +81,18 @@ target. This is stated here, not settled.
   the constructor on exactly those interpretations and the recorded initial
   state reproduces the candidate. Agent authorship of an interpretation is
   allowed and recorded.
-- (carrier) the candidate's pattern structure is extracted as a descent
-  relation `r` with `CascadeOrder.acyclicDescent r` and `CascadeOrder.hasMeets r`,
-  plus its co-application edges. A precedence list is the chain case of `r`.
+- (carrier) the candidate's pattern structure is extracted as a containment
+  order `r` on its patterns (a unit sits above another exactly when it
+  contains it; overlap and "sits above" are the same order) with
+  `CascadeOrder.acyclicDescent r`, and the semilattice condition restricted
+  to OVERLAPPING pairs: whenever two patterns share a descendant, their
+  common part is itself a pattern of the cascade (a greatest common
+  descendant). Disjoint pairs need no meet. `CascadeOrder.hasMeets`, which
+  demands a meet for every pair, is too strong and is not required. A
+  precedence list is the chain case of `r`.
+- (missing meet) an overlapping pair without a meet is recorded as a typed
+  finding naming the pair and the maximal units of their common part. It is
+  a finding, not a failure of W₀.
 
 **P₀.** As in PROOF-2, plus `[:decision :selection-certificate
 :candidate-derivations <id>]` carrying the interpretations used (with their
@@ -87,20 +105,57 @@ edges.
 - (d) a target refused because one want has no producer, where admission
   would accept a candidate that newly satisfies another want; W₀'s
   construction condition must fail (E-cascade-real D15).
-- (e) flatten each candidate's `r` to a topological order and recompute the
-  kernel and score. If nothing changes on any click, the record carries a
-  typed finding that the semilattice did no work on `L`. This is a finding,
-  not a failure.
+- (e) recompute the kernel and score under the list kernel for EVERY linear
+  extension of `r` (capped, cap recorded), at the click's recorded horizon,
+  and record the spread. The finding is stated relative to both: if the
+  horizon exceeds the cascade's depth, equal results say nothing about the
+  structure; and a single flattening is not a comparison, since on the
+  worked example the list kernel's p(all wants) ranged 0.168–0.797 across 48
+  extensions of one cascade (instance 5, horizon 8, θ 0.8). Where the
+  co-application result lies outside the spread, the record says so. This is
+  a finding, not a failure.
+- (f) a cascade whose frontier conflicts (below) must carry the conflict
+  flag; a record that omits it where the extract shows a conflicting
+  frontier fails W₀.
 
-**Missing definition (blocks the general case).** `CascadeTransition.cascadeKernel`
-is defined only for a list, through `firstEnabled`. There is no Lean
-definition of the transition kernel of a semilattice cascade: when patterns
-at incomparable positions are enabled at once, whether one fires (by what
-rule) or they co-apply. Until it exists, W₀'s kernel equalities are checkable
-only when `r` is a chain, and a passing clause 0 is recorded as the chain
-case. Sources for the definition: glossary ¶Policy π (`BV.seq`, `BV.copar`),
-`futon3a/holes/labs/M-memes-arrows/cascade_construct.py` (`chosen_semi_lattice`),
-and the flight cascades' `:differentiates` / `:jointly-with` edges.
+**The kernel: co-application of the enabled frontier.** At state `s`, a
+pattern is enabled when `CascadeTransition.guard` holds. The *enabled
+frontier* is the set of enabled patterns with no enabled pattern above them
+in `r`. Every frontier pattern fires independently, succeeding with its own
+θ; the next state adds the produced tokens of those that succeed:
+
+  K(s, s′) = Σ_{S ⊆ F(s)} ∏_{p∈S} θ_p ∏_{p∈F(s)∖S} (1−θ_p) · [s′ = s ∪ ⋃_{p∈S} produces_p]
+
+and K(s, ·) = δ_s when the frontier is empty. On a chain the frontier is
+`firstEnabled`, so K is `cascadeKernel` there. Guards are evaluated before
+the step. A *conflicting frontier* is one containing p, q with
+`produces_p ∩ forbids_q ≠ ∅`; the kernel still co-applies, and the
+certificate carries `:frontier-conflict` naming the pairs and the tokens.
+
+Why this and not one-at-a-time (interleaving, or a list over an arbitrary
+linear extension), on the worked example: (1) on instances 4 and 7 at
+horizon 6, co-application reaches all wants with p 0.26 and 0.85 where list
+and interleaving give 0; the difference is rate, and it closes by horizon
+14. (2) On instance 6 two incomparable patterns conflict (realtime/mode-gate
+keeps the original prompt text authoritative; wr-8 makes typed files
+canonical with prose generated). List and interleaving never reach all wants
+at any horizon, because whichever fires first disables the other;
+co-application does, through the state holding both tokens, which is the
+state the mission records the system as being in (both prompt versions live
+behind a mode flag). (3) In the same instance the one overlapping pair
+without a meet has exactly those two patterns as the maximal units of its
+common part: the missing meet and the conflict are the same fact. Evidence:
+`futon3c/holes/labs/M-futon-seams/` (annotations at futon3c `b0ffc7d1`; cascades `instance-{4,5,6,7}.edn`; kernels `proto/kernels.clj`).
+
+**Remaining missing definitions.** The Lean module: K as above, its
+nonnegativity and row sum 1, `K = cascadeKernel` on chains, the frontier
+conflict predicate, and the restricted meet condition over a containment
+order. Until that module exists, W₀'s kernel equalities are checkable only
+when `r` is a chain, and a passing clause 0 is recorded as the chain case.
+The forbids that create a conflict are interpretation claims, not pattern
+text (on instance 6 they are claude-1's, stated in its receipts); W₀'s
+record of each interpretation's author is what makes a conflict
+attributable.
 
 ### Clauses 1–6
 
@@ -117,11 +172,14 @@ priming edge; the recorded prior must change.
 
 ## Work this opens, in order
 
-1. **Lean: the semilattice kernel.** Define it (and prove row-stochasticity,
-   and agreement with `cascadeKernel` on chains). Unblocks W₀'s general case.
+1. **Lean: the co-application kernel and the restricted meet condition**, as
+   specified under clause 0 (definitions settled on the worked example;
+   proofs owed). Unblocks W₀'s general case.
 2. **Record: `[:decision :target-field]`.** Unblocks Clause T.
 3. **Record: interpretations and edges in `:candidate-derivations`.** With the
    constructor wired in (E-cascade-real D4), unblocks W₀'s construction
    condition.
 4. **Constructor: partial-want construction** (D15), so X₀(d) has something
    to pass.
+5. **Record: `:cost-ordering` in the target field**, and the linear-extension
+   spread for X₀(e).
