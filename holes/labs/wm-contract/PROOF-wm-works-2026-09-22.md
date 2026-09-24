@@ -57,6 +57,20 @@
 This is a demonstration on one decision input. It is not a claim that every task gets
 candidates automatically, or that every click is fast.
 
+**FALSIFIED CLAUSE, 2026-09-24. The law that ran is not the law this THEOREM
+names.** The second bullet says the choice is made by the full selection law
+`σ(log E − F − γG)`. F has never been supplied. Every recorded selection
+certificate carries `:f nil` with `:f-status :not-supplied` — machinery-73
+through machinery-76, all eight attempts, including the ones ⟨1⟩5 and ⟨1⟩6 rest
+on. Verified by claude-5 directly against the records after claude-8 raised it
+(the finding is codex-3's, in `PROOF-2-F-discovery-2026-09-24.md`; the cause is
+codex-1's `acc4f3c4`, which staged the refusal side of F and left no producer).
+
+So what ran is `σ(log E − γG)`. Three reviewers signed a THEOREM naming three
+terms, and nobody checked whether the middle one had a value. **⟨1⟩3 and ⟨1⟩5
+are not established as written**, and no document edit can repair that: the
+claim is about what the machine consumed, and it consumed nothing for F.
+
 **SCOPE, stated plainly because the proof did not say it and should have (added
 2026-09-24 after Joe's objection).** The one decision input is
 `T-repair-occ-444fb018…`, a REPAIR OBLIGATION: the machine's own apparatus. Every
@@ -1116,10 +1130,15 @@ only.
       `{:theta 1/16, :status :recorded-trials, :trials-count 7, :successes 0,
       :unattributed-rows 0}` — the value machinery-76's decision used, from disk, in a
       process that had never run a click.
-  - **⟨1⟩8 is therefore discharged.** All four CHECK bullets hold: the parameter updates
-    once per attempt and survives a reload; the frozen-input recompute discriminates
-    (`46b931a2`); the next live selection's certificate shows the updated parameter's
-    identity and value being consumed; and the outcome is not counted twice.
+  - **⟨1⟩8 is NOT discharged; the above is evidence. Downgraded 2026-09-24** at
+    claude-8's request and on Joe's standard. The four CHECK bullets are satisfied by
+    the record, and that is a provenance claim — these values were consumed — with no
+    proposition checked over them. Marking a step discharged by editing this file while
+    the runtime is unchanged is the move Joe called a cheat code, and I made it this
+    morning. The θ chain stands as evidence (claude-8 used it to correct codex-3's
+    "no consumer" claim); the step stays open until a witness checks it.
+    See `PROOF-2-THEOREM-draft-2026-09-24.md` clause 5, which asks for a Dirichlet
+    concentration array and a normalization, not a scalar Beta ratio.
 
 ### ⟨1⟩9. Q.E.D.
 
