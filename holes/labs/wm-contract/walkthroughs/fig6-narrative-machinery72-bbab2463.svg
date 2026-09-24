@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg aria-label="Cascade precedence, dependencies, and wanted-token outcomes" fill="#25313c" font-family="sans-serif" font-size="13" height="748" role="img" viewBox="0 0 950 748" width="950" xmlns="http://www.w3.org/2000/svg"><title>Cascade precedence, dependencies, and wanted-token outcomes</title>
+<rect fill="white" height="100%" width="100%"></rect>
+<text font-size="18" x="24" y="28">Cascade and wanted-token outcomes</text>
+<text x="24" y="52">Selected target: T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade</text>
+<text x="24" y="75">Solid arrows: need-edges / wires. Dashed arrows: model prediction.</text>
+<defs><marker id="arrow" markerHeight="8" markerWidth="8" orient="auto" refX="7" refY="4"><path d="M0,0 L8,4 L0,8 Z" fill="#68717b"></path>
+</marker>
+</defs>
+<path class="need-edge" d="M99.0,110 C99.0,96 273.0,96 273.0,110" data-from=":aif/declare-the-conditioning" data-to=":aif/measurement-window-hygiene" fill="none" marker-end="url(#arrow)" stroke="#68717b"></path>
+<path class="need-edge" d="M273.0,110 C273.0,91 447.0,91 447.0,110" data-from=":aif/measurement-window-hygiene" data-to=":aif/two-layer-calibration" fill="none" marker-end="url(#arrow)" stroke="#68717b"></path>
+<path class="need-edge" d="M447.0,110 C447.0,86 621.0,86 621.0,110" data-from=":aif/two-layer-calibration" data-to=":contracts/holder-states-the-claim" fill="none" marker-end="url(#arrow)" stroke="#68717b"></path>
+<path class="prediction-edge" d="M99.0,228 V244 H702 V454 H720" data-from=":aif/declare-the-conditioning" data-token=":repair/split-declared-valid" fill="none" stroke="#68717b" stroke-dasharray="6 4"></path>
+<polygon class="prediction-arrowhead" fill="#68717b" points="717,454 708,450 708,458"></polygon>
+<path class="prediction-edge" d="M273.0,228 V254 H702 V298 H720" data-from=":aif/measurement-window-hygiene" data-token=":repair/held-out-observations-collected" fill="none" stroke="#68717b" stroke-dasharray="6 4"></path>
+<polygon class="prediction-arrowhead" fill="#68717b" points="717,298 708,294 708,302"></polygon>
+<path class="prediction-edge" d="M447.0,228 V264 H702 V220 H720" data-from=":aif/two-layer-calibration" data-token=":repair/calibration-evidence-present" fill="none" stroke="#68717b" stroke-dasharray="6 4"></path>
+<polygon class="prediction-arrowhead" fill="#68717b" points="717,220 708,216 708,224"></polygon>
+<path class="prediction-edge" d="M696,169.0 C756,169.0 660,532 720,532" data-from=":contracts/holder-states-the-claim" data-token=":restoration-accepted" fill="none" stroke="#68717b" stroke-dasharray="6 4"></path>
+<polygon class="prediction-arrowhead" fill="#68717b" points="717,532 708,528 708,536"></polygon>
+<g class="pattern" data-pattern=":aif/declare-the-conditioning"><rect fill="#f6f7f8" height="118" rx="5" stroke="#68717b" width="150" x="24" y="110"></rect>
+<text font-size="12" x="32" y="132">:aif/declare-the-co</text>
+<text font-size="12" x="32" y="148">nditioning</text>
+<text font-size="12" x="32" y="164">produces:</text>
+<text font-size="12" x="32" y="180">:repair/split-decla</text>
+<text font-size="12" x="32" y="196">red-valid</text>
+</g>
+<g class="pattern" data-pattern=":aif/measurement-window-hygiene"><rect fill="#f6f7f8" height="118" rx="5" stroke="#68717b" width="150" x="198" y="110"></rect>
+<text font-size="12" x="206" y="132">:aif/measurement-wi</text>
+<text font-size="12" x="206" y="148">ndow-hygiene</text>
+<text font-size="12" x="206" y="164">produces:</text>
+<text font-size="12" x="206" y="180">:repair/held-out-ob</text>
+<text font-size="12" x="206" y="196">servations-collecte</text>
+<text font-size="12" x="206" y="212">d</text>
+</g>
+<g class="pattern" data-pattern=":aif/two-layer-calibration"><rect fill="#f6f7f8" height="118" rx="5" stroke="#68717b" width="150" x="372" y="110"></rect>
+<text font-size="12" x="380" y="132">:aif/two-layer-cali</text>
+<text font-size="12" x="380" y="148">bration</text>
+<text font-size="12" x="380" y="164">produces:</text>
+<text font-size="12" x="380" y="180">:repair/calibration</text>
+<text font-size="12" x="380" y="196">-evidence-present</text>
+</g>
+<g class="pattern" data-pattern=":contracts/holder-states-the-claim"><rect fill="#f6f7f8" height="118" rx="5" stroke="#68717b" width="150" x="546" y="110"></rect>
+<text font-size="12" x="554" y="132">:contracts/holder-s</text>
+<text font-size="12" x="554" y="148">tates-the-claim</text>
+<text font-size="12" x="554" y="164">produces:</text>
+<text font-size="12" x="554" y="180">:restoration-accept</text>
+<text font-size="12" x="554" y="196">ed</text>
+</g>
+<text x="720" y="96">Wanted tokens</text>
+<g class="want comparison-missing" data-predicted="not recorded in this run" data-token=":admission/task-stated"><rect fill="white" height="64" rx="5" stroke="#89939e" stroke-dasharray="4 3" stroke-width="1" width="208" x="720" y="110"></rect>
+<text font-size="12" x="728" y="128">:admission/task-stated</text>
+<text font-size="11" font-weight="bold" x="728" y="144">comparison not recorded</text>
+<text font-size="10" x="728" y="159">prediction: not recorded in this run</text>
+<text font-size="10" x="728" y="170">observed: true</text>
+</g>
+<g class="want comparison-missing" data-predicted="not recorded in this run" data-token=":repair/calibration-evidence-present"><rect fill="white" height="64" rx="5" stroke="#89939e" stroke-dasharray="4 3" stroke-width="1" width="208" x="720" y="188"></rect>
+<text font-size="12" x="728" y="206">:repair/calibration-evidence-present</text>
+<text font-size="11" font-weight="bold" x="728" y="222">comparison not recorded</text>
+<text font-size="10" x="728" y="237">prediction: not recorded in this run</text>
+<text font-size="10" x="728" y="248">observed: false</text>
+</g>
+<g class="want comparison-missing" data-predicted="not recorded in this run" data-token=":repair/held-out-observations-collected"><rect fill="white" height="64" rx="5" stroke="#89939e" stroke-dasharray="4 3" stroke-width="1" width="208" x="720" y="266"></rect>
+<text font-size="12" x="728" y="284">:repair/held-out-observations-collected</text>
+<text font-size="11" font-weight="bold" x="728" y="300">comparison not recorded</text>
+<text font-size="10" x="728" y="315">prediction: not recorded in this run</text>
+<text font-size="10" x="728" y="326">observed: false</text>
+</g>
+<g class="want comparison-missing" data-predicted="not recorded in this run" data-token=":repair/obstruction-observed-cleared"><rect fill="white" height="64" rx="5" stroke="#89939e" stroke-dasharray="4 3" stroke-width="1" width="208" x="720" y="344"></rect>
+<text font-size="12" x="728" y="362">:repair/obstruction-observed-cleared</text>
+<text font-size="11" font-weight="bold" x="728" y="378">comparison not recorded</text>
+<text font-size="10" x="728" y="393">prediction: not recorded in this run</text>
+<text font-size="10" x="728" y="404">observed: false</text>
+</g>
+<g class="want comparison-missing" data-predicted="not recorded in this run" data-token=":repair/split-declared-valid"><rect fill="white" height="64" rx="5" stroke="#89939e" stroke-dasharray="4 3" stroke-width="1" width="208" x="720" y="422"></rect>
+<text font-size="12" x="728" y="440">:repair/split-declared-valid</text>
+<text font-size="11" font-weight="bold" x="728" y="456">comparison not recorded</text>
+<text font-size="10" x="728" y="471">prediction: not recorded in this run</text>
+<text font-size="10" x="728" y="482">observed: true</text>
+</g>
+<g class="want predicted-not-observed" data-predicted="1" data-token=":restoration-accepted"><rect fill="#f9dfdc" height="64" rx="5" stroke="#b42318" stroke-width="3" width="208" x="720" y="500"></rect>
+<text font-size="12" x="728" y="518">:restoration-accepted</text>
+<text font-size="11" font-weight="bold" x="728" y="534">predicted, not observed</text>
+<text font-size="10" x="728" y="549">prediction: 1</text>
+<text font-size="10" x="728" y="560">observed: false</text>
+</g>
+<text x="24" y="598">shape: :chain</text>
+<text font-weight="bold" x="720" y="594">Comparison verdicts</text>
+<rect fill="#f9dfdc" height="12" rx="5" stroke="#b42318" stroke-width="3" width="12" x="720" y="606"></rect>
+<text font-size="10" x="740" y="616">predicted, not observed</text>
+<rect fill="#dceee3" height="12" rx="5" stroke="#287447" stroke-width="1" width="12" x="720" y="628"></rect>
+<text font-size="10" x="740" y="638">predicted and observed</text>
+<rect fill="#eef0f2" height="12" rx="5" stroke="#89939e" stroke-width="1" width="12" x="720" y="650"></rect>
+<text font-size="10" x="740" y="660">neither predicted nor observed</text>
+<rect fill="white" height="12" rx="5" stroke="#287447" stroke-width="2" width="12" x="720" y="672"></rect>
+<text font-size="10" x="740" y="682">not predicted, observed</text>
+<rect fill="white" height="12" rx="5" stroke="#89939e" stroke-dasharray="4 3" stroke-width="1" width="12" x="720" y="694"></rect>
+<text font-size="10" x="740" y="704">observation missing</text>
+<text x="24" y="664">Model prediction: machinery-72 attempt-002: s0 = {admission/task-state</text>
+<text x="24" y="680">d}; wanted restoration-accepted (predicted 1). Limb 1 fired (split-dec</text>
+<text x="24" y="696">lared-valid observed true); limb 2&apos;s product was never observed, so li</text>
+<text x="24" y="712">mbs 3-4 could not fire. artifact 0798f96ad2082a8f80c8a850c8e1138c03621</text>
+<text x="24" y="728">3f9</text>
+<text x="24" y="642">3 dependency arrow(s).</text>
+</svg>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg aria-label="Cascade precedence, dependencies, and wanted-token outcomes" fill="#25313c" font-family="sans-serif" font-size="13" height="472" role="img" viewBox="0 0 950 472" width="950" xmlns="http://www.w3.org/2000/svg"><title>Cascade precedence, dependencies, and wanted-token outcomes</title>
+<rect fill="white" height="100%" width="100%"></rect>
+<text font-size="18" x="24" y="28">Cascade and wanted-token outcomes</text>
+<text x="24" y="52">Selected target: T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade</text>
+<text x="24" y="75">Solid arrows: need-edges / wires. Dashed arrows: model prediction.</text>
+<defs><marker id="arrow" markerHeight="8" markerWidth="8" orient="auto" refX="7" refY="4"><path d="M0,0 L8,4 L0,8 Z" fill="#68717b"></path>
+</marker>
+</defs>
+<path class="need-edge" d="M99.0,110 C99.0,96 273.0,96 273.0,110" data-from=":aif/declare-the-conditioning" data-to=":aif/measurement-window-hygiene" fill="none" marker-end="url(#arrow)" stroke="#68717b"></path>
+<path class="need-edge" d="M273.0,110 C273.0,91 447.0,91 447.0,110" data-from=":aif/measurement-window-hygiene" data-to=":aif/two-layer-calibration" fill="none" marker-end="url(#arrow)" stroke="#68717b"></path>
+<path class="need-edge" d="M447.0,110 C447.0,86 621.0,86 621.0,110" data-from=":aif/two-layer-calibration" data-to=":contracts/holder-states-the-claim" fill="none" marker-end="url(#arrow)" stroke="#68717b"></path>
+<g class="pattern" data-pattern=":aif/declare-the-conditioning"><rect fill="#f6f7f8" height="118" rx="5" stroke="#68717b" width="150" x="24" y="110"></rect>
+<text font-size="12" x="32" y="132">:aif/declare-the-co</text>
+<text font-size="12" x="32" y="148">nditioning</text>
+<text font-size="12" x="32" y="164">produces:</text>
+<text font-size="12" x="32" y="180">:repair/split-decla</text>
+<text font-size="12" x="32" y="196">red-valid</text>
+</g>
+<g class="pattern" data-pattern=":aif/measurement-window-hygiene"><rect fill="#f6f7f8" height="118" rx="5" stroke="#68717b" width="150" x="198" y="110"></rect>
+<text font-size="12" x="206" y="132">:aif/measurement-wi</text>
+<text font-size="12" x="206" y="148">ndow-hygiene</text>
+<text font-size="12" x="206" y="164">produces:</text>
+<text font-size="12" x="206" y="180">:repair/held-out-ob</text>
+<text font-size="12" x="206" y="196">servations-collecte</text>
+<text font-size="12" x="206" y="212">d</text>
+</g>
+<g class="pattern" data-pattern=":aif/two-layer-calibration"><rect fill="#f6f7f8" height="118" rx="5" stroke="#68717b" width="150" x="372" y="110"></rect>
+<text font-size="12" x="380" y="132">:aif/two-layer-cali</text>
+<text font-size="12" x="380" y="148">bration</text>
+<text font-size="12" x="380" y="164">produces:</text>
+<text font-size="12" x="380" y="180">:repair/calibration</text>
+<text font-size="12" x="380" y="196">-evidence-present</text>
+</g>
+<g class="pattern" data-pattern=":contracts/holder-states-the-claim"><rect fill="#f6f7f8" height="118" rx="5" stroke="#68717b" width="150" x="546" y="110"></rect>
+<text font-size="12" x="554" y="132">:contracts/holder-s</text>
+<text font-size="12" x="554" y="148">tates-the-claim</text>
+<text font-size="12" x="554" y="164">produces:</text>
+<text font-size="12" x="554" y="180">:restoration-accept</text>
+<text font-size="12" x="554" y="196">ed</text>
+</g>
+<text x="720" y="96">Wanted tokens</text>
+<text font-size="11" x="720" y="132">Wanted tokens: not recorded.</text>
+<text x="24" y="322">shape: :chain</text>
+<text font-weight="bold" x="720" y="318">Comparison verdicts</text>
+<rect fill="#f9dfdc" height="12" rx="5" stroke="#b42318" stroke-width="3" width="12" x="720" y="330"></rect>
+<text font-size="10" x="740" y="340">predicted, not observed</text>
+<rect fill="#dceee3" height="12" rx="5" stroke="#287447" stroke-width="1" width="12" x="720" y="352"></rect>
+<text font-size="10" x="740" y="362">predicted and observed</text>
+<rect fill="#eef0f2" height="12" rx="5" stroke="#89939e" stroke-width="1" width="12" x="720" y="374"></rect>
+<text font-size="10" x="740" y="384">neither predicted nor observed</text>
+<rect fill="white" height="12" rx="5" stroke="#287447" stroke-width="2" width="12" x="720" y="396"></rect>
+<text font-size="10" x="740" y="406">not predicted, observed</text>
+<rect fill="white" height="12" rx="5" stroke="#89939e" stroke-dasharray="4 3" stroke-width="1" width="12" x="720" y="418"></rect>
+<text font-size="10" x="740" y="428">observation missing</text>
+<text x="24" y="388">Model prediction: one admitted candidate :C2: habit E = 1.0, G = 0.597</text>
+<text x="24" y="404">8370007556204, F :not-supplied — the law that ran is habit minus G/bet</text>
+<text x="24" y="420">a (PROOF-2-F-discovery-2026-09-24).</text>
+<text x="24" y="366">3 dependency arrow(s).</text>
+</svg>
