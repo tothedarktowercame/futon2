@@ -163,20 +163,19 @@
         "acceptance-of keys wants by target even when :files mismatches; the carrier must not accept a declaration whose declaring file does not resolve")))
 
 (deftest payload-hash-and-schema-conformance
-  ;; B4 slice 2d / CERT-S v1. Bugs named per assertion: (1) a carrier
-  ;; without a payload hash cannot join the payload-carrying sections
-  ;; (BJ-1 is then undetectable); (2) the hash must be the CERT-S §3
-  ;; canonical-EDN hash, "sha256:<hex>", not any digest of any printing
-  ;; (set/mar ordering variance must not change it); (3) the stricter
-  ;; symbol/string reading must hold — a string :target action joining a
-  ;; symbol :target candidate must REFUSE, not silently normalise.
+  ;; B4 slice 2d / CERT-S v1 (corrected: the symbol/string claim was
+  ;; withdrawn — payload hashed as read, no special case). Bugs named per
+  ;; assertion: (1) a carrier without a payload hash cannot join the
+  ;; payload-carrying sections (BJ-1 then undetectable); (2) the hash must
+  ;; be the CERT-S §3 canonical-EDN hash, "sha256:<hex>", not a digest of
+  ;; any one printing (set/map ordering variance must not change it);
+  ;; (3) a same-id action whose payload differs in ANY field must refuse
+  ;; as drift, not join by id alone.
   (let [d (cd/derivations [c2] s0 {:actions [(get c2 :id)]})]
     (is (string? (:candidate-payload-sha256 (:C2 d))))
     (is (= (ce/canonical-sha256 (:id c2)) (:candidate-payload-sha256 (:C2 d)))
         "hash equals the independently callable CERT-S canonical hash of the :id payload")
     (is (re-matches #"sha256:[0-9a-f]{64}" (:candidate-payload-sha256 (:C2 d))))
-    (is (= :distinct (get-in (:C2 d) [:payload-canonicalisation :target-symbol-vs-string]))
-        "the stricter reading is declared on the entry as a typed note")
     ;; canonical stability: a candidate whose maps/sets print in a different
     ;; insertion order hashes identically.
     (let [reordered (update-in c2 [:id :precedence 0 :guard :clauses 0]
@@ -184,19 +183,19 @@
           d2 (cd/derivations [reordered] s0)]
       (is (= (:candidate-payload-sha256 (:C2 d))
              (:candidate-payload-sha256 (:C2 d2))))))
-  ;; symbol/string: same id, the CANDIDATE materialises :target as a SYMBOL
-  ;; (the exemplar's :candidates variance) while the action carries the
-  ;; STRING — under the stricter reading the payloads differ, so the whole
-  ;; carrier refuses as :candidate-payload-drift with both hashes.
-  (let [symbol-target-candidate (assoc-in c2 [:id :target] (symbol target))
-        d (cd/derivations [symbol-target-candidate] s0 {:actions [(get c2 :id)]})]
+  ;; drift: same id, one perturbed payload field (a pattern's :authority)
+  ;; — the payloads differ, so the whole carrier refuses as
+  ;; :candidate-payload-drift with both hashes.
+  (let [perturbed-action (assoc-in (get c2 :id) [:precedence 0 :authority]
+                                   :some-other-interpretation)
+        d (cd/derivations [c2] s0 {:actions [perturbed-action]})]
     (is (map? d))
     (is (= :refused (:status d)))
     (is (= :candidate-payload-drift (:kind d)))
     (is (= :C2 (:id d)))
     (is (= 2 (count (:hashes d))))
     (is (not= (:candidates (:hashes d)) (:action-0 (:hashes d)))
-        "symbol and string targets hash differently — the variance cannot hide")
+        "a one-field payload difference must surface, not join by id alone")
     ;; and the matching-payload case must NOT refuse (the drift check must
     ;; not be an unconditional refusal on any action being present)
     (is (map? (cd/derivations [c2] s0 {:actions [(get c2 :id)]})))))

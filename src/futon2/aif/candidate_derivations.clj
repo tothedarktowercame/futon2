@@ -73,14 +73,12 @@
                                        (:sha256 dsrc)
                                        dsrc)
               :candidate-payload-sha256 (ce/canonical-sha256 (:id candidate))
-              ;; CERT-S v1 §0 is silent on symbol/string target
-              ;; materialisation; the stricter reading is taken: a symbol
-              ;; :target and a string :target hash DIFFERENTLY, so the
-              ;; exemplar's cross-section variance surfaces as a
-              ;; :candidate-payload-drift refusal rather than joining.
+              ;; CERT-S v1 §3, corrected 2026-09-24: the payload is hashed
+              ;; as read, plain canonical EDN — no symbol/string
+              ;; normalisation, no special case (the record holds no
+              ;; symbol-typed :target; that claim was withdrawn).
               :payload-canonicalisation
               {:form :cert-s-v1-canonical-edn
-               :target-symbol-vs-string :distinct
                :note "same candidate iff [:id :id] and :candidate-payload-sha256 agree"}
               :discovered-at {:status :missing
                               :reason :discovery-time-not-recorded}
@@ -153,11 +151,13 @@
            {:status :refused :kind :candidate-id-mismatch
             :reason :action-id-not-in-candidates
             :unmatched (vec (sort (remove id-set action-ids)))}
-           ;; CERT-S v1 §2 :candidate-payload-drift: the same id carrying
-           ;; differing canonical payload hashes across the sections the
-           ;; carrier can see (:candidates and the :actions it is passed).
-           ;; The whole carrier refuses, with the hashes per section, so the
-           ;; symbol/string materialisation cannot hide (BJ-1/§6.9).
+           ;; CERT-S v1 §2 :candidate-payload-drift (correction 2026-09-24:
+           ;; the exemplar's symbol/string claim was withdrawn — the refusal
+           ;; stands on its own merits for any future drift): the same id
+           ;; carrying differing canonical payload hashes across the
+           ;; sections the carrier can see (:candidates and the :actions it
+           ;; is passed). The whole carrier refuses, with the hashes per
+           ;; section (BJ-1).
            (let [hashes (merge-with merge
                          (into {} (map (fn [c] [(get-in c [:id :id])
                                                 {:candidates (ce/canonical-sha256 (:id c))}]))
