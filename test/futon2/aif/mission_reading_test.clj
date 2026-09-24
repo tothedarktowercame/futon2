@@ -102,6 +102,11 @@
         after (flight/click-wants f {})]
     (testing "before: six criteria, all unlocated, six locator readings needed"
       (is (= 6 (count (:wants before))))
+      (is (= :mission-text (get-in before [:source :criteria-from])))
+      (is (= [32 33 34 36 37 39]
+             (mapv #(get-in before [:source :criteria-by-token % :line])
+                   (get-in before [:source :readings-needed :locators])))
+          "the Acceptance bullets' lines in M-f11 at 22fa0da9")
       (is (= 6 (count (get-in before [:source :readings-needed :locators])))))
     (is (= (repeat 6 :published) (map :outcome (of-kind :locator (:asked read)))))
     (is (= [:published] (map :outcome (of-kind :constraints (:asked read)))) "the text's dependencies read once")
@@ -157,6 +162,7 @@
         read ((fr/read-fn {:store s :answer-fn (answer-with bad) :observe observe}) f {})]
     (is (= [:rejected] (mapv :outcome (of-kind :criteria (:asked read)))))
     (is (= [{:kind :rejected :missing :criteria}] (mapv #(select-keys % [:kind :missing]) (:needs read))))
+    (is (every? #(string? (:job-id %)) (:needs read)) "the need carries the answering job")
     (is (nil? (:criteria (wi/read-published s "M-bare"))))))
 
 (deftest the-loop-reads-before-it-reads-the-wants
