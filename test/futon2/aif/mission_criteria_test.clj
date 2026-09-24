@@ -125,3 +125,40 @@
     (is (every? #(= :verdict-not-stated (:reason %)) (:unlocated w))))
   (is (empty? (:wants (read-with "## Acceptance tests elsewhere\n\n- not criteria"))) "heading must start with the name")
   (is (empty? (:wants (read-with "## Acceptance-free notes\n\n- x")))) )
+
+;; Live pins: verbatim copies of the three missions the flight-target
+;; decision rests on, at the named shas (test/fixtures/mission-criteria/).
+;; Located and met are read the way the tick reads them, with decl-present?
+;; over the same text.
+(def fixture-dir "test/fixtures/mission-criteria/")
+
+(defn- live [file mission-id]
+  (let [text (slurp (str fixture-dir file))
+        cs (mc/criteria mission-id text)]
+    (mc/wants cs {:repo "r" :path "p" :observe (observe-in text)})))
+
+(defn- met-by-phase [w]
+  (into {} (for [c (:criteria w) :when (get (:locators w) (:token c))]
+             [(first (str/split (:phase c) #" ")) (get (:universe w) (:token c))])))
+
+(deftest live-m-futon-seams-futon3c-52dd90ec
+  (let [w (live "M-futon-seams@futon3c-52dd90ec.md" "M-futon-seams")]
+    (is (= 6 (count (:wants w))))
+    (is (empty? (:unlocated w)))
+    (is (= {"MAP" true "DERIVE" false "ARGUE" false "VERIFY" true
+            "INSTANTIATE" false "DOCUMENT" false}
+           (met-by-phase w)))))
+
+(deftest live-m-aif-eig-futon2-22fa0da9
+  (let [w (live "M-aif-policy-conditioned-eig@futon2-22fa0da9.md" "M-aif-policy-conditioned-eig")]
+    (is (= 11 (count (:wants w))))
+    (is (empty? (:locators w)))
+    (is (= 11 (count (filter #(= :verdict-not-stated (:reason %)) (:unlocated w)))))
+    (is (every? #(re-find #"^- \*\*C\d+ —" (:stated %)) (:criteria w)))))
+
+(deftest live-m-f11-futon2-22fa0da9
+  (let [w (live "M-f11-find-production-successor@futon2-22fa0da9.md" "M-f11-find-production-successor")]
+    (is (= 6 (count (:wants w))))
+    (is (every? #(= "Acceptance" (:phase %)) (:criteria w)))
+    (is (empty? (:locators w)))
+    (is (some #(str/includes? (:stated %) "State F1–F4 in Lean") (:criteria w)))))
