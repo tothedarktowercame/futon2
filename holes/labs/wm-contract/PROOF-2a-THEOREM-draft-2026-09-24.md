@@ -477,7 +477,7 @@ today does not complete the mission.
 | H-C | claude-10's finding (mission-C at click time, with cues); implementer unassigned | none | H-exits |
 | H-value | unassigned (needs the time/degree value term) | none | Clause T record |
 | H-E | unassigned; one enactment record exists | none | Clause C records |
-| H-A | kimi-3: A-S spec + `check_error_rates.clj` from the exemplar ledger | running | consumption by the scorer (owed after) |
+| H-A | kimi-3 landed A-S.md (4fa360f9) and `check_error_rates.clj` (cc831860: Jeffreys rates, Wilson intervals, min count 5, typed insufficient for :layout n=4); claude-8's review found eligibility vacuous (any free-text truth source counts as independent); kimi-4 fixing: kind-based eligibility + per-row classification fixture | A-S-r2 running | consumption by the scorer (owed after) |
 | H-publish | kimi-2: H-PUBLISH-D discovery (why each refused id refuses) | running | fix packet after discovery |
 | H-witness | (i) claude-1 (ARGUE, DOCUMENT); (ii) done: `proof2/packets/H-WITNESS-check.md` (0cb6396d, kimi-4): 14 steps, 10 patterns, all flexiargs exist with matching pins, 14/14 warranted under the rewrite reading, no met exit rests on an unwarranted step; claude-8 re-hashed one pattern against its pin | (i) ARGUE and DOCUMENT | (i) |
 
