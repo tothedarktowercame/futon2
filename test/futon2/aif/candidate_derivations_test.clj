@@ -5,7 +5,8 @@
   (:require [clojure.test :refer [deftest is]]
             [futon2.aif.candidate-derivations :as cd]
             [futon2.aif.cascade-equivalence :as ce]
-            [futon2.aif.cascade-model-manifest :as m]))
+            [futon2.aif.cascade-model-manifest :as m]
+            [futon2.aif.cascade-sources :as cascade-sources]))
 
 (def target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 
@@ -126,3 +127,37 @@
   (is (nil? (cd/s0-of {:continuation-belief {s0 1/2 #{} 1/2}})))
   (is (= {:status :missing :reason :initial-state-not-a-point-mass}
          (:transition-rows (:C2 (cd/derivations [c2] (cd/s0-of {:continuation-belief {s0 1/2 #{} 1/2}})))))))
+
+(deftest sources-populate-sha-and-acceptance
+  ;; B4 slice 2c. Bug this catches: a carrier that FABRICATES a sha or an
+  ;; acceptance from the candidate map alone (the no-sources assertions), or
+  ;; that joins a declared file to a candidate by anything other than its
+  ;; own target (the cross-target assertion).
+  (let [want-token [target :restoration-accepted]
+        locator {:class :C4 :repo "futon2" :sha "HEAD" :path "t.md" :decl "**Status:** DONE"}
+        sources {:files [{:path "resources/wm/cascade-sources/t.edn"
+                          :sha256 "feedface" :target target}]
+                 :wants {target [want-token]}
+                 :locators {target {want-token locator}}}
+        with-sources (cd/derivations [c2] s0 {:sources sources})
+        without-sources (cd/derivations [c2] s0 nil)
+        other-target (cd/derivations [c2] s0
+                       {:sources (update-in sources [:files 0] assoc :target "T-someone-else")})]
+    (is (= "feedface" (:source-content-sha256 (:C2 with-sources))))
+    (is (= (:sha256 (:source (:construction (:C2 with-sources)))) "feedface"))
+    (is (= (cascade-sources/acceptance-of target {:sources sources})
+           (:acceptance (:C2 with-sources))) "acceptance equals acceptance-of's value")
+    (is (= {:status :missing :reason :declared-source-sha-not-retained
+            :target target}
+           (:source-content-sha256 (:C2 without-sources)))
+        "no sources supplied: typed absence, never a fabricated sha")
+    (is (= {:status :missing :reason :declared-acceptance-not-in-decision-scope}
+           (:acceptance (:C2 without-sources)))
+        "no sources supplied: no acceptance invented from the candidate map")
+    (is (= {:status :missing :reason :declared-source-sha-not-retained
+            :target target}
+           (:source-content-sha256 (:C2 other-target)))
+        "a declared file for ANOTHER target never joins this candidate")
+    (is (= {:status :missing :reason :acceptance-source-file-not-found-for-target}
+           (:acceptance (:C2 other-target)))
+        "acceptance-of keys wants by target even when :files mismatches; the carrier must not accept a declaration whose declaring file does not resolve")))

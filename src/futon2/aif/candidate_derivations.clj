@@ -12,7 +12,8 @@
   are the Lean-bound manifest/cascade-kernel at s₀. Nothing here reads the
   substrate, fires clicks, or writes data/."
   (:require [futon2.aif.cascade-equivalence :as ce]
-            [futon2.aif.cascade-model-manifest :as m]))
+            [futon2.aif.cascade-model-manifest :as m]
+            [futon2.aif.cascade-sources :as cascade-sources]))
 
 (def p0-fields
   "Every field P₀ requires per candidate entry, checked by the tests."
@@ -86,8 +87,21 @@
               :review-publication {:status :missing
                                    :reason :no-review-publication-for-declared-candidates}
               :admission {:kind :declared-file-load :admitted-by :war-machine-judge}
-              :acceptance {:status :missing
-                           :reason :declared-acceptance-not-in-decision-scope}
+              :acceptance (or (when-let [a (and (:sources opts)
+                                                (cascade-sources/acceptance-of
+                                                 target {:sources (:sources opts)}))]
+                                ;; acceptance-of keys by the target's own want
+                                ;; and locator and can return them even when
+                                ;; :files has no entry for the target (nil
+                                ;; provenance sha). Accept only a declaration
+                                ;; whose declaring file actually resolves.
+                                (when (get-in a [:provenance :source-sha256])
+                                  a))
+                              (if (:sources opts)
+                                {:status :missing
+                                 :reason :acceptance-source-file-not-found-for-target}
+                                {:status :missing
+                                 :reason :declared-acceptance-not-in-decision-scope}))
               :locators (or (:observation-locators candidate)
                             {:status :missing :reason :locators-not-carried-on-candidate})
               :scope {:status :missing :reason :feasible-scope-not-declared}

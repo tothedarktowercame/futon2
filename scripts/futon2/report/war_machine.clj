@@ -6079,7 +6079,9 @@
 
 (defn- cascade-decision-admitted
   "Joint cascade decision over ASSEMBLED, the output of
-  futon2.aif.cascade-problems/assemble. OPTS is reserved (ignored today).
+  futon2.aif.cascade-problems/assemble. OPTS is reserved (ignored today),
+  except :cascade-sources (B4 2c): the declared sources map, read by the
+  candidate-derivations carrier for :source-content-sha256 and :acceptance.
 
   Returns {:decision … :lanes [… ] :cascade-problems assembled}, where
   :decision has passed futon2.aif.decision-gate/emit! and :lanes records
@@ -6495,7 +6497,8 @@
                                      (candidate-derivations/s0-of token-belief-stage)
                                      {:actions (when-let [a (get-in decision
                                                        [:selection-law :per-policy-argmax :action])]
-                                                 [a])}))
+                                                 [a])
+                                      :sources (:cascade-sources opts)}))
                 decision (assoc (input-receipts/with-preference-audit decision)
                                 :theta-consumption
                                 (into {}
@@ -7090,7 +7093,13 @@
                                        [:decision :selection-certificate :token-belief-stage
                                         :prospective-carry])
                                :token-belief-context
-                               {:occurrence-id (str "wm-live-selection-" wm-as-of)}))
+                               {:occurrence-id (str "wm-live-selection-" wm-as-of)}
+                               ;; B4 slice 2c: hand the declared sources map to
+                               ;; the decision fn so the P0 carrier's
+                               ;; :source-content-sha256 and :acceptance
+                               ;; populate from :files / acceptance-of instead
+                               ;; of typed absences.
+                               :cascade-sources cascade-sources))
         wm-decision (:decision cascade-result)
         ;; Strategic habit observes the CASCADE decision's first acting
         ;; pattern (strategic_habit/carry, H4/dd4a3bbe); an abstention
