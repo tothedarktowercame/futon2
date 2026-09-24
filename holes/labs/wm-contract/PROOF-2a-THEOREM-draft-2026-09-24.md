@@ -449,7 +449,7 @@ today does not complete the mission.
 | hole | what the machine must do | where it showed |
 |---|---|---|
 | H-interp | turn mission text into interpreted patterns (guard, produces, receipt) | every cascade was written by claude-1 (E-cascade-real D11) |
-| H-order | build the containment order from the interpretations | authored; the constructor returns a precedence only |
+| H-order | build the containment order from the interpretations, OVER UNITS: each node is one application of a pattern, with the pattern id as a unit attribute (D17's canonical id applies to the attribute, not the node identity); a cascade that applies one pattern twice has two units. Today's `:precedence` is a list of pattern ids and cannot carry that; the Lean order (`CoApplicationKernel`, mathlib4 69c2432f) is over unit indices (claude-10 and claude-8, 2026-09-24) | authored; the constructor returns a precedence only |
 | H-grain | choose the grain, with a check before enactment | click-001's first enactment built the wrong grain |
 | H-exits | take the mission's completion criteria as the flight's wants | MAP's table, ARGUE and DOCUMENT were done outside any click |
 | H-C | read the mission's outcomes at click time, with cues | mission-C was written by hand (claude-1) |
