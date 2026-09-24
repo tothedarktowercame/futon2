@@ -36,19 +36,29 @@
     (vec (remove #(or (true? (get universe %)) (contains? produced %)) wants))))
 
 (defn citation-for
-  "The citation of CRITERION ({:line n :stated text}) in TEXT, checked
-  against the text: the stated span must be the text at those lines, or the
-  mission has moved since the want was read and the request refuses."
+  "The citation of CRITERION ({:line n :stated text}) in TEXT, located by its
+  stated text rather than its recorded line: an edit above the criterion
+  moves it without changing it, and must not refuse. Refuses
+  :want/criterion-absent when the stated text no longer occurs, and
+  :want/criterion-ambiguous when it occurs more than once (the want token is
+  keyed on that text, so two occurrences cannot say which was meant). A
+  relocation is recorded with the line the want was read at."
   [source-id text {:keys [line stated]}]
-  (let [lines (vec (str/split-lines text))
-        n (count (str/split-lines stated))
-        a line b (+ line n -1)
-        at (when (<= 1 a b (count lines)) (str/join "\n" (subvec lines (dec a) b)))]
-    (when-not (and at (str/starts-with? at stated))
-      (throw (ex-info "criterion is not at its recorded lines"
-                      {:interpretation/refusal :want/criterion-moved
-                       :line line :stated stated :at at})))
-    {:source source-id :lines [a b] :quote at}))
+  (let [starts (loop [from 0 acc []]
+                 (let [k (str/index-of text stated from)]
+                   (if (nil? k) acc (recur (inc k) (conj acc k)))))
+        refuse (fn [kind] (throw (ex-info "criterion not located by its text"
+                                          {:interpretation/refusal kind :line line :stated stated
+                                           :occurrences (count starts)})))]
+    (case (count starts)
+      0 (refuse :want/criterion-absent)
+      1 (let [a (inc (count (filter #{\newline} (subs text 0 (first starts)))))
+              b (+ a (count (str/split-lines stated)) -1)
+              lines (vec (str/split-lines text))]
+          (cond-> {:source source-id :lines [a b]
+                   :quote (str/join "\n" (subvec lines (dec a) b))}
+            (not= a line) (assoc :relocated-from line)))
+      (refuse :want/criterion-ambiguous))))
 
 (defn request
   "The request for one WANT of TARGET. CRITERION is the reader's record of

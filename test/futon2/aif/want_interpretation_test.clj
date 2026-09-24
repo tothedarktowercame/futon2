@@ -73,17 +73,35 @@
     (is (= [9 10] (get-in r [:retrieval :target :citations 0 :lines])))
     (is (= :want-criterion (get-in r [:retrieval :target :tension-rule])))))
 
-(deftest a-moved-criterion-refuses
-  ;; bad case: the mission was edited after the want was read; the request
-  ;; must not cite whatever now sits at the old line
-  (let [{:keys [root opts]} (fixture)
-        c (assoc (document-criterion) :line 5)]
-    (is (= :want/criterion-moved
-           (try (wi/request! {:target "M-test" :want (:token c) :criterion c :facts {} :patterns {}}
-                             root (assoc opts :retrieve-fn (fn [_] [])))
-                nil
-                (catch clojure.lang.ExceptionInfo e
-                  (:interpretation/refusal (ex-data e))))))))
+(defn- refusal-of [f]
+  (try (f) nil (catch clojure.lang.ExceptionInfo e (:interpretation/refusal (ex-data e)))))
+
+(deftest a-criterion-moved-by-an-edit-above-it-is-relocated
+  ;; kimi-2's read of e08d0832: an insertion above the criterion moved it
+  ;; without changing it, and the request refused; it now re-locates by text
+  (let [c (document-criterion)
+        shifted (str "# M-test\n\nAn inserted paragraph.\nAnd another line.\n"
+                     (subs mission-text (count "# M-test\n")))
+        cit (wi/citation-for "src" shifted c)]
+    (is (= [(+ 3 (:line c)) (+ 4 (:line c))] (:lines cit)) "three lines inserted above")
+    (is (= (:line c) (:relocated-from cit)))
+    (is (str/starts-with? (:quote cit) "**Exit criterion:** someone browsing"))))
+
+(deftest a-criterion-that-is-gone-or-duplicated-refuses
+  (let [c (document-criterion)]
+    (testing "altered: the stated text no longer occurs"
+      (is (= :want/criterion-absent
+             (refusal-of #(wi/citation-for "src" (str/replace mission-text "browsing the docbook" "reading the docbook") c)))))
+    (testing "duplicated: two occurrences cannot say which was meant"
+      (is (= :want/criterion-ambiguous
+             (refusal-of #(wi/citation-for "src" (str mission-text "\n" (:stated c) "\n") c)))))
+    (testing "through request! as well"
+      (let [{:keys [root opts]} (fixture)]
+        (is (= :want/criterion-absent
+               (refusal-of #(wi/request! {:target "M-test" :want (:token c)
+                                          :criterion (assoc c :stated "**Exit criterion:** not in the text")
+                                          :facts {} :patterns {}}
+                                         root (assoc opts :retrieve-fn (fn [_] []))))))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Part 2: validation, on the first flight's real case. Mission text: the
