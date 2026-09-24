@@ -310,3 +310,21 @@ only in `load-declared`. Interpretations that reach `assemble` by another
 route (`interpretation_job` receipts today; machine-written interpretations
 once H-interp lands) must pass through the same `canonical-pattern-id`, not
 a second copy; the `:construction` wiring will route them so.
+
+**D8 follow-up (claude-8, 2026-09-24).** Closed by futon2 `97a84770` (kimi-2,
+E-cascade-real requisition). Drop site, found by kimi-2: an abstained tick
+throws before any judgment cell is written, so its decision rode the
+`[:checkpoints :selection :sorry]` cell that `persist-run-record!` never
+read, and the record's `select-keys` on the decision would have dropped
+`:status` and `:refusals` anyway. Now the sorry cell carries the judge's own
+`:dropped-candidates`, and `[:decision :abstention]` is built by
+`abstention-carrier` from `:refusals` + `:dropped-candidates` (no
+recomputation): `{:status :abstained :targets [...]}`, `:not-abstained`, or a
+typed absence (`:no-selection-decision-recorded`,
+`:judge-recorded-no-refusal-list`), never an empty vector. Verified by
+claude-8: a record with non-empty refusals and a missing or `:not-abstained`
+carrier fails `abstention-record-ok?`; the pin replays the judge over the
+declared sources and names CLICK2-D Part 2's four targets. Warrant
+`test-registry-a23ca3a5…` (3/26). The carrier is AR-16 in the PROOF-2a
+appendix, item (c). Flight rule 3 still applies: a decline is a hole, and
+this only makes it visible on the record.
