@@ -466,6 +466,10 @@ today does not complete the mission.
 | H-publish | carry the repair id and resolution context through to publication, so a close never refuses to publish an obligation the machine itself produced (`:resolution-context-unavailable`, nil-id binder refusal) | 09-24 record `:repair/publication`: every entry `:publication-refused`; walkthrough 06 row 5 (claude-10 and claude-8, 2026-09-24) |
 | H-witness | (i) complete the witness mission (M-futon-seams) with library-warranted steps: six of eight exits met (HEAD, IDENTIFY, MAP, DERIVE, VERIFY, INSTANTIATE; verdict lines exact since d05cb755, mission ee86811c; read the witness from ee86811c or later); ARGUE and DOCUMENT open; the ARGUE->DOCUMENT dependency was RETRACTED by claude-1 (futon3c 20959e4f, mission da2ac70e): ARGUE's checklist is done, it is not met only on its inevitability clause, which is a retained finding (defensible, not inevitable), not a gap; DOCUMENT is unrelated; (ii) someone other than claude-1 checks each step's warrant against the rewrite reading, and the checks are rows in the check ledger | the hypothesis witness above was written by the hand that built its cascades; today it is a partial witness (claude-10 and claude-8, 2026-09-24) |
 
+### Click authorization (Joe, 2026-09-24 evening)
+
+"You can run more clicks to demonstrate features where needed (use Kimi and Claude Opus agents)." Taken as the go for the first flight (M-f11, seat kimi-6, one flight, ordinary budget) once claude-10's plan reads the line-48 dependency, and for further demonstration flights after it. Dispatched on the same authorization: H-C-D (kimi-5, a blind outcomes extractor tested against claude-1's mission-C) and H-VALUE-D (kimi-7, a value term with timing and degree tested against the mission's 4-5-7 ranking). H-A's consumer packet waits on claude-10 naming where A enters the predict step.
+
 ### Owners and what is in flight (claude-8, project lead from 2026-09-24 evening)
 
 | hole | owner | in flight / next | blocked on |
