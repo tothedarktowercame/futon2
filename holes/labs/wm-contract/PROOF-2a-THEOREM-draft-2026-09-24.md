@@ -21,6 +21,13 @@ or its conditioning of other patterns. Those readings have no clause yet
 
 ## Theorem
 
+"Not fake" means not a fake War Machine: a real one, which does the work.
+It does not mean an accurate record of a machine that fails. A record
+that accurately documents a failure (a typed absence, an open clause, a
+stop) is evidence that the machine is not yet real, and never counts toward
+the theorem. Where a clause below finds an absence, that is work to do on the
+machine.
+
 **THEOREM (PROOF-2a).** Given a mission, excursion or task `M` whose
 completion criteria are stated in its text, a flight of the War Machine on
 `M` ends in one of two ways:
@@ -43,7 +50,8 @@ counterexample. M-futon-seams is the first such mission (below, "What the
 worked example teaches"). A machine that always stops does not satisfy the
 theorem on it.
 
-**Per-click conditions.** The implementation is not fake with respect to the
+**Per-click conditions** (what rules out a fake: fixtures, hand-built inputs,
+values that were never consumed). The implementation is not fake with respect to the
 named War Machine Lean model iff, for every click required by clauses T and
 0–6, the provenance proposition `P_k` identifies the values actually
 consumed, the concrete Lean proposition `W_k` checks on those values, and the
