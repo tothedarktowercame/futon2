@@ -128,3 +128,53 @@ wrong if either of the following is accepted by `rates-measured?`:
 And this packet is wrong if the `:layout` kind yields numeric rates: its
 4 runs are below the minimum count, so its rates must be
 `{:status :insufficient :n 4}`.
+
+## Revision 2 (2026-09-24, kimi-4): eligibility is structural, and the 22 rows classified
+
+Appended, not rewritten; sections 1–5 above stand as the original packet,
+with the eligibility rule of section 1 superseded as follows.
+
+**The defect.** claude-8's review of cc831860: `eligible-row?` treated ANY
+non-nil `:truth-source` as independent. Run against the landed code, six
+rows with `:truth true :passed true :truth-source "the check itself
+passed, so it held"` were counted as eligible (n = 6, nothing excluded).
+The docstring's "a self-truthed row MUST NOT carry :truth-source" was a
+convention on authors, not a check — and the estimator's whole purpose is
+to refuse declared or self-confirmed rates.
+
+**The change.** Eligibility is decided by a truth KIND, never by the
+presence of free text:
+
+```clojure
+truth-kinds = #{:constructed-bad-case :later-review :independent-recomputation}
+```
+
+`measured-rates` gains a two-argument form taking a classification map
+`{row-id truth-kind-or-:self-truthed}` (an entry may also be a map
+carrying `:kind` and `:reason`) plus `:classification-source` naming who
+classified and when. A row is eligible iff its kind — `:truth-kind` on
+the row if present, else the classification's entry — is in
+`truth-kinds`. A row carrying only free-text `:truth-source` and no kind
+is excluded as `:unclassified`; a `:self-truthed` row as `:self-truthed`;
+`::excluded-ids` is now `{id reason}`, and the result carries
+`::classification-source` (a typed absence when no classification was
+passed). The one-argument form excludes every row `:unclassified` and
+reports every kind `{:status :insufficient :n 0 ...}` — the true state of
+a ledger nobody has classified. Every kind present in the ledger appears
+in the result even when no row of it is eligible.
+
+**The classification (the judgment part).**
+`test/fixtures/check-ledger-classification/m-futon-seams-v1.edn`,
+classified by kimi-4 (the H-WITNESS-check independent warrant checker,
+not the ledger's author), one kind and a one-line reason per row drawn
+from its `:truth-source`, `:cause` and `:fixed-in`. Result: all 22 rows
+name an independent act — 7 `:constructed-bad-case`, 9 `:later-review`,
+6 `:independent-recomputation`; **zero rows are `:self-truthed`**. That
+is a finding about this ledger, not a default: the classification admits
+the same eligible population (33 runs) as section 1, so the measured
+rates of section 3 stand unchanged. What changed is what they rest on: a
+recorded, checkable judgment per row instead of the presence of a string.
+The pinned tests now run under this fixture; claude-8's bad case is a
+test verbatim (six such rows are excluded, the kind insufficient), and a
+test pins the one-argument all-`:unclassified` behaviour. The three
+section-5 falsifiers are kept.
