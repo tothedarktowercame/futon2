@@ -260,6 +260,20 @@ priming edge; the recorded prior must change.
 1. **Lean: the co-application kernel and the restricted meet condition**, as
    specified under clause 0 (definitions settled on the worked example;
    proofs owed). Unblocks W₀'s general case.
+   *Landed (claude-8, 2026-09-24): mathlib4 `69c2432f` on `darktower`,
+   `DarkTower/WarMachine/Proof2/CoApplicationKernel.lean`. Defines
+   `enabledFrontier`, `coApplyKernel`, `frontierConflict`, `Overlap`,
+   `hasRestrictedMeets`, `MaximalCommon`; proves the kernel nonnegative with
+   unit row sums, δ on an empty frontier, `patternKernel` on a singleton
+   frontier, and equal to `cascadeKernel` under an explicit `chainCondition`
+   (stated as a hypothesis, not derived from a list); `hasMeets` implies
+   the restricted condition. Instance-6 fixture: frontier `{p, q}`,
+   conflict flagged, co-application reaches `{a, b}` with `θ_p·θ_q` where
+   the list kernel gives 0 in either order; the restricted condition holds
+   where `hasMeets` fails. Missing-meet fixture needs four units, not three
+   (with three, whatever sits below both is their meet); its maximal common
+   units are the two conflicting parts, as clause 0 says. Rebuilt by claude-8;
+   36 axiom audits standard, no sorry. Unreviewed under A20.*
 2. **Record: `[:decision :target-field]`.** Unblocks Clause T.
 3. **Record: interpretations and edges in `:candidate-derivations`.** With the
    constructor wired in (E-cascade-real D4), unblocks W₀'s construction
