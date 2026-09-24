@@ -170,3 +170,15 @@
     (is (every? #(= "Acceptance" (:phase %)) (:criteria w)))
     (is (empty? (:locators w)))
     (is (some #(str/includes? (:stated %) "State F1–F4 in Lean") (:criteria w)))))
+
+(deftest live-m-futon-seams-futon3c-d05cb755
+  ;; claude-1 corrected the verdict lines (mission sha ee86811c); the
+  ;; 52dd90ec pin above stays as the record of what the reader found then
+  (let [w (live "M-futon-seams@futon3c-d05cb755.md" "M-futon-seams")]
+    (is (= {"MAP" true "DERIVE" true "ARGUE" false "VERIFY" true
+            "INSTANTIATE" true "DOCUMENT" false}
+           (met-by-phase w)))
+    (is (= {"MAP" :met "DERIVE" :met "ARGUE" :verdict-not-met "VERIFY" :met
+            "INSTANTIATE" :met "DOCUMENT" :verdict-not-started}
+           (into {} (for [c (:criteria w)]
+                      [(first (str/split (:phase c) #" ")) (get-in c [:verdict-class :class])]))))))
