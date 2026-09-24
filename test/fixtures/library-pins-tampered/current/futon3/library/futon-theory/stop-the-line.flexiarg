@@ -1,0 +1,66 @@
+@flexiarg futon-theory/stop-the-line
+@title Stop-the-Line Protocol
+@sigils [🌽/止]
+@keywords stop, block, halt, invariant, failure, observe, verify, fix
+@audience futon developers, on-call engineers
+@tone analytic-foundational
+@factor Keen investigation (dhammavicaya)
+@references [futon-theory/error-hierarchy futon-theory/counter-ratchet futon-theory/agent-contract]
+@references-extra ["Stop-the-line is not punishment; it's protection. Every stop is a" "learning opportunity. The goal is not to avoid stops but to fix the" "root cause so that specific stop never recurs."]
+@provenance no grounding source found for this pattern; deterministic search receipt: runs/L6-no-source-check.edn (L6-L10 sweep, 2026-09-05)
+
+! conclusion: 
+  When invariants fail, block APPLY_CHANGE. Continue to allow OBSERVE and
+  VERIFY until the issue is fixed. The line stops for production, not for
+  diagnosis. Borrowed from Toyota Production System.
+
+  + context: Invariant violations indicate system corruption or logic errors.
+    Continuing to apply changes while invariants are failing compounds the
+    problem. Stop-the-line halts destructive operations while keeping
+    diagnostic operations available.
+
+  + HOWEVER: The structural tension above manifests in the following concrete shapes (see substructure).
+    + ANTI-PATTERNS:
+      - Force-pushing changes despite violations
+      - Disabling invariant checks to "get things working"
+      - Logging violations but continuing anyway
+      - Waiting for someone else to notice
+
+  + THEN: Operate an explicit move on the named axis (see substructure below); steward the pattern against the declared discipline.
+    + NOTIFICATIONS:
+      - Immediate: Alert to on-call with violation details
+      - Contextual: Which invariant, which entity, what discrepancy
+      - Actionable: Suggested diagnostic steps
+      - Persistent: Status visible in health endpoints
+
+    + PROTOCOL:
+      1. INVARIANT_CHECK fails
+      2. System enters STOPPED state
+      3. APPLY_CHANGE blocked for all sessions
+      4. OBSERVE allowed (for diagnosis)
+      5. VERIFY allowed (to test fixes)
+      6. PROOF_COMMIT blocked until invariants pass
+      7. On fix: INVARIANT_CHECK succeeds, line resumes
+
+    + RECOVERY:
+      1. Diagnose: Use OBSERVE to understand the violation
+      2. Fix: Apply correction (may require special override)
+      3. Verify: Use VERIFY to confirm fix
+      4. Resume: Invariants pass, line reopens
+
+    + STOPPED-STATE-BEHAVIOR:
+      - Read operations: ALLOWED
+      - Query operations: ALLOWED
+      - Diagnostic operations: ALLOWED
+      - Write operations: BLOCKED
+      - Commit operations: BLOCKED
+      - Session clock-out: ALLOWED (with failure status)
+
+  + BECAUSE:
+    Continuing to run with broken invariants turns one problem into many.
+    A single write to corrupt storage can cascade. Stopping early contains
+    the blast radius and preserves diagnostic context.
+
+  + NEXT-STEPS:
+    next[Implement stopped-state middleware in futon1a]
+    next[Add stop-the-line status to health endpoint]

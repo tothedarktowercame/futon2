@@ -24,6 +24,7 @@
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.full-loop-cohort :as cohort]
+            [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.policy :as policy]
@@ -6040,6 +6041,13 @@
 
 (deftest close-retains-token-mismatch-before-manifest-freeze
   ;; The runner source-identity guard remains enabled. Run on merged main.
+  ;; RUNNER-SUITE-F: the recorded decision's interpretation receipts pin
+  ;; futon3 flexiarg bytes (sha256 42371c5d...); resolve them against the
+  ;; copy this suite owns (test/fixtures/library-pins, see its README), not
+  ;; the live sibling checkout -- the pin check keeps its force (see
+  ;; close-refuses-when-owned-pin-bytes-drift below) without the result
+  ;; depending on futon3's HEAD.
+  (binding [cascade-sources/*code-roots* ["test/fixtures/library-pins/r7fc6a050" "test/fixtures/library-pins/current"]]
   (token-fixture/with-artifact
    (fn [sha]
      (let [{:keys [root] :as c} (retention-cohort "runner-token-outcome")
@@ -6090,7 +6098,51 @@
        (is (= receipt (edn/read-string (slurp (:source-path entry)))))
        (is (= (:sha256 entry) (digest/sha256 (slurp (:source-path entry)))))
        (is (.isBefore (Instant/parse (:admitted-at entry))
-                      (Instant/parse (:recorded-at close-event))))))))
+                      (Instant/parse (:recorded-at close-event)))))))))
+
+
+(deftest close-refuses-when-owned-pin-bytes-drift
+  ;; RUNNER-SUITE-F falsifier: same fixture, code roots bound to
+  ;; test/fixtures/library-pins-tampered (one byte flipped in the CURRENT
+  ;; generation's one-authority-per-question flexiarg, which the declared
+  ;; sources pin and the dispatch path re-reads). The close must STILL
+  ;; refuse through the same pin gate -- owning the bytes never weakens
+  ;; the sha256 check. (The recorded decision's own r7fc6a050 receipts
+  ;; are not re-read at close; a falsifier aimed at them could not fail.)
+  (binding [cascade-sources/*code-roots* ["test/fixtures/library-pins-tampered/r7fc6a050" "test/fixtures/library-pins-tampered/current"]]
+  (token-fixture/with-artifact
+   (fn [sha]
+     (let [{:keys [root] :as c} (retention-cohort "runner-token-outcome")
+           decision (merge (:decision judgement) (token-fixture/decision))
+           record (io/file root "d-task.edn")
+           _ (spit record (pr-str {:after-token-evidence (token-fixture/measurements sha)}))
+           opts (assoc (retention-success-opts c)
+                       :author-artifact-observer-fn
+                       (fn [r before job]
+                         (assoc (synthetic-artifact-binding r before job) :repo root))
+                       :ground-fn (fn [& _] {:before {:implementation-entity nil}
+                                             :after {:implementation-entity {:id "retained"}}
+                                             :resolved? true :dial-moved? true
+                                             :implementation-id "retained"
+                                             :discharge-id "retained-discharge"})
+                       :judge-fn (fn [_] {:judgement (assoc judgement :decision decision)})
+                       :poll-fn (fn [_ id]
+                                  (if (= id "retention-author")
+                                    {:job-id id :state "done" :artifact-ref sha
+                                     :result-summary (str "FULL_LOOP_AUTHOR: DONE " sha)
+                                     :feature-card feature-card-claim
+                                     :execution successful-execution}
+                                    {:job-id id :state "done" :execution successful-execution
+                                     :result-summary "FULL_LOOP_REVIEW: APPROVE"})))
+           result (with-redefs [d-task/complete!
+                               (fn [& _] {:source {:path (.getPath record)
+                                                   :sha256 (digest/sha256 (slurp record))}})]
+                    (runner/run-opportunity! opts))]
+       (is (= :build-failed (:outcome result))
+           "one byte of drift in the owned pin bytes still fails the build")
+       (is (= "cascade-sources: interpretation-source-hash-mismatch"
+              (get-in result [:data :error]))
+           "the refusal kind is the sha256 pin gate, :interpretation-source-hash-mismatch"))))))
 
 
 (deftest token-comparison-bytes-are-admitted-and-source-tampering-refuses
@@ -6128,6 +6180,9 @@
 (deftest admitted-token-initialization-survives-runner-close
   ;; Same grounded retention fixture as close-retains-token-mismatch-before-manifest-freeze.
   ;; Source identity remains enabled; the owner runs this on merged main.
+  ;; RUNNER-SUITE-F: resolve the decision's pinned futon3 receipt bytes
+  ;; against the copy this suite owns (see close-retains-... above).
+  (binding [cascade-sources/*code-roots* ["test/fixtures/library-pins/r7fc6a050" "test/fixtures/library-pins/current"]]
   (initialization-fixture/with-two-ticks
    (fn [{decision :second}]
      (let [{:keys [root] :as c} (retention-cohort "runner-token-initialization")
@@ -6170,7 +6225,7 @@
        (is (= (:continuation-belief input)
               (get-in selected [:selection-certificate :precision-family :model :q0])))
        (is (every? #(not (contains? % initialization-fixture/updater))
-                   (keys (:continuation-belief input))))))))
+                   (keys (:continuation-belief input)))))))))
 
 (deftest feature-card-close-retains-learning-receipt-without-changing-selection
   ;; Canonical runner-source guard stays enabled; owner runs after merge.

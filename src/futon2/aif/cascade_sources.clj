@@ -63,6 +63,24 @@
 
 (defn- file-sha [f] (evidence/sha256 (java.nio.file.Files/readAllBytes (.toPath f))))
 
+(def ^:dynamic *code-roots*
+  "Additional code roots against which a receipt :source's relative :path
+  resolves during replay admission, tried after
+  futon2.aif.observation-checks/repo-root. A receipt binds ONLY to bytes
+  that hash to its pinned :sha256: listing a root never weakens the pin --
+  when no admitted root holds the pinned bytes the refusal stands
+  (:interpretation-source-unreadable when the file is absent everywhere,
+  :interpretation-source-hash-mismatch otherwise). Empty (default):
+  production behaviour unchanged, byte for byte.
+
+  Replay of a RECORDED decision needs this when two pin generations share
+  one relative path: the current declared sources pin futon3 at one
+  revision while a recorded decision pins the same files at an older one
+  (RUNNER-SUITE-D, futon2 795d4001). A single code root cannot hold two
+  generations at one path; a vector of generation trees can
+  (test/fixtures/library-pins/<generation>/..., see its README)."
+  [])
+
 (defn- read-receipt-source
   "Bind a document-backed interpretation to bytes read during admission.
    Source-less judgement receipts remain judgement receipts. A supplied hash
@@ -75,18 +93,29 @@
       (when-not (and (string? path) (not (str/blank? path)))
         (refuse! :interpretation-source-path {:source source}))
       (let [file (io/file path)
-            file (if (.isAbsolute file) file (io/file oc/repo-root path))
-            hash (try (file-sha file)
-                      (catch java.io.IOException e
-                        (refuse! :interpretation-source-unreadable
-                                 {:path path :exception (.getName (class e))}))
-                      (catch SecurityException e
-                        (refuse! :interpretation-source-unreadable
-                                 {:path path :exception (.getName (class e))})))]
-        (when (and (contains? source :sha256) (not= (:sha256 source) hash))
-          (refuse! :interpretation-source-hash-mismatch
-                   {:path path :declared (:sha256 source) :observed hash}))
-        (assoc receipt :source (assoc source :sha256 hash))))))
+            files (if (.isAbsolute file)
+                    [file]
+                    (mapv #(io/file % path) (cons oc/repo-root *code-roots*)))
+            attempts (mapv (fn [f]
+                             (try {:file f :hash (file-sha f)}
+                                  (catch java.io.IOException e
+                                    {:file f :hash ::unreadable :exception (.getName (class e))})
+                                  (catch SecurityException e
+                                    {:file f :hash ::unreadable :exception (.getName (class e))})))
+                           files)
+            pin (:sha256 source)
+            bound (if (contains? source :sha256)
+                    (some #(when (= pin (:hash %)) %) attempts)
+                    (some #(when (not= ::unreadable (:hash %)) %) attempts))]
+        (if bound
+          (assoc receipt :source (assoc source :sha256 (:hash bound)))
+          (let [readable (filter #(not= ::unreadable (:hash %)) attempts)]
+            (if (seq readable)
+              (refuse! :interpretation-source-hash-mismatch
+                       {:path path :declared pin :observed (:hash (first readable))})
+              (refuse! :interpretation-source-unreadable
+                       {:path path :exception (or (:exception (first attempts))
+                                                  "java.nio.file.NoSuchFileException")}))))))))
 
 (defn observation-schedule
   "A declared observation clock, independent of C's preference placement.
