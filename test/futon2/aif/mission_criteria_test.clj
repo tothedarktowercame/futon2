@@ -213,8 +213,9 @@
   ;; claude-1 moved the ARGUE condition into the mission (mission 119e4ede)
   (let [text (slurp (str fixture-dir "M-futon-seams@futon3c-ea68c485.md"))
         {:keys [requires unresolved]} (mc/constraints "M-futon-seams" text)]
-    (is (= [{:want :exit/hac75428b9c97 :requires :exit/h54d16050a9dc :phase "ARGUE" :through "DOCUMENT" :line 503}]
-           (mapv #(select-keys % [:want :requires :phase :through :line]) requires)))
+    (is (= [{:want :exit/hac75428b9c97 :requires :exit/h54d16050a9dc :phase "ARGUE" :through "DOCUMENT" :line 503
+             :by :mission-text}]
+           (mapv #(select-keys % [:want :requires :phase :through :line :by]) requires)))
     (is (str/starts-with? (:quote (first requires)) "This phase closes only through DOCUMENT's"))
     (is (empty? unresolved))
     (testing "the exit tokens did not move with the edit"
