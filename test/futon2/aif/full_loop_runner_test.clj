@@ -1658,6 +1658,136 @@
         (is (= :grounding-failed (:outcome (ex-data e))))))
     (is (empty? @docs) "failed revalidation writes neither implementation nor discharge")))
 
+;; --- Grounding props must be storable as written (2026-09-23) ---
+;;
+;; Six groundings on 2026-09-23 recorded {:dial-moved? true :resolved?
+;; false}: pattern-theta's recorded-trials attestation put Ratio theta
+;; values into the grounded selected-action, XTDB 2 cannot store
+;; clojure.lang.Ratio, and futon1b's rescue ladder silently answered by
+;; pr-str-ing :entity/props into a string -- so the witness's
+;; (get-in after [:props :implementation/commit]) read nil. The exact
+;; rational stays on the in-JVM pattern (the pattern kernel requires
+;; (ratio? theta)); the props copy is provenance and carries the double.
+
+(defn- recorded-trials-action
+  "The shape that degraded on 2026-09-23: a cascade candidate whose
+   precedence carries pattern-theta's recorded-trials attestation with
+   Ratio theta values."
+  []
+  {:kind :cascade-candidate :id :C1 :target "T-repair-occ-grounding"
+   :precedence [{:theta-source :recorded-trials :theta 3/4
+                 :theta-provenance {:trials-count 1 :successes 1
+                                    :identities ["8e7d1aaf"] :targets ["M-x"]
+                                    :unattributed-rows 0}
+                 :id :apparatus/done-is-observed-running
+                 :target "T-repair-occ-grounding"
+                 :authority :documented-interpretation
+                 :produces #{["T-repair-occ-grounding" :repair/obstruction-observed-cleared]}
+                 :transition {:status :interpreted :operator :union
+                              :produces #{["T-repair-occ-grounding" :repair/obstruction-observed-cleared]}}
+                 :guard {:status :interpreted :operator :and
+                         :clauses [{:status :interpreted
+                                    :present #{["T-repair-occ-grounding" :admission/task-stated]}
+                                    :absent #{}}]}}
+                {:theta-source :recorded-trials :theta 1/4
+                 :theta-provenance {:trials-count 1 :successes 0
+                                    :identities ["674ca5d7"] :targets ["T-repair-occ-grounding"]
+                                    :unattributed-rows 0}
+                 :id :apparatus/evidence-to-disposition-once
+                 :target "T-repair-occ-grounding"
+                 :authority :documented-interpretation
+                 :produces #{["T-repair-occ-grounding" :restoration-accepted]}
+                 :transition {:status :interpreted :operator :union
+                              :produces #{["T-repair-occ-grounding" :restoration-accepted]}}
+                 :guard {:status :interpreted :operator :and :clauses []}}]
+   :observation-locators {["T-repair-occ-grounding" :admission/task-stated]
+                          {:class :C4 :repo "futon2" :sha "HEAD"
+                           :path "holes/tickets/T-repair-occ-grounding.md"}}})
+
+(defn- no-ratio-no-string-coll?
+  "Every map in the value is a real map (never a pr-str string), and no
+   Ratio survives."
+  [v]
+  (cond
+    (ratio? v) false
+    (map? v) (every? (fn [[k x]] (and (keyword? k) (no-ratio-no-string-coll? x))) v)
+    (coll? v) (every? no-ratio-no-string-coll? v)
+    :else true))
+
+(deftest grounding-coerces-ratio-theta-to-a-storable-double
+  ;; The bad case the guard is named for, built from the real shape.
+  (let [construction {:construction-kind :cascade
+                      :selected-action (recorded-trials-action)}
+        {:keys [docs opts]} (substrate-fixture)
+        result (runner/ground-commit!
+                "attempt-theta" "T-repair-occ-grounding"
+                "codex-6" "claude-7" "/repo" "deadbee"
+                ["holes/tickets/T-repair-occ-grounding.md"] construction
+                {:job-id "review-theta"} opts)
+        implementation (get @docs "full-loop/implementation/deadbee")
+        precedence (get-in implementation [:implementation/selected-action :precedence])]
+    (is (:resolved? result) "the readback names the commit once props stay a map")
+    (is (:dial-moved? result))
+    (is (map? (:implementation/selected-action implementation))
+        "the selected action is stored as a map, never a pr-str string")
+    (is (no-ratio-no-string-coll? implementation)
+        "no Ratio and no stringified collection anywhere in the stored doc")
+    (is (= [0.75 0.25] (mapv :theta precedence))
+        "theta keeps its value to double precision")
+    (is (every? (comp double? :theta) precedence))
+    (is (= 1 (get-in precedence [0 :theta-provenance :trials-count]))
+        "the exact rational stays recoverable from the integer counts")
+    (let [locators (get-in implementation [:implementation/selected-action :observation-locators])]
+      (is (vector? locators)
+          "a token-keyed map grounds as entries, never a pr-str string")
+      (is (= {["T-repair-occ-grounding" :admission/task-stated]
+              {:class :C4 :repo "futon2" :sha "HEAD"
+               :path "holes/tickets/T-repair-occ-grounding.md"}}
+             (into {} locators))
+          "and the entries restore the original map exactly"))))
+
+(deftest grounding-refuses-a-value-the-store-cannot-hold
+  ;; Typed and loud, before any write: a symbol has no honest storable form.
+  (let [construction {:construction-kind :cascade
+                      :selected-action (assoc-in (recorded-trials-action)
+                                                 [:precedence 0 :theta] 'three-quarters)}
+        {:keys [docs opts]} (substrate-fixture)]
+    (try
+      (runner/ground-commit!
+       "attempt-sym" "T-repair-occ-grounding"
+       "codex-6" "claude-7" "/repo" "symbee"
+       ["holes/tickets/T-repair-occ-grounding.md"] construction
+       {:job-id "review-sym"} opts)
+      (is false "an unstorable value must not reach the substrate")
+      (catch clojure.lang.ExceptionInfo e
+        (is (= :grounding-failed (:outcome (ex-data e))))
+        (is (= :unstorable-grounding-value (:failure-kind (ex-data e))))
+        (is (= :grounding (:failure-stage (ex-data e))))
+        (is (= "clojure.lang.Symbol" (:value-type (ex-data e))))
+        (is (= [:implementation/selected-action :precedence :theta]
+               (:path (ex-data e)))
+            "the refusal names the offending key path")))
+    (is (empty? @docs) "a refused grounding writes neither implementation nor discharge")))
+
+(deftest storable-grounding-doc-is-exact-about-clean-values-and-nils
+  (let [f @#'runner/storable-grounding-doc]
+    (is (= {:xt/id "x" :p {:a 1 :b ["s" :k true] :c #{["t" :u]} :d nil}}
+           (f {:xt/id "x" :p {:a 1 :b ["s" :k true] :c #{["t" :u]} :d nil}}))
+        "a clean document is value-identical, including a top-level nil value")
+    (is (= {:p {:enacted-steps {:test/p nil} :deep {:deeper [nil]}}}
+           (f {:p {:enacted-steps {:test/p nil} :deep {:deeper [nil]}}}))
+        "nil map values at any depth and nils inside collections pass: XTDB
+         2.1.0 stores them (probed 2026-09-24), and :enacted-steps carries
+         {:pattern/id nil} whenever no pattern is enabled")
+    (is (= {:p {:theta 0.75}} (f {:p {:theta 3/4}})))
+    (is (= {:p 1} (f {:p 1N})) "a BigInt within long range coerces to long")
+    (is (= {:p [[["T" :tok] 1]]} (f {:p {["T" :tok] 1}}))
+        "a non-keyword-keyed map grounds as sorted entries, recoverable with into{}")
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"outside the substrate's range"
+                          (f {:p (.pow java.math.BigInteger/TEN 40)}))
+        "a BigInteger beyond i64 refuses")))
+
+
 (deftest construction-failure-opens-system-stop-line-and-does-not-write-trace
   (let [findings (atom [])
         traces (atom [])

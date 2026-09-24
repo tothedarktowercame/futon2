@@ -2680,14 +2680,97 @@
              :implementation/pattern-evidence-ids
              (:evidence-ids actuation-contract)))))
 
+(defn- storable-grounding-value
+  "Walk one props-bound value and return its storable form, refusing loudly
+   on what the write path cannot carry without silently changing shape.
+
+   Coercions, both with an honest storable form:
+   - Ratio -> double. The exact rational stays on the in-JVM pattern
+     (cascade-model-manifest/pattern-kernel requires (ratio? theta)) and is
+     recoverable from :theta-provenance's integer counts; the substrate copy
+     is provenance, and 0.75 is the honest numeric form of 3/4 there.
+   - clojure.lang.BigInt / BigInteger within long range -> long (XTDB 2
+     rejects the boxed type outright: \"unknown object type\").
+
+   Refusals, typed :unstorable-grounding-value with the key path:
+   - anything else XTDB 2.1.0 cannot type (Symbol, Character, arbitrary
+     objects -- the full \"unknown object type\" class);
+   - a map with a non-keyword key. Grounding props legitimately carry one:
+     the selected action's :observation-locators is keyed by token VECTORS
+     ([target token-name]). Raw XTDB 2.1.0 tolerates non-keyword keys, but
+     futon1b's migration.transform/deep-stringify-non-keyword-maps answers
+     one by pr-str-ing the whole map BEFORE the put -- the same silent
+     shape change as the rescue ladder, one stage earlier. The honest
+     storable form is a vector of [key value] entries, sorted by (pr-str
+     key) for determinism: structure is fully recoverable ((into {} ...)
+     restores the map exactly), and the conversion happens here, named,
+     not inside a rescue nobody reads.
+
+   Nil is allowed in any position: probed against XTDB 2.1.0 on 2026-09-24
+   (nil map values at any depth, nils inside vectors and sets all put
+   cleanly). migration.transform/risky-nil? says otherwise, but grounding
+   props legitimately carry nil map values -- the selection law's
+   :enacted-steps records {:pattern/id nil} when no pattern is enabled --
+   and refusing them breaks every grounding; the probe wins over the
+   heuristic.
+
+   Loud here because the alternative is the 2026-09-23 failure mode:
+   futon1b's rescue ladder answering an unstorable value by pr-str-ing
+   :entity/props into a string, and six groundings recording :resolved?
+   false over ten silent hours."
+  [path v]
+  (cond
+    (nil? v) v
+    (ratio? v) (double v)
+    (or (instance? clojure.lang.BigInt v) (instance? java.math.BigInteger v))
+    (let [bi (if (instance? clojure.lang.BigInt v)
+               (.toBigInteger ^clojure.lang.BigInt v)
+               ^java.math.BigInteger v)]
+      (try
+        (.longValueExact bi)
+        (catch ArithmeticException _
+          (throw (ex-info "Grounding props hold an integer outside the substrate's range"
+                          {:outcome :grounding-failed
+                           :failure-kind :unstorable-grounding-value
+                           :failure-stage :grounding
+                           :value-type (.getName ^Class (type v)) :path path})))))
+    (or (string? v) (keyword? v) (boolean? v) (integer? v) (float? v)
+        (decimal? v) (inst? v) (uuid? v) (bytes? v)) v
+    (map? v) (if (every? keyword? (keys v))
+               (into {}
+                     (map (fn [[k x]] [k (storable-grounding-value (conj path k) x)]))
+                     v)
+               (mapv (fn [[k x]] [k (storable-grounding-value (conj path k) x)])
+                     (sort-by (comp pr-str key) v)))
+    (sequential? v) (mapv #(storable-grounding-value path %) v)
+    (set? v) (into #{} (map #(storable-grounding-value path %)) v)
+    :else (throw (ex-info "Grounding props hold a value the substrate cannot store"
+                          {:outcome :grounding-failed
+                           :failure-kind :unstorable-grounding-value
+                           :failure-stage :grounding
+                           :value-type (.getName ^Class (type v)) :path path}))))
+
+(defn- storable-grounding-doc
+  "Apply storable-grounding-value to every top-level value of a grounding
+   document except :xt/id -- the per-value grain futon1b's rescue ladder
+   uses. A clean document comes back value-identical."
+  [doc]
+  (into {}
+        (map (fn [[k v]]
+               [k (if (= :xt/id k)
+                    v
+                    (storable-grounding-value [k] v))]))
+        doc))
+
 (defn ground-commit!
   [attempt-id target author reviewer repo commit files construction review-job opts]
   (let [discharge-ref (discharge-id (:cohort-id opts) (:run-id opts) attempt-id)
         impl-id (implementation-id commit)
         before (substrate/entity-by-id impl-id opts)
         construction-props (grounding-construction-props target construction)
-        implementation (merge
-                        {:xt/id impl-id
+        implementation (storable-grounding-doc
+                        (merge
+                         {:xt/id impl-id
                          :entity/type :implementation/commit
                          :entity/name (str "Reviewed implementation " commit)
                          :entity/source "wm-full-loop"
@@ -2698,8 +2781,9 @@
                          :implementation/author author
                          :implementation/reviewer reviewer
                          :implementation/review-job (:job-id review-job)}
-                        construction-props)
-        discharge (cond-> {:xt/id discharge-ref
+                        construction-props))
+        discharge (storable-grounding-doc
+                   (cond-> {:xt/id discharge-ref
                    :entity/type :discharge
                    :entity/name (str "Full-loop discharge " attempt-id)
                    :entity/source "wm-full-loop"
@@ -2716,7 +2800,7 @@
                     (assoc :discharge/cohort-id (:cohort-id opts))
                     (selected-cascade {:action (:selected-action construction)})
                     (assoc :discharge/selected-cascade
-                           (selected-cascade {:action (:selected-action construction)})))]
+                           (selected-cascade {:action (:selected-action construction)}))))]
     (when before
       (throw (ex-info "Implementation commit already grounded"
                       {:outcome :grounded-no-change :implementation-id impl-id})))
