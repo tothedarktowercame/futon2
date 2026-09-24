@@ -46,9 +46,9 @@
     (throw (ex-info (str seat " may not answer flight requests (claude-1's delegate)")
                     {:refused-seat seat}))))
 
-(defn- flight-for [{:keys [target repo path lifecycle-repo lifecycle-path read-text code-root observe id]}]
+(defn- flight-for [{:keys [target repo path lifecycle-repo lifecycle-path read-text code-root observe id store]}]
   (flight/start {:target target :chosen-because {:kind :requested :by "flight-driver"}}
-                (cond-> {:kind :a-exits :repo repo :path path}
+                (cond-> {:kind :a-exits :repo repo :path path :store (or store wi/default-store)}
                   lifecycle-path (assoc :lifecycle {:repo (or lifecycle-repo repo) :path lifecycle-path})
                   read-text (assoc :read-text read-text)
                   code-root (assoc :code-root code-root)
@@ -80,6 +80,16 @@
                                 :met? (get universe t)})))
              :out-of-view (:out-of-view src)
              :unlocated (:unlocated src)}
+     :criteria-from (:criteria-from src)
+     :machine-located (:machine-located src)
+     ;; D11 part 5: what the mission does not state, and the reading step
+     ;; would compute before the first click instead of refusing
+     :readings-it-would-request
+     {:criteria (when (get-in src [:readings-needed :criteria?])
+                  {:sections-read (get-in src [:readings-needed :sections-read])})
+      :locators (vec (for [t (get-in src [:readings-needed :locators])
+                           :let [c (get-in src [:criteria-by-token t])]]
+                       {:want t :line (:line c) :criterion (first (str/split-lines (str (:stated c))))}))}
      :open-wants (vec (remove #(true? (get universe %)) (:wants cw)))
      :constraints (mapv #(select-keys % [:want :requires :phase :through :line :by])
                         (get-in src [:constraints :requires]))
@@ -104,7 +114,8 @@
   (let [store (or store wi/default-store)
         f (flight-for (assoc opts :id (:flight-id planned)))
         answer (fr/agency-answer-fn {:seat seat :caller "wm-flight" :opts (runner/config {})})
-        flown (flight/run! f {:ask-fn (fr/ask-fn {:store store :answer-fn answer})
+        flown (flight/run! f {:read-fn (fr/read-fn {:store store :answer-fn answer})
+                              :ask-fn (fr/ask-fn {:store store :answer-fn answer})
                               :click-fn (fr/http-click-fn {:caller "wm-flight"})
                               :observe-fn (fr/observe-fn)
                               :sources-fn (constantly sources)
@@ -113,6 +124,7 @@
     (.mkdirs (.getParentFile path))
     (spit path (with-out-str (pp/pprint {:plan planned :flight flown})))
     {:flight flown :record-path (.getCanonicalPath path)
+     :readings (vec (for [a (:readings flown) q (:asked a)] (select-keys q [:kind :want :request-id :seat :job-id :outcome])))
      :requests (vec (for [a (:asks flown) q (:asked a)] (select-keys q [:want :request-id :seat :job-id :outcome])))
      :published-store (str store "/" target ".edn")
      :clicks (mapv #(select-keys % [:click-id :advanced :open-after :abstention]) (:clicks flown))

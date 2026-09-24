@@ -13,7 +13,10 @@
 
   Pure except `run!`, which calls the injected click and observe functions."
   (:refer-clojure :exclude [run!])
-  (:require [futon2.aif.mission-criteria :as criteria]
+  (:require [clojure.string :as str]
+            [futon2.aif.mission-criteria :as criteria]
+            [futon2.aif.mission-reading :as reading]
+            [futon2.aif.observation-checks :as checks]
             [futon2.aif.repair-proposals :as repairs])
   (:import [java.util UUID]))
 
@@ -39,30 +42,58 @@
 ;; names the mission file: {:kind :a-exits :repo … :path … :code-root …}.
 ;; A criterion with no stated verdict is a want with no locator; assembly
 ;; then refuses the target naming it, which is the hole to close.
-(defmethod source-wants :a-exits [{:keys [repo path code-root read-text observe lifecycle]} {:keys [target]} sources]
+(defmethod source-wants :a-exits [{:keys [repo path code-root read-text observe lifecycle store]} {:keys [target]} sources]
   (let [read (or read-text criteria/read-mission)
         root (or code-root "/home/joe/code")
         text (read root repo path)
+        store (or store reading/default-store)
         ;; a declared lifecycle file: phases judged in data only are named
         ;; out of view, so a closure over the stated criteria is never read
         ;; as the mission's completion
         out-of-view (when lifecycle
                       (some-> (read root (:repo lifecycle) (:path lifecycle))
                               criteria/data-only-phases))
-        cs (criteria/criteria target (or text ""))
-        w (criteria/wants cs (cond-> {:repo repo :path path} observe (assoc :observe observe)))]
+        stated (criteria/criteria target (or text ""))
+        ;; D11 part 5: no criteria in a recognised form is not a refusal;
+        ;; criteria extracted by a reading (published, cues still resolving)
+        ;; stand in, and until one exists the source asks for it
+        extracted (when (empty? stated) (reading/published-criteria store target text))
+        cs (if (seq stated) stated extracted)
+        w (criteria/wants cs (cond-> {:repo repo :path path} observe (assoc :observe observe)))
+        ;; a criterion with no stated verdict: a published machine locator
+        ;; decides it, observed each click like a stated verdict's
+        machine (select-keys (reading/published-locators store target) (map :token (:unlocated w)))
+        observe-loc (or observe #(contains? (:observed (checks/observe {::t %})) ::t))
+        still-unlocated (vec (remove #(contains? machine (:token %)) (:unlocated w)))]
     {:wants (vec (distinct (concat (get-in sources [:wants target]) (:wants w))))
-     :locators (:locators w)
-     :universe (:universe w)
+     :locators (merge (:locators w) machine)
+     :universe (merge (:universe w) (into {} (for [[t l] machine] [t (boolean (observe-loc l))])))
      :source {:kind :a-exits :via "futon2.aif.mission-criteria"
               :repo repo :path path :text-read? (some? text)
               :criteria (count cs)
+              :criteria-from (cond (seq stated) :mission-text (seq extracted) :machine-reading :else :none)
+              :machine-located (vec (sort-by str (keys machine)))
+              :unlocated still-unlocated
+              ;; the readings this source still needs; the flight's read
+              ;; step asks for them before the click (never a refusal)
+              :readings-needed {:criteria? (empty? cs)
+                                :locators (mapv :token still-unlocated)
+                                :sections-read (vec (keep #(second (re-matches #"^#+\s+(.*)$" %))
+                                                          (str/split-lines (str text))))}
               ;; ordering constraints the mission states in its own words
               :constraints (criteria/constraints target (or text ""))
               ;; token -> the criterion it was read from, for the D11 request
-              :criteria-by-token (into {} (map (fn [c] [(:token c) (select-keys c [:kind :line :phase :stated])]))
-                                       (:criteria w))
-              :unlocated (:unlocated w)
+              :criteria-by-token (merge
+                                  ;; a checkbox want's criterion is its own task
+                                  ;; line, unchecked (its locator's :decl is the
+                                  ;; checked form)
+                                  (into {} (for [t (get-in sources [:wants target])
+                                                 :let [d (get-in sources [:locators target t :decl])]
+                                                 :when (and (string? d) (re-find #"^[-*]\s+\[x\]" d))]
+                                             [t {:kind :checkbox-task :phase "checkbox"
+                                                 :stated (str/replace-first d #"\[x\]" "[ ]")}]))
+                                  (into {} (map (fn [c] [(:token c) (select-keys c [:kind :line :phase :stated])]))
+                                        (:criteria w)))
               ;; phases judged in data only, and findings the owner retains
               ;; as not met: neither is a want, both are named
               :out-of-view (vec (concat out-of-view (:retained w)))
@@ -181,15 +212,24 @@
   {token bool}. ASK-FN, when given, runs before each click with the flight,
   its wants and the sources, and returns {:asked [...] :needs [...]}: the
   D11 requests made for wants no interpretation produces (futon2.aif.
-  flight-runner/ask-fn); its needs join the flight's. SOURCES-FN returns the tick's
+  flight-runner/ask-fn); its needs join the flight's. READ-FN, when given,
+  runs first, before the wants are read (flight-runner/read-fn, D11 part 5). SOURCES-FN returns the tick's
   sources (for the want source). Stops when the flight closes, when a click
   advances nothing, or after MAX-CLICKS (then :status :click-limit, with the
   open wants on the last click). Returns the flight record."
-  [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn]}]
+  [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn]}]
   (loop [f flight]
     (if (or (not= :open (:status f)) (>= (count (:clicks f)) max-clicks))
       (cond-> f (= :open (:status f)) (assoc :status :click-limit))
       (let [sources (sources-fn)
+            ;; D11 part 5: readings the want source still needs (criteria a
+            ;; mission does not state in a recognised form; locators for
+            ;; criteria with no stated verdict) are asked before the wants
+            ;; are read, so this click sees what they publish
+            read (when read-fn (read-fn f sources))
+            f (cond-> f
+                read (-> (update :readings (fnil conj []) (assoc read :before-click (inc (count (:clicks f)))))
+                         (update :needs into (:needs read))))
             wants (click-wants f sources)
             locators (select-keys (merge (get-in sources [:locators (:target f)]) (:locators wants))
                                   (:wants wants))

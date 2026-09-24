@@ -13,6 +13,10 @@
             [futon2.aif.interpretation-construction :as ic]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.task-execution-evidence]
+            [futon2.aif.flight :as flight]
+            [futon2.aif.interpretation-evidence]
+            [futon2.aif.mission-criteria :as criteria]
+            [futon2.aif.mission-reading :as reading]
             [futon2.aif.want-interpretation :as wi]
             [futon2.report.war-machine :as wm]))
 
@@ -75,11 +79,12 @@
   for the minutes an answer takes; a bellback has no return path to the
   machine's persona). Returns {:seat :job-id :state :text}. OPTS are the
   runner's (:agency-base, poll settings)."
-  [{:keys [seat caller opts dispatch! poll! job-text]
+  [{:keys [seat caller opts dispatch! poll! job-text prompt-fn]
     :or {caller "wm-flight" dispatch! runner/dispatch! poll! runner/poll-job!
          job-text futon2.aif.task-execution-evidence/job-text}}]
   (fn [issued]
-    (let [sent (dispatch! opts seat caller (:target issued) (wi/prompt issued))
+    (let [prompt-fn (or prompt-fn (if (#{:locator :criteria} (:kind issued)) reading/prompt wi/prompt))
+          sent (dispatch! opts seat caller (:target issued) (prompt-fn issued))
           job-id (:job-id sent)]
       (if-not job-id
         {:seat seat :state :not-dispatched :text nil :dispatch sent}
@@ -279,3 +284,70 @@
                     (sleep! poll-ms)
                     (recur))))
               (assoc (record-summary target run-id (read-record! run-id)) :server-click-id click-id)))))))
+
+;; ---------------------------------------------------------------------------
+;; D11 part 5: the flight reads what the mission does not state
+
+(defn- answered [answer]
+  (select-keys answer [:seat :job-id]))
+
+(defn- evidence-sha [text]
+  (when text (futon2.aif.interpretation-evidence/sha256 (.getBytes ^String text "UTF-8"))))
+
+(defn- read-one
+  "Issue a reading request, answer it, parse, validate, publish. The entry."
+  [{:keys [store answer-fn]} issued schema validate publish]
+  (let [issued (wi/issue! store issued)
+        answer (answer-fn issued)
+        who (answered answer)
+        base (merge {:kind (:kind issued) :want (get-in issued [:want :token]) :request-id (:request-id issued)} who)
+        parsed (when (= "done" (:state answer)) (wi/parse-reply schema (:text answer)))]
+    (cond
+      (nil? parsed) (assoc base :outcome :not-answered :state (:state answer))
+      (:unparseable-response parsed) (assoc base :outcome :unparseable-response :detail (:unparseable-response parsed))
+      (:decline parsed) (assoc base :outcome :declined :decline (:decline parsed))
+      :else (let [v (validate issued (:response parsed))]
+              (if (= :valid (:status v))
+                (do (publish issued (:response parsed) v who) (assoc base :outcome :published))
+                (assoc base :outcome :rejected :reasons (:reasons v)))))))
+
+(defn read-fn
+  "The flight's read step (D11 part 5), run before the wants are read. When
+  the :a-exits source found no criteria in a recognised form, it asks for
+  criteria extracted from the mission text; then, for each criterion with
+  no stated verdict and no published locator, it asks for a checkable
+  locator. Everything that is not a publication is a flight :need with its
+  job id; a mission is never refused for a missing list, and a typed
+  absence arises only when a reading ran and found nothing."
+  [{:keys [store read-text code-root] :as opts}]
+  (fn [flight sources]
+    (let [ws (:want-source flight)
+          target (:target flight)
+          mission (select-keys ws [:repo :path])
+          text ((or read-text (:read-text ws) criteria/read-mission)
+                (or code-root (:code-root ws) "/home/joe/code") (:repo ws) (:path ws))
+          needed #(get-in (flight/click-wants flight sources) [:source :readings-needed])
+          first-need (needed)
+          criteria-entry
+          (when (:criteria? first-need)
+            (read-one opts (reading/criteria-request target mission (:sections-read first-need))
+                      reading/criteria-schema
+                      (fn [issued resp] (reading/validate-criteria issued resp text))
+                      (fn [issued resp v who]
+                        (reading/publish-criteria! store issued resp v who
+                                                   (evidence-sha text)))))
+          ;; locators are asked after any criteria publication, so newly
+          ;; extracted criteria get theirs in the same step
+          cw (flight/click-wants flight sources)
+          by-token (get-in cw [:source :criteria-by-token])
+          locator-entries
+          (vec (for [t (get-in cw [:source :readings-needed :locators])]
+                 (read-one opts (reading/locator-request target mission (assoc (get by-token t) :token t))
+                           reading/locator-schema
+                           (fn [issued resp] (reading/validate-locator issued resp (select-keys opts [:observe])))
+                           (fn [issued resp v who] (reading/publish-locator! store issued resp v who)))))
+          asked (vec (concat (when criteria-entry [criteria-entry]) locator-entries))]
+      {:asked asked
+       :needs (vec (for [a asked :when (not= :published (:outcome a))]
+                     (merge {:kind (:outcome a) :missing (if (= :criteria (:kind a)) :criteria :locator)}
+                            (select-keys a [:want :request-id :seat :job-id]))))})))

@@ -57,7 +57,7 @@
               lines (vec (str/split-lines text))]
           (cond-> {:source source-id :lines [a b]
                    :quote (str/join "\n" (subvec lines (dec a) b))}
-            (not= a line) (assoc :relocated-from line)))
+            (and line (not= a line)) (assoc :relocated-from line)))
       (refuse :want/criterion-ambiguous))))
 
 (defn request
@@ -220,7 +220,7 @@
   pattern they both name."
   "/home/joe/code/futon2/data/wm-interpretations")
 
-(defn- content-id [kind x]
+(defn content-id [kind x]
   (str (name kind) "-" (subs (evidence/sha256 (.getBytes (pr-str x) "UTF-8")) 0 16)))
 
 (defn- target-file [store target] (io/file store (str target ".edn")))
@@ -231,7 +231,7 @@
   (let [f (target-file store target)]
     (when (.isFile f) (edn/read-string (slurp f)))))
 
-(defn- write-atomic! [^java.io.File f x]
+(defn write-atomic! [^java.io.File f x]
   (.mkdirs (.getParentFile f))
   (let [tmp (io/file (.getParentFile f) (str "." (.getName f) "." (System/nanoTime) ".tmp"))]
     (spit tmp (with-out-str (pp/pprint x)))
@@ -249,7 +249,7 @@
     (when-not (.isFile f) (write-atomic! f issued))
     issued))
 
-(defn- issued-request [store request-id]
+(defn issued-request [store request-id]
   (let [f (io/file store "requests" (str request-id ".edn"))]
     (when (and (string? request-id) (.isFile f)) (edn/read-string (slurp f)))))
 
@@ -282,17 +282,19 @@
 (defn parse-reply
   "The single response form in reply TEXT: {:response m}, {:decline d}, or
   {:unparseable-response {:forms n …}} when there is not exactly one fenced
-  EDN form of the response schema. Never a decline by default."
-  [text]
+  EDN form of the response SCHEMA (default: the interpretation response).
+  Never a decline by default."
+  ([text] (parse-reply response-schema text))
+  ([schema text]
   (let [blocks (map second (re-seq #"(?s)```(?:edn|clojure)?\s*\n(.*?)```" (str text)))
         forms (keep (fn [b] (try (let [x (edn/read-string b)]
-                                   (when (and (map? x) (= response-schema (:schema x))) x))
+                                   (when (and (map? x) (= schema (:schema x))) x))
                                  (catch Exception _ nil)))
                     blocks)]
     (if (= 1 (count forms))
       (let [m (first forms)]
         (if (:decline m) {:decline (:decline m)} {:response (dissoc m :schema)}))
-      {:unparseable-response {:forms (count forms) :fenced-blocks (count blocks)}})))
+      {:unparseable-response {:forms (count forms) :fenced-blocks (count blocks)}}))))
 
 (defn publish!
   "Publish a VALIDATED result (validate-response :status :valid) for the
