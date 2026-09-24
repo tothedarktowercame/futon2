@@ -6011,6 +6011,18 @@
                          :enactor "futon2.report.war-machine/cascade-lane"
                          :claim :enactment-plan}})))))
 
+(defn flight-assembly-input
+  "The tick's assembly input inside a flight (futon2.aif.flight): the
+  flight's target is the only target, and its wants are the flight's.
+  Later clicks continue the chosen target and do not re-select among all
+  targets (PROOF-2a flight rule 4). With no FLIGHT, INPUT is unchanged."
+  [flight input]
+  (if flight
+    (-> input
+        (assoc :targets [(:target flight)])
+        (assoc-in [:sources :wants (:target flight)] (vec (:wants flight))))
+    input))
+
 (defn constructed-candidate-g
   "G of one constructed CANDIDATE on its target's PROBLEM (a cascade problem
   without :precedences), computed by the lane's own R1-R5 over a fixed
@@ -7126,6 +7138,8 @@
          ;; target with an unmet want could not be considered at all -- the
          ;; machine ignored work it had been given because a registry did not
          ;; list it.
+         (flight-assembly-input
+          (:flight judge-opts)
          {:targets (vec (distinct (concat (cascade-problems/substrate-targets)
                                           (keys (:universes cascade-sources))
                                           (map :target (:proposals cascade-proposal-supply))
@@ -7146,7 +7160,7 @@
                              :budget (or (:construction-budget cascade-sources)
                                          {:max-moves 4 :max-expansions 20000})
                              :move-cost 0
-                             :evaluate-g constructed-candidate-g}))})
+                             :evaluate-g constructed-candidate-g}))}))
         cascade-assembled
         (cascade-proposals/record-supply
          raw-cascade-assembled cascade-sources
