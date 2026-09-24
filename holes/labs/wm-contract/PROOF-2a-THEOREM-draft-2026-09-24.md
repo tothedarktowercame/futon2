@@ -51,19 +51,31 @@ All eight clauses hold on the single linked sequence `L` of PROOF-2
 (ordinary live clicks under A21); fixtures and hand-built inputs establish
 none of them.
 
-### Grain of a click: a flight, the whole mission (Joe, 2026-09-24)
+### A flight: the clicks on one mission, ending in closure
 
-A click is modelled on a flight (futon3c `M-first-flights` §8): one click
-takes a mission (or other task) end to end. Its target is the mission; its
-wants are the mission's completion criteria (for a mission document, its
-phase exits), read from the mission text at click time; a candidate is a
-mission-grain cascade spanning every phase; the enactment is the whole run;
-clause 4's attempts count across the mission. This is the grain at which
+A flight takes a mission (or other task) to closure. It may be one click or
+several; that is an engineering choice. What is not a choice:
+
+1. **The sequence closes the mission.** The flight's wants are the mission's
+   completion criteria (for a mission document, its phase exits), read from
+   the mission text. The flight ends when every criterion is met with checked
+   evidence. A sequence that ends short is a counterexample to the theorem.
+2. **Every click makes concrete progress.** Clicks carry a heavy overhead
+   (selection alone has run to minutes). A click that meets no criterion and
+   produces no token a later click in the flight consumes is overhead with no
+   progress, and counts against the machine as a stop would.
+3. **The machine does not refuse its own work.** If a mission is well
+   specified and the library has patterns that let the work proceed, a
+   missing input the machine could compute (an interpretation, a candidate,
+   an observation, the mission's outcomes) is computed within the flight, not
+   returned as a refusal. A refusal is admissible only where no warranted
+   pattern applies, and then it is a hole (below).
+4. **The mission stays the target across the flight.** Later clicks continue
+   the chosen mission; they do not re-select among all targets.
+
+Clause 4's attempts count across the flight. This is the grain at which
 `Q(o|π)` is read in `futon4/holes/mission-lifecycle-wm-alignment.md` §3c ("at
-mission grain … the catalog IS the playout record"). Every clause below is
-stated per click, and a click is at this grain. A run that ends before the
-completion criteria are met is a counterexample to the theorem, not a partial
-click counted as done.
+mission grain … the catalog IS the playout record").
 
 Worked example against this grain: click-001 (M-futon-seams) targeted one
 instance's three wants; the rest of the mission was carried by claude-1, with
