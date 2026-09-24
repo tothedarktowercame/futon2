@@ -5,7 +5,7 @@ Parent: the PROOF-2 plan (`labs/wm-contract/PROOF-2-STRATEGY-draft-2026-09-24.md
 `PROOF-2-THEOREM-draft-2026-09-24.md`). An excursion, not a mission: the proof
 plan already exists and there is no time to open a new mission.
 Owner: claude-10. Driver: Joe.
-Status: OPEN — defects D1–D10 written down; investigations I1 and I2 running.
+Status: OPEN — defects D1–D14 written down; I2 done, I1 running.
 Cross-refs: `labs/wm-contract/proof2/packets/CLICK2-D.md` (why click 2
 abstained; Part 2 per-target check); register row AR-16.
 
@@ -74,6 +74,12 @@ from the machine altogether. No ruling found for the second part.
 `construction_moves.clj` (`3b01790d`, 2026-09-17, the four
 construction-library moves). Their only callers are each other, tests, and
 the load-identity digest list. No click has run them on a real target.
+I2 (`56a58026`) ran it offline on the four admitted targets. Its output has
+exactly the shape admission accepts (non-empty `:precedence` plus a
+`:machine-constructed` receipt), and its refusals are typed:
+`:want-already-observed` on the two finished targets, `:no-supported-order`
+with finding `{:kind :unproduced-need :token :hole/h2045faa0e7cc}` on M-f11.
+Rerun by claude-10: same four results.
 
 **D5. The supply is five hand-written files, and it ran dry.**
 `resources/wm/cascade-sources/*.edn`, written 2026-09-22/23. By 2026-09-24
@@ -89,6 +95,10 @@ produced by no declared pattern. M-aif-policy-conditioned-eig: the false want
 but the candidate using it was withdrawn in `8f97757b` (2026-09-22) because
 the task needs held-out evidence that does not exist. A constructor would
 have to find the route, or report what evidence would open it.
+I2: the constructor does both. It reports M-f11's missing producer as a
+typed finding, and on M-aif-eig it builds `[:aif/two-layer-calibration]`,
+which the judge's own admission check (copied verbatim; claude-10 diffed it)
+passes. So the machine can find the route that was withdrawn by hand.
 
 **D7. Running out of work produces a hold, not a proposal to learn.** The old
 bootstrap proposer turned "no concrete actions for this class" into a
@@ -107,7 +117,10 @@ published at `resources/wm/eig/held-out-calibration.edn` on 2026-09-23
 (`f0adf39a`), and the 09-23 click's ticket commit `97e17e10` already cites
 it. The route is still withdrawn. The condition lives in a comment, so no
 code can observe it being met. Not yet checked: whether that file is the
-preregistered split and post-split outcomes the reviewer asked for (I2 Q3).
+preregistered split and post-split outcomes the reviewer asked for. I2 §3
+says there is no locator for the held-out evidence today; it did not find
+this file, so that sentence is wrong as written. Whether the constructor's
+EIG route is now correct therefore depends on that open check.
 
 **D10. The click can write the token it is selected to produce.**
 T-repair-occ-444fb018's only want is observed through its ticket's Status
@@ -115,11 +128,39 @@ line; the 09-23 click's own build commit `97e17e10` changed it from OPEN to
 DONE (register AR-31, from walkthrough 06). The commit cites a recheck and
 evidence, but the observation reads the Status line, not the evidence.
 
+**D11. 245 of 248 substrate targets have no declared interpretations.** I2
+§4. The constructor needs interpretations with receipts to search over;
+only three substrate targets have any (plus two declared targets outside
+the substrate list). Wiring the constructor in would not by itself give the
+machine work: interpretations are the actual supply, and only agents write
+them.
+
+**D12. Nothing at the call site can say whether a constructed plan is worth
+taking.** The constructor takes a plan only if its G beats the empty
+family, but G is computed later, in `select-and-record-cascade!`. I2 had to
+inject a G. With plain precedence length, M-aif-eig refused
+`:construction-not-taken`; with the empty family pinned worst, it
+constructed. The I2 script's pin decides the outcome for that target. No
+budget or move cost is declared anywhere either (I2 §5 gaps 1–2).
+
+**D13. Withdrawals and restore conditions are comments.** The general form
+of D9: the constructor's guard vocabulary has `:needs`, `:forbids`,
+`:produces`, and no way to say "not until this evidence exists". A
+withdrawal has to become data that the constructor and admission can read
+(I2 §5 gap 6).
+
+**D14. The constructor and the judge disagree on inputs.** The judge's
+observation emits `:unknown`, which the constructor refuses; receipts are
+optional in `cascade-problems/assemble` and mandatory in the constructor;
+the judge's horizon falls back to T=2 while the sources declare 4 (I2 §5
+gaps 3, 4, 7). Each would change which targets refuse, and with which
+reason.
+
 ## Investigations
 
 | id | question | who | job | status |
 |---|---|---|---|---|
 | I1 | History: what did the pre-H5b proposers propose and on what grounds (feasibility among them)? Is any ruling recorded behind "construction is outside the tick" (D3)? | kimi-2 | invoke-1790256229096-23668-ed1a1a26 (park-08328d54) | running |
-| I2 | Constructor: run `interpretation_construction` offline on the four admitted targets and the substrate missions; what does it build, where does it stop, and what would it need in order to run inside the judge (D4, D6)? | kimi-3 | invoke-1790256230680-23669-faccb791 (park-1ce12fa7) | running |
+| I2 | Constructor: run `interpretation_construction` offline on the four admitted targets and the substrate missions; what does it build, where does it stop, and what would it need in order to run inside the judge (D4, D6)? | kimi-3 | invoke-1790256230680-23669-faccb791 | done: `56a58026`, checked by claude-10 (script rerun, same four results; admission copy diffed verbatim) |
 
 Both read-only: no clicks, no writes under `data/`, no shared-JVM loads.
