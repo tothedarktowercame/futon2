@@ -1,0 +1,37 @@
+;; F11-INTERP proposal (kimi-6, 2026-09-24): the one interpretation
+;; M-f11-find-production-successor's open want :hole/h2045faa0e7cc needs.
+;; PROPOSAL ONLY -- merge into resources/wm/cascade-sources/M-f11-find-production-successor.edn
+;; is a separate, explicit step. Splice :patterns into the file's :patterns and
+;; :interpretation-receipts into its :interpretation-receipts; the want's C4
+;; locator (:hole/h2045faa0e7cc, decl "- [x] Publish the strict successful
+;; successor link for repair-024, or retain the typed failure without
+;; resolution.") already exists in the live sources file.
+;;
+;; Pattern fit (runners-up and the validation transcript:
+;; holes/labs/wm-contract/proof2/packets/F11-INTERP.md): the want is "publish
+;; the strict successful successor link for repair-024, OR retain the typed
+;; failure without resolution", and the mission states repair-024 is resolved
+;; only after ordinary gates produce strict durable terminal evidence.
+;; coordination/bind-promotion-to-post-repair-replay is exactly that shape:
+;; promote only after an independent receipt matches the repaired revision and
+;; its controls, otherwise retain a typed pending/failed finding.
+{:patterns
+ {:coordination/bind-promotion-to-post-repair-replay
+  {:guard {:needs #{:hole/h9ab212b3281d}         ; F11 ordinary acceptance done:
+                                                 ; the gates have run and their
+                                                 ; evidence exists to promote on
+           :forbids #{:hole/h2045faa0e7cc}}      ; not already resolved
+   :produces #{:hole/h2045faa0e7cc}}}
+ :interpretation-receipts
+ {:coordination/bind-promotion-to-post-repair-replay
+  {:kind :hand-admitted :by "kimi-6" :date "2026-09-24"
+   :source {:path "futon3/library/coordination/bind-promotion-to-post-repair-replay.flexiarg"
+            :revision "9c248d5229ea47ba04a2f228cf923ef20cde9169"
+            :sha256 "915d4188894a9781555b6f7c79aa792979f3de24d17f1c876cff38db5e2e293f"}
+   :reading "Repair-024's successor judgment is a promotion decision over evidence the F11 gates have already produced. Apply the pattern's promotion discipline: publish the strict successful successor link only when an independent receipt matches the repaired revision and the rejected controls (:feature-card-missing-or-invalid named by the mission); a request, a receipt for another revision, or the repair author's own passing tests do not discharge it. When no qualifying receipt exists, retain the typed failure (:awaiting-validation or the typed failure class) WITHOUT resolution -- the want's second disjunct is a retained typed finding, not a stop and not a success."
+   :scope-limit "This reading covers the successor-link disposition only. It does not relax F11's ordinary acceptance (the guard requires it observed), does not author the independent replay or its receipt, and does not judge whether any existing record qualifies -- that judgment is the enactment's, made against the named revision and controls. The pattern's promotion side and its retain-typed-failure side are one move here because the mission states them as one disjunctive want; a target that wanted only the promotion half would need the guard to carry the qualifying receipt as a separate token."
+   :target-source {:repo "futon2" :revision "4dd54848003882115eef3740d9838c22250075af"
+                   :sha256 "48033b45d9a992b1d9dfbddca8593a89823dd15e253ddeb893ce205b092fdf3b"
+                   :path "holes/missions/M-f11-find-production-successor.md"
+                   :hole-id "M-f11-find-production-successor#2045faa0e7cc" :line 102}
+   :observation-limit "C4 observes the mission's checked completion declaration, not the strictness of the link published or the faithfulness of the typed failure retained. Completion requires the named independent receipt (promotion half) or the retained typed finding (failure half) to exist as evidence; ticking the checkbox without either is not the action admitted here."}}}
