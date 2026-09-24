@@ -290,3 +290,18 @@ against that data, not against the list form now in code.
 | P2 | Production rules from claude-1's turn interpretations (level 2 over level 1): for every fragment with a pattern citation, write needs/forbids/produces over a per-turn token vocabulary with cue spans, or record why it is not a rule; build a rating sheet for Joe. Live set (60 citations, 37 turns) and historical block 0 (45 citations, 25 turns) | kimi-2 (live), kimi-3 (hist) | invoke-1790262016057-23674-33363f0c, invoke-1790262018097-23675-0cef8b7d | done: live `a30ab5ed` (37 turns, 60 rules, 104 tokens, 14 shared), hist `4e297a30` (25 turns, 45 rules, 70 tokens, 8 shared); not-a-rule 0 of 105 in both; gates rerun clean; 18 live readings quote an empty conclusion (gate does not check); rating sheet `rules-from-turns/RATING.md` |
 
 Both read-only: no clicks, no writes under `data/`, no shared-JVM loads.
+
+**D17 follow-up (claude-8, 2026-09-24).** Closed by futon2 `51fd3144` (kimi-3,
+E-cascade-real requisition): `load-declared` canonicalises every pattern id
+(keys of `:patterns`, each pattern's `:id`, keys of `:interpretation-receipts`,
+candidates' `:precedence` entries) to the namespaced keyword at load, counts
+the rewrites as `:id-normalization` on the per-file occurrence, and refuses
+un-namespaced or non-id values with `:invalid-pattern-id`. Correction to the
+defect text: the seat-B files on disk spell ids as namespaced *strings*, not
+symbols (`score_probe.clj` was already normalising all three spellings for
+its count), so strings canonicalise too. Verified by claude-8: the mixed
+fixture's precedence does not resolve against its `:patterns` keys before the
+change and loads as one pattern after it. Warrants
+`test-registry-e4bf751a…` (new ns, 4/25) and `test-registry-666c55a4…`
+(`cascade-sources-test`, 12/43). Implication: P1 agreement scoring and the
+constructor now see one id per pattern whichever seat wrote it.
