@@ -992,6 +992,33 @@ candidates automatically, or that every click is fast.
     checkout, with the unregistered listed rather than omitted.
   - So ⟨1⟩7 is coupled to ⟨1⟩6: part 2 needs an accepted increment to attest. No read-only
     recomputation can produce an attestation the machine never wrote.
+  - **Correction, 2026-09-24: part 2 is not coupled to ⟨1⟩6, and ⟨1⟩6's discharge did not
+    move it.** ⟨1⟩6 was discharged on 2026-09-23 with `:accepted? true`, and the close for
+    that very attempt still classifies `:class :unknown, :missing [:attested-increment],
+    :attestation nil`. The reason is structural and was not the substrate bug.
+    - The kernel takes its increment from the ROUTE ATTESTATION
+      (`run_ending_classification.clj:60-65, 88`), whose receipt is built only from
+      declarations and checkpoint events. `build-receipt`'s own docstring: *"No
+      declaration is inferred from a prompt, selected action or grounded outcome."* So no
+      accepted increment, however real, can produce an attestation by itself.
+    - On the accepted close the receipt reads
+      `{:status :none-declared, :institutions [], :increments []}`.
+    - **Two independent things are missing, and both are required.**
+      (a) *No declarations are supplied.* The runner reads `(:route-attestation opts)`
+      (`full_loop_runner.clj:3711`); `runner/config` never sets it,
+      `futon3c/src/futon3c/wm/runner_service.clj` never adds it, and `:route-attestation`
+      declarations exist tree-wide only in three test files and one resource schema.
+      (b) *No increment evidence is emitted.* A binding resolves against a checkpoint
+      event, and `005-build.edn` for machinery-76 attempt-002 carries no `:increment`,
+      no `:warrant-id` and no `:registered-test-warrant` — 6276 bytes, zero of each.
+    - Neither half can be supplied retroactively. Adding increment evidence to a retained
+      build checkpoint would be fabricating the evidence the attestation exists to check,
+      so part 2 needs the machinery built and then ONE live click. Dispatched 2026-09-24
+      (kimi-4).
+    - What this says about the earlier "NOT MET" reading: part 2 was recorded as waiting
+      on an accepted increment. It was waiting on a declaration nobody had written. The
+      kernel was never wrong — it said `:missing [:attested-increment]` every time, and
+      the missing thing was the declaration of what would count as one.
 
 ### ⟨1⟩8. The outcome updates B once, and the next selection consumes it.
 
