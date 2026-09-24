@@ -1,0 +1,47 @@
+== board before ==
+{:open-total 43, :open-machine-failure 26}
+== successor-resolution! repair-ea1-7093b8fbb1ca8fc99a18899b69ca39f1e5a1a129e76739ebddbbee974299f94f--attempt-001-untyped-failure
+{:id
+ "repair-ea1-7093b8fbb1ca8fc99a18899b69ca39f1e5a1a129e76739ebddbbee974299f94f--attempt-001-untyped-failure",
+ :status :resolved,
+ :resolved-at "2026-09-24T04:04:03.440650277Z"}
+== successor-resolution! repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001-untyped-failure
+{:id
+ "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001-untyped-failure",
+ :status :resolved,
+ :resolved-at "2026-09-24T04:04:03.524250030Z"}
+== successor-resolution! repair-initialization-a9177cab-e783-464e-83e2-21a6371484a4-initialization-failed
+{:id
+ "repair-initialization-a9177cab-e783-464e-83e2-21a6371484a4-initialization-failed",
+ :status :resolved,
+ :resolved-at "2026-09-24T04:04:03.531107311Z"}
+== successor-resolution! repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-003-artifact-binding-mismatch
+{:id
+ "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-003-artifact-binding-mismatch",
+ :status :resolved,
+ :resolved-at "2026-09-24T04:04:03.562233860Z"}
+== successor-resolution! repair-ea1-b0eeafa0e59b4dc0dd9e0abe1cbbed0e687c5827b3ade8320c98c7f82a79032b--attempt-001-machine-repair-lacks-grounded-review-evidence
+{:id
+ "repair-ea1-b0eeafa0e59b4dc0dd9e0abe1cbbed0e687c5827b3ade8320c98c7f82a79032b--attempt-001-machine-repair-lacks-grounded-review-evidence",
+ :status :resolved,
+ :resolved-at "2026-09-24T04:04:03.593136680Z"}
+== successor-resolution! repair-ea1-504ad8630070adf67604aab739c0c0184b5ccf632f552ec6d2b55fac7ad71c87--attempt-001-feature-card-missing-or-invalid
+{:id
+ "repair-ea1-504ad8630070adf67604aab739c0c0184b5ccf632f552ec6d2b55fac7ad71c87--attempt-001-feature-card-missing-or-invalid",
+ :status :resolved,
+ :resolved-at "2026-09-24T04:04:03.773703748Z"}
+== resolve! repair-initialization-6d5da36a-04f0-42ee-ba91-55bee5801a01-initialization-failed
+{:id
+ "repair-initialization-6d5da36a-04f0-42ee-ba91-55bee5801a01-initialization-failed",
+ :resolved-at "2026-09-24T04:04:03.790031243Z",
+ :validation-attempt "attempt-059"}
+== resolve! repair-attempt-051-feature-card-missing-or-invalid
+{:id "repair-attempt-051-feature-card-missing-or-invalid",
+ :resolved-at "2026-09-24T04:04:03.827745118Z",
+ :validation-attempt "attempt-060"}
+== resolve! repair-attempt-052-strategic-selection-unavailable
+{:id "repair-attempt-052-strategic-selection-unavailable",
+ :resolved-at "2026-09-24T04:04:03.832567719Z",
+ :validation-attempt "attempt-061"}
+== board after ==
+{:open-total 34, :open-machine-failure 17}
