@@ -88,3 +88,30 @@ file's path and committed sha) and `allocated` 5. Consumption counts ledger
 entries whose `:authorization` equals that map, so the thirty-five clicks spent
 under the seven earlier grants are neither double-counted nor erased — each
 remains in the ledger citing the authority in force when it was spent.
+
+## Joe's grant to claude-8, 2026-09-24 — ten clicks, allocated
+
+Heard from Joe directly, in claude-8's operator buffer (emacs-repl), after
+the PROOF-2 strategy and the first B4 carriers landed and were reloaded:
+
+> I would also like to say that I would award 10 clicks for you to use
+> overnight as you see fit.
+
+No further conditions were stated. Per the "further offer" section above,
+a draw is recorded by raising `allocated` in `ordinary_click_budget.clj`
+with a note naming this section, not by a new document. `allocated` goes
+from 5 to **15**: the five of the eighth grant (claude-5's lane, banked,
+unspent) plus these ten (claude-8's lane, overnight discretion). Both draw
+on this authorization's identity; the ledger's `:caller` says which lane
+spent which. Consumption rules are unchanged: issue-time accounting, failed
+runs never refund.
+
+How claude-8 intends to spend them, recorded before the first is spent:
+clicks are the scarce input to PROOF-2, and R7 says L is preregistered
+before the first proof click. So the ten are for (a) at most one or two
+tuning clicks outside L to validate the newly reloaded carriers live
+(`:candidate-derivations`, `:law-applied`, `:certificate-schema`) — such
+clicks are published, are not in L, and cannot be selected into it later
+(A19/A21); and (b) the preregistered sequence L-v1 once L-REG and READY
+have landed and been reviewed. Whether (a) fires tonight depends on the
+board reading at the time, taken from the store, not from this note.
