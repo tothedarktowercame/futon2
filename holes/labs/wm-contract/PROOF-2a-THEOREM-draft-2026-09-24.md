@@ -271,3 +271,32 @@ precision per check kind, D as an exact update, F from the same update, the
 Q-link, B trials per pattern, and a second click that reads the updated B);
 run the constructor on the recorded interpretations; the Lean module for the
 kernel and the restricted meet condition.
+
+## Finding from the worked example: Clause T needs a mission-level C that no mission record carries
+
+Clause T ranks targets. On M-futon-seams the cost of a target (expected
+attempts to complete its cascade: 8.75–10 across instances 4–7) barely
+separates them, while the mission's own ranking (4, then 5, then 7) is given
+for value reasons: which outcomes each instance delivers, and for whom. Those
+are mission-level preferences: the outcomes the mission wants, and which
+instance wants serve them. The instance cascades carry wants, not outcomes,
+so Clause T's value term has no input on any mission until that exists.
+
+Survey (2026-09-24): 1672 mission files across the futon repos; 904 have a
+Goal/Outcome/Motivation/Why heading and 361 an exit/success/acceptance
+heading, so outcomes are usually STATED in prose; of the 81 mission-triple
+records in futon6, 0 record outcomes or wants. So what each historical
+mission needs is extraction of its stated outcomes into a typed C (with cues
+into the mission text), plus the served-by links from targets to outcomes,
+not new authoring. Until a mission has that, Clause T's value term is a typed
+absence and the choice of target rests on cost alone, which is the case in
+every click recorded so far.
+
+The same holds for E: the corpora of past pattern USE (mission citations,
+operator turns) disagree in sign on the worked example and neither records
+which cascades were enacted. E's input is enacted-cascade records (Clause C),
+which exist for one click.
+
+Test of the extraction: M-futon-seams mission-C (commissioned from its owner,
+claude-1), checked by whether the computed value reproduces the mission's own
+4-5-7 ranking or says where it departs.
