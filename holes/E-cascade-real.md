@@ -5,7 +5,7 @@ Parent: the PROOF-2 plan (`labs/wm-contract/PROOF-2-STRATEGY-draft-2026-09-24.md
 `PROOF-2-THEOREM-draft-2026-09-24.md`). An excursion, not a mission: the proof
 plan already exists and there is no time to open a new mission.
 Owner: claude-10. Driver: Joe.
-Status: OPEN — defects D1–D17 written down; I1 and I2 done.
+Status: OPEN — defects D1–D18 written down; I1 and I2 done.
 Cross-refs: `labs/wm-contract/proof2/packets/CLICK2-D.md` (why click 2
 abstained; Part 2 per-target check); register row AR-16.
 
@@ -242,6 +242,43 @@ optional in `cascade-problems/assemble` and mandatory in the constructor;
 the judge's horizon falls back to T=2 while the sources declare 4 (I2 §5
 gaps 3, 4, 7). Each would change which targets refuse, and with which
 reason.
+
+**D18. The machine's cascade is a list; the definition says semilattice.**
+Everything on the WM path carries a cascade as a `:precedence` vector: the
+declared candidates, `cascade_problems/constructed-candidates`, the
+constructor's output, admission's rollout, and the P1 probe's scoring. The
+paper's own glossary (`p4ng/sec-glossary.tex`, "Policy π") defines the
+cascade as a semilattice, sequential dependency (`BV.seq`) plus cross-cutting
+co-application (`BV.copar`), calls the temporal reading "the impoverished,
+tree-shaped reading", and notes that "a cascade flattened to a linear list
+folds to an empty wiring". A semilattice constructor exists outside the WM
+path: `futon3a/holes/labs/M-memes-arrows/cascade_construct.py`
+(`construct_cascade`, `chosen_semi_lattice`, over
+`futon6/data/pattern-phylogeny-edges.json`). Joe (2026-09-24): "cascade is a
+semilattice is definitional ... we shouldn't hard-code cascade is a list."
+Any fix to D4/D15 must not harden the list form further.
+
+## Design notes (not defects)
+
+**N1. Stances are priming rules, not failed production rules** (Joe,
+2026-09-24, after P2 was dispatched). A pattern that names a stance does not
+change world state; it conditions which lower-level patterns are likely to
+fire: priming, in Hawkins's sense, or a top-down prior/precision over lower
+policies. The constructor has one level (needs/forbids → produces), so a
+stance has nowhere to go. Conditioning with several parents gives a
+structural reason for the semilattice: a lower pattern can be primed by
+several higher ones at once. Plan: P2 runs as briefed; its not-a-rule
+entries are the stance candidates; a follow-up (P3) asks for priming rules
+over them, and both kinds go on the rating sheet.
+
+**N2. The semilattice may be a projection of a hypergraph** (Joe,
+2026-09-24; "a proof is not a tree"). The proposed evidence is the superpod
+mining runs rendered as margin pages, e.g.
+`/var/www/zone.hyperreal.enterprises/wip/mark7-math_9906038-margin.html`
+(run mark7master-20260921; generator `futon6/scripts/typeset_preview.py`;
+related ticket `futon6/holes/T-argument-outside-of-proof.md`). Not yet read
+for this excursion; the representation question for D18 should be settled
+against that data, not against the list form now in code.
 
 ## Investigations
 
