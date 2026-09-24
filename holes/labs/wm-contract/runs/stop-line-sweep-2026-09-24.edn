@@ -1,0 +1,368 @@
+{:schema :wm-stop-line-sweep-v1,
+ :code-revision "b6ed08e597df3c751ff07f74f473bc812727730b",
+ :store-mutated false,
+ :counts
+ {:open-machine-failure 35,
+  :with-implementations 12,
+  :grounded-no-change 6,
+  :remainder 17},
+ :board-discrepancy
+ "Request said 35/12/6/23. Recomputed 35/12/6/17: the remainder is 17, not 23. Board totals by kind: 7 initialization-failed (3 of the 12, 4 of the 17) and 8 untyped-failure (2 of the 12, 6 of the 17); the 17 also include pinned-selection-refused, revision-unchanged, evidence-not-single-edn, close-exception, machine-defect, fold-output-invalid, explanation-invalid.",
+ :api
+ {:available
+  [dismiss-wontfix!
+   dismiss-condition-cleared!
+   dismiss-unexecuted!
+   dismiss-echo!
+   dismiss-fixture-pollution!
+   dismiss-superseded-attempt!
+   dismiss-grounding-readback-degraded!],
+  :new-this-sweep dismiss-grounding-readback-degraded!,
+  :blocker
+  "No route covers a machine-failure whose defect was repaired in code outside the discharge path (6 rows); no write authorized anywhere."},
+ :rows
+ [{:repair/id "repair-attempt-047-review-execution-evidence-missing",
+   :opened-at "2026-07-21T10:47:33.176906036Z",
+   :failure-kind :review-execution-evidence-missing,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id
+   "repair-initialization-6d5da36a-04f0-42ee-ba91-55bee5801a01-initialization-failed",
+   :opened-at "2026-07-25T17:29:15.782711684Z",
+   :failure-kind :initialization-failed,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id "repair-attempt-051-feature-card-missing-or-invalid",
+   :opened-at "2026-07-25T17:54:02.260139955Z",
+   :failure-kind :feature-card-missing-or-invalid,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id "repair-attempt-052-strategic-selection-unavailable",
+   :opened-at "2026-07-25T18:36:14.863516354Z",
+   :failure-kind :strategic-selection-unavailable,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id "repair-attempt-057-untyped-failure",
+   :opened-at "2026-07-25T22:10:57.671008911Z",
+   :failure-kind :untyped-failure,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record true,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id "repair-attempt-058-untyped-failure",
+   :opened-at "2026-07-25T22:25:22.252407203Z",
+   :failure-kind :untyped-failure,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record true,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id
+   "repair-initialization-b076e0f8-dbc2-4368-80a0-073d243951a0-initialization-failed",
+   :opened-at "2026-09-11T02:18:48.602125808Z",
+   :failure-kind :initialization-failed,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record true,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id
+   "repair-run4-u88-production-successor-20260911-v2--attempt-001-untyped-failure",
+   :opened-at "2026-09-11T11:30:36.876834887Z",
+   :failure-kind :untyped-failure,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record true,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id
+   "repair-initialization-38690d22-879c-47ab-a72a-6aaf2cce85fa-initialization-failed",
+   :opened-at "2026-09-11T14:46:00.757771979Z",
+   :failure-kind :initialization-failed,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record true,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id
+   "repair-ea1-78cd8a42e23392a5ce1412e49d181c3e7c3ac95aaa40d4f54c5c9d8ef3ae08eb--attempt-001-pinned-selection-refused",
+   :opened-at "2026-09-11T19:15:37.767680450Z",
+   :failure-kind :pinned-selection-refused,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record true,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id
+   "repair-initialization-8c13130f-bed1-4eac-b2f3-261243c119dc-initialization-failed",
+   :opened-at "2026-09-11T19:17:11.008243326Z",
+   :failure-kind :initialization-failed,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record true,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id
+   "repair-ea1-7093b8fbb1ca8fc99a18899b69ca39f1e5a1a129e76739ebddbbee974299f94f--attempt-001-untyped-failure",
+   :opened-at "2026-09-12T17:49:16.659900831Z",
+   :failure-kind :untyped-failure,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id
+   "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-001-untyped-failure",
+   :opened-at "2026-09-13T17:11:05.086024700Z",
+   :failure-kind :untyped-failure,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id
+   "repair-initialization-a9177cab-e783-464e-83e2-21a6371484a4-initialization-failed",
+   :opened-at "2026-09-13T17:11:48.900798226Z",
+   :failure-kind :initialization-failed,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id
+   "repair-ea1-3f4cac241e58afd9b6eae48e78a2ac7f63925aa3fc05c7e3a3fd6d789d4637a9--attempt-003-artifact-binding-mismatch",
+   :opened-at "2026-09-13T22:14:53.925488328Z",
+   :failure-kind :artifact-binding-mismatch,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id
+   "repair-ea1-b0eeafa0e59b4dc0dd9e0abe1cbbed0e687c5827b3ade8320c98c7f82a79032b--attempt-001-machine-repair-lacks-grounded-review-evidence",
+   :opened-at "2026-09-13T22:35:37.921764758Z",
+   :failure-kind :machine-repair-lacks-grounded-review-evidence,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id
+   "repair-initialization-a3e2319f-9562-4182-b651-54f409b90e39-initialization-failed",
+   :opened-at "2026-09-13T22:59:01.768226247Z",
+   :failure-kind :initialization-failed,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id
+   "repair-ea1-504ad8630070adf67604aab739c0c0184b5ccf632f552ec6d2b55fac7ad71c87--attempt-001-feature-card-missing-or-invalid",
+   :opened-at "2026-09-14T19:44:13.993847187Z",
+   :failure-kind :feature-card-missing-or-invalid,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id
+   "repair-ea1-259a7a93d9a9b63a45020e0ad646c508b9be83097dac6898106a063c1a1eef2e--attempt-001-revision-unchanged",
+   :opened-at "2026-09-14T23:53:20.021474557Z",
+   :failure-kind :revision-unchanged,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id
+   "repair-ea1-9b6ce3a47b9bdc24a5fc6a9b9aab4f270af86a4fcb54550d94b89737bb5e4f35--attempt-001-artifact-binding-mismatch",
+   :opened-at "2026-09-15T01:21:02.954709249Z",
+   :failure-kind :artifact-binding-mismatch,
+   :effective-status :awaiting-validation,
+   :implementations-record true,
+   :verifications-record false,
+   :decision :discharge-route,
+   :evidence
+   "implementations/ record exists; legacy binding (:repair-machine-failure action carrying the finding) binds against the real store (verified read-only 2026-09-24, /tmp/phase2-bind-check.clj). Ticket route correctly refuses :finding-ticket-link-unavailable -- never published as a ticket. Discharge cannot fire while the line is stopped; grounded-close evidence is the open question, not binding."}
+  {:repair/id
+   "repair-ea1-9b6ce3a47b9bdc24a5fc6a9b9aab4f270af86a4fcb54550d94b89737bb5e4f35--attempt-003-evidence-not-single-edn",
+   :opened-at "2026-09-15T02:18:32.445288442Z",
+   :failure-kind :evidence-not-single-edn,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id
+   "repair-occ-d36b1b271427fc21dc365b44a3297d65d6761f2d667850154ef578658f27205f",
+   :opened-at "2026-09-20T20:52:19.556981255Z",
+   :failure-kind :untyped-failure,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :no-category-fits,
+   :evidence
+   "defect repaired in code by a38becc9 within hours of opening (verified at source; no implementations/ record, so the discharge route never engaged). No dismissal route covers a machine-failure repaired elsewhere; category substitution forbidden. Residue of the discharge-chain defect repaired today."}
+  {:repair/id
+   "repair-occ-5ef53a512ad80d55f4bde136724d6ad13e6293cc548a092c90ab0317674753b9",
+   :opened-at "2026-09-20T21:38:23.259058709Z",
+   :failure-kind :untyped-failure,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :no-category-fits,
+   :evidence
+   "defect repaired in code by a38becc9 within hours of opening (verified at source; no implementations/ record, so the discharge route never engaged). No dismissal route covers a machine-failure repaired elsewhere; category substitution forbidden. Residue of the discharge-chain defect repaired today."}
+  {:repair/id
+   "repair-occ-652aa5f8e36ebcddd88ac69aa13a65e6c3f260cb1e2d056474ee9f46a5006546",
+   :opened-at "2026-09-20T23:58:11.534963888Z",
+   :failure-kind :untyped-failure,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :no-category-fits,
+   :evidence
+   "defect repaired in code by a38becc9 within hours of opening (verified at source; no implementations/ record, so the discharge route never engaged). No dismissal route covers a machine-failure repaired elsewhere; category substitution forbidden. Residue of the discharge-chain defect repaired today."}
+  {:repair/id
+   "repair-occ-e9eec70e60b38c5f3d0d073dc33832511f8b88a75cb22d4de6dad1a7d49bc4ff",
+   :opened-at "2026-09-21T00:02:57.202357102Z",
+   :failure-kind :initialization-failed,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :no-category-fits,
+   :evidence
+   "defect repaired in code by 29fb2a83 within hours of opening (verified at source; no implementations/ record, so the discharge route never engaged). No dismissal route covers a machine-failure repaired elsewhere; category substitution forbidden. Residue of the discharge-chain defect repaired today."}
+  {:repair/id
+   "repair-occ-88bb128331ef06bb2f9b50021e70d3f42d2d33504fcf22d8736b43a044c49d2b",
+   :opened-at "2026-09-21T00:03:37.129286336Z",
+   :failure-kind :close-exception,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :no-category-fits,
+   :evidence
+   "defect repaired in code by 29fb2a83 within hours of opening (verified at source; no implementations/ record, so the discharge route never engaged). No dismissal route covers a machine-failure repaired elsewhere; category substitution forbidden. Residue of the discharge-chain defect repaired today."}
+  {:repair/id
+   "repair-occ-f22800c6792de6edc80e03cb44c235cbb38a7e4e75c34b51f5f88c7c8672365a",
+   :opened-at "2026-09-21T00:50:00Z",
+   :failure-kind :machine-defect,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :no-category-fits,
+   :evidence
+   "defect repaired in code by d168d348+8f60f819 within hours of opening (verified at source; no implementations/ record, so the discharge route never engaged). No dismissal route covers a machine-failure repaired elsewhere; category substitution forbidden. Residue of the discharge-chain defect repaired today."}
+  {:repair/id
+   "repair-occ-0576180e03115d74ce0a32eff59df655649d732e8cdc10f12a86f98b15f51879",
+   :opened-at "2026-09-21T00:56:55.299481779Z",
+   :failure-kind :fold-output-invalid,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id
+   "repair-occ-6c6ecaf858aff5c7f9aeef1b92ad205e7ed31ed29882e89fa52f2724d3d039c8",
+   :opened-at "2026-09-21T23:35:32.190291940Z",
+   :failure-kind :explanation-invalid,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :no-category-fits,
+   :evidence
+   "no existing route's proof carrier is present in the finding; see phase-4 grouping"}
+  {:repair/id
+   "repair-occ-487ca3f2205bf084f5d9bbb6b753cdc3908f106e8ff3aec60243a1bff7c34581",
+   :opened-at "2026-09-23T17:32:56.539917579Z",
+   :failure-kind :grounded-no-change,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :dismiss-grounding-readback-degraded!,
+   :evidence
+   "new route built this sweep (b6ed08e5): finding retains :failure-outcome :grounded-no-change at :failure-stage :grounding; close witness {:dial-moved? true :resolved? false}; implementation entity reads back with STRING props naming the same commit. :store-mutated false -- authorization is Joe's."}
+  {:repair/id
+   "repair-occ-dd7c04a30d87dd8d3293f3f2257ce0158f4ef993a63fef01d9aef06013720b5c",
+   :opened-at "2026-09-23T18:14:33.650236596Z",
+   :failure-kind :grounded-no-change,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :dismiss-grounding-readback-degraded!,
+   :evidence
+   "new route built this sweep (b6ed08e5): finding retains :failure-outcome :grounded-no-change at :failure-stage :grounding; close witness {:dial-moved? true :resolved? false}; implementation entity reads back with STRING props naming the same commit. :store-mutated false -- authorization is Joe's."}
+  {:repair/id
+   "repair-occ-d9ed3e32d6297fae60ca2cbcef9649b5208398a99bdcd3c1e21c50cdb88692b0",
+   :opened-at "2026-09-23T18:59:00.611190075Z",
+   :failure-kind :grounded-no-change,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :dismiss-grounding-readback-degraded!,
+   :evidence
+   "new route built this sweep (b6ed08e5): finding retains :failure-outcome :grounded-no-change at :failure-stage :grounding; close witness {:dial-moved? true :resolved? false}; implementation entity reads back with STRING props naming the same commit. :store-mutated false -- authorization is Joe's."}
+  {:repair/id
+   "repair-occ-74116ef4fe5c8b02a34f04dd16200d46ff9c7c24b8dc3aba1e5ec9ff50530f2a",
+   :opened-at "2026-09-23T19:51:35.427405472Z",
+   :failure-kind :grounded-no-change,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :dismiss-grounding-readback-degraded!,
+   :evidence
+   "new route built this sweep (b6ed08e5): finding retains :failure-outcome :grounded-no-change at :failure-stage :grounding; close witness {:dial-moved? true :resolved? false}; implementation entity reads back with STRING props naming the same commit. :store-mutated false -- authorization is Joe's."}
+  {:repair/id
+   "repair-occ-a7641edf8f7951e20dde66669e0aa7a8dc630dc7f3d0a5c20d0eeb4717c389ad",
+   :opened-at "2026-09-23T20:54:16.881106984Z",
+   :failure-kind :grounded-no-change,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :dismiss-grounding-readback-degraded!,
+   :evidence
+   "new route built this sweep (b6ed08e5): finding retains :failure-outcome :grounded-no-change at :failure-stage :grounding; close witness {:dial-moved? true :resolved? false}; implementation entity reads back with STRING props naming the same commit. :store-mutated false -- authorization is Joe's."}
+  {:repair/id
+   "repair-occ-b8bf54762b072cf5131180a27e5a50da5e9ac54ade2724b69b1d013c8454df7a",
+   :opened-at "2026-09-23T21:37:40.519722638Z",
+   :failure-kind :grounded-no-change,
+   :effective-status :open,
+   :implementations-record false,
+   :verifications-record false,
+   :decision :dismiss-grounding-readback-degraded!,
+   :evidence
+   "new route built this sweep (b6ed08e5): finding retains :failure-outcome :grounded-no-change at :failure-stage :grounding; close witness {:dial-moved? true :resolved? false}; implementation entity reads back with STRING props naming the same commit. :store-mutated false -- authorization is Joe's."}]}
