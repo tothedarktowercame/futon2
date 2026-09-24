@@ -1787,6 +1787,36 @@
                           (f {:p (.pow java.math.BigInteger/TEN 40)}))
         "a BigInteger beyond i64 refuses")))
 
+(deftest grounding-refuses-a-real-write-that-reports-no-rescue-stage
+  ;; claude-5, reviewing d1f67d13. "Absent :rescue passes" is right for the
+  ;; stubbed writers all over this suite, and wrong for a real write: futon1b's
+  ;; entity envelope carries :rescue unconditionally
+  ;; (futon1b_graph.clj/write-entity!), so absence THERE means an older store,
+  ;; a changed contract, or a response we did not understand. Accepting it is
+  ;; the check quietly not checking -- the failure mode it exists to end.
+  (let [construction {:construction-kind :cascade
+                      :selected-action (recorded-trials-action)}
+        reads (atom 0)
+        ;; no :put-doc-fn, so this is the REAL write path
+        opts {:run-id "grounding-test-run"
+              :entity-by-id-fn (fn [_] (swap! reads inc) nil)}]
+    (with-redefs [futon2.aif.substrate/put-doc! (fn [_ _] {:ok true})]
+      (try
+        (runner/ground-commit!
+         "attempt-norescue" "T-repair-occ-grounding"
+         "codex-6" "claude-7" "/repo" "norescue1"
+         ["holes/tickets/T-repair-occ-grounding.md"] construction
+         {:job-id "review-norescue"} opts)
+        (is false "a real write reporting no :rescue must refuse")
+        (catch clojure.lang.ExceptionInfo e
+          (is (= :grounding-failed (:outcome (ex-data e))))
+          (is (= :grounding-write-unverified (:failure-kind (ex-data e))))
+          (is (= :grounding (:failure-stage (ex-data e))))
+          (is (= :implementation (:document (ex-data e)))
+              "refused on the first write, not after both"))))
+    (is (= 1 @reads)
+        "only the pre-write existence check ran; the readback never happened")))
+
 (deftest grounding-refuses-a-rescued-write
   ;; Every futon1b success envelope carries :rescue. On all six 2026-09-23
   ;; groundings it said :rescued-2 -- the document no longer had the shape

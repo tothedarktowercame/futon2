@@ -2827,7 +2827,22 @@
                            :failure-stage :grounding
                            :rescue stage
                            :document which
-                           :doc-id (:xt/id doc)})))))
+                           :doc-id (:xt/id doc)})))
+        ;; Absent means "no evidence", and no evidence is fine only where
+        ;; absence is expected: a stubbed writer. On a REAL write futon1b's
+        ;; entity envelope carries :rescue unconditionally
+        ;; (futon1b_graph.clj/write-entity!), so a missing key means an older
+        ;; store, a changed contract, or a response we did not understand --
+        ;; and accepting it silently is this check quietly not checking, which
+        ;; is the failure mode it exists to end (claude-5, reviewing d1f67d13).
+        (when (and (nil? stage) (nil? (:put-doc-fn opts)))
+          (throw (ex-info "Grounding write reported no rescue stage"
+                          {:outcome :grounding-failed
+                           :failure-kind :grounding-write-unverified
+                           :failure-stage :grounding
+                           :document which
+                           :doc-id (:xt/id doc)
+                           :response-keys (vec (sort (map str (keys response))))})))))
     ;; The substrate indexes asynchronously, so an immediate readback can
     ;; miss a successful write: r5 attempt-001 (2026-09-13) grounded
     ;; f9896cf6, the entity is durably present, but the instant readback saw
