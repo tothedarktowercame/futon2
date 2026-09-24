@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "codex-10-turn-221"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/codex-10-turn-221.json.analysis.json"
+ :source-sha256 "189fa83964ae089cc78abfcb46a48c4583188fe9e2b8872d3b1055f9e2092602"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-codex-10-turn-221/counter-displays-zero-of-fifty {:statement "The counter displays 'Solver rounds completed 0/50'." :cue [8 38]}
+  :turn-codex-10-turn-221/counter-accuracy-challenged {:statement "The displayed counter is challenged as inaccurate." :cue [39 61]}}
+ :rules
+ [
+  {:pattern "futon-theory/honest-map-over-flattering-counter"
+   :from {:fragment [0 61] :intent "challenge-the-displayed-counter"}
+   :guard {:needs #{:turn-codex-10-turn-221/counter-displays-zero-of-fifty} :forbids #{}}
+   :produces #{:turn-codex-10-turn-221/counter-accuracy-challenged}
+   :receipt {:source {:path "futon3/library/futon-theory/honest-map-over-flattering-counter.flexiarg" :sha256 "8015679fd94aa3063947311c48781b7ed1c6d2ed96083cef0b4e8926b22e306e"}
+           :reading "The honest-map reflex: 'When a progress counter … can be moved in your favour by either truthful or flattering edits, take the TRUTHFUL move.' A flattering display (0/50, the need) is challenged toward the truthful map (the product) rather than accepted."
+           :scope-limit "Challenges the display; the true count is not established here."}}
+ ]
+ :not-a-rule []
+}

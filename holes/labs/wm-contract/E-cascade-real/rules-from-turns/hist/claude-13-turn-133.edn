@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-133"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-133.json.analysis.json"
+ :source-sha256 "b0077626c659d3d2ac95957b1368b1445fddc8b81a0ae3a60cecd4b779c84ad4"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-133/patterns-section-missing-named {:statement "What is missing is named plainly: an actual section with actual patterns in it." :cue [6 73]}}
+ :rules
+ [
+  {:pattern "writing-coherence/name-what-you-drop"
+   :from {:fragment [6 73] :intent "name-the-missing-substance"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-133/patterns-section-missing-named}
+   :receipt {:source {:path "futon3/library/writing-coherence/name-what-you-drop.flexiarg" :sha256 "f408bb1d51a0230b37a77f28668e1ddd3d9ef76bfe6aae6eac0637fa559130d8"}
+           :reading "Adjacent application: the pattern's remedy is 'to name, alongside what is taken, what is deliberately dropped' — here the operator names what is ABSENT (the patterns themselves) with the same plainness, so readers do not infer the section generously. relations=['goal','context']; the naming is the produced state."
+           :scope-limit "Names the absence; writing the section is a separate act."}}
+ ]
+ :not-a-rule []
+}

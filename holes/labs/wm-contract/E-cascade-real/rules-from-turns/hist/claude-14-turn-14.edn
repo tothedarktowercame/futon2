@@ -1,0 +1,30 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-14-turn-14"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-14-turn-14.json.analysis.json"
+ :source-sha256 "48e9978fec97b9420c1a848f1bb06460abdd1a5c63020af3aeb6e4276501a1a4"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-14-turn-14/partials-merged-back {:statement "Deep-dive branches, including partials, are merged back into the library." :cue [241 290]}
+  :turn-claude-14-turn-14/agents-can-track-progress {:statement "Agents can keep track of progress, reusing material as ConstructionTargets or resuming it." :cue [291 332]}
+  :turn-claude-14-turn-14/singularhomology-merged-as-constructiontarget {:statement "The SingularHomology work was merged back as a ConstructionTarget that further rounds can find." :cue [533 575]}
+  :turn-claude-14-turn-14/precedent-commended-pending-artifact {:statement "The SingularHomology practice is commended as good, conditional on the merge artifact existing." :cue [491 531]}}
+ :rules
+ [
+  {:pattern "agent/handoff-preserves-context"
+   :from {:fragment [291 453] :intent "justify-by-downstream-reuse"}
+   :guard {:needs #{:turn-claude-14-turn-14/partials-merged-back} :forbids #{}}
+   :produces #{:turn-claude-14-turn-14/agents-can-track-progress}
+   :receipt {:source {:path "futon3/library/agent/handoff-preserves-context.flexiarg" :sha256 "403a43dfe0b4ae903c1e7ca249ffe8b43715b998b27262f75b3168028a0f3bb3"}
+           :reading "Merging partials back is precisely the handoff: 'When passing work to another agent or future self, transfer enough state that the receiver doesn't restart from scratch.' The merge is the need; progress-tracking by later agents is the product (relations=['goal'])."
+           :scope-limit "Covers the merge-back justification; branch retention during development is unaffected."}}
+  {:pattern "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad"
+   :from {:fragment [455 604] :intent "commend-precedent-conditionally"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-14-turn-14/precedent-commended-pending-artifact}
+   :receipt {:source {:path "futon3/library/war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad.flexiarg" :sha256 "f13388b7e4262797d712bdcee78abebbd7f69692dd6e6ca19080f225d5931f85"}
+           :reading "wr-25's discipline applied to a commendation: 'unanchored good news … leave numerical posteriors unchanged until an artifact supports it.' The praise is real but explicitly gated on the artifact ('if, indeed, it was merged back'), so the recorded state is a conditional commendation, not an accepted fact. The need is deliberately empty: the merge is NOT asserted, which is the point."
+           :scope-limit "The commendation's condition is recorded; verifying the merge is separate work."}}
+ ]
+ :not-a-rule []
+}

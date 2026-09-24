@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-14-turn-31"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-14-turn-31.json.analysis.json"
+ :source-sha256 "a5733c4fbcbc4d65d8d9d26af1ad63258167e7e4af6a7b5a6c1c5458330b95b8"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-14-turn-31/agents-buffer-exists {:statement "An *agents* buffer listing agents exists." :cue [131 178]}
+  :turn-claude-14-turn-31/active-agents-slice-view {:statement "An *active-agents* buffer presents the same data sliced to agents currently working." :cue [183 217]}}
+ :rules
+ [
+  {:pattern "cascades/the-slice-is-the-unit-of-use"
+   :from {:fragment [61 217] :intent "propose-filtered-view"}
+   :guard {:needs #{:turn-claude-14-turn-31/agents-buffer-exists} :forbids #{}}
+   :produces #{:turn-claude-14-turn-31/active-agents-slice-view}
+   :receipt {:source {:path "futon3/library/cascades/the-slice-is-the-unit-of-use.flexiarg" :sha256 "c259144e5fe5e126f905b05040618315b8c73f03bd03803b05407517a8c8f3eb"}
+           :reading "The slice move: 'Seats never need \"the cascade\"; they need the slice for one problem at one moment.' The seat's problem is 'who is working now'; the *agents* buffer (the need) sliced to active (the product) is that unit of use, not a new data source."
+           :scope-limit "Proposes the view; the filter criterion ('currently working') is the turn's, not a measured definition."}}
+ ]
+ :not-a-rule []
+}

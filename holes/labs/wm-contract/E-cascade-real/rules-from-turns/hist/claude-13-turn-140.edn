@@ -1,0 +1,37 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-140"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-140.json.analysis.json"
+ :source-sha256 "1c58ffa9ad75e49c5c95d28d2975b4b9500b53cce941b2e9f3127eb449e5d724"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-140/repos-work-committed {:statement "Everything pending under repos is committed." :cue [4 50]}
+  :turn-claude-13-turn-140/var-www-left-for-now {:statement "/var/www is left as-is for now." :cue [74 96]}
+  :turn-claude-13-turn-140/post-commit-hooks-named-as-future-mechanism {:statement "Post-commit hooks are named as the future mechanism for keeping /var/www up to date." :cue [132 177]}
+  :turn-claude-13-turn-140/served-page-bound-to-commit {:statement "The served page corresponds exactly to a committed artifact at a named commit hash with a clean worktree." :cue [297 356]}}
+ :rules
+ [
+  {:pattern "storage/durability-first"
+   :from {:fragment [4 50] :intent "direct-commit"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-140/repos-work-committed}
+   :receipt {:source {:path "futon3/library/storage/durability-first.flexiarg" :sha256 "1ccc6c4cd0e224d02cd4501451706fa1be65dd6f7219dbec79f97012c4684434"}
+           :reading "Durability-first applied to the repos tree: 'block success responses on durable storage confirmation; fail loudly when durability cannot be verified' — the work is not safe until it is committed, so committing precedes any report of done."
+           :scope-limit "Covers the repos commit; /var/www's update is the defer rule, not this one."}}
+  {:pattern "writing-coherence/hedged-lift"
+   :from {:fragment [52 178] :intent "defer-with-named-future-mechanism"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-140/var-www-left-for-now :turn-claude-13-turn-140/post-commit-hooks-named-as-future-mechanism}
+   :receipt {:source {:path "futon3/library/writing-coherence/hedged-lift.flexiarg" :sha256 "a58ce7caf31dc207a3f7b81b246570f7f6e182c49dfb309685fbe1d91fc68ed9"}
+           :reading "The defer branch again: 'defer properly with a forward pointer the reader can chase' — /var/www is not updated now and not dropped; the future mechanism (post-commit hooks) is named in the same breath."
+           :scope-limit "Defers with the mechanism named; the hooks are not installed here."}}
+  {:pattern "translation/bind-to-the-source"
+   :from {:fragment [297 382] :intent "present-quoted-report"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-140/served-page-bound-to-commit}
+   :receipt {:source {:path "futon3/library/translation/bind-to-the-source.flexiarg" :sha256 "6addd0b18ca85a5b2fd43e14e94798c29bc09e6ba5b71d1e01703ab187625d51"}
+           :reading "The pasted report is the binding itself: 'Every translation carries a hash-level binding to its exact source and refuses when that source has moved.' Served page tied to commit 4adbc49d and a clean worktree — the binding that lets the staleness conclusion be drawn at all (relations=['dependency'])."
+           :scope-limit "Establishes the binding for the served page; whether the source has moved since is a separate observation."}}
+ ]
+ :not-a-rule []
+}

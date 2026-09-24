@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "codex-10-turn-220"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/codex-10-turn-220.json.analysis.json"
+ :source-sha256 "e42be6281e4e969802aa253f91c10a539d5ac972cefbef82227a116de563e423"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-codex-10-turn-220/problem-buffer-shows-test-data {:statement "The *problem* buffer is showing t94J02, known test data, as a stand-in." :cue [43 77]}
+  :turn-codex-10-turn-220/authority-is-live-frame-22-data {:statement "The authority for the verdict is the actual data from the machine running on Frame 22." :cue [83 145]}}
+ :rules
+ [
+  {:pattern "hygiene/observe-the-authority"
+   :from {:fragment [0 145] :intent "distinguish-test-from-live-data"}
+   :guard {:needs #{:turn-codex-10-turn-220/problem-buffer-shows-test-data} :forbids #{}}
+   :produces #{:turn-codex-10-turn-220/authority-is-live-frame-22-data}
+   :receipt {:source {:path "futon3/library/hygiene/observe-the-authority.flexiarg" :sha256 "f43c2229b97e9162b4b62af0093f5d15854423b1fc810cd0da4ccdc5ed568bef"}
+           :reading "'A hygiene observation reads the authority its verdict is about, refreshes any stand-in before use, and fails when the authority cannot be compared.' The buffer's stand-in (the need) is not the authority; the rule names what the verdict must read instead (the product). relations=['contrast'] is the stand-in/authority split."
+           :scope-limit "Identifies the authority; the refreshed observation is not run here."}}
+ ]
+ :not-a-rule []
+}

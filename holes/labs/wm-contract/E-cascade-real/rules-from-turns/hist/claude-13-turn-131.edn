@@ -1,0 +1,29 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-131"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-131.json.analysis.json"
+ :source-sha256 "c60300c537e95f0862fff543aae63671e8f6a76346a250a27128238261146092"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-131/paper-comprehensible {:statement "The paper is now pretty much comprehensible." :cue [8 51]}
+  :turn-claude-13-turn-131/mission-drift-flagged {:statement "The paper is flagged as having no relationship to the M-futon-problems mission." :cue [57 121]}
+  :turn-claude-13-turn-131/plop-patterns-not-replicated {:statement "The design patterns contained in plop-2026 are not replicated in this paper." :cue [636 724]}}
+ :rules
+ [
+  {:pattern "scan-coherence/mission-anchored-scan"
+   :from {:fragment [8 122] :intent "flag-mission-drift"}
+   :guard {:needs #{:turn-claude-13-turn-131/paper-comprehensible} :forbids #{}}
+   :produces #{:turn-claude-13-turn-131/mission-drift-flagged}
+   :receipt {:source {:path "futon3/library/scan-coherence/mission-anchored-scan.flexiarg" :sha256 "9fe4d196f2a6eb29c1aa92b3d782a5c2fcf51cf78cf7be4f8f47a02dd7c59033"}
+           :reading "The anchoring discipline's diagnostic applied to the paper: the artefact is assessed against the mission question and found unanchored — 'anchored to a live mission's named question'. The comprehensibility assessment is the contrast against which the drift shows (relations=['contrast']); the flag is the product."
+           :scope-limit "Flags the drift; re-anchoring or revising the paper is not done here."}}
+  {:pattern "war-room/wr-2-pattern-library-stays-canonical"
+   :from {:fragment [636 724] :intent "rule-out-duplication"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-131/plop-patterns-not-replicated}
+   :receipt {:source {:path "futon3/library/war-room/wr-2-pattern-library-stays-canonical.flexiarg" :sha256 "b443e78d8addacfca957131724c28812f14220edc4ca0d962c556328c963917e"}
+           :reading "One canonical home for the patterns: 'Keep the shared pattern library in one canonical location so fast loops cannot silently modify their own constraints.' plop-2026 already carries these patterns; this paper points rather than duplicates."
+           :scope-limit "Rules out duplication of the plop-2026 set; the WR patterns 'that need work' are untouched by the rule."}}
+ ]
+ :not-a-rule []
+}

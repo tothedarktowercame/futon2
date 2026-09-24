@@ -1,0 +1,30 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-127"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-127.json.analysis.json"
+ :source-sha256 "09703352fb0caf1513ba06a7d21cd424fd0fb583c4747d4d6284c3f3712c68de"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-127/title-question-is-the-goal {:statement "The goal is to answer the question in the title of the paper." :cue [12 81]}
+  :turn-claude-13-turn-127/details-subordinated-to-title-question {:statement "Detail work is subordinated to answering the title question." :cue [83 116]}
+  :turn-claude-13-turn-127/title-question-unanswered {:statement "The title question remains unanswered." :cue [119 150]}
+  :turn-claude-13-turn-127/paper-improving {:statement "The paper is looking a lot better." :cue [156 189]}}
+ :rules
+ [
+  {:pattern "scan-coherence/mission-anchored-scan"
+   :from {:fragment [6 116] :intent "re-anchor-on-the-goal"}
+   :guard {:needs #{:turn-claude-13-turn-127/title-question-is-the-goal} :forbids #{}}
+   :produces #{:turn-claude-13-turn-127/details-subordinated-to-title-question}
+   :receipt {:source {:path "futon3/library/scan-coherence/mission-anchored-scan.flexiarg" :sha256 "9fe4d196f2a6eb29c1aa92b3d782a5c2fcf51cf78cf7be4f8f47a02dd7c59033"}
+           :reading "The re-anchoring move instantiated: 'A landscape scan is sharpest when it is anchored to a live mission's named question.' The scan of details is re-tied to the live question (the title); the anchor (the goal token) is the need."
+           :scope-limit "Re-anchors the work; it does not answer the title question."}}
+  {:pattern "peripherals/progress-heartbeat-distinct-from-cycle-completion"
+   :from {:fragment [119 190] :intent "assess-on-two-axes"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-127/paper-improving :turn-claude-13-turn-127/title-question-unanswered}
+   :receipt {:source {:path "futon3/library/peripherals/progress-heartbeat-distinct-from-cycle-completion.flexiarg" :sha256 "7d0c49787c8fad7daed229edbd5d6fb599f2df8520d2d1cfc3b6ba193bdc057b"}
+           :reading "Exactly the pattern's distinction held apart in one report: the improving paper is the progress heartbeat; the unanswered title question is the incomplete cycle — 'a progress heartbeat distinct from its cycle completion event. Conflating the two produces watchdogs that fire on healthy long-running cycles.' relations=['contrast'] is the separation itself. The rule produces the two facts as separately recorded state; it changes the record, not the paper."
+           :scope-limit "Reports both axes; neither improvement nor answer is claimed beyond the quoted lines."}}
+ ]
+ :not-a-rule []
+}

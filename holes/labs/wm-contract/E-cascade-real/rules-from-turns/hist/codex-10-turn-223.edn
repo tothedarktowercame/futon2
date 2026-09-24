@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "codex-10-turn-223"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/codex-10-turn-223.json.analysis.json"
+ :source-sha256 "7d549b42a9871b1e3ef5bd613ca5512966aa0a45264fb83b3a9b8eac0405e8fd"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-codex-10-turn-223/defect-list-narrowing {:statement "Fixes are narrowing down the list of possible defects." :cue [164 214]}
+  :turn-codex-10-turn-223/end-to-end-validation-outstanding {:statement "End-to-end uninterrupted running of the machine is not yet validated." :cue [220 288]}}
+ :rules
+ [
+  {:pattern "peripherals/progress-heartbeat-distinct-from-cycle-completion"
+   :from {:fragment [146 289] :intent "mark-the-unvalidated-property"}
+   :guard {:needs #{:turn-codex-10-turn-223/defect-list-narrowing} :forbids #{}}
+   :produces #{:turn-codex-10-turn-223/end-to-end-validation-outstanding}
+   :receipt {:source {:path "futon3/library/peripherals/progress-heartbeat-distinct-from-cycle-completion.flexiarg" :sha256 "7d0c49787c8fad7daed229edbd5d6fb599f2df8520d2d1cfc3b6ba193bdc057b"}
+           :reading "The pattern's distinction again, on the machine itself: narrowing defects is the progress heartbeat (the need); a validated end-to-end run is the cycle completion, and it is marked outstanding (the product) rather than inferred from the heartbeat — 'Conflating the two produces watchdogs that fire on healthy long-running cycles.' relations=['contrast'] is the 'but'."
+           :scope-limit "Marks the property unvalidated; the parallel-cycle validation proposed next is a separate act."}}
+ ]
+ :not-a-rule []
+}

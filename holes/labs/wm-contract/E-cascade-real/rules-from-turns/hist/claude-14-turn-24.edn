@@ -1,0 +1,29 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-14-turn-24"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-14-turn-24.json.analysis.json"
+ :source-sha256 "78ed79dd35c6220b57be5db9f5c478213d7cbce5b237aebc68120a6539302f91"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-14-turn-24/false-statements-marked-as-such {:statement "Problems with false or mistaken statements are banked marked as such." :cue [115 149]}
+  :turn-claude-14-turn-24/false-statements-not-treated-as-solved {:statement "False-statement problems are treated neither as solved problems nor as partials." :cue [152 228]}
+  :turn-claude-14-turn-24/rulings-made-in-any-case {:statement "A ruling is made on every problem, whatever its statement's status." :cue [248 314]}}
+ :rules
+ [
+  {:pattern "apparatus/evidence-to-disposition-once"
+   :from {:fragment [42 149] :intent "extend-the-status-taxonomy"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-14-turn-24/false-statements-marked-as-such :turn-claude-14-turn-24/rulings-made-in-any-case}
+   :receipt {:source {:path "futon3/library/apparatus/evidence-to-disposition-once.flexiarg" :sha256 "9f6b75df557cb3475b320fba4c73f02761702b088ba3c7ca13aa99e666bba764"}
+           :reading "The disposition enum extended at collection time: 'join their evidence ONCE into a closed-enum disposition constructed at collection time; consumers ask their different questions of that record by total pattern-match.' 'Mark them as such' is the new disposition value; 'a ruling is made in any case' is the totality of the match."
+           :scope-limit "Extends the taxonomy with one value; the banking mechanics are unchanged."}}
+  {:pattern "apparatus/evidence-to-disposition-once"
+   :from {:fragment [152 314] :intent "unify-by-disposition-phase"}
+   :guard {:needs #{:turn-claude-14-turn-24/false-statements-not-treated-as-solved} :forbids #{}}
+   :produces #{:turn-claude-14-turn-24/rulings-made-in-any-case}
+   :receipt {:source {:path "futon3/library/apparatus/evidence-to-disposition-once.flexiarg" :sha256 "9f6b75df557cb3475b320fba4c73f02761702b088ba3c7ca13aa99e666bba764"}
+           :reading "The unification half of the same pattern: not solved, not partial (the need, relations=['contrast']), but the same logical phase — one record, one phase, questions asked of it later by total pattern-match (the product). Same produced token as the extend rule; that reuse is what lets the two rules chain."
+           :scope-limit "States the phase unification; no consumer of the disposition is changed here."}}
+ ]
+ :not-a-rule []
+}

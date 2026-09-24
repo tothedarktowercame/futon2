@@ -1,0 +1,29 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-129"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-129.json.analysis.json"
+ :source-sha256 "fd4c115164b6accba7145a8f299763bdd630a43988c6ba62d32f0989b5ff31b1"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-129/r10-unclear-tolerated {:statement "R10 being unclear is tolerated at this stage, not treated as a defect." :cue [81 149]}
+  :turn-claude-13-turn-129/r10-label-contributes-nothing {:statement "The label 'R10 — apparatus marked' contributes nothing to understanding what problems are being solved." :cue [265 324]}
+  :turn-claude-13-turn-129/paper-states-problems-legibly {:statement "A reader of the paper can understand what problems are being solved." :cue [181 263]}}
+ :rules
+ [
+  {:pattern "agent/pause-is-not-failure"
+   :from {:fragment [81 149] :intent "tolerate-ambiguity-for-now"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-129/r10-unclear-tolerated}
+   :receipt {:source {:path "futon3/library/agent/pause-is-not-failure.flexiarg" :sha256 "ef0bb9c447ef515fbf4b405d47661bbfcbf8bd7699b897e681d9d07463d64240"}
+           :reading "The same tolerance structure the pattern names: 'Stopping to request clarification or expanded scope is a valid action, not a defect' — here an unresolved state at this stage is explicitly not treated as one. The rule records the tolerance as a state of the work (the red ring's implication is declined)."
+           :scope-limit "Tolerates the ambiguity for now; it does not license leaving R10 unexplained forever."}}
+  {:pattern "writing-coherence/plain-language-thesis"
+   :from {:fragment [181 263] :intent "require-legibility"}
+   :guard {:needs #{:turn-claude-13-turn-129/r10-label-contributes-nothing} :forbids #{}}
+   :produces #{:turn-claude-13-turn-129/paper-states-problems-legibly}
+   :receipt {:source {:path "futon3/library/writing-coherence/plain-language-thesis.flexiarg" :sha256 "ca0744c5a35aacb35d6290287941518ad91b2e9c66597dcf92a7fbf58827e511"}
+           :reading "The legibility bar applied to the catalogue: 'A top-level claim … must be readable standalone, by a reader who has not read the rest of the work … no load-bearing jargon.' The failing label is the need (relations=['condition']); the readable statement of problems solved is the product."
+           :scope-limit "Sets the bar and the failing instance; the rewrite of R10's label is not performed here."}}
+ ]
+ :not-a-rule []
+}

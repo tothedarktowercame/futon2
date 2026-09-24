@@ -1,0 +1,22 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "codex-10-turn-222"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/codex-10-turn-222.json.analysis.json"
+ :source-sha256 "e3ac7775f6271f0f677ba517f53d61f857fed41834fe7a680a84faa178a243f6"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-codex-10-turn-222/needed-branch-known {:statement "The needed branch is known." :cue [105 134]}
+  :turn-codex-10-turn-222/separate-checkout-used {:statement "The needed branch is put in a separate checkout." :cue [143 172]}
+  :turn-codex-10-turn-222/work-not-blocked-mutually {:statement "Neither this work nor other work in progress blocks the other." :cue [54 99]}}
+ :rules
+ [
+  {:pattern "translation/bind-to-the-source"
+   :from {:fragment [102 186] :intent "direct-separate-checkout"}
+   :guard {:needs #{:turn-codex-10-turn-222/needed-branch-known} :forbids #{}}
+   :produces #{:turn-codex-10-turn-222/separate-checkout-used :turn-codex-10-turn-222/work-not-blocked-mutually}
+   :receipt {:source {:path "futon3/library/translation/bind-to-the-source.flexiarg" :sha256 "6addd0b18ca85a5b2fd43e14e94798c29bc09e6ba5b71d1e01703ab187625d51"}
+           :reading "Same binding, second instance: 'Every translation carries a hash-level binding to its exact source.' With the branch known (the need), bind by separate checkout and continue (the products) — the mutual non-blocking is part of the same act, not a separate virtue."
+           :scope-limit "Directs the mechanism; the checkout itself is not performed in the turn."}}
+ ]
+ :not-a-rule []
+}

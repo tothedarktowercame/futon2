@@ -1,0 +1,90 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-118"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-118.json.analysis.json"
+ :source-sha256 "c470a434e0a12d0c1c1740c12b3f5d8419a63f3576611afdaaec9bfa34940f9a"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-118/mlk-quote-bridges-wwii-to-paper {:statement "The MLK quote is used to bridge from the WWII material to the paper's own work." :cue [23 108]}
+  :turn-claude-13-turn-118/war-room-name-motivated {:statement "The term 'war room' is motivated in the paper." :cue [206 247]}
+  :turn-claude-13-turn-118/war-machine-tension-staged {:statement "A tension between organising effectively and not recreating a State apparatus is staged against the war-machine term." :cue [309 334]}
+  :turn-claude-13-turn-118/tension-is-central-design-pattern {:statement "The staged tension is made the core of a central design pattern." :cue [550 599]}
+  :turn-claude-13-turn-118/organise-effectively-without-state-apparatus {:statement "The pattern's ruling is to organise effectively for peace without creating a state apparatus." :cue [602 712]}
+  :turn-claude-13-turn-118/open-model-chosen-for-inspectability {:statement "An open model is chosen because its objective is written down and inspectable." :cue [740 813]}
+  :turn-claude-13-turn-118/forkable-exit-available {:statement "Open source is chosen so that anyone can fork it." :cue [842 896]}
+  :turn-claude-13-turn-118/ruling-named-wr-0 {:statement "The ruling is named WR-0, placing it in the numbered war-room family." :cue [934 985]}}
+ :rules
+ [
+  {:pattern "war-room/wr-0-organise-without-apparatus"
+   :from {:fragment [23 108] :intent "bridge-via-epigraph"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-118/mlk-quote-bridges-wwii-to-paper}
+   :receipt {:source {:path "futon3/library/war-room/wr-0-organise-without-apparatus.flexiarg" :sha256 "5a1e32ce61a9233ac3b91c4633d67f9a6e977e64619488ec06421e29e98a5bc2"}
+           :reading "The MLK sentence is WR-0's IF clause ('Those who love peace must learn to organize as effectively as those who love war'); inserting it as the bridge performs the pattern's organising move on the paper's structure."
+           :scope-limit "Bridges the two bodies of material; it does not yet state the pattern."}}
+  {:pattern "war-room/wr-0-organise-without-apparatus"
+   :from {:fragment [194 259] :intent "justify-terminology"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-118/war-room-name-motivated}
+   :receipt {:source {:path "futon3/library/war-room/wr-0-organise-without-apparatus.flexiarg" :sha256 "5a1e32ce61a9233ac3b91c4633d67f9a6e977e64619488ec06421e29e98a5bc2"}
+           :reading "WR-0's own context says this ruling is the reason any of it is called a war room; recording that motivation in the paper is part of carrying the pattern forward, not an after-the-fact label. Borderline act — the state changed is the paper's apparatus of motivation, not the world."
+           :scope-limit "Etymology only; no design consequence is drawn here."}}
+  {:pattern "war-room/wr-0-organise-without-apparatus"
+   :from {:fragment [261 335] :intent "stage-tension"}
+   :guard {:needs #{:turn-claude-13-turn-118/mlk-quote-bridges-wwii-to-paper} :forbids #{}}
+   :produces #{:turn-claude-13-turn-118/war-machine-tension-staged}
+   :receipt {:source {:path "futon3/library/war-room/wr-0-organise-without-apparatus.flexiarg" :sha256 "5a1e32ce61a9233ac3b91c4633d67f9a6e977e64619488ec06421e29e98a5bc2"}
+           :reading "Staging the Deleuze passage against the MLK bridge is the pattern's constitutive HOWEVER: effective organisation (MLK, already bridged — hence the need) held against not recreating the despotic internal unity (Deleuze). relations=['contrast'] marks the tension itself; it becomes the produced token, not a forbids, because the tension is what the rule brings into being."
+           :scope-limit "Stages the tension; resolving it into THEN properties is later work."}}
+  {:pattern "war-room/wr-0-organise-without-apparatus"
+   :from {:fragment [535 599] :intent "propose-pattern-from-tension"}
+   :guard {:needs #{:turn-claude-13-turn-118/war-machine-tension-staged} :forbids #{}}
+   :produces #{:turn-claude-13-turn-118/tension-is-central-design-pattern}
+   :receipt {:source {:path "futon3/library/war-room/wr-0-organise-without-apparatus.flexiarg" :sha256 "5a1e32ce61a9233ac3b91c4633d67f9a6e977e64619488ec06421e29e98a5bc2"}
+           :reading "This is the proposal that became WR-0: the staged tension is promoted to a central design pattern. The pattern's own conclusion line is exactly this move — an apparatus built to organise effectively must carry this tension from the start."
+           :scope-limit "Proposes; the pattern is not yet written."}}
+  {:pattern "cascade-construction/add-a-pattern-when-an-item-fits-no-class"
+   :from {:fragment [535 599] :intent "propose-pattern-from-tension"}
+   :guard {:needs #{:turn-claude-13-turn-118/war-machine-tension-staged} :forbids #{}}
+   :produces #{:turn-claude-13-turn-118/tension-is-central-design-pattern}
+   :receipt {:source {:path "futon3/library/cascade-construction/add-a-pattern-when-an-item-fits-no-class.flexiarg" :sha256 "af576bfeadff31f0f620da1a76c043f1bf38aea6e79ff7508cb2a8123506c7f3"}
+           :reading "The same act read through the library-maintenance pattern: 'A real item that fits no class becomes a named gap, a domain question and, when warranted, a pattern built from a census' — here the pattern is authored directly because the item is already a ruling."
+           :scope-limit "Covers the minting decision; the census the pattern mentions is skipped because the item is already a ruling."}}
+  {:pattern "war-room/wr-0-organise-without-apparatus"
+   :from {:fragment [602 737] :intent "sketch-pattern-logic"}
+   :guard {:needs #{:turn-claude-13-turn-118/war-machine-tension-staged} :forbids #{}}
+   :produces #{:turn-claude-13-turn-118/organise-effectively-without-state-apparatus}
+   :receipt {:source {:path "futon3/library/war-room/wr-0-organise-without-apparatus.flexiarg" :sha256 "5a1e32ce61a9233ac3b91c4633d67f9a6e977e64619488ec06421e29e98a5bc2"}
+           :reading "The fragment states WR-0's IF + HOWEVER in one breath — organise effectively in support of peace, HOWEVER do not create a state apparatus — with THEN about to be populated; that ruling sentence is exactly the produced token."
+           :scope-limit "States the ruling; the THEN properties land as separate rules."}}
+  {:pattern "war-room/wr-0-organise-without-apparatus"
+   :from {:fragment [740 841] :intent "derive-design-consequence"}
+   :guard {:needs #{:turn-claude-13-turn-118/organise-effectively-without-state-apparatus} :forbids #{}}
+   :produces #{:turn-claude-13-turn-118/open-model-chosen-for-inspectability}
+   :receipt {:source {:path "futon3/library/war-room/wr-0-organise-without-apparatus.flexiarg" :sha256 "5a1e32ce61a9233ac3b91c4633d67f9a6e977e64619488ec06421e29e98a5bc2"}
+           :reading "Identical to WR-0's THEN property (a): an open model, chosen for the structural reason that its objective is written down and inspectable ('organizing via AIF starts to make sense because it is an \"open\" model'). Derived from the ruling — hence the need."
+           :scope-limit "One property of the ruling; not a claim that AIF is the only open model."}}
+  {:pattern "war-room/wr-0-organise-without-apparatus"
+   :from {:fragment [842 896] :intent "derive-design-consequence"}
+   :guard {:needs #{:turn-claude-13-turn-118/organise-effectively-without-state-apparatus} :forbids #{}}
+   :produces #{:turn-claude-13-turn-118/forkable-exit-available}
+   :receipt {:source {:path "futon3/library/war-room/wr-0-organise-without-apparatus.flexiarg" :sha256 "5a1e32ce61a9233ac3b91c4633d67f9a6e977e64619488ec06421e29e98a5bc2"}
+           :reading "Identical to WR-0's THEN property (b): an available exit — forkable, with a substrate legible enough to leave with ('open source makes sense because anyone can fork it')."
+           :scope-limit "One property of the ruling; exit mechanics are not designed here."}}
+  {:pattern "invariant-coherence/protocol-family-naming"
+   :from {:fragment [934 985] :intent "propose-family-name"}
+   :guard {:needs #{:turn-claude-13-turn-118/tension-is-central-design-pattern} :forbids #{}}
+   :produces #{:turn-claude-13-turn-118/ruling-named-wr-0}
+   :receipt {:source {:path "futon3/library/invariant-coherence/protocol-family-naming.flexiarg" :sha256 "abd189ac12c6393e3224f8f1df410b4f07c65268dafa36608639f9b0146f3677"}
+           :reading "Naming the ruling WR-0 places it in a numbered family where the family is the shape and the number indexes the instance — the pattern's form '<family-shape>/<artifact-class>' applied to the war-room family. relations=['condition'] became the need: naming applies once the pattern exists as a pattern."
+           :scope-limit "Names the instance; the numbering scheme for later WR-n is not fixed here."}}
+  {:pattern "war-room/wr-0-organise-without-apparatus"
+   :from {:fragment [934 985] :intent "propose-family-name"}
+   :guard {:needs #{:turn-claude-13-turn-118/tension-is-central-design-pattern} :forbids #{}}
+   :produces #{:turn-claude-13-turn-118/ruling-named-wr-0}
+   :receipt {:source {:path "futon3/library/war-room/wr-0-organise-without-apparatus.flexiarg" :sha256 "5a1e32ce61a9233ac3b91c4633d67f9a6e977e64619488ec06421e29e98a5bc2"}
+           :reading "The name stuck: the library's WR-0 is exactly this pattern, recorded retroactively as the ruling the numbered ones operated under. Same tokens as the protocol-family-naming rule; the two readings of one act are both kept because both citations are live."
+           :scope-limit "The retroactive naming; 'if we don't have one already' leaves existence checking open."}}
+ ]
+ :not-a-rule []
+}

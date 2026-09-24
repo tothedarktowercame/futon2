@@ -1,0 +1,22 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "codex-10-turn-214"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/codex-10-turn-214.json.analysis.json"
+ :source-sha256 "68d77c6ffa80604dace0aa214021efeb368becc53545b9c47d6715803fd8d263"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-codex-10-turn-214/git-hash-known {:statement "The git hash to use is known." :cue [75 103]}
+  :turn-codex-10-turn-214/hash-pinned-separate-checkout {:statement "The work points at the known hash as a separate checkout." :cue [114 150]}
+  :turn-codex-10-turn-214/unrelated-work-not-blocked {:statement "Unrelated work is not blocked by the checkout." :cue [152 193]}}
+ :rules
+ [
+  {:pattern "translation/bind-to-the-source"
+   :from {:fragment [72 193] :intent "propose-hash-pinned-checkout"}
+   :guard {:needs #{:turn-codex-10-turn-214/git-hash-known} :forbids #{}}
+   :produces #{:turn-codex-10-turn-214/hash-pinned-separate-checkout :turn-codex-10-turn-214/unrelated-work-not-blocked}
+   :receipt {:source {:path "futon3/library/translation/bind-to-the-source.flexiarg" :sha256 "6addd0b18ca85a5b2fd43e14e94798c29bc09e6ba5b71d1e01703ab187625d51"}
+           :reading "The binding made structural: 'Every translation carries a hash-level binding to its exact source.' When the hash is known (the need), bind by checkout to exactly it (the product), and stop paying the blocker on everyone else's work (the second product). relations=['contrast'] is the rejected alternative."
+           :scope-limit "Proposes the checkout mechanism; no claim that the hash is the right one."}}
+ ]
+ :not-a-rule []
+}

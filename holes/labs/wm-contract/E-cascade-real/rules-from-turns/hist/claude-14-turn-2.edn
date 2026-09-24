@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-14-turn-2"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-14-turn-2.json.analysis.json"
+ :source-sha256 "12a991ef337a301bd98f8627ea86951b58a44a443459af7f309a2d2a36d2bb3e"
+ :labeller "kimi-4"
+ :tokens
+ {
+  :turn-claude-14-turn-2/no-standard-homology-in-mathlib {:statement "There is no standard homology in Mathlib." :cue [121 160]}
+  :turn-claude-14-turn-2/topology-holdout-reason-named {:statement "The topology problems are held out for one named primary reason: they are way harder." :cue [73 116]}}
+ :rules
+ [
+  {:pattern "writing-coherence/scope-mush"
+   :from {:fragment [4 161] :intent "clarify"}
+   :guard {:needs #{:turn-claude-14-turn-2/no-standard-homology-in-mathlib} :forbids #{}}
+   :produces #{:turn-claude-14-turn-2/topology-holdout-reason-named}
+   :receipt {:source {:path "futon3/library/writing-coherence/scope-mush.flexiarg" :sha256 "0f36ffceeced759ac263cc154c3216aa3b4bd23baf1a823dd2895829a844cb49"}
+           :reading "scope-mush's remedy exercised in speech: 'typically contain either one real reason padded with filler, or several reasons of unequal weight that would each deserve a sentence.' The operator states the ONE primary reason with its weight ('let's be clear … primary reason'), grounded in the Mathlib fact (the need). The relations=['rationale'] guide became the need; followed."
+           :scope-limit "Names the primary reason; the Codex-spend consequence is sketched but not decided."}}
+ ]
+ :not-a-rule []
+}

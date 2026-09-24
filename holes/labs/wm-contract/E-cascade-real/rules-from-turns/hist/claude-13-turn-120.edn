@@ -1,0 +1,28 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-120"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-120.json.analysis.json"
+ :source-sha256 "d8ff84350e7d04167a2b34246771a665a27cf03d0d8788e367c605cf43189908"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-120/wr-0-formally-written-up {:statement "WR-0 is written up formally within futon3/library/war-room." :cue [22 80]}
+  :turn-claude-13-turn-120/wr-0-in-box-1-table {:statement "WR-0 is included in the Box 1 table." :cue [85 117]}}
+ :rules
+ [
+  {:pattern "process-coherence/author-the-missing-pattern"
+   :from {:fragment [4 80] :intent "direct-formal-writeup"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-120/wr-0-formally-written-up}
+   :receipt {:source {:path "futon3/library/process-coherence/author-the-missing-pattern.flexiarg" :sha256 "4b841fabf3b3971dae2314ce725bab6c187e7d7877798c227369adff9c7f7469"}
+           :reading "The argument (the paper, the war-room series) needs WR-0's vocabulary, so it is authored into the library rather than left as chat history: 'the library is INCOMPLETE BY CONSTRUCTION. Author real patterns from the built system's actual functionality.' The directive is the authoring act."
+           :scope-limit "Covers the writeup directive; the Box 1 registration is a separate rule."}}
+  {:pattern "problems/contract-edits-wait-for-their-exemplar"
+   :from {:fragment [85 117] :intent "register-where-readers-look"}
+   :guard {:needs #{:turn-claude-13-turn-120/wr-0-formally-written-up} :forbids #{}}
+   :produces #{:turn-claude-13-turn-120/wr-0-in-box-1-table}
+   :receipt {:source {:path "futon3/library/problems/contract-edits-wait-for-their-exemplar.flexiarg" :sha256 "5b23228d913e15762f3ceab86369705a13f32509106d14580fe6f752606aa418"}
+           :reading "The pattern's recorded precedent applies directly: a ruling not present in the registry the lanes consult is not a ruling for the lanes — 'encode the ruling in the registry the lanes consult immediately'. The Box 1 table is that registry for the paper's readers; the formal writeup is its precondition (relations=['condition'])."
+           :scope-limit "Registers the ruling where readers look; typographic fixes to the table are out of scope."}}
+ ]
+ :not-a-rule []
+}

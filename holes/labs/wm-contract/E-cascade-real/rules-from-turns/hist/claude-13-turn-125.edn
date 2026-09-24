@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-125"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-125.json.analysis.json"
+ :source-sha256 "5bc2abd2dcc07c74a4b2fa07b01bf9a383b71cf88b39cf0d81fc5dea73c95648"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-125/old-quote-retained-for-now {:statement "war-room.md keeps the old quote for now." :cue [34 87]}
+  :turn-claude-13-turn-125/quote-correction-deferred-with-return {:statement "Correcting the old quote is deferred with the later sorting named." :cue [89 115]}}
+ :rules
+ [
+  {:pattern "writing-coherence/hedged-lift"
+   :from {:fragment [21 116] :intent "defer-explicitly"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-125/old-quote-retained-for-now :turn-claude-13-turn-125/quote-correction-deferred-with-return}
+   :receipt {:source {:path "futon3/library/writing-coherence/hedged-lift.flexiarg" :sha256 "a58ce7caf31dc207a3f7b81b246570f7f6e182c49dfb309685fbe1d91fc68ed9"}
+           :reading "hedged-lift's defer branch exercised on a document: not committed now, not cut — 'defer properly with a forward pointer the reader can chase'. The deferral is stated aloud ('for now') with the return mechanism named ('sort that out later')."
+           :scope-limit "Defers the correction only; the later sorting is named, not scheduled."}}
+ ]
+ :not-a-rule []
+}

@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-119"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-119.json.analysis.json"
+ :source-sha256 "af7a3206f7f959ef04ea42a36f8ff2f59b3ca8df35bc934152376846f2d03d02"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-119/figure-constructed {:statement "Figure 1 with its two images exists as constructed output." :cue [39 65]}
+  :turn-claude-13-turn-119/figure-juxtaposition-interpreted {:statement "The juxtaposition of the two images is given its meaning: left projects the outside inward, right holds mobile rooms within the outside." :cue [195 264]}}
+ :rules
+ [
+  {:pattern "cascade-construction/separate-construction-from-meaning-review"
+   :from {:fragment [135 343] :intent "interpret-juxtaposition"}
+   :guard {:needs #{:turn-claude-13-turn-119/figure-constructed} :forbids #{}}
+   :produces #{:turn-claude-13-turn-119/figure-juxtaposition-interpreted}
+   :receipt {:source {:path "futon3/library/cascade-construction/separate-construction-from-meaning-review.flexiarg" :sha256 "9511f56cd30d03733d36f0fd34c1c738b900dd8f49033b48e12c932ec5aa46d1"}
+           :reading "The pattern's review half exercised: 'The owner of the model's meaning reviews the semantic claims in a constructed cascade, and corrections are applied and recorded.' The agent constructed the figure (the need); the operator supplies what the juxtaposition means (the product). The roles are not merged."
+           :scope-limit "Interprets this figure; it does not review the construction mechanics (the resize request is separate)."}}
+ ]
+ :not-a-rule []
+}

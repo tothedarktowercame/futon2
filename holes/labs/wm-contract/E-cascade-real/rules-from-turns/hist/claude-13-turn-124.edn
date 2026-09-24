@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-124"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-124.json.analysis.json"
+ :source-sha256 "e6f743b75183d1db9d65e5a6727bfb29402d4087d51a328393ca03fec48bbf7c"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-124/corrected-quote-published {:statement "The correct, documented quote is included in the publication." :cue [26 64]}
+  :turn-claude-13-turn-124/alteration-declared-in-publication {:statement "The publication declares that the altered quote appears in an altered image." :cue [69 119]}}
+ :rules
+ [
+  {:pattern "translation/declare-what-is-lost"
+   :from {:fragment [19 120] :intent "publish-with-provenance-note"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-124/corrected-quote-published :turn-claude-13-turn-124/alteration-declared-in-publication}
+   :receipt {:source {:path "futon3/library/translation/declare-what-is-lost.flexiarg" :sha256 "4d076f3ea837c347c28364d531257c04e62bbad00c9c9a8776541bd2130bb7e6"}
+           :reading "The publication keeps the altered version visible and declares exactly what it fails to preserve: 'Each translation states what it changes, fixes, drops, and requires for its equivalence to hold.' The corrected quote is the fix; the alteration note is the declared loss."
+           :scope-limit "Declares the loss in the publication; restoring the original image is not claimed."}}
+ ]
+ :not-a-rule []
+}

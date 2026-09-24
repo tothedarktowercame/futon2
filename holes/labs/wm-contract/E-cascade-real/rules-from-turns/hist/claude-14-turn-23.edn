@@ -1,0 +1,30 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-14-turn-23"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-14-turn-23.json.analysis.json"
+ :source-sha256 "b2d6b9aa715b7e7ba8bb31bc0e74d09dfe40a63c37a4d931809ec9a387c67fc2"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-14-turn-23/operator-babysitting-cost {:statement "The operator sits babysitting the machine, doing admin while it proves theorems." :cue [188 250]}
+  :turn-claude-14-turn-23/banking-and-merging-automated {:statement "The banking-and-merging process is automated." :cue [120 168]}
+  :turn-claude-14-turn-23/codex-standard-problem-solver-exists {:statement "Codex is working on an automated 'standard problem solver'." :cue [298 362]}
+  :turn-claude-14-turn-23/standard-problem-solver-adapted {:statement "The Codex standard-problem-solver work is adapted to this project's banking and merging." :cue [367 423]}}
+ :rules
+ [
+  {:pattern "agent/coordination-has-cost"
+   :from {:fragment [178 279] :intent "name-the-babysitting-cost"}
+   :guard {:needs #{:turn-claude-14-turn-23/operator-babysitting-cost} :forbids #{}}
+   :produces #{:turn-claude-14-turn-23/banking-and-merging-automated}
+   :receipt {:source {:path "futon3/library/agent/coordination-has-cost.flexiarg" :sha256 "c4cb887acc90b53511b2a56a502b1a2a188d862a0fbbd7e666e746e34644171a"}
+           :reading "'Involving other agents or humans has overhead; factor it into decisions.' The fragment factors the overhead in explicitly: the operator's babysitting (the need) is the priced reason the process must be automated (the product). relations=['contrast'] marks the cost against the machine's progress."
+           :scope-limit "Prices the admin cost; the automation itself is not built here."}}
+  {:pattern "collaboration-coherence/isolation"
+   :from {:fragment [298 424] :intent "propose-adapting-sister-work"}
+   :guard {:needs #{:turn-claude-14-turn-23/codex-standard-problem-solver-exists} :forbids #{}}
+   :produces #{:turn-claude-14-turn-23/standard-problem-solver-adapted}
+   :receipt {:source {:path "futon3/library/collaboration-coherence/isolation.flexiarg" :sha256 "140de9b9c18e5b8c5c133c535a9d5094e6b22f9b00fd987766ad99355f30dd08"}
+           :reading "isolation's coupling move: 'Collaborative work needs deliberate, recurring coupling to its surrounding field … or it … repeats solved problems.' Adapting Codex's sister work (the need) instead of rebuilding it is exactly the coupling (the product); relations=['dependency'] guided the need."
+           :scope-limit "Proposes the adaptation; whether the F22-failure lineage transfers usefully is an open question the turn itself flags."}}
+ ]
+ :not-a-rule []
+}

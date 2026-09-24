@@ -1,0 +1,22 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-14-turn-16"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-14-turn-16.json.analysis.json"
+ :source-sha256 "eb9950a6618be9bcc82e67d830ee54e1acff95b8db0084716008ea670b12f649"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-14-turn-16/file-existence-checked-simply {:statement "File existence is checked with a simple find before any alarm." :cue [131 165]}
+  :turn-claude-14-turn-16/alarm-word-withheld {:statement "The alarming word 'missing' is withheld pending the simple check." :cue [91 130]}
+  :turn-claude-14-turn-16/singularhomologyhomotopy-file-present {:statement "SingularHomologyHomotopy.lean is present at ./apm-simply-connected/ConstructionTargets/." :cue [216 288]}}
+ :rules
+ [
+  {:pattern "war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad"
+   :from {:fragment [91 166] :intent "demand-simple-check-before-alarm"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-14-turn-16/file-existence-checked-simply :turn-claude-14-turn-16/singularhomologyhomotopy-file-present :turn-claude-14-turn-16/alarm-word-withheld}
+   :receipt {:source {:path "futon3/library/war-room/wr-25-good-news-gets-the-same-evidence-discipline-as-bad.flexiarg" :sha256 "f13388b7e4262797d712bdcee78abebbd7f69692dd6e6ca19080f225d5931f85"}
+           :reading "The fragment exercises the bad-news direction of wr-25's discipline (good news gets the SAME evidence discipline as bad): an unanchored alarming claim is not accepted either — run the simple check first, and the scary word waits on the artifact. The find output is the artifact; the withheld alarm is the discipline. NOTE (flagged in NOTES.md): wr-25's conclusion letter is about good news ('Let unanchored good news change ordering immediately but leave numerical posteriors unchanged'), so this rule reads the pattern through its title and the discipline it generalises, not through its conclusion's exact case."
+           :scope-limit "One file's existence; whether other 'missing' claims hold is unchecked."}}
+ ]
+ :not-a-rule []
+}

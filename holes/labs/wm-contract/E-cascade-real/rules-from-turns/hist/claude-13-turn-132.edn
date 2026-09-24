@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-132"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-132.json.analysis.json"
+ :source-sha256 "f99da48478c59ece125a0843375bb20b62e09ae92b1c8054f304da194c9e2295"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-132/wr-patterns-in-library {:statement "War-room patterns already exist in futon3/library." :cue [226 278]}
+  :turn-claude-13-turn-132/paper-poses-action-question {:statement "The paper poses the question of what action the patterns demand." :cue [279 337]}}
+ :rules
+ [
+  {:pattern "structure/what-problem-is-this-actually-solving"
+   :from {:fragment [220 337] :intent "pose-the-action-question"}
+   :guard {:needs #{:turn-claude-13-turn-132/wr-patterns-in-library} :forbids #{}}
+   :produces #{:turn-claude-13-turn-132/paper-poses-action-question}
+   :receipt {:source {:path "futon3/library/structure/what-problem-is-this-actually-solving.flexiarg" :sha256 "16bd846e2db830ec4af813b49e99b836e29b3d511d521a40b2146711fff049a7"}
+           :reading "The same redirect the pattern names — 'Plucked when a mission is approaching a significant commitment of resources or closure on a phase whose framing may have drifted.' Having the patterns on paper is not the point; with them present (the need), the paper must now answer what action they demand."
+           :scope-limit "Poses the question; the prioritisation among WR/WM interfaces is sketched, not decided."}}
+ ]
+ :not-a-rule []
+}

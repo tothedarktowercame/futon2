@@ -1,0 +1,36 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "claude-13-turn-117"
+ :source-record "storage/operator-turns/batches/2026-08-22_2026-09-21_block000/claude-13-turn-117.json.analysis.json"
+ :source-sha256 "0cc39ff72ef95f64420584f6f186b035cdb6a80930210d41d41d59695574dde2"
+ :labeller "kimi-5"
+ :tokens
+ {
+  :turn-claude-13-turn-117/title-states-the-problem {:statement "The paper's working title states the problem the paper solves as a question." :cue [86 115]}
+  :turn-claude-13-turn-117/title-and-abstract-revised {:statement "The title and abstract are revised." :cue [0 45]}
+  :turn-claude-13-turn-117/title-reads-both-registers {:statement "The title reads as a question to both the theoretical reader and the more standard reader." :cue [120 222]}}
+ :rules
+ [
+  {:pattern "writing-coherence/meta-title"
+   :from {:fragment [0 45] :intent "propose-revision"}
+   :guard {:needs #{} :forbids #{:turn-claude-13-turn-117/title-states-the-problem}}
+   :produces #{:turn-claude-13-turn-117/title-and-abstract-revised}
+   :receipt {:source {:path "futon3/library/writing-coherence/meta-title.flexiarg" :sha256 "baa88852abcf8fcd16fd6d001cd9fee76852e7ee4e89bedb6b6d65ae4191fe5f"}
+           :reading "The act proposed is a title revision, which is meta-title's move on a document: 'A title — section, sub-section, working-paper, or document — should answer the question \"what is this saying\" in itself, not invite the reader to ask.' The fragment does not say the current title fails; the forbid marks only that the revision is idle once the title already states the problem."
+           :scope-limit "Does not claim the new title is written, or that the abstract revision is scoped here."}}
+  {:pattern "writing-coherence/meta-title"
+   :from {:fragment [47 116] :intent "propose-title"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-claude-13-turn-117/title-states-the-problem}
+   :receipt {:source {:path "futon3/library/writing-coherence/meta-title.flexiarg" :sha256 "baa88852abcf8fcd16fd6d001cd9fee76852e7ee4e89bedb6b6d65ae4191fe5f"}
+           :reading "The candidate is a question naming the problem, meta-title's remedy supplied verbatim: the title 'should answer the question \"what is this saying\" in itself' — 'What problems are we solving?' does exactly that."
+           :scope-limit "Evaluates the candidate title only; whether the abstract should carry the same question is undecided."}}
+  {:pattern "writing-coherence/meet-the-reader-where-they-are"
+   :from {:fragment [120 222] :intent "justify-by-dual-readership"}
+   :guard {:needs #{:turn-claude-13-turn-117/title-states-the-problem} :forbids #{}}
+   :produces #{:turn-claude-13-turn-117/title-reads-both-registers}
+   :receipt {:source {:path "futon3/library/writing-coherence/meet-the-reader-where-they-are.flexiarg" :sha256 "874038075fce2f031720ff946f48af61b091f27703803ba94a84cefac32ddf10"}
+           :reading "One phrasing serving two registers without rewriting for either is the pattern's remedy: 'When the registers do not meet, the document looks evasive even when it is principled. The remedy is not to rewrite in th[e one register]' but to meet the reader. The need is the propose-title rule's product: the dual-readership is claimed of that candidate title. relations=['rationale'] guided the need; the claim is recorded as a produced state of the title, not as an act on the paper."
+           :scope-limit "Claims only that the title bridges the two registers named; other readers are unexamined."}}
+ ]
+ :not-a-rule []
+}
