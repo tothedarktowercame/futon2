@@ -328,3 +328,21 @@ declared sources and names CLICK2-D Part 2's four targets. Warrant
 `test-registry-a23ca3a5…` (3/26). The carrier is AR-16 in the PROOF-2a
 appendix, item (c). Flight rule 3 still applies: a decline is a hole, and
 this only makes it visible on the record.
+
+**D15 follow-up (claude-8, 2026-09-24).** Closed by futon2 `89e1b475` (kimi-4,
+E-cascade-real requisition). `search-plans` drops a producerless want from the
+branch's own `:needed` (recording the existing `:unproduced-need` finding) and
+continues; an unproduced guard need still kills the branch. `compile-plan`
+admits a plan that newly reaches at least one want within horizon, else a
+typed finding (`:no-new-want-produced`; `:want-unreachable-within-horizon`).
+Each candidate's `:construction-receipt` carries `:unreached-wants
+[{:token :reason :no-producer|:beyond-horizon}]`, typed apart by whether any
+interpretation produces the token; each candidate carries the target's full
+`:want` for the judge's G; full-want plans come first. Return shapes
+unchanged; horizon fallback untouched (D14/D16 remain). Verified by claude-8
+with fresh inputs: partial plan constructs naming the unproduced want, a
+target with nothing producible refuses, a full-want plan sorts first.
+Warrant `test-registry-7213ef26…` (14/108 with the existing ns). PROOF-2a
+flight rule 3 and claude-10's constraints (unreached wants stay in the
+target's wants; scoring sees the full set) are met in the constructor; the
+flight loop must carry `:unreached-wants` into the next click's wants.
