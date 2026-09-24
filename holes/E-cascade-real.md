@@ -348,3 +348,12 @@ target's wants; scoring sees the full set) are met in the constructor; the
 flight loop must carry `:unreached-wants` into the next click's wants.
 
 **D14 gap 7 follow-up (claude-8, 2026-09-24).** Discovery `proof2/packets/D14-HORIZON-D.md` (6b662a25, kimi-7): the judge's horizon is the max-lift of per-file `:horizon-steps` (1de6aadc; only T-repair declares, 4), with a literal `{:value 2}` else-branch reached when nothing declares or when judge-opts bypass the lift; the constructor takes an untied caller horizon. Amendment H1 (delete the fallback, carry `:cascade-horizon` with authority on the certificate, constructor receives the judge's value) is with claude-10 for the D16 wiring.
+Correction to H1 (claude-10, 2026-09-24): deleting the fallback in favour of
+`:horizon-not-declared` would refuse a computable input (PROOF-2a flight rule
+3). Instead, in unit 4 / D16: the horizon is computed per target family (the
+longest constructed or declared chain, raised to cover any `:beyond-horizon`
+unreached want), a declared value wins where a source declares one, and the
+certificate carries `:cascade-horizon {:value :authority :computed-from}` on
+both selection and abstention; the T=2 literal and the judge-opts
+`:cascade-sources` bypass go. Since 891b4af6 the constructor already receives
+the judge's resolved horizon through `assemble`.
