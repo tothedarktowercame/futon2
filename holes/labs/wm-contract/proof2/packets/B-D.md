@@ -302,3 +302,125 @@ the read layer the identity collapse counts once; if any of the three lets
 3. **Name the dedup layer in X₅.** As in §5: X₅'s duplicate clause should
    enumerate the three layers and require the certificate's `:dedup`
    receipt to state which fired.
+
+## Revision 2 — 2026-09-24 (claude-8; specification correction, not implementation)
+
+This append answers `proof2/reviews/B-D-codex-20.md` (15ecfb2d, REJECT). It
+does not rewrite §§1–7 above; where a sentence above is wrong it is named
+here and superseded. Anchors: futon2 `4a2ba931` (B-C landed), mathlib4
+`77fdbda5` (branch darktower). Author ≠ reviewer: codex-20 re-reviews this
+revision; the B-C implementation is reviewed separately.
+
+### R2.1 The commit point and the population (supersedes §2 eligibility and §3)
+
+§3 placed the commit point at the accepted close. That is wrong.
+`learning-ledger/record!` runs inside the token comparison, during evidence
+retention (`full_loop_runner.clj:3149` at 93531d41), before the
+accepted-increment predicate is evaluated. Only the later `b-update` call is
+conditional on the accepted verdict; the append is not. The judge's
+`pattern-theta` (`learning_trial_ledger.clj:262–291`) then reads every
+attributable row for the `:theta-key`, with its own read-side identity
+collapse, and never consults any close's acceptance.
+
+The population the proof must describe is therefore **rows appended at
+comparison**, not rows of accepted closes. Eligibility for the append is
+`:admitted-at-attempt-grain` (record!'s admission); eligibility for the
+update is the accepted verdict; the two are different sets, and the judge
+consumes the first. Instance: machinery-71 attempt-002 closed with
+`[:payload :judgment :accepted-increment :accepted?] = :refused`
+(`:reason :predicate-evaluation-failed`) and its row was appended
+(`:ledger :status :appended`, identity `8e7d1aaf…`); that identity is the
+single trial behind C1's theta 3/4 on `tick-run-record-2026-09-23-1790199409`.
+
+Consequence for the carrier: each consumed row carries its close's
+acceptance as a field (`:close-acceptance {:accepted? :reason :source
+{:key-path …}}`, joined on the occurrence key, never on target/attempt), so a
+reader can partition the consumed population without recount. B-C does this
+(4a2ba931). "Eligible measurement" and "accepted increment" are named
+separately everywhere below.
+
+### R2.2 The carrier, reconciled with GEN-D and CERT-S (supersedes §4)
+
+The carrier is `:b-update` on the close judgment and, by the retained-file
+rule, `retained/b-update.edn`. Its fields, as landed:
+
+- `:prior-concentrations`, `:posterior-concentrations`: O×S arrays of exact
+  rationals, O = {achieved, not}, S = the singleton state; Jeffreys prior
+  `[[1/2] [1/2]]`. Not maps: GEN-E's extract binds arrays.
+- `:trial-identities`: ordered by ledger append, each with `:identity`,
+  `:theta-key`, `:cell`, and `:close-acceptance` as in R2.1.
+- `:trial-vectors`: the same order, one-hot `{:outcome [1 0]|[0 1]
+  :state-belief [1]}`, so `posterior = prior + Σ outer(outcome, state-belief)`
+  is checkable from the carrier alone (this is GEN-D's `:trial-vectors`
+  expectation; §4's identities-only carrier could not supply it).
+- `:normalization`: `{:conc-achieved a :conc-not b :theta a/(a+b) :rule …}`,
+  fixed-state outcome normalization (see R2.3).
+- `:dedup {:fired [...]}`: the layers that actually fired for this emission,
+  from {`:ledger-identity`, `:update-occurrence`, `:read-identity`}; not a
+  constant label.
+- `:version`: `"sha256:"` + hash of the arrays and ordered vectors via
+  `action-identity/canonical`, excluding close-provenance paths. This is a
+  content hash of the carrier value (CERT-S §3 sense), not a raw-record
+  identity; `:value-sha256` is dropped.
+- Typed absence when rows are unavailable; the retained file additionally
+  records `:post-close-update` (the learner's disposition), so a close that
+  did not run the update says so rather than reading as "no eligible outcome".
+
+Physical paths: close `[:payload :judgment :b-update]`;
+`retained/b-update.edn` beside `token-outcome.edn`. The historical
+`(:carrier b-update-result)` block swept in by cabc8e67 is replaced by this
+(4a2ba931 cites it).
+
+### R2.3 Normalization and the rational-to-real bridge (supersedes §1's "no bridge")
+
+`DirichletLearning.lean` (77fdbda5) has positive real concentrations,
+`step` as an outer product, `accumulate`, `accumulate_conc`,
+`accumulate_append`, and one-hot lemmas; it has **no** `rowTheta` or
+concentration-to-theta definition (review §2). The specialization is: O =
+Fin 2, S = Fin 1, prior 1/2 in both cells, n one-hot trials with s successes;
+concentrations `(s+1/2, n−s+1/2)`, sum n+1 > 0; theta := conc achieved 0 /
+Σ_o conc o 0 = (s+1/2)/(n+1). This is normalization **over outcomes at the
+fixed singleton state**, not across states of a row (which is identically 1
+for S = Fin 1). GEN-D's AM-1 must be read this way (register AR-18).
+Lean's array is over ℝ, so the record's exact rationals need the cast and
+the equality proof; no floating tolerance. §1's "no numerical bridge" is
+correct only for the rational arithmetic; the cast is an obligation B-N owns.
+
+### R2.4 Corrected source anchors and qualified claims
+
+- `read-trials` (128–152) maps all parsed rows; it is not an accepted-close
+  filter and performs no identity collapse. §2 implied otherwise.
+- `pattern-theta` reads all attributable rows (275 collapse, 280 ratio); it
+  returns sorted identities, not append order. §3's "read = judge's
+  pre-selection theta-consumption at war_machine.clj:6375–6393" stands; the
+  judge delegates the collapse to `pattern-theta` and does none itself.
+- `cascade_model_manifest.clj:282–290` is theta preservation, not the
+  observation prediction §1 cited there.
+- The Lean line numbers in §1 drift; cite by declaration name at 77fdbda5.
+- Absence claims are bounded to the checked corpus: the 14 `007-closed.edn`
+  files of machinery-70..76 carry no `:B-read`, `:read-at`, `:b-update`, or
+  B `:version` key (they do carry `:event/schema-version 1`), and
+  `1790199409` carries no certificate `:B-read` or `:model-inputs`. These
+  are findings; no witness reads a value from them. From 4a2ba931 onward
+  closes carry `:b-update`; records before it remain pre-schema.
+- "Exactly once" holds per identity grain per layer, as X5 must name (AR-4);
+  it is not a claim about occurrences across grains.
+
+### R2.5 Falsifiers, restated
+
+1. A builder that keeps only rows of accepted closes yields theta 1/2 for
+   `:apparatus/done-is-observed-running`, disagreeing with the record's 3/4;
+   B-C's test `dropping-refused-close-rows-disagrees-with-record-1790199409`
+   pins this from the live extract.
+2. A duplicate identity moving `conc(achieved)`: through each layer the
+   carrier's arrays are unchanged and `:dedup :fired` names the layer;
+   B-C's three-layer test pins each.
+3. A scalar 3/4 with no arrays and no normalization is refused
+   (`carrier-refusal`); a double anywhere in the carrier is refused
+   (`exact-tree?`).
+
+### R2.6 What remains owed
+
+B-N (the Lean specialization and the cast equality, AR-5/AR-18), B-R (the
+`:B-read` join on the certificate; still absent on every record), B-T, and
+the A20 reviews of this revision and of 4a2ba931.
