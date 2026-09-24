@@ -430,3 +430,49 @@ today does not complete the mission.
 | H-value | a value term with timing and degree of attainment | no weighting reproduces the mission's own ranking |
 | H-E | a habit prior from enacted cascades | one enactment record exists |
 | H-A | observation error rates measured per check kind | 22 ledger rows; declared rates were used first |
+| H-witness | (i) complete the witness mission (M-futon-seams) with library-warranted steps: MAP, ARGUE and DOCUMENT exits are unmet in its own text; (ii) someone other than claude-1 checks each step's warrant against the rewrite reading, and the checks are rows in the check ledger | the hypothesis witness above was written by the hand that built its cascades; today it is a partial witness (claude-10 and claude-8, 2026-09-24) |
+
+### Appendix to the Holes table: the PROOF-2 register rows (claude-8, 2026-09-24)
+
+`PROOF-2-THEOREM-draft-2026-09-24.md` carries a register AR-1..AR-28 from the
+2026-09-24 discovery packets, reviews and walkthroughs 01-05 (all
+`:proposed`; Codex and Zai signatures blocked until 09-26 / 09-29). They carry
+into PROOF-2a under "unchanged unless restated", but they are not one kind of
+thing. Sorted here so a reader of the Holes table sees which rows are
+evidence for a hole and which are the per-click layer.
+
+**(a) Rows that name a hole, cited beside it.**
+
+| register row | what it found | hole |
+|---|---|---|
+| AR-24 | on the recorded clicks the scorer consumed no token-level A: precision-family model is `:class-emission`, `:rates` a typed absence, the G decomposition's A term `:consumed-value-not-recorded` | H-A |
+| AR-1 (OBS-D r2) | zero eligible truth/observation pairs on all 14 closes; 64 observations without an independent truth leg | H-A |
+| AR-17, AR-26, B-R instance | the B commit point is the comparison-time append, so a refused close's row fed the consumed theta; the G decomposition has no `:B` term; the ledger moved after the 09-23 judge read it and nothing records which version was read | H-E (and the B commit point, which 2a's clause 5 inherits) |
+| AR-27, AR-28 | the one close with `:accepted? true` is `:grounded-no-change` with grounding witness `:resolved? false` (stringified readback); no close of 14 is classified a known success | the theorem statement: completion, not an accepted-and-ungrounded close |
+| AR-22 | two argmaxes with two tie rules disagree on an exact tie; the enacted candidate was the marginal's pick, the per-policy field recorded the other | Clause C, at candidate grain |
+| AR-23 | the accepted-increment's acceptance conjunct observes the ticket at a floating HEAD, not at the artifact revision the comparison is pinned to | Clause C ("evidence that a check confirms") |
+| CLICK2-D | no admitted target could construct: wants already true, or the declarations route no candidate at the false want; every recorded candidate hand-admitted | H-interp, H-exits |
+
+**(b) Rows that are the per-click layer (P_k / W_k / X_k), subordinate to the
+holes and reviewed after them:** AR-2, AR-3, AR-4 (trial vector and dedup
+layers), AR-5, AR-18 (`rowTheta` axis), AR-6, AR-21 (hex-double decoding),
+AR-7, AR-8 (F ablation retains G; F carrier is machine-double plus symbolic
+prefix), AR-9, AR-10, AR-11, AR-19 (numeric refinement and strict action
+stability), AR-12, AR-13, AR-14, AR-20 (carrier names, one refinement
+authority, hash projections), AR-15 (`:pair-sha256` byte domain), AR-25
+(`:accepted?` field domain). Landed code in this layer, unreviewed: NUM-R
+(12523685), OBS-P (cabc8e67, 54295ca0), B-C (4a2ba931), F-L (mathlib4
+41a3691f); walkthroughs 01-05 describe the machine as the records carry it.
+
+**(c) AR-16, a carrier that a hole needs.** A decline on the abstention path
+is a hole under this theorem, but the tick record carries no typed decline
+(the reason survives only in the cohort's selection event and the scan
+markdown). Keep the carrier: without it the hole cannot be seen from the
+record.
+
+Standing (agreed with claude-10, 2026-09-24): hole work goes first; A20
+reviews of layer (b) wait for quota; clicks stay held until the flight loop
+and the tick wiring of `cascade_problems/assemble`'s `:construction` exist
+(5922c56e adds construction but the live tick in `war_machine.clj` does not
+yet supply it, so a click today repeats click 2's abstention); when to fire
+is a budget call for Joe.
