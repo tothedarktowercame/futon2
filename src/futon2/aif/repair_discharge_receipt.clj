@@ -122,17 +122,37 @@
 
 (defn publication-result! [root repo id]
   ;; Retry publication only, never the authoritative store transition.
-  (loop [tries 2]
-    (let [result (try (publish! root repo id)
-                      (catch Exception e
-                        {:status :publication-refused :repair/id id :repair/discharged? false
-                         :reason (or (:repair-discharge/refusal (ex-data e)) :publication-error)
-                         :error (.getMessage e) :error-data-edn (pr-str (ex-data e))}))]
-      (if (and (= :publication-refused (:status result)) (> tries 1))
-        (recur (dec tries))
-        (assoc result :store/status
-               (try (get-in (repair/discharge-record root "resolutions" id) [:value :repair/status])
-                    (catch Exception _ :unavailable)))))))
+  ;; H-PUBLISH-A2: a :wm/publication-unreachable-v1 marker does NOT suppress
+  ;; publication — derive runs first; when it succeeds the receipt publishes
+  ;; and the marker is reported :superseded (the disposition is reversible).
+  ;; Only when publication still refuses does the marker speak, reporting
+  ;; :publication-unreachable with its class and ground instead of the raw
+  ;; refusal the tick would otherwise re-derive forever.
+  (let [marker (repair/publication-unreachable-marker root id)]
+    (loop [tries 2]
+      (let [result (try (publish! root repo id)
+                        (catch Exception e
+                          (if marker
+                            {:status :publication-unreachable :repair/id id
+                             :repair/discharged? false
+                             :class (:class marker) :ground (:ground marker)
+                             :reason (:reason marker)}
+                            {:status :publication-refused :repair/id id :repair/discharged? false
+                             :reason (or (:repair-discharge/refusal (ex-data e)) :publication-error)
+                             :error (.getMessage e) :error-data-edn (pr-str (ex-data e))})))]
+        (cond (and (= :publication-refused (:status result)) (> tries 1))
+              (recur (dec tries))
+
+              (and marker (= :receipt-committed (:status result)))
+              (assoc result :marker :superseded :marker-class (:class marker)
+                     :store/status
+                     (try (get-in (repair/discharge-record root "resolutions" id) [:value :repair/status])
+                          (catch Exception _ :unavailable)))
+
+              :else
+              (assoc result :store/status
+                     (try (get-in (repair/discharge-record root "resolutions" id) [:value :repair/status])
+                          (catch Exception _ :unavailable))))))))
 
 (defn catch-up!
   "Called at tick start independently of the T queue. Invalid/legacy records

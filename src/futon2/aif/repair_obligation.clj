@@ -1628,6 +1628,63 @@
        (filter #(str/ends-with? % ".edn"))
        (map #(subs % 0 (- (count %) 4))) sort vec))
 
+;; ---------------------------------------------------------------------
+;; H-PUBLISH-A2: the typed terminal disposition for resolutions whose
+;; discharge context can never exist (H-PUBLISH-D, 5cbf0031). A marker
+;; under publication-unreachable/ is evidence OF THE RULING, never a
+;; reconstructed context: it carries no :repair/discharge-context, and the
+;; writer refuses one explicitly.
+
+(def publication-unreachable-classes
+  #{:legacy-a :late-script-b :no-implementation-c})
+
+(def ^:private publication-unreachable-keys
+  #{:schema :repair/id :class :reason :ground
+    :ruled-by :ruled-at :written-by :written-at})
+
+(defn write-publication-unreachable!
+  "Write the :wm/publication-unreachable-v1 marker for ID. Refuses when the
+   id has no resolutions/ record (the marker marks a resolution, not a
+   rumour), when a marker already exists (write-new! semantics — markers
+   are facts, not drafts), when the value's keys are not exactly the marker
+   schema, and when it carries a :repair/discharge-context (the H-PUBLISH-D
+   falsifier: no fabricated provenance, ever)."
+  [root id marker]
+  (when-not (and (string? id) (re-matches #"[A-Za-z0-9][A-Za-z0-9._-]*" id))
+    (throw (ex-info "Invalid discharge store key" {:repair/id id})))
+  (when-not (.isFile (io/file root "resolutions" (str id ".edn")))
+    (throw (ex-info "Publication-unreachable marker names an unknown resolution"
+                    {:repair-discharge/refusal :publication-unreachable-unknown-resolution
+                     :repair/id id})))
+  (when (and (map? marker) (contains? marker :repair/discharge-context))
+    (throw (ex-info "Publication-unreachable marker must not carry a discharge context"
+                    {:repair-discharge/refusal :publication-unreachable-fabricated-context
+                     :repair/id id})))
+  (when-not (and (map? marker)
+                 (= publication-unreachable-keys (set (keys marker)))
+                 (= :wm/publication-unreachable-v1 (:schema marker))
+                 (= id (:repair/id marker))
+                 (contains? publication-unreachable-classes (:class marker))
+                 (every? (fn [k] (let [v (get marker k)]
+                                   (or (keyword? v) (and (string? v) (not (str/blank? v))))))
+                         [:reason :ground :ruled-by :ruled-at :written-by :written-at]))
+    (throw (ex-info "Publication-unreachable marker is not the v1 schema"
+                    {:repair-discharge/refusal :publication-unreachable-invalid
+                     :repair/id id})))
+  (let [text (pr-str marker)
+        _ (when-not (= marker (strict-read text :publication-unreachable))
+            (throw (ex-info "Unreadable publication-unreachable marker"
+                            {:repair/id id})))]
+    (write-new! (io/file root "publication-unreachable" (str id ".edn")) marker)
+    marker))
+
+(defn publication-unreachable-marker
+  "Read the marker for ID, or nil. Read-only."
+  [root id]
+  (let [file (io/file root "publication-unreachable" (str id ".edn"))]
+    (when (.isFile file)
+      (strict-read (slurp file) file))))
+
 (defn record-discharge-operation!
   "Append an intent or outcome through the store. Content-addressed operation
    records are replay-idempotent only when the existing exact value agrees."
