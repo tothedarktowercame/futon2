@@ -157,11 +157,43 @@ text (on instance 6 they are claude-1's, stated in its receipts); W₀'s
 record of each interpretation's author is what makes a conflict
 attributable.
 
+### Clause C — the enactment is the chosen candidate (new; from the worked example)
+
+**W_c.** For the click's selected candidate, the enactment record lists every
+attempt at a pattern step: the pattern, the token it claims to produce, the
+commit, and the check that observes the token. Every pattern of the selected
+candidate has a successful attempt; no attempt names a pattern outside it;
+an attempt claims only a token its pattern produces; each successful attempt
+names its check. Deviations from the candidate's order or scope are recorded
+with a typed `:kind`.
+
+**P_c.** To be built at `[:enactment]` beside the click record
+(worked-example form: futon3c
+`holes/labs/M-futon-seams/exemplar/click-001-enactment.edn`), joined to
+`[:decision :selection-law]` by candidate id.
+
+**X_c.** (a) The first attempt alone (a change at another grain than the one
+chosen); W_c must fail. (b) Successful attempts with their checks removed;
+W_c must fail. (c) An untyped deviation; W_c must fail. On the worked example
+all three are caught (futon3c `401469fd`).
+
+Why: clause 4 joins action → outcome → next belief, where "action" is the
+selected candidate. Without W_c a click can pass every other clause while the
+change actually made is something else, as click-001's first attempt did.
+
 ### Clauses 1–6
 
-Unchanged from PROOF-2, with one reading rule: wherever they use
+Unchanged from PROOF-2, with two reading rules. (1) Wherever they use
 `cascadeKernel precedence`, read it as the kernel of the candidate's
-structure `r`, which is the list kernel when `r` is a chain (AR-34).
+structure `r`, which is the list kernel when `r` is a chain (AR-34). (2)
+Clause 4's prediction and outcome are stated in one unit, the enactment's
+attempts: the Q-link scores the observed number of attempts to completion
+against the predicted distribution of that number, not a probability at a
+chosen kernel horizon. On the worked example, scoring at a 6-step horizon
+gave p(all wants) 0.26 against an outcome with every want met, which read as
+a miscalibration; in attempts the prediction's mean is 8.75 (7 patterns at
+θ 0.8) and the observed 8 has P(≤ 8) 0.50 (futon3c `356573c1`). Kernel
+choice changes elapsed steps, not attempts.
 
 ## Not yet a clause (AR-35)
 
@@ -226,7 +258,10 @@ Gaps in PROOF-2a exposed:
    interpretation author must be recorded.
 10. Clauses 1–6: A observed (a re-runnable redirect test); D, F, Q-link
     recorded as typed absences; B trials not usable because the enactment
-    deviated from the plan.
+    deviated from the plan. [Superseded after the checkpoint: the candidate
+    was enacted as chosen and clauses 1–6 computed on it
+    (`exemplar/click-001-clauses.edn`); see Clause C and the clause 4 reading
+    rule above.]
 11. Phase order: an INSTANTIATE step ran before MAP/DERIVE/ARGUE met their
     exits (`holes/labs/M-futon-seams/lifecycle.edn`).
 
