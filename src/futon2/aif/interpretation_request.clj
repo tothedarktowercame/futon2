@@ -143,7 +143,8 @@
 (defn- captured-request!
   "Pin target and retrieval inputs; return unjudged candidates only.
    Shared by authorized interpretation requests and preselection proposals."
-  [action identity root entry {:keys [revision-fn retrieve-fn retriever-specs library-fn now on-capture]
+  [action identity root entry {:keys [revision-fn retrieve-fn retriever-specs library-fn now on-capture
+                                     citations-fn]
                          :or {revision-fn revision retrieve-fn python-retrieve!
                               retriever-specs retrievers library-fn library-paths
                               on-capture (fn [_]) now #(str (Instant/now))}}]
@@ -156,7 +157,14 @@
          _ (on-capture (:source target-pin))
          pinned-at (now)
          kind (if (= :advance-ticket (:type action)) :ticket :mission)
-         tension (tension-selection kind (get-in target-pin [:source :id]) (String. ^bytes (:bytes target-pin) "UTF-8"))
+         ;; CITATIONS-FN (source-id text -> citations) replaces the tension
+         ;; rule when the request is for one want: the query is then the
+         ;; criterion that want was read from (futon2.aif.want-interpretation).
+         tension (let [src (get-in target-pin [:source :id])
+                       text (String. ^bytes (:bytes target-pin) "UTF-8")]
+                   (if citations-fn
+                     {:tension-rule :want-criterion :citations (vec (citations-fn src text))}
+                     (tension-selection kind src text)))
          citations (:citations tension)
          _ (need! (seq citations) :interpretation/no-citable-tension
                   {:identity identity :action action :sources [(:source target-pin)]})
@@ -273,3 +281,11 @@
            (throw (ex-info (.getMessage e)
                            (cond-> data (:request data) (update :request proposal-shape))
                            e))))))))
+
+(defn prepare-want-proposal!
+  "Preselection retrieval for ONE want of TARGET: the same pinned retrieval
+  as prepare-proposal!, with the query taken from CITATIONS-FN (source-id
+  text -> [{:source :lines [a b] :quote}]) instead of the mission's tension
+  sections. Unjudged candidates only; nothing is interpreted here."
+  [target kind root citations-fn options]
+  (prepare-proposal! target kind root (assoc options :citations-fn citations-fn)))
