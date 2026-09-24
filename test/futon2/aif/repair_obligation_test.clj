@@ -99,6 +99,98 @@
               (str label))
           (is (not (.exists (io/file root "dismissals" "finding-gnc.edn")))))))))
 
+(deftest dismiss-repaired-elsewhere-proof-controls
+  (let [repo (temp-root)
+        git (fn [& args]
+              (let [r (apply shell/sh "git" "-C" repo args)]
+                (when-not (zero? (:exit r)) (throw (ex-info "fixture git failed" r)))
+                (str/trim (:out r))))]
+    (git "init") (git "config" "user.email" "fixture@example.invalid")
+    (git "config" "user.name" "fixture")
+    ;; The fixing commit: its content carries the diagnosis anchor.
+    (spit (io/file repo "schedule.clj")
+          "(ns schedule)\n;; resolves :incommensurable-family by adopting the family schedule\n")
+    (git "add" "schedule.clj")
+    (git "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T21:43:00Z" "-m" "adopt the family schedule")
+    ;; An unrelated commit that does not speak to the diagnosis.
+    (spit (io/file repo "unrelated.txt") "nothing about schedules\n")
+    (git "add" "unrelated.txt")
+    (git "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T21:45:00Z" "-m" "unrelated")
+    ;; A side-branch commit that never landed.
+    (git "checkout" "-b" "side")
+    (spit (io/file repo "side.clj") ";; :incommensurable-family\n")
+    (git "add" "side.clj")
+    (git "-c" "commit.gpgsign=false" "commit" "--date=2026-09-20T21:46:00Z" "-m" "side fix")
+    (git "checkout" "master")
+    (let [fix-sha (git "rev-parse" "HEAD~1")
+          unrelated-sha (git "rev-parse" "HEAD")
+          side-sha (git "rev-parse" "side")
+          finding {:repair/id "finding-re" :repair/schema-version 3
+                   :repair/class :machine-failure :repair/status :open
+                   :attempt-id "attempt-002"
+                   :failure-kind :untyped-failure :failure-stage :selection
+                   :failure-outcome :incomplete
+                   :opened-at "2026-09-20T20:52:19Z"
+                   :failure-error "incompatible preference schedules"
+                   :failure-data {:kind :incommensurable-family}
+                   :machine-repo repo
+                   :discharge-contract {:artifact-shape :code-commit :requires [:grounded-repair]}}
+          disposition (fn [c] {:authority "Joe 2026-09-24 emacs-repl" :reason :repaired-elsewhere
+                               :actor "kimi-6" :commit c})]
+      (testing "the repaired condition dismisses, with evidence"
+        (let [root (temp-root)]
+          (write-record! root "findings" finding)
+          (let [record (repair/dismiss-repaired-elsewhere! root "finding-re" (disposition fix-sha))]
+            (is (= :dismissed-repaired-elsewhere (:repair/status record)))
+            (is (= :repaired-elsewhere (:dismissal/kind record)))
+            (is (= fix-sha (get-in record [:evidence :commit])))
+            (is (= "incommensurable-family" (get-in record [:evidence :diagnosis-anchor]))))
+          (is (= :already-dismissed
+                 (dismissal-refusal
+                  #(repair/dismiss-repaired-elsewhere! root "finding-re" (disposition fix-sha)))))))
+      (testing "a commit that does not speak to the diagnosis refuses"
+        (let [root (temp-root)]
+          (write-record! root "findings" finding)
+          (is (= :repair-not-evidenced
+                 (dismissal-refusal
+                  #(repair/dismiss-repaired-elsewhere! root "finding-re" (disposition unrelated-sha)))))
+          (is (not (.exists (io/file root "dismissals" "finding-re.edn"))))))
+      (testing "a finding with an implementation record refuses (route already engaged)"
+        (let [root (temp-root)]
+          (write-record! root "findings" finding)
+          (write-record! root "implementations"
+                         {:repair/id "finding-re" :repair/status :awaiting-validation
+                          :implementation-attempt "other"})
+          (is (= :finding-not-open
+                 (dismissal-refusal
+                  #(repair/dismiss-repaired-elsewhere! root "finding-re" (disposition fix-sha)))))
+          (is (not (.exists (io/file root "dismissals" "finding-re.edn"))))))
+      (testing "a commit that predates the finding refuses"
+        (let [root (temp-root)]
+          (write-record! root "findings" (assoc finding :opened-at "2026-09-21T00:00:00Z"))
+          (is (= :commit-predates-finding
+                 (dismissal-refusal
+                  #(repair/dismiss-repaired-elsewhere! root "finding-re" (disposition fix-sha)))))))
+      (testing "a commit that never landed refuses"
+        (let [root (temp-root)]
+          (write-record! root "findings" finding)
+          (is (= :commit-not-ancestor
+                 (dismissal-refusal
+                  #(repair/dismiss-repaired-elsewhere! root "finding-re" (disposition side-sha)))))))
+      (testing "not a commit at all refuses"
+        (let [root (temp-root)]
+          (write-record! root "findings" finding)
+          (is (= :commit-invalid
+                 (dismissal-refusal
+                  #(repair/dismiss-repaired-elsewhere! root "finding-re" (disposition "deadbeef"))))))))))
+
+(deftest public-dismissal-arglists-are-seam-free
+  ;; d7c8f8b1: a public opts map lets a caller supply the proof. Pin the
+  ;; public shape of every dismissal route so the seam cannot regrow.
+  (doseq [v [#'repair/dismiss-grounding-readback-degraded!
+             #'repair/dismiss-repaired-elsewhere!]]
+    (is (= #{2 3} (into #{} (map count) (:arglists (meta v)))))))
+
 (deftest dismiss-superseded-attempt-retained-proof-controls
   (doseq [[label finding-extra record expected]
           [[:later {} {:implementation-attempt "other-attempt"

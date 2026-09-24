@@ -1473,6 +1473,115 @@
                    (write-new! (io/file root "dismissals" (str finding-id ".edn")) record)
                    record))))))))))
 
+(defn- finding-diagnosis-anchors
+  "Mechanical anchors extracted from a finding's OWN retained bytes, tying
+   the diagnosis to code: every .clj path the finding names, every
+   namespaced-keyword token (6+ chars after the slash) in its
+   :failure-error/:failure-data text, and its [:failure-data :kind]
+   keyword. The caller supplies none of this."
+  [finding]
+  (let [text (pr-str finding)
+        clj-paths (map first (re-seq #"([\w./-]+\.clj)\b" text))
+        kw-tokens (map first (re-seq #"(:[\w.$!?*+-]+/[\w.$!?*+-]{6,})" text))
+        kind (some-> (get-in finding [:failure-data :kind]) name)]
+    (vec (distinct (concat clj-paths kw-tokens (when kind [kind]))))))
+
+(defn- git-out [repo & args]
+  (let [{:keys [exit out]} (apply git-command repo args)]
+    (when (zero? exit) (str/trim out))))
+
+(declare dismiss-repaired-elsewhere-impl!)
+
+(defn dismiss-repaired-elsewhere!
+  "Dismiss a machine-failure whose CONDITION was repaired elsewhere: the fix
+   landed in the machine repo outside the discharge path, so no
+   implementations/ record ever engaged and none can now.
+
+   The proof is found, never supplied. The disposition names only the
+   commit (an identifier, like the finding id); the route then verifies,
+   against the finding's retained bytes and the repository itself:
+   1. the commit exists in the finding's :machine-repo and is an ancestor
+      of HEAD (a fix that landed, not a branch tip somebody claims);
+   2. the finding PREDATES the commit (the condition existed to be fixed);
+   3. at least one anchor extracted from the finding's own diagnosis -- a
+      .clj path it names, a namespaced-keyword token in its error/data, or
+      its [:failure-data :kind] -- appears verbatim in the commit's
+      message or diff (the commit actually speaks to this condition);
+   4. no implementations/, verifications/ or discharge-operations/ record
+      names the finding (one would mean it has a route already).
+
+   A commit that does not speak to the diagnosis refuses
+   :repair-not-evidenced; a finding with a discharge record refuses
+   :discharge-already-engaged. This dismissal says the finding's condition
+   is gone and the ledger could never have seen it; it does not say the
+   discharge path ran."
+  ([finding-id disposition]
+   (dismiss-repaired-elsewhere-impl! default-root finding-id disposition))
+  ([root finding-id disposition]
+   (dismiss-repaired-elsewhere-impl! root finding-id disposition)))
+
+(defn- dismiss-repaired-elsewhere-impl!
+  [root finding-id {:keys [authority reason actor commit] :as disposition}]
+  (when-not (and (string? finding-id)
+                 (re-matches #"[A-Za-z0-9._-]+" finding-id))
+    (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+  (when-not (and (= #{:authority :reason :actor :commit} (set (keys disposition)))
+                 (nonblank? authority) (keyword? reason) (nonblank? actor)
+                 (nonblank? commit))
+    (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+  (when (get (indexed-records root "dismissals") finding-id)
+    (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+  (when (get (indexed-records root "resolutions") finding-id)
+    (dismissal-refuse! :already-resolved {:repair/id finding-id}))
+  (let [finding (get (indexed-records root "findings") finding-id)]
+    (when-not finding
+      (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+    (when (or (not= :open (:repair/status finding))
+              (get (indexed-records root "implementations") finding-id)
+              (get (verified-admissions root) finding-id))
+      (dismissal-refuse! :finding-not-open {:repair/id finding-id}))
+    (let [repo (:machine-repo finding)
+          _ (when-not (and (nonblank? repo) (.isDirectory (io/file repo)))
+              (dismissal-refuse! :machine-repo-unavailable {:repair/id finding-id}))
+          sha (git-out repo "rev-parse" "--verify" (str commit "^{commit}"))
+          _ (when-not sha
+              (dismissal-refuse! :commit-invalid {:repair/id finding-id :commit commit}))
+          _ (when-not (git-out repo "merge-base" "--is-ancestor" sha "HEAD")
+              (dismissal-refuse! :commit-not-ancestor {:repair/id finding-id :commit sha}))
+          authored (git-out repo "show" "-s" "--format=%aI" sha)
+          opened (try (Instant/parse (:opened-at finding)) (catch Exception _ nil))
+          authored-at (try (Instant/parse authored) (catch Exception _ nil))
+          _ (when-not (and opened authored-at (.isBefore ^Instant opened authored-at))
+              (dismissal-refuse! :commit-predates-finding
+                                 {:repair/id finding-id :commit sha}))
+          anchors (finding-diagnosis-anchors finding)
+          _ (when (empty? anchors)
+              (dismissal-refuse! :diagnosis-anchor-absent {:repair/id finding-id}))
+          commit-text (str (git-out repo "log" "-1" "--format=%B" sha) "\n"
+                           (git-out repo "show" "--format=" sha))
+          anchor (some #(when (str/includes? commit-text %) %) anchors)
+          _ (when-not anchor
+              (dismissal-refuse! :repair-not-evidenced
+                                 {:repair/id finding-id :commit sha :anchors anchors}))
+          discharge-engaged (some (fn [f]
+                                    (let [v (edn/read-string (slurp f))]
+                                      (= finding-id (get-in v [:value :result :repair/id]))))
+                                  (->> (.listFiles (io/file root "discharge-operations"))
+                                       (filter #(.endsWith (.getName ^java.io.File %) ".edn"))))
+          _ (when discharge-engaged
+              (dismissal-refuse! :discharge-already-engaged {:repair/id finding-id}))
+          record {:repair/id finding-id :repair/schema-version 1
+                  :repair/status :dismissed-repaired-elsewhere
+                  :dismissal/kind :repaired-elsewhere
+                  :failed-attempt (:attempt-id finding)
+                  :evidence {:machine-repo repo :commit sha
+                             :commit-authored-at authored
+                             :diagnosis-anchor anchor}
+                  :authority authority :reason reason :actor actor
+                  :dismissed-at (str (Instant/now))}]
+      (write-new! (io/file root "dismissals" (str finding-id ".edn")) record)
+      record)))
+
 (defn discharge-record
   "Read one immutable record, retaining its exact UTF-8 bytes for a derived
    discharge receipt. No pending queue membership is required."
