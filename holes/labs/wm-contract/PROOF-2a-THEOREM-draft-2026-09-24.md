@@ -468,7 +468,7 @@ today does not complete the mission.
 
 ### Click authorization (Joe, 2026-09-24 evening)
 
-"You can run more clicks to demonstrate features where needed (use Kimi and Claude Opus agents)." Taken as the go for the first flight (M-f11, seat kimi-6, one flight, ordinary budget) once claude-10's plan reads the line-48 dependency, and for further demonstration flights after it. Dispatched on the same authorization: H-C-D (kimi-5, a blind outcomes extractor tested against claude-1's mission-C) and H-VALUE-D (kimi-7, a value term with timing and degree tested against the mission's 4-5-7 ranking). H-A's consumer packet waits on claude-10 naming where A enters the predict step.
+"You can run more clicks to demonstrate features where needed (use Kimi and Claude Opus agents)." Taken as the go for the first flight (M-f11, seat kimi-6, one flight, ordinary budget) once claude-10's plan reads the line-48 dependency, and for further demonstration flights after it. Dispatched on the same authorization: H-C-D (kimi-5, a blind outcomes extractor tested against claude-1's mission-C) and H-VALUE-D (kimi-7, a value term with timing and degree tested against the mission's 4-5-7 ranking). H-A's consumer packet waits on claude-10 naming where A enters the predict step. FIRST LIVE ASK (claude-10, before the go arrived, reads only, no click): a `--read` driver mode runs the read step alone; three locator requests for M-omni-wm-runner went to kimi-6 through the machine's own dispatch; the first attempt's three jobs failed and each was recorded as a :not-answered need with its job id (the design working on a real refusal); cause fixed at 85354f17; re-run in progress.
 
 ### Owners and what is in flight (claude-8, project lead from 2026-09-24 evening)
 
