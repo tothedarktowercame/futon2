@@ -261,3 +261,34 @@ Also recorded from claude-5: ⟨1⟩7's blocker was never an accepted
 increment; the route attestation was `:none-declared` because nothing in the
 click path supplied declarations, and kimi-4 has now built both halves.
 Under PROOF-2 that is a carrier, not a step.
+
+## Amendment register from the discovery packets (2026-09-24, claude-8)
+
+Each row is a proposed amendment as its packet states it. Status
+`:proposed` means no A20 review has yet accepted it; the reviews were
+dispatched 2026-09-24 05:01 (codex-14/zai-1 SPEC-N, codex-10 SPEC-F,
+codex-20 B-D, codex-21 GEN-D, codex-23 OBS-D). Nothing in this register
+changes a clause above until its status reads `:reviewed`.
+
+| # | Packet (sha) | Touches | Amendment | Status |
+|---|---|---|---|---|
+| AR-1 | OBS-D (3277e9e6) | W1 / clause 1 | Define "eligible pair": one token of one target with both legs boolean, occurrence-bound, truth leg from an independent checker; typed-absent legs never enter a denominator; `:accepted-increment` verdicts barred from both legs. Today's population has zero eligible pairs, so clause 1 has no measurable A yet. | :proposed |
+| AR-2 | B-D (64b091ce) | W5 / A13 | Define "relevant concentration row" as the normalized achieved-cell of the declaring family's two-cell posterior, keyed by `:theta-key`, not the banked `:family` digest. | :proposed |
+| AR-3 | B-D (64b091ce) | X5 | Define "trial vector" as the singleton-carrier pair (O = {achieved, not}, S = one state per pattern id); the state-belief-alteration clause of X5 is inapplicable by construction and must say so with the reason. | :proposed |
+| AR-4 | B-D (64b091ce) | X5 | Enumerate the three dedup layers (ledger identity, update-occurrence `:already-recorded`, read-side identity collapse); a duplicate bad case must name its layer. | :proposed |
+| AR-5 | GEN-D (c7fe3001) AM-1 | W5 | W5's normalization names no Lean declaration; add `DirichletLearning.rowTheta` (or the equivalent) and bind the judge's consumed theta to it. | :proposed |
+| AR-6 | GEN-D (c7fe3001) AM-2, SPEC-N (634877af) §3 | CERT-S §1, W3/W6 | Give `#wm/double "<hex>"` a Lean meaning: `DecodeExact` by the binary64 sign/exponent/fraction rule, signed zero kept in the raw identity, NaN and infinities refused. SPEC-N §3 supplies the rule GEN-D asked for. | :proposed |
+| AR-7 | SPEC-F (b03017a5) | A12, A17, W3 | The F-ablation arm is an intervention that drops F and retains G, on byte-joined inputs identical to the full arm; not "habit alone" and not a fabricated historical F. | :proposed |
+| AR-8 | SPEC-F (b03017a5), SPEC-N (634877af) §5 | CERT-S §1 | "Exact-rational prefix-sum dual-carrier" cannot denote the mathematical F total. Replace by machine-double total + symbolic prefix expression and inputs + rational bounds; this is a value-form change and needs `:wm/proof2-certificate-v2`, not a v1 reinterpretation. Historical records are not edited. | :proposed |
+| AR-9 | SPEC-N (634877af) §4, §7.1 | W3, W6, W5 selection comparison | Replace each machine-double = real-expression assertion by `RefinesWithin`: a Lean-proved rational interval `l ≤ X ≤ u` with `d−e ≤ l`, `u ≤ d+e` against a preregistered per-term error budget. Literal equality stays for the rational subterms of W0/W1/W2/W4/W5. | :proposed |
+| AR-10 | SPEC-N (634877af) §4.3, §7.3 | W3, W5, W6 | Define strict action stability: for every action b ≠ recorded, upper mass bound of b < lower mass bound of recorded, summed over all policies of each action; overlapping intervals are `:action-stability-unresolved`, an open CHECK under R8, never a tie by name order. Both intervention arms (W3) and both B arms (W5) need it separately. | :proposed |
+| AR-11 | SPEC-N (634877af) §7.4 | W6, A16 | Decoded floating normalization residuals are bounded separately from exact normalization of the ideal carrier; a failed exact equality or a missing consumed input is not repaired by offline reconstruction. | :proposed |
+| AR-12 | GEN-D (c7fe3001), B-D (64b091ce) | Strategy order | B-C lands before GEN-E and B-N before GEN-B, because no close record today carries a `:b-update` key for GEN-E to extract. Naming: the carrier uses B-D's `:trial-identities` (cells + `:theta-key`); GEN-D's `:trial-vectors` placeholder follows it. | :proposed |
+
+Cross-packet check (claude-8, 2026-09-24): SPEC-F and SPEC-N agree on the
+F carrier (AR-8) and on the ablation arm (AR-7). GEN-D's AM-2 is answered by
+SPEC-N §3 (AR-6). B-D and GEN-D differ only in a key name (AR-12). No
+packet appeals to a ruling. Every falsifier is restated as a concrete bad
+case; SPEC-N's log-2 case was checked here by exact fraction arithmetic
+(d < l, P24(l)+R24(l) < 2 < P24(u)−R24(u)) and its posterior-sum example
+(1 + 7/2^55 on record 1790199409) reproduces from the hex doubles.
