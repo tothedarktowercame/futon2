@@ -1016,9 +1016,51 @@ candidates automatically, or that every click is fast.
     insensitivity there would otherwise read as a consumption that never happened.
   - Two assertions stop a vacuous pass: holder's θ alone reproduces the whole shift, and the
     other three recorded families together move nothing.
-  - **The corroboration half is not available without a click.** The third click ran before
+  - ~~**The corroboration half is not available without a click.** The third click ran before
     the identity fix and scored every pattern with `:theta-source :documented-default`, so no
-    recorded run shows the updated parameter being consumed.
+    recorded run shows the updated parameter being consumed.~~
+  - **Corroboration half settled from the record, 2026-09-24, no click spent.** The
+    sentence above was true when it was written at 16:30 on 2026-09-23 (futon2
+    `46b931a2`), when the latest click was machinery-73 attempt-001. Six clicks ran
+    after it, and they show the consumption it says is unavailable.
+    - `:contracts/holder-states-the-claim` — the parameter this step names — is scored
+      `:theta-source :documented-default` at θ = 1 in machinery-73 attempt-001, and
+      `:theta-source :recorded-trials` in every click after it.
+    - The value the DECISION uses advances one trial per click, and the certificate
+      names the one it supersedes. Read at
+      `[:payload :judgment :controller-decision :selection-certificate
+      :token-belief-input]`, whose `:inspection` and `:carry-admission` legs carry the
+      value in force and the value carried forward:
+
+      | click | decision θ (trials) | carried |
+      |---|---|---|
+      | m73 attempt-002 | 1/8 (3) | — |
+      | m74 attempt-001 | 1/10 (4) | 1/8 (3) |
+      | m74 attempt-002 | 1/12 (5) | 1/10 (4) |
+      | m75 attempt-001 | 1/14 (6) | 1/12 (5) |
+      | m76 attempt-002 | 1/16 (7) | — |
+
+    - The distinction matters and was nearly missed: each selection record ALSO carries
+      the next value at `[:payload :judgment :token-outcome-prediction …]`, the
+      prediction made after the decision for the outcome this attempt will produce. A
+      reader who greps the file for `:theta` finds two values per click and cannot say
+      which priced the choice. The decision certificate is the one that did.
+    - The values are the update rule exactly: `pattern-theta` returns
+      `(successes + 1/2)/(trials + 1)` (`learning_trial_ledger.clj:283`), and with
+      successes 0 that is 1/8, 1/10, 1/12, 1/14, 1/16 at n = 3…7.
+    - **Not counted twice**: `pattern-theta` dedupes rows by `:identity`
+      (`vals (into {} (map (juxt :identity identity)) rows)`), `:unattributed-rows` is 0
+      in every receipt, and `:trials-count` advances by exactly one per attempt with
+      distinct row hashes.
+    - **Survives a reload**: the ledger is a file (`data/wm-learning-trials/attempts.edn`).
+      Read in a fresh JVM on 2026-09-24 it returns
+      `{:theta 1/16, :status :recorded-trials, :trials-count 7, :successes 0,
+      :unattributed-rows 0}` — the value machinery-76's decision used, from disk, in a
+      process that had never run a click.
+  - **⟨1⟩8 is therefore discharged.** All four CHECK bullets hold: the parameter updates
+    once per attempt and survives a reload; the frozen-input recompute discriminates
+    (`46b931a2`); the next live selection's certificate shows the updated parameter's
+    identity and value being consumed; and the outcome is not counted twice.
 
 ### ⟨1⟩9. Q.E.D.
 
