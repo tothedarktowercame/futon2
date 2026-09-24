@@ -181,7 +181,12 @@
           (let [trial (-> sources
                           (assoc-in [:interpretations target :patterns id] interp)
                           (assoc-in [:interpretations target :receipts id] (:receipt response))
-                          (update :candidates dissoc target))
+                          (update :candidates dissoc target)
+                          ;; no declared horizon: count the interpretations
+                          ;; with this one, as the tick's resolution does
+                          (as-> t (cond-> t (nil? (:horizon-steps t))
+                                    (assoc :horizon-steps
+                                           (max 1 (count (get-in t [:interpretations target :patterns])))))))
                 {:keys [problems refusals]} (cp/assemble {:targets [target] :sources trial})
                 problem (first problems)
                 using (first (filter #(and (some #{id} (:precedence %))
@@ -255,6 +260,40 @@
           :source-sha256 (some-> (io/resource "futon2/aif/want_interpretation.clj")
                                  slurp (.getBytes "UTF-8") evidence/sha256)}))
 
+;; ---------------------------------------------------------------------------
+;; Part 4 support: the prompt and the reply grammar
+
+(def response-schema :wm/want-interpretation-response-v1)
+
+(defn prompt
+  "What the machine sends the answering seat for an ISSUED request."
+  [issued]
+  (str "The War Machine asks for one interpretation (D11). Request "
+       (:request-id issued) ":\n\n```edn\n" (with-out-str (pp/pprint (dissoc issued :retrieval)))
+       "```\n\nLibrary retrieval candidates (unjudged): "
+       (pr-str (vec (for [run (get-in issued [:retrieval :retrieval :runs])
+                          c (:candidates run)]
+                      (or (:pattern c) (:id c) c))))
+       "\n\nREPLY GRAMMAR: your reply must contain exactly one fenced ```edn block holding "
+       "{:schema " response-schema " :pattern … :guard {:needs #{…} :forbids #{…}} :produces #{…} "
+       ":receipt {:source {:path … :sha256 …} :reading … :scope-limit … :by …}} or "
+       "{:schema " response-schema " :decline {:reason …}}; anything else is unparseable.\n"))
+
+(defn parse-reply
+  "The single response form in reply TEXT: {:response m}, {:decline d}, or
+  {:unparseable-response {:forms n …}} when there is not exactly one fenced
+  EDN form of the response schema. Never a decline by default."
+  [text]
+  (let [blocks (map second (re-seq #"(?s)```(?:edn|clojure)?\s*\n(.*?)```" (str text)))
+        forms (keep (fn [b] (try (let [x (edn/read-string b)]
+                                   (when (and (map? x) (= response-schema (:schema x))) x))
+                                 (catch Exception _ nil)))
+                    blocks)]
+    (if (= 1 (count forms))
+      (let [m (first forms)]
+        (if (:decline m) {:decline (:decline m)} {:response (dissoc m :schema)}))
+      {:unparseable-response {:forms (count forms) :fenced-blocks (count blocks)}})))
+
 (defn publish!
   "Publish a VALIDATED result (validate-response :status :valid) for the
   issued REQUEST (from `issue!`, carrying :request-id) and RESPONSE into
@@ -264,7 +303,7 @@
   passed and the answerer's own receipt. Refuses anything not :valid, and a
   pattern id already published for this target with a different reading
   (republishing the same one is a no-op). Returns the target's record."
-  [store request response validated & [{:keys [now] :or {now #(str (Instant/now))}}]]
+  [store request response validated & [{:keys [now answered-by] :or {now #(str (Instant/now))}}]]
   (when-not (= :valid (:status validated))
     (throw (ex-info "only a validated response is published"
                     {:interpretation/refusal :want/not-validated :status (:status validated)})))
@@ -293,6 +332,7 @@
                                (assoc (:receipt validated)
                                       :kind :machine-requested
                                       :validator @validator
+                                      :answered-by answered-by
                                       :request-id request-id :response-id response-id
                                       :want (:want validated)
                                       :validated {:checks [:canonical-id :library-source-sha :produces-want

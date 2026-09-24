@@ -6025,7 +6025,17 @@
         ;; wants the flight's source located itself (A-exits criteria):
         ;; their locators and observed values join the target's sources
         (update-in [:sources :locators (:target flight)] merge (:locators flight))
-        (update-in [:sources :universes (:target flight)] merge (:universe flight)))
+        (update-in [:sources :universes (:target flight)] merge (:universe flight))
+        ;; a flight target the sources never declared (no hand source, no
+        ;; checkbox) has no context, so beta-for would refuse it
+        ;; :beta-not-declared. It gets the context mission_hole_wants gives
+        ;; every mission-stated target (:WM), or the flight's own :context;
+        ;; a context the sources already give it wins.
+        (update :sources (fn [srcs]
+                           (let [cf (:context-of srcs) t (:target flight)]
+                             (assoc srcs :context-of
+                                    (fn [x] (or (when (ifn? cf) (cf x))
+                                                (when (= x t) (or (:context flight) :WM)))))))))
     input))
 
 (defn constructed-candidate-g

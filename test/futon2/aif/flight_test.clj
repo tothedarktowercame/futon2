@@ -109,3 +109,15 @@
     (is (= [target] (:targets out)))
     (is (= [:a :b :c :d] (get-in out [:sources :wants target])))
     (is (= input (wm/flight-assembly-input nil input)) "no flight: unchanged")))
+
+(deftest a-flight-target-the-sources-never-declared-gets-a-context
+  ;; bad case: M-futon-seams has no hand source and no checkbox, so the
+  ;; tick's :context-of knows nothing of it and assembly refused it
+  ;; :beta-not-declared
+  (let [input {:targets ["M-other"] :sources {:context-of (fn [t] (when (= t "M-other") :OTHER))}}
+        out (wm/flight-assembly-input {:target "M-seams" :wants []} input)
+        cf (get-in out [:sources :context-of])]
+    (is (= :WM (cf "M-seams")))
+    (is (= :OTHER (cf "M-other")) "a context the sources give still wins")
+    (is (= :X ((get-in (wm/flight-assembly-input {:target "M-seams" :wants [] :context :X} input)
+                       [:sources :context-of]) "M-seams")))))

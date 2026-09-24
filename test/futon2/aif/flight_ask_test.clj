@@ -1,0 +1,146 @@
+(ns futon2.aif.flight-ask-test
+  "D11 part 4: the flight asks for the interpretations its wants lack. The
+  real case is the first flight: M-futon-seams at futon3c d05cb755, whose
+  open exits are ARGUE and DOCUMENT; the answering seat is stubbed with
+  kimi-6's readings (futon2 66a1779e), in the reply grammar."
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.pprint :as pp]
+            [clojure.string :as str]
+            [clojure.test :refer [deftest is testing use-fixtures]]
+            [futon2.aif.flight :as flight]
+            [futon2.aif.flight-runner :as fr]
+            [futon2.aif.interpretation-request :as ireq]
+            [futon2.aif.observation-checks :as checks]
+            [futon2.aif.want-interpretation :as wi])
+  (:import [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]))
+
+(def roots (atom []))
+(use-fixtures :each
+  (fn [f]
+    (try (f) (finally
+               (doseq [root @roots file (reverse (file-seq root))] (Files/delete (.toPath file)))
+               (reset! roots [])))))
+
+(defn- temp-dir [prefix]
+  (let [d (.toFile (Files/createTempDirectory prefix (make-array FileAttribute 0)))]
+    (swap! roots conj d) d))
+
+(def mission-file "test/fixtures/mission-criteria/M-futon-seams@futon3c-d05cb755.md")
+(def mission-text (slurp mission-file))
+(def proposals (edn/read-string (slurp "holes/labs/wm-contract/proof2/proposals/M-futon-seams-interpretations.edn")))
+(def argue :exit/hac75428b9c97)
+(def document :exit/h54d16050a9dc)
+(def by-want {document :writing-coherence/meet-the-reader-where-they-are
+              argue :writing-coherence/plain-language-thesis})
+
+(defn- reply-for [id]
+  (str "Here is my reading.\n\n```edn\n"
+       (with-out-str (pp/pprint (merge {:schema wi/response-schema :pattern id
+                                        :receipt (get-in proposals [:interpretation-receipts id])}
+                                       (get-in proposals [:patterns id]))))
+       "```\n"))
+
+(defn- stub-answer [text-fn]
+  (let [n (atom 0)]
+    (fn [issued]
+      {:seat "kimi-6" :job-id (str "job-" (swap! n inc)) :state "done"
+       :text (text-fn (get-in issued [:want :token]))})))
+
+(defn- request-options []
+  (let [d (temp-dir "ask-code") code (io/file d "code.py") index (io/file d "index.json")]
+    (spit code "# retriever fixture") (spit index "[]")
+    {:resolve-fn (fn [_] {:id "M-futon-seams" :path (.getCanonicalPath (io/file mission-file))})
+     :revision-fn (constantly "fixture-revision") :library-fn (constantly [])
+     :retrieve-fn (fn [_] [{:pattern "writing-coherence/plain-language-thesis" :score 1}])
+     :retriever-specs (mapv #(assoc % :implementation (.getCanonicalPath code)
+                                    :index (.getCanonicalPath index)) ireq/retrievers)}))
+
+(def constraint {:want argue :requires document :by "claude-1"})
+
+(defn- seams-flight []
+  (flight/start {:target "M-futon-seams" :chosen-because {:kind :requested}}
+                {:kind :a-exits :repo "futon3c" :path "holes/missions/M-futon-seams.md"
+                 :read-text (fn [& _] mission-text)
+                 :observe #(checks/decl-present? mission-text (:decl %))}
+                {:id "flight-ask"}))
+
+(def tick-sources {:beta-by-context {:WM {:beta 1}}})
+
+(defn- ask [store answer-fn]
+  (let [f (seams-flight)
+        wants (flight/click-wants f tick-sources)]
+    ((fr/ask-fn {:store (.getCanonicalPath store) :answer-fn answer-fn :constraints [constraint]
+                 :request-options (request-options)})
+     f wants tick-sources)))
+
+(deftest parse-reply-grammar
+  (is (= :writing-coherence/x (get-in (wi/parse-reply (str "```edn\n" (pr-str {:schema wi/response-schema :pattern :writing-coherence/x}) "\n```")) [:response :pattern])))
+  (is (= {:reason :none} (:decline (wi/parse-reply (str "```edn\n" (pr-str {:schema wi/response-schema :decline {:reason :none}}) "\n```")))))
+  (testing "not exactly one form of the schema is unparseable, never a decline"
+    (is (:unparseable-response (wi/parse-reply "no fences here")))
+    (is (:unparseable-response (wi/parse-reply (str (reply-for :writing-coherence/plain-language-thesis)
+                                                    (reply-for :writing-coherence/plain-language-thesis)))))
+    (is (:unparseable-response (wi/parse-reply "```edn\n{:schema :something-else}\n```")))
+    (is (:unparseable-response (wi/parse-reply "```edn\n{:schema :wm/want-interpretation-response-v1\n```")))))
+
+(deftest the-first-flight-asks-and-both-exits-become-constructible
+  (let [store (temp-dir "ask-store")
+        r (ask store (stub-answer #(reply-for (by-want %))))
+        published (wi/read-published (.getCanonicalPath store) "M-futon-seams")]
+    (testing "the reader lists ARGUE before DOCUMENT; ARGUE settles by revalidation"
+      (is (= [argue document] (mapv :want (:asked r))))
+      (is (= [:published :published] (mapv :outcome (:asked r))))
+      (is (= :revalidation (:published-on (first (:asked r))))))
+    (is (empty? (:needs r)))
+    (is (= #{:writing-coherence/meet-the-reader-where-they-are :writing-coherence/plain-language-thesis}
+           (set (keys (:patterns published)))))
+    (is (= {:seat "kimi-6" :job-id "job-1"}
+           (get-in published [:receipts :writing-coherence/plain-language-thesis :answered-by])))))
+
+(deftest what-is-not-a-publication-is-a-need
+  (testing "unparseable, with the job id"
+    (let [r (ask (temp-dir "ask-store") (stub-answer (constantly "I think plain-language-thesis fits.")))]
+      (is (= #{:unparseable-response} (set (map :kind (:needs r)))))
+      (is (every? :job-id (:needs r)))))
+  (testing "a job that did not finish is not answered, not declined"
+    (let [r (ask (temp-dir "ask-store") (fn [_] {:seat "kimi-6" :job-id "j" :state "failed" :text nil}))]
+      (is (= #{:not-answered} (set (map :kind (:needs r)))))))
+  (testing "a typed decline"
+    (let [r (ask (temp-dir "ask-store")
+                 (stub-answer (constantly (str "```edn\n" (pr-str {:schema wi/response-schema
+                                                                   :decline {:reason :no-library-pattern}}) "\n```"))))]
+      (is (= #{:declined} (set (map :kind (:needs r)))))))
+  (testing "claude-1's condition: an ARGUE reading that skips DOCUMENT is rejected and stays a need"
+    (let [bad (fn [want] (if (= want argue)
+                           (str/replace (reply-for (by-want want)) (str document) ":exit/h4ef5c183bc55")
+                           (reply-for (by-want want))))
+          r (ask (temp-dir "ask-store") (stub-answer bad))]
+      (is (= [{:want argue :kind :rejected}]
+             (mapv #(select-keys % [:want :kind]) (:needs r)))))))
+
+(deftest agency-answer-fn-bells-then-polls
+  (let [calls (atom [])
+        af (fr/agency-answer-fn {:seat "kimi-6" :opts {:agency-base "http://x"}
+                                 :dispatch! (fn [_ seat caller mission prompt]
+                                              (swap! calls conj [:bell seat caller mission (str/includes? prompt "REPLY GRAMMAR")])
+                                              {:job-id "job-9"})
+                                 :poll! (fn [_ id] (swap! calls conj [:poll id]) {:state "done" :job-id id})
+                                 :job-text (constantly "reply text")})
+        a (af {:target "M-futon-seams" :request-id "request-1" :want {:token argue}})]
+    (is (= [[:bell "kimi-6" "wm-flight" "M-futon-seams" true] [:poll "job-9"]] @calls)
+        "requisition is the mission; the prompt states the grammar")
+    (is (= {:seat "kimi-6" :job-id "job-9" :state "done" :text "reply text"} a))))
+
+(deftest the-loop-asks-before-each-click
+  (let [asks (atom 0)
+        f (flight/run! (seams-flight)
+                       {:ask-fn (fn [_ _ _] (swap! asks inc) {:asked [] :needs [{:kind :declined :want argue}]})
+                        :click-fn (fn [_] {:click-id "c"})
+                        :observe-fn (fn [_ _] {})
+                        :sources-fn (constantly tick-sources)
+                        :max-clicks 3})]
+    (is (= 1 @asks) "the click advanced nothing, so the flight stopped after one")
+    (is (= [{:kind :declined :want argue}] (:needs f)))
+    (is (= 1 (:before-click (first (:asks f)))))))
