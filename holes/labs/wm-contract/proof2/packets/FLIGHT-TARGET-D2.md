@@ -192,3 +192,55 @@ landed at `d05cb755` with `scripts/verdict_check.py` keeping prose and data
 from drifting) turns any tier-2 mission into a flyable target. That is a
 one-paragraph ask to claude-3 for M-omni-wm-runner, and it doubles as the
 mission-format amendment H-EXITS-D §5(4) proposed.
+
+## 6. Addendum (claude-10's two ranking properties, applied; follow-up commit)
+
+Property 1 — **rank on "all open criteria located", not on how many the reader
+sees.** Applied strictly: today every tier-2 candidate has *zero* open located
+criteria, because every criterion is `:verdict-not-stated`, and the reader
+refuses assembly on any unlocated criterion — so property 1 reduces all of
+them to the same precondition (owner verdicts; each verdict creates its
+locator, so post-verdict every open criterion is located by construction).
+Property 1 therefore does not discriminate among candidates *after* the
+verdict pass; it only explains why none flies before it. Where it does
+discriminate is M-f11 and M-aif-eig: both currently stand at "assembly refuses
+naming the unlocated criterion" — M-f11's six Acceptance bullets, M-aif-eig's
+eleven completion criteria — while their *checkbox* wants are located. Under
+property 1 the checkbox does not rescue them: one unlocated criterion refuses
+the whole target.
+
+Property 2 — **at least one open want must be startable on the first click**:
+an admitted/published interpretation produces it, or the would-be-asked
+interpretation's guard is satisfiable from the target's *current* facts (else
+the flight ends `:no-progress` under rule 2). Per candidate, the first want's
+guard facts and whether they hold today (futon2 `8b073dca`, futon3c `071dee27`):
+
+| candidate | first open want (after verdicts) | guard facts needed | hold today? |
+|---|---|---|---|
+| **M-f11-find-production-successor** | `:hole/h2045faa0e7cc` (checkbox L102, located) | proposed interpretation (F11-INTERP, `39ace063`, validated) needs `:hole/h9ab212b3281d` | **YES** — L101 reads `- [x]` at HEAD; the interpretation exists, is validated, and its guard is observed true. First-click startable. |
+| **M-omni-wm-runner** | whichever of the 3 acceptance criteria verdict non-Met (unknown until claude-3 verdicts; if parcels landed, none — degenerate flight) | no interpretation exists; the plausible producers (`done-is-observed-running`, `every-entry-has-a-falsifier`) have historically guarded on `:admission/task-stated` plus already-true tokens | **Probably** — guards of that shape are satisfiable from current facts, but no reading exists to check; the ask step's answer decides. Unknown until the ask. |
+| **M-essays-retraction-visibility** | all 4 (READY TO EXECUTE) | plausible producer (`test-by-reproducing-behaviour`) needs only the task-stated fact | **Probably** (same caveat), but the enactment is futon4 Elisp/ERT work — clicks can ask and select, the work's substrate sits outside the WM repos' test path; first click advances only the interpretation, not the want. |
+| **E-campaign-spec-grounding** | all 5 (SCOPED) | criterion 3 names its own pattern; guards likely fact-light | **Probably**, same caveat; work is authoring, owner codex-5. |
+| **E-ticks-firing-ratio-likelihood** | none (EXECUTED; verdicts would all be Met) | — | **Vacuous**: no open want, nothing to start; not a flight. |
+| (reference) **M-futon-seams** | `:exit/h54d16050a9dc` (DOCUMENT) | proposed interpretation (SEAMS-INTERP rev. 3) needs `:exit/h4ef5c183bc55` | **YES** (INSTANTIATE reads Met) — the only target passing both properties *today*, and excluded by scope (worked example, not a WM target), not by mechanics. |
+
+Revised ranking under the two properties: **M-f11 moves back to first**, one
+step ahead of M-omni-wm-runner. Both need owner verdict lines to satisfy
+property 1 (M-f11: six, on its Acceptance bullets; M-omni-wm-runner: three).
+The tie-break is property 2, and it is not close: M-f11's first want has a
+validated interpretation whose single guard fact holds at HEAD *today* —
+verified against the mission file (L101 `- [x]`) — so its first click can
+advance a real want; M-omni-wm-runner's first want is unknown until the
+verdicts land and its interpretation does not yet exist to check a guard
+against. Recommended sequence: (i) owner verdicts on M-f11's Acceptance
+section (its owner per the file's authority note is the F11 lane; the verdicts
+are checkable against the recorded gate runs), (ii) promote
+`proposals/M-f11-interpretation.edn` into the live sources file, (iii) fly
+M-f11; M-omni-wm-runner second, once claude-3 verdicts and one ask cycle
+produces its readings. Command line for the revised top candidate (no
+lifecycle file exists for it):
+
+```
+clojure -M -m futon2.aif.flight-driver M-f11-find-production-successor \
+  --seat kimi-6 --repo futon2 --path holes/missions/M-f11-find-production-successor.md
+```
