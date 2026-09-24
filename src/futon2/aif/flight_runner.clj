@@ -301,7 +301,7 @@
 
 (defn- read-one
   "Issue a reading request, answer it, parse, validate, publish. The entry."
-  [{:keys [store answer-fn]} issued schema validate publish]
+  [{:keys [store answer-fn]} issued schema validate publish & [publish-questions]]
   (let [issued (wi/issue! store issued)
         answer (answer-fn issued)
         who (answered answer)
@@ -312,8 +312,10 @@
       (:unparseable-response parsed) (assoc base :outcome :unparseable-response :detail (:unparseable-response parsed))
       (:decline parsed) (assoc base :outcome :declined :decline (:decline parsed))
       :else (let [v (validate issued (:response parsed))]
-              (if (= :valid (:status v))
-                (do (publish issued (:response parsed) v who) (assoc base :outcome :published))
+              (case (:status v)
+                :valid (do (publish issued (:response parsed) v who) (assoc base :outcome :published))
+                :questions (do (when publish-questions (publish-questions issued (:response parsed) v who))
+                               (assoc base :outcome :questions :questions (:questions v)))
                 (assoc base :outcome :rejected :reasons (:reasons v)))))))
 
 (defn read-fn
@@ -349,25 +351,30 @@
           (vec (for [t (get-in cw [:source :readings-needed :locators])]
                  (read-one opts (reading/locator-request target mission (assoc (get by-token t) :token t))
                            reading/locator-schema
-                           (fn [issued resp] (reading/validate-locator issued resp (select-keys opts [:observe])))
-                           (fn [issued resp v who] (reading/publish-locator! store issued resp v who)))))
+                           (fn [issued resp] (reading/validate-locator issued resp (assoc (select-keys opts [:observe]) :text text)))
+                           (fn [issued resp v who] (reading/publish-locator! store issued resp v who))
+                           (fn [issued resp v who] (reading/publish-locator-questions! store issued resp v who)))))
           asked (vec (concat (when criteria-entry [criteria-entry]) locator-entries))
           ;; questions the criteria reading raised: sent to the owner the
           ;; mission names (else recorded for the requisition's caller),
           ;; never a refusal
-          questions (when (= :published (:outcome criteria-entry))
-                      (reading/published-questions store target))
+          questions (vec (concat
+                          (when (= :published (:outcome criteria-entry))
+                            (reading/published-questions store target))
+                          (for [e locator-entries :when (= :questions (:outcome e)) q (:questions e)]
+                            (assoc q :want (:want e) :request-id (:request-id e)))))
           owner (reading/mission-owner text)
           addressed (or owner caller "requisition-caller")
           notified (when (and (seq questions) owner notify!)
                      (notify! owner target (reading/question-prompt target owner questions)))]
       {:asked asked
        :needs (vec (concat
-                    (for [a asked :when (not= :published (:outcome a))]
+                    (for [a asked :when (not (#{:published :questions} (:outcome a)))]
                       (merge {:kind (:outcome a) :missing (if (= :criteria (:kind a)) :criteria :locator)}
                              (select-keys a [:want :request-id :seat :job-id])))
                     (for [q questions]
                       {:kind :owner-question :missing :owner-answer :to addressed
                        :notified (boolean notified) :notification (select-keys notified [:job-id])
                        :question (:question q) :span (:span q) :alternatives (:alternatives q)
-                       :request-id (:request-id criteria-entry)})))})))
+                       :want (:want q)
+                       :request-id (or (:request-id q) (:request-id criteria-entry))})))})))

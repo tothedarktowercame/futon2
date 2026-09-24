@@ -47,7 +47,10 @@
    :want {:token (:token criterion)}
    :criterion (select-keys criterion [:kind :line :phase :stated])
    :mission mission
-   :asks "a checkable locator (C3 path exists, C4 declaration head starts a line, C5 registry entry, C6 witness reference) whose observation decides this criterion, or a typed decline"})
+   :asks (str "a checkable locator (C3 path exists, C4 declaration head starts a line, C5 registry entry, C6 witness reference) whose observation decides this criterion. "
+              "The locator may name evidence that does not exist yet: it then reads false now, and producing that evidence is the flight's work. "
+              "Where the criterion is about something being run or passing (tests green, gates run), name the run's evidence (a C5 test-registry ledger entry, or a C6 execution receipt that references the commit), not a file whose mere existence anyone could write. "
+              "Decline only if no checkable observation could ever decide it; ask questions if the criterion is unclear.")})
 
 (defn criteria-request [target mission sections-read]
   {:schema :wm/criteria-request-v1 :kind :criteria :target target
@@ -61,7 +64,8 @@
          (pr-str issued) "\n```\n\nREPLY GRAMMAR: exactly one fenced ```edn block holding "
          (if (= :locator (:kind issued))
            (str "{:schema " schema " :locator {:class :C3|:C4|:C5|:C6 :repo … :sha \"HEAD\" :path … (:decl for C4)} "
-                ":cue {:quote \"words of the criterion this locator decides\"} :reading \"why observing it decides the criterion\" :by \"seat\"}")
+                ":cue {:quote \"words of the criterion this locator decides\"} :reading \"why observing it decides the criterion\" :by \"seat\"}, "
+                "or, if the criterion is genuinely unclear, {:schema " schema " :questions [{:question \"…\" :span {:lines [first last] :quote \"exact mission text\"} :alternatives [\"reading A\" \"reading B\"]}] :by \"seat\"}")
            (str "{:schema " schema " :criteria [{:statement \"…\" :cue {:lines [first last] :quote \"exact text of those lines\"}} …] "
                 ":questions [{:question \"…\" :span {:lines [first last] :quote \"exact text\"} :alternatives [\"reading A\" \"reading B\"]} …] :by \"seat\"} "
                 "(criteria where the text is clear, questions anchored to the spans that are not; either may be empty but not both)"))
@@ -70,13 +74,39 @@
 ;; ---------------------------------------------------------------------------
 ;; Validation
 
+(defn- at-lines [lines {[a b] :lines}]
+  (when (and (integer? a) (integer? b) (<= 1 a b (count lines)))
+    (str/join "\n" (subvec lines (dec a) b))))
+
+(defn question-reasons
+  "Why QS are not good questions about TEXT: each needs a question, a span
+  that is exactly the text at its lines, and at least two readings."
+  [qs text]
+  (let [lines (vec (str/split-lines (str text)))]
+    (vec (for [{:keys [question span alternatives] :as q} qs
+               :let [at (at-lines lines span)]
+               :when (or (str/blank? question) (nil? at) (not= at (:quote span))
+                         (< (count (remove str/blank? alternatives)) 2))]
+           {:reason (cond (nil? span) :question-without-span
+                          (or (nil? at) (not= at (:quote span))) :question-span-does-not-resolve
+                          (str/blank? question) :question-not-stated
+                          :else :question-without-alternatives)
+            :question (select-keys q [:question])}))))
+
 (defn validate-locator
   "A locator reading for ISSUED is valid when its class is checkable, its
   fields are present, the check runs without refusing (OBSERVE, default
   observation-checks/observe), its cue quotes the criterion's own words and
   its reading is stated. Returns {:status :valid :locator … :observed bool}
   or {:status :rejected :reasons […]}."
-  [issued response & [{:keys [observe] :or {observe checks/observe}}]]
+  [issued response & [{:keys [observe text] :or {observe checks/observe}}]]
+  (if (and (seq (:questions response)) (nil? (:locator response)))
+    ;; the criterion is unclear: questions instead of a locator (Joe: good
+    ;; questions logged, not bad work against a vague specification)
+    (let [bad (question-reasons (:questions response) text)]
+      (if (seq bad)
+        {:status :rejected :reasons bad}
+        {:status :questions :questions (mapv #(select-keys % [:question :span :alternatives]) (:questions response))}))
   (let [{:keys [locator cue reading]} response
         cls (:class locator)
         missing (remove #(and (string? (get locator %)) (not (str/blank? (get locator %))))
@@ -94,11 +124,7 @@
             r (observe {token locator})]
         (if-let [refused (get-in r [:refused token])]
           {:status :rejected :reasons [{:reason :check-refused :refusal refused}]}
-          {:status :valid :locator locator :observed (contains? (:observed r) token)})))))
-
-(defn- at-lines [lines {[a b] :lines}]
-  (when (and (integer? a) (integer? b) (<= 1 a b (count lines)))
-    (str/join "\n" (subvec lines (dec a) b))))
+          {:status :valid :locator locator :observed (contains? (:observed r) token)}))))))
 
 (defn validate-criteria
   "A criteria reading is valid when it lists at least one criterion or one
@@ -115,15 +141,7 @@
         target (:target issued)
         cs (:criteria response)
         qs (:questions response)
-        bad-q (vec (for [{:keys [question span alternatives] :as q} qs
-                         :let [at (at-lines lines span)]
-                         :when (or (str/blank? question) (nil? at) (not= at (:quote span))
-                                   (< (count (remove str/blank? alternatives)) 2))]
-                     {:reason (cond (nil? span) :question-without-span
-                                    (or (nil? at) (not= at (:quote span))) :question-span-does-not-resolve
-                                    (str/blank? question) :question-not-stated
-                                    :else :question-without-alternatives)
-                      :question (select-keys q [:question])}))
+        bad-q (question-reasons qs text)
         bad (vec (for [{:keys [statement cue] :as c} cs
                        :let [[a b] (:lines cue)
                              at (when (and (integer? a) (integer? b) (<= 1 a b (count lines)))
@@ -216,3 +234,20 @@
   (str "The War Machine read " target " and could not tell what it asks for at these spans. "
        "Answering by editing the mission text at each span lets a later reading find the answer there.\n\n```edn\n"
        (pr-str {:target target :owner owner :questions questions}) "\n```\n"))
+
+(defn publish-locator-questions!
+  "Record the questions a locator reading raised for ISSUED's criterion."
+  [store issued response validated answered-by]
+  (bound! store issued)
+  (let [target (:target issued) token (get-in issued [:want :token])
+        prior (or (wi/read-published store target)
+                  {:schema :wm/machine-interpretations-v1 :target target :patterns {} :receipts {} :records {}})
+        rec (assoc-in prior [:locator-questions token]
+                      {:questions (:questions validated)
+                       :receipt {:kind :machine-read-questions :request-id (:request-id issued)
+                                 :response-id (wi/content-id :response response) :answered-by answered-by}})]
+    (wi/write-atomic! (io/file store (str target ".edn")) rec)
+    rec))
+
+(defn published-locator-questions [store target]
+  (into {} (for [[t {:keys [questions]}] (get-in (wi/read-published store target) [:locator-questions])] [t questions])))

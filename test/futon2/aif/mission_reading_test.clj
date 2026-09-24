@@ -259,3 +259,30 @@
                         :notify! (fn [& _] (swap! notified inc)) :caller "joe" :observe observe}) f {})]
     (is (zero? @notified))
     (is (= [["joe" false]] (mapv (juxt :to :notified) (filter #(= :owner-question (:kind %)) (:needs r)))))))
+
+(deftest a-locator-reading-may-ask-instead
+  ;; claude-8 (bell 23944): a locator reply may carry questions; that criterion
+  ;; leaves the wants, is named out of view, and its owner is asked
+  (let [s (store)
+        sorry-span {:lines [36 36] :quote "- Discharge or amend the `find` sorry."}
+        reply (fn [issued]
+                (if (str/includes? (get-in issued [:criterion :stated]) "`find` sorry")
+                  (str "```edn\n" (pr-str {:schema mr/locator-schema :by "kimi-6"
+                                           :questions [{:question "Discharge, or amend: which closes it?"
+                                                        :span sorry-span
+                                                        :alternatives ["the sorry is proved" "the statement is amended and the amendment reviewed"]}]})
+                       "\n```")
+                  (locator-reply issued)))
+        f (f11-flight s)
+        read ((fr/read-fn {:store s :answer-fn (answer-with reply) :observe observe}) f {})
+        after (flight/click-wants f {})
+        sorry-token (some (fn [[t c]] (when (str/includes? (:stated c) "`find` sorry") t))
+                          (get-in (flight/click-wants (f11-flight (store)) {}) [:source :criteria-by-token]))]
+    (is (= {:published 5 :questions 1} (frequencies (map :outcome (:asked read)))))
+    (is (= [sorry-token] (mapv :want (filter #(= :owner-question (:kind %)) (:needs read)))))
+    (is (= 5 (count (:wants after))) "the questioned criterion is not a want")
+    (is (some #(and (= sorry-token (:token %)) (= :owner-question (:reason %))) (get-in after [:source :out-of-view])))
+    (testing "bad case: a locator question with no span refuses"
+      (is (= :rejected (:status (mr/validate-locator {:criterion {:stated "x"}}
+                                                     {:questions [{:question "which?" :alternatives ["a" "b"]}]}
+                                                     {:text f11-text})))))))

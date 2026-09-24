@@ -63,9 +63,15 @@
         ;; a criterion with no stated verdict: a published machine locator
         ;; decides it, observed each click like a stated verdict's
         machine (select-keys (reading/published-locators store target) (map :token (:unlocated w)))
+        ;; a criterion whose locator reading raised owner questions waits
+        ;; for its owner: not a want, named out of view
+        questioned (select-keys (reading/published-locator-questions store target)
+                                (remove (set (keys machine)) (map :token (:unlocated w))))
         observe-loc (or observe #(contains? (:observed (checks/observe {::t %})) ::t))
-        still-unlocated (vec (remove #(contains? machine (:token %)) (:unlocated w)))]
-    {:wants (vec (distinct (concat (get-in sources [:wants target]) (:wants w))))
+        still-unlocated (vec (remove #(or (contains? machine (:token %)) (contains? questioned (:token %)))
+                                     (:unlocated w)))]
+    {:wants (vec (distinct (remove (set (keys questioned))
+                                   (concat (get-in sources [:wants target]) (:wants w)))))
      :locators (merge (:locators w) machine)
      :universe (merge (:universe w) (into {} (for [[t l] machine] [t (boolean (observe-loc l))])))
      :source {:kind :a-exits :via "futon2.aif.mission-criteria"
@@ -96,7 +102,9 @@
                                         (:criteria w)))
               ;; phases judged in data only, and findings the owner retains
               ;; as not met: neither is a want, both are named
-              :out-of-view (vec (concat out-of-view (:retained w)))
+              :out-of-view (vec (concat out-of-view (:retained w)
+                                        (for [[t qs] questioned]
+                                          {:token t :reason :owner-question :questions qs})))
               :lifecycle lifecycle}}))
 
 ;; A hand-declared list, for tests. Typed on every record it reaches, so a
