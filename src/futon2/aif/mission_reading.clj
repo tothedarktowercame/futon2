@@ -53,7 +53,7 @@
    :mission mission
    :asks (str "a checkable locator (C3 path exists, C4 declaration head starts a line, C5 registry entry, C6 witness reference) whose observation decides this criterion. "
               "The locator may name evidence that does not exist yet: it then reads false now, and producing that evidence is the flight's work. "
-              "Where the criterion is about something being run or passing (tests green, gates run), name the run's evidence (a C5 test-registry ledger entry, or a C6 execution receipt that references the commit), not a file whose mere existence anyone could write. "
+              "The classes observe exactly: C3 that a path exists at a commit; C4 that a declaration head starts a line of a file; C5 that a contract-registry bundle entry exists with its clojure loci; C6 that an EDN witness {:repo :sha :entry} at a path references an existing commit/entry. None of them observes that tests passed: for a criterion about something being run or passing, say so and decline (naming the evidence a passing-run check would read) rather than propose a file whose mere existence would read true. "
               "Decline only if no checkable observation could ever decide it; ask questions if the criterion is unclear.")})
 
 (defn criteria-request [target mission sections-read]
@@ -114,6 +114,12 @@
                           :else :question-without-alternatives)
             :question (select-keys q [:question])}))))
 
+(defn- words
+  "Text compared as words: whitespace runs and markdown code backticks do
+  not count, so a cue quoting a criterion across its line breaks matches."
+  [s]
+  (-> (str s) (str/replace "`" "") (str/replace #"\s+" " ") str/trim))
+
 (defn validate-locator
   "A locator reading for ISSUED is valid when its class is checkable, its
   fields are present, the check runs without refusing (OBSERVE, default
@@ -136,7 +142,7 @@
         static (cond-> []
                  (not (checkable cls)) (conj {:reason :class-not-checkable :class cls})
                  (and (checkable cls) (seq missing)) (conj {:reason :locator-fields-missing :missing (vec missing)})
-                 (or (str/blank? (:quote cue)) (not (str/includes? stated (:quote cue))))
+                 (or (str/blank? (:quote cue)) (not (str/includes? (words stated) (words (:quote cue)))))
                  (conj {:reason :cue-not-in-criterion :quote (:quote cue)})
                  (str/blank? reading) (conj {:reason :reading-not-stated}))]
     (if (seq static)

@@ -337,3 +337,14 @@
     (is (= [{:want checkbox :requires acceptance-box :by :machine-reading :line 48}]
            (mapv #(select-keys % [:want :requires :by :line]) (get-in after [:source :constraints :requires]))))
     (is (false? (get-in after [:source :readings-needed :constraints?])) "read once for this text")))
+
+(deftest a-cue-may-quote-across-line-breaks-and-backticks
+  ;; kimi-6's M-omni-wm-runner locators (jobs 23974/23976/23977) quoted the
+  ;; criteria with line breaks collapsed and backticks dropped
+  (let [issued {:kind :locator :want {:token :exit/hx}
+                :criterion {:stated "- Gates on both: clj-kondo, check-parens, `clojure -X:test` for the\n  touched namespaces."}}
+        good {:locator {:class :C4 :repo "futon2" :sha "HEAD" :path "p" :decl "OBSERVED x"}
+              :cue {:quote "Gates on both: clj-kondo, check-parens, clojure -X:test for the touched namespaces"}
+              :reading "r"}]
+    (is (= :valid (:status (mr/validate-locator issued good {:observe observe}))))
+    (is (= :rejected (:status (mr/validate-locator issued (assoc-in good [:cue :quote] "Gates on neither") {:observe observe}))))))
