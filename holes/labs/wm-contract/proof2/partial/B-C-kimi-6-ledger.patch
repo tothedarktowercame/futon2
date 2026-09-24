@@ -1,0 +1,102 @@
+diff --git a/src/futon2/aif/learning_trial_ledger.clj b/src/futon2/aif/learning_trial_ledger.clj
+index a4f30b16..06316e02 100644
+--- a/src/futon2/aif/learning_trial_ledger.clj
++++ b/src/futon2/aif/learning_trial_ledger.clj
+@@ -151,6 +151,81 @@
+                     :row row})
+                  (records (String. bytes "UTF-8")))))))))
+ 
++;; ---------------------------------------------------------------------------
++;; B-C (strategy row 34): the concentration carrier for the update that runs.
++;; Spec: holes/labs/wm-contract/proof2/packets/B-D.md §4.
++;; ---------------------------------------------------------------------------
++
++(defn concentration-carrier
++  "The B-C carrier for one pattern FAMILY, built PURELY from the trial rows
++   the update consumed (read-trials output, ledger append order) -- never a
++   recount against different rows. Outcome carrier {achieved, not},
++   Jeffreys prior (1/2,1/2), singleton state per family (B-D §1). Exact
++   rationals only; no doubles anywhere in the carrier.
++
++   ROWS are collapsed by ledger :identity, preserving append order (the
++   read-side dedup layer, B-D §2). DEDUP names the layer that fired for
++   this emission: :none, {:layer :update-occurrence}, or a record! held-row
++   reason map; the carrier never dedups silently past the read collapse --
++   DirichletLearning.accumulate is not a deduplicator, and the recorded
++   boundary is what X5 checks."
++  [family rows dedup]
++  (let [ordered (reduce (fn [acc r]
++                          (if (some #(= (:identity r) (:identity %)) acc)
++                            acc
++                            (conj acc r)))
++                        [] rows)
++        cells (mapv (fn [r] {:identity (:identity r)
++                             :theta-key (:theta-key r)
++                             :cell (if (true? (:observed r)) :achieved :not)})
++                    ordered)
++        successes (count (filter #(= :achieved (:cell %)) cells))
++        n (count cells)
++        prior {:achieved 1/2 :not 1/2}
++        posterior {:achieved (+ 1/2 successes) :not (+ 1/2 (- n successes))}
++        a (:achieved posterior)
++        b (:not posterior)
++        version (let [d (java.security.MessageDigest/getInstance "SHA-256")]
++                  (.update d (.getBytes (pr-str {:family family
++                                                 :posterior posterior
++                                                 :trial-identities cells})
++                                        "UTF-8"))
++                  (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest d))))]
++    {:schema :wm/b-update-carrier-v1
++     :family family
++     :prior prior
++     :posterior posterior
++     :trial-identities cells
++     :dedup dedup
++     :version version
++     :normalization {:conc-achieved a :conc-not b :theta (/ a (+ a b))}}))
++
++(defn carrier-refusal
++  "The X5 checks the carrier exists to support, as data: the first refusal
++   keyword that applies, or nil. A scalar theta with no concentration array
++   and normalization fails even when its value is 3/4 (X5); a token-level
++   belief is refused -- no token posterior exists in this learner and none
++   may be reconstructed (B-D §2); a non-exact number anywhere fails the
++   exact-rational rule (CERT-S §1 value forms)."
++  [carrier]
++  (cond
++    (not (map? carrier)) :carrier-not-a-map
++    (or (nil? (:posterior carrier))
++        (nil? (:normalization carrier))) :scalar-without-concentrations
++    (some #(contains? % :token-belief) (:trial-identities carrier))
++    :token-posterior-not-a-trial
++    (let [bad (atom nil)]
++      (letfn [(walk [v]
++                (cond
++                  (or (double? v) (float? v)) (reset! bad v)
++                  (map? v) (doseq [[k x] v] (walk k) (walk x))
++                  (coll? v) (doseq [x v] (walk x))
++                  :else nil))]
++        (walk carrier))
++      @bad)
++    :inexact-number
++    :else nil))
++
+ (defn b-update
+   "The B update, applied ONLY after a close the accepted-increment predicate
+    accepts (the caller passes the predicate's verdict; this function refuses
+@@ -219,6 +294,15 @@
+      :occurrence-identity occurrence-identity
+      :occurrence occurrence
+      :theta theta
++     ;; B-C: the concentration carrier over the rows this update actually
++     ;; consumed (mine, identity-collapsed, ledger append order) -- the same
++     ;; rows the judge's pattern-theta read consumes, so :normalization
++     ;; :theta equals the judge's read for this family. The dedup layer
++     ;; this update hit is named, never silent.
++     :carrier (concentration-carrier family mine
++                                     (if already
++                                       {:layer :update-occurrence :status :already-recorded}
++                                       {:layer :none}))
+      :rule "theta_post = (successes' + 1/2) / (trials' + 1): Laplace (beta 1/2,1/2) over the family's whole-attempt outcomes, counting this occurrence once (trials'/successes' include it if and only if it is not already recorded)"
+      :trials-read trials-n
+      ;; persistence: the value survives being read back because it is
