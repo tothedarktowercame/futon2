@@ -270,6 +270,8 @@ dispatched 2026-09-24 05:01 (codex-14/zai-1 SPEC-N, codex-10 SPEC-F,
 codex-20 B-D, codex-21 GEN-D, codex-23 OBS-D). Nothing in this register
 changes a clause above until its status reads `:reviewed`.
 
+Walkthroughs landed: 01 cascades (2db7b5ff, aceb8f26, corrected 76083b6d), 02 selection law (e9e7c405, verified against the three records bitwise). Their findings enter this register as AR-16 (from CLICK2-D) and AR-22.
+
 Standing note (claude-8, 2026-09-24 05:20): both Zai seats returned HTTP 429
 "Weekly/Monthly Limit Exhausted", reset 2026-09-29 10:04:33, while reviewing
 SPEC-N (zai-1) and F-L (zai-2); neither review was written. Kimi's 5-hour
@@ -309,6 +311,7 @@ under A20's rule that Claude does not review Claude.
 | AR-20 | SPEC-N review (codex-14 15b8a15e) §amendment 2 | AR-13, CERT-S v2 | The v2 refinement entry grammar: `SC :model-inputs <id> :F` is a container, not the scalar; name its `:total` value path and the symbolic expression and input paths separately; every alias carries candidate id and payload hash; an action marginal records all contributing candidate joins; hashes recomputed per CERT-S §3 with value and proof metadata separated, and no entry hashes itself. | :proposed |
 | AR-21 | SPEC-N review (codex-14 15b8a15e) §amendment 3 | AR-6, GEN-D AM-2 | The machine value in Lean is the cast of `DecodeExact` of the recorded encoding, the encoding retained for identity; the ideal F expression gets a separate name; the refinement relation is proved between them. An unspecified symbolic real is not a decoder. | :proposed |
 | F-L | SPEC-F §2 (b03017a5); mathlib4 41a3691f (codex-13, branch darktower) | W3 relation | `Proof2/PrefixFreeEnergy.lean` exists: `prefixVFE` as the finite sum of per-step VFE terms, the prefix lower bound, equality iff every step is the exact update, and a two-step negative control with exact gap `Real.log 2`. No hypotheses beyond the per-step normalization and positivity ones. claude-8 rebuilt it 2026-09-24: build success, twelve axiom audits standard. This is the relation only; no witness on any record. | :built, unreviewed (codex-10 and zai-2 review jobs died on quota; A20 waits for 09-26 / 09-29) |
+| AR-22 | Walkthrough 02 §6 (e9e7c405), record 2026-09-22-1790053967 | W6 (final posterior and action), AR-10 | The record carries two argmaxes with two tie rules that disagree on an exact tie: `bayes-choice` (cascade_selection.clj:157-160) orders by `(str head-map)` and chose C3, which was enacted (`:selection-event :policy-key`); the per-policy argmax (policy.clj:437-440) orders by `pr-str` of the candidate map and recorded C2. W6 must name which field is the machine's action on a tie, and the tie order must be defined on a stable key (the pattern id), not on the printed form of a map, whose key order changes between array-map and hash-map sizes (on 1790199409 the head map printed `:theta-source` first). | :proposed |
 
 Cross-packet check (claude-8, 2026-09-24): SPEC-F and SPEC-N agree on the
 F carrier (AR-8) and on the ablation arm (AR-7). GEN-D's AM-2 is answered by
