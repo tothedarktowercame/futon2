@@ -67,3 +67,56 @@ this click: a reader of the EDN alone cannot distinguish "no candidates
 declared" from "want already true". If PROOF-2 wants P₀'s refusals readable
 from the record, the admission declines need a typed carrier on the
 abstention path too.
+
+## Part 2 (2026-09-24, zai-2) — the judge's mechanical check, run offline per target
+
+Method: `cascade-sources/load-declared` + `cascade-problems/assemble` +
+`candidate-want-progress` (war_machine.clj:6549) verbatim, on the current
+C4-observed facts, in a private process (no shared JVM, no clicks, no
+writes; script run from /tmp, never staged). Declared horizon = 4.
+
+| Target | receipted candidates | want tokens | want already true at HEAD | decline reason |
+|---|---|---|---|---|
+| M-f11-find-production-successor | 1/1 (precedence `[:apparatus/done-is-observed-running]`) | `:hole/h9ab212b3281d`, `:hole/h2045faa0e7cc` | `:hole/h9ab212b3281d` | `:no-new-wanted-token` — the absent want is produced by NO declared interpretation |
+| M-aif-policy-conditioned-eig | 2/2 (`[:apparatus/one-authority-per-question]`, `[:contracts/every-entry-has-a-falsifier]`) | `:hole/h6378c65a4012`, `:hole/h0e270aa090bc`, `:hole/h42fceb4ad48b` | `h6378c65a4012`, `h0e270aa090bc` | `:no-new-wanted-token` — the candidates' patterns produce already-true tokens (guards skip them as completed) |
+| M-wm-08-external-f2 | 1/1 (`[:cascade-construction/run-it-on-a-real-case]`) | `:route-a-rehearsal-reported` | `:route-a-rehearsal-reported` (sole want) | `:no-new-wanted-token` |
+| T-repair-occ-444fb018… | 2/2 (C1, C2) | `:restoration-accepted` | `:restoration-accepted` (sole want; ticket `**Status:** DONE`) | `:no-new-wanted-token` |
+
+All four declined `:no-new-wanted-token`; none for want of receipts or
+precedence. What would have to change IN THE WORLD (not the declaration):
+
+- **T-repair-occ-444fb018**: the ticket's Status line no longer reading
+  DONE at HEAD, so `:restoration-accepted` observes false again; C1/C2's
+  rollouts then newly produce it (run 1790199409 is the existence proof).
+  This is the only one of the four where a pure world change re-enables
+  construction under the declaration as it stands.
+- **M-wm-08-external-f2**: the rehearsal report locator (`:decl` no longer
+  matching) observing false, with both guard needs
+  (`external-expectation-validator-exists`,
+  `independent-expectations-written`) still true — then the candidate newly
+  produces `:route-a-rehearsal-reported`. A world change works here too,
+  though "un-report a rehearsal" is not a change the world makes forward.
+- **M-f11-find-production-successor**: NO world change suffices. The
+  absent want `:hole/h2045faa0e7cc` is produced by no declared pattern, so
+  no add-only transition can reach it; and if it simply became true, the
+  candidate still adds no new want. Only a declaration change (an
+  interpretation that produces it, and a candidate citing it) constructs.
+- **M-aif-policy-conditioned-eig**: no world change suffices either. The
+  absent want `:hole/h42fceb4ad48b` IS producible — the declared
+  interpretation `:aif/two-layer-calibration` (needs `h6378c65a4012`,
+  true; forbids the want itself) produces it — but NEITHER declared
+  candidate's precedence contains that pattern, and the candidates' own
+  patterns produce only already-true tokens. A declaration-side change
+  (a candidate whose precedence includes `:aif/two-layer-calibration`)
+  would construct today.
+
+**Plain answer:** none of the four can construct a candidate today under
+any forward world change except by undoing observed work (T-repair-occ
+ticket status; wm-08 rehearsal report). Two of the four (f11, aif-eig) are
+construction-blocked by the DECLARATIONS themselves — reachable or
+unreachable false wants with no candidate routed at them — which is B4's
+authoring gap in miniature, not a world state. If clicks 3–10 are to
+construct rather than abstain, either the two mission targets get
+candidates aimed at their false wants (declaration work), or new targets
+with false, pattern-producible wants enter the sources. Holding clicks on
+"no candidate can newly satisfy any want" is correct at HEAD.
