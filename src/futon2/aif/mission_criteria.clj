@@ -73,6 +73,10 @@
       (nil? verdict) {:class :verdict-not-stated}
       (= verdict met-token) {:class :met}
       (re-find #"^Met\b" inner) {:class :verdict-partial :qualifier inner}
+      ;; a negative result the owner keeps: no honest work produces the
+      ;; exit, so it is never a want (the flight would drive toward
+      ;; softening the finding); it is named out of view instead
+      (re-find #"(?i)^Not met, retained as a finding" inner) {:class :verdict-not-met-retained :qualifier inner}
       (re-find #"^Not started" inner) {:class :verdict-not-started}
       (re-find #"^Not met" inner) {:class :verdict-not-met :qualifier inner}
       :else {:class :verdict-unrecognised :qualifier inner})))
@@ -118,12 +122,15 @@
             :else (recur (inc i) phase cc-level out)))))))
 
 (defn wants
-  "Flight wants from CRITERIA over the mission file REPO/PATH at HEAD:
+  "Flight wants from ALL-CRITERIA over the mission file REPO/PATH at HEAD:
   {:wants [token …] :locators {token C4} :universe {token bool}
    :unlocated [{:token :line :kind :reason}]}. OBSERVE takes a locator and
   returns true/false (default: observation-checks/check-decl-in-file)."
-  [criteria {:keys [repo path observe]}]
+  [all-criteria {:keys [repo path observe]}]
   (let [observe (or observe #(true? (:observed (checks/check-decl-in-file %))))
+        retained? #(= :verdict-not-met-retained (get-in % [:verdict-class :class]))
+        retained (filter retained? all-criteria)
+        criteria (remove retained? all-criteria)
         located (filter :met-decl criteria)
         locator (fn [c] {:class :C4 :repo repo :sha "HEAD" :path path :decl (:met-decl c)})]
     {:wants (mapv :token criteria)
@@ -131,7 +138,12 @@
      :universe (into {} (map (fn [c] [(:token c) (boolean (observe (locator c)))])) located)
      :unlocated (mapv #(select-keys % [:token :line :kind :reason])
                       (remove :met-decl criteria))
-     :criteria (mapv #(dissoc % :met-decl) criteria)}))
+     :criteria (mapv #(dissoc % :met-decl) criteria)
+     ;; retained findings: stated, not met, and kept so by the owner; never
+     ;; wants, named so a closure does not read as having met them
+     :retained (mapv (fn [c] {:token (:token c) :phase (first (str/split (str (:phase c)) #"\s"))
+                              :line (:line c) :verdict (:verdict c) :reason :retained-finding})
+                     retained)}))
 
 (defn read-mission
   "The mission file REPO/PATH at HEAD, under CODE-ROOT."

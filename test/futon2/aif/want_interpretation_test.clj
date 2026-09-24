@@ -116,7 +116,7 @@
 
 (def seams-text (slurp "test/fixtures/mission-criteria/M-futon-seams@futon3c-d05cb755.md"))
 (def proposals (clojure.edn/read-string
-                (slurp "holes/labs/wm-contract/proof2/proposals/M-futon-seams-interpretations.edn")))
+                (slurp "test/fixtures/want-interp-library/M-futon-seams-interpretations@futon2-78439f58.edn")))
 
 (defn- seams-sources []
   (let [w (mc/wants (mc/criteria "M-futon-seams" seams-text)

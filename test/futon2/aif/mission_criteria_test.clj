@@ -227,3 +227,43 @@
                              "**This phase closes only through NOWHERE's account** and so on." ""])]
     (is (= [] (:requires (mc/constraints "M" text))))
     (is (= "NOWHERE" (:through (first (:unresolved (mc/constraints "M" text))))))))
+
+(deftest live-m-futon-seams-futon3c-20959e4f-no-edge
+  ;; claude-1 retracted the ARGUE -> DOCUMENT dependency (mission da2ac70e):
+  ;; it was inferred from six words, and ARGUE's checklist is written in ARGUE.
+  ;; Read from the text, the edge is gone with it.
+  (let [text (slurp (str fixture-dir "M-futon-seams@futon3c-20959e4f.md"))]
+    (is (= {:requires [] :unresolved []} (mc/constraints "M-futon-seams" text)))
+    (is (= :verdict-not-met
+           (some #(when (str/starts-with? (:phase %) "ARGUE") (get-in % [:verdict-class :class]))
+                 (mc/criteria "M-futon-seams" text))))))
+
+(deftest live-m-futon-seams-futon3c-071dee27
+  ;; after the retraction claude-1 found ARGUE met: DOCUMENT is the only open exit
+  (let [w (live "M-futon-seams@futon3c-071dee27.md" "M-futon-seams")]
+    (is (= {"MAP" true "DERIVE" true "ARGUE" true "VERIFY" true "INSTANTIATE" true "DOCUMENT" false}
+           (met-by-phase w)))
+    (is (= [] (:retained w)))))
+
+(deftest a-retained-finding-is-named-never-wanted
+  ;; a negative result the owner keeps: chasing its exit would drive toward
+  ;; softening the finding (claude-8, bell 23903; AR-37)
+  (let [text (str/join "\n" ["## ARGUE" ""
+                             "**Exit criterion:** the design feels inevitable. **Not met, retained as a finding.** Defensible, not inevitable."
+                             "" "## DOCUMENT" ""
+                             "**Exit criterion:** someone can discover it. **Not started.**" ""])
+        w (read-with text)]
+    (is (= 1 (count (:wants w))) "only DOCUMENT")
+    (is (= [{:phase "ARGUE" :reason :retained-finding}] (mapv #(select-keys % [:phase :reason]) (:retained w))))
+    (testing "a closed flight names it out of view"
+      (let [f (flight/start {:target "M" :chosen-because {:kind :requested}}
+                            {:kind :a-exits :repo "r" :path "p" :read-text (fn [& _] text)
+                             :observe (observe-in text)}
+                            {:id "f-retained"})
+            cw (flight/click-wants f {})
+            closed (flight/record-click f {:click-id "c" :wants (:wants cw) :want-source (:source cw)
+                                           :before {} :after (zipmap (:wants cw) (repeat true))})]
+        (is (= :closed (:status closed)))
+        (is (= [:retained-finding] (mapv :reason (get-in closed [:closure-scope :out-of-view]))))))
+    (testing "plain Not met stays a want"
+      (is (= 2 (count (:wants (read-with (str/replace text ", retained as a finding" "")))))))))

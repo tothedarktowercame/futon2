@@ -1,7 +1,7 @@
 (ns futon2.aif.flight-ask-test
   "D11 part 4: the flight asks for the interpretations its wants lack. The
-  real case is the first flight: M-futon-seams at futon3c ea68c485 (mission
-  119e4ede, where ARGUE's closes-only-through-DOCUMENT is mission text), whose
+  real case is the first flight: M-futon-seams at futon3c 20959e4f (mission
+  da2ac70e, after claude-1 retracted the ARGUE -> DOCUMENT dependency), whose
   open exits are ARGUE and DOCUMENT; the answering seat is stubbed with
   kimi-6's readings (futon2 66a1779e), in the reply grammar."
   (:require [clojure.edn :as edn]
@@ -28,9 +28,9 @@
   (let [d (.toFile (Files/createTempDirectory prefix (make-array FileAttribute 0)))]
     (swap! roots conj d) d))
 
-(def mission-file "test/fixtures/mission-criteria/M-futon-seams@futon3c-ea68c485.md")
+(def mission-file "test/fixtures/mission-criteria/M-futon-seams@futon3c-20959e4f.md")
 (def mission-text (slurp mission-file))
-(def proposals (edn/read-string (slurp "holes/labs/wm-contract/proof2/proposals/M-futon-seams-interpretations.edn")))
+(def proposals (edn/read-string (slurp "test/fixtures/want-interp-library/M-futon-seams-interpretations@futon2-78439f58.edn")))
 (def argue :exit/hac75428b9c97)
 (def document :exit/h54d16050a9dc)
 (def by-want {document :writing-coherence/meet-the-reader-where-they-are
@@ -117,14 +117,7 @@
                                                                    :decline {:reason :no-library-pattern}}) "\n```"))))]
       (is (= #{:declined} (set (map :kind (:needs r)))))
       (is (every? :job-id (:needs r)))
-      (is (nil? (wi/read-published (.getCanonicalPath store) "M-futon-seams")))))
-  (testing "the mission's own condition (ARGUE closes only through DOCUMENT), read from its text: a reading that skips DOCUMENT is rejected and stays a need"
-    (let [bad (fn [want] (if (= want argue)
-                           (str/replace (reply-for (by-want want)) (str document) ":exit/h4ef5c183bc55")
-                           (reply-for (by-want want))))
-          r (ask (temp-dir "ask-store") (stub-answer bad))]
-      (is (= [{:want argue :kind :rejected}]
-             (mapv #(select-keys % [:want :kind]) (:needs r)))))))
+      (is (nil? (wi/read-published (.getCanonicalPath store) "M-futon-seams"))))))
 
 (deftest agency-answer-fn-bells-then-polls
   (let [calls (atom [])
@@ -152,10 +145,11 @@
     (is (= 1 (:before-click (first (:asks f)))))))
 
 (deftest a-declared-constraint-must-be-stated-in-the-text
+  ;; claude-1 retracted ARGUE -> DOCUMENT (futon3c 20959e4f): a declared edge
+  ;; restating it now refuses, because the text no longer states it
   (let [answer (stub-answer #(reply-for (by-want %)))]
-    (testing "the same edge as the text: accepted"
-      (is (empty? (:needs (ask (temp-dir "ask-store") answer [{:want argue :requires document :by "claude-1"}])))))
-    (testing "an edge the text does not state refuses, it does not win"
-      (is (= :want/declared-constraint-not-in-text
-             (try (ask (temp-dir "ask-store") answer [{:want document :requires argue :by "someone"}]) nil
-                  (catch clojure.lang.ExceptionInfo e (:interpretation/refusal (ex-data e)))))))))
+    (is (= :want/declared-constraint-not-in-text
+           (try (ask (temp-dir "ask-store") answer [{:want argue :requires document :by "claude-1"}]) nil
+                (catch clojure.lang.ExceptionInfo e (:interpretation/refusal (ex-data e))))))
+    (testing "with no declared constraint the same readings publish"
+      (is (empty? (:needs (ask (temp-dir "ask-store") answer)))))))

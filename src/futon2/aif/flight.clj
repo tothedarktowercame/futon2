@@ -63,7 +63,9 @@
               :criteria-by-token (into {} (map (fn [c] [(:token c) (select-keys c [:kind :line :phase :stated])]))
                                        (:criteria w))
               :unlocated (:unlocated w)
-              :out-of-view (vec out-of-view)
+              ;; phases judged in data only, and findings the owner retains
+              ;; as not met: neither is a want, both are named
+              :out-of-view (vec (concat out-of-view (:retained w)))
               :lifecycle lifecycle}}))
 
 ;; A hand-declared list, for tests. Typed on every record it reaches, so a

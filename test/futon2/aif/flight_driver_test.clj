@@ -1,7 +1,8 @@
 (ns futon2.aif.flight-driver-test
   "The first-flight driver: the plan is the record, --run is required to fly,
   kimi-1 never answers. The plan is pinned on M-futon-seams at futon3c
-  ea68c485 with its lifecycle at d74a7c5a."
+  20959e4f (after the ARGUE -> DOCUMENT retraction) with its lifecycle at
+  d74a7c5a."
   (:require [clojure.edn]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
@@ -11,7 +12,7 @@
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
-(def mission-text (slurp "test/fixtures/mission-criteria/M-futon-seams@futon3c-ea68c485.md"))
+(def mission-text (slurp "test/fixtures/mission-criteria/M-futon-seams@futon3c-20959e4f.md"))
 (def lifecycle-text (slurp "test/fixtures/mission-criteria/M-futon-seams-lifecycle@futon3c-d74a7c5a.edn"))
 (def argue :exit/hac75428b9c97)
 (def document :exit/h54d16050a9dc)
@@ -35,8 +36,7 @@
     (is (= [:HEAD :IDENTIFY] (mapv :phase (get-in p [:wants :out-of-view]))))
     (is (= [argue document] (:open-wants p)))
     (is (= [argue document] (mapv :want (:requests-it-would-issue p))))
-    (is (= [{:want argue :requires document :phase "ARGUE" :through "DOCUMENT" :line 503 :by :mission-text}]
-           (:constraints p)))
+    (is (= [] (:constraints p)) "the retracted edge is not read")
     (is (= :computed (get-in p [:horizon :authority :source])))
     (is (false? (:run? p)))))
 
