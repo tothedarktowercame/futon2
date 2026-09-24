@@ -272,7 +272,7 @@ Q-link, B trials per pattern, and a second click that reads the updated B);
 run the constructor on the recorded interpretations; the Lean module for the
 kernel and the restricted meet condition.
 
-## Finding from the worked example: Clause T needs a mission-level C that no mission record carries
+## Finding from the worked example: Clause T needs a mission-level C, computed at click time
 
 Clause T ranks targets. On M-futon-seams the cost of a target (expected
 attempts to complete its cascade: 8.75–10 across instances 4–7) barely
@@ -285,18 +285,26 @@ so Clause T's value term has no input on any mission until that exists.
 Survey (2026-09-24): 1672 mission files across the futon repos; 904 have a
 Goal/Outcome/Motivation/Why heading and 361 an exit/success/acceptance
 heading, so outcomes are usually STATED in prose; of the 81 mission-triple
-records in futon6, 0 record outcomes or wants. So what each historical
-mission needs is extraction of its stated outcomes into a typed C (with cues
-into the mission text), plus the served-by links from targets to outcomes,
-not new authoring. Until a mission has that, Clause T's value term is a typed
-absence and the choice of target rests on cost alone, which is the case in
-every click recorded so far.
+records in futon6, 0 record outcomes or wants. So the outcomes are there
+to be read, and the War Machine should read them when it needs them: C is
+computed at click time from the mission text, as a step of the click with
+its own receipt (each outcome cued to the span it came from; each served-by
+link to the instance want it names), not required as a record prepared in
+advance. A mission is never refused for lacking a precomputed C. Clause T's
+value term is a typed absence only when that step runs and finds no stated
+outcome, and the absence then names the sections it read.
+
+Consequence for W_t: the certificate carries the extracted C and its cues, so
+a reviewer can check the extraction against the text. Consequence for the
+constructor: its :observation-required refusal is the same shape (a missing
+input that could be computed), and should become a step that computes it.
 
 The same holds for E: the corpora of past pattern USE (mission citations,
 operator turns) disagree in sign on the worked example and neither records
 which cascades were enacted. E's input is enacted-cascade records (Clause C),
 which exist for one click.
 
-Test of the extraction: M-futon-seams mission-C (commissioned from its owner,
-claude-1), checked by whether the computed value reproduces the mission's own
-4-5-7 ranking or says where it departs.
+Test of the extraction: the owner's hand-written C for M-futon-seams
+(claude-1) is the reference, made independently of the extractor. The
+extractor's C is compared with it outcome by outcome, and the value computed
+from each is checked against the mission's own 4-5-7 ranking.
