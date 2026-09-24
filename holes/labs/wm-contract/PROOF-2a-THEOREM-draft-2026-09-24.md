@@ -304,7 +304,55 @@ operator turns) disagree in sign on the worked example and neither records
 which cascades were enacted. E's input is enacted-cascade records (Clause C),
 which exist for one click.
 
-Test of the extraction: the owner's hand-written C for M-futon-seams
-(claude-1) is the reference, made independently of the extractor. The
-extractor's C is compared with it outcome by outcome, and the value computed
-from each is checked against the mission's own 4-5-7 ranking.
+Not run: an extractor tested against the owner's hand-written C for
+M-futon-seams (claude-1, futon3c `e99342ac`), which would be the reference.
+The worked example stops at recording the requirement.
+
+## What the worked example teaches (M-futon-seams, 2026-09-24)
+
+The worked example is complete at this point; the fixes it names are not made
+here. Artefacts: futon3c `holes/labs/M-futon-seams/exemplar/` and `item6/`.
+Each item below is what went wrong or what was missing, and the change to
+PROOF-2a it implies.
+
+1. **The enactment can differ from the choice.** The first attempt at
+   click-001 built the provider grain while the click chose the role grain;
+   every other clause would still have passed. → Clause C (added above).
+2. **Prediction and outcome were in different units.** p(all wants) at a
+   6-step kernel horizon (0.26) against an enactment of 8 attempts read as a
+   miscalibration; in attempts the prediction fits (mean 8.75, P(≤8) 0.50).
+   → clause 4 reading rule (added above): state both in attempts.
+3. **Declared inputs decided the answers.** Declared check error rates gave
+   a posterior of 0.985; rates measured from 22 runs with known truth (a
+   ledger that found a false pass in a check written the same day) give 0.77.
+   The declared θ prior's effect is small (sensitivity table at 2/5/20
+   pseudo-trials). → W₁ should require measured rates with their counts, and
+   every constructed bad case is a ledger row.
+4. **The constructor rebuilds candidates once given interpretations, and
+   builds neither the interpretations nor the containment order.** Replayed
+   on click-001's inputs it returns both hand-built candidates exactly.
+   → Clause 0's construction condition can be met by replay; the carrier (the
+   semilattice) is still authored.
+5. **A target's value needs the mission's outcomes, and the outcomes are in
+   the mission text.** → computed at click time from the text, with cues;
+   never a refusal for lacking a precomputed list (finding above).
+6. **Outcomes served, weighted any way, do not reproduce the mission's own
+   ranking** (4 > 5 > 7 holds on at most 17% of weightings; instance 7 comes
+   first most often). The mission's reasons use when an outcome lands and a
+   cost that rises with delay ("immediately", "before a VS Code
+   implementation exists"), and how fully an outcome is served. → Clause T's
+   value term needs a time dimension and partial attainment; weights alone
+   cannot supply them.
+7. **E has no usable corpus.** Pattern-use frequencies from mission citations
+   and from operator turns disagree in sign on the two candidates, each on 1–3
+   citations; neither records applied cascades. → E is estimated from Clause C
+   enactment records, filled forward.
+8. **Working out of order cost a wrong-grain enactment.** The mission gained
+   artefacts for five later phases while at IDENTIFY; the first enactment
+   worked from the defect description rather than a DERIVE that had met its
+   exit. → the click record should name the phase exits its inputs rely on.
+9. **Checks that pass need a constructed bad case.** In this example that
+   found: a W₀ that accepted hand-built candidates, false missing meets from
+   strict descendants, a grep regex that passed a tree with a branch left, a
+   re-anchoring tool that reported moves it had not made, a layout check that
+   measured only titles. Each is a row in the check ledger (item 3).
