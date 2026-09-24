@@ -1,6 +1,8 @@
 (ns futon2.aif.learning-trial-ledger
-  "Append-only record-only counts. Read solely for deduplication/meaning admission,
-   never by a production model. OS lock serializes independent writers."
+  "Append-only comparison-time trials. Written by record! inside the token
+   comparison (before any close verdict); read by pattern-theta and b-update,
+   and snapshotted into each close as the B-C carrier (close-b-update).
+   OS lock serializes independent writers."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.action-identity :as identity]
@@ -126,7 +128,7 @@
    event appears exactly once (the ledger's own deduplication identity is
    the join key; a duplicate append would have been refused at write time)."
   ([root] (read-trials root (io/file root "attempts.edn")))
-  ([root file]
+  ([_root file]
    (locking mutex
      (if-not (.exists (io/file file))
        []
@@ -150,6 +152,337 @@
                     :contract-version (if (get-in row [:trial :consumption]) :v1 :v2)
                     :row row})
                  (records (String. bytes "UTF-8")))))))))
+
+;; ---------------------------------------------------------------------------
+;; B-C (PROOF-2 strategy row 34): the concentration carrier recorded at the
+;; close. Spec: holes/labs/wm-contract/proof2/packets/B-D.md §4, as revised by
+;; reviews/B-D-codex-20.md §3, §6, §7.
+;;
+;; POPULATION. `record!` runs inside the token comparison
+;; (full_loop_runner/retain-token-outcome!), BEFORE the accepted-increment
+;; predicate decides anything, and `pattern-theta` reads every appended row
+;; with a matching :theta-key. So the population the judge consumes is "rows
+;; appended at comparison", not "accepted closes": machinery-71/attempt-002
+;; closed with [:accepted-increment :accepted?] = :refused, its row 8e7d1aaf…
+;; has [:ledger :status] :appended, and that row is the single trial behind
+;; C1's theta 3/4 in tick-run-record 1790199409. The carrier records that
+;; population and annotates each row with its close's acceptance status, so a
+;; reader can partition consumed trials without recounting.
+;; ---------------------------------------------------------------------------
+
+(def carrier-schema :wm/b-update-carrier-v2)
+
+(def carrier-axes
+  "O × S: the outcome carrier {achieved, not} at the one (singleton) state."
+  {:outcomes [:achieved :not] :states [:singleton]})
+
+(def jeffreys-prior
+  "Concentrations as an O×S array, [[a_achieved] [a_not]] over the singleton
+   state: the (1/2, 1/2) prior pattern-theta's rule starts from."
+  [[1/2] [1/2]])
+
+(defn exact-tree?
+  "Every number anywhere in X is an integer or a ratio: no doubles, floats or
+   decimals, at any depth, in keys or values."
+  [x]
+  (cond (number? x) (or (integer? x) (ratio? x))
+        (map? x) (every? (fn [[k v]] (and (exact-tree? k) (exact-tree? v))) x)
+        (coll? x) (every? exact-tree? x)
+        :else true))
+
+(defn carrier-hash
+  "Content hash: SHA-256 over the canonical printed form
+   (action-identity/canonical: maps and sets unordered, vectors ordered,
+   ratios exact, doubles by IEEE hex), prefixed \"sha256:\"."
+  [x]
+  (str "sha256:" (identity/sha256 (identity/printed false (identity/canonical x)))))
+
+(defn- occurrence-key
+  "The three-field occurrence identity a ledger row and a close share. Never
+   target/attempt alone: two attempts on one target are two occurrences."
+  [m]
+  (let [k (select-keys m [:action/id :action/value-sha256 :transition/id])]
+    (when (and (= 3 (count k)) (every? some? (vals k))) k)))
+
+(defn row-occurrence
+  "The occurrence key a read-trials row was banked under, or nil."
+  [r]
+  (occurrence-key (or (get-in r [:row :trial :deduplication :inputs :occurrence])
+                      (get-in r [:row :deduplication :inputs :occurrence]))))
+
+(defn default-close-roots
+  "The cohort data roots beside the ledger root: every wm-full-loop* directory
+   under the ledger's parent (data/). A close lives at
+   <root>/<cohort>/<attempt>/007-closed.edn."
+  [ledger-root]
+  (->> (.listFiles (io/file (.getAbsoluteFile (io/file ledger-root)) ".."))
+       (filter #(and (.isDirectory ^java.io.File %)
+                     (.startsWith (.getName ^java.io.File %) "wm-full-loop")))
+       (sort-by str)
+       vec))
+
+(defn close-files
+  "Read-only discovery of closed checkpoints under ROOTS."
+  [roots]
+  (vec (sort-by str (for [root roots
+                          f (file-seq (io/file root))
+                          :when (and (.isFile ^java.io.File f)
+                                     (= "007-closed.edn" (.getName ^java.io.File f)))]
+                      f))))
+
+(defn- close-status [judgment source]
+  (let [v (:accepted-increment judgment)]
+    (if (and (map? v) (contains? v :accepted?))
+      {:status :recorded
+       :accepted? (:accepted? v)
+       :reason (if (contains? v :reason)
+                 (:reason v)
+                 {:status :missing :reason :reason-not-recorded})
+       :source source}
+      {:status :missing :reason :acceptance-not-recorded :source source})))
+
+(defn annotate-close-statuses
+  "Attach each row's close acceptance WITHOUT filtering any row. FILES are
+   close records (paths); a file is parsed only if its text mentions one of
+   the rows' :action/id values, and a parsed close counts only when all three
+   occurrence fields at [:payload :judgment :occurrence] match the row's.
+   CURRENT is the judgment being serialized into this very close (its file
+   does not exist yet), keyed the same way and sourced :same-close. A row
+   whose close is not found, or found twice, gets a typed absence."
+  [rows files current current-path]
+  (let [needed (set (keep row-occurrence rows))
+        ids (set (map :action/id needed))
+        entries (reduce
+                 (fn [out f]
+                   (let [text (slurp f)]
+                     (if-not (some #(.contains ^String text ^String %) ids)
+                       out
+                       (let [event (edn/read-string {:default tagged-literal} text)
+                             j (get-in event [:payload :judgment])
+                             k (occurrence-key (:occurrence j))]
+                         (if (contains? needed k)
+                           (update out k (fnil conj [])
+                                   (close-status j {:path (str f)
+                                                    :raw-sha256 (identity/sha256 text)
+                                                    :key-path [:payload :judgment :accepted-increment]}))
+                           out)))))
+                 {} files)
+        current-key (occurrence-key (:occurrence current))
+        entries (if (and current-key (contains? needed current-key))
+                  (update entries current-key (fnil conj [])
+                          (close-status current {:path current-path
+                                                 :placement :same-close
+                                                 :key-path [:payload :judgment :accepted-increment]}))
+                  entries)]
+    (mapv (fn [r]
+            (let [k (row-occurrence r)
+                  matches (get entries k)]
+              (assoc r :close-acceptance
+                     (cond
+                       (nil? k) {:status :missing :reason :occurrence-not-recorded}
+                       (= 1 (count matches)) (first matches)
+                       (seq matches) {:status :missing :reason :ambiguous-close
+                                      :sources (mapv :source matches)}
+                       :else {:status :missing :reason :close-not-found
+                              :close-files-scanned (count files)}))))
+          rows)))
+
+(defn- one-hot [observed] (if observed [1 0] [0 1]))
+(defn- outer [o s] (mapv (fn [oi] (mapv #(* oi %) s)) o))
+(defn- add-arrays [a b] (mapv #(mapv + %1 %2) a b))
+
+(defn concentration-carrier
+  "The B-C carrier for one FAMILY (a pattern id, the :theta-key) over ROWS
+   (read-trials output, ledger append order). Exact rationals only.
+
+   Population: every row appended at comparison whose :theta-key is FAMILY,
+   regardless of its close's acceptance; each trial carries its
+   :close-acceptance (from annotate-close-statuses, or the typed absence
+   :close-not-looked-up).
+
+   Read-side dedup collapses repeated :identity values as pattern-theta does
+   (last row wins), keeping first-append order; identities whose rows
+   disagree on :observed are listed, not hidden.
+
+   :trial-vectors are one-hot over O = [:achieved :not] at the singleton
+   state: {:outcome [1 0] | [0 1], :state-belief [1]}, one per identity in
+   the same order as :trial-identities. :posterior-concentrations = prior +
+   Σ outer(outcome, state-belief), so with s achieved among n trials the
+   array is [[s + 1/2] [n - s + 1/2]].
+
+   :normalization is the fixed-state outcome normalization: at the singleton
+   state, theta = conc-achieved / (conc-achieved + conc-not)
+   = (s + 1/2) / (n + 1), the same rule pattern-theta and b-update state.
+   It is NOT a sum across states (which is trivially 1 for one state).
+
+   :dedup :fired names the layers that fired for this emission, in order:
+   UPSTREAM's layer when it is not :none ({:layer :ledger-identity :held
+   […]} from record!, or {:layer :update-occurrence :status
+   :already-recorded} from b-update), then :read-identity when the collapse
+   above removed rows. Empty means no layer fired.
+
+   :version hashes {schema family axes prior posterior trial-vectors}: the
+   ordered identities and outcomes plus the arrays, not the close-acceptance
+   provenance (whose source paths are not part of the posterior)."
+  [family rows upstream]
+  (let [mine (vec (filter #(= family (:theta-key %)) rows))
+        ids (vec (distinct (map :identity mine)))
+        by-id (into {} (map (juxt :identity identity)) mine)
+        ordered (mapv by-id ids)
+        _ (doseq [r ordered]
+            (when-not (and (string? (:identity r)) (boolean? (:observed r)))
+              (throw (ex-info "Trial cannot supply a one-hot vector"
+                              {:learning-ledger/refusal :invalid-trial
+                               :identity (:identity r)}))))
+        conflicts (vec (sort (for [[id rs] (group-by :identity mine)
+                                   :when (> (count (distinct (map :observed rs))) 1)]
+                               id)))
+        trials (mapv (fn [r]
+                       {:identity (:identity r)
+                        :theta-key family
+                        :cell (if (:observed r) :achieved :not)
+                        :observed (:observed r)
+                        :content-ref (carrier-hash (:row r))
+                        :close-acceptance (or (:close-acceptance r)
+                                              {:status :missing :reason :close-not-looked-up})})
+                     ordered)
+        vectors (mapv (fn [r] {:identity (:identity r)
+                               :outcome (one-hot (:observed r))
+                               :state-belief [1]})
+                      ordered)
+        posterior (reduce (fn [acc v] (add-arrays acc (outer (:outcome v) (:state-belief v))))
+                          jeffreys-prior vectors)
+        a (get-in posterior [0 0])
+        b (get-in posterior [1 0])
+        s (count (filter :observed ordered))
+        n (count ordered)
+        collapsed (- (count mine) n)
+        fired (cond-> []
+                (not= :none (:layer upstream)) (conj (:layer upstream))
+                (pos? collapsed) (conj :read-identity))
+        value {:schema carrier-schema
+               :family family
+               :population :rows-appended-at-comparison
+               :axes carrier-axes
+               :prior-concentrations jeffreys-prior
+               :posterior-concentrations posterior
+               :trial-identities trials
+               :trial-vectors vectors
+               :dedup {:fired fired
+                       :upstream upstream
+                       :read-side {:layer :read-identity
+                                   :input-count (count mine)
+                                   :counted-count n
+                                   :collapsed-count collapsed
+                                   :conflicting-identities conflicts
+                                   :policy :last-row-wins}}
+               :normalization {:axis :outcomes-at-fixed-state
+                               :state :singleton
+                               :successes s
+                               :trials n
+                               :conc-achieved a
+                               :conc-not b
+                               :theta (/ a (+ a b))
+                               :rule "theta = conc-achieved / (conc-achieved + conc-not) = (s + 1/2) / (n + 1)"}}]
+    (assoc value :version
+           (carrier-hash (select-keys value [:schema :family :axes
+                                             :prior-concentrations
+                                             :posterior-concentrations
+                                             :trial-vectors])))))
+
+(defn carrier-refusal
+  "The X5 checks the carrier exists to support, as data: the first refusal
+   keyword that applies, or nil. A scalar theta with no concentration array
+   and normalization fails even at 3/4; a token-level belief is refused (no
+   token posterior exists in this learner and none may be synthesized); a
+   non-exact number anywhere fails; vectors, arrays, normalization and
+   version must agree with each other, recomputed here, not trusted."
+  [c]
+  (let [ts (:trial-identities c)
+        vs (:trial-vectors c)
+        expected-vectors (mapv (fn [t] {:identity (:identity t)
+                                        :outcome (one-hot (= :achieved (:cell t)))
+                                        :state-belief [1]})
+                               ts)
+        posterior (when (vector? vs)
+                    (reduce (fn [acc v] (add-arrays acc (outer (:outcome v) (:state-belief v))))
+                            jeffreys-prior vs))
+        a (get-in posterior [0 0] 0)
+        b (get-in posterior [1 0] 0)]
+    (cond
+      (not (map? c)) :carrier-not-a-map
+      (not (exact-tree? c)) :inexact-number
+      (or (nil? (:posterior-concentrations c))
+          (nil? (:normalization c))) :scalar-without-concentrations
+      (not= carrier-axes (:axes c)) :carrier-axis-mismatch
+      (not (vector? vs)) :trial-vectors-missing
+      (or (some #(contains? % :token-belief) ts)
+          (some #(not= [1] (:state-belief %)) vs)) :token-posterior-not-a-trial
+      (not= (mapv :identity ts) (mapv :identity vs)) :trial-identity-mismatch
+      (not= (count ts) (count (set (map :identity ts)))) :duplicate-trial-identity
+      (not= expected-vectors vs) :trial-vector-mismatch
+      (not= jeffreys-prior (:prior-concentrations c)) :prior-mismatch
+      (not= posterior (:posterior-concentrations c)) :posterior-mismatch
+      (not= {:axis :outcomes-at-fixed-state :state :singleton
+             :conc-achieved a :conc-not b :theta (/ a (+ a b))}
+            (select-keys (:normalization c)
+                         [:axis :state :conc-achieved :conc-not :theta])) :normalization-mismatch
+      (not= (:version c)
+            (carrier-hash (select-keys c [:schema :family :axes
+                                          :prior-concentrations
+                                          :posterior-concentrations
+                                          :trial-vectors]))) :version-mismatch
+      :else nil)))
+
+(defn close-b-update
+  "The :b-update snapshot for a close: one concentration-carrier per family
+   over the rows appended at comparison, each row annotated with its close's
+   acceptance. Typed absence with the reason when the rows cannot be
+   supplied ({:status :missing :reason :ledger-unavailable |
+   :ledger-or-close-read-failed}); never a prior standing in for data.
+
+   LEARNING-TRIAL-RECEIPT is this close's record! receipt: its :held trials
+   are the ledger-identity dedup layer's dispositions for this emission, and
+   are reported under the family they attribute to. This is a producer
+   receipt of what the ledger holds at this close; it asserts nothing about
+   later consumption."
+  [{:keys [ledger-root close-path close-judgment close-roots close-record-files
+           learning-trial-receipt]}]
+  (let [root (or ledger-root default-root)
+        file (io/file root "attempts.edn")]
+    (try
+      (if-not (.isFile file)
+        {:status :missing :reason :ledger-unavailable :ledger-path (str file)}
+        (let [files (or close-record-files
+                        (close-files (or close-roots (default-close-roots root))))
+              rows (annotate-close-statuses (read-trials root) files close-judgment close-path)
+              held (vec (for [t (:trials learning-trial-receipt)
+                              :when (= :held (:status t))]
+                          {:identity (get-in t [:deduplication :identity])
+                           :reason (:reason t)
+                           :theta-key (theta-key t)}))
+              families (sort-by str (distinct (filter keyword? (map :theta-key rows))))]
+          {:status :recorded
+           :schema :wm/b-update-close-snapshot-v1
+           :population :rows-appended-at-comparison
+           :ledger-path (str file)
+           :ledger-sha256 (identity/sha256 (slurp file))
+           :rows-read (count rows)
+           :close-files-scanned (count files)
+           :unattributed-identities (mapv :identity (remove #(keyword? (:theta-key %)) rows))
+           :families (into {}
+                           (for [family families
+                                 :let [mine-held (filterv #(= family (:theta-key %)) held)]]
+                             [family (concentration-carrier
+                                      family rows
+                                      (if (seq mine-held)
+                                        {:layer :ledger-identity
+                                         :held (mapv #(dissoc % :theta-key) mine-held)}
+                                        {:layer :none}))]))}))
+      (catch Exception e
+        {:status :missing
+         :reason :ledger-or-close-read-failed
+         :detail (or (:learning-ledger/refusal (ex-data e)) (.getMessage e))}))))
 
 (defn b-update
   "The B update, applied ONLY after a close the accepted-increment predicate
@@ -183,11 +516,11 @@
         ;; matched: trials-n was always 0 and the reported theta was always
         ;; a first-trial value regardless of history (claude-2's review,
         ;; 2026-09-23). The key is :theta-key, derived by producer-of.
-        mine (filter #(= family (:theta-key %)) trials)
+        mine-appended (filter #(= family (:theta-key %)) trials)
         ;; one contribution per recorded occurrence, as pattern-theta does:
         ;; two functions whose docstrings name the same posterior must not
         ;; disagree (claude-2's review)
-        mine (vals (into {} (map (juxt :identity identity)) mine))
+        mine (vals (into {} (map (juxt :identity identity)) mine-appended))
         ;; Exactly once. OCCURRENCE-IDENTITY is a commit sha; the row's
         ;; :identity is a digest of {:occurrence :effect :grain}, so the two
         ;; can never be equal and every occurrence looked new -- it
@@ -219,6 +552,14 @@
      :occurrence-identity occurrence-identity
      :occurrence occurrence
      :theta theta
+     ;; B-C: the carrier over the rows this update read (append order, the
+     ;; same rows pattern-theta reads), naming the update-occurrence dedup
+     ;; layer when it fired. :normalization :theta is the pre-update read;
+     ;; :theta above additionally counts this occurrence when it is new.
+     :carrier (concentration-carrier family mine-appended
+                                     (if already
+                                       {:layer :update-occurrence :status :already-recorded}
+                                       {:layer :none}))
      :rule "theta_post = (successes' + 1/2) / (trials' + 1): Laplace (beta 1/2,1/2) over the family's whole-attempt outcomes, counting this occurrence once (trials'/successes' include it if and only if it is not already recorded)"
      :trials-read trials-n
      ;; persistence: the value survives being read back because it is

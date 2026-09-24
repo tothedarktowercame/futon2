@@ -4100,6 +4100,30 @@
                          :declared-tokens (vec (sort-by pr-str declared))})
                          :criterion-step enacted-step
                          :measured-tokens (vec (sort-by pr-str (map :token measured-rows)))))
+                       ;; B-C (PROOF-2 strategy row 34): the concentration
+                       ;; carrier recorded ON the close. record! ran inside
+                       ;; retain-token-outcome! above, before the predicate
+                       ;; decided anything, and pattern-theta reads every
+                       ;; appended row -- so the population is the rows
+                       ;; appended at comparison, each annotated with its
+                       ;; close's acceptance (this close's from the verdict
+                       ;; just computed, since its file is not written yet).
+                       ;; Typed absence when no comparison ran here.
+                       b-update-snapshot
+                       (if-not (and cohort? @action-occurrence)
+                         {:status :missing :reason :no-token-comparison-at-this-close}
+                         (learning-ledger/close-b-update
+                          {:ledger-root (or (:learning-trial-ledger-root opts)
+                                            learning-ledger/default-root)
+                           :close-path (str (io/file (or (:data-root execution-cohort)
+                                                         cohort/default-data-root)
+                                                     (name (:cohort/id start-event))
+                                                     attempt-id "007-closed.edn"))
+                           :close-judgment {:occurrence @action-occurrence
+                                            :accepted-increment accepted-increment-result}
+                           :close-roots (:learning-trial-close-roots opts)
+                           :learning-trial-receipt
+                           (get-in token-comparison [:receipt :learning-trial-receipt])}))
                        close-judgment-base
                        (merge {:outcome outcome
                                :grounded? (= :grounded-change outcome)
@@ -4111,6 +4135,7 @@
                                :token-outcome-comparison (:receipt token-comparison)
                                :learning-trial-receipt (get-in token-comparison [:receipt :learning-trial-receipt])
                                :accepted-increment accepted-increment-result
+                               :b-update b-update-snapshot
                                :route-attestation (:receipt route-account)
                                :route-attestation-ref (:reference route-account)
                                :kernel-example (:receipt kernel-example-result)
@@ -4244,34 +4269,29 @@
                              {:status :refused
                               :reason (:learning-ledger/refusal (ex-data e))
                               :message (.getMessage e)})))))
-                       ;; B-C (PROOF-2 strategy row 34): the concentration
-                       ;; carrier rides the update result (:carrier, built
-                       ;; by learning-ledger/b-update from the rows the
-                       ;; update consumed). Persist it beside the close's
-                       ;; other retained evidence -- the close event itself
-                       ;; was already written above, so retained/ is the
-                       ;; honest emission point (same placement rule as
-                       ;; token-outcome.edn). Typed absence, never a
-                       ;; substituted number: a close without an accepted
-                       ;; eligible outcome records why.
+                       ;; B-C: retained/b-update.edn holds the SAME snapshot
+                       ;; the closed judgment carries under :b-update, plus
+                       ;; the post-close learner's disposition (b-update runs
+                       ;; only on an accepted close; when it ran, its own
+                       ;; carrier's :dedup names whether the
+                       ;; update-occurrence layer fired). Nothing here is a
+                       ;; recomputation over a different population.
                        b-update-retained
                        (when closed-event
                          (let [f (io/file (or (:data-root execution-cohort)
                                               cohort/default-data-root)
                                           (name (:cohort/id closed-event))
                                           attempt-id "retained" "b-update.edn")
-                               content (or (:carrier b-update-result)
-                                           {:status :missing
-                                            :reason (cond
-                                                      (nil? b-update-result)
-                                                      :close-not-accepted
-                                                      (= :not-attributed (:status b-update-result))
-                                                      :not-attributed
-                                                      (= :refused (:status b-update-result))
-                                                      :update-refused
-                                                      :else :no-eligible-outcome)
-                                            :detail (select-keys b-update-result
-                                                                 [:status :reason :attribution])})]
+                               post-close
+                               (if (nil? b-update-result)
+                                 {:status :not-run
+                                  :reason :close-not-accepted
+                                  :accepted? (:accepted? accepted-increment-result)}
+                                 (assoc (select-keys b-update-result
+                                                     [:status :reason :attribution :family
+                                                      :theta :occurrence-identity])
+                                        :dedup (get-in b-update-result [:carrier :dedup :fired])))
+                               content (assoc b-update-snapshot :post-close-update post-close)]
                            (io/make-parents f)
                            (spit f (pr-str content))
                            {:path (.getPath f)}))
