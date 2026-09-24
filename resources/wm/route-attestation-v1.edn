@@ -1,0 +1,37 @@
+{:schema :wm/route-attestation-declarations-v1
+ :mode :record-only
+ ;; PROOF-wm-works-2026-09-22 ⟨1⟩7 part 2. The War Machine's own route
+ ;; declarations: one institution, one increment criterion, one binding.
+ ;; The institution names what the machine actually commits to on the
+ ;; wm-contract repair route: increments count when they are warranted,
+ ;; and a warranted increment is a stamp the route MUST collect (Joe's
+ ;; deontics, ANSWERS-C-questions-2026-09-21: "you got stamps that you
+ ;; must collect"; the attestation that exists is the test-registry
+ ;; warrant). Record-only: matching is not verification, and no
+ ;; declaration is inferred from a prompt, selected action or grounded
+ ;; outcome.
+ :institutions
+ [{:id :wm-warranted-increment :version 1
+   :situation {:condition {:id :wm-contract-repair-route :version 1}
+               :status :holds}
+   :preference {:id :warranted-increments :version 1 :engaged? true}
+   :valence :must}]
+ :criteria
+ [;; The target and token are the ones the occurrence already declares:
+  ;; the machinery-76 family's selected action produces
+  ;; ["T-repair-occ-…" :repair/obstruction-observed-cleared]. The scope
+  ;; names the repository and the test namespaces the warrant's run must
+  ;; cover — the repair's own registered evidence chain.
+  {:id :restoration-obstruction-cleared :version 1
+   :institution {:id :wm-warranted-increment :version 1}
+   :target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+   :want ["T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade"
+          :repair/obstruction-observed-cleared]
+   :scope {:repo "futon2"
+           :tests ["futon2.aif.held-out-observations-test"
+                   "futon2.aif.held-out-calibration-test"
+                   "futon2.aif.repair-recheck-test"]}
+   :kind :increment :evidence-kind :registered-test-warrant}]
+ :bindings
+ [{:criterion {:id :restoration-obstruction-cleared :version 1}
+   :checkpoint :build :path [:increment]}]}

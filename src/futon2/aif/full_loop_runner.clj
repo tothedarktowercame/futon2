@@ -27,6 +27,7 @@
             [futon2.aif.token-outcome :as token-outcome]
             [futon2.aif.surprise :as surprise]
             [futon2.aif.route-attestation :as route-attestation]
+            [futon2.aif.increment-attestation :as increment-attestation]
             [futon2.aif.run-ending-classification :as run-ending]
             [futon2.aif.kernel-example :as kernel-example]
             [futon2.aif.attempt-learning :as attempt-learning]
@@ -283,6 +284,12 @@
            :revision-rounds default-revision-rounds
            :author-infrastructure-retries default-author-infrastructure-retries
            :trigger :duree-click-on-demand
+           ;; PROOF-wm-works ⟨1⟩7 part 2: every click supplies the War
+           ;; Machine's own route declarations, so the route-attestation
+           ;; receipt is :declared by construction rather than
+           ;; :none-declared by omission. The increment evidence itself is
+           ;; still earned per run — see the :build checkpoint.
+           :route-attestation (increment-attestation/declarations)
            :delivery-qa-fn delivery-qa/emit!
            :cohort? true
            :semantic-epoch semantic-epoch}
@@ -5107,29 +5114,43 @@
                                      (= :approve (review-verdict review-job))
                                      (:passed? review-gate))]
                   (reset! measurement-artifact {:repository repo :commit commit :paths files})
-                  (checkpoint! :build
-                               (term (cond->
-                                      {:artifacts files
-                                       :generated-code files
-                                       :commits (if revision
-                                                  [initial-commit commit]
-                                                  [commit])
-                                       :patterns-used (vec (:shown construction))
-                                       :inline-improvements []
-                                       :build-retries (vec build-retries)
-                                       :validation
-                                       {:author (:execution author-job)
-                                        :reviewer (:execution review-gate)
-                                        :review-job (:job-id review-job)
-                                        :review-text (job-text review-job)
-                                        :approved? approved?
-                                        :review-gate review-gate
-                                        :artifact-binding artifact-binding}}
-                                       revision
-                                       (assoc :revision revision
-                                              :reviews reviews))
-                                     {:kind :git-commit-and-independent-review
-                                      :repository repo}))
+                  ;; PROOF-wm-works ⟨1⟩7 part 2: the attested increment is the
+                  ;; wiring of an already-registered test-registry warrant
+                  ;; into the build judgment. Emitted only on an approved
+                  ;; build — an increment on a failing run would contradict
+                  ;; the typed failure — and only when a qualifying warrant
+                  ;; exists; otherwise :increment is absent by construction.
+                  (let [increment-evidence
+                        (when approved?
+                          ((or (:increment-evidence-fn opts)
+                               increment-attestation/increment-evidence)
+                           opts {:author author
+                                 :since (str (Instant/ofEpochMilli started))}))]
+                    (checkpoint! :build
+                                 (term (cond->
+                                        {:artifacts files
+                                         :generated-code files
+                                         :commits (if revision
+                                                    [initial-commit commit]
+                                                    [commit])
+                                         :patterns-used (vec (:shown construction))
+                                         :inline-improvements []
+                                         :build-retries (vec build-retries)
+                                         :validation
+                                         {:author (:execution author-job)
+                                          :reviewer (:execution review-gate)
+                                          :review-job (:job-id review-job)
+                                          :review-text (job-text review-job)
+                                          :approved? approved?
+                                          :review-gate review-gate
+                                          :artifact-binding artifact-binding}}
+                                         revision
+                                         (assoc :revision revision
+                                                :reviews reviews)
+                                         increment-evidence
+                                         (assoc :increment increment-evidence))
+                                       {:kind :git-commit-and-independent-review
+                                        :repository repo})))
                   (observe-end!)
                   (when (and approved? (:measured-acquisition? opts)
                              attempt-evidence-dir)

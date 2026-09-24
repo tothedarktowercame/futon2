@@ -44,6 +44,7 @@ resources/*
 !resources/wm/
 resources/wm/*
 !resources/wm/observation-contract.edn
+!resources/wm/route-attestation-v1.edn
 !resources/wm/repair-evaluator-admissions.edn
 !resources/wm/cascade-sources/
 # PROOF-wm-works 1.2 2.3 (2026-09-22, zai-1): completion-evidence resources for
