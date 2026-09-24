@@ -62,7 +62,9 @@
          (if (= :locator (:kind issued))
            (str "{:schema " schema " :locator {:class :C3|:C4|:C5|:C6 :repo … :sha \"HEAD\" :path … (:decl for C4)} "
                 ":cue {:quote \"words of the criterion this locator decides\"} :reading \"why observing it decides the criterion\" :by \"seat\"}")
-           (str "{:schema " schema " :criteria [{:statement \"…\" :cue {:lines [first last] :quote \"exact text of those lines\"}} …] :by \"seat\"}"))
+           (str "{:schema " schema " :criteria [{:statement \"…\" :cue {:lines [first last] :quote \"exact text of those lines\"}} …] "
+                ":questions [{:question \"…\" :span {:lines [first last] :quote \"exact text\"} :alternatives [\"reading A\" \"reading B\"]} …] :by \"seat\"} "
+                "(criteria where the text is clear, questions anchored to the spans that are not; either may be empty but not both)"))
          " or {:schema " schema " :decline {:reason … :sections-read […]}}; anything else is unparseable.\n")))
 
 ;; ---------------------------------------------------------------------------
@@ -94,14 +96,34 @@
           {:status :rejected :reasons [{:reason :check-refused :refusal refused}]}
           {:status :valid :locator locator :observed (contains? (:observed r) token)})))))
 
+(defn- at-lines [lines {[a b] :lines}]
+  (when (and (integer? a) (integer? b) (<= 1 a b (count lines)))
+    (str/join "\n" (subvec lines (dec a) b))))
+
 (defn validate-criteria
-  "A criteria reading is valid when it lists at least one criterion and
-  every cue's quote is exactly the mission TEXT at its lines; one cue that
-  does not resolve refuses the whole reply."
+  "A criteria reading is valid when it lists at least one criterion or one
+  question, every criterion's cue is exactly the mission TEXT at its lines,
+  and every question is anchored to a span that is exactly the text at its
+  lines and states at least two alternative readings (Joe: a genuinely
+  unclear mission is not a good target, but should yield good questions,
+  not a refusal or bad work against a vague specification). One cue or span
+  that does not resolve, or a question without a span, refuses the whole
+  reply: a vague question about a vague mission is what this prevents. A
+  reply may mix criteria and questions."
   [issued response text]
   (let [lines (vec (str/split-lines (str text)))
         target (:target issued)
         cs (:criteria response)
+        qs (:questions response)
+        bad-q (vec (for [{:keys [question span alternatives] :as q} qs
+                         :let [at (at-lines lines span)]
+                         :when (or (str/blank? question) (nil? at) (not= at (:quote span))
+                                   (< (count (remove str/blank? alternatives)) 2))]
+                     {:reason (cond (nil? span) :question-without-span
+                                    (or (nil? at) (not= at (:quote span))) :question-span-does-not-resolve
+                                    (str/blank? question) :question-not-stated
+                                    :else :question-without-alternatives)
+                      :question (select-keys q [:question])}))
         bad (vec (for [{:keys [statement cue] :as c} cs
                        :let [[a b] (:lines cue)
                              at (when (and (integer? a) (integer? b) (<= 1 a b (count lines)))
@@ -109,10 +131,11 @@
                        :when (or (str/blank? statement) (nil? at) (not= at (:quote cue)))]
                    {:reason :cue-does-not-resolve :criterion (select-keys c [:statement]) :lines (:lines cue)}))]
     (cond
-      (empty? cs) {:status :rejected :reasons [{:reason :no-criteria}]}
-      (seq bad) {:status :rejected :reasons bad}
+      (and (empty? cs) (empty? qs)) {:status :rejected :reasons [{:reason :no-criteria}]}
+      (or (seq bad) (seq bad-q)) {:status :rejected :reasons (into bad bad-q)}
       :else
       {:status :valid
+       :questions (mapv #(select-keys % [:question :span :alternatives]) qs)
        :criteria (mapv (fn [{:keys [statement cue]}]
                          {:kind :extracted-criterion :line (first (:lines cue))
                           :stated (:quote cue) :statement statement :phase "EXTRACTED"
@@ -158,7 +181,8 @@
         prior (or (wi/read-published store target)
                   {:schema :wm/machine-interpretations-v1 :target target :patterns {} :receipts {} :records {}})
         rec (assoc prior :criteria
-                   {:criteria (:criteria validated) :mission-sha mission-sha
+                   {:criteria (:criteria validated) :questions (:questions validated)
+                    :mission-sha mission-sha
                     :receipt {:kind :machine-read-criteria :request-id (:request-id issued)
                               :response-id (wi/content-id :response response)
                               :answered-by answered-by :validator @wi/validator}})]
@@ -178,3 +202,17 @@
 
 (defn published-locators [store target]
   (into {} (for [[t {:keys [locator]}] (get-in (wi/read-published store target) [:locators])] [t locator])))
+
+(defn published-questions [store target]
+  (get-in (wi/read-published store target) [:criteria :questions] []))
+
+(defn mission-owner
+  "The owner a mission names on an **Owner:** line (first agent-like id), or nil."
+  [text]
+  (some->> (re-find #"(?m)^\*\*Owner:\*\*\s*(.*)$" (str text)) second
+           (re-find #"(?:claude|codex|kimi|zai)-\d+")))
+
+(defn question-prompt [target owner questions]
+  (str "The War Machine read " target " and could not tell what it asks for at these spans. "
+       "Answering by editing the mission text at each span lets a later reading find the answer there.\n\n```edn\n"
+       (pr-str {:target target :owner owner :questions questions}) "\n```\n"))

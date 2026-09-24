@@ -18,6 +18,7 @@
             [futon2.aif.flight :as flight]
             [futon2.aif.flight-runner :as fr]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.mission-reading :as reading]
             [futon2.aif.want-interpretation :as wi]
             [futon2.report.war-machine :as wm])
   (:import [java.util UUID])
@@ -90,6 +91,8 @@
       :locators (vec (for [t (get-in src [:readings-needed :locators])
                            :let [c (get-in src [:criteria-by-token t])]]
                        {:want t :line (:line c) :criterion (first (str/split-lines (str (:stated c))))}))}
+     ;; questions an earlier criteria reading raised, and who they go to
+     :owner-questions (reading/published-questions store target)
      :open-wants (vec (remove #(true? (get universe %)) (:wants cw)))
      :constraints (mapv #(select-keys % [:want :requires :phase :through :line :by])
                         (get-in src [:constraints :requires]))
@@ -114,7 +117,9 @@
   (let [store (or store wi/default-store)
         f (flight-for (assoc opts :id (:flight-id planned)))
         answer (fr/agency-answer-fn {:seat seat :caller "wm-flight" :opts (runner/config {})})
-        flown (flight/run! f {:read-fn (fr/read-fn {:store store :answer-fn answer})
+        notify! (fn [owner tgt prompt] (runner/dispatch! (runner/config {}) owner "wm-flight" tgt prompt))
+        flown (flight/run! f {:read-fn (fr/read-fn {:store store :answer-fn answer
+                                                   :notify! notify! :caller "joe"})
                               :ask-fn (fr/ask-fn {:store store :answer-fn answer})
                               :click-fn (fr/http-click-fn {:caller "wm-flight"})
                               :observe-fn (fr/observe-fn)
@@ -128,7 +133,8 @@
      :requests (vec (for [a (:asks flown) q (:asked a)] (select-keys q [:want :request-id :seat :job-id :outcome])))
      :published-store (str store "/" target ".edn")
      :clicks (mapv #(select-keys % [:click-id :advanced :open-after :abstention]) (:clicks flown))
-     :status (:status flown) :closure-scope (:closure-scope flown) :needs (:needs flown)}))
+     :status (:status flown) :closure-scope (:closure-scope flown) :needs (:needs flown)
+     :open-questions (:open-questions flown)}))
 
 (defn main*
   "The driver without process exit: returns {:plan … :ran …}. :ran is nil

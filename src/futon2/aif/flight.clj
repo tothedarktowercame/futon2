@@ -215,8 +215,10 @@
   flight-runner/ask-fn); its needs join the flight's. READ-FN, when given,
   runs first, before the wants are read (flight-runner/read-fn, D11 part 5). SOURCES-FN returns the tick's
   sources (for the want source). Stops when the flight closes, when a click
-  advances nothing, or after MAX-CLICKS (then :status :click-limit, with the
-  open wants on the last click). Returns the flight record."
+  advances nothing, after MAX-CLICKS (then :status :click-limit, with the
+  open wants on the last click), or before any click when owner questions
+  leave it no wants (:status :not-a-target-yet, :open-questions). Returns the
+  flight record."
   [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn]}]
   (loop [f flight]
     (if (or (not= :open (:status f)) (>= (count (:clicks f)) max-clicks))
@@ -231,16 +233,26 @@
                 read (-> (update :readings (fnil conj []) (assoc read :before-click (inc (count (:clicks f)))))
                          (update :needs into (:needs read))))
             wants (click-wants f sources)
-            locators (select-keys (merge (get-in sources [:locators (:target f)]) (:locators wants))
-                                  (:wants wants))
-            before (observe-fn (:target f) locators)
-            asked (when ask-fn (ask-fn f wants sources))
-            f (cond-> f
-                asked (-> (update :asks (fnil conj []) (assoc asked :before-click (inc (count (:clicks f)))))
-                          (update :needs into (:needs asked))))
-            result (click-fn (judge-opts f wants))
-            after (observe-fn (:target f) locators)]
-        (recur (record-click f (merge result {:wants (:wants wants)
-                                              :want-source (:source wants)
-                                              :before before
-                                              :after after})))))))
+            questions (filterv #(= :owner-question (:kind %)) (:needs f))]
+        (if (and (seq questions) (empty? (:wants wants)))
+          ;; genuinely unclear: no click is spent; the flight ends with the
+          ;; owner's questions on its record (Joe: good questions logged,
+          ;; not a refusal and not bad work against a vague specification)
+          (assoc f :status :not-a-target-yet :open-questions questions)
+          (let [locators (select-keys (merge (get-in sources [:locators (:target f)]) (:locators wants))
+                                      (:wants wants))
+                before (observe-fn (:target f) locators)
+                asked (when ask-fn (ask-fn f wants sources))
+                f (cond-> f
+                    asked (-> (update :asks (fnil conj []) (assoc asked :before-click (inc (count (:clicks f)))))
+                              (update :needs into (:needs asked))))
+                result (click-fn (judge-opts f wants))
+                after (observe-fn (:target f) locators)
+                f (record-click f (merge result {:wants (:wants wants)
+                                                 :want-source (:source wants)
+                                                 :before before
+                                                 :after after}))]
+            ;; a closure over the clear criteria names the questions left open
+            (recur (cond-> f
+                     (and (= :closed (:status f)) (seq questions))
+                     (assoc-in [:closure-scope :open-questions] questions)))))))))

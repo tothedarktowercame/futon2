@@ -173,3 +173,89 @@
     (is (str/starts-with? (:stated c) "- [ ] Publish the strict"))
     (testing "and the request cites it where it stands in the mission"
       (is (= [102 102] (:lines (wi/citation-for "src" f11-text c)))))))
+
+;; ---------------------------------------------------------------------------
+;; Questions (Joe: a genuinely unclear mission yields good questions logged,
+;; not a refusal and not bad work against a vague specification)
+
+(def unclear-text
+  (str/join "\n" ["# M-unclear" "" "**Owner:** **claude-3** (by assignment)" "" "## Motivation" ""
+                  "Make the seam better." "" "## Notes" "" "Other text." ""]))
+
+(def question {:question "Better in what respect?"
+               :span {:lines [7 7] :quote "Make the seam better."}
+               :alternatives ["fewer call sites cross it" "it is documented" "a second implementation exists"]})
+
+(deftest questions-must-be-anchored-and-offer-readings
+  (let [issued {:kind :criteria :target "M-unclear"}
+        v #(mr/validate-criteria issued % unclear-text)
+        reasons #(set (map :reason (:reasons (v %))))]
+    (is (= :valid (:status (v {:questions [question]}))))
+    (testing "bad case: a question with no span refuses the whole reply"
+      (is (= :rejected (:status (v {:questions [(dissoc question :span)]}))))
+      (is (contains? (reasons {:questions [(dissoc question :span)]}) :question-without-span)))
+    (is (contains? (reasons {:questions [(assoc-in question [:span :quote] "Not the text.")]}) :question-span-does-not-resolve))
+    (is (contains? (reasons {:questions [(assoc question :alternatives ["only one"])]}) :question-without-alternatives))
+    (testing "a reply may mix clear criteria and questions"
+      (is (= :valid (:status (v {:questions [question]
+                                 :criteria [{:statement "notes exist" :cue {:lines [11 11] :quote "Other text."}}]})))))))
+
+(defn- unclear-flight [s]
+  (flight/start {:target "M-unclear" :chosen-because {:kind :requested}}
+                {:kind :a-exits :repo "futon2" :path "p" :store s :read-text (fn [& _] unclear-text)
+                 :observe #(contains? (:observed (observe {::t %})) ::t)} {:id "f-unclear"}))
+
+(defn- criteria-reply [m]
+  (constantly (str "```edn\n" (pr-str (merge {:schema mr/criteria-schema :by "kimi-6"} m)) "\n```")))
+
+(deftest an-unclear-mission-ends-not-a-target-yet-with-its-questions
+  (let [s (store)
+        notified (atom [])
+        clicks (atom 0)
+        f (flight/run! (unclear-flight s)
+                       {:read-fn (fr/read-fn {:store s :answer-fn (answer-with (criteria-reply {:questions [question]}))
+                                              :notify! (fn [owner target prompt]
+                                                         (swap! notified conj [owner target (str/includes? prompt "Better in what respect?")])
+                                                         {:job-id "q-1"})
+                                              :caller "joe" :observe observe})
+                        :click-fn (fn [_] (swap! clicks inc) {:click-id "c"})
+                        :observe-fn (fn [_ _] {})
+                        :sources-fn (constantly {})
+                        :max-clicks 3})]
+    (is (= :not-a-target-yet (:status f)))
+    (is (zero? @clicks) "no click is spent on a mission it cannot read")
+    (is (= [["claude-3" "M-unclear" true]] @notified) "the owner the mission names is asked")
+    (is (= [{:kind :owner-question :to "claude-3" :notified true :question "Better in what respect?"}]
+           (mapv #(select-keys % [:kind :to :notified :question]) (:open-questions f))))))
+
+(deftest clear-criteria-fly-and-the-closure-names-the-open-question
+  (let [s (store)
+        reply (fn [issued]
+                (if (= :criteria (:kind issued))
+                  ((criteria-reply {:questions [question]
+                                    :criteria [{:statement "notes exist" :cue {:lines [11 11] :quote "Other text."}}]}) issued)
+                  (str "```edn\n" (pr-str {:schema mr/locator-schema
+                                           :locator {:class :C4 :repo "futon2" :sha "HEAD" :path "x" :decl "OBSERVED notes"}
+                                           :cue {:quote "Other text"} :reading "r" :by "kimi-6"}) "\n```")))
+        f (flight/run! (unclear-flight s)
+                       {:read-fn (fr/read-fn {:store s :answer-fn (answer-with reply) :observe observe})
+                        :click-fn (fn [_] {:click-id "c"})
+                        :observe-fn (fn [_ _] {})
+                        :sources-fn (constantly {})
+                        :max-clicks 1})]
+    (is (not= :not-a-target-yet (:status f)) "a clear criterion is flown")
+    (is (some #(= :owner-question (:kind %)) (:needs f)))
+    (testing "no owner-less notification: this mission names claude-3, but no notify! was given"
+      (is (every? #(false? (:notified %)) (filter #(= :owner-question (:kind %)) (:needs f)))))))
+
+(deftest a-mission-that-names-no-owner-addresses-the-caller
+  (let [s (store)
+        text (str/replace unclear-text "**Owner:** **claude-3** (by assignment)" "")
+        notified (atom 0)
+        f (flight/start {:target "M-unclear" :chosen-because {:kind :requested}}
+                        {:kind :a-exits :repo "futon2" :path "p" :store s :read-text (fn [& _] text)} {:id "f"})
+        q question
+        r ((fr/read-fn {:store s :answer-fn (answer-with (criteria-reply {:questions [q]}))
+                        :notify! (fn [& _] (swap! notified inc)) :caller "joe" :observe observe}) f {})]
+    (is (zero? @notified))
+    (is (= [["joe" false]] (mapv (juxt :to :notified) (filter #(= :owner-question (:kind %)) (:needs r)))))))

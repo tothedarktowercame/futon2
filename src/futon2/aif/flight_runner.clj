@@ -319,7 +319,7 @@
   locator. Everything that is not a publication is a flight :need with its
   job id; a mission is never refused for a missing list, and a typed
   absence arises only when a reading ran and found nothing."
-  [{:keys [store read-text code-root] :as opts}]
+  [{:keys [store read-text code-root notify! caller] :as opts}]
   (fn [flight sources]
     (let [ws (:want-source flight)
           target (:target flight)
@@ -346,8 +346,23 @@
                            reading/locator-schema
                            (fn [issued resp] (reading/validate-locator issued resp (select-keys opts [:observe])))
                            (fn [issued resp v who] (reading/publish-locator! store issued resp v who)))))
-          asked (vec (concat (when criteria-entry [criteria-entry]) locator-entries))]
+          asked (vec (concat (when criteria-entry [criteria-entry]) locator-entries))
+          ;; questions the criteria reading raised: sent to the owner the
+          ;; mission names (else recorded for the requisition's caller),
+          ;; never a refusal
+          questions (when (= :published (:outcome criteria-entry))
+                      (reading/published-questions store target))
+          owner (reading/mission-owner text)
+          addressed (or owner caller "requisition-caller")
+          notified (when (and (seq questions) owner notify!)
+                     (notify! owner target (reading/question-prompt target owner questions)))]
       {:asked asked
-       :needs (vec (for [a asked :when (not= :published (:outcome a))]
-                     (merge {:kind (:outcome a) :missing (if (= :criteria (:kind a)) :criteria :locator)}
-                            (select-keys a [:want :request-id :seat :job-id]))))})))
+       :needs (vec (concat
+                    (for [a asked :when (not= :published (:outcome a))]
+                      (merge {:kind (:outcome a) :missing (if (= :criteria (:kind a)) :criteria :locator)}
+                             (select-keys a [:want :request-id :seat :job-id])))
+                    (for [q questions]
+                      {:kind :owner-question :missing :owner-answer :to addressed
+                       :notified (boolean notified) :notification (select-keys notified [:job-id])
+                       :question (:question q) :span (:span q) :alternatives (:alternatives q)
+                       :request-id (:request-id criteria-entry)})))})))
