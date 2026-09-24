@@ -118,7 +118,8 @@
   (let [store (or store wi/default-store)
         f (flight-for (assoc opts :id (:flight-id planned)))
         answer (fr/agency-answer-fn {:seat seat :caller "wm-flight" :opts (runner/config {})})
-        notify! (fn [owner tgt prompt] (runner/dispatch! (runner/config {}) owner "wm-flight" tgt prompt))
+        notify! (fn [owner tgt prompt] (runner/dispatch! (runner/config {}) owner "wm-flight" tgt
+                                                  (str "Requisition: " tgt " — War Machine questions for the mission owner\n\n" prompt)))
         flown (flight/run! f {:read-fn (fr/read-fn {:store store :answer-fn answer
                                                    :notify! notify! :caller "joe"})
                               :ask-fn (fr/ask-fn {:store store :answer-fn answer})
@@ -145,7 +146,8 @@
   (let [store (or store wi/default-store)
         f (flight-for (assoc opts :id (:flight-id planned)))
         answer (fr/agency-answer-fn {:seat seat :caller "wm-flight" :opts (runner/config {})})
-        notify! (fn [owner tgt prompt] (runner/dispatch! (runner/config {}) owner "wm-flight" tgt prompt))
+        notify! (fn [owner tgt prompt] (runner/dispatch! (runner/config {}) owner "wm-flight" tgt
+                                                  (str "Requisition: " tgt " — War Machine questions for the mission owner\n\n" prompt)))
         read ((fr/read-fn {:store store :answer-fn answer :notify! notify! :caller "joe"}) f sources)
         published (wi/read-published store (:target opts))]
     {:readings (:asked read)

@@ -84,7 +84,12 @@
          job-text futon2.aif.task-execution-evidence/job-text}}]
   (fn [issued]
     (let [prompt-fn (or prompt-fn (if (#{:locator :criteria} (:kind issued)) reading/prompt wi/prompt))
-          sent (dispatch! opts seat caller (:target issued) (prompt-fn issued))
+          ;; Kimi seats refuse a call without this line in the prompt
+          ;; (Agency: "You can't use a Kimi seat without a requisition")
+          requisition (str "Requisition: " (:target issued) " — War Machine "
+                           (name (or (:kind issued) :interpretation)) " request "
+                           (:request-id issued) "\n\n")
+          sent (dispatch! opts seat caller (:target issued) (str requisition (prompt-fn issued)))
           job-id (:job-id sent)]
       (if-not job-id
         {:seat seat :state :not-dispatched :text nil :dispatch sent}

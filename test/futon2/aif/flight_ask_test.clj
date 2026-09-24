@@ -123,13 +123,14 @@
   (let [calls (atom [])
         af (fr/agency-answer-fn {:seat "kimi-6" :opts {:agency-base "http://x"}
                                  :dispatch! (fn [_ seat caller mission prompt]
-                                              (swap! calls conj [:bell seat caller mission (str/includes? prompt "REPLY GRAMMAR")])
+                                              (swap! calls conj [:bell seat caller mission (str/includes? prompt "REPLY GRAMMAR")
+                                                                 (str/starts-with? prompt "Requisition: M-futon-seams — ")])
                                               {:job-id "job-9"})
                                  :poll! (fn [_ id] (swap! calls conj [:poll id]) {:state "done" :job-id id})
                                  :job-text (constantly "reply text")})
         a (af {:target "M-futon-seams" :request-id "request-1" :want {:token argue}})]
-    (is (= [[:bell "kimi-6" "wm-flight" "M-futon-seams" true] [:poll "job-9"]] @calls)
-        "requisition is the mission; the prompt states the grammar")
+    (is (= [[:bell "kimi-6" "wm-flight" "M-futon-seams" true true] [:poll "job-9"]] @calls)
+        "requisition is the mission, on the prompt's first line (Kimi seats refuse without it); the prompt states the grammar")
     (is (= {:seat "kimi-6" :job-id "job-9" :state "done" :text "reply text"} a))))
 
 (deftest the-loop-asks-before-each-click
