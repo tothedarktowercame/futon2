@@ -107,13 +107,24 @@ Off the serving path, by the record and the code: the organiser
 (`cascade_policy.clj` `organise`) and the canonical semilattice
 (`cascade_prior.clj` `canonical-semilattice`) exist but ran nowhere on these
 clicks — fix-9 said so in prose and nothing since contradicts it. There is
-also an *older* cascade assembly lane: `cascade_lane.clj:404-454` shells
-out to a Python constructor (`cascade_serve.py`) and stands *before*
-selection (`war_machine.clj:5047-5051`) — but every recorded tick passes
-`:include-advisory-lanes? false`, so it built nothing on any record
-(`C474-cascade-order-discovery.md` §1: "No recorded run built a cascade at
-all"). Two assembly paths exist; the one that ran on our records is the
-hand-admitted pipeline above.
+also an *older* cascade constructor, `futon2.report.cascade-lane`
+(`scripts/futon2/report/cascade_lane.clj`), which shells out to a Python
+process (`cascade_serve.py`, lines 22-23 and 44-45). At HEAD it does not
+stand before selection: it is called *after* selection, from
+`construct-selected-action :default` (`full_loop_runner.clj:1453-1457`),
+for the selected entry only, and only for action types with no dedicated
+constructor. The `:include-advisory-lanes? false` flag that C474 §1 blamed
+in the 2026-09-01 runs has had no reader since 5d55e7a0 (2026-09-17); the
+judge docstring at `war_machine.clj:6712-6719` says so, and the
+`war_machine.clj:5047-5051` site C474 cited is now manifest-reading code.
+Its output key `:construction-kind :selected-policy` appears on no run
+record and only in machinery-53/54 evidence dumps of 2026-09-14/15. (Not
+to be confused with the judge's own `cascade-lane` at
+`war_machine.clj:5748`, the in-JVM per-problem node run R1 → R6 → … → R9
+whose `:candidates` are what the selection lanes at `:6168-6172` read;
+that one is on the path.) Two constructors exist; the one that produced
+our recorded cascades is the hand-admitted pipeline above.
+[Correction by claude-8, 2026-09-24, after reading the call sites.]
 `cascade_structure.clj` `receipt` IS on the path
 (`full_loop_runner.clj:1353`) but is record-only: it computes shape, it
 never selects. The ticket queue (`ticket_queue.clj`) orders *which target*
