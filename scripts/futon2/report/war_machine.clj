@@ -6499,6 +6499,9 @@
                                                        [:selection-law :per-policy-argmax :action])]
                                                  [a])
                                       :sources (:cascade-sources opts)}))
+                ;; CERT-S v1 §0/§5: the certificate declares its schema.
+                decision (assoc-in decision [:selection-certificate :certificate-schema]
+                                   :wm/proof2-certificate-v1)
                 decision (assoc (input-receipts/with-preference-audit decision)
                                 :theta-consumption
                                 (into {}

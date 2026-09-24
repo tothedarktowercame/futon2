@@ -27,7 +27,8 @@
 (defn- canonical
   "Canonical form for hashing: sets sorted by their printed token
   representation, maps sorted by key, sequences kept in order (precedence is
-  ORDERED and that order is semantic)."
+  ORDERED and that order is semantic). Doubles print as the CERT-S v1 tagged
+  literal #wm/double \"0x…p…\" (Double/toHexString) so no bit is lost."
   [x]
   (cond
     (map? x) (into (sorted-map-by (fn [a b] (compare (pr-str a) (pr-str b))))
@@ -35,7 +36,18 @@
                    x)
     (set? x) (mapv canonical (sort-by pr-str x))
     (sequential? x) (mapv canonical x)
+    (double? x) (tagged-literal 'wm/double (Double/toHexString x))
     :else x))
+
+(defn canonical-sha256
+  "CERT-S v1 §3 content hash: sha256 of the canonical EDN bytes of the
+  value, written \"sha256:<hex>\". Shared by the candidate-derivations
+  carrier's :candidate-payload-sha256 so every section that inlines a
+  candidate payload can join by id AND hash. Doubles hash as the
+  #wm/double tagged form; ratios and integers print exactly; a reader
+  recomputes, never trusts an embedded hash (BJ-3)."
+  [x]
+  (str "sha256:" (manifest/sha256 (pr-str (canonical x)))))
 
 (defn- content-hash
   "sha256 of the canonical printed form. Deterministic across JVMs because

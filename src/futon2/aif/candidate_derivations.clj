@@ -72,6 +72,16 @@
               :source-content-sha256 (if (:sha256 dsrc)
                                        (:sha256 dsrc)
                                        dsrc)
+              :candidate-payload-sha256 (ce/canonical-sha256 (:id candidate))
+              ;; CERT-S v1 §0 is silent on symbol/string target
+              ;; materialisation; the stricter reading is taken: a symbol
+              ;; :target and a string :target hash DIFFERENTLY, so the
+              ;; exemplar's cross-section variance surfaces as a
+              ;; :candidate-payload-drift refusal rather than joining.
+              :payload-canonicalisation
+              {:form :cert-s-v1-canonical-edn
+               :target-symbol-vs-string :distinct
+               :note "same candidate iff [:id :id] and :candidate-payload-sha256 agree"}
               :discovered-at {:status :missing
                               :reason :discovery-time-not-recorded}
               :interpretation {:kind :declared}
@@ -143,5 +153,23 @@
            {:status :refused :kind :candidate-id-mismatch
             :reason :action-id-not-in-candidates
             :unmatched (vec (sort (remove id-set action-ids)))}
-           (into {} (map (fn [c] [(get-in c [:id :id]) (entry c s0 opts)]))
-                 candidates)))))))
+           ;; CERT-S v1 §2 :candidate-payload-drift: the same id carrying
+           ;; differing canonical payload hashes across the sections the
+           ;; carrier can see (:candidates and the :actions it is passed).
+           ;; The whole carrier refuses, with the hashes per section, so the
+           ;; symbol/string materialisation cannot hide (BJ-1/§6.9).
+           (let [hashes (merge-with merge
+                         (into {} (map (fn [c] [(get-in c [:id :id])
+                                                {:candidates (ce/canonical-sha256 (:id c))}]))
+                               candidates)
+                         (into {} (map-indexed (fn [i a] [(get-in a [:id])
+                                                          {(keyword (str "action-" i)) (ce/canonical-sha256 a)}]))
+                               (vec (:actions opts))))]
+             (if-let [drift (some (fn [[id sections]]
+                                    (when (< 1 (count (distinct (vals sections))))
+                                      {:id id :hashes sections}))
+                                  hashes)]
+               {:status :refused :kind :candidate-payload-drift
+                :id (:id drift) :hashes (:hashes drift)}
+               (into {} (map (fn [c] [(get-in c [:id :id]) (entry c s0 opts)]))
+                     candidates)))))))))
