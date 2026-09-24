@@ -106,7 +106,14 @@ The stages, with what the record shows per stage:
 Off the serving path, by the record and the code: the organiser
 (`cascade_policy.clj` `organise`) and the canonical semilattice
 (`cascade_prior.clj` `canonical-semilattice`) exist but ran nowhere on these
-clicks — fix-9 said so in prose and nothing since contradicts it.
+clicks — fix-9 said so in prose and nothing since contradicts it. There is
+also an *older* cascade assembly lane: `cascade_lane.clj:404-454` shells
+out to a Python constructor (`cascade_serve.py`) and stands *before*
+selection (`war_machine.clj:5047-5051`) — but every recorded tick passes
+`:include-advisory-lanes? false`, so it built nothing on any record
+(`C474-cascade-order-discovery.md` §1: "No recorded run built a cascade at
+all"). Two assembly paths exist; the one that ran on our records is the
+hand-admitted pipeline above.
 `cascade_structure.clj` `receipt` IS on the path
 (`full_loop_runner.clj:1353`) but is record-only: it computes shape, it
 never selects. The ticket queue (`ticket_queue.clj`) orders *which target*
@@ -203,6 +210,19 @@ limb. What it costs: two patterns that could both contribute to one
 acceptance must be serialised into an arbitrary order, and the
 intersection of their contributions — Moran's "where the design
 intelligence lives" — has nowhere to be recorded.
+
+**The look Joe has in mind.** The exemplar diagrams are the three
+graphviz `.dot` cascades under `holes/labs/M-evaluate-policies/exhibit/`
+(`cascade-1-M-bayesian-structure-learning.dot`,
+`cascade-2-M-canon-fingerprint-store.dot`,
+`cascade-3-M-evaluate-policies.dot`): undirected overlap graphs where a
+pattern has several parents — `budget-bounds-exploration` wires into three
+others in cascade-3 — with edge widths for relevance. That is Moran's
+"multiple parents, contexts overlap" drawn as a picture, and it is
+visibly not a precedence list. (The order-theoretic disposition of this
+question for the order registry is `C474-cascade-order-discovery.md`
+(discovery) and `C475-cascade-order-disposition.md` (disposition); the
+present walkthrough stays on the records.)
 
 **What a semilattice cascade would look like on the 09-23 target.**
 Hypothetical, drawn from the same tokens:
