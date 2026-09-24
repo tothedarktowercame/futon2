@@ -30,6 +30,26 @@ All eight clauses hold on the single linked sequence `L` of PROOF-2
 (ordinary live clicks under A21); fixtures and hand-built inputs establish
 none of them.
 
+### Grain of a click: a flight, the whole mission (Joe, 2026-09-24)
+
+A click is modelled on a flight (futon3c `M-first-flights` §8): one click
+takes a mission (or other task) end to end. Its target is the mission; its
+wants are the mission's completion criteria (for a mission document, its
+phase exits), read from the mission text at click time; a candidate is a
+mission-grain cascade spanning every phase; the enactment is the whole run;
+clause 4's attempts count across the mission. This is the grain at which
+`Q(o|π)` is read in `futon4/holes/mission-lifecycle-wm-alignment.md` §3c ("at
+mission grain … the catalog IS the playout record"). Every clause below is
+stated per click, and a click is at this grain. A run that stops before the
+completion criteria are met ends with a typed stop naming the unmet criterion
+and why, not with a partial click counted as done.
+
+Worked example against this grain: click-001 (M-futon-seams) targeted one
+instance's three wants. The mission's own exits (MAP's table, ARGUE,
+DOCUMENT) were met, where they were, by the owning agent outside any click,
+and the work was spread over many rounds. That is the wrong grain of click,
+the same error clause C catches in an enactment one level down.
+
 ### Clause T — the machine chooses its target (new; AR-32)
 
 **Wₜ.** On each click the extracted target field `T` lists every target the
@@ -347,6 +367,9 @@ PROOF-2a it implies.
    and from operator turns disagree in sign on the two candidates, each on 1–3
    citations; neither records applied cascades. → E is estimated from Clause C
    enactment records, filled forward.
+0. **The worked example used the wrong grain of click.** Its click targeted
+   one instance, and the mission's exits were met outside any click, across
+   many rounds. → a click is a flight: one mission end to end (section above).
 8. **Working out of order cost a wrong-grain enactment.** The mission gained
    artefacts for five later phases while at IDENTIFY; the first enactment
    worked from the defect description rather than a DERIVE that had met its
