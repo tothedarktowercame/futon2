@@ -183,3 +183,56 @@ priming edge; the recorded prior must change.
    to pass.
 5. **Record: `:cost-ordering` in the target field**, and the linear-extension
    spread for X₀(e).
+
+## Checkpoint 1 — M-futon-seams worked example (2026-09-24, not complete)
+
+A dated record of what the by-hand exemplar has shown so far. It is a
+checkpoint, not a result: clauses 1–6 have barely been exercised, and the
+exemplar's own clause 0 fails. Evidence lives in futon3c
+`holes/labs/M-futon-seams/` (page: https://zone.hyperreal.enterprises/wip/seams.html).
+
+Settled by examples (already in the clauses above):
+1. Kernel = co-application of the enabled frontier. One-at-a-time kernels are
+   slower where patterns are independent (instance 7, horizon 6: 0.853 vs 0),
+   and where they conflict (instance 6) never reach the wants; co-application
+   passes through the both-versions-live state the mission records.
+2. A precedence list silently picks a number: instance 5's p(all wants) ranges
+   0.168–0.797 over its linear extensions; X₀(e) compares the spread and states
+   the horizon.
+3. Carrier = containment order, meets required only for overlapping pairs. Only
+   instance 6 fails, and its missing meet's maximal common units are its two
+   conflicting patterns.
+
+Corrected along the way:
+4. "Below" must be reflexive (CascadeOrder's `a = b ∨ Reach r a b`); a strict
+   version produced four false missing meets (futon3c `4d748660`).
+5. Cascade (argument, containment) and wiring (construction, token flow) are
+   different objects; deriving one from the other's edges drew false pictures.
+   Token flow exposes dangling outputs (instance 5: three tokens nobody wants).
+6. Validators must accept what the loader accepts (`@arg` id lines; futon3c
+   `3a486cdc`), or they manufacture unproduced wants.
+
+Gaps in PROOF-2a exposed:
+7. No clause checks that the enacted change IS the chosen candidate. click-001
+   chose a role registry; the enactment (futon3c `8e5c431e`) built a
+   provider-grain fix; every clause as written would pass it
+   (`exemplar/click-001-outcome.edn`).
+8. Clause T has no target value: the mission's stated cost ordering did not pick
+   the target and is ambiguous in direction; the chosen target had the lowest
+   predicted p(all wants) of four, so p(all wants) is not a target's worth.
+9. Clause 0's construction condition is unmet: every candidate is hand-built;
+   `interpretation_construction.clj` has not run on these interpretations.
+   Conflicts come from interpretation forbids, not pattern text, so the
+   interpretation author must be recorded.
+10. Clauses 1–6: A observed (a re-runnable redirect test); D, F, Q-link
+    recorded as typed absences; B trials not usable because the enactment
+    deviated from the plan.
+11. Phase order: an INSTANTIATE step ran before MAP/DERIVE/ARGUE met their
+    exits (`holes/labs/M-futon-seams/lifecycle.edn`).
+
+Open next: enact the chosen candidate as chosen (role registry) with an
+enactment-conformance record; clauses 1–6 on that enactment (A with stated
+precision per check kind, D as an exact update, F from the same update, the
+Q-link, B trials per pattern, and a second click that reads the updated B);
+run the constructor on the recorded interpretations; the Lean module for the
+kernel and the restricted meet condition.
