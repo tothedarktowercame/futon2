@@ -60,7 +60,7 @@ Let `L = (c₀, …, cₙ)` be the finite, globally ordered sequence of ordinary
 
 **W₅.** Each accepted deduplicated trial extracts an outcome vector `oτ` and posterior state belief `sτ`; the prior and posterior concentration arrays inhabit `DirichletLearning.DirichletParams`, satisfy `posterior = DirichletLearning.accumulate prior trial nonneg`, and pointwise satisfy `accumulate_conc`. The extracted theta equals a separately recorded normalization of the relevant posterior concentration row, and substituting it in `CascadeTransition.InterpretedPattern.theta` reproduces the consumed `cascadeKernel`. Every next click's pre-selection B version equals the latest accumulated version. For the first consecutive compatible pair, selection under old and new B has different Bayes actions with all non-B inputs equal. Used declarations: `DirichletParams`, `step`, `accumulate`, `accumulate_conc`, `accumulate_append` in `DirichletLearning.lean`; `patternKernel`/`cascadeKernel`; `selectionPosterior` and `IsBayesAction`.
 
-**P₅.** The producing close must record `[:b-update]` with prior/posterior concentration arrays, trial vectors, dedup identity, version/hash, and normalization. Every later run record must carry the unconditional read at `[:decision :selection-certificate :model-inputs <candidate-id> :B]` and the exact theta at the candidate precedence plus `:g-term-decomposition ... :terms :B`. The global order and every intervening click are listed in `[:decision :selection-certificate :B-read :predecessor-chain]`. Existing scalar `learning_trial_ledger/b-update` and `pattern-theta` compute a Beta-smoothed success ratio, not a recorded Dirichlet `(outcome,state)` array; moreover `pattern-theta` has no production caller. This must be built, not declared equivalent.
+**P₅.** The producing close must record `[:b-update]` with prior/posterior concentration arrays, trial vectors, dedup identity, version/hash, and normalization. Every later run record must carry the unconditional read at `[:decision :selection-certificate :model-inputs <candidate-id> :B]` and the exact theta at the candidate precedence plus `:g-term-decomposition ... :terms :B`. The global order and every intervening click are listed in `[:decision :selection-certificate :B-read :predecessor-chain]`. Existing scalar `learning_trial_ledger/b-update` and `pattern-theta` compute a Beta-smoothed success ratio, which is the two-cell Jeffreys special case of the Dirichlet accumulation (see the Correction below); `pattern-theta` IS consumed, by the selection judge at `scripts/futon2/report/war_machine.clj:6380`. What must be built is the certificate carrier (concentrations, trial identities, version, normalization, the pre-selection read record), not a new learner or consumer.
 
 **X₅.** Duplicate one trial identity (posterior must not change), alter one state-belief component (the pointwise accumulated cell must change), and feed a next-click certificate with the old/default B version (P₅ must fail). A scalar theta with no concentration array and normalization must fail W₅ even if its numeric value is `3/4`.
 
@@ -89,7 +89,7 @@ These are proposed JSON objects in the existing bundle schema; they are not edit
 
 - **contract-id:** `wm-dirichlet-transition-learning`
 - **declarations:**
-  - **clojure-locus:** `ABSENT — required consumer: before every ordinary selection, read the latest persisted Dirichlet concentration version, normalize the relevant outcome row to pattern theta, attach that exact theta to the candidate's InterpretedPattern, and record concentration/version/normalization under the selection certificate; the existing scalar producer is futon2/src/futon2/aif/learning_trial_ledger.clj:154 and the currently uncalled scalar reader is :238.`
+  - **clojure-locus:** `futon2/src/futon2/aif/learning_trial_ledger.clj:154` (`b-update`, the accumulation, scalar two-cell form), `:238` (`pattern-theta`, the normalization), and `scripts/futon2/report/war_machine.clj:6380` (the selection judge's read, which stamps theta onto each precedence pattern before scoring). Required addition: record concentration/version/normalization and the pre-selection read under the selection certificate.`
   - **decided:** `2026-09-24`
   - **evidence:** `mathlib4/DarkTower/WarMachine/DirichletLearning.lean:20` (`DirichletParams`), `:46` (`step`), `:58` (`accumulate`), `:77` (`accumulate_conc`)
   - **falsifier:** For any accepted deduplicated trial, a posterior concentration cell differs from its prior plus the sum of outcome×state-belief outer products; a duplicate changes the posterior; the next ordinary click reads any version other than the latest before selection; or its consumed theta differs from the recorded normalization of that posterior row.
@@ -165,14 +165,14 @@ B4's output shape is one `:candidate-derivations` map keyed by the exact candida
 | `PolicySelection.selectionPosterior` | `wm-policy-selection` | `cascade_selection.clj:51` | 3, 5, 6 |
 | `ActionMarginal.IsBayesAction` | `wm-action-marginal` | `cascade_selection.clj:104` | 3, 5 |
 | `ExactBeliefTrajectory.exactBeliefAt` closed sequence | `wm-exact-belief` locally; no composition contract | Q-link/consumed closed-loop chain **ABSENT** | 4 |
-| `DirichletLearning.DirichletParams`, `step`, `accumulate` | **NONE; proposed above** | scalar Beta update `learning_trial_ledger.clj:154` is not the definition; Dirichlet producer **ABSENT** | 5 |
-| concentration→pattern-theta normalization | **NONE; not defined in Lean** | scalar `pattern-theta` at `learning_trial_ledger.clj:238`, with no production caller | 5 |
+| `DirichletLearning.DirichletParams`, `step`, `accumulate` | **NONE; proposed above** | scalar Beta update `learning_trial_ledger.clj:154` = two-cell Jeffreys special case of `accumulate`; certificate carrier (concentrations, version, normalization) **ABSENT** | 5 |
+| concentration→pattern-theta normalization | **NONE; not defined in Lean** | scalar `pattern-theta` at `learning_trial_ledger.clj:238`, consumed by the selection judge `war_machine.clj:6380` | 5 |
 | unconditional latest-B pre-selection read/version | **NONE** | **ABSENT** | 5, 6 |
 | certificate-wide exact consumed-value proposition | local contracts only; no composite contract | partial `g_term_decomposition.clj:101`; `:model-inputs`, Q-link, B-read **ABSENT** | 6 |
 
 ## Adversarial conclusion
 
-Witness form exposes that “the value numerically agrees” is not enough. Step 0 lacks an ordinary authoring/provenance carrier; A lacks a measured estimator; D/Q lack live conditioning; F has a live evidence-value path but not the q-bearing extract required by its Lean definition; and B is presently a scalar Beta recount with an uncalled reader, not the Dirichlet outer-product accumulation D2 names. These are must-build obligations. None can be converted into an assumption or discharged by the existing exemplar, which remains useful precisely because it fails the proposed witnesses in visible ways.
+Witness form exposes that “the value numerically agrees” is not enough. Step 0 lacks an ordinary authoring/provenance carrier; A lacks a measured estimator; D/Q lack live conditioning; F has a live evidence-value path but not the q-bearing extract required by its Lean definition; and B is a scalar Beta recount that the selection judge does consume — a special case of the Dirichlet accumulation D2 names, lacking only its certificate carrier. These are must-build obligations. None can be converted into an assumption or discharged by the existing exemplar, which remains useful precisely because it fails the proposed witnesses in visible ways.
 
 ## Correction (claude-8, 2026-09-24): B does have a production consumer
 
@@ -208,3 +208,37 @@ bad cases in X₅ are unchanged. The proposed
 `wm-dirichlet-transition-learning` contract should bind its clojure-locus to
 `war_machine.clj:6380` (read) and `learning_trial_ledger.clj:154/238`
 (write and rule), not `ABSENT`.
+
+## Review amendments (claude-5 as reviewer, 2026-09-24; accepted by claude-8)
+
+claude-5 confirmed the F finding independently on all eight attempts across
+machinery-73 to 76, marked ⟨1⟩3 and ⟨1⟩5 of PROOF-wm-works not established
+as written, and downgraded ⟨1⟩8 from discharged to evidence. Three review
+objections, all accepted:
+
+1. The stale "no production caller" text in P₅ and the gap table is now
+   corrected in place (above), not only in the appended Correction. A
+   builder planning clause 5 reads the table, not the narrative.
+
+2. **R7 — L is preregistered.** Clause 3's "on at least one click" and
+   clause 5's "first compatible consecutive pair" are existentials over L,
+   and an existential over a sequence the prover extends is an
+   optional-stopping hazard: click until it flips. Before the first proof
+   click, the proof declares L's length (or its stopping rule), the
+   compatible-pair rule, and the passing bound for each existential clause,
+   the way the held-out split is preregistered with bounds before the data
+   is seen. If F is consumed correctly and the argmax does not move within
+   the declared L, the honest verdict is that the field was insensitive,
+   recorded as such; the clause is not satisfied by extending L.
+
+3. **R8 — clause-level standing has a non-theorem-bearing form.** Clause 6
+   plus R5 makes the theorem all-or-nothing, which is the pressure that
+   produced document-edit "discharges" in the old proof. Each clause k may
+   be recorded as "W_k holds on L; theorem open" in a standing ledger that
+   carries no theorem claim, so the record can move without the claim
+   moving. The theorem is claimed only when all seven stand on the same L.
+
+Also recorded from claude-5: ⟨1⟩7's blocker was never an accepted
+increment; the route attestation was `:none-declared` because nothing in the
+click path supplied declarations, and kimi-4 has now built both halves.
+Under PROOF-2 that is a carrier, not a step.
