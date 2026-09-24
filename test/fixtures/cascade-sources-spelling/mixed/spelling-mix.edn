@@ -1,0 +1,21 @@
+;; D17 fixture: the SAME pattern spelled three ways in one declaration --
+;; a symbol key in :patterns (with a symbol :id on the pattern map), a
+;; symbol key in :interpretation-receipts, a keyword in the candidate's
+;; bare :precedence entry, and a namespaced string as the :id of the map
+;; entry. Canonicalisation must load these as ONE pattern the precedence
+;; resolves to; before the change the keyword precedence did not resolve
+;; against the symbol pattern key.
+{:schema :wm/cascade-source-v1
+ :target "M-spelling-mix"
+ :context :WM
+ :beta {:value 1 :status :declared}
+ :facts []
+ :want [:hole/h-goal]
+ :locators {}
+ :patterns {spelling/one-pattern
+            {:id spelling/one-pattern
+             :guard {:needs #{} :forbids #{}}
+             :produces #{:hole/h-goal}}}
+ :interpretation-receipts {spelling/one-pattern {:kind :hand-admitted :by "fixture"}}
+ :candidates [{:precedence [:spelling/one-pattern {:id "spelling/one-pattern"}]
+               :construction-receipt {:kind :hand-admitted}}]}

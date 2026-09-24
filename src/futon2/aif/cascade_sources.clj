@@ -124,6 +124,69 @@
              {:path path :target (:target d) :token token :check check :field field}))
   d)
 
+(defn- canonical-pattern-id
+  "D17: one canonical pattern-id form, the namespaced keyword. Authors have
+  written the same id in three spellings -- seat A keywords, seat B
+  namespaced strings (the E-cascade-real probe files on disk; the D17 note
+  remembers them as symbols) -- and a naive comparison saw two patterns
+  where there was one. The loader canonicalises at load so the constructor
+  and any agreement check see one id. An id with no namespace, or of any
+  other type, is a typed refusal naming the path and value, never a silent
+  string coercion."
+  [id path field]
+  (let [canonical
+        (cond
+          (keyword? id) (when (namespace id) id)
+          (symbol? id) (when (namespace id) (keyword (namespace id) (name id)))
+          (string? id) (let [slash (str/index-of id "/")]
+                         (when (and slash (pos? slash) (< slash (dec (count id))))
+                           (keyword (subs id 0 slash) (subs id (inc slash)))))
+          :else nil)]
+    (when-not canonical
+      (refuse! :invalid-pattern-id {:path path :field field :value id}))
+    canonical))
+
+(defn- normalize-pattern-ids
+  "Canonicalise every pattern id in a checked declaration: the keys of
+  :patterns, each pattern's own :id, the keys of :interpretation-receipts,
+  and each candidate's :precedence entries (bare ids and :id inside pattern
+  maps). Returns [declaration' n] where n counts the ids rewritten; the
+  per-file occurrence records n as :id-normalization so provenance shows
+  the rewrite happened."
+  [d path]
+  (let [rewritten (volatile! 0)
+        canon (fn [field id]
+                (let [c (canonical-pattern-id id path field)]
+                  (when (not= c id) (vswap! rewritten inc))
+                  c))
+        patterns (into {}
+                       (map (fn [[id pat]]
+                              [(canon :patterns id)
+                               (if (and (map? pat) (contains? pat :id))
+                                 (assoc pat :id (canon :patterns (:id pat)))
+                                 pat)]))
+                       (:patterns d))
+        receipts (into {}
+                       (map (fn [[id receipt]] [(canon :interpretation-receipts id) receipt]))
+                       (:interpretation-receipts d))
+        candidates (mapv (fn [candidate]
+                           (if (contains? candidate :precedence)
+                             (update candidate :precedence
+                                     (fn [entries]
+                                       (mapv (fn [entry]
+                                               (cond
+                                                 (and (map? entry) (contains? entry :id))
+                                                 (assoc entry :id (canon :precedence (:id entry)))
+                                                 (map? entry) entry
+                                                 :else (canon :precedence entry)))
+                                             entries)))
+                             candidate))
+                         (:candidates d))]
+    [(assoc d :patterns patterns
+             :interpretation-receipts receipts
+             :candidates candidates)
+     @rewritten]))
+
 (defn- observe-facts
   "Fact tokens to true/false/:unknown through their locators."
   [facts locators]
@@ -165,6 +228,7 @@
                 snapshot (java.nio.file.Files/readAllBytes (.toPath f))
                 hash (evidence/sha256 snapshot)
                 d (check-file! path (edn/read-string (String. snapshot java.nio.charset.StandardCharsets/UTF_8)))
+                [d id-normalization] (normalize-pattern-ids d path)
                 policy (get d :token-initialization token-policy/disabled)
                 _ (when-not (token-policy/valid-policy? policy)
                     (refuse! :invalid-token-initialization-policy {:path path :value policy}))
@@ -181,7 +245,8 @@
                                                      :rates [prior-beta this-beta]}))
                 {:keys [universe observations]} (observe-facts (:facts d) (:locators d))
                 occurrence {:path path :sha256 hash :target t :observations observations
-                            :token-initialization-policy policy}
+                            :token-initialization-policy policy
+                            :id-normalization id-normalization}
                 _ (when *read-occurrences* (swap! *read-occurrences* (fnil conj []) occurrence))]
             (-> acc
                 (assoc-in [:token-initialization t]

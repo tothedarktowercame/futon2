@@ -1,0 +1,12 @@
+;; D17 refusal fixture: a pattern id that is neither keyword, symbol, nor
+;; string is a typed refusal, never a silent coercion.
+{:schema :wm/cascade-source-v1
+ :target "M-spelling-bad"
+ :context :WM
+ :beta {:value 1 :status :declared}
+ :facts []
+ :want [:hole/h-goal]
+ :locators {}
+ :patterns {42 {:guard {:needs #{} :forbids #{}} :produces #{:hole/h-goal}}}
+ :interpretation-receipts {}
+ :candidates []}
