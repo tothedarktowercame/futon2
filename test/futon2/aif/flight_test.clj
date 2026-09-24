@@ -41,7 +41,7 @@
                    (when (< i (count steps)) (reset! facts (nth steps i)))
                    {:click-id (str "click-" (inc i))
                     :unreached-wants (get unreached i [])}))
-     :observe-fn (fn [_] @facts)
+     :observe-fn (fn [_ _] @facts)
      :sources-fn (constantly sources)}))
 
 (deftest a-flight-closes-its-target

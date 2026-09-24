@@ -4557,8 +4557,11 @@
                                 (fn [days]
                                   (wm/generate-war-machine
                                    days
+                                   ;; :flight: inside a flight the judge assembles only
+                                   ;; the flight's target (futon2.aif.flight-runner)
                                    (assoc (select-keys opts [:accumulate-strategic-habit?
-                                                            :run-id :loaded-code-identity :cascade-habit-path])
+                                                            :run-id :loaded-code-identity :cascade-habit-path
+                                                            :flight])
                                           :include-advisory-lanes? false
                                           :defer-render? true))))
             judgement0-base

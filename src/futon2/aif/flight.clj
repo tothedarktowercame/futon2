@@ -154,7 +154,9 @@
 (defn run!
   "Run FLIGHT to closure. CLICK-FN takes the judge-opts and returns
   {:click-id … :unreached-wants … :abstention …}; OBSERVE-FN takes the
-  target and returns its facts {token bool}. SOURCES-FN returns the tick's
+  target and the wants' locators {token locator} and returns the facts
+  {token bool} (the tick's sources' locators, overlaid with the want
+  source's own). SOURCES-FN returns the tick's
   sources (for the want source). Stops when the flight closes, when a click
   advances nothing, or after MAX-CLICKS (then :status :click-limit, with the
   open wants on the last click). Returns the flight record."
@@ -162,10 +164,13 @@
   (loop [f flight]
     (if (or (not= :open (:status f)) (>= (count (:clicks f)) max-clicks))
       (cond-> f (= :open (:status f)) (assoc :status :click-limit))
-      (let [wants (click-wants f (sources-fn))
-            before (observe-fn (:target f))
+      (let [sources (sources-fn)
+            wants (click-wants f sources)
+            locators (select-keys (merge (get-in sources [:locators (:target f)]) (:locators wants))
+                                  (:wants wants))
+            before (observe-fn (:target f) locators)
             result (click-fn (judge-opts f wants))
-            after (observe-fn (:target f))]
+            after (observe-fn (:target f) locators)]
         (recur (record-click f (merge result {:wants (:wants wants)
                                               :want-source (:source wants)
                                               :before before
