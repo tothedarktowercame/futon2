@@ -273,7 +273,14 @@ priming edge; the recorded prior must change.
    where `hasMeets` fails. Missing-meet fixture needs four units, not three
    (with three, whatever sits below both is their meet); its maximal common
    units are the two conflicting parts, as clause 0 says. Rebuilt by claude-8;
-   36 axiom audits standard, no sorry. Unreviewed under A20.*
+   36 axiom audits standard, no sorry. Unreviewed under A20. Chain case
+   closed by mathlib4 `81b5b774`, `Proof2/ChainOrder.lean`: `listChain n i j
+   := j < i` (earlier in the list sits above; so "below" is later, and the
+   meet of two indices is `max`), `chainCondition_of_list` proved from the
+   list, hence `coApplyKernel = cascadeKernel` for every precedence list with
+   no hypothesis; the list order is acyclic and has all meets. The only
+   cascades the machine produces today are therefore covered by the kernel
+   without assumption.*
 2. **Record: `[:decision :target-field]`.** Unblocks Clause T.
 3. **Record: interpretations and edges in `:candidate-derivations`.** With the
    constructor wired in (E-cascade-real D4), unblocks W₀'s construction
