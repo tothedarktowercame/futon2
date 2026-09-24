@@ -1646,8 +1646,21 @@
         (when-not (= record (strict-read (slurp path) path)) (throw e))))
     {:id id :path (.getCanonicalPath path) :kind kind}))
 
-(defn- discharge-context! [phase obligation record]
-  (when-let [context (:repair/discharge-context record)]
+(defn- discharge-context!
+  "H-PUBLISH-A1 (E-cascade-real): the discharge context is MANDATORY at
+   write time. A record written without it can never be published —
+   repair-discharge-receipt/derive refuses it
+   :resolution-context-unavailable on every tick (H-PUBLISH-D found 68/68
+   resolutions in that state, nine written by context-free callers AFTER
+   the schema existed). Refuse :discharge-context-missing before writing,
+   so an unpublishable record can never be written again."
+  [phase obligation record]
+  (let [context (:repair/discharge-context record)]
+    (when-not context
+      (throw (ex-info "Discharge context missing"
+                      {:repair-discharge/refusal :discharge-context-missing
+                       :phase phase
+                       :repair/id (:repair/id obligation)})))
     (when-not (and (= :wm/repair-discharge-context-v1 (:schema context))
                    (= phase (:phase context))
                    (= (:repair/id obligation) (:repair/id context))
@@ -1841,11 +1854,23 @@
   "Validate retained repairing-close R and later grounded successor-close S,
   then delegate to the existing authorized resolution writer. The injected
   readers/writer make the boundary testable without touching the live store.
-  A pre-existing resolution is returned as a stable no-op."
+  A pre-existing resolution is returned as a stable no-op.
+
+  H-PUBLISH-A1: :discharge-context is REQUIRED — the
+  :wm/repair-discharge-context-v1 value for phase :successor-validation,
+  carried onto the resolution handed to RESOLVE-FN, which validates it
+  again at the store boundary (discharge-context!). Without it the written
+  resolution could never be published, so the refusal happens here, before
+  any write."
   [{:keys [obligation repair-close successor-close authority
-           resolution-read-fn resolve-fn]}]
+           discharge-context resolution-read-fn resolve-fn]}]
   (when-not successor-close
     (successor-refuse! :successor-missing {:repair/id (:repair/id obligation)}))
+  (when-not discharge-context
+    (throw (ex-info "Discharge context missing"
+                    {:repair-discharge/refusal :discharge-context-missing
+                     :phase :successor-validation
+                     :repair/id (:repair/id obligation)})))
   (let [repair-keys #{:attempt/id :run/id :repair/id :closed-at :commit
                       :review-receipt-ids :review-sha256 :grounded?}
         successor-keys #{:attempt/id :run/id :repair/id :closed-at
@@ -1923,7 +1948,8 @@
                          :witness (:witness successor-close)
                          :validation {:kind :production-shaped-successor
                                       :production-shaped? true}
-                         :successor-relation relation})]
+                         :successor-relation relation
+                         :repair/discharge-context discharge-context})]
         {:status :resolved :resolution resolution :relation relation}))))
 
 (defn repair-derived-state

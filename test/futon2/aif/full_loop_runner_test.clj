@@ -5434,11 +5434,24 @@
                            :artifact-shape :code-commit}}
               bare {:attempt-id "attempt-001" :commit "aaa1111"
                     :reviewer "codex-24" :review-job "invoke-1"
+                    :repair/discharge-context
+                    {:schema :wm/repair-discharge-context-v1
+                     :phase :implementation
+                     :repair/id "repair-attempt-001"
+                     :close {:attempt/id "attempt-001"}
+                     :review-job {:job-id "invoke-1"}}
                     :witness {:resolved? true :dial-moved? true}}
               external {:attempt-id
                         "ea1-b0eeafa0e59b4dc0dd9e0abe1cbbed0e687c5827b3ade8320c98c7f82a79032b--attempt-001"
                         :commit "bbb2222" :reviewer "codex-24"
                         :review-job "invoke-1"
+                        :repair/discharge-context
+                        {:schema :wm/repair-discharge-context-v1
+                         :phase :implementation
+                         :repair/id "repair-attempt-001"
+                         :close {:attempt/id
+                                 "ea1-b0eeafa0e59b4dc0dd9e0abe1cbbed0e687c5827b3ade8320c98c7f82a79032b--attempt-001"}
+                         :review-job {:job-id "invoke-1"}}
                         :witness {:resolved? true :dial-moved? true}}
               tmp (str (Files/createTempDirectory
                         "wm-r6-impl-" (make-array FileAttribute 0)))

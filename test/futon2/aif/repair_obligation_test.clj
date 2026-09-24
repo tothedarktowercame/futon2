@@ -481,6 +481,16 @@
   {:reviewer "reviewer" :review-job "review-job"
    :witness {:resolved? true :dial-moved? true}})
 
+(defn- discharge-ctx
+  "Minimal valid :wm/repair-discharge-context-v1 for the store writers.
+  H-PUBLISH-A1 made the context mandatory: it must bind the phase, the
+  obligation id, the record's attempt-id and review-job."
+  [phase id attempt-id review-job]
+  {:schema :wm/repair-discharge-context-v1
+   :phase phase :repair/id id
+   :close {:attempt/id attempt-id}
+   :review-job {:job-id review-job}})
+
 (defn- shaped-obligation [shape & [extra]]
   (merge {:repair/id (str "repair-" (name shape))
           :repair/status :open
@@ -493,7 +503,10 @@
 
 (defn- successor-fixture []
   (let [repair-id "repair-successor-fixture"]
-    {:obligation
+    {:discharge-context
+     (discharge-ctx :successor-validation repair-id
+                    "successor-attempt" "review-job-2")
+     :obligation
      (shaped-obligation
       :code-commit
       {:repair/id repair-id
@@ -602,16 +615,26 @@
                    (repair/resolve! root finding
                                     {:attempt-id "repair-1" :commit "good456"
                                      :reviewer "codex-7" :review-job "review-2"
+                                     :repair/discharge-context
+                                     (discharge-ctx :successor-validation
+                                                    (:repair/id finding)
+                                                    "repair-1" "review-2")
                                      :witness {:resolved? true :dial-moved? false}}))))
     (repair/record-implementation!
      root finding {:attempt-id "repair-1" :commit "good456"
                    :reviewer "codex-7" :review-job "review-2"
+                   :repair/discharge-context
+                   (discharge-ctx :implementation (:repair/id finding)
+                                  "repair-1" "review-2")
                    :witness {:resolved? true :dial-moved? true}})
     (let [awaiting (first (repair/open-obligations root))]
       (is (= :awaiting-validation (:repair/status awaiting)))
       (repair/resolve! root awaiting
                        {:attempt-id "successor-1" :commit "next789"
                         :reviewer "codex-7" :review-job "review-3"
+                        :repair/discharge-context
+                        (discharge-ctx :successor-validation (:repair/id finding)
+                                       "successor-1" "review-3")
                         :witness {:resolved? true :dial-moved? true}
                         :validation {:production-shaped? true}}))
     (is (empty? (repair/open-obligations root)))))
@@ -693,10 +716,16 @@
                     :fresh-author? true :descendant? true
                     :in-author-window? true :corroborates? true
                     :disagreement? false}
+                   :repair/discharge-context
+                   (discharge-ctx :implementation (:repair/id finding)
+                                  "canary-repair" "review-2")
                    :witness {:resolved? true :dial-moved? true}})
     (repair/resolve! root (first (repair/open-obligations root))
                      {:attempt-id "canary-successor" :commit "next789"
                       :reviewer "claude-1" :review-job "review-3"
+                      :repair/discharge-context
+                      (discharge-ctx :successor-validation (:repair/id finding)
+                                     "canary-successor" "review-3")
                       :witness {:resolved? true :dial-moved? true}
                       :validation {:production-shaped? true}})
     (is (empty? (repair/open-obligations root)))))
@@ -808,6 +837,9 @@
                   root finding {:attempt-id "repair-attempt"
                                 :commit "bad123"
                                 :reviewer "reviewer" :review-job "review-2"
+                                :repair/discharge-context
+                                (discharge-ctx :implementation (:repair/id finding)
+                                               "repair-attempt" "review-2")
                                 :witness {:resolved? true :dial-moved? true}})))))
 
 (deftest artifact-shapes-validate-only-their-own-evidence
@@ -819,7 +851,10 @@
           record (repair/record-implementation!
                   root obligation
                   (merge grounded-review
-                         {:attempt-id "repair-code" :commit "good456"}))]
+                         {:attempt-id "repair-code" :commit "good456"
+                          :repair/discharge-context
+                          (discharge-ctx :implementation (:repair/id obligation)
+                                         "repair-code" "review-job")}))]
       (is (= "good456" (:replacement-commit record)))
       (is (nil? (:artifact-shape record)))))
 
@@ -829,6 +864,9 @@
                   (temp-root) (shaped-obligation :code-commit)
                   (merge grounded-review
                          {:attempt-id "wrong-code"
+                          :repair/discharge-context
+                          (discharge-ctx :implementation "repair-code-commit"
+                                         "wrong-code" "review-job")
                           :store-url "http://store" :record-type :records
                           :count-before 1 :count-after 2
                           :deposit-run-id "deposit-1"})))))
@@ -838,14 +876,20 @@
                  (repair/record-implementation!
                   (temp-root) (shaped-obligation :data-deposit)
                   (merge grounded-review
-                         {:attempt-id "wrong-data" :commit "good456"})))))
+                         {:attempt-id "wrong-data" :commit "good456"
+                          :repair/discharge-context
+                          (discharge-ctx :implementation "repair-data-deposit"
+                                         "wrong-data" "review-job")})))))
 
   (testing "spec contracts reject a bare commit"
     (is (thrown? clojure.lang.ExceptionInfo
                  (repair/record-implementation!
                   (temp-root) (shaped-obligation :spec-document)
                   (merge grounded-review
-                         {:attempt-id "wrong-spec" :commit "good456"}))))))
+                         {:attempt-id "wrong-spec" :commit "good456"
+                          :repair/discharge-context
+                          (discharge-ctx :implementation "repair-spec-document"
+                                         "wrong-spec" "review-job")}))))))
 
 (deftest data-deposit-validation-reads-current-count-without-writing
   (let [root (temp-root)
@@ -862,13 +906,20 @@
       (let [implementation
             (repair/record-implementation!
              root obligation
-             (merge grounded-review evidence {:attempt-id "repair-data"}))]
+             (merge grounded-review evidence
+                    {:attempt-id "repair-data"
+                     :repair/discharge-context
+                     (discharge-ctx :implementation (:repair/id obligation)
+                                    "repair-data" "review-job")}))]
         (repair/resolve!
          root (assoc obligation
                      :repair/status :awaiting-validation
                      :repair/implementation implementation)
          (merge grounded-review evidence
                 {:attempt-id "validate-data"
+                 :repair/discharge-context
+                 (discharge-ctx :successor-validation (:repair/id obligation)
+                                "validate-data" "review-job")
                  :validation {:production-shaped? true}}))))
     (is (= [["http://read-only-store" :wm-hyperparameter-update]
             ["http://read-only-store" :wm-hyperparameter-update]]
@@ -879,7 +930,10 @@
                      (repair/record-implementation!
                       (temp-root) obligation
                       (merge grounded-review evidence
-                             {:attempt-id "stale-data-evidence"}))))))))
+                             {:attempt-id "stale-data-evidence"
+                              :repair/discharge-context
+                              (discharge-ctx :implementation (:repair/id obligation)
+                                             "stale-data-evidence" "review-job")}))))))))
 
 (deftest spec-document-requires-ancestor-commit-that-touched-existing-path
   (let [root (temp-root)
@@ -902,12 +956,18 @@
           implementation (repair/record-implementation!
                           root obligation
                           (merge grounded-review evidence
-                                 {:attempt-id "repair-spec"}))]
+                                 {:attempt-id "repair-spec"
+                                  :repair/discharge-context
+                                  (discharge-ctx :implementation (:repair/id obligation)
+                                                 "repair-spec" "review-job")}))]
       (is (= evidence (:replacement-artifact implementation)))
       (is (thrown? clojure.lang.ExceptionInfo
                    (repair/record-implementation!
                     (temp-root) obligation
                     (merge grounded-review {:attempt-id "bad-spec"
+                                            :repair/discharge-context
+                                            (discharge-ctx :implementation (:repair/id obligation)
+                                                           "bad-spec" "review-job")
                                             :path path :git-sha "deadbeef"}))))
       (let [resolved (repair/resolve!
                       root (assoc obligation
@@ -915,6 +975,9 @@
                                   :repair/implementation implementation)
                       (merge grounded-review evidence
                              {:attempt-id "validate-spec"
+                              :repair/discharge-context
+                              (discharge-ctx :successor-validation (:repair/id obligation)
+                                             "validate-spec" "review-job")
                               :validation {:production-shaped? true}}))]
         (is (= :spec-document (:artifact-shape resolved)))
         (is (= evidence (:validation-artifact resolved)))))))
@@ -954,6 +1017,9 @@
                        (catch clojure.lang.ExceptionInfo e (ex-data e))))]
     (let [d (refusal {:attempt-id "same-attempt" :commit "good456"
                       :reviewer "reviewer" :review-job "review-2"
+                      :repair/discharge-context
+                      (discharge-ctx :implementation (:repair/id finding)
+                                     "same-attempt" "review-2")
                       :witness {:resolved? true :dial-moved? true}})]
       (is (= :machine-repair-lacks-grounded-review-evidence (:failure-kind d)))
       (is (= :stop-line-resolution (:failure-stage d)))
@@ -961,6 +1027,9 @@
       (is (not-any? #{:witness-not-resolved} (:failure-detail d))))
     (let [d (refusal {:attempt-id "repair-2" :commit "good456"
                       :reviewer "reviewer" :review-job "review-2"
+                      :repair/discharge-context
+                      (discharge-ctx :implementation (:repair/id finding)
+                                     "repair-2" "review-2")
                       :witness {:resolved? true :dial-moved? false}})]
       (is (some #{:witness-dial-not-moved} (:failure-detail d)))
       (is (not-any? #{:implementation-attempt-not-distinct} (:failure-detail d))))))
@@ -978,6 +1047,9 @@
               :commit "abc1234"
               :reviewer "codex-24"
               :review-job "review-42"
+              :repair/discharge-context
+              (discharge-ctx :implementation "repair-grounded-review"
+                             "ea1-new--attempt-001" "review-42")
               :witness {:resolved? true :dial-moved? true}}
         review-evidence {:job-id "review-42" :reviewer "codex-24"
                          :state "done" :verdict :approve :valid? true

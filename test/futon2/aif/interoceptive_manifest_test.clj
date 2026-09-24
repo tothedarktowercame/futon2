@@ -126,11 +126,23 @@
                         (.getPath repairs) finding
                         {:attempt-id "implementation-api" :commit "abc"
                          :reviewer :reviewer :review-job "review-api"
+                         :repair/discharge-context
+                         {:schema :wm/repair-discharge-context-v1
+                          :phase :implementation
+                          :repair/id (:repair/id finding)
+                          :close {:attempt/id "implementation-api"}
+                          :review-job {:job-id "review-api"}}
                          :witness {:resolved? true :dial-moved? true}})
         resolution (repair/resolve!
                     (.getPath repairs) (assoc finding :repair/implementation implementation)
                     {:attempt-id "validation-api" :commit "abc"
                      :reviewer :reviewer :review-job "review-api-2"
+                     :repair/discharge-context
+                     {:schema :wm/repair-discharge-context-v1
+                      :phase :successor-validation
+                      :repair/id (:repair/id finding)
+                      :close {:attempt/id "validation-api"}
+                      :review-job {:job-id "review-api-2"}}
                      :witness {:resolved? true :dial-moved? true}
                      :validation {:production-shaped? true}})]
     (is (.isFile (java.io.File. trip)))

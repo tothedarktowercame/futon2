@@ -57,6 +57,12 @@
         (repair/resolve! root resolvable
                          {:attempt-id "distinct-successor" :commit "fixture-commit"
                           :reviewer "independent-fixture" :review-job "fixture-review"
+                          :repair/discharge-context
+                          {:schema :wm/repair-discharge-context-v1
+                           :phase :successor-validation
+                           :repair/id (:repair/id resolvable)
+                           :close {:attempt/id "distinct-successor"}
+                           :review-job {:job-id "fixture-review"}}
                           :witness {:resolved? true :dial-moved? true}
                           :validation {:production-shaped? true}})
         (let [r (supply/supply root)]

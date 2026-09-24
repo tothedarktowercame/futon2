@@ -172,10 +172,11 @@
                 :repair-close (implementation-close previous)
                 :successor-close (successor-close context)
                 :authority {:decided-by reviewer :review-job (:job-id actual-job)}
+                ;; H-PUBLISH-A1: successor-resolution! requires the context
+                ;; and carries it onto the resolution itself.
+                :discharge-context context
                 :resolution-read-fn #(some-> (repair/discharge-record root "resolutions" %) :value)
-                :resolve-fn (fn [obligation value]
-                              (repair/resolve! root obligation
-                                               (assoc value :repair/discharge-context context)))}))
+                :resolve-fn (partial repair/resolve! root)}))
               (swap! accepted conj {:phase :successor-validation :record (str "resolutions/" id ".edn")})
               ;; Tests simulate process death with an Error; normal store
               ;; refusals remain Exceptions and are contained below.
