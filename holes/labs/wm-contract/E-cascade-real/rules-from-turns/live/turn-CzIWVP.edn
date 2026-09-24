@@ -1,0 +1,28 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-CzIWVP"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-CzIWVP.json.analysis.json"
+ :source-sha256 "e0ed5008728fd76ed535c74235f436ac146259e3fa9dd6d3689ad91cff94126d"
+ :labeller "claude-1"
+ :tokens {
+  :turn-CzIWVP/aligned-instances-with-varying-fillers {:statement "Instances of one move differ in their slot fillers." :cue [518 530]}
+  :turn-CzIWVP/thousands-of-patterns {:statement "The library grows to thousands of patterns." :cue [411 446]}
+  :turn-CzIWVP/frame-identity-criterion-stated {:statement "A pattern's identity is its frame; fillers are not necessarily part of it." :cue [536 571]}}
+ :rules
+ [
+  {:pattern "cascade-construction/lift-when-three-align"
+   :from {:fragment [532 572] :intent "constrain"}
+   :guard {:needs #{:turn-CzIWVP/aligned-instances-with-varying-fillers} :forbids #{}}
+   :produces #{:turn-CzIWVP/frame-identity-criterion-stated}
+   :receipt {:source {:path "futon3/library/cascade-construction/lift-when-three-align.flexiarg" :sha256 "06a12356f46905c436669464aa36e99e114361e3da907176a009a55a772757a9"}
+             :reading "The pattern's 'aligned' (Lift to a shared pattern from three written, aligned cascades, with a checklist @how, one incident per instance and recorded gaps.) has always meant sameness of move across differing particulars; Joe states that criterion explicitly — alignment is frame-sameness with fillers free to vary."
+             :scope-limit "The rule states the identity criterion; it does not decide any pending lift."}}
+  {:pattern "library-coherence/pattern-differentiation-alarms"
+   :from {:fragment [532 572] :intent "constrain"}
+   :guard {:needs #{:turn-CzIWVP/thousands-of-patterns} :forbids #{}}
+   :produces #{:turn-CzIWVP/frame-identity-criterion-stated}
+   :receipt {:source {:path "futon3/library/library-coherence/pattern-differentiation-alarms.flexiarg" :sha256 "6d8d57c721713208900a0e9873d3b8d11c54149530254989a633d564d40ac96f"}
+             :reading "The pattern () treats duplicate sigils as alarms needing a merge/split decision; the filler-exclusion gives that decision its operative criterion — overlap in filler words is not overlap in pattern. Same produced state as the sibling rule, reached from the library-hygiene side."
+             :scope-limit "The rule supplies the criterion; the merge/split decisions themselves are library work, not claimed."}}
+  ]
+ :not-a-rule []
+}

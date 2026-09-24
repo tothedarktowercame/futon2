@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-wTajW6"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-wTajW6.json.analysis.json"
+ :source-sha256 "dff81e535af5a3f53f3cdf5d1c7ae83a13f92af01dd6019ce8745c69c7a86ccb"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-wTajW6/repetition-present-in-corpus {:statement "The corpus shows repetition." :cue [18 36]}
+  :turn-wTajW6/repetition-valued-as-pattern-signal {:statement "Repetition in the corpus is treated as raw pattern-signal, an asset rather than a defect." :cue [18 67]}}
+ :rules
+ [
+  {:pattern "peeragogy/discerning-a-pattern"
+   :from {:fragment [0 68] :intent "approve"}
+   :guard {:needs #{:turn-wTajW6/repetition-present-in-corpus} :forbids #{}}
+   :produces #{:turn-wTajW6/repetition-valued-as-pattern-signal}
+   :receipt {:source {:path "futon3/library/peeragogy/discerning-a-pattern.flexiarg" :sha256 "40b32538566fa15d5205c6f6aae60883f55d87e8d7537941818245669d50972f"}
+             :reading "The pattern (A peeragogical pattern starts as a noticed repetition: something that happens often enough across peer-learning situations that it deserves a shared name.  The discernment work is twofold — first, attending to language and behaviour closely enough to spot the repetition at all; second, naming it without over-claiming what the repetition means.  Most candidate patterns die in the second step, when the namer rushes from \"I see this pattern\" to \"and therefore the participants are X.\") grounds the approval: repetition noticed is the raw material of a pattern, so a repetitive corpus is exactly what this analysis wants."
+             :scope-limit "The rule values the signal; whether the repetition the agents found is in operator turns or dispatch chatter is the turn's own caveat, carried but not adjudicated."}}
+  ]
+ :not-a-rule []
+}

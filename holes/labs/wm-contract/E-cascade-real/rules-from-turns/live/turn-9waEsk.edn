@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-9waEsk"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-9waEsk.json.analysis.json"
+ :source-sha256 "5812dc5b0bd2b89190a5e236457f4e6ce6cc3a861b8d061eac1d3ce1b69d3cc9"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-9waEsk/live-method-established {:statement "A per-turn live analysis method is established and running." :cue [295 339]}
+  :turn-9waEsk/historical-analysis-run-offline {:statement "The same method is run offline over the historical period on dedicated lanes." :cue [66 118]}
+  :turn-9waEsk/batch-checkpoint-100 {:statement "The offline run stops after each block of 100 turns for review." :cue [422 469]}}
+ :rules
+ [
+  {:pattern "enrichment/rational-reconstruction"
+   :from {:fragment [0 340] :intent "propose"}
+   :guard {:needs #{:turn-9waEsk/live-method-established} :forbids #{}}
+   :produces #{:turn-9waEsk/historical-analysis-run-offline :turn-9waEsk/batch-checkpoint-100}
+   :receipt {:source {:path "futon3/library/enrichment/rational-reconstruction.flexiarg" :sha256 "e47ed570e8a4239b69eb56777eb08dac3ce5632772ffb285b789349573314f8b"}
+             :reading "The pattern () verbatim: replay the live discipline over history as if it had been maintained — same method, dedicated lanes (kimi-4/kimi-5), explicitly offline. The 100-turn stopping rule is produced with it because the replay must stay reviewable."
+             :scope-limit "The rule covers the replay and its checkpoint; the historical corpus's content and any findings are not claimed."}}
+  ]
+ :not-a-rule []
+}

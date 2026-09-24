@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-v2qr9R"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-v2qr9R.json.analysis.json"
+ :source-sha256 "63313e40c087e547a3b1fda369110156c7f87272fa69835a7ba74af4e56951c7"
+ :labeller "claude-1"
+ :tokens {
+  :turn-v2qr9R/effective-affective-dichotomy {:statement "Utterances are classified as either effective or affective." :cue [98 120]}
+  :turn-v2qr9R/utterance-typed-by-illocution {:statement "The utterance is typed by its illocutionary act, with strength carried separately, instead of by the dichotomy." :cue [65 97]}}
+ :rules
+ [
+  {:pattern "象/言即行"
+   :from {:fragment [60 121] :intent "clarify"}
+   :guard {:needs #{} :forbids #{:turn-v2qr9R/effective-affective-dichotomy}}
+   :produces #{:turn-v2qr9R/utterance-typed-by-illocution}
+   :receipt {:source {:path "futon3/library/象/言即行.flexiarg" :sha256 "03e3051aaef51dbdab32aae2fed1ddb440d49852b7bc4c8870400050c6696a4a"}
+             :reading "The pattern (每一次传递都必须同时声明它的言语行为类型和它的模式内容；类型在信封上，内容在级联里，两者缺一不可。) requires every dispatch to declare its illocutionary type on the envelope; Joe's challenge shows one type at two strengths, so the rule excludes the two-way classification and produces a typed reading in which 'you're wrong' is one act whose intensity is a separate dimension the nine types do not yet carry."
+             :scope-limit "Borderline rule: the turn's act is a challenge to a classification, and the produced state is a demand on the analysis vocabulary, not a change to any artefact. Recorded as a rule because the vocabulary is the turn's work; the intensity dimension the pattern lacks is noted, not supplied."}}
+  ]
+ :not-a-rule []
+}

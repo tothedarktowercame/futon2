@@ -1,0 +1,45 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-Pb9TMC"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-Pb9TMC.json.analysis.json"
+ :source-sha256 "1b2df06483575d2edc030362c3e24d6bf9d66ee5fe87abcc212b506c0c0a6270"
+ :labeller "claude-1"
+ :tokens {
+  :turn-Pb9TMC/typed-holes-recorded {:statement "Holes in the produced cascade are recorded." :cue [90 99]}
+  :turn-Pb9TMC/holes-dispatched-to-agent {:statement "The recorded holes are dispatched to another agent as work." :cue [109 136]}
+  :turn-Pb9TMC/missing-patterns-named {:statement "The design patterns needed to fill the holes are named as missing." :cue [160 192]}
+  :turn-Pb9TMC/patterns-authored-by-dispatched-agent {:statement "The dispatched agent authors the missing design patterns." :cue [147 179]}
+  :turn-Pb9TMC/list-flattened-output {:statement "The cascade is presented as a flat list." :cue [238 275]}
+  :turn-Pb9TMC/semilattice-s-expression-output {:statement "The cascade is presented in its true semilattice shape, as an S-expression." :cue [295 321]}}
+ :rules
+ [
+  {:pattern "translation/route-the-untranslatable"
+   :from {:fragment [42 137] :intent "extend"}
+   :guard {:needs #{:turn-Pb9TMC/typed-holes-recorded} :forbids #{}}
+   :produces #{:turn-Pb9TMC/holes-dispatched-to-agent}
+   :receipt {:source {:path "futon3/library/translation/route-the-untranslatable.flexiarg" :sha256 "0717bab5a1ff89f6055c45dc4945ee62ddd6035523c987e0b427c4ef88bdd10c"}
+             :reading "The pattern's routing half (Untranslatable units refuse with a typed reason, go to whoever can act, and are counted by cause.) supplied where the cascade only recorded: a hole is a refused unit, and the rule routes it to whoever can act — here a second agent."
+             :scope-limit "The rule supplies routing; it does not choose the agent or count the holes by cause, both of which the pattern also asks for."}}
+  {:pattern "cascade-construction/hand-over-when-acting-is-worth-more"
+   :from {:fragment [42 137] :intent "extend"}
+   :guard {:needs #{:turn-Pb9TMC/typed-holes-recorded} :forbids #{}}
+   :produces #{:turn-Pb9TMC/holes-dispatched-to-agent}
+   :receipt {:source {:path "futon3/library/cascade-construction/hand-over-when-acting-is-worth-more.flexiarg" :sha256 "a8076a53cd33055b0fd7ff879a79cdcd4e1ad15202df3ffa5203b2a4fb6b33d6"}
+             :reading "The pattern (Construction stops and hands its best family to selection when acting is worth at least as much as the best further move, or at a declared budget or stopping observation, and the receipt records why it stopped.) at the same edge, different warrant: once a hole is typed, deliberating further locally is worth less than handing it to an agent that can act — the dispatch is the handover, and the produced state is shared with the routing rule."
+             :scope-limit "The rule warrants the handover decision; the budget and the value comparison behind it are not stated in the turn."}}
+  {:pattern "problems/pattern-genesis-from-evidence-bearing-holes"
+   :from {:fragment [138 193] :intent "clarify"}
+   :guard {:needs #{:turn-Pb9TMC/missing-patterns-named} :forbids #{}}
+   :produces #{:turn-Pb9TMC/patterns-authored-by-dispatched-agent}
+   :receipt {:source {:path "futon3/library/problems/pattern-genesis-from-evidence-bearing-holes.flexiarg" :sha256 "ba2a4bddd497b1a92a45623b0344520b96eefa4653ede4f81cdcd1d44494e3b3"}
+             :reading "The pattern (This is a problem-stating node from the catalogue's R17-triple-prime paragraph: retrieval, composition, embedding nearness and structure learning can only work with the patterns that already exist, so a recurring way of acting with no adequate pattern needs a minting path.) is the dispatched agent's brief: a typed hole in a cascade is the warrant for minting a new pattern from the hole's own evidence, not a permanent gap."
+             :scope-limit "The rule covers authoring from evidence; admission of the authored patterns to the library is a separate reviewed step."}}
+  {:pattern "cascades/declared-skeleton"
+   :from {:fragment [295 413] :intent "constrain"}
+   :guard {:needs #{} :forbids #{:turn-Pb9TMC/list-flattened-output}}
+   :produces #{:turn-Pb9TMC/semilattice-s-expression-output}
+   :receipt {:source {:path "futon3/library/cascades/declared-skeleton.flexiarg" :sha256 "9ff0c6495764148c49a648b932bcd938d493baab3aad10ce80d3e0778a384e99"}
+             :reading "The pattern () as a fidelity constraint on output: the declared shape must be the shape the cascade actually has — a semilattice — so the list rendering is excluded even when it is easier to produce."
+             :scope-limit "The rule constrains representation, not content; whether the S-expression is readable in chat is a separate concern Joe himself flags."}}
+  ]
+ :not-a-rule []
+}

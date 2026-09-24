@@ -1,0 +1,36 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-TAZQYL"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-TAZQYL.json.analysis.json"
+ :source-sha256 "4a07c82905506048f8315660d80b4bfcd101d1c936a0bef81716fd7b9fd479e8"
+ :labeller "claude-1"
+ :tokens {
+  :turn-TAZQYL/speech-acts-streaming {:statement "The operator speaks in English, live." :cue [325 343]}
+  :turn-TAZQYL/live-cascade-per-turn {:statement "Each spoken turn is translated into a design-pattern cascade live." :cue [353 397]}
+  :turn-TAZQYL/catalog-term-missing {:statement "A unit of the turn has no term in the design pattern catalog." :cue [410 430]}
+  :turn-TAZQYL/hole-marker-emitted {:statement "A HOLE marker is emitted in the cascade at that position, and the game continues." :cue [462 485]}}
+ :rules
+ [
+  {:pattern "cascades/on-the-fly-cascade"
+   :from {:fragment [251 291] :intent "ask-action"}
+   :guard {:needs #{:turn-TAZQYL/speech-acts-streaming} :forbids #{}}
+   :produces #{:turn-TAZQYL/live-cascade-per-turn}
+   :receipt {:source {:path "futon3/library/cascades/on-the-fly-cascade.flexiarg" :sha256 "d98806fe6943050ad0d87738c7168fbf3a7153510c137866b32407e6bfb88ad6"}
+             :reading "The pattern () governs exactly this situation: a cascade assembled live, mid-conversation, rather than constructed as a deliberate artefact — the game is an on-the-fly cascade per turn."
+             :scope-limit "The rule covers the live assembly; how such cascades are later repointed or admitted is the pattern's own later clause, not settled here."}}
+  {:pattern "translation/route-the-untranslatable"
+   :from {:fragment [478 486] :intent "clarify"}
+   :guard {:needs #{:turn-TAZQYL/catalog-term-missing} :forbids #{}}
+   :produces #{:turn-TAZQYL/hole-marker-emitted}
+   :receipt {:source {:path "futon3/library/translation/route-the-untranslatable.flexiarg" :sha256 "0717bab5a1ff89f6055c45dc4945ee62ddd6035523c987e0b427c4ef88bdd10c"}
+             :reading "The pattern's rule (Untranslatable units refuse with a typed reason, go to whoever can act, and are counted by cause.) is the rule Joe proposes for the game: the untranslatable unit refuses with a typed marker rather than being blanked over, so HOLE is the refusal made visible, not silence."
+             :scope-limit "The marker alone is produced; routing it to an actor and counting by cause are the pattern's other clauses, not yet wired in the game."}}
+  {:pattern "proof-search/typed-hole-as-frontier"
+   :from {:fragment [478 486] :intent "clarify"}
+   :guard {:needs #{:turn-TAZQYL/catalog-term-missing} :forbids #{}}
+   :produces #{:turn-TAZQYL/hole-marker-emitted}
+   :receipt {:source {:path "futon3/library/proof-search/typed-hole-as-frontier.flexiarg" :sha256 "5f342980b21e8043d5cb186050bc66e108292e6e2edcd61bfdb02ff3f63e18d7"}
+             :reading "The pattern (Never let \"incomplete\" be a vibe. Represent every incompleteness as a TYPED HOLE — a sorry with an explicit interface: what is wanted (the signature/codomain), what is in hand (the endpoints), and what would discharge it. A typed frontier is enumerable, rankable, and dispatchable; untyped TODO-prose is folklore that must be rediscovered by every reader.) sharpens the same marker: a HOLE should be typed — what is wanted, what is in hand, what would discharge it — so the cascade's holes are enumerable as the frontier of the vocabulary rather than bare gaps. Same produced state as the sibling rule, with the typing requirement added."
+             :scope-limit "The rule requires typing; the game's current marker is untyped, so this rule names an upgrade the game owes, not one it has."}}
+  ]
+ :not-a-rule []
+}

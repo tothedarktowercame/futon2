@@ -1,0 +1,19 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-Umq4TE"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-Umq4TE.json.analysis.json"
+ :source-sha256 "4d6792241aad2a724e567636d7df6694c9420cd41ac8c8b3f655fcaa33104201"
+ :labeller "claude-1"
+ :tokens {
+  :turn-Umq4TE/recommendation-adopted-for-execution {:statement "claude-1's triage recommendation is adopted and becomes the execution plan." :cue [3 34]}}
+ :rules
+ [
+  {:pattern "cascade-construction/hand-over-when-acting-is-worth-more"
+   :from {:fragment [0 34] :intent "approve"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-Umq4TE/recommendation-adopted-for-execution}
+   :receipt {:source {:path "futon3/library/cascade-construction/hand-over-when-acting-is-worth-more.flexiarg" :sha256 "a8076a53cd33055b0fd7ff879a79cdcd4e1ad15202df3ffa5203b2a4fb6b33d6"}
+             :reading "The pattern (Construction stops and hands its best family to selection when acting is worth at least as much as the best further move, or at a declared budget or stopping observation, and the receipt records why it stopped.) from the operator's side: the analysis is judged good enough to act on, so deliberation hands over to execution — 'I'll follow your recommendation' is that handover uttered."
+             :scope-limit "The recommendation's content (revert 139, truncate 305, relocate 395, keep 95) is the preceding turn's; this rule covers only the adoption edge."}}
+  ]
+ :not-a-rule []
+}

@@ -1,0 +1,29 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-QMNU0A"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-QMNU0A.json.analysis.json"
+ :source-sha256 "6a6b833a3bee3bdb87dc7bac2c515463880f991dac02ce023abf747fbc2b78a5"
+ :labeller "claude-1"
+ :tokens {
+  :turn-QMNU0A/transcript-as-recorded {:statement "The source transcript is the verbatim recording, garbles included." :cue [127 145]}
+  :turn-QMNU0A/translation-bound-to-verbatim-source {:statement "The translation is bound to that verbatim source." :cue [91 110]}
+  :turn-QMNU0A/unbounded-pattern-proliferation {:statement "The pattern library grows without bound." :cue [244 273]}
+  :turn-QMNU0A/library-growth-bounded {:statement "Library growth is bounded by an admission test, with pruning and compression as its instrument." :cue [230 274]}}
+ :rules
+ [
+  {:pattern "translation/bind-to-the-source"
+   :from {:fragment [127 145] :intent "constrain"}
+   :guard {:needs #{:turn-QMNU0A/transcript-as-recorded} :forbids #{}}
+   :produces #{:turn-QMNU0A/translation-bound-to-verbatim-source}
+   :receipt {:source {:path "futon3/library/translation/bind-to-the-source.flexiarg" :sha256 "6addd0b18ca85a5b2fd43e14e94798c29bc09e6ba5b71d1e01703ab187625d51"}
+             :reading "The pattern's rule (Every translation carries a hash-level binding to its exact source and refuses when that source has moved.) with the source pinned by the operator: 'exactly as spoken' declares the recorded transcript — not a cleaned-up version — as the thing the translation must bind to and refuse on when it moves."
+             :scope-limit "The rule pins the source; it does not say how garbles are marked inside the translation."}}
+  {:pattern "cascade-construction/add-a-pattern-when-an-item-fits-no-class"
+   :from {:fragment [230 274] :intent "constrain"}
+   :guard {:needs #{} :forbids #{:turn-QMNU0A/unbounded-pattern-proliferation}}
+   :produces #{:turn-QMNU0A/library-growth-bounded}
+   :receipt {:source {:path "futon3/library/cascade-construction/add-a-pattern-when-an-item-fits-no-class.flexiarg" :sha256 "af576bfeadff31f0f620da1a76c043f1bf38aea6e79ff7508cb2a8123506c7f3"}
+             :reading "The pattern (A real item that fits no class becomes a named gap, a domain question and, when warranted, a pattern built from a census.) is the existing admission test the proviso asks for: a pattern is added when a real item fits no class — an admission gate, not an invitation — so the requested pruning/compression functionality has a rule to enforce rather than a new invention."
+             :scope-limit "The rule supplies the gate; the pruning/compression functionality itself is named as needed but not specified by this rule."}}
+  ]
+ :not-a-rule []
+}

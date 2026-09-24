@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-L21yiL"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-L21yiL.json.analysis.json"
+ :source-sha256 "a27f8586e082815db58dc0fc1ec758a1b00478c6fc70db5d90b7018993c98085"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-L21yiL/replay-proposed {:statement "The kimi-4/kimi-5 historical replay was proposed." :cue [21 58]}
+  :turn-L21yiL/no-progress-credited {:statement "No progress is credited to the replay: its witness shows no state change." :cue [76 110]}}
+ :rules
+ [
+  {:pattern "workshop/progress-is-a-witnessed-state-change"
+   :from {:fragment [0 112] :intent "report-problem"}
+   :guard {:needs #{:turn-L21yiL/replay-proposed} :forbids #{}}
+   :produces #{:turn-L21yiL/no-progress-credited}
+   :receipt {:source {:path "futon3/library/workshop/progress-is-a-witnessed-state-change.flexiarg" :sha256 "81158cd5cc76c43b02b3a66a5799d77e4024f99b8479622f418d3229ccd803a8"}
+             :reading "The pattern () used negatively: the designated witness (agent-follow-mode updates) shows no change, so the honest state is that nothing has progressed — the proposal remains activity-free."
+             :scope-limit "The rule records the negative witness only; why the replay has not started (blocked, forgotten, misconfigured) is not claimed."}}
+  ]
+ :not-a-rule []
+}

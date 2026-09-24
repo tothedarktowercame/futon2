@@ -1,0 +1,29 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-pWiVHW"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-pWiVHW.json.analysis.json"
+ :source-sha256 "ce6e3398f2aae7390fe5f05b04dcc42b7d9a0e21abbe6286b05c431c8471581e"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-pWiVHW/holes-without-patterns {:statement "The cascade has holes where no patterns exist." :cue [26 65]}
+  :turn-pWiVHW/proposed-flexiargs-drafted {:statement "Proposed flexiargs are drafted for those holes, as candidates outside the library." :cue [79 116]}
+  :turn-pWiVHW/global-cascade-growing {:statement "A global cascade including new proposals is being built." :cue [258 292]}
+  :turn-pWiVHW/lineage-tracking-maintained {:statement "Lineage is tracked: which patterns match, which have descendants, which descendants are unminted." :cue [359 423]}}
+ :rules
+ [
+  {:pattern "process-coherence/author-the-missing-pattern"
+   :from {:fragment [0 117] :intent "propose"}
+   :guard {:needs #{:turn-pWiVHW/holes-without-patterns} :forbids #{}}
+   :produces #{:turn-pWiVHW/proposed-flexiargs-drafted}
+   :receipt {:source {:path "futon3/library/process-coherence/author-the-missing-pattern.flexiarg" :sha256 "4b841fabf3b3971dae2314ce725bab6c187e7d7877798c227369adff9c7f7469"}
+             :reading "The pattern (When a well-formed circumstance draws a thin argument (few or no relevant patterns), do not treat \"what the existing library retrieves\" as the warrant and move on — the library is INCOMPLETE BY CONSTRUCTION. Author real patterns from the built system's actual functionality, put them forward in the real argument, and let the argument's improvement justify them. Authoring is part of operating, not maintenance.) operationalized: where the cascade draws thin, author real patterns from the work rather than treating the library's current coverage as the warrant; the 'not going directly into the library' proviso keeps them candidates."
+             :scope-limit "The rule covers drafting candidates; their review and admission is a separate step the turn assigns elsewhere."}}
+  {:pattern "futon-theory/retroactive-canonicalization"
+   :from {:fragment [225 485] :intent "explain"}
+   :guard {:needs #{:turn-pWiVHW/global-cascade-growing} :forbids #{}}
+   :produces #{:turn-pWiVHW/lineage-tracking-maintained}
+   :receipt {:source {:path "futon3/library/futon-theory/retroactive-canonicalization.flexiarg" :sha256 "930580ac04b921f1ce1cb6611fe0114dc83bb525176354d444d3756675aada97"}
+             :reading "The pattern () is the genealogy move the worry calls for: invariants emerge by retroactively canonicalizing the ancestors that turn out to be necessary, which is impossible without exactly the lineage visibility this rule produces."
+             :scope-limit "The rule requires the tracking; it does not build the index or decide any canonicalization."}}
+  ]
+ :not-a-rule []
+}

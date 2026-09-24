@@ -1,0 +1,28 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-unzcX9"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-unzcX9.json.analysis.json"
+ :source-sha256 "f3266a9bcb65de150a571b2dfcbe0a39f6378a562e9c12cd150d50d89f0d3d01"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-unzcX9/annotations-present {:statement "The latest turns carry annotations." :cue [28 44]}
+  :turn-unzcX9/markup-not-credited-as-patterns {:statement "Annotations that are only markup are not credited as design-pattern retrieval." :cue [45 84]}
+  :turn-unzcX9/distinction-visible-at-a-glance {:statement "The display makes markup vs actual pattern retrieval distinguishable at a glance." :cue [349 464]}}
+ :rules
+ [
+  {:pattern "mmca/verified-but-idle-link"
+   :from {:fragment [4 86] :intent "report-problem"}
+   :guard {:needs #{:turn-unzcX9/annotations-present} :forbids #{}}
+   :produces #{:turn-unzcX9/markup-not-credited-as-patterns}
+   :receipt {:source {:path "futon3/library/mmca/verified-but-idle-link.flexiarg" :sha256 "81a02a12d9cfca72cc4cc70bf82047b1809239a105f5e870a473f9cae6af0bd6"}
+             :reading "The pattern (A cross-part connection can be exactly true, computationally verified, and still do NOTHING for the argument. Before promoting such a fact to a structural claim — a \"deductive link\" in an argument map, a reason two parts belong together — ask what breaks if it is false. If nothing does, it is decoration and should be demoted to a remark.) is the decoration-vs-load-bearing test applied to turn annotations: visually present but doing no retrieval work is the idle link, and the rule records that this is what was observed."
+             :scope-limit "The rule records the observation; it does not locate the fault (labeller, prompt, or pipeline)."}}
+  {:pattern "mmca/verified-but-idle-link"
+   :from {:fragment [346 465] :intent "explain"}
+   :guard {:needs #{:turn-unzcX9/annotations-present} :forbids #{}}
+   :produces #{:turn-unzcX9/distinction-visible-at-a-glance}
+   :receipt {:source {:path "futon3/library/mmca/verified-but-idle-link.flexiarg" :sha256 "81a02a12d9cfca72cc4cc70bf82047b1809239a105f5e870a473f9cae6af0bd6"}
+             :reading "The same test (A cross-part connection can be exactly true, computationally verified, and still do NOTHING for the argument. Before promoting such a fact to a structural claim — a \"deductive link\" in an argument map, a reason two parts belong together — ask what breaks if it is false. If nothing does, it is decoration and should be demoted to a remark.) operationalized as a display requirement: the acceptance criterion is that work-doing and decoration are visibly distinct, which is the pattern's question rendered as syntax highlighting."
+             :scope-limit "The rule states the display criterion; it does not claim the highlighting exists yet."}}
+  ]
+ :not-a-rule []
+}

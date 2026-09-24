@@ -1,0 +1,37 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-MDyMv9"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-MDyMv9.json.analysis.json"
+ :source-sha256 "9f4883cdf5ca92953501d7a62cbf315e64d2df4e5dbd664bd2be8d07452f4ad6"
+ :labeller "claude-1"
+ :tokens {
+  :turn-MDyMv9/informal-proof-written {:statement "An informal proof of the problem is written." :cue [513 532]}
+  :turn-MDyMv9/incremental-lean-proof-with-pressure-feedback {:statement "The Lean proof proceeds incrementally and its difficulty feeds back into the informal treatment." :cue [539 629]}
+  :turn-MDyMv9/single-plan-upstream-of-both {:statement "One proof-plan artefact sits upstream of both the informal and the formal proof." :cue [778 838]}
+  :turn-MDyMv9/proof-plans-accumulated {:statement "Proof plans accumulate across problems." :cue [1437 1456]}
+  :turn-MDyMv9/plans-promoted-to-patterns-driving-decomposition {:statement "Accumulated proof plans are saved as patterns and drive decomposition of new problems." :cue [1462 1557]}}
+ :rules
+ [
+  {:pattern "math-strategy/plan-first-attempt"
+   :from {:fragment [484 740] :intent "propose"}
+   :guard {:needs #{:turn-MDyMv9/informal-proof-written} :forbids #{}}
+   :produces #{:turn-MDyMv9/incremental-lean-proof-with-pressure-feedback}
+   :receipt {:source {:path "futon3/library/math-strategy/plan-first-attempt.flexiarg" :sha256 "7c423c02f96c5a97ef6acdd67ba014b4d45c88a94f4feea888516cd0a25fbb5f"}
+             :reading "The pattern () with its revise-as-you-prove stance made explicit: the plan is a working hypothesis, and the Lean pass's pressure (contradiction, digressions, expense) is the forcing signal that updates the informal plan. Variant two is the pattern with the feedback direction named."
+             :scope-limit "The rule covers the incremental-plus-feedback loop; it does not rank it against the other variants on the table."}}
+  {:pattern "math-strategy/plan-first-attempt"
+   :from {:fragment [742 839] :intent "propose"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-MDyMv9/single-plan-upstream-of-both}
+   :receipt {:source {:path "futon3/library/math-strategy/plan-first-attempt.flexiarg" :sha256 "7c423c02f96c5a97ef6acdd67ba014b4d45c88a94f4feea888516cd0a25fbb5f"}
+             :reading "The pattern's written form () taken as the shared artefact: one numbered plan stating the required lemmas, consumed by both the informal and the formal pass. Variant three is the pattern's own shape."
+             :scope-limit "The rule places the plan upstream; it does not claim one plan suffices for both passes in practice."}}
+  {:pattern "cascade-construction/lift-when-three-align"
+   :from {:fragment [1381 1557] :intent "propose"}
+   :guard {:needs #{:turn-MDyMv9/proof-plans-accumulated} :forbids #{}}
+   :produces #{:turn-MDyMv9/plans-promoted-to-patterns-driving-decomposition}
+   :receipt {:source {:path "futon3/library/cascade-construction/lift-when-three-align.flexiarg" :sha256 "06a12356f46905c436669464aa36e99e114361e3da907176a009a55a772757a9"}
+             :reading "The pattern's admission test (Lift to a shared pattern from three written, aligned cascades, with a checklist @how, one incident per instance and recorded gaps.) applied to promotion: a plan becomes a pattern only once written, aligned instances with incidents exist — which is what prevents every plan from becoming a pattern (the proliferation risk the session named)."
+             :scope-limit "The rule governs the promotion's warrant; the decomposition machinery that consumes the promoted patterns is separate work."}}
+  ]
+ :not-a-rule []
+}

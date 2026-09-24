@@ -1,0 +1,29 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-1QzzO5"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-1QzzO5.json.analysis.json"
+ :source-sha256 "879ddc4d0447f07d5977548fc83fbcbf0d1dc6c1dac4d5047837d76fe49b14ae"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-1QzzO5/turn-tagging-assigned-to-kimi-2 {:statement "The turn-tagging work is assigned to kimi-2." :cue [15 44]}
+  :turn-1QzzO5/turn-tagging-assigned-to-kimi-1 {:statement "The turn-tagging work is assigned to kimi-1." :cue [45 55]}
+  :turn-1QzzO5/sole-delegate-across-lanes {:statement "Exactly one delegate produces this work across all lanes." :cue [77 107]}
+  :turn-1QzzO5/multiple-delegates-across-lanes {:statement "More than one delegate is producing this work across lanes." :cue [77 94]}}
+ :rules
+ [
+  {:pattern "coordination/assignment-binding"
+   :from {:fragment [4 63] :intent "redirect"}
+   :guard {:needs #{} :forbids #{:turn-1QzzO5/turn-tagging-assigned-to-kimi-1}}
+   :produces #{:turn-1QzzO5/turn-tagging-assigned-to-kimi-2}
+   :receipt {:source {:path "futon3/library/coordination/assignment-binding.flexiarg" :sha256 "d20124da82dd1ff934ea1067f5626c154cbcf62f2487194e65c712db195253ee"}
+             :reading "The pattern's rule () applied here: the assignment is corrected so the work binds to exactly one named agent. 'wanted kimi-2 doing this work not kimi-1' supplies both the new binding and the conflicting one the guard excludes."
+             :scope-limit "The rule records the assignment correction only; whether kimi-2 accepts, or what the work is, is off-record."}}
+  {:pattern "cycle-machine/single-producer"
+   :from {:fragment [68 107] :intent "constrain"}
+   :guard {:needs #{:turn-1QzzO5/turn-tagging-assigned-to-kimi-2} :forbids #{:turn-1QzzO5/multiple-delegates-across-lanes}}
+   :produces #{:turn-1QzzO5/sole-delegate-across-lanes}
+   :receipt {:source {:path "futon3/library/cycle-machine/single-producer.flexiarg" :sha256 "973389525453e7e94222fe87d870dd6246dc155975a7469f6441ba7bad187e65"}
+             :reading "The pattern () read as a standing structural constraint: once the assignment binds to kimi-2, no second delegate may produce the same structure in any lane. 'Only' is the whole rule, so the guard excludes the multi-delegate state it names."
+             :scope-limit "The rule is about the producer cardinality of the structure, not about which lane kimi-2 works in or how production is scheduled."}}
+  ]
+ :not-a-rule []
+}

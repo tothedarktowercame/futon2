@@ -1,0 +1,21 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-Ik17Ej"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-Ik17Ej.json.analysis.json"
+ :source-sha256 "3ae11cd2a41ca7fc9495febe300faa7139f5a9bf876838ab97496640196c394e"
+ :labeller "claude-1"
+ :tokens {
+  :turn-Ik17Ej/results-received {:statement "The current round's results have come back." :cue [34 54]}
+  :turn-Ik17Ej/next-round-tools-planned {:statement "Classical NLP tools are planned to ease the next round." :cue [115 145]}
+  :turn-Ik17Ej/zai2-method-inspected-first {:statement "zai-2's working method in the buffer is inspected before tools are built." :cue [65 104]}}
+ :rules
+ [
+  {:pattern "cascade-construction/read-what-exists-first"
+   :from {:fragment [56 105] :intent "ask-action"}
+   :guard {:needs #{:turn-Ik17Ej/results-received :turn-Ik17Ej/next-round-tools-planned} :forbids #{}}
+   :produces #{:turn-Ik17Ej/zai2-method-inspected-first}
+   :receipt {:source {:path "futon3/library/cascade-construction/read-what-exists-first.flexiarg" :sha256 "04b442f40edd33be35382de2355944a0135c50dbefce4a7ec5967378ec21d81e"}
+             :reading "The pattern's rule (Construction starts from the requirement, the implementation, the live state and prior attempts, with their disagreements written down.): before building the tools, read the live state — here the translator's own recorded session — so construction starts from what exists rather than from a guess about the method."
+             :scope-limit "The rule orders inspection before tooling; it does not say what the inspection will find or which tools survive it."}}
+  ]
+ :not-a-rule []
+}

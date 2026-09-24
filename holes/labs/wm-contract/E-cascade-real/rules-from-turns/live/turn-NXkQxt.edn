@@ -1,0 +1,19 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-NXkQxt"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-NXkQxt.json.analysis.json"
+ :source-sha256 "69c29c229d2b55995c40dd4a2945a3a377bda44baf05fa73d6e4b8fdeb1052db"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-NXkQxt/prior-work-approved {:statement "The work or proposal from the preceding turn is approved." :cue [0 2]}}
+ :rules
+ [
+  {:pattern "orchestration/consent-gate"
+   :from {:fragment [0 2] :intent "approve"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-NXkQxt/prior-work-approved}
+   :receipt {:source {:path "futon3/library/orchestration/consent-gate.flexiarg" :sha256 "479420b4d1f7673f36610fe5f8e69fed5109fee6b141625144c8d9f311dcee71"}
+             :reading "The gate (An autonomous agent must not take an irreversible or outward-facing action unilaterally; route it through a consent-gate — a first-class, recorded operator-approval step at the exact locus where the action would otherwise fire — so the act is auditable and the supervised→autonomous transition is a swap at one seam, not a re-architecture.) at its consent step: 'OK' is the operator's approval releasing the held work to its next step."
+             :scope-limit "The referent and any warrant are off-record; only the approval edge is claimed."}}
+  ]
+ :not-a-rule []
+}

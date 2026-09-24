@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-qiO3lB"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-qiO3lB.json.analysis.json"
+ :source-sha256 "e6807ee502f2a95cf3d82c9c6321bb74d8507c5e9ba378184009344a8f09a812"
+ :labeller "codex-14"
+ :tokens {
+  :turn-qiO3lB/cue-analysis-built {:statement "A cue-analysis pass over typed turns exists (the 'just testing' flexiarg question)." :cue [72 114]}
+  :turn-qiO3lB/closed-loop-not-credited {:statement "The typed-cue→reuse loop is not credited closed: no reuse was observed." :cue [128 159]}}
+ :rules
+ [
+  {:pattern "apparatus/done-is-observed-running"
+   :from {:fragment [72 160] :intent "report-problem"}
+   :guard {:needs #{:turn-qiO3lB/cue-analysis-built} :forbids #{}}
+   :produces #{:turn-qiO3lB/closed-loop-not-credited}
+   :receipt {:source {:path "futon3/library/apparatus/done-is-observed-running.flexiarg" :sha256 "7f0c05735928fef7fdd95fcfcb369ae4bc39d2191d0a76104e2b4e26ec7621f9"}
+             :reading "The pattern (A mechanism exists when the live system shows it acting, not when the commit lands; the gap between declared, loaded, and running is closed by a standing comparator, not by discipline.) applied as the crediting rule: the loop exists when the live system shows it acting — the cue's reuse while typing — and this turn observes the counter-evidence, so the honest state is not-closed."
+             :scope-limit "The rule withholds credit; why the words did not appear (transcription, timing, wiring) is not claimed."}}
+  ]
+ :not-a-rule []
+}

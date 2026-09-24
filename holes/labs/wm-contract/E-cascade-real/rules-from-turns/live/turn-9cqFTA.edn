@@ -1,0 +1,29 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-9cqFTA"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-9cqFTA.json.analysis.json"
+ :source-sha256 "5281b8a34f8ef0e2f1a14ae65df0842b887212b65aa8b4a2aeada46b7a2662b2"
+ :labeller "claude-1"
+ :tokens {
+  :turn-9cqFTA/three-aligned-instances-written {:statement "Three written instances of the same move exist: Joe's pressure-update, Rob's causal-model transcoder, and their stated analogy." :cue [418 468]}
+  :turn-9cqFTA/shared-pattern-lifted-from-three {:statement "A shared pattern is lifted from the three aligned instances." :cue [425 434]}
+  :turn-9cqFTA/translator-model-of-source {:statement "The translating agent maintains a causal model of what it translates." :cue [354 414]}
+  :turn-9cqFTA/source-model-revisable-under-pressure {:statement "That model is revised when the target's pushback is structural." :cue [438 467]}}
+ :rules
+ [
+  {:pattern "cascade-construction/lift-when-three-align"
+   :from {:fragment [418 468] :intent "propose"}
+   :guard {:needs #{:turn-9cqFTA/three-aligned-instances-written} :forbids #{}}
+   :produces #{:turn-9cqFTA/shared-pattern-lifted-from-three}
+   :receipt {:source {:path "futon3/library/cascade-construction/lift-when-three-align.flexiarg" :sha256 "06a12356f46905c436669464aa36e99e114361e3da907176a009a55a772757a9"}
+             :reading "The pattern's admission test (Lift to a shared pattern from three written, aligned cascades, with a checklist @how, one incident per instance and recorded gaps.): the sentence supplies the third instance and asserts the alignment, so lifting is warranted by the session's own agreed test rather than by preference."
+             :scope-limit "The rule warrants the lift's admission; it does not claim the three instances align in every respect — the recorded gap (which artifact takes the pressure) stands."}}
+  {:pattern "translation/revise-the-source-under-pressure"
+   :from {:fragment [418 468] :intent "propose"}
+   :guard {:needs #{:turn-9cqFTA/translator-model-of-source} :forbids #{}}
+   :produces #{:turn-9cqFTA/source-model-revisable-under-pressure}
+   :receipt {:source {:path "futon3/library/translation/revise-the-source-under-pressure.flexiarg" :sha256 "5abeebb12556b885d15ea6f2996b65177e609cc33071992cd8195c8b4134d3e4"}
+             :reading "The pattern's rule (A translator keeps a model of what it is translating, grades the difficulty the target pushes back, and revises that model when the difficulty is structural rather than local.) is the lifted candidate itself: keep a model, grade the target's pushback, revise the model when the pushback is structural. Joe's sentence asserts this is the same mechanism on both sides."
+             :scope-limit "The rule states the mechanism's shape; whose artifact takes the pressure (Joe's informal proof vs Rob's C++ model) is the pattern's recorded open difference, not settled here."}}
+  ]
+ :not-a-rule []
+}

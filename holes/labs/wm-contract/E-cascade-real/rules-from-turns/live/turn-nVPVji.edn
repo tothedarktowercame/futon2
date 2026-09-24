@@ -1,0 +1,28 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-nVPVji"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-nVPVji.json.analysis.json"
+ :source-sha256 "96d6cc6386fb90f046426d2cd7ef45b7cd8fbefabef448fde2fac98406f5f406"
+ :labeller "claude-1"
+ :tokens {
+  :turn-nVPVji/operator-terms-distilled {:statement "Operator terms are being distilled into a compressed representation." :cue [257 284]}
+  :turn-nVPVji/distillation-judged-by-behaviour {:statement "The distilled representation is judged by whether it drives the same action, not by textual similarity." :cue [285 311]}
+  :turn-nVPVji/distillation-loss-declared {:statement "The distillation declares what it changes, drops, and requires for its equivalence to hold." :cue [285 311]}}
+ :rules
+ [
+  {:pattern "translation/choose-the-equivalence-check"
+   :from {:fragment [285 311] :intent "clarify"}
+   :guard {:needs #{:turn-nVPVji/operator-terms-distilled} :forbids #{}}
+   :produces #{:turn-nVPVji/distillation-judged-by-behaviour}
+   :receipt {:source {:path "futon3/library/translation/choose-the-equivalence-check.flexiarg" :sha256 "9d07c643c2d6ea6a8404e94127a420d09067f98ece8495698d40be0f452f5e07"}
+             :reading "The pattern (Destroyed units are judged by later truth, moved units by hash, translated units by source binding plus a declared relation tested by behaviour.) supplies the fidelity measure distillation needs: the student (the pattern language) is good when it acts as the teacher acted, not when it reads like the teacher."
+             :scope-limit "The rule fixes the criterion; the behaviour tests for turns are not specified here."}}
+  {:pattern "translation/declare-what-is-lost"
+   :from {:fragment [285 311] :intent "clarify"}
+   :guard {:needs #{:turn-nVPVji/operator-terms-distilled} :forbids #{}}
+   :produces #{:turn-nVPVji/distillation-loss-declared}
+   :receipt {:source {:path "futon3/library/translation/declare-what-is-lost.flexiarg" :sha256 "4d076f3ea837c347c28364d531257c04e62bbad00c9c9a8776541bd2130bb7e6"}
+             :reading "The pattern (Each translation states what it changes, fixes, drops, and requires for its equivalence to hold.) makes the loss a declared parameter of the compression rather than an accident: each translation states what it changes, fixes, drops, and what its equivalence needs."
+             :scope-limit "The rule requires the declaration; which losses the turn distillation actually has are not enumerated here."}}
+  ]
+ :not-a-rule []
+}

@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-IgOjxV"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-IgOjxV.json.analysis.json"
+ :source-sha256 "e8a85638e4fb9af1a698993bc9c0c4ccc1786d34510c98f5862980a37f8ee867"
+ :labeller "claude-1"
+ :tokens {
+  :turn-IgOjxV/hole-registry-exists {:statement "A hole registry exists as a causal model." :cue [153 186]}
+  :turn-IgOjxV/work-homed-in-m-sorry-enterprise {:statement "The hole-registry-as-causal-model work is homed in mission M-a-sorry-enterprise." :cue [187 213]}}
+ :rules
+ [
+  {:pattern "problems/pattern-genesis-from-evidence-bearing-holes"
+   :from {:fragment [144 213] :intent "clarify"}
+   :guard {:needs #{:turn-IgOjxV/hole-registry-exists} :forbids #{}}
+   :produces #{:turn-IgOjxV/work-homed-in-m-sorry-enterprise}
+   :receipt {:source {:path "futon3/library/problems/pattern-genesis-from-evidence-bearing-holes.flexiarg" :sha256 "ba2a4bddd497b1a92a45623b0344520b96eefa4653ede4f81cdcd1d44494e3b3"}
+             :reading "The pattern (This is a problem-stating node from the catalogue's R17-triple-prime paragraph: retrieval, composition, embedding nearness and structure learning can only work with the patterns that already exist, so a recurring way of acting with no adequate pattern needs a minting path.) routes evidence-bearing holes into new vocabulary under a standing apparatus; naming the mission homes the registry as that apparatus, turning one-off genesis into a trajectory that can be tracked over time."
+             :scope-limit "The rule assigns the work a home; it does not assert the mission's content is correct or complete."}}
+  ]
+ :not-a-rule []
+}

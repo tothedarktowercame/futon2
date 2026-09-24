@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-20Rp0h"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-20Rp0h.json.analysis.json"
+ :source-sha256 "d365799451c42e7da3e7c15b2e218b89a5da5fbf32c04fad0c1c3fccd38307bb"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-20Rp0h/suggested-patterns-mined {:statement "Patterns have been suggested from the APM problem/solution corpus." :cue [609 646]}
+  :turn-20Rp0h/higher-level-patterns-guiding-solutions {:statement "Higher-level patterns exist that guide solution attempts while leaving details open." :cue [682 747]}}
+ :rules
+ [
+  {:pattern "math-strategy/plan-first-attempt"
+   :from {:fragment [559 794] :intent "propose"}
+   :guard {:needs #{:turn-20Rp0h/suggested-patterns-mined} :forbids #{}}
+   :produces #{:turn-20Rp0h/higher-level-patterns-guiding-solutions}
+   :receipt {:source {:path "futon3/library/math-strategy/plan-first-attempt.flexiarg" :sha256 "7c423c02f96c5a97ef6acdd67ba014b4d45c88a94f4feea888516cd0a25fbb5f"}
+             :reading "The pattern's rule () lifted one level: the 'plan' is the mined per-problem patterns, and the move produces the higher-level pattern layer that guides attempts with details deferred ('leaving details to fill in where appropriate' is the plan's own revise-as-you-prove stance)."
+             :scope-limit "The rule covers forming the guiding layer; it does not claim the layer is correct or that any particular APM problem is solved by it."}}
+  ]
+ :not-a-rule []
+}

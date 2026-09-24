@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-whpvoR"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-whpvoR.json.analysis.json"
+ :source-sha256 "f2f5eadb8dedea29b68fe519e06b277b0a326c4cdc31fc4a506c9a0ac8237b70"
+ :labeller "claude-1"
+ :tokens {
+  :turn-whpvoR/hidden-layer-unwritten {:statement "The hidden layer of turns operates whether or not it is written down." :cue [1263 1325]}
+  :turn-whpvoR/hidden-patterns-recordable-from-evidence {:statement "Patterns already operating in practice are recordable from the evidence holes in translation mark." :cue [1290 1325]}}
+ :rules
+ [
+  {:pattern "problems/pattern-genesis-from-evidence-bearing-holes"
+   :from {:fragment [1259 1326] :intent "constrain"}
+   :guard {:needs #{:turn-whpvoR/hidden-layer-unwritten} :forbids #{}}
+   :produces #{:turn-whpvoR/hidden-patterns-recordable-from-evidence}
+   :receipt {:source {:path "futon3/library/problems/pattern-genesis-from-evidence-bearing-holes.flexiarg" :sha256 "ba2a4bddd497b1a92a45623b0344520b96eefa4653ede4f81cdcd1d44494e3b3"}
+             :reading "The pattern (This is a problem-stating node from the catalogue's R17-triple-prime paragraph: retrieval, composition, embedding nearness and structure learning can only work with the patterns that already exist, so a recurring way of acting with no adequate pattern needs a minting path.) with the ontology stated first: if the layer operates before it is written, then holes found in translation mark patterns that already exist in practice and are merely unrecorded — which is exactly the pattern's route of enlarging the vocabulary from evidence-bearing holes."
+             :scope-limit "The rule records the ontological premise and its consequence; it does not claim any particular hidden pattern exists or has been found."}}
+  ]
+ :not-a-rule []
+}

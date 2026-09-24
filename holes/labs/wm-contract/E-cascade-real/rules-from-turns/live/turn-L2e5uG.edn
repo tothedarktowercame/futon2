@@ -1,0 +1,19 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-L2e5uG"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-L2e5uG.json.analysis.json"
+ :source-sha256 "b713b75923364ae4dfbd2308508d2db11f59facc1be5155ad6a5fe4744fc4a8a"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-L2e5uG/proposed-action-released {:statement "The agent's proposed action is released by operator consent." :cue [0 9]}}
+ :rules
+ [
+  {:pattern "orchestration/consent-gate"
+   :from {:fragment [0 9] :intent "approve"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-L2e5uG/proposed-action-released}
+   :receipt {:source {:path "futon3/library/orchestration/consent-gate.flexiarg" :sha256 "479420b4d1f7673f36610fe5f8e69fed5109fee6b141625144c8d9f311dcee71"}
+             :reading "The gate (An autonomous agent must not take an irreversible or outward-facing action unilaterally; route it through a consent-gate — a first-class, recorded operator-approval step at the exact locus where the action would otherwise fire — so the act is auditable and the supervised→autonomous transition is a swap at one seam, not a re-architecture.) at its consent step: the agent proposed and waited; 'Please do' is the recorded consent that releases the act."
+             :scope-limit "The proposed action and any warrant are off-record; only the release edge is claimed."}}
+  ]
+ :not-a-rule []
+}

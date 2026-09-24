@@ -1,0 +1,39 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-A8Ioc3"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-A8Ioc3.json.analysis.json"
+ :source-sha256 "df362c4b0e40c4eda14dbe0011ec265b46e34734f513ecd81135dd2c5b4099d3"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-A8Ioc3/chaining-proposal-on-table {:statement "A proposal to chain models is on the table." :cue [16 33]}
+  :turn-A8Ioc3/model-chaining-accepted {:statement "The model-chaining idea is accepted." :cue [4 15]}
+  :turn-A8Ioc3/three-llm-chain-in-use {:statement "Each turn is currently processed by a chain of three LLMs." :cue [122 155]}
+  :turn-A8Ioc3/permanent-three-llm-dependence {:statement "The three-LLM-per-turn chain remains necessary forever." :cue [99 121]}
+  :turn-A8Ioc3/robust-learning-signal-captured {:statement "A robust learning signal is captured so the chain becomes unnecessary." :cue [63 95]}
+  :turn-A8Ioc3/why-how-fields-present {:statement "Patterns carry @why and @how fields." :cue [230 247]}
+  :turn-A8Ioc3/why-how-encoded-as-links {:statement "The @why and @how fields are encoded as explicit traversable links." :cue [248 281]}}
+ :rules
+ [
+  {:pattern "workshop/open-proposals-named-adoption"
+   :from {:fragment [0 33] :intent "approve"}
+   :guard {:needs #{:turn-A8Ioc3/chaining-proposal-on-table} :forbids #{}}
+   :produces #{:turn-A8Ioc3/model-chaining-accepted}
+   :receipt {:source {:path "futon3/library/workshop/open-proposals-named-adoption.flexiarg" :sha256 "7d1ef4a82a2e8cd5a02c1f76324a67de4e335d403a026a6ca63d1f4a63b0bc29"}
+             :reading "The pattern () at its adoption half: 'clever idea' is a named verdict adopting the chaining proposal before building on it."
+             :scope-limit "The verdict adopts the idea, not a committed build; the reservation introduced by 'but' is the next rule's object, not this one's."}}
+  {:pattern "measurement/error-needs-structure-to-teach"
+   :from {:fragment [34 170] :intent "extend"}
+   :guard {:needs #{:turn-A8Ioc3/three-llm-chain-in-use} :forbids #{:turn-A8Ioc3/permanent-three-llm-dependence}}
+   :produces #{:turn-A8Ioc3/robust-learning-signal-captured}
+   :receipt {:source {:path "futon3/library/measurement/error-needs-structure-to-teach.flexiarg" :sha256 "64ef6a39b265091746ba4ed4ebfbf8c1d56df95742239ad62eef636a6dadd9e8"}
+             :reading "The pattern (When a record says predicted X, realised Y, error Z, the number Z alone is not a learning signal. Record the DERIVATION with the judgment — what the prediction was computed FROM, what the realisation actually measured, and the interpretation of their difference — so the error has structure to propagate. A measurement is a discharge judgment, not a number.) names exactly this failure mode: a cheap record with no derivation cannot teach, so the chain must run forever. The rule requires the produced signal to carry structure — the learning pass must be able to say what each link's output was computed from — or the forbidden state stands."
+             :scope-limit "The rule requires the signal's structure; what the signal is (labels, corrections, receipts) is not specified here."}}
+  {:pattern "pattern-coherence/causal-clarity"
+   :from {:fragment [172 282] :intent "propose"}
+   :guard {:needs #{:turn-A8Ioc3/why-how-fields-present} :forbids #{}}
+   :produces #{:turn-A8Ioc3/why-how-encoded-as-links}
+   :receipt {:source {:path "futon3/library/pattern-coherence/causal-clarity.flexiarg" :sha256 "ebba4e1b0106fb8057b755a35ab3ae734a00bf83d198ef496b7241c41f20554d"}
+             :reading "The pattern (A good pattern states the causal chain that links context to the proposed action and expected outcome.) pushed one step: from stating the causal chain in prose to encoding it structurally, so the learning signal of the sibling rule has edges to propagate along."
+             :scope-limit "The rule covers the encoding move; the link semantics (what @why vs @how edges mean) are the 象 work's business, not claimed here."}}
+  ]
+ :not-a-rule []
+}

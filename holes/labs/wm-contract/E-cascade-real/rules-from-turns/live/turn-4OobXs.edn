@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-4OobXs"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-4OobXs.json.analysis.json"
+ :source-sha256 "aadc1910453cd34cb7f17ebf016489ff0152a60addbab006691028d48ebe43f2"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-4OobXs/chip-proposal-on-table {:statement "kimi-2's IBOL chip-icon proposal is on the table." :cue [33 58]}
+  :turn-4OobXs/adoption-decision-requested {:statement "An explicit adoption decision about visual flair is now requested." :cue [0 28]}}
+ :rules
+ [
+  {:pattern "workshop/open-proposals-named-adoption"
+   :from {:fragment [0 59] :intent "ask-action"}
+   :guard {:needs #{:turn-4OobXs/chip-proposal-on-table} :forbids #{}}
+   :produces #{:turn-4OobXs/adoption-decision-requested}
+   :receipt {:source {:path "futon3/library/workshop/open-proposals-named-adoption.flexiarg" :sha256 "7d1ef4a82a2e8cd5a02c1f76324a67de4e335d403a026a6ca63d1f4a63b0bc29"}
+             :reading "The pattern () at its routing half: the proposal stays open and named ('per this proposal from kimi-2') while 'Can we add ... ?' converts it into an explicit adoption decision to be taken."
+             :scope-limit "The question mark is load-bearing: the rule produces a decision request, not an adoption. No chip is yet installed."}}
+  ]
+ :not-a-rule []
+}

@@ -1,0 +1,29 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-5KtJ9F"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-5KtJ9F.json.analysis.json"
+ :source-sha256 "55b0627be34d020065650b6577cf1f40e012632006ba44d3656eb640e71434e2"
+ :labeller "claude-1"
+ :tokens {
+  :turn-5KtJ9F/lisp-like-pattern-language-defined {:statement "A lisp-like design-pattern language exists to drive a model with." :cue [572 603]}
+  :turn-5KtJ9F/kimi-responding-to-patterns-only {:statement "The installed model responds only to design patterns expressed in that language." :cue [537 568]}
+  :turn-5KtJ9F/cascade-underdetermines-action {:statement "A delivered cascade leaves the required action unclear." :cue [609 630]}
+  :turn-5KtJ9F/clarification-bell-sent {:statement "A clarifying bell is sent back to resolve the underdetermination." :cue [640 670]}}
+ :rules
+ [
+  {:pattern "cascades/declared-skeleton"
+   :from {:fragment [510 604] :intent "ask-action"}
+   :guard {:needs #{:turn-5KtJ9F/lisp-like-pattern-language-defined} :forbids #{}}
+   :produces #{:turn-5KtJ9F/kimi-responding-to-patterns-only}
+   :receipt {:source {:path "futon3/library/cascades/declared-skeleton.flexiarg" :sha256 "9ff0c6495764148c49a648b932bcd938d493baab3aad10ce80d3e0778a384e99"}
+             :reading "The pattern () read as an interface contract: before Kimi is installed, the language's declared shape fixes what 'responding to a pattern' means, so the produced state is a model whose entire input surface is the declared skeleton."
+             :scope-limit "The rule covers the teach-to-the-skeleton move; it does not claim the model will generalise or that any particular cascade will run."}}
+  {:pattern "translation/route-the-untranslatable"
+   :from {:fragment [605 671] :intent "propose"}
+   :guard {:needs #{:turn-5KtJ9F/cascade-underdetermines-action} :forbids #{}}
+   :produces #{:turn-5KtJ9F/clarification-bell-sent}
+   :receipt {:source {:path "futon3/library/translation/route-the-untranslatable.flexiarg" :sha256 "0717bab5a1ff89f6055c45dc4945ee62ddd6035523c987e0b427c4ef88bdd10c"}
+             :reading "The pattern's rule (Untranslatable units refuse with a typed reason, go to whoever can act, and are counted by cause.): a cascade the receiver cannot act on is an untranslatable unit, and the prescribed routing is a typed request to whoever can act — here the bell back to the operator."
+             :scope-limit "The rule covers the fallback path only; it does not define when a cascade counts as unclear beyond the receiver's own judgment."}}
+  ]
+ :not-a-rule []
+}

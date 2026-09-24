@@ -1,0 +1,28 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-9umMUN"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-9umMUN.json.analysis.json"
+ :source-sha256 "9866105fa79a00a4c48547931c7cc1b4de5683d16f794c741267f17d4962309d"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-9umMUN/translation-returned-to-kimi-1 {:statement "Translation work is assigned back to kimi-1." :cue [4 42]}
+  :turn-9umMUN/dispatch-help-needed {:statement "The global-cascade work needs another helper for dispatch." :cue [85 125]}
+  :turn-9umMUN/kimi-3-available {:statement "kimi-3 is available as an executor." :cue [128 147]}}
+ :rules
+ [
+  {:pattern "orchestration/consent-gate"
+   :from {:fragment [0 42] :intent "approve"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-9umMUN/translation-returned-to-kimi-1}
+   :receipt {:source {:path "futon3/library/orchestration/consent-gate.flexiarg" :sha256 "479420b4d1f7673f36610fe5f8e69fed5109fee6b141625144c8d9f311dcee71"}
+             :reading "The gate (An autonomous agent must not take an irreversible or outward-facing action unilaterally; route it through a consent-gate — a first-class, recorded operator-approval step at the exact locus where the action would otherwise fire — so the act is auditable and the supervised→autonomous transition is a swap at one seam, not a re-architecture.) at its consent step: 'OK ... is fine' is the recorded approval releasing the reassignment of translation back to kimi-1."
+             :scope-limit "Only the approval edge is claimed; the reason for the reassignment and any warrant are off-record."}}
+  {:pattern "data-mining/fan-out-independent-runs-across-devices"
+   :from {:fragment [128 147] :intent "propose"}
+   :guard {:needs #{:turn-9umMUN/dispatch-help-needed} :forbids #{}}
+   :produces #{:turn-9umMUN/kimi-3-available}
+   :receipt {:source {:path "futon3/library/data-mining/fan-out-independent-runs-across-devices.flexiarg" :sha256 "fb78b502862b3dbb1cc331f2d30126f1642cba172a54d2b8e05f35d59475ed41"}
+             :reading "The pattern (When a rented multi-GPU box runs a job that fits on ONE device, and the run is really several INDEPENDENT sub-runs (ablation arms, seeds, hyperparameter points), do not run them sequentially on GPU 0 while GPUs 1..k sit idle. Pin each independent run to its own device (`CUDA_VISIBLE_DEVICES=i`) and launch them concurrently — the box finishes all arms in roughly one arm's wall-clock instead of the sum. And ask the prior question first: if the model only needs one GPU, a 4-GPU box is only worth renting BECAUSE you will fan the arms across it — otherwise right-size down to a 1-GPU box. This is the training-run sibling of saturate-the-accelerator-with-concurrency: there the unit of parallelism is concurrent requests on one card; here it is concurrent independent runs across cards.) at the provisioning step: the anticipated extra dispatch lane gets an idle executor named in advance rather than serialising onto kimi-1. GPU context incidental."
+             :scope-limit "Availability is produced, not assignment; the rule does not claim kimi-3 is dispatched to anything yet."}}
+  ]
+ :not-a-rule []
+}

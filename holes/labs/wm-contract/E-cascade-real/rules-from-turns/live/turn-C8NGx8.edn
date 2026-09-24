@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-C8NGx8"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-C8NGx8.json.analysis.json"
+ :source-sha256 "36ba5be8a71a6d81f5672fff444586f300a4ea4049324747df12caf29b268e46"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-C8NGx8/bridge-health-unverified {:statement "The futon1b bridge's health is unverified — expected self-healed, possibly not." :cue [82 137]}
+  :turn-C8NGx8/bridge-diagnostics-read {:statement "The bridge's health diagnostics have been read." :cue [239 269]}}
+ :rules
+ [
+  {:pattern "stack-coherence/futon-bridge-health"
+   :from {:fragment [230 270] :intent "propose"}
+   :guard {:needs #{:turn-C8NGx8/bridge-health-unverified} :forbids #{}}
+   :produces #{:turn-C8NGx8/bridge-diagnostics-read}
+   :receipt {:source {:path "futon3/library/stack-coherence/futon-bridge-health.flexiarg" :sha256 "c719a1e8ab7d46d82a890b426c7fd724298a721688d24add619d9ccbc1508861"}
+             :reading "The pattern () applied to the named artifact: check the bridge's own health evidence (status, latency, last-verified) instead of reasoning blind about the hyperedge write failure."
+             :scope-limit "The rule covers the diagnostic step; it does not claim the bridge is healthy or that the write issue is a bridge issue at all."}}
+  ]
+ :not-a-rule []
+}

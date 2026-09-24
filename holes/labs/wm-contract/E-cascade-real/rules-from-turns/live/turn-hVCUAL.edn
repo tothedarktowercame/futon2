@@ -1,0 +1,35 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-hVCUAL"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-hVCUAL.json.analysis.json"
+ :source-sha256 "6144a931b6464e3fc7fc1784991bccba99902e337528f1aabea23c496133cb5e"
+ :labeller "claude-1"
+ :tokens {
+  :turn-hVCUAL/holes-in-translation {:statement "The translation contains holes where no pattern fits." :cue [340 349]}
+  :turn-hVCUAL/candidate-patterns-suggested {:statement "New candidate patterns are suggested to fill those holes." :cue [292 349]}
+  :turn-hVCUAL/hole-fillers-are-patterns {:statement "A hole's recursive filler is itself a pattern." :cue [441 477]}}
+ :rules
+ [
+  {:pattern "problems/pattern-genesis-from-evidence-bearing-holes"
+   :from {:fragment [288 350] :intent "extend"}
+   :guard {:needs #{:turn-hVCUAL/holes-in-translation} :forbids #{}}
+   :produces #{:turn-hVCUAL/candidate-patterns-suggested}
+   :receipt {:source {:path "futon3/library/problems/pattern-genesis-from-evidence-bearing-holes.flexiarg" :sha256 "ba2a4bddd497b1a92a45623b0344520b96eefa4653ede4f81cdcd1d44494e3b3"}
+             :reading "The pattern (This is a problem-stating node from the catalogue's R17-triple-prime paragraph: retrieval, composition, embedding nearness and structure learning can only work with the patterns that already exist, so a recurring way of acting with no adequate pattern needs a minting path.) covers enlarging the vocabulary from holes that carry their own evidence under witnessed review — which is exactly a translator proposing a candidate filler for its own typed hole."
+             :scope-limit "The rule covers the suggestion channel; the candidates are proposals, not library members, until reviewed."}}
+  {:pattern "cascade-construction/add-a-pattern-when-an-item-fits-no-class"
+   :from {:fragment [288 350] :intent "extend"}
+   :guard {:needs #{:turn-hVCUAL/holes-in-translation} :forbids #{}}
+   :produces #{:turn-hVCUAL/candidate-patterns-suggested}
+   :receipt {:source {:path "futon3/library/cascade-construction/add-a-pattern-when-an-item-fits-no-class.flexiarg" :sha256 "af576bfeadff31f0f620da1a76c043f1bf38aea6e79ff7508cb2a8123506c7f3"}
+             :reading "The pattern (A real item that fits no class becomes a named gap, a domain question and, when warranted, a pattern built from a census.) governs the same channel from the admission side: a hole is an item that fits no class, and the rule says when adding a pattern is warranted rather than forcing the item into a neighbour. Same produced state, with the warrant discipline named."
+             :scope-limit "The rule governs the decision at each hole; it does not guarantee any suggested candidate survives review."}}
+  {:pattern "proof-search/typed-hole-as-frontier"
+   :from {:fragment [429 478] :intent "explain"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-hVCUAL/hole-fillers-are-patterns}
+   :receipt {:source {:path "futon3/library/proof-search/typed-hole-as-frontier.flexiarg" :sha256 "5f342980b21e8043d5cb186050bc66e108292e6e2edcd61bfdb02ff3f63e18d7"}
+             :reading "The pattern (Never let \"incomplete\" be a vibe. Represent every incompleteness as a TYPED HOLE — a sorry with an explicit interface: what is wanted (the signature/codomain), what is in hand (the endpoints), and what would discharge it. A typed frontier is enumerable, rankable, and dispatchable; untyped TODO-prose is folklore that must be rediscovered by every reader.) is what makes the recursion coherent: a hole is a typed position with an interface — what is wanted, what is in hand, what would discharge it — so its filler is a pattern occupying that position, not prose."
+             :scope-limit "The rule states the recursive structure; the typing of each individual hole is the translation's work, not claimed here."}}
+  ]
+ :not-a-rule []
+}

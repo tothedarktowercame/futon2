@@ -1,0 +1,28 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-2yHv3v"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-2yHv3v.json.analysis.json"
+ :source-sha256 "6b7fd64b9b1664da1d7a07bfee070b780841066f11f7ba599fd8ddd21041c6c3"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-2yHv3v/proposal-released-for-execution {:statement "The previously held proposal is released to be executed." :cue [0 13]}
+  :turn-2yHv3v/multiple-lanes-needed {:statement "The work requires more than one parallel lane." :cue [15 41]}
+  :turn-2yHv3v/kimi-3-available-as-lane {:statement "kimi-3 is available as an additional executor lane." :cue [42 65]}}
+ :rules
+ [
+  {:pattern "orchestration/consent-gate"
+   :from {:fragment [0 14] :intent "approve"}
+   :guard {:needs #{} :forbids #{}}
+   :produces #{:turn-2yHv3v/proposal-released-for-execution}
+   :receipt {:source {:path "futon3/library/orchestration/consent-gate.flexiarg" :sha256 "479420b4d1f7673f36610fe5f8e69fed5109fee6b141625144c8d9f311dcee71"}
+             :reading "The gate (An autonomous agent must not take an irreversible or outward-facing action unilaterally; route it through a consent-gate — a first-class, recorded operator-approval step at the exact locus where the action would otherwise fire — so the act is auditable and the supervised→autonomous transition is a swap at one seam, not a re-architecture.) at its consent step: 'Let's do that' is the recorded operator approval that releases an action the agent was holding."
+             :scope-limit "The held proposal and its warrant are not in this record, so the rule covers only the release edge; the gate's full loop (request, warrant, audit) is not claimed."}}
+  {:pattern "data-mining/fan-out-independent-runs-across-devices"
+   :from {:fragment [15 65] :intent "propose"}
+   :guard {:needs #{:turn-2yHv3v/multiple-lanes-needed} :forbids #{}}
+   :produces #{:turn-2yHv3v/kimi-3-available-as-lane}
+   :receipt {:source {:path "futon3/library/data-mining/fan-out-independent-runs-across-devices.flexiarg" :sha256 "fb78b502862b3dbb1cc331f2d30126f1642cba172a54d2b8e05f35d59475ed41"}
+             :reading "The pattern's core (When a rented multi-GPU box runs a job that fits on ONE device, and the run is really several INDEPENDENT sub-runs (ablation arms, seeds, hyperparameter points), do not run them sequentially on GPU 0 while GPUs 1..k sit idle. Pin each independent run to its own device (`CUDA_VISIBLE_DEVICES=i`) and launch them concurrently — the box finishes all arms in roughly one arm's wall-clock instead of the sum. And ask the prior question first: if the model only needs one GPU, a 4-GPU box is only worth renting BECAUSE you will fan the arms across it — otherwise right-size down to a 1-GPU box. This is the training-run sibling of saturate-the-accelerator-with-concurrency: there the unit of parallelism is concurrent requests on one card; here it is concurrent independent runs across cards.) at agent grain: when work splits into independent lanes, provision an idle executor per lane rather than serialising. The condition 'if you need multiple lanes' is the guard's need; 'you can also use kimi-3' is the produced availability. The GPU context is incidental."
+             :scope-limit "The rule covers provisioning the lane, not how work is split or whether kimi-3 is actually used."}}
+  ]
+ :not-a-rule []
+}

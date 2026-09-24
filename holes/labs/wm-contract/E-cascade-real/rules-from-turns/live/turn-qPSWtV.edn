@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-qPSWtV"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-qPSWtV.json.analysis.json"
+ :source-sha256 "c0ed9ca6367b65d9ea22f2a5def32ccb96e2bed40d0fe3ea1ae6ba4076d13a85"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-qPSWtV/op-test-proposal-on-table {:statement "kimi-2's chip proposal, including the op-test choice for verify, is on the table." :cue [0 28]}
+  :turn-qPSWtV/op-test-chip-adopted {:statement "The op-test chip for the verify intent is adopted." :cue [29 36]}}
+ :rules
+ [
+  {:pattern "workshop/open-proposals-named-adoption"
+   :from {:fragment [0 37] :intent "approve"}
+   :guard {:needs #{:turn-qPSWtV/op-test-proposal-on-table} :forbids #{}}
+   :produces #{:turn-qPSWtV/op-test-chip-adopted}
+   :receipt {:source {:path "futon3/library/workshop/open-proposals-named-adoption.flexiarg" :sha256 "7d1ef4a82a2e8cd5a02c1f76324a67de4e335d403a026a6ca63d1f4a63b0bc29"}
+             :reading "The pattern () at row grain: 'Your op-test idea for verify is good' is a named verdict adopting one element of the open proposal, with authorship acknowledged."
+             :scope-limit "The verdict adopts the one chip; the rest of the proposal and the dropcaps layout request that follows are separate."}}
+  ]
+ :not-a-rule []
+}

@@ -1,0 +1,27 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-aWzllW"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-aWzllW.json.analysis.json"
+ :source-sha256 "4477337b6669c8092f9f960260e142e6608f9be994b50a4ebb3c53dc31e0f4ab"
+ :labeller "claude-1"
+ :tokens {
+  :turn-aWzllW/turn-to-cascade-translation-in-use {:statement "Operator turns are being translated into pattern-backed s-expressions and executed." :cue [43 94]}
+  :turn-aWzllW/translation-contract-defined {:statement "An explicit contract governing the turn-to-cascade translation is defined." :cue [118 171]}}
+ :rules
+ [
+  {:pattern "translation/declare-what-is-preserved"
+   :from {:fragment [114 172] :intent "ask-action"}
+   :guard {:needs #{:turn-aWzllW/turn-to-cascade-translation-in-use} :forbids #{}}
+   :produces #{:turn-aWzllW/translation-contract-defined}
+   :receipt {:source {:path "futon3/library/translation/declare-what-is-preserved.flexiarg" :sha256 "3e9f22c81b31c4329975f0bd56b67ca758eec4795fd3efd47ddd2c861ed06397"}
+             :reading "The pattern (A crossing starts by stating the unit, what must be the same on the other side, and the conditions under which it is.) is the first clause the contract owes: state the unit, what must be the same on the other side, and the conditions under which it is — that is what 'defining the translation contract' minimally means."
+             :scope-limit "The rule names the contract's first clause; it does not draft the contract."}}
+  {:pattern "translation/choose-the-equivalence-check"
+   :from {:fragment [114 172] :intent "ask-action"}
+   :guard {:needs #{:turn-aWzllW/turn-to-cascade-translation-in-use} :forbids #{}}
+   :produces #{:turn-aWzllW/translation-contract-defined}
+   :receipt {:source {:path "futon3/library/translation/choose-the-equivalence-check.flexiarg" :sha256 "9d07c643c2d6ea6a8404e94127a420d09067f98ece8495698d40be0f452f5e07"}
+             :reading "The pattern (Destroyed units are judged by later truth, moved units by hash, translated units by source binding plus a declared relation tested by behaviour.) answers the contract's sharp half: correctness is judged by source binding plus a declared relation tested by behaviour — what the receiving agent does, not textual similarity. Same produced contract as the sibling rule, with the judgement criterion specified."
+             :scope-limit "The rule fixes the judgement criterion; which behaviour tests instantiate it for cascades is not specified here."}}
+  ]
+ :not-a-rule []
+}

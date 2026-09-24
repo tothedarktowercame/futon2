@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-q6l8tB"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-q6l8tB.json.analysis.json"
+ :source-sha256 "59ea6e499e6ca9da8536b33f8dd6be4ef895810d0031ebc09c664b4cf11961e8"
+ :labeller "claude-1"
+ :tokens {
+  :turn-q6l8tB/turns-tagged-with-directions {:statement "Operator turns are successfully tagged with meaningful directions." :cue [186 237]}
+  :turn-q6l8tB/turns-categorized-by-r-number {:statement "Turns are categorized by R number, the requirement axis of the social layer." :cue [690 726]}}
+ :rules
+ [
+  {:pattern "social/ARGUMENT"
+   :from {:fragment [702 726] :intent "clarify"}
+   :guard {:needs #{:turn-q6l8tB/turns-tagged-with-directions} :forbids #{}}
+   :produces #{:turn-q6l8tB/turns-categorized-by-r-number}
+   :receipt {:source {:path "futon3/library/social/ARGUMENT.flexiarg" :sha256 "92b88e1d9209af8bf96e2495bdc628b556dc3ea9f1b3f0e2a0bc86cfd4569fc3"}
+             :reading "The pattern () is where the R-numbers are defined, each derived from a library pattern plus a futon-theory entry; categorizing turns by R extends that index from patterns to live operator directions."
+             :scope-limit "The rule extends the index; it does not claim the R-number set is finished — the turn itself records the earlier effort with claude-5 as incomplete."}}
+  ]
+ :not-a-rule []
+}

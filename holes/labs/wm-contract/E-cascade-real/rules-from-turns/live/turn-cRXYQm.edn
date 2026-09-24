@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-cRXYQm"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-cRXYQm.json.analysis.json"
+ :source-sha256 "e4d016bc00c3cf7290364ab7288c2e316f94e2c0052e995c8656fe1b0f920c6b"
+ :labeller "kimi-1"
+ :tokens {
+  :turn-cRXYQm/turn-tagging-multi-produced {:statement "Turn tagging is being produced by every agent." :cue [115 146]}
+  :turn-cRXYQm/turn-tagging-single-producer {:statement "Turn tagging has exactly one producer; the others are switched off." :cue [70 97]}}
+ :rules
+ [
+  {:pattern "cycle-machine/single-producer"
+   :from {:fragment [98 156] :intent "explain"}
+   :guard {:needs #{:turn-cRXYQm/turn-tagging-multi-produced} :forbids #{}}
+   :produces #{:turn-cRXYQm/turn-tagging-single-producer}
+   :receipt {:source {:path "futon3/library/cycle-machine/single-producer.flexiarg" :sha256 "973389525453e7e94222fe87d870dd6246dc155975a7469f6441ba7bad187e65"}
+             :reading "The pattern () stated from the operator side: the structure should have exactly one producer, and the multi-producer state named in the guard is the violation 'turn that off' removes."
+             :scope-limit "The rule covers the cardinality correction; which agent remains the producer is the sibling turns' assignment decision, not this one's."}}
+  ]
+ :not-a-rule []
+}

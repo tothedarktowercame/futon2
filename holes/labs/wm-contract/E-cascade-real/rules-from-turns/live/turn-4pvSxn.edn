@@ -1,0 +1,20 @@
+{:schema :e-cascade-real/turn-rules-v1
+ :turn "turn-4pvSxn"
+ :source-record "/home/joe/.emacs-graph/session-turn-analysis/turn-4pvSxn.json.analysis.json"
+ :source-sha256 "e43469f6e69ce1465cd80090e61b58ab61d3d42f9e0c2a5c28adf705d19892bc"
+ :labeller "claude-1"
+ :tokens {
+  :turn-4pvSxn/operator-text-available {:statement "The operator's own transcribed text is available as the object of work." :cue [745 752]}
+  :turn-4pvSxn/annotation-bound-to-source-text {:statement "An annotation layer exists bound to the operator's text itself." :cue [729 752]}}
+ :rules
+ [
+  {:pattern "translation/bind-to-the-source"
+   :from {:fragment [721 753] :intent "clarify"}
+   :guard {:needs #{:turn-4pvSxn/operator-text-available} :forbids #{}}
+   :produces #{:turn-4pvSxn/annotation-bound-to-source-text}
+   :receipt {:source {:path "futon3/library/translation/bind-to-the-source.flexiarg" :sha256 "6addd0b18ca85a5b2fd43e14e94798c29bc09e6ba5b71d1e01703ab187625d51"}
+             :reading "The pattern's rule (Every translation carries a hash-level binding to its exact source and refuses when that source has moved.) read as a placement constraint: the annotation lives on the source text, not in a free-standing artefact — 'annotate my text' makes the source binding the point of the work."
+             :scope-limit "The rule covers the binding placement only; the annotation format (cascade, spans) is the surrounding turn's design, not this rule's claim."}}
+  ]
+ :not-a-rule []
+}
