@@ -1,0 +1,178 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {"hygiene/receipt-then-gate"
+  {:guard {:needs #{}, :forbids #{:hole/h6adae34e06ad}},
+   :produces #{:hole/h6adae34e06ad}},
+  "hygiene/observe-the-authority"
+  {:guard
+   {:needs #{:hole/h6adae34e06ad}, :forbids #{:hole/he92ac929f4c4}},
+   :produces #{:hole/he92ac929f4c4}},
+  "contracts/every-entry-has-a-falsifier"
+  {:guard
+   {:needs #{:hole/he92ac929f4c4}, :forbids #{:hole/h8b2289908aa2}},
+   :produces #{:hole/h8b2289908aa2}},
+  "forward-model/the-forward-model-is-a-pattern-cascade"
+  {:guard
+   {:needs #{:hole/h8b2289908aa2}, :forbids #{:hole/h30576d62bffb}},
+   :produces #{:hole/h30576d62bffb}},
+  "peripherals/read-only-first-then-extend"
+  {:guard {:needs #{}, :forbids #{:hole/ha3f46a5c0073}},
+   :produces #{:hole/ha3f46a5c0073}},
+  "orchestration/recorded-handoff"
+  {:guard
+   {:needs
+    #{:hole/h6adae34e06ad
+      :hole/h8b2289908aa2
+      :hole/h30576d62bffb
+      :hole/he92ac929f4c4
+      :hole/ha3f46a5c0073},
+    :forbids #{:hole/h3547e9033d0d}},
+   :produces #{:hole/h3547e9033d0d}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h6adae34e06ad
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl "- [x] `clj-kondo` clean on the new `.clj` files."},
+        :he92ac929f4c4
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl
+         "- [x] `futon4/dev/check-parens.el` clean on the new `.clj`/`.bb`."},
+        :h8b2289908aa2
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl
+         "- [x] `clojure -X:test` (futon3c) passes incl. the new test ns."},
+        :h30576d62bffb
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl
+         "- [x] `bb futon7/holes/M-futon-forward-model.manifold-reader.bb` runs clean + prints the observation summary."},
+        :ha3f46a5c0073
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl
+         "- [x] NO real-world side-effects, NO XTDB writes, NO sending — read-only + pure logic only."},
+        :h3547e9033d0d
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/M-futon-forward-model.md",
+         :decl
+         "- [x] **bell claude-1 back with a summary + commit shas.**"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {"hygiene/receipt-then-gate"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/hygiene/receipt-then-gate.flexiarg",
+    :sha256
+    "9cb4d48129a64639071e0c18c8eed1d54eb0860f19ae1537810ac35de2df3609"},
+   :reading
+   "Task line 445: 'clj-kondo clean on the new .clj files'. Under receipt-then-gate, lint is an act-gate: the delivery act passes only through a gate that re-verifies cleanliness at act time rather than trusting a stale receipt. Applying it means the clj-kondo gate is actually run against the new files at delivery, refusal being a typed failure, not a skipped check.",
+   :scope-limit
+   "The clj-kondo gate only. Argues lint cleanliness at gate time, not code correctness."},
+  "hygiene/observe-the-authority"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/hygiene/observe-the-authority.flexiarg",
+    :sha256
+    "f43c2229b97e9162b4b62af0093f5d15854423b1fc810cd0da4ccdc5ed568bef"},
+   :reading
+   "Task line 446: 'futon4/dev/check-parens.el clean on the new .clj/.bb'. The pattern demands the verdict read the authority it is about: paren balance must be checked on the actual files under delivery by the canonical checker (check-parens.el), not assumed from an editor session or stale run. Applying it means running the named checker on the named files and reporting its raw result.",
+   :scope-limit
+   "The paren check on the real files. No coverage claim beyond structural balance."},
+  "contracts/every-entry-has-a-falsifier"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/contracts/every-entry-has-a-falsifier.flexiarg",
+    :sha256
+    "ae7e7a5730bdcc9a358353052b7667e2d24c8eae85597c19f9175b72abf1bf89"},
+   :reading
+   "Task line 447: 'clojure -X:test (futon3c) passes incl. the new test ns'. The mission's §9.6 expectations already instantiate the pattern: for each invariant, an adversarial trace violating ONLY it must be flagged (:verified? false) — each invariant entry carries its falsifier. Applying the pattern means the test namespace constructs those per-invariant adversarial traces and the suite passes against the real verifier.",
+   :scope-limit
+   "The falsifier-bearing suite passing. Does not cover the reader or the side-effect constraint."},
+  "forward-model/the-forward-model-is-a-pattern-cascade"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/forward-model/the-forward-model-is-a-pattern-cascade.flexiarg",
+    :sha256
+    "d01455d258ce7d703b3336ce2c64617c1b8beeed56977abbdc4e72f8caf622b9"},
+   :reading
+   "Task line 448: 'bb futon7/holes/M-futon-forward-model.manifold-reader.bb runs clean + prints the observation summary'. The reader's subject is the forward model read as a typed cascade (worlds, features, p-found) rather than a mission list — the pattern is the reader's semantics. Applying it means the reader loads the declared cascade-shaped EDN and reports its observation map, demonstrating the manifold is machine-readable as a cascade.",
+   :scope-limit
+   "The reader running and printing. Does not validate the manifold's contents against the world."},
+  "peripherals/read-only-first-then-extend"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/peripherals/read-only-first-then-extend.flexiarg",
+    :sha256
+    "ffe10550fc9d3c85725b0a086a1e9e3c5eae2f93319a67e90a073698022a1180"},
+   :reading
+   "Task line 449: 'NO real-world side-effects, NO XTDB writes, NO sending — read-only + pure logic only'. The pattern's first instantiation of a new peripheral is read-only; this task is that constraint stated as an acceptance check. Applying it means the new code observes (reads EDN, computes, prints) and writes nothing but its own output file.",
+   :scope-limit
+   "The read-only constraint on this deliverable. A later write-capable instantiation is separate work the pattern contemplates."},
+  "orchestration/recorded-handoff"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/orchestration/recorded-handoff.flexiarg",
+    :sha256
+    "232ec874e6061ce48f7edc39cc6a7029c7005a934c5769abd26cf4ed93c30620"},
+   :reading
+   "Task line 450: 'bell claude-1 back with a summary + commit shas'. The recorded-handoff pattern's return leg is literally this: bell-back summary plus commit shas, closing the dispatch's modeled lifecycle so the output tape attributes the work. Applying it means the handoff record is completed with summary and shas after the gates pass.",
+   :scope-limit
+   "The return leg only. Depends on the gates having passed; the bell reports, it does not certify."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/h6adae34e06ad
+  :hole/he92ac929f4c4
+  :hole/h8b2289908aa2
+  :hole/h30576d62bffb
+  :hole/ha3f46a5c0073
+  :hole/h3547e9033d0d],
+ :mu {:value 0, :status :declared},
+ :target "M-futon-forward-model",
+ :facts
+ [:hole/h6adae34e06ad
+  :hole/he92ac929f4c4
+  :hole/h8b2289908aa2
+  :hole/h30576d62bffb
+  :hole/ha3f46a5c0073
+  :hole/h3547e9033d0d]}

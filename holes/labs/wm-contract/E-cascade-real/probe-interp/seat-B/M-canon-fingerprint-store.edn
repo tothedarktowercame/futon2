@@ -1,0 +1,157 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {"sidecar/tri-store-separation"
+  {:guard {:needs #{}, :forbids #{:hole/hae4a98689e37}},
+   :produces #{:hole/hae4a98689e37}},
+  "storage/canonical-interface"
+  {:guard
+   {:needs #{:hole/hae4a98689e37}, :forbids #{:hole/hf6110df5c7b0}},
+   :produces #{:hole/hf6110df5c7b0}},
+  "aif/status-gated-belief-update"
+  {:guard
+   {:needs #{:hole/hae4a98689e37}, :forbids #{:hole/h61f4c17570aa}},
+   :produces #{:hole/h61f4c17570aa}},
+  "data-mining/smoke-before-the-paid-run"
+  {:guard
+   {:needs #{:hole/h61f4c17570aa :hole/hf6110df5c7b0},
+    :forbids #{:hole/h72b677883cde}},
+   :produces #{:hole/h72b677883cde}},
+  "storage/startup-integrity-gate"
+  {:guard
+   {:needs #{:hole/h72b677883cde}, :forbids #{:hole/hb0224092661b}},
+   :produces #{:hole/hb0224092661b}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:hae4a98689e37
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-canon-fingerprint-store.md",
+         :decl
+         "- [x] **F1** — SQLite `canon_store.db`: schema with **scope bindings** (`role`, `scope`,"},
+        :hf6110df5c7b0
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-canon-fingerprint-store.md",
+         :decl
+         "- [x] **F2** — reducer + **in-run** query over SQLite; incremental state-merge; **most-cited-first"},
+        :h61f4c17570aa
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-canon-fingerprint-store.md",
+         :decl
+         "- [x] **F3** (alongside, per §8b) — per-binding canon posterior consuming the store as prior (§3.2 of"},
+        :h72b677883cde
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-canon-fingerprint-store.md",
+         :decl
+         "- [x] **F4** — literature-lifted strategy-merge proposer (§5); validate on held-out gold, no-regression."},
+        :hb0224092661b
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-canon-fingerprint-store.md",
+         :decl
+         "- [x] **F5** — Stage 5 closes the loop: read store on startup → prior → MAP-append → incremental REDUCE."},
+        :h3b2303097926
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-canon-fingerprint-store.md",
+         :decl
+         "- [x] **(follow-on, separate deliverable)** proof fingerprints = OEIS-of-steps (§2.1) — defer until"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {"sidecar/tri-store-separation"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/sidecar/tri-store-separation.flexiarg",
+    :sha256
+    "c75832f2e2f52e9b29fbb797844d45aac5d849de1636b35b5b9764ca04f0af9e"},
+   :reading
+   "Task line 291 (F1): 'SQLite canon_store.db: schema with scope bindings (role, scope, strategy_anchor)'. The mission's §8 delta chose SQLite because canon fingerprints are inspectable curated semantics — neither facts nor fuzzy notions; the tri-store pattern is that trust-level argument. Applying it means placing the canon store at the inspectable SQLite tier with scope bindings explicit in the schema.",
+   :scope-limit
+   "F1 schema and store placement. Does not supply reducer, posterior, or proposer; does not claim the fingerprints are correct."},
+  "storage/canonical-interface"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/storage/canonical-interface.flexiarg",
+    :sha256
+    "dfef24222ed6eb81f2066b377b7dad9eafc3741c5d07c7da55ae808627a3a878"},
+   :reading
+   "Task line 294 (F2): 'reducer + in-run query over SQLite; incremental state-merge; most-cited-first seed'. Applying the canonical-interface pattern means the in-run query and reducer reach the store through one minimal, stable query/update interface, not via coupling to Stage 5 internals — so the incremental merge stays reproducible. The task's tests (idempotent reduce, correct aggregation) are the interface's stability checks.",
+   :scope-limit
+   "The query/reduce seam and its idempotence. The pattern is about interface canonicality, not merge semantics; most-cited-first ordering rationale belongs to §3.1, not this pattern."},
+  "aif/status-gated-belief-update"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/aif/status-gated-belief-update.flexiarg",
+    :sha256
+    "b7d11f4f5bbd4d1032994b1da3253c3ead8ac05d84cc8e2e9e3d6f698615d10e"},
+   :reading
+   "Task line 296 (F3, 'alongside, per §8b'): 'per-binding canon posterior consuming the store as prior; held-out precision lift'. The pattern's rule — update belief only for instances actually observed this run; untouched instances keep their prior — is the right discipline for a per-binding posterior over a store: a run with no new evidence for a binding leaves that binding at the store's prior rather than drifting it.",
+   :scope-limit
+   "The per-binding update discipline consuming the store as prior. Does not itself deliver the held-out precision lift, which needs the held-out split to exist; covers update semantics, not the evaluation result."},
+  "data-mining/smoke-before-the-paid-run"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/data-mining/smoke-before-the-paid-run.flexiarg",
+    :sha256
+    "45bf2e6d4fe6d78a00fc06010ad6ea2eaa8af2760399124f9e24ec418ef7e1f6"},
+   :reading
+   "Task line 298 (F4): 'literature-lifted strategy-merge proposer (§5); validate on held-out gold, no-regression'. The pattern — smoke-test against a held-out sample with pre-declared quality bands before the full paid run — is the task's validation demand: the proposer is accepted only after a held-out-gold check with a no-regression band, never on plumbing-green.",
+   :scope-limit
+   "The held-out validation discipline. Does not author the proposer's contents or claim literature coverage beyond what the held-out check witnesses."},
+  "storage/startup-integrity-gate"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/storage/startup-integrity-gate.flexiarg",
+    :sha256
+    "3960fe34f321edcb164496bc7f6e1b9225d1dfc45882bb76994c14e3814b595d"},
+   :reading
+   "Task line 299 (F5): 'Stage 5 closes the loop: read store on startup -> prior -> MAP-append -> incremental REDUCE'. The startup-integrity-gate pattern — gate startup on full rehydration with explicit diagnostics rather than serving stale state — is the 'read store on startup' step: the loop closes only if the run starts from an integrity-checked persisted store.",
+   :scope-limit
+   "The startup read/gate step. Does not cover MAP-append mathematics; claims the loop starts from a verified store, not that the update rule is optimal."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/hae4a98689e37
+  :hole/hf6110df5c7b0
+  :hole/h61f4c17570aa
+  :hole/h72b677883cde
+  :hole/hb0224092661b
+  :hole/h3b2303097926],
+ :mu {:value 0, :status :declared},
+ :target "M-canon-fingerprint-store",
+ :facts
+ [:hole/hae4a98689e37
+  :hole/hf6110df5c7b0
+  :hole/h61f4c17570aa
+  :hole/h72b677883cde
+  :hole/hb0224092661b
+  :hole/h3b2303097926]}

@@ -1,0 +1,68 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {"scan-coherence/mission-anchored-scan"
+  {:guard {:needs #{}, :forbids #{:hole/h55f8fe32c265}},
+   :produces #{:hole/h55f8fe32c265}},
+  "peripherals/surface-earns-inhabitation"
+  {:guard {:needs #{}, :forbids #{:hole/hb1ba19f964f5}},
+   :produces #{:hole/hb1ba19f964f5}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h55f8fe32c265
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/missions/M-daily-scan.md",
+         :decl
+         "- [x] **Partial audit** of other static probes for named-vs-queried misalignment:"},
+        :hb1ba19f964f5
+        {:class :C4,
+         :repo "futon7",
+         :sha "HEAD",
+         :path "holes/missions/M-daily-scan.md",
+         :decl
+         "- [x] **Optional (standing-task)**: extend brief render to include README excerpt / paper-link-presence per the surface-render-shallowness promotion."}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {"scan-coherence/mission-anchored-scan"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/scan-coherence/mission-anchored-scan.flexiarg",
+    :sha256
+    "9fe4d196f2a6eb29c1aa92b3d782a5c2fcf51cf78cf7be4f8f47a02dd7c59033"},
+   :reading
+   "Task line 362: '**Partial audit** of other static probes for named-vs-queried misalignment' (e.g. pattern-rule-systems: name suggests Alexander-style patterns, query pulls business-rule-engines). The pattern's demand — each probe instrument used only where its noise profile is low, query shape matching the named question — is exactly the audit criterion: a probe is misaligned when its query shape does not match its name's claim. Applying it means auditing each static probe against that correspondence.",
+   :scope-limit
+   "The audit of the named static probes. Does not rebuild probes toward deps-grounded contract shape (separate Day-6+ work)."},
+  "peripherals/surface-earns-inhabitation"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/peripherals/surface-earns-inhabitation.flexiarg",
+    :sha256
+    "8aa42b1b946896c826311fec4abe68603c4648b9f09e2d22465ff690bb8830f7"},
+   :reading
+   "Task line 369: '**Optional (standing-task)**: extend brief render to include README excerpt / paper-link-presence per the surface-render-shallowness promotion'. The pattern — a surface earns inhabitation by being less friction than the alternative — is the promotion's premise: the brief render is too shallow to inhabit, and adding README excerpt and paper-link presence is the friction-reduction that would make it worth reading daily.",
+   :scope-limit
+   "The render extension only. Whether the enriched brief gets inhabited is measured by later use, not claimed here."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want [:hole/h55f8fe32c265 :hole/hb1ba19f964f5],
+ :mu {:value 0, :status :declared},
+ :target "M-daily-scan",
+ :facts [:hole/h55f8fe32c265 :hole/hb1ba19f964f5]}

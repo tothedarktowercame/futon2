@@ -1,0 +1,88 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {"agency/single-routing-authority"
+  {:guard {:needs #{}, :forbids #{:hole/hd4bfb746db9b}},
+   :produces #{:hole/hd4bfb746db9b}},
+  "orchestration/recorded-handoff"
+  {:guard
+   {:needs #{:hole/hd4bfb746db9b}, :forbids #{:hole/h022fc0e7fab5}},
+   :produces #{:hole/h022fc0e7fab5}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h16025dd5deeb
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-distributed-frontiermath.md",
+         :decl
+         "- [x] claude-2 Mentor session started on workspace2 (REPL-driven, not auto-invoke)"},
+        :hd4bfb746db9b
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-distributed-frontiermath.md",
+         :decl
+         "- [x] zcodex reachable from `#math` (currently configured same as codex; may need Rob's bridge)"},
+        :h8606857c4374
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-distributed-frontiermath.md",
+         :decl "- [x] Rob has IRC access to `#math`"},
+        :h022fc0e7fab5
+        {:class :C4,
+         :repo "futon6",
+         :sha "HEAD",
+         :path "holes/missions/M-distributed-frontiermath.md",
+         :decl
+         "- [x] Tickle bell-driven orchestration wired for FM-001 phase transitions"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {"agency/single-routing-authority"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/agency/single-routing-authority.flexiarg",
+    :sha256
+    "df6bf568dee5ded23e3cf08530605b12abe375a3351676fe082305713a1dbf07"},
+   :reading
+   "Task line 210: 'zcodex reachable from #math (currently configured same as codex; may need Rob's bridge)'. The named failure is an identity/routing collision: zcodex configured same as codex means one routing entry serving two agent identities. Applying single-routing-authority means giving zcodex its own routing path — one agent, one entry, one authoritative transport — so #math reaches it distinctly.",
+   :scope-limit
+   "zcodex's distinct routing only. Does not provision Rob's access or start the mentor session; Rob's bridge may be an external precondition with no token in this want set."},
+  "orchestration/recorded-handoff"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/orchestration/recorded-handoff.flexiarg",
+    :sha256
+    "232ec874e6061ce48f7edc39cc6a7029c7005a934c5769abd26cf4ed93c30620"},
+   :reading
+   "Task line 212: 'Tickle bell-driven orchestration wired for FM-001 phase transitions'. The recorded-handoff pattern — dispatch as a modeled object with lifecycle: spec at dispatch, job-id on send, bell-back summary on return — is what 'wired' means for tickle's bells: each FM-001 phase transition is dispatched as a recorded handoff, not a bare ping.",
+   :scope-limit
+   "Wiring transitions as recorded handoffs. Does not decide FM-001's phase semantics or run the phases."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/h16025dd5deeb
+  :hole/hd4bfb746db9b
+  :hole/h8606857c4374
+  :hole/h022fc0e7fab5],
+ :mu {:value 0, :status :declared},
+ :target "M-distributed-frontiermath",
+ :facts
+ [:hole/h16025dd5deeb
+  :hole/hd4bfb746db9b
+  :hole/h8606857c4374
+  :hole/h022fc0e7fab5]}

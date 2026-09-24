@@ -1,0 +1,66 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {"aif/two-layer-calibration"
+  {:guard {:needs #{}, :forbids #{:hole/h46ed944f95da}},
+   :produces #{:hole/h46ed944f95da}},
+  "aif/no-self-certification"
+  {:guard {:needs #{}, :forbids #{:hole/hb5b297019e1e}},
+   :produces #{:hole/hb5b297019e1e}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h46ed944f95da
+        {:class :C4,
+         :repo "futon0",
+         :sha "HEAD",
+         :path "holes/missions/M-futonzero-generative.md",
+         :decl
+         "- [x] G-SIM clearance — field-simulator adequacy; first MEASURED calibration pairs now accruing via the WM pilot loop"},
+        :hb5b297019e1e
+        {:class :C4,
+         :repo "futon0",
+         :sha "HEAD",
+         :path "holes/missions/M-futonzero-generative.md",
+         :decl
+         "- [x] G-REWARD clearance — anti-laundered reward; Pudding Prover G1 arrow-witness binding"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {"aif/two-layer-calibration"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/aif/two-layer-calibration.flexiarg",
+    :sha256
+    "76a281cd37088f9de561ff72f8d5874180d12fe2b1103f190e57d5cc196c8366"},
+   :reading
+   "Task line 202: 'G-SIM clearance — field-simulator adequacy; first MEASURED calibration pairs now accruing via the WM pilot loop'. The pattern's two layers are the clearance shape: simulator-internal consistency (rollouts cohere) is one layer; adequacy against MEASURED calibration pairs from the pilot loop is the witnessed-outcome layer. Applying it means G-SIM clears only on the witnessed layer, with the internal layer reported separately.",
+   :scope-limit
+   "The clearance evaluation discipline. Does not manufacture calibration pairs; if measured pairs have not accrued, the clearance stays open — preparation does not produce the token."},
+  "aif/no-self-certification"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/aif/no-self-certification.flexiarg",
+    :sha256
+    "6133a47d8f5ec7206c0a39fa2d643e5d8b595f0ecdb0399b07dde2c76e0c04b6"},
+   :reading
+   "Task line 203: 'G-REWARD clearance — anti-laundered reward; Pudding Prover G1 arrow-witness binding'. A laundered reward is a verdict moved by evidence its maker manufactured (the mission's §4.5 red-team fixture enumerates the shapes: censored-fallback, prior-value-tautology, operator-gate-as-fruit). Applying the pattern means the reward channel counts only evidence carrying independence tags the rewarder cannot fake — the arrow-witness binding — structurally, not by vigilance.",
+   :scope-limit
+   "Structural independence of the reward verdict. Does not prove the reward is aligned, only that self-manufactured evidence cannot move it."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want [:hole/h46ed944f95da :hole/hb5b297019e1e],
+ :mu {:value 0, :status :declared},
+ :target "M-futonzero-generative",
+ :facts [:hole/h46ed944f95da :hole/hb5b297019e1e]}

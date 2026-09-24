@@ -1,0 +1,123 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {"cascades/on-the-fly-cascade"
+  {:guard {:needs #{}, :forbids #{:hole/h26fc1070c3e6}},
+   :produces #{:hole/h26fc1070c3e6}},
+  "cascades/the-slice-is-the-unit-of-use"
+  {:guard {:needs #{}, :forbids #{:hole/h4d3638710e7b}},
+   :produces #{:hole/h4d3638710e7b}},
+  "structure/interest-event-vocabulary"
+  {:guard {:needs #{}, :forbids #{:hole/ha04170c8d22b}},
+   :produces #{:hole/ha04170c8d22b}},
+  "aif/two-layer-calibration"
+  {:guard
+   {:needs
+    #{:hole/h4d3638710e7b :hole/ha04170c8d22b :hole/h26fc1070c3e6},
+    :forbids #{:hole/hbc48e7c4dbdf}},
+   :produces #{:hole/hbc48e7c4dbdf}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h26fc1070c3e6
+        {:class :C4,
+         :repo "futon2",
+         :sha "HEAD",
+         :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+         :decl
+         "- [x] **Adapt one non-threshold diversity source for Slice 1b.** A read-only"},
+        :h4d3638710e7b
+        {:class :C4,
+         :repo "futon2",
+         :sha "HEAD",
+         :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+         :decl
+         "- [x] **Make cascade scoring prefix-local and auditable.** Recompute every"},
+        :ha04170c8d22b
+        {:class :C4,
+         :repo "futon2",
+         :sha "HEAD",
+         :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+         :decl
+         "- [x] **Specify and persist the cascade-habit return event.** A distinct"},
+        :hbc48e7c4dbdf
+        {:class :C4,
+         :repo "futon2",
+         :sha "HEAD",
+         :path "holes/missions/M-wm-aif-policy-grain-compliance.md",
+         :decl
+         "- [x] **Run a dark end-to-end hierarchy shadow.** Candidate construction,"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {"cascades/on-the-fly-cascade"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/cascades/on-the-fly-cascade.flexiarg",
+    :sha256
+    "d98806fe6943050ad0d87738c7168fbf3a7153510c137866b32407e6bfb88ad6"},
+   :reading
+   "Task line 199: '**Adapt one non-threshold diversity source for Slice 1b** — a read-only adapter from one named arguing-worlds or slush artifact into the complete cascade-candidate schema... an explicit difference in membership or semilattice wiring'. The on-the-fly-cascade pattern — derive cascade edges per query against current problem state rather than from pre-declared relations — is what a non-threshold source contributes: candidates derived from the artifact's own structure, not the threshold frontier's. The adapter makes that derivation foldable.",
+   :scope-limit
+   "The adapter and its pinned fixture. Does not claim the new source improves selection, only that it yields foldable candidates differing from the incumbent."},
+  "cascades/the-slice-is-the-unit-of-use"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/cascades/the-slice-is-the-unit-of-use.flexiarg",
+    :sha256
+    "c259144e5fe5e126f905b05040618315b8c73f03bd03803b05407517a8c8f3eb"},
+   :reading
+   "Task line 214: '**Make cascade scoring prefix-local and auditable** — recompute every candidate selection term from that candidate's own :shown and :semilattice... changing only discarded suffix telemetry cannot change its rank'. The slice pattern — a seat needs the slice for one problem at one moment, computed against current state — applied to scoring: the enacted prefix is the slice, and its score must be computable from the slice alone. The truncation fixture is the check that nothing outside the slice leaks into its score.",
+   :scope-limit
+   "Prefix-local recompute and its truncation-fixture proof. Does not change what the terms measure, only where their inputs come from."},
+  "structure/interest-event-vocabulary"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/structure/interest-event-vocabulary.flexiarg",
+    :sha256
+    "b51296613be9c61bddf9b58d082eaaecbad91ef139373f73438762b2e0943405"},
+   :reading
+   "Task line 226: '**Specify and persist the cascade-habit return event** — a distinct versioned :cascade-prior-state, the complete selected identity pinned, and the one reviewed event that increments it'. The pattern — state transitions against an entity asserted via a typed, append-only event vocabulary with provenance — is the return event's shape: a versioned typed event, one qualifying event increments the prior once, and replays reconstruct state from the event log.",
+   :scope-limit
+   "The event's specification and persistence semantics. Does not decide the habit's policy effect, only that its increments are typed, versioned, and replay-exact."},
+  "aif/two-layer-calibration"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/aif/two-layer-calibration.flexiarg",
+    :sha256
+    "76a281cd37088f9de561ff72f8d5874180d12fe2b1103f190e57d5cc196c8366"},
+   :reading
+   "Task line 236: '**Run a dark end-to-end hierarchy shadow** — candidate construction, prefix-local ranking, fold/gate and trace production exercised without changing live selection... byte identity with the feature off'. The pattern's layer separation is the shadow's design: the live selection layer runs untouched (byte-identical with the feature off as the consistency check), while the shadow layer is evaluated separately with its own named terms (E_scheduler / cascade-score / E_cascade) and replay. Neither layer substitutes for the other.",
+   :scope-limit
+   "The dark shadow run and its separate reporting. Does not promote shadow results into live selection; a non-degenerate useful-case fraction is reported, not acted on."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/h26fc1070c3e6
+  :hole/h4d3638710e7b
+  :hole/ha04170c8d22b
+  :hole/hbc48e7c4dbdf],
+ :mu {:value 0, :status :declared},
+ :target "M-wm-aif-policy-grain-compliance",
+ :facts
+ [:hole/h26fc1070c3e6
+  :hole/h4d3638710e7b
+  :hole/ha04170c8d22b
+  :hole/hbc48e7c4dbdf]}

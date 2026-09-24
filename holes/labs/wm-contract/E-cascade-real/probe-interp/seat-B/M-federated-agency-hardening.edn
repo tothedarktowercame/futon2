@@ -1,0 +1,123 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {"agency/single-routing-authority"
+  {:guard {:needs #{}, :forbids #{:hole/hd6dd12860265}},
+   :produces #{:hole/hd6dd12860265}},
+  "social/idempotent-handoff"
+  {:guard
+   {:needs #{:hole/hd6dd12860265}, :forbids #{:hole/hb8a6fa5239dc}},
+   :produces #{:hole/hb8a6fa5239dc}},
+  "invariant-coherence/single-locus"
+  {:guard
+   {:needs #{:hole/hd6dd12860265}, :forbids #{:hole/h260a1b85a356}},
+   :produces #{:hole/h260a1b85a356}},
+  "agency/invariants"
+  {:guard
+   {:needs
+    #{:hole/h260a1b85a356 :hole/hd6dd12860265 :hole/hb8a6fa5239dc},
+    :forbids #{:hole/hf4b4e2392af5}},
+   :produces #{:hole/hf4b4e2392af5}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:hd6dd12860265
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-federated-agency-hardening.md",
+         :decl
+         "- [x] Laptop federates with the tunnel OFF (no 17070 listener anywhere)."},
+        :hb8a6fa5239dc
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-federated-agency-hardening.md",
+         :decl
+         "- [x] Rebooting either box requires zero human action: uplink reconnects within"},
+        :h260a1b85a356
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-federated-agency-hardening.md",
+         :decl
+         "- [x] `oxf=http://127.0.0.1:17070` peer entry removable from dev-linode-env once"},
+        :hf4b4e2392af5
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-federated-agency-hardening.md",
+         :decl
+         "- [x] Invariants hold: uplink routes to agents that already exist (I-2); no"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {"agency/single-routing-authority"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/agency/single-routing-authority.flexiarg",
+    :sha256
+    "df6bf568dee5ded23e3cf08530605b12abe375a3351676fe082305713a1dbf07"},
+   :reading
+   "Task line 858: 'Laptop federates with the tunnel OFF (no 17070 listener anywhere)'. With the tunnel off there must be exactly one routing path for laptop agents — the uplink — and no stale local listener claiming authority. Applying the pattern means the laptop registry holds one authoritative entry per agent via the uplink, with the 17070 listener gone rather than shadowing it.",
+   :scope-limit
+   "Single-path routing with tunnel off. Does not cover reboot recovery or the peer-entry removal."},
+  "social/idempotent-handoff"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/social/idempotent-handoff.flexiarg",
+    :sha256
+    "ce9a7a8e29fe6f4fb80031ddea4637fc812b271fe50497d2d947184caa6a8ed7"},
+   :reading
+   "Task line 859: 'Rebooting either box requires zero human action: uplink reconnects within backoff, roster reappears on the next announce'. The mission's own protocol (re-announce clears stale proxies; 3 missed intervals prune) is the idempotent-handoff discipline: a re-sent announce after reboot must reconcile-not-redo, keyed by stable agent identity, so the roster converges without human reconciliation.",
+   :scope-limit
+   "Reconnect/announce idempotence. Does not speed the backoff and does not cover the deploy-time removal."},
+  "invariant-coherence/single-locus"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/invariant-coherence/single-locus.flexiarg",
+    :sha256
+    "7e0dd480c1f5bdbcdd8f2a170fde06edbccb7ba5601485d097af282e5d7ff183"},
+   :reading
+   "Task line 861: 'oxf=http://127.0.0.1:17070 peer entry removable from dev-linode-env once the uplink is live'. Once the uplink is authoritative, the static peer entry is a second simultaneously-active record for the same (identity, route) pair — a single-locus violation. Applying the pattern means removing the duplicate so exactly one routing record remains, as a verified deploy step.",
+   :scope-limit
+   "The duplicate-record removal argument and its check. The removal itself is deferred to a verified deploy step per the mission; the reading does not execute the deploy."},
+  "agency/invariants"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/agency/invariants.flexiarg",
+    :sha256
+    "f906d5280627eebdac547769789bfd93a97204a0d1ec29d4384f723823c1a203"},
+   :reading
+   "Task line 863: 'Invariants hold: uplink routes to agents that already exist (I-2); no subprocess spawning in transport code (grep gate); locals stay bare (CP-D)'. This is a direct audit against the Agency Invariant Set: each named check (identity-exists routing, no transport subprocess, bare locals) is an invariant from the set, demonstrated to hold after the hardening work.",
+   :scope-limit
+   "The three named invariant checks. Does not extend the set or prove invariants beyond those named."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/hd6dd12860265
+  :hole/hb8a6fa5239dc
+  :hole/h260a1b85a356
+  :hole/hf4b4e2392af5],
+ :mu {:value 0, :status :declared},
+ :target "M-federated-agency-hardening",
+ :facts
+ [:hole/hd6dd12860265
+  :hole/hb8a6fa5239dc
+  :hole/h260a1b85a356
+  :hole/hf4b4e2392af5]}

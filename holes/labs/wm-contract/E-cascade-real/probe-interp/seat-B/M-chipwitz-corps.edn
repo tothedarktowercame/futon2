@@ -1,0 +1,172 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {"mmca/threshold-shaped-events"
+  {:guard {:needs #{}, :forbids #{:hole/hb9354e61ab3e}},
+   :produces #{:hole/hb9354e61ab3e}},
+  "peripherals/canonical-typed-event-vs-side-channel"
+  {:guard {:needs #{}, :forbids #{:hole/h09128afee45a}},
+   :produces #{:hole/h09128afee45a}},
+  "orchestration/pattern-warranted-choice-point"
+  {:guard
+   {:needs #{:hole/h09128afee45a}, :forbids #{:hole/h5963cec1a3df}},
+   :produces #{:hole/h5963cec1a3df}},
+  "aif/two-layer-calibration"
+  {:guard
+   {:needs #{:hole/h09128afee45a}, :forbids #{:hole/h2c51566a32b4}},
+   :produces #{:hole/h2c51566a32b4}},
+  "math-strategy/missing-dependency-protocol"
+  {:guard
+   {:needs #{:hole/h5963cec1a3df}, :forbids #{:hole/h4bd2d74d8763}},
+   :produces #{:hole/h4bd2d74d8763}},
+  "corps/working-where-others-can-see"
+  {:guard {:needs #{}, :forbids #{:hole/h056f5583d59e}},
+   :produces #{:hole/h056f5583d59e}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:hb9354e61ab3e
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] DERIVE: the warrant threshold — what cascade C-score / match quality"},
+        :h09128afee45a
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] Typed PXR channel (sibling of `futon3c.aif.discipline-events`): PSR +"},
+        :h5963cec1a3df
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] Wire the choice-point check into the pilot flow (warrant-finder"},
+        :h2c51566a32b4
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] `:pxr` evidence kind in `futon3c.aif.calibration` (FutonZero"},
+        :h4bd2d74d8763
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] No-warrant asks → sorry-mining hook (library gap → registry candidate)."},
+        :h056f5583d59e
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-chipwitz-corps.md",
+         :decl
+         "- [x] Relation to `library/corps/` patterns: name which corps disciplines"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {"mmca/threshold-shaped-events"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/mmca/threshold-shaped-events.flexiarg",
+    :sha256
+    "17b4c47951657887bfc87a79cabac014e7c45fa3288c5ec22a506d34ba8db6cf"},
+   :reading
+   "Task line 85: 'DERIVE: the warrant threshold — what cascade C-score / match quality counts as \"found\"? (too loose re-creates autopen-creep, too tight rubber-stamp asks)'. The pattern's lesson — when a detector's output is defined by a threshold, study the distribution of what the threshold admits before trusting its counts — is this derivation: set the threshold from the observed C-score distribution on real choice-points, with both failure tails named, not a priori.",
+   :scope-limit
+   "Deriving and defending the threshold. Does not build the PXR channel or wire the check."},
+  "peripherals/canonical-typed-event-vs-side-channel"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/peripherals/canonical-typed-event-vs-side-channel.flexiarg",
+    :sha256
+    "020b272ec5b4d9aedf8142ccaf7f60ed539d7c8041a5a854c235c7ad8dbc355c"},
+   :reading
+   "Task line 88: 'Typed PXR channel (sibling of futon3c.aif.discipline-events): PSR + PUR records with choice-point refs'. The task is literally the pattern: extend the canonical event taxonomy with a first-class typed event rather than shipping a side channel — PXR records become a typed sibling of discipline-events, not an ad-hoc log.",
+   :scope-limit
+   "The typed channel's existence and schema. Does not derive the threshold or evaluate the records."},
+  "orchestration/pattern-warranted-choice-point"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/orchestration/pattern-warranted-choice-point.flexiarg",
+    :sha256
+    "b62b00deb1415fa9e25dfa986e16254a4d9497bb0d934ec2642b380227c00fe9"},
+   :reading
+   "Task line 90: 'Wire the choice-point check into the pilot flow (warrant-finder consultation before surfacing operator questions)'. This is the pattern applied directly: each choice-point carries its warrant, and an operator question (a NAG) is surfaced with its warrant and the one specific gap — the warrant-finder consultation is the mechanism the pattern names.",
+   :scope-limit
+   "The pilot-flow wiring. Presumes the PXR channel exists; does not set the threshold the warrant-finder uses."},
+  "aif/two-layer-calibration"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/aif/two-layer-calibration.flexiarg",
+    :sha256
+    "76a281cd37088f9de561ff72f8d5874180d12fe2b1103f190e57d5cc196c8366"},
+   :reading
+   "Task line 92: ':pxr evidence kind in futon3c.aif.calibration (FutonZero evaluation of warranted work)'. The pattern separates dynamics-consistency from witnessed-outcome evaluation; adding :pxr as an evidence kind lets warranted choice-points be evaluated in the witnessed layer (did the warranted pick produce the outcome?) separately from internal consistency.",
+   :scope-limit
+   "Registering and using the :pxr kind. Does not collect enough PXR instances to say whether the warrant layer is calibrated."},
+  "math-strategy/missing-dependency-protocol"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/math-strategy/missing-dependency-protocol.flexiarg",
+    :sha256
+    "7ac0fd890c50c9026f46a16722361b50c3e2cb37aa2fae660aebfd8887c4785d"},
+   :reading
+   "Task line 94: 'No-warrant asks -> sorry-mining hook (library gap -> registry candidate)'. The pattern's protocol — establish the gap is real, localize it at one named hole, record what was searched and what remains — is the sorry-mining hook: each no-warrant ask becomes a localized library-gap record the registry can pick up.",
+   :scope-limit
+   "Turning no-warrant asks into localized recorded gaps. Does not guarantee registry acceptance or that gaps are fillable."},
+  "corps/working-where-others-can-see"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/corps/working-where-others-can-see.flexiarg",
+    :sha256
+    "8f3703f6d93a8dda565f34e511e30104daf30282ce7216d60d5cff04565b24e0"},
+   :reading
+   "Task line 95: 'Relation to library/corps/ patterns: name which corps disciplines the layer operationalizes'. The warrant layer makes an agent's choice-points visible and auditable to others — the corps discipline 'Working Where Others Can See' operationalized as infrastructure. Applying the pattern here means naming this correspondence (and any siblings) in the mission document.",
+   :scope-limit
+   "Naming the correspondence only. Does not change corps patterns or add warrant mechanics."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/hb9354e61ab3e
+  :hole/h09128afee45a
+  :hole/h5963cec1a3df
+  :hole/h2c51566a32b4
+  :hole/h4bd2d74d8763
+  :hole/h056f5583d59e],
+ :mu {:value 0, :status :declared},
+ :target "M-chipwitz-corps",
+ :facts
+ [:hole/hb9354e61ab3e
+  :hole/h09128afee45a
+  :hole/h5963cec1a3df
+  :hole/h2c51566a32b4
+  :hole/h4bd2d74d8763
+  :hole/h056f5583d59e]}

@@ -1,0 +1,176 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {"ukrns/scale-register"
+  {:guard {:needs #{}, :forbids #{:hole/h730434653957}},
+   :produces #{:hole/h730434653957}},
+  "war-room/wr-10-next-move-surface-is-recursive-closure"
+  {:guard
+   {:needs #{:hole/h730434653957}, :forbids #{:hole/h6e84a77745cb}},
+   :produces #{:hole/h6e84a77745cb}},
+  "campaign-coherence/campaign-as-temporary-institution"
+  {:guard
+   {:needs #{:hole/h6e84a77745cb}, :forbids #{:hole/h68dbc60a7584}},
+   :produces #{:hole/h68dbc60a7584}},
+  "contracts/every-entry-has-a-falsifier"
+  {:guard
+   {:needs #{:hole/h68dbc60a7584}, :forbids #{:hole/hb7f5a89877eb}},
+   :produces #{:hole/hb7f5a89877eb}},
+  "social/explicit-exit-over-abandonment"
+  {:guard
+   {:needs #{:hole/hb7f5a89877eb}, :forbids #{:hole/ha664b5558c56}},
+   :produces #{:hole/ha664b5558c56}},
+  "campaign-coherence/shared-standard-has-no-single-owner"
+  {:guard
+   {:needs #{:hole/ha664b5558c56}, :forbids #{:hole/hbe5e9b666bbc}},
+   :produces #{:hole/hbe5e9b666bbc}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h730434653957
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-action-cost-modelling.md",
+         :decl
+         "- [x] **Cost-signal lands**: Each candidate action in the WM's ranked-actions carries a `:scale` (or equivalently expressive) annotation, sourceable from at least one of shape (a)/(b)/(c)"},
+        :h6e84a77745cb
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-action-cost-modelling.md",
+         :decl
+         "- [x] **Work-breakdown gate fires**: When the WM's top recommendation is `:multi-session` or larger, the live next-move-live tile renders a \"needs work breakdown\" CTA instead of \"→ address-sorry X\""},
+        :h68dbc60a7584
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-action-cost-modelling.md",
+         :decl
+         "- [x] **Mission-or-Campaign decision is operator-visible**: The CTA either points to \"this is a Mission\" (existing futonic structure) or \"this requires a Campaign\" (new structure if we confirm it's needed; or the absence is operator-explicit)"},
+        :hb7f5a89877eb
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-action-cost-modelling.md",
+         :decl
+         "- [x] **The live test case discriminates**: After the layer ships, the 5 currently-tied sorries no longer present as equivalent. At minimum, `:minute`/`:hour` ranks above `:campaign` regardless of EFE score"},
+        :ha664b5558c56
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-action-cost-modelling.md",
+         :decl
+         "- [x] **M-live-geometric-stack decision recorded**: Either substrate-2 exposes per-action T-delta queries (shape (c) lands), OR a finding is filed on M-live-geometric-stack identifying the action-projection-query gap, with the 5-tied-sorries 2-orders-of-magnitude-cost-spread as the test case"},
+        :hbe5e9b666bbc
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-action-cost-modelling.md",
+         :decl
+         "- [x] **Campaign structure resolved**: Either ships as a new futon-stack structural element with documentation in `mission-lifecycle.md` (or its sibling), OR is explicitly rejected as \"Missions suffice\" with rationale"}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {"ukrns/scale-register"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/ukrns/scale-register.flexiarg",
+    :sha256
+    "5f117f4efa6a7656b13929860bfc5b7e0f94a1ea1d183f740fcb29a1fbdd8c0c"},
+   :reading
+   "Task line 110: '**Cost-signal lands**: each candidate action in the WM's ranked-actions carries a :scale annotation, sourceable from shape (a)/(b)/(c)'. The scale-register pattern is exactly this act: publish each capability's scale choice as an inspectable register entry with rationale and source, rather than leaving scale implicit. Applying it to the WM means every ranked action carries its scale with its sourcing rationale.",
+   :scope-limit
+   "Publishing sourced scale annotations only. Does not fire the gate, decide mission-vs-campaign, or validate that the scale values are correct."},
+  "war-room/wr-10-next-move-surface-is-recursive-closure"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/war-room/wr-10-next-move-surface-is-recursive-closure.flexiarg",
+    :sha256
+    "3169de193c52c1e4f998d796b8ec66a16a8f23a738143247012e032f57812c59"},
+   :reading
+   "Task line 111: '**Work-breakdown gate fires**: when the top recommendation is :multi-session or larger, the live next-move tile renders a \"needs work breakdown\" CTA'. WR-10 says the next-move tile reads its recommendation off the live canonical self-model, not a hand-maintained document. This task extends that live surface: with scale annotations present, the tile's CTA is driven by the model's own scale field — recursive closure applied to a new CTA case.",
+   :scope-limit
+   "CTA switching on the live tile only. Does not decide mission-vs-campaign or prove ranking discrimination."},
+  "campaign-coherence/campaign-as-temporary-institution"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/campaign-coherence/campaign-as-temporary-institution.flexiarg",
+    :sha256
+    "91faf72b3c639aadd506129a92563d82e73d69c0a171bbe40dc03e9d69e9ec53"},
+   :reading
+   "Task line 112: '**Mission-or-Campaign decision is operator-visible**: the CTA points to \"this is a Mission\" or \"this requires a Campaign\"'. The pattern (whose own header cites M-action-cost-modelling §3.5 as origin) supplies the criterion: work whose joint goal no single Mission can own wants Campaign shape, else Mission shape. Applying it here means the CTA names that criterion explicitly so the operator sees which shape is claimed and why.",
+   :scope-limit
+   "The visible decision with stated criterion. Does not charter a campaign or resolve whether the structure ships."},
+  "contracts/every-entry-has-a-falsifier"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/contracts/every-entry-has-a-falsifier.flexiarg",
+    :sha256
+    "ae7e7a5730bdcc9a358353052b7667e2d24c8eae85597c19f9175b72abf1bf89"},
+   :reading
+   "Task line 113: '**The live test case discriminates**: the 5 currently-tied sorries no longer present as equivalent; :minute/:hour ranks above :campaign regardless of EFE score'. This is a falsifier demand: the scale layer is complete only when the named wrong behavior (the 5-way tie) is observably refuted. The pattern's discipline — every entry carries the falsifier that would refute it — is the task's acceptance shape.",
+   :scope-limit
+   "The discrimination check on the 5 tied sorries. Does not add cost shapes or decide the geometric-stack question."},
+  "social/explicit-exit-over-abandonment"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/social/explicit-exit-over-abandonment.flexiarg",
+    :sha256
+    "5e6c7c6632fcca362b8ca0151802bdf2d668554334983cd72f870aa549dc96ad"},
+   :reading
+   "Task line 114: '**M-live-geometric-stack decision recorded**: either substrate-2 exposes per-action T-delta queries OR a finding is filed identifying the action-projection-query gap, with the 5-tied-sorries cost spread as test case'. The second arm is the pattern: when a substrate blocks the work, record the blocker and affected downstream explicitly (a filed finding) instead of drifting. Applying it means landing the query or filing the gap finding with the named test case.",
+   :scope-limit
+   "The decision record or filed finding. Does not implement substrate-2 queries and does not prejudge the arm."},
+  "campaign-coherence/shared-standard-has-no-single-owner"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/campaign-coherence/shared-standard-has-no-single-owner.flexiarg",
+    :sha256
+    "ff6e5b0a98fc7c3cd360493cac11d66617352699064717e3793d526801b8b01f"},
+   :reading
+   "Task line 115: '**Campaign structure resolved**: ships as a new structural element with documentation, OR explicitly rejected as \"Missions suffice\" with rationale'. The pattern names the adequacy question the decision turns on (a shared standard no single Mission can own). Applying it means resolving ship-or-reject by arguing whether that ownerless adequacy-check exists in the stack, with recorded rationale either way.",
+   :scope-limit
+   "The recorded resolution. Does not build the campaign substrate; a ship decision leaves construction to later work."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/h730434653957
+  :hole/h6e84a77745cb
+  :hole/h68dbc60a7584
+  :hole/hb7f5a89877eb
+  :hole/ha664b5558c56
+  :hole/hbe5e9b666bbc],
+ :mu {:value 0, :status :declared},
+ :target "M-action-cost-modelling",
+ :facts
+ [:hole/h730434653957
+  :hole/h6e84a77745cb
+  :hole/h68dbc60a7584
+  :hole/hb7f5a89877eb
+  :hole/ha664b5558c56
+  :hole/hbe5e9b666bbc]}

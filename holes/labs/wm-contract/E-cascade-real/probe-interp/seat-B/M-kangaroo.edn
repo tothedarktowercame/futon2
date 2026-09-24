@@ -1,0 +1,172 @@
+{:schema :wm/cascade-source-v1,
+ :beta {:value 1, :status :declared},
+ :candidates [],
+ :patterns
+ {"agent/evidence-over-assertion"
+  {:guard {:needs #{}, :forbids #{:hole/h625bf9588b21}},
+   :produces #{:hole/h625bf9588b21}},
+  "hygiene/settle-with-meters"
+  {:guard
+   {:needs #{:hole/h625bf9588b21}, :forbids #{:hole/hf27981fd598b}},
+   :produces #{:hole/hf27981fd598b}},
+  "data-mining/checkpoint-the-long-run"
+  {:guard
+   {:needs #{:hole/h625bf9588b21}, :forbids #{:hole/hb674018208b0}},
+   :produces #{:hole/hb674018208b0}},
+  "realtime/mode-gate"
+  {:guard
+   {:needs #{:hole/h625bf9588b21}, :forbids #{:hole/he91ecffec2e7}},
+   :produces #{:hole/he91ecffec2e7}},
+  "invariant-coherence/single-locus"
+  {:guard
+   {:needs #{:hole/h625bf9588b21}, :forbids #{:hole/h6e670ac8054e}},
+   :produces #{:hole/h6e670ac8054e}},
+  "agency/single-routing-authority"
+  {:guard
+   {:needs #{:hole/h6e670ac8054e}, :forbids #{:hole/h40dbfc082f77}},
+   :produces #{:hole/h40dbfc082f77}}},
+ :c-schedule
+ {:placement {:value :terminal, :status :declared},
+  :elsewhere {:value :uniform-over-non-ruled-zero, :status :declared}},
+ :locators
+ #:hole{:h625bf9588b21
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-kangaroo.md",
+         :decl
+         "- [x] W1 keystone settled with evidence: a warm process answers ≥2 consecutive"},
+        :hf27981fd598b
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-kangaroo.md",
+         :decl
+         "- [x] A warm-routed turn is measurably faster than cold on a large session"},
+        :hb674018208b0
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-kangaroo.md",
+         :decl
+         "- [x] Warm-process crash falls back to cold resume without stranding the turn."},
+        :he91ecffec2e7
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-kangaroo.md",
+         :decl
+         "- [x] Flag OFF = byte-for-byte cold behavior; ON = warm routing."},
+        :h6e670ac8054e
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-kangaroo.md",
+         :decl
+         "- [x] Exactly one warm process per agent identity; idle eviction works + is"},
+        :h40dbfc082f77
+        {:class :C4,
+         :repo "futon3c",
+         :sha "HEAD",
+         :path "holes/missions/M-kangaroo.md",
+         :decl
+         "- [x] (stretch) REPL + agency share one warm process per agent."}},
+ :lam {:value 1, :status :declared},
+ :interpretation-receipts
+ {"agent/evidence-over-assertion"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/agent/evidence-over-assertion.flexiarg",
+    :sha256
+    "28425a05c4a87cbfe3147c1998e83701b8519b42c1796f1d0f25b4b039271248"},
+   :reading
+   "Task line 262: 'W1 keystone settled with evidence: a warm process answers >=2 consecutive turns, or the mechanism is re-chosen'. The task is the pattern stated as a fork: the keystone claim (warm routing works) must be grounded in the witnessed two-turn evidence, and absent that evidence the mechanism is re-chosen rather than asserted.",
+   :scope-limit
+   "The W1 keystone evidence fork. Does not establish speed, fallback, or singleton properties."},
+  "hygiene/settle-with-meters"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/hygiene/settle-with-meters.flexiarg",
+    :sha256
+    "fdba89b0c3681438e3a174f260ff4f5020eb3f2059b08ec03a658b71ee8ed518"},
+   :reading
+   "Task line 264: 'A warm-routed turn is measurably faster than cold on a large session (fable-1 5.8 MB: warm << 67 s)'. The pattern requires claimed benefits to be measured against a recorded baseline, and to say so when there is no benefit. Applying it means the warm-vs-cold claim is settled with typed meters against the recorded 67 s cold baseline — and reported as no-benefit if the meters say so.",
+   :scope-limit
+   "The measured speed comparison. Does not itself make warm faster; if the meters show no benefit, the honest result is the token stays false."},
+  "data-mining/checkpoint-the-long-run"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path
+    "futon3/library/data-mining/checkpoint-the-long-run.flexiarg",
+    :sha256
+    "4457c4d9f580aa12b6055b5cb36e72f6992084300c8a7dd0be869f5eee82000b"},
+   :reading
+   "Task line 266: 'Warm-process crash falls back to cold resume without stranding the turn'. The pattern's rule — a crash must not cost the whole pass; durability means a kill partway through loses nothing already banked — applied per-turn: the warm process holds no unrecoverable turn state, so its crash degrades to the cold resume path with the turn intact.",
+   :scope-limit
+   "Crash-fallback to cold resume. The pattern's checkpoint mechanics are the analogy; the reading claims only that no turn state is stranded, not that resume is fast."},
+  "realtime/mode-gate"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/realtime/mode-gate.flexiarg",
+    :sha256
+    "5e505b53101854792852c33f2c27c73c37597a8f3de02af096bdfc714e8020d9"},
+   :reading
+   "Task line 267: 'Flag OFF = byte-for-byte cold behavior; ON = warm routing'. The mode-gate pattern — behavior-changing capability sits behind an explicit mode switch, and outside the mode the old behavior holds — is the flag discipline: OFF must be byte-for-byte the cold path, with the warm routing reachable only in the ON mode.",
+   :scope-limit
+   "The flag's mode separation and OFF identity. Does not judge whether warm mode is worth enabling."},
+  "invariant-coherence/single-locus"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/invariant-coherence/single-locus.flexiarg",
+    :sha256
+    "7e0dd480c1f5bdbcdd8f2a170fde06edbccb7ba5601485d097af282e5d7ff183"},
+   :reading
+   "Task line 268: 'Exactly one warm process per agent identity; idle eviction works + is observable'. This is a single-locus invariant directly: for identity I and attribute 'warm process', the system carries exactly one record — no two simultaneously-active warm processes per agent. Idle eviction is the locus being released observably.",
+   :scope-limit
+   "The per-identity uniqueness and observable eviction. Does not cover REPL/agency co-tenancy (the stretch task)."},
+  "agency/single-routing-authority"
+  {:kind :probe-authored,
+   :by "kimi-7",
+   :date "2026-09-24",
+   :source
+   {:path "futon3/library/agency/single-routing-authority.flexiarg",
+    :sha256
+    "df6bf568dee5ded23e3cf08530605b12abe375a3351676fe082305713a1dbf07"},
+   :reading
+   "Task line 270 (stretch): 'REPL + agency share one warm process per agent'. Once the per-identity warm process is unique (previous task), both consumers — REPL and agency — must route to that one authority rather than each spawning its own. Applying single-routing-authority means both surfaces resolve the agent identity to the same warm-process entry.",
+   :scope-limit
+   "Shared routing to the one warm process. Stretch task; the reading covers the routing unity, not the session-sharing ergonomics."}},
+ :token-initialization
+ {:schema :wm/token-initialization-policy-v1,
+  :enabled false,
+  :placement :next-selection,
+  :unknown :fresh-initialization,
+  :temporal-order :same-revision-only,
+  :historical :declared-revision-only},
+ :context :WM,
+ :want
+ [:hole/h625bf9588b21
+  :hole/hf27981fd598b
+  :hole/hb674018208b0
+  :hole/he91ecffec2e7
+  :hole/h6e670ac8054e
+  :hole/h40dbfc082f77],
+ :mu {:value 0, :status :declared},
+ :target "M-kangaroo",
+ :facts
+ [:hole/h625bf9588b21
+  :hole/hf27981fd598b
+  :hole/hb674018208b0
+  :hole/he91ecffec2e7
+  :hole/h6e670ac8054e
+  :hole/h40dbfc082f77]}
