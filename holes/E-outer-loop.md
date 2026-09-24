@@ -6,7 +6,7 @@ Sibling: `E-cascade-real.md` (the machine does not build its cascades). This
 excursion takes the other passive step: the machine does not choose what to
 work on.
 Owner: claude-10. Driver: Joe.
-Status: OPEN — the old loop and its removal are written down (O1–O7);
+Status: OPEN — the old loop and its removal are written down (O1–O8);
 investigations running.
 
 ## Joe's framing (dictated 2026-09-24, voice transcript)
@@ -79,7 +79,9 @@ policy — says what the machine should choose *among*. It does not say the
 machine should stop generating the set. The replacement has a target list
 (substrate missions, declared targets, the proposal supply, the ticket
 queue: `war_machine.clj:7072–7080`) but nothing that turns a target into a
-policy (E-cascade-real D3–D4).
+policy (E-cascade-real D3–D4). I1 (`0b06df90`) located the ruling text in
+`p4ng/wm-walkthroughs/build-loop/closure/FOCUS.md` Priority 0: three rulings,
+all about the decision, none about proposing.
 
 **O3. Feasibility changed from a support condition to a refusal.** Before,
 infeasible proposals were excluded and the rest competed, so the machine
@@ -102,6 +104,12 @@ list is missions, tickets, declared targets and the proposal supply. Open
 Lean `sorry`s, patterns and tension nodes, which were proposal sources
 before 09-17, are not on it.
 
+**O8. Nothing was ever planned to choose which targets to work on.** I1 Q4:
+the H-series planned H7f, feeding constructed families for *given* targets
+into the sources (never landed). No H-series row plans a replacement for
+what the old proposers did, which was decide which missions, tickets,
+sorrys and patterns were worth acting on.
+
 **O7. No record says what was lost.** H5b's message lists deleted code, not
 the capability — choosing among missions, tickets, patterns and sorrys by
 feasibility and value — that went with it.
@@ -115,7 +123,7 @@ what the records show.
 
 | id | question | who | job | status |
 |---|---|---|---|---|
-| I1 | (shared with E-cascade-real) history of the pre-H5b proposers and ranking; primary text of the 2026-09-17 instruction H5b cites | kimi-2 | invoke-1790256229096-23668-ed1a1a26 | running |
+| I1 | (shared with E-cascade-real) history of the pre-H5b proposers and ranking; primary text of the 2026-09-17 instruction H5b cites | kimi-2 | invoke-1790256229096-23668-ed1a1a26 | done: `0b06df90` |
 | I3 | Records: over the tick records before 2026-09-17, what did the outer loop propose and choose — counts by action type and proposer, feasibility exclusions, near-ties — and did the chosen work get done? | kimi-5 | invoke-1790256941064-23670-b64b5491 (park-cd984e66) | running |
 
 Read-only: no clicks, no writes under `data/`, no shared-JVM loads.

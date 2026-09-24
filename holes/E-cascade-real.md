@@ -5,7 +5,7 @@ Parent: the PROOF-2 plan (`labs/wm-contract/PROOF-2-STRATEGY-draft-2026-09-24.md
 `PROOF-2-THEOREM-draft-2026-09-24.md`). An excursion, not a mission: the proof
 plan already exists and there is no time to open a new mission.
 Owner: claude-10. Driver: Joe.
-Status: OPEN — defects D1–D14 written down; I2 done, I1 running.
+Status: OPEN — defects D1–D14 written down; I1 and I2 done.
 Cross-refs: `labs/wm-contract/proof2/packets/CLICK2-D.md` (why click 2
 abstained; Part 2 per-target check); register row AR-16.
 
@@ -43,14 +43,21 @@ looks).
 **D1. Proposing was deleted along with flat ranking.** `5d55e7a0`
 (2026-09-17, "H5b ... flat decision path deleted (Joe 2026-09-17)").
 Before it, the judge called `action-proposer/compose-proposers` over the
-substrate proposers (mission, pattern, portfolio, and the bootstrap
-proposer), ranked the proposals with `efe/rank-actions`, and selected. The
-cited instruction was that a cascade is a policy and G is computed over
-policies. The commit deleted the proposers' call site together with the flat
-ranking, and nothing proposes cascades in their place. The proposer
-namespaces still exist (`src/futon2/aif/action_proposer.clj`,
-`portfolio_action_proposer.clj`); the judge no longer calls them (only a
-comment at `scripts/futon2/report/war_machine.clj:7029` mentions them).
+six proposers (bootstrap, pattern, mission, ticket, sorry, tension; the
+portfolio proposer existed but was not composed), ranked the proposals with
+`efe/rank-actions`, and selected. The proposer namespaces still exist; the
+judge no longer calls them (only a comment at
+`scripts/futon2/report/war_machine.clj:7029` mentions them).
+I1 (`0b06df90`) found the ruling text H5b cites, in
+`p4ng/wm-walkthroughs/build-loop/closure/FOCUS.md` (Priority 0): "rip out
+the flat decision path"; "make it impossible to run the machine with the
+flat decision"; "a cascade is a policy, and G is computed over policies".
+Every one is about the decision. None mentions proposing. Deleting the
+proposers' call site was the implementer's reading. The same file's work
+item 2 points the other way: the enacted decision should come "over cascade
+candidates the tick builds itself". The planned step for that, H7f (feed
+the constructor's families into the cascade sources), is recorded "still
+open" on 2026-09-17 and was never committed.
 
 **D2. Feasibility is a gate after the fact, not a consideration in choosing
 work.** The target list is broad — every substrate mission, plus declared
@@ -66,7 +73,12 @@ complete cascade-source-v1 declaration ... proposals never populate its
 executable :candidates ... Retrieval is explicit, outside the tick." The
 first sentence guards against a fake constructor (claiming a pattern
 produces a token because its prose says so). The rest removes construction
-from the machine altogether. No ruling found for the second part.
+from the machine altogether. I1: the first part (an agent authors the
+full declaration; never infer from prose) rests on two claude-12 Agency
+rulings of 2026-09-21 named in `runs/proposal-supply-b1-2026-09-21/STATUS.md`
+(full texts not retained by the Agency API). For "Retrieval is explicit,
+outside the tick" no ruling was located (p4ng, futon2 holes, the commit's
+parents searched). It also contradicts FOCUS.md work item 2 above.
 
 **D4. The in-machine constructor exists and is not wired.**
 `src/futon2/aif/interpretation_construction.clj` (`4328238d`, 2026-09-21,
@@ -164,7 +176,7 @@ reason.
 
 | id | question | who | job | status |
 |---|---|---|---|---|
-| I1 | History: what did the pre-H5b proposers propose and on what grounds (feasibility among them)? Is any ruling recorded behind "construction is outside the tick" (D3)? | kimi-2 | invoke-1790256229096-23668-ed1a1a26 (park-08328d54) | running |
+| I1 | History: what did the pre-H5b proposers propose and on what grounds (feasibility among them)? Is any ruling recorded behind "construction is outside the tick" (D3)? | kimi-2 | invoke-1790256229096-23668-ed1a1a26 | done: `0b06df90`, checked by claude-10 (two code sites at `5d55e7a0^` and the FOCUS.md ruling text read) |
 | I2 | Constructor: run `interpretation_construction` offline on the four admitted targets and the substrate missions; what does it build, where does it stop, and what would it need in order to run inside the judge (D4, D6)? | kimi-3 | invoke-1790256230680-23669-faccb791 | done: `56a58026`, checked by claude-10 (script rerun, same four results; admission copy diffed verbatim) |
 
 Both read-only: no clicks, no writes under `data/`, no shared-JVM loads.
