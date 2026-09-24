@@ -12,6 +12,7 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.increment-attestation :as attestation]
             [futon2.aif.route-attestation :as route]
+            [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.run-ending-classification :as kernel]))
 
 (def declarations (attestation/declarations))
@@ -183,6 +184,35 @@
       (is (false? (:warrant? registration)))
       (is (= :registry-http-error (:reason registration)))
       (is (= 503 (:status registration))))))
+
+(deftest only-the-declared-target-attests
+  ;; The queue's front entry makes the declared ticket the eligible
+  ;; stratum; a selection landing there binds the criterion. A selection
+  ;; landing anywhere else does NOT — the criterion is declared in
+  ;; advance, so no other run's target can be made to attest. The second
+  ;; half is the one that matters: it is what stops the queue entry from
+  ;; becoming a way of making any run attest.
+  (let [queue {:schema :wm/ticket-queue-v1 :placement :front
+               :order [:inserted-at :ticket]
+               :within-stratum :cascade-selection-posterior
+               :entries [{:ticket target :inserted-at "2026-09-22T05:13:31Z"}
+                         {:ticket "T-other" :inserted-at "2026-09-23T00:00:00Z"}]}
+        candidates [{:id {:target target :precedence [{:id :c1}]} :g 1.0}
+                    {:id {:target "T-other" :precedence [{:id :c2}]} :g 9.0}]
+        plan (ticket-queue/plan queue candidates [])]
+    (is (= [target] (:eligible-targets plan)))
+    (is (= :front-stratum (:status plan))))
+  (let [evidence (evidence-with [warrant-entry])
+        receipt-on-target (route/receipt {:declarations declarations
+                                          :events (events evidence) :target target})
+        receipt-off-target (route/receipt {:declarations declarations
+                                           :events (events evidence) :target "T-other"})]
+    (is (= :matched (:status (first (:bindings receipt-on-target)))))
+    (is (= :invalid-criterion (:reason (first (:bindings receipt-off-target)))))
+    (is (empty? (:increments receipt-off-target)))
+    (let [result (classify-close receipt-off-target)]
+      (is (= :unknown (:class result)))
+      (is (= [:attested-increment] (:missing result))))))
 
 (deftest an-increment-on-a-typed-failure-refuses
   (let [evidence (evidence-with [warrant-entry])
