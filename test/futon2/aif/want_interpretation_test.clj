@@ -97,6 +97,12 @@
              (refusal-of #(wi/citation-for "src" (str mission-text "\n" (:stated c) "\n") c)))))
     (testing "through request! as well"
       (let [{:keys [root opts]} (fixture)]
+        (is (= :want/criterion-ambiguous
+               (refusal-of #(let [f (io/file (.getPath root) "M-test.md")]
+                              (spit f (str mission-text "\n" (:stated c) "\n"))
+                              (wi/request! {:target "M-test" :want (:token c) :criterion c
+                                            :facts {} :patterns {}}
+                                           root (assoc opts :retrieve-fn (fn [_] [])))))))
         (is (= :want/criterion-absent
                (refusal-of #(wi/request! {:target "M-test" :want (:token c)
                                           :criterion (assoc c :stated "**Exit criterion:** not in the text")

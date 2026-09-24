@@ -108,11 +108,14 @@
   (testing "a job that did not finish is not answered, not declined"
     (let [r (ask (temp-dir "ask-store") (fn [_] {:seat "kimi-6" :job-id "j" :state "failed" :text nil}))]
       (is (= #{:not-answered} (set (map :kind (:needs r)))))))
-  (testing "a typed decline"
-    (let [r (ask (temp-dir "ask-store")
+  (testing "a typed decline: a need with its job id, and nothing published"
+    (let [store (temp-dir "ask-store")
+          r (ask store
                  (stub-answer (constantly (str "```edn\n" (pr-str {:schema wi/response-schema
                                                                    :decline {:reason :no-library-pattern}}) "\n```"))))]
-      (is (= #{:declined} (set (map :kind (:needs r)))))))
+      (is (= #{:declined} (set (map :kind (:needs r)))))
+      (is (every? :job-id (:needs r)))
+      (is (nil? (wi/read-published (.getCanonicalPath store) "M-futon-seams")))))
   (testing "the mission's own condition (ARGUE closes only through DOCUMENT), read from its text: a reading that skips DOCUMENT is rejected and stays a need"
     (let [bad (fn [want] (if (= want argue)
                            (str/replace (reply-for (by-want want)) (str document) ":exit/h4ef5c183bc55")
