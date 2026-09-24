@@ -11,10 +11,20 @@
    - machinery-75 attempt-002's absent comparison:
      data/wm-full-loop-machinery-75/wm-contract-machinery-75-v1/attempt-002/007-closed.edn
      (:token-outcome-comparison {:status :absent :reason
-     :comparison-not-supplied}, judgment :failure-kind :agent-unavailable)."
+     :comparison-not-supplied}, judgment :failure-kind :agent-unavailable);
+   - machinery-76 attempt-002's kernel example (OBS-D Revision 2, 508a410e):
+     [:payload :judgment :kernel-example], :wm/aligned-kernel-example-v1,
+     :observation-source = futon3c/data/wm-d-task-enactment/
+     action-5c1163d2-3e45-4fea-8919-6e2b41c6acfe.edn, raw sha256
+     161d0c1c9afa30e927d4d08a110256820ee3563d227aac7b7c38dc1f921cdc66,
+     projection :admitted with six C4-true observations, revision pair
+     a1957b7c... -> 97e17e10...;
+   - the same close's :learning-trial-receipt (:wm/learning-trial-receipt-v2,
+     two trials, one :counted?), which must be refused as either leg."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.interpretation-evidence :as evidence]
             [futon2.aif.token-outcome-pair :as pair]))
 
 (def repo-root "/home/joe/code/futon2")
@@ -39,6 +49,24 @@
    :action/id "action-5c1163d2-3e45-4fea-8919-6e2b41c6acfe"})
 
 (def reviewed-revision "97e17e10f2695c481c55ddaebe9026f2d245663f")
+
+;; Revision 2 §R2.2's concrete 76/002 source, as the close records it.
+(def kernel-source
+  {:path "/home/joe/code/futon3c/data/wm-d-task-enactment/action-5c1163d2-3e45-4fea-8919-6e2b41c6acfe.edn"
+   :sha256 "161d0c1c9afa30e927d4d08a110256820ee3563d227aac7b7c38dc1f921cdc66"})
+
+(def live-revision-pair
+  {:before "a1957b7cb871a752927aa98ee2340ed91c64812f"
+   :after "97e17e10f2695c481c55ddaebe9026f2d245663f"
+   :before-evidence :not-measured})
+
+(def live-occurrence-identity
+  {:run/id "2026-09-23-1790199409"
+   :cohort/id ":wm-contract-machinery-76-v1"
+   :attempt/id "attempt-002"
+   :transition/id "transition-8de59450-b5ef-4326-bb1a-12d4b97201ae"
+   :action/id "action-5c1163d2-3e45-4fea-8919-6e2b41c6acfe"
+   :action/value-sha256 "1a7220e756b4c75f5ed3c9707041eb3d26dacc1256afcd4c8283c557ffe25bbf"})
 
 ;; ---------------------------------------------------------------------------
 ;; Acceptance (1): builder pinned from machinery-76 attempt-002's live
@@ -65,7 +93,15 @@
       (is (true? (get-in p [:observation :observed])))
       (is (= :C4 (get-in p [:observation :check])))
       (is (= reviewed-revision
-             (get-in p [:observation :evidence :resolved-sha]))))
+             (get-in p [:observation :evidence :resolved-sha])))
+      (is (= (:measurement-source cmp) (get-in p [:observation :source])))
+      (is (= kernel-source (get-in p [:observation :source]))
+          "the comparison was read from the same enactment file the kernel example was aligned from"))
+    (testing "revision pair: only :after known here; :before typed missing"
+      (is (= 2 (:schema-version p)))
+      (is (= {:before {:status :missing :reason :before-revision-not-recorded}
+              :after reviewed-revision}
+             (:revision-pair p))))
     (testing "truth leg: typed absence, no channel existing today"
       (is (= {:status :missing :reason :no-independent-truth-channel}
              (:truth p))))
@@ -225,83 +261,189 @@
     (is (false? (:estimable? p)))
     (is (pair/pair-ok? p))))
 
+;; ===========================================================================
+;; OBS-D Revision 2 amendment (508a410e). Every test below is pinned from
+;; machinery-76 attempt-002's live close; each requirement has a
+;; deliberately wrong builder whose output pair-ok? rejects, with a
+;; comment naming which check does the rejecting.
+;; ===========================================================================
+
 (def live-judgment
   (delay (get-in (read-record close-76-002) [:payload :judgment])))
+
+(def target
+  "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
+
+;; ---------------------------------------------------------------------------
+;; Requirement (1): the kernel example's per-token observations are an
+;; admissible observation-leg source, with the source path and sha on
+;; the pair.
+;; ---------------------------------------------------------------------------
 
 (deftest kernel-example-complete-live-observation-population
   (let [j @live-judgment
         k (:kernel-example j)
+        _ (is (= :wm/aligned-kernel-example-v1 (:schema k)))
+        _ (is (= :recorded (:status k)))
+        _ (is (= kernel-source (:observation-source k)))
+        _ (is (= live-revision-pair (get-in k [:observation-projection :revision-pair])))
+        _ (is (= live-occurrence-identity (pair/occurrence-identity (:occurrence j))))
         ps (pair/pairs-from-kernel-example {:kernel-example k :occurrence (:occurrence j)})
-        source (:observation-source k)
-        bytes (java.nio.file.Files/readAllBytes (.toPath (io/file (:path source))))
-        raw-hash (format "%064x" (java.math.BigInteger. 1
-                                  (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)))]
-    (is (= (:sha256 source) raw-hash) "verify the real source file, not its hash string alone")
-    (is (= 1 (count (:tokens k))))
-    (is (= 6 (count ps)) "the full projection includes five non-wanted tokens")
-    (is (= (set (keys (get-in k [:observation-projection :observations])))
+        source-file (io/file (:path kernel-source))]
+    (testing "the recorded sha is the raw hash of the file it names"
+      (is (.exists source-file))
+      (is (= (:sha256 kernel-source)
+             (format "%064x" (java.math.BigInteger.
+                              1 (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                                         (java.nio.file.Files/readAllBytes (.toPath source-file))))))))
+    (is (= 1 (count (:tokens k))) "the wanted projection is one token")
+    (is (= 6 (count ps)) "the admitted projection carries six observed tokens")
+    (is (= (sorted-set [target :admission/task-stated]
+                       [target :repair/calibration-evidence-present]
+                       [target :repair/held-out-observations-collected]
+                       [target :repair/obstruction-observed-cleared]
+                       [target :repair/split-declared-valid]
+                       [target :restoration-accepted])
            (set (map :token ps))))
     (doseq [p ps]
       (is (true? (get-in p [:observation :observed])))
       (is (= :C4 (get-in p [:observation :check])))
-      (is (= source (get-in p [:observation :source])))
+      (is (= reviewed-revision (get-in p [:observation :evidence :resolved-sha])))
+      (is (= kernel-source (get-in p [:observation :source])))
       (is (= :kernel-example (get-in p [:observation :observation-source])))
-      (is (= (get-in k [:observation-projection :revision-pair]) (:revision-pair p)))
+      (is (= [:observation-projection :observations (:token p) :artifact-observation]
+             (get-in p [:observation :source-key-path])))
+      (is (= live-revision-pair (:revision-pair p)))
+      (is (= reviewed-revision (:reviewed-revision p)))
+      (is (= live-occurrence-identity (:occurrence (pair/pair-value p))))
       (is (= {:status :missing :reason :no-independent-truth-channel} (:truth p)))
       (is (false? (:estimable? p)))
+      (is (= [:truth-not-a-boolean] (:ineligibility-reasons p)))
       (is (pair/pair-ok? p)))))
 
-(deftest learning-receipt-and-trials-refused-from-both-legs
-  ;; Exact bad input from the real close, including the counted B trial.
-  (let [receipt (:learning-trial-receipt @live-judgment)]
-    (is (= :wm/learning-trial-receipt-v2 (:schema receipt)))
-    (is (some :counted? (:trials receipt)))
-    (doseq [x (conj (:trials receipt) receipt)
-            supplied [x (assoc x :observed true :truth true)]]
-      (let [p (pair/build-pair {:occurrence occurrence :token ["T" :done]
-                                :reviewed-revision reviewed-revision
-                                :token-row supplied :truth supplied})]
-        (doseq [leg [:observation :truth]]
-          (is (= :refused (get-in p [leg :status])))
-          (is (= :learning-trial-receipt-not-a-leg (get-in p [leg :reason]))))
-        (is (false? (:estimable? p)))
-        (is (pair/pair-ok? p))))))
+;; Deliberately wrong builder for (1): cites the kernel row's boolean but
+;; drops the raw-file source reference, then hashes honestly. Without the
+;; source-ref clause in pair-ok? (a measured :kernel-example leg must carry
+;; :source {:path :sha256}) this pair would pass every other invariant.
+(defn- wrong-builder-kernel-without-source [p]
+  (let [q (update p :observation dissoc :source)]
+    (assoc q :pair-sha256 (pair/pair-digest q))))
+
+(deftest wrong-builder-kernel-without-source-is-killed
+  (let [p (first (pair/pairs-from-kernel-example
+                  {:kernel-example (:kernel-example @live-judgment)
+                   :occurrence (:occurrence @live-judgment)}))
+        wrong (wrong-builder-kernel-without-source p)]
+    (is (true? (get-in wrong [:observation :observed])))
+    (is (= :kernel-example (get-in wrong [:observation :observation-source])))
+    (is (= (:pair-sha256 wrong) (pair/pair-digest wrong)) "hash is honest; only the source is gone")
+    (is (not (pair/pair-ok? wrong)))
+    (is (pair/pair-ok? p))))
 
 (deftest kernel-missingness-and-join-failures-stay-typed
   (let [j @live-judgment k (:kernel-example j)
-        token (first (keys (get-in k [:observation-projection :observations])))
+        token [target :admission/task-stated]
         input {:occurrence (:occurrence j) :token token :kernel-example k}]
     (doseq [[changed reason]
             [[(assoc input :occurrence (assoc (:occurrence j) :run/id "other")) :occurrence-mismatch]
              [(assoc input :reviewed-revision "other") :artifact-revision-mismatch]
              [(update input :kernel-example dissoc :observation-source) :observation-source-not-recorded]
+             [(assoc-in input [:kernel-example :observation-source :sha256] "not-a-sha") :observation-source-not-recorded]
+             [(assoc input :token [target :not-observed]) :token-observation-not-recorded]
              [(assoc-in input [:kernel-example :observation-projection :observations token
-                               :artifact-observation :observed] false) :observation-evidence-mismatch]]]
-      (let [p (pair/build-pair changed)]
-        (is (= :missing (get-in p [:observation :status])))
+                               :artifact-observation :observed] false) :observation-evidence-mismatch]
+             [(assoc input :kernel-example nil) :carrier-not-recorded]]]
+      (let [p (pair/build-pair (update changed :kernel-example
+                                       #(or % {:status :missing :reason :carrier-not-recorded})))]
+        (is (= :missing (get-in p [:observation :status])) (pr-str reason))
         (is (= reason (get-in p [:observation :reason])))
         (is (not (contains? (:observation p) :observed)))
         (is (false? (:estimable? p)))
         (is (pair/pair-ok? p)))))
-  (let [j (get-in (read-record (io/file repo-root
-                   "data/wm-full-loop-machinery-70/wm-contract-machinery-70-v1/attempt-001/007-closed.edn"))
-                  [:payload :judgment])
-        ps (pair/pairs-from-kernel-example {:occurrence (:occurrence j) :kernel-example (:kernel-example j)})]
-    (is (= 2 (count ps)))
-    (doseq [p ps]
-      (is (= :missing (get-in p [:observation :status])))
-      (is (= :task-execution-incomplete (get-in p [:observation :reason])))
-      (is (not (contains? (:observation p) :observed)))
-      (is (pair/pair-ok? p)))))
+  (testing "machinery-70 attempt-001: projection refused, wanted tokens stay typed-missing"
+    (let [j (get-in (read-record (io/file repo-root
+                     "data/wm-full-loop-machinery-70/wm-contract-machinery-70-v1/attempt-001/007-closed.edn"))
+                    [:payload :judgment])
+          ps (pair/pairs-from-kernel-example {:occurrence (:occurrence j) :kernel-example (:kernel-example j)})]
+      (is (= 2 (count ps)))
+      (doseq [p ps]
+        (is (= :missing (get-in p [:observation :status])))
+        (is (= :task-execution-incomplete (get-in p [:observation :reason])))
+        (is (not (contains? (:observation p) :observed)))
+        (is (pair/pair-ok? p)))))
+  (testing "machinery-75 attempt-002: carrier nil -> one carrier-level absence, no token"
+    (let [ps (pair/pairs-from-kernel-example
+              {:occurrence {:run/id "2026-09-23-eee9f1be-731f-46c2-941d-11b94d30187e"
+                            :attempt/id "attempt-002"}
+               :kernel-example (get-in (read-record close-75-002)
+                                       [:payload :judgment :kernel-example])})]
+      (is (= 1 (count ps)))
+      (is (= :carrier-not-recorded (get-in (first ps) [:observation :reason])))
+      (is (= {:status :missing :reason :token-not-recorded} (:token (first ps))))
+      (is (pair/pair-ok? (first ps))))))
+
+;; ---------------------------------------------------------------------------
+;; Requirement (2): the learning-trial receipt is refused as a leg by an
+;; executable check with a reason.
+;; ---------------------------------------------------------------------------
+
+(deftest learning-receipt-and-trials-refused-from-both-legs
+  ;; Exact bad input from the real close: the receipt itself and each of
+  ;; its two trials, including the counted B trial, offered as each leg,
+  ;; both bare and with an :observed/:truth boolean spliced on.
+  (let [receipt (:learning-trial-receipt @live-judgment)]
+    (is (= :wm/learning-trial-receipt-v2 (:schema receipt)))
+    (is (= 2 (count (:trials receipt))))
+    (is (= 1 (count (filter :counted? (:trials receipt)))))
+    (is (every? #(contains? % :trial-grain) (:trials receipt)))
+    (doseq [x (conj (:trials receipt) receipt)
+            supplied [x (assoc x :observed true :truth true)]]
+      (let [p (pair/build-pair {:occurrence occurrence :token [target :restoration-accepted]
+                                :reviewed-revision reviewed-revision
+                                :token-row supplied :truth supplied})]
+        (doseq [leg [:observation :truth]]
+          (is (= :refused (get-in p [leg :status])))
+          (is (= :learning-trial-receipt-not-a-leg (get-in p [leg :reason])))
+          (is (not (contains? (get p leg) :observed)))
+          (is (not (contains? (get p leg) :truth))))
+        (is (false? (:estimable? p)))
+        (is (pair/pair-ok? p))))))
+
+;; Deliberately wrong builder for (2): reads the counted trial's
+;; :signed-observation boolean and passes the trial wrapper through as the
+;; observation leg. Without learning-trial-carrier? (in observation-leg
+;; and in pair-ok?) the wrapper's :observed true is a boolean and the pair
+;; reads as a measured observation sourced from the B trial.
+(defn- wrong-builder-trial-as-observation [trial]
+  (let [q {:schema pair/schema :occurrence occurrence
+           :token [target :repair/obstruction-observed-cleared]
+           :revision-pair live-revision-pair
+           :observation (assoc trial :observed
+                               (get-in trial [:signed-observation :artifact-observation :observed]))
+           :truth {:status :missing :reason :no-independent-truth-channel}
+           :estimable? false :ineligibility-reasons [:truth-not-a-boolean]}]
+    (assoc q :pair-sha256 (pair/pair-digest q))))
+
+(deftest wrong-builder-trial-as-observation-is-killed
+  (let [trial (first (filter :counted? (get-in @live-judgment [:learning-trial-receipt :trials])))
+        wrong (wrong-builder-trial-as-observation trial)]
+    (is (true? (get-in wrong [:observation :observed])))
+    (is (= (:pair-sha256 wrong) (pair/pair-digest wrong)))
+    (is (not (pair/pair-ok? wrong)))))
 
 (deftest accepted-increment-refused-from-observation-leg
   (let [verdict (:accepted-increment @live-judgment)
-        p (pair/build-pair {:occurrence occurrence :token ["T" :done]
+        p (pair/build-pair {:occurrence occurrence :token [target :restoration-accepted]
                             :token-row (assoc verdict :observed true)})]
-    (is (contains? verdict :accepted?))
+    (is (true? (:accepted? verdict)))
     (is (= :refused (get-in p [:observation :status])))
     (is (= :accepted-increment-source-refused (get-in p [:observation :reason])))
     (is (pair/pair-ok? p))))
+
+;; ---------------------------------------------------------------------------
+;; Requirement (3): :pair-sha256 is the canonical extracted-value hash
+;; over the five pair-value keys (Revision 2 §R2.3), never a record hash.
+;; ---------------------------------------------------------------------------
 
 (deftest cert-s-canonical-bytes-preserve-types-and-numeric-values
   (let [x (with-meta (array-map :z #{:b :a} :r 2/3 :d 0.5 :v [:b :a]) {:ignored true})]
@@ -312,7 +454,8 @@
            (pair/canonical-edn (into {} (reverse x))))))
   (is (not= (pair/canonical-edn #{:a :b}) (pair/canonical-edn [:a :b])))
   (is (= "{#{:a :b} 1 #{:c :d} 2}"
-         (pair/canonical-edn {#{:d :c} 2 #{:b :a} 1}))))
+         (pair/canonical-edn {#{:d :c} 2 #{:b :a} 1})))
+  (is (= "{:s \"a\\\"b\" :t nil}" (pair/canonical-edn {:t nil :s "a\"b"}))))
 
 (deftest pair-hash-is-extracted-value-not-record-identity
   (let [p (first (pair/pairs-from-kernel-example
@@ -321,22 +464,58 @@
         digest (:pair-sha256 p)]
     (is (= 2 (:schema-version p)))
     (is (= :wm/token-outcome-pair-value-v2 (:pair-hash-domain p)))
+    (is (re-matches #"sha256:[0-9a-f]{64}" digest))
     (is (= #{:occurrence :token :revision-pair :observation :truth}
            (set (keys (pair/pair-value p)))))
-    (is (= digest (pair/pair-digest (assoc p :estimable? true :schema :other
-                                           :pair-sha256 "self-attested"))))
-    (is (= digest (pair/pair-digest (assoc-in p [:occurrence :action/value] {:ignored true}))))
-    (doseq [changed [(assoc-in p [:observation :observed] false)
-                     (assoc p :truth {:truth false :truth-source :reviewer-adjudication})
-                     (assoc-in p [:occurrence :run/id] "other")
-                     (assoc-in p [:revision-pair :before] "other")
-                     (assoc-in p [:revision-pair :after] "other")
-                     (assoc-in p [:observation :source :sha256] "other")]]
-      (is (not= digest (pair/pair-digest changed)))
-      (is (not (pair/pair-ok? changed))))
-    (is (not (pair/pair-ok? (assoc p :pair-sha256 "self-attested")))))
-  (let [p (pair/build-pair {:occurrence occurrence :token ["T" :done]
+    (is (= live-occurrence-identity (:occurrence (pair/pair-value p)))
+        "the full :action/value payload is projected out")
+    (testing "outside the byte domain: eligibility fields, schema, the hash, the action payload"
+      (is (= digest (pair/pair-digest (assoc p :estimable? true :schema :other
+                                             :reviewed-revision "other"
+                                             :pair-sha256 "self-attested"))))
+      (is (= digest (pair/pair-digest (assoc-in p [:occurrence :action/value] {:ignored true})))))
+    (testing "inside the byte domain: both legs, identity, revisions, the source sha"
+      (doseq [changed [(assoc-in p [:observation :observed] false)
+                       (assoc p :truth {:truth false :truth-source :reviewer-adjudication})
+                       (assoc-in p [:occurrence :run/id] "other")
+                       (assoc-in p [:occurrence :action/value-sha256] "other")
+                       (assoc p :token [target :other])
+                       (assoc-in p [:revision-pair :before] "other")
+                       (assoc-in p [:revision-pair :after] "other")
+                       (assoc-in p [:observation :source :sha256] "other")]]
+        (is (not= digest (pair/pair-digest changed)))
+        (is (not (pair/pair-ok? changed)))))
+    (is (not (pair/pair-ok? (assoc p :pair-sha256 "self-attested"))))
+    (testing "the raw record sha stays a separate identity on the leg"
+      (is (= (:sha256 kernel-source) (get-in p [:observation :source :sha256])))
+      (is (not= digest (str "sha256:" (:sha256 kernel-source))))))
+  (let [p (pair/build-pair {:occurrence occurrence :token [target :restoration-accepted]
                             :reviewed-revision reviewed-revision})]
     (is (= {:status :missing :reason :before-revision-not-recorded}
            (get-in p [:revision-pair :before])))
     (is (pair/pair-ok? p))))
+
+;; Deliberately wrong builder for (3): the OBS-P v1 hash -- value-digest
+;; over the whole pair map minus the hash. That is a record hash: it moves
+;; when :estimable? or :schema moves and when the :action/value payload
+;; moves, so it is neither the Revision 2 byte domain nor stable under
+;; the fields Revision 2 excludes. Without pair-ok?'s
+;; (= :pair-sha256 (pair-digest pair)) clause it would pass.
+(defn- wrong-builder-record-hash [p]
+  (assoc p :pair-sha256 (evidence/value-digest (dissoc p :pair-sha256))))
+
+(deftest wrong-builder-record-hash-is-killed
+  (let [p (first (pair/pairs-from-kernel-example
+                  {:kernel-example (:kernel-example @live-judgment)
+                   :occurrence (:occurrence @live-judgment)}))
+        wrong (wrong-builder-record-hash p)]
+    (is (not= (:pair-sha256 wrong) (:pair-sha256 p)))
+    (is (not (pair/pair-ok? wrong)))
+    (testing "the record hash moves under a field Revision 2 excludes; the value hash does not"
+      (is (not= (:pair-sha256 wrong)
+                (:pair-sha256 (wrong-builder-record-hash (assoc p :estimable? true)))))
+      (is (= (:pair-sha256 p)
+             (:pair-sha256 (pair/build-pair
+                            {:kernel-example (:kernel-example @live-judgment)
+                             :occurrence (:occurrence @live-judgment)
+                             :token (:token p)})))))))
