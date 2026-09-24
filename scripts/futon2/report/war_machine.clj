@@ -49,6 +49,7 @@
             [futon2.aif.cascade-policy :as cascade-policy]
             [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.cascade-sources :as cascade-sources]
+            [futon2.aif.candidate-derivations :as candidate-derivations]
             [futon2.aif.cascade-proposals :as cascade-proposals]
             [futon2.aif.scoring-input-receipts :as input-receipts]
             [futon2.aif.focus-receipt :as focus-receipt]
@@ -6484,6 +6485,17 @@
                                    token-belief-stage)
                 decision (assoc-in decision [:selection-certificate :token-belief-input]
                                    token-belief-input)
+                ;; B4 slice 2b (PROOF-2 P₀ carrier): one derivation entry per
+                ;; scored candidate, truthful for today's declared files
+                ;; (:construction :kind :hand-admitted from the candidate's
+                ;; own receipt, so P₀ fails on provenance, not absence).
+                decision (assoc-in decision [:selection-certificate :candidate-derivations]
+                                   (candidate-derivations/derivations
+                                     (get-in decision [:selection-certificate :candidates])
+                                     (candidate-derivations/s0-of token-belief-stage)
+                                     {:actions (when-let [a (get-in decision
+                                                       [:selection-law :per-policy-argmax :action])]
+                                                 [a])}))
                 decision (assoc (input-receipts/with-preference-audit decision)
                                 :theta-consumption
                                 (into {}
