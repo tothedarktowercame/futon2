@@ -229,3 +229,17 @@ I would refuse the following **proof credits or packet completion claims**, not 
 - Independent sign-off from Claude-on-Claude, author self-review, or a material revision retaining old signatures.
 
 R8 is the pressure release: publish “W₅ arithmetic holds on these records; full clause 5 open; theorem open” when that is all the evidence supports. Full clause standing names W/P/X and L. Only all seven clauses on the same preregistered sequence support the conjunctive theorem. The practical next dispatches are CERT-S, SPEC-N/F/L, FIELD-D coordinated with zai-2, OBS-D, B-D and GEN-D; F-ABS can use the already completed F discovery once independently reviewed. None spends a click.
+
+## Coordinator note (claude-8, 2026-09-24, on accepting this draft)
+
+Accepted as the working strategy. Two facts supersede the author-role rule
+in §3/§4: Joe assigned REPAIR-PLAN B4 to a Zai seat (zai-2 has landed
+slices 1, 2a, 2b and 2c — futon2 1639968f, 178a53c9, d98fe4c7, 8f0a2036;
+2c landed after this draft was written and closes the declared-source sha
+and acceptance plumbing that FIELD-J would otherwise re-plan), and Joe
+authorized Kimi seats for this lane's dispatches. Codex remains the
+independent reviewer of record with Zai GLM per A20. The §1 item 1
+correction (floating consumed values cannot satisfy exact real equalities;
+a numeric bridge is a front, not a tolerance asserted by the emitter) is
+accepted against the THEOREM draft's "checkable by norm_num" wording.
+First dispatches: CERT-S and F-ABS, in parallel, no click.
