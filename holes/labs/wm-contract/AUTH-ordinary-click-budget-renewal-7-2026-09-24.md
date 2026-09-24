@@ -36,18 +36,33 @@ the next click, and neither is a budget question:
    does name (see the correction in `PROOF-wm-works-2026-09-22.md`, futon2
    `d59f646c`). Firing now would mint further spurious `:machine-failure`
    stop-lines and discharge nothing — exactly what the last six clicks did.
-   kimi-6's repair is in flight.
-2. **The stop-line question is unsettled.** Joe's rule of 2026-09-23 is that a
-   stop-line is repaired from outside with the machine stopped. Whether any
-   open row blocks clicking, or only its own defect does, is an open question
-   claude-8 has put to Joe. Sixteen rows stand, of which six are now known to
-   be artifacts of (1) and six of the older ten are already repaired but
-   undischarged.
+   **Repaired 2026-09-24**, four commits: futon2 `e61a10cb` (ticket-link
+   binding), `210dcdb0` (storable grounding values), `d1f67d13` + `a4043fce`
+   (a write the store reports as rescued, or reports no stage for, refuses
+   before the readback); futon1b `a425d18`, `e6b8990`, `89f65d8` make the
+   store's own message and every pre-put reshape readable from outside the
+   JVM. All are loaded: futon2 reloaded into the serving futon3c JVM from
+   master, futon1b restarted 02:47:39Z.
+2. **The stop-line rule, settled by Joe 2026-09-24.** Asked a third time, Joe:
+   *"if there is a stop-line, in my vocabulary that means the system should be
+   repaired from outside."* It is not per-defect. An open stop-line means the
+   line is stopped: no clicking, and the repair is done from outside the
+   machine's ordinary running. Clicks resume when the board is clear.
 
-The clicks are therefore banked, not authorized to be spent immediately. When
-(1) is fixed and (2) is answered, they are spent under the ordinary rules:
-issue-time accounting, failed runs never refund, and consumption counted
-against this authorization's identity.
+   The board is **35 open `:machine-failure` findings** (128 findings less 59
+   resolutions and 17 dismissals, filtered to that class) — not the sixteen
+   this file previously recorded. Six are the `:grounded-no-change` artifacts
+   of (1), 12 already carry an implementation and 7 a verification, and the
+   oldest six date to 2026-07. That every one of these accrued while the
+   machine kept clicking is the thing the rule exists to stop; Joe, 2026-09-23:
+   *"15 should never accrue."*
+
+(1) is now fixed and (2) is now answered, so neither is what holds the clicks.
+The rule in (2) is: the board must be clear. Thirty-five open stop-lines stand,
+so the five clicks stay banked until the outside repair has cleared them. When
+it has, they are spent under the ordinary rules: issue-time accounting, failed
+runs never refund, and consumption counted against this authorization's
+identity.
 
 ## Mechanics
 
