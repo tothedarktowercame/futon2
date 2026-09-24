@@ -108,7 +108,9 @@
                                                   :post-belief {#{:x} 1}}]}}]
     (is (= :non-degenerate (:verdict (d/verdict term value {:all-habits [2 1]}))) (str term)))
   (doseq [term d/terms]
-    (is (= :missing (:status (d/verdict term nil))))
+    ;; F-ABS (PROOF-2 packet 27): an absent F is typed :absent (omitted from
+    ;; the law), not :missing; every other term's nil case is unchanged.
+    (is (= (if (= :F term) :absent :missing) (:status (d/verdict term nil))))
     (is (not (contains? (d/verdict term nil) :verdict)))))
 
 (deftest consumed-f-and-missing-scoring-evidence

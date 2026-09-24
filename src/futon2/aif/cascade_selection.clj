@@ -160,6 +160,61 @@
                         (first ordered) (rest ordered))]
       {:action a :mass (double m) :tie-break-rule bayes-choice-tie-rule})))
 
+;; ---------------------------------------------------------------------------
+;; law receipt (PROOF-2 packet 27 / F-ABS, 2026-09-24)
+;;
+;; The `wm-policy-selection` contract bound at cascade_selection.clj:51
+;; (PolicySelection.lean @ a434947c63: one law, σ(log E − F − γG), γ = 1/β)
+;; presents the full law. When F is absent for a candidate, selection-posterior
+;; omits the term (line 112: `(if (= :not-supplied (:f-status c)) 0.0 …)`) —
+;; the arithmetic is UNCHANGED by this receipt; the receipt only says which law
+;; actually ran. Per Joe's 2026-09-19 ruling, F absence is typed evidence on
+;; the record, not a refusal: nothing here refuses or defers selection.
+;; ---------------------------------------------------------------------------
+
+(defn f-consumed-record
+  "The exact F value the selection law consumed for one candidate, or the
+   typed absence. A missing prefix contributes NO term — that is not a
+   measured F = 0, and the record must not say one was consumed."
+  [c]
+  (if (or (= :not-supplied (:f-status c)) (nil? (:f c)))
+    {:status :absent :reason :not-supplied}
+    (double (:f c))))
+
+(defn law-receipt
+  "Per-decision receipt naming the selection law that actually ran, under the
+   wm-policy-selection contract (cascade_selection.clj:51; PolicySelection.lean
+   @ a434947c63).
+
+   - every candidate has finite consumed F → the full law
+     σ(log E − F − γG);
+   - every candidate's F absent → the reduced law σ(log E − γG) with the F
+     term omitted, listing the candidates;
+   - a mixed field is its own case — named with BOTH per-candidate lists,
+     never collapsed to either pure law.
+
+   Evidence only: same input, same scores; nothing refuses."
+  [candidates]
+  (let [absent? (fn [c] (or (= :not-supplied (:f-status c)) (nil? (:f c))))
+        without (mapv :id (filter absent? candidates))
+        with (mapv :id (remove absent? candidates))]
+    (cond
+      (empty? without)
+      {:law :sigma-log-E-minus-F-minus-gamma-G}
+
+      (empty? with)
+      {:law :sigma-log-E-minus-gamma-G
+       :omitted-terms [:F]
+       :reason :f-not-supplied
+       :candidates-without-f without}
+
+      :else
+      {:law :sigma-log-E-minus-gamma-G-with-F-where-supplied
+       :omitted-terms [:F]
+       :reason :f-partially-supplied
+       :candidates-with-f with
+       :candidates-without-f without})))
+
 (defn- ordered-masses [m]
   (sort-by (fn [[id p]] [(- p) (pr-str id)]) (filter (comp pos? val) m)))
 

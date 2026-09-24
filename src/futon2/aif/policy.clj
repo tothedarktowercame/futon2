@@ -172,26 +172,12 @@
   (the empty-cascade case). Additive: nothing downstream changes key."
   [action state-tokens]
   (when (and (map? action) (seq (:precedence action)))
-    (let [;; the live qualifier's pattern maps carry interpreted guards; a
-          ;; bare token-interpretation shape needs the manifest's interpreted
-          ;; form — normalize through token-interpretation when the guard has
-          ;; no :clauses (the additive shapes both occur in records)
-          precedence (vec
-                      (for [p (:precedence action)]
-                        (if (= :interpreted (get-in p [:guard :status]))
-                          p
-                          (try
-                            ((requiring-resolve 'futon2.aif.cascade-policy/token-interpretation)
-                             (:id p) {:guard (into {} (for [cl (get-in p [:guard :clauses])]
-                                                         (cond-> []
-                                                           (seq (:present cl)) (conj :needs)
-                                                           (seq (:absent cl)) (conj :forbids)))
-                                      ;; token-interpretation takes flat sets
-                                      )
-                              :produces (:produces p)})
-                            (catch Exception _ p)))))
-          ;; simpler: use the guard clauses directly with first-enabled by
-          ;; building the interpreted shape here
+    (let [;; the live qualifier's pattern maps carry interpreted guards; the
+          ;; guard clauses are used directly with first-enabled by building
+          ;; the interpreted shape here. (The earlier `precedence` binding
+          ;; computed a token-interpretation normalization nothing consumed;
+          ;; removed 2026-09-24 under the F-ABS packet's clj-kondo 0/0 gate —
+          ;; pure and unused, so no behaviour changes.)
           interpreted (vec
                        (for [p (:precedence action)]
                          (cond
@@ -275,6 +261,8 @@
               :status (if (contains? certificate :node-evaluations) :recorded :missing)
               :evaluations (:node-evaluations certificate)})) ranked)
    :g-term-decomposition (decomposition/census ranked candidates)
+   ;; F-ABS (PROOF-2 packet 27): name the law that actually ran. Evidence only.
+   :law-applied (cascade-selection/law-receipt candidates)
    ;; Retain every candidate's own scorer provenance. Indexing by position
    ;; preserves the exact candidate association even when action names tie.
    :scoring (into (sorted-map)
@@ -283,7 +271,8 @@
                      [i (assoc (select-keys (:certificate entry) [:c :rates-provenance])
                                :id (:action entry))])
                    ranked))
-   :candidates candidates
+   :candidates (mapv #(assoc % :f-consumed (cascade-selection/f-consumed-record %))
+                     candidates)
    :policies (mapv (fn [c]
                      {:id (:id c)
                       :beta-declared beta

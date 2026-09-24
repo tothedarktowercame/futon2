@@ -55,7 +55,12 @@
   (if (or (nil? value) (and (= term :Q) (not (q-evidence? value)))
           (and (= term :C) (or (not (seq (:steps value)))
                                                         (some #(nil? (:distribution %)) (:steps value)))))
-    {:status :missing :value nil :reason :consumed-value-not-recorded}
+    (if (= term :F)
+      ;; F-ABS (PROOF-2 packet 27): an absent F is not a lost value — the
+      ;; selection law omits the term (cascade-selection line 112), so the
+      ;; record says the term was omitted from the law that ran.
+      {:status :absent :value nil :reason :omitted-from-law}
+      {:status :missing :value nil :reason :consumed-value-not-recorded})
     (if (and (= term :E) (not (seq (remove nil? (:all-habits ctx)))))
       {:status :missing :value value :reason :habit-vector-not-supplied}
     (let [[degenerate? reason]

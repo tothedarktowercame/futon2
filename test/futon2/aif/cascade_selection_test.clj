@@ -15,7 +15,8 @@
    - ActionMarginal.lean @ 6b55652425: IsBayesAction maximises the summed
      action marginal, not the per-policy argmax."
   (:require [clojure.test :refer [deftest is testing]]
-            [futon2.aif.cascade-selection :as cs]))
+            [futon2.aif.cascade-selection :as cs]
+            [futon2.aif.g-term-decomposition :as gtd]))
 
 (def ^:private tol 1e-12)
 
@@ -116,3 +117,84 @@
     (let [p (cs/selection-posterior {:beta 2 :candidates [{:id :p1 :habit 1 :f 0.5 :g 3}
                                                            {:id :p2 :habit 3 :f 0.5 :g 3}]})]
       (is (< (Math/abs (- (/ (:p2 p) (:p1 p)) 3.0)) tol)))))
+
+;; ---------------------------------------------------------------------------
+;; PROOF-2 packet 27 / F-ABS (2026-09-24): the receipt names the law that ran.
+;; ---------------------------------------------------------------------------
+
+(deftest law-receipt-all-absent-names-reduced-law
+  (testing "FALSIFIER: every candidate :f nil :f-status :not-supplied. Pre-fix,
+            the certificate presented σ(log E − F − γG) while σ(log E − γG) ran;
+            a receipt claiming the full law on this field must be impossible.
+            Catches: receipt hard-coded to the full law, or the all-absent case
+            collapsed into it."
+    (let [field [{:id :c1 :habit 1.0 :f nil :f-status :not-supplied :g 1.0}
+                 {:id :c2 :habit 1.0 :f nil :f-status :not-supplied :g 2.0}]]
+      (is (= {:law :sigma-log-E-minus-gamma-G
+              :omitted-terms [:F]
+              :reason :f-not-supplied
+              :candidates-without-f [:c1 :c2]}
+             (cs/law-receipt field)))
+      (is (= {:status :absent :reason :not-supplied}
+             (cs/f-consumed-record (first field)))))))
+
+(deftest law-receipt-all-finite-names-full-law
+  (testing "all-finite field → full-law receipt, :f-consumed equals the input F.
+            Catches: the receipt flipping the full-law case to reduced, and
+            :f-consumed recording the absent map over a supplied F."
+    (let [field [{:id :c1 :habit 1.0 :f 0.5 :f-status :attached :g 1.0}
+                 {:id :c2 :habit 1.0 :f 1.5 :f-status :attached :g 2.0}]]
+      (is (= {:law :sigma-log-E-minus-F-minus-gamma-G}
+             (cs/law-receipt field)))
+      (is (= 0.5 (cs/f-consumed-record (first field))))
+      (is (= 1.5 (cs/f-consumed-record (second field)))))))
+
+(deftest law-receipt-mixed-field-is-its-own-case
+  (testing "mixed field → mixed receipt with BOTH per-candidate lists, not
+            collapsed to either pure law. Catches: a boolean receipt that
+            picks one law for a per-candidate omission."
+    (is (= {:law :sigma-log-E-minus-gamma-G-with-F-where-supplied
+            :omitted-terms [:F]
+            :reason :f-partially-supplied
+            :candidates-with-f [:c2]
+            :candidates-without-f [:c1]}
+           (cs/law-receipt [{:id :c1 :habit 1.0 :f nil :f-status :not-supplied :g 1.0}
+                            {:id :c2 :habit 1.0 :f 0.5 :f-status :attached :g 2.0}])))))
+
+(deftest law-receipt-arithmetic-unchanged
+  (testing "ARITHMETIC-UNCHANGED CONTROL: on the all-absent field the posterior
+            and the Bayes action are BYTE-IDENTICAL to what the pre-change code
+            produced. Pre-change the omitted term scored exactly like a supplied
+            F = 0.0 (both contribute 0.0), so the absent-F field must equal the
+            existing :f 0.0 fixture number for number. Catches: any diff that
+            moved the law's arithmetic while adding the receipt."
+    (let [absent-field [{:id :c1 :habit 1.0 :f nil :f-status :not-supplied :g 1.0}
+                        {:id :c2 :habit 1.0 :f nil :f-status :not-supplied :g 2.0}]
+          supplied-zero [{:id :c1 :habit 1.0 :f 0.0 :f-status :attached :g 1.0}
+                         {:id :c2 :habit 1.0 :f 0.0 :f-status :attached :g 2.0}]
+          post-absent (cs/selection-posterior {:beta 1.0 :candidates absent-field})
+          post-zero (cs/selection-posterior {:beta 1.0 :candidates supplied-zero})]
+      (is (= post-zero post-absent))
+      (is (= (cs/bayes-choice post-zero {:c1 :a :c2 :b})
+             (cs/bayes-choice post-absent {:c1 :a :c2 :b})))
+      ;; and the numbers themselves are the pinned fixture values, not NaN
+      (is (< (abs (- (/ (get post-absent :c2) (get post-absent :c1))
+                     (Math/exp -1.0)))
+             tol)))))
+
+(deftest g-term-decomposition-f-absent-says-omitted-from-law
+  (testing "the decomposition's F term says :status :absent :reason
+            :omitted-from-law when F was not supplied — not
+            :consumed-value-not-recorded — and only the F case changed.
+            Catches: typed absence re-labelled as a lost value, and collateral
+            re-labelling of the other terms' missing case."
+    (let [ranked [{:certificate {:consumed-g {:A nil :C nil :D nil :Q nil}}}]
+          candidates [{:id :c1 :habit 1.0 :f nil :f-status :not-supplied}]
+          terms (get-in (gtd/census ranked candidates) [:policies 0 :terms])]
+      (is (= {:status :absent :value nil :reason :omitted-from-law}
+             (:F terms)))
+      (is (= {:status :missing :value nil :reason :consumed-value-not-recorded}
+             (:A terms)))
+      ;; a supplied F keeps its verdict path (zero consumed F is degenerate)
+      (is (= :present
+             (:status (gtd/verdict :F 0.0)))))))
