@@ -110,13 +110,18 @@
   (let [root (temp-root)
         id "repair-marker-superseded"
         _ (with-resolution root id)
-        _ (repair/write-publication-unreachable! root id (marker id))]
+        _ (repair/write-publication-unreachable! root id (marker id))
+        publishes (atom 0)]
+    ;; publication-result! reads the marker before it publishes, so read
+    ;; order is not the property. The property is that a marker present on
+    ;; disk does not suppress publication: publish! is still called, once.
     (with-redefs [receipt/publish! (fn [& _]
+                                     (swap! publishes inc)
                                      {:status :receipt-committed :repair/id id
                                       :repair/discharged? true})]
       (let [r (receipt/publication-result! root "/no/repo" id)]
-        (is (= :receipt-committed (:status r))
-            "the marker does NOT suppress publication — derive first")
+        (is (= 1 @publishes) "the marker does not suppress publication")
+        (is (= :receipt-committed (:status r)))
         (is (= :superseded (:marker r)))
         (is (= :legacy-a (:marker-class r)))
         (is (true? (:repair/discharged? r)))))))
