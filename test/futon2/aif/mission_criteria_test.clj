@@ -112,3 +112,16 @@
       (is (= ["M-test"] (:targets input)))
       (is (= 4 (count (get-in input [:sources :locators "M-test"]))))
       (is (true? (get-in input [:sources :universes "M-test" (:token (first (:criteria (read-with mission))))]))))))
+
+(deftest acceptance-headings-are-criteria-sections
+  ;; M-f11-find-production-successor states its done-definition under
+  ;; "## Acceptance"; a checkbox-only flight would close it on one box
+  ;; while the mission says F1-F4 remain open
+  (let [text (str/join "\n" ["# M" "" "## Acceptance" "" "- State F1-F4 in Lean."
+                             "- Discharge the find sorry." "" "## Open holes" ""
+                             "- [ ] Publish the successor link."])
+        w (read-with text)]
+    (is (= 2 (count (:wants w))))
+    (is (every? #(= :verdict-not-stated (:reason %)) (:unlocated w))))
+  (is (empty? (:wants (read-with "## Acceptance tests elsewhere\n\n- not criteria"))) "heading must start with the name")
+  (is (empty? (:wants (read-with "## Acceptance-free notes\n\n- x")))) )

@@ -7,8 +7,9 @@
 
     :phase-exit            a paragraph opening `**Exit criterion:**`, its
                            phase the enclosing `## ` heading
-    :completion-criterion  a bullet under a heading naming `completion
-                           criteria` (any level)
+    :completion-criterion  a bullet under a criteria heading (any level):
+                           `Completion criteria`, `Acceptance`, `Success
+                           criteria`, `Exit criteria`, `Done when`
 
   Every criterion becomes a want: the flight is not done until each is met.
   A criterion is OBSERVABLE when the mission states a verdict for it inline
@@ -33,6 +34,10 @@
 (def exit-marker "**Exit criterion:**")
 (def verdict-re #"\*\*(?:Met|Not met|Not started)")
 (def met-token "**Met.**")
+(def criteria-heading-re
+  ;; the heading IS the name, optionally followed by a dash, colon or
+  ;; parenthetical: "Acceptance (2026-09-12)" yes, "Acceptance tests" no
+  #"(?i)^(?:completion criteria|acceptance(?: criteria)?|success criteria|exit criteria|done when)\s*(?:$|[:(]|[—–-]\s)")
 
 (defn- sha1-12 [^String s]
   (let [d (.digest (MessageDigest/getInstance "SHA-1") (.getBytes s "UTF-8"))]
@@ -82,7 +87,7 @@
           (cond
             h (recur (inc i)
                      (if (= 2 (:level h)) (:title h) phase)
-                     (cond (re-find #"(?i)completion criteria" (:title h)) (:level h)
+                     (cond (re-find criteria-heading-re (:title h)) (:level h)
                            (and cc-level (<= (:level h) cc-level)) nil
                            :else cc-level)
                      out)
