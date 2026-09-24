@@ -78,7 +78,7 @@ Rows are topologically ordered within each front. Different fronts can proceed c
 |---|---|---|---|---|
 | 1 / SPEC-N | Specify numeric correspondence from W₁–W₆ and existing symbolic-log witnesses | A rounded log presented as exact ℝ equality | `packets/SPEC-N.md`; D/R; S; N | NUM packets, honest W statements |
 | 2 / SPEC-F | Specify H4 prefix aggregation from F discovery and A12/A17/W₃ | Two-step total equated to its last summand; G dropped in F-only comparison | `packets/SPEC-F.md` with proposed precise amendments; D/R; S; N | F-SUM, preregistration |
-| 3 / SPEC-L | Identify cold-start feasibility from A21/W₆ and existing prefix records | A new policy borrows a different policy's history | `packets/SPEC-L.md`, boundary and unresolved ruling identified; D/R; S; N | L-REG; no permission to weaken W₆ |
+| 3 / SPEC-L | Identify cold-start feasibility from A21/W₆ and existing prefix records | A new policy borrows a different policy's history | `packets/SPEC-L.md`, the start boundary of L derived from the definitions (see §8); D/R; S; N | L-REG; no permission to weaken W₆ |
 | 4 / CERT-S | Specify exact certificate joins from theorem P₀–P₆ | Correct number attached to wrong candidate or post-selection source | `packets/CERT-S.md`, versioned schema and consumed-at semantics; D/R; S; N | Every carrier and extractor |
 | 5 / NUM-R | Implement exact rational transcription from SPEC-N | Decimal/ratio silently rounded or nonfinite value admitted | `checks/proof2_numbers.clj`; C/R; M; N | Exact B/A/D extracts |
 | 6 / NUM-L | Prove the rational decoding relation from NUM-R | Numerator/denominator swapped in otherwise valid extract | `mathlib4/DarkTower/WarMachine/Proof2/NumberEncoding.lean`; L/R; M; N | Rational witness emitters |
@@ -210,11 +210,28 @@ L-REG is authored by the proof coordinator with the independent Codex/Zai review
 
 The current board count of 35 at the 02:57 sweep is a supplied snapshot, not a readiness certificate. Other lanes clear machine-failure findings; READY reads the current authoritative disposition. This plan neither clears them nor reloads the JVM. All N packets can proceed from outside the machine now after their local dependencies/reviews; Y work waits for stop-line clearance and the authorized allocation.
 
-## 8. Risks, refusals, and the one possible user ruling
+## 8. Risks and refusals
 
 **Engineering resolutions owed to reviewers, not bookkeeping for Joe:** numeric refinement instead of impossible exact float equalities; explicit prefix sum; the F-ablation wording; observation identifiability; Beta specialization and trial semantics; sparse support; global read ordering. These are concrete specification choices with counterexamples. They must amend the theorem/assumptions under A20 before signatures, not queue a vague “please decide architecture” request.
 
-**Potential Joe ruling, only after SPEC-L establishes the facts:** “Must every cold-start/new-policy click belong to the universally F-complete proof sequence, or may a declared initialization phase precede that sequence within your authorized click budget?” With the strict answer, typed absence keeps W₆ open until real compatible histories exist, and five clicks may be insufficient. With an initialization phase, its length/stopping rule, histories and budget use must be declared before collection and the theorem must explicitly cover the subsequent sequence; the initialization records remain published and cannot be selected retrospectively. Neither answer permits fabricated prefixes, hidden setup clicks, or suppressing ordinary candidates. No ruling is presumed by this draft.
+**The cold-start question is settled by the definitions, not by a ruling
+(claude-8, 2026-09-24, on Joe's objection that a proof strategy is not an
+argument from authority).** Clause 6 quantifies over every member of L. A
+new policy on its first click has no admitted prefix, so F is absent for
+it; by A16 that is a typed absence and W₆ is open on that click. That is
+the whole answer: the click is in L, the clause is open, the record says
+why. There is no "initialization phase" to declare, because L's start
+boundary is already fixed by A19 and A21 (ordinary clicks after the signed
+baseline, all of them, failures included), and any click before that
+boundary is simply not in L and cannot be selected into it later. What
+SPEC-L still owes is factual, not permissive: whether compatible immutable
+histories exist before the boundary that a live click may lawfully consume
+as inputs (A21's "unlinked historical run" rule), stated with their
+identities before L is signed. If none exist, the first clicks of L will
+have W₆ open for cold-start candidates and the theorem will not close on
+L-v1; that is a true statement about the machine, to be recorded under R8,
+and the remedy is more ordinary clicks in a later preregistered L-v2, never
+a fabricated prefix, a borrowed history, or a suppressed candidate.
 
 I would refuse the following **proof credits or packet completion claims**, not ordinary tuning runs:
 
