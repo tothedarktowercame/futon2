@@ -6020,7 +6020,11 @@
   (if flight
     (-> input
         (assoc :targets [(:target flight)])
-        (assoc-in [:sources :wants (:target flight)] (vec (:wants flight))))
+        (assoc-in [:sources :wants (:target flight)] (vec (:wants flight)))
+        ;; wants the flight's source located itself (A-exits criteria):
+        ;; their locators and observed values join the target's sources
+        (update-in [:sources :locators (:target flight)] merge (:locators flight))
+        (update-in [:sources :universes (:target flight)] merge (:universe flight)))
     input))
 
 (defn constructed-candidate-g

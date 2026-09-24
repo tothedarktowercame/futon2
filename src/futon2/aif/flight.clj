@@ -13,7 +13,8 @@
 
   Pure except `run!`, which calls the injected click and observe functions."
   (:refer-clojure :exclude [run!])
-  (:require [futon2.aif.repair-proposals :as repairs])
+  (:require [futon2.aif.mission-criteria :as criteria]
+            [futon2.aif.repair-proposals :as repairs])
   (:import [java.util UUID]))
 
 ;; ---------------------------------------------------------------------------
@@ -21,7 +22,9 @@
 
 (defmulti source-wants
   "The target's wants from a want source. Returns
-  {:wants [token …] :source {:kind … …}}. SOURCES is the tick's assembled
+  {:wants [token …] :source {:kind … …}}, and, for wants the tick's
+  sources do not already locate, :locators {token locator} and
+  :universe {token bool}. SOURCES is the tick's assembled
   sources map; FLIGHT the flight record."
   (fn [want-source _flight _sources] (:kind want-source)))
 
@@ -30,6 +33,23 @@
 (defmethod source-wants :checkbox [_ {:keys [target]} sources]
   {:wants (vec (get-in sources [:wants target]))
    :source {:kind :checkbox :via "futon2.aif.mission-hole-wants"}})
+
+;; The mission's completion criteria read from its text (A-exits,
+;; futon2.aif.mission-criteria), plus the checkbox wants. The want source
+;; names the mission file: {:kind :a-exits :repo … :path … :code-root …}.
+;; A criterion with no stated verdict is a want with no locator; assembly
+;; then refuses the target naming it, which is the hole to close.
+(defmethod source-wants :a-exits [{:keys [repo path code-root read-text observe]} {:keys [target]} sources]
+  (let [text ((or read-text criteria/read-mission) (or code-root "/home/joe/code") repo path)
+        cs (criteria/criteria target (or text ""))
+        w (criteria/wants cs (cond-> {:repo repo :path path} observe (assoc :observe observe)))]
+    {:wants (vec (distinct (concat (get-in sources [:wants target]) (:wants w))))
+     :locators (:locators w)
+     :universe (:universe w)
+     :source {:kind :a-exits :via "futon2.aif.mission-criteria"
+              :repo repo :path path :text-read? (some? text)
+              :criteria (count cs)
+              :unlocated (:unlocated w)}}))
 
 ;; A hand-declared list, for tests. Typed on every record it reaches, so a
 ;; reader can never mistake it for wants the machine read from the mission.
@@ -73,9 +93,11 @@
   "The wants for the flight's next click: the want source's wants plus every
   want carried from earlier clicks, in first-seen order."
   [flight sources]
-  (let [{:keys [wants source]} (source-wants (:want-source flight) flight sources)]
+  (let [{:keys [wants source locators universe]} (source-wants (:want-source flight) flight sources)]
     {:wants (vec (distinct (concat wants (:carried-wants flight))))
-     :source source}))
+     :source source
+     :locators (or locators {})
+     :universe (or universe {})}))
 
 (defn judge-opts
   "What the flight passes the tick's judge: the fixed target and the wants
@@ -84,6 +106,8 @@
   {:flight {:flight/id (:flight/id flight)
             :target (:target flight)
             :wants (:wants wants)
+            :locators (:locators wants)
+            :universe (:universe wants)
             :want-source (:source wants)
             :click (inc (count (:clicks flight)))}})
 
