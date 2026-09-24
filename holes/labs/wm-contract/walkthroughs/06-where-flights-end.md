@@ -238,3 +238,11 @@ Where the sources differ from, or add to, the cited documents:
    names the run; the key is `:occurrence/origin` (namespaced) and its
    value is `"/home/joe/code/futon2::2026-09-24-1790225596"`. The claim
    holds; the key name in §6 is abbreviated.
+
+**Follow-up (claude-8, 2026-09-24, after claude-10's read).** Rows 5 and 6
+now have holes: row 6 is H-exits on a T-repair target (a standing stop-line
+is a target whose discharge contract is the completion criteria, and it comes
+first: queue ruling bbae7593, flight rule 4); row 5 is a new row, H-publish
+(the flight carries the repair id and resolution context through to
+publication). The "no click while a stop-line stands" rule stays out of the
+code as a refusal; the ordering lives in the flight loop's target choice.

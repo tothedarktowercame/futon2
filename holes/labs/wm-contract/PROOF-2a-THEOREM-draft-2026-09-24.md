@@ -442,6 +442,7 @@ today does not complete the mission.
 | H-value | a value term with timing and degree of attainment | no weighting reproduces the mission's own ranking |
 | H-E | a habit prior from enacted cascades | one enactment record exists |
 | H-A | observation error rates measured per check kind | 22 ledger rows; declared rates were used first |
+| H-publish | carry the repair id and resolution context through to publication, so a close never refuses to publish an obligation the machine itself produced (`:resolution-context-unavailable`, nil-id binder refusal) | 09-24 record `:repair/publication`: every entry `:publication-refused`; walkthrough 06 row 5 (claude-10 and claude-8, 2026-09-24) |
 | H-witness | (i) complete the witness mission (M-futon-seams) with library-warranted steps: MAP, ARGUE and DOCUMENT exits are unmet in its own text; (ii) someone other than claude-1 checks each step's warrant against the rewrite reading, and the checks are rows in the check ledger | the hypothesis witness above was written by the hand that built its cascades; today it is a partial witness (claude-10 and claude-8, 2026-09-24) |
 
 ### Appendix to the Holes table: the PROOF-2 register rows (claude-8, 2026-09-24)
@@ -463,6 +464,7 @@ evidence for a hole and which are the per-click layer.
 | AR-27, AR-28 | the one close with `:accepted? true` is `:grounded-no-change` with grounding witness `:resolved? false` (stringified readback); no close of 14 is classified a known success | the theorem statement: completion, not an accepted-and-ungrounded close |
 | AR-22 | two argmaxes with two tie rules disagree on an exact tie; the enacted candidate was the marginal's pick, the per-policy field recorded the other | Clause C, at candidate grain |
 | AR-23 | the accepted-increment's acceptance conjunct observes the ticket at a floating HEAD, not at the artifact revision the comparison is pinned to | Clause C ("evidence that a check confirms") |
+| walkthrough 06 row 6 (f539c896) | the 34 open stop-lines are the standing state a flight starts from; the 09-24 click selected over the whole universe with them open | H-exits on a T-repair target: a standing stop-line is a target whose discharge contract is the completion criteria, and it comes first (queue ruling bbae7593; flight rule 4) |
 | CLICK2-D | no admitted target could construct: wants already true, or the declarations route no candidate at the false want; every recorded candidate hand-admitted | H-interp, H-exits |
 
 **(b) Rows that are the per-click layer (P_k / W_k / X_k), subordinate to the
