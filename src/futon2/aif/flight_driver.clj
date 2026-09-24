@@ -87,7 +87,9 @@
      ;; D11 part 5: what the mission does not state, and the reading step
      ;; would compute before the first click instead of refusing
      :readings-it-would-request
-     {:constraints (when (get-in src [:readings-needed :constraints?])
+     {:coverage (when (get-in src [:readings-needed :coverage?])
+                  {:found (count (:criteria-by-token src))})
+      :constraints (when (get-in src [:readings-needed :constraints?])
                      {:mission-sha (get-in src [:readings-needed :mission-sha])
                       :tokens-an-edge-may-join (count (:known-tokens src))})
       :criteria (when (get-in src [:readings-needed :criteria?])
@@ -101,6 +103,8 @@
      :constraints (mapv #(select-keys % [:want :requires :phase :through :line :by :quote])
                         (get-in src [:constraints :requires]))
      :constraint-questions (get-in src [:constraint-questions])
+     :coverage-questions (get-in src [:coverage-questions])
+     :unlocated (mapv #(select-keys % [:token :line :reason :decline]) (:unlocated src))
      :requests-it-would-issue
      (vec (for [t unproduced
                 :let [c (get-in src [:criteria-by-token t])]]

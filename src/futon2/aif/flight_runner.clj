@@ -343,6 +343,18 @@
                       (fn [issued resp v who]
                         (reading/publish-criteria! store issued resp v who
                                                    (evidence-sha text)))))
+          ;; coverage (once per text, when criteria were found): what the
+          ;; bullets miss, scope-outs, anchors
+          cov-need (get-in (flight/click-wants flight sources) [:source :readings-needed])
+          coverage-entry
+          (when (:coverage? cov-need)
+            (read-one opts (reading/coverage-request
+                            target mission (:mission-sha cov-need)
+                            (vec (for [[t c] (get-in (flight/click-wants flight sources) [:source :criteria-by-token])]
+                                   {:token t :text (:stated c)})))
+                      reading/criteria-schema
+                      (fn [issued resp] (reading/validate-coverage issued resp text))
+                      (fn [issued resp v who] (reading/publish-coverage! store issued resp v who))))
           ;; locators are asked after any criteria publication, so newly
           ;; extracted criteria get theirs in the same step
           cw (flight/click-wants flight sources)
@@ -354,6 +366,11 @@
                            (fn [issued resp] (reading/validate-locator issued resp (assoc (select-keys opts [:observe]) :text text)))
                            (fn [issued resp v who] (reading/publish-locator! store issued resp v who))
                            (fn [issued resp v who] (reading/publish-locator-questions! store issued resp v who)))))
+          ;; a declined locator is recorded for this text, not asked again
+          _ (doseq [e locator-entries :when (= :declined (:outcome e))]
+              (reading/record-locator-decline! store {:target target :want {:token (:want e)} :request-id (:request-id e)}
+                                               (:decline e) (select-keys e [:seat :job-id])
+                                               (get-in cw [:source :readings-needed :mission-sha])))
           ;; ordering dependencies stated in forms the reader does not
           ;; recognise, read once per text (after criteria, so extracted
           ;; ones are among the tokens an edge may join)
@@ -366,7 +383,7 @@
                       reading/constraints-schema
                       (fn [issued resp] (reading/validate-constraints issued resp text))
                       (fn [issued resp v who] (reading/publish-constraints! store issued resp v who))))
-          asked (vec (concat (when criteria-entry [criteria-entry]) locator-entries
+          asked (vec (concat (when criteria-entry [criteria-entry]) (when coverage-entry [coverage-entry]) locator-entries
                              (when constraints-entry [constraints-entry])))
           ;; questions the criteria reading raised: sent to the owner the
           ;; mission names (else recorded for the requisition's caller),
@@ -376,6 +393,9 @@
                             (reading/published-questions store target))
                           (for [e locator-entries :when (= :questions (:outcome e)) q (:questions e)]
                             (assoc q :want (:want e) :request-id (:request-id e)))
+                          (when (= :published (:outcome coverage-entry))
+                            (map #(assoc % :request-id (:request-id coverage-entry))
+                                 (get-in (flight/click-wants flight sources) [:source :coverage-questions])))
                           (when (= :published (:outcome constraints-entry))
                             (map #(assoc % :request-id (:request-id constraints-entry))
                                  (get-in (flight/click-wants flight sources) [:source :constraint-questions])))))
@@ -386,7 +406,7 @@
       {:asked asked
        :needs (vec (concat
                     (for [a asked :when (not (#{:published :questions} (:outcome a)))]
-                      (merge {:kind (:outcome a) :missing (case (:kind a) :criteria :criteria :constraints :constraints :locator)}
+                      (merge {:kind (:outcome a) :missing (case (:kind a) :criteria :criteria :coverage :coverage :constraints :constraints :locator)}
                              (select-keys a [:want :request-id :seat :job-id])))
                     (for [q questions]
                       {:kind :owner-question :missing :owner-answer :to addressed

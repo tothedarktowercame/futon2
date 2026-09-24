@@ -62,6 +62,19 @@
    :mission mission :sections-read (vec sections-read)
    :asks "the mission's completion criteria as it states them (goal, done-when, outcome sentences, phase exits), each cued to the exact lines of the mission at HEAD, or a typed decline naming the sections read"})
 
+(defn coverage-request
+  "Ask whether FOUND (the criteria the reader lifted) cover the mission's
+  done-definition: criteria stated elsewhere (Scope, Objective, boundary
+  sentences) that never became bullets, scope-outs a faithful closure must
+  not require, and anchor data (a file:line, a named artifact) the prose
+  gives for a found criterion. Asked once per text even when criteria were
+  found (FLIGHT-TARGET-D2 §7.2: an extractor lifts more than bullets)."
+  [target mission mission-sha found]
+  {:schema :wm/coverage-request-v1 :kind :coverage :target target
+   :want {:token :coverage :mission-sha mission-sha}
+   :mission mission :found (vec found)
+   :asks "criteria the found list misses (cued), scope-outs (cued), anchors for found criteria (cued), or anchored questions; all may be empty"})
+
 (defn constraints-request
   "Ask for the ordering dependencies the mission states in any form among
   its wants and facts: KNOWN is [{:token … :text …}], each want's criterion
@@ -75,13 +88,19 @@
               "if a stated dependency is unclear about which token it means, ask anchored questions instead")})
 
 (defn prompt [issued]
-  (let [schema (case (:kind issued) :locator locator-schema :constraints constraints-schema criteria-schema)]
+  (let [schema (case (:kind issued) :locator locator-schema :constraints constraints-schema criteria-schema)
+        coverage? (= :coverage (:kind issued))]
     (str "The War Machine asks for a reading (D11 part 5). Request " (:request-id issued) ":\n\n```edn\n"
          (pr-str issued) "\n```\n\nREPLY GRAMMAR: exactly one fenced ```edn block holding "
          (cond
            (= :constraints (:kind issued))
            (str "{:schema " schema " :constraints [{:want :token :requires :token :cue {:lines [first last] :quote \"exact text\"}} …] "
                 ":questions [{:question \"…\" :span {:lines [a b] :quote \"…\"} :alternatives [\"…\" \"…\"]}] :by \"seat\"} (both may be empty)")
+           coverage?
+           (str "{:schema " schema " :criteria [{:statement \"a criterion the found list misses\" :cue {:lines [a b] :quote \"exact text\"}} …] "
+                ":scope-outs [{:statement \"what a faithful closure must not require\" :cue {:lines [a b] :quote \"…\"}} …] "
+                ":anchors [{:token :found-token :anchor \"file:line or artifact\" :cue {:lines [a b] :quote \"…\"}} …] "
+                ":questions [anchored as usual] :by \"seat\"} (all may be empty: the found criteria cover it)")
            (= :locator (:kind issued))
            (str "{:schema " schema " :locator {:class :C3|:C4|:C5|:C6 :repo … :sha \"HEAD\" :path … (:decl for C4)} "
                 ":cue {:quote \"words of the criterion this locator decides\"} :reading \"why observing it decides the criterion\" :by \"seat\"}, "
@@ -328,3 +347,78 @@
   [store target mission-sha]
   (let [r (get-in (wi/read-published store target) [:constraints-read])]
     (when (and r (= mission-sha (:mission-sha r))) r)))
+
+(defn validate-coverage
+  "A coverage reading is valid when every added criterion, scope-out and
+  anchor is cued to exactly the mission TEXT at its lines, every anchor
+  names a found token, and every question is anchored. One bad item refuses
+  the reply. All-empty is valid: the found criteria cover the mission."
+  [issued response text]
+  (let [lines (vec (str/split-lines (str text)))
+        found (set (map :token (:found issued)))
+        cue-bad (fn [kind items]
+                  (for [{:keys [cue] :as it} items
+                        :let [at (at-lines lines cue)]
+                        :when (or (nil? at) (not= at (:quote cue))
+                                  (and (= kind :anchor) (not (found (:token it)))))]
+                    {:reason (if (and (= kind :anchor) (not (found (:token it)))) :anchor-token-not-found :cue-does-not-resolve)
+                     :kind kind :item (select-keys it [:statement :token :anchor])}))
+        bad (vec (concat (cue-bad :criterion (:criteria response))
+                         (cue-bad :scope-out (:scope-outs response))
+                         (cue-bad :anchor (:anchors response))
+                         (question-reasons (:questions response) text)))
+        target (:target issued)]
+    (if (seq bad)
+      {:status :rejected :reasons bad}
+      {:status :valid
+       :criteria (mapv (fn [{:keys [statement cue]}]
+                         {:kind :extracted-criterion :line (first (:lines cue)) :stated (:quote cue)
+                          :statement statement :phase "EXTRACTED"
+                          :token (keyword "exit" (str "h" (sha1-12 (str target "\n:extracted\n"
+                                                                        (first (str/split-lines (:quote cue)))))))})
+                       (:criteria response))
+       :scope-outs (mapv (fn [{:keys [statement cue]}] {:statement statement :line (first (:lines cue)) :quote (:quote cue)
+                                                        :reason :scope-out})
+                         (:scope-outs response))
+       :anchors (into {} (for [{:keys [token anchor cue]} (:anchors response)]
+                           [token {:anchor anchor :line (first (:lines cue)) :quote (:quote cue)}]))
+       :questions (mapv #(select-keys % [:question :span :alternatives]) (:questions response))})))
+
+(defn publish-coverage!
+  [store issued response validated answered-by]
+  (bound! store issued)
+  (when-not (= :valid (:status validated))
+    (throw (ex-info "only a validated reading is published" {:interpretation/refusal :reading/not-validated})))
+  (let [target (:target issued)
+        prior (or (wi/read-published store target)
+                  {:schema :wm/machine-interpretations-v1 :target target :patterns {} :receipts {} :records {}})
+        rec (assoc prior :coverage
+                   (assoc (select-keys validated [:criteria :scope-outs :anchors :questions])
+                          :mission-sha (get-in issued [:want :mission-sha])
+                          :receipt {:kind :machine-read-coverage :request-id (:request-id issued)
+                                    :response-id (wi/content-id :response response)
+                                    :answered-by answered-by :validator @wi/validator}))]
+    (wi/write-atomic! (io/file store (str target ".edn")) rec)
+    rec))
+
+(defn published-coverage [store target mission-sha]
+  (let [r (:coverage (wi/read-published store target))]
+    (when (and r (= mission-sha (:mission-sha r))) r)))
+
+;; A locator reading the seat declined, recorded per text so an unchanged
+;; mission is not asked again; the criterion stays a want that no check can
+;; yet observe (a typed absence after the step ran).
+(defn record-locator-decline! [store issued decline answered-by mission-sha]
+  (let [target (:target issued)
+        prior (or (wi/read-published store target)
+                  {:schema :wm/machine-interpretations-v1 :target target :patterns {} :receipts {} :records {}})
+        rec (assoc-in prior [:locator-declines (get-in issued [:want :token])]
+                      {:decline decline :mission-sha mission-sha :request-id (:request-id issued)
+                       :answered-by answered-by})]
+    (wi/write-atomic! (io/file store (str target ".edn")) rec)
+    rec))
+
+(defn published-locator-declines [store target mission-sha]
+  (into {} (for [[t d] (:locator-declines (wi/read-published store target))
+                 :when (= mission-sha (:mission-sha d))]
+             [t d])))

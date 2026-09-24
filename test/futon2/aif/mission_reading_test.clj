@@ -55,13 +55,16 @@
 (defn- answer-with
   "A stubbed seat answering with F; a constraints request (asked once per
   text) is answered with no edges unless F handles :constraints itself."
-  [f & [{:keys [constraints]}]]
+  [f & [{:keys [constraints coverage]}]]
   (let [n (atom 0)]
     (fn [issued]
       {:seat "kimi-6" :job-id (str "job-" (swap! n inc)) :state "done"
-       :text (if (and (= :constraints (:kind issued)) (not constraints))
+       :text (cond
+               (and (= :constraints (:kind issued)) (not constraints))
                (str "```edn\n" (pr-str {:schema mr/constraints-schema :constraints [] :by "kimi-6"}) "\n```")
-               (f issued))})))
+               (and (= :coverage (:kind issued)) (not coverage))
+               (str "```edn\n" (pr-str {:schema mr/criteria-schema :criteria [] :scope-outs [] :anchors [] :by "kimi-6"}) "\n```")
+               :else (f issued))})))
 
 (defn- of-kind [k asked] (filter #(= k (:kind %)) asked))
 
@@ -354,3 +357,67 @@
               :reading "r"}]
     (is (= :valid (:status (mr/validate-locator issued good {:observe observe}))))
     (is (= :rejected (:status (mr/validate-locator issued (assoc-in good [:cue :quote] "Gates on neither") {:observe observe}))))))
+
+;; ---------------------------------------------------------------------------
+;; Coverage (FLIGHT-TARGET-D2 §7.2): an extractor lifts more than bullets
+
+(def omni-text (slurp "test/fixtures/mission-criteria/M-omni-wm-runner@futon3c-2114cb99.md"))
+
+(deftest coverage-surfaces-o4-and-o5-on-m-omni-wm-runner
+  ;; O4, the mission's actual done-definition, is in Scope and never became
+  ;; a bullet; O5 is a scope-out a faithful closure must not require
+  (let [s (store)
+        f (flight/start {:target "M-omni-wm-runner" :chosen-because {:kind :requested}}
+                        {:kind :a-exits :repo "futon3c" :path "holes/missions/M-omni-wm-runner.md" :store s
+                         :read-text (fn [& _] omni-text) :observe (constantly false)} {:id "f-omni"})
+        o4 {:statement "one durée click runs in-process in the futon3c JVM on a dedicated thread, triggered over HTTP"
+            :cue {:lines [29 30] :quote "**In:** one durée click (`once` semantics) runs in-process in the futon3c\nJVM on a dedicated thread; HTTP trigger + status; registry-direct apparatus"}}
+        o5 {:statement "continuous mode and the futon0 scan JVM are out of scope"
+            :cue {:lines [35 35] :quote "**Out (follow-ups):** `continuous` mode; the transient futon0 scan JVM"}}
+        reply (fn [issued]
+                (if (= :coverage (:kind issued))
+                  (str "```edn\n" (pr-str {:schema mr/criteria-schema :by "kimi-6" :criteria [o4] :scope-outs [o5]}) "\n```")
+                  (locator-reply issued)))
+        before (flight/click-wants f {})
+        read ((fr/read-fn {:store s :answer-fn (answer-with reply {:coverage true}) :observe observe}) f {})
+        after (flight/click-wants f {})]
+    (is (= 3 (count (:wants before))) "the reader lifts the three Acceptance bullets")
+    (is (true? (get-in before [:source :readings-needed :coverage?])))
+    (is (= [:published] (map :outcome (of-kind :coverage (:asked read)))))
+    (is (= 4 (count (:wants after))) "O4 is now a want")
+    (is (some #(= "EXTRACTED" (:phase %)) (vals (get-in after [:source :criteria-by-token]))))
+    (is (some #(= :scope-out (:reason %)) (get-in after [:source :out-of-view])) "O5 named out of view")
+    (is (false? (get-in after [:source :readings-needed :coverage?])) "read once for this text")))
+
+(deftest coverage-attaches-f4s-anchor-to-its-criterion
+  (let [s (store)
+        f (f11-flight s)
+        sorry-token (some (fn [[t c]] (when (str/includes? (:stated c) "`find` sorry") t))
+                          (get-in (flight/click-wants f {}) [:source :criteria-by-token]))
+        reply (fn [issued]
+                (if (= :coverage (:kind issued))
+                  (str "```edn\n" (pr-str {:schema mr/criteria-schema :by "kimi-6"
+                                           :anchors [{:token sorry-token :anchor "DarkTower/WarMachine/Holes.lean:264"
+                                                      :cue {:lines [15 15] :quote "`find` sorry formerly anchored at `DarkTower/WarMachine/Holes.lean:264`."}}]}) "\n```")
+                  (locator-reply issued)))
+        _ ((fr/read-fn {:store s :answer-fn (answer-with reply {:coverage true}) :observe observe}) f {})
+        c (get-in (flight/click-wants f {}) [:source :criteria-by-token sorry-token])]
+    (is (= "DarkTower/WarMachine/Holes.lean:264" (get-in c [:anchor :anchor])))
+    (testing "bad case: an anchor for a token the reader did not find refuses the reply"
+      (is (= :rejected (:status (mr/validate-coverage {:found [{:token sorry-token}]}
+                                                      {:anchors [{:token :exit/hnope :anchor "x" :cue {:lines [15 15] :quote "`find` sorry formerly anchored at `DarkTower/WarMachine/Holes.lean:264`."}}]}
+                                                      f11-text)))))))
+
+(deftest a-declined-locator-is-not-asked-again-for-the-same-text
+  (let [s (store)
+        f (f11-flight s)
+        declines (constantly (str "```edn\n" (pr-str {:schema mr/locator-schema :decline {:reason :no-passing-run-class}}) "\n```"))
+        asks (atom 0)
+        answer (let [a (answer-with declines)] (fn [i] (when (= :locator (:kind i)) (swap! asks inc)) (a i)))
+        _ ((fr/read-fn {:store s :answer-fn answer :observe observe}) f {})
+        first-asks @asks
+        _ ((fr/read-fn {:store s :answer-fn answer :observe observe}) f {})
+        cw (flight/click-wants f {})]
+    (is (= 6 first-asks))
+    (is (= 6 @asks) "the second read asks nothing new for an unchanged text")
+    (is (every? #(= :locator-declined (:reason %)) (get-in cw [:source :unlocated])))))

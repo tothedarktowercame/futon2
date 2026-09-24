@@ -53,7 +53,12 @@
         out-of-view (when lifecycle
                       (some-> (read root (:repo lifecycle) (:path lifecycle))
                               criteria/data-only-phases))
+        mission-sha (when text (reading/text-sha text))
         stated (criteria/criteria target (or text ""))
+        ;; coverage reading (once per text): criteria the bullets miss,
+        ;; scope-outs, anchors for found criteria
+        coverage (when (seq stated) (reading/published-coverage store target mission-sha))
+        stated (vec (concat stated (remove (set (map :token stated)) (:criteria coverage))))
         ;; D11 part 5: no criteria in a recognised form is not a refusal;
         ;; criteria extracted by a reading (published, cues still resolving)
         ;; stand in, and until one exists the source asks for it
@@ -68,11 +73,12 @@
         questioned (select-keys (reading/published-locator-questions store target)
                                 (remove (set (keys machine)) (map :token (:unlocated w))))
         observe-loc (or observe #(contains? (:observed (checks/observe {::t %})) ::t))
-        mission-sha (when text (reading/text-sha text))
+        declined (reading/published-locator-declines store target mission-sha)
         text-constraints (criteria/constraints target (or text ""))
         read-constraints (reading/published-constraints store target mission-sha)
         still-unlocated (vec (remove #(or (contains? machine (:token %)) (contains? questioned (:token %)))
-                                     (:unlocated w)))]
+                                     (:unlocated w)))
+        to-ask (vec (remove #(contains? declined (:token %)) still-unlocated))]
     {:wants (vec (distinct (remove (set (keys questioned))
                                    (concat (get-in sources [:wants target]) (:wants w)))))
      :locators (merge (:locators w) machine)
@@ -82,11 +88,15 @@
               :criteria (count cs)
               :criteria-from (cond (seq stated) :mission-text (seq extracted) :machine-reading :else :none)
               :machine-located (vec (sort-by str (keys machine)))
-              :unlocated still-unlocated
+              :unlocated (mapv #(cond-> % (contains? declined (:token %))
+                                  (assoc :reason :locator-declined
+                                         :decline (get-in declined [(:token %) :decline :reason])))
+                               still-unlocated)
               ;; the readings this source still needs; the flight's read
               ;; step asks for them before the click (never a refusal)
               :readings-needed {:criteria? (empty? cs)
-                                :locators (mapv :token still-unlocated)
+                                :coverage? (and (some? text) (seq (criteria/criteria target text)) (nil? coverage))
+                                :locators (mapv :token to-ask)
                                 ;; dependencies stated in forms the reader does
                                 ;; not recognise are read once per text
                                 :constraints? (and (some? text) (nil? read-constraints))
@@ -115,11 +125,15 @@
                                                  :when (and (string? d) (re-find #"^[-*]\s+\[x\]" d))]
                                              [t {:kind :checkbox-task :phase "checkbox"
                                                  :stated (str/replace-first d #"\[x\]" "[ ]")}]))
-                                  (into {} (map (fn [c] [(:token c) (select-keys c [:kind :line :phase :stated])]))
+                                  (into {} (map (fn [c] [(:token c)
+                                                         (cond-> (select-keys c [:kind :line :phase :stated])
+                                                           (get-in coverage [:anchors (:token c)])
+                                                           (assoc :anchor (get-in coverage [:anchors (:token c)])))]))
                                         (:criteria w)))
               ;; phases judged in data only, and findings the owner retains
               ;; as not met: neither is a want, both are named
-              :out-of-view (vec (concat out-of-view (:retained w)
+              :coverage-questions (:questions coverage)
+              :out-of-view (vec (concat out-of-view (:retained w) (:scope-outs coverage)
                                         (for [[t qs] questioned]
                                           {:token t :reason :owner-question :questions qs})))
               :lifecycle lifecycle}}))
