@@ -57,6 +57,9 @@
      :source {:kind :a-exits :via "futon2.aif.mission-criteria"
               :repo repo :path path :text-read? (some? text)
               :criteria (count cs)
+              ;; token -> the criterion it was read from, for the D11 request
+              :criteria-by-token (into {} (map (fn [c] [(:token c) (select-keys c [:kind :line :phase :stated])]))
+                                       (:criteria w))
               :unlocated (:unlocated w)
               :out-of-view (vec out-of-view)
               :lifecycle lifecycle}}))
@@ -169,13 +172,16 @@
 (defn run!
   "Run FLIGHT to closure. CLICK-FN takes the judge-opts and returns
   {:click-id … :unreached-wants … :abstention …}; OBSERVE-FN takes the
-  target and the wants' locators {token locator} and returns the facts
-  {token bool} (the tick's sources' locators, overlaid with the want
-  source's own). SOURCES-FN returns the tick's
+  target and the wants' locators {token locator} (the tick's sources'
+  locators, overlaid with the want source's own) and returns the facts
+  {token bool}. ASK-FN, when given, runs before each click with the flight,
+  its wants and the sources, and returns {:asked [...] :needs [...]}: the
+  D11 requests made for wants no interpretation produces (futon2.aif.
+  flight-runner/ask-fn); its needs join the flight's. SOURCES-FN returns the tick's
   sources (for the want source). Stops when the flight closes, when a click
   advances nothing, or after MAX-CLICKS (then :status :click-limit, with the
   open wants on the last click). Returns the flight record."
-  [flight {:keys [click-fn observe-fn sources-fn max-clicks]}]
+  [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn]}]
   (loop [f flight]
     (if (or (not= :open (:status f)) (>= (count (:clicks f)) max-clicks))
       (cond-> f (= :open (:status f)) (assoc :status :click-limit))
@@ -184,6 +190,10 @@
             locators (select-keys (merge (get-in sources [:locators (:target f)]) (:locators wants))
                                   (:wants wants))
             before (observe-fn (:target f) locators)
+            asked (when ask-fn (ask-fn f wants sources))
+            f (cond-> f
+                asked (-> (update :asks (fnil conj []) (assoc asked :before-click (inc (count (:clicks f)))))
+                          (update :needs into (:needs asked))))
             result (click-fn (judge-opts f wants))
             after (observe-fn (:target f) locators)]
         (recur (record-click f (merge result {:wants (:wants wants)
