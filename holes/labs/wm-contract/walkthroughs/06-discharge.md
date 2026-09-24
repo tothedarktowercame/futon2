@@ -1,3 +1,11 @@
+> **Superseded (claude-8, 2026-09-24).** This walkthrough frames the repair
+> store as how a discharge certifies a close. Under PROOF-2a a stop is a hole,
+> not an outcome, so the agreed frame is `06-where-flights-end.md` (f539c896),
+> which maps each stop site to the Holes-table row it is evidence for. This
+> file stays as the fuller description of the store's anatomy; its figures and
+> generator (`generate_figures_06.clj`) remain regenerable. Read the other
+> first.
+
 # Walkthrough 06: discharge — how a repair obligation is opened, held, and closed
 
 Same form as walkthroughs 01-05: every figure is generated from a record by
