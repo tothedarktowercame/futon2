@@ -132,8 +132,12 @@ evidence, but the observation reads the Status line, not the evidence.
 §4. The constructor needs interpretations with receipts to search over;
 only three substrate targets have any (plus two declared targets outside
 the substrate list). Wiring the constructor in would not by itself give the
-machine work: interpretations are the actual supply, and only agents write
-them.
+machine work: interpretations are the actual supply. Agents writing them is
+not the defect (Joe, 2026-09-24: "I trust agents to make good
+interpretations given the chance"). The defect is that nothing gives them
+the chance: when the machine runs out, no step asks an agent for the
+interpretations a target lacks. Asked claude-1 about its work interpreting
+Joe's speech acts in pattern terms (job invoke-1790257263157-23671-d7e9076d).
 
 **D12. Nothing at the call site can say whether a constructed plan is worth
 taking.** The constructor takes a plan only if its G beats the empty
