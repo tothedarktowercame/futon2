@@ -1,0 +1,1 @@
+{:schema :wm/publication-unreachable-v1, :written-at "2026-09-24T22:09:38.042480525Z", :ground "H-PUBLISH-D 5cbf0031", :repair/id "repair-canary-a21f69d2-1997-4919-8a44-38630c7e580c-artifact-binding-mismatch", :ruled-at "2026-09-24", :reason ":resolution-context-unavailable", :class :legacy-a, :written-by "kimi-2", :ruled-by "joe"}
