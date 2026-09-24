@@ -7,7 +7,7 @@ excursion takes the other passive step: the machine does not choose what to
 work on.
 Owner: claude-10. Driver: Joe.
 Status: OPEN — the old loop and its removal are written down (O1–O8);
-investigations running.
+I1 and I3 done.
 
 ## Joe's framing (dictated 2026-09-24, voice transcript)
 
@@ -114,16 +114,49 @@ sorrys and patterns were worth acting on.
 the capability — choosing among missions, tickets, patterns and sorrys by
 feasibility and value — that went with it.
 
-Not yet established: whether the old loop chose *well*. The pre-H5b comment
-at the task-belief ladder mentions a plateau of "55 candidates at one
-:mission-value-factor", so it may have chosen among near-ties. I3 below asks
-what the records show.
+## What the old loop actually chose (I3, `1834cc73`)
+
+Source: `data/wm-trace/wm-trace-*.edn`, 60 files, 2026-05-18 to 09-12, 897
+judge ticks. claude-10 reran I3's script (output byte-identical to the
+committed report) and recounted the choices independently.
+
+- **Chosen action types** (recounted): `:address-sorry` 459, `:advance-mission`
+  196, `:learn-action-class` 146, `:open-mission` 96. `:no-op` was proposed
+  on every tick and never chosen; no ticket or pattern action was ever
+  chosen.
+- **Few targets, long runs** (I3's figures): 17 distinct targets in four
+  months; the longest runs of the same choice were 306, 128 and 108
+  consecutive ticks.
+- **Feasibility in practice** (I3): exclusions were the same four missions
+  on 137 ticks, all `:mission-absent-from-capability-graph`. The filter
+  existed but removed almost nothing.
+- **Near-ties** (I3): the chosen action was rank 1 on 867 ticks. The other
+  30 fell on the 07-14 to 07-21 plateau, where 23 actions sat within 0.01 of
+  the top score. How ties were broken is not recorded.
+- **Did the chosen work get done?** I3 said the "sorrys" were legacy items on
+  a dead substrate. That is wrong: they are entries in the WM's own registry,
+  `resources/sorrys.edn`, which I3 did not search. The most-chosen,
+  `:sorry/pudding-g1-arrow-witness-binding` (320 ticks), was chosen every
+  day from 06-12 to 07-14 and stopped on 07-14, the day the registry marks
+  it `:addressed` (futon7 commits, Codex review, canary grounding). I3 also
+  reported 8 of 11 chosen missions as having no file; at least
+  M-canon-fingerprint-store exists (in `futon6/holes/missions/`), so that
+  count is not reliable either. Whether the loop's choice *caused* the work
+  is not in the records.
+
+**Settled, as far as the records go.** The old loop did choose its own work,
+across missions, registry obligations and "learn this class", and at least
+once it held a choice until the obligation was closed. It chose narrowly
+(17 targets, never tickets or patterns), its feasibility filter was nearly
+inert, and a month-long run on one target is as consistent with being stuck
+as with persistence. So the capability existed and was weak; H5b removed it
+rather than improving it.
 
 ## Investigations
 
 | id | question | who | job | status |
 |---|---|---|---|---|
 | I1 | (shared with E-cascade-real) history of the pre-H5b proposers and ranking; primary text of the 2026-09-17 instruction H5b cites | kimi-2 | invoke-1790256229096-23668-ed1a1a26 | done: `0b06df90` |
-| I3 | Records: over the tick records before 2026-09-17, what did the outer loop propose and choose — counts by action type and proposer, feasibility exclusions, near-ties — and did the chosen work get done? | kimi-5 | invoke-1790256941064-23670-b64b5491 (park-cd984e66) | running |
+| I3 | Records: over the tick records before 2026-09-17, what did the outer loop propose and choose — counts by action type and proposer, feasibility exclusions, near-ties — and did the chosen work get done? | kimi-5 | invoke-1790256941064-23670-b64b5491 | done: `1834cc73`; script rerun identical; Q4 outcome claims corrected above |
 
 Read-only: no clicks, no writes under `data/`, no shared-JVM loads.
