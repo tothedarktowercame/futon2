@@ -512,6 +512,51 @@
                        :runner/source check})))
     check))
 
+(defn abstention-carrier
+  "D8/AR-16 (E-cascade-real): the abstained tick record carries its typed
+  declines. Built from the judge's own decision :refusals and the cascade
+  :dropped-candidates — no recomputation, no new reasons. A judge that
+  abstained without recording a refusal list yields a typed absence, never
+  an empty vector read as \"nothing declined\"; a tick with no recorded
+  decision at all is likewise a typed absence, never :not-abstained."
+  [decision dropped-candidates]
+  (cond
+    (nil? decision)
+    {:status :absent :reason :no-selection-decision-recorded}
+
+    (= :abstained (:status decision))
+    (if-let [refusals (seq (:refusals decision))]
+      {:status :abstained
+       :targets (mapv (fn [{:keys [target kind missing]}]
+                        {:target target
+                         :kind kind
+                         :missing missing
+                         :declines (into []
+                                         (comp (filter #(and (= target (:target %))
+                                                             (:candidate %)))
+                                               (map #(select-keys %
+                                                                  [:candidate :reason
+                                                                   :missing-evidence])))
+                                         dropped-candidates)})
+                      refusals)}
+      {:status :absent :reason :judge-recorded-no-refusal-list})
+
+    :else {:status :not-abstained}))
+
+(defn abstention-record-ok?
+  "D8/AR-16 record check: a tick whose decision abstained with a non-empty
+  refusal list must carry [:decision :abstention] with :status :abstained
+  naming every refused target's typed declines. A record whose carrier is
+  missing or reads :not-abstained against such a decision is a broken
+  record, not an unremarkable one."
+  [decision record]
+  (let [carrier (get-in record [:decision :abstention])]
+    (if (and (= :abstained (:status decision)) (seq (:refusals decision)))
+      (and (= :abstained (:status carrier))
+           (= (set (map :target (:refusals decision)))
+              (set (map :target (:targets carrier)))))
+      (contains? carrier :status))))
+
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -533,6 +578,12 @@
             terminal-context (terminal-record-context raw-opts result)
             decision (or (get-in result [:checkpoints :selection :judgment :controller-decision])
                          (get-in result [:checkpoints :selection :judgment :decision]))
+            ;; D8/AR-16: an abstained tick throws before a judgment cell is
+            ;; written; its decision and the judge's dropped candidates
+            ;; travel on the :no-selection sorry cell instead.
+            selection-sorry (get-in result [:checkpoints :selection :sorry])
+            abstention (abstention-carrier (or decision (:decision selection-sorry))
+                                           (:dropped-candidates selection-sorry))
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
                     :participants (participants/record-value raw-opts)
@@ -561,7 +612,8 @@
                     :decision (assoc (select-keys decision
                                                   [:selection-law :selection-certificate
                                                    :initial-belief-receipt :enumeration-completeness])
-                                     :g-term-decomposition (decomposition/from-result result))
+                                     :g-term-decomposition (decomposition/from-result result)
+                                     :abstention abstention)
                     :route route
                     :repair/discharge (:repair/discharge result)
                     :repair/publication (:repair/publication result)
@@ -4634,7 +4686,15 @@
                                (assoc-in [:judgment
                                           :readiness/selection-transient]
                                          true))
-                             (sorry :no-selection {:decision (:decision judgement)}))]
+                             ;; D8/AR-16: the abstained tick's typed declines
+                             ;; must survive to the run record — the judge's
+                             ;; own :dropped-candidates travel on the sorry
+                             ;; cell, unchanged, for persist-run-record!.
+                             (sorry :no-selection
+                                    {:decision (:decision judgement)
+                                     :dropped-candidates
+                                     (get-in judgement
+                                             [:cascade-problems :dropped-candidates])}))]
         (let [selection-cell (-> selection-cell
                                  (assoc-in [:judgment :effective-run-configuration]
                                            @effective-configuration)
