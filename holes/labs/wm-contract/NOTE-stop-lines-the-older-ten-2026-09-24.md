@@ -156,3 +156,62 @@ handoffs with a review between, per `CLAUDE.md`.
   A stop-line stays open until something writes `resolutions/` or an operator
   writes `dismissals/`; an `implementations/` record only marks it
   `:awaiting-validation`. Check before repairing.
+
+---
+
+## Addendum, 2026-09-24: most of this list is already repaired
+
+claude-8's analysis, checked by claude-5 against source and the live store.
+**Do not start repairing from this list until the discharge path is fixed** —
+three of the six conditions were repaired within the hour they were opened, and
+the ledger cannot see it.
+
+| condition | fixed by | opened → fixed |
+|---|---|---|
+| `f22800c6` pooled-nil action marginal | `d168d348` + `8f60f819` | 00:50 → same day |
+| `Invalid token: :hole/2f9b03b16170` (×2) | `29fb2a83` "Hole want-tokens must be readable, not merely printable" | 00:02:57 → 00:06 |
+| `incompatible preference schedules` (×3) | `a38becc9` "Generated mission-hole targets must adopt the family's schedule and scales" | 20:52 → 21:43 |
+
+That is six of the ten rows. The fixes are live; none has an `implementations/`
+or `resolutions/` record, because nobody ran `record-implementation!` and
+`resolve!` by hand and no automatic path writes them.
+
+### Why the automatic path writes nothing
+
+`repair-discharge/finalize-run!` is NOT silent — it runs on every click and
+refuses. Nine `discharge-operations/` records exist from 2026-09-23, six of them
+stamped at the exact minutes the six clicks closed (17:44, 18:21, 19:06, 19:58,
+21:02, 21:44). Every one:
+
+```clojure
+{:result {:status :evidence-unavailable
+          :repair/id nil
+          :stage :binding
+          :reason :unsafe-repair-id}}
+```
+
+Two independent blocks, both in `src/futon2/aif/repair_discharge.clj`:
+
+1. `bind-selected!` (:15-30) takes `(:repair/id action)` for a non-legacy
+   action. A ticket-queue action carries its target as a `T-repair-…` string and
+   no `:repair/id`, so `evidence/safe-id!` is handed nil and refuses before the
+   finding is ever read.
+2. `finalize!` (:86-90) requires `(true? (:grounded? close))`. The closes are
+   `:grounded? false`, so even past the binding stage there is no route from a
+   ticket going DONE to a `resolutions/` record.
+
+Nothing reads `ticket-links/` backwards, so the ticket route and the obligation
+ledger never join.
+
+### What this means for the order of work
+
+The note above suggests repairing `f22800c6` first. That is now known to be
+wrong: it needs no repair. **The first piece of work is the join** — the three
+conditions claude-8 names:
+
+- the selected action carries the finding id when its target is a repair ticket;
+- ticket acceptance (Status DONE) writes, or is read as, a resolution;
+- fixes that land outside a click get recorded at all.
+
+Until then, every repair done from outside adds a fix the ledger cannot see, and
+the list gets longer rather than shorter.
