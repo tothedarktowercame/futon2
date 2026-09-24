@@ -217,3 +217,51 @@
     (is (= [{:target target :candidate :C1 :stage :construction-admission
              :reason :unconstructed-proposal :missing-evidence [:nonempty-precedence]}]
            (:dropped-candidates r)))))
+
+;; Construction at assembly: a target with admitted interpretations and no
+;; declared candidate gets candidates from the constructor when the sources
+;; supply :construction; without it the old refusal stands.
+(def construction
+  {:construct (requiring-resolve 'futon2.aif.interpretation-construction/construct)
+   :budget {:max-moves 4 :max-expansions 2000} :move-cost 1
+   ;; the empty cascade reaches no want, so it scores worst, as the live G does
+   :evaluate-g (fn [c] (if (empty? (:precedence c)) 1.0e9 (double (count (:precedence c)))))})
+
+(defn- receipts-for [patterns]
+  (into {} (for [k (keys patterns)] [k {:source :test}])))
+
+(deftest constructs-candidates-when-none-declared
+  (let [srcs (-> full-sources
+                 (update :candidates dissoc target)
+                 (assoc-in [:interpretations target :receipts] (receipts-for (:patterns interpretations)))
+                 (assoc :construction construction))
+        {:keys [problems refusals]} (assemble* {:targets [target] :sources srcs})
+        p (first problems)]
+    (is (empty? refusals) (pr-str refusals))
+    (is (= target (:target p)))
+    (is (seq (:constructed-candidates p)))
+    (is (every? #(= :machine-constructed (get-in % [:construction-receipt :kind])) (:constructed-candidates p)))
+    ;; the want token held :unknown is what the plan produces
+    (is (every? #(some #{:summary-without-total-repos-observes-cleanly}
+                       (get-in % [:construction-receipt :unknown-read-as-not-established]))
+                (:constructed-candidates p)))))
+
+(deftest no-construction-without-construction-source
+  (let [srcs (update full-sources :candidates dissoc target)
+        {:keys [refusals]} (assemble* {:targets [target] :sources srcs})]
+    (is (= :no-constructed-candidate (:kind (first refusals))))))
+
+(deftest constructor-refusal-is-carried
+  ;; the bad case: a pattern needs a token no pattern produces and the
+  ;; universe does not establish, so no plan reaches the want
+  (let [bad (assoc-in interpretations [:patterns :test-step-covering-missing-total-repos :guard :needs]
+                      #{:test-covers-missing-total-repos-precondition})
+        srcs (-> full-sources
+                 (update :candidates dissoc target)
+                 (assoc :interpretations {target (assoc bad :receipts (receipts-for (:patterns bad)))})
+                 (assoc-in [:universes target :test-covers-missing-total-repos-precondition] false)
+                 (assoc :construction construction))
+        {:keys [problems refusals]} (assemble* {:targets [target] :sources srcs})]
+    (is (empty? problems))
+    (is (= :no-constructed-candidate (:kind (first refusals))))
+    (is (some? (:constructor-refusal (first refusals))))))

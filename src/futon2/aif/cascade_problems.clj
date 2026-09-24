@@ -95,6 +95,38 @@
                                  (:produces p)))
                        (vals patterns)))))
 
+;; A target with admitted interpretations but no declared candidate gets its
+;; candidates from the constructor, when the sources supply :construction
+;; {:construct futon2.aif.interpretation-construction/construct
+;;  :budget … :move-cost … :evaluate-g (fn [candidate] G)}. The constructor
+;; is injected because its namespace already depends on this one. Without
+;; :construction nothing is constructed and the existing refusal stands.
+;; The universe supplies the observation. A token the universe holds as
+;; :unknown is passed as not established (false): construction only asks
+;; which tokens a plan may start from, so an unknown token is one the plan
+;; has to produce. (claude-10, 2026-09-24; no ruling found. The constructor
+;; itself refuses unknowns; this is the caller's reading, and the tokens so
+;; read are listed on each candidate's receipt.) A token absent from the
+;; universe makes the constructor refuse, carried on the target's refusal.
+(defn- constructed-from-interpretations
+  [sources horizon target universe patterns want]
+  (when-let [{:keys [construct budget move-cost evaluate-g]} (:construction sources)]
+    (let [receipts (or (get-in sources [:interpretations target :receipts]) {})
+          tokens (problem-tokens universe want patterns)
+          unknown (sort-by pr-str (filter #(= :unknown (get universe %)) tokens))
+          observation (into {} (for [t tokens :let [v (get universe t)]
+                                     :when (or (boolean? v) (= :unknown v))]
+                                 [t (true? v)]))
+          result (construct {:target target :want (vec want) :observation observation
+                                  :interpretations (into {} (for [[k p] patterns] [k (select-keys p [:guard :produces])]))
+                                  :interpretation-receipts receipts
+                                  :horizon horizon :move-cost (or move-cost 1)
+                                  :budget budget :evaluate-g evaluate-g})]
+      (if (= :constructed (:status result))
+        {:candidates (mapv #(assoc-in % [:construction-receipt :unknown-read-as-not-established] (vec unknown))
+                           (:candidates result))}
+        {:construction-refusal (select-keys result [:kind :tokens :patterns :findings])}))))
+
 (defn unlocated-tokens
   "Tokens with no locator of a checkable class."
   [locators tokens]
@@ -109,7 +141,11 @@
         interp (get-in sources [:interpretations target])
         patterns (:patterns interp)
         want (get-in sources [:wants target])
-        candidates (get-in sources [:candidates target])
+        declared (get-in sources [:candidates target])
+        built (when (and (empty? (constructed-candidates declared))
+                         (map? patterns) (seq patterns) (sequential? want) (seq want) (map? universe))
+                (constructed-from-interpretations sources horizon target universe patterns want))
+        candidates (or (:candidates built) declared)
         constructed (vec (constructed-candidates candidates))
         ;; every pattern of every candidate must have an admitted
         ;; interpretation; an uninterpreted pattern is exactly a missing
@@ -149,6 +185,10 @@
       unlocated
       (refusal target :universe-not-admitted :locators
                {:tokens-without-checkable-locator (vec unlocated)})
+
+      (and (empty? constructed) (:construction-refusal built))
+      (refusal target :no-constructed-candidate :construction
+               {:constructor-refusal (:construction-refusal built)})
 
       (empty? constructed)
       (if (and (seq (or candidates []))
