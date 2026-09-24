@@ -224,3 +224,119 @@
     (is (= :artifact-revision-mismatch (get-in p [:observation :kind])))
     (is (false? (:estimable? p)))
     (is (pair/pair-ok? p))))
+
+(def live-judgment
+  (delay (get-in (read-record close-76-002) [:payload :judgment])))
+
+(deftest kernel-example-complete-live-observation-population
+  (let [j @live-judgment
+        k (:kernel-example j)
+        ps (pair/pairs-from-kernel-example {:kernel-example k :occurrence (:occurrence j)})
+        source (:observation-source k)
+        bytes (java.nio.file.Files/readAllBytes (.toPath (io/file (:path source))))
+        raw-hash (format "%064x" (java.math.BigInteger. 1
+                                  (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)))]
+    (is (= (:sha256 source) raw-hash) "verify the real source file, not its hash string alone")
+    (is (= 1 (count (:tokens k))))
+    (is (= 6 (count ps)) "the full projection includes five non-wanted tokens")
+    (is (= (set (keys (get-in k [:observation-projection :observations])))
+           (set (map :token ps))))
+    (doseq [p ps]
+      (is (true? (get-in p [:observation :observed])))
+      (is (= :C4 (get-in p [:observation :check])))
+      (is (= source (get-in p [:observation :source])))
+      (is (= :kernel-example (get-in p [:observation :observation-source])))
+      (is (= (get-in k [:observation-projection :revision-pair]) (:revision-pair p)))
+      (is (= {:status :missing :reason :no-independent-truth-channel} (:truth p)))
+      (is (false? (:estimable? p)))
+      (is (pair/pair-ok? p)))))
+
+(deftest learning-receipt-and-trials-refused-from-both-legs
+  ;; Exact bad input from the real close, including the counted B trial.
+  (let [receipt (:learning-trial-receipt @live-judgment)]
+    (is (= :wm/learning-trial-receipt-v2 (:schema receipt)))
+    (is (some :counted? (:trials receipt)))
+    (doseq [x (conj (:trials receipt) receipt)
+            supplied [x (assoc x :observed true :truth true)]]
+      (let [p (pair/build-pair {:occurrence occurrence :token ["T" :done]
+                                :reviewed-revision reviewed-revision
+                                :token-row supplied :truth supplied})]
+        (doseq [leg [:observation :truth]]
+          (is (= :refused (get-in p [leg :status])))
+          (is (= :learning-trial-receipt-not-a-leg (get-in p [leg :reason]))))
+        (is (false? (:estimable? p)))
+        (is (pair/pair-ok? p))))))
+
+(deftest kernel-missingness-and-join-failures-stay-typed
+  (let [j @live-judgment k (:kernel-example j)
+        token (first (keys (get-in k [:observation-projection :observations])))
+        input {:occurrence (:occurrence j) :token token :kernel-example k}]
+    (doseq [[changed reason]
+            [[(assoc input :occurrence (assoc (:occurrence j) :run/id "other")) :occurrence-mismatch]
+             [(assoc input :reviewed-revision "other") :artifact-revision-mismatch]
+             [(update input :kernel-example dissoc :observation-source) :observation-source-not-recorded]
+             [(assoc-in input [:kernel-example :observation-projection :observations token
+                               :artifact-observation :observed] false) :observation-evidence-mismatch]]]
+      (let [p (pair/build-pair changed)]
+        (is (= :missing (get-in p [:observation :status])))
+        (is (= reason (get-in p [:observation :reason])))
+        (is (not (contains? (:observation p) :observed)))
+        (is (false? (:estimable? p)))
+        (is (pair/pair-ok? p)))))
+  (let [j (get-in (read-record (io/file repo-root
+                   "data/wm-full-loop-machinery-70/wm-contract-machinery-70-v1/attempt-001/007-closed.edn"))
+                  [:payload :judgment])
+        ps (pair/pairs-from-kernel-example {:occurrence (:occurrence j) :kernel-example (:kernel-example j)})]
+    (is (= 2 (count ps)))
+    (doseq [p ps]
+      (is (= :missing (get-in p [:observation :status])))
+      (is (= :task-execution-incomplete (get-in p [:observation :reason])))
+      (is (not (contains? (:observation p) :observed)))
+      (is (pair/pair-ok? p)))))
+
+(deftest accepted-increment-refused-from-observation-leg
+  (let [verdict (:accepted-increment @live-judgment)
+        p (pair/build-pair {:occurrence occurrence :token ["T" :done]
+                            :token-row (assoc verdict :observed true)})]
+    (is (contains? verdict :accepted?))
+    (is (= :refused (get-in p [:observation :status])))
+    (is (= :accepted-increment-source-refused (get-in p [:observation :reason])))
+    (is (pair/pair-ok? p))))
+
+(deftest cert-s-canonical-bytes-preserve-types-and-numeric-values
+  (let [x (with-meta (array-map :z #{:b :a} :r 2/3 :d 0.5 :v [:b :a]) {:ignored true})]
+    (is (= "{:d #wm/double \"0x1.0p-1\" :r 2/3 :v [:b :a] :z #{:a :b}}"
+           (binding [*print-meta* true *print-length* 1 *print-level* 1]
+             (pair/canonical-edn x))))
+    (is (= (pair/canonical-edn x)
+           (pair/canonical-edn (into {} (reverse x))))))
+  (is (not= (pair/canonical-edn #{:a :b}) (pair/canonical-edn [:a :b])))
+  (is (= "{#{:a :b} 1 #{:c :d} 2}"
+         (pair/canonical-edn {#{:d :c} 2 #{:b :a} 1}))))
+
+(deftest pair-hash-is-extracted-value-not-record-identity
+  (let [p (first (pair/pairs-from-kernel-example
+                  {:kernel-example (:kernel-example @live-judgment)
+                   :occurrence (:occurrence @live-judgment)}))
+        digest (:pair-sha256 p)]
+    (is (= 2 (:schema-version p)))
+    (is (= :wm/token-outcome-pair-value-v2 (:pair-hash-domain p)))
+    (is (= #{:occurrence :token :revision-pair :observation :truth}
+           (set (keys (pair/pair-value p)))))
+    (is (= digest (pair/pair-digest (assoc p :estimable? true :schema :other
+                                           :pair-sha256 "self-attested"))))
+    (is (= digest (pair/pair-digest (assoc-in p [:occurrence :action/value] {:ignored true}))))
+    (doseq [changed [(assoc-in p [:observation :observed] false)
+                     (assoc p :truth {:truth false :truth-source :reviewer-adjudication})
+                     (assoc-in p [:occurrence :run/id] "other")
+                     (assoc-in p [:revision-pair :before] "other")
+                     (assoc-in p [:revision-pair :after] "other")
+                     (assoc-in p [:observation :source :sha256] "other")]]
+      (is (not= digest (pair/pair-digest changed)))
+      (is (not (pair/pair-ok? changed))))
+    (is (not (pair/pair-ok? (assoc p :pair-sha256 "self-attested")))))
+  (let [p (pair/build-pair {:occurrence occurrence :token ["T" :done]
+                            :reviewed-revision reviewed-revision})]
+    (is (= {:status :missing :reason :before-revision-not-recorded}
+           (get-in p [:revision-pair :before])))
+    (is (pair/pair-ok? p))))
