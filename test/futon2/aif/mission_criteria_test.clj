@@ -267,3 +267,14 @@
         (is (= [:retained-finding] (mapv :reason (get-in closed [:closure-scope :out-of-view]))))))
     (testing "plain Not met stays a want"
       (is (= 2 (count (:wants (read-with (str/replace text ", retained as a finding" "")))))))))
+
+(deftest live-m-futon-seams-futon3c-3f5f44dd-complete
+  ;; the finished mission (mission sha d13c5cfe): the H-witness record ends
+  ;; on the complete state, not a mid-state
+  (let [text (slurp (str fixture-dir "M-futon-seams@futon3c-3f5f44dd.md"))
+        w (live "M-futon-seams@futon3c-3f5f44dd.md" "M-futon-seams")]
+    (is (re-find #"(?m)^\*\*Status:\*\*\s*(?:\*\*)?COMPLETE" text))
+    (is (= {"MAP" true "DERIVE" true "ARGUE" true "VERIFY" true "INSTANTIATE" true "DOCUMENT" true}
+           (met-by-phase w)))
+    (is (every? #(= :met (get-in % [:verdict-class :class])) (:criteria w)))
+    (is (= {:requires [] :unresolved []} (mc/constraints "M-futon-seams" text)))))
