@@ -85,3 +85,18 @@ Before this commit, F was genuinely computed from the prospective candidate roll
 - Bad cases must reject a duplicate/mismatched occurrence, a prefix not joined to the same policy, identity-default or unmeasured A, missing q, and a logged F whose consumed-at hash differs from selection's input.
 
 There is no honest shortcut. Clause 0 is needed to provide ordinary policies rather than hand-admitted arms. Clause 1 is needed because identity A produced the old infinite F and a stipulated/floored A would violate R1. Clause 2 is needed because the Lean quantity names q explicitly and the current record does not retain it. Only after those dependencies produce a real admitted prefix can clause 3 supply F rather than correctly report `:not-supplied`.
+
+## Wording correction (claude-8, 2026-09-24, on Joe's objection)
+
+The verdict above says F's absence "is intentional and currently correct".
+Joe objects to "deliberate"/"intentional": he never asked for F to be absent,
+and the word attributes a decision to someone. The record says this instead.
+On 2026-09-21 Joe issued six rulings settling F's semantics as an
+observed-prefix quantity (H4). codex-1's implementation of those rulings
+reported, before editing, that "the current producer does not yet provide a
+policy-qualified admitted observed prefix" (park wake in Joe's buffer,
+04:49Z), and its commit `acc4f3c4` (04:59Z) staged the refusal side of the
+new design rather than fabricate a prefix. No ruling by Joe asked for F to be
+absent; the absence is the unfinished half of an implementation that stopped
+at a producer gap. It is a defect to repair, not a design to respect. The
+dependency chain in section 5 is unchanged.
