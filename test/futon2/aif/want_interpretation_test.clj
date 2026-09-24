@@ -177,10 +177,10 @@
         s0 (seams-sources)
         doc-resp (response :writing-coherence/meet-the-reader-where-they-are)
         doc (validate document doc-resp s0)
-        _ (wi/publish! store (req document) doc-resp doc)
+        _ (wi/publish! store (wi/issue! store (req document)) doc-resp doc)
         arg-resp (response :writing-coherence/plain-language-thesis)
         arg (validate argue arg-resp (wi/merge-published s0 store ["M-futon-seams"]))
-        rec (wi/publish! store (req argue) arg-resp arg)
+        rec (wi/publish! store (wi/issue! store (req argue)) arg-resp arg)
         {:keys [problems refusals]}
         (futon2.report.war-machine/assemble-cascade-problems-with-published
          store {:targets ["M-futon-seams"] :sources s0})]
@@ -198,7 +198,7 @@
         bad (assoc (response :writing-coherence/plain-language-thesis) :produces #{document})
         v (validate argue bad (seams-sources))]
     (is (= :want/not-validated
-           (try (wi/publish! store (req argue) bad v) nil
+           (try (wi/publish! store (wi/issue! store (req argue)) bad v) nil
                 (catch clojure.lang.ExceptionInfo e (:interpretation/refusal (ex-data e))))))
     (is (nil? (wi/read-published store "M-futon-seams")))))
 
@@ -206,20 +206,20 @@
   (let [store (temp-store)
         resp (response :writing-coherence/meet-the-reader-where-they-are)
         v (validate document resp (seams-sources))
-        _ (wi/publish! store (req document) resp v)
+        _ (wi/publish! store (wi/issue! store (req document)) resp v)
         other (update-in v [:interpretation :writing-coherence/meet-the-reader-where-they-are :guard :needs]
                          conj :exit/h66b2ffcf3e0b)]
     (is (= :want/conflicting-publication
-           (try (wi/publish! store (req document) resp other) nil
+           (try (wi/publish! store (wi/issue! store (req document)) resp other) nil
                 (catch clojure.lang.ExceptionInfo e (:interpretation/refusal (ex-data e))))))
     (testing "republishing the same reading is a no-op"
-      (is (map? (wi/publish! store (req document) resp v))))))
+      (is (map? (wi/publish! store (wi/issue! store (req document)) resp v))))))
 
 (deftest a-hand-declaration-wins-over-a-published-reading
   (let [store (temp-store)
         resp (response :writing-coherence/meet-the-reader-where-they-are)
         v (validate document resp (seams-sources))
-        _ (wi/publish! store (req document) resp v)
+        _ (wi/publish! store (wi/issue! store (req document)) resp v)
         declared {:guard {:needs #{instantiate} :forbids #{}} :produces #{document :exit/hdeclared}}
         merged (wi/merge-published
                 (assoc-in (seams-sources) [:interpretations "M-futon-seams" :patterns
@@ -237,3 +237,21 @@
         v (validate document resp (seams-sources))]
     (is (= :valid (:status v)) (pr-str (:reasons v)))
     (is (= [:writing-coherence/meet-the-reader-where-they-are] (keys (:interpretation v))))))
+
+(deftest only-an-answer-to-an-issued-request-publishes
+  (let [store (temp-store)
+        resp (response :writing-coherence/meet-the-reader-where-they-are)
+        v (validate document resp (seams-sources))
+        refusal (fn [request] (try (wi/publish! store request resp v) nil
+                                   (catch clojure.lang.ExceptionInfo e (:interpretation/refusal (ex-data e)))))]
+    (testing "a request the machine never issued"
+      (is (= :want/request-not-issued (refusal (assoc (req document) :request-id "request-0000")))))
+    (testing "an issued request for a different want"
+      (is (= :want/request-not-issued (refusal (wi/issue! store (req argue))))))
+    (is (nil? (wi/read-published store "M-futon-seams")))
+    (testing "the issued request for this want publishes, and the receipt names the validator"
+      (let [rec (wi/publish! store (wi/issue! store (req document)) resp v)
+            r (get-in rec [:receipts :writing-coherence/meet-the-reader-where-they-are])]
+        (is (= "futon2.aif.want-interpretation" (get-in r [:validator :ns])))
+        (is (re-matches #"[0-9a-f]{64}" (str (get-in r [:validator :source-sha256]))))
+        (is (string? (:request-id r)))))))

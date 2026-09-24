@@ -223,9 +223,33 @@
     (Files/move (.toPath tmp) (.toPath f)
                 (into-array StandardCopyOption [StandardCopyOption/ATOMIC_MOVE StandardCopyOption/REPLACE_EXISTING]))))
 
+(defn issue!
+  "Record REQUEST in STORE as issued by the machine; returns it with its
+  :request-id. Only an issued request can have its answer published: the
+  issued record is what binds a response to something the machine asked."
+  [store request]
+  (let [id (content-id :request (dissoc request :retrieval))
+        f (io/file store "requests" (str id ".edn"))
+        issued (assoc request :request-id id)]
+    (when-not (.isFile f) (write-atomic! f issued))
+    issued))
+
+(defn- issued-request [store request-id]
+  (let [f (io/file store "requests" (str request-id ".edn"))]
+    (when (and (string? request-id) (.isFile f)) (edn/read-string (slurp f)))))
+
+(def validator
+  "The validator's identity for published receipts: this namespace and the
+  sha256 of its source as loaded."
+  (delay {:ns "futon2.aif.want-interpretation"
+          :source-sha256 (some-> (io/resource "futon2/aif/want_interpretation.clj")
+                                 slurp (.getBytes "UTF-8") evidence/sha256)}))
+
 (defn publish!
-  "Publish a VALIDATED result (validate-response :status :valid) for REQUEST
-  and RESPONSE into STORE. The request and response are kept whole under
+  "Publish a VALIDATED result (validate-response :status :valid) for the
+  issued REQUEST (from `issue!`, carrying :request-id) and RESPONSE into
+  STORE. Refuses a request id that does not resolve to a request the machine
+  issued, or whose target and want differ from the validated result's. The request and response are kept whole under
   content ids; the interpretation's receipt carries both ids, the checks it
   passed and the answerer's own receipt. Refuses anything not :valid, and a
   pattern id already published for this target with a different reading
@@ -234,9 +258,16 @@
   (when-not (= :valid (:status validated))
     (throw (ex-info "only a validated response is published"
                     {:interpretation/refusal :want/not-validated :status (:status validated)})))
-  (let [target (:target request)
+  (let [request-id (:request-id request)
+        issued (issued-request store request-id)
+        _ (when-not (and issued (= (:target issued) (:target validated))
+                         (= (get-in issued [:want :token]) (:want validated)))
+            (throw (ex-info "the response is not bound to a request the machine issued"
+                            {:interpretation/refusal :want/request-not-issued
+                             :request-id request-id :target (:target validated) :want (:want validated)})))
+        request issued
+        target (:target request)
         [id interp] (first (:interpretation validated))
-        request-id (content-id :request (dissoc request :retrieval))
         response-id (content-id :response response)
         prior (or (read-published store target)
                   {:schema :wm/machine-interpretations-v1 :target target
@@ -251,6 +282,7 @@
                      (assoc-in [:receipts id]
                                (assoc (:receipt validated)
                                       :kind :machine-requested
+                                      :validator @validator
                                       :request-id request-id :response-id response-id
                                       :want (:want validated)
                                       :validated {:checks [:canonical-id :library-source-sha :produces-want
@@ -258,7 +290,7 @@
                                                            :constructs-through-it :admitted]
                                                   :candidate (:candidate validated)
                                                   :at (now)}))
-                     (assoc-in [:records request-id] request)
+                     (assoc-in [:records request-id] (dissoc request :request-id))
                      (assoc-in [:records response-id] response))]
       (when-not existing (write-atomic! (target-file store target) record))
       record)))
