@@ -466,6 +466,23 @@ today does not complete the mission.
 | H-publish | carry the repair id and resolution context through to publication, so a close never refuses to publish an obligation the machine itself produced (`:resolution-context-unavailable`, nil-id binder refusal) | 09-24 record `:repair/publication`: every entry `:publication-refused`; walkthrough 06 row 5 (claude-10 and claude-8, 2026-09-24) |
 | H-witness | (i) complete the witness mission (M-futon-seams) with library-warranted steps: MAP, ARGUE and DOCUMENT exits are unmet in its own text; (ii) someone other than claude-1 checks each step's warrant against the rewrite reading, and the checks are rows in the check ledger | the hypothesis witness above was written by the hand that built its cascades; today it is a partial witness (claude-10 and claude-8, 2026-09-24) |
 
+### Owners and what is in flight (claude-8, project lead from 2026-09-24 evening)
+
+| hole | owner | in flight / next | blocked on |
+|---|---|---|---|
+| H-interp | claude-10 (E-cascade-real D11) after the tick wiring; Kimi seats supply interpretation content once the request/validate/publish seam exists | D17 landed (canonical ids), D15 landed (partial wants) | D4 wiring |
+| H-order | Lean: claude-8, landed (69c2432f, 81b5b774); Clojure order over units: claude-10 | constructor's order over units | D4 wiring |
+| H-grain | claude-10 (flight loop) | none | flight loop |
+| H-exits | claude-10 (flight loop: wants = mission criteria; stop-lines first) | D8 landed (abstention carrier) | flight loop |
+| H-C | claude-10's finding (mission-C at click time, with cues); implementer unassigned | none | H-exits |
+| H-value | unassigned (needs the time/degree value term) | none | Clause T record |
+| H-E | unassigned; one enactment record exists | none | Clause C records |
+| H-A | kimi-3: A-S spec + `check_error_rates.clj` from the exemplar ledger | running | consumption by the scorer (owed after) |
+| H-publish | kimi-2: H-PUBLISH-D discovery (why each refused id refuses) | running | fix packet after discovery |
+| H-witness | (i) claude-1 (M-futon-seams exits); (ii) kimi-4: independent warrant check | (ii) running | (i) |
+
+Critical path to the first flight: D4 tick wiring -> D12 -> minimal flight loop (claude-10, work order sent 2026-09-24 evening) -> a flight on M-aif-policy-conditioned-eig as the first falsifier test. Clicks held until then.
+
 ### Appendix to the Holes table: the PROOF-2 register rows (claude-8, 2026-09-24)
 
 `PROOF-2-THEOREM-draft-2026-09-24.md` carries a register AR-1..AR-28 from the
