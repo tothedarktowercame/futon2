@@ -5,7 +5,7 @@ Parent: the PROOF-2 plan (`labs/wm-contract/PROOF-2-STRATEGY-draft-2026-09-24.md
 `PROOF-2-THEOREM-draft-2026-09-24.md`). An excursion, not a mission: the proof
 plan already exists and there is no time to open a new mission.
 Owner: claude-10. Driver: Joe.
-Status: OPEN — defects D1–D14 written down; I1 and I2 done.
+Status: OPEN — defects D1–D17 written down; I1 and I2 done.
 Cross-refs: `labs/wm-contract/proof2/packets/CLICK2-D.md` (why click 2
 abstained; Part 2 per-target check); register row AR-16.
 
@@ -177,6 +177,51 @@ write `:produces` and `:needs` against. What transfers from claude-1's loop:
 the block-dispatch harness, refuse-with-typed-reason validation, and
 rejections (close to `:forbids` in prose).
 
+**Probe P1 result (2026-09-24).** Two Kimi seats, same brief, same frozen
+inputs (`96fae955`: the 10 live missions with projected hole tokens and no
+declared source). Seat A kimi-6 `9e8892b8`, seat B kimi-7 `29ce17b1`. Scored
+by claude-10 with `probe-interp/score_probe.clj` (loader, then constructor,
+then the judge's admission check; same G, budget and horizon 4 as I2).
+
+| | files | loaded | constructed | admitted | refused |
+|---|---|---|---|---|---|
+| seat A | 9 (skipped M-daily-scan) | 9 | 5 | 5 | 4 `:no-supported-order`, each an `:unproduced-need` on one task the seat declined |
+| seat B | 10 | 10 | 4 | 4 | 6 `:no-supported-order`: 4 `:want-unreachable-within-horizon` (6-pattern chains at horizon 4), 2 `:unproduced-need` |
+
+Before the probe none of these 10 missions had anything the machine could
+act on; after it, 5 (A) and 4 (B) are constructible and admissible, 7
+distinct missions across the two seats. Hand spot-check, two per seat
+(futonzero-generative and federated-agency-hardening for A; futonzero-generative
+and daily-scan for B): every pattern file exists, its `@flexiarg` line matches,
+the receipt sha matches, and the produced token is the task the reading
+quotes. The one `:needs` edge seen was not checked against the mission's
+order.
+
+Seat agreement: 12 pattern ids shared across the 10 missions (of 34 in A and
+43 in B); on 9 of those 12 the seats name the same produced tokens. Both
+seats independently used `:aif/two-layer-calibration` for the same
+futonzero-generative task. Agreement is partial: different seats find
+different but defensible patterns, which is more like two readers than two
+runs of one procedure.
+
+**D15. The constructor is all-or-nothing over wants.** `search-plans`
+(`interpretation_construction.clj`) searches backward from ALL wants, so one
+want with no producer refuses the whole target. Admission needs only one
+newly satisfied want. Seat A's four refusals each covered 4–5 of 6 wants
+and are refused because the seat honestly declined one task. The brief said
+declining is better than a bad interpretation; the constructor penalises
+exactly that.
+
+**D16. Horizon 4 silently refuses long honest chains.** Seat B's four
+6-pattern chains refuse `:want-unreachable-within-horizon` at 4; seat B
+reports 8 of 10 construct at horizon 8. Which horizon construction answers
+to is D14's open question; this is its cost measured.
+
+**D17. The loader accepts pattern ids in two spellings.** Seat B wrote
+symbols (`aif/two-layer-calibration`), seat A keywords; `load-declared`
+accepted both, and a naive comparison reported zero agreement. A canonical
+id form belongs in the loader.
+
 **D12. Nothing at the call site can say whether a constructed plan is worth
 taking.** The constructor takes a plan only if its G beats the empty
 family, but G is computed later, in `select-and-record-cascade!`. I2 had to
@@ -204,6 +249,6 @@ reason.
 |---|---|---|---|---|
 | I1 | History: what did the pre-H5b proposers propose and on what grounds (feasibility among them)? Is any ruling recorded behind "construction is outside the tick" (D3)? | kimi-2 | invoke-1790256229096-23668-ed1a1a26 | done: `0b06df90`, checked by claude-10 (two code sites at `5d55e7a0^` and the FOCUS.md ruling text read) |
 | I2 | Constructor: run `interpretation_construction` offline on the four admitted targets and the substrate missions; what does it build, where does it stop, and what would it need in order to run inside the judge (D4, D6)? | kimi-3 | invoke-1790256230680-23669-faccb791 | done: `56a58026`, checked by claude-10 (script rerun, same four results; admission copy diffed verbatim) |
-| P1 | Interpretation probe (D11): two seats independently write cascade-source interpretations for the same 10 missions (inputs frozen at `96fae955`, `probe-interp/inputs.edn`); score by loader + constructor + admission; compare seats | kimi-6 (seat A), kimi-7 (seat B) | invoke-1790258132294-23672-43efc807, invoke-1790258134048-23673-49bd041c | running |
+| P1 | Interpretation probe (D11): two seats independently write cascade-source interpretations for the same 10 missions (inputs frozen at `96fae955`, `probe-interp/inputs.edn`); score by loader + constructor + admission; compare seats | kimi-6 (seat A), kimi-7 (seat B) | invoke-1790258132294-23672-43efc807, invoke-1790258134048-23673-49bd041c | done: A `9e8892b8`, B `29ce17b1`; scored under D11 |
 
 Both read-only: no clicks, no writes under `data/`, no shared-JVM loads.
