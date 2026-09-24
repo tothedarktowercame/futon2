@@ -6,7 +6,26 @@ Status: draft; no click, code, data, bundle, or Lean file was changed for this p
 
 ## Verification of decisions D1–D4
 
-D1–D3 agree with the named Lean files. D4 is correct that neither `PolicyVariationalFreeEnergy` nor `DirichletLearning` has an r12 contract, and correct that learned B has no runtime consumer: `learning_trial_ledger.clj:238` defines `pattern-theta`, but no production source calls it. D4's unqualified statement that “the runtime has no consumer” is false for F. `cascade_free_energy.clj:105` computes the exact-posterior equality value `−log P(o|π)`; `efe.clj:1126–1204` attaches a finite result; `cascade_selection.clj:51–125` subtracts it. The defect is sharper: the runtime/certificate does not retain `q`, so it cannot yet witness the full `variationalFreeEnergy lik prior q` definition, and the producer/consumer is not bound by a contract.
+D1–D3 agree with the named Lean files. D4 is correct that neither `PolicyVariationalFreeEnergy` nor `DirichletLearning` has an r12 contract. D4 was WRONG that learned B has no runtime consumer: `learning_trial_ledger.clj:238` defines `pattern-theta` and the selection judge at `scripts/futon2/report/war_machine.clj:6380` calls it before scoring (corrected 2026-09-24; an earlier version of this sentence said no production source calls it, and survived two rounds of correction because each round fixed an enumerated list). D4's unqualified statement that “the runtime has no consumer” is also false for F, but in a way that misleads either direction — see the F sentence below. `cascade_free_energy.clj:105` computes the exact-posterior equality value `−log P(o|π)`; `efe.clj:1126–1204` attaches a finite result; `cascade_selection.clj:51–125` subtracts it. The defect is sharper: the runtime/certificate does not retain `q`, so it cannot yet witness the full `variationalFreeEnergy lik prior q` definition, and the producer/consumer is not bound by a contract.
+
+**The F sentence (claude-5, 2026-09-24, verified by claude-8 at the branch).**
+`cascade_selection.clj:112` reads
+`(if (= :not-supplied (:f-status c)) 0.0 (- (double (:f c))))`. Every
+recorded certificate carries `:f-status :not-supplied`, so the consumer has
+run on every click and subtracted zero every time. "F has no consumer" and
+"F is consumed" both mislead a builder: the first implies wiring that exists,
+the second implies a term that participated. What is owed for clause 3 is a
+producer (the admitted prefix, per the F discovery note) AND a change at
+this branch so that an absent F is recorded as absent on the certificate
+and in the selection law's own record — the law that ran was
+`σ(log E − γG)` and the record must say so — rather than silently read as
+zero free energy. Under Joe's 2026-09-19 ruling (nothing halts runs during
+tuning; evidence yes, vetoes no) this is a typed absence on the record, not
+a refusal to select. It is the day's recurring shape: a fallback that makes
+absence look like a value (futon1b's rescue reported success while
+stringifying props; this branch reports a posterior while a missing term
+reads as no contribution), with nothing in the record saying which happened
+until someone read the branch.
 
 The accepted ASSUME file is amended in this commit at A12–A14 to use D1's F and D2's Dirichlet B/unconditional next-click rule.
 
