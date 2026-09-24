@@ -5,7 +5,7 @@ Parent: the PROOF-2 plan (`labs/wm-contract/PROOF-2-STRATEGY-draft-2026-09-24.md
 `PROOF-2-THEOREM-draft-2026-09-24.md`). An excursion, not a mission: the proof
 plan already exists and there is no time to open a new mission.
 Owner: claude-10. Driver: Joe.
-Status: OPEN — defects D1–D8 written down; investigations I1 and I2 running.
+Status: OPEN — defects D1–D10 written down; investigations I1 and I2 running.
 Cross-refs: `labs/wm-contract/proof2/packets/CLICK2-D.md` (why click 2
 abstained; Part 2 per-target check); register row AR-16.
 
@@ -99,6 +99,21 @@ proposes the work that would make the next cascade possible.
 **D8. The run record does not say why it abstained.** The per-candidate
 decline reasons are in the cohort's selection event and the scan markdown,
 not in the tick run record (AR-16, as corrected after walkthrough 05).
+
+**D9. A withdrawn route's restore condition was met and nothing noticed.**
+The EIG source's withdrawal comment (claude-3, 2026-09-22) reads "Restore
+when that evidence has a locator." Held-out calibration evidence was
+published at `resources/wm/eig/held-out-calibration.edn` on 2026-09-23
+(`f0adf39a`), and the 09-23 click's ticket commit `97e17e10` already cites
+it. The route is still withdrawn. The condition lives in a comment, so no
+code can observe it being met. Not yet checked: whether that file is the
+preregistered split and post-split outcomes the reviewer asked for (I2 Q3).
+
+**D10. The click can write the token it is selected to produce.**
+T-repair-occ-444fb018's only want is observed through its ticket's Status
+line; the 09-23 click's own build commit `97e17e10` changed it from OPEN to
+DONE (register AR-31, from walkthrough 06). The commit cites a recheck and
+evidence, but the observation reads the Status line, not the evidence.
 
 ## Investigations
 
