@@ -161,3 +161,17 @@
     (is (= [:review-publication :source] (:path (ce/admissible-provenance? reffield))))
     (is (= [:admission] (:path (ce/admissible-provenance? top))))
     (is (true? (:admissible (ce/admissible-provenance? (cand :C1 [])))))))
+
+(deftest effect-equivalent-verdict
+  ;; Slice 1 gap: nothing produced the :effect-equivalent verdict, so a
+  ;; verdict function that returned :distinct whenever N differs would pass
+  ;; every test. Bug this catches: exactly that shortcut. Two candidates
+  ;; with identical precedence (same kernel rows at s₀, first pattern
+  ;; fires) but N differing OUTSIDE the precedence — a different
+  ;; acceptance predicate — must land on :effect-equivalent, not :distinct.
+  (let [c1 (cand :C1 [p-alpha p-beta])
+        c2 (-> (cand :C2 [p-alpha p-beta])
+               (assoc-in [:acceptance :predicate] "a materially different acceptance predicate"))]
+    (is (false? (ce/equivalent? c1 c2)))
+    (is (true? (ce/effect-equivalent-at? c1 c2 s0)))
+    (is (= :effect-equivalent (:verdict (ce/distinct-with-differing-effects? c1 c2 s0))))))

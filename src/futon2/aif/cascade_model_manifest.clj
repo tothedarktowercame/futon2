@@ -108,14 +108,25 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                          :authority :documented-interpretation}
                      {:status :missing :kind :missing-pattern-interpretation})}))
 
+(defn- produces-of
+  "The ONE produces field of the pattern, as Lean
+  DarkTower.WarMachine.CascadeTransition.InterpretedPattern has one
+  (CascadeTransition.lean: `produces : Finset V`). The Clojure record shape
+  spells it twice — top-level `:produces` and nested `:transition
+  :produces` — and every reader must agree, or a pattern carrying only one
+  form guards correctly but kernels as identity (or the reverse at
+  transition-row). Preference order: top-level, then nested, then empty."
+  [pattern]
+  (or (:produces pattern) (get-in pattern [:transition :produces]) #{}))
+
 (defn guard-holds? [pattern state]
   (when (= :interpreted (get-in pattern [:guard :status]))
     (and (every? #(and (set/subset? (:present %) state) (empty? (set/intersection (:absent %) state)))
                  (get-in pattern [:guard :clauses]))
-         (not (set/subset? (or (:produces pattern) (get-in pattern [:transition :produces]) #{}) state)))))
+         (not (set/subset? (produces-of pattern) state)))))
 (defn transition-row [pattern state]
   (if (= :interpreted (get-in pattern [:transition :status]))
-    {(set/union state (get-in pattern [:transition :produces])) 1}
+    {(set/union state (produces-of pattern)) 1}
     {:status :missing :kind :missing-pattern-interpretation}))
 (defn observed-belief
   "Lean DarkTower.WarMachine.TokenState.observedBelief (mathlib4
@@ -292,7 +303,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
     (if-not (and (or (ratio? theta) (integer? theta)) (<= 0 theta 1))
       {:status :missing :kind :invalid-pattern-interpretation
        :pattern (:id pattern) :theta theta}
-      (let [target (set/union state (:produces pattern))]
+      (let [target (set/union state (produces-of pattern))]
         (if (= target state)
           {state 1}
           ;; sparse representation of the Lean row: zero-mass entries (theta

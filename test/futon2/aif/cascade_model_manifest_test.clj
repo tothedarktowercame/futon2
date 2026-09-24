@@ -1071,3 +1071,32 @@
     (is (= (:tempered-path lp/zeta-certificate-statuses) (:zeta-status tempered)))
     (is (not= :absent (:zeta-status plain)))
     (is (not= :absent (:zeta-status tempered)))))
+
+(deftest produces-read-from-one-place
+  ;; Negative control for the split produces-reader finding (B4 slice 2a):
+  ;; before the fix, a pattern carrying ONLY :transition :produces guarded
+  ;; correctly but pattern-kernel treated it as achieved (identity row), and
+  ;; a pattern carrying ONLY top-level :produces did the reverse at
+  ;; transition-row. Each assertion catches that: nested-only and top-level-
+  ;; only must agree with the both-forms pattern at a firing state AND at an
+  ;; achieved state. W₀ item 5 (runtime row = Lean row) depends on the ONE
+  ;; InterpretedPattern.produces field being read identically everywhere.
+  (let [both {:id :p/both
+              :produces #{"out"}
+              :guard {:status :interpreted
+                      :clauses [{:status :interpreted :present #{"in"} :absent #{}}]}
+              :transition {:status :interpreted :operator :union :produces #{"out"}}}
+        nested-only (-> both (dissoc :produces))
+        top-only (-> both (update :transition dissoc :produces))
+        s-fire #{"in"}
+        s-done #{"in" "out"}]
+    (doseq [p [nested-only top-only]]
+      (is (= (m/guard-holds? both s-fire) (m/guard-holds? p s-fire))
+          "guard must not depend on which spelling of produces a pattern carries")
+      (is (= (m/guard-holds? both s-done) (m/guard-holds? p s-done)))
+      (is (= (m/pattern-kernel both s-fire) (m/pattern-kernel p s-fire))
+          "kernel at a firing state must not silently become the identity row")
+      (is (= (m/pattern-kernel both s-done) (m/pattern-kernel p s-done))
+          "achieved state: point mass for every spelling")
+      (is (= (m/transition-row both s-fire) (m/transition-row p s-fire))
+          "transition-row must read the same produces as pattern-kernel"))))
