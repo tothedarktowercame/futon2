@@ -57,6 +57,38 @@
 This is a demonstration on one decision input. It is not a claim that every task gets
 candidates automatically, or that every click is fast.
 
+**SCOPE, stated plainly because the proof did not say it and should have (added
+2026-09-24 after Joe's objection).** The one decision input is
+`T-repair-occ-444fb018…`, a REPAIR OBLIGATION: the machine's own apparatus. Every
+token the accepted close measured is apparatus bookkeeping —
+`:admission/task-stated`, `:repair/split-declared-valid`,
+`:repair/held-out-observations-collected`, `:repair/calibration-evidence-present`,
+`:repair/obstruction-observed-cleared`, `:restoration-accepted`. So what ⟨1⟩6 and
+⟨1⟩7 demonstrate is the loop closing on the task of fixing the loop.
+
+That is self-referential, and the proof's earlier revisions never disclosed it. A
+reader could finish this document believing the War Machine had been shown to do
+active-inference work on a problem, when what was shown is that it can be steered
+through its own repair. The demonstration is not thereby void — a loop that cannot
+close on anything cannot close on this — but it is the weakest possible content for
+the claim, and the proof owes the reader that sentence up front.
+
+**What is NOT self-referential**, and is the part that is actually the model:
+⟨1⟩3 and ⟨1⟩5 (G computed from C and B decides among real alternatives, and G's
+contribution is shown) and ⟨1⟩8 (the recorded outcome updates B and the next
+decision consumes it — θ 1/8 → 1/16 over seven trials). Those are expected free
+energy and a posterior that moved. They are also thin: B here is a single
+Laplace-smoothed success rate over one pattern with seven trials and zero
+successes, and C is stipulated. "A transition model inferred from recorded
+outcomes" is accurate and small.
+
+**What this proof therefore does NOT establish**, and no future reading of it
+should claim: that the machine does active inference on substantive content; that
+a run on a non-repair target would close; or that the apparatus fixes made on
+2026-09-24 hold under a live run — at the time of writing, zero clicks have been
+fired since those repairs, so every one of them is verified by test and probe
+only.
+
 **ASSUME:**
 - A1. The Lean model in `mathlib4/DarkTower/WarMachine/` and the contract bundle
   `machine-contracts/machine-contracts.json` (16 contracts, 36 declarations) are the
