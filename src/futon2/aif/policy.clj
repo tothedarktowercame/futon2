@@ -457,16 +457,28 @@
         ;; each labelled: the chain head (the marginal's existing key, the
         ;; law's and the tie-break's identity — unchanged) and the step that
         ;; would be enacted now under the current belief. Additive only.
+        ;; `cascade-first-action` returns the first PRECEDENCE ENTRY, which is a
+        ;; map {:id …} for a real cascade and a bare keyword in the fixtures.
+        ;; This read `(get … :id)` unconditionally, so every fixture entry
+        ;; resolved to a nil head, every step to nil, and `into {}` collapsed
+        ;; the lot to `:enacted-steps {nil nil}` — a nil key standing in for
+        ;; "no answer", which is the same shape as the pooled-nil defect
+        ;; d168d348 removed from the marginal. An entry with no head is not a
+        ;; row: drop it (claude-5, 2026-09-24, on kimi-6's report).
         enacted-steps (into {}
                             (for [e original-ranked
                                   :let [a (:action e)
-                                        head (if (map? a) (get (cascade-first-action a) :id) a)
+                                        first-entry (cascade-first-action a)
+                                        head (if (map? first-entry)
+                                               (:id first-entry)
+                                               first-entry)
                                         ;; the belief the decision scored from:
                                         ;; the entry's prediction initial belief
                                         ;; (a state-set) or a fallback that
                                         ;; enables nothing (nil step)
                                         state (or (some-> (get-in e [:prediction :initial-belief]) keys first)
-                                                  (some-> (get-in e [:prediction :belief]) keys first))]]
+                                                  (some-> (get-in e [:prediction :belief]) keys first))]
+                                  :when (some? head)]
                               [head (enacted-step-of a state)]))
         queue-receipt (when queue-plan
                         (assoc queue-plan

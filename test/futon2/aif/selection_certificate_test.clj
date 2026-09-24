@@ -29,7 +29,19 @@
            (pr-str (-> (select ranked beta)
                        (dissoc :selection-certificate)
                        (update :selection-law dissoc
-                               :policy-comparison :action-comparison :near-tie-threshold)))))))
+                               :policy-comparison :action-comparison :near-tie-threshold
+                               ;; :enacted-steps joined the law in b1979ce2
+                               ;; (2026-09-23) AFTER this baseline was captured.
+                               ;; It is the same class as the three above --
+                               ;; additive reporting that changes no winner, no
+                               ;; marginal key and no tie-break -- and is pinned
+                               ;; independently in enacted-step-test. Projected
+                               ;; away rather than RE-CAPTURING the baseline:
+                               ;; re-recording the bytes to make a byte-identity
+                               ;; test pass is how such a test stops meaning
+                               ;; anything (claude-5, 2026-09-24, found by
+                               ;; kimi-6 while checking a different stop-line).
+                               :enacted-steps)))))))
 
 (deftest computed-and-consumed-are-distinct
   (let [{:keys [ranked beta]} (first (:cases (baseline)))
