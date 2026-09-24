@@ -245,7 +245,20 @@
                 store ["M-futon-seams"])]
     (is (= declared (get-in merged [:interpretations "M-futon-seams" :patterns
                                     :writing-coherence/meet-the-reader-where-they-are])))
-    (is (= [] (get-in merged [:machine-interpretations "M-futon-seams"])))))
+    (is (= [] (get-in merged [:machine-interpretations "M-futon-seams"])))
+    (testing "the overruled published reading stays visible (AR-31)"
+      (let [[o] (get-in merged [:machine-interpretations-overridden "M-futon-seams"])]
+        (is (= :writing-coherence/meet-the-reader-where-they-are (:id o)))
+        (is (not= (:published-sha o) (:declared-sha o)))
+        (is (string? (:request-id o)))))
+    (testing "a hand declaration identical to the published reading is not an override"
+      (let [same (get-in (wi/read-published store "M-futon-seams")
+                         [:patterns :writing-coherence/meet-the-reader-where-they-are])
+            m (wi/merge-published
+               (assoc-in (seams-sources) [:interpretations "M-futon-seams" :patterns
+                                          :writing-coherence/meet-the-reader-where-they-are] same)
+               store ["M-futon-seams"])]
+        (is (nil? (get-in m [:machine-interpretations-overridden "M-futon-seams"])))))))
 
 (deftest a-string-spelled-id-canonicalises
   ;; D17 sibling of the un-namespaced refusal: the same proposal with its
