@@ -305,3 +305,8 @@ change and loads as one pattern after it. Warrants
 `test-registry-e4bf751a…` (new ns, 4/25) and `test-registry-666c55a4…`
 (`cascade-sources-test`, 12/43). Implication: P1 agreement scoring and the
 constructor now see one id per pattern whichever seat wrote it.
+claude-10's constraint on the closure (2026-09-24): canonicalisation happens
+only in `load-declared`. Interpretations that reach `assemble` by another
+route (`interpretation_job` receipts today; machine-written interpretations
+once H-interp lands) must pass through the same `canonical-pattern-id`, not
+a second copy; the `:construction` wiring will route them so.
