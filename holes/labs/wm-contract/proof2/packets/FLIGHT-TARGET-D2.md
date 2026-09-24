@@ -340,3 +340,135 @@ tables — cues included — would have demonstrated the same role for criteria
 that claude-1's mission-C plays for outcomes.
 
 Everything else in the packet stands.
+
+## 8. Anchored questions for unclear missions (Joe's instruction; same grammar as futon2 d91471a3's `:questions` in a criteria reply)
+
+A mission whose ask is genuinely unclear is not a good target — but the survey
+logs the questions rather than refusing or guessing. Each question below is
+anchored to the sentence that is unclear (quoted verbatim; a question without
+an anchoring sentence does not count) and states at least two readings that
+would yield *different* completion criteria. Mission owners are named where
+the file names them.
+
+### M-omni-wm-runner (futon3c; owner claude-3)
+
+**Q1.** Anchor — Acceptance bullet 2: "no new JVM/process spawn anywhere
+(`pgrep java` count unchanged during a **stubbed** click)." The mission's
+Scope says the fold-in is about a real click running in-process, but every
+Acceptance test is stubbed. *Question:* is the done-definition the stubbed
+test suite, or does it require one recorded real in-process click? Reading A
+(stub suffices): criteria are exactly O1–O3 of §7.1, all test-witnessed.
+Reading B (a real run is required): add O4 witnessed by a run record, not a
+test — a different criterion with a different evidence class, and (with clicks
+now running in-process per flight_driver's own plumbing) one that may already
+be satisfiable from records or may still be open. The file carries no Status
+line, so even the phase is unread; the question includes: what is the Status?
+
+### M-apm-demonstration (futon3c)
+
+**Q2.** Anchor — the DERIVE-candidate exit: "**Exit criterion:** problem 2
+populates unaided." *Question:* what is "problem 2", and what counts as
+"populates"? Reading A: problem 2 is a specific numbered instance in the APM
+problem ledger and "populates" means its fields are filled by the system with
+no human entry — one narrow, testable criterion. Reading B: "problem 2" is the
+second demonstration problem in the mission's own motivating narrative and
+"unaided" includes authoring the problem statement itself — a much larger
+criterion including intake. The two readings differ in both scope and witness;
+and with IDENTIFY "pending operator acceptance", a third reading is that the
+exit itself is provisional.
+
+### E-fold-engine (futon3a; owner claude-2)
+
+**Q3.** Anchor — the Status line: "DERIVE (stage-1 cascade executed
+2026-06-22). **2026-06-24: the fold is now the live Car-3". *Question:* the
+four acceptance criteria (fold kit-cadence→recover Ck2; fold its own cascade;
+arrow witnessed end-to-end; holes surfaced honestly) are staged — which stages
+does "the fold is now the live Car-3" discharge? Reading A: the live fold IS
+the end-to-end witness, so criterion 3 is met and only the Ck2/self-fold
+recoveries remain. Reading B: live-as-Car-3 is an deployment event, not a
+recovery witness, and all four criteria stand untouched. The verdict lines
+differ on every criterion between the two readings.
+
+### M-war-machine-pilot (futon3c)
+
+**Q4.** Anchor — the Status line: "v0 mission-complete in operational
+substance … awaiting operator acceptance bell to formally close v0".
+*Question:* is the remaining work the bell, or the unverdicted criteria?
+Reading A: the eight success criteria are met on recorded evidence (the file
+asserts "all 4 consent-gate success-criteria verified") and the only open act
+is operator acceptance — closure is one verdict pass plus a bell. Reading B:
+"mission-complete in operational substance" is a hedge covering criteria that
+were never individually checked, and the eight criteria each need evidence
+first. Under A the flight would find zero open wants; under B, up to eight.
+
+### E-ticks-firing-ratio-likelihood (futon3c)
+
+**Q5.** Anchor — the Status line: "**Status:** EXECUTED". *Question:* does
+EXECUTED mean all four success criteria landed, or that the executing parcel
+landed with criteria unchecked? Reading A: all four met (mapping exists, no
+string-matching, channel present, sorry rotated) — a verdict-only mission.
+Reading B: EXECUTED covers the implementation but the fourth criterion ("WM
+tick refresh rotates off `sorry/r3a-likelihood-ticks-firing-ratio`") is a
+deployment rotation that happens later — three met, one open. A flight is
+worth flying only under B.
+
+### M-becoming-nomad (futon7)
+
+**Q6.** Anchor — the IDENTIFY exit: "**Exit criterion:** by 2026-08-31, (a)
+the standup question is *decided on evidence* per §5, (b) all five spheres
+show a touch inside the window per §3, and (c) the 41.25 VSAT hours are
+delivered or explicitly renegotiated". *Question:* the window closed on
+2026-08-31; was the criterion met, failed, or renegotiated? Reading A: the
+date bound is the criterion, so on 2026-09-01+ the exit is decidable from
+records — met or failed, but decidable. Reading B: "explicitly renegotiated"
+makes the criterion self-extending — any renegotiation resets the window, and
+only the operator can say whether one occurred. Under B the criterion is
+operator-answerable only, not machine-checkable, which is a different
+criterion shape entirely.
+
+### M-kangaroo (futon3c)
+
+**Q7.** Anchor — the Status line: "INSTANTIATE v1 LANDED on master +
+LIVE-VALIDATED 2026-06-10 … ACTIVATION: next restart … + flag ON". *Question:*
+is activation part of done? Reading A: the mission is the landed,
+live-validated capability behind a default-OFF flag — complete as landed;
+activation is operations. Reading B: the mission includes the flag ON in
+production, and it stays open until a restart activates it. The two readings
+put the mission on opposite sides of the complete/open boundary.
+
+### M-dionysus-winddown (futon3c)
+
+**Q8.** Anchor — the Status line: "MAP substantially complete (2026-08-14)".
+*Question:* what does "substantially" withhold? Reading A: the MAP exit
+("every MAP question has a concrete answer; the ready-vs-missing table is
+complete") is met in substance and the qualifier is modesty — MAP reads Met.
+Reading B: a named subset of MAP questions is unanswered and "substantially"
+is carrying them — the exit is Not met and the missing questions are the open
+wants. Only reading B produces work a flight could advance; the qualifier
+decides which.
+
+### M-essays-diachronic-model (futon4)
+
+**Q9.** Anchor — the Status line: "**Status:** SPECIFIED, NOT YET
+IMPLEMENTED". *Question:* is the specification the deliverable or the
+prelude? Reading A: the mission's five criteria describe the specified model,
+and "SPECIFIED" is the completion of a *specification* mission — the criteria
+should verdict against the spec's existence and coherence. Reading B: the
+criteria describe a running system, and "NOT YET IMPLEMENTED" means all five
+are open implementation wants. The registry's own classifier reads this exact
+string as `:draft` (mission-registry.clj), which is a third, machine-visible
+reading: not a flight target at all until re-stated.
+
+### Checkbox-only missions with unclear asks (M-forum-refactor, alleycat-scorecard, M-apm-solutions, M-peripheral-behavior, …)
+
+**Q10 (class question).** Anchor — the mission format itself: these files
+carry 18–37 unchecked `- [ ]` items and no completion section; e.g.
+M-apm-solutions' only status word is "parked". *Question, to each owner:* are
+the unchecked tasks the mission's done-definition, or a staging area?
+Reading A: the tasks are the criteria — the checkbox reader sees the whole
+ask, closure is faithful when all are ticked. Reading B: the tasks are
+scaffolding and the done-definition is unstated — extraction (§7) must run
+before any closure claim. Under A these missions are flyable today on the
+checkbox source alone; under B they are extraction-needed targets. The
+mission text does not say which, and the count of tasks does not answer it —
+that is H-EXITS-D's M-f11 case read as a class.
