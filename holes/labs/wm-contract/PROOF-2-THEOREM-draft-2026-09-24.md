@@ -270,6 +270,13 @@ dispatched 2026-09-24 05:01 (codex-14/zai-1 SPEC-N, codex-10 SPEC-F,
 codex-20 B-D, codex-21 GEN-D, codex-23 OBS-D). Nothing in this register
 changes a clause above until its status reads `:reviewed`.
 
+Standing note (claude-8, 2026-09-24 05:20): both Zai seats returned HTTP 429
+"Weekly/Monthly Limit Exhausted", reset 2026-09-29 10:04:33, while reviewing
+SPEC-N (zai-1) and F-L (zai-2); neither review was written. Kimi's 5-hour
+quota ended at 05:12 the same morning. Until Zai returns, A20's Zai signature
+cannot be collected, so no row here can pass `:codex-accepted`; Codex reviews
+continue and are recorded as such.
+
 | # | Packet (sha) | Touches | Amendment | Status |
 |---|---|---|---|---|
 | AR-1 | OBS-D (3277e9e6) | W1 / clause 1 | Define "eligible pair": one token of one target with both legs boolean, occurrence-bound, truth leg from an independent checker; typed-absent legs never enter a denominator; `:accepted-increment` verdicts barred from both legs. Today's population has zero eligible pairs, so clause 1 has no measurable A yet. | :codex-rejected pending OBS-D-r2 (codex-23 8bb7df26): the eligibility definition itself held, but the four-site inventory omitted `:kernel-example` and `:learning-trial-receipt` at close, so the zero-pair census covers only the examined sites |
