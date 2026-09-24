@@ -151,3 +151,36 @@
              :when (= :data-only (:verdict-source p))]
          {:phase (:id p) :title (:title p) :status-as-read (:status p)
           :reason :data-only-no-checkable-class})))
+
+(def closes-through-re
+  #"^\*\*This phase closes only through ([A-Z][A-Z-]*)'s\b")
+
+(defn constraints
+  "Ordering constraints the mission states in its own words: a paragraph in
+  a phase's section opening **This phase closes only through <PHASE>'s … is
+  a :requires edge from this phase's exit token to <PHASE>'s. The edge is
+  read, never inferred, and carries the line and the opening clause. A named
+  phase with no exit criterion is returned under :unresolved, not dropped."
+  [mission-id text]
+  (let [cs (criteria mission-id text)
+        token-of (into {} (for [c cs :when (= :phase-exit (:kind c))]
+                            [(first (str/split (str (:phase c)) #"\s")) (:token c)]))
+        lines (vec (str/split-lines text))]
+    (loop [i 0 phase nil out {:requires [] :unresolved []}]
+      (if (>= i (count lines))
+        out
+        (let [line (nth lines i) h (heading line)]
+          (cond
+            (and h (= 2 (:level h))) (recur (inc i) (:title h) out)
+            :else
+            (if-let [[_ named] (re-find closes-through-re line)]
+              (let [this (token-of (first (str/split (str phase) #"\s")))
+                    that (token-of named)
+                    edge {:want this :requires that :by :mission-text :line (inc i)
+                          :phase (first (str/split (str phase) #"\s")) :through named
+                          :quote (str/trim (second (str/split (paragraph lines i) #"\*\*" 3)))}]
+                (recur (inc i) phase
+                       (if (and this that)
+                         (update out :requires conj edge)
+                         (update out :unresolved conj (dissoc edge :want :requires)))))
+              (recur (inc i) phase out))))))))

@@ -163,6 +163,23 @@
           (assoc base :outcome :request-refused :refusal r)
           (settle opts view issued (answer-fn issued) base))))))
 
+(defn- constraints-for
+  "The owner constraints validation applies: those the want source read from
+  the mission text. A DECLARED constraint (opts :constraints) is accepted
+  only if the text states the same edge; one the text does not state
+  refuses, so a hand declaration can never override or add to the mission's
+  own words."
+  [{declared :constraints} wants]
+  (let [read (get-in wants [:source :constraints :requires])
+        edge (juxt :want :requires)
+        stated (set (map edge read))
+        extra (remove (comp stated edge) declared)]
+    (when (seq extra)
+      (throw (ex-info "a declared constraint is not stated in the mission text"
+                      {:interpretation/refusal :want/declared-constraint-not-in-text
+                       :declared (vec extra) :read (vec read)})))
+    (vec read)))
+
 (defn ask-fn
   "The flight's ask step: for each want no admitted or published
   interpretation produces, issue a request (want-interpretation/issue! and
@@ -172,13 +189,16 @@
   publication, answers rejected earlier are validated again (the same
   answers, no new request) until nothing changes, so a chain whose wants
   are listed out of order (ARGUE before DOCUMENT) settles in one step.
+  Owner constraints are those the want source read from the mission text
+  (mission-criteria/constraints); a declared one must match a read one.
   Everything that is not a publication is also a flight :need with the job
   id, never retried silently: :no-criterion, :request-refused,
   :not-answered, :unparseable-response, :declined, :rejected."
   [{:keys [store admit] :as opts}]
   (let [opts (assoc opts :admit (or admit (var-get #'wm/admit-cascade-problem)))]
     (fn [flight wants sources]
-      (let [target (:target flight)
+      (let [opts (assoc opts :constraints (constraints-for opts wants))
+            target (:target flight)
             view (target-view store flight wants sources)
             todo (wi/unproduced-wants (:wants wants) (get-in view [:universes target])
                                       (get-in view [:interpretations target :patterns]))

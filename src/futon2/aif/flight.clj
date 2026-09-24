@@ -57,6 +57,8 @@
      :source {:kind :a-exits :via "futon2.aif.mission-criteria"
               :repo repo :path path :text-read? (some? text)
               :criteria (count cs)
+              ;; ordering constraints the mission states in its own words
+              :constraints (criteria/constraints target (or text ""))
               ;; token -> the criterion it was read from, for the D11 request
               :criteria-by-token (into {} (map (fn [c] [(:token c) (select-keys c [:kind :line :phase :stated])]))
                                        (:criteria w))
