@@ -39,8 +39,16 @@
 ;; names the mission file: {:kind :a-exits :repo … :path … :code-root …}.
 ;; A criterion with no stated verdict is a want with no locator; assembly
 ;; then refuses the target naming it, which is the hole to close.
-(defmethod source-wants :a-exits [{:keys [repo path code-root read-text observe]} {:keys [target]} sources]
-  (let [text ((or read-text criteria/read-mission) (or code-root "/home/joe/code") repo path)
+(defmethod source-wants :a-exits [{:keys [repo path code-root read-text observe lifecycle]} {:keys [target]} sources]
+  (let [read (or read-text criteria/read-mission)
+        root (or code-root "/home/joe/code")
+        text (read root repo path)
+        ;; a declared lifecycle file: phases judged in data only are named
+        ;; out of view, so a closure over the stated criteria is never read
+        ;; as the mission's completion
+        out-of-view (when lifecycle
+                      (some-> (read root (:repo lifecycle) (:path lifecycle))
+                              criteria/data-only-phases))
         cs (criteria/criteria target (or text ""))
         w (criteria/wants cs (cond-> {:repo repo :path path} observe (assoc :observe observe)))]
     {:wants (vec (distinct (concat (get-in sources [:wants target]) (:wants w))))
@@ -49,7 +57,9 @@
      :source {:kind :a-exits :via "futon2.aif.mission-criteria"
               :repo repo :path path :text-read? (some? text)
               :criteria (count cs)
-              :unlocated (:unlocated w)}}))
+              :unlocated (:unlocated w)
+              :out-of-view (vec out-of-view)
+              :lifecycle lifecycle}}))
 
 ;; A hand-declared list, for tests. Typed on every record it reaches, so a
 ;; reader can never mistake it for wants the machine read from the mission.
@@ -146,7 +156,12 @@
         (update :needs #(cond-> % (:missing abstention)
                           (conj {:click-id click-id :kind (:kind abstention)
                                  :missing (:missing abstention)})))
-        (assoc :status status))))
+        (assoc :status status)
+        ;; what a closure covered: the criteria in view, and what was not
+        (cond-> (= :closed status)
+          (assoc :closure-scope {:criteria-in-view (count wants)
+                                 :want-source (:kind want-source)
+                                 :out-of-view (vec (:out-of-view want-source))})))))
 
 ;; ---------------------------------------------------------------------------
 ;; The loop

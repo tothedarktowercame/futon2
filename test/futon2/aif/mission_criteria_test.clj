@@ -182,3 +182,29 @@
             "INSTANTIATE" :met "DOCUMENT" :verdict-not-started}
            (into {} (for [c (:criteria w)]
                       [(first (str/split (:phase c) #" ")) (get-in c [:verdict-class :class])]))))))
+
+;; Phases judged in data only (lifecycle.edn :verdict-source :data-only,
+;; futon3c d74a7c5a) are named out of view, never wants, never met; a closed
+;; flight's record says what its closure covered.
+(def lifecycle-text (slurp (str fixture-dir "M-futon-seams-lifecycle@futon3c-d74a7c5a.edn")))
+
+(deftest data-only-phases-are-out-of-view
+  (is (= [:HEAD :IDENTIFY] (mapv :phase (mc/data-only-phases lifecycle-text))))
+  (is (every? #(= :data-only-no-checkable-class (:reason %)) (mc/data-only-phases lifecycle-text))))
+
+(deftest a-closed-flight-names-what-it-did-not-see
+  (let [text (slurp (str fixture-dir "M-futon-seams@futon3c-d05cb755.md"))
+        f (flight/start {:target "M-futon-seams" :chosen-because {:kind :requested}}
+                        {:kind :a-exits :repo "futon3c" :path "holes/missions/M-futon-seams.md"
+                         :lifecycle {:repo "futon3c" :path "holes/labs/M-futon-seams/lifecycle.edn"}
+                         :read-text (fn [_ _ path] (if (str/ends-with? path ".edn") lifecycle-text text))
+                         :observe (observe-in text)}
+                        {:id "flight-scope"})
+        cw (flight/click-wants f {})
+        closed (flight/record-click f {:click-id "c1" :wants (:wants cw) :want-source (:source cw)
+                                       :before (zipmap (:wants cw) (repeat false))
+                                       :after (zipmap (:wants cw) (repeat true))})]
+    (is (= 6 (count (:wants cw))))
+    (is (= :closed (:status closed)))
+    (is (= 6 (get-in closed [:closure-scope :criteria-in-view])))
+    (is (= [:HEAD :IDENTIFY] (mapv :phase (get-in closed [:closure-scope :out-of-view]))))))

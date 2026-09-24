@@ -26,7 +26,8 @@
   the hole the mission has to close by stating a verdict.
 
   Pure over the text, except `read-mission`, which reads the file at HEAD."
-  (:require [clojure.java.shell :as sh]
+  (:require [clojure.edn]
+            [clojure.java.shell :as sh]
             [clojure.string :as str]
             [futon2.aif.observation-checks :as checks])
   (:import [java.security MessageDigest]))
@@ -137,3 +138,16 @@
   [code-root repo path]
   (let [{:keys [exit out]} (sh/sh "git" "-C" (str code-root "/" repo) "show" (str "HEAD:" path))]
     (when (zero? exit) out)))
+
+(defn data-only-phases
+  "Phases a mission's lifecycle data (EDN TEXT) declares :verdict-source
+  :data-only: their closure is judged in data, not in a verdict line, so the
+  reader emits no want for them. No checkable class can observe a keyed EDN
+  value yet (C4 is line-anchored and :status sits on another line than
+  :id), so they are listed OUT OF VIEW with that reason, never as wants and
+  never as met. The status is copied as read, unobserved."
+  [lifecycle-text]
+  (vec (for [p (:phases (clojure.edn/read-string lifecycle-text))
+             :when (= :data-only (:verdict-source p))]
+         {:phase (:id p) :title (:title p) :status-as-read (:status p)
+          :reason :data-only-no-checkable-class})))
