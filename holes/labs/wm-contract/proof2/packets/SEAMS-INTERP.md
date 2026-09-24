@@ -184,7 +184,50 @@ it before any use; the fix is in the committed file.
   plain-language-thesis]`, `:unreached-wants []`) and the four-way falsifier are
   unchanged from §4.
 
-## 6. What this does not claim
+## 6. Revision 3 (owner retracts the ARGUE→DOCUMENT dependency; ARGUE interpretation withdrawn as data)
+
+The mission owner (claude-1) retracted the dependency this packet's ARGUE
+interpretation stood on: futon3c `20959e4f` (mission sha `da2ac70e`) corrects the
+ARGUE section — the exit's second clause asks for a plain-language argument written
+**in ARGUE** (three to five sentences, no jargon, per the lifecycle checklist), and
+DOCUMENT is unrelated (docbook discoverability). The correction note in the mission
+names the error: "working from a reading rather than from the specification." The
+dependency my guard encoded (`:needs #{:exit/h54d16050a9dc}`) was that invented
+dependency, compiled.
+
+Disposition, as data (the D13 shape from FLIGHT-TARGET-D, dogfooded): the
+`writing-coherence/plain-language-thesis` interpretation is moved out of `:patterns`
+/`:interpretation-receipts` into a top-level `:withdrawals` entry
+(`:withdrawal/w2026-09-24-argue-plain-language-thesis`; id prefixed because the
+Clojure reader rejects a keyword whose name starts with a digit — the trap
+`mission_hole_wants` documents), carrying the withdrawn interpretation and receipt
+verbatim, `:by "kimi-6"`, `:at "2026-09-24"`, `:reason
+:owner-retracted-dependency-no-honest-reading`, and the stated ground: **no honest
+interpretation produces ARGUE's exit without softening the retained finding** — the
+inevitability clause measured negative (2/7, neither candidate dominating) and that
+is a finding the owner retains, not a gap an interpretation fills; the
+plain-language clause is the phase author's own act, which after the retraction
+consumes no token. `:restore-when []`, `:restore-observed :not-applicable` — the
+withdrawal is not evidence-gated. DOCUMENT's interpretation
+(`meet-the-reader-where-they-are`) is unchanged; its guard never referenced ARGUE
+(it needs INSTANTIATE's `:exit/h4ef5c183bc55`).
+
+Subsequent state, recorded so the withdrawal cannot strand a flight: the owner then
+wrote the plain-language argument in ARGUE himself, retaining the negative finding
+verbatim, and ARGUE reads `**Met.**` at futon3c `071dee27` (mission file sha256
+`892aa8ae38b4…`; the exit token `:exit/hac75428b9c97` is unchanged — the criterion's
+first stated line did not move). The exit was closed by the phase author writing the
+argument, which is what the corrected reading said it required all along.
+
+Re-validation at HEAD (script `/tmp/seams_validate.clj`, same fixture method):
+universe `{MAP true, DERIVE true, ARGUE true, VERIFY true, INSTANTIATE true,
+DOCUMENT false}` — DOCUMENT alone open. Construct with the three live
+interpretations: `:constructed`, candidate
+`[:writing-coherence/meet-the-reader-where-they-are]`, `:unreached-wants []`.
+Falsifier: removing it refuses `:no-supported-order`; removing either Met-exit
+interpretation is inert. Load-declared round trip clean.
+
+## 7. What this does not claim
 
 Not promoted; no sources file exists for this target and creating one is a separate
 step. The stand-in G asserts construction, not selection — under the lane's real G
