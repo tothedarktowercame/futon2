@@ -147,7 +147,15 @@
     (is (empty? (:unlocated w)))
     (is (= {"MAP" true "DERIVE" false "ARGUE" false "VERIFY" true
             "INSTANTIATE" false "DOCUMENT" false}
-           (met-by-phase w)))))
+           (met-by-phase w)))
+    (testing "why each not-met exit is not met, typed"
+      (is (= {"MAP" :met "DERIVE" :verdict-partial "ARGUE" :verdict-not-met "VERIFY" :met
+              "INSTANTIATE" :verdict-partial "DOCUMENT" :verdict-not-started}
+             (into {} (for [c (:criteria w)]
+                        [(first (str/split (:phase c) #" ")) (get-in c [:verdict-class :class])]))))
+      (is (= "Met for instance 4"
+             (some #(when (str/starts-with? (:phase %) "INSTANTIATE") (get-in % [:verdict-class :qualifier]))
+                   (:criteria w)))))))
 
 (deftest live-m-aif-eig-futon2-22fa0da9
   (let [w (live "M-aif-policy-conditioned-eig@futon2-22fa0da9.md" "M-aif-policy-conditioned-eig")]

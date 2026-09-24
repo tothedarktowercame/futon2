@@ -61,6 +61,21 @@
                                          (not (re-find #"^\s*[-*]\s" %)))
                                    (drop (inc i) lines)))))
 
+(defn verdict-class
+  "The stated verdict, typed: :met only for exactly **Met.**; a verdict
+  that begins Met but qualifies it (\"**Met for instance 4**\") is
+  :verdict-partial with its :qualifier, because the owner has evidence for
+  part of the exit, which is a different next step from none."
+  [verdict]
+  (let [inner (some-> verdict (str/replace #"^\*\*|\*\*$" "") str/trim)]
+    (cond
+      (nil? verdict) {:class :verdict-not-stated}
+      (= verdict met-token) {:class :met}
+      (re-find #"^Met\b" inner) {:class :verdict-partial :qualifier inner}
+      (re-find #"^Not started" inner) {:class :verdict-not-started}
+      (re-find #"^Not met" inner) {:class :verdict-not-met :qualifier inner}
+      :else {:class :verdict-unrecognised :qualifier inner})))
+
 (defn- criterion [mission-id kind line-no phase text]
   (let [m (re-matcher verdict-re text)
         at (when (.find m) (.start m))
@@ -71,9 +86,11 @@
              :stated (str/trimr stated)
              :token (keyword "exit" (str "h" (sha1-12 (str mission-id "\n" kind "\n"
                                                           (first (str/split-lines stated))))))}
-      at (assoc :verdict (re-find #"^\*\*[^*]*\*\*" (subs text at))
-                :met-decl (str stated met-token))
-      (not at) (assoc :reason :verdict-not-stated))))
+      at (as-> c (assoc c :verdict (re-find #"^\*\*[^*]*\*\*" (subs text at))
+                              :met-decl (str stated met-token))
+           (assoc c :verdict-class (verdict-class (:verdict c))))
+      (not at) (assoc :reason :verdict-not-stated
+                      :verdict-class {:class :verdict-not-stated}))))
 
 (defn criteria
   "Every completion criterion stated in TEXT, in document order."
