@@ -25,6 +25,69 @@
     (spit file (pr-str record))
     record))
 
+(deftest dismiss-grounding-readback-degraded-proof-controls
+  (let [commit "a2d8aba0ae57126b22b9afa9c7ff0888a54afdaa"
+        impl-id (str "full-loop/implementation/" commit)
+        finding {:repair/id "finding-gnc" :repair/schema-version 3
+                 :repair/class :machine-failure :repair/status :open
+                 :attempt-id "attempt-002"
+                 :failure-kind :grounded-no-change :failure-stage :grounding
+                 :failure-outcome :grounded-no-change
+                 :opened-at "2026-09-23T17:32:56Z"
+                 :discharge-contract {:artifact-shape :code-commit :requires [:grounded-repair]}
+                 :repair/occurrence {:occurrence/id "occ-x"
+                                     :occurrence/origin "/repo::2026-09-23-1790184736"
+                                     :occurrence/event-id "ea1-hash--attempt-002"}}
+        close {:payload {:judgment {:witness {:implementation-id impl-id
+                                              :resolved? false :dial-moved? true}}}}
+        disposition {:authority "Joe 2026-09-24: repair stop-lines from outside"
+                     :reason :grounding-readback-degraded :actor "kimi-6"}
+        string-props (pr-str {:implementation/commit commit :implementation/files ["f"]})
+        run (fn [root entity close-ret]
+              (repair/dismiss-grounding-readback-degraded!
+               root "finding-gnc" disposition
+               {:close-read-fn (fn [_ _] close-ret)
+                :entity-by-id-fn (fn [_] entity)}))]
+    (testing "the false finding dismisses: string props naming the same commit"
+      (let [root (temp-root)]
+        (write-record! root "findings" finding)
+        (let [record (run root {:props string-props} close)]
+          (is (= :dismissed-grounding-readback-degraded (:repair/status record)))
+          (is (= :grounding-readback-degraded (:dismissal/kind record)))
+          (is (= impl-id (get-in record [:evidence :implementation-id])))
+          (is (= :already-dismissed
+                 (dismissal-refusal
+                  #(run root {:props string-props} close)))))))
+    (testing "THE REFUSAL CASE: a genuine grounded-no-change refuses"
+      ;; The entity's props read back as a proper MAP: the dial really did
+      ;; not move, the finding is honest, and this route must not clear it.
+      (let [root (temp-root)]
+        (write-record! root "findings" finding)
+        (is (= :grounding-readback-not-degraded
+               (dismissal-refusal #(run root {:props {:implementation/commit commit}} close))))
+        (is (empty? (.listFiles (io/file root "dismissals")))
+            "a refused route writes no dismissal")))
+    (testing "each proof leg refuses on its own absence"
+      (doseq [[label mutate-finding entity close-ret expected]
+              [[:finding-shape #(assoc % :failure-outcome :incomplete) {:props string-props} close
+                :finding-not-false-grounding]
+               [:occurrence #(dissoc % :repair/occurrence) {:props string-props} close
+                :occurrence-unavailable]
+               [:close identity {:props string-props} nil :close-unavailable]
+               [:witness identity {:props string-props}
+                {:payload {:judgment {:witness {:implementation-id impl-id
+                                                :resolved? true :dial-moved? true}}}}
+                :witness-not-false-grounded]
+               [:entity-missing identity nil close :grounding-readback-unavailable]
+               [:commit-mismatch identity
+                {:props (pr-str {:implementation/commit "deadbeefdeadbeef"})} close
+                :readback-commit-mismatch]]]
+        (let [root (temp-root)]
+          (write-record! root "findings" (mutate-finding finding))
+          (is (= expected (dismissal-refusal #(run root entity close-ret)))
+              (str label))
+          (is (not (.exists (io/file root "dismissals" "finding-gnc.edn")))))))))
+
 (deftest dismiss-superseded-attempt-retained-proof-controls
   (doseq [[label finding-extra record expected]
           [[:later {} {:implementation-attempt "other-attempt"

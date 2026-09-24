@@ -1309,6 +1309,148 @@
          (write-new! (io/file root "dismissals" (str finding-id ".edn")) dismissal)
          dismissal)))))
 
+(defn- occurrence-run-and-event
+  "The run id and execution event id a finding's retained :repair/occurrence
+   names. The occurrence origin is \"<repo>::<run-id>\" and the event-id is
+   the execution identity string (e.g. \"ea1-<hash>--attempt-002\")."
+  [finding]
+  (let [occ (:repair/occurrence finding)
+        origin (str (:occurrence/origin occ))
+        run-id (when-let [[_ r] (re-find #"::([^:]+)$" origin)] r)
+        event-id (some-> (:occurrence/event-id occ) str)]
+    (when (and (nonblank? run-id) (nonblank? event-id))
+      {:run-id run-id :event-id event-id})))
+
+(defn- default-close-reader
+  "Locate the close record (007-closed.edn) under the runner data stores
+   beside ROOT that names RUN-ID and EVENT-ID. Only wm-full-loop-* stores
+   are scanned."
+  [root]
+  (fn [run-id event-id]
+    (let [data-dir (.getParentFile (io/file root))]
+      (some (fn [^java.io.File f]
+              (let [text (slurp f)]
+                (when (and (str/includes? text run-id)
+                           (str/includes? text event-id))
+                  (strict-read text (str f)))))
+            (->> (.listFiles data-dir)
+                 (filter #(and (.isDirectory ^java.io.File %)
+                               (str/starts-with? (.getName ^java.io.File %) "wm-full-loop")))
+                 (mapcat file-seq)
+                 (filter #(and (.isFile ^java.io.File %)
+                               (= "007-closed.edn" (.getName ^java.io.File %)))))))))
+
+(defn- close-witness
+  "The grounding witness map inside a close record: the one map carrying
+   :implementation-id, :resolved? and :dial-moved?."
+  [close]
+  (let [found (atom nil)]
+    (letfn [(walk [v]
+              (cond
+                (map? v) (do (when (and (contains? v :implementation-id)
+                                        (contains? v :resolved?)
+                                        (contains? v :dial-moved?))
+                               (reset! found v))
+                             (doseq [[_ x] v] (walk x)))
+                (coll? v) (doseq [x v] (walk x))
+                :else nil))]
+      (walk close))
+    @found))
+
+(defn dismiss-grounding-readback-degraded!
+  "Dismiss a FALSE :grounded-no-change machine-failure: a run whose grounding
+   write the store silently rescued, so the close witness's :resolved?
+   compared the run's commit against a props STRING and read nil
+   (2026-09-23, six findings: clojure.lang.Ratio in the grounded props,
+   futon1b put-doc-with-rescue! stage 2 pr-str-ing :entity/props while
+   reporting success).
+
+   The proof is found, never supplied:
+   1. the finding's own retained bytes carry :failure-outcome
+      :grounded-no-change at :failure-stage :grounding and a
+      :repair/occurrence naming the run and execution event;
+   2. the close record those name retains the witness {:dial-moved? true
+      :resolved? false} and the :implementation-id it compared;
+   3. that implementation entity reads back with :props a STRING whose
+      parsed form carries :implementation/commit equal to the commit the
+      entity id names.
+
+   A finding whose entity reads back with MAP props is a genuine
+   grounded-no-change and REFUSES (:grounding-readback-not-degraded),
+   however old it is: the dial really did not move there, and the finding
+   stands. This dismissal says the finding misdiagnosed a store-side
+   degradation as an ungrounded run; it does not say any repair landed."
+  ([finding-id disposition]
+   (dismiss-grounding-readback-degraded! default-root finding-id disposition {}))
+  ([finding-id disposition opts]
+   (dismiss-grounding-readback-degraded! default-root finding-id disposition opts))
+  ([root finding-id {:keys [authority reason actor] :as disposition}
+    {:keys [close-read-fn entity-by-id-fn]
+     :or {close-read-fn (default-close-reader root)
+          entity-by-id-fn substrate/entity-by-id}}]
+   (when-not (and (string? finding-id)
+                  (re-matches #"[A-Za-z0-9._-]+" finding-id))
+     (dismissal-refuse! :finding-id-invalid {:repair/id finding-id}))
+   (when-not (and (= #{:authority :reason :actor} (set (keys disposition)))
+                  (nonblank? authority) (keyword? reason) (nonblank? actor))
+     (dismissal-refuse! :disposition-invalid {:repair/id finding-id}))
+   (when (get (indexed-records root "dismissals") finding-id)
+     (dismissal-refuse! :already-dismissed {:repair/id finding-id}))
+   (when (get (indexed-records root "resolutions") finding-id)
+     (dismissal-refuse! :already-resolved {:repair/id finding-id}))
+   (let [finding (get (indexed-records root "findings") finding-id)]
+     (when-not finding
+       (dismissal-refuse! :finding-not-found {:repair/id finding-id}))
+     (when (or (not= :open (:repair/status finding))
+               (get (indexed-records root "implementations") finding-id)
+               (get (verified-admissions root) finding-id))
+       (dismissal-refuse! :finding-not-open {:repair/id finding-id}))
+     (when-not (and (= :grounded-no-change (:failure-outcome finding))
+                    (= :grounding (:failure-stage finding)))
+       (dismissal-refuse! :finding-not-false-grounding {:repair/id finding-id}))
+     (let [{:keys [run-id event-id] :as occ-ref} (occurrence-run-and-event finding)]
+       (when-not occ-ref
+         (dismissal-refuse! :occurrence-unavailable {:repair/id finding-id}))
+       (let [close (close-read-fn run-id event-id)]
+         (when-not close
+           (dismissal-refuse! :close-unavailable {:repair/id finding-id :run-id run-id}))
+         (let [witness (close-witness close)]
+           (when-not (and witness (true? (:dial-moved? witness))
+                          (false? (:resolved? witness)))
+             (dismissal-refuse! :witness-not-false-grounded {:repair/id finding-id}))
+           (let [impl-id (:implementation-id witness)]
+             (when-not (and (string? impl-id)
+                            (re-matches #"full-loop/implementation/[0-9a-f]{6,64}" impl-id))
+               (dismissal-refuse! :implementation-id-invalid {:repair/id finding-id}))
+             (let [entity (entity-by-id-fn impl-id)
+                   props (:props entity)]
+               (when (map? props)
+                 (dismissal-refuse! :grounding-readback-not-degraded
+                                    {:repair/id finding-id :implementation-id impl-id}))
+               (when-not (string? props)
+                 (dismissal-refuse! :grounding-readback-unavailable
+                                    {:repair/id finding-id :implementation-id impl-id}))
+               (let [parsed (try (edn/read-string props) (catch Exception _ nil))
+                     commit (:implementation/commit parsed)]
+                 (when-not (and (map? parsed) (nonblank? commit)
+                                (= commit (subs impl-id (count "full-loop/implementation/"))))
+                   (dismissal-refuse! :readback-commit-mismatch
+                                      {:repair/id finding-id :implementation-id impl-id}))
+                 (let [record {:repair/id finding-id :repair/schema-version 1
+                               :repair/status :dismissed-grounding-readback-degraded
+                               :dismissal/kind :grounding-readback-degraded
+                               :failed-attempt (:attempt-id finding)
+                               :evidence {:run-id run-id :event-id event-id
+                                          :implementation-id impl-id
+                                          :witness (select-keys witness
+                                                                [:resolved? :dial-moved?])
+                                          :readback {:props-type :string
+                                                     :implementation/commit commit}}
+                               :authority authority :reason reason :actor actor
+                               :dismissed-at (str (Instant/now))}]
+                   (write-new! (io/file root "dismissals" (str finding-id ".edn")) record)
+                   record))))))))))
+
 (defn discharge-record
   "Read one immutable record, retaining its exact UTF-8 bytes for a derived
    discharge receipt. No pending queue membership is required."
