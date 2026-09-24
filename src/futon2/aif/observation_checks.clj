@@ -1,7 +1,8 @@
 (ns futon2.aif.observation-checks
   "Mechanical observation checks for the checkable token classes of the WM-04
   observation contract (futon2 resources/wm/observation-contract.edn, classes
-  C3-C6). Each check reads a repository at a pinned sha and returns either
+  C3-C6), plus C8, which reads the test registry rather than a git object.
+  Each check reads a repository at a pinned sha and returns either
   {:observed true|false :check … :evidence …} or a typed refusal
   {:status :missing :kind …}.
 
@@ -13,10 +14,13 @@
   class J, which has no measured rate and is refused at assembly.
 
   Warrant checks are outside the WM observation contract."
-  (:require [clojure.edn :as edn]
+  (:require [babashka.http-client :as http]
+            [clojure.edn :as edn]
             [clojure.data.json :as json]
+            [clojure.java.io :as io]
             [clojure.java.shell :as sh]
-            [clojure.string :as str]))
+            [clojure.string :as str])
+  (:import (java.security MessageDigest)))
 
 (def repo-root "/home/joe/code")
 
@@ -140,11 +144,186 @@
                          :evidence (assoc evidence :witness-present true
                                           :reference (cond-> resolved entry (assoc :entry entry)))})))))))))))
 
+;; ---------------------------------------------------------------------------
+;; C8: a test namespace passed AT THE CURRENT CONTENT (AR-41).
+;;
+;; C6 observes that a witness references an existing commit, so a receipt
+;; recording FAILING gates reads true under it (claude-10, first live read on
+;; M-omni-wm-runner, 2026-09-24). Every criterion of the form "tests stay
+;; green" therefore had no checkable class and could only be declined.
+;;
+;; The registry already records the needed fact: futon3c's test-registry pins
+;; each run to the SHA-256 of every declared code and test file, records a
+;; postcheck that those inputs did not move during the run, and records the
+;; run's counts. C8 observes that such a record exists for the namespace AND
+;; that its pinned bytes are still the bytes on disk. It does not rerun tests
+;; and makes no claim that the tests are adequate.
+
+(def ^:private registry-entry-id-pattern #"^test-registry-[0-9a-f]{64}$")
+
+(defn agency-base
+  "Evidence API base, resolved as the rest of the stack resolves it
+  (futon2.aif.pattern-registry/configured-evidence-base): FUTON3C_EVIDENCE_BASE,
+  FUTON3C_SERVER, then IPv4 loopback on FUTON3C_PORT. The listener is
+  IPv4-bound, so the loopback is 127.0.0.1 and not localhost."
+  ([] (agency-base (System/getenv)))
+  ([env]
+   (or (not-empty (get env "FUTON3C_EVIDENCE_BASE"))
+       (not-empty (get env "FUTON3C_SERVER"))
+       (str "http://127.0.0.1:" (or (not-empty (get env "FUTON3C_PORT")) "7070")))))
+
+(defn- sha256-hex [^bytes bs]
+  (format "%064x" (BigInteger. 1 (.digest (doto (MessageDigest/getInstance "SHA-256")
+                                            (.update bs))))))
+
+(defn content-sha
+  "SHA-256 of FILE's current bytes, or nil when it is not there. Byte-for-byte
+  the registry's own hash (futon3c.test-registry/file-sha), so a pinned sha and
+  a current sha are comparable values and not two spellings."
+  [file]
+  (let [f (io/file file)]
+    (when (.isFile f)
+      (sha256-hex (java.nio.file.Files/readAllBytes (.toPath f))))))
+
+(defn fetch-registry-entry
+  "Read one registry record through the evidence API.
+
+  Three outcomes, and C8 turns on telling them apart: the entry map; :absent
+  when the store answers and holds no such record (an observation, false);
+  a refusal when the store could not be asked or did not answer (unreadable)."
+  [base entry-id]
+  (let [url (str (str/replace base #"/$" "") "/api/alpha/evidence/" entry-id)
+        {:keys [status body]} (try (http/get url {:timeout 5000 :throw false})
+                                   (catch Exception e
+                                     {:status :unreachable :body (.getMessage e)}))]
+    (cond
+      (= 404 status) :absent
+      (not= 200 status) (refuse :registry-unreadable {:check :C8 :url url :status status})
+      :else (let [parsed (try (json/read-str body :key-fn keyword)
+                              (catch Exception _ nil))]
+              (cond
+                (nil? parsed) (refuse :registry-unreadable {:check :C8 :url url
+                                                            :reason :unparseable-response})
+                (nil? (:entry parsed)) :absent
+                :else (:entry parsed))))))
+
+(def ^:dynamic *registry-entry*
+  "The seam C8 reads the registry through: (fn [base entry-id] -> entry |
+  :absent | refusal). Bound by tests to a stubbed registry, so C8's own tests
+  neither need a live agency nor load anything into the serving JVM."
+  fetch-registry-entry)
+
+(defn- decode-record
+  "The record is EDN inside the entry body, named by its own digest. Verify
+  that naming before reading it: a body whose text does not hash to the id it
+  was fetched under is an unreadable registry, not an observation about tests."
+  [entry-id entry]
+  (let [body (:evidence/body entry)
+        text (:payload-edn body)]
+    (if-not (string? text)
+      (refuse :registry-unreadable {:check :C8 :entry-id entry-id :reason :no-payload})
+      (let [digest (sha256-hex (.getBytes ^String text "UTF-8"))]
+        (if-not (and (= digest (:sha256 body))
+                     (= entry-id (str "test-registry-" digest)))
+          (refuse :registry-unreadable {:check :C8 :entry-id entry-id
+                                        :reason :record-digest-mismatch})
+          (try (edn/read-string text)
+               (catch Exception _
+                 (refuse :registry-unreadable {:check :C8 :entry-id entry-id
+                                               :reason :unreadable-record}))))))))
+
+(defn- recorded-namespace
+  "The namespace the registry actually ran: the argument after -n in the
+  recorded command. Absent for a command of another shape (a Lean build), and
+  then no namespace is claimed."
+  [command]
+  (when (sequential? command)
+    (second (drop-while #(not= "-n" %) command))))
+
+(defn- locate-record
+  "The locator's :config is the registry's own name for a record — an entry id
+  test-registry-<sha256> — or a path to the EDN config carrying :entry-id.
+  A :config that names no record is a malformed locator, not a false reading:
+  nothing was observed about any registry."
+  [config]
+  (cond
+    (re-matches registry-entry-id-pattern config) {:entry-id config}
+    (.isFile (io/file config))
+    (let [cfg (try (edn/read-string (slurp config)) (catch Exception _ nil))
+          id (:entry-id cfg)]
+      (if (and (string? id) (re-matches registry-entry-id-pattern id))
+        {:entry-id id :base (:agency-url cfg)}
+        (refuse :no-record-id {:check :C8 :config config})))
+    :else (refuse :no-record-id {:check :C8 :config config})))
+
+(defn- path-comparison
+  "Every declared path, its pinned sha and the sha of the bytes there now."
+  [root files kind]
+  (mapv (fn [[path pinned]]
+          (let [current (content-sha (io/file root path))]
+            {:path path :kind kind :pinned pinned :current current
+             :matched? (= pinned current)}))
+        (sort-by key files)))
+
+(defn check-registered-run
+  "C8: the registry holds a warrant for NAMESPACE whose pinned code-path and
+  test-path shas are the shas of those files NOW, whose postcheck matched, and
+  whose run recorded no failures and no errors.
+
+  False (an observation, not a refusal) when there is no such record, when the
+  record is for another namespace, when any pinned path has moved, when the
+  postcheck did not match, or when the run recorded failures. Refuses only on a
+  malformed locator or a registry that cannot be read.
+
+  A true reading says those tests passed over exactly these bytes. It says
+  nothing about whether the tests are worth passing."
+  [{:keys [repo namespace config] :as m}]
+  (or (locator-refusal :C8 m [:repo :namespace :config])
+      (let [located (locate-record config)]
+        (if (:status located) located
+            (let [entry-id (:entry-id located)
+                  root (str repo-root "/" repo)
+                  base (or (:base located) (agency-base))
+                  entry (*registry-entry* base entry-id)
+                  evidence {:repo repo :root root :namespace namespace
+                            :warrant-id entry-id}]
+              (cond
+                (:status entry) (assoc entry :evidence evidence)
+                (= :absent entry) {:observed false :check :C8
+                                   :evidence (assoc evidence :reason :no-entry)}
+                :else
+                (let [record (decode-record entry-id entry)]
+                  (if (:status record) (assoc record :evidence evidence)
+                      (let [ran (recorded-namespace (:command record))
+                            {:keys [failures errors] :as results} (:results record)
+                            paths (into (path-comparison root (:code-files record) :code)
+                                        (path-comparison root (:test-files record) :test))
+                            moved (filterv (complement :matched?) paths)
+                            evidence (assoc evidence
+                                            :recorded-namespace ran
+                                            :postcheck (:postcheck record)
+                                            :warrant? (:warrant? record)
+                                            :run-counts (select-keys results
+                                                                     [:tests :assertions :failures :errors])
+                                            :paths paths
+                                            :moved-paths (mapv :path moved))
+                            reason (cond
+                                     (not= :run (:kind record)) :not-a-run-record
+                                     (not= namespace ran) :namespace-mismatch
+                                     (not (true? (:warrant? record))) :not-a-warrant
+                                     (not= :matched (get-in record [:postcheck :status])) :postcheck-not-matched
+                                     (not (and (number? failures) (zero? failures)
+                                               (number? errors) (zero? errors))) :run-recorded-failures
+                                     (seq moved) :content-moved)]
+                        {:observed (nil? reason) :check :C8
+                         :evidence (cond-> evidence reason (assoc :reason reason))}))))))))) 
+
 (def checks
   {:C3 check-path-exists
    :C4 check-decl-in-file
    :C5 check-registry-entry
-   :C6 check-witness-reference})
+   :C6 check-witness-reference
+   :C8 check-registered-run})
 
 (defn- observe* [tokens]
   (reduce-kv
@@ -159,7 +338,7 @@
    tokens))
 
 (defn observe
-  "Observe located tokens through C3/C4/C5/C6. Unknown classes are refused,
+  "Observe located tokens through C3/C4/C5/C6/C8. Unknown classes are refused,
    never observed absent. No warrant service is consulted."
   [tokens]
   (observe* tokens))
