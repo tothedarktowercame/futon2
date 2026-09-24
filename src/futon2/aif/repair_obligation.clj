@@ -1324,21 +1324,31 @@
 (defn- default-close-reader
   "Locate the close record (007-closed.edn) under the runner data stores
    beside ROOT that names RUN-ID and EVENT-ID. Only wm-full-loop-* stores
-   are scanned."
+   are scanned.
+   The match is a substring test on both ids, so more than one close can
+   satisfy it -- a close that merely mentions another run's id in retained
+   data would. Taking the first of an unordered listing would make the
+   proof depend on directory order, so an ambiguous match REFUSES. Today
+   each of the six 2026-09-23 findings matches exactly one close."
   [root]
   (fn [run-id event-id]
-    (let [data-dir (.getParentFile (io/file root))]
-      (some (fn [^java.io.File f]
-              (let [text (slurp f)]
-                (when (and (str/includes? text run-id)
-                           (str/includes? text event-id))
-                  (strict-read text (str f)))))
-            (->> (.listFiles data-dir)
-                 (filter #(and (.isDirectory ^java.io.File %)
-                               (str/starts-with? (.getName ^java.io.File %) "wm-full-loop")))
-                 (mapcat file-seq)
-                 (filter #(and (.isFile ^java.io.File %)
-                               (= "007-closed.edn" (.getName ^java.io.File %)))))))))
+    (let [data-dir (.getParentFile (io/file root))
+          hits (->> (.listFiles data-dir)
+                    (filter #(and (.isDirectory ^java.io.File %)
+                                  (str/starts-with? (.getName ^java.io.File %) "wm-full-loop")))
+                    (mapcat file-seq)
+                    (filter #(and (.isFile ^java.io.File %)
+                                  (= "007-closed.edn" (.getName ^java.io.File %))))
+                    (filterv (fn [^java.io.File f]
+                               (let [text (slurp f)]
+                                 (and (str/includes? text run-id)
+                                      (str/includes? text event-id))))))]
+      (when (> (count hits) 1)
+        (dismissal-refuse! :close-ambiguous
+                           {:run-id run-id :event-id event-id
+                            :matches (mapv str hits)}))
+      (when-let [^java.io.File f (first hits)]
+        (strict-read (slurp f) (str f))))))
 
 (defn- close-witness
   "The grounding witness map inside a close record: the one map carrying
@@ -1356,6 +1366,8 @@
                 :else nil))]
       (walk close))
     @found))
+
+(declare dismiss-grounding-readback-degraded-impl!)
 
 (defn dismiss-grounding-readback-degraded!
   "Dismiss a FALSE :grounded-no-change machine-failure: a run whose grounding
@@ -1381,9 +1393,19 @@
    stands. This dismissal says the finding misdiagnosed a store-side
    degradation as an ungrounded run; it does not say any repair landed."
   ([finding-id disposition]
-   (dismiss-grounding-readback-degraded! default-root finding-id disposition {}))
-  ([finding-id disposition opts]
-   (dismiss-grounding-readback-degraded! default-root finding-id disposition opts))
+   (dismiss-grounding-readback-degraded-impl! default-root finding-id disposition {}))
+  ([root finding-id disposition]
+   (dismiss-grounding-readback-degraded-impl! root finding-id disposition {})))
+
+(defn- dismiss-grounding-readback-degraded-impl!
+  "Implementation seam. The close reader and the substrate reader are
+   parameters HERE and nowhere else, so the tests can drive each proof leg.
+   The public route above takes no such argument: a caller that can supply
+   the close record and the readback can supply the entire proof, which is
+   the one thing every route in this file is built to prevent. The arities
+   also match the other six routes -- (finding-id disposition) and
+   (root finding-id disposition) -- so the shape a reader of this file
+   would write means what it looks like."
   ([root finding-id {:keys [authority reason actor] :as disposition}
     {:keys [close-read-fn entity-by-id-fn]
      :or {close-read-fn (default-close-reader root)

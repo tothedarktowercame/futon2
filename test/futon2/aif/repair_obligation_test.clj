@@ -43,11 +43,15 @@
         disposition {:authority "Joe 2026-09-24: repair stop-lines from outside"
                      :reason :grounding-readback-degraded :actor "kimi-6"}
         string-props (pr-str {:implementation/commit commit :implementation/files ["f"]})
+        ;; The readers are injected through the PRIVATE impl var, not the
+        ;; public route: the public one takes no such argument, so a caller
+        ;; cannot hand this route its own proof. Driving the legs is a test
+        ;; privilege, and reaching through #' is what says so.
+        impl #'repair/dismiss-grounding-readback-degraded-impl!
         run (fn [root entity close-ret]
-              (repair/dismiss-grounding-readback-degraded!
-               root "finding-gnc" disposition
-               {:close-read-fn (fn [_ _] close-ret)
-                :entity-by-id-fn (fn [_] entity)}))]
+              (impl root "finding-gnc" disposition
+                    {:close-read-fn (fn [_ _] close-ret)
+                     :entity-by-id-fn (fn [_] entity)}))]
     (testing "the false finding dismisses: string props naming the same commit"
       (let [root (temp-root)]
         (write-record! root "findings" finding)
@@ -58,6 +62,13 @@
           (is (= :already-dismissed
                  (dismissal-refusal
                   #(run root {:props string-props} close)))))))
+    (testing "the public route exposes no seam to supply the proof through"
+      ;; Every sibling route in repair_obligation.clj is (finding-id
+      ;; disposition) / (root finding-id disposition) and finds its own
+      ;; evidence. If this one ever grows a 4-arity again, a caller can
+      ;; fabricate the close and the readback and dismiss an HONEST finding.
+      (is (= #{2 3} (into #{} (map count)
+                          (:arglists (meta #'repair/dismiss-grounding-readback-degraded!))))))
     (testing "THE REFUSAL CASE: a genuine grounded-no-change refuses"
       ;; The entity's props read back as a proper MAP: the dial really did
       ;; not move, the finding is honest, and this route must not clear it.
