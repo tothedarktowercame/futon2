@@ -64,6 +64,23 @@ it has, they are spent under the ordinary rules: issue-time accounting, failed
 runs never refund, and consumption counted against this authorization's
 identity.
 
+## Joe's further offer, 2026-09-24 — noted, not allocated
+
+After the board work began Joe said: *"I can award up to five more clicks,
+although it sounds like you only are going to need one of them."*
+
+**Nothing is allocated on that offer and `allocated` stays 5.** This grant's
+five are entirely unspent — the ledger carries zero entries whose
+`:authorization` is this file's, against 35 entries under the seven earlier
+grants. Minting a renewal-8 on top of an untouched renewal-7 would create a
+second budget to reconcile and no additional capacity.
+
+The authority is recorded here so it can be drawn on without another round
+trip: if the proof needs more than the five in hand, this line is the operator
+consent, and the draw is recorded by raising `allocated` in
+`ordinary_click_budget.clj` with a note naming this section — not by a new
+document.
+
 ## Mechanics
 
 `futon3c/src/futon3c/wm/ordinary_click_budget.clj` carries `authorization` (this
