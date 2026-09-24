@@ -313,3 +313,150 @@ Add to clause 1:
 Without this, W₁'s "measured-rate side proposition" quantifies over a
 set the record cannot present, and any estimator risks the two
 falsifiers above as silent defaults.
+
+## Revision 2 — complete close-carrier census and extracted pair identity
+
+Author: codex-1, 2026-09-24. This append corrects the incomplete inventory
+and restricted population above; it does not rewrite the original findings.
+Sources inspected at futon2 `d1b011ab9dc54ee0740309752bfc110174bc554f`:
+`full_loop_runner.clj` (`retain-token-outcome!`, `retain-kernel-example!`,
+both close assemblies), `kernel_example.clj` (`align`, `collect`),
+`attempt_learning.clj` (`receipt`), `learning_trial.clj` (`receipt`), and
+`learning_trial_ledger.clj` (`record!`, `read-trials`, `b-update`).
+
+### R2.1 Two additional carriers
+
+1. `[:payload :judgment :kernel-example]` is an OBSERVATION carrier,
+   schema `:wm/aligned-kernel-example-v1`. Its complete token population is
+   `[:observation-projection :observations]`, a token-keyed map whose rows
+   carry `[:artifact-observation :observed]` and `:measurement :result`
+   (check class and evidence). The revision pair is nested at
+   `[:observation-projection :revision-pair]`, not at the example root.
+   `:tokens` is only the wanted-token projection; counting it alone misses
+   the other observed tokens. `:observation-source {:path :sha256}` names
+   the enactment file and its raw byte hash. `align` checks occurrence,
+   universe, declaration/meaning, artifact revision and measurement joins;
+   it emits typed missing observations when execution is not admitted.
+   This does not establish reference truth or causal attribution.
+2. `[:payload :judgment :learning-trial-receipt]`, also retained inside the
+   token comparison, is schema `:wm/learning-trial-receipt-v2`. Its
+   `:trials` are selected-cascade/effect/attempt B-learning trials with
+   `:after-observation`, retained measurements, deduplication identity,
+   admission/held status and ledger `:counted?`. `attempt-learning/receipt`
+   reads the same verified observations as the kernel example, and
+   `learning-ledger/record!` records eligible trials. Neither trial
+   admission, ledger counting, nor the illustrative Beta summary is an
+   independent truth adjudication or a new observation. Refuse the receipt
+   and trial wrapper as EITHER pair leg with
+   `:reason :learning-trial-receipt-not-a-leg`. The underlying locator
+   report can instead be cited through its observation carrier and source.
+
+The four earlier categories remain: comparison (observation plus prediction
+agreement verdict), accepted-increment (compound verdict), ending
+classification (record-only class), occurrence/outcome (identity/run label).
+The root comparison and route-attestation comparison are equal in all 13
+non-aborted closes; they are copies, not separate measurements. In 75/002,
+root comparison, kernel example and learning receipt are nil on the old
+record; the route comparison is explicitly absent. The census represents
+these legacy nils as `{:status :missing :reason :carrier-not-recorded}`;
+it neither rewrites the record nor substitutes a boolean.
+
+### R2.2 Recomputed machinery-70..76 population
+
+Read all **14** files matching
+`data/wm-full-loop-machinery-N/wm-contract-machinery-N-v1/attempt-00X/007-closed.edn`,
+N=70..76, X=1,2, with a tagged-literal-tolerant EDN reader and an EOF check.
+Table cells are **true / false / typed-missing token counts**. Kernel counts
+use the complete admitted observation map, not just wanted tokens. When
+projection admission fails, the wanted-token missing rows are counted.
+
+| N / attempt | run id (date prefix omitted) | Comparison | Kernel | B trials counted / held |
+|---|---|---|---|---|
+| 70/001 | 1790037762 (2026-09-22) | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 1 |
+| 70/002 | 1790053967 (2026-09-22) | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 1 |
+| 71/001 | 1790060806 (2026-09-22) | 2 / 1 / 0 | 3 / 4 / 0 | 1 / 0 |
+| 71/002 | 1790110142 (2026-09-22) | 1 / 1 / 0 | 1 / 2 / 0 | 1 / 0 |
+| 72/001 | 1790131591 (2026-09-23) | 0 / 1 / 0 | 1 / 5 / 0 | 1 / 3 |
+| 72/002 | 1790136186 (2026-09-23) | 0 / 1 / 0 | 2 / 4 / 0 | 1 / 3 |
+| 73/001 | 1790161992 (2026-09-23) | 0 / 1 / 0 | 2 / 4 / 0 | 1 / 3 |
+| 73/002 | 1790184736 (2026-09-23) | 0 / 1 / 0 | 2 / 4 / 0 | 1 / 3 |
+| 74/001 | 1790187227 (2026-09-23) | 0 / 1 / 0 | 2 / 4 / 0 | 1 / 3 |
+| 74/002 | 1790189901 (2026-09-23) | 0 / 1 / 0 | 3 / 3 / 0 | 1 / 3 |
+| 75/001 | 1790193054 (2026-09-23) | 0 / 1 / 0 | 4 / 2 / 0 | 1 / 3 |
+| 75/002 | occurrence missing: agent-unavailable | carrier absent | carrier missing | carrier missing |
+| 76/001 | 1790196782 (2026-09-23) | 0 / 1 / 0 | 5 / 1 / 0 | 1 / 1 |
+| 76/002 | 1790199409 (2026-09-23) | 1 / 0 / 0 | 6 / 0 / 0 | 1 / 1 |
+| Total | 14 closes | 4 / 10 / 5 | 31 / 33 / 5 | 11 / 25 |
+
+Thus 13 compared receipts carry 19 wanted rows, including five missing
+measurements (70); one further close has an absent comparison. The 13
+recorded kernel examples comprise 11 admitted projections (64 booleans)
+and two unavailable projections (five wanted-token typed absences,
+`:task-execution-incomplete`). The aborted close is one **carrier-level**
+absence, not a fabricated token row. Thirteen learning receipts have 36
+trials, 11 counted and 25 held. None supplies independent truth.
+
+The 14 boolean comparison rows are already among the 64 kernel observations
+on the same occurrence/token/revision; adding the carrier counts would
+count them twice. The kernel adds **50 distinct observed occurrence/token
+rows** to the comparison inventory. The held-out calibration snapshot's
+two realised-false rows remain same-locator reobservations, not reference
+truths. **Eligible truth/observation pairs: 0** in the enlarged inventory;
+64 measured occurrence/token observations lack independent truth, five
+wanted-token rows lack an admitted observation as well, and one close lacks
+a token carrier. False-positive and false-negative truth denominators are
+both zero: these absences cannot be estimated as zero error rates.
+
+Concrete 76/002 source: `futon3c/data/wm-d-task-enactment/` +
+`action-5c1163d2-3e45-4fea-8919-6e2b41c6acfe.edn`, raw SHA-256
+`161d0c1c9afa30e927d4d08a110256820ee3563d227aac7b7c38dc1f921cdc66`.
+Its projection records before `a1957b7cb871a752927aa98ee2340ed91c64812f`,
+after `97e17e10f2695c481c55ddaebe9026f2d245663f`, and
+`:before-evidence :not-measured`. All six observations are C4 true;
+the two learning trials are one held, one counted. Neither the unmeasured
+before leg nor the reference truth may be inferred from those six truths
+of the locator's report.
+
+### R2.3 Pair hash domain and explicit CERT-S/GEN-D amendment
+
+Proposed CERT-S addition (upstream source rows for its A entry) and GEN-D
+extraction rule: `:pair-sha256` is **only a canonical extracted-value hash**,
+`"sha256:<hex>"`, over this five-key map:
+
+```clojure
+{:occurrence <identity projection>
+ :token <qualified token or typed absence>
+ :revision-pair <recorded revision pair or typed absence per missing revision>
+ :observation <complete extracted observation leg including source ref>
+ :truth <complete extracted truth leg or typed absence>}
+```
+
+The occurrence projection has exactly `:run/id`, `:cohort/id`,
+`:attempt/id`, `:transition/id`, `:action/id`, `:action/value-sha256`;
+unrecorded fields carry `{:status :missing :reason :identity-not-recorded}`.
+The full action payload, schema/eligibility fields and the hash itself are
+outside this byte domain. When a comparison supplies only its after
+revision, before is `{:status :missing :reason :before-revision-not-recorded}`;
+no predecessor is reconstructed. Missing after is similarly typed.
+
+Canonical bytes follow CERT-S §3: UTF-8, no trailing newline, maps sorted
+by recursively canonical printed key, sets sorted by recursively canonical
+printed element **with set delimiters preserved**, vectors remain vectors,
+exact integers/ratios, doubles as `#wm/double "<Double/toHexString>"`, normal
+EDN escaping for strings, no metadata or comments. Use one space between
+map entries and between key/value; no commas. Recompute from those five
+values to verify. Record/source raw-file SHA-256 remains a separate identity
+and is never replaced by the pair hash. The observation source retains its
+raw `:path` and `:sha256`; hashing the extracted pair does not verify the
+referenced file. This explicitly separates the two domains GEN-D §1.1/§1.3
+requires. Historical OBS-P hashes are not silently reinterpreted: the
+amended producer uses `:schema-version 2` and declares
+`:pair-hash-domain :wm/token-outcome-pair-value-v2`.
+
+Amend §7's proposed W1/P1 eligibility definition and CERT-S's A source-row
+rule together: only same-occurrence/token/revision independent
+boolean/boolean pairs are eligible. Kernel observation rows are allowed;
+learning-trial receipt/trial wrappers, accepted-increment and comparison
+verdicts are neither leg. A missing or refused leg excludes the pair.
+These are proposed amendments, not a claim that W1 or CERT-S already
+contains the missing definitions, and the census does not establish W1.
