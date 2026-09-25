@@ -27,9 +27,8 @@ the composer file names none, so the dimension owner is named per gap.
 
 ## 1. Excursion and ticket nodes
 
-**Needed.** Per field entry of kind `:excursion` or `:ticket` (282 of 354 in
-the live field), the same facts as missions: cited patterns, cluster/basin,
-held, lineage.
+**Needed.** For the 282 excursions and tickets of 354: the facts missions
+get (cited patterns, cluster/basin, held, lineage).
 
 **Today.** The join takes the first endpoint matching `-d/mission/`
 (`cascade_real_live.clj:273`, `mission-ep`). Endpoint kinds, from the store walks:
