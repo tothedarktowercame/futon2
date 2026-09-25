@@ -119,11 +119,18 @@ target. This is stated here, not settled.
 its target ("Pick one instance and declare its interface — not all eight")
 by a declared cost ordering (declare first: free; retrofit in code:
 mechanical; retrofit in prompt text: worst), which is neither a feasibility
-exclusion nor a G. `Pₜ` therefore also carries `:cost-ordering` (the declared
-ranking, its source span, and how it entered the choice: as a prior over
-targets, a tie-break, or not at all). Wₜ adds: if a cost ordering is
-declared, the record states how it entered, and the chosen target is
-consistent with that statement.
+exclusion nor a G. [AMENDED 2026-09-25 ~03:20Z after claude-10's read: the
+list orders instances 4-8 of ONE mission, and Pₜ ranks work targets (M-,
+E-, T- objects, one per flight); inside a flight the target is fixed and the
+instances are its sub-goals, so the order a flight takes them in is its
+cascade precedence, not a target choice. M-futon-seams is COMPLETE and not
+in the field at all (f57402d0). So `:cost-ordering` is NOT a target-field
+key.] A mission's declared cost ordering is recorded as an input to that
+mission's flight, beside the wants, with its source span; the flight's
+record states how it entered the precedence over instances (as the order
+taken, a tie-break, or not at all), and the precedence taken is consistent
+with that statement. A `:cost-ordering` at target grain would fit only a
+mission that orders other missions or tickets, and none has been seen.
 
 ### Clause 0 — an ordinary, semantically nontrivial, machine-constructed field exists (restated; AR-33, AR-34)
 
@@ -309,8 +316,9 @@ priming edge; the recorded prior must change.
    condition.
 4. **Constructor: partial-want construction** (D15), so X₀(d) has something
    to pass.
-5. **Record: `:cost-ordering` in the target field**, and the linear-extension
-   spread for X₀(e).
+5. **Record: a mission's declared cost ordering as a flight input beside
+   the wants** (not a target-field key; amended 2026-09-25, see Clause T),
+   and the linear-extension spread for X₀(e).
 
 ## Checkpoint 1 — M-futon-seams worked example (2026-09-24, not complete)
 
