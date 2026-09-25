@@ -72,6 +72,11 @@
 ;; ---------------------------------------------------------------------------
 ;; D11 part 4: the flight asks for the interpretations its wants lack
 
+(def reading-kinds
+  "Request kinds answered in mission-reading's grammar; any other kind is a
+  want interpretation."
+  #{:locator :criteria :coverage :constraints})
+
 (defn agency-answer-fn
   "An answer function that asks SEAT through Agency: a bell (mode work, the
   flight's target as the requisition) carrying the want-interpretation
@@ -83,7 +88,7 @@
     :or {caller "wm-flight" dispatch! runner/dispatch! poll! runner/poll-job!
          job-text futon2.aif.task-execution-evidence/job-text}}]
   (fn [issued]
-    (let [prompt-fn (or prompt-fn (if (#{:locator :criteria} (:kind issued)) reading/prompt wi/prompt))
+    (let [prompt-fn (or prompt-fn (if (reading-kinds (:kind issued)) reading/prompt wi/prompt))
           ;; Kimi seats refuse a call without this line in the prompt
           ;; (Agency: "You can't use a Kimi seat without a requisition")
           requisition (str "Requisition: " (:target issued) " — War Machine "

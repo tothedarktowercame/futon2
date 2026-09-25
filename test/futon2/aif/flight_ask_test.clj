@@ -133,6 +133,25 @@
         "requisition is the mission, on the prompt's first line (Kimi seats refuse without it); the prompt states the grammar")
     (is (= {:seat "kimi-6" :job-id "job-9" :state "done" :text "reply text"} a))))
 
+;; claude-2, answering an M-f11 coverage request (2026-09-24): the dispatch
+;; sent :coverage and :constraints requests the want-interpretation grammar,
+;; whose reply read-one then discards as unparseable
+(deftest each-request-kind-is-sent-the-grammar-its-reply-is-read-in
+  (let [sent (atom nil)
+        af (fr/agency-answer-fn {:seat "claude-2" :opts {}
+                                 :dispatch! (fn [_ _ _ _ prompt] (reset! sent prompt) {:job-id "j"})
+                                 :poll! (fn [_ id] {:state "done" :job-id id})
+                                 :job-text (constantly "")})
+        grammar (fn [kind]
+                  (af {:kind kind :target "M-f11" :request-id "r" :want {:token :t}})
+                  (second (re-find #"REPLY GRAMMAR: exactly one fenced ```edn block holding \{:schema (\S+)" @sent)))]
+    (is (= ":wm/criteria-response-v1" (grammar :coverage)))
+    (is (str/includes? @sent ":scope-outs"))
+    (is (= ":wm/constraints-response-v1" (grammar :constraints)))
+    (is (= ":wm/locator-response-v1" (grammar :locator)))
+    (is (= ":wm/criteria-response-v1" (grammar :criteria)))
+    (is (not (str/includes? (do (grammar nil) @sent) "D11 part 5")) "a want interpretation keeps its own prompt")))
+
 (deftest the-loop-asks-before-each-click
   (let [asks (atom 0)
         f (flight/run! (seams-flight)
