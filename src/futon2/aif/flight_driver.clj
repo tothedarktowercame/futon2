@@ -5,13 +5,29 @@
       --repo futon3c --path holes/missions/M-futon-seams.md \\
       --lifecycle-path holes/labs/M-futon-seams/lifecycle.edn [--max-clicks 4] [--run]
 
+  The spike, the first flight of M-autoclock-in (M-wm-wiring), with every
+  wired step given:
+
+    clojure -M -m futon2.aif.flight-driver M-autoclock-in --seat <seat> \\
+      --repo futon3c --path holes/missions/M-autoclock-in.md \\
+      --checker /home/joe/code/futon3c/holes/labs/M-futon-seams/exemplar/proof2a_check.clj \\
+      --bb bb --library-root /home/joe/code/futon3/library --max-clicks 1 [--run]
+
+  Also --field-entry <edn> (the target field's entry for the target) and
+  --cascades <dir> (the target's cascades, for the read step's served-by
+  reading). Each flag not given is a typed absence on the plan's
+  :resolved-steps. The store is wi/default-store, under futon2's data/: a
+  --run writes the flight record, the readings, the requests and any
+  enactment record there.
+
   Without --run nothing is sent and nothing is written: the plan is the
   record Joe authorizes against. With --run, ONE flight: the ask step before
   each click (D11, answering seat named here), clicks as ordinary clicks
   through POST /api/alpha/wm/click (budget and cast-seat preflight apply),
   and a flight record written under the store, whose path is printed with
   every request, answer job, publication and click."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn]
+            [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [clojure.string :as str]
             [futon2.aif.cascade-sources :as cs]
@@ -83,6 +99,21 @@
                   observe (assoc :observe observe))
                 {:id id}))
 
+(defn resolved-steps
+  "What a real run would use for each wired step (M-wm-wiring WM-DRIVER-I),
+  from the parsed OPTS; a flag not given is a typed absence, never a default
+  standing in for it."
+  [{:keys [checker bb library-root field-entry cascades]}]
+  {:checker (or checker {:absent :no-wc-checker-configured})
+   :bb (or bb {:absent :not-given :runs "bb"})
+   :library-root (or library-root {:absent :not-in-flight-opts})
+   :field-entry (or field-entry {:absent :no-field-entry})
+   :cascades (or cascades {:absent :no-cascades-dir})
+   :quotes {:absent :no-quotes}
+   :dispatch-step {:absent :no-dispatch-configured}
+   :enact "flight-runner/enact-fn over the click's run record (observe-publication-fn inside it)"
+   :wc "flight-runner/wc-verdict-fn with the checker and bb"})
+
 (defn plan
   "The flight the driver would fly, as data. OPTS: parsed args plus
   :sources (the tick's declared sources) and, for tests, :read-text,
@@ -145,21 +176,41 @@
               :run-ids (str "<date>-" id "-click-<n>")
               :via "POST /api/alpha/wm/click with flight-edn: an ordinary click (budget consume + cast-seat preflight); runner/run-opportunity! in the serving JVM"}
      :needs-in-serving-jvm "futon3c b7340968 (flight-edn) and futon2 runner/war-machine at this checkout, reloaded from master"
+     :placement (select-keys (resolve-target opts) [:target :target-source :draw-seed :hand-target-overridden])
+     :resolved-steps (resolved-steps opts)
      :run? false}))
 
 (defn run-flight!
   "Fly the planned flight once. Returns {:flight … :record-path …}."
-  [{:keys [seat store max-clicks sources] :as opts} planned]
+  [{:keys [seat store max-clicks sources checker bb library-root cascades
+           run-record-dir click-fn answer-fn dispatch-step!] :as opts} planned]
   (let [target (:target (resolve-target opts))
         store (or store wi/default-store)
+        run-record-dir (or run-record-dir runner/default-run-record-dir)
+        record-path (fn [click-id] (str (io/file run-record-dir (str "tick-run-record-" click-id ".edn"))))
         f (flight-for (assoc opts :id (:flight-id planned)))
-        answer (fr/agency-answer-fn {:seat seat :caller "wm-flight" :opts (runner/config {})})
+        answer (or answer-fn
+                   (fr/agency-answer-fn (cond-> {:seat seat :caller "wm-flight" :opts (runner/config {})}
+                                          library-root (assoc :library-root library-root))))
+        enact (fr/enact-fn (cond-> {:interpretations (fn [fl] (:patterns (wi/read-published store (:target fl))))
+                                    :fetch-run-record (fn [click-id]
+                                                        (let [p (io/file (record-path click-id))]
+                                                          (when (.isFile p)
+                                                            (clojure.edn/read-string {:default tagged-literal} (slurp p)))))
+                                    :record-dir (str (io/file store "flights" "enactments"))}
+                             dispatch-step! (assoc :dispatch-step! dispatch-step!)))
+        wc (fr/wc-verdict-fn (cond-> {:click-record-path record-path}
+                               checker (assoc :checker checker)
+                               bb (assoc :bb bb)))
         notify! (fn [owner tgt prompt] (runner/dispatch! (runner/config {}) owner "wm-flight" tgt
                                                   (str "Requisition: " tgt " — War Machine questions for the mission owner\n\n" prompt)))
-        flown (flight/run! f {:read-fn (fr/read-fn {:store store :answer-fn answer
-                                                   :notify! notify! :caller "joe"})
+        flown (flight/run! f {:read-fn (fr/read-fn (cond-> {:store store :answer-fn answer
+                                                            :notify! notify! :caller "joe"}
+                                                     cascades (assoc :served-by-cascades {target cascades})))
                               :ask-fn (fr/ask-fn {:store store :answer-fn answer})
-                              :click-fn (fr/http-click-fn {:caller "wm-flight"})
+                              :click-fn (or click-fn (fr/http-click-fn {:caller "wm-flight" :run-record-dir run-record-dir}))
+                              :enact-fn enact
+                              :wc-fn wc
                               :observe-fn (fr/observe-fn)
                               :sources-fn (constantly sources)
                               :max-clicks (or max-clicks 4)})
@@ -167,6 +218,7 @@
     (.mkdirs (.getParentFile path))
     (spit path (with-out-str (pp/pprint {:plan planned :flight flown})))
     {:flight flown :record-path (.getCanonicalPath path)
+     :enactments (:enactments flown)
      :readings (vec (for [a (:readings flown) q (:asked a)] (select-keys q [:kind :want :request-id :seat :job-id :outcome])))
      :requests (vec (for [a (:asks flown) q (:asked a)] (select-keys q [:want :request-id :seat :job-id :outcome])))
      :published-store (str store "/" target ".edn")
@@ -200,7 +252,9 @@
   [args & [{:keys [load-sources] :or {load-sources #(cs/with-context-fn (cs/load-declared cs/default-dir))}}]]
   (let [opts (parse-args args)
         _ (check-args! opts)
-        opts (cond-> opts (:max-clicks opts) (update :max-clicks parse-long))
+        opts (cond-> opts
+               (:max-clicks opts) (update :max-clicks parse-long)
+               (:field-entry opts) (update :field-entry clojure.edn/read-string))
         opts (assoc opts :sources (load-sources))
         planned (plan opts)]
     {:plan planned

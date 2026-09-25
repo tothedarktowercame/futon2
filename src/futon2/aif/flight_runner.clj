@@ -574,8 +574,14 @@
          repo-root "/home/joe/code/futon3c"}}]
   (fn [flight click]
     (let [chosen (:chosen click)]
-      (if-not (and chosen (:candidate chosen))
+      (cond
+        (not (and chosen (:candidate chosen)))
         {:absent :no-decision :click-id (:click-id click)}
+        ;; a decision with no seat to carry it out: recorded, no record
+        ;; written, never a throw (WM-DRIVER-I)
+        (nil? dispatch-step!)
+        {:absent :no-dispatch-configured :click-id (:click-id click)}
+        :else
         (let [precedence (vec (:precedence chosen))
               interps (if interpretations (interpretations flight) {})
               grain-p (grain-pattern precedence interps)

@@ -4,6 +4,7 @@
   20959e4f (after the ARGUE -> DOCUMENT retraction) with its lifecycle at
   d74a7c5a."
   (:require [clojure.edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.flight-driver :as fd]
@@ -115,3 +116,57 @@
         (is (= 1 @reads))
         (is (nil? (:ran r)))
         (is (string? (get-in r [:read :read-for])))))))
+
+;; ---------------------------------------------------------------------------
+;; WM-DRIVER-I: the wired steps reach run-flight!, each flag not given is a
+;; typed absence, and a decision with no dispatch function is recorded, not
+;; thrown. Fixtures only: no seat, no click, a temp store and run-record dir.
+
+(deftest the-flags-reach-the-plan-and-absences-are-typed
+  (let [base ["M-futon-seams" "--seat" "kimi-6" "--repo" "futon3c"
+              "--path" "holes/missions/M-futon-seams.md" "--store" (store)]
+        load {:load-sources (constantly {:beta-by-context {:WM {:beta 1}}})}
+        given (:plan (fd/main* (into base ["--checker" "/c/proof2a_check.clj" "--bb" "/usr/bin/bb"
+                                           "--library-root" "/lib" "--cascades" "/casc"
+                                           "--field-entry" "{:target \"M-futon-seams\" :next-step :read-criteria}"])
+                               load))
+        bare (:plan (fd/main* base load))]
+    (is (= {:checker "/c/proof2a_check.clj" :bb "/usr/bin/bb" :library-root "/lib" :cascades "/casc"
+            :field-entry {:target "M-futon-seams" :next-step :read-criteria}}
+           (select-keys (:resolved-steps given) [:checker :bb :library-root :cascades :field-entry])))
+    (is (= {:checker {:absent :no-wc-checker-configured} :bb {:absent :not-given :runs "bb"}
+            :library-root {:absent :not-in-flight-opts} :field-entry {:absent :no-field-entry}
+            :cascades {:absent :no-cascades-dir} :quotes {:absent :no-quotes}
+            :dispatch-step {:absent :no-dispatch-configured}}
+           (select-keys (:resolved-steps bare) [:checker :bb :library-root :field-entry :cascades :quotes :dispatch-step])))
+    (is (= {:target "M-futon-seams" :target-source :hand-placed} (:placement bare)))))
+
+(defn- fixture-checker [s]
+  (let [f (io/file (store) "checker.clj")]
+    (spit f (str "(println " (pr-str s) ")\n"))
+    (str f)))
+
+(defn- wired-run [extra]
+  (let [runs (store)
+        _ (spit (io/file runs "tick-run-record-run-w.edn") (pr-str {:repair/publication []}))
+        opts (merge (fixture-opts)
+                    {:run-record-dir runs
+                     :answer-fn (fn [_] {:seat "fixture" :job-id "none" :state "failed"})
+                     :click-fn (constantly {:click-id "run-w" :chosen {:candidate :cand/w :precedence [:p/w]}})
+                     :checker (fixture-checker "[]")
+                     :max-clicks 1}
+                    extra)]
+    [opts (fd/run-flight! opts {:flight-id "flight-wired"})]))
+
+(deftest run-flight-reaches-the-enactment-and-the-wc-call
+  (let [[opts r] (wired-run {:dispatch-step! (fn [_] {:commit "c" :produced :t :check {:class :fixture}})})
+        entry (first (:enactments r))]
+    (is (= "run-w" (:click-id entry)))
+    (is (clojure.string/starts-with? (:record-path entry) (:store opts)) "the enactment record is under the store")
+    (is (= [] (get-in entry [:wc :verdict])) "the checker the flag named ran")
+    (is (= {:absent :no-repair-obligation-for-target :target "M-futon-seams"} (:publication-observed entry)))))
+
+(deftest a-decision-with-no-dispatch-is-recorded-not-thrown
+  (let [[opts r] (wired-run {})]
+    (is (= [{:enactment {:absent :no-dispatch-configured} :click-id "run-w"}] (:enactments r)))
+    (is (not (.exists (io/file (:store opts) "flights" "enactments"))) "no enactment record written")))
