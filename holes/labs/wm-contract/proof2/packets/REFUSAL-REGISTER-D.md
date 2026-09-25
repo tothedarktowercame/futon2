@@ -399,3 +399,28 @@ grep -c 'dispatch-step!' src/futon2/aif/flight_driver.clj      # 0 — no produc
 
 A count above a list's is a row this register missed. **Stated limit:** the 43 sites in D4.1 with no case at the site were not chased into the packets
 and rulings that may carry one; "no case found at the site" is all that was measured.
+---
+
+# D5 — what the first flight reached, and the shapes its fixes added
+
+Read at futon2 `2e509a34` and futon3c `3c29c70d`; read-only, nothing proposed for removal. The first flight of M-autoclock-in (`flight-d00574c8`, record copy futon3c `13b6d517` `holes/labs/M-wm-wiring/spike/`) reached two refusals §1-§D4 did not carry — the wiring defect the standing rule names — and its fixes added typed shapes. Every line, keyword and shape below was read at the sha given.
+
+| # | kind | site | condition | tick/flight | case |
+|---|---|---|---|---|---|
+| 19 | `:wm-click-cast-not-invoke-ready` | futon3c `runner_service.clj:190` `cast-preflight-refusal` (409, `:unready {role {:seat … :reason …}}`); thrown in `transport/http.clj`'s `handle-wm-click-start` (defn `:8921`) at `:9001-9002`; the handler's catch puts `:unready` under `:details` at `:9017-9024` | a cast seat the caller or env names is `:absent` (not on the roster), `:not-invoke-ready`, `:busy` — **or the observed status keyword**, the docstring's fourth reason, which reaches the flight as readily as the three | **neither, until futon2 `8588dba0`**: it is the click server's own. Since that commit it lands on the flight as the `:status` and `:detail` of §1's existing `:click-not-started` abstention (`flight_runner.clj:429-441` in `http-click-fn`; `flight.clj:231` and `:236`, the abstention and the `:need`), so §2's `:click-not-started` entry (line 75) gains a detail rather than the register gaining a flight kind | AIF-validity, and the site says so (`http.clj:8993-8996`): "A rationed click must not be spent on a run that cannot reach selection for a reason knowable now", the check firing before the issue callback and its budget append. Not red tape — it keeps the ledger from being debited for a run whose failure is knowable now. Narrowed by futon2 `393660c7`: with no default cast, a click naming no seat is not preflighted at all, so the guard fires only on a configuration that claims seats |
+| 20 | `:construction-threw` | `flight_runner.clj:254-257` in `issue-request` (defn `:240`), futon2 `9eed8b7e`: `{:kind :construction-threw :class … :message … :data-keys …}` | any exception out of `wi/request!` or `wi/issue!` that carries no `:interpretation/refusal` | flight (the ask step) | the typed-absence rule, and the defect is stated at `:243-245`: "a nil refusal once fell through ask-one and went to the seat as the request (the spike, three wants)" — a nil standing in for a refusal, and the seat asked with it. The entry is `:request-refused` (`:322`, already in §1's ask-step list at line 68) and the seat is not asked: `settle` is the other branch, `:323`. The spike reached it three times, the exception recorded as unknown on the mission |
+
+## D5.1 Typed absences these fixes added
+
+| what | site |
+|---|---|
+| `:status {:absent :no-response}`, with `:detail {:absent :no-response :message …}` — the POST threw | `flight_runner.clj:436`, `:438` (`8588dba0`) |
+| `:detail {:absent :no-reason-in-body :body …}` — a reply carrying none of `:error :message :rejected :unready :details` | `:439-440` |
+| `:detail {:absent :no-body}` — a reply body that is not a map | `:441` |
+| `:failure-detail {:absent :no-cast-given :roles […]}` — a tick that selected an action with no cast given; `:author` and `:reviewer` are the roles checked, not `:repair-reviewer` | `full_loop_runner.clj:4742-4746` (`393660c7`), under the existing `:agent-unavailable` row, no new kind; the brief's own `{:absent :no-cast-given}` for those two roles at `:5720-5721` |
+
+## D5.2 Correction to §D4.1, and how long row 19 went unregistered
+
+`393660c7` inserted the `:no-cast-given` throw into the seat-and-transport family, so §D4.1's falsifier count is stale: the runner now has **53** `throw (ex-info` sites, not the 52 read at `d6df5909`, and three of that row's citations moved — `:4538`→`:4542`, `:4551`→`:4557`, `:4743`→`:4756` — with the new throw at `:4742`. Its class is unchanged: `:outcome :agent-unavailable`, caught at `run-opportunity!`'s boundary, recorded, the flight sees a result.
+
+Row 19 is not new code. `cast-preflight-refusal` has existed since futon3c `507d90b3` (2026-09-23 20:38), so a reachable refusal sat unregistered for two days before the spike reached it — which is what the register is for, and the reason §D4.4's note about the spike's dispatch function applies to the click endpoint as well as to the seat.
