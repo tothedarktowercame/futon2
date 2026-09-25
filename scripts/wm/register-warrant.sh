@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # register-warrant.sh <test-namespace> — register a NARROW test warrant.
 #
-# Usage:
+# Usage (run from anywhere inside a canonical futon repo — futon2 or futon3c;
+# the repo is taken from the current directory's git toplevel):
 #   AUTHOR=zai-1 scripts/wm/register-warrant.sh futon2.vm.standing-enacted-policy-is-cascade-g-test
 #
 # WHY NARROW: a registration config that declares :code-paths ["src"] and
@@ -23,7 +24,7 @@
 # ARTIFACT_DIR (default /home/joe/code/storage/test-registry/artifacts).
 #
 # --pinned <commit>: register from a git worktree pinned at <commit> (a SIBLING
-# of futon2, because deps.edn's local/root paths are ../futonN). This is not a
+# of the repo, because deps.edn's local/root paths are ../futonN). This is not a
 # convenience wrapper: since futon3c's :scope-not-committed guard (6f50e24b,
 # 18ba2516), registering from the LIVE shared checkout refuses almost always,
 # because git status in a tree five agents are editing is almost never empty.
@@ -37,7 +38,7 @@
 # the check correctly refuses :stale-sha.
 set -euo pipefail
 
-usage() { sed -n '2,26p' "$0"; exit 2; }
+usage() { sed -n '2,28p' "$0"; exit 2; }
 PINNED=""
 case "${1:-}" in
   --pinned) [ $# -eq 3 ] || usage; PINNED="$2"; NS="$3" ;;
@@ -47,20 +48,35 @@ esac
 AGENCY_URL="${AGENCY_URL:-http://localhost:7070}"
 ARTIFACT_DIR="${ARTIFACT_DIR:-/home/joe/code/storage/test-registry/artifacts}"
 
-FUTON2="$(cd "$(dirname "$0")/../.." && pwd)"
-FUTON3C="$(cd "$FUTON2/.." && pwd)/futon3c"
+# --- repo: the current directory's git toplevel, iff canonical -------------
+# Canonical = a futon repo whose test convention this script knows. Typed
+# refusal (not a substituted default) when the toplevel is anything else.
+TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+  echo "refusal:not-a-git-repo — cwd is not inside a git repository" >&2; exit 1; }
+case "$(basename "$TOPLEVEL")" in
+  futon2)  NS_PREFIX_RE='(futon2|checks)' ;;
+  futon3c) NS_PREFIX_RE='(futon3c)' ;;
+  *)
+    echo "refusal:not-a-canonical-futon-repo — git toplevel is '$TOPLEVEL';" >&2
+    echo "register-warrant.sh knows the test conventions of futon2 and futon3c only." >&2
+    exit 1 ;;
+esac
+[ -f "$TOPLEVEL/deps.edn" ] || {
+  echo "refusal:no-deps-edn — canonical-looking toplevel '$TOPLEVEL' has no deps.edn" >&2; exit 1; }
+REPO="$TOPLEVEL"
+FUTON3C="$(dirname "$REPO")/futon3c"
 
 # --- pinned worktree (optional) --------------------------------------------
 WT=""
-cleanup() { [ -n "$WT" ] && git -C "$FUTON2" worktree remove --force "$WT" 2>/dev/null || true; }
+cleanup() { [ -n "$WT" ] && git -C "$REPO" worktree remove --force "$WT" 2>/dev/null || true; }
 trap cleanup EXIT
 if [ -n "$PINNED" ]; then
-  WT="$FUTON2/../wt-warrant-$(printf '%s' "$PINNED" | head -c 8)"
-  git -C "$FUTON2" worktree add --detach "$WT" "$PINNED" >/dev/null
+  WT="$REPO/../wt-warrant-$(printf '%s' "$PINNED" | head -c 8)"
+  git -C "$REPO" worktree add --detach "$WT" "$PINNED" >/dev/null
   ROOT="$WT"
   echo "--- worktree $ROOT at $PINNED"
 else
-  ROOT="$FUTON2"
+  ROOT="$REPO"
 fi
 
 ns_path() { printf '%s' "$1" | tr '.' '/' | tr '-' '_'; }
@@ -78,7 +94,7 @@ if [ -n "${CODE_PATHS:-}" ]; then
   code_paths=($CODE_PATHS)
 else
   mapfile -t reqs < <(
-    grep -oE '\[(futon2|checks)[a-zA-Z0-9._-]*' "$ROOT/$test_rel" \
+    grep -oE "\\[${NS_PREFIX_RE}[a-zA-Z0-9._-]*" "$ROOT/$test_rel" \
       | sed 's/^\[//' | sort -u)
   code_paths=()
   for r in "${reqs[@]:-}"; do
