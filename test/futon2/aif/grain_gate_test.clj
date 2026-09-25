@@ -109,3 +109,31 @@
              (grain-gate/grain-gate {:grain candidate-grain}
                                     {:grain candidate-grain}
                                     futon3c-root))))))
+
+(deftest candidate-without-grain-refuses-grain-not-declared-test
+  (testing "review bad case (claude-8): a candidate that declares no grain
+    (the mission's 4b shape) refuses; before the fix it passed, so an
+    attempt at any grain would have cleared the gate against it"
+    (let [verdict (grain-gate/grain-gate {} {:grain candidate-grain} futon3c-root)]
+      (is (= :refuse (:status verdict)))
+      (is (= :grain-not-declared (:reason verdict)))
+      (is (re-find #"candidate" (:detail verdict))))
+    (is (= :grain-not-declared
+           (:reason (grain-gate/grain-gate {:grain {:statement "no key"}}
+                                           {:grain candidate-grain}
+                                           futon3c-root))))))
+
+(deftest docstring-bracket-is-not-the-arglist-test
+  (testing "review bad case (claude-8): a defn whose docstring contains a
+    bracket; the arglist read is the real one, so a correct attempt passes
+    and a wrong recorded arglist still refuses"
+    (let [tmp (java.nio.file.Files/createTempDirectory "grain-gate-doc"
+                                                       (make-array java.nio.file.attribute.FileAttribute 0))
+          f (io/file (.toFile tmp) "x.clj")
+          _ (spit f "(ns x)\n(defn f\n  \"doc with [bracket] inside\"\n  {:added \"1\"}\n  [role]\n  role)\n")
+          attempt (fn [arglist] {:grain {:keyed-by :role
+                                         :evidence {:fn "x/f" :path "x.clj" :arglist arglist}}})
+          cand {:grain {:keyed-by :role}}]
+      (is (= {:status :pass} (grain-gate/grain-gate cand (attempt "[role]") (.toString tmp))))
+      (is (= :arglist-mismatch
+             (:reason (grain-gate/grain-gate cand (attempt "[bracket]") (.toString tmp))))))))

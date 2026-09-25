@@ -13,7 +13,8 @@
        the recorded sha256 under repo-root.
 
   Refusals are typed and evaluated in this order (first refusal wins):
-    :grain-not-declared  attempt carries no :grain map with a :keyed-by
+    :grain-not-declared  candidate or attempt carries no :grain map with a
+                         :keyed-by (the :detail names which)
     :grain-mismatch      candidate :keyed-by /= attempt :keyed-by
     :scope-mismatch      both grains declare :scope and they differ
     :resolver-missing    no (defn <fn> ...) in the evidence file
@@ -48,8 +49,13 @@
   FN-SHORT in SRC, or nil when no such defn exists. Same shape as
   grain_check.py's arglist_in: first bracketed form after the defn name."
   [src fn-short]
-  (when-let [m (re-find (re-pattern (str "\\(defn-?\\s+" (java.util.regex.Pattern/quote fn-short)
-                                         "\\b(?s).*?(\\[[^\\]]*\\])"))
+  (when-let [m (re-find (re-pattern (str "(?s)\\(defn-?\\s+" (java.util.regex.Pattern/quote fn-short)
+                                         "\\b\\s*"
+                                         ;; skip an optional docstring and attr-map, so a
+                                         ;; bracket inside the docstring is not read as
+                                         ;; the arglist (claude-8 review, 2026-09-25)
+                                         "(?:\"(?:[^\"\\\\]|\\\\.)*\"\\s*)?(?:\\{[^}]*\\}\\s*)?"
+                                         "(\\[[^\\]]*\\])"))
                         src)]
     (second m)))
 
@@ -66,6 +72,14 @@
         cand-key (:keyed-by cand-grain)
         att-key (:keyed-by att-grain)]
     (cond
+      ;; comparison 1: the candidate declares a grain. A candidate without one
+      ;; is the mission's 4b shape ("does not name a grain"); nothing can be
+      ;; compared against it, so it refuses rather than passing by default
+      ;; (claude-8 review, 2026-09-25: the bad case passed).
+      (nil? cand-key)
+      (refuse :grain-not-declared
+              "the candidate declares no :grain {:keyed-by ...}")
+
       (nil? att-key)
       (refuse :grain-not-declared
               "the planned attempt declares no :grain {:keyed-by ...}")
