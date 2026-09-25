@@ -9,7 +9,9 @@
             [cheshire.core]
             [clojure.edn]
             [clojure.java.io :as io]
+            [clojure.pprint]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.grain-gate :as gate]
             [futon2.aif.interpretation-construction :as ic]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.task-execution-evidence]
@@ -454,3 +456,123 @@
                        :question (:question q) :span (:span q) :alternatives (:alternatives q)
                        :want (:want q)
                        :request-id (or (:request-id q) (:request-id criteria-entry))})))})))
+
+;; ---------------------------------------------------------------------------
+;; The enactment step (M-wm-wiring row 0, with rows 5 and 10's read side)
+
+(defn- grain-pattern
+  "The chosen candidate's pattern whose interpretation declares :grain."
+  [precedence interpretations]
+  (first (filter #(get-in interpretations [% :grain]) precedence)))
+
+(defn- run-check [check-fn check]
+  (if (map? check)
+    (let [r (try (check-fn check) (catch Exception e {:status :refused :reason :check-threw
+                                                      :detail (.getMessage e)}))]
+      (assoc check :result r))
+    {:absent :no-check-from-seat}))
+
+(defn enact-fn
+  "The flight's enactment step: after a click that chose one of the flight
+  target's candidates, have a seat carry out the candidate's pattern steps
+  in precedence order and write the enactment record (the
+  click-001-enactment.edn shape: attempts, checks, grain, deviations).
+
+  OPTS:
+    :dispatch-step!  (fn [step] ...) -> the seat's answer for one step. STEP
+                     is {:target :candidate :pattern :n :interpretation
+                     :phase :plan|:commit}. A :plan answer (asked only for the
+                     grain attempt) is {:grain {...}}, the grain the attempt
+                     will build. A :commit answer is {:commit sha :produced
+                     token :check {..check locator..}}, or {:failed {:reason
+                     kw ...}}.
+    :check-fn        (fn [check] -> {:observed bool ...} or a refusal):
+                     observes the attempt's check (default the observation
+                     check for the locator's :class).
+    :interpretations (fn [flight] -> {pattern-id interpretation}), the
+                     interpretations the candidate's patterns carry.
+    :fetch-run-record (fn [click-id] -> run record or nil), the click's run
+                     record, referenced by id for the W_c checker.
+    :publication-observation (fn [flight click] -> value or nil).
+    :record-dir      where the record is written: <store>/flights/enactments.
+    :repo-root       for the grain gate's evidence files.
+
+  The grain attempt is the step at the pattern whose interpretation declares
+  :grain; grain-gate (candidate grain vs the grain the seat plans) runs
+  before its commit is asked for, and a refusal is recorded on the attempt
+  with no commit asked. With no such pattern the record says
+  {:absent :candidate-names-no-grain-pattern} and the gate's own refusal
+  (:grain-not-declared) is recorded; the flight continues either way.
+  A click with no chosen candidate writes no record: {:absent :no-decision}."
+  [{:keys [dispatch-step! check-fn interpretations fetch-run-record
+           publication-observation record-dir repo-root]
+    :or {check-fn (fn [check] (if-let [f (get checks/checks (:class check))]
+                                (f check)
+                                {:status :refused :reason :no-mechanical-check}))
+         repo-root "/home/joe/code/futon3c"}}]
+  (fn [flight click]
+    (let [chosen (:chosen click)]
+      (if-not (and chosen (:candidate chosen))
+        {:absent :no-decision :click-id (:click-id click)}
+        (let [precedence (vec (:precedence chosen))
+              interps (if interpretations (interpretations flight) {})
+              grain-p (grain-pattern precedence interps)
+              cand-grain (when grain-p (get-in interps [grain-p :grain]))
+              base-step {:target (:target flight) :candidate (:candidate chosen)}
+              attempts
+              (vec
+               (for [[i p] (map-indexed vector precedence)
+                     :let [step (assoc base-step :pattern p :n (inc i)
+                                       :interpretation (get interps p))]]
+                 (if (= p grain-p)
+                   (let [plan (dispatch-step! (assoc step :phase :plan))
+                         g (gate/grain-gate {:grain cand-grain} {:grain (:grain plan)} repo-root)]
+                     (if (= :pass (:status g))
+                       (let [c (dispatch-step! (assoc step :phase :commit))]
+                         (if (:failed c)
+                           {:n (inc i) :pattern p :success false :grain-gate g :failed (:failed c)}
+                           (let [chk (run-check check-fn (:check c))]
+                             {:n (inc i) :pattern p :commit (:commit c) :produced (:produced c)
+                              :grain (:grain plan) :grain-gate g
+                              :check chk :success (true? (:observed (:result chk)))})))
+                       {:n (inc i) :pattern p :success false :grain (:grain plan) :grain-gate g
+                        :not-committed :grain-gate-refused}))
+                   (let [c (dispatch-step! (assoc step :phase :commit))]
+                     (if (:failed c)
+                       {:n (inc i) :pattern p :success false :failed (:failed c)}
+                       (let [chk (run-check check-fn (:check c))]
+                         {:n (inc i) :pattern p :commit (:commit c) :produced (:produced c)
+                          :check chk :success (true? (:observed (:result chk)))}))))))
+              deviations (vec (concat
+                               (for [a attempts :when (:failed a)]
+                                 {:kind :step-failed :pattern (:pattern a) :failed (:failed a)})
+                               (for [a attempts :when (:not-committed a)]
+                                 {:kind :grain-gate-refused :pattern (:pattern a)
+                                  :reason (get-in a [:grain-gate :reason])})))
+              run-record (when fetch-run-record (fetch-run-record (:click-id click)))
+              pub (when publication-observation (publication-observation flight click))
+              record (cond-> {:schema :wm/enactment-v1
+                              :flight (:flight/id flight)
+                              :click (:click-id click)
+                              :candidate (:candidate chosen)
+                              ;; the decision's id, so W_c's join is checkable
+                              :decision-candidate (:candidate chosen)
+                              :run-record (if run-record
+                                            {:click-id (:click-id click) :present true}
+                                            {:click-id (:click-id click) :absent :run-record-not-fetched})
+                              :grain (or cand-grain {:absent :candidate-names-no-grain-pattern})
+                              :grain-attempt (if grain-p
+                                               {:pattern grain-p}
+                                               {:absent :candidate-names-no-grain-pattern})
+                              :attempts attempts
+                              :conformance {:deviations deviations}
+                              :publication-observed (if (some? pub) pub
+                                                      {:absent :no-publication-observed})}
+                       (nil? grain-p)
+                       (assoc :grain-gate (gate/grain-gate {:grain nil} {:grain nil} repo-root)))
+              path (when record-dir
+                     (io/file record-dir (str (:flight/id flight) "-" (:click-id click) ".edn")))]
+          (when path
+            (.mkdirs (.getParentFile path))
+            (spit path (with-out-str (clojure.pprint/pprint record))))
+          {:enactment record :record-path (some-> path .getCanonicalPath)})))))

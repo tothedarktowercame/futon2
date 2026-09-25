@@ -259,7 +259,7 @@
   open wants on the last click), or before any click when owner questions
   leave it no wants (:status :not-a-target-yet, :open-questions). Returns the
   flight record."
-  [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn]}]
+  [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn enact-fn]}]
   (loop [f flight]
     (if (or (not= :open (:status f)) (>= (count (:clicks f)) max-clicks))
       (cond-> f (= :open (:status f)) (assoc :status :click-limit))
@@ -287,6 +287,14 @@
                     asked (-> (update :asks (fnil conj []) (assoc asked :before-click (inc (count (:clicks f)))))
                               (update :needs into (:needs asked))))
                 result (click-fn (judge-opts f wants))
+                ;; M-wm-wiring row 0: the enactment step, after the click and
+                ;; before the after-observation, which should see its effect
+                enacted (when enact-fn (enact-fn f result))
+                f (cond-> f enacted (update :enactments (fnil conj [])
+                                            (assoc (if (:enactment enacted)
+                                                     (select-keys enacted [:record-path])
+                                                     {:enactment (select-keys enacted [:absent])})
+                                                   :click-id (:click-id result))))
                 after (observe-fn (:target f) locators)
                 f (record-click f (merge result {:wants (:wants wants)
                                                  :want-source (:source wants)
