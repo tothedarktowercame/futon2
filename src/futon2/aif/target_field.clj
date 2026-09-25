@@ -281,7 +281,7 @@
   universe, and two targets' ΔG compare only when t's constructed candidate
   moves no token of the other's universe (target_comparison, mathlib4
   759b8ca884). For an entry carrying a constructed candidate
-  (:candidate {:produces #{...}}), per other feasible target t':
+  (:constructed-candidate {:produces #{...}}), per other feasible target t':
     {:comparable true}                              no shared token
     {:incommensurable {:shared-tokens [...]}}       the tokens it moves in U(t')
     {:absent :no-universe}                          t' records no :universe
@@ -293,7 +293,7 @@
                           feasible)]
     (mapv (fn [e]
             (assoc e :pair-overlap
-                   (if-let [produces (seq (get-in e [:candidate :produces]))]
+                   (if-let [produces (seq (get-in e [:constructed-candidate :produces]))]
                      (into (sorted-map)
                            (for [o feasible :when (not= (:target o) (:target e))]
                              [(:target o)

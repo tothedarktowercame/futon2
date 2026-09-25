@@ -12,9 +12,9 @@
 
 (deftest a-shared-token-is-incommensurable-disjoint-is-comparable
   (let [f (tf/with-pair-overlap
-            [{:target "M-a" :candidate {:produces #{:x :y}} :universe #{:x :y :a}}
-             {:target "M-b" :candidate {:produces #{:z}} :universe #{:y :b}}
-             {:target "M-c" :candidate {:produces #{:w}} :universe #{:c}}
+            [{:target "M-a" :constructed-candidate {:produces #{:x :y}} :universe #{:x :y :a}}
+             {:target "M-b" :constructed-candidate {:produces #{:z}} :universe #{:y :b}}
+             {:target "M-c" :constructed-candidate {:produces #{:w}} :universe #{:c}}
              {:target "T-d" :next-step :read-criteria}])
         by (into {} (map (juxt :target :pair-overlap)) f)]
     (is (= {:incommensurable {:shared-tokens [:y]}} (get-in by ["M-a" "M-b"]))
