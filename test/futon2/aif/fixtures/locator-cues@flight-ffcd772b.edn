@@ -1,0 +1,49 @@
+;; Verbatim from futon3c holes/labs/M-wm-wiring/spike/flight-ffcd772b.edn (sha256 998565fb0a341077ae5b9341d977a9c5bf6db6ea0cf33fead1e00c630f4e2575):
+;; the five locator readings rejected :cue-not-in-criterion, each :quote from the reading's :reasons;
+;; :stated is [:criterion :stated] of the request record named (futon2 data/wm-interpretations/requests/,
+;; :request-sha256 its bytes). claude-10, 2026-09-25, WM-CUE-I.
+[{:want :exit/h5c6933e5e2fc,
+  :request-id "request-ee877276e5bbd6f3",
+  :job-id "invoke-1790377130400-24476-604cf348",
+  :request-sha256
+  "52a4197735742e5d5cefc4f7747ca08358f8f8cb30d04aee2fb2b17f962b258d",
+  :quote
+  "Auto-promote a mission/campaign/excursion target identified in a turn **iff**: 1. it **resolves** to a real `M-*`/`C-*`/`E-*` that exists ... 2. it respects **single-active** ... 3. it is **operator-overridable / confirmable**, never silent ... 4. it leaves an audit trail (why it auto-clocked)",
+  :stated
+  "Auto-promote a mission/campaign/excursion target identified in a turn **iff**:\n1. it **resolves** to a real `M-*`/`C-*`/`E-*` that exists (filesystem + ideally XTDB), not a fuzzy guess;\n2. it respects **single-active** (auto-promote *switches*, never stacks — same constraint as manual clock-in);\n3. it is **operator-overridable / confirmable**, never silent — the promotion is a *witnessed* proposal (status-as-witness discipline), surfaced (e.g. a prompt or a one-key confirm in the repl hydra), not an assertion;\n4. it leaves an audit trail (why it auto-clocked) so a mis-promote is diagnosable."}
+ {:want :exit/h7afd70f40a29,
+  :request-id "request-7a22ebcc5af3c2ae",
+  :job-id "invoke-1790377146302-24477-d441856f",
+  :request-sha256
+  "b2bb2eedde21975e0f115283d0018c7ee05c09d51d393c36de2cc1f1bad91a98",
+  :quote
+  "auto-clocking on a fuzzy mention ... would mislabel turns and corrupt `turn→mission` ground truth. A wrong auto-clock is worse than `[no mission]`.",
+  :stated
+  "- *Risk:* auto-clocking on a fuzzy mention (the exact anti-pattern `M-vsatarcs-invariants-integration` principle #8 warns about — *explicit, not fuzzy*) would mislabel turns and corrupt `turn→mission` ground truth. A wrong auto-clock is worse than `[no mission]`."}
+ {:want :exit/h64ddcd0e8811,
+  :request-id "request-a8b9fb06e9e0dba1",
+  :job-id "invoke-1790377162282-24478-07a0dbdb",
+  :request-sha256
+  "b485337a110e91f7d8aa53b05be2eac37666edde2b01acd65c3f4e884043c3a7",
+  :quote
+  "an **operator** turn naming an exact target supersedes a stale clock ... a **bell, auto-bellback or dispatch** turn fills an empty clock and never switches ... an ambiguous or unresolvable name records its refusal and leaves the clock where it was",
+  :stated
+  "   **Amended 2026-09-25 (claude-4, owner, answering the War Machine's question\n   at this span — request-3700db0370e216bd). Rule 0 stands, and it is scoped by\n   WHOSE TURN IT IS.** The rule was written on 2026-06-03 when the only clock\n   was the Emacs buffer's, so it never had to say who authored the turn. That\n   distinction is what carries it now, and both halves are already implemented\n   and pinned in the JVM resolver:\n\n   - an **operator** turn naming an exact target supersedes a stale clock —\n     `futon3c.agency.clock-decision-test/exact-mention-overrides-stale-clock-and-refusals-keep-it`;\n   - a **bell, auto-bellback or dispatch** turn fills an empty clock and never\n     switches — `.../bell-mentions-fill-an-empty-clock-but-do-not-switch`,\n     added by claude-8 on 2026-09-24 after bellbacks naming `M-futon-seams` in\n     passing kept moving a seat's `E-cascade-real` clock.\n\n   Joe's 2026-06-03 reason is preserved exactly where it bites. A target named\n   in prose by someone *other than the operator* is mention-graph data and must\n   not move anyone; an ambiguous or unresolvable name records its refusal and\n   leaves the clock where it was (Joe, 2026-09-24, same test). What the\n   operator himself types is an instruction, not a mention: he can see the\n   clock he is on, and attributing that turn to the target he just navigated\n   away from is the false attribution this mission exists to prevent."}
+ {:want :exit/h0c55648e57e5,
+  :request-id "request-eac34688cf1b8e75",
+  :job-id "invoke-1790377213296-24480-12e43013",
+  :request-sha256
+  "32fdeb4b4e0f5c8e5541adeaf0a2cc7ea51d9e48ae7bf3dbfee9921e21cb1163",
+  :quote
+  "every accepted turn has one durable, explicit clock decision, including the negative decision ... across Emacs, bell, and Marimo ... Use a stable turn/job identity for idempotent recording.",
+  :stated
+  "**Proposed first fix: one behaviour—every accepted turn has one durable,\nexplicit clock decision, including the negative decision.** Make this the\nturn-admission accounting contract across Emacs, bell, and Marimo; use\nexisting resolved clock inputs for the positive case and explicit\n:unclocked/reason for the otherwise case. Use a stable turn/job identity for\nidempotent recording. This first handoff establishes observable completeness;"}
+ {:want :exit/h59adca2cd730,
+  :request-id "request-da53dffe6dad625d",
+  :job-id "invoke-1790377252181-24483-c6cb2f3d",
+  :request-sha256
+  "be1877e71847eb1098636a920f6196846c3d331990e499ff1d0146158dae20b7",
+  :quote
+  "run a complete isolated session through each surface ... Every accepted turn must have a persisted decision ... Repeat with an existing valid resolved clock input and expect the positive decision. Read both cases back through a newly constructed real durable backend client; retry the same turn and assert no duplicate decision. If recording fails, assert it is surfaced as an accounting failure",
+  :stated
+  "Acceptance must construct the current bad case: run a complete isolated\nsession through each surface, with no manual clock, no named target, no\ninherited clock and no qualifying edits; finish it. Every accepted turn must\nhave a persisted decision, and session history must end with explicit\n:unclocked/:no-inferable-mission rather than missing fields. Repeat with an\nexisting valid resolved clock input and expect the positive decision. Read\nboth cases back through a newly constructed real durable backend client;\nretry the same turn and assert no duplicate decision. If recording fails,\nassert it is surfaced as an accounting failure, not reported as a successful\nrecorded decision. Keep absence and storage failure distinct."}]

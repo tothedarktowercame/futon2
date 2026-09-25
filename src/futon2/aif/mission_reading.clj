@@ -144,6 +144,32 @@
   [s]
   (-> (str s) (str/replace "`" "") (str/replace #"\s+" " ") str/trim))
 
+(defn cue-missing-piece
+  "The first piece of cue QUOTE that is not the criterion STATED's own words
+  in order, or nil when every piece is. The quote may elide with `...` or
+  `…`: each piece between ellipses, compared as `words`, must be non-blank
+  (an ellipsis at either end elides the criterion's edge) and occur in the
+  criterion at or after the end of the previous piece's match. A quote with
+  no ellipsis is one piece, the contiguous case. The locator grammar asks
+  for \"words of the criterion this locator decides\", not one span; all
+  five cue rejections on flight-ffcd772b were faithful elided quotes
+  (WM-CUE-D, 72a2caf4)."
+  [stated quote]
+  (let [s (words stated)
+        ;; an ellipsis at either end elides the criterion's edge: not a piece
+        pieces (->> (str/split (words quote) #"\.\.\.|…" -1)
+                    (map str/trim)
+                    (drop-while str/blank?) reverse (drop-while str/blank?) reverse)]
+    (if (empty? pieces)
+      {:piece ""}
+      (loop [[p & more] pieces from 0]
+        (cond
+          (nil? p) nil
+          (str/blank? p) {:piece p}
+          :else (if-let [i (str/index-of s p from)]
+                  (recur more (+ i (count p)))
+                  {:piece p}))))))
+
 (defn validate-locator
   "A locator reading for ISSUED is valid when its class is checkable, its
   fields are present, the check runs without refusing (OBSERVE, default
@@ -166,8 +192,11 @@
         static (cond-> []
                  (not (checkable cls)) (conj {:reason :class-not-checkable :class cls})
                  (and (checkable cls) (seq missing)) (conj {:reason :locator-fields-missing :missing (vec missing)})
-                 (or (str/blank? (:quote cue)) (not (str/includes? (words stated) (words (:quote cue)))))
+                 (str/blank? (:quote cue))
                  (conj {:reason :cue-not-in-criterion :quote (:quote cue)})
+                 (and (not (str/blank? (:quote cue))) (cue-missing-piece stated (:quote cue)))
+                 (conj (merge {:reason :cue-not-in-criterion :quote (:quote cue)}
+                              (cue-missing-piece stated (:quote cue))))
                  (str/blank? reading) (conj {:reason :reading-not-stated}))]
     (if (seq static)
       {:status :rejected :reasons static}
