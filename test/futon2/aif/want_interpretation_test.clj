@@ -432,4 +432,19 @@
                      :appended-source-sha-mismatch)))
     (testing "a candidate that locates nothing"
       (is (contains? (reasons (agent-search-runs [{:score 3}]))
-                     :appended-candidate-unlocatable)))))
+                     :appended-candidate-unlocatable)))
+    ;; review bad cases (claude-8, 2026-09-25): each passed before the fix
+    (testing "a sibling directory sharing the library's name as a prefix is outside it"
+      (is (contains? (reasons (agent-search-runs
+                               [{:pattern "x" :source {:path "futon3/library-old/x.flexiarg"}}]))
+                     :appended-candidate-outside-library)))
+    (testing "a pattern id whose library file does not exist locates nothing"
+      (is (contains? (reasons (agent-search-runs [{:pattern "gauntlet/no-such-pattern"}]))
+                     :appended-candidate-unlocatable))
+      (is (contains? (reasons (agent-search-runs
+                               [{:pattern "gauntlet/x"
+                                 :source {:path "futon3/library/gauntlet/nope.flexiarg" :sha256 "00"}}]))
+                     :appended-candidate-unlocatable)))
+    (testing "an absolute path refuses rather than throwing"
+      (is (contains? (reasons (agent-search-runs [{:pattern "x" :source {:path "/etc/passwd"}}]))
+                     :appended-candidate-outside-library)))))

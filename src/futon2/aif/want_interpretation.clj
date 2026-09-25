@@ -167,12 +167,26 @@
                       (let [path (or (get-in c [:source :path])
                                      (when-let [p (:pattern c)]
                                        (str "futon3/library/" p ".flexiarg")))]
-                        (if-not (string? path)
+                        (cond
+                          (not (string? path))
                           [{:reason :appended-candidate-unlocatable :candidate c}]
-                          (let [f (.getCanonicalFile (library-file code-root path))]
+                          ;; io/file throws on an absolute child path; a seat
+                          ;; naming one is outside the library, not a crash
+                          ;; (claude-8 review, 2026-09-25)
+                          (.isAbsolute (io/file path))
+                          [{:reason :appended-candidate-outside-library :path path}]
+                          :else
+                          (let [f (.getCanonicalFile (library-file code-root path))
+                                ;; the separator keeps a sibling such as
+                                ;; futon3/library-old/ from passing as a prefix
+                                inside? (str/starts-with? (str f) (str lib java.io.File/separator))]
                             (cond-> []
-                              (not (str/starts-with? (str f) (str lib)))
+                              (not inside?)
                               (conj {:reason :appended-candidate-outside-library :path path})
+                              ;; the rule is that a candidate LOCATES a file:
+                              ;; a path naming nothing is unlocatable, not a pass
+                              (and inside? (not (.isFile f)))
+                              (conj {:reason :appended-candidate-unlocatable :path path})
                               (and (.isFile f) (get-in c [:source :sha256])
                                    (not= (get-in c [:source :sha256])
                                          (evidence/sha256 (Files/readAllBytes (.toPath f)))))
