@@ -1,6 +1,8 @@
 (ns futon2.aif.observation-checks-test
   "Checks against real pinned shas in futon2 and mathlib4."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [babashka.http-client :as http]
+            [clojure.data.json :as json]
+            [clojure.test :refer [deftest is]]
             [futon2.aif.observation-checks :as oc]))
 
 (def futon2-sha "b81afd97")   ; H7c-1 construction commit
@@ -185,3 +187,85 @@
   ;; and an unknown class is still refused rather than observed absent
   (let [r (oc/observe {:t-unknown {:class :C9}})]
     (is (= :no-mechanical-check (:kind (get-in r [:refused :t-unknown]))))))
+
+;; ---------------------------------------------------------------------------
+;; AR-42: C8 resolves :namespace on its own, through futon3c's lookup.
+;; The rule for "newest run" lives in the registry; this side only asks.
+
+(deftest c8-resolves-a-namespace-with-no-config
+  (let [{:keys [entry-id entry]} (stub-record (run-record))
+        asked (atom [])]
+    (binding [oc/*registry-latest* (fn [base ns]
+                                     (swap! asked conj [base ns])
+                                     {:entry-id entry-id :resolved-by :namespace-lookup})
+              oc/*registry-entry* (fn [_ id] (if (= id entry-id) entry :absent))]
+      (let [r (oc/check-registered-run {:repo "futon2"
+                                        :namespace "futon2.aif.observation-checks-test"})]
+        (is (true? (:observed r)) (pr-str (:evidence r)))
+        (is (= 1 (count @asked)) "the lookup is asked exactly once")
+        (is (= "futon2.aif.observation-checks-test" (second (first @asked))))
+        (is (= :namespace-lookup (get-in r [:evidence :resolved-by])))
+        (is (= entry-id (get-in r [:evidence :warrant-id])))))))
+
+(deftest c8-still-judges-the-record-the-lookup-returned
+  ;; the lookup finds the newest run whether or not it passed, so C8 must judge
+  ;; it: a namespace whose newest run failed reads FALSE, not true
+  (let [{:keys [entry-id entry]} (stub-record
+                                  (run-record :results {:tests 9 :failures 2 :errors 0}))]
+    (binding [oc/*registry-latest* (fn [_ _] {:entry-id entry-id :resolved-by :namespace-lookup})
+              oc/*registry-entry* (fn [_ _] entry)]
+      (let [r (oc/check-registered-run {:repo "futon2"
+                                        :namespace "futon2.aif.observation-checks-test"})]
+        (is (false? (:observed r)))
+        (is (= :run-recorded-failures (get-in r [:evidence :reason])))))))
+
+(deftest c8-verifies-the-namespace-it-asked-for
+  ;; defence in depth: the lookup promises a record for this namespace, and C8
+  ;; checks the record's own command anyway
+  (let [{:keys [entry-id entry]} (stub-record (run-record :namespace "futon2.aif.other-test"))]
+    (binding [oc/*registry-latest* (fn [_ _] {:entry-id entry-id :resolved-by :namespace-lookup})
+              oc/*registry-entry* (fn [_ _] entry)]
+      (is (= :namespace-mismatch
+             (get-in (oc/check-registered-run {:repo "futon2"
+                                               :namespace "futon2.aif.observation-checks-test"})
+                     [:evidence :reason]))))))
+
+(deftest c8-reads-a-typed-none-as-false-and-an-unreachable-lookup-as-a-refusal
+  ;; the registry answered and holds no run for this namespace
+  (binding [oc/*registry-latest* (fn [_ _] :absent)]
+    (let [r (oc/check-registered-run {:repo "futon2" :namespace "futon2.aif.nothing-test"})]
+      (is (false? (:observed r)))
+      (is (nil? (:status r)))
+      (is (= :no-entry (get-in r [:evidence :reason])))
+      (is (= :namespace-lookup (get-in r [:evidence :resolved-by])))))
+  ;; the lookup could not be reached: nothing was observed about any registry
+  (binding [oc/*registry-latest* (fn [_ _] {:status :missing :kind :registry-unreadable
+                                            :data {:check :C8}})]
+    (let [r (oc/check-registered-run {:repo "futon2" :namespace "futon2.aif.nothing-test"})]
+      (is (= :registry-unreadable (:kind r)))
+      (is (nil? (:observed r)))))
+  ;; :namespace is still required, and a :config given as blank is malformed
+  (is (= [:namespace] (get-in (oc/check-registered-run {:repo "futon2"}) [:data :missing])))
+  (is (= [:config] (get-in (oc/check-registered-run {:repo "futon2" :namespace "n" :config ""})
+                           [:data :missing]))))
+
+(deftest c8-lookup-reader-maps-the-registry-answers
+  (let [respond (fn [status body]
+                  (with-redefs [http/get (fn [_ _] {:status status :body body})]
+                    (oc/fetch-latest-for-namespace "http://127.0.0.1:7070" "demo-test")))]
+    ;; found: the id, for this side to read and verify itself
+    (is (= {:entry-id "test-registry-abc" :resolved-by :namespace-lookup}
+           (respond 200 (json/write-str {:latest {:found true :entry-id "test-registry-abc"}}))))
+    ;; absence established by the registry
+    (is (= :absent (respond 200 (json/write-str {:latest {:found false
+                                                          :reason "no-run-for-namespace"}}))))
+    ;; absence NOT established: the scan filled its window. This is not an
+    ;; observation that nothing is registered, so it refuses.
+    (let [r (respond 200 (json/write-str {:latest {:found false
+                                                   :reason "scan-window-exhausted"}}))]
+      (is (= :registry-unreadable (:kind r)))
+      (is (= :scan-window-exhausted (get-in r [:data :reason]))))
+    ;; the endpoint is not there yet, or answered rubbish
+    (is (= :registry-unreadable (:kind (respond 404 ""))))
+    (is (= :registry-unreadable (:kind (respond 200 "not json"))))
+    (is (= :unparseable-response (get-in (respond 200 "not json") [:data :reason])))))

@@ -20,7 +20,8 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as sh]
             [clojure.string :as str])
-  (:import (java.security MessageDigest)))
+  (:import (java.net URLEncoder)
+           (java.security MessageDigest)))
 
 (def repo-root "/home/joe/code")
 
@@ -213,6 +214,47 @@
   neither need a live agency nor load anything into the serving JVM."
   fetch-registry-entry)
 
+(defn fetch-latest-for-namespace
+  "Ask the registry WHICH record covers NAMESPACE — AR-42's
+  GET /api/alpha/test-registry/latest. One rule, held in futon3c: this check
+  does not re-derive \"newest run\" for itself, because two implementations of
+  that rule would disagree the first time one of them was wrong.
+
+  Returns {:entry-id …}; :absent when the registry establishes that it holds no
+  run for the namespace; a refusal when the lookup cannot be reached, or when it
+  reports that its scan filled its window — a scan that ran out of room did not
+  establish absence, and reading it as \"no tests are registered\" would be the
+  substituted value this class exists to refuse."
+  [base namespace]
+  (let [url (str (str/replace base #"/$" "") "/api/alpha/test-registry/latest"
+                 "?namespace=" (URLEncoder/encode (str namespace) "UTF-8"))
+        {:keys [status body]} (try (http/get url {:timeout 5000 :throw false})
+                                   (catch Exception e
+                                     {:status :unreachable :body (.getMessage e)}))]
+    (if (not= 200 status)
+      (refuse :registry-unreadable {:check :C8 :url url :status status})
+      (let [latest (:latest (try (json/read-str body :key-fn keyword)
+                                 (catch Exception _ nil)))]
+        (cond
+          (nil? latest)
+          (refuse :registry-unreadable {:check :C8 :url url :reason :unparseable-response})
+
+          (true? (:found latest))
+          {:entry-id (:entry-id latest) :resolved-by :namespace-lookup}
+
+          (= "no-run-for-namespace" (:reason latest)) :absent
+
+          :else
+          (refuse :registry-unreadable {:check :C8 :url url
+                                        :reason (keyword (or (:reason latest)
+                                                             "lookup-inconclusive"))}))))))
+
+(def ^:dynamic *registry-latest*
+  "The seam C8 resolves a namespace through: (fn [base namespace] ->
+  {:entry-id …} | :absent | refusal). Bound by tests, so no test needs the
+  lookup endpoint to be live."
+  fetch-latest-for-namespace)
+
 (defn- decode-record
   "The record is EDN inside the entry body, named by its own digest. Verify
   that naming before reading it: a body whose text does not hash to the id it
@@ -278,15 +320,29 @@
   A true reading says those tests passed over exactly these bytes. It says
   nothing about whether the tests are worth passing."
   [{:keys [repo namespace config] :as m}]
-  (or (locator-refusal :C8 m [:repo :namespace :config])
-      (let [located (locate-record config)]
+  (or (locator-refusal :C8 m [:repo :namespace])
+      (when (contains? m :config) (locator-refusal :C8 m [:config]))
+      (let [located (if (contains? m :config)
+                      (locate-record config)
+                      ;; No :config: ask the registry which record covers this
+                      ;; namespace (AR-42). The answer is still judged below —
+                      ;; the lookup finds the newest run regardless of whether
+                      ;; it passed, so a later failing run cannot hide behind an
+                      ;; earlier green one.
+                      (*registry-latest* (agency-base) namespace))]
         (if (:status located) located
+          (if (= :absent located)
+            ;; the registry answered and holds no run for this namespace
+            {:observed false :check :C8
+             :evidence {:repo repo :root (str repo-root "/" repo) :namespace namespace
+                        :resolved-by :namespace-lookup :reason :no-entry}}
             (let [entry-id (:entry-id located)
                   root (str repo-root "/" repo)
                   base (or (:base located) (agency-base))
                   entry (*registry-entry* base entry-id)
-                  evidence {:repo repo :root root :namespace namespace
-                            :warrant-id entry-id}]
+                  evidence (cond-> {:repo repo :root root :namespace namespace
+                                    :warrant-id entry-id}
+                             (:resolved-by located) (assoc :resolved-by (:resolved-by located)))]
               (cond
                 (:status entry) (assoc entry :evidence evidence)
                 (= :absent entry) {:observed false :check :C8
@@ -316,7 +372,7 @@
                                                (number? errors) (zero? errors))) :run-recorded-failures
                                      (seq moved) :content-moved)]
                         {:observed (nil? reason) :check :C8
-                         :evidence (cond-> evidence reason (assoc :reason reason))}))))))))) 
+                         :evidence (cond-> evidence reason (assoc :reason reason))}))))))))))
 
 (def checks
   {:C3 check-path-exists
