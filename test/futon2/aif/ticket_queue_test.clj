@@ -7,6 +7,7 @@
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.locator-fixtures :as locators]
             [futon2.aif.live-c :as live-c]
+            [futon2.aif.focus-receipt :as focus-receipt]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -94,6 +95,23 @@
         (is (= d (gate/emit! d)))))))
 
 (deftest ordinary-refusal-does-not-block-admitted-candidates
+  ;; A target whose relation cannot be resolved is classified :unknown
+  ;; (focus-receipt/classify-target, "never guessed"), and the class
+  ;; observation model then refuses :class-unknown-no-scalar-g rather than
+  ;; scoring it -- codex-20's ruling, carried in the comment at
+  ;; observation_model.clj:210-221: "a target whose relation genuinely cannot
+  ;; be resolved gets NO scalar G -- no stop-the-line scoring, no worst case,
+  ;; no averaging, no uniform, no exclusion." So this test's synthetic M-main
+  ;; injects its own relation row through the :focus-inputs seam (the same
+  ;; seam cascade_decision_test uses for its synthetic targets), keeping the
+  ;; real :windows so the decision time is inside a discovery window.
+  ;;
+  ;; On the record, and not this test's to settle: the production corpus
+  ;; resources/wm/focus/commit-facets-v1.json carries nine relation rows, and
+  ;; M-autoclock-in -- the first flight's target -- is not one of them, so a
+  ;; click on it that reaches scoring refuses here too (FAILING-TESTS-D,
+  ;; futon2 3e9b1e76). Whether it gets a row is the focus receipt owner's
+  ;; judgment about that mission, not a fixture edit.
   (with-inputs
     (fn [opts]
       (let [sources (locators/locate-all
@@ -105,7 +123,18 @@
                       :horizon-steps 2 :beta-by-context {:WM {:beta 1}} :context-of (constantly :WM)})
             assembled (problems/assemble {:targets ["T-missing" "M-main"] :sources sources})
             q (queue (entry "T-missing" early))
-            opts (merge opts {:ticket-queue q :focus-as-of early
+            ;; noon, not `early`: `early` is the discovery window's own start
+            ;; instant, and discover credits only commits at-or-before the
+            ;; decision time, so at the window's first moment no focus is
+            ;; established and every target classifies :unknown. The queue's
+            ;; own ordering uses the entries' :inserted-at, not this.
+            opts (merge opts {:ticket-queue q :focus-as-of "2026-09-20T12:00:00Z"
+                              :focus-inputs (assoc (focus-receipt/read-inputs)
+                                                   :relations
+                                                   [{:target "M-main" :facet "WM" :relation "focus"
+                                                     :source {:repo "fixture" :commit "0"
+                                                              :path "test" :section "fixture"}
+                                                     :effective-from "2026-01-01T00:00:00Z"}])
                               :live-c {:sources {} :sources-now {}
                                        :derived {:want #{} :weights {} :lam 1 :entries [] :gaps [] :refusals nil :signature (live-c/signature-of {})}}})
             result (wm/cascade-decision assembled opts)
