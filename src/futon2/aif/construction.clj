@@ -96,6 +96,113 @@
   [q0]
   (if (sequential? q0) (set q0) #{}))
 
+(defn- reach-path
+  "A path a → … → b following CHILDREN (strict), or nil. Depth-first; the
+  seen set bounds it on cyclic input."
+  [children a b]
+  (letfn [(step [x seen]
+            (cond (= x b) [b]
+                  (contains? seen x) nil
+                  :else (some (fn [y]
+                                (when-let [p (step y (conj seen x))]
+                                  (into [x] p)))
+                              (get children x))))]
+    (when-not (= a b)
+      (step a #{}))))
+
+(defn containment-order
+  "PROOF-2a clause 0 (lines 128-212): a candidate's pattern structure as a
+  containment order r over UNITS — one node per application of a pattern,
+  the pattern id as an attribute — derived from the interpretations'
+  produces/consumes. Unit A sits above unit B exactly when A contains B:
+  A produces a token B's guard needs. This is the same producer→consumer
+  reading as interpretation-construction's :need-edges; on the hand cascade
+  M-futon-seams instance 6 the derived edges are exactly the recorded :above
+  spans.
+
+  Returns
+    {:units         [{:unit u :pattern id} …]
+     :descent       [[above below] …]     ; r itself
+     :meets         {[a b] m …}           ; overlapping pairs with a meet
+     :missing-meets [{:pair [a b] :common-maximal [u …]} …]}
+
+  Meets follow DarkTower.WarMachine.CascadeOrder: Below is reflexive
+  (a = b ∨ Reach r a b), and the semilattice condition is restricted to
+  OVERLAPPING pairs — two units sharing a descendant must have their
+  greatest common descendant as a unit of the cascade. An overlapping pair
+  without one is the typed finding :missing-meets naming the pair and the
+  maximal units of their common part, not a failure. Disjoint pairs need no
+  meet and are not recorded.
+
+  A cyclic containment is REFUSED with the typed reason
+  :cyclic-containment naming the cycle: CascadeOrder.acyclicDescent r is
+  required and over a cyclic relation no order exists to record. The
+  candidate's :precedence stays as the chain case; when r is a chain its
+  only linear extension is that precedence."
+  [candidate]
+  (let [pats (vec (:patterns candidate))
+        ids (mapv :id pats)
+        unique? (= (count ids) (count (set ids)))
+        units (if unique?
+                (mapv (fn [p] {:unit (:id p) :pattern (:id p)}) pats)
+                (mapv (fn [i p] {:unit [(:id p) i] :pattern (:id p)})
+                      (range) pats))
+        by-unit (into {} (map (fn [{:keys [unit]} p] [unit p]) units pats))
+        descent (vec (sort-by pr-str
+                              (for [[a pa] by-unit [b pb] by-unit
+                                    :when (not= a b)
+                                    :when (seq (set/intersection
+                                                (set (:produces pa))
+                                                (set (get-in pb [:guard :needs]))))]
+                                [a b])))
+        children (reduce (fn [m [a b]] (update m a (fnil conj []) b))
+                         {} descent)
+        cycle (some (fn [[a b]]
+                      (when-let [p (reach-path children b a)]
+                        (into [a] p)))
+                    descent)]
+    (if cycle
+      (refusal :cyclic-containment {:cycle (vec cycle)})
+      (let [below (into {}
+                        (for [u (keys by-unit)]
+                          [u (loop [seen #{u} frontier (set (get children u))]
+                               (if (empty? frontier)
+                                 seen
+                                 (recur (into seen frontier)
+                                        (set/difference
+                                         (set (mapcat #(get children %) frontier))
+                                         seen))))]))
+            unit-ids (vec (sort-by pr-str (keys by-unit)))
+            pairs (for [a unit-ids b unit-ids
+                        :when (neg? (compare (pr-str a) (pr-str b)))]
+                    [a b])
+            overlaps (for [[a b] pairs
+                           :let [common (set/intersection (below a) (below b))]
+                           :when (seq common)]
+                       (let [maximal (vec (sort-by pr-str
+                                                   (remove (fn [d]
+                                                             (some #(contains? (below %) d)
+                                                                   (disj common d)))
+                                                           common)))
+                             meet (when (= 1 (count maximal))
+                                    (let [m (first maximal)]
+                                      (when (every? #(contains? (below m) %)
+                                                    common)
+                                        m)))]
+                         {:pair [a b] :common-maximal maximal :meet meet}))]
+        {:units units
+         :descent descent
+         :meets (into {}
+                      (keep (fn [{:keys [pair meet]}]
+                              (when meet [pair meet])))
+                      overlaps)
+         :missing-meets (into []
+                              (keep (fn [{:keys [pair common-maximal meet]}]
+                                      (when-not meet
+                                        {:pair pair
+                                         :common-maximal common-maximal})))
+                              overlaps)}))))
+
 (defn- checks-for
   "Gating unknown facts as check candidates, through check-candidates.
   Returns check-candidates' {:checks […] :not-gating […]} or a typed

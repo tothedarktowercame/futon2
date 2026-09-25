@@ -3,7 +3,8 @@
   construction scoring, the hand-over-when-acting-is-worth-more stopping
   rule, and the construction receipt. Moves are injected fixtures on
   tick-1-like tokens; H7c-2 implements the library's real moves."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.set :as set]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.construction :as construction]))
@@ -279,6 +280,60 @@
                            :q0 [:inbox/zero])))]
       (is (= :want-already-observed (:stop-reason receipt)))
       (is (zero? (:budget-used receipt))))))
+
+;; ------------------------------------------------------- clause 0: containment order
+;; PROOF-2a lines 128-212: the constructor emits a containment order r over
+;; units, not only a precedence list. Fixtures below take the shape of the
+;; hand cascades (futon3c holes/labs/M-futon-seams/proto/instance-*.edn):
+;; patterns carrying :guard {:needs :forbids} and :produces.
+(deftest containment-order-chain-is-the-precedence-case
+  (testing "bad case (3): a chain cascade yields an :order whose only
+            linear extension is the existing :precedence"
+    (let [chain {:precedence [:p1 :p2 :p3]
+                 :patterns [{:id :p1 :guard {:needs #{} :forbids #{}} :produces #{:t1}}
+                            {:id :p2 :guard {:needs #{:t1} :forbids #{}} :produces #{:t2}}
+                            {:id :p3 :guard {:needs #{:t2} :forbids #{}} :produces #{:t3}}]}
+          order (construction/containment-order chain)
+          idx (into {} (map-indexed (fn [i u] [u i]) (:precedence chain)))
+          below (fn [u] ;; reflexive descendants under :descent
+                  (loop [seen #{u} frontier [u]]
+                    (let [nxt (set (mapcat (fn [x] (keep #(when (= x (first %)) (second %))
+                                                         (:descent order)))
+                                           frontier))]
+                      (if (set/subset? nxt seen) seen (recur (into seen nxt) nxt)))))]
+      (is (= [[:p1 :p2] [:p2 :p3]] (:descent order)))
+      (is (= [{:unit :p1 :pattern :p1} {:unit :p2 :pattern :p2} {:unit :p3 :pattern :p3}]
+             (:units order)))
+      ;; every pair overlaps and has its meet; nothing is missing
+      (is (empty? (:missing-meets order)))
+      (is (= {[:p1 :p2] :p2 [:p1 :p3] :p3 [:p2 :p3] :p3} (:meets order)))
+      ;; r is total (a chain) and precedence respects every edge, so
+      ;; precedence is the ONLY linear extension of r
+      (is (every? (fn [[a b]] (or (contains? (below a) b) (contains? (below b) a)))
+                  (for [a [:p1 :p2 :p3] b [:p1 :p2 :p3] :when (not= a b)] [a b])))
+      (is (every? (fn [[a b]] (< (idx a) (idx b))) (:descent order))))))
+
+(deftest containment-order-cyclic-containment-refused
+  (testing "bad case (2): a cyclic containment is refused with a typed
+            reason naming the cycle — no order exists to record"
+    (let [cyclic {:precedence [:a :b]
+                  :patterns [{:id :a :guard {:needs #{:y} :forbids #{}} :produces #{:x}}
+                             {:id :b :guard {:needs #{:x} :forbids #{}} :produces #{:y}}]}
+          order (construction/containment-order cyclic)]
+      (is (= :refused (:status order)))
+      (is (= :cyclic-containment (:kind order)))
+      (is (= [:a :b :a] (:cycle order))))))
+
+(deftest containment-order-disjoint-pairs-need-no-meet
+  (testing "clause 0 restricts the semilattice condition to OVERLAPPING
+            pairs: two patterns sharing no descendant record nothing"
+    (let [disjoint {:precedence [:a :b]
+                    :patterns [{:id :a :guard {:needs #{} :forbids #{}} :produces #{:x}}
+                               {:id :b :guard {:needs #{} :forbids #{}} :produces #{:y}}]}
+          order (construction/containment-order disjoint)]
+      (is (= [] (:descent order)))
+      (is (= {} (:meets order)))
+      (is (= [] (:missing-meets order))))))
 
 (deftest receipt-records-locators-and-unlocated-tokens
   ;; claude-4, WM-04: the receipt names the tokens with no checkable locator,

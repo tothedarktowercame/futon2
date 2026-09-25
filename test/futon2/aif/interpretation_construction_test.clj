@@ -127,3 +127,58 @@
     (is (= :invalid-input (:kind (sut/construct (edit input))))))
   (doseq [g [##Inf ##NaN :infinite {:status :missing :kind :missing-preference-spec}]]
     (is (= :nonfinite-g (:kind (sut/construct (assoc input :evaluate-g (constantly g))))))))
+
+;; ---------------------------------------------------------------- clause 0
+;; H-order: each candidate's :construction-receipt carries :order, the
+;; containment order over units derived from the interpretations'
+;; produces/consumes. Fixture is the recorded hand cascade itself
+;; (futon3c holes/labs/M-futon-seams/proto/instance-6.edn @ 6149272b),
+;; bad case (1) of the packet: instance 6's one overlapping pair without a
+;; meet must come out with mode-gate and wr-8 as the maximal common units.
+(def instance-6
+  (edn/read-string
+   (slurp "test/fixtures/want-interp-library/M-futon-seams-instance-6@futon3c-6149272b.edn")))
+
+(deftest instance-6-order-has-one-missing-meet-with-the-conflicting-pair-maximal
+  (let [interpretations (into {}
+                              (map (fn [[id p]] [id (select-keys p [:guard :produces])]))
+                              (:patterns instance-6))
+        tokens (reduce into
+                       (set (:want instance-6))
+                       (map (fn [p]
+                              (into (into (:produces p) (-> p :guard :needs))
+                                    (-> p :guard :forbids)))
+                            (vals interpretations)))
+        receipts (zipmap (keys interpretations)
+                         (repeat {:kind :fixture-interpretation :by "test"}))
+        r (sut/construct {:target "M-futon-seams-instance-6"
+                          :want (vec (:want instance-6))
+                          :observation (zipmap tokens (repeat false))
+                          :interpretations interpretations
+                          :interpretation-receipts receipts
+                          :budget {:max-moves 1 :max-expansions 500}
+                          :horizon 6
+                          :move-cost 0
+                          :evaluate-g (fn [c] (if (empty? (:precedence c)) 100.0 1.0))})
+        c (first (:candidates r))
+        order (get-in c [:construction-receipt :order])]
+    (is (= :constructed (:status r)))
+    (is (= 8 (count (:units order)))
+        "one unit per pattern application; pattern id as an attribute")
+    (is (every? #(= (:unit %) (:pattern %)) (:units order)))
+    (testing "the derived descent is exactly the instance's recorded :above"
+      (is (= (set (map (juxt :context :pattern) (:above instance-6)))
+             (set (:descent order)))))
+    (testing "the one overlapping pair without a meet names the pair and the
+             maximal units of their common part — the two incomparable
+             conflicting patterns (clause 0: the missing meet and the
+             frontier conflict are the same fact)"
+      (is (= [{:pair [:cascade-construction/choose-the-grain-where-state-lives
+                      :or3/count-every-card-back]
+               :common-maximal [:realtime/mode-gate
+                                :war-room/wr-8-typed-files-are-sources-of-truth]}]
+             (:missing-meets order))))
+    (is (= 27 (count (:meets order))))
+    (testing "a finding, not a failure: construction still hands the
+             candidate over with its order attached"
+      (is (= :machine-constructed (get-in c [:construction-receipt :kind]))))))
