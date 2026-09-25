@@ -276,7 +276,12 @@
            {:target :mission/test
             :initial-family [base]
             :moves moves
-            :evaluate-g unmet-need-g
+            :evaluate-g (fn [c] {:value (unmet-need-g c)
+                                 ;; a FIXED declared universe, standing in
+                                 ;; for the common scoring universe
+                                 ;; (E-kimi-task-2); without one every
+                                 ;; comparison is :incommensurable (W6)
+                                 :universe [:stub]})
             :budget {:max-moves 8}
             :horizon 2})]
       (is (contains? #{:acting-worth-more :no-admitted-move

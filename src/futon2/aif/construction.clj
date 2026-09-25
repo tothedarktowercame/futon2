@@ -47,15 +47,48 @@
   [g]
   (if (identical? g :infinite) ##Inf (double g)))
 
+(defn- scored-g
+  "Normalise an :evaluate-g result into {:value g :universe u}.
+
+  A G value is meaningful only with the universe it was normalised over
+  (H-VALUE-G-D §7, W6). :evaluate-g may therefore return either a bare
+  number/:infinite — a LEGACY value whose universe was never recorded,
+  normalised here to the typed absence :universe :not-recorded — or a map
+  {:value g :universe u}, where u is the sorted token set (recorded
+  sorted) or an opaque digest map. A map without :universe is the same
+  typed absence; absence is never a substituted value."
+  [r]
+  (if (map? r)
+    {:value (:value r)
+     :universe (cond (sequential? (:universe r)) (vec (sort-by pr-str (:universe r)))
+                     (some? (:universe r)) (:universe r)
+                     :else :not-recorded)}
+    {:value r :universe :not-recorded}))
+
 (defn- best-g
-  "G of the best candidate in FAMILY under :evaluate-g (lower is better)."
+  "Scored G ({:value … :universe …}) of the best candidate in FAMILY under
+  :evaluate-g (lower value is better)."
   [evaluate-g family]
   (when (seq family)
     (reduce (fn [b c]
-              (let [g (evaluate-g c)]
-                (if (< (g-norm g) (g-norm b)) g b)))
-            (evaluate-g (first family))
+              (let [s (scored-g (evaluate-g c))]
+                (if (< (g-norm (:value s)) (g-norm (:value b))) s b)))
+            (scored-g (evaluate-g (first family)))
             (rest family))))
+
+(defn- compare-g
+  "The ONLY recorded comparison of two scored G values (W6/X6). Both
+  operands must carry the same recorded universe: then {:delta …
+  :universe …} with delta = a − b (positive means b improved). Anything
+  else — different universes, or either universe the typed absence
+  :not-recorded — is {:incommensurable {:universes [ua ub]}}: no
+  improvement number exists and none is claimed."
+  [a b]
+  (if (and (not (identical? :not-recorded (:universe a)))
+           (= (:universe a) (:universe b)))
+    {:delta (- (g-norm (:value a)) (g-norm (:value b)))
+     :universe (:universe a)}
+    {:incommensurable {:universes [(:universe a) (:universe b)]}}))
 
 (defn- established-tokens
   "Tokens already established in q0. q0 is accepted as a coll of tokens
@@ -132,8 +165,13 @@
            (cond-> (update acc :no-move-reasons assoc move-id (:reason result))
              found (update :no-move-findings assoc move-id found)))
          (let [proposed (:proposed-family result)
-               pragmatic (- (g-norm (best-g evaluate-g family))
-                            (g-norm (best-g evaluate-g proposed)))
+               ;; pragmatic value is a COMPARISON of two G values; it exists
+               ;; only over one shared recorded universe (W6). Otherwise the
+               ;; comparison is recorded :incommensurable and contributes no
+               ;; number — an incommensurable pragmatic is not a 0.
+               g-cmp (compare-g (best-g evaluate-g family)
+                                (best-g evaluate-g proposed))
+               pragmatic (:delta g-cmp)
                est (:epistemic-estimate result)
                novelty? (= :novelty (:kind est))
                added? (contains? #{:novelty :parameter-information-gain}
@@ -141,12 +179,15 @@
                epistemic (if (and added? (number? (:value est)))
                            (double (:value est)) 0.0)
                cost (double (move-cost result cost-of))
-               value (+ pragmatic epistemic (- cost))]
+               value (+ (or pragmatic 0.0) epistemic (- cost))]
            (update acc :evaluations conj
                    {:move-id (:move-id result)
                     :value value
                     :proposed-family proposed
-                    :parts {:pragmatic pragmatic
+                    :g-comparison g-cmp
+                    :parts {:pragmatic (if (some? pragmatic)
+                                         pragmatic
+                                         :incommensurable)
                             :epistemic est
                             :epistemic-added epistemic
                             :cost cost
@@ -157,19 +198,30 @@
 (defn- receipt
   "The construction receipt cascade-problems accepts as
   :construction-receipt (non-nil, carried verbatim). Stopping is never
-  target success."
-  [target taken evaluations stop-reason budget-used horizon g-of-best checks
+  target success.
+
+  Every scored G on the receipt carries its :universe beside its value
+  (:g-of-best is {:value … :universe …}; a legacy value records the
+  typed absence :universe :not-recorded). Every recorded COMPARISON of G
+  values (:final-evaluation entries, each taken move's :g-comparison)
+  asserts both operands shared one universe; otherwise it records
+  {:incommensurable {:universes [...]}} and never a number."
+  [target taken evaluations stop-reason budget-used horizon best checks
    no-move-findings]
   {:target target
    :moves (mapv #(dissoc % :proposed-family) taken)
    :family-searched (inc (count taken))
    :coverage {:moves-taken (vec (keep :move-id taken))
-              :final-evaluation (into {} (map (juxt :move-id :value))
+              :final-evaluation (into {}
+                                      (map (fn [{:keys [move-id value g-comparison]}]
+                                             [move-id (if (:incommensurable g-comparison)
+                                                        g-comparison
+                                                        value)]))
                                       evaluations)}
    :stop-reason stop-reason
    :budget-used budget-used
    :horizon horizon
-   :g-of-best g-of-best
+   :g-of-best (select-keys best [:value :universe])
    :checks-added checks
    ;; what a move that could not move nonetheless FOUND: order-by-need's
    ;; unmet needs and cycles, borrow-a-sibling's gaps. Present-only. Without
@@ -192,7 +244,12 @@
                                            :basis …}
                       :cost c}
                      or the typed {:status :no-move :reason …})
-    :evaluate-g      (fn [candidate] → G: number or :infinite); production
+    :evaluate-g      (fn [candidate] → G), either a bare number or :infinite
+                     (LEGACY: recorded with the typed absence :universe
+                     :not-recorded, and every comparison against it is
+                     :incommensurable) or {:value g :universe tokens} —
+                     the G value together with the universe it was
+                     normalised over (H-VALUE-G-D §7, W6). Production
                      passes futon2.aif.active-horizon-g/active-horizon-g
     :budget          {:max-moves n} REQUIRED, no default — missing is the
                      typed refusal :budget-required
@@ -209,8 +266,11 @@
                      already observed there, construction stops immediately
                      (:want-already-observed)
 
-  Stop reasons: :acting-worth-more (best move's value <= 0),
-  :budget-exhausted, :no-admitted-move (every move :no-move),
+  Stop reasons: :acting-worth-more (best move's value <= 0 over one shared
+  recorded universe), :g-universes-incommensurable (the best move's G
+  comparison had no shared recorded universe, so no :acting-worth-more
+  verdict exists), :budget-exhausted, :no-admitted-move (every move
+  :no-move),
   :needs-routed-human-input (every move :no-move with reason
   :needs-human-input), :want-already-observed. Stopping is not target
   success; the receipt says so (:stopped-is-not-success true).
@@ -272,11 +332,19 @@
                                (:checks checks) no-move-findings)}
 
                     ;; hand-over-when-acting-is-worth-more: the best move
-                    ;; is worth no more than acting on the best family now
+                    ;; is worth no more than acting on the best family now.
+                    ;; But when the best move's G comparison is
+                    ;; :incommensurable (different or unrecorded universes)
+                    ;; that verdict was never reached: the stop is the typed
+                    ;; :g-universes-incommensurable, not :acting-worth-more.
                     (or (nil? best) (<= (:value best) 0))
                     {:family family
                      :receipt (receipt target taken evaluations
-                                       :acting-worth-more budget-used horizon
+                                       (if (and best
+                                                (get-in best [:g-comparison :incommensurable]))
+                                         :g-universes-incommensurable
+                                         :acting-worth-more)
+                                       budget-used horizon
                                        (best-g evaluate-g family)
                                        (:checks checks) no-move-findings)}
 

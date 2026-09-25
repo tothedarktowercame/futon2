@@ -23,7 +23,8 @@
 (deftest improving-move-taken-then-hand-over
   (testing "a move that lowers G is taken; the next move is worth <= 0, so
             construction stops with :acting-worth-more"
-    (let [g (fn [c] (get {:base 3.0 :improved 2.0} (:id c) 3.0))
+    (let [g (fn [c] {:value (get {:base 3.0 :improved 2.0} (:id c) 3.0)
+                     :universe [:a]})
           ;; proposes the same improved family every time: worth +0.75 once
           ;; (3.0 -> 2.0, state-information recorded not added, cost 0.25),
           ;; then worth -0.25 against the improved current best
@@ -49,14 +50,81 @@
              (get-in receipt [:moves 0 :parts :epistemic :kind])))
       (is (not (get-in receipt [:moves 0 :parts
                                 :includes-unformalised-novelty])))
-      (is (= 2.0 (g (apply min-key g family))))
+      (is (= 2.0 (:value (g (apply min-key (comp :value g) family)))))
       (is (true? (:stopped-is-not-success receipt)))
       (is (= 2 (:horizon receipt))))))
+
+;; --------------------------------------- W6/X6: G comparisons carry universes
+;; H-VALUE-G-D §7: a G value is meaningful only with the universe it was
+;; normalised over. The receipt must refuse to record a numeric comparison
+;; of G values taken over different (or unrecorded) universes.
+(deftest g-comparison-over-different-universes-is-incommensurable
+  (testing "two values over different universes: :incommensurable, no
+            improvement number, and no :acting-worth-more verdict"
+    (let [g (fn [c] (if (= :base (:id c))
+                      {:value 3.0 :universe [:s0 :t1 :t4]}
+                      {:value 2.0 :universe [:s0 :t1 :t2 :t3 :t4]}))
+          move (fn [_] {:move-id :improve
+                        :proposed-family [{:id :improved :precedence [:a]}]
+                        :cost 0.0})
+          receipt (:receipt
+                   (construction/construct
+                    (assoc base-input
+                           :initial-family [{:id :base :precedence [:a]}]
+                           :moves [move] :evaluate-g g)))]
+      (is (= :g-universes-incommensurable (:stop-reason receipt)))
+      (is (not= :acting-worth-more (:stop-reason receipt)))
+      (is (= [] (:moves receipt)) "no improvement was ever claimed")
+      (is (= {:incommensurable {:universes [[:s0 :t1 :t4] [:s0 :t1 :t2 :t3 :t4]]}}
+             (get-in receipt [:coverage :final-evaluation :improve])))
+      (is (= {:value 3.0 :universe [:s0 :t1 :t4]} (:g-of-best receipt))))))
+
+(deftest g-comparison-over-one-universe-compares-as-today
+  (testing "two values over the same universe compare numerically, with the
+            universe recorded beside the delta"
+    (let [g (fn [c] {:value (get {:base 3.0 :improved 2.0} (:id c) 3.0)
+                     ;; unsorted on purpose: the receipt records it sorted
+                     :universe [:t4 :s0]})
+          move (fn [_] {:move-id :improve
+                        :proposed-family [{:id :improved :precedence [:a]}]
+                        :cost 0.25})
+          receipt (:receipt
+                   (construction/construct
+                    (assoc base-input
+                           :initial-family [{:id :base :precedence [:a]}]
+                           :moves [move] :evaluate-g g)))]
+      (is (= {:delta 1.0 :universe [:s0 :t4]}
+             (get-in receipt [:moves 0 :g-comparison])))
+      (is (= 1.0 (get-in receipt [:moves 0 :parts :pragmatic])))
+      (is (= 0.75 (get-in receipt [:moves 0 :value])))
+      ;; :final-evaluation re-evaluates the move against the improved
+      ;; family, where the same proposal is worth -0.25
+      (is (= -0.25 (get-in receipt [:coverage :final-evaluation :improve])))
+      (is (= {:value 2.0 :universe [:s0 :t4]} (:g-of-best receipt))))))
+
+(deftest legacy-g-without-universe-is-incommensurable
+  (testing "a bare-number (legacy) G carries the typed absence :universe
+            :not-recorded, and a comparison against it is :incommensurable —
+            not silently allowed"
+    (let [g (fn [c] (get {:base 3.0 :improved 2.0} (:id c) 3.0))
+          move (fn [_] {:move-id :improve
+                        :proposed-family [{:id :improved :precedence [:a]}]
+                        :cost 0.0})
+          receipt (:receipt
+                   (construction/construct
+                    (assoc base-input
+                           :initial-family [{:id :base :precedence [:a]}]
+                           :moves [move] :evaluate-g g)))]
+      (is (= :g-universes-incommensurable (:stop-reason receipt)))
+      (is (= :not-recorded (get-in receipt [:g-of-best :universe])))
+      (is (= 3.0 (get-in receipt [:g-of-best :value])))
+      (is (= {:incommensurable {:universes [:not-recorded :not-recorded]}}
+             (get-in receipt [:coverage :final-evaluation :improve]))))))
 
 ;; ---------------------------------------------------------------- (b)
 (deftest budget-one-exhausts-after-one-move
   (testing "budget 1 gives :budget-exhausted after one move"
-    (let [g (fn [c] (:g c))
+    (let [g (fn [c] {:value (:g c) :universe [:a]})
           ;; always proposes a strictly better family (g strictly
           ;; decreasing), so only the budget can stop it
           move (fn [family]
@@ -102,7 +170,8 @@
 (deftest novelty-recorded-with-flag
   (testing "a novelty estimate is recorded as a typed estimate and marks the
             value :includes-unformalised-novelty"
-    (let [g (fn [c] (get {:base 3.0 :improved 2.8} (:id c) 3.0))
+    (let [g (fn [c] {:value (get {:base 3.0 :improved 2.8} (:id c) 3.0)
+                     :universe [:a]})
           called? (atom false)
           move (fn [_]
                  ;; interpretation information is revealed once; the same

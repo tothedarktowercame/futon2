@@ -168,12 +168,22 @@
                              (if (= family current)
                                {:status :no-move :move-id :compose-by-need :reason :family-already-constructed}
                                {:move-id :compose-by-need :proposed-family family :cost move-cost}))
+                      ;; W6: a G value is comparable only with the universe
+                      ;; it was normalised over. Every candidate here is
+                      ;; scored against this target's token set, so declare
+                      ;; it as the universe; an injected map result's own
+                      ;; :universe wins when it carries one.
+                      universe (vec (sort-by pr-str tokens))
                       evaluated (fn [c]
-                                  (let [g (evaluate-g c)]
+                                  (let [r (evaluate-g c)
+                                        g (if (map? r) (:value r) r)]
                                     (when-not (finite? g)
                                       (throw (ex-info "Constructor needs a finite G comparison"
                                                       {:constructor/refusal :nonfinite-g :value g})))
-                                    g))
+                                    {:value g
+                                     :universe (if (and (map? r) (some? (:universe r)))
+                                                 (:universe r)
+                                                 universe)}))
                       result (try
                                (construction/construct
                                 {:target target :want (vec want) :q0 (vec established)
