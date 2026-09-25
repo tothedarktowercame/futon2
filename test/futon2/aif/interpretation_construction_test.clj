@@ -255,3 +255,57 @@
     (is (= :construction-not-taken (:kind r)) (pr-str (dissoc r :findings)))
     (is (= [[:P :Q]] (mapv :precedence (:left-out r))))
     (is (= :nonfinite-g (get-in r [:left-out 0 :g :absent])))))
+
+;; -------------------------------------------------- NONFINITE-BASELINE-I
+;; The empty baseline cascade's G is the reference every candidate's dG is
+;; taken against (deltaG_localises). Nonfinite, it is its own absence,
+;; :nonfinite-baseline-g, with the finite candidates carried under
+;; :uncompared with their G and nothing selected (owner's decision,
+;; claude-10, 2026-09-25). three-input's nil key is the baseline's G.
+
+(deftest nb-1-nonfinite-baseline-carries-the-finite-candidates-uncompared
+  (let [r (sut/construct (assoc (three-input {:P 3.0 :P2 1.5 :P3 2})
+                                :interpretations (dissoc three-p :P2)
+                                :interpretation-receipts (dissoc (:interpretation-receipts (three-input {})) :P2)
+                                :evaluate-g (fn [c] (get {nil ##NaN :P 3.0 :P3 2} (first (:precedence c))))))]
+    (is (= :refused (:status r)))
+    (is (= :nonfinite-g (:kind r)))
+    (is (= :nonfinite-baseline-g (:absent r)))
+    (is (Double/isNaN (:baseline-g r)))
+    (is (= [] (:candidates r)) "none selected")
+    (is (= {[:P :Q] 3.0 [:P3 :Q] 2}
+           (into {} (map (juxt :precedence (comp :value :g))) (:uncompared r))))
+    (is (every? #(= [:q :w] (get-in % [:g :universe])) (:uncompared r)))
+    (is (not (contains? r :left-out)))))
+
+(deftest nb-2-nonfinite-baseline-and-a-nonfinite-candidate-are-two-absences
+  (let [r (sut/construct (assoc (three-input {})
+                                :interpretations (dissoc three-p :P2)
+                                :interpretation-receipts (dissoc (:interpretation-receipts (three-input {})) :P2)
+                                :evaluate-g (fn [c] (get {nil ##NaN :P ##NaN :P3 2} (first (:precedence c))))))]
+    (is (= :nonfinite-baseline-g (:absent r)))
+    (is (= [[:P3 :Q]] (mapv :precedence (:uncompared r))))
+    (is (= [[:P :Q]] (mapv :precedence (:left-out r))))
+    (is (= :nonfinite-g (get-in r [:left-out 0 :g :absent])) "the candidate's own absence")
+    (is (= 2 (get-in r [:uncompared 0 :g :value])))))
+
+(deftest nb-3-baseline-absence-is-not-the-all-candidates-absence
+  (let [baseline (sut/construct (three-input {nil ##NaN :P 3.0 :P2 1.5 :P3 2}))
+        all-cand (sut/construct (three-input {:P ##NaN :P2 ##Inf :P3 :infinite}))]
+    (is (= :nonfinite-baseline-g (:absent baseline)))
+    (is (= :no-finite-g (:absent all-cand)))
+    (is (not= (:absent baseline) (:absent all-cand)))))
+
+(deftest nb-4-finite-baseline-is-byte-identical-to-082dfe5e
+  (let [r (sut/construct (three-input {nil 4 :P 2.5 :P2 0.5 :P3 1}))]
+    (is (= (slurp "test/fixtures/interpretation-construction/nb4-finite-baseline@futon2-082dfe5e.edn")
+           (pr-str r)))))
+
+(deftest nb-bad-case-inf-baseline-and-inf-candidate-is-no-dg-of-zero
+  (let [r (sut/construct (three-input {nil ##Inf :P ##Inf :P2 1.5 :P3 2}))]
+    (is (= :nonfinite-baseline-g (:absent r)))
+    (is (= ##Inf (:baseline-g r)))
+    (is (= [[:P :Q]] (mapv :precedence (:left-out r))) "the Inf candidate is left out, not compared")
+    (is (= [] (:candidates r)))
+    (is (not-any? #(= [:P :Q] (:precedence %)) (:uncompared r)))
+    (is (nil? (get-in r [:candidates 0 :construction-receipt :moves])) "no move, no g-comparison recorded")))

@@ -240,12 +240,43 @@
                                      :universe (if (and (map? r) (some? (:universe r)))
                                                  (:universe r)
                                                  universe)}))
-                      result (if (empty? family)
+                      ;; NONFINITE-BASELINE-I (owner's decision, claude-10,
+                      ;; 2026-09-25): the empty baseline cascade is not a
+                      ;; candidate. Target-grain dG is the difference against
+                      ;; it (deltaG_localises), so with its G nonfinite no
+                      ;; candidate has a dG and none is selected; the click
+                      ;; abstains. The refusal says so as its own absence,
+                      ;; :nonfinite-baseline-g, distinct from :no-finite-g
+                      ;; (every candidate nonfinite). The finite candidates
+                      ;; stay on the record with their G under :uncompared;
+                      ;; :left-out keeps its one meaning (the candidate's own
+                      ;; G is nonfinite). Checked before :no-finite-g, since
+                      ;; without a baseline nothing is comparable either way.
+                      baseline {:precedence [] :patterns []}
+                      baseline-g (g-raw baseline)
+                      result (cond
+                               (not (finite? (:g baseline-g)))
+                               (refuse :nonfinite-g
+                                       {:absent :nonfinite-baseline-g
+                                        :baseline-g (let [{:keys [r g]} baseline-g]
+                                                      (if (or (number? g) (keyword? g)) g r))
+                                        :uncompared (mapv (fn [c]
+                                                            (assoc (select-keys c [:precedence :need-edges])
+                                                                   :kind :cascade-candidate :target target
+                                                                   :want (vec want)
+                                                                   :g (evaluated c)
+                                                                   :unreached-wants (:unreached-wants c)
+                                                                   :interpretation-receipts
+                                                                   (select-keys interpretation-receipts
+                                                                                (:precedence c))))
+                                                          family)})
+                               (empty? family)
                                (refuse :nonfinite-g {:absent :no-finite-g :left-out left-out})
+                               :else
                                (try
                                (construction/construct
                                 {:target target :want (vec want) :q0 (vec established)
-                                 :initial-family [{:precedence [] :patterns []}]
+                                 :initial-family [baseline]
                                  :moves [move] :evaluate-g evaluated :budget budget :horizon horizon})
                                (catch clojure.lang.ExceptionInfo e
                                  (if-let [kind (:constructor/refusal (ex-data e))]
