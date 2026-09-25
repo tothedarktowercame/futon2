@@ -153,3 +153,79 @@
           c (first (mapcat :constructed-candidates (:problems r)))]
       (is (= chain (:precedence c)) (pr-str (:refusals r)))
       (is (= (:universe scored) (get-in c [:construction-receipt :g-of-best :universe]))))))
+
+;; ---------------------------------------------------------------------------
+;; UNIVERSE-ABSENT-PIN-I: the :universe-absent arm of a98f5879 edit 1.
+;; ---------------------------------------------------------------------------
+
+(def ^:private absent-universe-fixture
+  "The smallest family this file scores: one pattern producing :t1 from :s0,
+  against the empty cascade, at T=2 with want #{:t1} and no
+  :adjudication-rates (so the identity kernel, :zero-adjudication-identity —
+  which is what makes the ln2 arithmetic below exact)."
+  {:patt {:id :p/one :produces #{:t1}
+          :guard {:status :interpreted
+                  :clauses [{:status :interpreted :present #{:s0} :absent #{}}]}}
+   :state {:cascade-belief {#{:s0} 1}}
+   :opts {:horizon-steps 2 :cascade-spec {:want #{:t1}}}
+   ;; q0's support ∪ :want ∪ every token the one candidate names
+   :family-universe #{:s0 :t1}})
+
+(deftest rank-cascade-actions-without-universe-scores-over-the-family
+  ;; a98f5879 made efe/rank-cascade-actions honour an explicit :universe, and
+  ;; claimed the absent case is a no-op. That claim rested on kimi-2's
+  ;; before/after run, not on a test (PROOF-2a H-C row, follow-up (iii)).
+  ;;
+  ;; The set the PRE-FIX code normalised over, verbatim from
+  ;; `git show a98f5879^:src/futon2/aif/efe.clj` (lines 1091-1094):
+  ;;
+  ;;   universe (-> (cascade-candidate-tokens (mapcat :precedence candidate-actions))
+  ;;                (into (reduce set/union #{} (keys q0)))
+  ;;                (into want))
+  ;;
+  ;; that is: every token named by any candidate's pattern precedence (each
+  ;; pattern's :produces, plus every guard clause's :present and :absent —
+  ;; `cascade-candidate-tokens`, same file line 993 at that commit), UNION the
+  ;; supports of q0's states, UNION the preference spec's :want. Post-fix that
+  ;; expression is the `or` fallback, so supplying it explicitly must reproduce
+  ;; the absent case exactly.
+  (let [{:keys [patt state opts family-universe]} absent-universe-fixture
+        T (:horizon-steps opts)
+        cands [{:kind :cascade-candidate :id :c0 :precedence []}
+               {:kind :cascade-candidate :id :c1 :precedence [patt]}]
+        absent (efe/rank-cascade-actions state cands opts)
+        explicit (efe/rank-cascade-actions state cands (assoc opts :universe family-universe))
+        ;; strictly larger: one token no candidate names, not wanted, never true
+        bigger (efe/rank-cascade-actions state cands
+                                         (assoc opts :universe (conj family-universe :t2)))
+        g-by-id (fn [ranked] (if (sequential? ranked)
+                               (into {} (map (juxt :cascade-id #(double (:G-efe %))) ranked))
+                               {}))
+        ;; ##NaN for a missing id, so a typed refusal or a dropped candidate
+        ;; FAILS the comparisons below instead of throwing on nil arithmetic
+        g-of (fn [m id] (double (get m id ##NaN)))
+        g-absent (g-by-id absent)
+        g-explicit (g-by-id explicit)
+        g-bigger (g-by-id bigger)]
+    (testing "each arm scored the family rather than refusing"
+      (doseq [[label r] [[:absent absent] [:explicit explicit] [:bigger bigger]]]
+        (is (sequential? r) (str label " is a typed refusal, not a ranking: " (pr-str r)))
+        (is (= 2 (count r)) (str label " ranked " (count r) " of 2 candidates"))))
+    (testing "(1) absent :universe == the family universe supplied explicitly"
+      (is (= (set (keys g-absent)) (set (keys g-explicit)) #{:c0 :c1}))
+      (doseq [id [:c0 :c1]]
+        (is (< (abs (- (g-of g-absent id) (g-of g-explicit id))) 1e-12)
+            [id (g-of g-absent id) (g-of g-explicit id)])))
+    (testing "(2) a strictly larger universe shifts every G by exactly T·ln2 per
+             extra token: an extra token has utility weight 0, so it adds
+             ln(1+e^0) = ln2 to lnZ at each of the T steps and nothing to u(S_τ)"
+      (let [expected (* T (Math/log 2))]
+        (doseq [id [:c0 :c1]]
+          (is (< (abs (- (- (g-of g-bigger id) (g-of g-absent id)) expected)) 1e-12)
+              [id :shift (- (g-of g-bigger id) (g-of g-absent id)) :expected expected]))))
+    (testing "(3) the no-universe call records the universe it actually used"
+      (let [recorded (get-in (meta absent) [:cascade-scoring :universe])]
+        (is (some? recorded) "never nil: a G is only comparable with its universe")
+        (is (= family-universe (set recorded)))
+        (is (= :zero-adjudication-identity (get-in (meta absent) [:cascade-scoring :rates]))
+            "the ln2 arithmetic above holds at the identity kernel")))))
