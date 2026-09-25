@@ -1,19 +1,13 @@
 (ns futon2.aif.served-by-reading-test
   "Quotes to spans for served-by proposals, against the live M-futon-seams
   text (its sha is checked by the verifier's :text-sha256 pin on every call).
-  The extractor script is load-filed into its own namespace, as
-  futon2.wm.extract-outcomes-test does, until it is a requirable namespace."
+  The extractor is required as futon2.wm.extract-outcomes (row 2(b))."
   (:require [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
-            [futon2.aif.served-by-reading :as sbr]))
+            [futon2.aif.served-by-reading :as sbr]
+            [futon2.wm.extract-outcomes]))
 
-(def script-ns 'extract-outcomes-for-reading)
-
-(binding [*ns* (create-ns script-ns)]
-  (clojure.core/refer-clojure)
-  (load-file "scripts/wm/extract-outcomes.clj"))
-
-(defn- f [v] @(ns-resolve script-ns v))
+(defn- f [v] @(ns-resolve 'futon2.wm.extract-outcomes v))
 
 (def mission-path "../futon3c/holes/missions/M-futon-seams.md")
 ;; The text is read live from futon3c, so the warrant on this namespace does

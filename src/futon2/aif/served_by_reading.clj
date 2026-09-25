@@ -24,8 +24,8 @@
   An unknown instance or outcome is not placed here: the verifier's own
   :instance-unknown / :outcome-unknown answers it, so the rule has one home.
 
-  VERIFY is passed in (the script has no ns form and cannot be required yet;
-  row 2(b)). Pure apart from calling it."
+  VERIFY is passed in (futon2.wm.extract-outcomes/verify-proposed-link in
+  production, a namespace since row 2(b)). Pure apart from calling it."
   (:require [clojure.string :as str])
   (:import [java.security MessageDigest]))
 

@@ -1,18 +1,17 @@
-;; Tests for scripts/wm/extract-outcomes.clj, H-C-D §4 fixes E1 and E2.
-;; The script is load-filed into its own namespace; it is not a lib on the
-;; classpath. Run: clojure -M:test -m cognitect.test-runner -d test/futon2/wm
+;; Tests for the extractor, futon2.wm.extract-outcomes (scripts/futon2/wm/
+;; extract_outcomes.clj), H-C-D §4 fixes E1 and E2 onward. Required as a
+;; namespace since M-wm-wiring row 2(b); the script shim at
+;; scripts/wm/extract-outcomes.clj is still exercised by main-output below.
+;; Run: clojure -M:test -m cognitect.test-runner -d test/futon2/wm
 (ns futon2.wm.extract-outcomes-test
   (:require [clojure.edn :as edn]
             [clojure.set :as set]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
-            [clojure.test :refer [deftest is]]))
+            [clojure.test :refer [deftest is]]
+            [futon2.wm.extract-outcomes]))
 
-(def script-ns 'extract-outcomes-under-test)
-
-(binding [*ns* (create-ns script-ns)]
-  (clojure.core/refer-clojure)
-  (load-file "scripts/wm/extract-outcomes.clj"))
+(def script-ns 'futon2.wm.extract-outcomes)
 
 (defn- f [v] (ns-resolve script-ns v))
 
