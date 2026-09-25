@@ -1,0 +1,90 @@
+H-VALUE-G-D — AR-40 reproduced against the lane's real G
+lower is better; the constructor takes a plan only if G(plan) < G(empty)
+
+=== A  want t1, plan = 1 step, 0 unwanted intermediates
+    wants [:t1]  plan [:chain/one]  AR-40 expects: 4.03 vs 8.03 (taken)
+    G(plan) 4.0256   G(empty) 8.0256   plan taken? true
+    plan  call: universe (:s0 :t1) (|V|=2), lnZ 2.0064
+         per-step risk ["1.0064" "1.0064" "1.0064" "1.0064"]  sum 4.0256
+         per-step ambiguity ["0.0000" "0.0000" "0.0000" "0.0000"]  status (:reduced-identically-zero)
+         lane G 4.0256  cert G 4.0256  same-computation? true  closed form T*lnZ-sum u(S) 4.0256
+    empty call: universe (:s0 :t1) (|V|=2), lnZ 2.0064
+         per-step risk ["2.0064" "2.0064" "2.0064" "2.0064"]  sum 8.0256
+         per-step ambiguity ["0.0000" "0.0000" "0.0000" "0.0000"]  status (:reduced-identically-zero)
+         lane G 8.0256  cert G 8.0256  same-computation? true  closed form T*lnZ-sum u(S) 8.0256
+
+=== B  want t2, plan = 2 steps, 1 unwanted intermediate (t1)
+    wants [:t2]  plan [:chain/one :chain/two]  AR-40 expects: 7.80 vs 10.80 (taken)
+    G(plan) 7.7982   G(empty) 10.7982   plan taken? true
+    plan  call: universe (:s0 :t1 :t2) (|V|=3), lnZ 2.6996
+         per-step risk ["2.6996" "1.6996" "1.6996" "1.6996"]  sum 7.7982
+         per-step ambiguity ["0.0000" "0.0000" "0.0000" "0.0000"]  status (:reduced-identically-zero)
+         lane G 7.7982  cert G 7.7982  same-computation? true  closed form T*lnZ-sum u(S) 7.7982
+    empty call: universe (:s0 :t1 :t2) (|V|=3), lnZ 2.6996
+         per-step risk ["2.6996" "2.6996" "2.6996" "2.6996"]  sum 10.7982
+         per-step ambiguity ["0.0000" "0.0000" "0.0000" "0.0000"]  status (:reduced-identically-zero)
+         lane G 10.7982  cert G 10.7982  same-computation? true  closed form T*lnZ-sum u(S) 10.7982
+
+=== C  want t4, plan = 4 steps, 3 unwanted intermediates (t1,t2,t3)
+    wants [:t4]  plan [:chain/one :chain/two :chain/three :chain/four]  AR-40 expects: 15.34 vs 10.80 (NOT taken)
+    G(plan) 15.3434   G(empty) 10.7982   plan taken? false
+    plan  call: universe (:s0 :t1 :t2 :t3 :t4) (|V|=5), lnZ 4.0859
+         per-step risk ["4.0859" "4.0859" "4.0859" "3.0859"]  sum 15.3434
+         per-step ambiguity ["0.0000" "0.0000" "0.0000" "0.0000"]  status (:reduced-identically-zero)
+         lane G 15.3434  cert G 15.3434  same-computation? true  closed form T*lnZ-sum u(S) 15.3434
+    empty call: universe (:s0 :t1 :t4) (|V|=3), lnZ 2.6996
+         per-step risk ["2.6996" "2.6996" "2.6996" "2.6996"]  sum 10.7982
+         per-step ambiguity ["0.0000" "0.0000" "0.0000" "0.0000"]  status (:reduced-identically-zero)
+         lane G 10.7982  cert G 10.7982  same-computation? true  closed form T*lnZ-sum u(S) 10.7982
+
+=== D  want t1..t4, plan = 4 steps, every intermediate wanted
+    wants [:t1 :t2 :t3 :t4]  plan [:chain/one :chain/two :chain/three :chain/four]  AR-40 expects: 13.49 vs 15.99 (taken)
+    G(plan) 13.4876   G(empty) 15.9876   plan taken? true
+    plan  call: universe (:s0 :t1 :t2 :t3 :t4) (|V|=5), lnZ 3.9969
+         per-step risk ["3.7469" "3.4969" "3.2469" "2.9969"]  sum 13.4876
+         per-step ambiguity ["0.0000" "0.0000" "0.0000" "0.0000"]  status (:reduced-identically-zero)
+         lane G 13.4876  cert G 13.4876  same-computation? true  closed form T*lnZ-sum u(S) 13.4876
+    empty call: universe (:s0 :t1 :t2 :t3 :t4) (|V|=5), lnZ 3.9969
+         per-step risk ["3.9969" "3.9969" "3.9969" "3.9969"]  sum 15.9876
+         per-step ambiguity ["0.0000" "0.0000" "0.0000" "0.0000"]  status (:reduced-identically-zero)
+         lane G 15.9876  cert G 15.9876  same-computation? true  closed form T*lnZ-sum u(S) 15.9876
+
+=== row C: the two G values the constructor compares are taken over DIFFERENT universes
+  universe when scoring the PLAN : (:s0 :t1 :t2 :t3 :t4)
+  universe when scoring EMPTY   : (:s0 :t1 :t4)
+  tokens only in the plan's universe: (:t2 :t3)  k = 2
+  G(empty) in its own (smaller) family : 10.7982   <- the number the constructor compares against
+  G(empty) in the PLAN's family        : 16.3434   <- the comparable number
+  difference                           : 5.5452   predicted T*k*ln2 = 5.5452
+  G(plan) 15.3434 vs G(empty) 16.3434 IN ONE UNIVERSE -> plan preferred? true  (by 1.0000 = the final want's lam)
+
+=== refutation check: is an unwanted token PENALISED as a deviation from preference?
+  ln c((:s0 :t4)) = -3.0859
+  ln c((:s0 :t1 :t2 :t3 :t4)) = -3.0859
+  equal? true -> three unwanted tokens change the preference of the state by 0.0000
+  => no per-token deviation penalty exists; what changes G is ln Z over the UNIVERSE,
+     and every token in the universe (wanted or not) adds ln(1+e^{w_v}) to it at every step.
+
+=== bad case arithmetic (must still be declined after any fix)
+  improvement in one universe = 1.0000 ; moves = 4 ; current move-cost = 0 (authority :none-found)
+    move-cost 0.00 -> total cost 0.00 < improvement 1.0000 -> taken
+    move-cost 0.20 -> total cost 0.80 < improvement 1.0000 -> taken
+    move-cost 0.25 -> total cost 1.00 >= improvement 1.0000 -> DECLINED
+    move-cost 0.50 -> total cost 2.00 >= improvement 1.0000 -> DECLINED
+
+=== what the fix would do, and the bad case under it, scored in ONE common universe
+  one universe for the whole family, G from a single lane run:
+    G(empty)                      = 16.3434
+    G(chain, reaches t4)          = 15.3434  improvement 1.0000 -> TAKEN (the AR-40 case, now taken)
+    G(3-step prefix, never reaches t4) = 16.3434  improvement 0.0000 -> DECLINED (bad case: no want reached, no credit)
+  so under the fix the want-reaching chain is preferred by exactly lam, and a chain
+  that reaches no want has improvement 0 and is declined at any move cost >= 0.
+  A want-reaching chain whose COST exceeds lam needs a positive move cost to be
+  declined: at lam 1 and 4 moves that is move-cost >= 0.25 (see the arithmetic above).
+  current declared move cost is 0, so on cost alone nothing is declined today.
+
+=== summary
+  A  want t1, plan = 1 step, 0 unwanted intermediates              G(plan)   4.0256  G(empty)   8.0256  taken true
+  B  want t2, plan = 2 steps, 1 unwanted intermediate (t1)         G(plan)   7.7982  G(empty)  10.7982  taken true
+  C  want t4, plan = 4 steps, 3 unwanted intermediates (t1,t2,t3)  G(plan)  15.3434  G(empty)  10.7982  taken false
+  D  want t1..t4, plan = 4 steps, every intermediate wanted        G(plan)  13.4876  G(empty)  15.9876  taken true
