@@ -16,6 +16,11 @@
 (defn- f [v] @(ns-resolve script-ns v))
 
 (def mission-path "../futon3c/holes/missions/M-futon-seams.md")
+;; The text is read live from futon3c, so the warrant on this namespace does
+;; not pin it; this pin does (claude-8, review of d7deccba). Content sha of
+;; M-futon-seams.md since futon3c 3f5f44dd, the same pin extract_outcomes_test
+;; carries.
+(def mission-sha-pinned "d13c5cfe9e9b19b445bd5bb73507f286a9e5ff3b478a1c5bc6a2250d70c6f6fd")
 
 (defn- context [text]
   (let [isecs ((f 'instance-sections) ((f 'headings) text) (count (str/split-lines text)))
@@ -46,6 +51,8 @@
         p (sbr/proposal (:text ctx) (:isecs ctx) (:outcomes ctx) reading-route)
         r (read-link ctx reading-route)]
     (is (= roles-sentence ((f 'cp-subs) (:text ctx) (first (:want-span p)) (second (:want-span p)))))
+    (is (= mission-sha-pinned (sbr/sha256 (:text ctx)))
+        "the fixture text is the pinned M-futon-seams; a changed text fails here, not silently downstream")
     (is (= (sbr/sha256 (:text ctx)) (:text-sha256 p)) "the proposal is pinned to the text it was placed in")
     (is (= [4 :o-2] [(:instance r) (:outcome r)]) (pr-str r))
     (is (= :proposed-verified (get-in r [:via :basis])))
