@@ -44,6 +44,13 @@
 ;;      :cue/every-later-must, :cue/otherwise, :cue/cost-of), each gated by
 ;;      :requires :artefact -- a consequence sentence that names no artefact is
 ;;      not cued, because a "must" about nothing is not an outcome.
+;;   E4/E5 FOUR-CLAUSE FILTER (H-C-DEF §2). Cued sentences that are method
+;;      rules, completion criteria, or past/current facts are not outcomes.
+;;      Each cue is scored against the four clauses (clause-verdict); a
+;;      sentence failing any clause is emitted under :rejected with :clause and
+;;      its cue, never under :outcomes. An evidence-voiced cue inside an
+;;      "Evidence it is needed" paragraph is a finer-grain facet of its
+;;      instance's outcome (:facets, :facet-of), not a new outcome.
 ;;
 ;; Read-only. Writes nothing; prints EDN on stdout. Exits 2 on refusal.
 ;;
@@ -388,6 +395,126 @@
          (sort-by (fn [o] (first (:cue (first (:cues o)))))) ;; first cue's line
          vec)))
 
+;; ---------------------------------------------------- E4/E5: four-clause filter
+;; H-C-DEF §2 (proof2/packets/H-C-DEF.md): an outcome is a sentence that
+;;   1. states a property of the world after the mission that does not hold now;
+;;   2. closes a named discrepancy for an attributable party;
+;;   3. is checkable by a world-check OUTSIDE the mission document;
+;;   4. is not discharged by the mission completing.
+;; Each cued sentence is scored against the four clauses BY CUE: the rule set
+;; that fired plus structural features of the quote decide, so a reviewer
+;; disputes a named clause rule, not the extractor's taste. A sentence failing
+;; any clause is never emitted under :outcomes; it goes to :rejected carrying
+;; :clause <which> and its cue. An outcome (post-E1) is admitted when at least
+;; one of its cues passes all four clauses; a cue that fails inside an admitted
+;; outcome is carried on the outcome as :clause-failures (o-4's evidence-voiced
+;; second cue is evidence FOR the outcome, not a second row).
+
+(defn clause-verdict
+  "Score one cued sentence against H-C-DEF §2's four clauses. Returns nil when
+   the sentence passes all four, else {:clause n :reason kw :reads str} for the
+   FIRST failing clause. `whose` is the consolidated outcome's attribution."
+  [{:keys [rules quote whose]}]
+  (let [rs (set rules)]
+    (cond
+      ;; clause 1 -- a past/current fact, not a post-mission world property
+      (= rs #{:cue/had-to})
+      {:clause 1 :reason :clause1/past-tense-report
+       :reads "forced-work narrative with no purpose clause: true before the mission started"}
+      (re-find #"(?i)^\*\*In:\*\*" quote)
+      {:clause 1 :reason :clause1/derive-input
+       :reads "a DERIVE step's input specification restating an existing discrepancy as method input"}
+      (re-find #"^-\s+`[^`]+`" quote)
+      {:clause 1 :reason :clause1/existing-artefact
+       :reads "a bullet on an artefact that exists now; its property holds before the mission"}
+      ;; clause 2 -- no attributable party and nothing in the world named.
+      ;; A sentence cued by a mission-method rule is not judged here: its
+      ;; subject is the mission's own artefacts, which the artefact vocabulary
+      ;; deliberately does not name; clauses 3/4 give its verdict below.
+      (and (= :the-mission whose)
+           (not (re-find artefact-re quote))
+           (not (some rs [:cue/intended-end :cue/develops :cue/recorded-form
+                          :cue/exit-is :cue/do-not])))
+      {:clause 2 :reason :clause2/no-party-no-artefact
+       :reads "attributes to no party and names no artefact whose state could close a discrepancy"}
+      ;; clause 3 -- checkable only by inspecting the mission's own artefacts
+      (contains? rs :cue/intended-end)
+      {:clause 3 :reason :clause3/enactment-end-state
+       :reads "the end state of the mission's own enactment; checkable by inspecting the artefact"}
+      (contains? rs :cue/develops)
+      {:clause 3 :reason :clause3/method-description
+       :reads "describes the mission's own method; checkable by reading the mission"}
+      (contains? rs :cue/recorded-form)
+      {:clause 3 :reason :clause3/artefact-form-constraint
+       :reads "constrains the form of the mission's own artefacts; checked by reading them"}
+      ;; clause 4 -- discharged by the mission completing
+      (contains? rs :cue/exit-is)
+      {:clause 4 :reason :clause4/completion-criterion
+       :reads "an exit rule ('how will we know it's done'); discharged when the mission completes"}
+      (contains? rs :cue/do-not)
+      {:clause 4 :reason :clause4/imperative-to-the-mission
+       :reads "an imperative to the mission's own process; discharged by enactment"}
+      :else nil)))
+
+(defn- facet-lead-in?
+  "E1-residual (H-C-DEF §3, :o-6): a cue whose blank-line-delimited paragraph
+   the mission itself introduces with 'Evidence it is needed' is a finer-grain
+   facet of that instance's outcome, evidence-voiced -- not a new outcome."
+  [^String text cue-span]
+  (let [a (first cue-span)
+        qs (.offsetByCodePoints text 0 a)
+        pstart (if-let [i (str/last-index-of text "\n\n" qs)] (+ i 2) 0)
+        pend (or (let [i (str/index-of text "\n\n" qs)] (when i i)) (count text))]
+    (boolean (re-find #"(?i)evidence it is needed" (subs text pstart pend)))))
+
+(defn filter-outcomes
+  "E4/E5: partition consolidated outcomes into admitted / rejected / facets.
+   Every row keeps its cues; rejected rows carry :clause, :reason and the cue
+   that failed; facet rows carry :facet-of the admitted outcome of the same
+   instance section (a facet with no admitted parent is rejected on clause 1,
+   never silently admitted)."
+  [^String text outcomes]
+  (let [scored (mapv (fn [o]
+                       (let [fails (vec (keep (fn [c]
+                                                (when-let [v (clause-verdict (assoc c :whose (:whose o)))]
+                                                  (assoc v :cue (:cue c) :quote (:quote c))))
+                                              (:cues o)))]
+                         (assoc o
+                                :facet? (boolean (some #(facet-lead-in? text (:span %)) (:cues o)))
+                                :passes? (boolean (some #(nil? (clause-verdict (assoc % :whose (:whose o))))
+                                                        (:cues o)))
+                                :clause-failures fails)))
+                       outcomes)
+        admitted (filterv #(and (not (:facet? %)) (:passes? %)) scored)
+        admitted-by-inst (into {} (keep (fn [o] (when (:instance o) [(:instance o) (:id o)])))
+                               admitted)
+        facets (filterv :facet? scored)
+        facets (mapv (fn [f]
+                       (if-let [parent (get admitted-by-inst (:instance f))]
+                         (assoc f :facet-of parent)
+                         (assoc f :facet? false :passes? false
+                                :clause-failures [{:clause 1 :reason :clause1/facet-without-parent
+                                                   :reads "evidence-voiced facet cue with no admitted outcome in its instance section"
+                                                   :cue (:cue (first (:cues f)))
+                                                   :quote (:quote (first (:cues f)))}])))
+                     facets)
+        ;; one row per original outcome: facets replace their scored entries
+        facets-merged (mapv (fn [o] (or (some #(when (= (:id %) (:id o)) %) facets) o)) scored)
+        rejected (filterv #(or (and (not (:facet? %)) (not (:passes? %)))
+                               (and (:facet? %) (not (:facet-of %))))
+                          facets-merged)
+        rejected (mapv (fn [r]
+                         (let [f0 (first (:clause-failures r))]
+                           (-> r
+                               (dissoc :facet? :passes?)
+                               (assoc :clause (:clause f0) :reason (:reason f0)
+                                      :reads (:reads f0)
+                                      :failed-cue (:cue f0)))))
+                       rejected)]
+    {:outcomes (mapv #(dissoc % :facet? :passes?) admitted)
+     :rejected (vec rejected)
+     :facets (mapv #(dissoc % :facet? :passes? :clause-failures) (vec (filter :facet-of facets)))}))
+
 (defn verify
   "Every cue's quote occurs exactly once, at the line it claims, and at the
    code-point span it claims. Returns failures; one failure refuses the whole
@@ -469,14 +596,16 @@
           section-of (fn [l] (:instance (first (filter #(<= (first (:lines %)) l (second (:lines %))) isecs))))
           wants (or (cascade-wants cdir) {})
           rows (extract text section-of wants)
-          outcomes (consolidate rows) ;; already first-span-first
-          outcomes (mapv #(assoc %1 :id (keyword (str "o-" (inc %2))))
-                         outcomes
-                         (range))
-          fails (verify text outcomes)
+          consolidated (consolidate rows) ;; already first-span-first
+          consolidated (mapv #(assoc %1 :id (keyword (str "o-" (inc %2))))
+                             consolidated
+                             (range))
+          {admitted :outcomes rejected :rejected facets :facets}
+          (filter-outcomes text consolidated)
+          fails (verify text (concat admitted rejected facets))
           served (vec (for [s isecs
                             :let [ws (get wants (:instance s))
-                                  os (filterv #(= (:instance s) (:instance %)) outcomes)]]
+                                  os (filterv #(= (:instance s) (:instance %)) admitted)]]
                         (if (nil? ws)
                           {:instance (:instance s)
                            :absent :no-cascade
@@ -486,33 +615,39 @@
                            :wants ws
                            :serves (mapv :id os)
                            :basis :section-containment})))
-          unlinked (filterv #(nil? (:instance %)) outcomes)
-          out (cond-> {:schema :wm/mission-outcomes-v3
+          unlinked (filterv #(nil? (:instance %)) admitted)
+          out (cond-> {:schema :wm/mission-outcomes-v4
                        :offset-unit offset-unit
                        :extractor {:script "scripts/wm/extract-outcomes.clj"
                                    :cue-rules (mapv :id cue-rules)
                                    :consolidation :e1-same-instance-or-party-and-artefact
+                                   :filter :e4-e5-four-clause-H-C-DEF-S2
                                    :served-by-basis :section-containment}
                        :mission {:path path :lines lines :sha256 (sha256 text)}
                        :sections-read (mapv #(select-keys % [:level :title :line]) hs)
-                       :outcomes outcomes
+                       :outcomes admitted
+                       :rejected rejected
+                       :facets facets
+                       :filter-counts {:outcomes (count admitted)
+                                       :rejected (count rejected)
+                                       :facets (count facets)}
                        :served-by served
                        :unlinked {:count (count unlinked)
                                   :ids (mapv :id unlinked)
                                   :absent :outside-instance-sections}
                        :weighting {:absent :unstated
                                    :note "no line assigns a magnitude or compares two outcomes"}}
-                ref (assoc :reference-comparison (compare-reference text ref outcomes)))]
+                ref (assoc :reference-comparison (compare-reference text ref admitted)))]
       (cond
         (seq fails)
-        (do (pp/pprint {:schema :wm/mission-outcomes-v3
+        (do (pp/pprint {:schema :wm/mission-outcomes-v4
                         :offset-unit offset-unit
                         :refused :cue-does-not-resolve
                         :mission path
                         :failures fails})
             (System/exit 2))
 
-        (empty? outcomes)
+        (empty? admitted)
         (pp/pprint (assoc out :outcomes {:absent :no-stated-outcome
                                          :sections-read (mapv :title hs)}))
 

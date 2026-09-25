@@ -2,7 +2,8 @@
 ;; The script is load-filed into its own namespace; it is not a lib on the
 ;; classpath. Run: clojure -M:test -m cognitect.test-runner -d test/futon2/wm
 (ns futon2.wm.extract-outcomes-test
-  (:require [clojure.test :refer [deftest is]]))
+  (:require [clojure.string :as str]
+            [clojure.test :refer [deftest is]]))
 
 (def script-ns 'extract-outcomes-under-test)
 
@@ -18,6 +19,11 @@
 (def cp-subs (f 'cp-subs))
 (def read-reference (f 'read-reference))
 (def cue-rules @(f 'cue-rules))
+(def clause-verdict (f 'clause-verdict))
+(def filter-outcomes (f 'filter-outcomes))
+(def headings (f 'headings))
+(def instance-sections (f 'instance-sections))
+(def sha256 (f 'sha256))
 
 (defn outcomes-of
   "extract + consolidate over text; section-of maps line -> instance number."
@@ -180,3 +186,115 @@
     (is (= {} (:outcomes (read-reference (.getPath tmp))))
         "the declared unit passes")
     (.delete tmp)))
+
+;; ---------------------------------------------------------------- E4/E5
+;; The four-clause filter (H-C-DEF §2), live-pinned to the mission at sha256
+;; d13c5cfe9e9b19b445bd5bb73507f286a9e5ff3b478a1c5bc6a2250d70c6f6fd -- the sha
+;; the H-C-DEF §3 classification was taken at, and the sha the reference
+;; mission-C.edn declares. A mission that has moved is a different extraction,
+;; not a failing one: the pin fails loudly so the test is re-pinned, not
+;; silently re-read.
+
+(def mission-path "../futon3c/holes/missions/M-futon-seams.md")
+(def mission-sha-pinned "d13c5cfe9e9b19b445bd5bb73507f286a9e5ff3b478a1c5bc6a2250d70c6f6fd")
+
+(defn mission-filter
+  "The -main pipeline (headings -> sections -> extract -> consolidate -> ids
+   -> filter-outcomes) over text, without cascades or a reference."
+  [text]
+  (let [hs (headings text)
+        isecs (instance-sections hs (count (str/split-lines text)))
+        section-of (fn [l] (:instance (first (filter #(<= (first (:lines %)) l (second (:lines %))) isecs))))
+        cs (mapv #(assoc %1 :id (keyword (str "o-" (inc %2))))
+                 (consolidate (extract text section-of {}))
+                 (range))]
+    (filter-outcomes text cs)))
+
+(defn- quoted?
+  "Does some cue of row quote a sentence containing s?"
+  [row s]
+  (some #(str/includes? (:quote %) s) (:cues row)))
+
+(deftest e4e5-mission-pin
+  (let [text (slurp mission-path)]
+    (is (= mission-sha-pinned (sha256 text))
+        "the mission moved: re-pin the fixture and re-check the classification")))
+
+(deftest e4e5-all-six-reference-outcomes-admitted
+  (let [text (slurp mission-path)
+        {:keys [outcomes]} (mission-filter text)]
+    (is (= mission-sha-pinned (sha256 text)))
+    (doseq [q ["Rob's closing ask for the future: a seam in the Emacs layer"
+               "every later implementation must impersonate the first"
+               "Joe could not use Rob's memory MCP because it is neo4j-specific"
+               "Rob could not use futon3c's agent roles because the code reads the provider out of the agent id"
+               "Two implementations that have already drifted cost more to unify"
+               "With hardcoded code you can grep for the literal"]]
+      (is (some #(quoted? % q) outcomes)
+          (str "reference outcome still emitted: " (subs q 0 (min 50 (count q))))))))
+
+(deftest e4e5-ten-extras-rejected-or-facet
+  ;; One assertion per extra of H-C-DEF §3, quoting the sentence, on the clause
+  ;; it was classified under. Ids are the extractor's at the pinned sha.
+  (let [text (slurp mission-path)
+        {:keys [outcomes rejected facets]} (mission-filter text)
+        rejected? (fn [clause q]
+                    (some #(and (= clause (:clause %)) (quoted? % q)) rejected))
+        in-outcomes? (fn [q] (some #(quoted? % q) outcomes))]
+    (is (= 6 (count outcomes)) "exactly the 6 reference outcomes are admitted")
+    (is (= 9 (count rejected)))
+    (is (= 1 (count facets)))
+    ;; :o-6 — the E1-residual: a finer facet of :rob-can-run-the-stack (:o-4),
+    ;; not an outcome and not a rejection.
+    (let [facet (first (filter #(quoted? % "With roles that is a property of the binding, not a string comparison in the dispatcher") facets))]
+      (is facet "the facet cue is emitted under :facets")
+      (is (= :o-4 (:facet-of facet)) "facet-of the instance-4 outcome (:rob-can-run-the-stack)")
+      (is (not (in-outcomes? "property of the binding")) "never under :outcomes"))
+    ;; the four evidence extras (E5) fail clause 1: facts true before the mission
+    (is (rejected? 1 "Rob had to add configurable room and agent names") ":o-7 clause 1")
+    (is (rejected? 1 "The Python one already had to reimplement sentence splitting to match the elisp.") ":o-10 clause 1")
+    (is (rejected? 1 "**In:** a person who could not do something") ":o-14 clause 1")
+    (is (rejected? 1 "`exemplar/check-ledger.edn` (claude-10)") ":o-16 clause 1")
+    ;; the method extras (E4): clause 3 where the check is artefact inspection,
+    ;; clause 4 where the mission completing discharges them
+    (is (rejected? 3 "The intended end state is the abstract path absorbing the hardcoded one and the flag disappearing.") ":o-9 clause 3")
+    (is (rejected? 3 "What this mission develops is a **capability**") ":o-13 clause 3")
+    (is (rejected? 3 "a judgement must be recorded in a form something else can") ":o-15 clause 3")
+    (is (rejected? 4 "the exit is: the interface is declared") ":o-11 clause 4")
+    (is (rejected? 4 "**Do not** mint the abstraction and leave the hardcoded path alive indefinitely.") ":o-12 clause 4")
+    ;; nothing rejected is also admitted
+    (doseq [q ["had to add configurable room" "intended end state" "already had to reimplement"
+               "the exit is:" "**Do not** mint" "What this mission develops"
+               "**In:** a person" "must be recorded in a form" "check-ledger.edn"]]
+      (is (not (in-outcomes? q)) (str "rejected sentence never under :outcomes: " q)))))
+
+(deftest e4e5-bad-case-outcome-like-method-sentence
+  ;; A method sentence with outcome-like wording ("the stack will then have
+  ;; one registry") is rejected on the world-check clause (clause 3), not
+  ;; admitted: its check is inspecting the artefact the mission leaves behind.
+  (let [text "The intended end state is that the stack will then have one registry.\n"
+        {:keys [outcomes rejected]} (mission-filter text)]
+    (is (= [] outcomes) "not admitted")
+    (is (= 1 (count rejected)))
+    (is (= 3 (:clause (first rejected))) "rejected on the world-check clause")
+    (is (= :clause3/enactment-end-state (:reason (first rejected))))))
+
+(deftest e4e5-clause-verdict-unit
+  ;; The clause rules as data, one probe per clause, cue-driven.
+  (is (nil? (clause-verdict {:rules [:cue/could-not] :quote "Rob could not use the adapter." :whose "Rob"}))
+      "a party's blocked discrepancy passes all four clauses")
+  (is (= 1 (:clause (clause-verdict {:rules [:cue/had-to] :quote "Rob had to add a shim." :whose "Rob"})))
+      "clause 1: past-tense report with no purpose clause")
+  (is (nil? (clause-verdict {:rules [:cue/had-to :cue/so-party-could]
+                             :quote "Configs had to be changed so the role could be served by Codex." :whose "Rob"}))
+      "a purpose clause lifts the had-to cue (o-4's second cue)")
+  (is (= 2 (:clause (clause-verdict {:rules [:cue/wants-a]
+                                     :quote "One wants the thing to be better somehow." :whose :the-mission})))
+      "clause 2: no party, no artefact, no discrepancy named")
+  (is (= 3 (:clause (clause-verdict {:rules [:cue/recorded-form]
+                                     :quote "A judgement must be recorded in a form." :whose :the-mission})))
+      "clause 3: constraint on the mission's own artefacts")
+  (is (= 4 (:clause (clause-verdict {:rules [:cue/do-not]
+                                     :quote "**Do not** leave the old path alive." :whose :the-mission})))
+      "clause 4: an imperative discharged by enactment"))
+
