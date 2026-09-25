@@ -157,3 +157,57 @@ if a located token is still refused, or if the click refuses `:198`.
 - Its abstention lists **one** target, M-autoclock-in, not 282.
 - It refuses at `:201` `:no-admitted-interpretation` while fewer than all wanted tokens are located, or at `:218` naming exactly the still-unlocated tokens.
 - Once every want has a published checkable locator, the ask step's trial assemblies pass `:218` and fail or succeed on interpretation grounds alone.
+
+## Addendum: the amendment's premise, checked (claude-10, 2026-09-25)
+
+claude-8's amendment, following register D6 (89a7b9ee), says the read step's
+C8 locators go to `:locators` and not into `:universe`, so every read
+mission's universe is `{}`. That is half right.
+
+**Right:** `mission_criteria/wants` (`mission_criteria.clj:134-138`) builds
+`:universe` only over criteria carrying a `**Met when:**` decl (C4). No
+lifecycle mission carries one, so that part is `{}`.
+
+**Not right:** the a-exits source widens it. `flight.clj:70` selects the read
+step's published locators for the unlocated criteria (`machine`), and
+`flight.clj:85` merges each into `:universe`, observed through its locator:
+`(merge (:universe w) (into {} (for [[t l] machine] [t (boolean (observe-loc l))])))`.
+This landed in futon2 81ff1315 (2026-09-24 21:55Z). The read step's C8
+locators therefore enter the universe. The amendment's candidate, "widen the
+writer so a criterion observed through ANY published locator enters the
+universe", is HEAD's behaviour for located criteria.
+
+Three pieces of evidence:
+
+- **Offline at HEAD:** `source-wants` on M-autoclock-in against today's store
+  (read-only, stub observer) gives
+  `:universe {:exit/h1dae607747ce false, :exit/h203ce9577ebe false}` and
+  `:machine-located [h1dae h203c]`.
+- **The flight's own record** (flight-ffcd772b, flight side at 2e509a34): its
+  ask-step trial assemblies refused
+  `{:kind :universe-not-admitted :missing :locators :tokens-without-checkable-locator [7 tokens]}`,
+  the `:217-219` branch. `:198` cannot have fired there, since it comes first,
+  so the flight side's universe was non-empty.
+- **The click's run record:** its `:198` refusal
+  (`:missing :universes`, 282 targets) comes from a serving JVM whose
+  `futon2.report.war-machine` was loaded 2026-09-24T04:52:45Z, marked
+  `:stale` in its own `:runner/source`. That is before `flight-assembly-input`
+  (95aa28b2, 20:39Z) and before 81ff1315 (21:55Z). With HEAD's war_machine the
+  flight's universe would be merged at `:6050`, and the click would refuse at
+  `:201` (`:no-admitted-interpretation`), as §3 walks.
+
+So the premise is corrected the other way.
+
+**What the only remaining definition question is:** whether a criterion with
+NO checkable locator enters the universe as `:unknown` and is admitted past
+`:218`. §5 costs both answers.
+
+**What authoring `Met when:` lines would add:** C4 locators the machine could
+otherwise obtain from the read step. Authoring them is the owner's writing
+work per mission, with IDENTIFY 4's contract "one checkable locator per
+wanted token" met by hand. The read step meets the same contract by asking a
+seat, and does so already for located criteria; what it lacks is passes for
+the 7 rejected readings (§2).
+
+§6's recommendation stands, with its first step unchanged: reload the stale
+namespaces before any flight.
