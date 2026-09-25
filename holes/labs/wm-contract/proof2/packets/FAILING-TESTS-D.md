@@ -217,3 +217,34 @@ gate gets an arm or learns to ask the check is the decision-gate owner's.
 
 `futon2.aif.decision-gate-test` is therefore left exactly as it was: 16 tests,
 408 assertions, 1 failure, and no warrant, since the namespace is not green.
+
+---
+
+# D2 — three more, at HEAD `de36a7d9` (read-only, same method and bar)
+
+From claude-10's 58-namespace run at `27d6072d`; each quoted from a run at HEAD in futon2's own JVM, every bisect in a throwaway sibling worktree removed after, never the shared tree, no stash. Nothing changed; the first failing commits all carry the git identity Joseph Corneli.
+
+| test | first failing commit | pin/code | path | smallest change, owner's call |
+|---|---|---|---|---|
+| `offline-tick-record-preserves-validity-and-missing-prefix`, ERROR at `war_machine.clj:6624` (`uniform-run-record-test`) | `84f81cb4` 09-22 18:14 "Proof 1.3: shared relation producer" — §2's own commit | fixture | tick scoring | the shape landed at `f574a16c`: `:focus-inputs` with a row for its own target, decision time inside a discovery window |
+| `existing-selection-decisions-unchanged` ×6 at `:194` (`g-term-decomposition-test`) | `991e27a4` 09-21 05:11 "Wire joint policy precision learning from declared task observations"; green at `d168d348` 00:52 | pin | selection | the projection its twin already applies, in that one `is` |
+| `no-selection-does-not-borrow-historical-quantities` at `:140` (`uniform-run-record-test`) | `97a84770` 09-24 19:45 "E-cascade-real D8/AR-16: the abstained tick record carries its typed declines"; green at `b4fbc290` 19:41 | pin | the click record the flight reads | assert the two keys are typed absences, not absent |
+
+**The error, settled first.** `{:kind :class-unknown-no-scalar-g … :target :wm-tick-001-observation-crash}`: the
+same refusal, site and cause as §2, a synthetic target with no corpus relation, and `cascade_decision_test`
+already carries a row for this very target name. Qualifier: the var was red before that commit too (14 of 67
+assertions at `3b071260`, green at `792afae2` 09-21 14:49); the 288 commits between are **not** bisected, since
+the error is what is red at HEAD and `84f81cb4` is where it became one. Not on M-autoclock-in's first click,
+which abstains at assembly — but its precondition is the one M-autoclock-in also lacks.
+
+**Both pins are stale, and neither code change is wrong.** `selection_certificate_test.clj:22-34` reads the
+*same* fixture and is green: it adds the new precision metadata to the baseline and projects away
+`:policy-comparison :action-comparison :near-tie-threshold :enacted-steps`, each with a comment naming the
+commit that added it; `g_term_decomposition_test.clj:194-196` compares raw, so every field added since the 09-21
+baseline breaks it (first divergence `:tau-source :declared-beta`, 4,940 expected bytes against 9,461) — fix
+that `is`, not the shared fixture, which the twin needs as the historical snapshot. For the other, `:decision`
+is built with `assoc` (`full_loop_runner.clj:625-632`), so `:abstention` and `:chosen` are always present and,
+with no decision, are typed absences (`{:status :absent :reason :no-selection-decision-recorded}`;
+`chosen-summary`: "A typed absence when nothing was chosen") computed from this result — the comment above them
+reads "No historical checkpoints or trace lookup", which is the property the test's name guards. Both keys exist
+because the flight reads them (`record-summary`, `flight_runner.clj:244-253`), so dropping them is not open.
