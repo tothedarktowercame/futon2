@@ -624,6 +624,24 @@
   {:instance (:instance link) :outcome (:outcome link) :artefact artefact
    :want-span (get-in link [:via :want-span]) :outcome-span (get-in link [:via :outcome-span])})
 
+(deftest v-14-text-sha-pin-refuses-a-different-text
+  ;; claude-10's request (read step): a proposal may pin the text its spans
+  ;; were taken against; the right sha passes unchanged, a wrong one refuses
+  ;; :text-mismatch before any other condition, no sha behaves as before.
+  (let [{:keys [text isecs outcomes links]} (seams-context)
+        link (first (filter #(= [4 :o-4] [(:instance %) (:outcome %)]) links))
+        base (proposal-of link "provider")
+        plain (verify-proposed-link text isecs outcomes base)
+        pinned (verify-proposed-link text isecs outcomes (assoc base :text-sha256 (sha256 text)))
+        wrong (verify-proposed-link text isecs outcomes (assoc base :text-sha256 "0000"))
+        wrong-and-bad (verify-proposed-link text isecs outcomes
+                                            (assoc base :text-sha256 "0000" :instance 99))]
+    (is (= :proposed-verified (get-in plain [:via :basis])))
+    (is (= plain pinned) "the right sha changes nothing")
+    (is (= :text-mismatch (:reason wrong)))
+    (is (= (sha256 text) (get-in wrong [:detail :text-sha256])))
+    (is (= :text-mismatch (:reason wrong-and-bad)) "refuses before :instance-unknown")))
+
 (deftest v-13-two-identical-phrases-are-the-one-string-form
   ;; claude-8's bad case on I3: {:outcome-phrase "provider" :want-phrase "provider"}
   ;; claims no co-reference the checks did not verify, so the record must be

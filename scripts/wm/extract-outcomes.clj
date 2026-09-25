@@ -421,6 +421,8 @@
    :via span uses). Returns artefact-links' row shape with :via :basis
    :proposed-verified, or {:status :refused :reason r :detail ...} for the
    first failing condition, in order:
+     :text-mismatch               the proposal's optional :text-sha256 is not
+                                  this text's (spans are meaningless elsewhere)
      :instance-unknown            the instance is not a unit of isecs (a file
                                   with no instances anchor verifies nothing)
      :outcome-unknown             the outcome is not an admitted outcome id
@@ -453,7 +455,7 @@
    :proposed-verified. Two-string proposals carry the phrase map, :basis
    :proposed-verified and :coreference :reader-claimed. Nothing here proposes
    links."
-  [^String text isecs outcomes {:keys [instance outcome artefact want-span outcome-span]}]
+  [^String text isecs outcomes {:keys [instance outcome artefact want-span outcome-span text-sha256]}]
   (let [refuse (fn [reason detail] {:status :refused :reason reason :detail detail})
         sec (first (filter #(= instance (:instance %)) isecs))
         o (first (filter #(= outcome (:id %)) outcomes))
@@ -471,6 +473,11 @@
                              (when-not (phrase-in? want-text want-phrase) [:want-phrase])))
         dir (when want-text (some (fn [[kw re]] (when (re-find re want-text) kw)) direction-verbs))]
     (cond
+      ;; optional pin (claude-10's read step, 2026-09-25): a proposal may carry
+      ;; the sha256 of the text its spans were taken against; a different text
+      ;; here would make every span mean something else, so it refuses first
+      (and text-sha256 (not= text-sha256 (sha256 text)))
+      (refuse :text-mismatch {:proposal-text-sha256 text-sha256 :text-sha256 (sha256 text)})
       (nil? sec) (refuse :instance-unknown {:instance instance :instances (mapv :instance isecs)})
       (nil? o) (refuse :outcome-unknown {:outcome outcome :admitted (mapv :id outcomes)})
       (not (and want-lines
