@@ -87,12 +87,41 @@ machine does not yet do are listed as the gaps below.
 
 **Wₜ.** On each click the extracted target field `T` lists every target the
 tick considered and partitions it into a feasible support `T_f` and
-exclusions, each exclusion with a typed reason. The chosen target maximises
+exclusions, each exclusion with a typed reason. **Feasible** means the object
+is a work target readable at HEAD: a lifecycle-shaped mission (a Status line
+and at least one lifecycle phase heading, the form of
+`futon4/holes/mission-lifecycle.md`'s Conventions), an excursion, or a
+ticket; every such target is in `T_f`, since a mission the owner wrote down
+is feasible by that fact (Joe, 2026-09-25). **Exclusions** are only
+non-targets: an M- file without the lifecycle form, a file not at HEAD.
+Every feasible entry carries the machine's **`:next-step`** for it, one of
+`:read-criteria`, `:ask-interpretation` (naming the wants and their
+criterion lines), `:observe` (naming the tokens), `:construct`, `:ready`,
+with the constructor's typed finding kept under it as data; the field says
+what the machine still has to do to fly each target, never that a target
+cannot be flown. The chosen target maximises
 `PolicySelection.selectionPosterior` over `T_f` at target grain, with
 feasibility acting as policy support (membership in `T_f`) and not as a term
-of G. If `T_f` is empty, each excluded target's record states what would make
-it feasible; for a construction failure this is the constructor's typed
-finding (the unproduced want, or the missing interpretation).
+of G; a target whose next step is longer is not thereby infeasible. A
+feasible entry without a next step, or a considered target neither feasible
+nor excluded, fails Wₜ.
+
+*Landed (claude-10, 2026-09-25): futon2 0df9f027 (lifecycle form per the
+Conventions), 7bd17dfb (this definition), fixtures ee2dcccc and 6d2b39a7
+with pins; warrants test-registry-bdf6e939 and test-registry-4ef4b04b.
+Live read at 7bd17dfb: 501 considered (217 M-, 30 T-, 254 E-); 343
+feasible (59 shaped missions, 30 tickets, 254 excursions); 158 excluded,
+all M- files without the lifecycle form; next steps: 331 `:read-criteria`
+(51 missions, 28 tickets, 252 excursions), 12 `:ask-interpretation`
+(M-apm-demonstration, M-live-efe-map, M-demonstration-foundry,
+M-fold-self-play, M-action-vocabulary, M-peradam-mechanization,
+M-self-documenting-stack, M-war-machine-pilot; T-jvm-provenance-before-multi-jvm,
+T-strategic-cascade-emits-disconnected-patterns; E-efe-education,
+E-futon1a-archivist), none `:ready`. M-autoclock-in is feasible, next step
+`:read-criteria`. claude-8 recounted the fixture independently (158 / 331 /
+12) and ran the bad cases: an invented next step fails `check-field`; a
+mission with only `## MAPPING` and `## The tension` headings is not shaped;
+a phase heading without a Status line is not shaped.*
 
 **Pₜ.** To be built at `[:decision :target-field]`: `:considered`,
 `:feasible`, `:exclusions` (target, reason, what-would-make-feasible), the
