@@ -5789,7 +5789,7 @@
   no selection and no β needed. The constructor scores a candidate this
   way, with the same G selection uses (see `constructed-candidate-g`)."
   ([problem] (cascade-lane problem {}))
-  ([problem {:keys [through universe]}]
+  ([problem {:keys [through universe observation-labels]}]
   (let [{:keys [facts want interpretations repository precedences horizon-steps
                 cascade-spec beta]} problem
         route (atom [])
@@ -5885,9 +5885,19 @@
     (step :R5 "futon2.aif.efe/rank-actions"
           (fn []
             (let [locators (:locators problem)
+                  ;; M-wm-wiring row 6 (claude-10, 2026-09-25): admitted
+                  ;; labels reach sourced-rates from the lane's
+                  ;; :observation-labels {:labels [...] :subjects {class n}}.
+                  ;; None are admitted today, so every class keeps the
+                  ;; zero kernel and the numbers are unchanged; the record
+                  ;; now carries :measurement per token (:absent, or the
+                  ;; counts), so a zero kernel reads as unmeasured, never
+                  ;; as an exact observation.
+                  labels (vec (:labels observation-labels))
                   sourced (when (map? locators)
                             (observation-rates/sourced-rates
-                             nil nil nil locators (observation-contract)))
+                             labels (or (:subjects observation-labels) {}) nil
+                             locators (observation-contract)))
                   ;; H-VALUE-G-D (2026-09-25): the scored universe is the
                   ;; PROBLEM's declared token universe (facts, want, every
                   ;; interpreted pattern's guard and produces — the same set
@@ -5922,7 +5932,10 @@
                                           :rates-provenance
                                           {:source (:source sourced)
                                            :basis (:basis sourced)
-                                           :labels :none-admitted
+                                           :labels (if (some :admitted labels)
+                                                     {:admitted (count (filter :admitted labels))}
+                                                     :none-admitted)
+                                           :measurement (:measurement sourced)
                                            :contract :wm/observation-contract-v1}}))))))
     (when (= :R5 through) (reset! halted true))
     ;; R14 — selection at the DECLARED β (no default: a missing β is
