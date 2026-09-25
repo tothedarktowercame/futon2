@@ -2,6 +2,7 @@
   "Checks against real pinned shas in futon2 and mathlib4."
   (:require [babashka.http-client :as http]
             [clojure.data.json :as json]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.observation-checks :as oc]))
 
@@ -269,3 +270,24 @@
     (is (= :registry-unreadable (:kind (respond 404 ""))))
     (is (= :registry-unreadable (:kind (respond 200 "not json"))))
     (is (= :unparseable-response (get-in (respond 200 "not json") [:data :reason])))))
+
+(deftest c8-lookup-asks-for-a-small-page-and-a-refusal-says-how-far-it-looked
+  ;; 2026-09-25, live: with no limit the endpoint's default page does not
+  ;; answer within this client's 5s timeout, so C8 refused :registry-unreadable
+  ;; for EVERY namespace, present or absent. The client asks for an explicit
+  ;; small page, and a refusal carries the endpoint's own accounting of how
+  ;; far it looked.
+  (let [seen (atom nil)]
+    (with-redefs [http/get (fn [url _]
+                             (reset! seen url)
+                             {:status 200
+                              :body (json/write-str {:latest {:found false
+                                                              :reason "scan-window-exhausted"
+                                                              :scanned 100
+                                                              :registry-entries 3108}})})]
+      (let [r (oc/fetch-latest-for-namespace "http://127.0.0.1:7070" "demo-test")]
+        (is (str/includes? @seen "namespace=demo-test"))
+        (is (str/includes? @seen "&limit=100"))
+        (is (= :scan-window-exhausted (get-in r [:data :reason])))
+        (is (= 100 (get-in r [:data :scanned])))
+        (is (= 3108 (get-in r [:data :registry-entries])))))))

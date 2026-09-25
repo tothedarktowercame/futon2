@@ -224,10 +224,18 @@
   run for the namespace; a refusal when the lookup cannot be reached, or when it
   reports that its scan filled its window — a scan that ran out of room did not
   establish absence, and reading it as \"no tests are registered\" would be the
-  substituted value this class exists to refuse."
+  substituted value this class exists to refuse.
+
+  The page is asked for explicitly (&limit=100): with no limit the endpoint's
+  default page over a several-thousand-entry registry does not answer within
+  this client's 5s timeout (2026-09-25, live), which would refuse EVERY
+  namespace, present or absent. A refusal carries the endpoint's own :scanned
+  and :registry-entries when it reported them, so the refusal says how far the
+  lookup looked rather than just that it refused."
   [base namespace]
   (let [url (str (str/replace base #"/$" "") "/api/alpha/test-registry/latest"
-                 "?namespace=" (URLEncoder/encode (str namespace) "UTF-8"))
+                 "?namespace=" (URLEncoder/encode (str namespace) "UTF-8")
+                 "&limit=100")
         {:keys [status body]} (try (http/get url {:timeout 5000 :throw false})
                                    (catch Exception e
                                      {:status :unreachable :body (.getMessage e)}))]
@@ -245,9 +253,13 @@
           (= "no-run-for-namespace" (:reason latest)) :absent
 
           :else
-          (refuse :registry-unreadable {:check :C8 :url url
-                                        :reason (keyword (or (:reason latest)
-                                                             "lookup-inconclusive"))}))))))
+          (refuse :registry-unreadable
+                  (merge {:check :C8 :url url
+                          :reason (keyword (or (:reason latest)
+                                               "lookup-inconclusive"))}
+                         ;; how far the lookup looked, when it said
+                         (into {} (filter (comp some? val))
+                               (select-keys latest [:scanned :held :registry-entries])))))))))
 
 (def ^:dynamic *registry-latest*
   "The seam C8 resolves a namespace through: (fn [base namespace] ->
