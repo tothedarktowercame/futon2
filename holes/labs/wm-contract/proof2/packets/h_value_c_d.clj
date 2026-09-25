@@ -223,3 +223,139 @@
         :full-sweep              (aggregate lam all-cells)
         :text-reading            (aggregate lam (where #(and (<= (:u-v %) 0.5) (<= (:d5r %) 0.5))))
         :lane-rate-rho-0.105     (aggregate lam (where #(= 0.105 (:rho %))))}))
+
+;; =====================================================================
+;; H-VALUE-CAL-D (claude-11, 2026-09-25): C over a CALENDAR index,
+;; separate from rollout step. The sections above are unchanged, so their
+;; output still reproduces H-VALUE-C-D; this section is one more reading.
+;; Design and every span: H-VALUE-CAL-D.md.
+;;
+;; Clock: calendar time t in attempt units, t = 0 at the mission's record
+;; date. DECLARED mapping: rollout step contributes no calendar time. Every
+;; want token of instance i is attained together at the instance's calendar
+;; completion time T_i, because the IDENTIFY exit is conjunctive (interface
+;; declared AND a caller converted AND a redirect test). T_i = E[attempts_i]
+;; at theta 0.8 (target-cost.edn), one attempt = one unit.
+;;
+;; Events: E_now (t = 0); E_vs, "a VS Code implementation exists" (date
+;; UNSTATED, swept as s-vs; ##Inf = not within any horizon).
+;;
+;; Attainment of outcome o by instance i landing at T, as a share of the
+;; horizon H (H unstated, swept):
+;;   R, S, D, C : flow from T to H             (H - T)+ / H
+;;   V          : flow from E_vs to H, only if the seam precedes E_vs;
+;;                a VS Code client landing first leaves the retrofit
+;;                degree kappa (unstated, swept)
+;;   instance 7 : "do before a VS Code implementation exists, not after":
+;;                if T_7 >= s-vs, every service of 7 carries kappa.
+;; Degree d as above (d5-rob swept, others 1). u_V is gone: the deferral
+;; of V and the deadline on 7 are both stated against E_vs.
+;;
+;; Two rankings:
+;;   single-pick  V(i) = SUM a_i(o) w_o f_o(T_i) - lam*cost_i; "Pick one
+;;                instance" (span [17969 18029]); 4>5>7 as before.
+;;   sequence     the order of {4,5,7} worked one after another; V(order)
+;;                sums each instance's value at its cumulative completion
+;;                time. lam*cost is the same for every order and drops out.
+;;                4>5>7 = (4 5 7) is the strict best of the six orders;
+;;                7-first = the best order starts with 7.
+
+(def CAL-H [30.0 60.0 120.0])
+(def CAL-SVS [5.0 15.0 25.0 40.0 ##Inf])
+(def CAL-KAPPA [0.0 0.5])
+(def cal-T (into {} (for [i instances] [i (get cost i)])))
+
+(defn cal-token-coeffs
+  "Per instance: [[outcome-index degree] ...] for every (token, outcome) link.
+   Degree only; timing is applied at a completion time."
+  [d5r]
+  (into {} (for [i instances]
+             [i (vec (for [[[inst token] outs] token-links :when (= inst i)
+                           o outs]
+                       [(.indexOf ^java.util.List OUTS o) (degree i token o d5r)]))])))
+
+(defn cal-factor
+  "Attainment share for outcome O of instance I landing at calendar time T."
+  [{:keys [H s-vs kappa]} i o T]
+  (let [flow (fn [from] (/ (max 0.0 (- H from)) H))
+        late? (and (= i "7") (>= T s-vs))]
+    (* (if late? kappa 1.0)
+       (if (= o :V)
+         (if (< T s-vs) (if (Double/isInfinite s-vs) 0.0 (flow s-vs)) (flow T))
+         (flow T)))))
+
+(defn cal-coeff
+  "Vector a_i(o)*f_o(T) for instance I landing at T."
+  [p tc i T]
+  (reduce (fn [v [oi d]] (update v oi + (* d (cal-factor p i (nth OUTS oi) T))))
+          [0.0 0.0 0.0 0.0 0.0] (get tc i)))
+
+(def cal-cells
+  (vec (for [H CAL-H s-vs CAL-SVS kappa CAL-KAPPA d5r D5R]
+         {:H H :s-vs s-vs :kappa kappa :d5r d5r})))
+
+(def ORDERS (for [a ["4" "5" "7"] b ["4" "5" "7"] c ["4" "5" "7"]
+                  :when (= 3 (count (set [a b c])))] [a b c]))
+
+(defn cal-cell-data
+  "Precomputed coefficients for one cell: single-pick per instance, and per
+   order the summed coefficient vector."
+  [p]
+  (let [tc (cal-token-coeffs (:d5r p))]
+    {:single (into {} (for [i instances] [i (cal-coeff p tc i (cal-T i))]))
+     :orders (into {} (for [ord ORDERS]
+                        [ord (apply mapv + (map (fn [i t] (cal-coeff p tc i t))
+                                                ord (reductions + (map cal-T ord))))]))}))
+
+(def cal-data (mapv (fn [p] [p (cal-cell-data p)]) cal-cells))
+
+(defn cal-aggregate
+  [lam pred]
+  (let [cells (filter (comp pred first) cal-data)
+        [ok7 sev ok-seq sev-seq n]
+        (reduce
+         (fn [acc [_ {:keys [single orders]}]]
+           (reduce
+            (fn [[a b c d n] w]
+              (let [v (fn [i] (- (dot (get single i) w) (* lam (get cost i))))
+                    v4 (v "4") v5 (v "5") v6 (v "6") v7 (v "7")
+                    ov (into {} (for [[ord co] orders] [ord (dot co w)]))
+                    best (apply max (vals ov))
+                    top (filter #(= best (ov %)) ORDERS)]
+                [(if (and (> v4 v5) (> v5 v7)) (inc a) a)
+                 (if (and (> v7 v4) (> v7 v5) (> v7 v6)) (inc b) b)
+                 (if (= [["4" "5" "7"]] top) (inc c) c)
+                 (if (and (= 1 (count top)) (= "7" (ffirst top))) (inc d) d)
+                 (inc n)]))
+            acc W-GRID))
+         [0 0 0 0 0] cells)]
+    {:points n
+     :single-4>5>7 (r4 (/ (double ok7) n)) :single-7-first (r4 (/ (double sev) n))
+     :sequence-4>5>7 (r4 (/ (double ok-seq) n)) :sequence-7-first (r4 (/ (double sev-seq) n))}))
+
+(println)
+(println ";; H-VALUE-CAL-D (claude-11): calendar index, completion times T_i =" (pr-str cal-T))
+(prn {:swept {:H CAL-H :s-vs CAL-SVS :kappa CAL-KAPPA :d5-rob D5R :w-points (count W-GRID)
+              :orders (count ORDERS)}})
+
+;; Cross-check: with every attainment share forced to 1 the assembly must
+;; reproduce the static token-grain cells at u_V = 1, rho = delta = 0.
+(let [static (aggregate 0 (where #(and (zero? (:rho %)) (zero? (:delta %)) (= 1.0 (:u-v %)))))
+      forced (let [cells (for [d5r D5R]
+                           (let [tc (cal-token-coeffs d5r)]
+                             [nil (into {} (for [i instances]
+                                             [i (reduce (fn [v [oi d]] (update v oi + d))
+                                                        [0.0 0.0 0.0 0.0 0.0] (get tc i))]))]))]
+               (aggregate 0 cells))]
+  (prn {:cross-check-static-uV1 static :calendar-assembly-with-shares-1 forced
+        :equal (= static forced)}))
+
+(doseq [lam LAMS]
+  (prn {:lambda lam
+        :calendar-full          (cal-aggregate lam (constantly true))
+        :vs-not-in-horizon      (cal-aggregate lam #(Double/isInfinite (:s-vs %)))
+        :vs-after-all-three     (cal-aggregate lam #(= 40.0 (:s-vs %)))
+        :vs-mid-sequence        (cal-aggregate lam #(#{15.0 25.0} (:s-vs %)))
+        :vs-before-any-lands    (cal-aggregate lam #(= 5.0 (:s-vs %)))
+        :deadline-reachable     (cal-aggregate lam #(> (:s-vs %) (cal-T "7")))
+        :text-reading-d5r<=0.5  (cal-aggregate lam #(<= (:d5r %) 0.5))}))
