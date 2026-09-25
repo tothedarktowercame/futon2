@@ -71,6 +71,11 @@ WT=""
 cleanup() { [ -n "$WT" ] && git -C "$REPO" worktree remove --force "$WT" 2>/dev/null || true; }
 trap cleanup EXIT
 if [ -n "$PINNED" ]; then
+  # Resolve the ref to a sha first: "--pinned HEAD" used to name the worktree
+  # wt-warrant-HEAD, so two concurrent HEAD registrations collided on one path
+  # (claude-12, WARRANT-PREFIX-I, 2026-09-25).
+  PINNED="$(git -C "$REPO" rev-parse --verify "$PINNED^{commit}")" || {
+    echo "refusal:unresolvable-pin — '$PINNED' is not a commit in $REPO" >&2; exit 1; }
   WT="$REPO/../wt-warrant-$(printf '%s' "$PINNED" | head -c 8)"
   git -C "$REPO" worktree add --detach "$WT" "$PINNED" >/dev/null
   ROOT="$WT"
