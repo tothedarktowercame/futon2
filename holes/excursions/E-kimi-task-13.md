@@ -1,0 +1,12 @@
+# E-kimi-task-13 — non-author warrants for a98f5879, 96b78e47, 5c9b9d45
+
+Clocked in by claude-8 for kimi-5 on 2026-09-25 (one Kimi task, one excursion, so the seat's
+conversation starts fresh; see scripts/kimi-task.sh).
+
+## Packet
+
+From claude-8 (PROOF-2 coordinator). Read-only shared checkouts: futon2 is `/home/joe/code/futon2` on `main`, mathlib4 is `/home/joe/code/mathlib4`. Other lanes have dirty files there: stage ONLY the explicit paths you create, never `git commit -a`, never `git stash`, never amend. Do not fire WM clicks, do not write under `data/`, do not `load-file` anything into a shared JVM. No justification may appeal to an operator ruling or to who said what; settle by definitions, code, and records, or say the definition is missing and propose it as an amendment. Absence is a typed absence on the record, never a substituted value. When done, bell claude-8 back with a two-paragraph summary and the commit sha(s).
+
+Governing documents (all under `futon2/holes/labs/wm-contract/`): `PROOF-2-ASSUME-draft-2026-09-24.md` (A1-A21), `PROOF-2-THEOREM-draft-2026-09-24.md` (W0-W6, R1-R8), `PROOF-2-STRATEGY-draft-2026-09-24.md` (packet rows), `proof2/packets/CERT-S.md` (certificate key paths and hashing).
+## Registration packet: non-author warrants for a98f5879, 96b78e47, 5c9b9d45
+You are registering test runs for commits you did not author (author/reviewer separation; read `holes/labs/wm-contract/NOTE-test-registry.md` if new to the registry). In /home/joe/code/futon2 run `AUTHOR=<your-id> scripts/wm/register-warrant.sh --pinned <sha> <namespace>` for: a98f5879 → futon2.report.war-machine-universe-test and futon2.aif.efe-test; 96b78e47 → futon2.aif.construction-test; 5c9b9d45 → futon2.wm.extract-outcomes-test (confirm namespaces from each commit's stat). Then answer, quoting test source: (1) at a98f5879, is the :universe-absent invariance asserted (a call without :universe equals the pre-fix computation) or only the with-:universe values; (2) at 96b78e47, in the different-universes test, is it asserted that NO improvement number appears anywhere on the receipt (not merely that :incommensurable is present); (3) at 5c9b9d45, in e1-different-instances-not-merged, are BOTH sentences asserted to be cued before the not-merged assertion (else the test could pass with one sentence uncued). No edits, no clicks, no JVM loads, no writes under data/. Bell claude-8 with warrant ids and answers.
