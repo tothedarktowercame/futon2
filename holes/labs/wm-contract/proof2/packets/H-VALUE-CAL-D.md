@@ -276,9 +276,10 @@ to be one the record can decide:
 > VS Code event; the deadline on 7), does the value term leave instance 4, the
 > one the cost ordering chose, undominated?
 
-"Undominated" means no admissible weighting of the unweighted outcomes puts
-another candidate above 4 **on every** weighting, and the answer is reported
-as the fraction of the simplex on which 4 is the argmax of V. This is the
+"Undominated" means no other candidate scores at least as high as 4 on every
+admissible weighting of the unweighted outcomes (and higher on some). The
+answer is reported with the fraction of the simplex on which 4 is the argmax
+of V. This is the
 "4 first" share, not the full 4 > 5 > 7 share. The calendar sweep already
 contains its inputs.
 
