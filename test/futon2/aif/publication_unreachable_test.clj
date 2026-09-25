@@ -126,19 +126,32 @@
         (is (= :legacy-a (:marker-class r)))
         (is (true? (:repair/discharged? r)))))))
 
-(deftest store-wide-catch-up-reports-markers-not-refusals
-  ;; H-PUBLISH-A2 acceptance: after the one-shot write, a full catch-up!
-  ;; over the real store reports every one of the 68 H-PUBLISH-D ids as
-  ;; :publication-unreachable with its class, and re-refuses none of them.
-  ;; Read-only against data/: every marked id's derive refuses before any
-  ;; git operation, so catch-up! writes nothing here.
-  (let [results (receipt/catch-up! "data/wm-repair-obligations" "/home/joe/code/futon2")
-        by-status (group-by :status results)
-        by-class (frequencies (map :class (:publication-unreachable by-status)))]
-    (is (= 68 (count results)))
-    (is (= 68 (count (:publication-unreachable by-status))))
-    (is (nil? (:publication-refused by-status))
-        "no re-refusals of the marked ids")
-    (is (= {:legacy-a 44 :late-script-b 9 :no-implementation-c 15} by-class))
-    (is (every? #(= "H-PUBLISH-D 5cbf0031" (:ground %))
-                (:publication-unreachable by-status)))))
+(deftest synthetic-store-catch-up-reports-markers-not-refusals
+  ;; The registrable form of the store-wide acceptance: one resolution per
+  ;; class under a temp root, each marked through the writer, then a full
+  ;; catch-up!. The count over the real store lives in
+  ;; futon2.aif.publication-unreachable-live-test (shared checkout only).
+  ;; Classes A and B have an implementation record, as derive would look for
+  ;; one; class C has none. Each derive refuses
+  ;; :resolution-context-unavailable before any git operation.
+  (let [root (temp-root)
+        ids {:legacy-a "repair-synthetic-legacy-a"
+             :late-script-b "repair-synthetic-late-script-b"
+             :no-implementation-c "repair-synthetic-no-implementation-c"}]
+    (doseq [[class id] ids]
+      (with-resolution root id)
+      (when-not (= :no-implementation-c class)
+        (let [f (io/file root "implementations" (str id ".edn"))]
+          (io/make-parents f)
+          (spit f (pr-str {:repair/id id :repair/phase :implementation
+                           :implementation-attempt "repair-1"}))))
+      (repair/write-publication-unreachable! root id (assoc (marker id) :class class)))
+    (let [results (receipt/catch-up! root "/no/repo")
+          by-status (group-by :status results)
+          by-class (frequencies (map :class (:publication-unreachable by-status)))]
+      (is (= 3 (count results)))
+      (is (= 3 (count (:publication-unreachable by-status))))
+      (is (nil? (:publication-refused by-status)) "no re-refusals of the marked ids")
+      (is (= {:legacy-a 1 :late-script-b 1 :no-implementation-c 1} by-class))
+      (is (every? #(= "H-PUBLISH-D 5cbf0031" (:ground %))
+                  (:publication-unreachable by-status))))))
