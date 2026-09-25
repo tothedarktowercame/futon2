@@ -390,13 +390,17 @@
             "and reads back as the same vector")))))
 
 ;; ONE live-pinned case (E-kimi-task-28): the command lookup and the namespace
-;; lookup observe the same entry on the live :7070. Pinned 2026-09-25T03:23Z,
-;; when the rebuilt ledger's marker read :scanned 3200 = :registry-entries,
-;; :complete? true and the newest run of futon3c.test-registry-test was the
-;; 03:21:59Z warranted run. If the registry has since seen a newer run of that
+;; lookup observe the same entry on the live :7070. First pinned
+;; 2026-09-25T03:23Z (06f03cf1…, the 03:21:59Z warranted run). Re-pinned
+;; 2026-09-25T12:49Z by claude-8, read verbatim from both live lookups at
+;; that time: the newest run of futon3c.test-registry-test is now the
+;; 04:06:47Z run (claude-8's warrant at futon3c bcd0d86f), which the lookup
+;; reaches because the ledger's fill-forward (futon3c bcd0d86f) reads from
+;; the ledger's watermark. The build marker below is unchanged: it is the
+;; 03:23Z build. If the registry has since seen a newer run of that
 ;; namespace, the pin — not the lookup — is what moved.
 (def ^:private live-pinned-entry-id
-  "test-registry-06f03cf1551c33455e13e82c59bd4deff97f40bb6bd6de3bf3a07c972396044e")
+  "test-registry-204346f534d4686aa9172f223f6d3e897c7b413045f6f50d40147c3b89141605")
 
 (deftest c8-live-command-lookup-observes-the-same-entry-as-the-namespace-lookup
   (let [base (oc/agency-base)
