@@ -7,8 +7,13 @@
 ;; per-run record (data/wm-runs/tick-run-record-*.edn) and reports, per run,
 ;; whether the five required quantities are present and valid:
 ;;
-;;   :c-source          C on the decision, :status :derived (typed
-;;                      :derived-no-overlap accepted as present-but-flagged)
+;;   :c-source          live-C's provenance on the decision, :status :derived
+;;                      (typed :derived-no-overlap accepted as
+;;                      present-but-flagged). Since daf2124e (2026-09-22) the
+;;                      same key carries the SCORER's step-indexed preference
+;;                      schedule instead; that is reported as a schedule and
+;;                      the provenance's absence is typed, never judged "bad"
+;;                      (PROOF-2 AR-45).
 ;;   :rates-provenance  outcome-rate provenance recorded (value reported)
 ;;   :posterior         a cascade posterior over >1 candidate, with per-policy
 ;;                      F CONSUMED — :f-status :computed. A policy whose
@@ -87,11 +92,35 @@
 (defn get-found [form path] (when path (get-in form path)))
 
 ;; Each check returns {:field :verdict (:ok|:flagged|:missing|:bad) :at :note}
+(defn- preference-schedule?
+  "A :c that is the SCORER's step-indexed preference schedule rather than
+   live-C's provenance. Told apart by SHAPE -- :steps or :form -- and never by
+   the absence of :status: a schedule that happens to carry a :status is still
+   a schedule, and reading that status as provenance is the mistake this
+   predicate exists to prevent."
+  [v]
+  (and (map? v) (or (sequential? (:steps v)) (contains? v :form))))
+
 (defn check-c-source [r]
+  ;; Until daf2124e (2026-09-22) [:decision :selection-certificate :scoring N :c]
+  ;; held live-C's provenance, {:status :derived|:derived-no-overlap :source
+  ;; :futon2.aif.live-c/cascade-spec}. That commit put the class observation
+  ;; model on the joint decision, and the same path now holds the scorer's
+  ;; step-indexed preference schedule; the provenance is written into the
+  ;; cascade SPEC (war_machine.clj:6131, :6606, :6615) and reaches no run
+  ;; record. Reading the schedule's missing :status as provenance reported
+  ;; "bad" -- a verdict about C's source computed from something that is not
+  ;; C's source (PROOF-2 AR-45). The absence is typed instead, and the
+  ;; schedule is reported beside it rather than judged.
   (let [p (find-field r :c)
-        status (:status (get-found r p))]
+        v (get-found r p)
+        status (:status v)]
     (cond
       (nil? p) {:field :c-source :verdict :missing}
+      (preference-schedule? v)
+      {:field :c-source :verdict :absent :at p
+       :note (str (pr-str {:c-provenance {:absent :no-c-provenance-on-record}})
+                  "  " (pr-str {:c :preference-schedule :steps (count (:steps v))}))}
       (= :derived status) {:field :c-source :verdict :ok :at p}
       (= :derived-no-overlap status)
       {:field :c-source :verdict :flagged :at p
@@ -187,7 +216,10 @@
 
 (defn validity [r]
   (let [results (mapv #(locate-near-miss r (% r)) checks)
-        missing (filter #(#{:missing :bad} (:verdict %)) results)]
+        ;; :absent is a typed absence, not a wrong value, but it invalidates
+        ;; exactly as :missing does: a record that cannot show where C came
+        ;; from must not read as valid on that field.
+        missing (filter #(#{:missing :bad :absent} (:verdict %)) results)]
     {:results results
      :verdict (if (seq missing) :invalid :valid)}))
 
@@ -263,6 +295,22 @@
                {:schema :wm/g-term-decomposition-v1 :status :missing
                 :reason :no-recorded-cascade-selection :policies []})
     :g-terms]
+   ;; AR-45's case, and its bad case (claude-3, 2026-09-25). The first: the
+   ;; scorer's schedule under :c must type the provenance's absence, not be
+   ;; judged as provenance. The second: a schedule that HAPPENS to carry
+   ;; :status :derived is still a schedule -- discriminating by the presence
+   ;; of :status rather than by shape would read it as provenance and score
+   ;; a point for a quantity the record does not carry.
+   ["c-is-a-preference-schedule"
+    #(assoc-in % [:decision :c]
+               {:form :step-indexed :schedule nil
+                :steps [{:tau 1 :distribution nil} {:tau 2 :distribution nil}]})
+    :c-source]
+   ["schedule-carrying-status-derived"
+    #(assoc-in % [:decision :c]
+               {:form :step-indexed :status :derived
+                :steps [{:tau 1 :distribution nil}]})
+    :c-source]
    ["quantities-relocated-off-root"
     (fn [rec] {:run/id (:run/id rec) :terminal (:terminal rec)
                :some-unrelated-archive {:stashed-previous-run
@@ -276,12 +324,12 @@
     (doseq [[label f field] perturbations]
       (let [{:keys [results]} (validity (f complete-fixture))
             r (first (filter #(= field (:field %)) results))
-            rejected? (contains? #{:missing :bad :flagged} (:verdict r))
+            rejected? (contains? #{:missing :bad :flagged :absent} (:verdict r))
             ;; :flagged is NOTICED but does not make a run :invalid. Printing
             ;; "REJECTED" for both overstated what the flagged case shows --
             ;; five of these perturbations invalidate a run and one only
             ;; annotates it (claude-4, r110 finding F3). Say which.
-            invalidates? (contains? #{:missing :bad} (:verdict r))]
+            invalidates? (contains? #{:missing :bad :absent} (:verdict r))]
         (println (format "  %-30s -> %-18s %s" label
                          (str (name field) ":" (name (:verdict r)))
                          (cond (not rejected?) "NOT REJECTED — selftest FAIL"

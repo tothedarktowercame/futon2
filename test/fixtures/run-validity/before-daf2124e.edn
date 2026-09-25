@@ -1,0 +1,17 @@
+;; A run record in the shape futon2 wrote before daf2124e (2026-09-22): the
+;; scoring entry's :c is live-C's provenance. Reduced from
+;; data/wm-runs/tick-run-record-2026-09-19-1789854206.edn, whose :c sits at
+;; exactly this path with exactly this :status and :source; the other four
+;; quantities are the checker's own complete-fixture values so that only the
+;; c-source line differs between this record and after-daf2124e.edn.
+{:run/id "fixture-before-daf2124e"
+ :terminal {:outcome :grounded-change}
+ :decision {:rates-provenance :factorized-nonzero-rates
+            :selection-law {:posterior {[:a :t1] 0.6 [:b :t2] 0.4}}
+            :selection-certificate
+            {:scoring {0 {:c {:status :derived
+                              :source :futon2.aif.live-c/cascade-spec}}}
+             :policies [{:id :a :f 0.2 :f-status :computed}
+                        {:id :b :f 0.1 :f-status :computed}]}
+            :enumeration-completeness {:verdict :complete :kinds []}
+            :g-terms {:risk 0.3 :ambiguity 0.1 :novelty 0.0}}}

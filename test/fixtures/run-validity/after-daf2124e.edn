@@ -1,0 +1,18 @@
+;; The same record in the shape futon2 writes since daf2124e (2026-09-22):
+;; the SAME path now holds the scorer's step-indexed preference schedule, and
+;; live-C's provenance is nowhere on the record. Reduced from
+;; data/wm-runs/tick-run-record-2026-09-23-1790199409.edn (the record
+;; Walkthrough 03 reads, cited by AR-24), whose :c has this shape at this
+;; path. Everything else is before-daf2124e.edn's, so the c-source line is
+;; the only difference between the two outputs.
+{:run/id "fixture-after-daf2124e"
+ :terminal {:outcome :grounded-change}
+ :decision {:rates-provenance :factorized-nonzero-rates
+            :selection-law {:posterior {[:a :t1] 0.6 [:b :t2] 0.4}}
+            :selection-certificate
+            {:scoring {0 {:c {:form :step-indexed :schedule nil
+                              :steps [{:tau 1 :distribution nil} {:tau 2 :distribution nil}]}}}
+             :policies [{:id :a :f 0.2 :f-status :computed}
+                        {:id :b :f 0.1 :f-status :computed}]}
+            :enumeration-completeness {:verdict :complete :kinds []}
+            :g-terms {:risk 0.3 :ambiguity 0.1 :novelty 0.0}}}
