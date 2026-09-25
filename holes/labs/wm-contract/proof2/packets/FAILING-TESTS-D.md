@@ -148,3 +148,72 @@ parent, in `git worktree add --detach` siblings of futon2 (so `deps.edn`'s
 Candidates came from `git log -S` on the moved keys and were confirmed by
 running, not by reading. No other namespace was run, so this says nothing about
 failures elsewhere. No code, fixture or test was changed.
+
+---
+
+# Correction (2026-09-25, after attempting the two test-side fixes)
+
+TEST-FIXES-I asked for both fixes test-side. One landed; the other cannot,
+and the sizing in §1 and §3 above was wrong in two ways. Read-only again:
+nothing outside `test/futon2/aif/ticket_queue_test.clj` was changed.
+
+**§2 was two keys, not one** (landed, futon2 `f574a16c`). Injecting
+`:focus-inputs` with a relation row for `M-main` is necessary but not
+sufficient: the test pins `:focus-as-of early`, and `early` is the discovery
+window's own start instant. `focus-receipt/discover` credits only commits
+at-or-before the decision time, so at a window's first moment no focus is
+established, `classify-target` returns `:unknown` whatever relation row it
+finds, and the model refuses exactly as before. The decision time has to move
+inside the window (noon of the same day establishes focus `WM`). Both keys are
+the test's own inputs; no source, no fixture file, no facets file touched.
+`futon2.aif.ticket-queue-test` goes 37 assertions / 2 failures / 1 error →
+43 assertions / 2 failures / 0 errors, the six recovered assertions being the
+ones the error used to abort.
+
+**§3 is not a test-side fix at all.** `decision_gate.clj:72-77` keeps its **own**
+class → required-fields table:
+
+```clojure
+(case (:class locator)
+  :C3 [:repo :sha :path]      :C4 [:repo :sha :path :decl]
+  :C5 [:repo :sha :bundle-path :entry]   :C6 [:repo :sha :path]
+  nil)
+```
+
+Any other class falls to the `nil` branch and the gate returns
+`{:kind :no-mechanical-check :class …}`, so **no `:C8` guard locator can pass
+`gate/emit!`**, whatever the test's fixture says. Adding the fixture entry
+makes the failure worse, not better: the good locator then fails
+`(= decision (gate/emit! decision))`, and three per-field assertions fail
+because the gate's `:locator-refusals` carries no entry for a class it does
+not know.
+
+The fixture half is right and was verified separately:
+`{:class :C8 :repo "futon2" :namespace "futon2.aif.nonexistent-locator-test-ns"}`
+returns `{:observed false}` from `check-registered-run` under
+`*registry-latest*` bound to `:absent` — the seam the check declares for this
+("Bound by tests, so no test needs the lookup endpoint to be live"). Note the
+fields: `:config` is **optional** at HEAD, and a locator carrying it falls back
+to the namespace lookup when `:config` is removed rather than refusing, so a
+three-field C8 locator breaks the test loop's own every-field-is-required rule.
+`:repo` plus exactly one of `:namespace`/`:command` is the required set
+(`check-registered-run`, rule `:exactly-one-of-namespace-or-command`). The
+packet's field list, and my §3 above, both came from the contract's
+`:inputs {:repo :namespace :config}` and from the pre-`:command` shape of the
+code.
+
+So what the failing assertion is reporting is a **source-side gap, not a stale
+fixture**: when C8 joined `observation-checks/checks` at `9d5525ee`, the gate's
+duplicate table was not extended, and the gate cannot admit a C8 guard locator.
+The test named it two minutes after C8 landed. Sizing, for the owner, no
+proposal beyond it: one `case` arm in `decision_gate.clj`, plus the test
+fixture entry and the seam binding — but the arm cannot be a plain field list,
+because the gate would then have to express "exactly one of `:namespace` or
+`:command`", which is the rule `check-registered-run` already holds. The two
+tables are the same rule written twice, which is the disagreement
+`fetch-latest-for-namespace`'s own docstring warns about ("two implementations
+of that rule would disagree the first time one of them was wrong"). Whether the
+gate gets an arm or learns to ask the check is the decision-gate owner's.
+
+`futon2.aif.decision-gate-test` is therefore left exactly as it was: 16 tests,
+408 assertions, 1 failure, and no warrant, since the namespace is not green.
