@@ -240,9 +240,13 @@
 (defn- issue-request
   "Issue the request for WANT, or return {::refused refusal}: the
   construction's :interpretation/refusal, or, when the exception carries
-  none, {:kind :construction-threw :message .. :data-keys ..}. Never nil: a
-  nil refusal once fell through ask-one and went to the seat as the request
-  (the spike, three wants; WM-SPIKE-FIX-I C)."
+  none, {:kind :construction-threw :class :message :data-keys}, with the
+  exception's own :kind as :ex-kind when its ex-data has one, and :cause,
+  the chain of causes beneath it as {:class :message}, at most 5 (the second
+  flight's refusal said \"substrate-2 mission registry unreachable\" and not
+  the futon1b read timeout beneath it; WM-SPIKE-FIX-II E). Never nil: a nil
+  refusal once fell through ask-one and went to the seat as the request (the
+  spike, three wants; WM-SPIKE-FIX-I C)."
   [store view target want criterion request-options]
   (try (wi/issue! store (wi/request! {:target target :want want :criterion criterion
                                       :facts (get-in view [:universes target])
@@ -251,10 +255,13 @@
                                      (or request-options {})))
        (catch Exception e
          {::refused (or (:interpretation/refusal (ex-data e))
-                        {:kind :construction-threw
-                         :class (.getName (class e))
-                         :message (ex-message e)
-                         :data-keys (vec (sort-by str (keys (ex-data e))))})})))
+                        (cond-> {:kind :construction-threw
+                                 :class (.getName (class e))
+                                 :message (ex-message e)
+                                 :data-keys (vec (sort-by str (keys (ex-data e))))}
+                          (:kind (ex-data e)) (assoc :ex-kind (:kind (ex-data e)))
+                          (ex-cause e) (assoc :cause (vec (for [c (take 5 (take-while some? (iterate ex-cause (ex-cause e))))]
+                                                            {:class (.getName (class c)) :message (ex-message c)})))))})))
 
 (defn- settle
   "Parse, validate and publish ANSWER to ISSUED; the outcome entry."

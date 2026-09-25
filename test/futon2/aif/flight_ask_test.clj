@@ -190,3 +190,20 @@
             :message "evidence write failed" :data-keys [:path]}
            (:refusal (first (:asked r)))))
     (is (every? #(= :request-refused (:kind %)) (:needs r)))))
+
+(deftest a-construction-exception-keeps-its-kind-and-its-causes
+  ;; WM-SPIKE-FIX-II E: mission-registry throws {:kind :substrate-unreachable}
+  ;; with the substrate's exception as cause; the second flight's record kept
+  ;; only the outer message
+  (let [root (java.net.SocketTimeoutException. "Read timed out")
+        mid (ex-info "futon1b entities query failed" {:url "http://localhost:7073/api/entities"} root)
+        outer (ex-info "substrate-2 mission registry unreachable" {:kind :substrate-unreachable} mid)
+        r (with-redefs [wi/issue! (fn [& _] (throw outer))]
+            (ask (temp-dir "ask-store") (fn [_] (throw (ex-info "the seat must not be asked" {})))))
+        refusal (:refusal (first (:asked r)))]
+    (is (= :construction-threw (:kind refusal)))
+    (is (= :substrate-unreachable (:ex-kind refusal)))
+    (is (= "substrate-2 mission registry unreachable" (:message refusal)))
+    (is (= [{:class "clojure.lang.ExceptionInfo" :message "futon1b entities query failed"}
+            {:class "java.net.SocketTimeoutException" :message "Read timed out"}]
+           (:cause refusal)))))
