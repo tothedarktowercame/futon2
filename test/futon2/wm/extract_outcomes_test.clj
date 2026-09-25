@@ -624,6 +624,21 @@
   {:instance (:instance link) :outcome (:outcome link) :artefact artefact
    :want-span (get-in link [:via :want-span]) :outcome-span (get-in link [:via :outcome-span])})
 
+(deftest v-13-two-identical-phrases-are-the-one-string-form
+  ;; claude-8's bad case on I3: {:outcome-phrase "provider" :want-phrase "provider"}
+  ;; claims no co-reference the checks did not verify, so the record must be
+  ;; byte-identical to the one-string proposal "provider": no :coreference key,
+  ;; :artefact the string. Case differs only in spelling of the same word.
+  (let [{:keys [text isecs outcomes links]} (seams-context)
+        link (first (filter #(= [4 :o-4] [(:instance %) (:outcome %)]) links))
+        one (verify-proposed-link text isecs outcomes (proposal-of link "provider"))
+        two (verify-proposed-link text isecs outcomes
+                                  (proposal-of link {:outcome-phrase "provider" :want-phrase "Provider"}))]
+    (is (= :proposed-verified (get-in one [:via :basis])))
+    (is (= one two) "identical phrases record as the one-string form")
+    (is (not (contains? (:via two) :coreference)))
+    (is (= "provider" (get-in two [:via :artefact])))))
+
 (deftest v-1-vocabulary-links-as-proposals-3-of-8-verify
   ;; The vocabulary names an artefact CLASS by two phrasings, one per span
   ;; (:obstacle-res vs :mention-res). A proposal names it by one string found

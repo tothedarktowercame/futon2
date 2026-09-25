@@ -486,9 +486,16 @@
       :else
       {:instance instance
        :outcome outcome
-       :via (cond-> {:artefact artefact :want-span want-span :outcome-span outcome-span
-                     :direction dir :basis :proposed-verified}
-              (map? artefact) (assoc :coreference :reader-claimed))})))
+       ;; two phrases that are the same string (case-insensitive) claim nothing
+       ;; beyond the one-string check, so they are recorded as the one-string
+       ;; form: :coreference marks only a co-reference the checks did not verify
+       :via (let [same? (and (map? artefact)
+                             (= (str/lower-case (:outcome-phrase artefact))
+                                (str/lower-case (:want-phrase artefact))))]
+              (cond-> {:artefact (if same? (:outcome-phrase artefact) artefact)
+                       :want-span want-span :outcome-span outcome-span
+                       :direction dir :basis :proposed-verified}
+                (and (map? artefact) (not same?)) (assoc :coreference :reader-claimed)))})))
 
 ;; ---------------------------------------------------------------- extraction
 
