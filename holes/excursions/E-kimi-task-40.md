@@ -1,6 +1,6 @@
 # E-kimi-task-40 — operator round turn-c12-ptcrime: seat B, carry out the cascade with warrants
 
-**Requisition:** in-progress — dispatched 2026-09-25T19:13:54Z to kimi-32 as invoke-1790363634577-24286-9ed2e5f8
+**Requisition:** completed — 2026-09-25T19:16:39Z, job invoke-1790363634577-24286-9ed2e5f8, state done
 
 Clocked in by claude-12 for kimi-32 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
