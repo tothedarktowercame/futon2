@@ -468,7 +468,7 @@ today does not complete the mission.
 
 ### Kimi dispatch rule (Joe, 2026-09-25)
 
-The two Kimi drains of 2026-09-24 were context, not count: a Kimi seat clears its conversation only when its requisition target changes, and every PROOF-2a packet went out under E-cascade-real, so each seat carried all its prior packets on every request. Rule: each Kimi dispatch clocks in on a unique task, E-kimi-task-N, one excursion file per task (futon2 holes/excursions/), minted and sent by futon3c scripts/kimi-task.sh. Claude seats keep their standing requisitions.
+The two Kimi drains of 2026-09-24 were context, not count: a Kimi seat clears its conversation only when its requisition target changes, and every PROOF-2a packet went out under E-cascade-real, so each seat carried all its prior packets on every request. Rule: each Kimi dispatch clocks in on a unique task, E-kimi-task-N, one excursion file per task (futon2 holes/excursions/), minted and sent by futon3c scripts/kimi-task.sh. Claude seats keep their standing requisitions. The seat's requisition reminder (posted as an operator turn, so it reclocks the caller onto the requisitioned target) is skipped when the target file's head line says the caller clocked it in for that seat (futon3c: zai_api.clj caller-minted-task?, zai-api-test 21/110), so the coordinator stays on E-cascade-real.
 
 ### Click authorization (Joe, 2026-09-24 evening)
 
