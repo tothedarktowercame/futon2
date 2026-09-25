@@ -247,9 +247,15 @@
         :path "src/futon2/aif/decision_gate.clj" :decl "(ns futon2.aif.decision-gate"}
    :C5 {:class :C5 :repo "futon2" :sha "HEAD"
         :bundle-path "nonexistent-locator-test-bundle.json" :entry "contract"}
-   :C6 {:class :C6 :repo "futon2" :sha "HEAD" :path "nonexistent-locator-test-witness.edn"}})
+   :C6 {:class :C6 :repo "futon2" :sha "HEAD" :path "nonexistent-locator-test-witness.edn"}
+   ;; C8 (OBS-C8, 9d5525ee): the registry lookup is the check's seam, bound
+   ;; to :absent below, so the check observes false and asks no registry.
+   ;; Its rule is exactly one of :namespace / :command; :config is optional
+   ;; and only with :namespace, so it is not a field of this locator.
+   :C8 {:class :C8 :repo "futon2" :namespace "futon2.aif.decision-gate-test"}})
 
 (deftest guard-locators-discriminate-by-production-observation-class
+  (binding [observations/*registry-latest* (fn [_ _] :absent)]
   (is (= (set (keys observations/checks)) (set (keys class-locators))))
   (doseq [[class locator] class-locators]
     (testing (str class " admits its own fields, without imposing another class's")
@@ -279,7 +285,30 @@
              (get-in error [:detail :locator-refusals :present-token :missing])))))
   (testing "extra fields are permitted by handlers and gate"
     (let [decision (located-guard-decision (assoc (:C5 class-locators) :path "extra"))]
-      (is (= decision (gate/emit! decision))))))
+      (is (= decision (gate/emit! decision)))))
+  (testing "C8: :config is optional, admitted with :namespace"
+    (let [decision (located-guard-decision (assoc (:C8 class-locators) :config "test-registry-x"))]
+      (is (= decision (gate/emit! decision)))))
+  (testing "C8: both :namespace and :command refuse, naming the rule the check holds"
+    (let [error (locator-error (located-guard-decision (assoc (:C8 class-locators) :command ["bb" "x"])))]
+      (is (= :missing-observation-locators (:reason error)))
+      (is (= :exactly-one-of-namespace-or-command
+             (get-in error [:detail :locator-refusals :present-token :rule])))))))
+
+(deftest the-gate-asks-the-check-and-c3-c6-are-unchanged
+  ;; fixture: the gate's own observation-locator-refusal at futon2 de36a7d9
+  ;; (its C3-C6 table), over 79 locators: valid, each field absent or
+  ;; nil/""/"  "/17, non-maps, {}, an unknown class, generic fields for C5
+  (let [{:keys [cases refusals]} (read-string (slurp "test/fixtures/decision-gate/locator-refusals-before@futon2-de36a7d9.edn"))
+        now (mapv @#'gate/observation-locator-refusal cases)]
+    (is (= 79 (count cases)))
+    (is (= refusals now))
+    (is (= {:kind :no-locator :class :C4 :missing [:decl]}
+           (@#'gate/observation-locator-refusal
+            {:class :C4 :repo "futon2" :sha "HEAD" :path "p"}))
+        "a C4 locator missing :decl is refused as before: the moved rule did not loosen")
+    (is (= {:kind :no-mechanical-check :class :J}
+           (@#'gate/observation-locator-refusal {:class :J :repo "r"})))))
 
 (deftest missing-empty-and-unsupported-guard-locators-refuse-typed
   (doseq [[locator kind] [[nil :invalid-observation-locator]

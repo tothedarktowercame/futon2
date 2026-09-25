@@ -5,7 +5,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.observation-checks :as oc]))
 
 (def futon2-sha "b81afd97")   ; H7c-1 construction commit
@@ -470,3 +470,25 @@
     (binding [oc/*registry-latest* (fn [_ _] :absent)]
       (is (= :no-entry (get-in (oc/check-registered-run {:repo "futon3c" :command ["bb" "g.clj"]})
                                [:evidence :reason]))))))
+
+;; locator-refusal: each class's locator rule, held once here and asked by the
+;; decision gate (M-wm-wiring, claude-10, 2026-09-25)
+(deftest locator-refusal-per-class
+  (is (nil? (oc/locator-refusal {:class :C3 :repo "r" :sha "HEAD" :path "p"})))
+  (is (= [:decl] (get-in (oc/locator-refusal {:class :C4 :repo "r" :sha "HEAD" :path "p"}) [:data :missing])))
+  (is (= [:bundle-path :entry] (get-in (oc/locator-refusal {:class :C5 :repo "r" :sha "HEAD" :path "p"}) [:data :missing])))
+  (is (nil? (oc/locator-refusal {:class :C6 :repo "r" :sha "HEAD" :path "w"})))
+  (is (nil? (oc/locator-refusal {:class :C8 :repo "r" :namespace "n"})))
+  (is (nil? (oc/locator-refusal {:class :C8 :repo "r" :command ["bb" "x"]})))
+  (is (nil? (oc/locator-refusal {:class :C8 :repo "r" :namespace "n" :config "c"})) ":config optional, with :namespace")
+  (is (= :exactly-one-of-namespace-or-command
+         (get-in (oc/locator-refusal {:class :C8 :repo "r" :namespace "n" :command ["bb"]}) [:data :rule])))
+  (is (= :exactly-one-of-namespace-or-command
+         (get-in (oc/locator-refusal {:class :C8 :repo "r"}) [:data :rule])))
+  (is (= [:namespace] (get-in (oc/locator-refusal {:class :C8 :repo "r" :command ["bb"] :config "c"}) [:data :missing]))
+      ":config is only with :namespace")
+  (is (= :no-mechanical-check (:kind (oc/locator-refusal {:class :J}))))
+  (is (= :invalid-observation-locator (:kind (oc/locator-refusal "not a map"))))
+  (testing "the checks answer with the same refusal before reading anything"
+    (is (= (oc/locator-refusal {:class :C4 :repo "r" :sha "HEAD" :path "p"})
+           (oc/check-decl-in-file {:repo "r" :sha "HEAD" :path "p"})))))

@@ -30,7 +30,16 @@
 (defn- git [repo & args]
   (apply sh/sh "git" "-C" (str repo-root "/" repo) args))
 
-(defn- locator-refusal
+(def locator-fields
+  "The locator fields each field-list class requires, every one a non-blank
+  string (extra fields are allowed). C8's rule is not a field list; see
+  c8-locator-refusal."
+  {:C3 [:repo :sha :path]
+   :C4 [:repo :sha :path :decl]
+   :C5 [:repo :sha :bundle-path :entry]
+   :C6 [:repo :sha :path]})
+
+(defn- fields-refusal
   "A check needs every locator field as a non-blank string."
   [check m ks]
   (when-let [missing (seq (remove #(and (string? (get m %)) (not (str/blank? (get m %)))) ks))]
@@ -46,7 +55,7 @@
 (defn check-path-exists
   "C3: resolve the declared reference once; check the file at that commit."
   [{:keys [repo sha path] :as m}]
-  (or (locator-refusal :C3 m [:repo :sha :path])
+  (or (fields-refusal :C3 m (:C3 locator-fields))
       (let [reference (resolve-reference repo sha)]
         (if (:status reference) reference
             (let [{:keys [exit]} (git repo "cat-file" "-e"
@@ -67,7 +76,7 @@
 (defn check-decl-in-file
   "C4: check the anchored declaration head at the resolved commit."
   [{:keys [repo sha path decl] :as m}]
-  (or (locator-refusal :C4 m [:repo :sha :path :decl])
+  (or (fields-refusal :C4 m (:C4 locator-fields))
       (let [reference (resolve-reference repo sha)]
         (if (:status reference) reference
             (let [{:keys [exit out]} (git repo "show" (str (:resolved-sha reference) ":" path))]
@@ -89,7 +98,7 @@
   "C5: resolve the bundle reference and each locus repository HEAD separately.
    Every content check uses its recorded resolved commit."
   [{:keys [repo sha bundle-path entry] :as m}]
-  (or (locator-refusal :C5 m [:repo :sha :bundle-path :entry])
+  (or (fields-refusal :C5 m (:C5 locator-fields))
       (let [reference (resolve-reference repo sha)]
         (if (:status reference) reference
           (let [{:keys [exit out]} (git repo "show" (str (:resolved-sha reference) ":" bundle-path))]
@@ -116,7 +125,7 @@
   commit or entry exists; no claim about its authorship or correctness.
   Missing witness is false. Malformed or unresolved references refuse."
   [{:keys [repo sha path] :as locator}]
-  (or (locator-refusal :C6 locator [:repo :sha :path])
+  (or (fields-refusal :C6 locator (:C6 locator-fields))
       (let [reference (resolve-reference repo sha)]
         (if (:status reference) reference
           (let [evidence (assoc reference :path path)
@@ -126,9 +135,9 @@
               (let [witness (try (edn/read-string out)
                                  (catch Exception _ ::malformed))
                     bad (when (map? witness)
-                          (or (locator-refusal :C6 witness [:repo :sha])
+                          (or (fields-refusal :C6 witness [:repo :sha])
                               (when (or (:require-entry locator) (contains? witness :entry))
-                                (locator-refusal :C6 witness [:entry]))))]
+                                (fields-refusal :C6 witness [:entry]))))]
                 (cond
                   (not (map? witness))
                   (assoc (refuse :invalid-witness {:check :C6}) :evidence evidence)
@@ -375,6 +384,34 @@
       (or clj? lean?) :failed
       :else :unknown)))
 
+(defn- c8-locator-refusal
+  "C8's locator rule: :repo; exactly one of :namespace or :command (an argv
+  of non-blank strings); :config only with :namespace. Held here once, read
+  by check-registered-run and by locator-refusal (the decision gate)."
+  [{:keys [namespace command] :as m}]
+  (or (fields-refusal :C8 m [:repo])
+      (when (contains? m :config) (fields-refusal :C8 m [:config]))
+      ;; A :config locator names the record directly; it still answers for a
+      ;; namespace (the judgement below compares it), never for a command.
+      (when (contains? m :config) (fields-refusal :C8 m [:namespace]))
+      (when-not (contains? m :config)
+        (let [has-ns (boolean (and (string? namespace) (not (str/blank? namespace))))
+              has-cmd (c8-command-present? command)]
+          (or
+           (when (or (and has-ns has-cmd) (not (or has-ns has-cmd)))
+             (refuse :no-locator {:check :C8 :rule :exactly-one-of-namespace-or-command
+                                  :namespace? has-ns :command? has-cmd}))
+           ;; a command is an argv: every element a non-blank string. Anything
+           ;; else (a keyword, a nested vector, "") would be sent to the
+           ;; registry as a key no run can ever carry and read false
+           ;; :no-entry forever; that is a malformed locator, refused as one
+           ;; (claude-8 review of d5320918, 2026-09-25).
+           (when has-cmd
+             (let [bad (vec (remove #(and (string? %) (not (str/blank? %))) command))]
+               (when (seq bad)
+                 (refuse :no-locator {:check :C8 :rule :command-elements-must-be-nonblank-strings
+                                      :offending bad})))))))))
+
 (defn check-registered-run
   "C8: the registry holds a warrant for NAMESPACE whose pinned code-path and
   test-path shas are the shas of those files NOW, whose postcheck matched, and
@@ -394,28 +431,7 @@
   A true reading says those tests passed over exactly these bytes. It says
   nothing about whether the tests are worth passing."
   [{:keys [repo namespace command config] :as m}]
-  (or (locator-refusal :C8 m [:repo])
-      (when (contains? m :config) (locator-refusal :C8 m [:config]))
-      ;; A :config locator names the record directly; it still answers for a
-      ;; namespace (the judgement below compares it), never for a command.
-      (when (contains? m :config) (locator-refusal :C8 m [:namespace]))
-      (when-not (contains? m :config)
-        (let [has-ns (boolean (and (string? namespace) (not (str/blank? namespace))))
-              has-cmd (c8-command-present? command)]
-          (or
-           (when (or (and has-ns has-cmd) (not (or has-ns has-cmd)))
-             (refuse :no-locator {:check :C8 :rule :exactly-one-of-namespace-or-command
-                                  :namespace? has-ns :command? has-cmd}))
-           ;; a command is an argv: every element a non-blank string. Anything
-           ;; else (a keyword, a nested vector, "") would be sent to the
-           ;; registry as a key no run can ever carry and read false
-           ;; :no-entry forever; that is a malformed locator, refused as one
-           ;; (claude-8 review of d5320918, 2026-09-25).
-           (when has-cmd
-             (let [bad (vec (remove #(and (string? %) (not (str/blank? %))) command))]
-               (when (seq bad)
-                 (refuse :no-locator {:check :C8 :rule :command-elements-must-be-nonblank-strings
-                                      :offending bad})))))))
+  (or (c8-locator-refusal m)
       (let [by-command? (and (not (contains? m :config)) (c8-command-present? command))
             lookup (when-not (contains? m :config)
                      (if by-command? {:command (vec command)} namespace))
@@ -490,6 +506,23 @@
                                      (seq moved) :content-moved)]
                         {:observed (nil? reason) :check :C8
                          :evidence (cond-> evidence reason (assoc :reason reason))}))))))))))
+
+(defn locator-refusal
+  "Is LOCATOR admissible for its class's check? nil when it is, else the
+  check's own typed refusal, the same one the check returns before it reads
+  anything: {:status :missing :kind :no-locator :data {:check c :missing
+  [...]}} (C3-C6, from locator-fields), C8's rule refusals (:data :rule),
+  {:kind :invalid-observation-locator} for a non-map, and {:kind
+  :no-mechanical-check :data {:class c}} for a class no check reads. Pure:
+  it reads no file and asks no registry. One authority for the locator
+  rule; the decision gate asks this (M-wm-wiring, claude-10, 2026-09-25)."
+  [locator]
+  (cond
+    (not (map? locator)) (refuse :invalid-observation-locator {})
+    (= :C8 (:class locator)) (c8-locator-refusal locator)
+    (contains? locator-fields (:class locator))
+    (fields-refusal (:class locator) locator (get locator-fields (:class locator)))
+    :else (refuse :no-mechanical-check {:class (:class locator)})))
 
 (def checks
   {:C3 check-path-exists

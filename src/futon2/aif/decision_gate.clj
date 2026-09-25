@@ -36,8 +36,8 @@
    chosen mass is not the posterior marginal, and a missing β. There is no
    fallback and no silent default: refusing is the only alternative to
    admitting."
-  (:require [clojure.string :as str]
-            [futon2.aif.cascade-selection :as selection]
+  (:require [futon2.aif.cascade-selection :as selection]
+            [futon2.aif.observation-checks :as observations]
             [futon2.aif.ticket-queue :as ticket-queue]))
 
 (def ^:private allowed-refusal-kinds
@@ -61,26 +61,20 @@
                    :detail detail})))
 
 (defn- observation-locator-refusal
-  "Field requirements follow observation-checks' check-path-exists (C3),
-  check-decl-in-file (C4), check-registry-entry (C5), and
-  check-witness-reference (C6). As in their locator-refusal, required values
-  are non-blank strings; extra fields are allowed. This checks the locator,
-  not whether its referenced artifact exists or the observation is true."
+  "The observation check's own answer (observation-checks/locator-refusal,
+  the one authority for each class's locator rule), in the gate's refusal
+  shape: {:kind :no-locator :class c :missing [...]} (plus :rule when the
+  class's rule is not a field list, as C8's exactly-one-of is),
+  {:kind :no-mechanical-check :class c}, or {:kind
+  :invalid-observation-locator}. This checks the locator, not whether its
+  referenced artifact exists or the observation is true."
   [locator]
-  (if-not (map? locator)
-    {:kind :invalid-observation-locator}
-    (if-let [fields (case (:class locator)
-                     :C3 [:repo :sha :path]
-                     :C4 [:repo :sha :path :decl]
-                     :C5 [:repo :sha :bundle-path :entry]
-                     :C6 [:repo :sha :path]
-                     nil)]
-      (let [missing (filterv #(let [v (get locator %)]
-                               (not (and (string? v) (not (str/blank? v)))))
-                             fields)]
-        (when (seq missing)
-          {:kind :no-locator :class (:class locator) :missing missing}))
-      {:kind :no-mechanical-check :class (:class locator)})))
+  (when-let [r (observations/locator-refusal locator)]
+    (case (:kind r)
+      :invalid-observation-locator {:kind :invalid-observation-locator}
+      :no-mechanical-check {:kind :no-mechanical-check :class (:class locator)}
+      (cond-> {:kind (:kind r) :class (:class locator) :missing (get-in r [:data :missing])}
+        (get-in r [:data :rule]) (assoc :rule (get-in r [:data :rule]))))))
 
 (defn- check-guard-locators!
   [candidate]
