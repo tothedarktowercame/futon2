@@ -463,7 +463,61 @@
 ;; ---------------------------------------------------------------------------
 ;; The enactment step (M-wm-wiring row 0, with rows 5 and 10's read side)
 
-(declare observe-publication-fn)
+(defn- admit-observation
+  "The writer's rule: :observed true must carry its evidence, or it is a
+  value standing in for an observation, refused with its reason."
+  [obs]
+  (if (and (true? (:observed obs)) (empty? (:evidence obs)))
+    {:absent :observation-refused :reason :observed-true-without-evidence}
+    obs))
+
+(defn observe-publication-fn
+  "Row 10 (H-publish): did the click's chosen action publish? Publication, in
+  PROOF-2a's H-publish, is a repair obligation's discharge receipt reaching
+  the store: the tick's catch-up! (repair-discharge-receipt/catch-up!) runs
+  publication-result! for every resolution and the run record carries the
+  results under :repair/publication, one per :repair/id, :status
+  :receipt-committed when it published (else :publication-refused or
+  :publication-unreachable).
+
+  Returns (fn [flight click] -> {:publication-observed observation}); the
+  enactment step records that value (one authority: this function writes
+  it, enact-fn reads it):
+    {:observed true :at click-id :evidence entry}      the target's receipt committed
+    {:observed false :checked {...}}                   its entry, not committed, or none
+    {:absent :no-repair-obligation-for-target ...}     the chosen action discharges no
+                                                       repair obligation (publication
+                                                       does not apply)
+    {:absent :no-publication-observation-source ...}   the run record carries no
+                                                       :repair/publication
+  OPTS: :fetch-run-record (fn [click-id] -> run record); :repair-id-fn (fn
+  [flight click] -> the repair id the chosen action discharges, or nil);
+  :observation-fn replaces the reading (tests only). An :observed true with
+  no evidence is refused by the writer."
+  [{:keys [fetch-run-record repair-id-fn observation-fn]}]
+  (fn [flight click]
+    {:publication-observed
+    (admit-observation
+     (if observation-fn
+       (observation-fn flight click)
+       (let [repair-id (when repair-id-fn (repair-id-fn flight click))
+             record (when fetch-run-record (fetch-run-record (:click-id click)))
+             entries (:repair/publication record)]
+         (cond
+           (nil? repair-id)
+           {:absent :no-repair-obligation-for-target :target (:target flight)}
+           (not (sequential? entries))
+           {:absent :no-publication-observation-source
+            :missing "[:repair/publication] on the click's run record" :click-id (:click-id click)}
+           :else
+           (let [mine (filterv #(= repair-id (:repair/id %)) entries)
+                 committed (first (filter #(= :receipt-committed (:status %)) mine))]
+             (if committed
+               {:observed true :at (:click-id click) :evidence committed}
+               {:observed false
+                :checked {:repair/id repair-id :click-id (:click-id click)
+                          :entries (count entries)
+                          :statuses (mapv :status mine)}}))))))}))
 
 (defn- grain-pattern
   "The chosen candidate's pattern whose interpretation declares :grain."
@@ -630,59 +684,3 @@
                           flight enactment)]
             {:wc {:verdict verdict :click-record click-path}
              :increment (increment! enactment identity verdict)}))))))
-
-(defn- admit-observation
-  "The writer's rule: :observed true must carry its evidence, or it is a
-  value standing in for an observation, refused with its reason."
-  [obs]
-  (if (and (true? (:observed obs)) (empty? (:evidence obs)))
-    {:absent :observation-refused :reason :observed-true-without-evidence}
-    obs))
-
-(defn observe-publication-fn
-  "Row 10 (H-publish): did the click's chosen action publish? Publication, in
-  PROOF-2a's H-publish, is a repair obligation's discharge receipt reaching
-  the store: the tick's catch-up! (repair-discharge-receipt/catch-up!) runs
-  publication-result! for every resolution and the run record carries the
-  results under :repair/publication, one per :repair/id, :status
-  :receipt-committed when it published (else :publication-refused or
-  :publication-unreachable).
-
-  Returns (fn [flight click] -> {:publication-observed observation}); the
-  enactment step records that value (one authority: this function writes
-  it, enact-fn reads it):
-    {:observed true :at click-id :evidence entry}      the target's receipt committed
-    {:observed false :checked {...}}                   its entry, not committed, or none
-    {:absent :no-repair-obligation-for-target ...}     the chosen action discharges no
-                                                       repair obligation (publication
-                                                       does not apply)
-    {:absent :no-publication-observation-source ...}   the run record carries no
-                                                       :repair/publication
-  OPTS: :fetch-run-record (fn [click-id] -> run record); :repair-id-fn (fn
-  [flight click] -> the repair id the chosen action discharges, or nil);
-  :observation-fn replaces the reading (tests only). An :observed true with
-  no evidence is refused by the writer."
-  [{:keys [fetch-run-record repair-id-fn observation-fn]}]
-  (fn [flight click]
-    {:publication-observed
-    (admit-observation
-     (if observation-fn
-       (observation-fn flight click)
-       (let [repair-id (when repair-id-fn (repair-id-fn flight click))
-             record (when fetch-run-record (fetch-run-record (:click-id click)))
-             entries (:repair/publication record)]
-         (cond
-           (nil? repair-id)
-           {:absent :no-repair-obligation-for-target :target (:target flight)}
-           (not (sequential? entries))
-           {:absent :no-publication-observation-source
-            :missing "[:repair/publication] on the click's run record" :click-id (:click-id click)}
-           :else
-           (let [mine (filterv #(= repair-id (:repair/id %)) entries)
-                 committed (first (filter #(= :receipt-committed (:status %)) mine))]
-             (if committed
-               {:observed true :at (:click-id click) :evidence committed}
-               {:observed false
-                :checked {:repair/id repair-id :click-id (:click-id click)
-                          :entries (count entries)
-                          :statuses (mapv :status mine)}}))))))}))
