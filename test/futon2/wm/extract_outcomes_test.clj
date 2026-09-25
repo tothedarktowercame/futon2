@@ -660,14 +660,44 @@
                             (for [l links :let [a (reader-artefact [(:instance l) (:outcome l)])] :when a]
                               (verify-proposed-link text isecs outcomes (proposal-of l a)))))))))
 
-(deftest v-1b-reach-limit-a-shared-verb-stem-passes-as-artefact
-  ;; Reach limit, recorded not fixed: condition 5 is a substring check, so a
-  ;; shared VERB stem passes as an artefact. 5/:o-2's spans share no word, but
-  ;; "impersonat" is in "impersonating" and "impersonate".
+(deftest v-1b-a-shared-verb-stem-is-not-an-artefact
+  ;; H-C-REACH-I3: phrases match as whole words, so "impersonat" (a stem of
+  ;; "impersonating" and "impersonate") no longer passes as a single string
+  ;; (it did under I2's substring check). The two inflections as a two-string
+  ;; proposal verify, with the co-reference typed as the reader's claim.
   (let [{:keys [text isecs outcomes links]} (seams-context)
-        l (first (filter #(= [5 :o-2] [(:instance %) (:outcome %)]) links))]
-    (is (= :proposed-verified
-           (get-in (verify-proposed-link text isecs outcomes (proposal-of l "impersonat")) [:via :basis])))))
+        l (first (filter #(= [5 :o-2] [(:instance %) (:outcome %)]) links))
+        one (verify-proposed-link text isecs outcomes (proposal-of l "impersonat"))
+        two (verify-proposed-link text isecs outcomes
+                                  (proposal-of l {:outcome-phrase "impersonate" :want-phrase "impersonating"}))]
+    (is (= :artefact-not-in-both (:reason one)))
+    (is (= [:outcome-phrase :want-phrase] (get-in one [:detail :missing])))
+    (is (= :proposed-verified (get-in two [:via :basis])))
+    (is (= :reader-claimed (get-in two [:via :coreference])))))
+
+(deftest v-1-two-string-all-8-vocabulary-links-verify-with-claim
+  ;; Each vocabulary link re-proposed with its entry's own two phrasings: the
+  ;; :obstacle-res match in the outcome span, the :mention-res match in the
+  ;; want span. The 3 one-string links still verify one-string, with no :coreference.
+  (let [{:keys [text isecs outcomes links]} (seams-context)
+        rows (for [l links
+                   :let [entry (first (filter #(= (get-in l [:via :artefact]) (:id %)) coupling-artefacts))
+                         out-text (apply cp-subs text (get-in l [:via :outcome-span]))
+                         want-text (apply cp-subs text (get-in l [:via :want-span]))
+                         phrases {:outcome-phrase (some #(re-find % out-text) (:obstacle-res entry))
+                                  :want-phrase (some #(re-find % want-text) (:mention-res entry))}]]
+               [l phrases (verify-proposed-link text isecs outcomes (proposal-of l phrases))])]
+    (is (= 8 (count rows)))
+    (doseq [[l phrases r] rows]
+      (is (every? string? (vals phrases)) (pr-str phrases))
+      (is (= (select-keys l [:instance :outcome]) (select-keys r [:instance :outcome])) (pr-str phrases))
+      (is (= :reader-claimed (get-in r [:via :coreference])) (pr-str phrases))
+      (is (= phrases (get-in r [:via :artefact]))))
+    (doseq [[k a] reader-artefact
+            :let [l (first (filter #(= k [(:instance %) (:outcome %)]) links))
+                  r (verify-proposed-link text isecs outcomes (proposal-of l a))]]
+      (is (= :proposed-verified (get-in r [:via :basis])) (pr-str k))
+      (is (not (contains? (:via r) :coreference)) (pr-str k)))))
 
 (def ^:private roles-sentence
   "Roles resolve to seats; seats declare provider and availability; code asks for a role instead of pattern-matching an id.")
@@ -679,13 +709,15 @@
   ;; impersonate the first". The outcome's artefact (a later implementation)
   ;; is not named in section 4's converting sentence, so the reading route
   ;; refuses it too. The one section-4 sentence carrying "implement" (the
-  ;; "implementer" role) has no direction verb.
+  ;; "implementer" role) has no direction verb; since H-C-REACH-I3 the stem
+  ;; "implement" is not a whole word of either span, so that proposal now
+  ;; stops one condition earlier, at :artefact-not-in-both.
   (let [{:keys [text isecs outcomes]} (seams-context)
         o2-cue (:span (first (:cues (first (filter #(= :o-2 (:id %)) outcomes)))))
         base {:instance 4 :outcome :o-2 :want-span (span-of text roles-sentence) :outcome-span o2-cue}]
     (is (= :artefact-not-in-both (:reason (verify-proposed-link text isecs outcomes
                                                                 (assoc base :artefact "implementation")))))
-    (is (= :no-direction-verb
+    (is (= :artefact-not-in-both
            (:reason (verify-proposed-link
                      text isecs outcomes
                      (assoc base :artefact "implement"
@@ -728,3 +760,42 @@
     (is (not-any? (fn [[_ re]] (re-find re want)) direction-verbs))
     (is (= :no-direction-verb (:reason r)))
     (is (nil? (:via r)))))
+
+(deftest v-2-two-string-4-caller-converted-to-o-2-verifies-with-reader-claim
+  ;; The miss 4/:caller-converted -> :o-2 with the best two-string proposal:
+  ;; "later implementation" (the :o-2 cue) and "code asks for a role" (section
+  ;; 4's converting sentence, which carries "declare" and "instead of"). It
+  ;; VERIFIES, with :coreference :reader-claimed. Every checked fact holds;
+  ;; that "code asks for a role" co-refers with "later implementation" is the
+  ;; reader's claim, and is what a reviewer would weigh. The verifier does not
+  ;; and cannot judge it.
+  (let [{:keys [text isecs outcomes]} (seams-context)
+        o2-cue (:span (first (:cues (first (filter #(= :o-2 (:id %)) outcomes)))))
+        r (verify-proposed-link text isecs outcomes
+                                {:instance 4 :outcome :o-2
+                                 :artefact {:outcome-phrase "later implementation"
+                                            :want-phrase "code asks for a role"}
+                                 :want-span (span-of text roles-sentence) :outcome-span o2-cue})]
+    (is (= [4 :o-2] [(:instance r) (:outcome r)]))
+    (is (= :reader-claimed (get-in r [:via :coreference])))
+    (is (= :declare (get-in r [:via :direction])))))
+
+(deftest v-11-swapped-phrases-refuse-naming-the-side
+  (let [{:keys [text isecs outcomes] :as ctx} (seams-context)
+        p (assoc (good-proposal ctx) :artefact {:outcome-phrase "pattern-matching an id"
+                                                :want-phrase "provider out of the agent id"})
+        r (verify-proposed-link text isecs outcomes p)]
+    (is (= :artefact-not-in-both (:reason r)))
+    (is (= [:outcome-phrase :want-phrase] (get-in r [:detail :missing])))
+    (let [half (verify-proposed-link text isecs outcomes
+                                     (assoc p :artefact {:outcome-phrase "provider out of the agent id"
+                                                         :want-phrase "provider out of the agent id"}))]
+      (is (= [:want-phrase] (get-in half [:detail :missing])) "only the want side missed"))))
+
+(deftest v-12-a-phrase-only-inside-a-longer-word-refuses
+  (let [{:keys [text isecs outcomes] :as ctx} (seams-context)
+        p (assoc (good-proposal ctx) :artefact {:outcome-phrase "provider" :want-phrase "seat"})
+        want-text (apply cp-subs text (:want-span p))]
+    (is (str/includes? want-text "seats") "\"seat\" occurs, but only inside \"seats\"")
+    (is (= :artefact-not-in-both (:reason (verify-proposed-link text isecs outcomes p))))
+    (is (= [:want-phrase] (get-in (verify-proposed-link text isecs outcomes p) [:detail :missing])))))

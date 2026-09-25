@@ -402,6 +402,15 @@
   (vec (reduce (fn [acc [kw re]] (if (some #(= kw (first %)) acc) acc (conj acc [kw re])))
                [] (mapcat :direction-verbs coupling-artefacts))))
 
+(defn- phrase-in?
+  "PHRASE occurs in S as whole words, case-insensitive."
+  [^String s phrase]
+  (boolean
+   (and (string? phrase) (not (str/blank? phrase)) s
+        (re-find (java.util.regex.Pattern/compile
+                  (str "(?i)(?<!\\w)" (java.util.regex.Pattern/quote phrase) "(?!\\w)"))
+                 s))))
+
 (defn- span-text [^String text [a b]]
   (try (when (and (integer? a) (integer? b) (<= 0 a b)) (cp-subs text a b))
        (catch Exception _ nil)))
@@ -422,12 +431,28 @@
                                   not in both span texts
      :no-direction-verb           the want span carries none of the
                                   coupling-artefacts direction verbs
-   The conditions are the :via fields plus the two identity checks, so a
-   proposal that passes is checked by the same facts as a vocabulary link
-   (with one difference: a vocabulary entry may name one artefact by two
-   different phrasings, one per span; a proposal names it by ONE string found
-   in both). :basis :proposed-verified on the record lets a consumer weight a
-   proposed link or not. Nothing here proposes links."
+   The conditions are the :via fields plus the two identity checks.
+
+   :artefact is either ONE string, which must occur in both spans, or
+   {:outcome-phrase s1 :want-phrase s2}: s1 in the outcome span, s2 in the
+   want span (H-C-REACH-I3). The two-string form has the shape of a vocabulary
+   entry (one artefact named by an :obstacle-res phrasing and a :mention-res
+   phrasing). The difference is that a vocabulary entry's co-reference of its two
+   phrasings was predeclared, while a reader's is CLAIMED. The verifier checks
+   everything it can (spans resolve, each phrase in its own span, a direction
+   verb) and records the co-reference as :coreference :reader-claimed. That
+   claim is the only thing a two-string link rests on beyond the checked
+   facts. Phrases match as whole words, case-insensitive (no word character
+   on either side), so a stem shared by inflection is not an artefact:
+   \"impersonat\" does not match \"impersonating\", and \"bind\" does not
+   match \"bindings\". That is why \"impersonating\" vs \"impersonate\" needs
+   the two-string form.
+
+   A consumer can tell three link kinds apart. Vocabulary links carry :via
+   :artefact as an entry id. One-string proposals carry a string and :basis
+   :proposed-verified. Two-string proposals carry the phrase map, :basis
+   :proposed-verified and :coreference :reader-claimed. Nothing here proposes
+   links."
   [^String text isecs outcomes {:keys [instance outcome artefact want-span outcome-span]}]
   (let [refuse (fn [reason detail] {:status :refused :reason reason :detail detail})
         sec (first (filter #(= instance (:instance %)) isecs))
@@ -439,7 +464,11 @@
                            ca (.offsetByCodePoints text 0 a)
                            cb (.offsetByCodePoints text 0 b)]
                        [(line-of text ca) (line-of text (max ca (dec cb)))]))
-        needle (when (string? artefact) (str/lower-case artefact))
+        [out-phrase want-phrase] (if (map? artefact)
+                                   [(:outcome-phrase artefact) (:want-phrase artefact)]
+                                   [artefact artefact])
+        missing (vec (concat (when-not (phrase-in? out-text out-phrase) [:outcome-phrase])
+                             (when-not (phrase-in? want-text want-phrase) [:want-phrase])))
         dir (when want-text (some (fn [[kw re]] (when (re-find re want-text) kw)) direction-verbs))]
     (cond
       (nil? sec) (refuse :instance-unknown {:instance instance :instances (mapv :instance isecs)})
@@ -451,16 +480,15 @@
                                            :section-lines (:lines sec)})
       (not (some #(= outcome-span (:span %)) (:cues o)))
       (refuse :outcome-span-not-a-cue {:outcome-span outcome-span :cue-spans (mapv :span (:cues o))})
-      (not (and needle (not (str/blank? needle))
-                (str/includes? (str/lower-case want-text) needle)
-                (str/includes? (str/lower-case out-text) needle)))
-      (refuse :artefact-not-in-both {:artefact artefact})
+      (seq missing)
+      (refuse :artefact-not-in-both {:artefact artefact :missing missing})
       (nil? dir) (refuse :no-direction-verb {:want-span want-span})
       :else
       {:instance instance
        :outcome outcome
-       :via {:artefact artefact :want-span want-span :outcome-span outcome-span
-             :direction dir :basis :proposed-verified}})))
+       :via (cond-> {:artefact artefact :want-span want-span :outcome-span outcome-span
+                     :direction dir :basis :proposed-verified}
+              (map? artefact) (assoc :coreference :reader-claimed))})))
 
 ;; ---------------------------------------------------------------- extraction
 
