@@ -94,7 +94,7 @@
         (not (vector? wc-verdict)) (assoc :wc-verdict (if (and (map? wc-verdict) (keyword? (:status wc-verdict)))
                                                          (select-keys wc-verdict [:status])
                                                          {:status :absent}))
-        (seq wc-verdict) (assoc :wc-failures wc-verdict)))))
+        (and (vector? wc-verdict) (seq wc-verdict)) (assoc :wc-failures wc-verdict)))))
 
 (defn fold
   "Apply increment receipts to a cascade-prior state. A :delta 1 receipt
