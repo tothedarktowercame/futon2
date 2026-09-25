@@ -175,3 +175,18 @@
                 (catch clojure.lang.ExceptionInfo e (:interpretation/refusal (ex-data e))))))
     (testing "with no declared constraint the same readings publish"
       (is (empty? (:needs (ask (temp-dir "ask-store") answer)))))))
+
+(deftest a-construction-exception-is-a-refusal-never-a-request
+  ;; WM-SPIKE-FIX-I C: the spike's last three wants hit an ExceptionInfo with
+  ;; no :interpretation/refusal; the refusal was nil, ask-one fell through and
+  ;; {::refused nil} went to claude-5 as the request (request-id nil)
+  (let [asked-seat (atom [])
+        r (with-redefs [wi/issue! (fn [& _] (throw (ex-info "evidence write failed" {:path "/x"})))]
+            (ask (temp-dir "ask-store") (fn [issued] (swap! asked-seat conj issued)
+                                          {:seat "kimi-6" :job-id "j" :state "done" :text ""})))]
+    (is (= [] @asked-seat) "the seat is never asked")
+    (is (= [:request-refused :request-refused] (mapv :outcome (:asked r))))
+    (is (= {:kind :construction-threw :class "clojure.lang.ExceptionInfo"
+            :message "evidence write failed" :data-keys [:path]}
+           (:refusal (first (:asked r)))))
+    (is (every? #(= :request-refused (:kind %)) (:needs r)))))

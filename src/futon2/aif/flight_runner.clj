@@ -150,15 +150,23 @@
                               :evaluate-g wm/constructed-candidate-g}))))
 
 (defn- issue-request
-  "Issue the request for WANT, or return {::refused refusal-kind}."
+  "Issue the request for WANT, or return {::refused refusal}: the
+  construction's :interpretation/refusal, or, when the exception carries
+  none, {:kind :construction-threw :message .. :data-keys ..}. Never nil: a
+  nil refusal once fell through ask-one and went to the seat as the request
+  (the spike, three wants; WM-SPIKE-FIX-I C)."
   [store view target want criterion request-options]
   (try (wi/issue! store (wi/request! {:target target :want want :criterion criterion
                                       :facts (get-in view [:universes target])
                                       :patterns (get-in view [:interpretations target :patterns])}
                                      (io/file store "evidence" target)
                                      (or request-options {})))
-       (catch clojure.lang.ExceptionInfo e
-         {::refused (:interpretation/refusal (ex-data e))})))
+       (catch Exception e
+         {::refused (or (:interpretation/refusal (ex-data e))
+                        {:kind :construction-threw
+                         :class (.getName (class e))
+                         :message (ex-message e)
+                         :data-keys (vec (sort-by str (keys (ex-data e))))})})))
 
 (defn- settle
   "Parse, validate and publish ANSWER to ISSUED; the outcome entry."
@@ -222,8 +230,8 @@
     (if-not criterion
       (assoc base :outcome :no-criterion)
       (let [issued (issue-request store view target want criterion request-options)]
-        (if-let [r (::refused issued)]
-          (assoc base :outcome :request-refused :refusal r)
+        (if (contains? issued ::refused)
+          (assoc base :outcome :request-refused :refusal (::refused issued))
           (settle opts view issued (answer-fn issued) base))))))
 
 (defn- constraints-for
