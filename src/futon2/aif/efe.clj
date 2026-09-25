@@ -1003,6 +1003,56 @@
    #{}
    precedence))
 
+(defn order-use
+  "M-wm-wiring row 4 (claude-10, 2026-09-25): which containment the kernel
+  scores ACTION under, read from its construction receipt's :order
+  (construction/containment-order). Returns {:precedence [...] :meta {...}}.
+
+    :order absent          the list kernel over :precedence;
+                           meta {:order {:absent :no-order-on-receipt}}
+    :order refused         (e.g. :cyclic-containment) the list kernel;
+                           meta {:order-not-used {:refused kind}}
+    violations non-empty   the list kernel; meta {:order-not-used
+                           {:precedence-violations n}}
+    no violations, chain   the order's own linear order (its one linear
+                           extension, which the precedence then is);
+                           meta {:order :chain}
+    no violations, not a   the list kernel; meta {:order-not-used
+    chain                  :not-a-chain :needs :co-application-kernel}
+
+  A non-chain order has no list reading: its kernel is the co-application
+  kernel (DarkTower/WarMachine/Proof2/CoApplicationKernel.lean, mathlib4
+  69c2432f2b, coApplyKernel; equal to the list kernel on a chain by
+  coApplyKernel_eq_cascadeKernel_of_chain), which has no counterpart here
+  yet. Until it does, that case is recorded, never silently scored as a
+  list."
+  [action]
+  (let [prec (:precedence action)
+        order (get-in action [:construction-receipt :order])
+        list-use (fn [meta] {:precedence prec :meta meta})]
+    (cond
+      (nil? order) (list-use {:order {:absent :no-order-on-receipt}})
+      (:kind order) (list-use {:order-not-used {:refused (:kind order)}})
+      (keyword? (:precedence-violations order))
+      (list-use {:order-not-used (:precedence-violations order)})
+      (seq (:precedence-violations order))
+      (list-use {:order-not-used {:precedence-violations (count (:precedence-violations order))}})
+      :else
+      (let [units (map :unit (:units order))
+            children (reduce (fn [m [a b]] (update m a (fnil conj #{}) b)) {} (:descent order))
+            below (fn below [u] (reduce into (set (children u)) (map below (children u))))
+            n (count units)
+            chain? (= (* n (dec n)) (* 2 (reduce + (map (comp count below) units))))]
+        (if-not chain?
+          (list-use {:order-not-used :not-a-chain :needs :co-application-kernel})
+          (let [linear (sort-by (comp - count below) units)
+                pattern-of (into {} (map (juxt :unit :pattern)) (:units order))
+                by-id (into {} (map (fn [p] [(if (map? p) (:id p) p) p])) prec)
+                ordered (mapv #(get by-id (pattern-of %)) linear)]
+            (if (and (= n (count prec)) (every? some? ordered))
+              {:precedence ordered :meta {:order :chain}}
+              (list-use {:order-not-used :units-not-mapped-to-precedence}))))))))
+
 (defn rank-cascade-actions
   "Score a sequence of cascade candidates ({:kind :cascade-candidate :id …
   :precedence [patterns…]}) by expected free energy and rank ascending.
@@ -1156,11 +1206,12 @@
                     candidate-actions))
             excluded-ids (set (map :cascade-id f-exclusions))
             scored (map (fn [action]
-                          (let [{:keys [g certificate]}
+                          (let [ou (order-use action)
+                                {:keys [g certificate]}
                                 (cascade-manifest/horizon-g-sparse-cert
                                  (cond-> {:rates rates
                                   :q0 q0
-                                  :precedence-fn (constantly (:precedence action))
+                                  :precedence-fn (constantly (:precedence ou))
                                   :horizon T
                                   :spec spec
                                   ;; R7: the declared FIXED zeta rides the
@@ -1202,7 +1253,9 @@
                                      :horizon-steps T
                                      :G-efe g
                                      :G-cascade g
-                                     :controller-score (if (number? g) g ##Inf)}
+                                     :controller-score (if (number? g) g ##Inf)
+                                     ;; row 4: which containment scored it
+                                     :order-use (:meta ou)}
                               ;; WIRE-2: the computed F_π reaches selection as
                               ;; :f (select-action-cascades' σ(ln E − F − G/β)).
                               ;; Attached exactly when it was computed for this
