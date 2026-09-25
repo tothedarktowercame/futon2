@@ -1088,10 +1088,18 @@
                     (assoc :weights (:weights spec-in))
                     (contains? spec-in :c-schedule)
                     (assoc :c-schedule (:c-schedule spec-in)))
-            universe (-> (cascade-candidate-tokens
-                          (mapcat :precedence candidate-actions))
-                         (into (reduce set/union #{} (keys q0)))
-                         (into want))
+            ;; H-VALUE-G-D (2026-09-25): an explicit :universe in opts is the
+            ;; DECLARED common token universe of the comparison (the
+            ;; problem's, via cascade-problems/problem-tokens), used as-is so
+            ;; that a caller scoring candidates one call at a time — the
+            ;; constructor — takes every G over the SAME universe. Absent
+            ;; :universe the universe is computed from this call's family
+            ;; exactly as before (byte-identical for every existing call).
+            universe (or (:universe opts)
+                         (-> (cascade-candidate-tokens
+                              (mapcat :precedence candidate-actions))
+                             (into (reduce set/union #{} (keys q0)))
+                             (into want)))
             ;; R7 (2026-09-18): the adjudication rates are no longer
             ;; hardcoded to zero here. Absent :adjudication-rates the call
             ;; is EXACTLY what it always was — the all-zero identity kernel,

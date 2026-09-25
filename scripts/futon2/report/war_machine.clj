@@ -5789,7 +5789,7 @@
   no selection and no β needed. The constructor scores a candidate this
   way, with the same G selection uses (see `constructed-candidate-g`)."
   ([problem] (cascade-lane problem {}))
-  ([problem {:keys [through]}]
+  ([problem {:keys [through universe]}]
   (let [{:keys [facts want interpretations repository precedences horizon-steps
                 cascade-spec beta]} problem
         route (atom [])
@@ -5888,9 +5888,18 @@
                   sourced (when (map? locators)
                             (observation-rates/sourced-rates
                              nil nil nil locators (observation-contract)))
+                  ;; H-VALUE-G-D (2026-09-25): the scored universe is the
+                  ;; PROBLEM's declared token universe (facts, want, every
+                  ;; interpreted pattern's guard and produces — the same set
+                  ;; locator coverage uses), not the candidate family's, so
+                  ;; every evaluate-g call of one problem normalises ln Z
+                  ;; over one universe and compared G's are commensurable.
                   base-opts {:f-prefix-production? true
                              :horizon-steps (get-in @state [:R13 :cascade-rollout])
-                             :cascade-spec cascade-spec}]
+                             :cascade-spec cascade-spec
+                             :universe (or universe
+                                           (cascade-problems/problem-tokens
+                                            facts want interpretations))}]
               (cond
                 ;; no locators on the problem: previous behaviour, the
                 ;; certificate records :identity-default.
@@ -6043,9 +6052,11 @@
   without :precedences), computed by the lane's own R1-R5 over a fixed
   family: the single-pattern order of every interpretation enabled on the
   problem's facts, plus the candidate's own order. (R6's law O4 refuses an
-  order whose pattern cannot fire, so disabled patterns are left out.) Fixing the family keeps the universe G is taken
-  over the same for every candidate the constructor compares, the empty
-  cascade included (R6 always adds it as C0). This is the
+  order whose pattern cannot fire, so disabled patterns are left out.) The
+  universe G is taken over is the problem's declared token universe
+  (cascade-problems/problem-tokens), passed to the lane explicitly
+  (H-VALUE-G-D), so it is the same for every candidate the constructor
+  compares, the empty cascade included (R6 always adds it as C0). This is the
   constructor's :evaluate-g, so a constructed plan is taken only if the same
   G selection uses scores it better than the empty family -- no G is
   injected or pinned (E-cascade-real D12). A lane refusal is thrown with its
@@ -6059,7 +6070,15 @@
         singles (mapv (comp vector key)
                       (sort-by (comp pr-str key) (filter enabled? (:interpretations problem))))
         family (vec (distinct (cond-> singles (seq prec) (conj prec))))
-        lane (cascade-lane (assoc problem :precedences family) {:through :R5})]
+        ;; H-VALUE-G-D: score over the problem's declared token universe so
+        ;; every evaluate-g call of one problem — and the empty baseline it
+        ;; is subtracted from at construction.clj — is normalised over the
+        ;; SAME universe (the cross-universe subtraction differed by T·k·ln2).
+        lane (cascade-lane (assoc problem :precedences family)
+                           {:through :R5
+                            :universe (cascade-problems/problem-tokens
+                                       (:facts problem) (:want problem)
+                                       (:interpretations problem))})]
     (when (:refusal lane)
       (throw (ex-info "constructed-candidate-g: lane refused"
                       {:constructor/refusal :lane-refused :refusal (:refusal lane)

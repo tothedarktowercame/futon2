@@ -31,11 +31,11 @@
     :construction {:construct ic/construct :budget {:max-moves 4 :max-expansions 20000}
                    ;; a stand-in G (empty cascade worst, then shorter
                    ;; better): this test is about the horizon. With the lane's
-                   ;; real G the 4-step chain is DECLINED even at horizon 4:
-                   ;; G(plan) 15.34 > G(empty) 10.80 when the three
-                   ;; intermediate tokens are not wanted (13.49 < 15.99 when
-                   ;; they are). That is a finding about G, reported to
-                   ;; claude-8 with this commit, not a horizon behaviour.
+                   ;; real G the 4-step chain was DECLINED even at horizon 4
+                   ;; before H-VALUE-G-D: G(plan) 15.34 vs G(empty) 10.80
+                   ;; compared two different token universes; in one
+                   ;; universe the pair is 15.34 vs 16.34 and the chain is
+                   ;; taken (futon2.report.war-machine-universe-test).
                    :move-cost 0 :evaluate-g (fn [_ c] (if (empty? (:precedence c)) 1.0e9
                                                           (double (count (:precedence c)))))}}
    extra))
