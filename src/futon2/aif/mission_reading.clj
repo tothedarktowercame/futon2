@@ -52,7 +52,7 @@
    :want {:token (:token criterion)}
    :criterion (select-keys criterion [:kind :line :phase :stated])
    :mission mission
-   :asks (str "a checkable locator (C3 path exists, C4 declaration head starts a line, C5 registry entry, C6 witness reference) whose observation decides this criterion. "
+   :asks (str "a checkable locator (C3 path exists, C4 declaration head starts a line, C5 registry entry, C6 witness reference, C8 registered passing run) whose observation decides this criterion. "
               "The locator may name evidence that does not exist yet: it then reads false now, and producing that evidence is the flight's work. "
               "The classes observe exactly: C3 that a path exists at a commit; C4 that a declaration head starts a line of a file; C5 that a contract-registry bundle entry exists with its clojure loci; C6 that an EDN witness {:repo :sha :entry} at a path references an existing commit/entry; C8 that the test registry holds a warrant for a named test namespace pinned to the current content of its code and test paths, postcheck matched, 0 failures and errors. "
               "For a criterion about tests passing or gates running, use C8: {:class :C8 :repo \"<dir under /home/joe/code>\" :namespace \"<test ns>\" :config \"<registry record id test-registry-<64hex>, or an EDN config path carrying :entry-id>\"}. It reads false until a run is registered at current content (no entry, moved content, wrong namespace, failures are all false, not refusals); registering that run is the flight's work. Do not propose a file whose mere existence would read true. "
