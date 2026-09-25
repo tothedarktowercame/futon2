@@ -44,8 +44,7 @@
 (deftest enacted-steps-recorded-on-the-selection-law
   ;; the decision record carries :enacted-steps keyed by the chain head,
   ;; alongside (never replacing) :action-marginal
-  (let [sources (cs/with-context-fn (cs/load-declared))
-        c2 (reference-action :C2)
+  (let [c2 (reference-action :C2)
         c1 (reference-action :C1)
         ranked [{:action c1 :controller-score 2.99}
                 {:action c2 :controller-score 0.59
@@ -65,3 +64,22 @@
     ;; the marginal's key is unchanged: the chain head
     (is (contains? (get-in decision [:selection-law :action-marginal])
                    (first (:precedence c2))))))
+
+;; Typed absences (claude-10, 2026-09-25; fad94c89 found the nils): the step
+;; is an id, or a reason there is none, never nil standing in for one.
+(deftest no-step-is-a-typed-absence-never-nil
+  (let [a (reference-action :C2)]
+    (is (= {:absent :no-scoring-belief} (policy/enacted-step-of a nil))
+        "the entry carried no prediction belief")
+    (is (nil? (policy/enacted-step-of {:kind :cascade-candidate :precedence []} #{}))
+        "no precedence: not a row, no step")))
+
+(deftest a-belief-enabling-exactly-one-pattern-records-that-step
+  ;; the bad case: a real step must not be turned into an absence
+  (let [p {:id :p/only :guard {:status :interpreted
+                               :clauses [{:status :interpreted :present #{:x} :absent #{:y}}]}
+           :produces #{:y}}
+        a {:kind :cascade-candidate :id :one :precedence [p]}]
+    (is (= :p/only (policy/enacted-step-of a #{:x})))
+    (is (= {:absent :no-enabled-step} (policy/enacted-step-of a #{})))))
+

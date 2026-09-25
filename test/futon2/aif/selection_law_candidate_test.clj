@@ -48,10 +48,18 @@
 
 (deftest every-other-selection-law-key-is-unchanged
   ;; fixture: pr-str of this decision from policy.clj at futon2 54e3c396,
-  ;; before row 9, captured before the change
-  (let [d (decide roster)]
-    (is (= (edn/read-string (slurp "test/fixtures/selection-law/row9-before@futon2-54e3c396.edn"))
-           (pr-str (update d :selection-law dissoc :candidate))))))
+  ;; before row 9, captured before the change. It froze :enacted-steps as
+  ;; nils ({:p/b nil ...}: the roster carries no prediction belief), which
+  ;; enacted-step-of now records as {:absent :no-scoring-belief}; so both
+  ;; sides project :enacted-steps (and the output its new :candidate) away,
+  ;; both read back through EDN so the comparison is of the same printing.
+  ;; The fixture bytes are untouched; the typed values are pinned below and
+  ;; in enacted-step-test.
+  (let [d (decide roster)
+        proj (fn [m] (pr-str (update m :selection-law dissoc :candidate :enacted-steps)))]
+    (is (= (proj (edn/read-string (edn/read-string (slurp "test/fixtures/selection-law/row9-before@futon2-54e3c396.edn"))))
+           (proj (edn/read-string (pr-str d)))))
+    (is (every? #(= {:absent :no-scoring-belief} %) (vals (get-in d [:selection-law :enacted-steps]))))))
 
 (deftest no-cascade-id-leaves-the-key-out
   ;; an entry without :cascade-id (the ticket-queue fixtures' shape): no

@@ -149,12 +149,32 @@
           (is (= :abstained (get-in r [:decision :status])))
           (is (= :no-admitted-front-entry (get-in r [:decision :selection-certificate :ticket-queue :status]))))))))
 
+(defn- frozen-projection
+  ;; :enacted-steps joined the selection law in b1979ce2 (2026-09-23), AFTER
+  ;; this fixture was frozen; it is additive reporting and is pinned in
+  ;; enacted-step-test. Projected away, as selection-certificate-test does,
+  ;; rather than re-capturing the frozen bytes (which would freeze whatever
+  ;; the key held at capture time). The fixture file is untouched.
+  ;; Two other keys joined after the freeze and are projected the same way
+  ;; (a clojure.data/diff of fixture and output shows only these additions,
+  ;; nothing removed or changed): each certificate candidate's :f-consumed
+  ;; and the certificate's :law-applied (ad039985, F-ABS: the law that ran
+  ;; when F is absent).
+  [decision]
+  (pr-str (-> decision
+              (update :selection-law dissoc :enacted-steps)
+              (update-in [:selection-certificate :candidates] #(mapv (fn [c] (dissoc c :f-consumed)) %))
+              (update :selection-certificate dissoc :law-applied))))
+
 (deftest no-entries-preserves-frozen-decision-bytes
   (with-inputs
     (fn [opts]
       (let [expected (edn/read-string (slurp (io/resource "fixtures/ticket-queue/before.edn")))]
-        (is (= expected (pr-str (policy/select-action-cascades roster opts))))
-        (is (= expected (pr-str (select roster opts declaration))))))))
+        (is (= expected (frozen-projection (policy/select-action-cascades roster opts))))
+        (is (= expected (frozen-projection (select roster opts declaration))))
+        (is (= {:p/mission {:absent :no-scoring-belief} :p/docs {:absent :no-scoring-belief}}
+               (get-in (policy/select-action-cascades roster opts) [:selection-law :enacted-steps]))
+            "the entries carry no prediction belief: a typed absence, never nil")))))
 
 (deftest invalid-declaration-refuses-instead-of-defaulting
   (with-inputs

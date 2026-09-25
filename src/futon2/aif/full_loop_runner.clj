@@ -1997,6 +1997,7 @@
         enacted-steps (get-in action [:enacted-steps])
         recorded (get enacted-steps head-id)]
     (if (and (some? recorded)
+             (not (:absent recorded))
              (some #(= recorded (:id %)) precedence))
       {:pattern (first (filter #(= recorded (:id %)) precedence))
        :enacted-step {:id recorded :source :recorded-decision}}
@@ -2006,6 +2007,9 @@
                       :reason (cond
                                 (nil? enacted-steps) :no-recorded-enacted-steps
                                 (nil? recorded) :no-entry-for-head
+                                ;; the decision recorded why no step was
+                                ;; enabled (policy/enacted-step-of)
+                                (:absent recorded) (:absent recorded)
                                 :else :recorded-step-not-in-precedence)}})))
 
 (defn- acceptance-criterion-block
@@ -2785,10 +2789,10 @@
    Nil is allowed in any position: probed against XTDB 2.1.0 on 2026-09-24
    (nil map values at any depth, nils inside vectors and sets all put
    cleanly). migration.transform/risky-nil? says otherwise, but grounding
-   props legitimately carry nil map values -- the selection law's
-   :enacted-steps records {:pattern/id nil} when no pattern is enabled --
-   and refusing them breaks every grounding; the probe wins over the
-   heuristic.
+   props legitimately carry nil map values (the selection law's
+   :enacted-steps did, {:pattern/id nil}, until it recorded a typed absence
+   there instead, 2026-09-25) -- and refusing them breaks every grounding;
+   the probe wins over the heuristic.
 
    Loud here because the alternative is the 2026-09-23 failure mode:
    futon1b's rescue ladder answering an unstorable value by pr-str-ing

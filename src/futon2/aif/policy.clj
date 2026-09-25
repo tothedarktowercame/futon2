@@ -167,9 +167,15 @@
   "PROOF-wm-works ⟨1⟩6: the step the machine would actually take now — the
   first pattern in the cascade's precedence whose guard holds at the
   current state (Lean CascadeTransition.firstEnabled semantics), resolved
-  against the belief the decision scored from. Returns the chain head's id
-  when it is itself the enabled step, and nil when no pattern is enabled
-  (the empty-cascade case). Additive: nothing downstream changes key."
+  against the belief the decision scored from. Returns the enabled step's
+  id (the chain head's when it is itself enabled). Otherwise a typed
+  absence, never nil standing in for one (M-wm-wiring, claude-10,
+  2026-09-25; fad94c89 found the nils): {:absent :no-scoring-belief} when
+  STATE-TOKENS is nil (the entry carried no prediction belief),
+  {:absent :no-enabled-step} when the belief enables no pattern,
+  {:absent :first-enabled-refused} when first-enabled threw. An action
+  with no precedence has no step and returns nil (it is not a row).
+  Additive: nothing downstream changes key."
   [action state-tokens]
   (when (and (map? action) (seq (:precedence action)))
     (let [;; the live qualifier's pattern maps carry interpreted guards; the
@@ -190,11 +196,16 @@
                                             :clauses [{:present (get-in p [:guard :present] #{})
                                                        :absent (get-in p [:guard :absent] #{})}]})
                                   :produces (:produces p)})))
-          enabled (try
-                    ((requiring-resolve 'futon2.aif.cascade-model-manifest/first-enabled)
-                      interpreted state-tokens)
-                    (catch Exception _ nil))]
-      (some-> enabled :id))))
+          enabled (when (some? state-tokens)
+                    (try
+                      ((requiring-resolve 'futon2.aif.cascade-model-manifest/first-enabled)
+                        interpreted state-tokens)
+                      (catch Exception _ ::refused)))]
+      (cond
+        (nil? state-tokens) {:absent :no-scoring-belief}
+        (= ::refused enabled) {:absent :first-enabled-refused}
+        (some? (:id enabled)) (:id enabled)
+        :else {:absent :no-enabled-step}))))
 
 (defn- selection-input
   "Record the historical neutral-input rule, including present null/false.
@@ -463,8 +474,9 @@
                                                first-entry)
                                         ;; the belief the decision scored from:
                                         ;; the entry's prediction initial belief
-                                        ;; (a state-set) or a fallback that
-                                        ;; enables nothing (nil step)
+                                        ;; (a state-set); nil when the entry
+                                        ;; carries none, which enacted-step-of
+                                        ;; records as {:absent :no-scoring-belief}
                                         state (or (some-> (get-in e [:prediction :initial-belief]) keys first)
                                                   (some-> (get-in e [:prediction :belief]) keys first))]
                                   :when (some? head)]
