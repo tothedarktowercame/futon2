@@ -3,6 +3,7 @@
 ;; classpath. Run: clojure -M:test -m cognitect.test-runner -d test/futon2/wm
 (ns futon2.wm.extract-outcomes-test
   (:require [clojure.edn :as edn]
+            [clojure.set :as set]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]))
@@ -585,3 +586,145 @@
         a (.codePointCount text 0 (str/index-of text "so Rob"))]
     (is (= :shape/fenced-block (:reason (shape-verdict text {:quote "so Rob could run it" :span [a (+ a 5)]})))
         "a span inside a fence is rejected by position")))
+
+;; ---------------------------------------------------------- H-C-REACH-I2
+;; verify-proposed-link: a served-by link proposed by a reader, verified by the
+;; facts artefact-links writes into :via. Live-pinned to M-futon-seams at the
+;; E4/E5 sha, with cascades.
+
+(def verify-proposed-link (f 'verify-proposed-link))
+(def direction-verbs @(f 'direction-verbs))
+
+(defn- seams-context []
+  (let [text (slurp mission-path)
+        hs (headings text)
+        isecs (instance-sections hs (count (str/split-lines text)))
+        section-of (fn [l] (:instance (first (filter #(<= (first (:lines %)) l (second (:lines %))) isecs))))
+        cs (mapv #(assoc %1 :id (keyword (str "o-" (inc %2))))
+                 (consolidate (extract text section-of {})) (range))
+        outcomes (:outcomes (filter-outcomes text cs))]
+    {:text text :isecs isecs :outcomes outcomes
+     :links (artefact-links text isecs outcomes)}))
+
+(defn- span-of
+  "Code point span of S, which must occur exactly once in TEXT."
+  [^String text ^String s]
+  (let [i (str/index-of text s)]
+    (assert (and i (= i (str/last-index-of text s))) (str "not unique: " s))
+    [(.codePointCount text 0 i) (.codePointCount text 0 (+ i (count s)))]))
+
+(defn- words [s] (set (map str/lower-case (re-seq #"[A-Za-z][A-Za-z-]{3,}" s))))
+
+(def ^:private reader-artefact
+  ;; The artefact a reader names by ONE string found in both spans, for the
+  ;; three vocabulary links whose two spans share a content word.
+  {[4 :o-4] "provider" [6 :o-8] "hardcoded" [7 :o-1] "Emacs"})
+
+(defn- proposal-of [link artefact]
+  {:instance (:instance link) :outcome (:outcome link) :artefact artefact
+   :want-span (get-in link [:via :want-span]) :outcome-span (get-in link [:via :outcome-span])})
+
+(deftest v-1-vocabulary-links-as-proposals-3-of-8-verify
+  ;; The vocabulary names an artefact CLASS by two phrasings, one per span
+  ;; (:obstacle-res vs :mention-res). A proposal names it by one string found
+  ;; in both. 3 of the 8 links' spans share a content word and verify; the
+  ;; other 5 share none (the words both spans contain, >= 4 letters, are
+  ;; pinned below) and refuse :artefact-not-in-both.
+  (let [{:keys [text isecs outcomes links]} (seams-context)
+        _ (is (= mission-sha-pinned (sha256 text)))
+        shared (into {} (for [l links]
+                          [[(:instance l) (:outcome l)]
+                           (set/intersection (words (apply cp-subs text (get-in l [:via :want-span])))
+                                             (words (apply cp-subs text (get-in l [:via :outcome-span]))))]))]
+    (is (= 8 (count links)))
+    (is (= {[4 :o-4] #{"provider" "code" "roles"} [5 :o-2] #{} [5 :o-5] #{}
+            [6 :o-5] #{"that"} [6 :o-8] #{"hardcoded"} [7 :o-1] #{"than" "emacs" "rather" "code"}
+            [7 :o-2] #{} [7 :o-5] #{"than" "already"}}
+           shared))
+    (doseq [l links
+            :let [k [(:instance l) (:outcome l)]
+                  artefact (or (reader-artefact k)
+                               ;; the want's own naming of the vocabulary artefact
+                               (some #(re-find % (apply cp-subs text (get-in l [:via :want-span])))
+                                     (:mention-res (first (filter #(= (get-in l [:via :artefact]) (:id %))
+                                                                  coupling-artefacts)))))
+                  r (verify-proposed-link text isecs outcomes (proposal-of l artefact))]]
+      (if (reader-artefact k)
+        (do (is (= (select-keys l [:instance :outcome]) (select-keys r [:instance :outcome])) (pr-str k))
+            (is (= (select-keys (:via l) [:want-span :outcome-span])
+                   (select-keys (:via r) [:want-span :outcome-span])))
+            (is (= :proposed-verified (get-in r [:via :basis])))
+            (is (keyword? (get-in r [:via :direction]))))
+        (is (= :artefact-not-in-both (:reason r)) (pr-str k))))
+    (is (= 3 (count (filter #(= :proposed-verified (get-in % [:via :basis]))
+                            (for [l links :let [a (reader-artefact [(:instance l) (:outcome l)])] :when a]
+                              (verify-proposed-link text isecs outcomes (proposal-of l a)))))))))
+
+(deftest v-1b-reach-limit-a-shared-verb-stem-passes-as-artefact
+  ;; Reach limit, recorded not fixed: condition 5 is a substring check, so a
+  ;; shared VERB stem passes as an artefact. 5/:o-2's spans share no word, but
+  ;; "impersonat" is in "impersonating" and "impersonate".
+  (let [{:keys [text isecs outcomes links]} (seams-context)
+        l (first (filter #(= [5 :o-2] [(:instance %) (:outcome %)]) links))]
+    (is (= :proposed-verified
+           (get-in (verify-proposed-link text isecs outcomes (proposal-of l "impersonat")) [:via :basis])))))
+
+(def ^:private roles-sentence
+  "Roles resolve to seats; seats declare provider and availability; code asks for a role instead of pattern-matching an id.")
+
+(deftest v-2-miss-4-caller-converted-to-o-2-refused-artefact-not-in-both
+  ;; Reference mapping 4/:caller-converted -> :o-2 (a vocabulary miss). The
+  ;; sentence a reader would pick in section 4 is the conversion itself (code
+  ;; asks for a role); :o-2's only cue is "every later implementation must
+  ;; impersonate the first". The outcome's artefact (a later implementation)
+  ;; is not named in section 4's converting sentence, so the reading route
+  ;; refuses it too. The one section-4 sentence carrying "implement" (the
+  ;; "implementer" role) has no direction verb.
+  (let [{:keys [text isecs outcomes]} (seams-context)
+        o2-cue (:span (first (:cues (first (filter #(= :o-2 (:id %)) outcomes)))))
+        base {:instance 4 :outcome :o-2 :want-span (span-of text roles-sentence) :outcome-span o2-cue}]
+    (is (= :artefact-not-in-both (:reason (verify-proposed-link text isecs outcomes
+                                                                (assoc base :artefact "implementation")))))
+    (is (= :no-direction-verb
+           (:reason (verify-proposed-link
+                     text isecs outcomes
+                     (assoc base :artefact "implement"
+                            :want-span (span-of text "The role is **implementer** and the constraint being enforced is **author ≠ reviewer**; neither needs a provider name, and as written the rule cannot be satisfied if no Codex seat exists though its actual requirement could be."))))))))
+
+(defn- good-proposal [{:keys [links]}]
+  (proposal-of (first (filter #(= [4 :o-4] [(:instance %) (:outcome %)]) links)) "provider"))
+
+(deftest v-3-to-v-8-one-field-edits-one-reason-each
+  (let [{:keys [text isecs outcomes links] :as ctx} (seams-context)
+        p (good-proposal ctx)
+        reason #(:reason (verify-proposed-link text isecs outcomes %))
+        section-5-want (get-in (first (filter #(= 5 (:instance %)) links)) [:via :want-span])]
+    (is (= :proposed-verified (get-in (verify-proposed-link text isecs outcomes p) [:via :basis])))
+    (is (= :instance-unknown (reason (assoc p :instance 99))) "v-3")
+    (is (= :outcome-unknown (reason (assoc p :outcome :o-9))) "v-4: :o-9 is rejected, not admitted")
+    (is (= :want-span-outside-instance (reason (assoc p :want-span section-5-want))) "v-5")
+    (is (= :outcome-span-not-a-cue (reason (update-in p [:outcome-span 0] inc))) "v-6")
+    (is (= :artefact-not-in-both (reason (assoc p :artefact "neo4j"))) "v-7")
+    (is (= :no-direction-verb
+           (reason (assoc p :want-span (span-of text "It is worse than naming — the provider is **parsed out of the id to make routing decisions**:"))))
+        "v-8")))
+
+(deftest v-9-no-anchor-verifies-nothing
+  (let [text @close-s6
+        isecs (instance-sections (headings text) (count (str/split-lines text)))]
+    (is (= [] isecs))
+    (is (= :instance-unknown
+           (:reason (verify-proposed-link text isecs [] {:instance 1 :outcome :o-1 :artefact "THE-STACK"
+                                                         :want-span [0 10] :outcome-span [0 10]}))))))
+
+(deftest v-10-artefact-in-both-without-a-verb-is-not-a-link
+  (let [{:keys [text isecs outcomes]} (seams-context)
+        want "It is worse than naming — the provider is **parsed out of the id to make routing decisions**:"
+        o4-cue (get-in (first (filter #(= :o-4 (:id %)) outcomes)) [:cues 0 :span])
+        r (verify-proposed-link text isecs outcomes {:instance 4 :outcome :o-4 :artefact "provider"
+                                                     :want-span (span-of text want) :outcome-span o4-cue})]
+    (is (str/includes? want "provider"))
+    (is (str/includes? (str/lower-case (apply cp-subs text o4-cue)) "provider"))
+    (is (not-any? (fn [[_ re]] (re-find re want)) direction-verbs))
+    (is (= :no-direction-verb (:reason r)))
+    (is (nil? (:via r)))))

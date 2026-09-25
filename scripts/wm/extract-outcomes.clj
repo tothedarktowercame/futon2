@@ -391,6 +391,77 @@
               :outcome-span (:span ocue)
               :direction (:direction mention)}}))))
 
+;; ------------------------------------------- proposed links (H-C-REACH-I2)
+;; Beyond M-futon-seams no lexical vocabulary generalises (H-C-REACH-D §2,
+;; futon2 b10589a9): a served-by link is PROPOSED by a reader and VERIFIED here
+;; against the same facts artefact-links writes into :via.
+
+(def direction-verbs
+  "Every coupling-artefacts direction verb, in table order, first occurrence
+   kept. Reused, not extended."
+  (vec (reduce (fn [acc [kw re]] (if (some #(= kw (first %)) acc) acc (conj acc [kw re])))
+               [] (mapcat :direction-verbs coupling-artefacts))))
+
+(defn- span-text [^String text [a b]]
+  (try (when (and (integer? a) (integer? b) (<= 0 a b)) (cp-subs text a b))
+       (catch Exception _ nil)))
+
+(defn verify-proposed-link
+  "Verify a PROPOSED served-by link {:instance n :outcome :o-k :artefact s
+   :want-span [a b] :outcome-span [c d]} (spans in code points, the unit every
+   :via span uses). Returns artefact-links' row shape with :via :basis
+   :proposed-verified, or {:status :refused :reason r :detail ...} for the
+   first failing condition, in order:
+     :instance-unknown            the instance is not a unit of isecs (a file
+                                  with no instances anchor verifies nothing)
+     :outcome-unknown             the outcome is not an admitted outcome id
+     :want-span-outside-instance  the want span is not inside that section
+     :outcome-span-not-a-cue      the outcome span is not exactly one of that
+                                  outcome's cue spans
+     :artefact-not-in-both        the artefact string (case-insensitive) is
+                                  not in both span texts
+     :no-direction-verb           the want span carries none of the
+                                  coupling-artefacts direction verbs
+   The conditions are the :via fields plus the two identity checks, so a
+   proposal that passes is checked by the same facts as a vocabulary link
+   (with one difference: a vocabulary entry may name one artefact by two
+   different phrasings, one per span; a proposal names it by ONE string found
+   in both). :basis :proposed-verified on the record lets a consumer weight a
+   proposed link or not. Nothing here proposes links."
+  [^String text isecs outcomes {:keys [instance outcome artefact want-span outcome-span]}]
+  (let [refuse (fn [reason detail] {:status :refused :reason reason :detail detail})
+        sec (first (filter #(= instance (:instance %)) isecs))
+        o (first (filter #(= outcome (:id %)) outcomes))
+        want-text (span-text text want-span)
+        out-text (span-text text outcome-span)
+        want-lines (when want-text
+                     (let [[a b] want-span
+                           ca (.offsetByCodePoints text 0 a)
+                           cb (.offsetByCodePoints text 0 b)]
+                       [(line-of text ca) (line-of text (max ca (dec cb)))]))
+        needle (when (string? artefact) (str/lower-case artefact))
+        dir (when want-text (some (fn [[kw re]] (when (re-find re want-text) kw)) direction-verbs))]
+    (cond
+      (nil? sec) (refuse :instance-unknown {:instance instance :instances (mapv :instance isecs)})
+      (nil? o) (refuse :outcome-unknown {:outcome outcome :admitted (mapv :id outcomes)})
+      (not (and want-lines
+                (<= (first (:lines sec)) (first want-lines))
+                (<= (second want-lines) (second (:lines sec)))))
+      (refuse :want-span-outside-instance {:want-span want-span :want-lines want-lines
+                                           :section-lines (:lines sec)})
+      (not (some #(= outcome-span (:span %)) (:cues o)))
+      (refuse :outcome-span-not-a-cue {:outcome-span outcome-span :cue-spans (mapv :span (:cues o))})
+      (not (and needle (not (str/blank? needle))
+                (str/includes? (str/lower-case want-text) needle)
+                (str/includes? (str/lower-case out-text) needle)))
+      (refuse :artefact-not-in-both {:artefact artefact})
+      (nil? dir) (refuse :no-direction-verb {:want-span want-span})
+      :else
+      {:instance instance
+       :outcome outcome
+       :via {:artefact artefact :want-span want-span :outcome-span outcome-span
+             :direction dir :basis :proposed-verified}})))
+
 ;; ---------------------------------------------------------------- extraction
 
 (defn extract
