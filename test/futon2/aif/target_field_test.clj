@@ -84,8 +84,11 @@
            (select-keys (into {} (map (juxt :target :kind)) (:considered fld)) ["E-plain" "T-plain" "M-shaped"])))
     (is (= [] (tf/check-field fld)))
     (is (not (contains? fld :chosen)) "step 1 chooses nothing")
-    (testing "a lifecycle-shaped mission with a published producer for its open exit is feasible"
-      (is (= #{"M-shaped"} (set (keys ok))))
+    (testing "every work target is feasible; only non-targets are excluded"
+      (is (= #{"M-shaped" "M-autoclock-in" "T-plain" "E-plain"} (set (keys ok))))
+      (is (= #{"M-f11-find-production-successor" "M-mapping" "M-nostatus"} (set (keys ex)))))
+    (testing "a published producer for the open exit: the next step is :ready"
+      (is (= :ready (get-in ok ["M-shaped" :next-step])))
       (is (= [(:map-want l)] (get-in ok ["M-shaped" :open-wants])))
       (is (= 1 (get-in ok ["M-shaped" :support]))))
     (testing "M-f11 is excluded as not lifecycle-shaped: no phase heading"
@@ -96,7 +99,7 @@
       (let [c (first (filter #(= "M-autoclock-in" (:target %)) (:considered fld)))]
         (is (str/starts-with? (:status-line c) "INSTANTIATE-1 (first implementation, 2026-06-03)"))
         (is (= :unknown (:status-class c)))
-        (is (= :needs-reading (get-in ex ["M-autoclock-in" :reason])))
+        (is (= :read-criteria (get-in ok ["M-autoclock-in" :next-step])))
         (is (= {:status-line true :phase-headings 15 :phase-exits 0 :verdict-lines 0
                 :lifecycle-shaped? true :missing []}
                (tf/lifecycle-shape "M-autoclock-in" autoclock (:status-line c)))
@@ -108,10 +111,11 @@
       (is (= :not-lifecycle-shaped (get-in ex ["M-nostatus" :reason])))
       (is (= [:status-line] (get-in ex ["M-nostatus" :what-would-make-feasible :lifecycle-parts-missing])))
       (is (= 2 (get-in ex ["M-nostatus" :details :shape :phase-headings])) "INSTANTIATE-7a counts"))
-    (testing "a ticket with no criteria waits on the read step"
-      (is (= :needs-reading (get-in ex ["T-plain" :reason]))))))
+    (testing "a ticket and an excursion with no criteria: the next step is reading them"
+      (is (= :read-criteria (get-in ok ["T-plain" :next-step])))
+      (is (= :read-criteria (get-in ok ["E-plain" :next-step]))))))
 
-(deftest a-missing-producer-is-needs-interpretation-naming-the-want
+(deftest a-missing-producer-is-an-ask-naming-the-want
   ;; the only published pattern produces the IDENTIFY exit, already met, so
   ;; the constructor finds no order producing a new want and names the MAP
   ;; exit as the unproduced need
@@ -121,13 +125,14 @@
                    :patterns {:survey/other {:guard {:needs #{} :forbids #{}}
                                              :produces #{(want-of "M-shaped" shaped "IDENTIFY")}}}
                    :receipts {:survey/other {:request-id "request-test" :by :test}}}))
-    (let [ex (by-target (:exclusions (field l)))
-          e (get ex "M-shaped")]
-      (is (= :needs-interpretation (:reason e)) (pr-str e))
-      (is (= :no-supported-order (get-in e [:details :constructor-finding])))
+    (let [fld (field l)
+          e (get (by-target (:feasible fld)) "M-shaped")]
+      (is (= :ask-interpretation (:next-step e)) (pr-str e))
+      (is (= :no-supported-order (get-in e [:finding :kind])) "the constructor's finding kept as data")
       (is (= [{:want (:map-want l) :line 11
                :criterion "**Exit criterion:** the survey lists every caller."}]
-             (get-in e [:what-would-make-feasible :interpretations-for]))))))
+             (:interpretations-for e)))
+      (is (not-any? #(= "M-shaped" (:target %)) (:exclusions fld))))))
 
 (deftest x-t-a-a-feasible-target-removed-fails-the-check
   (let [fld (field (layout))
@@ -137,9 +142,11 @@
 
 (deftest x-t-c-an-exclusion-without-what-would-make-feasible-fails-the-check
   (let [fld (field (layout))
-        bare (update fld :exclusions (fn [xs] (mapv #(if (= "T-plain" (:target %)) (dissoc % :what-would-make-feasible) %) xs)))]
-    (is (= [{:failure :exclusion-without-what-would-make-feasible :targets ["T-plain"]}]
+        bare (update fld :exclusions (fn [xs] (mapv #(if (= "M-mapping" (:target %)) (dissoc % :what-would-make-feasible) %) xs)))
+        stepless (update fld :feasible (fn [xs] (mapv #(if (= "T-plain" (:target %)) (dissoc % :next-step) %) xs)))]
+    (is (= [{:failure :exclusion-without-what-would-make-feasible :targets ["M-mapping"]}]
            (tf/check-field bare)))
+    (is (= [{:failure :feasible-without-next-step :targets ["T-plain"]}] (tf/check-field stepless)))
     (is (seq (tf/check-field (assoc fld :chosen "M-shaped"))) "a step-1 field names no choice")))
 
 (deftest live-field-futon2-7a5f6c0b

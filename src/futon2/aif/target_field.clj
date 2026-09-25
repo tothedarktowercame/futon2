@@ -7,15 +7,16 @@
                mission and ticket enumerators (mission-registry, still in
                src, not called by the judge since 5d55e7a0) and an excursion
                enumerator on the same shape, over M-, T- and E- objects.
-  :feasible    targets in the constructor's support: its support step
-               (interpretation-construction/support, the constructor before
-               any G) returns at least one plan over the target's published
-               interpretations. Feasibility is support, not a G comparison
-               (E-outer-loop O3).
-  :exclusions  every other considered target, with a typed :reason and
-               :what-would-make-feasible.
-
-  Exclusion reasons, in the order they are tested:
+  :feasible    every considered work target: a lifecycle-shaped mission, a
+               ticket or an excursion, readable at HEAD. An owner wrote it
+               down, so it can be done; each entry carries the machine's
+               :next-step for it: :read-criteria, :ask-interpretation
+               (naming the wants and criterion lines), :observe (naming the
+               tokens), :construct (the constructor's finding as data) or
+               :ready (the constructor's support step,
+               interpretation-construction/support, before any G, has a
+               plan).
+  :exclusions  non-targets only, with :reason and :what-would-make-feasible:
     :not-lifecycle-shaped   an M- object without the mission-lifecycle form
                             (futon4/holes/mission-lifecycle.md, Conventions):
                             a Status line and at least one `## ` heading
@@ -23,13 +24,8 @@
                             not missions and are not tested against it (no
                             form is defined for them).
     :text-unreadable        the file is not at HEAD of its repository.
-    :needs-reading          no criteria in a recognised form: the flight's
-                            read step would ask a seat for them.
-    :want-already-observed  every want reads true.
-    :needs-interpretation   an open want no published interpretation
-                            produces (no seat is called here).
-    otherwise the constructor's own typed refusal (:observation-required,
-    :no-supported-order, :search-budget-exhausted, ...).
+  Nothing else excludes: what the machine still has to do for a target is
+  its :next-step, never a reason it cannot be done.
 
   Reads only: git show at HEAD, the published interpretation store, the
   declared cascade sources. Writes nothing."
@@ -117,6 +113,13 @@
   (cond-> {:target (:target t) :kind (:kind t) :reason reason :what-would-make-feasible wwmf}
     details (assoc :details details)))
 
+(defn- step
+  "A feasible target with the machine's NEXT-STEP for it and what that step
+  works on; FINDING is the constructor's or reader's typed finding, kept as
+  data."
+  [t next-step & [detail]]
+  (merge {:target (:target t) :kind (:kind t) :next-step next-step} detail))
+
 (defn- open-wants [wants universe] (vec (remove #(true? (get universe %)) wants)))
 
 (defn- named-wants
@@ -129,26 +132,26 @@
 
 (defn- unobserved [wants universe] (vec (remove #(boolean? (get universe %)) wants)))
 
-(defn- constructor-exclusion [t r wants universe cbt]
+(defn- constructor-step [t r wants universe cbt]
   (let [open (set (open-wants wants universe))
         unproduced (vec (sort-by pr-str (distinct (for [f (:findings r)
                                                         :when (and (= :unproduced-need (:kind f)) (open (:token f)))]
                                                     (:token f)))))]
-    (case (:kind r)
-      :observation-required
-      (exclusion t :observation-required {:observations-for (named-wants (:tokens r) cbt)
-                                          :via "a checkable locator per token, observed at click time"})
-      :no-supported-order
-      (if (seq unproduced)
-        (exclusion t :needs-interpretation {:interpretations-for (named-wants unproduced cbt)
-                                            :via "an interpretation request per want (the flight's ask step)"}
-                   {:constructor-finding :no-supported-order :findings (:findings r)
-                    :unobserved (unobserved wants universe)})
-        (exclusion t :no-supported-order {:constructor-findings (:findings r)}))
-      (exclusion t (:kind r) {:constructor-refusal (dissoc r :candidates :status)}))))
+    (cond
+      (= :observation-required (:kind r))
+      (step t :observe {:observations-for (named-wants (:tokens r) cbt)
+                        :finding (dissoc r :candidates :status)})
+      (and (= :no-supported-order (:kind r)) (seq unproduced))
+      (step t :ask-interpretation {:interpretations-for (named-wants unproduced cbt)
+                                   :unobserved (unobserved wants universe)
+                                   :finding (dissoc r :candidates :status)})
+      :else
+      (step t :construct {:finding (dissoc r :candidates :status)}))))
 
 (defn assess
-  "Feasible entry or exclusion for one considered target T.
+  "One considered target T: an exclusion when T is not a work target (an M-
+  file without the lifecycle form, a file not at HEAD), else a feasible entry
+  carrying the machine's :next-step for it.
   OPTS: :store :sources :code-root, and for tests :read-text / :observe."
   [{:keys [store sources code-root read-text observe]} t]
   (let [read (or read-text (fn [root repo path] (mc/read-mission root repo path)))
@@ -175,9 +178,8 @@
             wants (:wants cw)]
         (cond
           (empty? wants)
-          (exclusion t :needs-reading
-                     {:reading (if (get-in src [:readings-needed :criteria?]) :criteria :criteria-or-coverage)
-                      :via "the flight's read step (a seat names the criteria, each cued to the text)"})
+          (step t :read-criteria
+                {:finding {:kind (if (get-in src [:readings-needed :criteria?]) :criteria-not-stated :no-wants)}})
           :else
           (let [view (fr/target-view store f cw sources)
                 target (:target t)
@@ -186,12 +188,13 @@
                 patterns (get-in view [:interpretations target :patterns])]
             (cond
               (empty? open)
-              (exclusion t :want-already-observed {:a-want-not-yet-observed :none-stated
-                                                   :note "every stated want reads true at HEAD"})
+              ;; the owner lists it live and every stated want reads true:
+              ;; what remains is reading what the text still asks for
+              (step t :read-criteria {:finding {:kind :want-already-observed :wants wants}})
               (empty? patterns)
-              (exclusion t :needs-interpretation {:interpretations-for (named-wants open (:criteria-by-token src))
-                                                  :via "an interpretation request per want (the flight's ask step)"}
-                         {:unobserved (unobserved open universe)})
+              (step t :ask-interpretation {:interpretations-for (named-wants open (:criteria-by-token src))
+                                           :unobserved (unobserved open universe)
+                                           :finding {:kind :no-published-interpretation}})
               :else
               (let [r (ic/support {:target target :want wants :observation universe
                                    :interpretations patterns
@@ -200,11 +203,8 @@
                                    :horizon (:value (wm/resolve-cascade-horizon view [target]))
                                    :move-cost (:value wm/construction-move-cost)})]
                 (if (= :supported (:status r))
-                  (cond-> {:target target :kind (:kind t)
-                           :support (count (:family r))
-                           :open-wants open}
-                    shape (assoc :shape (select-keys shape [:phase-exits :verdict-lines])))
-                  (constructor-exclusion t r wants universe (:criteria-by-token src)))))))))))
+                  (step t :ready {:support (count (:family r)) :open-wants open})
+                  (constructor-step t r wants universe (:criteria-by-token src)))))))))))
 
 (defn target-field
   "`{:considered [...] :feasible [...] :exclusions [...]}` over LOADED."
@@ -213,12 +213,15 @@
         assessed (for [t cs]
                    (try (assess opts t)
                         (catch Exception e
-                          (exclusion t :assembly-refused
-                                     {:refusal (or (ex-data e) {:message (.getMessage e)})
-                                      :via "the refusal names what the assembly lacked"}))))]
+                          (step t :construct {:finding {:kind :assembly-refused
+                                                        :refusal (or (ex-data e) {:message (.getMessage e)})}}))))]
     {:considered cs
      :feasible (vec (remove :reason assessed))
      :exclusions (vec (filter :reason assessed))}))
+
+(def next-steps
+  "What the machine does next for a feasible target."
+  #{:read-criteria :ask-interpretation :observe :construct :ready})
 
 (defn check-field
   "Wₜ's partition half for a step-1 field (no :chosen): every considered
@@ -238,6 +241,9 @@
       (seq (filter #(> (val %) 1) freq)) (conj {:failure :listed-twice
                                                 :targets (vec (keys (filter #(> (val %) 1) freq)))})
       (seq (remove #(keyword? (:reason %)) exclusions)) (conj {:failure :exclusion-without-reason})
+      (seq (remove #(next-steps (:next-step %)) feasible))
+      (conj {:failure :feasible-without-next-step
+             :targets (vec (map :target (remove #(next-steps (:next-step %)) feasible)))})
       (seq (remove #(seq (:what-would-make-feasible %)) exclusions))
       (conj {:failure :exclusion-without-what-would-make-feasible
              :targets (vec (map :target (remove #(seq (:what-would-make-feasible %)) exclusions)))}))))
@@ -248,6 +254,9 @@
    :excluded (count exclusions)
    :considered-by-kind (frequencies (map :kind considered))
    :excluded-by-reason (into (sorted-map) (frequencies (map :reason exclusions)))})
+
+(defn next-step-counts [{:keys [feasible]}]
+  (into (sorted-map) (frequencies (map :next-step feasible))))
 
 (defn- head-sha [code-root repo]
   (str/trim (:out (sh/sh "git" "-C" (str code-root "/" repo) "rev-parse" "HEAD"))))
@@ -266,6 +275,7 @@
         repos (sort (distinct (keep :repo (:considered field))))]
     (pp/pprint {:decision {:target-field field}
                 :counts (counts field)
+                :next-steps (next-step-counts field)
                 :check (check-field field)
                 :read {:code-root code-root
                        :mission-source :file-scan
