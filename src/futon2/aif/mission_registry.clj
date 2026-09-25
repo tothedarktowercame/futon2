@@ -658,3 +658,55 @@
          :ticket-path (:path t) :open-hole-count 1
          :rationale (str "ticket substrate: " (:title t))}))
     (proposer-id [_] :ticket-enumerator)))
+
+;; Excursions (E-*.md), enumerated on the mission shape: same primary-checkout
+;; fence, same Status-line classification, same dedupe. The pre-H5b loop had
+;; no excursion enumerator; the three work-target kinds are M-, E- and T-
+;; (PROOF-2a Clause T), so this is the third, built like the other two.
+(def ^:private excursion-path-pattern
+  #".*/holes/(?:excursions/)?(E-[^/]+)\.md$")
+
+(defn- excursion-doc->entry [path]
+  (let [lines (str/split-lines (slurp path))
+        id (second (re-matches excursion-path-pattern path))
+        status-line (some (fn [line] (when-let [[_ status] (re-matches status-line-pattern line)] status))
+                          (take 20 lines))]
+    {:id id :kind :excursion :path path
+     :title (mission-title-from-lines id lines)
+     :status-line status-line
+     :status-class (classify-status status-line)}))
+
+(defn load-excursions
+  "Primary-checkout `<repo>/holes/E-*.md` and `<repo>/holes/excursions/E-*.md`
+  under CODE-ROOT, fenced and deduplicated as `load-missions-from-files` is."
+  ([] (load-excursions default-code-root))
+  ([code-root]
+   {:excursions
+    (->> (or (.listFiles (io/file code-root)) (make-array File 0))
+         (filter #(.isDirectory ^File %))
+         (filter mission-scan-repo?)
+         (mapcat #(vector (io/file % "holes") (io/file % "holes" "excursions")))
+         (filter #(.isDirectory ^File %))
+         (mapcat #(or (.listFiles ^File %) (make-array File 0)))
+         (filter #(.isFile ^File %))
+         (map #(.getAbsolutePath ^File %))
+         (filter #(re-matches excursion-path-pattern %))
+         (remove sandbox-path?)
+         (remove non-primary-path?)
+         (sort-by (juxt count identity))
+         (map excursion-doc->entry)
+         dedupe-by-id vec)}))
+
+(defn live-excursion? [excursion] (live-mission? excursion))
+
+(def excursion-enumerator-proposer
+  "One :advance-excursion candidate per live excursion in (:excursions state),
+  shaped like the mission and ticket enumerators' candidates."
+  (reify ap/ActionProposer
+    (propose [_ state]
+      (for [e (:excursions state) :when (live-excursion? e)]
+        {:type :advance-excursion :target (:id e) :weight 1.0
+         :excursion-path (:path e)
+         :rationale (str "excursion substrate: " (:title e)
+                         " [" (name (:status-class e)) "]")}))
+    (proposer-id [_] :excursion-enumerator)))

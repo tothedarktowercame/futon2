@@ -98,40 +98,25 @@
            :ordering {:move-id :order-by-need :before order :after precedence
                       :status (if (= :no-move (:status ordering)) :already-ordered :reordered)}})))))
 
-(defn construct
-  "Return {:status :constructed :candidates [...]} or a typed refusal.
-
-  Inputs: :target, nonempty :want, :observation {token boolean},
-  :interpretations {id {:guard {:needs #{} :forbids #{}} :produces #{}}},
-  :interpretation-receipts {id nonempty-map}, :horizon, :move-cost,
-  :budget {:max-moves n :max-expansions n}, and :evaluate-g (candidate -> G).
-  G is injected unchanged; candidates carry :patterns with ids and :precedence.
-  Search bounds are explicit; exhausting search refuses rather than claiming
-  a complete family. Only support sets minimal among the reachable plans remain.
-
-  Partial wants (D15): a plan is admissible when it newly produces at least
-  one want; the empty plan never constructs. Each candidate's
-  :construction-receipt names what it leaves as :unreached-wants
-  [{:token ... :reason :no-producer|:beyond-horizon}] and the candidate
-  carries the target's full :want so the judge's G scores partial plans
-  against all wants. Full-want plans come first in :candidates. Unreached
-  wants are never dropped from the target.
-
-  This slice requires fully observed tokens. :observation-required names missing
-  or unknown tokens for an upstream measurement/check step; it never treats them
-  as false or claims that the target is impossible. No observation/locator store
-  or interpreter is called. Receipts report :token-set-not-supplied to the existing
-  construction policy: supplying observation locators/check policies is later work."
+(defn support
+  "The constructor's support step, before any G: the family of minimal plans
+  over the GIVEN interpretations that each newly produce at least one want,
+  within HORIZON and the search budget. Returns {:status :supported :family
+  [...] :findings [...] :expanded n :tokens #{...} :established #{...}} or the
+  same typed refusal `construct` gives (:observation-required,
+  :interpretation-receipt-missing, :want-already-observed,
+  :search-budget-exhausted, :no-supported-order). `construct` is this step
+  followed by the G comparison, so a target is in the support exactly when
+  construct gets past :no-supported-order; whether G then takes a move is
+  scoring, not support."
   [{:keys [target want observation interpretations interpretation-receipts
-           budget horizon move-cost evaluate-g]}]
+           budget horizon move-cost]}]
   (cond
-    (not (and (map? budget) (integer? (:max-moves budget)) (<= 0 (:max-moves budget))
-              (pos-int? (:max-expansions budget)))) (refuse :budget-required)
+    (not (and (map? budget) (pos-int? (:max-expansions budget)))) (refuse :budget-required)
     (not (pos-int? horizon)) (refuse :horizon-required)
     (not (and target (coll? want) (seq want) (map? observation)
               (map? interpretations) (seq interpretations)
-              (every? pattern? (vals interpretations))
-              (finite? move-cost) (<= 0 move-cost) (fn? evaluate-g)))
+              (every? pattern? (vals interpretations))))
     (refuse :invalid-input)
     :else
     (let [tokens (set/union (set want) (union-of (fn [p] (set/union (:produces p)
@@ -164,7 +149,51 @@
                   findings (into (:findings search) (keep :finding compiled))]
               (if (empty? family)
                 (refuse :no-supported-order {:findings findings :expanded (:expanded search)})
-                (let [move (fn [current]
+                {:status :supported :family family :findings findings :compiled compiled
+                 :search search :expanded (:expanded search)
+                 :tokens tokens :established established}))))))))
+
+(defn construct
+  "Return {:status :constructed :candidates [...]} or a typed refusal.
+
+  Inputs: :target, nonempty :want, :observation {token boolean},
+  :interpretations {id {:guard {:needs #{} :forbids #{}} :produces #{}}},
+  :interpretation-receipts {id nonempty-map}, :horizon, :move-cost,
+  :budget {:max-moves n :max-expansions n}, and :evaluate-g (candidate -> G).
+  G is injected unchanged; candidates carry :patterns with ids and :precedence.
+  Search bounds are explicit; exhausting search refuses rather than claiming
+  a complete family. Only support sets minimal among the reachable plans remain.
+
+  Partial wants (D15): a plan is admissible when it newly produces at least
+  one want; the empty plan never constructs. Each candidate's
+  :construction-receipt names what it leaves as :unreached-wants
+  [{:token ... :reason :no-producer|:beyond-horizon}] and the candidate
+  carries the target's full :want so the judge's G scores partial plans
+  against all wants. Full-want plans come first in :candidates. Unreached
+  wants are never dropped from the target.
+
+  This slice requires fully observed tokens. :observation-required names missing
+  or unknown tokens for an upstream measurement/check step; it never treats them
+  as false or claims that the target is impossible. No observation/locator store
+  or interpreter is called. Receipts report :token-set-not-supplied to the existing
+  construction policy: supplying observation locators/check policies is later work."
+  [{:keys [target want observation interpretations interpretation-receipts
+           budget horizon move-cost evaluate-g] :as input}]
+  (cond
+    (not (and (map? budget) (integer? (:max-moves budget)) (<= 0 (:max-moves budget))
+              (pos-int? (:max-expansions budget)))) (refuse :budget-required)
+    (not (pos-int? horizon)) (refuse :horizon-required)
+    (not (and target (coll? want) (seq want) (map? observation)
+              (map? interpretations) (seq interpretations)
+              (every? pattern? (vals interpretations))
+              (finite? move-cost) (<= 0 move-cost) (fn? evaluate-g)))
+    (refuse :invalid-input)
+    :else
+    (let [supported (support input)]
+      (if (not= :supported (:status supported))
+        supported
+        (let [{:keys [family findings compiled search tokens established]} supported
+              move (fn [current]
                              (if (= family current)
                                {:status :no-move :move-id :compose-by-need :reason :family-already-constructed}
                                {:move-id :compose-by-need :proposed-family family :cost move-cost}))
@@ -213,8 +242,17 @@
                                                 :kind :cascade-candidate :target target
                                                 :want (vec want)
                                                 :construction-receipt
-                                                (assoc receipt :unreached-wants (:unreached-wants c))
+                                                (assoc receipt
+                                                       :unreached-wants (:unreached-wants c)
+                                                       ;; clause 0: this
+                                                       ;; candidate's
+                                                       ;; containment order
+                                                       ;; over units (or the
+                                                       ;; typed
+                                                       ;; :cyclic-containment
+                                                       ;; refusal)
+                                                       :order (construction/containment-order c))
                                                 :interpretation-receipts
                                                 (select-keys interpretation-receipts (:precedence c))))
                                        (sort-by (fn [c] (if (seq (:unreached-wants c)) 1 0))
-                                                (:family result)))}))))))))))
+                                                (:family result)))}))))))
