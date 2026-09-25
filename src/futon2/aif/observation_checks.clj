@@ -356,6 +356,25 @@
   [command]
   (boolean (and (sequential? command) (seq command))))
 
+(defn results-verdict
+  "The run record's counts, read by shape: :clean when a Clojure run's
+  :failures and :errors are both zero or a Lean run's :error-count and
+  :sorry-count are both zero; :failed when a pair is present but is not two
+  zeros (a nonzero or a typed-none count); :unknown when none of the four
+  keys is present (a typed absence on the record, not a failure)."
+  [{:keys [failures errors error-count sorry-count] :as results}]
+  (let [clj? (or (contains? results :failures) (contains? results :errors))
+        lean? (or (contains? results :error-count) (contains? results :sorry-count))
+        zero-num? (fn [x] (and (number? x) (zero? x)))]
+    (cond
+      (and clj? (zero-num? failures) (zero-num? errors)) :clean
+      (and lean? (zero-num? error-count) (zero-num? sorry-count)) :clean
+      ;; a present pair that is not two zeros is a failure, including a
+      ;; typed-none count ({:record/type :none}: the run's output did not
+      ;; parse, so it cannot be called clean)
+      (or clj? lean?) :failed
+      :else :unknown)))
+
 (defn check-registered-run
   "C8: the registry holds a warrant for NAMESPACE whose pinned code-path and
   test-path shas are the shas of those files NOW, whose postcheck matched, and
@@ -425,7 +444,7 @@
                 (let [record (decode-record entry-id entry)]
                   (if (:status record) (assoc record :evidence evidence)
                       (let [ran (recorded-namespace (:command record))
-                            {:keys [failures errors] :as results} (:results record)
+                            results (:results record)
                             paths (into (path-comparison root (:code-files record) :code)
                                         (path-comparison root (:test-files record) :test))
                             moved (filterv (complement :matched?) paths)
@@ -434,7 +453,8 @@
                                             :postcheck (:postcheck record)
                                             :warrant? (:warrant? record)
                                             :run-counts (select-keys results
-                                                                     [:tests :assertions :failures :errors])
+                                                                     [:tests :assertions :failures :errors
+                                                                      :error-count :sorry-count :jobs])
                                             :paths paths
                                             :moved-paths (mapv :path moved))
                             reason (cond
@@ -446,8 +466,16 @@
                                      :command-mismatch
                                      (not (true? (:warrant? record))) :not-a-warrant
                                      (not= :matched (get-in record [:postcheck :status])) :postcheck-not-matched
-                                     (not (and (number? failures) (zero? failures)
-                                               (number? errors) (zero? errors))) :run-recorded-failures
+                                     ;; the record's counts by shape: a Clojure run
+                                     ;; carries :failures/:errors, the registry's Lean
+                                     ;; arm carries :error-count/:sorry-count. A record
+                                     ;; with neither is a typed unknown, never a
+                                     ;; failure: before this (claude-8 review of
+                                     ;; b9eae2d6, 2026-09-25) the first live gate run
+                                     ;; looked up by command, a green lake build, read
+                                     ;; :run-recorded-failures because :failures was nil.
+                                     (= :unknown (results-verdict results)) :results-shape-unknown
+                                     (= :failed (results-verdict results)) :run-recorded-failures
                                      (seq moved) :content-moved)]
                         {:observed (nil? reason) :check :C8
                          :evidence (cond-> evidence reason (assoc :reason reason))}))))))))))

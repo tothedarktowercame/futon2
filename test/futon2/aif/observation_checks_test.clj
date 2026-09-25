@@ -418,3 +418,33 @@
     (is (= 3200 (:scanned marker)))
     (is (= 3200 (:registry-entries marker)))
     (is (true? (:complete? marker)))))
+
+(deftest c8-reads-a-run-record-s-counts-by-shape
+  ;; review bad case (claude-8, 2026-09-25, of b9eae2d6): the first live gate
+  ;; run looked up by command, a green lake build, read :run-recorded-failures
+  ;; because the Lean arm records :error-count/:sorry-count and :failures was
+  ;; nil. Absence is not a failure: counts are read by shape, and a record
+  ;; with neither shape is a typed unknown.
+  (is (= :clean (oc/results-verdict {:failures 0 :errors 0})))
+  (is (= :clean (oc/results-verdict {:error-count 0 :sorry-count 0 :jobs 8501})))
+  (is (= :failed (oc/results-verdict {:failures 1 :errors 0})))
+  (is (= :failed (oc/results-verdict {:error-count 0 :sorry-count 2})))
+  (is (= :unknown (oc/results-verdict {:exit 0})))
+  (is (= :unknown (oc/results-verdict nil)))
+  (let [lookup (fn [record]
+                 (let [{:keys [entry-id entry]} (stub-record record)]
+                   (binding [oc/*registry-latest* (fn [_ _] {:entry-id entry-id :resolved-by :command-lookup})
+                             oc/*registry-entry* (fn [_ id] (if (= id entry-id) entry :absent))]
+                     (oc/check-registered-run {:repo "futon2" :command (:command record)}))))
+        lean (assoc (run-record) :command ["lake" "build" "DarkTower.WarMachine.X"]
+                    :results {:exit 0 :error-count 0 :sorry-count 0 :jobs 8501 :duration-ms 3389})]
+    ;; a green Lean build observes true and its counts are carried
+    (let [r (lookup lean)]
+      (is (true? (:observed r)) (pr-str (:evidence r)))
+      (is (= {:error-count 0 :sorry-count 0 :jobs 8501} (get-in r [:evidence :run-counts]))))
+    ;; a Lean build with a sorry is a recorded failure
+    (is (= :run-recorded-failures
+           (get-in (lookup (assoc-in lean [:results :sorry-count] 1)) [:evidence :reason])))
+    ;; a record with neither shape is a typed unknown, not a failure
+    (is (= :results-shape-unknown
+           (get-in (lookup (assoc lean :results {:exit 0})) [:evidence :reason])))))
