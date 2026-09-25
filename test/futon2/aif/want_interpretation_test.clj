@@ -146,13 +146,10 @@
                        :reason "ARGUE closes only through DOCUMENT's outsider account; its negative finding is retained"})
 
 (defn- response [id]
-  ;; :forces is supplied here, not from the fixture: the pinned proposal
-  ;; (futon2 78439f58) predates the grammar's :forces requirement
-  ;; (H-INTERP-D gap 2) and carries none, so as recorded it would now be
-  ;; refused :forces-required. Reported, not edited.
-  (assoc (merge {:pattern id :receipt (get-in proposals [:interpretation-receipts id])}
-                (get-in proposals [:patterns id]))
-         :forces "test-supplied pressure; the pinned proposal predates the :forces requirement"))
+  ;; the pinned proposal (futon2 78439f58) carries no :forces and validates
+  ;; as recorded: :forces is an optional note, never required
+  (merge {:pattern id :receipt (get-in proposals [:interpretation-receipts id])}
+         (get-in proposals [:patterns id])))
 
 (defn- req [want] {:target "M-futon-seams" :want {:token want}})
 
@@ -206,7 +203,7 @@
 
 ;; ---------------------------------------------------------------------------
 ;; H-INTERP-D gaps 1 and 2: one grammar — hand-unit keys normalised at
-;; intake, :forces required.
+;; intake; :forces optional (carried as a note when supplied, never required).
 
 (def placenta-unit
   "claude-1's gauntlet/placenta-transfer hand unit, quoted verbatim from
@@ -252,11 +249,16 @@
            (get-in v [:interpretation :gauntlet/placenta-transfer :forces]))
         "the interpretation record carries the forces")))
 
-(deftest a-reply-without-forces-is-refused
+(deftest a-reply-without-forces-validates
+  ;; Joe, 2026-09-25 (relayed by claude-10): a required field that is only
+  ;; tested non-blank is red tape; the receipt's :reading and source sha are
+  ;; the application statement and its pin. Nothing is refused for a
+  ;; missing :forces.
   (let [v (validate-hand (-> placenta-unit (dissoc :forces)
                              (assoc :pattern :gauntlet/placenta-transfer)))]
-    (is (= :rejected (:status v)))
-    (is (some #(= :forces-required (:reason %)) (:reasons v)))))
+    (is (= :valid (:status v)) (pr-str (:reasons v)))
+    (is (not-any? #(= :forces-required (:reason %)) (:reasons v)))
+    (is (nil? (get-in v [:interpretation :gauntlet/placenta-transfer :forces])))))
 
 (deftest conflicting-key-spellings-are-refused-not-merged
   (let [v (validate-hand (-> placenta-unit

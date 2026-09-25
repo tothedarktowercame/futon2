@@ -220,8 +220,7 @@
 
   Checks, in order, all reported: receipt keys normalised (:scope →
   :scope-limit, :author → :by; both spellings with different values is a
-  conflict, never a merge); :forces present (the pressure the pattern
-  answers — H-INTERP-D gap 2); id canonical (the loader's own rule);
+  conflict, never a merge); id canonical (the loader's own rule);
   receipt names the pattern's library file with matching sha256 and states
   reading, scope-limit and by; :produces contains the requested want; guard
   tokens are known; owner CONSTRAINTS hold; the constructor, with this
@@ -245,6 +244,12 @@
             interp (cond-> {:guard {:needs (set (get-in response [:guard :needs]))
                                     :forbids (set (get-in response [:guard :forbids]))}
                             :produces (set (:produces response))}
+                     ;; :forces, when a reply supplies it, is carried as an
+                     ;; unchecked note. It is NOT required: a required
+                     ;; field that is only tested non-blank proves nothing
+                     ;; about the reading (Joe, 2026-09-25, relayed by
+                     ;; claude-10); :reading and the source sha are the
+                     ;; application statement and its pin.
                      (some? (:forces response)) (assoc :forces (:forces response)))
             patterns (get-in sources [:interpretations target :patterns])
             known (set (concat (keys (get-in sources [:universes target]))
@@ -252,8 +257,6 @@
                                (mapcat :produces (vals patterns))))
             static (vec (concat
                          (:conflicts norm-receipt)
-                         (when (str/blank? (str (:forces response)))
-                           [{:reason :forces-required}])
                          (when-not id [{:reason :invalid-pattern-id :value (:pattern response)}])
                          (when (and id (not (:conflicts norm-receipt)))
                            (receipt-reasons code-root id (:receipt response)))
