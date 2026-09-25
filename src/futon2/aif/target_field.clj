@@ -17,12 +17,11 @@
 
   Exclusion reasons, in the order they are tested:
     :not-lifecycle-shaped   an M- object without the mission-lifecycle form
-                            (futon4/holes/mission-lifecycle.md): a Status
-                            line, `**Exit criterion:**` paragraphs under
-                            lifecycle phase headings, verdict lines. The
-                            test is mission-criteria's reader; E- and T-
-                            objects are not missions and are not tested
-                            against it (no form is defined for them).
+                            (futon4/holes/mission-lifecycle.md, Conventions):
+                            a Status line and at least one `## ` heading
+                            naming a lifecycle phase. E- and T- objects are
+                            not missions and are not tested against it (no
+                            form is defined for them).
     :text-unreadable        the file is not at HEAD of its repository.
     :needs-reading          no criteria in a recognised form: the flight's
                             read step would ask a seat for them.
@@ -56,10 +55,13 @@
 
 (defn lifecycle-shape
   "The lifecycle form of mission TEXT (id MISSION-ID) whose registry
-  Status line is STATUS-LINE: shaped when it has a Status line, at least one
-  `**Exit criterion:**` paragraph under a lifecycle phase heading, and at
-  least one of those carrying a verdict line. :phase-headings counts `## `
-  headings naming a lifecycle phase, recorded but not part of the test."
+  Status line is STATUS-LINE, as futon4/holes/mission-lifecycle.md's
+  Conventions define it: a Status line at the top and phases as appended
+  checkpoints, so shaped when there is a Status line and at least one `## `
+  heading naming a lifecycle phase (`INSTANTIATE-7a` counts). :phase-exits
+  (`**Exit criterion:**` paragraphs under a phase heading) and :verdict-lines
+  are the criteria reader's forms, recorded as data and not tested: a shaped
+  mission without them waits on the read step (:needs-reading)."
   [mission-id text status-line]
   (let [exits (filter #(and (= :phase-exit (:kind %)) (lifecycle-phases (phase-name (:phase %))))
                       (mc/criteria mission-id (str text)))
@@ -67,17 +69,15 @@
                        :let [[_ h] (re-matches #"^##\s+(.*)$" l)]
                        :when (and h (lifecycle-phases (phase-name h)))]
                    (phase-name h))
-        parts {:status-line (some? status-line)
-               :phase-exits (count exits)
-               :verdict-lines (count (filter :verdict exits))}
         missing (cond-> []
-                  (not (:status-line parts)) (conj :status-line)
-                  (zero? (:phase-exits parts)) (conj :phase-exits)
-                  (zero? (:verdict-lines parts)) (conj :verdict-lines))]
-    (assoc parts
-           :phase-headings (count headings)
-           :lifecycle-shaped? (empty? missing)
-           :missing missing)))
+                  (nil? status-line) (conj :status-line)
+                  (empty? headings) (conj :phase-headings))]
+    {:status-line (some? status-line)
+     :phase-headings (count headings)
+     :phase-exits (count exits)
+     :verdict-lines (count (filter :verdict exits))
+     :lifecycle-shaped? (empty? missing)
+     :missing missing}))
 
 ;; ---------------------------------------------------------------------------
 ;; Enumeration

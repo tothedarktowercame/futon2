@@ -46,6 +46,10 @@
     (doseq [r ["futon3c" "futon2"]] (.mkdirs (io/file root r ".git")))
     (put! root "futon3c/holes/missions/M-autoclock-in.md" autoclock)
     (put! root "futon3c/holes/missions/M-shaped.md" shaped)
+    (put! root "futon3c/holes/missions/M-mapping.md"
+          "# M-mapping\n\n**Status:** MAPPING (2026-09-25)\n\n## MAPPING\n\nprose\n\n## The tension\n\nprose\n")
+    (put! root "futon3c/holes/missions/M-nostatus.md"
+          "# M-nostatus\n\n## IDENTIFY\n\nprose\n\n## INSTANTIATE-7a\n\nprose\n")
     (put! root "futon3c/holes/tickets/T-plain.md" "# T-plain\n\n**Status:** OPEN\n\nSome prose, no criteria.\n")
     (put! root "futon3c/holes/excursions/E-plain.md" "# E-plain\n\nStatus: OPEN\n")
     (put! root "futon3c/holes/excursions/E-done.md" "# E-done\n\nStatus: COMPLETE (2026-09-01)\n")
@@ -72,7 +76,8 @@
   (let [l (layout) fld (field l)
         ex (by-target (:exclusions fld))
         ok (by-target (:feasible fld))]
-    (is (= #{"M-autoclock-in" "M-shaped" "M-f11-find-production-successor" "T-plain" "E-plain"}
+    (is (= #{"M-autoclock-in" "M-shaped" "M-f11-find-production-successor" "T-plain" "E-plain"
+             "M-mapping" "M-nostatus"}
            (set (map :target (:considered fld))))
         "a complete excursion is not proposed")
     (is (= {"E-plain" :excursion "T-plain" :ticket "M-shaped" :mission}
@@ -83,19 +88,26 @@
       (is (= #{"M-shaped"} (set (keys ok))))
       (is (= [(:map-want l)] (get-in ok ["M-shaped" :open-wants])))
       (is (= 1 (get-in ok ["M-shaped" :support]))))
-    (testing "M-f11 is excluded as not lifecycle-shaped"
+    (testing "M-f11 is excluded as not lifecycle-shaped: no phase heading"
       (is (= :not-lifecycle-shaped (get-in ex ["M-f11-find-production-successor" :reason])))
-      (is (= [:phase-exits :verdict-lines]
+      (is (= [:phase-headings]
              (get-in ex ["M-f11-find-production-successor" :what-would-make-feasible :lifecycle-parts-missing]))))
-    (testing "M-autoclock-in is considered, its status read"
+    (testing "M-autoclock-in is considered, its status read, shaped, and waits on the read step"
       (let [c (first (filter #(= "M-autoclock-in" (:target %)) (:considered fld)))]
         (is (str/starts-with? (:status-line c) "INSTANTIATE-1 (first implementation, 2026-06-03)"))
         (is (= :unknown (:status-class c)))
-        (is (= :not-lifecycle-shaped (get-in ex ["M-autoclock-in" :reason])))
-        (is (= {:status-line true :phase-exits 0 :verdict-lines 0 :phase-headings 15}
-               (select-keys (get-in ex ["M-autoclock-in" :details :shape])
-                            [:status-line :phase-exits :verdict-lines :phase-headings]))
-            "phase headings but no exit criterion in the reader's form")))
+        (is (= :needs-reading (get-in ex ["M-autoclock-in" :reason])))
+        (is (= {:status-line true :phase-headings 15 :phase-exits 0 :verdict-lines 0
+                :lifecycle-shaped? true :missing []}
+               (tf/lifecycle-shape "M-autoclock-in" autoclock (:status-line c)))
+            "phase headings are the form; no exit criterion in the reader's form is recorded, not tested")))
+    (testing "headings that name no phase are not the form"
+      (is (= :not-lifecycle-shaped (get-in ex ["M-mapping" :reason])))
+      (is (= [:phase-headings] (get-in ex ["M-mapping" :what-would-make-feasible :lifecycle-parts-missing]))))
+    (testing "phase headings without a Status line are not the form"
+      (is (= :not-lifecycle-shaped (get-in ex ["M-nostatus" :reason])))
+      (is (= [:status-line] (get-in ex ["M-nostatus" :what-would-make-feasible :lifecycle-parts-missing])))
+      (is (= 2 (get-in ex ["M-nostatus" :details :shape :phase-headings])) "INSTANTIATE-7a counts"))
     (testing "a ticket with no criteria waits on the read step"
       (is (= :needs-reading (get-in ex ["T-plain" :reason]))))))
 
@@ -131,10 +143,15 @@
     (is (seq (tf/check-field (assoc fld :chosen "M-shaped"))) "a step-1 field names no choice")))
 
 (deftest live-field-futon2-7a5f6c0b
-  ;; the one live read (futon2 7a5f6c0b, futon3c 7466251c; heads recorded in
-  ;; the fixture): 495 considered, none feasible. Every live mission fails the
-  ;; stated lifecycle test; the only mission that meets it, M-futon-seams, is
-  ;; COMPLETE and so not proposed.
+  ;; the first live read, under the EARLIER lifecycle test (Status line,
+  ;; Exit criterion paragraphs, verdict lines), kept as its record: 495
+  ;; considered, none feasible. Every live mission failed that test; the only
+  ;; mission meeting it, M-futon-seams, is COMPLETE and so not proposed.
+  ;; "futon2 7a5f6c0b" names the shared working tree at that time, not the
+  ;; sha: 7a5f6c0b's interpretation_construction.clj carried kimi-2's then
+  ;; uncommitted containment-order call, landed at bfb05766, so from a clean
+  ;; checkout the namespace does not load at 7a5f6c0b..fc482415; the field
+  ;; calls only `support`, so the fixture's content is unaffected.
   (let [r (clojure.edn/read-string (slurp "test/fixtures/target-field/target-field@futon2-7a5f6c0b.edn"))
         f (get-in r [:decision :target-field])
         ex (by-target (:exclusions f))]
