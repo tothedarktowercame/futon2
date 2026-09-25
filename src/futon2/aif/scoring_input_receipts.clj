@@ -90,13 +90,26 @@
                                                  (= (:count p) (get-in receipt [:state :counts (:policy-key p)] 0))
                                                  (= (:alpha p) (get-in receipt [:state :alpha]))
                                                  (= (:samples p) (get-in receipt [:state :samples]))
-                                                 (or (= :absent (:status receipt))
+                                                 ;; an absent store read carries no snapshot;
+                                                 ;; an absent enactment fold carries the initial
+                                                 ;; state it consumed, so any snapshot is checked
+                                                 (or (and (= :absent (:status receipt))
+                                                          (nil? (:snapshot-edn receipt)))
                                                      (and (= (:sha256 receipt) (sha (:snapshot-edn receipt)))
                                                           (= (:state receipt) (edn/read-string (:snapshot-edn receipt))))))))
                                         occurrences)))
-                              (filter #(= :cascade-prior (get-in % [:habit-provenance :source])) candidates)))
+                              ;; the store (pre-drop records) and the enactment fold
+                              ;; (M-wm-wiring step 8) are checked the same way: the
+                              ;; consumed state is in the occurrence's receipt
+                              (filter #(#{:cascade-prior :enactment-fold}
+                                        (get-in % [:habit-provenance :source])) candidates)))
                :valid :invalid)
-     :errors errors}))
+     :errors errors
+     ;; a record whose selection read the legacy habit store predates step 8:
+     ;; it validates as it did, and says it is history
+     :history (if (some #(= :cascade-prior (get-in % [:habit-provenance :source])) candidates)
+                :pre-drop-store-read
+                :enactment-fold)}))
 
 (defn validate-record [record]
   (try (validate-record* record)

@@ -5,6 +5,7 @@
   action: two cascades sharing a first step outweigh, summed, one cascade
   that is the single most probable policy."
   (:require [clojure.edn :as edn]
+            [clojure.string]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.policy :as policy])
@@ -56,8 +57,12 @@
   ;; The fixture bytes are untouched; the typed values are pinned below and
   ;; in enacted-step-test.
   (let [d (decide roster)
-        proj (fn [m] (pr-str (update m :selection-law dissoc :candidate :enacted-steps)))]
-    (is (= (proj (edn/read-string (edn/read-string (slurp "test/fixtures/selection-law/row9-before@futon2-54e3c396.edn"))))
+        ;; :e-source (step 8, the enactment fold) joined after the capture too
+        proj (fn [m] (pr-str (update m :selection-law dissoc :candidate :enacted-steps :e-source)))]
+    ;; step 8's named drop: the habit provenance names the enactment fold
+    (is (= (proj (edn/read-string (clojure.string/replace
+                                   (edn/read-string (slurp "test/fixtures/selection-law/row9-before@futon2-54e3c396.edn"))
+                                   ":source :cascade-prior" ":source :enactment-fold")))
            (proj (edn/read-string (pr-str d)))))
     (is (every? #(= {:absent :no-scoring-belief} %) (vals (get-in d [:selection-law :enacted-steps]))))))
 

@@ -88,6 +88,58 @@
                          :scope :whole-menu}) ranked)
           (throw e))))))
 
+(defn attach-state
+  "E at the selector's joint-menu boundary from STATE, a cascade-prior state
+  already in hand (enactment-habit/fold's folded state), with the same masses
+  and the same whole-menu fallback as attach-habits; no store is read.
+  Provenance {:source SOURCE ...} names where the state came from."
+  [state ranked source]
+  (let [supplied? (some? state)
+        state (prior/coerce-state state)
+        views (mapv (comp policy-view :action) ranked)
+        ;; the habit read the run record keeps: what selection CONSUMED, in
+        ;; the slot the store read used to fill (scoring-input-receipts);
+        ;; the source changes, the slot does not (M-wm-wiring step 8)
+        text (pr-str state)
+        occurrence (when receipts/*habit-reads*
+                     (let [purpose (if (= :unspecified receipts/*habit-read-purpose*)
+                                     :selection-scoring receipts/*habit-read-purpose*)
+                           reads (swap! receipts/*habit-reads*
+                                        (fn [reads]
+                                          (conj reads
+                                                {:purpose purpose
+                                                 :receipt (cond-> {:status (if supplied? :present :absent)
+                                                                   :source source
+                                                                   :snapshot-edn text :sha256 (receipts/sha text)
+                                                                   :state state
+                                                                   :occurrence-index (count reads)}
+                                                            (not supplied?) (assoc :reason :no-enactment-fold))})))]
+                       (dec (count reads))))]
+    (try
+      (let [masses (prior/habit-masses state views)
+            keys (mapv prior/policy-key views)
+            _ (when occurrence
+                (swap! receipts/*habit-reads* assoc-in [occurrence :consumption]
+                       {:candidate-ids (mapv :action ranked) :policy-keys keys :masses masses}))]
+        (mapv (fn [entry key mass]
+                (assoc entry :habit mass
+                       :habit-provenance
+                       {:source source :policy-key key
+                        :count (get (:counts state) key 0)
+                        :alpha (:alpha state) :samples (:samples state)
+                        :multiplicity (get (frequencies keys) key)
+                        :unit :probability-mass}))
+              ranked keys masses))
+      (catch clojure.lang.ExceptionInfo e
+        (if (contains? #{:missing-policy-identity :mixed-pattern-id-types}
+                       (get-in (ex-data e) [:refusal :kind]))
+          (mapv #(assoc % :habit 1
+                        :habit-provenance
+                        {:source :neutral-fallback
+                         :reason (get-in (ex-data e) [:refusal :kind])
+                         :scope :whole-menu}) ranked)
+          (throw e))))))
+
 (defn- publish! [file state]
   (let [parent (.toPath (.getParentFile file))
         temporary (Files/createTempFile parent "cascade-prior-" ".edn"

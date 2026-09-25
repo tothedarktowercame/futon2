@@ -1,6 +1,6 @@
 (ns futon2.aif.scoring-input-receipts-test
   (:require [clojure.edn :as edn]
-            [clojure.test :refer [deftest is use-fixtures]]
+            [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.cascade-habit-store :as habit]
             [futon2.aif.cascade-problems :as problems]
             [futon2.aif.declaration-reads-test :as runner-fixture]
@@ -46,8 +46,20 @@
        (is (= :valid (:status (receipts/validate-record second-record))))
        (is (= [:selection-scoring :joint-selection] (mapv :purpose (get-in second-record [:habit-reads :occurrences]))))
        (is (= 1 (:occurrence-index receipt)))
-       (is (= 1 (get-in receipt [:state :samples])))
-       (is (= 1 (get-in next-receipt [:state :samples])))
+       ;; M-wm-wiring step 8: the read names what selection consumed, the
+       ;; enactment fold, here its typed absence (the tick passes none); the
+       ;; store written above (record-selection!, 1 sample) is not read
+       (is (= {:status :absent :source :enactment-fold :reason :no-enactment-fold}
+              (select-keys receipt [:status :source :reason])))
+       (is (= 0 (get-in receipt [:state :samples])))
+       (is (= 0 (get-in next-receipt [:state :samples])))
+       (is (= :enactment-fold (:history (receipts/validate-record second-record))))
+       (is (every? #(= :enactment-fold (get-in % [:habit-provenance :source])) candidates))
+       (testing "a pre-drop record (E from the legacy store) is history, not invalid"
+         (let [pre-drop (update-in second-record [:decision :selection-certificate :candidates]
+                                   (fn [cs] (mapv #(assoc-in % [:habit-provenance :source] :cascade-prior) cs)))]
+           (is (= {:status :valid :history :pre-drop-store-read}
+                  (select-keys (receipts/validate-record pre-drop) [:status :history])))))
        (is (= (:sha256 receipt) (:sha256 next-receipt)))
        (is (= (:sha256 receipt) (receipts/sha (:snapshot-edn receipt))))
        (doseq [c candidates]
@@ -99,3 +111,4 @@
          (habit/record-selection! path {:action candidate}))
        (is (= [0 0 1] (mapv #(get-in % [:receipt :state :samples]) @log)))
        (is (= [:selection-scoring :selection-update :selection-update] (mapv :purpose @log)))))))
+

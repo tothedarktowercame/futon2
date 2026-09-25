@@ -362,17 +362,36 @@
 
    `controller-authority/authorize` accepts the result on the admissible set
    (finite :controller-score, admissible action, :selection-law with :applied)."
-  [ranked-actions {:keys [beta beta-state cascade-habit-path near-tie-threshold novelty-inputs
+  [ranked-actions {:keys [beta beta-state enactment-fold habit-state near-tie-threshold novelty-inputs
                                  ticket-queue ticket-queue-refusals] :as opts}]
   ;; Runtime resolution breaks the existing prior -> policy shadow dependency.
   ;; This is the mandatory live seam, not an optional caller-side attachment.
-  (let [attach (requiring-resolve 'futon2.aif.cascade-habit-store/attach-habits)
-        path (or cascade-habit-path
-                 @(requiring-resolve 'futon2.aif.cascade-habit-store/default-path))
+  ;;
+  ;; M-wm-wiring step 8 (claude-10, 2026-09-25): E comes from the ENACTMENT
+  ;; FOLD (enactment-habit/fold's cascade-prior state, opts :enactment-fold;
+  ;; none is the empty fold, uniform E). The legacy habit store
+  ;; (:cascade-habit-path, data/cascade-prior.edn, filled by the legacy
+  ;; selection writer and the runner's close rule without W_c) is no longer
+  ;; read here: that is the drop the fidelity matrix lists for row 7. The
+  ;; store stays on disk as history.
+  ;; REPLAY ONLY: :habit-state {:state s :source :recorded-run} replays a
+  ;; recorded run against the habit state it recorded (pre-drop runs took E
+  ;; from the store); its provenance says :recorded-run so a replay is never
+  ;; read as a live E. No live caller passes it (selection-reads-fold-test
+  ;; checks every non-test caller).
+  (let [replay? (and (map? habit-state) (= :recorded-run (:source habit-state)))
+        e-input (if replay? (:state habit-state) enactment-fold)
+        e-label (if replay? :recorded-run :enactment-fold)
+        fold-state ((requiring-resolve 'futon2.aif.cascade-prior/coerce-state) e-input)
+        e-source {:source e-label
+                  :records (count (:enactment-records fold-state))
+                  :samples (:samples fold-state)
+                  :uniform (zero? (:samples fold-state))}
         ;; ⟨1⟩6: the ORIGINAL entries carry the prediction context the
         ;; enacted-step record reads; attach may rebuild entries without it
         original-ranked ranked-actions
-        ranked-actions (attach path ranked-actions)
+        ranked-actions ((requiring-resolve 'futon2.aif.cascade-habit-store/attach-state)
+                        e-input ranked-actions e-label)
         candidates (mapv selection-candidate ranked-actions)
         _ (when (and beta-state
                      (not (and ((requiring-resolve 'futon2.aif.policy-precision-carry/intact?) beta-state)
@@ -526,6 +545,8 @@
       ;; same chain-head id the marginal uses — labelled, additive, and
       ;; never a substitute for the marginal's own key
       :enacted-steps enacted-steps
+      ;; step 8: where E came from (the enactment fold, never the store)
+      :e-source e-source
       :per-policy-argmax per-policy-argmax
       :excluded-non-actions
       {:count (count excluded)

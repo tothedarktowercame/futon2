@@ -1,8 +1,10 @@
 (ns futon2.report.cascade-habit-read-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-habit-store :as habit]
+            [futon2.aif.cascade-prior :as prior]
+            [futon2.aif.enactment-habit :as eh]
             [futon2.aif.cascade-selection :as selection]
             [futon2.aif.efe :as efe]
             [futon2.aif.policy :as policy])
@@ -13,6 +15,18 @@
   (let [dir (.toFile (Files/createTempDirectory "habit-read-" (make-array FileAttribute 0)))]
     (try (f (str (io/file dir "prior.edn")))
          (finally (doseq [file (reverse (file-seq dir))] (.delete file))))))
+
+;; M-wm-wiring step 8 (claude-10, 2026-09-25): selection takes E from the
+;; enactment fold, not the legacy store. The learned mass these tests pin now
+;; comes from three counted enactment records in the fold (enactment-habit/
+;; fold), the same counts record-selection! used to write; a populated store
+;; with an empty fold moves nothing.
+(defn fold-for
+  "A fold with N counted (W_c-passing) enactment records for ACTION's policy."
+  [action n]
+  (eh/fold nil (for [i (range n)]
+                 {:record-id [:habit-read-test i] :delta 1
+                  :policy-key (prior/policy-key (habit/policy-view action))})))
 
 (defn menu []
   (let [fixture (edn/read-string (slurp (io/resource "fixtures/habit-accumulation/before.edn")))]
@@ -28,7 +42,9 @@
                  {:beta 2 :candidates (mapv #(hash-map :id (:action %) :habit 1
                                                       :f (:f %) :g (:controller-score %)) ranked)})]
     (dotimes [_ 3] (habit/record-selection! path {:action b}))
-    (let [decision (policy/select-action-cascades ranked {:beta 2 :cascade-habit-path path})
+    (let [decision (policy/select-action-cascades ranked {:beta 2 :cascade-habit-path path
+                                                          :enactment-fold (fold-for b 3)})
+          store-only (policy/select-action-cascades ranked {:beta 2 :cascade-habit-path path})
           candidates (get-in decision [:selection-certificate :candidates])
           posterior (get-in decision [:selection-law :posterior])]
       {:counts (mapv #(get-in % [:habit-provenance :count]) candidates)
@@ -40,7 +56,10 @@
        :learned-argmax (:id (key (apply max-key val posterior)))
        :selected (:id (:action decision))
        :E (mapv #(get-in % [:terms :E])
-                (get-in decision [:selection-certificate :g-term-decomposition :policies]))})))
+                (get-in decision [:selection-certificate :g-term-decomposition :policies]))
+       :e-source (get-in decision [:selection-law :e-source])
+       :store-only-posterior (mapv (get-in store-only [:selection-law :posterior]) [a b])
+       :store-only-e-source (get-in store-only [:selection-law :e-source])})))
 
 (deftest learned-mass-moves-the-posterior-and-choice
   (with-store
@@ -54,6 +73,10 @@
         (is (= [:empty :work :work] ((juxt :neutral-argmax :learned-argmax :selected) r)))
         (is (every? #(= {:verdict :non-degenerate :reason :informative-habit}
                         (select-keys % [:verdict :reason])) (:E r)))
+        (is (= {:source :enactment-fold :records 3 :samples 3 :uniform false} (:e-source r)))
+        (testing "the legacy store, populated, with an empty fold: not read"
+          (is (= {:source :enactment-fold :records 0 :samples 0 :uniform true} (:store-only-e-source r)))
+          (is (= (:neutral-posterior r) (:store-only-posterior r))))
         (println "HABIT-READ-EVIDENCE" (pr-str r))))))
 
 (deftest scorer-output-is-attached-by-the-selector
@@ -61,11 +84,13 @@
     (fn [path]
       (let [actions (menu)
             _ (dotimes [_ 3] (habit/record-selection! path {:action (second actions)}))
+            fold (fold-for (second actions) 3)
             ranked (efe/rank-cascade-actions {:cascade-belief {#{} 1}}
                                              actions
                                              {:horizon-steps 1
                                               :cascade-spec {:want #{:route-a-rehearsal-reported}}})
-            result (policy/select-action-cascades ranked {:beta 2 :cascade-habit-path path})
+            result (policy/select-action-cascades ranked {:beta 2 :cascade-habit-path path
+                                                          :enactment-fold fold})
             cs (get-in result [:selection-certificate :candidates])]
         (is (= 2 (count cs)))
         (is (every? #(= :attached (:habit-status %)) cs))

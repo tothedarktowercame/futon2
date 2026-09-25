@@ -220,4 +220,8 @@
                                ;; (claude-10, 2026-09-25), the chosen entry's
                                ;; :cascade-id; pinned in
                                ;; selection-law-candidate-test.
-                               :candidate)))))))
+                               :candidate
+                               ;; :e-source joined with M-wm-wiring step 8 (claude-10,
+                               ;; 2026-09-25): where E came from, the enactment fold;
+                               ;; pinned in selection-reads-fold-test.
+                               :e-source)))))))

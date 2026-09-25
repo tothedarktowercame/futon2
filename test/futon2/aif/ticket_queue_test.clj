@@ -1,5 +1,6 @@
 (ns futon2.aif.ticket-queue-test
-  (:require [clojure.edn :as edn]
+  (:require [clojure.string :as str]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is]]
             [futon2.aif.policy :as policy]
@@ -162,14 +163,21 @@
   ;; when F is absent).
   [decision]
   (pr-str (-> decision
-              (update :selection-law dissoc :enacted-steps)
+              ;; :e-source joined with M-wm-wiring step 8 (the enactment
+              ;; fold as E's source), pinned in selection-reads-fold-test
+              (update :selection-law dissoc :enacted-steps :e-source)
               (update-in [:selection-certificate :candidates] #(mapv (fn [c] (dissoc c :f-consumed)) %))
               (update :selection-certificate dissoc :law-applied))))
 
 (deftest no-entries-preserves-frozen-decision-bytes
   (with-inputs
     (fn [opts]
-      (let [expected (edn/read-string (slurp (io/resource "fixtures/ticket-queue/before.edn")))]
+      (let [expected (-> (edn/read-string (slurp (io/resource "fixtures/ticket-queue/before.edn")))
+                         ;; M-wm-wiring step 8 (the named drop): E's source is
+                         ;; the enactment fold, not the legacy store; with no
+                         ;; enactment and no stored counts the masses are the
+                         ;; same, and this one value is what changes
+                         (str/replace ":source :cascade-prior" ":source :enactment-fold"))]
         (is (= expected (frozen-projection (policy/select-action-cascades roster opts))))
         (is (= expected (frozen-projection (select roster opts declaration))))
         (is (= {:p/mission {:absent :no-scoring-belief} :p/docs {:absent :no-scoring-belief}}

@@ -7,12 +7,14 @@
 (defn fixture [id]
   (edn/read-string (slurp (io/resource (str "fixtures/narrative-discrimination/" id ".edn")))))
 
-(defn select [ranked opts snapshot]
-  (let [file (java.io.File/createTempFile "discrimination-habit" ".edn")]
-    (try
-      (spit file (or snapshot "nil"))
-      (policy/select-action-cascades ranked (assoc opts :cascade-habit-path (str file)))
-      (finally (.delete file)))))
+(defn select
+  "Replay a recorded run against the habit state it recorded (M-wm-wiring
+  step 8: selection no longer reads the store; the replay-only :habit-state
+  names the state and says :recorded-run on the record)."
+  [ranked opts snapshot]
+  (policy/select-action-cascades
+   ranked (assoc opts :habit-state {:state (edn/read-string (or snapshot "nil"))
+                                    :source :recorded-run})))
 
 (defn replay [f]
   (select (mapv (fn [c]
@@ -37,6 +39,9 @@
         (is (= (if (= id "1789964661") "M-aif-policy-conditioned-eig" "M-expressions-of-interest")
                (get-in d [:action :target])))
         (is (= :acting-policy (:comparison-domain p)))
+        (is (= :recorded-run (get-in law [:e-source :source])) "a replay, never a live E")
+        (is (every? #(= :recorded-run (get-in % [:habit-provenance :source]))
+                    (get-in d [:selection-certificate :candidates])))
         (is (= :action (:comparison-domain a)))
         (if (= id "1789964661")
           (do
