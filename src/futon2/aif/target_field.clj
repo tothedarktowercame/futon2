@@ -16,6 +16,12 @@
                :ready (the constructor's support step,
                interpretation-construction/support, before any G, has a
                plan).
+               Each feasible entry also carries :requisition (the state read
+               from the file, or a typed absence), :eligible, and
+               :ineligible-reason when a requisition makes it ineligible; a
+               pending excursion carries :voted. See `requisition`. An
+               ineligible entry stays on the record with its :next-step:
+               the ruling makes it ineligible, it does not unwrite it.
   :exclusions  non-targets only, with :reason and :what-would-make-feasible:
     :not-lifecycle-shaped   an M- object without the mission-lifecycle form
                             (futon4/holes/mission-lifecycle.md, Conventions):
@@ -148,6 +154,65 @@
       :else
       (step t :construct {:finding (dissoc r :candidates :status)}))))
 
+(def requisition-states
+  "The state words kimi-task.sh writes. A requisition is made at dispatch
+  time, so it flags the work in-progress and then completed."
+  {"in-progress" :in-progress "completed" :completed})
+
+(defn requisition
+  "The requisition state declared by TEXT, as a typed fact:
+  {:state :in-progress|:completed :text <rest of the line>},
+  {:malformed <line>}, or {:absent :no-requisition}.
+
+  The form kimi-task.sh writes is one line directly under the H1,
+  `**Requisition:** in-progress — <purpose>`; the first non-blank line
+  after the H1 is the only line read, so the same words in the body are
+  prose and not a requisition. A line carrying the marker with no state
+  word, or a word that is neither, is :malformed: it is reported, never
+  guessed at.
+
+  Joe's ruling of 2026-09-25 ~17:40Z, recorded at futon2 a461b124
+  (PROOF-2a-THEOREM-draft-2026-09-24.md, \"Ruling: a requisition is a
+  different semantic layer\"): a requisition is a different semantic layer
+  from a pending E-/M-/T- job. It is made at dispatch time and flags the
+  work in-progress, then completed, and a target in either state is
+  therefore ineligible; a pending object with no requisition is eligible.
+  This function reads the state only. What it makes of it is
+  `with-eligibility`."
+  [text]
+  (let [lines (str/split-lines (str text))
+        after-h1 (next (drop-while #(not (re-matches #"^#\s+\S.*$" %)) lines))
+        line (first (drop-while str/blank? after-h1))]
+    (if-not (and line (re-find #"^\*\*Requisition:\*\*" line))
+      {:absent :no-requisition}
+      (let [[_ word rest] (re-matches #"^\*\*Requisition:\*\*\s+(\S+)\s*(.*)$" (str line))
+            state (requisition-states word)
+            text (str/trim (str/replace (str rest) #"^[—-]\s*" ""))]
+        (if-not state
+          {:malformed line}
+          (cond-> {:state state} (seq text) (assoc :text text)))))))
+
+(defn- with-eligibility
+  "Record REQ on feasible entry E, and what the ruling (see `requisition`)
+  makes of it. Only a requisition IN A STATE makes a target ineligible:
+  an absent or malformed line leaves it eligible, so a file the machine
+  cannot read a state from is never silently taken off the table. An
+  ineligible entry keeps its :next-step, which is a fact about the target
+  and not a plan to act on it.
+
+  A pending excursion also carries :voted {:absent :vote-undefined}. Joe
+  attaches \"as long as they are voted\" to undispatched E- jobs, and no
+  definition of a vote exists in code: the only carrier on record,
+  M-portfolio-inference's :upvote, is a placeholder returning 0.0
+  (futon3c portfolio/policy.clj:119-124). The absence is typed and
+  nothing gates on it."
+  [e req kind]
+  (let [req (or req {:absent :text-unread})
+        state (:state req)]
+    (cond-> (assoc e :requisition req :eligible (nil? state))
+      state (assoc :ineligible-reason (keyword "requisition" (name state)))
+      (and (nil? state) (= :excursion kind)) (assoc :voted {:absent :vote-undefined}))))
+
 (defn assess
   "One considered target T: an exclusion when T is not a work target (an M-
   file without the lifecycle form, a file not at HEAD), else a feasible entry
@@ -157,64 +222,77 @@
   (let [read (or read-text (fn [root repo path] (mc/read-mission root repo path)))
         text (when (:repo t) (read code-root (:repo t) (:path t)))
         shape (when (and text (= :mission (:kind t)))
-                (lifecycle-shape (:target t) text (:status-line t)))]
-    (cond
-      (nil? text)
-      (exclusion t :text-unreadable {:file-at-head (str (:repo t) "/" (:path t))})
-
-      (and shape (not (:lifecycle-shaped? shape)))
-      (exclusion t :not-lifecycle-shaped {:lifecycle-parts-missing (:missing shape)
-                                          :form "futon4/holes/mission-lifecycle.md"}
-                 {:shape shape})
-
-      :else
-      (let [f (flight/start {:target (:target t) :chosen-because {:kind :target-field}}
-                            (cond-> {:kind :a-exits :repo (:repo t) :path (:path t) :store store
-                                     :code-root code-root :read-text (fn [& _] text)}
-                              observe (assoc :observe observe))
-                            {:id (str "target-field-" (:target t))})
-            cw (flight/click-wants f sources)
-            src (:source cw)
-            wants (:wants cw)]
+                (lifecycle-shape (:target t) text (:status-line t)))
+        req (requisition text)
+        entry
         (cond
-          (empty? wants)
-          (step t :read-criteria
-                {:finding {:kind (if (get-in src [:readings-needed :criteria?]) :criteria-not-stated :no-wants)}})
+          (nil? text)
+          (exclusion t :text-unreadable {:file-at-head (str (:repo t) "/" (:path t))})
+
+          (and shape (not (:lifecycle-shaped? shape)))
+          (exclusion t :not-lifecycle-shaped {:lifecycle-parts-missing (:missing shape)
+                                              :form "futon4/holes/mission-lifecycle.md"}
+                     {:shape shape})
+
           :else
-          (let [view (fr/target-view store f cw sources)
-                target (:target t)
-                universe (get-in view [:universes target])
-                open (open-wants wants universe)
-                patterns (get-in view [:interpretations target :patterns])]
-            (cond
-              (empty? open)
-              ;; the owner lists it live and every stated want reads true:
-              ;; what remains is reading what the text still asks for
-              (step t :read-criteria {:finding {:kind :want-already-observed :wants wants}})
-              (empty? patterns)
-              (step t :ask-interpretation {:interpretations-for (named-wants open (:criteria-by-token src))
-                                           :unobserved (unobserved open universe)
-                                           :finding {:kind :no-published-interpretation}})
-              :else
-              (let [r (ic/support {:target target :want wants :observation universe
-                                   :interpretations patterns
-                                   :interpretation-receipts (get-in view [:interpretations target :receipts])
-                                   :budget (:value (wm/construction-budget sources))
-                                   :horizon (:value (wm/resolve-cascade-horizon view [target]))
-                                   :move-cost (:value wm/construction-move-cost)})]
-                (if (= :supported (:status r))
-                  (step t :ready {:support (count (:family r)) :open-wants open})
-                  (constructor-step t r wants universe (:criteria-by-token src)))))))))))
+          (try
+            (let [f (flight/start {:target (:target t) :chosen-because {:kind :target-field}}
+                                  (cond-> {:kind :a-exits :repo (:repo t) :path (:path t) :store store
+                                           :code-root code-root :read-text (fn [& _] text)}
+                                    observe (assoc :observe observe))
+                                  {:id (str "target-field-" (:target t))})
+                  cw (flight/click-wants f sources)
+                  src (:source cw)
+                  wants (:wants cw)]
+              (cond
+                (empty? wants)
+                (step t :read-criteria
+                      {:finding {:kind (if (get-in src [:readings-needed :criteria?]) :criteria-not-stated :no-wants)}})
+                :else
+                (let [view (fr/target-view store f cw sources)
+                      target (:target t)
+                      universe (get-in view [:universes target])
+                      open (open-wants wants universe)
+                      patterns (get-in view [:interpretations target :patterns])]
+                  (cond
+                    (empty? open)
+                    ;; the owner lists it live and every stated want reads true:
+                    ;; what remains is reading what the text still asks for
+                    (step t :read-criteria {:finding {:kind :want-already-observed :wants wants}})
+                    (empty? patterns)
+                    (step t :ask-interpretation {:interpretations-for (named-wants open (:criteria-by-token src))
+                                                 :unobserved (unobserved open universe)
+                                                 :finding {:kind :no-published-interpretation}})
+                    :else
+                    (let [r (ic/support {:target target :want wants :observation universe
+                                         :interpretations patterns
+                                         :interpretation-receipts (get-in view [:interpretations target :receipts])
+                                         :budget (:value (wm/construction-budget sources))
+                                         :horizon (:value (wm/resolve-cascade-horizon view [target]))
+                                         :move-cost (:value wm/construction-move-cost)})]
+                      (if (= :supported (:status r))
+                        (step t :ready {:support (count (:family r)) :open-wants open})
+                        (constructor-step t r wants universe (:criteria-by-token src))))))))
+            (catch Exception e
+              (step t :construct {:finding {:kind :assembly-refused
+                                            :refusal (or (ex-data e) {:message (.getMessage e)})}}))))]
+    (if (:reason entry) entry (with-eligibility entry req (:kind t)))))
 
 (defn target-field
   "`{:considered [...] :feasible [...] :exclusions [...]}` over LOADED."
   [opts loaded]
   (let [cs (considered (:code-root opts) loaded)
+        ;; `assess` catches its own assembly refusals, with the target's
+        ;; requisition already read; this catches a read that throws, where
+        ;; no line could be looked at. Eligibility needs a requisition IN A
+        ;; STATE, so the entry stays eligible and says the text went unread.
         assessed (for [t cs]
                    (try (assess opts t)
                         (catch Exception e
-                          (step t :construct {:finding {:kind :assembly-refused
-                                                        :refusal (or (ex-data e) {:message (.getMessage e)})}}))))]
+                          (with-eligibility
+                            (step t :construct {:finding {:kind :assembly-refused
+                                                          :refusal (or (ex-data e) {:message (.getMessage e)})}})
+                            nil (:kind t)))))]
     {:considered cs
      :feasible (vec (remove :reason assessed))
      :exclusions (vec (filter :reason assessed))}))

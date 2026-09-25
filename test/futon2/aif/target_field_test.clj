@@ -39,8 +39,9 @@
 
 (defn- layout
   "A code root with futon3c (M-autoclock-in, M-shaped, a criteria-less
-  ticket), futon2 (M-f11) and a store publishing M-shaped's MAP producer."
-  []
+  ticket), futon2 (M-f11) and a store publishing M-shaped's MAP producer.
+  EXTRA is [[rel text] …] written into the same root."
+  [& [extra]]
   (let [root (tmp "tf-code") store (tmp "tf-store")
         map-want (want-of "M-shaped" shaped "MAP")]
     (doseq [r ["futon3c" "futon2"]] (.mkdirs (io/file root r ".git")))
@@ -54,6 +55,7 @@
     (put! root "futon3c/holes/excursions/E-plain.md" "# E-plain\n\nStatus: OPEN\n")
     (put! root "futon3c/holes/excursions/E-done.md" "# E-done\n\nStatus: COMPLETE (2026-09-01)\n")
     (put! root "futon2/holes/missions/M-f11-find-production-successor.md" f11)
+    (doseq [[rel text] extra] (put! root rel text))
     (spit (io/file store "M-shaped.edn")
           (pr-str {:schema :wm/machine-interpretations-v1 :target "M-shaped"
                    :patterns {:survey/list-callers {:guard {:needs #{} :forbids #{}} :produces #{map-want}}}
@@ -209,3 +211,101 @@
     (is (= 59 (count (filter #(= :mission (:kind %)) (:feasible f)))))
     (is (= :read-criteria (get-in ok ["M-autoclock-in" :next-step])))
     (is (= :ask-interpretation (get-in ok ["M-apm-demonstration" :next-step])))))
+
+;; ---------------------------------------------------------------------------
+;; The requisition state (Joe, 2026-09-25 ~17:40Z, recorded at futon2
+;; a461b124): a requisition is made at dispatch time and flags the work
+;; in-progress, then completed, so a target in either state is ineligible.
+;; A pending E-/M-/T- object with no requisition stays eligible. The field
+;; records the state and the ineligibility; it never drops the file.
+
+(defn- requisitioned [id state-line & [body]]
+  (str "# " id " — a Kimi task\n"
+       (when state-line (str "\n" state-line "\n"))
+       "\nClocked in by claude-12 for kimi-32 on 2026-09-25.\n"
+       (or body "")))
+
+(def ^:private requisition-files
+  [["futon3c/holes/excursions/E-req-progress.md"
+    (requisitioned "E-req-progress" "**Requisition:** in-progress — E-req-progress — interpret block011")]
+   ["futon3c/holes/excursions/E-req-done.md"
+    (requisitioned "E-req-done" "**Requisition:** completed — E-req-done — interpret block010")]
+   ["futon3c/holes/excursions/E-req-odd.md"
+    (requisitioned "E-req-odd" "**Requisition:** frobnicated — E-req-odd — a word nobody writes")]
+   ;; the bad case: the words appear in the body, not on the line under the H1
+   ["futon3c/holes/missions/M-prose-requisition.md"
+    (str/replace shaped "# Mission: M-shaped"
+                 (str "# Mission: M-prose-requisition\n\nThe ruling on requisitions is quoted below.\n\n"
+                      "**Requisition:** completed — this sentence is prose about requisitions, not a requisition"))]])
+
+(deftest r-requisition-state-decides-eligibility-and-nothing-is-dropped
+  (let [fld (field (layout requisition-files))
+        ok (by-target (:feasible fld))
+        considered (set (map :target (:considered fld)))]
+    (testing "r-1 an in-progress requisition: ineligible, still on the record"
+      (let [e (get ok "E-req-progress")]
+        (is (contains? considered "E-req-progress"))
+        (is (some? e) "the file is listed, not dropped")
+        (is (= false (:eligible e)))
+        (is (= :requisition/in-progress (:ineligible-reason e)))
+        (is (= {:state :in-progress :text "E-req-progress — interpret block011"} (:requisition e)))
+        (is (contains? tf/next-steps (:next-step e))
+            "the next step is a fact about the target, computed for it either way")))
+    (testing "r-2 a completed requisition"
+      (let [e (get ok "E-req-done")]
+        (is (= false (:eligible e)))
+        (is (= :requisition/completed (:ineligible-reason e)))
+        (is (= {:state :completed :text "E-req-done — interpret block010"} (:requisition e)))))
+    (testing "r-3 no requisition line: eligible and pending"
+      (let [e (get ok "E-plain")]
+        (is (= true (:eligible e)))
+        (is (= {:absent :no-requisition} (:requisition e)))
+        (is (not (contains? e :ineligible-reason)))
+        (is (= {:absent :vote-undefined} (:voted e))
+            "Joe attaches \"as long as they are voted\" to undispatched E- jobs; no vote is defined in code"))
+      (testing "on E- entries only"
+        (is (= {:absent :vote-undefined} (:voted (get ok "E-req-odd"))))
+        (is (not (contains? (get ok "T-plain") :voted)))
+        (is (not (contains? (get ok "M-shaped") :voted)))
+        (is (= true (:eligible (get ok "T-plain"))))
+        (is (= true (:eligible (get ok "M-shaped"))))))
+    (testing "r-4 an unknown state word is reported, not guessed at"
+      (let [e (get ok "E-req-odd")]
+        (is (= {:malformed "**Requisition:** frobnicated — E-req-odd — a word nobody writes"}
+               (:requisition e)))
+        (is (= true (:eligible e)))
+        (is (not (contains? e :ineligible-reason)))))
+    (testing "the bad case: the words in the body are prose, and the mission stays eligible"
+      (let [e (get ok "M-prose-requisition")]
+        (is (some? e) "a shaped mission is feasible")
+        (is (= true (:eligible e)))
+        (is (= {:absent :no-requisition} (:requisition e)))
+        (is (not (contains? e :ineligible-reason)))))
+    (testing "the field still partitions, and the ineligible entries are in it"
+      (is (= [] (tf/check-field fld)))
+      (is (= 2 (count (filter #(false? (:eligible %)) (:feasible fld)))))
+      (is (every? #(contains? % :eligible) (:feasible fld))
+          "no feasible entry is silently unlabelled"))))
+
+(deftest r-requisition-reads-only-the-line-under-the-h1
+  (testing "the state words, and the rest of the line as :text"
+    (is (= {:state :in-progress :text "E-1 — purpose"}
+           (tf/requisition "# E-1\n\n**Requisition:** in-progress — E-1 — purpose\n\nbody\n")))
+    (is (= {:state :completed} (tf/requisition "# E-1\n\n**Requisition:** completed\n"))
+        "a line with no rest carries no :text")
+    (is (= {:state :completed :text "E-1"}
+           (tf/requisition "# E-1\n**Requisition:** completed — E-1\n"))
+        "immediately under the H1, with no blank line, is the same line"))
+  (testing "absences and malformations"
+    (is (= {:absent :no-requisition} (tf/requisition "# E-1\n\nbody\n")))
+    (is (= {:absent :no-requisition} (tf/requisition nil)))
+    (is (= {:absent :no-requisition} (tf/requisition "**Requisition:** completed — no H1 above it\n"))
+        "the line is read under the H1, not anywhere")
+    (is (= {:absent :no-requisition}
+           (tf/requisition "# E-1\n\nprose\n\n**Requisition:** completed — later in the body\n"))
+        "a second paragraph is body text")
+    (is (= {:malformed "**Requisition:** dispatched — x"}
+           (tf/requisition "# E-1\n\n**Requisition:** dispatched — x\n")))
+    (is (= {:malformed "**Requisition:**"}
+           (tf/requisition "# E-1\n\n**Requisition:**\n"))
+        "the marker with no state word is malformed, not a state")))
