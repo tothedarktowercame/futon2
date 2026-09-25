@@ -189,8 +189,35 @@
            (get-in certificate [:consumed-g :Q :steps])))))
 
 (deftest existing-selection-decisions-unchanged
+  ;; Same baseline as selection-certificate-test/decisions-byte-identical, and
+  ;; compared the same way as that twin: the precision metadata added after the
+  ;; snapshot is asserted on the baseline, and the later additive law records
+  ;; are projected away rather than the bytes re-captured -- re-recording a
+  ;; byte-identity fixture to make it pass is how such a test stops meaning
+  ;; anything (claude-5, 2026-09-24). The fixture is shared with that twin,
+  ;; which needs it to stay the historical snapshot, so it is not touched here.
   (doseq [{:keys [ranked beta decision-bytes]}
           (:cases (edn/read-string (slurp (io/resource "fixtures/selection-certificate/before.edn"))))]
-    (is (= (pr-str (edn/read-string decision-bytes))
-           (pr-str (dissoc (policy/select-action-cascades ranked {:beta beta})
-                           :selection-certificate))))))
+    ;; :gamma, :tau and :tau-source joined the law at 991e27a4 (2026-09-21),
+    ;; which is the commit this assertion first failed at; their values are
+    ;; asserted rather than projected away.
+    (is (= (pr-str (update (edn/read-string decision-bytes) :selection-law
+                           assoc :gamma (/ 1.0 beta) :tau beta :tau-source :declared-beta))
+           (pr-str (-> (policy/select-action-cascades ranked {:beta beta})
+                       (dissoc :selection-certificate)
+                       (update :selection-law dissoc
+                               ;; :policy-comparison and :near-tie-threshold
+                               ;; joined at b701baa3 (2026-09-21), acting-policy
+                               ;; odds and action-level flips; :action-comparison
+                               ;; at 978c5067 (2026-09-22), the ticket-queue
+                               ;; strata. Additive reporting: no winner, no
+                               ;; marginal key and no tie-break moves.
+                               :policy-comparison :action-comparison :near-tie-threshold
+                               ;; :enacted-steps joined at b1979ce2 (2026-09-23),
+                               ;; pinned independently in enacted-step-test.
+                               :enacted-steps
+                               ;; :candidate joined with M-wm-wiring row 9
+                               ;; (claude-10, 2026-09-25), the chosen entry's
+                               ;; :cascade-id; pinned in
+                               ;; selection-law-candidate-test.
+                               :candidate)))))))
