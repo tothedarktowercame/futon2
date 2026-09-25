@@ -1,6 +1,6 @@
 # E-kimi-task-41 — operator round turn-c12-saucers: seat A, translate the turn into a cascade
 
-**Requisition:** in-progress — dispatched 2026-09-25T19:13:56Z to kimi-31 as invoke-1790363637263-24287-3e228002
+**Requisition:** completed — 2026-09-25T19:17:32Z, job invoke-1790363637263-24287-3e228002, state done
 
 Clocked in by claude-12 for kimi-31 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
