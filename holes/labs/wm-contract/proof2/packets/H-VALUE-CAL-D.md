@@ -223,3 +223,68 @@ recording this as a question about the target, not as a verdict on it.
 
 The index and events are declarations for the owners of `live_c.clj` and
 `preference-member`. No lane code is edited here.
+
+## 7. Does the mission state a value ordering over instances?
+
+*claude-8 asked for this as "§5". The packet already has a §5 (Reading) and a
+§6, so it is appended as §7.*
+
+I read the whole mission: `futon3c/holes/missions/M-futon-seams.md`, 65,070
+bytes, sha256 `d13c5cfe9e9b19b445bd5bb73507f286a9e5ff3b478a1c5bc6a2250d70c6f6fd`
+(last commit to the file: futon3c `3f5f44dd`). Spans are character offsets as
+before. I looked for every sentence that ranks, prefers or prioritises
+instances, and for every per-instance benefit or consequence claim.
+
+**Answer: (b).** No value ordering over instances is stated. The only
+ordering is by cost, plus the deadline event on 7. (c) does not apply either:
+the outcomes are stated, but nothing orders or weights them.
+
+**The ordering the mission does state, and its key:**
+
+| span | text | what it orders by |
+|---|---|---|
+| [4361 4402] | "## Cost ordering (use this to prioritise)" | the mission's only instruction on how to prioritise. Its three tiers are cost tiers: declare first (free), retrofit in code (expensive), retrofit in prompt text (worst) |
+| [18030 18058] | "The candidates in cost order" | heads the IDENTIFY list 4, 5, 7 |
+| [44631 44669] | "IDENTIFY's anchor is the cost ordering" | the mission's own account, written after the fact, of what the IDENTIFY choice rested on |
+| [44454 44563] | a war-room pattern "bears on the IDENTIFY exit's choice of one instance over eight, but the mission did not cite it when choosing" | a second possible basis for the choice, which the text says was **not** used |
+
+**Per-instance benefit and consequence claims.** None of them is ranked
+against another instance:
+
+| instance | span | text | value or cost-justification? |
+|---|---|---|---|
+| 4 | [18227 18277] | "unblocks provider substitution for Rob immediately" | **A per-instance benefit with a timing, not a ranking.** It is a clause in item 1 of a list whose stated key is cost [18030 18058]. It compares 4 with nothing, and 5 and 7 carry no Rob-unblocking clause to compare it against. In the list it answers "why is the cheapest one worth doing", not "why is this worth more than 5". Its outcome is `:rob-can-run-the-stack`, already stated at [2931 3026]. |
+| 5 | [18322 18408] | "larger, but it retires `matrix-ircd` and the \"don't start an IRC server\" flag together" | A benefit offered **against** a higher cost ("larger, but"). This is the one place the list weighs benefit against cost, for one instance. It does not say the benefit places 5 above or below anything. |
+| 7 | [18462 18514] | "do before a VS Code implementation exists, not after" | A deadline on an event (§2, O4). It says **when**, not how much. |
+| 7 | [14434 14484] | "Editor coupling — the one still compounding" | A consequence claim: cost grows while it waits. It is a claim about the rate of cost, and it would argue for doing 7 **earlier**, while the list puts 7 last. |
+| 6 | [12358 12416], [13480 13511] | "the most painful retrofit", "Why this is the worst case" | Cost (the retrofit tier). 6 is not in the candidate list. |
+
+**Outcomes.** The mission states the value it wants per outcome: Rob can run
+the stack, a second implementation is cheap, no drifting forks, and so on.
+mission-C records six outcomes, each with its span. No sentence weights one
+outcome above another, and mission-C records `:preference :status :unstated`
+for that reason. So value is stated per outcome but not ordered. The outcome
+list gives H-value the things to value, not an order to reproduce. That is why
+the answer is (b) and not (c).
+
+**H-value's next measurable question.** With no value ordering stated, the
+value term has no ranking on this mission to reproduce. The next question has
+to be one the record can decide:
+
+> Given the mission's stated outcomes, the stated links from instances to
+> outcomes, and its stated timing (Rob "immediately"; V deferred to the
+> VS Code event; the deadline on 7), does the value term leave instance 4, the
+> one the cost ordering chose, undominated?
+
+"Undominated" means no admissible weighting of the unweighted outcomes puts
+another candidate above 4 **on every** weighting, and the answer is reported
+as the fraction of the simplex on which 4 is the argmax of V. This is the
+"4 first" share, not the full 4 > 5 > 7 share. The calendar sweep already
+contains its inputs.
+
+The claim under test becomes that value and the declared cost ordering do not
+**conflict** at the first pick. They do not have to agree on the whole order.
+It stays falsifiable: if some candidate beats 4 on every weighting, or 4 is
+first on only a sliver, value contradicts the cost choice, and that finding
+would belong in PROOF-2a. The hold-out stays as in H-VALUE-C-D §7, and needs a
+mission that states an order by value.
