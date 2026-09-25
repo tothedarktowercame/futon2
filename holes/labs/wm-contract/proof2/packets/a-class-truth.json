@@ -1262,13 +1262,13 @@
   "near-miss?": false,
   "locator": {
    "repo": "futon2",
-   "namespace": "futon2.aif.observation-checks-test",
-   "config": "test-registry-44ddff9fdf7fd7caa1c82418fe99bffdebf7a532bc44810da03cabff4c20ebfe"
+   "namespace": "futon2.aif.candidate-derivations-test",
+   "config": "test-registry-057974d5eac75437b36f34dd19bd56c4c29bcdf8897c4c1df35de7a74cba499b"
   },
-  "note": null,
+  "note": "Originally observation-checks-test warrant test-registry-44ddff9f\u2026; that warrant went stale mid-packet when AR-42 (futon2 45b05e09) moved observation_checks.clj between the dry run and the post-commit verification \u2014 itself a live instance of C8 staleness. Swapped for a warrant valid at the packet commit.",
   "expect": null,
   "derived-truth": true,
-  "truth-how": "warrant test-registry-44ddff9fdf\u2026 current, matched, 0 failures over 2 pinned paths"
+  "truth-how": "warrant test-registry-057974d5ea\u2026 current, matched, 0 failures over 4 pinned paths"
  },
  {
   "id": "c8-t03",

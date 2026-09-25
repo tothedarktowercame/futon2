@@ -2,8 +2,8 @@
  :schema :proof2/a-class-results-v1,
  :disagreements [],
  :n-cases 100,
- :futon2-head "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
- :repo-root "/tmp/a-class-roots",
+ :futon2-head "2577604181787cafafa83d7b10594adcda5cf87b",
+ :repo-root "/home/joe/code",
  :per-class
  {"C3"
   {:n 20,
@@ -1550,7 +1550,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT01.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note nil,
    :derived-truth true,
@@ -1572,7 +1572,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT02.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note nil,
    :derived-truth true,
@@ -1594,7 +1594,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT03.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note nil,
    :derived-truth true,
@@ -1616,7 +1616,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT04.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note nil,
    :derived-truth true,
@@ -1638,7 +1638,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT05.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note nil,
    :derived-truth true,
@@ -1660,7 +1660,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT06.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note nil,
    :derived-truth true,
@@ -1682,7 +1682,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT07.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note nil,
    :derived-truth true,
@@ -1704,7 +1704,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT08.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note nil,
    :derived-truth true,
@@ -1726,7 +1726,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT09.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note nil,
    :derived-truth true,
@@ -1748,7 +1748,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT10.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note nil,
    :derived-truth true,
@@ -1770,7 +1770,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF1.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note
    "witness resolves, but :entry path never existed at the referenced commit",
@@ -1793,7 +1793,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF2.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note
    ":entry added only after the referenced sha (right path, wrong sha)",
@@ -1816,7 +1816,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF3.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note
    ":entry (ContractEmitter.lean) deleted before the referenced commit",
@@ -1839,7 +1839,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF4.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note
    ":entry exists at HEAD today but not at the referenced older commit",
@@ -1862,7 +1862,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wit-absent.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present false},
    :note
    "witness file absent (right directory, file never existed): observed false",
@@ -1885,7 +1885,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF8.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f",
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b",
     :witness-present true},
    :note ":entry deleted from futon2 before the referenced commit",
    :derived-truth false,
@@ -1927,7 +1927,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF5.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f"},
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b"},
    :note "witness carries a made-up 40-hex sha: typed refusal",
    :derived-truth false,
    :id "c6-f08",
@@ -1948,7 +1948,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF6.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f"},
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b"},
    :note
    "witness names repo futon2 with a mathlib4 commit sha: typed refusal",
    :derived-truth false,
@@ -1971,7 +1971,7 @@
    :check-evidence
    {:path
     "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF7.edn",
-    :resolved-sha "0feff1198f2974cef54b5c8d32a6b81908f6ea8f"},
+    :resolved-sha "2577604181787cafafa83d7b10594adcda5cf87b"},
    :note ":require-entry set and witness has no :entry: typed refusal",
    :derived-truth false,
    :id "c6-f10",
@@ -2007,22 +2007,23 @@
    :agree true}
   {:near-miss? false,
    :truth-how
-   "warrant test-registry-44ddff9fdf… current, matched, 0 failures over 2 pinned paths",
+   "warrant test-registry-057974d5ea… current, matched, 0 failures over 4 pinned paths",
    :locator
    {:repo "futon2",
-    :namespace "futon2.aif.observation-checks-test",
+    :namespace "futon2.aif.candidate-derivations-test",
     :config
-    "test-registry-44ddff9fdf7fd7caa1c82418fe99bffdebf7a532bc44810da03cabff4c20ebfe"},
+    "test-registry-057974d5eac75437b36f34dd19bd56c4c29bcdf8897c4c1df35de7a74cba499b"},
    :outcome :observation,
    :intended-truth true,
    :check-evidence
    {:warrant-id
-    "test-registry-44ddff9fdf7fd7caa1c82418fe99bffdebf7a532bc44810da03cabff4c20ebfe",
-    :recorded-namespace "futon2.aif.observation-checks-test",
+    "test-registry-057974d5eac75437b36f34dd19bd56c4c29bcdf8897c4c1df35de7a74cba499b",
+    :recorded-namespace "futon2.aif.candidate-derivations-test",
     :postcheck {:status :matched},
-    :run-counts {:tests 19, :assertions 73, :failures 0, :errors 0},
+    :run-counts {:tests 7, :assertions 60, :failures 0, :errors 0},
     :moved-paths []},
-   :note nil,
+   :note
+   "Originally observation-checks-test warrant test-registry-44ddff9f…; that warrant went stale mid-packet when AR-42 (futon2 45b05e09) moved observation_checks.clj between the dry run and the post-commit verification — itself a live instance of C8 staleness. Swapped for a warrant valid at the packet commit.",
    :derived-truth true,
    :id "c8-t02",
    :class "C8",

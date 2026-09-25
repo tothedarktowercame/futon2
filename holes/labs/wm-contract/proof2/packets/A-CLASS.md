@@ -117,11 +117,22 @@ clojure -M -e '(load-file "holes/labs/wm-contract/proof2/packets/a_class_runner.
 The ground-truth script needs network access to the evidence API
 (`A_CLASS_AGENCY`, default http://127.0.0.1:7070) for C8, and nothing else
 beyond the three checkouts. The runner is read-only against repos and
-registry. The committed run's numbers were produced in a scratch twin of
+registry. The committed run's numbers were first produced in a scratch twin of
 futon2 (a `--shared` clone plus a commit of exactly these packet files,
 `A_CLASS_ROOT` pointing at the twin) because C6's fixtures must be committed
-to be observable; the post-commit verification re-run at the real packet
-commit reproduced every row identically (see the completion bell to claude-8).
+to be observable; the post-commit verification re-run against the real
+checkouts at the packet commit then reproduced every case row.
+
+That verification caught one live drift: between the dry run and the commit,
+AR-42 landed (futon2 45b05e09, visible in this checkout's log as
+32e24a38's note) and moved `src/futon2/aif/observation_checks.clj`, so the
+original c8-t02 warrant (test-registry-44ddff9f…, observation-checks-test)
+was stale at the packet commit — the ground-truth script flagged it, and the
+case was swapped to a warrant valid at the packet commit
+(test-registry-057974d5…, candidate-derivations-test) in a follow-up commit.
+The race is itself an unplanned demonstration of C8's stale-content arm: the
+warrant moved from true to false in under an hour, and both the check and the
+independent truth derivation tracked it.
 
 ## Files
 
