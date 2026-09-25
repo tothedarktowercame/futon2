@@ -48,6 +48,21 @@
       (is (= (:certificate entry) (dissoc (get scoring i) :id))))))
 
 (deftest offline-tick-record-preserves-validity-and-missing-prefix
+  ;; tick-001's target is synthetic and has no row in the production focus
+  ;; corpus, so classify-target returns :unknown ("never guessed") and the
+  ;; class observation model refuses :class-unknown-no-scalar-g
+  ;; (observation_model.clj) before this test reaches any of its assertions --
+  ;; codex-20's ruling, in that site's own comment: "a target whose relation
+  ;; genuinely cannot be resolved gets NO scalar G -- no stop-the-line
+  ;; scoring, no worst case, no averaging, no uniform, no exclusion."
+  ;;
+  ;; :focus-inputs is the seam war_machine documents for exactly this
+  ;; ("injectable like :live-c (tests supply synthetic corpora)"), and the
+  ;; corpus borrowed here is the one cascade-decision-test already injects for
+  ;; this same target, so the two fixtures cannot drift apart. :focus-as-of is
+  ;; pinned inside a discovery window: at a window's first instant no commit
+  ;; is credited yet, so no focus is established and every target classifies
+  ;; :unknown however its relation row reads.
   (let [dir (temp-dir)
         before (counts)
         mission (io/file dir "corpus/repo/holes/missions/M-present.md")]
@@ -57,7 +72,9 @@
       (let [assembled (cp/assemble {:targets [tick/tick-1-target]
                                     :sources (locfix/locate-all tick/tick-1-sources)})
             result (wm/cascade-decision assembled
-                                        {:live-c {:sources live-sources :sources-now live-sources}})
+                                        {:live-c {:sources live-sources :sources-now live-sources}
+                                         :focus-inputs (:focus-inputs tick/live-c-opts)
+                                         :focus-as-of "2026-09-21T12:00:00Z"})
             ;; Use the same U37 producer/carry as judge, against an isolated
             ;; corpus. It must preserve its membership diff, not invent a
             ;; complete verdict to make a validity check green.
