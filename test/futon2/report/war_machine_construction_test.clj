@@ -44,8 +44,8 @@
 (deftest constructed-g-beats-the-empty-cascade
   ;; the constructor takes a plan only if the lane's G prefers it
   (let [problem (-> (only-target (sources)) :problems first :cascade-problem (dissoc :precedences))
-        g-plan (wm/constructed-candidate-g problem {:precedence [:aif/two-layer-calibration]})
-        g-empty (wm/constructed-candidate-g problem {:precedence []})]
+        g-plan (:value (wm/constructed-candidate-g problem {:precedence [:aif/two-layer-calibration]}))
+        g-empty (:value (wm/constructed-candidate-g problem {:precedence []}))]
     (is (< g-plan g-empty) [g-plan g-empty])))
 
 (deftest positive-move-cost-declines-the-plan

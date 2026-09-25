@@ -6049,7 +6049,7 @@
 
 (defn constructed-candidate-g
   "G of one constructed CANDIDATE on its target's PROBLEM (a cascade problem
-  without :precedences), computed by the lane's own R1-R5 over a fixed
+  without :precedences), as {:value G :universe [token ...]}, computed by the lane's own R1-R5 over a fixed
   family: the single-pattern order of every interpretation enabled on the
   problem's facts, plus the candidate's own order. (R6's law O4 refuses an
   order whose pattern cannot fire, so disabled patterns are left out.) The
@@ -6074,11 +6074,10 @@
         ;; every evaluate-g call of one problem — and the empty baseline it
         ;; is subtracted from at construction.clj — is normalised over the
         ;; SAME universe (the cross-universe subtraction differed by T·k·ln2).
+        universe (cascade-problems/problem-tokens
+                  (:facts problem) (:want problem) (:interpretations problem))
         lane (cascade-lane (assoc problem :precedences family)
-                           {:through :R5
-                            :universe (cascade-problems/problem-tokens
-                                       (:facts problem) (:want problem)
-                                       (:interpretations problem))})]
+                           {:through :R5 :universe universe})]
     (when (:refusal lane)
       (throw (ex-info "constructed-candidate-g: lane refused"
                       {:constructor/refusal :lane-refused :refusal (:refusal lane)
@@ -6088,7 +6087,9 @@
       (when-not entry
         (throw (ex-info "constructed-candidate-g: candidate not ranked"
                         {:constructor/refusal :candidate-not-ranked :precedence prec})))
-      (double (:G-efe entry)))))
+      ;; the universe G was taken over, so the construction receipt records
+      ;; the scorer's universe rather than one the caller declares for it
+      {:value (double (:G-efe entry)) :universe (vec (sort-by pr-str universe))})))
 
 ;; ---------------------------------------------------------------------------
 ;; Joint cascade decision over assembled problems (SPEC-flat-removal H5a).

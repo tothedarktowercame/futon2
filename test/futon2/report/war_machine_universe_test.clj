@@ -70,10 +70,10 @@
   ;; bad case (a): with :universe supplied, G(empty) and G(chain) over the
   ;; AR-40 fixture are 16.3434 and 15.3434 and the chain is TAKEN.
   (let [p (problem chain)
-        g-empty (wm/constructed-candidate-g p {:precedence []})
-        g-chain (wm/constructed-candidate-g p {:precedence chain})]
+        g-empty (:value (wm/constructed-candidate-g p {:precedence []}))
+        g-chain (:value (wm/constructed-candidate-g p {:precedence chain}))]
     (is (= g-baseline g-empty))
-    (is (= g-chain (wm/constructed-candidate-g p {:precedence chain})))
+    (is (= g-chain (:value (wm/constructed-candidate-g p {:precedence chain}))))
     (is (< g-chain g-empty) [g-chain g-empty])
     (testing "the constructor TAKES the chain at the declared move cost 0"
       (let [r (wm/assemble-cascade-problems-with-published
@@ -112,8 +112,8 @@
   ;; value <= 0 → :acting-worth-more, construction.clj) declines it at any
   ;; move cost >= 0.
   (let [p (problem prefix3)
-        g-empty (wm/constructed-candidate-g p {:precedence []})
-        g-prefix (wm/constructed-candidate-g p {:precedence prefix3})]
+        g-empty (:value (wm/constructed-candidate-g p {:precedence []}))
+        g-prefix (:value (wm/constructed-candidate-g p {:precedence prefix3}))]
     (is (= g-baseline g-empty))
     (is (= g-baseline g-prefix))
     (is (zero? (- g-empty g-prefix)) [g-empty g-prefix])
@@ -127,3 +127,29 @@
         (is (empty? (mapcat :constructed-candidates (:problems r))))
         (is (= :no-constructed-candidate (:kind (first (:refusals r))))
             (pr-str (:refusals r)))))))
+
+(deftest the-receipt-records-the-universe-the-scorer-used
+  ;; constructed-candidate-g returns {:value G :universe U} with U the
+  ;; problem's own tokens (cascade-problems/problem-tokens), so the
+  ;; construction receipt records the universe G was taken over. Bad case:
+  ;; a fact no pattern names (:x-idle) is in the scorer's universe but not in
+  ;; the token set interpretation-construction would declare for a bare G
+  ;; (want ∪ pattern tokens); a bare-number G would record that narrower set.
+  (let [extra (fn [srcs] (-> srcs
+                             (assoc-in [:universes target :x-idle] false)
+                             (assoc-in [:locators target :x-idle]
+                                       {:class :C4 :repo "futon2" :sha "HEAD" :path "x.md" :decl "- [x] x-idle"})))
+        p (let [srcs (extra (assoc (sources) :candidates
+                                   {target [{:precedence chain
+                                             :construction-receipt {:kind :declared-for-universe-test}}]}))]
+            (-> (wm/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources srcs})
+                :problems first :cascade-problem (dissoc :precedences)))
+        scored (wm/constructed-candidate-g p {:precedence chain})
+        scorer-universe (conj tokens :x-idle)]
+    (is (= (set scorer-universe) (set (:universe scored))))
+    (is (= (:universe scored) (vec (sort-by pr-str (:universe scored)))) "recorded sorted")
+    (is (number? (:value scored)))
+    (let [r (wm/assemble-cascade-problems-with-published (empty-store) {:targets [target] :sources (extra (sources))})
+          c (first (mapcat :constructed-candidates (:problems r)))]
+      (is (= chain (:precedence c)) (pr-str (:refusals r)))
+      (is (= (:universe scored) (get-in c [:construction-receipt :g-of-best :universe]))))))
