@@ -244,6 +244,21 @@
 ;; ---------------------------------------------------------------------------
 ;; The loop
 
+(defn throwable-summary
+  "A Throwable as data for a record: :class, :message, the ex-data's :kind
+  as :ex-kind when present, and :cause, the chain beneath it as
+  {:class :message}, at most 5."
+  [e]
+  (cond-> {:class (.getName (class e)) :message (ex-message e)}
+    (:kind (ex-data e)) (assoc :ex-kind (:kind (ex-data e)))
+    (ex-cause e) (assoc :cause (vec (for [c (take 5 (take-while some? (iterate ex-cause (ex-cause e))))]
+                                      {:class (.getName (class c)) :message (ex-message c)})))))
+
+(defn aborted-flight
+  "The flight record a run! abort carries (:status :aborted), or nil."
+  [e]
+  (some-> e ex-data ::aborted))
+
 (defn run!
   "Run FLIGHT to closure. CLICK-FN takes the judge-opts and returns
   {:click-id … :unreached-wants … :abstention …}; OBSERVE-FN takes the
@@ -261,19 +276,29 @@
   leave it no wants (:status :not-a-target-yet, :open-questions). Returns the
   flight record."
   [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn enact-fn wc-fn]}]
+  ;; WM-SPIKE-FIX-III: a Throwable out of any step still leaves a record.
+  ;; P holds the flight as recorded so far and the step running; the catch
+  ;; throws an ex-info carrying that flight with :status :aborted, which the
+  ;; driver writes before exiting non-zero. The third flight
+  ;; (flight-74325007) lost its read step's record this way.
+  (let [p (volatile! {:f flight :step nil})
+        at (fn [step thunk] (vswap! p assoc :step step) (thunk))
+        keep! (fn [f] (vswap! p assoc :f f) f)]
+   (try
   (loop [f flight]
     (if (or (not= :open (:status f)) (>= (count (:clicks f)) max-clicks))
       (cond-> f (= :open (:status f)) (assoc :status :click-limit))
-      (let [sources (sources-fn)
+      (let [_ (keep! f)
+            sources (at :sources sources-fn)
             ;; D11 part 5: readings the want source still needs (criteria a
             ;; mission does not state in a recognised form; locators for
             ;; criteria with no stated verdict) are asked before the wants
             ;; are read, so this click sees what they publish
-            read (when read-fn (read-fn f sources))
-            f (cond-> f
-                read (-> (update :readings (fnil conj []) (assoc read :before-click (inc (count (:clicks f)))))
-                         (update :needs into (:needs read))))
-            wants (click-wants f sources)
+            read (when read-fn (at :read #(read-fn f sources)))
+            f (keep! (cond-> f
+                       read (-> (update :readings (fnil conj []) (assoc read :before-click (inc (count (:clicks f)))))
+                                (update :needs into (:needs read)))))
+            wants (at :wants #(click-wants f sources))
             questions (filterv #(= :owner-question (:kind %)) (:needs f))]
         (if (and (seq questions) (empty? (:wants wants)))
           ;; genuinely unclear: no click is spent; the flight ends with the
@@ -282,18 +307,18 @@
           (assoc f :status :not-a-target-yet :open-questions questions)
           (let [locators (select-keys (merge (get-in sources [:locators (:target f)]) (:locators wants))
                                       (:wants wants))
-                before (observe-fn (:target f) locators)
-                asked (when ask-fn (ask-fn f wants sources))
-                f (cond-> f
-                    asked (-> (update :asks (fnil conj []) (assoc asked :before-click (inc (count (:clicks f)))))
-                              (update :needs into (:needs asked))))
-                result (click-fn (judge-opts f wants))
+                before (at :observe #(observe-fn (:target f) locators))
+                asked (when ask-fn (at :ask #(ask-fn f wants sources)))
+                f (keep! (cond-> f
+                           asked (-> (update :asks (fnil conj []) (assoc asked :before-click (inc (count (:clicks f)))))
+                                     (update :needs into (:needs asked)))))
+                result (at :click #(click-fn (judge-opts f wants)))
                 ;; M-wm-wiring row 0: the enactment step, after the click and
                 ;; before the after-observation, which should see its effect
-                enacted (when enact-fn (enact-fn f result))
+                enacted (when enact-fn (at :enact #(enact-fn f result)))
                 ;; step 11: the W_c verdict of that enactment, handed to the
                 ;; habit fold's increment unchanged
-                wc (when (and wc-fn (:enactment enacted)) (wc-fn f enacted))
+                wc (when (and wc-fn (:enactment enacted)) (at :wc #(wc-fn f enacted)))
                 f (cond-> f enacted (update :enactments (fnil conj [])
                                             (merge (assoc (if (:enactment enacted)
                                                             (assoc (select-keys enacted [:record-path])
@@ -305,7 +330,8 @@
                                                             {:enactment (select-keys enacted [:absent])})
                                                           :click-id (:click-id result))
                                                    wc)))
-                after (observe-fn (:target f) locators)
+                _ (keep! f)
+                after (at :observe #(observe-fn (:target f) locators))
                 f (record-click f (merge result {:wants (:wants wants)
                                                  :want-source (:source wants)
                                                  :before before
@@ -319,4 +345,10 @@
                      (and (= :closed (:status f)) (seq questions))
                      (assoc-in [:closure-scope :open-questions] questions)
                      (and (= :no-progress (:status f)) (seq pending))
-                     (assoc :status :awaiting-answer :pending pending)))))))))
+                     (assoc :status :awaiting-answer :pending pending))))))))
+   (catch Throwable e
+     (let [{:keys [f step]} @p]
+       (throw (ex-info (str "flight aborted in step " (some-> step name) ": " (ex-message e))
+                       {::aborted (assoc f :status :aborted
+                                         :aborted (merge {:step step} (throwable-summary e)))}
+                       e)))))))

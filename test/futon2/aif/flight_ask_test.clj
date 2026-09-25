@@ -207,3 +207,66 @@
     (is (= [{:class "clojure.lang.ExceptionInfo" :message "futon1b entities query failed"}
             {:class "java.net.SocketTimeoutException" :message "Read timed out"}]
            (:cause refusal)))))
+
+;; ---------------------------------------------------------------------------
+;; WM-SPIKE-FIX-III: no exception escapes a flight step unrecorded. The third
+;; flight (flight-74325007) died in the ask step on the Agency job poll's
+;; HttpTimeoutException and wrote no record. Live pin: its error report.
+
+(def third-flight-error
+  (edn/read-string {:default tagged-literal}
+                   (slurp "/home/joe/code/futon3c/holes/labs/M-wm-wiring/spike/driver-error-report-flight-74325007.edn")))
+
+(defn- pinned-timeout []
+  (let [{:clojure.error/keys [class cause]} (:clojure.main/triage third-flight-error)]
+    (assert (= 'java.net.http.HttpTimeoutException class))
+    (java.net.http.HttpTimeoutException. cause)))
+
+(deftest an-ask-that-throws-is-an-entry-and-the-flight-goes-on
+  (let [store (temp-dir "ask-store")
+        calls (atom 0) clicks (atom 0)
+        stub (stub-answer #(reply-for (by-want %)))
+        answer (fn [issued] (if (= 2 (swap! calls inc)) (throw (pinned-timeout)) (stub issued)))
+        f (flight/run! (seams-flight)
+                       {:ask-fn (fr/ask-fn {:store (.getCanonicalPath store) :answer-fn answer
+                                            :code-root (.getCanonicalPath (io/file "test/fixtures/want-interp-library"))
+                                            :request-options (request-options)})
+                        :click-fn (fn [_] (swap! clicks inc) {:click-id "c1" :abstention {:kind :no-admitted-interpretation}})
+                        :observe-fn (fn [_ _] {})
+                        :sources-fn (constantly tick-sources)
+                        :max-clicks 1})
+        asked (:asked (first (:asks f)))
+        threw (first (filter #(= :ask-threw (:outcome %)) asked))]
+    (is (= 2 (count asked)))
+    (is (not= :ask-threw (:outcome (first asked))) "the first want's entry stands")
+    (is (= {:kind :ask-threw :class "java.net.http.HttpTimeoutException" :message "request timed out"}
+           (select-keys (:refusal threw) [:kind :class :message])))
+    (is (some #(= :ask-threw (:kind %)) (:needs f)) "and it is a need")
+    (is (= 1 @clicks) "the flight reached its click")
+    (is (not= :aborted (:status f)))))
+
+(deftest an-answer-poll-failure-keeps-the-job-id
+  (let [answer (fr/agency-answer-fn {:seat "claude-5" :dispatch! (fn [& _] {:job-id "job-p"})
+                                     :poll! (fn [& _] (throw (pinned-timeout)))})
+        r (with-redefs [wi/issue! (fn [_ req] (assoc req :request-id "r1"))]
+            (ask (temp-dir "ask-store") answer))]
+    (is (every? #(= "job-p" (:job-id %)) (:asked r)))
+    (is (= "java.net.http.HttpTimeoutException" (get-in r [:asked 0 :refusal :class]))
+        "the refusal names the poll's failure, not the wrapper")))
+
+(deftest a-step-that-throws-aborts-with-the-record-kept
+  (let [e (try (flight/run! (seams-flight)
+                            {:ask-fn (fn [_ _ _] {:asked [{:want argue :outcome :declined}] :needs []})
+                             :click-fn (fn [_] (throw (pinned-timeout)))
+                             :observe-fn (fn [_ _] {})
+                             :sources-fn (constantly tick-sources)
+                             :max-clicks 1})
+               nil
+               (catch clojure.lang.ExceptionInfo e e))
+        aborted (flight/aborted-flight e)]
+    (is (some? e) "run! rethrows")
+    (is (= :aborted (:status aborted)))
+    (is (= {:step :click :class "java.net.http.HttpTimeoutException" :message "request timed out"}
+           (select-keys (:aborted aborted) [:step :class :message])))
+    (is (= [{:want argue :outcome :declined}] (:asked (first (:asks aborted)))) "the asks before it are kept")
+    (is (instance? java.net.http.HttpTimeoutException (ex-cause e)))))

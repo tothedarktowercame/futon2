@@ -136,7 +136,11 @@
           job-id (:job-id sent)]
       (if-not job-id
         {:seat seat :state :not-dispatched :text nil :dispatch sent :library-root root}
-        (let [job (poll! opts job-id)]
+        (let [job (try (poll! opts job-id)
+                       (catch Throwable e
+                         ;; the job exists; say which, so the reply can be read
+                         (throw (ex-info (str "polling " job-id " failed: " (ex-message e))
+                                         {::answer-failed true ::job-id job-id ::seat seat} e))))]
           {:seat seat :job-id job-id :state (:state job) :text (job-text job)
            :library-root root})))))
 
@@ -255,13 +259,24 @@
                                      (or request-options {})))
        (catch Exception e
          {::refused (or (:interpretation/refusal (ex-data e))
-                        (cond-> {:kind :construction-threw
-                                 :class (.getName (class e))
-                                 :message (ex-message e)
-                                 :data-keys (vec (sort-by str (keys (ex-data e))))}
-                          (:kind (ex-data e)) (assoc :ex-kind (:kind (ex-data e)))
-                          (ex-cause e) (assoc :cause (vec (for [c (take 5 (take-while some? (iterate ex-cause (ex-cause e))))]
-                                                            {:class (.getName (class c)) :message (ex-message c)})))))})))
+                        (merge {:kind :construction-threw}
+                               (flight/throwable-summary e)
+                               {:data-keys (vec (sort-by str (keys (ex-data e))))}))})))
+
+(defn- ask-threw
+  "The entry for an ask whose answer or settle path threw (WM-SPIKE-FIX-III):
+  the want's BASE with :outcome :ask-threw and the Throwable as a refusal.
+  An exception agency-answer-fn raised after the job was issued carries the
+  job id (::answer-failed), so the seat's reply stays findable; the refusal
+  then describes the underlying failure (the third flight's poll timeout,
+  flight-74325007), not the wrapper."
+  [base e]
+  (let [{job-id ::job-id seat ::seat} (ex-data e)
+        cause (if (::answer-failed (ex-data e)) (ex-cause e) e)]
+    (cond-> (assoc base :outcome :ask-threw
+                   :refusal (merge {:kind :ask-threw} (flight/throwable-summary cause)))
+      job-id (assoc :job-id job-id)
+      seat (assoc :seat seat))))
 
 (defn- settle
   "Parse, validate and publish ANSWER to ISSUED; the outcome entry."
@@ -327,7 +342,8 @@
       (let [issued (issue-request store view target want criterion request-options)]
         (if (contains? issued ::refused)
           (assoc base :outcome :request-refused :refusal (::refused issued))
-          (settle opts view issued (answer-fn issued) base))))))
+          (try (settle opts view issued (answer-fn issued) base)
+               (catch Throwable e (ask-threw (assoc base :request-id (:request-id issued)) e))))))))
 
 (defn- constraints-for
   "The owner constraints validation applies: those the want source read from
@@ -378,7 +394,7 @@
         {:asked asked
          :needs (vec (for [a asked :when (not= :published (:outcome a))]
                        (merge {:kind (:outcome a) :missing :interpretation}
-                              (select-keys a [:want :request-id :seat :job-id :state]))))}))))
+                              (select-keys a [:want :request-id :seat :job-id :state :refusal]))))}))))
 
 ;; ---------------------------------------------------------------------------
 ;; Clicks through the serving JVM (POST /api/alpha/wm/click)
@@ -466,7 +482,9 @@
   "Issue a reading request, answer it, parse, validate, publish. The entry."
   [{:keys [store answer-fn]} issued schema validate publish & [publish-questions]]
   (let [issued (wi/issue! store issued)
-        answer (answer-fn issued)
+        base0 {:kind (:kind issued) :want (get-in issued [:want :token]) :request-id (:request-id issued)}]
+   (try
+    (let [answer (answer-fn issued)
         who (answered answer)
         base (merge {:kind (:kind issued) :want (get-in issued [:want :token]) :request-id (:request-id issued)} who)
         parsed (when (= "done" (:state answer)) (wi/parse-reply schema (:text answer)))]
@@ -479,7 +497,8 @@
                 :valid (do (publish issued (:response parsed) v who) (assoc base :outcome :published))
                 :questions (do (when publish-questions (publish-questions issued (:response parsed) v who))
                                (assoc base :outcome :questions :questions (:questions v)))
-                (assoc base :outcome :rejected :reasons (:reasons v)))))))
+                (assoc base :outcome :rejected :reasons (:reasons v))))))
+    (catch Throwable e (ask-threw base0 e)))))
 
 (defn read-fn
   "The flight's read step (D11 part 5), run before the wants are read. When
@@ -579,7 +598,7 @@
        :needs (vec (concat
                     (for [a asked :when (not (#{:published :questions} (:outcome a)))]
                       (merge {:kind (:outcome a) :missing (case (:kind a) :criteria :criteria :coverage :coverage :constraints :constraints :locator)}
-                             (select-keys a [:want :request-id :seat :job-id])))
+                             (select-keys a [:want :request-id :seat :job-id :refusal])))
                     (for [q questions]
                       {:kind :owner-question :missing :owner-answer :to addressed
                        :notified (boolean notified) :notification (select-keys notified [:job-id])

@@ -216,7 +216,22 @@
                                bb (assoc :bb bb)))
         notify! (fn [owner tgt prompt] (runner/dispatch! (runner/config {}) owner "wm-flight" tgt
                                                   (str "Requisition: " tgt " — War Machine questions for the mission owner\n\n" prompt)))
-        flown (flight/run! f {:read-fn (fr/read-fn (cond-> {:store store :answer-fn answer
+        write! (fn [flown]
+                 (let [path (io/file store "flights" (str (:flight/id flown) ".edn"))]
+                   (.mkdirs (.getParentFile path))
+                   (spit path (with-out-str (pp/pprint {:plan planned :flight flown})))
+                   path))
+        ;; WM-SPIKE-FIX-III: an aborted run! still has its record written
+        ;; (:status :aborted, the step named), then the error goes on
+        fly! (fn [opts]
+               (try (flight/run! f opts)
+                    (catch Throwable e
+                      (when-let [aborted (flight/aborted-flight e)]
+                        (let [path (write! aborted)]
+                          (throw (ex-info (str (ex-message e) "; flight record written to " (.getCanonicalPath path))
+                                          {:record-path (.getCanonicalPath path) :flight aborted} e))))
+                      (throw e))))
+        flown (fly! {:read-fn (fr/read-fn (cond-> {:store store :answer-fn answer
                                                             :notify! notify! :caller "joe"}
                                                      cascades (assoc :served-by-cascades {target cascades})))
                               :ask-fn (fr/ask-fn {:store store :answer-fn answer})
@@ -226,9 +241,7 @@
                               :observe-fn (fr/observe-fn)
                               :sources-fn (constantly sources)
                               :max-clicks (or max-clicks 4)})
-        path (io/file store "flights" (str (:flight/id flown) ".edn"))]
-    (.mkdirs (.getParentFile path))
-    (spit path (with-out-str (pp/pprint {:plan planned :flight flown})))
+        path (write! flown)]
     {:flight flown :record-path (.getCanonicalPath path)
      :enactments (:enactments flown)
      :readings (vec (for [a (:readings flown) q (:asked a)] (select-keys q [:kind :want :request-id :seat :job-id :outcome])))

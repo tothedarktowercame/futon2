@@ -170,3 +170,15 @@
   (let [[opts r] (wired-run {})]
     (is (= [{:enactment {:absent :no-dispatch-configured} :click-id "run-w"}] (:enactments r)))
     (is (not (.exists (io/file (:store opts) "flights" "enactments"))) "no enactment record written")))
+
+(deftest an-aborted-flight-still-writes-its-record
+  ;; WM-SPIKE-FIX-III: the third flight wrote no record when a step threw
+  (let [e (try (wired-run {:click-fn (fn [_] (throw (java.net.http.HttpTimeoutException. "request timed out")))})
+               nil
+               (catch clojure.lang.ExceptionInfo e e))
+        path (:record-path (ex-data e))
+        rec (clojure.edn/read-string {:default tagged-literal} (slurp path))]
+    (is (some? e) "the error still reaches the caller (exit 1)")
+    (is (= :aborted (get-in rec [:flight :status])))
+    (is (= :click (get-in rec [:flight :aborted :step])))
+    (is (= "java.net.http.HttpTimeoutException" (get-in rec [:flight :aborted :class])))))
