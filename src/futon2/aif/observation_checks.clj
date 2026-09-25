@@ -195,6 +195,29 @@
     (when (.isFile f)
       (sha256-hex (java.nio.file.Files/readAllBytes (.toPath f))))))
 
+(def ^:dynamic *registry-timeout-ms*
+  "The registry read's timeout (5000 ms since C8's reader was written; not
+  raised by WM-SPIKE-FIX-II D). Bound by tests."
+  5000)
+
+(defn- timeout? [e]
+  (some #(or (instance? java.net.http.HttpTimeoutException %)
+             (instance? java.net.SocketTimeoutException %)
+             (instance? java.util.concurrent.TimeoutException %))
+        (take 5 (take-while some? (iterate ex-cause e)))))
+
+(defn- registry-get
+  "GET URL for C8. An exception is {:status :unreachable :message ..}, plus
+  :timeout-ms when it was the read's timeout, so the record tells a timeout
+  from a refused connection (the second flight's two C8 refusals were a
+  5.66 s endpoint read against this 5 s timeout, recorded as bare
+  :unreachable; WM-SPIKE-FIX-II D)."
+  [url]
+  (try (http/get url {:timeout *registry-timeout-ms* :throw false})
+       (catch Exception e
+         (cond-> {:status :unreachable :message (ex-message e) :class (.getName (class e))}
+           (timeout? e) (assoc :timeout-ms *registry-timeout-ms*)))))
+
 (defn fetch-registry-entry
   "Read one registry record through the evidence API.
 
@@ -203,12 +226,11 @@
   a refusal when the store could not be asked or did not answer (unreadable)."
   [base entry-id]
   (let [url (str (str/replace base #"/$" "") "/api/alpha/evidence/" entry-id)
-        {:keys [status body]} (try (http/get url {:timeout 5000 :throw false})
-                                   (catch Exception e
-                                     {:status :unreachable :body (.getMessage e)}))]
+        {:keys [status body] :as resp} (registry-get url)
+        unreachable (select-keys resp [:message :class :timeout-ms])]
     (cond
       (= 404 status) :absent
-      (not= 200 status) (refuse :registry-unreadable {:check :C8 :url url :status status})
+      (not= 200 status) (refuse :registry-unreadable (merge {:check :C8 :url url :status status} unreachable))
       :else (let [parsed (try (json/read-str body :key-fn keyword)
                               (catch Exception _ nil))]
               (cond
@@ -233,14 +255,13 @@
   (let [url (str (str/replace base #"/$" "") "/api/alpha/test-registry/latest"
                  "?" param "=" (URLEncoder/encode (str value) "UTF-8")
                  "&limit=100")
-        {:keys [status body]} (try (http/get url {:timeout 5000 :throw false})
-                                   (catch Exception e
-                                     {:status :unreachable :body (.getMessage e)}))]
+        {:keys [status body] :as resp} (registry-get url)
+        unreachable (select-keys resp [:message :class :timeout-ms])]
     (if (not= 200 status)
       (let [parsed (try (json/read-str (str body) :key-fn keyword)
                         (catch Exception _ nil))]
         (refuse :registry-unreadable
-                (cond-> {:check :C8 :url url :status status}
+                (cond-> (merge {:check :C8 :url url :status status} unreachable)
                   (:reason parsed) (assoc :reason (keyword (:reason parsed))))))
       (let [latest (:latest (try (json/read-str body :key-fn keyword)
                                  (catch Exception _ nil)))]
