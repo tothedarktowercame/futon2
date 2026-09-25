@@ -2,7 +2,8 @@
   "Completion criteria read from mission text as flight wants (A-exits,
   proof2/packets/H-EXITS-D.md). The falsifier is §4's: a locator over the
   criterion sentence alone reads true under either verdict."
-  (:require [clojure.string :as str]
+  (:require [clojure.edn :as edn]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.flight :as flight]
             [futon2.aif.mission-criteria :as mc]
@@ -278,3 +279,22 @@
            (met-by-phase w)))
     (is (every? #(= :met (get-in % [:verdict-class :class])) (:criteria w)))
     (is (= {:requires [] :unresolved []} (mc/constraints "M-futon-seams" text)))))
+
+(deftest live-m-futon-seams-futon3c-dcd14563-corrected-record
+  ;; claude-1 after H-WITNESS-ii (futon3c dcd14563): the mission text is the
+  ;; 3f5f44dd bytes unchanged; the lifecycle record's :mission :sha256 pin,
+  ;; stale at 288ce657, is re-set to that text. The H-witness sequence ends here.
+  (let [text (slurp (str fixture-dir "M-futon-seams@futon3c-3f5f44dd.md"))
+        lifecycle (slurp (str fixture-dir "M-futon-seams-lifecycle@futon3c-dcd14563.edn"))
+        sha (format "%064x" (BigInteger. 1 (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                                                    (.getBytes text "UTF-8"))))
+        w (live "M-futon-seams@futon3c-3f5f44dd.md" "M-futon-seams")]
+    (is (= "d13c5cfe9e9b19b445bd5bb73507f286a9e5ff3b478a1c5bc6a2250d70c6f6fd" sha))
+    (is (= sha (get-in (edn/read-string lifecycle) [:mission :sha256]))
+        "the record's pin names the text its verdicts were checked against")
+    (is (= {"MAP" true "DERIVE" true "ARGUE" true "VERIFY" true "INSTANTIATE" true "DOCUMENT" true}
+           (met-by-phase w)))
+    (is (every? #(= :met (get-in % [:verdict-class :class])) (:criteria w)))
+    (is (= {:requires [] :unresolved []} (mc/constraints "M-futon-seams" text)))
+    (is (= [:HEAD :IDENTIFY] (mapv :phase (mc/data-only-phases lifecycle)))
+        "IDENTIFY's recorded technical exit leaves it judged in data only")))
