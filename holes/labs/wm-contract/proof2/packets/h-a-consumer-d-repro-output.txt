@@ -1,0 +1,121 @@
+
+========================================================================
+E1. sourced-rates with measured labels vs nil labels
+========================================================================
+
+rates-by-class over the same labels (the PRODUCER):
+{:C4
+ {:false-pos {:numerator 1, :denominator 2, :rate 1/2},
+  :false-neg {:numerator 1, :denominator 2, :rate 1/2},
+  :coverage 1}}
+
+sourced-rates WITH measured labels:
+{:status :sourced,
+ :source :futon2.aif.observation-rates/sourced-rates,
+ :rates
+ #:t{:other {:false-neg 0, :false-pos 0},
+     :wanted {:false-neg 0, :false-pos 0},
+     :observed {:false-neg 0, :false-pos 0}},
+ :basis
+ #:t{:other :checkable, :wanted :checkable, :observed :checkable},
+ :class-of #:t{:other :C4, :wanted :C4, :observed :C4}}
+
+sourced-rates WITH nil labels:
+{:status :sourced,
+ :source :futon2.aif.observation-rates/sourced-rates,
+ :rates
+ #:t{:other {:false-neg 0, :false-pos 0},
+     :wanted {:false-neg 0, :false-pos 0},
+     :observed {:false-neg 0, :false-pos 0}},
+ :basis
+ #:t{:other :checkable, :wanted :checkable, :observed :checkable},
+ :class-of #:t{:other :C4, :wanted :C4, :observed :C4}}
+
+equal? true
+printed forms equal? true
+every token :basis :checkable? true
+
+classes the contract declares, with their :kind:
+  :C3 :checkable
+  :C4 :checkable
+  :C5 :checkable
+  :C6 :checkable
+  :C8 :checkable
+  :J :judgement
+
+========================================================================
+E2. What the A-S exemplar ledger measured
+========================================================================
+
+ledger: /home/joe/code/futon3c/holes/labs/M-futon-seams/exemplar/check-ledger.edn
+schema: :m-futon-seams/check-ledger-v1  rows: 22
+
+contract classes and the check function each names:
+  :C3 -> check-path-exists
+  :C4 -> check-decl-in-file
+  :C5 -> check-registry-entry
+  :C6 -> check-witness-reference
+  :C8 -> check-registered-run
+
+ledger rows by kind, with the check each row ran:
+  :grep (6 rows, 6 runs)
+    :g1 | starts-with\?[^)]*"(claude|codex|kimi|zai)" (old regex) 
+    :g2 | starts-with\?[^)]*"(claude|codex|kimi|zai)" (old regex) | :false-pass
+    :g3 | old regex 
+    :g4 | starts-with\?.*"(claude|codex|kimi|zai)" (new regex) 
+    :g5 | new regex 
+    :g6 | new regex 
+  :layout (4 rows, 4 runs)
+    :l1 | check_seams_layout.js (measured .nid/.wid only) | :false-pass
+    :l2 | check_seams_layout.js (body measured as .main p) | :false-fail
+    :l3 | check_seams_layout.js text-in-box 
+    :l4 | check_seams_layout.js (40 measurements) 
+  :test (5 rows, 5 runs)
+    :t1 | roles_test provider-routing tests 
+    :t2 | roles_test provider-routing tests 
+    :t3 | roles_test redirect-a-role-to-another-provider 
+    :t4 | roles_test redirect-a-role-to-another-provider 
+    :t5 | roles_test (8 tests) 
+  :validator (7 rows, 18 runs)
+    :v1 | proof2a_check W_t/W_0 
+    :v2 | proof2a_check falsifiers 
+    :v3 | proof2a_check W_0 (first version) | :false-pass
+    :v4 | meets.clj (strict descendants) | :false-fail
+    :v5 | cascade_check.py receipt sha 
+    :v6 | seams page stale-anchor flag 
+    :v7 | reanchor.py (sequential replace) | :false-pass
+
+rows whose :check names one of the contract's check functions:
+  check-fn names looked for: [check-decl-in-file check-path-exists check-registered-run check-registry-entry check-witness-reference]
+  matching rows: NONE
+
+========================================================================
+E3. Would a non-zero kernel for a checkable class move G?
+========================================================================
+
+production (checkable zero kernel):
+  stopped-at: nil  refusal: nil
+  ranked [cascade-id G-efe]: [[:C1 2.012817736156336] [:C0 4.012817736156336]]
+
+design (a) simulated (:C4 takes {:false-neg 1/6, :false-pos 3/10} ):
+  stopped-at: nil  refusal: nil
+  ranked [cascade-id G-efe]: [[:C1 3.7324454306095607] [:C0 4.799112097276227]]
+
+G equal? false
+
+family meta :rates of each run:
+  production: :sourced-adjudication-rates
+  design (a): :sourced-adjudication-rates
+
+rates actually scored, production:
+#:t{:other {:false-neg 0, :false-pos 0},
+    :wanted {:false-neg 0, :false-pos 0},
+    :observed {:false-neg 0, :false-pos 0}}
+rates actually scored, design (a):
+#:t{:other {:false-neg 1/6, :false-pos 3/10},
+    :wanted {:false-neg 1/6, :false-pos 3/10},
+    :observed {:false-neg 1/6, :false-pos 3/10}}
+
+========================================================================
+read-only: no click, no store write, no shared-JVM load.
+========================================================================
