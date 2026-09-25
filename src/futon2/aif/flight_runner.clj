@@ -84,6 +84,14 @@
   want interpretation."
   #{:locator :criteria :coverage :constraints})
 
+(defn requisition-line
+  "The prompt's first line naming TARGET as the requisition, or nil when
+  there is no target to name. Kimi seats refuse a call without it (Agency:
+  \"You can't use a Kimi seat without a requisition\")."
+  [target what]
+  (when (and (string? target) (not (str/blank? target)))
+    (str "Requisition: " target " — War Machine " what "\n\n")))
+
 (defn reply-text
   "The seat's reply in an Agency JOB, once: :result (the full response) when
   present, else the job's text events joined. Never :result-summary (a
@@ -121,11 +129,9 @@
                               library-root #(wi/prompt % {:library-root library-root})
                               :else wi/prompt))
           root (or library-root {:absent :not-in-flight-opts})
-          ;; Kimi seats refuse a call without this line in the prompt
-          ;; (Agency: "You can't use a Kimi seat without a requisition")
-          requisition (str "Requisition: " (:target issued) " — War Machine "
-                           (name (or (:kind issued) :interpretation)) " request "
-                           (:request-id issued) "\n\n")
+          requisition (requisition-line (:target issued)
+                                        (str (name (or (:kind issued) :interpretation)) " request "
+                                             (:request-id issued)))
           sent (dispatch! opts seat caller (:target issued) (str requisition (prompt-fn issued)))
           job-id (:job-id sent)]
       (if-not job-id
@@ -133,6 +139,88 @@
         (let [job (poll! opts job-id)]
           {:seat seat :job-id job-id :state (:state job) :text (job-text job)
            :library-root root})))))
+
+(def step-response-schema :wm/enactment-step-response-v1)
+
+(defn step-prompt
+  "What the seat is asked for one pattern STEP of the chosen candidate
+  (enact-fn's step map): the pattern, its interpretation, the phase, and the
+  reply grammar enact-fn reads."
+  [{:keys [target candidate pattern n interpretation phase]}]
+  (str "The War Machine chose candidate " (pr-str candidate) " for " target
+       ". Carry out step " n ", pattern " (pr-str pattern) ", phase " (name phase) ".\n\n"
+       "The pattern's interpretation:\n\n```edn\n" (with-out-str (clojure.pprint/pprint interpretation)) "```\n\n"
+       "Reply with exactly one fenced edn block of schema " step-response-schema ":\n"
+       (if (= :plan phase)
+         "  {:schema ... :grain {...the grain your attempt will build...}}\n"
+         "  {:schema ... :commit \"<sha>\" :produced <token> :check {...check locator...}}\n")
+       "or, if you will not do it, {:schema ... :decline {:reason \"...\"}}.\n"))
+
+(defn agency-dispatch-step!
+  "enact-fn's :dispatch-step! over the Agency (M-wm-wiring WM-DISPATCH-STEP-I):
+  for one pattern step, read the roster, bell SEAT by requisition (the flight
+  target; mode work, runner/dispatch!), poll the job to a terminal state
+  within DEADLINE-MS, and return the answer enact-fn records, each carrying
+  :job-id and :deadline (the deadline that applied):
+    the seat's reply               {:commit .. :produced .. :check ..} or {:grain ..}
+    the seat declines              {:declined {:reason <the seat's words>}}
+    seat not on the roster         {:failed {:reason :seat-not-on-roster :seat ..}}
+    no requisition to name         {:failed {:reason :requisition-missing}}
+    still running at the deadline  {:failed {:reason :job-not-terminal-by-deadline
+                                             :job-id .. :deadline-ms ..}}
+    terminal but not done          {:failed {:reason :not-answered :state ..}}
+    reply not in the grammar       {:failed {:reason :unparseable-response ..}}
+    the bell not accepted          {:failed {:reason :not-dispatched ..}}
+  Nothing escapes as an exception. DEADLINE-MS not given is
+  {:absent :no-step-deadline}: the job is polled to terminal, as
+  runner/poll-job! does. Ports (:roster-fn :dispatch! :read-job! :now-ms
+  :sleep!) are injectable for tests."
+  [{:keys [seat caller opts deadline-ms poll-ms roster-fn dispatch! read-job! now-ms sleep!]
+    :or {caller "wm-flight" poll-ms 5000
+         now-ms #(System/currentTimeMillis) sleep! #(Thread/sleep (long %))}}]
+  (let [opts (or opts (runner/config {}))
+        roster-fn (or roster-fn #((var-get #'runner/agent-roster) (:agency-base opts)))
+        dispatch! (or dispatch! runner/dispatch!)
+        read-job! (or read-job! #(runner/read-job! opts %))
+        deadline (if deadline-ms {:ms deadline-ms :source :flight-option} {:absent :no-step-deadline})]
+    (fn [step]
+      (try
+        (let [roster (roster-fn)
+              requisition (requisition-line (:target step) (str "enactment step " (:n step)))]
+          (cond
+            (not (or (get roster (keyword seat)) (get roster seat)))
+            {:failed {:reason :seat-not-on-roster :seat seat} :deadline deadline}
+            (nil? requisition)
+            {:failed {:reason :requisition-missing} :deadline deadline}
+            :else
+            (let [sent (dispatch! opts seat caller (:target step) (str requisition (step-prompt step)))
+                  job-id (:job-id sent)]
+              (if-not job-id
+                {:failed {:reason :not-dispatched :response sent} :deadline deadline}
+                (let [start (now-ms)
+                      job (loop []
+                            (let [j (read-job! job-id)]
+                              (cond
+                                (contains? runner/terminal-states (:state j)) j
+                                (and deadline-ms (>= (- (now-ms) start) deadline-ms)) nil
+                                :else (do (sleep! poll-ms) (recur)))))
+                      base {:job-id job-id :deadline deadline}]
+                  (cond
+                    (nil? job)
+                    (assoc base :failed {:reason :job-not-terminal-by-deadline
+                                         :job-id job-id :deadline-ms deadline-ms})
+                    (not= "done" (:state job))
+                    (assoc base :failed {:reason :not-answered :state (:state job)})
+                    :else
+                    (let [parsed (wi/parse-reply step-response-schema (reply-text job))]
+                      (cond
+                        (:decline parsed) (assoc base :declined (:decline parsed))
+                        (:response parsed) (merge base (:response parsed))
+                        :else (assoc base :failed (assoc (:unparseable-response parsed)
+                                                         :reason :unparseable-response))))))))))
+        (catch Exception e
+          {:failed {:reason :dispatch-threw :class (.getName (class e)) :message (ex-message e)}
+           :deadline deadline})))))
 
 (defn target-view
   "The flight target's sources as the tick would see them: the flight's
@@ -563,6 +651,21 @@
       (assoc check :result r))
     {:absent :no-check-from-seat}))
 
+(defn- step-attempt
+  "The attempt at pattern P from the seat's commit answer C: failed or
+  declined as the seat's step said (a decline is the seat's own words, not a
+  failure), else the commit with its check observed. The job id and the
+  deadline that applied are kept when the answer carries them."
+  [check-fn n p c]
+  (merge {:n n :pattern p}
+         (select-keys c [:job-id :deadline])
+         (cond
+           (:failed c) {:success false :failed (:failed c)}
+           (:declined c) {:success false :declined (:declined c)}
+           :else (let [chk (run-check check-fn (:check c))]
+                   {:commit (:commit c) :produced (:produced c)
+                    :check chk :success (true? (:observed (:result chk)))}))))
+
 (defn enact-fn
   "The flight's enactment step: after a click that chose one of the flight
   target's candidates, have a seat carry out the candidate's pattern steps
@@ -625,27 +728,22 @@
                      :let [step (assoc base-step :pattern p :n (inc i)
                                        :interpretation (get interps p))]]
                  (if (= p grain-p)
-                   (let [plan (dispatch-step! (assoc step :phase :plan))
-                         g (gate/grain-gate {:grain cand-grain} {:grain (:grain plan)} repo-root)]
-                     (if (= :pass (:status g))
-                       (let [c (dispatch-step! (assoc step :phase :commit))]
-                         (if (:failed c)
-                           {:n (inc i) :pattern p :success false :grain-gate g :failed (:failed c)}
-                           (let [chk (run-check check-fn (:check c))]
-                             {:n (inc i) :pattern p :commit (:commit c) :produced (:produced c)
-                              :grain (:grain plan) :grain-gate g
-                              :check chk :success (true? (:observed (:result chk)))})))
-                       {:n (inc i) :pattern p :success false :grain (:grain plan) :grain-gate g
-                        :not-committed :grain-gate-refused}))
-                   (let [c (dispatch-step! (assoc step :phase :commit))]
-                     (if (:failed c)
-                       {:n (inc i) :pattern p :success false :failed (:failed c)}
-                       (let [chk (run-check check-fn (:check c))]
-                         {:n (inc i) :pattern p :commit (:commit c) :produced (:produced c)
-                          :check chk :success (true? (:observed (:result chk)))}))))))
+                   (let [plan (dispatch-step! (assoc step :phase :plan))]
+                     (if (or (:failed plan) (:declined plan))
+                       (merge {:n (inc i) :pattern p :success false :phase :plan}
+                              (select-keys plan [:failed :declined :job-id :deadline]))
+                       (let [g (gate/grain-gate {:grain cand-grain} {:grain (:grain plan)} repo-root)]
+                         (if (= :pass (:status g))
+                           (merge (step-attempt check-fn (inc i) p (dispatch-step! (assoc step :phase :commit)))
+                                  {:grain (:grain plan) :grain-gate g})
+                           {:n (inc i) :pattern p :success false :grain (:grain plan) :grain-gate g
+                            :not-committed :grain-gate-refused}))))
+                   (step-attempt check-fn (inc i) p (dispatch-step! (assoc step :phase :commit))))))
               deviations (vec (concat
                                (for [a attempts :when (:failed a)]
                                  {:kind :step-failed :pattern (:pattern a) :failed (:failed a)})
+                               (for [a attempts :when (:declined a)]
+                                 {:kind :step-declined :pattern (:pattern a) :declined (:declined a)})
                                (for [a attempts :when (:not-committed a)]
                                  {:kind :grain-gate-refused :pattern (:pattern a)
                                   :reason (get-in a [:grain-gate :reason])})))

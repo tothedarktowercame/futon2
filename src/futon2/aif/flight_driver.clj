@@ -13,9 +13,12 @@
       --checker /home/joe/code/futon3c/holes/labs/M-futon-seams/exemplar/proof2a_check.clj \\
       --bb bb --library-root /home/joe/code/futon3/library --max-clicks 1 [--run]
 
-  Also --field-entry <edn> (the target field's entry for the target) and
+  Also --field-entry <edn> (the target field's entry for the target),
   --cascades <dir> (the target's cascades, for the read step's served-by
-  reading). Each flag not given is a typed absence on the plan's
+  reading), and --dispatch-seat <seat> [--step-deadline-ms <ms>] (the seat
+  that carries out a chosen candidate's steps, flight-runner/
+  agency-dispatch-step!; without it a decision is recorded
+  {:absent :no-dispatch-configured}). Each flag not given is a typed absence on the plan's
   :resolved-steps. The store is wi/default-store, under futon2's data/: a
   --run writes the flight record, the readings, the requests and any
   enactment record there.
@@ -103,14 +106,19 @@
   "What a real run would use for each wired step (M-wm-wiring WM-DRIVER-I),
   from the parsed OPTS; a flag not given is a typed absence, never a default
   standing in for it."
-  [{:keys [checker bb library-root field-entry cascades]}]
+  [{:keys [checker bb library-root field-entry cascades dispatch-seat step-deadline-ms]}]
   {:checker (or checker {:absent :no-wc-checker-configured})
    :bb (or bb {:absent :not-given :runs "bb"})
    :library-root (or library-root {:absent :not-in-flight-opts})
    :field-entry (or field-entry {:absent :no-field-entry})
    :cascades (or cascades {:absent :no-cascades-dir})
    :quotes {:absent :no-quotes}
-   :dispatch-step {:absent :no-dispatch-configured}
+   :dispatch-step (if dispatch-seat
+                    {:via "flight-runner/agency-dispatch-step!" :seat dispatch-seat
+                     :deadline (if step-deadline-ms
+                                 {:ms step-deadline-ms :source :flight-option}
+                                 {:absent :no-step-deadline})}
+                    {:absent :no-dispatch-configured})
    :enact "flight-runner/enact-fn over the click's run record (observe-publication-fn inside it)"
    :wc "flight-runner/wc-verdict-fn with the checker and bb"})
 
@@ -183,12 +191,16 @@
 (defn run-flight!
   "Fly the planned flight once. Returns {:flight … :record-path …}."
   [{:keys [seat store max-clicks sources checker bb library-root cascades
-           run-record-dir click-fn answer-fn dispatch-step!] :as opts} planned]
+           run-record-dir click-fn answer-fn dispatch-step! dispatch-seat step-deadline-ms] :as opts} planned]
   (let [target (:target (resolve-target opts))
         store (or store wi/default-store)
         run-record-dir (or run-record-dir runner/default-run-record-dir)
         record-path (fn [click-id] (str (io/file run-record-dir (str "tick-run-record-" click-id ".edn"))))
         f (flight-for (assoc opts :id (:flight-id planned)))
+        dispatch-step! (or dispatch-step!
+                           (when dispatch-seat
+                             (fr/agency-dispatch-step! (cond-> {:seat dispatch-seat :opts (runner/config {})}
+                                                         step-deadline-ms (assoc :deadline-ms step-deadline-ms)))))
         answer (or answer-fn
                    (fr/agency-answer-fn (cond-> {:seat seat :caller "wm-flight" :opts (runner/config {})}
                                           library-root (assoc :library-root library-root))))
@@ -254,6 +266,7 @@
         _ (check-args! opts)
         opts (cond-> opts
                (:max-clicks opts) (update :max-clicks parse-long)
+               (:step-deadline-ms opts) (update :step-deadline-ms parse-long)
                (:field-entry opts) (update :field-entry clojure.edn/read-string))
         opts (assoc opts :sources (load-sources))
         planned (plan opts)]
