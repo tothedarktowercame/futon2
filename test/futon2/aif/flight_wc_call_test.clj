@@ -84,3 +84,18 @@
     (is (= ["W_c: no successful attempt names a G_c pass (X_c(d)): the grain attempt's check is not grain-gate"]
            (get-in r [:wc :verdict]) @seen)
         "per 4bc95005: the recorded grain attempt names no G_c pass")))
+
+(deftest the-real-checker-on-a-tick-run-record
+  ;; WM-PRESPIKE-I (futon3c d85b5941): the checker reads the tick's run-record
+  ;; shape; the reduced record and its enactment are futon3c fixtures, read
+  ;; by absolute path (outside this namespace's warrant)
+  (let [fx "/home/joe/code/futon3c/test/futon3c/exemplar/fixtures/"
+        enactment-path (str fx "enactment-machine@a4b4fc78.edn")
+        seen (atom nil)
+        r ((fr/wc-verdict-fn {:checker "/home/joe/code/futon3c/holes/labs/M-futon-seams/exemplar/proof2a_check.clj"
+                              :click-record-path (constantly (str fx "tick-run-record-reduced@a4b4fc78.edn"))
+                              :increment! (fn [_ _ v] (reset! seen v) {:delta (if (= [] v) 1 0)})})
+           {:target "M-aif-policy-conditioned-eig"}
+           {:enactment (edn/read-string (slurp enactment-path)) :record-path enactment-path})]
+    (is (= [] (get-in r [:wc :verdict]) @seen) "the verdict reaches increment")
+    (is (= 1 (get-in r [:increment :delta])))))
