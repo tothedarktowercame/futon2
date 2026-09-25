@@ -583,6 +583,8 @@
 (defn isolated-runner-opts []
   (merge (hermetic/runner-repair-options)
   {:cohort? false
+   ;; the fixture's cast, named here: the runner has no default cast
+   :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
    :phase-log-fn (fn [_])
    :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                        :codex-7 {:status "idle" :invoke-ready? true}
@@ -1381,7 +1383,7 @@
         phases (atom [])
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :batch-id "overnight-2026-07-16"
           :phase-log-fn #(swap! phases conj %)
           :repair-open-fn (constantly [])
@@ -1866,7 +1868,7 @@
         ;; constructor refusing (construct-fn nil), not the action grain
         gap-judgement judgement
         result (runner/run-opportunity!
-                {:cohort? false
+                {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
                  :phase-log-fn (fn [_])
                  :repair-open-fn (constantly [])
                  :repair-system-record-fn
@@ -2055,7 +2057,7 @@
         findings (atom [])
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :revision-rounds 0
           :phase-log-fn (fn [_])
           :repair-open-fn (constantly [])
@@ -2924,7 +2926,7 @@
                          :review-text "unrelated finding")
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :phase-log-fn (fn [_])
           :repair-open-fn (constantly [unrelated stop-line follow-up])
           :repair-implement-fn (fn [obligation implementation]
@@ -3054,7 +3056,7 @@
         queued (atom [])
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :phase-log-fn (fn [_])
           :roster-fn (fn [_] (throw (ex-info "agency unavailable" {})))
           :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
@@ -3074,6 +3076,7 @@
 
 (defn- readiness-run-opts [phases roster-fn]
   {:cohort? false
+   :author "zai-5" :reviewer "codex-7"
    :phase-log-fn #(swap! phases conj %)
    :roster-fn roster-fn
    :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
@@ -3169,6 +3172,32 @@
     (is (= :ok (:outcome readiness-end)))
     (is (true? (:readiness/wake-attempted readiness-end)))
     (is (= :woken (:readiness/wake-result readiness-end)))))
+
+(deftest no-cast-given-is-recorded-not-filled
+  ;; Joe 2026-09-25: no default cast. The runner's config names no seat when
+  ;; neither the caller nor the env does, and a tick that selects with no cast
+  ;; records the absence instead of casting a literal seat.
+  (is (every? nil? (map (runner/config {}) [:author :reviewer :repair-reviewer]))
+      "no seat in the config when none is given (this JVM sets no FUTON_WM_*_AGENT)")
+  (let [phases (atom [])
+        idle {:zai-5 {:status "idle" :invoke-ready? true}
+              :codex-7 {:status "idle" :invoke-ready? true}}
+        abstaining (runner/run-opportunity!
+                    (dissoc (readiness-run-opts phases (constantly idle)) :author :reviewer))
+        selecting (runner/run-opportunity!
+                   (merge (dissoc (isolated-runner-opts) :author :reviewer :repair-reviewer)
+                          {:repair-open-fn (constantly [])}))]
+    (is (= :abstained (:outcome abstaining))
+        "no cast is not a refusal before judging: the tick judges (a flight's click needs no seat)")
+    (is (= :agent-unavailable (:outcome selecting)))
+    (is (= {:absent :no-cast-given :roles [:author :reviewer]}
+           (get-in selecting [:data :failure-detail]))
+        "a selection with no cast records the absence where it would dispatch")
+    (let [named (runner/run-opportunity!
+                 (assoc (readiness-run-opts phases (constantly idle)) :author "nobody-1"))]
+      (is (= :agent-unavailable (:outcome named)))
+      (is (= "nobody-1" (get-in named [:data :error-data :author]))
+          "a cast naming a seat not on the roster is refused on the record, with the seat named"))))
 
 (deftest restored-agent-no-reply-retains-unavailable-vocabulary-and-detail
   (let [phases (atom [])
@@ -3366,7 +3395,7 @@
                 {:beta 2.0}))
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :phase-log-fn (fn [_])
           :repair-open-fn (constantly [])
           :repair-system-record-fn
@@ -3408,7 +3437,7 @@
                    :failure-data {:job-id "late-author-job"}}
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :phase-log-fn (fn [_])
           :repair-open-fn (constantly [stop-line])
           :repair-resolve-fn (fn [obligation resolution]
@@ -3474,7 +3503,7 @@
                                   :files ["src/real.clj"]}}
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :phase-log-fn (fn [_])
           :repair-open-fn (constantly [stop-line])
           :repair-resolve-fn (fn [obligation resolution]
@@ -3522,7 +3551,7 @@
                    :failure-data {:job-id "late-review-job"}}
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :phase-log-fn (fn [_])
           :repair-open-fn (constantly [stop-line])
           :repair-system-record-fn
@@ -3710,7 +3739,7 @@
         queued (atom [])
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :phase-log nil
           :phase-log-fn (fn [_] (throw (ex-info "phase sink failed" {})))
           :repair-system-record-fn
@@ -4195,7 +4224,7 @@
         queued (atom [])
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :phase-log nil
           :phase-log-fn (fn [_]
                           (throw (java.net.http.HttpTimeoutException.
@@ -4222,7 +4251,7 @@
   (let [findings (atom [])
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :phase-log nil
           :phase-log-fn (fn [_]
                           (throw (java.net.SocketException. "Socket closed")))
@@ -4243,7 +4272,7 @@
   (let [findings (atom [])
         result
         (runner/run-opportunity!
-         {:cohort? false
+         {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
           :phase-log nil
           :phase-log-fn (fn [_] (throw (RuntimeException. "sink exploded")))
           :repair-system-record-fn
@@ -4331,7 +4360,7 @@
     (let [findings (atom [])
           result
           (runner/run-opportunity!
-           {:cohort? false
+           {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
             :phase-log nil
             :phase-log-fn (fn [_]
                             (throw (ex-info "build failed"
@@ -4355,7 +4384,7 @@
     (let [findings (atom [])
           result
           (runner/run-opportunity!
-           {:cohort? false
+           {:cohort? false :author "zai-5" :reviewer "codex-7" :repair-reviewer "codex-1"
             :phase-log nil
             :phase-log-fn (fn [_]
                             (throw (java.net.http.HttpTimeoutException.

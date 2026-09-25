@@ -39,14 +39,15 @@
                                   {:tripwire-action "promote-now"}))))
 
 (deftest repair-reviewer-is-an-explicit-runner-role
-  (is (= "codex-1" runner/default-repair-reviewer))
+  (is (not (contains? (ns-publics 'futon2.aif.full-loop-runner) 'default-repair-reviewer))
+      "no default cast (Joe, 2026-09-25)")
   (is (= "codex-1"
          (:repair-reviewer
           (#'cli/runner-opts :duree-click-on-demand
                              {:repair-reviewer "codex-1"}))))
   (is (nil? (:repair-reviewer
              (#'cli/runner-opts :duree-click-on-demand {})))
-      "the runner config owns the visible default"))
+      "not given on the command line: absent here, and absent in the runner's config unless the env names it"))
 
 (deftest continuous-stops-after-first-non-grounded-opportunity
   (let [calls (atom 0)

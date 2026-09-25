@@ -72,9 +72,15 @@
 
 (def default-agency-base "http://127.0.0.1:7070")
 (def default-substrate-base "http://127.0.0.1:7073")
-(def default-author "zai-5")
-(def default-reviewer "codex-7")
-(def default-repair-reviewer "codex-1")
+
+;; No default cast (Joe, 2026-09-25: "This nonsense about default casts must
+;; be stopped"). The seats were literals here (zai-5, codex-7, codex-1, from
+;; d0be5e66/887c2569) that config used whenever the caller and the env named
+;; none; by 2026-09-25 two of them were not on the roster, so every click that
+;; named no cast was refused at the click endpoint's cast preflight, including
+;; flight clicks that never dispatch an author. A cast is now the caller's or
+;; the env's; one not given is absent, and a tick that selects an action with
+;; no cast records that absence where it would dispatch.
 (def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
 (def default-run-record-dir
   "Where a run drops its receipt when the caller names no directory. Under
@@ -262,11 +268,9 @@
   ([opts]
    (merge {:agency-base (or (System/getenv "FUTON_WM_AGENCY_BASE")
                             default-agency-base)
-           :author (or (System/getenv "FUTON_WM_AUTHOR_AGENT") default-author)
-           :reviewer (or (System/getenv "FUTON_WM_REVIEWER_AGENT") default-reviewer)
-           :repair-reviewer
-           (or (System/getenv "FUTON_WM_REPAIR_REVIEWER_AGENT")
-               default-repair-reviewer)
+           :author (System/getenv "FUTON_WM_AUTHOR_AGENT")
+           :reviewer (System/getenv "FUTON_WM_REVIEWER_AGENT")
+           :repair-reviewer (System/getenv "FUTON_WM_REPAIR_REVIEWER_AGENT")
            :substrate-url (or (System/getenv "FUTON_SUBSTRATE_URL")
                               (System/getenv "FUTON1B_URL")
                               default-substrate-base)
@@ -4547,7 +4551,9 @@
                          :failure-kind :code-state-failed
                          :failure-stage :code-state}
                         e)))
-      (when-not (available? roster author)
+      ;; only a cast that was given is checked here; none given is recorded
+      ;; after selection, where a seat would be dispatched
+      (when (and author (not (available? roster author)))
         (throw (ex-info "Configured author is unavailable"
                         {:outcome :agent-unavailable
                          :failure-kind :agent-unavailable
@@ -4731,6 +4737,13 @@
                           {:outcome (if (= :abstained
                                            (get-in judgement [:decision :status]))
                                       :abstained :no-selection)})))
+        (when-let [uncast (seq (for [[role seat] [[:author author] [:reviewer reviewer]]
+                                     :when (nil? seat)] role))]
+          (throw (ex-info "Selected an action, but no cast was given for it"
+                          {:outcome :agent-unavailable
+                           :failure-kind :agent-unavailable
+                           :failure-stage :agent-readiness
+                           :failure-detail {:absent :no-cast-given :roles (vec uncast)}})))
         (let [reviewer-roster
               (if (restored? roster reviewer)
                 (:roster
@@ -5704,8 +5717,8 @@
                   :trigger trigger
                   :batch-id (:batch-id raw-opts)
                   :outcome :incomplete
-                  :author (or (:author raw-opts) default-author)
-                  :reviewer (or (:reviewer raw-opts) default-reviewer)
+                  :author (or (:author raw-opts) {:absent :no-cast-given})
+                  :reviewer (or (:reviewer raw-opts) {:absent :no-cast-given})
                   :achievement {:tier :none
                                 :summary "No achievement; initialization stopped the line"}
                   :failure {:kind failure-kind
