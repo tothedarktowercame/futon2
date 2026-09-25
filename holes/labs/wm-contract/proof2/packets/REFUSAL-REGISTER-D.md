@@ -172,3 +172,129 @@ Counts that do not reconcile, and what they would mean:
   difference is the unenumerated remainder, and a flight that reaches one of
   those is not thereby a wiring defect under 4(a) until this register is
   extended to cover the tick.
+
+---
+
+# D2 — the tick's surface (appended 2026-09-25)
+
+Read at futon2 `3bbf5059`; same bar, read-only, nothing proposed for removal.
+Extends §1 at the owner's request (claude-10, ~19:10Z, recorded at futon3c
+`holes/missions/M-wm-wiring.md:72`), because M-autoclock-in reaches a click as
+soon as one criterion publishes. §1-§5 stand, two corrections in §D2.5.
+
+## D2.1 The owner's decisions on D's six
+
+| D row | kind | decision |
+|---|---|---|
+| 5 | `:reading/request-not-issued` | KEEP — the row-3 issued-request binding (draft `:671`); a reading publishes without an operator step only because it answers a request the machine issued |
+| 13 | `:universe-not-admitted` | KEEP — dropping unlocated tokens would change the universe G is taken over (W6 comparability); the read step's locator request is the route out |
+| 14 | `:no-admitted-interpretation` | KEEP — P₀/W₀: a candidate's G cannot be recomputed without its patterns' interpretations and receipts |
+| 15 | `:no-constructed-candidate` | KEEP — W₀ requires machine-constructed candidates; selecting a declared hand candidate after the constructor refused would substitute one for the other |
+| 16 | `:unknown-class` | KEEP — H-A `7ba427ab`: the zero kernel is the unmeasured default only for a class in the contract; zero for a class outside it is absence read as value |
+| 12 | `:nonfinite-g` | CHANGES — becomes a typed absence per candidate, that candidate left out of the comparison; packet NONFINITE-G-I (claude-13, author ≠ reviewer) |
+
+## D2.2 The tick's refusals, by stage
+
+Class: **T** stops the tick (the abstention carrier records it, the flight's
+click-summary reads it: `full_loop_runner.clj:515-521`); **C** caught and
+recorded; **F** stops the flight.
+
+| stage | kind(s) | site (futon2 3bbf5059) | trigger | class | case |
+|---|---|---|---|---|---|
+| assembly | `:universe-not-admitted` | `cascade_problems.clj:198` (universes), `:218` (locators) | no admitted fact universe; a token with no checkable locator | T | D2.1 row 13 |
+| assembly | `:no-admitted-interpretation` | `:201`, `:206` | no admitted interpretation, or a candidate pattern without one | T | D2.1 row 14 |
+| assembly | `:want-not-declared` | `:211` | no want for the target | T | **no case found**; the ns states the rule only (`:24`) |
+| assembly | `:no-constructed-candidate` | `:222`, `:230`, `:231` | no non-empty precedence carrying a construction receipt | T | D2.1 row 15 |
+| assembly | `:beta-not-declared` | `:234` | no declared β for the target's context | T | **no case found**; β has no default by `policy.clj:92`'s refusal, which is its consequence |
+| assembly | `:horizon-not-declared` | `cascade_problems.clj:30,274` | `:horizon-steps` absent — refuses ALL targets, not one | T | P7's common horizon: candidates compared at one T |
+| constructor | `:nonfinite-g` | `interpretation_construction.clj:210`, **caught at `:222-223`** and returned `{:status :refused :kind :nonfinite-g}` | a candidate's G is not finite | C→T | changing, D2.1 row 12 |
+| constructor | `:construction-not-taken` | `interpretation_construction.clj:228` | the receipt records no moves | T | the site: the empty cascade alone is never "constructed" (`cascade_problems.clj:24-26`) |
+| scoring | `:missing-common-horizon`, `:missing-cascade-belief`, `:missing-cascade-want` | `efe.clj:1060`, `:1064`, `:1067` | a scoring input absent | T | the inputs G is defined over; typed `:status :missing` returns, rethrown at the judge boundary (below) |
+| scoring | `:invalid-adjudication-rates` | `efe.clj:1117` | the rates map does not cover the scored universe | T | `efe.clj:1105-1112`: "never a silent projection onto zero" |
+| scoring | `:mixed-candidate-kinds` | `efe.clj:1390` | a family mixing candidate kinds | T | **no case found** |
+| scoring | `:unknown-class`, `:unsupported-class` | `observation_rates.clj:186`, `:211` | class outside the contract; no usable measured pair | T | D2.1 row 16; A-S §5 |
+| selection | `:nonpositive-temperature`, `:nonfinite-temperature` | `policy.clj:92` | β not a positive finite number | T | a posterior needs a valid temperature; no default β (see `:beta-not-declared`) |
+| selection | `:f-pi-scaling`, `:f-pi-values` alignment, `:f-pi` non-numeric | `policy.clj:99`, `:103`, `:108` | F_π inputs malformed when the F_π posterior is on | T | **no case found** |
+| selection | `:invalid-policy-prefix` | `policy.clj:229` | a candidate's prefix is not a policy prefix | T | **no case found** |
+| selection | `:precision-consumption-mismatch` | `policy.clj:371` | the precision consumed differs from the one recorded | T | **no case found** |
+| selection | `:no-acting-cascade-candidate` | `policy.clj:393` | no candidate has an acting first pattern | T | an all-empty family has no action to enact |
+| selection | `:invalid-temperature`, `:invalid-habit`, `:invalid-free-energy`, `:no-admissible-candidate`, `:unmapped-candidate` | `cascade_selection.clj:75,78,91,106,150,154` (via `refuse!` `:36`) | the posterior's own inputs, and a family with no admissible candidate | T | the selection law's inputs must be the ones recorded; **no ruling found** |
+| gate | `:inadmissible-decision` with 14 reasons: `:missing-observation-locators` `:beta-not-recorded` `:posterior-over-non-cascade` `:missing-construction-receipt` `:missing-interpretation-receipts` `:empty-interpretation-receipts` `:ticket-queue-certificate-mismatch` `:ticket-queue-candidates-mismatch` `:ticket-queue-choice-invalid` `:missing-recorded-posterior` `:posterior-not-normalised` `:chosen-action-not-a-candidate` `:chosen-action-is-not-an-action` `:no-acting-candidate` | `decision_gate.clj:96,123,131,133,136,140,164,168,196,204,209,211,229,233` (via `refuse!` `:58`) | the emitted decision does not recompute from its own record | T | the ns `:1-14`: the gate is the single place a decision is emitted and recomputes the marginal from the decision's own posterior, "never trusted from `:softmax-weights` or `:chosen-action-mass`" |
+| gate | `:invalid-controller-authorization`, reasons `:target-not-open` `:action-not-admissible` `:controller-score-missing-or-invalid` `:selection-law-missing-or-invalid` | `controller_authority.clj:43`, reasons `:30-41` | the action is not enactable, or its score/law is not on the record | T | the ns `:1`: "Machine authorization for the actual controller decision; no fixture recall" |
+| judge | `:incommensurable-family` | `war_machine.clj:6224`, `:6227` | candidates with incompatible preference schedules or scales | T | comparability: a family scored under different C is not one comparison (the `a38becc9` schedule fix) |
+| judge | `:live-c-refused`, `:live-c-stale` | `war_machine.clj:6288`, `:6310` | C unavailable or older than its source | T | C must be the one this tick's sources give; a grain mismatch (`:no-reachable-want`) is deliberately NOT refused (`:6422`) |
+| judge | rethrow boundary — carries the callee's kind | `war_machine.clj:6424`, `:6611` | a live-C refusal, or `ranked` carrying a `:status` | T | this is where efe's typed `:status :missing` returns become the tick's refusal |
+| judge | belief accumulation: `:accumulation-configuration-invalid` `:accumulation-identity-missing` `:single-entity-belief-missing` `:accumulation-migration-required` `:accumulation-initialization-required` + one generic | `war_machine.clj:111`, `:1529`, `:1533`, `:1537`, `:1541`, `:1553` | the tick's belief accumulation cannot be identified, migrated or initialised | T | **no case found** |
+| judge | three precondition gates | `war_machine.clj:352` (F_π posterior), `:402` (selection law), `:433` (variational τ) | preconditions of the recorded law | T | **no case found** |
+| judge | two scoring guards | `war_machine.clj:6082`, `:6088` in `constructed-candidate-g` | the constructor's G call cannot be formed | T | **no case found** |
+| judge | two configuration guards | `war_machine.clj:948` (habit prior span cap), `:2316` (mission value weights) | configuration out of range | T | **no case found** |
+
+## D2.3 Typed absences the tick records and continues past
+
+| kind | site |
+|---|---|
+| the abstention carrier itself: a judge that abstained without a refusal list, or a tick with no recorded decision, is a typed absence, "never an empty vector read as 'nothing declined'" | `full_loop_runner.clj:515-521` |
+| `:no-reachable-want` — a C grain mismatch is recorded, not refused | `war_machine.clj:6422` |
+| the close classification: `classify` catches an `ExceptionInfo` and returns a typed receipt | `run_ending_classification.clj:139-143` |
+| the unmeasured default kernel `{… :basis :checkable :measurement :absent}` | `observation_rates.clj:174` |
+
+## D2.4 The M-autoclock-in walk, continued
+
+After its first criterion publishes (§3 step 1), the click runs and:
+
+1. **Assembly refuses `:no-admitted-interpretation`** (`cascade_problems.clj:201`):
+   nothing is published for this target yet. If a locator reading has not landed,
+   `:universe-not-admitted` (`:218`) comes first — first applicable wins (`:17-28`).
+2. The tick **abstains**; `abstention-carrier` records the decline and
+   `click-summary` (`flight_runner.clj:30-45`) puts it on the click.
+3. `record-click` sees no want advanced → **`:no-progress`**, and the flight
+   ends (`flight.clj:218-220`) unless the ask step published an interpretation
+   in the same click, in which case the next click re-enters assembly.
+4. Nothing downstream is reached: no scoring, no selection, no gate, no close.
+
+**Ends the click:** `:no-admitted-interpretation` (or `:universe-not-admitted`),
+an abstention, not a stop. **Ends the flight:** `:no-progress`, not a refusal.
+On this target the tick adds no flight-stopping refusal to §3's answer.
+
+## D2.5 Two corrections to §1
+
+**Row 12** said `:nonfinite-g` stops the tick as a throw. It is caught inside
+the constructor (`interpretation_construction.clj:222-223`) and returned as
+`{:status :refused :kind :nonfinite-g}`, surfacing as assembly's
+`:no-constructed-candidate`: class C→T, not T. **Row 18** cited `efe.clj:1118`;
+the map opens at `:1117`.
+
+## D2.6 Counts
+
+Counted by table row, as §4 was.
+- **D2.2 has 25 rows**, covering **39 named kinds** over about 60 sites (the
+  gate's 14 reasons and the authorization's 4 are one kind each; nine sites
+  raise no named kind: the two rethrow boundaries, three precondition gates,
+  two scoring guards, two configuration guards).
+- **Already in D:** 7 kinds (its rows 12-18). **New here: 32 named kinds.**
+- **With a case: 14 rows. Without: 11** — `:want-not-declared`,
+  `:beta-not-declared`, `:mixed-candidate-kinds`, the F_π inputs,
+  `:invalid-policy-prefix`, `:precision-consumption-mismatch`, the five
+  `cascade_selection` kinds, the six accumulation kinds, the three precondition
+  gates, the two scoring guards, the two configuration guards.
+- **By class:** 24 rows stop the tick; 1 (`:nonfinite-g`) is caught inside the
+  constructor; **none stops the flight.** Every tick refusal arrives at the
+  flight as an abstention on the click record.
+- **Register total: 11 flight-level kinds (§1 rows 1-11) + 39 tick kinds = 50.**
+
+## D2.7 Falsifiers for D2
+
+```sh
+grep -c 'throw (ex-info' scripts/futon2/report/war_machine.clj   # 19, all in D2.2
+grep -c '(refusal target' src/futon2/aif/cascade_problems.clj    # 9 sites, 5 kinds + horizon
+grep -c ':status :missing' src/futon2/aif/efe.clj                # 5, all 5 in D2.2
+grep -c 'throw (ex-info' src/futon2/aif/policy.clj               # 7
+grep -co 'refuse! :[a-z-]*' src/futon2/aif/cascade_selection.clj # 6 sites, 5 kinds
+grep -co 'refuse! :[a-z-]*' src/futon2/aif/decision_gate.clj     # 14 reasons
+```
+
+A count above the list's is a row this register missed. **Stated limit, as in
+§5:** `full_loop_runner.clj` carries 52 further `throw` sites — the dispatch,
+build, review and close machinery after a chosen action, which a first click on
+M-autoclock-in never reaches (D2.4). They are named as a boundary, not
+enumerated; a flight that gets a chosen action needs that third register.
