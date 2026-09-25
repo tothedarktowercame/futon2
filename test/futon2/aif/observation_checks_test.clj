@@ -390,27 +390,70 @@
             "and reads back as the same vector")))))
 
 ;; ONE live-pinned case (E-kimi-task-28): the command lookup and the namespace
-;; lookup observe the same entry on the live :7070. First pinned
-;; 2026-09-25T03:23Z (06f03cf1…, the 03:21:59Z warranted run). Re-pinned
-;; 2026-09-25T12:49Z by claude-8, read verbatim from both live lookups at
-;; that time: the newest run of futon3c.test-registry-test is now the
-;; 04:06:47Z run (claude-8's warrant at futon3c bcd0d86f), which the lookup
-;; reaches because the ledger's fill-forward (futon3c bcd0d86f) reads from
-;; the ledger's watermark. The build marker below is unchanged: it is the
-;; 03:23Z build. If the registry has since seen a newer run of that
-;; namespace, the pin — not the lookup — is what moved.
+;; lookup observe the same entry on the live :7070.
+;;
+;; LIVE-PIN-I (claude-13, 2026-09-25): the pin is ONE registered entry, fetched
+;; by its id, not "the newest run", which moved every time the registry gained
+;; a run of the namespace (re-pinned twice, 06f03cf1 then 204346f5, and failing
+;; again at 96df1637). The pinned entry is claude-8's 04:06:47Z run of
+;; futon3c.test-registry-test (warrant at futon3c bcd0d86f), a :kind :run
+;; record whose :command is the command form below, so it is both a namespace
+;; entry and a command-form entry. The test asserts:
+;;   - the pinned id resolves (a missing id fails naming the id, never a nil
+;;     comparison) and its record carries this command;
+;;   - the two lookups agree with EACH OTHER on the entry they return, and that
+;;     entry carries the same command as the pinned one. Neither lookup can
+;;     return the pinned id itself once a newer run exists; agreement is the
+;;     claim, the pin is what makes the command form a fact rather than an
+;;     assumption.
+;; If the pinned record ever carried no :command in this form (no command-form
+;; entry), the command lookup's answer is recorded as the typed absence
+;; {:absent :no-command-form-entry} and only the namespace lookup is asserted.
+;; A command-form entry needs a registered :run whose :command is the exact
+;; vector ["clojure" "-M:test" "-n" <ns>], which register-warrant.sh writes.
 (def ^:private live-pinned-entry-id
   "test-registry-204346f534d4686aa9172f223f6d3e897c7b413045f6f50d40147c3b89141605")
 
+(defn- entry-payload
+  "The registry record's payload map, read from the evidence body's EDN."
+  [entry]
+  (some-> entry :evidence/body :payload-edn edn/read-string))
+
+(defn- pinned-entry
+  "The pinned record by id, or a typed failure naming the id."
+  [base entry-id]
+  (let [e (oc/fetch-registry-entry base entry-id)]
+    (cond
+      (= :absent e) {:absent :pinned-entry-not-in-registry :entry-id entry-id}
+      (:status e) {:absent :registry-unreadable :entry-id entry-id :refusal e}
+      :else {:entry e :payload (entry-payload e)})))
+
 (deftest c8-live-command-lookup-observes-the-same-entry-as-the-namespace-lookup
   (let [base (oc/agency-base)
-        cmd ["clojure" "-M:test" "-n" "futon3c.test-registry-test"]
-        by-command (oc/fetch-latest-for-command base cmd)
-        by-namespace (oc/fetch-latest-for-namespace base "futon3c.test-registry-test")]
-    (is (= live-pinned-entry-id (:entry-id by-command)) (pr-str by-command))
-    (is (= live-pinned-entry-id (:entry-id by-namespace)) (pr-str by-namespace))
-    (is (= :command-lookup (:resolved-by by-command)))
-    (is (= :namespace-lookup (:resolved-by by-namespace))))
+        ns-name "futon3c.test-registry-test"
+        cmd ["clojure" "-M:test" "-n" ns-name]
+        pinned (pinned-entry base live-pinned-entry-id)]
+    (is (nil? (:absent pinned))
+        (str "pinned entry " live-pinned-entry-id " did not resolve: " (pr-str pinned)))
+    (when-let [payload (:payload pinned)]
+      (is (= :run (:kind payload)) live-pinned-entry-id)
+      (let [command-form? (= cmd (:command payload))
+            by-namespace (oc/fetch-latest-for-namespace base ns-name)
+            by-command (if command-form?
+                         (oc/fetch-latest-for-command base cmd)
+                         {:absent :no-command-form-entry})]
+        (is (= :namespace-lookup (:resolved-by by-namespace)) (pr-str by-namespace))
+        (if-not command-form?
+          (is (= {:absent :no-command-form-entry} by-command))
+          (let [found (pinned-entry base (:entry-id by-command))]
+            (is (= :command-lookup (:resolved-by by-command)) (pr-str by-command))
+            (is (= (:entry-id by-namespace) (:entry-id by-command))
+                "the two lookups observe the same entry")
+            (is (= cmd (get-in found [:payload :command]))
+                "the entry both lookups return carries the pinned entry's command")
+            (is (not (neg? (compare (get-in found [:payload :ran-at])
+                                    (get-in pinned [:payload :ran-at]))))
+                "a latest lookup never answers a run older than the pinned one"))))))
   ;; the marker this pin was taken against: a complete command-keyed build
   (let [ledger-file (io/file "/home/joe/code/futon3c/data/test-registry/namespace-ledger.edn")
         entries (with-open [r (java.io.PushbackReader. (io/reader ledger-file))]
