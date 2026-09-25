@@ -392,8 +392,14 @@
     (is (true? (get-in before [:source :readings-needed :coverage?])))
     (is (= [:published] (map :outcome (of-kind :coverage (:asked read)))))
     (is (= 4 (count (:wants after))) "O4 is now a want")
-    (is (some #(= "EXTRACTED" (:phase %)) (vals (get-in after [:source :criteria-by-token]))))
-    (is (some #(= :scope-out (:reason %)) (get-in after [:source :out-of-view])) "O5 named out of view")
+    (let [extracted (filter #(= "EXTRACTED" (:phase %)) (vals (get-in after [:source :criteria-by-token])))]
+      (is (= 1 (count extracted)))
+      ;; O4's cue is lines 29-30; the criterion records its first line and quote.
+      (is (= 29 (:line (first extracted))))
+      (is (str/includes? (:stated (first extracted)) "durée click")))
+    (is (= [{:reason :scope-out :line 35}]
+           (mapv #(select-keys % [:reason :line]) (get-in after [:source :out-of-view])))
+        "O5 named out of view")
     (is (false? (get-in after [:source :readings-needed :coverage?])) "read once for this text")))
 
 (deftest coverage-attaches-f4s-anchor-to-its-criterion
@@ -409,7 +415,11 @@
                   (locator-reply issued)))
         _ ((fr/read-fn {:store s :answer-fn (answer-with reply {:coverage true}) :observe observe}) f {})
         c (get-in (flight/click-wants f {}) [:source :criteria-by-token sorry-token])]
-    (is (= "DarkTower/WarMachine/Holes.lean:264" (get-in c [:anchor :anchor])))
+    (is (= 36 (:line c)) "the anchor lands on the line-36 criterion")
+    (is (= {:anchor "DarkTower/WarMachine/Holes.lean:264" :line 15
+            :quote "`find` sorry formerly anchored at `DarkTower/WarMachine/Holes.lean:264`."}
+           (:anchor c))
+        "the anchor keeps its line-15 cue")
     (testing "bad case: an anchor for a token the reader did not find refuses the reply"
       (is (= :rejected (:status (mr/validate-coverage {:found [{:token sorry-token}]}
                                                       {:anchors [{:token :exit/hnope :anchor "x" :cue {:lines [15 15] :quote "`find` sorry formerly anchored at `DarkTower/WarMachine/Holes.lean:264`."}}]}
@@ -427,4 +437,15 @@
         cw (flight/click-wants f {})]
     (is (= 6 first-asks))
     (is (= 6 @asks) "the second read asks nothing new for an unchanged text")
-    (is (every? #(= :locator-declined (:reason %)) (get-in cw [:source :unlocated])))))
+    (is (every? #(= :locator-declined (:reason %)) (get-in cw [:source :unlocated])))
+    (testing "contrast: a changed text is asked again"
+      (let [changed (str/replace f11-text "- Discharge or amend the `find` sorry."
+                                 "- Discharge or amend the `find` sorry now.")
+            f2 (flight/start {:target target :chosen-because {:kind :requested}}
+                             {:kind :a-exits :repo "futon2" :path "holes/missions/M-f11-find-production-successor.md"
+                              :store s :read-text (fn [& _] changed)
+                              :observe #(contains? (:observed (observe {::t %})) ::t)}
+                             {:id "flight-f11-changed"})]
+        (is (not= changed f11-text))
+        ((fr/read-fn {:store s :answer-fn answer :observe observe}) f2 {})
+        (is (> @asks 6) "one criterion's wording changed, so the text is read again")))))
