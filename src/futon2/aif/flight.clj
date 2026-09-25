@@ -254,7 +254,8 @@
   flight-runner/ask-fn); its needs join the flight's. READ-FN, when given,
   runs first, before the wants are read (flight-runner/read-fn, D11 part 5). SOURCES-FN returns the tick's
   sources (for the want source). Stops when the flight closes, when a click
-  advances nothing, after MAX-CLICKS (then :status :click-limit, with the
+  advances nothing (:no-progress, or :awaiting-answer with :pending when an
+  ask's answer was still in flight at the click), after MAX-CLICKS (then :status :click-limit, with the
   open wants on the last click), or before any click when owner questions
   leave it no wants (:status :not-a-target-yet, :open-questions). Returns the
   flight record."
@@ -290,8 +291,14 @@
                 f (record-click f (merge result {:wants (:wants wants)
                                                  :want-source (:source wants)
                                                  :before before
-                                                 :after after}))]
-            ;; a closure over the clear criteria names the questions left open
+                                                 :after after}))
+                pending (filterv #(= :pending (:kind %)) (:needs asked))]
+            ;; a closure over the clear criteria names the questions left open;
+            ;; a click that advanced nothing while an ask was still pending
+            ;; ends :awaiting-answer with those jobs, not :no-progress: the
+            ;; answer never reached the click (M-wm-wiring row 3)
             (recur (cond-> f
                      (and (= :closed (:status f)) (seq questions))
-                     (assoc-in [:closure-scope :open-questions] questions)))))))))
+                     (assoc-in [:closure-scope :open-questions] questions)
+                     (and (= :no-progress (:status f)) (seq pending))
+                     (assoc :status :awaiting-answer :pending pending)))))))))

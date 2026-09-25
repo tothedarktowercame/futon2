@@ -131,7 +131,9 @@
         a (af {:target "M-futon-seams" :request-id "request-1" :want {:token argue}})]
     (is (= [[:bell "kimi-6" "wm-flight" "M-futon-seams" true true] [:poll "job-9"]] @calls)
         "requisition is the mission, on the prompt's first line (Kimi seats refuse without it); the prompt states the grammar")
-    (is (= {:seat "kimi-6" :job-id "job-9" :state "done" :text "reply text"} a))))
+    (is (= {:seat "kimi-6" :job-id "job-9" :state "done" :text "reply text"
+            ;; row 3: no library root in the flight's opts is recorded, typed
+            :library-root {:absent :not-in-flight-opts}} a))))
 
 ;; claude-2, answering an M-f11 coverage request (2026-09-24): the dispatch
 ;; sent :coverage and :constraints requests the want-interpretation grammar,

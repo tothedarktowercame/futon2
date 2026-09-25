@@ -83,13 +83,25 @@
   flight's target as the requisition) carrying the want-interpretation
   prompt, then a poll to a terminal state (a whistle would block the flight
   for the minutes an answer takes; a bellback has no return path to the
-  machine's persona). Returns {:seat :job-id :state :text}. OPTS are the
-  runner's (:agency-base, poll settings)."
-  [{:keys [seat caller opts dispatch! poll! job-text prompt-fn]
+  machine's persona). Returns {:seat :job-id :state :text :library-root}.
+  OPTS are the runner's (:agency-base, poll settings).
+
+  poll! is runner/poll-job!, which waits until the job reaches a terminal
+  state (it records stalls and keeps waiting), so a real answer is settled
+  before the flight's click posts. LIBRARY-ROOT (M-wm-wiring row 3) is
+  passed to the want-interpretation prompt, which names it as the library
+  the seat may search; when the flight's opts carry none, the prompt's own
+  pinned default applies and the answer records that as
+  {:absent :not-in-flight-opts}."
+  [{:keys [seat caller opts dispatch! poll! job-text prompt-fn library-root]
     :or {caller "wm-flight" dispatch! runner/dispatch! poll! runner/poll-job!
          job-text futon2.aif.task-execution-evidence/job-text}}]
   (fn [issued]
-    (let [prompt-fn (or prompt-fn (if (reading-kinds (:kind issued)) reading/prompt wi/prompt))
+    (let [prompt-fn (or prompt-fn
+                        (cond (reading-kinds (:kind issued)) reading/prompt
+                              library-root #(wi/prompt % {:library-root library-root})
+                              :else wi/prompt))
+          root (or library-root {:absent :not-in-flight-opts})
           ;; Kimi seats refuse a call without this line in the prompt
           ;; (Agency: "You can't use a Kimi seat without a requisition")
           requisition (str "Requisition: " (:target issued) " — War Machine "
@@ -98,9 +110,10 @@
           sent (dispatch! opts seat caller (:target issued) (str requisition (prompt-fn issued)))
           job-id (:job-id sent)]
       (if-not job-id
-        {:seat seat :state :not-dispatched :text nil :dispatch sent}
+        {:seat seat :state :not-dispatched :text nil :dispatch sent :library-root root}
         (let [job (poll! opts job-id)]
-          {:seat seat :job-id job-id :state (:state job) :text (job-text job)})))))
+          {:seat seat :job-id job-id :state (:state job) :text (job-text job)
+           :library-root root})))))
 
 (defn target-view
   "The flight target's sources as the tick would see them: the flight's
@@ -132,9 +145,17 @@
   "Parse, validate and publish ANSWER to ISSUED; the outcome entry."
   [{:keys [store constraints admit code-root]} view issued answer base]
   (let [who (select-keys answer [:seat :job-id])
-        base (merge base {:request-id (:request-id issued)} who)
+        base (merge base {:request-id (:request-id issued)} who
+                    (select-keys answer [:library-root]))
         parsed (when (= "done" (:state answer)) (wi/parse-reply (:text answer)))]
     (cond
+      ;; an answer still in flight when the step settles (the job exists and
+      ;; is not terminal) is pending, not unanswered: the click cannot see it
+      ;; yet, and the record says so (M-wm-wiring row 3)
+      (and (nil? parsed) (string? (:state answer))
+           (not (contains? runner/terminal-states (:state answer))))
+      (assoc base :outcome :pending :state (:state answer))
+
       (nil? parsed)
       (assoc base :outcome :not-answered :state (:state answer))
 
@@ -145,7 +166,11 @@
       (assoc base :outcome :declined :decline (:decline parsed))
 
       :else
-      (let [v (wi/validate-response issued (:response parsed)
+      (let [base (assoc base :retrieval
+                        (if-let [runs (seq (get-in parsed [:response :retrieval :runs]))]
+                          {:appended-runs (count runs)}
+                          {:absent :no-appended-runs}))
+            v (wi/validate-response issued (:response parsed)
                                     {:sources view :constraints constraints :admit admit
                                      :code-root (or code-root "/home/joe/code")})]
         (if (= :valid (:status v))
@@ -231,7 +256,7 @@
         {:asked asked
          :needs (vec (for [a asked :when (not= :published (:outcome a))]
                        (merge {:kind (:outcome a) :missing :interpretation}
-                              (select-keys a [:want :request-id :seat :job-id]))))}))))
+                              (select-keys a [:want :request-id :seat :job-id :state]))))}))))
 
 ;; ---------------------------------------------------------------------------
 ;; Clicks through the serving JVM (POST /api/alpha/wm/click)
