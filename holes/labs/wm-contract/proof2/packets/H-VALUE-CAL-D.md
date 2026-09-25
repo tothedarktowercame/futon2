@@ -289,3 +289,96 @@ It stays falsifiable: if some candidate beats 4 on every weighting, or 4 is
 first on only a sliver, value contradicts the cost choice, and that finding
 would belong in PROOF-2a. The hold-out stays as in H-VALUE-C-D §7, and needs a
 mission that states an order by value.
+
+## 8. Is instance 4 undominated under the value term?
+
+Script: `h_value_undominated.clj` (this directory, babashka, its own process,
+seeded, reads only). Inputs, as printed by the run:
+
+```
+c7d2c5cba4a3091dbfa274f9f9291e1984978dd0a93b9743725aaa2e8105b8f7  item6/mission-C.edn   (futon3c 6149272b)
+7d77ef0299ede3427035ee88c3bbf4f7b4fadca64954214540380b3769d64e3d  item6/target-cost.edn
+```
+
+**Definition, fixed before any number.** Candidates are 4, 5, 6 and 7. The
+value term is §3's single-pick V_i(w) = Σ_o w_o·a_i(o) − λ·E[attempts_i],
+where a_i(o) sums d·f_o(T_i) over the mission-C links from i's want tokens to
+o. f_o is as in §3:
+- Rob, like every non-V outcome, flows from completion ("immediately",
+  [18227 18277]).
+- V flows from the VS Code event.
+- 7 carries κ if it lands at or after that event.
+
+Candidate x **dominates** 4 iff V_x(w) ≥ V_4(w) for every weighting w of the
+outcomes and V_x(w) > V_4(w) for some w. 4 is **undominated** iff no x
+dominates it. The weighting is over all six outcomes mission-C states.
+`:joe-can-use-robs-work` is served by no scored instance (8 is
+`:prospective`), so every candidate has coefficient 0 on it.
+
+V_x − V_4 is affine in w. So "≥ 0 on the whole simplex" holds iff it holds at
+the six vertices, and "> 0 somewhere" holds iff it holds at some vertex. The
+dominance check is therefore exact over the vertices, not sampled. It runs on:
+- all 120 timed cells of §4 (H × s_vs × κ × d₅ᴿ);
+- the 4 untimed cells (every attainment share = 1);
+- each of the 6 values of λ.
+
+That is 744 cells. A planted check runs first. A copy of 4 must be reported
+as tying 4 everywhere, and 4 plus one unit of drift service must be reported
+as dominating it. Both are caught: `{:dominates ["6"], :ties-everywhere ["5"]}`.
+
+**The bad case, first: can 5 beat 4 on the Rob outcome alone?** Not in any
+cell. At w = e_Rob:
+
+V_5 − V_4 = d₅ᴿ·f(10) − f(8.75) − λ·(10 − 8.75)
+
+Both 4 and 5 serve Rob through exactly one token, and 4's degree is 1. So:
+- with timing on, 5 lands later (T₅ = 10 against 8.75) and d₅ᴿ ≤ 1, so the
+  difference is negative in every timed cell (maximum −0.0104);
+- without timing it is 0 only at d₅ᴿ = 1 and λ = 0 (a tie), and negative
+  everywhere else.
+
+Nothing in the sweep can reverse this. The Rob outcome is decided by the
+links and the completion times.
+
+**The same holds more strongly on the S outcome**, which is what decides
+dominance. 4 serves "second implementation is cheap" through two tokens
+(`:caller-converted`, `:redirect-test`); 5 and 7 each serve it through one
+(`:protocol-declared`, `:record-schema-declared`); 6 not at all. 4's cost,
+8.75, is also the lowest, tied with 7. So at the S vertex 4 is strictly top
+in every cell. At H = 30, λ = 0 the coefficients are 4: 1.4167, 5: 0.6667,
+6: 0, 7: 0. 7's S service there is 0 because the VS Code event has already
+passed in that cell and κ = 0. Where 7 keeps its S service it is still one
+token against 4's two.
+
+**Answers.**
+
+| | answer |
+|---|---|
+| (i) undominated? | **Yes.** No candidate dominates 4 in any of the 744 cells. The reason is structural: 4 is strictly best at the S vertex, so every other candidate loses to it on at least one weighting. The links decide this, not the sweep. |
+| (ii) share of the simplex where 4 is the strict top pick | Uniform Dirichlet over six outcomes, **N = 20,000** samples (seed 20260925), the same samples for every cell. Pooled over the 120 timed cells: **40.6%** at λ = 0, rising to 52.5% at λ = 0.4 (per-cell range 29.0%–94.0%). With the deadline on 7 reachable (s_vs > T₇): 38.6%–45.9%. Untimed: 31.0%–35.9%. |
+| (iii) the same, VS Code event before any instance (s_vs = 5) | **48.3%** at λ = 0, rising to **79.0%** at λ = 0.4 (per-cell range 41.2%–94.0%). The same direction as the setting that flipped §4's sweeps, and for the same reason: 7 misses its deadline and carries κ. |
+| (iv) does any candidate tie 4 on every weighting? | **No**, in all 744 cells. "Undominated" is not vacuous here. |
+
+Per-λ shares (pooled; min–max over cells in brackets):
+
+| λ | all timed cells | s_vs = 5 | deadline reachable | untimed |
+|---|---|---|---|---|
+| 0 | 0.4057 [0.2895–0.5256] | 0.4832 [0.4121–0.5256] | 0.3864 | 0.3104 |
+| 0.02 | 0.4230 [0.3085–0.5553] | 0.5133 [0.4487–0.5553] | 0.4004 | 0.3189 |
+| 0.05 | 0.4437 [0.3273–0.5992] | 0.5529 [0.4958–0.5992] | 0.4164 | 0.3281 |
+| 0.1 | 0.4687 [0.3463–0.6700] | 0.6100 [0.5556–0.6700] | 0.4334 | 0.3396 |
+| 0.2 | 0.4996 [0.3587–0.7925] | 0.6967 [0.6273–0.7925] | 0.4503 | 0.3500 |
+| 0.4 | 0.5251 [0.3661–0.9400] | 0.7899 [0.6770–0.9400] | 0.4588 | 0.3586 |
+
+**Reading.** The value term does not conflict with the cost ordering's first
+pick. 4 is undominated in every cell, and no candidate matches it on every
+weighting. Two limits on how far this goes:
+- Undominated is a weak property. Here it follows from one link count (two S
+  tokens against one), so it would survive almost any timing term. The
+  simplex shares are the informative part.
+- By those shares, 4 is the single most likely top pick among four
+  candidates. But in most timed settings it is top on well under the whole
+  simplex, and a majority only as λ grows or when the VS Code event comes
+  early. The outcome weights are still unstated
+  (`:preference :unstated`), so the value term alone does not choose 4. It
+  agrees with the choice more often than it disagrees, and never excludes it.
