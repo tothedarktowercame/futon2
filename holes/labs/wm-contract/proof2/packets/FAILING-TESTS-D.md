@@ -248,3 +248,68 @@ with no decision, are typed absences (`{:status :absent :reason :no-selection-de
 `chosen-summary`: "A typed absence when nothing was chosen") computed from this result — the comment above them
 reads "No historical checkpoints or trace lookup", which is the property the test's name guards. Both keys exist
 because the flight reads them (`record-summary`, `flight_runner.clj:244-253`), so dropping them is not open.
+
+---
+
+# D3 — uniform-run-record-test's 17 older failures, per failure
+
+Read at HEAD `aba5d260`; read-only, no code, fixture or test changed. Each failure quoted from a run at HEAD in
+futon2's own JVM; every bisect run in a throwaway sibling worktree, removed after, never the shared tree, no stash.
+The twelve `:present` failures are **four** terms — A, C, D, Q — across three policies; **E passes**.
+
+| group | first failing commit (git identity Joseph Corneli) | pin or code | AR | smallest change, owner's call |
+|---|---|---|---|---|
+| A, C, D, Q read `:missing` (12, `:125`) | `daf2124e` 09-22 17:14 "Proof 1.3 build 2/3: class observation scorer in the live joint decision"; green at `3d25b818` 16:32 | code — the record types a real absence | **AR-24**, `:proposed` | assert the typed absence for A/C/D/Q, keep `:present` for E |
+| F ×3 (`:122`) | `ad039985` 09-24 "F-ABS (PROOF-2 packet 27): record the selection law that actually ran when F is absent" | code — a deliberate vocabulary change | none | three words in the pin |
+| `:derived-no-overlap` (1, `:126`) and the checker's `c-source` (1, `:132`) | `daf2124e`, with the twelve | **not the test** — a key whose meaning changed under its reader | none | one line in `wm_run_validity.bb`, or keep live-C where it reads |
+
+**A, C, D, Q.** `:A` `:C` `:D` `:Q` at `:125`: `expected: (= :present (get-in p [:terms term :status]))`, `actual:
+(not (= :present :missing))`. Bisected: seven probes spread across the 288-commit range (09-21 15:30 … 09-22 13:38)
+are all green at 67 assertions, so nothing earlier contributes; the transition is one commit, `daf2124e`, where all
+fourteen of the older failures appear at once. `census` (`g_term_decomposition.clj:105-106`) reads A/C/D/Q from each
+ranked entry's `[:certificate :consumed-g]`, and `verdict` (`:44`, returns at `:55-63`) returns `{:status :missing :value nil :reason
+:consumed-value-not-recorded}` when that value is nil — for `:C` also when any step's `:distribution` is nil
+(`:57-58`), which is what this record has. `daf2124e` made war_machine's joint decision score with the class-emission
+model, whose decomposition (KL of the class pushforward against 55/35/5/5, ambiguity 0) has no token-level A/C/D/Q to
+consume. So the terms are absent because the machine no longer computes them on this path, and the record says so
+with a reason; the `:present` pin predates the class scorer. E stays `:present` because it comes from the candidate's
+`:habit`, which selection still supplies (`census:106`).
+
+**That absence is already on the register.** AR-24 (`PROOF-2-THEOREM-draft-2026-09-24.md:316`, `:proposed`), from
+Walkthrough 03 §5 over live records: "On the recorded clicks the scorer consumed no token-level A at all: the
+precision-family model is `:class-emission` with `:rates {:status :absent :reason :class-emission-has-no-token-rates}`
+and the G decomposition's A term is `:consumed-value-not-recorded`. Clause 1 as drafted assumes a consumed A to
+compare with a measured one; on these records there is neither." This test reaches the same fact from the fixture
+side. It is an absence, not a substitution: nothing stands in for the term, and the status carries its own reason.
+C, D and Q have no AR of their own (AR-26 is the only other row naming the decomposition). Because AR-24 is
+`:proposed`, flipping the pin records today's behaviour while the question it opens — whether the class scorer should
+record its own consumed terms rather than leaving the token four absent — is still open; that is AR-24's owner's
+call, and the test-side change is four lines in the shape used at `7b9690a1`.
+
+**F.** At `:122`, `{:status :absent :value nil :reason :omitted-from-law}` against a pin of `{:status :missing :value
+nil :reason :consumed-value-not-recorded}`. Confirmed from the diff, not from a run: at `ad039985` the namespace still
+errors on the class model before reaching this assertion, so the evidence is `git show ad039985 --
+src/futon2/aif/g_term_decomposition.clj`, which replaces exactly those two lines in `verdict`'s F branch. The reason
+is in the code (`:58-61`): "an absent F is not a lost value — the selection law omits the term (cascade-selection line
+112), so the record says the term was omitted from the law that ran." A deliberate change of vocabulary that makes the
+KIND of absence explicit, which is the distinction `[[absence-must-not-read-as-a-value]]` (cited at AR-27) turns on.
+Owner: F-ABS, PROOF-2 packet 27.
+
+**The two C-shape failures are not a stale pin.** `:126` wants every scoring entry's `[:c :status]` to be
+`:derived-no-overlap`; `:132` wants the validity checker's field map to read `"c-source" "flagged"` and gets `"bad"`.
+After `daf2124e` the scoring entry's `:c` is the class scorer's step-indexed preference schedule — `{:form
+:step-indexed :schedule nil :steps [{:tau 1 :distribution nil} …]}`, six of them on this record — and no `:status
+:derived…` appears anywhere on the record. `scripts/wm_run_validity.bb:90-99` does `(find-field r :c)` and reads
+`:status`: `:derived` → ok, `:derived-no-overlap` → flagged, anything else → **bad**, noting the status it saw (here
+`nil`). So the checker is reading a key whose meaning changed under it: one name, `:c`, now carrying the preference
+schedule where the checker expects live-C's provenance. Its `bad` is a verdict about C's source computed from
+something that is not C's source, which is the nearest thing here to an absence read as a value, though no AR names
+it. The smallest change is not in the test: either the checker reads live-C at its own path instead of by
+`find-field`, or the record keeps the live-C status where the checker looks. Which of those is right is a claim about
+the record's schema, so it belongs to the checker's and live-C's owners, not to this test.
+
+**Path.** All seventeen are on the click's scoring path, not the flight's: `from-result` (`g_term_decomposition.clj:
+122-131`) writes the census onto every run record, and the checker runs over any record. None is reached by
+M-autoclock-in's first click, which abstains at assembly (REFUSAL-REGISTER-D §D2.4). **Not done:** no per-term
+bisect was needed — all four terms move together at `daf2124e` — and the F trio's commit is established by diff
+rather than by a run, for the reason given.
