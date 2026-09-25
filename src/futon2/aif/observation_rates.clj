@@ -111,13 +111,44 @@
   [contract]
   (into {} (map (fn [cls] [(:id cls) cls])) (:classes contract)))
 
-(defn- usable-rate
-  "The rate a cell contributes to the kernel: the prior-adjusted posterior
-  mean when an authorised prior is recorded, else the raw rate. An
-  :unobserved cell has no usable rate."
+(defn- counts-produce-rate?
+  "The cell's :rate is the ratio of its own counts: integer :numerator over
+  positive integer :denominator, and :rate EQUAL to that ratio. The counts
+  are what `cell` divided, so the ratio is exact; a :rate that only equals
+  it numerically (0.5 beside 1/2) was written by a hand, not divided from
+  these counts, and does not pass here."
   [cell]
-  (when-not (= :unobserved (:status cell))
-    (or (:posterior-mean cell) (:rate cell))))
+  (and (integer? (:numerator cell))
+       (integer? (:denominator cell))
+       (pos? (:denominator cell))
+       (= (:rate cell) (/ (:numerator cell) (:denominator cell)))))
+
+(defn- measured-cell
+  "What a cell contributes to the kernel, and when it contributes nothing,
+  why. Three outcomes:
+
+  - {:rate r} — its counts produce its rate (see
+    `counts-produce-rate?`), so r is its usable rate: the prior-adjusted
+    posterior mean when an authorised prior recorded one, else the raw
+    rate;
+  - {:status :unobserved} — no comparison was made in this cell. An
+    absence, neither a measurement nor a claim of one;
+  - {:status :declared-not-measured} — the cell carries a rate its counts
+    do not produce: a bare :rate with no counts, counts with no :rate, or
+    counts that divide to something else.
+
+  A-S section 5 (proof2/packets/A-S.md) states the falsifier this
+  distinguishes: \"a rate table with no counts, or with declared numbers
+  wearing the shape of measured ones, is not measured and must be
+  refused.\" The case for refusing rather than consuming: a rate consumed
+  as measured that was never counted is a value standing in for an
+  absence, and the kernel cannot tell the two apart afterwards -- the
+  number reaches G either way, with :basis :estimated on the record."
+  [cell]
+  (cond
+    (= :unobserved (:status cell)) {:status :unobserved}
+    (counts-produce-rate? cell) {:rate (or (:posterior-mean cell) (:rate cell))}
+    :else {:status :declared-not-measured}))
 
 (defn- cell-counts [cell]
   (select-keys cell [:numerator :denominator]))
@@ -133,7 +164,11 @@
     :denominator d} :false-pos {...}} read from the cells;
   - an entry with a cell :unobserved, or any other entry that yields no
     usable pair: the typed :unsupported-class refusal. A measured cell is
-    never discarded, a partial measurement never padded;
+    never discarded, a partial measurement never padded. When a cell
+    carried a rate its own counts do not produce (A-S section 5's declared
+    number wearing a measured shape, see `measured-cell`) the refusal
+    carries :cell-reason :declared-not-measured — a reason on the existing
+    refusal, not a second kind of refusal;
   - no entry, or the whole entry {:status :unobserved}: a :checkable class
     takes the zero kernel {:false-neg 0 :false-pos 0 :basis :checkable
     :measurement :absent}; a :judgement class is :unsupported-class.
@@ -153,8 +188,13 @@
                    (let [cls (get by-id class-id)
                          r (get rates class-id)
                          unmeasured? (or (nil? r) (= :unobserved (:status r)))
-                         fn-rate (some-> r :false-neg usable-rate)
-                         fp-rate (some-> r :false-pos usable-rate)]
+                         fn-cell (some-> r :false-neg measured-cell)
+                         fp-cell (some-> r :false-pos measured-cell)
+                         fn-rate (:rate fn-cell)
+                         fp-rate (:rate fp-cell)
+                         declared? (boolean
+                                    (some #(= :declared-not-measured (:status %))
+                                          [fn-cell fp-cell]))]
                      (cond
                        (and fn-rate fp-rate)
                        (assoc acc token {:false-neg fn-rate
@@ -168,8 +208,10 @@
                                          :measurement :absent})
 
                        :else
-                       (reduced {:status :missing :kind :unsupported-class
-                                 :class class-id :token token})))))
+                       (reduced (cond-> {:status :missing :kind :unsupported-class
+                                         :class class-id :token token}
+                                  declared? (assoc :cell-reason
+                                                   :declared-not-measured)))))))
                {}
                token-classes)))
 
@@ -181,7 +223,9 @@
   the zero kernel as the unmeasured default (tokenLikelihood_checkable,
   conditional on zero rates), recorded as :measurement :absent; a judgement
   class with no admitted rate, or any class measured on one cell only, is
-  the typed :unsupported-class refusal, never padded. A refused
+  the typed :unsupported-class refusal, never padded; a class whose rate
+  is not the ratio of its own counts refuses the same way, with
+  :cell-reason :declared-not-measured. A refused
   rates-by-class (:invalid-prior) is returned as is. LOCATORS is the cascade
   problem's {token {:class class-id}}; CONTRACT is the S-1 observation
   contract. Returns

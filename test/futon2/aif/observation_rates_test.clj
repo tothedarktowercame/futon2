@@ -271,15 +271,95 @@
       (is (close? (* 2 (Math/log 2)) (- g-zero 2.012817736156336))))
     (is (not (close? g-zero g-measured)))))
 
-;; Row 6. REACH LIMIT, recorded not fixed: a cell carrying a :rate but no
-;; :numerator/:denominator (a declared number wearing a measured shape, A-S
-;; §5's falsifier) is still read by usable-rate as a measurement. The kernel
-;; records empty :counts beside it, so the absence of counts is visible on the
-;; record; refusing it is a separate packet.
-(deftest row6-declared-number-in-measured-shape-reach-limit
-  (let [declared {:C4 {:false-neg {:rate 1/6} :false-pos {:rate 3/10}}}
-        m (rates/token-likelihood-rates declared prod-contract {:t/wanted :C4})]
-    (is (= {:false-neg 1/6 :false-pos 3/10 :basis :estimated
-            :counts {:false-neg {} :false-pos {}}}
-           (:t/wanted m))
-        "reach limit: accepted today, with empty :counts")))
+;; Row 6. A declared number wearing a measured shape is refused. A cell whose
+;; :rate its own counts do not produce is not a measurement, and the kernel
+;; cannot tell the two apart once the number is in G: both arrive as :basis
+;; :estimated. A-S §5's falsifier ("a rate table with no counts, or with
+;; declared numbers wearing the shape of measured ones, is not measured and
+;; must be refused") is the case; the refusal is the EXISTING
+;; :unsupported-class, carrying :cell-reason :declared-not-measured.
+(deftest row6-declared-number-in-measured-shape-refuses
+  (testing "r6-1 the reach limit recorded at 7ba427ab: bare :rate, no counts"
+    (let [declared {:C4 {:false-neg {:rate 1/6} :false-pos {:rate 3/10}}}]
+      (is (= {:status :missing :kind :unsupported-class :class :C4
+              :token :t/wanted :cell-reason :declared-not-measured}
+             (rates/token-likelihood-rates declared prod-contract {:t/wanted :C4})))
+      (testing "one declared cell is enough; the other being real does not save it"
+        (let [half (assoc-in (rates/rates-by-class repro-labels {:C4 4})
+                             [:C4 :false-neg] {:rate 1/6})]
+          (is (= :declared-not-measured
+                 (:cell-reason (rates/token-likelihood-rates
+                                half prod-contract {:t/wanted :C4}))))))))
+
+  (testing "r6-2 counts present but :rate is not their ratio"
+    (doseq [[what cell] [[:rate-disagrees-with-counts
+                          {:numerator 1 :denominator 2 :rate 1/6}]
+                         [:counts-with-no-rate {:numerator 1 :denominator 2}]
+                         [:denominator-zero {:numerator 0 :denominator 0 :rate 0}]
+                         [:non-integer-counts
+                          {:numerator 1.0 :denominator 2.0 :rate 1/2}]
+                         ;; exact, because the counts are what `cell` divided:
+                         ;; 0.5 beside 1/2 was written by a hand, not divided.
+                         [:float-rate-beside-exact-counts
+                          {:numerator 1 :denominator 2 :rate 0.5}]]]
+      (let [r {:C4 {:false-neg cell :false-pos cell}}]
+        (is (= {:status :missing :kind :unsupported-class :class :C4
+                :token :t/wanted :cell-reason :declared-not-measured}
+               (rates/token-likelihood-rates r prod-contract {:t/wanted :C4}))
+            (str what " must not reach the kernel")))))
+
+  (testing "r6-3 real rates-by-class output is unchanged: accepted, counts carried"
+    (let [r (rates/rates-by-class repro-labels {:C4 4})
+          m (rates/token-likelihood-rates r prod-contract {:t/wanted :C4})]
+      (is (= {:false-neg 1/2 :false-pos 1/2 :basis :estimated
+              :counts {:false-neg {:numerator 1 :denominator 2}
+                       :false-pos {:numerator 1 :denominator 2}}}
+             (:t/wanted m)))
+      (testing "zero errors are counted, not declared: rate 0 stays usable"
+        (let [clean [{:token-class :C4 :admitted :present :recorded true}
+                     {:token-class :C4 :admitted :present :recorded true}
+                     {:token-class :C4 :admitted :absent :recorded false}]
+              m0 (rates/token-likelihood-rates
+                  (rates/rates-by-class clean {:C4 3}) prod-contract {:t/wanted :C4})]
+          (is (= {:false-neg 0 :false-pos 0 :basis :estimated
+                  :counts {:false-neg {:numerator 0 :denominator 2}
+                           :false-pos {:numerator 0 :denominator 1}}}
+                 (:t/wanted m0)))))))
+
+  (testing "r6-4 a prior-bearing cell is unchanged: :basis :prior"
+    (let [prior {:alpha 1/2 :beta 1/2 :authority "test: Jeffreys Beta(1/2,1/2)"}
+          m (rates/token-likelihood-rates
+             (rates/rates-by-class repro-labels {:C4 4} prior)
+             prod-contract {:t/wanted :C4})]
+      (is (= {:false-neg 1/2 :false-pos 1/2 :basis :prior}
+             (select-keys (:t/wanted m) [:false-neg :false-pos :basis])))
+      (testing "a posterior mean with no counts under it is still refused"
+        (let [r {:C4 {:prior prior
+                      :false-neg {:posterior-mean 3/8}
+                      :false-pos {:posterior-mean 1/4}}}]
+          (is (= :declared-not-measured
+                 (:cell-reason (rates/token-likelihood-rates
+                                r prod-contract {:t/wanted :C4}))))))))
+
+  (testing "an absence is not a declaration: :unobserved refuses with no reason"
+    ;; row3's partial measurement keeps refusing exactly as it did — the new
+    ;; reason marks a claimed number, never a missing one.
+    (let [present-only [{:token-class :C4 :admitted :present :recorded true}
+                        {:token-class :C4 :admitted :present :recorded false}]
+          m (rates/token-likelihood-rates
+             (rates/rates-by-class present-only {:C4 2}) prod-contract {:t/wanted :C4})]
+      (is (= {:status :missing :kind :unsupported-class :class :C4 :token :t/wanted} m))
+      (is (not (contains? m :cell-reason))))))
+
+;; REACH LIMIT, recorded not fixed: `counts-produce-rate?` checks that the counts
+;; produce the rate, not that they are a possible count. {:numerator 3 :denominator 2
+;; :rate 3/2} is self-consistent and reaches the kernel as a rate above 1,
+;; which AdjudicationRates (falseNeg v ∈ Set.Icc 0 1) does not admit. That is
+;; an out-of-range measurement, a different defect from a declared number, and
+;; it needs its own case and refusal.
+(deftest row6-range-of-a-counted-rate-is-not-checked-reach-limit
+  (let [r {:C4 {:false-neg {:numerator 3 :denominator 2 :rate 3/2}
+                :false-pos {:numerator 0 :denominator 1 :rate 0}}}]
+    (is (= 3/2 (get-in (rates/token-likelihood-rates r prod-contract {:t/wanted :C4})
+                       [:t/wanted :false-neg]))
+        "reach limit: a self-consistent count above 1 is accepted today")))
