@@ -2,6 +2,8 @@
   "Checks against real pinned shas in futon2 and mathlib4."
   (:require [babashka.http-client :as http]
             [clojure.data.json :as json]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is]]
             [futon2.aif.observation-checks :as oc]))
@@ -245,8 +247,10 @@
     (let [r (oc/check-registered-run {:repo "futon2" :namespace "futon2.aif.nothing-test"})]
       (is (= :registry-unreadable (:kind r)))
       (is (nil? (:observed r)))))
-  ;; :namespace is still required, and a :config given as blank is malformed
-  (is (= [:namespace] (get-in (oc/check-registered-run {:repo "futon2"}) [:data :missing])))
+  ;; exactly one of :namespace / :command is required (neither refuses, naming
+  ;; the rule), and a :config given as blank is malformed
+  (is (= :exactly-one-of-namespace-or-command
+         (get-in (oc/check-registered-run {:repo "futon2"}) [:data :rule])))
   (is (= [:config] (get-in (oc/check-registered-run {:repo "futon2" :namespace "n" :config ""})
                            [:data :missing]))))
 
@@ -291,3 +295,126 @@
         (is (= :scan-window-exhausted (get-in r [:data :reason])))
         (is (= 100 (get-in r [:data :scanned])))
         (is (= 3108 (get-in r [:data :registry-entries])))))))
+
+;; ---------------------------------------------------------------------------
+;; E-kimi-task-28: C8 resolves a COMMAND, not only a namespace.
+;; A gate run (["bb" "scripts/gates.clj"], a shell VERIFY exit, ["lake" "build"
+;; <Module>]) names no -n namespace, so a namespace-only consumer refused it
+;; before any read. The command lookup is the registry's own (futon3c
+;; E-kimi-task-19); this side asks with ?command=<pr-str> and reads the same
+;; reply shape.
+
+(deftest c8-resolves-a-command-with-no-config
+  (let [{:keys [entry-id entry]} (stub-record (run-record))
+        asked (atom [])]
+    (binding [oc/*registry-latest* (fn [base locator]
+                                     (swap! asked conj [base locator])
+                                     {:entry-id entry-id :resolved-by :command-lookup})
+              oc/*registry-entry* (fn [_ id] (if (= id entry-id) entry :absent))]
+      (let [cmd ["clojure" "-M:test" "-n" "futon2.aif.observation-checks-test"]
+            r (oc/check-registered-run {:repo "futon2" :command cmd})]
+        (is (true? (:observed r)) (pr-str (:evidence r)))
+        (is (= 1 (count @asked)) "the lookup is asked exactly once")
+        (is (= {:command cmd} (second (first @asked)))
+            "the seam is handed the command locator, not a namespace string")
+        (is (= :command-lookup (get-in r [:evidence :resolved-by])))
+        (is (= entry-id (get-in r [:evidence :warrant-id])))))))
+
+(deftest c8-command-no-entry-is-false-not-a-refusal
+  ;; the registry answered and holds no run for this command: observed false,
+  ;; :no-entry, exactly as the namespace path reads a typed absence
+  (binding [oc/*registry-latest* (fn [_ _] :absent)]
+    (let [r (oc/check-registered-run {:repo "futon2" :command ["bb" "scripts/gates.clj"]})]
+      (is (false? (:observed r)))
+      (is (nil? (:status r)))
+      (is (= :no-entry (get-in r [:evidence :reason])))
+      (is (= :command-lookup (get-in r [:evidence :resolved-by]))))))
+
+(deftest c8-command-locator-refusals
+  ;; both :namespace and :command refuses, and names the rule
+  (let [r (oc/check-registered-run {:repo "futon2" :namespace "futon2.x-test"
+                                    :command ["bb" "scripts/gates.clj"]})]
+    (is (= :no-locator (:kind r)))
+    (is (= :exactly-one-of-namespace-or-command (get-in r [:data :rule]))))
+  ;; neither refuses the same way
+  (let [r (oc/check-registered-run {:repo "futon2"})]
+    (is (= :no-locator (:kind r)))
+    (is (= :exactly-one-of-namespace-or-command (get-in r [:data :rule]))))
+  ;; an empty vector is not a command
+  (is (= :no-locator
+         (:kind (oc/check-registered-run {:repo "futon2" :command []})))))
+
+(deftest c8-command-lookup-reader-maps-the-registry-answers
+  (let [respond (fn [status body]
+                  (with-redefs [http/get (fn [_ _] {:status status :body body})]
+                    (oc/fetch-latest-for-command "http://127.0.0.1:7070"
+                                                 ["bb" "scripts/gates.clj"])))]
+    ;; found: the id, resolved by the command lookup
+    (is (= {:entry-id "test-registry-abc" :resolved-by :command-lookup}
+           (respond 200 (json/write-str {:latest {:found true :entry-id "test-registry-abc"}}))))
+    ;; typed absence: no-run-for-command reads :absent
+    (is (= :absent (respond 200 (json/write-str {:latest {:found false
+                                                          :reason "no-run-for-command"}}))))
+    ;; a 400 is the endpoint refusing the question; its named reason is carried
+    (let [r (respond 400 (json/write-str {:record/type "test-registry/refusal"
+                                          :reason "invalid-command"}))]
+      (is (= :registry-unreadable (:kind r)))
+      (is (= :invalid-command (get-in r [:data :reason])))
+      (is (= 400 (get-in r [:data :status]))))
+    ;; any other not-found reason stays :registry-unreadable
+    (let [r (respond 200 (json/write-str {:latest {:found false
+                                                   :reason "scan-window-exhausted"}}))]
+      (is (= :registry-unreadable (:kind r)))
+      (is (= :scan-window-exhausted (get-in r [:data :reason]))))))
+
+(deftest c8-command-lookup-url-encodes-the-pr-str
+  ;; bad case watched: a command whose pr-str contains spaces must arrive
+  ;; intact through URL encoding — the stub asserts the query it received.
+  (let [seen (atom nil)]
+    (with-redefs [http/get (fn [url _]
+                             (reset! seen url)
+                             {:status 200
+                              :body (json/write-str {:latest {:found false
+                                                              :reason "no-run-for-command"}})})]
+      (is (= :absent (oc/fetch-latest-for-command
+                      "http://127.0.0.1:7070" ["sh" "-c" "verify exit 0"])))
+      (let [query (second (str/split @seen #"\?" 2))
+            command-param (first (filter #(str/starts-with? % "command=")
+                                         (str/split query #"&")))
+            encoded (second (str/split command-param #"=" 2))
+            decoded (java.net.URLDecoder/decode encoded "UTF-8")]
+        (is (not (str/includes? encoded " ")) "no raw space crosses the wire")
+        (is (= "[\"sh\" \"-c\" \"verify exit 0\"]" decoded)
+            "the pr-str arrives intact")
+        (is (= ["sh" "-c" "verify exit 0"] (edn/read-string decoded))
+            "and reads back as the same vector")))))
+
+;; ONE live-pinned case (E-kimi-task-28): the command lookup and the namespace
+;; lookup observe the same entry on the live :7070. Pinned 2026-09-25T03:23Z,
+;; when the rebuilt ledger's marker read :scanned 3200 = :registry-entries,
+;; :complete? true and the newest run of futon3c.test-registry-test was the
+;; 03:21:59Z warranted run. If the registry has since seen a newer run of that
+;; namespace, the pin — not the lookup — is what moved.
+(def ^:private live-pinned-entry-id
+  "test-registry-06f03cf1551c33455e13e82c59bd4deff97f40bb6bd6de3bf3a07c972396044e")
+
+(deftest c8-live-command-lookup-observes-the-same-entry-as-the-namespace-lookup
+  (let [base (oc/agency-base)
+        cmd ["clojure" "-M:test" "-n" "futon3c.test-registry-test"]
+        by-command (oc/fetch-latest-for-command base cmd)
+        by-namespace (oc/fetch-latest-for-namespace base "futon3c.test-registry-test")]
+    (is (= live-pinned-entry-id (:entry-id by-command)) (pr-str by-command))
+    (is (= live-pinned-entry-id (:entry-id by-namespace)) (pr-str by-namespace))
+    (is (= :command-lookup (:resolved-by by-command)))
+    (is (= :namespace-lookup (:resolved-by by-namespace))))
+  ;; the marker this pin was taken against: a complete command-keyed build
+  (let [ledger-file (io/file "/home/joe/code/futon3c/data/test-registry/namespace-ledger.edn")
+        entries (with-open [r (java.io.PushbackReader. (io/reader ledger-file))]
+                  (loop [acc []]
+                    (let [form (edn/read {:eof ::eof} r)]
+                      (if (= ::eof form) acc (recur (conj acc form))))))
+        marker (last (filter #(= :namespace-ledger-built (:entry/type %)) entries))]
+    (is (some? marker) "the ledger carries a build marker")
+    (is (= 3200 (:scanned marker)))
+    (is (= 3200 (:registry-entries marker)))
+    (is (true? (:complete? marker)))))

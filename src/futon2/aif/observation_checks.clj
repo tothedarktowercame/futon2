@@ -214,6 +214,53 @@
   neither need a live agency nor load anything into the serving JVM."
   fetch-registry-entry)
 
+(defn- fetch-latest-for
+  "GET /api/alpha/test-registry/latest?<param>=<value>&limit=100 — the shared
+  reader for the namespace and command forms. The registry's own typed
+  absence is \"no-run-for-<param>\"; a 400 is the endpoint refusing the
+  question (a malformed command vector, say), and its named reason is
+  carried, not flattened into a bare status."
+  [base param value]
+  (let [url (str (str/replace base #"/$" "") "/api/alpha/test-registry/latest"
+                 "?" param "=" (URLEncoder/encode (str value) "UTF-8")
+                 "&limit=100")
+        {:keys [status body]} (try (http/get url {:timeout 5000 :throw false})
+                                   (catch Exception e
+                                     {:status :unreachable :body (.getMessage e)}))]
+    (if (not= 200 status)
+      (let [parsed (try (json/read-str (str body) :key-fn keyword)
+                        (catch Exception _ nil))]
+        (refuse :registry-unreadable
+                (cond-> {:check :C8 :url url :status status}
+                  (:reason parsed) (assoc :reason (keyword (:reason parsed))))))
+      (let [latest (:latest (try (json/read-str body :key-fn keyword)
+                                 (catch Exception _ nil)))]
+        (cond
+          (nil? latest)
+          (refuse :registry-unreadable {:check :C8 :url url :reason :unparseable-response})
+
+          (true? (:found latest))
+          {:entry-id (:entry-id latest) :resolved-by (keyword (str param "-lookup"))}
+
+          (= (str "no-run-for-" param) (:reason latest)) :absent
+
+          :else
+          (refuse :registry-unreadable
+                  (merge {:check :C8 :url url
+                          :reason (keyword (or (:reason latest)
+                                               "lookup-inconclusive"))}
+                         ;; how far the lookup looked, when it said
+                         (into {} (filter (comp some? val))
+                               (select-keys latest [:scanned :held :registry-entries])))))))))
+
+(defn fetch-latest-for-command
+  "Ask the registry which record covers an exact logical COMMAND (E-kimi-task-19:
+  gate runs — bb, sh, lake build — name no -n namespace, so the namespace
+  lookup can never find them). VALUE sent is (pr-str command); the reply
+  shape and the absence rule are the namespace lookup's own."
+  [base command]
+  (fetch-latest-for base "command" (pr-str (vec command))))
+
 (defn fetch-latest-for-namespace
   "Ask the registry WHICH record covers NAMESPACE — AR-42's
   GET /api/alpha/test-registry/latest. One rule, held in futon3c: this check
@@ -221,7 +268,8 @@
   that rule would disagree the first time one of them was wrong.
 
   Returns {:entry-id …}; :absent when the registry establishes that it holds no
-  run for the namespace; a refusal when the lookup cannot be reached, or when it
+  run for the namespace; a refusal when the lookup cannot be reached, when it
+  refuses the question itself (a 400 names its own reason), or when it
   reports that its scan filled its window — a scan that ran out of room did not
   establish absence, and reading it as \"no tests are registered\" would be the
   substituted value this class exists to refuse.
@@ -233,39 +281,22 @@
   and :registry-entries when it reported them, so the refusal says how far the
   lookup looked rather than just that it refused."
   [base namespace]
-  (let [url (str (str/replace base #"/$" "") "/api/alpha/test-registry/latest"
-                 "?namespace=" (URLEncoder/encode (str namespace) "UTF-8")
-                 "&limit=100")
-        {:keys [status body]} (try (http/get url {:timeout 5000 :throw false})
-                                   (catch Exception e
-                                     {:status :unreachable :body (.getMessage e)}))]
-    (if (not= 200 status)
-      (refuse :registry-unreadable {:check :C8 :url url :status status})
-      (let [latest (:latest (try (json/read-str body :key-fn keyword)
-                                 (catch Exception _ nil)))]
-        (cond
-          (nil? latest)
-          (refuse :registry-unreadable {:check :C8 :url url :reason :unparseable-response})
+  (fetch-latest-for base "namespace" (str namespace)))
 
-          (true? (:found latest))
-          {:entry-id (:entry-id latest) :resolved-by :namespace-lookup}
-
-          (= "no-run-for-namespace" (:reason latest)) :absent
-
-          :else
-          (refuse :registry-unreadable
-                  (merge {:check :C8 :url url
-                          :reason (keyword (or (:reason latest)
-                                               "lookup-inconclusive"))}
-                         ;; how far the lookup looked, when it said
-                         (into {} (filter (comp some? val))
-                               (select-keys latest [:scanned :held :registry-entries])))))))))
+(defn fetch-latest
+  "The *registry-latest* seam's default: dispatch on the locator. A string is a
+  namespace; {:command [...]} asks by command."
+  [base locator]
+  (if (string? locator)
+    (fetch-latest-for-namespace base locator)
+    (fetch-latest-for-command base (:command locator))))
 
 (def ^:dynamic *registry-latest*
-  "The seam C8 resolves a namespace through: (fn [base namespace] ->
-  {:entry-id …} | :absent | refusal). Bound by tests, so no test needs the
-  lookup endpoint to be live."
-  fetch-latest-for-namespace)
+  "The seam C8 resolves a locator through: (fn [base locator] -> {:entry-id …}
+  | :absent | refusal), where the locator is a namespace string or
+  {:command [...]}. Bound by tests, so no test needs the lookup endpoint to
+  be live."
+  fetch-latest)
 
 (defn- decode-record
   "The record is EDN inside the entry body, named by its own digest. Verify
@@ -319,6 +350,12 @@
              :matched? (= pinned current)}))
         (sort-by key files)))
 
+(defn- c8-command-present?
+  "A locator :command is present when it is a non-empty sequential (a vector of
+  argv strings). Anything else is not a command this check can ask by."
+  [command]
+  (boolean (and (sequential? command) (seq command))))
+
 (defn check-registered-run
   "C8: the registry holds a warrant for NAMESPACE whose pinned code-path and
   test-path shas are the shas of those files NOW, whose postcheck matched, and
@@ -329,31 +366,56 @@
   postcheck did not match, or when the run recorded failures. Refuses only on a
   malformed locator or a registry that cannot be read.
 
+  The locator resolves the record one of two ways: :namespace <string> asks
+  the registry's namespace lookup, or :command <argv vector> asks its command
+  lookup (a gate run — bb, sh, lake build — names no -n namespace, so without
+  the command form it can never be observed). Exactly one of the two; both or
+  neither is a locator refusal naming the rule.
+
   A true reading says those tests passed over exactly these bytes. It says
   nothing about whether the tests are worth passing."
-  [{:keys [repo namespace config] :as m}]
-  (or (locator-refusal :C8 m [:repo :namespace])
+  [{:keys [repo namespace command config] :as m}]
+  (or (locator-refusal :C8 m [:repo])
       (when (contains? m :config) (locator-refusal :C8 m [:config]))
-      (let [located (if (contains? m :config)
+      ;; A :config locator names the record directly; it still answers for a
+      ;; namespace (the judgement below compares it), never for a command.
+      (when (contains? m :config) (locator-refusal :C8 m [:namespace]))
+      (when-not (contains? m :config)
+        (let [has-ns (boolean (and (string? namespace) (not (str/blank? namespace))))
+              has-cmd (c8-command-present? command)]
+          (when (or (and has-ns has-cmd) (not (or has-ns has-cmd)))
+            (refuse :no-locator {:check :C8 :rule :exactly-one-of-namespace-or-command
+                                 :namespace? has-ns :command? has-cmd}))))
+      (let [by-command? (and (not (contains? m :config)) (c8-command-present? command))
+            lookup (when-not (contains? m :config)
+                     (if by-command? {:command (vec command)} namespace))
+            located (if (contains? m :config)
                       (locate-record config)
                       ;; No :config: ask the registry which record covers this
-                      ;; namespace (AR-42). The answer is still judged below —
-                      ;; the lookup finds the newest run regardless of whether
-                      ;; it passed, so a later failing run cannot hide behind an
-                      ;; earlier green one.
-                      (*registry-latest* (agency-base) namespace))]
+                      ;; namespace or command (AR-42). The answer is still judged
+                      ;; below — the lookup finds the newest run regardless of
+                      ;; whether it passed, so a later failing run cannot hide
+                      ;; behind an earlier green one.
+                      (*registry-latest* (agency-base) lookup))
+            resolved-by (if by-command? :command-lookup :namespace-lookup)]
         (if (:status located) located
           (if (= :absent located)
-            ;; the registry answered and holds no run for this namespace
+            ;; the registry answered and holds no run for this locator
             {:observed false :check :C8
-             :evidence {:repo repo :root (str repo-root "/" repo) :namespace namespace
-                        :resolved-by :namespace-lookup :reason :no-entry}}
+             :evidence (cond-> {:repo repo :root (str repo-root "/" repo)
+                                :resolved-by resolved-by :reason :no-entry}
+                         (and (string? namespace) (not (str/blank? namespace)))
+                         (assoc :namespace namespace)
+                         by-command? (assoc :command (vec command)))}
             (let [entry-id (:entry-id located)
                   root (str repo-root "/" repo)
                   base (or (:base located) (agency-base))
                   entry (*registry-entry* base entry-id)
-                  evidence (cond-> {:repo repo :root root :namespace namespace
+                  evidence (cond-> {:repo repo :root root
                                     :warrant-id entry-id}
+                             (and (string? namespace) (not (str/blank? namespace)))
+                             (assoc :namespace namespace)
+                             by-command? (assoc :command (vec command))
                              (:resolved-by located) (assoc :resolved-by (:resolved-by located)))]
               (cond
                 (:status entry) (assoc entry :evidence evidence)
@@ -377,7 +439,11 @@
                                             :moved-paths (mapv :path moved))
                             reason (cond
                                      (not= :run (:kind record)) :not-a-run-record
-                                     (not= namespace ran) :namespace-mismatch
+                                     (and (not by-command?) (not= namespace ran))
+                                     :namespace-mismatch
+                                     (and by-command?
+                                          (not= (vec command) (vec (:command record))))
+                                     :command-mismatch
                                      (not (true? (:warrant? record))) :not-a-warrant
                                      (not= :matched (get-in record [:postcheck :status])) :postcheck-not-matched
                                      (not (and (number? failures) (zero? failures)
