@@ -1,0 +1,26 @@
+;; extractor sha256 857ef641c5ea68f88d8c595e067846409414c575158612e0f0955072740fc4dd
+;; targets 23
+{:target "M-zaif-harness", :units-before 5, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "M-autoclock-in", :units-before 4, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "M-weird-modernism", :units-before 8, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "M-apm-demonstration", :units-before 11, :units-after 0, :anchor false, :outcomes 9, :shape-rejected [:shape/heading :shape/fenced-block :shape/merge-note :shape/merge-note], :links 0}
+{:target "M-mission-coherence-patterns", :units-before 6, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-live-loop-3", :units-before 4, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-memory-latency", :units-before 4, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-close-S6", :units-before 4, :units-after 0, :anchor false, :outcomes 1, :shape-rejected [], :links 0}
+{:target "E-war-machine-qa", :units-before 7, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-port-wiring-map", :units-before 4, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-R6-red-ring-fill", :units-before 4, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-cascade-assembly", :units-before 8, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-R14-red-ring-fill", :units-before 5, :units-after 0, :anchor false, :outcomes 1, :shape-rejected [], :links 0}
+{:target "E-jax-demonstrators", :units-before 2, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-loss-function-shape", :units-before 4, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-pipeline-pipecleaner", :units-before 3, :units-after 0, :anchor false, :outcomes 1, :shape-rejected [], :links 0}
+{:target "E-globe-6-closure-rubric", :units-before 5, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-inbox-zero-implementation", :units-before 6, :units-after 0, :anchor false, :outcomes 1, :shape-rejected [], :links 0}
+{:target "E-candidate-queue-xtdb-shape-v0", :units-before 3, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-btoa-evidence-sample-mapping-v0", :units-before 4, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-first-flights-policy-grade-G-closure", :units-before 4, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-strategic-bridge-motif-comparison-v0", :units-before 6, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:target "E-first-flights-typed-grounds-tail-closure", :units-before 6, :units-after 0, :anchor false, :outcomes 0, :shape-rejected [], :links 0}
+{:units-before 117, :units-after 0, :links 0, :outcomes 13, :shape-rejected #:shape{:heading 1, :fenced-block 1, :merge-note 2}}

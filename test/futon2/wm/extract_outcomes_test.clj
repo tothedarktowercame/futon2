@@ -2,7 +2,9 @@
 ;; The script is load-filed into its own namespace; it is not a lib on the
 ;; classpath. Run: clojure -M:test -m cognitect.test-runner -d test/futon2/wm
 (ns futon2.wm.extract-outcomes-test
-  (:require [clojure.string :as str]
+  (:require [clojure.edn :as edn]
+            [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]))
 
 (def script-ns 'extract-outcomes-under-test)
@@ -439,7 +441,9 @@
 (deftest e6-no-direction-verb-no-link
   ;; Bad case: a section naming the artefact without treating it as acted on
   ;; (no direction verb) does not link -- presence is not a serve.
-  (let [text (str "### 4. Prompts\n\n"
+  ;; H-C-REACH-I: instance sections need an instances anchor, so the fixture
+  ;; carries one (it had none, and was read by the whole-file fallback).
+  (let [text (str "## The instances\n\n### 4. Prompts\n\n"
                   "With hardcoded code you can grep for the literal; with a hardcoded prompt you must match natural language at runtime.\n\n"
                   "The hardcoded prompt sits in the call site, as it always has.\n")
         hs (headings text)
@@ -463,3 +467,121 @@
           links2 (artefact-links text2 isecs2 outcomes2)]
       (is (= 1 (count links2)) "adding a direction-verb mention links it")
       (is (= :absorb (:direction (:via (first links2))))))))
+
+;; ---------------------------------------------------------- H-C-REACH-I
+;; Reader precision (H-C-REACH-D, futon2 b10589a9): no instance units without
+;; an instances anchor; heading, fenced-block and merge-note spans rejected by
+;; shape. Live texts are read with git show at the shas the target-field
+;; fixture (6d2b39a7) recorded, and pinned by sha256.
+
+(def shape-verdict (f 'shape-verdict))
+(def cue-shapes @(f 'cue-shapes))
+
+(defn- git-show [repo rev path]
+  (let [r (shell/sh "git" "-C" (str "../" repo) "show" (str rev ":" path))]
+    (when (zero? (:exit r)) (:out r))))
+
+(def close-s6 (delay (git-show "futon5a" "1e4ab8d7" "holes/excursions/E-close-S6.md")))
+(def close-s6-sha "5ebc8363280017523d72dd1e55052c1ce496b48c89deb0cdaaca6cfc02a68798")
+(def apm (delay (git-show "futon3c" "acdd14f4" "holes/missions/M-apm-demonstration.md")))
+(def apm-sha "0abc8484a418f6ea4cd42573dd2942ce0b28571fb4216043664c4e6c89e7788e")
+
+(defn- run-main-on
+  "-main's EDN output for a text, via a temp file (no cascades)."
+  [text]
+  (let [tmp (java.io.File/createTempFile "h-c-reach-i" ".md")]
+    (spit tmp text)
+    (let [out (with-out-str ((f '-main) (.getPath tmp)))]
+      (.delete tmp)
+      (edn/read-string out))))
+
+(deftest control-m-futon-seams-unchanged
+  (let [text (slurp mission-path)
+        _ (is (= mission-sha-pinned (sha256 text)))
+        hs (headings text)
+        isecs (instance-sections hs (count (str/split-lines text)))
+        section-of (fn [l] (:instance (first (filter #(<= (first (:lines %)) l (second (:lines %))) isecs))))
+        cs (mapv #(assoc %1 :id (keyword (str "o-" (inc %2))))
+                 (consolidate (extract text section-of {})) (range))
+        {:keys [outcomes rejected facets]} (filter-outcomes text cs)
+        {:keys [links served]} (mission-served text)]
+    (is (= [6 9 1] [(count outcomes) (count rejected) (count facets)]))
+    (is (= 8 (count links)))
+    (is (not-any? #(= :shape (:clause %)) rejected) "no shape rejection on the control")
+    (is (= [1 2 3 4 5 6 7 8] (mapv :instance served)))
+    (is (= [:no-cascade :no-cascade :no-cascade] (mapv :absent (take 3 served))))))
+
+(def pre-change-rev "a31f9cee")
+
+(defn- main-output
+  "-main's parsed output for the script at REV (nil = the working file) on
+   the pinned mission with its cascades."
+  [rev]
+  (let [nsym (symbol (str "extract-outcomes-" (or rev "head")))
+        path (if rev
+               (let [tmp (java.io.File/createTempFile "extract-outcomes-" ".clj")]
+                 (spit tmp (:out (shell/sh "git" "show" (str rev ":scripts/wm/extract-outcomes.clj"))))
+                 (.getPath tmp))
+               "scripts/wm/extract-outcomes.clj")]
+    (binding [*ns* (create-ns nsym)]
+      (clojure.core/refer-clojure)
+      (load-file path))
+    (edn/read-string
+     (with-out-str ((ns-resolve nsym '-main) mission-path "--cascades" cascade-dir)))))
+
+(deftest control-m-futon-seams-output-identical-to-pre-change
+  (let [before (main-output pre-change-rev)
+        after (main-output nil)]
+    (is (= mission-sha-pinned (get-in after [:mission :sha256])))
+    (is (= (:served-by before) (:served-by after)) "served-by rows byte-identical")
+    (is (= before after) "the whole -main output is unchanged on the control")))
+
+(deftest anchor-1-numbered-headings-without-anchor-are-not-instances
+  (let [text @close-s6
+        _ (is (= close-s6-sha (sha256 text)))
+        hs (headings text)
+        numbered (filter #(and (= 3 (:level %)) (re-find #"^\d+\.\s" (:title %))) hs)]
+    (is (= 4 (count numbered)) "the protocol steps 1-4 are numbered ### headings")
+    (is (= [] (instance-sections hs (count (str/split-lines text)))))
+    (is (= {:absent :no-instances-anchor} (:served-by (run-main-on text))))))
+
+(deftest anchor-2-the-same-file-with-an-instances-heading
+  (let [lines (vec (str/split-lines @close-s6))
+        i (.indexOf ^java.util.List lines "### 1. Freeze the preregistration")
+        text (str/join "\n" (concat (subvec lines 0 i) ["## Instances" ""] (subvec lines i)))
+        units (instance-sections (headings text) (count (str/split-lines text)))]
+    (is (pos? i))
+    (is (= [1 2 3 4] (mapv :instance units)))
+    (is (vector? (:served-by (run-main-on text))))))
+
+(deftest shape-1-m-apm-demonstration
+  (let [text @apm
+        _ (is (= apm-sha (sha256 text)))
+        cs (mapv #(assoc %1 :id (keyword (str "o-" (inc %2))))
+                 (consolidate (extract text (constantly nil) {})) (range))
+        before (filter-outcomes
+                text cs)
+        shape-rej (filter #(= :shape (:clause %)) (:rejected before))
+        reasons (set (map :reason shape-rej))
+        quote-of (fn [r] (:quote (first (:cues r))))]
+    (is (contains? reasons :shape/heading))
+    (is (contains? reasons :shape/fenced-block))
+    (is (contains? reasons :shape/merge-note))
+    (is (some #(str/starts-with? (quote-of %) "### First, the cost of tuning role cards") shape-rej))
+    (is (some #(str/starts-with? (quote-of %) "```clojure\n:reg/escalation") shape-rej))
+    (is (some #(str/starts-with? (quote-of %) "Merged (`see log`)") shape-rej))
+    ;; 13 admitted before H-C-REACH-I (H-C-REACH-D §1); each shape rejection
+    ;; removes exactly one
+    (is (= 13 (+ (count (:outcomes before)) (count shape-rej))))
+    (doseq [o (:outcomes before)]
+      (is (not-any? #(shape-verdict text %) (:cues o))
+          "no admitted outcome passes on a shape-matching cue alone"))))
+
+(deftest shape-2-prose-containing-hash-or-backtick-is-not-rejected
+  (is (nil? (shape-verdict "x" {:quote "Rob wants a seam so issue #12 in `roles.clj` could close." :span [0 1]})))
+  (is (nil? (shape-verdict "x" {:quote "The branch was merged into the plan as a note." :span [0 1]})))
+  (is (= :shape/heading (:reason (shape-verdict "x" {:quote "## A heading" :span [0 1]}))))
+  (let [text "Prose.\n\n```\nso Rob could run it\n```\n"
+        a (.codePointCount text 0 (str/index-of text "so Rob"))]
+    (is (= :shape/fenced-block (:reason (shape-verdict text {:quote "so Rob could run it" :span [a (+ a 5)]})))
+        "a span inside a fence is rejected by position")))

@@ -214,22 +214,37 @@
        (remove nil?)
        vec))
 
+(defn instances-anchor
+  "The level-2 heading that introduces the instances (`## ... instances`,
+   `## The <n> instances`), or nil."
+  [hs]
+  (first (filter #(and (= 2 (:level %))
+                       (re-find #"(?i)instances?$|(?i)^the \w+ instances" (:title %)))
+                 hs)))
+
 (defn instance-sections
   "### <n>. <title> sections, with the line range each spans. These are the only
    sections whose contents can be linked to an instance by containment.
 
    Scoped to the level-2 section that introduces the instances. Without that
    scope DERIVE's numbered method steps (### 1. Someone hits the coupling, ...)
-   parse as instances 1-3, and every served-by row is emitted twice."
+   parse as instances 1-3, and every served-by row is emitted twice.
+
+   No anchor, no units (H-C-REACH-I). The earlier fallback scanned the whole
+   file, so numbered findings, protocol steps, bands and rubric levels became
+   117 'instance' units across 23 feasible targets, none an instance
+   (H-C-REACH-D §3, futon2 b10589a9). -main records the anchor's absence as
+   {:absent :no-instances-anchor} in the served-by slot."
   [hs total-lines]
   (let [h2 (filter #(= 2 (:level %)) hs)
-        anchor (first (filter #(re-find #"(?i)instances?$|(?i)^the \w+ instances" (:title %)) h2))
+        anchor (instances-anchor hs)
         stop (when anchor (first (filter #(> (:line %) (:line anchor)) h2)))
-        lo (if anchor (:line anchor) 0)
+        lo (when anchor (:line anchor))
         hi (if stop (:line stop) (inc total-lines))
-        ins (filter #(and (= 3 (:level %))
-                          (re-find #"^\d+\.\s" (:title %))
-                          (< lo (:line %) hi)) hs)]
+        ins (when anchor
+              (filter #(and (= 3 (:level %))
+                            (re-find #"^\d+\.\s" (:title %))
+                            (< lo (:line %) hi)) hs))]
     (mapv (fn [h]
             (let [n (Integer/parseInt (second (re-find #"^(\d+)\." (:title h))))
                   after (filter #(and (> (:line %) (:line h)) (<= (:level %) 3)) hs)
@@ -558,6 +573,53 @@
        :reads "an imperative to the mission's own process; discharged by enactment"}
       :else nil)))
 
+;; ------------------------------------------------ cue shape (H-C-REACH-I)
+;; H-C-DEF §2's four clauses presuppose a sentence. Off M-futon-seams the cue
+;; rules also fire on spans that are not sentences at all; on
+;; M-apm-demonstration (futon3c holes/missions/M-apm-demonstration.md) 13
+;; outcomes were admitted, among them
+;;   a heading:     "### First, the cost of tuning role cards — permitted, but priced"
+;;   a fenced block: "```clojure\n:reg/escalation {:trigger    :no-improvement-across-student-attempts ..."
+;;   a merge note:   "Merged (`see log`) but\nNOT reloaded — the live JVM predates the env flag, ..."
+;; (H-C-REACH-D §1, futon2 b10589a9). A span of one of these shapes cannot be
+;; an outcome, whatever cue fired on it. The table is data; a reviewer
+;; disputes a named shape. :inside-fence is judged on the span's position in
+;; the text, the others on the quote.
+
+(def cue-shapes
+  [{:id :shape/heading
+    :re #"^#{1,6}\s"
+    :reads "a markdown heading, not a sentence"}
+   {:id :shape/fenced-block
+    :re #"^```"
+    :inside-fence true
+    :reads "a fenced code block, or a span inside one"}
+   {:id :shape/merge-note
+    :re #"(?i)^(?:\*\*)?(?:[^:\n]{0,60}:\s*)?(?:reviewed and )?merged\b"
+    :reads "a merge/review log line reporting that a change landed"}])
+
+(defn- inside-fence?
+  "True when code point offset a lies inside a ``` fenced block of text."
+  [^String text a]
+  (let [before (subs text 0 (.offsetByCodePoints text 0 a))]
+    (odd? (count (re-seq #"(?m)^\s*```" before)))))
+
+(defn shape-verdict
+  "nil, or {:clause :shape :reason :shape/<id> :reads s} for the first
+   cue-shapes entry the cue matches."
+  [^String text {:keys [quote span]}]
+  (some (fn [{:keys [id re inside-fence reads]}]
+          (when (or (re-find re quote)
+                    (and inside-fence span (inside-fence? text (first span))))
+            {:clause :shape :reason id :reads reads}))
+        cue-shapes))
+
+(defn- cue-verdict
+  "Shape first, then the four clauses."
+  [^String text cue whose]
+  (or (shape-verdict text cue)
+      (clause-verdict (assoc cue :whose whose))))
+
 (defn- facet-lead-in?
   "E1-residual (H-C-DEF §3, :o-6): a cue whose blank-line-delimited paragraph
    the mission itself introduces with 'Evidence it is needed' is a finer-grain
@@ -578,12 +640,12 @@
   [^String text outcomes]
   (let [scored (mapv (fn [o]
                        (let [fails (vec (keep (fn [c]
-                                                (when-let [v (clause-verdict (assoc c :whose (:whose o)))]
+                                                (when-let [v (cue-verdict text c (:whose o))]
                                                   (assoc v :cue (:cue c) :quote (:quote c))))
                                               (:cues o)))]
                          (assoc o
                                 :facet? (boolean (some #(facet-lead-in? text (:span %)) (:cues o)))
-                                :passes? (boolean (some #(nil? (clause-verdict (assoc % :whose (:whose o))))
+                                :passes? (boolean (some #(nil? (cue-verdict text % (:whose o)))
                                                         (:cues o)))
                                 :clause-failures fails)))
                        outcomes)
@@ -706,6 +768,7 @@
           (filter-outcomes text consolidated)
           fails (verify text (concat admitted rejected facets))
           links (artefact-links text isecs admitted)
+          anchor (instances-anchor hs)
           served (vec (for [s isecs
                             :let [ws (get wants (:instance s))
                                   ls (filterv #(= (:instance s) (:instance %)) links)]]
@@ -735,7 +798,7 @@
                        :filter-counts {:outcomes (count admitted)
                                        :rejected (count rejected)
                                        :facets (count facets)}
-                       :served-by served
+                       :served-by (if anchor served {:absent :no-instances-anchor})
                        :unlinked {:count (count unlinked)
                                   :outcomes (mapv (fn [o] {:outcome (:id o)
                                                            :absent :no-shared-artefact})
