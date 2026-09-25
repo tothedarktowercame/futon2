@@ -493,7 +493,14 @@
                               beta-state (assoc :policy-precision-state beta-state)
                               queue-receipt (assoc :ticket-queue queue-receipt))
      :selection-law
-     (merge comparisons {:requested :cascade-selection-posterior
+     ;; M-wm-wiring row 9 (claude-10, 2026-09-25): :candidate is the CHOSEN
+     ;; entry's :cascade-id (efe's ranked entries carry it), the id Clause C's
+     ;; P_c joins an enactment on. Not :per-policy-argmax, the posterior's
+     ;; mode, which the summed marginal can overrule (recorded beside it
+     ;; above). Absent when the chosen entry carries no :cascade-id: the key
+     ;; is left out rather than written nil, and the W_c checker reads the
+     ;; missing id as :join-unverifiable.
+     (cond-> (merge comparisons {:requested :cascade-selection-posterior
       :applied :cascade-selection-posterior
       :beta beta
       :beta-status beta-status
@@ -520,6 +527,7 @@
                      (if stratum-posterior
                        (reduce-kv (fn [m a p] (update m (get action-of a) (fnil + 0.0) p)) {} stratum-posterior)
                        weights)))})
+       (some? (:cascade-id chosen-entry)) (assoc :candidate (:cascade-id chosen-entry)))
      :softmax-weights weights
      :chosen-action (:action choice)
      :chosen-action-mass (get weights (:action choice))}))

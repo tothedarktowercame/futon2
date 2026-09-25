@@ -41,7 +41,12 @@
                                ;; test pass is how such a test stops meaning
                                ;; anything (claude-5, 2026-09-24, found by
                                ;; kimi-6 while checking a different stop-line).
-                               :enacted-steps)))))))
+                               :enacted-steps
+                               ;; :candidate joined the law with M-wm-wiring
+                               ;; row 9 (claude-10, 2026-09-25): the chosen
+                               ;; entry's :cascade-id, additive, same class;
+                               ;; pinned in selection-law-candidate-test.
+                               :candidate)))))))
 
 (deftest computed-and-consumed-are-distinct
   (let [{:keys [ranked beta]} (first (:cases (baseline)))
