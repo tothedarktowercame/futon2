@@ -228,11 +228,12 @@
                          :open-after open
                          :unreached-wants (vec unreached-wants)
                          :progress? (boolean (seq moved))}
-                  abstention (assoc :abstention (select-keys abstention [:kind :missing :declines]))))
+                  abstention (assoc :abstention (select-keys abstention [:kind :missing :declines :status :detail]))))
         (update :carried-wants #(vec (distinct (concat % (map :token unreached-wants)))))
         (update :needs #(cond-> % (:missing abstention)
-                          (conj {:click-id click-id :kind (:kind abstention)
-                                 :missing (:missing abstention)})))
+                          (conj (merge {:click-id click-id :kind (:kind abstention)
+                                        :missing (:missing abstention)}
+                                       (select-keys abstention [:status :detail])))))
         (assoc :status status)
         ;; what a closure covered: the criteria in view, and what was not
         (cond-> (= :closed status)

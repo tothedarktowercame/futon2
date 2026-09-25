@@ -311,14 +311,24 @@
       (let [flight (:flight judge-opts)
             target (:target flight)
             run-id (str (today) "-" (:flight/id flight) "-click-" (:click flight))
-            {:keys [status body]} (post! {:flight-edn (pr-str flight) :run-id run-id
-                                          :issuing-caller caller :trigger "duree-click-on-demand"})
+            {:keys [status body no-response]}
+            (try (post! {:flight-edn (pr-str flight) :run-id run-id
+                         :issuing-caller caller :trigger "duree-click-on-demand"})
+                 (catch Exception e {:no-response (ex-message e)}))
             click-id (:click-id body)]
         (if-not (and (= 200 status) click-id)
           {:click-id run-id
            :unreached-wants []
-           :abstention {:kind :click-not-started :missing :click :status status
-                        :detail (select-keys body [:error :message :rejected])}}
+           ;; the server's reason as it gave it (the cast preflight's 409
+           ;; carries :unready under :details); a click never answered is
+           ;; typed, never nil (WM-SPIKE-FIX-I A)
+           :abstention {:kind :click-not-started :missing :click
+                        :status (or status {:absent :no-response})
+                        :detail (cond
+                                  no-response {:absent :no-response :message no-response}
+                                  (map? body) (let [d (select-keys body [:error :message :rejected :unready :details])]
+                                                (if (seq d) d {:absent :no-reason-in-body :body body}))
+                                  :else {:absent :no-body})}}
           (do (loop []
                 (let [s (get-status!)]
                   (when (and (:running? s) (= click-id (:click-id s)))
