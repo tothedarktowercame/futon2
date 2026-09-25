@@ -190,3 +190,22 @@
     (is (= [:phase-headings] (get-in ex ["M-f11-find-production-successor" :what-would-make-feasible :lifecycle-parts-missing])))
     (is (= :needs-reading (get-in ex ["M-autoclock-in" :reason])))
     (is (= :needs-interpretation (get-in ex ["M-apm-demonstration" :reason])))))
+
+(deftest live-field-futon2-7bd17dfb
+  ;; the live read under "every work target is feasible" (code at futon2
+  ;; 7bd17dfb, run from a clean worktree; the heads of the repos whose texts
+  ;; were read are in the fixture): 59 shaped missions, 30 tickets and 254
+  ;; excursions are feasible; only the 158 M- files without the lifecycle
+  ;; form are excluded; no target is :ready.
+  (let [r (clojure.edn/read-string (slurp "test/fixtures/target-field/target-field@futon2-7bd17dfb.edn"))
+        f (get-in r [:decision :target-field])
+        ok (by-target (:feasible f))]
+    (is (= [] (tf/check-field f)))
+    (is (= {:considered 501 :feasible 343 :excluded 158
+            :considered-by-kind {:mission 217 :ticket 30 :excursion 254}
+            :excluded-by-reason {:not-lifecycle-shaped 158}}
+           (tf/counts f)))
+    (is (= {:ask-interpretation 12 :read-criteria 331} (tf/next-step-counts f)))
+    (is (= 59 (count (filter #(= :mission (:kind %)) (:feasible f)))))
+    (is (= :read-criteria (get-in ok ["M-autoclock-in" :next-step])))
+    (is (= :ask-interpretation (get-in ok ["M-apm-demonstration" :next-step])))))
