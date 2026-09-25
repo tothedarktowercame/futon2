@@ -10,6 +10,7 @@
             [clojure.edn]
             [clojure.java.io :as io]
             [clojure.pprint]
+            [clojure.string :as str]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.grain-gate :as gate]
             [futon2.aif.enactment-habit :as enactment-habit]
@@ -83,6 +84,19 @@
   want interpretation."
   #{:locator :criteria :coverage :constraints})
 
+(defn reply-text
+  "The seat's reply in an Agency JOB, once: :result (the full response) when
+  present, else the job's text events joined. Never :result-summary (a
+  prefix of the same reply). task-execution-evidence/job-text joins all of
+  them, which a review-verdict search needs and a one-block reply parser
+  cannot take: the spike's single-block replies arrived as two copies and
+  were discarded as {:forms 2} (WM-SPIKE-FIX-I B)."
+  [job]
+  (let [result (:result job)]
+    (if (and (string? result) (not (str/blank? result)))
+      result
+      (str/join "\n" (keep :text (filter #(= "text" (:type %)) (:events job)))))))
+
 (defn agency-answer-fn
   "An answer function that asks SEAT through Agency: a bell (mode work, the
   flight's target as the requisition) carrying the want-interpretation
@@ -100,7 +114,7 @@
   {:absent :not-in-flight-opts}."
   [{:keys [seat caller opts dispatch! poll! job-text prompt-fn library-root]
     :or {caller "wm-flight" dispatch! runner/dispatch! poll! runner/poll-job!
-         job-text futon2.aif.task-execution-evidence/job-text}}]
+         job-text reply-text}}]
   (fn [issued]
     (let [prompt-fn (or prompt-fn
                         (cond (reading-kinds (:kind issued)) reading/prompt
