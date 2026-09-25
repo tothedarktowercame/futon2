@@ -428,6 +428,32 @@
       (:status e) {:absent :registry-unreadable :entry-id entry-id :refusal e}
       :else {:entry e :payload (entry-payload e)})))
 
+(def ^:private pinned-marker-at
+  "The :at of the ledger build marker the C8 live pin was taken against."
+  "2026-09-25T03:23:03.538975798Z")
+
+(defn- complete-marker-failure
+  "nil when ENTRIES hold a :namespace-ledger-built marker at AT that is
+  :complete? with :scanned = :registry-entries; else a typed reason with the
+  marker's counts."
+  [entries at]
+  (let [m (first (filter #(and (= :namespace-ledger-built (:entry/type %)) (= at (:at %)))
+                         entries))
+        counts (select-keys m [:scanned :registry-entries :complete?])]
+    (cond
+      (nil? m) {:absent :pinned-marker-not-in-ledger :at at}
+      (not (true? (:complete? m))) (merge {:failure :marker-incomplete :at at} counts)
+      (not (and (pos-int? (:scanned m)) (= (:scanned m) (:registry-entries m))))
+      (merge {:failure :scanned-not-registry-entries :at at} counts))))
+
+(deftest ledger-marker-invariant-bad-cases
+  (let [ok {:entry/type :namespace-ledger-built :at "t" :scanned 5 :registry-entries 5 :complete? true}]
+    (is (nil? (complete-marker-failure [ok] "t")))
+    (is (= :marker-incomplete (:failure (complete-marker-failure [(assoc ok :complete? false)] "t"))))
+    (is (= :scanned-not-registry-entries
+           (:failure (complete-marker-failure [(assoc ok :registry-entries 6)] "t"))))
+    (is (= :pinned-marker-not-in-ledger (:absent (complete-marker-failure [ok] "u"))))))
+
 (deftest c8-live-command-lookup-observes-the-same-entry-as-the-namespace-lookup
   (let [base (oc/agency-base)
         ns-name "futon3c.test-registry-test"
@@ -454,17 +480,20 @@
             (is (not (neg? (compare (get-in found [:payload :ran-at])
                                     (get-in pinned [:payload :ran-at]))))
                 "a latest lookup never answers a run older than the pinned one"))))))
-  ;; the marker this pin was taken against: a complete command-keyed build
+  ;; the marker this pin was taken against: a complete command-keyed build.
+  ;; Pinned by identity (LIVE-PIN-I2): a :namespace-ledger-built marker has no
+  ;; id field; its identity is :at, the Instant build-namespace-ledger! stamps
+  ;; it with (futon3c src/futon3c/test_registry.clj L1209-1213). The ledger is
+  ;; append-only (append-ledger-entry!), so a later rebuild adds a marker and
+  ;; this one stays. Its counts are asserted equal to EACH OTHER, not to a
+  ;; number the registry will outgrow.
   (let [ledger-file (io/file "/home/joe/code/futon3c/data/test-registry/namespace-ledger.edn")
         entries (with-open [r (java.io.PushbackReader. (io/reader ledger-file))]
                   (loop [acc []]
                     (let [form (edn/read {:eof ::eof} r)]
-                      (if (= ::eof form) acc (recur (conj acc form))))))
-        marker (last (filter #(= :namespace-ledger-built (:entry/type %)) entries))]
-    (is (some? marker) "the ledger carries a build marker")
-    (is (= 3200 (:scanned marker)))
-    (is (= 3200 (:registry-entries marker)))
-    (is (true? (:complete? marker)))))
+                      (if (= ::eof form) acc (recur (conj acc form))))))]
+    (is (nil? (complete-marker-failure entries pinned-marker-at))
+        (pr-str (complete-marker-failure entries pinned-marker-at)))))
 
 (deftest c8-reads-a-run-record-s-counts-by-shape
   ;; review bad case (claude-8, 2026-09-25, of b9eae2d6): the first live gate
