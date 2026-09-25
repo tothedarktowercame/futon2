@@ -112,52 +112,77 @@
   (into {} (map (fn [cls] [(:id cls) cls])) (:classes contract)))
 
 (defn- usable-rate
-  "The rate a judgement class contributes to the kernel: the prior-adjusted
-  posterior mean when an authorised prior is recorded, else the raw rate.
-  An :unobserved cell has no usable rate."
+  "The rate a cell contributes to the kernel: the prior-adjusted posterior
+  mean when an authorised prior is recorded, else the raw rate. An
+  :unobserved cell has no usable rate."
   [cell]
   (when-not (= :unobserved (:status cell))
     (or (:posterior-mean cell) (:rate cell))))
 
+(defn- cell-counts [cell]
+  (select-keys cell [:numerator :denominator]))
+
 (defn token-likelihood-rates
   "Assemble a rate map for cascade-model-manifest/token-likelihood over a
   universe. token-classes is {token class-id} for every token in the
-  universe; contract is the S-1 observation contract. Tokens in a :checkable
-  class get the exact zero kernel {:false-neg 0 :false-pos 0 :basis
-  :checkable} (tokenLikelihood_checkable). Tokens in a :judgement class get
-  the class's usable rate with :basis :estimated (or :prior when a prior is
-  recorded). A judgement class with no rate entry, or with any :unobserved
-  cell and no prior making it usable, is the typed :unsupported-class
-  refusal — never a default. A class id absent from the contract is
-  :unknown-class."
+  universe; contract is the S-1 observation contract. Every class, checkable
+  or judgement, is read from RATES first (H-A-CONSUMER-I):
+
+  - both cells usable: the class's usable rates, :basis :estimated (or
+    :prior when a prior is recorded), and :counts {:false-neg {:numerator n
+    :denominator d} :false-pos {...}} read from the cells;
+  - an entry with a cell :unobserved, or any other entry that yields no
+    usable pair: the typed :unsupported-class refusal. A measured cell is
+    never discarded, a partial measurement never padded;
+  - no entry, or the whole entry {:status :unobserved}: a :checkable class
+    takes the zero kernel {:false-neg 0 :false-pos 0 :basis :checkable
+    :measurement :absent}; a :judgement class is :unsupported-class.
+
+  The zero kernel is the UNMEASURED DEFAULT for a checkable class, not an
+  observation that the check is exact: tokenLikelihood is defined for any
+  rates in [0,1], and tokenLikelihood_checkable (the identity kernel) is
+  conditional on the rates being zero. :measurement :absent records that
+  the condition was assumed, not measured. A class id absent from the
+  contract is :unknown-class."
   [rates contract token-classes]
   (let [by-id (contract-classes contract)]
     (reduce-kv (fn [acc token class-id]
                  (if-not (contains? by-id class-id)
                    (reduced {:status :missing :kind :unknown-class
                              :class class-id :token token})
-                   (let [cls (get by-id class-id)]
-                     (if (= :checkable (:kind cls))
-                       (assoc acc token {:false-neg 0 :false-pos 0 :basis :checkable})
-                       (let [r (get rates class-id)
-                             fn-rate (some-> r :false-neg usable-rate)
-                             fp-rate (some-> r :false-pos usable-rate)]
-                         (if (and fn-rate fp-rate)
-                           (assoc acc token {:false-neg fn-rate
-                                             :false-pos fp-rate
-                                             :basis (if (:prior r) :prior :estimated)})
-                           (reduced {:status :missing :kind :unsupported-class
-                                     :class class-id :token token})))))))
+                   (let [cls (get by-id class-id)
+                         r (get rates class-id)
+                         unmeasured? (or (nil? r) (= :unobserved (:status r)))
+                         fn-rate (some-> r :false-neg usable-rate)
+                         fp-rate (some-> r :false-pos usable-rate)]
+                     (cond
+                       (and fn-rate fp-rate)
+                       (assoc acc token {:false-neg fn-rate
+                                         :false-pos fp-rate
+                                         :basis (if (:prior r) :prior :estimated)
+                                         :counts {:false-neg (cell-counts (:false-neg r))
+                                                  :false-pos (cell-counts (:false-pos r))}})
+
+                       (and unmeasured? (= :checkable (:kind cls)))
+                       (assoc acc token {:false-neg 0 :false-pos 0 :basis :checkable
+                                         :measurement :absent})
+
+                       :else
+                       (reduced {:status :missing :kind :unsupported-class
+                                 :class class-id :token token})))))
                {}
                token-classes)))
 
 (defn sourced-rates
   "Adjudication rates for a cascade scoring universe, SOURCED from this
   namespace rather than declared by a caller (WIRE-5). LABELS, SUBJECTS and
-  PRIOR are `rates-by-class`'s inputs (nil labels = no admitted judgement
-  data: checkable classes still get their exact zero kernel from
-  tokenLikelihood_checkable; a judgement class with no admitted rate is the
-  typed :unsupported-class refusal, never padded). LOCATORS is the cascade
+  PRIOR are `rates-by-class`'s inputs. A class with admitted labels takes
+  its measured rates, checkable or not; a checkable class with none takes
+  the zero kernel as the unmeasured default (tokenLikelihood_checkable,
+  conditional on zero rates), recorded as :measurement :absent; a judgement
+  class with no admitted rate, or any class measured on one cell only, is
+  the typed :unsupported-class refusal, never padded. A refused
+  rates-by-class (:invalid-prior) is returned as is. LOCATORS is the cascade
   problem's {token {:class class-id}}; CONTRACT is the S-1 observation
   contract. Returns
 
@@ -165,6 +190,8 @@
      :source :futon2.aif.observation-rates/sourced-rates
      :rates {token {:false-neg r :false-pos r}}   ; every LOCATED token
      :basis {token :checkable|:estimated|:prior}
+     :measurement {token :absent | {:false-neg {:numerator n :denominator d}
+                                    :false-pos {...}}}
      :class-of {token class-id}}
 
   or token-likelihood-rates' typed refusal (:unknown-class /
@@ -174,7 +201,9 @@
   [labels subjects prior locators contract]
   (let [rates (rates-by-class labels subjects prior)
         class-of (into {} (map (fn [[t l]] [t (:class l)])) locators)
-        assembled (token-likelihood-rates rates contract class-of)]
+        assembled (if (contains? rates :status)
+                    rates
+                    (token-likelihood-rates rates contract class-of))]
     (if (contains? assembled :status)
       assembled
       {:status :sourced
@@ -182,4 +211,6 @@
        :rates (into {} (map (fn [[t r]] [t (select-keys r [:false-neg :false-pos])]))
                     assembled)
        :basis (into {} (map (fn [[t r]] [t (:basis r)])) assembled)
+       :measurement (into {} (map (fn [[t r]] [t (or (:counts r) (:measurement r))]))
+                          assembled)
        :class-of class-of})))
