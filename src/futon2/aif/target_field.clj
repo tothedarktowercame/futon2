@@ -275,8 +275,40 @@
                                             :refusal (or (ex-data e) {:message (.getMessage e)})}}))))]
     (if (:reason entry) entry (with-eligibility entry req (:kind t)))))
 
+(defn with-pair-overlap
+  "Each feasible entry of FEASIBLE with :pair-overlap (M-wm-wiring row 8;
+  PROOF-2a H-G-target part 1). Target-grain ΔG_t is taken over t's own
+  universe, and two targets' ΔG compare only when t's constructed candidate
+  moves no token of the other's universe (target_comparison, mathlib4
+  759b8ca884). For an entry carrying a constructed candidate
+  (:candidate {:produces #{...}}), per other feasible target t':
+    {:comparable true}                              no shared token
+    {:incommensurable {:shared-tokens [...]}}       the tokens it moves in U(t')
+    {:absent :no-universe}                          t' records no :universe
+  An entry with no constructed candidate records {:absent
+  :no-constructed-candidate}, never an empty map (which would read as no
+  overlap). No target has a constructed candidate at HEAD."
+  [feasible]
+  (let [universe-of (into {} (keep (fn [e] (when (:universe e) [(:target e) (set (:universe e))])))
+                          feasible)]
+    (mapv (fn [e]
+            (assoc e :pair-overlap
+                   (if-let [produces (seq (get-in e [:candidate :produces]))]
+                     (into (sorted-map)
+                           (for [o feasible :when (not= (:target o) (:target e))]
+                             [(:target o)
+                              (if-let [u (universe-of (:target o))]
+                                (let [shared (vec (sort-by pr-str (filter u produces)))]
+                                  (if (seq shared)
+                                    {:incommensurable {:shared-tokens shared}}
+                                    {:comparable true}))
+                                {:absent :no-universe})]))
+                     {:absent :no-constructed-candidate})))
+          feasible)))
+
 (defn target-field
-  "`{:considered [...] :feasible [...] :exclusions [...]}` over LOADED."
+  "`{:considered [...] :feasible [...] :exclusions [...]}` over LOADED; each
+  feasible entry carries :pair-overlap (with-pair-overlap)."
   [opts loaded]
   (let [cs (considered (:code-root opts) loaded)
         ;; `assess` catches its own assembly refusals, with the target's
@@ -291,7 +323,7 @@
                                                           :refusal (or (ex-data e) {:message (.getMessage e)})}})
                             nil (:kind t)))))]
     {:considered cs
-     :feasible (vec (remove :reason assessed))
+     :feasible (with-pair-overlap (vec (remove :reason assessed)))
      :exclusions (vec (filter :reason assessed))}))
 
 (def next-steps
