@@ -16,10 +16,10 @@
 ;;      read, and every outcome names the rule that found it. A cue table tuned
 ;;      per mission would make the extractor a transcription of its author's
 ;;      reading, which is what the reference exists to test against.
-;;   2. VERIFIED SPANS. Every quote must occur EXACTLY ONCE in the file and at
-;;      the line range reported. One failure refuses the whole output: a C whose
-;;      cues are half-checked is worse than none, because the half that resolve
-;;      make the rest look checked.
+;;   2. VERIFIED SPANS. Every quote of every cue must occur EXACTLY ONCE in the
+;;      file and at the line range reported. One failure refuses the whole
+;;      output: a C whose cues are half-checked is worse than none, because the
+;;      half that resolve make the rest look checked.
 ;;   3. TYPED ABSENCE, NEVER A SUBSTITUTED VALUE. No outcome found emits
 ;;      {:absent :no-stated-outcome} naming every section read. An instance with
 ;;      no cascade emits {:absent :no-cascade}, not an empty want list. An
@@ -31,12 +31,27 @@
 ;; {:unlinked :outside-instance-sections} -- the honest answer, since linking it
 ;; would mean guessing which instance a mission-level sentence is about.
 ;;
+;; Fixes against H-C-D section 4 (futon2 f20084da had both defects):
+;;
+;;   E1 OUTCOME IDENTITY. One row per cued sentence counted an outcome stated
+;;      three times as three outcomes. Cued sentences that name the same
+;;      instance, or the same party-and-artefact, or the same distinctive
+;;      artefact with compatible attribution now consolidate into ONE outcome
+;;      carrying ALL its spans as a list of cues, first span first
+;;      (consolidate, below; the vocabularies it uses are data).
+;;   E2 CONSEQUENCE VOICE. An outcome stated as the cost of its absence was not
+;;      cued. The cue table now carries that voice (:cue/must-impersonate,
+;;      :cue/every-later-must, :cue/otherwise, :cue/cost-of), each gated by
+;;      :requires :artefact -- a consequence sentence that names no artefact is
+;;      not cued, because a "must" about nothing is not an outcome.
+;;
 ;; Read-only. Writes nothing; prints EDN on stdout. Exits 2 on refusal.
 ;;
 ;; Run: clojure -M scripts/wm/extract-outcomes.clj <mission.md> [--cascades DIR]
 ;;  or: bb scripts/wm/extract-outcomes.clj <mission.md> [--cascades DIR]
 
 (require '[clojure.string :as str]
+         '[clojure.set :as set]
          '[clojure.java.io :as io]
          '[clojure.pprint :as pp])
 
@@ -46,7 +61,8 @@
 
 ;; Each rule: :id names it in the output, :re finds it, :reads says in words what
 ;; the rule believes it is reading. A reviewer disputing an outcome disputes a
-;; named rule, not the extractor's taste.
+;; named rule, not the extractor's taste. :requires :artefact gates a rule: the
+;; cued sentence must name an artefact (below) or the hit is dropped.
 (def cue-rules
   [{:id :cue/closing-ask      :re #"(?i)closing ask"
     :reads "an ask recorded as the speaker's own, for the future"}
@@ -69,10 +85,53 @@
    {:id :cue/recorded-form    :re #"(?i)must be recorded in a form"
     :reads "a constraint the mission places on its own artefacts"}
    {:id :cue/not-what-wanted  :re #"(?i)what one does not want"
-    :reads "a negated outcome; the outcome is its complement"}])
+    :reads "a negated outcome; the outcome is its complement"}
+   ;; E2: the consequence voice -- the outcome stated as the cost of its
+   ;; absence. Each gated on :artefact (H-C-D E2: "must impersonate",
+   ;; "must <verb> ... every later", "otherwise", "the cost of").
+   {:id :cue/must-impersonate :re #"(?i)\bmust impersonate\b"
+    :requires :artefact
+    :reads "the coupling's cost stated as forced impersonation; the outcome is not having to"}
+   {:id :cue/every-later-must :re #"(?i)\bevery later\b[^.\n]{0,80}?\bmust\b"
+    :requires :artefact
+    :reads "a burden every later instance must carry; the outcome is lifting it"}
+   {:id :cue/otherwise        :re #"(?i)\botherwise\b"
+    :requires :artefact
+    :reads "the consequence of not reaching the outcome"}
+   {:id :cue/cost-of          :re #"(?i)\bcosts? (?:of|more)\b"
+    :requires :artefact
+    :reads "the outcome's absence stated as a cost"}])
 
 ;; Parties the corpus names. Attribution is by naming, never by inference.
 (def parties ["Rob" "Joe" "claude-1" "claude-10" "kimi-4"])
+
+;; ------------------------------------------------------- E1/E2 vocabularies
+
+;; Artefacts an outcome can be ABOUT. Two purposes, both as data:
+;;  - E2 gating: a consequence-voice sentence is cued only if it names one.
+;;  - E1 identity: two cues naming the same party-and-artefact state one
+;;    outcome twice. Matching is case-insensitive, word-bounded, a trailing
+;;    plural "s" ignored. "code" is deliberately NOT an artefact: it matches
+;;    "VS Code" and every "the code" sentence, and bridged two different
+;;    outcomes into one when tried.
+(def artefacts
+  ["seam" "interface" "adapter" "transport" "protocol" "parser" "schema" "shim"
+   "implementation" "MCP" "caller" "client" "server" "prompt" "store" "flag"
+   "path" "role" "ledger" "abstraction" "binding" "module" "component"
+   "matrix-ircd" "neo4j"])
+
+;; Distinctive artefacts: rare enough that two cues naming the same one state
+;; the same outcome even when one of them names no party (e.g. a sentence
+;; inside an instance section restating a party's closing ask). Generic
+;; artefacts like "implementation" are NOT here: two sentences about an
+;; implementation can be about different outcomes.
+(def distinctive-artefacts ["seam" "matrix-ircd" "neo4j" "MCP"])
+
+(def artefact-re
+  (re-pattern (str "(?i)\\b(" (str/join "|" (map #(java.util.regex.Pattern/quote %) artefacts)) ")s?\\b")))
+
+(defn- normalise-artefact [^String mention]
+  (str/replace (str/lower-case mention) #"s$" ""))
 
 ;; ------------------------------------------------------------------- helpers
 
@@ -120,7 +179,7 @@
 
 (defn sentence-around
   "The sentence containing character index i: back to the previous boundary,
-   forward to the next. Boundaries are a blank line, or '. '/'.\\n'/':\\n' that is
+   forward to the next. Boundaries are a blank line, or '. '/'.\n'/':\n' that is
    not inside a markdown code span."
   [^String text i]
   (let [bstart (loop [j (max 0 (dec i))]
@@ -163,7 +222,10 @@
 
 ;; ---------------------------------------------------------------- extraction
 
-(defn extract [^String text section-of wants]
+(defn extract
+  "One row per distinct cued sentence (before E1 consolidation). A rule gated
+   :requires :artefact yields a hit only when the sentence names an artefact."
+  [^String text section-of _wants]
   (let [hits (for [rule cue-rules
                    m (let [mm (re-matcher (:re rule) text)]
                        (loop [acc []] (if (.find mm) (recur (conj acc (.start mm))) acc)))]
@@ -179,7 +241,7 @@
                                           (when (.find mm) [(.start mm) p]))))
                                 (sort-by first) first second)
                      inst (section-of l0)]
-                 {:rule (:id rule) :reads (:reads rule)
+                 {:rule (:id rule) :reads (:reads rule) :requires (:requires rule)
                   :quote quote :cue [l0 l1]
                   :whose (cond named named
                                inst  :unattributed-in-instance-section
@@ -187,27 +249,108 @@
                   :instance inst}))]
     (->> hits
          (remove #(str/blank? (:quote %)))
-         ;; one outcome per distinct quote; a sentence matched by two rules keeps both
+         ;; E2 gate: consequence-voice rules cue only sentences about an artefact
+         (remove #(and (= :artefact (:requires %))
+                       (not (re-find artefact-re (:quote %)))))
+         ;; one row per distinct quote; a sentence matched by two rules keeps both
          (group-by :quote)
-         (map (fn [[q ms]]
+         (map (fn [[_q ms]]
                 (let [f (first ms)]
                   (-> f
                       (assoc :rules (vec (sort (distinct (map :rule ms)))))
-                      (dissoc :rule :reads)))))
+                      (dissoc :rule :reads :requires)))))
          (sort-by (comp first :cue))
          vec)))
 
+;; ---------------------------------------------------- E1: outcome identity
+
+(defn- mentioned-instances
+  "Instance numbers the cue text itself names (\"instance 4\")."
+  [^String quote]
+  (set (map #(Integer/parseInt (second %))
+            (re-seq #"(?i)\binstances?\s+(\d+)\b" quote))))
+
+(defn- quote-artefacts
+  "The artefact vocabulary entries the cue text names, normalised (lowercase,
+   plural stripped)."
+  [^String quote]
+  (set (map #(normalise-artefact (second %)) (re-seq artefact-re quote))))
+
+(defn- compatible-whose?
+  "Attributions that can be one outcome's: equal, or one is an unnamed sentence
+   in an instance section and the other a named party. :the-mission merges with
+   nothing but itself -- a mission-method sentence is not a party's outcome."
+  [a b]
+  (or (= a b)
+      (and (= a :unattributed-in-instance-section) (string? b))
+      (and (= b :unattributed-in-instance-section) (string? a))))
+
+(defn consolidate
+  "E1: cued sentences that name the same instance, the same party-and-artefact,
+   or the same distinctive artefact with compatible attribution state ONE
+   outcome. Union-find over those three keys; the outcome carries every cue as a
+   list, first span first. Two sentences naming DIFFERENT instance numbers are
+   never merged, whatever else they share."
+  [rows]
+  (let [rows (mapv #(assoc %
+                           :mentioned (mentioned-instances (:quote %))
+                           :named-artefacts (quote-artefacts (:quote %))
+                           :distinctive (set/intersection (quote-artefacts (:quote %))
+                                                          (set (map str/lower-case distinctive-artefacts))))
+                   rows)
+        n (count rows)
+        parent (atom (vec (range n)))
+        find-root (fn [p x] (let [r (nth p x)] (if (= r x) [p x] (recur p r))))
+        union! (fn [i j]
+                 (swap! parent
+                        (fn [p]
+                          (let [[p ri] (find-root p i)
+                                [p rj] (find-root p j)]
+                            (if (= ri rj) p (assoc p ri rj))))))
+        veto? (fn [a b]
+                (and (seq (:mentioned a)) (seq (:mentioned b))
+                     (empty? (set/intersection (:mentioned a) (:mentioned b)))))
+        mergeable? (fn [a b]
+                     (and (not (veto? a b))
+                          (or ;; the cue texts name the same instance
+                              (and (seq (:mentioned a))
+                                   (seq (set/intersection (:mentioned a) (:mentioned b))))
+                              ;; the same party-and-artefact
+                              (and (string? (:whose a)) (= (:whose a) (:whose b))
+                                   (seq (set/intersection (:named-artefacts a) (:named-artefacts b))))
+                              ;; the same distinctive artefact, compatibly attributed
+                              (and (compatible-whose? (:whose a) (:whose b))
+                                   (seq (set/intersection (:distinctive a) (:distinctive b)))))))]
+    (doseq [i (range n) j (range (inc i) n)
+            :when (mergeable? (nth rows i) (nth rows j))]
+      (union! i j))
+    (->> (group-by #(second (find-root @parent %)) (range n))
+         vals
+         (map (fn [idxs]
+                (let [cs (->> idxs (map rows) (sort-by (comp first :cue)) vec)]
+                  {:whose (or (some #(when (string? (:whose %)) (:whose %)) cs)
+                              (:whose (first cs)))
+                   :instance (some :instance cs)
+                   :rules (vec (sort (distinct (mapcat :rules cs))))
+                   :cues (mapv #(select-keys % [:quote :cue :rules]) cs)})))
+         (sort-by (fn [o] (first (:cue (first (:cues o)))))) ;; first cue's line
+         vec)))
+
 (defn verify
-  "Every quote occurs exactly once and at the line it claims. Returns failures."
+  "Every cue's quote occurs exactly once and at the line it claims. Returns
+   failures; one failure refuses the whole output."
   [^String text outcomes]
   (vec (for [o outcomes
-             :let [n (count (re-seq (java.util.regex.Pattern/compile
-                                     (java.util.regex.Pattern/quote (:quote o))) text))
-                   i (str/index-of text (:quote o))
+             c (:cues o)
+             :let [q (:quote c)
+                   n (count (re-seq (java.util.regex.Pattern/compile
+                                     (java.util.regex.Pattern/quote q)) text))
+                   i (str/index-of text q)
                    l (when i (line-of text i))]
-             :when (or (not= 1 n) (not= l (first (:cue o))))]
-         {:quote (subs (:quote o) 0 (min 60 (count (:quote o))))
-          :occurrences n :claimed-line (first (:cue o)) :found-line l})))
+             :when (or (not= 1 n) (not= l (first (:cue c))))]
+         {:id (:id o)
+          :quote (subs q 0 (min 60 (count q)))
+          :occurrences n :claimed-line (first (:cue c)) :found-line l})))
 
 (defn -main [& args]
   (let [[path & more] args
@@ -222,10 +365,12 @@
           isecs (instance-sections hs lines)
           section-of (fn [l] (:instance (first (filter #(<= (first (:lines %)) l (second (:lines %))) isecs))))
           wants (or (cascade-wants cdir) {})
-          outcomes (extract text section-of wants)
+          rows (extract text section-of wants)
+          outcomes (consolidate rows) ;; already first-span-first
+          outcomes (mapv #(assoc %1 :id (keyword (str "o-" (inc %2))))
+                         outcomes
+                         (range))
           fails (verify text outcomes)
-          ids (zipmap (map :quote outcomes) (map #(keyword (str "o-" (inc %))) (range)))
-          outcomes (mapv #(assoc % :id (ids (:quote %))) outcomes)
           served (vec (for [s isecs
                             :let [ws (get wants (:instance s))
                                   os (filterv #(= (:instance s) (:instance %)) outcomes)]]
@@ -239,9 +384,10 @@
                            :serves (mapv :id os)
                            :basis :section-containment})))
           unlinked (filterv #(nil? (:instance %)) outcomes)
-          out {:schema :wm/mission-outcomes-v1
+          out {:schema :wm/mission-outcomes-v2
                :extractor {:script "scripts/wm/extract-outcomes.clj"
                            :cue-rules (mapv :id cue-rules)
+                           :consolidation :e1-same-instance-or-party-and-artefact
                            :served-by-basis :section-containment}
                :mission {:path path :lines lines :sha256 (sha256 text)}
                :sections-read (mapv #(select-keys % [:level :title :line]) hs)
@@ -254,7 +400,7 @@
                            :note "no line assigns a magnitude or compares two outcomes"}}]
       (cond
         (seq fails)
-        (do (pp/pprint {:schema :wm/mission-outcomes-v1
+        (do (pp/pprint {:schema :wm/mission-outcomes-v2
                         :refused :cue-does-not-resolve
                         :mission path
                         :failures fails})
@@ -266,4 +412,10 @@
 
         :else (pp/pprint out)))))
 
-(apply -main *command-line-args*)
+;; Run as a script only; a test that load-files this file (into its own ns)
+;; gets the fns, not a System/exit. clojure -M <this-file> and bb both run in
+;; the user ns; load-file from a test does not.
+(when (and (= 'user (ns-name *ns*))
+           (or *command-line-args*
+               (and *file* (= *file* (System/getProperty "babashka.file")))))
+  (apply -main *command-line-args*))
