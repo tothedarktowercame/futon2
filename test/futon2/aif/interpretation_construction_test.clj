@@ -245,3 +245,13 @@
       (is (= :constructed (:status r)) (pr-str (type z)))
       (is (not (contains? r :left-out)) (pr-str (type z)))
       (is (zero? (g-of-best r)) (pr-str (type z))))))
+
+(deftest nf-5-left-out-survives-when-no-move-is-taken
+  ;; claude-10 review of f4c1fb09: the baseline (5.0) beats both finite
+  ;; candidates, so the constructor takes no move and the result is
+  ;; :construction-not-taken; the NaN candidate must still be on the record
+  (let [r (sut/construct (three-input {:P ##NaN :P2 9.0 :P3 8.0}))]
+    (is (= :refused (:status r)))
+    (is (= :construction-not-taken (:kind r)) (pr-str (dissoc r :findings)))
+    (is (= [[:P :Q]] (mapv :precedence (:left-out r))))
+    (is (= :nonfinite-g (get-in r [:left-out 0 :g :absent])))))

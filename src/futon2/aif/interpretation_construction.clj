@@ -255,12 +255,17 @@
                                 (assoc (:receipt result) :kind :machine-constructed
                                        :search {:expanded (:expanded search) :limit (:max-expansions budget)}
                                        :ordering (vec (keep :ordering compiled))))]
-                  (cond
+                  ;; :left-out is on every outcome, not only :constructed: a
+                  ;; candidate left out for a nonfinite G stays on the record
+                  ;; when the constructor then takes no move (the baseline
+                  ;; beats every finite candidate) or refuses for its own
+                  ;; reason (claude-10 review of f4c1fb09)
+                  (cond-> (cond
                     (:status result) result
                     (empty? (:moves receipt))
                     (refuse :construction-not-taken {:construction-receipt receipt :findings findings})
                     :else
-                    (cond-> {:status :constructed :findings findings
+                    {:status :constructed :findings findings
                      ;; Full-want plans first (stable): inside the
                      ;; constructor a partial plan never ranks above a plan
                      ;; that reaches every want. G scoring against the full
@@ -284,5 +289,5 @@
                                                 :interpretation-receipts
                                                 (select-keys interpretation-receipts (:precedence c))))
                                        (sort-by (fn [c] (if (seq (:unreached-wants c)) 1 0))
-                                                (:family result)))}
-                      (seq left-out) (assoc :left-out left-out))))))))
+                                                (:family result)))})
+                    (seq left-out) (assoc :left-out left-out)))))))
