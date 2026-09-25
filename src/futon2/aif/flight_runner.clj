@@ -12,6 +12,9 @@
             [clojure.pprint]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.grain-gate :as gate]
+            [futon2.aif.enactment-habit :as enactment-habit]
+            [futon2.aif.cascade-prior :as cascade-prior]
+            [clojure.java.shell]
             [futon2.aif.interpretation-construction :as ic]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.task-execution-evidence]
@@ -576,3 +579,44 @@
             (.mkdirs (.getParentFile path))
             (spit path (with-out-str (clojure.pprint/pprint record))))
           {:enactment record :record-path (some-> path .getCanonicalPath)})))))
+
+(defn wc-verdict-fn
+  "The flight's W_c call (M-wm-wiring step 11): after enact-fn writes the
+  enactment record, run the W_c checker (futon3c proof2a_check.clj, one
+  checker for hand and machine records) on the click's run record and the
+  enactment record with --wc --edn, read its EDN verdict, and hand it to
+  enactment-habit/increment UNCHANGED (a vector of failures, [] a pass, or
+  the typed {:status :join-unverifiable ...}; 531cfaaa passes that status
+  through as delta 0).
+
+  OPTS: :checker (path to proof2a_check.clj) and :bb (the binary, default
+  \"bb\"); :click-record-path (fn [click-id] -> path); :identity-fn (fn
+  [flight enactment] -> policy key; default the target and the attempts'
+  patterns in order, :semilattice {}); :increment! (default
+  enactment-habit/increment). No :checker: {:wc {:absent
+  :no-wc-checker-configured}} and increment is not called (never a default
+  pass). A non-zero exit or output that is not one EDN form is {:wc
+  {:refused :checker-failed :exit n :stderr s}}, never a verdict."
+  [{:keys [checker bb click-record-path identity-fn increment!]
+    :or {bb "bb" increment! enactment-habit/increment}}]
+  (fn [flight {:keys [enactment record-path]}]
+    (cond
+      (nil? enactment) nil
+      (nil? checker) {:wc {:absent :no-wc-checker-configured}}
+      :else
+      (let [click-path (when click-record-path (click-record-path (:click enactment)))
+            {:keys [exit out err]} (clojure.java.shell/sh bb (str checker) (str click-path) (str record-path)
+                                                          "--wc" "--edn")
+            verdict (when (zero? exit)
+                      (try (let [v (clojure.edn/read-string out)]
+                             (when (or (vector? v) (map? v)) v))
+                           (catch Exception _ nil)))]
+        (if (nil? verdict)
+          {:wc {:refused :checker-failed :exit exit :stderr (str err)}}
+          (let [identity ((or identity-fn
+                              (fn [f e] (cascade-prior/policy-key {:mission (:target f)
+                                                                   :shown (mapv :pattern (:attempts e))
+                                                                   :semilattice {}})))
+                          flight enactment)]
+            {:wc {:verdict verdict :click-record click-path}
+             :increment (increment! enactment identity verdict)}))))))
