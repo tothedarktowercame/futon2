@@ -41,15 +41,41 @@
         :else (recur more (assoc out :target x)))
       out)))
 
-(defn- check-args! [{:keys [target seat repo path]}]
-  (doseq [[k v] {:target target :seat seat :repo repo :path path}]
+(defn resolve-target
+  "Which target this flight flies, and how it was placed (M-wm-wiring step 7,
+  the flight entry's read). :chosen-target, the outer cascade's choice (not
+  written by anything yet), wins: {:target t :target-source :chosen
+  :draw-seed seed-or-{:absent :no-draw-seed}}, and a --target given as well
+  is recorded as {:hand-target-overridden t}, not dropped. Otherwise the
+  --target: {:target t :target-source :hand-placed}. A :field-entry (the
+  target field's entry for the target) is carried beside it as given:
+  eligibility is the field's, not filtered here. Neither is the driver's
+  missing-target refusal, the same ex-info check-args! has always thrown
+  ({:missing :target}), never a nil target."
+  [{:keys [target chosen-target draw-seed field-entry]}]
+  (let [given? #(and (string? %) (not (str/blank? %)))]
+    (cond-> (cond
+              (given? chosen-target)
+              (cond-> {:target chosen-target :target-source :chosen
+                       :draw-seed (if (some? draw-seed) draw-seed {:absent :no-draw-seed})}
+                (given? target) (assoc :hand-target-overridden target))
+              (given? target)
+              {:target target :target-source :hand-placed}
+              :else
+              (throw (ex-info "missing target" {:missing :target})))
+      field-entry (assoc :field-entry field-entry))))
+
+(defn- check-args! [{:keys [seat repo path] :as opts}]
+  (resolve-target opts)
+  (doseq [[k v] {:seat seat :repo repo :path path}]
     (when (str/blank? v) (throw (ex-info (str "missing " (name k)) {:missing k}))))
   (when (refused-seats seat)
     (throw (ex-info (str seat " may not answer flight requests (claude-1's delegate)")
                     {:refused-seat seat}))))
 
-(defn- flight-for [{:keys [target repo path lifecycle-repo lifecycle-path read-text code-root observe id store]}]
-  (flight/start {:target target :chosen-because {:kind :requested :by "flight-driver"}}
+(defn- flight-for [{:keys [repo path lifecycle-repo lifecycle-path read-text code-root observe id store] :as opts}]
+  (flight/start (let [r (resolve-target opts)]
+                  (assoc r :chosen-because {:kind :requested :by "flight-driver"}))
                 (cond-> {:kind :a-exits :repo repo :path path :store (or store wi/default-store)}
                   lifecycle-path (assoc :lifecycle {:repo (or lifecycle-repo repo) :path lifecycle-path})
                   read-text (assoc :read-text read-text)
@@ -61,8 +87,9 @@
   "The flight the driver would fly, as data. OPTS: parsed args plus
   :sources (the tick's declared sources) and, for tests, :read-text,
   :observe and :id."
-  [{:keys [target seat store max-clicks sources id] :as opts}]
-  (let [store (or store wi/default-store)
+  [{:keys [seat store max-clicks sources id] :as opts}]
+  (let [target (:target (resolve-target opts))
+        store (or store wi/default-store)
         id (or id (str "flight-" (subs (str (UUID/randomUUID)) 0 8)))
         f (flight-for (assoc opts :id id))
         cw (flight/click-wants f sources)
@@ -122,8 +149,9 @@
 
 (defn run-flight!
   "Fly the planned flight once. Returns {:flight … :record-path …}."
-  [{:keys [target seat store max-clicks sources] :as opts} planned]
-  (let [store (or store wi/default-store)
+  [{:keys [seat store max-clicks sources] :as opts} planned]
+  (let [target (:target (resolve-target opts))
+        store (or store wi/default-store)
         f (flight-for (assoc opts :id (:flight-id planned)))
         answer (fr/agency-answer-fn {:seat seat :caller "wm-flight" :opts (runner/config {})})
         notify! (fn [owner tgt prompt] (runner/dispatch! (runner/config {}) owner "wm-flight" tgt
@@ -157,7 +185,7 @@
         notify! (fn [owner tgt prompt] (runner/dispatch! (runner/config {}) owner "wm-flight" tgt
                                                   (str "Requisition: " tgt " — War Machine questions for the mission owner\n\n" prompt)))
         read ((fr/read-fn {:store store :answer-fn answer :notify! notify! :caller "joe"}) f sources)
-        published (wi/read-published store (:target opts))]
+        published (wi/read-published store (:target (resolve-target opts)))]
     {:readings (:asked read)
      :needs (:needs read)
      :published-locators (into {} (for [[t {:keys [locator receipt]}] (:locators published)]
