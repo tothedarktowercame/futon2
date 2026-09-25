@@ -124,7 +124,11 @@
     {:units         [{:unit u :pattern id} …]
      :descent       [[above below] …]     ; r itself
      :meets         {[a b] m …}           ; overlapping pairs with a meet
-     :missing-meets [{:pair [a b] :common-maximal [u …]} …]}
+     :missing-meets [{:pair [a b] :common-maximal [u …]} …]
+     :precedence-violations [[a b] …]}    ; descent edges :precedence reverses
+                                          ; (absent when no :precedence;
+                                          ; :units-not-mapped-to-precedence
+                                          ; when duplicates make it ambiguous)
 
   Meets follow DarkTower.WarMachine.CascadeOrder: Below is reflexive
   (a = b ∨ Reach r a b), and the semilattice condition is restricted to
@@ -190,18 +194,39 @@
                                                     common)
                                         m)))]
                          {:pair [a b] :common-maximal maximal :meet meet}))]
-        {:units units
-         :descent descent
-         :meets (into {}
-                      (keep (fn [{:keys [pair meet]}]
-                              (when meet [pair meet])))
-                      overlaps)
-         :missing-meets (into []
-                              (keep (fn [{:keys [pair common-maximal meet]}]
-                                      (when-not meet
-                                        {:pair pair
-                                         :common-maximal common-maximal})))
-                              overlaps)}))))
+        (cond-> {:units units
+                 :descent descent
+                 :meets (into {}
+                              (keep (fn [{:keys [pair meet]}]
+                                      (when meet [pair meet])))
+                              overlaps)
+                 :missing-meets (into []
+                                      (keep (fn [{:keys [pair common-maximal meet]}]
+                                              (when-not meet
+                                                {:pair pair
+                                                 :common-maximal common-maximal})))
+                                      overlaps)}
+          ;; the candidate's :precedence must be a linear extension of r:
+          ;; every descent edge [a b] has a before b. Edges it reverses are
+          ;; recorded as data, so a receipt carrying a precedence that
+          ;; contradicts its own order says so (claude-8 review, 2026-09-25:
+          ;; before this the two were recorded side by side in silence).
+          ;; Absent when the candidate carries no :precedence;
+          ;; :units-not-mapped-to-precedence when duplicate pattern ids
+          ;; leave the unit positions ambiguous.
+          (contains? candidate :precedence)
+          (assoc :precedence-violations
+                 (let [prec (vec (:precedence candidate))
+                       pos (if (= ids prec)
+                             (into {} (map-indexed (fn [i {:keys [unit]}] [unit i]) units))
+                             (when unique?
+                               (let [by-id (into {} (map-indexed (fn [i id] [id i]) prec))]
+                                 (into {} (map (fn [{:keys [unit pattern]}]
+                                                 [unit (get by-id pattern)])
+                                               units)))))]
+                   (if (and pos (every? some? (vals pos)))
+                     (vec (filter (fn [[a b]] (> (pos a) (pos b))) descent))
+                     :units-not-mapped-to-precedence))))))))
 
 (defn- checks-for
   "Gating unknown facts as check candidates, through check-candidates.

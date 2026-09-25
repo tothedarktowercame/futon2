@@ -324,6 +324,20 @@
       (is (= :cyclic-containment (:kind order)))
       (is (= [:a :b :a] (:cycle order))))))
 
+(deftest containment-order-records-a-precedence-that-contradicts-it
+  (testing "review bad case (claude-8): a :precedence putting the consumer
+            before its producer is not silently carried beside the order;
+            the reversed edge is recorded"
+    (let [pats [{:id :p1 :guard {:needs #{} :forbids #{}} :produces #{:t1}}
+                {:id :p2 :guard {:needs #{:t1} :forbids #{}} :produces #{:t2}}]
+          bad (construction/containment-order {:precedence [:p2 :p1] :patterns pats})
+          good (construction/containment-order {:precedence [:p1 :p2] :patterns pats})
+          none (construction/containment-order {:patterns pats})]
+      (is (= [[:p1 :p2]] (:descent bad)))
+      (is (= [[:p1 :p2]] (:precedence-violations bad)))
+      (is (= [] (:precedence-violations good)))
+      (is (not (contains? none :precedence-violations)) "no precedence, nothing to check"))))
+
 (deftest containment-order-disjoint-pairs-need-no-meet
   (testing "clause 0 restricts the semilattice condition to OVERLAPPING
             pairs: two patterns sharing no descendant record nothing"
