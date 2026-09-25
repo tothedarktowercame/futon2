@@ -124,10 +124,8 @@ for `Priority`, `priority:`, `top/highest priority`, `urgent`, `P0`,
 | `:upvote` — "Express desire for a mission (Nonstarter-style)"; "upvoted missions have higher pragmatic value" | futon3c `M-portfolio-inference.md:312-318` (`697201b9`) | This is the designed carrier for an owner-stated priority. |
 | `upvote-value` — "Placeholder: returns 0.0 until Nonstarter integration." | futon3c `src/futon3c/portfolio/policy.clj:119-124` (`ac93ed46`) | The carrier exists and holds no value at HEAD. Typed absence, not zero preference. |
 | `**Gate:** operator-…` lines | `mission-lifecycle.md:321-331`; 4 mission files | A gate says the operator must act. It is not a ranking, and Clause T makes every lifecycle mission feasible whatever its gate. |
-| `**Blocked by**` (26 files), `**Depends**` (20), "Prerequisite" (17) | mission headers | Dependencies: a partial order on *when* a target can finish, not a statement of which is wanted more. I did not check which of these files are in T_f. |
-| "Highest priority" | futon3c `E-cheesemonger.md:87` | Ranks items inside one excursion, not targets. |
-| "Listed by priority:" | futon3 `M-pattern-mining.md:470` | Inside one mission. |
-| `:mission/depends` | futon3 `QUEUE-FORMAT.md` (`6f8483b`, Status: Draft) | Dependencies again. |
+| `**Blocked by**` (26 files), `**Depends**` (20), "Prerequisite" (17); `:mission/depends` | mission headers; futon3 `QUEUE-FORMAT.md` (`6f8483b`, Draft) | Dependencies: a partial order on *when* a target can finish, not a statement of which is wanted more. I did not check which of these files are in T_f. |
+| "Highest priority"; "Listed by priority:" | futon3c `E-cheesemonger.md:87`; futon3 `M-pattern-mining.md:470` | Items inside one target, not targets. |
 | bid/clear "nonstarter mechanics" for time allocation | futon5a `futon5a.devmap:9-11` | Personal hours, "Private data … lives elsewhere". No record over futon targets. |
 
 **Answer: none is stated.** No document states a priority or value ordering
@@ -175,17 +173,15 @@ earlier action); (ii) puts an owner statement where the model has nothing.
 
 ## 5. Falsifiers
 
-For the absent-choice record (§4):
-- (a) A record in the no-prior state that names a `:chosen` member must fail
-  Wₜ. A checker that accepts it is accepting a choice the law did not make.
-- (b) The absent-choice record must carry the full field. Dropping one
-  feasible target must fail Wₜ (Xₜ(a) unchanged).
+*Absent-choice record (§4):*
+- (a) A no-prior record naming a `:chosen` member must fail Wₜ.
+- (b) Dropping one feasible target from it must fail Wₜ (Xₜ(a)).
 - (c) Construct one `:ready` target with a finite ΔG and leave the rest
   absent. The record must still not choose it over the absent ones unless
   Clause T says absent-G targets leave the support. If it does say so, then
   removing that sentence must change `:chosen`.
 
-For definition (i), next-step G:
+*Definition (i), next-step G:*
 - (d) Two targets with the same step kind and identical decline histories
   must get equal step-G. A step-G that differs between them reads something
   other than the model's inputs.
@@ -195,7 +191,7 @@ For definition (i), next-step G:
 - (f) Remove every decline record for one target. Its step-outcome prior
   must change. If it does not, the records were not an input.
 
-For definition (ii), a stated prior:
+*Definition (ii), a stated prior:*
 - (g) Change one `:upvote` weight, or the stated priority for one target.
   The recorded E must change, and with G undefined everywhere, `:chosen` must
   follow E's argmax.
