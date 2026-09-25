@@ -42,7 +42,7 @@
     (is (= :grain-not-declared (get-in enactment [:grain-gate :reason])) "the gate's own refusal, recorded")
     (is (= {:click-id "run-1" :present true} (:run-record enactment)))
     (is (= :cand/x (:decision-candidate enactment)) "the decision's id is on the record for W_c's join")
-    (is (= {:absent :no-publication-observed} (:publication-observed enactment)))
+    (is (= {:absent :no-repair-obligation-for-target :target "M-t"} (:publication-observed enactment)) "no repair id for the target: publication does not apply (step 12)")
     (is (= enactment (edn/read-string (slurp record-path))) "the record is written where the flight's records go")
     (is (.startsWith ^String record-path (.getCanonicalPath (io/file dir))))))
 

@@ -295,7 +295,12 @@
                 wc (when (and wc-fn (:enactment enacted)) (wc-fn f enacted))
                 f (cond-> f enacted (update :enactments (fnil conj [])
                                             (merge (assoc (if (:enactment enacted)
-                                                            (select-keys enacted [:record-path])
+                                                            (assoc (select-keys enacted [:record-path])
+                                                                   ;; row 10: copied from the enactment
+                                                                   ;; record, whose writer is
+                                                                   ;; observe-publication-fn
+                                                                   :publication-observed
+                                                                   (get-in enacted [:enactment :publication-observed]))
                                                             {:enactment (select-keys enacted [:absent])})
                                                           :click-id (:click-id result))
                                                    wc)))
