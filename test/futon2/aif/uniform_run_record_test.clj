@@ -145,6 +145,15 @@
       (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))
 
 (deftest no-selection-does-not-borrow-historical-quantities
+  ;; The guarded property is that a record written with no selection takes
+  ;; nothing from history: persist-run-record! builds :decision from THIS
+  ;; result only, under its own comment "No historical checkpoints or trace
+  ;; lookup". :abstention and :chosen are assoc'd unconditionally
+  ;; (full_loop_runner.clj) because the flight reads them off the record
+  ;; (flight-runner/record-summary), so their absence is not what pins the
+  ;; property -- their being TYPED ABSENCES is. A number, an id or an empty
+  ;; map in either place would be a value standing in for the absence, which
+  ;; is what this test exists to catch.
   (let [dir (temp-dir)]
     (try
       (let [written (#'runner/persist-run-record!
@@ -154,8 +163,16 @@
                                              :c {:status :derived}}}})
             record (edn/read-string (slurp (:run-record written)))
             check (shell/sh "bb" "scripts/wm_run_validity.bb" (:run-record written))]
-        (is (= #{:g-term-decomposition} (set (keys (:decision record)))))
+        (is (= #{:g-term-decomposition :abstention :chosen}
+               (set (keys (:decision record)))))
         (is (= :missing (get-in record [:decision :g-term-decomposition :status])))
+        ;; the exact shapes persist-run-record! writes with no decision:
+        ;; abstention-carrier's nil branch and chosen-summary's "typed
+        ;; absence when nothing was chosen"
+        (is (= {:status :absent :reason :no-selection-decision-recorded}
+               (get-in record [:decision :abstention])))
+        (is (= {:status :absent :reason :no-chosen-action}
+               (get-in record [:decision :chosen])))
         (is (str/includes? (:out check) "INVALID"))
         (is (zero? (:exit check)) "Invalidity reports; it does not gate the run."))
       (finally (doseq [f (reverse (file-seq dir))] (io/delete-file f true))))))
