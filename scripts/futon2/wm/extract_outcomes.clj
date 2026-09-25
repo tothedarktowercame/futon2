@@ -858,20 +858,18 @@
      :extras (- (count outcomes) hits)
      :rows rows}))
 
-(defn -main [& args]
-  (let [[path & more] args
-        opts (apply hash-map more)
-        cdir (get opts "--cascades")
-        refpath (get opts "--reference")]
-    (when-not (and path (.isFile (io/file path)))
-      (binding [*out* *err*] (println "usage: extract-outcomes.clj <mission.md> [--cascades DIR] [--reference C.edn]"))
-      (System/exit 2))
-    (let [text (slurp path)
-          ref (when refpath (read-reference refpath))]
-      (if (:refused ref)
-        (do (pp/pprint ref)
-            (System/exit 2))
-        (let [lines (count (str/split-lines text))
+(defn read-outcomes
+  "The extractor's output for mission TEXT (read from PATH, recorded as
+  :mission :path) as data: the v5 map -main prints, or
+  {:refused :cue-does-not-resolve ...} when a cue span does not resolve.
+  OPTS: :cascades (a cascades directory, the wants per instance) and
+  :reference (an already-read reference map). -main is this plus printing
+  and the exit codes (M-wm-wiring row 2: the flight calls it at click time)."
+  ([path text] (read-outcomes path text {}))
+  ([path text {:keys [cascades reference]}]
+   (let [cdir cascades
+         ref reference
+         lines (count (str/split-lines text))
           hs (headings text)
           isecs (instance-sections hs lines)
           section-of (fn [l] (:instance (first (filter #(<= (first (:lines %)) l (second (:lines %))) isecs))))
@@ -925,15 +923,32 @@
                 ref (assoc :reference-comparison (compare-reference text ref admitted)))]
       (cond
         (seq fails)
-        (do (pp/pprint {:schema :wm/mission-outcomes-v5
-                        :offset-unit offset-unit
-                        :refused :cue-does-not-resolve
-                        :mission path
-                        :failures fails})
-            (System/exit 2))
+        {:schema :wm/mission-outcomes-v5
+         :offset-unit offset-unit
+         :refused :cue-does-not-resolve
+         :mission path
+         :failures fails}
 
         (empty? admitted)
-        (pp/pprint (assoc out :outcomes {:absent :no-stated-outcome
-                                         :sections-read (mapv :title hs)}))
+        (assoc out :outcomes {:absent :no-stated-outcome
+                              :sections-read (mapv :title hs)})
 
-        :else (pp/pprint out)))))))
+        :else out))))
+
+(defn -main [& args]
+  (let [[path & more] args
+        opts (apply hash-map more)
+        cdir (get opts "--cascades")
+        refpath (get opts "--reference")]
+    (when-not (and path (.isFile (io/file path)))
+      (binding [*out* *err*] (println "usage: extract-outcomes.clj <mission.md> [--cascades DIR] [--reference C.edn]"))
+      (System/exit 2))
+    (let [text (slurp path)
+          ref (when refpath (read-reference refpath))]
+      (if (:refused ref)
+        (do (pp/pprint ref)
+            (System/exit 2))
+        (let [r (read-outcomes path text {:cascades cdir :reference ref})]
+          (pp/pprint r)
+          (when (= :cue-does-not-resolve (:refused r))
+            (System/exit 2)))))))

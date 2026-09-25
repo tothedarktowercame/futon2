@@ -17,6 +17,7 @@
             [futon2.aif.interpretation-evidence]
             [futon2.aif.mission-criteria :as criteria]
             [futon2.aif.mission-reading :as reading]
+            [futon2.aif.served-by-reading :as served]
             [futon2.aif.want-interpretation :as wi]
             [futon2.report.war-machine :as wm]))
 
@@ -331,7 +332,7 @@
   locator. Everything that is not a publication is a flight :need with its
   job id; a mission is never refused for a missing list, and a typed
   absence arises only when a reading ran and found nothing."
-  [{:keys [store read-text code-root notify! caller] :as opts}]
+  [{:keys [store read-text code-root notify! caller served-by-cascades served-by-quotes] :as opts}]
   (fn [flight sources]
     (let [ws (:want-source flight)
           target (:target flight)
@@ -404,11 +405,20 @@
                           (when (= :published (:outcome constraints-entry))
                             (map #(assoc % :request-id (:request-id constraints-entry))
                                  (get-in (flight/click-wants flight sources) [:source :constraint-questions])))))
+          served-by (when text
+                      (served/reading (str (:repo ws) "/" (:path ws)) text
+                                      {:cascades (get served-by-cascades target)
+                                       :quotes (get served-by-quotes target)}))
           owner (reading/mission-owner text)
           addressed (or owner caller "requisition-caller")
           notified (when (and (seq questions) owner notify!)
                      (notify! owner target (reading/question-prompt target owner questions)))]
       {:asked asked
+       ;; M-wm-wiring row 2: the mission's outcomes and served-by links read
+       ;; from its text now; seat quotes, when the caller supplies them
+       ;; (:served-by-quotes), placed and verified against this text's sha
+       :served-by served-by
+       :text-sha256 (:text-sha256 served-by)
        :needs (vec (concat
                     (for [a asked :when (not (#{:published :questions} (:outcome a)))]
                       (merge {:kind (:outcome a) :missing (case (:kind a) :criteria :criteria :coverage :coverage :constraints :constraints :locator)}

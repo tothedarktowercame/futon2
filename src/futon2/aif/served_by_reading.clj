@@ -26,7 +26,8 @@
 
   VERIFY is passed in (futon2.wm.extract-outcomes/verify-proposed-link in
   production, a namespace since row 2(b)). Pure apart from calling it."
-  (:require [clojure.string :as str])
+  (:require [clojure.string :as str]
+            [futon2.wm.extract-outcomes :as ext])
   (:import [java.security MessageDigest]))
 
 (defn sha256
@@ -104,3 +105,29 @@
   [verify ^String text isecs outcomes q]
   (let [p (proposal text isecs outcomes q)]
     (if (= :refused (:status p)) p (verify text isecs outcomes p))))
+
+(defn reading
+  "The read step's served-by record for mission TEXT at PATH (M-wm-wiring
+  row 2, the flight hop): the extractor's v5 output computed now (with the
+  target's cascades directory when it has one), the text's sha256, and every
+  seat proposal in QUOTES with its result, a verified link (:via :basis,
+  any :coreference) or a refusal with its reason and :detail, none dropped.
+  A mission with no instances heading records {:absent
+  :no-instances-anchor} and proposes nothing; QUOTES absent is
+  {:absent :no-quotes}, typed (this step asks no seat for them)."
+  [path ^String text {:keys [cascades quotes]}]
+  (let [out (ext/read-outcomes path text {:cascades cascades})
+        sha (sha256 text)
+        hs (ext/headings text)
+        isecs (ext/instance-sections hs (count (str/split-lines text)))
+        outcomes (when (sequential? (:outcomes out)) (:outcomes out))]
+    {:outcomes out
+     :text-sha256 sha
+     :served-by (if (map? (:served-by out)) (:served-by out) :vocabulary-links-on-the-outcomes)
+     :proposals (cond
+                  (nil? quotes) {:absent :no-quotes}
+                  (nil? (ext/instances-anchor hs)) {:absent :no-instances-anchor}
+                  (nil? outcomes) {:absent :no-admitted-outcome}
+                  :else (mapv (fn [q] {:proposal q
+                                       :result (read-link ext/verify-proposed-link text isecs outcomes q)})
+                              quotes))}))

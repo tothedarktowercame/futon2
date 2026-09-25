@@ -5,7 +5,9 @@
   (:require [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.served-by-reading :as sbr]
-            [futon2.wm.extract-outcomes]))
+            [futon2.wm.extract-outcomes]
+            [futon2.aif.flight]
+            [futon2.aif.flight-runner]))
 
 (defn- f [v] @(ns-resolve 'futon2.wm.extract-outcomes v))
 
@@ -98,3 +100,54 @@
     (testing "an unknown instance or outcome is answered by the verifier, not here"
       (is (= :instance-unknown (:reason (read-link ctx (assoc reading-route :instance 99)))))
       (is (= :outcome-unknown (:reason (read-link ctx (assoc reading-route :outcome :o-99))))))))
+
+;; ---------------------------------------------------------------------------
+;; The flight hop (M-wm-wiring row 2): flight-runner/read-fn records the
+;; served-by reading on the flight's read record. M-futon-seams is a FIXTURE
+;; here (its text pinned by sha), not a flight target; M-autoclock-in is the
+;; first target. No seat is asked for quotes: they are supplied by the caller
+;; or recorded absent.
+
+(def seams-sha "d13c5cfe9e9b19b445bd5bb73507f286a9e5ff3b478a1c5bc6a2250d70c6f6fd")
+
+(defn- temp-store []
+  (str (.toFile (java.nio.file.Files/createTempDirectory
+                 "served-by-flight" (make-array java.nio.file.attribute.FileAttribute 0)))))
+
+(defn- read-record [target repo path text opts]
+  (let [f (futon2.aif.flight/start {:target target :chosen-because {:kind :requested}}
+                                   {:kind :a-exits :repo repo :path path :read-text (fn [& _] text)}
+                                   {:id (str "flight-read-" target)})
+        rf (futon2.aif.flight-runner/read-fn
+            (merge {:store (temp-store)
+                    ;; every reading request goes unanswered: a :need, never a refusal
+                    :answer-fn (fn [_] {:seat "none" :job-id "none" :state "failed"})}
+                   opts))]
+    (rf f {})))
+
+(deftest the-flight-read-step-records-the-reading-route-link-and-a-refusal
+  (let [text (slurp mission-path)
+        refused (assoc reading-route :artefact "neo4j")
+        rec (read-record "M-futon-seams" "futon3c" "holes/missions/M-futon-seams.md" text
+                         {:served-by-quotes {"M-futon-seams" [reading-route refused]}
+                          :served-by-cascades {"M-futon-seams" "../futon3c/holes/labs/M-futon-seams/proto"}})
+        [ok bad] (get-in rec [:served-by :proposals])]
+    (is (= seams-sha (:text-sha256 rec)) "the text sha on the record is the fixture's pinned sha")
+    (is (= :wm/mission-outcomes-v5 (get-in rec [:served-by :outcomes :schema])))
+    (is (vector? (get-in rec [:served-by :outcomes :served-by])) "v5 served-by rows, cascades read")
+    (is (= reading-route (:proposal ok)))
+    (is (= [4 :o-2] [(get-in ok [:result :instance]) (get-in ok [:result :outcome])]))
+    (is (= :reader-claimed (get-in ok [:result :via :coreference])))
+    (is (= [:refused :artefact-not-in-both] [(get-in bad [:result :status]) (get-in bad [:result :reason])])
+        "a refused proposal is on the record with its reason, not dropped")
+    (is (some? (get-in bad [:result :detail])))))
+
+(deftest m-autoclock-in-records-the-anchor-absence-and-no-links
+  (let [text (slurp "../futon3c/holes/missions/M-autoclock-in.md")
+        rec (read-record "M-autoclock-in" "futon3c" "holes/missions/M-autoclock-in.md" text
+                         {:served-by-quotes {"M-autoclock-in" [reading-route]}})
+        bare (read-record "M-autoclock-in" "futon3c" "holes/missions/M-autoclock-in.md" text {})]
+    (is (= {:absent :no-instances-anchor} (get-in rec [:served-by :outcomes :served-by])))
+    (is (= {:absent :no-instances-anchor} (get-in rec [:served-by :proposals])))
+    (is (= {:absent :no-quotes} (get-in bare [:served-by :proposals])) "no seat asked: absent, typed")
+    (is (= (sbr/sha256 text) (:text-sha256 rec)))))
