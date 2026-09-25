@@ -313,3 +313,21 @@ the record's schema, so it belongs to the checker's and live-C's owners, not to 
 M-autoclock-in's first click, which abstains at assembly (REFUSAL-REGISTER-D §D2.4). **Not done:** no per-term
 bisect was needed — all four terms move together at `daf2124e` — and the F trio's commit is established by diff
 rather than by a run, for the reason given.
+
+---
+
+# D5 — `cascade-structure-test`'s two, sized (read-only, 2026-09-25)
+
+Read at HEAD `2e509a34`; bisect in throwaway sibling worktrees, removed after, never the shared tree, no stash. Nothing changed.
+
+**(a)** `futon2.aif.cascade-structure-test` `receipt-is-record-only-and-roundtrips`, `:94` and `:95`, in a namespace otherwise green (6 tests, 63 assertions, 2 failures). `:95` is the readable one: `expected: (= singleton (:selected-action c))`, and the actual is that candidate with one key added, `:enacted-steps nil`. `:94` is the same key inside the whole-record comparison.
+
+**(b)** Green at `2996eb6b` (09-23 16:43), fails at **`a4dc67f6`** (09-23 16:59, Joseph Corneli, "1.6: the dispatch and the acceptance predicate read the ENACTED step, not the chain head"). Not `27d6072d`, which is the later typed-absence fix on the *law*; `b1979ce2`, where `:enacted-steps` first appears, is green here. Identical 2 failures at `51486dab` (run first-hand) and at HEAD, so it is not the cast change.
+
+**(c)** A stale pin. The writer is `construct-selected-action`'s `:cascade-candidate` defmethod, `full_loop_runner.clj:1405-1417`, whose last line assocs unconditionally: `(assoc (:action entry) :enacted-steps (:enacted-steps entry))`. The test calls it with `{:action singleton}`, an entry carrying no `:enacted-steps`, so the action comes back with a bare `nil`. The fixture predates the field: the test file last moved at `0bed9df9` (09-21 15:29).
+
+**(d) For the field's owner, not this test.** `27d6072d` is titled ":enacted-steps records a typed absence, never nil" and did that on the law in `policy.clj`; `:1417` still writes a bare `nil` when the entry has no such key. On the live path that cannot happen — the docstring at `:1412-1416` records that `selected-entry` now carries the field, after claude-5's review found the earlier read inert — so the `nil` is reachable only with a hand-assembled entry. Whether that case should get a typed absence is the writer's call.
+
+**(e)** The writer is on the tick's dispatch path; these two assertions are the record-only roundtrip's, so neither is on a flight's path.
+
+**(f)** Owner: row 0's field, claude-10's lane; not fixed here. Smallest change is test-side and has the two shapes `FAILING-TESTS-D2` already named for a moved field — the fixture's expected gains the key, or the comparison projects it away with a comment naming `a4dc67f6`. Which one depends on (d), so it is not this packet's to choose.
