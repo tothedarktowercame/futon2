@@ -17,9 +17,10 @@
                         {:status :publication-refused :repair/id "occ-refused" :reason :publication-error}]})
 
 (defn- observe [repair-id & [record]]
-  ((fr/observe-publication-fn {:fetch-run-record (fn [_] (or record run-record))
+  (:publication-observed
+   ((fr/observe-publication-fn {:fetch-run-record (fn [_] (or record run-record))
                                :repair-id-fn (constantly repair-id)})
-   {:target "T-repair-x"} {:click-id "run-p"}))
+   {:target "T-repair-x"} {:click-id "run-p"})))
 
 (deftest a-committed-receipt-is-observed-with-its-evidence
   (is (= {:observed true :at "run-p"
@@ -38,7 +39,7 @@
 
 (deftest observed-true-without-evidence-is-refused-by-the-writer
   ;; the bad case: a value standing in for an observation
-  (is (= {:absent :observation-refused :reason :observed-true-without-evidence}
+  (is (= {:publication-observed {:absent :observation-refused :reason :observed-true-without-evidence}}
          ((fr/observe-publication-fn {:observation-fn (constantly {:observed true})})
           {:target "t"} {:click-id "c"}))))
 

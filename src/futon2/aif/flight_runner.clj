@@ -560,10 +560,11 @@
               run-record (when fetch-run-record (fetch-run-record (:click-id click)))
               ;; row 10's read side: the observation's writer is
               ;; observe-publication-fn (step 12); this record copies it
-              pub ((or publication-observation
-                       (observe-publication-fn {:fetch-run-record fetch-run-record
-                                                :repair-id-fn repair-id-fn}))
-                   flight click)
+              pub (:publication-observed
+                   ((or publication-observation
+                        (observe-publication-fn {:fetch-run-record fetch-run-record
+                                                 :repair-id-fn repair-id-fn}))
+                    flight click))
               record (cond-> {:schema :wm/enactment-v1
                               :flight (:flight/id flight)
                               :click (:click-id click)
@@ -647,8 +648,9 @@
   :receipt-committed when it published (else :publication-refused or
   :publication-unreachable).
 
-  Returns (fn [flight click] -> observation), the value the enactment step
-  records and copies, one authority:
+  Returns (fn [flight click] -> {:publication-observed observation}); the
+  enactment step records that value (one authority: this function writes
+  it, enact-fn reads it):
     {:observed true :at click-id :evidence entry}      the target's receipt committed
     {:observed false :checked {...}}                   its entry, not committed, or none
     {:absent :no-repair-obligation-for-target ...}     the chosen action discharges no
@@ -662,6 +664,7 @@
   no evidence is refused by the writer."
   [{:keys [fetch-run-record repair-id-fn observation-fn]}]
   (fn [flight click]
+    {:publication-observed
     (admit-observation
      (if observation-fn
        (observation-fn flight click)
@@ -682,4 +685,4 @@
                {:observed false
                 :checked {:repair/id repair-id :click-id (:click-id click)
                           :entries (count entries)
-                          :statuses (mapv :status mine)}}))))))))
+                          :statuses (mapv :status mine)}}))))))}))
