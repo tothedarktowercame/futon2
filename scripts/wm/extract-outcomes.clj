@@ -108,7 +108,34 @@
     :reads "the consequence of not reaching the outcome"}
    {:id :cue/cost-of          :re #"(?i)\bcosts? (?:of|more)\b"
     :requires :artefact
-    :reads "the outcome's absence stated as a cost"}])
+    :reads "the outcome's absence stated as a cost"}
+   ;; E3: the capability contrast -- the outcome stated as "with X you can V;
+   ;; with Y you must W" (or cannot). Both arms must be present: a single
+   ;; "with the script you can regenerate the page" is a method statement
+   ;; (H-C-D E4), not an outcome, and the two-arm shape is what keeps it out.
+   ;; Gated on :artefact, as E2: a contrast about nothing named is not cued.
+   ;; M-futon-seams L124, span [13700 13817]:
+   ;;   "With hardcoded code you can grep for the literal; with a hardcoded
+   ;;    prompt you must match natural language at runtime."
+   {:id :cue/contrast-with-you-can
+    :re #"(?i)\bwith (?:a |an |the )?[\w-][^.\n]{0,60}? you can\b[^.\n]{0,100}?; with (?:a |an |the )?[\w-][^.\n]{0,60}? you (?:must|cannot|can't)\b"
+    :requires :artefact
+    :reads "two couplings contrasted by the capability each leaves you; the outcome is the capable arm"}
+   ;; Same voice, "lets you ... where ... cannot" form. Declared ahead of the
+   ;; corpus: no mission sentence instantiates it yet, so no span is quoted --
+   ;; the table is predeclared, and a shape with no instance cues nothing.
+   {:id :cue/contrast-lets-you
+    :re #"(?i)\blets? you\b[^.\n]{0,80}?\bwhere\b[^.\n]{0,60}?\b(?:cannot|can't|must not)\b"
+    :requires :artefact
+    :reads "a capability one artefact grants where its contrast cannot"}
+   ;; Same voice, the negated-capability form "a property of X, not a Y":
+   ;; M-futon-seams L93, span [10283 10371]:
+   ;;   "With roles that is a property of the binding, not a string comparison
+   ;;    in the dispatcher."
+   {:id :cue/contrast-property-not
+    :re #"(?i)\bproperty of the \w[^.\n]{0,40}?, not a\b"
+    :requires :artefact
+    :reads "a capability the outcome makes structural, named against the manual contrast it replaces"}])
 
 ;; Parties the corpus names. Attribution is by naming, never by inference.
 (def parties ["Rob" "Joe" "claude-1" "claude-10" "kimi-4"])

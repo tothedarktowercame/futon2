@@ -91,10 +91,51 @@
   (is (= [] (extract e2-no-artefact-text (constantly nil) {}))
       "no artefact named: the consequence voice does not cue"))
 
+;; E3: the capability contrast -- "with X you can V; with Y you must W" --
+;; is cued, as data, when the sentence names an artefact (M-futon-seams L124).
+(def e3-text
+  (str "With hardcoded code you can grep for the literal; with a hardcoded prompt you must match natural language at runtime.\n"
+       "\n"
+       "With roles that is a property of the binding, not a string comparison in the dispatcher.\n"))
+
+(deftest e3-capability-contrast-cued
+  (let [os (outcomes-of e3-text {3 4})
+        rules (set (mapcat :rules os))]
+    (is (contains? rules :cue/contrast-with-you-can)
+        "the two-arm contrast is cued")
+    (is (contains? rules :cue/contrast-property-not)
+        "the negated-capability contrast is cued")
+    (is (every? #(= :artefact (:requires %))
+                (filter #(#{:cue/contrast-with-you-can :cue/contrast-lets-you
+                            :cue/contrast-property-not} (:id %))
+                        cue-rules))
+        "every capability-contrast rule carries the artefact gate as data")
+    (is (= [] (verify e3-text os)) "every E3 cue resolves")))
+
+;; E3 bad case: a contrast sentence naming no artefact or capability is not cued.
+(def e3-no-artefact-text
+  "With patience you can wait for the bus; with a car you must find parking.\n")
+
+(deftest e3-contrast-without-artefact-not-cued
+  (is (= [] (extract e3-no-artefact-text (constantly nil) {}))
+      "no artefact named: the capability contrast does not cue"))
+
+;; E3 bad case: a single-arm capability sentence is a method statement
+;; (H-C-D E4), not an outcome. What keeps it out is structural: every E3 rule
+;; requires BOTH arms of the contrast (\"you can ... ; with ... you must\" /
+;; \"lets you ... where ... cannot\" / \"property of X, not a Y\"), and this
+;; sentence has only one arm, so no E3 rule's regex matches at all.
+(def e3-method-text
+  "With the script you can regenerate the page.\n")
+
+(deftest e3-method-statement-not-cued
+  (is (= [] (extract e3-method-text (constantly nil) {}))
+      "one arm only: the two-arm contrast shape keeps the method statement out"))
+
 ;; Verified spans: every cue in the output resolves to its quote in the text,
 ;; and a cue that does not is caught (the refusal the script exits 2 on).
 (deftest every-cue-resolves
-  (let [text (str e1-text "\n" e2-text)
+  (let [text (str e1-text "\n" e2-text "\n" e3-text)
           os (outcomes-of text {3 7})]
     (is (= [] (verify text os)) "every cue of every outcome resolves")
     (let [broken (assoc-in os [0 :cues 0 :cue] [999 999])]
