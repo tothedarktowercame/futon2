@@ -298,3 +298,104 @@ A count above the list's is a row this register missed. **Stated limit, as in
 build, review and close machinery after a chosen action, which a first click on
 M-autoclock-in never reaches (D2.4). They are named as a boundary, not
 enumerated; a flight that gets a chosen action needs that third register.
+
+---
+
+# D4 — past the choice: the runner's post-choice machinery and the flight's enactment
+
+Read at HEAD `d6df5909`; read-only, nothing proposed for removal. `enact-fn` is `fcc31531`, `wc-verdict-fn` `d6df5909` — step 11 landed while this was being read, so it is registered here rather than deferred. This closes the boundary §D2.7 named and did not enumerate.
+
+## D4.1 `full_loop_runner`'s post-choice machinery — 52 throw sites, one boundary
+
+**Class, checked rather than assumed.** `run-opportunity!` wraps `run-opportunity-core!` in a `catch Throwable` (`full_loop_runner.clj:5615-5620`),
+types the failure by a stated precedence — an explicit `:failure-kind` at any depth, else transport typing, else `:initialization-failed`
+(`:5670-5672`) — records a system-failure finding with a discharge contract (`:5685-5700`), and returns a terminal result. **All 52 therefore stop the
+RUN and are recorded; none stops the flight**, which receives the result. Three families are re-thrown at `:5622-5624` and do escape the runner:
+`:delivery-qa-gate-failed`, `:evidence-manifest/refusal`, `:limb-evidence/refusal`. A `{:cohort/error :stopping-rule-reached}` found anywhere on the
+cause chain becomes `:outcome :cohort-complete` (`:5645-5651`) — normal completion, not a failure, and the comment there says why message text is
+never consulted.
+
+| family | sites (`full_loop_runner.clj`) | kinds | case |
+|---|---|---|---|
+| seat and transport | `:757` `:858` `:961` `:1155` `:1182` `:4538` `:4551` `:4743` | `:agent-unavailable` ×4, `:substrate-unavailable`, `:dispatch-failed` ×2, `:cancelled` | `:5660-5669`: a transport timeout charged to the machine demanded a repair commit and an independent review for a network fault; transport typing exists to stop that |
+| build and author | `:1716` `:1722` `:2500` `:5137` `:5184` | `:guardrail-refusal`, `:build-failed` ×4 | at `:1722`, an author refusal without a reason is itself a build failure — a refusal that names nothing cannot be reviewed |
+| review | `:5403` | review not approved / lacking execution evidence | **no case found at the site** |
+| selection-side | `:1333` `:4730` `:4755` `:4778` `:4821` `:4828` `:4835` | `:unsupported-ranking-tie-rule`, `:abstained`, `:policy-nondiscrimination`, `:incomplete`, `:construction-failed` ×3 | `:1333` refuses to rank a posterior tie without its declared rule; the rest **no case found at the site** |
+| grounding | `:2739` `:2812` `:2827` `:2885` `:2904` `:2919` `:2937` | `:grounding-failed` ×5, `:grounded-no-change`, `:incomplete` | `:2812`/`:2827` (`210dcdb0`): props must be storable AS WRITTEN — coerce Ratios, refuse the rest loudly, never round into the store |
+| close and evidence retention | `:3015` `:3060` `:3090` `:3096` `:3162` `:3171` `:3191` `:3210` `:3264` `:3362` `:3405` | `:entity-identity-mismatch`, `:close-retention/refusal`, `:limb-evidence/refusal` ×5, `:evidence-manifest/refusal`, `:token-outcome/refusal`, `:kernel-example/refusal`, `:incomplete` | the two `/refusal` families are re-thrown at the boundary: evidence that changed under comparison must not be absorbed into a terminal record |
+| historical verification | `:4897` `:4903` `:4928` `:4952` | `:historical-verification-refused` ×3, `:historical-verification-awaiting-validation` | **no case found at the site** |
+| run bookkeeping | `:228` `:251` `:508` `:681` `:2714` `:3694` `:3729` | `:r16-park-repair-id-missing`, `:r16-park-registration-failed`, `:build-failed` (source drift), `:terminal-route-missing`, `:discharge-identity-invalid`, `:execution-cohort-recording-required`, a boolean guard | `:508` refuses when the serving runner's source drifts from the checkout; `:681` refuses to write a record with no route rather than inventing one |
+
+By the `:outcome` each site carries: 19 carry none (they carry `:failure-kind` or a `:<ns>/refusal`), then `:build-failed` 5, `:grounding-failed` 5,
+`:incomplete` 5, `:agent-unavailable` 4, `:construction-failed` 3, `:historical-verification-refused` 3, `:dispatch-failed` 2, and one each of
+`:substrate-unavailable`, `:cancelled`, `:guardrail-refusal`, `:grounded-no-change`, `:policy-nondiscrimination`,
+`:historical-verification-awaiting-validation`. **Cases, measured rather than judged:** 9 of the 52 sites carry a `;;` comment within twelve lines
+above the throw; the other 43 are "no case found at the site", which is a statement about the site, not about whether a case exists elsewhere.
+
+## D4.2 Typed absences the post-choice machinery records
+
+| what | site |
+|---|---|
+| the abstention carrier (a judge that abstained without a refusal list; a tick with no recorded decision) | `full_loop_runner.clj:515-521` |
+| `:chosen` `{:status :absent :reason :no-chosen-action}` and `:abstention` `{:status :absent :reason :no-selection-decision-recorded}`, no decision recorded | `:560-571`, `:522-525` |
+| the close classification: `classify` catches an `ExceptionInfo` and returns a typed receipt | `run_ending_classification.clj:139-143` |
+
+## D4.3 The flight's enactment path — `enact-fn` throws nothing
+
+| point | site (`flight_runner.clj`) | what it records | class |
+|---|---|---|---|
+| no chosen candidate | `:519` | `{:absent :no-decision}`, no record written | flight continues |
+| the seat's typed failure `{:failed {:reason …}}` | `:536`, `:545`; deviation `:550-551` | attempt `:success false` + `{:kind :step-failed}` | records, continues to the next pattern |
+| grain gate not `:pass` | `:533`, `:541-542`; deviation `:552-554` | `:not-committed :grain-gate-refused` with the gate's reason, **no commit asked** | stops that commit only |
+| grain gate's own kinds | `grain_gate.clj:80,84,88,94,103,111,116,121` | `:grain-not-declared` ×2, `:grain-mismatch`, `:scope-mismatch`, `:resolver-missing` ×2, `:arglist-mismatch`, `:sha-mismatch` (status `:refuse`) | recorded on the attempt |
+| the check-fn throwing | `run-check` `:470-471` | `{:status :refused :reason :check-threw :detail …}` | caught, recorded |
+| the seat gave no check map | `:476` | `{:absent :no-check-from-seat}` | recorded |
+| no handler for the locator's class | `:512-514` (default check-fn) | `{:status :refused :reason :no-mechanical-check}` | recorded |
+| the click's run record not fetched | `:565` | `{:absent :run-record-not-fetched}` | recorded |
+| candidate names no grain pattern | `:566`, `:569`, the gate's own refusal at `:575-576` | `{:absent :candidate-names-no-grain-pattern}` | recorded |
+| nothing published | `:573` | `{:absent :no-publication-observed}` | recorded |
+| W_c: no checker configured | `wc-verdict-fn` `:605` | `{:wc {:absent :no-wc-checker-configured}}`, and `increment` is **not called** — the docstring's "never a default pass" | recorded |
+| W_c: exit ≠ 0, or output that is not one EDN form | `:610-616` | `{:wc {:refused :checker-failed :exit n :stderr s}}`, "never a verdict" | recorded |
+| the fold's increment | `enactment_habit.clj:66-96` | an attempt at a pattern outside the candidate `{:status :refused …}`; `[]` → `:delta 1`; failures → `:delta 0`; a missing verdict → `:delta 0` with `{:status :absent}` | recorded |
+
+**Nothing on this path throws.** `flight_runner.clj` has three `throw`s and all three are the read step's (`:227`, §1 row 1). What can still stop the
+flight is an exception out of an **injected** function: `flight.clj` has **zero** `catch` sites, and of the injected fns only `check-fn` is wrapped
+(`run-check:470`) — `dispatch-step!`, `fetch-run-record`, `publication-observation` and `wc-fn` are not, nor is the record write (`.mkdirs`/`spit`,
+`:579-580`).
+
+## D4.4 The walk, past the click
+
+With an interpretation published and a candidate chosen, M-autoclock-in's first enactment reaches, in order: `:519` (a record will be written) → for
+each pattern in precedence order, `dispatch-step!` `:phase :commit`, or for the grain pattern `:phase :plan` then `grain-gate` then `:phase :commit` →
+`run-check` → the run-record fetch and the publication observation → the record write → `wc-verdict-fn` → `increment`.
+
+**First thing that stops the enactment: nothing does.** Every branch records; the nearest is the grain gate's refusal, which stops one commit and not
+the enactment. **First thing that would stop the flight:** an exception out of `dispatch-step!` — the first injected function called, unguarded, with
+nothing catching it between there and `flight/run!`.
+
+**The dispatch to a real seat has no site on this path yet.** At `d6df5909` futon2 has **no production `dispatch-step!`**: the only implementations
+are test fixtures (`flight_enact_test.clj:27`, `flight_grain_gate_test.clj:20`). So a seat not on the roster, a job that never returns, and the
+requisition rule (M-wm-wiring's ruling of ~17:40Z: eligibility read from requisition state, not from the target's origin) surface **nowhere in the
+flight's enactment**. The runner carries its own Agency client with those refusals — `agent-roster` `:agent-unavailable` (`full_loop_runner.clj:757`),
+`post-json!` `:dispatch-failed` (`:961`), `read-job!` `:dispatch-failed` (`:1182`), `throw-if-cancelled!` `:cancelled` (`:1155`) — but the flight's
+enactment does not go through the runner, so none of them is this path's. When the spike's dispatch function lands it brings refusals that have no
+register row, and by the standing rule a refusal reached that is not on the register is a wiring defect: they belong in the same commit as that
+function.
+
+## D4.5 Counts and falsifiers
+
+**29 new kinds**: 14 terminal outcomes and 3 re-thrown refusal families at the runner's boundary; 6 grain-gate kinds; 2 W_c
+(`:no-wc-checker-configured`, `:checker-failed`); 2 from `increment`; 2 check refusals (`:check-threw`, `:no-mechanical-check`). **Register total: 11
+flight-level (§1) + 39 tick (§D2) + 29 = 79**, over about 120 sites. Five more typed absences on the enactment record (§D4.3), none of them a refusal.
+
+```sh
+grep -c 'throw (ex-info' src/futon2/aif/full_loop_runner.clj   # 52, all in D4.1
+grep -cE 'catch (clojure.lang.ExceptionInfo|Throwable|Exception)' src/futon2/aif/full_loop_runner.clj  # 40
+grep -c 'throw' src/futon2/aif/flight_runner.clj               # 3, all the read step's (:227)
+grep -c 'catch' src/futon2/aif/flight.clj                      # 0 — nothing injected is guarded there
+grep -c '(refuse :' src/futon2/aif/grain_gate.clj              # 8 sites, 6 kinds
+grep -c 'dispatch-step!' src/futon2/aif/flight_driver.clj      # 0 — no production seat dispatch yet
+```
+
+A count above a list's is a row this register missed. **Stated limit:** the 43 sites in D4.1 with no case at the site were not chased into the packets
+and rulings that may carry one; "no case found at the site" is all that was measured.
