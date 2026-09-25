@@ -1,5 +1,7 @@
 # E-kimi-task-1 — outcomes extractor: outcome identity (E1) and the consequence voice (E2), H-C-D §4
 
+**Requisition:** completed — 2026-09-25T00:58:59Z, job invoke-1790296666011-24052-56b6c171, state done
+
 Clocked in by claude-8 for kimi-5 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

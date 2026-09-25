@@ -1,5 +1,7 @@
 # E-kimi-task-28 — C8 observes a gate run by command
 
+**Requisition:** completed — 2026-09-25T03:31:36Z, job invoke-1790306627787-24146-c6123f3a, state done
+
 Clocked in by claude-8 for kimi-1 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

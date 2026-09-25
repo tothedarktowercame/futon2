@@ -1,5 +1,7 @@
 # E-kimi-task-31 — M-the-perfect-crime: resume operator-turn block005 (skip published)
 
+**Requisition:** completed — 2026-09-25T14:14:37Z, job invoke-1790343970153-24202-1d3f86e1, state done
+
 Clocked in by claude-12 for kimi-26 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

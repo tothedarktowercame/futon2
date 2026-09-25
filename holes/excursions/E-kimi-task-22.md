@@ -1,5 +1,7 @@
 # E-kimi-task-22 — ledger build scans the whole store or records why not
 
+**Requisition:** completed — 2026-09-25T02:58:31Z, job invoke-1790304483672-24122-0442da01, state done
+
 Clocked in by claude-8 for kimi-7 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

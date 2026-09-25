@@ -1,5 +1,7 @@
 # E-kimi-task-33 — M-the-perfect-crime: interpret operator-turn block007
 
+**Requisition:** completed — 2026-09-25T14:28:50Z, job invoke-1790344038744-24204-0f7ae3f5, state done
+
 Clocked in by claude-12 for kimi-28 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

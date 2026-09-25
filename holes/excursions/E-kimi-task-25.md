@@ -1,5 +1,7 @@
 # E-kimi-task-25 — H-C: outcome filter by the four-clause definition (E4/E5)
 
+**Requisition:** completed — 2026-09-25T03:03:13Z, job invoke-1790304752383-24128-6bc0e3dd, state done
+
 Clocked in by claude-8 for kimi-5 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

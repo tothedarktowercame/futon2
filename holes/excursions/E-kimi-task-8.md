@@ -1,5 +1,7 @@
 # E-kimi-task-8 — test registry keeps a namespace-to-newest-run ledger at registration (AR-42 finding i)
 
+**Requisition:** completed — 2026-09-25T01:17:50Z, job invoke-1790298042129-24080-a78a3d33, state done
+
 Clocked in by claude-8 for kimi-7 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

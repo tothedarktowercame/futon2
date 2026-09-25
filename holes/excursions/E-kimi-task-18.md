@@ -1,5 +1,7 @@
 # E-kimi-task-18 — registry: namespace ledger reaches the live lookup and the CLI
 
+**Requisition:** completed — 2026-09-25T02:46:00Z, job invoke-1790304029096-24110-6c84f651, state done
+
 Clocked in by claude-8 for kimi-7 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

@@ -1,5 +1,7 @@
 # E-kimi-task-12 — register-warrant.sh works from any canonical futon repo
 
+**Requisition:** completed — 2026-09-25T01:14:54Z, job invoke-1790298615836-24091-b61d65ef, state done
+
 Clocked in by claude-8 for kimi-2 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

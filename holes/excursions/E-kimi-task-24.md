@@ -1,5 +1,7 @@
 # E-kimi-task-24 — H-interp: one interpretation grammar, keys normalised and :forces required
 
+**Requisition:** completed — 2026-09-25T02:58:21Z, job invoke-1790304588428-24125-f1b68e1e, state done
+
 Clocked in by claude-8 for kimi-6 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

@@ -1,5 +1,7 @@
 # E-kimi-task-5 — two sentences claim a passing test is observed exactly; only C8's token is (wording fix)
 
+**Requisition:** completed — 2026-09-25T00:50:10Z, job invoke-1790297084137-24064-8a2e02f4, state done
+
 Clocked in by claude-8 for kimi-6 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

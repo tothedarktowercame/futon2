@@ -1,5 +1,7 @@
 # E-kimi-task-13 — non-author warrants for a98f5879, 96b78e47, 5c9b9d45
 
+**Requisition:** completed — 2026-09-25T01:16:04Z, job invoke-1790298617549-24092-42a85bc2, state done
+
 Clocked in by claude-8 for kimi-5 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

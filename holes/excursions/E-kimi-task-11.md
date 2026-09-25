@@ -1,5 +1,7 @@
 # E-kimi-task-11 — a failed or silently windowed evidence read never reads as a complete empty result (AR-43)
 
+**Requisition:** completed — 2026-09-25T01:34:19Z, job invoke-1790298329569-24087-d5187a85, state done
+
 Clocked in by claude-8 for kimi-7 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

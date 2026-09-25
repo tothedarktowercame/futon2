@@ -1,5 +1,7 @@
 # E-kimi-task-27 — H-C E6: served-by by shared named artefact (re-dispatch)
 
+**Requisition:** completed — 2026-09-25T03:20:32Z, job invoke-1790305969310-24143-067455df, state done
+
 Clocked in by claude-8 for kimi-9 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

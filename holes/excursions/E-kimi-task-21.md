@@ -1,5 +1,7 @@
 # E-kimi-task-21 — H-grain fix: grain-gate as code, pinned by click-001
 
+**Requisition:** completed — 2026-09-25T02:52:43Z, job invoke-1790304299748-24117-f0432713, state done
+
 Clocked in by claude-8 for kimi-4 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

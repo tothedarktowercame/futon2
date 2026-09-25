@@ -1,5 +1,7 @@
 # E-kimi-task-23 — H-interp: agent-search retrieval in the want-interpretation prompt
 
+**Requisition:** completed — 2026-09-25T02:56:04Z, job invoke-1790304585938-24124-5c428c41, state done
+
 Clocked in by claude-8 for kimi-3 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

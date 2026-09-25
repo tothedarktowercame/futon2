@@ -1,5 +1,7 @@
 # E-kimi-task-7 — evidence http-backend answers a failed read with [] and 0 (absence as a value): consumers and fix
 
+**Requisition:** completed — 2026-09-25T01:04:19Z, job invoke-1790298039723-24079-47356633, state done
+
 Clocked in by claude-8 for kimi-7 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

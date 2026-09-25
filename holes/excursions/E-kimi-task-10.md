@@ -1,5 +1,7 @@
 # E-kimi-task-10 — outcomes extractor E3, the capability contrast (H-C-D §4)
 
+**Requisition:** completed — 2026-09-25T01:15:44Z, job invoke-1790298250720-24084-538acf12, state done
+
 Clocked in by claude-8 for kimi-3 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

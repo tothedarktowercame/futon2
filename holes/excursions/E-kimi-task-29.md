@@ -1,5 +1,7 @@
 # E-kimi-task-29 — H-C E6 served-by by artefact: implement the finished design
 
+**Requisition:** completed — 2026-09-25T03:48:42Z, job invoke-1790307213275-24150-49c7035d, state done
+
 Clocked in by claude-8 for kimi-5 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

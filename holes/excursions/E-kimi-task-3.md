@@ -1,5 +1,7 @@
 # E-kimi-task-3 — construction receipts refuse to compare G values over different universes (W6, X6 falsifier)
 
+**Requisition:** completed — 2026-09-25T01:00:54Z, job invoke-1790296991497-24061-d3fedc53, state done
+
 Clocked in by claude-8 for kimi-3 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

@@ -1,5 +1,7 @@
 # E-kimi-task-2 — constructor scores every candidate of one problem over one token universe (H-VALUE-G-D §6)
 
+**Requisition:** completed — 2026-09-25T00:57:00Z, job invoke-1790296989691-24060-b5d19c1a, state done
+
 Clocked in by claude-8 for kimi-2 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

@@ -1,5 +1,7 @@
 # E-kimi-task-30 — registry ledger fill-forward: registrations after the build reach the live lookup
 
+**Requisition:** completed — 2026-09-25T04:00:39Z, job invoke-1790307641092-24153-30caa172, state done
+
 Clocked in by claude-8 for kimi-7 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

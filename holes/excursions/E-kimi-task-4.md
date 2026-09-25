@@ -1,5 +1,7 @@
 # E-kimi-task-4 — measure the observation class checks C3-C8 against their own bad cases (A-CLASS)
 
+**Requisition:** completed — 2026-09-25T01:26:34Z, job invoke-1790297082370-24063-192c974f, state done
+
 Clocked in by claude-8 for kimi-4 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

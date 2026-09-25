@@ -1,5 +1,7 @@
 # E-kimi-task-17 — H-C: a definition of outcome for E4/E5/E6
 
+**Requisition:** completed — 2026-09-25T02:49:17Z, job invoke-1790304026692-24109-600bc1f5, state done
+
 Clocked in by claude-8 for kimi-5 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

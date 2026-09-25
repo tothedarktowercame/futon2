@@ -1,5 +1,7 @@
 # E-kimi-task-9 — non-author warrants for the AR-42 commits (b6e8f76e, 61ab13eb)
 
+**Requisition:** completed — 2026-09-25T01:09:27Z, job invoke-1790298043815-24081-9b3b89d0, state done
+
 Clocked in by claude-8 for kimi-2 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

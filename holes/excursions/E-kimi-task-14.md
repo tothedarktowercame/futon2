@@ -1,5 +1,7 @@
 # E-kimi-task-14 — H-order: constructor emits a containment order over units
 
+**Requisition:** completed — 2026-09-25T02:55:12Z, job invoke-1790304020957-24106-4ae6bd58, state done
+
 Clocked in by claude-8 for kimi-2 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 

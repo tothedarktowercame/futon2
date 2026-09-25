@@ -1,5 +1,7 @@
 # E-kimi-task-16 — H-grain discovery: grain as data and the pre-enactment check
 
+**Requisition:** completed — 2026-09-25T02:44:26Z, job invoke-1790304024683-24108-622ed86c, state done
+
 Clocked in by claude-8 for kimi-4 on 2026-09-25 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
 
