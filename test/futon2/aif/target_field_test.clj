@@ -261,10 +261,10 @@
         (is (= true (:eligible e)))
         (is (= {:absent :no-requisition} (:requisition e)))
         (is (not (contains? e :ineligible-reason)))
-        (is (= {:absent :vote-undefined} (:voted e))
-            "Joe attaches \"as long as they are voted\" to undispatched E- jobs; no vote is defined in code"))
-      (testing "on E- entries only"
-        (is (= {:absent :vote-undefined} (:voted (get ok "E-req-odd"))))
+        (is (not (contains? e :voted))
+            "creation makes a pending object eligible (Joe, 2026-09-25 ~18:05Z: \"mooted\", not \"voted\"; no tag); nothing further is recorded"))
+      (testing "the same on every kind"
+        (is (not (contains? (get ok "E-req-odd") :voted)))
         (is (not (contains? (get ok "T-plain") :voted)))
         (is (not (contains? (get ok "M-shaped") :voted)))
         (is (= true (:eligible (get ok "T-plain"))))

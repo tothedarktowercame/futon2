@@ -18,8 +18,8 @@
                plan).
                Each feasible entry also carries :requisition (the state read
                from the file, or a typed absence), :eligible, and
-               :ineligible-reason when a requisition makes it ineligible; a
-               pending excursion carries :voted. See `requisition`. An
+               :ineligible-reason when a requisition makes it ineligible.
+               See `requisition`. An
                ineligible entry stays on the record with its :next-step:
                the ruling makes it ineligible, it does not unwrite it.
   :exclusions  non-targets only, with :reason and :what-would-make-feasible:
@@ -200,18 +200,15 @@
   ineligible entry keeps its :next-step, which is a fact about the target
   and not a plan to act on it.
 
-  A pending excursion also carries :voted {:absent :vote-undefined}. Joe
-  attaches \"as long as they are voted\" to undispatched E- jobs, and no
-  definition of a vote exists in code: the only carrier on record,
-  M-portfolio-inference's :upvote, is a placeholder returning 0.0
-  (futon3c portfolio/policy.clj:119-124). The absence is typed and
-  nothing gates on it."
-  [e req kind]
+  Creation is what makes a pending object eligible (Joe, 2026-09-25 ~18:05Z:
+  \"when a new T- or E- or M- is created it becomes eligible\"; his earlier
+  \"voted\" was \"mooted\", and it carries no tag). Nothing further is read
+  or recorded for a pending entry."
+  [e req _kind]
   (let [req (or req {:absent :text-unread})
         state (:state req)]
     (cond-> (assoc e :requisition req :eligible (nil? state))
-      state (assoc :ineligible-reason (keyword "requisition" (name state)))
-      (and (nil? state) (= :excursion kind)) (assoc :voted {:absent :vote-undefined}))))
+      state (assoc :ineligible-reason (keyword "requisition" (name state))))))
 
 (defn assess
   "One considered target T: an exclusion when T is not a work target (an M-
