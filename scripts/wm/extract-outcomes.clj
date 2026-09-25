@@ -25,11 +25,17 @@
 ;;      no cascade emits {:absent :no-cascade}, not an empty want list. An
 ;;      unstated weighting emits {:absent :unstated}, not a uniform prior.
 ;;
-;; Served-by is drawn from SECTION CONTAINMENT: an outcome stated inside
-;; "### <n>. <title>" is served by the wants of that instance's cascade. That is
-;; structural and exact. An outcome stated outside any instance section gets
-;; {:unlinked :outside-instance-sections} -- the honest answer, since linking it
-;; would mean guessing which instance a mission-level sentence is about.
+;; Served-by is drawn from SHARED NAMED ARTEFACTS (H-C-DEF §4, E6): outcome o
+;; is served by the wants of instance i iff i's section names the same artefact
+;; one of o's cues carries as its obstacle, AND the mention sentence carries a
+;; direction verb (the section treats the artefact as something being declared,
+;; converted, retired, tested, absorbed, replaced or kept-in-sync -- acted on,
+;; not merely present). The coupling-artefact vocabulary below is data,
+;; predeclared like the cue table. ALL wants of a linked instance serve each
+;; linked outcome: per-want lexical grounding was judged too fragile (the want
+;; tokens do not lexically recur in the sections), so the link is stated at
+;; outcome granularity with the mention sentence as :via evidence. An outcome
+;; no instance section links this way gets {:absent :no-shared-artefact}.
 ;;
 ;; Fixes against H-C-D section 4 (futon2 f20084da had both defects):
 ;;
@@ -273,6 +279,102 @@
                               (remove str/blank?)
                               (mapv #(keyword (str/replace % #"^:" ""))))]))))
                 (.listFiles (io/file dir))))))
+
+;; ---------------------------------------------------- E6: served-by by artefact
+;; The coupling-artefact vocabulary (H-C-DEF §4). Each entry names ONE artefact
+;; as it appears in two voices: :obstacle-res match an outcome's cue (the
+;; artefact carried as the obstacle the outcome removes); :mention-res match a
+;; sentence inside an instance section (the same artefact named where the
+;; cascade lives); :direction-verbs are [keyword regex] pairs -- the mention
+;; sentence must carry one, evidencing that the section treats the artefact as
+;; being acted on. The matched keyword is reported as :direction. Predeclared
+;; data, like the cue table: a reviewer disputes a named entry, not taste.
+(def coupling-artefacts
+  [{:id :provider-parsed-from-agent-id
+    :obstacle-res [#"provider out of the agent id" #"hardcoded to talk to"]
+    :mention-res [#"pattern-matching an id" #"parsed out of the id" #"provider-literal"]
+    :direction-verbs [[:declare #"declare"] [:replace #"instead of"]]}
+   {:id :first-implementation-impersonated
+    :obstacle-res [#"impersonate the first"]
+    :mention-res [#"impersonating the transport" #"mimic IRC"
+                  #"agreeing by convention" #"reimplement sentence splitting"]
+    :direction-verbs [[:impersonate #"impersonat"] [:mimic #"mimic"]
+                      [:reimplement #"reimplement"] [:convention #"agreeing by convention"]]}
+   {:id :second-implementation-kept-in-sync
+    :obstacle-res [#"already drifted" #"drifted cost more to unify"]
+    :mention-res [#"impersonating the transport" #"mimic IRC"
+                  #"second source of truth" #"kept in sync"
+                  #"agreeing by convention" #"reimplement sentence splitting"]
+    :direction-verbs [[:keep-in-sync #"kept in sync"] [:impersonate #"impersonat"]
+                      [:mimic #"mimic"] [:reimplement #"reimplement"]
+                      [:convention #"agreeing by convention"] [:drift #"drifting"]]}
+   {:id :hardcoded-prompt-text
+    :obstacle-res [#"hardcoded prompt"]
+    :mention-res [#"the hardcoded one" #"prompt text" #"hardcoded prompt"]
+    :direction-verbs [[:absorb #"absorb"] [:disappear #"disappear"]
+                      [:never-treated #"never treated"]]}
+   {:id :emacs-turn-record-seam
+    :obstacle-res [#"seam in the Emacs layer" #"turn-annotation seam" #"seam inserted"]
+    :mention-res [#"turn record" #"block-quote parser" #"record writer"]
+    :direction-verbs [[:written-again #"written again"]
+                      [:convention #"agreeing by convention"] [:reimplement #"reimplement"]]}])
+
+(defn- line-start-offsets
+  "Char index where each 1-based line starts: (nth v (dec line))."
+  [^String text]
+  (loop [v [0] i 0]
+    (if-let [j (str/index-of text "\n" i)]
+      (recur (conj v (inc j)) (inc j))
+      v)))
+
+(defn- section-mention
+  "The first sentence inside section s that names entry's artefact (a
+   :mention-res hit) AND carries one of its :direction-verbs. Returns
+   {:span [codepoints] :direction kw} or nil."
+  [^String text line-starts s entry]
+  (let [[l0 l1] (:lines s)
+        ca (nth line-starts (dec l0))
+        cb (if (< l1 (count line-starts)) (nth line-starts l1) (count text))
+        section (subs text ca cb)]
+    (first
+     (for [mre (:mention-res entry)
+           :let [mm (re-matcher mre section)]
+           m (loop [acc []] (if (.find mm) (recur (conj acc (.start mm))) acc))
+           :let [[s0 e0] (sentence-around section m)
+                 sentence (subs section s0 e0)
+                 dir (some (fn [[kw re]] (when (re-find re sentence) kw))
+                           (:direction-verbs entry))]
+           :when dir]
+       {:span [(.codePointCount text 0 (+ ca s0)) (.codePointCount text 0 (+ ca e0))]
+        :direction dir}))))
+
+(defn artefact-links
+  "E6 (H-C-DEF §4): outcome o is served by the wants of instance i iff i's
+   section mentions an artefact that one of o's cues carries as its obstacle,
+   and the mention sentence carries a direction verb. One link per
+   (instance, outcome); :via carries the matched artefact, the mention
+   sentence's span (:want-span), the obstacle cue's span (:outcome-span) and
+   the direction verb found. All wants of a linked instance serve the outcome
+   -- per-want lexical grounding was judged too fragile (the want tokens do
+   not recur lexically in the sections)."
+  [^String text isecs outcomes]
+  (let [line-starts (line-start-offsets text)]
+    (vec
+     (for [s isecs
+           o outcomes
+           entry coupling-artefacts
+           :let [ocue (first (for [c (:cues o)
+                                   re (:obstacle-res entry)
+                                   :when (re-find re (:quote c))]
+                               c))
+                 mention (when ocue (section-mention text line-starts s entry))]
+           :when (and ocue mention)]
+       {:instance (:instance s)
+        :outcome (:id o)
+        :via {:artefact (:id entry)
+              :want-span (:span mention)
+              :outcome-span (:span ocue)
+              :direction (:direction mention)}}))))
 
 ;; ---------------------------------------------------------------- extraction
 
@@ -603,26 +705,28 @@
           {admitted :outcomes rejected :rejected facets :facets}
           (filter-outcomes text consolidated)
           fails (verify text (concat admitted rejected facets))
+          links (artefact-links text isecs admitted)
           served (vec (for [s isecs
                             :let [ws (get wants (:instance s))
-                                  os (filterv #(= (:instance s) (:instance %)) admitted)]]
+                                  ls (filterv #(= (:instance s) (:instance %)) links)]]
                         (if (nil? ws)
                           {:instance (:instance s)
                            :absent :no-cascade
-                           :cue (:lines s)
-                           :outcomes-stated-here (mapv :id os)}
+                           :cue (:lines s)}
                           {:instance (:instance s)
                            :wants ws
-                           :serves (mapv :id os)
-                           :basis :section-containment})))
-          unlinked (filterv #(nil? (:instance %)) admitted)
-          out (cond-> {:schema :wm/mission-outcomes-v4
+                           :serves (mapv (fn [l] {:outcome (:outcome l) :via (:via l)}) ls)
+                           :basis :shared-named-artefact})))
+          linked-ids (set (map :outcome links))
+          unlinked (filterv #(not (contains? linked-ids (:id %))) admitted)
+          out (cond-> {:schema :wm/mission-outcomes-v5
                        :offset-unit offset-unit
                        :extractor {:script "scripts/wm/extract-outcomes.clj"
                                    :cue-rules (mapv :id cue-rules)
                                    :consolidation :e1-same-instance-or-party-and-artefact
                                    :filter :e4-e5-four-clause-H-C-DEF-S2
-                                   :served-by-basis :section-containment}
+                                   :served-by-basis :shared-named-artefact
+                                   :coupling-artefacts (mapv :id coupling-artefacts)}
                        :mission {:path path :lines lines :sha256 (sha256 text)}
                        :sections-read (mapv #(select-keys % [:level :title :line]) hs)
                        :outcomes admitted
@@ -633,14 +737,15 @@
                                        :facets (count facets)}
                        :served-by served
                        :unlinked {:count (count unlinked)
-                                  :ids (mapv :id unlinked)
-                                  :absent :outside-instance-sections}
+                                  :outcomes (mapv (fn [o] {:outcome (:id o)
+                                                           :absent :no-shared-artefact})
+                                                  unlinked)}
                        :weighting {:absent :unstated
                                    :note "no line assigns a magnitude or compares two outcomes"}}
                 ref (assoc :reference-comparison (compare-reference text ref admitted)))]
       (cond
         (seq fails)
-        (do (pp/pprint {:schema :wm/mission-outcomes-v4
+        (do (pp/pprint {:schema :wm/mission-outcomes-v5
                         :offset-unit offset-unit
                         :refused :cue-does-not-resolve
                         :mission path

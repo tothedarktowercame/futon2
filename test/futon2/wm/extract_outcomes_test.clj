@@ -298,3 +298,168 @@
                                      :quote "**Do not** leave the old path alive." :whose :the-mission})))
       "clause 4: an imperative discharged by enactment"))
 
+
+;; ---------------------------------------------------------------- E6
+;; Served-by by shared named artefact (H-C-DEF §4), live-pinned at the same
+;; mission sha as the E4/E5 block. The 13 scorable reference mappings are
+;; mission-C.edn :served-by minus the 14th row (instance 8, :status
+;; :prospective -- no cascade, unscorable by its own note). Reference outcome
+;; names are translated to the extractor's ids at the pinned sha (o-1 =
+;; :vs-code-implementation-possible, o-2 = :second-implementation-is-cheap,
+;; o-3 = :joe-can-use-robs-work, o-4 = :rob-can-run-the-stack, o-5 =
+;; :no-drifting-forks, o-8 = :coupling-visible-to-tooling; verified by the
+;; :reference-comparison rows).
+
+(def artefact-links (f 'artefact-links))
+(def coupling-artefacts @(f 'coupling-artefacts))
+(def cascade-wants (f 'cascade-wants))
+
+(def cascade-dir "../futon3c/holes/labs/M-futon-seams/proto")
+
+(def reference-served-by
+  ;; [instance want outcome-id]: the 13 scorable mappings, ids at the pinned sha
+  [[4 :prefix-routing-retired :o-4]
+   [4 :caller-converted :o-2]
+   [4 :redirect-test :o-2]
+   [5 :protocol-declared :o-2]
+   [5 :impersonation-retired :o-4]
+   [5 :adapter-conformance-test :o-5]
+   [6 :one-authority :o-5]
+   [6 :one-authority :o-8]
+   [6 :flag-retired :o-5]
+   [7 :record-schema-declared :o-1]
+   [7 :record-schema-declared :o-2]
+   [7 :writers-converted :o-5]
+   [7 :divergence-test :o-5]])
+
+(defn mission-served
+  "The -main pipeline over the pinned mission WITH cascades: admitted outcomes,
+   artefact-links, and the served-by rows as -main emits them."
+  [text]
+  (let [hs (headings text)
+        isecs (instance-sections hs (count (str/split-lines text)))
+        section-of (fn [l] (:instance (first (filter #(<= (first (:lines %)) l (second (:lines %))) isecs))))
+        cs (mapv #(assoc %1 :id (keyword (str "o-" (inc %2))))
+                 (consolidate (extract text section-of {}))
+                 (range))
+        {:keys [outcomes]} (filter-outcomes text cs)
+        wants (cascade-wants cascade-dir)
+        links (artefact-links text isecs outcomes)
+        served (vec (for [s isecs
+                          :let [ws (get wants (:instance s))
+                                ls (filterv #(= (:instance s) (:instance %)) links)]]
+                      (if (nil? ws)
+                        {:instance (:instance s) :absent :no-cascade}
+                        {:instance (:instance s)
+                         :wants ws
+                         :serves (mapv (fn [l] {:outcome (:outcome l) :via (:via l)}) ls)
+                         :basis :shared-named-artefact})))]
+    {:outcomes outcomes :links links :served served}))
+
+(deftest e6-served-by-links
+  (let [text (slurp mission-path)
+        _ (is (= mission-sha-pinned (sha256 text)))
+        {:keys [links]} (mission-served text)
+        link-set (set (map (juxt :instance :outcome) links))]
+    (is (= #{[4 :o-4] [5 :o-2] [5 :o-5] [6 :o-5] [6 :o-8] [7 :o-1] [7 :o-2] [7 :o-5]}
+           link-set)
+        "exactly the shared-artefact links, one per (instance, outcome)")
+    (doseq [{:keys [via]} links]
+      (is (some #(= (:artefact via) (:id %)) coupling-artefacts)
+          "every link names a predeclared coupling artefact")
+      (is (keyword? (:direction via)) "every mention sentence carried a direction verb")
+      (let [entry (first (filter #(= (:artefact via) (:id %)) coupling-artefacts))
+            mention-sentence (apply cp-subs text (:want-span via))
+            obstacle-quote (apply cp-subs text (:outcome-span via))]
+        (is (some #(re-find % mention-sentence) (:mention-res entry))
+            ":want-span resolves to a sentence naming the artefact")
+        (is (some #(re-find % obstacle-quote) (:obstacle-res entry))
+            ":outcome-span resolves to the cue carrying the artefact as obstacle")))))
+
+(deftest e6-no-drifting-forks-five-links
+  ;; All five reference mappings to :no-drifting-forks (:o-5) are reproduced,
+  ;; each via a named artefact.
+  (let [text (slurp mission-path)
+        {:keys [served]} (mission-served text)
+        o5-links (into {} (keep (fn [row]
+                                  (when-let [sv (first (filter #(= :o-5 (:outcome %)) (:serves row)))]
+                                    [(:instance row) (get-in sv [:via :artefact])]))
+                                served))]
+    (is (= {5 :second-implementation-kept-in-sync
+            6 :second-implementation-kept-in-sync
+            7 :second-implementation-kept-in-sync}
+           o5-links)
+        "instances 5, 6 and 7 each link :o-5 via :second-implementation-kept-in-sync")
+    (let [o5-mappings (filter #(= :o-5 (nth % 2)) reference-served-by)
+          reproduced (filter (fn [[i _w _o]] (contains? o5-links i)) o5-mappings)]
+      (is (= 5 (count reproduced))
+          "all five :no-drifting-forks mappings (5/:adapter-conformance-test, 6/:one-authority, 6/:flag-retired, 7/:writers-converted, 7/:divergence-test)"))))
+
+(deftest e6-former-containment-false-positives-get-no-link
+  ;; At HEAD's section-containment basis, instance 4's row served :o-4, which
+  ;; at want granularity linked :caller-converted and :redirect-test to :o-4 --
+  ;; the reference maps both to :o-2. Under the artefact basis there are no
+  ;; per-want link claims at all (:via names an artefact, never a want), and
+  ;; instance 4 links no outcome its section names no artefact for.
+  (let [text (slurp mission-path)
+        {:keys [served]} (mission-served text)
+        row4 (first (filter #(= 4 (:instance %)) served))]
+    (is (= [:o-4] (mapv :outcome (:serves row4)))
+        "instance 4 links :o-4 only; :caller-converted/:redirect-test get no link to their reference outcome :o-2")
+    (doseq [row served, sv (:serves row)]
+      (is (not (contains? (:via sv) :want))
+          "no per-want link is claimed: per-want lexical grounding was dropped as too fragile"))))
+
+(deftest e6-instance-8-no-cascade-and-joe-unlinked
+  (let [text (slurp mission-path)
+        {:keys [links served]} (mission-served text)
+        linked (set (map :outcome links))]
+    (is (= {:instance 8 :absent :no-cascade}
+           (first (filter #(= 8 (:instance %)) served)))
+        "instance 8 stays {:absent :no-cascade}")
+    (is (not (contains? linked :o-3))
+        ":joe-can-use-robs-work (:o-3) is unlinked {:absent :no-shared-artefact}: no coupling-artefact entry names it and instance 8 has no cascade")))
+
+(deftest e6-reference-recall
+  ;; Counting method: a reference mapping (i, w, o) is reproduced when instance
+  ;; i's served-by row links outcome o (all wants of i link, per the basis).
+  (let [text (slurp mission-path)
+        {:keys [served]} (mission-served text)
+        links (into #{} (for [row served, sv (:serves row)] [(:instance row) (:outcome sv)]))
+        hits (filterv (fn [[i _w o]] (contains? links [i o])) reference-served-by)
+        recall (str (count hits) "/" (count reference-served-by))]
+    (println "E6 served-by reference recall:" recall)
+    (is (>= (count hits) 3)
+        (str "recall " recall " is at least the measured 3/13 containment baseline"))
+    (is (= 10 (count hits)) "the design's expected 10/13")
+    ;; the three honest misses, asserted absent -- not forced to link
+    (is (not (contains? links [4 :o-2])) "miss: 4/:caller-converted, 4/:redirect-test -> :o-2 (no artefact mention in section 4)")
+    (is (not (contains? links [5 :o-4])) "miss: 5/:impersonation-retired -> :o-4 (section 5 does not name provider-in-id)")))
+
+(deftest e6-no-direction-verb-no-link
+  ;; Bad case: a section naming the artefact without treating it as acted on
+  ;; (no direction verb) does not link -- presence is not a serve.
+  (let [text (str "### 4. Prompts\n\n"
+                  "With hardcoded code you can grep for the literal; with a hardcoded prompt you must match natural language at runtime.\n\n"
+                  "The hardcoded prompt sits in the call site, as it always has.\n")
+        hs (headings text)
+        isecs (instance-sections hs (count (str/split-lines text)))
+        section-of (fn [l] (:instance (first (filter #(<= (first (:lines %)) l (second (:lines %))) isecs))))
+        cs (mapv #(assoc %1 :id (keyword (str "o-" (inc %2))))
+                 (consolidate (extract text section-of {}))
+                 (range))
+        {:keys [outcomes]} (filter-outcomes text cs)]
+    (is (= 1 (count outcomes)) "the contrast outcome is admitted")
+    (is (= [] (artefact-links text isecs outcomes))
+        "the section names the artefact but carries no direction verb: no link")
+    (let [text2 (str text "\nThe intended end state is the abstract path absorbing the hardcoded one.\n")
+          hs2 (headings text2)
+          isecs2 (instance-sections hs2 (count (str/split-lines text2)))
+          section-of2 (fn [l] (:instance (first (filter #(<= (first (:lines %)) l (second (:lines %))) isecs2))))
+          cs2 (mapv #(assoc %1 :id (keyword (str "o-" (inc %2))))
+                    (consolidate (extract text2 section-of2 {}))
+                    (range))
+          outcomes2 (:outcomes (filter-outcomes text2 cs2))
+          links2 (artefact-links text2 isecs2 outcomes2)]
+      (is (= 1 (count links2)) "adding a direction-verb mention links it")
+      (is (= :absorb (:direction (:via (first links2))))))))
