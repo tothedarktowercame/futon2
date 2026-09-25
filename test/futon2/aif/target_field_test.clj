@@ -3,7 +3,8 @@
   like ~/code (primary checkouts with a .git directory). Texts are read from
   disk, observations are stubbed, and the interpretation store is a temp
   directory, so the test reads nothing live and writes nothing shared."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.mission-criteria :as mc]
@@ -128,3 +129,21 @@
     (is (= [{:failure :exclusion-without-what-would-make-feasible :targets ["T-plain"]}]
            (tf/check-field bare)))
     (is (seq (tf/check-field (assoc fld :chosen "M-shaped"))) "a step-1 field names no choice")))
+
+(deftest live-field-futon2-7a5f6c0b
+  ;; the one live read (futon2 7a5f6c0b, futon3c 7466251c; heads recorded in
+  ;; the fixture): 495 considered, none feasible. Every live mission fails the
+  ;; stated lifecycle test; the only mission that meets it, M-futon-seams, is
+  ;; COMPLETE and so not proposed.
+  (let [r (clojure.edn/read-string (slurp "test/fixtures/target-field/target-field@futon2-7a5f6c0b.edn"))
+        f (get-in r [:decision :target-field])
+        ex (by-target (:exclusions f))]
+    (is (= [] (tf/check-field f)))
+    (is (= {:considered 495 :feasible 0 :excluded 495
+            :considered-by-kind {:mission 217 :ticket 30 :excursion 248}
+            :excluded-by-reason {:needs-interpretation 4 :needs-reading 274 :not-lifecycle-shaped 217}}
+           (tf/counts f)))
+    (is (= :not-lifecycle-shaped (get-in ex ["M-f11-find-production-successor" :reason])))
+    (is (= "futon3c" (:repo (first (filter #(= "M-autoclock-in" (:target %)) (:considered f))))))
+    (is (= 15 (get-in ex ["M-autoclock-in" :details :shape :phase-headings])))
+    (is (not-any? #(= "M-futon-seams" (:target %)) (:considered f)))))
