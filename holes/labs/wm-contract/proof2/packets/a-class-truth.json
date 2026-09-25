@@ -1,0 +1,1543 @@
+[
+ {
+  "id": "c3-t01",
+  "class": "C3",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "9d5525ee584515226d120497e718916da1bf8a45",
+   "path": "src/futon2/aif/observation_checks.clj"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "git ls-tree 9d5525ee58 -- src/futon2/aif/observation_checks.clj: nonempty"
+ },
+ {
+  "id": "c3-t02",
+  "class": "C3",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "b81afd97195a93f69cd6ac8fcd98a3343fe656eb",
+   "path": "src/futon2/aif/construction.clj"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "git ls-tree b81afd9719 -- src/futon2/aif/construction.clj: nonempty"
+ },
+ {
+  "id": "c3-t03",
+  "class": "C3",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/check_error_rates.clj"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "git ls-tree 2af1ff5ec1 -- src/futon2/aif/check_error_rates.clj: nonempty"
+ },
+ {
+  "id": "c3-t04",
+  "class": "C3",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "resources/wm/observation-contract.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "git ls-tree 2af1ff5ec1 -- resources/wm/observation-contract.edn: nonempty"
+ },
+ {
+  "id": "c3-t05",
+  "class": "C3",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "AGENTS.md"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "git ls-tree 2af1ff5ec1 -- AGENTS.md: nonempty"
+ },
+ {
+  "id": "c3-t06",
+  "class": "C3",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon3c",
+   "sha": "61ab13eb7c7507e7f3aac38cc7f85352d1b52e94",
+   "path": "src/futon3c/test_registry.clj"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "git ls-tree 61ab13eb7c -- src/futon3c/test_registry.clj: nonempty"
+ },
+ {
+  "id": "c3-t07",
+  "class": "C3",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon3c",
+   "sha": "61ab13eb7c7507e7f3aac38cc7f85352d1b52e94",
+   "path": "deps.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "git ls-tree 61ab13eb7c -- deps.edn: nonempty"
+ },
+ {
+  "id": "c3-t08",
+  "class": "C3",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/TokenObservation.lean"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "git ls-tree 5fe0371169 -- DarkTower/WarMachine/TokenObservation.lean: nonempty"
+ },
+ {
+  "id": "c3-t09",
+  "class": "C3",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   "path": "DarkTower/WarMachine/EpistemicValue.lean"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "git ls-tree 3b19f6225e -- DarkTower/WarMachine/EpistemicValue.lean: nonempty"
+ },
+ {
+  "id": "c3-t10",
+  "class": "C3",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "test/futon2/aif/observation_checks_test.clj"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "git ls-tree 2af1ff5ec1 -- test/futon2/aif/observation_checks_test.clj: nonempty"
+ },
+ {
+  "id": "c3-f01",
+  "class": "C3",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/find_expectation.clj"
+  },
+  "note": "file deleted at 6e531aae; stale by history",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "git ls-tree 2af1ff5ec1 -- src/futon2/aif/find_expectation.clj: empty"
+ },
+ {
+  "id": "c3-f02",
+  "class": "C3",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "77cf311af16c6b5ab9d22958072961553f9e6395",
+   "path": "src/futon2/aif/construction.clj"
+  },
+  "note": "right path, sha one before the file was added",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "git ls-tree 77cf311af1 -- src/futon2/aif/construction.clj: empty"
+ },
+ {
+  "id": "c3-f03",
+  "class": "C3",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/observation_checks.cljc"
+  },
+  "note": "right basename, wrong extension",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "git ls-tree 2af1ff5ec1 -- src/futon2/aif/observation_checks.cljc: empty"
+ },
+ {
+  "id": "c3-f04",
+  "class": "C3",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/Observation_checks.clj"
+  },
+  "note": "case-flipped filename",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "git ls-tree 2af1ff5ec1 -- src/futon2/aif/Observation_checks.clj: empty"
+ },
+ {
+  "id": "c3-f05",
+  "class": "C3",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon3c/test_registry.clj"
+  },
+  "note": "real path, wrong repo (lives in futon3c)",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "git ls-tree 2af1ff5ec1 -- src/futon3c/test_registry.clj: empty"
+ },
+ {
+  "id": "c3-f06",
+  "class": "C3",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/ContractEmitter.lean"
+  },
+  "note": "Lean module deleted at c4203e06c5",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "git ls-tree 5fe0371169 -- DarkTower/WarMachine/ContractEmitter.lean: empty"
+ },
+ {
+  "id": "c3-f07",
+  "class": "C3",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "b81afd97195a93f69cd6ac8fcd98a3343fe656eb",
+   "path": "src/futon2/aif/check_error_rates.clj"
+  },
+  "note": "file exists at HEAD but not at this older sha",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "git ls-tree b81afd9719 -- src/futon2/aif/check_error_rates.clj: empty"
+ },
+ {
+  "id": "c3-f08",
+  "class": "C3",
+  "truth": false,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/definitely_absent_xyz.clj"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "git ls-tree 2af1ff5ec1 -- src/futon2/aif/definitely_absent_xyz.clj: empty"
+ },
+ {
+  "id": "c3-f09",
+  "class": "C3",
+  "truth": false,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/NoSuchModule.lean"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "git ls-tree 5fe0371169 -- DarkTower/WarMachine/NoSuchModule.lean: empty"
+ },
+ {
+  "id": "c3-f10",
+  "class": "C3",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/ants/aif/affect.clj"
+  },
+  "note": "ants tree deleted at 611d7442",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "git ls-tree 2af1ff5ec1 -- src/ants/aif/affect.clj: empty"
+ },
+ {
+  "id": "c4-t01",
+  "class": "C4",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/TokenObservation.lean",
+   "decl": "theorem tokenLikelihood_nonneg"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-t02",
+  "class": "C4",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/TokenObservation.lean",
+   "decl": "def tokenLikelihood"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-t03",
+  "class": "C4",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/TokenObservation.lean",
+   "decl": "theorem tokenLikelihood_checkable"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-t04",
+  "class": "C4",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/TokenObservation.lean",
+   "decl": "structure AdjudicationRates"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-t05",
+  "class": "C4",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3b19f6225e9dc5cf4cd645e230bb427b003b431f",
+   "path": "DarkTower/WarMachine/EpistemicValue.lean",
+   "decl": "theorem fixture_check_strictly_better"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-t06",
+  "class": "C4",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/observation_checks.clj",
+   "decl": "(defn check-path-exists"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-t07",
+  "class": "C4",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/observation_checks.clj",
+   "decl": "(defn check-registered-run"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-t08",
+  "class": "C4",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/observation_checks.clj",
+   "decl": "(def repo-root"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-t09",
+  "class": "C4",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/check_error_rates.clj",
+   "decl": "(defn measured-rates"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-t10",
+  "class": "C4",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon3c",
+   "sha": "61ab13eb7c7507e7f3aac38cc7f85352d1b52e94",
+   "path": "src/futon3c/test_registry.clj",
+   "decl": "(defn check-record!"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-f01",
+  "class": "C4",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/TokenObservation.lean",
+   "decl": "theorem tokenLikelihood"
+  },
+  "note": "prefix of real decls; underscore is not a delimiter",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-f02",
+  "class": "C4",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/MixtureJointSeparationWitness.lean",
+   "decl": "theorem tokenLikelihood_fin2"
+  },
+  "note": "decl exists but the line is headed by 'private'",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-f03",
+  "class": "C4",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/ExactBeliefTrajectory.lean",
+   "decl": "theorem tokenLikelihood_nonneg"
+  },
+  "note": "real decl, wrong file: only applied mid-line here",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-f04",
+  "class": "C4",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/ContractEmitter.lean",
+   "decl": "def emitContract"
+  },
+  "note": "file deleted at c4203e06c5",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "file absent at 5fe0371169"
+ },
+ {
+  "id": "c4-f05",
+  "class": "C4",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "48d498164ea1b5ab4dbcdf9feb397a10bad39191",
+   "path": "src/futon2/aif/observation_checks.clj",
+   "decl": "(defn check-registered-run"
+  },
+  "note": "decl added in 9d5525ee; queried at its parent",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-f06",
+  "class": "C4",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "resources/wm/observation-contract.edn",
+   "decl": "check-path-exists"
+  },
+  "note": "named only as a :check-fn value mid-line",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-f07",
+  "class": "C4",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/observation_checks.clj",
+   "decl": "(defn check"
+  },
+  "note": "prefix of real defns; '-' is not a delimiter",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-f08",
+  "class": "C4",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "2af1ff5ec1032b6147a395a1cf500d73b6cbb45a",
+   "path": "src/futon2/aif/observation_checks.clj",
+   "decl": "defn check-path-exists"
+  },
+  "note": "missing the leading paren; no line starts with the bare symbol",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-f09",
+  "class": "C4",
+  "truth": false,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/TokenObservation.lean",
+   "decl": "theorem no_such_theorem"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c4-f10",
+  "class": "C4",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/TokenObservation.lean",
+   "decl": "theorem tokenLikelihood_noisy"
+  },
+  "note": "prefix of tokenLikelihood_noisy_miss/_hit",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "line scan over git show output"
+ },
+ {
+  "id": "c5-t01",
+  "class": "C5",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3726659d8487ee9a3927161022f7c8dd20ec93c7",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "entry": "wm-machine-observe"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "1 loci resolve"
+ },
+ {
+  "id": "c5-t02",
+  "class": "C5",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3726659d8487ee9a3927161022f7c8dd20ec93c7",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "entry": "wm-machine-belief-state"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "1 loci resolve"
+ },
+ {
+  "id": "c5-t03",
+  "class": "C5",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3726659d8487ee9a3927161022f7c8dd20ec93c7",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "entry": "wm-machine-precision"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "1 loci resolve"
+ },
+ {
+  "id": "c5-t04",
+  "class": "C5",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3726659d8487ee9a3927161022f7c8dd20ec93c7",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "entry": "wm-token-state"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "3 loci resolve"
+ },
+ {
+  "id": "c5-t05",
+  "class": "C5",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3726659d8487ee9a3927161022f7c8dd20ec93c7",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "entry": "wm-cascade-transition"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "8 loci resolve"
+ },
+ {
+  "id": "c5-t06",
+  "class": "C5",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "52d65169223ebb8a18cf26d19f2ef0f7e95b6ea9",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json",
+   "entry": "wm-token-observation"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "2 loci resolve"
+ },
+ {
+  "id": "c5-t07",
+  "class": "C5",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "52d65169223ebb8a18cf26d19f2ef0f7e95b6ea9",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json",
+   "entry": "wm-machine-depth"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "1 loci resolve"
+ },
+ {
+  "id": "c5-t08",
+  "class": "C5",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "52d65169223ebb8a18cf26d19f2ef0f7e95b6ea9",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json",
+   "entry": "wm-policy-rollout"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "2 loci resolve"
+ },
+ {
+  "id": "c5-t09",
+  "class": "C5",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "52d65169223ebb8a18cf26d19f2ef0f7e95b6ea9",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json",
+   "entry": "wm-token-preference"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "5 loci resolve"
+ },
+ {
+  "id": "c5-t10",
+  "class": "C5",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "52d65169223ebb8a18cf26d19f2ef0f7e95b6ea9",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json",
+   "entry": "wm-exact-belief"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "2 loci resolve"
+ },
+ {
+  "id": "c5-f01",
+  "class": "C5",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3726659d8487ee9a3927161022f7c8dd20ec93c7",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "entry": "wm-machine-action"
+  },
+  "note": "locus futon2/src/futon2/aif/policy.clj:672 stale: policy.clj has 525 lines at HEAD",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "locus futon2/src/futon2/aif/policy.clj:672 does not resolve at futon2 HEAD (lines=525)"
+ },
+ {
+  "id": "c5-f02",
+  "class": "C5",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "52d65169223ebb8a18cf26d19f2ef0f7e95b6ea9",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json",
+   "entry": "wm-machine-action"
+  },
+  "note": "same stale locus, one bundle revision later",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "locus futon2/src/futon2/aif/policy.clj:672 does not resolve at futon2 HEAD (lines=525)"
+ },
+ {
+  "id": "c5-f03",
+  "class": "C5",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-16-r10/machine-contracts.json",
+   "entry": "wm-machine-action"
+  },
+  "note": "same stale locus, oldest revision carrying it",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "locus futon2/src/futon2/aif/policy.clj:672 does not resolve at futon2 HEAD (lines=525)"
+ },
+ {
+  "id": "c5-f04",
+  "class": "C5",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3726659d8487ee9a3927161022f7c8dd20ec93c7",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "entry": "wm-machine-observ"
+  },
+  "note": "prefix of a real contract-id",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "contract-id absent from bundle"
+ },
+ {
+  "id": "c5-f05",
+  "class": "C5",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3726659d8487ee9a3927161022f7c8dd20ec93c7",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "entry": "WM-machine-observe"
+  },
+  "note": "case-flipped real contract-id",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "contract-id absent from bundle"
+ },
+ {
+  "id": "c5-f06",
+  "class": "C5",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3726659d8487ee9a3927161022f7c8dd20ec93c7",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "entry": "wm-machine-observe "
+  },
+  "note": "trailing space on a real contract-id",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "contract-id absent from bundle"
+ },
+ {
+  "id": "c5-f07",
+  "class": "C5",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r13/machine-contracts.json",
+   "entry": "wm-machine-action"
+  },
+  "note": "same stale locus in r13",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "locus futon2/src/futon2/aif/policy.clj:672 does not resolve at futon2 HEAD (lines=525)"
+ },
+ {
+  "id": "c5-f08",
+  "class": "C5",
+  "truth": false,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "3726659d8487ee9a3927161022f7c8dd20ec93c7",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r14/machine-contracts.json",
+   "entry": "wm-no-such-contract"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "contract-id absent from bundle"
+ },
+ {
+  "id": "c5-f09",
+  "class": "C5",
+  "truth": false,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "52d65169223ebb8a18cf26d19f2ef0f7e95b6ea9",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r15/machine-contracts.json",
+   "entry": "wm-totally-absent"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "contract-id absent from bundle"
+ },
+ {
+  "id": "c5-f10",
+  "class": "C5",
+  "truth": false,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "bundle-path": "DarkTower/WarMachine/machine-contracts-2026-09-17-r13/machine-contracts.json",
+   "entry": "wm-does-not-exist"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "contract-id absent from bundle"
+ },
+ {
+  "id": "c6-t01",
+  "class": "C6",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT01.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "witness commit 9d5525ee58 resolves, entry present"
+ },
+ {
+  "id": "c6-t02",
+  "class": "C6",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT02.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "witness commit b81afd9719 resolves, entry present"
+ },
+ {
+  "id": "c6-t03",
+  "class": "C6",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT03.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "witness commit 3b19f6225e resolves, entry present"
+ },
+ {
+  "id": "c6-t04",
+  "class": "C6",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT04.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "witness commit 9d5525ee58 resolves"
+ },
+ {
+  "id": "c6-t05",
+  "class": "C6",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT05.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "witness commit 61ab13eb7c resolves, entry present"
+ },
+ {
+  "id": "c6-t06",
+  "class": "C6",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT06.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "witness commit 5fe0371169 resolves, entry present"
+ },
+ {
+  "id": "c6-t07",
+  "class": "C6",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT07.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "witness commit 2af1ff5ec1 resolves, entry present"
+ },
+ {
+  "id": "c6-t08",
+  "class": "C6",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT08.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "witness commit 2af1ff5ec1 resolves, entry present"
+ },
+ {
+  "id": "c6-t09",
+  "class": "C6",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT09.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "witness commit 5fe0371169 resolves"
+ },
+ {
+  "id": "c6-t10",
+  "class": "C6",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wT10.edn"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "witness commit b81afd9719 resolves"
+ },
+ {
+  "id": "c6-f01",
+  "class": "C6",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF1.edn"
+  },
+  "note": "witness resolves, but :entry path never existed at the referenced commit",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "witness entry absent at 9d5525ee58"
+ },
+ {
+  "id": "c6-f02",
+  "class": "C6",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF2.edn"
+  },
+  "note": ":entry added only after the referenced sha (right path, wrong sha)",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "witness entry absent at 77cf311af1"
+ },
+ {
+  "id": "c6-f03",
+  "class": "C6",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF3.edn"
+  },
+  "note": ":entry (ContractEmitter.lean) deleted before the referenced commit",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "witness entry absent at 5fe0371169"
+ },
+ {
+  "id": "c6-f04",
+  "class": "C6",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF4.edn"
+  },
+  "note": ":entry exists at HEAD today but not at the referenced older commit",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "witness entry absent at b81afd9719"
+ },
+ {
+  "id": "c6-f05",
+  "class": "C6",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wit-absent.edn"
+  },
+  "note": "witness file absent (right directory, file never existed): observed false",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "witness file absent"
+ },
+ {
+  "id": "c6-f06",
+  "class": "C6",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF8.edn"
+  },
+  "note": ":entry deleted from futon2 before the referenced commit",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "witness entry absent at 2af1ff5ec1"
+ },
+ {
+  "id": "c6-f07",
+  "class": "C6",
+  "truth": false,
+  "near-miss?": false,
+  "locator": {
+   "repo": "mathlib4",
+   "sha": "5fe0371169993c45d18c11050274d8e78c81d7be",
+   "path": "DarkTower/WarMachine/NoWitness.edn"
+  },
+  "note": "witness file absent, wrong repo path entirely",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "witness file absent"
+ },
+ {
+  "id": "c6-f08",
+  "class": "C6",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF5.edn"
+  },
+  "note": "witness carries a made-up 40-hex sha: typed refusal",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "witness sha unresolvable in futon2 (refusal expected)"
+ },
+ {
+  "id": "c6-f09",
+  "class": "C6",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF6.edn"
+  },
+  "note": "witness names repo futon2 with a mathlib4 commit sha: typed refusal",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "witness sha unresolvable in futon2 (refusal expected)"
+ },
+ {
+  "id": "c6-f10",
+  "class": "C6",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "sha": "HEAD",
+   "path": "holes/labs/wm-contract/proof2/packets/a-class-fixtures/wF7.edn",
+   "require-entry": true
+  },
+  "note": ":require-entry set and witness has no :entry: typed refusal",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "entry mandatory but absent (refusal expected)"
+ },
+ {
+  "id": "c8-t01",
+  "class": "C8",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.publication-unreachable-test",
+   "config": "test-registry-6e95807d8f673dd8fbba7ca9e9fdad60fda29689b3897ae0304fba72475ba87d"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "warrant test-registry-6e95807d8f\u2026 current, matched, 0 failures over 3 pinned paths"
+ },
+ {
+  "id": "c8-t02",
+  "class": "C8",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.observation-checks-test",
+   "config": "test-registry-44ddff9fdf7fd7caa1c82418fe99bffdebf7a532bc44810da03cabff4c20ebfe"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "warrant test-registry-44ddff9fdf\u2026 current, matched, 0 failures over 2 pinned paths"
+ },
+ {
+  "id": "c8-t03",
+  "class": "C8",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.publication-unreachable-test",
+   "config": "test-registry-c1b5c778f044d569928068781b887b547437b2f251fd60b1458076064c3ae9d7"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "warrant test-registry-c1b5c778f0\u2026 current, matched, 0 failures over 3 pinned paths"
+ },
+ {
+  "id": "c8-t04",
+  "class": "C8",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.repair-discharge-context-test",
+   "config": "test-registry-ce4ddaafc032a6c0e6fa55a0a8fdbc56e36fc849fb7da0bcfccbdb6150892cf9"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "warrant test-registry-ce4ddaafc0\u2026 current, matched, 0 failures over 2 pinned paths"
+ },
+ {
+  "id": "c8-t05",
+  "class": "C8",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.flight-test",
+   "config": "test-registry-fc82dfbfd1ff6fb5a347001d2ac3c9fc24733780afa5744d4fcadf43e971781d"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "warrant test-registry-fc82dfbfd1\u2026 current, matched, 0 failures over 2 pinned paths"
+ },
+ {
+  "id": "c8-t06",
+  "class": "C8",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.full-loop-discharge-test",
+   "config": "test-registry-c1990c6b81924524fea13f248dbe813df3bda732e5e3dabb5446ed69561b2d9f"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "warrant test-registry-c1990c6b81\u2026 current, matched, 0 failures over 2 pinned paths"
+ },
+ {
+  "id": "c8-t07",
+  "class": "C8",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.repair-discharge-test",
+   "config": "test-registry-9ffcc188e074e6d3bf69e3a6d752d9982857cc426023afe6b3ef973d51361c4a"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "warrant test-registry-9ffcc188e0\u2026 current, matched, 0 failures over 6 pinned paths"
+ },
+ {
+  "id": "c8-t08",
+  "class": "C8",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.check-error-rates-test",
+   "config": "test-registry-c4ad4223bb51afd9e7f1c2925f98f7c5495a72286543dae797425e08d689b331"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "warrant test-registry-c4ad4223bb\u2026 current, matched, 0 failures over 2 pinned paths"
+ },
+ {
+  "id": "c8-t09",
+  "class": "C8",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.b-update-carrier-test",
+   "config": "test-registry-75592c26cd6c6fff9e31c8ae9a30c8846f1ebc13c7aa232a50bc1cc65f19819f"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "warrant test-registry-75592c26cd\u2026 current, matched, 0 failures over 2 pinned paths"
+ },
+ {
+  "id": "c8-t10",
+  "class": "C8",
+  "truth": true,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.token-outcome-pair-test",
+   "config": "test-registry-c7fd8575291d7c6ba06313921d779307cee22bad19bd35e4fe0229c75616819e"
+  },
+  "note": null,
+  "expect": null,
+  "derived-truth": true,
+  "truth-how": "warrant test-registry-c7fd857529\u2026 current, matched, 0 failures over 3 pinned paths"
+ },
+ {
+  "id": "c8-f01",
+  "class": "C8",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.publication-unreachable-test",
+   "config": "test-registry-adef81a8e243838168e7a350717cbe8d641c39ecf665d87d7065a907551ca17c"
+  },
+  "note": "registry record is real but its run recorded 3 failures",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "not a warrant"
+ },
+ {
+  "id": "c8-f02",
+  "class": "C8",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.repair-discharge-context-test",
+   "config": "test-registry-c6c35e13ece1706471a8e346f06304502fd044cea50d00029df14655e2bb7b2b"
+  },
+  "note": "run recorded 9 failures and 9 errors",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "not a warrant"
+ },
+ {
+  "id": "c8-f03",
+  "class": "C8",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.registry-orthogonality-test",
+   "config": "test-registry-8e83660393ee97bc943525a4a258b474a1127c3581c7ef6fdd3842cfb43ebcf0"
+  },
+  "note": "pinned code path moved since the run: src/futon2/aif/observation_checks.clj",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "content moved: src/futon2/aif/observation_checks.clj"
+ },
+ {
+  "id": "c8-f04",
+  "class": "C8",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.observation-checks-test",
+   "config": "test-registry-b0e805c5343ef7a6e4d2832b81d97ae82aeb41b8480a857a7995940ed630ae8b"
+  },
+  "note": "pinned code and test paths moved: src/futon2/aif/observation_checks.clj, test/futon2/aif/observation_checks_test.clj",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "content moved: src/futon2/aif/observation_checks.clj, test/futon2/aif/observation_checks_test.clj"
+ },
+ {
+  "id": "c8-f05",
+  "class": "C8",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.mission-reading-test",
+   "config": "test-registry-ee621414fc2b7d068d72e3e292442f6ed1310994bfcb777f4a841b7ae08403f4"
+  },
+  "note": "pinned code path moved: src/futon2/aif/flight.clj, src/futon2/aif/flight_runner.clj, src/futon2/aif/mission_reading.clj, test/futon2/aif/mission_reading_test.clj",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "content moved: src/futon2/aif/flight.clj, src/futon2/aif/flight_runner.clj, src/futon2/aif/mission_reading.clj, test/futon2/aif/mission_reading_test.clj"
+ },
+ {
+  "id": "c8-f06",
+  "class": "C8",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.flight-test",
+   "config": "test-registry-b2661654bb0445df65e43de3061a38a2c11d5acadbcf9de4fc66c5f7839a3e19"
+  },
+  "note": "pinned code path moved: src/futon2/aif/flight.clj",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "content moved: src/futon2/aif/flight.clj"
+ },
+ {
+  "id": "c8-f07",
+  "class": "C8",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.flight-test",
+   "config": "test-registry-6e95807d8f673dd8fbba7ca9e9fdad60fda29689b3897ae0304fba72475ba87d"
+  },
+  "note": "warrant is real and current but for a different namespace (namespace-mismatch)",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "namespace-mismatch: record ran futon2.aif.publication-unreachable-test"
+ },
+ {
+  "id": "c8-f08",
+  "class": "C8",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.observation-checks-test",
+   "config": "test-registry-c4ad4223bb51afd9e7f1c2925f98f7c5495a72286543dae797425e08d689b331"
+  },
+  "note": "warrant is for check-error-rates-test, queried as observation-checks-test",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "namespace-mismatch: record ran futon2.aif.check-error-rates-test"
+ },
+ {
+  "id": "c8-f09",
+  "class": "C8",
+  "truth": false,
+  "near-miss?": false,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.flight-test",
+   "config": "test-registry-0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "note": "well-formed record id that the registry does not hold (:absent)",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "registry holds no such record (:absent)"
+ },
+ {
+  "id": "c8-f10",
+  "class": "C8",
+  "truth": false,
+  "near-miss?": true,
+  "locator": {
+   "repo": "futon2",
+   "namespace": "futon2.aif.repair-discharge-context-test",
+   "config": "test-registry-e0ee3ff6e5cf91c8d6b42ad59d44b0876a72b9ce2bc32edae0b30f64eecb1db7"
+  },
+  "note": "run recorded 9 failures and 9 errors (second namespace)",
+  "expect": null,
+  "derived-truth": false,
+  "truth-how": "not a warrant"
+ }
+]
