@@ -448,3 +448,21 @@
     ;; a record with neither shape is a typed unknown, not a failure
     (is (= :results-shape-unknown
            (get-in (lookup (assoc lean :results {:exit 0})) [:evidence :reason])))))
+
+(deftest c8-command-elements-must-be-nonblank-strings
+  ;; review bad case (claude-8, 2026-09-25, of d5320918): a command with a
+  ;; keyword, a nested vector or a blank element was sent to the registry as
+  ;; a key no run can carry and read false :no-entry forever. A malformed
+  ;; command is a locator refusal naming the offending elements.
+  (binding [oc/*registry-latest* (fn [_ _] (throw (ex-info "registry must not be asked" {})))]
+    (doseq [[command offending] [[["lake" :build "X"] [:build]]
+                                 [[["bb"] "g.clj"] [["bb"]]]
+                                 [["bb" ""] [""]]]]
+      (let [r (oc/check-registered-run {:repo "futon3c" :command command})]
+        (is (= :no-locator (:kind r)) (pr-str command))
+        (is (= :command-elements-must-be-nonblank-strings (get-in r [:data :rule])))
+        (is (= offending (get-in r [:data :offending])))))
+    ;; a well-formed argv still goes through to the registry
+    (binding [oc/*registry-latest* (fn [_ _] :absent)]
+      (is (= :no-entry (get-in (oc/check-registered-run {:repo "futon3c" :command ["bb" "g.clj"]})
+                               [:evidence :reason]))))))

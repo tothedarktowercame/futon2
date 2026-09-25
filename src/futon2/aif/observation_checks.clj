@@ -402,9 +402,20 @@
       (when-not (contains? m :config)
         (let [has-ns (boolean (and (string? namespace) (not (str/blank? namespace))))
               has-cmd (c8-command-present? command)]
-          (when (or (and has-ns has-cmd) (not (or has-ns has-cmd)))
-            (refuse :no-locator {:check :C8 :rule :exactly-one-of-namespace-or-command
-                                 :namespace? has-ns :command? has-cmd}))))
+          (or
+           (when (or (and has-ns has-cmd) (not (or has-ns has-cmd)))
+             (refuse :no-locator {:check :C8 :rule :exactly-one-of-namespace-or-command
+                                  :namespace? has-ns :command? has-cmd}))
+           ;; a command is an argv: every element a non-blank string. Anything
+           ;; else (a keyword, a nested vector, "") would be sent to the
+           ;; registry as a key no run can ever carry and read false
+           ;; :no-entry forever; that is a malformed locator, refused as one
+           ;; (claude-8 review of d5320918, 2026-09-25).
+           (when has-cmd
+             (let [bad (vec (remove #(and (string? %) (not (str/blank? %))) command))]
+               (when (seq bad)
+                 (refuse :no-locator {:check :C8 :rule :command-elements-must-be-nonblank-strings
+                                      :offending bad})))))))
       (let [by-command? (and (not (contains? m :config)) (c8-command-present? command))
             lookup (when-not (contains? m :config)
                      (if by-command? {:command (vec command)} namespace))
