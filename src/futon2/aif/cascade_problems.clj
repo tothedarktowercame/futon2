@@ -79,8 +79,9 @@
   "The mechanically checkable token classes of the WM-04 observation contract
   (resources/wm/observation-contract.edn). Class J (judgement) is not among
   them: Joe, 2026-09-17, a blinded study on each pass is too heavy, so every
-  token the model predicts must be observable by a mechanical check."
-  #{:C3 :C4 :C5 :C6})
+  token the model predicts must be observable by a mechanical check. C8, a
+  registered passing run at current content, is AR-41 (futon2 9d5525ee)."
+  #{:C3 :C4 :C5 :C6 :C8})
 
 (defn problem-tokens
   "Every token a target's problem reads or writes: its facts, its want, and

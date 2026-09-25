@@ -34,13 +34,20 @@
 
 (deftest reduced-contract-and-loaded-run-record
   (let [contract (edn/read-string (slurp (io/resource "wm/observation-contract.edn")))
-        classes #{:C3 :C4 :C5 :C6}
+        classes #{:C3 :C4 :C5 :C6 :C8}
         loaded (sources/load-declared)
         record (fixture/record-run #(sources/load-declared))]
     (is (= classes (get-in contract [:production-path :classes])))
     (is (= classes (set (keys (get-in contract [:production-path :checks-implemented])))))
     (is (= classes (set (map :id (filter #(= :checkable (:kind %)) (:classes contract))))))
     (is (= classes (set (keys checks/checks)) problems/checkable-classes))
+    (doseq [[class fn-name] (get-in contract [:production-path :checks-implemented])]
+      (is (= (get checks/checks class)
+             (some-> (ns-resolve 'futon2.aif.observation-checks fn-name) deref))
+          (str class " names " fn-name ", which is not the check observe runs")))
+    (doseq [{:keys [id check-fn]} (filter #(= :checkable (:kind %)) (:classes contract))]
+      (is (= check-fn (get-in contract [:production-path :checks-implemented id]))
+          (str id " :check-fn disagrees with :checks-implemented")))
     (is (not (contains? (:universes loaded) "M-wm-aif-policy-grain-compliance")))
     (is (nil? (io/resource "wm/cascade-sources/M-wm-aif-policy-grain-compliance.edn")))
     (is (seq (:read-occurrences loaded)))

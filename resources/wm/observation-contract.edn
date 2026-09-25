@@ -2,11 +2,11 @@
  :authority {:basis "P5 (Joe, 2026-09-16): checkable tokens observed exactly; judgement tokens need rates"
              :per-pass "Joe, 2026-09-17, emacs REPL to claude-4: \"it seems kind of heavy to do a blinded study with each pass that the WM is supposed to work on.\""
              :recorded "p4ng PLAN-WM-04-unblock-2026-09-17.md, 337c85b"}
- :production-path {:classes #{:C3 :C4 :C5 :C6}
+ :production-path {:classes #{:C3 :C4 :C5 :C6 :C8}
                    :judgement-class-J :refused-at-assembly
                    :enforced-by "futon2.aif.cascade-problems (705adb39): every problem token needs a checkable locator, else :universe-not-admitted naming the tokens"
                    :J-evidence "futon2 holes/labs/wm-contract/wm04-pilot/PILOT-OBSERVER-ONLY.edn (83f8b5ce): unreviewed pilot; of 38 recorded realised steps, blind observers confirmed 15"
-                   :checks-implemented {:C3 check-path-exists :C4 check-decl-in-file :C5 check-registry-entry :C6 check-witness-reference}
+                   :checks-implemented {:C3 check-path-exists :C4 check-decl-in-file :C5 check-registry-entry :C6 check-witness-reference :C8 check-registered-run}
                    :applicability-reading "claude-7, 2026-09-17: schedule holds; J refusal holds; zero rates hold only for the class tokens as defined here (fixes applied in futon2 725a17f1)"}
  :written "2026-09-17"
  :owner "WM-04"
@@ -37,6 +37,15 @@
    :invalid-witness :typed-refusal
    :unresolved-reference :typed-refusal
    :missing-entry :observed-false}
+  {:id :C8 :kind :checkable
+   :token "the test registry holds a warrant for the named test namespace whose pinned code-path and test-path shas equal those files' shas now, whose postcheck matched, and whose run recorded no failures and no errors"
+   :check "read the registry record; compare every pinned path's sha with the file now; read postcheck and run counts"
+   :check-fn check-registered-run
+   :inputs {:repo string :namespace string :config string}
+   :no-entry :observed-false :content-moved :observed-false :namespace-mismatch :observed-false
+   :registry-unreadable :typed-refusal :no-record-id :typed-refusal
+   :authority "AR-41 (PROOF-2a register, approved by claude-8, 2026-09-24); check futon2 9d5525ee (claude-9)"
+   :limit "a true reading says those tests passed over exactly these bytes; it says nothing about whether the tests are worth passing"}
   {:id :J :kind :judgement
    :question "Does this step's stated output exist as an independently locatable artifact satisfying the application's own stated conditions, at cutoff sha X?"
    :verdicts [:exists :does-not-exist :insufficient-evidence :ambiguous]
