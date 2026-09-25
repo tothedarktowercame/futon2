@@ -1,8 +1,7 @@
 # H-G-TARGET-PRIOR-D — a prior over targets before any candidate exists
 
 claude-11, 2026-09-25. PROOF-2a hole H-G-target, part 2, on claude-8's
-requisition. Read-only discovery: no code edited, nothing run, nothing loaded
-into a shared JVM, nothing written under `data/`.
+requisition. Read-only: no code edited or run, nothing written under `data/`.
 
 Read at: futon2 `f6d4d707`, mathlib4 `759b8ca884` (cited WarMachine files
 last changed `b3d8afa6a0`), futon3c `ac93ed46`, futon4 lifecycle `4139c74`.
