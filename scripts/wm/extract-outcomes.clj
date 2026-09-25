@@ -47,11 +47,19 @@
 ;;
 ;; Read-only. Writes nothing; prints EDN on stdout. Exits 2 on refusal.
 ;;
-;; Run: clojure -M scripts/wm/extract-outcomes.clj <mission.md> [--cascades DIR]
-;;  or: bb scripts/wm/extract-outcomes.clj <mission.md> [--cascades DIR]
+;; OFFSET UNIT (H-C-D R1, adopted in mission-C.edn futon3c 6149272b): every
+;; :span this script emits, and every span it reads from a reference C, is in
+;; Unicode code points, zero-based, end-exclusive, declared as :offset-unit on
+;; the map that carries it. The mission has 392 more UTF-8 bytes than code
+;; points, so a byte reading is wrong everywhere; a reference that declares no
+;; unit, or a different one, is refused rather than reinterpreted.
+;;
+;; Run: clojure -M scripts/wm/extract-outcomes.clj <mission.md> [--cascades DIR] [--reference C.edn]
+;;  or: bb scripts/wm/extract-outcomes.clj <mission.md> [--cascades DIR] [--reference C.edn]
 
 (require '[clojure.string :as str]
          '[clojure.set :as set]
+         '[clojure.edn :as edn]
          '[clojure.java.io :as io]
          '[clojure.pprint :as pp])
 
@@ -144,6 +152,18 @@
   [^String text i]
   (inc (count (re-seq #"\n" (subs text 0 i)))))
 
+;; ----------------------------------------------------------- offset unit
+;; Every span is Unicode code points, zero-based, end-exclusive (H-C-D R1).
+;; Java String indices are UTF-16 code units; these two convert. For BMP-only
+;; text they coincide with char indices; for astral characters they do not.
+
+(def offset-unit :unicode-codepoints-zero-based-end-exclusive)
+
+(defn cp-subs
+  "Substring by Unicode code point offsets, zero-based, end-exclusive."
+  [^String text a b]
+  (subs text (.offsetByCodePoints text 0 a) (.offsetByCodePoints text 0 b)))
+
 (defn headings
   "Every markdown heading with its level, title and line."
   [^String text]
@@ -230,7 +250,12 @@
                    m (let [mm (re-matcher (:re rule) text)]
                        (loop [acc []] (if (.find mm) (recur (conj acc (.start mm))) acc)))]
                (let [[s e] (sentence-around text m)
-                     quote (str/trim (subs text s e))
+                     raw (subs text s e)
+                     quote (str/trim raw)
+                     ;; UTF-16 index of the trimmed quote, then code points
+                     qs (+ s (- (count raw) (count (str/triml raw))))
+                     qe (+ qs (count quote))
+                     span [(.codePointCount text 0 qs) (.codePointCount text 0 qe)]
                      l0 (line-of text s) l1 (line-of text (max s (dec e)))
                      named (->> parties
                                 (keep (fn [p]
@@ -242,7 +267,7 @@
                                 (sort-by first) first second)
                      inst (section-of l0)]
                  {:rule (:id rule) :reads (:reads rule) :requires (:requires rule)
-                  :quote quote :cue [l0 l1]
+                  :quote quote :cue [l0 l1] :span span
                   :whose (cond named named
                                inst  :unattributed-in-instance-section
                                :else :the-mission)
@@ -332,13 +357,14 @@
                               (:whose (first cs)))
                    :instance (some :instance cs)
                    :rules (vec (sort (distinct (mapcat :rules cs))))
-                   :cues (mapv #(select-keys % [:quote :cue :rules]) cs)})))
+                   :cues (mapv #(select-keys % [:quote :cue :span :rules]) cs)})))
          (sort-by (fn [o] (first (:cue (first (:cues o)))))) ;; first cue's line
          vec)))
 
 (defn verify
-  "Every cue's quote occurs exactly once and at the line it claims. Returns
-   failures; one failure refuses the whole output."
+  "Every cue's quote occurs exactly once, at the line it claims, and at the
+   code-point span it claims. Returns failures; one failure refuses the whole
+   output."
   [^String text outcomes]
   (vec (for [o outcomes
              c (:cues o)
@@ -346,21 +372,71 @@
                    n (count (re-seq (java.util.regex.Pattern/compile
                                      (java.util.regex.Pattern/quote q)) text))
                    i (str/index-of text q)
-                   l (when i (line-of text i))]
-             :when (or (not= 1 n) (not= l (first (:cue c))))]
+                   l (when i (line-of text i))
+                   span-ok (try (= (cp-subs text (first (:span c)) (second (:span c))) q)
+                                (catch Exception _ false))]
+             :when (or (not= 1 n) (not= l (first (:cue c))) (not span-ok))]
          {:id (:id o)
           :quote (subs q 0 (min 60 (count q)))
-          :occurrences n :claimed-line (first (:cue c)) :found-line l})))
+          :occurrences n :claimed-line (first (:cue c)) :found-line l
+          :span-resolves span-ok})))
+
+;; ---------------------------------------------------- reference comparison
+
+(defn read-reference
+  "Read a reference C for the comparison. Refuses with a typed reason unless it
+   declares exactly the offset unit the comparison reads spans in (H-C-D R1) --
+   a C whose :cue units are undeclared is a span that cannot be read, not a
+   span to be guessed at."
+  [path]
+  (let [ref (edn/read-string (slurp path))]
+    (if (= offset-unit (:offset-unit ref))
+      ref
+      {:refused :reference-offset-unit-mismatch
+       :required offset-unit
+       :found (if (contains? ref :offset-unit) (:offset-unit ref) :absent)
+       :reference path})))
+
+(defn compare-reference
+  "Recall and extras against a reference C. Each reference outcome's own :cue
+   span is checked to resolve to its :cue-quote under the declared unit (a
+   reference whose spans do not resolve is reported, not trusted); it is a HIT
+   when its :cue-quote occurs in one of the emitted outcomes' cue quotes."
+  [^String text ref outcomes]
+  (let [rows (vec (for [[k v] (:outcomes ref)]
+                    (let [[a b] (:cue v)
+                          resolves (try (= (cp-subs text a b) (:cue-quote v))
+                                        (catch Exception _ false))
+                          hit (first (filter (fn [o] (some #(str/includes? (:quote %) (:cue-quote v))
+                                                           (:cues o)))
+                                             outcomes))]
+                      {:reference-outcome k
+                       :span-resolves resolves
+                       :hit (when hit {:id (:id hit) :cues (mapv :cue (:cues hit))})})))
+        total (count rows)
+        hits (count (filter :hit rows))]
+    {:reference-outcomes total
+     :mission-sha-match (when (:mission-sha ref) (= (:mission-sha ref) (sha256 text)))
+     :hits hits
+     :recall (if (zero? total) {:absent :empty-reference} (str hits "/" total))
+     :outcomes-emitted (count outcomes)
+     :extras (- (count outcomes) hits)
+     :rows rows}))
 
 (defn -main [& args]
   (let [[path & more] args
         opts (apply hash-map more)
-        cdir (get opts "--cascades")]
+        cdir (get opts "--cascades")
+        refpath (get opts "--reference")]
     (when-not (and path (.isFile (io/file path)))
-      (binding [*out* *err*] (println "usage: extract-outcomes.clj <mission.md> [--cascades DIR]"))
+      (binding [*out* *err*] (println "usage: extract-outcomes.clj <mission.md> [--cascades DIR] [--reference C.edn]"))
       (System/exit 2))
     (let [text (slurp path)
-          lines (count (str/split-lines text))
+          ref (when refpath (read-reference refpath))]
+      (if (:refused ref)
+        (do (pp/pprint ref)
+            (System/exit 2))
+        (let [lines (count (str/split-lines text))
           hs (headings text)
           isecs (instance-sections hs lines)
           section-of (fn [l] (:instance (first (filter #(<= (first (:lines %)) l (second (:lines %))) isecs))))
@@ -384,23 +460,26 @@
                            :serves (mapv :id os)
                            :basis :section-containment})))
           unlinked (filterv #(nil? (:instance %)) outcomes)
-          out {:schema :wm/mission-outcomes-v2
-               :extractor {:script "scripts/wm/extract-outcomes.clj"
-                           :cue-rules (mapv :id cue-rules)
-                           :consolidation :e1-same-instance-or-party-and-artefact
-                           :served-by-basis :section-containment}
-               :mission {:path path :lines lines :sha256 (sha256 text)}
-               :sections-read (mapv #(select-keys % [:level :title :line]) hs)
-               :outcomes outcomes
-               :served-by served
-               :unlinked {:count (count unlinked)
-                          :ids (mapv :id unlinked)
-                          :absent :outside-instance-sections}
-               :weighting {:absent :unstated
-                           :note "no line assigns a magnitude or compares two outcomes"}}]
+          out (cond-> {:schema :wm/mission-outcomes-v3
+                       :offset-unit offset-unit
+                       :extractor {:script "scripts/wm/extract-outcomes.clj"
+                                   :cue-rules (mapv :id cue-rules)
+                                   :consolidation :e1-same-instance-or-party-and-artefact
+                                   :served-by-basis :section-containment}
+                       :mission {:path path :lines lines :sha256 (sha256 text)}
+                       :sections-read (mapv #(select-keys % [:level :title :line]) hs)
+                       :outcomes outcomes
+                       :served-by served
+                       :unlinked {:count (count unlinked)
+                                  :ids (mapv :id unlinked)
+                                  :absent :outside-instance-sections}
+                       :weighting {:absent :unstated
+                                   :note "no line assigns a magnitude or compares two outcomes"}}
+                ref (assoc :reference-comparison (compare-reference text ref outcomes)))]
       (cond
         (seq fails)
-        (do (pp/pprint {:schema :wm/mission-outcomes-v2
+        (do (pp/pprint {:schema :wm/mission-outcomes-v3
+                        :offset-unit offset-unit
                         :refused :cue-does-not-resolve
                         :mission path
                         :failures fails})
@@ -410,7 +489,7 @@
         (pp/pprint (assoc out :outcomes {:absent :no-stated-outcome
                                          :sections-read (mapv :title hs)}))
 
-        :else (pp/pprint out)))))
+        :else (pp/pprint out)))))))
 
 ;; Run as a script only; a test that load-files this file (into its own ns)
 ;; gets the fns, not a System/exit. clojure -M <this-file> and bb both run in

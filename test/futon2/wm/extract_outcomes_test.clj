@@ -15,6 +15,8 @@
 (def extract (f 'extract))
 (def consolidate (f 'consolidate))
 (def verify (f 'verify))
+(def cp-subs (f 'cp-subs))
+(def read-reference (f 'read-reference))
 (def cue-rules @(f 'cue-rules))
 
 (defn outcomes-of
@@ -103,3 +105,35 @@
         os (outcomes-of dup {})]
     (is (seq (verify dup os))
         "a quote occurring twice cannot identify a span: refusal")))
+
+;; Offset unit (H-C-D R1): every cue carries a :span in Unicode code points,
+;; zero-based, end-exclusive, and the span resolves to the quote. A multi-byte
+;; character before the cue makes the byte reading wrong.
+(def span-text "\u2014 is an em dash. Rob wants a seam packaged for reuse.\n")
+
+(deftest cue-spans-are-codepoint-offsets
+  (let [os (outcomes-of span-text {})
+        [a b] (:span (first (:cues (first os))))
+        quote (:quote (first (:cues (first os))))]
+    (is (= quote "Rob wants a seam packaged for reuse."))
+    (is (= [17 53] [a b]) "the em dash counts once, not three times (bytes)")
+    (is (= quote (cp-subs span-text a b)) "the span resolves to the quote")
+    (is (= [] (verify span-text os)))
+    (is (not= a (count (.getBytes (subs span-text 0 a) "UTF-8")))
+        "a byte reading of the same span would land somewhere else")))
+
+;; A reference C that declares no offset unit, or a different one, is refused
+;; with a typed reason, never reinterpreted.
+(deftest reference-offset-unit-required
+  (let [tmp (java.io.File/createTempFile "ref" ".edn")]
+    (spit tmp "{:schema :x/c-v1 :outcomes {}}")
+    (is (= :reference-offset-unit-mismatch (:refused (read-reference (.getPath tmp))))
+        "absent :offset-unit refuses")
+    (is (= :absent (:found (read-reference (.getPath tmp)))))
+    (spit tmp "{:schema :x/c-v1 :offset-unit :bytes :outcomes {}}")
+    (is (= :bytes (:found (read-reference (.getPath tmp))))
+        "a different unit refuses, naming what it found")
+    (spit tmp "{:schema :x/c-v1 :offset-unit :unicode-codepoints-zero-based-end-exclusive :outcomes {}}")
+    (is (= {} (:outcomes (read-reference (.getPath tmp))))
+        "the declared unit passes")
+    (.delete tmp)))
