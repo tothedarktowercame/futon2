@@ -146,8 +146,13 @@
                        :reason "ARGUE closes only through DOCUMENT's outsider account; its negative finding is retained"})
 
 (defn- response [id]
-  (merge {:pattern id :receipt (get-in proposals [:interpretation-receipts id])}
-         (get-in proposals [:patterns id])))
+  ;; :forces is supplied here, not from the fixture: the pinned proposal
+  ;; (futon2 78439f58) predates the grammar's :forces requirement
+  ;; (H-INTERP-D gap 2) and carries none, so as recorded it would now be
+  ;; refused :forces-required. Reported, not edited.
+  (assoc (merge {:pattern id :receipt (get-in proposals [:interpretation-receipts id])}
+                (get-in proposals [:patterns id]))
+         :forces "test-supplied pressure; the pinned proposal predates the :forces requirement"))
 
 (defn- req [want] {:target "M-futon-seams" :want {:token want}})
 
@@ -198,6 +203,69 @@
 
 (deftest a-decline-is-recorded-not-rejected
   (is (= :declined (:status (validate argue {:decline {:reason :no-library-pattern}} (seams-sources))))))
+
+;; ---------------------------------------------------------------------------
+;; H-INTERP-D gaps 1 and 2: one grammar — hand-unit keys normalised at
+;; intake, :forces required.
+
+(def placenta-unit
+  "claude-1's gauntlet/placenta-transfer hand unit, quoted verbatim from
+  futon3c holes/labs/M-futon-seams/proto/instance-4.edn (the receipt's
+  sha256 is the live library file's; its bytes are pinned under
+  test/fixtures/want-interp-library/futon3/library/gauntlet/)."
+  {:guard {:needs #{:sites-enumerated :one-producer} :forbids #{}}
+   :produces #{:caller-converted}
+   :receipt {:source {:path "futon3/library/gauntlet/placenta-transfer.flexiarg"
+                      :sha256 "9771eca50e93c42de6b1ea22e188c770635d62830ca190f5ae4ca18056a069cd"}
+             :reading "Its conclusion IS the conversion move: identify which functions the human is performing as a surrogate for missing infrastructure and transfer them one at a time to the system. The function here is resolving which seat plays a role, and the mission records Joe performing it by hand four times in one evening. Converting a caller is that transfer, once."
+             :scope "The pattern's wider list of AIF functions the operator carries does not transfer; only the identify-and-move-one discipline is used."
+             :author "claude-1"}
+   :forces "The human is currently performing multiple AIF functions simultaneously, as a surrogate for infrastructure that does not exist yet."})
+
+(defn- hand-sources []
+  {:universes {"M-hand" {:sites-enumerated true :one-producer true :caller-converted false}}
+   :wants {"M-hand" [:caller-converted]}
+   :locators {"M-hand" {:sites-enumerated {:class :C3 :stated "sites enumerated"}
+                        :one-producer {:class :C3 :stated "one producer"}
+                        :caller-converted {:class :C3 :stated "the caller is converted"}}}
+   :interpretations {"M-hand" {:patterns {} :receipts {}}}
+   :horizon-steps 4
+   :beta-by-context {:WM {:beta 1}} :context-of (constantly :WM)
+   :construction {:construct futon2.aif.interpretation-construction/construct
+                  :budget {:max-moves 4 :max-expansions 20000} :move-cost 0
+                  :evaluate-g futon2.report.war-machine/constructed-candidate-g}})
+
+(defn- validate-hand [resp]
+  (wi/validate-response {:target "M-hand" :want {:token :caller-converted}} resp
+                        {:sources (hand-sources) :constraints []
+                         :admit #'futon2.report.war-machine/admit-cascade-problem
+                         :code-root library-root}))
+
+(deftest a-hand-unit-validates-with-its-keys-normalised
+  (let [v (validate-hand (assoc placenta-unit :pattern :gauntlet/placenta-transfer))]
+    (is (= :valid (:status v)) (pr-str (:reasons v)))
+    (is (= (:scope (:receipt placenta-unit)) (get-in v [:receipt :scope-limit]))
+        ":scope-limit populated from :scope")
+    (is (= "claude-1" (get-in v [:receipt :by])) ":by populated from :author")
+    (is (nil? (get-in v [:receipt :scope])) "the alias spelling is gone")
+    (is (= (:forces placenta-unit)
+           (get-in v [:interpretation :gauntlet/placenta-transfer :forces]))
+        "the interpretation record carries the forces")))
+
+(deftest a-reply-without-forces-is-refused
+  (let [v (validate-hand (-> placenta-unit (dissoc :forces)
+                             (assoc :pattern :gauntlet/placenta-transfer)))]
+    (is (= :rejected (:status v)))
+    (is (some #(= :forces-required (:reason %)) (:reasons v)))))
+
+(deftest conflicting-key-spellings-are-refused-not-merged
+  (let [v (validate-hand (-> placenta-unit
+                             (assoc :pattern :gauntlet/placenta-transfer)
+                             (assoc-in [:receipt :scope-limit] "a different limit")))]
+    (is (= :rejected (:status v)))
+    (is (some #(= :receipt-key-conflict (:reason %)) (:reasons v)))
+    (is (not-any? #(= :receipt-incomplete (:reason %)) (:reasons v))
+        "the conflict is reported as a conflict, not as a missing canonical key")))
 
 ;; ---------------------------------------------------------------------------
 ;; Part 3: publication, and the next tick constructing from it
@@ -302,3 +370,66 @@
         (is (= "futon2.aif.want-interpretation" (get-in r [:validator :ns])))
         (is (re-matches #"[0-9a-f]{64}" (str (get-in r [:validator :source-sha256]))))
         (is (string? (:request-id r)))))))
+
+;; ---------------------------------------------------------------------------
+;; Part 4: the prompt, and agent-search retrieval in the response (H-INTERP-D
+;; §3 gap 3: the pattern a reviewer chose was outside what the seat was
+;; shown; the seat may now search the library and append its own runs).
+
+(deftest the-prompt-offers-agent-search-over-the-library
+  (let [{:keys [root opts]} (fixture)
+        c (document-criterion)
+        store (temp-store)
+        r (wi/request! {:target "M-test" :want (:token c) :criterion c :facts {} :patterns {}}
+                       root (assoc opts :retrieve-fn (fn [_] [{:pattern "family/example" :score 1}])))
+        issued (wi/issue! store r)
+        text (wi/prompt issued {:library-root library-root})]
+    (is (str/includes? text "agent-search"))
+    (is (str/includes? text library-root))
+    (is (str/includes? text "outside futon3/library/"))))
+
+;; the bytes are a pinned copy of futon3/library/gauntlet/placenta-transfer
+;; .flexiarg; the sha256 is of the live file's bytes at capture time
+(def placenta-sha256 "9771eca50e93c42de6b1ea22e188c770635d62830ca190f5ae4ca18056a069cd")
+
+(defn- agent-search-runs [candidates]
+  {:runs [{:retriever "agent-search" :candidates candidates}]})
+
+(deftest an-agent-search-candidate-naming-a-real-library-file-validates
+  ;; the unit claude-1 chose for instance 4 was outside the machine's 48
+  ;; retrieval candidates; appended this way the response validates
+  (let [resp (assoc (response :writing-coherence/meet-the-reader-where-they-are)
+                    :retrieval (agent-search-runs
+                                [{:pattern "gauntlet/placenta-transfer"
+                                  :source {:path "futon3/library/gauntlet/placenta-transfer.flexiarg"
+                                           :sha256 placenta-sha256}}]))
+        v (validate document resp (seams-sources))]
+    (is (= :valid (:status v)) (pr-str (:reasons v)))))
+
+(deftest bad-appended-runs-are-rejected-with-typed-reasons
+  (let [base (response :writing-coherence/meet-the-reader-where-they-are)
+        reasons (fn [retrieval]
+                  (set (map :reason (:reasons (validate document (assoc base :retrieval retrieval)
+                                                        (seams-sources))))))]
+    (testing "any other retriever name"
+      (is (contains? (reasons {:runs [{:retriever "grep" :candidates []}]})
+                     :appended-run-not-agent-search)))
+    (testing "a candidate path outside the library root"
+      (is (contains? (reasons (agent-search-runs
+                               [{:pattern "gauntlet/placenta-transfer"
+                                 :source {:path "futon3/not-the-library/placenta-transfer.flexiarg"
+                                          :sha256 placenta-sha256}}]))
+                     :appended-candidate-outside-library))
+      (is (contains? (reasons (agent-search-runs
+                               [{:pattern "gauntlet/placenta-transfer"
+                                 :source {:path "futon3/library/../../../etc/passwd"}}]))
+                     :appended-candidate-outside-library)))
+    (testing "a declared sha256 that is not the file's bytes"
+      (is (contains? (reasons (agent-search-runs
+                               [{:pattern "gauntlet/placenta-transfer"
+                                 :source {:path "futon3/library/gauntlet/placenta-transfer.flexiarg"
+                                          :sha256 "0000"}}]))
+                     :appended-source-sha-mismatch)))
+    (testing "a candidate that locates nothing"
+      (is (contains? (reasons (agent-search-runs [{:score 3}]))
+                     :appended-candidate-unlocatable)))))

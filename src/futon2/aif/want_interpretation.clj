@@ -103,6 +103,28 @@
 
 (def receipt-keys [:reading :scope-limit :by])
 
+(def receipt-key-aliases
+  "claude-1's hand units spell the receipt keys :scope and :author; the reply
+  grammar's canonical keys are :scope-limit and :by (H-INTERP-D gap 1)."
+  {:scope :scope-limit :author :by})
+
+(defn normalise-receipt
+  "RECEIPT with the hand-unit spellings (:scope, :author) renamed to the
+  canonical keys (:scope-limit, :by), so a hand unit and a seat reply are
+  the same record. A key present under both spellings with different values
+  is a conflict, not a merge: returns {:conflicts [...]}."
+  [receipt]
+  (reduce-kv (fn [r alias canonical]
+               (if (contains? r alias)
+                 (let [a (get r alias) c (get r canonical)]
+                   (if (and (some? c) (not= a c))
+                     (reduced {:conflicts [{:reason :receipt-key-conflict
+                                            :alias alias :canonical canonical
+                                            :alias-value a :canonical-value c}]})
+                     (-> r (dissoc alias) (assoc canonical a))))
+                 r))
+             (or receipt {}) receipt-key-aliases))
+
 (defn- library-file [code-root path] (io/file code-root path))
 
 (defn- receipt-reasons
@@ -121,6 +143,43 @@
       (conj {:reason :source-missing :path path})
       (and f (.isFile f) (not= (:sha256 source) (evidence/sha256 (Files/readAllBytes (.toPath f)))))
       (conj {:reason :source-sha-mismatch :path path :declared (:sha256 source)}))))
+
+(def agent-search-retriever "agent-search")
+
+(defn- appended-run-reasons
+  "Why the response's appended retrieval runs do not hold. A response may
+  append runs the answerer found by searching the library itself (the
+  interpretation job's agent-search convention): every appended run must be
+  named \"agent-search\", and every candidate must locate a file inside the
+  library — an explicit :source :path, or the pattern id's own library file.
+  The canonical path is compared against the library directory under
+  CODE-ROOT, so \"..\" segments and other roots refuse. When the candidate
+  declares the bytes' sha256 and the file is present, the bytes must match."
+  [code-root response]
+  (let [lib (.getCanonicalFile (io/file code-root "futon3" "library"))]
+    (vec
+     (for [run (get-in response [:retrieval :runs])
+           reason (concat
+                   (when (not= agent-search-retriever (:retriever run))
+                     [{:reason :appended-run-not-agent-search :retriever (:retriever run)}])
+                   (mapcat
+                    (fn [c]
+                      (let [path (or (get-in c [:source :path])
+                                     (when-let [p (:pattern c)]
+                                       (str "futon3/library/" p ".flexiarg")))]
+                        (if-not (string? path)
+                          [{:reason :appended-candidate-unlocatable :candidate c}]
+                          (let [f (.getCanonicalFile (library-file code-root path))]
+                            (cond-> []
+                              (not (str/starts-with? (str f) (str lib)))
+                              (conj {:reason :appended-candidate-outside-library :path path})
+                              (and (.isFile f) (get-in c [:source :sha256])
+                                   (not= (get-in c [:source :sha256])
+                                         (evidence/sha256 (Files/readAllBytes (.toPath f)))))
+                              (conj {:reason :appended-source-sha-mismatch :path path
+                                     :declared (get-in c [:source :sha256])}))))))
+                    (:candidates run)))]
+       reason))))
 
 (defn- guard-reasons
   "Guard tokens must be ones the target already knows: its facts, its wants,
@@ -145,7 +204,10 @@
   sources map, with :construction supplied). RESPONSE is
   {:pattern id :guard … :produces … :receipt …} or {:decline {:reason …}}.
 
-  Checks, in order, all reported: id canonical (the loader's own rule);
+  Checks, in order, all reported: receipt keys normalised (:scope →
+  :scope-limit, :author → :by; both spellings with different values is a
+  conflict, never a merge); :forces present (the pressure the pattern
+  answers — H-INTERP-D gap 2); id canonical (the loader's own rule);
   receipt names the pattern's library file with matching sha256 and states
   reading, scope-limit and by; :produces contains the requested want; guard
   tokens are known; owner CONSTRAINTS hold; the constructor, with this
@@ -160,22 +222,33 @@
         want (get-in request [:want :token])]
     (if-let [decline (:decline response)]
       {:status :declined :target target :want want :decline decline}
-      (let [id (try (cs/canonical-pattern-id (:pattern response) :want-response :pattern)
+      (let [norm-receipt (normalise-receipt (:receipt response))
+            response (if (:conflicts norm-receipt)
+                       response
+                       (assoc response :receipt norm-receipt))
+            id (try (cs/canonical-pattern-id (:pattern response) :want-response :pattern)
                     (catch clojure.lang.ExceptionInfo _ nil))
-            interp {:guard {:needs (set (get-in response [:guard :needs]))
-                            :forbids (set (get-in response [:guard :forbids]))}
-                    :produces (set (:produces response))}
+            interp (cond-> {:guard {:needs (set (get-in response [:guard :needs]))
+                                    :forbids (set (get-in response [:guard :forbids]))}
+                            :produces (set (:produces response))}
+                     (some? (:forces response)) (assoc :forces (:forces response)))
             patterns (get-in sources [:interpretations target :patterns])
             known (set (concat (keys (get-in sources [:universes target]))
                                (get-in sources [:wants target])
                                (mapcat :produces (vals patterns))))
             static (vec (concat
+                         (:conflicts norm-receipt)
+                         (when (str/blank? (str (:forces response)))
+                           [{:reason :forces-required}])
                          (when-not id [{:reason :invalid-pattern-id :value (:pattern response)}])
-                         (when id (receipt-reasons code-root id (:receipt response)))
+                         (when (and id (not (:conflicts norm-receipt)))
+                           (receipt-reasons code-root id (:receipt response)))
                          (when-not (contains? (:produces interp) want)
                            [{:reason :does-not-produce-the-want :want want}])
                          (guard-reasons interp known)
-                         (constraint-reasons interp constraints)))]
+                         (constraint-reasons interp constraints)
+                         (when (:retrieval response)
+                           (appended-run-reasons code-root response))))]
         (if (seq static)
           {:status :rejected :target target :want want :reasons static}
           (let [trial (-> sources
@@ -266,18 +339,30 @@
 (def response-schema :wm/want-interpretation-response-v1)
 
 (defn prompt
-  "What the machine sends the answering seat for an ISSUED request."
-  [issued]
-  (str "The War Machine asks for one interpretation (D11). Request "
-       (:request-id issued) ":\n\n```edn\n" (with-out-str (pp/pprint (dissoc issued :retrieval)))
-       "```\n\nLibrary retrieval candidates (unjudged): "
-       (pr-str (vec (for [run (get-in issued [:retrieval :retrieval :runs])
-                          c (:candidates run)]
-                      (or (:pattern c) (:id c) c))))
-       "\n\nREPLY GRAMMAR: your reply must contain exactly one fenced ```edn block holding "
-       "{:schema " response-schema " :pattern … :guard {:needs #{…} :forbids #{…}} :produces #{…} "
-       ":receipt {:source {:path … :sha256 …} :reading … :scope-limit … :by …}} or "
-       "{:schema " response-schema " :decline {:reason …}}; anything else is unparseable.\n"))
+  "What the machine sends the answering seat for an ISSUED request. OPTIONS:
+  :library-root names the library the seat may search itself (default
+  interpretation-request's pinned root) — the want-interpretation sibling of
+  the interpretation job's agent-search affordance, so a reviewed pattern
+  the retriever did not surface is still reachable (H-INTERP-D §3, gap 3)."
+  ([issued] (prompt issued nil))
+  ([issued {:keys [library-root] :or {library-root ireq/library-root}}]
+   (str "The War Machine asks for one interpretation (D11). Request "
+        (:request-id issued) ":\n\n```edn\n" (with-out-str (pp/pprint (dissoc issued :retrieval)))
+        "```\n\nLibrary retrieval candidates (unjudged): "
+        (pr-str (vec (for [run (get-in issued [:retrieval :retrieval :runs])
+                           c (:candidates run)]
+                       (or (:pattern c) (:id c) c))))
+        "\n\nWhole-section retrieval can be weak: you may search the captured library under "
+        library-root " and append conformant runs named \"agent-search\" to your response under "
+        ":retrieval {:runs [...]}; each run is {:retriever \"agent-search\" :candidates "
+        "[{:pattern \"family/name\" :source {:path \"futon3/library/<family>/<name>.flexiarg\" "
+        ":sha256 \"of its bytes\"}}]}. A run with any other retriever name, or a candidate "
+        "path outside futon3/library/, refuses with a typed reason. "
+        "\n\nREPLY GRAMMAR: your reply must contain exactly one fenced ```edn block holding "
+        "{:schema " response-schema " :pattern … :guard {:needs #{…} :forbids #{…}} :produces #{…} "
+        ":receipt {:source {:path … :sha256 …} :reading … :scope-limit … :by …}} "
+        "(:retrieval {:runs [...]} optional, for agent-search runs as above) or "
+        "{:schema " response-schema " :decline {:reason …}}; anything else is unparseable.\n")))
 
 (defn parse-reply
   "The single response form in reply TEXT: {:response m}, {:decline d}, or
