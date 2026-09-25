@@ -183,6 +183,15 @@
     (is (= 1 (:delta r)))
     (is (= r (eh/increment @enactment (key-a) [])) "same receipt as without the G_c check")))
 
+(deftest join-unverifiable-verdict-keeps-its-status
+  ;; check-c (futon3c 4bc95005) returns {:status :join-unverifiable :failures []}
+  ;; when the selection law names no candidate: neither pass nor fail. The
+  ;; fold counts it 0 and records THAT status, not :absent.
+  (let [r (eh/increment @enactment (key-a) {:status :join-unverifiable :failures []})]
+    (is (= 0 (:delta r)))
+    (is (= {:status :join-unverifiable} (:wc-verdict r)))
+    (is (nil? (:wc-failures r)))))
+
 (deftest missing-verdict-is-not-a-pass
   (let [r (eh/increment @enactment (key-a) nil)]
     (is (= 0 (:delta r)))

@@ -88,7 +88,12 @@
                :attempts (count attempts)
                :deviations (mapv :kind (get-in enactment [:conformance :deviations]))
                :basis basis}
-        (not (vector? wc-verdict)) (assoc :wc-verdict {:status :absent})
+        ;; a map verdict is check-c's typed non-verdict (e.g. {:status
+        ;; :join-unverifiable}, futon3c 4bc95005): counted 0, its status kept;
+        ;; anything else is no verdict at all
+        (not (vector? wc-verdict)) (assoc :wc-verdict (if (and (map? wc-verdict) (keyword? (:status wc-verdict)))
+                                                         (select-keys wc-verdict [:status])
+                                                         {:status :absent}))
         (seq wc-verdict) (assoc :wc-failures wc-verdict)))))
 
 (defn fold
