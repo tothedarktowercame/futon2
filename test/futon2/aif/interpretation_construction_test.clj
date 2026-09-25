@@ -182,3 +182,66 @@
     (testing "a finding, not a failure: construction still hands the
              candidate over with its order attached"
       (is (= :machine-constructed (get-in c [:construction-receipt :kind]))))))
+
+;; ------------------------------------------------------ NONFINITE-G-I
+;; A candidate whose G is nonfinite is left out of the comparison and kept on
+;; the record under :left-out; the rest are compared as before (owner's
+;; decision, claude-10, 2026-09-25, REFUSAL-REGISTER-D row 12). Three
+;; alternative producers of :q give three candidates [:Pn :Q]; G is set per
+;; candidate by its first pattern, and the empty baseline scores 5.0.
+(def three-p
+  (let [p {:guard {:needs #{} :forbids #{}} :produces #{:q}}]
+    {:P p :P2 p :P3 p :Q {:guard {:needs #{:q} :forbids #{}} :produces #{:w}}}))
+
+(defn- three-input [g-by]
+  {:target "M-construction" :want [:w] :observation {:q false :w false}
+   :interpretations three-p
+   :interpretation-receipts (zipmap (keys three-p) (repeat {:kind :fixture-interpretation :by "test"}))
+   :budget {:max-moves 1 :max-expansions 50} :horizon 2 :move-cost 0
+   :evaluate-g (fn [c] (get (merge {nil 5.0} g-by) (first (:precedence c))))})
+
+(defn- g-of-best [r] (get-in r [:candidates 0 :construction-receipt :g-of-best :value]))
+
+(deftest nf-1-one-nan-is-left-out-the-finite-two-are-compared
+  (let [r (sut/construct (three-input {:P ##NaN :P2 1.5 :P3 2}))
+        [lo] (:left-out r)]
+    (is (= :constructed (:status r)))
+    (is (= #{[:P2 :Q] [:P3 :Q]} (set (map :precedence (:candidates r)))))
+    (is (= 1.5 (g-of-best r)) "the winner is the finite min")
+    (is (= 1 (count (:left-out r))))
+    (is (= [:P :Q] (:precedence lo)))
+    (is (= :nonfinite-g (get-in lo [:g :absent])))
+    (is (Double/isNaN (get-in lo [:g :value])))
+    (is (= #{:P :Q} (set (keys (:interpretation-receipts lo)))))))
+
+(deftest nf-2-positive-infinity-is-left-out-the-same-way
+  (let [r (sut/construct (three-input {:P 3.0 :P2 ##Inf :P3 2}))]
+    (is (= :constructed (:status r)))
+    (is (= #{[:P :Q] [:P3 :Q]} (set (map :precedence (:candidates r)))))
+    (is (= 2.0 (double (g-of-best r))))
+    (is (= [{:precedence [:P2 :Q] :g {:absent :nonfinite-g :value ##Inf}}]
+           (mapv #(select-keys % [:precedence :g]) (:left-out r))))))
+
+(deftest nf-3-every-candidate-nonfinite-is-a-typed-result-not-a-throw
+  (let [r (sut/construct (three-input {:P ##NaN :P2 ##Inf :P3 :infinite}))]
+    (is (= :refused (:status r)))
+    (is (= :nonfinite-g (:kind r)) "the refusal kind the constructor already used")
+    (is (= :no-finite-g (:absent r)))
+    (is (= [] (:candidates r)) "no constructed candidate")
+    (is (= #{[:P :Q] [:P2 :Q] [:P3 :Q]} (set (map :precedence (:left-out r)))))
+    (is (every? #(= :nonfinite-g (get-in % [:g :absent])) (:left-out r)))))
+
+(deftest nf-4-all-finite-is-byte-identical-to-before
+  ;; fixture: pr-str of this call on the unchanged source (futon2 3bbf5059,
+  ;; interpretation_construction.clj sha256 ef18699e...), captured before the change
+  (let [r (sut/construct (three-input {:P 3.0 :P2 1.5 :P3 2}))]
+    (is (= (slurp "test/fixtures/interpretation-construction/nf4-all-finite@futon2-3bbf5059.edn")
+           (pr-str r)))
+    (is (not (contains? r :left-out)))))
+
+(deftest nf-bad-case-a-zero-g-boxed-double-or-long-is-finite
+  (doseq [z [0 0.0 (Double/valueOf 0.0) (Long/valueOf 0) 0N 0M]]
+    (let [r (sut/construct (three-input {:P z :P2 1.5 :P3 2}))]
+      (is (= :constructed (:status r)) (pr-str (type z)))
+      (is (not (contains? r :left-out)) (pr-str (type z)))
+      (is (zero? (g-of-best r)) (pr-str (type z))))))

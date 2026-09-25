@@ -192,7 +192,32 @@
     (let [supported (support input)]
       (if (not= :supported (:status supported))
         supported
-        (let [{:keys [family findings compiled search tokens established]} supported
+        (let [{:keys [findings compiled search tokens established]} supported
+              ;; NONFINITE-G-I (owner's decision, claude-10, 2026-09-25, on
+              ;; REFUSAL-REGISTER-D row 12): a candidate whose G is NaN, an
+              ;; infinity or not a number is LEFT OUT of the comparison and
+              ;; kept on the record under :left-out with
+              ;; :g {:absent :nonfinite-g :value v}; the other candidates are
+              ;; compared as before. Left out rather than ranked, because a
+              ;; NaN in the min comparison picks an arbitrary winner. Before
+              ;; this, one nonfinite G refused :nonfinite-g for the whole
+              ;; target and every finite candidate was lost with it. When no
+              ;; candidate has a finite G the result is still the :nonfinite-g
+              ;; refusal, now carrying {:absent :no-finite-g} and every
+              ;; candidate under :left-out (not :candidates, which in a
+              ;; refusal means the constructed ones and stays []).
+              g-raw (memoize (fn [c] (let [r (evaluate-g c)] {:r r :g (if (map? r) (:value r) r)})))
+              left-out (vec (for [c (:family supported)
+                                  :let [{:keys [r g]} (g-raw c)]
+                                  :when (not (finite? g))]
+                              (assoc (select-keys c [:precedence :need-edges])
+                                     :kind :cascade-candidate :target target :want (vec want)
+                                     :g {:absent :nonfinite-g
+                                         :value (if (or (number? g) (keyword? g)) g r)}
+                                     :unreached-wants (:unreached-wants c)
+                                     :interpretation-receipts
+                                     (select-keys interpretation-receipts (:precedence c)))))
+              family (vec (filter #(finite? (:g (g-raw %))) (:family supported)))
               move (fn [current]
                              (if (= family current)
                                {:status :no-move :move-id :compose-by-need :reason :family-already-constructed}
@@ -203,9 +228,11 @@
                       ;; it as the universe; an injected map result's own
                       ;; :universe wins when it carries one.
                       universe (vec (sort-by pr-str tokens))
+                      ;; the finite check below now fires only for the
+                      ;; empty baseline cascade: every family candidate
+                      ;; reaching it has a finite G (left-out above)
                       evaluated (fn [c]
-                                  (let [r (evaluate-g c)
-                                        g (if (map? r) (:value r) r)]
+                                  (let [{:keys [r g]} (g-raw c)]
                                     (when-not (finite? g)
                                       (throw (ex-info "Constructor needs a finite G comparison"
                                                       {:constructor/refusal :nonfinite-g :value g})))
@@ -213,7 +240,9 @@
                                      :universe (if (and (map? r) (some? (:universe r)))
                                                  (:universe r)
                                                  universe)}))
-                      result (try
+                      result (if (empty? family)
+                               (refuse :nonfinite-g {:absent :no-finite-g :left-out left-out})
+                               (try
                                (construction/construct
                                 {:target target :want (vec want) :q0 (vec established)
                                  :initial-family [{:precedence [] :patterns []}]
@@ -221,7 +250,7 @@
                                (catch clojure.lang.ExceptionInfo e
                                  (if-let [kind (:constructor/refusal (ex-data e))]
                                    (refuse kind (dissoc (ex-data e) :constructor/refusal))
-                                   (throw e))))
+                                   (throw e)))))
                       receipt (when (:receipt result)
                                 (assoc (:receipt result) :kind :machine-constructed
                                        :search {:expanded (:expanded search) :limit (:max-expansions budget)}
@@ -231,7 +260,7 @@
                     (empty? (:moves receipt))
                     (refuse :construction-not-taken {:construction-receipt receipt :findings findings})
                     :else
-                    {:status :constructed :findings findings
+                    (cond-> {:status :constructed :findings findings
                      ;; Full-want plans first (stable): inside the
                      ;; constructor a partial plan never ranks above a plan
                      ;; that reaches every want. G scoring against the full
@@ -255,4 +284,5 @@
                                                 :interpretation-receipts
                                                 (select-keys interpretation-receipts (:precedence c))))
                                        (sort-by (fn [c] (if (seq (:unreached-wants c)) 1 0))
-                                                (:family result)))}))))))
+                                                (:family result)))}
+                      (seq left-out) (assoc :left-out left-out))))))))
