@@ -14,6 +14,7 @@
   values below are pinned from the post-fix run of this fixture, not from
   the packet."
   (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.efe :as efe]
             [futon2.aif.interpretation-construction :as ic]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
@@ -81,6 +82,28 @@
         (is (empty? (:refusals r)) (pr-str (:refusals r)))
         (is (= chain (:precedence c)))
         (is (= 1.0 (get-in c [:construction-receipt :moves 0 :parts :pragmatic])))))))
+
+(deftest absent-universe-is-the-family-universe-no-op
+  ;; a98f5879 edit 1's claim: with :universe ABSENT, efe/rank-cascade-actions
+  ;; computes the family universe (q0's support ∪ :want ∪ every token any
+  ;; candidate names) exactly as before the fix. So scoring with no
+  ;; :universe must be identical to scoring with that family universe
+  ;; supplied explicitly; a WRONG explicit :universe must change the result
+  ;; (G shifts by T·k·ln2 for the k extra tokens).
+  (let [patt {:id :p/one :produces #{:t1}
+              :guard {:status :interpreted
+                      :clauses [{:status :interpreted
+                                 :present #{:s0} :absent #{}}]}}
+        cands [{:kind :cascade-candidate :id :c0 :precedence []}
+               {:kind :cascade-candidate :id :c1 :precedence [patt]}]
+        state {:cascade-belief {#{:s0} 1}}
+        base {:horizon-steps 2 :cascade-spec {:want #{:t1}}}
+        family-universe #{:s0 :t1}
+        absent (efe/rank-cascade-actions state cands base)]
+    (is (= absent (efe/rank-cascade-actions state cands (assoc base :universe family-universe)))
+        ":universe absent is a no-op: identical to the explicit family universe")
+    (is (not= absent (efe/rank-cascade-actions state cands (assoc base :universe (conj family-universe :t2))))
+        "a wrong explicit :universe shifts G — the arms differ")))
 
 (deftest want-never-reached-scores-the-baseline-and-is-declined
   ;; bad case (b): a 3-step prefix that never reaches the want earns no

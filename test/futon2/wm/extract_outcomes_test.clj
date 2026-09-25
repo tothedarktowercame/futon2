@@ -49,6 +49,8 @@
 
 (deftest e1-different-instances-not-merged
   (let [os (outcomes-of e1-veto-text {})]
+    (is (= 2 (count (mapcat :cues os))) "BOTH sentences are cued")
+    (is (every? #(= 1 (count (:cues %))) os) "each outcome carries its own sentence's cue")
     (is (= 2 (count os)) "same party-and-artefact but different named instances: no merge")))
 
 ;; E1 bad case, mirror: same distinctive artefact, different named parties.
