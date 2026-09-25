@@ -35,7 +35,10 @@
 (def checkable #{:C3 :C4 :C5 :C6 :C8})
 (def class-fields {:C3 [:repo :sha :path] :C4 [:repo :sha :path :decl]
                    :C5 [:repo :sha :bundle-path :entry] :C6 [:repo :sha :path]
-                   :C8 [:repo :namespace :config]})
+                   ;; C8's own check owns its locator rule (exactly one of
+                   ;; :namespace or :command; :config only with :namespace);
+                   ;; a locator it refuses comes back :check-refused
+                   :C8 [:repo]})
 
 (defn text-sha [^String text]
   (wi/content-id :text text))
@@ -54,8 +57,8 @@
    :mission mission
    :asks (str "a checkable locator (C3 path exists, C4 declaration head starts a line, C5 registry entry, C6 witness reference, C8 registered passing run) whose observation decides this criterion. "
               "The locator may name evidence that does not exist yet: it then reads false now, and producing that evidence is the flight's work. "
-              "The classes observe exactly: C3 that a path exists at a commit; C4 that a declaration head starts a line of a file; C5 that a contract-registry bundle entry exists with its clojure loci; C6 that an EDN witness {:repo :sha :entry} at a path references an existing commit/entry; C8 that the test registry holds a warrant for a named test namespace pinned to the current content of its code and test paths, postcheck matched, 0 failures and errors. "
-              "For a criterion about tests passing or gates running, use C8: {:class :C8 :repo \"<dir under /home/joe/code>\" :namespace \"<test ns>\" :config \"<registry record id test-registry-<64hex>, or an EDN config path carrying :entry-id>\"}. It reads false until a run is registered at current content (no entry, moved content, wrong namespace, failures are all false, not refusals); registering that run is the flight's work. Do not propose a file whose mere existence would read true. "
+              "The classes observe exactly: C3 that a path exists at a commit; C4 that a declaration head starts a line of a file; C5 that a contract-registry bundle entry exists with its clojure loci; C6 that an EDN witness {:repo :sha :entry} at a path references an existing commit/entry; C8 that the test registry holds a warrant for a named test namespace, or for a named command (a gate: bb, sh, lake build), pinned to the current content of its code and test paths, postcheck matched, no failures or errors. "
+              "For a criterion about tests passing, use C8 with the test namespace: {:class :C8 :repo \"<dir under /home/joe/code>\" :namespace \"<test ns>\"}, the registry finding its newest run (add :config \"<registry record id test-registry-<64hex>>\" only to name one record). For a gate or a Lean build, use C8 with the exact command it runs, no :config: {:class :C8 :repo \"<dir>\" :command [\"bb\" \"<script>\" …]} or [\"lake\" \"build\" \"<target>\"]. Exactly one of :namespace or :command. It reads false until a run is registered at current content (no entry, moved content, another namespace or command, failures are all false, not refusals); registering that run is the flight's work. Do not propose a file whose mere existence would read true. "
               "Decline only if no checkable observation could ever decide it; ask questions if the criterion is unclear.")})
 
 (defn criteria-request [target mission sections-read]
@@ -104,7 +107,7 @@
                 ":anchors [{:token :found-token :anchor \"file:line or artifact\" :cue {:lines [a b] :quote \"…\"}} …] "
                 ":questions [anchored as usual] :by \"seat\"} (all may be empty: the found criteria cover it)")
            (= :locator (:kind issued))
-           (str "{:schema " schema " :locator {:class :C3|:C4|:C5|:C6 :repo … :sha \"HEAD\" :path … (:decl for C4)} or {:class :C8 :repo … :namespace … :config …} "
+           (str "{:schema " schema " :locator {:class :C3|:C4|:C5|:C6 :repo … :sha \"HEAD\" :path … (:decl for C4)} or {:class :C8 :repo … :namespace …} or {:class :C8 :repo … :command [argv …]} "
                 ":cue {:quote \"words of the criterion this locator decides\"} :reading \"why observing it decides the criterion\" :by \"seat\"}, "
                 "or, if the criterion is genuinely unclear, {:schema " schema " :questions [{:question \"…\" :span {:lines [first last] :quote \"exact mission text\"} :alternatives [\"reading A\" \"reading B\"]}] :by \"seat\"}")
            :else

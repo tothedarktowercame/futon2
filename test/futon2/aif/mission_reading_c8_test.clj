@@ -129,3 +129,62 @@
             (is (= new-id (:config (get (mr/published-locators s target) token))))
             (is (true? (get (:universe after) token)))
             (is (= 5 (count (filter false? (map #(get (:universe after) %) (:wants after))))))))))))
+
+;; A gate names a command, not a test namespace (the M-f11 line-37 case:
+;; bb, sh and lake gates, declined because C8 then needed a namespace). The
+;; locator carries :command and no :config, so the registry's command lookup
+;; resolves it each click and no re-read is needed after the run registers.
+(def gate ["lake" "build" "DarkTower.WarMachine.F11AppliedConformance"])
+
+(def gate-run
+  (delay (stub-record {:schema "test-registry/v1" :kind :run :author "claude-10" :run/id "r-gate"
+                       :command gate
+                       :code-files {code-path (sha-now code-path)}
+                       :test-files {}
+                       :results {:error-count 0 :sorry-count 0 :jobs 1 :exit 0}
+                       :postcheck {:status :matched} :warrant? true})))
+
+(defn- gate-reply [issued]
+  (let [stated (str/replace (get-in issued [:criterion :stated]) #"^- " "")]
+    (str "```edn\n"
+         (pr-str {:schema mr/locator-schema
+                  :locator {:class :C8 :repo "futon2" :command gate}
+                  :cue {:quote (subs stated 0 (min 20 (count stated)))}
+                  :reading "the criterion is decided by this gate passing at current content"
+                  :by "claude-2"})
+         "\n```")))
+
+(deftest c8-command-locator-full-cycle
+  (let [s (store)
+        f (f11-flight s)
+        {run-id :entry-id run-entry :entry} @gate-run
+        asked (atom [])]
+    (testing "no run for the command: the locator validates, reads false :no-entry, and is published"
+      (binding [oc/*registry-latest* (fn [_ loc] (swap! asked conj loc) :absent)
+                oc/*registry-entry* (registry {})]
+        (let [read ((fr/read-fn {:store s :answer-fn (answer-with gate-reply)}) f {})
+              after (flight/click-wants f {})
+              published (mr/published-locators s target)]
+          (is (= (repeat 6 :published) (map :outcome (filter #(= :locator (:kind %)) (:asked read)))))
+          (is (empty? (:needs read)))
+          (is (every? #(= {:class :C8 :repo "futon2" :command gate} %) (vals published)))
+          (is (every? false? (map #(get (:universe after) %) (:wants after))))
+          (is (some #(= {:command gate} %) @asked) "asked by command, not by namespace")
+          (is (= :no-entry (get-in (oc/check-registered-run (first (vals published))) [:evidence :reason]))))))
+    (testing "the gate's run registered at current content: the SAME published locator reads true"
+      (binding [oc/*registry-latest* (fn [_ loc] (if (= {:command gate} loc) {:entry-id run-id :resolved-by :command-lookup} :absent))
+                oc/*registry-entry* (registry {run-id run-entry})]
+        (let [before (mr/published-locators s target)
+              after (flight/click-wants f {})]
+          (is (= before (mr/published-locators s target)) "nothing re-read or patched")
+          (is (every? true? (map #(get (:universe after) %) (:wants after)))))))))
+
+(deftest a-command-locator-with-config-is-the-checks-refusal
+  ;; the rule is the check's, not a second copy in the validator: a command
+  ;; with :config refuses in the check and comes back :check-refused
+  (let [issued {:kind :locator :target target :want {:token :exit/hx}
+                :criterion {:stated "- Run the same gates as F12"}}
+        v (mr/validate-locator issued {:locator {:class :C8 :repo "futon2" :command gate :config "x"}
+                                       :cue {:quote "Run the same gates"} :reading "r"})]
+    (is (= :rejected (:status v)))
+    (is (= :check-refused (:reason (first (:reasons v)))))))
