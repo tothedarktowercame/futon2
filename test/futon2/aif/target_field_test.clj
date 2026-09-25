@@ -164,3 +164,22 @@
     (is (= "futon3c" (:repo (first (filter #(= "M-autoclock-in" (:target %)) (:considered f))))))
     (is (= 15 (get-in ex ["M-autoclock-in" :details :shape :phase-headings])))
     (is (not-any? #(= "M-futon-seams" (:target %)) (:considered f)))))
+
+(deftest live-field-futon2-0df9f027
+  ;; the live read under mission-lifecycle.md's form (futon2 0df9f027;
+  ;; futon3c and every other head read are in the fixture): 59 of the 217
+  ;; live missions are shaped, none feasible; M-f11 has no phase heading;
+  ;; M-autoclock-in is shaped and waits on the read step.
+  (let [r (clojure.edn/read-string (slurp "test/fixtures/target-field/target-field@futon2-0df9f027.edn"))
+        f (get-in r [:decision :target-field])
+        ex (by-target (:exclusions f))
+        missions (filter #(= :mission (:kind %)) (:exclusions f))]
+    (is (= [] (tf/check-field f)))
+    (is (= {:considered 499 :feasible 0 :excluded 499
+            :considered-by-kind {:mission 217 :ticket 30 :excursion 252}
+            :excluded-by-reason {:needs-interpretation 12 :needs-reading 329 :not-lifecycle-shaped 158}}
+           (tf/counts f)))
+    (is (= 59 (count (remove #(= :not-lifecycle-shaped (:reason %)) missions))))
+    (is (= [:phase-headings] (get-in ex ["M-f11-find-production-successor" :what-would-make-feasible :lifecycle-parts-missing])))
+    (is (= :needs-reading (get-in ex ["M-autoclock-in" :reason])))
+    (is (= :needs-interpretation (get-in ex ["M-apm-demonstration" :reason])))))
