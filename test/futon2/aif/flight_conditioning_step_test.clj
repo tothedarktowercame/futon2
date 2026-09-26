@@ -19,6 +19,7 @@
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.flight :as flight]
             [futon2.aif.flight-runner :as fr]
+            [futon2.aif.policy-prefix-admission :as admission]
             [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -196,3 +197,51 @@
       (is (= enabled (manifest/guard-holds? selection state)
                      (manifest/guard-holds? converted state))))
     (is (= {#{:ready :done} 1} (manifest/transition-row converted #{:ready})))))
+
+(deftest a-contradiction-cannot-become-a-later-prior
+  ;; theta=0 leaves only #{:u}; on checked V=#{:t}, A({:t}|{})=FP=0.
+  ;; Hence evidence = 1*0 = 0, using the real rollout and token kernel.
+  (let [first-step (:step (fly {:theta 0 :labels (labels :C4 10 0 5 0)}))
+        next-step (fn [steps policy-key click]
+                    (flight/conditioning-step
+                     {:run-record (run-record {}) :target target
+                      :flight-id "flight-f1bj" :click-id click
+                      :observation {:status :observed :o #{:t} :checked #{:t}}
+                      :policy-key policy-key :precedence [:p/a]
+                      :enactments (mapv #(hash-map :step %) steps)}))
+        second-step (next-step [first-step] key-a "run-2")
+        third-step (next-step [first-step second-step] key-a "run-3")]
+    (is (= :present (:status first-step)))
+    (is (= 0 (:p-o first-step)))
+    (is (= :contradiction (:f first-step)))
+    (is (= :zero-predictive-probability (get-in first-step [:q :kind])))
+    (is (= {:status :absent :reason :chain-contradiction
+            :inputs {:previous (:occurrence first-step)}}
+           (select-keys second-step [:status :reason :inputs])))
+    (is (not (contains? second-step :s-prev)))
+    (is (not (contains? second-step :q)))
+    (is (= :chain-contradiction (:reason third-step)) "absence cannot restart the chain either")
+    (testing "an inner typed q is refused even without the F marker"
+      (is (= :chain-contradiction
+             (:reason (next-step [(dissoc first-step :f)] key-a "run-2")))))
+    (testing "a different policy starts from its own initial belief"
+      (let [other (next-step [first-step] [target [:p/other] {}] "run-2")]
+        (is (= :present (:status other)))
+        (is (= :initial-belief (get-in other [:s-prev :source])))
+        (is (= 11/20 (:p-o other)))))
+    (testing "real prefix admission stops at the typed absence"
+      (let [r (admission/admit key-a (mapv #(hash-map :step %) [first-step second-step third-step]))]
+        (is (= :chain-contradiction (:conditioning-status r)))
+        (is (= 1 (count (:observation-updates r))))
+        (is (= (:occurrence second-step) (get-in r [:ended-at :occurrence])))))))
+
+(deftest a-prior-step-without-q-does-not-restart-from-initial-belief
+  (let [previous {:status :absent :reason :no-measured-a :policy-key key-a
+                  :occurrence {:flight "f" :click "run-1"}}
+        step (flight/conditioning-step
+              {:run-record (run-record {}) :target target :flight-id "f" :click-id "run-2"
+               :observation {:status :observed :o #{:t} :checked #{:t}}
+               :policy-key key-a :precedence [:p/a] :enactments [{:step previous}]})]
+    (is (= :chain-prior-unavailable (:reason step)))
+    (is (= {:previous (:occurrence previous)} (:inputs step)))
+    (is (not (contains? step :s-prev)))))

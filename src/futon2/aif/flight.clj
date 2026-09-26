@@ -286,14 +286,14 @@
                        (fnil + 0) mass))
              {} belief))
 
-(defn- prior-q
-  "The chain's own q for POLICY-KEY: the :q of the last earlier enactment
-  entry whose :step is present for the same policy key, or nil."
+(defn- prior-step
+  "The last earlier step for POLICY-KEY, including typed absences. Never
+  skip an ended chain to recover an older posterior or the initial belief."
   [enactments policy-key]
   (some->> enactments
-           (filter #(and (= :present (get-in % [:step :status]))
-                         (= policy-key (get-in % [:step :policy-key]))))
-           last :step :q))
+           (map :step)
+           (filter #(= policy-key (:policy-key %)))
+           last))
 
 (defn conditioning-step
   "One conditioning step for the enacted click, or a typed absence/refusal.
@@ -307,7 +307,9 @@
   A = the decision's measured rates, target-local, restricted to V; B = the
   candidate's patterns from the run record's :domain-inputs; sPrev = the
   chain's own q for this policy, else the decision's initial belief
-  marginalised to the target (step 1 of a chain); q = cascade-model-manifest
+  marginalised to the target (step 1 ONLY; a contradictory or unavailable
+  chain posterior is a typed absence, never an initial-belief restart);
+  q = cascade-model-manifest
   /exact-update over token-likelihood with rates AND state intersected with V
   (C5's restriction: token-likelihood refuses any state token without a rate);
   f = -ln P(o) at that posterior, and a P(o) = 0 is :f :contradiction, never
@@ -318,6 +320,7 @@
   (let [ma (get-in run-record [:decision :measured-a])
         rates-q (:rates ma)
         measurement-q (:measurement ma)
+        previous (prior-step enactments policy-key)
         V (set (:checked observation))
         o (set (:o observation))
         interps (some #(when (= target (:target %)) (get-in % [:declaration :interpretations]))
@@ -330,6 +333,12 @@
       (nil? run-record) (absent :no-run-record)
       (not= :observed (:status observation)) (absent :nothing-observed {:observation-status (:status observation)})
       (nil? policy-key) (absent :no-policy-key)
+      (or (= :contradiction (:f previous))
+          (contains? (:q previous) :status)
+          (= :chain-contradiction (:reason previous)))
+      (absent :chain-contradiction {:previous (:occurrence previous)})
+      (and previous (nil? (:q previous)))
+      (absent :chain-prior-unavailable {:previous (:occurrence previous)})
       (nil? ma) (absent :no-measured-a)
       (= :absent (:status ma)) (absent :measured-a-absent {:measured-a ma})
       (nil? rates-q) (absent :no-rates-value {:rates-sha (:rates-sha ma)})
@@ -355,8 +364,8 @@
             (if (seq missing)
               (absent :no-interpretation {:patterns (mapv :pattern missing)
                                          :refusals missing})
-              (let [chain-q (prior-q enactments policy-key)
-                    s-prev (or chain-q (target-marginal target (get-in run-record [:decision :initial-belief-receipt :value])))
+              (let [chain-q (:q previous)
+                    s-prev (if previous chain-q (target-marginal target (get-in run-record [:decision :initial-belief-receipt :value])))
                     rates-v (select-keys rates V)
                     lik (fn [st obs] (manifest/token-likelihood rates-v (set/intersection st V) obs))
                     pushed (manifest/rollout (constantly pats) s-prev 1)]
