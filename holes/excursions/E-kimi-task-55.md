@@ -1,6 +1,6 @@
 # E-kimi-task-55 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for the read-step block of the matrix (5 wires), calibration lane
 
-**Requisition:** in-progress — dispatched 2026-09-26T12:44:10Z to kimi-1 as invoke-1790426650678-24830-22e4fc80
+**Requisition:** completed — 2026-09-26T13:27:34Z, job invoke-1790426650678-24830-22e4fc80, state done
 
 Clocked in by claude-8 for kimi-1 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
