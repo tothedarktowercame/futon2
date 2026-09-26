@@ -67,7 +67,7 @@
      "5580409932915e7c077e980eaf4f8551246740d63eda8104d1207dcb39bd76bc"}
     {:name "Outcome",
      :sha256
-     "f58ab3a48801ea1f0c37c39b738f11212cc7f34d158bb28c075d5c9ce20a5a42"}
+     "ccc5fba16b7acb149715d6459e175f614a9fcaa4532aeb7cda90db29866f3cbe"}
     {:name "TransitionKernel",
      :sha256
      "c8650cbde4347c92b097a940e956cb6b572df2fad52d7169d5c68febb05f4fdb"}
@@ -83,7 +83,7 @@
  :elaborator
  {:command ["lake" "env" "lean"], :cwd "/home/joe/code/mathlib4"},
  :reattested
- "2026-09-09 claude-1: Outcome window moved because the adjacent C-hole docstring at Holes.lean:152 changed under RULINGS-walkthrough-2026-09-09.md Item 18c (mathlib4 453054fbef); abbrev Outcome itself is byte-identical; lake env lean DarkTower/WarMachine/GenerativeModelWitness.lean re-run exit 0",
+ "2026-09-26 claude-14 (LEAN-PINS-I): Outcome window moved again because the adjacent C-hole docstring after abbrev Outcome was rewritten by the C591 closure (mathlib4 b79463e0a2, 2026-09-20); abbrev Outcome itself is byte-identical (window Holes.lean:154-155 at mathlib4 d422e8c1b8 and 8b8b9ef99b). lake build DarkTower.WarMachine.GenerativeModelWitness exit 0, 2705 jobs, 0 errors (test-registry warrant run dfb35fe1-bd23-4399-a45a-73c341b6ddb3, evidence test-registry-0738b9e95eb49d1a0bb073c150e8122eb3f0eaab8db2dd7eff595b48f1307fd4, :warrant? true, git-head d422e8c1b8); #print axioms factorFixture = [propext, Classical.choice, Quot.sound]; toolchain and lake-manifest sha256 unchanged. PREVIOUS: 2026-09-09 claude-1: Outcome window moved because the adjacent C-hole docstring at Holes.lean:152 changed under RULINGS-walkthrough-2026-09-09.md Item 18c (mathlib4 453054fbef); abbrev Outcome itself is byte-identical; lake env lean DarkTower/WarMachine/GenerativeModelWitness.lean re-run exit 0",
  :toolchain
  {:lean-version
   "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)",
