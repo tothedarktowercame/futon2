@@ -1,0 +1,5 @@
+;; Live pin (WM-CAST-I): the fifth flight's tick run record (flight-7f89646a,
+;; the untyped close), the keys record-summary reads, verbatim.
+;; source: futon3c b4bb0150 holes/labs/M-wm-wiring/spike/tick-run-record-2026-09-26-flight-7f89646a-click-1.edn
+;; sha256: a8e04fb97e58808e8fabdb4ab771f3c414b4181ef82dac336729dd472a18d816
+{:run/id "2026-09-26-flight-7f89646a-click-1", :click/id "wm-click-e9140183-529d-48b8-8859-5112fa70dac4", :route [{:fromNode "RUNNER", :toNode "FULL_LOOP_CLOSE", :via :incomplete, :at_ "2026-09-26T02:25:15.968473899Z"}], :decision {:chosen {:status :absent, :reason :no-chosen-action}, :abstention {:status :absent, :reason :no-selection-decision-recorded}}}

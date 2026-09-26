@@ -403,7 +403,10 @@
   "What the flight needs from a click's RUN RECORD (tick-run-record-<run-id>)
   for TARGET: the chosen plan's :unreached-wants (the record's
   [:decision :chosen], when it is this target's) and, when the tick
-  abstained, the target's own decline from [:decision :abstention]."
+  abstained, the target's own decline from [:decision :abstention]; and the
+  tick's close kind as :outcome, the :via of the route edge into
+  FULL_LOOP_CLOSE (held_out_observations' reading), else
+  {:absent :no-terminal-outcome-on-run-record} (WM-CAST-I)."
   [target run-id record]
   (let [chosen (get-in record [:decision :chosen])
         carrier (get-in record [:decision :abstention])
@@ -412,7 +415,12 @@
                    {:kind :target-not-in-refusals :missing :refusal}))]
     (cond-> {:click-id run-id
              :chosen (when (= target (:target chosen)) (select-keys chosen [:candidate :precedence]))
-             :unreached-wants (vec (when (= target (:target chosen)) (:unreached-wants chosen)))}
+             :unreached-wants (vec (when (= target (:target chosen)) (:unreached-wants chosen)))
+             :outcome (or (some->> (:route record)
+                                   (filter #(= "FULL_LOOP_CLOSE" (:toNode %)))
+                                   first
+                                   :via)
+                          {:absent :no-terminal-outcome-on-run-record})}
       mine (assoc :abstention (select-keys mine [:target :kind :missing :declines]))
       (nil? record) (assoc :abstention {:kind :run-record-missing :missing :run-record}))))
 

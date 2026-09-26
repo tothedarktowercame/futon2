@@ -229,8 +229,11 @@
                          :unreached-wants (vec unreached-wants)
                          :progress? (boolean (seq moved))}
                   abstention (assoc :abstention (select-keys abstention [:kind :missing :declines :status :detail]))
-                  ;; WM-CAST-I: the cast the click was sent with, as the
-                  ;; click function gave it (http-click-fn)
+                  ;; WM-CAST-I: the click's selection and close kind
+                  ;; (record-summary) and the cast it was sent with
+                  ;; (http-click-fn), as the click function gave them
+                  (:chosen click) (assoc :chosen (:chosen click))
+                  (contains? click :outcome) (assoc :outcome (:outcome click))
                   (contains? click :cast) (assoc :cast (:cast click))))
         (update :carried-wants #(vec (distinct (concat % (map :token unreached-wants)))))
         (update :needs #(cond-> % (:missing abstention)

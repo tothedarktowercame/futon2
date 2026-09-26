@@ -69,7 +69,8 @@
         (is (string? (get-in r [:ran :flown])))))))
 
 (deftest record-summary-reads-the-run-record
-  (is (= {:click-id "r1" :chosen {:candidate :C1 :precedence [:p/a]} :unreached-wants [{:token :x :reason :no-producer}]}
+  (is (= {:click-id "r1" :chosen {:candidate :C1 :precedence [:p/a]} :unreached-wants [{:token :x :reason :no-producer}]
+          :outcome {:absent :no-terminal-outcome-on-run-record}}
          (fr/record-summary "M" "r1" {:decision {:chosen {:target "M" :candidate :C1 :precedence [:p/a]
                                                             :unreached-wants [{:token :x :reason :no-producer}]}
                                                   :abstention {:status :not-abstained}}})))
