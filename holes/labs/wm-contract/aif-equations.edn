@@ -14,8 +14,8 @@
 ;; retrieved PDFs; :eq on a row is the specific equation the row reduces from.
 ;; Parr-Pezzulo-Friston 2022 could not be retrieved and is cited for notation only.
 {:schema :wm/aif-equations-v1
- :as-of "2026-09-01"
- :verified "2026-09-01 (claude-1; TN-edge-review-aif-wiring §8)"
+ :as-of "2026-09-26"
+ :verified "2026-09-26 (claude-3; WM-EQUATIONS-APPLY-I, applying WM-EQUATIONS-DELTA-D, futon2 a0b6f4a5). The 2026-09-01 verification (claude-1; TN-edge-review-aif-wiring §8) stands for every row it covered; this one covers the PROOF-2a-era delta: 8 new equations, 4 new exogenous symbols, 11 changed rows, and :code for R1/R2/R5."
  :owner :wm-organization
  :sources ["futon2/holes/labs/wm-contract/glossary-formal-lines.md"
            "p4ng/empirics-futon/control-stages.edn"
@@ -59,11 +59,27 @@
  ;; Exogenous symbols: imported by equations, defined by no equation here.
  ;; :class :stack-defined means the War Machine supplies the content.
  :exogenous
- [{:symbol :A :meaning "observation model P(o|s)" :class :stack-defined :glossary "Observation model A" :node :R4}
-  {:symbol :B :meaning "transition model P(s'|s,pi)" :class :stack-defined :glossary "Generative model" :node :R4}
+ [{:symbol :A :meaning "observation model P(o|s)" :class :stack-defined :glossary "Observation model A" :node :R4
+   :model :channel-model :superseded-by :token-likelihood
+   :note "WM-EQUATIONS-APPLY-I (2026-09-26): A remains exogenous at the CHANNEL grain and this row is a correct statement of it. At TOKEN grain it is no longer exogenous: :token-likelihood defines it from the measured adjudication rates, for every class that has admitted labels. A checkable class with none takes the zero kernel as the UNMEASURED DEFAULT, recorded :measurement :absent (observation_rates.clj:156-217) -- exogenous-by-default, and saying so on the record."}
+  {:symbol :B :meaning "transition model P(s'|s,pi)" :class :stack-defined :glossary "Generative model" :node :R4
+   :model :channel-model :superseded-by :co-application-kernel
+   :note "WM-EQUATIONS-APPLY-I (2026-09-26): B remains exogenous at the CHANNEL grain. At CASCADE grain it is defined by :co-application-kernel from the containment order and the interpreted patterns. Same relation this registry already uses between :prediction-error and :state-prediction-error under P9."}
   {:symbol :C :meaning "preference distribution over outcomes" :class :stack-defined :glossary "Preferences (R19 stack)" :node nil
-   :note "C has no node in control-stages.edn; it lives in the R19 preference stack registry"}
-  {:symbol :E :meaning "habit prior over policies" :class :stack-defined :glossary "Softmax and controller calibration" :node :R6}
+   :superseded-by :mission-preference
+   :note "C has no node in control-stages.edn; it lives in the R19 preference stack registry. SUPERSEDED 2026-09-26 (WM-EQUATIONS-APPLY-I): R19 IS a node now (p4ng afbc95b declared it in control-stage-amendments.json's 'nodes' section), and :mission-preference defines C there, read from the target mission's own text at click time. This row is kept as the statement of what C was while it was a vector the stack had to have prepared; :node stays nil so it contributes no edge, and gen_aif_dag.bb's source-node prefers the equation."}
+  {:symbol :E :meaning "habit prior over policies" :class :stack-defined :glossary "Softmax and controller calibration" :node :R6
+   :superseded-by :enactment-habit
+   :note "SUPERSEDED 2026-09-26 (WM-EQUATIONS-APPLY-I): E was supplied at the node that CONSUMES it, so it had no producer and no edge. :enactment-habit now defines it at R17 from the W_c-passing enactment records. This row is inert for the DAG -- source-node prefers the equation -- and is kept as the record of the exogenous era."}
+  {:symbol :mission-text :meaning "the target's own text at HEAD, with its sha256: the object the click reads C and the token universe out of" :class :external :glossary "Mission preference (C read at click time)" :node :R19
+   :note "DECLARED 2026-09-26 (WM-EQUATIONS-APPLY-I). Hosted at R19, the step that reads it, following this registry's convention for exogenous symbols (alpha at R3, eps0 at R7, q0 at R1 are each at the node that holds them), so it contributes no edge. It is NOT :o -- o is a token's observed truth value, this is the document. Code: futon2 src/futon2/aif/served_by_reading.clj:33-37, the sha256 of the text's UTF-8 bytes, which is the verifier's :text-sha256 rule."}
+  {:symbol :interp :meaning "an interpreted pattern as a library seat answers it: {:pattern :guard {:needs :forbids} :produces :receipt}, and the pattern's theta" :class :external :glossary "Structured observation" :node :R2
+   :note "DECLARED 2026-09-26 (WM-EQUATIONS-APPLY-I). PLACEMENT IS A CHOICE, recorded per TN-edge-review §1 standard 3 and movable by editing this one field. :R2 because the interpretation arrives from OUTSIDE the machine -- a seat's answer to want-interpretation/prompt, read by flight_runner/agency-answer-fn (boxes :r3-prompt, :r3-flight-ask) -- so it enters where the machine reads the world. The alternative is :R6, on the ground that it is an attribute of a candidate policy; that placement removes the two edges R2->R6 and R2->R4 (:containment-order's import becomes a self-edge and :co-application-kernel's rides the existing R6->R4), taking the theory-edge count from 37 to 35. Recorded, not decided."}
+  {:symbol :ref-label :meaning "the admitted reference judgement for a token: the blinded, @R9-reviewed label admitted by observation-admission" :class :external :glossary "Structured observation" :node :R2
+   :note "DECLARED 2026-09-26 (WM-EQUATIONS-APPLY-I). A judgement recorded ABOUT a token is an observation, so :R2. NOT :R12 (Two-layer calibration), which is declared plumbing: an equation hosted at a plumbing node is filtered out of the drawn figure by gen_aif_dag.bb's eq-node-list. The roles, exactly (observation_rates.clj:1-30): the observation procedure is the RECORDED VERDICT, the reference judgement is the ADMITTED LABEL."}
+  {:symbol :wc :meaning "the Clause C verdict W_c on one enactment record: a vector of failure strings, empty meaning pass" :class :stack-defined :node nil
+   :node-absence {:absent :producer-not-located
+                  :detail "futon3c holes/labs/M-wm-wiring/wm-flight-wiring.edn's :wc-checker box carries :site nil -- the verdict's producer is not located in the map. futon2 src/futon2/aif/enactment_habit.clj:6-9 states it is input data ('the vector of failure strings futon3c's exemplar proof2a_check.clj check-c returns') and that the namespace neither re-implements W_c nor reads G_c. Typed rather than guessed; with no node it contributes no edge, and it is the one symbol here waiting on a site."}}
   {:symbol :alpha :meaning "belief-update step size" :class :stack-defined :glossary "Prediction error" :node :R3}
   {:symbol :eps0 :meaning "variance floor in the precision map" :class :stack-defined :glossary "Precision" :node :R7}
   {:symbol :world :meaning "the environment: actuation changes what is next observed" :class :external :node :R16}
@@ -85,6 +101,7 @@
                   :finding "The world/action/time relation is stated: P(o_t | s_{t-1}, u_{t-1}) = sum_{s_t} B(s_t | s_{t-1}, u_{t-1}) A(o_t | s_t), conditioned on the world's own previous state and the executed action, not on a belief. Time indexing matches eq. 2.1 (u_{t-1} = pi(t-1) takes s_{t-1} to s_t), with no off-by-one. The distribution is normalised and depends on the action only through its B row. The fixture shows the action changing the observation (1/10 vs 9/10). The re-audit's MATCHES-WITH-UNDECLARED-REDUCTION is now declared, in the module docstring and in :eq below. Friston separates the generative process R (refs/friston2017.txt:227-245) from the model whose categorical form is eq. 2.1. Taking the world to be a finite categorical process on the model's carriers is a stack assumption. Process = model appears only as the explicit hypothesis of predictedOutcome_fromKnownState (renamed from fromObserved). The observation reports the world's token set exactly only at zero adjudication rates. Counterexamples recorded by the auditor: an A constant in s satisfies the definition, so structure comes only from hA : M.A = tokenLikelihood r; and a nonzero false-positive rate makes the reported set differ from the world state. Axioms propext/Classical.choice/Quot.sound only."}
    :defines :o :node :R2 :class :stack-defined :ref :friston2017
    :imports [:world :u :A :B]
+   :code "FILLED 2026-09-26 (WM-EQUATIONS-APPLY-I; this field was empty, and wm-vs-equation-dag.edn recorded R2 under :registry-names-no-site). futon2 src/futon2/aif/observation_checks.clj:567-571 (observe -- located tokens through C3/C4/C5/C6/C8; 'Unknown classes are refused, never observed absent'), registry-get / fetch-registry-entry / fetch-latest-for (the C8 arm); src/futon2/aif/flight_runner.clj:69-78 (observe-fn -- 'a refused check is :unknown, never false and never true, so it cannot count as a want advanced or met'), :685-691 (the writer's rule: :observed true must carry its evidence), :692-765 (observe-publication-fn, box :r10-observe-publication)"
    :formal "o_t ~ P(o_t | s_{t-1}, u_{t-1}) = sum_{s_t} B(s_t | s_{t-1}, u_{t-1}) A(o_t | s_t): the world's own state s_{t-1} (not a belief), advanced by the executed action u_{t-1}, then observed through A; under P5 s ranges over established-token sets and A = tokenLikelihood r (o_t = s_t exactly only where every adjudication rate is 0)"
    :lean "ObservationProcess.observationAfter" :eq "friston2017 eq. 2.1, P(o_t|s_t) = Cat(A) and P(s_{t+1}|s_t,pi) = Cat(B(u = pi(t))) (refs/friston2017.txt:323-334), used as the form of the generative process R(o~,s~,u~) of the Definition at :227-228. Declared stack assumption (not stated by the source, which gives 2.1 as the generative MODEL): the process is a finite categorical POMDP on the model's carriers (hidden state = established-token set, P5). Outside this row: o_1 from D (no preceding action). Process = agent model only as a hypothesis (predictedOutcome_fromKnownState); identity observation only at zero adjudication rates; no statement yet for mixed checkable/judgement rates"
    :lean-status :closed
@@ -122,7 +139,8 @@
                 :section "A1 §1" :finding "Exact declared reduction of Buckley eq. 45"}
    :defines :F :node :R8 :class :theory-defined :ref :buckley2017
    :imports [:Pi :eps]
-   :formal "F = 1/2 * mean_k (Pi_k eps_k^2)" :eq "buckley2017 eq. 45 (reduction: ½ ln σ terms dropped; mean over channels instead of sum)" :lean "variationalFreeEnergy" :lean-status :closed
+   :formal "F = 1/2 * mean_k (Pi_k eps_k^2)" :eq "buckley2017 eq. 45 (reduction: ½ ln σ terms dropped; mean over channels instead of sum)" :lean "Holes.variationalFreeEnergy" :lean-status :closed
+   :lean-qualified "2026-09-26 (WM-EQUATIONS-APPLY-I, on WM-LEAN-DEP-MAP-I's ambiguity report, p4ng 40a1240): the bare name resolved to BOTH Holes.variationalFreeEnergy and PolicyVariationalFreeEnergy.variationalFreeEnergy. This row's formal line is F = 1/2 * mean_k (Pi_k eps_k^2), which is Holes.variationalFreeEnergy's own docstring verbatim ('F = ½ · mean_k (Π_k · ε_k²), over Channel.all'); the PolicyVariationalFreeEnergy declaration is the POLICY F this row's :superseded-by names, and :policy-free-energy already binds it."
    :code "NO PRODUCER AT HEAD. compute-variational-free-energy was DELETED by worklist :I5 slice (c) under Joe's J2 ruling: free_energy.clj:7-12 records the deletion and its grounds, trace.clj:241-247 records revision 21 removing the per-tick :variational-free-energy scalar, and free_energy_test.clj:293-301 asserts the var no longer resolves. The pointers this field carried until 2026-09-05 (free_energy.clj:184-205; war_machine.clj:4913-4915) were themselves RUN9's repair of an earlier drift and had drifted again -- they land on free-energy/prediction-member and on a string builder inside render-war-machine."
    :live-consumer nil :status :retired
    :retired {:at "2026-09-01" :grounds :ruling :ruling-key :free-energy-form :by "joe (J2)"
@@ -180,6 +198,7 @@
                       :subject "mathlib4 60e8335e94 + ba0eda16df (claude-7; design P12 approved by Joe 2026-09-16): ExactBeliefTrajectory.exactBeliefAt; exactBeliefAt_dist; exactBeliefAt_congr; tokenBeliefAt; tokenBeliefAt_dist; tokenBeliefAt_one_eq_meanField"
                       :finding "Rebound under P12 from BeliefTrajectory (mean-field) to the exact categorical filtering posterior. The re-audit's MATCHES-WITH-UNDECLARED-REDUCTION was answered by declaring reductions (a)-(h) in the module docstring and in :formal: exact posterior rather than the mean-field fixed point; one belief along executed actions; no future message; no smoothing (compiled: mu_1 cannot depend on o_2, whereas the smoothed value would); closed form rather than gradient flow; q0 per P4 with o_0 unread; B.2 used per step; not B.6. Also stated over the approved carriers (TokenState q0, cascadeKernel B, tokenLikelihood A) at claude-4's request, so WM-02's aligned Clojure can replay it. Axioms propext/Classical.choice/Quot.sound only."}
    :defines :mu :node :R1 :class :stack-defined :ref :parr2022
+   :code "FILLED 2026-09-26 (WM-EQUATIONS-APPLY-I; empty until now, R1 under wm-vs-equation-dag.edn's :registry-names-no-site). futon2 src/futon2/aif/belief.clj:37-43 (status-set, the seven-member status set), :44-61 (uniform-prior), :62-93 (initial-belief-state), :447-453 (most-likely-status, derived on demand), :510-533 (reconcile-belief-carry -- the actual mu_t: survivors keep the carried posterior, new entities take the fresh prior, carried-only entities are DROPPED); futon2 scripts/futon2/report/war_machine.clj:6969-6974 (the tick's carry, guarded by belief/*carry-belief?*, reading (:mu-post prev-trace-record)); src/futon2/aif/trace.clj:445 (the :mu-post write), :421-424 (the read rule). Filling this field does NOT repair what :lean-note establishes at length -- that the :formal line is false as written, mu_t being reconcile-belief-carry(fresh_t, mu-post_{t-1}) -- it makes the site checkable."
    :imports [:s-next :A :B :o :u :q0]
    :formal "mu_0 := q0 (P4: already conditioned on the record, so o_0 is not reused); mu_{t+1} := s_next(mu_t, u_t, o_{t+1}) of :state-belief-update, i.e. mu_{t+1}(x) = A(o_{t+1}|x) (B_{u_t} mu_t)(x) / P(o_{t+1}), (B mu)(x) = sum_{s0} B(x|s0) mu(s0), P(o) = sum_y A(o|y) (B mu)(y); or a typed refusal (none, carried forward to every later t) exactly when P(o_{t+1}) = 0. Every stored mu_t is a distribution (A, B >= 0, q0 a distribution). mu_t depends only on u_{<t} and o_{1..t}. Declared reductions against eq. 4.13: exact categorical posterior (P12), not the mean-field fixed point (they agree, refusal included, when mu_t is a point mass); one belief along the executed actions, not s_pi_tau per policy; filtering only: no future message (ln B_{tau+1})^T s_{tau+1} and no retrospective revision of stored beliefs; closed form, not the v-dot gradient flow; q0 (P4) in place of B.4's ln D + ln A.o_1. Not formalised: that mu_t equals the marginal P(s_t|o_{1:t},u_{<t}) of the B.1 trajectory joint"
    :eq "exact categorical filtering posterior, each step the unique minimiser of parr2022 B.2 instantiated per step (likelihood A(o_{t+1}|.), prior B_{u_t} mu_t); design P12 (Joe, 2026-09-16). parr2022 eq. 4.13 (mean-field, B.4-B.5) remains the stated inference scheme (:state-prediction-error), equal to this belief when mu_t is a point mass; NOT B.6"
@@ -212,6 +231,7 @@
    :reduction "Finite KL only: positive preference mass is required on every listed predictive outcome."
    :defines :risk :node :R5 :class :theory-defined :ref :dacosta2020
    :imports [:Q-o-pi :C]
+   :code "FILLED 2026-09-26 (WM-EQUATIONS-APPLY-I; empty until now, R5 under wm-vs-equation-dag.edn's :registry-names-no-site). futon2 src/futon2/aif/cascade_model_manifest.clj:600-611 (outcome-risk: D_KL[q||c] in extended reals, :infinite exactly when some observation has q(o) > 0 and c(o) = 0, a missing key counting as 0)"
    :formal "risk(pi) := D_KL[Q(o|pi) || C]" :eq "dacosta2020 eq. 44 (risk over outcomes)" :lean "OutcomeRiskKL.outcomeRisk" :lean-status :closed
    :lean-at "mathlib4 f4fed50271 (OutcomeRiskKL.lean; Holes.predictiveOutcomeRisk is unchanged and proved its finite special case)"}
   {:id :ambiguity
@@ -221,7 +241,9 @@
    :imports-note "Audit 2026-09-16, A3 §4: \"imports should be Q(s|π), not Q(o|π)\". No registry row defines Q(s|π), so :imports is retained unchanged."
    :defines :ambiguity :node :R5 :class :theory-defined :ref :dacosta2020
    :imports [:Q-o-pi :A]
-   :formal "ambiguity(pi) := E_{Q(s|pi)}[H(P(o|s))]" :eq "dacosta2020 eq. 45-48" :lean "ambiguity" :lean-status :closed
+   :code "FILLED 2026-09-26 (WM-EQUATIONS-APPLY-I; empty until now). futon2 src/futon2/aif/cascade_model_manifest.clj:612-631 (step-ambiguity: sum_s q(s)*H[A(.|s)] with 0 ln 0 = 0; at all-zero adjudication rates A is the identity kernel, tokenLikelihood_checkable, and this is 0.0)"
+   :formal "ambiguity(pi) := E_{Q(s|pi)}[H(P(o|s))]" :eq "dacosta2020 eq. 45-48" :lean "Holes.ambiguity" :lean-status :closed
+   :lean-qualified "2026-09-26 (WM-EQUATIONS-APPLY-I, on WM-LEAN-DEP-MAP-I's ambiguity report, p4ng 40a1240): the bare name resolved to Holes.ambiguity, CascadeEFE.ambiguity and GNonPointMassDecomposition.ambiguity. The one R5 hosts is Holes.ambiguity: :expected-free-energy's own re-audit on this registry records that MachineQ.machineExpectedFreeEnergy -- the binding of G at R5 -- takes 'ambiguity is Holes.ambiguity over the constructed Q(s|pi) and model.observation', and MachineQ.lean:137,265,275 names Holes.ambiguity as the function it calls."
    :u4-discrimination-sweep
    {:by "claude-cli" :at "2026-09-02" :row :U4 :report "C487-u4-ambiguity-discrimination.md"
     :script "u4_ambiguity_sweep.clj" :artifact "U4-AMBIGUITY-SWEEP.txt (byte-identical on two runs)"
@@ -252,6 +274,7 @@
                   :finding "Risk is the finite KL over the constructed Q(o|pi) and ambiguity is Holes.ambiguity over the constructed Q(s|pi) and model.observation, both from one model, reading and belief; ambiguity >= 0 and the audit's deterministic case scores exactly 0. Inherits the declared finite-KL restriction of :risk (positive C on listed outcomes). C remains an argument (fundamental machine-preference-distribution, WM-06); the plan is one step (horizon: :depth). Rebuilt by claude-4."}
    :defines :G :node :R5 :class :theory-defined :ref :dacosta2020
    :imports [:risk :ambiguity]
+   :code "FILLED 2026-09-26 (WM-EQUATIONS-APPLY-I; empty until now). futon2 src/futon2/aif/cascade_model_manifest.clj:632-666 (horizon-g), :1070-1112 (horizon-g-sparse -- the same numbers without enumerating the powerset), :1113+ (horizon-g-sparse-cert); src/futon2/aif/efe.clj:1066+ (rank-cascade-actions, the R5 path: ONE common horizon and ONE common token universe for the whole candidate list); src/futon2/aif/active_horizon_g.clj:176-220 (the :spec / :c-fn-pointwise seam)"
    :formal "G(pi) := risk(pi) + ambiguity(pi)" :eq "dacosta2020 eq. 42 WITHOUT the novelty term -E[D_KL[Q(A|o,s)||Q(A)]]; eq. 42 uses state risk, and outcome risk additionally requires eq. 44 (corrected 2026-09-16, audit)" :lean "machineExpectedFreeEnergy" :lean-status :closed :lean-previous "expectedFreeEnergy (Holes.lean; ambiguity was an arbitrary argument, audit A3 §5)"
    :omits "novelty (parameter-exploration) term of eq. 42; the WM has no Dirichlet Q(A) live, so the term is identically absent rather than approximated"
    :conflict "Holes.G := risk - eig over a generic Policy; G_eq_expectedFreeEnergy bridges the two under stated assumptions (glossary-formal-lines.md, G entry)"}
@@ -328,10 +351,11 @@
                   :finding "The audit's exp := fun _ => 0 input can no longer be written; for every admitted input the output is a probability distribution over the policy list computing sigma(ln E - G/tau - F_pi). Row-local verdict only: its inputs G (:expected-free-energy), F_pi (:policy-free-energy) and tau (:temperature) remain :diverges. Rebuilt by claude-4 with all importers."}
    :defines :Q-pi :node :R6 :class :theory-defined :ref :parr2022 :also-refs [:dacosta2020 :friston2017 :friston2016]
    :imports [:E :G :tau :pi :F-pi]
-   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau - F_pi(pi))" :eq "parr2022 eq. B.9 (π = σ(ln E − F − G), p. 247) with γ = 1/τ from friston2017 text after eq. 2.7 / dacosta2020 A.2 (corrected 2026-09-16, audit). E's meaning: friston2016 eq. 7 (habit as policy concentration parameters) (corrected 2026-09-16, audit)"
+   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau - F_pi(pi)) over the FINITE-G candidates, with a candidate whose G is infinite (EReal top) taking probability exactly 0 at every positive precision, and the normalisation over the finite candidates only"
+   :formal-amended "2026-09-26 (WM-EQUATIONS-APPLY-I): the infinite-G clause was missing and is not decoration. Under the identity-A reduction F_pi is infinite for EVERY cascade that produces anything, so this was the ORDINARY case and not a corner (found reviewing WIRE-2, 2026-09-18; the comment is at cascade_selection.clj:79-90). The Lean has carried it since PolicySelection: selectionWeight_top (:33), selectionPosterior_eq_zero_of_risk_top (:40), selectionPosterior_finite (:63). :lean stays softmaxWithFPi, which is unambiguous and is the closed-form statement; this field is where the extended-real branch is cited, because naming only the closed form left it uncited. The code's typed refusals are :invalid-temperature (beta not positive), :invalid-habit, :invalid-free-energy (F not finite and not a declared typed absence) and :no-admissible-candidate (every candidate infinite, so the normaliser would be 0)." :eq "parr2022 eq. B.9 (π = σ(ln E − F − G), p. 247) with γ = 1/τ from friston2017 text after eq. 2.7 / dacosta2020 A.2 (corrected 2026-09-16, audit). E's meaning: friston2016 eq. 7 (habit as policy concentration parameters) (corrected 2026-09-16, audit)"
    :lean "softmaxWithFPi" :lean-status :closed
    :lean-rebinding-note "REBOUND 2026-09-12 (claude-15, reviewer, from the codex-23 R6 witness stop): :lean previously named 'softmax' (Holes.lean, CLOSED-BY-RECORD, F-less form exp(ln E - G/tau)), which omits this row's declared F_pi term. The general carrier softmaxWithFPi (PolicyPosterior.lean since mathlib4 780de57fc3 — relocated out of Holes.lean under the 2026-09-12 subject-file freeze policy, Holes restored byte-identical to 4dc0a76b; first stated at bcdd2ee406) states the full B.9 score ln E - G/tau - F_pi with theorem softmaxWithFPi_zero proving full-argument equality to the closed softmax at fPi = 0 — so all existing softmax evidence speaks to the general carrier's zero-F branch unchanged. The closed softmax declaration and SoftmaxWitness are untouched. Witnesses at records with F_pi :status :absent target the F-absent branch; the general nonzero-F correspondence is open until a record with F_pi present exists."
-   :code "policy.clj:51-113 (selection-scores; the score expression is at :208-213, with F_π subtracted unscaled), policy.clj:115-134 (softmax-weights, the normalisation), the deleted policy/default-selection-law (:525-670 pre-deletion) (:habit-adjusted-ranking and :counterfactual -- the second ordering, which is NOT B.9; see :note), the deleted policy/default-selection-law (:525-670 pre-deletion) (:f-pi-posterior and :softmax-weights, what the decision records)"
+   :code "RE-POINTED 2026-09-26 (WM-EQUATIONS-APPLY-I): this field named the deleted policy/default-selection-law THREE times, and its two surviving pointers had drifted. Verified by grep at futon2 79d70a46: neither default-selection-law nor selection-laws exists in src/futon2/aif/policy.clj. At HEAD: futon2 src/futon2/aif/cascade_selection.clj:54-124 (selection-posterior -- THE LAW: habit*exp(-F - G/beta) in log space, normalised over the finite-G candidates), :131-176 (bayes-choice), :186-240 (law-receipt); src/futon2/aif/policy.clj:57-120 (selection-scores, was :51-113), :121-146 (softmax-weights, was :115-134), :300-566 (select-action-cascades, the live caller and what the record carries)"
    :note "F_π ENTERED THIS ROW 2026-09-01 (RUN9 / stage S4), which is why :imports gained :F-pi and the formal line its third term: the registry previously said the WM scores policies by G only, and that is no longer true when FUTON_WM_FPI_POSTERIOR=1. It reaches ONE site, this posterior. The decision map records a second ordering beside it -- :habit-adjusted-ranking and its :counterfactual winner, at the deleted policy/default-selection-law (:525-670 pre-deletion) -- and that one is still ln E - G/tau with no F_π, so a reader must not take the two as the same object. Computed and recorded; the live path then selects deterministically (see :action), so what F_π moves here is the recorded posterior and not the enacted action -- measured, RUN9: 133 of 145 ranks move and the argmax does not."
    :pointer-revisions
    {:at "2026-09-18" :by "zai-51 (E07 republish blocker)"
@@ -351,7 +375,8 @@
    :defines :u :node :R16 :class :theory-defined :ref :friston2017
    :imports [:Q-pi :pi]
    :formal "u_t := argmax_u sum_pi delta(u, pi_t) Q(pi)" :eq "dacosta2020 eq. 11 (Bayesian-model-average argmax); friston2017 eq. 2.3 selects the action minimising expected outcome prediction error -- two deterministic rules in the literature, neither is sampling (C453)"
-   :code "the deleted policy/default-selection-law (:525-670 pre-deletion) (head and head-idx, the first admissible controller entry), the deleted policy/selection-laws (:503-519 pre-deletion) (selection-laws), the deleted policy/default-selection-law (:525-670 pre-deletion; the selection law now lives in cascade-selection/selection-posterior, src/futon2/aif/cascade_selection.clj:51-91, and policy/select-action-cascades, policy.clj:151-231) (first-argmax) with the deleted policy/default-selection-law body (:593 pre-deletion)-594 (chosen-idx: the controller head under the default law, the argmax of the recorded posterior under :full-score-posterior), the deleted policy/select-action body (:838 pre-deletion)-839 (the max-key argmax on the :actuation habit-prior branch)" :note "The code's deterministic selection conforms to eq. 11. C448 5b: the enacted action at R16 is the first passing act gate (enact.clj:287-316), not the recorded selection -- see :holes."
+   :code "RE-POINTED 2026-09-26 (WM-EQUATIONS-APPLY-I): almost the whole field named deleted vars -- policy/default-selection-law (head, head-idx, first-argmax, chosen-idx) and policy/selection-laws -- as the row's own parenthetical already said. At HEAD: futon2 src/futon2/aif/cascade_selection.clj:54-124 (selection-posterior), :131-176 (bayes-choice), :186-240 (law-receipt); src/futon2/aif/policy.clj:300-566 (select-action-cascades: :action-marginal, :per-policy-argmax, :tie-break-rule, :tie-broken?, :excluded-non-actions)"
+   :formal-note "The formal line is unchanged and still correct: u is the action-marginal argmax. What the record now carries is BOTH readings -- :softmax-weights / :action-marginal (the unrestricted SUMMED marginal, first-acting-action -> probability) and :per-policy-argmax (the highest-probability policy's first action) -- 'recorded beside :per-policy-argmax so a reader can reconstruct a selection, including a disagreement between the two, from the record alone' (policy.clj:358-361). That the two CAN disagree is not stated by the formal line." :note "The code's deterministic selection conforms to eq. 11. C448 5b: the enacted action at R16 is the first passing act gate (enact.clj:287-316), not the recorded selection -- see :holes."
    :lean "ActionMarginal.IsBayesAction"
    :lean-status :closed
    :lean-at "mathlib4 4da0bb7949 (ActionMarginal.lean, first committed at 6b55652425 by zai-39; the production selector machineAction in MachineAction.lean is unchanged and no longer this row's binding)"
@@ -431,7 +456,91 @@
    :eq "parr2022 §B.2.4 eqs. B.14-B.19 (likelihood precision zeta, gamma prior, posterior update)"
    :lean "LikelihoodPrecision.precisionLikelihood" :lean-status :closed
    :lean-at "mathlib4 fd02c510f8 (LikelihoodPrecision.lean)"
-   :note "MINTED 2026-09-16 under P9 (claude-7), replacing :precision as the WM target. Closed the same day on zai-30's LikelihoodPrecision.lean."}]
+   :note "MINTED 2026-09-16 under P9 (claude-7), replacing :precision as the WM target. Closed the same day on zai-30's LikelihoodPrecision.lean."}
+
+  ;; ------------------------------------------------------------------------
+  ;; The PROOF-2a era. Added 2026-09-26 by WM-EQUATIONS-APPLY-I, from
+  ;; WM-EQUATIONS-DELTA-D (futon2 a0b6f4a5), which read for each row the
+  ;; PROOF-2a draft section, the Lean module and the Clojure site at HEAD.
+  ;; ------------------------------------------------------------------------
+
+  {:id :mission-preference
+   :defines :C :node :R19 :class :stack-defined :ref :parr2022
+   :imports [:mission-text]
+   :formal "C := the outcomes the target's own text states, each cued to the span it came from, with served-by links to the instance wants that serve it. Predeclared cue table; every quote must occur EXACTLY ONCE at the reported line range or the whole output refuses. No outcome found is {:absent :no-stated-outcome} naming every section read; an instance with no cascade is {:absent :no-cascade}; an unstated weighting is {:absent :unstated}, never a uniform prior."
+   :ref-note "C is da Costa/Parr's preference over outcomes; what is new is not the term but that its CONTENT is read rather than supplied."
+   :lean "Holes.PreferenceDistribution" :lean-status :carrier-only
+   :lean-note "THE CARRIER ONLY, and the absence beside it is typed rather than papered over: no Lean module formalises the READING rule (the cue table, the exactly-once span check, the typed absences). MachinePreferenceDistribution.machineC is NOT this row -- its own docstring says 'Only the ruled outcome seed contributes mass ... and the mission-grain layer remains undeclared', and its Layer enum carries .mission as the declared-but-empty slot this row would fill."
+   :code "futon2 scripts/futon2/wm/extract_outcomes.clj:1-40 (the three disciplines: predeclared cues, verified spans, typed absence), :422-512 (verify-proposed-link), :513+ (extract); src/futon2/aif/served_by_reading.clj:85-133 (proposal, read-link, reading -- quotes to code-point spans, pinned to the text sha256); src/futon2/aif/flight_runner.clj:575-583 (read-fn, the flight's read step, which requires served-by-reading at :27)"
+   :not-realised "THE EDGE R19->R5 IS A THEORY EDGE THE CODE DOES NOT CARRY. The C that enters risk today is built at futon2 src/futon2/aif/cascade_problems.clj:150-174 from the target's :want plus live-c/preference-scales and live-c/preference-schedule -- not from the extracted outcomes. The M-wm-wiring map says the same from the other side: row 2's :fields-leaving-the-row are :text-sha256 and :want-span, both to row-2 boxes, with an empty node list on each."
+   :supersedes "the exogenous :C row (kept, :node nil, so it contributes no edge). PROOF-2a: 'A mission is never refused for lacking a precomputed C.'"
+   :node-note "R19 is declared in p4ng empirics-futon/control-stage-amendments.json ('nodes', claude-2, afbc95b) and merged into control-stages.edn as :declared-in. WM-EQUATIONS-DELTA-D hosted this row at :R2 because R19 did not exist then; hosting it at R19 moves the delta's new edge R2->R5 to R19->R5 and adds no other, because :mission-text is hosted at R19 too, following this registry's convention for exogenous symbols."}
+
+  {:id :target-universe
+   :defines :U-t :node :R19 :class :stack-defined :ref :dacosta2020
+   :imports [:mission-text]
+   :formal "U(t) := the token universe of target t, read from t's own text at click time -- the same reading step that produces C. A target that records none is {:absent :no-universe}, never the empty set."
+   :lean-absent {:absent :no-declaration
+                 :detail "The universe is the Finset U that Proof2.TargetGrainG.localDelta takes as an ARGUMENT; no declaration names it, so this row carries no :lean rather than a binding to someone else's declaration. This is the registry's one row without a :lean and it is the reason :equations-without-lean is 1 rather than 0."}
+   :code "futon2 src/futon2/aif/target_field.clj:278-308 (with-pair-overlap reads :universe off each feasible entry), :213-277 (assess, where the entry's wants and universe are read)"}
+
+  {:id :containment-order
+   :defines :r :node :R6 :class :theory-defined :ref :dacosta2020
+   :imports [:interp]
+   :formal "r := the containment order over UNITS -- one node per APPLICATION of a pattern, the pattern id as an attribute, so a cascade applying one pattern twice has two units. Unit A is above unit B iff A produces a token B's guard needs. Below is reflexive (a = b or Reach r a b); the semilattice condition is restricted to OVERLAPPING pairs (those sharing a descendant), and an overlapping pair without a meet is the typed finding :missing-meets naming the pair and the maximal units of its common part, not a failure. A cyclic containment REFUSES with :cyclic-containment. A precedence list is the chain case of r."
+   :ref-note "FLAGGED against TN-edge-review §1 standard 2: :dacosta2020 is the citation for the SURROUNDING term (pi as a structured policy), not for this line. The order is the stack's own structure on policies and the registry has no reference for it. Recorded rather than dressed."
+   :lean "acyclicDescent" :lean-status :closed
+   :lean-note "CascadeOrder declares no namespace, so its declarations are unqualified and the name resolves to exactly one module (DarkTower.WarMachine.CascadeOrder). acyclicDescent is the condition whose failure IS this row's typed refusal. The rest of the order vocabulary is in the same module (Reach, Below, IsMeet, hasMeets); the RESTRICTED meet condition the Clojure actually enforces is Proof2.CoApplicationKernel.hasRestrictedMeets, with hasMeets_imp_hasRestrictedMeets and a two-element antichain showing the converse fails; the chain case is Proof2.ChainOrder.listChain, with chainCondition discharged."
+   :code "futon2 src/futon2/aif/construction.clj:113-230 (containment-order). Its docstring records that on the hand cascade M-futon-seams instance 6 the derived edges are exactly the recorded :above spans."}
+
+  {:id :co-application-kernel
+   :defines :B-co :node :R4 :class :theory-defined :ref :dacosta2020
+   :imports [:r :interp]
+   :model :cascade-token-model
+   :formal "K(s, .) := every unit on the ENABLED FRONTIER of r at s fires independently with its own theta; each subset S of the frontier that succeeds, with probability prod_S theta * prod_(F\\S) (1 - theta), moves s to s union produces(S). An empty frontier is {s -> 1}. The frontier at s is the enabled units with no enabled unit strictly above them in r. K = cascadeKernel (the one-at-a-time list kernel) exactly on a chain. A theta outside [0,1] refuses."
+   :ref-note "B is da Costa's transition model P(s'|s,pi); this is its cascade-token instance. The exogenous :B row names this one under :superseded-by."
+   :lean "Proof2.CoApplicationKernel.coApplyKernel" :lean-status :closed
+   :lean-note "with coApplyKernel_eq_cascadeKernel_of_chain and frontierConflict; CascadeCoapplication adds the chain case for an arbitrary total order, with the frontier shown empty-or-singleton rather than assumed."
+   :code "futon2 src/futon2/aif/cascade_model_manifest.clj:375-399 (co-apply-kernel, exact rationals, sparse rows), :400-410 (evaluate-co-apply, recording :frontier, :kernel-kind and :frontier-conflict), :412-415 (evaluate-state dispatching on a map precedence); src/futon2/aif/efe.clj:1006-1065 (order-use -- which containment the kernel scores an action under, with its five branches: no order on the receipt, a refused order, precedence violations, a chain, and the co-application kernel)"
+   :g-note "G is unchanged as a formula. What changes is the Q(s_tau|pi) it is evaluated against: the rollout's kernel is now a function of r, which is why :r rides the existing R6->R4 edge."}
+
+  {:id :adjudication-rates
+   :defines :rates :node :R7 :class :theory-defined :ref :dacosta2020
+   :imports [:o :ref-label]
+   :formal "Per truth kind: false-neg := P(recorded verdict = false | admitted = :present), false-pos := P(recorded verdict = true | admitted = :absent), as RAW exact-rational counts, numerator over denominator. An error count exists only where BOTH a recorded verdict and an admitted reference are present for the same subject. A zero denominator is :unobserved for that cell -- never 0, never defaulted. No default prior, no smoothing; a prior applies only when passed explicitly with an :authority, and an unauthorised prior refuses."
+   :lean "TokenObservation.AdjudicationRates" :lean-status :closed
+   :code "futon2 src/futon2/aif/observation_rates.clj:32-48 (cell), :75-107 (rates-by-class), :126-152 (measured-cell), :218-260 (sourced-rates); src/futon2/aif/check_error_rates.clj (the estimator); the R5 call site is scripts/futon2/report/war_machine.clj (cascade-lane, box :r6-cascade-lane)"}
+
+  {:id :token-likelihood
+   :defines :A-tok :node :R4 :class :theory-defined :ref :dacosta2020
+   :imports [:rates]
+   :model :cascade-token-model
+   :formal "A(o|s) := tokenLikelihood r s o, the product over the universe's tokens of each token's per-token rate: a token in s reported absent contributes false-neg, a token outside s reported present contributes false-pos. At all-zero rates A is the IDENTITY kernel (tokenLikelihood_checkable) and the ambiguity term is identically 0."
+   :lean "TokenObservation.tokenLikelihood" :lean-status :closed
+   :code "futon2 src/futon2/aif/cascade_model_manifest.clj:191-216 (token-likelihood), :217-233 (observation-distribution), :1272-1290 (the belief-update consumer); src/futon2/aif/cascade_free_energy.clj:100; src/futon2/aif/likelihood_precision.clj:124-205 (tempered-rates, the effective rates whose token-likelihood IS A_zeta)"
+   :note "A is no longer exogenous for any class that has admitted labels. The zero kernel is reached only when a :checkable class has NO entry, or the whole entry is {:status :unobserved}; it is then recorded {:false-neg 0 :false-pos 0 :basis :checkable :measurement :absent}. A :judgement class with no admitted rate, and ANY class measured on one cell only, is the typed :unsupported-class refusal -- a measured cell is never discarded, a partial measurement never padded; a cell carrying a rate its own counts do not produce refuses with :cell-reason :declared-not-measured."}
+
+  {:id :enactment-habit
+   :defines :E :node :R17 :class :theory-defined :ref :friston2016
+   :imports [:u :wc]
+   :formal "E := the cascade-grain habit prior counted from Clause C enactment records. One enactment record adds AT MOST ONE count, to its candidate's policy key [mission, ordered pattern ids, semilattice], and only when the W_c verdict passes (an empty failure vector): a W_c fail gives :delta 0 with the failures, a missing verdict :delta 0 with its absence typed -- no verdict is not a pass. A :delta 1 receipt counts once per [click, candidate]; a later one with the same id is listed under :duplicates and not counted. An attempt at a pattern outside the candidate refuses. Attempts are trials of their pattern's theta (clause 5), not of E. E over a menu is exp of the cascade-prior log-priors."
+   :ref-note "friston2016 eq. 7: the habit prior over policies learned as Dirichlet concentration parameters. The counting RULE -- one record, W_c-gated, deduplicated by click x candidate -- is the stack's, not the paper's."
+   :lean "Holes.PolicyPriorKernel" :lean-status :carrier-only
+   :lean-note "THE CARRIER ONLY. No module states the counting rule, and that absence is typed here rather than left to read as formalised. The consumer side is PolicySelection.selectionPosterior's `habit` argument; CascadeEFEPolicies:63-73 carries the .habit score shape, log E i - G i."
+   :code "futon2 src/futon2/aif/enactment_habit.clj:34-65 (policy-key-for, with its three typed absences A1/A2/A3 kept as absences), :66-98 (increment), :99-118 (fold), :119-122 (masses); src/futon2/aif/cascade_prior.clj:158-162 (habit-masses); src/futon2/aif/policy.clj:300-566 (select-action-cascades, which reads E from the fold)"
+   :node-note "PLACEMENT IS A CHOICE, movable by editing this one field. :R17 (Structure learning) is where this registry already hosts :dirichlet-accumulation and :model-reduction -- learning parameters from experience, which is what the fold does, and friston2016 eq. 7 is the same shape. The alternative is :R6, where E was supplied while exogenous: that removes R17->R6 (E's import becomes a self-edge) and turns R16->R17 into R16->R6, taking the theory-edge count from 37 to 36 and leaving R17 a sink again. Recorded, not decided."
+   :drop "futon2 policy.clj:367-382 records the drop this row rests on: the legacy habit store (data/wm-habit/cascade-prior.edn, filled by the legacy selection writer and the runner's close rule WITHOUT W_c) is no longer read, and since WM-HABIT-STORE-RETIRE-I no longer written either. H-E-D (69bfd1ab) found that store had two writers, record-selection! (17 of 21 samples, its own docstring saying live selection must not call it) and record-reinforcement! (4)."}
+
+  {:id :target-grain-g
+   :defines :Delta-G-t :node :R5 :class :theory-defined :ref :dacosta2020
+   :imports [:G :U-t]
+   :formal "Under a POSITIVE PRODUCT-form preference C(o) = prod_v (c_in v if v in o else c_out v), total G = risk + ambiguity is minus a sum of per-token terms. Partition the tokens into t's own U and the rest: if the candidate law q1 and the baseline q2 have the same total mass and the same present-marginal on every token OUTSIDE U, then G(q1) - G(q2) = localDelta U q1 q2, the delta over U alone. Two targets are then comparable by their localised deltas. When the action also moves a token outside U, localDelta misreports by EXACTLY the outside tokens' term difference."
+   :lean "Proof2.TargetGrainG.localDelta" :lean-status :closed
+   :lean-note "with totalG_eq_neg_sum_tokenTerm, deltaG_localises, target_comparison and the negative witness totalG_sub_eq_localDelta_sub_outside; on GTotalMarginalInvariance.cross_term_product."
+   :code "futon2 src/futon2/aif/target_field.clj:278-308 (with-pair-overlap: per pair of feasible targets, {:comparable true} | {:incommensurable {:shared-tokens [...]}} | {:absent :no-universe}; an entry with no constructed candidate records {:absent :no-constructed-candidate}, never an empty map)"
+   :value-absent {:absent :not-computed
+                  :detail "No Delta-G-t is computed anywhere at HEAD. with-pair-overlap's own docstring: 'No target has a constructed candidate at HEAD.' The comparability PRECONDITION is computed; the number is not."}
+   :still-owed "Part 2 of PROOF-2a's H-G-target -- the outcome universe C ranges over when targets are compared, and a prior over targets before any candidate exists -- has no definition in any document, by the Lean module's own statement: 'a target with no constructed candidate has no candidate law q1, so its Delta-G is a typed absence on the record, not a number'."}]
 
  ;; Where the framework leaves a free hand. Each is recorded as OBSERVED in
  ;; the War Machine as of 2026-09-01; Joe decides. Format mirrors
@@ -1276,7 +1385,13 @@
    :evidence "war_machine.clj:4450-4452, 4753"}]
 
  ;; Nodes that run no equation. Legitimate plumbing, not AIF.
- :plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]
+ ;; GRAIN-GATE added 2026-09-26 (WM-EQUATIONS-APPLY-I): the grain gate defines
+ ;; no symbol any equation imports, so it is plumbing by the TN-edge-review §1
+ ;; standard. What it does is restrict which enactments are admissible -- the
+ ;; shape Clause T gives feasibility (membership in the policy support, not a
+ ;; term of G). Listing it here is what makes gen_aif_dag.bb draw the box
+ ;; control-stage-amendments.json declares.
+ :plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE :GRAIN-GATE]
  :plumbing-notes
  {:TRACE "C462 §6 (I2 slice a, claude-20, 2026-09-01; verified by claude-1 against trace.clj): the trace store drops the two quantities the theory-aligned replacements need. strip-ranked-action (trace.clj:76-127) persists a 35-key whitelist per ranked action and drops each candidate's :prediction -- its docstring calls it 'recoverable on demand by re-running forward-model/predict', which holds only if predict is deterministic given the stored belief AND the effects mode is recorded (C462 §6 item 3). strip-decision (trace.clj:128-137) dissocs :softmax-weights (Q(π), keyed by action maps) and :ranked-actions from the persisted decision. So I2's F_π (each candidate's prediction at t joined to o at t+1) and I1's β update (needs π) both require a trace WRITE before they require an equation -- a statement about trace.clj, not policy.clj."}
    :pointer-revisions
