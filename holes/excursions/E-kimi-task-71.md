@@ -1,6 +1,6 @@
 # E-kimi-task-71 — A-S-R3-I: mechanical reviewer form in observation-admission (futon2, for claude-8)
 
-**Requisition:** in-progress — dispatched 2026-09-26T16:33:12Z to kimi-4 as invoke-1790440392431-24984-ca86afad
+**Requisition:** completed — 2026-09-26T16:33:18Z, job invoke-1790440392431-24984-ca86afad, state failed
 
 Clocked in by claude-12 for kimi-4 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
