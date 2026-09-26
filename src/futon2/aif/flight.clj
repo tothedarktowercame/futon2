@@ -13,7 +13,9 @@
 
   Pure except `run!`, which calls the injected click and observe functions."
   (:refer-clojure :exclude [run!])
-  (:require [clojure.string :as str]
+  (:require [clojure.set :as set]
+            [clojure.string :as str]
+            [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.interpretation-evidence :as ievidence]
             [futon2.aif.mission-criteria :as criteria]
             [futon2.aif.mission-reading :as reading]
@@ -263,6 +265,113 @@
                 :sha256 (ievidence/sha256 (.getBytes (pr-str (vec (sort-by str universe))) "UTF-8"))
                 :count (count universe)}}))
 
+;; ---------------------------------------------------------------------------
+;; The conditioning step (F1b-join-I; PROOF-2a-PLAN <2>2d F1; F1c-D futon3c
+;; 8cc2d425, SPEC-F s1): the six fields of one step bound together, with the
+;; exact posterior and its F term.
+
+(defn- target-local
+  "The part of a target-qualified map {[target token] v} that belongs to
+  TARGET, keyed by token."
+  [target m]
+  (into {} (for [[k v] m :when (and (vector? k) (= target (first k)))] [(second k) v])))
+
+(defn- target-marginal
+  "BELIEF over target-qualified token states ({#{[target token] ...} mass}),
+  marginalised to TARGET's own tokens."
+  [target belief]
+  (reduce-kv (fn [acc st mass]
+               (update acc (set (for [k st :when (and (vector? k) (= target (first k)))] (second k)))
+                       (fnil + 0) mass))
+             {} belief))
+
+(defn- prior-q
+  "The chain's own q for POLICY-KEY: the :q of the last earlier enactment
+  entry whose :step is present for the same policy key, or nil."
+  [enactments policy-key]
+  (some->> enactments
+           (filter #(and (= :present (get-in % [:step :status]))
+                         (= policy-key (get-in % [:step :policy-key]))))
+           last :step :q))
+
+(defn conditioning-step
+  "One conditioning step for the enacted click, or a typed absence/refusal.
+
+  INPUTS: :run-record (the click's, or nil), :target, :flight-id, :click-id,
+  :observation (the entry's v2 :observation), :policy-key (the :increment
+  receipt's), :precedence (the chosen candidate's pattern ids), :enactments
+  (the flight's earlier entries, for the chain).
+
+  The step is SPEC-F s1's: o = the observation's :o over V = its :checked;
+  A = the decision's measured rates, target-local, restricted to V; B = the
+  candidate's patterns from the run record's :domain-inputs; sPrev = the
+  chain's own q for this policy, else the decision's initial belief
+  marginalised to the target (step 1 of a chain); q = cascade-model-manifest
+  /exact-update over token-likelihood with rates AND state intersected with V
+  (C5's restriction: token-likelihood refuses any state token without a rate);
+  f = -ln P(o) at that posterior, and a P(o) = 0 is :f :contradiction, never
+  a number. A checked token whose class has no measured cell refuses the step
+  :unmeasured-class (SPEC-F: a step needs measured A). Any other missing input
+  is {:status :absent :reason <the first>}; no value stands in."
+  [{:keys [run-record target flight-id click-id observation policy-key precedence enactments]}]
+  (let [ma (get-in run-record [:decision :measured-a])
+        rates-q (:rates ma)
+        measurement-q (:measurement ma)
+        V (set (:checked observation))
+        o (set (:o observation))
+        interps (some #(when (= target (:target %)) (get-in % [:declaration :interpretations]))
+                      (get-in run-record [:decision :selection-certificate :token-belief-stage :domain-inputs]))
+        absent (fn [reason & [inputs]] (cond-> {:status :absent :reason reason} inputs (assoc :inputs inputs)))]
+    (cond
+      (nil? run-record) (absent :no-run-record)
+      (not= :observed (:status observation)) (absent :nothing-observed {:observation-status (:status observation)})
+      (nil? policy-key) (absent :no-policy-key)
+      (nil? ma) (absent :no-measured-a)
+      (= :absent (:status ma)) (absent :measured-a-absent {:measured-a ma})
+      (nil? rates-q) (absent :no-rates-value {:rates-sha (:rates-sha ma)})
+      (nil? measurement-q) (absent :no-measurement-provenance {:rates-sha (:rates-sha ma)})
+      (empty? precedence) (absent :no-precedence)
+      (nil? interps) (absent :no-interpretations {:target target})
+      :else
+      (let [rates (target-local target rates-q)
+            measurement (target-local target measurement-q)
+            unmeasured (vec (sort-by str (filter #(or (not (contains? rates %))
+                                                      (= :absent (get measurement %))
+                                                      (not (contains? measurement %)))
+                                                 V)))]
+        (if (seq unmeasured)
+          {:status :refused :reason :unmeasured-class
+           :tokens unmeasured
+           :classes (into {} (for [t unmeasured] [t (get-in observation [:channel t])]))}
+          (let [pats (mapv (fn [id] (when-let [p (get interps id)] (assoc p :id id))) precedence)
+                missing (vec (keep-indexed (fn [i p] (when (nil? p) (nth precedence i))) pats))]
+            (if (seq missing)
+              (absent :no-interpretation {:patterns missing})
+              (let [chain-q (prior-q enactments policy-key)
+                    s-prev (or chain-q (target-marginal target (get-in run-record [:decision :initial-belief-receipt :value])))
+                    rates-v (select-keys rates V)
+                    lik (fn [st obs] (manifest/token-likelihood rates-v (set/intersection st V) obs))
+                    pushed (manifest/rollout (constantly pats) s-prev 1)]
+                (cond
+                  (empty? s-prev) (absent :no-initial-belief)
+                  (and (map? pushed) (contains? pushed :status)) (absent :transition-refused {:refusal pushed})
+                  :else
+                  (let [p-o (reduce + 0 (for [[st mass] pushed] (* mass (lik st o))))
+                        q (manifest/exact-update lik pushed o)]
+                    {:schema :wm/conditioning-step-v1
+                     :status :present
+                     :policy-key policy-key
+                     :occurrence {:flight flight-id :click click-id}
+                     :target target
+                     :o {:o o :checked V}
+                     :measured-a {:rates-sha (:rates-sha ma) :rates rates-v :classes (:classes ma)}
+                     :b {:precedence (vec precedence)
+                         :digest (ievidence/sha256 (.getBytes (pr-str [(vec precedence) (select-keys interps precedence)]) "UTF-8"))}
+                     :s-prev {:value s-prev :source (if chain-q :chain :initial-belief)}
+                     :q q
+                     :p-o p-o
+                     :f (if (zero? p-o) :contradiction (- (Math/log (double p-o))))}))))))))))
+
 (defn record-click
   "FLIGHT after one click. CLICK is
     {:click-id … :wants [..] :want-source {..}
@@ -350,7 +459,7 @@
   open wants on the last click), or before any click when owner questions
   leave it no wants (:status :not-a-target-yet, :open-questions). Returns the
   flight record."
-  [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn enact-fn wc-fn]}]
+  [flight {:keys [click-fn observe-fn sources-fn max-clicks ask-fn read-fn enact-fn wc-fn fetch-run-record]}]
   ;; WM-SPIKE-FIX-III: a Throwable out of any step still leaves a record.
   ;; P holds the flight as recorded so far and the step running; the catch
   ;; throws an ex-info carrying that flight with :status :aborted, which the
@@ -424,6 +533,23 @@
                                                      (get-in enacted [:enactment :attempts])
                                                      locators
                                                      (:click-id result))))))))
+                ;; F1b-join-I: the conditioning step, from the entry and the
+                ;; click's run record (fetched by :click-id when a fetcher is
+                ;; given; without one the step is the typed absence)
+                f (cond-> f
+                    (:enactment enacted)
+                    (update :enactments
+                            (fn [es] (let [enactment-entry (peek es)]
+                                       (conj (pop es)
+                                             (assoc enactment-entry :step
+                                                    (conditioning-step
+                                                     {:run-record (when fetch-run-record (fetch-run-record (:click-id result)))
+                                                      :target (:target f) :flight-id (:flight/id f)
+                                                      :click-id (:click-id result)
+                                                      :observation (:observation enactment-entry)
+                                                      :policy-key (get-in enactment-entry [:increment :policy-key])
+                                                      :precedence (get-in result [:chosen :precedence])
+                                                      :enactments (pop es)})))))))
                 f (record-click f (merge result {:wants (:wants wants)
                                                  :want-source (:source wants)
                                                  :before before
