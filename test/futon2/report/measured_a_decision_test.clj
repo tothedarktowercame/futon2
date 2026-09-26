@@ -1,53 +1,39 @@
 (ns futon2.report.measured-a-decision-test
-  "F1a-2-I (PROOF-2a-PLAN ⟨2⟩2d F1, packet of 2026-09-26): the tick's
-  admitted decision carries the measured-A version the step's likelihood
-  will use, at [:decision :measured-a]. Write only: the decision still
-  scores with the class model.
-
-  Wire tests (per futon3c wm-wire-ledger-test's definition — a value sent
-  over the wire, checked at both ends):
-
-  1. hermetic tick WITH sourced rates: the decision's :measured-a carries a
-     :rates-sha equal to the digest of what observation-rates/sourced-rates
-     returns for the same records (recomputed here, independently of the
-     decision);
-  2. no records: the typed absence {:status :absent :reason
-     :no-measured-rates} — never a digest of the identity/zero kernel;
-  3. the bad case: force the no-records path to digest the zero kernel and
-     show that test 2 then fails (an absence reads as a value);
-  4. the existing decision score is byte-identical with and without the
-     write.
-
-  F1a-2b (2026-09-26, F1c-D §3 and §5): the record carries the rates VALUE
-  beside its digest, and :rates-sha is the digest of that same value
-  (rates-match-digest?); a record whose :rates is not the digested value
-  fails that check. Live-shaped: the decision's lanes call cascade-lane with
-  no :observation-labels, exactly as production does, and no production
-  caller of cascade-lane passes any (war_machine.clj's three calls,
-  evidence_emit's three; only click_measurement_test supplies labels), so
-  the R5 lane's own certificate records every token :measurement :absent
-  and the decision writes the typed absence. The labels stop before the
-  lane: nothing in production admits them."
+  "Measured-A's value and digest agree with the rates sourced from a real
+   entry label snapshot. The joint decision still scores its class model."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is use-fixtures]]
+            [futon2.aif.observation-checks :as checks]
+            [futon2.aif.observation-labels :as labels]
+            [futon2.aif.observation-label-store :as store]
+            [futon2.aif.observation-label-reader :as reader]
+            [futon2.aif.observation-label-reader-test :as population]
             [futon2.aif.cascade-problems :as cp]
             [futon2.aif.locator-fixtures :as locfix]
             [futon2.aif.observation-rates :as observation-rates]
             [futon2.report.cascade-decision-test :as fixture]
             [futon2.report.war-machine :as wm]))
 
-;; A real measurement for the fixture's only class (:C3, checkable): three
-;; admitted-:present labels, one recorded false (false-neg 1/3); one
-;; admitted-:absent label recorded false (false-pos 0/1). The rates are the
-;; ratios of these counts, so sourced-rates assembles measured cells.
-(def ^:private c3-labels
-  [{:token-class :C3 :admitted :present :recorded true}
-   {:token-class :C3 :admitted :present :recorded true}
-   {:token-class :C3 :admitted :present :recorded false}
-   {:token-class :C3 :admitted :absent :recorded false}])
+(def ^:dynamic ^:private c3-labels nil)
+(def ^:private c3-subjects {:C3 10})
+(def ^:dynamic ^:private labels-opt nil)
 
-(def ^:private c3-subjects {:C3 12})
+(use-fixtures :each
+  (fn [f]
+    (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                       "measured-a-labels-" (make-array java.nio.file.attribute.FileAttribute 0)))
+          path (io/file dir "labels.edn")
+          ids (labels/loaded-identities)]
+      (try
+        (store/init! path)
+        (store/record! path
+                       (mapv #(checks/check-path-exists {:repo "futon2" :sha population/pin :path %})
+                             (concat population/present-paths population/absent-paths)) ids {})
+        (binding [c3-labels (:labels (reader/read-rates-inputs path ids))
+                  labels-opt {:observation-labels-path (str path)}]
+          (f))
+        (finally (doseq [file (reverse (file-seq dir))] (io/delete-file file true)))))))
 
 (defn- assembled []
   (cp/assemble {:targets [fixture/tick-1-target]
@@ -58,10 +44,6 @@
 
 (defn- decision [extra-opts]
   (:decision (wm/cascade-decision (assembled) (opts extra-opts))))
-
-(def ^:private labels-opt
-  {:observation-labels {fixture/tick-1-target {:labels c3-labels
-                                               :subjects c3-subjects}}})
 
 (defn- contract []
   (edn/read-string (slurp (io/resource "wm/observation-contract.edn"))))
@@ -79,7 +61,7 @@
         ;; records and the same locators, target-qualified the decision's
         ;; way, digested the same canonical way
         sourced (observation-rates/sourced-rates
-                 c3-labels c3-subjects nil
+                 c3-labels c3-subjects reader/prior
                  (get-in (assembled) [:problems 0 :cascade-problem :locators])
                  (contract))
         qualified (into {} (map (fn [[tok v]] [[fixture/tick-1-target tok] v]))
@@ -109,14 +91,8 @@
     (is (not (rates-match-digest? tampered))
         "BAD CASE: :rates is not the digested value, and the check fails")))
 
-(deftest live-shaped-the-labels-stop-before-the-lane
-  ;; F1a-2b live-shaped case. The decision's lanes call
-  ;; (cascade-lane (:cascade-problem problem)) with no opts, as production
-  ;; does; the R5 step's certificate therefore records every located token
-  ;; unmeasured, and the decision on the production path (no
-  ;; :observation-labels) writes the typed absence. This pins the finding:
-  ;; closing it needs a production source of admitted labels, which does
-  ;; not exist at this sha.
+(deftest without-a-store-the-lane-is-unmeasured
+  ;; No configured store preserves the historical unmeasured default.
   (let [problem (get-in (assembled) [:problems 0 :cascade-problem])
         lane (wm/cascade-lane problem)
         prov (get-in (first (:ranked lane)) [:certificate :rates-provenance])

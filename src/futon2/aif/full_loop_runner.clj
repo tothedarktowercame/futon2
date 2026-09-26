@@ -730,7 +730,7 @@
                     ;; quantities. No historical checkpoints or trace lookup.
                     :decision (assoc (select-keys decision
                                                   [:selection-law :selection-certificate
-                                                   :initial-belief-receipt :enumeration-completeness])
+                                                   :initial-belief-receipt :enumeration-completeness :measured-a])
                                      :g-term-decomposition (decomposition/from-result result)
                                      :abstention abstention
                                      ;; the chosen plan, so a flight can read
@@ -4835,7 +4835,7 @@
                                    ;; :flight: inside a flight the judge assembles only
                                    ;; the flight's target (futon2.aif.flight-runner)
                                    (assoc (select-keys opts [:accumulate-strategic-habit?
-                                                            :run-id :loaded-code-identity :cascade-habit-path
+                                                            :run-id :loaded-code-identity :cascade-habit-path :observation-labels-path
                                                             :flight])
                                           :include-advisory-lanes? false
                                           :defer-render? true))))

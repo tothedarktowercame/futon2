@@ -63,6 +63,8 @@
             [futon2.aif.calibration-cycle :as calibration-cycle]
             [futon2.aif.efe :as efe]
             [futon2.aif.observation-rates :as observation-rates]
+            [futon2.aif.observation-label-reader :as label-reader]
+            [futon2.aif.observation-labels :as observation-labels]
             [futon2.aif.enumeration-completeness :as enum-complete]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
@@ -5902,18 +5904,12 @@
     (step :R5 "futon2.aif.efe/rank-actions"
           (fn []
             (let [locators (:locators problem)
-                  ;; M-wm-wiring row 6 (claude-10, 2026-09-25): admitted
-                  ;; labels reach sourced-rates from the lane's
-                  ;; :observation-labels {:labels [...] :subjects {class n}}.
-                  ;; None are admitted today, so every class keeps the
-                  ;; zero kernel and the numbers are unchanged; the record
-                  ;; now carries :measurement per token (:absent, or the
-                  ;; counts), so a zero kernel reads as unmeasured, never
-                  ;; as an exact observation.
+                  ;; One entry snapshot supplies the lane and measured-A.
+                  ;; No view keeps the unmeasured zero kernel and nil prior.
                   labels (vec (:labels observation-labels))
                   sourced (when (map? locators)
                             (observation-rates/sourced-rates
-                             labels (or (:subjects observation-labels) {}) nil
+                             labels (or (:subjects observation-labels) {}) (:prior observation-labels)
                              locators (observation-contract)))
                   ;; H-VALUE-G-D (2026-09-25): the scored universe is the
                   ;; PROBLEM's declared token universe (facts, want, every
@@ -6081,6 +6077,24 @@
                                                 (when (= x t) (or (:context flight) :WM)))))))))
     input))
 
+(defn- observation-label-view [opts]
+  (if (contains? opts :observation-labels-view)
+    (:observation-labels-view opts)
+    (if-let [path (:observation-labels-path opts)]
+      (label-reader/read-rates-inputs path (observation-labels/loaded-identities))
+      {:status :absent :reason :no-label-store-configured})))
+
+(defn- observation-label-inputs [view]
+  (when-not (:status view) (select-keys view [:labels :subjects :prior])))
+
+(defn- observation-label-certificate [view opts]
+  (merge (select-keys view [:snapshot-sha256 :identities :subjects :excluded
+                            :minimum :prior :reason])
+         {:status (or (:kind view) (:status view) :sourced)
+          :labels-count (count (:labels view))
+          :constructor-scored-with (or (:constructor-scored-with opts)
+                                       :not-scored-in-this-call)}))
+
 (defn constructed-candidate-g
   "G of one constructed CANDIDATE on its target's PROBLEM (a cascade problem
   without :precedences), as {:value G :universe [token ...]}, computed by the lane's own R1-R5 over a fixed
@@ -6095,7 +6109,8 @@
   G selection uses scores it better than the empty family -- no G is
   injected or pinned (E-cascade-real D12). A lane refusal is thrown with its
   data, and the constructor carries it as its refusal."
-  [problem candidate]
+  ([problem candidate] (constructed-candidate-g problem candidate {}))
+  ([problem candidate opts]
   (let [prec (vec (:precedence candidate))
         true-facts (set (for [[t v] (:facts problem) :when (true? v)] t))
         enabled? (fn [[_ {:keys [guard]}]]
@@ -6111,7 +6126,9 @@
         universe (cascade-problems/problem-tokens
                   (:facts problem) (:want problem) (:interpretations problem))
         lane (cascade-lane (assoc problem :precedences family)
-                           {:through :R5 :universe universe})]
+                           {:through :R5 :universe universe
+                            :observation-labels (observation-label-inputs
+                                                 (:observation-labels-view opts))})]
     (when (:refusal lane)
       (throw (ex-info "constructed-candidate-g: lane refused"
                       {:constructor/refusal :lane-refused :refusal (:refusal lane)
@@ -6123,7 +6140,7 @@
                         {:constructor/refusal :candidate-not-ranked :precedence prec})))
       ;; the universe G was taken over, so the construction receipt records
       ;; the scorer's universe rather than one the caller declares for it
-      {:value (double (:G-efe entry)) :universe (vec (sort-by pr-str universe))})))
+      {:value (double (:G-efe entry)) :universe (vec (sort-by pr-str universe))}))))
 
 ;; ---------------------------------------------------------------------------
 ;; Joint cascade decision over assembled problems (SPEC-flat-removal H5a).
@@ -6312,13 +6329,10 @@
   problem's :locators; the arithmetic is not copied here.
 
   PROBLEMS is the admitted family (the assembled problems);
-  OBSERVATION-LABELS is the opts key of the same name: {target {:labels
-  [...] :subjects {class n}}} — cascade-lane's :observation-labels shape,
-  per target because the decision is joint. The decision calls cascade-lane
-  WITHOUT :observation-labels today (its scoring uses the class model), so
-  no admitted labels are in scope at this site unless the caller declares
-  them; with none, every located token keeps the unmeasured checkable
-  default (the zero kernel, :measurement :absent) and this returns the
+  OBSERVATION-LABELS is {target {:labels [...] :subjects {class n} :prior p}}.
+  The decision's lanes and this function share one entry snapshot. With no
+  usable view, every located token keeps the unmeasured checkable default
+  (the zero kernel, :measurement :absent) and this returns the
   typed absence — packet F1a-2-I: never a digest of a default/identity/zero
   kernel; an absence must not read as a value.
 
@@ -6346,9 +6360,9 @@
                       (let [t (:target p)
                             locators (get-in p [:cascade-problem :locators])]
                         (when (map? locators)
-                          (let [{:keys [labels subjects]} (get observation-labels t)]
+                          (let [{:keys [labels subjects prior]} (get observation-labels t)]
                             [t (observation-rates/sourced-rates
-                                (vec labels) (or subjects {}) nil
+                                (vec labels) (or subjects {}) prior
                                 locators contract)])))))
               problems)
         sourced (into {} (filter (fn [[_ s]] (= :sourced (:status s))) per-target))
@@ -6467,7 +6481,9 @@
               preference-schedule (live-c/family-schedule problems)
               lanes
               (mapv (fn [problem]
-                      (let [lane (cascade-lane (:cascade-problem problem))]
+                      (let [lane (cascade-lane (:cascade-problem problem)
+                                               {:observation-labels (observation-label-inputs
+                                                                     (:observation-labels-view opts))})]
                         {:target (:target problem)
                          :route (:route lane)
                          :decision (select-keys (:decision lane) [:preference-schedule])
@@ -6856,7 +6872,10 @@
                 ;; (sourced-rates over each problem's :locators), written
                 ;; beside :selection-certificate. Write only: the scoring
                 ;; above is unchanged and nothing here is a gate.
-                measured-a (measured-a-version problems (:observation-labels opts))]
+                measured-a (measured-a-version problems
+                              (zipmap (map :target problems)
+                                      (repeat (observation-label-inputs
+                                                (:observation-labels-view opts)))))]
             {:decision (assoc emitted
                               :measured-a measured-a
                               :preference-schedule (class-preference-schedule class-model)
@@ -6968,7 +6987,9 @@
   "Admit explicitly paired nonempty constructions, record every decline, then
   score/select only admitted candidates. An all-declined family abstains."
   [assembled opts]
-  (let [_ (when (seq (:problems assembled))
+  (let [view (observation-label-view opts)
+        opts (assoc opts :observation-labels-view view)
+        _ (when (seq (:problems assembled))
             (cascade-family-parameters (:problems assembled)))
         admissions (mapv admit-cascade-problem (:problems assembled))
         dropped (vec (concat (:dropped-candidates assembled)
@@ -7002,6 +7023,8 @@
                  result)]
     (cond-> (-> result
                 (assoc :dropped-candidates dropped)
+                (assoc-in [:decision :selection-certificate :observation-labels]
+                          (observation-label-certificate view opts))
                 (assoc-in [:decision :mission-hole-coverage]
                           (or (:mission-hole-coverage assembled)
                               {:status :absent :reason :source-coverage-not-supplied}))
@@ -7059,7 +7082,9 @@
                :as judge-opts
                :or {trace? false
                     step-portfolio? true eval-invariant-fallback? true}}]
-  (let [loaded-configuration (effective-run-configuration judge-opts)
+  (let [judge-opts (assoc judge-opts :observation-labels-view
+                           (observation-label-view judge-opts))
+        loaded-configuration (effective-run-configuration judge-opts)
         depth-config (policy-depth/configured judge-opts)
         accumulate-strategic-habit?
         (strategic-habit/enabled? judge-opts
@@ -7426,7 +7451,8 @@
                             {:construct interpretation-construction/construct
                              :budget (:value (construction-budget cascade-sources))
                              :move-cost (:value construction-move-cost)
-                             :evaluate-g constructed-candidate-g}))}))
+                             :evaluate-g (fn [problem candidate]
+                                           (constructed-candidate-g problem candidate judge-opts))}))}))
         ;; The tick-level horizon, common to the compared family, recorded
         ;; on the judgement (selection and abstention) with its authority.
         cascade-horizon (:cascade-horizon raw-cascade-assembled)
@@ -7437,6 +7463,9 @@
         cascade-result (select-and-record-cascade!
                         cascade-assembled
                         (assoc judge-opts
+                               :constructor-scored-with
+                               (if (contains? cascade-sources :construction)
+                                 :caller-supplied-evaluator :same-observation-labels-snapshot)
                                :ticket-queue ticket-queue-declaration
                                :token-belief-predecessor-trace prev-trace-record
                                :prospective-token-carry
