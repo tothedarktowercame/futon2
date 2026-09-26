@@ -56,16 +56,32 @@
                         :else (recur (inc i) cum))))]
     {:generator "java.util.SplittableRandom" :seed seed :value u :index index :order order}))
 
+(defn- recorded-input [m k reason]
+  (if (some? (get m k)) (get m k) {:absent reason}))
+
+(defn- selection-inputs [entries opts]
+  (merge
+   (into {} (for [k [:next-step :pair-overlap]]
+              [k (into (sorted-map)
+                       (for [entry entries]
+                         [(:target entry) (recorded-input entry k :no-such-key-on-entry)]))]))
+   (into {} (for [k [:enactment-records :publication-observed :clock-lineage]]
+              [k (recorded-input opts k :not-supplied)]))))
+
 (defn select
   "Choose a target from the field. OPTS: :field (the `target-field` map), :seed
   (an integer, the caller's), :trigger (which clock fired, recorded). Returns
   {:target-selection record} and, when the support is non-empty and a seed is given,
   :chosen-target and :draw-seed beside it. An empty support is the recorded
   absence {:absent :no-eligible-target}; a missing seed is {:absent :no-seed}.
-  Neither is a refusal: the excluded list is on the record either way."
+  Neither is a refusal: the excluded list is on the record either way.
+  Records entry :next-step/:pair-overlap and opts :enactment-records,
+  :publication-observed, :clock-lineage verbatim as inputs, including typed
+  absences. These are not value terms in the draw; :law-uses names :eligible."
   [opts]
   (let [{:keys [field seed trigger]} opts
-        support (mapv :target (support-of field))
+        entries (support-of field)
+        support (mapv :target entries)
         n (count support)
         posterior (into (sorted-map) (map (fn [t] [t (/ 1 n)])) support)
         seeded? (integer? seed)
@@ -74,6 +90,8 @@
     (cond-> {:target-selection
              {:rule :seeded-draw-from-E
               :trigger (or trigger {:absent :no-trigger})
+              :inputs (selection-inputs entries opts)
+              :law-uses [:eligible]
               :support support
               :posterior posterior
               :E {:basis :uniform-no-data}

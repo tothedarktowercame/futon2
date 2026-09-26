@@ -24,12 +24,16 @@
   Returns {:target-selection the outer cascade's record, :plan the flight's plan}; when
   no target is eligible, :plan is {:absent :no-eligible-target} and nothing is
   planned. The chosen entry's :repo and :path come from the field's :considered
-  entry for it (the feasible entry does not carry them)."
+  entry for it (the feasible entry does not carry them).
+  :enactment-records, :publication-observed and :clock-lineage are forwarded
+  to selection for recording only; their producers remain caller-owned."
   [{:keys [trigger seed seat load-field-fn plan-opts]
-    :or {load-field-fn target-field/load-field}}]
+    :or {load-field-fn target-field/load-field} :as selection-opts}]
   (let [{:keys [field opts]} (load-field-fn)
         seed (if (integer? seed) seed (System/currentTimeMillis))
-        chosen (outer-cascade/select {:field field :seed seed :trigger trigger})
+        chosen (outer-cascade/select
+                (merge (select-keys selection-opts [:enactment-records :publication-observed :clock-lineage])
+                       {:field field :seed seed :trigger trigger}))
         target (:chosen-target chosen)
         entry (first (filter #(= target (:target %)) (:feasible field)))
         considered (first (filter #(= target (:target %)) (:considered field)))]

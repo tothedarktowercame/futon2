@@ -2,7 +2,10 @@
   "H-T-CALLER-I: the outer cascade's `select`. Pure; over a fixture field of
   two eligible targets, one a requisition makes ineligible, and one exclusion."
   (:require [clojure.test :refer [deftest is testing]]
-            [futon2.aif.outer-cascade :as oc])
+            [futon2.aif.outer-cascade :as oc]
+            [futon2.aif.target-field :as tf]
+            [futon2.aif.enactment-habit :as eh]
+            [futon2.aif.flight-runner :as fr])
   (:import [java.util SplittableRandom]))
 
 (def field
@@ -76,3 +79,70 @@
     (is (not (contains? r :chosen-target)))
     (is (= {:absent :no-seed} (get-in r [:target-selection :chosen])))
     (is (= ["M-a" "M-b"] (get-in r [:target-selection :support])))))
+
+(defn declared-input-fixture []
+  (let [text (slurp "test/fixtures/target-field/M-autoclock-in@futon3c-7466251c.md")
+        entries (mapv (fn [id]
+                        (tf/assess {:read-text (fn [& _] text) :observe (constantly false)
+                                    :sources {} :store "/nonexistent/outer-inputs"}
+                                   {:target id :kind :mission :repo "futon3c"
+                                    :path "holes/missions/M-autoclock-in.md"
+                                    :status-line (re-find #"(?m)^\*\*Status:\*\*.*$" text)}))
+                      ["M-autoclock-in" "M-other"])
+        entries (tf/with-pair-overlap
+                 (mapv #(assoc % :universe #{:shared}
+                               :constructed-candidate {:produces #{:shared}}) entries))
+        receipts (mapv (fn [click]
+                         (eh/increment {:click click :candidate :c
+                                        :attempts [{:pattern :p :success true}]}
+                                       [:pattern-cascade "M-autoclock-in" [:p] {}] []))
+                       ["click-1" "click-2"])
+        records (:enactment-records (eh/fold nil receipts))
+        publication (:publication-observed ((fr/observe-publication-fn {})
+                                            {:target "M-autoclock-in"} {:click-id "click-2"}))]
+    {:field {:considered entries :feasible entries :exclusions []}
+     :seed 42 :enactment-records records :publication-observed publication
+     ;; persist-clock!'s durable edge props: string keys, not keywordised.
+     ;; This shape is caller data, not a claim of invoking futon3c's writer.
+     :clock-lineage {"agent-id" "codex-1" "session-id" "test-session"
+                     "clocked-at-ms" 1000 "mission-id" "M-autoclock-in"
+                     "witness" "test"}}))
+
+(deftest declared-inputs-reach-the-record-without-changing-the-law
+  (let [opts (declared-input-fixture)
+        result (oc/select opts)
+        selection (:target-selection result)
+        inputs (:inputs selection)
+        law #(dissoc (:target-selection %) :inputs)]
+    (is (= 2 (count (:support selection))))
+    (is (= [:eligible] (:law-uses selection)))
+    (doseq [k [:next-step :pair-overlap]]
+      (is (= (into {} (map (juxt :target k) (get-in opts [:field :feasible]))) (get inputs k)))
+      (is (every? some? (vals (get inputs k)))))
+    (is (every? keyword? (vals (:next-step inputs))))
+    (is (= {:incommensurable {:shared-tokens [:shared]}}
+           (get-in inputs [:pair-overlap "M-autoclock-in" "M-other"])))
+    (is (= 2 (count (:enactment-records inputs))))
+    (doseq [k [:enactment-records :publication-observed :clock-lineage]]
+      (is (= (get opts k) (get inputs k)))
+      (doseq [missing [::omitted nil]]
+        (let [changed (oc/select (if (= missing ::omitted) (dissoc opts k) (assoc opts k nil)))]
+          (is (= {:absent :not-supplied} (get-in changed [:target-selection :inputs k])))
+          (is (= (law result) (law changed)))
+          (is (= (:chosen-target result) (:chosen-target changed)))))
+      (let [changed (oc/select (assoc opts k {:absent :writer-unavailable}))]
+        (is (= {:absent :writer-unavailable} (get-in changed [:target-selection :inputs k])))
+        (is (= (law result) (law changed)))))
+    (doseq [k [:next-step :pair-overlap]]
+      (let [changed (oc/select (update-in opts [:field :feasible]
+                                         #(mapv (fn [e] (dissoc e k)) %)))]
+        (is (every? #(= {:absent :no-such-key-on-entry} %)
+                    (vals (get-in changed [:target-selection :inputs k]))))
+        (is (= (law result) (law changed)))
+        (is (= (:chosen-target result) (:chosen-target changed)))))
+    (doseq [k [:enactment-records :publication-observed :clock-lineage]]
+      (let [changed (oc/select (assoc opts k {:different :value}))]
+        (is (= {:different :value} (get-in changed [:target-selection :inputs k])))
+        (is (= (law result) (law changed)))))
+    (is (= {:basis :uniform-no-data} (:E selection)))
+    (is (= {:absent :no-target-grain-g} (:g selection)))))

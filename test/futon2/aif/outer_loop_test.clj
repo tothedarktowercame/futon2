@@ -8,7 +8,8 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.flight-driver :as fd]
             [futon2.aif.observation-checks :as checks]
-            [futon2.aif.outer-loop :as outer-loop])
+            [futon2.aif.outer-loop :as outer-loop]
+            [futon2.aif.outer-cascade-test :as oc-test])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -110,3 +111,18 @@
                     :sources {:beta-by-context {:WM {:beta 1}}}})]
     (is (= {:absent :no-selection-record} (:target-selection p)))
     (is (= :chosen (get-in p [:placement :target-source])))))
+
+(deftest caller-inputs-reach-selection-and-real-plan
+  (let [store (store-dir)
+        inputs (select-keys (oc-test/declared-input-fixture)
+                            [:enactment-records :publication-observed :clock-lineage])
+        opts (entry-opts store)
+        baseline (outer-loop/plan-from-field! opts)
+        result (outer-loop/plan-from-field! (merge opts inputs))]
+    (doseq [[k value] inputs]
+      (is (= value (get-in result [:target-selection :inputs k])))
+      (is (= value (get-in result [:plan :target-selection :inputs k])))
+      (is (= {:absent :not-supplied} (get-in baseline [:target-selection :inputs k]))))
+    (is (= (dissoc (:target-selection baseline) :inputs)
+           (dissoc (:target-selection result) :inputs)))
+    (is (= (get-in baseline [:plan :requisition]) (get-in result [:plan :requisition])))))
