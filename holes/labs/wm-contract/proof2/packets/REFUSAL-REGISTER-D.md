@@ -513,3 +513,27 @@ Read at futon2 `7b4ecf98` and futon3c `b4bb0150`; the tree is clean for the thre
 ## D9.3 The C8 locator rule at HEAD, with the flight's own locators as the pin
 
 `c8-locator-refusal` (`observation_checks.clj:408-430`): `:repo`; exactly one of `:namespace` or `:command` (an argv of non-blank strings); `:config` only with `:namespace`. Both tokens the gate refused — `:exit/h1dae607747ce` and `:exit/h64ddcd0e8811`, read from the click's own run record — carry `{:class :C8 :repo "futon3c" :namespace "futon3c.agency.clock-decision-test"}`: `:repo` non-blank, exactly one of the two, no `:config`, so the rule returns nil and admits them. claude-8 confirmed that live after the 02:31:44Z reload. (The same record carries C8 locators of the other admitted shape, `:repo` with a `:command` argv, on other tokens.)
+
+---
+
+# D10 — `:untyped-failure`, the kind the runner writes when no one typed the failure
+
+Read at futon2 `c95c6453` (the runtime the eighth flight ran; no `src/futon2/aif` file differs at HEAD `0d4ebdea`) and futon3c `74e0235a`. Read-only. Reached by the eighth flight of M-autoclock-in, `flight-ada87008` (2026-09-26 03:50–03:56Z, cast author `claude-6`, reviewer `claude-13`), finding `repair-occ-036463620c0c032c9e46aa44b6a6d6b35ed3e0ceb27dc58030f07d8fc2e6c747`. Sizing and the defect list are in `WM-REGISTRY-READ-D.md`.
+
+| # | kind | site | condition | tick/flight | case |
+|---|---|---|---|---|---|
+| 25 | `:untyped-failure` | `full_loop_runner.clj:3637-3642` `failure-kind-from`, the last `or` branch; written onto the finding by the close catch at `:5680` and onto the repair record at `:3987-3991` | no ex-data anywhere in the cause chain carries `:failure-kind` or `:outcome` (`explicit-failure-kind` `:3601-3608`) **and** no recognised transport class is beneath it (`transport-failure-kind` `:3628-3635`) | tick, and the flight sees only its `:outcome` | **not a refusal at all — the absence of one.** It is the honest default: `:3631-3632` says an unknown exception "STAYS `:untyped-failure` and keeps the heavy machine-failure contract", and `repair-class-for` `:3644-3652` accordingly withholds `:environmental-hold`. What it hides is that the thrower often *did* type itself: this flight's finding carries `:failure-data {:kind :substrate-unreachable}` — register row 23's kind, present as data because nothing on the phase-error path reads `:kind`. The cause beneath the wrapper reaches no record at all: `{:absent :cause-not-on-record}` |
+| 26 | `:substrate-mission-registry-empty` | `mission_registry.clj:454`, "substrate-2 mission registry returned no missions" | the substrate answers and holds no mission | tick | row 23's sibling and the same shape — ex-data carries only `:kind`, so it would close `:untyped-failure` too. Not previously on the register |
+
+## D10.1 Note for the kinds column: which registered kinds close `:untyped-failure`
+
+The selection phase's catch (`full_loop_runner.clj:4692-4706`) recognises exactly two shapes — `judge-refusal` (`:519-542`, requires `(= "cascade decision refused" (ex-message e))`) and `gate-refusal` (`:550-566`, requires `(= :inadmissible-decision (:error d))`). Anything else is rethrown untouched at `:4706`. Scanning `src/futon2/aif/*.clj` and `war_machine.clj` for `ex-info` throws whose ex-data carries `:kind` and neither `:failure-kind` nor `:outcome` gives **48 sites**. The registered kinds among them, on the selection path and **not** covered by either recogniser:
+
+- row 23 `:substrate-unreachable`, `mission_registry.clj:446` — reached this flight
+- row 26 `:substrate-mission-registry-empty`, `:454`
+- row 218 `:invalid-policy-prefix`, `policy.clj:240` ("Invalid policy prefix")
+- row 219 `:precision-consumption-mismatch`, `policy.clj:401`
+- row 220 `:no-acting-cascade-candidate`, `policy.clj:423` ("Cascade selection refused")
+- row 221's five — `:invalid-temperature`, `:invalid-habit`, `:invalid-free-energy`, `:no-admissible-candidate`, `:unmapped-candidate` — `cascade_selection.clj:36`, same message
+
+Row 12's `war_machine.clj` kinds (`:6237 :6240 :6301 :6323 :6626`) **are** covered: they carry the exact message `judge-refusal` tests, and `8c396c3a` re-throws them with `:outcome :abstained`. That fix's call site is `:4705`, inside this same catch — so the site is shared, not merely similar; §D9.1's gate finding was fixed the same way, by `gate-refusal`.
