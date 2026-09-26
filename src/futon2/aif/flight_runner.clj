@@ -430,11 +430,12 @@
   click endpoint's own rule, handle-wm-click-start's nonblank-string?), else
   a typed absence ({:absent :no-author-given} …). No default, no env read."
   [opts]
-  (into {} (for [k [:author :reviewer :repair-reviewer]
-                 :let [v (get opts k)]]
-             [k (if (and (string? v) (not (str/blank? v)))
-                  v
-                  {:absent (keyword (str "no-" (name k) "-given"))})])))
+  (let [seat (fn [k absent]
+               (let [v (get opts k)]
+                 (if (and (string? v) (not (str/blank? v))) v {:absent absent})))]
+    {:author (seat :author :no-author-given)
+     :reviewer (seat :reviewer :no-reviewer-given)
+     :repair-reviewer (seat :repair-reviewer :no-repair-reviewer-given)}))
 
 (defn http-click-fn
   "A flight click function over the serving JVM: POST /api/alpha/wm/click
