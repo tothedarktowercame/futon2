@@ -5749,6 +5749,21 @@
                    :message (ex-message e)
                    :data d})})))
 
+(defn token-preference-schedule
+  "Write-only receipt from R5's effective scoring spec. An absent placement
+   has preference-member's constant (every-step) semantics. Source ids are
+   the target ids that key cascade-sources' declarations."
+  [spec source-id]
+  {:schema :wm/preference-schedule-v1
+   :placement (or (get-in spec [:c-schedule :placement :value]) :every-step)
+   :source (if (= :declared (get-in spec [:c-schedule :placement :status]))
+             [:declared source-id]
+             :defaulted)
+   :family :token
+   :lam (:lam spec)
+   :mu (:mu spec)
+   :weights-ruling :none-found})
+
 (defn cascade-lane
   "The cascade lane of the tick (VM-PROTOCOL Figure 5A node order; R10 wiring,
   tick 1). PROBLEM is a cascade problem map:
@@ -6029,7 +6044,11 @@
          :candidates (:candidates (:R4 s))
          :predictions (:predictions (:R4 s))
          :ranked (:R5 s)
-         :decision (:decision (:R14 s))
+         :decision (assoc (:decision (:R14 s))
+                          :preference-schedule
+                          (token-preference-schedule
+                           (get-in (meta (:R5 s)) [:cascade-scoring :spec])
+                           (:preference-source-id problem)))
          :authorization (:authorization (:R14 s))
          :enactment-plan (:R16 s)
          :certification {:status :independent-check-required
@@ -6199,6 +6218,18 @@
     (assoc (assemble-cascade-problems (assoc-in merged [:sources :horizon-steps] (:value horizon)))
            :cascade-horizon horizon)))
 
+(def class-preference-weights
+  "Joe's fixed terminal class preference (2026-09-22)."
+  {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100})
+
+(defn class-preference-schedule
+  "Write-only receipt read from the exact class model passed to the scorer."
+  [model]
+  {:family :class
+   :placement :terminal
+   :weights (get-in model [:class-preference (:horizon model)])
+   :site "scripts/futon2/report/war_machine.clj:class-preference-weights"})
+
 (defn- class-observation-model
   "PROOF-wm-works 1.3 build 2/3: the class observation model for the joint
    family. Emission is deterministic: before the common horizon every state
@@ -6214,7 +6245,7 @@
    consumes, and live-c is still derived and recorded."
   [{:keys [universe acceptance target-class horizon]}]
   (let [not-yet :ending/not-yet-evaluated
-        joe-c {:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100}
+        joe-c class-preference-weights
         class-pref (into {} (for [tau (range 1 (inc horizon))]
                               [tau (if (= tau horizon) joe-c {not-yet 1})]))]
     {:schema :wm/observation-model-v1
@@ -6433,6 +6464,7 @@
                       (let [lane (cascade-lane (:cascade-problem problem))]
                         {:target (:target problem)
                          :route (:route lane)
+                         :decision (select-keys (:decision lane) [:preference-schedule])
                          :refusal (when (:stopped-at lane) (:refusal lane))
                          :candidates (filterv #(seq (:precedence %)) (:candidates lane))
                          :null-comparison
@@ -6648,7 +6680,7 @@
                           :let [family (:id p)]]
                       [family (try
                                 (learning-ledger/pattern-theta family ledger-root-for-theta)
-                                (catch Exception e
+                                (catch Exception _e
                                   {:status :defaulted :reason :ledger-read-failed}))] ))
               joint-candidates
               (mapv (fn [c]
@@ -6821,6 +6853,7 @@
                 measured-a (measured-a-version problems (:observation-labels opts))]
             {:decision (assoc emitted
                               :measured-a measured-a
+                              :preference-schedule (class-preference-schedule class-model)
                               :live-c-coverage (:live-c-coverage live-spec)
                               :token-qualification
                               {:scheme :target-token-pair

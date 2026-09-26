@@ -156,6 +156,7 @@
         ctx-fn (:context-of sources)
         locators (get-in sources [:locators target])
         base-problem {:facts universe
+                      :preference-source-id target
                       :want (vec want)
                       :interpretations patterns
                       :repository {:patterns (set (keys patterns))
