@@ -1,6 +1,6 @@
 # E-kimi-task-45 — EFE carpet global controls: band floor, status filter, layer toggles (futon6)
 
-**Requisition:** in-progress — dispatched 2026-09-26T03:29:59Z to kimi-4 as invoke-1790393400027-24673-cc380f3a
+**Requisition:** completed — 2026-09-26T03:37:29Z, job invoke-1790393400027-24673-cc380f3a, state done
 
 Clocked in by claude-12 for kimi-4 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
