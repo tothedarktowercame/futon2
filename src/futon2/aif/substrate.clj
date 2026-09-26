@@ -82,12 +82,24 @@
                            {:bindings (vec bindings)})))))
 
 (defn entities-by-type
+  "Every typed entity read futon2 makes. It returns :entities and nothing else:
+  the substrate's :count and :next-cursor are read, paid for and discarded, and
+  each is a full scan of the type in futon1b
+  (futon1b/TN-entities-speedups-2026-09-26.md), so both are switched off here.
+
+  `ordered=false` is safe for these callers because none of them pages -- there
+  is no :next-cursor to hand back. It does change WHICH rows a TRUNCATED read
+  returns: below :limit the window stops being the first N by xt/id and becomes
+  an arbitrary N. No caller relies on that ordering today (the WM's mission
+  read is 331 rows under a limit of 1000), but a caller that starts to must ask
+  for the ordered page. A futon1b older than the flags ignores both params."
   ([type] (entities-by-type type {}))
   ([type opts]
    (if-let [f (:entities-by-type-fn opts)]
      (f type)
      (let [url (str (api-url opts "/entities") "?type=" (encode type)
-                    "&limit=" (long (or (:limit opts) 10000)))]
+                    "&limit=" (long (or (:limit opts) 10000))
+                    "&include-total=false&ordered=false")]
        (:entities (request! :get url opts nil))))))
 
 (defn entity-by-id

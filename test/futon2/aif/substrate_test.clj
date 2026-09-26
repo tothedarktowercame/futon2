@@ -36,6 +36,24 @@
            (do (substrate/put-doc! {:xt/id "e" :entity/type :test} opts)
                @written)))))
 
+(deftest entities-by-type-asks-for-neither-total-nor-cursor
+  ;; This client reads a whole type in one page and returns :entities only, so
+  ;; the two scans behind :count and :next-cursor are pure cost
+  ;; (futon1b/TN-entities-speedups-2026-09-26.md). Pinned because the saving is
+  ;; in the URL: drop either param and the substrate goes back to scanning.
+  (let [seen (atom nil)]
+    (with-redefs [http/request
+                  (fn [req]
+                    (reset! seen (:uri req))
+                    {:status 200 :body (pr-str {:entities [{:entity/id "e"}]})})]
+      (is (= [{:entity/id "e"}]
+             (substrate/entities-by-type "mission"
+                                         {:substrate-url "http://store.test:7073"
+                                          :limit 1000})))
+      (is (= (str "http://store.test:7073/api/alpha/entities?type=mission"
+                  "&limit=1000&include-total=false&ordered=false")
+             @seen)))))
+
 (deftest unsupported-transaction-operations-fail-loudly
   (testing "there is no backend-specific evict escape hatch"
     (is (thrown-with-msg?
