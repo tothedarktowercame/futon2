@@ -136,3 +136,71 @@
                   (catch clojure.lang.ExceptionInfo e (:kind (ex-data e))))))
       (finally
         (doseq [file [first-path second-path dir]] (io/delete-file file true))))))
+
+(deftest c3-real-path-carries-both-verdicts
+  (let [check (checks/check-path-exists (dissoc locator :decl))
+        subject (labels/c3-subject check pin)
+        label (one-label (labels/write-labels [check] {} opts))]
+    (is (= :C3 (:token-class label)))
+    (is (= [(:evidence check)] (:evidence-pointers subject)))
+    (is (not (contains? (:evidence check) :decl)))
+    (is (nil? (nth (:label-key label) 4)))
+    (is (= true (:observed check) (:recorded label)))
+    (is (= :present (:admitted label)))
+    (is (= "C3/ls-tree@writer-under-test" (get-in label [:admission :observer])))
+    (is (= "mechanical-review@writer-under-test" (get-in label [:admission :reviewer])))))
+
+(deftest c3-real-absent-path-is-a-label
+  (let [check (checks/check-path-exists
+               (assoc (dissoc locator :decl) :path "no-such-c3-path.clj"))
+        label (one-label (labels/write-labels [check] {} opts))]
+    (is (= false (:observed check) (:recorded label)))
+    (is (= :absent (:admitted label)))))
+
+(deftest c3-directory-and-trailing-slash-require-exact-paths
+  ;; At pin, ls-tree -- src lists src itself; -- src/ lists src/futon2.
+  ;; Both cat-file calls succeed, but only the first listing has an exact
+  ;; path match. A prefix-based observer would wrongly label src/ present.
+  (doseq [[path finding] [["src" :present] ["src/" :absent]]]
+    (let [check (checks/check-path-exists (assoc (dissoc locator :decl) :path path))
+          label (one-label (labels/write-labels [check] {} opts))]
+      (is (= true (:observed check) (:recorded label)))
+      (is (= finding (:admitted label)) path))))
+
+(deftest c3-unreadable-evidence-never-becomes-an-absent-label
+  (let [check (checks/check-path-exists
+               (assoc (dissoc locator :decl) :sha "no-such-c3-commit"))
+        result (labels/write-labels [check] {} opts)]
+    (is (= :unknown-sha (:kind check)))
+    (is (= [check] (:refused result)))
+    (is (empty? (:store result)))
+    (is (empty? (:written result))))
+  (let [check (checks/check-path-exists (dissoc locator :decl))
+        make-subject labels/c3-subject]
+    ;; Preserve the real check and construct an unreadable evidence subject.
+    ;; ls-tree really runs and fails; review and admission are not stubbed.
+    (with-redefs [labels/c3-subject
+                  (fn [c sha]
+                    (-> (make-subject c sha)
+                        (assoc-in [:evidence-pointers 0 :repo] "no-such-c3-repository")
+                        (assoc-in [:check-cutoff :repo] "no-such-c3-repository")))]
+      (let [result (labels/write-labels [check] {} opts)]
+        (refused result :no-label nil)
+        (is (= :insufficient (get-in result [:refused 0 :data :finding])))))))
+
+(deftest c3-and-c4-at-one-path-have-distinct-keys
+  (let [result (labels/write-labels
+                [(checks/check-path-exists (dissoc locator :decl)) (real-check)] {} opts)
+        records (:written result)]
+    (is (empty? (:refused result)))
+    (is (= 2 (count (:store result)) (count records)))
+    (is (= #{:C3 :C4} (set (map :token-class records))))
+    (is (= #{:C3 :C4} (set (map (comp first :label-key) records))))
+    (is (= 2 (count (set (map :label-key records)))))))
+
+(deftest c3-self-truthed-stores-nothing
+  (let [check (checks/check-path-exists (dissoc locator :decl))
+        recompute labels/c3-recompute]
+    (with-redefs [labels/c3-recompute
+                  (fn [s] (assoc (recompute s) :observer (str "C3/cat-file-e@" pin)))]
+      (refused (labels/write-labels [check] {} opts) :review-not-concur :self-truthed))))

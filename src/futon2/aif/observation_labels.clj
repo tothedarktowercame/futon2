@@ -1,5 +1,5 @@
 (ns futon2.aif.observation-labels
-  "A-S Revision 3: C4 labels from blinded, independently recomputed evidence.
+  "A-S Revision 3: C3/C4 labels from blinded, independently recomputed evidence.
    No tick wiring or implicit storage path. Code identities are caller-supplied."
   (:refer-clojure :exclude [load])
   (:require [clojure.edn :as edn]
@@ -12,7 +12,7 @@
 
 (def ^:dynamic *code-sha*
   "The commit identifying this namespace, supplied by the caller. write-labels
-   binds it from opts :code-sha; direct c4-recompute callers must bind it too.
+   binds it from opts :code-sha; direct recomputation callers must bind it too.
    No HEAD lookup: a later unrelated commit must not rename the mechanism."
   nil)
 
@@ -66,8 +66,46 @@
                   :else :absent)]
     (admission/adjudication observer view finding {:repo repo :sha resolved-sha})))
 
+(defn c3-subject
+  "Adapt a tick-time check-path-exists result, preserving its evidence pointer
+   verbatim. C3 identifies a path, so label-key's declaration slot is nil."
+  [check-result mechanism-sha]
+  (required-identity mechanism-sha :mechanism-sha)
+  (let [{:keys [repo resolved-sha] :as evidence} (:evidence check-result)]
+    {:token (:token check-result)
+     :token-class :C3
+     :evidence-pointers [evidence]
+     :check-mechanism (str "C3/cat-file-e@" mechanism-sha)
+     :check-cutoff {:repo repo :sha resolved-sha}
+     :recorded-verdict (:observed check-result)
+     :author :none :enactor :none}))
+
+(defn c3-recompute
+  "Read only observer-view and independently list the resolved tree. Presence
+   requires a listed path field EXACTLY equal to the requested path, never a
+   prefix. -z preserves literal path bytes without git's display quoting.
+   An empty or nonmatching listing is :absent; git failure is :insufficient.
+   Bind *code-sha* to the commit identifying this namespace."
+  [subject]
+  (let [view (admission/observer-view subject)
+        {:keys [repo resolved-sha path]} (first (:evidence-pointers view))
+        observer (str "C3/ls-tree@" (required-identity *code-sha* :code-sha))
+        readable-locator? (every? #(and (string? %) (not (str/blank? %)))
+                                 [repo resolved-sha path])
+        result (when readable-locator?
+                 (try
+                   (sh/sh "git" "-C" (str (io/file checks/repo-root repo))
+                          "ls-tree" "-z" resolved-sha "--" path)
+                   (catch java.io.IOException _ nil)))
+        finding (cond
+                  (not= 0 (:exit result)) :insufficient
+                  (some #(= path (second (str/split % #"\t" 2)))
+                        (str/split (:out result) #"\u0000")) :present
+                  :else :absent)]
+    (admission/adjudication observer view finding {:repo repo :sha resolved-sha})))
+
 (defn write-labels
-  "CHECK-RESULTS is a sequence of C4 results (optionally carrying :token).
+  "CHECK-RESULTS is a sequence of C3/C4 results (optionally carrying :token).
    STORE maps admission/label-key to admission/label-record. OPTS requires
    :mechanism-sha (the check's code commit) and :code-sha (this namespace's
    code commit). Repeated keys skip recomputation and add no label. Admission
@@ -81,15 +119,18 @@
      (fn [acc check-result]
        (cond
          (:status check-result) (update acc :refused conj check-result)
-         (not= :C4 (:check check-result))
+         (not (contains? #{:C3 :C4} (:check check-result)))
          (update acc :refused conj {:status :missing :kind :unsupported-check
                                    :data {:check (:check check-result)}})
          :else
-         (let [subject (c4-subject check-result mechanism-sha)
+         (let [[make-subject recompute] (case (:check check-result)
+                                          :C3 [c3-subject c3-recompute]
+                                          :C4 [c4-subject c4-recompute])
+               subject (make-subject check-result mechanism-sha)
                key (admission/label-key subject)]
            (if (contains? (:store acc) key)
              (update acc :skipped conj {:key key :already-labelled true})
-             (let [adjudication (c4-recompute subject)
+             (let [adjudication (recompute subject)
                    review (admission/mechanical-review
                            (str "mechanical-review@" code-sha) subject adjudication)
                    admitted (admission/admit subject adjudication review)]
