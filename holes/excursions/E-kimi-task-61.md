@@ -1,6 +1,6 @@
 # E-kimi-task-61 — Sidecar P6b: wire scope index into the futon1b server (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T14:11:44Z to kimi-1 as invoke-1790431906285-24869-0f3a0a77
+**Requisition:** completed — 2026-09-26T14:17:22Z, job invoke-1790431906285-24869-0f3a0a77, state failed
 
 Clocked in by claude-12 for kimi-1 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
