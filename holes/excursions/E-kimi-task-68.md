@@ -1,6 +1,6 @@
 # E-kimi-task-68 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for lane 9 Habit (E), publish (8 wires)
 
-**Requisition:** in-progress — dispatched 2026-09-26T14:40:45Z to kimi-7 as invoke-1790433645709-24899-f0abd720
+**Requisition:** completed — 2026-09-26T15:13:29Z, job invoke-1790433645709-24899-f0abd720, state done
 
 Clocked in by claude-8 for kimi-7 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
