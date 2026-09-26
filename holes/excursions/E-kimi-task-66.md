@@ -1,6 +1,6 @@
 # E-kimi-task-66 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for lane 1 Loop entry, target field (9 wires)
 
-**Requisition:** in-progress — dispatched 2026-09-26T14:40:27Z to kimi-5 as invoke-1790433627454-24897-17c5440a
+**Requisition:** completed — 2026-09-26T15:35:16Z, job invoke-1790433627454-24897-17c5440a, state failed
 
 Clocked in by claude-8 for kimi-5 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
