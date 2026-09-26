@@ -6295,7 +6295,8 @@
   distinct. Returns
 
     {:schema :wm/measured-a-v1
-     :rates-sha <sha256 of canonical-pr of the qualified rates value>
+     :rates {[target token] {:false-neg r :false-pos r}}  ; the value
+     :rates-sha <sha256 of canonical-pr of :rates>
      :source :futon2.aif.observation-rates/sourced-rates   ; verbatim
      :classes [class-id …]}
 
@@ -6331,7 +6332,10 @@
           ;; zero kernel. Digesting it would make an absence read as a
           ;; value, so the absence is written instead.
           {:status :absent :reason :no-measured-rates}
+          ;; F1a-2b: the value travels with its digest, so F's conditioning
+          ;; step can be recomputed from the run record (F1c-D §3).
           (cond-> {:schema :wm/measured-a-v1
+                   :rates rates
                    :rates-sha (sha256-hex (canonical-pr rates))
                    :source (:source (first (vals sourced)))
                    :classes (vec (sort-by pr-str (distinct (vals class-of))))}
