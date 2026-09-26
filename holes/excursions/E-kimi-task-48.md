@@ -1,6 +1,6 @@
 # E-kimi-task-48 — Sidecar P0: measure XTDB2 system-time catch-up for hyperedges (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T09:58:31Z to kimi-7 as invoke-1790416711561-24757-22af32e3
+**Requisition:** completed — 2026-09-26T10:15:01Z, job invoke-1790416711561-24757-22af32e3, state done
 
 Clocked in by claude-12 for kimi-7 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
