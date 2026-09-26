@@ -59,7 +59,7 @@ DEPENDS: ⟨2⟩1a, ⟨2⟩1b. PAR: per module (6): W1 one module for R14→R6 a
 STATUS: PENDING; HELD for Joe's look at this list (12:44Z). LOG: —
 
 #### ⟨2⟩1e. QED for ⟨2⟩1: figure `aif-lean-dag-nodes.svg` has no orange or red arrow.
-Figure requisition (Joe, 14:15Z): the static figure is too complex to read, so a generated HTML version with a controller (hide/show by class, by how a term arrives, Lean-only off by default, focus on a node, hover for the declaration) sits beside it, same counts. WM-LEAN-DAG-INTERACTIVE-I · claude-11 · 9c7d3714 · in flight (14:15Z).
+Figure requisition (Joe, 14:15Z): the static figure is too complex to read, so a generated HTML version with a controller (hide/show by class, by how a term arrives, Lean-only off by default, focus on a node, hover for the declaration) sits beside it, same counts. WM-LEAN-DAG-INTERACTIVE-I · claude-11 · p4ng 1a7204d · ACCEPTED 14:21Z: `aif-lean-dag-nodes.html` written by the same `gen_lean_dag.bb` run, the SVG inlined with a class, how, shared-only, from/to and terms on every edge and a hover title naming the declaration; checkboxes per class and how (Lean-only off by default), a shared-module toggle, click-to-focus a node, a live "shown: n of 37"; same counts as the static legend; checked in headless Chromium (initial 37 of 37 with the 27 Lean-only hidden; focus R6 leaves its 9 incident edges); the test checks every EDN edge is listed with its class and the initial state, with a planted default-on bug caught. Published: https://zone.hyperreal.enterprises/wip/aif-lean-dag-nodes.html, linked from the page.
 
 ### ⟨2⟩2. Map level: the wiring map is complete.
 
