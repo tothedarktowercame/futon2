@@ -347,10 +347,13 @@
            :policy-key policy-key :occurrence {:flight flight-id :click click-id}
            :tokens unmeasured
            :classes (into {} (for [t unmeasured] [t (get-in observation [:channel t])]))}
-          (let [pats (mapv (fn [id] (when-let [p (get interps id)] (assoc p :id id))) precedence)
-                missing (vec (keep-indexed (fn [i p] (when (nil? p) (nth precedence i))) pats))]
+          (let [pats (mapv (fn [id]
+                             (manifest/declared->interpreted
+                              id (when-let [p (get interps id)] (assoc p :id id)))) precedence)
+                missing (filterv #(= :missing (:status %)) pats)]
             (if (seq missing)
-              (absent :no-interpretation {:patterns missing})
+              (absent :no-interpretation {:patterns (mapv :pattern missing)
+                                         :refusals missing})
               (let [chain-q (prior-q enactments policy-key)
                     s-prev (or chain-q (target-marginal target (get-in run-record [:decision :initial-belief-receipt :value])))
                     rates-v (select-keys rates V)

@@ -11,7 +11,10 @@
   hand-built map (the earlier hand-built record carried a :measurement key
   the producer did not write, so the step's test passed against its own
   stub). Bad inputs are that producer's record with a key removed."
-  (:require [clojure.set :as set]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.set :as set]
+            [futon2.aif.cascade-policy :as policy]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.flight :as flight]
@@ -139,3 +142,55 @@
                :observation {:status :observed :o #{:t} :checked #{:t} :channel {:t :C4}}
                :policy-key key-a :precedence [:p/a] :enactments [prior]})]
     (is (= {:value {#{:t} 1} :source :chain} (:s-prev step)))))
+
+(def live-record-path
+  "../futon3c/holes/labs/M-wm-wiring/spike/tick-run-record-2026-09-26-flight-278b6988-click-1.edn")
+(def live-record-sha "f634b05c8020472aed90eb3c0333226788264142f572b62b301bf84aee8c6dfa")
+
+(defn live-declarations []
+  (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file live-record-path)))
+        sha (apply str (map #(format "%02x" (bit-and 0xff %))
+                           (.digest (java.security.MessageDigest/getInstance "SHA-256") bytes)))]
+    (when-not (= live-record-sha sha) (throw (ex-info "Moved live pin" {:sha sha})))
+    (let [record (edn/read-string {:default tagged-literal} (String. bytes "UTF-8"))]
+      (some #(when (= "M-autoclock-in" (:target %)) (get-in % [:declaration :interpretations]))
+            (get-in record [:decision :selection-certificate :token-belief-stage :domain-inputs])))))
+
+(defn agreement-table []
+  (vec (for [[id {:keys [guard produces] :as declaration}] (sort-by (comp str key) (live-declarations))
+             [state-name state] [[:empty #{}] [:needs (:needs guard)]
+                                 [:with-forbids (set/union (:needs guard) (:forbids guard))]
+                                 [:completed (set/union (:needs guard) produces)]]]
+         {:pattern id :state state-name
+          ;; Selection's actual adapter and actual enabledness rule; assembly
+          ;; itself has no guard evaluator. Both paths must skip completion.
+          :selection (manifest/guard-holds? (policy/token-interpretation id declaration) state)
+          :conditioning (manifest/guard-holds? (manifest/declared->interpreted id declaration) state)})))
+
+(deftest retained-declarations-have-selections-enabledness
+  (let [rows (agreement-table)]
+    (is (= 8 (count (live-declarations))))
+    (is (= 32 (count rows)))
+    (doseq [row rows]
+      (is (= (:selection row) (:conditioning row)) (pr-str row)))))
+
+(deftest declaration-conversion-refuses-missing-shapes
+  (doseq [d [{:produces #{:t}}
+             {:guard {:needs nil :forbids #{}} :produces #{:t}}
+             {:guard {:needs #{} :forbids #{}} :produces [:t]}]]
+    (is (= {:status :missing :kind :missing-pattern-interpretation :pattern :p :declared d}
+           (manifest/declared->interpreted :p d))))
+  (let [p (pattern 1/2)]
+    (is (= p (manifest/declared->interpreted :p p)))))
+
+(deftest nonempty-forbids-and-completion-are-preserved
+  ;; The eight live patterns all have empty forbids: those rows alone cannot
+  ;; distinguish a conversion that drops negation. This declaration can.
+  (let [d {:guard {:needs #{:ready} :forbids #{:blocked}} :produces #{:done}}
+        converted (manifest/declared->interpreted :p d)
+        selection (policy/token-interpretation :p d)]
+    (doseq [[state enabled] [[#{} false] [#{:ready} true]
+                            [#{:ready :blocked} false] [#{:ready :done} false]]]
+      (is (= enabled (manifest/guard-holds? selection state)
+                     (manifest/guard-holds? converted state))))
+    (is (= {#{:ready :done} 1} (manifest/transition-row converted #{:ready})))))

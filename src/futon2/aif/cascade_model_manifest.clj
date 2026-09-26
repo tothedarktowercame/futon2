@@ -108,6 +108,24 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
                          :authority :documented-interpretation}
                      {:status :missing :kind :missing-pattern-interpretation})}))
 
+(defn declared->interpreted
+  "Convert a retained declaration without parsing text or defaulting guards.
+  Already interpreted patterns pass through unchanged. Malformed declarations
+  return a typed missing interpretation, naming the pattern and declaration."
+  [id {:keys [guard produces] :as declared}]
+  (cond
+    (= :interpreted (:status guard)) declared
+    (and (map? guard) (set? (:needs guard)) (set? (:forbids guard)) (set? produces))
+    {:id id :authority :declared-interpretation :source {:declared true}
+     :produces produces
+     :guard {:status :interpreted :operator :and
+             :clauses [{:present (into (sorted-set) (:needs guard))
+                        :absent (into (sorted-set) (:forbids guard))}]}
+     :transition {:status :interpreted :operator :union :produces produces
+                  :authority :declared-interpretation}}
+    :else {:status :missing :kind :missing-pattern-interpretation
+           :pattern id :declared declared}))
+
 (defn- produces-of
   "The ONE produces field of the pattern, as Lean
   DarkTower.WarMachine.CascadeTransition.InterpretedPattern has one
