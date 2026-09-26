@@ -20,8 +20,8 @@ LOG: WM-REGISTRY-LATEX-I · claude-3 · invoke-…69e33771 · in flight. Prior: 
 
 ### ⟨1⟩2. Every `:latex-absent` row is either written in Lean or ruled not an equation.
 ACCEPT: for each row from ⟨1⟩1, either a Lean declaration exists that the row's `:lean` names and `gen_lean_dag.bb` places (with a `lake build` warrant), or the row is reclassified to `:plumbing` with the reason (as the grain gate was: a support restriction, not an equation). Expected rows: `:mission-preference` (C's reading rule), `:enactment-habit` (E's counting rule), `:target-universe`, plus whatever ⟨2⟩1a classes as not-written.
-DEPENDS: ⟨1⟩1, ⟨2⟩1a. PAR: per row; Kimi-able (one E-kimi-task per row, `lake build` warrant), Lean layer reviewed by claude-8.
-STATUS: PENDING.
+DEPENDS: ⟨1⟩1, ⟨2⟩1a. PAR: per row; Kimi-able (one E-kimi-task per row, `lake build` warrant), Lean layer reviewed by claude-8. Rows from ⟨2⟩1c: C1–C4 (above), plus ⟨1⟩1's typed absences when they land.
+STATUS: PENDING; HELD for Joe's look at the list (12:44Z).
 LOG: —
 
 ### ⟨1⟩3. The Holes table has no open row.
@@ -41,21 +41,22 @@ At 2026-09-26 (p4ng e22c72b): 16 imported, 10 present-not-imported (free paramet
 
 #### ⟨2⟩1a. The 21 unimported edges are sorted into name-mismatch, grain, not-written, instantiation.
 ACCEPT: `WM-LEAN-ABSENT-TRIAGE-D.md` exists with all 21 classified with declaration-level evidence and a packet list.
-DEPENDS: none. STATUS: IN FLIGHT (done, return pending).
-LOG: WM-LEAN-ABSENT-TRIAGE-D · claude-11 · invoke-…a9407410 · done, wake pending. Prior: WM-LEAN-DEP-MAP-I (p4ng 40a1240), WM-LEAN-VS-REGISTRY-I (p4ng 33d9a72, e22c72b).
+DEPENDS: none. STATUS: ACCEPTED 2026-09-26 ~12:44Z.
+LOG: WM-LEAN-ABSENT-TRIAGE-D · claude-11 · invoke-…a9407410 · futon2 57849fb9 · 10 instantiation, 5 grain, 3 name-mismatch, 3 not-written. Findings that change the plan: the model's convention agrees with the instantiation reading (each equation is parametric, the machine's value is a separate `machine*` declaration, nothing applies one to the other); E does NOT need u (the registry's R16→R17 import is wrong: the habit counts the enacted candidate with the W_c verdict), so that edge is a registry correction and the counting rule a component; three instantiations are not plain substitutions (`machineTemperature` returns `Except`, so the error arm is a typed absence; `IsBayesAction` is a Prop, so the action needs a chosen maximiser; R2→R3a's two sides carry `o` as different types, needing a stated map first). Prior: WM-LEAN-DEP-MAP-I (p4ng 40a1240), WM-LEAN-VS-REGISTRY-I (p4ng 33d9a72, e22c72b).
 
 #### ⟨2⟩1b. Registry corrections: the name-mismatch and grain rows.
 ACCEPT: after the edit, `gen_lean_dag.bb` classes each such edge `:imported` or `:present` under the corrected `:lean-term` / `:enters-through`, and no other edge changes class.
-DEPENDS: ⟨2⟩1a. PAR: none (one registry editor). Seat: claude-3.
-STATUS: PENDING. LOG: —
+DEPENDS: ⟨2⟩1a; G0 (the generator must read the hints first); ⟨1⟩1 (one registry editor at a time). PAR: none. Seat: claude-11 for G0, claude-3 for RC1–RC6.
+STATUS: IN FLIGHT (G0).
+LOG: G0 · claude-11 · invoke-…caf81894 · in flight (12:44Z). RC1–RC6 (the triage's §1: three name-mismatch, five grain, and R16→R17 struck as a wrong import, with `:observe`'s `world` noted as `sPrev`) · claude-3 · queued behind ⟨1⟩1.
 
 #### ⟨2⟩1c. Not-written edges become ⟨1⟩2 rows.
-ACCEPT: each not-written edge names the ⟨1⟩2 row that writes it. DEPENDS: ⟨2⟩1a. STATUS: PENDING. LOG: —
+ACCEPT: each not-written edge names the ⟨1⟩2 row that writes it. DEPENDS: ⟨2⟩1a. STATUS: ACCEPTED 12:44Z: the triage names C1 the containment order built from the patterns (R2→R6 interp), C2 adjudication rates counted from records (R2→R7), C3 the β_ζ update of the likelihood precision, C4 the habit prior counted from enactment records (`:enactment-habit`'s `:lean` names only a type). These are ⟨1⟩2's rows. LOG: as ⟨2⟩1a.
 
 #### ⟨2⟩1d. Instantiation: for each present-not-imported edge, a Lean definition instantiating the parametric declaration at the registry's source term (e.g. the policy posterior at `machineTemperature`; two edges into `softmaxWithFPi` share one module).
 ACCEPT: the edge is `:imported`; the figure's orange arrow is blue; `lake build` warrant per module.
-DEPENDS: ⟨2⟩1a, ⟨2⟩1b. PAR: per edge (10); Kimi-able, one E-kimi-task per module; reviewed by claude-8.
-STATUS: PENDING. LOG: —
+DEPENDS: ⟨2⟩1a, ⟨2⟩1b. PAR: per module (6): W1 one module for R14→R6 and R8→R6 (both instantiate `softmaxWithFPi`; the temperature's `Except` arm carried as a typed absence); W2 the action from that posterior (needs a chosen maximiser, `IsBayesAction` being a Prop); W3 the closed-loop belief trajectory, four edges; W4 the rollout from the current belief (finer declaration: the rollout starts from the model's `q₀`, and nothing puts the current belief there); W5 the state prediction error; W6 the sensory prediction error, after a discovery settles the carrier of `o` (channel vector vs token observation). Each W re-points the row's `:lean` in the same commit. Kimi-able with a `lake build` warrant, reviewed by claude-8.
+STATUS: PENDING; HELD for Joe's look at this list (12:44Z). LOG: —
 
 #### ⟨2⟩1e. QED for ⟨2⟩1: figure `aif-lean-dag-nodes.svg` has no orange or red arrow.
 
@@ -83,8 +84,8 @@ STATUS: PENDING. LOG: —
 At 2026-09-26 (futon3c 2d4eeeb6): 0 verified, 2 witnessed hermetically, 107 unverified, of 109.
 ACCEPT: `wm-wire-ledger.edn` reports 0 unverified; every entry is verified or witnessed hermetically with a named test.
 DEPENDS: within-lane entries, none (start now); hand-off entries, ⟨2⟩2a. PAR: per block diagonal of the matrix, one lane per seat; Kimi-able (one E-kimi-task per lane: write the wire tests for that lane's entries, register them in `wire-test-nses`, warrant them), the definition already fixed in `wm-wire-ledger-test`'s docstring (WM-WIRE-TEST-I, 042a0570).
-STATUS: PENDING (definition and ledger ACCEPTED; two prototypes witnessed).
-LOG: WM-WIRE-TEST-I · claude-10 · 042a0570 · definition, ledger, two wires hermetic; found and fixed via WM-CHOSEN-CANDIDATE-I (futon2 f69f103d) and WM-HABIT-FOLD-CALL-I (futon2 663caa7b).
+STATUS: IN FLIGHT (definition and ledger ACCEPTED; two prototypes witnessed; the within-lane blocks: 78 wires in 11 lanes, the first lane out as calibration).
+LOG: E-kimi-task-55 · kimi-1 · invoke-…22e4fc80 · lane 3 read step, 5 wires · in flight (12:44Z). WM-WIRE-TEST-I · claude-10 · 042a0570 · definition, ledger, two wires hermetic; found and fixed via WM-CHOSEN-CANDIDATE-I (futon2 f69f103d) and WM-HABIT-FOLD-CALL-I (futon2 663caa7b).
 
 ### ⟨2⟩4. QED for ⟨2⟩: by ⟨2⟩1e, ⟨2⟩2a–c, ⟨2⟩3. This is "the map is complete" in the mission's four criteria.
 
