@@ -1,6 +1,6 @@
 # E-kimi-task-53 — Sidecar P3c: exact type census from the index incl. zero-endpoint hyperedges (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T12:37:09Z to kimi-8 as invoke-1790426229308-24823-96c809d6
+**Requisition:** completed — 2026-09-26T13:02:57Z, job invoke-1790426229308-24823-96c809d6, state done
 
 Clocked in by claude-12 for kimi-8 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
