@@ -271,7 +271,8 @@
                   :finding "The undeclared reduction is removed, not declared. This is the design Joe approved (absolute continuity; p4ng 3880a38). risk is D_KL[Q(o|pi) || C] valued in EReal: top exactly when Q(o|pi) > 0 and C(o) = 0 (outcomeRisk_eq_top_iff), the condition checked per policy and only where Q has positive mass. Otherwise it is the finite Gibbs sum over positive-mass outcomes, nonnegative by Gibbs' inequality. The old finite binding predictiveOutcomeRisk is the special case under its positivity hypothesis. Both audit cases compile: support padded with a zero-mass b where C(b) = 0 gives 0, and disjoint deltas give top. With G extended to EReal, the policy posterior E(pi) exp(-G - F), normalised in ENNReal, gives probability 0 to any policy that puts positive mass on a zero-preference outcome (policyPosterior_eq_zero_of_unpreferred_outcome). So zero-preference exclusion follows from the model and is not an extra rule. On finite G the posterior agrees with the real softmax weight and sums to one. Eq. (44) checked at refs/dacosta2020.txt:1418-1423. Rebuilt by claude-7; axioms propext/Classical.choice/Quot.sound only."}
    :reduction "Finite KL only: positive preference mass is required on every listed predictive outcome."
    :defines :risk :node :R5 :class :theory-defined :ref :dacosta2020
-   :imports [:Q-o-pi :C]
+   :imports [:Q-o-pi :C :C-tau]
+   :imports-note "CTAU-I: :C-tau added. :C is the THEORY import -- :mission-preference's read outcomes -- and the registry records that hop as not carried (:holes [:R19 :R5], :not-realised). :C-tau is what risk is ACTUALLY taken against on the per-problem lane and in the constructor: outcome-risk-pointwise against preference-member's distribution at step tau (cascade_model_manifest.clj:755, :809). Both are kept: the theory edge and the live one are different claims and the figure now shows them as different classes."
    :code "FILLED 2026-09-26 (WM-EQUATIONS-APPLY-I; empty until now, R5 under wm-vs-equation-dag.edn's :registry-names-no-site). futon2 src/futon2/aif/cascade_model_manifest.clj:600-611 (outcome-risk: D_KL[q||c] in extended reals, :infinite exactly when some observation has q(o) > 0 and c(o) = 0, a missing key counting as 0). RC7 (WM-SUPERSET-D, [:R19 :R5]): the consumer end of C. futon2:src/futon2/aif/efe.clj:1066-1427 (rank-cascade-actions), where :1116-1117 read the problem's cascade spec and its want -- spec-in (or (:cascade-spec opts) {}), want (:want spec-in) -- and :1140 passes (:c spec-in) into the pointwise preference the risk term is taken against."
    :formal "risk(pi) := D_KL[Q(o|pi) || C]" :eq "dacosta2020 eq. 44 (risk over outcomes)" :lean "OutcomeRiskKL.outcomeRisk" :lean-status :closed
    :lean-at "mathlib4 f4fed50271 (OutcomeRiskKL.lean; Holes.predictiveOutcomeRisk is unchanged and proved its finite special case)"}
@@ -710,7 +711,78 @@
    :code "futon2 src/futon2/aif/target_field.clj:278-308 (with-pair-overlap: per pair of feasible targets, {:comparable true} | {:incommensurable {:shared-tokens [...]}} | {:absent :no-universe}; an entry with no constructed candidate records {:absent :no-constructed-candidate}, never an empty map)"
    :value-absent {:absent :not-computed
                   :detail "No Delta-G-t is computed anywhere at HEAD. with-pair-overlap's own docstring: 'No target has a constructed candidate at HEAD.' The comparability PRECONDITION is computed; the number is not."}
-   :still-owed "Part 2 of PROOF-2a's H-G-target -- the outcome universe C ranges over when targets are compared, and a prior over targets before any candidate exists -- has no definition in any document, by the Lean module's own statement: 'a target with no constructed candidate has no candidate law q1, so its Delta-G is a typed absence on the record, not a number'."}]
+   :still-owed "Part 2 of PROOF-2a's H-G-target -- the outcome universe C ranges over when targets are compared, and a prior over targets before any candidate exists -- has no definition in any document, by the Lean module's own statement: 'a target with no constructed candidate has no candidate law q1, so its Delta-G is a typed absence on the record, not a number'."}
+
+  ;; CTAU-I (2026-09-26, from CTAU-D: futon3c e30a3a54 + futon2 cf4635ff9, claude-2).
+  ;; TWO C_tau families are live and they are scored by DIFFERENT scorers. This row
+  ;; is the token family; :class-preference-schedule below is the class family.
+  {:id :preference-schedule
+   :latex "\\begin{aligned}
+           C_\\tau(o) &= \\frac{e^{u_\\tau(o)}}{Z_\\tau}, \\qquad u_\\tau(o) = \\sum_{v \\in o} w^\\tau_v \\\\
+           w^\\tau_v &= \\lambda/|W| \\ (v \\in W), \\ +\\mu \\ (v \\in E), \\ 0 \\text{ otherwise} \\\\
+           &\\qquad \\text{at placement } \\texttt{:every-step}, \\text{ or } \\texttt{:terminal} \\text{ at } \\tau = T \\\\
+           w^\\tau_v &= 0 \\ \\text{for all } v \\qquad (\\texttt{:terminal},\\ \\tau < T) \\\\
+           &\\quad \\tau \\text{ is a rollout step of ONE click, not a click and not a lifecycle occurrence;} \\\\
+           &\\quad \\text{the } \\tau \\to \\text{occurrence mapping is ABSENT}
+           \\end{aligned}"
+   :defines :C-tau :node :CTAU-TOKEN :class :stack-defined :ref :dacosta2020
+   :imports [:T]
+   :imports-note "ONLY :T. The want tokens, lambda, mu and the schedule arrive on the assembled problem's :cascade-spec (cascade_problems.clj:150-168), and no registry symbol names that spec. :C is NOT imported here on purpose: :C is :mission-preference's READ outcomes, and HOP 1 (mission text -> extracted outcomes -> the cascade spec) is not wired -- see the :holes entry for [:R19 :R5]. Importing :C would assert the hop this registry records as absent."
+   :formal "C_tau := the distribution over subsets o of the problem's token universe that risk is taken against at prediction step tau of ONE click's rollout at horizon T. Weights are additive per token: lam/|want| for a want (or its declared :weights entry), plus mu for an evidence token, zero for any other token; outcomes in :zeroed carry exactly zero mass. The schedule's :placement is :every-step (the same C at every tau; also the DEFAULT when a source declares none) or :terminal (uniform over non-ruled-zero outcomes before tau = T, the weighted C at tau = T). tau is a rollout step, not a click and not a lifecycle occurrence; the tau -> occurrence mapping is absent. Tokens outside want and evidence weigh 0: C is UNIFORM over intermediates, it does not penalise them."
+   :lean "DarkTower.WarMachine.PolicyHorizon.horizonEFE" :lean-status :closed
+   :lean-at "mathlib4 afe69a946c DarkTower/WarMachine/PolicyHorizon.lean:61 (C : Nat -> O -> Real, step-indexed; stepRisk :50); fixture_stepIndexed_preference :306 (the ranking reverses against a constant C); the token law is DarkTower/WarMachine/TokenPreference.lean"
+   :lean-note "Binds the step-indexed C_tau binder and the risk term. It does NOT bind the schedule's :placement or :elsewhere, the per-token weights from want/evidence/lam/mu, or preference-member; those are the Clojure's (cascade_model_manifest.clj:735 utility-weights, :767 preference-member). The dense Clojure horizon-g (:632) is the one that mirrors horizonEFE with :c-fn; THE LIVE SCORER IS horizon-g-sparse* (:809), the factorised form, and CTAU-D found no live caller of horizon-g in src or scripts."
+   :code "futon2 src/futon2/aif/cascade_model_manifest.clj:767 (preference-member), :735 (utility-weights), :809 (horizon-g-sparse*), :755 (outcome-risk-pointwise); src/futon2/aif/live_c.clj:324 (preference-schedule), :337 (family-schedule); src/futon2/aif/cascade_problems.clj:150-168 (assemble-one: :c-schedule, :lam, :mu, :want on the :cascade-spec); src/futon2/aif/cascade_sources.clj:267 (the declared schedule per target); src/futon2/aif/efe.clj:1221 (rank-cascade-actions -> horizon-g-sparse-cert). CONSUMERS: the per-problem lane's R5 step (futon2 scripts/futon2/report/war_machine.clj:5905-5935) and the constructor's :evaluate-g (constructed-candidate-g, :6065). NOT consumed by the joint selection, which scores the class family."
+   :live-status {:implemented true
+                 :consumed-by [:lane-r5 :constructor-evaluate-g]
+                 :map {:declared [[:want {:record :cascade-spec}]]
+                       :not-declared [:c-schedule :lam :mu :preference-member :horizon-g-sparse*]}
+                 :ledger {:verified []
+                          :at "futon3c wm-wire-ledger.edn 68bc4d92 (163 wires, 5 verified / 73 hermetic / 85 unverified)"
+                          :note "NO WIRE OF THIS FAMILY IS VERIFIED. The two ends are :witness / UNVERIFIED."}
+                 :recorded-per-run {:absent :run-record-carries-no-c-schedule}}
+   :open [{:assumption "the production placement"
+           :state "per target, from the declared source: :terminal for the four targets in resources/wm/cascade-sources/ that declare it; :every-step (defaulted, :schedule-not-declared) for a target with no source entry, which is what a flight over M-autoclock-in gets by the code as read. The run record does not state the placement. Not established: which placement the flights actually ran under."}
+          {:assumption "the ordering under measured A at a stated placement, with ties and controls"
+           :state "a PLAN-2a 2b/3b test, not run. No claim of an ordering (chain, detour, idle) is made or measured here."}
+          {:assumption "the constructor's proposal grain and strict-improvement rule"
+           :state "one :compose-by-need move proposing the whole minimal-support family at once (single move, not per-pattern extension); taken iff value = G(best current) - G(best proposed) + epistemic - cost > 0 over one shared universe. The one cited receipt is data/wm-runs/tick-run-record-2026-09-26-flight-7f89646a-click-1.edn (UNTRACKED, sha256 a8e04fb97e58...), first machine-constructed receipt :value 1.25, :horizon 4, 4 wants unreached. The grain question stays OPEN until a COMMITTED receipt witnesses it."}
+          {:assumption "the horizon relative to the proposed chain"
+           :state "T is one common declared-or-computed horizon per tick (resolve-cascade-horizon); :max-moves (construction budget, default 4) is a different quantity that also reads 4 in the receipt above. In that receipt T = 4 with 7 unit applications in the proposed order and 3 wants :beyond-horizon; the chain is longer than the horizon it is scored over."}]}
+
+  {:id :class-preference-schedule
+   :latex "\\begin{aligned}
+           C^{\\mathrm{cls}}_{T} &= \\{\\,\\texttt{focused} \\mapsto 0.55,\\ \\texttt{related} \\mapsto 0.35,\\
+             \\texttt{unrelated} \\mapsto 0.05,\\ \\texttt{stop-the-line} \\mapsto 0.05\\,\\} \\\\
+           C^{\\mathrm{cls}}_{\\tau} &= \\{\\,\\texttt{:ending/not-yet-evaluated} \\mapsto 1\\,\\} \\qquad (\\tau < T),
+             \\text{ so risk is exactly } 0 \\text{ before } T \\\\
+           &\\quad \\text{scored by the tick's JOINT decision, NOT through } \\texttt{preference-member} \\\\
+           &\\quad \\text{a target with no class is the typed refusal } \\texttt{:class-unknown-no-scalar-g}
+           \\end{aligned}"
+   :defines :C-class :node :CTAU-CLASS :class :stack-defined :ref :dacosta2020
+   :imports [:T]
+   :imports-note "ONLY :T, for the same reason as :preference-schedule: the target CLASS arrives from focus_receipt/classify-target, a wiring-map box with no registry symbol. The relation -> class -> class-model hops are wires of the M-wm-wiring map, not edges of this registry, and their ledger statuses are recorded in :live-status rather than drawn here."
+   :formal "C_class := the preference the tick's JOINT decision scores risk against. At tau = T it is the literal {focused 55/100, related 35/100, unrelated 5/100, stop-the-line 5/100}; at tau < T it is unit mass on :ending/not-yet-evaluated, so risk is exactly 0 before the horizon. It is NOT routed through preference-member -- the scorer says so in its own comment -- and the derived live-C weights are recorded but no longer enter the score. A target whose class is :unknown gets the typed refusal :class-unknown-no-scalar-g, not a class."
+   :lean-absent {:absent :no-declaration
+                 :detail "No Lean declaration mentions the four classes. The code calls the weights stipulated and held fixed (PROOF-wm-works-2026-09-22.md:314-317), and the model records its own provenance as :status :synthetic :calibrated false."}
+   :code "futon2 scripts/futon2/report/war_machine.clj:6202-6230 (class-observation-model: the joe-c literal, and the live-C weights recorded but no longer entering the score), :6683-6698 (the tick's joint decision passing :observation-model), :6632 (scorer-class: focus -> :focused, associated -> :related, useful-elsewhere -> :unrelated); src/futon2/aif/cascade_observation_scoring.clj:144-160 (the scorer that reads (get-in model [:class-preference tau]) and says classes are NOT routed through preference-member); src/futon2/aif/observation_model.clj:195-232 (:class-unknown-no-scalar-g); src/futon2/aif/focus_receipt.clj:244 (classify-target); src/futon2/aif/efe.clj:1111 (the (contains? opts :observation-model) branch that selects this scorer)."
+   :weights-provenance {:read-at "futon2 7f94e48c4, war_machine.clj:6202-6230"
+                        :literal "{:focused 55/100 :related 35/100 :unrelated 5/100 :stop-the-line 5/100}"
+                        :recorded-in-the-model {:status :synthetic :calibrated false}
+                        :ruling "Joe, 2026-09-22, quoted at holes/labs/wm-contract/PROOF-wm-works-2026-09-22.md:388: \"55=focused mission, 35=related, 5=unrelated, 5=stop-the-line\"; the code at :314-317 calls them stipulated and held fixed. ORIGIN COMMIT NOT TRACED by CTAU-D or by this row."}
+   :live-status {:implemented true
+                 :consumed-by [:tick-joint-decision]
+                 :map {:declared [:r9-classify-target :r9-decision :r9-class-model]
+                       :not-declared [:cascade-observation-scoring "the 55/35/5/5 literal"]}
+                 :ledger {:verified [[:r9-classify-target :r9-decision :class]
+                                     [:r9-decision :r9-class-model :target-class]
+                                     [:r9-embedding-neighbour :r9-classify-target :derived-via]]
+                          :at "futon3c wm-wire-ledger.edn 68bc4d92"
+                          :note "The three relation -> class -> class-model wires ARE VERIFIED (the third :conditional). The scorer that consumes the class C, and the literal itself, are not on the map."}}
+   :open [{:assumption "whether the class C is Joe's preference"
+           :state "the WEIGHTS are his ruling of 2026-09-22 (authored). The class ASSIGNMENT is not: a target's class is its corpus relation row (focus/associated/useful-elsewhere), which is a declared relation and not a judgement of whether adjacent work is necessary or irrelevant; the code names useful-elsewhere :unrelated and PROOF-wm-works calls that class elsewhere. Whether that reading is what Joe means is NOT ESTABLISHED. See PREFERENCE-AUDIT.md rows 2 and 11; the class-assignment rule's authority is unstated (agent-built, codex-20 handoff B)."}
+          {:assumption "no scoring record was read"
+           :state "CTAU-D read no class-scoring run record, so nothing here witnesses the class C being consumed on a live tick; the VERIFIED wires above are the relation and class hops, not the score."}]}]
 
  ;; Where the framework leaves a free hand. Each is recorded as OBSERVED in
  ;; the War Machine as of 2026-09-01; Joe decides. Format mirrors
@@ -1578,6 +1650,13 @@
    :record :by-design
    :finding "BY DESIGN, recorded so it is not read as a defect: this row's :formal is the generative process and the machine does not simulate it. The observation reads the world -- the published store and the checks -- so A and B do not enter it."
    :evidence "WM-SUPERSET-D [:R4 :R2]; futon2:src/futon2/aif/observation.clj:103-147 (the tick's channel vector, read from scan data), futon2:src/futon2/aif/observation_checks.clj:567-571 (the flight's located tokens)"}
+  {:edge [:R19 :R5]
+   :equation :mission-preference
+   :status :not-realised
+   :finding "HOP 1 IS NOT WIRED. Mission text -> extracted outcomes -> the cascade spec does not exist on the live path. The wants that reach the spec come from declared sources, checkboxes (mission_hole_wants) and A-exits criteria (flight/source-wants), not from extract_outcomes, whose only consumer is the R2 read step served_by_reading.clj. The C that enters risk today is the TOKEN family of :preference-schedule, built at cascade_problems.clj:150-174 from :want plus live-c/preference-scales and live-c/preference-schedule."
+   :recorded-where "This row's own :not-realised field said so already; CTAU-I moves it into :holes, which is the field gen_aif_dag.bb reads, so the figure stops classing R19->R5 as realised-in-code-but-undrawn."
+   :evidence "CTAU-D 1(a) and 1(c) (futon3c e30a3a54), confirmed at futon2 7f94e48c4: futon2:scripts/futon2/wm/extract_outcomes.clj has one src consumer, futon2:src/futon2/aif/served_by_reading.clj:30 and :119; futon2:src/futon2/aif/flight.clj:29-60 (source-wants: :checkbox or :a-exits); futon2:src/futon2/aif/cascade_problems.clj:150-168"}
+
   {:symbol :F :status :no-consumer
    :finding "Per-tick F is computed and stored and read by nothing (C448, C452). This is NOT a theory hole: BMR does not import F (see :model-reduction). It is an observation about the F row: a diagnostic."
    :evidence "war_machine.clj:4450-4452, 4753"}]
