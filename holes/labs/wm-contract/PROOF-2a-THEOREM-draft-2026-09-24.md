@@ -53,6 +53,8 @@ none of them.
 
 ### A flight: the clicks on one mission, ending in closure
 
+*Note (Joe, 2026-09-26 ~12:13Z): how many clicks a flight spends on one target before reselecting is an empirical question settled in a given instance, not a definition and not a ruling; the sweet spot preserves capability without overhead, and with no proof of functioning yet a general answer is premature. Joe's stated preference (his notes on C) is focused work leading to completion. The runner carries this as a parameter (`flight/run!`'s `max-clicks`); the definition below is read with that parameter free.*
+
 A flight takes a mission (or other task) to closure. It may be one click or
 several; that is an engineering choice. What is not a choice:
 
