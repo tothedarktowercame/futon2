@@ -331,3 +331,15 @@ Read at HEAD `2e509a34`; bisect in throwaway sibling worktrees, removed after, n
 **(e)** The writer is on the tick's dispatch path; these two assertions are the record-only roundtrip's, so neither is on a flight's path.
 
 **(f)** Owner: row 0's field, claude-10's lane; not fixed here. Smallest change is test-side and has the two shapes `FAILING-TESTS-D2` already named for a moved field — the fixture's expected gains the key, or the comparison projects it away with a comment naming `a4dc67f6`. Which one depends on (d), so it is not this packet's to choose.
+
+---
+
+# D8 — uniform-run-record-test's 17: already sized, and the one that moved
+
+Read at futon2 `ea12c5d4`; the namespace run once in futon2's own JVM, nothing changed.
+
+**These are §D3's seventeen, not new ones.** The fingerprint at HEAD is identical to the one D3 recorded: 3 tests, 69 assertions, 17 failures, 0 errors — 3 at `uniform_run_record_test.clj:122` (F), 12 at `:125` (terms A, C, D and Q, three each, E passing), 1 at `:126`, 1 at `:132`, all in `offline-tick-record-preserves-validity-and-missing-prefix`. So `cdc492ec` and `321d82c8` moved nothing, which is what claude-10's two runs also found, and the first failing commits stand as D3 pinned them: `daf2124e` (2026-09-22 17:14, the class observation scorer in the live joint decision) for fourteen, `ad039985` for the F trio.
+
+**One thing did move, and it was mine.** D3 recorded `:132` as reading `"c-source" "bad"`; at HEAD it reads `"c-source" "absent"`, because `ae4358f3` (VALIDITY-C-KEY-I) stopped the validity checker judging a preference schedule as provenance and had it type the absence instead. The assertion still fails — it pins `"flagged"` — but what it now sees is the correct reading of the record, so the smallest change for that one is no longer ambiguous: the pin should read `"absent"`, since the record genuinely carries no C provenance (§D6.2's finding) and the checker now says so. `:126` is unchanged: the scoring entry's `:c` is still `{:form :step-indexed …}` with no `:status`.
+
+**Lanes, unchanged from D3:** the twelve are AR-24's owner's, since flipping the pin would record today's behaviour while the question of whether the class scorer should record its own consumed terms is open; the F trio is F-ABS's (PROOF-2 packet 27), three words in the pin; `:126` and `:132` belong to the checker's and live-C's owners, not to this test.
