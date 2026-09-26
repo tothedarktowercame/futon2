@@ -20,6 +20,7 @@
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.task-execution-evidence]
             [futon2.aif.flight :as flight]
+            [futon2.aif.loaded-displacement :as displacement]
             [futon2.aif.interpretation-evidence]
             [futon2.aif.mission-criteria :as criteria]
             [futon2.aif.mission-reading :as reading]
@@ -416,6 +417,11 @@
     (cond-> {:click-id run-id
              :chosen (when (= target (:target chosen)) (select-keys chosen [:candidate :precedence]))
              :unreached-wants (vec (when (= target (:target chosen)) (:unreached-wants chosen)))
+             ;; RUNNER-DRIFT-I: the serving JVM's displaced namespaces
+             ;; when the click ran, from the record's :runner/source
+             :displacement (if-let [r (get-in record [:runner/source :loaded-displacement])]
+                             (displacement/summary r)
+                             {:absent :no-loaded-displacement-on-run-record})
              :outcome (or (some->> (:route record)
                                    (filter #(= "FULL_LOOP_CLOSE" (:toNode %)))
                                    first
@@ -423,6 +429,24 @@
                           {:absent :no-terminal-outcome-on-run-record})}
       mine (assoc :abstention (select-keys mine [:target :kind :missing :declines]))
       (nil? record) (assoc :abstention {:kind :run-record-missing :missing :run-record}))))
+
+(defn latest-displacement
+  "RUNNER-DRIFT-I, for the flight's dry-run plan: the displaced namespaces
+  the serving JVM reported at its LAST click (the newest tick run record in
+  RUN-RECORD-DIR, by modification time), with that record's run id and
+  start. It is the last click's reading, not the JVM's state now: the driver
+  runs in its own JVM, which cannot see the serving one. A typed absence
+  when there is no record, or the record carries no report."
+  [run-record-dir]
+  (let [files (->> (.listFiles (io/file run-record-dir))
+                   (filter #(re-matches #"tick-run-record-.*\.edn" (.getName ^java.io.File %))))
+        newest (when (seq files) (apply max-key #(.lastModified ^java.io.File %) files))]
+    (if-not newest
+      {:absent :no-run-record :dir (str run-record-dir)}
+      (let [record (clojure.edn/read-string {:default tagged-literal} (slurp newest))
+            r (get-in record [:runner/source :loaded-displacement])]
+        (merge {:from-run-record (:run/id record) :started-at (:startedAt record)}
+               (if r (displacement/summary r) {:absent :no-loaded-displacement-on-run-record}))))))
 
 (defn click-cast
   "WM-CAST-I: the tick's cast as the flight sends it in the click. Each of

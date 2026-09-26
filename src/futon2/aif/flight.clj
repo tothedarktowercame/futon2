@@ -234,7 +234,10 @@
                   ;; (http-click-fn), as the click function gave them
                   (:chosen click) (assoc :chosen (:chosen click))
                   (contains? click :outcome) (assoc :outcome (:outcome click))
-                  (contains? click :cast) (assoc :cast (:cast click))))
+                  (contains? click :cast) (assoc :cast (:cast click))
+                  ;; RUNNER-DRIFT-I: the serving JVM's displaced namespaces
+                  ;; when the click ran (record-summary)
+                  (contains? click :displacement) (assoc :displacement (:displacement click))))
         (update :carried-wants #(vec (distinct (concat % (map :token unreached-wants)))))
         (update :needs #(cond-> % (:missing abstention)
                           (conj (merge {:click-id click-id :kind (:kind abstention)

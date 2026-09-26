@@ -190,6 +190,9 @@
      :needs-in-serving-jvm "futon3c b7340968 (flight-edn) and futon2 runner/war-machine at this checkout, reloaded from master"
      :placement (select-keys (resolve-target opts) [:target :target-source :draw-seed :hand-target-overridden])
      :resolved-steps (resolved-steps opts)
+     ;; RUNNER-DRIFT-I: the serving JVM's displaced namespaces at its last
+     ;; click (fr/latest-displacement), read before this flight's click
+     :serving-jvm-displacement (fr/latest-displacement (or (:run-record-dir opts) runner/default-run-record-dir))
      :run? false}))
 
 (defn run-flight!

@@ -7,6 +7,7 @@
   Morning Brief QA, and closes every preregistered checkpoint. The deterministic
   fold executor is not an actuator here."
   (:require [futon2.aif.load-identity :as load-identity]
+            [futon2.aif.loaded-displacement :as loaded-displacement]
             [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn :as edn]
@@ -478,7 +479,11 @@
    :namespaces reports the registered and explicitly required decision/close
    scope, including unregistered namespaces. This is not bytecode identity:
    edits during compilation, partial loads and later Var mutation are outside
-   the capture guarantee. Only this runner's :drift retains refusal authority."
+   the capture guarantee. Only this runner's :drift retains refusal authority.
+   :loaded-displacement (RUNNER-DRIFT-I) reports every loaded futon2.aif.* /
+   futon2.report.* namespace whose vars' recorded lines no longer hold them
+   in the classpath file (loaded-displacement/report): displacement, not
+   content drift; report only, it refuses nothing."
   ([]
    (runner-source-drift (fn [path]
                           (if (= path canonical-runner-path)
@@ -494,7 +499,8 @@
               :runner/canonical-present? (some? disk)
               :runner/loaded-sha256 loaded :runner/canonical-sha256 disk
               :identity-kind :source-digest-at-namespace-load
-              :namespaces reports}
+              :namespaces reports
+              :loaded-displacement (loaded-displacement/report)}
        (= :current (:status own)) (assoc :runner/sha256 loaded)))))
 
 (defn- refuse-on-runner-source-drift!
