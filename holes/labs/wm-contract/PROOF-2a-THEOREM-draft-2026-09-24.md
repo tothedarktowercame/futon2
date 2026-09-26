@@ -319,6 +319,10 @@ a miscalibration; in attempts the prediction's mean is 8.75 (7 patterns at
 θ 0.8) and the observed 8 has P(≤ 8) 0.50 (futon3c `356573c1`). Kernel
 choice changes elapsed steps, not attempts.
 
+### Ruling: the map is complete and every wire verified before flights resume (Joe, 2026-09-26 ~11:27Z)
+
+The premise the plan ran on, that the components were ready and only needed wiring, was wrong: the harness figure (M-wm-wiring, futon3c 95f0f744) shows six step boundaries with no declared hand-off, four steps no field enters or leaves, and against futon-2026 Figure 6A no edge of the equation DAG declared at function grain (WM-AIF-DAG-D). Figure 6A is itself out of date, its registry predating this proof's equations, and is to be remade. The correction is to the plan, not the theorem: components and wires are verified before any flight, the map is the specification of the remaining work, and it is complete when every step boundary is crossed by a declared field, the map is a strict superset of the regenerated Figure 6A, every field has a wire test, and the organisation layer (call order and carriers) is drawn. The phase and its order are in M-wm-wiring, "COMPLETE THE MAP, VERIFY THE WIRES". Whether this is a PROOF-2b is Joe's; claude-8 recommends not, since the theorem stands and the amendment is to the plan.
+
 ## Not yet a clause (AR-35)
 
 A prior over lower-level patterns conditioned by higher-level ones (the
