@@ -7,7 +7,10 @@
 (defn initialize
   "Explicit declared initialization; never inferred by `step`."
   [observation-support state-support prior]
-  (if (and (vector? observation-support) (seq observation-support)
+  (cond
+    (and (number? prior) (<= prior 0))
+    (refuse :prior-not-positive [:initialization :prior])
+    (and (vector? observation-support) (seq observation-support)
            (= (count observation-support) (count (set observation-support)))
            (vector? state-support) (seq state-support)
            (= (count state-support) (count (set state-support)))
@@ -16,7 +19,7 @@
      :concentrations (into {} (for [o observation-support]
                                 [o (zipmap state-support (repeat prior))]))
      :last-tick nil :initialization {:authority :declared :prior prior}}
-    (refuse :invalid-declared-initialization [:initialization])))
+    :else (refuse :invalid-declared-initialization [:initialization])))
 (defn step [carried {:keys [id previous-id observation belief]}]
   (let [os (get-in carried [:support :observation]) ss (get-in carried [:support :state])]
     (cond
