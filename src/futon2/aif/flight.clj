@@ -16,6 +16,7 @@
   (:require [clojure.string :as str]
             [futon2.aif.mission-criteria :as criteria]
             [futon2.aif.mission-reading :as reading]
+            [futon2.aif.observation-admission :as admission]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.repair-proposals :as repairs])
   (:import [java.util UUID]))
@@ -212,6 +213,59 @@
     (:failure entry)
     {:absent :no-failure-on-click-entry}))
 
+;; ---------------------------------------------------------------------------
+;; The observation after an enacted step (F1a-1, PROOF-2a-PLAN <2>2d F1)
+
+(def ^:private after-observer "futon2.aif.flight/after-observation")
+
+(defn step-observation
+  "The observation o that followed an enacted step, on the token carrier O
+  (TokenObservation; the alphabet measured A is indexed over), for the flight's
+  :enactments entry. Candidate labels come from the after-observation AFTER
+  ({token bool}; anything but a boolean is a refused check, i.e. unobserved)
+  and from the enactment's ATTEMPTS (each produced token's check result).
+  UNIVERSE is the flight's view of the target's tokens (the want source's
+  universe and wants); a universe token neither source observed is
+  :unobserved, never absent (observation-admission's rule).
+
+  Each observed token is put through observation-admission/admit. The flight
+  has a mechanical check and no reviewer, so admit refuses (no review
+  verdict); the entry is then {:status :not-admitted :reason
+  :review-required} with the candidate labels and admit's own refusals
+  beside it. No review is fabricated. Were every label admitted, the entry
+  would carry :present/:absent/:unobserved at the top."
+  [universe after attempts click-id]
+  (let [checked (into {} (for [a attempts
+                               :let [r (get-in a [:check :result :observed])]
+                               :when (and (some? (:produced a)) (boolean? r))]
+                           [(:produced a) r]))
+        observed (merge checked (into {} (filter (comp boolean? val)) after))
+        universe (into (set universe) (keys observed))
+        candidate {:present (into (sorted-set-by #(compare (str %1) (str %2))) (keep (fn [[t v]] (when v t))) observed)
+                   :absent-observed (into (sorted-set-by #(compare (str %1) (str %2))) (keep (fn [[t v]] (when-not v t))) observed)
+                   :unobserved (into (sorted-set-by #(compare (str %1) (str %2))) (remove (set (keys observed))) universe)}
+        admitted (into (sorted-map-by #(compare (str %1) (str %2)))
+                       (for [[t v] observed
+                             :let [subject {:token t :evidence-pointers [{:click click-id :source :flight-after-observation}]}
+                                   adj (admission/adjudication after-observer (admission/observer-view subject)
+                                                               (if v :present :absent) {})]]
+                         [t (admission/admit subject adj nil)]))
+        all-admitted? (and (seq admitted) (every? #(= :admitted (:status %)) (vals admitted)))
+        review-missing? (every? #(and (= :invalid-verdict (:kind %)) (nil? (get-in % [:data :verdict])))
+                                (vals admitted))]
+    (cond-> {:schema :wm/admitted-observation-v1
+             :click-id click-id
+             :universe {:source :flight-want-source
+                        :sha256 (admission/view-digest (vec (sort-by str universe)))
+                        :count (count universe)}
+             :candidate-labels candidate
+             :admission admitted}
+      all-admitted? (merge {:status :admitted} (select-keys candidate [:present :unobserved])
+                           {:absent (:absent-observed candidate)})
+      (not all-admitted?) (assoc :status :not-admitted
+                                 :reason (if (and (seq admitted) review-missing?) :review-required
+                                             (if (empty? admitted) :nothing-observed :admission-refused))))))
+
 (defn record-click
   "FLIGHT after one click. CLICK is
     {:click-id … :wants [..] :want-source {..}
@@ -356,6 +410,18 @@
                                                    wc)))
                 _ (keep! f)
                 after (at :observe #(observe-fn (:target f) locators))
+                ;; F1a-1: the observation that followed the enacted step, on
+                ;; its :enactments entry (only when an enactment record exists)
+                f (cond-> f
+                    (:enactment enacted)
+                    (update :enactments
+                            (fn [es] (conj (pop es)
+                                           (assoc (peek es) :observation
+                                                  (step-observation
+                                                   (concat (keys (:universe wants)) (:wants wants))
+                                                   after
+                                                   (get-in enacted [:enactment :attempts])
+                                                   (:click-id result)))))))
                 f (record-click f (merge result {:wants (:wants wants)
                                                  :want-source (:source wants)
                                                  :before before
