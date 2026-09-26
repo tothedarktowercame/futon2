@@ -330,6 +330,7 @@ The habit prior is wired (futon2 663caa7b): at each selection the tick folds the
 WM-LEAN-DEP-MAP-I (p4ng 40a1240): the Lean model's dependency map, generated from the build's own declaration index for 199 of 207 modules; the equation registry places 18 modules and names none of the other 189, so the model is far ahead of the registry from the third side. Figure: zone/wip/aif-lean-dag-nodes.svg.
 The legacy habit store's last production writer is retired (futon2 2d8b6bf6, on Joe's word); the file stays as history; it already had no production reader.
 WM-HANDOFF-H1-I (futon3c b9d18dfe): the flight loop's readings and needs are declared, and the read → ask boundary stays uncrossed because the read step hands the ask step nothing on the flight record; it publishes to the interpretation store, which the wants read back. The store is the carrier the map must box next. Map at 218, matrix at 98 wires.
+WM-HANDOFF-H2-I (futon3c b44b63ab): the interpretation store boxed; the read → ask boundary is crossed by its six keys; map at 235, matrix at 104 wires, 0 verified live, 2 hermetic.
 
 ## Not yet a clause (AR-35)
 
@@ -339,6 +340,9 @@ hierarchical prior on B, or new. Falsifier to carry forward: remove one
 priming edge; the recorded prior must change.
 
 ## Work this opens, in order
+
+*Priority order (Joe, 2026-09-26 ~12:29Z): (1) components, where gaps remain; (2) wires, at the map's level and at the Lean level, where a registry dependency with no Lean import behind it means an equation not yet written down (37 registry edges, 14 imported in Lean, 23 not, on the working tree during the delta's application; R14's temperature reaches no consumer, R16's action marginal none in either direction), with Figure 6A's boxes carrying the equations typeset so dependence is visible; (3) then the empirical questions of runtime behaviour. No flight before (1) and (2). The instrument is M-wm-wiring's phase "COMPLETE THE MAP, VERIFY THE WIRES", re-ordered under these heads.*
+
 
 1. **Lean: the co-application kernel and the restricted meet condition**, as
    specified under clause 0 (definitions settled on the worked example;
