@@ -450,7 +450,8 @@
    :reviewed-by "claude (wm-edge-loop second reader; the slice-10 seat authored, this seat did not)"
    :reviewed-at "2026-09-05T20:39:58Z"
    :review-covers "484dbeb1"}
-  {:id :C28 :class :C :status :done-unreviewed :owner :claude-14
+  {:id :C28 :class :C :status :done :owner :claude-14 :reviewed-by "claude-8" :reviewed-at "2026-09-26" :review-covers "c95c6725"
+   :review "Reviewed as PROOF-2a-PLAN <2>2d RC9b/RC9c (claude-8, 2026-09-26 15:01Z and 15:35Z): both held sites read at HEAD before acceptance: scripts/wm_scheduled_run.clj calls enact/close-loop! behind (live-wire?) and no crontab entry or timer runs it; horizon-g-sparse* binds tempered = (if (or (= 1 zeta) bad (zero-rates? rates)) rates (lprec/tempered-rates rates zeta)). The classes are the registry's own (path-dependent; control-map conditional), no ruling; the seven conformance classes sum to 37 after ee0cc66."
    :covers-key [:holes {:edge [:R6 :R16]}]
    :registry-path "holes/labs/wm-contract/aif-equations.edn"
    :supersedes :C11
