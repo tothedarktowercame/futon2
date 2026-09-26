@@ -7210,13 +7210,18 @@
         ;; tokens, so the decision reached 3 of 465 live-C entries (~0.47% of
         ;; corpus weight) and 464 sat unreached. A hand-written declaration
         ;; still wins on any target it names.
+        ;; WM-MISSION-READ-ONCE-I: the registry is read once per selection,
+        ;; here, unconditionally, and both the declared sources and the
+        ;; cascade's targets take this doc (they were two reads of the same
+        ;; registry, one substrate read apart, in this let)
+        loaded-missions (mission-registry/load-missions)
         declared-sources (when-not (:cascade-sources judge-opts)
                            (cascade-sources/with-context-fn
                             (mission-hole-wants/merge-into-sources
                              (cascade-sources/load-declared
                               (or (:cascade-sources-dir judge-opts) cascade-sources/default-dir))
                              mission-registry/default-code-root
-                             (:missions (mission-registry/load-missions))
+                             (:missions loaded-missions)
                              :WM)))
         cascade-sources (or (:cascade-sources judge-opts) declared-sources {})
         cascade-proposal-supply
@@ -7238,7 +7243,7 @@
          ;; list it.
          (flight-assembly-input
           (:flight judge-opts)
-         {:targets (vec (distinct (concat (cascade-problems/substrate-targets)
+         {:targets (vec (distinct (concat (cascade-problems/substrate-targets loaded-missions)
                                           (keys (:universes cascade-sources))
                                           (map :target (:proposals cascade-proposal-supply))
                                           (map :ticket (:entries ticket-queue-declaration)))))

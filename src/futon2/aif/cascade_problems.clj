@@ -40,11 +40,14 @@
   enumerate (mission_registry.clj :322/:419) — live mission ids then live
   ticket ids — as TARGET IDENTITIES, not the flat :advance-mission /
   :advance-ticket actions those proposers construct. Pure listing; the
-  enumeration itself is the tick's existing substrate read."
-  []
-  (vec (concat (map :id (registry/open-missions))
-               (map :id (filter registry/live-ticket?
-                                (:tickets (registry/load-tickets)))))))
+  enumeration itself is the tick's existing substrate read. The one-arg
+  arity takes the mission registry doc already loaded (WM-MISSION-READ-ONCE-I:
+  the selection reads it once), as open-missions' one-arg arity does."
+  ([] (substrate-targets (registry/load-missions)))
+  ([loaded-missions]
+   (vec (concat (map :id (registry/open-missions loaded-missions))
+                (map :id (filter registry/live-ticket?
+                                 (:tickets (registry/load-tickets))))))))
 
 (defn- refusal
   [target kind missing & [more]]
