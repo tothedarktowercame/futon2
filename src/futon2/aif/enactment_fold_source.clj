@@ -71,3 +71,38 @@
     (assoc (enactment-habit/fold nil receipts)
            :folded-from (cond-> {:dir (str dir) :read read :unread unread}
                           (not present?) (assoc :dir-status {:absent :no-flights-dir})))))
+
+(defn conditioning-steps
+  "F1b-admit-I: the conditioning steps (flight/conditioning-step, under
+  [:flight :enactments i :step]) on the flight records in DIR, in the files'
+  order, each with the record it came from:
+  {:steps [{:step s :path p :sha256 h} ...] :read [...] :unread [...]} and
+  :dir-status {:absent :no-flights-dir} when DIR is missing. An unreadable
+  file is noted, never skipped silently."
+  [dir]
+  (if-not (.isDirectory (io/file dir))
+    {:steps [] :read [] :unread [] :dir (str dir) :dir-status {:absent :no-flights-dir}}
+    (assoc
+     (reduce
+      (fn [acc ^java.io.File f]
+        (let [path (.getCanonicalPath f)
+              bytes (java.nio.file.Files/readAllBytes (.toPath f))
+              h (sha256 bytes)
+              record (try (edn/read-string {:default tagged-literal} (String. bytes "UTF-8"))
+                          (catch Exception e {::unparseable (ex-message e)}))]
+          (cond
+            (contains? record ::unparseable)
+            (update acc :unread conj {:path path :reason :unparseable :message (::unparseable record)})
+            (not (map? record))
+            (update acc :unread conj {:path path :reason :not-a-flight-record})
+            :else
+            (let [steps (vec (keep (fn [enactment-entry]
+                                     (let [s (:step enactment-entry)]
+                                       (when (map? s) {:step s :path path :sha256 h})))
+                                   (get-in record [:flight :enactments])))]
+              (-> acc
+                  (update :steps into steps)
+                  (update :read conj {:path path :sha256 h :steps (count steps)}))))))
+      {:steps [] :read [] :unread []}
+      (flight-files dir))
+     :dir (str dir))))

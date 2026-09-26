@@ -87,8 +87,13 @@
 
 (deftest a-run-record-without-the-rates-value-is-an-absence
   (let [step (:step (fly {:measured-a {:schema :wm/measured-a-v1 :rates-sha "sha-only" :classes [:C4]}}))]
-    (is (= {:status :absent :reason :no-rates-value :inputs {:rates-sha "sha-only"}} step)))
-  (is (= {:status :absent :reason :no-run-record} (:step (fly {} :fetch? false)))
+    (is (= {:status :absent :reason :no-rates-value :inputs {:rates-sha "sha-only"}}
+           (select-keys step [:status :reason :inputs])))
+    (is (= {:policy-key key-a :occurrence {:flight "flight-f1bj" :click "run-1"}}
+           (select-keys step [:policy-key :occurrence]))
+        "an absence names its policy and occurrence, so admission can end that prefix at it"))
+  (is (= {:status :absent :reason :no-run-record}
+         (select-keys (:step (fly {} :fetch? false)) [:status :reason]))
       "no fetcher: the typed absence, not a step"))
 
 (deftest a-later-step-takes-the-chain's-q

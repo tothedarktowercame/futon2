@@ -321,7 +321,10 @@
         o (set (:o observation))
         interps (some #(when (= target (:target %)) (get-in % [:declaration :interpretations]))
                       (get-in run-record [:decision :selection-certificate :token-belief-stage :domain-inputs]))
-        absent (fn [reason & [inputs]] (cond-> {:status :absent :reason reason} inputs (assoc :inputs inputs)))]
+        ;; a refusal or absence names the step's policy and occurrence when
+        ;; known, so admission can end that policy's prefix at it (F1b-admit-I)
+        ident (cond-> {:occurrence {:flight flight-id :click click-id}} policy-key (assoc :policy-key policy-key))
+        absent (fn [reason & [inputs]] (merge (cond-> {:status :absent :reason reason} inputs (assoc :inputs inputs)) ident))]
     (cond
       (nil? run-record) (absent :no-run-record)
       (not= :observed (:status observation)) (absent :nothing-observed {:observation-status (:status observation)})
@@ -341,6 +344,7 @@
                                                  V)))]
         (if (seq unmeasured)
           {:status :refused :reason :unmeasured-class
+           :policy-key policy-key :occurrence {:flight flight-id :click click-id}
            :tokens unmeasured
            :classes (into {} (for [t unmeasured] [t (get-in observation [:channel t])]))}
           (let [pats (mapv (fn [id] (when-let [p (get interps id)] (assoc p :id id))) precedence)

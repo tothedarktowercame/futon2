@@ -81,6 +81,7 @@
             [futon2.aif.ticket-queue :as ticket-queue]
             [futon2.aif.parameter-novelty :as novelty]
             [futon2.aif.policy-prefix-evidence :as policy-prefix]
+            [futon2.aif.policy-prefix-admission :as prefix-admission]
             [futon2.aif.policy-free-energy :as policy-free-energy]
             [futon2.aif.policy-precision :as policy-precision]
             [futon2.aif.policy-precision-carry :as precision-carry]
@@ -6753,6 +6754,17 @@
                                    (precision-carry/family decision precision-model schedules))
                 decision (assoc-in decision [:selection-certificate :token-belief-stage]
                                    token-belief-stage)
+                ;; F1b-admit-I: each candidate's admitted observed prefix from
+                ;; the flights' conditioning steps, recorded per candidate under
+                ;; :policy-prefixes AFTER scoring (the score is unchanged; the
+                ;; top-level :observation-updates stay D's initialization
+                ;; updates). F1c-I consumes it. Without the flights' steps in
+                ;; opts every candidate is {:conditioning-status :no-flight-records}.
+                token-belief-input (assoc token-belief-input :policy-prefixes
+                                          (prefix-admission/prefixes
+                                           joint-candidates
+                                           (or (:conditioning-steps opts)
+                                               {:steps [] :dir-status {:absent :no-flight-steps-in-opts}})))
                 decision (assoc-in decision [:selection-certificate :token-belief-input]
                                    token-belief-input)
                 ;; B4 slice 2b (PROOF-2 P₀ carrier): one derivation entry per
@@ -7406,7 +7418,14 @@
                                    (enactment-fold-source/fold-from-flights
                                     (str (io/file (or (:machine-interpretations-dir judge-opts)
                                                       want-interpretation/default-store)
-                                                  "flights"))))))
+                                                  "flights"))))
+                               ;; F1b-admit-I: the flights' conditioning steps,
+                               ;; from the same flight records
+                               :conditioning-steps
+                               (enactment-fold-source/conditioning-steps
+                                (str (io/file (or (:machine-interpretations-dir judge-opts)
+                                                  want-interpretation/default-store)
+                                              "flights")))))
         wm-decision (:decision cascade-result)
         ;; Strategic habit observes the CASCADE decision's first acting
         ;; pattern (strategic_habit/carry, H4/dd4a3bbe); an abstention
