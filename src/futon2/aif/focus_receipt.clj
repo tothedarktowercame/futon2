@@ -95,6 +95,152 @@
              (some #(second (re-matches #"^\*{0,2}Parent:\*{0,2}\s+(\S+)" %))))
     (catch Exception _ nil)))
 
+;; ---------------------------------------------------------------------------
+;; WM-RELATION-I: an M- target with no row derives its relation, in order,
+;; from (a) its mission's stated ## Relations, walked through M- targets to
+;; the first target with a row, then (b) its nearest rowed neighbour in the
+;; pinned structure embedding; else it stays :unknown with the reason. Joe,
+;; 2026-09-26: "'I do not know how this relates to anything' is not a good
+;; answer" when the machine holds the graph and the embedding. Each
+;; derivation is a reading with its receipt (:derived-via), not a value
+;; standing in for an absence.
+
+(def relation-hop-bound
+  "How many stated-relation hops (a) walks (claude-8, WM-RELATION-I)."
+  2)
+
+(defn- sha256-file [f]
+  (let [md (java.security.MessageDigest/getInstance "SHA-256")]
+    (with-open [in (io/input-stream f)]
+      (let [buf (byte-array 65536)]
+        (loop []
+          (let [n (.read in buf)]
+            (when (pos? n) (.update md buf 0 n) (recur))))))
+    (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest md)))))
+
+(defn- default-mission-text
+  "The mission file for TARGET under CODE-ROOT's primary futon checkouts
+  (<repo>/holes/M-*.md or <repo>/holes/missions/M-*.md), as {:path :text
+  :sha256}, or nil."
+  [code-root target]
+  (some (fn [repo]
+          (some (fn [sub]
+                  (let [f (io/file repo sub (str target ".md"))]
+                    (when (.isFile f)
+                      {:path (.getCanonicalPath f) :text (slurp f) :sha256 (sha256-file f)})))
+                ["holes/missions" "holes"]))
+        (sort-by #(.getName ^java.io.File %)
+                 (filter #(and (.isDirectory ^java.io.File %)
+                               (re-matches #"futon\d+[a-z]?" (.getName ^java.io.File %)))
+                         (or (.listFiles (io/file code-root)) [])))))
+
+(defn stated-relations
+  "The M- targets a mission's `## Relations` section names, in order, each
+  {:to id :line n :quote text} (the line, 1-based, as in the file)."
+  [text]
+  (let [lines (vec (str/split-lines text))
+        start (first (keep-indexed (fn [i l] (when (re-matches #"^##\s+Relations\s*$" l) i)) lines))]
+    (when start
+      (let [end (or (first (keep-indexed (fn [i l] (when (and (> i start) (re-find #"^##\s" l)) i)) lines))
+                    (count lines))]
+        (vec (distinct
+              (for [i (range (inc start) end)
+                    :let [l (lines i)]
+                    id (map second (re-seq #"(?<![A-Za-z0-9-])(M-[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)" l))]
+                {:to id :line (inc i) :quote (str/trim l)})))))))
+
+(defn stated-relation-path
+  "(a): breadth-first over TARGET's stated Relations through M- targets, at
+  most relation-hop-bound hops, to the first target ROW-OF finds a row for.
+  {:row r :derived-via {:kind :stated-relation :path [...] :parent id}} or
+  {:absent reason}."
+  [target row-of mission-text]
+  (if-not (mission-text target)
+    {:absent :mission-text-not-found}
+    (loop [frontier [[target []]] seen #{target} hop 0]
+      (if (or (empty? frontier) (>= hop relation-hop-bound))
+        {:absent :no-stated-path-to-a-classified-target}
+        (let [steps (for [[from path] frontier
+                          :let [m (mission-text from)]
+                          :when m
+                          {:keys [to line quote]} (stated-relations (:text m))
+                          :when (not (seen to))]
+                      [to (conj path {:from from :to to :line line :quote quote
+                                      :source {:path (:path m) :sha256 (:sha256 m)}})])
+              hit (first (filter (fn [[to _]] (row-of to)) steps))]
+          (if hit
+            (let [[to path] hit]
+              {:row (row-of to)
+               :derived-via {:kind :stated-relation :path path :parent to}})
+            (recur (vec (distinct steps)) (into seen (map first steps)) (inc hop))))))))
+
+(defn- read-npy-f8
+  "A little-endian float64 C-order .npy file as {:shape [r c] :rows [[..]..]}."
+  [f]
+  (let [bytes (java.nio.file.Files/readAllBytes (.toPath (io/file f)))
+        bb (doto (java.nio.ByteBuffer/wrap bytes) (.order java.nio.ByteOrder/LITTLE_ENDIAN))
+        major (aget bytes 6)
+        hlen (if (= 1 major) (.getShort bb 8) (.getInt bb 8))
+        off (if (= 1 major) 10 12)
+        header (String. bytes (int off) (int hlen) "latin1")
+        _ (when-not (and (str/includes? header "'<f8'") (str/includes? header "'fortran_order': False"))
+            (throw (ex-info "unsupported npy" {:header header})))
+        [r c] (map #(Long/parseLong %) (re-seq #"\d+" (second (re-find #"'shape':\s*\(([^)]*)\)" header))))
+        base (+ off hlen)]
+    {:shape [r c]
+     :rows (vec (for [i (range r)]
+                  (vec (for [j (range c)] (.getDouble bb (int (+ base (* 8 (+ (* i c) j)))))))))}))
+
+(defn- cosine [a b]
+  (let [dot (reduce + (map * a b)) na (Math/sqrt (reduce + (map * a a))) nb (Math/sqrt (reduce + (map * b b)))]
+    (if (or (zero? na) (zero? nb)) 0.0 (/ dot (* na nb)))))
+
+(defn embedding-neighbour
+  "(b): TARGET's nearest rowed neighbour in the structure embedding the
+  inputs pin (:embedding :source-pins, mission-embed.json and
+  structure-embeddings.npy), re-hashed against the pins at read time. ROWED
+  is {target row}. {:row r :derived-via {:kind :embedding-neighbour
+  :neighbour :cosine :runner-up :candidates :pins :floor}} or {:absent
+  reason …}. A floor applies only when the inputs declare
+  :embedding :min-cosine; otherwise :floor {:absent :no-floor-declared}."
+  [inputs target rowed]
+  (let [pins (get-in inputs [:embedding :source-pins])
+        pin-of (fn [suffix] (first (filter #(str/ends-with? (str (:path %)) suffix) pins)))
+        jp (pin-of "mission-structure-embed/mission-embed.json")
+        np (pin-of "mission-structure-embed/structure-embeddings.npy")]
+    (cond
+      (not (and jp np)) {:absent :embedding-not-pinned}
+      (not (and (.isFile (io/file (:path jp))) (.isFile (io/file (:path np)))))
+      {:absent :embedding-file-missing :pins [jp np]}
+      :else
+      (let [mismatch (vec (for [p [jp np] :let [now (sha256-file (:path p))] :when (not= now (:sha256 p))]
+                            {:path (:path p) :pinned (:sha256 p) :now now}))]
+        (if (seq mismatch)
+          {:absent :embedding-pin-mismatch :mismatch mismatch}
+          (let [stems (:stems (json/parse-string (slurp (:path jp)) true))
+                {:keys [rows]} (read-npy-f8 (:path np))
+                idx (into {} (map-indexed (fn [i s] [s i]) stems))
+                stem (fn [t] (if (str/starts-with? t "M-") (subs t 2) t))
+                me (idx (stem target))]
+            (if-not me
+              {:absent :embedding-node-not-retained}
+              (let [cands (->> rowed
+                               (keep (fn [[t _]] (when-let [i (idx (stem t))]
+                                                   (when (not= t target) [t (cosine (rows me) (rows i))]))))
+                               (sort-by (comp - second)) vec)
+                    [[nt nc] runner] cands
+                    floor (get-in inputs [:embedding :min-cosine])]
+                (cond
+                  (empty? cands) {:absent :no-classified-target-in-embedding}
+                  (and (number? floor) (< nc floor))
+                  {:absent :nearest-below-threshold :nearest nt :cosine nc :min-cosine floor}
+                  :else
+                  {:row (get rowed nt)
+                   :derived-via {:kind :embedding-neighbour :neighbour nt :cosine nc
+                                 :runner-up (or runner {:absent :no-runner-up})
+                                 :candidates cands :pins [jp np]
+                                 :floor (if (number? floor) {:min-cosine floor} {:absent :no-floor-declared})}})))))))))
+
 (defn classify-target
   "THE shared relation producer (codex-20 ruling, handoff B): one
    classification for BOTH the scoring path and the close receipt. Accepts a
@@ -106,8 +252,9 @@
    outcome, and never guessed."
   ([inputs discovery as-of target]
    (classify-target inputs discovery as-of target nil))
-  ([inputs discovery as-of target {:keys [ticket-dir findings-dir]}]
-   (let [direct (first (filter #(and (= target (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs)))
+  ([inputs discovery as-of target {:keys [ticket-dir findings-dir code-root mission-text-fn] :as ctx}]
+   (let [row-of (fn [t] (first (filter #(and (= t (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs))))
+         direct (row-of target)
          parent-source (when (and (nil? direct) (string? target) (str/starts-with? target "T-"))
                          (or (when ticket-dir
                              (when-let [p (ticket-parent (io/file ticket-dir (str target ".md")))]
@@ -119,11 +266,26 @@
                                  {:kind :finding-target :parent p :source (str "finding " (subs target 2))})
                                (catch Exception _ nil)))))
          parent (:parent parent-source)
+         ;; WM-RELATION-I: an M- target with no row, when a relation context
+         ;; is given (the scoring path's), derives through (a) then (b)
+         m-derivation (when (and (nil? direct) ctx (string? target) (str/starts-with? target "M-"))
+                        (let [text (or mission-text-fn
+                                       (memoize #(default-mission-text (or code-root (str (System/getProperty "user.home") "/code")) %)))
+                              a (stated-relation-path target row-of text)]
+                          (if (:row a)
+                            a
+                            (let [rowed (into {} (keep (fn [r] (when (at-or-before? (:effective-from r) as-of) [(:target r) r])))
+                                              (reverse (:relations inputs)))
+                                  b (embedding-neighbour inputs target rowed)]
+                              (if (:row b)
+                                (assoc-in b [:derived-via :stated-relation] {:absent (:absent a)})
+                                {:absent (:absent b) :embedding b :stated-relation (:absent a)})))))
          relation-row (or direct
                           (when parent
-                            (first (filter #(and (= parent (:target %)) (at-or-before? (:effective-from %) as-of)) (:relations inputs)))))
-         derived (when (and parent-source relation-row (nil? direct))
-                   parent-source)
+                            (row-of parent))
+                          (:row m-derivation))
+         derived (cond (and parent-source relation-row (nil? direct)) parent-source
+                       (:row m-derivation) (:derived-via m-derivation))
          facets (set (concat (get-in discovery [:facet-graph :active]) (get-in discovery [:facet-graph :background])))
          eligible (and (contains? #{:discovered :retained} (:status discovery)) (:source relation-row)
                        (contains? #{"focus" "associated" "useful-elsewhere"} (:relation relation-row))
@@ -132,10 +294,13 @@
       :class (if eligible (keyword (:relation relation-row)) :unknown)
       :relation (if eligible
                   relation-row
-                  {:status :absent
-                   :reason (cond (nil? relation-row) (if (and (string? target) (str/starts-with? target "T-")) :no-parent-relation :relation-not-declared)
-                                 (not (contains? #{:discovered :retained} (:status discovery))) :focus-not-established
-                                 :else :relation-outside-focus-facets)})
+                  (cond-> {:status :absent
+                           :reason (cond (and (nil? relation-row) (:absent m-derivation)) (:absent m-derivation)
+                                         (nil? relation-row) (if (and (string? target) (str/starts-with? target "T-")) :no-parent-relation :relation-not-declared)
+                                         (not (contains? #{:discovered :retained} (:status discovery))) :focus-not-established
+                                         :else :relation-outside-focus-facets)}
+                    (and (nil? relation-row) (:absent m-derivation))
+                    (assoc :derivation (dissoc m-derivation :absent))))
       :derived-via derived})))
 
 (defn- classification [inputs discovery as-of candidate]

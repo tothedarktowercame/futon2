@@ -6516,7 +6516,9 @@
               ;; checkout the machinery runs from), never the JVM's working
               ;; directory -- the serving JVM runs from futon3c.
               f2-root (str mission-registry/default-code-root "/futon2")
-              relation-context {:ticket-dir (str f2-root "/holes/tickets")
+              relation-context {:code-root mission-registry/default-code-root
+                                ;; WM-RELATION-I: M- targets' stated Relations are read here
+                                :ticket-dir (str f2-root "/holes/tickets")
                                 :findings-dir (str f2-root "/data/wm-repair-obligations/findings")}
               target-classifications
               (into {}
