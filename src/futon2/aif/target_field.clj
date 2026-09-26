@@ -45,6 +45,7 @@
             [futon2.aif.interpretation-construction :as ic]
             [futon2.aif.mission-criteria :as mc]
             [futon2.aif.mission-registry :as mr]
+            [futon2.aif.served-by-reading :as served]
             [futon2.aif.want-interpretation :as wi]
             [futon2.report.war-machine :as wm]))
 
@@ -124,7 +125,45 @@
   works on; FINDING is the constructor's or reader's typed finding, kept as
   data."
   [t next-step & [detail]]
-  (merge {:target (:target t) :kind (:kind t) :next-step next-step} detail))
+  (merge {:target (:target t) :kind (:kind t) :next-step next-step}
+         (select-keys t [:universe :universe-source]) detail))
+
+(defn- read-universe
+  "Read U(t) using the click's served-by reader on the already-read TEXT.
+  Outcome ids are the reading's outcome tokens; include wants only from
+  instances with a served-by link (vocabulary or a verified proposal).
+  Qualify every token [target token], independently of the observation map.
+  An explicit outcome collection, including [], is a successful reading;
+  an absent/refused reading never becomes an empty universe. The source pins
+  the text bytes by SHA-256, exactly as the click's reading does."
+  [t text {:keys [served-by-cascades served-by-quotes]}]
+  (try
+    (let [r (served/reading (str (:repo t) "/" (:path t)) text
+                            {:cascades (get served-by-cascades (:target t))
+                             :quotes (get served-by-quotes (:target t))})
+          out (:outcomes r)
+          outcomes (:outcomes out)
+          source {:reading (:text-sha256 r)}]
+      (cond
+        (:refused out) {:universe-source (merge source out)}
+        (map? outcomes) {:universe-source (merge source outcomes)}
+        (not (sequential? outcomes))
+        {:universe-source (assoc source :absent :no-stated-outcome)}
+        :else
+        (let [proposed (set (keep #(when (get-in % [:result :via])
+                                    (get-in % [:result :instance]))
+                                 (when (sequential? (:proposals r)) (:proposals r))))
+              links (when (sequential? (:served-by out)) (:served-by out))
+              wants (mapcat :wants (filter #(or (seq (:serves %))
+                                               (contains? proposed (:instance %))) links))
+              tokens (concat (map :id outcomes) wants)]
+          {:universe (set (map #(vector (:target t) %) tokens))
+           :universe-source (assoc source :outcomes (count outcomes)
+                                         :cues (reduce + 0 (map #(count (:cues %)) outcomes)))})))
+    (catch Exception e
+      {:universe-source {:reading (served/sha256 text)
+                         :refused :universe-reading-failed
+                         :detail (or (ex-data e) {:message (.getMessage e)})}})))
 
 (defn- open-wants [wants universe] (vec (remove #(true? (get universe %)) wants)))
 
@@ -215,12 +254,14 @@
   file without the lifecycle form, a file not at HEAD), else a feasible entry
   carrying the machine's :next-step for it.
   OPTS: :store :sources :code-root, and for tests :read-text / :observe."
-  [{:keys [store sources code-root read-text observe]} t]
+  [{:keys [store sources code-root read-text observe] :as opts} t]
   (let [read (or read-text (fn [root repo path] (mc/read-mission root repo path)))
         text (when (:repo t) (read code-root (:repo t) (:path t)))
         shape (when (and text (= :mission (:kind t)))
                 (lifecycle-shape (:target t) text (:status-line t)))
         req (requisition text)
+        t (if (and text (or (nil? shape) (:lifecycle-shaped? shape)))
+            (merge t (read-universe t text opts)) t)
         entry
         (cond
           (nil? text)
@@ -373,12 +414,13 @@
   `target-field` map, :opts {:code-root :store :sources}}. Reads only. Optional
   OVERRIDES replace :code-root, :store or :sources (tests and callers with a
   store of their own)."
-  [& [{:keys [code-root store sources]}]]
+  [& [{:keys [code-root store sources served-by-cascades served-by-quotes]}]]
   (let [code-root (or code-root mr/default-code-root)
         loaded {:missions (:missions (mr/load-missions-from-files code-root))
                 :tickets (:tickets (mr/load-tickets code-root))
                 :excursions (:excursions (mr/load-excursions code-root))}
         opts {:code-root code-root :store (or store wi/default-store)
+              :served-by-cascades served-by-cascades :served-by-quotes served-by-quotes
               :sources (or sources (cs/with-context-fn (cs/load-declared cs/default-dir)))}]
     {:field (target-field opts loaded) :opts opts}))
 

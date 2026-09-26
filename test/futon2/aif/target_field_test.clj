@@ -9,6 +9,7 @@
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.mission-criteria :as mc]
             [futon2.aif.mission-registry :as mr]
+            [futon2.aif.served-by-reading :as served]
             [futon2.aif.target-field :as tf])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -73,6 +74,79 @@
                      loaded)))
 
 (defn- by-target [xs] (into {} (map (juxt :target identity)) xs))
+
+(def outcome-text
+  "# T-outcome\n\nJoe wants a working router so agents can send messages.\n")
+
+(deftest u-reading-reaches-field-and-pair-overlap
+  (let [fld (field (layout [["futon3c/holes/tickets/T-outcome.md" outcome-text]
+                           ["futon3c/holes/tickets/T-other.md"
+                            (str/replace outcome-text "T-outcome" "T-other")]]))
+        entries (by-target (:feasible fld))
+        a (entries "T-outcome") b (entries "T-other")
+        reading (served/reading "futon3c/holes/tickets/T-outcome.md" outcome-text {})
+        outcomes (get-in reading [:outcomes :outcomes])
+        compared (by-target (tf/with-pair-overlap
+                             [(assoc a :constructed-candidate {:produces (:universe a)})
+                              (assoc b :constructed-candidate {:produces (:universe b)})]))]
+    (is (seq outcomes) "the real reader sends tokens, not a typed absence")
+    (is (= #{["T-outcome" :o-1]} (:universe a)))
+    (is (= (set (map #(vector "T-outcome" (:id %)) outcomes)) (:universe a)))
+    (is (= {:reading (served/sha256 outcome-text) :outcomes 1 :cues 1}
+           (:universe-source a)))
+    (is (= {:comparable true} (get-in compared ["T-outcome" :pair-overlap "T-other"])))
+    (is (= {:comparable true} (get-in compared ["T-other" :pair-overlap "T-outcome"])))
+    (is (= {:incommensurable {:shared-tokens [["T-other" :o-1]]}}
+           (get-in (first (tf/with-pair-overlap
+                           [(assoc a :constructed-candidate {:produces (:universe b)}) b]))
+                   [:pair-overlap "T-other"])))))
+
+(deftest u-real-reader-refusal-and-unstated-outcomes-stay-absent
+  ;; Repeating a cued sentence violates the real extractor's exactly-once
+  ;; span check. Do not stub that dependency: it must actually refuse.
+  (let [repeated (str outcome-text "\nJoe wants a working router so agents can send messages.\n")
+        fld (field (layout [["futon3c/holes/tickets/T-repeated.md" repeated]]))
+        entries (by-target (:feasible fld))
+        bad (entries "T-repeated") plain (entries "T-plain")
+        probe {:target "probe" :constructed-candidate {:produces #{["T-repeated" :o-1]}}}
+        compared (first (tf/with-pair-overlap [probe bad plain]))]
+    (is (= :cue-does-not-resolve (get-in bad [:universe-source :refused])))
+    (is (= (served/sha256 repeated) (get-in bad [:universe-source :reading])))
+    (is (= :no-stated-outcome (get-in plain [:universe-source :absent])))
+    (doseq [e [bad plain]]
+      (is (some? e) "a refused reading does not exclude the target")
+      (is (not (contains? e :universe)))
+      (is (= {:absent :no-universe} (get-in compared [:pair-overlap (:target e)]))))))
+
+(deftest u-explicit-empty-reading-is-distinct-from-no-reading
+  ;; The current extractor emits :no-stated-outcome for text with no outcomes.
+  ;; Exercise the successful-empty reader contract explicitly at that port;
+  ;; no prose is made to claim an empty universe by a fallback.
+  (let [l (layout)]
+    (with-redefs [served/reading (fn [_ text _]
+                                 {:text-sha256 (served/sha256 text)
+                                  :outcomes {:outcomes [] :served-by []}})]
+      (let [e (get (by-target (:feasible (field l))) "T-plain")
+            probe {:target "probe" :constructed-candidate {:produces #{:anything}}}
+            compared (first (tf/with-pair-overlap [probe e {:target "refused"}]))]
+        (is (contains? e :universe))
+        (is (= #{} (:universe e)))
+        (is (= 0 (get-in e [:universe-source :outcomes])))
+        (is (= {:comparable true} (get-in compared [:pair-overlap "T-plain"])))
+        (is (= {:absent :no-universe} (get-in compared [:pair-overlap "refused"])))))))
+
+(deftest u-includes-wants-serving-the-read-outcome
+  (let [text (str "# T-linked\n\nJoe wants a replacement for the hardcoded prompt.\n\n"
+                  "## The instances\n\n### 1. Prompt\n\nThe hardcoded prompt will disappear.\n")
+        cascades (tmp "tf-cascades")
+        l (layout)
+        t {:target "T-linked" :kind :ticket :repo "futon3c" :path "T-linked.md"}]
+    (put! cascades "instance-1.edn" "{:want #{:prompt-gone}}")
+    (let [e (tf/assess {:code-root (:root l) :store (:store l) :sources {}
+                        :read-text (fn [& _] text) :observe (constantly false)
+                        :served-by-cascades {"T-linked" cascades}} t)]
+      (is (= #{["T-linked" :o-1] ["T-linked" :prompt-gone]} (:universe e)))
+      (is (= (served/sha256 text) (get-in e [:universe-source :reading]))))))
 
 (deftest the-field-partitions-what-the-enumerators-propose
   (let [l (layout) fld (field l)
