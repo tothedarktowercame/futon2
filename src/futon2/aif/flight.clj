@@ -415,13 +415,17 @@
                 f (cond-> f
                     (:enactment enacted)
                     (update :enactments
-                            (fn [es] (conj (pop es)
-                                           (assoc (peek es) :observation
-                                                  (step-observation
-                                                   (concat (keys (:universe wants)) (:wants wants))
-                                                   after
-                                                   (get-in enacted [:enactment :attempts])
-                                                   (:click-id result)))))))
+                            ;; bound to the record's name, so the map's scoped
+                            ;; write [:observation {:record :enactment-entry}]
+                            ;; is attributed to it (the prover's receiver form)
+                            (fn [es] (let [enactment-entry (peek es)]
+                                       (conj (pop es)
+                                             (assoc enactment-entry :observation
+                                                    (step-observation
+                                                     (concat (keys (:universe wants)) (:wants wants))
+                                                     after
+                                                     (get-in enacted [:enactment :attempts])
+                                                     (:click-id result))))))))
                 f (record-click f (merge result {:wants (:wants wants)
                                                  :want-source (:source wants)
                                                  :before before
