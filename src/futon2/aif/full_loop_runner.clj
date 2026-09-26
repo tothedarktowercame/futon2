@@ -719,7 +719,10 @@
                     :repair/publication (:repair/publication result)
                     :d-task-enactment (:d-task-enactment result)
                     :route-attestation-ref (:route-attestation-ref result)
-                    :job-liveness (vec (some-> (:job-liveness/state raw-opts) deref))}
+                    :job-liveness (vec (some-> (:job-liveness/state raw-opts) deref))
+                    ;; WM-PHASE-SWALLOW-I: the preference refresh's outcome
+                    :refresh (or (some-> (:preference-refresh/state raw-opts) deref)
+                                 {:absent :refresh-not-reached})}
                      (get-in result [:checkpoints :selection :judgment :open-stop-lines])
                      (assoc :open-stop-lines
                             (get-in result [:checkpoints :selection :judgment :open-stop-lines]))
@@ -3842,6 +3845,35 @@
          :artifact-ref artifact-ref
          :message "Deferred author job artifact-ref is not a commit"}))))
 
+(defn- refresh-record
+  "WM-PHASE-SWALLOW-I: run the preference refresh REFRESH-FN and say how it
+  went, never throwing: the phase stays non-fatal, as it was, but a failed
+  refresh is recorded rather than swallowed. {:outcome :refresh-failed
+  :failure-kind k :error (flight/throwable-summary t)} on any Throwable, k
+  the throw's typed kind (explicit typing, else the thrower's :kind, else
+  failure-kind-from); else {:outcome :ok :freshness {:absent
+  :not-reported-by-maybe-refresh}}: maybe-refresh! returns the C state,
+  not whether it was stale."
+  [refresh-fn]
+  (try
+    (refresh-fn)
+    {:outcome :ok :freshness {:absent :not-reported-by-maybe-refresh}}
+    (catch Throwable t
+      {:outcome :refresh-failed
+       :failure-kind (or (explicit-failure-kind t)
+                         (some thrower-kind (cause-chain t))
+                         (failure-kind-from t))
+       :error (flight/throwable-summary t)})))
+
+(defn phase-refresh
+  "The refresh record on a :preference-refresh phase event or a run record
+  (:refresh), or {:absent :no-refresh-record} for one written before
+  WM-PHASE-SWALLOW-I, whose phase said :ok whatever the refresh did."
+  [m]
+  (if (contains? m :refresh)
+    (:refresh m)
+    {:absent :no-refresh-record}))
+
 (defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
   [raw-opts]
@@ -4732,9 +4764,14 @@
       (run-phase! opts @phase-context :substrate-preflight
                   #(substrate-readiness! opts)
                   readiness-event)
+      ;; WM-PHASE-SWALLOW-I: non-fatal as before; the refresh's own
+      ;; outcome is recorded beside the phase's :ok, on the phase event and
+      ;; (through :preference-refresh/state) the run record
       (run-phase! opts @phase-context :preference-refresh
-                  #(try ((or (:refresh-fn opts) cv/maybe-refresh!))
-                        (catch Throwable _ nil)))
+                  #(let [r (refresh-record (or (:refresh-fn opts) cv/maybe-refresh!))]
+                     (some-> (:preference-refresh/state opts) (reset! r))
+                     r)
+                  (fn [r] {:refresh r}))
       (let [open-stop-lines
             (run-phase! opts @phase-context :stop-line-memory
                         #((or (:repair-open-fn opts) repair/open-obligations)))
@@ -5805,7 +5842,8 @@
                                 :declaration-reads/state (atom nil)
                                 :habit-reads/state (atom [])
                                 :job-liveness/state (atom [])
-                                :scan-report/state (atom nil))
+                                :scan-report/state (atom nil)
+                                :preference-refresh/state (atom nil))
         _ (ensure-dispatch-seat! (config raw-opts))
         ;; BEFORE the attempt: a stale runner must not consume it, and the
         ;; identity it records must be the identity that judged the run.

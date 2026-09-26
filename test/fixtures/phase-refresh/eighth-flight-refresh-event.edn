@@ -1,0 +1,6 @@
+;; Live pin (WM-PHASE-SWALLOW-I): the eighth flight's :preference-refresh
+;; end event, verbatim (read, not written), from the repair finding's
+;; [:backtrace :phase-events]; the run record carries no phase events.
+;; source: futon3c 74e0235a holes/labs/M-wm-wiring/spike/flight-ada87008/repair-occ-036463620c0c032c9e46aa44b6a6d6b35ed3e0ceb27dc58030f07d8fc2e6c747.edn
+;; sha256: 95bbb9c5476aedaadc50125068fff5f0a7e773c29a7a7494d84be58a57d893ad
+{:transition :end, :attempt-id "attempt-002", :phase :preference-refresh, :outcome :ok, :duration-ms 85894, :execution-identity {:kind :runner-execution, :id "ea1-d6535ffd3c1e360c08c9c36682accc45d430fd32bc55baa8a39fd01d356e54d9--attempt-002"}, :at "2026-09-26T03:54:39.801280313Z", :trigger :duree-click-on-demand, :opportunity-id "duree-click-on-demand/2026-09-26T03:52:03.725268778Z/9474d8ef-b7c7-4851-9bcf-1d3e8cdb26ac", :external-attempt-id "ea1-d6535ffd3c1e360c08c9c36682accc45d430fd32bc55baa8a39fd01d356e54d9--attempt-002"}
