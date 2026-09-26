@@ -2,9 +2,9 @@
   "B4 slice 2b: the P₀ carrier. For every candidate the scorer received,
   emit [:decision :selection-certificate :candidate-derivations <id>] with
   the THEOREM-draft P₀ field list, TRUTHFULLY for today's candidates, which
-  are declared files with no authoring chain: their construction receipts
-  are :hand-admitted, so P₀ fails on provenance rather than on absence, and
-  the record says what happened. Every field with no truthful value today
+  include declared files and machine constructions. Keep the payload's
+  construction receipt; when it records none, retain :hand-admitted with
+  the declared-file source. Every field with no truthful value today
   is a typed absence map, never nil and never a placeholder.
 
   Provenance verdicts come from futon2.aif.cascade-equivalence/admissible-
@@ -59,7 +59,7 @@
 (defn- entry
   "One candidate's P₀ entry, built from the candidate map itself (the shape
   at [:decision :selection-certificate :candidates], whose payload sits
-  under :id and which carries :construction-receipt and :observation-locators)
+  under :id, including its :construction-receipt)
   plus whatever the caller can truthfully supply."
   [candidate s0 opts]
   (let [id (get-in candidate [:id :id])
@@ -91,7 +91,7 @@
                                 {:kind :declared-file :target target})}
                      ;; today's candidates already self-report their
                      ;; construction receipt; keep its words and its author
-                     (:construction-receipt candidate))
+                     (get-in candidate [:id :construction-receipt]))
               :review-publication {:status :missing
                                    :reason :no-review-publication-for-declared-candidates}
               :admission {:kind :declared-file-load :admitted-by :war-machine-judge}

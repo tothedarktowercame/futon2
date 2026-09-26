@@ -11,8 +11,8 @@
 (def target "T-repair-occ-444fb018cbbb656d09b8f4f67c063f1d51a1932a9b1c281d999c567cf22a2ade")
 
 ;; The exemplar record's candidate shape (tick-run-record-2026-09-23-1790131591.edn):
-;; payload under :id, observation locators and BOTH receipt families on the
-;; candidate map, construction receipt :hand-admitted by the declaring agent.
+;; Historical test fixture: payload under :id but receipt on the wrapper.
+;; Production puts its receipt under :id; the old outer receipt is ignored.
 (def c2
   {:id {:kind :cascade-candidate :id :C2 :target target
         :precedence
@@ -199,3 +199,27 @@
     ;; and the matching-payload case must NOT refuse (the drift check must
     ;; not be an unconditional refusal on any action being present)
     (is (map? (cd/derivations [c2] s0 {:actions [(get c2 :id)]})))))
+
+
+(deftest nested-machine-receipt-keeps-provenance-and-payload-digest
+  (let [receipt {:kind :machine-constructed :by "constructor"
+                 :reading "Built by needs" :moves [:compose-by-need]}
+        candidate (-> c2 (dissoc :construction-receipt)
+                      (assoc-in [:id :construction-receipt] receipt))
+        e (:C2 (cd/derivations [candidate] s0))]
+    (is (= receipt (select-keys (:construction e) (keys receipt))))
+    (is (= :machine-constructed (get-in e [:construction :kind])))
+    ;; Captured by running the pre-fix entry on this exact same payload.
+    (is (= "sha256:c688c34917264cb09fd65a938594604dba28233c58fac4719b6200d7727bbdbd"
+           (:candidate-payload-sha256 e)
+           (ce/canonical-sha256 (:id candidate))))))
+
+(deftest absent-payload-receipt-keeps-declared-source-and-ignores-wrapper
+  (let [candidate (assoc c2 :construction-receipt
+                         {:kind :machine-constructed :by "wrong-level"})
+        e (:C2 (cd/derivations [candidate] s0
+                              {:sources {:files [{:target target :path "declared.edn" :sha256 "declared-sha"}]}}))]
+    (is (= {:kind :hand-admitted
+            :source {:kind :declared-file :path "declared.edn" :sha256 "declared-sha"}}
+           (:construction e)))
+    (is (= (ce/canonical-sha256 (:id candidate)) (:candidate-payload-sha256 e)))))
