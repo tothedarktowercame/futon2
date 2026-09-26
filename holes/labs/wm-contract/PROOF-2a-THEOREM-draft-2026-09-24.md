@@ -11,6 +11,8 @@ governs PROOF-2a. The rationale for each change is in
 findings behind them are in `holes/E-outer-loop.md`, `holes/E-cascade-real.md`
 and `holes/E-flight-aif.md`.
 
+*The plan to reach the state this theorem is witnessed in is `PROOF-2a-PLAN.md`, beside this file, as a structured proof: numbered steps with acceptance predicates and dispatch logs (Joe, 2026-09-26 ~12:42Z: dispatches are logged into that summary, not made reactively).*
+
 ## Scope statement (AR-36)
 
 Clauses T and 0–6 certify the **rewrite reading** of a design pattern: an
