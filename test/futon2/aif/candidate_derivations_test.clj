@@ -81,7 +81,7 @@
       (is (= :inadmissible (:status e)))
       (is (= [:construction] (:offending-path e)) "offends at the top-level hand-admitted construction")
       (is (= :hand-admitted (:offending-kind e)))
-      (is (= (:observation-locators (if (= :C1 (:source-id e)) c1 c2))
+      (is (= {:status :missing :reason :locators-not-carried-on-candidate}
              (:locators e))))))
 
 (deftest authored-entry-is-admitted
@@ -223,3 +223,14 @@
             :source {:kind :declared-file :path "declared.edn" :sha256 "declared-sha"}}
            (:construction e)))
     (is (= (ce/canonical-sha256 (:id candidate)) (:candidate-payload-sha256 e)))))
+
+
+(deftest locators-come-only-from-the-certificate-payload
+  (let [locators (:observation-locators c2)
+        nested (-> c2 (dissoc :observation-locators)
+                   (assoc-in [:id :observation-locators] locators))]
+    (is (= locators (:locators (:C2 (cd/derivations [nested] s0)))))
+    (doseq [candidate [(dissoc c2 :observation-locators) c2]]
+      (is (= {:status :missing :reason :locators-not-carried-on-candidate}
+             (:locators (:C2 (cd/derivations [candidate] s0))))
+          "Absent payload locators stay absent, even with historical wrapper locators"))))

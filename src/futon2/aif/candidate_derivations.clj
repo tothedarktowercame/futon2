@@ -110,7 +110,7 @@
                                  :reason :acceptance-source-file-not-found-for-target}
                                 {:status :missing
                                  :reason :declared-acceptance-not-in-decision-scope}))
-              :locators (or (:observation-locators candidate)
+              :locators (or (get-in candidate [:id :observation-locators])
                             {:status :missing :reason :locators-not-carried-on-candidate})
               :scope {:status :missing :reason :feasible-scope-not-declared}
               :normalized-cascade-sha256
