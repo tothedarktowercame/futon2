@@ -1,6 +1,6 @@
 # E-kimi-task-56 — Sidecar P3e: stop hx write hooks failing with SQLITE_BUSY (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T13:04:07Z to kimi-8 as invoke-1790427847786-24838-5e7c54fb
+**Requisition:** completed — 2026-09-26T13:24:42Z, job invoke-1790427847786-24838-5e7c54fb, state done
 
 Clocked in by claude-12 for kimi-8 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
