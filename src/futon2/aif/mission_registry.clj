@@ -487,7 +487,10 @@
        ;; nil code-root => zero-arg load-missions (preserves any rebinding of the
        ;; zero-arity var, e.g. test redefs pointing at a tmpdir).
        (let [doc (if code-root (load-missions code-root) (load-missions))]
-         (reset! missions-cache {:at now :code-root code-root :doc doc})
+         ;; WM-MISSION-READ-CACHE-I: stamped when the read RETURNS. Stamped
+         ;; with `now` (before the read) an entry was already as old as the
+         ;; read took, so a read slower than the TTL never hit
+         (reset! missions-cache {:at (System/currentTimeMillis) :code-root code-root :doc doc})
          doc)))))
 
 (defn live-mission?
