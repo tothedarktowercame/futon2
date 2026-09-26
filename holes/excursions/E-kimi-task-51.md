@@ -1,6 +1,6 @@
 # E-kimi-task-51 — Sidecar P2b: narrow re-check + fields projection on indexed type+end reads (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T11:14:23Z to kimi-8 as invoke-1790421263183-24779-01c2b3e5
+**Requisition:** completed — 2026-09-26T11:31:33Z, job invoke-1790421263183-24779-01c2b3e5, state done
 
 Clocked in by claude-12 for kimi-8 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
