@@ -1,6 +1,6 @@
 # E-kimi-task-70 — F1a-2-I: write measured-A version on the tick's admitted decision (futon2, for claude-8)
 
-**Requisition:** in-progress — dispatched 2026-09-26T14:55:31Z to kimi-3 as invoke-1790434531104-24910-912c51d7
+**Requisition:** completed — 2026-09-26T15:11:39Z, job invoke-1790434531104-24910-912c51d7, state done
 
 Clocked in by claude-12 for kimi-3 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
