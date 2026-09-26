@@ -3058,6 +3058,13 @@
 (defn- sorry [kind data]
   {:sorry (assoc data :kind kind)})
 
+(defn- judge-refusal-sorry
+  "The :no-selection sorry cell of a tick whose judge refused the cascade
+  decision typed (judge-refusal); persist-run-record! reads it into the
+  abstention carrier."
+  [jr]
+  (sorry :no-selection {:judge-refusal jr}))
+
 (defn- outcome-from [e]
   (let [raw (or (:outcome (ex-data e)) :incomplete)]
     (cond
@@ -4649,7 +4656,7 @@
                 ;; below), carried on the :no-selection sorry cell; anything
                 ;; else goes on untouched
                 (if-let [jr (judge-refusal e (get-in opts [:flight :target]))]
-                  (let [cell (sorry :no-selection {:judge-refusal jr})]
+                  (let [cell (judge-refusal-sorry jr)]
                     (reset! pending-selection cell)
                     (swap! checkpoints assoc :selection cell)
                     (throw (ex-info "War Machine abstained: cascade decision refused"
