@@ -5,9 +5,10 @@
   so G is exactly the list kernel's (the Lean statement is
   coApplyKernel_eq_cascadeKernel_of_chain, DarkTower/WarMachine/Proof2/
   CoApplicationKernel.lean, mathlib4 69c2432f2b). Violations, a refused or
-  absent order, or a non-chain keep the list kernel with a typed reason on
-  the entry's :order-use; a non-chain needs the co-application kernel, which
-  has no counterpart in futon2 yet."
+  absent order keep the list kernel with a typed reason on the entry's
+  :order-use; a non-chain is scored by the co-application kernel
+  (cascade-model-manifest/co-apply-kernel, step 14, WM-COAPPLY-I), labelled
+  {:order :co-application}."
   (:require [clojure.edn :as edn]
             [clojure.test :refer [deftest is]]
             [futon2.aif.construction :as construction]
@@ -55,16 +56,21 @@
     (is (= (mapv pat [:A :B]) (:precedence (efe/order-use (first candidates))))
         "the order's one linear extension is the precedence")))
 
-(deftest every-g-is-unchanged
+(deftest every-list-g-is-unchanged
   ;; fixture: [[id G] ...] from efe.clj at futon2 f8e766a5, before row 4,
-  ;; captured on a prepended classpath before the change
-  (is (= (edn/read-string (slurp "test/fixtures/order-kernel/g-before@futon2-f8e766a5.edn"))
-         (pr-str (sort-by (comp str first) (mapv (juxt :cascade-id :G-efe) (rank)))))))
+  ;; captured on a prepended classpath before the change. Every candidate
+  ;; the list kernel still scores keeps its G to the bit; the non-chain
+  ;; :independent is now scored by the co-application kernel, so its G moves
+  ;; (step 14) and is excluded here, asserted different.
+  (let [before (into {} (edn/read-string (edn/read-string (slurp "test/fixtures/order-kernel/g-before@futon2-f8e766a5.edn"))))
+        now (into {} (mapv (juxt :cascade-id :G-efe) (rank)))]
+    (is (= (dissoc before :independent) (dissoc now :independent)))
+    (is (not= (:independent before) (:independent now)))))
 
 (deftest the-list-kernel-cases-carry-their-reason
   (let [r (by-id (rank))]
     (is (= {:order-not-used {:precedence-violations 1}} (get-in r [:violating :order-use])))
-    (is (= {:order-not-used :not-a-chain :needs :co-application-kernel} (get-in r [:independent :order-use])))
+    (is (= {:order :co-application} (get-in r [:independent :order-use])))
     (is (= {:order {:absent :no-order-on-receipt}} (get-in r [:no-order :order-use])))
     (is (= {:order-not-used {:refused :cyclic-containment}} (get-in r [:cyclic :order-use])))))
 

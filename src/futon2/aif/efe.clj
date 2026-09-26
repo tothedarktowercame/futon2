@@ -1017,15 +1017,19 @@
     no violations, chain   the order's own linear order (its one linear
                            extension, which the precedence then is);
                            meta {:order :chain}
-    no violations, not a   the list kernel; meta {:order-not-used
-    chain                  :not-a-chain :needs :co-application-kernel}
+    no violations, not a   the co-application kernel: :kernel-step
+    chain                  {:co-apply {:units :descent :patterns}}, which
+                           the rollout's evaluate-state scores by
+                           cascade-model-manifest/co-apply-kernel;
+                           meta {:order :co-application}
 
   A non-chain order has no list reading: its kernel is the co-application
   kernel (DarkTower/WarMachine/Proof2/CoApplicationKernel.lean, mathlib4
   69c2432f2b, coApplyKernel; equal to the list kernel on a chain by
-  coApplyKernel_eq_cascadeKernel_of_chain), which has no counterpart here
-  yet. Until it does, that case is recorded, never silently scored as a
-  list."
+  coApplyKernel_eq_cascadeKernel_of_chain). Before WM-COAPPLY-I (step 14)
+  a non-chain WAS scored as a list over :precedence, labelled
+  {:order-not-used :not-a-chain :needs :co-application-kernel}. A chain
+  keeps its linear precedence: the two kernels coincide there."
   [action]
   (let [prec (:precedence action)
         order (get-in action [:construction-receipt :order])
@@ -1044,7 +1048,13 @@
             n (count units)
             chain? (= (* n (dec n)) (* 2 (reduce + (map (comp count below) units))))]
         (if-not chain?
-          (list-use {:order-not-used :not-a-chain :needs :co-application-kernel})
+          (let [by-id (into {} (map (fn [p] [(if (map? p) (:id p) p) p])) prec)
+                patterns (into {} (for [{:keys [unit pattern]} (:units order)] [unit (get by-id pattern)]))]
+            (if (and (seq units) (every? map? (vals patterns)))
+              {:precedence prec
+               :kernel-step {:co-apply {:units (vec units) :descent (vec (:descent order)) :patterns patterns}}
+               :meta {:order :co-application}}
+              (list-use {:order-not-used :units-not-mapped-to-precedence})))
           (let [linear (sort-by (comp - count below) units)
                 pattern-of (into {} (map (juxt :unit :pattern)) (:units order))
                 by-id (into {} (map (fn [p] [(if (map? p) (:id p) p) p])) prec)
@@ -1211,7 +1221,7 @@
                                 (cascade-manifest/horizon-g-sparse-cert
                                  (cond-> {:rates rates
                                   :q0 q0
-                                  :precedence-fn (constantly (:precedence ou))
+                                  :precedence-fn (constantly (or (:kernel-step ou) (:precedence ou)))
                                   :horizon T
                                   :spec spec
                                   ;; R7: the declared FIXED zeta rides the

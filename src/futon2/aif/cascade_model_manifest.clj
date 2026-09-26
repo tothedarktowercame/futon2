@@ -339,7 +339,80 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
   (when-let [p (first (filter #(not= :interpreted (get-in % [:guard :status])) precedence))]
     {:status :missing :kind :missing-pattern-interpretation :pattern (:id p)}))
 
+(defn- forbids-of [pattern]
+  (set (mapcat :absent (get-in pattern [:guard :clauses]))))
+
+(defn- above-fn
+  "unit -> the units strictly above it under DESCENT [[above below] …]
+  (Lean CascadeOrder.Reach, transitive), each unit visited once."
+  [descent]
+  (let [parents (reduce (fn [m [a b]] (update m b (fnil conj #{}) a)) {} descent)]
+    (fn [u]
+      (loop [todo (vec (parents u)) seen #{}]
+        (if-let [v (peek todo)]
+          (if (seen v)
+            (recur (pop todo) seen)
+            (recur (into (pop todo) (parents v)) (conj seen v)))
+          seen)))))
+
+(defn enabled-frontier
+  "Lean Proof2.CoApplicationKernel.enabledFrontier: the units whose pattern's
+   guard holds at STATE and above which no unit with a holding guard sits."
+  [units descent pattern-of state]
+  (let [enabled (set (filter #(true? (guard-holds? (pattern-of %) state)) units))
+        above (above-fn descent)]
+    (vec (filter #(and (enabled %) (empty? (filter enabled (above %)))) units))))
+
+(defn- frontier-conflict?
+  "Lean frontierConflict: two distinct frontier units, one producing a token
+   the other forbids."
+  [frontier pattern-of]
+  (boolean (some (fn [[p q]] (and (not= p q)
+                                  (seq (set/intersection (produces-of (pattern-of p))
+                                                         (forbids-of (pattern-of q))))))
+                 (for [p frontier q frontier] [p q]))))
+
+(defn co-apply-kernel
+  "Lean Proof2.CoApplicationKernel.coApplyKernel (mathlib4 69c2432f2b): every
+   unit on the enabled frontier fires independently with its theta; each
+   subset S of the frontier that succeeds, with probability
+   prod_S theta * prod_(F\\S) (1 - theta), moves STATE to STATE union the
+   produces of S. Exact rationals, sparse (zero masses omitted) as
+   pattern-kernel's rows; an empty frontier is {STATE 1}. Equal to
+   cascade-kernel under the chain condition
+   (coApplyKernel_eq_cascadeKernel_of_chain). A theta outside [0,1] refuses
+   as pattern-kernel does. UNITS are the construction receipt's :order
+   units, DESCENT its [[above below] …], PATTERN-OF unit -> pattern map."
+  [units descent pattern-of state]
+  (let [frontier (enabled-frontier units descent pattern-of state)
+        pats (mapv (comp with-pattern-theta pattern-of) frontier)
+        bad (first (remove #(let [t (:theta %)] (and (or (ratio? t) (integer? t)) (<= 0 t 1))) pats))]
+    (if bad
+      {:status :missing :kind :invalid-pattern-interpretation :pattern (:id bad) :theta (:theta bad)}
+      (into {} (remove (comp zero? val))
+            (reduce (fn [row succeeded]
+                      (let [w (reduce * 1 (map-indexed (fn [i p] (if (succeeded i) (:theta p) (- 1 (:theta p)))) pats))
+                            s' (reduce set/union state (map #(produces-of (pats %)) succeeded))]
+                        (update row s' (fnil + 0) w)))
+                    {}
+                    (map set (powerset (range (count pats)))))))))
+
+(defn- evaluate-co-apply [{:keys [units descent patterns]} state record?]
+  (let [pattern-of patterns]
+    (if-let [refusal (missing-interpretation (map pattern-of units))]
+      {:kernel refusal :status :refused}
+      (let [frontier (enabled-frontier units descent pattern-of state)
+            kernel (co-apply-kernel units descent pattern-of state)]
+        (cond-> {:kernel kernel}
+          record? (assoc :frontier frontier
+                         :status (if (contains? kernel :status) :refused :evaluated)
+                         :kernel-kind (if (seq frontier) :co-application :identity))
+          (and record? (frontier-conflict? frontier pattern-of)) (assoc :frontier-conflict true))))))
+
 (defn- evaluate-state [precedence state record?]
+  (if (map? precedence)
+    ;; a step whose containment order is not a chain (efe/order-use)
+    (evaluate-co-apply (:co-apply precedence) state record?)
   (if-let [refusal (missing-interpretation precedence)]
     {:kernel refusal :guard-search [] :selected-index nil :pattern-id nil
      :status :refused}
@@ -349,7 +422,7 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
         record? (assoc :guard-search guard-search :selected-index index
                        :pattern-id (:id pattern)
                        :status (if (contains? kernel :status) :refused :evaluated)
-                       :kernel-kind (if pattern :pattern-kernel :identity))))))
+                       :kernel-kind (if pattern :pattern-kernel :identity)))))))
 
 (defn cascade-kernel
   "Lean CascadeTransition.cascadeKernel: pattern-kernel of the first enabled
@@ -382,9 +455,15 @@ f. Negation words are never dropped in any of this. Declare both marker lists in
       record? (assoc :evaluation
                      {:status (if (refusal? outgoing) :refused :evaluated)
                       :incoming-belief q :states @states :outgoing-belief outgoing
-                      :model {:schema :wm/cascade-evaluation-model-v1
-                              :semantics :first-enabled-union-theta-v1
-                              :precedence (mapv with-pattern-theta prec)}})))))
+                      :model (if (map? prec)
+                               (let [{:keys [units descent patterns]} (:co-apply prec)]
+                                 {:schema :wm/cascade-evaluation-model-v1
+                                  :semantics :co-application-frontier-theta-v1
+                                  :units (vec units) :descent (vec descent)
+                                  :patterns (into {} (for [u units] [u (with-pattern-theta (patterns u))]))})
+                               {:schema :wm/cascade-evaluation-model-v1
+                                :semantics :first-enabled-union-theta-v1
+                                :precedence (mapv with-pattern-theta prec)})})))))
 
 (defn- rollout* [precedence-fn q0 n record?]
   (loop [k 0 q q0 evaluations []]
