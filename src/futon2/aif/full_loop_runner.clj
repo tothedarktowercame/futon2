@@ -19,7 +19,6 @@
             [futon2.aif.c-vector :as cv]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.cascade-structure :as cascade-structure]
-            [futon2.aif.cascade-habit-store :as cascade-habit]
             [futon2.aif.cascade-habit-reinforcement :as habit-reinforcement]
             [futon2.aif.cascade-plan :as cascade-plan]
             [futon2.aif.scoring-input-receipts :as input-receipts]
@@ -4620,11 +4619,31 @@
                        retained-manifest
                        (get-in closed-event [:payload :close-evidence-manifest])
                        result (cond-> (assoc result-base :repair/discharge discharge-result
+                                            ;; WM-HABIT-STORE-RETIRE-I (Joe,
+                                            ;; 2026-09-26: the legacy habit store
+                                            ;; "can be retired"). This was
+                                            ;; habit-reinforcement/close! into
+                                            ;; cascade-habit/default-path
+                                            ;; (data/wm-habit/cascade-prior.edn),
+                                            ;; the last production writer of that
+                                            ;; file, at every close. Nothing read
+                                            ;; it: E comes from the enactment
+                                            ;; records now (WM-HABIT-FOLD-CALL-I),
+                                            ;; counted by a different rule — one
+                                            ;; increment per enactment record,
+                                            ;; gated on W_c — while this one
+                                            ;; counted per successful close with
+                                            ;; no W_c gate, over a history that
+                                            ;; includes the withdrawn M-f11
+                                            ;; (WM-HABIT-FOLD-WIRE-D, 655bbced).
+                                            ;; The file stays on disk as history.
+                                            ;; The absence is typed so a reader
+                                            ;; can tell a retired close from a
+                                            ;; legacy one; it is not a receipt
+                                            ;; with a zero delta, which would read
+                                            ;; as "the rule ran and declined".
                                             :habit-reinforcement
-                                            (habit-reinforcement/close!
-                                             (or (:cascade-habit-path opts) cascade-habit/default-path)
-                                             (:controller-decision selection-judgment)
-                                             outcome (:token-outcome-comparison result-base)))
+                                            {:absent :legacy-habit-store-retired})
                                 retained (assoc :close-retention retained)
                                 retained-manifest
                                 (assoc :close-evidence-manifest retained-manifest))]
