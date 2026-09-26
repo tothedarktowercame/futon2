@@ -331,6 +331,7 @@ WM-LEAN-DEP-MAP-I (p4ng 40a1240): the Lean model's dependency map, generated fro
 The legacy habit store's last production writer is retired (futon2 2d8b6bf6, on Joe's word); the file stays as history; it already had no production reader.
 WM-HANDOFF-H1-I (futon3c b9d18dfe): the flight loop's readings and needs are declared, and the read → ask boundary stays uncrossed because the read step hands the ask step nothing on the flight record; it publishes to the interpretation store, which the wants read back. The store is the carrier the map must box next. Map at 218, matrix at 98 wires.
 WM-HANDOFF-H2-I (futon3c b44b63ab): the interpretation store boxed; the read → ask boundary is crossed by its six keys; map at 235, matrix at 104 wires, 0 verified live, 2 hermetic.
+WM-EQUATIONS-APPLY-I (futon2 9c8b3f33, p4ng 791c9f8): the registry behind Figure 6A now carries this proof's equations, 37 dependency edges, R19 and the grain gate drawn, every node with a code site; the Lean map places 28 of 29 equations with none ambiguous; C's reading rule and E's counting rule are typed as carrier-only, with no Lean module formalising them. Against the refreshed registry the wiring map declares 2 of the 37 edges at function grain, up from none.
 
 ## Not yet a clause (AR-35)
 
