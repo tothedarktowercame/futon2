@@ -54,7 +54,11 @@
              :used-for "the log-evidence threshold of 3 ('strong') behind bayesFactorThreshold"
              :verified {:table2 "p. 777: 2 ln B₁₀ in 6–10 (B₁₀ 20–150) = 'strong'; > 10 = 'very strong'. So ln BF ≥ 3 is the lower edge of 'strong'. Verified by eye (scanned PDF)."}
              :note "Supports the magnitude 3 only; the direction is the WM sign convention stated under :friston2018bmr."
-             :retrieved "refs/kass1995.pdf"}}
+             :retrieved "refs/kass1995.pdf"}
+  :a-s-revision-3 {:cite "A-S: the observation model A from the record, Revision 3 (claude-12, 2026-09-26; futon2 c9cba0b82). holes/labs/wm-contract/proof2/packets/A-S.md, from the heading '## Revision 3'. A STACK DESIGN NOTE, not a paper: the local authority for a :stack-defined row whose content the War Machine supplies."
+                   :used-for "channel identity: a label is evidence for class c's rates only when its :check-mechanism names the check the flight runs as c at the loaded code identity (§1); the reader's rules: active mechanism only, per-cell minimum of 5, the Jeffreys prior, a class left out rather than pooled (§2)"
+                   :verified {:s1 "the check mechanism and the observer are independent identities (§1(a)); a label under another mechanism or another identity is not evidence for A_c" :s2 "population = the active mechanism; both cells >= 5; prior alpha = beta = 1/2; an excluded class is unmeasured, never silent"}
+                   :retrieved "holes/labs/wm-contract/proof2/packets/A-S.md (in-tree)"}}
 
  ;; Exogenous symbols: imported by equations, defined by no equation here.
  ;; :class :stack-defined means the War Machine supplies the content.
@@ -666,7 +670,7 @@
 
   {:id :channel-identity
    :latex "\\mathcal{L}_c := \\{\\ell \\mid \\operatorname{class}(\\ell)=c \\land \\operatorname{mechanism}(\\ell)=\\operatorname{loadedCheck}(c)\\};\\quad \\operatorname{rates}(c) := \\operatorname{adjudicationRates}(\\mathcal{L}_c);\\quad \\mathcal{L}_c=\\varnothing \\Rightarrow \\operatorname{measurement}(c)=\\mathrm{absent}"
-   :defines :rates :node :R7 :class :stack-defined
+   :defines :rates :node :R7 :class :stack-defined :ref :a-s-revision-3
    :model :cascade-token-model
    :imports [:o :ref-label]
    :formal "For each observation class c, A_c (the class's false-negative and false-positive rates) is measured only from labels whose :check-mechanism names the check function the flight runs as class c at the loaded code identity; a label produced by any other mechanism, or by the same function at another identity, is not evidence for A_c. A class with no such labels is unmeasured (:measurement :absent), never measured from a neighbour."
