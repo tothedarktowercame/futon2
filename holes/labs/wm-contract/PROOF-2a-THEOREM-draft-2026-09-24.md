@@ -329,6 +329,7 @@ WM-WIRE-TEST-I (futon3c 042a0570): the wire test defined and a ledger over the m
 The habit prior is wired (futon2 663caa7b): at each selection the tick folds the flights' increment receipts and hands the fold to selection, with what it read on the receipt; every live selection before this ran on a uniform E. Map at 197 (futon3c 3be5afbf, adb335c1); matrix at 96 wires, 0 verified live, 2 hermetic.
 WM-LEAN-DEP-MAP-I (p4ng 40a1240): the Lean model's dependency map, generated from the build's own declaration index for 199 of 207 modules; the equation registry places 18 modules and names none of the other 189, so the model is far ahead of the registry from the third side. Figure: zone/wip/aif-lean-dag-nodes.svg.
 The legacy habit store's last production writer is retired (futon2 2d8b6bf6, on Joe's word); the file stays as history; it already had no production reader.
+WM-HANDOFF-H1-I (futon3c b9d18dfe): the flight loop's readings and needs are declared, and the read → ask boundary stays uncrossed because the read step hands the ask step nothing on the flight record; it publishes to the interpretation store, which the wants read back. The store is the carrier the map must box next. Map at 218, matrix at 98 wires.
 
 ## Not yet a clause (AR-35)
 
