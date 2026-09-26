@@ -48,11 +48,11 @@
 ;; H-T-CALLER-I: the chosen target carries the outer cascade's record of the choice.
 (deftest a-chosen-target-carries-its-selection
   (let [sel {:rule :seeded-draw-from-E :support ["M-a"] :chosen "M-a"}]
-    (is (= {:target "M-a" :target-source :chosen :draw-seed 5 :selection sel}
-           (driver/resolve-target {:chosen-target "M-a" :draw-seed 5 :selection sel})))
+    (is (= {:target "M-a" :target-source :chosen :draw-seed 5 :target-selection sel}
+           (driver/resolve-target {:chosen-target "M-a" :draw-seed 5 :target-selection sel})))
     (testing "a selection is carried on a chosen target only: the hand path is exactly as before"
       (is (= {:target "M-autoclock-in" :target-source :hand-placed}
-             (driver/resolve-target {:target "M-autoclock-in" :selection sel}))))
-    (is (= {:target "M-a" :target-source :chosen :draw-seed 5 :hand-target-overridden "M-hand" :selection sel}
-           (driver/resolve-target {:chosen-target "M-a" :draw-seed 5 :selection sel :target "M-hand"}))
+             (driver/resolve-target {:target "M-autoclock-in" :target-selection sel}))))
+    (is (= {:target "M-a" :target-source :chosen :draw-seed 5 :hand-target-overridden "M-hand" :target-selection sel}
+           (driver/resolve-target {:chosen-target "M-a" :draw-seed 5 :target-selection sel :target "M-hand"}))
         "the hand target overridden is still kept beside the selection")))

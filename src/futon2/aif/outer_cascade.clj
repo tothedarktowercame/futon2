@@ -59,7 +59,7 @@
 (defn select
   "Choose a target from the field. OPTS: :field (the `target-field` map), :seed
   (an integer, the caller's), :trigger (which clock fired, recorded). Returns
-  {:selection record} and, when the support is non-empty and a seed is given,
+  {:target-selection record} and, when the support is non-empty and a seed is given,
   :chosen-target and :draw-seed beside it. An empty support is the recorded
   absence {:absent :no-eligible-target}; a missing seed is {:absent :no-seed}.
   Neither is a refusal: the excluded list is on the record either way."
@@ -70,7 +70,7 @@
         seeded? (integer? seed)
         d (when (and (pos? n) seeded?) (draw posterior seed))
         chosen (some-> d :order (nth (:index d)))]
-    (cond-> {:selection
+    (cond-> {:target-selection
              {:rule :seeded-draw-from-E
               :trigger (or trigger {:absent :no-trigger})
               :support support

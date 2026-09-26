@@ -19,7 +19,7 @@
 
 (deftest chooses-only-from-the-eligible-support
   (let [r (oc/select {:field field :seed 42 :trigger :wallclock-cron})
-        s (:selection r)]
+        s (:target-selection r)]
     (is (= ["M-a" "M-b"] (:support s)) "sorted by target id, the ineligible and the excluded out")
     (is (contains? #{"M-a" "M-b"} (:chosen-target r)))
     (is (= (:chosen-target r) (:chosen s)))
@@ -37,8 +37,8 @@
         b (oc/select {:field field :seed 7})]
     (is (= a b) "same seed, same field: same record")
     (testing "and recomputable from the record alone"
-      (let [{:keys [seed value index order]} (get-in a [:selection :draw])]
-        (is (= "java.util.SplittableRandom" (get-in a [:selection :draw :generator])))
+      (let [{:keys [seed value index order]} (get-in a [:target-selection :draw])]
+        (is (= "java.util.SplittableRandom" (get-in a [:target-selection :draw :generator])))
         (is (= value (.nextDouble (SplittableRandom. (long seed)))))
         (is (= (:chosen-target a) (nth order index)))
         (is (= (:chosen-target a) (if (< value 0.5) "M-a" "M-b")) "two equal masses split at one half")))
@@ -49,7 +49,7 @@
         (is (= #{"M-a" "M-b"} chosen))))))
 
 (deftest the-posterior-is-e-over-the-support-and-g-is-a-typed-absence
-  (let [s (:selection (oc/select {:field field :seed 1}))]
+  (let [s (:target-selection (oc/select {:field field :seed 1}))]
     (is (= {"M-a" 1/2 "M-b" 1/2} (:posterior s)))
     (is (= 1 (reduce + (vals (:posterior s)))))
     (is (= {:basis :uniform-no-data} (:E s)))
@@ -66,13 +66,13 @@
         r (oc/select {:field f :seed 3})]
     (is (not (contains? r :chosen-target)))
     (is (not (contains? r :draw-seed)))
-    (is (= {:absent :no-eligible-target} (get-in r [:selection :chosen])))
-    (is (= {:absent :no-eligible-target} (get-in r [:selection :draw])))
-    (is (= [] (get-in r [:selection :support])))
-    (is (= 4 (count (get-in r [:selection :excluded]))) "everything not in the support is still listed")))
+    (is (= {:absent :no-eligible-target} (get-in r [:target-selection :chosen])))
+    (is (= {:absent :no-eligible-target} (get-in r [:target-selection :draw])))
+    (is (= [] (get-in r [:target-selection :support])))
+    (is (= 4 (count (get-in r [:target-selection :excluded]))) "everything not in the support is still listed")))
 
 (deftest a-missing-seed-is-typed-and-no-target-is-chosen
   (let [r (oc/select {:field field})]
     (is (not (contains? r :chosen-target)))
-    (is (= {:absent :no-seed} (get-in r [:selection :chosen])))
-    (is (= ["M-a" "M-b"] (get-in r [:selection :support])))))
+    (is (= {:absent :no-seed} (get-in r [:target-selection :chosen])))
+    (is (= ["M-a" "M-b"] (get-in r [:target-selection :support])))))

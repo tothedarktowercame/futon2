@@ -48,15 +48,15 @@
         p (:plan r)]
     (testing "1. only the eligible target is chosen; the ineligible and the excluded are on the record"
       (is (= "M-futon-seams" (:requisition p)))
-      (is (= ["M-futon-seams"] (get-in r [:selection :support])))
-      (is (= ["E-not-a-target" "M-mooted"] (mapv :target (get-in r [:selection :excluded]))))
-      (is (= [:not-lifecycle-shaped :requisition/mooted] (mapv :reason (get-in r [:selection :excluded])))))
+      (is (= ["M-futon-seams"] (get-in r [:target-selection :support])))
+      (is (= ["E-not-a-target" "M-mooted"] (mapv :target (get-in r [:target-selection :excluded]))))
+      (is (= [:not-lifecycle-shaped :requisition/mooted] (mapv :reason (get-in r [:target-selection :excluded])))))
     (testing "4. resolve-target says :chosen, with the seed and the selection, and the plan's placement carries them"
-      (is (= {:target "M-futon-seams" :target-source :chosen :draw-seed 42 :selection (:selection r)}
+      (is (= {:target "M-futon-seams" :target-source :chosen :draw-seed 42 :target-selection (:target-selection r)}
              (:placement p)))
-      (is (= (:selection r) (:selection p)) "and the plan carries the selection on every plan")
-      (is (= {:absent :no-target-grain-g} (get-in p [:selection :g])))
-      (is (= {:basis :uniform-no-data} (get-in p [:selection :E]))))
+      (is (= (:target-selection r) (:target-selection p)) "and the plan carries the selection on every plan")
+      (is (= {:absent :no-target-grain-g} (get-in p [:target-selection :g])))
+      (is (= {:basis :uniform-no-data} (get-in p [:target-selection :E]))))
     (testing "the chosen entry rides beside it, and the plan is a plan"
       (is (= :ask-interpretation (get-in p [:resolved-steps :field-entry :next-step])))
       (is (false? (:run? p))))
@@ -79,9 +79,9 @@
         two (assoc field :feasible (conj (:feasible field)
                                         {:target "M-other" :kind :mission :next-step :ready :eligible true}))
         two (update two :considered conj {:target "M-other" :kind :mission :repo "futon3c" :path "holes/missions/M-other.md"})
-        sel (fn [seed] (get-in (outer-loop/plan-from-field!
-                                (assoc (entry-opts store {:field two :seed seed}) :plan-fn (fn [o] {:chosen (:chosen-target o)})))
-                               [:plan :chosen]))]
+        sel (fn [seed] (with-redefs [fd/plan (fn [o] {:chosen (:chosen-target o)})]
+                         (get-in (outer-loop/plan-from-field! (entry-opts store {:field two :seed seed}))
+                                 [:plan :chosen])))]
     (is (= (sel 11) (sel 11)))
     (is (= #{"M-futon-seams" "M-other"} (set (map sel (range 40)))))))
 
@@ -90,8 +90,8 @@
         none (update field :feasible (fn [fs] (mapv #(assoc % :eligible false :ineligible-reason :requisition/mooted) fs)))
         r (outer-loop/plan-from-field! (entry-opts store {:field none}))]
     (is (= {:absent :no-eligible-target} (:plan r)))
-    (is (= {:absent :no-eligible-target} (get-in r [:selection :chosen])))
-    (is (= 3 (count (get-in r [:selection :excluded]))))))
+    (is (= {:absent :no-eligible-target} (get-in r [:target-selection :chosen])))
+    (is (= 3 (count (get-in r [:target-selection :excluded]))))))
 
 (deftest the-hand-path-says-so-on-every-plan
   (let [p (fd/plan {:target "M-futon-seams" :seat "kimi-6" :repo "futon3c" :path "holes/missions/M-futon-seams.md"
@@ -100,7 +100,7 @@
                     :observe #(checks/decl-present? mission-text (:decl %))
                     :sources {:beta-by-context {:WM {:beta 1}}}})]
     (is (= {:target "M-futon-seams" :target-source :hand-placed} (:placement p)) "placement is exactly as before")
-    (is (= {:absent :hand-placed} (:selection p)))))
+    (is (= {:absent :hand-placed} (:target-selection p)))))
 
 (deftest a-chosen-target-with-no-selection-record-is-typed
   (let [p (fd/plan {:chosen-target "M-futon-seams" :seat "kimi-6" :repo "futon3c" :path "holes/missions/M-futon-seams.md"
@@ -108,5 +108,5 @@
                     :read-text (fn [_ _ path] (if (str/ends-with? path ".edn") lifecycle-text mission-text))
                     :observe #(checks/decl-present? mission-text (:decl %))
                     :sources {:beta-by-context {:WM {:beta 1}}}})]
-    (is (= {:absent :no-selection-record} (:selection p)))
+    (is (= {:absent :no-selection-record} (:target-selection p)))
     (is (= :chosen (get-in p [:placement :target-source])))))

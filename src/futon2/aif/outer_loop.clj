@@ -18,15 +18,15 @@
   "OPTS: :trigger (which clock fired), :seed (an integer; the wall clock in ms
   when absent, and it goes on the record either way), :seat (the seat that would
   answer the flight's asks; a typed absence when not given), and for tests
-  :load-field-fn (default `target-field/load-field`), :plan-fn (default
-  `flight-driver/plan`) and :plan-opts (merged into the plan's options: :read-text,
-  :observe, :id).
-  Returns {:selection the outer cascade's record, :plan the flight's plan}; when
+  :load-field-fn (default `target-field/load-field`) and :plan-opts (merged into
+  the plan's options: :read-text, :observe, :id). The plan is `flight-driver/plan`
+  called by name, so the map's :passes can check the call; tests redefine the var.
+  Returns {:target-selection the outer cascade's record, :plan the flight's plan}; when
   no target is eligible, :plan is {:absent :no-eligible-target} and nothing is
   planned. The chosen entry's :repo and :path come from the field's :considered
   entry for it (the feasible entry does not carry them)."
-  [{:keys [trigger seed seat load-field-fn plan-fn plan-opts]
-    :or {load-field-fn target-field/load-field plan-fn driver/plan}}]
+  [{:keys [trigger seed seat load-field-fn plan-opts]
+    :or {load-field-fn target-field/load-field}}]
   (let [{:keys [field opts]} (load-field-fn)
         seed (if (integer? seed) seed (System/currentTimeMillis))
         chosen (outer-cascade/select {:field field :seed seed :trigger trigger})
@@ -34,16 +34,17 @@
         entry (first (filter #(= target (:target %)) (:feasible field)))
         considered (first (filter #(= target (:target %)) (:considered field)))]
     (if-not target
-      {:selection (:selection chosen) :plan {:absent :no-eligible-target}}
-      {:selection (:selection chosen)
-       :plan (plan-fn (merge {:chosen-target target
-                              :draw-seed (:draw-seed chosen)
-                              :selection (:selection chosen)
-                              :field-entry entry
-                              :repo (:repo considered)
-                              :path (:path considered)
-                              :seat (or seat {:absent :no-seat-configured})
-                              :sources (:sources opts)
-                              :store (:store opts)
-                              :code-root (:code-root opts)}
-                             plan-opts))})))
+      {:target-selection (:target-selection chosen) :plan {:absent :no-eligible-target}}
+      {:target-selection (:target-selection chosen)
+       :plan (driver/plan
+              (merge {:chosen-target target
+                      :draw-seed (:draw-seed chosen)
+                      :target-selection (:target-selection chosen)
+                      :field-entry entry
+                      :repo (:repo considered)
+                      :path (:path considered)
+                      :seat (or seat {:absent :no-seat-configured})
+                      :sources (:sources opts)
+                      :store (:store opts)
+                      :code-root (:code-root opts)}
+                     plan-opts))})))
