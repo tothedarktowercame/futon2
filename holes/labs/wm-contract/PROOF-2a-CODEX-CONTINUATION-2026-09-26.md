@@ -111,3 +111,27 @@ with the old discovery before adding another R6 edge.
 Thus the next linear packet is the existing prover work, with positive and
 negative attribution cases and a map replay; R6 follows it. Neither a
 duplicate box nor a weaker occurrence check is a completion of R6.
+
+A direct read-only probe of `wiring/field-usage` at futon3c `401f18d5`
+confirms why a symbol-count patch is insufficient:
+
+| Source text, queried for `:beta` | Current result |
+|---|---|
+| `(defn f [{:keys [beta]}] beta)` | 1 read |
+| `(defn f [] {:keys [beta]})` | 1 read, although this is a returned data map |
+| `(quote (defn f [{:keys [beta]}] beta))` | 1 read, although this is quoted data |
+| `(defn f [{b :beta}] b)` | 0 reads, 1 unclassified occurrence |
+
+The first-stage unscoped occurrence check separately searches the literal
+keyword, so the existing `:keys` usage result is not enough to establish an
+occurrence either. Do not fix that by accepting every current `:reads`
+count: the two data cases above would then become false evidence. The
+structural extension needs binding-context and quotation handling, plus
+record attribution for the actual handoff. Its negative controls should
+include both data cases, a wrong record alias and an unrelated parameter;
+positive cases should use the production renamed binding and `:keys`
+parameter. The sealed return also needs an explicit justified attribution
+rule, not a rule that treats arbitrary wrappers as transparent.
+
+No prover code or map declarations were changed on the strength of these
+probes. The newly generated artifacts retain the existing findings.
