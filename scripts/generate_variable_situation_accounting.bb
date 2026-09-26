@@ -171,11 +171,11 @@
    :policy #{"ControlPolicy" "ControlVocabulary" "cascadeGrainPi" "PolicyPriorKernel"
              "policyPosteriorImportsPolicyF" "policyPrecisionIsGammaFromBeta"
              "machineTemperature" "machineAction"}
-   ;; dirichletAccumulationImportAbsent (Holes.lean:6645, H2) names the missing path into
+   ;; dirichletAccumulationFeedsConcentrations (Holes.lean:8118, H2; was ...ImportAbsent) names the path into
    ;; R17's concentrations; its contract evidence is DirichletConcentrations, already here.
    :learning #{"bayesianModelReduction" "modelReductionFreeEnergyChange"
                "logMultivariateBeta" "DirichletConcentrations" "bayesFactorThreshold"
-               "dirichletAccumulationImportAbsent"}
+               "dirichletAccumulationFeedsConcentrations"}
    :demo #{"Fold" "FoldEscrowRecord" "FoldEscrowRecord.reconstructible" "actGate"
            "ActGateVerdict" "HaveWantArrow" "HaveWantArrowState"
            "HaveWantArrowComposition" "aliveness" "AlivenessFactor"}
@@ -417,13 +417,24 @@
     :basis (str "The declaration names its own gate: whether the refusal weakens "
                 "to definable is LA2's to decide from a running policy-grain "
                 "rule. That running is checks/playout_snatch.clj, not a tick.")}
-   "dirichletAccumulationImportAbsent"
-   {:closability :pre-run-closable :readiness :not-ready
-    :basis (str "An absence over code paths, settled by reading the tree; a run "
-                "could only falsify it. The provenance walk is done and written "
-                "down (TN §9a) but not bound: the name does not occur in "
-                "checks/witness-registry.edn, so there is no check, no fixture "
-                "and no rejecting control.")}
+   ;; dirichletAccumulationImportAbsent (:pre-run-closable, an absence "a run
+   ;; could only falsify") left the contract at mathlib4 8569c576fb: under Joe's
+   ;; forward-specification principle (2026-09-21) the standing proposition is
+   ;; the positive requirement below, and the observed absence is a dated finding.
+   ;; Its entry is REMOVED, as F1-F4's were, rather than left stale. (U27-I,
+   ;; claude-14 for claude-8, 2026-09-26.)
+   "dirichletAccumulationFeedsConcentrations"
+   {:closability :run-gated :readiness :not-ready
+    :runtime-evidence (str "A qualifying default-path run supplying a "
+                           "DirichletAccumulationWitness (Holes.lean:8087): recorded "
+                           "prior, realised outcomes with receipts, the updated "
+                           "concentrations, and the consumer's input equal to them.")
+    :basis (str "Holes.lean:8118 declares itself a POSITIVE, RUN-GATED REQUIREMENT "
+                "(mathlib4 8569c576fb): 'a qualifying run must supply this witness "
+                "and its proof'. Closing it needs a live tick's record, which is the "
+                "audit's run-gated question. Not ready: no path from the tick's o "
+                "or mu into R17 exists (aif-equations.edn :holes [[:R2 :R17] "
+                "[:R1 :R17]], :not-realised; A4a recounts substrate hyperedges).")}
    "preferenceStackLiveRecorded"
    {:closability :run-gated :readiness :not-ready
     :runtime-evidence (str "A trace record carrying mission-c criteria records "
