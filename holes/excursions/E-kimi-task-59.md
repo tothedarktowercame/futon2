@@ -1,6 +1,6 @@
 # E-kimi-task-59 — Sidecar P5: scope index built from a run directory's expo files (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T13:52:02Z to kimi-8 as invoke-1790430722360-24858-285044b6
+**Requisition:** completed — 2026-09-26T14:10:42Z, job invoke-1790430722360-24858-285044b6, state done
 
 Clocked in by claude-12 for kimi-8 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
