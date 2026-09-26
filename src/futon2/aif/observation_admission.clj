@@ -41,6 +41,37 @@
 (defn- refuse [kind data]
   {:status :missing :kind kind :reason (name kind) :data data})
 
+(defn mechanical-review
+  "Review only mechanism identity, observer-view digest and cutoff. SUBJECT
+  declares :check-mechanism (a nonempty code identity string) and :check-cutoff
+  (the same repo/sha map carried by adjudication). No evidence is read and no
+  recorded verdict is inspected.
+
+  Declaration/reviewer refusals precede the three comparisons: undeclared
+  mechanism, missing reviewer, reviewer equal to observer, reviewer equal to
+  check mechanism. They return a disputed review with typed :status/:kind.
+  Otherwise dispute the FIRST failure: :self-truthed, :view-mismatch,
+  :cutoff-mismatch, in that order; concur only if all three pass.
+  The view check duplicates admit's earlier :view-digest-mismatch refusal
+  deliberately: this review must stand on its own when read without admit."
+  [reviewer-id subject adjudication]
+  (let [mechanism (:check-mechanism subject)
+        observer (:observer adjudication)
+        invalid (cond
+                  (not (and (string? mechanism) (seq mechanism))) :check-mechanism-undeclared
+                  (not (and (string? reviewer-id) (seq reviewer-id))) :reviewer-missing
+                  (= reviewer-id observer) :observer-is-reviewer
+                  (= reviewer-id mechanism) :reviewer-is-check-mechanism)
+        reason (or invalid
+                   (cond
+                     (= observer mechanism) :self-truthed
+                     (not= (:view-digest adjudication) (view-digest (observer-view subject))) :view-mismatch
+                     (not= (:cutoff adjudication) (:check-cutoff subject)) :cutoff-mismatch))]
+    (cond-> (assoc (review reviewer-id adjudication (if reason :dispute :concur))
+                   :mechanical true)
+      reason (assoc :reason reason)
+      invalid (assoc :status :missing :kind invalid))))
+
 (defn admit
   "Admit a token label from SUBJECT + ADJUDICATION + REVIEW, or refuse typed.
 
@@ -111,7 +142,9 @@
       (refuse :no-label {:finding finding})
 
       (not= :concur verdict)
-      (refuse :review-not-concur {:verdict verdict})
+      (refuse :review-not-concur (cond-> {:verdict verdict}
+                                  (:mechanical review-record)
+                                  (assoc :reason (:reason review-record))))
 
       :else {:status :admitted :label finding
              :token (:token subject)
@@ -121,3 +154,26 @@
              :observer observer :reviewer reviewer
              :cutoff (:cutoff adjudication)
              :view-digest (:view-digest adjudication)})))
+
+(defn label-key
+  "Identity of one located subject under one check mechanism, independent of
+  tick/run ids. :token-class is on SUBJECT; its first :evidence-pointers entry
+  is the subject locator, with :repo, :resolved-sha (or an already resolved
+  :sha), :path or :entry, and optional :decl. Callers supply resolved commits;
+  this pure helper never resolves a symbolic git ref."
+  [subject]
+  (let [{:keys [repo resolved-sha sha path entry decl]} (first (:evidence-pointers subject))]
+    [(:token-class subject) repo (or resolved-sha sha) (or path entry) decl
+     (:check-mechanism subject)]))
+
+(defn label-record
+  "Return a rates label only for an admitted result; any refusal yields nil.
+  Carry the recorded verdict unchanged (boolean or absent for rates), alongside
+  the full admission and the stable subject/check identity."
+  [subject admit-result]
+  (when (= :admitted (:status admit-result))
+    {:token-class (:token-class subject)
+     :recorded (:recorded-verdict admit-result)
+     :admitted (:label admit-result)
+     :label-key (label-key subject)
+     :admission admit-result}))
