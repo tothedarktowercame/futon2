@@ -212,7 +212,7 @@
   Records the wants advanced; carries unreached wants and the abstention's
   missing input forward; closes when every want holds after the click; ends
   :no-progress when nothing advanced."
-  [flight {:keys [click-id wants want-source before after unreached-wants abstention]}]
+  [flight {:keys [click-id wants want-source before after unreached-wants abstention] :as click}]
   (let [moved (advanced wants before after)
         open (vec (remove #(true? (get after %)) wants))
         status (cond (empty? open) :closed
@@ -228,7 +228,10 @@
                          :open-after open
                          :unreached-wants (vec unreached-wants)
                          :progress? (boolean (seq moved))}
-                  abstention (assoc :abstention (select-keys abstention [:kind :missing :declines :status :detail]))))
+                  abstention (assoc :abstention (select-keys abstention [:kind :missing :declines :status :detail]))
+                  ;; WM-CAST-I: the cast the click was sent with, as the
+                  ;; click function gave it (http-click-fn)
+                  (contains? click :cast) (assoc :cast (:cast click))))
         (update :carried-wants #(vec (distinct (concat % (map :token unreached-wants)))))
         (update :needs #(cond-> % (:missing abstention)
                           (conj (merge {:click-id click-id :kind (:kind abstention)

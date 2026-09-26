@@ -416,19 +416,35 @@
       mine (assoc :abstention (select-keys mine [:target :kind :missing :declines]))
       (nil? record) (assoc :abstention {:kind :run-record-missing :missing :run-record}))))
 
+(defn click-cast
+  "WM-CAST-I: the tick's cast as the flight sends it in the click. Each of
+  :author/:reviewer/:repair-reviewer in OPTS that is a nonblank string (the
+  click endpoint's own rule, handle-wm-click-start's nonblank-string?), else
+  a typed absence ({:absent :no-author-given} …). No default, no env read."
+  [opts]
+  (into {} (for [k [:author :reviewer :repair-reviewer]
+                 :let [v (get opts k)]]
+             [k (if (and (string? v) (not (str/blank? v)))
+                  v
+                  {:absent (keyword (str "no-" (name k) "-given"))})])))
+
 (defn http-click-fn
   "A flight click function over the serving JVM: POST /api/alpha/wm/click
   with the flight as flight-edn and a dated run id, wait until that click is
   no longer running, then read its run record. The click is an ordinary
   click: it goes through the same budget and cast-seat preflight. A click
   the server does not start is recorded as an abstention
-  (:click-not-started), never retried. Ports are injectable for tests."
+  (:click-not-started), never retried. The cast (click-cast of OPTS) goes on
+  the POST body under the endpoint's keys, each seat given; the result
+  carries :cast as sent. Ports are injectable for tests."
   [{:keys [agency-base run-record-dir caller poll-ms post! get-status! read-record! sleep! today]
     :or {agency-base "http://localhost:7070" caller "wm-flight" poll-ms 5000
          run-record-dir runner/default-run-record-dir
          sleep! #(Thread/sleep (long %))
-         today #(subs (str (java.time.Instant/now)) 0 10)}}]
-  (let [post! (or post! (fn [body] (let [r (babashka.http-client/post
+         today #(subs (str (java.time.Instant/now)) 0 10)}
+    :as opts}]
+  (let [cast (click-cast opts)
+        post! (or post! (fn [body] (let [r (babashka.http-client/post
                                             (str agency-base "/api/alpha/wm/click")
                                             {:headers {"Content-Type" "application/json"}
                                              :body (cheshire.core/generate-string body)
@@ -445,12 +461,14 @@
             target (:target flight)
             run-id (str (today) "-" (:flight/id flight) "-click-" (:click flight))
             {:keys [status body no-response]}
-            (try (post! {:flight-edn (pr-str flight) :run-id run-id
-                         :issuing-caller caller :trigger "duree-click-on-demand"})
+            (try (post! (merge {:flight-edn (pr-str flight) :run-id run-id
+                                :issuing-caller caller :trigger "duree-click-on-demand"}
+                               (into {} (filter (comp string? val)) cast)))
                  (catch Exception e {:no-response (ex-message e)}))
             click-id (:click-id body)]
         (if-not (and (= 200 status) click-id)
           {:click-id run-id
+           :cast cast
            :unreached-wants []
            ;; the server's reason as it gave it (the cast preflight's 409
            ;; carries :unready under :details); a click never answered is
@@ -467,7 +485,8 @@
                   (when (and (:running? s) (= click-id (:click-id s)))
                     (sleep! poll-ms)
                     (recur))))
-              (assoc (record-summary target run-id (read-record! run-id)) :server-click-id click-id)))))))
+              (assoc (record-summary target run-id (read-record! run-id))
+                     :server-click-id click-id :cast cast)))))))
 
 ;; ---------------------------------------------------------------------------
 ;; D11 part 5: the flight reads what the mission does not state

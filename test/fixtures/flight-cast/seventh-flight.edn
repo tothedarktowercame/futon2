@@ -1,0 +1,6 @@
+;; Live pin (WM-CAST-I): the seventh flight's flight record (flight-278b6988):
+;; its id and target, its first click's wants, and the keys that click entry
+;; carries (neither :chosen nor :outcome nor :cast), verbatim.
+;; source: futon3c c788c15c holes/labs/M-wm-wiring/spike/flight-278b6988.edn
+;; sha256: 2e27390797bb6332ba4a40e67ef92c452bca6a70eee8acb57ce2ff68f88fe212
+{:flight/id "flight-278b6988", :target "M-autoclock-in", :click 1, :wants [:exit/h1dae607747ce :exit/h5c6933e5e2fc :exit/h7afd70f40a29 :exit/h64ddcd0e8811 :exit/h203ce9577ebe :exit/h0c55648e57e5 :exit/h0f3acdf222d7 :exit/h59adca2cd730], :click-entry-keys [:click-id :n :wants :want-source :advanced :open-after :unreached-wants :progress?]}

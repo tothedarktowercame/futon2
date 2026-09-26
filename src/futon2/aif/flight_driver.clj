@@ -18,7 +18,9 @@
   reading), and --dispatch-seat <seat> [--step-deadline-ms <ms>] (the seat
   that carries out a chosen candidate's steps, flight-runner/
   agency-dispatch-step!; without it a decision is recorded
-  {:absent :no-dispatch-configured}). Each flag not given is a typed absence on the plan's
+  {:absent :no-dispatch-configured}), and --author <seat> --reviewer <seat>
+  [--repair-reviewer <seat>] (the tick's cast, sent in the click's POST body
+  under the endpoint's keys). Each flag not given is a typed absence on the plan's
   :resolved-steps. The store is wi/default-store, under futon2's data/: a
   --run writes the flight record, the readings, the requests and any
   enactment record there.
@@ -106,7 +108,7 @@
   "What a real run would use for each wired step (M-wm-wiring WM-DRIVER-I),
   from the parsed OPTS; a flag not given is a typed absence, never a default
   standing in for it."
-  [{:keys [checker bb library-root field-entry cascades dispatch-seat step-deadline-ms]}]
+  [{:keys [checker bb library-root field-entry cascades dispatch-seat step-deadline-ms] :as opts}]
   {:checker (or checker {:absent :no-wc-checker-configured})
    :bb (or bb {:absent :not-given :runs "bb"})
    :library-root (or library-root {:absent :not-in-flight-opts})
@@ -119,6 +121,8 @@
                                  {:ms step-deadline-ms :source :flight-option}
                                  {:absent :no-step-deadline})}
                     {:absent :no-dispatch-configured})
+   ;; WM-CAST-I: --author/--reviewer/--repair-reviewer, sent in the click
+   :cast (fr/click-cast opts)
    :enact "flight-runner/enact-fn over the click's run record (observe-publication-fn inside it)"
    :wc "flight-runner/wc-verdict-fn with the checker and bb"})
 
@@ -235,7 +239,8 @@
                                                             :notify! notify! :caller "joe"}
                                                      cascades (assoc :served-by-cascades {target cascades})))
                               :ask-fn (fr/ask-fn {:store store :answer-fn answer})
-                              :click-fn (or click-fn (fr/http-click-fn {:caller "wm-flight" :run-record-dir run-record-dir}))
+                              :click-fn (or click-fn (fr/http-click-fn (merge {:caller "wm-flight" :run-record-dir run-record-dir}
+                                                                               (select-keys opts [:author :reviewer :repair-reviewer]))))
                               :enact-fn enact
                               :wc-fn wc
                               :observe-fn (fr/observe-fn)
