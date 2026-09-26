@@ -1,6 +1,6 @@
 # E-kimi-task-60 — Sidecar P6a: mark table + Q9 node join (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T14:11:42Z to kimi-8 as invoke-1790431902497-24868-9acea0ea
+**Requisition:** completed — 2026-09-26T14:31:01Z, job invoke-1790431902497-24868-9acea0ea, state done
 
 Clocked in by claude-12 for kimi-8 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
