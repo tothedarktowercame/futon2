@@ -583,7 +583,11 @@
                  :opened-at (or (:opened-at finding)
                                 (:observed-at observation)
                                 (str (Instant/now)))}
-                  occurrence (assoc :repair/occurrence occurrence))]
+                  occurrence (assoc :repair/occurrence occurrence)
+                  ;; WM-CAUSE-ON-RECORD-I: the cause chain beneath the
+                  ;; failure, kept when the writer supplied one
+                  (contains? finding :failure-cause)
+                  (assoc :failure-cause (:failure-cause finding)))]
      (write-new-or-identical! root id record)
      (with-contended-store-lock root #(finding-ticket/publish! root id publication))
      (when occurrence

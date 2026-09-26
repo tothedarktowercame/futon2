@@ -256,12 +256,16 @@
 (defn throwable-summary
   "A Throwable as data for a record: :class, :message, the ex-data's :kind
   as :ex-kind when present, and :cause, the chain beneath it as
-  {:class :message}, at most 5."
+  {:class :message}, at most 5. When the chain goes deeper than five,
+  :cause-cut-at 5 says so (WM-CAUSE-ON-RECORD-I), so a cut chain is not
+  read as the whole of it."
   [e]
-  (cond-> {:class (.getName (class e)) :message (ex-message e)}
-    (:kind (ex-data e)) (assoc :ex-kind (:kind (ex-data e)))
-    (ex-cause e) (assoc :cause (vec (for [c (take 5 (take-while some? (iterate ex-cause (ex-cause e))))]
-                                      {:class (.getName (class c)) :message (ex-message c)})))))
+  (let [chain (take 6 (take-while some? (iterate ex-cause (ex-cause e))))]
+    (cond-> {:class (.getName (class e)) :message (ex-message e)}
+      (:kind (ex-data e)) (assoc :ex-kind (:kind (ex-data e)))
+      (seq chain) (assoc :cause (vec (for [c (take 5 chain)]
+                                       {:class (.getName (class c)) :message (ex-message c)})))
+      (< 5 (count chain)) (assoc :cause-cut-at 5))))
 
 (defn aborted-flight
   "The flight record a run! abort carries (:status :aborted), or nil."

@@ -8,6 +8,7 @@
   fold executor is not an actuator here."
   (:require [futon2.aif.load-identity :as load-identity]
             [futon2.aif.loaded-displacement :as loaded-displacement]
+            [futon2.aif.flight :as flight]
             [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn :as edn]
@@ -3666,6 +3667,45 @@
     (when-let [k (some thrower-kind (cause-chain e))]
       (ex-info (ex-message e) (assoc (ex-data e) :failure-kind k) e))))
 
+(defn- runner-rethrow?
+  "True when T is one of the selection catch's own re-throws around the
+  thrower's exception: judge-refusal-abstention ({:outcome :abstained
+  :judge-refusal ...}) or phase-kind-failure (the cause's message and
+  ex-data, plus :failure-kind)."
+  [t]
+  (let [c (ex-cause t) d (ex-data t)]
+    (boolean
+     (and c
+          (or (and (= :abstained (:outcome d)) (contains? d :judge-refusal))
+              (and (contains? d :failure-kind)
+                   (= (ex-message t) (ex-message c))
+                   (= (dissoc d :failure-kind) (ex-data c))))))))
+
+(defn close-cause
+  "WM-CAUSE-ON-RECORD-I: the cause chain beneath the thrower's exception for
+  the close map, in flight/throwable-summary's shape ({:cause [{:class
+  :message} ...]}, with :cause-cut-at 5 past five), or {:absent :no-cause}
+  when there is none. The thrower's exception is E, or the one beneath the
+  selection catch's own re-throws (runner-rethrow?), which would otherwise
+  stand first in the chain repeating :error. The close map's
+  :error/:error-class/:error-data describe E alone, so the eighth flight's
+  finding said the registry read failed and nothing of why."
+  [e]
+  (let [thrower (first (drop-while runner-rethrow? (take 16 (take-while some? (iterate ex-cause e)))))
+        s (flight/throwable-summary thrower)]
+    (if (:cause s)
+      (select-keys s [:cause :cause-cut-at])
+      {:absent :no-cause})))
+
+(defn finding-failure-cause
+  "A repair finding's :failure-cause, or {:absent :cause-not-on-record} for a
+  finding written before WM-CAUSE-ON-RECORD-I (or by a writer that never
+  had one), so an old finding is typed rather than read as causeless."
+  [finding]
+  (if (contains? finding :failure-cause)
+    (:failure-cause finding)
+    {:absent :cause-not-on-record}))
+
 (defn- repair-class-for [failure-kind]
   (cond
     (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
@@ -4014,6 +4054,12 @@
                                         (str "zero-achievement outcome " outcome)
                                         (:error data))
                                :failure-data (:error-data data)
+                               ;; WM-CAUSE-ON-RECORD-I: the close catch's
+                               ;; cause chain; a close no exception reached
+                               ;; has none to give
+                               :failure-cause (if (contains? data :cause)
+                                                (:cause data)
+                                                {:absent :close-without-exception})
                                :opened-at (get-in time-cell
                                                   [:judgment :machine-state :started-at])
                                :backtrace
@@ -5715,6 +5761,7 @@
                         :error (.getMessage e)
                         :error-class (.getName (class e))
                         :error-data failure
+                        :cause (close-cause e)
                         :build-retries (when (seq (:build-retries failure))
                                          (:build-retries failure))}
                         (seq (:reviews failure))
