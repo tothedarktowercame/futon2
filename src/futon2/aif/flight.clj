@@ -16,6 +16,7 @@
   (:require [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.cascade-model-manifest :as manifest]
+            [futon2.aif.cascade-policy :as policy]
             [futon2.aif.interpretation-evidence :as ievidence]
             [futon2.aif.mission-criteria :as criteria]
             [futon2.aif.mission-reading :as reading]
@@ -348,7 +349,7 @@
            :tokens unmeasured
            :classes (into {} (for [t unmeasured] [t (get-in observation [:channel t])]))}
           (let [pats (mapv (fn [id]
-                             (manifest/declared->interpreted
+                             (policy/declared->interpreted
                               id (when-let [p (get interps id)] (assoc p :id id)))) precedence)
                 missing (filterv #(= :missing (:status %)) pats)]
             (if (seq missing)

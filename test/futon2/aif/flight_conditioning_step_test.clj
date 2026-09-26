@@ -156,7 +156,9 @@
       (some #(when (= "M-autoclock-in" (:target %)) (get-in % [:declaration :interpretations]))
             (get-in record [:decision :selection-certificate :token-belief-stage :domain-inputs])))))
 
-(defn agreement-table []
+(defn agreement-table
+  "Both paths now use token-interpretation; these rows pin the typed wrapper."
+  []
   (vec (for [[id {:keys [guard produces] :as declaration}] (sort-by (comp str key) (live-declarations))
              [state-name state] [[:empty #{}] [:needs (:needs guard)]
                                  [:with-forbids (set/union (:needs guard) (:forbids guard))]
@@ -165,7 +167,7 @@
           ;; Selection's actual adapter and actual enabledness rule; assembly
           ;; itself has no guard evaluator. Both paths must skip completion.
           :selection (manifest/guard-holds? (policy/token-interpretation id declaration) state)
-          :conditioning (manifest/guard-holds? (manifest/declared->interpreted id declaration) state)})))
+          :conditioning (manifest/guard-holds? (policy/declared->interpreted id declaration) state)})))
 
 (deftest retained-declarations-have-selections-enabledness
   (let [rows (agreement-table)]
@@ -179,15 +181,15 @@
              {:guard {:needs nil :forbids #{}} :produces #{:t}}
              {:guard {:needs #{} :forbids #{}} :produces [:t]}]]
     (is (= {:status :missing :kind :missing-pattern-interpretation :pattern :p :declared d}
-           (manifest/declared->interpreted :p d))))
+           (policy/declared->interpreted :p d))))
   (let [p (pattern 1/2)]
-    (is (= p (manifest/declared->interpreted :p p)))))
+    (is (= p (policy/declared->interpreted :p p)))))
 
 (deftest nonempty-forbids-and-completion-are-preserved
   ;; The eight live patterns all have empty forbids: those rows alone cannot
   ;; distinguish a conversion that drops negation. This declaration can.
   (let [d {:guard {:needs #{:ready} :forbids #{:blocked}} :produces #{:done}}
-        converted (manifest/declared->interpreted :p d)
+        converted (policy/declared->interpreted :p d)
         selection (policy/token-interpretation :p d)]
     (doseq [[state enabled] [[#{} false] [#{:ready} true]
                             [#{:ready :blocked} false] [#{:ready :done} false]]]

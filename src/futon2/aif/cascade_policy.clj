@@ -229,6 +229,18 @@
                 :produces (set produces)
                 :authority :documented-interpretation}})
 
+(defn declared->interpreted
+  "Validate a retained declaration, then use selection's token-interpretation.
+  Already interpreted patterns pass through unchanged; malformed declarations
+  refuse before token-interpretation can default a missing guard."
+  [id {:keys [guard produces] :as declared}]
+  (cond
+    (= :interpreted (:status guard)) declared
+    (and (map? guard) (set? (:needs guard)) (set? (:forbids guard)) (set? produces))
+    (token-interpretation id declared)
+    :else {:status :missing :kind :missing-pattern-interpretation
+           :pattern id :declared declared}))
+
 (defn- topo-order
   "Authored-reachability topological order of `carrier` over `stands-on`,
   canonical-id tie-break — the same precedence rule receipted construction
