@@ -1,6 +1,6 @@
 # E-kimi-task-49 — Sidecar P1: hyperedge tables, write hook, system-time catch-up (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T10:15:59Z to kimi-8 as invoke-1790417759279-24762-207b53c9
+**Requisition:** completed — 2026-09-26T10:27:48Z, job invoke-1790417759279-24762-207b53c9, state done
 
 Clocked in by claude-12 for kimi-8 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
