@@ -516,6 +516,31 @@
                        :runner/source check})))
     check))
 
+(defn judge-refusal
+  "WM-CLICK-REFUSAL-I: the judge's typed refusal of the cascade decision, or
+  nil. The joint decision throws \"cascade decision refused\" with the kind
+  under :kind (war_machine.clj cascade-family-parameters, the live-C checks,
+  and the rethrow of efe's typed :status :missing returns), which
+  explicit-failure-kind does not read, so the fourth flight's
+  :class-unknown-no-scalar-g closed :untyped-failure. Register section D2.2
+  classes these T: the tick abstains. Returns {:kind :target :missing :data}:
+  :target from the refusal, else the flight's target, else a typed absence;
+  :missing from the refusal, else from the kind; :data the ex-data, kept."
+  [e flight-target]
+  (let [d (ex-data e)]
+    (when (and (instance? clojure.lang.ExceptionInfo e)
+               (= "cascade decision refused" (ex-message e))
+               (keyword? (:kind d)))
+      {:kind (:kind d)
+       :target (or (:target d) flight-target {:absent :refusal-names-no-target})
+       :missing (or (:missing d)
+                    (case (:kind d)
+                      :class-unknown-no-scalar-g :target-relation
+                      :incommensurable-family (if (contains? d :horizon-steps) :common-horizon :common-beta)
+                      (:live-c-refused :live-c-stale) :live-c
+                      {:absent :kind-names-no-missing-input}))
+       :data d})))
+
 (defn abstention-carrier
   "D8/AR-16 (E-cascade-real): the abstained tick record carries its typed
   declines. Built from the judge's own decision :refusals and the cascade
@@ -523,8 +548,15 @@
   abstained without recording a refusal list yields a typed absence, never
   an empty vector read as \"nothing declined\"; a tick with no recorded
   decision at all is likewise a typed absence, never :not-abstained."
-  [decision dropped-candidates]
+  ([decision dropped-candidates] (abstention-carrier decision dropped-candidates nil))
+  ([decision dropped-candidates judge-refusal]
   (cond
+    ;; the judge refused the decision typed (judge-refusal): the tick abstains
+    ;; with that kind, its ex-data kept under :data
+    (and (nil? decision) judge-refusal)
+    {:status :abstained
+     :targets [(assoc (select-keys judge-refusal [:target :kind :missing :data]) :declines [])]}
+
     (nil? decision)
     {:status :absent :reason :no-selection-decision-recorded}
 
@@ -545,7 +577,7 @@
                       refusals)}
       {:status :absent :reason :judge-recorded-no-refusal-list})
 
-    :else {:status :not-abstained}))
+    :else {:status :not-abstained})))
 
 (defn abstention-record-ok?
   "D8/AR-16 record check: a tick whose decision abstained with a non-empty
@@ -600,7 +632,8 @@
             ;; travel on the :no-selection sorry cell instead.
             selection-sorry (get-in result [:checkpoints :selection :sorry])
             abstention (abstention-carrier (or decision (:decision selection-sorry))
-                                           (:dropped-candidates selection-sorry))
+                                           (:dropped-candidates selection-sorry)
+                                           (:judge-refusal selection-sorry))
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
                     :participants (participants/record-value raw-opts)
@@ -3868,7 +3901,9 @@
                  (doseq [cp required-checkpoints
                          :when (not (contains? @checkpoints cp))]
                    (checkpoint! cp (sorry (keyword (str "not-reached-" (name cp)))
-                                          {:outcome outcome})))
+                                          (cond-> {:outcome outcome}
+                                            (:judge-refusal data)
+                                            (assoc :judge-refusal-kind (get-in data [:judge-refusal :kind]))))))
                  (let [admitted-verification?
                        (= :historical-verification-awaiting-validation outcome)
                        selection-judgment (get-in @checkpoints [:selection :judgment])
@@ -4591,6 +4626,7 @@
                                           :include-advisory-lanes? false
                                           :defer-render? true))))
             judgement0-base
+            (try
             (run-phase!
              opts @phase-context :selection
              #(let [_ (swap! effective-configuration assoc :evaluation :started)
@@ -4607,6 +4643,18 @@
                   (reset! state (assoc (or (:render-data generated) (:data generated))
                                        :judgement judgement)))
                 judgement))
+              (catch clojure.lang.ExceptionInfo e
+                ;; WM-CLICK-REFUSAL-I: a typed refusal of the cascade decision
+                ;; is the tick's abstention (as an abstained judgement is,
+                ;; below), carried on the :no-selection sorry cell; anything
+                ;; else goes on untouched
+                (if-let [jr (judge-refusal e (get-in opts [:flight :target]))]
+                  (let [cell (sorry :no-selection {:judge-refusal jr})]
+                    (reset! pending-selection cell)
+                    (swap! checkpoints assoc :selection cell)
+                    (throw (ex-info "War Machine abstained: cascade decision refused"
+                                    {:outcome :abstained :judge-refusal jr} e)))
+                  (throw e))))
             judgement0 judgement0-base
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             ordinary-entry (selected-entry judgement0)
@@ -5581,6 +5629,7 @@
                         (or (:repair/occurrence failure)
                             (:repair/occurrence finding))
                         :failure-kind (failure-kind-from e)
+                        :judge-refusal (:judge-refusal failure)
                         :feature-card-invalid-reason
                         (:feature-card-invalid-reason failure)
                         :feature-card-source (:feature-card-source failure)
