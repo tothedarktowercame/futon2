@@ -123,16 +123,15 @@
   ([ranked conditioning prefixes]
    (with-meta
      (mapv (fn [entry]
-             (-> entry
-                 (dissoc :f)
-                 (assoc :f-prefix
-                        (if-let [prefix (and prefixes (get prefixes (:id (:action entry))))]
-                          (let [fp (prefix-f entry prefix conditioning)]
-                            ;; an invalid prefix is refused as data, never
-                            ;; scored: the selection sees it :not-supplied
-                            (if (= :invalid (:status fp))
-                              (assoc (not-supplied entry conditioning :invalid-policy-prefix) :refused fp)
-                              fp))
-                          (not-supplied entry conditioning :no-admitted-policy-prefix)))))
+             (let [ranked-entry (dissoc entry :f)]
+               (assoc ranked-entry :f-prefix
+                      (if-let [prefix (and prefixes (get prefixes (:id (:action entry))))]
+                        (let [fp (prefix-f entry prefix conditioning)]
+                          ;; an invalid prefix is refused as data, never
+                          ;; scored: the selection sees it :not-supplied
+                          (if (= :invalid (:status fp))
+                            (assoc (not-supplied entry conditioning :invalid-policy-prefix) :refused fp)
+                            fp))
+                        (not-supplied entry conditioning :no-admitted-policy-prefix)))))
            ranked)
      (meta ranked))))
