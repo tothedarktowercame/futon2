@@ -50,8 +50,8 @@ negative logarithm (`flight.clj:376-390`), not epsilon_s.
 prediction-error call at all. The registry correctly labels the residual
 row `:legacy-channel-model`, superseded as target by `:state-prediction-error`
 (`aif-equations.edn:113-114`). The legacy calculation nevertheless still runs.
-The replacement target's whole row is at 499-516; its formal formula at 511
-and Lean-at at 514 do not create a Clojure implementation.
+The replacement target's whole row is at 499-516; its formal formula at 512
+and Lean-at at 515 do not create a Clojure implementation.
 
 ## 2. Flight input inventory and the policy-time distinction
 
@@ -96,8 +96,8 @@ subsets of all V), no C5 restriction. Flight intentionally restricts both
 rates and state to checked tokens (369-370). Its record alone does not turn
 an unknown unchecked token into a false observation; adopting full-O W5
 therefore needs a separately witnessed full observation/model. The row's
-formal 511 permits general mean-field marginals; its actual Lean binding
-514 chooses predicted marginals, not the conditioned q.
+formal 512 permits general mean-field marginals; its actual Lean binding
+515 chooses predicted marginals, not the conditioned q.
 
 ## 3. Real arithmetic and the strict domain
 
@@ -190,7 +190,7 @@ validate the weighted-log and current-positivity clauses, then return a typed
 clamp nor interpret Lean's `Real.log 0 = 0` as the source's logarithm; the
 source has negative infinity, and mixed infinities need not define a real
 sum. W5 refuses at 118-120; the row currently omits the current-positivity
-clause from its formal domain despite acknowledging it in Lean-at (511,514).
+clause from its formal domain despite acknowledging it in Lean-at (512,515).
 
 ## 4. Recommendation: row documentation only
 
@@ -225,7 +225,7 @@ A point-mass previous state alone does NOT remove a nonconstant future
 message. Further, equality is of the stationary posterior, not equality of
 rollout marginals to the posterior nor a claim that epsilon vanishes. At the
 stationary posterior epsilon=ln Z (`StatePredictionErrorAtMachine.lean:199-210`).
-The row's actual `:eq` at 512 merely names mean-field 4.13, not the stronger
+The row's actual `:eq` at 513 merely names mean-field 4.13, not the stronger
 unqualified equality in the request; the equality and reductions are in the
 neighbouring exact-update row and underlying theorem.
 
