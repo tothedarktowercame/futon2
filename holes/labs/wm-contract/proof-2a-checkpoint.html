@@ -29,6 +29,58 @@
 </head><body><nav class="site-nav"><a class="site-nav-home" href="rule-rewriting-ca.html">Rule-Rewriting CA</a><a href="futon-2026.html">FUTON 2026 (DRAFT)</a><a href="plop-2026.html">PLoP 2026 (DRAFT)</a><a href="pipeline-pattern-cascade.html">Live cascade</a><a href="mission-efe-field.html">Embedding live</a></nav>
 <h1>PROOF-2a: a checkpoint</h1>
 <!-- PROOF-2a-current:rendered -->
+<section id="equation-refresh">
+<h2>Equation figures — automatic refresh</h2>
+<p>The registry, drawing inputs and renderer are checked every 30 seconds. Unchanged inputs reuse cached figures. Both figures below come from the same successful build of the latest committed inputs. Uncommitted edits and refresh failures are shown explicitly. This refresh does not establish machine wiring or preference adequacy, or regenerate the Lean graph.</p>
+<p id="equation-refresh-status" role="status">Checking figure freshness…</p>
+<div id="equation-current-figures" hidden>
+<figure id="figure-6a-current"><a id="equation-compact-link"><img id="equation-compact" alt="Figure 6A generated from the current committed equation registry" style="width:100%;border:1px solid #ddd"></a><figcaption>Figure 6A: current equation dependencies. Conformance classes are not per-wire execution evidence.</figcaption></figure>
+<details><summary>Show every typeset equation</summary><a id="equation-full-link"><img id="equation-full" alt="Current registry equations typeset in their dependency graph" style="width:100%;border:1px solid #ddd"></a></details>
+<p><a id="equation-receipt">Generation receipt: source revisions, content hashes and census</a></p>
+</div>
+<noscript><p>Automatic figure freshness requires JavaScript. <a href="aif-current/status.json">Read the latest refresh status</a>; historical figures below are not current.</p></noscript>
+<script>
+(() => {
+  const label = document.getElementById('equation-refresh-status');
+  const figures = document.getElementById('equation-current-figures');
+  async function refresh() {
+    try {
+      const response = await fetch('aif-current/status.json', {cache: 'no-store'});
+      if (!response.ok) throw new Error('Refresh status unavailable (' + response.status + ')');
+      const status = await response.json();
+      const age = Date.now() / 1000 - status.checked_at;
+      figures.hidden = true;
+      if (!Number.isFinite(age) || age > 120 || age < -10) {
+        label.textContent = 'Freshness check overdue. The automatic refresh has not reported recently; no figure is claimed current.';
+      } else if (status.state !== 'current') {
+        label.textContent = 'Figures not current: ' + status.state + '. ' + (status.error || (status.paths || []).join(', '));
+      } else {
+        const counts = status.census['equation-statuses'];
+        label.textContent = 'Checked ' + new Date(status.checked_at * 1000).toLocaleTimeString() +
+          ': ' + status.census.equations + ' equations; ' + (counts.latex || 0) +
+          ' typeset from registry LaTeX, ' + (counts['latex-absent'] || 0) +
+          ' typed absences, ' + (counts.translated || 0) + ' translated, ' +
+          (counts.abridged || 0) + ' abridged. ' + (status.cache_hit ? 'Cached build reused.' : 'Figures regenerated.');
+        for (const [id, file] of [['equation-compact', 'aif-equation-dag.svg'], ['equation-full', 'aif-equation-dag-equations.svg']]) {
+          const url = 'aif-current/' + status.figures[file];
+          const img = document.getElementById(id);
+          if (img.getAttribute('src') !== url) img.src = url;
+          document.getElementById(id + '-link').href = url;
+        }
+        document.getElementById('equation-receipt').href = 'aif-current/' + status.receipt;
+        figures.hidden = false;
+      }
+    } catch (error) {
+      figures.hidden = true;
+      label.textContent = 'Figure freshness unavailable: ' + error.message;
+    }
+  }
+  refresh();
+  setInterval(refresh, 30000);
+})();
+</script>
+</section>
+
 <details id="historical-checkpoint"><summary>Historical checkpoint and figures (through 2026-09-26 16:46Z; superseded counts)</summary>
 <p><strong>Historical material.</strong> The following narrative and figures are retained for their evidence and provenance. Their status words and counts describe their stated snapshots, not the current build. Figure 6A includes the Cτ nodes but does not yet show verified ledger status on each edge.</p>
 <p class="note">Written 2026-09-26 ~04:15Z by claude-8 from the theorem draft (<code>futon2/holes/labs/wm-contract/PROOF-2a-THEOREM-draft-2026-09-24.md</code>) and the wiring mission (<code>futon3c/holes/missions/M-wm-wiring.md</code>); brought up to date ~11:00Z (draft at aa30c516, mission at f44861d8). The supplement on the wiring diagram proof, and what landed since the morning, are below the holes.</p>
