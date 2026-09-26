@@ -1,6 +1,6 @@
 # E-kimi-task-57 — Sidecar P3d: endpoint-prefix hyperedge reads (Q3) from the index (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T13:27:16Z to kimi-8 as invoke-1790429236453-24847-5e471bbd
+**Requisition:** completed — 2026-09-26T13:37:47Z, job invoke-1790429236453-24847-5e471bbd, state done
 
 Clocked in by claude-12 for kimi-8 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
