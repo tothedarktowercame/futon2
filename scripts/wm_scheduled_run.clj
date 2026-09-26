@@ -22,6 +22,7 @@
   (:require [clojure.pprint :as pp]
             [futon2.aif.evidence-emit :as evidence-emit]
             [futon2.aif.trace :as trace]
+            [futon2.run-tick-once :as tick]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.enact :as enact]
             [futon2.aif.fold-realized :as fr]
@@ -104,7 +105,8 @@
                           :seed (some-> (System/getenv "FUTON_WM_FLIGHT_SEED") parse-long)
                           :seat (System/getenv "FUTON_WM_FLIGHT_SEAT")})
       (System/exit 0))
-    (let [days (if (seq args) (Integer/parseInt (first args)) 14)
+    (let [run-id (tick/mint-run-id)
+          days (if (seq args) (Integer/parseInt (first args)) 14)
           ;; B-0a tick provenance (M-aif-faithfulness §2.0): stamp WHICH code
           ;; + WHICH config produced this tick — git sha/dirty of this one-shot
           ;; JVM's checkout, the arena-resolved mode flags (the same fns the
@@ -130,7 +132,7 @@
           ;; (builds toward nothing). Degrades safely: store down -> [] -> the
           ;; static floor; never throws the run.
           belly (try (cv/maybe-refresh!) (catch Exception _ {:entries []}))
-          {:keys [judgement]} (wm/generate-war-machine days (wm/accumulation-config))
+          {:keys [judgement]} (wm/generate-war-machine days (assoc (wm/accumulation-config) :run-id run-id))
           ;; R16 close-the-loop (live-wired 2026-07-02): act-gates over the
           ;; judged actions; first :pass is ENACTED (artifact-only — escrow
           ;; impl #2 else fold-engine impl #1) and the :realized-outcome

@@ -1546,6 +1546,10 @@
                                         {:refusal :accumulation-initialization-required})))
                       (machine-accumulation/initialize
                        (vec (sort (keys observation))) (vec (sort (keys post))) (:prior initialization))))
+        _ (when-not (:ok carried)
+            (throw (ex-info "Accumulation initialization refused"
+                            {:refusal (get-in carried [:refusal :kind])
+                             :detail (:refusal carried)})))
         input {:tick-id tick-id :previous-id previous-id :entity/id entity-id
                :observation observation :belief-pre pre :belief-post post
                :state-support (vec (sort (keys post)))
@@ -1557,6 +1561,38 @@
       (throw (ex-info "Accumulation step refused"
                       {:refusal (get-in result [:refusal :kind]) :detail (:refusal result)})))
     {:state result :update-input input :initialization (when-not previous-record initialization)}))
+
+(defn accumulation-outcome-for-tick
+  "Read accumulation's own strict predecessor, then record one update or typed
+   absence. Never supplies inputs to selection. Hash UTF-8 pr-str of the exact
+   returned state (no newline), the same state retained by trace-record."
+  [{:keys [enabled? trace-dir] :as input}]
+  (if-not enabled?
+    {:receipt {:status :absent :reason :accumulation-not-configured}}
+    (try
+      (let [history (trace/read-history-strict 12 :dir trace-dir)]
+        (if-not (= :ok (:status history))
+          {:receipt history}
+          (let [result (accumulation-step-for-tick
+                        (assoc input :previous-record (peek (:records history))))
+                update-input (:update-input result)]
+            (assoc result :receipt
+                   {:status :accumulated
+                    :state-sha256 (load-identity/sha256 (.getBytes (pr-str (:state result)) "UTF-8"))
+                    :previous-id (:previous-id update-input) :tick-id (:tick-id update-input)
+                    :entity (:entity/id update-input) :model/revision (:model/revision update-input)
+                    :initialization? (boolean (:initialization result))}))))
+      (catch Exception e
+        {:receipt {:status :absent :reason (or (:refusal (ex-data e)) :accumulation-failed)
+                   :detail (ex-data e)
+                   :error {:class (.getName (class e)) :message (ex-message e)}}}))))
+
+(defn with-accumulation-receipt
+  "Attach the already computed outcome beside an unchanged selection."
+  [judgement outcome]
+  (-> judgement
+      (assoc :accumulation-receipt (:receipt outcome))
+      (assoc-in [:decision :accumulation] (:receipt outcome))))
 
 (defn- selected-mission-focus
   "The mission THIS tick selected, as a focus map, or nil when the decision is
@@ -7348,13 +7384,12 @@
                                                 driver-rejections)}
               (recur (inc step) belief' prec-state' micro-trace'))))
         wm-belief belief
-        accumulation (when (or trace? accumulation-entity-id)
-                       (accumulation-step-for-tick
-                        {:previous-record prev-trace-record
-                         :tick-id (or run-id scan-id (:scan-id scan-data))
-                         :entity-id accumulation-entity-id
-                         :observation observation :belief-pre wm-belief-pre
-                         :belief-post wm-belief :initialization accumulation-initialization}))
+        accumulation (accumulation-outcome-for-tick
+                      {:enabled? (or trace? accumulation-entity-id) :trace-dir wm-trace-dir
+                       :tick-id (or run-id scan-id (:scan-id scan-data))
+                       :entity-id accumulation-entity-id
+                       :observation observation :belief-pre wm-belief-pre
+                       :belief-post wm-belief :initialization accumulation-initialization})
         route2 (-> route1
                    (route-tag :R7 "futon2.aif.precision/update-precision-state")
                    (route-tag :R3 "futon2.report.war-machine/apply-arena-belief-events"))
@@ -7680,7 +7715,8 @@
         ;; U21: the last of the three terminal projections, applied in its own
         ;; step so the two S4/U11 projections above keep the exact shape their
         ;; rows built and reviewed.
-        result0-unasserted (carry-mission-focus result0-unfocused mission-focus)
+        result0-unasserted (with-accumulation-receipt
+                           (carry-mission-focus result0-unfocused mission-focus) accumulation)
         ;; U37: last of the terminal projections, after the focus read, so the
         ;; three reviewed shapes above are untouched when the flag is off.
         result0 (cond-> (assoc (carry-enumeration-completeness result0-unasserted)

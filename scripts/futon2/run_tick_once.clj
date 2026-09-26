@@ -229,6 +229,7 @@
      :inputIssues (long (count (:issues input-status)))
      :preferenceLayers (long (count preference-stack))
      :traceWritten (boolean trace-written?)
+     :decision (select-keys (:decision result) [:accumulation])
      :selectorSeam selector-seam
      :route route
      :route-verdict verdict}))
@@ -319,6 +320,14 @@
      :store-basis store-basis
      :sample sample}))
 
+(defn mint-run-id
+  "Shared scheduled/one-shot identity: UTC date and epoch seconds. The caller
+   mints once before judgement and retains that identity through publication."
+  ([] (mint-run-id (Instant/now)))
+  ([instant]
+   (str (.toLocalDate (.atZone ^Instant instant java.time.ZoneOffset/UTC))
+        "-" (.getEpochSecond ^Instant instant))))
+
 (defn- run-tick-once*
   "One machine, one runner (RUN12): the lock is taken before any of the tick's
   reads and released after the trace write, so a second starter refuses instead
@@ -327,7 +336,7 @@
   script holds the lock across every tick."
   [days]
   (let [started-at (str (Instant/now))
-        run-id (str (java.util.UUID/randomUUID))]
+        run-id (mint-run-id)]
     (run-lock/call-with-run-lock
      {:path (lock-path) :run-id run-id}
      (fn [_handle] (tick* days started-at run-id)))))

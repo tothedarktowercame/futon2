@@ -585,6 +585,8 @@
     (assoc :strategic-habit-state (:strategic-habit-state judge-output))
     (:habit-prior-state judge-output)
     (assoc :habit-prior-state (:habit-prior-state judge-output))
+    (:accumulation-receipt judge-output)
+    (assoc :accumulation-receipt (:accumulation-receipt judge-output))
     (:accumulation-state judge-output)
     (assoc :accumulation-state (:accumulation-state judge-output)
            :accumulation-update-input (:accumulation-update-input judge-output))
@@ -752,6 +754,55 @@
                 records (read-trace :dir dir :date-str date-str)]
             (recur (rest files)
                    (into newest-first (reverse records)))))))))
+
+(defn- strict-file-records [file]
+  (let [path (str file) eof (Object.)]
+    (try
+      (with-open [r (PushbackReader. (io/reader file))]
+        (loop [records [] index 1]
+          (let [item (try
+                       (let [value (edn/read {:eof eof} r)]
+                         (if (or (identical? eof value) (map? value))
+                           {:value value}
+                           (throw (ex-info "Trace record is not a map" {}))))
+                       (catch java.io.IOException e (throw e))
+                       (catch Exception e
+                         {:status :absent :reason :malformed-trace-record
+                          :path path :index index
+                          :error {:class (.getName (class e)) :message (ex-message e)}}))]
+            (cond
+              (:status item) item
+              (identical? eof (:value item)) {:status :ok :records records}
+              :else (recur (conj records (:value item)) (inc index))))))
+      (catch Exception e
+        {:status :absent :reason :trace-read-failed :path path
+         :error {:class (.getName (class e)) :message (ex-message e)}}))))
+
+(defn read-history-strict
+  "Authoritative accumulation history. Visit newest daily filenames until N
+   records are available; validate every form in each visited file, then return
+   the newest N chronologically. Indices are one-based within the failing file.
+   Unlike diagnostic read-trace, malformed forms and unknown tags never skip."
+  [n & {:keys [dir] :or {dir default-trace-dir}}]
+  (let [root (io/file dir) limit (max 0 (long n))]
+    (if-not (.isDirectory root)
+      {:status :absent :reason :trace-dir-missing :path (str root)}
+      (try
+        (let [entries (.listFiles root)]
+          (when (nil? entries) (throw (java.io.IOException. "Cannot list trace directory")))
+          (loop [files (reverse (sort-by #(.getName %)
+                                        (filter #(re-matches #"wm-trace-\d{4}-\d{2}-\d{2}\.edn"
+                                                            (.getName %)) entries)))
+                 records []]
+            (if (or (>= (count records) limit) (empty? files))
+              {:status :ok :records (vec (take-last limit records))}
+              (let [result (strict-file-records (first files))]
+                (if (= :ok (:status result))
+                  (recur (rest files) (into (:records result) records))
+                  result)))))
+        (catch Exception e
+          {:status :absent :reason :trace-read-failed :path (str root)
+           :error {:class (.getName (class e)) :message (ex-message e)}})))))
 
 (defn reduce-traces
   "Chronologically reduce the trace corpus without retaining it in memory.

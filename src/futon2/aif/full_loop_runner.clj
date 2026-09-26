@@ -730,7 +730,7 @@
                     ;; quantities. No historical checkpoints or trace lookup.
                     :decision (assoc (select-keys decision
                                                   [:selection-law :selection-certificate
-                                                   :initial-belief-receipt :enumeration-completeness :measured-a])
+                                                   :initial-belief-receipt :enumeration-completeness :measured-a :accumulation])
                                      :g-term-decomposition (decomposition/from-result result)
                                      :abstention abstention
                                      ;; the chosen plan, so a flight can read
