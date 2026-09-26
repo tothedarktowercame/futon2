@@ -15,6 +15,10 @@
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
+(defn- observed-check [class locator]
+  (let [r (checks/observe {:subject (assoc locator :class class)})]
+    (or (get-in r [:results :subject]) (get-in r [:refused :subject]))))
+
 (def ^:dynamic *dir* nil)
 (use-fixtures :each
   (fn [f]
@@ -23,7 +27,7 @@
            (finally (doseq [file (reverse (file-seq dir))] (io/delete-file file true)))))))
 (defn- path [] (str (io/file *dir* "labels.edn")))
 (defn- check-path [p]
-  (checks/check-path-exists {:repo "futon2" :sha population/pin :path p}))
+  (observed-check :C3 {:repo "futon2" :sha population/pin :path p}))
 (defn- fill! [n]
   (store/init! (path))
   (store/record! (path) (mapv check-path (concat (take n population/present-paths) population/absent-paths))

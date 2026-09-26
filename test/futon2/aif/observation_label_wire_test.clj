@@ -6,8 +6,10 @@
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.load-identity :as identity]
             [futon2.aif.observation-admission :as admission]
+            [futon2.aif.observation-checks :as checks]
             [futon2.aif.observation-labels :as labels]
             [futon2.aif.observation-label-store :as store]
+            [futon2.aif.observation-label-reader :as reader]
             [futon2.aif.observation-label-wire :as wire])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
@@ -31,46 +33,56 @@
 
 (defn- key-of [r]
   (admission/label-key ((case (:check r) :C3 labels/c3-subject :C4 labels/c4-subject)
-                       r (:mechanism-sha (labels/loaded-identities)))))
+                       r)))
 
-(deftest live-check-receipts-reach-the-store
-  (let [p (path) provenance (live-provenance) results (wire/check-results provenance)
+(deftest historical-checks-are-unwitnessed-and-fresh-dispatch-is-labelled
+  (let [p (path) provenance (live-provenance)
+        results (wire/check-results provenance)
         receipt (wire/record-declaration-reads! p provenance)
-        first-snapshot (store/snapshot p)
-        envelope (:envelope first-snapshot)
-        counts (frequencies (map key-of results))
-        by-key (into {} (map (juxt key-of identity) results))
-        verdicts (frequencies (for [[_k label] (:labels envelope)]
-                               (if (= (:recorded label) (= :present (:admitted label))) :agree :disagree)))
-        insufficient (filter #(= :refused (:last-outcome %)) (vals (:seen envelope)))]
-    (is (= 34 (count results) (:results receipt)))
-    (is (= 10 (:occurrences receipt)))
-    (is (true? (:initialized receipt)))
-    (is (= :recorded (:status receipt)))
-    (is (= (set (keys counts)) (set (keys (:seen envelope)))))
-    (is (= (:sha256 first-snapshot) (:snapshot-sha256 receipt)))
-    (doseq [[k label] (:labels envelope)]
-      (let [r (get by-key k)
-            s ((case (:check r) :C3 labels/c3-subject :C4 labels/c4-subject)
-               r (:mechanism-sha (labels/loaded-identities)))
-            adj (binding [labels/*code-sha* (:code-sha (labels/loaded-identities))]
-                  ((case (:check r) :C3 labels/c3-recompute :C4 labels/c4-recompute) s))]
-        (is (= (:observed r) (:recorded label)))
-        (is (= (:finding adj) (:admitted label)))))
-    (doseq [seen insufficient] (is (= :no-label (:last-refusal seen))))
-    (let [again (wire/record-declaration-reads! p provenance)
-          e2 (:envelope (store/snapshot p))]
-      (is (false? (:initialized again)))
-      (is (= (:labels envelope) (:labels e2)))
-      (is (= (- (count results) (:refused again)) (:skipped again)))
-      (is (zero? (:written again)))
-      ;; Five keys occur twice in this actual provenance. Store :times counts
-      ;; results, not ticks: replay doubles each key's observed multiplicity.
-      (doseq [[k n] counts]
-        (is (= (* 2 n) (get-in e2 [:seen k :times])))))
-    (println "LIVE-LABEL-WIRE" (pr-str {:results (count results) :subjects (count counts)
-                                        :receipt receipt :verdicts verdicts
-                                        :insufficient (count insufficient)}))))
+        e (:envelope (store/snapshot p))]
+    (is (= 34 (count results) (:results receipt) (:refused receipt)))
+    (is (= {:C4 28 :C3 6} (frequencies (map (comp first :key) (:refusals receipt)))))
+    (is (= 0 (:written receipt) (:labels-total receipt)))
+    (is (every? #(= :check-mechanism-unwitnessed (:kind %)) (:refusals receipt)))
+    (is (every? #(= labels/unwitnessed-mechanism (nth % 5)) (keys (:seen e))))
+    (is (= 34 (reduce + (map :times (vals (:seen e))))))
+    (is (= 29 (:seen-total receipt)))
+    (let [again (wire/record-declaration-reads! p provenance)]
+      (is (= 34 (:refused again)))
+      (is (= 68 (reduce + (map :times (vals (get-in (store/snapshot p) [:envelope :seen])))))))
+    ;; This is a NEW observation, never a backfill of the historical verdict.
+    (let [fresh (sources/provenance
+                 (mapv (fn [occurrence]
+                         (assoc occurrence :observations
+                                (checks/observe
+                                 (into {} (map (fn [[token r]]
+                                                 [token (assoc (:evidence r)
+                                                               :class (:check r)
+                                                               :sha (get-in r [:evidence :resolved-sha]))])
+                                               (get-in occurrence [:observations :results]))))))
+                       (:occurrences provenance)))
+          checks (wire/check-results fresh)
+          r (wire/record-declaration-reads! p fresh)
+          envelope (:envelope (store/snapshot p))
+          by-key (into {} (map (juxt key-of identity) checks))]
+      (is (= {:C4 28 :C3 6} (frequencies (map :check checks))))
+      (is (= 29 (:written r) (:labels-total r)))
+      (is (= 5 (:skipped r)))
+      (is (= 0 (:refused r)))
+      (doseq [[k label] (:labels envelope)]
+        (is (= (:observed (get by-key k)) (:recorded label)))
+        (is (= (:check-mechanism (get by-key k)) (nth k 5))))
+      (let [view (reader/read-rates-inputs p (labels/loaded-identities))]
+        (is (not (:status view)))
+        (is (every? #(contains? #{:one-cell-unobserved :below-minimum} (:excluded %))
+                    (:excluded view)))
+        (println "C6-LIVE-READER" (select-keys view [:subjects :excluded])))
+      (let [again (wire/record-declaration-reads! p fresh)]
+        (is (= 34 (:skipped again))))
+      (println "C6-LIVE-PIN" {:historical-refused (:refused receipt)
+                               :historical-subjects (:seen-total receipt)
+                               :fresh-results (frequencies (map :check checks))
+                               :written (:written r) :skipped (:skipped r)}))))
 
 (deftest unsupported-and-refused-checks-are-counted-not-labelled
   (let [provenance (sources/provenance

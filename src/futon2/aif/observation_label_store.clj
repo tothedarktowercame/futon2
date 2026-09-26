@@ -26,11 +26,18 @@
 (defn- timestamp? [s]
   (and (string? s) (try (Instant/parse s) true (catch Exception _ false))))
 
-(defn- label-key? [k]
+(defn- located-key? [k]
   (and (vector? k) (= 6 (count k)) (contains? #{:C3 :C4} (first k))
        (every? #(and (string? %) (not (str/blank? %)))
-               (map #(nth k %) [1 2 3 5]))
+               (map #(nth k %) [1 2 3]))
        (if (= :C3 (first k)) (nil? (nth k 4)) (string? (nth k 4)))))
+
+(defn- label-key? [k]
+  (and (located-key? k) (string? (nth k 5)) (not (str/blank? (nth k 5)))))
+
+(defn- unwitnessed-key? [k]
+  ;; Absence is a seen-only identity, never an admitted label mechanism.
+  (and (located-key? k) (= labels/unwitnessed-mechanism (nth k 5))))
 
 (defn- envelope? [e]
   (and (map? e) (= schema (:schema e)) (map? (:labels e)) (map? (:seen e))
@@ -43,7 +50,11 @@
                       (= :admitted (get-in v [:admission :status]))
                       (contains? (:seen e) k))) (:labels e))
        (every? (fn [[k v]]
-                 (and (label-key? k) (map? v)
+                 (and (or (label-key? k)
+                          (and (unwitnessed-key? k)
+                               (= :refused (:last-outcome v))
+                               (= :check-mechanism-unwitnessed (:last-refusal v))))
+                      (map? v)
                       (timestamp? (:first-seen v)) (timestamp? (:last-seen v))
                       (pos-int? (:times v))
                       (contains? #{:written :skipped :refused} (:last-outcome v))

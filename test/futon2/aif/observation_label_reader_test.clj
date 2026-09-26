@@ -3,12 +3,19 @@
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.observation-checks :as checks]
+            [futon2.aif.load-identity :as identity]
+            [clojure.java.shell :as sh]
+            [clojure.string :as str]
             [futon2.aif.observation-labels :as labels]
             [futon2.aif.observation-label-store :as store]
             [futon2.aif.observation-label-reader :as reader]
             [futon2.aif.observation-rates :as rates])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
+
+(defn- observed-check [class locator]
+  (let [r (checks/observe {:subject (assoc locator :class class)})]
+    (or (get-in r [:results :subject]) (get-in r [:refused :subject]))))
 
 (def pin "3fabf0260c056c5bd09755a288cfe179b349e83b")
 (def present-paths ["README.md" "deps.edn" "src/futon2/aif/observation_admission.clj"
@@ -23,7 +30,7 @@
       (try (binding [*dir* dir] (f))
            (finally (doseq [file (reverse (file-seq dir))] (io/delete-file file true)))))))
 (defn- path [] (io/file *dir* "labels.edn"))
-(defn- check-path [p] (checks/check-path-exists {:repo "futon2" :sha pin :path p}))
+(defn- check-path [p] (observed-check :C3 {:repo "futon2" :sha pin :path p}))
 (defn- population [present absent]
   (mapv check-path (concat (take present present-paths) (take absent absent-paths))))
 (defn- fill! [present absent]
@@ -74,16 +81,25 @@
 
 (deftest mechanisms-are-separate-populations
   (let [ids (fill! 5 5)
-        ;; A suffix collision must not mix distinct identities.
-        other (assoc ids :mechanism-sha (str "previous-" (:mechanism-sha ids)))]
-    (is (= 10 (:written (store/record! (path) (population 5 5) other {}))))
-    (doseq [active [ids other]]
-      (let [inputs (reader/read-rates-inputs (path) active)]
-        (is (= 10 (count (:labels inputs))))
-        (is (= {:C3 10} (:subjects inputs)))
-        (is (= [{:class :C3 :excluded :obsolete-mechanism :counts {:labels 10}}] (:excluded inputs)))
-        (is (every? #(= (str "C3/cat-file-e@" (:mechanism-sha active)) (nth (:label-key %) 5))
-                    (:labels inputs)))))))
+        n 'futon2.aif.observation-checks saved (get @identity/registry n)]
+    (try
+      ;; Simulate the replacement source registration. Both checks still use
+      ;; real git and independent admission; no verdict or admission stub.
+      (swap! identity/registry assoc-in [n :sha256] (apply str (repeat 64 "0")))
+      (let [active (labels/loaded-identities)
+            before (reader/read-rates-inputs (path) active)]
+        (is (empty? (:labels before)))
+        (is (= [{:class :C3 :excluded :obsolete-mechanism :counts {:labels 10}}] (:excluded before)))
+        (is (= :absent (get-in (source before) [:measurement :target])))
+        (is (= 10 (:written (store/record! (path) (population 5 5) active {}))))
+        (let [after (reader/read-rates-inputs (path) active)]
+          (is (= 10 (count (:labels after))))
+          (is (= {:C3 10} (:subjects after)))
+          (is (= {:false-neg 1/12 :false-pos 1/12} (get-in (source after) [:rates :target])))))
+      (finally (swap! identity/registry assoc n saved)))
+    (let [inputs (reader/read-rates-inputs (path) ids)]
+      (is (= 10 (count (:labels inputs))))
+      (is (= [{:class :C3 :excluded :obsolete-mechanism :counts {:labels 10}}] (:excluded inputs))))))
 
 (deftest refused-subjects-count-towards-coverage
   (let [ids (fill! 5 5) recompute labels/c3-recompute]
@@ -129,3 +145,35 @@
                (:excluded inputs)))
         (is (= [] (:labels inputs)))
         (is (= {} (:subjects inputs)))))))
+
+(deftest another-class-mechanism-cannot-measure-c4
+  (let [ids (fill! 5 5) snapshot (store/snapshot (path))
+        envelope (:envelope snapshot)
+        rekey (fn [k] (assoc k 0 :C4 4 "(defn synthetic"))
+        synthetic (-> envelope
+                      (update :labels #(into {} (map (fn [[k r]]
+                                                       [(rekey k) (assoc r :token-class :C4 :label-key (rekey k))]) %)))
+                      (update :seen #(into {} (map (fn [[k r]] [(rekey k) r]) %))))
+        ;; Explicitly synthetic envelope, not a claim that admission emitted it.
+        _ (spit (path) (pr-str synthetic))
+        read-back (store/snapshot (path))
+        old-source (sh/sh "git" "show"
+                          "58a0b8e8c998f584f2b074da32bbe9a48a8ebd3e:src/futon2/aif/observation_label_reader.clj")
+        _ (is (zero? (:exit old-source)))
+        _ (load-string (str/replace (:out old-source)
+                                   "(ns futon2.aif.observation-label-reader"
+                                   "(ns futon2.aif.c6-pinned-suffix-reader"))
+        old ((ns-resolve 'futon2.aif.c6-pinned-suffix-reader 'rates-inputs) read-back ids)
+        fixed (reader/rates-inputs read-back ids)
+        source-c4 (fn [inputs]
+                    (rates/sourced-rates (:labels inputs) (:subjects inputs) (:prior inputs)
+                                        {:target {:class :C4}} contract))]
+    (is (= {:false-neg 1/12 :false-pos 1/12} (get-in (source-c4 old) [:rates :target])))
+    (is (= [{:class :C4 :excluded :mechanism-mismatch :counts {:labels 10}
+             :mechanism (str "C3/cat-file-e@" (:mechanism-sha ids))}] (:excluded fixed)))
+    (is (= [] (:labels fixed)))
+    (is (= {} (:subjects fixed)))
+    (is (= :absent (get-in (source-c4 fixed) [:measurement :target])))
+    (is (not= (get-in (source-c4 old) [:rates :target])
+              (get-in (source-c4 fixed) [:rates :target])))
+    (println "C6-COUNTEREXAMPLE" {:old (source-c4 old) :fixed (source-c4 fixed)})))

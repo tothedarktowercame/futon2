@@ -564,3 +564,20 @@
   (testing "the checks answer with the same refusal before reading anything"
     (is (= (oc/locator-refusal {:class :C4 :repo "r" :sha "HEAD" :path "p"})
            (oc/check-decl-in-file {:repo "r" :sha "HEAD" :path "p"})))))
+
+(deftest dispatch-stamps-the-loaded-check-descriptor
+  (is (= #{:C3 :C4 :C5 :C6 :C8}
+         (set (keys oc/checks)) (set (keys oc/check-mechanisms))))
+  (let [base {:repo "futon2" :sha "3fabf0260c056c5bd09755a288cfe179b349e83b"
+              :path "src/futon2/aif/observation_admission.clj"}
+        result (oc/observe {:path (assoc base :class :C3)
+                            :decl (assoc base :class :C4 :decl "(defn label-record")
+                            :bad (assoc base :class :C4 :sha "no-such-c6-pin" :decl "(defn label-record")})]
+    (doseq [r (concat (vals (:results result)) (vals (:refused result)))]
+      (let [d (oc/loaded-check (:check r))]
+        (is (identical? (:fn d) (get oc/checks (:check r))))
+        (is (= (:check-mechanism-name r) (:mechanism-name d)))
+        (is (= (:check-mechanism r) (str (:mechanism-name d) "@" (:mechanism-sha d))))))
+    (is (= :unknown-sha (get-in result [:refused :bad :kind]))))
+  (with-redefs [oc/check-mechanisms (dissoc oc/check-mechanisms :C4)]
+    (is (= :check-descriptor-mismatch (:kind (oc/loaded-check :C4))))))

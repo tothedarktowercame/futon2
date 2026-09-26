@@ -7,17 +7,20 @@
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.observation-labels :as labels]))
 
+(defn- observed-check [class locator]
+  (let [r (checks/observe {:subject (assoc locator :class class)})]
+    (or (get-in r [:results :subject]) (get-in r [:refused :subject]))))
+
 (def pin "3fabf0260c056c5bd09755a288cfe179b349e83b")
 (def locator {:repo "futon2" :sha pin
               :path "src/futon2/aif/observation_admission.clj"
               :decl "(defn label-record"})
 (def opts
   ;; The writer's code identity is an explicit input, not an inferred HEAD.
-  ;; This identity names the mechanism under test; production supplies the
-  ;; commit introducing observation_labels.clj (reported with this packet).
+  ;; The check stamp names its dispatch; this placeholder names the observer.
   {:mechanism-sha pin :code-sha "writer-under-test"})
 
-(defn- real-check [] (checks/check-decl-in-file locator))
+(defn- real-check [] (observed-check :C4 locator))
 
 (defn- one-label [result]
   (is (= 1 (count (:written result))))
@@ -27,7 +30,7 @@
 
 (deftest real-c4-result-is-admitted-with-both-verdicts
   (let [check (real-check)
-        subject (labels/c4-subject check pin)
+        subject (labels/c4-subject check)
         label (one-label (labels/write-labels [check] {} opts))]
     (is (= :C4 (:check check) (:token-class subject) (:token-class label)))
     (is (= [(:evidence check)] (:evidence-pointers subject)))
@@ -43,7 +46,7 @@
   ;; The file has `(defn label-record`, not a line starting `defn label-record`.
   ;; Splitting on opening '(' makes these the same leading token sequence;
   ;; the literal regex refuses the latter declaration head.
-  (let [check (checks/check-decl-in-file (assoc locator :decl "defn label-record"))
+  (let [check (observed-check :C4 (assoc locator :decl "defn label-record"))
         label (one-label (labels/write-labels [check] {} opts))]
     (is (false? (:observed check)))
     (is (false? (:recorded label)))
@@ -51,16 +54,16 @@
     (is (= false (get-in label [:admission :recorded-verdict])))))
 
 (deftest recomputation-is-blind-and-absence-is-not-an-io-failure
-  (let [subject (labels/c4-subject (real-check) pin)]
+  (let [subject (labels/c4-subject (real-check))]
     (binding [labels/*code-sha* (:code-sha opts)]
       (is (= (labels/c4-recompute subject)
              (labels/c4-recompute (assoc subject :recorded-verdict false
                                         :author "hidden-author" :enactor "hidden-enactor"))))))
-  (let [check (checks/check-decl-in-file (assoc locator :decl "(defn no-such-label-declaration"))
+  (let [check (observed-check :C4 (assoc locator :decl "(defn no-such-label-declaration"))
         label (one-label (labels/write-labels [check] {} opts))]
     (is (= :absent (:admitted label)))
     (is (false? (:recorded label))))
-  (let [check (checks/check-decl-in-file (assoc locator :path "no-such-c4-file.clj"))
+  (let [check (observed-check :C4 (assoc locator :path "no-such-c4-file.clj"))
         result (labels/write-labels [check] {} opts)]
     (is (false? (:observed check)))
     (is (empty? (:store result)))
@@ -80,7 +83,7 @@
         subject labels/c4-subject
         review admission/mechanical-review]
     (doseq [[falsifier corrupt kind reason]
-            [[:self-truthed #(assoc % :observer (str "C4/decl-present?@" pin))
+            [[:self-truthed #(assoc % :observer (:check-mechanism check))
               :review-not-concur :self-truthed]
              [:cutoff-mismatch #(assoc % :cutoff {:repo "futon2" :sha "another-cutoff"})
               :review-not-concur :cutoff-mismatch]
@@ -95,7 +98,7 @@
       (with-redefs [admission/mechanical-review (fn [_ s a] (review nil s a))]
         (refused (labels/write-labels [check] {} opts) :reviewer-missing nil)))
     (testing "authorship-undeclared"
-      (with-redefs [labels/c4-subject (fn [c sha] (dissoc (subject c sha) :author))]
+      (with-redefs [labels/c4-subject (fn [c] (dissoc (subject c) :author))]
         (refused (labels/write-labels [check] {} opts) :authorship-undeclared nil)))))
 
 (deftest one-label-per-subject-and-check-mechanism
@@ -103,12 +106,17 @@
         once (labels/write-labels [check check] {} opts)
         label (one-label once)
         again (labels/write-labels [check] (:store once) opts)
-        changed (labels/write-labels [check] (:store once)
-                                     (assoc opts :mechanism-sha
-                                            "b3c4dddaed624c1a62cecc01831a8d3664e71323"))]
+        ;; A synthetic replacement stamp tests key identity; opts cannot rename it.
+        changed (labels/write-labels
+                 [(assoc check :check-mechanism
+                         (str (:check-mechanism-name check) "@replacement-identity"))]
+                 (:store once) opts)]
     (is (= [{:key (:label-key label) :already-labelled true}] (:skipped once)))
     (is (= (:skipped once) (:skipped again)))
     (is (= (:store once) (:store again)))
+    (is (= (:store again)
+           (:store (labels/write-labels [check] (:store once)
+                                        (assoc opts :mechanism-sha "cannot-rename-a-stamp")))))
     (is (empty? (:written again)))
     (is (= 2 (count (:store changed))))
     (is (= 1 (count (:written changed))))
@@ -138,8 +146,8 @@
         (doseq [file [first-path second-path dir]] (io/delete-file file true))))))
 
 (deftest c3-real-path-carries-both-verdicts
-  (let [check (checks/check-path-exists (dissoc locator :decl))
-        subject (labels/c3-subject check pin)
+  (let [check (observed-check :C3 (dissoc locator :decl))
+        subject (labels/c3-subject check)
         label (one-label (labels/write-labels [check] {} opts))]
     (is (= :C3 (:token-class label)))
     (is (= [(:evidence check)] (:evidence-pointers subject)))
@@ -151,7 +159,7 @@
     (is (= "mechanical-review@writer-under-test" (get-in label [:admission :reviewer])))))
 
 (deftest c3-real-absent-path-is-a-label
-  (let [check (checks/check-path-exists
+  (let [check (observed-check :C3
                (assoc (dissoc locator :decl) :path "no-such-c3-path.clj"))
         label (one-label (labels/write-labels [check] {} opts))]
     (is (= false (:observed check) (:recorded label)))
@@ -162,26 +170,26 @@
   ;; Both cat-file calls succeed, but only the first listing has an exact
   ;; path match. A prefix-based observer would wrongly label src/ present.
   (doseq [[path finding] [["src" :present] ["src/" :absent]]]
-    (let [check (checks/check-path-exists (assoc (dissoc locator :decl) :path path))
+    (let [check (observed-check :C3 (assoc (dissoc locator :decl) :path path))
           label (one-label (labels/write-labels [check] {} opts))]
       (is (= true (:observed check) (:recorded label)))
       (is (= finding (:admitted label)) path))))
 
 (deftest c3-unreadable-evidence-never-becomes-an-absent-label
-  (let [check (checks/check-path-exists
+  (let [check (observed-check :C3
                (assoc (dissoc locator :decl) :sha "no-such-c3-commit"))
         result (labels/write-labels [check] {} opts)]
     (is (= :unknown-sha (:kind check)))
     (is (= [check] (:refused result)))
     (is (empty? (:store result)))
     (is (empty? (:written result))))
-  (let [check (checks/check-path-exists (dissoc locator :decl))
+  (let [check (observed-check :C3 (dissoc locator :decl))
         make-subject labels/c3-subject]
     ;; Preserve the real check and construct an unreadable evidence subject.
     ;; ls-tree really runs and fails; review and admission are not stubbed.
     (with-redefs [labels/c3-subject
-                  (fn [c sha]
-                    (-> (make-subject c sha)
+                  (fn [c]
+                    (-> (make-subject c)
                         (assoc-in [:evidence-pointers 0 :repo] "no-such-c3-repository")
                         (assoc-in [:check-cutoff :repo] "no-such-c3-repository")))]
       (let [result (labels/write-labels [check] {} opts)]
@@ -190,7 +198,7 @@
 
 (deftest c3-and-c4-at-one-path-have-distinct-keys
   (let [result (labels/write-labels
-                [(checks/check-path-exists (dissoc locator :decl)) (real-check)] {} opts)
+                [(observed-check :C3 (dissoc locator :decl)) (real-check)] {} opts)
         records (:written result)]
     (is (empty? (:refused result)))
     (is (= 2 (count (:store result)) (count records)))
@@ -199,8 +207,8 @@
     (is (= 2 (count (set (map :label-key records)))))))
 
 (deftest c3-self-truthed-stores-nothing
-  (let [check (checks/check-path-exists (dissoc locator :decl))
+  (let [check (observed-check :C3 (dissoc locator :decl))
         recompute labels/c3-recompute]
     (with-redefs [labels/c3-recompute
-                  (fn [s] (assoc (recompute s) :observer (str "C3/cat-file-e@" pin)))]
+                  (fn [s] (assoc (recompute s) :observer (:check-mechanism s)))]
       (refused (labels/write-labels [check] {} opts) :review-not-concur :self-truthed))))

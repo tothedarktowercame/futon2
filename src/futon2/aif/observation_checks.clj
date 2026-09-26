@@ -9,7 +9,7 @@
   These observe exactly the fact each check defines: that a path exists, that
   a declaration head is present in a file, or that a contract entry exists
   with a clojure locus. A true result is not evidence that the artifact is
-  correct. Under P5 these channels have zero adjudication rates by construction
+  correct. Under P5 these channels have zero adjudication rates as an unmeasured default
   (TokenObservation.tokenLikelihood_checkable). Any claim needing judgement is
   class J, which has no measured rate and is refused at assembly.
 
@@ -555,11 +555,41 @@
    :C6 check-witness-reference
    :C8 check-registered-run})
 
+(def check-mechanisms
+  "Names of the deciding mechanisms, paired with the flight dispatch."
+  {:C3 "C3/cat-file-e" :C4 "C4/decl-present?"
+   :C5 "C5/check-registry-entry" :C6 "C6/check-witness-reference"
+   :C8 "C8/check-registered-run"})
+
+(when-not (= (set (keys checks)) (set (keys check-mechanisms)))
+  (throw (ex-info "Check dispatch and mechanism names differ"
+                  {:status :missing :kind :check-descriptor-mismatch})))
+
+(defn loaded-check
+  "Capture the function, name and registered source identity at dispatch.
+   No disk or HEAD lookup; unavailable identities are typed refusals."
+  [class]
+  (let [f (get checks class) n (get check-mechanisms class)
+        entry (get @load-identity/registry 'futon2.aif.observation-checks)]
+    (cond
+      (and (nil? f) (nil? n)) (refuse :no-mechanical-check {:class class})
+      (not (and f n)) (refuse :check-descriptor-mismatch {:class class})
+      (not (and (= :captured (:status entry)) (string? (:sha256 entry))
+                (re-matches #"[0-9a-f]{64}" (:sha256 entry))))
+      {:status :missing :kind :code-identity-unregistered
+       :namespace 'futon2.aif.observation-checks}
+      :else {:class class :fn f :mechanism-name n
+             :mechanism-sha (str "sha256:" (:sha256 entry))})))
+
 (defn- observe* [tokens]
   (reduce-kv
    (fn [acc token {:keys [class] :as locator}]
-     (let [f (get checks class)
-           r (if f (f locator) (refuse :no-mechanical-check {:class class}))]
+     (let [{:keys [mechanism-name mechanism-sha] :as descriptor} (loaded-check class)
+           r (if (:status descriptor) descriptor
+                 (assoc ((:fn descriptor) locator)
+                        :check class
+                        :check-mechanism-name mechanism-name
+                        :check-mechanism (str mechanism-name "@" mechanism-sha)))]
        (if (contains? r :status)
          (assoc-in acc [:refused token] r)
          (cond-> (assoc-in acc [:results token] r)

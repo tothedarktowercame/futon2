@@ -8,12 +8,16 @@
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute PosixFilePermissions]))
 
+(defn- observed-check [class locator]
+  (let [r (checks/observe {:subject (assoc locator :class class)})]
+    (or (get-in r [:results :subject]) (get-in r [:refused :subject]))))
+
 (def pin "3fabf0260c056c5bd09755a288cfe179b349e83b")
 (def locator {:repo "futon2" :sha pin :path "src/futon2/aif/observation_admission.clj"})
 (def ^:dynamic *dir* nil)
 (defn- path [] (io/file *dir* "labels.edn"))
-(defn- c3 [] (checks/check-path-exists locator))
-(defn- c4 [] (checks/check-decl-in-file (assoc locator :decl "(defn label-record")))
+(defn- c3 [] (observed-check :C3 locator))
+(defn- c4 [] (observed-check :C4 (assoc locator :decl "(defn label-record")))
 (defn- failure [f]
   (try (f) nil (catch clojure.lang.ExceptionInfo e (ex-data e))))
 (defn- file-bytes [p] (vec (Files/readAllBytes (.toPath (io/file p)))))
@@ -64,7 +68,7 @@
   (let [p (path) ids (labels/loaded-identities) check (c3)]
     (store/init! p)
     (store/record! p [check] ids {})
-    (let [r (store/record! p [check] (assoc ids :mechanism-sha (str "sha256:" (apply str (repeat 64 "0")))) {})]
+    (let [r (store/record! p [(assoc check :check-mechanism (str (:check-mechanism-name check) "@replacement-identity"))] ids {})]
       (is (= 1 (:written r)))
       (is (= 2 (:labels-total r) (:seen-total r)))
       (is (= 2 (count (get-in (store/snapshot p) [:envelope :labels])))))))
@@ -128,3 +132,29 @@
           (is (= :code-identity-unregistered (:kind (labels/loaded-identities))))
           (finally (swap! identity/registry assoc n saved)))))
     (println "Loaded observation identities:" (pr-str ids))))
+
+(deftest unwitnessed-check-is-seen-with-absence-never-a-label
+  (let [p (path) ids (labels/loaded-identities)
+        check (checks/check-path-exists locator)]
+    (store/init! p)
+    (let [r (store/record! p [check] ids {})
+          e (:envelope (store/snapshot p))]
+      (is (= 1 (:refused r) (:seen-total r)))
+      (is (= :check-mechanism-unwitnessed (get-in r [:refusals 0 :kind])))
+      (is (= labels/unwitnessed-mechanism (nth (first (keys (:seen e))) 5)))
+      (is (empty? (:labels e)))
+      ;; A seen-only absence must never pass the admitted-label schema.
+      (let [k (first (keys (:seen e)))]
+        (spit p (pr-str (assoc-in e [:labels k]
+                                 {:label-key k :token-class :C3 :recorded true :admitted :present
+                                  :admission {:status :admitted}})))
+        (is (= :invalid-label-store (:kind (failure #(store/snapshot p)))))))))
+
+(deftest writer-refuses-a-class-mechanism-mismatch
+  (let [p (path) ids (labels/loaded-identities)
+        wrong (assoc (c4) :check-mechanism (:check-mechanism (c3)))]
+    (store/init! p)
+    (let [r (store/record! p [wrong] ids {})]
+      (is (= 1 (:refused r) (:seen-total r)))
+      (is (= :class-mechanism-mismatch (get-in r [:refusals 0 :kind])))
+      (is (empty? (get-in (store/snapshot p) [:envelope :labels]))))))

@@ -41,21 +41,38 @@
                     {:status :missing :kind :code-identity-missing :field field})))
   value)
 
+(def unwitnessed-mechanism {:absent :check-mechanism-unwitnessed})
+
+(defn- check-subject [check-result]
+  (let [{:keys [repo resolved-sha] :as evidence} (:evidence check-result)
+        c (:check check-result)
+        mechanism (:check-mechanism check-result)
+        descriptor (checks/loaded-check c)
+        subject {:token (:token check-result) :token-class c
+                 :evidence-pointers [evidence]
+                 :check-mechanism (or mechanism unwitnessed-mechanism)
+                 :check-cutoff {:repo repo :sha resolved-sha}
+                 :recorded-verdict (:observed check-result)
+                 :author :none :enactor :none}
+        key (admission/label-key subject)
+        name-part (when (string? mechanism) (first (str/split mechanism #"@" 2)))
+        kind (cond
+               (nil? mechanism) :check-mechanism-unwitnessed
+               (:status descriptor) (:kind descriptor)
+               (or (not= name-part (:mechanism-name descriptor))
+                   (not (and (string? mechanism)
+                             (re-matches #"[^@]+@[^@]+" mechanism)))
+                   (and (:check-mechanism-name check-result)
+                        (not= name-part (:check-mechanism-name check-result))))
+               :class-mechanism-mismatch)]
+    (if kind
+      (throw (ex-info (name kind) {:status :missing :kind kind :reason (name kind) :key key :check c}))
+      subject)))
+
 (defn c4-subject
-  "Adapt a tick-time check-decl-in-file result. :check carries the class id;
-   the first evidence pointer remains the check's verbatim locator. The cutoff
-   uses admission's {:repo repo :sha resolved-sha} shape. This constructor
-   explicitly declares the tick-time author and enactor absent."
-  [check-result mechanism-sha]
-  (required-identity mechanism-sha :mechanism-sha)
-  (let [{:keys [repo resolved-sha] :as evidence} (:evidence check-result)]
-    {:token (:token check-result)
-     :token-class (:check check-result)
-     :evidence-pointers [evidence]
-     :check-mechanism (str "C4/decl-present?@" mechanism-sha)
-     :check-cutoff {:repo repo :sha resolved-sha}
-     :recorded-verdict (:observed check-result)
-     :author :none :enactor :none}))
+  "Copy the dispatch stamp and evidence; never rename a historical check."
+  [check-result]
+  (check-subject check-result))
 
 (defn- tokens [line]
   (vec (remove str/blank? (str/split (str/trim line) #"[\s:({\[]+"))))
@@ -86,18 +103,9 @@
     (admission/adjudication observer view finding {:repo repo :sha resolved-sha})))
 
 (defn c3-subject
-  "Adapt a tick-time check-path-exists result, preserving its evidence pointer
-   verbatim. C3 identifies a path, so label-key's declaration slot is nil."
-  [check-result mechanism-sha]
-  (required-identity mechanism-sha :mechanism-sha)
-  (let [{:keys [repo resolved-sha] :as evidence} (:evidence check-result)]
-    {:token (:token check-result)
-     :token-class :C3
-     :evidence-pointers [evidence]
-     :check-mechanism (str "C3/cat-file-e@" mechanism-sha)
-     :check-cutoff {:repo repo :sha resolved-sha}
-     :recorded-verdict (:observed check-result)
-     :author :none :enactor :none}))
+  "Copy the dispatch stamp; C3 evidence has no declaration slot."
+  [check-result]
+  (check-subject check-result))
 
 (defn c3-recompute
   "Read only observer-view and independently list the resolved tree. Presence
@@ -126,13 +134,13 @@
 (defn write-labels
   "CHECK-RESULTS is a sequence of C3/C4 results (optionally carrying :token).
    STORE maps admission/label-key to admission/label-record. OPTS requires
-   :mechanism-sha (the check's code identity) and :code-sha (this namespace's
-   code identity): load-identity source digests sha256:<hex>, or commits when
+   :code-sha (this namespace's code identity). Check identity is copied from
+   each result's dispatch stamp, never from opts. Code identities are
+   load-identity source digests sha256:<hex>, or commits when
    the caller holds verified ones. Repeated keys skip recomputation and add no label. Admission
    refusals are returned verbatim with :key; upstream check refusals pass
    through without being reinterpreted as observations. No store IO."
-  [check-results store {:keys [mechanism-sha code-sha]}]
-  (required-identity mechanism-sha :mechanism-sha)
+  [check-results store {:keys [code-sha]}]
   (required-identity code-sha :code-sha)
   (binding [*code-sha* code-sha]
     (reduce
@@ -143,20 +151,23 @@
          (update acc :refused conj {:status :missing :kind :unsupported-check
                                    :data {:check (:check check-result)}})
          :else
-         (let [[make-subject recompute] (case (:check check-result)
-                                          :C3 [c3-subject c3-recompute]
-                                          :C4 [c4-subject c4-recompute])
-               subject (make-subject check-result mechanism-sha)
-               key (admission/label-key subject)]
-           (if (contains? (:store acc) key)
-             (update acc :skipped conj {:key key :already-labelled true})
-             (let [adjudication (recompute subject)
-                   review (admission/mechanical-review
-                           (str "mechanical-review@" code-sha) subject adjudication)
-                   admitted (admission/admit subject adjudication review)]
-               (if-let [record (admission/label-record subject admitted)]
-                 (-> acc (assoc-in [:store key] record) (update :written conj record))
-                 (update acc :refused conj (assoc admitted :key key))))))))
+         (try
+           (let [[make-subject recompute] (case (:check check-result)
+                                            :C3 [c3-subject c3-recompute]
+                                            :C4 [c4-subject c4-recompute])
+                 subject (make-subject check-result)
+                 key (admission/label-key subject)]
+             (if (contains? (:store acc) key)
+               (update acc :skipped conj {:key key :already-labelled true})
+               (let [adjudication (recompute subject)
+                     review (admission/mechanical-review
+                             (str "mechanical-review@" code-sha) subject adjudication)
+                     admitted (admission/admit subject adjudication review)]
+                 (if-let [record (admission/label-record subject admitted)]
+                   (-> acc (assoc-in [:store key] record) (update :written conj record))
+                   (update acc :refused conj (assoc admitted :key key))))))
+           (catch clojure.lang.ExceptionInfo e
+             (update acc :refused conj (ex-data e))))))
      {:store store :written [] :skipped [] :refused []}
      check-results)))
 
