@@ -25,8 +25,9 @@
            (is (= :not-supplied (:f-status c)))
            (is (nil? (:f c)))
            (is (= (:id c) (get-in c [:f-prefix :policy])))
-           (is (= :no-admitted-policy-prefix (get-in c [:f-prefix :reason])))
-           (is (= :d-conditioning-consumption-and-policy-prefix-admission
-                  (get-in c [:f-prefix :pending-dependency]))))
+           ;; F1c-I: admission ran and found no flight records; that is the
+           ;; typed absence, and no dependency is pending
+           (is (= :no-flight-records (get-in c [:f-prefix :reason])))
+           (is (nil? (get-in c [:f-prefix :pending-dependency]))))
          (println "H4-PRODUCTION-DECISION-TEMP-STORES-NO-CLICK"
                   (pr-str (mapv #(select-keys % [:id :f :f-status :f-prefix]) cs))))))))

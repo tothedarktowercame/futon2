@@ -142,7 +142,10 @@
    V3 replays signed observation updates. External snapshot origin is checked
    by the production reader, not by this retained-receipt replay."
   [receipt stage]
-  (let [inspection (:inspection receipt)
+  ;; :policy-prefixes (F1b-admit-I) is the per-candidate prefix record the tick
+  ;; writes beside the receipt; it is not part of the receipt being replayed
+  (let [receipt (dissoc receipt :policy-prefixes)
+        inspection (:inspection receipt)
         candidates (:candidates inspection)]
     (and (= :previous-trace-only (:scope inspection))
          (= candidate-paths (mapv :path candidates))

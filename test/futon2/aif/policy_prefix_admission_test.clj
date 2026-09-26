@@ -79,7 +79,7 @@
       (is (= :admitted (:conditioning-status r)))
       (is (= 2 (count (:observation-updates r)))))))
 
-(deftest the-tick-records-the-prefix-and-its-score-is-unchanged
+(deftest the-tick-records-the-prefix
   (let [assemble* @#'cdt/assemble*
         assembled (assemble* {:targets [cdt/tick-1-target] :sources cdt/tick-1-sources})
         base (:decision (wm/cascade-decision assembled cdt/live-c-opts))
@@ -94,9 +94,9 @@
       (is (= :no-flight-records
              (get-in base [:selection-certificate :token-belief-input :policy-prefixes chosen :conditioning-status]))
           "no flight steps in opts: the typed absence"))
-    (testing "the score is unchanged (F1c-I consumes the prefix, this packet does not)"
-      (is (= (pr-str (get-in base [:selection-law :posterior])) (pr-str (get-in with [:selection-law :posterior]))))
-      (is (= (pr-str (:action base)) (pr-str (:action with))))
+    ;; the posterior now moves with the prefix's F: F1c-I's tests
+    ;; (policy-prefix-f-test) assert how
+    (testing "the rest of the token-belief input is untouched"
       (is (= (dissoc (get-in base [:selection-certificate :token-belief-input]) :policy-prefixes)
              (dissoc (get-in with [:selection-certificate :token-belief-input]) :policy-prefixes))
           "the rest of the token-belief input, top-level :observation-updates included, is untouched"))))

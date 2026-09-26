@@ -112,10 +112,10 @@
           (doseq [p policies]
             (is (= :not-supplied (:f-status p)))
             (is (nil? (:f p)))
-            (is (= :no-admitted-policy-prefix (:reason p)))
+            ;; F1c-I: the admission's reason; no dependency is pending
+            (is (= :no-flight-records (:reason p)))
             (is (= (:id p) (get-in p [:f-prefix :policy])))
-            (is (= :d-conditioning-consumption-and-policy-prefix-admission
-                   (get-in p [:f-prefix :pending-dependency]))))
+            (is (nil? (get-in p [:f-prefix :pending-dependency]))))
           (is (= :missing (:status census)))
           (is (= (set (map :id policies)) (set (map :id (:policies census)))))
           (doseq [p (:policies census)]
