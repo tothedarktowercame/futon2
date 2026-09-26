@@ -3089,20 +3089,13 @@
   (sorry :no-selection {:judge-refusal jr}))
 
 (defn- judge-refusal-abstention
-  "The exception a judge-refused tick closes on: :outcome :abstained, which
+  "The exception a refused tick closes on: :outcome :abstained, which
   explicit-failure-kind reads (the judge's own throw carries only :kind, so
-  before 321d82c8 the refusal closed :untyped-failure), with the refusal and
-  the judge's exception as cause."
+  before 321d82c8 the refusal closed :untyped-failure; the decision gate's
+  likewise, before WM-GATE-REFUSAL-I), with the refusal and the refusing
+  exception as cause."
   [jr e]
-  (ex-info "War Machine abstained: cascade decision refused"
-           {:outcome :abstained :judge-refusal jr} e))
-
-(defn- gate-refusal-abstention
-  "The exception a gate-refused tick closes on: :outcome :abstained, which
-  explicit-failure-kind reads (the gate's own throw carries only :error),
-  with the refusal and the gate's exception as cause."
-  [jr e]
-  (ex-info "War Machine abstained: decision gate refused"
+  (ex-info (str "War Machine abstained: " (ex-message e))
            {:outcome :abstained :judge-refusal jr} e))
 
 (defn- outcome-from [e]
@@ -4703,9 +4696,7 @@
                     (let [cell (judge-refusal-sorry r)]
                       (reset! pending-selection cell)
                       (swap! checkpoints assoc :selection cell)
-                      (throw (if jr
-                               (judge-refusal-abstention jr e)
-                               (gate-refusal-abstention gr e))))
+                      (throw (judge-refusal-abstention r e)))
                     (throw e)))))
             judgement0 judgement0-base
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
