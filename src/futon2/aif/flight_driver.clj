@@ -70,16 +70,19 @@
   is recorded as {:hand-target-overridden t}, not dropped. Otherwise the
   --target: {:target t :target-source :hand-placed}. A :field-entry (the
   target field's entry for the target) is carried beside it as given:
-  eligibility is the field's, not filtered here. Neither is the driver's
+  eligibility is the field's, not filtered here. So is a :selection (the outer
+  cascade's record of the choice: posterior, draw, excluded; H-T-CALLER-I), on a
+  chosen target only. Neither is the driver's
   missing-target refusal, the same ex-info check-args! has always thrown
   ({:missing :target}), never a nil target."
-  [{:keys [target chosen-target draw-seed field-entry]}]
+  [{:keys [target chosen-target draw-seed field-entry selection]}]
   (let [given? #(and (string? %) (not (str/blank? %)))]
     (cond-> (cond
               (given? chosen-target)
               (cond-> {:target chosen-target :target-source :chosen
                        :draw-seed (if (some? draw-seed) draw-seed {:absent :no-draw-seed})}
-                (given? target) (assoc :hand-target-overridden target))
+                (given? target) (assoc :hand-target-overridden target)
+                (some? selection) (assoc :selection selection))
               (given? target)
               {:target target :target-source :hand-placed}
               :else
@@ -188,7 +191,13 @@
               :run-ids (str "<date>-" id "-click-<n>")
               :via "POST /api/alpha/wm/click with flight-edn: an ordinary click (budget consume + cast-seat preflight); runner/run-opportunity! in the serving JVM"}
      :needs-in-serving-jvm "futon3c b7340968 (flight-edn) and futon2 runner/war-machine at this checkout, reloaded from master"
-     :placement (select-keys (resolve-target opts) [:target :target-source :draw-seed :hand-target-overridden])
+     :placement (select-keys (resolve-target opts) [:target :target-source :draw-seed :hand-target-overridden :selection])
+     ;; on every plan: the outer cascade's record when the target was chosen, else a
+     ;; typed absence (H-T-CALLER-I); the flight record carries the plan, so it carries this
+     :selection (let [r (resolve-target opts)]
+                  (cond (some? (:selection r)) (:selection r)
+                        (= :chosen (:target-source r)) {:absent :no-selection-record}
+                        :else {:absent :hand-placed}))
      :resolved-steps (resolved-steps opts)
      ;; RUNNER-DRIFT-I: the serving JVM's displaced namespaces at its last
      ;; click (fr/latest-displacement), read before this flight's click

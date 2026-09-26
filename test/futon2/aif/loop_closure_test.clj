@@ -4,7 +4,7 @@
   cascade's field, written by nothing yet), else takes --target and records
   that it was placed by hand (flight-driver/resolve-target, which
   run-flight!, plan and read-only! call; nothing is flown here)."
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.flight-driver :as driver]))
 
 (deftest a-hand-placed-target-says-so
@@ -44,3 +44,15 @@
                                 :path "holes/missions/M-autoclock-in.md" :read-text (fn [& _] "") :id "f"})]
     (is (= :hand-placed (:target-source f)))
     (is (= "M-autoclock-in" (:target f)))))
+
+;; H-T-CALLER-I: the chosen target carries the outer cascade's record of the choice.
+(deftest a-chosen-target-carries-its-selection
+  (let [sel {:rule :seeded-draw-from-E :support ["M-a"] :chosen "M-a"}]
+    (is (= {:target "M-a" :target-source :chosen :draw-seed 5 :selection sel}
+           (driver/resolve-target {:chosen-target "M-a" :draw-seed 5 :selection sel})))
+    (testing "a selection is carried on a chosen target only: the hand path is exactly as before"
+      (is (= {:target "M-autoclock-in" :target-source :hand-placed}
+             (driver/resolve-target {:target "M-autoclock-in" :selection sel}))))
+    (is (= {:target "M-a" :target-source :chosen :draw-seed 5 :hand-target-overridden "M-hand" :selection sel}
+           (driver/resolve-target {:chosen-target "M-a" :draw-seed 5 :selection sel :target "M-hand"}))
+        "the hand target overridden is still kept beside the selection")))

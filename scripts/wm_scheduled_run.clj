@@ -19,7 +19,8 @@
    doesn't break the schedule. Failure modes print to stderr with a
    non-zero exit code so cron can surface them via its standard
    error-mail mechanism."
-  (:require [futon2.aif.evidence-emit :as evidence-emit]
+  (:require [clojure.pprint :as pp]
+            [futon2.aif.evidence-emit :as evidence-emit]
             [futon2.aif.trace :as trace]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.enact :as enact]
@@ -63,10 +64,46 @@
          " decision=" action-desc
          " trace=" trace-path)))
 
+(defn trigger-from-env
+  "Which clock fired this run: FUTON_WM_TRIGGER as a keyword (:wallclock-cron,
+  :duree-click-*, ...), else :unspecified. The tick's version stamp and the
+  flight path's selection record both read it here."
+  ([] (trigger-from-env #(System/getenv %)))
+  ([getenv]
+   (if-let [t (getenv "FUTON_WM_TRIGGER")]
+     (keyword t)
+     :unspecified)))
+
+(defn flight-mode
+  "FUTON_WM_FLIGHT: nil (unset or blank) is the tick, unchanged. \"plan\" chooses a
+  target from the field and prints the flight's plan; nothing is sent and
+  nothing is written. Anything else is refused by `flight-plan!`."
+  ([] (flight-mode (System/getenv "FUTON_WM_FLIGHT")))
+  ([v] (when (and (string? v) (seq (.trim ^String v))) (.trim ^String v))))
+
+(defn flight-plan!
+  "The flight path of the loop entry: `futon2.aif.outer-loop/plan-from-field!`,
+  resolved HERE and not required by the ns, so the default tick loads no flight
+  code. Only \"plan\" exists: running a flight is not wired (no flight before the
+  spike is belled). OPTS: :trigger, and from the environment :seed
+  (FUTON_WM_FLIGHT_SEED, an integer) and :seat (FUTON_WM_FLIGHT_SEAT)."
+  [mode opts]
+  (when-not (= "plan" mode)
+    (throw (ex-info (str "FUTON_WM_FLIGHT=" mode ": only \"plan\" is wired") {:mode mode})))
+  (let [plan-from-field! (requiring-resolve 'futon2.aif.outer-loop/plan-from-field!)]
+    (pp/pprint (plan-from-field! opts))))
+
 (defn -main
-  "Entrypoint. Optional first arg: scan-window-days (default 14)."
+  "Entrypoint. Optional first arg: scan-window-days (default 14). With
+  FUTON_WM_FLIGHT=plan the flight path runs instead of the tick (see
+  `flight-plan!`); unset, this is the tick."
   [& args]
   (try
+    (when-let [mode (flight-mode)]
+      (flight-plan! mode {:trigger (trigger-from-env)
+                          :seed (some-> (System/getenv "FUTON_WM_FLIGHT_SEED") parse-long)
+                          :seat (System/getenv "FUTON_WM_FLIGHT_SEAT")})
+      (System/exit 0))
     (let [days (if (seq args) (Integer/parseInt (first args)) 14)
           ;; B-0a tick provenance (M-aif-faithfulness §2.0): stamp WHICH code
           ;; + WHICH config produced this tick — git sha/dirty of this one-shot
@@ -85,9 +122,7 @@
           ;; detection in the trace-hygiene norm (wm-baseline.md).
           version-stamp (trace/wm-version-stamp
                          (assoc (wm/arena-mode-flags)
-                                :trigger (if-let [t (System/getenv "FUTON_WM_TRIGGER")]
-                                           (keyword t)
-                                           :unspecified)))
+                                :trigger (trigger-from-env)))
           ;; E-C-vector-live: keep the belly fresh BEFORE scoring. Off-cycle
           ;; (once per scheduled tick, not per candidate action) — derive the
           ;; live C only when the goal/hole corpus changed (maybe-refresh!).

@@ -368,17 +368,26 @@
 (defn- head-sha [code-root repo]
   (str/trim (:out (sh/sh "git" "-C" (str code-root "/" repo) "rev-parse" "HEAD"))))
 
+(defn load-field
+  "The target field over the live checkouts, as `-main` reads it: {:field the
+  `target-field` map, :opts {:code-root :store :sources}}. Reads only. Optional
+  OVERRIDES replace :code-root, :store or :sources (tests and callers with a
+  store of their own)."
+  [& [{:keys [code-root store sources]}]]
+  (let [code-root (or code-root mr/default-code-root)
+        loaded {:missions (:missions (mr/load-missions-from-files code-root))
+                :tickets (:tickets (mr/load-tickets code-root))
+                :excursions (:excursions (mr/load-excursions code-root))}
+        opts {:code-root code-root :store (or store wi/default-store)
+              :sources (or sources (cs/with-context-fn (cs/load-declared cs/default-dir)))}]
+    {:field (target-field opts loaded) :opts opts}))
+
 (defn -main
   "Read the field over the live checkouts and print it as EDN
   ({:decision {:target-field …}} with the read's provenance). Writes nothing."
   [& _]
-  (let [code-root mr/default-code-root
-        loaded {:missions (:missions (mr/load-missions-from-files code-root))
-                :tickets (:tickets (mr/load-tickets code-root))
-                :excursions (:excursions (mr/load-excursions code-root))}
-        opts {:code-root code-root :store wi/default-store
-              :sources (cs/with-context-fn (cs/load-declared cs/default-dir))}
-        field (target-field opts loaded)
+  (let [{:keys [field opts]} (load-field)
+        code-root (:code-root opts)
         repos (sort (distinct (keep :repo (:considered field))))]
     (pp/pprint {:decision {:target-field field}
                 :counts (counts field)
