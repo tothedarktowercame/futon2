@@ -3641,6 +3641,31 @@
       (transport-failure-kind e)
       :untyped-failure))
 
+(defn- thrower-kind
+  "The keyword kind a thrower put on its own ex-data: :kind, or the :kind of
+  a map under :refusal (cascade_selection.clj refuse! and policy.clj's
+  no-acting-cascade-candidate follow cascade-g's {:refusal {:kind ...}}
+  convention). nil for anything else, a string :kind included."
+  [t]
+  (let [d (ex-data t)
+        k (or (:kind d) (when (map? (:refusal d)) (:kind (:refusal d))))]
+    (when (keyword? k) k)))
+
+(defn- phase-kind-failure
+  "WM-PHASE-KIND-I: an exception reaching the selection phase's catch that
+  its thrower typed with a bare :kind (at any depth of the cause chain) and
+  that carries neither :failure-kind nor :outcome anywhere, re-thrown
+  carrying :failure-kind equal to that kind, ex-data otherwise kept, the
+  original as cause; nil otherwise. explicit-failure-kind reads only the two
+  typed keys, so the eighth flight's :substrate-unreachable
+  (mission_registry.clj) closed :untyped-failure with its kind on the
+  finding as data. Explicit typing wins: nothing is re-thrown when either
+  typed key is present."
+  [e]
+  (when-not (explicit-failure-kind e)
+    (when-let [k (some thrower-kind (cause-chain e))]
+      (ex-info (ex-message e) (assoc (ex-data e) :failure-kind k) e))))
+
 (defn- repair-class-for [failure-kind]
   (cond
     (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
@@ -4694,7 +4719,7 @@
                 ;; is the tick's abstention (as an abstained judgement is,
                 ;; below), carried on the :no-selection sorry cell; so is the
                 ;; decision gate's refusal (WM-GATE-REFUSAL-I); anything
-                ;; else goes on untouched
+                ;; else goes on, typed by its thrower's :kind when it has one
                 (let [target (get-in opts [:flight :target])
                       jr (judge-refusal e target)
                       gr (when-not jr (gate-refusal e target))]
@@ -4703,7 +4728,9 @@
                       (reset! pending-selection cell)
                       (swap! checkpoints assoc :selection cell)
                       (throw (judge-refusal-abstention r e)))
-                    (throw e)))))
+                    ;; WM-PHASE-KIND-I: a thrower's own bare :kind becomes
+                    ;; the :failure-kind, not :untyped-failure
+                    (throw (or (phase-kind-failure e) e))))))
             judgement0 judgement0-base
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             ordinary-entry (selected-entry judgement0)

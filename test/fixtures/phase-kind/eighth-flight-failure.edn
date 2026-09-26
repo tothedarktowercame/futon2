@@ -1,0 +1,7 @@
+;; Live pin (WM-PHASE-KIND-I): the eighth flight's repair finding's
+;; :failure-kind, :failure-stage, :failure-error and :failure-data, verbatim
+;; (read, not written).
+;; source: futon3c 74e0235a holes/labs/M-wm-wiring/spike/flight-ada87008/repair-occ-036463620c0c032c9e46aa44b6a6d6b35ed3e0ceb27dc58030f07d8fc2e6c747.edn
+;; sha256: 95bbb9c5476aedaadc50125068fff5f0a7e773c29a7a7494d84be58a57d893ad
+;; the click: 2026-09-26-flight-ada87008-click-1 (flight-ada87008).
+{:failure-kind :untyped-failure, :failure-stage :selection, :failure-error "substrate-2 mission registry unreachable", :failure-data {:kind :substrate-unreachable}}
