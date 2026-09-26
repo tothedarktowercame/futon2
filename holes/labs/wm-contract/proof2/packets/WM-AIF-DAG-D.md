@@ -1,6 +1,6 @@
 # WM-AIF-DAG-D — the wiring map against the equation DAG (futon-2026 Figure 6A)
 
-Discovery, read-only, claude-8, 2026-09-26 ~11:30Z. Joe, on the harness figure and the "each one typed and
+Discovery, read-only, claude-8, 2026-09-26 ~11:10Z. Joe, on the harness figure and the "each one typed and
 fixed" correction: "This is why I wanted the map as a topological object. This is also why referring to
 diagrams like Figure 6A in futon-2026 would be helpful. That figure shows how the components depend on
 each other, i.e. we can make no claim to be implementing AIF without at least those dependencies."
