@@ -6738,20 +6738,23 @@
                              :initialized-beta beta :model-id model-id :admission admission
                              :family (:precision-family admission)})
                 ;; F1b-admit-I / F1c-I: each candidate's admitted observed
-                ;; prefix from the flights' conditioning steps, computed BEFORE
-                ;; selection so production-ranked supplies F from it (a
-                ;; candidate with no admitted steps stays :not-supplied).
-                ;; Without the flights' steps in opts every candidate is
-                ;; {:conditioning-status :no-flight-records}.
-                policy-prefixes (prefix-admission/prefixes
-                                 joint-candidates
-                                 (or (:conditioning-steps opts)
-                                     {:steps [] :dir-status {:absent :no-flight-steps-in-opts}}))
+                ;; prefix from the flights' conditioning steps, recorded per
+                ;; candidate under :policy-prefixes BEFORE selection (the
+                ;; top-level :observation-updates stay D's initialization
+                ;; updates), and production-ranked supplies F from the
+                ;; recorded value (a candidate with no admitted steps stays
+                ;; :not-supplied). Without the flights' steps in opts every
+                ;; candidate is {:conditioning-status :no-flight-records}.
+                token-belief-input (assoc token-belief-input :policy-prefixes
+                                          (prefix-admission/prefixes
+                                           joint-candidates
+                                           (or (:conditioning-steps opts)
+                                               {:steps [] :dir-status {:absent :no-flight-steps-in-opts}})))
                 decision (assoc (binding [input-receipts/*habit-read-purpose* :joint-selection]
                                   (policy/select-action-cascades
                                     (policy-prefix/production-ranked ranked
                                       (select-keys token-belief-input [:conditioning-status :reason :observation-updates])
-                                      policy-prefixes)
+                                      (:policy-prefixes token-belief-input))
                                     {:beta (:beta beta-state) :beta-state beta-state
                                      :cascade-habit-path (:cascade-habit-path opts)
                                      ;; WM-HABIT-FOLD-CALL-I: judge's fold
@@ -6765,10 +6768,6 @@
                                    (precision-carry/family decision precision-model schedules))
                 decision (assoc-in decision [:selection-certificate :token-belief-stage]
                                    token-belief-stage)
-                ;; the same prefixes, recorded per candidate under
-                ;; :policy-prefixes (the top-level :observation-updates stay D's
-                ;; initialization updates)
-                token-belief-input (assoc token-belief-input :policy-prefixes policy-prefixes)
                 decision (assoc-in decision [:selection-certificate :token-belief-input]
                                    token-belief-input)
                 ;; B4 slice 2b (PROOF-2 P₀ carrier): one derivation entry per
