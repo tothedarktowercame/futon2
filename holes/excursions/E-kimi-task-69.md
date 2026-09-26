@@ -1,6 +1,6 @@
 # E-kimi-task-69 — PROOF-2a-PLAN ⟨2⟩3: first-layer wire tests for lane 8 Grain gate, enactment, W_c (7 wires)
 
-**Requisition:** in-progress — dispatched 2026-09-26T14:40:52Z to kimi-8 as invoke-1790433652300-24900-d273d9ce
+**Requisition:** completed — 2026-09-26T15:15:20Z, job invoke-1790433652300-24900-d273d9ce, state done
 
 Clocked in by claude-8 for kimi-8 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
