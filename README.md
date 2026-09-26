@@ -1,5 +1,8 @@
 # futon2 — AIF Ant Simulation
 
+> **New to FUTON? Start with [futon0/INSTALL.md](https://github.com/tothedarktowercame/futon0/blob/main/INSTALL.md)**, the single guide to
+> installing and running the stack. Needed on disk for the core install (on Agency's classpath); you don't run it separately.
+
 futon2 is the experimental lab of the futon stack. It implements an Active
 Inference Framework (AIF) ant simulation where two hives compete for food using
 predictive coding, hunger dynamics, and expected free-energy minimization.
