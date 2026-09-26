@@ -400,6 +400,18 @@
 ;; ---------------------------------------------------------------------------
 ;; Clicks through the serving JVM (POST /api/alpha/wm/click)
 
+(defn- run-record-failure
+  "The click entry's :failure from a run RECORD (record-summary)."
+  [record]
+  (let [f (:failure record)]
+    (cond
+      (not (contains? record :failure)) {:absent :failure-not-on-run-record}
+      (:absent f) {:absent :no-failure-on-run-record}
+      :else {:kind (:kind f)
+             :stage (if (contains? f :stage) (:stage f) {:absent :stage-not-on-record})
+             :error (if (contains? f :error) (:error f) {:absent :error-not-on-record})
+             :cause (if (contains? f :cause) (:cause f) {:absent :cause-not-on-record})})))
+
 (defn record-summary
   "What the flight needs from a click's RUN RECORD (tick-run-record-<run-id>)
   for TARGET: the chosen plan's :unreached-wants (the record's
@@ -407,7 +419,14 @@
   abstained, the target's own decline from [:decision :abstention]; and the
   tick's close kind as :outcome, the :via of the route edge into
   FULL_LOOP_CLOSE (held_out_observations' reading), else
-  {:absent :no-terminal-outcome-on-run-record} (WM-CAST-I)."
+  {:absent :no-terminal-outcome-on-run-record} (WM-CAST-I); and why it
+  closed as :failure {:kind :stage :error :cause}, from the record's
+  :failure (full-loop-runner run-record-failure, the close map's
+  :failure-kind :failure-stage :error :cause), each part typed absent when
+  the record lacks it (a cause on a record written before WM-CAUSE-ON-
+  RECORD-I), {:absent :no-failure-on-run-record} when the click closed
+  without one, and {:absent :failure-not-on-run-record} for a record written
+  before WM-CLICK-REASON-I (WM-CLICK-REASON-I). No record: no :failure."
   [target run-id record]
   (let [chosen (get-in record [:decision :chosen])
         carrier (get-in record [:decision :abstention])
@@ -427,6 +446,7 @@
                                    first
                                    :via)
                           {:absent :no-terminal-outcome-on-run-record})}
+      record (assoc :failure (run-record-failure record))
       mine (assoc :abstention (select-keys mine [:target :kind :missing :declines]))
       (nil? record) (assoc :abstention {:kind :run-record-missing :missing :run-record}))))
 

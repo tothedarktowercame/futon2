@@ -636,6 +636,22 @@
      :construction-kind (get-in action [:construction-receipt :kind])}
     {:status :absent :reason :no-chosen-action}))
 
+(defn- run-record-failure
+  "WM-CLICK-REASON-I: the failure a click closed on, for its run record, so
+  the flight's click entry can say why (record-summary reads only the run
+  record). Read from the close map (RESULT's :data, as the close catch
+  writes it: :failure-kind :failure-stage :error :cause), as
+  {:kind :stage :error :cause}; {:absent :no-failure} when the close carries
+  no failure kind. A close no exception reached has no cause to give."
+  [result]
+  (let [d (:data result)]
+    (if-let [kind (:failure-kind d)]
+      {:kind kind
+       :stage (or (:failure-stage d) {:absent :no-failure-stage})
+       :error (if (str/blank? (str (:error d))) {:absent :no-error-message} (:error d))
+       :cause (if (contains? d :cause) (:cause d) {:absent :close-without-exception})}
+      {:absent :no-failure})))
+
 (defn- persist-run-record!
   [raw-opts run-id started-at result]
   (let [observed (observed-route (:wm/route result))
@@ -698,6 +714,7 @@
                                      ;; what it left unreached from the record
                                      :chosen (chosen-summary decision))
                     :route route
+                    :failure (run-record-failure result)
                     :repair/discharge (:repair/discharge result)
                     :repair/publication (:repair/publication result)
                     :d-task-enactment (:d-task-enactment result)

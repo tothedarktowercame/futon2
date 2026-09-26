@@ -203,6 +203,15 @@
   [wants before after]
   (vec (filter #(and (not (true? (get before %))) (true? (get after %))) wants)))
 
+(defn click-failure
+  "A flight record click ENTRY's :failure (WM-CLICK-REASON-I), or
+  {:absent :no-failure-on-click-entry} for an entry written before it, so
+  an older entry is typed rather than read as a click that did not fail."
+  [entry]
+  (if (contains? entry :failure)
+    (:failure entry)
+    {:absent :no-failure-on-click-entry}))
+
 (defn record-click
   "FLIGHT after one click. CLICK is
     {:click-id … :wants [..] :want-source {..}
@@ -234,6 +243,8 @@
                   ;; (http-click-fn), as the click function gave them
                   (:chosen click) (assoc :chosen (:chosen click))
                   (contains? click :outcome) (assoc :outcome (:outcome click))
+                  ;; WM-CLICK-REASON-I: why the click closed (record-summary)
+                  (contains? click :failure) (assoc :failure (:failure click))
                   (contains? click :cast) (assoc :cast (:cast click))
                   ;; RUNNER-DRIFT-I: the serving JVM's displaced namespaces
                   ;; when the click ran (record-summary)
