@@ -1,0 +1,7 @@
+;; Live pin (WM-GATE-REFUSAL-I): the :failure-data of the fifth flight's
+;; repair finding, verbatim (read, not written), with its :failure-kind,
+;; :failure-stage and :failure-error.
+;; source: futon3c b4bb0150 holes/labs/M-wm-wiring/spike/flight-7f89646a-repair-finding.edn
+;; sha256: 758eaeb64b3c0f0ef3733a1725c9a8a54f8a23701698a26373fc44b29279e264
+;; the click: 2026-09-26-flight-7f89646a-click-1 (flight-7f89646a).
+{:failure-kind :untyped-failure, :failure-stage :selection, :failure-error "Inadmissible decision", :failure-data {:error :inadmissible-decision, :reason :missing-observation-locators, :detail {:candidate-id :C1, :target "M-autoclock-in", :missing-tokens [["M-autoclock-in" :exit/h1dae607747ce] ["M-autoclock-in" :exit/h64ddcd0e8811]], :locator-refusals {["M-autoclock-in" :exit/h64ddcd0e8811] {:kind :no-mechanical-check, :class :C8}, ["M-autoclock-in" :exit/h1dae607747ce] {:kind :no-mechanical-check, :class :C8}}}}}

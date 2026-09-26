@@ -541,6 +541,29 @@
                       {:absent :kind-names-no-missing-input}))
        :data d})))
 
+(defn gate-refusal
+  "WM-GATE-REFUSAL-I: the decision gate's refusal of the emitted decision
+  (decision_gate.clj refuse!, ex-data {:error :inadmissible-decision :reason
+  r :detail d}), or nil. explicit-failure-kind reads only :failure-kind and
+  :outcome, so the fifth flight's :missing-observation-locators closed
+  :untyped-failure, and so would each of the gate's reasons. The tick
+  abstains, as for a judge refusal, in the same shape: :kind the gate's
+  :reason, else a typed absence; :target the detail's, else the flight's,
+  else a typed absence; :missing the detail's :missing-tokens, else a typed
+  absence; :data the detail."
+  [e flight-target]
+  (let [d (ex-data e)]
+    (when (and (instance? clojure.lang.ExceptionInfo e)
+               (= :inadmissible-decision (:error d)))
+      (let [detail (:detail d)]
+        {:kind (if (keyword? (:reason d)) (:reason d) {:absent :no-reason-given})
+         :target (or (when (map? detail) (:target detail))
+                     flight-target
+                     {:absent :refusal-names-no-target})
+         :missing (or (when (map? detail) (:missing-tokens detail))
+                      {:absent :reason-names-no-missing-input})
+         :data detail}))))
+
 (defn abstention-carrier
   "D8/AR-16 (E-cascade-real): the abstained tick record carries its typed
   declines. Built from the judge's own decision :refusals and the cascade
@@ -3074,6 +3097,14 @@
   (ex-info "War Machine abstained: cascade decision refused"
            {:outcome :abstained :judge-refusal jr} e))
 
+(defn- gate-refusal-abstention
+  "The exception a gate-refused tick closes on: :outcome :abstained, which
+  explicit-failure-kind reads (the gate's own throw carries only :error),
+  with the refusal and the gate's exception as cause."
+  [jr e]
+  (ex-info "War Machine abstained: decision gate refused"
+           {:outcome :abstained :judge-refusal jr} e))
+
 (defn- outcome-from [e]
   (let [raw (or (:outcome (ex-data e)) :incomplete)]
     (cond
@@ -4662,14 +4693,20 @@
               (catch clojure.lang.ExceptionInfo e
                 ;; WM-CLICK-REFUSAL-I: a typed refusal of the cascade decision
                 ;; is the tick's abstention (as an abstained judgement is,
-                ;; below), carried on the :no-selection sorry cell; anything
+                ;; below), carried on the :no-selection sorry cell; so is the
+                ;; decision gate's refusal (WM-GATE-REFUSAL-I); anything
                 ;; else goes on untouched
-                (if-let [jr (judge-refusal e (get-in opts [:flight :target]))]
-                  (let [cell (judge-refusal-sorry jr)]
-                    (reset! pending-selection cell)
-                    (swap! checkpoints assoc :selection cell)
-                    (throw (judge-refusal-abstention jr e)))
-                  (throw e))))
+                (let [target (get-in opts [:flight :target])
+                      jr (judge-refusal e target)
+                      gr (when-not jr (gate-refusal e target))]
+                  (if-let [r (or jr gr)]
+                    (let [cell (judge-refusal-sorry r)]
+                      (reset! pending-selection cell)
+                      (swap! checkpoints assoc :selection cell)
+                      (throw (if jr
+                               (judge-refusal-abstention jr e)
+                               (gate-refusal-abstention gr e))))
+                    (throw e)))))
             judgement0 judgement0-base
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             ordinary-entry (selected-entry judgement0)
