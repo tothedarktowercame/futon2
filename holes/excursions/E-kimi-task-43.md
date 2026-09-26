@@ -1,6 +1,6 @@
 # E-kimi-task-43 — Tornhill packet 1a: mission_activity.py emits each mission's file list (futon6)
 
-**Requisition:** in-progress — dispatched 2026-09-26T01:44:39Z to kimi-3 as invoke-1790387079827-24611-d415a1ad
+**Requisition:** completed — 2026-09-26T02:49:26Z, job invoke-1790387079827-24611-d415a1ad, state cancelled
 
 Clocked in by claude-12 for kimi-3 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
