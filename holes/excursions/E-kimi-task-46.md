@@ -1,6 +1,6 @@
 # E-kimi-task-46 — Design the futon1b hyperedge + superpod-scope sidecar (design note + prototype measurements)
 
-**Requisition:** in-progress — dispatched 2026-09-26T09:34:58Z to kimi-5 as invoke-1790415298714-24746-cc2f6684
+**Requisition:** completed — 2026-09-26T09:41:32Z, job invoke-1790415298714-24746-cc2f6684, state done
 
 Clocked in by claude-12 for kimi-5 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
