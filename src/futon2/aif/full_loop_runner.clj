@@ -3065,6 +3065,15 @@
   [jr]
   (sorry :no-selection {:judge-refusal jr}))
 
+(defn- judge-refusal-abstention
+  "The exception a judge-refused tick closes on: :outcome :abstained, which
+  explicit-failure-kind reads (the judge's own throw carries only :kind, so
+  before 321d82c8 the refusal closed :untyped-failure), with the refusal and
+  the judge's exception as cause."
+  [jr e]
+  (ex-info "War Machine abstained: cascade decision refused"
+           {:outcome :abstained :judge-refusal jr} e))
+
 (defn- outcome-from [e]
   (let [raw (or (:outcome (ex-data e)) :incomplete)]
     (cond
@@ -4659,8 +4668,7 @@
                   (let [cell (judge-refusal-sorry jr)]
                     (reset! pending-selection cell)
                     (swap! checkpoints assoc :selection cell)
-                    (throw (ex-info "War Machine abstained: cascade decision refused"
-                                    {:outcome :abstained :judge-refusal jr} e)))
+                    (throw (judge-refusal-abstention jr e)))
                   (throw e))))
             judgement0 judgement0-base
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
