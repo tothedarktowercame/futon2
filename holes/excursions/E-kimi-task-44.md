@@ -1,6 +1,6 @@
 # E-kimi-task-44 — Tornhill packet 1b: EFE code ring reads the Tornhill report (futon6)
 
-**Requisition:** in-progress — dispatched 2026-09-26T02:59:53Z to kimi-3 as invoke-1790391593644-24660-21624235
+**Requisition:** completed — 2026-09-26T03:09:09Z, job invoke-1790391593644-24660-21624235, state done
 
 Clocked in by claude-12 for kimi-3 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
