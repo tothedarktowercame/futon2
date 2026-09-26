@@ -2,13 +2,21 @@
   "F1b-join-I (PROOF-2a-PLAN <2>2d F1; F1c-D futon3c 8cc2d425): the
   conditioning step bound on the flight's enactment entry, from the entry's
   observation and policy key and the click's run record. First-layer wire
-  test through run! with a hermetic run record carrying fixture measured
-  rates; SPEC-F's bad cases assigned to this packet."
+  test through run! with a hermetic run record; SPEC-F's bad cases
+  assigned to this packet.
+
+  F1a-2c: the run record's [:decision :measured-a] is the record the tick's
+  PRODUCER builds, futon2.report.war-machine/measured-a-version, from
+  admitted labels through observation-rates/sourced-rates, never a
+  hand-built map (the earlier hand-built record carried a :measurement key
+  the producer did not write, so the step's test passed against its own
+  stub). Bad inputs are that producer's record with a key removed."
   (:require [clojure.set :as set]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.cascade-model-manifest :as manifest]
             [futon2.aif.flight :as flight]
-            [futon2.aif.flight-runner :as fr])
+            [futon2.aif.flight-runner :as fr]
+            [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -20,12 +28,27 @@
    :transition {:status :interpreted :produces #{:t}}
    :theta theta})
 
-(defn- run-record [{:keys [theta rates measurement measured-a]}]
+(defn- labels
+  "Admitted labels for CLS: PRESENT established tokens of which MISSED were
+  recorded false, ABSENT non-established of which REPORTED were recorded
+  true, so false-neg = MISSED/PRESENT and false-pos = REPORTED/ABSENT."
+  [cls present missed absent reported]
+  (concat (for [i (range present)] {:token-class cls :admitted :present :recorded (>= i missed)})
+          (for [i (range absent)] {:token-class cls :admitted :absent :recorded (< i reported)})))
+
+(defn- produced-measured-a
+  "The measured-A record as the tick writes it: measured-a-version over one
+  problem of TARGET with LOCATORS, from LABELS (default: :t of class :C4,
+  false-neg 1/10, false-pos 1/5)."
+  [{:keys [locators] :as opts}]
+  (let [ls (vec (or (:labels opts) (labels :C4 10 1 5 1)))]
+    (wm/measured-a-version [{:target target :cascade-problem {:locators (or locators {:t {:class :C4}})}}]
+                           {target {:labels ls
+                                    :subjects (frequencies (map :token-class ls))}})))
+
+(defn- run-record [{:keys [theta measured-a] :as opts}]
   {:decision
-   {:measured-a (or measured-a
-                    {:schema :wm/measured-a-v1 :rates-sha "fixture-sha" :classes [:C4]
-                     :rates (or rates {[target :t] {:false-neg 1/10 :false-pos 1/5}})
-                     :measurement (or measurement {[target :t] {:false-neg {:numerator 1 :denominator 10}}})})
+   {:measured-a (or measured-a (produced-measured-a opts))
     ;; the belief holds :u, a token the step does not check
     :initial-belief-receipt {:value {#{[target :u]} 1}}
     :selection-certificate
@@ -71,8 +94,20 @@
     (is (= 11/20 (:p-o step)))
     (is (= (- (Math/log (double 11/20))) (:f step)) "f = -ln P(o)")))
 
+(deftest the-producer-writes-what-the-step-reads
+  (let [ma (produced-measured-a {})]
+    (is (= {[target :t] {:false-neg 1/10 :false-pos 1/5}} (:rates ma)))
+    (is (= {[target :t] {:false-neg {:numerator 1 :denominator 10}
+                         :false-pos {:numerator 1 :denominator 5}}}
+           (update-vals (:measurement ma) #(update-vals % (fn [c] (select-keys c [:numerator :denominator]))))))
+    (testing "bad case: the producer's record without :measurement (F1a-2b's record) leaves the step absent"
+      (is (= {:status :absent :reason :no-measurement-provenance}
+             (select-keys (:step (fly {:measured-a (dissoc ma :measurement)})) [:status :reason]))))))
+
 (deftest unmeasured-a-refuses-the-step
-  (let [step (:step (fly {:measurement {[target :t] :absent}}))]
+  ;; :t's class (:C4) has no admitted labels while :w's (:C3) does: the
+  ;; producer writes a present record whose :t measurement is :absent
+  (let [step (:step (fly {:locators {:t {:class :C4} :w {:class :C3}} :labels (labels :C3 4 1 2 0)}))]
     (is (= :refused (:status step)))
     (is (= :unmeasured-class (:reason step)))
     (is (= {:t :C4} (:classes step)))
@@ -80,14 +115,15 @@
 
 (deftest a-zero-probability-observation-is-a-contradiction-not-a-number
   ;; theta 0: :t is never produced; zero false-pos: :t is never reported unless established
-  (let [step (:step (fly {:theta 0 :rates {[target :t] {:false-neg 0 :false-pos 0}}}))]
+  (let [step (:step (fly {:theta 0 :labels (labels :C4 10 0 5 0)}))]
     (is (= :contradiction (:f step)))
     (is (= 0 (:p-o step)))
     (is (= :refused (get-in step [:q :status])) "the update refuses: no q")))
 
 (deftest a-run-record-without-the-rates-value-is-an-absence
-  (let [step (:step (fly {:measured-a {:schema :wm/measured-a-v1 :rates-sha "sha-only" :classes [:C4]}}))]
-    (is (= {:status :absent :reason :no-rates-value :inputs {:rates-sha "sha-only"}}
+  (let [ma (dissoc (produced-measured-a {}) :rates)
+        step (:step (fly {:measured-a ma}))]
+    (is (= {:status :absent :reason :no-rates-value :inputs {:rates-sha (:rates-sha ma)}}
            (select-keys step [:status :reason :inputs])))
     (is (= {:policy-key key-a :occurrence {:flight "flight-f1bj" :click "run-1"}}
            (select-keys step [:policy-key :occurrence]))

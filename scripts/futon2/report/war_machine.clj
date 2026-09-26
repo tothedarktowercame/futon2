@@ -6329,6 +6329,8 @@
     {:schema :wm/measured-a-v1
      :rates {[target token] {:false-neg r :false-pos r}}  ; the value
      :rates-sha <sha256 of canonical-pr of :rates>
+     :measurement {[target token] :absent | {:false-neg {:numerator n
+                   :denominator d} :false-pos {...}}}   ; per-token provenance
      :source :futon2.aif.observation-rates/sourced-rates   ; verbatim
      :classes [class-id …]}
 
@@ -6366,9 +6368,13 @@
           {:status :absent :reason :no-measured-rates}
           ;; F1a-2b: the value travels with its digest, so F's conditioning
           ;; step can be recomputed from the run record (F1c-D §3).
+          ;; F1a-2c: and with its per-token measurement, which the step
+          ;; needs to refuse a checked token whose class is unmeasured
+          ;; (flight/conditioning-step, :unmeasured-class)
           (cond-> {:schema :wm/measured-a-v1
                    :rates rates
                    :rates-sha (sha256-hex (canonical-pr rates))
+                   :measurement measurement
                    :source (:source (first (vals sourced)))
                    :classes (vec (sort-by pr-str (distinct (vals class-of))))}
             (seq refusals) (assoc :refusals refusals)))))))
