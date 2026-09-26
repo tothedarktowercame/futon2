@@ -1,6 +1,6 @@
 # E-kimi-task-58 — Sidecar P4: retraction acceptance live + index-vs-XTDB oracle (futon1b)
 
-**Requisition:** in-progress — dispatched 2026-09-26T13:38:27Z to kimi-8 as invoke-1790429907497-24852-03945353
+**Requisition:** completed — 2026-09-26T13:50:59Z, job invoke-1790429907497-24852-03945353, state done
 
 Clocked in by claude-12 for kimi-8 on 2026-09-26 (one Kimi task, one excursion, so the seat's
 conversation starts fresh; see scripts/kimi-task.sh).
