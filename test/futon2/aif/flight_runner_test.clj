@@ -28,9 +28,19 @@
 (deftest summary-of-a-selected-click
   (let [s (fr/click-summary target "run-1" (selected [{:token :b :reason :beyond-horizon}]))]
     (is (= "run-1" (:click-id s)))
-    (is (= {:candidate :C1 :precedence [:p/one :p/two]} (:chosen s)))
+    ;; WM-CHOSEN-CANDIDATE-I: the action's :id, and :candidate only when the
+    ;; decision's selection law names one — this fixture's does not, so the
+    ;; key is OMITTED rather than filled with the action id.
+    (is (= {:id :C1 :precedence [:p/one :p/two]} (:chosen s)))
+    (is (not (contains? (:chosen s) :candidate)))
     (is (= [{:token :b :reason :beyond-horizon}] (:unreached-wants s)))
-    (is (nil? (:abstention s)))))
+    (is (nil? (:abstention s))))
+  (testing "a selection law that names a candidate puts it beside the action id"
+    (let [r (assoc-in (selected []) [:checkpoints :selection :judgment :decision
+                                     :selection-law :candidate]
+                      :cas/b)
+          s (fr/click-summary target "run-1b" r)]
+      (is (= {:id :C1 :candidate :cas/b :precedence [:p/one :p/two]} (:chosen s))))))
 
 (deftest summary-of-an-abstained-click-names-the-targets-decline
   (let [s (fr/click-summary target "run-2"

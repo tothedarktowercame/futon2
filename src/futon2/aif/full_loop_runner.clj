@@ -625,15 +625,33 @@
 
 (defn chosen-summary
   "The chosen cascade on a tick's DECISION, for the run record: its target,
-  candidate, pattern order and the :unreached-wants of its construction
-  receipt. A typed absence when nothing was chosen."
+  the SELECTION LAW's :candidate, the chosen action's :id, the pattern order
+  and the :unreached-wants of its construction receipt. A typed absence when
+  nothing was chosen.
+
+  WM-CHOSEN-CANDIDATE-I: :candidate is the selection law's candidate (the
+  chosen entry's :cascade-id) — the value Clause C joins an enactment on —
+  and :id is the chosen action's own id, beside it. They coincide when an
+  action's id is its cascade-id (the seventh flight's :C1, and every decision
+  candidate-derivations admits, since it refuses :action-id-not-in-candidates)
+  and not otherwise; futon3c
+  wm_wire_r9_candidate_enact_test/a-cascade-id-unlike-the-action-id-fails-the-wire
+  is the case where they differ. Until this change :candidate carried the
+  ACTION id under a key named for the candidate, so a record written before it
+  carries its action id there and no :id at all.
+
+  A decision whose selection law names no candidate OMITS :candidate rather
+  than putting the action id in its place; the enactment step then records a
+  typed absence (flight-runner/enact-fn)."
   [decision]
   (if-let [action (:action decision)]
-    {:target (:target action)
-     :candidate (:id action)
-     :precedence (mapv #(or (:id %) %) (:precedence action))
-     :unreached-wants (vec (get-in action [:construction-receipt :unreached-wants]))
-     :construction-kind (get-in action [:construction-receipt :kind])}
+    (cond-> {:target (:target action)
+             :id (:id action)
+             :precedence (mapv #(or (:id %) %) (:precedence action))
+             :unreached-wants (vec (get-in action [:construction-receipt :unreached-wants]))
+             :construction-kind (get-in action [:construction-receipt :kind])}
+      (contains? (:selection-law decision) :candidate)
+      (assoc :candidate (get-in decision [:selection-law :candidate])))
     {:status :absent :reason :no-chosen-action}))
 
 (defn- run-record-failure

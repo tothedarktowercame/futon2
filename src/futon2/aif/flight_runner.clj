@@ -45,9 +45,17 @@
                (or (first (filter #(= target (:target %)) (:targets carrier)))
                    {:kind :target-not-in-refusals :missing :refusal}))]
     (cond-> {:click-id run-id
+             ;; WM-CHOSEN-CANDIDATE-I: the same shape full-loop-runner/
+             ;; chosen-summary writes on the run record — the selection law's
+             ;; :candidate, the action's :id beside it — because this is the
+             ;; OTHER writer of the click's :chosen (click-fn's in-process
+             ;; path; record-summary is http-click-fn's). Fixing one and not
+             ;; the other would leave the wire whole on one path only.
              :chosen (when (and action (= target (:target action)))
-                       {:candidate (:id action)
-                        :precedence (mapv #(or (:id %) %) (:precedence action))})
+                       (cond-> {:id (:id action)
+                                :precedence (mapv #(or (:id %) %) (:precedence action))}
+                         (contains? (:selection-law decision) :candidate)
+                         (assoc :candidate (get-in decision [:selection-law :candidate]))))
              :unreached-wants (vec (when (= target (:target action))
                                      (get-in action [:construction-receipt :unreached-wants])))}
       mine (assoc :abstention mine))))
@@ -434,7 +442,9 @@
                (or (first (filter #(= target (:target %)) (:targets carrier)))
                    {:kind :target-not-in-refusals :missing :refusal}))]
     (cond-> {:click-id run-id
-             :chosen (when (= target (:target chosen)) (select-keys chosen [:candidate :precedence]))
+             ;; WM-CHOSEN-CANDIDATE-I: :id (the action) rides beside
+             ;; :candidate (the selection law's), as chosen-summary writes them
+             :chosen (when (= target (:target chosen)) (select-keys chosen [:id :candidate :precedence]))
              :unreached-wants (vec (when (= target (:target chosen)) (:unreached-wants chosen)))
              ;; RUNNER-DRIFT-I: the serving JVM's displaced namespaces
              ;; when the click ran, from the record's :runner/source
@@ -798,7 +808,12 @@
   with no commit asked. With no such pattern the record says
   {:absent :candidate-names-no-grain-pattern} and the gate's own refusal
   (:grain-not-declared) is recorded; the flight continues either way.
-  A click with no chosen candidate writes no record: {:absent :no-decision}."
+  A click whose summary names no chosen action at all (neither :id nor
+  :candidate) writes no record: {:absent :no-decision}. A summary that names
+  one but carries no :candidate records :decision-candidate
+  {:absent :no-candidate-on-run-record} and enacts (WM-CHOSEN-CANDIDATE-I):
+  a missing decision candidate is an absence on the record, not a refusal,
+  and never the action id standing in for it."
   [{:keys [dispatch-step! check-fn interpretations fetch-run-record
            publication-observation repair-id-fn record-dir repo-root]
     :or {check-fn (fn [check] (if-let [f (get checks/checks (:class check))]
@@ -806,9 +821,24 @@
                                 {:status :refused :reason :no-mechanical-check}))
          repo-root "/home/joe/code/futon3c"}}]
   (fn [flight click]
-    (let [chosen (:chosen click)]
+    (let [chosen (:chosen click)
+          ;; WM-CHOSEN-CANDIDATE-I. The chosen summary carries two ids now:
+          ;; :id, the chosen ACTION's, and :candidate, the SELECTION LAW's —
+          ;; which is the one Clause C joins an enactment on. A summary
+          ;; written before this change carries only :candidate, holding the
+          ;; ACTION id; `action-id` reads it from there so the enactment
+          ;; record's own :candidate (enactment-habit/policy-key-for's join
+          ;; key, looked up in :candidate-derivations) keeps exactly the value
+          ;; it has today.
+          action-id (if (contains? chosen :id) (:id chosen) (:candidate chosen))
+          ;; The decision's candidate, or a typed absence — never the action
+          ;; id standing in for it. Reached when a decision's selection law
+          ;; named no candidate (chosen-summary then omits the key).
+          decision-candidate (if (contains? chosen :candidate)
+                               (:candidate chosen)
+                               {:absent :no-candidate-on-run-record})]
       (cond
-        (not (and chosen (:candidate chosen)))
+        (not (and chosen (or (:candidate chosen) (:id chosen))))
         {:absent :no-decision :click-id (:click-id click)}
         ;; a decision with no seat to carry it out: recorded, no record
         ;; written, never a throw (WM-DRIVER-I)
@@ -819,7 +849,7 @@
               interps (if interpretations (interpretations flight) {})
               grain-p (grain-pattern precedence interps)
               cand-grain (when grain-p (get-in interps [grain-p :grain]))
-              base-step {:target (:target flight) :candidate (:candidate chosen)}
+              base-step {:target (:target flight) :candidate action-id}
               attempts
               (vec
                (for [[i p] (map-indexed vector precedence)
@@ -856,9 +886,11 @@
               record (cond-> {:schema :wm/enactment-v1
                               :flight (:flight/id flight)
                               :click (:click-id click)
-                              :candidate (:candidate chosen)
-                              ;; the decision's id, so W_c's join is checkable
-                              :decision-candidate (:candidate chosen)
+                              :candidate action-id
+                              ;; the DECISION's candidate (the selection law's),
+                              ;; so W_c's join is checkable; typed absent when
+                              ;; the run record carries none
+                              :decision-candidate decision-candidate
                               :run-record (if run-record
                                             {:click-id (:click-id click) :present true}
                                             {:click-id (:click-id click) :absent :run-record-not-fetched})
