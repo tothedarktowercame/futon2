@@ -484,3 +484,32 @@ The catch at `:4658-4664` puts `judge-refusal-sorry`'s `:no-selection` cell (`:3
 At `ea12c5d4`, `war_machine.clj` unchanged since `946405c5`: `:6236-6238` and `:6239-6241` (`:incommensurable-family`, horizons and betas), `:6300-6304` (`:live-c-refused`), `:6322-6326` (`:live-c-stale`), `:6435-6437` (the live-C rethrow, which passes `live-refusal` whole so its own `:kind` travels — except a `:no-reachable-want` grain mismatch, recorded on the certificate instead, `:6430-6434`), `:6623-6626` (the rank boundary carrying efe's scoring kinds).
 
 Two conditions from WM-CLICK-REFUSAL-D (`cdc492ec`), both readable at the site. **`:incommensurable-family` cannot fire on a flight:** `cascade-family-parameters` refuses on `(not= 1 (count Ts))` and `(not= 1 (count betas))` over `problems` (`:6234-6241`), and a one-problem family has exactly one of each. **`:live-c-stale` cannot fire in production:** the comparison is at **`:6319-6321`** — not `:6316-6318`, which is the injected-test-seam branch — and reads `(live-c/stale? live-derived (or (:sources-now live-c-opts) live-sources))`, where with no `:sources-now` injected `live-sources` is the very read `live-derived` was derived from (`:6297-6299`).
+
+---
+
+# D9 — the fifth flight's stop: a stale gate, and a gate refusal the classifier does not read
+
+Read at futon2 `7b4ecf98` and futon3c `b4bb0150`; the tree is clean for the three files cited. Read-only, nothing proposed for removal. The fifth flight (`flight-7f89646a`, 02:14:27–02:25:25Z) passed where the fourth refused and stopped at the decision gate.
+
+## D9.1 Row 222's refusal is never read by the classifier — and the row undercounts
+
+`decision_gate.clj:56-61` `refuse!` throws `{:error :inadmissible-decision :reason … :detail …}` with the message "Inadmissible decision" and **neither `:outcome` nor `:failure-kind`**. `explicit-failure-kind` (`full_loop_runner.clj:3571-3578` at this HEAD — it was `:3562` at `ea12c5d4`, §D8's sha) reads only those two keys, anywhere down the cause chain. So every gate reason closes `:untyped-failure`, exactly as §D8's judge refusals did before `c7367eaa` fixed them on the thrower's side.
+
+**The row undercounts, and this is not drift.** Row 222 says "with 14 reasons" and lists 14 sites. The gate has **21** `refuse!` sites, each with its own reason, and all 21 were already there at `3bbf5059`, the sha the row was written against — so seven were omitted when it was written, not added since: `:chosen-not-bayes-action` (`:235`), `:chosen-mass-not-recorded` (`:248`), `:chosen-mass-not-marginal` (`:250`), `:empty-refusals` (`:263`), `:unknown-refusal-kind` (`:268`), `:flat-action` (`:280`), `:not-a-decision` (`:281`). The row's fourteen line numbers have also moved; at `7b4ecf98` they are `:90 :117 :125 :127 :130 :134 :158 :162 :190 :198 :203 :205 :223 :227`. **All 21 close `:untyped-failure` when reached**, not 14.
+
+## D9.2 The stale-JVM stop
+
+| what | loaded in the serving JVM | at HEAD `7b4ecf98` |
+|---|---|---|
+| `futon2.aif.observation-checks` | no `locator-refusal` var that HEAD would recognise; claude-8's live read gave `:line 28`, and at `dd938402`'s parent `de36a7d9` line 28 is `(defn- refuse [kind data] …)` | `locator-refusal` at `:531-546`, arglist `[locator]`, routing `(= :C8 (:class locator))` to `c8-locator-refusal` at `:543` and everything unrecognised to `:no-mechanical-check` at `:546` |
+| `futon2.aif.decision-gate` | 11 of 15 vars off their lines; `check-guard-locators!` at `:85`. At `de36a7d9` the gate held its **own** class table and ended `{:kind :no-mechanical-check :class (:class locator)}` at `:83` — with no C8 entry, so a C8 locator could only fall through | `check-guard-locators!` at `:79`; the gate asks the check instead, `observations/locator-refusal` at `:72`, and `:63-66` names it "the one authority for each class's locator rule" |
+
+**The commit both missed is `dd938402`** (2026-09-25 18:48Z, "decision gate asks the observation check for its locator rule"), which *created* `locator-refusal`: it does not exist at `de36a7d9`. So the flight's `{:kind :no-mechanical-check :class :C8}` was not a wrong answer from the C8 rule — in that JVM there was no C8 rule for the gate to reach.
+
+**Was `367be490`'s C8 read fix ever live? No.** It landed 23:29Z, after `dd938402` at 18:48Z; a copy that predates the earlier commit predates the later one. The C8 registry read in that JVM still dropped `:message`, `:class` and `:timeout-ms` (§D7's row 21 defect), for the whole life of the serving process.
+
+**Neither namespace is in the drift set.** `load_identity.clj`'s `required-sources` is a literal map of **69** entries and contains neither; the other membership is calling `load-identity/register!`, which **48** namespaces do and neither of these does. See `RUNNER-DRIFT-D.md` for why membership is not the only gap.
+
+## D9.3 The C8 locator rule at HEAD, with the flight's own locators as the pin
+
+`c8-locator-refusal` (`observation_checks.clj:408-430`): `:repo`; exactly one of `:namespace` or `:command` (an argv of non-blank strings); `:config` only with `:namespace`. Both tokens the gate refused — `:exit/h1dae607747ce` and `:exit/h64ddcd0e8811`, read from the click's own run record — carry `{:class :C8 :repo "futon3c" :namespace "futon3c.agency.clock-decision-test"}`: `:repo` non-blank, exactly one of the two, no `:config`, so the rule returns nil and admits them. claude-8 confirmed that live after the 02:31:44Z reload. (The same record carries C8 locators of the other admitted shape, `:repo` with a `:command` argv, on other tokens.)
