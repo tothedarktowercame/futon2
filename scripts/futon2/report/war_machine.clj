@@ -6242,6 +6242,101 @@
                       {:kind :incommensurable-family :beta (vec betas)})))
     {:horizon-steps (first Ts) :beta (first betas)}))
 
+;; ---------------------------------------------------------------------------
+;; F1a-2-I (PROOF-2a-PLAN ⟨2⟩2d F1, packet of 2026-09-26): the measured-A
+;; version written on the tick's admitted decision. A WRITE ONLY: the
+;; decision still scores with the class model, and nothing computed here
+;; reaches efe/rank-actions (the "two A's" question is separate).
+;; ---------------------------------------------------------------------------
+
+(defn canonical-pr
+  "A deterministic printed serialisation for digesting: map entries sorted
+  by printed key, sets sorted by printed element, sequential values in
+  order, everything else pr-str. Equal values serialise identically
+  regardless of hash order."
+  [v]
+  (cond
+    (map? v) (str "{"
+                  (str/join " " (map (fn [[k x]]
+                                       (str (canonical-pr k) " " (canonical-pr x)))
+                                     (sort-by (comp pr-str key) v)))
+                  "}")
+    (set? v) (str "#{" (str/join " " (map canonical-pr (sort-by pr-str v))) "}")
+    (sequential? v) (str "[" (str/join " " (map canonical-pr v)) "]")
+    :else (pr-str v)))
+
+(defn sha256-hex
+  "Hex SHA-256 of a string's UTF-8 bytes."
+  [^String s]
+  (apply str
+         (map #(format "%02x" (bit-and 0xff %))
+              (.digest (java.security.MessageDigest/getInstance "SHA-256")
+                       (.getBytes s "UTF-8")))))
+
+(defn measured-a-version
+  "F1a-2-I: the measured-A version for the tick's admitted decision,
+  computed the way cascade-lane's R5 step computes its rates —
+  observation-rates/sourced-rates → token-likelihood-rates over each
+  problem's :locators; the arithmetic is not copied here.
+
+  PROBLEMS is the admitted family (the assembled problems);
+  OBSERVATION-LABELS is the opts key of the same name: {target {:labels
+  [...] :subjects {class n}}} — cascade-lane's :observation-labels shape,
+  per target because the decision is joint. The decision calls cascade-lane
+  WITHOUT :observation-labels today (its scoring uses the class model), so
+  no admitted labels are in scope at this site unless the caller declares
+  them; with none, every located token keeps the unmeasured checkable
+  default (the zero kernel, :measurement :absent) and this returns the
+  typed absence — packet F1a-2-I: never a digest of a default/identity/zero
+  kernel; an absence must not read as a value.
+
+  Rate keys are target-qualified ([target token]), the decision's own
+  qualification scheme, so identical tokens on different targets stay
+  distinct. Returns
+
+    {:schema :wm/measured-a-v1
+     :rates-sha <sha256 of canonical-pr of the qualified rates value>
+     :source :futon2.aif.observation-rates/sourced-rates   ; verbatim
+     :classes [class-id …]}
+
+  or {:status :absent :reason :no-measured-rates} when nothing measured is
+  sourced, or {:status :absent :reason :sourcing-refused :refusals …} when
+  every located problem's sourcing refused (the refusal is the finding,
+  recorded, never thrown from here: this write refuses nothing)."
+  [problems observation-labels]
+  (let [contract (observation-contract)
+        per-target
+        (into {}
+              (keep (fn [p]
+                      (let [t (:target p)
+                            locators (get-in p [:cascade-problem :locators])]
+                        (when (map? locators)
+                          (let [{:keys [labels subjects]} (get observation-labels t)]
+                            [t (observation-rates/sourced-rates
+                                (vec labels) (or subjects {}) nil
+                                locators contract)])))))
+              problems)
+        sourced (into {} (filter (fn [[_ s]] (= :sourced (:status s))) per-target))
+        refusals (into {} (remove (fn [[_ s]] (= :sourced (:status s))) per-target))]
+    (if (empty? sourced)
+      (if (seq refusals)
+        {:status :absent :reason :sourcing-refused :refusals refusals}
+        {:status :absent :reason :no-measured-rates})
+      (let [qualify (fn [t m] (into {} (map (fn [[tok v]] [[t tok] v])) m))
+            rates (into {} (mapcat (fn [[t s]] (qualify t (:rates s))) sourced))
+            measurement (into {} (mapcat (fn [[t s]] (qualify t (:measurement s))) sourced))
+            class-of (into {} (mapcat (fn [[t s]] (qualify t (:class-of s))) sourced))]
+        (if-not (some (fn [[_ m]] (not= :absent m)) measurement)
+          ;; Every located token is the unmeasured checkable default: the
+          ;; zero kernel. Digesting it would make an absence read as a
+          ;; value, so the absence is written instead.
+          {:status :absent :reason :no-measured-rates}
+          (cond-> {:schema :wm/measured-a-v1
+                   :rates-sha (sha256-hex (canonical-pr rates))
+                   :source (:source (first (vals sourced)))
+                   :classes (vec (sort-by pr-str (distinct (vals class-of))))}
+            (seq refusals) (assoc :refusals refusals)))))))
+
 (defn- cascade-decision-admitted
   "Joint cascade decision over ASSEMBLED, the output of
   futon2.aif.cascade-problems/assemble. OPTS is reserved (ignored today),
@@ -6699,8 +6794,14 @@
                            :relation-context relation-context
                            :classifications target-classifications})
                 authorized (controller-authority/authorize decision ranked)
-                emitted (decision-gate/emit! authorized)]
+                emitted (decision-gate/emit! authorized)
+                ;; F1a-2-I: the measured-A version, computed the lane's way
+                ;; (sourced-rates over each problem's :locators), written
+                ;; beside :selection-certificate. Write only: the scoring
+                ;; above is unchanged and nothing here is a gate.
+                measured-a (measured-a-version problems (:observation-labels opts))]
             {:decision (assoc emitted
+                              :measured-a measured-a
                               :live-c-coverage (:live-c-coverage live-spec)
                               :token-qualification
                               {:scheme :target-token-pair
