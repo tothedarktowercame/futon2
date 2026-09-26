@@ -343,3 +343,15 @@ Read at futon2 `ea12c5d4`; the namespace run once in futon2's own JVM, nothing c
 **One thing did move, and it was mine.** D3 recorded `:132` as reading `"c-source" "bad"`; at HEAD it reads `"c-source" "absent"`, because `ae4358f3` (VALIDITY-C-KEY-I) stopped the validity checker judging a preference schedule as provenance and had it type the absence instead. The assertion still fails — it pins `"flagged"` — but what it now sees is the correct reading of the record, so the smallest change for that one is no longer ambiguous: the pin should read `"absent"`, since the record genuinely carries no C provenance (§D6.2's finding) and the checker now says so. `:126` is unchanged: the scoring entry's `:c` is still `{:form :step-indexed …}` with no `:status`.
 
 **Lanes, unchanged from D3:** the twelve are AR-24's owner's, since flipping the pin would record today's behaviour while the question of whether the class scorer should record its own consumed terms is open; the F trio is F-ABS's (PROOF-2 packet 27), three words in the pin; `:126` and `:132` belong to the checker's and live-C's owners, not to this test.
+
+---
+
+# D9 — `decision-gate-test` and `observation-checks-test` at HEAD: both green
+
+Read at futon2 `7b4ecf98`; each namespace run once in futon2's own JVM, nothing changed, no warrant registered (this is the read-only lane). This takes the file to 357 lines, seven over the 350 cap the earlier packets set; no packet since has set one.
+
+**Counts.** `futon2.aif.decision-gate-test`: 17 tests, 468 assertions, 0 failures, 0 errors. `futon2.aif.observation-checks-test`: 30 tests, 148 assertions, 0 failures, 0 errors.
+
+**Why I ran rather than read a warrant.** Both namespaces are in futon3c's `data/test-registry/namespace-ledger.edn`, newest runs `2026-09-25T18:48:3…Z` and `18:51:48Z`. The ledger entry carries `:entry-id`, `:command`, `:ran-at` and `:finished-at` and **no counts** — those live in the evidence record behind a futon1b read. And only one of the two warrants is at HEAD's bytes: `decision_gate.clj` and `decision_gate_test.clj` were both last touched by `dd938402` (18:48Z), matching that run, but `observation_checks.clj` was last touched by `367be490` at 23:29Z, after its namespace's newest run, so that warrant does not cover HEAD.
+
+**What green does not say here.** Both passed while the serving JVM was running a copy of `futon2.aif.observation-checks` older than `dd938402` — older than either ledger run. A namespace test is evidence about the files on disk; it is not evidence about what a long-lived server has loaded, which is the fifth flight's stop (`REFUSAL-REGISTER-D.md` §D9.2, `RUNNER-DRIFT-D.md`).
