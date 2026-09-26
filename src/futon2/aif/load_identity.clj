@@ -15,7 +15,10 @@
   guessing), so namespaces that never register themselves (e.g.
   full-loop-cohort, tripwire, the futon3c runner service) show as
   :unregistered instead of silently disappearing."
-  {'futon2.aif.parameter-novelty "/home/joe/code/futon2/src/futon2/aif/parameter_novelty.clj"
+  {'futon2.aif.observation-checks "/home/joe/code/futon2/src/futon2/aif/observation_checks.clj"
+   'futon2.aif.observation-labels "/home/joe/code/futon2/src/futon2/aif/observation_labels.clj"
+   'futon2.aif.observation-label-store "/home/joe/code/futon2/src/futon2/aif/observation_label_store.clj"
+   'futon2.aif.parameter-novelty "/home/joe/code/futon2/src/futon2/aif/parameter_novelty.clj"
    'futon2.aif.surprise "/home/joe/code/futon2/src/futon2/aif/surprise.clj"
    'futon2.aif.attempt-learning "/home/joe/code/futon2/src/futon2/aif/attempt_learning.clj"
    'futon2.aif.learning-trial-ledger "/home/joe/code/futon2/src/futon2/aif/learning_trial_ledger.clj"

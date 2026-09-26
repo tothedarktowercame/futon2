@@ -10,6 +10,8 @@
            [java.nio.file.attribute FileAttribute]
            [java.time Instant]))
 
+(identity/register! *ns* *file*)
+
 (def schema :wm/observation-labels-v1)
 (defonce ^:private monitor (Object.))
 

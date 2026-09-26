@@ -48,6 +48,7 @@
             [futon2.aif.fact-measurement :as measurement]
             [futon2.aif.task-execution-evidence :as task-execution]
             [futon2.aif.accepted-increment :as accepted-increment]
+            [futon2.aif.observation-label-wire :as observation-label-wire]
             [futon2.aif.d-predecessor-task-authority :as d-task]
             [futon2.aif.receipt-construction :as receipt-construction]
             [futon2.aif.mission-registry :as missions]
@@ -280,6 +281,7 @@
                        parse-long)
                default-agent-budget-ms)
            :phase-log (or (System/getenv "FUTON_WM_PHASE_LOG") default-phase-log)
+           :observation-labels-path "/home/joe/code/futon2/data/wm-observation-labels/labels.edn"
            :poll-ms 2000
            :window-days 14
            :build-cure-retries
@@ -697,13 +699,17 @@
             abstention (abstention-carrier (or decision (:decision selection-sorry))
                                            (:dropped-candidates selection-sorry)
                                            (:judge-refusal selection-sorry))
+            declaration-reads (cascade-sources/provenance
+                               (some-> (:declaration-reads/state raw-opts) deref))
             record (cond-> {:run/id run-id
                     :runner/source (:runner/source result)
                     :participants (participants/record-value raw-opts)
                     :habit-reads (input-receipts/habit-log
                                   (some-> (:habit-reads/state raw-opts) deref))
-                    :declaration-reads (cascade-sources/provenance
-                                        (some-> (:declaration-reads/state raw-opts) deref))
+                    :declaration-reads declaration-reads
+                    ;; After selection: these labels are for the next decision.
+                    :observation-labels (observation-label-wire/record-declaration-reads!
+                                         (:observation-labels-path raw-opts) declaration-reads)
                     :click/id (:click-id raw-opts)
                     :startedAt started-at
                     :selectorSeam "live:validated-selection"
