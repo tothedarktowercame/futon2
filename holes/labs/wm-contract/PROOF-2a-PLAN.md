@@ -59,6 +59,7 @@ DEPENDS: ⟨2⟩1a, ⟨2⟩1b. PAR: per module (6): W1 one module for R14→R6 a
 STATUS: PENDING; HELD for Joe's look at this list (12:44Z). LOG: —
 
 #### ⟨2⟩1e. QED for ⟨2⟩1: figure `aif-lean-dag-nodes.svg` has no orange or red arrow.
+Figure requisition (Joe, 14:15Z): the static figure is too complex to read, so a generated HTML version with a controller (hide/show by class, by how a term arrives, Lean-only off by default, focus on a node, hover for the declaration) sits beside it, same counts. WM-LEAN-DAG-INTERACTIVE-I · claude-11 · 9c7d3714 · in flight (14:15Z).
 
 ### ⟨2⟩2. Map level: the wiring map is complete.
 
