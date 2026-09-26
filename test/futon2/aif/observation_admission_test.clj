@@ -122,6 +122,16 @@
 (defn- mechanically-admit [s adj]
   (oa/admit s adj (oa/mechanical-review "mechanical-review-v1" s adj)))
 
+(deftest self-truthed-is-refused-under-an-ordinary-review-too
+  ;; A-S Revision 3 falsifier 1 through the non-mechanical path: the check's
+  ;; own mechanism as observer, with a human/agent :concur review. admit must
+  ;; refuse; before this clause it admitted the label.
+  (let [s mechanical-subject
+        adj (assoc (recomputation s) :observer (:check-mechanism s))
+        result (oa/admit s adj (oa/review "codex-5" adj :concur))]
+    (is (= :observer-is-check-mechanism (:kind result)))
+    (is (nil? (oa/label-record s result)))))
+
 (deftest mechanical-self-truthed-is-never-a-label
   (let [s mechanical-subject
         adj (assoc (recomputation s) :observer (:check-mechanism s))

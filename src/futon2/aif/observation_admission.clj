@@ -86,6 +86,8 @@
     :no-label                              — insufficient/ambiguous/conflicting
                                             finding: no label, reason recorded
     :review-not-concur                     — dispute or insufficient review
+    :observer-is-check-mechanism           — the adjudication is the check's own
+                                            mechanism (A-S Revision 3, self-truthed)
   UNOBSERVED IS NOT ABSENT: no code path derives :absent from a missing
   adjudication; only an adjudicated :absent with a :concur review admits one."
   [subject adjudication review-record]
@@ -145,6 +147,14 @@
       (refuse :review-not-concur (cond-> {:verdict verdict}
                                   (:mechanical review-record)
                                   (assoc :reason (:reason review-record))))
+
+      ;; A-S Revision 3: a subject that declares its check's mechanism is never
+      ;; admitted on an adjudication BY that mechanism, whatever the review.
+      ;; mechanical-review already disputes it (:self-truthed, above); this
+      ;; closes the path through an ordinary concurring review.
+      (and (some? (:check-mechanism subject))
+           (= observer (:check-mechanism subject)))
+      (refuse :observer-is-check-mechanism {:observer observer})
 
       :else {:status :admitted :label finding
              :token (:token subject)
