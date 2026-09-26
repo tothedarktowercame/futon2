@@ -63,8 +63,9 @@
   :chosen-target and :draw-seed beside it. An empty support is the recorded
   absence {:absent :no-eligible-target}; a missing seed is {:absent :no-seed}.
   Neither is a refusal: the excluded list is on the record either way."
-  [{:keys [field seed trigger]}]
-  (let [support (mapv :target (support-of field))
+  [opts]
+  (let [{:keys [field seed trigger]} opts
+        support (mapv :target (support-of field))
         n (count support)
         posterior (into (sorted-map) (map (fn [t] [t (/ 1 n)])) support)
         seeded? (integer? seed)

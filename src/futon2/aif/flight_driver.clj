@@ -133,8 +133,9 @@
   "The flight the driver would fly, as data. OPTS: parsed args plus
   :sources (the tick's declared sources) and, for tests, :read-text,
   :observe and :id."
-  [{:keys [seat store max-clicks sources id] :as opts}]
-  (let [target (:target (resolve-target opts))
+  [opts]
+  (let [{:keys [seat store max-clicks sources id]} opts
+        target (:target (resolve-target opts))
         store (or store wi/default-store)
         id (or id (str "flight-" (subs (str (UUID/randomUUID)) 0 8)))
         f (flight-for (assoc opts :id id))
