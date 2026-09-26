@@ -84,6 +84,8 @@
    'futon2.aif.repair-discharge-receipt "/home/joe/code/futon2/src/futon2/aif/repair_discharge_receipt.clj"
    'futon2.aif.repair-evaluators "/home/joe/code/futon2/src/futon2/aif/repair_evaluators.clj"
    'futon2.aif.substrate "/home/joe/code/futon2/src/futon2/aif/substrate.clj"
+   ;; WM-HABIT-FOLD-CALL-I: judge folds E from the flights' receipts
+   'futon2.aif.enactment-fold-source "/home/joe/code/futon2/src/futon2/aif/enactment_fold_source.clj"
    'futon2.aif.tripwire "/home/joe/code/futon2/src/futon2/aif/tripwire.clj"
    'futon2.report.cascade-lane "/home/joe/code/futon2/scripts/futon2/report/cascade_lane.clj"})
 

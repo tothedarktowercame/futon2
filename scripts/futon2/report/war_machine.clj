@@ -50,6 +50,7 @@
             [futon2.aif.cascade-problems :as cascade-problems]
             [futon2.aif.interpretation-construction :as interpretation-construction]
             [futon2.aif.want-interpretation :as want-interpretation]
+            [futon2.aif.enactment-fold-source :as enactment-fold-source]
             [futon2.aif.cascade-sources :as cascade-sources]
             [futon2.aif.candidate-derivations :as candidate-derivations]
             [futon2.aif.cascade-proposals :as cascade-proposals]
@@ -6642,6 +6643,8 @@
                                       (select-keys token-belief-input [:conditioning-status :reason :observation-updates]))
                                     {:beta (:beta beta-state) :beta-state beta-state
                                      :cascade-habit-path (:cascade-habit-path opts)
+                                     ;; WM-HABIT-FOLD-CALL-I: judge's fold
+                                     :enactment-fold (:enactment-fold opts)
                                      :ticket-queue (:ticket-queue opts)
                                      :ticket-queue-refusals (:ticket-queue-refusals opts)
                                      :novelty-inputs (or (:novelty-inputs opts) (novelty/read-inputs))}))
@@ -7288,7 +7291,17 @@
                                ;; :source-content-sha256 and :acceptance
                                ;; populate from :files / acceptance-of instead
                                ;; of typed absences.
-                               :cascade-sources cascade-sources))
+                               :cascade-sources cascade-sources
+                               ;; WM-HABIT-FOLD-CALL-I: E, folded from the
+                               ;; flights' increment receipts in the same
+                               ;; store the interpretations come from; a
+                               ;; fold already in judge-opts wins
+                               :enactment-fold
+                               (or (:enactment-fold judge-opts)
+                                   (enactment-fold-source/fold-from-flights
+                                    (str (io/file (or (:machine-interpretations-dir judge-opts)
+                                                      want-interpretation/default-store)
+                                                  "flights"))))))
         wm-decision (:decision cascade-result)
         ;; Strategic habit observes the CASCADE decision's first acting
         ;; pattern (strategic_habit/carry, H4/dd4a3bbe); an abstention
