@@ -14,9 +14,9 @@
   Pure except `run!`, which calls the injected click and observe functions."
   (:refer-clojure :exclude [run!])
   (:require [clojure.string :as str]
+            [futon2.aif.interpretation-evidence :as ievidence]
             [futon2.aif.mission-criteria :as criteria]
             [futon2.aif.mission-reading :as reading]
-            [futon2.aif.observation-admission :as admission]
             [futon2.aif.observation-checks :as checks]
             [futon2.aif.repair-proposals :as repairs])
   (:import [java.util UUID]))
@@ -214,57 +214,54 @@
     {:absent :no-failure-on-click-entry}))
 
 ;; ---------------------------------------------------------------------------
-;; The observation after an enacted step (F1a-1, PROOF-2a-PLAN <2>2d F1)
+;; The observation after an enacted step (F1a-1, F1b-I; PROOF-2a-PLAN <2>2d F1)
 
-(def ^:private after-observer "futon2.aif.flight/after-observation")
+(defn- by-str [] (sorted-set-by #(compare (str %1) (str %2))))
 
 (defn step-observation
-  "The observation o that followed an enacted step, on the token carrier O
-  (TokenObservation; the alphabet measured A is indexed over), for the flight's
-  :enactments entry. Candidate labels come from the after-observation AFTER
-  ({token bool}; anything but a boolean is a refused check, i.e. unobserved)
-  and from the enactment's ATTEMPTS (each produced token's check result).
-  UNIVERSE is the flight's view of the target's tokens (the want source's
-  universe and wants); a universe token neither source observed is
-  :unobserved, never absent (observation-admission's rule).
+  "The observation o that followed an enacted step: the check channel's
+  RECORDED VERDICTS, as TokenObservation's tokenLikelihood r s o reads them
+  (o = the tokens the channel reported). No admission is applied: admission
+  (observation-admission/admit, a blinded review) makes the independent
+  REFERENCE labels measured A is counted against, not the observation
+  (F1b-D, futon3c d8b6bf7f).
 
-  Each observed token is put through observation-admission/admit. The flight
-  has a mechanical check and no reviewer, so admit refuses (no review
-  verdict); the entry is then {:status :not-admitted :reason
-  :review-required} with the candidate labels and admit's own refusals
-  beside it. No review is fabricated. Were every label admitted, the entry
-  would carry :present/:absent/:unobserved at the top."
-  [universe after attempts click-id]
-  (let [checked (into {} (for [a attempts
-                               :let [r (get-in a [:check :result :observed])]
-                               :when (and (some? (:produced a)) (boolean? r))]
-                           [(:produced a) r]))
-        observed (merge checked (into {} (filter (comp boolean? val)) after))
-        universe (into (set universe) (keys observed))
-        candidate {:present (into (sorted-set-by #(compare (str %1) (str %2))) (keep (fn [[t v]] (when v t))) observed)
-                   :absent-observed (into (sorted-set-by #(compare (str %1) (str %2))) (keep (fn [[t v]] (when-not v t))) observed)
-                   :unobserved (into (sorted-set-by #(compare (str %1) (str %2))) (remove (set (keys observed))) universe)}
-        admitted (into (sorted-map-by #(compare (str %1) (str %2)))
-                       (for [[t v] observed
-                             :let [subject {:token t :evidence-pointers [{:click click-id :source :flight-after-observation}]}
-                                   adj (admission/adjudication after-observer (admission/observer-view subject)
-                                                               (if v :present :absent) {})]]
-                         [t (admission/admit subject adj nil)]))
-        all-admitted? (and (seq admitted) (every? #(= :admitted (:status %)) (vals admitted)))
-        review-missing? (every? #(and (= :invalid-verdict (:kind %)) (nil? (get-in % [:data :verdict])))
-                                (vals admitted))]
-    (cond-> {:schema :wm/admitted-observation-v1
-             :click-id click-id
-             :universe {:source :flight-want-source
-                        :sha256 (admission/view-digest (vec (sort-by str universe)))
-                        :count (count universe)}
-             :candidate-labels candidate
-             :admission admitted}
-      all-admitted? (merge {:status :admitted} (select-keys candidate [:present :unobserved])
-                           {:absent (:absent-observed candidate)})
-      (not all-admitted?) (assoc :status :not-admitted
-                                 :reason (if (and (seq admitted) review-missing?) :review-required
-                                             (if (empty? admitted) :nothing-observed :admission-refused))))))
+  Sources: the after-observation AFTER ({token bool}; a non-boolean reading
+  is a refused check, so the token is unchecked, not false) and the
+  enactment's ATTEMPTS (each produced token's check result). :checked is
+  every token with a boolean verdict (V for this step), :o the checked
+  tokens whose verdict is true (o is a subset of checked), :channel the class
+  whose check produced each verdict (the attempt's :check :class, or the
+  locator's :class in LOCATORS for the after-observation). UNIVERSE is the
+  flight's view of the target's tokens (the want source's universe and
+  wants); a universe token not checked is :unobserved -- marginalised,
+  never absent. Returns {:schema :wm/step-observation-v2 :status :observed
+  ...}, or :status :nothing-observed when no token was checked."
+  [universe after attempts locators click-id]
+  (let [from-attempts (into {} (for [a attempts
+                                     :let [r (get-in a [:check :result :observed])]
+                                     :when (and (some? (:produced a)) (boolean? r))]
+                                 [(:produced a) {:verdict r :class (get-in a [:check :class])}]))
+        from-after (into {} (for [[t v] after :when (boolean? v)]
+                              [t {:verdict v :class (get-in locators [t :class])}]))
+        ;; the after-observation is the later reading, so its verdict stands;
+        ;; its class comes from the locator, else from the attempt's check
+        verdicts (merge-with (fn [att aft] (cond-> aft (nil? (:class aft)) (assoc :class (:class att))))
+                             from-attempts from-after)
+        checked (into (by-str) (keys verdicts))
+        universe (into (set universe) checked)]
+    {:schema :wm/step-observation-v2
+     :status (if (seq checked) :observed :nothing-observed)
+     :click-id click-id
+     :o (into (by-str) (keep (fn [[t {:keys [verdict]}]] (when verdict t))) verdicts)
+     :checked checked
+     :channel (into (sorted-map-by #(compare (str %1) (str %2)))
+                    (for [[t {:keys [class]}] verdicts]
+                      [t (or class {:absent :no-class-on-check})]))
+     :unobserved (into (by-str) (remove checked) universe)
+     :universe {:source :flight-want-source
+                :sha256 (ievidence/sha256 (.getBytes (pr-str (vec (sort-by str universe))) "UTF-8"))
+                :count (count universe)}}))
 
 (defn record-click
   "FLIGHT after one click. CLICK is
@@ -425,6 +422,7 @@
                                                      (concat (keys (:universe wants)) (:wants wants))
                                                      after
                                                      (get-in enacted [:enactment :attempts])
+                                                     locators
                                                      (:click-id result))))))))
                 f (record-click f (merge result {:wants (:wants wants)
                                                  :want-source (:source wants)
